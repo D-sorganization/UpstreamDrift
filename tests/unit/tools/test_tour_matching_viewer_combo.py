@@ -74,9 +74,11 @@ def test_multi_candidate_replay_construction_and_rms() -> None:
     rms_dict = combo.get_per_engine_rms(0)
     assert "mujoco" in rms_dict
     assert "pinocchio" in rms_dict
-    # Marker difference was 0.01 m = 10 mm
-    assert np.isclose(rms_dict["mujoco"], 0.01, atol=1e-4)
-    assert np.isclose(rms_dict["pinocchio"], 0.01, atol=1e-4)
+    # Canonical receipt RMS pools the per-marker 3D distances: a 0.01 m
+    # component offset on every XYZ axis is a 0.01*sqrt(3) m marker distance
+    # (matches compute_shared_metrics), not the flattened component mean.
+    assert np.isclose(rms_dict["mujoco"], 0.01 * np.sqrt(3), atol=1e-4)
+    assert np.isclose(rms_dict["pinocchio"], 0.01 * np.sqrt(3), atol=1e-4)
 
 
 def test_multi_candidate_replay_max_four_candidates() -> None:
@@ -152,7 +154,8 @@ def test_tour_matching_viewer_widget_rejection_and_capabilities(qapp) -> None:  
     widget.set_acceptance(False, "Marker error > 15 mm")
     assert widget._rejection_banner.isHidden() is False
     assert "Marker error > 15 mm" in widget._rejection_banner.text()
-    assert "#d9534f" in widget._rejection_banner.styleSheet()
+    # 70762eb7fe replaced the "#d9534f" hex literal with the semantic CSS color.
+    assert "darkred" in widget._rejection_banner.styleSheet()
 
     # Acceptance hides banner
     widget.set_acceptance(True)

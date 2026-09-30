@@ -1,5 +1,4 @@
 ## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [scope: fail-closed conversion]
-
 Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
 - **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:
   - `OPENSIM_ENGINE_LIMITATIONS`: documents Hill-type activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
@@ -12,6 +11,127 @@ Specifies the native OpenSim qualification pipeline and receipt verification for
   - `README.md`: documents model topology, Hill-type muscle models, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
 - **Test Suite (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`)**:
   - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
+## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
+
+Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
+- **Path Pattern Extension (`scripts/ci/check_phantom_guard_paths.py`)**:
+  - Extends `ISSUE_PATH_PATTERN` with negative lookbehind boundary protection `(?<![\w/.-])` and recognizes repository paths under `scripts/` and `.github/workflows/` (and `.github/`) alongside `src/`, `tests/`, `rust_core/`, and `api/`.
+  - Prevents matching fragments in the middle of non-path slash sequences (such as `engines/api/core/...`).
+  - Strips trailing punctuation (`.,;:)'"`) from extracted paths.
+- **Parenthetical Prose Filtering**:
+  - Implements `_drop_parenthetical_prose_fragments` to parse parenthetical blocks `(...)`, split them on commas into fragments, and drop prose fragments that lack recognized code/configuration file extensions.
+  - Preserves legitimate file references inside parentheses (e.g. `(scripts/check_lod.py, tests/foo.py)`) while discarding prose slash alternatives (e.g. `(engines/api/core/shared/robotics)`).
+- **Verification (`tests/scripts/test_check_phantom_guard_paths.py`)**:
+  - Adds unit test coverage for `scripts/` and `.github/workflows/` path extraction.
+  - Adds regression test reproducing issue #10965 / PR #11113 verifying Rule 3 passes cleanly on real `scripts/` diffs and excludes parenthetical prose fragments.
+## Govern Screenshot Schema, Capture Metadata, and Qualified Assets (#9191)
+
+Establishes the authoritative screenshot metadata contract, representative visual artifacts, and companion catalog integration:
+- **Contract Schemas (`upstreamdrift-companion-screenshots-v1.schema.json`, `upstreamdrift-companion-v1.schema.json`)**:
+  - Enforces strict JSON Schema Draft 2020-12 shapes: `id`, `program_id`, `status` (`captured` | `pending`), `path`, `sha256`, `width`, `height`, `viewport`, `theme` (`light` | `dark`), `capture_workflow_id`, `capture_step_id`, `capture_environment`, `alt_text`, `caption`, `visible_limitations`, `artifact_class`, `source_commit`, and `reason`.
+  - Conditional `allOf` constraints enforce that pending records carry explicit non-empty reasons and null asset fields, while captured records require non-empty alt text, caption, capture environment, valid dimensions, and resolved in-repository assets.
+  - Adds screenshot metric fields (`screenshot_records`, `captured_screenshot_records`, `pending_screenshot_records`) to companion manifest `summary`.
+- **Governed Screenshot Authority (`scripts/companion_screenshots.py`)**:
+  - Implements fail-closed byte-level verification using standard library PNG IHDR chunk inspection and SHA-256 computation against repository files.
+  - Implements headless deterministic asset generation with `matplotlib` using the `Agg` backend (display-server free).
+  - Implements registry parser and validator `parse_registry()` and `load_and_parse_registry()` checking program and workflow resolution.
+- **Representative Assets & Registry (`docs/screenshots/`, `scripts/config/companion_screenshots.v1.json`)**:
+  - Generates 6 deterministic qualified PNG visual assets across desktop (1280x720) and mobile responsive (375x667) viewports in light and dark themes for `pendulum_simulator`, `project_map`, `tour_matching_viewer`, and `rate_of_closure`.
+  - Registers all 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured records, 70 pending records with explicit reasons).
+- **Companion Catalog Integration (`scripts/companion_catalog.py`)**:
+  - Adds `companion_screenshots.REGISTRY_PATH` to `INPUT_PATHS`.
+  - Integrates `screenshot_registry` in catalog `registries`, populates `screenshots` inventory with exact source-commit provenance, and updates `summary` with screenshot counts.
+- **Verification (`tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`)**:
+  - Verifies registry syntax, asset hash matching, PNG header dimensions, pending-reason fail-closed behavior, dangling program/workflow refusal, and catalog serialization.
+## Simscape Continuous-Replay Qualification Harness (#11107)
+
+Implements fail-closed qualification harness and canonical receipt adapter for continuous Simscape replays under MATLAB R2025b (MMR-07):
+- **Continuous Replay Qualification Harness (`src/shared/python/motion_matching/simscape_replay_harness.py`)**:
+  - Implements `ContinuousReplayTrajectory`, `ContinuousReplayControlIdentity`, `ContinuousReplayProvenance`, and `SimscapeContinuousReplayReceipt`.
+  - Implements `validate_continuous_replay_inputs`: fail-closed validation rejecting missing terminal samples / truncated horizon duration, non-finite states/markers (NaN/Inf), duplicated/retrograde timestamps, wrong MATLAB releases (requires R2025b, rejects R2026a), hidden motion prescription or undeclared root assistance in pure torque replays, altered candidate/model hashes, and initial condition mismatches against declared `q0`/`v0`.
+  - Labels deliberate state resets as incompatible with uninterrupted replay (`is_uninterrupted=False`).
+  - Implements `compute_per_marker_channels` (per-marker RMS errors) and `compute_phase_channels` (address, backswing, downswing, follow-through).
+  - Wires full terminal marker breakdown via `compute_terminal_marker_breakdown` and feeds canonical metrics into `acceptance.evaluate()` without modifying frozen thresholds.
+  - Implements `load_continuous_replay_trajectory`, `save_replay_qualification_receipt`, and `load_replay_qualification_receipt` for lossless serialization.
+- **Candidate Runner Integration (`scripts/matlab/run_simscape_candidate.ps1`)**:
+  - Adds `-ContinuousQualification` switch deriving qualification inputs from native evidence (`load_replay_evidence_inputs`): recomputed replay NPZ SHA-256 with fail-closed content-address verification, `q0`/`v0` read from `returned-candidate.json`, control identity and solver clock read from the qualified replay receipt, then serializing `simscape_replay_qualification.json`.
+  - Acceptance metrics delegate to the canonical `compute_replay_five_metrics()` (early window `t <= 0.60 s`, canonical club-cluster labels); the receipt measures pelvis yaw from `WaistLeft`/`WaistRight` and discloses unmeasured contact quantities (`unavailable_physical_quantities`) instead of reporting fabricated passes; the duration gate requires start at t=0 and the full elapsed horizon span; the receipt loader preserves explicitly-null terminal channels losslessly.
+- **Testing & Verification (`tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`)**:
+  - 22 unit tests (11 fail-closed handling + 11 review-fix regressions: prefix-truncated replay rejection, shifted start rejection, canonical 0.60 s early window, native club labels, measured yaw with omitted unmeasured gates, null-channel roundtrip, and fail-closed native-evidence derivation on stale NPZ / missing control identity / altered initial state).
+  - Preserves the run-102 terminal rejection (~40.3 mm > 35 mm G1 ceiling) under honest evaluation without inventing synthetic passes.
+## Historical-Video Evidence Review Workflow (MMR-12, #11098)
+
+Integrates historical-video evidence ingestion, non-destructive review, multi-shot frame isolation, timing authority, and installed PyQt review workflows:
+- **Multi-Shot Frame Isolation & Lineage (`src/shared/python/shadow_tracker/service.py`)**:
+  - `DefaultShadowTrackerService`: Preserves non-colliding frame observations across distinct shots sharing identical local `frame_id`s via scoped `(shot_id, frame_id)` index mapping, disambiguated retrieval, and preserved order across sessions.
+  - `import_video` is atomic for repeat imports: the decoded batch plus masks are staged and scope ownership, single source asset, and revision-id uniqueness are validated before any session mutation, so a failing repeat import leaves the reviewed session exactly intact.
+  - Manual mask updates invalidate downstream fit results deterministically while tracking revision lineage (`parent_revision_id`, `producer_id`, `correction_note`).
+- **Timing Preservation & Ingestion Pipeline (`src/shared/python/shadow_tracker/service.py`, `src/shared/python/shadow_tracker/ingestion.py`)**:
+  - `import_video`: Supports native container PTS extraction, constant and variable-frame-rate (VFR) containers, affine and piecewise timing transforms (e.g. slow motion), and shot boundary cut definitions.
+  - Without an evidenced timing mapping, imported frames keep `physical_time_s=None` with the canonical unknown physical-time reason; container PTS authority remains in `timing_mode`/`clock_evidence` and is never copied into fabricated physical-time provenance.
+  - Bounded memory and prompt cancellation: Passes `DecodeLimits` with active cancellation token callbacks to abort decode loops promptly during ingestion rather than only upon completion.
+  - Session fault tolerance: Gracefully handles missing codecs and corrupt media files with fail-closed errors while leaving existing session state completely intact and recoverable.
+- **Installed PyQt Review Journey (`src/tools/shadow_tracker/gui.py`)**:
+  - `ShadowTrackerWidget` & `ShadowTrackerReviewModel`: Provides interactive video file import, keyboard navigation (`Key_Left`, `Key_Right`, `Key_Home`, `Key_End`, `Key_W` for worst-frame jump), shortcut bundle persistence (`Ctrl+S`, `Ctrl+O`, `Ctrl+I`), viewport rendering with clock authority metadata, and honest refusal reporting for unverified automated fitting backends.
+  - Viewport renders unknown physical time safely (`Physical Time: unknown (<reason>)` via `format_clock_evidence_text`), so GUI-default imports with `physical_time_s=None` paint without `None` formatting errors.
+## Repeatable MJX Budget and Promotion Reports (#11108)
+
+Extends MJX trajectory-solver benchmarking with repeated seeded run aggregation, stage timings, failure retention, and content-hashed incumbent reuse:
+- **Seeded Run Aggregation (`src/shared/python/motion_matching/solver_benchmark.py`)**:
+  - Implements `aggregate_seeded_rows` across repeated random seeds for each (capture, solver) pair.
+  - Independently calculates median and p95 replay marker RMS and wall clock time.
+  - Enforces failure retention in the denominator: failed runs remain in total count and decrement the success rate, preventing hidden convergence faults.
+  - Aggregates per-stage timings (`stage_timings_s`) across optimization and shared-simulator replay.
+- **Content-Hashed Comparison & Integrity (`promotion_decision`, `_resolve_case`)**:
+  - Rejects comparisons across mismatched capture hashes or model geometry hashes.
+  - Enforces that candidates stopped on `max_iterations` never promote, even with lower replay RMS.
+  - Strictly prevents synthetic unit-test receipts from being promoted into production.
+  - Implements tamper-evident content-hashed incumbent reuse via `expected_sha256` verification in `reuse.json`.
+- **Benchmark Runner CLI (`scripts/benchmark_mjx_knot_solvers.py`)**:
+  - Supports `--seeds` argument for repeated evaluations and `--allow-synthetic` flag for synthetic verification.
+  - Discovers and aggregates multiple seeded cases (`<case>_seed*`) cleanly.
+- **Verification & Testing (`tests/unit/motion_matching/test_mjx_budget_and_promotion_reports.py`)**:
+  - Unit tests covering max_iterations promotion rejection, geometry/capture hash mismatch rejection, failure retention in denominator, independent median/p95 calculations, synthetic receipt rejection, and content-hashed reuse.
+## Repair Reduced-Model and Club-Only Product Claims (MMR-11 #11097)
+
+Repairs reduced-model and club-only product claims by adding code-level, fail-closed gates across coverage, baseline packages, and matrix reporting. Scope honesty: this PR's receipts-disqualification, package-integrity and matrix guards are code-level invariants proven by unit tests; baseline packages/coverage artifacts were NOT regenerated from raw source data in this PR, club-only required-cell selection with the Board was NOT performed, and no native (physical/simulated-hardware) runs were performed. The issue's raw-to-package reproduction criterion remains open.
+- **Disqualified Driven-Triple Receipts (`src/shared/python/tour_baselines/coverage.py`)**:
+  - `_DRIVEN_TRIPLE_RECEIPTS`: marks four historical driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) as disqualified at projection time (`status="rejected"`, `residual_mm=None`, `blocker="disqualified_receipt_tampered_or_unverified"`).
+  - Driver and iron coverage matrix cells reflect honest rejection status without promoting disqualified artifacts. The underlying receipt/evidence data under `docs/plans/tour_baselines/evidence/` is unchanged; the disqualification is enforced in code, not by rewriting historical evidence.
+- **Promoted Baseline Package Integrity (`src/shared/python/tour_baselines/baseline_package.py`, `qualification.py`)**:
+  - Enforces that any promoted baseline package contains complete geometry, inertia, control, q0, and v0 hashes.
+  - Rejects zero, negative, or fabricated out-of-plane residuals (`out_of_plane_rmse_m <= 0.0`), failing package integrity check fail-closed.
+  - Existing committed baseline packages were not regenerated from raw artifacts in this PR; the gates reject packages already on disk that violate the invariants.
+- **Planar Floor Fit Prevention (`src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/pendulum/python/motion_matching/provider.py`)**:
+  - `FitOptions.max_marker_rmse_m`: Exposes threshold configuration for early rejection; DbC-validates the ceiling as finite and strictly positive at construction (NaN would silently disable the gate, `<= 0` would reject planar data).
+  - Pendulum provider evaluates the CURRENT target's butt/clubhead distances to the selected plane against `max_marker_rmse_m` in `validate_and_project_target`; fails closed before expensive optimization (`solver_status="failure"`, `iterations=0`) when the target's planar floor exceeds tolerance. Gating on the current target (not the residual recorded on a calibrated plane) means a stale/noisy calibration cannot reject a fine target and a clean calibration cannot pass a far-off target.
+- **Club-Only Continuous Replay & Labeled Inferred Posture (`src/shared/python/motion_matching/club_only/ui_integration.py`)**:
+  - `ResultViewModel` enforces non-empty `body_motion_disclaimer` for inferred postures and validates `has_continuous_replay`.
+  - `build_club_only_result_view` requires fresh continuous replay before permitting native verification display, appending blocker `"missing_fresh_continuous_replay"` when absent.
+  - `assert_unqualified_cannot_appear_verified` rejects native-verified views lacking fresh continuous replay.
+- **Truthful Matrix All-Complete Claims (`src/shared/python/motion_matching/club_only/matrix_qualification.py`)**:
+  - `MatrixQualificationReport`: Adds `claims_all_complete: bool = False`, `unresolved_cells`, and `is_complete` properties.
+  - `assert_matrix_not_all_complete_with_unresolved`: Fails closed (`ValueError`) if a report claims `claims_all_complete=True` while unresolved (non-scored) cells remain in the matrix. The existing ~80 unresolved club-only cells are tracked as-is; required-cell selection with the Board is left open.
+- **Verified vs. open:** Verified here: fail-closed unit tests for every gate above plus red/green regressions for the two Codex findings (current-target planar floor gating, `max_marker_rmse_m` DbC validation). Open (not claimed): raw-to-package regeneration of baseline packages, Board-selected required club-only cells, and any native qualification run; the PR references rather than closes this slice of #11097.
+## Publish a Best-Candidate Viewer With Honest Residuals (#11102)
+
+Implements [MMR-16] publishing an interactive best-candidate viewer with honest marker residuals, drive mode filtering, visual presets, and publication-ready stills:
+- **Observation Immutability (`src/tools/tour_matching_viewer/core.py`)**:
+  - `ReplayData.__post_init__` sets `writeable = False` on `time_s`, `coordinates`, `model_markers_m`, `target_markers_m`, and `valid_mask` to prevent fitted positions or views from overwriting raw observations.
+  - Adds dataclasses `MarkerResidual`, `FrameResidual`, and `ResidualSummary` with `mean_rms_m` property.
+  - Implements `compute_residual_summary` tracking per-frame RMS, per-marker errors, swing phase boundaries (Address, Top, Impact, Finish), and 3D residual vectors `(model - target)`.
+  - Implements `export_board_ready_still` generating high-DPI stills with observed dots, model skeleton, residual vector lines, and comprehensive metadata banner (Candidate SHA, Engine, Drive Mode, Frame, RMS, Verdict).
+- **Drive Mode Filtering & Comparable Candidate Ranking (`src/tools/matched_swing_browser/model.py`)**:
+  - Adds `drive_mode` and `profile` fields to `MatchedSwingFilter`.
+  - Implements `extract_drive_mode` to distinguish torque-driven, muscle-driven, and kinematic candidates.
+  - Implements `rank_candidates(rows, capture, drive_mode)` sorting comparable candidates in strictly ascending RMS error order while preserving disqualified/rejected verdicts honestly without hiding failure reasons.
+- **Interactive 3D Viewer & Controls (`src/tools/tour_matching_viewer/gui.py`)**:
+  - Adds `current_frame`, `current_rendered_frame_index`, `current_frame_time_s`, `current_rms_error`, `physics_score`, `candidate_hash`, `drive_mode`, `title_caption`, and `capabilities_caption` properties.
+  - Implements `select_worst_residual()` allowing direct navigation to the exact discrete frame with the highest marker residual error.
+  - Implements `set_camera_view` (perspective, front, side, top, isometric) and `set_appearance_preset` (default, high_contrast, residual_vectors, dots_and_mesh) ensuring pure presentation independence where camera or preset switches never mutate underlying physics scores or numerical receipts.
+  - Implements `launch_native_backend` and graceful `_show_recovery_message` handling missing engines (`ViewerUnavailableError`) without unhandled crashes.
+- **TDD Test Coverage (`tests/unit/tools/test_tour_matching_viewer_residuals.py`, `tests/unit/tools/test_matched_swing_browser_best_candidate.py`)**:
+  - Verifies raw observation immutability, camera/appearance score invariance, worst-residual jump clock alignment, drive mode caption accuracy, board-ready export, and missing-engine recovery dialogs.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
@@ -46,7 +166,6 @@ Implements fail-closed capability checks, cancellation recovery semantics, and a
   - Decomposes monolithic `DefaultShadowTrackerService.fit()` into modular helpers (`_validate_fit_capabilities`, `_build_cancelled_bundle`, `_assemble_fit_result`), reducing cyclomatic complexity and satisfying the repository 100-line function architecture budget.
 - **Verification & Testing (`tests/unit/shadow_tracker/test_fail_closed_fitting.py`)**:
   - Unit tests verifying capability validation, PTS-window and aligned-coverage fail-closed gates, unknown-frame-timing refusal, execution-status propagation, camera calibration staleness, renderer calibration sync, atomic publish and rollback, and cancellation recovery.
-
 
 Enforces strict boundary contracts, no-evidence abstention, and edge-case handling across shadow tracker initialization, renderer, camera bridge, and forward kinematics:
 - **No-Evidence Abstention & State Convention Support (`src/shared/python/shadow_tracker/initialization.py`)**:
@@ -439,7 +558,6 @@ Freezes content-addressed club Excel workbook identity for epic #10602 without a
 - **Loader Alignment**: Excel `read_excel_event_markers` and Pinocchio `ClubTrajectoryParser` consume the shared helpers so TW_wiffle `A=` no longer returns NaN.
 - **Evidence**: `docs/plans/club_only_matching/evidence/club_workbook_identity.json` and `tests/unit/motion_matching/test_club_workbook_identity.py`.
 
-
 ## OpenSim/MyoSuite Native Nightly Lane Receipts (MS-43, #10342)
 
 Adds a ControlTower-oriented native-engine pytest lane with hashed nightly receipts and a freshness gate on `main` without editing `.github/workflows`:
@@ -699,7 +817,6 @@ Calibrates and smooths full-swing Pinocchio kinematics with exact grip compatibi
   - Enforces left elbow pit up-and-inward alignment at address posture (MM-5, #10107).
   - Enforces strict separation of driver and 7-iron calibration provenance in acceptance gating.
 
-
 ## Analytic Pelvis-Yaw Orientation Cost for Crocoddyl Solver (MS-107, #10381)
 
 Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body solver on the Pinocchio plant:
@@ -717,7 +834,6 @@ Integrates analytic pelvis-yaw orientation cost into the Crocoddyl full-body sol
   - Updated `cost_breakdown` to compute and report `"pelvis_yaw"` per-term cost in execution receipts.
 - **Verification (`tests/unit/motion_matching/test_crocoddyl_pelvis_yaw.py`)**:
   - Unit tests verify zero residual and gradient when aligned, central-difference gradient match, positive semi-definite Gauss-Newton Hessian, and no-op behavior when inactive (`pelvis_yaw = 0.0`) or waist markers are absent.
-
 
 ## Fast-Matching Evidence, Schemas and Negative Acceptance Fixtures (PF-01, #10431)
 
@@ -1310,7 +1426,6 @@ Implements the official OpenSim inverse kinematics pipeline processing tour capt
   - Exposes `python -m src.engines.physics_engines.opensim.python.tour_matching ik` CLI with full parameterization.
   - Registers `OpenSimPlant` in the shared motion-matching plant abstraction.
 
-
 ## Matched Swing Ledger Horizon Extraction and Drake Ground Support Classification (#10363)
 
 Updates matched swing ledger indexing and ground support metadata:
@@ -1546,7 +1661,6 @@ Delivers engine-independent pipeline plant interface, protocol adapters, registr
 
 ## Tools Dependency Repin and Seam Integrity (MS-95, #10362)
 
-
 Enforces immutable Tools source resolution and couples the 4-way dependency repin to Tools `main` commit `62e8cdbf9`:
 - **Submodule and Manifest Pinning (`vendor/ud-tools`, `requirements-tools.txt`, `Cargo.toml`)**:
   - `vendor/ud-tools`: Pinned to commit `62e8cdbf9c9f5f8a43a0342059f825e8fa78f8e1` on Tools `main`.
@@ -1627,7 +1741,6 @@ Proves native Pink displaced-target motion reduction, hard constraint qualificat
 - **Both-Club (Driver & 7-Iron) Pipeline Smoke Journeys (`tests/unit/motion_matching/test_pink_pipeline_receipts.py`)**:
   - Exercises full pipeline matching runs across both driver and 7-iron clubs via `MatchRequest` and CLI `--backend pink`.
   - Verifies generation of conforming `ConstrainedIkReceipt` records across both clubs.
-
 
 ## Pink Constrained IK Interface Repair and Fail-Closed Qualification (#10318)
 
@@ -2099,7 +2212,6 @@ Exposes `GolfSessionService` and `ReplaySubmissionCoordinator` through existing 
   - Feature parity entry `tools.golf_simulator` registered with status `parity` in `src/config/feature_parity.json` and matrix regenerated in `docs/development/feature_parity_matrix.md`.
   - Embed module registered in `FALLBACK_ADAPTER_MODULES` in `src/launchers/embedded_tool_bootstrap.py`.
 
-
 ## Ground Support Pipeline Modularization and Law of Demeter Abstractions (HO-1 #10155, #10162)
 
 Modularizes the monolithic `run_ground_support.py` script into a tested, cleanly factored package under `src/shared/python/motion_matching/pipeline/`:
@@ -2355,7 +2467,6 @@ Native GSPro avatars and autonomous course feedback remain vendor-gated research
 Existing contact/impact qualification gaps must be resolved independently of
 socket delivery; scientific acceptance retains the canonical manual governance.
 
-
 ## Shadow Tracker Evidence-Based Turnover Refresh (#10184)
 
 Corrects prototype completion claims after the September 15 review. Records
@@ -2441,7 +2552,6 @@ Specifies video ingestion, shot partitioning, timing mappings, and capture evide
   - `map_frame_to_observation()`: Translates ingested frame identities into `FrameObservation` records.
   - `SyntheticVideoDecoder` and `ingest_capture_rig_view()`: Provides deterministic offline decoding and Capture Rig view adapters.
 
-
 ## Shadow Tracker Immutable Evidence Contracts and Service Protocols (#10125)
 
 Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protocols for Shadow Tracker ST-02:
@@ -2455,7 +2565,6 @@ Freezes immutable evidence contracts, auxiliary DTOs, and runtime service protoc
   - `FrameObservation` presentation time conversion returns an exact, reduced `fractions.Fraction`, enforcing strictly positive timebase denominators and strict `float` for known physical time.
 - Enforces defensive copying and immutability across tuples and mapping attributes to prevent external mutation of constructor inputs or exported fields.
 - Implements strict lossless dictionary serialization and deserialization (`to_dict` / `from_dict`) with schema tag validation, unknown field rejection, and container element verification.
-
 
 ## Shadow Tracker Feasibility Qualification and Benchmark Freeze (#10124)
 
@@ -2498,7 +2607,6 @@ Records the reviewed image-contract baseline, reproduced validation findings and
 full delivery handoff covering TDD/DbC/LoD/DRY, model qualification, launcher/UI,
 performance and CI/CD. No fitter or scientific gate is completed by this review.
 
-
 ## Shadow Tracker Immutable Binary Masks and Lineage (ST-02B, #10138)
 
 Implements frozen `MaskFrame` record under `src/shared/python/shadow_tracker/mask_records.py`
@@ -2526,7 +2634,6 @@ Implements bidirectional conversion between `pose_estimation.observations.Camera
 Reuses `Transform6DOF` SE(3) inversion, enforces pinhole K constraints (zero skew, bottom row
 `[0, 0, 1]`, positive focal lengths), validates proper finite rotations, and canonicalizes
 distortion representations (none/empty to five zeros; four coefficients to five with k3=0).
-
 
 ## Shadow Tracker Source and Frame Identity Contracts (ST-02A, #10137)
 
@@ -2855,7 +2962,6 @@ Harden and stabilize the shared toast notification system (`src/shared/python/ui
 - Window Anchoring and Deactivation Handling: Drop `Qt.WindowType.WindowStaysOnTopHint`. Install an internal event filter on `ToastManager.parent` to automatically invoke `reposition_all()` on `Move` and `Resize` events. On `WindowDeactivate` and `Hide`, conceal active toasts so they never float over other desktop applications, unhiding and repositioning them on `WindowActivate` and `Show`. Dismiss active toasts on `Close`.
 - Automated Verification: Unit tests in `tests/unit/ui/test_toast.py` verifying icon glyphs, accessible naming, window flags, click-to-dismiss, hover pause and resume, toast stack capping, window move/resize anchoring, and application deactivation hiding.
 
-
 ## Embedded-Host Workspace Layout and Dock Geometry Persistence (#8899)
 
 Persist embedded-host workspace tabs, dock areas, active tab focus, and dock splitter geometries across launcher restarts (`src/launchers/embedded_host.py`, `src/launchers/launcher_layout_manager.py`, `src/launchers/launcher_layout_persistence.py`, `src/launchers/upstream_drift_launcher.py`):
@@ -2926,7 +3032,6 @@ Restore the `src.shared.python.model_generation.humanoid` and `src.shared.python
 - Mesh Processing Facade (`src/shared/python/model_generation/mesh/__init__.py`): Repoints all 14 advertised public exports directly to canonical submodules in `src.shared.python.humanoid_character_builder.mesh` (`collision_geometry`, `inertia_calculator`, `mesh_processor`, `primitive_inertia`). Removes `# mypy: ignore-errors` and eliminates the silent `try/except ImportError: pass` block.
 - Humanoid Character Builder CLI (`src/shared/python/humanoid_character_builder/__main__.py`): Corrects `CharacterBuilder` import from non-existent `core.builder` to `interfaces.api`.
 - Automated Verification (`tests/unit/shared_python/test_model_generation_facades.py`): Adds regression suite asserting full resolvability of all symbols in `model_generation.humanoid.__all__` and `model_generation.mesh.__all__`, as well as CLI entry point imports.
-
 
 Adopt `src/launchers/help_menu.py:build_help_menu` across GUI tool windows and provide direct navigation to calculation sheets and model documentation:
 - Reusable Help Menu Extension: Enhance `build_help_menu(menubar, parent, *, show_shortcuts=None, doc_target=None)` with support for an optional `doc_target: tuple[str, str | Path] | None` parameter, creating a primary action that directly launches the tool's calculation sheet or model document in the in-app document reader (`show_document`). Add helper `open_model_doc(path, parent)`.
@@ -3000,7 +3105,6 @@ Implement 6th-order continuous Bernstein and power polynomial torque forward dyn
 - Runtime availability probe (`is_mujoco_available`): Cleanly detects presence of functional compiled MuJoCo C++ bindings versus missing/mocked runtimes.
 - Verification & Test Suite: Unit and parity tests under `tests/unit/engines/mujoco/` (`pytestmark = pytest.mark.unit`) validating parameter bounds, Bernstein evaluation properties, control range clipping, Horner equivalence, and forward dynamics trajectories.
 
-
 ## Document #8556-Conditional Parameters in Model Completion Falsification Matrix (#8920)
 
 Document in `MODEL_COMPLETION_FALSIFICATION_MATRIX.md` that #8556 serves not only as a human-validation gate but also supplies parameters on which three model-tier claims are conditionally anchored:
@@ -3025,7 +3129,6 @@ Replace `np.linalg.norm` with `np.sqrt(np.einsum)` in joint coordinate system pa
 
 Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` in `src/motion_capture/coaching/measurements.py` for multi-dimensional distance calculations to bypass `np.linalg.norm` overhead.
 
-
 ## Impact Shaft Provider Integration (#9912)
 
 The exact vendor/ud-tools pin provides golf_club.distributed_shaft/1 through the
@@ -3036,7 +3139,6 @@ qualification promotion fail at the provider boundary. Byte identity remains
 distinct from physical validation. Resolved theme defaults and custom tokens
 must survive the same provider update. Engine adapters and studies remain under
 #9703/#9704; this integration does not claim their completion.
-
 
 ## Scoped Ubuntu CI Dependency Installation (#9894)
 
@@ -3090,14 +3192,12 @@ and dynamic/inertial parameter estimation (src.shared.python.optimization.ocp.pa
 - Created evidence document `docs/motion_capture/evidence/capture_rig_responsive_evidence.md` with before/after measurements (minimum width reduced from 3276 px historical floor to 478 px against the <= 900 px budget; 1280x800 preview width 656 px vs controls 240 px, a 2.73:1 preview-to-controls ratio) and rendered UI capture `capture_rig_responsive_layout.png`.
 - Regenerated feature parity matrix and documentation.
 
-
 ## Capture Rig GUI: Adapt to Window Size & Guard Minimum Width (#9847)
 
 - `src.tools.capture_rig.responsive` introduces pure `resolve_layout_mode` classifying widths below 1400 px into `COMPACT` and at/above into `ROOMY`.
 - In compact mode, control docks (`rail` and `inputs`) collapse together as tabs into a single 240 px column on the left, keeping the majority of available width for the central live preview pane and ensuring no horizontal scrollbars on 1280 px displays.
 - `CaptureRigWidget` connects `resizeEvent` and `showEvent` to adapt layout density dynamically across display dimensions.
 - Standing regression guard asserts `CaptureRigWidget().minimumSizeHint().width() <= 900` px (down from historical 3276 px floor).
-
 
 ## Reference Overlay: Comparison Workspace, Saved Layers & Reproducible Exports (#9866)
 
@@ -3115,7 +3215,6 @@ identifiers and canonical reference UUIDs keep comparison files inside the
 session directory. Exports reuse the existing SwingExportActions lifecycle:
 snapshot a saved job, prevent duplicates, report failure, cancel on close or
 Escape, and close the dialog only after its worker has finished.
-
 
 ## Video Upload Suffix Derivation From Filename Allow-List (#9612)
 
@@ -3146,7 +3245,6 @@ imported. A third, unreferenced pair of handler mixins lived in
 - `library_get_model` and `library_add_model` read `ModelEntry.id`; they read a
   non-existent `model_id` attribute and raised `AttributeError` on every call.
 - `MAX_MESH_UPLOAD_BYTES` is 50 MiB, the limit the adapters enforced.
-
 
 ## Restore Reverted Capsule-Inertia and SE(3) Reparenting Fixes (#9474)
 
@@ -3396,7 +3494,6 @@ hardcoded model IDs and type-based fallback heuristics from `LauncherLayoutManag
 Addresses GH-9477:
 1. **Actuator Torque in Pinocchio Simulation Loop**: Replaced hard-coded zero-torque vectors (`tau = zeros`) in `SimulationMixin._advance_physics()`, `_record_frame()`, and `PinocchioGUI.step_simulation()` with explicit commanded torque support (`self.commanded_tau`), enabling actuated dynamics rather than pure free-fall simulation. Added `set_commanded_torque()` and tests demonstrating that non-zero commanded torque alters trajectories compared to free-fall.
 2. **True Physical Energy and Cartesian Speed Metrics**: Replaced dimensionless velocity norm proxy in `CrossEnginePerturbationRunner._run_trial()` with genuine total mechanical energy in Joules ($J$), evaluating engine-native energy methods, kinetic energy with physical mass matrix/inertia ($0.5 v^T M(q) v$), and potential energy. Evaluated end-effector speed as Cartesian linear velocity in m/s via kinematics/Jacobians rather than generalized velocity norms. Added unit tests against an analytic single-link pendulum verifying mass scaling and kinematic speed. Decomposed energy evaluation helpers to conform to function-line budgets and refined numpy/GeometryModel type annotations.
-
 
 ## Research Evidence Source Hash Re-Registration (#9233)
 
@@ -7206,7 +7303,12 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
+| 2026-09-29 | #11130 | [MMR-11] Fail-closed reduced-model/club-only claims repair for #11097: planar-floor gate compares the current target's butt/clubhead plane distances (not the calibrated plane's stale residual) against a DbC-validated finite-positive `max_marker_rmse_m`; driven-triple receipts disqualified at projection time; promoted-package hash/residual integrity gates; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells. All are code-level gates; no package regeneration, Board cell selection, or native runs performed. |
+| 2026-09-29 | #11132 | [MMR-16] Review fixes for the best-candidate viewer (#11102): `rank_candidates` is wired into the matched-swing browser's real list-build path so the auto-selected first row is the best comparable candidate (ascending `whole_marker_rmse_m`, rejected rows kept visible with their verdicts), the viewer residual summary, rendered-frame and multi-candidate captions pool per-marker 3D distances like `tour_metrics.compute_shared_metrics`, frames with zero valid markers are excluded from global-worst selection and mean statistics, and the browser open-viewer path forwards the selected row's provenance (candidate hash, engine, drive mode, verdict) into the viewer load path; web/API parity and accessibility review remain open on the issue. |
 | 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
+| 2026-09-29 | #11138 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
+| 2026-09-29 | #11098 | Historical-video evidence review workflow (MMR-12): multi-shot frame isolation, VFR/cut/slow-motion timing preservation, bounded decode limits with prompt cancellation, atomic fail-closed repeat imports (scope/revision validated before mutation), unknown physical-time provenance preserved, recoverable corrupt media handling, and installed PyQt review scrubbing with unmeasured-time-safe viewport rendering. |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |
@@ -7511,6 +7613,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-09-29 | #11107 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |
 | 2026-09-19 | #10480 | Reuse shared physical-time playback across Qt React and native viewers (MV-04): PhysicalTimePlayback driving evaluation by continuous physical time using Tools playback_transport, quaternion SLERP with antipodal continuity, dropped-draw handling without timescale drift, discrete knot stepping, and PlaybackAdapter matrix (Qt, React web payload, MeshCat, Gepetto, MediaVideo with offset and documented mute reason). |
 | 2026-09-19 | #10479 | Bind saved candidates to viewer and analysis sessions (MV-03): CandidateSession ingestion with SHA-256 integrity, WSL host boundary probe, multi-candidate replay overlay with ENGINE_COLORS, conspicuous rejected fit banner, and GIF export. |
 | 2026-09-18 | #10395 | Freeze the OpenSim anatomical baseline and failure fixtures (OG-01): pure-XML model audit verifying SHA-256 hashes (051d61ea/7dd1da17), body/coord/actuator counts (23/39/39/0), detecting empty Club attached geometry and unscaled arm meshes, with fail-closed qualification verification. |
@@ -8214,7 +8317,6 @@ Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linal
 - Optimized `q_statistic` calculation in `player_covariation_core.py` using `np.vdot` to avoid intermediate array allocations.
 
 ## Change 2026-06-18
-
 
 ### Module Map Changelog
 

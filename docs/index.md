@@ -194,6 +194,7 @@ repository, which made them effectively unreachable.
 | `research/`             | @research-team        | draft     | Long-form research articles (Quarto/LaTeX/PDF) produced from repository analyses, with verified bibliographies.                     |
 | `review_archive/`       | @quality-team         | archived  | Older review records retained in place; see the consolidation decisions below.                                                      |
 | `reviews/`              | @quality-team         | stable    | Current review records, remediation notes, and quality findings.                                                                    |
+| `screenshots/`          | @ui-team              | draft     | Governed companion screenshot assets: authoritative registry, capture metadata, and qualified representative visuals.               |
 | `sg_optimizer/`         | @physics-team         | draft     | Strokes Gained Optimizer spec, data sources, and documentation.                                                                     |
 | `shared_tools/`         | @platform-team        | stable    | UpstreamDrift <-> Tools seam: divergence inventory, per-package rulings, drift-gate docs (UD #9406).                                |
 | `sidekick/`             | @platform-team        | stable    | Sidekick shared-utilities docs, launcher sidebar, chat/provider integration, tools library, and integration guides.                 |

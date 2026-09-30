@@ -38,9 +38,43 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 ISSUE_REF_PATTERN = re.compile(r"(?:Closes|Fixes|Resolves)\s+#([0-9]+)", re.IGNORECASE)
-ISSUE_PATH_PATTERN = re.compile(r"(?:src|tests|rust_core|api)/[A-Za-z0-9_/.-]+")
+ISSUE_PATH_PATTERN = re.compile(
+    r"(?<![\w/.-])(?:src|tests|rust_core|api|scripts|\.github(?:/workflows)?)/[A-Za-z0-9_/.-]+"
+)
 ENV_CHANGED_FILES = "PR_CHANGED_FILES"
 MAX_PATHS_SHOWN = 5
+
+_PATH_EXTENSIONS = (
+    ".py",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".md",
+    ".toml",
+    ".rs",
+    ".sh",
+    ".ps1",
+    ".txt",
+    ".c",
+    ".h",
+    ".cpp",
+    ".hpp",
+    ".in",
+    ".cfg",
+    ".ini",
+    ".lock",
+    ".html",
+    ".js",
+    ".ts",
+    ".css",
+)
+
+
+def _has_file_extension(path: str) -> bool:
+    """Return True if path ends with a recognized code/config extension."""
+    _, ext = posixpath.splitext(path)
+    return bool(ext and ext.lower() in _PATH_EXTENSIONS)
+
 
 IssueBodyLoader = Callable[[str], "str | None"]
 ApiListLoader = Callable[[], "list[str] | None"]
@@ -171,9 +205,35 @@ def _referenced_issue_numbers(pr_body: str) -> list[str]:
     return sorted(set(ISSUE_REF_PATTERN.findall(pr_body)), key=int)
 
 
+def _drop_parenthetical_prose_fragments(text: str) -> str:
+    """Drop parenthetical fragments that are prose rather than valid file references.
+
+    Splits on commas inside parentheses and filters out fragments that lack
+    a recognized file path.
+    """
+
+    def replace_parens(match: re.Match[str]) -> str:
+        inner = match.group(1)
+        fragments = [f.strip() for f in inner.split(",")]
+        kept: list[str] = []
+        for frag in fragments:
+            matches = ISSUE_PATH_PATTERN.findall(frag)
+            cleaned = [m.rstrip(".,;:)'\"") for m in matches]
+            if any(_has_file_extension(m) for m in cleaned):
+                kept.append(frag)
+        if kept:
+            return "(" + ", ".join(kept) + ")"
+        return ""
+
+    return re.sub(r"\(([^)]+)\)", replace_parens, text)
+
+
 def _issue_referenced_paths(issue_body: str) -> list[str]:
     """Return unique repo paths referenced in an issue body, sorted."""
-    return sorted(set(ISSUE_PATH_PATTERN.findall(issue_body)))
+    cleaned_body = _drop_parenthetical_prose_fragments(issue_body)
+    raw_matches = ISSUE_PATH_PATTERN.findall(cleaned_body)
+    cleaned = [m.rstrip(".,;:)'\"") for m in raw_matches]
+    return sorted(set(cleaned))
 
 
 def _first_path_match(changed_files: list[str], referenced: list[str]) -> str | None:

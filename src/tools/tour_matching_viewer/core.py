@@ -83,10 +83,23 @@ class MultiCandidateReplay:
             vm = replay.valid_mask[frame_idx] if replay.valid_mask is not None else None
             if tm is not None and mm is not None:
                 diff = mm[vm] - tm[vm] if vm is not None else mm - tm
-                res[engine] = float(np.sqrt(np.mean(diff**2))) if len(diff) > 0 else 0.0
+                # Canonical receipt RMS: per-marker 3D distances pooled over the
+                # frame's valid markers (matches compute_shared_metrics).
+                if len(diff) > 0:
+                    rms_sq = np.sum(diff**2, axis=-1)
+                    res[engine] = float(np.sqrt(np.mean(rms_sq)))
+                else:
+                    res[engine] = 0.0
             else:
                 res[engine] = 0.0
         return res
+
+
+def _make_readonly(arr: np.ndarray | None) -> None:
+    """Set numpy array flags to read-only while satisfying Law of Demeter."""
+    if arr is not None and isinstance(arr, np.ndarray):
+        flags = arr.flags
+        flags.writeable = False
 
 
 @dataclass(frozen=True)
@@ -99,6 +112,14 @@ class ReplayData:
     target_markers_m: NDArray[np.float64] | None = None
     valid_mask: NDArray[np.bool_] | None = None
     coordinate_names: tuple[str, ...] | None = None
+    drive_mode: str = "kinematic_prescribed"
+
+    def __post_init__(self) -> None:
+        _make_readonly(self.time_s)
+        _make_readonly(self.coordinates)
+        _make_readonly(self.model_markers_m)
+        _make_readonly(self.target_markers_m)
+        _make_readonly(self.valid_mask)
 
     @property
     def frame_count(self) -> int:
@@ -114,6 +135,51 @@ class ViewerFrame:
     model_markers: NDArray[np.float64] | None
     valid_mask: NDArray[np.bool_] | None
     rms_error: float
+
+
+@dataclass(frozen=True)
+class MarkerResidual:
+    """Per-marker error within a single frame."""
+
+    marker_name: str
+    marker_idx: int
+    error_m: float
+
+
+@dataclass(frozen=True)
+class FrameResidual:
+    """Error metrics and worst marker for a single time frame."""
+
+    frame_idx: int
+    time_s: float
+    phase: str
+    rms_error_m: float
+    worst_marker: MarkerResidual | None
+    valid_markers: int = 0
+
+
+@dataclass(frozen=True)
+class ResidualSummary:
+    """Comprehensive residual timeline across an entire candidate swing."""
+
+    worst_frame_idx: int
+    worst_time_s: float
+    worst_phase: str
+    worst_marker_name: str
+    worst_marker_idx: int
+    max_marker_error_m: float
+    worst_frame_rms_m: float
+    frame_residuals: tuple[FrameResidual, ...]
+    marker_names: tuple[str, ...]
+    residual_vectors: tuple[NDArray[np.float64], ...]
+
+    @property
+    def mean_rms_m(self) -> float:
+        """Mean RMS error across frames with observed markers, in meters."""
+        observed = [fr for fr in self.frame_residuals if fr.valid_markers > 0]
+        if not observed:
+            return 0.0
+        return float(np.mean([fr.rms_error_m for fr in observed]))
 
 
 @dataclass(frozen=True)
@@ -503,8 +569,12 @@ def viewer_frame(
             diff = model_markers[valid_mask] - target_markers[valid_mask]
         else:
             diff = model_markers - target_markers
+        # Canonical receipt RMS (tour_metrics.compute_shared_metrics): pool the
+        # per-marker 3D distances over the frame's valid markers, never the
+        # flattened XYZ components.
         if len(diff) > 0:
-            rms_error = float(np.sqrt(np.mean(diff**2)))
+            rms_sq = np.sum(diff**2, axis=-1)
+            rms_error = float(np.sqrt(np.mean(rms_sq)))
 
     return ViewerFrame(
         segments=segments,
@@ -602,4 +672,244 @@ def export_animation_gif(
             duration=duration_ms,
             loop=0,
         )
+    return out_p
+
+
+def _resolve_marker_names(
+    tm: NDArray[np.float64] | None,
+    mm: NDArray[np.float64] | None,
+    marker_names: Sequence[str] | None,
+) -> tuple[str, ...]:
+    if marker_names is not None:
+        return tuple(marker_names)
+    n_m = tm.shape[1] if tm is not None else (mm.shape[1] if mm is not None else 0)
+    return tuple(f"Marker_{i}" for i in range(n_m))
+
+
+def _resolve_phase_boundaries(
+    n_frames: int, event_indices: Mapping[str, int] | None
+) -> tuple[int, int, int]:
+    if event_indices:
+        return (
+            event_indices.get("Top", int(0.35 * n_frames)),
+            event_indices.get("Impact", int(0.60 * n_frames)),
+            event_indices.get("Finish", max(0, n_frames - 1)),
+        )
+    return int(0.35 * n_frames), int(0.60 * n_frames), max(0, n_frames - 1)
+
+
+def _get_swing_phase(k: int, top_idx: int, impact_idx: int, n_frames: int) -> str:
+    if k < top_idx:
+        return "Address / Backswing"
+    if k < impact_idx:
+        return "Top / Early Downswing"
+    if k <= impact_idx + max(1, int(0.15 * n_frames)):
+        return "Impact Zone"
+    return "Finish"
+
+
+def _evaluate_single_frame_residual(
+    k: int,
+    t_k: float,
+    phase_k: str,
+    tm: NDArray[np.float64] | None,
+    mm: NDArray[np.float64] | None,
+    vm: NDArray[np.bool_] | None,
+    names: tuple[str, ...],
+) -> tuple[FrameResidual, NDArray[np.float64], MarkerResidual | None, float]:
+    if tm is not None and mm is not None and k < len(tm) and k < len(mm):
+        diff = mm[k] - tm[k]
+        mask_k = (
+            vm[k] if vm is not None and k < len(vm) else np.ones(len(diff), dtype=bool)
+        )
+        valid_diff = diff[mask_k]
+        # Canonical receipt RMS (tour_metrics.compute_shared_metrics): pool the
+        # per-marker 3D distances over the frame's valid markers, never the
+        # flattened XYZ components. An empty valid set is unobserved: claim no
+        # worst marker and keep the frame out of global-worst/mean statistics.
+        if valid_diff.size == 0:
+            frame_res = FrameResidual(k, t_k, phase_k, 0.0, None, 0)
+            return frame_res, diff, None, 0.0
+        per_marker_sq = np.sum(valid_diff**2, axis=-1)
+        rms_k = float(np.sqrt(np.mean(per_marker_sq))) if per_marker_sq.size else 0.0
+        norms = np.linalg.norm(diff, axis=-1)
+        norms_masked = np.where(mask_k, norms, -1.0)
+        worst_m_idx = int(np.argmax(norms_masked))
+        worst_m_err = float(norms[worst_m_idx])
+        worst_m_name = (
+            names[worst_m_idx] if worst_m_idx < len(names) else f"Marker_{worst_m_idx}"
+        )
+        marker_res = MarkerResidual(worst_m_name, worst_m_idx, worst_m_err)
+        frame_res = FrameResidual(k, t_k, phase_k, rms_k, marker_res, int(mask_k.sum()))
+        return frame_res, diff, marker_res, rms_k
+
+    diff = np.zeros((len(names), 3), dtype=np.float64)
+    frame_res = FrameResidual(k, t_k, phase_k, 0.0, None, 0)
+    return frame_res, diff, None, 0.0
+
+
+def compute_residual_summary(
+    replay: ReplayData,
+    marker_names: Sequence[str] | None = None,
+    event_indices: Mapping[str, int] | None = None,
+) -> ResidualSummary:
+    """Compute per-frame, per-marker, and per-phase residual errors across the swing."""
+    n_frames = replay.frame_count
+    tm = replay.target_markers_m
+    mm = replay.model_markers_m
+    vm = replay.valid_mask
+    names = _resolve_marker_names(tm, mm, marker_names)
+    top_idx, impact_idx, _ = _resolve_phase_boundaries(n_frames, event_indices)
+
+    frame_residuals_list: list[FrameResidual] = []
+    residual_vectors_list: list[NDArray[np.float64]] = []
+    global_max_err = -1.0
+    global_worst_frame = 0
+    global_worst_marker_idx = 0
+    global_worst_marker_name = names[0] if names else "None"
+    global_worst_frame_rms = 0.0
+
+    for k in range(n_frames):
+        t_k = float(replay.time_s[k])
+        phase_k = _get_swing_phase(k, top_idx, impact_idx, n_frames)
+        f_res, diff, m_res, rms_k = _evaluate_single_frame_residual(
+            k, t_k, phase_k, tm, mm, vm, names
+        )
+        frame_residuals_list.append(f_res)
+        residual_vectors_list.append(diff)
+        if m_res is not None and m_res.error_m > global_max_err:
+            global_max_err = m_res.error_m
+            global_worst_frame = k
+            global_worst_marker_idx = m_res.marker_idx
+            global_worst_marker_name = m_res.marker_name
+            global_worst_frame_rms = rms_k
+
+    worst_phase = _get_swing_phase(global_worst_frame, top_idx, impact_idx, n_frames)
+    worst_time = (
+        float(replay.time_s[global_worst_frame])
+        if global_worst_frame < len(replay.time_s)
+        else 0.0
+    )
+
+    return ResidualSummary(
+        worst_frame_idx=global_worst_frame,
+        worst_time_s=worst_time,
+        worst_phase=worst_phase,
+        worst_marker_name=global_worst_marker_name,
+        worst_marker_idx=global_worst_marker_idx,
+        max_marker_error_m=max(0.0, global_max_err),
+        worst_frame_rms_m=global_worst_frame_rms,
+        frame_residuals=tuple(frame_residuals_list),
+        marker_names=names,
+        residual_vectors=tuple(residual_vectors_list),
+    )
+
+
+def _render_still_geometry(ax: Any, vframe: ViewerFrame, engine_name: str) -> None:
+    """Render skeleton lines, target dots, model dots, and residual vectors into 3D axes."""
+    from mpl_toolkits.mplot3d.art3d import Line3DCollection
+
+    eng_color = ENGINE_COLORS.get(engine_name.lower(), ENGINE_COLORS["default"])
+    lines = [[seg.start_m, seg.end_m] for seg in vframe.segments]
+    if lines:
+        ax.add_collection3d(
+            Line3DCollection(lines, colors=eng_color, linewidths=2.5, alpha=0.85)
+        )
+
+    valid = (
+        vframe.valid_mask
+        if vframe.valid_mask is not None
+        else (
+            np.ones(len(vframe.target_markers), dtype=bool)
+            if vframe.target_markers is not None
+            else np.array([], dtype=bool)
+        )
+    )
+    if vframe.target_markers is not None:
+        tm = vframe.target_markers[valid]
+        if len(tm) > 0:
+            ax.scatter(
+                tm[:, 0],
+                tm[:, 1],
+                tm[:, 2],
+                color="black",
+                s=24,
+                label="Observed Dots",
+                alpha=0.9,
+            )
+
+    if vframe.model_markers is not None:
+        mm = vframe.model_markers
+        ax.scatter(
+            mm[:, 0],
+            mm[:, 1],
+            mm[:, 2],
+            color=eng_color,
+            s=20,
+            label=f"Model ({engine_name.capitalize()})",
+            alpha=0.9,
+        )
+        if vframe.target_markers is not None:
+            res_lines = [
+                [m_pos, t_pos]
+                for m_pos, t_pos, is_v in zip(
+                    mm, vframe.target_markers, valid, strict=False
+                )
+                if is_v
+            ]
+            if res_lines:
+                ax.add_collection3d(
+                    Line3DCollection(
+                        res_lines,
+                        colors="#d9534f",
+                        linewidths=1.2,
+                        linestyles="--",
+                        alpha=0.75,
+                    )
+                )
+
+
+def export_board_ready_still(
+    replay: ReplayData,
+    spec: Mapping[str, Any],
+    frame_idx: int,
+    output_path: Path | str,
+    *,
+    candidate_hash: str = "unknown",
+    engine_name: str = "default",
+    drive_mode: str = "torque_driven",
+    verdict: str = "UNVERIFIED",
+) -> Path:
+    """Export a board-ready still image with model vs observed dots and honest residual captions."""
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    matplotlib.use("Agg")
+    out_p = Path(output_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = Figure(figsize=(8, 7), dpi=150)
+    canvas = FigureCanvasAgg(fig)
+    ax: Any = fig.add_subplot(111, projection="3d")
+    ax.clear()
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(0.0, 2.0)
+    ax.view_init(elev=20, azim=45)
+
+    vframe = viewer_frame(spec, replay, frame_idx)
+    _render_still_geometry(ax, vframe, engine_name)
+
+    t_val = float(replay.time_s[frame_idx]) if frame_idx < len(replay.time_s) else 0.0
+    rms_mm = vframe.rms_error * 1000.0
+    caption = (
+        f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
+        f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {verdict}"
+    )
+    fig.suptitle(caption, fontsize=10, fontweight="bold", y=0.96)
+    ax.legend(loc="upper right", fontsize=8)
+
+    canvas.draw()
+    fig.savefig(out_p, bbox_inches="tight")
     return out_p

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T12:23:00Z",
+  "generated_at": "2026-09-30T06:35:12Z",
   "rows": [
     {
       "acceptance": null,
@@ -206,7 +206,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/drake/receipt.json",
-      "sha256": "0e0d10eb06a2f95259fb7ca432e70440feafe71790a79bdc882c818c48187d2d"
+      "sha256": "c875adc96cd17967ecddc3abe36748da4c795b3ba47fedb1bab2d0c0e668d12c"
     },
     {
       "acceptance": null,
@@ -229,7 +229,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/historical/receipt.json",
-      "sha256": "f3e34b0619a73f8a1a06a950dd19c8e644f809ef80a1682b4c9f0f81fbc25a7e"
+      "sha256": "aea51e7927da413b4c1e0120347dc2b24f7c98905231204be382964eee352751"
     },
     {
       "acceptance": null,
@@ -252,7 +252,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/mujoco/receipt.json",
-      "sha256": "20925c2d281f90865b0b110d7c04cdf966f845e6fb413ffe32d0eca599f21a32"
+      "sha256": "4946770632a1ef05e3d2dff0fcaefdd5c00b7282ef8b58be0198a6fb37e43d19"
     },
     {
       "acceptance": null,
@@ -275,7 +275,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb4_calibration/pinocchio/receipt.json",
-      "sha256": "2469677a90e2427db52174b6e2e53ab697793a19f2ea43b776e590bcde4a4213"
+      "sha256": "301878aca8dbeb8bbecfcc49f1acb413764af117b42ca41188cce225dcd08f2b"
     },
     {
       "acceptance": null,
@@ -298,7 +298,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb5_matching/receipt_mujoco.json",
-      "sha256": "a99cc066d94b7f6f240b5bd6f1bc9fe1808078a4525ae25bc40365bcde0aec5e"
+      "sha256": "77f62118c32ca520ee9c46cc20d3e66ad1110d42b1a5f345ec1e1d77e28da4a1"
     },
     {
       "acceptance": null,
@@ -321,7 +321,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_drake.json",
-      "sha256": "15c4c2fc3d2c2388578fac4dcdfa089ac325dc334c32167e970c358a4d695ecb"
+      "sha256": "703f8fd046163d6b3caa81f802452d69d3b5d99fedf357b4f53ff692793a0f4e"
     },
     {
       "acceptance": null,
@@ -344,7 +344,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_mujoco.json",
-      "sha256": "2eb45578bb46bfcce717832ef9d44f439e257e0dfb144291f4cd97aaf443ee85"
+      "sha256": "81442d54abceac69862848d5ef07b1e8ad16f2bb40bdce8776796ee905173f1c"
     },
     {
       "acceptance": null,
@@ -367,7 +367,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_pinocchio.json",
-      "sha256": "435bef946064921f2b58ac7cee08a08ec542031d93fba327f4b650bc0bb9531e"
+      "sha256": "7c66cafe00f0d3d0f2294a1aa272e8a75e6505b90c49bb4c3d5d58269f9aeb1f"
     },
     {
       "acceptance": null,
@@ -452,7 +452,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver/receipt.json",
-      "sha256": "82b463bc4d703c7f3b62788dcfe4668d96433e8bcca08995b6c088160a3e35a3"
+      "sha256": "6e9437b81cf692a6654863ec2e28e1ef44fa8d219115e55539f59e72d39063d0"
     },
     {
       "acceptance": {
@@ -538,7 +538,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_drake/receipt.json",
-      "sha256": "8808e5d9ab5a2b482f1a4465cbf36ae2ee5ea62a71e295c1c891cc8e2e7a694c"
+      "sha256": "7b72a21deea675daab13aa3ccd2c5414626d0fdb35305e96b33236eec41e0eeb"
     },
     {
       "acceptance": null,
@@ -561,7 +561,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_fit/receipt.json",
-      "sha256": "05dd52ffa1516e222e31e478a15170d57757e55b286636bcf3ba00b48a1cbaf5"
+      "sha256": "a91c3f0a75c5660b06f0f78f5ff58a8d485e03efd1cf5cd5b9fa36cf9b0ce4a1"
     },
     {
       "acceptance": {
@@ -655,7 +655,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_native_tools/receipt.json",
-      "sha256": "bcbbaae63db3922c51b611e3e87bc79f356350d6951cb0630ac7d462ea3f760b"
+      "sha256": "468d881428f1d7904c0b4fd4c672b5c3e7590d12e5c1b347eccd5df509b657f8"
     },
     {
       "acceptance": {
@@ -873,7 +873,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_seeds/receipt.json",
-      "sha256": "a4e1cb65f1876a97616a0051921836b7370dd92e9d89a97a728516f4bd84f389"
+      "sha256": "ed530c3e60da2922342589b9b47d0e1d65b20e57766ae4e41bd43de43de3f487"
     },
     {
       "acceptance": null,
@@ -896,7 +896,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot/receipt.json",
-      "sha256": "2867b90798cfbbe6e88206b8201f35269ab1aec0c34f1f716bb91ede89d6cfe3"
+      "sha256": "d14e07e5374e1f779cc6ef3b20b8cb5e29416577375b2981b063b242c1b927fe"
     },
     {
       "acceptance": {
@@ -958,7 +958,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_shoot_g025/receipt.json",
-      "sha256": "e7ae60b483ba3436e97a496de5501bf7da6d7129e1ead0ab4a2e683ff52ce3f6"
+      "sha256": "16e1cf5cdd8d5673960d7714a52bedc1a7412a06f844f030dd90db0caff5d5e9"
     },
     {
       "acceptance": {
@@ -1020,7 +1020,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_driver_zmp/receipt.json",
-      "sha256": "dc351b0b7dd3a319884b298e6a4d4569619df6a3ee9d437d8692c01d3f1d440f"
+      "sha256": "f9b0555281554054bb3f15845727903d902abca786755850c073e6371fb97ff4"
     },
     {
       "acceptance": {
@@ -1082,7 +1082,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron/receipt.json",
-      "sha256": "2f4f35320226dac0dec187491e43c2765acd81f93f336d8b7165b7268c0099c7"
+      "sha256": "d215d841a87198c75fdfb811c505a9870068845c713e5c0aa15540f044281d23"
     },
     {
       "acceptance": {
@@ -1184,7 +1184,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_seeds_zmp/receipt.json",
-      "sha256": "6347983a31d0555951db7439cec9271262852db8712cc5af639f3f8f387cf2a4"
+      "sha256": "9f25aeb57a9029b8c0941457173a7672bc234aa880fa148dadcc494606717f4f"
     },
     {
       "acceptance": {
@@ -1246,7 +1246,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_shoot/receipt.json",
-      "sha256": "67e5d1aefeb04c7c4646414a2b48832a1744839cecf79a355724824988b5d7ef"
+      "sha256": "d115d91cda0c76f2ac7407b8a323ec57716d5f20b6559842d38ffb02fe0dd8d8"
     },
     {
       "acceptance": null,
@@ -1269,7 +1269,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/anthro_iron_zmp/receipt.json",
-      "sha256": "679baee6f97e7af1dec92dd475a6b866bb8da1d4f99b1768316baefcfcaf46e5"
+      "sha256": "8fa35a1da85913f3822b4e96ecf2e70e26ead91bc66e7a1d77b915274778f8dc"
     },
     {
       "acceptance": null,
@@ -1338,7 +1338,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/candidate_anthro/receipt.json",
-      "sha256": "e154c980d6a83f1a20e0cc16689369944e508d5b2777e84984fe4869650bc14c"
+      "sha256": "ab475e40c08fe6d2c564474ef5a8355d77c33c8b2368b0bfa6a381e56de728a0"
     },
     {
       "acceptance": null,
@@ -1361,7 +1361,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/ground_support/receipt.json",
-      "sha256": "7c93addcf2c463f155074f3415510b59c221cad8aa0534ee2339cbb754c2756d"
+      "sha256": "faac729e7a08bfa3a724a6f41ac2c99b9ec301f6490fc8dd94f9adc50d05e709"
     },
     {
       "acceptance": null,
@@ -1486,7 +1486,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/driver_mjx-adam/receipt.json",
-      "sha256": "f0a0f124d89a9e4daa96fc64202ce1688802da9e60a2ec80fbc848bc1cb55283"
+      "sha256": "7ba8fd01659743683f7f04beabb72087a31c530038981e9beae818a0bdb700c2"
     },
     {
       "acceptance": null,
@@ -1611,7 +1611,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/driver_mjx-lbfgs/receipt.json",
-      "sha256": "f74f0dbd123edd39a76f35a9655f52fdb0be1d253280ffe7c340c1ab03986990"
+      "sha256": "a7854f80eed89fc10c8adfec261c48136746bc89bd5ca0d12f2fab468e8606b1"
     },
     {
       "acceptance": {
@@ -1713,7 +1713,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/driver_none/receipt.json",
-      "sha256": "8aa8ed0ef0a7a6590ca712e574fde455974758ff54c03a19b323c471ea75aa86"
+      "sha256": "ee3124c8dbfad59614a438305969b976235c4ac13632d2eac51059cd4bc45eb9"
     },
     {
       "acceptance": {
@@ -1815,7 +1815,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/driver_shooting/receipt.json",
-      "sha256": "68506b8788971dfd7b29ff87e70278559d5f817529cedca3945e75b14ad3d9ae"
+      "sha256": "9bf99fdd50c417db3de0b37e68b805a579adb1303352e4100484d294be55173c"
     },
     {
       "acceptance": null,
@@ -1940,7 +1940,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/iron_mjx-adam/receipt.json",
-      "sha256": "16b9ab08c7e6aea0ba9ea918e785349ecf7507accc6116c5c56980669003471b"
+      "sha256": "f71e7328303430045f60ba764ff2284012c9db577c76704869821d14fab5dca1"
     },
     {
       "acceptance": null,
@@ -2065,7 +2065,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/iron_mjx-lbfgs/receipt.json",
-      "sha256": "eda8ac42c695519ac4801fdb0c345b7e913e58271f8b874ad84ddc082f67877a"
+      "sha256": "0114cefeca9c1f9fee499ef209c327a32c962fe2e7a2e09f291a9027acf255ff"
     },
     {
       "acceptance": {
@@ -2167,7 +2167,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/iron_none/receipt.json",
-      "sha256": "3c4d0204f692ee0e88d7444795e3118f50aa0024bad4fd39ce12c71c22116b23"
+      "sha256": "9605a55d61d8f596495d90f4149d5c06c3f63296c4a0ffa9ab3129f7fa2042b3"
     },
     {
       "acceptance": {
@@ -2269,7 +2269,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark/iron_shooting/receipt.json",
-      "sha256": "ed0eaa7ca694b1a2bd1590d654703f88e79be9814987a413f48bcd00aafb6a70"
+      "sha256": "9b99150329d311eeaa67feea67ad398faca83b6fce4bc7a760ad0d0708a0ce93"
     },
     {
       "acceptance": null,
@@ -2394,7 +2394,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/driver_mjx-lbfgs/receipt.json",
-      "sha256": "ab3bdb44af1ad8a53e0e4654018b647167d6cffa6457ef6a13e425974addc8b6"
+      "sha256": "4d4ee94913e2e2be8c37995b36f946841d1c5c99db111891bd12309d68ed56b3"
     },
     {
       "acceptance": null,
@@ -2519,7 +2519,7 @@
       },
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/mjx_benchmark_lbfgs60/iron_mjx-lbfgs/receipt.json",
-      "sha256": "7f0c2c2fbe3fa223585071e33dd0a55a2c24e58bdcb19973c1fd52a1eb6b31b3"
+      "sha256": "9ac8d4c9c357165a33d9d2d85fd7413f56f1b9e0a07db478a7b193bbbdaeccff"
     },
     {
       "acceptance": null,
@@ -2795,7 +2795,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os0_audit_receipt.json",
-      "sha256": "e03501bf9402dff5623192bb17c5eca5c7598e596a533620be43644b274771a0"
+      "sha256": "6419fb02ce3da870215b9e5bc5f88ba82a52ad9c6179d7cf604306feca6558d6"
     },
     {
       "acceptance": null,
@@ -2818,7 +2818,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os1_trc_receipt.json",
-      "sha256": "ad4861def490c533be9ea3c5210ae89b4afb89f7a29bc2888a69c20bf57073ce"
+      "sha256": "ce5c14e1e97ced2e80bb5414bb2beb4982d0af7ebd9350846bded56280c8410f"
     },
     {
       "acceptance": null,
@@ -3034,7 +3034,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/opensim_tour_matching/evidence/os6_handoff/reproduction_receipt.json",
-      "sha256": "79c2737b1c2ec262918e33f2bcd1dd6e4e7d3b42f621096bc29e412452d01b77"
+      "sha256": "481ea8917405b381689a6cd3f1d1af4ea4f46504e2450fb27553d35d0ba6ccb9"
     },
     {
       "acceptance": null,
@@ -3402,7 +3402,7 @@
       },
       "reason": null,
       "receipt_path": "docs/development/simscape_tour_matching/native_evidence/first_prefix_bundle_receipt.json",
-      "sha256": "76eb0f31b9c43f19c67a9b240bbd354e512ab1da1de32d30918d37bf604bdbde"
+      "sha256": "0dc65938c98e75c6d1fd43cecf8be3204d77e86a5be4574a4f7265bb4391dd69"
     },
     {
       "acceptance": null,
@@ -4040,7 +4040,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/driver_target_audit_receipt.json",
-      "sha256": "c4b83505d561696b21b06f469d8d137d5964c167ad7bd917f2580941b0386b94"
+      "sha256": "4d37cf3f112efb65d405f5391f587af0180ae302e7278f77608895495b3989c4"
     },
     {
       "acceptance": null,
@@ -4063,7 +4063,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/iron_target_audit_receipt.json",
-      "sha256": "b73e651b5de7afcaa373b4a15cb40ceff527528e05b4fe44b92bc06916d46d4a"
+      "sha256": "330d2b8e47181ae236c5de02857a2c692ce98e3458836f025c7744e562a3bda7"
     },
     {
       "acceptance": {
@@ -4091,7 +4091,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb04_driver_qualification_receipt.json",
-      "sha256": "cecea136ce9784ec7dc7beb0facafd3fd1dba86d2e4944cb1c62c57dce305ae8"
+      "sha256": "0f190a360cd0287a170cc8b59b73875554f5e10ee9e3276c0137338ddc3aef7a"
     },
     {
       "acceptance": {
@@ -4119,7 +4119,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb04_iron_qualification_receipt.json",
-      "sha256": "f03df247e98e3488a3cf0ca776f4fea62030ce389af2bb279ff228ac3000bf9b"
+      "sha256": "950c9bcd80853bdb9e7ee845c75b688776b8b739c0e3f559c41ead20b4c6abf4"
     },
     {
       "acceptance": {
@@ -4147,7 +4147,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb05_driver_qualification_receipt.json",
-      "sha256": "6e73af194d18fd007a16aa8f5a1cc65afe3b1830c2d7830cc97bbc9d8531ca8d"
+      "sha256": "fd26ef3d7f4d0624db0c305829f0379065cb19563ad0f3013ee54663d014d7b0"
     },
     {
       "acceptance": {
@@ -4175,7 +4175,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb05_iron_qualification_receipt.json",
-      "sha256": "6a63ca63aeabd001d72489140cbfccf0ae536bba88d049cf799ae84ee235664b"
+      "sha256": "542539f21c9497fda4e005e57091a58183eba867a6cb8c75bc4726ab6a9a9543"
     },
     {
       "acceptance": {
@@ -4203,7 +4203,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_driver_planarity_receipt.json",
-      "sha256": "25631e3856948d7ae98029675b594c34223814c940f46aacf9d6230dd36c70cb"
+      "sha256": "530f4268c0d2eb4a2138c344ad448cf47526fbf70af8d5923c5aee716e4df7ca"
     },
     {
       "acceptance": {
@@ -4231,7 +4231,7 @@
       },
       "reason": null,
       "receipt_path": "docs/plans/tour_baselines/evidence/tb06_iron_planarity_receipt.json",
-      "sha256": "9fddb6328f043fbff5fbf52f17a83116aaba4f4fd63890a1bd819d6325391891"
+      "sha256": "22d775656cbfeb0e6353ce2c92afeb9e1736a759be61fe9a91f932c45132e686"
     },
     {
       "acceptance": {
@@ -4445,7 +4445,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_full_mujoco_replay/receipt.json",
-      "sha256": "9a6ea9c655fa354069a3b369092e8a7a8e53abd1b4cd5a78dd015b8b57157468"
+      "sha256": "3c0f2cc53145c00f7b3674a458d1f5aa4ab39ce5dc4f0568e2990d5f018c5f73"
     },
     {
       "acceptance": {
@@ -4524,7 +4524,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_full_pinocchio/receipt.json",
-      "sha256": "b064a0efd2c267ee217e818de4845dd5395b61d68a9676b827e78b3767fb20f5"
+      "sha256": "ed373d457aa43c1f6048058ddb3e14352de5a88c27f2195d494b0565db7ba64a"
     },
     {
       "acceptance": {
@@ -4611,7 +4611,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45/receipt.json",
-      "sha256": "c129c5fec534c074c5011d35b899b7abf866ebe53781df334011d53c94d19523"
+      "sha256": "73ed9647ad1d7c8efa51b3991d334b5fa86828ea619dd791a16520cc73e133f5"
     },
     {
       "acceptance": {
@@ -4706,7 +4706,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100/receipt.json",
-      "sha256": "bc277fcd2b11747efdf44b57951c4ff1e7a159da538f44fe44351419cd6ad721"
+      "sha256": "57c8ca98edd8257424da4f450810a10a066099a6bc0f5d4559b4b8bb11fce449"
     },
     {
       "acceptance": {
@@ -4768,7 +4768,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -4832,7 +4832,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -4840,7 +4840,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-5,
+            "measured": 1.8289190783135055e-05,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -4920,7 +4920,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_b100_mujoco_replay/receipt.json",
-      "sha256": "39b33b37b30ac5bfe72594951d97d60805585c5260ef2b14367a3fa6ed485778"
+      "sha256": "b1a640bb65ef021ff147b63f3fb162c80233039a34ad114b7f8d0da80bce59b2"
     },
     {
       "acceptance": {
@@ -5007,7 +5007,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/driver_g1_crocoddyl_rk45_rtol6/receipt.json",
-      "sha256": "166eb43ba7a2a0243720bf838d0b509dfabe9e6a51beccc6431d7b27d47a0826"
+      "sha256": "7c6f7d23766642fa15fa012542ff39d1cf4e3406a80abd9da985ee673c49a7ae"
     },
     {
       "acceptance": {
@@ -5400,7 +5400,7 @@
       },
       "reason": null,
       "receipt_path": "evidence/matched/iron_full_pinocchio/receipt.json",
-      "sha256": "246719a47fd4a593fe62b7c52fc1ac45d0a52e0e49b3bf2fc2402cc608204f5f"
+      "sha256": "c2defb3002d4aa71e83718fcf3c09ba5a3027998c587afa72ca2dddf17f8ffe2"
     }
   ],
   "schema_version": "1.0.0",

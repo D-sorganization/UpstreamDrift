@@ -23,6 +23,17 @@ from numpy.typing import NDArray
 Array: TypeAlias = NDArray[np.float64]
 BoolArray: TypeAlias = NDArray[np.bool_]
 
+# Canonical club-cluster label tags (Marker_2 / Marker_3 clubhead-shaft pairs,
+# plus any explicit 'club' naming). Single source of truth for every replay
+# consumer; do not re-implement label matching locally.
+CLUB_MARKER_TAGS: tuple[str, ...] = ("marker_2", "marker_3", "club")
+
+
+def is_club_marker_label(label: str) -> bool:
+    """Return True when a marker label belongs to the canonical club cluster."""
+    lowered = str(label).lower()
+    return any(tag in lowered for tag in CLUB_MARKER_TAGS)
+
 
 @dataclass(frozen=True)
 class ReplayFiveMetrics:
@@ -224,9 +235,7 @@ def compute_replay_five_metrics(
 
     # 4. Club cluster RMS (last frame, clubhead and shaft markers)
     club_indices = [
-        i
-        for i, lbl in enumerate(marker_labels)
-        if any(tag in lbl.lower() for tag in ("marker_2", "marker_3", "club"))
+        i for i, lbl in enumerate(marker_labels) if is_club_marker_label(lbl)
     ]
     if club_indices:
         club_term_mask = term_val[club_indices]
