@@ -9,6 +9,7 @@
 - Tests: 17 unit tests passed (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN); Ruff check and format clean.
 - Limitation: no native OpenSim execution exists anywhere in this evidence; real qualification requires the opensim bindings on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine opensim`.
 # Current Handoff — Qualify Drake Native Dual-Club Dynamics and Replay (#11094)
+
 - Branch: `feat/mmr-10d-drake-dual-club-11094`
 - Pull request: Refs #11094 (partial: fail-closed conversion; native qualification still requires pydrake on a pinned host/native CI lane).
 - Done: [MMR-10D] Drake qualification contracts plus **fail-closed conversion** after review audit (placeholder receipts `c0ffee`/`deadbeef`/`cafebabe`, gates that always qualified, invented marker metrics):
@@ -21,7 +22,9 @@
 - Tests: 36 focused tests passed (16 `tests/unit/engines/drake/test_drake_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN; 20 lane/freshness tests). Ruff check and format clean on changed files.
 - Limitation: no native Drake execution exists anywhere in this evidence; real qualification requires pydrake on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine drake`.
 - Next step: merge drivers follow; do not treat UNAVAILABLE receipts as engine qualification.
+
 # Current Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+
 # Current Handoff — Restore the High-Severity UI Npm Audit Gate (#11184)
 
 - Repository: D-sorganization/UpstreamDrift
