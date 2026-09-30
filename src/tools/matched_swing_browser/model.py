@@ -43,6 +43,8 @@ class MatchedSwingFilter:
     capture: str | None = None
     lane: str | None = None
     verdict: str | None = None
+    drive_mode: str | None = None
+    profile: str | None = None
     text: str | None = None
 
     def to_result_filter(self) -> ResultFilter:
@@ -130,6 +132,21 @@ class MatchedSwingBrowserModel:
             if row_verdict.upper() != criteria.verdict.upper():
                 return False
 
+        if criteria.drive_mode:
+            row_dm = self.extract_drive_mode(row)
+            if row_dm.lower() != criteria.drive_mode.lower():
+                return False
+
+        if criteria.profile:
+            row_profile = (
+                "dynamic"
+                if "torque" in self.extract_drive_mode(row).lower()
+                or row.lane.lower() in ("native", "replays", "matched")
+                else "kinematic"
+            )
+            if row_profile.lower() != criteria.profile.lower():
+                return False
+
         if q_text:
             searchable = (
                 f"{row.receipt_path} {row.engine} {row.lane} {row.capture or ''} "
@@ -139,6 +156,46 @@ class MatchedSwingBrowserModel:
                 return False
 
         return True
+
+    @staticmethod
+    def extract_drive_mode(row: LedgerRow) -> str:
+        """Extract drive mode (torque_driven or kinematic_prescribed) for a row."""
+        if row.acceptance and "drive_mode" in row.acceptance:
+            return str(row.acceptance["drive_mode"])
+        if row.reason and "drive_mode:" in row.reason:
+            for part in row.reason.split(";"):
+                if "drive_mode:" in part:
+                    return part.split(":", 1)[1].strip()
+        if "torque" in row.lane.lower() or "dynamic" in row.lane.lower():
+            return "torque_driven"
+        return "kinematic_prescribed"
+
+    @precondition(
+        lambda self, rows, capture=None, drive_mode=None: isinstance(rows, list)
+    )
+    @postcondition(lambda result: isinstance(result, list))
+    def rank_candidates(
+        self,
+        rows: list[LedgerRow],
+        capture: str | None = None,
+        drive_mode: str | None = None,
+    ) -> list[LedgerRow]:
+        """Rank comparable candidates by whole_marker_rmse_m ascending (best first)."""
+        filtered = [
+            r
+            for r in rows
+            if (capture is None or (r.capture or "").lower() == capture.lower())
+            and (
+                drive_mode is None
+                or self.extract_drive_mode(r).lower() == drive_mode.lower()
+            )
+        ]
+
+        def sort_key(r: LedgerRow) -> float:
+            val = r.metrics.whole_marker_rmse_m
+            return float("inf") if val is None or math.isnan(val) else val
+
+        return sorted(filtered, key=sort_key)
 
     @staticmethod
     def extract_verdict_string(row: LedgerRow) -> str:

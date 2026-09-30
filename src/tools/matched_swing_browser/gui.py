@@ -426,7 +426,17 @@ class MatchedSwingBrowserWidget(QWidget):
             verdict=verdict,
             text=text,
         )
-        self._current_filtered_rows = self._model.filter_rows(self._all_rows, criteria)
+        filtered = self._model.filter_rows(self._all_rows, criteria)
+        # Best-candidate wiring (MMR-16 #11102): order the user-filtered rows
+        # with rank_candidates so the auto-selected first row is the best
+        # comparable candidate (ascending whole_marker_rmse_m among rows that
+        # share the capture/drive-mode lens). Rejected rows stay in the table
+        # with their verdicts; nothing is hidden by the ranking step.
+        self._current_filtered_rows = self._model.rank_candidates(
+            filtered,
+            capture=capture,
+            drive_mode=criteria.drive_mode,
+        )
         self._populate_table(self._current_filtered_rows)
         self._count_lbl.setText(
             f"Showing {len(self._current_filtered_rows)} of {len(self._all_rows)} runs"
@@ -649,8 +659,9 @@ class MatchedSwingBrowserWidget(QWidget):
         return npz_path
 
     def _on_open_tour_matching_viewer(self) -> None:
+        row = self._selected_row
         npz_path = self._get_selected_npz_path()
-        if not npz_path:
+        if not npz_path or row is None:
             return
 
         try:
@@ -658,8 +669,20 @@ class MatchedSwingBrowserWidget(QWidget):
                 TourMatchingViewerWindow,
             )
 
+            verdict = self._model.extract_verdict_string(row)
             viewer_win = TourMatchingViewerWindow(self)
-            viewer_win.widget.load_file(npz_path)
+            # Forward the selected row's receipt provenance (candidate hash,
+            # engine, drive mode) and verdict so viewer captions match the
+            # selected receipt and rejected candidates show their failure
+            # banner instead of filename-derived placeholders (#11102).
+            viewer_win.widget.load_file(
+                npz_path,
+                candidate_hash=row.candidate_sha or None,
+                engine_name=row.engine or None,
+                drive_mode=self._model.extract_drive_mode(row),
+                is_accepted=(verdict != "REJECTED"),
+                rejection_reason=row.reason or "",
+            )
             viewer_win.show()
         except Exception as exc:
             logger.exception("Failed to launch Tour Matching Viewer: %s", exc)

@@ -102,6 +102,31 @@
 - Open (MMR-11 acceptance criteria NOT satisfied by this PR): raw-to-package reproduction/regeneration of reported baselines and residuals, Board-selected required club-only cells, and any native qualification run.
 - Tests: TDD red-to-green for both Codex findings (current-target planar-floor gating; ceiling DbC validation) plus all fail-closed gate tests. Scoped runs at `46b804bc69`: 18 passed (`tests/unit/motion_matching/test_fit_options_dbc.py`, `tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py`) and 86 passed (`tests/unit/tour_baselines/test_coverage_matrix.py`, `test_qualification.py`, `test_baseline_packages.py`, `tests/unit/motion_matching/test_club_matrix_qualification.py`, `test_club_ui_integration.py`). `ruff check` clean on changed files. Full suite, mypy and CI gates were not run by this slice.
 - Next step: raw-to-package regeneration and Board cell-selection follow-ups for #11097.
+# Current Handoff — Publish a Best-Candidate Viewer With Honest Residuals (#11102)
+
+- Repository: D-sorganization/UpstreamDrift
+- Branch: `feat/mmr-16-best-candidate-viewer-11102`
+- Issue: #11102
+- Pull request: refs #11102 (mergeability and PR body owned by the main lane; desktop-slice scope below)
+- Done:
+  - Enforced raw observation immutability on `ReplayData` by setting numpy array flags to `writeable = False` on `time_s`, `coordinates`, `model_markers_m`, `target_markers_m`, and `valid_mask`.
+  - Added dataclasses `MarkerResidual`, `FrameResidual`, and `ResidualSummary` with `mean_rms_m` property.
+  - Implemented `compute_residual_summary` with per-frame RMS, per-marker errors, phase boundaries (Address, Top, Impact, Finish), and 3D residual vectors `(model - target)`.
+  - Implemented `export_board_ready_still` generating high-DPI stills with observed dots, model skeleton, residual vector lines, and comprehensive metadata banner (Candidate SHA, Engine, Drive Mode, Frame, RMS, Verdict).
+  - Extended `MatchedSwingFilter` with `drive_mode` and `profile`. Implemented `extract_drive_mode` and `rank_candidates(rows, capture, drive_mode)` sorting comparable candidates in strictly ascending RMS error order while preserving disqualified/rejected verdicts honestly.
+  - Wired `rank_candidates` into the browser's real list-build path (`_apply_filters`) so the auto-selected first row is the best comparable candidate (ascending `whole_marker_rmse_m`); rejected rows remain visible with their verdicts.
+  - Fixed the viewer frame RMS (`_evaluate_single_frame_residual`, `viewer_frame`, `get_per_engine_rms`) to pool per-marker 3D distances (`sqrt(mean(sum(valid_diff**2, axis=-1)))`) matching the canonical `tour_metrics.compute_shared_metrics`, so residual summaries, physics scores and captions agree with the ledger.
+  - Frames with zero valid markers claim no worst marker (`FrameResidual.valid_markers`) and are excluded from global-worst selection and `mean_rms_m`, so the Worst Residual jump never lands on unobserved placeholder data.
+  - `TourMatchingViewerWidget.load_file` now accepts optional receipt provenance (`candidate_hash`, `engine_name`, `drive_mode`, `is_accepted`, `rejection_reason`); the browser's `_on_open_tour_matching_viewer` forwards the selected `LedgerRow`'s hash, engine, drive mode and verdict so captions match the selected receipt and rejected candidates show their failure banner.
+  - Extended `TourMatchingViewerWidget` with properties `current_frame`, `current_rendered_frame_index`, `current_frame_time_s`, `current_rms_error`, `physics_score`, `candidate_hash`, `drive_mode`, `title_caption`, and `capabilities_caption`.
+  - Implemented `select_worst_residual()` jumping directly to the exact discrete frame with the highest marker residual error.
+  - Implemented camera view presets (`perspective`, `front`, `side`, `top`, `isometric`) and appearance presets (`default`, `high_contrast`, `residual_vectors`, `dots_and_mesh`) preserving physics scores and numerical receipts.
+  - Implemented `launch_native_backend` and graceful `_show_recovery_message` handling missing engines without crashes.
+- Tests (scoped, `/tmp/ud-venv-11132`, offscreen PyQt6 + mujoco): red outcomes for all four review fixes recorded pre-fix; post-fix `pytest tests/unit/tools/test_matched_swing_browser_best_candidate.py tests/unit/tools/test_tour_matching_viewer_residuals.py` → 21 passed and the targeted viewer suites (core, playback, combo, forces, native_button, adapter) → 29 passed; two combo pins that predated the review fixes updated (old flattened-RMS value and removed `#d9534f` hex literal, see 70762eb7fe). Exit code 0 on every run.
+- Not done (remains open on #11102 — the desktop PyQt seam above is fixed, but the issue's acceptance does not stop there):
+  - The same journey is not exercised on the supported web/API surfaces (installable-PyQt and web/API parity, accessibility keyboard review and missing-engine recovery on real hosts are unreviewed).
+  - Human visual review of captions/stills and acceptance checkboxes in #11102 are unchecked; no claim is made that "all acceptance criteria" pass.
+- Next step: main-lane rebase/CI and frontier review of PR #11132.
 
 ---
 
