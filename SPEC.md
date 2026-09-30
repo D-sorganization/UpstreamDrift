@@ -11,6 +11,13 @@ Specifies the native OpenSim qualification pipeline and receipt verification for
   - `README.md`: documents model topology, Hill-type muscle models, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
 - **Test Suite (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`)**:
   - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
+## PreconditionError Exception-Identity Repair at the Shared Contracts Seam (#11175)
+
+- **Duplicate DbC exception class objects eliminated (`_contracts_exceptions` re-export seam)**:
+  - `src/shared/python/_contracts_exceptions.py` no longer redefines `ContractViolationError`, `PreconditionError`, `PostconditionError`, or `InvariantError`; it re-exports the SAME class objects from the public `src.shared.python.contracts` module, while keeping shard-local `ContractEvaluationError` (with message validation).
+  - Both import paths (`src.shared.python.contracts` and `src.shared.python._contracts_exceptions`) now yield referentially identical classes, so `@precondition`/`@postcondition` failures raised in decorated code are catchable by code importing either seam — unblocks `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid`, red on main since the #11171 restore.
+  - Regression guard strengthens the test with an object-identity assertion (`contracts.PreconditionError is _contracts_exceptions.PreconditionError`) plus `errisinstance` on the raised violation.
+
 ## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
 
 Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
