@@ -487,6 +487,81 @@ def compute_segment_rotations(
     )
 
 
+def _segment_yaw_angular_speed(
+    motion: SwingMotion,
+    t: np.ndarray,
+    left_labels: tuple[str, ...],
+    right_labels: tuple[str, ...],
+) -> np.ndarray:
+    """Return the yaw angular speed (deg/s) of a left/right marker-pair segment."""
+    vec = _resolve_vector(
+        motion.markers, left_labels, right_labels, fallback_dim=len(t)
+    )
+    yaw = np.unwrap(np.arctan2(vec[:, 1], vec[:, 0]))
+    return np.degrees(np.abs(np.gradient(yaw, t)))
+
+
+def _lead_arm_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.ndarray:
+    """Return the 3D angular speed (deg/s) of the shoulder-to-wrist vector."""
+    sh_pt: np.ndarray | None = None
+    for lbl in ("LShoulderTop", "LShoulderBack"):
+        if lbl in motion.markers:
+            sh_pt = _fill_nans_3d(motion.markers[lbl])
+            break
+    wrist_pt: np.ndarray | None = None
+    for lbl in ("LWristTop", "LElbowOut"):
+        if lbl in motion.markers:
+            wrist_pt = _fill_nans_3d(motion.markers[lbl])
+            break
+    if sh_pt is None or wrist_pt is None:
+        return np.zeros(n, dtype=np.float64)
+
+    arm_v = wrist_pt - sh_pt
+    norms = np.linalg.norm(arm_v, axis=-1, keepdims=True)
+    norms = np.where(norms == 0, 1.0, norms)
+    u_arm = arm_v / norms
+    du_arm = np.gradient(u_arm, t, axis=0)
+    return np.degrees(np.linalg.norm(du_arm, axis=-1))
+
+
+def _club_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.ndarray:
+    """Return the 3D angular speed (deg/s) of the grip-to-clubhead shaft vector."""
+    head_pt = motion.club_head
+    if head_pt is None and "Marker_2:2:1" in motion.markers:
+        head_pt = motion.markers["Marker_2:2:1"]
+    grip_pt = motion.grip
+    if grip_pt is None and "Marker_3:3:1" in motion.markers:
+        grip_pt = motion.markers["Marker_3:3:1"]
+
+    if head_pt is None or grip_pt is None:
+        return np.zeros(n, dtype=np.float64)
+
+    shaft_v = _fill_nans_3d(head_pt) - _fill_nans_3d(grip_pt)
+    norms = np.linalg.norm(shaft_v, axis=-1, keepdims=True)
+    norms = np.where(norms == 0, 1.0, norms)
+    u_shaft = shaft_v / norms
+    du_shaft = np.gradient(u_shaft, t, axis=0)
+    return np.degrees(np.linalg.norm(du_shaft, axis=-1))
+
+
+def _extract_kinematic_peak(
+    name: str,
+    omega: np.ndarray,
+    t: np.ndarray,
+    window: slice,
+    w_start: int,
+    fallback_idx: int,
+) -> SegmentKinematicPeak:
+    """Return the peak angular speed for one segment within ``window``."""
+    sub = omega[window]
+    if sub.size == 0 or np.all(np.isnan(sub)):
+        return SegmentKinematicPeak(name, 0.0, float(t[fallback_idx]), fallback_idx)
+    peak_val = float(np.nanmax(sub))
+    local_idx = int(np.nanargmax(sub))
+    global_idx = w_start + local_idx
+    return SegmentKinematicPeak(name, peak_val, float(t[global_idx]), global_idx)
+
+
 def compute_kinematic_sequence(
     motion: SwingMotion,
     events: SwingEvents,
@@ -515,64 +590,14 @@ def compute_kinematic_sequence(
         "Events must satisfy 0 <= top < impact <= finish < n",
     )
 
-    # 1. Pelvis angular speed
-    pelvis_vec = _resolve_vector(
-        motion.markers,
-        CAPTURE_A_PELVIS_LEFT_LABELS,
-        CAPTURE_A_PELVIS_RIGHT_LABELS,
-        fallback_dim=n,
+    omega_pelvis = _segment_yaw_angular_speed(
+        motion, t, CAPTURE_A_PELVIS_LEFT_LABELS, CAPTURE_A_PELVIS_RIGHT_LABELS
     )
-    p_yaw = np.unwrap(np.arctan2(pelvis_vec[:, 1], pelvis_vec[:, 0]))
-    omega_pelvis = np.degrees(np.abs(np.gradient(p_yaw, t)))
-
-    # 2. Thorax angular speed
-    thorax_vec = _resolve_vector(
-        motion.markers,
-        CAPTURE_A_SHOULDER_LEFT_LABELS,
-        CAPTURE_A_SHOULDER_RIGHT_LABELS,
-        fallback_dim=n,
+    omega_thorax = _segment_yaw_angular_speed(
+        motion, t, CAPTURE_A_SHOULDER_LEFT_LABELS, CAPTURE_A_SHOULDER_RIGHT_LABELS
     )
-    t_yaw = np.unwrap(np.arctan2(thorax_vec[:, 1], thorax_vec[:, 0]))
-    omega_thorax = np.degrees(np.abs(np.gradient(t_yaw, t)))
-
-    # 3. Lead arm angular speed (shoulder to wrist)
-    sh_pt: np.ndarray | None = None
-    for lbl in ("LShoulderTop", "LShoulderBack"):
-        if lbl in motion.markers:
-            sh_pt = _fill_nans_3d(motion.markers[lbl])
-            break
-    wrist_pt: np.ndarray | None = None
-    for lbl in ("LWristTop", "LElbowOut"):
-        if lbl in motion.markers:
-            wrist_pt = _fill_nans_3d(motion.markers[lbl])
-            break
-    if sh_pt is not None and wrist_pt is not None:
-        arm_v = wrist_pt - sh_pt
-        norms = np.linalg.norm(arm_v, axis=-1, keepdims=True)
-        norms = np.where(norms == 0, 1.0, norms)
-        u_arm = arm_v / norms
-        du_arm = np.gradient(u_arm, t, axis=0)
-        omega_arm = np.degrees(np.linalg.norm(du_arm, axis=-1))
-    else:
-        omega_arm = np.zeros(n, dtype=np.float64)
-
-    # 4. Club angular speed
-    head_pt = motion.club_head
-    if head_pt is None and "Marker_2:2:1" in motion.markers:
-        head_pt = motion.markers["Marker_2:2:1"]
-    grip_pt = motion.grip
-    if grip_pt is None and "Marker_3:3:1" in motion.markers:
-        grip_pt = motion.markers["Marker_3:3:1"]
-
-    if head_pt is not None and grip_pt is not None:
-        shaft_v = _fill_nans_3d(head_pt) - _fill_nans_3d(grip_pt)
-        norms = np.linalg.norm(shaft_v, axis=-1, keepdims=True)
-        norms = np.where(norms == 0, 1.0, norms)
-        u_shaft = shaft_v / norms
-        du_shaft = np.gradient(u_shaft, t, axis=0)
-        omega_club = np.degrees(np.linalg.norm(du_shaft, axis=-1))
-    else:
-        omega_club = np.zeros(n, dtype=np.float64)
+    omega_arm = _lead_arm_angular_speed(motion, t, n)
+    omega_club = _club_angular_speed(motion, t, n)
 
     # Search window: downswing plus small follow-through margin
     margin = max(3, int(0.15 * (events.impact_idx - events.top_idx) + 5))
@@ -580,21 +605,18 @@ def compute_kinematic_sequence(
     w_end = min(n, events.impact_idx + margin)
     window = slice(w_start, w_end)
 
-    def extract_peak(name: str, omega: np.ndarray) -> SegmentKinematicPeak:
-        sub = omega[window]
-        if sub.size == 0 or np.all(np.isnan(sub)):
-            return SegmentKinematicPeak(
-                name, 0.0, float(t[events.top_idx]), events.top_idx
-            )
-        peak_val = float(np.nanmax(sub))
-        local_idx = int(np.nanargmax(sub))
-        global_idx = w_start + local_idx
-        return SegmentKinematicPeak(name, peak_val, float(t[global_idx]), global_idx)
-
-    peak_p = extract_peak("pelvis", omega_pelvis)
-    peak_t = extract_peak("thorax", omega_thorax)
-    peak_a = extract_peak("lead_arm", omega_arm)
-    peak_c = extract_peak("club", omega_club)
+    peak_p = _extract_kinematic_peak(
+        "pelvis", omega_pelvis, t, window, w_start, events.top_idx
+    )
+    peak_t = _extract_kinematic_peak(
+        "thorax", omega_thorax, t, window, w_start, events.top_idx
+    )
+    peak_a = _extract_kinematic_peak(
+        "lead_arm", omega_arm, t, window, w_start, events.top_idx
+    )
+    peak_c = _extract_kinematic_peak(
+        "club", omega_club, t, window, w_start, events.top_idx
+    )
 
     # Sort segments by peak time
     peaks = [peak_p, peak_t, peak_a, peak_c]
@@ -924,30 +946,11 @@ def _resample_phase(
     return out
 
 
-def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
-    """Compare two swings, computing all metrics, differences, and time-normalized RMS.
-
-    Time-normalization aligns each swing across Address -> Impact -> Finish:
-    - Phase 1 (Address to Impact): 100 normalized points
-    - Phase 2 (Impact to Finish): 50 normalized points
-    For any marker present in both motions, the Root Mean Square Error (RMSE)
-    across the aligned phases is computed.
-
-    Args:
-        a: Reference swing motion.
-        b: Candidate swing motion.
-
-    Returns:
-        ComparisonReport containing metrics for both, differences, and trajectory RMS.
-    """
-    events_a = detect_events(a)
-    events_b = detect_events(b)
-
-    metrics_a = compute_all_metrics(a, events_a)
-    metrics_b = compute_all_metrics(b, events_b)
-
-    # 1. Scalar differences (b - a)
-    differences: dict[str, float | None] = {
+def _compute_scalar_metric_differences(
+    metrics_a: SwingMetrics, metrics_b: SwingMetrics
+) -> dict[str, float | None]:
+    """Return the b-minus-a scalar differences for every compared metric."""
+    return {
         "backswing_time_s": metrics_b.tempo.backswing_time
         - metrics_a.tempo.backswing_time,
         "downswing_time_s": metrics_b.tempo.downswing_time
@@ -1027,7 +1030,14 @@ def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
         ),
     }
 
-    # 2. Time-normalized trajectory RMS of shared markers
+
+def _compute_shared_marker_rms(
+    a: SwingMotion,
+    b: SwingMotion,
+    events_a: SwingEvents,
+    events_b: SwingEvents,
+) -> dict[str, float]:
+    """Return per-marker RMSE between time-normalized Address->Impact->Finish phases."""
     shared_labels = sorted(set(a.markers.keys()) & set(b.markers.keys()))
     shared_rms: dict[str, float] = {}
 
@@ -1038,7 +1048,6 @@ def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
         pts_a = _fill_nans_3d(a.markers[lbl])
         pts_b = _fill_nans_3d(b.markers[lbl])
 
-        # Normalize A
         p1_a = _resample_phase(
             a.t, pts_a, events_a.address_time, events_a.impact_time, n_phase1
         )
@@ -1047,7 +1056,6 @@ def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
         )
         norm_a = np.concatenate([p1_a, p2_a], axis=0)
 
-        # Normalize B
         p1_b = _resample_phase(
             b.t, pts_b, events_b.address_time, events_b.impact_time, n_phase1
         )
@@ -1057,9 +1065,35 @@ def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
         norm_b = np.concatenate([p1_b, p2_b], axis=0)
 
         err_sq = np.sum((norm_b - norm_a) ** 2, axis=-1)
-        rms = float(np.sqrt(np.mean(err_sq)))
-        shared_rms[lbl] = rms
+        shared_rms[lbl] = float(np.sqrt(np.mean(err_sq)))
 
+    return shared_rms
+
+
+def compare(a: SwingMotion, b: SwingMotion) -> ComparisonReport:
+    """Compare two swings, computing all metrics, differences, and time-normalized RMS.
+
+    Time-normalization aligns each swing across Address -> Impact -> Finish:
+    - Phase 1 (Address to Impact): 100 normalized points
+    - Phase 2 (Impact to Finish): 50 normalized points
+    For any marker present in both motions, the Root Mean Square Error (RMSE)
+    across the aligned phases is computed.
+
+    Args:
+        a: Reference swing motion.
+        b: Candidate swing motion.
+
+    Returns:
+        ComparisonReport containing metrics for both, differences, and trajectory RMS.
+    """
+    events_a = detect_events(a)
+    events_b = detect_events(b)
+
+    metrics_a = compute_all_metrics(a, events_a)
+    metrics_b = compute_all_metrics(b, events_b)
+
+    differences = _compute_scalar_metric_differences(metrics_a, metrics_b)
+    shared_rms = _compute_shared_marker_rms(a, b, events_a, events_b)
     mean_rms = float(np.mean(list(shared_rms.values()))) if shared_rms else 0.0
 
     return ComparisonReport(

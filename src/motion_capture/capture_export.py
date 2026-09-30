@@ -127,6 +127,85 @@ def fill_short_gaps(x: np.ndarray, max_gap: int) -> tuple[np.ndarray, int]:
 # ---------------------------------------------------------------------------
 
 
+def _validate_relabel_inputs(
+    points: np.ndarray, labels: Sequence[str], target_labels: Sequence[str]
+) -> None:
+    """Validate the argument types and shapes for :func:`relabel_markers`."""
+    require(
+        isinstance(points, np.ndarray),
+        "points must be a numpy.ndarray",
+        type(points).__name__,
+    )
+    require(points.ndim == 3, "points must be a 3D array", points.shape)
+    require(
+        isinstance(labels, (list, tuple)),
+        "labels must be a sequence of strings",
+    )
+    require(
+        isinstance(target_labels, (list, tuple)),
+        "target_labels must be a sequence of strings",
+    )
+    require(
+        points.shape[1] == len(labels),
+        "points.shape[1] must match len(labels)",
+        (points.shape[1], len(labels)),
+    )
+
+
+def _resolve_relabel_layout(points: np.ndarray, layout: str | None) -> bool:
+    """Return whether ``points`` uses the coords-first ``(3, M, N)`` layout."""
+    if layout is not None:
+        canonical_layout = layout.strip().lower()
+        require(
+            canonical_layout
+            in ("(3, m, n)", "coords_first", "(n, m, 3)", "frames_first"),
+            "Invalid layout specified",
+            layout,
+        )
+        return canonical_layout in ("(3, m, n)", "coords_first")
+    return points.shape[0] == 3 and points.shape[2] != 3
+
+
+def _require_targets_resolvable(
+    target_labels: Sequence[str],
+    labels: Sequence[str],
+    label_map: dict[str, int],
+    opt_set: set[str],
+) -> None:
+    """Raise if any non-optional target label is missing from the source labels."""
+    for tgt in target_labels:
+        if tgt not in label_map and tgt not in opt_set:
+            require(
+                False,
+                f"Missing required target label: {tgt!r}. Source labels: {list(labels)!r}",
+                tgt,
+            )
+
+
+def _build_relabeled_points(
+    points: np.ndarray,
+    target_labels: Sequence[str],
+    label_map: dict[str, int],
+    *,
+    is_coords_first: bool,
+) -> np.ndarray:
+    """Assemble the reordered, NaN-padded output array for ``target_labels``."""
+    m_target = len(target_labels)
+    if is_coords_first:
+        n_frames = points.shape[2]
+        out = np.full((3, m_target, n_frames), np.nan, dtype=np.float64)
+        for j, tgt in enumerate(target_labels):
+            if tgt in label_map:
+                out[:, j, :] = points[:, label_map[tgt], :]
+    else:
+        n_frames = points.shape[0]
+        out = np.full((n_frames, m_target, 3), np.nan, dtype=np.float64)
+        for j, tgt in enumerate(target_labels):
+            if tgt in label_map:
+                out[:, j, :] = points[:, label_map[tgt], :]
+    return out
+
+
 def relabel_markers(
     points: np.ndarray,
     labels: Sequence[str],
@@ -170,69 +249,20 @@ def relabel_markers(
         PreconditionError / ValueError: If shape, dimension, or label counts mismatch,
             or if a required target label is missing.
     """
-    require(
-        isinstance(points, np.ndarray),
-        "points must be a numpy.ndarray",
-        type(points).__name__,
-    )
-    require(points.ndim == 3, "points must be a 3D array", points.shape)
-    require(
-        isinstance(labels, (list, tuple)),
-        "labels must be a sequence of strings",
-    )
-    require(
-        isinstance(target_labels, (list, tuple)),
-        "target_labels must be a sequence of strings",
-    )
-    require(
-        points.shape[1] == len(labels),
-        "points.shape[1] must match len(labels)",
-        (points.shape[1], len(labels)),
-    )
+    _validate_relabel_inputs(points, labels, target_labels)
 
-    # Determine layout: coords-first (3, M, N) vs frames-first (N, M, 3)
-    if layout is not None:
-        canonical_layout = layout.strip().lower()
-        require(
-            canonical_layout
-            in ("(3, m, n)", "coords_first", "(n, m, 3)", "frames_first"),
-            "Invalid layout specified",
-            layout,
-        )
-        is_coords_first = canonical_layout in ("(3, m, n)", "coords_first")
-    else:
-        if points.shape[0] == 3 and points.shape[2] != 3:
-            is_coords_first = True
-        else:
-            is_coords_first = False
+    is_coords_first = _resolve_relabel_layout(points, layout)
 
     opt_set = set(optional_labels) if optional_labels is not None else set()
     label_map = {lbl: i for i, lbl in enumerate(labels)}
 
-    # Validate that every non-optional target label exists in source
-    for tgt in target_labels:
-        if tgt not in label_map and tgt not in opt_set:
-            require(
-                False,
-                f"Missing required target label: {tgt!r}. Source labels: {list(labels)!r}",
-                tgt,
-            )
+    _require_targets_resolvable(target_labels, labels, label_map, opt_set)
 
-    m_target = len(target_labels)
-    if is_coords_first:
-        n_frames = points.shape[2]
-        out = np.full((3, m_target, n_frames), np.nan, dtype=np.float64)
-        for j, tgt in enumerate(target_labels):
-            if tgt in label_map:
-                out[:, j, :] = points[:, label_map[tgt], :]
-    else:
-        n_frames = points.shape[0]
-        out = np.full((n_frames, m_target, 3), np.nan, dtype=np.float64)
-        for j, tgt in enumerate(target_labels):
-            if tgt in label_map:
-                out[:, j, :] = points[:, label_map[tgt], :]
+    out = _build_relabeled_points(
+        points, target_labels, label_map, is_coords_first=is_coords_first
+    )
 
-    ensure(out.shape[1] == m_target, "Output marker count mismatch")
+    ensure(out.shape[1] == len(target_labels), "Output marker count mismatch")
     return out
 
 
@@ -399,6 +429,119 @@ def to_capture_frame(
 # ---------------------------------------------------------------------------
 
 
+def _validate_impact_frame_inputs(club_head: np.ndarray, t: np.ndarray) -> np.ndarray:
+    """Validate :func:`detect_impact_frame` inputs and return the valid-frame mask."""
+    require(
+        isinstance(club_head, np.ndarray),
+        "club_head must be a numpy.ndarray",
+        type(club_head).__name__,
+    )
+    require(isinstance(t, np.ndarray), "t must be a numpy.ndarray", type(t).__name__)
+    require(
+        club_head.ndim == 2 and club_head.shape[1] == 3,
+        "club_head must have shape (N, 3)",
+        club_head.shape,
+    )
+    require(t.ndim == 1, "t must be 1D (N,)", t.shape)
+    require(
+        len(club_head) == len(t),
+        "club_head and t must have the same length",
+        (len(club_head), len(t)),
+    )
+    require(len(t) >= 2, "At least 2 frames are required", len(t))
+    require(
+        bool(np.all(np.diff(t) > 0)),
+        "Time array t must be strictly increasing",
+    )
+
+    valid_mask = ~np.isnan(club_head).any(axis=1)
+    require(
+        bool(np.sum(valid_mask) >= 2),
+        "At least 2 valid frames in club_head are required",
+        int(np.sum(valid_mask)),
+    )
+    return valid_mask
+
+
+def _compute_frame_speeds(
+    club_head: np.ndarray, t: np.ndarray, valid_mask: np.ndarray
+) -> np.ndarray:
+    """Return per-frame club-head speeds via central/one-sided differences.
+
+    Frames adjacent to a NaN gap never bridge across it; frames with no
+    usable neighbour remain NaN.
+    """
+    n_frames = len(t)
+    speeds = np.full(n_frames, np.nan, dtype=np.float64)
+    for i in range(n_frames):
+        if not valid_mask[i]:
+            continue
+        has_prev = (i > 0) and valid_mask[i - 1]
+        has_next = (i < n_frames - 1) and valid_mask[i + 1]
+
+        if has_prev and has_next:
+            v = (club_head[i + 1] - club_head[i - 1]) / (t[i + 1] - t[i - 1])
+        elif has_prev:
+            v = (club_head[i] - club_head[i - 1]) / (t[i] - t[i - 1])
+        elif has_next:
+            v = (club_head[i + 1] - club_head[i]) / (t[i + 1] - t[i])
+        else:
+            continue
+        speeds[i] = float(np.linalg.norm(v))
+    return speeds
+
+
+def _select_impact_frame_index(
+    speeds: np.ndarray,
+    n_frames: int,
+    downswing_window: tuple[int, int] | None,
+) -> int:
+    """Return the index of maximum speed within an optional downswing window."""
+    search_speeds = np.copy(speeds)
+    if downswing_window is not None:
+        start_w, end_w = downswing_window
+        require(
+            0 <= start_w < end_w <= n_frames,
+            "Invalid downswing_window range",
+            downswing_window,
+        )
+        search_speeds[:start_w] = np.nan
+        search_speeds[end_w:] = np.nan
+
+    require(
+        bool(np.any(~np.isnan(search_speeds))),
+        "No valid speed values could be evaluated in search range",
+    )
+    return int(np.nanargmax(search_speeds))
+
+
+def _log_impact_frame_result(
+    impact_idx: int,
+    n_frames: int,
+    valid_mask: np.ndarray,
+    speeds: np.ndarray,
+    t: np.ndarray,
+) -> None:
+    """Log a dropout warning or the detected impact frame, as appropriate."""
+    pre_gap = (impact_idx > 0) and not valid_mask[impact_idx - 1]
+    post_gap = (impact_idx < n_frames - 1) and not valid_mask[impact_idx + 1]
+    if pre_gap or post_gap:
+        logger.warning(
+            "Dropout or NaN gap detected adjacent to impact frame %d (pre_gap=%s, post_gap=%s); "
+            "returned nearest valid frame.",
+            impact_idx,
+            pre_gap,
+            post_gap,
+        )
+    else:
+        logger.info(
+            "Detected impact at frame %d (t=%.4f s, speed=%.2f m/s).",
+            impact_idx,
+            t[impact_idx],
+            speeds[impact_idx],
+        )
+
+
 def detect_impact_frame(
     club_head: np.ndarray,
     t: np.ndarray,
@@ -434,90 +577,12 @@ def detect_impact_frame(
         PreconditionError / ValueError: If shapes mismatch, t is not monotonic,
             or insufficient valid frames exist.
     """
-    require(
-        isinstance(club_head, np.ndarray),
-        "club_head must be a numpy.ndarray",
-        type(club_head).__name__,
-    )
-    require(isinstance(t, np.ndarray), "t must be a numpy.ndarray", type(t).__name__)
-    require(
-        club_head.ndim == 2 and club_head.shape[1] == 3,
-        "club_head must have shape (N, 3)",
-        club_head.shape,
-    )
-    require(t.ndim == 1, "t must be 1D (N,)", t.shape)
-    require(
-        len(club_head) == len(t),
-        "club_head and t must have the same length",
-        (len(club_head), len(t)),
-    )
-    require(len(t) >= 2, "At least 2 frames are required", len(t))
-    require(
-        bool(np.all(np.diff(t) > 0)),
-        "Time array t must be strictly increasing",
-    )
-
+    valid_mask = _validate_impact_frame_inputs(club_head, t)
     n_frames = len(t)
-    valid_mask = ~np.isnan(club_head).any(axis=1)
-    require(
-        bool(np.sum(valid_mask) >= 2),
-        "At least 2 valid frames in club_head are required",
-        int(np.sum(valid_mask)),
-    )
 
-    speeds = np.full(n_frames, np.nan, dtype=np.float64)
-    for i in range(n_frames):
-        if not valid_mask[i]:
-            continue
-        # Use finite differences without bridging across NaN gaps
-        has_prev = (i > 0) and valid_mask[i - 1]
-        has_next = (i < n_frames - 1) and valid_mask[i + 1]
-
-        if has_prev and has_next:
-            v = (club_head[i + 1] - club_head[i - 1]) / (t[i + 1] - t[i - 1])
-        elif has_prev:
-            v = (club_head[i] - club_head[i - 1]) / (t[i] - t[i - 1])
-        elif has_next:
-            v = (club_head[i + 1] - club_head[i]) / (t[i + 1] - t[i])
-        else:
-            continue
-        speeds[i] = float(np.linalg.norm(v))
-
-    search_speeds = np.copy(speeds)
-    if downswing_window is not None:
-        start_w, end_w = downswing_window
-        require(
-            0 <= start_w < end_w <= n_frames,
-            "Invalid downswing_window range",
-            downswing_window,
-        )
-        search_speeds[:start_w] = np.nan
-        search_speeds[end_w:] = np.nan
-
-    require(
-        bool(np.any(~np.isnan(search_speeds))),
-        "No valid speed values could be evaluated in search range",
-    )
-    impact_idx = int(np.nanargmax(search_speeds))
-
-    # Check for adjacent dropouts and report
-    pre_gap = (impact_idx > 0) and not valid_mask[impact_idx - 1]
-    post_gap = (impact_idx < n_frames - 1) and not valid_mask[impact_idx + 1]
-    if pre_gap or post_gap:
-        logger.warning(
-            "Dropout or NaN gap detected adjacent to impact frame %d (pre_gap=%s, post_gap=%s); "
-            "returned nearest valid frame.",
-            impact_idx,
-            pre_gap,
-            post_gap,
-        )
-    else:
-        logger.info(
-            "Detected impact at frame %d (t=%.4f s, speed=%.2f m/s).",
-            impact_idx,
-            t[impact_idx],
-            speeds[impact_idx],
-        )
+    speeds = _compute_frame_speeds(club_head, t, valid_mask)
+    impact_idx = _select_impact_frame_index(speeds, n_frames, downswing_window)
+    _log_impact_frame_result(impact_idx, n_frames, valid_mask, speeds, t)
 
     ensure(0 <= impact_idx < n_frames, "impact_frame index out of bounds")
     ensure(

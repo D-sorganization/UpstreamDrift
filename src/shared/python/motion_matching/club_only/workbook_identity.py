@@ -418,21 +418,14 @@ def _ball_label_for_sheet(sheet_name: str, a1_label: str) -> tuple[str | None, s
     return None, "unknown"
 
 
-@precondition(
-    lambda repo_root: Path(repo_root).is_dir(),
-    "repo_root must be an existing directory",
-)
-@postcondition(
-    lambda result: result.schema == IDENTITY_SCHEMA,
-    "identity package must use club-workbook-identity/1.0.0",
-)
-def build_club_workbook_identity(
-    repo_root: Path | str,
-    *,
-    data_dir: Path | None = None,
-) -> ClubWorkbookIdentity:
-    """Build and verify the frozen club-only workbook identity package."""
-    root = Path(repo_root)
+def _resolve_club_workbook_paths(
+    root: Path, data_dir: Path | None
+) -> tuple[Path, Path]:
+    """Resolve the club and wiffle workbook paths via the capture registry.
+
+    Falls back to the repo-relative default path when the registry does not
+    (yet) know the capture id.
+    """
     from src.motion_capture.capture_registry import (
         CaptureRegistryError,
         resolve_capture,
@@ -452,10 +445,17 @@ def build_club_workbook_identity(
     except CaptureRegistryError:
         wiffle_path = root / WIFFLE_PROV1_RELATIVE
 
+    return club_path, wiffle_path
+
+
+def _build_workbook_manifests(
+    club_path: Path, wiffle_path: Path
+) -> tuple[WorkbookManifest, WorkbookManifest]:
+    """Verify workbook hashes and return their frozen manifests."""
     club_hash = verify_workbook_hash(club_path, CLUB_DATA_SHA256)
     wiffle_hash = verify_workbook_hash(wiffle_path, WIFFLE_PROV1_SHA256)
 
-    manifests = (
+    return (
         WorkbookManifest(
             workbook_id="club_data",
             relative_path=CLUB_DATA_RELATIVE.as_posix(),
@@ -470,6 +470,9 @@ def build_club_workbook_identity(
         ),
     )
 
+
+def _compute_verified_fingerprints(club_path: Path) -> dict[str, str]:
+    """Return per-sheet numeric fingerprints, verifying the alias-sheet lineage."""
     fingerprints = {
         sheet: sheet_numeric_fingerprint(club_path, sheet)
         for sheet in (*CANONICAL_TRIAL_SHEETS, *sorted(ALIAS_SHEETS))
@@ -478,50 +481,52 @@ def build_club_workbook_identity(
         raise ValueError(
             "Filtering Experiments must share numeric lineage with TW_ProV1"
         )
+    return fingerprints
 
-    trials: list[TrialRecord] = []
-    for sheet in CANONICAL_TRIAL_SHEETS:
-        count = count_numeric_samples(club_path, sheet)
-        expected = EXPECTED_SAMPLE_COUNTS[sheet]
-        if count != expected:
-            raise ValueError(
-                f"sample count for {sheet}: expected {expected}, got {count}"
-            )
-        # Worksheet padding must not be counted as samples.
-        if count >= 885:
-            raise ValueError(
-                f"sample count for {sheet} must exclude trailing blanks; got {count}"
-            )
-        events = read_sheet_event_samples(club_path, sheet)
-        expected_events = EXPECTED_EVENT_SAMPLES[sheet]
-        for key, value in expected_events.items():
-            if key not in events or events[key] != value:
-                raise ValueError(
-                    f"event mismatch on {sheet} for {key}: "
-                    f"expected {value}, got {events.get(key)}"
-                )
-        a1 = read_sheet_a1_label(club_path, sheet)
-        ball_label, ball_status = _ball_label_for_sheet(sheet, a1)
-        time_range = read_native_time_range(club_path, sheet)
-        aliases: tuple[str, ...] = ()
-        if sheet == "TW_ProV1":
-            aliases = ("Filtering Experiments",)
-        trials.append(
-            TrialRecord(
-                trial_id=sheet,
-                primary_sheet=sheet,
-                alias_sheets=aliases,
-                lineage_id=fingerprints[sheet],
-                numeric_sample_count=count,
-                event_samples=events,
-                sheet_a1_label=a1,
-                ball_label=ball_label,
-                ball_label_status=ball_status,
-                time_range_s=time_range,
-            )
+
+def _build_trial_record(
+    club_path: Path, sheet: str, fingerprints: dict[str, str]
+) -> TrialRecord:
+    """Build and validate the :class:`TrialRecord` for a single canonical sheet."""
+    count = count_numeric_samples(club_path, sheet)
+    expected = EXPECTED_SAMPLE_COUNTS[sheet]
+    if count != expected:
+        raise ValueError(f"sample count for {sheet}: expected {expected}, got {count}")
+    # Worksheet padding must not be counted as samples.
+    if count >= 885:
+        raise ValueError(
+            f"sample count for {sheet} must exclude trailing blanks; got {count}"
         )
+    events = read_sheet_event_samples(club_path, sheet)
+    expected_events = EXPECTED_EVENT_SAMPLES[sheet]
+    for key, value in expected_events.items():
+        if key not in events or events[key] != value:
+            raise ValueError(
+                f"event mismatch on {sheet} for {key}: "
+                f"expected {value}, got {events.get(key)}"
+            )
+    a1 = read_sheet_a1_label(club_path, sheet)
+    ball_label, ball_status = _ball_label_for_sheet(sheet, a1)
+    time_range = read_native_time_range(club_path, sheet)
+    aliases: tuple[str, ...] = ("Filtering Experiments",) if sheet == "TW_ProV1" else ()
+    return TrialRecord(
+        trial_id=sheet,
+        primary_sheet=sheet,
+        alias_sheets=aliases,
+        lineage_id=fingerprints[sheet],
+        numeric_sample_count=count,
+        event_samples=events,
+        sheet_a1_label=a1,
+        ball_label=ball_label,
+        ball_label_status=ball_status,
+        time_range_s=time_range,
+    )
 
-    # Cross-workbook shared-trial sheets must match lineage on overlapping names.
+
+def _verify_cross_workbook_lineage(
+    wiffle_path: Path, fingerprints: dict[str, str]
+) -> None:
+    """Raise if any canonical sheet's lineage differs between the two workbooks."""
     for sheet in CANONICAL_TRIAL_SHEETS:
         other_fp = sheet_numeric_fingerprint(wiffle_path, sheet)
         if other_fp != fingerprints[sheet]:
@@ -530,10 +535,37 @@ def build_club_workbook_identity(
                 f"Club_Data vs Wiffle_ProV1"
             )
 
+
+@precondition(
+    lambda repo_root: Path(repo_root).is_dir(),
+    "repo_root must be an existing directory",
+)
+@postcondition(
+    lambda result: result.schema == IDENTITY_SCHEMA,
+    "identity package must use club-workbook-identity/1.0.0",
+)
+def build_club_workbook_identity(
+    repo_root: Path | str,
+    *,
+    data_dir: Path | None = None,
+) -> ClubWorkbookIdentity:
+    """Build and verify the frozen club-only workbook identity package."""
+    root = Path(repo_root)
+    club_path, wiffle_path = _resolve_club_workbook_paths(root, data_dir)
+    manifests = _build_workbook_manifests(club_path, wiffle_path)
+    fingerprints = _compute_verified_fingerprints(club_path)
+
+    trials = tuple(
+        _build_trial_record(club_path, sheet, fingerprints)
+        for sheet in CANONICAL_TRIAL_SHEETS
+    )
+
+    _verify_cross_workbook_lineage(wiffle_path, fingerprints)
+
     return ClubWorkbookIdentity(
         schema=IDENTITY_SCHEMA,
         manifests=manifests,
-        trials=tuple(trials),
+        trials=trials,
         units=UNIT_AUTHORITY,
         frames=FRAME_AUTHORITY,
         events=EVENT_AUTHORITY,
