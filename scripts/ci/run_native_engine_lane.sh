@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run OpenSim, MyoSuite, or Drake native pytest lanes and write nightly receipts (MS-43 #10342, MMR-10D #11094).
+# Run OpenSim or MyoSuite native pytest lanes and write nightly receipts (MS-43 #10342).
 #
 # Intended for ControlTower / labeled fleet runners.  Standard CI skips these
 # markers; refresh receipts at least weekly via nightly-cross-engine.yml or:
@@ -63,7 +63,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$ENGINE" ]]; then
-  echo "--engine is required (opensim|myosuite|drake)" >&2
+  echo "--engine is required (opensim|myosuite)" >&2
   exit 2
 fi
 

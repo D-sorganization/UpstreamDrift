@@ -1,6 +1,6 @@
-"""Run native-engine pytest lanes and emit hashed nightly receipts (MS-43 #10342, MMR-10D #11094).
+"""Run native-engine pytest lanes and emit hashed nightly receipts (MS-43 #10342).
 
-OpenSim, MyoSuite, and Drake tests are skipped in standard CI; this harness is intended
+OpenSim and MyoSuite tests are skipped in standard CI; this harness is intended
 for ControlTower or another labeled runner with the qualified SDK venv.  Receipt
 shape follows ``scripts/ci/check_motion_runtime.py`` (schema version, checker
 hash, repository revision, source freshness, per-probe outcomes).
@@ -68,14 +68,6 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "default_venv": None,
         "receipt_filename": "myosuite_receipt.json",
         "runner_hint": "ControlTower with myosuite extra; nightly-cross-engine.yml",
-    },
-    "drake": {
-        "pytest_marker": "requires_drake",
-        "python_module": "pydrake",
-        "distribution": "drake",
-        "default_venv": None,
-        "receipt_filename": "drake_receipt.json",
-        "runner_hint": "ControlTower with drake/pydrake venv; nightly-cross-engine.yml",
     },
 }
 

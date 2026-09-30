@@ -47,7 +47,8 @@ dependencies = [
     # pillow raised to 12.3.0 for PYSEC-2026-2253/2254/2255/2256/2257 and
     # PYSEC-2026-3451/3452/3453/3454/3493/3494/3495/3496 (#8738).
     "pillow>=12.3.0",
-    "requests>=2.33.0",
+    "requests>=2.34.2",
+    "urllib3>=2.8.0",
     "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
     # Transitive via bokeh, which only requires tornado>=6.2. The floor is
