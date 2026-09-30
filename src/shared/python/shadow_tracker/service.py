@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from fractions import Fraction
 import hashlib
 import json
 from pathlib import Path
@@ -46,7 +47,7 @@ from .fitting import (
 from .mask_records import MaskFrame
 from .projection import PinholeCameraModel, camera_calibration_fingerprint
 from .segmentation import ManualMaskProvider
-from .source_records import FrameIdentity, SourceAsset
+from .source_records import FrameIdentity, RightsStatus, SourceAsset
 
 WorstFrameMetric = Literal["mask_coverage", "uncertainty", "silhouette_loss"]
 
@@ -67,6 +68,7 @@ class WorstFrameReport:
     score: float
     metric: str
     rank: int
+    shot_id: str = ""
 
 
 class DefaultShadowTrackerService:
@@ -75,7 +77,9 @@ class DefaultShadowTrackerService:
     def __init__(self) -> None:
         self._source_asset: SourceAsset | None = None
         self._shot: Shot | None = None
-        self._observations: dict[str, FrameObservation] = {}
+        self._observations_order: list[FrameObservation] = []
+        self._obs_by_scope: dict[tuple[str, str], FrameObservation] = {}
+        self._obs_by_frame_id: dict[str, list[FrameObservation]] = {}
         self._mask_provider: ManualMaskProvider = ManualMaskProvider()
         self._candidates: list[Any] = []
         self._uncertainty: dict[str, Any] = {}
@@ -145,7 +149,11 @@ class DefaultShadowTrackerService:
             raise TypeError(f"Expected SourceAsset, got {type(source_asset).__name__}")
         self._source_asset = source_asset
         self._shot = shot
-        self._observations = {obs.frame_id: obs for obs in observations}
+        self._observations_order = list(observations)
+        self._obs_by_scope = {(obs.shot_id, obs.frame_id): obs for obs in observations}
+        self._obs_by_frame_id = {}
+        for obs in observations:
+            self._obs_by_frame_id.setdefault(obs.frame_id, []).append(obs)
         self._mask_provider = ManualMaskProvider()
         for mask in initial_masks:
             self._mask_provider.register_mask(mask)
@@ -179,23 +187,107 @@ class DefaultShadowTrackerService:
         """Testing utility to verify that mask corrections invalidate existing fits."""
         self._candidates.append(candidate_id)
 
+    def _validate_staged_video_import(
+        self,
+        *,
+        asset: SourceAsset,
+        new_observations: Sequence[FrameObservation],
+        new_masks: Sequence[MaskFrame],
+    ) -> None:
+        """Fail closed on staged import conflicts before any session mutation.
+
+        Rejects duplicated scope/revision entries inside the staged batch, an
+        imported asset other than the session's (single) source asset, shot/frame
+        scopes that already exist in the session, and revision ids that would
+        collide with the live revision lineage.
+        """
+        staged_scopes = [(obs.shot_id, obs.frame_id) for obs in new_observations]
+        if len(set(staged_scopes)) != len(staged_scopes):
+            raise ValueError("Staged video import contains duplicate shot/frame scopes")
+        staged_revision_ids = [mask.revision_id for mask in new_masks]
+        if len(set(staged_revision_ids)) != len(staged_revision_ids):
+            raise ValueError("Staged video import contains duplicate revision ids")
+
+        if self._source_asset is None:
+            # First import: initialize_session replaces the empty session wholesale.
+            return
+
+        if asset.asset_id != self._source_asset.asset_id:
+            raise ValueError(
+                f"Session already owns source asset {self._source_asset.asset_id!r}; "
+                f"refusing to mix imported asset {asset.asset_id!r}. Start a fresh "
+                "session for a different asset."
+            )
+
+        colliding_scopes = sorted(
+            f"{shot_id}/{frame_id}"
+            for shot_id, frame_id in staged_scopes
+            if (shot_id, frame_id) in self._obs_by_scope
+        )
+        if colliding_scopes:
+            raise ValueError(
+                "Imported video collides with already-reviewed shot/frame scopes: "
+                f"{colliding_scopes[:8]}"
+            )
+
+        existing_revision_ids = {
+            mask.revision_id for mask in self._mask_provider.all_revisions()
+        }
+        colliding_revisions = sorted(set(staged_revision_ids) & existing_revision_ids)
+        if colliding_revisions:
+            raise ValueError(
+                "Imported video would re-register revision ids already present in "
+                f"the session: {colliding_revisions[:8]}"
+            )
+
     def get_observations(self) -> tuple[FrameObservation, ...]:
         """Return all observations ordered by frame identity."""
-        return tuple(self._observations.values())
+        return tuple(self._observations_order)
 
-    def get_observation(self, frame_id: str) -> FrameObservation:
-        """Retrieve observation by frame_id."""
-        if frame_id not in self._observations:
+    def get_observation(
+        self, frame_id: str, *, shot_id: str | None = None
+    ) -> FrameObservation:
+        """Retrieve observation by frame_id, disambiguating by shot_id if provided."""
+        check_id(frame_id, "frame_id")
+        if shot_id is not None:
+            check_id(shot_id, "shot_id")
+            key = (shot_id, frame_id)
+            if key not in self._obs_by_scope:
+                raise KeyError(
+                    f"No observation found for frame_id {frame_id!r} in shot {shot_id!r}"
+                )
+            return self._obs_by_scope[key]
+
+        matches = self._obs_by_frame_id.get(frame_id, [])
+        if not matches:
             raise KeyError(f"No observation found for frame_id {frame_id!r}")
-        return self._observations[frame_id]
+        if len(matches) > 1:
+            shots = [m.shot_id for m in matches]
+            raise ValueError(
+                f"Multiple observations ({len(matches)}) match frame_id {frame_id!r} "
+                f"across shots {shots}. Specify shot_id to disambiguate."
+            )
+        return matches[0]
 
-    def get_mask(self, frame_id: str) -> MaskFrame:
-        """Retrieve current latest mask for frame_id."""
-        return self._mask_provider.get_mask(frame_id)
+    def get_mask(self, frame_id: str, *, shot_id: str | None = None) -> MaskFrame:
+        """Retrieve current latest mask for frame_id, optionally filtered by shot_id."""
+        check_id(frame_id, "frame_id")
+        if shot_id is None:
+            matches = self._obs_by_frame_id.get(frame_id, [])
+            if len(matches) == 1:
+                shot_id = matches[0].shot_id
+        return self._mask_provider.get_mask(frame_id, shot_id=shot_id)
 
-    def get_mask_history(self, frame_id: str) -> tuple[MaskFrame, ...]:
+    def get_mask_history(
+        self, frame_id: str, *, shot_id: str | None = None
+    ) -> tuple[MaskFrame, ...]:
         """Retrieve revision lineage history for frame_id."""
-        return self._mask_provider.get_revision_history(frame_id)
+        check_id(frame_id, "frame_id")
+        if shot_id is None:
+            matches = self._obs_by_frame_id.get(frame_id, [])
+            if len(matches) == 1:
+                shot_id = matches[0].shot_id
+        return self._mask_provider.get_revision_history(frame_id, shot_id=shot_id)
 
     def get_uncertainty(self) -> dict[str, Any]:
         """Return current uncertainty declarations."""
@@ -209,6 +301,7 @@ class DefaultShadowTrackerService:
         self,
         *,
         frame_id: str,
+        shot_id: str | None = None,
         body: bytes,
         club: bytes,
         valid: bytes,
@@ -222,13 +315,15 @@ class DefaultShadowTrackerService:
             - Any existing fits or downstream hypotheses are immediately invalidated.
         """
         check_id(frame_id, "frame_id")
-        obs = self.get_observation(frame_id)
+        obs = self.get_observation(frame_id, shot_id=shot_id)
 
         # Build FrameIdentity for the revised mask
-        prev_mask = self._mask_provider.get_mask(frame_id)
+        prev_mask = self.get_mask(frame_id, shot_id=obs.shot_id)
         frame_ident = prev_mask.frame
 
-        rev_seq = len(self._mask_provider.get_revision_history(frame_id))
+        rev_seq = len(
+            self._mask_provider.get_revision_history(frame_id, shot_id=obs.shot_id)
+        )
         content_hash = hashlib.sha256(body + club + valid).hexdigest()[:8]
         new_rev_id = f"{parent_revision_id or 'rev'}-m{rev_seq}-{content_hash}"
 
@@ -261,35 +356,34 @@ class DefaultShadowTrackerService:
         top_n: int = 10,
     ) -> list[WorstFrameReport]:
         """Rank frames to facilitate worst-frame review navigation."""
-        scores: list[tuple[str, float]] = []
+        scores: list[tuple[str, str, float]] = []
 
-        for frame_id in self._observations:
-            if not self._mask_provider.has_mask(frame_id):
-                scores.append((frame_id, 0.0))
+        for obs in self._observations_order:
+            frame_id = obs.frame_id
+            shot_id = obs.shot_id
+            if not self._mask_provider.has_mask(frame_id, shot_id=shot_id):
+                scores.append((shot_id, frame_id, 0.0))
                 continue
 
-            mask = self._mask_provider.get_mask(frame_id)
+            mask = self._mask_provider.get_mask(frame_id, shot_id=shot_id)
             if metric == "mask_coverage":
-                # Score is foreground fraction: lower score = worse coverage
                 fg_count = mask.body.count(1) + mask.club.count(1)
                 valid_count = mask.valid.count(1) or 1
                 coverage = fg_count / valid_count
-                scores.append((frame_id, coverage))
+                scores.append((shot_id, frame_id, coverage))
             elif metric == "uncertainty":
-                # In absence of per-frame variance, default to constant
-                scores.append((frame_id, 0.5))
+                scores.append((shot_id, frame_id, 0.5))
             else:
-                # Default silhouette loss
-                scores.append((frame_id, 0.0))
+                scores.append((shot_id, frame_id, 0.0))
 
-        # Ascending sort: lowest coverage = worst frame
-        scores.sort(key=lambda item: item[1])
+        scores.sort(key=lambda item: item[2])
 
         reports: list[WorstFrameReport] = []
-        for rank, (fid, score) in enumerate(scores[:top_n], start=1):
+        for rank, (sid, fid, score) in enumerate(scores[:top_n], start=1):
             reports.append(
                 WorstFrameReport(
                     frame_id=fid,
+                    shot_id=sid,
                     score=score,
                     metric=metric,
                     rank=rank,
@@ -315,7 +409,7 @@ class DefaultShadowTrackerService:
 
         current_mask_revs = tuple(
             self._mask_provider.get_mask(fid).revision_id
-            for fid in sorted(self._observations.keys())
+            for fid in sorted({obs.frame_id for obs in self._observations_order})
             if self._mask_provider.has_mask(fid)
         )
         if checkpoint.mask_revision_ids != current_mask_revs:
@@ -361,7 +455,7 @@ class DefaultShadowTrackerService:
         if not isinstance(request, FitRequest):
             raise TypeError(f"Expected FitRequest, got {type(request).__name__}")
 
-        if not self._observations:
+        if not self._observations_order:
             raise ValueError("Cannot fit: session has no observations")
 
         if (
@@ -513,10 +607,14 @@ class DefaultShadowTrackerService:
                 f"({window_end_pts}) is before time_window_start_pts ({window_start_pts})."
             )
 
-        sorted_frame_ids = sorted(self._observations.keys())
+        sorted_frame_ids = sorted(self._obs_by_frame_id.keys())
         windowed_obs = [
             obs
-            for obs in (self._observations[fid] for fid in sorted_frame_ids)
+            for obs in (
+                frame_obs
+                for fid in sorted_frame_ids
+                for frame_obs in self._obs_by_frame_id[fid]
+            )
             if window_start_pts <= int(obs.pts_ticks) <= window_end_pts
         ]
         if not windowed_obs:
@@ -578,6 +676,175 @@ class DefaultShadowTrackerService:
         outcome = fitter.fit(initial_controls=initial_controls)
         return self._assemble_fit_result(request, outcome, is_synthetic, obs_list)
 
+    def import_video(
+        self,
+        video_path: Path | str,
+        *,
+        asset_id: str | None = None,
+        shot_id: str = "shot-001",
+        swing_id: str = "swing-001",
+        camera_id: str = "camera-001",
+        subject_id: str = "subject-001",
+        timing_mapping: Any | None = None,
+        cuts: Sequence[tuple[int, int]] = (),
+        transforms: Sequence[str] = (),
+        max_frames: int | None = None,
+        cancel_token: Any | None = None,
+        rights_status: RightsStatus = "unknown",
+        rights_note: str = "",
+    ) -> tuple[FrameObservation, ...]:
+        """Import video file into review session, preserving timing and isolated shot namespaces."""
+        from .ingestion import (
+            AffineTimingMapping,
+            DecodeLimits,
+            OpenCvVideoDecoder,
+            ShotDefinition,
+            create_shot,
+            decode_video_frames,
+            filter_shot_frames,
+            ingest_source_asset,
+            map_frame_to_observation,
+        )
+
+        path = Path(video_path)
+        if not path.is_file() or path.stat().st_size == 0:
+            raise ValueError(f"Invalid or empty media file: {path}")
+
+        decoder = OpenCvVideoDecoder(path)
+        if decoder.frame_count == 0:
+            raise ValueError(f"Failed to decode frames from media: {path}")
+
+        aid = asset_id if asset_id is not None else f"asset-{path.stem}"
+        asset = ingest_source_asset(
+            path,
+            asset_id=aid,
+            width_px=decoder.width,
+            height_px=decoder.height,
+            rights_status=rights_status,
+            rights_note=rights_note,
+        )
+
+        phys_fn = None
+        # Without an evidenced timing mapping, physical time stays unknown
+        # (None). Container PTS authority remains in timing_mode/clock_evidence;
+        # the ingestion adapter records its canonical unknown-time reason
+        # instead of fabricating physical-time provenance.
+        phys_reason = ""
+        if timing_mapping is not None:
+
+            def phys_fn(_idx: int, pres_time: Fraction) -> float:
+                return float(timing_mapping.to_physical_time(pres_time))
+
+            phys_reason = (
+                "timing_mapping_affine"
+                if isinstance(timing_mapping, AffineTimingMapping)
+                else "timing_mapping_piecewise"
+            )
+
+        def _is_cancelling() -> bool:
+            return self._is_cancelled or (
+                cancel_token() if cancel_token is not None else False
+            )
+
+        limits = DecodeLimits(max_frames=max_frames, is_cancelled=_is_cancelling)
+        raw_frames = list(
+            decode_video_frames(
+                decoder,
+                asset=asset,
+                shot_id=shot_id,
+                swing_id=swing_id,
+                camera_id=camera_id,
+                physical_time_s_fn=phys_fn,
+                physical_time_reason=phys_reason,
+                limits=limits,
+            )
+        )
+
+        was_cancelled = _is_cancelling()
+        if was_cancelled:
+            self._is_cancelled = True
+            self._execution_status = "cancelled"
+
+        if raw_frames:
+            shot_def = ShotDefinition(
+                shot_id=shot_id,
+                start_pts=raw_frames[0].pts_ticks,
+                end_pts=raw_frames[-1].pts_ticks,
+                start_frame_id=raw_frames[0].frame_id,
+                end_frame_id=raw_frames[-1].frame_id,
+                subject_id=subject_id,
+                swing_id=swing_id,
+                camera_id=camera_id,
+                cuts=tuple(cuts),
+                transforms=tuple(transforms),
+            )
+            shot_rec = create_shot(asset, shot_def)
+            filtered_frames = filter_shot_frames(shot_rec, raw_frames)
+        else:
+            shot_rec = None
+            filtered_frames = []
+
+        new_obs: list[FrameObservation] = []
+        new_masks: list[MaskFrame] = []
+        blank_valid = bytes([1] * (decoder.width * decoder.height))
+        blank_fg = bytes([0] * (decoder.width * decoder.height))
+        for f in filtered_frames:
+            obs = map_frame_to_observation(
+                f,
+                body_mask_ref=f"mask-body-{f.frame_id}",
+                club_mask_ref=f"mask-club-{f.frame_id}",
+                valid_mask_ref=f"mask-valid-{f.frame_id}",
+                confidence_provenance="manual_review",
+            )
+            new_obs.append(obs)
+            m = MaskFrame(
+                schema_version=MASK_SCHEMA_VERSION,
+                frame=f,
+                width_px=decoder.width,
+                height_px=decoder.height,
+                body=blank_fg,
+                club=blank_fg,
+                valid=blank_valid,
+                revision_id=f"rev-init-{shot_id}-{f.frame_id}",
+                parent_revision_id=None,
+                producer_id="reviewer-import",
+                correction_note="initial import mask",
+            )
+            new_masks.append(m)
+
+        if self._source_asset is None:
+            self._validate_staged_video_import(
+                asset=asset,
+                new_observations=new_obs,
+                new_masks=new_masks,
+            )
+            self.initialize_session(
+                source_asset=asset,
+                observations=new_obs,
+                initial_masks=new_masks,
+                shot=shot_rec,
+            )
+        else:
+            # Atomic repeat import: every scope/revision conflict is rejected
+            # before the session state is touched.
+            self._validate_staged_video_import(
+                asset=asset,
+                new_observations=new_obs,
+                new_masks=new_masks,
+            )
+            for o in new_obs:
+                self._observations_order.append(o)
+                self._obs_by_scope[(o.shot_id, o.frame_id)] = o
+                self._obs_by_frame_id.setdefault(o.frame_id, []).append(o)
+            for m in new_masks:
+                self._mask_provider.register_mask(m)
+
+        if was_cancelled:
+            self._is_cancelled = True
+            self._execution_status = "cancelled"
+
+        return tuple(new_obs)
+
     def save_bundle(self, path: Path | str) -> None:
         """Atomically persist current session to a review bundle."""
         if self._source_asset is None:
@@ -586,7 +853,7 @@ class DefaultShadowTrackerService:
         bundle = ShadowTrackerBundle(
             bundle_id=f"bundle-{self._source_asset.asset_id}",
             source_asset=self._source_asset,
-            observations=tuple(self._observations.values()),
+            observations=tuple(self._observations_order),
             masks=self._mask_provider.all_revisions(),
             uncertainty=self._uncertainty,
             assumptions=self._assumptions,
@@ -614,7 +881,7 @@ class DefaultShadowTrackerService:
             "schema_version": "shadow-tracker-export/1.0.0",
             "exported_at": datetime.now(timezone.utc).isoformat(),
             "source_asset": self._source_asset.to_dict(),
-            "observations": [obs.to_dict() for obs in self._observations.values()],
+            "observations": [obs.to_dict() for obs in self._observations_order],
             "masks": [m.to_dict() for m in self._mask_provider.all_revisions()],
             "uncertainty": self._uncertainty,
             "assumptions": list(self._assumptions),
