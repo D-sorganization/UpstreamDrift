@@ -271,7 +271,9 @@ def _compute_myosuite_marker_metrics(
     return marker_metrics
 
 
-def _myosuite_unavailable_receipt(candidate: dict[str, Any]) -> MyoSuiteQualificationReceipt:
+def _myosuite_unavailable_receipt(
+    candidate: dict[str, Any],
+) -> MyoSuiteQualificationReceipt:
     """Fail-closed: without the myosuite/MuJoCo runtime on host no native dynamic replay can be produced."""
     missing_evidence = ["native MyoSuite rollout (myosuite/MuJoCo runtime)"]
     return MyoSuiteQualificationReceipt(
