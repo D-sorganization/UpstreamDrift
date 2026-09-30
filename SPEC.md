@@ -46,6 +46,21 @@ Implements fail-closed qualification harness and canonical receipt adapter for c
 - **Testing & Verification (`tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`)**:
   - 22 unit tests (11 fail-closed handling + 11 review-fix regressions: prefix-truncated replay rejection, shifted start rejection, canonical 0.60 s early window, native club labels, measured yaw with omitted unmeasured gates, null-channel roundtrip, and fail-closed native-evidence derivation on stale NPZ / missing control identity / altered initial state).
   - Preserves the run-102 terminal rejection (~40.3 mm > 35 mm G1 ceiling) under honest evaluation without inventing synthetic passes.
+## Historical-Video Evidence Review Workflow (MMR-12, #11098)
+
+Integrates historical-video evidence ingestion, non-destructive review, multi-shot frame isolation, timing authority, and installed PyQt review workflows:
+- **Multi-Shot Frame Isolation & Lineage (`src/shared/python/shadow_tracker/service.py`)**:
+  - `DefaultShadowTrackerService`: Preserves non-colliding frame observations across distinct shots sharing identical local `frame_id`s via scoped `(shot_id, frame_id)` index mapping, disambiguated retrieval, and preserved order across sessions.
+  - `import_video` is atomic for repeat imports: the decoded batch plus masks are staged and scope ownership, single source asset, and revision-id uniqueness are validated before any session mutation, so a failing repeat import leaves the reviewed session exactly intact.
+  - Manual mask updates invalidate downstream fit results deterministically while tracking revision lineage (`parent_revision_id`, `producer_id`, `correction_note`).
+- **Timing Preservation & Ingestion Pipeline (`src/shared/python/shadow_tracker/service.py`, `src/shared/python/shadow_tracker/ingestion.py`)**:
+  - `import_video`: Supports native container PTS extraction, constant and variable-frame-rate (VFR) containers, affine and piecewise timing transforms (e.g. slow motion), and shot boundary cut definitions.
+  - Without an evidenced timing mapping, imported frames keep `physical_time_s=None` with the canonical unknown physical-time reason; container PTS authority remains in `timing_mode`/`clock_evidence` and is never copied into fabricated physical-time provenance.
+  - Bounded memory and prompt cancellation: Passes `DecodeLimits` with active cancellation token callbacks to abort decode loops promptly during ingestion rather than only upon completion.
+  - Session fault tolerance: Gracefully handles missing codecs and corrupt media files with fail-closed errors while leaving existing session state completely intact and recoverable.
+- **Installed PyQt Review Journey (`src/tools/shadow_tracker/gui.py`)**:
+  - `ShadowTrackerWidget` & `ShadowTrackerReviewModel`: Provides interactive video file import, keyboard navigation (`Key_Left`, `Key_Right`, `Key_Home`, `Key_End`, `Key_W` for worst-frame jump), shortcut bundle persistence (`Ctrl+S`, `Ctrl+O`, `Ctrl+I`), viewport rendering with clock authority metadata, and honest refusal reporting for unverified automated fitting backends.
+  - Viewport renders unknown physical time safely (`Physical Time: unknown (<reason>)` via `format_clock_evidence_text`), so GUI-default imports with `physical_time_s=None` paint without `None` formatting errors.
 
 ## Unify Per-Package Coverage Gates on the Exclusion Budget (#10965)
 
@@ -7220,6 +7235,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
 | 2026-09-29 | #10977 | Fleet Critic scheduled pass: 6 scientific weaknesses in neural-motion checkpoint matrix, benchmark runner, and Bolt optimization claims (supersedes #10942). |
 | 2026-09-29 | #11138 | Consolidate Bolt micro-optimisation PRs #11112, #11128, #11129: row/column norms switched to `sqrt(einsum)` (bunkershot3d qualification-fit scale, motion-matching club calibration/hull/hip/downswing/reference/multi-shooting/club-only), and small fixed-size vectors switched to `math.sqrt(np.vdot)` (pink_tasks weld/marker residuals, physics_validation Jacobian error). Numerically identical results; new identity test `tests/unit/motion_matching/test_row_norm_einsum_identity.py` covers axis=0/1/2, keepdims, empty, NaN/Inf. |
+| 2026-09-29 | #11098 | Historical-video evidence review workflow (MMR-12): multi-shot frame isolation, VFR/cut/slow-motion timing preservation, bounded decode limits with prompt cancellation, atomic fail-closed repeat imports (scope/revision validated before mutation), unknown physical-time provenance preserved, recoverable corrupt media handling, and installed PyQt review scrubbing with unmeasured-time-safe viewport rendering. |
 | 2026-09-29 | #11115 | Unquarantine the simscape loader thread invalid-CSV test; the loader now accepts actionable error messages for invalid C3D files and the unit-gate quarantine ledger drops from 34 to 33 node IDs across 10 clusters (#9411). |
 | 2026-09-29 | #11116 | Replaced np.sum(**2) and np.mean(np.sum(**2)) with np.einsum and np.vdot in mjx_knot_optimiser and marker_kinematics for performance (spec-exempt: micro-optimization) |
 | 2026-09-29 | #11119 | Optimize `np.linalg.norm` for small 1D vectors in pre-impact contracts (spec-exempt: micro-optimization) |

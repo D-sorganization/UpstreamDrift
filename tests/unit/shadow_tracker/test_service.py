@@ -456,3 +456,421 @@ def test_export_canonical_package(tmp_path: Path) -> None:
     assert len(exported["observations"]) == 1
     assert len(exported["masks"]) == 1
     assert "exported_at" in exported
+
+
+# ---------------------------------------------------------------------------
+# 7. MMR-12 Review Workflow & Ingestion Journey Tests
+# ---------------------------------------------------------------------------
+
+
+def test_multi_shot_no_frame_id_collision_and_invalidation() -> None:
+    """Same frame IDs across distinct shots must not collide, and corrections invalidate fits (MMR-12)."""
+    service = DefaultShadowTrackerService()
+    source = _make_source_asset()
+
+    # Create observations for shot A and shot B sharing identical local frame_id
+    obs_a0 = _make_observation(0)
+    obs_a1 = _make_observation(1)
+
+    obs_b0 = FrameObservation(
+        schema_version=FRAME_OBSERVATION_SCHEMA_VERSION,
+        shot_id="shot-B",
+        camera_id="cam-front",
+        frame_id="frame-000",
+        pts_ticks=0,
+        timebase_numerator=1,
+        timebase_denominator=30000,
+        physical_time_s=0.0,
+        physical_time_reason="container_presentation_timestamp",
+        body_mask_ref="mask-body-b0",
+        club_mask_ref="mask-club-b0",
+        valid_mask_ref="mask-valid-b0",
+        confidence_provenance="manual_review",
+        timing_mode="container_pts",
+        is_timing_exact=True,
+        clock_evidence="iso_bmff_pts",
+        decoder_name="opencv",
+        decoder_version="4.10.0",
+        pixel_format="bgr24",
+    )
+    obs_b1 = FrameObservation(
+        schema_version=FRAME_OBSERVATION_SCHEMA_VERSION,
+        shot_id="shot-B",
+        camera_id="cam-front",
+        frame_id="frame-001",
+        pts_ticks=1000,
+        timebase_numerator=1,
+        timebase_denominator=30000,
+        physical_time_s=1.0 / 30.0,
+        physical_time_reason="container_presentation_timestamp",
+        body_mask_ref="mask-body-b1",
+        club_mask_ref="mask-club-b1",
+        valid_mask_ref="mask-valid-b1",
+        confidence_provenance="manual_review",
+        timing_mode="container_pts",
+        is_timing_exact=True,
+        clock_evidence="iso_bmff_pts",
+        decoder_name="opencv",
+        decoder_version="4.10.0",
+        pixel_format="bgr24",
+    )
+
+    mask_a0 = _make_mask_frame(0)
+    mask_a1 = _make_mask_frame(1)
+
+    frame_ident_b0 = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id="asset-10134",
+        shot_id="shot-B",
+        swing_id="swing-002",
+        camera_id="cam-front",
+        frame_id="frame-000",
+        pts_ticks=0,
+        timebase_numerator=1,
+        timebase_denominator=30000,
+        physical_time_s=0.0,
+        physical_time_reason="container_presentation_timestamp",
+        frame_sha256=SAMPLE_SHA256,
+        timing_mode="container_pts",
+        is_timing_exact=True,
+        clock_evidence="iso_bmff_pts",
+        decoder_name="opencv",
+        decoder_version="4.10.0",
+        pixel_format="bgr24",
+    )
+    mask_b0 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=frame_ident_b0,
+        width_px=4,
+        height_px=4,
+        body=bytes([0] * 16),
+        club=bytes([0] * 16),
+        valid=bytes([1] * 16),
+        revision_id="rev-b0-0",
+        parent_revision_id=None,
+        producer_id="reviewer-local",
+        correction_note="shot B initial mask",
+    )
+
+    frame_ident_b1 = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id="asset-10134",
+        shot_id="shot-B",
+        swing_id="swing-002",
+        camera_id="cam-front",
+        frame_id="frame-001",
+        pts_ticks=1000,
+        timebase_numerator=1,
+        timebase_denominator=30000,
+        physical_time_s=1.0 / 30.0,
+        physical_time_reason="container_presentation_timestamp",
+        frame_sha256=SAMPLE_SHA256,
+        timing_mode="container_pts",
+        is_timing_exact=True,
+        clock_evidence="iso_bmff_pts",
+        decoder_name="opencv",
+        decoder_version="4.10.0",
+        pixel_format="bgr24",
+    )
+    mask_b1 = MaskFrame(
+        schema_version=MASK_SCHEMA_VERSION,
+        frame=frame_ident_b1,
+        width_px=4,
+        height_px=4,
+        body=bytes([0] * 16),
+        club=bytes([0] * 16),
+        valid=bytes([1] * 16),
+        revision_id="rev-b1-0",
+        parent_revision_id=None,
+        producer_id="reviewer-local",
+        correction_note="shot B initial mask",
+    )
+
+    service.initialize_session(
+        source_asset=source,
+        observations=(obs_a0, obs_a1, obs_b0, obs_b1),
+        initial_masks=(mask_a0, mask_a1, mask_b0, mask_b1),
+    )
+
+    # 4 distinct observations must exist without colliding
+    assert len(service.get_observations()) == 4
+
+    # Scoped retrieval disambiguates same frame_id across shots
+    retrieved_a = service.get_observation("frame-000", shot_id="shot-10134")
+    retrieved_b = service.get_observation("frame-000", shot_id="shot-B")
+    assert retrieved_a.shot_id == "shot-10134"
+    assert retrieved_b.shot_id == "shot-B"
+
+    # Ambiguous retrieval without shot_id must raise ValueError
+    with pytest.raises(ValueError, match="Multiple observations .* match frame_id"):
+        service.get_observation("frame-000")
+
+    # Scoped mask retrieval
+    m_a = service.get_mask("frame-000", shot_id="shot-10134")
+    m_b = service.get_mask("frame-000", shot_id="shot-B")
+    assert m_a.revision_id == "rev-0-0"
+    assert m_b.revision_id == "rev-b0-0"
+
+    # Inject fit and verify that updating mask for shot A invalidates fits
+    service._inject_fit_for_testing("fit-candidate-001")
+    assert service.has_active_fits() is True
+
+    service.update_mask(
+        frame_id="frame-000",
+        shot_id="shot-10134",
+        body=bytes([1] * 16),
+        club=bytes([0] * 16),
+        valid=bytes([1] * 16),
+        parent_revision_id="rev-0-0",
+        producer_id="reviewer-human",
+        correction_note="corrected shot A frame 0",
+    )
+
+    # Downstream fits must be invalidated
+    assert service.has_active_fits() is False
+
+    # Mask for shot B must remain unchanged
+    assert service.get_mask("frame-000", shot_id="shot-B").revision_id == "rev-b0-0"
+
+
+def test_import_video_real_vfr_cuts_slow_motion_timing(tmp_path: Path) -> None:
+    """Importing real VFR video preserves timing across cuts and slow motion (MMR-12)."""
+    from fractions import Fraction
+    from src.shared.python.shadow_tracker.ingestion import AffineTimingMapping
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    vfr_clip = tmp_path / "review_vfr.mp4"
+    deltas = [100, 300, 200, 400]
+    make_vfr_mp4_fixture(vfr_clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+
+    # 2x slow-motion mapping (0.5x speed) with offset
+    timing_mapping = AffineTimingMapping(
+        scale=Fraction(1, 2),
+        offset_seconds=0.1,
+    )
+
+    # Cut frame index 2 (pts = 400)
+    # PTS sequence: frame 0 -> 0, frame 1 -> 100, frame 2 -> 400, frame 3 -> 600
+    cuts = ((350, 450),)
+
+    imported_obs = service.import_video(
+        vfr_clip,
+        asset_id="asset-vfr-review",
+        shot_id="shot-review-01",
+        swing_id="swing-review-01",
+        camera_id="cam-main",
+        timing_mapping=timing_mapping,
+        cuts=cuts,
+        transforms=("rotate_0", "playback_speed_0.5"),
+    )
+
+    # Frame 2 (pts 400) was in cuts, so 3 frames remain
+    assert len(imported_obs) == 3
+    assert len(service.get_observations()) == 3
+
+    # Check frame 0: pts=0 -> physical_time = 0.5 * 0 + 0.1 = 0.1s
+    f0 = imported_obs[0]
+    assert f0.pts_ticks == 0
+    assert f0.is_timing_exact is True
+    assert f0.timing_mode == "container_pts"
+    assert pytest.approx(f0.physical_time_s, rel=1e-5) == 0.1
+
+    # Check frame 1: pts=100 -> presentation_time = 100/1000 = 0.1s -> physical_time = 0.5 * 0.1 + 0.1 = 0.15s
+    f1 = imported_obs[1]
+    assert f1.pts_ticks == 100
+    assert pytest.approx(f1.physical_time_s, rel=1e-5) == 0.15
+
+    # Check frame 3 (imported as 3rd): pts=600 -> presentation_time = 600/1000 = 0.6s -> physical_time = 0.5 * 0.6 + 0.1 = 0.4s
+    f2 = imported_obs[2]
+    assert f2.pts_ticks == 600
+    assert pytest.approx(f2.physical_time_s, rel=1e-5) == 0.4
+
+
+def test_import_video_cancellation_during_decode_bounded_memory(tmp_path: Path) -> None:
+    """Cancellation during decode stops promptly and keeps memory bounded (MMR-12)."""
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "long_clip.mp4"
+    deltas = [100] * 5
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+
+    cancel_after_n = 2
+    decoded_count = 0
+
+    def cancel_token() -> bool:
+        nonlocal decoded_count
+        decoded_count += 1
+        return decoded_count > cancel_after_n
+
+    imported = service.import_video(
+        clip,
+        asset_id="asset-cancelled",
+        shot_id="shot-cancelled",
+        cancel_token=cancel_token,
+    )
+
+    # Must have stopped promptly
+    assert len(imported) <= cancel_after_n + 1
+    assert service.is_cancelled is True
+
+
+def test_import_corrupt_media_leaves_session_recoverable(tmp_path: Path) -> None:
+    """Corrupt media file import raises error and preserves pre-existing session (MMR-12)."""
+    service = DefaultShadowTrackerService()
+    source = _make_source_asset()
+    obs = (_make_observation(0),)
+    mask = (_make_mask_frame(0),)
+
+    service.initialize_session(
+        source_asset=source,
+        observations=obs,
+        initial_masks=mask,
+    )
+
+    corrupt_clip = tmp_path / "corrupt.mp4"
+    corrupt_clip.write_bytes(b"NOT_A_VALID_VIDEO_PAYLOAD")
+
+    with pytest.raises((ValueError, RuntimeError, OSError)):
+        service.import_video(
+            corrupt_clip,
+            asset_id="asset-corrupt",
+            shot_id="shot-corrupt",
+        )
+
+    # Pre-existing session must remain completely intact and recoverable
+    assert len(service.get_observations()) == 1
+    assert service.get_observation("frame-000").shot_id == "shot-10134"
+    assert service.get_mask("frame-000").revision_id == "rev-0-0"
+
+
+# ---------------------------------------------------------------------------
+# 8. Review-Fix Regressions: Atomic Repeat Imports & Unknown-Time Provenance
+# ---------------------------------------------------------------------------
+
+
+def test_repeat_import_same_scope_rejected_before_mutation(tmp_path: Path) -> None:
+    """Re-importing a video that reuses an already-reviewed shot must fail atomically.
+
+    Codex P1: the previous implementation appended observations before mask
+    registration, so a duplicate revision id left the session mixed with the
+    old asset and masks after the GUI reported a failure.
+    """
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "short_clip.mp4"
+    deltas = [100] * 3
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    first_import = service.import_video(clip, shot_id="shot-reviewed")
+    assert len(first_import) == 3
+    baseline_observations = service.get_observations()
+    baseline_masks = service._mask_provider.all_revisions()
+
+    with pytest.raises(ValueError):
+        service.import_video(
+            clip,
+            asset_id="asset-short_clip",  # same asset as the first import
+            shot_id="shot-reviewed",  # re-import reuses the already-reviewed scope
+        )
+
+    # Session must remain exactly as before the failed import.
+    assert service.get_observations() == baseline_observations
+    assert service._mask_provider.all_revisions() == baseline_masks
+    assert len(service.get_observations()) == 3
+    assert (
+        service.get_observation("frame-000000", shot_id="shot-reviewed").frame_id
+        == "frame-000000"
+    )
+
+
+def test_repeat_import_new_shot_appends_without_collision(tmp_path: Path) -> None:
+    """A second shot imported from the same asset appends scope-isolated observations."""
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "same_clip.mp4"
+    deltas = [100] * 2
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    service.import_video(clip, asset_id="asset-same_clip", shot_id="shot-A")
+
+    imported = service.import_video(
+        clip,
+        asset_id="asset-same_clip",
+        shot_id="shot-B",
+        swing_id="swing-002",
+    )
+    assert len(imported) == 2
+    assert len(service.get_observations()) == 4
+    # Same local frame ids may recur across shots without masking each other.
+    assert service.get_observation("frame-000000", shot_id="shot-B").shot_id == "shot-B"
+    scoped_mask = service.get_mask("frame-000000", shot_id="shot-B")
+    assert scoped_mask.revision_id == "rev-init-shot-B-frame-000000"
+    # Original shot untouched.
+    assert (
+        service.get_mask("frame-000000", shot_id="shot-A").revision_id
+        == "rev-init-shot-A-frame-000000"
+    )
+
+
+def test_import_video_other_asset_rejected_before_mutation(tmp_path: Path) -> None:
+    """Importing a different source asset into an existing session must be refused."""
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "other_clip.mp4"
+    deltas = [100] * 2
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    service.initialize_session(
+        source_asset=_make_source_asset(),
+        observations=(_make_observation(0),),
+        initial_masks=(_make_mask_frame(0),),
+    )
+    baseline = service.get_observations()
+
+    with pytest.raises(ValueError, match="refusing to mix imported asset"):
+        service.import_video(clip, shot_id="shot-C")
+
+    assert service.get_observations() == baseline
+
+
+def test_import_video_unknown_physical_time_provenance_preserved(
+    tmp_path: Path,
+) -> None:
+    """Without a timing mapping, physical time stays unknown; PTS authority stays in
+    timing_mode/clock_evidence and the reason is the canonical unknown-time reason.
+
+    Codex P1: the previous import claimed physical_time_reason='container_pts'
+    although physical_time_s was None, fabricating physical-time provenance.
+    """
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "unknown_time_clip.mp4"
+    deltas = [100, 300, 200, 400]
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    imported = service.import_video(clip, shot_id="shot-unknown-time")
+
+    assert len(imported) == 4
+    first = imported[0]
+    assert first.physical_time_s is None
+    assert first.physical_time_reason == (
+        "unknown physical time without evidenced clock mapping"
+    )
+    # Container PTS authority is preserved in the clock evidence fields.
+    assert first.timing_mode == "container_pts"
+    assert first.is_timing_exact is True
+    assert first.pts_ticks == 0
+
+    # Persisted evidence must keep the unknown-time provenance, not a fake reason.
+    exported = service.export_canonical(tmp_path / "export.json")
+    payload = json.loads(json.dumps(exported["observations"][0]))
+    assert payload["physical_time_s"] is None
+    assert payload["physical_time_reason"].startswith("unknown physical time")
