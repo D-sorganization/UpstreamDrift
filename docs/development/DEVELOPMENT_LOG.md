@@ -25,9 +25,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `fix/main-npm-audit-11184`
 - **Paths:** `ui/package-lock.json`, `ui/src/test/dependencySecurityContract.test.ts`, `SPEC.md`
 - **Started:** 2026-09-30
-- **Last verified:** 2026-09-30 at `aeb2edbca` (uncommitted) — baseline audit reproduced two HIGH and two MODERATE advisories; after the lock-only patch `npm ci` passed, `npm audit --audit-level=high` passed with two MODERATE findings remaining, contract 2 passed, lint/type-check passed, UI tests 936 passed, and production build passed.
+- **Last verified:** 2026-09-30 at `d3b3a27bea` — baseline audit reproduced two HIGH and two MODERATE advisories; after the lock-only patch `npm ci` passed, `npm audit --audit-level=high` passed with two MODERATE findings remaining, contract 2 passed, lint/type-check passed, UI tests 936 passed, and production build passed. Normal commit and push hooks passed.
 - **Summary:** Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.
-- **Next step:** Root reviews the uncommitted #11184 diff and authorizes publication.
+- **Next step:** Root reviews draft PR #11187 and decides whether it is ready for merge.
 
 ### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
 

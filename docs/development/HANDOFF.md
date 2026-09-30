@@ -3,17 +3,18 @@
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `C:/Users/diete/Repositories/Worktrees/luna-upstream11184-20260930`
 - Branch: `fix/main-npm-audit-11184`
-- Commit: `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5` (reviewed base; scoped changes pending commit)
-- Pull request: not created yet; root approved publishing a draft PR after reviewing the bounded diff and RED→GREEN evidence.
+- Commit: `SELF` (implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667`)
+- Pull request: [#11187](https://github.com/D-sorganization/UpstreamDrift/pull/11187), draft; opened from `fix/main-npm-audit-11184`.
 - Governing issue: #11184 — restore the UI `npm audit --audit-level=high` gate using only compatible patched transitive resolutions.
 - Done: added `ui/src/test/dependencySecurityContract.test.ts`; moved only `brace-expansion` 5.0.9 → 5.0.12 and `undici` 8.10.0 → 8.11.2 in `ui/package-lock.json`; added one SPEC row and an active development-log entry. No manifest, override, audit-policy, or moderate-advisory changes.
 - RED evidence: baseline `npm ci` completed with 2 HIGH and 2 MODERATE advisories; baseline `npm audit --audit-level=high` exited 1. The regression contract failed on old lock versions 5.0.9 and 8.10.0.
 - GREEN evidence: final `npm ci` passed; `npm audit --audit-level=high` passed with 2 MODERATE findings left (`@humanfs/node` 0.16.7 and nested `fflate` 0.6.10); `npm ls brace-expansion undici --all` showed only 5.0.12 and 8.11.2 on the affected paths. Contract: 2 passed; lint and type-check passed; all UI tests passed (99 files, 936 tests); build passed. Vitest emitted jsdom `scrollTo` notices; build emitted a large-chunk warning.
 - Documentation checks: SPEC changelog validation and fleet hook passed. The repository development-log validator still exits 1 on pre-existing duplicate IDs, portfolio WIP/active-entry ceilings, and file-size ceiling; it reports no DL-#11184 finding.
 - Compatibility evidence: registry metadata confirms the published patch releases and parent ranges `minimatch@10.2.5` → `^5.0.5`, `jsdom@30.0.1` → `^8.9.0`. The selected versions stay within those ranges.
-- Coordination: fresh Repository_Management inbox at 2026-09-30 11:04 UTC was complete with no conflicts and no messages since 2026-09-29. Renewed the existing `codex-luna-upstream11184-20260930` presence, preserving its issue, branch and goal and adding `ui/src/test` and `docs/development`; lease/presence expires at 13:04 UTC. Scoped REST lookup found no existing PR for this branch. Authenticated `git ls-remote` confirmed `origin/main` remains exactly `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5`.
-- Worktree state: bounded five-path changes are uncommitted. Root reviewed and accepted the source, lockfile and test diff plus RED→GREEN evidence, authorizing draft publication. No commit, push, PR, merge, or cleanup has occurred. The primary checkout’s pre-existing untracked paths and other worktrees remain untouched.
-- Next steps: commit only the five accepted paths with normal hooks; push this topic branch without force; open a draft PR with the readable issue-linked body; replace the provisional SPEC `#11184` key with the actual PR number and push that follow-up with normal hooks. Root alone decides readiness and merge.
+- Coordination: fresh Repository_Management inbox was complete with no conflicts or new messages since 2026-09-29. Renewed the existing `codex-luna-upstream11184-20260930` presence, preserving its issue, branch and goal and adding `ui/src/test` and `docs/development`; presence expires at 13:04 UTC. Scoped REST lookup found no pre-existing PR for this branch. Authenticated `git ls-remote` confirmed `origin/main` remained exactly `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5` before publication.
+- Publication: root reviewed and accepted the bounded source, lockfile and test diff plus RED→GREEN evidence. Commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667` was created with normal pre-commit hooks; the branch was pushed without force with normal pre-push hooks; draft PR #11187 was opened with `Closes #11184` and `agent:codex`. The SPEC row now uses actual PR key #11187. Two MODERATE audit findings remain (`@humanfs/node@0.16.7` and nested `fflate@0.6.10`). Root alone decides readiness and merge.
+- Worktree state: PR metadata updates are pending commit/push; no merge, release, cleanup, or unrelated changes were performed. The primary checkout’s pre-existing untracked paths and other worktrees remain untouched.
+- Next steps: run scoped changelog checks, commit and push the SPEC/handoff metadata update with normal hooks, verify full remote branch and main refs, and publish the result report. Root decides readiness and merge.
 
 ---
 
