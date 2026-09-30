@@ -1043,6 +1043,33 @@
       "issue": 10783,
       "reason": "Exact fleet bundle from Repository_Management 0a1041018e737173e49ff97ed4b82283e3cb672f; digest contract prevents local growth or forks. Refactor at the central source and requalify consumers before expiry; adoption tracked by #10783.",
       "expires_on": "2026-10-23"
+    },
+    {
+      "path": "src/shared/python/shadow_tracker/service.py",
+      "symbol": "DefaultShadowTrackerService.import_video",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11098,
+      "reason": "Issue #11098: import_video performs atomic video intake with provenance and failure isolation (168 lines > 100 budget). Decompose at an #11127 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/shared/python/shadow_tracker/service.py",
+      "symbol": "DefaultShadowTrackerService.import_video",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11098,
+      "reason": "Issue #11098: import_video carries the full VFR/provenance parameter surface for imported videos (13 > 8 budget). Decompose at an #11127 follow-up.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/shadow_tracker/gui.py",
+      "symbol": "ShadowTrackerReviewModel.import_video",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11098,
+      "reason": "Issue #11098: GUI model import_video forwards the imported-video parameter surface to the service (9 > 8 budget). Decompose at an #11127 follow-up.",
+      "expires_on": "2026-12-31"
     }
   ]
 }
