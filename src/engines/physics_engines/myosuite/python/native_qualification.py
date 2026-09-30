@@ -148,9 +148,11 @@ def _myosuite_unavailable_receipt(candidate: dict[str, Any]):
         MyoSuiteQualificationReceipt,
         engine="myosuite",
         status=MyoSuiteQualificationStatus.UNAVAILABLE,
-        missing_rollout_label="native MyoSuite rollout (myosuite/MuJoCo runtime)",
-        rejection_reason="MyoSuite runtime is not installed on host",
-        diagnostic_message="MyoSuite runtime is not installed on host: live dynamic simulation unavailable.",
+        labels={
+            "missing_rollout_label": "native MyoSuite rollout (myosuite/MuJoCo runtime)",
+            "rejection_reason": "MyoSuite runtime is not installed on host",
+            "diagnostic_message": "MyoSuite runtime is not installed on host: live dynamic simulation unavailable.",
+        },
         limitations=MYOSUITE_ENGINE_LIMITATIONS,
         remedy=MYOSUITE_UNAVAILABLE_REMEDY,
     )
