@@ -70,6 +70,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         Applied by continuation: every frame is first
 %                         fitted without it (that chain gives the warm
 %                         starts), then polished from that pose with it
+%     rom                 (GS3DX_JOINT_ROM()) the range table ROM_WEIGHT
+%                         holds the joints to; GS3DX_GOLF_ROM() narrows it
+%                         to the golf-swing band (lead arm straight, #11156)
 %     backward            (true) also track backward and keep the lower cost
 %                         per frame; with the weights above, false keeps one
 %                         continuous forward solution (the lower-cost frame
@@ -99,13 +102,14 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.smooth_weight (1,1) double {mustBeNonnegative} = 0
         opts.backward (1,1) logical = true
         opts.rom_weight (1,1) double {mustBeNonnegative} = 0
+        opts.rom table = gs3dx_joint_rom()
         opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
     end
     s = local_setup(opts.model);
     s.verbose = opts.verbose;
     s.backward = opts.backward;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
-    s.rom = local_rom(s, opts.rom_weight);
+    s.rom = local_rom(s, opts.rom_weight, opts.rom);
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
@@ -172,11 +176,11 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         'rom_weight', opts.rom_weight);
 end
 
-function rom = local_rom(s, weight)
-% The range-of-motion penalty: for each bounded GS3DX_JOINT_ROM row of a
-% joint of this model, where its angle is (parameter index, or index into
-% the closed-loop outputs G) and its range in rad.
-    t = gs3dx_joint_rom();
+function rom = local_rom(s, weight, t)
+% The range-of-motion penalty: for each bounded row of the ROM table T
+% (GS3DX_JOINT_ROM columns) of a joint of this model, where its angle is
+% (parameter index, or index into the closed-loop outputs G) and its range
+% in rad.
     t = t(~isnan(t.neutral_deg), :);
     [has, at] = ismember(t.key, s.jkeys);
     t = t(has, :);

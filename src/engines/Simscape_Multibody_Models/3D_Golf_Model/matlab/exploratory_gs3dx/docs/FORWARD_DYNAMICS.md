@@ -41,20 +41,21 @@ swing, per joint and in total. Record it for every run.
 
 ### Reference and IK
 
-| Lesson                                                                                                  | Evidence                                                                                                                                                                           |
-| ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Joint centres alone admit mirror branches; bound the IK by human ROM                                    | Unpenalized IK: knees hyperextended 10–53° with the legs spun about their axes; spine side-bend 81° (docs/ROM.md)                                                                  |
-| A universal joint has two branches, (a, b) and (a + 180, 180 − b); seed the trunk at zero               | Torso twisted 100° at address, 90–260° steps between frames without the posture pull (docs/FIT.md §3)                                                                              |
-| Track forward then backward and keep the lower cost per frame                                           | The backward pass repairs local minima of the forward pass (docs/FIT.md §3)                                                                                                        |
-| Gap-filled targets must still anchor the pelvis                                                         | Pelvis wandered 15–36 cm where its markers dropped out (`gap_weight`)                                                                                                              |
-| Filter the reference (12 Hz) before differentiating                                                     | `gs3dx_upper_body_reference`                                                                                                                                                       |
-| Neutral poses matter: a zero neck at address continues the trunk axis                                   | Head 126 mm off the capture's head markers (docs/HUMAN.md)                                                                                                                         |
-| A drawn hand across the shaft leaves the wrist neutral undefined                                        | Hands 66° off the forearm axis (#11157)                                                                                                                                            |
-| Never fit isolated frames: each needs a warm start from a near neighbour                                | Address, top and impact alone: 47 mm RMS unregularized, 79 mm regularized (160 mm at address); whole trial 6.3 mm                                                                  |
-| A range penalty cannot rescue a bad seed; it trades marker error for range                              | Same three frames: ROM weight 1 gave 137 mm, weight 10 gave 334 mm, with the ranges nearly met (2026-09-29)                                                                        |
-| Wrap a range check at ±180° only far from the range; the hinge jumps at the wrap                        | `mod` wrap about the neutral makes the residual discontinuous there; finite differences then stall                                                                                 |
-| A penalty applied from the first frame derails the tracker; carry warm starts from an unpenalized chain | Every 10th frame to impact, warm-started: no penalty 23 mm mean; weight 0.3 86 mm, 1 39 mm (427 mm worst), 3 100 mm: not monotonic, lost frames seed their neighbours (2026-09-30) |
-| Apply a constraint penalty by continuation: fit free, then polish each frame from its free pose         | Weights 1, 3, 10 by continuation: 37.6, 37.7, 38.4 mm mean with 2.85°, 0.71°, 0.08° excess; worst frame 104-137 mm instead of 427-541 mm (docs/ROM.md)                             |
+| Lesson                                                                                                  | Evidence                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Joint centres alone admit mirror branches; bound the IK by human ROM                                    | Unpenalized IK: knees hyperextended 10–53° with the legs spun about their axes; spine side-bend 81° (docs/ROM.md)                                                                     |
+| A universal joint has two branches, (a, b) and (a + 180, 180 − b); seed the trunk at zero               | Torso twisted 100° at address, 90–260° steps between frames without the posture pull (docs/FIT.md §3)                                                                                 |
+| Track forward then backward and keep the lower cost per frame                                           | The backward pass repairs local minima of the forward pass (docs/FIT.md §3)                                                                                                           |
+| Gap-filled targets must still anchor the pelvis                                                         | Pelvis wandered 15–36 cm where its markers dropped out (`gap_weight`)                                                                                                                 |
+| Filter the reference (12 Hz) before differentiating                                                     | `gs3dx_upper_body_reference`                                                                                                                                                          |
+| Neutral poses matter: a zero neck at address continues the trunk axis                                   | Head 126 mm off the capture's head markers (docs/HUMAN.md)                                                                                                                            |
+| A drawn hand across the shaft leaves the wrist neutral undefined                                        | Hands 66° off the forearm axis (#11157)                                                                                                                                               |
+| Never fit isolated frames: each needs a warm start from a near neighbour                                | Address, top and impact alone: 47 mm RMS unregularized, 79 mm regularized (160 mm at address); whole trial 6.3 mm                                                                     |
+| A range penalty cannot rescue a bad seed; it trades marker error for range                              | Same three frames: ROM weight 1 gave 137 mm, weight 10 gave 334 mm, with the ranges nearly met (2026-09-29)                                                                           |
+| Wrap a range check at ±180° only far from the range; the hinge jumps at the wrap                        | `mod` wrap about the neutral makes the residual discontinuous there; finite differences then stall                                                                                    |
+| A penalty applied from the first frame derails the tracker; carry warm starts from an unpenalized chain | Every 10th frame to impact, warm-started: no penalty 23 mm mean; weight 0.3 86 mm, 1 39 mm (427 mm worst), 3 100 mm: not monotonic, lost frames seed their neighbours (2026-09-30)    |
+| Apply a constraint penalty by continuation: fit free, then polish each frame from its free pose         | Weights 1, 3, 10 by continuation: 37.6, 37.7, 38.4 mm mean with 2.85°, 0.71°, 0.08° excess; worst frame 104-137 mm instead of 427-541 mm (docs/ROM.md)                                |
+| Joint angle and marker offset are not jointly identifiable: the prior decides, so calibrate under it    | Lead elbow (#11156): free IK 51.8–65.9° flexion; raw capture markers 31–62°. Golf band 20° at weight 3 with free-calibrated offsets: held 18.5–41.7°, 43.2 mm vs 23.3 mm (2026-09-30) |
 
 ### Dynamics and Balance
 
@@ -212,3 +213,11 @@ feedback=true)` returns `.feedback` (`gs3dx_feedback_torque`): the
    within bounds.
 7. **Second golfer (idea 7).** Accept: `capture-O` converges from the scaled
    warm start in at most half the iterations `capture-A` needed.
+
+**Next step for the next agent:** step 4, before step 2. The step-1 table shows
+the leg servo and the balance loop cancelling (about 300 N·m each, about 101 N·m
+summed), so an inverse-dynamics feedforward on today's leg reference would
+feed that conflict forward. Cross-engine evidence (#11166, MuJoCo): summed
+leg-task objectives fight each other, so build the consistent reference as ONE
+whole-body solve (for example a QP over the pelvis wrench and the foot contacts),
+not as extra weighted tasks.

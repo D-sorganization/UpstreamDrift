@@ -7,10 +7,86 @@
 - Branch: `feat/simscape-gs3dx-exploratory`
 - Baseline commit: `2d5830d18` (origin/main)
 - Implementation commit: `SELF`
-- Pull request: #10963 was closed by the 2026-09-29 history scrub; a new draft PR is opened from this branch (same branch, post-scrub history)
-- Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979)
-- Lease session: `claude-gs3dx-shape-20260928` (#10979, renewed to 2026-09-29T15:22Z)
+- Pull request: #11179 (draft, open); #10963 was closed by the 2026-09-29 history scrub
+- Governing issue/epic: #10950 (children #10951–#10959, #10985, #10986, #11011; in progress #10979); quality issues #11156–#11160; forward-dynamics goal #11173
+- Lease session: `claude-gs3dx-shape-20260928` (#10979); expired, not renewed at turnover: the next agent posts its own lease
 - Development log: `DL-#10950`
+
+## Turnover (2026-09-30): Start Here
+
+Work was paused at the owner's request so the project can be handed to other
+agents. Nothing is running: no MATLAB job of this session is alive and the
+MATLAB lock is free (a stale `%USERPROFILE%/gs3dx_matlab.lock` whose owner is
+dead is cleared by the runner itself). The two MATLAB processes started
+2026-09-25 and 2026-09-29 (`modes.m`, `probe_signs.m`) belong to the owner:
+never kill them.
+
+**Where things live**
+
+- Branch `feat/simscape-gs3dx-exploratory`, draft PR #11179 (replaces #10963,
+  closed by the history scrub). Every commit up to `SELF` is pushed.
+- Playbook for the forward-dynamics goal (#11173): `exploratory_gs3dx/docs/FORWARD_DYNAMICS.md`
+  (ladder, lessons with evidence, convergence ideas, roadmap with acceptance
+  per step, and a "Next step for the next agent" line). Read it first.
+- Range of motion: `docs/ROM.md`. Fit, balance, human model: `docs/FIT.md`,
+  `docs/HUMAN.md`. This file's "Next Steps" keeps the full history.
+- Owner-swing epic #11161 (capture-O on five engines) lives on a separate
+  branch, `feat/capture-registry-11161` (draft PR #11172, worktree
+  `UpstreamDrift-worktrees/claude-epic-11161`) with its own HANDOFF.
+
+**How to run MATLAB here**
+
+- Only through `exploratory_gs3dx/tools/run_matlab_locked.ps1` (one MATLAB at a
+  time; GS3DX runs share the Simulink cache). Put the script in a scratch
+  folder, end it with `fprintf("GS3DX_BATCH_DONE\n"); quit(0, "force");`, run the
+  runner in the background, read `EXIT n` at the end of the log.
+- Capture data is private: set `$env:CAPTURE_DATA_DIR` to
+  `[IO.Path]::Combine($env:USERPROFILE,'Private_Backups','Capture_Data_Private')`
+  in the same PowerShell before the runner. Never write that absolute path,
+  the capture's vendor or any third-party name into a committed file, issue
+  or PR (use `capture-A`, `capture-B`, `capture-O`).
+- In a script: `addpath(<exploratory_gs3dx>); gs3dx_setup();` (never
+  `setup_matlab_environment`: it calls `savepath`). Never load-and-save the
+  original models; `gs3dx_save_model` guards the writes. Compiled blocks <= 975.
+- Tests: `matlab.unittest.TestRunner.withTextOutput` over one test file; the
+  IK tests take 5-30 min, Human simulations about 30 min.
+
+**Open work, in order (each with its first action)**
+
+1. **#11156 lead arm straight (in progress, test RED).** Added `gs3dx_golf_rom`
+   (lead elbow flexion band <= 20 deg), the IK option `rom=` (any ROM table)
+   and `tests/test_gs3dx_lead_arm.m`. `the_golf_band_narrows_only_the_lead_elbow`
+   passes; `the_ik_keeps_the_lead_arm_straight` FAILS: held 18.5-41.7 deg
+   (limit 21), RMS 43.2 mm against 23.3 mm free (limit free + 15 mm). The free
+   IK already flexes the lead elbow 52-66 deg; the raw capture markers say
+   31-62 deg; elbow angle and marker offsets are not jointly identifiable, so
+   the offsets calibrated with a free elbow fight the band. First action: run
+   the unfinished probe (it was stopped before any output; ~1 h): calibrate
+   the offsets WITH the band,
+   `off = gs3dx_whole_body_ik(jc, frames=1, calibration_frames=1:15:f0-90, rom_weight=3, rom=gs3dx_golf_rom()).offsets`,
+   then fit every 10th frame to impact with and without the band and report
+   the lead-elbow range and RMS. If the band then holds within 15 mm, change
+   the test to calibrate under the band. If not, record the RMS cost with the
+   owner on #11156 before loosening anything (never loosen the 20 deg or 15 mm
+   bounds on your own).
+2. **#11160 club motion matches.** `gs3dx_club_match` (pure metric, 8/8 tests)
+   exists. Missing: model-side club points. The IK computes the predicted
+   target points in its per-frame loop (`pts`, `gs3dx_whole_body_ik.m` near
+   line 168) but only returns residuals: add `ik.points` (3 x targets x frames),
+   then a test that builds REF from `jc.club_head`/`jc.club_grip` and SIM from
+   `ik.points` and asserts `M.ok.all`. It must fail today (`test_gs3dx_fit`
+   only bounds the club-head residual at 40 mm; the targets are 10 mm RMS /
+   20 mm max). The face normal needs a head-cluster frame
+   from the capture markers (`gs3dx_capture_markers` `local_club`) and a
+   constant body-frame normal calibrated like the marker offsets.
+3. **#11173 roadmap step 4** (balance-consistent leg reference) before step 2;
+   see the playbook's next-step line.
+4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
+   bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
+5. **#11158 follow-up**: `human_references_stay_in_the_human_range` stays red
+   until the reference pipeline is rebuilt from the range-limited IK.
+6. Finish-phase trail-foot lift (see #10979 notes below): trail-foot vertical
+   load loop idea.
 
 ## Objective and Status
 
