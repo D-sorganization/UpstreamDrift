@@ -133,7 +133,7 @@ def _check_quaternion_normalization(q: np.ndarray, tol: float = 1e-4) -> bool:
 def _check_myosuite_execution_contract(
     replay: dict[str, Any],
     *,
-    expected_model_sha: str,
+    expected_model_sha: str | None,
     model_sha: str,
     native_tests_executed: int | None,
     rejection_reasons: list[str],
