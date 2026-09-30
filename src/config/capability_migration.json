@@ -2031,8 +2031,8 @@
     "export.companion_current": {
       "path": "tests/fixtures/companion/current-v1.0.0.json",
       "kind": "export",
-      "sha256": "b9e39d53f8cd52584693bafb32c36bf1fc3f25a3215bdaa63681af8abe7f2508",
-      "size_bytes": 1671,
+      "sha256": "99b95f45494ba3ecfeee5209ee661bd2c248db297f0db682ce87f4f851b618f0",
+      "size_bytes": 1775,
       "support_status": "golden_baseline",
       "notes": "Current supported v1.0.0 companion schema"
     },

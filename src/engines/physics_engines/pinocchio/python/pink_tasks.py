@@ -53,7 +53,7 @@ def _require_weld_log_chart(
     pose_error: NDArray[np.float64], margin_rad: float = _WELD_LOG_BRANCH_MARGIN_RAD
 ) -> None:
     """Validate that rotation residual stays safely away from the log branch cut at pi."""
-    rot_norm = float(np.linalg.norm(pose_error[3:]))
+    rot_norm = float(math.sqrt(np.vdot(pose_error[3:], pose_error[3:])))
     if rot_norm >= math.pi - margin_rad:
         raise ValueError("Weld log derivative is undefined near the rotation-pi branch")
 
@@ -707,8 +707,9 @@ class FullBodyPinkTasks:
 
         if weld_error is not None:
             _require_weld_log_chart(weld_error)
-            return float(np.linalg.norm(weld_error[:3])), float(
-                np.linalg.norm(weld_error[3:])
+            return (
+                float(math.sqrt(np.vdot(weld_error[:3], weld_error[:3]))),
+                float(math.sqrt(np.vdot(weld_error[3:], weld_error[3:]))),
             )
         return float("nan"), float("nan")
 
@@ -732,7 +733,8 @@ class FullBodyPinkTasks:
                             target = np.asarray(
                                 request.marker_targets[name], dtype=np.float64
                             )
-                            marker_errors[name] = float(np.linalg.norm(pred - target))
+                            diff = pred - target
+                            marker_errors[name] = float(math.sqrt(np.vdot(diff, diff)))
                         else:
                             marker_errors[name] = float("nan")
             else:

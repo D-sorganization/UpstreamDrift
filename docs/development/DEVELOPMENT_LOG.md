@@ -18,16 +18,69 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ## Active
 
 ### DL-#11096 — Qualify MyoSuite Native Dual-Club Dynamics and Replay
-
-- **State:** in_review
 - **Owner:** UDFixTrio10x
 - **Issue:** #11096
 - **Branch:** `feat/mmr-10m-myosuite-dual-club-11096`
 - **Paths:** `src/engines/physics_engines/myosuite/python/native_qualification.py`, `tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/myosuite/`
-- **Started:** 2026-09-29
 - **Last verified:** 2026-09-29 at 613b0e28ed88b5af4719ecccfe876d5d9db90419 — 19 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native MyoSuite qualification NOT achieved: myosuite/MuJoCo unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10M] dual-club MyoSuite qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, non-finite values, and unnormalized root quaternions all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records (README model hashes marked as regeneration targets, not evidence). Real qualification still requires the myosuite/MuJoCo stack on a pinned host via the native lane.
 - **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
+### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11124
+- **Branch:** `fix/phantom-guard-scripts-paths-11124`
+- **Paths:** `scripts/ci/check_phantom_guard_paths.py`, `tests/scripts/test_check_phantom_guard_paths.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 27 focused unit tests pass in `test_check_phantom_guard_paths.py`; ruff, black, architecture budget, and LOD clean.
+- **Summary:** Fixes false positive in anti-phantom-merge Rule 3 by expanding `ISSUE_PATH_PATTERN` to recognize `scripts/` and `.github/workflows/` (and `.github/`) paths, adding `(?<![\w/.-])` boundary protection to reject non-path prefix substrings (e.g. `engines/api`), stripping trailing punctuation from extracted paths, and dropping parenthetical prose fragments lacking valid file extensions.
+- **Next step:** Submit PR for review and release lease.
+### DL-#11107 — Implement Simscape Continuous-Replay Qualification Harness
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11107
+- **Branch:** `feat/mmr-07-simscape-continuous-replay-11107`
+- **Paths:** `src/shared/python/motion_matching/simscape_replay_harness.py`, `tests/unit/motion_matching/test_simscape_continuous_replay_harness.py`, `scripts/matlab/run_simscape_candidate.ps1`, `docs/development/simscape_tour_matching/native_evidence/two_window_fit_9967_102/simscape_replay_qualification.json`, `SPEC.md`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 at 27c0d34967 — 22 focused harness tests passed (11 review-fix regressions demonstrated red pre-fix, green post-fix); `tests/unit/motion_matching` 1901 passed, 11 failed all pre-existing (`c3d_reader.load_c3d`, `bunkershot3d`, stability-matrix precondition — verified identical on a pristine baseline checkout); ruff check/format and mypy clean on touched modules.
+- **Summary:** Added Simscape continuous-replay qualification harness with full-rate continuous trajectory validation, fail-closed contracts for missing samples, non-finite states, timestamp monotonicity, non-R2025b releases, motion prescription, and candidate hash mismatches. Structured qualification receipt schema records per-marker/phase channels, provenance, and evaluates against frozen G1 acceptance gates. Native candidate run-102 honestly rejected at terminal phase (40.3 mm vs 35 mm G1 ceiling). Review fixes (PR #11126 Codex P1/P2): metrics derive from the canonical `compute_replay_five_metrics()` (0.60 s early window, canonical club labels), pelvis yaw measured, unmeasured contact quantities disclosed as unavailable, elapsed-span/start validation, receipt loader null preservation, and `load_replay_evidence_inputs()` deriving digest/initial conditions/control identity from native evidence (run-102 receipt extended additively with `control_identity`, no measured value changed).
+- **Next step:** CI green, PR review.
+### DL-#11098 — Historical-Video Evidence Review Workflow
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11098
+- **Branch:** `feat/mmr-12-historical-video-review-11098`
+- **Paths:** `src/shared/python/shadow_tracker/service.py`, `src/tools/shadow_tracker/gui.py`, `tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 at 0c31f341a7 — 330 tests collected across `tests/unit/shadow_tracker/` and `tests/tools/shadow_tracker/`, all passing (review-fix regressions demonstrated red pre-fix, green post-fix); ruff check/format and mypy clean on touched modules.
+- **Summary:** Preserves multi-shot frame isolation and revision lineage in `DefaultShadowTrackerService`, implements video ingestion with container PTS and slow-motion affine timing mappings, bounded decode limits with prompt cancellation, recoverable session state on corrupt media, and keyboard review scrubbing with honest automated fit refusal in `ShadowTrackerWidget`. Review fixes (PR #11127 Codex P1s): repeat video imports stage and validate scope/revision/asset ownership before any session mutation (atomic failure), no-mapping imports keep `physical_time_s=None` with the canonical unknown-time reason (PTS authority stays in `timing_mode`/`clock_evidence`), and the viewport renders unknown physical time safely instead of formatting `None`.
+- **Next step:** Commit and submit PR; release agent lease.
+### DL-#11097 — Repair Reduced-Model and Club-Only Product Claims (MMR-11)
+
+- **State:** in_review
+- **Owner:** local
+- **Issue:** #11097
+- **Branch:** `feat/mmr-11-reduced-model-claims-11097`
+- **Paths:** `src/shared/python/tour_baselines/coverage.py`, `src/shared/python/tour_baselines/baseline_package.py`, `src/shared/python/tour_baselines/qualification.py`, `src/shared/python/motion_matching/provider.py`, `src/engines/physics_engines/pendulum/python/motion_matching/provider.py`, `src/shared/python/motion_matching/club_only/ui_integration.py`, `src/shared/python/motion_matching/club_only/matrix_qualification.py`, `tests/unit/motion_matching/test_fit_options_dbc.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 at `46b804bc69` — scoped runs: `pytest tests/unit/motion_matching/test_fit_options_dbc.py tests/unit/engines/physics_engines/pendulum/test_motion_matching_provider.py` (18 passed), and `pytest tests/unit/tour_baselines/test_coverage_matrix.py tests/unit/tour_baselines/test_qualification.py tests/unit/tour_baselines/test_baseline_packages.py tests/unit/motion_matching/test_club_matrix_qualification.py tests/unit/motion_matching/test_club_ui_integration.py` (86 passed). New TDD tests observed RED pre-fix (planar-floor gate used the calibrated plane's stale residual; missing `max_marker_rmse_m` DbC validation, NaN ceiling silently disabled the gate) and GREEN post-fix; `ruff check` clean on changed files. Not run / not available: full project suite, mypy, CI gates, raw-to-package regeneration, native runs.
+- **Summary:** Added code-level, fail-closed claims gates: four driven-triple pendulum receipts (`driver_amateur`, `driver_elite`, `iron_amateur`, `iron_elite`) disqualified at projection time (evidence files on disk unchanged); promoted-package hash and out-of-plane-residual integrity checks; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells; pendulum planar-floor early rejection now driven by the CURRENT target's plane distances with a DbC-validated `max_marker_rmse_m`.
+- **Open (per MMR-11 acceptance, not satisfied here):** raw-to-package reproduction/regeneration of the reported baselines, Board-selected required club-only cells, and native qualification runs. PR references (not "Closes") #11097 for these.
+### DL-#11102 — Publish a Best-Candidate Viewer With Honest Residuals
+
+- **State:** in_review (review fixes for Codex findings on PR #11132)
+- **Owner:** local
+- **Issue:** #11102
+- **Branch:** `feat/mmr-16-best-candidate-viewer-11102`
+- **Paths:** `src/tools/tour_matching_viewer/core.py`, `src/tools/tour_matching_viewer/gui.py`, `src/tools/matched_swing_browser/model.py`, `src/tools/matched_swing_browser/gui.py`, `tests/unit/tools/test_tour_matching_viewer_residuals.py`, `tests/unit/tools/test_matched_swing_browser_best_candidate.py`, `tests/unit/tools/test_tour_matching_viewer_combo.py`
+- **Started:** 2026-09-29
+- **Last verified:** e86a4d4f1c — scoped pytest with `/tmp/ud-venv-11132` (PyQt6 + mujoco, offscreen): red outcomes recorded pre-fix for every review finding, then `tests/unit/tools/test_matched_swing_browser_best_candidate.py tests/unit/tools/test_tour_matching_viewer_residuals.py` 21 passed, targeted viewer suites (core, playback, combo, forces, native_button, adapter) 29 passed; `ruff check` and `ruff format --check` clean on changed files. Project-wide suites, web/API surfaces and mypy were not run in this slice.
+- **Summary:** Published best-candidate viewer with honest residuals (MMR-16): enforced raw observation immutability on ReplayData, added residual vector computation, board-ready export stills with complete metadata banners, drive mode filtering, comparable candidate ranking in ascending RMS error preserving rejected verdicts, worst-residual jump navigation, camera and appearance presets preserving invariant physics scores, and graceful missing-engine recovery. Review fixes: wired `rank_candidates` into the browser's real list-build path (best comparable candidate first, rejected rows preserved), pooled per-marker 3D distances for the receipt-convention RMS in the residual summary, rendered-frame and multi-candidate captions, excluded zero-valid-marker frames from global-worst selection and mean statistics, and forwarded the selected row's provenance and verdict into the viewer load path.
+- **Remaining scope on #11102:** web/API surface parity, accessibility/native visual review and the remaining acceptance checkboxes; desktop PyQt fixes above do not close them.
+- **Next step:** main-lane rebase/CI and frontier review of PR #11132.
 
 ### DL-#10965 — Unify Per-Package Coverage Gates on the Exclusion Budget
 
@@ -572,18 +625,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** `check_coverage_gates.py` now takes its gates from `coverage_gates` in `scripts/config/mypy_exclusion_budget.json` (hard-coded COVERAGE_GATES/MODULE_PATTERNS were never enforced and are gone), reads Cobertura XML or coverage.py JSON, resolves XML filenames through `<sources>` against the repo root, and treats a gate with no matching files or an unmappable source as exit 2. Not wired into CI yet; the ratchet dates cannot move before 2026-10-01 because of the #8731 pin.
 - **Next step:** CI green, review, merge.
 
-### DL-#9191 · Verify Companion Screenshot Bytes and Pixel Dimensions
+### DL-#9191 · Govern Screenshot Schema, Capture Metadata, and Qualified Assets
 
 - **State:** in_review
-- **Owner:** claude
+- **Owner:** local
 - **Issue:** #9191
-- **PR:** draft PR from `agy/ud-9191-screenshot-verifier`
-- **Branch:** `agy/ud-9191-screenshot-verifier`
-- **Paths:** `scripts/verify_companion_screenshots.py`, `tests/unit/scripts/test_verify_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
-- **Started:** 2026-09-26
-- **Last verified:** 2026-09-26 — 57/57 pass across the verifier tests and tests/companion/test_companion_catalog.py; ruff clean; architecture budget OK.
-- **Summary:** `scripts/verify_companion_screenshots.py` recomputes SHA-256 and PNG IHDR pixel size for every captured screenshot record (path must resolve inside the repo, alt text required) and requires pending records to carry null asset fields plus a reason; the companion catalog tests run it on the exporter's real payload. Delivers the #9191 'SHA-256/dimension verification' item; the governed capture workflow, real assets and AffineDrift #4025 alignment remain.
-- **Next step:** CI green, review, merge.
+- **Branch:** `feat/comp-b3-screenshot-governance-9191`
+- **Paths:** `docs/api/contracts/upstreamdrift-companion-screenshots-v1.schema.json`, `docs/api/contracts/upstreamdrift-companion-v1.schema.json`, `scripts/companion_screenshots.py`, `scripts/companion_catalog.py`, `scripts/config/companion_screenshots.v1.json`, `docs/screenshots/`, `tests/companion/test_companion_screenshots.py`, `tests/companion/test_companion_catalog.py`, `tests/companion/test_companion_publication.py`, `tests/fixtures/companion/current-v1.0.0.json`, `SPEC.md`, `docs/development/DEVELOPMENT_LOG.md`, `docs/development/HANDOFF.md`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-29 — 165/165 pass across tests/companion and screenshot verification suites; ruff check clean; ruff format clean; prettier clean; architecture budget OK; DRY duplication gate OK; hardcoded style ratchet OK.
+- **Summary:** Complete implementation of COMP-B3 screenshot governance (#9191): updated schemas with exact capture metadata (`capture_environment`, `source_commit`, pixels/viewport, and summary screenshot counts); implemented `scripts/companion_screenshots.py` with standard library PNG IHDR byte parsing, SHA-256 computation, registry loading/validation, and headless deterministic asset generation; generated 6 representative visual assets in `docs/screenshots/` (pendulum simulator desktop light/dark + mobile dark, project map, rate of closure, tour matching viewer); registered 74 visible programs in `scripts/config/companion_screenshots.v1.json` (6 captured, 70 pending with explicit reasons); wired screenshot registry and inventory into `scripts/companion_catalog.py` and publication bundle.
+- **Next step:** Create PR and release lease.
 
 ### DL-#10943 · Drift Wizard Sidekick Knowledge Pack
 
@@ -3553,3 +3605,5 @@ Older entries live in `DEVELOPMENT_LOG_ARCHIVE_<year>.md`.
 
 Never place credentials, tokens, or customer data in a development log.
 No material development-log change — Bolt `np.linalg.norm` → `einsum` consolidation (#11073, #11074, #11076) is a behaviour-preserving micro-optimisation with no feature entry.
+No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/`math.sqrt(np.vdot)` consolidation (#11112, #11128, #11129) is a behaviour-preserving micro-optimisation with no feature entry.
+No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.

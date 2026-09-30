@@ -22,7 +22,7 @@ from typing import Any
 
 import yaml
 
-from scripts import companion_evidence, companion_workflows
+from scripts import companion_evidence, companion_screenshots, companion_workflows
 
 # This module must stay importable with only ``jsonschema`` and ``pyyaml``
 # installed: the release workflow's companion job pip-installs exactly those
@@ -48,6 +48,7 @@ INPUT_PATHS = (
     Path("pyproject.toml"),
     companion_evidence.CAPABILITY_REGISTRY_PATH,
     companion_evidence.DOCUMENTATION_REGISTRY_PATH,
+    companion_screenshots.REGISTRY_PATH,
     companion_workflows.REGISTRY_PATH,
     Path("src/config/feature_parity.json"),
     Path("src/config/launcher_manifest.json"),
@@ -710,6 +711,12 @@ def _catalog_payload(
             "discovery_mode": "local-only",
         },
         {
+            "id": "screenshot_registry",
+            "path": companion_screenshots.REGISTRY_PATH.as_posix(),
+            "version": companion_screenshots.REGISTRY_VERSION,
+            "discovery_mode": "local-only",
+        },
+        {
             "id": "workflow_registry",
             "path": companion_workflows.REGISTRY_PATH.as_posix(),
             "version": companion_workflows.REGISTRY_VERSION,
@@ -737,7 +744,7 @@ def _catalog_payload(
         "features": list(inventories["features"]),
         "documentation": list(inventories["documentation"]),
         "workflows": list(inventories["workflows"]),
-        "screenshots": [],
+        "screenshots": list(inventories["screenshots"]),
         "known_gaps": list(inventories["known_gaps"]),
         "summary": dict(summary),
     }
@@ -820,35 +827,42 @@ def _capabilities_payload(
     }
 
 
-def _screenshots_payload(catalog: Mapping[str, Any]) -> dict[str, Any]:
-    """Emit metadata-only screenshot records; nothing is fabricated.
+def _screenshots_payload(
+    catalog: Mapping[str, Any], records: Sequence[Mapping[str, Any]] | None = None
+) -> dict[str, Any]:
+    """Emit screenshot records for the companion screenshot catalog.
 
-    Every non-hidden program gets one ``pending`` record with null asset
-    fields and an explicit reason. Captured records require the governed
-    capture workflow tracked by #9191, which does not exist at this commit.
+    If governed records are present in the catalog or passed explicitly, use them;
+    otherwise emit fallback pending records with explicit reasons.
     """
-    records = [
-        {
-            "id": f"{program['id']}-primary",
-            "program_id": program["id"],
-            "status": "pending",
-            "path": None,
-            "sha256": None,
-            "width": None,
-            "height": None,
-            "viewport": None,
-            "theme": None,
-            "capture_workflow_id": None,
-            "capture_step_id": None,
-            "alt_text": None,
-            "caption": None,
-            "visible_limitations": [],
-            "artifact_class": "illustrative",
-            "reason": SCREENSHOT_PENDING_REASON,
-        }
-        for program in catalog["programs"]
-        if not program["hidden"]
-    ]
+    if records is not None:
+        rec_list = [dict(r) for r in records]
+    elif catalog.get("screenshots"):
+        rec_list = [dict(r) for r in catalog["screenshots"]]
+    else:
+        rec_list = [
+            {
+                "id": f"{program['id']}-primary",
+                "program_id": program["id"],
+                "status": "pending",
+                "path": None,
+                "sha256": None,
+                "width": None,
+                "height": None,
+                "viewport": None,
+                "theme": None,
+                "capture_workflow_id": None,
+                "capture_step_id": None,
+                "capture_environment": None,
+                "alt_text": None,
+                "caption": None,
+                "visible_limitations": [],
+                "artifact_class": "illustrative",
+                "reason": SCREENSHOT_PENDING_REASON,
+            }
+            for program in catalog.get("programs", [])
+            if not program.get("hidden", False)
+        ]
     return {
         "$schema": SCREENSHOTS_SCHEMA_ID,
         "schema_version": SCHEMA_VERSION,
@@ -857,7 +871,7 @@ def _screenshots_payload(catalog: Mapping[str, Any]) -> dict[str, Any]:
             "repository": catalog["source"]["repository"],
             "commit": catalog["source"]["commit"],
         },
-        "records": records,
+        "records": rec_list,
     }
 
 
@@ -994,6 +1008,13 @@ def _build(
             fixture_path,
             _read_input(root, fixture_path, require_committed=require_clean),
         )
+    screenshots = companion_screenshots.parse_registry(
+        payloads[companion_screenshots.REGISTRY_PATH],
+        repo_root=root,
+        source_commit=source_commit,
+        program_ids={program["id"] for program in programs},
+        workflow_ids={workflow["id"] for workflow in workflows},
+    )
     source = _source_provenance(root, payloads)
     tools_commit = _tools_gitlink(root)
     summary = {
@@ -1022,6 +1043,7 @@ def _build(
         summary=summary,
     )
     summary.update(evidence["summary"])
+    summary.update(screenshots["summary"])
     catalog = _catalog_payload(
         launcher=launcher,
         parity=parity,
@@ -1034,6 +1056,7 @@ def _build(
             "features": features,
             "documentation": evidence["documentation"],
             "workflows": workflows,
+            "screenshots": screenshots["catalog_records"],
             "known_gaps": evidence["known_gaps"],
         },
         blockers=evidence["blockers"],

@@ -93,6 +93,7 @@
         "theme",
         "capture_workflow_id",
         "capture_step_id",
+        "capture_environment",
         "alt_text",
         "caption",
         "visible_limitations",
@@ -133,6 +134,9 @@
         "capture_step_id": {
           "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }]
         },
+        "capture_environment": {
+          "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
+        },
         "alt_text": {
           "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
         },
@@ -147,6 +151,9 @@
         },
         "artifact_class": {
           "enum": ["illustrative", "raw_plot", "qualification_evidence"]
+        },
+        "source_commit": {
+          "oneOf": [{ "$ref": "#/$defs/commit" }, { "type": "null" }]
         },
         "reason": {
           "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }]
@@ -167,6 +174,7 @@
               "theme": { "type": "null" },
               "capture_workflow_id": { "type": "null" },
               "capture_step_id": { "type": "null" },
+              "capture_environment": { "type": "null" },
               "alt_text": { "type": "null" },
               "caption": { "type": "null" },
               "reason": { "$ref": "#/$defs/nonEmptyString" }
@@ -182,6 +190,7 @@
               "theme": { "enum": ["light", "dark"] },
               "capture_workflow_id": { "$ref": "#/$defs/identifier" },
               "capture_step_id": { "$ref": "#/$defs/identifier" },
+              "capture_environment": { "$ref": "#/$defs/nonEmptyString" },
               "alt_text": { "$ref": "#/$defs/nonEmptyString" },
               "caption": { "$ref": "#/$defs/nonEmptyString" }
             }

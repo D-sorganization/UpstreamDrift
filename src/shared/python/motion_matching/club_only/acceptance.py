@@ -130,7 +130,8 @@ def normalized_position_error(
         raise ValueError("position arrays must be non-empty")
     if not np.all(np.isfinite(pred)) or not np.all(np.isfinite(meas)):
         raise ValueError("position arrays must be finite")
-    norms = np.linalg.norm(pred - meas, axis=1) / sigma_m
+    diff = pred - meas
+    norms = np.sqrt(np.einsum("ij,ij->i", diff, diff)) / sigma_m
     return float(np.sqrt(np.mean(np.square(norms))))
 
 

@@ -28,6 +28,25 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
 
+def format_clock_evidence_text(obs: FrameObservation) -> str:
+    """Return the viewport timing line, rendering unknown physical time safely.
+
+    Imported observations may legitimately carry ``physical_time_s=None`` (no
+    evidenced clock mapping); the viewport shows the unknown state and the
+    recorded reason instead of formatting None.
+    """
+    if obs.physical_time_s is None:
+        physical_time_text = "unknown"
+    else:
+        physical_time_text = f"{obs.physical_time_s:.4f}s"
+    return (
+        f"PTS: {obs.pts_ticks} | Physical Time: {physical_time_text} "
+        f"({obs.physical_time_reason}) | "
+        f"Clock Authority: {obs.timing_mode} ({obs.clock_evidence}) | "
+        f"Exact: {obs.is_timing_exact}"
+    )
+
+
 class ShadowTrackerReviewModel:
     """Headless state and controller for the Shadow Tracker review session."""
 
@@ -70,7 +89,38 @@ class ShadowTrackerReviewModel:
         obs = self.get_current_observation()
         if obs is None:
             return None
-        return self.service.get_mask(obs.frame_id)
+        return self.service.get_mask(obs.frame_id, shot_id=obs.shot_id)
+
+    def import_video(
+        self,
+        video_path: str | Path,
+        *,
+        asset_id: str | None = None,
+        shot_id: str = "shot-001",
+        swing_id: str = "swing-001",
+        camera_id: str = "camera-001",
+        timing_mapping: Any | None = None,
+        cuts: Sequence[tuple[int, int]] = (),
+        transforms: Sequence[str] = (),
+        max_frames: int | None = None,
+    ) -> tuple[FrameObservation, ...]:
+        """Import a video media file into the review session."""
+        imported = self.service.import_video(
+            video_path,
+            asset_id=asset_id,
+            shot_id=shot_id,
+            swing_id=swing_id,
+            camera_id=camera_id,
+            timing_mapping=timing_mapping,
+            cuts=cuts,
+            transforms=transforms,
+            max_frames=max_frames,
+        )
+        self.current_frame_index = 0
+        self.bundle_path = None
+        self.mark_clean()
+        logger.info("Imported video with %d frames from %s", len(imported), video_path)
+        return imported
 
     def load_bundle(self, bundle_dir: str | Path) -> None:
         """Load an existing review bundle directory."""
@@ -131,7 +181,9 @@ class ShadowTrackerReviewModel:
         worst = ranked[0]
         obs = self.service.get_observations()
         for idx, item in enumerate(obs):
-            if item.frame_id == worst.frame_id:
+            if item.frame_id == worst.frame_id and (
+                not worst.shot_id or item.shot_id == worst.shot_id
+            ):
                 self.current_frame_index = idx
                 break
         return worst
@@ -152,6 +204,7 @@ class ShadowTrackerReviewModel:
             raise RuntimeError("Cannot update mask: no active frame observation")
         new_mask = self.service.update_mask(
             frame_id=obs.frame_id,
+            shot_id=obs.shot_id,
             body=body,
             club=club,
             valid=valid,
@@ -230,12 +283,7 @@ class ShadowTrackerViewportWidget(QWidget):
             font.setBold(False)
             font.setPointSize(9)
             painter.setFont(font)
-            timing_info = (
-                f"PTS: {obs.pts_ticks} ({obs.physical_time_s:.4f}s) | "
-                f"Clock Authority: {obs.timing_mode} ({obs.clock_evidence}) | "
-                f"Exact: {obs.is_timing_exact}"
-            )
-            painter.drawText(20, 60, timing_info)
+            painter.drawText(20, 60, format_clock_evidence_text(obs))
 
             mask_info = f"Masks: Body: {obs.body_mask_ref} | Club: {obs.club_mask_ref} | Valid: {obs.valid_mask_ref}"
             painter.drawText(20, 80, mask_info)
@@ -273,10 +321,12 @@ class ShadowTrackerWidget(QWidget):
 
         # Header toolbar
         toolbar = QtWidgets.QHBoxLayout()
+        self.btn_import = QtWidgets.QPushButton("Import Video...", self)
         self.btn_open = QtWidgets.QPushButton("Open Bundle...", self)
         self.btn_save = QtWidgets.QPushButton("Save Bundle", self)
         self.btn_export = QtWidgets.QPushButton("Export Canonical...", self)
         self.btn_worst = QtWidgets.QPushButton("Jump to Worst Frame", self)
+        toolbar.addWidget(self.btn_import)
         toolbar.addWidget(self.btn_open)
         toolbar.addWidget(self.btn_save)
         toolbar.addWidget(self.btn_export)
@@ -306,6 +356,7 @@ class ShadowTrackerWidget(QWidget):
         layout.addWidget(self.lbl_status)
 
         # Connect signals
+        self.btn_import.clicked.connect(self._on_import_video)
         self.btn_open.clicked.connect(self._on_open_bundle)
         self.btn_save.clicked.connect(self._on_save_bundle)
         self.btn_export.clicked.connect(self._on_export_canonical)
@@ -313,6 +364,24 @@ class ShadowTrackerWidget(QWidget):
         self.btn_next.clicked.connect(self._on_next)
         self.slider_frame.valueChanged.connect(self._on_slider_changed)
         self.btn_worst.clicked.connect(self._on_worst)
+
+    def _on_import_video(self) -> None:
+        video_file, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Select Video File to Import",
+            "",
+            "Video Files (*.mp4 *.avi *.mov *.mkv);;All Files (*)",
+        )
+        if not video_file:
+            return
+        try:
+            obs = self.import_video(video_file)
+            self.lbl_status.setText(
+                f"Imported {len(obs)} frames from {Path(video_file).name}"
+            )
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            logger.warning("Failed to import video: %s", exc)
+            self.lbl_status.setText(f"Error importing video: {exc}")
 
     def _on_open_bundle(self) -> None:
         bundle_dir = QtWidgets.QFileDialog.getExistingDirectory(
@@ -398,6 +467,14 @@ class ShadowTrackerWidget(QWidget):
         self.viewport.set_observation(obs)
 
     # Public review API methods
+    def import_video(
+        self, video_path: str | Path, **kwargs: Any
+    ) -> tuple[FrameObservation, ...]:
+        """Import video into review model and refresh display."""
+        res = self.model.import_video(video_path, **kwargs)
+        self._update_display()
+        return res
+
     def load_bundle(self, bundle_dir: str | Path) -> None:
         self.model.load_bundle(bundle_dir)
         self._update_display()
@@ -410,6 +487,49 @@ class ShadowTrackerWidget(QWidget):
 
     def is_dirty(self) -> bool:
         return self.model.is_dirty
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # noqa: N802
+        """Handle keyboard scrubbing, triage shortcuts, and navigation (MMR-12)."""
+        if event is None:
+            return
+        key = event.key()
+        modifiers = event.modifiers()
+        if key == QtCore.Qt.Key.Key_Right:
+            self._on_next()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_Left:
+            self._on_prev()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_Home:
+            self.model.jump_to_frame(0)
+            self._update_display()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_End:
+            self.model.jump_to_frame(max(0, self.model.frame_count - 1))
+            self._update_display()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_W and not (
+            modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
+        ):
+            self._on_worst()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_S and (
+            modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
+        ):
+            self._on_save_bundle()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_O and (
+            modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
+        ):
+            self._on_open_bundle()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_I and (
+            modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
+        ):
+            self._on_import_video()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
     def cleanup(self) -> None:
         """Idempotently release resources upon shutdown or unload."""

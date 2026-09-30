@@ -143,8 +143,9 @@ def marker_errors(
 
     return np.array(
         [
-            np.linalg.norm(kin.marker_positions(row) - target, axis=1)
+            np.sqrt(np.einsum("ij,ij->i", diff, diff))
             for row, target in zip(q, points, strict=True)
+            for diff in (kin.marker_positions(row) - target,)
         ]
     )
 

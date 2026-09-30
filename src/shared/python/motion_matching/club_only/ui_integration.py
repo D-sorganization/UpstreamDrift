@@ -263,6 +263,16 @@ class ResultViewModel:
     schema_version: str = UI_SCHEMA
     seed_source: str | None = None
     is_synthetic_seed: bool = False
+    has_continuous_replay: bool = False
+
+    def __post_init__(self) -> None:
+        if (
+            not self.body_motion_disclaimer
+            or not str(self.body_motion_disclaimer).strip()
+        ):
+            raise ValueError(
+                "inferred body posture must always be labeled with a body motion disclaimer"
+            )
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -275,6 +285,7 @@ class ResultViewModel:
             "preset": self.preset.value,
             "display_status": self.display_status.value,
             "native_g1_pass": self.native_g1_pass,
+            "has_continuous_replay": self.has_continuous_replay,
             "qualification_blockers": list(self.qualification_blockers),
             "trial_clock_hz": self.trial_clock_hz,
             "body_motion_disclaimer": self.body_motion_disclaimer,
@@ -540,21 +551,34 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
     if not isinstance(result, ClubOnlyUiResult):
         raise TypeError("result must be ClubOnlyUiResult")
     native_pass = bool(result.match.native_g1_pass)
-    blockers = list(result.match.qualification_blockers) or list(_DEFAULT_BLOCKERS)
+    blockers = (
+        list(result.match.qualification_blockers)
+        if result.match.qualification_blockers is not None
+        else list(_DEFAULT_BLOCKERS)
+    )
     seed = result.seed
     is_synthetic = seed is None or seed.source not in VERIFIED_SEED_SOURCES
     if is_synthetic:
         blockers.append("synthetic_seed_unqualified_for_verified_fit")
+    has_replay = bool(getattr(result.match, "has_continuous_replay", False))
+    if not has_replay and "missing_fresh_continuous_replay" not in blockers:
+        blockers.append("missing_fresh_continuous_replay")
+
     if result.session.preset is MatchPreset.FAST_PREVIEW:
         status = VerificationDisplayStatus.PREVIEW
     elif is_synthetic:
         status = VerificationDisplayStatus.UNQUALIFIED
-    elif native_pass and not blockers:
+    elif (
+        native_pass
+        and not [b for b in blockers if b != "missing_fresh_continuous_replay"]
+        and has_replay
+    ):
         status = VerificationDisplayStatus.NATIVE_VERIFIED
     else:
         status = VerificationDisplayStatus.SOFTWARE_VERIFIED_FIT
     if not native_pass and status is VerificationDisplayStatus.NATIVE_VERIFIED:
         status = VerificationDisplayStatus.UNQUALIFIED
+
     tradeoffs = tuple(
         {
             "club_fit": (
@@ -590,6 +614,7 @@ def build_club_only_result_view(result: ClubOnlyUiResult) -> ResultViewModel:
         preset=result.session.preset,
         display_status=status,
         native_g1_pass=native_pass,
+        has_continuous_replay=has_replay,
         qualification_blockers=tuple(blockers),
         trial_clock_hz=float(NATIVE_SAMPLE_RATE_HZ),
         native_time_s=np.asarray(result.observation.native_time_s, dtype=np.float64),
@@ -643,6 +668,7 @@ def assert_unqualified_cannot_appear_verified(view: Any) -> None:
     native_pass = bool(getattr(view, "native_g1_pass", False))
     status = getattr(view, "display_status", None)
     blockers = tuple(getattr(view, "qualification_blockers", ()) or ())
+    has_continuous_replay = bool(getattr(view, "has_continuous_replay", False))
     if status is VerificationDisplayStatus.NATIVE_VERIFIED and (
         not native_pass or blockers
     ):
@@ -650,6 +676,11 @@ def assert_unqualified_cannot_appear_verified(view: Any) -> None:
             "unqualified club-only result cannot appear native_verified "
             f"(native_g1_pass={native_pass}, blockers={blockers})"
         )
+    if (
+        status is VerificationDisplayStatus.NATIVE_VERIFIED
+        and not has_continuous_replay
+    ):
+        raise ValueError("verified club-only fit requires fresh continuous replay")
 
 
 def _receipt_path_relative_to_repo(path: Path, repo_root: Path) -> str:
