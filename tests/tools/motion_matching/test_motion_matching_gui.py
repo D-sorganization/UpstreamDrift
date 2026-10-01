@@ -659,9 +659,14 @@ def test_checkpoint_mismatch_and_missing_runtime_return_named_reasons(
 
 
 def test_ui_interaction_drives_run_and_checks_run_bound_disposition(
-    widget: MotionMatchingWidget,
+    widget: MotionMatchingWidget, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """UI interaction drives the same controller/request path as Run and binds disposition (R07 #11147)."""
+    from unittest.mock import MagicMock
+
+    mock_worker_start = MagicMock()
+    monkeypatch.setattr(widget._worker, "start", mock_worker_start)
+
     # 1. Test Run with neural preview + fallback=False
     widget.neural_mode.setCurrentText("Neural Preview")
     widget.neural_model_selector.setCurrentText("driven_double_pendulum")
@@ -679,6 +684,7 @@ def test_ui_interaction_drives_run_and_checks_run_bound_disposition(
     assert "Missing checkpoint" in disp.reason
     assert "REJECTED" in widget.neural_status_badge.text()
     assert "rejected" in widget.results.text().lower()
+    assert mock_worker_start.call_count == 0
 
     # 2. Test Run with neural preview + fallback=True
     widget.allow_classical_fallback.setChecked(True)
@@ -690,6 +696,7 @@ def test_ui_interaction_drives_run_and_checks_run_bound_disposition(
     assert disp2.allow_fallback is True
     assert disp2.status == "classical_fallback"
     assert "CLASSICAL_FALLBACK" in widget.neural_status_badge.text()
+    assert mock_worker_start.call_count == 1
 
 
 def test_feature_parity_records_reflect_neural_matching_support_and_gap() -> None:
