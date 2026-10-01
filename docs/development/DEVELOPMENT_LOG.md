@@ -21,6 +21,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
+- **PR:** [#11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237)
 - **Issue:** #11233; parent #11232; player epics #11226 and #11229
 - **Branch:** `feat/necromatcher-library-11233`
 - **Paths:** `src/shared/python/workspace/necromatcher.py`, `src/shared/python/workspace/necromatcher_capture.py`, `src/api/routes/necromatcher.py`
