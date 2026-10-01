@@ -495,9 +495,9 @@ def _advanced_gs3dx_variant_definitions(
     }
 
 
-def get_canonical_gs3dx_variant_definitions() -> (
-    dict[GS3DXVariant, GS3DXVariantDefinition]
-):
+def get_canonical_gs3dx_variant_definitions() -> dict[
+    GS3DXVariant, GS3DXVariantDefinition
+]:
     """Return the authoritative dictionary of 10 promoted GS3DX variants."""
     base_prefix = "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/models/"
     return {
