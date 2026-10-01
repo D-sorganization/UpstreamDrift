@@ -174,13 +174,34 @@ def export_capture(
                 detected += observation["status"] == "detected"
     if not count:
         raise ValueError("Capture window contains no decoded frames")
+    return _write_receipt(
+        destination,
+        window,
+        subject_id,
+        asset.to_dict(),
+        count,
+        detected,
+        detector_identity,
+    )
+
+
+def _write_receipt(
+    destination: Path,
+    window: CaptureWindow,
+    subject_id: str,
+    source_record: dict[str, Any],
+    count: int,
+    detected: int,
+    detector_identity: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind completed observations to their source and detector evidence."""
     observations_path = destination / "observations.jsonl"
     with observations_path.open("rb") as handle:
         observations_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
     receipt = {
         "schema_version": "historical-capture/1.0.0",
         "subject_id": subject_id,
-        "source": asset.to_dict(),
+        "source": source_record,
         "window_presentation_s": [window.start_s, window.end_s],
         "frame_count": count,
         "detected_count": detected,
