@@ -18,6 +18,20 @@ Specifies the end-to-end integration and fail-closed validation contracts connec
   - UI interaction binds execution through controller `prepare_run()`, updating badges (`PREVIEW (REJECTED)`, `PREVIEW (CLASSICAL_FALLBACK)`, `UNVERIFIED`) and log panes consistently before dispatching worker processes.
   - `feature_parity.json` updated under `tools.motion_matching` documenting wired neural controls, verified inference orchestrator gate, and intentional platform parity gap across operating platforms.
 
+## Bind Matcher Process Events to Their Run and Handle Failed Starts (R08, #11148)
+
+Specifies the process lifecycle, immutable run context, and tab-routing contracts for the Motion Matching launcher tile:
+- **Process Lifecycle Management (`src/tools/motion_matching/process_lifecycle.py`)**:
+  - `RunContext`: immutable dataclass binding run ID, owning panel (`"matching"`, `"experiment"`, `"mjx"`), active stage name, request, and output directory.
+  - `RunWorker`: robust sequential command queue executor backed by `QProcess`.
+  - Failed-start handling: connects `QProcess.errorOccurred` to capture startup failures (e.g. `QProcess.ProcessError.FailedToStart` when an executable is missing or denied execution permission) without hanging in a running state indefinitely.
+  - Idempotent finalizer: handles failed starts, crashes (`QProcess.ProcessError.Crashed`), user cancellations (`worker.stop()`), and nonzero exits through a single terminal finalizer (`_finalize`) that guarantees exactly one terminal callback is emitted.
+  - Resource disposal: disconnects signals, unparents processes, and disposes completed/terminated process instances via `QProcess.deleteLater()`, preventing object leaks across repeated executions.
+  - Context-bound tab routing: `_on_output` and `_on_finished` route logs and outcomes strictly to the panel identified by `RunContext.owning_panel`, preserving logs and results even when the user switches tabs during execution.
+  - Actionable diagnostics: `format_failure_diagnostic` identifies the failing stage, error reason, and actionable recovery steps while retaining user inputs.
+- **Unit Test Suite (`tests/tools/motion_matching/test_matcher_process_lifecycle.py`)**:
+  - Tests covering missing executables, denied permissions, process crashes, user cancellation, normal completion, multi-tab switching, repeated start/stop process disposal, and stage-specific failure recovery reporting.
+
 ## Simulation Error Outcomes and Partial-Result States (R09, #11149)
 Specifies machine-readable error modeling, pipeline stage isolation, and partial-result resilience across sync and background simulation execution paths:
 - **Structured Error Outcome Model (`SimulationErrorInfo` in `src/api/models/responses.py`)**:
@@ -7488,6 +7502,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
 | 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
 | 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |

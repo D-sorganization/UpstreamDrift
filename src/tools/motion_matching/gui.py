@@ -69,67 +69,13 @@ from src.tools.motion_matching.tour_baselines_presenter import (
 
 WINDOW_TITLE = "Motion Matching"
 
-
-class RunWorker(QObject):
-    """Executes a queue of external CLI commands sequentially via QProcess."""
-
-    started = pyqtSignal()
-    output_received = pyqtSignal(str)
-    finished = pyqtSignal(int)
-
-    def __init__(self, parent: QObject | None = None) -> None:
-        super().__init__(parent)
-        self._process: QProcess | None = None
-        self._queue: list[list[str]] = []
-        self._cwd: Path = pipeline.REPO_ROOT
-
-    def is_running(self) -> bool:
-        return self._process is not None
-
-    def start(self, commands: list[list[str]], cwd: Path | None = None) -> None:
-        if self._process is not None:
-            return
-        if not commands:
-            self.finished.emit(0)
-            return
-        self._queue = list(commands)
-        self._cwd = cwd or pipeline.REPO_ROOT
-        self.started.emit()
-        self._next()
-
-    def _next(self) -> None:
-        if not self._queue:
-            self._process = None
-            self.finished.emit(0)
-            return
-        command = self._queue.pop(0)
-        self.output_received.emit("$ " + " ".join(command) + "\n")
-        process = QProcess(self)
-        process.setWorkingDirectory(str(self._cwd))
-        process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        process.readyReadStandardOutput.connect(
-            lambda: self.output_received.emit(
-                process.readAllStandardOutput().data().decode(errors="replace")
-            )
-        )
-        process.finished.connect(self._on_step_finished)
-        self._process = process
-        process.start(command[0], command[1:])
-
-    def _on_step_finished(self, code: int, _status: object) -> None:
-        self._process = None
-        if code != 0:
-            self._queue.clear()
-            self.finished.emit(code)
-            return
-        self._next()
-
-    def stop(self) -> None:
-        self._queue.clear()
-        if self._process is not None:
-            self._process.kill()
-            self._process = None
-            self.finished.emit(-1)
+from src.tools.motion_matching.process_lifecycle import (  # noqa: E402
+    RunContext,
+    RunResult,
+    RunStatus,
+    RunWorker,
+    format_failure_diagnostic,
+)
 
 
 class MotionMatchingWidget(QWidget):
@@ -915,7 +861,15 @@ class MotionMatchingWidget(QWidget):
             self.results.setText("Running matching pipeline...")
 
         self._set_active_buttons(self.run_button, self.stop_button, running=True)
-        self._worker.start(list(disp.commands))
+        commands = list(disp.commands)
+        ctx = RunContext(
+            owning_panel="matching",
+            stage_name="build",
+            request=self._request,
+            output_dir=self._request.output_dir,
+            commands=tuple(tuple(c) for c in commands),
+        )
+        self._worker.start(commands, context=ctx, stage_names=["build", "match"])
 
     def start_experiment(self) -> None:
         if self._worker.is_running():
@@ -924,7 +878,15 @@ class MotionMatchingWidget(QWidget):
         self.exp_log.clear()
         self.exp_results.setText("Running downswing experiment...")
         self._set_active_buttons(self.exp_run_btn, self.exp_stop_btn, running=True)
-        self._worker.start([self.experiment_command()])
+        cmd = self.experiment_command()
+        ctx = RunContext(
+            owning_panel="experiment",
+            stage_name="downswing_experiment",
+            request=self._exp_request,
+            output_dir=Path(self._exp_request.run),
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["downswing_experiment"])
 
     def start_mjx_export(self) -> None:
         if self._worker.is_running():
@@ -932,7 +894,13 @@ class MotionMatchingWidget(QWidget):
         self.mjx_log.clear()
         self.mjx_results.setText("Exporting MJX package...")
         self._set_active_buttons(self.mjx_export_btn, self.mjx_stop_btn, running=True)
-        self._worker.start([self.mjx_export_command()])
+        cmd = self.mjx_export_command()
+        ctx = RunContext(
+            owning_panel="mjx",
+            stage_name="mjx_export",
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["mjx_export"])
 
     def start_mjx_validation(self) -> None:
         if self._worker.is_running():
@@ -940,7 +908,13 @@ class MotionMatchingWidget(QWidget):
         self.mjx_log.clear()
         self.mjx_results.setText("Validating MJX reference...")
         self._set_active_buttons(self.mjx_validate_btn, self.mjx_stop_btn, running=True)
-        self._worker.start([self.mjx_validate_command()])
+        cmd = self.mjx_validate_command()
+        ctx = RunContext(
+            owning_panel="mjx",
+            stage_name="mjx_validate",
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["mjx_validate"])
 
     def stop(self) -> None:
         self._worker.stop()
@@ -952,16 +926,16 @@ class MotionMatchingWidget(QWidget):
         stop_btn.setEnabled(running)
 
     def _on_output(self, text: str) -> None:
-        # Route output to current active tab log
-        idx = self.tabs.currentIndex()
-        if idx == 0:
+        ctx = self._worker.current_context
+        panel = ctx.owning_panel if ctx is not None else None
+        if panel == "matching" or (panel is None and self.tabs.currentIndex() == 0):
             self.log.appendPlainText(text)
-        elif idx == 1:
+        elif panel == "experiment" or (panel is None and self.tabs.currentIndex() == 1):
             self.exp_log.appendPlainText(text)
-        elif idx == 2:
+        elif panel == "mjx" or (panel is None and self.tabs.currentIndex() == 2):
             self.mjx_log.appendPlainText(text)
 
-    def _on_finished(self, code: int) -> None:
+    def _on_finished(self, code: int, result: RunResult | None = None) -> None:
         self._set_active_buttons(self.run_button, self.stop_button, running=False)
         self._set_active_buttons(self.exp_run_btn, self.exp_stop_btn, running=False)
         self._set_active_buttons(self.mjx_export_btn, self.mjx_stop_btn, running=False)
@@ -969,18 +943,27 @@ class MotionMatchingWidget(QWidget):
             self.mjx_validate_btn, self.mjx_stop_btn, running=False
         )
 
-        idx = self.tabs.currentIndex()
-        if code != 0:
-            msg = f"Step failed with exit code {code}; see log for details."
-            if idx == 0:
+        res = result or self._worker.last_result
+        panel = res.context.owning_panel if res is not None else None
+        if panel is None:
+            idx = self.tabs.currentIndex()
+            panel = "matching" if idx == 0 else ("experiment" if idx == 1 else "mjx")
+
+        if code != 0 or (res is not None and not res.is_success):
+            msg = (
+                format_failure_diagnostic(res)
+                if res is not None
+                else f"Step failed with exit code {code}; see log for details."
+            )
+            if panel == "matching":
                 self.results.setText(msg)
-            elif idx == 1:
+            elif panel == "experiment":
                 self.exp_results.setText(msg)
-            elif idx == 2:
+            elif panel == "mjx":
                 self.mjx_results.setText(msg)
             return
 
-        if idx == 0 and self._request is not None:
+        if panel == "matching" and self._request is not None:
             try:
                 summary = pipeline.read_summary(self._request.output_dir)
                 metrics, verdict = pipeline.extract_five_metrics_and_acceptance(summary)
@@ -989,7 +972,7 @@ class MotionMatchingWidget(QWidget):
                 )
             except ValueError as exc:
                 self.results.setText(str(exc))
-        elif idx == 1 and self._exp_request is not None:
+        elif panel == "experiment" and self._exp_request is not None:
             try:
                 summary = pipeline.read_experiment_summary(
                     self._exp_request.run, self._exp_request.name
@@ -1004,7 +987,7 @@ class MotionMatchingWidget(QWidget):
                 )
             except ValueError as exc:
                 self.exp_results.setText(str(exc))
-        elif idx == 2:
+        elif panel == "mjx":
             self.mjx_results.setText("MJX operation completed successfully.")
 
     def _update_results_ui(
@@ -1158,4 +1141,13 @@ def main(argv: list[str] | None = None) -> int:
     return app.exec()
 
 
-__all__ = ["MotionMatchingWidget", "RunWorker", "get_dockable_ui", "main"]
+__all__ = [
+    "MotionMatchingWidget",
+    "RunContext",
+    "RunResult",
+    "RunStatus",
+    "RunWorker",
+    "format_failure_diagnostic",
+    "get_dockable_ui",
+    "main",
+]
