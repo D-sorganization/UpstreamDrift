@@ -22,6 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #11235; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240), draft over #11239
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** shared matching plant and native MuJoCo model; historical fitting integration
 - **Last verified:** 2026-10-01 — five native closure regressions failed before repair; 12 native plant/model tests pass afterward, one real-Drake test skips. Actual generic driver model loads 44 coordinates and reports nonzero grip separation.

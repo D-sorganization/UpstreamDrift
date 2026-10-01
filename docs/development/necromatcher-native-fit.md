@@ -10,6 +10,8 @@ and simulation/impact/analysis handoffs. No historical fit is accepted yet.
 
 Owned branch: `feat/necromatcher-native-fit-11235`, based on workspace branch
 `feat/necromatcher-workspace-11234`. Lease uses the current Codex session.
+Draft [PR #11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+records this prerequisite and remains open for the fitting work.
 
 ## Native Closure Repair
 

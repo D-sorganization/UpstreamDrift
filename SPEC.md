@@ -7519,6 +7519,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11240 | Repair native MuJoCo grip-closure queries without requiring observation markers, validate coordinate vectors and verify detached world-space residuals against independently compiled native models; continue historical fitting and simulation/impact/analysis handoffs under #11235. |
 | 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | #11231 | Add reusable historical-player streaming image observations with rational PTS, source/frame/model hashes, explicit missingness and unqualified receipts; track Hogan #11229 and Tiger #11226. |
