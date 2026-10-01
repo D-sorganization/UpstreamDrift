@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 20 parity · 13 gap · 13 exempt (12 pending decision in #7460).
+**Summary:** 20 parity · 14 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -52,6 +52,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
+| `tools.necromatcher`<br>Historical Player Library And Source Review | 🔴 gap | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | #11234 |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.putting_green`<br>Putting green simulation | ✅ parity | `src/engines/physics_engines/putting_green/python/simulator.py` | `src/api/routes/putting_green.py` | `ui/src/pages/PuttingGreen.tsx` | — |
 | `tools.rate_of_closure`<br>Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | 🔴 gap | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `src/api/local_server.py` | `ui/src/pages/ImpactExplorer.tsx` | #9546 |
@@ -95,6 +96,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `mujoco_dashboard` | `engines.dashboards` |
 | `mujoco_unified` | `engines.load_and_simulate` |
 | `myosim_suite` | `engines.load_and_simulate` |
+| `necromatcher` | `tools.necromatcher` |
 | `opensim_golf` | `engines.load_and_simulate` |
 | `pendulum_simulator` | `engines.load_and_simulate` |
 | `perturbation_analysis` | `analysis.cross_engine_robustness` |

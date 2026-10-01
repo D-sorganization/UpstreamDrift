@@ -1,5 +1,13 @@
 # Active Necromatcher Delivery
 
+Current branch `feat/necromatcher-workspace-11234` adds the player tile, web route,
+native adapter and shared source-frame archive reader. Thirteen UI tests, desktop
+recall and worker failure tests pass. Web type checking and scoped ESLint pass.
+Desktop import/overlay parity, real UI verification and final validation remain
+in progress. Library draft PR #11237 depends on capture PR #11231. The capture
+PR has an unrelated inherited title-case failure at `.jules/bolt.md:208`; do not
+mark it accepted or change unrelated work under this delivery.
+
 Owner priority is the integrated historical-player workspace (#11232), with library #11233, tile/review #11234 and real fitting/downstream qualification #11235. See [Necromatcher Turnover](necromatcher-turnover.md) for contracts, TDD evidence, real capture imports and current PR state. Tiger #11226 and Hogan #11229 remain open.
 
 # Historical Player Capture Handoff

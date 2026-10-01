@@ -33,6 +33,56 @@ The export-mutation test failed before final ZIP byte verification was added. Ex
 
 ## Remaining Work
 
+Workspace #11234 now has a registered Necromatcher tile, React route, native
+entry point and lazy embeddable adapter. A public default-library factory keeps
+both hosts on one configured store. Shared `CaptureReview` checks the archive
+hash once per opened version, retains original observation rows, verifies PNG
+ZIP CRCs and rejects changes to the opened file's size/mtime. HTTP previews cache
+up to four open captures; image reads never extract arbitrary archive paths.
+Web forms save players/swings and import capture/model/profile versions.
+The shared image overlay also replaces Video Analyzer's duplicate SVG overlay.
+Frame requests hide old imagery while loading and retain source PTS/missingness.
+
+Native review supports player/swing creation, recalled original PNGs and portable
+export. Shared background workers perform costly verification outside the Qt
+thread; a timer applies results on the UI thread. A failing KeyError test exposed
+the worker adapter's limited exception contract; the adapter boundary now
+translates expected lookup/type errors to a reported ValueError.
+Thirteen UI tests and native recall/failure/import/overlay tests pass. Native
+import forms and landmark overlays are implemented. A real Hogan practice frame
+was rendered from the persistent capture ZIP, with PTS 3300000 × 1/30000 seconds,
+750 source frames and physical time unknown. Preview outside Git:
+`C:/Users/diete/Downloads/historical-capture/necromatcher-native-hogan-font-20261001.png`.
+The Windows offscreen Qt plugin exposes no system font families; the verification
+harness explicitly loaded the installed Segoe UI font. No product font fallback
+or user preference was changed to accommodate that headless renderer.
+Real web verification and final validation remain active.
+
+Current checks: 31 library/API/native/launcher tests, 10 generated inventory tests,
+13 UI tests; scoped mypy passes eight production files. Route-producer,
+architecture, document title, catalog and design-manual governance checks pass.
+Capture-cache retry testing failed before invalidation was added: a changed
+archive returns 409 and clears the cached review; retry must hash-check anew.
+Archive byte corruption remains rejected. Source PNGs and observations are
+never changed by the desktop's detached overlay rendering.
+
+The official USGA broadcast source now has a downloaded 2981–3267-second
+excerpt outside Git, 1280×720 AV1 with audio, 30000/1001 presentation FPS,
+clip duration 286.031 seconds and SHA-256
+`6618fd8caf6a3c17ba4121d23b9bcdd576eff868a73045166f0a260705c30dde`.
+Path: `C:/Users/diete/Downloads/historical-capture/tiger_2000/usga/bado2QdgD3c-teeoff-2981-3267.mp4`.
+Its chapter label is insufficient golfer identity evidence: the contact sheet
+mostly shows other players. The subsequent 3267–3616-second window is currently
+downloading in owned process session 56961. Verify the actual golfer and shot
+continuity before extracting a Tiger capture. Do not promote broadcast playback
+time to physical swing time without independent timing review.
+Library PR #11237 is published as a draft over capture PR #11231.
+
+Capture PR #11231's generated inventory correction passes unit/structure checks.
+Its documentation check fails on `.jules/bolt.md:208`, inherited from main's
+unrelated quaternion optimization. Record this external failure; the CI skill
+forbids modifying pre-existing failures outside the story.
+
 Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Finish validation and publish a focused dependency-aware PR. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
 
 The existing `ModelMatchHandoffCoordinator` currently generates fixed output artifacts and hard-coded fit metrics. Do not call those results real matching or reuse that coordinator as Necromatcher scientific evidence. The shadow-tracker segmentation fallback issue #11227 also remains open. Physical-time calibration, shot continuity, club visibility, camera calibration and source-year lineage remain unresolved for the current clips.

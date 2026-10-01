@@ -575,6 +575,22 @@ models:
       status: "beta"
       default_launch: "tab"
 
+  - id: "necromatcher"
+    help: "docs/help/necromatcher.md"
+    name: "Necromatcher"
+    description: "Historical player library, original capture frames, and immutable model and torque profile versions"
+    type: "special_app"
+    path: "src/tools/necromatcher/__main__.py"
+    capabilities:
+      - "historical_library"
+      - "source_frame_review"
+      - "swing_package_export"
+    launcher:
+      category: "motion_capture"
+      logo: "assets/matched_swing_browser.png"
+      status: "experimental"
+      default_launch: "tab"
+
   - id: "matched_swing_browser"
     help: "docs/help/matched_swing_browser.md"
     name: "Results Browser"

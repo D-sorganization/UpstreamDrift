@@ -17,6 +17,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11234 — Necromatcher Historical Player Workspace
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11234; parent #11232
+- **Branch:** `feat/necromatcher-workspace-11234`
+- **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
+- **Last verified:** 2026-10-01 — 13 UI tests passed; source/API/native recall tests passed; native worker failure reproduced and fixed; web type checking and scoped ESLint passed.
+- **Summary:** Shared persistent library, historical tiles, source-frame review, web import forms and portable exports. Native import/overlay parity and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
+
 ### DL-#11233 — Necromatcher Persistent Library
 
 - **State:** in_progress

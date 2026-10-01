@@ -1148,6 +1148,23 @@
       }
     },
     {
+      "id": "necromatcher",
+      "name": "Necromatcher",
+      "description": "Historical player library, source frames, model candidates and authored torque profiles",
+      "category": "motion_capture",
+      "type": "special_app",
+      "path": "src/tools/necromatcher/__main__.py",
+      "logo": "matched_swing_browser.svg",
+      "status": "utility",
+      "capabilities": [
+        "historical_library",
+        "source_frame_review",
+        "swing_package_export"
+      ],
+      "order": 51,
+      "web": { "mode": "route", "route": "/tools/necromatcher" }
+    },
+    {
       "id": "matched_swing_browser",
       "name": "Results Browser",
       "description": "Browse matched-swing execution ledger, receipts, standardized metrics, physical gate verdicts, and kinematic GIF animations",

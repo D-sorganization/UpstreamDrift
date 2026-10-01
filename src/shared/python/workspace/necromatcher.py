@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import asdict
+from functools import lru_cache
 import hashlib
 import json
 import os
@@ -19,6 +20,7 @@ from zipfile import ZIP_STORED, ZipFile
 import numpy as np
 
 from src.shared.python.core.contracts.exceptions import StateError
+from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.motion_matching.piecewise_polynomial import (
     PiecewisePolynomialTorque,
     PolynomialSegment,
@@ -314,3 +316,17 @@ class NecromatcherLibrary:
                         raise ValueError("Export asset hash mismatch")
             # Same-filesystem atomic publication, with no overwrite of an existing export.
             os.link(temporary, destination)
+
+
+@lru_cache(maxsize=1)
+def default_necromatcher_library() -> NecromatcherLibrary:
+    """Open the one configured local library for every application surface."""
+    configured = os.environ.get("NECROMATCHER_LIBRARY_ROOT")
+    root = Path(configured) if configured else user_config_path("necromatcher")
+    try:
+        return NecromatcherLibrary(root)
+    except KeyError:
+        try:
+            return NecromatcherLibrary.create(root)
+        except StateError:
+            return NecromatcherLibrary(root)
