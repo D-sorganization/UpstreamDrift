@@ -909,22 +909,38 @@ def _render_still_geometry(ax: Any, vframe: ViewerFrame, engine_name: str) -> No
                 )
 
 
+@dataclass(frozen=True)
+class BoardExportMetadata:
+    """Metadata displayed on board-ready stills and animations."""
+
+    candidate_hash: str = "unknown"
+    engine_name: str = "default"
+    drive_mode: str = "torque_driven"
+    verdict: str = "UNVERIFIED"
+    evidence_link: str | None = None
+
+
 def export_board_ready_still(
     replay: ReplayData,
     spec: Mapping[str, Any],
     frame_idx: int,
     output_path: Path | str,
     *,
-    candidate_hash: str = "unknown",
-    engine_name: str = "default",
-    drive_mode: str = "torque_driven",
-    verdict: str = "UNVERIFIED",
-    evidence_link: str | None = None,
+    metadata: BoardExportMetadata | None = None,
+    **kwargs: Any,
 ) -> Path:
     """Export a board-ready still image with model vs observed dots and honest residual captions."""
     import matplotlib
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
+
+    meta = metadata or BoardExportMetadata(
+        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
+        engine_name=str(kwargs.get("engine_name", "default")),
+        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
+        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
+        evidence_link=kwargs.get("evidence_link"),
+    )
 
     matplotlib.use("Agg")
     out_p = Path(output_path)
@@ -940,16 +956,16 @@ def export_board_ready_still(
     ax.view_init(elev=20, azim=45)
 
     vframe = viewer_frame(spec, replay, frame_idx)
-    _render_still_geometry(ax, vframe, engine_name)
+    _render_still_geometry(ax, vframe, meta.engine_name)
 
     t_val = float(replay.time_s[frame_idx]) if frame_idx < len(replay.time_s) else 0.0
     rms_mm = vframe.rms_error * 1000.0
     caption = (
-        f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
-        f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {verdict}"
+        f"Candidate: {meta.candidate_hash[:12]} | Engine: {meta.engine_name.capitalize()} | Drive: {meta.drive_mode.replace('_', ' ').title()}\n"
+        f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {meta.verdict}"
     )
-    if evidence_link:
-        caption += f"\nEvidence Link: {evidence_link}"
+    if meta.evidence_link:
+        caption += f"\nEvidence Link: {meta.evidence_link}"
     fig.suptitle(caption, fontsize=10, fontweight="bold", y=0.96)
     ax.legend(loc="upper right", fontsize=8)
 
@@ -963,20 +979,25 @@ def export_board_ready_video(
     spec: Mapping[str, Any],
     output_path: Path | str,
     *,
-    candidate_hash: str = "unknown",
-    engine_name: str = "default",
-    drive_mode: str = "torque_driven",
-    verdict: str = "UNVERIFIED",
-    evidence_link: str | None = None,
+    metadata: BoardExportMetadata | None = None,
     fps: int = 20,
     dpi: int = 100,
     max_frames: int | None = None,
+    **kwargs: Any,
 ) -> Path:
     """Export animated board-ready video/GIF with observed dots, residual vectors, and metadata."""
     import matplotlib
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
     from PIL import Image
+
+    meta = metadata or BoardExportMetadata(
+        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
+        engine_name=str(kwargs.get("engine_name", "default")),
+        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
+        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
+        evidence_link=kwargs.get("evidence_link"),
+    )
 
     matplotlib.use("Agg")
     out_p = Path(output_path)
@@ -999,16 +1020,16 @@ def export_board_ready_video(
         ax.view_init(elev=20, azim=45)
 
         vframe = viewer_frame(spec, replay, k)
-        _render_still_geometry(ax, vframe, engine_name)
+        _render_still_geometry(ax, vframe, meta.engine_name)
 
         t_val = float(replay.time_s[k]) if k < len(replay.time_s) else 0.0
         rms_mm = vframe.rms_error * 1000.0
         caption = (
-            f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
-            f"Frame {k + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS: {rms_mm:.2f} mm | Verdict: {verdict}"
+            f"Candidate: {meta.candidate_hash[:12]} | Engine: {meta.engine_name.capitalize()} | Drive: {meta.drive_mode.replace('_', ' ').title()}\n"
+            f"Frame {k + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS: {rms_mm:.2f} mm | Verdict: {meta.verdict}"
         )
-        if evidence_link:
-            caption += f" | Link: {evidence_link}"
+        if meta.evidence_link:
+            caption += f" | Link: {meta.evidence_link}"
         fig.suptitle(caption, fontsize=9, fontweight="bold", y=0.97)
 
         canvas.draw()
