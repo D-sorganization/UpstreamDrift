@@ -1,5 +1,12 @@
 # Necromatcher Handoff
 
+Active native-fit worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-native-fit`,
+branch `feat/necromatcher-native-fit-11235`. Actual MuJoCo closure probing failed
+before the marker-independent repair; five new regressions now pass, and broader
+native checks pass 12 with one Drake skip. The generic driver specimen loads 44
+coordinates; its nonzero grip separation is not historical fit acceptance.
+Continue the full goal under #11235 using [Native Fitting Turnover](docs/development/necromatcher-native-fit.md).
+
 ## Active: Integrated Historical Player Workspace
 
 - Current workspace implementation: `feat/necromatcher-workspace-11234` in `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-workspace`, baseline commit `1b0099a405`. Both hosts create players/swings, import immutable versions, review original images/landmarks and export packages. Real Hogan and Tiger web imagery is verified; Hogan frame navigation reaches frame 750 at source PTS 134.967 s. 31 library/API/native/launcher tests and 10 inventory tests pass; scoped mypy passes eight production files. Further web form tests and fitting remain active.

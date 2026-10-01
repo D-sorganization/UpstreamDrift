@@ -127,8 +127,13 @@ class MujocoMatchingPlant:
         return self.adapter.evaluate_contact_samples(coordinates, rates)
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
-        ik = self.create_ik({})
-        return np.asarray(ik.closure_residuals(q), dtype=float)
+        """Evaluate grip separation without requiring observation markers."""
+        q_array = np.asarray(q, dtype=float)
+        order = self.coordinate_order
+        if q_array.shape != (len(order),) or not np.isfinite(q_array).all():
+            raise ValueError("Coordinates must be a finite vector of model size")
+        coordinates = dict(zip(order, q_array, strict=True))
+        return self.adapter.kinematic_closure_residuals(coordinates)
 
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float

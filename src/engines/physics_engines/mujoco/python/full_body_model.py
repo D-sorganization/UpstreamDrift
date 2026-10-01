@@ -114,6 +114,14 @@ class NativeMujocoFullBodyModel:
         self._mj.mj_kinematics(self.model, self.data)
         return _extract_frame_poses(self.data, self._sites)
 
+    def kinematic_closure_residuals(
+        self, coordinates: Mapping[str, float]
+    ) -> np.ndarray:
+        """Return detached world-space grip separation in metres at this pose."""
+        self.frame_poses(coordinates)
+        a, b = self._closure
+        return np.asarray(self.data.site_xpos[a] - self.data.site_xpos[b], dtype=float)
+
     def evaluate_contact_samples(
         self,
         coordinates: Mapping[str, float],

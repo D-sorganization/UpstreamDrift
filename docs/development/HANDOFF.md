@@ -1,5 +1,11 @@
 # Active Necromatcher Delivery
 
+Native fitting now continues in `feat/necromatcher-native-fit-11235`. The public
+MuJoCo plant failed closure queries without observation markers; its native
+position-residual boundary is repaired with five red-to-green regression cases.
+See [Native Fitting Turnover](necromatcher-native-fit.md). Player-specific fitting,
+independent replay and downstream scientific acceptance remain open.
+
 Current branch `feat/necromatcher-workspace-11234` adds the player tile, web route,
 native adapter and shared source-frame archive reader. Sixteen UI tests, desktop
 recall and worker failure tests pass. Web type checking and scoped ESLint pass.
