@@ -10,7 +10,7 @@
       "status": "gap",
       "issue": 11234,
       "tiles": ["necromatcher"],
-      "notes": "Both hosts recall the same immutable library and original frames. Web import forms and landmark overlays still need native parity. Model fitting and qualified simulation handoffs remain open under #11235."
+      "notes": "Both hosts recall the same immutable library and original frames, import versions and render image-space overlays. Further form/navigation verification and final parity acceptance remain under #11234. Model fitting and qualified simulation handoffs remain open under #11235."
     },
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
