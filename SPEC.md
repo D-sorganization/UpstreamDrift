@@ -50,6 +50,20 @@ Specifies anatomical mesh substitution, visual presets, physical and kinematic i
   - Bilateral handedness mirroring (`mirror_bilateral_metadata`) for hands and shoes across lateral planes.
   - Multi-phase swing clearance and collision checking (`check_segment_clearance`) across adjacent segments.
 
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
 
 ## Publish a Best-Candidate Viewer With Honest Residuals (MMR-16, #11102)
 Specifies the best-candidate viewer, honest marker residuals, drive mode filtering, visual presets, board-ready video/still export, and web/API parity:
@@ -7441,6 +7455,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
 | 2026-10-01 | #11089 | [MMR-05] Add Anatomical Meshes Without Changing Qualified Physics (#11089): one-segment File Solid and visual preset substitution preserving exact mass, COM, inertia, joint frames, and same-state forward kinematics marker invariance; Design by Contract validation for SI units, finite bounds, and missing assets with documented graceful fallback; asset provenance and redistribution terms tracking; MMR-04 compiled block budget enforcement (<=975 production ceiling); reusable segment adapter for pelvis, trunk, head, hand, and shoe prototypes with bilateral handedness mirroring and multi-phase swing clearance verification. |
+| 2026-10-01 | #11210 | [MMR-18] Benchmark MATLAB Iteration Throughput and Portable Model Exchange (#11104): cold/warm timing and peak memory tracking on same hardware/capture, 7-axis content-addressed cache invalidation, session reuse rebuild guards on topology and operating-point edits, metric parity tolerances, uncached native cold replay verification for optimization winners, and fail-closed rejection of unsupported neck/contact/muscle dynamics in portable exchange. |
 | 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11097 | [MMR-11] Repair reduced-model and club-only product claims: enforce exploratory/disqualified pendulum receipts, block matrix completion on unresolved required cells with required_model_ids support, reject spatial planar floor failure before optimization, verify raw-to-package reproduction, and enforce labeled inferred body posture (#11097). |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
