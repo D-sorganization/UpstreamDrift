@@ -304,9 +304,13 @@ class NecromatcherLibrary:
             with ZipFile(temporary, "r") as archive:
                 for asset in assets:
                     member = f"assets/{Path(asset.path).name}"
+                    digest = hashlib.sha256()
                     with archive.open(member) as copied:
-                        digest = hashlib.file_digest(copied, "sha256").hexdigest()
-                    if digest != asset.metadata["hash"].removeprefix("sha256:"):
+                        while chunk := copied.read(65536):
+                            digest.update(chunk)
+                    if digest.hexdigest() != asset.metadata["hash"].removeprefix(
+                        "sha256:"
+                    ):
                         raise ValueError("Export asset hash mismatch")
             # Same-filesystem atomic publication, with no overwrite of an existing export.
             os.link(temporary, destination)
