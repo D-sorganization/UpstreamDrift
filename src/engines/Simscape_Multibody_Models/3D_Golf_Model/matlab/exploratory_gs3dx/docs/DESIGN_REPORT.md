@@ -241,18 +241,9 @@ runtests(fullfile(info.root, 'tests'));
 
 Closing the three gaps (a tool per input, with the values saved beside the models) is open work in the handoff.
 
-## How the Model Was Developed
+## Development Methodology
 
-The work ran as a chain of small, tested variants, each built by a script from the one before, so any stage can be rebuilt and compared ([README.md](../README.md#model-lineage)):
-
-1. **Safe starting point.** The hand-built `GolfSwing3D_Kinetic.slx` is cloned, never edited; the clone matches it on all 413 logged signals ([SENSITIVITY_FINDINGS.md](SENSITIVITY_FINDINGS.md)).
-2. **Room to grow.** The Home licence caps a model at 1,000 compiled blocks. Slimming the drive and swapping gimbal joints for quaternion joints freed room and removed gimbal lock ([BLOCK_BUDGET_FINDINGS.md](BLOCK_BUDGET_FINDINGS.md), [QUATERNION_SHOULDERS.md](QUATERNION_SHOULDERS.md)).
-3. **Legs and ground.** Legs, then contact spheres and a free pelvis, so the golfer stands on the ground instead of being bolted to it ([FULL_BODY.md](FULL_BODY.md), [GROUND_CONTACT.md](GROUND_CONTACT.md)).
-4. **A real body.** de Leva masses for an 80 kg golfer, then segment lengths and grip geometry fitted to the motion capture ([ANTHROPOMETRY.md](ANTHROPOMETRY.md), [FIT.md](FIT.md)).
-5. **Following the swing.** Whole-body inverse kinematics of the capture, leg servos tracking it, upper-body tracking with learned feedforward, and a balance loop that keeps the centre of mass over the feet ([FIT.md](FIT.md)).
-6. **Human inertia and shape.** de Leva radii of gyration, a two-axis neck driven by the head markers, then the ellipsoid body, square club face, jointed feet and the driver-head mesh ([SHAPE.md](SHAPE.md), [NECK.md](NECK.md), [HUMAN.md](HUMAN.md)).
-
-Every stage was checked against the capture and against its predecessor. Each owner review of the renders (neck length, hip line, face angle, impact frame, the neck joining the shoulders) became a measured cause and a tested fix, recorded in [HUMAN.md](HUMAN.md#what-looked-wrong-and-why).
+The model was developed through an incremental sequence of tested variants built from reproducible scripts ([README.md](../README.md#model-lineage)). Each stage verified kinematics, block budget headroom under MATLAB R2025b Home limits, and signal fidelity against motion capture markers before advancing to subsequent physical features. Owner visual review findings are recorded in [HUMAN.md](HUMAN.md#what-looked-wrong-and-why).
 
 ## Glossary
 

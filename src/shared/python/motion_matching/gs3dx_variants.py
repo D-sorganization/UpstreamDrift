@@ -691,7 +691,8 @@ def validate_gs3dx_variant_receipt(receipt: GS3DXVariantReceipt) -> None:
         )
 
     # 6. Cold replay specification checks
-    if not receipt.cold_replay.command.strip():
+    cold_replay = receipt.cold_replay
+    if not cold_replay.command.strip():
         raise GS3DXPromotionError("Cold replay command must be specified")
 
 
