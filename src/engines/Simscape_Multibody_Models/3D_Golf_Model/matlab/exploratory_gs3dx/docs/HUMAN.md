@@ -322,3 +322,16 @@ becomes the solver's axis and angle. `gs3dx_render` draws the returned
 
 `tests/test_gs3dx_capture.m` pins the ball-contact frame
 (`ball_contact_follows_peak_speed`).
+
+## Anatomical Mesh Substitution (MMR-05)
+
+Issue [#11089](https://github.com/D-sorganization/UpstreamDrift/issues/11089).
+
+The anatomical mesh substitution framework implemented in
+`src.shared.python.motion_matching.anatomical_meshes` provides prototype File
+Solid mesh substitutions (pelvis, trunk, head, hand, shoe) behind an optional
+visual preset. All physical invariants are preserved:
+
+- Rigid body mass, COM, inertia, and joint frames are invariant to mesh visual skins.
+- Forward kinematics marker positions match same-state baseline within tolerance.
+- Asset redistribution terms, units, and SHA-256 provenance hashes are validated.
