@@ -47,6 +47,10 @@ from PyQt6.QtWidgets import (
 )
 
 from src.tools.motion_matching import pipeline
+from src.tools.motion_matching.badge_utils import (
+    resolve_acceptance_badge_style,
+    resolve_neural_badge,
+)
 from src.tools.motion_matching.tour_baselines_presenter import (
     ComputeBudgetView,
     EvidenceInspectionReport,
@@ -1016,12 +1020,8 @@ class MotionMatchingWidget(QWidget):
     ) -> None:
         self._metrics = metrics
         self.acceptance_badge.setText(verdict)
-        if verdict in ("PASSED", "QUALIFIED"):
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: green;")
-        elif verdict == "REJECTED":
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: red;")
-        else:
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: gray;")
+        _, v_style = resolve_acceptance_badge_style(verdict)
+        self.acceptance_badge.setStyleSheet(v_style)
 
         def _fmt_mm(val: Any) -> str:
             return f"{val} mm" if val is not None else "-"
@@ -1061,38 +1061,21 @@ class MotionMatchingWidget(QWidget):
 
         neural_info = summary.get("neural_inference") or metrics.get("neural_inference")
         if isinstance(neural_info, dict):
-            raw_status = neural_info.get("status")
-            is_preview = bool(
-                neural_info.get("is_preview")
-                or neural_info.get("is_preview_only", False)
-            )
-            # If status is omitted or empty (e.g. timing only), fail closed to UNVERIFIED (#11146)
-            if not raw_status:
-                status = "UNVERIFIED"
-            else:
-                status = str(raw_status).strip()
-                active_model = self.neural_model_selector.currentText().strip()
-                info_model = str(neural_info.get("model_id", "")).strip()
-                if info_model and active_model and info_model != active_model:
-                    status = "UNVERIFIED"
-
-            self.update_neural_metrics(
-                status=status,
-                is_preview=is_preview,
-                confidence=neural_info.get("confidence"),
-                t_neural_s=float(neural_info.get("t_neural_s", 0.0)),
-                t_polish_s=float(neural_info.get("t_polish_s", 0.0)),
-                t_total_s=float(neural_info.get("t_total_s", 0.0)),
-            )
+            active_model = self.neural_model_selector.currentText().strip()
+            nb = resolve_neural_badge(neural_info, active_model)
+            self._apply_neural_badge(nb)
         else:
             self.clear_neural_metrics()
 
+    def _apply_neural_badge(self, nb: dict[str, Any]) -> None:
+        self.neural_status_badge.setText(nb["badge_text"])
+        self.neural_status_badge.setStyleSheet(nb["badge_style"])
+        self.metric_neural_confidence.setText(nb["confidence_text"])
+        self.metric_time_breakdown.setText(nb["timing_text"])
+
     def clear_neural_metrics(self) -> None:
         """Clear neural-assisted status badge, empirical confidence, and time breakdown (R06, #11146)."""
-        self.neural_status_badge.setText("-")
-        self.neural_status_badge.setStyleSheet("font-weight: bold; color: gray;")
-        self.metric_neural_confidence.setText("-")
-        self.metric_time_breakdown.setText("-")
+        self._apply_neural_badge(resolve_neural_badge(None))
 
     def update_neural_metrics(
         self,
@@ -1105,42 +1088,15 @@ class MotionMatchingWidget(QWidget):
         t_total_s: float = 0.0,
     ) -> None:
         """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626, #11146)."""
-        status_upper = status.upper()
-        if is_preview:
-            self.neural_status_badge.setText(f"PREVIEW ({status})")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: darkorange; background-color: cornsilk; border-radius: 4px; padding: 2px 6px;"
-            )
-        elif status_upper in ("VERIFIED", "NEURAL_ACCEPTED"):
-            self.neural_status_badge.setText("VERIFIED")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: forestgreen; background-color: honeydew; border-radius: 4px; padding: 2px 6px;"
-            )
-        elif status_upper == "CLASSICAL_FALLBACK":
-            self.neural_status_badge.setText("CLASSICAL FALLBACK")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: royalblue; background-color: aliceblue; border-radius: 4px; padding: 2px 6px;"
-            )
-        elif status_upper == "REJECTED":
-            self.neural_status_badge.setText("REJECTED")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: crimson; background-color: mistyrose; border-radius: 4px; padding: 2px 6px;"
-            )
-        else:
-            self.neural_status_badge.setText(status)
-            self.neural_status_badge.setStyleSheet("font-weight: bold; color: gray;")
-
-        if confidence is not None:
-            self.metric_neural_confidence.setText(f"{confidence:.3f} (domain support)")
-        else:
-            self.metric_neural_confidence.setText("-")
-
-        if t_total_s > 0.0:
-            self.metric_time_breakdown.setText(
-                f"Neural: {t_neural_s * 1000:.1f}ms | Polish: {t_polish_s * 1000:.1f}ms | Total: {t_total_s * 1000:.1f}ms"
-            )
-        else:
-            self.metric_time_breakdown.setText("-")
+        info = {
+            "status": status,
+            "is_preview": is_preview,
+            "confidence": confidence,
+            "t_neural_s": t_neural_s,
+            "t_polish_s": t_polish_s,
+            "t_total_s": t_total_s,
+        }
+        self._apply_neural_badge(resolve_neural_badge(info))
 
     def metrics_values(self) -> dict[str, Any]:
         """Return the extracted five headline metrics from the last matching run."""
