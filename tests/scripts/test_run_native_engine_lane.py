@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import pytest
 
@@ -168,3 +169,80 @@ def test_engine_lanes_includes_drake_configuration() -> None:
     assert drake_lane["python_module"] == "pydrake"
     assert drake_lane["distribution"] == "drake"
     assert drake_lane["receipt_filename"] == "drake_receipt.json"
+
+
+def test_engine_lanes_includes_all_six_engines() -> None:
+    for expected in ("opensim", "myosuite", "drake", "mujoco", "pinocchio", "simscape"):
+        assert expected in lane.ENGINE_LANES, (
+            f"Engine {expected} missing from ENGINE_LANES"
+        )
+
+
+def test_evaluate_native_release_matrix_fails_when_mandatory_engine_skipped(
+    tmp_path: Path,
+) -> None:
+    # Set up receipts dir with opensim passed, but myosuite skipped / 0 executed
+    receipts_dir = tmp_path / "receipts"
+    receipts_dir.mkdir()
+    opensim_r = _valid_receipt(status="pass", executed=5)
+    opensim_r["engine"] = "opensim"
+    myosuite_r = _valid_receipt(status="fail", executed=0)
+    myosuite_r["engine"] = "myosuite"
+    myosuite_r["tests"]["skipped"] = 5
+
+    (receipts_dir / "opensim_receipt.json").write_text(
+        __import__("json").dumps(opensim_r), encoding="utf-8"
+    )
+    (receipts_dir / "myosuite_receipt.json").write_text(
+        __import__("json").dumps(myosuite_r), encoding="utf-8"
+    )
+
+    report = lane.evaluate_native_release_matrix(
+        receipts_dir=receipts_dir,
+        required_engines=("opensim", "myosuite"),
+    )
+    assert report["release_status"] == "blocked"
+    assert (
+        "myosuite" in report["skipped_engines"]
+        or "myosuite" in report["failed_engines"]
+    )
+    assert any("myosuite" in reason for reason in report["blockers"])
+
+
+def test_evaluate_native_release_matrix_distinguishes_passed_failed_skipped_unavailable(
+    tmp_path: Path,
+) -> None:
+    receipts_dir = tmp_path / "receipts"
+    receipts_dir.mkdir()
+
+    # opensim: passed
+    r_pass = _valid_receipt(status="pass", executed=4)
+    r_pass["engine"] = "opensim"
+    (receipts_dir / "opensim_receipt.json").write_text(
+        __import__("json").dumps(r_pass), encoding="utf-8"
+    )
+
+    # drake: failed tests
+    r_fail = _valid_receipt(status="fail", executed=4)
+    r_fail["engine"] = "drake"
+    r_fail["tests"]["failed"] = 2
+    (receipts_dir / "drake_receipt.json").write_text(
+        __import__("json").dumps(r_fail), encoding="utf-8"
+    )
+
+    # myosuite: unavailable runtime
+    r_unavail = _valid_receipt(status="fail", executed=0)
+    r_unavail["engine"] = "myosuite"
+    r_unavail["engine_inventory"]["available"] = False
+    (receipts_dir / "myosuite_receipt.json").write_text(
+        __import__("json").dumps(r_unavail), encoding="utf-8"
+    )
+
+    report = lane.evaluate_native_release_matrix(
+        receipts_dir=receipts_dir,
+        required_engines=("opensim", "drake", "myosuite"),
+    )
+    assert "opensim" in report["passed_engines"]
+    assert "drake" in report["failed_engines"]
+    assert "myosuite" in report["unavailable_engines"]
+    assert report["release_status"] == "blocked"
