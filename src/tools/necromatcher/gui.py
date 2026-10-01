@@ -330,8 +330,9 @@ class NecromatcherWidget(QWidget):
         self._timer.stop()
         if self._worker:
             self._worker.wait()
-            if isinstance(self._worker.result, CaptureReview):
-                self._worker.result.close()
+            result = self._worker.result
+            if isinstance(result, CaptureReview):
+                result.close()
             self._worker = None
         if self._review:
             self._review.close()
