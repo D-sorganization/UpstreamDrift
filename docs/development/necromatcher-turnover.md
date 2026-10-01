@@ -15,7 +15,7 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
-Library issue #11233 is implemented in the owned `feat/necromatcher-library-11233` worktree. Code is being prepared for a focused PR after validation. This branch currently depends on the capture foundation PR #11231.
+Library issue #11233 is implemented in the owned `feat/necromatcher-library-11233` worktree. Code is published in [Draft PR #11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237), based on capture PR #11231. This branch currently depends on the capture foundation PR #11231.
 
 Players and swings survive process restart. Model bytes are copied and stored as unqualified candidates. Immutable version IDs reject overwrite. Recall checks bytes; profiles reject incompatible model revisions, joint order, units, physical clock and cross-player sessions. Library writers acquire an exclusive lock; concurrent writers fail visibly instead of losing metadata. Do not modify the same project through a separate raw store writer concurrently. A crashed writer can leave a lock: inspect its recorded PID and confirm no writer is running before removing that one lock file.
 
@@ -56,7 +56,13 @@ was rendered from the persistent capture ZIP, with PTS 3300000 × 1/30000 second
 The Windows offscreen Qt plugin exposes no system font families; the verification
 harness explicitly loaded the installed Segoe UI font. No product font fallback
 or user preference was changed to accommodate that headless renderer.
-Real web verification and final validation remain active.
+Real web review on `http://127.0.0.1:5191/tools/necromatcher` against the owned
+local API on port 8019 rendered both Hogan and Tiger PNGs and landmark overlays.
+Hogan navigation reached source frame 750/750 at PTS 134.967 s. Physical time
+remained unknown. Both player/swing selections recalled their proper captures.
+The in-app browser review tab is marked for continuation. Backend/Vite process
+sessions are 46801/73969; inspect their current state before reuse or shutdown.
+Further form/error tests and final validation remain active.
 
 Current checks: 31 library/API/native/launcher tests, 10 generated inventory tests,
 13 UI tests; scoped mypy passes eight production files. Route-producer,
@@ -72,10 +78,15 @@ clip duration 286.031 seconds and SHA-256
 `6618fd8caf6a3c17ba4121d23b9bcdd576eff868a73045166f0a260705c30dde`.
 Path: `C:/Users/diete/Downloads/historical-capture/tiger_2000/usga/bado2QdgD3c-teeoff-2981-3267.mp4`.
 Its chapter label is insufficient golfer identity evidence: the contact sheet
-mostly shows other players. The subsequent 3267–3616-second window is currently
-downloading in owned process session 56961. Verify the actual golfer and shot
-continuity before extracting a Tiger capture. Do not promote broadcast playback
-time to physical swing time without independent timing review.
+mostly shows other players. The subsequent 3267–3616-second window is downloaded
+(349.013 s, SHA-256 `e6b524474db4b800bafe8b98e754c8fc6d2fe7e43feec86b15db45adbac7889b`)
+and shows Tiger warming up at its beginning, with Tiger/Ernie Els tee-time graphics.
+A single 3250–3295-second excerpt now contains the full-body practice swing around
+clip PTS 15–22 s; file `bado2QdgD3c-range-3250-3295.mp4`, duration 45.025 s,
+SHA-256 `99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673`.
+The contact sheet shows address, follow-through and subsequent camera zoom;
+dense continuous-shot review is next. Do not promote broadcast playback time to
+physical swing time without independent timing review.
 Library PR #11237 is published as a draft over capture PR #11231.
 
 Capture PR #11231's generated inventory correction passes unit/structure checks.
@@ -83,10 +94,10 @@ Its documentation check fails on `.jules/bolt.md:208`, inherited from main's
 unrelated quaternion optimization. Record this external failure; the CI skill
 forbids modifying pre-existing failures outside the story.
 
-Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Finish validation and publish a focused dependency-aware PR. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
+Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Library validation passed: 43 workspace/API tests, 13 library tests after the ZIP typing correction, scoped mypy for all three production modules, repo-wide Ruff lint and format (8,269 files). Draft PR #11237 is published. Keep it draft until the base capture PR is accepted and dependency tracking is resolved. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
 
 The existing `ModelMatchHandoffCoordinator` currently generates fixed output artifacts and hard-coded fit metrics. Do not call those results real matching or reuse that coordinator as Necromatcher scientific evidence. The shadow-tracker segmentation fallback issue #11227 also remains open. Physical-time calibration, shot continuity, club visibility, camera calibration and source-year lineage remain unresolved for the current clips.
 
 ## Capture Foundation CI
 
-PR #11231 failed the 100-line function budget. Receipt and source-identity helpers reduce the function below the limit; local architecture check and 12 capture tests pass. Latest local commit `4ef1fa2e04` was pushed after refreshing Git credential configuration. Earlier saved capture receipts correctly retain the pre-refactor implementation hash. Current-head repository-structure gate is green; other CI jobs remain running.
+PR #11231 failed the 100-line function budget. Receipt and source-identity helpers reduce the function below the limit; local architecture check and 12 capture tests pass. Capture commit `c029a23e6b` also regenerates the required divergence inventory after the full unit gate exposed the missing capture entry (19,873 passed, one inventory failure). The inventory suite passed after regeneration; new CI is running. Earlier saved capture receipts correctly retain the pre-refactor implementation hash. The prior head passed repository-structure validation; current capture CI is running after the inventory update.
