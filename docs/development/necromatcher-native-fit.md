@@ -76,3 +76,90 @@ python3 -m scripts.check_design_manual_governance
 
 Keep the full goal active until the player fits and downstream handoffs are
 implemented and verified. Native closure repair is a prerequisite only.
+
+## Image Fitting and Source Evaluation
+
+The public `motion_matching.historical_fit` package now converts immutable
+capture observations to pixels, fits native coordinates through the canonical
+Hermite-spline MAP estimator, and preserves its coefficients for evaluation at
+every original source PTS. Camera projection and weighted residuals reuse the
+shared estimation facade. Missing landmarks have zero objective weight and null
+reported errors; unknown visibility requires an explicit caller weight. Evidence
+and fitted arrays are detached and read-only.
+
+`initialize_camera_hypothesis` uses OpenCV SQPnP followed by LM refinement,
+conditional on the caller's assumed pose, geometry and optics. It validates six
+nondegenerate correspondences, proper rotations and positive camera depth.
+This is an initial research hypothesis, not camera calibration. See the
+[OpenCV Pose Computation Documentation](https://docs.opencv.org/4.13.0/d5/d1f/calib3d_solvePnP.html).
+
+Eight red-to-green tests cover native projection recovery, missing-point
+exclusion, evidence clocks/identity/immutability, invalid camera geometry,
+rotations and out-of-interval spline evaluation. The broader native run passes
+20 tests with one real-Drake skip. Scoped Ruff and mypy pass; global LoD remains
+within its existing baseline. Manual governance remains blocked for release.
+
+## Measured Historical Research Runs
+
+Both actual archives were fitted using 25 evenly selected source frames, four
+Hermite knots, 17 free upper-body/root coordinates, and all 13 anatomical
+associations (nose, shoulders, elbows, wrists, hips, knees and ankles). Geometry
+is the generic driver specimen; lower-limb coordinates remain locked. Focal
+length is assumed equal to image width, principal point at image center, and
+distortion zero. Camera initialization is conditioned on the authored address
+seed. Prior/smoothness/closure weights are 3/1/100; the budget is 30 evaluations.
+These choices are experiment inputs, not qualified player properties.
+
+| Source                                                | Initial Landmark RMS | Fitted Landmark RMS | Optimizer Status                |
+| ----------------------------------------------------- | -------------------- | ------------------- | ------------------------------- |
+| Hogan Practice, 110–134.967 Source Seconds            | 23.842 px            | 13.168 px           | Evaluation Limit, Not Converged |
+| Official USGA Tiger Range, 15.015–21.989 Clip Seconds | 130.198 px           | 28.526 px           | Evaluation Limit, Not Converged |
+
+RMS is confidence-weighted Euclidean distance per landmark, not per-axis RMS.
+The preserved splines were subsequently evaluated at all 750 Hogan and 210 Tiger
+source frames. Excluding the 25 fitting frames, measured held-out landmark RMS
+is 13.683 px across 725 Hogan frames and 28.968 px across 185 Tiger frames.
+The `*-dense-source-evaluation-v1.json` artifacts bind the spline-fit hash and
+each original frame identity/hash, all 44-coordinate poses and per-point errors.
+This is interpolation and held-out image evaluation, not independent dynamics
+replay; no physical rates or torque acceptance are inferred.
+Raw fit records and four-frame overlays are retained outside Git under the
+Downloads `historical-capture/native-fit-research` directory. Each record binds
+the source archive, native coordinate order/model bytes, original frame IDs and
+hashes, camera assumptions, q samples and actual errors. The first prototype
+records are named `*-sparse-fit.json`; the subsequent `*-spline-fit-v1.json`
+records additionally preserve spline knots and coefficients. Do not overwrite
+or promote these failed-to-converge candidates as accepted models.
+
+Visual review confirms residual leg motion in Hogan that cannot be represented
+by locked lower-limb coordinates. Tiger framing changes near the end of the
+window; a fixed camera across that interval is an inadequate assumption.
+Next passes need explicit reviewed swing/shot intervals, full-body motion,
+camera-change handling, denser knots and held-out-frame residuals. Increasing
+iteration count alone does not fix these model limitations. Native finite
+differences currently repeat FK for each spline coefficient; reuse analytic
+native derivatives and spline bases for efficient future-player fitting.
+
+## Repeatable Research Procedure
+
+1. Open the source through `CaptureReview` after the library verifies its hash.
+   Select reviewed continuous shot/swing indices; retain source and frame hashes.
+2. Call `read_capture_evidence` with attachment labels in declared order and an
+   explicit unknown-visibility weight. Preserve the archive's original evidence.
+3. Load original model-spec bytes with public `get_plant`; supply a documented
+   seed, coordinate scales, free coordinates, attachments and camera assumptions.
+   Use `ImageFitInputs` and `ImageFitConfig`, then `fit_image_trajectory`.
+4. Store configuration, source/model/code hashes, convergence, per-point errors,
+   fitted coefficients/knots and coordinate order as a new research version.
+   `evaluate_source_times` evaluates inside that interval without extrapolation;
+   measure held-out original-frame errors and inspect overlays.
+5. Keep physical time unknown until source-speed evidence supports an explicit
+   conversion. Source-clock velocities do not certify joint torques. Require
+   bounded anatomical motion, grip/contact checks, sensitivity/identifiability
+   analysis, actual native dynamics and independent forward replay before
+   publishing simulation/impact/analysis handoffs.
+
+Gemini Flash 3.8 was used through `agy` for supplied-source, tool-free audits.
+The evidence-mutation finding was reproduced with a failing test and repaired.
+Its suggested factor-of-two RMS change was rejected because this metric is
+per-landmark distance; off-image coordinates remain valid detector observations.

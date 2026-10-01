@@ -1,0 +1,126 @@
+"""Native pixel reprojection fits using the canonical spline MAP estimator."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+
+import numpy as np
+
+from src.shared.python.estimation import (
+    CubicHermiteSplineTrajectory,
+    MapEstimatorOptions,
+    MapEstimatorProblem,
+    SharedParameterBlock,
+    SplineTrajectoryEvaluation,
+    solve_single_trial_map,
+)
+from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
+from .contracts import CameraProjection, ImageFitConfig, ImageFitInputs, ImageFitResult
+
+
+class _Fit:
+    def __init__(
+        self,
+        native: MatchingPlant,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        camera: CameraProjection,
+        inputs: ImageFitInputs,
+        config: ImageFitConfig,
+    ) -> None:
+        self.native, self.attachments, self.camera = native, attachments, camera
+        self.inputs, self.config = inputs, config
+        order = native.coordinate_order
+        if inputs.seed.shape != (len(order),):
+            raise ValueError("Seed must match the native coordinate order")
+        if len(attachments) != inputs.observed_pixels.shape[1] or not attachments:
+            raise ValueError("Attachments must match observed marker order")
+        if any(name not in order for name in inputs.free_coordinates):
+            raise ValueError("Free coordinates must belong to the native model")
+        self.indices = np.array([order.index(name) for name in inputs.free_coordinates])
+
+    def expand(self, free: np.ndarray) -> np.ndarray:
+        result = np.tile(self.inputs.seed, (len(free), 1))
+        result[:, self.indices] = free
+        return result
+
+    def image_residuals(self, q: np.ndarray) -> np.ndarray:
+        rows = []
+        for pose, observed, weights in zip(
+            q, self.inputs.observed_pixels, self.inputs.confidence, strict=True
+        ):
+            points = self.native.marker_positions(pose, self.attachments)
+            rows.append(self.camera.residual(points, observed, weights))
+        return np.asarray(rows)
+
+    def residual(
+        self, evaluation: SplineTrajectoryEvaluation, parameters: Mapping[str, float]
+    ) -> np.ndarray:
+        q = self.expand(evaluation.q)
+        pieces = [self.image_residuals(q).ravel()]
+        scaled_prior = (q - self.inputs.seed) / self.inputs.coordinate_scales
+        pieces.append(self.config.prior_weight * scaled_prior.ravel())
+        duration = self.inputs.source_times[-1] - self.inputs.source_times[0]
+        scaled_speed = evaluation.v / self.inputs.coordinate_scales[self.indices]
+        pieces.append(self.config.smoothness_weight * duration * scaled_speed.ravel())
+        if self.config.closure_weight:
+            pieces.append(
+                self.config.closure_weight
+                * np.array([self.native.closure_residuals(pose) for pose in q]).ravel()
+            )
+        return np.concatenate(pieces)
+
+    def rms(self, residual: np.ndarray) -> float:
+        return float(np.sqrt(np.sum(residual**2) / np.sum(self.inputs.confidence)))
+
+
+def fit_image_trajectory(
+    native: MatchingPlant,
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    camera: CameraProjection,
+    inputs: ImageFitInputs,
+    config: ImageFitConfig = ImageFitConfig(),
+) -> ImageFitResult:
+    """Fit native poses to pixels; camera, geometry and priors remain explicit assumptions."""
+    fit = _Fit(native, attachments, camera, inputs, config)
+    knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
+    trajectory = CubicHermiteSplineTrajectory(knots, len(fit.indices))
+    initial = np.tile(inputs.seed[fit.indices], (len(inputs.source_times), 1))
+    coefficients = trajectory.initial_coefficients_from_samples(
+        inputs.source_times, initial
+    )
+    initial_residual = fit.image_residuals(fit.expand(initial))
+    problem = MapEstimatorProblem(
+        trajectory,
+        inputs.source_times,
+        coefficients,
+        SharedParameterBlock(()),
+        fit.residual,
+        options=MapEstimatorOptions(
+            max_iterations=config.max_iterations, non_finite_policy="raise"
+        ),
+    )
+    solved = solve_single_trial_map(problem)
+    q = fit.expand(trajectory.evaluate(solved.coefficients, inputs.source_times).q)
+    final_residual = fit.image_residuals(q)
+    weighted = final_residual.reshape(inputs.confidence.shape + (2,))
+    distances = np.empty(inputs.confidence.shape, dtype=object)
+    distances[:] = None
+    valid = inputs.confidence > 0
+    distances[valid] = np.sqrt(
+        np.sum(weighted[valid] ** 2, axis=1) / inputs.confidence[valid]
+    )
+    return ImageFitResult(
+        inputs.source_times.copy(),
+        q,
+        fit.rms(final_residual),
+        fit.rms(initial_residual),
+        distances,
+        int(np.count_nonzero(valid)),
+        native.plant_sha,
+        native.coordinate_order,
+        solved.success,
+        solved.message,
+        knots,
+        solved.coefficients,
+        inputs.free_coordinates,
+    )

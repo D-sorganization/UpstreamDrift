@@ -1,5 +1,16 @@
 # Necromatcher Handoff
 
+## Native Image Fitting Progress
+
+The shared historical-fit package now fits actual native geometry to image
+observations and retains Hermite coefficients for full-source evaluation.
+Eight fitting/evidence tests pass; broader native checks pass 20 with one Drake
+skip. Actual sparse Hogan error improves 23.842 to 13.168 px and Tiger error
+130.198 to 28.526 px; both hit the evaluation limit and remain unaccepted.
+Overlays reveal locked Hogan legs and changing Tiger framing. Camera/geometry
+are explicit generic assumptions; physical time, torques, independent replay
+and downstream handoffs remain open. See the native fitting turnover procedure.
+
 Active native-fit worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-native-fit`,
 branch `feat/necromatcher-native-fit-11235`. Actual MuJoCo closure probing failed
 before the marker-independent repair; five new regressions now pass, and broader

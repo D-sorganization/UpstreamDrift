@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** shared matching plant and native MuJoCo model; historical fitting integration
 - **Last verified:** 2026-10-01 — five native closure regressions failed before repair; 12 native plant/model tests pass afterward, one real-Drake test skips. Actual generic driver model loads 44 coordinates and reports nonzero grip separation.
-- **Summary:** Repaired marker-independent closure prerequisite. Actual historical projection fits, independent replay, model resource validation and downstream handoffs remain open. [Turnover](necromatcher-native-fit.md).
+- **Summary:** Repaired closure and added source-bound native image fitting with preserved Hermite splines. Eight image-fit tests pass; actual sparse Hogan RMS improves 23.842 to 13.168 px and Tiger 130.198 to 28.526 px, both evaluation-limited. Overlays expose locked legs and changing framing. Full-body fitting, independent replay, model resource validation and downstream handoffs remain open. [Turnover](necromatcher-native-fit.md).
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 
