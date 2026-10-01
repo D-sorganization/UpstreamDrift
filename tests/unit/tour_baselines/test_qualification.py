@@ -796,3 +796,182 @@ def test_promoted_package_fails_integrity_if_missing_hashes_or_fabricated_out_of
         assert any("out_of_plane_residual_m" in v for v in report.violations)
         with pytest.raises(IntegrityViolation, match="out_of_plane_residual_m"):
             qualifier.qualify(tampered_pkg)
+
+
+def test_load_current_pendulum_receipts_assert_exploratory_and_disqualified() -> None:
+    """Current pendulum receipts on disk are exploratory and disqualified (#11097)."""
+    from src.shared.python.tour_baselines.baseline_package import (
+        KinematicAccuracyStatus,
+        ProductPromotionStatus,
+        ScientificQualificationStatus,
+        SolverConvergenceStatus,
+        import_baseline_package,
+    )
+
+    repo_root = Path(__file__).resolve().parents[3]
+    evidence_dir = repo_root / "docs" / "plans" / "tour_baselines" / "evidence"
+
+    receipt_files = [
+        "tb04_driver_qualification_receipt.json",
+        "tb04_iron_qualification_receipt.json",
+        "tb05_driver_qualification_receipt.json",
+        "tb05_iron_qualification_receipt.json",
+    ]
+    package_files = [
+        "tb04_driver_baseline_package.npz",
+        "tb04_iron_baseline_package.npz",
+        "tb05_driver_baseline_package.npz",
+        "tb05_iron_baseline_package.npz",
+    ]
+
+    for fname in receipt_files:
+        path = evidence_dir / fname
+        assert path.is_file(), f"Missing receipt {fname}"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        statuses = data["statuses"]
+        assert statuses["product_promotion"] == "exploratory"
+        assert statuses["scientific_qualification"] == "disqualified"
+        assert statuses["kinematic_accuracy"] == "exceeds_threshold"
+        assert statuses["solver_convergence"] == "max_iterations"
+
+    qualifier = IndependentBaselineQualifier()
+    for pkg_name in package_files:
+        pkg_path = evidence_dir / pkg_name
+        assert pkg_path.is_file(), f"Missing package {pkg_name}"
+        pkg = import_baseline_package(pkg_path)
+        assert pkg.statuses.product_promotion == ProductPromotionStatus.EXPLORATORY
+        assert (
+            pkg.statuses.scientific_qualification
+            == ScientificQualificationStatus.DISQUALIFIED
+        )
+        assert (
+            pkg.statuses.kinematic_accuracy == KinematicAccuracyStatus.EXCEEDS_THRESHOLD
+        )
+        assert pkg.statuses.solver_convergence == SolverConvergenceStatus.MAX_ITERATIONS
+
+        # Reduced pendulum model cannot qualify under G3
+        with pytest.raises(
+            IntegrityViolation, match="Reduced models cannot qualify under G3"
+        ):
+            qualifier.qualify(pkg)
+
+
+def test_spatial_planar_floor_failure_rejects_before_expensive_optimization() -> None:
+    """Spatial planar floor failure must reject before expensive optimization (#11097)."""
+    from types import SimpleNamespace
+    from src.engines.physics_engines.pendulum.python.motion_matching.provider import (
+        PendulumFitSwingProvider,
+    )
+    from src.engines.physics_engines.pendulum.python.motion_matching.upper_body_capture import (
+        CaptureFrameCalibration,
+        UpperBodyCaptureFrame,
+        assess_planarity_lower_bound,
+    )
+    from src.shared.python.motion_matching.club_target import (
+        ClubTarget,
+        SourceProvenance,
+    )
+    from src.shared.python.motion_matching.provider import FitOptions
+
+    # 1. Pendulum provider checks planar floor of the current target and rejects at iterations=0
+    provider = PendulumFitSwingProvider()
+    n = 20
+    times = np.linspace(0.0, 0.2, n)
+    butt = np.zeros((n, 3))
+    clubhead = np.zeros((n, 3))
+    # Add 100 mm out-of-plane deviation
+    clubhead[:, 2] = 0.10 * np.sin(np.pi * np.linspace(0.0, 1.0, n))
+    target = ClubTarget(
+        time=times,
+        butt=butt,
+        clubhead=clubhead,
+        club_quat=np.tile([1.0, 0.0, 0.0, 0.0], (n, 1)),
+        impact_idx=n // 2,
+        source=SourceProvenance("test.c3d", "c3d", "test", "test", "hash123"),
+    )
+
+    from src.shared.python.motion_matching.projection_2d import (
+        CalibratedSwingPlane,
+        GeometricProjectionResidual,
+    )
+
+    plane = CalibratedSwingPlane(
+        origin=np.zeros(3),
+        basis=np.eye(3),
+        transform_world_to_plane=np.eye(4),
+        transform_plane_to_world=np.eye(4),
+        inclination_deg=0.0,
+        azimuth_deg=0.0,
+        residual=GeometricProjectionResidual(
+            rmse=0.0001,
+            max_deviation=0.0002,
+            signed_deviations=np.zeros(4),
+        ),
+    )
+    engine_opts = SimpleNamespace(calibrated_plane=plane)
+    opts = FitOptions(maxiter=100, engine_options=engine_opts, max_marker_rmse_m=0.010)
+
+    result = provider.fit_swing(target, opts)
+    assert result.solver_status == "failure"
+    assert result.iterations == 0
+    assert "planar floor" in result.message.lower()
+
+    # 2. assess_planarity_lower_bound checks irreducible normal error against ceiling
+    calib = CaptureFrameCalibration(
+        frame=UpperBodyCaptureFrame(
+            origin_m=np.zeros(3),
+            plane_basis=np.eye(3)[:, :2],
+        ),
+        marker_names=("M1", "M2", "M3"),
+        plane_rmse_m=0.080,
+        plane_max_deviation_m=0.120,
+    )
+    assessment = assess_planarity_lower_bound(calib, max_marker_rmse_m=0.055)
+    assert assessment.planar_fit_is_eligible is False
+    assert "cannot attain" in assessment.reason
+    assert assessment.marker_rmse_lower_bound_m > assessment.max_marker_rmse_m
+
+
+def test_raw_to_package_reproduction_generates_reported_status_and_residual(
+    tmp_path: Path,
+) -> None:
+    """Raw-to-package reproduction generates the reported status and residual (#11097)."""
+    import math
+
+    pytest.importorskip("ezc3d")
+    from src.engines.physics_engines.pendulum.python.motion_matching.qualification import (
+        generate_baseline_package_for_target,
+        resolve_qualification_paths,
+    )
+    from src.shared.python.tour_baselines.baseline_package import (
+        import_baseline_package,
+    )
+
+    repo_root = Path(__file__).resolve().parents[3]
+    driver_c3d, iron_c3d, _ = resolve_qualification_paths(repo_root)
+    assert driver_c3d.is_file(), f"Missing raw driver C3D: {driver_c3d}"
+
+    # Reproduce driver package from raw source (limited iterations for test speed)
+    pkg, verdict = generate_baseline_package_for_target(driver_c3d, "driver", maxiter=5)
+
+    # Generated package must reflect disqualified / exploratory status and large residual
+    assert (
+        pkg.statuses.scientific_qualification
+        == ScientificQualificationStatus.DISQUALIFIED
+    )
+    assert pkg.statuses.product_promotion == ProductPromotionStatus.EXPLORATORY
+    assert pkg.statuses.kinematic_accuracy == KinematicAccuracyStatus.EXCEEDS_THRESHOLD
+    assert pkg.statuses.solver_convergence == SolverConvergenceStatus.MAX_ITERATIONS
+    assert pkg.metrics.whole_marker_rmse_m > 0.40  # ~0.57 m reported residual
+    assert verdict["passed"] is False
+
+    # Export to tmp_path and verify clean-machine round-trip import
+    out_pkg_path = tmp_path / "reproduced_driver_pkg.npz"
+    export_baseline_package(pkg, out_pkg_path)
+    imported = import_baseline_package(out_pkg_path)
+    assert imported.statuses == pkg.statuses
+    assert math.isclose(
+        imported.metrics.whole_marker_rmse_m,
+        pkg.metrics.whole_marker_rmse_m,
+        rel_tol=1e-5,
+    )

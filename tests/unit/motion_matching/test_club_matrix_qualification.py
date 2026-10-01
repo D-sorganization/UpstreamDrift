@@ -570,3 +570,94 @@ def test_matrix_cannot_show_all_complete_with_unresolved_cells() -> None:
         match="matrix cannot show all-complete while required cells are unresolved",
     ):
         assert_matrix_not_all_complete_with_unresolved(fake_report)  # type: ignore[arg-type]
+
+
+def test_unresolved_required_club_only_matrix_cell_blocks_completion() -> None:
+    """An unresolved required club-only matrix cell must block completion (#11097)."""
+    from dataclasses import replace
+    from src.shared.python.motion_matching.club_only.matrix_qualification import (
+        assert_matrix_not_all_complete_with_unresolved,
+    )
+
+    init_default_registry()
+    # Explicitly designate required models (e.g. driven_double_pendulum)
+    report = build_matrix_qualification_report(
+        required_model_ids=("driven_double_pendulum",),
+    )
+    assert report.required_model_ids == ("driven_double_pendulum",)
+    assert not report.is_complete
+    assert len(report.unresolved_required_cells) == 4
+
+    # Any attempt to claim all-complete while required cells are unresolved must fail
+    with pytest.raises(
+        ValueError,
+        match="matrix cannot show all-complete while required cells are unresolved",
+    ):
+        replace(report, claims_all_complete=True)
+
+
+def test_inferred_body_posture_is_always_labeled() -> None:
+    """Inferred body posture is always labeled with a disclaimer and never claimed as measured (#11097)."""
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        ClubOnlyUiResult,
+        MatchPreset,
+        VerificationDisplayStatus,
+    )
+
+    # 1. ExportedCandidatePackage fails if body labels are hidden
+    with pytest.raises(ValueError, match="hidden body"):
+        assert_no_hidden_body_labels(_package(body_labels_hidden=True))
+
+    # 2. ResultViewModel requires a non-empty body motion disclaimer
+    from src.shared.python.motion_matching.club_only.ui_integration import (
+        ResultViewModel,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="inferred body posture must always be labeled with a body motion disclaimer",
+    ):
+        ResultViewModel(
+            session_id="sess-test",
+            trial_id="TW_wiffle",
+            model_id="driven_double_pendulum",
+            preset=MatchPreset.FAST_PREVIEW,
+            display_status=VerificationDisplayStatus.PREVIEW,
+            native_g1_pass=False,
+            qualification_blockers=("blocker",),
+            trial_clock_hz=100.0,
+            native_time_s=np.array([0.0, 0.01]),
+            body_motion_disclaimer="",  # Missing disclaimer must fail
+            candidate_ids=("cand-1",),
+            error_time_tradeoffs=(),
+            infeasible_models=(),
+            prior_choices={},
+            geometry_choices={},
+        )
+
+    # 3. Withheld-body experiment cannot claim true body was identified
+    pkg = _package(body_marker_status="withheld")
+    with pytest.raises(ValueError, match="true body|identify"):
+        evaluate_withheld_body_experiment(
+            pkg,
+            WithheldBodyComparison(
+                body_markers_used_in_fit=False,
+                optional_body_rmse_m=0.20,
+                club_only_feasible=True,
+                claims_true_body_identified=True,
+            ),
+        )
+
+    # 4. Derived orientation cannot be scored as measured
+    with pytest.raises(ValueError, match="inferred|derived.*measured"):
+        assert_orientation_semantics(
+            _package(
+                orientation_claims=(
+                    OrientationClaim(
+                        component="face_orientation",
+                        declared_status=ComponentStatus.DERIVED,
+                        scored_as_measured=True,
+                    ),
+                )
+            )
+        )
