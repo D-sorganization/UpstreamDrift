@@ -1929,6 +1929,30 @@
       "alias_target": null,
       "evidence": "src/shared/python/body_part_viz/force_color_controls.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "necromatcher": {
+      "id": "necromatcher",
+      "name": "Necromatcher Historical Player Workspace",
+      "entity_kind": "tile",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "tools.necromatcher": {
+      "id": "tools.necromatcher",
+      "name": "Necromatcher Historical Player Workspace",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
     }
   },
   "fixtures": {

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from functools import partial
 
 import numpy as np
 
@@ -12,6 +13,7 @@ from src.shared.python.estimation import (
     MapEstimatorProblem,
     SharedParameterBlock,
     SplineTrajectoryEvaluation,
+    finite_difference_jacobian,
     solve_single_trial_map,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
@@ -56,7 +58,7 @@ class _Fit:
         self, evaluation: SplineTrajectoryEvaluation, parameters: Mapping[str, float]
     ) -> np.ndarray:
         q = self.expand(evaluation.q)
-        pieces = [self.image_residuals(q).ravel()]
+        pieces: list[np.ndarray] = [self.image_residuals(q).ravel()]
         scaled_prior = (q - self.inputs.seed) / self.inputs.coordinate_scales
         pieces.append(self.config.prior_weight * scaled_prior.ravel())
         duration = self.inputs.source_times[-1] - self.inputs.source_times[0]
@@ -71,6 +73,70 @@ class _Fit:
 
     def rms(self, residual: np.ndarray) -> float:
         return float(np.sqrt(np.sum(residual**2) / np.sum(self.inputs.confidence)))
+
+    def _frame_residual(
+        self, free: np.ndarray, observed: np.ndarray, weights: np.ndarray
+    ) -> np.ndarray:
+        pose = self.expand(free[None, :])[0]
+        points = self.native.marker_positions(pose, self.attachments)
+        pixels = self.camera.residual(points, observed, weights).ravel()
+        if not self.config.closure_weight:
+            return pixels
+        return np.concatenate(
+            [pixels, self.config.closure_weight * self.native.closure_residuals(pose)]
+        )
+
+    def jacobian(
+        self,
+        evaluation: SplineTrajectoryEvaluation,
+        parameters: Mapping[str, float],
+        layout: object,
+    ) -> np.ndarray:
+        """Differentiate native frame poses once, then apply exact spline bases.
+
+        Native pose derivatives use the canonical central-difference helper.
+        They depend on free DOF count rather than the number of spline knots.
+        Pose and speed priors use exact derivatives; no engine internals enter.
+        """
+        pixel_size = 2 * len(self.attachments)
+        image_rows: list[np.ndarray] = []
+        closure_rows: list[np.ndarray] = []
+        for free, observed, weights, basis in zip(
+            evaluation.q,
+            self.inputs.observed_pixels,
+            self.inputs.confidence,
+            evaluation.q_basis,
+            strict=True,
+        ):
+            native_jacobian = finite_difference_jacobian(
+                partial(self._frame_residual, observed=observed, weights=weights), free
+            )
+            chained = native_jacobian @ basis
+            image_rows.append(chained[:pixel_size])
+            if self.config.closure_weight:
+                closure_rows.append(chained[pixel_size:])
+        frames, _, columns = evaluation.q_basis.shape
+        prior = np.zeros((frames, len(self.inputs.seed), columns))
+        prior[:, self.indices] = (
+            self.config.prior_weight
+            * evaluation.q_basis
+            / self.inputs.coordinate_scales[self.indices][None, :, None]
+        )
+        duration = self.inputs.source_times[-1] - self.inputs.source_times[0]
+        speed = (
+            self.config.smoothness_weight
+            * duration
+            * evaluation.v_basis
+            / self.inputs.coordinate_scales[self.indices][None, :, None]
+        )
+        pieces = [
+            np.vstack(image_rows),
+            prior.reshape(-1, columns),
+            speed.reshape(-1, columns),
+        ]
+        if closure_rows:
+            pieces.append(np.vstack(closure_rows))
+        return np.vstack(pieces)
 
 
 def fit_image_trajectory(
@@ -95,6 +161,7 @@ def fit_image_trajectory(
         coefficients,
         SharedParameterBlock(()),
         fit.residual,
+        jacobian=fit.jacobian,
         options=MapEstimatorOptions(
             max_iterations=config.max_iterations, non_finite_policy="raise"
         ),

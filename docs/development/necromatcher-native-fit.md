@@ -163,3 +163,51 @@ Gemini Flash 3.8 was used through `agy` for supplied-source, tool-free audits.
 The evidence-mutation finding was reproduced with a failing test and repaired.
 Its suggested factor-of-two RMS change was rejected because this metric is
 per-landmark distance; off-image coordinates remain valid detector observations.
+
+## Full-Body Pass and Efficient Derivatives
+
+The fitter now differentiates each native frame with the public central-difference
+helper and applies exact canonical spline bases. Pose and source-speed prior
+derivatives are analytic. Native pose evaluations therefore depend on the free
+coordinate count rather than the number of spline coefficients. A new numerical
+test compares every residual block with independent coefficient differences at
+interior and endpoint samples, includes a missing landmark and grip closure,
+and verifies fewer than half as many native marker evaluations. Nine fitting
+tests pass. Explicit ndarray list annotations repair the NumPy shape inference
+failure observed in the Python 3.11 CI lane; scoped mypy passes afterward.
+
+The second actual research pass uses 60 frames, 12 knots and 27 free coordinates,
+including hip, knee and ankle motion, while retaining the same camera assumptions
+and prior/smoothness/closure weights. It evaluates every source frame afterward.
+
+| Source                    | Fitted Landmark RMS | Held-Out Landmark RMS | Maximum Grip Separation | Declared ROM Violations                         |
+| ------------------------- | ------------------- | --------------------- | ----------------------- | ----------------------------------------------- |
+| Hogan Practice            | 7.210 px            | 7.694 px, 690 Frames  | 0.1258 m                | None in the Available Declared Ranges           |
+| Official USGA Tiger Range | 11.636 px           | 11.666 px, 150 Frames | 0.2571 m                | LEInput: 4 Frames; REInput: 9; SpineInputY: 156 |
+
+Both solves still reach the evaluation limit. Better pixel agreement is not
+closure or anatomical acceptance. The available range inventory is incomplete
+for lower limbs; absence of declared violations does not certify physiology.
+The new `*-full-body-fit-v2.json` and `*-dense-full-body-evaluation-v2.json`
+artifacts remain outside Git. The tracked second-pass receipt binds their bytes
+and records actual rejection evidence. Execution-time implementation stamps were
+not captured for these exploratory runs; the reviewed source digest is recorded
+separately and must not be substituted for qualified run provenance.
+
+Next: preserve launch-time source/model/capture fingerprints in the production
+fit job, support warm starts, enforce anatomical ranges and grip closure, handle
+camera changes and store source-bound fit versions in the player library. Joint
+effort exports also need per-coordinate units: native root translations use N,
+while rotational joint torques use N*m. The existing all-N*m authored-profile
+schema must not be used as a 44-coordinate full-body effort qualification.
+
+## Launcher Inventory Repair
+
+The full CI lane reproduced eight Necromatcher logo, migration and companion
+inventory failures. The native and web registry now reference a distinct,
+Qt-validated SVG; tile/feature migration entries point to actual implementation
+and acceptance tests. A governed pending screenshot record uses the canonical
+pending reason; no capture is invented. Companion counts reflect the new
+program, feature and surfaces. Generated baseline, atlas and agent-context views
+are refreshed from their authorities, with the launcher boundary re-reviewed.
+The separate shallow-checkout origin/main prerequisite remains a CI concern.

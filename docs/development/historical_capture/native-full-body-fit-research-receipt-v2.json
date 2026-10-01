@@ -1,0 +1,74 @@
+{
+  "schema_version": "necromatcher-research-fit/2",
+  "accepted": false,
+  "physical_time_qualified": false,
+  "run_implementation_binding": "Not captured at execution start; not qualified run provenance",
+  "reviewed_solver_sha256": "5f0691d5156c2327736422c6ecfb6bc0f88a45517f37e63d73c494f1f4dce7dd",
+  "configuration": {
+    "sample_count": 60,
+    "knot_count": 12,
+    "free_coordinate_count": 27,
+    "prior_weight": 3,
+    "smoothness_weight": 1,
+    "closure_weight": 100,
+    "max_evaluations": 30
+  },
+  "runs": [
+    {
+      "capture_id": "hogan-practice-capture-v1",
+      "source_archive_sha256": "199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "model_spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+      "initial_rms_pixels": 24.043550431584652,
+      "rms_pixels": 7.210336103201978,
+      "converged": false,
+      "message": "The maximum number of function evaluations is exceeded.",
+      "frame_count": 750,
+      "held_out_frame_count": 690,
+      "held_out_rms_pixels": 7.694206111270482,
+      "max_grip_separation_m": 0.1258018405775014,
+      "rms_grip_separation_m": 0.056263170609478795,
+      "declared_rom_violations": {},
+      "dynamics_replayed": false,
+      "artifacts": [
+        {
+          "name": "hogan-practice-capture-v1-full-body-fit-v2.json",
+          "sha256": "4a97f6ebc49a14ae190668c1869801bfe18a1ae35ebfe73558c8ff86bba9fac7"
+        },
+        {
+          "name": "hogan-practice-capture-v1-dense-full-body-evaluation-v2.json",
+          "sha256": "02972730430558f0a31ad551cf8195b0ba7fc96caa7e2058feb6a1b6caf10a9b"
+        }
+      ]
+    },
+    {
+      "capture_id": "tiger-usga-range-capture-v1",
+      "source_archive_sha256": "d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "model_spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+      "initial_rms_pixels": 130.01285955329584,
+      "rms_pixels": 11.635654253149234,
+      "converged": false,
+      "message": "The maximum number of function evaluations is exceeded.",
+      "frame_count": 210,
+      "held_out_frame_count": 150,
+      "held_out_rms_pixels": 11.665900557367884,
+      "max_grip_separation_m": 0.25712263730260926,
+      "rms_grip_separation_m": 0.09814569426915576,
+      "declared_rom_violations": {
+        "LEInput": 4,
+        "REInput": 9,
+        "SpineInputY": 156
+      },
+      "dynamics_replayed": false,
+      "artifacts": [
+        {
+          "name": "tiger-usga-range-capture-v1-full-body-fit-v2.json",
+          "sha256": "e33f01f1d66cba89ef40d74543099350daf882a1cb74e997fa513c929d4df829"
+        },
+        {
+          "name": "tiger-usga-range-capture-v1-dense-full-body-evaluation-v2.json",
+          "sha256": "0dba8adc83b9df85b30b2d997cf1cc39c1f7ff4db698d99cfd9e06f89842a9eb"
+        }
+      ]
+    }
+  ]
+}

@@ -1154,7 +1154,7 @@
       "category": "motion_capture",
       "type": "special_app",
       "path": "src/tools/necromatcher/__main__.py",
-      "logo": "matched_swing_browser.svg",
+      "logo": "necromatcher.svg",
       "status": "utility",
       "capabilities": [
         "historical_library",
@@ -1162,7 +1162,10 @@
         "swing_package_export"
       ],
       "order": 51,
-      "web": { "mode": "route", "route": "/tools/necromatcher" }
+      "web": {
+        "mode": "route",
+        "route": "/tools/necromatcher"
+      }
     },
     {
       "id": "matched_swing_browser",

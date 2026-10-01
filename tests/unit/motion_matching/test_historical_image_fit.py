@@ -5,7 +5,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.estimation import project_pinhole
+from src.shared.python.estimation import (
+    project_pinhole,
+    finite_difference_jacobian,
+    CubicHermiteSplineTrajectory,
+)
+from src.shared.python.motion_matching.historical_fit.solver import _Fit
 from src.shared.python.motion_matching.pipeline import plant
 from src.shared.python.motion_matching.historical_fit import (
     CameraProjection,
@@ -18,6 +23,52 @@ from src.shared.python.motion_matching.historical_fit import (
 
 pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
+
+
+def test_spline_chain_jacobian_matches_independent_coefficient_differences(monkeypatch):
+    native, attachments, camera, original = native_problem()
+    times = np.array([110.0, 110.35, 111.0])
+    observed = np.stack(
+        [
+            original.observed_pixels[0],
+            original.observed_pixels.mean(axis=0),
+            original.observed_pixels[1],
+        ]
+    )
+    confidence = np.ones((3, 3))
+    confidence[1, 0] = 0
+    inputs = ImageFitInputs(
+        times,
+        observed,
+        confidence,
+        original.seed,
+        original.coordinate_scales,
+        ("REInput", "RSInputY"),
+    )
+    config = ImageFitConfig(prior_weight=0.2, smoothness_weight=0.3, closure_weight=2.0)
+    fit = _Fit(native, attachments, camera, inputs, config)
+    trajectory = CubicHermiteSplineTrajectory(original.source_times, 2)
+    coefficients = trajectory.pack(
+        np.array([[-0.2, 0.3], [-0.4, 0.6]]), np.array([[-0.1, 0.2], [-0.2, 0.1]])
+    )
+    evaluation = trajectory.evaluate(coefficients, inputs.source_times)
+    calls = []
+    original_markers = native.marker_positions
+
+    def counted_markers(pose, mapping):
+        calls.append(1)
+        return original_markers(pose, mapping)
+
+    monkeypatch.setattr(native, "marker_positions", counted_markers)
+    chained = fit.jacobian(evaluation, {}, None)
+    chain_calls = len(calls)
+    calls.clear()
+    direct = finite_difference_jacobian(
+        lambda value: fit.residual(trajectory.evaluate(value, inputs.source_times), {}),
+        coefficients,
+    )
+    np.testing.assert_allclose(chained, direct, atol=1e-5, rtol=1e-5)
+    assert chain_calls < len(calls) / 2
 
 
 def test_camera_hypothesis_recovers_supplied_geometry_and_optics():

@@ -4,12 +4,15 @@
 
 The shared historical-fit package now fits actual native geometry to image
 observations and retains Hermite coefficients for full-source evaluation.
-Eight fitting/evidence tests pass; broader native checks pass 20 with one Drake
-skip. Actual sparse Hogan error improves 23.842 to 13.168 px and Tiger error
-130.198 to 28.526 px; both hit the evaluation limit and remain unaccepted.
-Overlays reveal locked Hogan legs and changing Tiger framing. Camera/geometry
-are explicit generic assumptions; physical time, torques, independent replay
-and downstream handoffs remain open. See the native fitting turnover procedure.
+Nine fitting/evidence tests pass, including independent spline-chain derivative
+checks and reduced native evaluation counts. Full-body held-out RMS improves to
+7.694 px for Hogan and 11.666 px for Tiger. Both solves remain evaluation-limited;
+maximum grip separation is 0.126/0.257 m and Tiger violates declared ROM.
+No dynamics acceptance is inferred. Launcher logos, migration classifications,
+companion inventories and generated context views are repaired. Continue with
+source-stamped fit jobs, bounded/closed motion, mixed force/torque units, stored
+fit versions, independent replay and downstream handoffs. See the native fitting
+turnover procedure.
 
 Native fitting now continues in `feat/necromatcher-native-fit-11235`. The public
 MuJoCo plant failed closure queries without observation markers; its native
