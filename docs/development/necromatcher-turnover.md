@@ -87,6 +87,15 @@ SHA-256 `99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673`.
 The contact sheet shows address, follow-through and subsequent camera zoom;
 dense continuous-shot review is next. Do not promote broadcast playback time to
 physical swing time without independent timing review.
+
+The 15–22 s range-swing extraction is complete: 210 frames, 210 detections using
+the same full MediaPipe model and strict source/PTS contracts. It is recalled
+from the persistent library as swing `tiger-usopen-2000-range`, capture version
+`tiger-usga-range-capture-v1`, archive hash
+`sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357`.
+The original generic receipt retains unqualified timing/year fields; separate
+source-catalog evidence attributes the official archive event to 2000.
+No receipt fields were rewritten to manufacture scientific qualification.
 Library PR #11237 is published as a draft over capture PR #11231.
 
 Capture PR #11231's generated inventory correction passes unit/structure checks.
