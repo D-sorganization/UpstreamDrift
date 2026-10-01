@@ -1,3 +1,19 @@
+## Propagate Flight Termination Before Reporting Landing Metrics (R04, #11145)
+
+Specifies the explicit flight termination states, fail-closed metric gating, and provider-to-API-to-viewer contracts:
+- **Flight Termination States (`src/shared/python/physics/flight_models.py`)**:
+  - `FlightTermination` enum distinguishes physical ground landing (`LANDED`) from truncation at time horizon (`TIME_LIMIT`), numerical solver failure (`SOLVER_FAILED`), and external cooperative cancellation (`CANCELLED`).
+  - Terminal event evidence (`terminal_event: bool`) and actual integration horizon (`actual_horizon: float`) are preserved on every `FlightResult`.
+- **Fail-Closed Metric Gating & Contract Validation**:
+  - Landing-derived metrics (`carry_distance`, `landing_angle`, `lateral_deviation`) are strictly populated only when `termination is FlightTermination.LANDED`; otherwise they are gated to `None`.
+  - `FlightResult.__post_init__` enforces that non-landed flights have `None` landing metrics, rejecting invalid states with `ValueError`.
+  - `FlightResult.require_landing()` asserts `self.landed` and raises `IncompleteFlightError(RuntimeError)` carrying `self.result` for partial trace inspection when the flight did not reach the ground.
+  - Cooperative cancellation via `cancellation_requested` raises `FlightSimulationCancelled(RuntimeError)` carrying partial `FlightResult` with `termination=FlightTermination.CANCELLED`.
+- **API & Viewer Integration**:
+  - REST route `/tools/ball-flight/simulate` and `/tools/ball-flight/import` propagate `termination`, `terminal_event`, `actual_horizon_s`, and `landed` within `BallFlightSummary`, safely exposing nullable landing metrics (`float | None`).
+  - Shot Tracer viewer table formatting (`_shot_tracer_gui._update_results_table`) formats `carry_distance` and `landing_angle` as `"N/A"` on incomplete trajectories without raising `TypeError`.
+  - Contract parity between Tools flight backend (`swing_sim.flight`) and UpstreamDrift physics models is verified across all five termination scenarios (time-cap ascending, normal landing, negative launch, solver failure, cancellation).
+
 ## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
 
 Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
@@ -7452,6 +7468,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11145 | [R04] Propagate Flight Termination Before Reporting Landing Metrics: propagate explicit FlightTermination states (LANDED, TIME_LIMIT, SOLVER_FAILED, CANCELLED) with terminal-event evidence and actual horizon, gate landing metrics (carry, landing angle, lateral deviation) to None on unlanded flights, raise IncompleteFlightError carrying partial result on require_landing(), support cooperative cancellation via FlightSimulationCancelled, update BallFlightSummary and trajectory import to reflect termination status, and handle None metrics safely in Shot Tracer results table (#11145). |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
