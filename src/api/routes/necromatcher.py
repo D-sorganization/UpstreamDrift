@@ -152,6 +152,70 @@ def add_capture(
         )
 
 
+@router.post("/swings/{swing_id}/fits", status_code=201)
+def add_fit(swing_id: str, request: AssetRequest, library: Library) -> dict[str, Any]:
+    """Import an immutable source-bound research trajectory through the library."""
+    with _errors():
+        return _asset_response(
+            library.add_fit(request.id, swing_id, Path(request.source_path))
+        )
+
+
+@router.get("/fits/{fit_id}")
+def fit_summary(fit_id: str, library: Library) -> dict[str, Any]:
+    """Return verified fit identity and selectable source indices without paths."""
+    with _errors():
+        fit = library.load_fit(fit_id)
+        return {
+            "fit_id": fit_id,
+            "frame_count": len(fit["frame_indices"]),
+            **{
+                key: fit[key]
+                for key in (
+                    "model_id",
+                    "model_hash",
+                    "capture_id",
+                    "capture_hash",
+                    "coordinate_order",
+                    "coordinate_units",
+                    "frame_indices",
+                    "qualification",
+                    "physical_time_qualified",
+                    "dynamics_replayed",
+                )
+            },
+        }
+
+
+@router.get("/fits/{fit_id}/frames/{frame_index}")
+def fit_frame(fit_id: str, frame_index: int, library: Library) -> dict[str, Any]:
+    """Recall one native sample by original capture index, including exact PTS."""
+    with _errors():
+        fit = library.load_fit(fit_id)
+        try:
+            position = fit["frame_indices"].index(frame_index)
+        except ValueError as exc:
+            raise IndexError("Source frame has no stored fit sample") from exc
+        return {
+            "fit_id": fit_id,
+            "frame_index": frame_index,
+            "frame": fit["frames"][position],
+            "q": fit["q"][position],
+            **{
+                key: fit[key]
+                for key in (
+                    "model_id",
+                    "capture_id",
+                    "coordinate_order",
+                    "coordinate_units",
+                    "qualification",
+                    "physical_time_qualified",
+                    "dynamics_replayed",
+                )
+            },
+        }
+
+
 @router.get("/swings/{swing_id}/export")
 def export_swing(swing_id: str, library: Library) -> FileResponse:
     temporary = TemporaryDirectory(prefix="necromatcher-export-")

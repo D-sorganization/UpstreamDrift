@@ -246,7 +246,14 @@ For Future Players:
    `export_swing` for portable transfer. Never overwrite a prior version.
 
 The web workspace distinguishes these versions as Kinematic Research Fits and
-shows their qualification. Native trajectory overlays, fit-job submission,
+shows their qualification. Its existing import form accepts fit JSON through
+`POST /necromatcher/swings/{swing_id}/fits`. Verified fit summaries and individual
+native samples are available at `GET /necromatcher/fits/{fit_id}` and
+`GET /necromatcher/fits/{fit_id}/frames/{source_frame_index}`. Missing sparse
+samples return 404; stale model/capture bindings reject recall. The frame response
+retains exact source identity, coordinate order/units and research qualification.
+Seventeen fit-storage/API tests and fourteen web page/form tests pass.
+Native trajectory overlays, fit-job submission,
 resource-validated model import, physical-clock qualification, generalized
 effort profiles and independently verified simulation/impact handoffs remain
 required. Preserve the existing rejection evidence during that work.

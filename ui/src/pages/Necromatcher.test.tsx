@@ -29,7 +29,8 @@ describe('Necromatcher historical workspace', () => {
   it('labels saved kinematic fits as research and retains their qualification', async () => {
     mocks.assets.mockResolvedValue({assets:[{dataset_id:'hogan-fit-v2',session_id:'hogan-practice',kind:'kinematic_fit',metadata:{qualification:'monocular_research_hypothesis',model_id:'model-v2',frame_count:750}}]});
     show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice');
-    expect(await screen.findByText('Kinematic Research Fit')).toBeInTheDocument();
+    expect(await screen.findByText('hogan-fit-v2')).toBeInTheDocument();
+    expect(screen.getAllByText('Kinematic Research Fit')).toHaveLength(2);
     expect(screen.getByText('monocular_research_hypothesis')).toBeInTheDocument();
     expect(screen.queryByText('Authored Controls')).not.toBeInTheDocument();
   });

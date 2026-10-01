@@ -7,7 +7,9 @@ immutable library and portable swing export. Real Hogan/Tiger v2 versions retain
 750/210 exact source frames, model/capture hashes, native coordinate samples,
 original generic model definitions and rejection evidence. Sixteen new storage
 regressions cover stale bindings, cross-swing inputs and malformed claims.
-Web labeling distinguishes research fits from authored controls. Continue with
+An additional API regression verifies import, exact source-frame recall and stale
+parent rejection. Web labeling and import distinguish research fits from authored
+controls; fourteen page/form tests pass. Continue with
 native fit overlays/job execution, qualified closed motion and downstream replay.
 See [Native Fitting Turnover](docs/development/necromatcher-native-fit.md).
 

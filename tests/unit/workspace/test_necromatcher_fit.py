@@ -129,3 +129,34 @@ def test_fit_cannot_bind_another_swing(fit_case):
     library.add_swing("other", "hogan", "Other")
     with pytest.raises(ValueError, match="same swing"):
         library.add_fit("bad", "other", source)
+
+
+def test_api_import_and_source_frame_recall_use_verified_library(fit_case):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from src.api.routes.necromatcher import get_library, router
+
+    library, source, payload = fit_case
+    app = FastAPI()
+    app.include_router(router)
+    app.dependency_overrides[get_library] = lambda: library
+    with TestClient(app) as client:
+        saved = client.post(
+            "/necromatcher/swings/practice/fits",
+            json={"id": "fit-v1", "source_path": str(source)},
+        )
+        assert saved.status_code == 201
+        assert "path" not in saved.json()
+        summary = client.get("/necromatcher/fits/fit-v1")
+        assert summary.status_code == 200
+        assert summary.json()["frame_count"] == 2
+        assert summary.json()["physical_time_qualified"] is False
+        frame = client.get("/necromatcher/fits/fit-v1/frames/2")
+        assert frame.status_code == 200
+        assert frame.json()["q"] == [0.2]
+        assert frame.json()["frame"] == payload["frames"][1]
+        assert frame.json()["coordinate_units"] == ["rad"]
+        assert client.get("/necromatcher/fits/fit-v1/frames/1").status_code == 404
+        assert client.get("/necromatcher/fits/fit-v1/frames/-1").status_code == 404
+        Path(library.load_asset("model-v1").path).write_text("changed")
+        assert client.get("/necromatcher/fits/fit-v1/frames/2").status_code == 422
