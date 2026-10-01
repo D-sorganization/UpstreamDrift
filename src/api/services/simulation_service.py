@@ -568,6 +568,48 @@ class SimulationService:
                     f"does not match times length ({n_times})"
                 )
 
+    def _validate_simulation_timing(
+        self, request: SimulationRequest
+    ) -> tuple[float, int, int]:
+        timestep = request.timestep or 0.001
+        if timestep <= 0:
+            raise ValueError(f"Timestep must be positive, got {timestep}")
+        if timestep > request.duration:
+            raise ValueError(
+                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
+            )
+        steps = int(request.duration / timestep)
+        return timestep, steps, steps + 1
+
+    def _create_and_run_recorder(
+        self,
+        engine: Any,
+        request: SimulationRequest,
+        timestep: float,
+        steps: int,
+        expected_frames: int,
+    ) -> GenericPhysicsRecorder:
+        recorder = GenericPhysicsRecorder(
+            engine, max_samples=max(100000, expected_frames)
+        )
+        if self._biomechanics_binding is not None:
+            recorder.configure_biomechanics(self._biomechanics_binding)
+        if request.analysis_config:
+            recorder.set_analysis_config(request.analysis_config)
+        recorder.start()
+        try:
+            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+        finally:
+            recorder.stop()
+        self._retain_active_session(engine, recorder)
+        self._last_recorder = recorder
+        self._last_recording_meta = {
+            "engine": request.engine_type,
+            "model": str(request.model_path) if request.model_path else None,
+            "duration": request.duration,
+        }
+        return recorder
+
     def _run_simulation_sync(
         self, request: SimulationRequest, run_id: str | None = None
     ) -> SimulationResponse:
@@ -583,41 +625,10 @@ class SimulationService:
         self._begin_last_run(request)
         engine = self._prepare_engine(request)
 
-        timestep = request.timestep or 0.001
-        if timestep <= 0:
-            raise ValueError(f"Timestep must be positive, got {timestep}")
-        if timestep > request.duration:
-            raise ValueError(
-                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
-            )
-        steps = int(request.duration / timestep)
-        expected_frames = steps + 1
-
-        recorder = GenericPhysicsRecorder(
-            engine, max_samples=max(100000, expected_frames)
+        timestep, steps, expected_frames = self._validate_simulation_timing(request)
+        recorder = self._create_and_run_recorder(
+            engine, request, timestep, steps, expected_frames
         )
-        if self._biomechanics_binding is not None:
-            recorder.configure_biomechanics(self._biomechanics_binding)
-
-        if request.analysis_config:
-            recorder.set_analysis_config(request.analysis_config)
-
-        recorder.start()
-        try:
-            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
-        finally:
-            recorder.stop()
-
-        self._retain_active_session(engine, recorder)
-
-        # Retain the recorder so the recordings API (issue #7451) can
-        # finalize/persist the session via POST /recordings.
-        self._last_recorder = recorder
-        self._last_recording_meta = {
-            "engine": request.engine_type,
-            "model": str(request.model_path) if request.model_path else None,
-            "duration": request.duration,
-        }
 
         simulation_data = self._extract_simulation_data(recorder)
         is_mock_rec = (
@@ -729,6 +740,70 @@ class SimulationService:
                 error=error_info,
             )
 
+    def _record_background_task_result(
+        self, task_id: str, result: Any, active_tasks: Any
+    ) -> None:
+        dump = (
+            result.model_dump()
+            if hasattr(result, "model_dump")
+            else (result if isinstance(result, dict) else {})
+        )
+        if getattr(result, "success", False) is True:
+            task_payload: dict[str, Any] = {
+                "status": "completed",
+                "result": dump,
+            }
+            err = getattr(result, "error", None)
+            if (
+                getattr(result, "persistence_status", None) == "failed"
+                and err is not None
+            ):
+                task_payload["persistence_status"] = "failed"
+                task_payload["error"] = getattr(err, "message", "Simulation failed")
+                task_payload["error_code"] = getattr(err, "code", "storage_failure")
+                task_payload["error_stage"] = getattr(err, "stage", "persistence")
+                task_payload["retriable"] = getattr(err, "retriable", False)
+                task_payload["retry_guidance"] = getattr(err, "retry_guidance", None)
+                task_payload["error_info"] = (
+                    err.model_dump()
+                    if hasattr(err, "model_dump")
+                    else (err if isinstance(err, dict) else None)
+                )
+            active_tasks.set(task_id, task_payload)
+        else:
+            err = getattr(result, "error", None)
+            msg = (
+                getattr(err, "message", "Simulation failed")
+                if err
+                else "Simulation failed"
+            )
+            code = getattr(err, "code", "unknown_error") if err else "unknown_error"
+            stage = getattr(err, "stage", "execution") if err else "execution"
+            retriable = getattr(err, "retriable", False) if err else False
+            guidance = getattr(err, "retry_guidance", None) if err else None
+            err_dict = (
+                (
+                    err.model_dump()
+                    if hasattr(err, "model_dump")
+                    else (err if isinstance(err, dict) else None)
+                )
+                if err is not None
+                else None
+            )
+            active_tasks.set(
+                task_id,
+                {
+                    "status": "failed",
+                    "result": dump,
+                    "error": msg,
+                    "error_code": code,
+                    "error_stage": stage,
+                    "retriable": retriable,
+                    "retry_guidance": guidance,
+                    "error_info": err_dict,
+                },
+            )
+
     @precondition(
         lambda self, task_id, request, active_tasks: (
             task_id is not None and len(task_id) > 0
@@ -758,77 +833,8 @@ class SimulationService:
         """
         try:
             active_tasks.set(task_id, {"status": "running", "progress": 0})
-
             result = await self.run_simulation(request)
-
-            if getattr(result, "success", False) is True:
-                dump = (
-                    result.model_dump()
-                    if hasattr(result, "model_dump")
-                    else (result if isinstance(result, dict) else {})
-                )
-                task_payload: dict[str, Any] = {
-                    "status": "completed",
-                    "result": dump,
-                }
-                err = getattr(result, "error", None)
-                if (
-                    getattr(result, "persistence_status", None) == "failed"
-                    and err is not None
-                ):
-                    task_payload["persistence_status"] = "failed"
-                    task_payload["error"] = getattr(err, "message", "Simulation failed")
-                    task_payload["error_code"] = getattr(err, "code", "storage_failure")
-                    task_payload["error_stage"] = getattr(err, "stage", "persistence")
-                    task_payload["retriable"] = getattr(err, "retriable", False)
-                    task_payload["retry_guidance"] = getattr(
-                        err, "retry_guidance", None
-                    )
-                    task_payload["error_info"] = (
-                        err.model_dump()
-                        if hasattr(err, "model_dump")
-                        else (err if isinstance(err, dict) else None)
-                    )
-                active_tasks.set(task_id, task_payload)
-            else:
-                dump = (
-                    result.model_dump()
-                    if hasattr(result, "model_dump")
-                    else (result if isinstance(result, dict) else {})
-                )
-                err = getattr(result, "error", None)
-                msg = (
-                    getattr(err, "message", "Simulation failed")
-                    if err
-                    else "Simulation failed"
-                )
-                code = getattr(err, "code", "unknown_error") if err else "unknown_error"
-                stage = getattr(err, "stage", "execution") if err else "execution"
-                retriable = getattr(err, "retriable", False) if err else False
-                guidance = getattr(err, "retry_guidance", None) if err else None
-                err_dict = (
-                    (
-                        err.model_dump()
-                        if hasattr(err, "model_dump")
-                        else (err if isinstance(err, dict) else None)
-                    )
-                    if err is not None
-                    else None
-                )
-
-                active_tasks.set(
-                    task_id,
-                    {
-                        "status": "failed",
-                        "result": dump,
-                        "error": msg,
-                        "error_code": code,
-                        "error_stage": stage,
-                        "retriable": retriable,
-                        "retry_guidance": guidance,
-                        "error_info": err_dict,
-                    },
-                )
+            self._record_background_task_result(task_id, result, active_tasks)
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError, TimeoutError) as e:
             logger.exception("Background simulation %s failed", task_id)

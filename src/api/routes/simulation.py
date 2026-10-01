@@ -34,6 +34,25 @@ if TYPE_CHECKING:
 router = APIRouter()
 
 
+def _raise_simulation_failure_http_error(err: Any) -> None:
+    code = getattr(err, "code", "unknown_error") if err else "unknown_error"
+    stage = getattr(err, "stage", "execution") if err else "execution"
+    msg = getattr(err, "message", "Simulation failed") if err else "Simulation failed"
+    if code == "invalid_input":
+        status_code = 400
+    elif code in ("engine_unavailable", "model_load_error"):
+        status_code = 503 if code == "engine_unavailable" else 400
+    elif code == "timeout":
+        status_code = 504
+    else:
+        status_code = 500
+    raise HTTPException(
+        status_code=status_code,
+        detail=msg,
+        headers={"X-Error-Code": code, "X-Error-Stage": stage},
+    )
+
+
 @router.post("/simulate", response_model=SimulationResponse)
 @limiter.limit(get_limit("API_LIMIT_SIMULATE", "5/minute"))
 @precondition(
@@ -70,26 +89,7 @@ async def run_simulation(
             err = getattr(result, "error", None)
 
         if success is False:
-            code = getattr(err, "code", "unknown_error") if err else "unknown_error"
-            stage = getattr(err, "stage", "execution") if err else "execution"
-            msg = (
-                getattr(err, "message", "Simulation failed")
-                if err
-                else "Simulation failed"
-            )
-            if code == "invalid_input":
-                status_code = 400
-            elif code in ("engine_unavailable", "model_load_error"):
-                status_code = 503 if code == "engine_unavailable" else 400
-            elif code == "timeout":
-                status_code = 504
-            else:
-                status_code = 500
-            raise HTTPException(
-                status_code=status_code,
-                detail=msg,
-                headers={"X-Error-Code": code, "X-Error-Stage": stage},
-            )
+            _raise_simulation_failure_http_error(err)
         return result
     except HTTPException:
         raise
