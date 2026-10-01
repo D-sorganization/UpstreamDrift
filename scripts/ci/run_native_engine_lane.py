@@ -593,6 +593,106 @@ def _resolve_python(engine: str, venv: str | None) -> str:
     return sys.executable
 
 
+def _evaluate_single_engine_lane(
+    engine: str,
+    *,
+    receipts_dir: Path,
+    now: datetime | None,
+    fail_days: int,
+) -> tuple[str, list[str], dict[str, Any] | None]:
+    """Evaluate a single engine receipt.
+
+    Returns (status, blockers, details) where status is
+    'passed', 'failed', 'skipped', or 'unavailable'.
+    """
+    if engine not in ENGINE_LANES:
+        return "unavailable", [f"Engine {engine} is unsupported"], None
+
+    lane_info = ENGINE_LANES[engine]
+    receipt_path = receipts_dir / lane_info["receipt_filename"]
+
+    if not receipt_path.is_file():
+        return (
+            "unavailable",
+            [
+                f"Missing native receipt for required engine: {engine} ({receipt_path.name})"
+            ],
+            None,
+        )
+
+    try:
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return "failed", [f"Corrupt or unreadable receipt for {engine}: {exc}"], None
+
+    ok, reasons = validate_receipt(payload)
+    if not ok:
+        return "failed", [f"Invalid receipt for {engine}: {r}" for r in reasons], None
+
+    gen_at = payload.get("generated_at", "")
+    fresh_status, age_days = assess_receipt_freshness(
+        gen_at, now=now, fail_days=fail_days
+    )
+    if fresh_status == "fail":
+        return (
+            "failed",
+            [
+                f"Stale receipt for {engine}: age is {age_days:.1f} days (max {fail_days})"
+            ],
+            None,
+        )
+
+    inv = payload.get("engine_inventory", {})
+    if not inv.get("available"):
+        return (
+            "unavailable",
+            [
+                f"Native engine runtime/SDK unavailable for {engine}: {inv.get('error', 'not installed')}"
+            ],
+            None,
+        )
+
+    tests = payload.get("tests", {})
+    executed = int(tests.get("executed", 0))
+    skipped = int(tests.get("skipped", 0))
+    failed = int(tests.get("failed", 0))
+    errors = int(tests.get("errors", 0))
+
+    details: dict[str, Any] = {
+        "executed": executed,
+        "passed": int(tests.get("passed", 0)),
+        "failed": failed,
+        "skipped": skipped,
+        "errors": errors,
+        "age_days": round(age_days, 2),
+        "version": payload.get("engine_version") or inv.get("version"),
+    }
+
+    if executed == 0:
+        if skipped > 0:
+            return (
+                "skipped",
+                [
+                    f"Mandatory engine {engine} skipped (zero executed tests, {skipped} skipped)"
+                ],
+                details,
+            )
+        return (
+            "unavailable",
+            [f"Zero executed tests for required engine {engine}"],
+            details,
+        )
+
+    if failed > 0 or errors > 0 or payload.get("status") != "pass":
+        return (
+            "failed",
+            [f"Tests failed for engine {engine}: {failed} failures, {errors} errors"],
+            details,
+        )
+
+    return "passed", [], details
+
+
 def evaluate_native_release_matrix(
     *,
     receipts_dir: Path,
@@ -614,88 +714,21 @@ def evaluate_native_release_matrix(
     per_engine_details: dict[str, Any] = {}
 
     for engine in required_engines:
-        if engine not in ENGINE_LANES:
-            unavailable_engines.append(engine)
-            blockers.append(f"Engine {engine} is unsupported")
-            continue
-
-        lane_info = ENGINE_LANES[engine]
-        receipt_path = receipts_dir / lane_info["receipt_filename"]
-
-        if not receipt_path.is_file():
-            unavailable_engines.append(engine)
-            blockers.append(
-                f"Missing native receipt for required engine: {engine} ({receipt_path.name})"
-            )
-            continue
-
-        try:
-            payload = json.loads(receipt_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            failed_engines.append(engine)
-            blockers.append(f"Corrupt or unreadable receipt for {engine}: {exc}")
-            continue
-
-        ok, reasons = validate_receipt(payload)
-        if not ok:
-            failed_engines.append(engine)
-            blockers.extend([f"Invalid receipt for {engine}: {r}" for r in reasons])
-            continue
-
-        gen_at = payload.get("generated_at", "")
-        fresh_status, age_days = assess_receipt_freshness(
-            gen_at, now=now, fail_days=fail_days
+        status, engine_blockers, details = _evaluate_single_engine_lane(
+            engine, receipts_dir=receipts_dir, now=now, fail_days=fail_days
         )
-        if fresh_status == "fail":
-            failed_engines.append(engine)
-            blockers.append(
-                f"Stale receipt for {engine}: age is {age_days:.1f} days (max {fail_days})"
-            )
-            continue
+        blockers.extend(engine_blockers)
+        if details is not None:
+            per_engine_details[engine] = details
 
-        inv = payload.get("engine_inventory", {})
-        if not inv.get("available"):
+        if status == "passed":
+            passed_engines.append(engine)
+        elif status == "failed":
+            failed_engines.append(engine)
+        elif status == "skipped":
+            skipped_engines.append(engine)
+        else:
             unavailable_engines.append(engine)
-            blockers.append(
-                f"Native engine runtime/SDK unavailable for {engine}: {inv.get('error', 'not installed')}"
-            )
-            continue
-
-        tests = payload.get("tests", {})
-        executed = int(tests.get("executed", 0))
-        skipped = int(tests.get("skipped", 0))
-        failed = int(tests.get("failed", 0))
-        errors = int(tests.get("errors", 0))
-
-        per_engine_details[engine] = {
-            "executed": executed,
-            "passed": int(tests.get("passed", 0)),
-            "failed": failed,
-            "skipped": skipped,
-            "errors": errors,
-            "age_days": round(age_days, 2),
-            "version": payload.get("engine_version") or inv.get("version"),
-        }
-
-        if executed == 0:
-            if skipped > 0:
-                skipped_engines.append(engine)
-                blockers.append(
-                    f"Mandatory engine {engine} skipped (zero executed tests, {skipped} skipped)"
-                )
-            else:
-                unavailable_engines.append(engine)
-                blockers.append(f"Zero executed tests for required engine {engine}")
-            continue
-
-        if failed > 0 or errors > 0 or payload.get("status") != "pass":
-            failed_engines.append(engine)
-            blockers.append(
-                f"Tests failed for engine {engine}: {failed} failures, {errors} errors"
-            )
-            continue
-
-        passed_engines.append(engine)
 
     is_ready = bool(passed_engines) and not (
         failed_engines or skipped_engines or unavailable_engines or blockers
