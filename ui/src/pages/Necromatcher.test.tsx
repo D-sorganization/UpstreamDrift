@@ -26,6 +26,13 @@ beforeEach(() => {
   mocks.frame.mockResolvedValue({capture_id:'capture-v1',frame_index:0,frame_count:3,image_width:320,image_height:240,frame:{pts_ticks:1100,timebase_numerator:1,timebase_denominator:10,physical_time_s:null},observation:{status:'detected',landmarks:{left_wrist:{x:0.5,y:0.4,visibility:null}}}});
 });
 describe('Necromatcher historical workspace', () => {
+  it('labels saved kinematic fits as research and retains their qualification', async () => {
+    mocks.assets.mockResolvedValue({assets:[{dataset_id:'hogan-fit-v2',session_id:'hogan-practice',kind:'kinematic_fit',metadata:{qualification:'monocular_research_hypothesis',model_id:'model-v2',frame_count:750}}]});
+    show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice');
+    expect(await screen.findByText('Kinematic Research Fit')).toBeInTheDocument();
+    expect(screen.getByText('monocular_research_hypothesis')).toBeInTheDocument();
+    expect(screen.queryByText('Authored Controls')).not.toBeInTheDocument();
+  });
   it('offers player tiles and retrieves the selected player swings', async () => {
     const user=userEvent.setup(); show();
     await user.click(await screen.findByRole('button',{name:'Ben Hogan'}));

@@ -6,7 +6,7 @@ const root = '/api/v1/necromatcher';
 export interface HistoricalPlayer { subject_id: string; display_name: string; metadata: Record<string, unknown> }
 export interface HistoricalSwing { session_id: string; subject_id: string; name: string; metadata: Record<string, unknown> }
 export interface HistoricalAsset {
-  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile';
+  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit';
   metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; hash?: string };
 }
 export interface CaptureFrame {

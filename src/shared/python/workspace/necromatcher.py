@@ -27,6 +27,7 @@ from src.shared.python.motion_matching.piecewise_polynomial import (
 )
 from .artifact_handoff import ArtifactKind, ArtifactReference, compute_file_sha256
 from .necromatcher_capture import build_capture_archive
+from .necromatcher_fit import FIT_SCHEMA, read_kinematic_fit
 from .project_store import (
     DatasetMetadata,
     SessionMetadata,
@@ -38,6 +39,7 @@ _ARTIFACT_KINDS = {
     "native_model": ArtifactKind.MODEL,
     "torque_profile": ArtifactKind.DRIVING_PROFILE,
     "image_capture": ArtifactKind.OBSERVATION,
+    "kinematic_fit": ArtifactKind.TRAJECTORY,
 }
 
 
@@ -251,6 +253,35 @@ class NecromatcherLibrary:
             raise ValueError("Profile channel count must match model DOFs")
         return payload, torque
 
+    def add_fit(self, fit_id: str, swing_id: str, source: Path) -> DatasetMetadata:
+        """Preserve source-bound research samples without certifying dynamics."""
+        with self._write_lock():
+            source_hash = compute_file_sha256(source)
+            payload = read_kinematic_fit(source, self, swing_id)
+            return self._save_asset(
+                fit_id,
+                swing_id,
+                source,
+                "kinematic_fit",
+                {
+                    "schema": FIT_SCHEMA,
+                    "hash": source_hash,
+                    "model_id": payload["model_id"],
+                    "capture_id": payload["capture_id"],
+                    "frame_count": len(payload["frame_indices"]),
+                    "qualification": "monocular_research_hypothesis",
+                    "physical_time_qualified": False,
+                    "dynamics_replayed": False,
+                },
+            )
+
+    def load_fit(self, fit_id: str) -> dict[str, Any]:
+        """Recall detached samples after verifying both immutable parent versions."""
+        asset = self.load_asset(fit_id)
+        if asset.kind != "kinematic_fit":
+            raise ValueError("Fit recall requires a kinematic-fit asset")
+        return read_kinematic_fit(Path(asset.path), self, asset.session_id)
+
     def add_profile(
         self, profile_id: str, swing_id: str, source: Path
     ) -> DatasetMetadata:
@@ -284,6 +315,9 @@ class NecromatcherLibrary:
         session = self._store.load_session(swing_id)
         player = self._store.load_project().subjects[session.subject_id]
         assets = [self.load_asset(x.dataset_id) for x in self.assets(swing_id)]
+        for asset in assets:
+            if asset.kind == "kinematic_fit":
+                self.load_fit(asset.dataset_id)
         manifest = {
             "schema_version": "necromatcher/swing-package/1",
             "player": asdict(player),

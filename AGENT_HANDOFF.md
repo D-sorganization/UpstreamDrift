@@ -1,5 +1,16 @@
 # Necromatcher Handoff
 
+## Persistent Fit Storage
+
+Source-bound kinematic research fit storage and recall now use the existing
+immutable library and portable swing export. Real Hogan/Tiger v2 versions retain
+750/210 exact source frames, model/capture hashes, native coordinate samples,
+original generic model definitions and rejection evidence. Sixteen new storage
+regressions cover stale bindings, cross-swing inputs and malformed claims.
+Web labeling distinguishes research fits from authored controls. Continue with
+native fit overlays/job execution, qualified closed motion and downstream replay.
+See [Native Fitting Turnover](docs/development/necromatcher-native-fit.md).
+
 ## Native Image Fitting Progress
 
 The shared historical-fit package now fits actual native geometry to image

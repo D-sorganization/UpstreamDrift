@@ -61,6 +61,7 @@ SUPPORTED_SCHEMAS: Final[frozenset[str]] = frozenset(
         "necromatcher/native-model/1",
         "necromatcher/torque-profile/1",
         "necromatcher/image-capture/1",
+        "necromatcher/kinematic-fit/1",
     }
 )
 

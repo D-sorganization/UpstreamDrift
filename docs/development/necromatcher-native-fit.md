@@ -211,3 +211,42 @@ pending reason; no capture is invented. Companion counts reflect the new
 program, feature and surfaces. Generated baseline, atlas and agent-context views
 are refreshed from their authorities, with the launcher boundary re-reviewed.
 The separate shallow-checkout origin/main prerequisite remains a CI concern.
+
+## Persistent Research Fit Versions
+
+`NecromatcherLibrary.add_fit(fit_id, swing_id, source)` stores immutable JSON
+under `necromatcher/kinematic-fit/1`. `load_fit(fit_id)` rechecks the fit bytes,
+both parent hashes, same-swing ownership, model coordinate order and every exact
+source frame identity. Sample matrices must be finite numeric values; declared
+coordinate units are `rad` or `m`. This is storage validation, not native model
+compilation or a physical calibration certificate. Fit exports use the existing
+portable swing package and revalidate bindings before publication.
+
+The real `hogan-full-body-research-fit-v2` and
+`tiger-full-body-research-fit-v2` versions now retain 750 and 210 source-frame
+samples in the configured persistent library. Their corresponding
+`hogan-generic-native-model-v2` and `tiger-generic-native-model-v2` assets contain
+actual compiled-export MuJoCo XML, with the original generic definition and its
+digest retained in fit provenance. The producer derived coordinate units from
+compiled MuJoCo hinge/slide types. These are generic geometry candidates.
+[Storage Receipt](historical_capture/native-fit-library-receipt-v2.json) records
+the immutable model, capture and fit hashes without local filesystem paths.
+
+For Future Players:
+
+1. Import a verified capture and immutable native model under the same swing.
+2. Produce finite native `q` samples in the model's ordered coordinates.
+3. Bind `model_id`, `model_hash`, `capture_id` and `capture_hash` to those exact
+   library versions. Copy complete `CaptureReview.frame(index)["frame"]`
+   identities, retaining rational PTS, rather than rounding source timestamps.
+4. Include explicit provenance, camera/geometry assumptions, fit evidence and
+   rejection reasons. Keep `qualification=monocular_research_hypothesis`,
+   `physical_time_qualified=false` and `dynamics_replayed=false`.
+5. Call `add_fit`, then reopen the library and call `load_fit`; export through
+   `export_swing` for portable transfer. Never overwrite a prior version.
+
+The web workspace distinguishes these versions as Kinematic Research Fits and
+shows their qualification. Native trajectory overlays, fit-job submission,
+resource-validated model import, physical-clock qualification, generalized
+effort profiles and independently verified simulation/impact handoffs remain
+required. Preserve the existing rejection evidence during that work.

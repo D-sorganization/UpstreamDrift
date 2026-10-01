@@ -24,9 +24,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11235; parent #11232
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240), draft over #11239
 - **Branch:** `feat/necromatcher-native-fit-11235`
-- **Paths:** shared matching plant and native MuJoCo model; historical fitting integration
+- **Paths:** shared matching plant, native MuJoCo model, historical fitting integration and source-bound workspace fit storage
 - **Last verified:** 2026-10-01 — five native closure regressions failed before repair; 12 native plant/model tests pass afterward, one real-Drake test skips. Actual generic driver model loads 44 coordinates and reports nonzero grip separation.
-- **Summary:** Repaired closure and added source-bound native image fitting with preserved Hermite splines. Nine image-fit tests pass, including spline-chain derivative agreement and reduced native evaluations. Second-pass full-body held-out RMS is 7.694 px for Hogan and 11.666 px for Tiger; both evaluation-limited. Native grip separation and Tiger ROM violations prohibit acceptance. Canonical logo/migration/companion inventories and context views are repaired. Full-body fitting, independent replay, model resource validation and downstream handoffs remain open. [Turnover](necromatcher-native-fit.md).
+- **Summary:** Repaired closure and added source-bound native image fitting with preserved Hermite splines. Nine image-fit tests pass, including spline-chain derivative agreement and reduced native evaluations. Second-pass full-body held-out RMS is 7.694 px for Hogan and 11.666 px for Tiger; both evaluation-limited. Native grip separation and Tiger ROM violations prohibit acceptance. Canonical inventories are repaired. Source-bound kinematic fit versions now survive library recall and portable export, with 750 Hogan and 210 Tiger frames, generic native models and rejection evidence. Sixteen new storage tests cover binding and input contracts. Fit jobs, closed motion, independent replay, model resource validation and downstream handoffs remain open. [Turnover](necromatcher-native-fit.md).
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 

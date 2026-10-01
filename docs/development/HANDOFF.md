@@ -1,5 +1,14 @@
 # Active Necromatcher Delivery
 
+## Persistent Fit Storage
+
+The immutable library now stores and recalls exact source-bound kinematic fit
+samples. Real Hogan/Tiger v2 fit versions retain 750/210 frames and their compiled
+generic MuJoCo model versions. Hash bindings, frame identities, provenance and
+rejection evidence survive recall/export. Sixteen new storage tests cover these
+contracts. Fit overlays, fit jobs, physical-clock/closure qualification and
+independent dynamics handoffs remain open. See [Turnover](necromatcher-native-fit.md).
+
 ## Native Image Fitting Progress
 
 The shared historical-fit package now fits actual native geometry to image

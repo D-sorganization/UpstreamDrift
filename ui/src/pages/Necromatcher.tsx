@@ -66,7 +66,8 @@ export function NecromatcherPage() {
   </div>;
   const details = <div className="p-4 space-y-4 text-gray-200"><h2 className="text-lg font-semibold">Models and Controls</h2>
     {selectedAssets.filter((x) => x.kind !== 'image_capture').map((item) => <div key={item.dataset_id} className={card}>
-      <h3 className="font-medium">{item.dataset_id}</h3><p className="text-sm text-gray-400">{item.kind === 'native_model' ? 'Candidate Model' : 'Authored Controls'}</p>
+      <h3 className="font-medium">{item.dataset_id}</h3><p className="text-sm text-gray-400">{item.kind === 'native_model' ? 'Candidate Model' : item.kind === 'kinematic_fit' ? 'Kinematic Research Fit' : 'Authored Controls'}</p>
+      <p className="text-sm text-gray-400">{item.metadata.qualification}</p>
       {item.metadata.engine && <p>{item.metadata.engine}</p>}{item.metadata.model_id && <p>Model: {item.metadata.model_id}</p>}
     </div>)}
     {!selectedAssets.some((x) => x.kind !== 'image_capture') && <p className="text-sm text-gray-400">No Models or Driving Profiles Saved.</p>}
