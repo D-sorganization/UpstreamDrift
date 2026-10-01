@@ -702,27 +702,26 @@ def _generate_synthetic_silhouette(
     if "thin_shaft_loss" in adverse_conditions:
         club_2d[cy : int(cy + 0.8 * ry), :] = 0
 
-    club = club_2d.flatten()
+    # Ensure mutual separation and validity
+    club_raw = club_2d.flatten()
+    body_raw = body_2d.flatten()
+    separated_body = (body_raw * (1 - club_raw)).astype(np.uint8)
 
-    # Ensure mutual separation: remove club pixels from body
-    body = body * (1 - club)
-
-    # Invariant: body and club must be zero where valid is zero
-    body = (body * valid).astype(np.uint8)
-    club = (club * valid).astype(np.uint8)
+    final_body: np.ndarray = (separated_body * valid).astype(np.uint8)
+    final_club: np.ndarray = (club_raw * valid).astype(np.uint8)
 
     # Precondition fallback: ensure at least one foreground pixel for each if valid allows
     if np.sum(valid) > 0:
         first_valid = int(np.argmax(valid))
         last_valid = int(total_px - 1 - np.argmax(valid[::-1]))
-        if np.sum(body) == 0:
-            body[first_valid] = 1
-            club[first_valid] = 0
-        if np.sum(club) == 0 and last_valid != first_valid:
-            club[last_valid] = 1
-            body[last_valid] = 0
+        if np.sum(final_body) == 0:
+            final_body[first_valid] = 1
+            final_club[first_valid] = 0
+        if np.sum(final_club) == 0 and last_valid != first_valid:
+            final_club[last_valid] = 1
+            final_body[last_valid] = 0
 
-    return bytes(body), bytes(club), bytes(valid)
+    return bytes(final_body), bytes(final_club), bytes(valid)
 
 
 class ModelSegmentationProvider:
@@ -998,99 +997,102 @@ class ClipBenchmarkMetrics:
         return asdict(self)
 
 
+def _evaluate_clip(
+    provider: ModelSegmentationProvider,
+    clip: BenchmarkClip,
+) -> dict[str, Any]:
+    t0 = time.perf_counter()
+
+    frame = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id="asset-benchmark",
+        shot_id=f"shot-{clip.clip_id}",
+        swing_id="swing-01",
+        camera_id="cam-01",
+        frame_id=f"frame-{clip.clip_id}-001",
+        pts_ticks=10,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.01,
+        physical_time_reason="standard_shutter",
+        frame_sha256=hashlib.sha256(clip.clip_id.encode()).hexdigest(),
+    )
+
+    inferred = provider.infer_frame(
+        frame,
+        clip.width_px,
+        clip.height_px,
+        adverse_conditions=clip.adverse_conditions,
+    )
+
+    gold_frame = FrameIdentity(
+        schema_version=FRAME_SCHEMA_VERSION,
+        asset_id="asset-benchmark-gold",
+        shot_id=f"shot-{clip.clip_id}-gold",
+        swing_id="swing-01",
+        camera_id="cam-01",
+        frame_id=f"frame-{clip.clip_id}-gold-001",
+        pts_ticks=10,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.01,
+        physical_time_reason="standard_shutter",
+        frame_sha256=hashlib.sha256((clip.clip_id + "_gold").encode()).hexdigest(),
+    )
+    gold = provider.infer_frame(
+        gold_frame,
+        clip.width_px,
+        clip.height_px,
+        adverse_conditions=(),
+    )
+
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+    body_iou = compute_mask_iou(inferred.body, gold.body, inferred.valid)
+    club_dice = compute_mask_dice(inferred.club, gold.club, inferred.valid)
+
+    inf_club = np.frombuffer(inferred.club, dtype=np.uint8)
+    gold_club = np.frombuffer(gold.club, dtype=np.uint8)
+    val = np.frombuffer(inferred.valid, dtype=np.uint8)
+    true_pos = np.sum((inf_club == 1) & (gold_club == 1) & (val == 1))
+    gold_pos = np.sum((gold_club == 1) & (val == 1))
+    club_recall = float(true_pos / gold_pos) if gold_pos > 0 else 1.0
+
+    boundary_f1 = float(club_dice)
+
+    expected_body_px = max(1, gold.body.count(1))
+    occ_rep = track_occlusion_and_identity(
+        inferred, expected_body_area_px=expected_body_px
+    )
+    occ_detected = occ_rep.is_partially_occluded or occ_rep.is_identity_lost
+
+    diff_px = int(np.sum((inf_club != gold_club) & (val == 1)))
+    correction_edits = max(0, diff_px)
+
+    card = provider.model_card
+    param_count = card.parameter_count_m if card else 10.0
+    peak_mem = 45.2 if param_count < 20 else 185.6
+
+    metrics = ClipBenchmarkMetrics(
+        clip_id=clip.clip_id,
+        clip_type=clip.clip_type,
+        body_iou=round(body_iou, 4),
+        club_recall=round(club_recall, 4),
+        boundary_f1=round(boundary_f1, 4),
+        correction_effort_edits=correction_edits,
+        latency_ms_per_frame=round(elapsed_ms, 2),
+        peak_memory_mb=peak_mem,
+        occlusion_detected=occ_detected,
+    )
+    return metrics.to_dict()
+
+
 def evaluate_segmentation_benchmark(
     provider: ModelSegmentationProvider,
     clips: Sequence[BenchmarkClip],
 ) -> dict[str, Any]:
     """Execute bounded benchmark across modern, archive, and occluded clips."""
-    results: list[dict[str, Any]] = []
-
-    for clip in clips:
-        t0 = time.perf_counter()
-
-        frame = FrameIdentity(
-            schema_version=FRAME_SCHEMA_VERSION,
-            asset_id="asset-benchmark",
-            shot_id=f"shot-{clip.clip_id}",
-            swing_id="swing-01",
-            camera_id="cam-01",
-            frame_id=f"frame-{clip.clip_id}-001",
-            pts_ticks=10,
-            timebase_numerator=1,
-            timebase_denominator=1000,
-            physical_time_s=0.01,
-            physical_time_reason="standard_shutter",
-            frame_sha256=hashlib.sha256(clip.clip_id.encode()).hexdigest(),
-        )
-
-        inferred = provider.infer_frame(
-            frame,
-            clip.width_px,
-            clip.height_px,
-            adverse_conditions=clip.adverse_conditions,
-        )
-
-        gold_frame = FrameIdentity(
-            schema_version=FRAME_SCHEMA_VERSION,
-            asset_id="asset-benchmark-gold",
-            shot_id=f"shot-{clip.clip_id}-gold",
-            swing_id="swing-01",
-            camera_id="cam-01",
-            frame_id=f"frame-{clip.clip_id}-gold-001",
-            pts_ticks=10,
-            timebase_numerator=1,
-            timebase_denominator=1000,
-            physical_time_s=0.01,
-            physical_time_reason="standard_shutter",
-            frame_sha256=hashlib.sha256((clip.clip_id + "_gold").encode()).hexdigest(),
-        )
-        gold = provider.infer_frame(
-            gold_frame,
-            clip.width_px,
-            clip.height_px,
-            adverse_conditions=(),
-        )
-
-        elapsed_ms = (time.perf_counter() - t0) * 1000.0
-
-        body_iou = compute_mask_iou(inferred.body, gold.body, inferred.valid)
-        club_dice = compute_mask_dice(inferred.club, gold.club, inferred.valid)
-
-        inf_club = np.frombuffer(inferred.club, dtype=np.uint8)
-        gold_club = np.frombuffer(gold.club, dtype=np.uint8)
-        val = np.frombuffer(inferred.valid, dtype=np.uint8)
-        true_pos = np.sum((inf_club == 1) & (gold_club == 1) & (val == 1))
-        gold_pos = np.sum((gold_club == 1) & (val == 1))
-        club_recall = float(true_pos / gold_pos) if gold_pos > 0 else 1.0
-
-        boundary_f1 = float(club_dice)
-
-        expected_body_px = max(1, gold.body.count(1))
-        occ_rep = track_occlusion_and_identity(
-            inferred, expected_body_area_px=expected_body_px
-        )
-        occ_detected = occ_rep.is_partially_occluded or occ_rep.is_identity_lost
-
-        diff_px = int(np.sum((inf_club != gold_club) & (val == 1)))
-        correction_edits = max(0, diff_px)
-
-        card = provider.model_card
-        param_count = card.parameter_count_m if card else 10.0
-        peak_mem = 45.2 if param_count < 20 else 185.6
-
-        metrics = ClipBenchmarkMetrics(
-            clip_id=clip.clip_id,
-            clip_type=clip.clip_type,
-            body_iou=round(body_iou, 4),
-            club_recall=round(club_recall, 4),
-            boundary_f1=round(boundary_f1, 4),
-            correction_effort_edits=correction_edits,
-            latency_ms_per_frame=round(elapsed_ms, 2),
-            peak_memory_mb=peak_mem,
-            occlusion_detected=occ_detected,
-        )
-        results.append(metrics.to_dict())
-
+    results = [_evaluate_clip(provider, clip) for clip in clips]
     card_dict = (
         provider.model_card.to_dict()
         if provider.model_card
