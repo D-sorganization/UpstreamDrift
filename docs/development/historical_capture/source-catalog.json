@@ -48,6 +48,28 @@
       "physical_playback_scale": null,
       "film_lineage_status": "unreviewed",
       "publication_permitted": false
+    },
+    {
+      "subject_id": "ben-hogan",
+      "original_filename": "DJDYMjmvFwg.mp4",
+      "sha256": "b91d2a45d189dfc1d92204b71349a06ed88bbb2789b5f14751d7a095364eba81",
+      "size_bytes": 100374395,
+      "source_url": "https://www.youtube.com/watch?v=DJDYMjmvFwg",
+      "acquisition": "yt-dlp 2026.8.19 formats 399+140-1; lossless remux",
+      "title": "10 Minutes of Ben Hogan (Every Angle Ever Recorded)",
+      "uploader": "Sonic Titan Golf",
+      "upload_date": "2026-07-08",
+      "duration_s": 623,
+      "width_px": 1920,
+      "height_px": 1080,
+      "presentation_fps": 60,
+      "recording_year": null,
+      "claimed_recording_year": null,
+      "year_evidence": "Compilation of archive footage; individual recording dates unverified",
+      "rights_status": "unknown",
+      "physical_playback_scale": null,
+      "film_lineage_status": "unreviewed; may repeat owner-supplied recordings",
+      "publication_permitted": false
     }
   ],
   "candidates": [

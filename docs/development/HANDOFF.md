@@ -938,3 +938,22 @@ pass is claimed. Required commit and design-manual governance hooks passed.
 Merged origin/main 51a0c1bfa4 into the owned branch without conflicts, retaining
 both SPEC rows. Post-merge focused Shadow Tracker tests are being verified;
 source/model receipts remain unchanged. Pre-push checks must pass on the merge.
+
+## Additional Hogan Source
+
+Owner-requested DJDYMjmvFwg was downloaded with yt-dlp, including audio and
+metadata: 10 Minutes of Ben Hogan (Every Angle Ever Recorded), Sonic Titan Golf,
+10:23, 1920x1080 at 60 presentation fps. SHA-256 is recorded in source-catalog.json.
+Original archive cadence, individual recording dates and film overlap are unknown;
+this compilation must not be treated as synchronized multiview or independent
+held-out footage. Local media: Downloads/historical-capture/ben_hogan/.
+
+The new Hogan compilation window 253-267 presentation seconds was processed:
+839 frames, 769 detections and 70 explicit missing detections. Receipt and hashes
+are committed; source-bound frames and observations remain outside Git. This
+window is unreviewed and may cross cuts; 60 presentation fps does not establish
+original film timing or independent multiview.
+
+The first post-merge push was stopped because documentation changed while the
+security hook was running (no security issues were identified). Finish the
+current documentation commit and retry from a clean worktree.
