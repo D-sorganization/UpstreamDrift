@@ -304,6 +304,118 @@ def test_update_neural_metrics_display(widget: MotionMatchingWidget) -> None:
     assert "0.450" in widget.metric_neural_confidence.text()
 
 
+def test_neural_metrics_timing_only_fails_closed_to_unverified(
+    widget: MotionMatchingWidget, tmp_path: Path
+) -> None:
+    """A dictionary containing timing only cannot display VERIFIED (#11146)."""
+    summary = {
+        "neural_inference": {
+            "t_neural_s": 0.015,
+            "t_total_s": 0.060,
+        }
+    }
+    widget._update_results_ui(
+        output_dir=tmp_path,
+        summary=summary,
+        metrics={},
+        verdict="PASSED",
+    )
+    assert widget.neural_status_badge.text() == "UNVERIFIED"
+    assert widget.neural_status_badge.text() != "VERIFIED"
+
+
+def test_neural_metrics_preview_never_displays_verified(
+    widget: MotionMatchingWidget, tmp_path: Path
+) -> None:
+    """Preview mode cannot display VERIFIED even if status says VERIFIED or NEURAL_ACCEPTED (#11146)."""
+    summary = {
+        "neural_inference": {
+            "status": "VERIFIED",
+            "is_preview": True,
+            "confidence": 0.95,
+        }
+    }
+    widget._update_results_ui(
+        output_dir=tmp_path,
+        summary=summary,
+        metrics={},
+        verdict="PASSED",
+    )
+    assert widget.neural_status_badge.text() == "PREVIEW (VERIFIED)"
+    assert widget.neural_status_badge.text() != "VERIFIED"
+
+
+def test_neural_metrics_cleared_when_subsequent_result_omits_neural_evidence(
+    widget: MotionMatchingWidget, tmp_path: Path
+) -> None:
+    """When a subsequent result omits neural metadata, no stale verification or confidence survives (#11146)."""
+    # 1. Load verified result
+    verified_summary = {
+        "neural_inference": {
+            "status": "VERIFIED",
+            "is_preview": False,
+            "confidence": 0.942,
+            "t_total_s": 0.100,
+        }
+    }
+    widget._update_results_ui(
+        output_dir=tmp_path,
+        summary=verified_summary,
+        metrics={},
+        verdict="PASSED",
+    )
+    assert widget.neural_status_badge.text() == "VERIFIED"
+    assert "0.942" in widget.metric_neural_confidence.text()
+
+    # 2. Load classical/unverified result without neural_inference
+    classical_summary = {
+        "full_capture_ik_rms_mm": 12.3,
+    }
+    widget._update_results_ui(
+        output_dir=tmp_path,
+        summary=classical_summary,
+        metrics={},
+        verdict="PASSED",
+    )
+    assert widget.neural_status_badge.text() == "-"
+    assert widget.metric_neural_confidence.text() == "-"
+    assert widget.metric_time_breakdown.text() == "-"
+
+
+def test_clear_neural_metrics_resets_badges_on_start(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Starting a new matching run clears all neural badges and metrics (#11146)."""
+    widget.update_neural_metrics(status="VERIFIED", is_preview=False, confidence=0.9)
+    assert widget.neural_status_badge.text() == "VERIFIED"
+
+    widget.clear_neural_metrics()
+    assert widget.neural_status_badge.text() == "-"
+    assert widget.metric_neural_confidence.text() == "-"
+    assert widget.metric_time_breakdown.text() == "-"
+
+
+def test_neural_metrics_mismatched_model_or_contradictory_fails_closed(
+    widget: MotionMatchingWidget, tmp_path: Path
+) -> None:
+    """Mismatched model/checkpoint or contradictory status fails closed to UNVERIFIED (#11146)."""
+    summary = {
+        "neural_inference": {
+            "status": "VERIFIED",
+            "model_id": "other_model_xyz",
+            "confidence": 0.95,
+        }
+    }
+    widget.neural_model_selector.setCurrentText("driven_double_pendulum")
+    widget._update_results_ui(
+        output_dir=tmp_path,
+        summary=summary,
+        metrics={},
+        verdict="PASSED",
+    )
+    assert widget.neural_status_badge.text() == "UNVERIFIED"
+
+
 def test_tour_baselines_tab_controls_and_metadata(widget: MotionMatchingWidget) -> None:
     """Verify Tour Baselines tab initialization, selectors, and metadata display (TB-11, #10596)."""
     assert widget.tb_capture.count() == 2
