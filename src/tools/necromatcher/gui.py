@@ -1,5 +1,8 @@
 """Native historical library review backed by the shared workspace spine."""
 
+# noqa: gui-thread/ok -- canonical threaded worker runs imports/hash checks;
+# QTimer polling applies results on the Qt thread, verified by native tests.
+
 from __future__ import annotations
 
 from collections.abc import Callable
