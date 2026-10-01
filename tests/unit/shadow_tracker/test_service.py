@@ -874,3 +874,299 @@ def test_import_video_unknown_physical_time_provenance_preserved(
     payload = json.loads(json.dumps(exported["observations"][0]))
     assert payload["physical_time_s"] is None
     assert payload["physical_time_reason"].startswith("unknown physical time")
+
+
+# ---------------------------------------------------------------------------
+# 9. MMR-12 Acceptance Criteria: VFR Journey, Multi-Shot Isolation, Invalidation
+# ---------------------------------------------------------------------------
+
+
+def test_vfr_import_manual_correction_save_reopen_and_invalidation(
+    tmp_path: Path,
+) -> None:
+    """Exercise real VFR decode -> manual body/club correction -> save -> reopen;
+    timing and revision lineage preserved, and correction invalidates saved candidate (MMR-12).
+    """
+    from fractions import Fraction
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+    from shared.python.shadow_tracker.ingestion import AffineTimingMapping
+
+    vfr_clip = tmp_path / "vfr_journey.mp4"
+    deltas = [100, 300, 200, 400]
+    make_vfr_mp4_fixture(vfr_clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    timing_mapping = AffineTimingMapping(
+        scale=Fraction(1, 2),
+        offset_seconds=0.05,
+    )
+    # Cut frame index 2 (pts=400)
+    cuts = ((350, 450),)
+    transforms = ("rotate_0", "crop_0", "playback_speed_0.5")
+
+    imported = service.import_video(
+        vfr_clip,
+        asset_id="asset-vfr-journey",
+        shot_id="shot-01",
+        swing_id="swing-01",
+        camera_id="cam-01",
+        timing_mapping=timing_mapping,
+        cuts=cuts,
+        transforms=transforms,
+    )
+    assert len(imported) == 3
+    assert len(service.get_observations()) == 3
+
+    # Check timing preservation
+    f0 = imported[0]
+    assert f0.pts_ticks == 0
+    assert f0.is_timing_exact is True
+    assert f0.timing_mode == "container_pts"
+    assert pytest.approx(f0.physical_time_s, rel=1e-5) == 0.05
+
+    # Inject fit candidate to test downstream invalidation
+    service._inject_fit_for_testing("candidate-active-001")
+    assert service.has_active_fits() is True
+    assert len(service.get_candidates()) == 1
+
+    # Perform manual body and club correction on frame 0
+    w, h = 64, 64
+    body_mask = bytes([1] * (w * h))
+    club_mask = bytes([1] * (w * h))
+    valid_mask = bytes([1] * (w * h))
+    initial_mask = service.get_mask("frame-000000", shot_id="shot-01")
+
+    revised_mask = service.update_mask(
+        frame_id="frame-000000",
+        shot_id="shot-01",
+        body=body_mask,
+        club=club_mask,
+        valid=valid_mask,
+        parent_revision_id=initial_mask.revision_id,
+        producer_id="expert-reviewer",
+        correction_note="manual body and club correction",
+    )
+    assert revised_mask.parent_revision_id == initial_mask.revision_id
+    assert revised_mask.body == body_mask
+    assert revised_mask.club == club_mask
+
+    # DbC Postcondition: candidate MUST be invalidated immediately
+    assert service.has_active_fits() is False
+    assert service.get_candidates() == ()
+    assert service.checkpoints == ()
+
+    # Persist session bundle to disk
+    bundle_dir = tmp_path / "vfr_saved_bundle"
+    service.save_bundle(bundle_dir)
+
+    # Reopen in a clean service instance
+    reopened_service = DefaultShadowTrackerService()
+    reopened_service.load_bundle(bundle_dir)
+
+    # Validate reopened session contracts
+    assert len(reopened_service.get_observations()) == 3
+    reopened_f0 = reopened_service.get_observation("frame-000000", shot_id="shot-01")
+    assert reopened_f0.pts_ticks == 0
+    assert reopened_f0.timing_mode == "container_pts"
+    assert pytest.approx(reopened_f0.physical_time_s, rel=1e-5) == 0.05
+
+    # Mask and lineage preserved in reopened session
+    reopened_mask = reopened_service.get_mask("frame-000000", shot_id="shot-01")
+    assert reopened_mask.revision_id == revised_mask.revision_id
+    assert reopened_mask.body == body_mask
+    assert reopened_mask.club == club_mask
+
+    history = reopened_service.get_mask_history("frame-000000", shot_id="shot-01")
+    assert len(history) == 2
+    assert history[0].revision_id == initial_mask.revision_id
+    assert history[1].revision_id == revised_mask.revision_id
+
+    # Downstream candidate remains empty (no stale results reopened)
+    assert reopened_service.has_active_fits() is False
+
+
+def test_multi_shot_duplicate_local_frame_ids_no_collision_and_invalidation(
+    tmp_path: Path,
+) -> None:
+    """Duplicate local frame IDs across shots must not collide in observations, masks,
+    revisions, or triage navigation, and a correction in one shot invalidates fits without
+    touching other shots (MMR-12)."""
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "multi_shot.mp4"
+    deltas = [100, 200]
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    # Shot 1
+    service.import_video(
+        clip,
+        asset_id="asset-shared",
+        shot_id="shot-alpha",
+        swing_id="swing-01",
+    )
+    # Shot 2: produces identical local frame IDs (frame-000000, frame-000001)
+    service.import_video(
+        clip,
+        asset_id="asset-shared",
+        shot_id="shot-beta",
+        swing_id="swing-02",
+    )
+
+    assert len(service.get_observations()) == 4
+
+    # Inject fit candidate
+    service._inject_fit_for_testing("cand-multi-shot")
+    assert service.has_active_fits() is True
+
+    # Initial masks for frame-000000 in both shots are separate
+    mask_alpha_init = service.get_mask("frame-000000", shot_id="shot-alpha")
+    mask_beta_init = service.get_mask("frame-000000", shot_id="shot-beta")
+    assert mask_alpha_init.frame.shot_id == "shot-alpha"
+    assert mask_beta_init.frame.shot_id == "shot-beta"
+    assert mask_alpha_init.revision_id != mask_beta_init.revision_id
+
+    # Correct mask on shot-beta frame-000000 with parent_revision_id=None
+    w, h = 64, 64
+    body_fix = bytes([1] * (w * h))
+    club_fix = bytes([1] * (w * h))
+    valid_fix = bytes([1] * (w * h))
+
+    mask_beta_rev = service.update_mask(
+        frame_id="frame-000000",
+        shot_id="shot-beta",
+        body=body_fix,
+        club=club_fix,
+        valid=valid_fix,
+        parent_revision_id=None,
+        producer_id="reviewer",
+        correction_note="corrected shot beta",
+    )
+
+    # Candidate invalidated
+    assert service.has_active_fits() is False
+
+    # Also correct mask on shot-alpha frame-000000 with identical mask data and parent_revision_id=None
+    # Revisions MUST NOT collide!
+    mask_alpha_rev = service.update_mask(
+        frame_id="frame-000000",
+        shot_id="shot-alpha",
+        body=body_fix,
+        club=club_fix,
+        valid=valid_fix,
+        parent_revision_id=None,
+        producer_id="reviewer",
+        correction_note="corrected shot alpha",
+    )
+
+    assert mask_alpha_rev.revision_id != mask_beta_rev.revision_id
+    assert mask_alpha_rev.frame.shot_id == "shot-alpha"
+    assert mask_beta_rev.frame.shot_id == "shot-beta"
+
+    # Worst-frame triage navigation includes both shots and respects shot_id
+    worst = service.worst_frames(metric="mask_coverage", top_n=10)
+    assert len(worst) == 4
+    shot_ids_in_worst = {w.shot_id for w in worst}
+    assert shot_ids_in_worst == {"shot-alpha", "shot-beta"}
+
+    # Save and reload bundle with multi-shot duplicate frame IDs
+    bundle_path = tmp_path / "multi_shot_bundle"
+    service.save_bundle(bundle_path)
+
+    reloaded = DefaultShadowTrackerService()
+    reloaded.load_bundle(bundle_path)
+
+    assert len(reloaded.get_observations()) == 4
+    # Reopened masks resolve without collision
+    assert (
+        reloaded.get_mask("frame-000000", shot_id="shot-alpha").revision_id
+        == mask_alpha_rev.revision_id
+    )
+    assert (
+        reloaded.get_mask("frame-000000", shot_id="shot-beta").revision_id
+        == mask_beta_rev.revision_id
+    )
+
+
+def test_corrupt_bundle_and_media_preserves_session_recoverability(
+    tmp_path: Path,
+) -> None:
+    """Corrupt media imports or corrupt bundle loads raise clear errors and leave
+    the active review session fully intact and recoverable (MMR-12)."""
+    service = DefaultShadowTrackerService()
+    service.initialize_session(
+        source_asset=_make_source_asset(),
+        observations=(_make_observation(0),),
+        initial_masks=(_make_mask_frame(0),),
+    )
+    baseline_obs = service.get_observations()
+    baseline_mask = service.get_mask("frame-000")
+
+    # 1. Corrupt empty media file
+    empty_file = tmp_path / "corrupt_empty.mp4"
+    empty_file.write_bytes(b"")
+    with pytest.raises(ValueError):
+        service.import_video(empty_file, shot_id="shot-empty")
+    assert service.get_observations() == baseline_obs
+    assert service.get_mask("frame-000") == baseline_mask
+
+    # 2. Corrupt bundle with tampered manifest checksum
+    good_bundle_dir = tmp_path / "good_bundle"
+    service.save_bundle(good_bundle_dir)
+
+    # Tamper with masks.json
+    (good_bundle_dir / "masks.json").write_bytes(b"[]")
+    with pytest.raises(ValueError, match="Checksum mismatch"):
+        service.load_bundle(good_bundle_dir)
+
+    # Session must remain fully intact
+    assert service.get_observations() == baseline_obs
+    assert service.get_mask("frame-000") == baseline_mask
+
+    # Session can still proceed normally (e.g. export or save)
+    export_out = service.export_canonical(tmp_path / "recovered_export.json")
+    assert len(export_out["observations"]) == 1
+
+
+def test_multi_shot_duplicate_frame_ids_fit_mask_coverage(tmp_path: Path) -> None:
+    """Multi-shot sessions with identical local frame IDs must scope mask lookups by shot_id
+    during fit requests rather than raising ambiguous match errors (MMR-12)."""
+    from tests.unit.shadow_tracker.test_video_ingestion import make_vfr_mp4_fixture
+
+    clip = tmp_path / "clip.mp4"
+    deltas = [100, 200]
+    make_vfr_mp4_fixture(clip, deltas, timescale=1000)
+
+    service = DefaultShadowTrackerService()
+    service.import_video(
+        clip,
+        asset_id="asset-scoped",
+        shot_id="shot-1",
+        swing_id="swing-1",
+    )
+    service.import_video(
+        clip,
+        asset_id="asset-scoped",
+        shot_id="shot-2",
+        swing_id="swing-2",
+    )
+
+    # When multiple shots exist with the same frame_id ('frame-000000'),
+    # fit() must properly scope mask retrieval to (obs.shot_id, obs.frame_id).
+    # Since backend is not qualified, calling fit() must reach _validate_fit_capabilities
+    # or handle the request without crashing on mask ambiguity.
+    req = FitRequest(
+        schema_version="shadow-tracker/fit-request/1.0.0",
+        request_id="req-multi-shot",
+        shot_id="shot-1",
+        model_hash="0" * 64,
+        candidate_count=1,
+        objective_profile="silhouette_iou",
+        time_window_start_pts=0,
+        time_window_end_pts=500,
+        budget_seconds=1.0,
+        engine_capability_requirement=(),
+    )
+    # Fit fails with UnavailableBackendError (honest refusal), NOT ValueError about multiple masks!
+    with pytest.raises(UnavailableBackendError):
+        service.fit(req)

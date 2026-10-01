@@ -325,11 +325,13 @@ class ShadowTrackerWidget(QWidget):
         self.btn_open = QtWidgets.QPushButton("Open Bundle...", self)
         self.btn_save = QtWidgets.QPushButton("Save Bundle", self)
         self.btn_export = QtWidgets.QPushButton("Export Canonical...", self)
+        self.btn_fit = QtWidgets.QPushButton("Auto-Fit", self)
         self.btn_worst = QtWidgets.QPushButton("Jump to Worst Frame", self)
         toolbar.addWidget(self.btn_import)
         toolbar.addWidget(self.btn_open)
         toolbar.addWidget(self.btn_save)
         toolbar.addWidget(self.btn_export)
+        toolbar.addWidget(self.btn_fit)
         toolbar.addStretch()
         toolbar.addWidget(self.btn_worst)
         layout.addLayout(toolbar)
@@ -360,6 +362,7 @@ class ShadowTrackerWidget(QWidget):
         self.btn_open.clicked.connect(self._on_open_bundle)
         self.btn_save.clicked.connect(self._on_save_bundle)
         self.btn_export.clicked.connect(self._on_export_canonical)
+        self.btn_fit.clicked.connect(self._on_request_fit)
         self.btn_prev.clicked.connect(self._on_prev)
         self.btn_next.clicked.connect(self._on_next)
         self.slider_frame.valueChanged.connect(self._on_slider_changed)
@@ -376,9 +379,14 @@ class ShadowTrackerWidget(QWidget):
             return
         try:
             obs = self.import_video(video_file)
-            self.lbl_status.setText(
-                f"Imported {len(obs)} frames from {Path(video_file).name}"
-            )
+            if self.model.service.is_cancelled:
+                self.lbl_status.setText(
+                    f"Import cancelled: {len(obs)} frames decoded from {Path(video_file).name}"
+                )
+            else:
+                self.lbl_status.setText(
+                    f"Imported {len(obs)} frames from {Path(video_file).name}"
+                )
         except (OSError, ValueError, RuntimeError, KeyError) as exc:
             logger.warning("Failed to import video: %s", exc)
             self.lbl_status.setText(f"Error importing video: {exc}")
@@ -434,6 +442,36 @@ class ShadowTrackerWidget(QWidget):
             logger.warning("Failed to export canonical package: %s", exc)
             self.lbl_status.setText(f"Error exporting canonical package: {exc}")
 
+    def _on_request_fit(self) -> None:
+        """Trigger automated forward fitting and display honest refusal if unqualified (MMR-12)."""
+        obs = self.model.get_current_observation()
+        if obs is None:
+            self.lbl_status.setText("Auto-Fit Unavailable: No observation loaded")
+            return
+        req = FitRequest(
+            schema_version="shadow-tracker/fit-request/1.0.0",
+            request_id=f"fit-{obs.shot_id}-{obs.frame_id}",
+            shot_id=obs.shot_id,
+            model_hash="0" * 64,
+            candidate_count=1,
+            objective_profile="silhouette_iou",
+            time_window_start_pts=obs.pts_ticks,
+            time_window_end_pts=obs.pts_ticks + 100,
+            budget_seconds=5.0,
+            engine_capability_requirement=("forward_dynamics",),
+        )
+        try:
+            self.model.request_fit(req)
+            self.lbl_status.setText("Auto-Fit completed")
+        except UnavailableBackendError as exc:
+            logger.info("Auto-fit honestly unavailable: %s", exc)
+            self.lbl_status.setText(
+                f"Auto-Fit Unavailable: {exc} (Forward dynamics gates ST-07..ST-10 unqualified)"
+            )
+        except (ValueError, RuntimeError) as exc:
+            logger.warning("Auto-fit failed: %s", exc)
+            self.lbl_status.setText(f"Auto-Fit Error: {exc}")
+
     def _on_prev(self) -> None:
         self.model.step_frame(-1)
         self._update_display()
@@ -488,6 +526,31 @@ class ShadowTrackerWidget(QWidget):
     def is_dirty(self) -> bool:
         return self.model.is_dirty
 
+    def update_mask(
+        self,
+        *,
+        body: bytes,
+        club: bytes,
+        valid: bytes,
+        parent_revision_id: str | None = None,
+        producer_id: str = "reviewer-gui",
+        correction_note: str = "",
+    ) -> MaskFrame:
+        """Update mask for current frame, invalidating downstream fits and marking session dirty (MMR-12)."""
+        new_mask = self.model.update_mask(
+            body=body,
+            club=club,
+            valid=valid,
+            parent_revision_id=parent_revision_id,
+            producer_id=producer_id,
+            correction_note=correction_note,
+        )
+        self._update_display()
+        self.lbl_status.setText(
+            f"Updated mask for {new_mask.frame.frame_id} (rev: {new_mask.revision_id})"
+        )
+        return new_mask
+
     def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # noqa: N802
         """Handle keyboard scrubbing, triage shortcuts, and navigation (MMR-12)."""
         if event is None:
@@ -512,6 +575,11 @@ class ShadowTrackerWidget(QWidget):
             modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
         ):
             self._on_worst()
+            event.accept()
+        elif key == QtCore.Qt.Key.Key_F and not (
+            modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
+        ):
+            self._on_request_fit()
             event.accept()
         elif key == QtCore.Qt.Key.Key_S and (
             modifiers & QtCore.Qt.KeyboardModifier.ControlModifier
