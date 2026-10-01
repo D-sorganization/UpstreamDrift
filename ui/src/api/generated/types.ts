@@ -2586,6 +2586,26 @@ export interface SimulationDefaultsSettings {
 }
 
 /**
+ * Structured error outcome for simulation failures (issue #11149, R09).
+ */
+export interface SimulationErrorInfo {
+  /** Stable machine-readable error code */
+  code: string;
+  /** Safe user-facing error message */
+  message: string;
+  /** Pipeline stage where failure occurred: preparation, execution, analysis, persistence */
+  stage: string;
+  /** Run or correlation identifier */
+  run_id?: string | null;
+  /** Whether the operation can be retried */
+  retriable: boolean;
+  /** Actionable retry guidance */
+  retry_guidance?: string | null;
+  /** Safe contextual metadata without leaking internals */
+  details?: Record<string, unknown> | null;
+}
+
+/**
  * Request model for physics simulation. Preconditions: - engine_type must be a known engine identifier - duration must be in (0, 300] seconds - timestep (if given) must be in [1e-6, 0.1] seconds
  */
 export interface SimulationRequest {
@@ -2621,6 +2641,16 @@ export interface SimulationResponse {
   analysis_results?: Record<string, unknown> | null;
   /** Paths to exported files */
   export_paths?: string[] | null;
+  /** Calculation status: completed, failed, cancelled */
+  calculation_status: string;
+  /** Analysis status: not_requested, completed, partial, failed */
+  analysis_status: string;
+  /** Persistence status: not_requested, persisted, failed */
+  persistence_status: string;
+  /** Structured error details if failure occurred */
+  error?: SimulationErrorInfo | null;
+  /** Run or correlation identifier */
+  run_id?: string | null;
 }
 
 /**
