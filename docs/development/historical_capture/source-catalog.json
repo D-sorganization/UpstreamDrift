@@ -49,5 +49,20 @@
       "film_lineage_status": "unreviewed",
       "publication_permitted": false
     }
+  ],
+  "candidates": [
+    {
+      "source_url": "https://www.youtube.com/watch?v=bado2QdgD3c",
+      "title": "2000 U.S. Open (Final Round): Tiger Woods Historical Performance at Pebble Beach | Full Broadcast",
+      "uploader": "United States Golf Association (USGA)",
+      "channel_is_verified": true,
+      "duration_s": 19229,
+      "event_year": 2000,
+      "event_year_evidence": "Official USGA event-specific broadcast title; metadata acquired 2026-10-01",
+      "media_acquired": false,
+      "physical_playback_scale": null,
+      "rights_status": "unknown",
+      "next_step": "Download bounded broadcast windows, identify full-speed Tiger swings and inspect cuts/replays before physical timing claims"
+    }
   ]
 }

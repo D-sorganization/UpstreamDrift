@@ -3,8 +3,8 @@
 ## Active: Tiger 2000 and Ben Hogan
 
 - Repository/worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`.
-- Branch: `feat/historical-player-capture-11226`; implementation commit: SELF.
-- PR: not created. Epics: #11226 (Tiger), #11229 (Hogan); shared runner: #11230.
+- Branch: `feat/historical-player-capture-11226`; implementation commit: ab2c869813a2b2be2f14b512ee34647694614377; handoff refresh: SELF.
+- PR: https://github.com/D-sorganization/UpstreamDrift/pull/11231; open, CI pending. Epics: #11226 (Tiger), #11229 (Hogan); shared runner: #11230.
 - Objective: complete both source-grounded historical reconstructions and make future players repeatable.
 - Implemented: bounded PyAV streaming, existing SourceAsset/FrameIdentity contracts,
   existing MediaPipe estimator, normalized image XY/visibility/missingness, exact
@@ -37,9 +37,9 @@
 1. Final Tiger/Hogan receipts collected; inspect dense source-bound landmark
    overlays and split each window at every cut/identity change. Contact-sheet
    inspection shows foreground body tracking, with errors/low-confidence joints.
-2. Process the higher-resolution Hogan source, select clean continuous swings,
+2. Higher-resolution Hogan source processed: 899 frames, 892 detections; select clean continuous swings,
    and review P1–P10 checkpoint and impact intervals.
-3. Publish the focused shared-runner PR after local checks; monitor CI using the
+3. Monitor published shared-runner PR #11231 using the
    repository ci-watch-and-fix skill. Keep parent epics open.
 4. Resolve recording/event lineage, playback scale and usage permissions; fit
    cameras and subject anthropometry with declared priors/uncertainty.
@@ -921,3 +921,14 @@ main and GS3DX branch evidence, metrics and licensing budgets, and Shadow Tracke
 integration/qualification gaps. No implementation issues claimed or closed.
 375 focused tests and full Ruff lint/format passed. Board approval and native
 qualification are separate next steps; preserve the active #10979 work.
+
+## Current Coordination Limits
+
+Issue leases succeeded. The presence inbox reported incomplete board evidence
+(page limit and malformed comments); absence of messages is not evidence that
+the repository is unoccupied. This owned isolated worktree preserves all others.
+The original root handoff already exceeded its 150-line guideline; unrelated
+active sections were preserved. No full-repository pytest/coverage run was made;
+364 scoped tests and all configured pre-push checks (including mypy, Bandit and
+core/DbC/utils tests) passed. A guessed SPEC test path was absent; no SPEC-test
+pass is claimed. Required commit and design-manual governance hooks passed.

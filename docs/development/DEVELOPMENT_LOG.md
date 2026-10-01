@@ -23,9 +23,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #11230; epics #11226 and #11229
 - **Branch:** `feat/historical-player-capture-11226`
-- **PR:** not created
+- **PR:** [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231)
 - **Paths:** `src/shared/python/shadow_tracker/historical_capture.py`, `scripts/historical_capture.py`, `docs/development/historical-capture-procedure.md`
-- **Last verified:** 2026-10-01 at SELF — 364 Shadow Tracker tests passed; final Hogan 750/739 detected and Tiger 2000/1994 detected; observations only.
+- **Last verified:** 2026-10-01 at ab2c869813a2b2be2f14b512ee34647694614377 — 364 Shadow Tracker tests passed; final Hogan 750/739 detected and Tiger 2000/1994 detected; observations only.
 - **Summary:** Streaming source-bound detector observations; final reproducibility runs completed; dense review pending. Camera/time calibration, dense 3D fitting, native parity, dynamics, held-out evaluation and website integration remain open.
 
 ### DL-#11095 — Qualify OpenSim Native Dual-Club Dynamics and Replay
