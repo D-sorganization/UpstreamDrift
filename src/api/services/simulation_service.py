@@ -819,6 +819,25 @@ class SimulationService:
             run.status = "failed"
             raise
 
+    def _execute_analysis_phase(
+        self,
+        recorder: Any,
+        analysis_config: dict[str, Any] | None,
+        frames: int,
+    ) -> tuple[dict[str, Any] | None, str]:
+        results, status, summary = None, "not_requested", None
+        if analysis_config:
+            results = self._perform_analysis(recorder, analysis_config)
+            status = results.get("_status", "completed") if results else "completed"
+            if isinstance(results, dict) and results:
+                summary = "analysis: " + ", ".join(
+                    sorted(str(k) for k in results if not str(k).startswith("_"))
+                )
+        self._finish_last_run(
+            status="completed", frames=frames, analysis_summary=summary
+        )
+        return results, status
+
     def _execute_sync_pipeline(
         self,
         request: SimulationRequest,
@@ -831,11 +850,7 @@ class SimulationService:
 
         timing_plan = self._validate_simulation_timing(request, engine=engine)
         recorder = self._create_and_run_recorder(
-            engine,
-            request,
-            run_stats=run.stats,
-            run=run,
-            timing_plan=timing_plan,
+            engine, request, run_stats=run.stats, run=run, timing_plan=timing_plan
         )
 
         simulation_data = self._extract_simulation_data(recorder)
@@ -860,21 +875,8 @@ class SimulationService:
             is_mock=is_mock_rec,
         )
 
-        analysis_results = None
-        analysis_status = "not_requested"
-        if request.analysis_config:
-            analysis_results = self._perform_analysis(recorder, request.analysis_config)
-            analysis_status = analysis_results.get("_status", "completed")
-
-        analysis_summary = None
-        if isinstance(analysis_results, dict) and analysis_results:
-            analysis_summary = "analysis: " + ", ".join(
-                sorted(str(k) for k in analysis_results if not str(k).startswith("_"))
-            )
-        self._finish_last_run(
-            status="completed",
-            frames=timing_plan.retained_samples,
-            analysis_summary=analysis_summary,
+        analysis_results, analysis_status = self._execute_analysis_phase(
+            recorder, request.analysis_config, timing_plan.retained_samples
         )
 
         export_paths, persistence_status, persistence_error = (
@@ -887,19 +889,20 @@ class SimulationService:
             )
         )
 
+        meta = {
+            "engine": request.engine_type,
+            "model": str(request.model_path) if request.model_path else None,
+            "duration": timing_plan.integrated_duration,
+            "requested_duration": request.duration,
+            "integrated_duration": timing_plan.integrated_duration,
+            "step_count": timing_plan.step_count,
+            "retained_samples": timing_plan.retained_samples,
+        }
         self.register_completed_run(
             run_id=run_id,
             engine=engine,
             recorder=recorder,
-            meta={
-                "engine": request.engine_type,
-                "model": str(request.model_path) if request.model_path else None,
-                "duration": timing_plan.integrated_duration,
-                "requested_duration": request.duration,
-                "integrated_duration": timing_plan.integrated_duration,
-                "step_count": timing_plan.step_count,
-                "retained_samples": timing_plan.retained_samples,
-            },
+            meta=meta,
             simulation_data=simulation_data,
             analysis_results=analysis_results,
         )

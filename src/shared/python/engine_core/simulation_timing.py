@@ -74,6 +74,92 @@ def engine_supports_variable_step(engine: Any) -> bool:
     return True
 
 
+def _build_divisible_plan(
+    duration: float, timestep: float, step_count: int
+) -> SimulationTimingPlan:
+    step_sizes = (timestep,) * step_count
+    return SimulationTimingPlan(
+        requested_duration=duration,
+        timestep=timestep,
+        step_count=step_count,
+        step_sizes=step_sizes,
+        integrated_duration=round(step_count * timestep, 9),
+        retained_samples=step_count + 1,
+        has_remainder_step=False,
+        remainder_dt=None,
+        is_divisible=True,
+    )
+
+
+def _build_substep_plan(
+    duration: float, timestep: float, can_variable_step: bool
+) -> SimulationTimingPlan:
+    if can_variable_step:
+        return SimulationTimingPlan(
+            requested_duration=duration,
+            timestep=timestep,
+            step_count=1,
+            step_sizes=(duration,),
+            integrated_duration=duration,
+            retained_samples=2,
+            has_remainder_step=True,
+            remainder_dt=duration,
+            is_divisible=False,
+        )
+    return SimulationTimingPlan(
+        requested_duration=duration,
+        timestep=timestep,
+        step_count=0,
+        step_sizes=(),
+        integrated_duration=0.0,
+        retained_samples=1,
+        has_remainder_step=False,
+        remainder_dt=None,
+        is_divisible=False,
+    )
+
+
+def _build_multistep_plan(
+    duration: float, timestep: float, can_variable_step: bool
+) -> SimulationTimingPlan:
+    n_full = int(math.floor(duration / timestep))
+    rem = round(duration - (n_full * timestep), 12)
+
+    if math.isclose(rem, 0.0, abs_tol=1e-12) or math.isclose(
+        rem, timestep, abs_tol=1e-12
+    ):
+        step_count = n_full if math.isclose(rem, 0.0, abs_tol=1e-12) else n_full + 1
+        return _build_divisible_plan(duration, timestep, step_count)
+
+    if can_variable_step and rem > 0:
+        step_count = n_full + 1
+        step_sizes = (timestep,) * n_full + (rem,)
+        return SimulationTimingPlan(
+            requested_duration=duration,
+            timestep=timestep,
+            step_count=step_count,
+            step_sizes=step_sizes,
+            integrated_duration=round(duration, 9),
+            retained_samples=step_count + 1,
+            has_remainder_step=True,
+            remainder_dt=rem,
+            is_divisible=False,
+        )
+
+    step_count = n_full
+    return SimulationTimingPlan(
+        requested_duration=duration,
+        timestep=timestep,
+        step_count=step_count,
+        step_sizes=(timestep,) * step_count,
+        integrated_duration=round(n_full * timestep, 9),
+        retained_samples=step_count + 1,
+        has_remainder_step=False,
+        remainder_dt=None,
+        is_divisible=False,
+    )
+
+
 def compute_simulation_timing(
     duration: float,
     timestep: float,
@@ -110,110 +196,16 @@ def compute_simulation_timing(
 
     duration = float(duration)
     timestep = float(timestep)
-
-    # Check if backend permits variable final steps
     can_variable_step = allow_remainder_step and engine_supports_variable_step(engine)
 
-    # 1. Divisible check with floating-point tolerance (e.g. 0.03 / 0.01 = 2.9999999999999996)
     ratio = duration / timestep
     rounded_steps = round(ratio)
     if rounded_steps > 0 and math.isclose(
         rounded_steps * timestep, duration, rel_tol=1e-9, abs_tol=1e-12
     ):
-        step_count = rounded_steps
-        step_sizes = (timestep,) * step_count
-        integrated_duration = round(step_count * timestep, 9)
-        return SimulationTimingPlan(
-            requested_duration=duration,
-            timestep=timestep,
-            step_count=step_count,
-            step_sizes=step_sizes,
-            integrated_duration=integrated_duration,
-            retained_samples=step_count + 1,
-            has_remainder_step=False,
-            remainder_dt=None,
-            is_divisible=True,
-        )
+        return _build_divisible_plan(duration, timestep, rounded_steps)
 
-    # 2. Sub-step duration (duration < timestep)
     if duration < timestep:
-        if can_variable_step:
-            step_sizes = (duration,)
-            return SimulationTimingPlan(
-                requested_duration=duration,
-                timestep=timestep,
-                step_count=1,
-                step_sizes=step_sizes,
-                integrated_duration=duration,
-                retained_samples=2,
-                has_remainder_step=True,
-                remainder_dt=duration,
-                is_divisible=False,
-            )
-        # Fixed-step only cannot step smaller than timestep; report 0 steps or 1 full step
-        return SimulationTimingPlan(
-            requested_duration=duration,
-            timestep=timestep,
-            step_count=0,
-            step_sizes=(),
-            integrated_duration=0.0,
-            retained_samples=1,
-            has_remainder_step=False,
-            remainder_dt=None,
-            is_divisible=False,
-        )
+        return _build_substep_plan(duration, timestep, can_variable_step)
 
-    # 3. Non-divisible duration (duration > timestep)
-    n_full = int(math.floor(duration / timestep))
-    rem = round(duration - (n_full * timestep), 12)
-
-    # Check if remainder is effectively zero within float precision
-    if math.isclose(rem, 0.0, abs_tol=1e-12) or math.isclose(
-        rem, timestep, abs_tol=1e-12
-    ):
-        step_count = n_full if math.isclose(rem, 0.0, abs_tol=1e-12) else n_full + 1
-        step_sizes = (timestep,) * step_count
-        integrated_duration = round(step_count * timestep, 9)
-        return SimulationTimingPlan(
-            requested_duration=duration,
-            timestep=timestep,
-            step_count=step_count,
-            step_sizes=step_sizes,
-            integrated_duration=integrated_duration,
-            retained_samples=step_count + 1,
-            has_remainder_step=False,
-            remainder_dt=None,
-            is_divisible=True,
-        )
-
-    if can_variable_step and rem > 0:
-        step_count = n_full + 1
-        step_sizes = (timestep,) * n_full + (rem,)
-        integrated_duration = round(duration, 9)
-        return SimulationTimingPlan(
-            requested_duration=duration,
-            timestep=timestep,
-            step_count=step_count,
-            step_sizes=step_sizes,
-            integrated_duration=integrated_duration,
-            retained_samples=step_count + 1,
-            has_remainder_step=True,
-            remainder_dt=rem,
-            is_divisible=False,
-        )
-
-    # Fixed step only: execute n_full steps, truthfully report executed horizon
-    step_count = n_full
-    step_sizes = (timestep,) * step_count
-    integrated_duration = round(n_full * timestep, 9)
-    return SimulationTimingPlan(
-        requested_duration=duration,
-        timestep=timestep,
-        step_count=step_count,
-        step_sizes=step_sizes,
-        integrated_duration=integrated_duration,
-        retained_samples=step_count + 1,
-        has_remainder_step=False,
-        remainder_dt=None,
-        is_divisible=False,
-    )
+    return _build_multistep_plan(duration, timestep, can_variable_step)
