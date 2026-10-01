@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import numpy as np
 
 # Above this absolute dot product the two quaternions are nearly identical and
@@ -62,7 +63,9 @@ def _single_rotmat_to_quat(r: np.ndarray) -> np.ndarray:
         y = (m12 + m21) / s
         z = 0.25 * s
     q = np.array([w, x, y, z], dtype=np.float64)
-    norm = np.linalg.norm(q)
+    norm = math.sqrt(
+        np.dot(q, q)
+    )  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm
     if norm == 0.0:
         return np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
     return q / norm
@@ -97,7 +100,9 @@ def slerp(q0: np.ndarray, q1: np.ndarray, t: float) -> np.ndarray:
         dot = -dot
     if dot > SLERP_LERP_FALLBACK_THRESHOLD:
         result = a + t * (b - a)
-        return result / np.linalg.norm(result)
+        return result / math.sqrt(
+            np.dot(result, result)
+        )  # ⚡ Bolt: math.sqrt(np.dot) is faster than np.linalg.norm
     theta_0 = np.arccos(dot)
     theta = theta_0 * t
     sin_theta = np.sin(theta)
@@ -128,6 +133,7 @@ def slerp_series(
         span = source_t[j + 1] - source_t[j]
         alpha = 0.0 if span == 0.0 else float((t - source_t[j]) / span)
         out[i] = slerp(source_q[j], source_q[j + 1], alpha)
-    norms = np.sqrt(np.einsum("ij,ij->i", out, out))[:, np.newaxis]
+    # ⚡ Bolt: np.sum(**2) is faster than einsum for this shape
+    norms = np.sqrt(np.sum(out**2, axis=1, keepdims=True))
     norms[norms == 0.0] = 1.0
     return out / norms
