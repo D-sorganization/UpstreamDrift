@@ -201,3 +201,6 @@
 **Learning:** Using `np.linalg.norm(..., axis=1)` for computing Euclidean distances along an axis creates temporary arrays and incurs NumPy dispatch overhead. Replacing it with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is roughly 1.7x faster for these operations, significantly speeding up inner loops calculating residuals.
 **Action:** Always prefer `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.sum(diff * diff, axis=1))` when calculating Euclidean norms across rows in performance-critical code over `np.linalg.norm(..., axis=1)`.
 
+## 2026-10-01 - math.sqrt(ndarray.dot) vs np.linalg.norm
+**Learning:** For small 1D arrays, `math.sqrt(x.dot(x))` is significantly faster than `np.linalg.norm`.
+**Action:** Replace `np.linalg.norm` with `math.sqrt(x.dot(x))` for small 1D vectors in inner loops for performance boosts.
