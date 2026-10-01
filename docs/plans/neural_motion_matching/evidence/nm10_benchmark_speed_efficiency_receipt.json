@@ -61,7 +61,7 @@
         "wall_time_break_even_queries": 8109,
         "dollar_break_even_queries": 4000
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 4.52
     },
     {
@@ -106,7 +106,7 @@
         "wall_time_break_even_queries": 8511,
         "dollar_break_even_queries": 4286
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 5.15
     },
     {
@@ -151,7 +151,7 @@
         "wall_time_break_even_queries": 9412,
         "dollar_break_even_queries": 4737
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 5.14
     }
   ],

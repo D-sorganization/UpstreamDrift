@@ -5,9 +5,12 @@
 **Schema:** `neural-benchmark-speed-efficiency/1.0.0`
 **Receipt:** `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json`
 
+> [!WARNING] > **DIAGNOSTIC ONLY — UNQUALIFIED HISTORICAL EVIDENCE (R06, #11146)**
+> This report documents diagnostic data from historical receipt `nm10_benchmark_speed_efficiency_receipt.json` (`status: DIAGNOSTIC`), which contains unmeasured baseline and cost estimates relabelled under #10960. It does NOT represent qualified production benchmarks or achieved promotion. Native checkpoint verification requires real weights and rollout verification before production qualification claims can be made.
+
 ## 1. Executive Summary
 
-NM-10 delivers the immutable comparative benchmark suite evaluating matched swing speedup, data efficiency, and financial/compute break-even economics across the 5 canonical techniques:
+NM-10 delivers the comparative benchmark suite evaluating matched swing speedup, data efficiency, and financial/compute break-even economics across the 5 canonical techniques:
 
 1. `cold_solver`: Classical iterative trajectory optimization / inverse kinematics initialized from rest.
 2. `retrieval_solver`: Nearest-neighbor trajectory database lookup followed by classical polish.
@@ -21,6 +24,7 @@ All measurements strictly enforce:
 - Non-positive savings ($\le 0$) result in an explicit `no break-even` designation.
 - Hardware synchronization for GPU timing measurements.
 - Frozen promotion gates ($\ge 2\times$ median acceleration, non-worse p95 latency, non-worse accepted quality).
+- Diagnostic receipts cannot advertise production qualification or achieved promotion (#11146).
 
 ## 2. Comparative Method Benchmark Results
 
@@ -29,16 +33,16 @@ All measurements strictly enforce:
 | `pendulum_2dof`                  | `cold_solver`              | 0.190              | 0.320           | 0.92            | 14.5             | 1.00x     | BASELINE              |
 | `pendulum_2dof`                  | `retrieval_solver`         | 0.110              | 0.210           | 0.90            | 7.8              | 1.73x     | RESEARCH_ONLY         |
 | `pendulum_2dof`                  | `existing_neural`          | 0.025              | 0.040           | 0.42            | 0.0              | 7.60x     | REJECTED (Unverified) |
-| `pendulum_2dof`                  | `forward_surrogate_polish` | 0.085              | 0.160           | 0.91            | 5.2              | 2.24x     | PROMOTED              |
-| `pendulum_2dof`                  | `learned_proposal_polish`  | **0.042**          | **0.088**       | **0.94**        | **2.2**          | **4.52x** | **PROMOTED**          |
+| `pendulum_2dof`                  | `forward_surrogate_polish` | 0.085              | 0.160           | 0.91            | 5.2              | 2.24x     | DIAGNOSTIC            |
+| `pendulum_2dof`                  | `learned_proposal_polish`  | **0.042**          | **0.088**       | **0.94**        | **2.2**          | **4.52x** | **DIAGNOSTIC**        |
 | `pendulum_3dof`                  | `cold_solver`              | 0.350              | 0.620           | 0.88            | 22.0             | 1.00x     | BASELINE              |
 | `pendulum_3dof`                  | `retrieval_solver`         | 0.190              | 0.390           | 0.85            | 11.2             | 1.84x     | RESEARCH_ONLY         |
-| `pendulum_3dof`                  | `forward_surrogate_polish` | 0.140              | 0.280           | 0.86            | 7.5              | 2.50x     | PROMOTED              |
-| `pendulum_3dof`                  | `learned_proposal_polish`  | **0.068**          | **0.142**       | **0.91**        | **3.1**          | **5.15x** | **PROMOTED**          |
+| `pendulum_3dof`                  | `forward_surrogate_polish` | 0.140              | 0.280           | 0.86            | 7.5              | 2.50x     | DIAGNOSTIC            |
+| `pendulum_3dof`                  | `learned_proposal_polish`  | **0.068**          | **0.142**       | **0.91**        | **3.1**          | **5.15x** | **DIAGNOSTIC**        |
 | `constrained_golfer_8coord_5dof` | `cold_solver`              | 0.950              | 1.850           | 0.82            | 45.0             | 1.00x     | BASELINE              |
 | `constrained_golfer_8coord_5dof` | `retrieval_solver`         | 0.480              | 0.980           | 0.80            | 18.5             | 1.98x     | RESEARCH_ONLY         |
-| `constrained_golfer_8coord_5dof` | `forward_surrogate_polish` | 0.380              | 0.740           | 0.81            | 12.0             | 2.50x     | PROMOTED              |
-| `constrained_golfer_8coord_5dof` | `learned_proposal_polish`  | **0.185**          | **0.380**       | **0.87**        | **5.4**          | **5.14x** | **PROMOTED**          |
+| `constrained_golfer_8coord_5dof` | `forward_surrogate_polish` | 0.380              | 0.740           | 0.81            | 12.0             | 2.50x     | DIAGNOSTIC            |
+| `constrained_golfer_8coord_5dof` | `learned_proposal_polish`  | **0.185**          | **0.380**       | **0.87**        | **5.4**          | **5.14x** | **DIAGNOSTIC**        |
 
 ## 3. Data Efficiency (Active vs. Random Acquisition)
 
