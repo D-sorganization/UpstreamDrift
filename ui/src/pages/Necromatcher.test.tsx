@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, useNavigate } from 'react-router';
 import { NecromatcherPage } from './Necromatcher';
 
 const mocks = vi.hoisted(() => ({ players: vi.fn(), swings: vi.fn(), assets: vi.fn(), frame: vi.fn(), createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn() }));
@@ -12,7 +12,11 @@ vi.mock('@/api/necromatcher', () => ({
   createPlayer: mocks.createPlayer, createSwing: mocks.createSwing, importAsset: mocks.importAsset,
 }));
 function show(initial = '/tools/necromatcher') {
-  render(<MemoryRouter initialEntries={[initial]}><NecromatcherPage /></MemoryRouter>);
+  render(<MemoryRouter initialEntries={[initial]}><Navigation /><NecromatcherPage /></MemoryRouter>);
+}
+function Navigation() {
+  const navigate = useNavigate();
+  return <button onClick={() => navigate('/tools/necromatcher?player=tiger-woods&swing=tiger-practice')}>Recall Tiger URL</button>;
 }
 beforeEach(() => {
   Object.values(mocks).forEach((mock) => mock.mockReset());
@@ -58,5 +62,35 @@ describe('Necromatcher historical workspace', () => {
   it('shows actionable loading failure', async () => {
     mocks.players.mockRejectedValue(new Error('Local library unavailable')); show();
     expect(await screen.findByRole('alert')).toHaveTextContent('Local library unavailable');
+  });
+  it('hides previous player assets immediately when recalling another URL', async () => {
+    const user = userEvent.setup();
+    show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice');
+    await screen.findByRole('button', {name: /capture-v1/});
+    await screen.findByRole('button', {name: 'Hogan Practice'});
+    mocks.swings.mockImplementation(() => new Promise(() => {}));
+    mocks.assets.mockImplementation(() => new Promise(() => {}));
+    await user.click(screen.getByRole('button', {name: 'Recall Tiger URL'}));
+    expect(screen.queryByRole('button', {name: /capture-v1/})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Hogan Practice'})).not.toBeInTheDocument();
+  });
+  it('stops frame loading on failure and retries the same recalled frame', async () => {
+    mocks.frame.mockRejectedValueOnce(new Error('Capture archive temporarily unavailable'));
+    const user = userEvent.setup();
+    show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice&capture=capture-v1');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Capture archive temporarily unavailable');
+    expect(screen.queryByText('Loading Source Frame…')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', {name: 'Retry Loading'}));
+    expect(await screen.findByAltText('Historical Source Frame')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(mocks.frame).toHaveBeenCalledTimes(2);
+  });
+  it('does not expose another player swing through a mismatched saved URL', async () => {
+    show('/tools/necromatcher?player=tiger-woods&swing=hogan-practice&capture=capture-v1');
+    await screen.findByRole('button', {name: 'Tiger Practice'});
+    expect(mocks.assets).not.toHaveBeenCalled();
+    expect(mocks.frame).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', {name: 'Export Swing Package'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Import Version'})).not.toBeInTheDocument();
   });
 });
