@@ -76,6 +76,7 @@ def app_with_service(
     service = SimulationService(mock_engine_manager)
     test_app = FastAPI()
     test_app.state.limiter = limiter
+    limiter.enabled = False
     test_app.include_router(router)
     test_app.dependency_overrides[get_simulation_service] = lambda: service
     test_app.dependency_overrides[get_task_manager] = lambda: task_manager
