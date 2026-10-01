@@ -1,3 +1,20 @@
+## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
+
+Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
+- **Compiled Budget Enforcement & Diagnostics (`src/shared/python/motion_matching/simscape_block_budget.py`)**:
+  - `BlockBudgetProfile`: execution and verification profiles (`PRODUCTION`, `AUDIT`, `INSTRUMENTED`).
+  - Strict budget ceilings: actual R2025b production count <= 975 with mandatory 25-block instrumentation reserve documented independently of the 1,000-block Home license ceiling.
+  - Audit profile: exact required audit variant compiles <= 1,000 nonvirtual blocks with diagnostic instrumentation.
+  - Fail-closed validation on over-budget models: deliberately over-budget clones fail with actionable diagnostics reporting the exact error, license limit, headroom, and offending subsystems ranked by compilation growth.
+  - Observability contract (`ObservabilityEvidenceType`): ensures no consumer loses mass, COM, energy, contact, or closure evidence when sensors are removed. Dropping consumed sensors without replacement offline diagnostics is rejected with actionable diagnostics identifying the orphaned consumer.
+  - Subsystem breakdown (`SubsystemBlockCount`): requires explicit per-subsystem uncompiled and compiled counts matching totals, rejecting inferred icon counts.
+  - JSON parser: `parse_matlab_block_budget_json` deserializes MATLAB-generated block budget JSON into typed reports with canonical observability manifests.
+- **MATLAB Exploratory Infrastructure (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`)**:
+  - `gs3dx_block_budget.m`: updated to categorize nonvirtual blocks by top-level subsystem for both uncompiled and compiled diagrams, computing compilation growth and exporting structured subsystem tables.
+  - Actionable compilation error handling: wraps license ceiling compile errors with actionable remediation steps.
+- **Test Suite (`tests/unit/motion_matching/test_simscape_block_budget.py`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_block_budget.m`)**:
+  - Regression tests for production <= 975 ceiling with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, missing observability evidence detection, orphaned consumer detection on sensor removal, empty/inconsistent subsystem rejection, and roundtrip JSON parsing.
+
 ## Publish a Best-Candidate Viewer With Honest Residuals (MMR-16, #11102)
 Specifies the best-candidate viewer, honest marker residuals, drive mode filtering, visual presets, board-ready video/still export, and web/API parity:
 - **Observation Immutability & Residual Data Structures (`src/tools/tour_matching_viewer/core.py`)**:
@@ -7385,11 +7402,12 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11097 | [MMR-11] Repair reduced-model and club-only product claims: enforce exploratory/disqualified pendulum receipts, block matrix completion on unresolved required cells with required_model_ids support, reject spatial planar floor failure before optimization, verify raw-to-package reproduction, and enforce labeled inferred body posture (#11097). |
+| 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
+| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
+| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
 | 2026-10-01 | #11196 | [MMR-17] Establish Clean-Host End-to-End and Native Release Gates (#11103): clean-installation bounded journeys, native receipt ingestion across all six engines (opensim, myosuite, drake, mujoco, pinocchio, simscape), adverse path rejection (tampered package, missing engine, unsupported model, corrupt capture), and fail-closed release qualification matrix. |
-| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
 | 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
 | 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
 | 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |
