@@ -73,6 +73,11 @@ class ShadowTrackerReviewModel:
         self._dirty = False
 
     @property
+    def is_cancelled(self) -> bool:
+        """Return True if underlying service operation was cancelled."""
+        return self.service.is_cancelled
+
+    @property
     def frame_count(self) -> int:
         """Number of frames in the current review session."""
         return len(self.service.get_observations())
@@ -379,7 +384,7 @@ class ShadowTrackerWidget(QWidget):
             return
         try:
             obs = self.import_video(video_file)
-            if self.model.service.is_cancelled:
+            if self.model.is_cancelled:
                 self.lbl_status.setText(
                     f"Import cancelled: {len(obs)} frames decoded from {Path(video_file).name}"
                 )

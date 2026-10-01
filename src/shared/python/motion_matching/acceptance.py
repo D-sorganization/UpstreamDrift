@@ -1,7 +1,8 @@
 """Physical acceptance contract and evaluation engine for tour motion matching (MS-01, #10322).
 
 Defines the single source of truth for physical and kinematic acceptance across all
-engines and horizons (G1, G2, G3) under the Matched Swing Program.
+engines and horizons (G1, G2, G3) under the Matched Swing Program, including
+continuous-replay qualification evaluation (MMR-07, #11107).
 """
 
 from __future__ import annotations
