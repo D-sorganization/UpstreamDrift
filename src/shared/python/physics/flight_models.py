@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -530,40 +530,11 @@ class BallFlightModel(ABC):
 
         def wrapped_deriv(t: float, y: np.ndarray) -> np.ndarray:
             last_state[0] = (float(t), y.copy())
-            if cancellation_requested is not None:
-                try:
-                    requested = cancellation_requested()
-                    if type(requested) is not bool:
-                        raise TypeError(
-                            "cancellation_requested must return an exact bool"
-                        )
-                except Exception as error:
-                    if not isinstance(error, FlightSimulationCancelled):
-                        raise FlightCancellationCallbackError(
-                            "flight cancellation callback failed"
-                        ) from error
-                    raise
-                if requested:
-                    raise FlightSimulationCancelled("flight simulation cancelled")
+            _check_flight_cancellation(cancellation_requested)
             return deriv_func(t, y)
 
         try:
-            if cancellation_requested is not None:
-                try:
-                    requested_initial = cancellation_requested()
-                    if type(requested_initial) is not bool:
-                        raise TypeError(
-                            "cancellation_requested must return an exact bool"
-                        )
-                except Exception as error:
-                    if not isinstance(error, FlightSimulationCancelled):
-                        raise FlightCancellationCallbackError(
-                            "flight cancellation callback failed"
-                        ) from error
-                    raise
-                if requested_initial:
-                    raise FlightSimulationCancelled("flight simulation cancelled")
-
+            _check_flight_cancellation(cancellation_requested)
             sol = solve_ivp(
                 wrapped_deriv,
                 (0, max_time),
@@ -587,36 +558,8 @@ class BallFlightModel(ABC):
                 result=partial_result,
             ) from exc
 
-        success = getattr(sol, "success", True)
-        status = getattr(sol, "status", 0)
-        t_events = getattr(sol, "t_events", None)
-
-        if not success or status < 0:
-            termination = FlightTermination.SOLVER_FAILED
-            terminal_event = False
-            actual_horizon = float(sol.t[-1]) if len(sol.t) > 0 else 0.0
-        elif status == 1 and t_events and len(t_events[0]) > 0:
-            termination = FlightTermination.LANDED
-            terminal_event = True
-            actual_horizon = float(t_events[0][0])
-        elif status == 1:
-            termination = FlightTermination.LANDED
-            terminal_event = True
-            actual_horizon = float(sol.t[-1])
-        else:
-            termination = FlightTermination.TIME_LIMIT
-            terminal_event = False
-            actual_horizon = float(sol.t[-1])
-
-        t_eval = np.arange(0, sol.t[-1], dt)
-        assert sol.sol is not None
-        points = [
-            TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
-        ]
-        if sol.t[-1] not in t_eval:
-            points.append(
-                TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1])
-            )
+        termination, terminal_event, actual_horizon = _determine_ode_termination(sol)
+        points = _extract_ode_trajectory_points(sol, dt)
 
         return self._compute_metrics(
             points,
@@ -624,6 +567,52 @@ class BallFlightModel(ABC):
             terminal_event=terminal_event,
             actual_horizon=actual_horizon,
         )
+
+
+def _check_flight_cancellation(
+    cancellation_requested: Callable[[], bool] | None,
+) -> None:
+    """Evaluate cooperative cancellation callback with fail-closed error handling."""
+    if cancellation_requested is None:
+        return
+    try:
+        requested = cancellation_requested()
+        if type(requested) is not bool:
+            raise TypeError("cancellation_requested must return an exact bool")
+    except Exception as error:
+        if not isinstance(error, FlightSimulationCancelled):
+            raise FlightCancellationCallbackError(
+                "flight cancellation callback failed"
+            ) from error
+        raise
+    if requested:
+        raise FlightSimulationCancelled("flight simulation cancelled")
+
+
+def _determine_ode_termination(sol: Any) -> tuple[FlightTermination, bool, float]:
+    """Inspect ODE solver status and resolve flight termination category and horizon."""
+    success = getattr(sol, "success", True)
+    status = getattr(sol, "status", 0)
+    t_events = getattr(sol, "t_events", None)
+
+    if not success or status < 0:
+        actual_horizon = float(sol.t[-1]) if len(sol.t) > 0 else 0.0
+        return FlightTermination.SOLVER_FAILED, False, actual_horizon
+    if status == 1 and t_events and len(t_events[0]) > 0:
+        return FlightTermination.LANDED, True, float(t_events[0][0])
+    if status == 1:
+        return FlightTermination.LANDED, True, float(sol.t[-1])
+    return FlightTermination.TIME_LIMIT, False, float(sol.t[-1])
+
+
+def _extract_ode_trajectory_points(sol: Any, dt: float) -> list[TrajectoryPoint]:
+    """Sample dense ODE output into trajectory points at fixed step intervals."""
+    t_eval = np.arange(0, sol.t[-1], dt)
+    assert sol.sol is not None
+    points = [TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval]
+    if sol.t[-1] not in t_eval:
+        points.append(TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1]))
+    return points
 
 
 class WaterlooPennerModel(BallFlightModel):
