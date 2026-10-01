@@ -34,6 +34,8 @@ __all__ = [
     "RunDisposition",
     "format_neural_explanation",
     "get_neural_model_availability",
+    "open_results_browser_dialog",
+    "open_tour_matching_viewer",
     "setup_neural_group",
 ]
 
@@ -381,3 +383,55 @@ def setup_neural_group(
     layout.addRow(fallback_cb)
     layout.addRow("Availability:", expl_lbl)
     return box, mode_cb, model_cb, fallback_cb, expl_lbl
+
+
+def open_results_browser_dialog(parent: Any, log_callback: Any) -> Any:
+    """Open or show the Matched Swing Results Browser dialog."""
+    try:
+        from PyQt6.QtWidgets import (
+            QDialog,
+            QTableWidget,
+            QTableWidgetItem,
+            QVBoxLayout,
+        )
+
+        from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
+
+        model = MatchedSwingBrowserModel()
+        dialog = QDialog(parent)
+        dialog.setWindowTitle("Matched Swing Results Browser")
+        dialog.resize(800, 400)
+        d_layout = QVBoxLayout(dialog)
+        table = QTableWidget(dialog)
+        rows = model.load_ledger()
+        table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(
+            ["Receipt Path", "Engine", "Lane", "Capture", "Verdict"]
+        )
+        table.setRowCount(len(rows))
+        for i, r in enumerate(rows):
+            table.setItem(i, 0, QTableWidgetItem(str(r.receipt_path)))
+            table.setItem(i, 1, QTableWidgetItem(str(r.engine)))
+            table.setItem(i, 2, QTableWidgetItem(str(r.lane)))
+            table.setItem(i, 3, QTableWidgetItem(str(r.capture or "")))
+            verdict = model.extract_verdict_string(r)
+            table.setItem(i, 4, QTableWidgetItem(verdict))
+        d_layout.addWidget(table)
+        dialog.show()
+        return dialog
+    except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
+        log_callback(f"Could not open results browser: {exc}\n")
+        return None
+
+
+def open_tour_matching_viewer(log_callback: Any) -> Any:
+    """Open or show the Tour Matching Viewer window."""
+    try:
+        from src.tools.tour_matching_viewer.gui import TourMatchingViewerWindow
+
+        viewer = TourMatchingViewerWindow()
+        viewer.show()
+        return viewer
+    except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
+        log_callback(f"Could not open viewer: {exc}\n")
+        return None

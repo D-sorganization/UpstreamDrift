@@ -55,6 +55,8 @@ from src.tools.motion_matching.controller import (
     MotionMatchingController,
     RunDisposition,
     format_neural_explanation,
+    open_results_browser_dialog,
+    open_tour_matching_viewer,
     setup_neural_group,
 )
 from src.tools.motion_matching.tour_baselines_presenter import (
@@ -153,25 +155,11 @@ class MotionMatchingWidget(QWidget):
 
         self.tabs = QTabWidget(self)
 
-        # Tab 1: Matching
-        match_widget = self._create_matching_tab()
-        self.tabs.addTab(match_widget, "Matching")
-
-        # Tab 2: Downswing experiment
-        exp_widget = self._create_experiment_tab()
-        self.tabs.addTab(exp_widget, "Downswing experiment")
-
-        # Tab 3: MJX
-        mjx_widget = self._create_mjx_tab()
-        self.tabs.addTab(mjx_widget, "MJX")
-
-        # Tab 4: Club-Only Excel (CO-09 #10613)
-        club_widget = self._create_club_only_tab()
-        self.tabs.addTab(club_widget, "Club-Only")
-
-        # Tab 5: Tour Baselines (TB-11 #10596)
-        baselines_widget = self._create_tour_baselines_tab()
-        self.tabs.addTab(baselines_widget, "Tour Baselines")
+        self.tabs.addTab(self._create_matching_tab(), "Matching")
+        self.tabs.addTab(self._create_experiment_tab(), "Downswing experiment")
+        self.tabs.addTab(self._create_mjx_tab(), "MJX")
+        self.tabs.addTab(self._create_club_only_tab(), "Club-Only")
+        self.tabs.addTab(self._create_tour_baselines_tab(), "Tour Baselines")
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
@@ -1145,45 +1133,13 @@ class MotionMatchingWidget(QWidget):
 
     def _on_open_results_browser(self) -> None:
         """Open or show the Matched Swing Results Browser dialog."""
-        try:
-            from PyQt6.QtWidgets import QDialog, QTableWidget, QTableWidgetItem
-
-            from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
-
-            model = MatchedSwingBrowserModel()
-            dialog = QDialog(self)
-            dialog.setWindowTitle("Matched Swing Results Browser")
-            dialog.resize(800, 400)
-            d_layout = QVBoxLayout(dialog)
-            table = QTableWidget(dialog)
-            rows = model.load_ledger()
-            table.setColumnCount(5)
-            table.setHorizontalHeaderLabels(
-                ["Receipt Path", "Engine", "Lane", "Capture", "Verdict"]
-            )
-            table.setRowCount(len(rows))
-            for i, r in enumerate(rows):
-                table.setItem(i, 0, QTableWidgetItem(str(r.receipt_path)))
-                table.setItem(i, 1, QTableWidgetItem(str(r.engine)))
-                table.setItem(i, 2, QTableWidgetItem(str(r.lane)))
-                table.setItem(i, 3, QTableWidgetItem(str(r.capture or "")))
-                verdict = model.extract_verdict_string(r)
-                table.setItem(i, 4, QTableWidgetItem(verdict))
-            d_layout.addWidget(table)
-            self._browser_window = dialog
-            dialog.show()
-        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
-            self.log.appendPlainText(f"Could not open results browser: {exc}\n")
+        self._browser_window = open_results_browser_dialog(
+            self, self.log.appendPlainText
+        )
 
     def _on_open_viewer(self) -> None:
         """Open or show the Tour Matching Viewer window."""
-        try:
-            from src.tools.tour_matching_viewer.gui import TourMatchingViewerWindow
-
-            self._viewer_window = TourMatchingViewerWindow()
-            self._viewer_window.show()
-        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
-            self.log.appendPlainText(f"Could not open viewer: {exc}\n")
+        self._viewer_window = open_tour_matching_viewer(self.log.appendPlainText)
 
 
 def get_dockable_ui() -> QMainWindow:
