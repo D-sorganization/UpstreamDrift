@@ -43,6 +43,22 @@ from src.shared.python.pose_interchange.services.myosuite import (
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def _isolate_pose_interchange_modules():
+    tracked = (
+        "src.shared.python.pose_interchange.adapters._base",
+        "src.shared.python.pose_interchange.canonical",
+        "src.shared.python.pose_interchange.services.myosuite",
+    )
+    saved = {m: sys.modules[m] for m in tracked if m in sys.modules}
+    try:
+        yield
+    finally:
+        for m in tracked:
+            sys.modules.pop(m, None)
+        sys.modules.update(saved)
+
+
 # ---- Fallback / mock-parity tests ------------------------------------------
 
 
