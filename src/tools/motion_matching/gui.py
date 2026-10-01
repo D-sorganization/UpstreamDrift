@@ -909,6 +909,7 @@ class MotionMatchingWidget(QWidget):
         self._request = self.request()
         self.log.clear()
         self.results.setText("Running matching pipeline...")
+        self.clear_neural_metrics()
         self._set_active_buttons(self.run_button, self.stop_button, running=True)
         commands = [
             pipeline.build_command(self._request),
@@ -1060,14 +1061,38 @@ class MotionMatchingWidget(QWidget):
 
         neural_info = summary.get("neural_inference") or metrics.get("neural_inference")
         if isinstance(neural_info, dict):
+            raw_status = neural_info.get("status")
+            is_preview = bool(
+                neural_info.get("is_preview")
+                or neural_info.get("is_preview_only", False)
+            )
+            # If status is omitted or empty (e.g. timing only), fail closed to UNVERIFIED (#11146)
+            if not raw_status:
+                status = "UNVERIFIED"
+            else:
+                status = str(raw_status).strip()
+                active_model = self.neural_model_selector.currentText().strip()
+                info_model = str(neural_info.get("model_id", "")).strip()
+                if info_model and active_model and info_model != active_model:
+                    status = "UNVERIFIED"
+
             self.update_neural_metrics(
-                status=str(neural_info.get("status", "NEURAL_ACCEPTED")),
-                is_preview=bool(neural_info.get("is_preview", False)),
+                status=status,
+                is_preview=is_preview,
                 confidence=neural_info.get("confidence"),
                 t_neural_s=float(neural_info.get("t_neural_s", 0.0)),
                 t_polish_s=float(neural_info.get("t_polish_s", 0.0)),
                 t_total_s=float(neural_info.get("t_total_s", 0.0)),
             )
+        else:
+            self.clear_neural_metrics()
+
+    def clear_neural_metrics(self) -> None:
+        """Clear neural-assisted status badge, empirical confidence, and time breakdown (R06, #11146)."""
+        self.neural_status_badge.setText("-")
+        self.neural_status_badge.setStyleSheet("font-weight: bold; color: gray;")
+        self.metric_neural_confidence.setText("-")
+        self.metric_time_breakdown.setText("-")
 
     def update_neural_metrics(
         self,
@@ -1079,21 +1104,27 @@ class MotionMatchingWidget(QWidget):
         t_polish_s: float = 0.0,
         t_total_s: float = 0.0,
     ) -> None:
-        """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626)."""
+        """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626, #11146)."""
+        status_upper = status.upper()
         if is_preview:
             self.neural_status_badge.setText(f"PREVIEW ({status})")
             self.neural_status_badge.setStyleSheet(
                 "font-weight: bold; color: darkorange; background-color: cornsilk; border-radius: 4px; padding: 2px 6px;"
             )
-        elif status in ("VERIFIED", "NEURAL_ACCEPTED"):
+        elif status_upper in ("VERIFIED", "NEURAL_ACCEPTED"):
             self.neural_status_badge.setText("VERIFIED")
             self.neural_status_badge.setStyleSheet(
                 "font-weight: bold; color: forestgreen; background-color: honeydew; border-radius: 4px; padding: 2px 6px;"
             )
-        elif status == "CLASSICAL_FALLBACK":
+        elif status_upper == "CLASSICAL_FALLBACK":
             self.neural_status_badge.setText("CLASSICAL FALLBACK")
             self.neural_status_badge.setStyleSheet(
                 "font-weight: bold; color: royalblue; background-color: aliceblue; border-radius: 4px; padding: 2px 6px;"
+            )
+        elif status_upper == "REJECTED":
+            self.neural_status_badge.setText("REJECTED")
+            self.neural_status_badge.setStyleSheet(
+                "font-weight: bold; color: crimson; background-color: mistyrose; border-radius: 4px; padding: 2px 6px;"
             )
         else:
             self.neural_status_badge.setText(status)
