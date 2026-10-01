@@ -113,6 +113,7 @@ class ReplayData:
     valid_mask: NDArray[np.bool_] | None = None
     coordinate_names: tuple[str, ...] | None = None
     drive_mode: str = "kinematic_prescribed"
+    marker_names: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         _make_readonly(self.time_s)
@@ -180,6 +181,41 @@ class ResidualSummary:
         if not observed:
             return 0.0
         return float(np.mean([fr.rms_error_m for fr in observed]))
+
+    def worst_frame_for_marker(self, marker: str | int) -> int:
+        """Return the discrete frame index with highest error for a given marker."""
+        if isinstance(marker, int):
+            idx = marker
+        else:
+            norm_marker = marker.strip().lower()
+            idx = -1
+            for i, name in enumerate(self.marker_names):
+                if name.strip().lower() == norm_marker:
+                    idx = i
+                    break
+            if idx == -1:
+                raise KeyError(f"Unknown marker name: {marker}")
+
+        best_frame = 0
+        best_val = -1.0
+        for f_idx, vec in enumerate(self.residual_vectors):
+            if idx < len(vec):
+                err = float(np.linalg.norm(vec[idx]))
+                if err > best_val:
+                    best_val = err
+                    best_frame = f_idx
+        return best_frame
+
+    def worst_frame_for_phase(self, phase: str) -> int:
+        """Return the discrete frame index with highest RMS within a specified swing phase."""
+        norm_phase = phase.strip().lower()
+        matching_frames = [
+            fr for fr in self.frame_residuals if norm_phase in fr.phase.lower()
+        ]
+        if not matching_frames:
+            return self.worst_frame_idx
+        worst_fr = max(matching_frames, key=lambda fr: fr.rms_error_m)
+        return worst_fr.frame_idx
 
 
 @dataclass(frozen=True)
@@ -653,26 +689,12 @@ def export_animation_gif(
         else (("default", replay),)
     )
 
-    frames: list[Image.Image] = []
+    frames: list[Any] = []
     for i in range(total_frames):
         _render_single_gif_frame(ax, spec, replays, i)
-        canvas.draw()
-        buf = canvas.buffer_rgba()
-        img = Image.frombuffer(
-            "RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1
-        )
-        frames.append(img.convert("RGB"))
+        frames.append(_capture_canvas_frame(canvas))
 
-    if frames:
-        duration_ms = max(10, int(1000 / max(1, fps)))
-        frames[0].save(
-            out_p,
-            save_all=True,
-            append_images=frames[1:],
-            duration=duration_ms,
-            loop=0,
-        )
-    return out_p
+    return _save_gif_frames(frames, out_p, fps)
 
 
 def _resolve_marker_names(
@@ -760,7 +782,9 @@ def compute_residual_summary(
     tm = replay.target_markers_m
     mm = replay.model_markers_m
     vm = replay.valid_mask
-    names = _resolve_marker_names(tm, mm, marker_names)
+    names = _resolve_marker_names(
+        tm, mm, marker_names or getattr(replay, "marker_names", None)
+    )
     top_idx, impact_idx, _ = _resolve_phase_boundaries(n_frames, event_indices)
 
     frame_residuals_list: list[FrameResidual] = []
@@ -871,21 +895,79 @@ def _render_still_geometry(ax: Any, vframe: ViewerFrame, engine_name: str) -> No
                 )
 
 
+def _setup_3d_axes(ax: Any) -> None:
+    """Setup standard 3D viewport limits and elevation/azimuth angles."""
+    ax.clear()
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(0.0, 2.0)
+    ax.view_init(elev=20, azim=45)
+
+
+def _capture_canvas_frame(canvas: Any) -> Any:
+    """Draw canvas and convert rgba buffer to an RGB PIL Image."""
+    from PIL import Image
+
+    canvas.draw()
+    buf = canvas.buffer_rgba()
+    img = Image.frombuffer("RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1)
+    return img.convert("RGB")
+
+
+def _save_gif_frames(frames: Sequence[Any], out_p: Path, fps: int) -> Path:
+    """Write sequential RGB PIL images to an animated GIF."""
+    if frames:
+        duration_ms = max(10, int(1000 / max(1, fps)))
+        frames[0].save(
+            out_p,
+            save_all=True,
+            append_images=frames[1:],
+            duration=duration_ms,
+            loop=0,
+        )
+    return out_p
+
+
+@dataclass(frozen=True)
+class BoardExportMetadata:
+    """Metadata displayed on board-ready stills and animations."""
+
+    candidate_hash: str = "unknown"
+    engine_name: str = "default"
+    drive_mode: str = "torque_driven"
+    verdict: str = "UNVERIFIED"
+    evidence_link: str | None = None
+
+
+def _resolve_export_metadata(
+    metadata: BoardExportMetadata | None,
+    kwargs: Mapping[str, Any],
+) -> BoardExportMetadata:
+    """Resolve explicit metadata or synthesize from legacy keyword arguments."""
+    return metadata or BoardExportMetadata(
+        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
+        engine_name=str(kwargs.get("engine_name", "default")),
+        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
+        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
+        evidence_link=kwargs.get("evidence_link"),
+    )
+
+
 def export_board_ready_still(
     replay: ReplayData,
     spec: Mapping[str, Any],
     frame_idx: int,
     output_path: Path | str,
     *,
-    candidate_hash: str = "unknown",
-    engine_name: str = "default",
-    drive_mode: str = "torque_driven",
-    verdict: str = "UNVERIFIED",
+    metadata: BoardExportMetadata | None = None,
+    **kwargs: Any,
 ) -> Path:
     """Export a board-ready still image with model vs observed dots and honest residual captions."""
     import matplotlib
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
+
+    meta = _resolve_export_metadata(metadata, kwargs)
 
     matplotlib.use("Agg")
     out_p = Path(output_path)
@@ -894,24 +976,74 @@ def export_board_ready_still(
     fig = Figure(figsize=(8, 7), dpi=150)
     canvas = FigureCanvasAgg(fig)
     ax: Any = fig.add_subplot(111, projection="3d")
-    ax.clear()
-    ax.set_xlim(-1.5, 1.5)
-    ax.set_ylim(-1.5, 1.5)
-    ax.set_zlim(0.0, 2.0)
-    ax.view_init(elev=20, azim=45)
+    _setup_3d_axes(ax)
 
     vframe = viewer_frame(spec, replay, frame_idx)
-    _render_still_geometry(ax, vframe, engine_name)
+    _render_still_geometry(ax, vframe, meta.engine_name)
 
     t_val = float(replay.time_s[frame_idx]) if frame_idx < len(replay.time_s) else 0.0
     rms_mm = vframe.rms_error * 1000.0
     caption = (
-        f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
-        f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {verdict}"
+        f"Candidate: {meta.candidate_hash[:12]} | Engine: {meta.engine_name.capitalize()} | Drive: {meta.drive_mode.replace('_', ' ').title()}\n"
+        f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {meta.verdict}"
     )
+    if meta.evidence_link:
+        caption += f"\nEvidence Link: {meta.evidence_link}"
     fig.suptitle(caption, fontsize=10, fontweight="bold", y=0.96)
     ax.legend(loc="upper right", fontsize=8)
 
     canvas.draw()
     fig.savefig(out_p, bbox_inches="tight")
     return out_p
+
+
+def export_board_ready_video(
+    replay: ReplayData,
+    spec: Mapping[str, Any],
+    output_path: Path | str,
+    *,
+    metadata: BoardExportMetadata | None = None,
+    fps: int = 20,
+    dpi: int = 100,
+    max_frames: int | None = None,
+    **kwargs: Any,
+) -> Path:
+    """Export animated board-ready video/GIF with observed dots, residual vectors, and metadata."""
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    meta = _resolve_export_metadata(metadata, kwargs)
+
+    matplotlib.use("Agg")
+    out_p = Path(output_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = Figure(figsize=(7, 6), dpi=dpi)
+    canvas = FigureCanvasAgg(fig)
+    ax: Any = fig.add_subplot(111, projection="3d")
+
+    total_frames = replay.frame_count
+    if max_frames is not None:
+        total_frames = min(total_frames, max_frames)
+
+    frames: list[Any] = []
+    for k in range(total_frames):
+        _setup_3d_axes(ax)
+
+        vframe = viewer_frame(spec, replay, k)
+        _render_still_geometry(ax, vframe, meta.engine_name)
+
+        t_val = float(replay.time_s[k]) if k < len(replay.time_s) else 0.0
+        rms_mm = vframe.rms_error * 1000.0
+        caption = (
+            f"Candidate: {meta.candidate_hash[:12]} | Engine: {meta.engine_name.capitalize()} | Drive: {meta.drive_mode.replace('_', ' ').title()}\n"
+            f"Frame {k + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS: {rms_mm:.2f} mm | Verdict: {meta.verdict}"
+        )
+        if meta.evidence_link:
+            caption += f" | Link: {meta.evidence_link}"
+        fig.suptitle(caption, fontsize=9, fontweight="bold", y=0.97)
+
+        frames.append(_capture_canvas_frame(canvas))
+
+    return _save_gif_frames(frames, out_p, fps)

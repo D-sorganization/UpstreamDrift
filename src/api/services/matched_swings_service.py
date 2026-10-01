@@ -114,11 +114,36 @@ class MatchedSwingsService:
     def repo_root(self) -> Path:
         return self._repo_root
 
-    @precondition(lambda self: True)
+    @precondition(
+        lambda self, capture=None, drive_mode=None, ranked=False: (
+            (capture is None or isinstance(capture, str))
+            and (drive_mode is None or isinstance(drive_mode, str))
+            and isinstance(ranked, bool)
+        )
+    )
     @postcondition(lambda result: isinstance(result, list))
-    def list_runs(self) -> list[RunSummary]:
-        """Return all ledger rows as public summaries keyed by receipt SHA-256."""
+    def list_runs(
+        self,
+        *,
+        capture: str | None = None,
+        drive_mode: str | None = None,
+        ranked: bool = False,
+    ) -> list[RunSummary]:
+        """Return ledger rows as public summaries, optionally filtered and ranked by ascending RMSE."""
         rows = self._load_rows()
+        if ranked:
+            ranked_rows = self._browser.rank_candidates(
+                rows, capture=capture, drive_mode=drive_mode
+            )
+            return [self._to_summary(row) for row in ranked_rows]
+        if capture or drive_mode:
+            from src.tools.matched_swing_browser.model import MatchedSwingFilter
+
+            crit = MatchedSwingFilter(
+                capture=capture or "", drive_mode=drive_mode or ""
+            )
+            filtered = self._browser.filter_rows(rows, crit)
+            return [self._to_summary(row) for row in filtered]
         return [self._to_summary(row) for row in rows]
 
     @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
@@ -213,6 +238,153 @@ class MatchedSwingsService:
             if markers is None:
                 raise ValueError("Candidate package has no model_markers_m")
             return int(markers.shape[0])
+
+    @precondition(
+        lambda self, run_id, frame_index=0: isinstance(run_id, str) and frame_index >= 0
+    )
+    @postcondition(lambda result: isinstance(result, dict))
+    def candidate_preview_frame(
+        self, run_id: str, frame_index: int = 0
+    ) -> dict[str, Any]:
+        """Return complete preview data for a frame: model joints, observed dots, and residuals."""
+        row = self.get_row(run_id)
+        npz_path = self.resolve_artifact_path(run_id, "candidate")
+        with np.load(npz_path, allow_pickle=False) as data:
+            model_markers = data.get("model_markers_m")
+            if model_markers is None:
+                raise ValueError("Candidate package has no model_markers_m")
+            if frame_index >= model_markers.shape[0]:
+                raise IndexError(f"Frame index {frame_index} out of range")
+
+            target_markers = data.get("target_markers_m")
+            valid_mask = data.get("marker_validity")
+
+            # Parse marker names from manifest if available
+            names: tuple[str, ...] = ()
+            if "manifest_json" in data:
+                try:
+                    manifest = json.loads(str(data["manifest_json"]))
+                    raw_names = manifest.get("marker_names")
+                    if raw_names:
+                        names = tuple(raw_names)
+                except (
+                    json.JSONDecodeError,
+                    KeyError,
+                    TypeError,
+                    ValueError,
+                    UnicodeDecodeError,
+                ):
+                    pass
+            if not names:
+                names = tuple(f"marker_{idx}" for idx in range(model_markers.shape[1]))
+
+            n_markers = model_markers.shape[1]
+            joints: list[dict[str, Any]] = []
+            targets: list[dict[str, Any]] = []
+            residuals: list[dict[str, Any]] = []
+
+            vm_frame = (
+                valid_mask[frame_index]
+                if valid_mask is not None and frame_index < len(valid_mask)
+                else np.ones(n_markers, dtype=bool)
+            )
+
+            diff_sq_list: list[float] = []
+
+            for idx in range(n_markers):
+                name = names[idx] if idx < len(names) else f"marker_{idx}"
+                m_pos = model_markers[frame_index, idx]
+                joints.append(
+                    {
+                        "name": name,
+                        "position": [float(m_pos[0]), float(m_pos[1]), float(m_pos[2])],
+                        "confidence": 1.0,
+                        "parent": None,
+                    }
+                )
+
+                if target_markers is not None and frame_index < len(target_markers):
+                    t_pos = target_markers[frame_index, idx]
+                    is_valid = bool(vm_frame[idx])
+                    targets.append(
+                        {
+                            "name": name,
+                            "position": [
+                                float(t_pos[0]),
+                                float(t_pos[1]),
+                                float(t_pos[2]),
+                            ],
+                            "valid": is_valid,
+                        }
+                    )
+                    diff = m_pos - t_pos
+                    mag = float(np.linalg.norm(diff))
+                    residuals.append(
+                        {
+                            "name": name,
+                            "vector": [float(diff[0]), float(diff[1]), float(diff[2])],
+                            "magnitude_m": mag,
+                            "valid": is_valid,
+                        }
+                    )
+                    if is_valid:
+                        diff_sq_list.append(float(np.sum(diff**2)))
+
+            rms_error = float(np.sqrt(np.mean(diff_sq_list))) if diff_sq_list else 0.0
+
+            return {
+                "id": run_id,
+                "frame_index": frame_index,
+                "frame_count": int(model_markers.shape[0]),
+                "joints": joints,
+                "target_markers": targets,
+                "residual_vectors": residuals,
+                "rms_error_m": rms_error,
+                "verdict": MatchedSwingBrowserModel.extract_verdict_string(row),
+                "drive_mode": MatchedSwingBrowserModel.extract_drive_mode(row),
+            }
+
+    @precondition(lambda self, run_id: isinstance(run_id, str) and bool(run_id.strip()))
+    @postcondition(lambda result: isinstance(result, dict))
+    def candidate_preview_residual_summary(self, run_id: str) -> dict[str, Any]:
+        """Compute residual summary across all frames for web/API consumers."""
+        from src.tools.tour_matching_viewer.core import (
+            ReplayData,
+            compute_residual_summary,
+        )
+
+        row = self.get_row(run_id)
+        npz_path = self.resolve_artifact_path(run_id, "candidate")
+        with np.load(npz_path, allow_pickle=False) as data:
+            times = data["time_s"]
+            q = data.get("q", np.zeros((len(times), 0)))
+            mm = data.get("model_markers_m")
+            tm = data.get("target_markers_m")
+            vm = data.get("marker_validity")
+            drive_mode = MatchedSwingBrowserModel.extract_drive_mode(row)
+
+            replay = ReplayData(
+                time_s=times,
+                coordinates=q,
+                model_markers_m=mm,
+                target_markers_m=tm,
+                valid_mask=vm,
+                drive_mode=drive_mode,
+            )
+            summary = compute_residual_summary(replay)
+            return {
+                "id": run_id,
+                "worst_frame_idx": summary.worst_frame_idx,
+                "worst_time_s": summary.worst_time_s,
+                "worst_phase": summary.worst_phase,
+                "worst_marker_name": summary.worst_marker_name,
+                "worst_marker_idx": summary.worst_marker_idx,
+                "max_marker_error_m": summary.max_marker_error_m,
+                "mean_rms_m": summary.mean_rms_m,
+                "worst_frame_rms_m": summary.worst_frame_rms_m,
+                "verdict": MatchedSwingBrowserModel.extract_verdict_string(row),
+                "drive_mode": drive_mode,
+            }
 
     def _load_rows(self) -> list[LedgerRow]:
         rows = self._browser.load_ledger(self._ledger_path)
