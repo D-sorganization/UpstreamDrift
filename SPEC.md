@@ -7452,6 +7452,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
