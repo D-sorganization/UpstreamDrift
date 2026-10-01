@@ -339,11 +339,10 @@ class GS3DXVariantReceipt:
         }
 
 
-def get_canonical_gs3dx_variant_definitions() -> dict[
-    GS3DXVariant, GS3DXVariantDefinition
-]:
-    """Return the authoritative dictionary of 10 promoted GS3DX variants."""
-    base_prefix = "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/models/"
+def _early_gs3dx_variant_definitions(
+    base_prefix: str,
+) -> dict[GS3DXVariant, GS3DXVariantDefinition]:
+    """Return dictionary of the first 5 early GS3DX variant definitions."""
     return {
         GS3DXVariant.BASELINE: GS3DXVariantDefinition(
             variant=GS3DXVariant.BASELINE,
@@ -415,6 +414,14 @@ def get_canonical_gs3dx_variant_definitions() -> dict[
             default_balance_mode=BalanceMode.STANCE_HOLD_SERVO,
             description="Three contact spheres per foot on Infinite Plane with unactuated pelvis and stance-hold servo.",
         ),
+    }
+
+
+def _advanced_gs3dx_variant_definitions(
+    base_prefix: str,
+) -> dict[GS3DXVariant, GS3DXVariantDefinition]:
+    """Return dictionary of the remaining 5 advanced GS3DX variant definitions."""
+    return {
         GS3DXVariant.GOLFER: GS3DXVariantDefinition(
             variant=GS3DXVariant.GOLFER,
             model_name="GS3DX_Golfer",
@@ -485,6 +492,17 @@ def get_canonical_gs3dx_variant_definitions() -> dict[
             default_balance_mode=BalanceMode.JACOBIAN_BALANCE_LOOP,
             description="Human body shape, C7 neck pivot, square clubface, sprung midfoot joints, 5 contacts/foot.",
         ),
+    }
+
+
+def get_canonical_gs3dx_variant_definitions() -> (
+    dict[GS3DXVariant, GS3DXVariantDefinition]
+):
+    """Return the authoritative dictionary of 10 promoted GS3DX variants."""
+    base_prefix = "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/models/"
+    return {
+        **_early_gs3dx_variant_definitions(base_prefix),
+        **_advanced_gs3dx_variant_definitions(base_prefix),
     }
 
 
