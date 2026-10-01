@@ -1,3 +1,20 @@
+## Bound Simulation Work and Preserve Cancellable Jobs Under Load (R03, #11144)
+
+Specifies aggregate step budget validation, trajectory sampling safety bounds, worker-thread event-loop offloading, active job retention under load, and cooperative cancellation contracts:
+- **Aggregate Step Budget & Finiteness Validation (`src/api/models/requests.py`)**:
+  - `MAX_SIMULATION_STEPS = 100_000`: bounds `duration / effective_dt` across single and multi-engine simulation requests.
+  - Fail-closed validation rejects nonfinite (`NaN`, `Inf`) inputs, negative durations, non-positive timesteps, and over-budget step ratios (`422 Unprocessable Entity`) before engine creation or heavy resource allocation.
+- **Flight Trajectory & ODE Sample Guards (`src/api/routes/ball_flight.py`, `src/shared/python/physics/flight_models.py`)**:
+  - `MIN_FLIGHT_TIMESTEP_S = 0.0001`, `MAX_FLIGHT_SAMPLES = 50_000`, `MAX_FLIGHT_MODELS_BATCH = 10`, `MAX_ODE_TRAJECTORY_POINTS = 50_000`: prevent multi-gigabyte memory allocations and runaway integration loops.
+  - Offloads synchronous CPU-bound trajectory integration in `simulate_ball_flight` to worker threads via `anyio.to_thread.run_sync`, keeping FastAPI event loop and health/heartbeat endpoints responsive under load.
+- **TaskManager Active Job Retention & Capacity Admission (`src/api/task_manager.py`)**:
+  - Explicit active job retention: tasks in `pending`, `running`, or `started` states are protected from TTL expiration and LRU eviction under memory/size pressure.
+  - `admit_active()`, `can_admit_active()`, and `in_flight_count()`: enforce concurrency capacity bounds while keeping active jobs queryable and cancellable.
+  - `cancel_task()`: marks active background tasks as cancelled and tracks cancellation reasons.
+- **Cooperative Simulation Loop Cancellation & Distinct Response States (`src/api/services/simulation_service.py`, `src/api/services/simulation_runs.py`)**:
+  - Stepping loop cooperative checks (`run.is_cancelled()`, `run.is_deadline_exceeded()`): gracefully halts stepping within 1 step without raising buffer exhaustion or unhandled exceptions.
+  - Terminal response distinction: sets `calculation_status="cancelled"`, distinct from persistence failures or completed calculations, returning partial trajectory data with actionable error metadata.
+
 ## Isolate Engine, Recorder, and Analysis State per Simulation Run (R02, #11143)
 
 Specifies multi-engine isolation, run-addressed recorder state, explicit concurrency bounds, and independent lifecycle cleanup across REST and WebSocket simulation sessions:
@@ -7556,6 +7573,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
 | 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |
 | 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11150 | [R10] Keep Ball-Flight Results Attached to Input Snapshot and Provenance: immutable execution input snapshots (launch conditions, model selections), active results tied to snapshot with committed/previous status badges, visual indicator for post-execution input modifications, previous results retained on failure, monotonic request sequence IDs guarding out-of-order responses, exposed model coefficients, and WCAG live region status announcements (#11150). |
