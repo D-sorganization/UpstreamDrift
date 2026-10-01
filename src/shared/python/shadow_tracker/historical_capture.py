@@ -14,6 +14,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from src.shared.python.pose_estimation.interface import PoseEstimationResult
+    from .source_records import SourceAsset
 
 
 class ImageEstimator(Protocol):
@@ -215,7 +216,7 @@ def _write_receipt(
     return receipt
 
 
-def _source_asset(source: Path, width: int, height: int) -> Any:
+def _source_asset(source: Path, width: int, height: int) -> SourceAsset:
     """Use content identity shared by every player's capture of this source."""
     from .ingestion import ingest_source_asset
 
