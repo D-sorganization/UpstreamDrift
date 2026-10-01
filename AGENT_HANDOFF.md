@@ -2,7 +2,7 @@
 
 ## Active: Tiger 2000 and Ben Hogan
 
-- Branch/worktree: `feat/historical-player-capture-11226`, `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`; commit SELF; PR [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231), CI pending.
+- Branch/worktree: `feat/historical-player-capture-11226`, `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`; commit SELF; PR [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231), main merged at 7b98249f0e89f9ba452e40d887f3fa38855a9273; CI pending.
 - Tracking: shared runner #11230, Tiger #11226, Hogan #11229. Full reconstruction remains active.
 - Continuation and exact checks: [Detailed State](docs/development/HANDOFF.md); [Procedure](docs/development/historical-capture-procedure.md).
 - Implemented: source-bound streaming image observations, rational container PTS, missingness, lossless frames and source/frame/model/code hashes.

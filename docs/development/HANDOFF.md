@@ -932,3 +932,9 @@ active sections were preserved. No full-repository pytest/coverage run was made;
 364 scoped tests and all configured pre-push checks (including mypy, Bandit and
 core/DbC/utils tests) passed. A guessed SPEC test path was absent; no SPEC-test
 pass is claimed. Required commit and design-manual governance hooks passed.
+
+## Publication Refresh
+
+Merged origin/main 51a0c1bfa4 into the owned branch without conflicts, retaining
+both SPEC rows. Post-merge focused Shadow Tracker tests are being verified;
+source/model receipts remain unchanged. Pre-push checks must pass on the merge.
