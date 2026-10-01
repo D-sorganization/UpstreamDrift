@@ -6,6 +6,53 @@ from src.shared.python.workspace import NecromatcherLibrary
 pytestmark = pytest.mark.unit
 
 
+def test_library_operation_keeps_qt_responsive_and_completes_on_owner_thread(
+    tmp_path, monkeypatch
+):
+    import threading
+
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    pytest.importorskip("PyQt6.QtWidgets")
+    from PyQt6.QtCore import QTimer
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.gui import NecromatcherWidget
+
+    app = QApplication.instance() or QApplication([])
+    widget = NecromatcherWidget(
+        library=NecromatcherLibrary.create(tmp_path / "library")
+    )
+    owner = threading.get_ident()
+    entered, release = threading.Event(), threading.Event()
+    callbacks, ticks = [], []
+
+    def operation():
+        entered.set()
+        if not release.wait(2):
+            raise RuntimeError("Test did not release background operation")
+        return threading.get_ident()
+
+    try:
+        widget._run(
+            operation, lambda worker: callbacks.append((worker, threading.get_ident()))
+        )
+        assert entered.wait(1)
+        QTimer.singleShot(0, lambda: ticks.append(threading.get_ident()))
+        app.processEvents()
+        assert ticks == [owner]
+        assert callbacks == []
+        release.set()
+        assert widget._worker.wait(2)
+        widget._poll()
+        assert len(callbacks) == 1
+        worker_thread, callback_thread = callbacks[0]
+        assert worker_thread != owner
+        assert callback_thread == owner
+    finally:
+        release.set()
+        widget.cleanup()
+        widget.close()
+
+
 def test_desktop_player_and_swing_recall(tmp_path, monkeypatch):
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
     try:

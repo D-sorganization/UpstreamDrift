@@ -15,6 +15,16 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
+Workspace CI completed three story remediation cycles: cleanup LoD, source-bound
+launcher context/atlas freshness, and the GUI-thread heuristic. A new test
+verifies a blocked background operation leaves Qt responsive and applies its
+completion on the owner thread. Five native GUI/overlay tests pass; no GUI
+ratchet baseline was increased. The remaining unit-lane failure is a runner Rust
+toolchain install conflict before tests. See [Workspace CI Report](../ci-failures/11234-20261001.md);
+keep delivery in progress. The generated API contract is now refreshed through
+the library dependency, all six freshness tests pass, and web forms reuse the
+canonical request types.
+
 CI follow-up for draft #11237: its full unit lane reported 19,886 passing,
 241 skipped and two failures. The API type freshness failure was reproduced
 locally before regenerating `ui/src/api/generated/types.ts`; the added request

@@ -7,6 +7,14 @@ native checks pass 12 with one Drake skip. The generic driver specimen loads 44
 coordinates; its nonzero grip separation is not historical fit acceptance.
 Continue the full goal under #11235 using [Native Fitting Turnover](docs/development/necromatcher-native-fit.md).
 
+Workspace CI uses three remediation cycles; remaining runner Rust/Clippy setup
+failure is recorded in [Workspace CI Report](docs/ci-failures/11234-20261001.md).
+Five native GUI/overlay tests pass, including owner-thread completion and Qt
+responsiveness; the supported GUI heuristic annotation does not increase its
+baseline. Generated API types are refreshed, and web requests reuse them.
+Native closure TDD work now exists on `feat/necromatcher-native-fit-11235` in the
+separate owned native-fit worktree; no historical fit is accepted yet.
+
 ## Active: Integrated Historical Player Workspace
 
 - Current workspace implementation: `feat/necromatcher-workspace-11234` in `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-necromatcher-workspace`, baseline commit `1b0099a405`. Both hosts create players/swings, import immutable versions, review original images/landmarks and export packages. Real Hogan and Tiger web imagery is verified; Hogan frame navigation reaches frame 750 at source PTS 134.967 s. 31 library/API/native/launcher tests and 10 inventory tests pass; scoped mypy passes eight production files. Further web form tests and fitting remain active.
