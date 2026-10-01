@@ -132,6 +132,9 @@ class SimulationRequest(BaseModel):
     analysis_config: dict[str, Any] | None = Field(
         None, description="Analysis configuration"
     )
+    run_id: str | None = Field(
+        None, description="Optional unique identifier for the simulation run"
+    )
 
     @field_validator("engine_type")
     @classmethod
@@ -241,6 +244,10 @@ class CounterfactualRequest(BaseModel):
             "When true and no counterfactual data is stored yet, replay the "
             "recorded frames through the engine (expensive)"
         ),
+    )
+    run_id: str | None = Field(
+        None,
+        description="Optional simulation run ID to analyze. If omitted, uses active/latest run.",
     )
 
     @field_validator("kind")

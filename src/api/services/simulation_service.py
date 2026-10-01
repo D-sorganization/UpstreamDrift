@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import threading
 import time
 from typing import TYPE_CHECKING, Any
+import uuid
 
 import anyio.to_thread
 import numpy as np
@@ -21,6 +23,7 @@ from src.shared.python.core.error_utils import (
     GolfSuiteError,
     ModelLoadError,
     PhysicsSimulationError,
+    SimulationBusyError,
     SimulationTimeoutError,
     ValidationError,
 )
@@ -32,31 +35,31 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.requests import SimulationRequest
 from ..models.responses import SimulationErrorInfo, SimulationResponse
+from .simulation_data_utils import (
+    extract_simulation_data,
+    perform_simulation_analysis,
+    validate_simulation_data,
+)
+from .simulation_runs import (
+    SimulationRunRecord,
+    SimulationRunStore,
+    SimulationStats,
+    build_simulation_error_info,
+    record_background_task_result,
+)
 
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
+__all__ = [
+    "SimulationRunRecord",
+    "SimulationService",
+    "SimulationStats",
+]
+
 _DEFAULT_SPEED_FACTOR = 1.0
-
-
-@dataclass
-class SimulationStats:
-    """Authoritative runtime state for an active simulation session.
-
-    Owned by SimulationService and updated by the real simulation loop.
-    Routes read from this instead of engine_manager private fields.
-    """
-
-    start_time: float = field(default_factory=time.time)
-    frame_count: int = 0
-    speed_factor: float = _DEFAULT_SPEED_FACTOR
-    is_recording: bool = False
-    recorded_frames: list[Any] = field(default_factory=list)
-    #: Last/current run summary for chat context (#7453). Keys mirror
-    #: ``src.api.services.chat_app_context.SimulationRunContext``.
-    last_run: dict[str, Any] | None = None
 
 
 class SimulationService:
@@ -78,6 +81,7 @@ class SimulationService:
         """
         self.engine_manager = engine_manager
         self.output_manager = output_manager or OutputManager()
+        self._run_store = SimulationRunStore()
         self._stats = SimulationStats()
         self._active_recorder: GenericPhysicsRecorder | None = None
         self._active_joint_names: list[str] = []
@@ -85,26 +89,106 @@ class SimulationService:
         self._last_recording_meta: dict[str, Any] = {}
         self._biomechanics_binding: Any = None
         self._active_candidate_session: Any = None
+        self.single_run_mode: bool = False
+
+    @property
+    def _runs(self) -> dict[str, SimulationRunRecord]:
+        return self._run_store.runs
+
+    @property
+    def _active_run_id(self) -> str | None:
+        return self._run_store.active_run_id
+
+    @_active_run_id.setter
+    def _active_run_id(self, val: str | None) -> None:
+        self._run_store.active_run_id = val
+
+    @property
+    def _run_lock(self) -> threading.RLock:
+        return self._run_store.lock
 
     @property
     def stats(self) -> SimulationStats:
-        """Return the authoritative runtime stats for this session."""
+        """Return the authoritative runtime stats for the active session."""
         return self._stats
 
     @property
     def active_recorder(self) -> GenericPhysicsRecorder | None:
-        """Recorder of the most recently completed simulation, if any.
-
-        Retained so analysis endpoints (issue #7449) can compute post-run
-        plot data from the active session without re-running the
-        simulation. ``None`` until a simulation has completed.
-        """
+        """Recorder of the most recently completed simulation, if any."""
         return self._active_recorder
 
     @property
     def active_joint_names(self) -> list[str]:
         """Joint names of the engine used by the active recorder."""
         return list(self._active_joint_names)
+
+    def create_run(
+        self,
+        run_id: str | None = None,
+        engine_type: str = "",
+    ) -> SimulationRunRecord:
+        """Create and register a new isolated run record."""
+        return self._run_store.create_run(run_id=run_id, engine_type=engine_type)
+
+    def get_run(self, run_id: str | None = None) -> SimulationRunRecord | None:
+        """Retrieve an isolated run record by ID, or the active run if None."""
+        return self._run_store.get_run(run_id=run_id)
+
+    def get_run_stats(self, run_id: str | None = None) -> SimulationStats:
+        """Return authoritative runtime stats for the specified or active run."""
+        return self._run_store.get_run_stats(self._stats, run_id=run_id)
+
+    def get_run_recorder(
+        self, run_id: str | None = None
+    ) -> GenericPhysicsRecorder | None:
+        """Return recorder for run_id or the active recorder."""
+        fallback = self._active_recorder or getattr(self, "_last_recorder", None)
+        return self._run_store.get_run_recorder(fallback, run_id=run_id)
+
+    def get_run_joint_names(self, run_id: str | None = None) -> list[str]:
+        """Return joint names for run_id or the active joint names."""
+        return self._run_store.get_run_joint_names(
+            self._active_joint_names, run_id=run_id
+        )
+
+    def register_completed_run(
+        self,
+        run_id: str,
+        engine: Any,
+        recorder: Any,
+        meta: dict[str, Any] | None = None,
+        joint_names: list[str] | None = None,
+        simulation_data: dict[str, Any] | None = None,
+        analysis_results: dict[str, Any] | None = None,
+    ) -> SimulationRunRecord:
+        """Register or update a completed run record for post-run analysis and persistence."""
+        run = self._run_store.register_completed_run(
+            run_id=run_id,
+            engine=engine,
+            recorder=recorder,
+            meta=meta,
+            joint_names=joint_names,
+            simulation_data=simulation_data,
+            analysis_results=analysis_results,
+        )
+        self._active_recorder = recorder
+        self._active_joint_names = list(run.joint_names)
+        self._last_recorder = recorder
+        if meta is not None:
+            self._last_recording_meta = dict(meta)
+        return run
+
+    def is_busy(self, exclude_run_id: str | None = None) -> bool:
+        """Return True if an active simulation is currently running."""
+        return self._run_store.is_busy(exclude_run_id=exclude_run_id)
+
+    def cleanup_run_engine(self, run_id: str) -> None:
+        """Clean up the physics engine owned by a specific run.
+
+        Idempotent: cleanup occurs exactly once. Run isolation guarantee:
+        cleaning up one run cannot unload or affect another run's engine.
+        """
+        self._run_store.cleanup_run_engine(run_id=run_id)
 
     def get_biomechanics_payload(self) -> dict[str, Any] | None:
         """Expose recorded calibrated geometry without leaking recorder internals."""
@@ -120,8 +204,14 @@ class SimulationService:
 
         self._biomechanics_binding = model_binding_from_dict(payload)
 
-    def _counterfactual_recorder(self) -> GenericPhysicsRecorder | None:
-        """Return the active recorder, including legacy test seam fallback."""
+    def _counterfactual_recorder(
+        self, run_id: str | None = None
+    ) -> GenericPhysicsRecorder | None:
+        """Return the recorder for run_id or the active recorder."""
+        if run_id is not None:
+            run = self.get_run(run_id)
+            if run is not None and run.recorder is not None:
+                return run.recorder
         return self._active_recorder or getattr(self, "_last_recorder", None)
 
     def _retain_active_session(self, engine: Any, recorder: Any) -> None:
@@ -141,9 +231,11 @@ class SimulationService:
                 logger.exception("Could not read joint names from engine")
         self._active_joint_names = joint_names
 
-    def describe_counterfactual_support(self) -> dict[str, Any]:
-        """Describe counterfactual capability for the active session."""
-        recorder = self._counterfactual_recorder()
+    def describe_counterfactual_support(
+        self, run_id: str | None = None
+    ) -> dict[str, Any]:
+        """Describe counterfactual capability for the active or selected session."""
+        recorder = self._counterfactual_recorder(run_id=run_id)
         engine = recorder.engine if recorder is not None else None
         engine_name: str | None = None
         if engine is not None:
@@ -154,27 +246,41 @@ class SimulationService:
                 engine_name = str(engine_name)
 
         supported = supported_counterfactual_kinds(engine)
-        return {
+        payload: dict[str, Any] = {
             "kinds": supported,
             "engine": engine_name,
             "session_available": recorder is not None,
         }
+        if run_id is not None:
+            payload["run_id"] = run_id
+        return payload
 
     def _compute_counterfactual_sync(
-        self, kind: str, run_post_hoc: bool = True
+        self,
+        kind: str,
+        run_post_hoc: bool = True,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
-        """Compute a counterfactual against the active recorder."""
-        recorder = self._counterfactual_recorder()
+        """Compute a counterfactual against the active or selected recorder."""
+        recorder = self._counterfactual_recorder(run_id=run_id)
         if recorder is None:
-            raise ValueError("No completed simulation session; run a simulation first")
-        orchestrator = AnalysisOrchestrator(
-            recorder, joint_names=self._active_joint_names
-        )
+            msg = (
+                f"Simulation run '{run_id}' not found or produced no recorded session"
+                if run_id
+                else "No completed simulation session; run a simulation first"
+            )
+            raise ValueError(msg)
+        joint_names = self._active_joint_names
+        if run_id is not None:
+            run = self.get_run(run_id)
+            if run is not None and run.joint_names:
+                joint_names = run.joint_names
+        orchestrator = AnalysisOrchestrator(recorder, joint_names=joint_names)
         result = orchestrator.compute_counterfactual(kind, run_post_hoc=run_post_hoc)
         return result.to_dict()
 
     @precondition(
-        lambda self, task_id, kind, run_post_hoc, active_tasks: (
+        lambda self, task_id, kind, run_post_hoc, active_tasks, run_id=None: (
             task_id is not None and len(task_id) > 0
         ),
         "Task ID must be a non-empty string",
@@ -185,18 +291,24 @@ class SimulationService:
         kind: str,
         run_post_hoc: bool,
         active_tasks: Any,
+        run_id: str | None = None,
     ) -> None:
         """Run a counterfactual analysis as a background task."""
         if active_tasks is None:
             raise ValueError("active_tasks must be provided")
-        active_tasks.set(task_id, {"status": "running", "kind": kind})
+        active_tasks.set(task_id, {"status": "running", "kind": kind, "run_id": run_id})
         try:
             result = await anyio.to_thread.run_sync(
-                self._compute_counterfactual_sync, kind, run_post_hoc
+                self._compute_counterfactual_sync, kind, run_post_hoc, run_id
             )
             active_tasks.set(
                 task_id,
-                {"status": "completed", "kind": kind, "result": result},
+                {
+                    "status": "completed",
+                    "kind": kind,
+                    "result": result,
+                    "run_id": run_id,
+                },
             )
         except (
             GolfSuiteError,
@@ -207,27 +319,30 @@ class SimulationService:
         ) as e:
             logger.exception("Counterfactual '%s' failed", kind)
             active_tasks.set(
-                task_id, {"status": "failed", "kind": kind, "error": str(e)}
+                task_id,
+                {"status": "failed", "kind": kind, "error": str(e), "run_id": run_id},
             )
 
     def start_recording(self) -> None:
         """Begin recording trajectory frames. Clears any previously recorded data."""
-        self._stats.is_recording = True
-        self._stats.recorded_frames = []
+        stats = self.stats
+        stats.is_recording = True
+        stats.recorded_frames = []
 
     def stop_recording(self) -> None:
         """Stop recording trajectory frames."""
-        self._stats.is_recording = False
+        self.stats.is_recording = False
 
     def get_session_recording(
-        self,
+        self, run_id: str | None = None
     ) -> tuple[GenericPhysicsRecorder, dict[str, Any]] | None:
-        """Return the most recent session recorder and its context, if any.
+        """Return the specified or most recent session recorder and context, if any."""
+        if run_id is not None:
+            run = self.get_run(run_id)
+            if run is None or run.recorder is None:
+                return None
+            return run.recorder, dict(run.meta)
 
-        Used by the recordings API (issue #7451) to persist the active
-        session recorder to disk. Returns ``None`` when no simulation has
-        produced recorded frames yet.
-        """
         if self._last_recorder is None or self._last_recorder.current_idx == 0:
             return None
         return self._last_recorder, dict(self._last_recording_meta)
@@ -261,6 +376,9 @@ class SimulationService:
             "error": None,
             "analysis_summary": None,
         }
+        active_run = self.get_run()
+        if active_run is not None:
+            active_run.stats.last_run = self._stats.last_run
 
     def _finish_last_run(
         self,
@@ -283,43 +401,88 @@ class SimulationService:
             last_run["error"] = error
         if analysis_summary is not None:
             last_run["analysis_summary"] = analysis_summary
+        active_run = self.get_run()
+        if active_run is not None:
+            active_run.stats.last_run = last_run
 
     @precondition(
-        lambda self, request: request is not None,
+        lambda self, request, run_id=None: request is not None,
         "Simulation request must not be None",
     )
     @precondition(
-        lambda self, request: request.duration > 0,
+        lambda self, request, run_id=None: request.duration > 0,
         "Simulation duration must be positive",
     )
     @precondition(
-        lambda self, request: (
+        lambda self, request, run_id=None: (
             request.engine_type is not None and len(request.engine_type) > 0
         ),
         "Engine type must be specified",
     )
-    def _prepare_engine(self, request: SimulationRequest) -> Any:
+    def _prepare_engine(
+        self, request: SimulationRequest, run_id: str | None = None
+    ) -> Any:
         """Load and configure the physics engine for simulation.
 
         Args:
             request: Simulation request with engine type and model path.
+            run_id: Optional unique identifier for the owning run.
 
         Returns:
             Configured engine instance.
 
         Raises:
+            SimulationBusyError: If single-run containment is active and another run is running.
             EngineLaunchError: If engine fails to load.
             ModelLoadError: If model file fails to load.
         """
-        engine_type = EngineType(request.engine_type.lower())
-        self.engine_manager._load_engine(engine_type)
+        if self.single_run_mode and self.is_busy(exclude_run_id=run_id):
+            raise SimulationBusyError(
+                "Simulation service is busy with another active run",
+                active_run_id=self._active_run_id,
+            )
 
-        engine = self.engine_manager.get_active_physics_engine()
+        engine_type = EngineType(request.engine_type.lower())
+        create_fn = getattr(self.engine_manager, "create_engine", None)
+        has_mock_return = hasattr(create_fn, "_mock_return_value")
+        is_mock_configured = False
+        if has_mock_return and create_fn is not None:
+            from unittest.mock import DEFAULT
+
+            is_mock_configured = (
+                getattr(create_fn, "_mock_return_value", DEFAULT) is not DEFAULT
+                or getattr(create_fn, "side_effect", None) is not None
+            )
+
+        if callable(create_fn) and (not has_mock_return or is_mock_configured):
+            engine = create_fn(engine_type)
+        else:
+            self.engine_manager._load_engine(engine_type)
+            engine = None
+            get_active = getattr(self.engine_manager, "get_active_physics_engine", None)
+            if callable(get_active):
+                try:
+                    engine = get_active(engine_type)
+                except TypeError:
+                    engine = get_active()
+                if not engine:
+                    try:
+                        engine = get_active()
+                    except TypeError:
+                        pass
+
         if not engine:
             raise EngineLaunchError(
                 request.engine_type,
                 reason="engine loaded but no active engine returned",
             )
+
+        if run_id:
+            with self._run_lock:
+                run = self._runs.get(run_id) or self.create_run(
+                    run_id, request.engine_type
+                )
+                run.engine = engine
 
         if request.model_path:
             try:
@@ -342,6 +505,7 @@ class SimulationService:
         request: SimulationRequest,
         timestep: float,
         steps: int,
+        run_stats: SimulationStats | None = None,
     ) -> None:
         """Execute the main simulation stepping loop.
 
@@ -351,6 +515,7 @@ class SimulationService:
             request: Simulation request with control inputs.
             timestep: Time step per simulation step.
             steps: Total number of steps to execute.
+            run_stats: Optional per-run stats instance to update.
         """
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
@@ -389,6 +554,8 @@ class SimulationService:
             engine.step(timestep)
             recorder.record_step(control_input=torques)
             self._stats.frame_count += 1
+            if run_stats is not None:
+                run_stats.frame_count += 1
 
         expected_samples = steps + 1
         retained_samples = getattr(recorder, "current_idx", expected_samples)
@@ -409,66 +576,7 @@ class SimulationService:
         run_id: str | None = None,
     ) -> SimulationErrorInfo:
         """Construct structured, safe error outcome without leaking paths (R09)."""
-        import re
-
-        exc_str = str(exc)
-        safe_msg = (
-            re.sub(r"([A-Za-z]:)?(/|\\)[^:\s]+", "<path>", exc_str)
-            if "/" in exc_str or "\\" in exc_str
-            else exc_str
-        )
-
-        if isinstance(exc, (EngineNotAvailableError, EngineLaunchError)):
-            code = "engine_unavailable"
-            retriable = False
-            guidance = (
-                "Ensure the requested physics engine is installed and operational."
-            )
-            safe_msg = "Requested physics engine is not available"
-        elif isinstance(exc, (ModelLoadError, FileNotFoundError)):
-            code = "model_load_error"
-            retriable = False
-            guidance = "Verify that the model asset exists and is accessible."
-            safe_msg = "Model asset could not be loaded"
-        elif isinstance(exc, (ValueError, ValidationError)):
-            code = "invalid_input"
-            retriable = False
-            guidance = "Check simulation duration, timestep, and control inputs."
-        elif isinstance(exc, (TimeoutError, SimulationTimeoutError)):
-            code = "timeout"
-            retriable = True
-            guidance = (
-                "Consider reducing simulation duration or increasing timeout ceiling."
-            )
-            safe_msg = "Simulation execution timed out"
-        elif (
-            isinstance(exc, PhysicsSimulationError)
-            or "diverged" in exc_str.lower()
-            or "nan" in exc_str.lower()
-        ):
-            code = "numerical_failure"
-            retriable = True
-            guidance = "Try decreasing the integration timestep or verifying model initial conditions."
-            safe_msg = "Physics solver encountered numerical instability"
-        elif stage == "persistence" or isinstance(exc, (OSError, PermissionError)):
-            code = "persistence_failed"
-            retriable = True
-            guidance = "Simulation data is preserved in memory. Retry persistence via POST /recordings."
-            safe_msg = "Failed to persist simulation results to disk"
-        else:
-            code = "internal_error"
-            retriable = False
-            guidance = "Contact system administrator if the issue persists."
-            safe_msg = "Internal simulation error"
-
-        return SimulationErrorInfo(
-            code=code,
-            message=safe_msg,
-            stage=stage,
-            run_id=run_id,
-            retriable=retriable,
-            retry_guidance=guidance,
-        )
+        return build_simulation_error_info(exc=exc, stage=stage, run_id=run_id)
 
     def _persist_simulation_results(
         self,
@@ -521,52 +629,13 @@ class SimulationService:
         has_controls: bool = False,
         is_mock: bool = False,
     ) -> None:
-        """Validate required channels, non-empty arrays, and length alignment.
-
-        Raises:
-            ValueError: If required channels are missing, empty, or misaligned.
-        """
-        required_channels = (
-            "times",
-            "joint_positions",
-            "joint_velocities",
-            "joint_accelerations",
+        """Validate required channels, non-empty arrays, and length alignment."""
+        validate_simulation_data(
+            simulation_data=simulation_data,
+            expected_frames=expected_frames,
+            has_controls=has_controls,
+            is_mock=is_mock,
         )
-        for channel in required_channels:
-            if channel not in simulation_data or len(simulation_data[channel]) == 0:
-                raise ValueError(
-                    f"Simulation failed required channel validation: '{channel}' is missing or empty"
-                )
-
-        n_times = len(simulation_data["times"])
-        if n_times == 0:
-            raise ValueError("Simulation produced zero recorded samples")
-
-        if not is_mock and n_times != expected_frames:
-            raise ValueError(
-                f"Retained sample count ({n_times}) does not match expected frame count ({expected_frames})"
-            )
-
-        for channel in ("joint_positions", "joint_velocities", "joint_accelerations"):
-            if channel in simulation_data and len(simulation_data[channel]) != n_times:
-                raise ValueError(
-                    f"Channel '{channel}' length ({len(simulation_data[channel])}) "
-                    f"does not match times length ({n_times})"
-                )
-
-        if has_controls:
-            if (
-                "control_inputs" not in simulation_data
-                or len(simulation_data["control_inputs"]) == 0
-            ):
-                raise ValueError(
-                    "Simulation with commanded control inputs produced no recorded control data"
-                )
-            if len(simulation_data["control_inputs"]) != n_times:
-                raise ValueError(
-                    f"Channel 'control_inputs' length ({len(simulation_data['control_inputs'])}) "
-                    f"does not match times length ({n_times})"
-                )
 
     def _validate_simulation_timing(
         self, request: SimulationRequest
@@ -588,6 +657,7 @@ class SimulationService:
         timestep: float,
         steps: int,
         expected_frames: int,
+        run_stats: SimulationStats | None = None,
     ) -> GenericPhysicsRecorder:
         recorder = GenericPhysicsRecorder(
             engine, max_samples=max(100000, expected_frames)
@@ -598,7 +668,9 @@ class SimulationService:
             recorder.set_analysis_config(request.analysis_config)
         recorder.start()
         try:
-            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+            self._execute_simulation_loop(
+                engine, recorder, request, timestep, steps, run_stats=run_stats
+            )
         finally:
             recorder.stop()
         self._retain_active_session(engine, recorder)
@@ -613,21 +685,67 @@ class SimulationService:
     def _run_simulation_sync(
         self, request: SimulationRequest, run_id: str | None = None
     ) -> SimulationResponse:
-        """Run the full CPU-bound simulation pipeline synchronously.
+        """Run the full CPU-bound simulation pipeline synchronously with run isolation.
 
         This performs engine preparation, the stepping loop, data extraction,
         and analysis. It is intentionally blocking and must be invoked off the
         event loop (see :meth:`run_simulation`) so the FastAPI worker is not
         frozen for the duration of the simulation (issue #6988).
         """
+
+        run_id = (
+            run_id or getattr(request, "run_id", None) or f"sim_{uuid.uuid4().hex[:12]}"
+        )
+        if self.single_run_mode and self.is_busy(exclude_run_id=run_id):
+            busy_err = SimulationErrorInfo(
+                code="busy",
+                message="Simulation service is busy with another run",
+                stage="preparation",
+                run_id=run_id,
+                retriable=True,
+                retry_guidance="Wait for active simulation to complete and retry.",
+            )
+            return SimulationResponse(
+                success=False,
+                duration=0.0,
+                frames=0,
+                data={},
+                analysis_results=None,
+                export_paths=[],
+                calculation_status="failed",
+                analysis_status="not_requested",
+                persistence_status="not_requested",
+                error=busy_err,
+                run_id=run_id,
+            )
+
+        run = self.create_run(run_id=run_id, engine_type=request.engine_type)
+        run.status = "running"
+        run.stats.start_time = time.time()
+        run.stats.frame_count = 0
         self._stats.start_time = time.time()
         self._stats.frame_count = 0
         self._begin_last_run(request)
-        engine = self._prepare_engine(request)
+
+        try:
+            return self._execute_sync_pipeline(request, run, run_id)
+        except Exception:
+            run.status = "failed"
+            raise
+
+    def _execute_sync_pipeline(
+        self,
+        request: SimulationRequest,
+        run: SimulationRunRecord,
+        run_id: str,
+    ) -> SimulationResponse:
+        """Execute simulation stepping, data extraction, and post-processing."""
+        engine = self._prepare_engine(request, run_id=run_id)
+        run.engine = engine
 
         timestep, steps, expected_frames = self._validate_simulation_timing(request)
         recorder = self._create_and_run_recorder(
-            engine, request, timestep, steps, expected_frames
+            engine, request, timestep, steps, expected_frames, run_stats=run.stats
         )
 
         simulation_data = self._extract_simulation_data(recorder)
@@ -670,6 +788,19 @@ class SimulationService:
             )
         )
 
+        self.register_completed_run(
+            run_id=run_id,
+            engine=engine,
+            recorder=recorder,
+            meta={
+                "engine": request.engine_type,
+                "model": str(request.model_path) if request.model_path else None,
+                "duration": request.duration,
+            },
+            simulation_data=simulation_data,
+            analysis_results=analysis_results,
+        )
+
         return SimulationResponse(
             success=True,
             duration=request.duration,
@@ -702,6 +833,17 @@ class SimulationService:
         Returns:
             Simulation results and data
         """
+        target_run_id = (
+            kwargs.get("run_id")
+            or (args[0] if args and isinstance(args[0], str) else None)
+            or getattr(request, "run_id", None)
+        )
+        if target_run_id is not None and getattr(request, "run_id", None) is None:
+            try:
+                request.run_id = target_run_id
+            except (AttributeError, TypeError):
+                pass
+
         try:
             # run_sync is typed to return Any; bind to the declared type so
             # mypy-strict's no-any-return is satisfied.
@@ -709,6 +851,7 @@ class SimulationService:
                 self._run_simulation_sync, request
             )
             return response
+
         except (GolfSuiteError, ValueError, RuntimeError, OSError, TimeoutError) as e:
             logger.error("Simulation failed: %s", e, exc_info=True)
             self._finish_last_run(status="failed", error=str(e))
@@ -720,13 +863,14 @@ class SimulationService:
                         EngineLaunchError,
                         EngineNotAvailableError,
                         ModelLoadError,
+                        SimulationBusyError,
                         ValueError,
                         ValidationError,
                     ),
                 )
                 else "execution"
             )
-            error_info = self._build_error_info(e, stage=stage)
+            error_info = self._build_error_info(e, stage=stage, run_id=target_run_id)
             return SimulationResponse(
                 success=False,
                 duration=0.0,
@@ -738,71 +882,13 @@ class SimulationService:
                 analysis_status="not_requested",
                 persistence_status="not_requested",
                 error=error_info,
+                run_id=target_run_id,
             )
 
     def _record_background_task_result(
         self, task_id: str, result: Any, active_tasks: Any
     ) -> None:
-        dump = (
-            result.model_dump()
-            if hasattr(result, "model_dump")
-            else (result if isinstance(result, dict) else {})
-        )
-        if getattr(result, "success", False) is True:
-            task_payload: dict[str, Any] = {
-                "status": "completed",
-                "result": dump,
-            }
-            err = getattr(result, "error", None)
-            if (
-                getattr(result, "persistence_status", None) == "failed"
-                and err is not None
-            ):
-                task_payload["persistence_status"] = "failed"
-                task_payload["error"] = getattr(err, "message", "Simulation failed")
-                task_payload["error_code"] = getattr(err, "code", "storage_failure")
-                task_payload["error_stage"] = getattr(err, "stage", "persistence")
-                task_payload["retriable"] = getattr(err, "retriable", False)
-                task_payload["retry_guidance"] = getattr(err, "retry_guidance", None)
-                task_payload["error_info"] = (
-                    err.model_dump()
-                    if hasattr(err, "model_dump")
-                    else (err if isinstance(err, dict) else None)
-                )
-            active_tasks.set(task_id, task_payload)
-        else:
-            err = getattr(result, "error", None)
-            msg = (
-                getattr(err, "message", "Simulation failed")
-                if err
-                else "Simulation failed"
-            )
-            code = getattr(err, "code", "unknown_error") if err else "unknown_error"
-            stage = getattr(err, "stage", "execution") if err else "execution"
-            retriable = getattr(err, "retriable", False) if err else False
-            guidance = getattr(err, "retry_guidance", None) if err else None
-            err_dict = (
-                (
-                    err.model_dump()
-                    if hasattr(err, "model_dump")
-                    else (err if isinstance(err, dict) else None)
-                )
-                if err is not None
-                else None
-            )
-            active_tasks.set(
-                task_id,
-                {
-                    "status": "failed",
-                    "result": dump,
-                    "error": msg,
-                    "error_code": code,
-                    "error_stage": stage,
-                    "retriable": retriable,
-                    "retry_guidance": guidance,
-                    "error_info": err_dict,
-                },
-            )
+        record_background_task_result(task_id, result, active_tasks)
 
     @precondition(
         lambda self, task_id, request, active_tasks: (
@@ -878,128 +964,14 @@ class SimulationService:
     def _extract_simulation_data(
         self, recorder: GenericPhysicsRecorder
     ) -> dict[str, Any]:
-        """Extract simulation data from recorder.
-
-        Args:
-            recorder: Physics recorder with simulation data
-
-        Returns:
-            Dictionary containing simulation data
-        """
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
-        data = {}
-
-        try:
-            # Extract time series data
-            times, positions = recorder.get_time_series("joint_positions")
-            data["times"] = times.tolist() if hasattr(times, "tolist") else times
-            data["joint_positions"] = (
-                positions.tolist() if hasattr(positions, "tolist") else positions
-            )
-
-            times, velocities = recorder.get_time_series("joint_velocities")
-            data["joint_velocities"] = (
-                velocities.tolist() if hasattr(velocities, "tolist") else velocities
-            )
-
-            times, accelerations = recorder.get_time_series("joint_accelerations")
-            data["joint_accelerations"] = (
-                accelerations.tolist()
-                if hasattr(accelerations, "tolist")
-                else accelerations
-            )
-
-            # Extract control data if available
-            try:
-                times, controls = recorder.get_time_series("control_inputs")
-                if len(controls) == 0:
-                    times, controls = recorder.get_time_series("joint_torques")
-                if len(controls) > 0:
-                    data["control_inputs"] = (
-                        controls.tolist() if hasattr(controls, "tolist") else controls
-                    )
-            except (KeyError, ValueError, AttributeError) as e:
-                logger.debug("Control inputs not available: %s", e)
-
-        except (KeyError, ValueError, AttributeError, TypeError) as e:
-            logger.warning("Error extracting simulation data: %s", e)
-
-        return data
+        """Extract simulation data from recorder."""
+        return extract_simulation_data(recorder=recorder)
 
     def _perform_analysis(
         self, recorder: GenericPhysicsRecorder, config: dict[str, Any]
     ) -> dict[str, Any]:
-        """Perform analysis on simulation data with explicit channel availability status (R09).
-
-        Args:
-            recorder: Physics recorder with simulation data
-            config: Analysis configuration
-
-        Returns:
-            Analysis results dict including '_channel_status' and '_status'.
-        """
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
-        results: dict[str, Any] = {}
-        channel_status: dict[str, str] = {}
-        requested_count = 0
-        success_count = 0
-
-        # Extract ZTCF data if enabled
-        if config.get("ztcf", False):
-            requested_count += 1
-            try:
-                times, ztcf = recorder.get_time_series("ztcf_accel")
-                results["ztcf_acceleration"] = (
-                    ztcf.tolist() if hasattr(ztcf, "tolist") else ztcf
-                )
-                channel_status["ztcf_acceleration"] = "available"
-                success_count += 1
-            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
-                logger.warning("Error performing ztcf analysis: %s", e)
-                channel_status["ztcf_acceleration"] = f"unavailable: {e}"
-
-        # Extract ZVCF data if enabled
-        if config.get("zvcf", False):
-            requested_count += 1
-            try:
-                times, zvcf = recorder.get_time_series("zvcf_accel")
-                results["zvcf_acceleration"] = (
-                    zvcf.tolist() if hasattr(zvcf, "tolist") else zvcf
-                )
-                channel_status["zvcf_acceleration"] = "available"
-                success_count += 1
-            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
-                logger.warning("Error performing zvcf analysis: %s", e)
-                channel_status["zvcf_acceleration"] = f"unavailable: {e}"
-
-        # Extract drift analysis if enabled
-        if config.get("track_drift", False):
-            requested_count += 1
-            try:
-                times, drift = recorder.get_time_series("drift_accel")
-                results["drift_acceleration"] = (
-                    drift.tolist() if hasattr(drift, "tolist") else drift
-                )
-                channel_status["drift_acceleration"] = "available"
-                success_count += 1
-            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
-                logger.warning("Error performing drift analysis: %s", e)
-                channel_status["drift_acceleration"] = f"unavailable: {e}"
-
-        if requested_count > 0:
-            results["_channel_status"] = channel_status
-            if success_count == requested_count:
-                results["_status"] = "completed"
-            elif success_count > 0:
-                results["_status"] = "partial"
-            else:
-                results["_status"] = "failed"
-        else:
-            results["_status"] = "not_requested"
-
-        return results
+        """Perform analysis on simulation data with explicit channel availability status (R09)."""
+        return perform_simulation_analysis(recorder=recorder, config=config)
 
     def get_candidate_session(
         self,

@@ -320,17 +320,10 @@ def _engine_analysis_to_dict(engine: object) -> dict[str, Any]:
 
 
 def _resolve_sim_stats(websocket: WebSocket) -> Any:
-    """Return the shared simulation-service ``stats`` object, or ``None``.
-
-    Collapses the ``websocket.app.state.simulation_service.stats`` reach-through
-    chain into a single Law-of-Demeter-respecting accessor so the five call
-    sites cannot drift apart (DRY; finding #7740). Every ``getattr`` defaults to
-    ``None`` so a partially-initialised app state (or a test double missing any
-    link) yields ``None`` rather than raising.
-
-    Postcondition: returns the ``stats`` object when fully resolvable, else
-    ``None``.
-    """
+    """Return the isolated WebSocket simulation stats, or fall back to shared stats."""
+    ws_state = getattr(websocket, "state", None)
+    if ws_state is not None and hasattr(ws_state, "sim_stats"):
+        return ws_state.sim_stats
     app_state = getattr(getattr(websocket, "app", None), "state", None)
     simulation_service = getattr(app_state, "simulation_service", None)
     return getattr(simulation_service, "stats", None)
@@ -431,11 +424,15 @@ async def _load_simulation_engine(
     )
     try:
         enum_type = _engine_type_from_str(engine_type)
-        success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
-        if not success:
-            raise ValueError("Could not load engine")
+        create_fn = getattr(engine_manager, "create_engine", None)
+        if callable(create_fn):
+            engine = create_fn(enum_type)
+        else:
+            success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
+            if not success:
+                raise ValueError("Could not load engine")
+            engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
 
-        engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
         if not engine:
             raise ValueError("Could not load engine")
 
@@ -464,7 +461,8 @@ def _apply_set_speed(
         config: Simulation configuration dict (mutated in place).
         msg: The decoded client message; ``speed_factor`` is read from it.
     """
-    speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
+    raw_speed = msg.get("speed_factor", msg.get("value", _DEFAULT_SPEED_FACTOR))
+    speed_factor = _clamp_speed_factor(raw_speed)
     config["speed_factor"] = speed_factor
     stats = _resolve_sim_stats(websocket)
     if stats is not None:
@@ -762,6 +760,13 @@ async def simulation_stream(
     if user is None:
         return
     await websocket.accept()
+    if not hasattr(websocket, "state") or websocket.state is None:
+        import types
+
+        setattr(websocket, "state", types.SimpleNamespace())  # noqa: B010
+    from src.api.services.simulation_service import SimulationStats
+
+    setattr(websocket.state, "sim_stats", SimulationStats())  # noqa: B010
 
     try:
         engine_manager = get_ws_engine_manager(websocket)

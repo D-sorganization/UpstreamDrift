@@ -205,9 +205,16 @@ class EngineManager(ContractChecker):
         self._discover_engines()
 
         self._pendulum_model_dir: Path | None = None
+        self._loaded_engines: dict[EngineType, PhysicsEngine] = {}
 
-    def get_active_physics_engine(self) -> PhysicsEngine | None:
+    def get_active_physics_engine(
+        self, engine_type: EngineType | None = None
+    ) -> PhysicsEngine | None:
         """Get the currently active PhysicsEngine instance."""
+        if engine_type is not None:
+            loaded = self._loaded_engines.get(engine_type)
+            if loaded is not None:
+                return loaded
         return self.active_physics_engine
 
     def get_available_engines(self) -> list[EngineType]:
@@ -335,7 +342,22 @@ class EngineManager(ContractChecker):
                 ),
             )
 
-    def _load_engine(self, engine_type: EngineType) -> None:
+    def create_engine(self, engine_type: EngineType) -> PhysicsEngine:
+        """Create and return a new isolated PhysicsEngine instance.
+
+        Does not mutate active_physics_engine or current_engine, ensuring
+        concurrent simulation runs have independent engine instances.
+        """
+        if engine_type is None:
+            raise ValueError("engine_type must be provided")
+        self._ensure_runtime_importable(engine_type)
+        registry = get_registry()
+        registration = registry.get(engine_type)
+        if not registration:
+            raise GolfModelingError(f"No registration found for {engine_type}")
+        return registration.factory()
+
+    def _load_engine(self, engine_type: EngineType) -> PhysicsEngine:
         """Load a specific engine."""
         if engine_type is None:
             raise ValueError("engine_type must be provided")
@@ -352,12 +374,14 @@ class EngineManager(ContractChecker):
 
             engine = registration.factory()
             self.active_physics_engine = engine
+            self._loaded_engines[engine_type] = engine
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(
                 "engine_loaded_successfully engine=%s status=loaded",
                 engine_type.value,
             )
+            return engine
 
         except GolfModelingError:
             self.engine_status[engine_type] = EngineStatus.ERROR
