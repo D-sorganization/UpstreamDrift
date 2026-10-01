@@ -12,6 +12,22 @@ Specifies the process lifecycle, immutable run context, and tab-routing contract
 - **Unit Test Suite (`tests/tools/motion_matching/test_matcher_process_lifecycle.py`)**:
   - Tests covering missing executables, denied permissions, process crashes, user cancellation, normal completion, multi-tab switching, repeated start/stop process disposal, and stage-specific failure recovery reporting.
 
+## Simulation Error Outcomes and Partial-Result States (R09, #11149)
+Specifies machine-readable error modeling, pipeline stage isolation, and partial-result resilience across sync and background simulation execution paths:
+- **Structured Error Outcome Model (`SimulationErrorInfo` in `src/api/models/responses.py`)**:
+  - `SimulationErrorInfo`: defines typed fields `code`, `message`, `stage`, `run_id`, `retriable`, `retry_guidance`, and `details`.
+  - Distinguishes pipeline failure stages: `preparation`, `execution`, `analysis`, and `persistence`.
+  - Enforces safe, non-leaky error messages that never expose raw internal filesystem paths or database credentials to clients.
+- **REST Status Codes & Machine-Readable Response Headers (`src/api/routes/simulation.py`)**:
+  - Sync execution failures map domain errors to specific HTTP status codes: HTTP 400 for invalid inputs/parameters, HTTP 503 for unavailable engines, HTTP 500 for internal/numerical/physics errors, and HTTP 504 for timeout conditions.
+  - Injects `X-Error-Code` and `X-Error-Stage` headers on HTTP error responses to provide zero-cost client observability without requiring JSON parsing.
+- **Partial-Result State Preservation & Storage Failure Resilience (`src/api/services/simulation_service.py`)**:
+  - Distinguishes calculation completion from persistence failure: when simulation calculation succeeds but disk/cloud storage fails, results are preserved in memory with `calculation_status="completed"`, `persistence_status="failed"`, `export_paths=[]`, and structured retry guidance.
+  - Per-channel analysis status tracking: records `_channel_status` for requested channels (`ztcf`, `zvcf`, `track_drift`), setting overall `_status` to `"completed"`, `"partial"`, or `"failed"`.
+  - Asynchronous background task recording: persists machine-readable `error_code`, `error_stage`, `retriable`, `retry_guidance`, and full `error_info` dictionary into `active_tasks`.
+- **Regression Test Suite (`tests/unit/api/test_simulation_r09.py`)**:
+  - Behavioral tests verifying HTTP status code mappings (400, 503, 500), response headers, in-memory result preservation during persistence failure, per-channel analysis status labeling, and background task error record consistency.
+
 ## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
 
 Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
@@ -7466,8 +7482,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
+| 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
+| 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
