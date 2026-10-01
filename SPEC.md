@@ -1,3 +1,19 @@
+## Publish a Best-Candidate Viewer With Honest Residuals (MMR-16, #11102)
+Specifies the best-candidate viewer, honest marker residuals, drive mode filtering, visual presets, board-ready video/still export, and web/API parity:
+- **Observation Immutability & Residual Data Structures (`src/tools/tour_matching_viewer/core.py`)**:
+  - Guards raw observations by setting numpy array flags `writeable = False` on `time_s`, `coordinates`, `target_markers_m`, `model_markers_m`, and `valid_mask` in `ReplayData.__post_init__`.
+  - Implements `worst_frame_for_marker` and `worst_frame_for_phase` on `ResidualSummary` to locate exact discrete frame indices for targeted residual inspection.
+  - Implements `export_board_ready_video` and `export_board_ready_still` generating animations and high-DPI stills with observed dots, model skeleton, residual vector lines, SI units (mm, s, m), and metadata banners (Candidate SHA, Engine, Drive Mode, Frame, RMS, Verdict, Evidence link).
+- **Tour Matching Viewer GUI (`src/tools/tour_matching_viewer/gui.py`)**:
+  - Exposes public `is_accepted`, `verdict`, `failure_badge_visible`, `failure_badge_text`, and `residual_summary` properties.
+  - Implements `select_worst_marker` and `select_worst_phase` jumping directly to discrete frame indices, ensuring synchronized clocks without decoupled indices.
+  - Ensures numerical verdict, candidate hash, failure badges, and physics scores are strictly invariant under camera orientation and visual preset changes.
+  - Configures full accessibility annotations (`setAccessibleName`, `setToolTip`) across interactive controls.
+- **Web & API Parity (`src/api/services/matched_swings_service.py`, `src/api/routes/matched_swings.py`)**:
+  - Extends `MatchedSwingsService.list_runs` with `capture`, `drive_mode`, and `ranked` filters, sorting candidates in ascending whole-marker RMSE order while honestly preserving rejections.
+  - Implements `candidate_preview_frame` returning observed target dots, fitted model joints, residual vectors, and frame RMS for web 3D clients.
+  - Implements `candidate_preview_residual_summary` and `GET /matched-swings/{run_id}/residuals` exposing swing-wide residual timelines.
+
 ## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
 - **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
@@ -7358,6 +7374,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
 | 2026-10-01 | #11196 | [MMR-17] Establish Clean-Host End-to-End and Native Release Gates (#11103): clean-installation bounded journeys, native receipt ingestion across all six engines (opensim, myosuite, drake, mujoco, pinocchio, simscape), adverse path rejection (tampered package, missing engine, unsupported model, corrupt capture), and fail-closed release qualification matrix. |
+| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
 | 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
 | 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
 | 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |

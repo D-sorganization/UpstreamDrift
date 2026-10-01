@@ -113,6 +113,7 @@ class ReplayData:
     valid_mask: NDArray[np.bool_] | None = None
     coordinate_names: tuple[str, ...] | None = None
     drive_mode: str = "kinematic_prescribed"
+    marker_names: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         _make_readonly(self.time_s)
@@ -180,6 +181,41 @@ class ResidualSummary:
         if not observed:
             return 0.0
         return float(np.mean([fr.rms_error_m for fr in observed]))
+
+    def worst_frame_for_marker(self, marker: str | int) -> int:
+        """Return the discrete frame index with highest error for a given marker."""
+        if isinstance(marker, int):
+            idx = marker
+        else:
+            norm_marker = marker.strip().lower()
+            idx = -1
+            for i, name in enumerate(self.marker_names):
+                if name.strip().lower() == norm_marker:
+                    idx = i
+                    break
+            if idx == -1:
+                raise KeyError(f"Unknown marker name: {marker}")
+
+        best_frame = 0
+        best_val = -1.0
+        for f_idx, vec in enumerate(self.residual_vectors):
+            if idx < len(vec):
+                err = float(np.linalg.norm(vec[idx]))
+                if err > best_val:
+                    best_val = err
+                    best_frame = f_idx
+        return best_frame
+
+    def worst_frame_for_phase(self, phase: str) -> int:
+        """Return the discrete frame index with highest RMS within a specified swing phase."""
+        norm_phase = phase.strip().lower()
+        matching_frames = [
+            fr for fr in self.frame_residuals if norm_phase in fr.phase.lower()
+        ]
+        if not matching_frames:
+            return self.worst_frame_idx
+        worst_fr = max(matching_frames, key=lambda fr: fr.rms_error_m)
+        return worst_fr.frame_idx
 
 
 @dataclass(frozen=True)
@@ -760,7 +796,9 @@ def compute_residual_summary(
     tm = replay.target_markers_m
     mm = replay.model_markers_m
     vm = replay.valid_mask
-    names = _resolve_marker_names(tm, mm, marker_names)
+    names = _resolve_marker_names(
+        tm, mm, marker_names or getattr(replay, "marker_names", None)
+    )
     top_idx, impact_idx, _ = _resolve_phase_boundaries(n_frames, event_indices)
 
     frame_residuals_list: list[FrameResidual] = []
@@ -881,6 +919,7 @@ def export_board_ready_still(
     engine_name: str = "default",
     drive_mode: str = "torque_driven",
     verdict: str = "UNVERIFIED",
+    evidence_link: str | None = None,
 ) -> Path:
     """Export a board-ready still image with model vs observed dots and honest residual captions."""
     import matplotlib
@@ -909,9 +948,83 @@ def export_board_ready_still(
         f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
         f"Frame {frame_idx + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS Error: {rms_mm:.2f} mm | Verdict: {verdict}"
     )
+    if evidence_link:
+        caption += f"\nEvidence Link: {evidence_link}"
     fig.suptitle(caption, fontsize=10, fontweight="bold", y=0.96)
     ax.legend(loc="upper right", fontsize=8)
 
     canvas.draw()
     fig.savefig(out_p, bbox_inches="tight")
+    return out_p
+
+
+def export_board_ready_video(
+    replay: ReplayData,
+    spec: Mapping[str, Any],
+    output_path: Path | str,
+    *,
+    candidate_hash: str = "unknown",
+    engine_name: str = "default",
+    drive_mode: str = "torque_driven",
+    verdict: str = "UNVERIFIED",
+    evidence_link: str | None = None,
+    fps: int = 20,
+    dpi: int = 100,
+    max_frames: int | None = None,
+) -> Path:
+    """Export animated board-ready video/GIF with observed dots, residual vectors, and metadata."""
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+    from PIL import Image
+
+    matplotlib.use("Agg")
+    out_p = Path(output_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    fig = Figure(figsize=(7, 6), dpi=dpi)
+    canvas = FigureCanvasAgg(fig)
+    ax: Any = fig.add_subplot(111, projection="3d")
+
+    total_frames = replay.frame_count
+    if max_frames is not None:
+        total_frames = min(total_frames, max_frames)
+
+    frames: list[Image.Image] = []
+    for k in range(total_frames):
+        ax.clear()
+        ax.set_xlim(-1.5, 1.5)
+        ax.set_ylim(-1.5, 1.5)
+        ax.set_zlim(0.0, 2.0)
+        ax.view_init(elev=20, azim=45)
+
+        vframe = viewer_frame(spec, replay, k)
+        _render_still_geometry(ax, vframe, engine_name)
+
+        t_val = float(replay.time_s[k]) if k < len(replay.time_s) else 0.0
+        rms_mm = vframe.rms_error * 1000.0
+        caption = (
+            f"Candidate: {candidate_hash[:12]} | Engine: {engine_name.capitalize()} | Drive: {drive_mode.replace('_', ' ').title()}\n"
+            f"Frame {k + 1}/{replay.frame_count} ({t_val:.3f} s) | RMS: {rms_mm:.2f} mm | Verdict: {verdict}"
+        )
+        if evidence_link:
+            caption += f" | Link: {evidence_link}"
+        fig.suptitle(caption, fontsize=9, fontweight="bold", y=0.97)
+
+        canvas.draw()
+        buf = canvas.buffer_rgba()
+        img = Image.frombuffer(
+            "RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1
+        )
+        frames.append(img.convert("RGB"))
+
+    if frames:
+        duration_ms = max(10, int(1000 / max(1, fps)))
+        frames[0].save(
+            out_p,
+            save_all=True,
+            append_images=frames[1:],
+            duration=duration_ms,
+            loop=0,
+        )
     return out_p

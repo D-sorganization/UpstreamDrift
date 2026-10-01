@@ -72,11 +72,20 @@ def _raise_job_error(error: MatchedSwingJobError, status_code: int) -> NoReturn:
 
 @router.get("")
 async def list_matched_swings(
+    capture: str | None = Query(
+        default=None, description="Filter by capture profile (e.g. driver, iron)"
+    ),
+    drive_mode: str | None = Query(
+        default=None, description="Filter by drive mode (e.g. torque_driven)"
+    ),
+    ranked: bool = Query(
+        default=False, description="When true, rank candidates in ascending RMSE order"
+    ),
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
 ) -> dict[str, Any]:
     """Return the matched-swing ledger as public run summaries."""
-    runs = service.list_runs()
+    runs = service.list_runs(capture=capture, drive_mode=drive_mode, ranked=ranked)
     return {
         "schema_version": "matched-swing-api/1",
         "total": len(runs),
@@ -110,13 +119,31 @@ async def get_matched_swing_receipt(
     }
 
 
+@router.get("/{run_id}/residuals")
+async def get_matched_swing_residuals(
+    run_id: str,
+    _local: None = Depends(require_local_client),
+    service: MatchedSwingsService = Depends(get_matched_swings_service),
+) -> dict[str, Any]:
+    """Return comprehensive residual summary across all frames and markers for a run."""
+    try:
+        return service.candidate_preview_residual_summary(run_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError) as exc:
+        _raise_job_error(
+            MatchedSwingJobError(code="residuals_unavailable", message=str(exc)),
+            status_code=404,
+        )
+
+
 @router.get("/{run_id}/candidate", response_model=None)
 async def get_matched_swing_candidate(
     run_id: str,
     preview_frame: int | None = Query(
         default=None,
         ge=0,
-        description="When set, return JSON marker joints for MocapSkeleton3D preview.",
+        description="When set, return JSON marker joints and observed dots for 3D preview.",
     ),
     _local: None = Depends(require_local_client),
     service: MatchedSwingsService = Depends(get_matched_swings_service),
@@ -124,8 +151,7 @@ async def get_matched_swing_candidate(
     """Stream the candidate NPZ or return a JSON preview frame for 3D replay."""
     if preview_frame is not None:
         try:
-            joints = service.candidate_preview_joints(run_id, preview_frame)
-            frame_count = service.candidate_frame_count(run_id)
+            return service.candidate_preview_frame(run_id, preview_frame)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except (FileNotFoundError, ValueError, IndexError) as exc:
@@ -133,12 +159,6 @@ async def get_matched_swing_candidate(
                 MatchedSwingJobError(code="candidate_unavailable", message=str(exc)),
                 status_code=404,
             )
-        return {
-            "id": run_id,
-            "frame_index": preview_frame,
-            "frame_count": frame_count,
-            "joints": joints,
-        }
 
     try:
         path = service.resolve_artifact_path(run_id, "candidate")
