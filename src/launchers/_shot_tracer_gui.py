@@ -526,19 +526,26 @@ class MultiModelShotTracerWidget(QWidget):
         self.results_table.setRowCount(len(self.results))
 
         for row, (model_name, result) in enumerate(self.results.items()):
-            carry_yd = result.carry_distance * 1.09361
+            carry_yd_str = (
+                f"{result.carry_distance * 1.09361:.1f}"
+                if result.carry_distance is not None
+                else "N/A"
+            )
+            landing_str = (
+                f"{result.landing_angle:.1f}"
+                if result.landing_angle is not None
+                else "N/A"
+            )
 
             self.results_table.setItem(row, 0, QTableWidgetItem(model_name))
-            self.results_table.setItem(row, 1, QTableWidgetItem(f"{carry_yd:.1f}"))
+            self.results_table.setItem(row, 1, QTableWidgetItem(carry_yd_str))
             self.results_table.setItem(
                 row, 2, QTableWidgetItem(f"{result.max_height:.1f}")
             )
             self.results_table.setItem(
                 row, 3, QTableWidgetItem(f"{result.flight_time:.2f}")
             )
-            self.results_table.setItem(
-                row, 4, QTableWidgetItem(f"{result.landing_angle:.1f}")
-            )
+            self.results_table.setItem(row, 4, QTableWidgetItem(landing_str))
 
         self.results_table.resizeColumnsToContents()
 

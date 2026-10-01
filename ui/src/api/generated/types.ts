@@ -421,11 +421,15 @@ export interface BallFlightSimulationResponse {
  * Scalar trajectory metrics.
  */
 export interface BallFlightSummary {
-  carry_m: number;
+  carry_m?: number | null;
   apex_m: number;
   flight_time_s: number;
-  landing_angle_deg: number;
-  lateral_deviation_m: number;
+  landing_angle_deg?: number | null;
+  lateral_deviation_m?: number | null;
+  termination: string;
+  terminal_event: boolean;
+  actual_horizon_s: number;
+  landed: boolean;
 }
 
 /**

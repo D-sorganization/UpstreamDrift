@@ -125,11 +125,15 @@ class BallFlightTrajectorySample(BaseModel):
 class BallFlightSummary(BaseModel):
     """Scalar trajectory metrics."""
 
-    carry_m: float
+    carry_m: float | None = None
     apex_m: float
     flight_time_s: float
-    landing_angle_deg: float
-    lateral_deviation_m: float
+    landing_angle_deg: float | None = None
+    lateral_deviation_m: float | None = None
+    termination: str = "landed"
+    terminal_event: bool = True
+    actual_horizon_s: float = 0.0
+    landed: bool = True
 
 
 class BallFlightModelResult(BaseModel):
@@ -186,11 +190,27 @@ def _simulate_one(
         coefficients={k: float(v) for k, v in result.coefficients.items()},
         trajectory=_trajectory_samples(result.trajectory),
         summary=BallFlightSummary(
-            carry_m=float(result.carry_distance),
+            carry_m=(
+                float(result.carry_distance)
+                if result.carry_distance is not None
+                else None
+            ),
             apex_m=float(result.max_height),
             flight_time_s=float(result.flight_time),
-            landing_angle_deg=float(result.landing_angle),
-            lateral_deviation_m=float(result.lateral_deviation),
+            landing_angle_deg=(
+                float(result.landing_angle)
+                if result.landing_angle is not None
+                else None
+            ),
+            lateral_deviation_m=(
+                float(result.lateral_deviation)
+                if result.lateral_deviation is not None
+                else None
+            ),
+            termination=result.termination.value,
+            terminal_event=result.terminal_event,
+            actual_horizon_s=float(result.actual_horizon),
+            landed=result.landed,
         ),
     )
 
@@ -335,6 +355,10 @@ def _imported_response(
             flight_time_s=summary.flight_time_s,
             landing_angle_deg=summary.landing_angle_deg,
             lateral_deviation_m=summary.lateral_deviation_m,
+            termination=summary.termination,
+            terminal_event=summary.terminal_event,
+            actual_horizon_s=summary.actual_horizon_s,
+            landed=summary.landed,
         ),
     )
 
