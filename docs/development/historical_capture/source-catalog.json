@@ -1,0 +1,53 @@
+{
+  "schema_version": "historical-source-catalog/1.0.0",
+  "tiger_epic": 11226,
+  "hogan_epic": 11229,
+  "runner_issue": 11230,
+  "sources": [
+    {
+      "subject_id": "ben-hogan",
+      "original_filename": "Ben Hogans_ slow motion practice routine.mp4",
+      "sha256": "8424c562eb3f58c11a3791cc7a6bb83631fe23c172ca8b228a31a63accbc49eb",
+      "size_bytes": 12049490,
+      "source_url": null,
+      "acquisition": "owner-provided Downloads MP4",
+      "recording_year": null,
+      "claimed_recording_year": null,
+      "year_evidence": "Unknown; owner attribution Ben Hogan",
+      "rights_status": "unknown",
+      "physical_playback_scale": null,
+      "film_lineage_status": "unreviewed",
+      "publication_permitted": false
+    },
+    {
+      "subject_id": "ben-hogan",
+      "original_filename": "Ben Hogan In Pursuit of Perfection.mp4",
+      "sha256": "f459454f43ee59757f8e483a5464a986bc4da26281628045d5bd24b3c4349197",
+      "size_bytes": 123948581,
+      "source_url": null,
+      "acquisition": "owner-provided Downloads MP4",
+      "recording_year": null,
+      "claimed_recording_year": null,
+      "year_evidence": "Unknown; owner attribution Ben Hogan",
+      "rights_status": "unknown",
+      "physical_playback_scale": null,
+      "film_lineage_status": "unreviewed",
+      "publication_permitted": false
+    },
+    {
+      "subject_id": "tiger-woods",
+      "original_filename": "t_J6Vik3Tss.mp4",
+      "sha256": "1a9fb1993b05db8bd9ef083c38716d7f5aa0b1963ba52a914ed8cf32cfd08af8",
+      "size_bytes": 81403056,
+      "source_url": "https://www.youtube.com/watch?v=t_J6Vik3Tss",
+      "acquisition": "yt-dlp 2026.8.19 format 299",
+      "recording_year": null,
+      "claimed_recording_year": 2000,
+      "year_evidence": "Uploader title/description; event lineage not verified",
+      "rights_status": "unknown",
+      "physical_playback_scale": null,
+      "film_lineage_status": "unreviewed",
+      "publication_permitted": false
+    }
+  ]
+}
