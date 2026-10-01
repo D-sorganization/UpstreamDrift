@@ -29,6 +29,8 @@ from src.shared.python.engine_core.simulation_timing import (
     engine_supports_variable_step,
 )
 
+pytestmark = [pytest.mark.unit]
+
 
 class TestSimulationTimingPlanCalculations:
     """Contract tests for compute_simulation_timing."""
