@@ -838,13 +838,20 @@ class SimulationService:
             or (args[0] if args and isinstance(args[0], str) else None)
             or getattr(request, "run_id", None)
         )
+        if target_run_id is not None and getattr(request, "run_id", None) is None:
+            try:
+                request.run_id = target_run_id
+            except (AttributeError, TypeError):
+                pass
+
         try:
             # run_sync is typed to return Any; bind to the declared type so
             # mypy-strict's no-any-return is satisfied.
             response: SimulationResponse = await anyio.to_thread.run_sync(
-                self._run_simulation_sync, request, target_run_id
+                self._run_simulation_sync, request
             )
             return response
+
         except (GolfSuiteError, ValueError, RuntimeError, OSError, TimeoutError) as e:
             logger.error("Simulation failed: %s", e, exc_info=True)
             self._finish_last_run(status="failed", error=str(e))

@@ -797,6 +797,8 @@ export interface CounterfactualRequest {
   kind: string;
   /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
   run_post_hoc: boolean;
+  /** Optional simulation run ID to analyze. If omitted, uses active/latest run. */
+  run_id?: string | null;
 }
 
 export interface CourseStateColumnsV1 {
@@ -2623,6 +2625,8 @@ export interface SimulationRequest {
   control_inputs?: Record<string, unknown>[] | null;
   /** Analysis configuration */
   analysis_config?: Record<string, unknown> | null;
+  /** Optional unique identifier for the simulation run */
+  run_id?: string | null;
 }
 
 /**
