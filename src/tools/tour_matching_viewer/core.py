@@ -8,6 +8,7 @@ Supports:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -200,7 +201,10 @@ class ResidualSummary:
         best_val = -1.0
         for f_idx, vec in enumerate(self.residual_vectors):
             if idx < len(vec):
-                err = float(np.linalg.norm(vec[idx]))
+                x = vec[idx]
+                err = float(
+                    math.sqrt(x.dot(x))
+                )  # ⚡ Bolt: math.sqrt(ndarray.dot) is faster than np.linalg.norm for small 1D arrays
                 if err > best_val:
                     best_val = err
                     best_frame = f_idx
