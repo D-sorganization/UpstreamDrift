@@ -14,6 +14,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from src.shared.python.pose_estimation.interface import PoseEstimationResult
+    from .source_records import SourceAsset
 
 
 class ImageEstimator(Protocol):
@@ -97,7 +98,7 @@ def export_capture(
     import av
     import cv2
 
-    from .ingestion import compute_frame_hash, ingest_source_asset
+    from .ingestion import compute_frame_hash
     from .source_records import FrameIdentity
 
     if not isinstance(window, CaptureWindow):
@@ -111,14 +112,7 @@ def export_capture(
     previous_pts: Fraction | None = None
     with av.open(str(source)) as container:
         stream = container.streams.video[0]
-        asset = ingest_source_asset(
-            source,
-            asset_id=f"{subject_id}-source",
-            width_px=stream.width,
-            height_px=stream.height,
-        )
-        source_id = f"source-{asset.content_sha256}"
-        asset = replace(asset, asset_id=source_id, source_uri=f"urn:asset:{source_id}")
+        asset = _source_asset(source, stream.width, stream.height)
         # Seek to the preceding keyframe, then discard pre-window frames.
         container.seek(int(window.start_s / stream.time_base), stream=stream)
         with (destination / "observations.jsonl").open("w", encoding="utf-8") as output:
@@ -174,13 +168,34 @@ def export_capture(
                 detected += observation["status"] == "detected"
     if not count:
         raise ValueError("Capture window contains no decoded frames")
+    return _write_receipt(
+        destination,
+        window,
+        subject_id,
+        asset.to_dict(),
+        count,
+        detected,
+        detector_identity,
+    )
+
+
+def _write_receipt(
+    destination: Path,
+    window: CaptureWindow,
+    subject_id: str,
+    source_record: dict[str, Any],
+    count: int,
+    detected: int,
+    detector_identity: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind completed observations to their source and detector evidence."""
     observations_path = destination / "observations.jsonl"
     with observations_path.open("rb") as handle:
         observations_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
     receipt = {
         "schema_version": "historical-capture/1.0.0",
         "subject_id": subject_id,
-        "source": asset.to_dict(),
+        "source": source_record,
         "window_presentation_s": [window.start_s, window.end_s],
         "frame_count": count,
         "detected_count": detected,
@@ -199,3 +214,14 @@ def export_capture(
         json.dumps(receipt, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )
     return receipt
+
+
+def _source_asset(source: Path, width: int, height: int) -> SourceAsset:
+    """Use content identity shared by every player's capture of this source."""
+    from .ingestion import ingest_source_asset
+
+    asset = ingest_source_asset(
+        source, asset_id="capture-source", width_px=width, height_px=height
+    )
+    source_id = f"source-{asset.content_sha256}"
+    return replace(asset, asset_id=source_id, source_uri=f"urn:asset:{source_id}")

@@ -87,3 +87,7 @@ The focused suite passed 35 tests before the final metadata refinements. Synthet
 video tests prove source/frame contracts and lossless image hash round trips;
 they are not Hogan/Tiger biomechanical validation. Current exact commands and
 results belong in AGENT_HANDOFF.md and the per-run receipts.
+
+## CI Receipt Refactor
+
+PR #11231 separates receipt writing from frame extraction to satisfy the 100-line function budget. The saved captures retain their original implementation hash; they were produced before this refactor. Twelve capture tests passed after the refactor.
