@@ -20,8 +20,10 @@ from src.shared.python.core.error_utils import (
     EngineNotAvailableError,
     ModelLoadError,
     PhysicsSimulationError,
+    SimulationBusyError,
     ValidationError,
 )
+
 
 from ..dependencies import get_logger, get_simulation_service, get_task_manager
 from ..models.requests import SimulationRequest
@@ -40,6 +42,8 @@ def _raise_simulation_failure_http_error(err: Any) -> None:
     msg = getattr(err, "message", "Simulation failed") if err else "Simulation failed"
     if code == "invalid_input":
         status_code = 400
+    elif code == "busy":
+        status_code = 409
     elif code in ("engine_unavailable", "model_load_error"):
         status_code = 503 if code == "engine_unavailable" else 400
     elif code == "timeout":
@@ -93,6 +97,14 @@ async def run_simulation(
         return result
     except HTTPException:
         raise
+    except SimulationBusyError as exc:
+        if logger:
+            logger.warning("Simulation service busy: %s", exc)
+        raise HTTPException(
+            status_code=409,
+            detail=str(exc),
+            headers={"X-Error-Code": "busy", "X-Error-Stage": "preparation"},
+        ) from exc
     except TimeoutError as exc:
         if logger:
             logger.warning("Simulation timeout: %s", exc)

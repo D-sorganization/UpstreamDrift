@@ -1,3 +1,22 @@
+## Isolate Engine, Recorder, and Analysis State per Simulation Run (R02, #11143)
+
+Specifies multi-engine isolation, run-addressed recorder state, explicit concurrency bounds, and independent lifecycle cleanup across REST and WebSocket simulation sessions:
+- **Engine Concurrency & Deterministic Isolation (`src/shared/python/engine_core/engine_manager.py`)**:
+  - `create_engine(engine_type: EngineType) -> PhysicsEngine`: instantiates and configures isolated, unshared physics engine instances without mutating global active engine references (`active_physics_engine`).
+  - Deterministic barrier test verifies two overlapping preparations cannot acquire, mutate, or cross-contaminate each other's engine, model, or configuration.
+- **Run-Addressed Session Isolation & Independent Controls (`src/api/services/simulation_service.py`, `src/api/models/requests.py`)**:
+  - `SimulationRunRecord`: encapsulates per-run state (`run_id`, `engine_type`, `stats`, `recorder`, `joint_names`, `meta`, `simulation_data`, `analysis_results`, `engine`, `status`, `cleaned_up`).
+  - `SimulationRequest` and `CounterfactualRequest`: accept optional `run_id` to explicitly address simulation and post-hoc rollouts.
+  - Independent clocks, frame counts, and speed adjustments: WebSocket and REST runs maintain connection- and run-isolated `SimulationStats` instances (`ws.state.sim_stats` and `run.stats`), ensuring speed adjustments and stat resets on one channel do not mutate concurrent runs.
+- **Explicit Busy Response & Concurrency Containment (`src/shared/python/core/error_utils.py`, `src/api/routes/simulation.py`)**:
+  - `SimulationBusyError(GolfSuiteError)`: raised when execution is constrained to single-run mode and another run is active.
+  - Maps to HTTP 409 Conflict with `code="busy"`, `stage="preparation"`, and `retriable=True`, rejecting contending runs explicitly rather than allowing undefined state clobbering.
+- **Immutable Run-Addressed Analysis & Export (`src/api/routes/analysis.py`, `src/api/routes/analysis_plots.py`, `src/api/routes/recordings.py`)**:
+  - Analysis plot data (`/analysis/plot-data/{plot_type}`), counterfactual analyses (`/analysis/counterfactual`), and recording persistence (`/recordings`) accept optional `run_id`.
+  - Fetching analysis or persisting recordings explicitly references the targeted run record; completion of a newer or concurrent simulation run cannot alter or overwrite the analyzed dataset.
+- **Isolated, Idempotent Engine Cleanup**:
+  - `cleanup_run_engine(run_id)`: idempotent cleanup occurs once per owning run; one run cannot unload, close, or interfere with another run's active engine.
+
 ## Keep Ball-Flight Results Attached to Input Snapshot and Provenance (R10, #11150)
 
 Specifies immutable execution input snapshots, provenance tracking, and out-of-order response protection on the BallFlight comparison page (`ui/src/pages/BallFlight.tsx`, `ui/src/pages/ballFlightModel.ts`):
@@ -7537,6 +7556,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |
 | 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11150 | [R10] Keep Ball-Flight Results Attached to Input Snapshot and Provenance: immutable execution input snapshots (launch conditions, model selections), active results tied to snapshot with committed/previous status badges, visual indicator for post-execution input modifications, previous results retained on failure, monotonic request sequence IDs guarding out-of-order responses, exposed model coefficients, and WCAG live region status announcements (#11150). |
 | 2026-10-01 | #11223 | [R07] Wire Neural Matching Controls to Executed Requests: wire neural mode, model selector, and fallback checkboxes to MatchRequest, validate models and dispositions via MotionMatchingController, update badges and metrics with fail-closed behavior, document platform gap in feature_parity.json (#11147). |

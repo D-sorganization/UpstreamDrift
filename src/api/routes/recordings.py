@@ -22,7 +22,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import anyio.to_thread
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+
 from fastapi.responses import FileResponse
 
 from src.api.services.recording_service import (
@@ -81,11 +82,19 @@ async def list_export_formats() -> dict[str, Any]:
 
 @router.post("/recordings", status_code=201)
 async def create_recording(
+    run_id: str | None = Query(None, description="Optional run ID to persist"),
     simulation_service: SimulationService = Depends(get_simulation_service),
     store: RecordingStore = Depends(get_recording_store),
 ) -> dict[str, Any]:
-    """Finalize and persist the active session recorder to disk."""
-    session = simulation_service.get_session_recording()
+    """Finalize and persist the active or specified session recorder to disk."""
+    try:
+        session = (
+            simulation_service.get_session_recording(run_id=run_id)
+            if run_id
+            else simulation_service.get_session_recording()
+        )
+    except TypeError:
+        session = simulation_service.get_session_recording()
     if session is None:
         raise HTTPException(
             status_code=409,
