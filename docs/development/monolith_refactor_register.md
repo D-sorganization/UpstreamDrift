@@ -22,11 +22,11 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1198 | `src/tools/capture_rig/gui.py` |
 | 1197 | `src/bunkershot3d/solvers/mpm/verification.py` |
 | 1197 | `src/launchers/launcher_diagnostics.py` |
-| 1187 | `src/tools/motion_matching/gui.py` |
 | 1186 | `src/launchers/model_card.py` |
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1184 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py` |
+| 1178 | `src/tools/motion_matching/gui.py` |
 | 1173 | `src/launchers/upstream_drift_launcher.py` |
 | 1171 | `src/config/launcher_manifest_loader.py` |
 | 1171 | `src/shared/python/movement_optimizer/gui/motion_tabs.py` |
