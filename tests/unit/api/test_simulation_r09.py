@@ -67,17 +67,88 @@ def task_manager() -> InMemoryTaskManager:
     return InMemoryTaskManager()
 
 
+def _disable_all_limiters(app: FastAPI, routes_list: list[Any]) -> None:
+    from src.api.rate_limit import limiter
+    import src.api.routes.simulation as sim_route
+
+    for candidate in [
+        limiter,
+        getattr(sim_route, "limiter", None),
+        getattr(app.state, "limiter", None),
+    ]:
+        if candidate is not None:
+            candidate.enabled = False
+            if hasattr(candidate, "reset"):
+                try:
+                    candidate.reset()
+                except (AttributeError, RuntimeError):
+                    pass
+            storage = getattr(candidate, "_storage", None)
+            if storage is not None:
+                if hasattr(storage, "storage") and hasattr(storage.storage, "clear"):
+                    storage.storage.clear()
+                if hasattr(storage, "events") and hasattr(storage.events, "clear"):
+                    storage.events.clear()
+                if hasattr(storage, "reset"):
+                    try:
+                        storage.reset()
+                    except (AttributeError, RuntimeError):
+                        pass
+
+    for route in routes_list:
+        ep = getattr(route, "endpoint", None)
+        while ep is not None:
+            if hasattr(ep, "__closure__") and ep.__closure__:
+                for cell in ep.__closure__:
+                    obj = cell.cell_contents
+                    if hasattr(obj, "enabled"):
+                        obj.enabled = False
+                    if hasattr(obj, "reset"):
+                        try:
+                            obj.reset()
+                        except (AttributeError, RuntimeError):
+                            pass
+                    storage = getattr(obj, "_storage", None)
+                    if storage is not None:
+                        if hasattr(storage, "storage") and hasattr(
+                            storage.storage, "clear"
+                        ):
+                            storage.storage.clear()
+                        if hasattr(storage, "events") and hasattr(
+                            storage.events, "clear"
+                        ):
+                            storage.events.clear()
+                        if hasattr(storage, "reset"):
+                            try:
+                                storage.reset()
+                            except (AttributeError, RuntimeError):
+                                pass
+            if hasattr(ep, "__globals__"):
+                glob_limiter = ep.__globals__.get("limiter")
+                if glob_limiter is not None:
+                    glob_limiter.enabled = False
+                    if hasattr(glob_limiter, "reset"):
+                        try:
+                            glob_limiter.reset()
+                        except (AttributeError, RuntimeError):
+                            pass
+            ep = getattr(ep, "__wrapped__", None)
+
+
 @pytest.fixture
 def app_with_service(
-    mock_engine_manager: MagicMock, task_manager: InMemoryTaskManager
+    mock_engine_manager: MagicMock,
+    task_manager: InMemoryTaskManager,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[FastAPI, SimulationService]:
     from src.api.rate_limit import limiter
 
     service = SimulationService(mock_engine_manager)
     test_app = FastAPI()
     test_app.state.limiter = limiter
-    limiter.enabled = False
     test_app.include_router(router)
+    _disable_all_limiters(test_app, list(test_app.routes) + list(router.routes))
+    monkeypatch.setattr(limiter, "enabled", False)
     test_app.dependency_overrides[get_simulation_service] = lambda: service
     test_app.dependency_overrides[get_task_manager] = lambda: task_manager
     test_app.dependency_overrides[get_logger] = lambda: None
@@ -168,10 +239,12 @@ async def test_background_simulation_retains_machine_readable_error(
 ) -> None:
     """Background failure records machine-readable error_code, error_stage, and error_info."""
     _, service = app_with_service
-    request = SimulationRequest(
-        engine_type="mujoco",
-        duration=0.01,
-        timestep=0.05,  # Invalid parameter: timestep > duration triggers ValueError
+    request = SimulationRequest.model_validate(
+        {
+            "engine_type": "mujoco",
+            "duration": 0.01,
+            "timestep": 0.05,  # Invalid parameter: timestep > duration triggers ValueError
+        }
     )
 
     await service.run_simulation_background("task-r09-bg-err", request, task_manager)
@@ -223,8 +296,8 @@ async def test_persistence_failure_preserves_memory_results_and_marks_failed(
             side_effect=OSError("Disk quota exceeded [Errno 122]"),
         ),
     ):
-        request = SimulationRequest(
-            engine_type="mujoco", duration=0.001, timestep=0.001
+        request = SimulationRequest.model_validate(
+            {"engine_type": "mujoco", "duration": 0.001, "timestep": 0.001}
         )
         response = await service.run_simulation(request, raise_on_error=False)
 
@@ -237,6 +310,7 @@ async def test_persistence_failure_preserves_memory_results_and_marks_failed(
         assert response.error.code == "persistence_failed"
         assert response.error.stage == "persistence"
         assert response.error.retriable is True
+        assert response.error.retry_guidance is not None
         assert "memory" in response.error.retry_guidance.lower()
 
         # In-memory session must be preserved for explicit retry
@@ -281,12 +355,15 @@ async def test_analysis_partial_status_and_optional_channel_labeling(
         "src.api.services.simulation_service.GenericPhysicsRecorder",
         return_value=mock_rec,
     ):
-        request = SimulationRequest(
-            engine_type="mujoco",
-            duration=0.001,
-            timestep=0.001,
-            analysis_config={"ztcf": True, "zvcf": True},
+        request = SimulationRequest.model_validate(
+            {
+                "engine_type": "mujoco",
+                "duration": 0.001,
+                "timestep": 0.001,
+                "analysis_config": {"ztcf": True, "zvcf": True},
+            }
         )
+
         response = await service.run_simulation(request, raise_on_error=False)
 
         assert response.success is True

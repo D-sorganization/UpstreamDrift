@@ -224,6 +224,28 @@ def build_parser() -> argparse.ArgumentParser:
         default="adam",
         help="optimisation algorithm for MJX knot optimisation (adam or lbfgs)",
     )
+    parser.add_argument(
+        "--neural-mode",
+        choices=["classical", "preview", "verified"],
+        default="classical",
+        help="neural-assisted matching mode (classical, preview, verified)",
+    )
+    parser.add_argument(
+        "--neural-model",
+        default=None,
+        help="neural model identity from qualified roster (e.g. driven_double_pendulum)",
+    )
+    parser.add_argument(
+        "--no-neural-fallback",
+        action="store_true",
+        help="disable classical fallback when neural proposal is rejected or unavailable",
+    )
+    parser.add_argument(
+        "--neural-checkpoint",
+        type=Path,
+        default=None,
+        help="optional explicit path to qualified neural model checkpoint",
+    )
     return parser
 
 
