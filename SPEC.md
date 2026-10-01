@@ -1,3 +1,21 @@
+## Keep Ball-Flight Results Attached to Input Snapshot and Provenance (R10, #11150)
+
+Specifies immutable execution input snapshots, provenance tracking, and out-of-order response protection on the BallFlight comparison page (`ui/src/pages/BallFlight.tsx`, `ui/src/pages/ballFlightModel.ts`):
+- **Immutable Input Snapshot & Provenance Banner (`ballFlightModel.ts`, `BallFlight.tsx`)**:
+  - `BallFlightInputSnapshot`: captures exact launch condition values and selected model keys at simulation submission time.
+  - Active simulation results remain explicitly bound to their input snapshot. A prominent result provenance banner displays whether the visible result is a `"Committed Run"` or a preserved `"Previous Result"`.
+  - Snapshot summary renders formatted launch conditions (ball speed, launch angle, spin rate, spin axis tilt, wind speed and direction).
+- **Post-Execution Input Modification Warning**:
+  - `areInputsChanged` and `areModelsChanged` dynamically compare current form state against the committed snapshot.
+  - An `"Inputs modified since this run was calculated"` banner alerts the user whenever input parameters diverge from the calculated results, preventing stale interpretations while preserving visible data.
+- **Previous Result Retention on Simulation Failure**:
+  - When a subsequent simulation fails, previously computed results and their associated input snapshot are retained rather than cleared, labeled with a `"Previous Result"` status badge alongside the failure alert.
+- **Monotonic Request Sequence Protection**:
+  - Monotonic `requestIdRef` tracks simulation requests, ensuring slow out-of-order network responses can never overwrite newer simulation runs or input snapshots.
+- **Model Coefficients & Assistive Technology Announcements**:
+  - Propagates API-computed flight coefficients (`cd`, `cl`, `spin_decay`) in per-model metrics tables.
+  - WCAG live region (`div[role="status"][aria-live="polite"]`) announces simulation start, completion, and failure transitions.
+
 ## Wire Neural Matching Controls to Executed Requests and Validate Executability (R07, #11147)
 
 Specifies the end-to-end integration and fail-closed validation contracts connecting UI neural matching controls to executed pipeline requests:
@@ -7519,12 +7537,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11150 | [R10] Keep Ball-Flight Results Attached to Input Snapshot and Provenance: immutable execution input snapshots (launch conditions, model selections), active results tied to snapshot with committed/previous status badges, visual indicator for post-execution input modifications, previous results retained on failure, monotonic request sequence IDs guarding out-of-order responses, exposed model coefficients, and WCAG live region status announcements (#11150). |
 | 2026-10-01 | #11223 | [R07] Wire Neural Matching Controls to Executed Requests: wire neural mode, model selector, and fallback checkboxes to MatchRequest, validate models and dispositions via MotionMatchingController, update badges and metrics with fail-closed behavior, document platform gap in feature_parity.json (#11147). |
 | 2026-10-01 | #11145 | [R04] Propagate Flight Termination Before Reporting Landing Metrics: propagate explicit FlightTermination states (LANDED, TIME_LIMIT, SOLVER_FAILED, CANCELLED) with terminal-event evidence and actual horizon, gate landing metrics (carry, landing angle, lateral deviation) to None on unlanded flights, raise IncompleteFlightError carrying partial result on require_landing(), support cooperative cancellation via FlightSimulationCancelled, update BallFlightSummary and trajectory import to reflect termination status, and handle None metrics safely in Shot Tracer results table (#11145). |
 | 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
 | 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
 | 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
-| 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |

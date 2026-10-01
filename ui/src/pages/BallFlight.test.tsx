@@ -49,6 +49,7 @@ vi.mock("recharts", () => ({
 }));
 
 import { BallFlightPage } from "./BallFlight";
+import { getFieldMetadata } from "@/ux/fieldMetadata";
 import {
   invalidLaunchFields,
   modelColor,
@@ -517,6 +518,244 @@ describe("BallFlightPage — import record", () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId("import-list")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("R10 input snapshot, result provenance, and out-of-order protection (#11150)", () => {
+    it("attaches and displays immutable input snapshot on successful simulation", async () => {
+      mockApi();
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("result-provenance-banner")).toBeInTheDocument();
+      });
+      expect(screen.getByTestId("committed-result-badge")).toHaveTextContent(
+        "Committed Run",
+      );
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("70 m/s");
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("12°");
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("2600 RPM");
+      expect(screen.queryByTestId("inputs-changed-indicator")).not.toBeInTheDocument();
+    });
+
+    it("displays inputs-modified indicator when user edits inputs after a run", async () => {
+      mockApi();
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+      await waitFor(() => {
+        expect(screen.getByTestId("result-provenance-banner")).toBeInTheDocument();
+      });
+
+      // Edit an input
+      fireEvent.change(
+        screen.getByLabelText(
+          new RegExp(
+            getFieldMetadata("ball_flight.ball_speed").label,
+            "i",
+          ),
+        ),
+        { target: { value: "75" } },
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("inputs-changed-indicator"),
+        ).toBeInTheDocument();
+      });
+      expect(screen.getByTestId("inputs-changed-indicator")).toHaveTextContent(
+        "Inputs modified since this run was calculated",
+      );
+      // The committed snapshot summary is immutable and still reflects 70 m/s
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("70 m/s");
+    });
+
+    it("retains and labels prior results as previous result when a subsequent run fails", async () => {
+      let callCount = 0;
+      apiFetchMock.mockImplementation((path: string) => {
+        if (path === "/api/tools/ball-flight/models") {
+          return Promise.resolve({ models: MODELS });
+        }
+        if (path === "/api/tools/ball-flight/simulate") {
+          callCount++;
+          if (callCount === 1) {
+            return Promise.resolve(SIMULATE_RESPONSE);
+          }
+          return Promise.reject(new Error("Integration step failed"));
+        }
+        return Promise.reject(new Error(`Unexpected path: ${path}`));
+      });
+
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      // Run A succeeds
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+      await waitFor(() => {
+        expect(screen.getByTestId("committed-result-badge")).toBeInTheDocument();
+      });
+
+      // Edit inputs for Run B
+      fireEvent.change(
+        screen.getByLabelText(
+          new RegExp(
+            getFieldMetadata("ball_flight.ball_speed").label,
+            "i",
+          ),
+        ),
+        { target: { value: "85" } },
+      );
+
+      // Run B fails
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "Integration step failed",
+        );
+      });
+
+      // Result remains visible and explicitly labeled as Previous Result
+      expect(screen.getByTestId("previous-result-badge")).toHaveTextContent(
+        "Previous Result",
+      );
+      // Still tied to Run A's inputs (70 m/s), not Run B (85 m/s)
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("70 m/s");
+      expect(screen.getByTestId("metrics-table")).toBeInTheDocument();
+    });
+
+    it("guards against out-of-order responses overwriting newer runs", async () => {
+      let resolveFirst!: (val: unknown) => void;
+      const firstPromise = new Promise((resolve) => {
+        resolveFirst = resolve;
+      });
+
+      const responseRun1: BallFlightSimulationResponse = {
+        ...makeResult("waterloo_penner", "Run 1 Waterloo"),
+        results: [makeResult("waterloo_penner", "Run 1 Waterloo")],
+      };
+      const responseRun2: BallFlightSimulationResponse = {
+        ...makeResult("waterloo_penner", "Run 2 Waterloo"),
+        results: [makeResult("waterloo_penner", "Run 2 Waterloo")],
+      };
+
+      let call = 0;
+      apiFetchMock.mockImplementation((path: string) => {
+        if (path === "/api/tools/ball-flight/models") {
+          return Promise.resolve({ models: MODELS });
+        }
+        if (path === "/api/tools/ball-flight/simulate") {
+          call++;
+          if (call === 1) return firstPromise;
+          return Promise.resolve(responseRun2);
+        }
+        return Promise.reject(new Error(`Unexpected path: ${path}`));
+      });
+
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      // Launch slow Run 1
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      // Change input and launch fast Run 2
+      fireEvent.change(
+        screen.getByLabelText(
+          new RegExp(
+            getFieldMetadata("ball_flight.ball_speed").label,
+            "i",
+          ),
+        ),
+        { target: { value: "80" } },
+      );
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      // Run 2 completes first
+      await waitFor(() => {
+        expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("80 m/s");
+      });
+      expect(screen.getByText("Run 2 Waterloo")).toBeInTheDocument();
+
+      // Now Run 1 finishes late
+      resolveFirst(responseRun1);
+
+      // Ensure Run 1 did NOT overwrite Run 2
+      await waitFor(() => {
+        expect(screen.queryByText("Run 1 Waterloo")).not.toBeInTheDocument();
+      });
+      expect(screen.getByText("Run 2 Waterloo")).toBeInTheDocument();
+      expect(screen.getByTestId("snapshot-summary")).toHaveTextContent("80 m/s");
+    });
+
+    it("displays model coefficients returned by the API", async () => {
+      const responseWithCoeffs: BallFlightSimulationResponse = {
+        ...makeResult("waterloo_penner", "Waterloo/Penner"),
+        results: [
+          {
+            ...makeResult("waterloo_penner", "Waterloo/Penner"),
+            coefficients: { cd: 0.25, cl: 0.18, spin_decay: 0.05 },
+          },
+        ],
+      };
+
+      apiFetchMock.mockImplementation((path: string) => {
+        if (path === "/api/tools/ball-flight/models") {
+          return Promise.resolve({ models: MODELS });
+        }
+        if (path === "/api/tools/ball-flight/simulate") {
+          return Promise.resolve(responseWithCoeffs);
+        }
+        return Promise.reject(new Error(`Unexpected path: ${path}`));
+      });
+
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId("coefficients-waterloo_penner"),
+        ).toBeInTheDocument();
+      });
+      expect(
+        screen.getByTestId("coefficients-waterloo_penner"),
+      ).toHaveTextContent("cd=0.25");
+      expect(
+        screen.getByTestId("coefficients-waterloo_penner"),
+      ).toHaveTextContent("cl=0.18");
+    });
+
+    it("announces status transitions to assistive technology via WCAG live region", async () => {
+      mockApi();
+      render(<BallFlightPage />);
+      await waitFor(() => {
+        expect(screen.getByTestId("simulate-btn")).toBeInTheDocument();
+      });
+
+      const announcer = screen.getByTestId("ball-flight-status-announcer");
+      expect(announcer).toHaveAttribute("aria-live", "polite");
+      expect(announcer).toHaveAttribute("role", "status");
+
+      fireEvent.click(screen.getByTestId("simulate-btn"));
+
+      await waitFor(() => {
+        expect(announcer).toHaveTextContent(/simulation complete/i);
+      });
     });
   });
 });
