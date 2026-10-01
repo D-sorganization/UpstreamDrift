@@ -37,6 +37,7 @@ from .contracts import (
     ShadowTrackerService,
     Shot,
     SilhouetteRenderer,
+    Segmenter,
 )
 from .evaluation import create_evaluated_result_bundle
 from .fitting import (
@@ -90,6 +91,7 @@ class DefaultShadowTrackerService:
         self._renderer: SilhouetteRenderer | None = None
         self._camera: PinholeCameraModel | None = None
         self._checkpoints: list[OptimizationCheckpoint] = []
+        self._segmenter: Segmenter | None = None
 
     @property
     def is_cancelled(self) -> bool:
@@ -105,6 +107,17 @@ class DefaultShadowTrackerService:
     def checkpoints(self) -> tuple[OptimizationCheckpoint, ...]:
         """Return all recorded optimization checkpoints from the most recent run."""
         return tuple(self._checkpoints)
+
+    @property
+    def segmenter(self) -> Segmenter | None:
+        """Return registered segmenter provider or None if manual."""
+        return self._segmenter
+
+    def register_segmenter(self, segmenter: Segmenter) -> None:
+        """Register an optional automated segmentation provider."""
+        if not isinstance(segmenter, Segmenter):
+            raise TypeError(f"Expected Segmenter, got {type(segmenter).__name__}")
+        self._segmenter = segmenter
 
     def register_backend(
         self,

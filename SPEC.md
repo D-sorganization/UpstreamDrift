@@ -14,6 +14,19 @@ Specifies the best-candidate viewer, honest marker residuals, drive mode filteri
   - Implements `candidate_preview_frame` returning observed target dots, fitted model joints, residual vectors, and frame RMS for web 3D clients.
   - Implements `candidate_preview_residual_summary` and `GET /matched-swings/{run_id}/residuals` exposing swing-wide residual timelines.
 
+## Integrate and Benchmark Real Body and Club Segmentation (MMR-13, #11099)
+Specifies neural silhouette segmentation provider interface, model card and checkpoint verification, separated body/club channels, and benchmark evaluation:
+- **Segmentation Provider & Architecture Card (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `SegmentationModelCard`: records architecture (SAM-ViT-B, MobileSAM), version, license (Apache-2.0), parameter counts, input resolutions, hardware requirements, redistribution terms, and known failure modes (motion blur, thin shafts, occlusion).
+  - Pinned weight hashes: `SAM_VIT_B_GOLF_SHA256` and `MOBILESAM_GOLF_SHA256`.
+  - `verify_checkpoint`: fail-closed validation rejecting corrupt or arbitrary weight files (`RuntimeError`) and missing files (`FileNotFoundError`) with zero hidden network downloads.
+  - `ModelSegmentationProvider`: lazy and optional segmentation adapter fulfilling the `Segmenter` protocol, separating body and club binary masks across valid foreground pixels and preserving frame/checkpoint provenance hashes (`producer_id`, `revision_id`, `frame_sha256`).
+  - `evaluate_segmentation_benchmark`: bounded evaluation suite testing held-out modern high-speed (120 fps blur), historical archive (1953 shaft dropouts), and occluded adverse clips, reporting body IoU, club recall, boundary F1, correction effort edits, latency, memory, and occlusion detection.
+- **Service Integration (`src/shared/python/shadow_tracker/service.py`)**:
+  - `register_segmenter` and `segmenter` property on `DefaultShadowTrackerService`, allowing automated segmenters to feed initial masks into `ManualMaskProvider` while keeping purely manual operation operational when unconfigured.
+- **Verification (`tests/unit/shadow_tracker/test_silhouette_segmentation.py`)**:
+  - Unit tests verifying fail-closed checkpoint validation on corrupt weights, lazy optional initialization, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback with parent-revision branching, and multi-clip benchmark evaluation.
+
 ## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
 - **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
@@ -7372,9 +7385,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
+| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
 | 2026-10-01 | #11196 | [MMR-17] Establish Clean-Host End-to-End and Native Release Gates (#11103): clean-installation bounded journeys, native receipt ingestion across all six engines (opensim, myosuite, drake, mujoco, pinocchio, simscape), adverse path rejection (tampered package, missing engine, unsupported model, corrupt capture), and fail-closed release qualification matrix. |
-| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
 | 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
 | 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
 | 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |
