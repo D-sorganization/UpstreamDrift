@@ -326,6 +326,18 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         """Force/torque and counterfactual inspection widget."""
         return self._force_widget
 
+    def _jump_to_frame_index(self, frame_idx: int) -> None:
+        """Internal helper to navigate transport and canvas to a target frame index."""
+        if self._replay is None or not (0 <= frame_idx < self._replay.frame_count):
+            return
+        t = float(self._replay.time_s[frame_idx])
+        if hasattr(self, "_transport") and self._transport is not None:
+            self._transport.blockSignals(True)
+            self._transport.jump_to_time(t)
+            self._transport.blockSignals(False)
+        self._current_frame = frame_idx
+        self.render_frame(frame_idx)
+
     def select_worst_marker(self, marker: str | int) -> int:
         """Navigate to the discrete frame with highest residual error for the marker."""
         if self._residual_summary is None and self._replay is not None:
@@ -334,14 +346,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             return self._current_frame
 
         frame_idx = self._residual_summary.worst_frame_for_marker(marker)
-        if 0 <= frame_idx < self._replay.frame_count:
-            t = float(self._replay.time_s[frame_idx])
-            if hasattr(self, "_transport") and self._transport is not None:
-                self._transport.blockSignals(True)
-                self._transport.jump_to_time(t)
-                self._transport.blockSignals(False)
-            self._current_frame = frame_idx
-            self.render_frame(frame_idx)
+        self._jump_to_frame_index(frame_idx)
         return frame_idx
 
     def select_worst_phase(self, phase: str) -> int:
@@ -352,14 +357,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             return self._current_frame
 
         frame_idx = self._residual_summary.worst_frame_for_phase(phase)
-        if 0 <= frame_idx < self._replay.frame_count:
-            t = float(self._replay.time_s[frame_idx])
-            if hasattr(self, "_transport") and self._transport is not None:
-                self._transport.blockSignals(True)
-                self._transport.jump_to_time(t)
-                self._transport.blockSignals(False)
-            self._current_frame = frame_idx
-            self.render_frame(frame_idx)
+        self._jump_to_frame_index(frame_idx)
         return frame_idx
 
     def select_worst_residual(self) -> None:
@@ -370,14 +368,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             return
 
         worst_idx = self._residual_summary.worst_frame_idx
-        if 0 <= worst_idx < self._replay.frame_count:
-            t = float(self._replay.time_s[worst_idx])
-            if hasattr(self, "_transport") and self._transport is not None:
-                self._transport.blockSignals(True)
-                self._transport.jump_to_time(t)
-                self._transport.blockSignals(False)
-            self._current_frame = worst_idx
-            self.render_frame(worst_idx)
+        self._jump_to_frame_index(worst_idx)
 
     def set_camera_view(self, view: str) -> None:
         """Set camera view preset ('perspective', 'front', 'side', 'top', 'isometric')."""

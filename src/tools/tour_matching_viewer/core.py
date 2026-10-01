@@ -689,26 +689,12 @@ def export_animation_gif(
         else (("default", replay),)
     )
 
-    frames: list[Image.Image] = []
+    frames: list[Any] = []
     for i in range(total_frames):
         _render_single_gif_frame(ax, spec, replays, i)
-        canvas.draw()
-        buf = canvas.buffer_rgba()
-        img = Image.frombuffer(
-            "RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1
-        )
-        frames.append(img.convert("RGB"))
+        frames.append(_capture_canvas_frame(canvas))
 
-    if frames:
-        duration_ms = max(10, int(1000 / max(1, fps)))
-        frames[0].save(
-            out_p,
-            save_all=True,
-            append_images=frames[1:],
-            duration=duration_ms,
-            loop=0,
-        )
-    return out_p
+    return _save_gif_frames(frames, out_p, fps)
 
 
 def _resolve_marker_names(
@@ -909,6 +895,39 @@ def _render_still_geometry(ax: Any, vframe: ViewerFrame, engine_name: str) -> No
                 )
 
 
+def _setup_3d_axes(ax: Any) -> None:
+    """Setup standard 3D viewport limits and elevation/azimuth angles."""
+    ax.clear()
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(0.0, 2.0)
+    ax.view_init(elev=20, azim=45)
+
+
+def _capture_canvas_frame(canvas: Any) -> Any:
+    """Draw canvas and convert rgba buffer to an RGB PIL Image."""
+    from PIL import Image
+
+    canvas.draw()
+    buf = canvas.buffer_rgba()
+    img = Image.frombuffer("RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1)
+    return img.convert("RGB")
+
+
+def _save_gif_frames(frames: Sequence[Any], out_p: Path, fps: int) -> Path:
+    """Write sequential RGB PIL images to an animated GIF."""
+    if frames:
+        duration_ms = max(10, int(1000 / max(1, fps)))
+        frames[0].save(
+            out_p,
+            save_all=True,
+            append_images=frames[1:],
+            duration=duration_ms,
+            loop=0,
+        )
+    return out_p
+
+
 @dataclass(frozen=True)
 class BoardExportMetadata:
     """Metadata displayed on board-ready stills and animations."""
@@ -918,6 +937,20 @@ class BoardExportMetadata:
     drive_mode: str = "torque_driven"
     verdict: str = "UNVERIFIED"
     evidence_link: str | None = None
+
+
+def _resolve_export_metadata(
+    metadata: BoardExportMetadata | None,
+    kwargs: Mapping[str, Any],
+) -> BoardExportMetadata:
+    """Resolve explicit metadata or synthesize from legacy keyword arguments."""
+    return metadata or BoardExportMetadata(
+        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
+        engine_name=str(kwargs.get("engine_name", "default")),
+        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
+        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
+        evidence_link=kwargs.get("evidence_link"),
+    )
 
 
 def export_board_ready_still(
@@ -934,13 +967,7 @@ def export_board_ready_still(
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
-    meta = metadata or BoardExportMetadata(
-        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
-        engine_name=str(kwargs.get("engine_name", "default")),
-        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
-        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
-        evidence_link=kwargs.get("evidence_link"),
-    )
+    meta = _resolve_export_metadata(metadata, kwargs)
 
     matplotlib.use("Agg")
     out_p = Path(output_path)
@@ -949,11 +976,7 @@ def export_board_ready_still(
     fig = Figure(figsize=(8, 7), dpi=150)
     canvas = FigureCanvasAgg(fig)
     ax: Any = fig.add_subplot(111, projection="3d")
-    ax.clear()
-    ax.set_xlim(-1.5, 1.5)
-    ax.set_ylim(-1.5, 1.5)
-    ax.set_zlim(0.0, 2.0)
-    ax.view_init(elev=20, azim=45)
+    _setup_3d_axes(ax)
 
     vframe = viewer_frame(spec, replay, frame_idx)
     _render_still_geometry(ax, vframe, meta.engine_name)
@@ -989,15 +1012,8 @@ def export_board_ready_video(
     import matplotlib
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
-    from PIL import Image
 
-    meta = metadata or BoardExportMetadata(
-        candidate_hash=str(kwargs.get("candidate_hash", "unknown")),
-        engine_name=str(kwargs.get("engine_name", "default")),
-        drive_mode=str(kwargs.get("drive_mode", "torque_driven")),
-        verdict=str(kwargs.get("verdict", "UNVERIFIED")),
-        evidence_link=kwargs.get("evidence_link"),
-    )
+    meta = _resolve_export_metadata(metadata, kwargs)
 
     matplotlib.use("Agg")
     out_p = Path(output_path)
@@ -1011,13 +1027,9 @@ def export_board_ready_video(
     if max_frames is not None:
         total_frames = min(total_frames, max_frames)
 
-    frames: list[Image.Image] = []
+    frames: list[Any] = []
     for k in range(total_frames):
-        ax.clear()
-        ax.set_xlim(-1.5, 1.5)
-        ax.set_ylim(-1.5, 1.5)
-        ax.set_zlim(0.0, 2.0)
-        ax.view_init(elev=20, azim=45)
+        _setup_3d_axes(ax)
 
         vframe = viewer_frame(spec, replay, k)
         _render_still_geometry(ax, vframe, meta.engine_name)
@@ -1032,20 +1044,6 @@ def export_board_ready_video(
             caption += f" | Link: {meta.evidence_link}"
         fig.suptitle(caption, fontsize=9, fontweight="bold", y=0.97)
 
-        canvas.draw()
-        buf = canvas.buffer_rgba()
-        img = Image.frombuffer(
-            "RGBA", canvas.get_width_height(), buf, "raw", "RGBA", 0, 1
-        )
-        frames.append(img.convert("RGB"))
+        frames.append(_capture_canvas_frame(canvas))
 
-    if frames:
-        duration_ms = max(10, int(1000 / max(1, fps)))
-        frames[0].save(
-            out_p,
-            save_all=True,
-            append_images=frames[1:],
-            duration=duration_ms,
-            loop=0,
-        )
-    return out_p
+    return _save_gif_frames(frames, out_p, fps)
