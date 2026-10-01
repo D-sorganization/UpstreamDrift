@@ -68,6 +68,23 @@ class SimulationRunRecord:
     created_at: float = field(default_factory=time.time)
     finished_at: float | None = None
     cleaned_up: bool = False
+    deadline: float | None = None
+    cancellation_requested: bool = False
+    cancellation_reason: str | None = None
+
+    def cancel(self, reason: str = "Simulation cancelled by user") -> None:
+        """Signal cooperative cancellation for this run (R03)."""
+        self.cancellation_requested = True
+        self.cancellation_reason = reason
+        self.status = "cancelled"
+
+    def is_cancelled(self) -> bool:
+        """Return True if cancellation has been requested."""
+        return self.cancellation_requested or self.status == "cancelled"
+
+    def is_deadline_exceeded(self) -> bool:
+        """Return True if execution deadline has passed."""
+        return self.deadline is not None and time.time() > self.deadline
 
 
 class SimulationRunStore:
@@ -345,10 +362,12 @@ def record_background_task_result(
             if err is not None
             else None
         )
+        calc_status = getattr(result, "calculation_status", None)
+        task_status = "cancelled" if calc_status == "cancelled" else "failed"
         active_tasks.set(
             task_id,
             {
-                "status": "failed",
+                "status": task_status,
                 "result": dump,
                 "error": msg,
                 "error_code": code,

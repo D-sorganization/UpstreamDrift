@@ -506,8 +506,9 @@ class SimulationService:
         timestep: float,
         steps: int,
         run_stats: SimulationStats | None = None,
+        run: SimulationRunRecord | None = None,
     ) -> None:
-        """Execute the main simulation stepping loop.
+        """Execute the main simulation stepping loop with cancellation and deadline checks (R03).
 
         Args:
             engine: Physics engine instance.
@@ -516,6 +517,7 @@ class SimulationService:
             timestep: Time step per simulation step.
             steps: Total number of steps to execute.
             run_stats: Optional per-run stats instance to update.
+            run: Optional simulation run record for cooperative cancellation and deadline checks.
         """
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
@@ -528,7 +530,18 @@ class SimulationService:
         # Record initial state at t=0
         recorder.record_step(control_input=None)
 
+        early_stopped = False
         for step in range(steps):
+            if run is not None:
+                if run.is_cancelled():
+                    run.status = "cancelled"
+                    early_stopped = True
+                    break
+                if run.is_deadline_exceeded():
+                    run.status = "timed_out"
+                    early_stopped = True
+                    break
+
             if (
                 getattr(recorder, "buffer_exhausted", False) is True
                 or not recorder.is_recording
@@ -556,6 +569,10 @@ class SimulationService:
             self._stats.frame_count += 1
             if run_stats is not None:
                 run_stats.frame_count += 1
+
+        if early_stopped:
+            recorder.is_recording = False
+            return
 
         expected_samples = steps + 1
         retained_samples = getattr(recorder, "current_idx", expected_samples)
@@ -658,6 +675,7 @@ class SimulationService:
         steps: int,
         expected_frames: int,
         run_stats: SimulationStats | None = None,
+        run: SimulationRunRecord | None = None,
     ) -> GenericPhysicsRecorder:
         recorder = GenericPhysicsRecorder(
             engine, max_samples=max(100000, expected_frames)
@@ -669,7 +687,13 @@ class SimulationService:
         recorder.start()
         try:
             self._execute_simulation_loop(
-                engine, recorder, request, timestep, steps, run_stats=run_stats
+                engine,
+                recorder,
+                request,
+                timestep,
+                steps,
+                run_stats=run_stats,
+                run=run,
             )
         finally:
             recorder.stop()
@@ -681,6 +705,53 @@ class SimulationService:
             "duration": request.duration,
         }
         return recorder
+
+    def _build_interrupted_run_response(
+        self,
+        run: SimulationRunRecord,
+        run_id: str,
+        recorder: GenericPhysicsRecorder,
+        timestep: float,
+        simulation_data: dict[str, Any],
+    ) -> SimulationResponse:
+        """Construct a terminal SimulationResponse for a cancelled or timed-out run (R03)."""
+        recorded_frames = getattr(recorder, "current_idx", 0)
+        self._finish_last_run(status=run.status, frames=recorded_frames)
+        err_code = "cancelled" if run.status == "cancelled" else "timeout"
+        err_msg = run.cancellation_reason or (
+            "Simulation timed out" if err_code == "timeout" else "Simulation cancelled"
+        )
+        cancel_err = SimulationErrorInfo(
+            code=err_code,
+            message=err_msg,
+            stage="execution",
+            run_id=run_id,
+            retriable=True,
+            retry_guidance="Restart simulation with a new run ID.",
+        )
+        return SimulationResponse(
+            success=False,
+            duration=round(recorded_frames * timestep, 6),
+            frames=recorded_frames,
+            data=simulation_data,
+            analysis_results=None,
+            export_paths=[],
+            calculation_status=run.status,
+            analysis_status="not_requested",
+            persistence_status="not_requested",
+            error=cancel_err,
+            run_id=run_id,
+        )
+
+    def cancel_run(
+        self, run_id: str, reason: str = "Simulation cancelled by user"
+    ) -> bool:
+        """Cooperatively cancel an active simulation run (R03)."""
+        run = self.get_run(run_id)
+        if run is not None and run.status == "running":
+            run.cancel(reason=reason)
+            return True
+        return False
 
     def _run_simulation_sync(
         self, request: SimulationRequest, run_id: str | None = None
@@ -745,10 +816,25 @@ class SimulationService:
 
         timestep, steps, expected_frames = self._validate_simulation_timing(request)
         recorder = self._create_and_run_recorder(
-            engine, request, timestep, steps, expected_frames, run_stats=run.stats
+            engine,
+            request,
+            timestep,
+            steps,
+            expected_frames,
+            run_stats=run.stats,
+            run=run,
         )
 
         simulation_data = self._extract_simulation_data(recorder)
+
+        if run.is_cancelled() or run.status in ("cancelled", "timed_out"):
+            return self._build_interrupted_run_response(
+                run=run,
+                run_id=run_id,
+                recorder=recorder,
+                timestep=timestep,
+                simulation_data=simulation_data,
+            )
         is_mock_rec = (
             not isinstance(GenericPhysicsRecorder, type)
             or not isinstance(recorder, GenericPhysicsRecorder)

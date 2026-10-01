@@ -102,17 +102,26 @@ class TaskManager:
         if self._closed:
             raise RuntimeError("TaskManager is closed")
 
+    @staticmethod
+    def _is_active_task(data: dict[str, Any] | None) -> bool:
+        """Return True if task is in an active (non-terminal) state (R03)."""
+        if not data or not isinstance(data, dict):
+            return False
+        status = str(data.get("status", "")).lower()
+        return status in (TaskStatus.PENDING.value, TaskStatus.RUNNING.value, "started")
+
     def _purge_expired_locked(self, current_time: float) -> None:
         """Run the full O(n) expiry sweep. Caller must hold ``self._lock``.
 
         Records the sweep time so :meth:`_cleanup_expired_locked` can throttle
-        subsequent invocations (issue #6992).
+        subsequent invocations (issue #6992). Active tasks are never purged (R03).
         """
         self._last_cleanup = current_time
         expired_keys = [
             task_id
             for task_id, timestamp in self._timestamps.items()
-            if current_time - timestamp > self.TTL_SECONDS
+            if not self._is_active_task(self._tasks.get(task_id))
+            and current_time - timestamp > self.TTL_SECONDS
         ]
         for task_id in expired_keys:
             self._tasks.pop(task_id, None)
@@ -145,23 +154,68 @@ class TaskManager:
         """Return whether ``task_id`` is past its TTL. Caller holds the lock.
 
         Used by the read path so throttled physical cleanup never returns a
-        logically-expired task (issue #6992).
+        logically-expired task (issue #6992). Active tasks never expire (R03).
         """
+        task = self._tasks.get(task_id)
+        if task is not None and self._is_active_task(task):
+            return False
         ts = self._timestamps.get(task_id)
         if ts is None:
             return True
         return time.time() - ts > self.TTL_SECONDS
 
     def _enforce_size_limit_locked(self) -> None:
-        """Evict oldest tasks if over limit. Caller must hold ``self._lock``."""
+        """Evict oldest terminal tasks if over limit. Caller must hold ``self._lock`` (R03)."""
         overflow = len(self._tasks) - self.MAX_TASKS
         if overflow <= 0:
             return
         sorted_by_age = sorted(self._timestamps.items(), key=lambda x: x[1])
-        for task_id, _ in sorted_by_age[:overflow]:
-            self._tasks.pop(task_id, None)
-            self._timestamps.pop(task_id, None)
-        logger.debug("Evicted %d tasks due to size limit", overflow)
+        evicted = 0
+        for task_id, _ in sorted_by_age:
+            if not self._is_active_task(self._tasks.get(task_id)):
+                self._tasks.pop(task_id, None)
+                self._timestamps.pop(task_id, None)
+                evicted += 1
+                if evicted >= overflow:
+                    break
+        if evicted:
+            logger.debug("Evicted %d terminal tasks due to size limit", evicted)
+
+    def in_flight_count(self) -> int:
+        """Return the number of in-flight (pending or running) jobs (R03)."""
+        with self._lock:
+            self._ensure_open()
+            return sum(1 for t in self._tasks.values() if self._is_active_task(t))
+
+    def can_admit_active(self) -> bool:
+        """Return whether a new active task can be admitted within capacity (R03)."""
+        with self._lock:
+            self._ensure_open()
+            self._cleanup_expired_locked()
+            return self.in_flight_count() < self.MAX_CONCURRENT_ENGINES
+
+    def admit_active(self, task_id: str, data: dict[str, Any]) -> None:
+        """Admit a new active task, raising if capacity is saturated (R03)."""
+        _validate_task_id(task_id)
+        with self._lock:
+            self._ensure_open()
+            if self._is_active_task(data) and not self.can_admit_active():
+                raise RuntimeError(
+                    f"Task manager active capacity ({self.MAX_CONCURRENT_ENGINES}) is saturated; "
+                    "cannot admit new active task."
+                )
+            self.set(task_id, data)
+
+    def cancel_task(self, task_id: str) -> bool:
+        """Mark an active task as cancelled (R03)."""
+        with self._lock:
+            self._ensure_open()
+            task = self._tasks.get(task_id)
+            if task is not None and self._is_active_task(task):
+                task["status"] = TaskStatus.CANCELLED.value
+                self._timestamps[task_id] = time.time()
+                return True
+            return False
 
     @property
     def engine_semaphore(self) -> asyncio.Semaphore:
