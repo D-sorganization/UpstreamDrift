@@ -29,6 +29,42 @@ Specifies reproducible evidence promotion and qualification contracts for the 10
 - **Unit Test Suite (`tests/unit/motion_matching/test_gs3dx_variants_promotion.py`)**:
   - Tests covering complete 10-variant inventory, receipt serialization/deserialization lifecycle, clean-host R2025b validation failures, original model protection, drive classification distinctions, motion prescription disclosures, package integrity, ledger consumption filtering, and MATLAB suite rerun verification.
 
+## Add Anatomical Meshes Without Changing Qualified Physics (MMR-05, #11089)
+Specifies anatomical mesh substitution, visual presets, physical and kinematic invariance, provenance tracking, compiled block budget, and reusable segment adapter:
+- **Physical & Kinematic Invariance (`src/shared/python/motion_matching/anatomical_meshes.py`)**:
+  - One-segment File Solid substitution behind optional visual preset (`VisualPreset.ANATOMICAL_MESH`, `VisualPreset.HYBRID`) strictly preserves exact body mass sum, per-solid mass (`mass_kg`), center of mass (`com_m`), inertia (`inertia_com_kg_m2`), placement transforms, and joint attachment frames.
+  - Forward kinematics marker positions are strictly invariant across swing phases (address, top, impact, follow-through) with zero drift ($< 1\times 10^{-12}$ m).
+- **Design by Contract & Graceful Fallback**:
+  - Validates SI mesh units (`m`, `mm`, `cm`) and finite positive bounding boxes (`BoundingBox3D`).
+  - Wrong units, non-finite/inverted bounds, or missing asset files fail closed (`InvalidMeshUnitsError`, `NonFiniteMeshBoundsError`, `MissingMeshAssetError`) when `allow_fallback=False`.
+  - When `allow_fallback=True`, documents and records graceful fallback (`VisualFallbackStatus.FALLBACK_TO_PRIMITIVE`) to default primitive shapes (ellipsoid/box).
+- **Asset Provenance & Redistribution Tracking**:
+  - `MeshAssetProvenance` records asset name, source repository, commit, license (e.g. CC-BY-SA 2.0), license URL, attribution, and redistribution permissions.
+  - Direct integration with bundled human models in `src/tools/model_explorer/bundled_assets/`.
+- **MMR-04 Compiled Block Budget Enforcement**:
+  - Enforces Simscape nonvirtual compiled block limits under MATLAB R2025b Home license:
+    - Direct File Solid substitution: 0 delta blocks, preserving compiled count within production ceiling ($\le 975$, with 25-block reserve from 1,000 license ceiling).
+    - External visual solids: 7 blocks per segment (measured in `SHAPE.md`), failing closed if total exceeds 975.
+- **Reusable Segment Adapter (`AnatomicalSegmentAdapter`)**:
+  - Prototype support across pelvis, trunk, head, hand, and shoe.
+  - Bilateral handedness mirroring (`mirror_bilateral_metadata`) for hands and shoes across lateral planes.
+  - Multi-phase swing clearance and collision checking (`check_segment_clearance`) across adjacent segments.
+
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
+
 ## Publish a Best-Candidate Viewer With Honest Residuals (MMR-16, #11102)
 Specifies the best-candidate viewer, honest marker residuals, drive mode filtering, visual presets, board-ready video/still export, and web/API parity:
 - **Observation Immutability & Residual Data Structures (`src/tools/tour_matching_viewer/core.py`)**:
@@ -7416,13 +7452,15 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
-| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
+| 2026-10-01 | #11089 | [MMR-05] Add Anatomical Meshes Without Changing Qualified Physics (#11089): one-segment File Solid and visual preset substitution preserving exact mass, COM, inertia, joint frames, and same-state forward kinematics marker invariance; Design by Contract validation for SI units, finite bounds, and missing assets with documented graceful fallback; asset provenance and redistribution terms tracking; MMR-04 compiled block budget enforcement (<=975 production ceiling); reusable segment adapter for pelvis, trunk, head, hand, and shoe prototypes with bilateral handedness mirroring and multi-phase swing clearance verification. |
+| 2026-10-01 | #11210 | [MMR-18] Benchmark MATLAB Iteration Throughput and Portable Model Exchange (#11104): cold/warm timing and peak memory tracking on same hardware/capture, 7-axis content-addressed cache invalidation, session reuse rebuild guards on topology and operating-point edits, metric parity tolerances, uncached native cold replay verification for optimization winners, and fail-closed rejection of unsupported neck/contact/muscle dynamics in portable exchange. |
 | 2026-10-01 | #11097 | [MMR-11] Repair reduced-model and club-only product claims: enforce exploratory/disqualified pendulum receipts, block matrix completion on unresolved required cells with required_model_ids support, reject spatial planar floor failure before optimization, verify raw-to-package reproduction, and enforce labeled inferred body posture (#11097). |
+| 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
+| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
+| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
 | 2026-10-01 | #11196 | [MMR-17] Establish Clean-Host End-to-End and Native Release Gates (#11103): clean-installation bounded journeys, native receipt ingestion across all six engines (opensim, myosuite, drake, mujoco, pinocchio, simscape), adverse path rejection (tampered package, missing engine, unsupported model, corrupt capture), and fail-closed release qualification matrix. |
-| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
 | 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
 | 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
 | 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |
