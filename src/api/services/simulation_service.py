@@ -17,8 +17,12 @@ from src.shared.python.analysis.orchestrator import (
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import (
     EngineLaunchError,
+    EngineNotAvailableError,
     GolfSuiteError,
     ModelLoadError,
+    PhysicsSimulationError,
+    SimulationTimeoutError,
+    ValidationError,
 )
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.data_io._format_handlers import OutputFormat
@@ -27,7 +31,7 @@ from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.requests import SimulationRequest
-from ..models.responses import SimulationResponse
+from ..models.responses import SimulationErrorInfo, SimulationResponse
 
 logger = get_logger(__name__)
 
@@ -398,14 +402,83 @@ class SimulationService:
                 f"were retained (max_samples={max_cap})"
             )
 
+    def _build_error_info(
+        self,
+        exc: Exception,
+        stage: str,
+        run_id: str | None = None,
+    ) -> SimulationErrorInfo:
+        """Construct structured, safe error outcome without leaking paths (R09)."""
+        import re
+
+        exc_str = str(exc)
+        safe_msg = (
+            re.sub(r"([A-Za-z]:)?(/|\\)[^:\s]+", "<path>", exc_str)
+            if "/" in exc_str or "\\" in exc_str
+            else exc_str
+        )
+
+        if isinstance(exc, (EngineNotAvailableError, EngineLaunchError)):
+            code = "engine_unavailable"
+            retriable = False
+            guidance = (
+                "Ensure the requested physics engine is installed and operational."
+            )
+            safe_msg = "Requested physics engine is not available"
+        elif isinstance(exc, (ModelLoadError, FileNotFoundError)):
+            code = "model_load_error"
+            retriable = False
+            guidance = "Verify that the model asset exists and is accessible."
+            safe_msg = "Model asset could not be loaded"
+        elif isinstance(exc, (ValueError, ValidationError)):
+            code = "invalid_input"
+            retriable = False
+            guidance = "Check simulation duration, timestep, and control inputs."
+        elif isinstance(exc, (TimeoutError, SimulationTimeoutError)):
+            code = "timeout"
+            retriable = True
+            guidance = (
+                "Consider reducing simulation duration or increasing timeout ceiling."
+            )
+            safe_msg = "Simulation execution timed out"
+        elif (
+            isinstance(exc, PhysicsSimulationError)
+            or "diverged" in exc_str.lower()
+            or "nan" in exc_str.lower()
+        ):
+            code = "numerical_failure"
+            retriable = True
+            guidance = "Try decreasing the integration timestep or verifying model initial conditions."
+            safe_msg = "Physics solver encountered numerical instability"
+        elif stage == "persistence" or isinstance(exc, (OSError, PermissionError)):
+            code = "persistence_failed"
+            retriable = True
+            guidance = "Simulation data is preserved in memory. Retry persistence via POST /recordings."
+            safe_msg = "Failed to persist simulation results to disk"
+        else:
+            code = "internal_error"
+            retriable = False
+            guidance = "Contact system administrator if the issue persists."
+            safe_msg = "Internal simulation error"
+
+        return SimulationErrorInfo(
+            code=code,
+            message=safe_msg,
+            stage=stage,
+            run_id=run_id,
+            retriable=retriable,
+            retry_guidance=guidance,
+        )
+
     def _persist_simulation_results(
         self,
         request: SimulationRequest,
         simulation_data: dict[str, Any],
         analysis_results: dict[str, Any] | None,
         steps: int,
-    ) -> list[str]:
-        """Persist a completed run's results via ``OutputManager`` (issue #8871).
+        run_id: str | None = None,
+    ) -> tuple[list[str], str, SimulationErrorInfo | None]:
+        """Persist a completed run's results via ``OutputManager`` (issue #8871, R09).
 
         Provenance passed through to ``OutputManager.save_simulation_results``
         (engine type, model path, duration/timestep) is limited to values the
@@ -413,9 +486,9 @@ class SimulationService:
         (see the provenance-honesty theme from issues #8816-#8822).
 
         Returns:
-            Single-element list with the saved file's path as a string, or
-            an empty list if the save itself failed. A persistence failure
-            must not fail an otherwise-successful simulation.
+            Tuple of (export_paths, persistence_status, persistence_error).
+            A persistence failure must not fail an otherwise-successful simulation;
+            results remain recoverable in memory.
         """
         engine = str(request.engine_type).lower()
         metadata: dict[str, Any] = {"duration": request.duration, "frames": steps}
@@ -435,10 +508,11 @@ class SimulationService:
                     "timestep": request.timestep,
                 },
             )
+            return [str(saved_path)], "persisted", None
         except (FileNotFoundError, PermissionError, OSError, ValueError) as e:
             logger.warning("Failed to persist simulation results: %s", e)
-            return []
-        return [str(saved_path)]
+            error_info = self._build_error_info(e, stage="persistence", run_id=run_id)
+            return [], "failed", error_info
 
     def _validate_simulation_data(
         self,
@@ -494,7 +568,51 @@ class SimulationService:
                     f"does not match times length ({n_times})"
                 )
 
-    def _run_simulation_sync(self, request: SimulationRequest) -> SimulationResponse:
+    def _validate_simulation_timing(
+        self, request: SimulationRequest
+    ) -> tuple[float, int, int]:
+        timestep = request.timestep or 0.001
+        if timestep <= 0:
+            raise ValueError(f"Timestep must be positive, got {timestep}")
+        if timestep > request.duration:
+            raise ValueError(
+                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
+            )
+        steps = int(request.duration / timestep)
+        return timestep, steps, steps + 1
+
+    def _create_and_run_recorder(
+        self,
+        engine: Any,
+        request: SimulationRequest,
+        timestep: float,
+        steps: int,
+        expected_frames: int,
+    ) -> GenericPhysicsRecorder:
+        recorder = GenericPhysicsRecorder(
+            engine, max_samples=max(100000, expected_frames)
+        )
+        if self._biomechanics_binding is not None:
+            recorder.configure_biomechanics(self._biomechanics_binding)
+        if request.analysis_config:
+            recorder.set_analysis_config(request.analysis_config)
+        recorder.start()
+        try:
+            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
+        finally:
+            recorder.stop()
+        self._retain_active_session(engine, recorder)
+        self._last_recorder = recorder
+        self._last_recording_meta = {
+            "engine": request.engine_type,
+            "model": str(request.model_path) if request.model_path else None,
+            "duration": request.duration,
+        }
+        return recorder
+
+    def _run_simulation_sync(
+        self, request: SimulationRequest, run_id: str | None = None
+    ) -> SimulationResponse:
         """Run the full CPU-bound simulation pipeline synchronously.
 
         This performs engine preparation, the stepping loop, data extraction,
@@ -507,41 +625,10 @@ class SimulationService:
         self._begin_last_run(request)
         engine = self._prepare_engine(request)
 
-        timestep = request.timestep or 0.001
-        if timestep <= 0:
-            raise ValueError(f"Timestep must be positive, got {timestep}")
-        if timestep > request.duration:
-            raise ValueError(
-                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
-            )
-        steps = int(request.duration / timestep)
-        expected_frames = steps + 1
-
-        recorder = GenericPhysicsRecorder(
-            engine, max_samples=max(100000, expected_frames)
+        timestep, steps, expected_frames = self._validate_simulation_timing(request)
+        recorder = self._create_and_run_recorder(
+            engine, request, timestep, steps, expected_frames
         )
-        if self._biomechanics_binding is not None:
-            recorder.configure_biomechanics(self._biomechanics_binding)
-
-        if request.analysis_config:
-            recorder.set_analysis_config(request.analysis_config)
-
-        recorder.start()
-        try:
-            self._execute_simulation_loop(engine, recorder, request, timestep, steps)
-        finally:
-            recorder.stop()
-
-        self._retain_active_session(engine, recorder)
-
-        # Retain the recorder so the recordings API (issue #7451) can
-        # finalize/persist the session via POST /recordings.
-        self._last_recorder = recorder
-        self._last_recording_meta = {
-            "engine": request.engine_type,
-            "model": str(request.model_path) if request.model_path else None,
-            "duration": request.duration,
-        }
 
         simulation_data = self._extract_simulation_data(recorder)
         is_mock_rec = (
@@ -557,13 +644,15 @@ class SimulationService:
         )
 
         analysis_results = None
+        analysis_status = "not_requested"
         if request.analysis_config:
             analysis_results = self._perform_analysis(recorder, request.analysis_config)
+            analysis_status = analysis_results.get("_status", "completed")
 
         analysis_summary = None
         if isinstance(analysis_results, dict) and analysis_results:
             analysis_summary = "analysis: " + ", ".join(
-                sorted(str(k) for k in analysis_results)
+                sorted(str(k) for k in analysis_results if not str(k).startswith("_"))
             )
         self._finish_last_run(
             status="completed",
@@ -571,8 +660,14 @@ class SimulationService:
             analysis_summary=analysis_summary,
         )
 
-        export_paths = self._persist_simulation_results(
-            request, simulation_data, analysis_results, expected_frames
+        export_paths, persistence_status, persistence_error = (
+            self._persist_simulation_results(
+                request,
+                simulation_data,
+                analysis_results,
+                expected_frames,
+                run_id=run_id,
+            )
         )
 
         return SimulationResponse(
@@ -582,9 +677,19 @@ class SimulationService:
             data=simulation_data,
             analysis_results=analysis_results,
             export_paths=export_paths,
+            calculation_status="completed",
+            analysis_status=analysis_status,
+            persistence_status=persistence_status,
+            error=persistence_error,
+            run_id=run_id,
         )
 
-    async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
+    async def run_simulation(
+        self,
+        request: SimulationRequest,
+        *args: Any,
+        **kwargs: Any,
+    ) -> SimulationResponse:
         """Run a physics simulation based on request parameters.
 
         The CPU-bound stepping loop is offloaded to a worker thread via
@@ -604,9 +709,24 @@ class SimulationService:
                 self._run_simulation_sync, request
             )
             return response
-        except (GolfSuiteError, ValueError, RuntimeError) as e:
+        except (GolfSuiteError, ValueError, RuntimeError, OSError, TimeoutError) as e:
             logger.error("Simulation failed: %s", e, exc_info=True)
             self._finish_last_run(status="failed", error=str(e))
+            stage = (
+                "preparation"
+                if isinstance(
+                    e,
+                    (
+                        EngineLaunchError,
+                        EngineNotAvailableError,
+                        ModelLoadError,
+                        ValueError,
+                        ValidationError,
+                    ),
+                )
+                else "execution"
+            )
+            error_info = self._build_error_info(e, stage=stage)
             return SimulationResponse(
                 success=False,
                 duration=0.0,
@@ -614,6 +734,74 @@ class SimulationService:
                 data={},
                 analysis_results=None,
                 export_paths=[],
+                calculation_status="failed",
+                analysis_status="not_requested",
+                persistence_status="not_requested",
+                error=error_info,
+            )
+
+    def _record_background_task_result(
+        self, task_id: str, result: Any, active_tasks: Any
+    ) -> None:
+        dump = (
+            result.model_dump()
+            if hasattr(result, "model_dump")
+            else (result if isinstance(result, dict) else {})
+        )
+        if getattr(result, "success", False) is True:
+            task_payload: dict[str, Any] = {
+                "status": "completed",
+                "result": dump,
+            }
+            err = getattr(result, "error", None)
+            if (
+                getattr(result, "persistence_status", None) == "failed"
+                and err is not None
+            ):
+                task_payload["persistence_status"] = "failed"
+                task_payload["error"] = getattr(err, "message", "Simulation failed")
+                task_payload["error_code"] = getattr(err, "code", "storage_failure")
+                task_payload["error_stage"] = getattr(err, "stage", "persistence")
+                task_payload["retriable"] = getattr(err, "retriable", False)
+                task_payload["retry_guidance"] = getattr(err, "retry_guidance", None)
+                task_payload["error_info"] = (
+                    err.model_dump()
+                    if hasattr(err, "model_dump")
+                    else (err if isinstance(err, dict) else None)
+                )
+            active_tasks.set(task_id, task_payload)
+        else:
+            err = getattr(result, "error", None)
+            msg = (
+                getattr(err, "message", "Simulation failed")
+                if err
+                else "Simulation failed"
+            )
+            code = getattr(err, "code", "unknown_error") if err else "unknown_error"
+            stage = getattr(err, "stage", "execution") if err else "execution"
+            retriable = getattr(err, "retriable", False) if err else False
+            guidance = getattr(err, "retry_guidance", None) if err else None
+            err_dict = (
+                (
+                    err.model_dump()
+                    if hasattr(err, "model_dump")
+                    else (err if isinstance(err, dict) else None)
+                )
+                if err is not None
+                else None
+            )
+            active_tasks.set(
+                task_id,
+                {
+                    "status": "failed",
+                    "result": dump,
+                    "error": msg,
+                    "error_code": code,
+                    "error_stage": stage,
+                    "retriable": retriable,
+                    "retry_guidance": guidance,
+                    "error_info": err_dict,
+                },
             )
 
     @precondition(
@@ -645,29 +833,24 @@ class SimulationService:
         """
         try:
             active_tasks.set(task_id, {"status": "running", "progress": 0})
-
             result = await self.run_simulation(request)
+            self._record_background_task_result(task_id, result, active_tasks)
 
-            if result.success:
-                active_tasks.set(
-                    task_id,
-                    {
-                        "status": "completed",
-                        "result": result.model_dump(),
-                    },
-                )
-            else:
-                active_tasks.set(
-                    task_id,
-                    {
-                        "status": "failed",
-                        "result": result.model_dump(),
-                    },
-                )
-
-        except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
+        except (GolfSuiteError, ValueError, RuntimeError, OSError, TimeoutError) as e:
             logger.exception("Background simulation %s failed", task_id)
-            active_tasks.set(task_id, {"status": "failed", "error": str(e)})
+            err_info = self._build_error_info(e, stage="execution", run_id=task_id)
+            active_tasks.set(
+                task_id,
+                {
+                    "status": "failed",
+                    "error": str(e),
+                    "error_code": err_info.code,
+                    "error_stage": err_info.stage,
+                    "retriable": err_info.retriable,
+                    "retry_guidance": err_info.retry_guidance,
+                    "error_info": err_info.model_dump(),
+                },
+            )
         except Exception:  # noqa: BLE001 - background task boundary (#8009)
             # No caller can observe this exception: BackgroundTasks swallows it
             # after the response has been sent. Record the terminal state and
@@ -676,7 +859,20 @@ class SimulationService:
             logger.exception("Background simulation %s failed", task_id)
             active_tasks.set(
                 task_id,
-                {"status": "failed", "error": "Internal simulation error"},
+                {
+                    "status": "failed",
+                    "error": "Internal simulation error",
+                    "error_code": "internal_error",
+                    "error_stage": "execution",
+                    "retriable": False,
+                    "error_info": {
+                        "code": "internal_error",
+                        "message": "Internal simulation error",
+                        "stage": "execution",
+                        "run_id": task_id,
+                        "retriable": False,
+                    },
+                },
             )
 
     def _extract_simulation_data(
@@ -734,43 +930,74 @@ class SimulationService:
     def _perform_analysis(
         self, recorder: GenericPhysicsRecorder, config: dict[str, Any]
     ) -> dict[str, Any]:
-        """Perform analysis on simulation data.
+        """Perform analysis on simulation data with explicit channel availability status (R09).
 
         Args:
             recorder: Physics recorder with simulation data
             config: Analysis configuration
 
         Returns:
-            Analysis results
+            Analysis results dict including '_channel_status' and '_status'.
         """
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
-        results = {}
+        results: dict[str, Any] = {}
+        channel_status: dict[str, str] = {}
+        requested_count = 0
+        success_count = 0
 
-        try:
-            # Extract ZTCF data if enabled
-            if config.get("ztcf", False):
+        # Extract ZTCF data if enabled
+        if config.get("ztcf", False):
+            requested_count += 1
+            try:
                 times, ztcf = recorder.get_time_series("ztcf_accel")
                 results["ztcf_acceleration"] = (
                     ztcf.tolist() if hasattr(ztcf, "tolist") else ztcf
                 )
+                channel_status["ztcf_acceleration"] = "available"
+                success_count += 1
+            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
+                logger.warning("Error performing ztcf analysis: %s", e)
+                channel_status["ztcf_acceleration"] = f"unavailable: {e}"
 
-            # Extract ZVCF data if enabled
-            if config.get("zvcf", False):
+        # Extract ZVCF data if enabled
+        if config.get("zvcf", False):
+            requested_count += 1
+            try:
                 times, zvcf = recorder.get_time_series("zvcf_accel")
                 results["zvcf_acceleration"] = (
                     zvcf.tolist() if hasattr(zvcf, "tolist") else zvcf
                 )
+                channel_status["zvcf_acceleration"] = "available"
+                success_count += 1
+            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
+                logger.warning("Error performing zvcf analysis: %s", e)
+                channel_status["zvcf_acceleration"] = f"unavailable: {e}"
 
-            # Extract drift analysis if enabled
-            if config.get("track_drift", False):
+        # Extract drift analysis if enabled
+        if config.get("track_drift", False):
+            requested_count += 1
+            try:
                 times, drift = recorder.get_time_series("drift_accel")
                 results["drift_acceleration"] = (
                     drift.tolist() if hasattr(drift, "tolist") else drift
                 )
+                channel_status["drift_acceleration"] = "available"
+                success_count += 1
+            except (KeyError, ValueError, AttributeError, TypeError, RuntimeError) as e:
+                logger.warning("Error performing drift analysis: %s", e)
+                channel_status["drift_acceleration"] = f"unavailable: {e}"
 
-        except (KeyError, ValueError, AttributeError, TypeError) as e:
-            logger.warning("Error performing analysis: %s", e)
+        if requested_count > 0:
+            results["_channel_status"] = channel_status
+            if success_count == requested_count:
+                results["_status"] = "completed"
+            elif success_count > 0:
+                results["_status"] = "partial"
+            else:
+                results["_status"] = "failed"
+        else:
+            results["_status"] = "not_requested"
 
         return results
 
