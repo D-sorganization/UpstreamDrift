@@ -325,7 +325,12 @@ class DefaultShadowTrackerService:
             self._mask_provider.get_revision_history(frame_id, shot_id=obs.shot_id)
         )
         content_hash = hashlib.sha256(body + club + valid).hexdigest()[:8]
-        new_rev_id = f"{parent_revision_id or 'rev'}-m{rev_seq}-{content_hash}"
+        prefix = (
+            f"{parent_revision_id}-{obs.shot_id}"
+            if parent_revision_id is not None and obs.shot_id not in parent_revision_id
+            else (parent_revision_id or f"rev-{obs.shot_id}")
+        )
+        new_rev_id = f"{prefix}-m{rev_seq}-{content_hash}"
 
         new_mask = MaskFrame(
             schema_version=MASK_SCHEMA_VERSION,
@@ -408,9 +413,9 @@ class DefaultShadowTrackerService:
             )
 
         current_mask_revs = tuple(
-            self._mask_provider.get_mask(fid).revision_id
-            for fid in sorted({obs.frame_id for obs in self._observations_order})
-            if self._mask_provider.has_mask(fid)
+            self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id).revision_id
+            for obs in self._observations_order
+            if self._mask_provider.has_mask(obs.frame_id, shot_id=obs.shot_id)
         )
         if checkpoint.mask_revision_ids != current_mask_revs:
             raise StaleCheckpointError(
@@ -635,9 +640,9 @@ class DefaultShadowTrackerService:
             )
 
         missing_masks = [
-            obs.frame_id
+            f"{obs.shot_id}/{obs.frame_id}"
             for obs in windowed_obs
-            if not self._mask_provider.has_mask(obs.frame_id)
+            if not self._mask_provider.has_mask(obs.frame_id, shot_id=obs.shot_id)
         ]
         if missing_masks:
             raise ValueError(
@@ -646,7 +651,10 @@ class DefaultShadowTrackerService:
             )
 
         obs_list = list(windowed_obs)
-        mask_list = [self._mask_provider.get_mask(obs.frame_id) for obs in obs_list]
+        mask_list = [
+            self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id)
+            for obs in obs_list
+        ]
         time_points = [
             float(time_s)
             for obs in obs_list

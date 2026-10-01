@@ -1,3 +1,18 @@
+## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
+Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
+- **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
+  - `update_mask`: namespaces newly generated mask revisions with `obs.shot_id`, preventing revision ID collisions across multiple shots when updating manual masks.
+  - Multi-shot resolution: scopes mask lookup and presence checks (`has_mask`, `get_mask`) to `(obs.shot_id, obs.frame_id)` across `fit()` and `resume_from_checkpoint()`, preventing ambiguous match errors when local frame IDs collide across distinct shots.
+  - Downstream invalidation: ensures candidate fits and checkpoints are immediately cleared upon manual mask corrections.
+  - Timing preservation: preserves container presentation timestamps, exact timebases, and physical time mappings (affine / piecewise) across VFR decode, cuts, and slow-motion playback.
+  - Safe error recovery: corrupt media imports and tampered bundle loads fail closed without corrupting or resetting pre-existing session state.
+- **Shadow Tracker GUI Workbench (`src/tools/shadow_tracker/gui.py`)**:
+  - Auto-Fit toolbar button (`btn_fit`) and `Key_F` keyboard shortcut: requests fitting and displays honest status when forward dynamics gates (ST-07..ST-10) are unqualified.
+  - Widget mask update: exposes `update_mask` method on `ShadowTrackerWidget` to record manual body/club silhouette corrections, mark session dirty, and update display status.
+  - Import cancellation and recovery: displays clear cancelled or error statuses in `lbl_status` while keeping active sessions recoverable.
+- **Test Suite (`tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`)**:
+  - Regression tests verifying complete VFR import -> correction -> save -> reopen round-trip with downstream candidate invalidation, multi-shot duplicate local frame ID collision avoidance, honest auto-fit refusal, and session recovery after corrupt media imports.
+
 ## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [Scope: Fail-Closed Conversion]
 Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
 - **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:

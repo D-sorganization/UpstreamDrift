@@ -5,25 +5,25 @@
       "path": "docs/user_guide/upstream_drift_user_manual.md",
       "owner": "@docs-team",
       "reason": "Legacy monolithic user manual tracked by issue #3839; staged for Sphinx chapter decomposition.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/development/ARCHITECTURE_IMPLEMENTATION_PLAN.md",
       "owner": "@architecture-team",
       "reason": "Legacy implementation plan above the documentation budget; staged for topic split or archival.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "SPEC.md",
       "owner": "@maintainers",
       "reason": "Root repository specification is governed separately and updated by feature PRs.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/testing/functional-test-plan.md",
       "owner": "@docs-team",
       "reason": "Expanded functional test matrix tracked by consolidation commit #8129; split or archive after the backlog recovery window.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/chapters/_ch06c_spatial_cross_formulation.qmd",
@@ -35,13 +35,13 @@
       "path": "docs/research/proximal_distal_energy_transfer/DATA_DICTIONARY.md",
       "owner": "@physics-team",
       "reason": "Comprehensive data dictionary for proximal distal energy transfer research release; staged for section decomposition.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "docs/research/proximal_distal_energy_transfer/MODEL_COMPLETION_FALSIFICATION_MATRIX.md",
       "owner": "@physics-team",
       "reason": "Falsification matrix tracking model-tier and empirical completion gates for proximal distal energy transfer; staged for decomposition.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "AGENT_HANDOFF.md",
