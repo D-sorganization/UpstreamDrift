@@ -1,0 +1,53 @@
+function names = gs3dx_names()
+%GS3DX_NAMES  Single source of truth for original and exploratory model names.
+%
+%   NAMES = GS3DX_NAMES() returns a struct:
+%     .prefix            "GS3DX_"
+%     .original_model    "GolfSwing3D_Kinetic"
+%     .original_subsys   map of role -> original referenced-subsystem name
+%     .clone_subsys      map of role -> GS3DX referenced-subsystem name
+%     .slim_subsys       map of role -> direct-torque-drive subsystem (#10954)
+%     .spherical_subsys  Spherical-joint stand-in for GS3DX_KDS_Gimbal (#10955)
+%     .variants          GS3DX top-level model names by stage
+%
+%   Every tool reads names from here (DRY) so a rename happens in one place.
+
+    names = struct();
+    names.prefix         = "GS3DX_";
+    names.original_model = "GolfSwing3D_Kinetic";
+
+    roles = ["Gimbal", "Revolute", "Universal"];
+    names.roles = roles;
+    names.original_subsys = containers.Map( ...
+        cellstr(roles), ...
+        {'Kinetically_Driven_Gimbal_Joint', ...
+         'Kinetically_Driven_Revolute_Joint', ...
+         'Kinetically_Driven_Universal_Joint'});
+    names.clone_subsys = containers.Map( ...
+        cellstr(roles), ...
+        {'GS3DX_KD_Gimbal', 'GS3DX_KD_Revolute', 'GS3DX_KD_Universal'});
+    names.slim_subsys = containers.Map( ...
+        cellstr(roles), ...
+        {'GS3DX_KDS_Gimbal', 'GS3DX_KDS_Revolute', 'GS3DX_KDS_Universal'});
+    names.spherical_subsys = 'GS3DX_KDS_Spherical';
+
+    names.variants = struct( ...
+        'baseline', "GS3DX_Baseline", ...   % verbatim renamed clone
+        'slim',     "GS3DX_Slim", ...       % direct joint torque drive (#10954)
+        'quat',     "GS3DX_Quat", ...       % quaternion shoulders + hip (#10955/#10956)
+        'fullbody', "GS3DX_FullBody", ...   % lower body added (#10957/#10958)
+        'contact',  "GS3DX_FullBodyContact", ...   % foot-ground contact, leg-supported pelvis (#10986)
+        'golfer',   "GS3DX_Golfer", ...   % contact model with de Leva segment masses (#11011)
+        'fit',      "GS3DX_Fit", ...   % golfer with segment lengths from the capture (#10979)
+        'fit_legs', "GS3DX_FitLegs", ...   % fit with leg servo references from the capture (#10979)
+        'fit_track', "GS3DX_FitTrack", ...   % fit legs with the upper body tracking the capture (#10979)
+        'fit_balance', "GS3DX_FitBalance", ...   % fit track with centre-of-mass feedback into the legs (#10979)
+        'shape', "GS3DX_Shape", ...   % fit balance with de Leva limb inertia and ellipsoid segments (#10979)
+        'neck', "GS3DX_Neck", ...   % shape with a motion-driven two-axis neck (#10979)
+        'human', "GS3DX_Human");   % neck with an ellipsoid body shape, square face and jointed feet (#10979)
+
+    names.simscape_prefixes   = ["sm_lib", "fl_lib", "nesl_utility", "ee_lib"];
+    names.converter_refs      = ["nesl_utility/PS-Simulink Converter", ...
+                                 "nesl_utility/Simulink-PS Converter"];
+    names.license_block_limit = 1000;
+end

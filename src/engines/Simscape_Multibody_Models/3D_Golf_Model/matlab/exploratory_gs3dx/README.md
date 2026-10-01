@@ -1,0 +1,127 @@
+# GS3DX Exploratory Simscape Workspace
+
+Agent-editable exploratory copies of the hand-built 3D kinetic golf model
+(`../src/model/GolfSwing3D_Kinetic.slx`). Governing epic:
+[#10950](https://github.com/D-sorganization/UpstreamDrift/issues/10950).
+
+Start with the [design report](docs/DESIGN_REPORT.md): what the model is, how
+it was built stage by stage, what it matches, its limits, and how to rebuild it.
+
+![GS3DX_Human face-on at address](docs/screenshots/GS3DX_Human_fo_addr.png)
+
+## Safety Rules
+
+1. **The originals are read-only.** Tools only ever `copyfile` them. They are
+   never loaded or saved. `tests/test_gs3dx_safety.m` proves they still match
+   git `HEAD`.
+2. **Every model here uses the `GS3DX_` prefix.** Simulink resolves models by
+   name on the path. A same-named copy silently wins `which()` (seen during
+   the feasibility probe), so no file here may reuse an original name.
+   `gs3dx_assert_no_shadowing` enforces this on every setup.
+3. **This folder is outside `matlab/src/`.** `setup_matlab_environment`
+   (`genpath(src)`) never puts it on the path by accident.
+4. **Writes go through `gs3dx_save_model`.** It refuses unprefixed names and
+   refuses any model backed by a file outside `models/`.
+5. **`gs3dx_setup` never calls `savepath`.** Path changes last for the session
+   only, and the Simulink cache is redirected to `tempdir`.
+6. **MATLAB R2025b only** (see the repository `AGENTS.md`).
+
+## Layout
+
+| Path                                  | Purpose                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `gs3dx_setup.m`                       | Session setup: adds the path, redirects the cache and runs the shadowing guard |
+| `tools/gs3dx_names.m`                 | Single source of truth for original and GS3DX names                            |
+| `tools/gs3dx_clone_baseline.m`        | Builds `GS3DX_Baseline` plus `GS3DX_KD_*` from the originals                   |
+| `tools/gs3dx_save_model.m`            | The only sanctioned model writer                                               |
+| `tools/gs3dx_original_manifest.m`     | SHA-256 of the originals                                                       |
+| `tools/gs3dx_drive.m`                 | Regression drives: `impact` (default) and `persisted` (ill-conditioned)        |
+| `tools/gs3dx_build_slim.m`            | Builds `GS3DX_Slim` plus `GS3DX_KDS_*` from the baseline clones                |
+| `tools/gs3dx_build_quat.m`            | Builds `GS3DX_Quat` plus `GS3DX_KDS_Spherical` (quaternion shoulders and hip)  |
+| `tools/gs3dx_quaternion_swap.m`       | Swaps an Euler-angle joint for a quaternion joint, keeping the interface       |
+| `tools/gs3dx_joint_rig.m`             | Drives one joint subsystem in isolation (torqued equivalence rig)              |
+| `tools/gs3dx_hip_rig.m`               | Drives the hip subsystem in isolation (Bushing vs 6-DOF rig)                   |
+| `tools/gs3dx_build_lower_body.m`      | Builds `GS3DX_FullBody`: legs from `gs3dx_leg_table`, feet welded to World     |
+| `tools/gs3dx_stance_frames.m`         | Measures pelvis and shoulder frames at t = 0 (places the legs)                 |
+| `tools/gs3dx_contact_trial.m`         | Prices foot-ground contact against the weld (never saved)                      |
+| `tools/gs3dx_pinned_drive.m`          | Impact drive with the right shoulder's assembled start state pinned            |
+| `tools/gs3dx_capture_stance.m`        | Reads the tour-average C3D (ezc3d): stance, foot yaw, marker gaps, no GRF      |
+| `tools/gs3dx_leg_fk.m`                | Foot pose from pelvis pose and the six leg angles (matches Simscape)           |
+| `tools/gs3dx_leg_ik.m`                | Leg angles that put a foot on a target pose, tracked over a pelvis path        |
+| `tools/gs3dx_build_contact.m`         | Builds `GS3DX_FullBodyContact`: sole contacts, free pelvis, leg servo          |
+| `tools/gs3dx_contact_check.m`         | Simulates the contact model: Newton check, foot slip/lift, GRF                 |
+| `tools/gs3dx_anthropometry.m`         | de Leva segment masses and COM fractions for one body mass (one table)         |
+| `tools/gs3dx_build_golfer.m`          | Builds `GS3DX_Golfer`: typical (de Leva) masses, parameter-only                |
+| `tools/gs3dx_capture_markers.m`       | Reads a C3D's markers (Z-up), impact frame and address target frame            |
+| `tools/gs3dx_kinematic_grf.m`         | Total ground reaction force from the capture COM, without force plates         |
+| `tools/gs3dx_capture_joint_centres.m` | Joint-centre estimates and segment lengths from the capture markers            |
+| `tools/gs3dx_fit_lengths.m`           | Maps the capture segment lengths onto the model length variables               |
+| `tools/gs3dx_build_fit.m`             | Builds `GS3DX_Fit`: segment lengths from the capture, parameter-only           |
+| `tools/gs3dx_whole_body_ik.m`         | Least-squares whole-body IK to the capture (KinematicsSolver FK, grip loop)    |
+| `tools/gs3dx_fit_grip.m`              | Hand-on-grip geometry from the capture (functional wrist centres on the club)  |
+| `tools/gs3dx_leg_reference.m`         | Leg servo angle/rate references from the IK pelvis path and the measured feet  |
+| `tools/gs3dx_build_fit_legs.m`        | Builds `GS3DX_FitLegs`: the leg servo plays the reference (From Workspace)     |
+| `tools/gs3dx_upper_body_reference.m`  | Upper-body chart angle/rate references from the whole-body IK                  |
+| `tools/gs3dx_build_fit_track.m`       | Builds `GS3DX_FitTrack`: charts track the capture (feedforward + PD), rewired  |
+| `tools/gs3dx_track_learn.m`           | Learns the upper-body feedforward by iterative learning control (Simscape log) |
+| `tools/gs3dx_track_torque.m`          | Feedforward plus PD torque of a joint reference (called by the charts)         |
+| `tools/gs3dx_track_gains.m`           | Tracking PD gains: critically damped 6 Hz servos on estimated joint inertias   |
+| `tools/gs3dx_build_fit_balance.m`     | Builds `GS3DX_FitBalance`: centre-of-mass and foot feedback into the leg servo |
+| `tools/gs3dx_balance_command.m`       | Leg servo command with the balance shift and foot correction (MATLAB Function) |
+| `tools/gs3dx_balance_gain.m`          | Foot-fixed damped inverse leg Jacobian: leg angles per unit pelvis shift       |
+| `tools/gs3dx_balance_com_offset.m`    | Centre of mass in the pelvis frame from a run, for the balance reference       |
+| `tools/gs3dx_time_interp.m`           | Sample index and weight for linear interpolation on a time grid                |
+| `models/`                             | GS3DX `.slx` files (all generated by tools, never hand-copied)                 |
+| `baselines/`                          | Small reference trajectories for regression                                    |
+| `tests/`                              | `matlab.unittest` suites                                                       |
+| `docs/`                               | Findings, block budgets and screenshots                                        |
+
+## Model Lineage
+
+| Model                   | Built by                  | Change                                                                                                                         |
+| ----------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GS3DX_Baseline`        | `gs3dx_clone_baseline`    | Verbatim renamed clone, with subsystem references re-pointed                                                                   |
+| `GS3DX_Slim`            | `gs3dx_build_slim`        | Direct joint `InputTorque` drive: 63 fewer blocks (672 → 609)                                                                  |
+| `GS3DX_Quat`            | `gs3dx_build_quat`        | Quaternion shoulders and hip: 15 fewer blocks (609 → 594)                                                                      |
+| `GS3DX_FullBody`        | `gs3dx_build_lower_body`  | Legs and welded feet: 157 more blocks (594 → 751, cap 900)                                                                     |
+| `GS3DX_FullBodyContact` | `gs3dx_build_contact`     | Feet on the ground, unactuated pelvis, leg servo (773; **967 compiled**)                                                       |
+| `GS3DX_Golfer`          | `gs3dx_build_golfer`      | Contact model with de Leva masses, 80 kg (parameters only; 967)                                                                |
+| `GS3DX_Fit`             | `gs3dx_build_fit`         | Golfer with segment lengths and grip from the capture (parameters; 967)                                                        |
+| `GS3DX_FitLegs`         | `gs3dx_build_fit_legs`    | Fit with time-varying leg servo references from the capture (one for one; 967)                                                 |
+| `GS3DX_FitTrack`        | `gs3dx_build_fit_track`   | FitLegs with the upper body tracking the capture, learned feedforward (967)                                                    |
+| `GS3DX_FitBalance`      | `gs3dx_build_fit_balance` | FitTrack with centre-of-mass and foot feedback into the leg servo (973)                                                        |
+| `GS3DX_Shape`           | `gs3dx_build_shape`       | FitBalance with de Leva inertia, ellipsoid legs, hands and head, balanced on the capture's joint-centre centre of mass (973)   |
+| `GS3DX_Neck`            | `gs3dx_build_neck`        | Shape with a two-axis neck driven by the capture's head markers; joint spheres removed (975, `docs/NECK.md`)                   |
+| `GS3DX_Human`           | `gs3dx_build_human`       | Neck drawn with ellipsoids, square face, head aimed at address, sprung midfoot joints, driver-head mesh (965, `docs/HUMAN.md`) |
+
+The license counts compiled blocks (FullBody compiles to 945 of 1,000), see
+`docs/BLOCK_BUDGET_FINDINGS.md`. Data sources and gaps are in
+`docs/DATA_AUDIT.md`; ground contact is in `docs/GROUND_CONTACT.md`; segment
+masses, the force-plate-free GRF and the swing plan are in
+`docs/ANTHROPOMETRY.md`; segment inertia against de Leva is in
+`docs/INERTIA.md` and the de Leva inertia and ellipsoid model in
+`docs/SHAPE.md`; segment lengths, the whole-body IK fitted to the capture and
+balance are in `docs/FIT.md`; headless stills and video are in
+`docs/RENDERING.md`.
+
+## Regression Drive
+
+Equivalence is proven on the `impact` drive. The model's saved inputs give an
+ill-conditioned run that turns rounding noise into metre-scale differences;
+see `docs/SENSITIVITY_FINDINGS.md`.
+
+`GS3DX_Quat` has different solver states, so it is proven by convergence
+under `gs3dx_pinned_drive` and on the isolated joint and hip rigs; see
+`docs/QUATERNION_SHOULDERS.md`. `GS3DX_FullBody` starts in `GS3DX_Quat`'s
+state and then diverges, because its legs are passive; see `docs/FULL_BODY.md`.
+
+## Quick Start
+
+```matlab
+cd <repo>/src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx
+info = gs3dx_setup();
+gs3dx_clone_baseline(info, overwrite=true);   % regenerate GS3DX_Baseline
+runtests('tests')
+```
+
+Headless: `matlab.exe -batch "cd('<this folder>'); info = gs3dx_setup(); runtests('tests')"`.

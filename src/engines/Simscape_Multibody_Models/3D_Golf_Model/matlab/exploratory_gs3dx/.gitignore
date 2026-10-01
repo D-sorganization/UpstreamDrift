@@ -1,0 +1,4 @@
+# Simulink backups and caches produced when GS3DX tools re-save models
+*.r20*
+*.slxc
+slprj/
