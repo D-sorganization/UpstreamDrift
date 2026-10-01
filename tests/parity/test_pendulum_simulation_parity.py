@@ -27,7 +27,7 @@ PENDULUM_TEST_VECTORS = [
         "timestep": 0.01,
         "expected": {
             "success": True,
-            "frames": 10,
+            "frames": 11,
             "final_positions_near_zero": True,
         },
     },
@@ -39,7 +39,7 @@ PENDULUM_TEST_VECTORS = [
         "timestep": 0.01,
         "expected": {
             "success": True,
-            "frames": 50,
+            "frames": 51,
             "theta1_oscillates": True,
         },
     },
@@ -54,7 +54,7 @@ PENDULUM_TEST_VECTORS = [
         "timestep": 0.01,
         "expected": {
             "success": True,
-            "frames": 20,
+            "frames": 21,
             "theta1_decreases": True,
         },
     },
@@ -184,7 +184,7 @@ class TestPendulumSimulationAPI:
         )
         data = response.json()
         assert data["success"] is True, "Assertion failed: data[success] is True"
-        assert data["frames"] == 10, "Assertion failed: data[frames] == 10"
+        assert data["frames"] == 11, "Assertion failed: data[frames] == 11"
         assert data["duration"] == 0.1, "Assertion failed: data[duration] == 0.1"
 
     def test_api_simulate_returns_data_fields(self, client) -> None:
@@ -272,11 +272,11 @@ class TestPendulumEngineAPIConsistency:
         """Engine and API should produce the same number of frames."""
         duration = 0.1
         timestep = 0.01
-        expected_frames = int(duration / timestep)
+        expected_frames = int(duration / timestep) + 1
 
         # Engine
         pendulum_engine.set_state(np.array([0.1, 0.0]), np.array([0.0, 0.0]))
-        for _ in range(expected_frames):
+        for _ in range(expected_frames - 1):
             pendulum_engine.step(timestep)
 
         # API

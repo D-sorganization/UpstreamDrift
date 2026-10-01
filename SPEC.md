@@ -18,6 +18,22 @@ Specifies the end-to-end integration and fail-closed validation contracts connec
   - UI interaction binds execution through controller `prepare_run()`, updating badges (`PREVIEW (REJECTED)`, `PREVIEW (CLASSICAL_FALLBACK)`, `UNVERIFIED`) and log panes consistently before dispatching worker processes.
   - `feature_parity.json` updated under `tools.motion_matching` documenting wired neural controls, verified inference orchestrator gate, and intentional platform parity gap across operating platforms.
 
+## Propagate Flight Termination Before Reporting Landing Metrics (R04, #11145)
+
+Specifies the explicit flight termination states, fail-closed metric gating, and provider-to-API-to-viewer contracts:
+- **Flight Termination States (`src/shared/python/physics/flight_models.py`)**:
+  - `FlightTermination` enum distinguishes physical ground landing (`LANDED`) from truncation at time horizon (`TIME_LIMIT`), numerical solver failure (`SOLVER_FAILED`), and external cooperative cancellation (`CANCELLED`).
+  - Terminal event evidence (`terminal_event: bool`) and actual integration horizon (`actual_horizon: float`) are preserved on every `FlightResult`.
+- **Fail-Closed Metric Gating & Contract Validation**:
+  - Landing-derived metrics (`carry_distance`, `landing_angle`, `lateral_deviation`) are strictly populated only when `termination is FlightTermination.LANDED`; otherwise they are gated to `None`.
+  - `FlightResult.__post_init__` enforces that non-landed flights have `None` landing metrics, rejecting invalid states with `ValueError`.
+  - `FlightResult.require_landing()` asserts `self.landed` and raises `IncompleteFlightError(RuntimeError)` carrying `self.result` for partial trace inspection when the flight did not reach the ground.
+  - Cooperative cancellation via `cancellation_requested` raises `FlightSimulationCancelled(RuntimeError)` carrying partial `FlightResult` with `termination=FlightTermination.CANCELLED`.
+- **API & Viewer Integration**:
+  - REST route `/tools/ball-flight/simulate` and `/tools/ball-flight/import` propagate `termination`, `terminal_event`, `actual_horizon_s`, and `landed` within `BallFlightSummary`, safely exposing nullable landing metrics (`float | None`).
+  - Shot Tracer viewer table formatting (`_shot_tracer_gui._update_results_table`) formats `carry_distance` and `landing_angle` as `"N/A"` on incomplete trajectories without raising `TypeError`.
+  - Contract parity between Tools flight backend (`swing_sim.flight`) and UpstreamDrift physics models is verified across all five termination scenarios (time-cap ascending, normal landing, negative launch, solver failure, cancellation).
+
 ## Bind Matcher Process Events to Their Run and Handle Failed Starts (R08, #11148)
 
 Specifies the process lifecycle, immutable run context, and tab-routing contracts for the Motion Matching launcher tile:
@@ -31,6 +47,7 @@ Specifies the process lifecycle, immutable run context, and tab-routing contract
   - Actionable diagnostics: `format_failure_diagnostic` identifies the failing stage, error reason, and actionable recovery steps while retaining user inputs.
 - **Unit Test Suite (`tests/tools/motion_matching/test_matcher_process_lifecycle.py`)**:
   - Tests covering missing executables, denied permissions, process crashes, user cancellation, normal completion, multi-tab switching, repeated start/stop process disposal, and stage-specific failure recovery reporting.
+
 
 ## Simulation Error Outcomes and Partial-Result States (R09, #11149)
 Specifies machine-readable error modeling, pipeline stage isolation, and partial-result resilience across sync and background simulation execution paths:
@@ -7502,6 +7519,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11145 | [R04] Propagate Flight Termination Before Reporting Landing Metrics: propagate explicit FlightTermination states (LANDED, TIME_LIMIT, SOLVER_FAILED, CANCELLED) with terminal-event evidence and actual horizon, gate landing metrics (carry, landing angle, lateral deviation) to None on unlanded flights, raise IncompleteFlightError carrying partial result on require_landing(), support cooperative cancellation via FlightSimulationCancelled, update BallFlightSummary and trajectory import to reflect termination status, and handle None metrics safely in Shot Tracer results table (#11145). |
 | 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
 | 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
 | 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
