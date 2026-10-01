@@ -68,6 +68,15 @@ player URL must hide the previous assets and swings immediately, failed frame
 loads must stop their loading message and allow retry, and mismatched player/swing
 URLs must not expose imports or exports. Sixteen UI tests now pass. Cleanup LoD
 fix `d762816466` passes native tests, the global baseline and its CI gate.
+Form verification now passes four additional tests: swing drafts reset when the
+selected player changes, import drafts reset when the selected swing changes,
+failed saves retain values for correction, and a pending model import retains
+its original engine/joint payload. Gemini Flash 3.8 through `agy` supplied a
+tool-free source audit; its potential asynchronous payload mutation claim was
+rejected by the actual request-snapshot test. Twenty focused UI tests pass.
+The official USGA source capture also renders its actual original PNG and
+210-frame review in the browser at source PTS 15.015 s, physical time unknown.
+
 CI cycle 2 identified stale agent-context generated views and launcher boundary
 review. Reviewed the existing launcher-to-atlas contract, regenerated capability
 atlas outputs and agent-context views, and renewed the source-bound review with

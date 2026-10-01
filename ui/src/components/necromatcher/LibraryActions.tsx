@@ -34,7 +34,7 @@ export function LibraryActions({ player, swing, onChanged }: {player: string; sw
   return <div className="space-y-4">
     <h2 className="text-lg font-semibold text-white">Library Actions</h2>
     <ActionForm title="Save Player" fields={[{name:'id',label:'Player ID'},{name:'name',label:'Player Name'}]} onSave={(values) => save(createPlayer(values.id, values.name))} />
-    {player && <ActionForm title="Save Swing" fields={[{name:'id',label:'Swing ID'},{name:'name',label:'Swing Name'}]} onSave={(values) => save(createSwing(values.id, player, values.name))} />}
+    {player && <ActionForm key={player} title="Save Swing" fields={[{name:'id',label:'Swing ID'},{name:'name',label:'Swing Name'}]} onSave={(values) => save(createSwing(values.id, player, values.name))} />}
     {swing && <div className="space-y-3">
       <label className="block text-sm text-gray-300">Import Type<select className={field} value={kind} onChange={(event) => setKind(event.target.value as typeof kind)}>
         <option value="captures">Capture Folder</option><option value="models">Native Model</option><option value="profiles">Torque Profile</option>
@@ -42,7 +42,7 @@ export function LibraryActions({ player, swing, onChanged }: {player: string; sw
       {kind === 'models' && <><label className="block text-sm text-gray-300">Model Engine<select className={field} value={engine} onChange={(event) => setEngine(event.target.value)}>{['mujoco','drake','pinocchio','opensim','simscape'].map((name) => <option key={name}>{name}</option>)}</select></label>
         <label className="block text-sm text-gray-300">Ordered Joint Names<input className={field} value={dofs} onChange={(event) => setDofs(event.target.value)} placeholder="hip, knee, shoulder" /></label></>}
       <p className="text-xs text-gray-400">Use a local capture folder, model file or profile JSON. Models are saved as candidates until native replay is verified.</p>
-      <ActionForm title="Import Version" fields={[{name:'id',label:'Version ID'},{name:'source_path',label:'Source Path'}]} onSave={(values) => save(importAsset(swing, kind, {id:values.id,source_path:values.source_path,...(kind === 'models' ? {engine,dofs:dofs.split(',').map((x) => x.trim()).filter(Boolean)} : {})}))} />
+      <ActionForm key={`${swing}/${kind}`} title="Import Version" fields={[{name:'id',label:'Version ID'},{name:'source_path',label:'Source Path'}]} onSave={(values) => save(importAsset(swing, kind, {id:values.id,source_path:values.source_path,...(kind === 'models' ? {engine,dofs:dofs.split(',').map((x) => x.trim()).filter(Boolean)} : {})}))} />
     </div>}
   </div>;
 }
