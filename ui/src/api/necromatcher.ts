@@ -1,5 +1,6 @@
 import { apiFetch } from './fetch';
 import { getApiBase } from './backend';
+import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
 export interface HistoricalPlayer { subject_id: string; display_name: string; metadata: Record<string, unknown> }
@@ -19,8 +20,8 @@ export const fetchAssets = (swing: string) => apiFetch<{ assets: HistoricalAsset
 export const fetchCaptureFrame = (capture: string, frame: number) => apiFetch<CaptureFrame>(`${root}/captures/${encodeURIComponent(capture)}/frames/${frame}`);
 export const captureFrameImageUrl = (capture: string, frame: number) => `${getApiBase()}${root}/captures/${encodeURIComponent(capture)}/frames/${frame}/image`;
 export const swingExportUrl = (swing: string) => `${getApiBase()}${root}/swings/${encodeURIComponent(swing)}/export`;
-export const createPlayer = (id: string, name: string) => apiFetch<HistoricalPlayer>(`${root}/players`, { method: 'POST', body: JSON.stringify({ id, name }) });
-export const createSwing = (id: string, player_id: string, name: string) => apiFetch<HistoricalSwing>(`${root}/swings`, { method: 'POST', body: JSON.stringify({ id, player_id, name }) });
-export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles', payload: { id: string; source_path: string; engine?: string; dofs?: string[] }) {
+export const createPlayer = (id: string, name: string) => apiFetch<HistoricalPlayer>(`${root}/players`, { method: 'POST', body: JSON.stringify({ id, name } satisfies IdentityRequest) });
+export const createSwing = (id: string, player_id: string, name: string) => apiFetch<HistoricalSwing>(`${root}/swings`, { method: 'POST', body: JSON.stringify({ id, player_id, name } satisfies SwingRequest) });
+export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles', payload: AssetRequest & Partial<Pick<ModelRequest, 'engine' | 'dofs'>>) {
   return apiFetch<HistoricalAsset>(`${root}/swings/${encodeURIComponent(swing)}/${kind}`, { method: 'POST', body: JSON.stringify(payload), timeoutMs: 300_000 });
 }
