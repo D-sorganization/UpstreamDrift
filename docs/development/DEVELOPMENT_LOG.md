@@ -25,8 +25,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239), draft over #11237
 - **Branch:** `feat/necromatcher-workspace-11234`
 - **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
-- **Last verified:** 2026-10-01 — 31 library/API/native/launcher tests, 10 inventory tests and 13 UI tests passed; mypy eight production files and web type checking passed; actual Hogan/Tiger web imagery and native Hogan overlay verified; official Tiger range capture 210/210 imported and recalled.
-- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. Further form/navigation tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
+- **Last verified:** 2026-10-01 — 31 library/API/native/launcher tests, 10 inventory tests and 16 UI tests passed; mypy eight production files and web type checking passed; navigation ownership and frame retry regressions reproduced and fixed; global LoD passes after cleanup fix; actual Hogan/Tiger web imagery and native Hogan overlay verified; official Tiger range capture 210/210 imported and recalled.
+- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. CI identified stale launcher context and capability-atlas views; reviewed the existing boundary and regenerated canonical views. Further form tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
 
 ### DL-#11233 — Necromatcher Persistent Library
 

@@ -1,10 +1,14 @@
 # Active Necromatcher Delivery
 
 Current branch `feat/necromatcher-workspace-11234` adds the player tile, web route,
-native adapter and shared source-frame archive reader. Thirteen UI tests, desktop
+native adapter and shared source-frame archive reader. Sixteen UI tests, desktop
 recall and worker failure tests pass. Web type checking and scoped ESLint pass.
-Desktop import/overlay parity, real UI verification and final validation remain
-in progress. Library draft PR #11237 depends on capture PR #11231. The capture
+Native import/overlay and actual Hogan/Tiger web review are implemented. URL
+navigation now hides stale results, verifies player/swing/capture ownership and
+supports retry after frame loading errors. Further form tests, final parity and
+fitted-model handoffs remain in progress. CI cycle 2 refreshes canonical launcher
+context/atlas views after their freshness checks failed. Library draft PR #11237
+depends on capture PR #11231. The capture
 PR has an unrelated inherited title-case failure at `.jules/bolt.md:208`; do not
 mark it accepted or change unrelated work under this delivery.
 

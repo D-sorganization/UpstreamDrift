@@ -655,6 +655,22 @@
       "id": "tools.motion_matching"
     },
     {
+      "feature_id": "tools.necromatcher",
+      "title": "Historical Player Library And Source Review",
+      "status": "gap",
+      "pyqt": "src/tools/necromatcher/gui.py",
+      "api": "src/api/routes/necromatcher.py",
+      "web": "ui/src/pages/Necromatcher.tsx",
+      "issue": 11234,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "necromatcher"
+      ],
+      "notes": "Both hosts recall the same immutable library and original frames, import versions and render image-space overlays. Further form/navigation verification and final parity acceptance remain under #11234. Model fitting and qualified simulation handoffs remain open under #11235.",
+      "id": "tools.necromatcher"
+    },
+    {
       "feature_id": "tools.pose_editing",
       "title": "Pose Studio interactive pose editing",
       "status": "exempt",
@@ -1265,6 +1281,20 @@
       "category": "tool",
       "status": "beta",
       "capabilities": []
+    },
+    {
+      "id": "necromatcher",
+      "title": "Necromatcher",
+      "description": "Historical player library, original capture frames, and immutable model and torque profile versions",
+      "path": "src/tools/necromatcher/__main__.py",
+      "launch_target": "src/tools/necromatcher/__main__.py",
+      "category": "motion_capture",
+      "status": "experimental",
+      "capabilities": [
+        "historical_library",
+        "source_frame_review",
+        "swing_package_export"
+      ]
     },
     {
       "id": "matched_swing_browser",
@@ -2868,9 +2898,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "e5ee8eecce00a2c078fa0fa84c38def53b85c63280ab667f6aabc4fd353a5ebd",
-    "src/config/launcher_manifest.json": "72f0d537333b3970ab2c17a159dacc5a61f9e1ae7870b927ec504eacc64864f5",
-    "src/config/feature_parity.json": "cec203c503593b3c0d18e4bd426075e3dbf98d1b1cc70703452239ec31e56993",
+    "src/config/models.yaml": "08e53213cd5b2312a13cd7d66c29479d4e9ff07db0a7c7dd03781d6fce1e9b4b",
+    "src/config/launcher_manifest.json": "55fef678ddb7b19995733b66c109c1058aae827188559cdce89ab8826e0c61fb",
+    "src/config/feature_parity.json": "e1a6e2a0445c9b6a024d197278a57ac78a1068256bb19bc7b4f756a1053caa36",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

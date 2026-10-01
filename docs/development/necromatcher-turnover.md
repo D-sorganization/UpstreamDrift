@@ -62,7 +62,17 @@ Hogan navigation reached source frame 750/750 at PTS 134.967 s. Physical time
 remained unknown. Both player/swing selections recalled their proper captures.
 The in-app browser review tab is marked for continuation. Backend/Vite process
 sessions are 46801/73969; inspect their current state before reuse or shutdown.
-Further form/error tests and final validation remain active.
+Further form tests and final validation remain active. Navigation regressions
+were reproduced before fixing the shared scoped request state: recalling another
+player URL must hide the previous assets and swings immediately, failed frame
+loads must stop their loading message and allow retry, and mismatched player/swing
+URLs must not expose imports or exports. Sixteen UI tests now pass. Cleanup LoD
+fix `d762816466` passes native tests, the global baseline and its CI gate.
+CI cycle 2 identified stale agent-context generated views and launcher boundary
+review. Reviewed the existing launcher-to-atlas contract, regenerated capability
+atlas outputs and agent-context views, and renewed the source-bound review with
+its explicit limitation: registry membership does not establish scientific
+qualification. The atlas freshness test failed before regeneration.
 
 Current checks: 31 library/API/native/launcher tests, 10 generated inventory tests,
 13 UI tests; scoped mypy passes eight production files. Route-producer,
