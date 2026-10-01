@@ -77,6 +77,30 @@ ENGINE_LANES: dict[str, dict[str, Any]] = {
         "receipt_filename": "drake_receipt.json",
         "runner_hint": "ControlTower with drake/pydrake venv; nightly-cross-engine.yml",
     },
+    "mujoco": {
+        "pytest_marker": "requires_mujoco",
+        "python_module": "mujoco",
+        "distribution": "mujoco",
+        "default_venv": None,
+        "receipt_filename": "mujoco_receipt.json",
+        "runner_hint": "ControlTower with mujoco extra; nightly-cross-engine.yml",
+    },
+    "pinocchio": {
+        "pytest_marker": "requires_pinocchio",
+        "python_module": "pinocchio",
+        "distribution": "pinocchio",
+        "default_venv": None,
+        "receipt_filename": "pinocchio_receipt.json",
+        "runner_hint": "ControlTower with pinocchio/crocoddyl venv; nightly-cross-engine.yml",
+    },
+    "simscape": {
+        "pytest_marker": "requires_matlab",
+        "python_module": "matlab",
+        "distribution": "matlabengine",
+        "default_venv": None,
+        "receipt_filename": "simscape_receipt.json",
+        "runner_hint": "Licensed R2025b host; nightly-cross-engine.yml",
+    },
 }
 
 CONTRACT_PATHS = (
@@ -569,12 +593,167 @@ def _resolve_python(engine: str, venv: str | None) -> str:
     return sys.executable
 
 
+def _evaluate_single_engine_lane(
+    engine: str,
+    *,
+    receipts_dir: Path,
+    now: datetime | None,
+    fail_days: int,
+) -> tuple[str, list[str], dict[str, Any] | None]:
+    """Evaluate a single engine receipt.
+
+    Returns (status, blockers, details) where status is
+    'passed', 'failed', 'skipped', or 'unavailable'.
+    """
+    if engine not in ENGINE_LANES:
+        return "unavailable", [f"Engine {engine} is unsupported"], None
+
+    lane_info = ENGINE_LANES[engine]
+    receipt_path = receipts_dir / lane_info["receipt_filename"]
+
+    if not receipt_path.is_file():
+        return (
+            "unavailable",
+            [
+                f"Missing native receipt for required engine: {engine} ({receipt_path.name})"
+            ],
+            None,
+        )
+
+    try:
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return "failed", [f"Corrupt or unreadable receipt for {engine}: {exc}"], None
+
+    ok, reasons = validate_receipt(payload)
+    if not ok:
+        return "failed", [f"Invalid receipt for {engine}: {r}" for r in reasons], None
+
+    gen_at = payload.get("generated_at", "")
+    fresh_status, age_days = assess_receipt_freshness(
+        gen_at, now=now, fail_days=fail_days
+    )
+    if fresh_status == "fail":
+        return (
+            "failed",
+            [
+                f"Stale receipt for {engine}: age is {age_days:.1f} days (max {fail_days})"
+            ],
+            None,
+        )
+
+    inv = payload.get("engine_inventory", {})
+    if not inv.get("available"):
+        return (
+            "unavailable",
+            [
+                f"Native engine runtime/SDK unavailable for {engine}: {inv.get('error', 'not installed')}"
+            ],
+            None,
+        )
+
+    tests = payload.get("tests", {})
+    executed = int(tests.get("executed", 0))
+    skipped = int(tests.get("skipped", 0))
+    failed = int(tests.get("failed", 0))
+    errors = int(tests.get("errors", 0))
+
+    details: dict[str, Any] = {
+        "executed": executed,
+        "passed": int(tests.get("passed", 0)),
+        "failed": failed,
+        "skipped": skipped,
+        "errors": errors,
+        "age_days": round(age_days, 2),
+        "version": payload.get("engine_version") or inv.get("version"),
+    }
+
+    if executed == 0:
+        if skipped > 0:
+            return (
+                "skipped",
+                [
+                    f"Mandatory engine {engine} skipped (zero executed tests, {skipped} skipped)"
+                ],
+                details,
+            )
+        return (
+            "unavailable",
+            [f"Zero executed tests for required engine {engine}"],
+            details,
+        )
+
+    if failed > 0 or errors > 0 or payload.get("status") != "pass":
+        return (
+            "failed",
+            [f"Tests failed for engine {engine}: {failed} failures, {errors} errors"],
+            details,
+        )
+
+    return "passed", [], details
+
+
+def evaluate_native_release_matrix(
+    *,
+    receipts_dir: Path,
+    required_engines: Iterable[str] = tuple(ENGINE_LANES),
+    now: datetime | None = None,
+    fail_days: int = FAIL_FRESHNESS_DAYS,
+) -> dict[str, Any]:
+    """Evaluate native release readiness across all required native engine lanes.
+
+    Reports passed, failed, skipped, and unavailable separately.
+    Fail-closes release_status to 'blocked' if any mandatory engine is skipped,
+    unavailable, failed, stale, or lacks receipts.
+    """
+    passed_engines: list[str] = []
+    failed_engines: list[str] = []
+    skipped_engines: list[str] = []
+    unavailable_engines: list[str] = []
+    blockers: list[str] = []
+    per_engine_details: dict[str, Any] = {}
+
+    for engine in required_engines:
+        status, engine_blockers, details = _evaluate_single_engine_lane(
+            engine, receipts_dir=receipts_dir, now=now, fail_days=fail_days
+        )
+        blockers.extend(engine_blockers)
+        if details is not None:
+            per_engine_details[engine] = details
+
+        if status == "passed":
+            passed_engines.append(engine)
+        elif status == "failed":
+            failed_engines.append(engine)
+        elif status == "skipped":
+            skipped_engines.append(engine)
+        else:
+            unavailable_engines.append(engine)
+
+    is_ready = bool(passed_engines) and not (
+        failed_engines or skipped_engines or unavailable_engines or blockers
+    )
+    release_status = "ready" if is_ready else "blocked"
+
+    return {
+        "schema_version": "native-release-matrix/1.0.0",
+        "evaluated_at": (now or datetime.now(tz=UTC)).isoformat(),
+        "release_status": release_status,
+        "required_engines": list(required_engines),
+        "passed_engines": sorted(passed_engines),
+        "failed_engines": sorted(failed_engines),
+        "skipped_engines": sorted(skipped_engines),
+        "unavailable_engines": sorted(unavailable_engines),
+        "per_engine_details": per_engine_details,
+        "blockers": blockers,
+    }
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--engine",
         choices=tuple(ENGINE_LANES),
-        required=True,
         help="native engine lane to execute",
     )
     parser.add_argument(
@@ -594,11 +773,22 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         help="validate an existing receipt file and exit",
     )
+    parser.add_argument(
+        "--evaluate-matrix",
+        type=Path,
+        metavar="RECEIPTS_DIR",
+        help="evaluate native release matrix across receipts in RECEIPTS_DIR and exit",
+    )
     return parser
 
 
 def main(argv: Iterable[str] | None = None) -> int:
-    args = _parser().parse_args(list(argv) if argv is not None else None)
+    parser = _parser()
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    if args.evaluate_matrix:
+        report = evaluate_native_release_matrix(receipts_dir=args.evaluate_matrix)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["release_status"] == "ready" else 1
     if args.validate_only:
         payload = json.loads(args.validate_only.read_text(encoding="utf-8"))
         ok, reasons = validate_receipt(payload)
@@ -608,6 +798,10 @@ def main(argv: Iterable[str] | None = None) -> int:
             return 1
         print(f"Valid: {args.validate_only}")
         return 0
+    if not args.engine:
+        parser.error(
+            "--engine is required unless --evaluate-matrix or --validate-only is specified"
+        )
     if not math.isfinite(args.timeout) or args.timeout <= 0:
         print("--timeout must be finite and positive", file=sys.stderr)
         return 2
