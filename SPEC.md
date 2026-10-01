@@ -1,3 +1,21 @@
+## Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs (R11, #11151)
+
+Specifies truthful simulation clock calculation, endpoint-inclusive discrete sampling, remainder step execution, and separation of requested vs integrated horizons:
+- **Simulation Timing Plan & Clock Calculation (`src/shared/python/engine_core/simulation_timing.py`)**:
+  - `SimulationTimingPlan`: immutable integration plan encapsulating `requested_duration`, `timestep`, `step_count`, `step_sizes`, `integrated_duration`, `retained_samples`, `has_remainder_step`, `remainder_dt`, `is_divisible`, and `sampling_policy`. Supports 3-tuple iteration unpacking `(timestep, step_count, retained_samples)` for backwards compatibility.
+  - Floating-point boundary precision: replaces naive integer division (`int(duration / timestep)`) with close-boundary rounding (`math.isclose(round(d/dt)*dt, d)`), eliminating integer truncation on floating boundaries (e.g. `0.03 / 0.01` resolving to 3 steps, not 2).
+  - Sub-step duration support: allows sub-step simulations (`duration < timestep`) without raising invalid `ValueError("Timestep must not exceed duration")`, taking a single bounded step of `dt = duration` on engines supporting variable steps.
+  - Remainder step handling: when `allow_remainder_step=True` and horizon is non-divisible, executes full steps plus a bounded final remainder step (`remainder_dt = duration - k * dt`), reaching exact integrated duration without physics state drift.
+  - Fixed-step non-divisible fallback: when variable final steps are disallowed (`allow_remainder_step=False`), executes $k$ integer steps and reports the truthful actual integrated duration ($k \times \mathrm{dt}$), strictly forbidding artificial relabeling of states to an unreached requested horizon.
+- **Separated Horizon Fields on API Contracts (`src/api/models/requests.py`, `src/api/models/responses.py`)**:
+  - `SimulationRequest`: exposes `allow_remainder_step: bool = True` controlling fractional final step adoption.
+  - `SimulationResponse`: distinctly reports `requested_duration`, `integrated_duration`, `step_count`, and `retained_samples` alongside legacy `duration` and `frames`.
+- **Truthful Clocks in Synchronous Stepping & Streaming Loops (`src/api/services/simulation_service.py`, `src/api/routes/simulation_ws.py`)**:
+  - REST stepping loop: iterates through `timing_plan.step_sizes` and records initial state at $t=0$, guaranteeing $N = \text{step\_count} + 1$ endpoint-inclusive state samples where final timestamp equals `timing_plan.integrated_duration`.
+  - WebSocket streaming loop: eliminates `min(duration, frame * timestep)` artificial clamping, steps physics batches with `final_step_dt` when executing remainder steps, emits truthful wire timestamps, and completes with `requested_duration`, `integrated_duration`, and `step_count`.
+- **Cross-Engine Variable-Step Capability Declaration (`engine_supports_variable_step`)**:
+  - Explicit capability check via `supports_variable_step` attribute or backend protocol capabilities; prevents silent per-backend reinterpretation.
+
 ## Bound Simulation Work and Preserve Cancellable Jobs Under Load (R03, #11144)
 
 Specifies aggregate step budget validation, trajectory sampling safety bounds, worker-thread event-loop offloading, active job retention under load, and cooperative cancellation contracts:
@@ -7573,6 +7591,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
 | 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
 | 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |
 | 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |

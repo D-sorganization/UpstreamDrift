@@ -24,6 +24,10 @@ from src.api.models.requests import (
 )
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.simulation_timing import (
+    SimulationTimingPlan,
+    compute_simulation_timing,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 router = APIRouter()
@@ -530,13 +534,19 @@ async def _wait_for_resume_or_stop(
             _apply_set_speed(websocket, config, msg)
 
 
-def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
+def _step_physics_batch(
+    engine: Any,
+    timestep: float,
+    step_count: int,
+    final_step_dt: float | None = None,
+) -> int:
     """Step the physics engine synchronously for a batch of integration steps.
 
     Args:
         engine: The physics engine instance.
-        timestep: Delta time for each step in seconds.
+        timestep: Delta time for standard steps in seconds.
         step_count: Number of steps to advance.
+        final_step_dt: Optional custom delta time for the final step (R11 remainder step).
 
     Returns:
         Number of steps successfully executed.
@@ -544,8 +554,13 @@ def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
     require(timestep > 0, "Simulation timestep must be positive", timestep)
     require(step_count >= 0, "Step count cannot be negative", step_count)
     if hasattr(engine, "step"):
-        for _ in range(step_count):
-            engine.step(timestep)
+        for i in range(step_count):
+            dt = (
+                final_step_dt
+                if (i == step_count - 1 and final_step_dt is not None)
+                else timestep
+            )
+            engine.step(dt)
     return step_count
 
 
@@ -675,6 +690,16 @@ async def _run_simulation_loop(
     require(duration > 0, "Simulation duration must be positive", duration)
     require(timestep > 0, "Simulation timestep must be positive", timestep)
 
+    allow_remainder = config.get("allow_remainder_step", True)
+    timing_plan = compute_simulation_timing(
+        duration=duration,
+        timestep=timestep,
+        allow_remainder_step=allow_remainder,
+        engine=engine,
+    )
+    if hasattr(websocket, "state") and websocket.state is not None:
+        websocket.state.timing_plan = timing_plan
+
     await websocket.send_json({"status": "running", "duration": duration})
 
     time_elapsed = 0.0
@@ -684,7 +709,7 @@ async def _run_simulation_loop(
     target_fps = 60
     steps_per_second = 1.0 / timestep
     frame_skip = max(1, int(steps_per_second / target_fps))
-    total_steps = max(1, int(math.ceil(duration / timestep)))
+    total_steps = timing_plan.step_count
     loop = asyncio.get_running_loop()
     stats = _resolve_sim_stats(websocket)
 
@@ -711,12 +736,25 @@ async def _run_simulation_loop(
                 recv_task = asyncio.create_task(websocket.receive_json())
 
             batch_steps = min(frame_skip, total_steps - frame)
+            is_final_batch = frame + batch_steps >= total_steps
+            final_dt = (
+                timing_plan.remainder_dt
+                if (is_final_batch and timing_plan.has_remainder_step)
+                else None
+            )
+
             await anyio.to_thread.run_sync(
-                _step_physics_batch, engine, timestep, batch_steps
+                _step_physics_batch, engine, timestep, batch_steps, final_dt
             )
 
             frame += batch_steps
-            time_elapsed = min(duration, frame * timestep)
+            if hasattr(engine, "get_time") and callable(engine.get_time):
+                time_elapsed = float(engine.get_time())
+            elif frame >= total_steps:
+                time_elapsed = timing_plan.integrated_duration
+            else:
+                time_elapsed = sum(timing_plan.step_sizes[:frame])
+
             if stats is not None:
                 stats.frame_count = frame
 
@@ -726,7 +764,11 @@ async def _run_simulation_loop(
                 )
 
             speed_factor = _get_simulation_speed_factor(websocket, config)
-            batch_duration = batch_steps * timestep
+            batch_duration = (
+                ((batch_steps - 1) * timestep + final_dt)
+                if (final_dt is not None and batch_steps > 0)
+                else (batch_steps * timestep)
+            )
             delay = _compute_real_time_sleep_delay(
                 batch_duration,
                 speed_factor,
@@ -818,11 +860,23 @@ async def simulation_stream(
         frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
 
         # Send completion
+        timing_plan = getattr(getattr(websocket, "state", None), "timing_plan", None)
+        req_dur = (
+            timing_plan.requested_duration
+            if timing_plan is not None
+            else config.get("duration", time_elapsed)
+        )
+        int_dur = (
+            timing_plan.integrated_duration if timing_plan is not None else time_elapsed
+        )
         await websocket.send_json(
             {
                 "status": "complete",
                 "total_frames": frame,
                 "total_time": round(time_elapsed, 4),
+                "requested_duration": req_dur,
+                "integrated_duration": round(int_dur, 6),
+                "step_count": frame,
             }
         )
 
