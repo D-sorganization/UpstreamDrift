@@ -228,12 +228,7 @@ class RunWorker(QObject):
             return
 
         if self._was_cancelled:
-            self._finalize(
-                status=RunStatus.CANCELLED,
-                exit_code=-1,
-                error_msg="Process execution was cancelled by user.",
-                recovery="Re-run the workflow when ready.",
-            )
+            self._finalize_cancellation()
             return
 
         if status == QProcess.ExitStatus.CrashExit:
@@ -288,6 +283,15 @@ class RunWorker(QObject):
                 recovery="Review process arguments, system permissions, and environment variables.",
             )
 
+    def _finalize_cancellation(self) -> None:
+        """Finalize the active run as cancelled by the user."""
+        self._finalize(
+            status=RunStatus.CANCELLED,
+            exit_code=-1,
+            error_msg="Process execution was cancelled by user.",
+            recovery="Re-run the workflow when ready.",
+        )
+
     def stop(self) -> None:
         """Cancel the ongoing run cleanly and idempotently."""
         self._was_cancelled = True
@@ -298,12 +302,7 @@ class RunWorker(QObject):
                 proc.kill()
             except RuntimeError:
                 pass
-            self._finalize(
-                status=RunStatus.CANCELLED,
-                exit_code=-1,
-                error_msg="Process execution was cancelled by user.",
-                recovery="Re-run the workflow when ready.",
-            )
+            self._finalize_cancellation()
 
     def _dispose_process(self) -> None:
         """Disconnect, unparent, and schedule deletion of current QProcess instance."""
