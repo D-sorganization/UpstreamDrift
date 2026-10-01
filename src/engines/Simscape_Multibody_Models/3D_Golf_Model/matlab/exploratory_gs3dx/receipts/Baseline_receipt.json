@@ -1,0 +1,67 @@
+{
+  "balance_mode": "passive",
+  "block_budget": {
+    "compiled_count": 941,
+    "headroom": 34,
+    "license_ceiling": 1000,
+    "reserve_blocks": 25,
+    "uncompiled_count": 672,
+    "within_production_ceiling": true
+  },
+  "builder": "gs3dx_clone_baseline",
+  "c3d_tracking": false,
+  "clean_host_build": {
+    "built_clean": true,
+    "host": "licensed-r2025b-host",
+    "matlab_release": "2025b",
+    "matlab_version": "24.2.0.2741519 (R2025b)",
+    "reopened_clean": true,
+    "saved_clean": true
+  },
+  "cold_replay": {
+    "command": "matlab -batch \"addpath('tools'); gs3dx_setup; gs3dx_simulate('GS3DX_Baseline')\"",
+    "cwd": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx",
+    "environment": {
+      "MATLABPATH": "tools;models"
+    },
+    "input_files": ["models/GS3DX_Baseline.slx", "data/C3D_TA_Driver.c3d"]
+  },
+  "drive_classification": "stable_drive_equivalence",
+  "drive_mode": "baseline_torque",
+  "drive_reference": "baselines/original_GolfSwing3D_Kinetic_impact_0p3S.mat",
+  "image_artifacts": {},
+  "model_file": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/models/GS3DX_Baseline.slx",
+  "model_name": "GS3DX_Baseline",
+  "model_sha256": "8935d01e5e55be65c0a72fbc899007d89cb655c2d8f2fbec8bf7e01bd08d4258",
+  "neck_actuation": "rigid_upper_trunk",
+  "original_protection": {
+    "details": {
+      "GolfSwing3D_Kinetic.slx": "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9",
+      "Kinetically_Driven_Gimbal_Joint.slx": "1dd72e348eeba0ffa5df16a927dd43b5c7f3441d03a45cfdee15f329ac0d825a",
+      "Kinetically_Driven_Revolute_Joint.slx": "deb039b2eebf00001cac8097a79d7dbf0dee4a9d2ea0cc883caa80941e044512",
+      "Kinetically_Driven_Universal_Joint.slx": "2252a7f9a7457359b26b7c640c01dfdcfe5ac3e3500bab0a6bfc275cbf747ab0"
+    },
+    "files_checked": [
+      "GolfSwing3D_Kinetic.slx",
+      "Kinetically_Driven_Gimbal_Joint.slx",
+      "Kinetically_Driven_Revolute_Joint.slx",
+      "Kinetically_Driven_Universal_Joint.slx"
+    ],
+    "hashes_match": true,
+    "originals_verified": true
+  },
+  "parent_variant": null,
+  "provenance": {
+    "capture_file": "data/C3D_TA_Driver.c3d",
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "host": "licensed-r2025b-host",
+    "matlab_release": "2025b",
+    "matlab_version": "24.2.0.2741519 (R2025b)",
+    "model_name": "GS3DX_Baseline",
+    "model_sha256": "8935d01e5e55be65c0a72fbc899007d89cb655c2d8f2fbec8bf7e01bd08d4258",
+    "provider": "MATLAB R2025b / Simscape Multibody"
+  },
+  "review_status": "exploratory_promoted",
+  "schema_version": "gs3dx-variant-receipt/1",
+  "variant": "Baseline"
+}
