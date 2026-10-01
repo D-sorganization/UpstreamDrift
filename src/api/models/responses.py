@@ -32,6 +32,30 @@ class EngineStatusResponse(BaseModel):
     description: str = Field("", description="Engine description")
 
 
+class SimulationErrorInfo(BaseModel):
+    """Structured error outcome for simulation failures (issue #11149, R09)."""
+
+    code: str = Field(..., description="Stable machine-readable error code")
+    message: str = Field(..., description="Safe user-facing error message")
+    stage: str = Field(
+        ...,
+        description="Pipeline stage where failure occurred: preparation, execution, analysis, persistence",
+    )
+    run_id: str | None = Field(
+        default=None, description="Run or correlation identifier"
+    )
+    retriable: bool = Field(
+        default=False, description="Whether the operation can be retried"
+    )
+    retry_guidance: str | None = Field(
+        default=None, description="Actionable retry guidance"
+    )
+    details: dict[str, Any] | None = Field(
+        default=None,
+        description="Safe contextual metadata without leaking internals",
+    )
+
+
 class SimulationResponse(BaseModel):
     """Response model for simulation results.
 
@@ -52,9 +76,29 @@ class SimulationResponse(BaseModel):
         ..., description="Simulation data (states, controls, etc.)"
     )
     analysis_results: dict[str, Any] | None = Field(
-        None, description="Analysis results if requested"
+        default=None, description="Analysis results if requested"
     )
-    export_paths: list[str] | None = Field(None, description="Paths to exported files")
+    export_paths: list[str] | None = Field(
+        default=None, description="Paths to exported files"
+    )
+    calculation_status: str = Field(
+        default="completed",
+        description="Calculation status: completed, failed, cancelled",
+    )
+    analysis_status: str = Field(
+        default="not_requested",
+        description="Analysis status: not_requested, completed, partial, failed",
+    )
+    persistence_status: str = Field(
+        default="not_requested",
+        description="Persistence status: not_requested, persisted, failed",
+    )
+    error: SimulationErrorInfo | None = Field(
+        default=None, description="Structured error details if failure occurred"
+    )
+    run_id: str | None = Field(
+        default=None, description="Run or correlation identifier"
+    )
 
     @model_validator(mode="after")
     def check_data_on_success(self) -> SimulationResponse:
@@ -153,6 +197,19 @@ class TaskStatusResponse(BaseModel):
     progress: float | None = Field(None, description="Progress percentage (0-100)")
     result: dict[str, Any] | None = Field(None, description="Task result if completed")
     error: str | None = Field(None, description="Error message if failed")
+    error_code: str | None = Field(
+        None, description="Machine-readable error code if failed"
+    )
+    error_stage: str | None = Field(
+        None, description="Pipeline stage where failure occurred"
+    )
+    retriable: bool | None = Field(None, description="Whether the task can be retried")
+    retry_guidance: str | None = Field(
+        None, description="Guidance for retrying or fixing"
+    )
+    error_info: SimulationErrorInfo | None = Field(
+        None, description="Structured error information"
+    )
 
 
 # ──────────────────────────────────────────────────────────────
