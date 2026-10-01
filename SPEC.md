@@ -1,3 +1,23 @@
+## Wire Neural Matching Controls to Executed Requests and Validate Executability (R07, #11147)
+
+Specifies the end-to-end integration and fail-closed validation contracts connecting UI neural matching controls to executed pipeline requests:
+- **Typed Request & Command Surface (`src/tools/motion_matching/pipeline.py`, `src/shared/python/motion_matching/pipeline/cli.py`)**:
+  - `MatchRequest`: incorporates `neural_mode` (`classical`, `preview`, `verified`), `neural_model` (canonical model ID or identifier), `allow_fallback` (boolean, defaults to `True`), and optional `checkpoint_path`. Canonical modes and model strings are normalized on initialization.
+  - Property `allow_classical_fallback`: exposes backward-compatible boolean fallback toggle.
+  - CLI bindings: `--neural-mode`, `--neural-model`, `--no-neural-fallback`, and `--neural-checkpoint` serialized consistently in `MatchRequest.match_command()` and parsed in pipeline CLI parser.
+- **Qualified Registry Model Availability & Honest Disclosure (`src/tools/motion_matching/controller.py`)**:
+  - `get_neural_model_availability`: evaluates candidate models against the qualified tour baselines registry (`build_neural_model_roster()`) and active runtime environment.
+  - Returns structured `NeuralModelAvailability` records detailing whether a model is qualified for production, pilot-eligible for research/preview, or unavailable, along with an actionable explanation and clear next action.
+  - Replaces misleading effective-looking controls with unambiguous availability status for unsupported or research models.
+- **Fail-Closed Execution Preparation & Verified-Inference Orchestration (`src/tools/motion_matching/controller.py`)**:
+  - `MotionMatchingController.validate_request` and `prepare_run`: drives candidate requests through `VerifiedInferenceOrchestrator` target-distribution bounds checking and qualification checks.
+  - Disabling fallback is strictly honored: when `allow_fallback=False` and neural verification or proposal generation fails, execution is rejected with named reasons (`Missing checkpoint file`, `Checkpoint architecture mismatch`, `Distribution bounds violated`) rather than silently falling back.
+  - Preview promotion protection: unverified preview proposals can never be promoted to verified status; fallback execution produces a `classical_fallback` disposition with explicit user notification.
+  - Returns immutable `RunDisposition` containing status (`executable`, `rejected`, `classical_fallback`), commands, preview flag, model ID, and diagnostic reason.
+- **UI Run-Bound Disposition & Feature Parity Documentation (`src/tools/motion_matching/gui.py`, `src/config/feature_parity.json`)**:
+  - UI interaction binds execution through controller `prepare_run()`, updating badges (`PREVIEW (REJECTED)`, `PREVIEW (CLASSICAL_FALLBACK)`, `UNVERIFIED`) and log panes consistently before dispatching worker processes.
+  - `feature_parity.json` updated under `tools.motion_matching` documenting wired neural controls, verified inference orchestrator gate, and intentional platform parity gap across operating platforms.
+
 ## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
 
 Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
@@ -7777,6 +7797,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-10-01 | #11147 | Wire neural matching controls to executed requests, populate qualified registry model availability, honor disabled fallbacks with named reasons, prevent preview promotion to verified, and update feature parity docs (R07 #11147). |
 | 2026-10-01 | #11107 | Complete Simscape continuous-replay qualification harness integration (MMR-07-I #11107): add test_simscape_replay_harness contract suite, integrate continuous-replay qualification receipt evaluation into test_acceptance, and verify full-marker channel evaluation. |
 | 2026-09-29 | #11126 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |
 | 2026-09-19 | #10480 | Reuse shared physical-time playback across Qt React and native viewers (MV-04): PhysicalTimePlayback driving evaluation by continuous physical time using Tools playback_transport, quaternion SLERP with antipodal continuity, dropped-draw handling without timescale drift, discrete knot stepping, and PlaybackAdapter matrix (Qt, React web payload, MeshCat, Gepetto, MediaVideo with offset and documented mute reason). |

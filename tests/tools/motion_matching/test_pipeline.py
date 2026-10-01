@@ -255,3 +255,57 @@ def test_read_experiment_summary(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="No experiment receipt"):
         module.read_experiment_summary(tmp_path, "nonexistent")
+
+
+def test_neural_match_request_fields_and_command_building() -> None:
+    """Verify MatchRequest neural matching fields, normalization, and CLI args (R07 #11147)."""
+    # 1. Defaults: classical mode, fallback allowed
+    req_default = module.MatchRequest(capture="driver", club="driver")
+    assert req_default.neural_mode == "classical"
+    assert req_default.allow_fallback is True
+    assert req_default.allow_classical_fallback is True
+
+    # Classical command does not carry neural flags
+    cmd_default = module.match_command(req_default)
+    assert "--neural-mode" not in cmd_default
+
+    # 2. Preview mode with fallback
+    req_preview = module.MatchRequest(
+        capture="driver",
+        club="driver",
+        neural_mode="preview",
+        neural_model="driven_double_pendulum",
+        allow_fallback=True,
+    )
+    assert req_preview.neural_mode == "preview"
+    assert req_preview.neural_model == "driven_double_pendulum"
+    cmd_preview = module.match_command(req_preview)
+    assert "--neural-mode" in cmd_preview
+    assert cmd_preview[cmd_preview.index("--neural-mode") + 1] == "preview"
+    assert "--neural-model" in cmd_preview
+    assert (
+        cmd_preview[cmd_preview.index("--neural-model") + 1] == "driven_double_pendulum"
+    )
+    assert "--no-neural-fallback" not in cmd_preview
+
+    # 3. Verified mode without fallback
+    req_verified = module.MatchRequest(
+        capture="driver",
+        club="driver",
+        neural_mode="Neural Verified",
+        neural_model="driven_double_pendulum",
+        allow_fallback=False,
+    )
+    assert req_verified.neural_mode == "verified"
+    cmd_verified = module.match_command(req_verified)
+    assert "--neural-mode" in cmd_verified
+    assert cmd_verified[cmd_verified.index("--neural-mode") + 1] == "verified"
+    assert "--no-neural-fallback" in cmd_verified
+
+    # 4. Invalid neural mode rejected
+    with pytest.raises(ValueError, match="neural_mode"):
+        module.MatchRequest(
+            capture="driver",
+            club="driver",
+            neural_mode="unsupported_quantum_mode",
+        )

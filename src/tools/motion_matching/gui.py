@@ -51,6 +51,12 @@ from src.tools.motion_matching.badge_utils import (
     resolve_acceptance_badge_style,
     resolve_neural_badge,
 )
+from src.tools.motion_matching.controller import (
+    MotionMatchingController,
+    RunDisposition,
+    format_neural_explanation,
+    setup_neural_group,
+)
 from src.tools.motion_matching.tour_baselines_presenter import (
     ComputeBudgetView,
     EvidenceInspectionReport,
@@ -135,6 +141,8 @@ class MotionMatchingWidget(QWidget):
         super().__init__(parent)
         self._tb_presenter = tb_presenter or TourBaselinesPresenter()
         self._worker = RunWorker(self)
+        self.controller = MotionMatchingController()
+        self.last_run_disposition: RunDisposition | None = None
         self._request: pipeline.MatchRequest | None = None
         self._exp_request: pipeline.ExperimentRequest | None = None
         self.ik_movie: QMovie | None = None
@@ -231,16 +239,12 @@ class MotionMatchingWidget(QWidget):
         self.shooting_gain = self._double_spin(0.70, 0.0, 1.0, 0.05)
 
         # Mutual exclusion between free and bound wrists
-        def _on_free_wrists(checked: bool) -> None:
-            if checked:
-                self.bound_wrists.setChecked(False)
-
-        def _on_bound_wrists(checked: bool) -> None:
-            if checked:
-                self.free_wrists.setChecked(False)
-
-        self.free_wrists.toggled.connect(_on_free_wrists)
-        self.bound_wrists.toggled.connect(_on_bound_wrists)
+        self.free_wrists.toggled.connect(
+            lambda c: self.bound_wrists.setChecked(False) if c else None
+        )
+        self.bound_wrists.toggled.connect(
+            lambda c: self.free_wrists.setChecked(False) if c else None
+        )
 
         stages_layout.addRow(self.free_wrists)
         stages_layout.addRow(self.bound_wrists)
@@ -274,30 +278,14 @@ class MotionMatchingWidget(QWidget):
         return widget
 
     def _create_neural_group(self) -> QGroupBox:
-        """Create neural-assisted matching controls (NM-11, #10626)."""
-        box = QGroupBox("Neural-Assisted Motion Matching")
-        layout = QFormLayout(box)
-        self.neural_mode = QComboBox()
-        self.neural_mode.addItems(
-            ["Classical Only", "Neural Preview", "Neural Verified"]
-        )
-        self.neural_mode.setCurrentText("Classical Only")
-
-        self.neural_model_selector = QComboBox()
-        self.neural_model_selector.addItems(
-            [
-                "driven_double_pendulum",
-                "mujoco_humanoid_3d",
-                "pinocchio_golf_arm",
-            ]
-        )
-
-        self.allow_classical_fallback = QCheckBox("Allow classical fallback")
-        self.allow_classical_fallback.setChecked(True)
-
-        layout.addRow("Inference Mode:", self.neural_mode)
-        layout.addRow("Neural Model:", self.neural_model_selector)
-        layout.addRow(self.allow_classical_fallback)
+        """Create neural-assisted matching controls (NM-11, #10626, R07 #11147)."""
+        (
+            box,
+            self.neural_mode,
+            self.neural_model_selector,
+            self.allow_classical_fallback,
+            self.neural_explanation_label,
+        ) = setup_neural_group(self)
         return box
 
     def _create_results_section(self) -> QGroupBox:
@@ -838,13 +826,13 @@ class MotionMatchingWidget(QWidget):
         return box
 
     def _browse_dir(self, line_edit: QLineEdit, caption: str) -> None:
-        chosen = QFileDialog.getExistingDirectory(self, caption)
-        if chosen:
+        if chosen := QFileDialog.getExistingDirectory(self, caption):
             line_edit.setText(chosen)
 
     def _browse_file(self, line_edit: QLineEdit, filter_str: str) -> None:
-        chosen, _ = QFileDialog.getOpenFileName(self, "Select file", filter=filter_str)
-        if chosen:
+        if chosen := QFileDialog.getOpenFileName(
+            self, "Select file", filter=filter_str
+        )[0]:
             line_edit.setText(chosen)
 
     def _default_club(self, capture: str) -> None:
@@ -872,6 +860,9 @@ class MotionMatchingWidget(QWidget):
             ik_backend=self.ik_backend.currentText(),
             tracking=self.tracking.currentText(),
             step_mode=self.step_mode.currentText(),
+            neural_mode=self.neural_mode.currentText(),
+            neural_model=self.neural_model_selector.currentText().strip(),
+            allow_fallback=self.allow_classical_fallback.isChecked(),
         )
 
     def experiment_request(self) -> pipeline.ExperimentRequest:
@@ -912,14 +903,31 @@ class MotionMatchingWidget(QWidget):
             return
         self._request = self.request()
         self.log.clear()
-        self.results.setText("Running matching pipeline...")
         self.clear_neural_metrics()
+        disp = self.controller.prepare_run(self._request)
+        self.last_run_disposition = disp
+
+        if disp.status == "rejected":
+            self.results.setText(f"Run rejected: {disp.reason}")
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {"status": "REJECTED", "is_preview": disp.is_preview}
+                )
+            )
+            return
+
+        if disp.status == "classical_fallback":
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {"status": "CLASSICAL_FALLBACK", "is_preview": disp.is_preview}
+                )
+            )
+            self.results.setText("Running matching pipeline (classical fallback)...")
+        else:
+            self.results.setText("Running matching pipeline...")
+
         self._set_active_buttons(self.run_button, self.stop_button, running=True)
-        commands = [
-            pipeline.build_command(self._request),
-            pipeline.match_command(self._request),
-        ]
-        self._worker.start(commands)
+        self._worker.start(list(disp.commands))
 
     def start_experiment(self) -> None:
         if self._worker.is_running():
@@ -1023,17 +1031,13 @@ class MotionMatchingWidget(QWidget):
         _, v_style = resolve_acceptance_badge_style(verdict)
         self.acceptance_badge.setStyleSheet(v_style)
 
-        def _fmt_mm(val: Any) -> str:
-            return f"{val} mm" if val is not None else "-"
+        def fmt(k: str) -> str:
+            return f"{metrics[k]} mm" if metrics.get(k) is not None else "-"
 
-        self.metric_ik_rms.setText(_fmt_mm(metrics.get("full_capture_ik_rms_mm")))
-        self.metric_address_rms.setText(_fmt_mm(metrics.get("address_marker_rms_mm")))
-        self.metric_backswing_root.setText(
-            _fmt_mm(metrics.get("backswing_root_error_max_mm"))
-        )
-        self.metric_whole_run_root.setText(
-            _fmt_mm(metrics.get("whole_run_root_rms_mm"))
-        )
+        self.metric_ik_rms.setText(fmt("full_capture_ik_rms_mm"))
+        self.metric_address_rms.setText(fmt("address_marker_rms_mm"))
+        self.metric_backswing_root.setText(fmt("backswing_root_error_max_mm"))
+        self.metric_whole_run_root.setText(fmt("whole_run_root_rms_mm"))
         frac = metrics.get("inside_support_polygon_fraction")
         self.metric_support_polygon.setText(f"{frac:.2f}" if frac is not None else "-")
 
@@ -1062,8 +1066,19 @@ class MotionMatchingWidget(QWidget):
         neural_info = summary.get("neural_inference") or metrics.get("neural_inference")
         if isinstance(neural_info, dict):
             active_model = self.neural_model_selector.currentText().strip()
-            nb = resolve_neural_badge(neural_info, active_model)
-            self._apply_neural_badge(nb)
+            self._apply_neural_badge(resolve_neural_badge(neural_info, active_model))
+        elif (
+            self.last_run_disposition is not None
+            and self.last_run_disposition.status == "classical_fallback"
+        ):
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {
+                        "status": "CLASSICAL_FALLBACK",
+                        "is_preview": self.last_run_disposition.is_preview,
+                    }
+                )
+            )
         else:
             self.clear_neural_metrics()
 
@@ -1088,15 +1103,18 @@ class MotionMatchingWidget(QWidget):
         t_total_s: float = 0.0,
     ) -> None:
         """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626, #11146)."""
-        info = {
-            "status": status,
-            "is_preview": is_preview,
-            "confidence": confidence,
-            "t_neural_s": t_neural_s,
-            "t_polish_s": t_polish_s,
-            "t_total_s": t_total_s,
-        }
-        self._apply_neural_badge(resolve_neural_badge(info))
+        self._apply_neural_badge(
+            resolve_neural_badge(
+                {
+                    "status": status,
+                    "is_preview": is_preview,
+                    "confidence": confidence,
+                    "t_neural_s": t_neural_s,
+                    "t_polish_s": t_polish_s,
+                    "t_total_s": t_total_s,
+                }
+            )
+        )
 
     def metrics_values(self) -> dict[str, Any]:
         """Return the extracted five headline metrics from the last matching run."""

@@ -244,7 +244,7 @@ def test_extract_five_metrics_and_acceptance_logic() -> None:
     assert verdict2 == "REJECTED"
 
     # None -> UNCLASSIFIED
-    summary_empty = {}
+    summary_empty: dict[str, object] = {}
     _, verdict3 = pipeline.extract_five_metrics_and_acceptance(summary_empty)
     assert verdict3 == "UNCLASSIFIED"
 
@@ -502,3 +502,205 @@ def test_tour_baselines_tab_actions(widget: MotionMatchingWidget) -> None:
     log_text4 = widget.tb_log.toPlainText()
     assert "[REPRODUCE]" in log_text4
     assert "--reproduce" in log_text4
+
+
+def test_neural_controls_change_captured_execution_request(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Changing each control changes the captured execution request (R07 #11147)."""
+    # 1. Default request carries classical mode
+    req1 = widget.request()
+    assert req1.neural_mode == "classical"
+    assert req1.allow_fallback is True
+
+    # 2. Switching to Neural Preview changes captured request
+    widget.neural_mode.setCurrentText("Neural Preview")
+    req2 = widget.request()
+    assert req2.neural_mode == "preview"
+    assert req2.neural_model == widget.neural_model_selector.currentText()
+
+    # 3. Changing model selector changes captured request
+    widget.neural_model_selector.setCurrentText("pinocchio_golf_arm")
+    req3 = widget.request()
+    assert req3.neural_model == "pinocchio_golf_arm"
+
+    # 4. Disabling fallback changes captured request
+    widget.allow_classical_fallback.setChecked(False)
+    req4 = widget.request()
+    assert req4.allow_fallback is False
+    assert req4.allow_classical_fallback is False
+
+    # 5. Switching to Neural Verified changes captured request
+    widget.neural_mode.setCurrentText("Neural Verified")
+    req5 = widget.request()
+    assert req5.neural_mode == "verified"
+
+
+def test_neural_availability_populated_from_qualified_registry(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Until executable, show clear unavailable/research explanation and next action (R07 #11147)."""
+    # Selector has models populated from registry
+    assert widget.neural_model_selector.count() >= 3
+    assert hasattr(widget, "neural_explanation_label")
+
+    # In classical mode, explanation describes classical plant simulation
+    widget.neural_mode.setCurrentText("Classical Only")
+    assert "Classical" in widget.neural_explanation_label.text()
+
+    # In Neural Preview or Verified, shows unavailable / research explanation and next action
+    widget.neural_mode.setCurrentText("Neural Preview")
+    widget.neural_model_selector.setCurrentText("driven_double_pendulum")
+    text = widget.neural_explanation_label.text()
+    assert "Unavailable" in text or "Research" in text
+    assert "Next action:" in text
+
+
+def test_unsupported_model_selection_explicitly_refused(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Selecting unsupported or non-pilot models explicitly refuses execution (R07 #11147)."""
+    # Setting an unsupported mode in request raises ValueError
+    with pytest.raises(ValueError, match="neural_mode"):
+        pipeline.MatchRequest(
+            capture="driver",
+            club="driver",
+            neural_mode="hyper_neural_unsupported",
+        )
+
+    # Controller validates request and refuses unsupported models or verified promotion
+    from src.tools.motion_matching.controller import MotionMatchingController
+
+    controller = MotionMatchingController()
+    unsupported_req = pipeline.MatchRequest(
+        capture="driver",
+        club="driver",
+        neural_mode="preview",
+        neural_model="reconstruction_triple_pendulum",  # REFERENCE_ONLY model
+    )
+    result = controller.validate_request(unsupported_req)
+    assert result.is_valid is False
+    assert "Unsupported" in result.reason or "Reference" in result.reason
+
+
+def test_disabling_fallback_is_honored_and_returns_named_reason(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Disabling fallback is honored: fails with named reason rather than falling back (R07 #11147)."""
+    widget.neural_mode.setCurrentText("Neural Preview")
+    widget.neural_model_selector.setCurrentText("driven_double_pendulum")
+
+    # Disabling fallback
+    widget.allow_classical_fallback.setChecked(False)
+    disposition = widget.controller.prepare_run(widget.request())
+    assert disposition.status == "rejected"
+    assert disposition.allow_fallback is False
+    assert disposition.reason != ""
+    assert (
+        "Missing checkpoint" in disposition.reason
+        or "No classical solver" in disposition.reason
+    )
+
+    # Enabling fallback
+    widget.allow_classical_fallback.setChecked(True)
+    disposition_fallback = widget.controller.prepare_run(widget.request())
+    assert disposition_fallback.status == "classical_fallback"
+    assert disposition_fallback.allow_fallback is True
+    assert "Missing checkpoint" in disposition_fallback.reason
+
+
+def test_preview_cannot_be_promoted_to_verified(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Preview results cannot be promoted to verified (R07 #11147)."""
+    from src.tools.motion_matching.controller import MotionMatchingController
+
+    controller = MotionMatchingController()
+    req = pipeline.MatchRequest(
+        capture="driver",
+        club="driver",
+        neural_mode="verified",
+        neural_model="driven_double_pendulum",
+        allow_fallback=False,
+    )
+    # Attempting to run verified without a qualified verified checkpoint
+    disposition = controller.prepare_run(req, preview_only_checkpoint=True)
+    assert disposition.status == "rejected"
+    assert "Preview cannot be promoted to verified" in disposition.reason
+
+
+def test_checkpoint_mismatch_and_missing_runtime_return_named_reasons(
+    widget: MotionMatchingWidget,
+) -> None:
+    """Checkpoint mismatch and missing runtime return named reasons (R07 #11147)."""
+    from src.tools.motion_matching.controller import MotionMatchingController
+
+    controller = MotionMatchingController()
+    req = pipeline.MatchRequest(
+        capture="driver",
+        club="driver",
+        neural_mode="preview",
+        neural_model="driven_double_pendulum",
+        allow_fallback=False,
+    )
+
+    # 1. Checkpoint mismatch (dimension or contract mismatch)
+    disp_mismatch = controller.prepare_run(req, inject_mismatch=True)
+    assert disp_mismatch.status == "rejected"
+    assert any(
+        kw in disp_mismatch.reason
+        for kw in ("Dimension mismatch", "Incompatible checkpoint contract", "mismatch")
+    )
+
+    # 2. Missing runtime
+    disp_runtime = controller.prepare_run(req, inject_missing_runtime=True)
+    assert disp_runtime.status == "rejected"
+    assert "Missing runtime" in disp_runtime.reason
+
+
+def test_ui_interaction_drives_run_and_checks_run_bound_disposition(
+    widget: MotionMatchingWidget,
+) -> None:
+    """UI interaction drives the same controller/request path as Run and binds disposition (R07 #11147)."""
+    # 1. Test Run with neural preview + fallback=False
+    widget.neural_mode.setCurrentText("Neural Preview")
+    widget.neural_model_selector.setCurrentText("driven_double_pendulum")
+    widget.allow_classical_fallback.setChecked(False)
+
+    # Click Run
+    widget.run_button.click()
+
+    disp = widget.last_run_disposition
+    assert disp is not None
+    assert disp.mode == "preview"
+    assert disp.model_id == "driven_double_pendulum"
+    assert disp.allow_fallback is False
+    assert disp.status == "rejected"
+    assert "Missing checkpoint" in disp.reason
+    assert "REJECTED" in widget.neural_status_badge.text()
+    assert "rejected" in widget.results.text().lower()
+
+    # 2. Test Run with neural preview + fallback=True
+    widget.allow_classical_fallback.setChecked(True)
+    widget.run_button.click()
+
+    disp2 = widget.last_run_disposition
+    assert disp2 is not None
+    assert disp2.mode == "preview"
+    assert disp2.allow_fallback is True
+    assert disp2.status == "classical_fallback"
+    assert "CLASSICAL_FALLBACK" in widget.neural_status_badge.text()
+
+
+def test_feature_parity_records_reflect_neural_matching_support_and_gap() -> None:
+    """Feature parity JSON documents neural matching controls and intentional platform gap (R07 #11147)."""
+    import json
+    from src.tools.motion_matching.pipeline import REPO_ROOT
+
+    parity_file = REPO_ROOT / "src/config/feature_parity.json"
+    data = json.loads(parity_file.read_text(encoding="utf-8"))
+    mm_feature = data["features"]["tools.motion_matching"]
+
+    notes = mm_feature.get("notes", "")
+    assert "neural" in notes.lower()
+    assert "fallback" in notes.lower()
