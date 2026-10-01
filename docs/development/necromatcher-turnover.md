@@ -15,6 +15,15 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
+CI follow-up for draft #11237: its full unit lane reported 19,886 passing,
+241 skipped and two failures. The API type freshness failure was reproduced
+locally before regenerating `ui/src/api/generated/types.ts`; the added request
+models require their canonical TypeScript projection. The second failure is the
+existing child-copy contract requiring `origin/main` in CI; its shallow checkout
+does not provide that ref. Keep this infrastructure failure separate from
+Necromatcher acceptance and do not weaken the test. The SPEC changelog row now
+references actual PR #11237.
+
 Library issue #11233 is implemented in the owned `feat/necromatcher-library-11233` worktree. Code is published in [Draft PR #11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237), based on capture PR #11231. This branch currently depends on the capture foundation PR #11231.
 
 Players and swings survive process restart. Model bytes are copied and stored as unqualified candidates. Immutable version IDs reject overwrite. Recall checks bytes; profiles reject incompatible model revisions, joint order, units, physical clock and cross-player sessions. Library writers acquire an exclusive lock; concurrent writers fail visibly instead of losing metadata. Do not modify the same project through a separate raw store writer concurrently. A crashed writer can leave a lock: inspect its recorded PID and confirm no writer is running before removing that one lock file.
