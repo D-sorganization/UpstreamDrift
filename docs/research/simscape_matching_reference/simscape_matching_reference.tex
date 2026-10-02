@@ -804,7 +804,19 @@ not anatomical or physical acceptance. Canonical SI XYZ, validity masks,
 ordered-label digests and capture rates match exactly under the two recorded
 NumPy/ezc3d runtimes. This narrows importer concerns but does not establish
 solver equivalence or explain the model difference. A controlled native
-model/default comparison remains pending. Software tests, a published draft and natural IK export
+model/default comparison was then performed using an immutable private copy of
+the earlier model with current source and host runtime. Its tour joint poses
+are identical to the current-model run, with the same 13.366/41.385 mm
+position metrics. The initial wrapper used a nonexistent field on the returned
+report after the solve and exited with code one; a corrected wrapper validated
+the actual JSON provenance, reused the verified pose cache and exited naturally
+with code zero at \texttt{08:59:42Z}. This is a cache-validated continuation,
+not a second fresh solve. Recorded solve-source hashes match those of the
+earlier selected execution, but the earlier pose arrays differ. Recorded
+identity does not cover all transitive native/runtime inputs; the cause of
+this cross-execution difference remains unresolved. The newer model binary
+alone does not explain the observed tour fit change under the tested common
+conditions. Software tests, a published draft and natural IK export
 receipts do not establish contact, anatomical or forward-dynamics acceptance.
 
 \begin{thebibliography}{9}
