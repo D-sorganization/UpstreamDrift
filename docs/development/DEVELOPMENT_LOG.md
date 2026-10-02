@@ -21,27 +21,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11235; parent #11232
+- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — committed producer 9c21eda8baae1192b66640467b4d67219878b958 completed exact-start V10 Tiger/Hogan phase trials. Independent audit reproduces dense RMS 35.752077/10.699637px; both pass pixels/scalar bounds and fail grip/rotation/penetration research targets, remain rejected/nonconverged. Live one-evaluation Hogan web submission retains the complete phase recipe and exact start. Phase implementation validation: 424 Python/parity and 57 UI/API cases pass.
+- **Last verified:** 2026-10-02 — committed producer 9c21eda8baae1192b66640467b4d67219878b958 completed exact-start V10 Tiger/Hogan phase trials. Independent audit reproduces dense RMS 35.752077/10.699637px; both pass pixels/scalar bounds and fail grip/rotation/penetration research targets, remain rejected/nonconverged. Live one-evaluation Hogan web submission retains the complete phase recipe and exact start. Latest coordinate-seed/native-recall implementation validation: 471 broad Python/parity cases and 40 final seed/worker/receipt cases pass; pinned source mypy, Ruff and architecture budgets pass. No wrist optimization claimed before the committed producer runs. Earlier 57 UI/API phase cases remain verified.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Diagnose native grip geometry/DOFs and camera/landmark evidence before a new controlled trial; preserve rejected V10 baselines. Exercise actual native player-package UI and continue qualified controls/dynamics/consumer handoffs.
+- **Next step:** Freeze the public coordinate-expansion and canonical seed serializer, then run bounded wrist-only Tiger/Hogan trials with unchanged geometry/camera/contact/evidence and independent audits. Preserve rejected V10 baselines; continue qualified controls/dynamics/consumer handoffs.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #11246; parent #11232
+- **Issue:** #11246; parent #11232; native stored-run recall #11282
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at producer 9c21eda8baae1192b66640467b4d67219878b958 — V10 Tiger/Hogan overlay exports verified independently: all 960 source-sized MP4 frames, six stills, source frame identities, output hashes and ZIP member bytes. Rejected native body-origin trees/attachment seeds retain visible model mismatch; earlier V9 evidence remains.
+- **Last verified:** 2026-10-02 — both actual V10 player/capture/fit packages recalled through canonical offscreen QTest widgets, first/middle/end projections rendered, stored exports selected without run injection and guarded ZIP saves matched independent hashes. Receipt 48b28fc4dc12ddd0520fc795f0e84dda6234066ea34699ee329765f201c0b8df records working-tree source hashes and programmatic scope. V10 exports retain all 960 verified frames; native OS/manual acceptance remains separate.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Revalidate native legacy save with an actual stored player package.
+- **Next step:** Publish durable native stored-run recall and boundary tests; retain programmatic evidence separately from manual native OS acceptance, then export and independently review wrist-only candidates.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 

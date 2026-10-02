@@ -6,6 +6,7 @@ from collections import OrderedDict
 from collections.abc import Callable
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -48,6 +49,7 @@ _BLOCKERS = (
     "anatomy_camera_unqualified",
 )
 _KIND = "necromatcher/video-job/1"
+logger = logging.getLogger(__name__)
 
 
 def _read(path: Path) -> dict[str, Any]:
@@ -465,6 +467,10 @@ class NativeVideoSession:
             except TimeoutError:
                 pass
         manifest_path = root / "run_manifest.json"
+        if manifest_path.is_symlink() or (
+            manifest_path.exists() and not manifest_path.is_file()
+        ):
+            raise ValueError("Video manifest must be a regular file without symlink")
         manifest = (
             RunManifest.from_dict(_read(manifest_path))
             if manifest_path.exists()
@@ -472,6 +478,12 @@ class NativeVideoSession:
         )
         if manifest is not None and manifest.run_id != run_id:
             raise ValueError("Video manifest identity mismatch")
+        if (
+            manifest is not None
+            and manifest.status == JobStatus.SUCCEEDED
+            and manifest.acceptance != AcceptanceState.REJECTED
+        ):
+            raise ValueError("Research overlay cannot claim scientific acceptance")
         status = (
             result.status
             if result
@@ -523,6 +535,42 @@ class NativeVideoSession:
     def view(self, run_id: str) -> dict[str, Any]:
         with self._lock:
             return self._view(run_id)
+
+    def _view_for_fit(self, fit_id: str, run_id: str) -> dict[str, Any]:
+        _, request = self._record(run_id)
+        if request.get("source_fit_id") != fit_id:
+            raise ValueError("Stored overlay belongs to a different source fit")
+        _parents(self.library, request)
+        return self._view(run_id)
+
+    def view_for_fit(self, fit_id: str, run_id: str) -> dict[str, Any]:
+        """Recall one source-bound run without granting foreign fit controls."""
+        with self._lock:
+            return self._view_for_fit(fit_id, run_id)
+
+    def stored_runs(self, fit_id: str) -> list[dict[str, Any]]:
+        """List durable fit-scoped statuses without scheduling or hashing video."""
+        with self._lock:
+            self.library.load_fit(fit_id)
+            directory = self.library.root / "video-runs"
+            if directory.is_symlink():
+                raise ValueError("Video run directory may not be a symlink")
+            if not directory.exists():
+                return []
+            runs = []
+            for path in sorted(directory.iterdir()):
+                if not re.fullmatch(r"[a-f0-9]{32}", path.name):
+                    continue
+                try:
+                    _, request = self._record(path.name)
+                except (OSError, ValueError, KeyError) as exc:
+                    logger.warning(
+                        "Skipping unreadable stored overlay %s: %s", path.name, exc
+                    )
+                    continue
+                if request.get("source_fit_id") == fit_id:
+                    runs.append(self._view_for_fit(fit_id, path.name))
+            return runs
 
     def cancel(self, run_id: str) -> dict[str, Any]:
         with self._lock:

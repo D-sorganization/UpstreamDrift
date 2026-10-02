@@ -29,6 +29,10 @@ from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
 from .necromatcher_spline import preserved_fit_spline
 from .necromatcher_contacts import contact_schedule_binding
+from .necromatcher_fit_records import (
+    build_native_fit_payload as _build_fit_payload,
+    native_research_blockers as _research_blockers,  # noqa: F401 -- compatibility
+)
 
 logger = logging.getLogger(__name__)
 
@@ -293,133 +297,6 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         output["provenance"]["contact_schedule_binding"] = contact_binding
     if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
         raise ValueError("Native worker implementation changed during execution")
-    return output
-
-
-def _research_blockers(
-    result: ImageFitResult, config: ImageFitConfig, ranges: dict[str, Any] | None
-) -> list[str]:
-    blockers = [
-        "monocular_research_only",
-        "physical_clock_unknown",
-        "camera_unqualified",
-        "independent_dynamics_not_replayed",
-        "nonlinear_continuous_constraints_not_certified",
-        "historical_anatomy_unqualified",
-    ]
-    configured = {
-        name: [lower, upper] for name, lower, upper in config.coordinate_bounds
-    }
-    exact = (
-        bool(configured)
-        and ranges is not None
-        and ranges.get("range_source")
-        == "bound_native_definition.coordinate_ranges_deg"
-        and ranges.get("named_bounds") == configured
-    )
-    if not exact:
-        blockers.append("anatomical_ranges_not_enforced")
-        blockers.append("native_authored_ranges_not_fully_enforced")
-    elif ranges and ranges.get("unbounded_names"):
-        blockers.append("native_coordinates_without_authored_ranges")
-    if not result.optimizer_ran:
-        blockers.append("authored_initialization_only")
-    elif not result.converged:
-        blockers.append("optimizer_not_converged")
-    return blockers
-
-
-def _fit_evidence(
-    result: ImageFitResult,
-    original: dict[str, Any],
-    options: dict[str, Any],
-    max_grip: float,
-) -> dict[str, Any]:
-    return {
-        "camera": original["camera"],
-        "attachments": original["attachments"],
-        "free_coordinates": list(result.free_coordinates),
-        "coordinate_order": list(result.coordinate_order),
-        "frame_indices": list(options["frame_indices"]),
-        "source_times": result.source_times.tolist(),
-        "q": result.q.tolist(),
-        "knot_times": result.knot_times.tolist(),
-        "spline_coefficients": result.spline_coefficients.tolist(),
-        "initial_rms_pixels": result.initial_rms_pixels,
-        "rms_pixels": result.rms_pixels,
-        "converged": result.converged,
-        "optimizer_ran": result.optimizer_ran,
-        "initialization": asdict(result.initialization)
-        if result.initialization is not None
-        else None,
-        "initial_spline": result.initial_spline.to_record()
-        if result.initial_spline is not None
-        else None,
-        "initial_coefficient_sha256": result.initial_spline.coefficient_sha256
-        if result.initial_spline is not None
-        else None,
-        "spline_start": ImageSplineStart.from_coefficients(
-            result.knot_times,
-            result.spline_coefficients,
-            tuple(result.coordinate_order),
-            result.free_coordinates,
-            result.model_sha,
-        ).to_record(),
-        "model_sha": result.model_sha,
-        "initialization_source": options.get("initialization_source", "sampled_parent"),
-        "message": result.optimizer_message,
-        "config": asdict(ImageFitConfig.from_record(options["config"])),
-        "max_grip_separation_m": max_grip,
-        "constraint_assessment": {
-            "tested_times": result.constraint_times.tolist(),
-            "row_labels": list(result.constraint_row_labels),
-            "scaled_residuals": result.constraint_residuals.tolist(),
-            "maximum_dimensionless_residual": result.maximum_constraint_residual,
-            "continuous_certified": False,
-        },
-    }
-
-
-def _build_fit_payload(
-    request: dict[str, Any],
-    source: dict[str, Any],
-    result: ImageFitResult,
-    dense_output: tuple[tuple[int, ...], list[dict[str, Any]], np.ndarray],
-    stamp: dict[str, Any],
-    max_grip: float,
-    ranges: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    original = source["evidence"]["original_fit"]
-    options = request["options"]
-    dense_indices, frames, q = dense_output
-    blockers = _research_blockers(
-        result, ImageFitConfig.from_record(options["config"]), ranges
-    )
-    output = {
-        **source,
-        "frame_indices": list(dense_indices),
-        "frames": frames,
-        "q": q.tolist(),
-        "provenance": {
-            "native_definition": source["provenance"]["native_definition"],
-            "warm_start_provenance": source["provenance"],
-            "description": "Source-stamped native research "
-            + options.get("operation", "fit"),
-            "operation": options.get("operation", "fit"),
-            "warm_start_fit_id": request["source_fit_id"],
-            "warm_start_fit_hash": request["source_fit_hash"],
-            "request_options": options,
-            "execution_stamp": request["execution_stamp"],
-            "worker_stamp": {
-                key: stamp[key]
-                for key in ("started_at_utc", "source_sha256", "runtime_sha256")
-            },
-        },
-        "evidence": {
-            "rejection_reasons": blockers,
-            "original_fit": _fit_evidence(result, original, options, max_grip),
-        },
-    }
     return output
 
 

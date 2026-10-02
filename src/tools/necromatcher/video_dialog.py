@@ -9,7 +9,14 @@ import shutil
 from typing import Any
 
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QDialog, QFileDialog, QLabel, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import compute_file_sha256
@@ -63,6 +70,10 @@ class VideoExportDialog(QDialog):
         )
         self.boundary.setWordWrap(True)
         layout.addWidget(self.boundary)
+        self.stored_runs = QComboBox()
+        self.stored_runs.setAccessibleName("Stored Overlay Exports")
+        self.stored_runs.addItem("Select a Stored Overlay Export", None)
+        layout.addWidget(self.stored_runs)
         self.start = QPushButton("Render Original-Footage Overlay")
         self.cancel = QPushButton("Cancel Export")
         self.save = QPushButton("Save Checked ZIP")
@@ -81,6 +92,58 @@ class VideoExportDialog(QDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(100)
         self._timer.timeout.connect(self._poll)
+        self.stored_runs.currentIndexChanged.connect(self._recall)
+        self._load_stored_runs()
+
+    def _load_stored_runs(self) -> None:
+        """List canonical fit-scoped persisted receipts without submitting work."""
+        list_runs = getattr(self.session, "stored_runs", None)
+        if not callable(list_runs):
+            return
+        try:
+            records = list_runs(self.source_fit_id)
+            for record in records:
+                self._check_owner(record)
+            for record in records:
+                self.stored_runs.addItem(
+                    f"{record['run_id']} · {record['status']} · {record['acceptance']}",
+                    record["run_id"],
+                )
+        except (ValueError, KeyError, OSError, RuntimeError) as exc:
+            self.status.setText(str(exc))
+
+    def _recall(self, index: int) -> None:
+        """Observe a stored run through the authoritative session status boundary."""
+        if self._closed or self._worker:
+            return
+        self._timer.stop()
+        self.run = None
+        self._cancel_requested = False
+        self.save.setEnabled(False)
+        self.cancel.setEnabled(False)
+        self.start.setEnabled(True)
+        run_id = self.stored_runs.itemData(index)
+        if run_id is None:
+            self.status.setText(
+                "Select a Stored Export or Render a New Research Overlay."
+            )
+            return
+        try:
+            view = self._view_run(run_id)
+            self._check_owner(view, run_id)
+            self.run = view
+            self._render()
+            if view["status"] in {"pending", "running"}:
+                self._timer.start()
+        except (ValueError, KeyError, OSError, RuntimeError) as exc:
+            self.status.setText(str(exc))
+
+    def _view_run(self, run_id: str) -> dict[str, Any]:
+        """Use the fit/parent guard when supported by the canonical session."""
+        guarded_view = getattr(self.session, "view_for_fit", None)
+        if callable(guarded_view):
+            return dict(guarded_view(self.source_fit_id, run_id))
+        return dict(self.session.view(run_id))
 
     def _work(self, operation: str, target: Callable[[], Any]) -> None:
         def guarded() -> Any:
@@ -93,6 +156,7 @@ class VideoExportDialog(QDialog):
         self._worker = get_worker_adapter(guarded, force_threading=True)
         self.start.setEnabled(False)
         self.save.setEnabled(False)
+        self.stored_runs.setEnabled(False)
         self._worker.start()
         self._timer.start()
 
@@ -112,6 +176,7 @@ class VideoExportDialog(QDialog):
             if self._worker.is_running():
                 return
             worker, self._worker = self._worker, None
+            self.stored_runs.setEnabled(True)
             if worker.error:
                 if self._operation == "save":
                     self._render()
@@ -122,7 +187,10 @@ class VideoExportDialog(QDialog):
                 return
             if self._operation == "save":
                 self._render()
-                self.status.setText(f"Checked Research Overlay Saved: {worker.result}")
+                self.status.setText(
+                    self.status.text()
+                    + f"\nChecked Research Overlay Saved: {worker.result}"
+                )
                 self._timer.stop()
                 return
             try:
@@ -139,7 +207,7 @@ class VideoExportDialog(QDialog):
                 updated = (
                     self.session.cancel(self.run["run_id"])
                     if self._cancel_requested and self.run["control_available"]
-                    else self.session.view(self.run["run_id"])
+                    else self._view_run(self.run["run_id"])
                 )
                 self._check_owner(updated, self.run["run_id"])
                 self.run = updated

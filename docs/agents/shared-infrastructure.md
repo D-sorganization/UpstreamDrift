@@ -552,3 +552,9 @@ mapping. Scientific acceptance remains independent. See the
 ### Authored Source Contact Phases
 
 Reuse `historical_fit.ContactPinSchedule` / `ScheduledConstraintOptions` for exact source-clock phase-dependent normal-height pins. Legacy native options, stable residual rows and unilateral nonpenetration remain canonical. `workspace.necromatcher_contacts.contact_schedule_binding` validates capture/hash, exact original boundary PTS and reviewed decoded-frame hashes before native optimization. Phase assumptions do not infer no-slip contact or physical forces. See [Contact Phase Procedure](../development/necromatcher-contact-phases.md).
+
+### Explicit Fitting Coordinates and Stored Overlay Recall
+
+Reuse public `historical_fit.expand_image_spline_coordinates` and `SplineCoordinateExpansion` to expand a checked Hermite decision selection without changing geometry or old coefficients. Added coordinates remain constant before optimization, with a detached reference-pose receipt and changed decision identity. Reuse `workspace.build_native_fit_payload` for canonical worker/derived-seed serialization; expansion-only records cannot inherit optimized/converged metadata. Strict initializer and native authored-range extraction remain authoritative. See [Coordinate Expansion Procedure](../development/necromatcher-coordinate-expansion.md).
+
+`NativeVideoSession.stored_runs(fit_id)` and `view_for_fit(fit_id, run_id)` reuse canonical status and current parent binding checks for durable native recall. The dialog selector submits no new job. Guarded downloads/transfer remain shared; successful research exports remain rejected. Unreadable unpublished run directories are logged and omitted, while selected binding corruption is rejected. No full video hashing is added to polling.

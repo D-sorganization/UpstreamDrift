@@ -13,7 +13,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1573,
+    "ud-only": 1575,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 262,
+      "ud-only": 263,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -847,7 +847,7 @@
     "workspace": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 38,
+      "ud-only": 39,
       "tools-only": 0,
       "spelling-only": 0
     }
@@ -13614,7 +13614,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 880,
+      "ud_bytes": 1042,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13687,6 +13687,18 @@
       "package": "motion_matching",
       "subpackage": "historical_fit",
       "ud_bytes": 18493,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/historical_fit/spline_expansion.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 5652,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36678,7 +36690,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 9148,
+      "ud_bytes": 9244,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36866,11 +36878,23 @@
       "spelling_only": false
     },
     {
+      "path": "workspace/necromatcher_fit_records.py",
+      "classification": "ud-only",
+      "package": "workspace",
+      "subpackage": "",
+      "ud_bytes": 10658,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "workspace/necromatcher_fit_worker.py",
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 16413,
+      "ud_bytes": 11725,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37026,7 +37050,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 23277,
+      "ud_bytes": 25440,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

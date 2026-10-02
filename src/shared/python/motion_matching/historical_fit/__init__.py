@@ -12,6 +12,8 @@ from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "SplineCoordinateExpansion",
+    "expand_image_spline_coordinates",
     "ContactPinPhase",
     "ContactPinSchedule",
     "ScheduledConstraintOptions",
@@ -32,3 +34,5 @@ from .contact_schedule import (
     ContactPinSchedule,
     ScheduledConstraintOptions,
 )
+
+from .spline_expansion import SplineCoordinateExpansion, expand_image_spline_coordinates

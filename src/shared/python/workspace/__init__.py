@@ -174,7 +174,10 @@ from .feature_preservation_audit import (
     FeaturePreservationAuditor,
 )
 
+from .necromatcher_fit_records import build_native_fit_payload
+
 __all__ = [
+    "build_native_fit_payload",
     "NativeFitBinding",
     "author_ground_placement",
     "repair_native_motion",

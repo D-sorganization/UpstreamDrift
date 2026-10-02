@@ -69,6 +69,7 @@ def _fake_export(request_path, budget, cancelled):
 def test_video_job_success_reopens_and_checks_zip(fit_case, monkeypatch):
     from src.shared.python.workspace import necromatcher_video_jobs as jobs
 
+    _freeze_execution_stamp(jobs, monkeypatch)
     library, source, _ = fit_case
     library.add_fit("source", "practice", source)
     monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
@@ -92,6 +93,11 @@ def test_video_job_success_reopens_and_checks_zip(fit_case, monkeypatch):
         session.close()
     reopened = jobs.NativeVideoSession(library)
     try:
+        recalled = reopened.stored_runs("source")
+        assert len(recalled) == 1 and recalled[0]["run_id"] == run
+        assert recalled[0]["status"] == "succeeded"
+        assert recalled[0]["acceptance"] == "rejected"
+        assert reopened.view_for_fit("source", run) == recalled[0]
         assert reopened.view(run)["download_available"]
         assert not reopened.view(run)["control_available"]
         assert reopened.download(run).is_file()
@@ -135,6 +141,31 @@ def test_video_job_cancel_and_one_owned_active_job(fit_case, monkeypatch):
             session.download(run)
     finally:
         session.close()
+
+
+def test_reopened_research_overlay_cannot_claim_acceptance(fit_case, monkeypatch):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["status"] == "succeeded"
+    finally:
+        session.close()
+    manifest_path = library.root / "video-runs" / run / "run_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["acceptance"] = "accepted"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    reopened = jobs.NativeVideoSession(library)
+    try:
+        with pytest.raises(ValueError, match="research|acceptance"):
+            reopened.view_for_fit("source", run)
+    finally:
+        reopened.close()
 
 
 def test_video_job_failure_has_no_download(fit_case, monkeypatch):
