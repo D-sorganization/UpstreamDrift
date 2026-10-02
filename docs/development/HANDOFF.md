@@ -419,11 +419,18 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    tilt is 108 deg, the pelvis is at z -1.93 m, and the vertical force
    is 3591 N, of which the left heel carries 1991 N. Do not repeat this
    combination. It does not reach capture impact at 1.319 s. The 0.2
-   body-weight bar is not met. The next unsaved 1.0 s check keeps that
-   quiet start and GroundOffset z -0.95297, and replaces the moving leg
-   reference with its first sample held for every column and
-   LegReferenceRate set to 0. Do not save. Do not write the shift into
-   the model. Do not claim the 5 % bar. Do not rerun 1.809 s.
+   body-weight bar is not met. The address hold (LegReferenceAngle
+   frozen on its first sample, 654 columns, LegReferenceRate 0) with
+   that same quiet start and GroundOffset z -0.95297 finished
+   (EXIT 0). The right heel takes 3180 N at the first sample. The
+   right foot then carries 719 N, 808 N, and 502 N at 0.20 s, 0.30 s,
+   and 0.40 s. At 0.50 s the tilt is 14.5 deg, the pelvis is at
+   z 0.008 m, the right ankle is at z -0.767 m, and the vertical force
+   is 0. At 1.0 s the tilt is 114 deg, the pelvis is at z -1.85 m, and
+   the vertical force is 6717 N, of which the left heel carries
+   4716 N. Holding the address angles does not keep a stance. Do not
+   repeat this hold. Do not save. Do not write the shift into the
+   model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
