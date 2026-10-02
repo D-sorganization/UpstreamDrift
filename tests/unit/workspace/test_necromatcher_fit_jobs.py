@@ -77,6 +77,31 @@ def test_refit_operation_defaults_to_fit_and_rejects_unknown_values():
         replace(valid, operation="author_initialization")
 
 
+def test_preserved_refit_options_require_fit_and_strict_policy():
+    from src.shared.python.workspace.necromatcher_fit_jobs import NativeRefitOptions
+    from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+
+    valid = NativeRefitOptions((0, 2), 2, (1.0,))
+    assert valid.initialization_source == "sampled_parent"
+    assert replace(valid, initialization_source="preserved_spline").operation == "fit"
+    for value in (True, None, [], "unknown"):
+        with pytest.raises(ValueError, match="initialization source"):
+            replace(valid, initialization_source=value)
+    authored = ImageFitConfig(
+        coordinate_bounds=(("hip", -1.0, 1.0),),
+        initialization_policy="authored_range_project_zero_slopes",
+    )
+    with pytest.raises(ValueError, match="strict"):
+        replace(valid, config=authored, initialization_source="preserved_spline")
+    with pytest.raises(ValueError, match="fit"):
+        replace(
+            valid,
+            config=authored,
+            operation="author_initialization",
+            initialization_source="preserved_spline",
+        )
+
+
 def test_author_job_publishes_separate_rejected_version_and_preserves_source(
     fit_case, monkeypatch
 ):

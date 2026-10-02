@@ -9,6 +9,72 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+def test_api_retains_complete_nested_refit_recipe():
+    from dataclasses import asdict
+    from src.api.routes.necromatcher import RefitRequest
+    from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+    from src.shared.python.motion_matching.contact_law import GroundPlane
+
+    config = ImageFitConfig(
+        max_iterations=30,
+        constraint_options=ConstraintOptions(
+            GroundPlane((0.0, 0.0, 1.0), 0.0), 1.0, 1.0, 1.0, 0.01, 0.1, 0.01
+        ),
+        interior_fractions=(0.25, 0.5, 0.75),
+        coordinate_bounds=(("hip", -1.0, 1.0),),
+    )
+    request = RefitRequest.model_validate(
+        {
+            "new_fit_id": "new",
+            "frame_indices": [0, 2],
+            "knot_count": 2,
+            "coordinate_scales": [1.0],
+            "config": asdict(config),
+            "initialization_source": "preserved_spline",
+        }
+    )
+    assert request.options().config == config
+    assert request.options().initialization_source == "preserved_spline"
+    assert request.options().operation == "fit"
+
+
+def test_api_rejects_ambiguous_nested_and_legacy_recipe():
+    from src.api.routes.necromatcher import RefitRequest
+
+    request = {
+        "new_fit_id": "new",
+        "frame_indices": [0, 2],
+        "knot_count": 2,
+        "coordinate_scales": [1.0],
+        "config": {"max_iterations": 30},
+        "prior_weight": 0.5,
+    }
+    with pytest.raises(ValueError, match="legacy"):
+        RefitRequest.model_validate(request).options()
+
+
+@pytest.mark.parametrize(
+    "config", [{"unrecognized": 1}, {"coordinate_bounds": [["hip", 1.0, -1.0]]}]
+)
+def test_api_rejects_invalid_nested_recipe_before_job_admission(config):
+    from src.api.routes.necromatcher import RefitRequest
+
+    request = RefitRequest.model_validate(
+        {
+            "new_fit_id": "new",
+            "frame_indices": [0, 2],
+            "knot_count": 2,
+            "coordinate_scales": [1.0],
+            "config": config,
+        }
+    )
+    with pytest.raises(ValueError):
+        request.options()
+
+
 def test_refit_controls_bound_admission_cancel_and_reopen(fit_case, monkeypatch):
     from src.shared.python.workspace import NativeRefitSession, NativeRefitOptions
     from src.shared.python.workspace import necromatcher_refits as controls

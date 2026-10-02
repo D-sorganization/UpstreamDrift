@@ -553,8 +553,9 @@ explicitly applies the initialization policy again. Consequently Tiger's
 61.717592 px seed becomes a 62.451437 px fit baseline; Hogan's 12.285791 px
 seed becomes a 13.027773 px baseline. Within each job the original observations
 and prior remain unchanged. Across jobs, the new fit's prior is its saved seed
-parent's first pose, not the preceding V7 prior. Exact coefficient replay with
-explicit parent/prior identity is a future reproducibility improvement.
+parent's first pose, not the preceding V7 prior. These V8 jobs used sampled-parent initialization. The subsequently implemented
+preserved-spline restart described below addresses coefficient replay with
+explicit parent/prior identity; no new player result is asserted here.
 
 \begin{table}[ht]
 \centering\small
@@ -794,6 +795,95 @@ RMS was 11.861 px. Grip gaps remained about 0.123 and 0.257 m. Subsequent v5
 native/web runs validated actual job interfaces with a one-evaluation budget,
 preserving rejected qualification. Results from different options or source
 revisions must not be pooled into a claimed convergence trend.
+
+\subsection{Exact Preserved Hermite Restart and Recipe Transport}
+\label{sec:preserved-restart}
+A saved native image fit can now supply an explicit physical Hermite start to
+\code{fit_image_spline}. This is a reproducibility capability, separate from
+numerical acceptance of a golfer. The operation has two disclosed choices:
+\emph{Sample Parent Poses} retains the existing reconstruction of new knot
+positions and slopes from selected parent samples; \emph{Resume Saved Spline}
+loads the parent's declared canonical coefficients and original knot clock.
+The latter performs no sample-to-knot interpolation, authored position
+projection, or slope reset. Legacy parents without a preserved spline are
+reported as unavailable; malformed declared identities are rejected rather
+than replaced by a sampled start.
+
+\paragraph{The Bound Coefficient Identity.}
+The immutable public \code{ImageSplineStart} record contains six fields:
+\code{knot_times}, \code{spline_coefficients}, \code{coordinate_order},
+\code{free_coordinates}, \code{model_sha}, and \code{coefficient_sha256}.
+For $K$ knots and $n_f$ free coordinates, its finite canonical coefficient
+vector has length $2K n_f$ and retains the shared trajectory's packing order
+for knot positions and source-clock slopes. Let $\operatorname{LE64}(\mathbf c)$
+be the contiguous little-endian IEEE~754 binary64 bytes of that vector, in
+its declared order. Its coefficient identity is
+\begin{equation}
+ H_c=\operatorname{SHA256}\!\left(\operatorname{LE64}(\mathbf c)\right).
+\end{equation}
+The serialized value carries the \code{sha256:} prefix. This hash identifies
+coefficient bytes; it does not by itself bind the knot clock, coordinate
+names, model, parent, or observations. Those remain explicit validated fields
+and immutable fit/model/capture hashes. Initial and final physical snapshots
+are retained independently: \code{initial_spline} records the admitted start,
+\code{initial_coefficient_sha256} exposes its coefficient hash, and
+\code{spline_start} records the returned final coefficients for a later
+restart. The snapshots do not imply that an optimizer ran or converged.
+
+\paragraph{Strict Preconditions.}
+The preserved path requires \code{operation="fit"},
+\code{initialization_source="preserved_spline"}, and
+\code{initialization_policy="strict"}. The native model identity, ordered
+full and free coordinate names, explicit knot grid and knot count must agree.
+Knot times must be finite and strictly increasing, and the requested evidence
+must span exactly the saved first and last source times. The worker evaluates
+the canonical preserved trajectory at the parent's source timestamps and
+checks the stored parent poses against it using absolute tolerance $10^{-10}$
+and relative tolerance $10^{-8}$. Locked coordinates retain the parent's
+first pose. Any authored hard-bound domain must admit the unchanged physical
+start; an infeasible start fails rather than being projected or clipped.
+These checks preserve the full source interval and reject a shortened window
+or a silently replaced spline. Optimizer transformations and subsequent
+floating-point evaluation remain subject to their recorded numerical checks;
+a coefficient identity is not a claim of exact arithmetic or nonlinear
+constraint satisfaction.
+
+\paragraph{Evidence and Prior Semantics.}
+Within each job, decoded observed pixels, source-frame identities, confidence
+weights, the camera hypothesis, and the pose prior remain fixed for the
+admitted request. Optimizing coefficients changes predicted pixels, not the
+observations. Every new job uses its selected parent's first source pose as
+its pose-prior reference, including an exact spline restart. Consequently an
+identical coefficient start does not establish an identical objective across
+jobs: the parent/prior identity, selected image rows, weights, and full recipe
+must also be compared. Source-clock slopes remain derivatives with respect
+to container presentation time, not measured physical velocities.
+
+\paragraph{Complete Recipe Transport in Both Interfaces.}
+Native and web controls expose the initialization choice explicitly. The
+refit plan supplies \code{baseline_config}, preferring the preserved original
+fit configuration, and a \code{preserved_spline} descriptor containing
+availability, reason, original knot count, and source interval. A saved
+restart uses that clock, requires both interval endpoint frames, and submits
+strict initialization. The complete request \code{config} remains nested:
+iteration budget, prior/smoothness/closure weights, named coordinate bounds,
+interior fractions, initialization policy, and native grip/ground options
+are retained together. The latter include the ground plane, position and
+rotation weights/scales, penetration scale, and explicitly pinned sphere
+identities. A brief range/pin summary discloses retained authored hypotheses;
+heel pinning remains an unobserved operator assumption, not measured contact.
+Legacy scalar requests remain supported when no nested configuration is
+provided; an ambiguous nested/scalar mixture is rejected. Visibility weight,
+coordinate scales, source indices, wall budget, operation, new version ID,
+and initialization source retain their separate request fields.
+
+\note{Implementation Evidence Only}{Focused regressions cover complete nested
+recipe transport, exact start identity and strict preconditions, unavailable
+legacy starts, source-selection reset, and preservation of bounds/contact
+options when scalar controls change. These are software checks. Actual
+numerical preserved-restart validation and new player receipts remain pending;
+the V8 artifacts retain their original sampled initialization and rejected
+research qualification.}
 
 \subsection{Jobs, Recall, and Cancellation}
 \code{start_native_refit} reuses \code{MatchingJobService}; native and web shells

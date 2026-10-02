@@ -74,8 +74,15 @@ class NativeRefitOptions:
     unknown_visibility_weight: float = 0.5
     budget_wall_s: float = 600.0
     operation: Literal["fit", "author_initialization"] = "fit"
+    initialization_source: Literal["sampled_parent", "preserved_spline"] = (
+        "sampled_parent"
+    )
 
     def __post_init__(self) -> None:
+        if not isinstance(
+            self.initialization_source, str
+        ) or self.initialization_source not in ("sampled_parent", "preserved_spline"):
+            raise ValueError("Unknown refit initialization source")
         if not isinstance(self.operation, str) or self.operation not in (
             "fit",
             "author_initialization",
@@ -102,6 +109,13 @@ class NativeRefitOptions:
             raise ValueError("Refit coordinate scales must be finite and positive")
         if not isinstance(self.config, ImageFitConfig):
             raise ValueError("Refit requires validated image-fit configuration")
+        if self.initialization_source == "preserved_spline":
+            if self.operation != "fit":
+                raise ValueError("Preserved spline requires fit operation")
+            if self.config.initialization_policy != "strict":
+                raise ValueError(
+                    "Preserved spline requires strict initialization policy"
+                )
         if (
             self.operation == "author_initialization"
             and self.config.initialization_policy

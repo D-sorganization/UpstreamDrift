@@ -119,6 +119,8 @@ def test_saved_initialization_receipt_is_not_optimizer_convergence():
         constraint_row_labels=(),
         constraint_residuals=np.empty((0, 0)),
         maximum_constraint_residual=0.0,
+        model_sha="model",
+        initial_spline=None,
     )
     original = {"camera": {}, "attachments": {"marker": ["body", [0.0, 0.0, 0.0]]}}
     source = {
@@ -178,3 +180,97 @@ def test_exact_authored_ranges_keep_anatomy_and_unbounded_coordinates_unqualifie
         result, config, {"range_source": "custom_coordinate_bounds"}
     )
     assert "native_authored_ranges_not_fully_enforced" in custom
+
+
+def _preserved_binding():
+    import hashlib
+    from src.shared.python.motion_matching.historical_fit import ImageSplineStart
+
+    model_sha = hashlib.sha256(b"{}").hexdigest()
+    start = ImageSplineStart.from_coefficients(
+        (1.0, 2.0), (0.2, 0.4, 0.6, -0.2), ("joint",), ("joint",), model_sha
+    )
+    source = {
+        "coordinate_order": ["joint"],
+        "provenance": {"native_definition": {}},
+        "q": [[0.2], [0.4]],
+        "frames": [
+            {"pts_ticks": i, "timebase_numerator": 1, "timebase_denominator": 1}
+            for i in (1, 2)
+        ],
+        "evidence": {
+            "original_fit": {
+                "spline_start": start.to_record(),
+                "free_coordinates": ["joint"],
+                "coordinate_order": ["joint"],
+                "knot_times": [1.0, 2.0],
+                "spline_coefficients": [0.2, 0.4, 0.6, -0.2],
+            }
+        },
+    }
+    binding = SimpleNamespace(
+        fit=source,
+        plant=SimpleNamespace(plant_sha=model_sha, coordinate_order=("joint",)),
+    )
+    return binding, start
+
+
+def test_worker_reconstructs_exact_start_and_rejects_changed_parent_motion():
+    from src.shared.python.workspace import necromatcher_fit_worker as worker
+
+    binding, start = _preserved_binding()
+    options = {"knot_count": 2}
+    rebuilt = worker._preserved_start(binding, options, np.array([1.0, 2.0]))
+    assert rebuilt == start
+    binding.fit["q"][0][0] = 0.3
+    with pytest.raises(ValueError, match="samples"):
+        worker._preserved_start(binding, options, np.array([1.0, 2.0]))
+
+
+def test_worker_exact_input_path_never_creates_sampled_knot_grid(monkeypatch):
+    from src.shared.python.workspace import necromatcher_fit_worker as worker
+
+    binding, start = _preserved_binding()
+    evidence = SimpleNamespace(
+        source_times=np.array([1.0, 2.0]),
+        observed_pixels=np.zeros((2, 1, 2)),
+        confidence=np.ones((2, 1)),
+    )
+    options = {
+        "knot_count": 2,
+        "coordinate_scales": [1.0],
+        "config": {},
+        "initialization_source": "preserved_spline",
+    }
+    samples = np.array([[0.2], [0.4]])
+    monkeypatch.setattr(
+        worker.np, "linspace", lambda *args: pytest.fail("resampled knots")
+    )
+    inputs, preserved = worker._worker_inputs(binding, options, evidence, samples)
+    assert preserved == start and inputs.initial_samples is None
+    np.testing.assert_array_equal(inputs.seed, samples[0])
+    np.testing.assert_array_equal(inputs.observed_pixels, evidence.observed_pixels)
+    np.testing.assert_array_equal(inputs.knot_times, start.knot_times)
+
+
+@pytest.mark.parametrize("change", ["clock", "knot_count", "hash", "model", "order"])
+def test_worker_rejects_incompatible_preserved_identity(change):
+    from src.shared.python.workspace import necromatcher_fit_worker as worker
+
+    binding, start = _preserved_binding()
+    options = {"knot_count": 2}
+    times = np.array([1.0, 2.0])
+    if change == "clock":
+        times = np.array([1.0, 2.1])
+    elif change == "knot_count":
+        options["knot_count"] = 3
+    elif change == "hash":
+        binding.fit["evidence"]["original_fit"]["spline_start"]["spline_coefficients"][
+            2
+        ] = 0.0
+    elif change == "model":
+        binding.plant.plant_sha = "other"
+    else:
+        binding.plant.coordinate_order = ("other",)
+    with pytest.raises(ValueError):
+        worker._preserved_start(binding, options, times)

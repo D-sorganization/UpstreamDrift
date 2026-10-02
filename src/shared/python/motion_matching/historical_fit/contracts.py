@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from collections.abc import Mapping
+import hashlib
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -294,6 +295,122 @@ class ImageFitConfig:
             raise ValueError("Malformed fit configuration") from exc
 
 
+def _spline_vector(values: Any, name: str) -> tuple[float, ...]:
+    raw = np.asarray(values)
+    if raw.ndim != 1 or raw.dtype.kind not in "ifu" or not np.isfinite(raw).all():
+        raise ValueError(f"Spline {name} must be a finite numeric vector")
+    return tuple(float(value) for value in raw)
+
+
+def _spline_hash(coefficients: tuple[float, ...]) -> str:
+    return (
+        "sha256:"
+        + hashlib.sha256(np.asarray(coefficients, dtype="<f8").tobytes()).hexdigest()
+    )
+
+
+@dataclass(frozen=True)
+class ImageSplineStart:
+    """Exact immutable physical Hermite start, bound to model and coordinate identities."""
+
+    knot_times: tuple[float, ...]
+    spline_coefficients: tuple[float, ...]
+    coordinate_order: tuple[str, ...]
+    free_coordinates: tuple[str, ...]
+    model_sha: str
+    coefficient_sha256: str
+
+    def __post_init__(self) -> None:
+        knots = _spline_vector(self.knot_times, "knot times")
+        coefficients = _spline_vector(self.spline_coefficients, "coefficients")
+        order, free = tuple(self.coordinate_order), tuple(self.free_coordinates)
+        for names in (order, free):
+            if (
+                not names
+                or any(not isinstance(name, str) or not name.strip() for name in names)
+                or len(set(names)) != len(names)
+            ):
+                raise ValueError(
+                    "Spline coordinate identities must be nonempty and unique"
+                )
+        if not set(free).issubset(order):
+            raise ValueError(
+                "Spline free coordinates must belong to native coordinate order"
+            )
+        if len(knots) < 2 or any(
+            b <= a for a, b in zip(knots, knots[1:], strict=False)
+        ):
+            raise ValueError("Spline knot times must strictly increase")
+        if len(coefficients) != 2 * len(knots) * len(free):
+            raise ValueError(
+                "Spline coefficients must match knot and free coordinate counts"
+            )
+        if not isinstance(self.model_sha, str) or not self.model_sha.strip():
+            raise ValueError("Spline requires a model identity")
+        if self.coefficient_sha256 != _spline_hash(coefficients):
+            raise ValueError(
+                "Spline coefficient hash does not match canonical physical bytes"
+            )
+        for name, value in (
+            ("knot_times", knots),
+            ("spline_coefficients", coefficients),
+            ("coordinate_order", order),
+            ("free_coordinates", free),
+        ):
+            object.__setattr__(self, name, value)
+
+    @classmethod
+    def from_coefficients(
+        cls,
+        knot_times: Any,
+        coefficients: Any,
+        coordinate_order: tuple[str, ...],
+        free_coordinates: tuple[str, ...],
+        model_sha: str,
+    ) -> ImageSplineStart:
+        """Snapshot canonical coefficients and compute their explicit byte identity."""
+        values = _spline_vector(coefficients, "coefficients")
+        return cls(
+            knot_times,
+            values,
+            coordinate_order,
+            free_coordinates,
+            model_sha,
+            _spline_hash(values),
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        """Return a detached six-field JSON representation."""
+        return {
+            "knot_times": list(self.knot_times),
+            "spline_coefficients": list(self.spline_coefficients),
+            "coordinate_order": list(self.coordinate_order),
+            "free_coordinates": list(self.free_coordinates),
+            "model_sha": self.model_sha,
+            "coefficient_sha256": self.coefficient_sha256,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> ImageSplineStart:
+        """Decode a declared saved spline; never silently repair malformed identities."""
+        fields = {
+            "knot_times",
+            "spline_coefficients",
+            "coordinate_order",
+            "free_coordinates",
+            "model_sha",
+            "coefficient_sha256",
+        }
+        if not isinstance(record, Mapping) or set(record) != fields:
+            raise ValueError(
+                "Saved spline must contain exactly its six declared fields"
+            )
+        try:
+            return cls(**dict(record))
+        except (TypeError, KeyError) as exc:
+            raise ValueError("Malformed saved spline identity") from exc
+
+
 @dataclass(frozen=True)
 class ImageFitResult:
     """Kinematic research output; source-clock derivatives cannot certify torques."""
@@ -316,6 +433,7 @@ class ImageFitResult:
     constraint_row_labels: tuple[str, ...] = ()
     optimizer_ran: bool = True
     initialization: AuthoredHermiteInitialization | None = None
+    initial_spline: ImageSplineStart | None = None
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
@@ -337,6 +455,12 @@ class ImageFitResult:
             self.initialization, AuthoredHermiteInitialization
         ):
             raise ValueError("Initialization must be a typed authored receipt")
+        if self.initial_spline is not None and not isinstance(
+            self.initial_spline, ImageSplineStart
+        ):
+            raise ValueError(
+                "Initial spline must be a typed preserved coefficient identity"
+            )
         errors = self.pixel_errors.copy()
         errors.setflags(write=False)
         object.__setattr__(self, "pixel_errors", errors)

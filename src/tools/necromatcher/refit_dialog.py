@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
-from typing import Any
+from dataclasses import asdict, replace
+from typing import Any, cast
 
 from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import (
+    QComboBox,
     QDialog,
     QFormLayout,
     QLabel,
@@ -46,11 +48,37 @@ class ResearchRefitDialog(QDialog):
         )
         label.setWordWrap(True)
         layout.addWidget(label)
+        layout.addLayout(self._build_form(plan))
+        self.start = QPushButton("Start Research Refit")
+        self.start.clicked.connect(self._start)
+        self.cancel = QPushButton("Cancel Research Refit")
+        self.cancel.setEnabled(False)
+        self.cancel.clicked.connect(self._cancel)
+        layout.addWidget(self.start)
+        layout.addWidget(self.cancel)
+        self.status = QLabel()
+        self.status.setWordWrap(True)
+        layout.addWidget(self.status)
+        self._timer = QTimer(self)
+        self._timer.setInterval(50)
+        self._timer.timeout.connect(self._poll)
+
+    def _build_form(self, plan: dict[str, Any]) -> QFormLayout:
         form = QFormLayout()
         self.identity = QLineEdit()
         self.frames = QLineEdit()
         self.scales = QLineEdit()
         previous = plan.get("recorded_options") or {}
+        self._preserved = plan.get("preserved_spline") or {}
+        self._source_indices = tuple(plan["frame_indices"])
+        record = plan.get("baseline_config")
+        if record is None:
+            record = previous.get("config", {})
+        self._baseline_config = (
+            record
+            if isinstance(record, ImageFitConfig)
+            else ImageFitConfig.from_record(record)
+        )
         indices = previous.get("frame_indices", plan["frame_indices"])
         if not previous:
             step = max(1, (len(indices) + 59) // 60)
@@ -72,14 +100,13 @@ class ResearchRefitDialog(QDialog):
         form.addRow("Coordinate Prior Scales", self.scales)
         defaults = {
             "knot_count": min(12, len(indices)),
-            **asdict(ImageFitConfig()),
+            **asdict(self._baseline_config),
             "budget_wall_s": 600.0,
             "unknown_visibility_weight": 0.5,
         }
         defaults.update(
             {key: value for key, value in previous.items() if key in defaults}
         )
-        defaults.update(previous.get("config", {}))
         self.fields: dict[str, QLineEdit] = {}
         labels = {
             "knot_count": "Spline Knots",
@@ -93,35 +120,103 @@ class ResearchRefitDialog(QDialog):
         for name, title in labels.items():
             self.fields[name] = QLineEdit(str(defaults[name]))
             form.addRow(title, self.fields[name])
-        layout.addLayout(form)
-        self.start = QPushButton("Start Research Refit")
-        self.start.clicked.connect(self._start)
-        self.cancel = QPushButton("Cancel Research Refit")
-        self.cancel.setEnabled(False)
-        self.cancel.clicked.connect(self._cancel)
-        layout.addWidget(self.start)
-        layout.addWidget(self.cancel)
-        self.status = QLabel()
-        self.status.setWordWrap(True)
-        layout.addWidget(self.status)
-        self._timer = QTimer(self)
-        self._timer.setInterval(50)
-        self._timer.timeout.connect(self._poll)
+        self._sample_knot_count = self.fields["knot_count"].text()
+        self._sample_frames = self.frames.text()
+        self.initialization = QComboBox()
+        self.initialization.addItem("Sample Parent Poses", "sampled_parent")
+        self.initialization.addItem("Resume Saved Spline", "preserved_spline")
+        model = cast(QStandardItemModel, self.initialization.model())
+        item = model.item(1)
+        if item is not None:
+            item.setEnabled(self._preserved.get("available") is True)
+        self.initialization.currentIndexChanged.connect(self._initialization_changed)
+        form.addRow("Initialization", self.initialization)
+        self.recipe_summary = QLabel()
+        self.recipe_summary.setWordWrap(True)
+        form.addRow("Retained Recipe", self.recipe_summary)
+        self._update_recipe_summary()
+        return form
+
+    def _initialization_changed(self, index: int) -> None:
+        exact = index == 1
+        field = self.fields["knot_count"]
+        if exact:
+            self._sample_knot_count = field.text()
+            self._sample_frames = self.frames.text()
+            try:
+                self.frames.setText(", ".join(map(str, self._resume_indices())))
+            except ValueError:
+                pass  # Submission validates malformed selected sample IDs.
+            field.setText(str(self._preserved.get("knot_count", "")))
+        else:
+            field.setText(self._sample_knot_count)
+            self.frames.setText(self._sample_frames)
+        field.setEnabled(not exact)
+        self.frames.setEnabled(not exact)
+        self._update_recipe_summary()
+
+    def _resume_indices(self) -> tuple[int, ...]:
+        selected = {int(x.strip()) for x in self._sample_frames.split(",")}
+        return tuple(
+            sorted(selected | {self._source_indices[0], self._source_indices[-1]})
+        )
+
+    def _update_recipe_summary(self) -> None:
+        config = self._baseline_config
+        constraints = config.constraint_options
+        pins = constraints.pinned_spheres if constraints else ()
+        policy = (
+            "strict"
+            if self.initialization.currentIndex() == 1
+            else config.initialization_policy
+        )
+        resume = (
+            f"Saved Spline: {self._preserved.get('knot_count')} Knots, "
+            f"Source Interval {self._preserved.get('source_interval')}"
+            if self._preserved.get("available") is True
+            else f"Resume Unavailable: {self._preserved.get('reason', 'No saved spline')}"
+        )
+        self.recipe_summary.setText(
+            f"{len(config.coordinate_bounds)} Authored Bounds; "
+            f"{len(config.interior_fractions)} Interior Fractions "
+            f"{config.interior_fractions}; Pins: {', '.join(pins) or 'None'}; "
+            f"Initialization Policy: {policy}. {resume}. "
+            "Grip, Contact, Camera and Physical Time Remain Unqualified."
+        )
 
     def _options(self) -> NativeRefitOptions:
         values = {name: field.text() for name, field in self.fields.items()}
-        return NativeRefitOptions(
-            tuple(int(x.strip()) for x in self.frames.text().split(",")),
-            int(values["knot_count"]),
-            tuple(float(x.strip()) for x in self.scales.text().split(",")),
-            ImageFitConfig(
-                int(values["max_iterations"]),
-                float(values["prior_weight"]),
-                float(values["smoothness_weight"]),
-                float(values["closure_weight"]),
+        exact = self.initialization.currentIndex() == 1
+        if exact and self._preserved.get("available") is not True:
+            raise ValueError(self._preserved.get("reason", "No saved spline"))
+        config = replace(
+            self._baseline_config,
+            max_iterations=int(values["max_iterations"]),
+            prior_weight=float(values["prior_weight"]),
+            smoothness_weight=float(values["smoothness_weight"]),
+            closure_weight=float(values["closure_weight"]),
+            initialization_policy=(
+                "strict" if exact else self._baseline_config.initialization_policy
             ),
-            float(values["unknown_visibility_weight"]),
-            float(values["budget_wall_s"]),
+        )
+        indices = (
+            self._resume_indices()
+            if exact
+            else tuple(int(x.strip()) for x in self.frames.text().split(","))
+        )
+        return NativeRefitOptions(
+            frame_indices=indices,
+            knot_count=(
+                self._preserved["knot_count"] if exact else int(values["knot_count"])
+            ),
+            coordinate_scales=tuple(
+                float(x.strip()) for x in self.scales.text().split(",")
+            ),
+            config=config,
+            unknown_visibility_weight=float(values["unknown_visibility_weight"]),
+            budget_wall_s=float(values["budget_wall_s"]),
+            operation="fit",
+            initialization_source="preserved_spline" if exact else "sampled_parent",
         )
 
     def _start(self) -> None:

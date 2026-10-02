@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import OrderedDict
+from dataclasses import asdict
 import json
 from pathlib import Path
 import re
@@ -18,6 +19,8 @@ from src.shared.python.motion_matching.jobs import (
 from src.shared.python.motion_matching.jobs.service import JobHandle
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
+from .necromatcher_spline import preserved_fit_spline
+from src.shared.python.motion_matching.historical_fit import ImageFitConfig
 
 
 class NativeRefitSession:
@@ -147,11 +150,28 @@ class NativeRefitSession:
 def refit_plan(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]:
     """Expose verified source choices and recorded priors, without inventing scales."""
     fit = library.load_fit(fit_id)
+    previous = fit["provenance"].get("request_options") or {}
+    original = fit["evidence"].get("original_fit", {})
+    baseline = ImageFitConfig.from_record(
+        original.get("config", previous.get("config", {}))
+    )
+    start = preserved_fit_spline(fit)
     return {
         "source_fit_id": fit_id,
         "frame_indices": fit["frame_indices"],
         "coordinate_order": fit["coordinate_order"],
         "coordinate_units": fit["coordinate_units"],
         "recorded_options": fit["provenance"].get("request_options"),
+        "baseline_config": asdict(baseline),
+        "preserved_spline": {
+            "available": start is not None,
+            "knot_count": len(start.knot_times) if start else None,
+            "source_interval": [start.knot_times[0], start.knot_times[-1]]
+            if start
+            else None,
+            "reason": "Exact saved coefficients and source interval are available"
+            if start
+            else "This legacy version has no saved physical spline",
+        },
         "qualification": fit["qualification"],
     }

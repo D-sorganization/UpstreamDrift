@@ -90,20 +90,40 @@ class RefitRequest(BaseModel):
     closure_weight: float = Field(default=100.0, ge=0)
     unknown_visibility_weight: float = Field(default=0.5, ge=0, le=1)
     budget_wall_s: float = Field(default=600.0, gt=0, le=3600)
+    config: dict[str, Any] | None = None
+    operation: Literal["fit", "author_initialization"] = "fit"
+    initialization_source: Literal["sampled_parent", "preserved_spline"] = (
+        "sampled_parent"
+    )
 
     def options(self) -> NativeRefitOptions:
-        return NativeRefitOptions(
-            tuple(self.frame_indices),
-            self.knot_count,
-            tuple(self.coordinate_scales),
-            ImageFitConfig(
+        legacy = {
+            "max_iterations",
+            "prior_weight",
+            "smoothness_weight",
+            "closure_weight",
+        }
+        if self.config is not None and self.model_fields_set & legacy:
+            raise ValueError("Nested config cannot be mixed with legacy scalar options")
+        config = (
+            ImageFitConfig.from_record(self.config)
+            if self.config is not None
+            else ImageFitConfig(
                 self.max_iterations,
                 self.prior_weight,
                 self.smoothness_weight,
                 self.closure_weight,
-            ),
+            )
+        )
+        return NativeRefitOptions(
+            tuple(self.frame_indices),
+            self.knot_count,
+            tuple(self.coordinate_scales),
+            config,
             self.unknown_visibility_weight,
             self.budget_wall_s,
+            self.operation,
+            self.initialization_source,
         )
 
 

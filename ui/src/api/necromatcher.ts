@@ -1,14 +1,32 @@
 import { apiFetch } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest, RefitRequest } from './generated/types';
+import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
-export type RefitOptions = Required<Omit<RefitRequest, 'new_fit_id'>>;
+export interface FitConstraintRecipe {
+  ground: {normal: number[]; height_m: number};
+  position_weight: number; rotation_weight: number; ground_weight: number;
+  position_scale_m: number; rotation_scale_rad: number; ground_scale_m: number;
+  pinned_spheres?: string[];
+}
+export interface ImageFitRecipe {
+  max_iterations: number; prior_weight: number; smoothness_weight: number; closure_weight: number;
+  constraint_options?: FitConstraintRecipe | null;
+  interior_fractions?: number[];
+  coordinate_bounds?: [string, number, number][];
+  initialization_policy?: 'strict' | 'authored_range_project_zero_slopes';
+}
+export interface RefitOptions {
+  frame_indices: number[]; knot_count: number; coordinate_scales: number[];
+  unknown_visibility_weight: number; budget_wall_s: number; config: ImageFitRecipe;
+  operation?: 'fit' | 'author_initialization';
+  initialization_source?: 'sampled_parent' | 'preserved_spline';
+}
 export interface RefitPlan {
   source_fit_id: string; frame_indices: number[]; coordinate_order: string[]; coordinate_units: string[];
-  recorded_options: (Omit<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'> & {
-    config: Pick<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'>;
-  }) | null;
+  recorded_options: RefitOptions | null;
+  baseline_config?: ImageFitRecipe;
+  preserved_spline?: {available: boolean; knot_count: number | null; source_interval: [number, number] | null; reason: string};
 }
 export interface ResearchRun {
   run_id: string; source_fit_id: string;

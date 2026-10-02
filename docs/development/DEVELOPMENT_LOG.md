@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at producer 2ad99b870a12b1683fe19a82100ebcf22aefa237 — 160 focused tests passed; four owned seed/bounded jobs saved rejected research versions. Independent source/midpoint/extrema audit passed all 32 authored ranges but retained grip/ground failures.
+- **Last verified:** 2026-10-02 — 374 focused Python/parity tests and 39 UI tests pass; scoped Ruff, pinned mypy, TypeScript and ESLint pass. Exact saved-spline identity and full native/web recipe transport are implemented; actual committed restart trials follow source freeze.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Implement exact preserved-coefficient restart and reviewed swing/stance intervals with time-varying contact hypotheses; preserve full bound/contact recipes through native/web refit surfaces. Repeat image/closure/contact audits before dynamics and downstream qualification.
+- **Next step:** Run committed exact-spline Tiger/Hogan restarts, compare starting hashes and fresh pixel RMS, retain Desktop evidence and compiled report updates, then implement reviewed swing/stance intervals and time-varying contact before dynamics/downstream qualification.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 

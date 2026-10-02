@@ -24,7 +24,13 @@ from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
 )
-from .contracts import CameraProjection, ImageFitConfig, ImageFitInputs, ImageFitResult
+from .contracts import (
+    CameraProjection,
+    ImageFitConfig,
+    ImageFitInputs,
+    ImageFitResult,
+    ImageSplineStart,
+)
 
 
 class _Fit:
@@ -264,9 +270,36 @@ class _PreparedFit:
     domain: HermiteBoundsDomain | None
     initialization: AuthoredHermiteInitialization | None
     initial_rms: float
+    initial_spline: ImageSplineStart
 
 
-def _prepare_fit(fit: _Fit) -> _PreparedFit:
+def _preserved_coefficients(
+    fit: _Fit, knots: np.ndarray, start: ImageSplineStart
+) -> np.ndarray:
+    if not isinstance(start, ImageSplineStart):
+        raise ValueError("Preserved start must be an ImageSplineStart")
+    if fit.config.initialization_policy != "strict":
+        raise ValueError("Preserved spline requires strict initialization policy")
+    if start.model_sha != fit.native.plant_sha:
+        raise ValueError("Preserved spline model identity differs from native model")
+    if (
+        start.coordinate_order != tuple(fit.native.coordinate_order)
+        or start.free_coordinates != fit.inputs.free_coordinates
+    ):
+        raise ValueError("Preserved spline coordinate orders differ from fit")
+    if not np.array_equal(knots, start.knot_times):
+        raise ValueError("Preserved spline knot grid differs from explicit input knots")
+    if (start.knot_times[0], start.knot_times[-1]) != (
+        fit.inputs.source_times[0],
+        fit.inputs.source_times[-1],
+    ):
+        raise ValueError("Preserved spline source interval differs from evidence")
+    return np.asarray(start.spline_coefficients, dtype=float)
+
+
+def _prepare_fit(
+    fit: _Fit, initial_spline: ImageSplineStart | None = None
+) -> _PreparedFit:
     inputs = fit.inputs
     knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
     trajectory = CubicHermiteSplineTrajectory(knots, len(fit.indices))
@@ -275,8 +308,10 @@ def _prepare_fit(fit: _Fit) -> _PreparedFit:
         if inputs.initial_samples is None
         else inputs.initial_samples[:, fit.indices]
     )
-    coefficients = trajectory.initial_coefficients_from_samples(
-        inputs.source_times, initial
+    coefficients = (
+        _preserved_coefficients(fit, knots, initial_spline)
+        if initial_spline is not None
+        else trajectory.initial_coefficients_from_samples(inputs.source_times, initial)
     )
     domain = _trajectory_domain(fit, knots)
     initialization = None
@@ -292,8 +327,15 @@ def _prepare_fit(fit: _Fit) -> _PreparedFit:
     residual = fit.image_residuals(
         fit.expand(trajectory.evaluate(coefficients, inputs.source_times).q)
     )
+    start = ImageSplineStart.from_coefficients(
+        knots,
+        coefficients,
+        tuple(fit.native.coordinate_order),
+        inputs.free_coordinates,
+        fit.native.plant_sha,
+    )
     return _PreparedFit(
-        fit, trajectory, coefficients, domain, initialization, fit.rms(residual)
+        fit, trajectory, coefficients, domain, initialization, fit.rms(residual), start
     )
 
 
@@ -339,6 +381,7 @@ def _fit_result(
         constraint_row_labels=rows[0].row_labels if rows else (),
         optimizer_ran=optimizer_ran,
         initialization=prepared.initialization,
+        initial_spline=prepared.initial_spline,
     )
 
 
@@ -348,16 +391,21 @@ def initialize_image_trajectory(
     camera: CameraProjection,
     inputs: ImageFitInputs,
     config: ImageFitConfig,
+    initial_spline: ImageSplineStart | None = None,
 ) -> ImageFitResult:
     """Author a feasible seed and measure original pixels without running an optimizer."""
-    if config.initialization_policy == "strict":
+    if config.initialization_policy == "strict" and initial_spline is None:
         raise ValueError("Seed authoring requires explicit initialization policy")
-    prepared = _prepare_fit(_Fit(native, attachments, camera, inputs, config))
+    prepared = _prepare_fit(
+        _Fit(native, attachments, camera, inputs, config), initial_spline
+    )
     return _fit_result(
         prepared,
         prepared.coefficients,
         False,
-        "Authored feasible initialization; optimizer not run",
+        "Preserved spline evaluation; optimizer not run"
+        if initial_spline is not None
+        else "Authored feasible initialization; optimizer not run",
         False,
     )
 
@@ -368,9 +416,12 @@ def fit_image_trajectory(
     camera: CameraProjection,
     inputs: ImageFitInputs,
     config: ImageFitConfig = ImageFitConfig(),
+    initial_spline: ImageSplineStart | None = None,
 ) -> ImageFitResult:
     """Fit native pixels with explicit initialization, unchanged observations and priors."""
-    prepared = _prepare_fit(_Fit(native, attachments, camera, inputs, config))
+    prepared = _prepare_fit(
+        _Fit(native, attachments, camera, inputs, config), initial_spline
+    )
     fit = prepared.fit
     problem = MapEstimatorProblem(
         prepared.trajectory,

@@ -505,6 +505,8 @@ assumptions cannot certify physical derivatives or joint efforts. See the
 
 The canonical estimation facade exports `initialize_authored_hermite` and its immutable receipt DTOs. Historical fitting exports `initialize_image_trajectory` for explicit seed authoring without optimization; `fit_image_trajectory` shares preparation/result assembly while preserving original priors and pixels. Reuse `NativeFitBinding.authored_coordinate_bounds()` for captured definition/XML/unit-bound authored radian ranges; compiled joint limits remain disabled. See [Authored Initialization](../development/necromatcher-authored-initialization.md) and [Authored Ranges](../development/necromatcher-authored-ranges.md).
 
+`historical_fit.ImageSplineStart` and the optional exact start on `fit_image_trajectory` preserve physical Hermite coefficients, native model/order identities and the original knot clock. Reuse `workspace.necromatcher_spline.preserved_fit_spline` for SDK-free plan/worker recall, and `refit_plan.baseline_config` for complete canonical recipes across both hosts. See [Saved-Spline Restart](../development/necromatcher-saved-spline-restart.md).
+
 ### Repository Python Worker Environments
 
 `core.repo_python_environment(repo_root, base=None)` is the public, pure
