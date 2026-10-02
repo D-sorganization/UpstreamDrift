@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from enum import Enum
 import io
+import json
 import math
 import re
 from types import MappingProxyType
@@ -225,6 +226,65 @@ class ForceTorqueFrame:
         )
 
 
+def _interpolate_wrench(
+    w0: OverlayWrench, w1: OverlayWrench, alpha: float
+) -> OverlayWrench | None:
+    om_alpha = 1.0 - alpha
+    p = (
+        om_alpha * w0.point_m[0] + alpha * w1.point_m[0],
+        om_alpha * w0.point_m[1] + alpha * w1.point_m[1],
+        om_alpha * w0.point_m[2] + alpha * w1.point_m[2],
+    )
+    f_n = None
+    if w0.force_n is not None and w1.force_n is not None:
+        f_n = (
+            om_alpha * w0.force_n[0] + alpha * w1.force_n[0],
+            om_alpha * w0.force_n[1] + alpha * w1.force_n[1],
+            om_alpha * w0.force_n[2] + alpha * w1.force_n[2],
+        )
+    t_nm = None
+    if w0.torque_nm is not None and w1.torque_nm is not None:
+        t_nm = (
+            om_alpha * w0.torque_nm[0] + alpha * w1.torque_nm[0],
+            om_alpha * w0.torque_nm[1] + alpha * w1.torque_nm[1],
+            om_alpha * w0.torque_nm[2] + alpha * w1.torque_nm[2],
+        )
+    if f_n is None and t_nm is None:
+        return None
+    return OverlayWrench(
+        kind=w0.kind,
+        label=w0.label,
+        body=w0.body,
+        point_m=p,
+        force_n=f_n,
+        torque_nm=t_nm,
+        source=w0.source,
+    )
+
+
+def _interpolate_axial_loads(
+    f0: ForceTorqueFrame, f1: ForceTorqueFrame, alpha: float, t: float
+) -> AxialLoadFrame | None:
+    if f0.axial_loads is None or f1.axial_loads is None:
+        return None
+    om_alpha = 1.0 - alpha
+    v0 = f0.axial_loads.values_n
+    v1 = f1.axial_loads.values_n
+    interp_values: dict[str, float | None] = {}
+    for k in set(v0.keys()).union(v1.keys()):
+        val0 = v0.get(k)
+        val1 = v1.get(k)
+        if val0 is not None and val1 is not None:
+            interp_values[k] = om_alpha * val0 + alpha * val1
+        else:
+            interp_values[k] = None
+    return AxialLoadFrame(
+        time_s=t,
+        values_n=interp_values,
+        source=f0.axial_loads.source,
+    )
+
+
 @dataclass(frozen=True)
 class ForceTorqueSeries:
     """An immutable time-indexed series of ForceTorqueFrames from a single engine."""
@@ -252,12 +312,10 @@ class ForceTorqueSeries:
         if t < self.frames[0].time_s or t > self.frames[-1].time_s:
             return None
 
-        # Exact match
         for f in self.frames:
             if math.isclose(f.time_s, t, rel_tol=0, abs_tol=1e-12):
                 return f
 
-        # Locate neighbours
         idx = 0
         while idx < len(self.frames) - 1 and self.frames[idx + 1].time_s < t:
             idx += 1
@@ -269,75 +327,16 @@ class ForceTorqueSeries:
             return None
 
         alpha = (t - f0.time_s) / gap
-        om_alpha = 1.0 - alpha
-
-        # Interpolate matching wrenches
         w1_by_label = {w.label: w for w in f1.wrenches}
         interp_wrenches: list[OverlayWrench] = []
         for w0 in f0.wrenches:
             w1 = w1_by_label.get(w0.label)
-            if w1 is None:
-                continue
+            if w1 is not None:
+                iw = _interpolate_wrench(w0, w1, alpha)
+                if iw is not None:
+                    interp_wrenches.append(iw)
 
-            # Interpolate point
-            p = (
-                om_alpha * w0.point_m[0] + alpha * w1.point_m[0],
-                om_alpha * w0.point_m[1] + alpha * w1.point_m[1],
-                om_alpha * w0.point_m[2] + alpha * w1.point_m[2],
-            )
-
-            # Force half (only if present in both)
-            f_n = None
-            if w0.force_n is not None and w1.force_n is not None:
-                f_n = (
-                    om_alpha * w0.force_n[0] + alpha * w1.force_n[0],
-                    om_alpha * w0.force_n[1] + alpha * w1.force_n[1],
-                    om_alpha * w0.force_n[2] + alpha * w1.force_n[2],
-                )
-
-            # Torque half (only if present in both)
-            t_nm = None
-            if w0.torque_nm is not None and w1.torque_nm is not None:
-                t_nm = (
-                    om_alpha * w0.torque_nm[0] + alpha * w1.torque_nm[0],
-                    om_alpha * w0.torque_nm[1] + alpha * w1.torque_nm[1],
-                    om_alpha * w0.torque_nm[2] + alpha * w1.torque_nm[2],
-                )
-
-            if f_n is None and t_nm is None:
-                continue
-
-            interp_wrenches.append(
-                OverlayWrench(
-                    kind=w0.kind,
-                    label=w0.label,
-                    body=w0.body,
-                    point_m=p,
-                    force_n=f_n,
-                    torque_nm=t_nm,
-                    source=w0.source,
-                )
-            )
-
-        # Interpolate axial loads if present in both
-        interp_axial = None
-        if f0.axial_loads is not None and f1.axial_loads is not None:
-            v0 = f0.axial_loads.values_n
-            v1 = f1.axial_loads.values_n
-            interp_values: dict[str, float | None] = {}
-            for k in set(v0.keys()).union(v1.keys()):
-                val0 = v0.get(k)
-                val1 = v1.get(k)
-                if val0 is not None and val1 is not None:
-                    interp_values[k] = om_alpha * val0 + alpha * val1
-                else:
-                    interp_values[k] = None
-            interp_axial = AxialLoadFrame(
-                time_s=t,
-                values_n=interp_values,
-                source=f0.axial_loads.source,
-            )
-
+        interp_axial = _interpolate_axial_loads(f0, f1, alpha, t)
         return ForceTorqueFrame(
             time_s=t,
             engine=self.engine,
@@ -395,7 +394,7 @@ class ForceTorqueSeries:
                         "source": w.source,
                     }
 
-        meta_json = str(metadata)
+        meta_json = json.dumps(metadata)
         np.savez(
             path_or_buf,
             engine=np.array(self.engine),
@@ -423,7 +422,7 @@ class ForceTorqueSeries:
         point_mask = data["point_mask"]
         force_mask = data["force_mask"]
         torque_mask = data["torque_mask"]
-        meta_dict = eval(str(data["meta_json"]))  # safe literal dict of primitives
+        meta_dict = json.loads(str(data["meta_json"]))
 
         frames: list[ForceTorqueFrame] = []
         for f_idx, t in enumerate(times):
