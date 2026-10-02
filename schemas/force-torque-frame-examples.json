@@ -1,0 +1,219 @@
+{
+  "description": "Cross-runtime force-torque-frame wire schema conformance fixtures (ADR-0052, #11286).",
+  "cases": [
+    {
+      "name": "torque_only",
+      "valid": true,
+      "description": "Valid frame with joint actuator wrench having torque only (force is null)",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.05,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "joint_actuator",
+            "label": "joint:left_elbow",
+            "body": "forearm",
+            "point_m": [0.2, 0.1, 1.2],
+            "force_n": null,
+            "torque_nm": [0.0, 15.5, 0.0],
+            "source": "mujoco:actuator"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "force_only",
+      "valid": true,
+      "description": "Valid frame with contact wrench having force only (torque is null)",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.1,
+        "engine": "drake",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:right_foot:0",
+            "body": "right_foot",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 650.0],
+            "torque_nm": null,
+            "source": "drake:hydroelastic"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "both",
+      "valid": true,
+      "description": "Valid frame with external wrench having both force and torque present",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.2,
+        "engine": "pinocchio",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "external",
+            "label": "external:wind_gust",
+            "body": "torso",
+            "point_m": [0.0, 0.0, 1.4],
+            "force_n": [10.0, -5.0, 0.0],
+            "torque_nm": [0.0, 0.0, 2.5],
+            "source": "pinocchio:ext"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "with_axial_loads",
+      "valid": true,
+      "description": "Valid frame with wrenches and matching axial load frame",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.3,
+        "engine": "opensim",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "joint_reaction",
+            "label": "joint:knee_r",
+            "body": "tibia_r",
+            "point_m": [0.05, 0.0, 0.5],
+            "force_n": [0.0, 0.0, 400.0],
+            "torque_nm": [5.0, 0.0, 0.0],
+            "source": "opensim:reaction"
+          }
+        ],
+        "axial_loads": {
+          "time_s": 0.3,
+          "values_n": {
+            "femur_r": -400.0,
+            "tibia_r": 400.0
+          },
+          "source": "opensim:reaction_axial",
+          "units": "N",
+          "sign_convention": "tension-positive"
+        }
+      }
+    },
+    {
+      "name": "both_null_invalid",
+      "valid": false,
+      "description": "Invalid wrench where both force_n and torque_nm are null",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.0,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:null_wrench",
+            "body": "foot",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": null,
+            "torque_nm": null,
+            "source": "mujoco:invalid"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "duplicate_labels_invalid",
+      "valid": false,
+      "description": "Invalid frame with duplicate wrench labels",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.0,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:foot",
+            "body": "foot_1",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco:cfrc"
+          },
+          {
+            "kind": "contact",
+            "label": "contact:foot",
+            "body": "foot_2",
+            "point_m": [0.1, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco:cfrc"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "nan_invalid",
+      "valid": false,
+      "description": "Invalid frame containing non-number NaN coordinate in point_m",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.0,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:foot",
+            "body": "foot",
+            "point_m": ["NaN", 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco:cfrc"
+          }
+        ],
+        "axial_loads": null
+      }
+    }
+  ]
+}
