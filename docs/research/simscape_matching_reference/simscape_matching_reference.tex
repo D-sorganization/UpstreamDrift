@@ -1759,6 +1759,76 @@ must verify the Human ankle FK/gain interface and initialize COM and ankle
 references from this same stance. See
 \texttt{saved\_native\_hold\_diagnosis\_review\_20261002.json}.
 
+
+\subsection{Native Human Ankle and Balance-Gain Interface Verification}
+A read-only native R2025b probe completed naturally with exit zero at
+\texttt{2026-10-02T16:03:31Z}. Both accepted address stances used their exact
+capture-specific fitted geometry. The existing analytical
+\texttt{gs3dx\_leg\_fk} returns the ankle joint follower, not a foot-solid
+or contact-sphere frame. Native world-relative ankle and pelvis poses
+were obtained with all 48 canonical joint targets fixed, including explicit
+units and axis-angle mapping. Pelvis rotations map pelvis coordinates into
+World. Servo hip coordinates use intrinsic XYZ angles in degrees; each
+perturbation was converted back to the native spherical axis-angle target.
+
+The fixed interface gates were $10^{-8}$ m pose-position error,
+$10^{-7}$ rotation-matrix Frobenius error, $10^{-6}$ m/degree maximum
+Jacobian-component difference and $10^{-5}$ degree/m gain difference.
+For each six-coordinate leg, central differences used
+$h=10^{-3}$ degree, a 0.5 m rotation lever and damping
+$\lambda=0.002$ m/degree. The existing gain is
+\[
+ G=-J^T(JJ^T+\lambda^2 I_6)^{-1}
+ \begin{bmatrix}I_3\\0_{3\times3}\end{bmatrix},
+ \qquad \Delta q=G\,\Delta p.
+\]
+The rotational Jacobian rows use infinitesimal World-resolved angular
+changes multiplied by the lever; this local derivative is distinct from
+the earlier global half-turn orientation-convergence defect.
+
+Both stances passed all interface gates. Maximum native/analytical
+position discrepancy was below $4.8\times10^{-16}$ m and rotation-matrix
+error below $9.5\times10^{-16}$. Maximum Jacobian discrepancy was below
+$2.3\times10^{-13}$ m/degree; maximum native/analytical gain discrepancy
+was below $7.5\times10^{-9}$ degree/m. Reconstructed analytical gains
+equaled the existing \texttt{gs3dx\_balance\_gain} output exactly in this
+probe. This qualifies the local address interface for the next controlled
+balance-enabled hold; it does not qualify the entire swing, contact
+dynamics or independent open-loop replay. See
+\texttt{human\_ankle\_gain\_interface\_review\_20261002.json}.
+
+
+\subsection{Same-Stance Balance-Enabled Hold Comparison}
+The controlled one-second comparison enabled balance feedback after the
+native Human ankle/gain interface passed. COM and ankle references were
+initialized from the same accepted assembled address state. Saved ankle
+sensor positions were checked against the verified analytical FK within
+$10^{-8}$ m before simulation. Reference rates were zero; all original
+servo and balance gains were retained. No feedforward was learned or tuned.
+Both leg and upper-body feedforward remained zero, upper tracking stayed
+active and neck motion remained prescribed. These are hybrid
+feedback-assisted hold diagnostics, not independent open-loop swings.
+
+The original force and drift gates were retained. Results are:
+\begin{center}
+\begin{tabular}{lrrl}
+\toprule
+Capture & Pelvis Displacement (mm) & Rotation Change ($^\circ$) & Hold Screen \\
+\midrule
+Tour & 20.041 & 5.582 & Reject \\
+Owner & 14.818 & 4.408 & Reject \\
+\bottomrule
+\end{tabular}
+\end{center}
+An improved result does not pass a failed gate. Native execution receipts,
+unchanged gains, per-foot force summaries and individual acceptance results
+are recorded in
+\texttt{balance\_enabled\_hold\_comparison\_review\_20261002.json}.
+Full-body gravity/torque qualification and independent Human swing replay
+remain separate requirements. The current upper-body learning helper
+hardcodes the legacy FitTrack model and replaces initial states; it requires
+a contract-tested adaptation before reuse with configured Human states.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

@@ -1406,3 +1406,17 @@ articulation. No new simulation or model save occurred. See
 `saved_native_hold_diagnosis_review_20261002.json` and the updated LaTeX.
 Next: verify Human ankle FK/gain compatibility before a same-stance
 balance-enabled hold with the unchanged registered force/drift gates.
+
+Native Human ankle/gain interface checks passed for both exact fitted address
+stances (R2025b natural exit zero at16:03:31Z). Native/analytical Jacobian
+differences are below2.3e-13 m/degree and gain differences below7.5e-9 degree/m.
+Same-stance balance-on holds retain all original gains, zero feedforward,
+prescribed neck and fixed force/drift gates. Tour pelvis displacement/rotation
+is 20.041 mm / 5.582 degrees;
+owner is 14.818 mm / 4.408 degrees.
+Hold screens: tour REJECT, owner REJECT.
+Improvement is not physical acceptance. See
+`human_ankle_gain_interface_review_20261002.json` and
+`balance_enabled_hold_comparison_review_20261002.json`. The existing upper-only
+learning API hardcodes FitTrack and overwrites starts; a private Gemini TDD
+proposal is not accepted code or full forward-dynamics evidence.
