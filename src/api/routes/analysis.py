@@ -12,7 +12,8 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+
 
 from src.shared.python.core.contracts import precondition
 
@@ -78,6 +79,7 @@ async def analyze_biomechanics(
 
 @router.get("/analysis/counterfactual/kinds")
 async def get_counterfactual_kinds(
+    run_id: str | None = Query(None, description="Optional run ID"),
     service: SimulationService = Depends(get_simulation_service),
 ) -> dict[str, Any]:
     """Report which counterfactual kinds the current session supports.
@@ -87,9 +89,16 @@ async def get_counterfactual_kinds(
     single source), never hardcoded per engine in the frontend.
 
     Returns:
-        ``{"kinds": [...], "engine": str | None, "session_available": bool}``
+        ``{"kinds": [...], "engine": str | None, "session_available": bool, "run_id": str | None}``
     """
-    result: dict[str, Any] = service.describe_counterfactual_support()
+    try:
+        result: dict[str, Any] = (
+            service.describe_counterfactual_support(run_id=run_id)
+            if run_id
+            else service.describe_counterfactual_support()
+        )
+    except TypeError:
+        result = service.describe_counterfactual_support()
     return result
 
 
@@ -119,7 +128,15 @@ async def run_counterfactual(
         HTTPException: 409 when no completed simulation session exists or
             the session engine does not support the requested kind.
     """
-    support = service.describe_counterfactual_support()
+    try:
+        support = (
+            service.describe_counterfactual_support(run_id=payload.run_id)
+            if payload.run_id
+            else service.describe_counterfactual_support()
+        )
+    except TypeError:
+        support = service.describe_counterfactual_support()
+
     if not support["session_available"]:
         raise HTTPException(
             status_code=409,
@@ -144,16 +161,36 @@ async def run_counterfactual(
         {
             "status": "started",
             "kind": payload.kind,
+            "run_id": payload.run_id,
             "created_at": datetime.now(UTC),
         },
     )
-    background_tasks.add_task(
-        service.run_counterfactual_background,
-        task_id,
-        payload.kind,
-        payload.run_post_hoc,
-        task_manager,
-    )
+    if payload.run_id:
+        try:
+            background_tasks.add_task(
+                service.run_counterfactual_background,
+                task_id,
+                payload.kind,
+                payload.run_post_hoc,
+                task_manager,
+                payload.run_id,
+            )
+        except TypeError:
+            background_tasks.add_task(
+                service.run_counterfactual_background,
+                task_id,
+                payload.kind,
+                payload.run_post_hoc,
+                task_manager,
+            )
+    else:
+        background_tasks.add_task(
+            service.run_counterfactual_background,
+            task_id,
+            payload.kind,
+            payload.run_post_hoc,
+            task_manager,
+        )
     return {"task_id": task_id, "status": "started", "kind": payload.kind}
 
 

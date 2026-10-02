@@ -605,13 +605,27 @@ def _determine_ode_termination(sol: Any) -> tuple[FlightTermination, bool, float
     return FlightTermination.TIME_LIMIT, False, float(sol.t[-1])
 
 
+MAX_ODE_TRAJECTORY_POINTS: int = 50_000
+
+
 def _extract_ode_trajectory_points(sol: Any, dt: float) -> list[TrajectoryPoint]:
     """Sample dense ODE output into trajectory points at fixed step intervals."""
-    t_eval = np.arange(0, sol.t[-1], dt)
+    if not (math.isfinite(dt) and dt > 0.0):
+        raise ValueError(f"dt must be finite and positive; got {dt!r}")
+    final_t = float(sol.t[-1])
+    if not (math.isfinite(final_t) and final_t >= 0.0):
+        raise ValueError(f"sol.t[-1] must be finite and >= 0; got {final_t!r}")
+    estimated_samples = int(final_t / dt) + 1
+    if estimated_samples > MAX_ODE_TRAJECTORY_POINTS:
+        raise ValueError(
+            f"Requested ODE trajectory points ({estimated_samples}) exceeds limit "
+            f"({MAX_ODE_TRAJECTORY_POINTS}). Increase dt or shorten simulation interval."
+        )
+    t_eval = np.arange(0, final_t, dt)
     assert sol.sol is not None
     points = [TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval]
-    if sol.t[-1] not in t_eval:
-        points.append(TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1]))
+    if final_t not in t_eval:
+        points.append(TrajectoryPoint(final_t, sol.y[:3, -1], sol.y[3:, -1]))
     return points
 
 
