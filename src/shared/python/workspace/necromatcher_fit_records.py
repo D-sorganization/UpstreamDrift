@@ -4,10 +4,12 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 import numpy as np
-from src.shared.python.motion_matching.historical_fit import (
+from src.shared.python.motion_matching.historical_fit.contracts import (
     ImageFitConfig,
     ImageFitResult,
     ImageSplineStart,
+)
+from src.shared.python.motion_matching.historical_fit.spline_expansion import (
     SplineCoordinateExpansion,
     expand_image_spline_coordinates,
 )

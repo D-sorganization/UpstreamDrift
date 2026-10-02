@@ -217,3 +217,45 @@ def test_coordinate_seed_rejects_changed_requested_training_frame_identity():
         build_native_fit_payload(
             request, source, result, dense, stamp, 0.0, coordinate_expansion=expansion
         )
+
+
+@pytest.mark.parametrize("native_first", [False, True])
+def test_historical_fit_first_clean_import_order(native_first):
+    import importlib.util
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    if native_first and importlib.util.find_spec("mujoco") is None:
+        pytest.skip("Native SDK unavailable for actual driver import order")
+    root = Path(__file__).resolve().parents[3]
+    script = """import sys
+from pathlib import Path
+for path in (Path.cwd()/'src',Path.cwd()/'src/shared/python',Path.cwd()/'vendor/ud-tools/src'):
+    sys.path.insert(0,str(path))
+"""
+    if native_first:
+        script += "import mujoco\n"
+    else:
+        script += """import builtins
+original=builtins.__import__
+def guarded(name,*args,**kwargs):
+    if name.split('.')[0] in {'mujoco','pydrake','pinocchio','opensim'}:
+        raise RuntimeError('native SDK import: '+name)
+    return original(name,*args,**kwargs)
+builtins.__import__=guarded
+"""
+    script += """from src.shared.python.motion_matching.historical_fit import (
+    ImageFitConfig, SplineCoordinateExpansion, initialize_image_trajectory)
+from src.shared.python.workspace import build_native_fit_payload
+assert callable(build_native_fit_payload)
+assert callable(initialize_image_trajectory)
+"""
+    process = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert process.returncode == 0, process.stderr
