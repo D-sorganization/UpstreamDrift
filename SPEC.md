@@ -1,3 +1,23 @@
+## Freeze Dual-Club Observation, Calibration and Accuracy Contracts (MMR-02, #11086)
+
+Specifies frozen observation manifests, independent error metrics, holdout protection, and measurement uncertainty floors for dual-club motion matching:
+- **Authoritative Dual-Club Observation Manifests (`src/shared/python/tour_baselines/observation_manifest.py`)**:
+  - `ObservationManifest`: versioned, immutable per-club schema for Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) captures.
+  - Frozen frame-by-marker validity mask: bit-for-bit reconstructed from per-marker missing spans, verified against caller masks to reject gap-filled, interpolated, or unmeasured samples from measured evidence.
+  - Disjoint calibration and holdout intervals: address through top-of-backswing frames (frame 397 driver / 394 iron) reserved for static/fixed geometry calibration; downswing, impact window, and follow-through frames strictly held out.
+- **Holdout Protection Contract (`calibrate_with_manifest_protection`)**:
+  - Fixed-geometry calibration functions consume calibration frames only, preventing holdout observations from updating calibrated body dimensions or club offsets.
+- **Independent Multi-Metric Error Evaluation (`ComprehensiveErrorMetrics`, `compute_comprehensive_error_metrics`)**:
+  - Distinct metric breakdown: pooled 3D Euclidean RMSE, median frame RMS, mean frame RMS, 95th percentile error (p95), and maximum error computed distinctly.
+  - Median frame RMS is mathematically proven not to substitute for pooled RMSE when observation counts vary across frames.
+  - Per-phase error evaluation: computes distinct RMSE across address, backswing, downswing, impact window, and follow-through intervals.
+  - Per-segment error evaluation: computes distinct RMSE across anatomical body markers, shaft cluster, and clubhead cluster.
+- **Common-Target Model Comparison with Visible Coverage (`CommonTargetComparison`, `compute_common_target_comparison`)**:
+  - Compares competing candidate models on their exact common valid observation target ($A \cap B$) while preserving explicit visibility into coverage counts, exclusive observation sets, and coverage ratios.
+- **Documented Measurement Uncertainty and Justified Model Floors (`docs/plans/tour_baselines/observation_uncertainty_and_floors.md`)**:
+  - Documents optical capture uncertainty breakdown: instrument calibration (0.5 - 1.5 mm), soft tissue artifact (5.0 - 15.0 mm), club marker flutter (2.0 - 4.0 mm), and joint center estimation (10.0 - 25.0 mm).
+  - Establishes justified model floor of 18.5 mm (0.0185 m) pooled RMSE for full swing motion matching, preventing optimizer overfitting of soft tissue artifacts.
+
 ## Define and Validate Neural Data-Efficiency Claims Statistically (R12, #11155)
 
 Specifies Design by Contract input validation, honest estimand distinction, undefined/inconclusive zero-reference and unattained-target handling, and multi-seed statistical uncertainty evaluation for neural data efficiency:
@@ -7614,6 +7634,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11086 | [MMR-02] Freeze Dual-Club Observation, Calibration and Accuracy Contracts: versioned Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) observation manifests, bit-for-bit frame validity verification rejecting unmeasured/interpolated samples from measured holdout scoring, holdout protection during geometry calibration, comprehensive multi-metric evaluation (pooled RMSE, frame distribution, p95/max, per-phase, per-segment), common-target candidate comparison with explicit coverage visibility, and justified model floor documentation (18.5 mm pooled RMSE floor) (#11086). |
 | 2026-10-01 | #11155 | [R12] Define and Validate Neural Data-Efficiency Claims Statistically: Design by Contract budget validation rejecting unsorted, non-positive, and duplicate budgets; equal-curve non-superiority ([0.5, 0.5] vs [0.5, 0.5] -> False); undefined/inconclusive zero-reference and unattained-target handling (None, not 1.0 default); distinct descriptive mean ratio, trapezoidal AUC ratio, and horizontal budget-to-target sample savings; multi-seed statistical uncertainty evaluation (evaluate_multi_seed_data_efficiency, MultiSeedEfficiencySummary); and truthful diagnostic documentation and receipt updates (#11155). |
 | 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
 | 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
