@@ -129,6 +129,15 @@ class MaskFrame:
         return any(b == 1 for b in self.body) or any(b == 1 for b in self.club)
 
     @property
+    def is_synthetic(self) -> bool:
+        """True if mask originates from synthetic fallback fixture rather than verified observed inference."""
+        return (
+            self.producer_id.startswith("synthetic:")
+            or "synthetic" in self.producer_id.lower()
+            or "synthetic" in self.correction_note.lower()
+        )
+
+    @property
     def observation_hash(self) -> str:
         """Deterministic SHA-256 hash over canonical UTF-8 JSON serialization."""
         payload = self.to_dict()

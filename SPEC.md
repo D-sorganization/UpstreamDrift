@@ -1,3 +1,17 @@
+## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
+
+Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
+- **Fail-Closed Absent Inference Contract (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ModelSegmentationProvider` enforces explicit opt-in for synthetic fallback via `allow_synthetic: bool = False`.
+  - In absence of an active `inference_engine` (e.g. `inference_engine=None`), attempting segmentation without `allow_synthetic=True` raises `RuntimeError` ("Model ... has no active inference engine configured. Absent model inference cannot produce observed masks").
+  - When explicitly enabled (`allow_synthetic=True`), synthetic fixtures are branded with distinct provenance (`producer_id="synthetic:..."`, `correction_note="Synthetic procedural fallback; unverified against model inference"`), preventing synthetic fallbacks from masquerading as verified pinned model outputs.
+- **Release Gate Qualification Disqualification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `GateProfile` and `default_release_profile()` configure `allow_synthetic: bool = False`. Gate G0 strictly rejects fitting sessions containing synthetic segmentation masks under release evaluation.
+  - `classify_evidence_quality` demotes candidates derived from synthetic observations or providers to `dynamic_candidate`, preventing synthetic evidence from attaining `validated_profile` certification.
+- **Fitting Session Provenance Tracking (`src/shared/python/shadow_tracker/service.py`, `src/shared/python/shadow_tracker/mask_records.py`)**:
+  - `MaskFrame.is_synthetic` dynamically detects synthetic masks via producer prefix or correction notes.
+  - `ShadowTrackerService.fit()` surfaces `is_synthetic=True` on `FittingResult` when any observation in the fitting window originates from synthetic generators.
+
 ## Unify Camera, Morphology and Native State for Shadow Fitting (MMR-14, #11100)
 
 Specifies mathematical, kinematic, and renderer unification for monocular shadow fitting across native multibody states and canonical articulated representations:
@@ -7654,6 +7668,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
+| 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |
 | 2026-10-01 | #11231 | Add reusable historical-player streaming image observations with rational PTS, source/frame/model hashes, explicit missingness and unqualified receipts; track Hogan #11229 and Tiger #11226. |
 | 2026-10-01 | #11100 | [MMR-14] Unify Camera, Morphology and Native State for Shadow Fitting: exact algebraic quaternion velocity Jacobian J_quat and left inverse with tangent projector (I - q q^T), bidirectional canonical_37 to native_41 state transformations preserving SI units, closed_grip_golfer_setup address pose with 4.3 mm hand separation and decoupled translation/rotation tolerance gates, multi-convention articulated renderer support for native_full_body_v1 and canonical_v2_full_body, and FittingPriors validation with multi-hypothesis generation across yaw, depth, and scale (#11100). |
 | 2026-10-01 | #11086 | [MMR-02] Freeze Dual-Club Observation, Calibration and Accuracy Contracts: versioned Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) observation manifests, bit-for-bit frame validity verification rejecting unmeasured/interpolated samples from measured holdout scoring, holdout protection during geometry calibration, comprehensive multi-metric evaluation (pooled RMSE, frame distribution, p95/max, per-phase, per-segment), common-target candidate comparison with explicit coverage visibility, and justified model floor documentation (18.5 mm pooled RMSE floor) (#11086). |
