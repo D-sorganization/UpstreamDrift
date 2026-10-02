@@ -541,12 +541,42 @@ PTS, output hashes, codec, implementation hash and qualification flags.
 The source-sized MP4 is decoded completely and selected PNGs are losslessly
 read back before a new destination is published. Existing destinations are
 never overwritten. Exported playback has no audio and does not establish
-physical swing time. Native/web export controls remain tracked in \#11246.
+physical swing time. Native/web export controls are implemented through the shared job boundary
+tracked in \#11246.
 
 Visual review of frame 103 exposes Tiger's raised-arm mismatch, while frame
 549 exposes Hogan's cropped-foot framing. These outputs support falsifiable
 comparison rather than visual acceptance; they do not erase closure, depth,
 anatomy or camera uncertainty.
+
+\subsection{Owned Export Jobs and Interface Controls}
+\code{NativeVideoSession} reuses the canonical matching-job service and an
+owned clean SDK subprocess. Submission snapshots fit/model/capture identities
+and source/runtime fingerprints. The worker rechecks these identities before
+and after rendering. Cancellation terminates only its owned process, and
+publication requires the requested first/middle/last stills and verified output
+hashes. Durable status distinguishes unowned active execution from terminal
+completion; no live control or download is inferred from an orphaned status
+record. Verified ZIP download rechecks parents and every packaged member.
+
+The native selected-fit dialog submits asynchronously, checks fit/run ownership,
+polls lightweight status, and copies checked ZIPs exclusively outside the
+library. Its copy postcondition verifies destination SHA-256 against the checked
+source and removes only its own new output on corruption. Web controls share
+refit/export polling, retain \code{export_run} during frame navigation, suppress
+stale/cross-fit responses and show downloads only after succeeded computation,
+\code{execution_verified}, and \code{download_available}. Scientific acceptance
+remains rejected research even when artifact production succeeds.
+
+A held Windows reader reproduced \code{WinError 5} during atomic JSON promotion.
+The canonical writer now retries only permission/sharing errors 5, 32 and 33
+for six attempts with 0.31 seconds total backoff; permanent and unrelated errors
+still propagate and owned staging files are cleaned. Fifty atomic-I/O, service
+and video-job tests passed, as did two 43-case broad runs and 37 frontend cases.
+An earlier truncated intermittent reader exception remains unidentified; the
+verified writer fix is not presented as proof of that error's cause. Tool-free
+Gemini Flash review informed the corrupted-transfer regression, while process
+ownership and teardown claims were checked against actual source and tests.
 
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment

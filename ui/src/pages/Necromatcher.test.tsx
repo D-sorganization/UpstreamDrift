@@ -1,15 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, useNavigate } from 'react-router';
+import { MemoryRouter, useNavigate, useLocation } from 'react-router';
 import { NecromatcherPage } from './Necromatcher';
 
-const mocks = vi.hoisted(() => ({ players: vi.fn(), swings: vi.fn(), assets: vi.fn(), frame: vi.fn(), projection: vi.fn(), plan: vi.fn(), createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn() }));
+const mocks = vi.hoisted(() => ({ players: vi.fn(), swings: vi.fn(), assets: vi.fn(), frame: vi.fn(), projection: vi.fn(), plan: vi.fn(), createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn(), videoSubmit: vi.fn(), videoView: vi.fn(), videoCancel: vi.fn() }));
 vi.mock('@/api/necromatcher', () => ({
   fetchPlayers: mocks.players, fetchSwings: mocks.swings, fetchAssets: mocks.assets,
   fetchCaptureFrame: mocks.frame, captureFrameImageUrl: () => '/test-source.png',
   fetchFitProjection: mocks.projection,
-  fetchRefitPlan: mocks.plan,
+  fetchRefitPlan: mocks.plan, submitRefit: vi.fn(), fetchRefit: vi.fn(), cancelRefit: vi.fn(),
+  submitVideoExport: mocks.videoSubmit, fetchVideoExport: mocks.videoView, cancelVideoExport: mocks.videoCancel, videoExportDownloadUrl: (run: string) => `/export/${run}/download`,
   swingExportUrl: (id: string) => `/api/v1/necromatcher/swings/${id}/export`,
   createPlayer: mocks.createPlayer, createSwing: mocks.createSwing, importAsset: mocks.importAsset,
 }));
@@ -18,7 +19,8 @@ function show(initial = '/tools/necromatcher') {
 }
 function Navigation() {
   const navigate = useNavigate();
-  return <button onClick={() => navigate('/tools/necromatcher?player=tiger-woods&swing=tiger-practice')}>Recall Tiger URL</button>;
+  const location = useLocation();
+  return <><output aria-label="Recalled Selection">{location.search}</output><button onClick={() => navigate('/tools/necromatcher?player=tiger-woods&swing=tiger-practice')}>Recall Tiger URL</button></>;
 }
 beforeEach(() => {
   Object.values(mocks).forEach((mock) => mock.mockReset());
@@ -121,4 +123,18 @@ describe('Necromatcher historical workspace', () => {
     expect(screen.queryByRole('link', {name: 'Export Swing Package'})).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: 'Import Version'})).not.toBeInTheDocument();
   });
+});
+
+it('retains export URL recall while changing a selected fit source frame', async () => {
+  mocks.assets.mockResolvedValue({assets:[
+    {dataset_id:'capture-v1',session_id:'hogan-practice',kind:'image_capture',metadata:{frame_count:3}},
+    {dataset_id:'fit-v2',session_id:'hogan-practice',kind:'kinematic_fit',metadata:{capture_id:'capture-v1',qualification:'monocular_research_hypothesis'}},
+  ]});
+  mocks.videoView.mockResolvedValue({run_id:'saved-export',source_fit_id:'fit-v2',status:'succeeded',acceptance:'rejected',qualification:'monocular_research_hypothesis',blockers:[],message:'Verified export',fraction:null,control_available:false,execution_verified:true,download_available:true});
+  mocks.projection.mockImplementation(() => new Promise(() => {}));
+  show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice&capture=capture-v1&fit=fit-v2&export_run=saved-export');
+  await screen.findByRole('link',{name:'Download Overlay Package'});
+  fireEvent.change(screen.getByRole('slider',{name:'Source Frame'}), {target:{value:'1'}});
+  expect(screen.getByLabelText('Recalled Selection')).toHaveTextContent('export_run=saved-export');
+  expect(mocks.videoView).toHaveBeenCalledWith('saved-export');
 });

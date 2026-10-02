@@ -21,6 +21,7 @@ from src.shared.python.workspace import (
     NecromatcherLibrary,
     project_fit_frame,
     NativeRefitSession,
+    NativeVideoSession,
     NativeRefitOptions,
     refit_plan,
 )
@@ -38,6 +39,9 @@ async def refits_lifespan(_app: object) -> AsyncIterator[None]:
         if get_refits.cache_info().currsize:
             get_refits().close()
             get_refits.cache_clear()
+        if get_video_exports.cache_info().currsize:
+            get_video_exports().close()
+            get_video_exports.cache_clear()
 
 
 router = APIRouter(
@@ -63,6 +67,15 @@ def get_refits() -> NativeRefitSession:
 
 
 Refits = Annotated[NativeRefitSession, Depends(get_refits)]
+
+
+@lru_cache(maxsize=1)
+def get_video_exports() -> NativeVideoSession:
+    """Share owned export jobs and verified artifact recall across API requests."""
+    return NativeVideoSession(get_library())
+
+
+VideoExports = Annotated[NativeVideoSession, Depends(get_video_exports)]
 
 
 class RefitRequest(BaseModel):
@@ -168,6 +181,43 @@ def view_refit(run_id: str, refits: Refits) -> dict[str, Any]:
 def cancel_refit(run_id: str, refits: Refits) -> dict[str, Any]:
     with _errors():
         return refits.cancel(run_id)
+
+
+@router.post("/fits/{fit_id}/video-exports", status_code=202)
+def submit_video_export(fit_id: str, exports: VideoExports) -> dict[str, Any]:
+    """Queue a source-bound video review without accepting a host output path."""
+    with _errors():
+        try:
+            return exports.submit(fit_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/video-exports/{run_id}")
+def view_video_export(run_id: str, exports: VideoExports) -> dict[str, Any]:
+    with _errors():
+        return exports.view(run_id)
+
+
+@router.post("/video-exports/{run_id}/cancel")
+def cancel_video_export(run_id: str, exports: VideoExports) -> dict[str, Any]:
+    with _errors():
+        return exports.cancel(run_id)
+
+
+@router.get("/video-exports/{run_id}/download")
+def download_video_export(run_id: str, exports: VideoExports) -> FileResponse:
+    """Serve only the session's revalidated completed review ZIP."""
+    with _errors():
+        try:
+            path = exports.download(run_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return FileResponse(
+            path,
+            media_type="application/zip",
+            filename=f"necromatcher-overlay-{run_id}.zip",
+        )
 
 
 @router.get("/players")

@@ -37,6 +37,7 @@ from src.shared.python.workspace import (
 )
 from .image_review import landmark_overlay
 from .refit_dialog import ResearchRefitDialog
+from .video_dialog import VideoExportDialog
 
 
 class NecromatcherWidget(QWidget):
@@ -53,6 +54,8 @@ class NecromatcherWidget(QWidget):
         self._projection_process = NativeFitProjectionProcess(self.library.root)
         self._refits = NativeRefitSession(self.library)
         self._refit_dialogs: list[ResearchRefitDialog] = []
+        self._video_session: Any = None
+        self._video_dialogs: list[VideoExportDialog] = []
         self._review: CaptureReview | None = None
         self._fit_id: str | None = None
         self._pending_projection: int | None = None
@@ -83,6 +86,7 @@ class NecromatcherWidget(QWidget):
             ("Import Version", self._import_version),
             ("Export Swing", self._export),
             ("Refit Selected Version", self._refit),
+            ("Export Fitted Overlay", self._video_export),
         ):
             button = QPushButton(name)
             button.clicked.connect(callback)
@@ -435,6 +439,21 @@ class NecromatcherWidget(QWidget):
 
         self._run(lambda: refit_plan(self.library, source_id), show)
 
+    def _video_export(self) -> None:
+        source_id = self._fit_id
+        if not source_id:
+            self.status.setText("Select a saved research fit to export.")
+            return
+        if self._video_session is None:
+            from src.shared.python.workspace import NativeVideoSession
+
+            self._video_session = NativeVideoSession(self.library)
+        dialog = VideoExportDialog(
+            source_id, self._video_session, self, library_root=self.library.root
+        )
+        self._video_dialogs.append(dialog)
+        dialog.show()
+
     def cleanup(self) -> None:
         """Drain owned I/O before releasing archive and worker handles."""
         self._closed = True
@@ -451,4 +470,8 @@ class NecromatcherWidget(QWidget):
         self._projection_process.close()
         self._refits.close()
         for dialog in self._refit_dialogs:
+            dialog.cleanup()
+        if self._video_session:
+            self._video_session.close()
+        for dialog in self._video_dialogs:
             dialog.cleanup()

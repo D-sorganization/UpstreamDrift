@@ -1,5 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useResearchJob } from './useResearchJob';
+import { useEffect, useState } from 'react';
 import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions } from '@/api/necromatcher';
+
+const refitApi = {submit: submitRefit, view: fetchRefit, cancel: cancelRefit};
 
 type Props = {fit: string; onStored: () => void; initialRunId?: string; onRun?: (run: string) => void};
 const errorText = (error: unknown) => error instanceof Error ? error.message : 'The research job could not be reached.';
@@ -17,7 +20,7 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const [scales, setScales] = useState('');
   const [options, setOptions] = useState({knot_count: 2, max_iterations: 100, prior_weight: 0.1, smoothness_weight: 0.01, closure_weight: 100, unknown_visibility_weight: 0.5, budget_wall_s: 600});
   const [planError, setPlanError] = useState('');
-  const job = useRefitJob({fit, onStored, initialRunId, onRun});
+  const job = useResearchJob<RefitRun, RefitOptions & {new_fit_id: string}>({fit, onCompleted: onStored, initialRunId, onRun, api: refitApi});
   const {run, submitting, controlAvailable} = job;
   useEffect(() => {
     let active = true;
@@ -62,66 +65,3 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   </section>;
 }
 
-function useRefitJob({fit, onStored, initialRunId, onRun}: Props) {
-  const [run, setRun] = useState<RefitRun | null>(null);
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const mounted = useRef(true);
-  const notified = useRef('');
-  const submittedRun = useRef('');
-  useEffect(() => {mounted.current = true; return () => {mounted.current = false;};}, []);
-  useEffect(() => {
-    if (!initialRunId) return;
-    let active = true;
-    fetchRefit(initialRunId).then((value) => {
-      if (!active) return;
-      if (value.source_fit_id !== fit) {setError('This run belongs to another source version.'); return;}
-      if (value.status === 'succeeded' && submittedRun.current !== value.run_id) notified.current = value.run_id;
-      setRun(value);
-    }).catch((reason) => {if (active) setError(errorText(reason));});
-    return () => {active = false;};
-  }, [initialRunId, fit]);
-  useEffect(() => {
-    if (run?.status === 'succeeded' && notified.current !== run.run_id) {
-      notified.current = run.run_id;
-      onStored();
-    }
-  }, [run, onStored]);
-  const activeRunId = run?.run_id;
-  const activeStatus = run?.status;
-  const controlAvailable = run?.control_available !== false;
-  useEffect(() => {
-    if (!activeRunId || !activeStatus || !controlAvailable || !['pending', 'running'].includes(activeStatus)) return;
-    let active = true;
-    let timer: ReturnType<typeof setTimeout>;
-    async function poll() {
-      try {
-        const value = await fetchRefit(activeRunId!);
-        if (!active || value.source_fit_id !== fit || value.run_id !== activeRunId) return;
-        setRun(value);
-        setError('');
-        if (['pending', 'running'].includes(value.status)) timer = setTimeout(poll, 500);
-      } catch (reason) {
-        if (active) {setError(errorText(reason)); timer = setTimeout(poll, 1000);}
-      }
-    }
-    timer = setTimeout(poll, 100);
-    return () => {active = false; clearTimeout(timer);};
-  }, [activeRunId, activeStatus, controlAvailable, fit]);
-  async function start(payload: RefitOptions & {new_fit_id: string}) {
-    setSubmitting(true); setError('');
-    try {
-      const result = await submitRefit(fit, payload);
-      if (mounted.current && result.source_fit_id === fit) {submittedRun.current = result.run_id; setRun(result); onRun?.(result.run_id);}
-    } catch (reason) {if (mounted.current) setError(errorText(reason));}
-    finally {if (mounted.current) setSubmitting(false);}
-  }
-  async function cancel() {
-    if (!run) return;
-    try {
-      const result = await cancelRefit(run.run_id);
-      if (mounted.current && result.source_fit_id === fit) setRun(result);
-    } catch (reason) {if (mounted.current) setError(errorText(reason));}
-  }
-  return {run, error, submitting, controlAvailable, start, cancel};
-}

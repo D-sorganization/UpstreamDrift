@@ -198,3 +198,37 @@ The existing `ModelMatchHandoffCoordinator` currently generates fixed output art
 ## Capture Foundation CI
 
 PR #11231 failed the 100-line function budget. Receipt and source-identity helpers reduce the function below the limit; local architecture check and 12 capture tests pass. Capture commit `c029a23e6b` also regenerates the required divergence inventory after the full unit gate exposed the missing capture entry (19,873 passed, one inventory failure). The inventory suite passed after regeneration; new CI is running. Earlier saved capture receipts correctly retain the pre-refactor implementation hash. The prior head passed repository-structure validation; current capture CI is running after the inventory update.
+
+## Owned Native and Web Video Export Controls
+
+Issue #11246 now uses NativeVideoSession over the existing matching-job service,
+a clean SDK subprocess and guarded ZIP publication. Shared API routes admit,
+poll, cancel and download by fit/run identity. Native and web controls bind the
+selected source version; web URLs retain export_run during frame navigation.
+Downloads require succeeded computation and execution_verified plus
+download_available; scientific acceptance remains rejected research. Native
+saves are exclusive, outside the library, and checked against source SHA-256.
+
+Red-first API and native tests prove unknown identities, duplicate admission,
+remote-client rejection, guarded download, response ownership, asynchronous
+submission, cancellation, closed-state guards and corrupted-transfer cleanup.
+The frontend extracts common refit/export polling and preserves prior refit
+regressions; 37 related UI tests, TypeScript and scoped ESLint pass.
+
+A wider run first exposed an intermittent request-reader failure whose exact
+exception was truncated; subsequent focused and broad repetitions passed.
+Separately, a held Windows reader decisively reproduced atomic promotion
+WinError 5. Canonical io_atomic now retries only Windows permission/sharing
+errors 5/32/33 for six attempts, with 0.31 seconds total backoff; permanent and
+unrelated errors remain visible and owned stages are cleaned. Fifty focused
+atomic-I/O, service and video-job cases pass. This evidence does not claim to
+identify the original unknown reader exception or cure every filesystem race.
+
+Gemini Flash 3.8 via tool-free agy audited supplied native/worker source. Its
+transfer-integrity finding led to a failing corrupted-copy regression and
+SHA-256 postcondition. Its claims about uncontrolled worker cancellation and
+missing cleanup guards were checked against canonical ProcessGuard ownership
+tests and the existing closed/worker guards; they were not treated as proven
+failures. Actual UI exports and current committed-source identities will be
+recorded below after the live journey. See necromatcher-video-export.md for the
+repeatable control contract.

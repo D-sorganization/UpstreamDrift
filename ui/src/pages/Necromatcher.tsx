@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 import { LibraryActions } from '@/components/necromatcher/LibraryActions';
+import { VideoExportControls } from '@/components/necromatcher/VideoExportControls';
 import { RefitControls } from '@/components/necromatcher/RefitControls';
 import { fetchPlayers, fetchSwings, fetchAssets, fetchCaptureFrame, captureFrameImageUrl, swingExportUrl,
   fetchFitProjection, type FitProjection, type HistoricalPlayer, type HistoricalSwing, type HistoricalAsset, type CaptureFrame } from '@/api/necromatcher';
@@ -72,6 +73,7 @@ export function NecromatcherPage() {
     <LibraryActions player={player} swing={selectedSwing} onChanged={() => setRevision((value) => value + 1)} />
   </div>;
   const details = <div className="p-4 space-y-4 text-gray-200"><h2 className="text-lg font-semibold">Models and Controls</h2>
+    {selectedFit && <VideoExportControls fit={selectedFit} initialRunId={query.get('export_run') ?? undefined} onRun={(run) => setQuery((old) => {const next = new URLSearchParams(old); next.set('export_run', run); return next;})} />}
     {selectedFit && <RefitControls fit={selectedFit} initialRunId={query.get('run') ?? undefined} onRun={(run) => setQuery((old) => {const next = new URLSearchParams(old); next.set('run', run); return next;})} onStored={() => setRevision((value) => value + 1)} />}
     {selectedAssets.filter((x) => x.kind !== 'image_capture').map((item) => <div key={item.dataset_id} className={card}>
       <h3 className="font-medium">{item.dataset_id}</h3><p className="text-sm text-gray-400">{item.kind === 'native_model' ? 'Candidate Model' : item.kind === 'kinematic_fit' ? 'Kinematic Research Fit' : 'Authored Controls'}</p>
@@ -93,7 +95,7 @@ export function NecromatcherPage() {
       {selectedAssets.filter((x) => x.kind === 'image_capture').map((item) => <button key={item.dataset_id} className={card} aria-pressed={capture === item.dataset_id} onClick={() => { setQuery({player, swing, capture: item.dataset_id}); }}>
         <span className="block font-semibold">{item.dataset_id}</span><span className="text-sm text-gray-400">{item.metadata.frame_count} Source Frames · Image Observations</span>
       </button>)}
-      {selectedCapture && <SourceFrameReview capture={selectedCapture} frame={currentFrame} projection={currentProjection} failed={Boolean(frameLoad.error)} frameCount={frameCount} frameIndex={frameIndex} onChange={(index) => setQuery({player, swing, capture, ...(selectedFit ? {fit: selectedFit, ...(query.get('run') ? {run: query.get('run')!} : {})} : {}), frame: String(index)})} />}
+      {selectedCapture && <SourceFrameReview capture={selectedCapture} frame={currentFrame} projection={currentProjection} failed={Boolean(frameLoad.error)} frameCount={frameCount} frameIndex={frameIndex} onChange={(index) => setQuery({player, swing, capture, ...(selectedFit ? {fit: selectedFit, ...(query.get('run') ? {run: query.get('run')!} : {}), ...(query.get('export_run') ? {export_run: query.get('export_run')!} : {})} : {}), frame: String(index)})} />}
     </div>
   </WorkspaceShell>;
 }

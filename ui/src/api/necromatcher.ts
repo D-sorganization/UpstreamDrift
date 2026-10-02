@@ -10,13 +10,22 @@ export interface RefitPlan {
     config: Pick<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'>;
   }) | null;
 }
-export interface RefitRun {
-  run_id: string; source_fit_id: string; new_fit_id: string;
+export interface ResearchRun {
+  run_id: string; source_fit_id: string;
   status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
   acceptance: 'partial' | 'interrupted' | 'accepted' | 'rejected';
   blockers: string[]; message: string; fraction: number | null;
   control_available?: boolean;
 }
+export interface RefitRun extends ResearchRun {new_fit_id: string}
+export interface VideoExportRun extends ResearchRun {
+  qualification: 'monocular_research_hypothesis'; download_available: boolean;
+  execution_started: boolean; execution_verified: boolean;
+}
+export const submitVideoExport = (fit: string) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST'});
+export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
+export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
+export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;
 export const fetchRefitPlan = (fit: string) => apiFetch<RefitPlan>(`${root}/fits/${encodeURIComponent(fit)}/refit-plan`);
 export const submitRefit = (fit: string, payload: RefitOptions & {new_fit_id: string}) => apiFetch<RefitRun>(`${root}/fits/${encodeURIComponent(fit)}/refits`, {method: 'POST', body: JSON.stringify(payload)});
 export const fetchRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}`);
