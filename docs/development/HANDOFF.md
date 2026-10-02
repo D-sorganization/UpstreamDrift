@@ -1,13 +1,23 @@
-# Force and Torque Overlay Planning — #11285
+# Force and Torque Overlay Contract — #11286 (FTO-1)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `claude/force-torque-overlays-smwke2`; commit SELF; PR: see the planning PR for this branch.
-- Objective: plan (not execute) force/torque arrows and tension/compression shading for MuJoCo, Drake, Pinocchio, OpenSim and Simscape models, and their overlay on source footage.
-- Completed: deep-dive assessment (`docs/development/force_torque_overlay_epic.md` §2); ADR-0052 (status Proposed); epic #11285 with children #11286–#11315 (FTO-1 … FTO-30) carrying TDD/DbC/LoD/DRY contracts and dependency waves; development-log entry `DL-#11285`.
-- Review fixes (Codex on #11316): `OverlayWrench` has optional force/torque halves (reuses `SpatialWrench` validation/transforms, no fabricated halves); serialized `GlyphSet` (`glyph-set-v1`) is the only rendering wire, so the web renders server glyphs; Simscape already logs `<J>Logs_Rotation_Transform_*` (global = R·local), so FTO-18 draws every joint and FTO-19 is rescoped to the simulation-output path; children open ready-for-review PRs (never drafts); retired public renderers keep one-release `DeprecationWarning` shims.
-- Key decisions: build on `SpatialWrench` and `AxialLoadFrame` rather than adding an eighth vector type; one pure glyph builder; engine SDK renderers live beside their engine; unavailable channels are never drawn as zero; video reuses `PinholeCamera`, `TimeMapping` and the existing compositors; Necromatcher layer (FTO-28) waits for #11246.
-- Validation: development-log validator, Ruff (no Python changed) and document checks (see the PR body).
-- Blockers: ADR-0052 needs owner acceptance; FTO-19 needs an R2025b MATLAB host (it no longer blocks Simscape joint arrows); FTO-27 is `tier:strong`.
-- Next steps: 1) owner reviews and accepts ADR-0052; 2) dispatch Wave A (FTO-1 #11286, FTO-4 #11289); 3) Wave B (FTO-2, FTO-3, FTO-24) once FTO-1 merges.
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`
+- Branch: `feat/fto-11286-force-torque-overlay-contract`; commit: SELF; PR: #11286
+- Governing issue: #11286 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-1] Force/torque overlay contract: ForceTorqueFrame, wire schema and shared fixtures.
+- Completed:
+  - `src/shared/python/force_overlay/__init__.py`: explicit `__all__`, headless import guard.
+  - `src/shared/python/force_overlay/contracts.py`: `WrenchKind` (7 categorical values), `OverlayWrench` (frozen dataclass with optional halves, DbC validation, `to_spatial_wrench`, `to_dict`/`from_dict`), `ForceTorqueFrame` (frozen dataclass, `by_kind`, `axial_loads` temporal alignment within 1e-12, `to_dict`/`from_dict`), `ForceTorqueProvider` protocol, `read_force_torque_frame`.
+  - `src/shared/python/force_overlay/series.py`: `ForceTorqueSeries` (strictly increasing times, single engine, `frame_at` with linear interpolation and gap-bounding, pickle-free NPZ serialization with boolean masks, dict round-trip).
+  - Promoted `validate_vec3` to public in `src/shared/python/motion_matching/force_torque.py` with `_validate_vec3` backward-compatible alias.
+  - Wire schema `schemas/force-torque-frame-v1.json` (JSON Schema Draft 2020-12) and 7 conformance cases in `schemas/force-torque-frame-examples.json`.
+  - 25 unit tests in `tests/unit/force_overlay/` (contracts, series, schema fixtures, headless import purity).
+- Validation:
+  - `python3 -m ruff check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 violations.
+  - `python3 -m ruff format --check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 diffs.
+  - `python3 -m pytest tests/unit/force_overlay -n auto --timeout=60`: 25 passed.
+  - `python3 scripts/ci/check_file_size_budget.py`: OK.
+  - `python3 scripts/ci/check_error_handling_ratchet.py`: OK.
+- Next steps: Wave B child issues: FTO-2 (#11287) shared conversions and FTO-3 (#11288) glyph builder.
 
 # Capture-O Video Companion Planning — #11268
 
