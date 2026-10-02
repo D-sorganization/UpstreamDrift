@@ -1,5 +1,17 @@
 # Necromatcher Handoff
 
+## Unit-Preserving Authored Controls
+
+The new effort-profile/2 format binds exact model and research-fit hashes and
+preserves ordered m/rad coordinates with N/N\*m generalized efforts. Import,
+recall and export reject incompatible units and legacy torque profiles for known
+translation coordinates. Bounded evaluation rejects extrapolation and overflow;
+coefficients use immutable backing bytes. The existing native/web import route
+accepts the format. See [Authored Effort Procedure](docs/development/necromatcher-effort-profiles.md).
+54 focused profile/library/fit/refit checks and two-module mypy pass.
+Native unit qualification, actual historical driving controls and independent
+replay remain open; source timing and scientific acceptance remain unqualified.
+
 ## Native and Web Research Refit Controls
 
 Necromatcher now submits, polls and cancels immutable research refits through

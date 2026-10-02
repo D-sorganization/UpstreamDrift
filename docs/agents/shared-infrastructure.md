@@ -521,3 +521,12 @@ returns verified coordinate/sample choices and recorded priors. It does not
 invent missing scales. project_store.validate_workspace_id exposes the existing
 identity contract for early admission before native work. UI request types are
 generated from the strict RefitRequest schema.
+
+### Historical Authored Generalized Efforts
+
+workspace.AuthoredEffortProfile and NecromatcherLibrary.load_effort_profile
+preserve exact model/fit bindings and ordered N/N\*m channels for declared m/rad
+coordinates. Import and export reuse canonical PiecewisePolynomialTorque with
+strict JSON validation and bounded finite evaluation. Native units and source
+physical timing remain separate qualification requirements. See the
+[Authored Effort Procedure](../development/necromatcher-effort-profiles.md).

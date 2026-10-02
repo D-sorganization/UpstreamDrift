@@ -17,17 +17,21 @@ from tempfile import TemporaryDirectory
 from typing import Any, Iterator
 from zipfile import ZIP_STORED, ZipFile
 
-import numpy as np
-
 from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.motion_matching.piecewise_polynomial import (
     PiecewisePolynomialTorque,
-    PolynomialSegment,
 )
 from .artifact_handoff import ArtifactKind, ArtifactReference, compute_file_sha256
 from .necromatcher_capture import build_capture_archive
 from .necromatcher_fit import FIT_SCHEMA, read_kinematic_fit
+from .necromatcher_efforts import (
+    EFFORT_SCHEMA,
+    AuthoredEffortProfile,
+    read_effort_profile,
+    read_segments,
+    validate_authored_provenance,
+)
 from .project_store import (
     DatasetMetadata,
     SessionMetadata,
@@ -231,24 +235,17 @@ class NecromatcherLibrary:
             or payload.get("timebase") != "physical_seconds"
         ):
             raise ValueError("Profiles require N*m torques in physical_seconds")
-        provenance = payload.get("provenance", {})
-        if (
-            provenance.get("kind") != "authored"
-            or not provenance.get("description", "").strip()
-        ):
-            raise ValueError(
-                "Authored profiles require an explicit provenance description"
-            )
-        segments = tuple(
-            PolynomialSegment(
-                start_s=x["start_s"],
-                end_s=x["end_s"],
-                coefficients=np.asarray(x["coefficients"], dtype=float),
-                is_bernstein=x["is_bernstein"],
-            )
-            for x in payload["segments"]
-        )
-        torque = PiecewisePolynomialTorque(segments)
+        for asset in self.assets(swing_id):
+            if (
+                asset.kind == "kinematic_fit"
+                and asset.metadata["model_id"] == model.dataset_id
+            ):
+                if "m" in self.load_fit(asset.dataset_id)["coordinate_units"]:
+                    raise ValueError(
+                        "Legacy torque units cannot represent model translation"
+                    )
+        validate_authored_provenance(payload)
+        torque = read_segments(payload)
         if torque.n_channels != len(model.metadata["dofs"]):
             raise ValueError("Profile channel count must match model DOFs")
         return payload, torque
@@ -288,7 +285,11 @@ class NecromatcherLibrary:
         """Save model-bound authored controls without claiming measured torque."""
         with self._write_lock():
             source_hash = compute_file_sha256(source)
-            payload, _ = self._read_profile(source, swing_id)
+            raw = json.loads(source.read_text(encoding="utf-8"))
+            if isinstance(raw, dict) and raw.get("schema_version") == EFFORT_SCHEMA:
+                payload, _ = read_effort_profile(source, self, swing_id)
+            else:
+                payload, _ = self._read_profile(source, swing_id)
             return self._save_asset(
                 profile_id,
                 swing_id,
@@ -307,8 +308,22 @@ class NecromatcherLibrary:
         profile = self.load_asset(profile_id)
         if profile.kind != "torque_profile" or profile.metadata["model_id"] != model_id:
             raise ValueError("Profile is incompatible with requested model revision")
+        if profile.metadata["schema"] == EFFORT_SCHEMA:
+            raise ValueError(
+                "Use load_effort_profile to preserve generalized effort units"
+            )
         _, torque = self._read_profile(Path(profile.path), profile.session_id)
         return torque
+
+    def load_effort_profile(
+        self, profile_id: str, model_id: str
+    ) -> AuthoredEffortProfile:
+        """Recall authored generalized controls without discarding channel units."""
+        profile = self.load_asset(profile_id)
+        if profile.kind != "torque_profile" or profile.metadata["model_id"] != model_id:
+            raise ValueError("Profile is incompatible with requested model revision")
+        _, controls = read_effort_profile(Path(profile.path), self, profile.session_id)
+        return controls
 
     def export_swing(self, swing_id: str, destination: Path) -> None:
         """Export checked versions and portable identities for downstream tools."""
@@ -318,6 +333,13 @@ class NecromatcherLibrary:
         for asset in assets:
             if asset.kind == "kinematic_fit":
                 self.load_fit(asset.dataset_id)
+            elif asset.kind == "torque_profile":
+                if asset.metadata["schema"] == EFFORT_SCHEMA:
+                    self.load_effort_profile(
+                        asset.dataset_id, asset.metadata["model_id"]
+                    )
+                else:
+                    self.load_torque(asset.dataset_id, asset.metadata["model_id"])
         manifest = {
             "schema_version": "necromatcher/swing-package/1",
             "player": asdict(player),
