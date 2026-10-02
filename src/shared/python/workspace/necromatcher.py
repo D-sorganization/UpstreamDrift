@@ -14,7 +14,7 @@ import json
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 from zipfile import ZIP_STORED, ZipFile
 
 from src.shared.python.core.contracts.exceptions import StateError
@@ -39,11 +39,15 @@ from .project_store import (
     SubjectMetadata,
 )
 
+if TYPE_CHECKING:
+    from src.shared.python.simulation_backends import Trace
+
 _ARTIFACT_KINDS = {
     "native_model": ArtifactKind.MODEL,
     "torque_profile": ArtifactKind.DRIVING_PROFILE,
     "image_capture": ArtifactKind.OBSERVATION,
     "kinematic_fit": ArtifactKind.TRAJECTORY,
+    "authored_replay": ArtifactKind.TRAJECTORY,
 }
 
 
@@ -325,13 +329,60 @@ class NecromatcherLibrary:
         _, controls = read_effort_profile(Path(profile.path), self, profile.session_id)
         return controls
 
+    def add_replay(
+        self, replay_id: str, swing_id: str, source: Path
+    ) -> DatasetMetadata:
+        """Publish a checked immutable authored trace without scientific acceptance."""
+        from .necromatcher_replay_storage import (
+            REPLAY_TRACE_SCHEMA,
+            read_authored_replay,
+        )
+
+        with self._write_lock():
+            source_hash = compute_file_sha256(source)
+            trace = read_authored_replay(source, self, swing_id)
+            return self._save_asset(
+                replay_id,
+                swing_id,
+                source,
+                "authored_replay",
+                {
+                    "schema": REPLAY_TRACE_SCHEMA,
+                    "profile_id": trace.meta["profile_id"],
+                    "model_id": trace.meta["model_id"],
+                    "fit_id": trace.meta["fit_id"],
+                    "qualification": "unqualified_authored_replay",
+                    "hash": source_hash,
+                },
+            )
+
+    def load_replay(self, replay_id: str) -> Trace:
+        """Recall detached trace arrays after checking all immutable parent versions."""
+        from .necromatcher_replay_storage import (
+            REPLAY_TRACE_SCHEMA,
+            read_authored_replay,
+        )
+
+        asset = self.load_asset(replay_id)
+        if asset.kind != "authored_replay":
+            raise ValueError("Replay recall requires an authored replay asset")
+        trace = read_authored_replay(Path(asset.path), self, asset.session_id)
+        if asset.metadata["schema"] != REPLAY_TRACE_SCHEMA or any(
+            asset.metadata.get(key) != trace.meta[key]
+            for key in ("profile_id", "model_id", "fit_id")
+        ):
+            raise ValueError("Replay asset metadata differs from its immutable trace")
+        return trace
+
     def export_swing(self, swing_id: str, destination: Path) -> None:
         """Export checked versions and portable identities for downstream tools."""
         session = self._store.load_session(swing_id)
         player = self._store.load_project().subjects[session.subject_id]
         assets = [self.load_asset(x.dataset_id) for x in self.assets(swing_id)]
         for asset in assets:
-            if asset.kind == "kinematic_fit":
+            if asset.kind == "authored_replay":
+                self.load_replay(asset.dataset_id)
+            elif asset.kind == "kinematic_fit":
                 self.load_fit(asset.dataset_id)
             elif asset.kind == "torque_profile":
                 if asset.metadata["schema"] == EFFORT_SCHEMA:

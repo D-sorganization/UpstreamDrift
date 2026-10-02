@@ -248,6 +248,42 @@ def add_fit(swing_id: str, request: AssetRequest, library: Library) -> dict[str,
         )
 
 
+@router.post("/swings/{swing_id}/replays", status_code=201)
+def add_replay(
+    swing_id: str, request: AssetRequest, library: Library
+) -> dict[str, Any]:
+    """Import a checked authored trace using shared immutable library admission."""
+    with _errors():
+        return _asset_response(
+            library.add_replay(request.id, swing_id, Path(request.source_path))
+        )
+
+
+@router.get("/replays/{replay_id}")
+def replay_summary(replay_id: str, library: Library) -> dict[str, Any]:
+    """Expose checked replay provenance without host filesystem paths."""
+    with _errors():
+        trace = library.load_replay(replay_id)
+        return {
+            "replay_id": replay_id,
+            "sample_count": len(trace.t),
+            "dt_s": trace.dt,
+            "backend": trace.backend,
+            "metadata": dict(trace.meta),
+        }
+
+
+@router.get("/replays/{replay_id}/data")
+def replay_data(replay_id: str, library: Library) -> FileResponse:
+    """Download the canonical HDF5 after revalidating replay and parent versions."""
+    with _errors():
+        library.load_replay(replay_id)
+        asset = library.load_asset(replay_id)
+        return FileResponse(
+            asset.path, media_type="application/x-hdf5", filename=f"{replay_id}.h5"
+        )
+
+
 @router.get("/fits/{fit_id}")
 def fit_summary(fit_id: str, library: Library) -> dict[str, Any]:
     """Return verified fit identity and selectable source indices without paths."""

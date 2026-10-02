@@ -149,6 +149,9 @@ def replay_authored_profile(
         "scientific_qualified": False,
         "independent_replay_executed": True,
         "verification_refinement": options.refinement,
+        "duration_s": options.duration_s,
+        "record_every": options.record_every,
+        "max_steps": options.max_steps,
         "initial_grip_gap_m": float(gaps[0]),
         "max_grip_gap_m": float(gaps.max()),
     }

@@ -149,3 +149,178 @@ def test_replay_rejects_unknown_frame_rates_and_horizon(replay_case):
     ):
         with pytest.raises((IndexError, ValueError)):
             replay_authored_profile(library, "replay-profile", changed)
+
+
+@pytest.fixture
+def replay_trace(replay_case):
+    from src.shared.python.workspace import ReplayOptions, replay_authored_profile
+
+    library, _, _ = replay_case
+    trace = replay_authored_profile(
+        library, "replay-profile", ReplayOptions(0, (0.0,) * 44, 0.004, 0.001)
+    )
+    return library, trace
+
+
+def test_replay_versions_survive_recall_and_portable_export(replay_trace):
+    from zipfile import ZipFile
+    from src.shared.python.simulation_backends.trace_io import write_trace
+    from src.shared.python.core.contracts.exceptions import StateError
+
+    library, trace = replay_trace
+    source = library.root / "run.h5"
+    write_trace(trace, source)
+    saved = library.add_replay("saved-replay", "practice", source)
+    assert saved.kind == "authored_replay"
+    assert saved.metadata["qualification"] == "unqualified_authored_replay"
+    recalled = library.load_replay(saved.dataset_id)
+    np.testing.assert_array_equal(recalled.q, trace.q)
+    assert recalled.meta["profile_hash"] == trace.meta["profile_hash"]
+    with pytest.raises(StateError):
+        library.add_replay("saved-replay", "practice", source)
+    package = library.root / "swing.zip"
+    library.export_swing("practice", package)
+    with ZipFile(package) as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        entry = next(
+            x for x in manifest["assets"] if x["dataset_id"] == saved.dataset_id
+        )
+        assert entry["metadata"]["schema"] == "simulation_backend.trace/2.1.0"
+        assert archive.read(entry["path"]) == source.read_bytes()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "profile_hash",
+        "model_hash",
+        "source_frame",
+        "units",
+        "qualified",
+        "initial_pose",
+        "rates",
+        "controls",
+        "clock",
+        "diagnostic",
+    ],
+)
+def test_replay_import_rejects_relabelled_or_malformed_evidence(replay_trace, mutation):
+    from src.shared.python.simulation_backends.trace_io import write_trace
+
+    library, trace = replay_trace
+    meta = dict(trace.meta)
+    if mutation in {"profile_hash", "model_hash"}:
+        meta[mutation] = "sha256:" + "0" * 64
+    elif mutation == "source_frame":
+        meta["source_frame_json"] = "{}"
+    elif mutation == "units":
+        meta["coordinate_units_json"] = json.dumps(["rad"] * 44)
+    elif mutation == "qualified":
+        meta["scientific_qualified"] = True
+    elif mutation == "initial_pose":
+        trace.q[0, 0] += 1
+    elif mutation == "rates":
+        trace.v[0, 0] += 1
+    elif mutation == "controls":
+        trace.u[1, 6] += 1
+    elif mutation == "clock":
+        trace.t[-1] += 0.001
+    elif mutation == "diagnostic":
+        meta["max_grip_gap_m"] = float("nan")
+    trace.meta = meta
+    source = library.root / "invalid.h5"
+    write_trace(trace, source)
+    with pytest.raises(ValueError):
+        library.add_replay("invalid-replay", "practice", source)
+    assert not any(x.dataset_id == "invalid-replay" for x in library.assets("practice"))
+
+
+def test_replay_recall_and_export_recheck_parent_bytes(replay_trace):
+    from pathlib import Path
+    from src.shared.python.simulation_backends.trace_io import write_trace
+
+    library, trace = replay_trace
+    source = library.root / "run.h5"
+    write_trace(trace, source)
+    library.add_replay("saved-replay", "practice", source)
+    parent = library.load_asset("replay-profile")
+    Path(parent.path).write_text("{}")
+    for action in (
+        lambda: library.load_replay("saved-replay"),
+        lambda: library.export_swing("practice", library.root / "invalid.zip"),
+    ):
+        with pytest.raises(ValueError, match="hash mismatch"):
+            action()
+
+
+def test_shared_api_imports_and_recalls_replay_versions(replay_trace):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from src.api.routes import necromatcher as routes
+    from src.shared.python.simulation_backends.trace_io import write_trace
+
+    library, trace = replay_trace
+    source = library.root / "run.h5"
+    write_trace(trace, source)
+    app = FastAPI()
+    app.include_router(routes.router)
+    app.dependency_overrides[routes.get_library] = lambda: library
+    app.dependency_overrides[routes.require_local_client] = lambda: None
+    with TestClient(app) as client:
+        response = client.post(
+            "/necromatcher/swings/practice/replays",
+            json={"id": "api-replay", "source_path": str(source)},
+        )
+        assert response.status_code == 201, response.text
+        assert response.json()["kind"] == "authored_replay"
+        summary = client.get("/necromatcher/replays/api-replay")
+        assert summary.status_code == 200, summary.text
+        assert summary.json()["sample_count"] == 5
+        assert summary.json()["metadata"]["scientific_qualified"] is False
+        download = client.get("/necromatcher/replays/api-replay/data")
+        assert download.status_code == 200
+        assert download.content == source.read_bytes()
+        assert client.get("/necromatcher/replays/replay-profile").status_code == 422
+
+
+def test_malformed_trace_file_has_an_admission_error(replay_case):
+    library, _, _ = replay_case
+    source = library.root / "broken.h5"
+    source.write_bytes(b"not an HDF5 trace")
+    with pytest.raises(ValueError, match="canonical trace"):
+        library.add_replay("broken-replay", "practice", source)
+
+
+def test_replay_storage_preserves_an_uneven_final_recording_stride(replay_case):
+    from src.shared.python.workspace import ReplayOptions, replay_authored_profile
+    from src.shared.python.simulation_backends.trace_io import write_trace
+
+    library, _, _ = replay_case
+    trace = replay_authored_profile(
+        library,
+        "replay-profile",
+        ReplayOptions(0, (0.0,) * 44, 0.003, 0.001, record_every=2),
+    )
+    np.testing.assert_allclose(trace.t, [0.5, 0.502, 0.503])
+    source = library.root / "uneven.h5"
+    write_trace(trace, source)
+    library.add_replay("uneven-replay", "practice", source)
+    np.testing.assert_array_equal(library.load_replay("uneven-replay").t, trace.t)
+
+
+def test_replay_storage_requires_the_native_root_coordinate_order(replay_trace):
+    from src.shared.python.workspace.necromatcher_replay_storage import _check_samples
+    from src.shared.python.workspace import ReplayOptions
+
+    library, trace = replay_trace
+    controls = library.load_effort_profile("replay-profile", trace.meta["model_id"])
+    swapped = replace(
+        controls, dofs=(controls.dofs[1], controls.dofs[0]) + controls.dofs[2:]
+    )
+    with pytest.raises(ValueError, match="root coordinate order"):
+        _check_samples(
+            trace,
+            swapped,
+            library.load_fit("replay-fit"),
+            ReplayOptions(0, (0.0,) * 44, 0.004, 0.001),
+        )
