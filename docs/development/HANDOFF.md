@@ -408,14 +408,19 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    is 101 deg and the pelvis is at z -1.77 m. Capture impact is at
    1.319 s, so this run does not measure impact support. The 0.2
    body-weight bar is not met. Do not repeat this resample by itself.
-   The next unsaved 1.0 s check combines that same resampled reference
-   with the quiet start (upper-body positions matched to their track
-   angles, upper-body rates 0, both wrist track gains 0, BalanceGain
-   rows 1-12 zero) and GroundOffset z -0.95297. That combination has
-   not been run. As of 19:48 local the MATLAB lock is held by another
-   session (`export_tour.m`); the runner queues, so do not kill that
-   process. Do not save. Do not write the shift into the model. Do not
-   claim the 5 % bar. Do not rerun 1.809 s.
+   The same resampled reference with the quiet start (21 positions
+   matched, 21 rates zero, both wrist track gains 0, BalanceGain rows
+   1-12 zero) and GroundOffset z -0.95297 finished (48 frames, EXIT 0).
+   The right heel takes 3180 N at the first sample, the feet unload by
+   0.10 s, and the right lesser toes carry 621 N, 666 N, and 326 N at
+   0.20 s, 0.30 s, and 0.40 s. At 0.50 s the tilt is 15.9 deg, the
+   pelvis is at z -0.045 m, the right ankle is at z -0.758 m, and the
+   vertical force is 0. It stays unloaded through 0.80 s. At 1.0 s the
+   tilt is 108 deg, the pelvis is at z -1.93 m, and the vertical force
+   is 3591 N, of which the left heel carries 1991 N. Do not repeat this
+   combination. It does not reach capture impact at 1.319 s. The 0.2
+   body-weight bar is not met. Do not save. Do not write the shift into
+   the model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
