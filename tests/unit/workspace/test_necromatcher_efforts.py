@@ -208,3 +208,45 @@ def test_local_api_import_preserves_mixed_profile(effort_case):
             ).status_code
             == 422
         )
+
+
+def test_effort_profile_crosses_canonical_handoff_without_qualification(effort_case):
+    from src.shared.python.workspace import (
+        ArtifactKind,
+        ArtifactReference,
+        SessionProjectStore,
+        WorkspaceHandoff,
+    )
+
+    library, path, _ = effort_case
+    asset = library.add_profile("effort", "practice", path)
+    controls = library.load_effort_profile("effort", "mixed-model")
+    reference = ArtifactReference(
+        asset.dataset_id,
+        asset.path,
+        asset.metadata["hash"],
+        asset.metadata["schema"],
+        ArtifactKind.DRIVING_PROFILE,
+    )
+    handoff = WorkspaceHandoff(
+        handoff_id="research-controls",
+        project_id="necromatcher",
+        session_id="practice",
+        subject_id="hogan",
+        engine="mujoco",
+        model_id=controls.model_id,
+        club={},
+        frame="model",
+        units=dict(zip(controls.dofs, controls.effort_units, strict=True)),
+        timebase={"kind": "authored_physical_seconds", "source_clock_qualified": False},
+        parameters={"fit_id": controls.fit_id, "fit_hash": controls.fit_hash},
+        inputs=(reference,),
+        qualification={"passed": False, "kind": "authored_controls"},
+    )
+    store = SessionProjectStore(library.root)
+    saved = store.register_run(handoff)
+    recalled = store.load_run(saved.run_id)
+    assert recalled.units == {"root_x": "N", "hip": "N*m"}
+    assert recalled.qualification["passed"] is False
+    assert recalled.status == "draft"
+    recalled.inputs[0].verify_on_disk(library.root)

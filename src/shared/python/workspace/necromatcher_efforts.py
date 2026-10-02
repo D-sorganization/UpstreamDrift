@@ -23,7 +23,9 @@ from src.shared.python.motion_matching.piecewise_polynomial import (
 if TYPE_CHECKING:
     from .necromatcher import NecromatcherLibrary
 
-EFFORT_SCHEMA = "necromatcher/effort-profile/2"
+from .artifact_handoff import EFFORT_PROFILE_SCHEMA
+
+EFFORT_SCHEMA = EFFORT_PROFILE_SCHEMA
 _FIELDS = {
     "schema_version",
     "model_id",

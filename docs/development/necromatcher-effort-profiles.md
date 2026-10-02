@@ -45,6 +45,11 @@ channel count. Empty, string, boolean and nonfinite coefficients are rejected.
    verify DOF order and native units, distinguish root actuation from reactions,
    and retain an independently checked replay receipt. These steps remain open.
 
+The canonical WorkspaceHandoff schema registry accepts v2 driving-profile
+references. A red-first save/recall regression checks asset hashes, ordered units,
+draft status and `qualification.passed=False`; 31 effort/handoff checks pass.
+This establishes metadata transport, not an engine simulation adapter.
+
 The existing `load_torque` refuses v2 profiles so consumers cannot silently lose
 mixed units. Update consumers to the typed effort facade before simulation.
 

@@ -9,6 +9,9 @@ translation coordinates. Bounded evaluation rejects extrapolation and overflow;
 coefficients use immutable backing bytes. The existing native/web import route
 accepts the format. See [Authored Effort Procedure](necromatcher-effort-profiles.md).
 54 focused profile/library/fit/refit checks and two-module mypy pass.
+A separate red-first canonical handoff regression now preserves mixed units,
+exact asset hashes, draft status and unqualified controls; 31 effort/handoff
+checks pass after schema registration.
 Native unit qualification, actual historical driving controls and independent
 replay remain open; source timing and scientific acceptance remain unqualified.
 
