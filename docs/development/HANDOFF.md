@@ -24,7 +24,7 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
 **Where things live**
 
 - Branch `feat/simscape-gs3dx-exploratory`, draft PR #11179 (replaces #10963,
-  closed by the history scrub). Every commit up to `SELF` is pushed.
+  closed by the history scrub). `22419ee13` is local only; it has not been pushed.
 - Playbook for the forward-dynamics goal (#11173): `exploratory_gs3dx/docs/FORWARD_DYNAMICS.md`
   (ladder, lessons with evidence, convergence ideas, roadmap with acceptance
   per step, and a "Next step for the next agent" line). Read it first.
