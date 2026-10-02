@@ -111,7 +111,11 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             samples,
         )
         result = fit_image_trajectory(
-            native, attachments, camera, inputs, ImageFitConfig(**options["config"])
+            native,
+            attachments,
+            camera,
+            inputs,
+            ImageFitConfig.from_record(options["config"]),
         )
         dense_indices = tuple(
             i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
@@ -197,8 +201,15 @@ def _build_fit_payload(
                 "rms_pixels": result.rms_pixels,
                 "converged": result.converged,
                 "message": result.optimizer_message,
-                "config": asdict(ImageFitConfig(**options["config"])),
+                "config": asdict(ImageFitConfig.from_record(options["config"])),
                 "max_grip_separation_m": max_grip,
+                "constraint_assessment": {
+                    "tested_times": result.constraint_times.tolist(),
+                    "row_labels": list(result.constraint_row_labels),
+                    "scaled_residuals": result.constraint_residuals.tolist(),
+                    "maximum_dimensionless_residual": result.maximum_constraint_residual,
+                    "continuous_certified": False,
+                },
             },
         },
     }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from functools import partial
 
 import numpy as np
@@ -17,6 +18,9 @@ from src.shared.python.estimation import (
     solve_single_trial_map,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
+from src.shared.python.motion_matching.constraint_kinematics import (
+    ConstraintLinearization,
+)
 from .contracts import CameraProjection, ImageFitConfig, ImageFitInputs, ImageFitResult
 
 
@@ -46,6 +50,67 @@ class _Fit:
                 np.tile(inputs.seed[locked], (len(inputs.source_times), 1)),
             ):
                 raise ValueError("Warm-start samples cannot change locked coordinates")
+        knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
+        probes = [
+            left + fraction * (right - left)
+            for left, right in zip(knots[:-1], knots[1:], strict=True)
+            for fraction in config.interior_fractions
+        ]
+        self.evaluation_times = np.unique(np.concatenate([inputs.source_times, probes]))
+        self.source_indices = np.searchsorted(
+            self.evaluation_times, inputs.source_times
+        )
+        self.ik = (
+            native.create_ik(attachments)
+            if config.constraint_options is not None
+            else None
+        )
+
+    def source_evaluation(
+        self, evaluation: SplineTrajectoryEvaluation
+    ) -> SplineTrajectoryEvaluation:
+        """Select original evidence rows without inventing observations at probes."""
+        if not np.array_equal(evaluation.times, self.evaluation_times):
+            raise ValueError(
+                "Fit evaluation must match configured source and probe times"
+            )
+        indices = self.source_indices
+        return replace(
+            evaluation,
+            times=evaluation.times[indices],
+            q=evaluation.q[indices],
+            v=evaluation.v[indices],
+            a=evaluation.a[indices],
+            q_basis=evaluation.q_basis[indices],
+            v_basis=evaluation.v_basis[indices],
+            a_basis=evaluation.a_basis[indices],
+        )
+
+    def constraint_linearizations(self, q: np.ndarray) -> list[ConstraintLinearization]:
+        """Use the declared public IK capability with stable rows and native order."""
+        if self.ik is None or self.config.constraint_options is None:
+            return []
+        rows = [
+            self.ik.constraint_residual_jacobian(pose, self.config.constraint_options)
+            for pose in q
+        ]
+        if any(not isinstance(row, ConstraintLinearization) for row in rows):
+            raise ValueError(
+                "Constraint linearization must be a validated public record"
+            )
+        for row in rows:
+            if (
+                row.coordinate_order != tuple(self.native.coordinate_order)
+                or row.row_labels != rows[0].row_labels
+                or row.jacobian.shape != (len(row.row_labels), len(self.inputs.seed))
+                or row.residual.shape != (len(row.row_labels),)
+                or not np.isfinite(row.residual).all()
+                or not np.isfinite(row.jacobian).all()
+            ):
+                raise ValueError(
+                    "Constraint linearization must retain finite fixed rows and native coordinate order"
+                )
+        return rows
 
     def expand(self, free: np.ndarray) -> np.ndarray:
         result = np.tile(self.inputs.seed, (len(free), 1))
@@ -64,14 +129,26 @@ class _Fit:
     def residual(
         self, evaluation: SplineTrajectoryEvaluation, parameters: Mapping[str, float]
     ) -> np.ndarray:
-        q = self.expand(evaluation.q)
+        source = self.source_evaluation(evaluation)
+        q = self.expand(source.q)
         pieces: list[np.ndarray] = [self.image_residuals(q).ravel()]
         scaled_prior = (q - self.inputs.seed) / self.inputs.coordinate_scales
         pieces.append(self.config.prior_weight * scaled_prior.ravel())
         duration = self.inputs.source_times[-1] - self.inputs.source_times[0]
-        scaled_speed = evaluation.v / self.inputs.coordinate_scales[self.indices]
+        scaled_speed = source.v / self.inputs.coordinate_scales[self.indices]
         pieces.append(self.config.smoothness_weight * duration * scaled_speed.ravel())
-        if self.config.closure_weight:
+        if self.ik is not None:
+            pieces.append(
+                np.concatenate(
+                    [
+                        row.residual
+                        for row in self.constraint_linearizations(
+                            self.expand(evaluation.q)
+                        )
+                    ]
+                )
+            )
+        elif self.config.closure_weight:
             pieces.append(
                 self.config.closure_weight
                 * np.array([self.native.closure_residuals(pose) for pose in q]).ravel()
@@ -87,7 +164,7 @@ class _Fit:
         pose = self.expand(free[None, :])[0]
         points = self.native.marker_positions(pose, self.attachments)
         pixels = self.camera.residual(points, observed, weights).ravel()
-        if not self.config.closure_weight:
+        if self.ik is not None or not self.config.closure_weight:
             return pixels
         return np.concatenate(
             [pixels, self.config.closure_weight * self.native.closure_residuals(pose)]
@@ -106,13 +183,14 @@ class _Fit:
         Pose and speed priors use exact derivatives; no engine internals enter.
         """
         pixel_size = 2 * len(self.attachments)
+        source = self.source_evaluation(evaluation)
         image_rows: list[np.ndarray] = []
         closure_rows: list[np.ndarray] = []
         for free, observed, weights, basis in zip(
-            evaluation.q,
+            source.q,
             self.inputs.observed_pixels,
             self.inputs.confidence,
-            evaluation.q_basis,
+            source.q_basis,
             strict=True,
         ):
             native_jacobian = finite_difference_jacobian(
@@ -120,20 +198,20 @@ class _Fit:
             )
             chained = native_jacobian @ basis
             image_rows.append(chained[:pixel_size])
-            if self.config.closure_weight:
+            if self.ik is None and self.config.closure_weight:
                 closure_rows.append(chained[pixel_size:])
-        frames, _, columns = evaluation.q_basis.shape
+        frames, _, columns = source.q_basis.shape
         prior = np.zeros((frames, len(self.inputs.seed), columns))
         prior[:, self.indices] = (
             self.config.prior_weight
-            * evaluation.q_basis
+            * source.q_basis
             / self.inputs.coordinate_scales[self.indices][None, :, None]
         )
         duration = self.inputs.source_times[-1] - self.inputs.source_times[0]
         speed = (
             self.config.smoothness_weight
             * duration
-            * evaluation.v_basis
+            * source.v_basis
             / self.inputs.coordinate_scales[self.indices][None, :, None]
         )
         pieces = [
@@ -141,7 +219,17 @@ class _Fit:
             prior.reshape(-1, columns),
             speed.reshape(-1, columns),
         ]
-        if closure_rows:
+        if self.ik is not None:
+            rows = self.constraint_linearizations(self.expand(evaluation.q))
+            pieces.append(
+                np.vstack(
+                    [
+                        row.jacobian[:, self.indices] @ basis
+                        for row, basis in zip(rows, evaluation.q_basis, strict=True)
+                    ]
+                )
+            )
+        elif closure_rows:
             pieces.append(np.vstack(closure_rows))
         return np.vstack(pieces)
 
@@ -170,7 +258,7 @@ def fit_image_trajectory(
     )
     problem = MapEstimatorProblem(
         trajectory,
-        inputs.source_times,
+        fit.evaluation_times,
         coefficients,
         SharedParameterBlock(()),
         fit.residual,
@@ -189,6 +277,9 @@ def fit_image_trajectory(
     distances[valid] = np.sqrt(
         np.sum(weighted[valid] ** 2, axis=1) / inputs.confidence[valid]
     )
+    constraint_rows = fit.constraint_linearizations(
+        fit.expand(trajectory.evaluate(solved.coefficients, fit.evaluation_times).q)
+    )
     return ImageFitResult(
         inputs.source_times.copy(),
         q,
@@ -203,4 +294,9 @@ def fit_image_trajectory(
         knots,
         solved.coefficients,
         inputs.free_coordinates,
+        constraint_times=fit.evaluation_times if constraint_rows else np.empty(0),
+        constraint_residuals=np.array([row.residual for row in constraint_rows])
+        if constraint_rows
+        else np.empty((0, 0)),
+        constraint_row_labels=constraint_rows[0].row_labels if constraint_rows else (),
     )

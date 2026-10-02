@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -11,6 +13,11 @@ from src.shared.python.estimation import (
     project_pinhole,
     reprojection_residual_from_points,
 )
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
 
 
 def _array(value: np.ndarray, name: str) -> np.ndarray:
@@ -165,6 +172,8 @@ class ImageFitConfig:
     prior_weight: float = 0.1
     smoothness_weight: float = 0.01
     closure_weight: float = 100.0
+    constraint_options: ConstraintOptions | None = None
+    interior_fractions: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
         if (
@@ -176,6 +185,67 @@ class ImageFitConfig:
         for value in (self.prior_weight, self.smoothness_weight, self.closure_weight):
             if not np.isfinite(value) or value < 0:
                 raise ValueError("Fit weights must be finite and nonnegative")
+        fractions = self.interior_fractions
+        if (
+            not isinstance(fractions, tuple)
+            or any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not np.isfinite(value)
+                or not 0 < value < 1
+                for value in fractions
+            )
+            or tuple(sorted(set(fractions))) != fractions
+        ):
+            raise ValueError(
+                "Interior fractions must be finite, unique and increasing in (0, 1)"
+            )
+        if fractions and self.constraint_options is None:
+            raise ValueError("Interior fractions require explicit constraint options")
+        if self.constraint_options is not None:
+            from src.shared.python.motion_matching.constraint_kinematics import (
+                ConstraintOptions,
+            )
+
+            if not isinstance(self.constraint_options, ConstraintOptions):
+                raise ValueError(
+                    "Fit constraint options must be a ConstraintOptions record"
+                )
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> ImageFitConfig:
+        """Decode only the declared JSON configuration; nested records stay typed."""
+        if not isinstance(record, Mapping):
+            raise ValueError("Fit configuration must be an object")
+        values = dict(record)
+        fractions = values.get("interior_fractions", ())
+        if not isinstance(fractions, (tuple, list)):
+            raise ValueError("Interior fractions must be an array")
+        values["interior_fractions"] = tuple(fractions)
+        nested = values.get("constraint_options")
+        try:
+            if nested is not None:
+                from src.shared.python.motion_matching.constraint_kinematics import (
+                    ConstraintOptions,
+                )
+                from src.shared.python.motion_matching.contact_law import GroundPlane
+
+                if not isinstance(nested, Mapping) or not isinstance(
+                    nested.get("ground"), Mapping
+                ):
+                    raise ValueError(
+                        "Fit constraint configuration must contain a ground object"
+                    )
+                options = dict(nested)
+                options["ground"] = GroundPlane(**dict(options["ground"]))
+                pinned = options.get("pinned_spheres", ())
+                if not isinstance(pinned, (tuple, list)):
+                    raise ValueError("Pinned sphere names must be an array")
+                options["pinned_spheres"] = tuple(pinned)
+                values["constraint_options"] = ConstraintOptions(**options)
+            return cls(**values)
+        except (TypeError, KeyError) as exc:
+            raise ValueError("Malformed fit configuration") from exc
 
 
 @dataclass(frozen=True)
@@ -195,15 +265,54 @@ class ImageFitResult:
     knot_times: np.ndarray
     spline_coefficients: np.ndarray
     free_coordinates: tuple[str, ...]
+    constraint_times: np.ndarray = field(default_factory=lambda: np.empty(0))
+    constraint_residuals: np.ndarray = field(default_factory=lambda: np.empty((0, 0)))
+    constraint_row_labels: tuple[str, ...] = ()
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
-        for name in ("source_times", "q", "knot_times", "spline_coefficients"):
+        for name in (
+            "source_times",
+            "q",
+            "knot_times",
+            "spline_coefficients",
+            "constraint_times",
+            "constraint_residuals",
+        ):
             object.__setattr__(self, name, _array(getattr(self, name), name))
         errors = self.pixel_errors.copy()
         errors.setflags(write=False)
         object.__setattr__(self, "pixel_errors", errors)
+        times, labels = self.constraint_times, self.constraint_row_labels
+        if (
+            times.ndim != 1
+            or not np.all(np.diff(times) > 0)
+            or np.any(times < self.source_times[0])
+            or np.any(times > self.source_times[-1])
+        ):
+            raise ValueError(
+                "Constraint report times must increase inside the source interval"
+            )
+        if (
+            not isinstance(labels, tuple)
+            or any(not isinstance(label, str) or not label.strip() for label in labels)
+            or len(set(labels)) != len(labels)
+            or bool(len(times)) != bool(labels)
+        ):
+            raise ValueError(
+                "Constraint report labels must be immutable, unique nonempty strings"
+            )
+        if self.constraint_residuals.shape != (
+            len(self.constraint_times),
+            len(self.constraint_row_labels),
+        ):
+            raise ValueError("Constraint report times, labels and residuals must agree")
+
+    @property
+    def maximum_constraint_residual(self) -> float:
+        """Maximum scaled dimensionless residual at tested times, never all-time proof."""
+        return float(np.max(np.abs(self.constraint_residuals), initial=0.0))
 
     def evaluate_source_times(self, source_times: np.ndarray) -> np.ndarray:
         """Evaluate the preserved fitted spline inside its source-clock interval."""

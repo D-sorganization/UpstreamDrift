@@ -17,6 +17,10 @@ from scipy.spatial.transform import Rotation
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
 )
+from src.shared.python.motion_matching.constraint_kinematics import (
+    ConstraintLinearization,
+    ConstraintOptions,
+)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
@@ -325,6 +329,51 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             w = np.sqrt(weight)
             rows.append(w * (world_axis - target))
             jacs.append(w * (-skew @ jr)[:, self._dof])
+
+    def constraint_residual_jacobian(
+        self, q: Array, options: ConstraintOptions
+    ) -> ConstraintLinearization:
+        """Return fixed grip XYZ/rotation XYZ/declared-sphere rows at a pose.
+
+        Ground rows describe configured native geometry, not observed contact.
+        Zero weights retain rows. Jacobians are analytic away from the SO(3)
+        principal-log branch and the unpinned ground depth kink.
+        """
+        if not isinstance(options, ConstraintOptions):
+            raise ValueError("Constraint options must be validated ConstraintOptions")
+        if len(self._closure) != 2 or not self._spheres:
+            raise NotImplementedError("Native grip/ground constraints are unavailable")
+        pinned = frozenset(options.pinned_spheres)
+        if not pinned.issubset(self.sphere_names):
+            raise ValueError(
+                "Pinned contact identities must be declared native spheres"
+            )
+        self._set(q)
+        rows: list[Array] = []
+        jacs: list[Array] = []
+        self._append_closure(rows, jacs, 1.0, 1.0)
+        self._append_ground(rows, jacs, options.ground, 1.0, pinned)
+        factors = np.concatenate(
+            (
+                np.full(3, np.sqrt(options.position_weight) / options.position_scale_m),
+                np.full(
+                    3, np.sqrt(options.rotation_weight) / options.rotation_scale_rad
+                ),
+                np.full(
+                    len(self.sphere_names),
+                    np.sqrt(options.ground_weight) / options.ground_scale_m,
+                ),
+            )
+        )
+        labels = tuple(f"grip_position:{axis}" for axis in "xyz")
+        labels += tuple(f"grip_rotation:{axis}" for axis in "xyz")
+        labels += tuple(f"ground:{name}" for name in self.sphere_names)
+        return ConstraintLinearization(
+            np.concatenate(rows) * factors,
+            np.vstack(jacs) * factors[:, None],
+            self.coordinate_order,
+            labels,
+        )
 
     def _append_closure(
         self,

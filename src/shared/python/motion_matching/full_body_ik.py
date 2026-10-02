@@ -18,6 +18,10 @@ from numpy.typing import NDArray
 from scipy.optimize import least_squares
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.constraint_kinematics import (
+    ConstraintLinearization,
+    ConstraintOptions,
+)
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -421,6 +425,12 @@ class BaseFullBodyIK:
     def closure_residuals(self, q: Array) -> Array:
         """Evaluate position residual between dual-grip weld frames/sites in world."""
         raise NotImplementedError  # tracked: #10330
+
+    def constraint_residual_jacobian(
+        self, q: Array, options: ConstraintOptions
+    ) -> ConstraintLinearization:
+        """Linearize declared geometry, or explicitly reject unsupported engines."""
+        raise NotImplementedError("Native constraint linearization is unsupported")
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""

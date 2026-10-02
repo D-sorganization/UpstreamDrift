@@ -13,7 +13,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1564,
+    "ud-only": 1566,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -476,7 +476,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 259,
+      "ud-only": 261,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -12962,6 +12962,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/constraint_kinematics.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 3881,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/contact_derivatives.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13458,7 +13470,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 34915,
+      "ud_bytes": 35332,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13574,6 +13586,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/historical_fit/assessment.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "historical_fit",
+      "ud_bytes": 11030,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/historical_fit/camera.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -13602,7 +13626,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 8236,
+      "ud_bytes": 12960,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13614,7 +13638,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "historical_fit",
-      "ud_bytes": 8272,
+      "ud_bytes": 12386,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -36786,7 +36810,7 @@
       "classification": "ud-only",
       "package": "workspace",
       "subpackage": "",
-      "ud_bytes": 8073,
+      "ud_bytes": 8563,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

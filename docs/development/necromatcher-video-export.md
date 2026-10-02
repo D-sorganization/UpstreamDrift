@@ -51,7 +51,7 @@ The initial actual Desktop examples are under
 frames at 1280×720 and source rate 30000/1001; Hogan Overlay has 750 frames at
 320×240 and source rate 30. The local review index and SHA-256 manifest also
 identify original portable fit packages, failed interim candidates and the
-compiled 16-page standalone LaTeX report. Media remains outside Git.
+compiled standalone LaTeX report. Media remains outside Git.
 
 The exact source PTS governs playback only. Irregular timestamps or gaps are
 rejected. Original PNGs remain unchanged; blue model geometry, green image
@@ -68,3 +68,10 @@ The control implementation adds admission, process ownership, cancellation,
 durable recall, guarded download, cross-fit UI ownership and stale-response
 coverage. Record completed checks and actual UI journeys in turnover rather
 than treating this plan as execution evidence.
+
+Actual native/web control verification and the two live downloaded runs are
+recorded in `necromatcher-turnover.md` and
+`historical_capture/live-web-export-review.json`. Updated Desktop directories
+`Tiger Web Overlay` and `Hogan Web Overlay` contain all-frame decoded outputs,
+first/middle/last stills and SHA-256 manifests. Completed execution retains
+rejected scientific acceptance.

@@ -36,6 +36,7 @@
 \newcommand{\reportsection}[1]{\section{#1}}
 
 \begin{document}
+\hypersetup{pageanchor=false}
 \begin{titlepage}
 \thispagestyle{empty}
 \vspace*{0.7in}
@@ -53,7 +54,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; later sequential exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; later sequential exploration identified separately.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -68,8 +69,9 @@ This standalone report is a turnover artifact, not the canonical engineering
 design manual. That manual's editable authority remains
 \code{manuals/upstreamdrift}; its scientific release inventory remains blocked.
 \end{titlepage}
+\hypersetup{pageanchor=true}
 
-{\footnotesize\linespread{0.95}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
+{\footnotesize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
 \vspace{0.15in}
 \note{Reading Guide}{Sections 1--4 explain evidence and the image fit.
 Sections 5--7 explain placement, closure, and constrained repair. Sections
@@ -578,6 +580,16 @@ verified writer fix is not presented as proof of that error's cause. Tool-free
 Gemini Flash review informed the corrupted-transfer regression, while process
 ownership and teardown claims were checked against actual source and tests.
 
+\subsection{Live Web Export Evidence}
+Live export buttons at source \code{3c73001a7c} started Tiger run
+\code{165988043c994250aed72d3a57ebf027} (210 frames) and Hogan run
+\code{f6daf6efec0d4dd8aa36a8a2424036cd} (750 frames). Both completed with
+\code{succeeded} computation and rejected scientific qualification. Verified
+ZIP downloads were exercised through the actual visible links. Navigating
+Tiger to frame 1 preserved \code{export_run}; reloading Hogan and reopening
+the Models drawer recalled the same completed run and verified download.
+These live checks establish export and recall behavior, not motion acceptance.
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -702,8 +714,10 @@ controls image tradeoffs and audits intermediate geometry, alongside a Hogan
 shot/crop review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled
-report/Desktop package in \#11247. A Desktop review package has fourteen
-hash-verified artifacts; that transfer verifies bytes, not scientific validity.
+report/Desktop package in \#11247. The Desktop review package contains
+hash-verified source packages, interim candidates, overlay videos and stills,
+and this compiled report; \code{review-manifest.json} records the current
+inventory. That transfer verifies bytes, not scientific validity.
 
 MATLAB R2025b is required for any Simscape scientific acceptance. Other runtime
 availability must be proved independently rather than inferred from a registry
@@ -711,7 +725,7 @@ or synthetic adapter. The canonical design manual still requires its
 calculation inventory and release governance. This methods report records
 current evidence and repeatability; it grants no scientific approval.
 
-\clearpage\appendix
+\appendix
 \section{Exact Source, Artifact, and Runtime Identities}
 \subsection{Capture Identity}
 \begin{longtable}{@{}p{1.45in}p{4.85in}@{}}
