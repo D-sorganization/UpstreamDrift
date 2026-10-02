@@ -62,6 +62,11 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         translation, and the fit wanders 15-36 cm; the
 %                         interpolated targets hold it.  The offset
 %                         calibration uses measured samples only.
+%     gap_target_weight   (struct([])) optional scalar struct of per-target
+%                         overrides for gap residual scales in [0, 1].
+%                         Targets not specified retain gap_weight. Measured position
+%                         weights, offset calibration and head/foot orientation terms
+%                         are unchanged; interpolated observations remain nonmeasured.
 %     target_weight       (ones per target) extra scale on each target's
 %                         position residual, multiplied with the gap/valid
 %                         weight inside the least-squares fit.  A struct with
@@ -131,7 +136,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %     .status      KinematicsSolver status per frame (1 = loop closed)
 %     .regularization  struct of posture_weight, smooth_weight, backward,
 %                  gap_weight, rom_weight, foot_orientation_weight,
-%                  head_orientation_weight
+%                  head_orientation_weight, and optional gap_target_weight
+%                  when nonempty
 %     .foot_orientation_error_deg  2 x frames 3D orientation error angle (deg,
 %                  Left then Right), NaN where gap-filled or nonfinite
 %     .head_orientation_error_deg  1 x frames 3D orientation error angle (deg),
@@ -151,11 +157,17 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.rom_weight (1,1) double {mustBeNonnegative} = 0
         opts.rom table = gs3dx_joint_rom()
         opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
+        opts.gap_target_weight = struct([])
         opts.target_weight = []
         opts.foot_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.head_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.initial_pose = struct([])
     end
+
+    % Validate selective gap overrides before any model load or KinematicsSolver initialization
+    canonical_names = gs3dx_ik_target_names();
+    gap_weights = gs3dx_ik_gap_weights(canonical_names, opts.gap_weight, opts.gap_target_weight);
+
     assert(isscalar(opts.foot_orientation_weight) && isreal(opts.foot_orientation_weight) && ...
         isfinite(opts.foot_orientation_weight) && opts.foot_orientation_weight >= 0, ...
         'gs3dx:ik', 'foot_orientation_weight must be a finite real non-negative scalar');
@@ -186,7 +198,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
     tw = local_target_weight(s.names, opts.target_weight);
-    weight = @(f) (valid(f) + opts.gap_weight * ~valid(f)) .* tw;   % residual weight per target
+    assert(isequal(s.names, canonical_names), 'gs3dx:ik', 'Position target order mismatch');
+    weight = @(f) (valid(f) + gap_weights .* ~valid(f)) .* tw;   % residual weight per target
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
@@ -275,6 +288,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
         'rom_weight', opts.rom_weight, 'foot_orientation_weight', opts.foot_orientation_weight, ...
         'head_orientation_weight', opts.head_orientation_weight);
+    if ~isempty(opts.gap_target_weight) && isstruct(opts.gap_target_weight) && ~isempty(fieldnames(opts.gap_target_weight))
+        ik.regularization.gap_target_weight = opts.gap_target_weight;
+    end
 end
 
 function tw = local_target_weight(names, tw_in)
@@ -407,23 +423,26 @@ function s = local_setup(mdl, with_head)
     paths = string(unique(jp.BlockPath, 'stable'));
     joint = @(pat) char(paths(contains(paths, pat)));
     club = find_system(mdl, 'LookUnderMasks', 'all', 'Name', 'Clubhead');
-    % target, point frame, frame of the body that carries the marker
-    T = {
-        'pelvis',     [joint('Hip Kinetically Driven/Hip Joint') '/F'], [joint('Hip Kinetically Driven/Hip Joint') '/F']
-        'hip_L',      [joint('Left Hip Joint') '/F'],   [joint('Hip Kinetically Driven/Hip Joint') '/F']
-        'hip_R',      [joint('Right Hip Joint') '/F'],  [joint('Hip Kinetically Driven/Hip Joint') '/F']
-        'knee_L',     [joint('Left Knee') '/F'],        [joint('Left Knee') '/B']
-        'knee_R',     [joint('Right Knee') '/F'],       [joint('Right Knee') '/B']
-        'ankle_L',    [joint('Left Ankle') '/F'],       [joint('Left Ankle') '/B']
-        'ankle_R',    [joint('Right Ankle') '/F'],      [joint('Right Ankle') '/B']
-        'shoulder_L', [joint('Left Shoulder') '/F'],    [joint('Left Shoulder') '/B']
-        'shoulder_R', [joint('Right Shoulder') '/F'],   [joint('Right Shoulder') '/B']
-        'elbow_L',    [joint('Left Elbow') '/F'],       [joint('Left Elbow') '/B']
-        'elbow_R',    [joint('Right Elbow') '/F'],      [joint('Right Elbow') '/B']
-        'wrist_L',    [joint('Left Wrist') '/F'],       [joint('Left Wrist') '/B']
-        'wrist_R',    [joint('Right Wrist') '/F'],      [joint('Right Wrist') '/B']
-        'club_head',  [club{1} '/R'],                   [club{1} '/R']
+
+    % Authoritative target names and block paths
+    canonical_names = gs3dx_ik_target_names();
+    target_paths = {
+        [joint('Hip Kinetically Driven/Hip Joint') '/F'], [joint('Hip Kinetically Driven/Hip Joint') '/F']
+        [joint('Left Hip Joint') '/F'],   [joint('Hip Kinetically Driven/Hip Joint') '/F']
+        [joint('Right Hip Joint') '/F'],  [joint('Hip Kinetically Driven/Hip Joint') '/F']
+        [joint('Left Knee') '/F'],        [joint('Left Knee') '/B']
+        [joint('Right Knee') '/F'],       [joint('Right Knee') '/B']
+        [joint('Left Ankle') '/F'],       [joint('Left Ankle') '/B']
+        [joint('Right Ankle') '/F'],      [joint('Right Ankle') '/B']
+        [joint('Left Shoulder') '/F'],    [joint('Left Shoulder') '/B']
+        [joint('Right Shoulder') '/F'],   [joint('Right Shoulder') '/B']
+        [joint('Left Elbow') '/F'],       [joint('Left Elbow') '/B']
+        [joint('Right Elbow') '/F'],      [joint('Right Elbow') '/B']
+        [joint('Left Wrist') '/F'],       [joint('Left Wrist') '/B']
+        [joint('Right Wrist') '/F'],      [joint('Right Wrist') '/B']
+        [club{1} '/R'],                   [club{1} '/R']
         };
+    T = [canonical_names, target_paths];
     s.names = T(:, 1);
     [bodies, ~, s.body] = unique(T(:, 3), 'stable');
     for k = 1:size(T, 1)

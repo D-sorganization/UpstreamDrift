@@ -2312,6 +2312,19 @@ Weight 1.0 gives interpolated positions equal objective weight to
 measured positions, but their reported provenance stays nonmeasured.
 Neither candidate is promoted without full-chain and uncertainty review.
 
+The full 46-frame owner trial at gap weight 1.0 exited naturally at
+\texttt{2026-10-02T21:15:21Z}; its mapping/metric audit exited at
+\texttt{21:16:08Z}. The addressed transition decreases to 17.350 mm,
+with a 27.062 mm maximum root step across the full chain. However,
+mean measured-marker RMS rises from 16.754 to 18.791 mm, and peak RMS
+from 36.987 to 49.148 mm. Both exceed the unchanged prior allowances
+of 0.5 mm mean and 1.0 mm peak increase against the selected reference.
+The full candidate is therefore rejected for promotion despite improved
+local continuity. This demonstrates why a short-window improvement
+cannot qualify the complete motion. Selective missing-observation
+policies require separate contracts and tests; a global gap weight
+must not silently replace uncertainty by equal confidence.
+
 
 \subsection{Startup Transient Versus Terminal Posture}
 A separate native read-only audit of the saved ramped runs exited
@@ -2398,6 +2411,69 @@ exact peaks and native/probe hashes are maintained in
 \texttt{guarded\_leg\_feedforward\_hold\_review\_20261002.json}.
 % END GUARDED HOLD RESULT
 
+
+% BEGIN SELECTIVE GAP CONTRACT
+\subsection{Selective Missing-Position Weights and Native Contracts}
+The full owner trial with every missing position weighted at one reduced
+the 241-to-249 root step to 17.350 mm but increased measured-marker RMS
+from 16.754 to 18.791 mm (mean) and from 36.987 to 49.148 mm (peak).
+It fails the unchanged mean-plus-0.5-mm and peak-plus-1-mm screens and
+is rejected for promotion. A closed kinematic loop does not override
+those fit gates. Existing Desktop media remain the selected IK outputs.
+
+The optional \texttt{gap\_target\_weight} setting assigns absolute scales
+to named missing position targets while unspecified targets retain
+\texttt{gap\_weight}. For target $i$, let $v_i\in\{0,1\}$ indicate an
+observed sample, $g_i\in[0,1]$ the missing-position scale, and $t_i$ the
+existing position scale. The residual multiplier becomes
+\[
+ w_i=\bigl(v_i+g_i(1-v_i)\bigr)t_i.
+\]
+This is a residual multiplier, whose square enters the least-squares
+objective. It is not a probability or a conversion of interpolation
+into measurement. Measured-target scales, measured-only offset
+calibration, missing-position residual NaNs and separately masked
+head/foot orientation terms remain unchanged.
+
+\texttt{gs3dx\_ik\_target\_names} is the single authority for the
+14 position names and their native frame-table order.
+\texttt{gs3dx\_ik\_gap\_weights} rejects unknown names (including
+\texttt{c7}), malformed or duplicate identifiers, nonfinite/complex/
+non-scalar weights and values outside $[0,1]$. Overrides are validated
+before model loading. Omitted and empty overrides retain the old
+metadata shape; explicit nonempty overrides record their provenance.
+
+Native R2025b RED preserved eight passing keyed-seed tests and exposed
+10 failing new tests (eight incomplete because helpers were absent).
+After reviewed implementation, native GREEN at
+\texttt{2026-10-02T21:34:09Z} passed all 10 new tests and 35 existing
+seed, head and foot tests with no failures. These are software contracts,
+not geometric or dynamic acceptance. An additional actual-model trial
+checks exact whole-output parity against the preceding solver for
+omitted and empty overrides, then evaluates a full 46-frame owner
+candidate with only missing pelvis/hip/knee/ankle scales increased to
+one. Other missing positions retain 0.1. Its results remain unqualified
+until native receipt, unchanged fit gates, continuity and observability
+are reviewed. No model file or contact physics are changed.
+The completed native trial exited naturally at
+\texttt{2026-10-02T21:39:54Z}; its separate no-model audit exited at
+\texttt{21:40:23Z}. Exact whole-struct equality against the preceding
+solver holds for omitted and empty overrides at source frames 1, 241
+and 249, retaining head, foot and keyed-seed outputs. The selective
+full owner trial reduces the transition root step from 53.926 to
+17.350 mm, maximum root step to 27.062 mm and maximum leg step from
+$38.380^\circ$ to $34.090^\circ$. Marker mean/peak RMS are
+16.753/36.975 mm, passing the unchanged selected-reference body-fit
+screen. Post-address head mean is $11.253^\circ$ and both foot peaks
+remain within $0.004^\circ$ of the selected output. Every sampled loop
+status is one. This promising candidate remains unpromoted: the
+remaining large leg-coordinate step, missing-marker uncertainty,
+ROM and both-view visual review still require evaluation before
+media promotion or moving-reference dynamics. Private trajectories
+remain outside Git; neutral aggregates and natural-exit receipts are
+in \texttt{selective\_gap\_contract\_checkpoint\_20261002.json}.
+% END SELECTIVE GAP CONTRACT
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
@@ -2422,3 +2498,4 @@ Historical results are attributed to that turnover unless a fresh receipt
 identifies a new execution.
 \end{thebibliography}
 \end{document}
+
