@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-10-01
 - **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 106 current canonical/domain/native image/job cases and pinned mypy pass; v7 scientific audit remains rejected.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds now use a canonical Bernstein-admissible domain; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Run both player trials from an explicitly authored feasible bounded initialization.
+- **Next step:** Implement the explicit authored initialization policy in necromatcher-feasible-initialization-plan.md.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
