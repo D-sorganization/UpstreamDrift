@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11268 · Capture-O Video Companion
+
+- **State:** proposed
+- **Owner:** claude
+- **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** not created
+- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
+- **Paths:** `docs/development/capture-o-video/**`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 at SELF — epic and eleven child issues published; procedure document added; no implementation or data processing performed.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Owner supplies the album privately and a fleet agent executes COV-1 (#11269).
+
 ### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress
