@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python import full_body_markers as module
 from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -19,6 +20,46 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 GROUND = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+
+
+def test_native_rotation_residual_preserves_half_turn() -> None:
+    """A reversed weld has pi radians of error, never zero."""
+    from src.engines.physics_engines.mujoco.python import full_body_ik
+
+    rotation = Rotation.from_rotvec([np.pi, 0.0, 0.0]).as_matrix()
+    residual = full_body_ik._finite_rotation_error(rotation, np.eye(3))
+    assert np.linalg.norm(residual) == pytest.approx(np.pi)
+    np.testing.assert_allclose(
+        full_body_ik._finite_rotation_error(np.eye(3), np.eye(3)), 0.0, atol=1e-12
+    )
+
+
+@pytest.mark.parametrize("scale", [0.4, 0.9])
+def test_native_closure_jacobian_matches_finite_rotation_difference(
+    kinematics: module.FullBodyMarkerKinematics, scale: float
+) -> None:
+    """The native log residual derivative holds away from aligned frames."""
+    q = np.zeros(len(kinematics.coordinate_order))
+    q[6:] = np.random.default_rng(7).uniform(-scale, scale, len(q) - 6)
+
+    def residual(pose: np.ndarray) -> np.ndarray:
+        kinematics._set(pose)
+        rows: list[np.ndarray] = []
+        kinematics._append_closure(rows, [], 0.0, 1.0)
+        return rows[0]
+
+    kinematics._set(q)
+    rows: list[np.ndarray] = []
+    jacobians: list[np.ndarray] = []
+    kinematics._append_closure(rows, jacobians, 0.0, 1.0)
+    step = 1e-6
+    numeric = np.column_stack(
+        [
+            (residual(q + step * axis) - residual(q - step * axis)) / (2 * step)
+            for axis in np.eye(len(q))
+        ]
+    )
+    np.testing.assert_allclose(jacobians[0], numeric, atol=2e-7, rtol=2e-6)
 
 
 @pytest.fixture(scope="module")

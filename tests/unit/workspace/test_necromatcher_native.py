@@ -189,3 +189,48 @@ def test_mutating_detached_fit_cannot_change_compiled_control_identity(bound_con
     bound.fit["model_hash"] = "forged-native-model"
     with pytest.raises(ValueError, match="Controls"):
         bound.efforts(replace(controls, model_hash="forged-native-model"), 0.5)
+
+
+def test_native_frame_queries_preserve_requested_model_aliases(native_fit_case):
+    library, path, payload = native_fit_case
+    library.add_fit("alias-fit", "practice", path)
+    from src.shared.python.workspace import load_native_fit_binding
+
+    binding = load_native_fit_binding(library, "alias-fit")
+    closure = payload["provenance"]["native_definition"]["closure"]
+    mapping = {
+        name: (closure[key], [0, 0, 0])
+        for name, key in (("hand", "body_a"), ("club", "body_b"))
+    }
+    q = np.array(payload["q"][0])
+    poses = binding.plant.frame_poses(mapping, q)
+    assert set(poses) == {record[0] for record in mapping.values()}
+    points = binding.plant.marker_positions(q, mapping)
+    for index, (body, _) in enumerate(mapping.values()):
+        rotation, translation = poses[body]
+        np.testing.assert_allclose(rotation @ rotation.T, np.eye(3), atol=1e-12)
+        np.testing.assert_allclose(translation, points[index], atol=1e-12)
+
+
+@pytest.mark.parametrize("invalid", [np.zeros(43), np.full(44, np.nan)])
+def test_native_frame_query_rejects_invalid_coordinates(native_fit_case, invalid):
+    library, path, payload = native_fit_case
+    library.add_fit("alias-fit", "practice", path)
+    from src.shared.python.workspace import load_native_fit_binding
+
+    binding = load_native_fit_binding(library, "alias-fit")
+    body = payload["provenance"]["native_definition"]["closure"]["body_a"]
+    with pytest.raises(ValueError, match="finite vector"):
+        binding.plant.frame_poses({"hand": (body, [0, 0, 0])}, invalid)
+
+
+def test_native_frame_query_rejects_unknown_frame(native_fit_case):
+    library, path, payload = native_fit_case
+    library.add_fit("alias-fit", "practice", path)
+    from src.shared.python.workspace import load_native_fit_binding
+
+    binding = load_native_fit_binding(library, "alias-fit")
+    with pytest.raises(ValueError, match="unknown body"):
+        binding.plant.frame_poses(
+            {"hand": ("missing-frame", [0, 0, 0])}, payload["q"][0]
+        )

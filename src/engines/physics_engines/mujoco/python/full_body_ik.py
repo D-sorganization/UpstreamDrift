@@ -12,6 +12,7 @@ from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
@@ -19,13 +20,34 @@ from src.engines.physics_engines.mujoco.python.full_body_model import (
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
-    _rotation_error,
     _validate_axis_spec,
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
 
 Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
+
+
+def _finite_rotation_error(r_a: Array, r_b: Array) -> Array:
+    """Principal world-axis rotation vector taking frame b onto frame a.
+
+    The principal logarithm has a branch discontinuity at a half turn;
+    its norm still reports pi instead of falsely reporting alignment.
+    """
+    return np.asarray(Rotation.from_matrix(r_a @ r_b.T).as_rotvec(), dtype=float)
+
+
+def _rotation_log_jacobian(phi: Array) -> Array:
+    """Inverse SO(3) left Jacobian for a finite world-axis rotation vector."""
+    theta = float(np.linalg.norm(phi))
+    x, y, z = phi
+    skew = np.array([[0.0, -z, y], [z, 0.0, -x], [-y, x, 0.0]])
+    coefficient = (
+        1.0 / 12.0 + theta**2 / 720.0
+        if theta < 1e-5
+        else (1.0 - 0.5 * theta / np.tan(0.5 * theta)) / theta**2
+    )
+    return np.eye(3) - 0.5 * skew + coefficient * skew @ skew
 
 
 class MujocoFullBodyIK(BaseFullBodyIK):
@@ -257,7 +279,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         self._set(q)
         a, b = self._closure
         pos = np.linalg.norm(self.data.site_xpos[a] - self.data.site_xpos[b])
-        rot = _rotation_error(
+        rot = _finite_rotation_error(
             self.data.site_xmat[a].reshape(3, 3), self.data.site_xmat[b].reshape(3, 3)
         )
         return float(pos), float(np.linalg.norm(rot))
@@ -326,12 +348,13 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             jacs.append(w * (jp_a - jp_b)[:, self._dof])
         if rotation_weight > 0:
             wr = np.sqrt(rotation_weight)
-            rot = _rotation_error(
-                self.data.site_xmat[a].reshape(3, 3),
-                self.data.site_xmat[b].reshape(3, 3),
-            )
+            r_a = self.data.site_xmat[a].reshape(3, 3)
+            r_b = self.data.site_xmat[b].reshape(3, 3)
+            relative = r_a @ r_b.T
+            rot = _finite_rotation_error(r_a, r_b)
             rows.append(wr * rot)
-            jacs.append(wr * (jr_a - jr_b)[:, self._dof])
+            derivative = _rotation_log_jacobian(rot) @ (jr_a - relative @ jr_b)
+            jacs.append(wr * derivative[:, self._dof])
 
     def _append_ground(
         self,

@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
-from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.plant import integrate_euler_step
 
 if TYPE_CHECKING:
@@ -74,7 +73,7 @@ class MujocoMatchingPlant:
         attachments: Mapping[str, tuple[str, Sequence[float]]],
         *,
         ik_backend: str = "lm",
-    ) -> BaseFullBodyIK:
+    ) -> FullBodyMarkerKinematics:
         from src.engines.physics_engines.mujoco.python.full_body_ik import (
             FullBodyMarkerKinematics,
         )
@@ -105,9 +104,14 @@ class MujocoMatchingPlant:
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
     ) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        q_array = np.asarray(q, dtype=float)
+        if (
+            q_array.shape != (len(self.coordinate_order),)
+            or not np.isfinite(q_array).all()
+        ):
+            raise ValueError("Coordinates must be a finite vector of model size")
         ik = self.create_ik(mapping)
-        raw_poses = ik.pose_fn(q)
-        return {b: (pose[0], pose[1]) for b, pose in raw_poses.items()}
+        return ik.body_poses(q_array, tuple(body for body, _ in mapping.values()))
 
     def marker_positions(
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]

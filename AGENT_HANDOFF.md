@@ -1,5 +1,18 @@
 # Necromatcher Handoff
 
+## Constrained Motion Repair
+
+Native frame queries now retain requested specification aliases. Native grip IK
+uses a finite SO(3) error and matching logarithm Jacobian; three red-first
+regressions and existing native marker tests pass. The shared repair_native_motion
+procedure applies 32 explicit authored ranges through existing bounded IK and
+reports soft closure/ground penalties, per-frame budgets and pixel changes.
+Targets are inferred native markers; returned discrete candidates are separate
+research reports, not source-observation refits or published library fits.
+See [Constrained Repair Procedure](docs/development/necromatcher-constrained-repair.md).
+Full-track image review, continuous closed motion, controls and independent replay
+remain required. Original v6 assets are preserved.
+
 ## Authored Ground Placement
 
 The shared author_ground_placement operation creates separate source-linked fits
