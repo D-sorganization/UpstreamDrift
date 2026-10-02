@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: PinocchioForceTorqueSource builds world-frame JOINT_REACTION (data.f rotated by oMi), JOINT_ACTUATOR and CONTACT wrenches plus tension-positive axial loads; engine exposes get_force_torque_frame, get_segment_axial_loads, get_applied_torques and an optional contact model. |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |
 | 2026-10-02 | #11285 | Plan the force/torque overlay epic: ADR-0052 engine-agnostic force/torque contract (proposed), assessment of every engine and the video stack, and 30 dependency-ordered child issues including tension/compression producers and source-footage overlays. |
 | 2026-10-02 | #11268 | Plan the capture-O video companion epic: procedure for markerless, Necromatcher and Simscape comparison of the owner's session video against the marker capture, with graded comparison levels and private-data rules. |

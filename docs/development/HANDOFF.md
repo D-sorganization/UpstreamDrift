@@ -1,3 +1,16 @@
+# Pinocchio Force/Torque Provider — #11298 (FTO-13)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11298-pinocchio-ft`; commit: SELF; PR: see the PR for this branch (`Closes #11298`, `Refs #11285`).
+- Objective: expose Pinocchio joint wrenches, applied torques, contacts and axial loads through the engine adapter as `ForceTorqueProvider` and `AxialLoadProvider`.
+- Completed:
+  - `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`: `PinocchioForceTorqueSource` with a private `pin.Data`; `rnea` at the actual acceleration; `JOINT_REACTION` from `data.f[i]` rotated into the world frame via `oMi`; `JOINT_ACTUATOR` for revolute and spherical joints (others omitted); `CONTACT` passthrough of `ContactSample`; axial loads from `oMi` segment axes.
+  - `pinocchio_physics_engine.py`: `get_force_torque_frame`, `get_segment_axial_loads`, read-only `get_applied_torques`, `set_contact_provider`; `compute_contact_forces` sums the attached contact model (zeros without one); `force_visualization=FULL`.
+  - Tests: `tests/unit/engines/pinocchio/test_pinocchio_force_torque.py` and the updated `tests/engines/physics_engines/test_pinocchio_engine.py`.
+  - `src/engines/CROSS_ENGINE_PARITY_SPEC.md` section 2.5.2: Pinocchio force-overlay channel row.
+- Key decisions: FTO-2 (#11287, shared conversions) and FTO-11 (segment axes) are not on main, so this module keeps minimal private equivalents (inline frame rotation, `_segment_axes`); swap them for the shared helpers once those land. Segment axes use the single child joint origin, or the COM for leaf bodies; multi-child bodies are omitted.
+- Validation: pytest on the two test files above: 59 passed; ruff check and format clean on changed files; file-size budget and error-handling ratchet OK.
+- Next steps: FTO-14 (Pinocchio GUI) and FTO-21 (parity) consume the provider; replace the private helpers when FTO-2/FTO-11 merge.
+
 # Force and Torque Overlay Contract — #11286 (FTO-1)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`

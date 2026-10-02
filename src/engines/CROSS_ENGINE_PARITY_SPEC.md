@@ -167,6 +167,15 @@ canonical gate:
 - Humid-air density uses the two-gas dry-air/water-vapor formula; saturated air
   at 30 C must be less dense than dry air at the same pressure.
 
+### 2.5.2 Force-overlay channel (ADR-0052)
+
+Each engine exposes `ForceTorqueProvider` (and, where it can,
+`AxialLoadProvider`). All wrenches are world-frame, Z-up, SI units.
+
+| Engine    | Channel | Source | Status |
+| --------- | ------- | ------ | ------ |
+| Pinocchio | `JOINT_REACTION` (`data.f` rotated by `oMi`), `JOINT_ACTUATOR`, `CONTACT`, tension-positive axial loads | `pinocchio_force_torque.PinocchioForceTorqueSource` (#11298) | FULL |
+
 ### 2.6 Body model (humanoid + club)
 
 Every engine has **a single canonical full-body humanoid model** with the

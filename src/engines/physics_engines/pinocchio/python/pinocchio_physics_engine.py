@@ -9,7 +9,8 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -36,6 +37,11 @@ if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
 
 from src.shared.python.core import constants
+
+if TYPE_CHECKING:
+    from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
+    from src.shared.python.force_overlay import ForceTorqueFrame
+    from src.shared.python.motion_matching.contact_law import ContactSample
 
 logger = get_logger(__name__)
 
@@ -74,6 +80,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.tau: np.ndarray = np.array([])
         self.time: float = 0.0
         self.integrator: PinocchioIntegrator = "rk4"
+        self._contact_provider: Callable[[], Mapping[str, ContactSample]] | None = None
+        self._force_torque_source: Any = None
 
     @property
     def is_initialized(self) -> bool:
@@ -127,6 +135,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             contact_forces=CapabilityLevel.NONE,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
+            force_visualization=CapabilityLevel.FULL,
             extra={"spatial_jacobian_order": "angular_linear"},
         )
 
@@ -348,21 +357,65 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Compute total contact forces (ground reaction force, GRF).
 
         Pinocchio's standard ABA dynamics do not compute contact forces
-        without a constraint solver (e.g., RigidContactModel + ProximalContactSolver).
-        This implementation returns a zero-force fallback to allow callers
-        to degrade gracefully to static gravity approximations.
-
-        For accurate contact-aware dynamics, use Drake, MuJoCo, or a
-        constraint-enabled Pinocchio configuration.
+        without a constraint solver. When a contact model has been attached
+        with :meth:`set_contact_provider`, this returns the summed
+        ``ContactSample`` force (normal plus friction) in the world frame.
+        Without a contact model it returns a zero-force fallback so callers
+        can degrade gracefully to static gravity approximations.
 
         Returns:
-            Zero force vector [N] (3,) as fallback for unsupported contact queries.
+            Total contact force [N] (3,); zeros when no contact model is set.
         """
+        total = np.zeros(3)
         if self.model is None or self.data is None:
-            return np.array([0.0, 0.0, 0.0])
+            return total
+        if self._contact_provider is None:
+            return total
+        for sample in self._contact_provider().values():
+            total += np.asarray(sample.normal_force_n, dtype=float)
+            total += np.asarray(sample.friction_force_n, dtype=float)
+        return total
 
-        # Return zero vector; callers check norm and fall back to gravity
-        return np.array([0.0, 0.0, 0.0])
+    def set_contact_provider(
+        self, provider: Callable[[], Mapping[str, ContactSample]] | None
+    ) -> None:
+        """Attach (or clear with ``None``) a contact model returning samples."""
+        if provider is not None and not callable(provider):
+            raise TypeError("provider must be callable or None")
+        self._contact_provider = provider
+
+    def get_applied_torques(self) -> np.ndarray:
+        """Return a read-only copy of the applied generalized torques (nv,)."""
+        tau = self.tau.copy()
+        tau.flags.writeable = False
+        return tau
+
+    def _current_force_torque_frame(self) -> ForceTorqueFrame | None:
+        """Sample the force/torque source at the current state, or None."""
+        if not self.is_initialized:
+            return None
+        from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (
+            PinocchioForceTorqueSource,
+        )
+
+        source = self._force_torque_source
+        if source is None or source.model is not self.model:
+            source = PinocchioForceTorqueSource(self.model)
+            self._force_torque_source = source
+        contacts = {} if self._contact_provider is None else self._contact_provider()
+        return cast(
+            "ForceTorqueFrame",
+            source.sample(self.q, self.v, self.a, self.tau, contacts, time_s=self.time),
+        )
+
+    def get_force_torque_frame(self) -> ForceTorqueFrame | None:
+        """Return world-frame reactions, actuator torques and contacts."""
+        return self._current_force_torque_frame()
+
+    def get_segment_axial_loads(self) -> AxialLoadFrame | None:
+        """Return tension-positive proximal axial loads per segment."""
+        frame = self._current_force_torque_frame()
+        return None if frame is None else frame.axial_loads
 
     @precondition(
         lambda self, body_name: self.is_initialized,

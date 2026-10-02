@@ -19,6 +19,7 @@ from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine impor
     PinocchioPhysicsEngine,
 )
 from src.shared.python.core.contracts.exceptions import PreconditionError
+from src.shared.python.motion_matching.contact_law import ContactSample
 
 
 @pytest.fixture
@@ -305,3 +306,17 @@ class TestWithMockedPin:
         eng, _ = self._engine_with_model()
         f = eng.compute_contact_forces()
         assert np.allclose(f, [0.0, 0.0, 0.0])
+
+    def test_compute_contact_forces_sums_attached_contact_model(self) -> None:
+        eng, _ = self._engine_with_model()
+        sample = ContactSample(
+            0.01,
+            0.0,
+            np.zeros(3),
+            np.array([0.0, 0.0, 40.0]),
+            np.array([3.0, 0.0, 0.0]),
+        )
+        eng.set_contact_provider(lambda: {"foot": sample})
+        assert np.allclose(eng.compute_contact_forces(), [3.0, 0.0, 40.0])
+        eng.set_contact_provider(None)
+        assert np.allclose(eng.compute_contact_forces(), [0.0, 0.0, 0.0])
