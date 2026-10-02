@@ -54,7 +54,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; later sequential exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; later sequential exploration identified separately.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -395,8 +395,9 @@ $(\text{name},L,U)$ records, transported through its narrow JSON decoder.
 Unspecified coordinates remain unbounded; no bounds keeps the original
 identity coefficient domain. The checked public procedure is
 \path{docs/development/necromatcher-hermite-bounds.md}.
-New historical bounded trials, image tradeoffs and nonlinear contact audits
-remain required; this implementation is not a new historical execution receipt.
+The V8 receipts below now record historical bounded trials and their image
+tradeoffs. Their separate scalar-bound and nonlinear audits must not be
+confused with a historical execution claim for the earlier V7 artifacts.
 
 \subsection{Exact Native Authored Range Provenance}
 \code{NativeFitBinding.authored_coordinate_bounds()} derives ranges from the
@@ -516,11 +517,145 @@ and preserve its initialization receipt; named hard limits remain active
 throughout that solve. The checked procedure is
 \path{docs/development/necromatcher-authored-initialization.md}.
 
-No bounded Tiger or Hogan player trial has run in this report snapshot. The prior V7 results
-below remain their original rejected outputs. Feasible scalar initialization and coordinate
-bounds do not establish nonlinear grip closure, planted contact, camera/anatomy correctness,
-physical timing, controls or independent dynamics. Fresh historical trials and source/midpoint,
-polynomial-extrema, image-fidelity and nonlinear-contact audits remain required.
+\subsection{Actual V8 Authored Seeds and Bounded Trials}
+The immutable \path{bounded-trials-v8-receipt.json} records four saved research
+versions produced at \code{2ad99b870a12b1683fe19a82100ebcf22aefa237}:
+one authored seed and one subsequent bounded fit for each player. The four
+corresponding \code{*-v8.json} files match their receipt SHA-256 identities.
+All four computations succeeded operationally and remained scientifically
+rejected. The two seeds performed no optimization; the two fits exhausted
+30 evaluations under a 300 s wall guard and reported \code{converged=false}.
+Each job used twelve knots and 22 Tiger or 23 Hogan training frames. Constraint
+probes used fractions $(0.25,0.5,0.75)$, giving 55 and 56 tested times.
+The grip/ground weights were 1000 with position/ground scales 0.01 m and
+rotation scale 0.1 rad; prior and smoothness weights were 0.001 and 0.0001.
+Both heels, \code{heel_r} and \code{heel_l}, were pinned to an authored
+$z=0$ plane throughout the interval. This stance was not observed from footage.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule Version & Initial & Final & Dense & Held Out & Grip (mm) & Scaled Max\\\midrule
+Tiger Seed & 61.717592 & 61.717592 & 59.400880 & 59.124878 & 259.624 & 5129.942\\
+Tiger Fit & 62.451437 & 69.423194 & 68.847158 & 68.779687 & 50.779 & 157.111\\
+Hogan Seed & 12.285791 & 12.285791 & 12.566361 & 12.574884 & 278.841 & 633.094\\
+Hogan Fit & 13.027773 & 12.649875 & 13.338353 & 13.358949 & 15.411 & 92.546\\
+\bottomrule
+\end{tabular}
+\caption{V8 Receipt Metrics. Initial and Final Are Training Image RMS in Pixels;
+Dense and Held Out Use Original Source Frames. Grip Is the Saved Dense-Source
+Maximum; Scaled Max Is the Finite Constraint-Probe Maximum.}
+\end{table}
+
+A subsequent fit does not replay the authored seed's exact Hermite coefficients.
+The worker samples the saved parent's source poses, constructs new knots, and
+explicitly applies the initialization policy again. Consequently Tiger's
+61.717592 px seed becomes a 62.451437 px fit baseline; Hogan's 12.285791 px
+seed becomes a 13.027773 px baseline. Within each job the original observations
+and prior remain unchanged. Across jobs, the new fit's prior is its saved seed
+parent's first pose, not the preceding V7 prior. Exact coefficient replay with
+explicit parent/prior identity is a future reproducibility improvement.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Initialization & Knots & Changed Pairs & Position Changes & Slopes Zeroed\\\midrule
+Tiger Seed & 12 & 324 & 47 & 324\\
+Tiger Fit & 12 & 304 & 3 & 303\\
+Hogan Seed & 12 & 324 & 29 & 324\\
+Hogan Fit & 12 & 306 & 0 & 306\\
+\bottomrule
+\end{tabular}
+\caption{Actual Initialization Changes. A Pair Is One Knot/Coordinate Record;
+Position and Slope Counts Can Overlap. All Twelve Knots Changed in Each Job.}
+\end{table}
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule Native Coordinate & Tiger Seed (rad) & Hogan Seed (rad)\\\midrule
+\code{SpineInputX} & 0.049124 & 0.043715\\
+\code{SpineInputY} & 0.759150 & 0\\
+\code{LEInput} & 1.129213 & 0.939641\\
+\code{REInput} & 0.415823 & 0.692304\\
+\code{hip_flexion_r} & 1.566107 & 0\\
+\code{hip_adduction_r} & 0.071895 & 0\\
+\code{hip_rotation_r} & 1.289077 & 0\\
+\code{knee_angle_r} & 0.719052 & 0.926872\\
+\code{ankle_angle_r} & 0 & 0.040870\\
+\code{hip_flexion_l} & 0.441902 & 0\\
+\code{hip_rotation_l} & 0.398014 & 0\\
+\bottomrule
+\end{tabular}
+\caption{Maximum Authored Seed Position Displacements by Coordinate. All Other
+Coordinates Had Zero Displacement, Including Translations in Metres.}
+\end{table}
+
+Tiger fit reinitialization displaced only the two hip-rotation coordinates,
+with a maximum $1.11\times10^{-16}$ rad (three knot/coordinate
+entries; full precision is retained in the receipt); Hogan fit reinitialization changed no positions. Both still zeroed
+all free slopes, including those of unbounded coordinates. These changes,
+rather than an assumed coefficient-preserving restart, explain the distinct
+initialized baselines. Coefficient hashes retain both pre-initialization and
+initialized arrays in each immutable version.
+
+\subsection{Independent V8 Bounds and Nonlinear Audit}
+The separate \path{bounded-v8-independent-assessment.json} reloaded both
+bounded fits without optimization. Producer and audit source/runtime
+fingerprints matched and remained unchanged across the audit. Its script
+identity is recorded by SHA-256 in that receipt. The canonical
+\code{HermiteBoundsDomain.encode} check and independent cubic derivative-root
+extrema agreed: all 32 declared scalar ranges were satisfied continuously on
+the source interval, with zero violating coordinates. Twelve coordinates
+remained explicitly unbounded; compiled native limits remained disabled.
+This is a certificate of the authored scalar coordinate domain only.
+
+The nonlinear audit evaluated all 210 Tiger source poses and 209 adjacent
+midpoints, or all 750 Hogan source poses and 749 midpoints, plus 88 global
+coordinate-extremum records per player (minimum and maximum for each of 44
+coordinates). Those records can share times: Tiger had 507 evaluation records
+at 465 distinct times, Hogan 1587 at 1547 distinct times. No added audit pose
+became an image-objective point, and no source-video file rehash was claimed.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule Independent Assessment & Tiger & Hogan\\\midrule
+Continuous Authored Scalar Ranges & 32 Passed & 32 Passed\\
+Unbounded Coordinates & 12 & 12\\
+Maximum Sampled Grip Gap (mm) & 50.778827 & 15.424154\\
+Maximum Sampled Grip Angle (degrees) & 27.785302 & 17.021964\\
+Maximum Sampled Ground Penetration (mm) & 31.379098 & 6.523293\\
+Nonlinear Continuous Certificate & False & False\\
+Scientific Acceptance & Rejected & Rejected\\
+\bottomrule
+\end{tabular}
+\caption{Independent V8 Audit. Finite Native Grip and Ground Evaluations Do Not
+Supply an All-Time Nonlinear Certificate or Physical Acceptance.}
+\end{table}
+
+Tiger's sampled gap maximum was source frame 124 at 19.152466667 s, its
+angle maximum source frame 105 at 18.518500000 s, and its penetration maximum
+source frame 209 at 21.988633333 s. Hogan's maxima occurred at adjacent-frame
+midpoints: gap 197/198 at 116.583333333 s, angle 380/381 at 122.683333333 s,
+and penetration 728/729 at 134.283333333 s. The Hogan midpoint gap exceeds
+the saved dense-source maximum, illustrating why source-only evaluation is
+insufficient. All times refer to the container clock, not qualified physical time.
+
+The bounded domain corrected scalar feasibility but did not recover accepted
+historical motion. Tiger's final training RMS worsened from 62.451437 to
+69.423194 px; Hogan improved from 13.027773 to 12.649875 px but remained worse
+than its authored seed and previous V7 image fit. Neither solve converged.
+Visual review of the original-footage stills found obvious Tiger upper-body
+mismatch in follow-through/walk-off and low-resolution Hogan club/seed
+mismatch. A constant two-heel pin across heel lifts and walking is an
+inappropriate whole-interval hypothesis, not evidence of planted contact.
+The next method stage requires reviewed swing/stance intervals and time-varying
+contact hypotheses, better source landmark/club evidence and camera/seed
+qualification, exact coefficient restart, and fresh bounded fitting with
+independent image, scalar-extrema and nonlinear audits. Grip/contact,
+anatomy, physical timing, controls and dynamics remain unqualified.
+The earlier V7 artifacts below retain their original producer and results.
 
 \subsection{Constraint Wiring Verification and Historical Trials}
 The earlier interior-constraint implementation at \code{b92732e725} reported
@@ -1114,9 +1249,10 @@ The integrated epic is \#11232, with player epics \#11226 and \#11229 and
 native fitting/downstream issue \#11235. Draft PR \#11240 remains a work-in-
 progress implementation vehicle. Local numerical progress does not resolve
 its documented CI remediation limit, remote checks, or complete project goal.
-The canonical coordinate domain and explicit authored initializer must next be
-exercised in historical trials with retained image tradeoffs and
-nonlinear grip/planted-contact audits, alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
+The V8 trials exercised the canonical coordinate domain and explicit authored
+initializer with retained image tradeoffs and independent nonlinear audits.
+Next implement exact coefficient restart and reviewed swing/stance intervals
+with time-varying contact hypotheses, alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled
 report/Desktop package in \#11247. The Desktop review package contains

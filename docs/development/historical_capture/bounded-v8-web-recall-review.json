@@ -1,0 +1,14 @@
+{
+  "schema": "necromatcher/bounded-v8-web-recall-review/1",
+  "fit_id": "hogan-bounded-heel-hypothesis-fit-v8",
+  "run_id": "7b38e4876eb7411ea032d1ace2eb5681",
+  "producer_source_commit": "2ad99b870a12b1683fe19a82100ebcf22aefa237",
+  "current_server_source_equality": "unverified",
+  "recalled_source_projection": true,
+  "both_saved_seed_and_fit_listed": true,
+  "download_available": true,
+  "downloaded_zip_sha256": "567e77317ab777c05d80726a3301442479be2a9b5872b601030cb0ad1a6d3c65",
+  "matches_guarded_cli_package": true,
+  "scientific_acceptance": "rejected",
+  "proof": "hogan-bounded-v8-web-recall-proof.png"
+}

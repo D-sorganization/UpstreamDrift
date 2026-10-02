@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 on base 96aefc36e0576993a7f970e416279bd31e416870 — 150 canonical initialization/domain/image, native range/extrema and owned worker/job/session cases passed; pinned mypy and scoped Ruff passed. No new bounded player trial yet.
+- **Last verified:** 2026-10-02 at producer 2ad99b870a12b1683fe19a82100ebcf22aefa237 — 160 focused tests passed; four owned seed/bounded jobs saved rejected research versions. Independent source/midpoint/extrema audit passed all 32 authored ranges but retained grip/ground failures.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Freeze owned initialization job persistence and independent audit, run new exact-range Tiger/Hogan seed and bounded-fit versions, then publish source overlays and update compiled methods evidence.
+- **Next step:** Implement exact preserved-coefficient restart and reviewed swing/stance intervals with time-varying contact hypotheses; preserve full bound/contact recipes through native/web refit surfaces. Repeat image/closure/contact audits before dynamics and downstream qualification.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
@@ -39,7 +39,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 20 video job and ten native control cases passed; actual live Hogan legacy verification downloaded the identical ZIP and persisted readiness through reload.
+- **Last verified:** 2026-10-02 at producer 2ad99b870a — both V8 exports verified; all 960 MP4 frames decoded, six stills visually reviewed and output hashes checked. Live Hogan V8 web recall downloaded the same SHA256 as the guarded CLI ZIP.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
 - **Next step:** Revalidate native legacy save with an actual stored player package.
 
@@ -52,7 +52,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at 73ace83145 — final 21-page methods PDF compiled with installer-disabled MiKTeX and visually reviewed; Desktop package reverified. Built-in platform-directory failure remains.
+- **Last verified:** 2026-10-02 — final 25-page methods PDF compiled twice with installer-disabled MiKTeX and all pages reviewed; 89 Desktop artifacts hash-verified. PDF SHA-256: e40bc030acce622ee5af22abbc4be967e720ab53c5a779273a7d7f1cc3d1671d. Built-in platform-directory failure remains.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
 - **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
 

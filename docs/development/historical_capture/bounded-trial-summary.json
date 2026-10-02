@@ -1,0 +1,944 @@
+{
+  "schema": "necromatcher/bounded-trial-summary/1",
+  "producer_source_commit": "2ad99b870a12b1683fe19a82100ebcf22aefa237",
+  "scientific_acceptance": "rejected",
+  "continuous_nonlinear_certified": false,
+  "runs": [
+    {
+      "player": "tiger",
+      "source_fit_id": "tiger-interior-constraint-fit-v7",
+      "new_fit_id": "tiger-authored-bounded-seed-v8",
+      "stored_fit_hash": "sha256:b8b77e5155982575034ba4b98c5c377a306f340e51f876badc8852f7c320111a",
+      "stance_hypothesis": {
+        "pinned_spheres": ["heel_r", "heel_l"],
+        "ground_z_m": 0,
+        "historically_observed": false
+      },
+      "run_id": "f3af214b73ad45bf833c728018ce2344",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "blockers": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "nonlinear_continuous_constraints_not_certified",
+        "historical_anatomy_unqualified",
+        "native_coordinates_without_authored_ranges",
+        "authored_initialization_only"
+      ],
+      "execution_source_sha256": "sha256:81d6b01dcfa418c4f77ee0900176355031211df320e2215e84eba05b450db6e3",
+      "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+      "options": {
+        "operation": "author_initialization",
+        "frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "knot_count": 12,
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": ["heel_r", "heel_l"],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "authored_range_project_zero_slopes",
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        }
+      },
+      "metrics": {
+        "initial_rms_pixels": 61.717591912265206,
+        "rms_pixels": 61.717591912265206,
+        "dense_rms_pixels": 59.40087998974088,
+        "held_out_rms_pixels": 59.12487796011691,
+        "max_grip_separation_m": 0.25962361935207484,
+        "converged": false,
+        "optimizer_ran": false
+      },
+      "initialization": {
+        "policy": "authored_range_project_zero_slopes",
+        "original_coefficient_sha256": "sha256:69f82add75fc2ac0adfbf77c338d49bde5fa8479584d2b868f8fafddcf5a1f53",
+        "initialized_coefficient_sha256": "sha256:089bf09aff939a6ce01a2afd3217ff825d36bb66bbb8c0c67aaa3220288d09a9",
+        "changed_knot_count": 324,
+        "maximum_position_displacements": [
+          {
+            "coordinate_name": "TranslationInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputX",
+            "maximum_absolute_position_displacement": 0.0491238223141256
+          },
+          {
+            "coordinate_name": "SpineInputY",
+            "maximum_absolute_position_displacement": 0.7591500716974784
+          },
+          {
+            "coordinate_name": "TorsoInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LEInput",
+            "maximum_absolute_position_displacement": 1.1292132788418663
+          },
+          {
+            "coordinate_name": "LSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "REInput",
+            "maximum_absolute_position_displacement": 0.4158230461267025
+          },
+          {
+            "coordinate_name": "RSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_r",
+            "maximum_absolute_position_displacement": 1.5661067706328917
+          },
+          {
+            "coordinate_name": "hip_adduction_r",
+            "maximum_absolute_position_displacement": 0.07189524791665702
+          },
+          {
+            "coordinate_name": "hip_rotation_r",
+            "maximum_absolute_position_displacement": 1.2890770858742382
+          },
+          {
+            "coordinate_name": "knee_angle_r",
+            "maximum_absolute_position_displacement": 0.7190521939706058
+          },
+          {
+            "coordinate_name": "ankle_angle_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_l",
+            "maximum_absolute_position_displacement": 0.44190197987716595
+          },
+          {
+            "coordinate_name": "hip_adduction_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_l",
+            "maximum_absolute_position_displacement": 0.3980143568693323
+          },
+          {
+            "coordinate_name": "knee_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          }
+        ]
+      },
+      "constraint_assessment": {
+        "tested_time_count": 55,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "maximum_dimensionless_residual": 5129.941947625565,
+        "continuous_certified": false
+      }
+    },
+    {
+      "player": "tiger",
+      "source_fit_id": "tiger-authored-bounded-seed-v8",
+      "new_fit_id": "tiger-bounded-heel-hypothesis-fit-v8",
+      "stored_fit_hash": "sha256:5af70b5ef2464c9b3f5bf244cadada130d5288b8d2f0b58b9ad0b3c4241211f9",
+      "stance_hypothesis": {
+        "pinned_spheres": ["heel_r", "heel_l"],
+        "ground_z_m": 0,
+        "historically_observed": false
+      },
+      "run_id": "d5481a20dfc7457f94a729dfd8d71073",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "blockers": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "nonlinear_continuous_constraints_not_certified",
+        "historical_anatomy_unqualified",
+        "native_coordinates_without_authored_ranges",
+        "optimizer_not_converged"
+      ],
+      "execution_source_sha256": "sha256:81d6b01dcfa418c4f77ee0900176355031211df320e2215e84eba05b450db6e3",
+      "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+      "options": {
+        "operation": "fit",
+        "frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "knot_count": 12,
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": ["heel_r", "heel_l"],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "authored_range_project_zero_slopes",
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        }
+      },
+      "metrics": {
+        "initial_rms_pixels": 62.45143696391826,
+        "rms_pixels": 69.42319412520281,
+        "dense_rms_pixels": 68.84715804895544,
+        "held_out_rms_pixels": 68.77968688551948,
+        "max_grip_separation_m": 0.050778827248410804,
+        "converged": false,
+        "optimizer_ran": true
+      },
+      "initialization": {
+        "policy": "authored_range_project_zero_slopes",
+        "original_coefficient_sha256": "sha256:bb58a8909c54aa7a930831ec35d03bd18dd209a37c87eae79a53f96541233afa",
+        "initialized_coefficient_sha256": "sha256:5503ffcbbc76a68afab9e1134c789760b5431a6e53a77d28cf1036010514e7b6",
+        "changed_knot_count": 304,
+        "maximum_position_displacements": [
+          {
+            "coordinate_name": "TranslationInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TorsoInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LEInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "REInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_r",
+            "maximum_absolute_position_displacement": 1.1102230246251565e-16
+          },
+          {
+            "coordinate_name": "knee_angle_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_l",
+            "maximum_absolute_position_displacement": 1.1102230246251565e-16
+          },
+          {
+            "coordinate_name": "knee_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          }
+        ]
+      },
+      "constraint_assessment": {
+        "tested_time_count": 55,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "maximum_dimensionless_residual": 157.1107392778792,
+        "continuous_certified": false
+      }
+    },
+    {
+      "player": "hogan",
+      "source_fit_id": "hogan-interior-constraint-fit-v7",
+      "new_fit_id": "hogan-authored-bounded-seed-v8",
+      "stored_fit_hash": "sha256:b7e3ce8f6fc4731bda3298654f4f9df57d8e98ccab6e3a214b62872bae1a0c56",
+      "stance_hypothesis": {
+        "pinned_spheres": ["heel_r", "heel_l"],
+        "ground_z_m": 0,
+        "historically_observed": false
+      },
+      "run_id": "2c38b3444275457599b77a817d3a6b3d",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "blockers": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "nonlinear_continuous_constraints_not_certified",
+        "historical_anatomy_unqualified",
+        "native_coordinates_without_authored_ranges",
+        "authored_initialization_only"
+      ],
+      "execution_source_sha256": "sha256:81d6b01dcfa418c4f77ee0900176355031211df320e2215e84eba05b450db6e3",
+      "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+      "options": {
+        "operation": "author_initialization",
+        "frame_indices": [
+          0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490,
+          525, 560, 595, 630, 665, 700, 735, 749
+        ],
+        "knot_count": 12,
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": ["heel_r", "heel_l"],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "authored_range_project_zero_slopes",
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        }
+      },
+      "metrics": {
+        "initial_rms_pixels": 12.285791096433673,
+        "rms_pixels": 12.285791096433673,
+        "dense_rms_pixels": 12.566360780555888,
+        "held_out_rms_pixels": 12.574884004511297,
+        "max_grip_separation_m": 0.27884088219716796,
+        "converged": false,
+        "optimizer_ran": false
+      },
+      "initialization": {
+        "policy": "authored_range_project_zero_slopes",
+        "original_coefficient_sha256": "sha256:6ae5733b5ce1ec6fac4ead1d824dab8f71185e690383d37971384196e7261e4b",
+        "initialized_coefficient_sha256": "sha256:97c27dd3be0fe58b112e47ebd69772d32e71f3a778e18ce93f8562f5cc65c047",
+        "changed_knot_count": 324,
+        "maximum_position_displacements": [
+          {
+            "coordinate_name": "TranslationInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputX",
+            "maximum_absolute_position_displacement": 0.043714971911325784
+          },
+          {
+            "coordinate_name": "SpineInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TorsoInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LEInput",
+            "maximum_absolute_position_displacement": 0.939641101828938
+          },
+          {
+            "coordinate_name": "LSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "REInput",
+            "maximum_absolute_position_displacement": 0.6923037749128497
+          },
+          {
+            "coordinate_name": "RSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "knee_angle_r",
+            "maximum_absolute_position_displacement": 0.926872420544226
+          },
+          {
+            "coordinate_name": "ankle_angle_r",
+            "maximum_absolute_position_displacement": 0.04086979589876738
+          },
+          {
+            "coordinate_name": "hip_flexion_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "knee_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          }
+        ]
+      },
+      "constraint_assessment": {
+        "tested_time_count": 56,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "maximum_dimensionless_residual": 633.0943925775903,
+        "continuous_certified": false
+      }
+    },
+    {
+      "player": "hogan",
+      "source_fit_id": "hogan-authored-bounded-seed-v8",
+      "new_fit_id": "hogan-bounded-heel-hypothesis-fit-v8",
+      "stored_fit_hash": "sha256:aae654ff027de93010e3d1aa6ff6b5e94b544a20e479c80fe9e3df448cfc626d",
+      "stance_hypothesis": {
+        "pinned_spheres": ["heel_r", "heel_l"],
+        "ground_z_m": 0,
+        "historically_observed": false
+      },
+      "run_id": "78f05304b48744b3aefe85220d8c2573",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "blockers": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "nonlinear_continuous_constraints_not_certified",
+        "historical_anatomy_unqualified",
+        "native_coordinates_without_authored_ranges",
+        "optimizer_not_converged"
+      ],
+      "execution_source_sha256": "sha256:81d6b01dcfa418c4f77ee0900176355031211df320e2215e84eba05b450db6e3",
+      "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+      "options": {
+        "operation": "fit",
+        "frame_indices": [
+          0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490,
+          525, 560, 595, 630, 665, 700, 735, 749
+        ],
+        "knot_count": 12,
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": ["heel_r", "heel_l"],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "coordinate_bounds": [
+            ["SpineInputX", -0.6108652381980153, 0.6108652381980153],
+            ["SpineInputY", -0.7853981633974483, 0.7853981633974483],
+            ["TorsoInput", -1.7453292519943295, 1.7453292519943295],
+            ["LEInput", -2.6179938779914944, 0.08726646259971647],
+            ["LFInput", -1.5707963267948966, 1.5707963267948966],
+            ["LScapInputX", -0.17453292519943295, 0.5235987755982988],
+            ["LScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["LWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["LWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["REInput", -2.6179938779914944, 0.08726646259971647],
+            ["RFInput", -1.5707963267948966, 1.5707963267948966],
+            ["RScapInputX", -0.5235987755982988, 0.17453292519943295],
+            ["RScapInputY", -0.6981317007977318, 0.6981317007977318],
+            ["RWInputX", -0.6981317007977318, 0.4363323129985824],
+            ["RWInputY", -1.2217304763960306, 1.2217304763960306],
+            ["NeckInputX", -0.7853981633974483, 0.7853981633974483],
+            ["NeckInputY", -1.0471975511965976, 1.0471975511965976],
+            ["NeckInputZ", -1.3962634015954636, 1.3962634015954636],
+            ["hip_flexion_r", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_r", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_r", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_r", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_r", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_r", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_r", -0.5235987755982988, 0.5235987755982988],
+            ["hip_flexion_l", -0.5235987755982988, 2.0943951023931953],
+            ["hip_adduction_l", -0.8726646259971648, 0.5235987755982988],
+            ["hip_rotation_l", -0.6981317007977318, 0.6981317007977318],
+            ["knee_angle_l", -2.0943951023931953, 0.17453292519943295],
+            ["ankle_angle_l", -0.6981317007977318, 0.5235987755982988],
+            ["subtalar_angle_l", -0.3490658503988659, 0.3490658503988659],
+            ["mtp_angle_l", -0.5235987755982988, 0.5235987755982988]
+          ],
+          "initialization_policy": "authored_range_project_zero_slopes",
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 30,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        }
+      },
+      "metrics": {
+        "initial_rms_pixels": 13.02777286051838,
+        "rms_pixels": 12.649874969308826,
+        "dense_rms_pixels": 13.338352918397067,
+        "held_out_rms_pixels": 13.35894903122789,
+        "max_grip_separation_m": 0.015410589527530563,
+        "converged": false,
+        "optimizer_ran": true
+      },
+      "initialization": {
+        "policy": "authored_range_project_zero_slopes",
+        "original_coefficient_sha256": "sha256:cf12fd27d491015565d4b4dcae547a562d39cef2149862181606e304768797c8",
+        "initialized_coefficient_sha256": "sha256:073b53cf337359ece0dc74815f7910a0f6dea7555e8fde9fc7c9934858a88932",
+        "changed_knot_count": 306,
+        "maximum_position_displacements": [
+          {
+            "coordinate_name": "TranslationInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TranslationInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "HipInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "SpineInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "TorsoInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LEInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "LSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "REInput",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputX",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputY",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "RSInputZ",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "knee_angle_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_r",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_flexion_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_adduction_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "hip_rotation_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "knee_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          },
+          {
+            "coordinate_name": "ankle_angle_l",
+            "maximum_absolute_position_displacement": 0.0
+          }
+        ]
+      },
+      "constraint_assessment": {
+        "tested_time_count": 56,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "maximum_dimensionless_residual": 92.54626352569146,
+        "continuous_certified": false
+      }
+    }
+  ]
+}
