@@ -1138,3 +1138,7 @@ original film timing or independent multiview.
 The first post-merge push was stopped because documentation changed while the
 security hook was running (no security issues were identified). Finish the
 current documentation commit and retry from a clean worktree.
+
+## Main Refresh
+
+Commit `SELF` merges current main at `80dd2f7be`, retaining both SPEC changelog entries. No exploratory GS3DX source or model files changed upstream from the previously tested integration base. The 187 native integration tests and 44 focused Python checks therefore retain their stated scope. Tour matching on the current-main Human model exited naturally with code zero at 07:49:26Z, but mean/max frame position RMS increased to 13.366/41.385 mm, so it has not replaced the earlier selected tour clips. Owner matching and same-runtime/model delta diagnosis remain pending. Draft continuation PR: https://github.com/D-sorganization/UpstreamDrift/pull/11256.

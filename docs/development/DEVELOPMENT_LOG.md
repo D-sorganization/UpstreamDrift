@@ -22,13 +22,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** codex (Gemini 3.8 CLI delegates)
 - **Issue:** #10950 (children #10951–#10959, #10979, #10985, #10986, #11011)
-- **PR:** #11179 (draft; #10963 closed by the history scrub)
+- **PR:** #11256 (draft); original #11179 remains separate.
 - **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-01, reviewed base 144e81188 plus working patch: 102 focused MATLAB pure tests (0 incomplete), 10 native Human visual-adapter tests, 15 sphere tests, 12 grip-contract tests, 18 subject-physics/catalog tests, 13 capture-import tests, 17 runtime-fingerprint tests, 12 export-contract tests and 44 focused Python tests pass. Full Human A/O native solves exited naturally with code zero; four H.264 clips fully decoded and packaged without raw captures. Earlier LaTeX revision compiled; latest full-export additions remain uncompiled due to editor platform error. Physical qualification remains red; main-based integration passed 187 native MATLAB tests with zero incomplete and 44 focused Python tests; full matching on the preserved new model remains pending.
+- **Last verified:** 2026-10-02 at SELF, reviewed base 144e81188 plus working patch: 102 focused MATLAB pure tests (0 incomplete), 10 native Human visual-adapter tests, 15 sphere tests, 12 grip-contract tests, 18 subject-physics/catalog tests, 13 capture-import tests, 17 runtime-fingerprint tests, 12 export-contract tests and 44 focused Python tests pass. Full Human A/O native solves exited naturally with code zero; four H.264 clips fully decoded and packaged without raw captures. Earlier LaTeX revision compiled; latest full-export additions remain uncompiled due to editor platform error. Physical qualification remains red; main-based integration passed 187 native MATLAB tests with zero incomplete and 44 focused Python tests; full matching on the preserved new model remains pending.
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
-- **Next step:** Verify full A/O matching against the preserved current-main Human model before selecting new videos.
+- **Next step:** Complete the current-main owner match and compare both captures before selecting replacement videos.
 
 ### DL-#11230 — Historical Player Capture
 
