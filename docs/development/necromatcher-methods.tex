@@ -54,7 +54,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; later sequential exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; later sequential exploration identified separately.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -326,8 +326,81 @@ Unbounded coordinates remain explicitly unbounded. This floating-point scalar
 assessment neither enforces hard bounds during fitting nor certifies nonlinear
 closure/contact, physical timing, dynamics, or historical motion.
 
+\subsection{Canonical Hard Hermite Coordinate Bounds}
+A subsequent tested implementation at source \code{73ace83145} adds
+\code{HermiteBoundsDomain} to the canonical single-trial MAP estimator. The V7 artifacts below
+were produced at \code{b92732e725} without this domain and retain their original
+rejected outcomes; the new feature does not retroactively repair those paths.
+
+For a segment of duration $h$, the scalar cubic Bernstein controls are
+\begin{equation}
+ b_0=q_0,\quad b_1=q_0+\frac{h v_0}{3},\quad
+ b_2=q_1-\frac{h v_1}{3},\quad b_3=q_1.
+\end{equation}
+Keeping all four controls in a named finite coordinate interval $[L,U]$
+keeps the entire scalar segment in that interval by the convex-hull property.
+This is a sufficient conservative domain: some bounded cubics have Bernstein
+controls outside their limits and are excluded. It constrains model
+coordinates in their declared native units; it supplies no nonlinear grip,
+contact, camera, anatomical, physical-clock or dynamics qualification.
+
+A bounded knot position $q$ supplies outgoing and incoming admissible
+source-clock velocity intervals
+\begin{equation}
+ I_{\rm out}=\left[\frac{3(L-q)}{h_{\rm out}},
+                         \frac{3(U-q)}{h_{\rm out}}\right],\qquad
+ I_{\rm in}=\left[\frac{3(q-U)}{h_{\rm in}},
+                        \frac{3(q-L)}{h_{\rm in}}\right].
+\end{equation}
+Interior knots intersect both intervals, with $\ell$ the largest lower
+endpoint and $u$ the smallest upper endpoint. End knots use their sole
+incident segment. A normalized decision $w\in[-1,1]$ decodes as
+\begin{equation}
+ \theta=(w+1)/2,\qquad v=(1-\theta)\ell+\theta u.
+\end{equation}
+Each knot has one shared decoded velocity, preserving $C^1$ continuity on
+nonuniform knot grids. Equal coordinate limits remove their decision columns
+and decode to constant position $L$ and zero velocity. Unbounded coordinates
+retain ordinary physical position and velocity decisions.
+
+The adapter strictly encodes a feasible physical initialization. It rejects
+infeasible positions or Bernstein controls, nonzero fixed velocities, and
+unsupported/nonrepresentable limits; the public historical-fit binding also
+rejects unknown names and inconsistent locked seeds. Neither boundary clips
+output or silently repairs an existing candidate. A caller
+may explicitly author a feasible initialization with bounded positions and
+zero slopes, recording that assumption. A collapsed velocity interval encodes
+zero velocity with $w=0$; other normalized decisions can decode to the same
+zero there.
+
+The decoder Jacobian $D$ maps internal decisions to the ordinary physical
+Hermite coefficients. Away from branch ties,
+$\partial v/\partial w=(u-\ell)/2$ and
+$\partial v/\partial q=(1-\theta)\ell'+\theta u'$. At exact active-branch
+ties it returns the mean active slopes as a symmetric generalized derivative;
+one-sided derivatives can differ. No proximity tolerance changes the domain,
+and this kink treatment does not imply optimizer convergence.
+
+Physical callback layouts and saved coefficients retain the canonical spline
+contract. For physical coefficient Jacobian $J_c$ and shared-parameter
+Jacobian $J_p$, the internal Jacobian is $[J_cD,\,J_p]$; shared prior rows,
+parameter locks, and identifiability gates retain their own columns and
+semantics. Finite internal bounds select the existing trust-region solver
+when necessary. An entirely fixed problem evaluates its objective without
+calling SciPy on zero decisions. Multi-trial MAP rejects this single-trial
+capability explicitly. No second fitting solver is introduced.
+
+\code{ImageFitConfig.coordinate_bounds} supplies immutable named
+$(\text{name},L,U)$ records, transported through its narrow JSON decoder.
+Unspecified coordinates remain unbounded; no bounds keeps the original
+identity coefficient domain. The checked public procedure is
+\path{docs/development/necromatcher-hermite-bounds.md}.
+New historical bounded trials, image tradeoffs and nonlinear contact audits
+remain required; this implementation is not a new historical execution receipt.
+
 \subsection{Constraint Wiring Verification and Historical Trials}
-Combined local verification for this implementation reported 108 passing cases;
+The earlier interior-constraint implementation at \code{b92732e725} reported
+108 passing cases in its combined local verification;
 a subsequent native refactor was checked with a separate 34-case native suite.
 These counts describe distinct verification runs and should not be added as an
 independent-test total. A clean MuJoCo 3.3.4 process also executed a synthetic
@@ -743,6 +816,38 @@ verified writer fix is not presented as proof of that error's cause. Tool-free
 Gemini Flash review informed the corrupted-transfer regression, while process
 ownership and teardown claims were checked against actual source and tests.
 
+\subsection{Historical Execution and Present Overlay Readiness}
+A successful historical execution receipt and present download readiness are
+separate claims. \code{execution_verified} describes the persisted successful
+execution; \code{producer_source_commit} retains its original request stamp.
+Neither field claims equality with the current checkout or runtime. An older
+producer source does not invalidate an otherwise intact historical package.
+
+After authoritative parent/output verification, an owned worker retains exact
+relevant asset metadata and an artifact stat baseline: path, device, inode,
+size, modification time and change time. Polling checks relevant public asset
+metadata and at most nine artifact file stats. Missing files, symlinks,
+undeclared outputs, or changed relevant metadata make readiness
+\code{changed_or_unverified}; an intact baseline is
+\code{verified_stat_baseline}. Unrelated fit versions do not invalidate it.
+Polling does not hash the MP4, model or capture archive, and it does not
+fingerprint current implementation files. Stat identities detect ordinary
+mutations; they are not cryptographic content attestation.
+
+The guarded download remains authoritative. It fully verifies immutable
+parents, declared output hashes and final ZIP members, repeats checks after
+packaging, and compares the surrounding stat identities. Older completed runs
+without a baseline can retain verified historical execution while their
+readiness is unverified. Web and native controls offer
+\texttt{Verify Stored Overlay Package} only for a succeeded historically
+verified run lacking readiness. That explicit action invokes the guarded
+download, which establishes a baseline only after complete verification;
+changed parents or artifacts can still fail. Pending, failed, cancelled or
+historically unverified runs offer no stored verification action. A ready run
+retains its ordinary download/save action. The checked procedure is
+\path{docs/development/necromatcher-overlay-status.md}; scientific acceptance
+remains separate from both receipt verification and readiness.
+
 \subsection{Live Web Export Evidence}
 Live export buttons at source \code{3c73001a7c} started Tiger run
 \code{165988043c994250aed72d3a57ebf027} (210 frames) and Hogan run
@@ -885,9 +990,9 @@ The integrated epic is \#11232, with player epics \#11226 and \#11229 and
 native fitting/downstream issue \#11235. Draft PR \#11240 remains a work-in-
 progress implementation vehicle. Local numerical progress does not resolve
 its documented CI remediation limit, remote checks, or complete project goal.
-The next numerical step is a temporally coupled, bounded closed path that
-controls image tradeoffs and audits intermediate geometry, alongside a Hogan
-shot/crop review. Replay execution controls, qualified downstream analysis,
+The newly implemented canonical coordinate domain must next be exercised with
+explicit feasible historical initialization, retained image tradeoffs and
+nonlinear grip/planted-contact audits, alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled
 report/Desktop package in \#11247. The Desktop review package contains

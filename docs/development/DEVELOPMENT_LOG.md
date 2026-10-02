@@ -39,9 +39,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 20 video job cases passed; bounded availability baselines preserve historical execution and fail closed on mutated output/parents.
+- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 20 video job and ten native control cases passed; actual live Hogan legacy verification downloaded the identical ZIP and persisted readiness through reload.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Exercise guarded legacy overlay verification through both visible interfaces.
+- **Next step:** Revalidate native legacy save with an actual stored player package.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 
@@ -52,7 +52,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 19-page PDF compiled with existing MiKTeX installer disabled; all pages visually reviewed and 60 Desktop artifact hashes verified.
+- **Last verified:** 2026-10-02 at 73ace83145 — final 21-page methods PDF compiled with installer-disabled MiKTeX and visually reviewed; Desktop package reverified. Built-in platform-directory failure remains.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
 - **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
 
