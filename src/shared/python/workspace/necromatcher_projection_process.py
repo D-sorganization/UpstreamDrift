@@ -11,6 +11,7 @@ from threading import Lock, Thread
 from typing import Any, TextIO
 
 from src.shared.python.security import secure_popen
+from src.shared.python.core import repo_python_environment
 from src.shared.python.version_info import get_repo_root
 
 PROJECTION_TIMEOUT_S = 45.0
@@ -44,6 +45,7 @@ class NativeFitProjectionProcess:
         process = secure_popen(
             [sys.executable, "-u", "-m", WORKER_MODULE],
             cwd=get_repo_root(),
+            env=repo_python_environment(get_repo_root()),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             text=True,

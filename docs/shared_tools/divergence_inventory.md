@@ -46,7 +46,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `core` | 0 | 0 | 0 | 21 | 0 | 0 |
+| `core` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
@@ -133,7 +133,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 25 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1553** | **770** | **680** |
+| **Total** | **406** | **274** | **123** | **1554** | **770** | **680** |
 
 ## Diverged Files by Package
 

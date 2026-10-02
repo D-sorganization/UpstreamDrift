@@ -32,11 +32,13 @@ from src.shared.python.motion_matching.jobs import (
 from src.shared.python.motion_matching.jobs.service import JobHandle
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
 from src.shared.python.security import secure_popen
+from src.shared.python.core import repo_python_environment
 from src.shared.python.version_info import get_repo_root, read_git_commit
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 
 _SOURCE_DIRECTORIES = (
+    "src/shared/python/core",
     "src/shared/python/workspace",
     "src/shared/python/motion_matching",
     "src/shared/python/estimation",
@@ -145,6 +147,7 @@ def _execute_worker(
             str(request_path),
         ],
         cwd=get_repo_root(),
+        env=repo_python_environment(get_repo_root()),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

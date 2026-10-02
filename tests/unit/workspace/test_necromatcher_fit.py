@@ -109,8 +109,9 @@ def test_api_import_and_source_frame_recall_use_verified_library(fit_case):
 
 
 def test_native_projection_verifies_rebuilt_model_and_uses_stored_camera(
-    fit_case, tmp_path
+    fit_case, tmp_path, monkeypatch
 ):
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     import numpy as np
 
     pytest.importorskip("mujoco")
@@ -177,6 +178,7 @@ def test_native_projection_verifies_rebuilt_model_and_uses_stored_camera(
     import sys
 
     from src.shared.python.security import secure_run
+    from src.shared.python.core import repo_python_environment
 
     script = (
         "import sys; from PyQt6.QtWidgets import QApplication; "
@@ -189,7 +191,10 @@ def test_native_projection_verifies_rebuilt_model_and_uses_stored_camera(
     secure_run(
         [sys.executable, "-c", script, str(library.root)],
         cwd=Path(__file__).resolve().parents[3],
-        env={**os.environ, "QT_QPA_PLATFORM": "offscreen"},
+        env=repo_python_environment(
+            Path(__file__).resolve().parents[3],
+            {**os.environ, "QT_QPA_PLATFORM": "offscreen"},
+        ),
         check=True,
         timeout=60,
         capture_output=True,

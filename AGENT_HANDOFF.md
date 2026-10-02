@@ -6,9 +6,18 @@ Canonical matching jobs now execute immutable native warm-start refits in a clea
 interpreter with source/runtime/input fingerprints captured at execution. Explicit
 work outcomes preserve rejection after successful computation. Cancellation and
 publication share a commit gate, and dense/held-out errors retain source confidence.
-Seventy-two fitting/job/storage/API/native review checks pass. Final committed-source
-Hogan/Tiger runs and their receipts are next; UI/API job submission, bounded closed
-motion, effort units and qualified downstream replay still require work.
+Seventy-three fitting/job/storage/API/native review checks passed at implementation
+commit `5038b0748bec967931ab76a07593aa1af14ca2d8`. Its actual v4 jobs saved
+750 Hogan frames and 210 Tiger frames with launch/worker source and runtime
+identities. Held-out RMS is 7.635 px for Hogan and 11.861 px for Tiger; Hogan
+improved slightly versus v2 while Tiger worsened. Both computations succeeded
+with rejected qualification, evaluation-budget exhaustion and large grip gaps.
+The portable [V4 Run Receipt](docs/development/historical_capture/native-refit-job-receipt-v4.json)
+records exact identities and metrics. A follow-up reproduces and repairs clean
+worker launches without inherited PYTHONPATH using the shared core environment
+builder extracted from Capture Rig; 84 focused checks pass without inherited
+PYTHONPATH. UI/API job submission, anatomical bounds,
+closed motion, effort units and qualified downstream replay still require work.
 
 ## Native and Web Projection Review
 

@@ -335,8 +335,41 @@ To Refit a Saved Player Version:
    stored fit with `load_fit` and review its model projections before export.
 6. Call `service.close()` after owned jobs finish. Preserve previous versions.
 
-Seventy-two fitting/job/storage/API/native review checks pass, including red-first
+Seventy-three fitting/job/storage/API/native review checks passed at `5038b0748b`, including red-first
 outcome, warm-start, cancellation, publication, input-contract and held-out-metric
 regressions. Job submission through native/web controls, anatomical bounds,
 closed motion, physical-clock qualification, mixed effort units and independently
 verified downstream replay remain open. The full goal and #11235 remain active.
+
+## Committed V4 Research Runs and Clean Worker Launches
+
+[V4 Run Receipt](historical_capture/native-refit-job-receipt-v4.json) records jobs
+executed from exact committed source `5038b0748bec967931ab76a07593aa1af14ca2d8`.
+Both used 60 source samples, 12 knots and a ten-evaluation budget, preserving
+all 750 Hogan and 210 Tiger frames. Hogan training RMS changed from 9.672 to
+7.252 px and held-out RMS is 7.635 px. Tiger training RMS changed from 21.456
+to 11.350 px and held-out RMS is 11.861 px. Initial errors evaluate the actual
+warm-start spline, rather than the unsmoothed seed samples. Hogan held-out error
+improved slightly versus v2; Tiger held-out error worsened. Both jobs exhausted
+the evaluation budget. Maximum grip gaps are 0.123 m and 0.257 m, respectively.
+Neither computation establishes anatomical, physical-clock or dynamics acceptance.
+
+A subsequent launch regression removed inherited PYTHONPATH and reproduced
+`ModuleNotFoundError: bunkershot3d` in the native projection child. Both owned
+workers now use `core.repo_python_environment`, extracted from the existing
+Capture Rig environment builder. It puts this checkout's src first, preserves
+all other settings and does not alter SDK plugin or rendering options. Launch
+module commands from the repository root. Current execution stamps include core
+sources; the historical v4 receipt retains its original, narrower source scope.
+The v4 jobs were not executed from this subsequent launch-fix revision.
+
+Validation of the follow-up: 84 focused fitting, job, storage, API, native
+review, shared environment and Capture Rig checks passed with inherited
+PYTHONPATH removed. Ruff, file budgets, title case and manual governance pass;
+manual release remains blocked pending the required calculation inventory.
+
+Both v4 fits reopened through the verified library after the clean-launch fix.
+Actual native projections at Hogan frames 0/375/749 and Tiger frames 0/105/209
+returned all 13 stored attachments with PYTHONPATH removed from the parent.
+Portable swing exports retained each exact v4 fit hash recorded in the receipt.
+These are recall/export checks, not independent physical replay.

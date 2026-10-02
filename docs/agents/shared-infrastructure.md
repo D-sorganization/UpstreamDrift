@@ -502,3 +502,12 @@ against cancellation. The native worker uses canonical image evidence and Hermit
 MAP fitting with immutable warm-start samples; source PTS and unqualified camera
 assumptions cannot certify physical derivatives or joint efforts. See the
 [Necromatcher Native Fitting Procedure](../development/necromatcher-native-fit.md).
+
+### Repository Python Worker Environments
+
+`core.repo_python_environment(repo_root, base=None)` is the public, pure
+repository-worker environment builder shared by Capture Rig and Necromatcher.
+Run module commands with cwd set to repo_root. It prioritizes repo_root/src for
+bare package imports, preserves SDK/runtime settings and does not mutate the
+parent mapping. Regression tests cover absent PYTHONPATH, duplicate source
+roots, idempotence and real native workers launched by a fresh Qt parent.

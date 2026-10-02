@@ -67,7 +67,9 @@ def test_refit_options_reject_invalid_sampling_and_budgets():
 
 def test_refit_job_persists_start_identity_and_fails_without_native_assumptions(
     fit_case,
+    monkeypatch,
 ):
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     from src.shared.python.motion_matching.jobs import (
         AcceptanceState,
         JobStatus,
@@ -89,6 +91,8 @@ def test_refit_job_persists_start_identity_and_fails_without_native_assumptions(
         result = handle.join(timeout=40)
         assert result.status == JobStatus.FAILED
         assert result.acceptance == AcceptanceState.REJECTED
+        assert "native_definition" in result.message
+        assert "ModuleNotFoundError" not in result.message
         request = json.loads((run_root / "request.json").read_text())
         assert (
             request["source_fit_hash"] == library.load_asset("old-fit").metadata["hash"]
