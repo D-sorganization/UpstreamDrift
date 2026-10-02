@@ -1,3 +1,26 @@
+## Define and Validate Neural Data-Efficiency Claims Statistically (R12, #11155)
+
+Specifies Design by Contract input validation, honest estimand distinction, undefined/inconclusive zero-reference and unattained-target handling, and multi-seed statistical uncertainty evaluation for neural data efficiency:
+- **Strict Budget & Input Preconditions (`src/shared/python/neural_motion/benchmark/efficiency.py`)**:
+  - Strictly positive simulation budgets: rejects non-positive budgets ($b \le 0$) fail-closed with `ValueError`.
+  - Strictly increasing monotone sequence without duplicates: validates $b_{i+1} > b_i$, rejecting unsorted budgets (e.g. `[100, 1]`) and duplicate budgets (e.g. `[100, 100, 200]`) with explicit `ValueError`.
+  - Bounded acceptance values: validates all values in $[0.0, 1.0]$ and finite.
+- **Truthful Descriptive Estimands vs Horizontal Sample-Budget Savings**:
+  - `mean_acceptance_ratio`: unweighted arithmetic mean acceptance ratio ($\bar{a} / \bar{r}$).
+  - `auc_acceptance_ratio`: budget-weighted learning-curve area ratio using trapezoidal numerical integration ($\text{AUC}_{\text{active}} / \text{AUC}_{\text{random}}$ via `trapezoidal_auc`).
+  - `budget_to_target_ratio` (`compute_budget_to_target_ratio`): horizontal sample-budget savings calculating the ratio of random to active simulation budget required to attain a specified target acceptance rate ($B_{\text{random}}(T) / B_{\text{active}}(T)$ via linear interpolation).
+- **Undefined Zero-Reference and Unattained-Target Outcomes**:
+  - Zero-reference random baseline ($\bar{r} \le 10^{-9}$ or $\text{AUC}_r \le 10^{-9}$): sets ratios to `None`, `is_inconclusive=True`, and `active_superiority_confirmed=False`, strictly preventing false $1.0\times$ default success assertions.
+  - Unattained targets ($T > \max(a)$ or $T > \max(r)$): returns `None`, rejecting speculative extrapolation when target performance is unachieved within the evaluated budget window.
+  - Equal curves (`[0.5, 0.5]` vs `[0.5, 0.5]`): sets `active_superiority_confirmed=False`, requiring strict superiority at $\ge 1$ point ($a > r + 10^{-6}$) in addition to non-inferiority ($a \ge r - 10^{-6}$).
+- **Multi-Seed Uncertainty & Statistical Hypothesis Testing (`evaluate_multi_seed_data_efficiency`, `MultiSeedEfficiencySummary`)**:
+  - Aggregates point-wise means and standard errors across independent repeated seed runs.
+  - Paired learning-curve AUC hypothesis test (Student's $t$ paired test with declared confidence level $\alpha = 1 - \text{confidence\_level}$): requires mean AUC difference $> 0$, $p < \alpha$, and point-wise lower confidence bounds $\ge$ random upper bounds to confirm statistical superiority.
+  - Overlapping or high-variance seed distributions fail closed with `active_statistically_superior=False` and `is_inconclusive=True`.
+- **Honest Documentation and Diagnostic Evidence Receipts**:
+  - `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`: updates section 3 with truthful definitions distinguishing arithmetic mean (1.33x), trapezoidal AUC (1.31x), and target budget savings (2.62x at 74% target).
+  - `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json`: updates `sample_data_efficiency` with truthful metrics and explicit `HISTORICAL_DIAGNOSTIC_ONLY` status.
+
 ## Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs (R11, #11151)
 
 Specifies truthful simulation clock calculation, endpoint-inclusive discrete sampling, remainder step execution, and separation of requested vs integrated horizons:
@@ -7591,6 +7614,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11155 | [R12] Define and Validate Neural Data-Efficiency Claims Statistically: Design by Contract budget validation rejecting unsorted, non-positive, and duplicate budgets; equal-curve non-superiority ([0.5, 0.5] vs [0.5, 0.5] -> False); undefined/inconclusive zero-reference and unattained-target handling (None, not 1.0 default); distinct descriptive mean ratio, trapezoidal AUC ratio, and horizontal budget-to-target sample savings; multi-seed statistical uncertainty evaluation (evaluate_multi_seed_data_efficiency, MultiSeedEfficiencySummary); and truthful diagnostic documentation and receipt updates (#11155). |
 | 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
 | 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
 | 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |

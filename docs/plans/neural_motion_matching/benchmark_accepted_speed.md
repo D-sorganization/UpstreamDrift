@@ -46,14 +46,28 @@ All measurements strictly enforce:
 
 ## 3. Data Efficiency (Active vs. Random Acquisition)
 
-| Native Simulation Budget | Active Acquisition Acceptance | Random Acquisition Acceptance | Active Advantage |
-| ------------------------ | ----------------------------- | ----------------------------- | ---------------- |
-| 100 episodes             | 45.0%                         | 30.0%                         | +15.0%           |
-| 250 episodes             | 65.0%                         | 48.0%                         | +17.0%           |
-| 500 episodes             | 82.0%                         | 62.0%                         | +20.0%           |
-| 1000 episodes            | 92.0%                         | 74.0%                         | +18.0%           |
+| Native Simulation Budget | Active Acquisition Acceptance | Random Acquisition Acceptance | Pointwise Absolute Advantage |
+| ------------------------ | ----------------------------- | ----------------------------- | ---------------------------- |
+| 100 episodes             | 45.0%                         | 30.0%                         | +15.0%                       |
+| 250 episodes             | 65.0%                         | 48.0%                         | +17.0%                       |
+| 500 episodes             | 82.0%                         | 62.0%                         | +20.0%                       |
+| 1000 episodes            | 92.0%                         | 74.0%                         | +18.0%                       |
 
-Active acquisition achieves a **1.48x sample efficiency multiplier**, matching the accuracy of 1,000 random episodes with only ~480 actively acquired episodes.
+### Estimand Distinction and Diagnostic Metrics (R12, #11155)
+
+The benchmark pipeline strictly distinguishes **descriptive acceptance gain** from **sample-budget savings**:
+
+1. **Arithmetic Mean Acceptance Ratio**:
+   - $\bar{a} / \bar{r} = 0.710 / 0.535 = \mathbf{1.33\times}$ (unweighted average acceptance rate ratio across evaluated points).
+2. **Budget-Weighted Learning Curve Area (Trapezoidal AUC Ratio)**:
+   - $\text{AUC}_{\text{active}} / \text{AUC}_{\text{random}} = 701.25 / 536.00 = \mathbf{1.31\times}$ (integrated learning area across the $[100, 1000]$ simulation budget domain).
+3. **Horizontal Sample-Budget Savings (Budget-to-Target Efficiency)**:
+   - At target acceptance rate = **74.0%** (the maximum rate attained by random acquisition within 1,000 episodes):
+     - Active acquisition attains 74.0% acceptance at **~382 episodes** (interpolated between 250 and 500 episodes).
+     - Random acquisition requires **1,000 episodes**.
+     - Effective sample-budget savings multiplier: $1000 / 382.4 = \mathbf{2.62\times}$ budget efficiency.
+   - At targets $> 74.0\%$ (e.g. 80% or 92%):
+     - Random acquisition fails to achieve the target within the evaluated 1,000-episode window; the budget savings multiplier is strictly **inconclusive / undefined** rather than asserted via speculative extrapolation.
 
 ## 4. Break-Even Economics
 
