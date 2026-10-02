@@ -30,6 +30,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Retain fixed pose/force/anatomical gates, and address coupled whole-body posture/torque support before full Human swing and independent replay. Keep prescribed-neck/feedback limits explicit; recover and qualify all actuator controls. Reconcile current main, protected delivery and PDF review.
 
+### DL-#11268 · Capture-O Video Companion
+
+- **State:** proposed
+- **Owner:** claude
+- **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** not created
+- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
+- **Paths:** `docs/development/capture-o-video/**`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 at SELF — epic and eleven child issues published; procedure document added; no implementation or data processing performed.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Owner supplies the album privately and a fleet agent executes COV-1 (#11269).
+
 ### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress
