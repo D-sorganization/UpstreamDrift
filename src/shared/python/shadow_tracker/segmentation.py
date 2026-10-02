@@ -740,6 +740,7 @@ class ModelSegmentationProvider:
         "_is_loaded",
         "_checkpoint_sha256",
         "_model_card",
+        "_allow_synthetic",
     )
 
     def __init__(
@@ -755,6 +756,7 @@ class ModelSegmentationProvider:
             | None
         ) = None,
         manual_provider: ManualMaskProvider | None = None,
+        allow_synthetic: bool = False,
     ) -> None:
         check_id(model_name, "model_name")
         self._model_name = model_name
@@ -765,6 +767,7 @@ class ModelSegmentationProvider:
         self._is_loaded = False
         self._checkpoint_sha256: str | None = None
         self._model_card: SegmentationModelCard | None = None
+        self._allow_synthetic = bool(allow_synthetic)
 
     @property
     def model_name(self) -> str:
@@ -777,6 +780,10 @@ class ModelSegmentationProvider:
     @property
     def expected_sha256(self) -> str | None:
         return self._expected_sha256
+
+    @property
+    def allow_synthetic(self) -> bool:
+        return self._allow_synthetic
 
     @property
     def is_loaded(self) -> bool:
@@ -832,15 +839,31 @@ class ModelSegmentationProvider:
             body, club, valid = self._inference_engine(
                 frame, width_px, height_px, adverse_conditions
             )
-        else:
+            is_synthetic = False
+        elif self._allow_synthetic:
             body, club, valid = _generate_synthetic_silhouette(
                 width_px, height_px, adverse_conditions
             )
+            is_synthetic = True
+        else:
+            raise RuntimeError(
+                f"Model '{self._model_name}' has no active inference engine configured. "
+                "Absent model inference cannot produce observed masks. "
+                "Provide an inference_engine or explicitly configure allow_synthetic=True for testing fixtures."
+            )
 
-        revision_id = (
-            f"rev-{self._model_name}-{frame.frame_id}-{self._checkpoint_sha256[:8]}"
-        )
-        producer_id = f"model:{self._model_name}:{self._checkpoint_sha256[:16]}"
+        if is_synthetic:
+            revision_id = f"rev-synthetic-{self._model_name}-{frame.frame_id}-{self._checkpoint_sha256[:8]}"
+            producer_id = f"synthetic:{self._model_name}:{self._checkpoint_sha256[:16]}"
+            correction_note = (
+                "Synthetic silhouette fallback fixture (unobserved model output)"
+            )
+        else:
+            revision_id = (
+                f"rev-{self._model_name}-{frame.frame_id}-{self._checkpoint_sha256[:8]}"
+            )
+            producer_id = f"model:{self._model_name}:{self._checkpoint_sha256[:16]}"
+            correction_note = "Automated inference from verified pinned model weights"
 
         mask_frame = MaskFrame(
             schema_version=MASK_SCHEMA_VERSION,
@@ -853,7 +876,7 @@ class ModelSegmentationProvider:
             revision_id=revision_id,
             parent_revision_id=None,
             producer_id=producer_id,
-            correction_note="Automated inference from verified pinned model weights",
+            correction_note=correction_note,
         )
 
         self._manual_provider.register_mask(mask_frame)
@@ -903,10 +926,15 @@ class ModelSegmentationProvider:
             )
             count += 1
 
+        provenance_prefix = (
+            "synthetic"
+            if (self._inference_engine is None and self._allow_synthetic)
+            else "model_inference"
+        )
         return SegmentationResult(
             shot_id=request.shot_id,
             mask_count=count,
-            provenance=f"model_inference:{self._model_name}:{self._checkpoint_sha256[:16]}",
+            provenance=f"{provenance_prefix}:{self._model_name}:{self._checkpoint_sha256[:16]}",
         )
 
     def get_mask(

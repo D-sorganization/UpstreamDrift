@@ -631,7 +631,7 @@ def test_screenshot_schema_encodes_pending_and_captured_conditions() -> None:
             "commit": "1" * 40,
         },
     }
-    pending = {
+    pending: dict[str, object] = {
         "id": "p-primary",
         "program_id": "p",
         "status": "pending",

@@ -98,6 +98,10 @@ DECLARED_SHARED_LOGOS: dict[str, SharedLogoDeclaration] = {
         "category:tool",
         "Tools-provider video analysis and processing tiles.",
     ),
+    "matched_swing_browser.svg": SharedLogoDeclaration(
+        "category:tool",
+        "Results browser and historical player workspace share the matched swing browser icon.",
+    ),
     "sidekick.svg": SharedLogoDeclaration(
         "category:tool",
         "AI assistant/agent tiles (chat assistant, AIP protocol); verbatim "

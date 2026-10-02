@@ -802,6 +802,8 @@ export interface CounterfactualRequest {
   kind: string;
   /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
   run_post_hoc: boolean;
+  /** Optional simulation run ID to analyze. If omitted, uses active/latest run. */
+  run_id?: string | null;
 }
 
 export interface CourseStateColumnsV1 {
@@ -2653,6 +2655,10 @@ export interface SimulationRequest {
   control_inputs?: Record<string, unknown>[] | null;
   /** Analysis configuration */
   analysis_config?: Record<string, unknown> | null;
+  /** Optional unique identifier for the simulation run */
+  run_id?: string | null;
+  /** Whether to permit a variable remainder step for non-divisible durations */
+  allow_remainder_step: boolean;
 }
 
 /**
@@ -2681,6 +2687,14 @@ export interface SimulationResponse {
   error?: SimulationErrorInfo | null;
   /** Run or correlation identifier */
   run_id?: string | null;
+  /** Requested simulation duration in seconds */
+  requested_duration?: number | null;
+  /** Actual integrated simulation horizon in seconds */
+  integrated_duration?: number | null;
+  /** Number of physics integration steps executed */
+  step_count?: number | null;
+  /** Number of retained state samples including t=0 */
+  retained_samples?: number | null;
 }
 
 /**

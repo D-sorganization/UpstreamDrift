@@ -58,6 +58,7 @@ class MarkerObservationSpec:
     is_interpolated: bool = False
     exclusion_reason: str | None = None
     missing_spans: tuple[tuple[int, int], ...] = ()
+    interpolated_spans: tuple[tuple[int, int], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -69,6 +70,7 @@ class MarkerObservationSpec:
             "is_interpolated": self.is_interpolated,
             "exclusion_reason": self.exclusion_reason,
             "missing_spans": [list(span) for span in self.missing_spans],
+            "interpolated_spans": [list(span) for span in self.interpolated_spans],
         }
 
     @classmethod
@@ -87,6 +89,10 @@ class MarkerObservationSpec:
             ),
             missing_spans=tuple(
                 (int(span[0]), int(span[1])) for span in data.get("missing_spans", ())
+            ),
+            interpolated_spans=tuple(
+                (int(span[0]), int(span[1]))
+                for span in data.get("interpolated_spans", ())
             ),
         )
 
@@ -166,7 +172,28 @@ class ObservationManifest:
         mask.setflags(write=False)
         return mask
 
-    def require_frozen_validity(self, valid: np.ndarray) -> np.ndarray:
+    def measured_frame_validity(self) -> np.ndarray:
+        """Return the frozen frame-by-marker validity mask strictly for measured observations.
+
+        Excludes any marker channels or frame spans marked as interpolated or unmeasured.
+        """
+        mask = self.frame_validity().copy()
+        labels = tuple(sorted(self.markers))
+        for col, label in enumerate(labels):
+            spec = self.markers[label]
+            if spec.is_interpolated:
+                mask[:, col] = False
+            for start, end in spec.interpolated_spans:
+                mask[start : end + 1, col] = False
+        mask.setflags(write=False)
+        return mask
+
+    def require_frozen_validity(
+        self,
+        valid: np.ndarray,
+        *,
+        require_measured_only: bool = False,
+    ) -> np.ndarray:
         """Verify a caller-supplied mask against the frozen frame-level validity.
 
         Returns the frozen mask on success; raises ValueError when the supplied mask
@@ -174,15 +201,20 @@ class ObservationManifest:
         never become measured evidence under an authoritative manifest.
         """
         mask = np.asarray(valid)
-        frozen = self.frame_validity()
+        frozen = (
+            self.measured_frame_validity()
+            if require_measured_only
+            else self.frame_validity()
+        )
         if mask.shape != frozen.shape or not np.array_equal(mask, frozen):
             n_diff = (
                 int(np.count_nonzero(mask != frozen))
                 if mask.shape == frozen.shape
                 else -1
             )
+            mode_name = "measured " if require_measured_only else ""
             raise ValueError(
-                "Validity mask does not match the manifest's frozen frame-level "
+                f"Validity mask does not match the manifest's frozen {mode_name}frame-level "
                 f"validity ({n_diff} differing cells); metric evaluation must use "
                 "or verify the frozen frame-by-marker validity"
             )
@@ -238,6 +270,8 @@ def _validate_arrays(
     obs: np.ndarray,
     valid: np.ndarray,
     manifest: ObservationManifest | None = None,
+    *,
+    measured_only: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
     pred_arr = np.asarray(pred, dtype=np.float64)
     obs_arr = np.asarray(obs, dtype=np.float64)
@@ -263,7 +297,9 @@ def _validate_arrays(
 
     # Bind evaluation to the frozen frame-level validity when a manifest is supplied.
     if manifest is not None:
-        valid_arr = manifest.require_frozen_validity(valid_arr)
+        valid_arr = manifest.require_frozen_validity(
+            valid_arr, require_measured_only=measured_only
+        )
 
     n_valid = int(np.count_nonzero(valid_arr))
     if n_valid == 0:
@@ -278,7 +314,9 @@ def _validate_arrays(
 
 
 @precondition(
-    lambda pred, obs, valid: pred is not None and obs is not None and valid is not None
+    lambda pred, obs, valid, **kwargs: (
+        pred is not None and obs is not None and valid is not None
+    )
 )
 @postcondition(lambda res: isinstance(res, float) and res >= 0.0)
 def compute_pooled_rmse(
@@ -287,16 +325,18 @@ def compute_pooled_rmse(
     valid: np.ndarray,
     *,
     manifest: ObservationManifest | None = None,
+    measured_only: bool = False,
 ) -> float:
     """Compute exact pooled 3D Euclidean marker RMSE: sqrt(sum(valid ||pred - obs||^2) / N_valid).
 
     When a manifest is bound, `valid` is verified bit-for-bit against the manifest's
-    frozen frame-by-marker validity before any metric is produced.
+    frozen frame-by-marker validity before any metric is produced. When `measured_only=True`,
+    the mask is verified strictly against measured (non-interpolated) observations.
 
     Note: Distinct from median or mean of per-frame RMS when valid counts or error distributions vary.
     """
     pred_arr, obs_arr, valid_arr, n_valid = _validate_arrays(
-        pred, obs, valid, manifest=manifest
+        pred, obs, valid, manifest=manifest, measured_only=measured_only
     )
     diff = pred_arr - obs_arr
     sq_dist = np.sum(diff**2, axis=-1)
@@ -305,7 +345,9 @@ def compute_pooled_rmse(
 
 
 @precondition(
-    lambda pred, obs, valid: pred is not None and obs is not None and valid is not None
+    lambda pred, obs, valid, **kwargs: (
+        pred is not None and obs is not None and valid is not None
+    )
 )
 def compute_frame_wise_rms(
     pred: np.ndarray,
@@ -313,6 +355,7 @@ def compute_frame_wise_rms(
     valid: np.ndarray,
     *,
     manifest: ObservationManifest | None = None,
+    measured_only: bool = False,
 ) -> tuple[np.ndarray, float]:
     """Compute per-frame 3D marker RMS and overall median frame RMS.
 
@@ -323,7 +366,7 @@ def compute_frame_wise_rms(
         (frame_rms, median_frame_rms)
     """
     pred_arr, obs_arr, valid_arr, _ = _validate_arrays(
-        pred, obs, valid, manifest=manifest
+        pred, obs, valid, manifest=manifest, measured_only=measured_only
     )
     n_frames = pred_arr.shape[0]
     frame_rms = np.full(n_frames, np.nan, dtype=np.float64)
@@ -345,6 +388,237 @@ def compute_frame_wise_rms(
 
     median_rms = float(np.median(valid_frame_rms))
     return frame_rms, median_rms
+
+
+def _compute_phase_rmse(
+    sq_dist: np.ndarray,
+    valid_arr: np.ndarray,
+    phase_spans: Mapping[str, tuple[int, int]],
+) -> dict[str, float]:
+    per_phase: dict[str, float] = {}
+    for phase, (start, end) in phase_spans.items():
+        sub_valid = valid_arr[start : end + 1]
+        cnt = int(np.count_nonzero(sub_valid))
+        if cnt > 0:
+            sub_sq = sq_dist[start : end + 1][sub_valid]
+            per_phase[phase] = math.sqrt(float(np.sum(sub_sq)) / cnt)
+        else:
+            per_phase[phase] = 0.0
+    return per_phase
+
+
+def _compute_segment_rmse(
+    sq_dist: np.ndarray,
+    valid_arr: np.ndarray,
+    n_markers: int,
+    manifest: ObservationManifest | None,
+    segment_mapping: Mapping[str, str] | None,
+) -> dict[str, float]:
+    labels = tuple(sorted(manifest.markers)) if manifest is not None else ()
+    seg_map: dict[str, str] = {}
+    if segment_mapping is not None:
+        seg_map.update(segment_mapping)
+    elif manifest is not None:
+        seg_map = {lbl: spec.segment for lbl, spec in manifest.markers.items()}
+
+    segments: dict[str, list[int]] = {}
+    for col in range(n_markers):
+        lbl = labels[col] if col < len(labels) else f"marker_{col}"
+        seg = seg_map.get(lbl, seg_map.get(f"marker_{col}", "unknown"))
+        segments.setdefault(seg, []).append(col)
+
+    per_segment: dict[str, float] = {}
+    for seg, cols in sorted(segments.items()):
+        sub_valid = valid_arr[:, cols]
+        cnt = int(np.count_nonzero(sub_valid))
+        if cnt > 0:
+            sub_sq = sq_dist[:, cols][sub_valid]
+            per_segment[seg] = math.sqrt(float(np.sum(sub_sq)) / cnt)
+        else:
+            per_segment[seg] = 0.0
+    return per_segment
+
+
+@dataclass(frozen=True)
+class ComprehensiveErrorMetrics:
+    """Comprehensive 3D tracking error metrics across frames, phases, and segments."""
+
+    pooled_rmse: float
+    median_frame_rms: float
+    mean_frame_rms: float
+    p95_error: float
+    max_error: float
+    per_phase_rmse: Mapping[str, float]
+    per_segment_rmse: Mapping[str, float]
+    total_valid_observations: int
+    valid_frames: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "pooled_rmse": self.pooled_rmse,
+            "median_frame_rms": self.median_frame_rms,
+            "mean_frame_rms": self.mean_frame_rms,
+            "p95_error": self.p95_error,
+            "max_error": self.max_error,
+            "per_phase_rmse": dict(self.per_phase_rmse),
+            "per_segment_rmse": dict(self.per_segment_rmse),
+            "total_valid_observations": self.total_valid_observations,
+            "valid_frames": self.valid_frames,
+        }
+
+
+@precondition(
+    lambda pred, obs, valid, **kwargs: (
+        pred is not None and obs is not None and valid is not None
+    )
+)
+def compute_comprehensive_error_metrics(
+    pred: np.ndarray,
+    obs: np.ndarray,
+    valid: np.ndarray,
+    *,
+    manifest: ObservationManifest | None = None,
+    measured_only: bool = False,
+    phase_spans: Mapping[str, tuple[int, int]] | None = None,
+    segment_mapping: Mapping[str, str] | None = None,
+) -> ComprehensiveErrorMetrics:
+    """Compute detailed metric breakdown: pooled RMSE, frame distribution, p95/max, per-phase and per-segment."""
+    pred_arr, obs_arr, valid_arr, n_valid = _validate_arrays(
+        pred, obs, valid, manifest=manifest, measured_only=measured_only
+    )
+    diff = pred_arr - obs_arr
+    sq_dist = np.sum(diff**2, axis=-1)
+    distances = np.sqrt(sq_dist[valid_arr])
+
+    pooled_rmse = math.sqrt(float(np.sum(sq_dist[valid_arr])) / n_valid)
+    p95_error = float(np.percentile(distances, 95))
+    max_error = float(np.max(distances))
+
+    frame_rms, median_rms = compute_frame_wise_rms(
+        pred_arr, obs_arr, valid_arr, manifest=manifest, measured_only=measured_only
+    )
+    valid_frame_indices = np.where(np.isfinite(frame_rms))[0]
+    valid_frames = len(valid_frame_indices)
+    mean_frame_rms = (
+        float(np.mean(frame_rms[valid_frame_indices])) if valid_frames > 0 else 0.0
+    )
+
+    per_phase = (
+        _compute_phase_rmse(sq_dist, valid_arr, phase_spans)
+        if phase_spans is not None
+        else {}
+    )
+    per_segment = _compute_segment_rmse(
+        sq_dist, valid_arr, pred_arr.shape[1], manifest, segment_mapping
+    )
+
+    return ComprehensiveErrorMetrics(
+        pooled_rmse=pooled_rmse,
+        median_frame_rms=median_rms,
+        mean_frame_rms=mean_frame_rms,
+        p95_error=p95_error,
+        max_error=max_error,
+        per_phase_rmse=MappingProxyType(per_phase),
+        per_segment_rmse=MappingProxyType(per_segment),
+        total_valid_observations=n_valid,
+        valid_frames=valid_frames,
+    )
+
+
+@dataclass(frozen=True)
+class CommonTargetComparison:
+    """Comparison between two candidate models on their common valid observation subset."""
+
+    common_pooled_rmse_a: float
+    common_pooled_rmse_b: float
+    common_p95_a: float
+    common_p95_b: float
+    valid_count_a: int
+    valid_count_b: int
+    common_valid_count: int
+    exclusive_valid_count_a: int
+    exclusive_valid_count_b: int
+    coverage_ratio_a: float
+    coverage_ratio_b: float
+    common_coverage_ratio: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "common_pooled_rmse_a": self.common_pooled_rmse_a,
+            "common_pooled_rmse_b": self.common_pooled_rmse_b,
+            "common_p95_a": self.common_p95_a,
+            "common_p95_b": self.common_p95_b,
+            "valid_count_a": self.valid_count_a,
+            "valid_count_b": self.valid_count_b,
+            "common_valid_count": self.common_valid_count,
+            "exclusive_valid_count_a": self.exclusive_valid_count_a,
+            "exclusive_valid_count_b": self.exclusive_valid_count_b,
+            "coverage_ratio_a": self.coverage_ratio_a,
+            "coverage_ratio_b": self.coverage_ratio_b,
+            "common_coverage_ratio": self.common_coverage_ratio,
+        }
+
+
+def compute_common_target_comparison(
+    pred_a: np.ndarray,
+    pred_b: np.ndarray,
+    obs: np.ndarray,
+    valid_a: np.ndarray,
+    valid_b: np.ndarray,
+    *,
+    manifest: ObservationManifest | None = None,
+) -> CommonTargetComparison:
+    """Evaluate two candidate models on their common valid observation target while keeping coverage differences explicit."""
+    arr_a = np.asarray(pred_a, dtype=np.float64)
+    arr_b = np.asarray(pred_b, dtype=np.float64)
+    obs_arr = np.asarray(obs, dtype=np.float64)
+    mask_a = np.asarray(valid_a, dtype=bool)
+    mask_b = np.asarray(valid_b, dtype=bool)
+
+    if arr_a.shape != obs_arr.shape or arr_b.shape != obs_arr.shape:
+        raise ValueError(
+            f"Shape mismatch: pred_a {arr_a.shape}, pred_b {arr_b.shape}, obs {obs_arr.shape}"
+        )
+    if mask_a.shape != obs_arr.shape[:2] or mask_b.shape != obs_arr.shape[:2]:
+        raise ValueError(
+            f"Mask shape mismatch: mask_a {mask_a.shape}, mask_b {mask_b.shape}, expected {obs_arr.shape[:2]}"
+        )
+
+    common_valid = mask_a & mask_b
+    n_common = int(np.count_nonzero(common_valid))
+    if n_common == 0:
+        raise ValueError(
+            "No common valid observations between candidate A and candidate B"
+        )
+
+    total_elements = mask_a.size
+    n_a = int(np.count_nonzero(mask_a))
+    n_b = int(np.count_nonzero(mask_b))
+
+    rmse_a = compute_pooled_rmse(arr_a, obs_arr, common_valid)
+    rmse_b = compute_pooled_rmse(arr_b, obs_arr, common_valid)
+
+    diff_a = arr_a - obs_arr
+    diff_b = arr_b - obs_arr
+    dist_a = np.sqrt(np.sum(diff_a**2, axis=-1)[common_valid])
+    dist_b = np.sqrt(np.sum(diff_b**2, axis=-1)[common_valid])
+    p95_a = float(np.percentile(dist_a, 95))
+    p95_b = float(np.percentile(dist_b, 95))
+
+    return CommonTargetComparison(
+        common_pooled_rmse_a=rmse_a,
+        common_pooled_rmse_b=rmse_b,
+        common_p95_a=p95_a,
+        common_p95_b=p95_b,
+        valid_count_a=n_a,
+        valid_count_b=n_b,
+        common_valid_count=n_common,
+        exclusive_valid_count_a=n_a - n_common,
+        exclusive_valid_count_b=n_b - n_common,
+        coverage_ratio_a=float(n_a) / total_elements,
+        coverage_ratio_b=float(n_b) / total_elements,
+        common_coverage_ratio=float(n_common) / total_elements,
+    )
 
 
 def calibrate_with_manifest_protection(

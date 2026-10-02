@@ -1288,7 +1288,7 @@
       "description": "Historical player library, original capture frames, and immutable model and torque profile versions",
       "path": "src/tools/necromatcher/__main__.py",
       "launch_target": "src/tools/necromatcher/__main__.py",
-      "category": "motion_capture",
+      "category": "tool",
       "status": "experimental",
       "capabilities": [
         "historical_library",
@@ -2898,8 +2898,8 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "13e6a51f64384817234f36d11f8d114786ef901e2bb4dd3c3038821171edac47",
-    "src/config/launcher_manifest.json": "053465e7d9b92cfe3593c78432abc8e89384feb6132fe587a4a20928d58abc68",
+    "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
+    "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
     "src/config/feature_parity.json": "e1a6e2a0445c9b6a024d197278a57ac78a1068256bb19bc7b4f756a1053caa36",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"

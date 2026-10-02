@@ -23,7 +23,8 @@ import anyio.to_thread
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+
 from pydantic import BaseModel, Field
 
 from src.shared.python.analysis.orchestrator import AnalysisOrchestrator
@@ -117,12 +118,14 @@ async def list_plot_types() -> PlotTypesResponse:
 @router.get("/analysis/plot-data/{plot_type}")
 async def get_plot_data(
     plot_type: str,
+    run_id: str | None = Query(None, description="Optional run ID"),
     service: SimulationService = Depends(get_simulation_service),
 ) -> dict[str, Any]:
     """Compute structured plot data for one registered plot type.
 
     Args:
         plot_type: One of the ids from ``GET /analysis/plot-types``.
+        run_id: Optional simulation run ID to analyze.
         service: Injected simulation service holding the active recorder.
 
     Returns:
@@ -141,7 +144,12 @@ async def get_plot_data(
             ),
         )
 
-    recorder = service.active_recorder
+    recorder_getter = getattr(service, "get_run_recorder", None)
+    if callable(recorder_getter):
+        recorder = recorder_getter(run_id=run_id)
+    else:
+        recorder = getattr(service, "active_recorder", None)
+
     if recorder is None:
         raise HTTPException(
             status_code=409,
@@ -151,9 +159,15 @@ async def get_plot_data(
             ),
         )
 
-    return await anyio.to_thread.run_sync(
+    joint_getter = getattr(service, "get_run_joint_names", None)
+    if callable(joint_getter):
+        joint_names = tuple(joint_getter(run_id=run_id))
+    else:
+        joint_names = tuple(getattr(service, "active_joint_names", ()))
+    result: dict[str, Any] = await anyio.to_thread.run_sync(
         _plot_data_cached,
         recorder,
-        tuple(service.active_joint_names),
+        joint_names,
         plot_type,
     )
+    return result

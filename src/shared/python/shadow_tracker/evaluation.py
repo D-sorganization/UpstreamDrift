@@ -70,6 +70,7 @@ class GateProfile:
     max_grip_rotation_error_rad: float = 0.05
     require_exact_timing: bool = True
     require_club_evidence: bool = True
+    allow_synthetic: bool = False
 
     def __post_init__(self) -> None:
         check_str(self.profile_version, "profile_version")
@@ -83,6 +84,10 @@ class GateProfile:
     @classmethod
     def default_development_profile(cls) -> GateProfile:
         return cls()
+
+    @classmethod
+    def default_release_profile(cls) -> GateProfile:
+        return cls(allow_synthetic=False)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -309,6 +314,18 @@ def classify_evidence_quality(
     """Classify evidence quality under deterministic Gate G0-G5 rules."""
     active_profile = profile or GateProfile.default_development_profile()
 
+    # Rule 0: Synthetic observation, mask, or candidate blocks validated_profile
+    if (
+        bool(candidate.diagnostics.get("is_synthetic", False))
+        or any(obs.confidence_provenance == "synthetic" for obs in observations)
+        or any(getattr(obs, "is_synthetic", False) for obs in observations)
+    ):
+        logger.info(
+            "Synthetic observations or candidate blocks validated_profile for candidate %s",
+            candidate.candidate_id,
+        )
+        return "dynamic_candidate"
+
     # Rule 1: Physical Replay Audit Check (Gate G4)
     audit = candidate.replay_audit
     if audit is None or not audit.is_physically_accepted or audit.reset_count != 1:
@@ -337,35 +354,48 @@ def classify_evidence_quality(
     return "validated_profile"
 
 
+def _evaluate_g0(
+    candidate: CandidateResult,
+    observations: Sequence[FrameObservation],
+    profile: GateProfile,
+) -> GateStatus:
+    has_synthetic = (
+        bool(candidate.diagnostics.get("is_synthetic", False))
+        or any(obs.confidence_provenance == "synthetic" for obs in observations)
+        or any(getattr(obs, "is_synthetic", False) for obs in observations)
+    )
+    if has_synthetic and not profile.allow_synthetic:
+        g0_pass = False
+        g0_reason = "Synthetic observations cannot satisfy release qualification"
+    else:
+        g0_pass = bool(
+            observations
+            and all(
+                isinstance(obs.frame_id, str)
+                and len(obs.frame_id.strip()) > 0
+                and obs.pts_ticks >= 0
+                for obs in observations
+            )
+        )
+        g0_reason = (
+            "Input frames valid" if g0_pass else "Missing/invalid observation frames"
+        )
+    return GateStatus(
+        gate_id="G0",
+        passed=g0_pass,
+        score=1.0 if g0_pass else 0.0,
+        threshold=1.0,
+        reason=g0_reason,
+    )
+
+
 def audit_gate_profile(
     candidate: CandidateResult,
     observations: Sequence[FrameObservation],
     profile: GateProfile,
 ) -> tuple[bool, tuple[GateStatus, ...]]:
     """Audit candidate against versioned Gate G0 through G5 thresholds."""
-    statuses: list[GateStatus] = []
-
-    # G0: Input integrity
-    g0_pass = bool(
-        observations
-        and all(
-            isinstance(obs.frame_id, str)
-            and len(obs.frame_id.strip()) > 0
-            and obs.pts_ticks >= 0
-            for obs in observations
-        )
-    )
-    statuses.append(
-        GateStatus(
-            gate_id="G0",
-            passed=g0_pass,
-            score=1.0 if g0_pass else 0.0,
-            threshold=1.0,
-            reason="Input frames valid"
-            if g0_pass
-            else "Missing/invalid observation frames",
-        )
-    )
+    statuses: list[GateStatus] = [_evaluate_g0(candidate, observations, profile)]
 
     # G1/G2: Silhouette Fidelity
     mean_iou = float(candidate.diagnostics.get("mean_iou", 0.0))

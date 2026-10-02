@@ -586,8 +586,8 @@ models:
       - "source_frame_review"
       - "swing_package_export"
     launcher:
-      category: "motion_capture"
-      logo: "assets/logos/necromatcher.svg"
+      category: "tool"
+      logo: "assets/matched_swing_browser.png"
       status: "experimental"
       default_launch: "tab"
 

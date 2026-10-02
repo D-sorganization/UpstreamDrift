@@ -226,8 +226,30 @@ class DataEfficiencyCurve:
     budget_points: tuple[int, ...]
     active_acceptance_curve: tuple[float, ...]
     random_acceptance_curve: tuple[float, ...]
-    sample_efficiency_multiplier: float
-    active_superiority_confirmed: bool
+    mean_acceptance_ratio: float | None = None
+    auc_acceptance_ratio: float | None = None
+    budget_to_target_ratio: float | None = None
+    sample_efficiency_multiplier: float | None = None
+    active_superiority_confirmed: bool = False
+    is_inconclusive: bool = False
+    status_message: str = ""
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class MultiSeedEfficiencySummary:
+    """Aggregated statistical evaluation of data efficiency across multiple seeds."""
+
+    budget_points: tuple[int, ...]
+    mean_active_curve: tuple[float, ...]
+    std_active_curve: tuple[float, ...]
+    mean_random_curve: tuple[float, ...]
+    std_random_curve: tuple[float, ...]
+    mean_auc_ratio: float | None
+    active_statistically_superior: bool
+    p_value: float | None
+    confidence_level: float
+    is_inconclusive: bool
+    status_message: str = ""
 
 
 UNMEASURED_BASELINE_MESSAGE: Final[str] = (

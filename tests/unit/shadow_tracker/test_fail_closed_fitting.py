@@ -187,7 +187,13 @@ def _make_obs(frame_num: int) -> FrameObservation:
     )
 
 
-def _make_mask(frame_num: int, *, revision_id: str | None = None) -> MaskFrame:
+def _make_mask(
+    frame_num: int,
+    *,
+    revision_id: str | None = None,
+    producer_id: str = "reviewer",
+    correction_note: str = "test mask",
+) -> MaskFrame:
     actual_rev_id = revision_id if revision_id is not None else f"rev-{frame_num}-0"
     ident = FrameIdentity(
         schema_version=FRAME_SCHEMA_VERSION,
@@ -223,8 +229,8 @@ def _make_mask(frame_num: int, *, revision_id: str | None = None) -> MaskFrame:
         valid=valid,
         revision_id=actual_rev_id,
         parent_revision_id=None,
-        producer_id="reviewer",
-        correction_note="test mask",
+        producer_id=producer_id,
+        correction_note=correction_note,
     )
 
 
@@ -375,6 +381,43 @@ def test_synthetic_backend_labels_synthetic_and_blocks_validated_profile() -> No
     assert len(bundle.candidates) == 1
     # Candidate must not be accepted for real-data release profile
     assert bundle.candidates[0].is_accepted is False
+
+
+def test_synthetic_masks_block_validated_profile_even_with_qualified_backend() -> None:
+    """When session masks originate from synthetic fallback, fit cannot achieve validated_profile."""
+    service = DefaultShadowTrackerService()
+    # Masks explicitly tagged as synthetic
+    synth_mask0 = _make_mask(
+        0,
+        producer_id="synthetic:sam-vit-b-golf:abcd1234",
+        correction_note="Synthetic silhouette fallback fixture (unobserved model output)",
+    )
+    synth_mask1 = _make_mask(
+        1,
+        producer_id="synthetic:sam-vit-b-golf:abcd1234",
+        correction_note="Synthetic silhouette fallback fixture (unobserved model output)",
+    )
+    service.initialize_session(
+        source_asset=_make_source(),
+        observations=[_make_obs(0), _make_obs(1)],
+        initial_masks=[synth_mask0, synth_mask1],
+    )
+    # Qualified non-synthetic backend
+    backend = MockForwardModel(is_available=True, is_synthetic=False, is_qualified=True)
+    cam = _make_camera()
+    service.register_backend(
+        forward_model=backend,
+        renderer=_make_renderer(cam),
+        camera=cam,
+    )
+
+    req = _make_request()
+    bundle = service.fit(req)
+
+    assert bundle.execution_status == "completed"
+    assert bundle.evidence_quality != "validated_profile"
+    assert bundle.metrics.get("is_synthetic") is True
+    assert bundle.candidates[0].diagnostics.get("is_synthetic") is True
 
 
 # ---------------------------------------------------------------------------

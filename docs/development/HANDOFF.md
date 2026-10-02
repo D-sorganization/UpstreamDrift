@@ -1,118 +1,14 @@
-# Active Necromatcher Delivery
+# Active Necromatcher Native Fit Delivery — #11240
 
-## Compiled Native Resources and Authored Controls
+Current branch `feat/necromatcher-native-fit-11235` (PR #11240) retargeted to `main` following merge of workspace #11239. It adds source-bound native trajectory fitting with preserved Hermite splines, native video export, research refit controls, ground placement, and effort bindings. All 88 fitting/spline/IK tests and 142 workspace unit tests pass locally.
 
-NativeFitBinding now shares one hash-checked compiled plant between projection
-review and refitting. Named compiled joints independently establish ordered m/rad
-units; missing capability and declaration mismatch fail. Authored controls must
-match exact model/fit hashes, order and N/N\*m units before native effort mapping.
-Detached sample metadata cannot change retained compiled model identity.
-96 focused checks pass; one unavailable real-Drake check skips. See
-[Native Resource Procedure](necromatcher-native-resources.md). Historical driving controls, independent
-replay and downstream/site integration remain open; no scientific acceptance is
-claimed. Actual Hogan/Tiger resource checks from source 54d8f6fb13 verify
-750/210 saved frames, three compiled translation and 41 rotation coordinates,
-and thirteen projected attachments at start/middle/end. The native-resource
-receipt preserves exact identities; motion qualification remains rejected research.
+- Issue: #11235; parent #11232
+- PR: #11240 (retargeted to `main`)
+- Branch: `feat/necromatcher-native-fit-11235`
+- Validation: 88 fitting tests, 142 workspace tests pass; Ruff lint/format clean.
 
-## Unit-Preserving Authored Controls
+# Active Necromatcher Workspace Delivery — #11239 (Merged)
 
-The new effort-profile/2 format binds exact model and research-fit hashes and
-preserves ordered m/rad coordinates with N/N\*m generalized efforts. Import,
-recall and export reject incompatible units and legacy torque profiles for known
-translation coordinates. Bounded evaluation rejects extrapolation and overflow;
-coefficients use immutable backing bytes. The existing native/web import route
-accepts the format. See [Authored Effort Procedure](necromatcher-effort-profiles.md).
-54 focused profile/library/fit/refit checks and two-module mypy pass.
-A separate red-first canonical handoff regression now preserves mixed units,
-exact asset hashes, draft status and unqualified controls; 31 effort/handoff
-checks pass after schema registration.
-Actual historical driving controls and independent
-replay remain open; source timing and scientific acceptance remain unqualified.
-
-## Native and Web Research Refit Controls
-
-Necromatcher now submits, polls and cancels immutable research refits through
-one shared NativeRefitSession over the canonical matching executor. Admission
-permits one active run per host; terminal views reopen canonical manifests.
-Requests are saved before execution, with execution_started distinguishing queued
-identity from actual worker start. Native dialogs submit off the Qt thread;
-web controls retain job IDs in URLs, reject stale source completions and expose
-explicit coordinate scales, sampling, priors and budgets. Saved nonterminal runs
-without an owned handle retain their recorded status with an explicit unverified
-execution message; absence of a handle does not prove worker termination.
-
-Ninety focused Python checks pass, including five new controller/API/native checks
-and a real clean worker rejected
-for absent model assumptions. Nineteen web page/form controls pass; TypeScript,
-scoped ESLint and three changed source modules pass type validation. Continue
-anatomical bounds/closed motion,
-mixed effort units, independent replay and downstream handoffs. The full goal
-and #11235 remain open; no scientific acceptance or green CI is claimed.
-
-## Source-Stamped Native Research Jobs
-
-Canonical matching jobs now execute immutable native warm-start refits in a clean
-interpreter with source/runtime/input fingerprints captured at execution. Explicit
-work outcomes preserve rejection after successful computation. Cancellation and
-publication share a commit gate, and dense/held-out errors retain source confidence.
-Seventy-three fitting/job/storage/API/native review checks passed at implementation
-commit `5038b0748bec967931ab76a07593aa1af14ca2d8`. Its actual v4 jobs saved
-750 Hogan frames and 210 Tiger frames with launch/worker source and runtime
-identities. Held-out RMS is 7.635 px for Hogan and 11.861 px for Tiger; Hogan
-improved slightly versus v2 while Tiger worsened. Both computations succeeded
-with rejected qualification, evaluation-budget exhaustion and large grip gaps.
-The portable [V4 Run Receipt](historical_capture/native-refit-job-receipt-v4.json)
-records exact identities and metrics. A follow-up reproduces and repairs clean
-worker launches without inherited PYTHONPATH using the shared core environment
-builder extracted from Capture Rig; 84 focused checks pass without inherited
-PYTHONPATH. UI/API job submission, anatomical bounds,
-closed motion, effort units and qualified downstream replay still require work.
-
-## Native and Web Projection Review
-
-The saved 750-frame Hogan and 210-frame Tiger fits now have native/web model
-projection review using exact source frames and verified native XML bindings.
-A real Windows Qt DLL-order failure was reproduced and fixed with a reusable
-clean-interpreter worker; a fresh Qt-parent regression guards it. Twenty-five
-fit/storage/API/GUI/overlay checks pass. Camera and physical time remain
-unqualified; continue fit jobs, closed motion, effort units and downstream replay.
-Native PR #11240 exhausted its three CI remediation cycles; the exact prior
-head's remaining shallow-checkout failure is recorded in
-[Native CI Report](../ci-failures/11235-20261001.md).
-
-## Persistent Fit Storage
-
-The immutable library now stores and recalls exact source-bound kinematic fit
-samples. Real Hogan/Tiger v2 fit versions retain 750/210 frames and their compiled
-generic MuJoCo model versions. Hash bindings, frame identities, provenance and
-rejection evidence survive recall/export. Sixteen new storage tests cover these
-contracts, with an additional API regression for import and exact frame recall.
-The web import form accepts research fit JSON; fourteen page/form tests pass.
-Fit overlays, fit jobs, physical-clock/closure qualification and
-independent dynamics handoffs remain open. See [Turnover](necromatcher-native-fit.md).
-
-## Native Image Fitting Progress
-
-The shared historical-fit package now fits actual native geometry to image
-observations and retains Hermite coefficients for full-source evaluation.
-Nine fitting/evidence tests pass, including independent spline-chain derivative
-checks and reduced native evaluation counts. Full-body held-out RMS improves to
-7.694 px for Hogan and 11.666 px for Tiger. Both solves remain evaluation-limited;
-maximum grip separation is 0.126/0.257 m and Tiger violates declared ROM.
-No dynamics acceptance is inferred. Launcher logos, migration classifications,
-companion inventories and generated context views are repaired. Continue with
-source-stamped fit jobs, bounded/closed motion, mixed force/torque units, stored
-fit versions, independent replay and downstream handoffs. See the native fitting
-turnover procedure.
-
-Native fitting now continues in `feat/necromatcher-native-fit-11235`. The public
-MuJoCo plant failed closure queries without observation markers; its native
-position-residual boundary is repaired with five red-to-green regression cases.
-See [Native Fitting Turnover](necromatcher-native-fit.md). Player-specific fitting,
-independent replay and downstream scientific acceptance remain open.
-
-Current branch `feat/necromatcher-workspace-11234` adds the player tile, web route,
 native adapter and shared source-frame archive reader. Sixteen UI tests, desktop
 recall and worker failure tests pass. Web type checking and scoped ESLint pass.
 Native import/overlay and actual Hogan/Tiger web review are implemented. URL

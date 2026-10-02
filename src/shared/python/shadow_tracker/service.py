@@ -599,24 +599,9 @@ class DefaultShadowTrackerService:
 
         return bundle
 
-    def fit(
-        self,
-        request: FitRequest,
-        *,
-        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
-    ) -> ResultBundle:
-        """Run forward model fitting with fail-closed capability gates and cancellation wiring."""
-        (
-            forward_model,
-            renderer,
-            camera,
-            caps,
-            is_synthetic,
-        ) = self._validate_fit_capabilities(request)
-
-        if self._is_cancelled:
-            return self._build_cancelled_bundle(request)
-
+    def _collect_windowed_observations(
+        self, request: FitRequest
+    ) -> list[FrameObservation]:
         window_start_pts = int(request.time_window_start_pts)
         window_end_pts = int(request.time_window_end_pts)
         if window_end_pts < window_start_pts:
@@ -662,12 +647,35 @@ class DefaultShadowTrackerService:
                 "Cannot fit: incomplete observation/mask coverage — the following "
                 f"frame(s) lack a manual mask: {', '.join(missing_masks)}."
             )
+        return list(windowed_obs)
 
-        obs_list = list(windowed_obs)
+    def fit(
+        self,
+        request: FitRequest,
+        *,
+        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
+    ) -> ResultBundle:
+        """Run forward model fitting with fail-closed capability gates and cancellation wiring."""
+        (
+            forward_model,
+            renderer,
+            camera,
+            caps,
+            is_synthetic,
+        ) = self._validate_fit_capabilities(request)
+
+        if self._is_cancelled:
+            return self._build_cancelled_bundle(request)
+
+        obs_list = self._collect_windowed_observations(request)
         mask_list = [
             self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id)
             for obs in obs_list
         ]
+        has_synthetic_masks = any(
+            getattr(mask, "is_synthetic", False) for mask in mask_list
+        )
+        is_synthetic = is_synthetic or has_synthetic_masks
         time_points = [
             float(time_s)
             for obs in obs_list

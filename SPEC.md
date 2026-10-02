@@ -1,3 +1,151 @@
+## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
+
+Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
+- **Fail-Closed Absent Inference Contract (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ModelSegmentationProvider` enforces explicit opt-in for synthetic fallback via `allow_synthetic: bool = False`.
+  - In absence of an active `inference_engine` (e.g. `inference_engine=None`), attempting segmentation without `allow_synthetic=True` raises `RuntimeError` ("Model ... has no active inference engine configured. Absent model inference cannot produce observed masks").
+  - When explicitly enabled (`allow_synthetic=True`), synthetic fixtures are branded with distinct provenance (`producer_id="synthetic:..."`, `correction_note="Synthetic procedural fallback; unverified against model inference"`), preventing synthetic fallbacks from masquerading as verified pinned model outputs.
+- **Release Gate Qualification Disqualification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `GateProfile` and `default_release_profile()` configure `allow_synthetic: bool = False`. Gate G0 strictly rejects fitting sessions containing synthetic segmentation masks under release evaluation.
+  - `classify_evidence_quality` demotes candidates derived from synthetic observations or providers to `dynamic_candidate`, preventing synthetic evidence from attaining `validated_profile` certification.
+- **Fitting Session Provenance Tracking (`src/shared/python/shadow_tracker/service.py`, `src/shared/python/shadow_tracker/mask_records.py`)**:
+  - `MaskFrame.is_synthetic` dynamically detects synthetic masks via producer prefix or correction notes.
+  - `ShadowTrackerService.fit()` surfaces `is_synthetic=True` on `FittingResult` when any observation in the fitting window originates from synthetic generators.
+
+## Unify Camera, Morphology and Native State for Shadow Fitting (MMR-14, #11100)
+
+Specifies mathematical, kinematic, and renderer unification for monocular shadow fitting across native multibody states and canonical articulated representations:
+- **Quaternion Velocity Jacobian and Tangent Projector (`src/shared/python/shadow_tracker/forward_model.py`)**:
+  - Exact algebraic quaternion velocity Jacobian $J_{\text{quat}}(q)$ ($4\times 3$) and left inverse $J_{\text{quat}}^{\dagger}(q)$ ($3\times 4$) satisfying $J^{\dagger} J = I_3$ and $J J^{\dagger} = I_4 - q q^T$ tangent space projection.
+  - Exact transformations between body angular velocity $\omega \in \mathbb{R}^3$ and quaternion time-derivative $\dot{q} \in \mathbb{R}^4$ via `body_omega_to_quat_derivative` and `quat_derivative_to_body_omega`.
+- **Bidirectional Canonical-Native Full-Body State Mapping (`canonical_37_to_native_41`, `native_41_to_canonical_37`)**:
+  - Converts between 37-dimensional canonical state vectors (Euler angles in radians/degrees) and 41-dimensional native multibody state vectors (pelvis position, unit orientation quaternion, and 34 articulatory joint degrees of freedom).
+  - Preserves SI units (meters, radians) and exact roundtrip identity $S_{37} \to S_{41} \to S_{37}$.
+- **Closed-Loop Grip Kinematic Setup and Closure Verification (`closed_grip_golfer_setup`, `evaluate_grip_closure`, `GripClosureResult`)**:
+  - Closed-loop address pose where hands meet on the grip within $4.3\text{ mm}$ translation residual and aligned wrist rotation axes.
+  - Decoupled translation ($\le 0.05\text{ m}$) and rotation ($\le 0.1\text{ rad}$) tolerance gates in `evaluate_grip_closure` returning structured `GripClosureResult`.
+- **Multi-Convention Articulated Renderer Support (`src/shared/python/shadow_tracker/articulated_renderer.py`, `src/shared/python/shadow_tracker/contracts.py`)**:
+  - Extended `_VALID_RENDER_STATE_CONVENTIONS` to include `native_full_body_v1` (41 elements) and `canonical_v2_full_body` (42 elements).
+  - Request validation and transcoding guaranteeing exact forward kinematics and rendering parity with canonical 37 articulated requests.
+- **Fitting Priors and Multi-Hypothesis Generation (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - `FittingPriors` dataclass with Design by Contract validation enforcing positive, physically plausible bounds on camera distance, golfer height, club length, and frame rate.
+  - `generate_monocular_hypotheses` generating diverse initialization hypotheses covering yaw, depth, and scale combinations to prevent local minima traps during single-camera fitting.
+
+## Freeze Dual-Club Observation, Calibration and Accuracy Contracts (MMR-02, #11086)
+
+Specifies frozen observation manifests, independent error metrics, holdout protection, and measurement uncertainty floors for dual-club motion matching:
+- **Authoritative Dual-Club Observation Manifests (`src/shared/python/tour_baselines/observation_manifest.py`)**:
+  - `ObservationManifest`: versioned, immutable per-club schema for Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) captures.
+  - Frozen frame-by-marker validity mask: bit-for-bit reconstructed from per-marker missing spans, verified against caller masks to reject gap-filled, interpolated, or unmeasured samples from measured evidence.
+  - Disjoint calibration and holdout intervals: address through top-of-backswing frames (frame 397 driver / 394 iron) reserved for static/fixed geometry calibration; downswing, impact window, and follow-through frames strictly held out.
+- **Holdout Protection Contract (`calibrate_with_manifest_protection`)**:
+  - Fixed-geometry calibration functions consume calibration frames only, preventing holdout observations from updating calibrated body dimensions or club offsets.
+- **Independent Multi-Metric Error Evaluation (`ComprehensiveErrorMetrics`, `compute_comprehensive_error_metrics`)**:
+  - Distinct metric breakdown: pooled 3D Euclidean RMSE, median frame RMS, mean frame RMS, 95th percentile error (p95), and maximum error computed distinctly.
+  - Median frame RMS is mathematically proven not to substitute for pooled RMSE when observation counts vary across frames.
+  - Per-phase error evaluation: computes distinct RMSE across address, backswing, downswing, impact window, and follow-through intervals.
+  - Per-segment error evaluation: computes distinct RMSE across anatomical body markers, shaft cluster, and clubhead cluster.
+- **Common-Target Model Comparison with Visible Coverage (`CommonTargetComparison`, `compute_common_target_comparison`)**:
+  - Compares competing candidate models on their exact common valid observation target ($A \cap B$) while preserving explicit visibility into coverage counts, exclusive observation sets, and coverage ratios.
+- **Documented Measurement Uncertainty and Justified Model Floors (`docs/plans/tour_baselines/observation_uncertainty_and_floors.md`)**:
+  - Documents optical capture uncertainty breakdown: instrument calibration (0.5 - 1.5 mm), soft tissue artifact (5.0 - 15.0 mm), club marker flutter (2.0 - 4.0 mm), and joint center estimation (10.0 - 25.0 mm).
+  - Establishes justified model floor of 18.5 mm (0.0185 m) pooled RMSE for full swing motion matching, preventing optimizer overfitting of soft tissue artifacts.
+
+## Define and Validate Neural Data-Efficiency Claims Statistically (R12, #11155)
+
+Specifies Design by Contract input validation, honest estimand distinction, undefined/inconclusive zero-reference and unattained-target handling, and multi-seed statistical uncertainty evaluation for neural data efficiency:
+- **Strict Budget & Input Preconditions (`src/shared/python/neural_motion/benchmark/efficiency.py`)**:
+  - Strictly positive simulation budgets: rejects non-positive budgets ($b \le 0$) fail-closed with `ValueError`.
+  - Strictly increasing monotone sequence without duplicates: validates $b_{i+1} > b_i$, rejecting unsorted budgets (e.g. `[100, 1]`) and duplicate budgets (e.g. `[100, 100, 200]`) with explicit `ValueError`.
+  - Bounded acceptance values: validates all values in $[0.0, 1.0]$ and finite.
+- **Truthful Descriptive Estimands vs Horizontal Sample-Budget Savings**:
+  - `mean_acceptance_ratio`: unweighted arithmetic mean acceptance ratio ($\bar{a} / \bar{r}$).
+  - `auc_acceptance_ratio`: budget-weighted learning-curve area ratio using trapezoidal numerical integration ($\text{AUC}_{\text{active}} / \text{AUC}_{\text{random}}$ via `trapezoidal_auc`).
+  - `budget_to_target_ratio` (`compute_budget_to_target_ratio`): horizontal sample-budget savings calculating the ratio of random to active simulation budget required to attain a specified target acceptance rate ($B_{\text{random}}(T) / B_{\text{active}}(T)$ via linear interpolation).
+- **Undefined Zero-Reference and Unattained-Target Outcomes**:
+  - Zero-reference random baseline ($\bar{r} \le 10^{-9}$ or $\text{AUC}_r \le 10^{-9}$): sets ratios to `None`, `is_inconclusive=True`, and `active_superiority_confirmed=False`, strictly preventing false $1.0\times$ default success assertions.
+  - Unattained targets ($T > \max(a)$ or $T > \max(r)$): returns `None`, rejecting speculative extrapolation when target performance is unachieved within the evaluated budget window.
+  - Equal curves (`[0.5, 0.5]` vs `[0.5, 0.5]`): sets `active_superiority_confirmed=False`, requiring strict superiority at $\ge 1$ point ($a > r + 10^{-6}$) in addition to non-inferiority ($a \ge r - 10^{-6}$).
+- **Multi-Seed Uncertainty & Statistical Hypothesis Testing (`evaluate_multi_seed_data_efficiency`, `MultiSeedEfficiencySummary`)**:
+  - Aggregates point-wise means and standard errors across independent repeated seed runs.
+  - Paired learning-curve AUC hypothesis test (Student's $t$ paired test with declared confidence level $\alpha = 1 - \text{confidence\_level}$): requires mean AUC difference $> 0$, $p < \alpha$, and point-wise lower confidence bounds $\ge$ random upper bounds to confirm statistical superiority.
+  - Overlapping or high-variance seed distributions fail closed with `active_statistically_superior=False` and `is_inconclusive=True`.
+- **Honest Documentation and Diagnostic Evidence Receipts**:
+  - `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`: updates section 3 with truthful definitions distinguishing arithmetic mean (1.33x), trapezoidal AUC (1.31x), and target budget savings (2.62x at 74% target).
+  - `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json`: updates `sample_data_efficiency` with truthful metrics and explicit `HISTORICAL_DIAGNOSTIC_ONLY` status.
+
+## Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs (R11, #11151)
+
+Specifies truthful simulation clock calculation, endpoint-inclusive discrete sampling, remainder step execution, and separation of requested vs integrated horizons:
+- **Simulation Timing Plan & Clock Calculation (`src/shared/python/engine_core/simulation_timing.py`)**:
+  - `SimulationTimingPlan`: immutable integration plan encapsulating `requested_duration`, `timestep`, `step_count`, `step_sizes`, `integrated_duration`, `retained_samples`, `has_remainder_step`, `remainder_dt`, `is_divisible`, and `sampling_policy`. Supports 3-tuple iteration unpacking `(timestep, step_count, retained_samples)` for backwards compatibility.
+  - Floating-point boundary precision: replaces naive integer division (`int(duration / timestep)`) with close-boundary rounding (`math.isclose(round(d/dt)*dt, d)`), eliminating integer truncation on floating boundaries (e.g. `0.03 / 0.01` resolving to 3 steps, not 2).
+  - Sub-step duration support: allows sub-step simulations (`duration < timestep`) without raising invalid `ValueError("Timestep must not exceed duration")`, taking a single bounded step of `dt = duration` on engines supporting variable steps.
+  - Remainder step handling: when `allow_remainder_step=True` and horizon is non-divisible, executes full steps plus a bounded final remainder step (`remainder_dt = duration - k * dt`), reaching exact integrated duration without physics state drift.
+  - Fixed-step non-divisible fallback: when variable final steps are disallowed (`allow_remainder_step=False`), executes $k$ integer steps and reports the truthful actual integrated duration ($k \times \mathrm{dt}$), strictly forbidding artificial relabeling of states to an unreached requested horizon.
+- **Separated Horizon Fields on API Contracts (`src/api/models/requests.py`, `src/api/models/responses.py`)**:
+  - `SimulationRequest`: exposes `allow_remainder_step: bool = True` controlling fractional final step adoption.
+  - `SimulationResponse`: distinctly reports `requested_duration`, `integrated_duration`, `step_count`, and `retained_samples` alongside legacy `duration` and `frames`.
+- **Truthful Clocks in Synchronous Stepping & Streaming Loops (`src/api/services/simulation_service.py`, `src/api/routes/simulation_ws.py`)**:
+  - REST stepping loop: iterates through `timing_plan.step_sizes` and records initial state at $t=0$, guaranteeing $N = \text{step\_count} + 1$ endpoint-inclusive state samples where final timestamp equals `timing_plan.integrated_duration`.
+  - WebSocket streaming loop: eliminates `min(duration, frame * timestep)` artificial clamping, steps physics batches with `final_step_dt` when executing remainder steps, emits truthful wire timestamps, and completes with `requested_duration`, `integrated_duration`, and `step_count`.
+- **Cross-Engine Variable-Step Capability Declaration (`engine_supports_variable_step`)**:
+  - Explicit capability check via `supports_variable_step` attribute or backend protocol capabilities; prevents silent per-backend reinterpretation.
+
+## Bound Simulation Work and Preserve Cancellable Jobs Under Load (R03, #11144)
+
+Specifies aggregate step budget validation, trajectory sampling safety bounds, worker-thread event-loop offloading, active job retention under load, and cooperative cancellation contracts:
+- **Aggregate Step Budget & Finiteness Validation (`src/api/models/requests.py`)**:
+  - `MAX_SIMULATION_STEPS = 100_000`: bounds `duration / effective_dt` across single and multi-engine simulation requests.
+  - Fail-closed validation rejects nonfinite (`NaN`, `Inf`) inputs, negative durations, non-positive timesteps, and over-budget step ratios (`422 Unprocessable Entity`) before engine creation or heavy resource allocation.
+- **Flight Trajectory & ODE Sample Guards (`src/api/routes/ball_flight.py`, `src/shared/python/physics/flight_models.py`)**:
+  - `MIN_FLIGHT_TIMESTEP_S = 0.0001`, `MAX_FLIGHT_SAMPLES = 50_000`, `MAX_FLIGHT_MODELS_BATCH = 10`, `MAX_ODE_TRAJECTORY_POINTS = 50_000`: prevent multi-gigabyte memory allocations and runaway integration loops.
+  - Offloads synchronous CPU-bound trajectory integration in `simulate_ball_flight` to worker threads via `anyio.to_thread.run_sync`, keeping FastAPI event loop and health/heartbeat endpoints responsive under load.
+- **TaskManager Active Job Retention & Capacity Admission (`src/api/task_manager.py`)**:
+  - Explicit active job retention: tasks in `pending`, `running`, or `started` states are protected from TTL expiration and LRU eviction under memory/size pressure.
+  - `admit_active()`, `can_admit_active()`, and `in_flight_count()`: enforce concurrency capacity bounds while keeping active jobs queryable and cancellable.
+  - `cancel_task()`: marks active background tasks as cancelled and tracks cancellation reasons.
+- **Cooperative Simulation Loop Cancellation & Distinct Response States (`src/api/services/simulation_service.py`, `src/api/services/simulation_runs.py`)**:
+  - Stepping loop cooperative checks (`run.is_cancelled()`, `run.is_deadline_exceeded()`): gracefully halts stepping within 1 step without raising buffer exhaustion or unhandled exceptions.
+  - Terminal response distinction: sets `calculation_status="cancelled"`, distinct from persistence failures or completed calculations, returning partial trajectory data with actionable error metadata.
+
+## Isolate Engine, Recorder, and Analysis State per Simulation Run (R02, #11143)
+
+Specifies multi-engine isolation, run-addressed recorder state, explicit concurrency bounds, and independent lifecycle cleanup across REST and WebSocket simulation sessions:
+- **Engine Concurrency & Deterministic Isolation (`src/shared/python/engine_core/engine_manager.py`)**:
+  - `create_engine(engine_type: EngineType) -> PhysicsEngine`: instantiates and configures isolated, unshared physics engine instances without mutating global active engine references (`active_physics_engine`).
+  - Deterministic barrier test verifies two overlapping preparations cannot acquire, mutate, or cross-contaminate each other's engine, model, or configuration.
+- **Run-Addressed Session Isolation & Independent Controls (`src/api/services/simulation_service.py`, `src/api/models/requests.py`)**:
+  - `SimulationRunRecord`: encapsulates per-run state (`run_id`, `engine_type`, `stats`, `recorder`, `joint_names`, `meta`, `simulation_data`, `analysis_results`, `engine`, `status`, `cleaned_up`).
+  - `SimulationRequest` and `CounterfactualRequest`: accept optional `run_id` to explicitly address simulation and post-hoc rollouts.
+  - Independent clocks, frame counts, and speed adjustments: WebSocket and REST runs maintain connection- and run-isolated `SimulationStats` instances (`ws.state.sim_stats` and `run.stats`), ensuring speed adjustments and stat resets on one channel do not mutate concurrent runs.
+- **Explicit Busy Response & Concurrency Containment (`src/shared/python/core/error_utils.py`, `src/api/routes/simulation.py`)**:
+  - `SimulationBusyError(GolfSuiteError)`: raised when execution is constrained to single-run mode and another run is active.
+  - Maps to HTTP 409 Conflict with `code="busy"`, `stage="preparation"`, and `retriable=True`, rejecting contending runs explicitly rather than allowing undefined state clobbering.
+- **Immutable Run-Addressed Analysis & Export (`src/api/routes/analysis.py`, `src/api/routes/analysis_plots.py`, `src/api/routes/recordings.py`)**:
+  - Analysis plot data (`/analysis/plot-data/{plot_type}`), counterfactual analyses (`/analysis/counterfactual`), and recording persistence (`/recordings`) accept optional `run_id`.
+  - Fetching analysis or persisting recordings explicitly references the targeted run record; completion of a newer or concurrent simulation run cannot alter or overwrite the analyzed dataset.
+- **Isolated, Idempotent Engine Cleanup**:
+  - `cleanup_run_engine(run_id)`: idempotent cleanup occurs once per owning run; one run cannot unload, close, or interfere with another run's active engine.
+
+## Keep Ball-Flight Results Attached to Input Snapshot and Provenance (R10, #11150)
+
+Specifies immutable execution input snapshots, provenance tracking, and out-of-order response protection on the BallFlight comparison page (`ui/src/pages/BallFlight.tsx`, `ui/src/pages/ballFlightModel.ts`):
+- **Immutable Input Snapshot & Provenance Banner (`ballFlightModel.ts`, `BallFlight.tsx`)**:
+  - `BallFlightInputSnapshot`: captures exact launch condition values and selected model keys at simulation submission time.
+  - Active simulation results remain explicitly bound to their input snapshot. A prominent result provenance banner displays whether the visible result is a `"Committed Run"` or a preserved `"Previous Result"`.
+  - Snapshot summary renders formatted launch conditions (ball speed, launch angle, spin rate, spin axis tilt, wind speed and direction).
+- **Post-Execution Input Modification Warning**:
+  - `areInputsChanged` and `areModelsChanged` dynamically compare current form state against the committed snapshot.
+  - An `"Inputs modified since this run was calculated"` banner alerts the user whenever input parameters diverge from the calculated results, preventing stale interpretations while preserving visible data.
+- **Previous Result Retention on Simulation Failure**:
+  - When a subsequent simulation fails, previously computed results and their associated input snapshot are retained rather than cleared, labeled with a `"Previous Result"` status badge alongside the failure alert.
+- **Monotonic Request Sequence Protection**:
+  - Monotonic `requestIdRef` tracks simulation requests, ensuring slow out-of-order network responses can never overwrite newer simulation runs or input snapshots.
+- **Model Coefficients & Assistive Technology Announcements**:
+  - Propagates API-computed flight coefficients (`cd`, `cl`, `spin_decay`) in per-model metrics tables.
+  - WCAG live region (`div[role="status"][aria-live="polite"]`) announces simulation start, completion, and failure transitions.
+
 ## Wire Neural Matching Controls to Executed Requests and Validate Executability (R07, #11147)
 
 Specifies the end-to-end integration and fail-closed validation contracts connecting UI neural matching controls to executed pipeline requests:
@@ -7522,7 +7670,17 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-10-01 | #11240 | Add native historical image fitting using canonical spline MAP estimation, explicit camera hypotheses, immutable evidence, efficient derivatives and measured Hogan/Tiger residuals; preserve exact source-bound research fit versions through library recall/export, add verified native/web projection review with a clean-interpreter SDK worker, add source-stamped warm-start job execution with explicit rejection and cancellation-safe publication, record committed Hogan/Tiger refits and clean-worker environment regressions, expose native/web submit-status-cancel controls through the canonical session with durable research run recall, add unit-preserving model/fit-bound authored effort profiles with strict import/recall/export checks and canonical unqualified handoff transport, add compiled scalar-unit verification and shared native fit/control bindings, verify both actual player resources from committed source, add bounded authored open-loop replay with fresh-resource step refinement and canonical SI trace metadata, add immutable replay admission/recall/export and shared local API transport with source/parent/clock/control checks, add explicit source-linked ground/camera placement hypotheses with all-frame conservation and lineage validation, record actual committed Hogan/Tiger placement revisions and remaining cropped-foot/closure failures, preserve research qualification, repair native frame-alias queries and finite-angle grip IK derivatives, add source-stamped discrete authored bounded repair with explicit soft constraints and pixel tradeoffs, record full-track failed LM probes and add opt-in native analytic bounded TRF with fixed contact rows and preserved locked states, add canonical sequential warm starts, source-sized native joint-tree MP4/PNG overlays with exact source PTS and immutable manifests, and a compiled reproducible LaTeX methods report/Desktop review package tracked by #11246/#11247; add owned native/web video export jobs, clean SDK workers, durable status/cancellation, guarded downloads, native transfer hash verification and bounded canonical Windows atomic-promotion retries; add public scaled 6D native grip/ground Jacobians, opt-in interior spline constraints with source-only image evidence, immutable tested-time receipts and independently assessed cubic coordinate extrema; repair governed inventories and continue qualified replay and downstream handoffs under #11235. |
 | 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
+| 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |
 | 2026-10-01 | #11231 | Add reusable historical-player streaming image observations with rational PTS, source/frame/model hashes, explicit missingness and unqualified receipts; track Hogan #11229 and Tiger #11226. |
+| 2026-10-01 | #11100 | [MMR-14] Unify Camera, Morphology and Native State for Shadow Fitting: exact algebraic quaternion velocity Jacobian J_quat and left inverse with tangent projector (I - q q^T), bidirectional canonical_37 to native_41 state transformations preserving SI units, closed_grip_golfer_setup address pose with 4.3 mm hand separation and decoupled translation/rotation tolerance gates, multi-convention articulated renderer support for native_full_body_v1 and canonical_v2_full_body, and FittingPriors validation with multi-hypothesis generation across yaw, depth, and scale (#11100). |
+| 2026-10-01 | #11086 | [MMR-02] Freeze Dual-Club Observation, Calibration and Accuracy Contracts: versioned Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) observation manifests, bit-for-bit frame validity verification rejecting unmeasured/interpolated samples from measured holdout scoring, holdout protection during geometry calibration, comprehensive multi-metric evaluation (pooled RMSE, frame distribution, p95/max, per-phase, per-segment), common-target candidate comparison with explicit coverage visibility, and justified model floor documentation (18.5 mm pooled RMSE floor) (#11086). |
+| 2026-10-01 | #11155 | [R12] Define and Validate Neural Data-Efficiency Claims Statistically: Design by Contract budget validation rejecting unsorted, non-positive, and duplicate budgets; equal-curve non-superiority ([0.5, 0.5] vs [0.5, 0.5] -> False); undefined/inconclusive zero-reference and unattained-target handling (None, not 1.0 default); distinct descriptive mean ratio, trapezoidal AUC ratio, and horizontal budget-to-target sample savings; multi-seed statistical uncertainty evaluation (evaluate_multi_seed_data_efficiency, MultiSeedEfficiencySummary); and truthful diagnostic documentation and receipt updates (#11155). |
+| 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
+| 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
+| 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |
+| 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11150 | [R10] Keep Ball-Flight Results Attached to Input Snapshot and Provenance: immutable execution input snapshots (launch conditions, model selections), active results tied to snapshot with committed/previous status badges, visual indicator for post-execution input modifications, previous results retained on failure, monotonic request sequence IDs guarding out-of-order responses, exposed model coefficients, and WCAG live region status announcements (#11150). |
 | 2026-10-01 | #11223 | [R07] Wire Neural Matching Controls to Executed Requests: wire neural mode, model selector, and fallback checkboxes to MatchRequest, validate models and dispositions via MotionMatchingController, update badges and metrics with fail-closed behavior, document platform gap in feature_parity.json (#11147). |
 | 2026-10-01 | #11145 | [R04] Propagate Flight Termination Before Reporting Landing Metrics: propagate explicit FlightTermination states (LANDED, TIME_LIMIT, SOLVER_FAILED, CANCELLED) with terminal-event evidence and actual horizon, gate landing metrics (carry, landing angle, lateral deviation) to None on unlanded flights, raise IncompleteFlightError carrying partial result on require_landing(), support cooperative cancellation via FlightSimulationCancelled, update BallFlightSummary and trajectory import to reflect termination status, and handle None metrics safely in Shot Tracer results table (#11145). |
 | 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
