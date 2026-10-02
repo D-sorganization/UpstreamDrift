@@ -1,3 +1,20 @@
+## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
+Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
+- **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
+  - `evaluate_candidate_promotion` enforces strict gate contracts: iron candidates must not use driver capture declarations, document IDs, or attachment calibration hashes; driver candidates must not use iron assets.
+  - Fail-closed integrator parity verification: solve and replay integrators must match exactly in scheme (`rk45`, `euler`, etc.), relative/absolute tolerances, and step configuration before promotion.
+  - G1-before-G2/G3 prerequisite: G2/G3 promotion strictly rejects candidates when G1 is unaccepted.
+  - Multibody physical audit gating: enforces normal force limits ($\le 2.5\text{ BW}$), ground penetration ($\le 5\text{ mm}$), weld closure translation ($\le 5\text{ mm}$), weld closure rotation ($\le 0.05\text{ rad}$), min weight fraction ($\ge 0.85$), and anatomical range of motion (RoM) excess bounds ($\le 0.0^\circ$) beyond mere solver convergence.
+- **Cross-Engine Torque Transfer & Parity Evaluation (`evaluate_cross_engine_torque_transfer`, `EngineTransferVerdict`, `CrossEngineTransferMatrix`)**:
+  - Validates transfer of optimal control torques and contact allocations computed by Pinocchio into downstream target dynamics engines (MuJoCo, Simscape).
+  - Evaluates forward acceleration parity $\ddot{q}_{\text{target}}$ against target accelerations and equilibrium residuals against engine-specific declared tolerances (`engine_tolerances`, `engine_equilibrium_tolerances`).
+  - Preserves declared actuator armature inertia ($5 \times 10^{-3}\text{ kg}\cdot\text{m}^2$), tracking gains, and residual root wrench assistance across engine boundaries.
+  - Employs synthetic force adapters (`PinocchioSyntheticForceAdapter`, `MujocoSyntheticForceAdapter`) with explicit opt-in (`allow_synthetic=True`) for non-native test environments.
+- **Quaternion Spherical Joint Virtual Work Duality (`src/shared/python/motion_matching/named_state.py`)**:
+  - `SphericalJointVirtualWorkOracle` verifies exact virtual work duality $\tau^T \omega = \tau_q^T \dot{q}$ for spherical joints with quaternion coordinates.
+  - Enforces coordinate name-to-index permutation invariance, ensuring packed state vectors and physical poses remain strictly invariant under dictionary key reordering while failing closed on missing or unexpected coordinates.
+
 ## Continuous Shadow Optimization With Uncertainty and Abstention (MMR-15, #11101)
 
 Specifies continuous forward model optimization, zero-assistance physical audit compliance, held-out C3D phase stratification, archive stress resilience, and monocular kinetic identifiability boundaries:
@@ -7696,6 +7713,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-02 | #11265 | [MMR-15] Wire Continuous Shadow Optimization With Uncertainty and Abstention: continuous whole-body forward rollouts with zero state resets (reset_count == 1) and zero ghost pelvis assistance, forward model is_qualified capability gate, synchronized held-out C3D phase-stratified tracking validation (evaluate_phase_stratified_tracking), archive stress set resilience against cuts, motion blur, and unknown cameras (evaluate_archive_stress_resilience), nominal 90% confidence coverage assessment with structured abstention on holdouts, and model-dependent unidentifiable labeling for monocular joint torques and contact forces (#11101). |
+| 2026-10-02 | #11093 | [MMR-09] Finish Pinocchio Native Fitting and Cross-Engine Torque Transfer: candidate promotion gating enforcing iron/driver capture declaration isolation, solve/replay integrator parity, G1-before-G2/G3 promotion, and physical audit/RoM gates; cross-engine torque transfer matrix reproducing declared parity and equilibrium tolerances across MuJoCo and Simscape with diagnostic rejection; spherical joint virtual work duality and coordinate permutation invariance (#11093). |
 | 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
