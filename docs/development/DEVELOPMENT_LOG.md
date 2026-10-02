@@ -17,6 +17,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11234 — Necromatcher Historical Player Workspace
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11234; parent #11232
+- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239), draft over #11237
+- **Branch:** `feat/necromatcher-workspace-11234`
+- **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
+- **Last verified:** 2026-10-02 — 31 library/API/native/launcher tests, 10 inventory tests, 20 UI tests and 71 launcher/atlas tests passed; resolved launcher logo family gate for matched_swing_browser.svg under category:tool, classified necromatcher in capability migration baseline and reconciled companion catalog counts and screenshot records; mypy, ruff and all green gates pass.
+- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. Reconciled launcher manifest and capability migration inventories. Further form tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
+
 ### DL-#11233 — Necromatcher Persistent Library
 
 - **State:** in_progress
