@@ -299,3 +299,18 @@ Native exit is naturally zero at 15:23:43Z; final left/right forces are
 531.659/499.520 N. Both captures require controller/reference/COM diagnosis;
 neither hold qualifies standing stability or independent open-loop motion.
 Read `owner_constant_hold_review_20261002.json`. Gates remain unchanged.
+
+Saved native endpoint diagnosis completed naturally in R2025b at 15:54:34Z.
+COM horizontal displacement is 230.802 mm (tour) and 110.766 mm (owner);
+terminal projected COM lies outside the contact-point hull by 167.030 and
+13.899 mm. Native ankle rotations change 12.485/12.476 degrees (tour L/R)
+and 4.069/4.525 degrees (owner L/R). This is endpoint motion, not continuous
+contact-slip measurement or a causal diagnosis. Initial forces are zero;
+there is no initial active support hull. Native workspace and hold scripts
+confirm zero leg feedforward and unchanged servo gains. A preliminary probe
+rejected its incorrect rigid five-sphere constellation assumption; the
+corrected probe measures ankle followers directly and preserves midfoot
+articulation. No new simulation or model save occurred. See
+`saved_native_hold_diagnosis_review_20261002.json` and the updated LaTeX.
+Next: verify Human ankle FK/gain compatibility before a same-stance
+balance-enabled hold with the unchanged registered force/drift gates.

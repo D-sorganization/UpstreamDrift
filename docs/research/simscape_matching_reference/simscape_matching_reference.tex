@@ -1706,6 +1706,59 @@ cannot be assumed to replay Human without a reviewed adaptation. No
 gravity-feedforward or independently replayed Human swing is qualified by
 these runs. See \texttt{owner\_constant\_hold\_review\_20261002.json}.
 
+
+\subsection{Saved Native Hold Diagnostics: COM and Ankle Motion}
+Read-only R2025b reconstruction of both saved hold endpoints completed
+naturally with exit zero at \texttt{2026-10-02T15:54:34Z}. The exact Human
+binary and capture-specific geometry were reapplied; all 48 native joint
+IDs, keys and units were checked. No new simulation or model save occurred.
+Scalar errors were separated into metres and degrees; spherical errors
+were computed from explicitly keyed axis-angle coordinates. The metre
+errors are floating-root coordinates, not rotational servo errors.
+
+Maximum whole-run horizontal COM displacement was 230.802 mm for the tour
+and 110.766 mm for the owner; absolute vertical COM displacement was
+27.401 and 13.842 mm. This evidence does not support describing the entire
+drift as vertical sag. At one second, ankle-follower horizontal displacement
+was 19.401/19.205 mm for the tour's left/right feet and 5.062/5.569 mm for
+the owner. Their native rotation changes were
+$12.485^\circ/12.476^\circ$ and $4.069^\circ/4.525^\circ$.
+Maximum scalar rotational reference errors were $1.570^\circ$ and
+$2.085^\circ$; hip spherical errors stayed below $0.663^\circ$ and
+$1.150^\circ$. These endpoint quantities do not establish a causal defect
+or measure continuous tangential contact slip.
+
+For a ground-plane convex hull with counterclockwise vertices $v_i$,
+projected COM $c$ and edges $e_i=v_{i+1}-v_i$, the diagnostic margin is
+\[
+ m=\min_i\frac{e_{ix}(c_y-v_{iy})-e_{iy}(c_x-v_{ix})}{\lVert e_i\rVert}.
+\]
+Positive margins indicate an interior projection. The potential hull uses
+all ten projected sphere centers; the active hull uses spheres carrying
+more than 1 N normal force. This load threshold is diagnostic, not a new
+acceptance criterion. Initial potential margins were 61.994/96.182 mm
+for tour/owner; no initial active hull existed because all contact forces
+were zero. Terminal potential and active margins were
+$-167.030/-13.899$ mm, with three/four active spheres. This COM projection
+diagnostic complements the already rejected hold gates; it is not a
+dynamic stability certificate.
+
+The preliminary reconstruction failed naturally at
+\texttt{2026-10-02T15:51:21Z} because it incorrectly assumed that all five
+spheres on one foot form a rigid constellation. Native midfoot articulation
+invalidates that assumption. The corrected probe measures the ankle
+follower directly and preserves the constellation-fit residual as an
+observation. The failed source and receipt remain private execution history.
+
+Native workspace inspection and the hold scripts confirm zero leg
+feedforward. Leg servo proportional gains were
+$[100,100,100,100,50,50]$ per side in N\,m/degree, and derivative gains
+$[2,2,2,2,1,1]$ in N\,m\,s/degree. Neither gains nor leg commands were
+overridden by the holds. Balance remained off. The next controlled run
+must verify the Human ankle FK/gain interface and initialize COM and ankle
+references from this same stance. See
+\texttt{saved\_native\_hold\_diagnosis\_review\_20261002.json}.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
