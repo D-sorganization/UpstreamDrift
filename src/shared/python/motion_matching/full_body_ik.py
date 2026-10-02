@@ -436,9 +436,9 @@ class BaseFullBodyIK:
         self, q: Array, options: ConstraintOptions
     ) -> ConstraintLinearization:
         """Linearize declared geometry, or explicitly reject unsupported engines."""
-        raise NotImplementedError(
+        raise NotImplementedError(  # tracked: #10330
             "Native constraint linearization is unsupported"
-        )  # tracked: #10330
+        )
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""

@@ -342,9 +342,9 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         if not isinstance(options, ConstraintOptions):
             raise ValueError("Constraint options must be validated ConstraintOptions")
         if len(self._closure) != 2 or not self._spheres:
-            raise NotImplementedError(
+            raise NotImplementedError(  # tracked: #11235
                 "Native grip/ground constraints are unavailable"
-            )  # tracked: #11235
+            )
         pinned = frozenset(options.pinned_spheres)
         if not pinned.issubset(self.sphere_names):
             raise ValueError(
