@@ -54,7 +54,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; later sequential exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; later sequential exploration identified separately.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -71,7 +71,7 @@ design manual. That manual's editable authority remains
 \end{titlepage}
 \hypersetup{pageanchor=true}
 
-{\footnotesize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
+{\scriptsize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
 \vspace{0.15in}
 \note{Reading Guide}{Sections 1--4 explain evidence and the image fit.
 Sections 5--7 explain placement, closure, and constrained repair. Sections
@@ -270,6 +270,169 @@ reuses the existing shared MAP estimator rather than maintaining a second
 optimization framework. The original estimator leaves trajectory coefficients
 unbounded; fitting a low image residual can therefore produce implausible
 coordinates or open grip geometry.
+
+\subsection{Opt-In Interior Constraints and Scalar Spline Assessment}
+The source \code{b92732e725} adds explicit \code{ConstraintOptions} to the
+historical spline fit while preserving the original position-only closure
+behavior when those options are absent. The public native IK capability
+returns six grip rows---three world position components in metres and three
+principal world rotation-log components in radians---followed by one row for
+each declared ground-contact sphere. Every row is dimensionless:
+\begin{equation}
+ r_k(\mathbf q)=\frac{\sqrt{w_k}}{s_k}\,g_k(\mathbf q),
+ \qquad w_k\geq0,\quad s_k>0.
+\end{equation}
+Position and ground scales use metres; rotation scales use radians. These
+weights differ from the residual multipliers in Equation~\ref{eq:map}:
+$w_k$ weights the squared native discrepancy after scaling. Zero-weight and
+inactive ground rows retain their ordered identities. Unpinned ground rows
+measure penetration only; explicitly pinned spheres retain signed depth.
+Ground, pinning, scales, and weights are authored assumptions.
+
+For spline knots $\tau_k$ and explicit increasing fractions
+$\alpha\in(0,1)$, the constraint evaluation set is the sorted unique union
+\begin{equation}
+ \mathcal T=\{t_i^{\mathrm{src}}\}_i\ \cup\
+ \{\tau_k+\alpha(\tau_{k+1}-\tau_k)\}_{k,\alpha}.
+\end{equation}
+Only original source rows enter the image, pose-prior, and speed residuals,
+landmark RMS, observed counts, and missingness reports. An interior evaluation
+is a constraint probe; it adds no decoded frame, observation, confidence,
+or source-frame identity. The public native Jacobian $J_q(t)$ is chained
+through the canonical free-coordinate spline basis $B_f(t)$:
+\begin{equation}
+ \frac{\partial\mathbf r_{\mathrm{constraint}}(t)}{\partial\mathbf c}
+ =J_{q,f}(t)B_f(t),\qquad t\in\mathcal T.
+\end{equation}
+The existing MAP estimator consumes these rows; no separate solver or native
+geometry implementation is introduced. Saved assessments retain tested times,
+stable row labels, scaled residuals, and their maximum absolute value. A finite
+probe set can miss an intervening nonlinear grip or ground failure. Principal
+rotation logs also have a branch discontinuity at $\pi$, and penetration-only
+contact has a derivative kink at zero depth. The report therefore retains
+\code{continuous_certified=false}.
+
+A separate scalar-coordinate assessment checks the preserved cubic Hermite
+trajectory over its full source interval. For normalized segment time
+$u\in[0,1]$, write $q(u)=a u^3+b u^2+c u+d$. Candidate extrema comprise both
+endpoints and the real interior roots of $3a u^2+2b u+c=0$. Candidate values
+are evaluated through the canonical spline API, retaining extrema, source
+times, and lower/upper violations in each coordinate's native units. Locked
+coordinates must remain constant. Stored source poses must agree with the
+preserved spline under absolute tolerance $10^{-10}$ and relative tolerance
+$10^{-8}$ before this assessment is admitted. Named authored limits must be
+finite and two-sided with lower $\leq$ upper; equal limits are supported.
+Unbounded coordinates remain explicitly unbounded. This floating-point scalar
+assessment neither enforces hard bounds during fitting nor certifies nonlinear
+closure/contact, physical timing, dynamics, or historical motion.
+
+\subsection{Constraint Wiring Verification and Historical Trials}
+Combined local verification for this implementation reported 108 passing cases;
+a subsequent native refactor was checked with a separate 34-case native suite.
+These counts describe distinct verification runs and should not be added as an
+independent-test total. A clean MuJoCo 3.3.4 process also executed a synthetic
+one-evaluation wiring smoke, recorded in
+\code{TEMP/necromatcher-native-interior-smoke.json}. Its 44-coordinate native
+provider returned a $12\times44$ pose Jacobian and a $3\times12$ constraint
+matrix at times 110, 110.5, and 111 seconds. Only the two synthetic source
+samples contributed six observed landmarks. Independently computed image RMS
+matched the returned 5.528795 px and the one-evaluation baseline; the maximum
+scaled constraint residual was 9.216566. The optimizer exhausted its single
+evaluation, so \code{converged=false}. This fixture checks native wiring and
+source-only metric accounting; it contains no historical fitting evidence and
+establishes no scientific acceptance.
+
+Actual historical trials at the same source used the generic 44-coordinate
+model, twelve knots, and interior fractions $(0.25,0.5,0.75)$. Position,
+rotation, and ground weights were each 1000, with scales 0.01 m, 0.1 rad,
+and 0.01 m respectively; prior and source-speed multipliers were 0.001 and
+0.0001. These are explicit operator assumptions, with no hard coordinate
+bounds. Each request allowed twenty function evaluations and a 180-second
+worker wall guard; this guard is a deadline, not a reported elapsed time.
+The terminal receipt is
+\path{Downloads/historical-capture/native-fit-research/interior-constraint-trial-receipt.json}.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule Metric & Tiger & Hogan\\\midrule
+Training source frames & 22 & 23\\
+Tested constraint times & 55 & 56\\
+Initial training RMS (px) & 19.033458 & 10.579293\\
+Final training RMS (px) & 26.671572 & 8.171890\\
+Dense source RMS (px) & 30.408970 & 10.801430\\
+Held-out source RMS (px) & 30.815205 & 10.872172\\
+Maximum dense source grip gap (m) & 0.038116054 & 0.006292341\\
+Maximum tested scaled constraint residual & 155.787739 & 31.594861\\
+\bottomrule
+\end{tabular}
+\caption{Interior-Constraint Historical Trial Outputs. Dense Grip Gaps Describe
+Source Samples; Tested Scaled Residuals Describe the Authored Evaluation Union.}
+\end{table}
+
+Both jobs returned \code{succeeded} research computation, rejected scientific
+acceptance, and \code{optimizer_not_converged}. Tiger's training image RMS
+increased under these weights; Hogan's decreased. Neither tradeoff establishes
+feasible closed motion. The following independent assessment evaluates the
+preserved V7 candidates without performing new optimization.
+
+\subsection{Independent V7 Source and Midpoint Audit}
+A clean MuJoCo process at the recorded source evaluated all original source
+poses and every adjacent-source midpoint. Both before and after each player's
+audit, all 500 recorded producer-file hashes matched the trial implementation.
+Midpoints retain their bracketing source-frame indices and rational source
+time; they remain authored evaluations with no added image observations.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule Independent Assessment & Tiger & Hogan\\\midrule
+Original source poses & 210 & 750\\
+Adjacent-source midpoints & 209 & 749\\
+Combined tested poses & 419 & 1499\\
+Maximum grip gap (mm) & 38.514036 & 6.292341\\
+Maximum grip angle (degrees) & 32.828463 & 5.984619\\
+Maximum ground penetration (mm) & 0 & 17.291890\\
+Penetrating source poses & 0 & 108\\
+Penetrating midpoint poses & 0 & 103\\
+Violated authored scalar ranges (of 32) & 10 & 5\\
+\bottomrule
+\end{tabular}
+\caption{Independent Evaluation of Preserved V7 Splines. Finite Nonlinear
+Sampling and Scalar Cubic Extrema Remain Separate Assessments.}
+\end{table}
+
+Tiger's maximum gap occurs at source time 18.835483333 s, between frames 114
+and 115; its maximum angle occurs at 18.535183333 s, between frames 105 and
+106. Hogan's maximum gap occurs at original frame 334, 121.133333333 s; its
+maximum angle occurs at 117.15 s, between frames 214 and 215. Hogan's worst
+penetration occurs at 127.983333333 s, between frames 539 and 540. These times
+refer to the source clock, with exact rational identities retained in the
+receipt. They do not establish physical swing timing.
+
+Tiger has no sampled penetration because all six contact-sphere bottoms remain
+at least 42.004690 mm above the plane at every tested pose. No spheres were
+pinned. This nonpenetration result does not establish planted feet: the
+candidate floats above the authored plane. Hogan's 108 source and 103 midpoint
+penetrations also prevent a ground-feasible interpretation.
+
+The scalar cubic assessment uses 32 authored angular ranges from the exact
+native definition whose public MJCF export reproduces the bound model hash.
+Tiger's largest excess is 1.569530652 rad below the lower limit for
+\code{hip_flexion_r} at 21.962738289 s. Hogan's largest excess is
+1.094094008 rad above the upper limit for \code{knee_angle_r} at
+128.075861733 s. The twelve unbounded coordinates remain unbounded.
+These are generic operator-authored ranges, not measured historical anatomy.
+
+The full independent receipt and its reproduction script are
+\code{v7-independent-dense-midpoint-assessment-b927.json} and
+\code{v7-independent-dense-midpoint-assessment-b927.py} in the Desktop package;
+the sanitized repository summary is
+\path{docs/development/historical_capture/v7-independent-assessment-summary.json}.
+Both candidates retain rejected research qualification, optimizer nonconvergence,
+and \code{continuous_certified=false}. Finite source/midpoint sampling cannot
+certify nonlinear geometry between its evaluations, and no hard bound
+constraint was added to fitting.
 
 \subsection{Reporting Fit Error}
 The reported confidence-weighted Euclidean landmark RMS is
@@ -590,6 +753,19 @@ Tiger to frame 1 preserved \code{export_run}; reloading Hogan and reopening
 the Models drawer recalled the same completed run and verified download.
 These live checks establish export and recall behavior, not motion acceptance.
 
+\subsection{V7 Interior-Constraint Overlay Evidence}
+The shared owned export jobs at source \code{b92732e725} produced Tiger run
+\code{95aea87381e04e68b316783933a05b89} and Hogan run
+\code{d32f1523f7654fa3ba4360226519f768}. Both returned \code{succeeded},
+\code{execution_verified=true}, and \code{download_available=true}, while
+scientific acceptance remained rejected. Independent decoding counted 210
+Tiger and 750 Hogan frames; MP4 and selected PNG hashes matched their export
+manifests. \texttt{Tiger Interior V7 Overlay/} and
+\texttt{Hogan Interior V7 Overlay/}, their ZIPs, and
+\code{interior-v7-overlay-review.json} preserve these interim outputs.
+Artifact verification establishes transferred bytes and frame counts, not
+accepted player motion or continuous closure.
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -675,8 +851,8 @@ Inputs validate finite values, dimensions, proper rotations, increasing times,
 exact identities, named units, horizon bounds, immutable parents, and ownership.
 Public plant, estimator, simulator, background-worker, and storage boundaries
 keep orchestration narrow; canonical camera, spline, polynomial, Trace, and
-hash interfaces avoid duplicate numerical authorities. Current combined local
-verification reports 169 passing tests. Scoped Ruff and pinned mypy, file and
+hash interfaces avoid duplicate numerical authorities. An earlier combined local
+verification lane reported 169 passing tests. Scoped Ruff and pinned mypy, file and
 function budgets, title conventions, and manual-governance checks pass.
 These local checks do not establish remote green CI or scientific release.
 
@@ -770,6 +946,7 @@ unpublished sequential NPZ remain outside Git under
 \code{Downloads/historical-capture/native-fit-research}.
 
 \section{Source Map and Resume Instructions}
+{\footnotesize
 \begin{longtable}{@{}p{2.3in}p{4.0in}@{}}
 \toprule Authority & Repository Path / Purpose\\\midrule\endhead
 Capture Catalog & \path{docs/development/historical_capture/source-catalog.json}\\
@@ -810,4 +987,5 @@ The focused commands test the bounded native solver and its geometry
 derivatives. They do not replace the combined library/API/replay regression
 lane, original-image review, continuous-motion audits, or remote checks.
 
+}
 \end{document}

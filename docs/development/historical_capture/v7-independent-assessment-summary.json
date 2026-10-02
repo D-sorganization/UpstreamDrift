@@ -1,0 +1,1409 @@
+{
+  "schema": "necromatcher/independent-preserved-spline-audit/1",
+  "created_at_utc": "2026-10-02T08:04:14.951631+00:00",
+  "source_commit": "b92732e72579bfb72ba77d16f671f5f657a1b37c",
+  "full_receipt_sha256": "dac04762d85239400902585679d1e893ae8649becb227c6d706d1c2b56211ad7",
+  "reproduction_script_sha256": "sha256:8d39099cb9967b8eaa5b24827f2d1249510adc0f4c80e1aa769b7be5e72a5d2c",
+  "runs": [
+    {
+      "player": "tiger",
+      "fit_id": "tiger-interior-constraint-fit-v7",
+      "fit_hash": "sha256:d77f55bf901279145f87fdaeedc4aba503c4324a65945d2ff67b440517309877",
+      "model_id": "tiger-generic-native-model-v2",
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "optimization_frame_count": 22,
+      "dense_observed_frame_count": 210,
+      "dense_observed_image_rms_pixels": 30.408969934470633,
+      "source_frame_summary": {
+        "count": 210,
+        "maximum_grip_gap_m": {
+          "value": 0.038116053689916794,
+          "source_time": 18.8188,
+          "pts_rational": {
+            "numerator": 47047,
+            "denominator": 2500
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [114]
+        },
+        "positive_grip_gap_m_count": 210,
+        "maximum_grip_angle_deg": {
+          "value": 32.67053215735729,
+          "source_time": 18.5185,
+          "pts_rational": {
+            "numerator": 37037,
+            "denominator": 2000
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [105]
+        },
+        "positive_grip_angle_deg_count": 210,
+        "maximum_ground_penetration_m": {
+          "value": 0.0,
+          "source_time": 15.015,
+          "pts_rational": {
+            "numerator": 3003,
+            "denominator": 200
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [0]
+        },
+        "positive_ground_penetration_m_count": 0
+      },
+      "midpoint_summary": {
+        "count": 209,
+        "maximum_grip_gap_m": {
+          "value": 0.03851403642702296,
+          "source_time": 18.835483333333332,
+          "pts_rational": {
+            "numerator": 1130129,
+            "denominator": 60000
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [114, 115]
+        },
+        "positive_grip_gap_m_count": 209,
+        "maximum_grip_angle_deg": {
+          "value": 32.82846342723015,
+          "source_time": 18.535183333333332,
+          "pts_rational": {
+            "numerator": 1112111,
+            "denominator": 60000
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [105, 106]
+        },
+        "positive_grip_angle_deg_count": 209,
+        "maximum_ground_penetration_m": {
+          "value": 0.0,
+          "source_time": 15.031683333333334,
+          "pts_rational": {
+            "numerator": 901901,
+            "denominator": 60000
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [0, 1]
+        },
+        "positive_ground_penetration_m_count": 0
+      },
+      "combined_summary": {
+        "count": 419,
+        "maximum_grip_gap_m": {
+          "value": 0.03851403642702296,
+          "source_time": 18.835483333333332,
+          "pts_rational": {
+            "numerator": 1130129,
+            "denominator": 60000
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [114, 115]
+        },
+        "positive_grip_gap_m_count": 419,
+        "maximum_grip_angle_deg": {
+          "value": 32.82846342723015,
+          "source_time": 18.535183333333332,
+          "pts_rational": {
+            "numerator": 1112111,
+            "denominator": 60000
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [105, 106]
+        },
+        "positive_grip_angle_deg_count": 419,
+        "maximum_ground_penetration_m": {
+          "value": 0.0,
+          "source_time": 15.015,
+          "pts_rational": {
+            "numerator": 3003,
+            "denominator": 200
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [0]
+        },
+        "positive_ground_penetration_m_count": 0
+      },
+      "authored_coordinate_bounds": {
+        "source_interval": [15.015, 21.988633333333333],
+        "coordinates": [
+          {
+            "name": "TranslationInputX",
+            "minimum": 0.6626885423356053,
+            "minimum_source_time": 15.015,
+            "maximum": 2.744441462947015,
+            "maximum_source_time": 21.988633333333333,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "TranslationInputY",
+            "minimum": -0.45649718956181,
+            "minimum_source_time": 21.988633333333333,
+            "maximum": -0.05184912642192667,
+            "maximum_source_time": 18.138663949683767,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "TranslationInputZ",
+            "minimum": 0.9806488868497689,
+            "minimum_source_time": 17.97657902131056,
+            "maximum": 1.730481967653915,
+            "maximum_source_time": 21.988633333333333,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputX",
+            "minimum": -0.1358575405672209,
+            "minimum_source_time": 20.025015633350158,
+            "maximum": 1.2608237319960196,
+            "maximum_source_time": 21.988633333333333,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputY",
+            "minimum": -0.6438625940099859,
+            "minimum_source_time": 19.58988743050394,
+            "maximum": 0.11511591546041737,
+            "maximum_source_time": 21.280711756002468,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputZ",
+            "minimum": -0.3923272867805079,
+            "minimum_source_time": 17.446832249240693,
+            "maximum": 2.2637989726125816,
+            "maximum_source_time": 21.140492916922597,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "SpineInputX",
+            "minimum": -0.7364873868622223,
+            "minimum_source_time": 17.505181331663298,
+            "maximum": 0.3362997569224029,
+            "maximum_source_time": 20.256010466878003,
+            "bounds": [-0.6108652381980153, 0.6108652381980153],
+            "lower_violation": 0.12562214866420696,
+            "upper_violation": 0.0,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "SpineInputY",
+            "minimum": -0.6551640660881738,
+            "minimum_source_time": 20.08194582893344,
+            "maximum": 1.5451011685077385,
+            "maximum_source_time": 21.981158310153212,
+            "bounds": [-0.7853981633974483, 0.7853981633974483],
+            "lower_violation": 0.0,
+            "upper_violation": 0.7597030051102902,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "TorsoInput",
+            "minimum": -0.696668861862768,
+            "minimum_source_time": 17.567252481222184,
+            "maximum": 0.3818316494269992,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.7453292519943295, 1.7453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LEInput",
+            "minimum": -1.7033567754413632,
+            "minimum_source_time": 21.239017795332337,
+            "maximum": 1.224107992970304,
+            "maximum_source_time": 15.617246460488879,
+            "bounds": [-2.6179938779914944, 0.08726646259971647],
+            "lower_violation": 0.0,
+            "upper_violation": 1.1368415303705877,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "LFInput",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.5707963267948966, 1.5707963267948966],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LScapInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.17453292519943295, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LScapInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LSInputX",
+            "minimum": -1.190834021104512,
+            "minimum_source_time": 19.9472431699419,
+            "maximum": 1.8663210942133077,
+            "maximum_source_time": 21.988633333333333,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LSInputY",
+            "minimum": -0.36774585057858117,
+            "minimum_source_time": 17.58176532573948,
+            "maximum": 2.1759405579747293,
+            "maximum_source_time": 21.49935828735118,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LSInputZ",
+            "minimum": -1.6886832111104197,
+            "minimum_source_time": 17.65549989237577,
+            "maximum": 1.481049449729877,
+            "maximum_source_time": 20.057918194875008,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LWInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.4363323129985824],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LWInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.2217304763960306, 1.2217304763960306],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "REInput",
+            "minimum": -2.758504083570943,
+            "minimum_source_time": 18.91705311050124,
+            "maximum": 0.5289241526977536,
+            "maximum_source_time": 20.272669706145603,
+            "bounds": [-2.6179938779914944, 0.08726646259971647],
+            "lower_violation": 0.1405102055794485,
+            "upper_violation": 0.4416576900980371,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "RFInput",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.5707963267948966, 1.5707963267948966],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RScapInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.5235987755982988, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RScapInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RSInputX",
+            "minimum": -5.117812048713178,
+            "minimum_source_time": 18.819417850728048,
+            "maximum": 1.2071199828344255,
+            "maximum_source_time": 21.385985576646533,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RSInputY",
+            "minimum": 0.006447807241826798,
+            "minimum_source_time": 17.569503596238075,
+            "maximum": 2.250796649624698,
+            "maximum_source_time": 19.462661802544346,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RSInputZ",
+            "minimum": -1.4320544809933637,
+            "minimum_source_time": 18.19306491520548,
+            "maximum": 3.3638148889233945,
+            "maximum_source_time": 18.80088497528218,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RWInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.4363323129985824],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RWInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.2217304763960306, 1.2217304763960306],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.7853981633974483, 0.7853981633974483],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.0471975511965976, 1.0471975511965976],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputZ",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-1.3962634015954636, 1.3962634015954636],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_flexion_r",
+            "minimum": -2.093129427906784,
+            "minimum_source_time": 21.9627382894285,
+            "maximum": -0.034837089842669575,
+            "maximum_source_time": 17.50739721078843,
+            "bounds": [-0.5235987755982988, 2.0943951023931953],
+            "lower_violation": 1.5695306523084853,
+            "upper_violation": 0.0,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "hip_adduction_r",
+            "minimum": -0.9445598739138218,
+            "minimum_source_time": 21.988633333333333,
+            "maximum": 0.09325222221265325,
+            "maximum_source_time": 18.156008527272718,
+            "bounds": [-0.8726646259971648, 0.5235987755982988],
+            "lower_violation": 0.07189524791665702,
+            "upper_violation": 0.0,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "hip_rotation_r",
+            "minimum": -0.08232749553473548,
+            "minimum_source_time": 20.123333693152638,
+            "maximum": 1.9872087866719699,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 1.2890770858742382,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "knee_angle_r",
+            "minimum": -0.02904991097273791,
+            "minimum_source_time": 17.396292451296635,
+            "maximum": 0.928359125191439,
+            "maximum_source_time": 19.257534845706125,
+            "bounds": [-2.0943951023931953, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.7538261999920061,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "ankle_angle_r",
+            "minimum": 0.037597351114542495,
+            "minimum_source_time": 18.756665923353694,
+            "maximum": 0.45902052355533685,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.6981317007977318, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "subtalar_angle_r",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.3490658503988659, 0.3490658503988659],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "mtp_angle_r",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.5235987755982988, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_flexion_l",
+            "minimum": -0.965730293936232,
+            "minimum_source_time": 21.98078768866662,
+            "maximum": 0.3112783785027549,
+            "maximum_source_time": 17.511057825001743,
+            "bounds": [-0.5235987755982988, 2.0943951023931953],
+            "lower_violation": 0.4421315183379332,
+            "upper_violation": 0.0,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "hip_adduction_l",
+            "minimum": -0.2582355501315372,
+            "minimum_source_time": 20.047654776638236,
+            "maximum": 0.4561514333211357,
+            "maximum_source_time": 21.988633333333333,
+            "bounds": [-0.8726646259971648, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_rotation_l",
+            "minimum": 0.3380439307020137,
+            "minimum_source_time": 20.134917875234077,
+            "maximum": 1.1444806503577716,
+            "maximum_source_time": 18.224721308819603,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.4463489495600398,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "knee_angle_l",
+            "minimum": -1.6280540398014163,
+            "minimum_source_time": 21.988633333333333,
+            "maximum": 0.055760954053142645,
+            "maximum_source_time": 18.159043255548283,
+            "bounds": [-2.0943951023931953, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "ankle_angle_l",
+            "minimum": -0.6177483710430199,
+            "minimum_source_time": 17.562838017832778,
+            "maximum": -0.28464625279461075,
+            "maximum_source_time": 20.073475248563447,
+            "bounds": [-0.6981317007977318, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "subtalar_angle_l",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.3490658503988659, 0.3490658503988659],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "mtp_angle_l",
+            "minimum": 0.0,
+            "minimum_source_time": 15.015,
+            "maximum": 0.0,
+            "maximum_source_time": 15.015,
+            "bounds": [-0.5235987755982988, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          }
+        ],
+        "method": "cubic_hermite_derivative_roots",
+        "continuous_certified": false,
+        "grip_assessment": "not_assessed",
+        "ground_assessment": "not_assessed",
+        "source_sample_atol": 1e-10,
+        "source_sample_rtol": 1e-8,
+        "status": "assessed_exact_preserved_spline",
+        "bounds_source": "coordinate_ranges_deg in exact native_definition whose public MJCF export reproduced bound model_hash",
+        "units": "rad for all finite authored bounds; m/rad retained for unbounded coordinates",
+        "bounded_coordinates": [
+          "SpineInputX",
+          "SpineInputY",
+          "TorsoInput",
+          "LEInput",
+          "LFInput",
+          "LScapInputX",
+          "LScapInputY",
+          "LWInputX",
+          "LWInputY",
+          "REInput",
+          "RFInput",
+          "RScapInputX",
+          "RScapInputY",
+          "RWInputX",
+          "RWInputY",
+          "NeckInputX",
+          "NeckInputY",
+          "NeckInputZ",
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "ankle_angle_r",
+          "subtalar_angle_r",
+          "mtp_angle_r",
+          "hip_flexion_l",
+          "hip_adduction_l",
+          "hip_rotation_l",
+          "knee_angle_l",
+          "ankle_angle_l",
+          "subtalar_angle_l",
+          "mtp_angle_l"
+        ],
+        "unbounded_coordinates": [
+          "TranslationInputX",
+          "TranslationInputY",
+          "TranslationInputZ",
+          "HipInputX",
+          "HipInputY",
+          "HipInputZ",
+          "LSInputX",
+          "LSInputY",
+          "LSInputZ",
+          "RSInputX",
+          "RSInputY",
+          "RSInputZ"
+        ],
+        "violating_coordinates": [
+          "SpineInputX",
+          "SpineInputY",
+          "LEInput",
+          "REInput",
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "hip_flexion_l",
+          "hip_rotation_l"
+        ]
+      },
+      "ground_clearance_assessment": {
+        "minimum_any_contact_sphere_height_m": 0.04200468999536595,
+        "maximum_any_contact_sphere_height_m": 1.9238169187319043,
+        "all_contact_spheres_above_plane_count": 419,
+        "tested_pose_count": 419,
+        "pinned_spheres": [],
+        "interpretation": "Ground penalty assesses nonpenetration only; positive clearance and no pinned spheres do not establish planted-foot contact."
+      },
+      "independent_audit_blockers": [
+        "nonzero_grip_position_and_rotation_at_assessed_times",
+        "authored_coordinate_bound_violations",
+        "finite_grid_is_not_nonlinear_all_time_certification",
+        "saved_optimizer_not_converged",
+        "physical_time_camera_anatomy_unqualified",
+        "independent_dynamics_not_replayed"
+      ],
+      "assessment_limitations": [
+        "finite source/midpoint sampling does not certify nonlinear all-time grip or ground",
+        "authored generic coordinate limits do not establish historical anatomy",
+        "motion uses source-clock PTS, not identified physical swing time",
+        "saved optimizer did not converge; no new optimization was performed"
+      ],
+      "continuous_certified": false,
+      "scientific_acceptance": false
+    },
+    {
+      "player": "hogan",
+      "fit_id": "hogan-interior-constraint-fit-v7",
+      "fit_hash": "sha256:3fd610a20ae7982f66af59cf0e1680e04ff1202c150ef2ebf6fd5cec4b6d65a4",
+      "model_id": "hogan-generic-native-model-v2",
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "hogan-practice-capture-v1",
+      "capture_hash": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "optimization_frame_count": 23,
+      "dense_observed_frame_count": 750,
+      "dense_observed_image_rms_pixels": 10.801429771006733,
+      "source_frame_summary": {
+        "count": 750,
+        "maximum_grip_gap_m": {
+          "value": 0.0062923412738587845,
+          "source_time": 121.13333333333334,
+          "pts_rational": {
+            "numerator": 1817,
+            "denominator": 15
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [334]
+        },
+        "positive_grip_gap_m_count": 750,
+        "maximum_grip_angle_deg": {
+          "value": 5.984087949631726,
+          "source_time": 117.16666666666667,
+          "pts_rational": {
+            "numerator": 703,
+            "denominator": 6
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [215]
+        },
+        "positive_grip_angle_deg_count": 750,
+        "maximum_ground_penetration_m": {
+          "value": 0.017265097157276407,
+          "source_time": 128.0,
+          "pts_rational": {
+            "numerator": 128,
+            "denominator": 1
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [540]
+        },
+        "positive_ground_penetration_m_count": 108
+      },
+      "midpoint_summary": {
+        "count": 749,
+        "maximum_grip_gap_m": {
+          "value": 0.006286277140958832,
+          "source_time": 121.11666666666666,
+          "pts_rational": {
+            "numerator": 7267,
+            "denominator": 60
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [333, 334]
+        },
+        "positive_grip_gap_m_count": 749,
+        "maximum_grip_angle_deg": {
+          "value": 5.98461873206152,
+          "source_time": 117.15,
+          "pts_rational": {
+            "numerator": 2343,
+            "denominator": 20
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [214, 215]
+        },
+        "positive_grip_angle_deg_count": 749,
+        "maximum_ground_penetration_m": {
+          "value": 0.017291890403941718,
+          "source_time": 127.98333333333333,
+          "pts_rational": {
+            "numerator": 7679,
+            "denominator": 60
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [539, 540]
+        },
+        "positive_ground_penetration_m_count": 103
+      },
+      "combined_summary": {
+        "count": 1499,
+        "maximum_grip_gap_m": {
+          "value": 0.0062923412738587845,
+          "source_time": 121.13333333333334,
+          "pts_rational": {
+            "numerator": 1817,
+            "denominator": 15
+          },
+          "kind": "source_frame",
+          "source_frame_indices": [334]
+        },
+        "positive_grip_gap_m_count": 1499,
+        "maximum_grip_angle_deg": {
+          "value": 5.98461873206152,
+          "source_time": 117.15,
+          "pts_rational": {
+            "numerator": 2343,
+            "denominator": 20
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [214, 215]
+        },
+        "positive_grip_angle_deg_count": 1499,
+        "maximum_ground_penetration_m": {
+          "value": 0.017291890403941718,
+          "source_time": 127.98333333333333,
+          "pts_rational": {
+            "numerator": 7679,
+            "denominator": 60
+          },
+          "kind": "adjacent_source_midpoint",
+          "source_frame_indices": [539, 540]
+        },
+        "positive_ground_penetration_m_count": 211
+      },
+      "authored_coordinate_bounds": {
+        "source_interval": [110.0, 134.96666666666667],
+        "coordinates": [
+          {
+            "name": "TranslationInputX",
+            "minimum": -0.45773711660454874,
+            "minimum_source_time": 126.06622148992064,
+            "maximum": 1.1689912371528266,
+            "maximum_source_time": 127.95311643445707,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "TranslationInputY",
+            "minimum": -0.3664154424011306,
+            "minimum_source_time": 127.36185536845883,
+            "maximum": 0.40500099396513856,
+            "maximum_source_time": 124.87621522290901,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "TranslationInputZ",
+            "minimum": 0.5923963027356385,
+            "minimum_source_time": 120.83535916196041,
+            "maximum": 1.0534451418857373,
+            "maximum_source_time": 125.74239360666506,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputX",
+            "minimum": -0.24513311295013204,
+            "minimum_source_time": 117.39867582499474,
+            "maximum": 0.2808480206237555,
+            "maximum_source_time": 127.89884882753861,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputY",
+            "minimum": -0.8002309954019805,
+            "minimum_source_time": 120.07278020636586,
+            "maximum": 0.12627879513521625,
+            "maximum_source_time": 112.21735016866711,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "HipInputZ",
+            "minimum": -0.5230896494230215,
+            "minimum_source_time": 117.04217752238502,
+            "maximum": 0.6309035942213885,
+            "maximum_source_time": 132.14188882480272,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "SpineInputX",
+            "minimum": -0.7745146699615099,
+            "minimum_source_time": 127.98093167952942,
+            "maximum": 0.25294839567681743,
+            "maximum_source_time": 111.25220169888377,
+            "bounds": [-0.6108652381980153, 0.6108652381980153],
+            "lower_violation": 0.16364943176349456,
+            "upper_violation": 0.0,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "SpineInputY",
+            "minimum": -0.2663795969494483,
+            "minimum_source_time": 126.57783569851391,
+            "maximum": 0.5756810639809795,
+            "maximum_source_time": 114.99794303192816,
+            "bounds": [-0.7853981633974483, 0.7853981633974483],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "TorsoInput",
+            "minimum": -0.3899386404122663,
+            "minimum_source_time": 119.88416698135273,
+            "maximum": 0.40578386758128,
+            "maximum_source_time": 126.60057825846403,
+            "bounds": [-1.7453292519943295, 1.7453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LEInput",
+            "minimum": 0.2835118078551859,
+            "minimum_source_time": 128.79659663004105,
+            "maximum": 1.0763930246491793,
+            "maximum_source_time": 122.15970354278035,
+            "bounds": [-2.6179938779914944, 0.08726646259971647],
+            "lower_violation": 0.0,
+            "upper_violation": 0.9891265620494628,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "LFInput",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.5707963267948966, 1.5707963267948966],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LScapInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.17453292519943295, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LScapInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LSInputX",
+            "minimum": -0.8091456876194772,
+            "minimum_source_time": 133.1031524070661,
+            "maximum": -0.4333222825180393,
+            "maximum_source_time": 117.46834808378016,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LSInputY",
+            "minimum": -0.1549209663509808,
+            "minimum_source_time": 116.10899864618398,
+            "maximum": 0.530723535644853,
+            "maximum_source_time": 133.22681507378218,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LSInputZ",
+            "minimum": -1.4773263664200524,
+            "minimum_source_time": 128.79615690665102,
+            "maximum": 0.07774840981512887,
+            "maximum_source_time": 118.80446871216137,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "LWInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.6981317007977318, 0.4363323129985824],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "LWInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.2217304763960306, 1.2217304763960306],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "REInput",
+            "minimum": -1.149590001083833,
+            "minimum_source_time": 128.60281286411802,
+            "maximum": 0.8136670263219965,
+            "maximum_source_time": 118.9546220390938,
+            "bounds": [-2.6179938779914944, 0.08726646259971647],
+            "lower_violation": 0.0,
+            "upper_violation": 0.72640056372228,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "RFInput",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.5707963267948966, 1.5707963267948966],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RScapInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.5235987755982988, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RScapInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RSInputX",
+            "minimum": 0.2972093620335082,
+            "minimum_source_time": 116.8910376687198,
+            "maximum": 0.7996165869266474,
+            "maximum_source_time": 133.0475466522493,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RSInputY",
+            "minimum": -0.2605701203992318,
+            "minimum_source_time": 118.5421905582452,
+            "maximum": 0.9821566906325973,
+            "maximum_source_time": 133.1392951372298,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RSInputZ",
+            "minimum": -1.356241278605042,
+            "minimum_source_time": 132.86962522679272,
+            "maximum": 0.5186442395542237,
+            "maximum_source_time": 118.56460920396017,
+            "bounds": null,
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": null
+          },
+          {
+            "name": "RWInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.6981317007977318, 0.4363323129985824],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "RWInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.2217304763960306, 1.2217304763960306],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputX",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.7853981633974483, 0.7853981633974483],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputY",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.0471975511965976, 1.0471975511965976],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "NeckInputZ",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-1.3962634015954636, 1.3962634015954636],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_flexion_r",
+            "minimum": -0.26991998989034405,
+            "minimum_source_time": 132.89752203164153,
+            "maximum": 0.5168243178412144,
+            "maximum_source_time": 117.0017110800915,
+            "bounds": [-0.5235987755982988, 2.0943951023931953],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_adduction_r",
+            "minimum": -0.4831190182981249,
+            "minimum_source_time": 127.96754568280933,
+            "maximum": 0.00477560835441564,
+            "maximum_source_time": 110.62198501223236,
+            "bounds": [-0.8726646259971648, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_rotation_r",
+            "minimum": -0.21524568471648806,
+            "minimum_source_time": 110.0,
+            "maximum": 0.5305162376939507,
+            "maximum_source_time": 121.95255278500179,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "knee_angle_r",
+            "minimum": 0.18209112097728952,
+            "minimum_source_time": 126.1019045497393,
+            "maximum": 1.268626933149621,
+            "maximum_source_time": 128.07586173302082,
+            "bounds": [-2.0943951023931953, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 1.094094007950188,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "ankle_angle_r",
+            "minimum": -0.17051233451723227,
+            "minimum_source_time": 119.46024957507288,
+            "maximum": 0.6256221351774951,
+            "maximum_source_time": 127.12931967769069,
+            "bounds": [-0.6981317007977318, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.10202335957919628,
+            "within_authored_bounds": false
+          },
+          {
+            "name": "subtalar_angle_r",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.3490658503988659, 0.3490658503988659],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "mtp_angle_r",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.5235987755982988, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_flexion_l",
+            "minimum": -0.008215860273068098,
+            "minimum_source_time": 134.84853962525253,
+            "maximum": 0.7681455519047873,
+            "maximum_source_time": 121.4057977825284,
+            "bounds": [-0.5235987755982988, 2.0943951023931953],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_adduction_l",
+            "minimum": -0.7376501547111692,
+            "minimum_source_time": 128.04344189503473,
+            "maximum": 0.24460567033512662,
+            "maximum_source_time": 113.01827382375795,
+            "bounds": [-0.8726646259971648, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "hip_rotation_l",
+            "minimum": -0.47399385668534616,
+            "minimum_source_time": 128.29768305260123,
+            "maximum": 0.2194278364554741,
+            "maximum_source_time": 111.91886400181828,
+            "bounds": [-0.6981317007977318, 0.6981317007977318],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "knee_angle_l",
+            "minimum": -1.487668405094913,
+            "minimum_source_time": 117.40985042762347,
+            "maximum": -0.12394998843578393,
+            "maximum_source_time": 125.96812235073214,
+            "bounds": [-2.0943951023931953, 0.17453292519943295],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "ankle_angle_l",
+            "minimum": -0.3069352938585683,
+            "minimum_source_time": 121.68354148079459,
+            "maximum": 0.22489873369043872,
+            "maximum_source_time": 115.69206674038497,
+            "bounds": [-0.6981317007977318, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "subtalar_angle_l",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.3490658503988659, 0.3490658503988659],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          },
+          {
+            "name": "mtp_angle_l",
+            "minimum": 0.0,
+            "minimum_source_time": 110.0,
+            "maximum": 0.0,
+            "maximum_source_time": 110.0,
+            "bounds": [-0.5235987755982988, 0.5235987755982988],
+            "lower_violation": 0.0,
+            "upper_violation": 0.0,
+            "within_authored_bounds": true
+          }
+        ],
+        "method": "cubic_hermite_derivative_roots",
+        "continuous_certified": false,
+        "grip_assessment": "not_assessed",
+        "ground_assessment": "not_assessed",
+        "source_sample_atol": 1e-10,
+        "source_sample_rtol": 1e-8,
+        "status": "assessed_exact_preserved_spline",
+        "bounds_source": "coordinate_ranges_deg in exact native_definition whose public MJCF export reproduced bound model_hash",
+        "units": "rad for all finite authored bounds; m/rad retained for unbounded coordinates",
+        "bounded_coordinates": [
+          "SpineInputX",
+          "SpineInputY",
+          "TorsoInput",
+          "LEInput",
+          "LFInput",
+          "LScapInputX",
+          "LScapInputY",
+          "LWInputX",
+          "LWInputY",
+          "REInput",
+          "RFInput",
+          "RScapInputX",
+          "RScapInputY",
+          "RWInputX",
+          "RWInputY",
+          "NeckInputX",
+          "NeckInputY",
+          "NeckInputZ",
+          "hip_flexion_r",
+          "hip_adduction_r",
+          "hip_rotation_r",
+          "knee_angle_r",
+          "ankle_angle_r",
+          "subtalar_angle_r",
+          "mtp_angle_r",
+          "hip_flexion_l",
+          "hip_adduction_l",
+          "hip_rotation_l",
+          "knee_angle_l",
+          "ankle_angle_l",
+          "subtalar_angle_l",
+          "mtp_angle_l"
+        ],
+        "unbounded_coordinates": [
+          "TranslationInputX",
+          "TranslationInputY",
+          "TranslationInputZ",
+          "HipInputX",
+          "HipInputY",
+          "HipInputZ",
+          "LSInputX",
+          "LSInputY",
+          "LSInputZ",
+          "RSInputX",
+          "RSInputY",
+          "RSInputZ"
+        ],
+        "violating_coordinates": [
+          "SpineInputX",
+          "LEInput",
+          "REInput",
+          "knee_angle_r",
+          "ankle_angle_r"
+        ]
+      },
+      "ground_clearance_assessment": {
+        "minimum_any_contact_sphere_height_m": -0.017291890403941718,
+        "maximum_any_contact_sphere_height_m": 0.2636094038368868,
+        "all_contact_spheres_above_plane_count": 1288,
+        "tested_pose_count": 1499,
+        "pinned_spheres": [],
+        "interpretation": "Ground penalty assesses nonpenetration only; positive clearance and no pinned spheres do not establish planted-foot contact."
+      },
+      "independent_audit_blockers": [
+        "nonzero_grip_position_and_rotation_at_assessed_times",
+        "authored_coordinate_bound_violations",
+        "finite_grid_is_not_nonlinear_all_time_certification",
+        "saved_optimizer_not_converged",
+        "physical_time_camera_anatomy_unqualified",
+        "independent_dynamics_not_replayed",
+        "assessed_ground_penetration"
+      ],
+      "assessment_limitations": [
+        "finite source/midpoint sampling does not certify nonlinear all-time grip or ground",
+        "authored generic coordinate limits do not establish historical anatomy",
+        "motion uses source-clock PTS, not identified physical swing time",
+        "saved optimizer did not converge; no new optimization was performed"
+      ],
+      "continuous_certified": false,
+      "scientific_acceptance": false
+    }
+  ]
+}

@@ -17,16 +17,44 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11235 — Necromatcher Native Fit
+### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress
 - **Owner:** codex
 - **Issue:** #11235; parent #11232
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
 - **Branch:** `feat/necromatcher-native-fit-11235`
-- **Paths:** shared matching plant, native MuJoCo model, historical fitting integration and source-bound workspace fit storage
-- **Last verified:** 2026-10-02 — 88 focused fitting/spline/IK tests, 142 workspace unit tests pass; ruff clean; native video and research refit controls integrated.
-- **Summary:** Repaired closure and added source-bound native image fitting with preserved Hermite splines. Source-bound kinematic fit versions survive library recall and portable export with Hogan and Tiger frames. Native video export, research refit controls, ground placement, and effort bindings integrated with fail-closed validation. [Turnover](necromatcher-turnover.md).
+- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 108 focused cases passed; subsequent native test refactor passed 34 cases; independent v7 audit checked 419 Tiger and 1499 Hogan poses. These receipts precede the b50e8fd91e branch merge.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Both v7 candidates remain rejected: joint-limit violations and grip/contact errors require hard feasibility constraints. [Turnover](necromatcher-turnover.md).
+- **Next step:** Implement canonical whole-Hermite coordinate bounds with red-first overshoot tests.
+
+### DL-#11246 · Necromatcher Source Video Overlays
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11246; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — all 210 Tiger and 750 Hogan v7 output frames decoded with matching hashes; prior live web v6 jobs and downloaded packages verified.
+- **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
+- **Next step:** Revalidate export-job recall and download guards against the merged branch.
+
+### DL-#11247 · Necromatcher Reproducible Methods Report
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11247; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 19-page PDF compiled with existing MiKTeX installer disabled; all pages visually reviewed and 60 Desktop artifact hashes verified.
+- **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
+- **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 
