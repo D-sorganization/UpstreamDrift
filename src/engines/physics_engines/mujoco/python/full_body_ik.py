@@ -12,20 +12,46 @@ from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python.full_body_model import (
     NativeMujocoFullBodyModel,
 )
+from src.shared.python.motion_matching.constraint_kinematics import (
+    ConstraintLinearization,
+    ConstraintOptions,
+)
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import (
     BaseFullBodyIK,
-    _rotation_error,
     _validate_axis_spec,
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
 
 Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
+
+
+def _finite_rotation_error(r_a: Array, r_b: Array) -> Array:
+    """Principal world-axis rotation vector taking frame b onto frame a.
+
+    The principal logarithm has a branch discontinuity at a half turn;
+    its norm still reports pi instead of falsely reporting alignment.
+    """
+    return np.asarray(Rotation.from_matrix(r_a @ r_b.T).as_rotvec(), dtype=float)
+
+
+def _rotation_log_jacobian(phi: Array) -> Array:
+    """Inverse SO(3) left Jacobian for a finite world-axis rotation vector."""
+    theta = float(np.linalg.norm(phi))
+    x, y, z = phi
+    skew = np.array([[0.0, -z, y], [z, 0.0, -x], [-y, x, 0.0]])
+    coefficient = (
+        1.0 / 12.0 + theta**2 / 720.0
+        if theta < 1e-5
+        else (1.0 - 0.5 * theta / np.tan(0.5 * theta)) / theta**2
+    )
+    return np.eye(3) - 0.5 * skew + coefficient * skew @ skew
 
 
 class MujocoFullBodyIK(BaseFullBodyIK):
@@ -98,6 +124,8 @@ class MujocoFullBodyIK(BaseFullBodyIK):
 
 class FullBodyMarkerKinematics(BaseFullBodyIK):
     """MuJoCo marker kinematics and pose inverse kinematics adapter."""
+
+    supports_trf = True
 
     def __init__(
         self,
@@ -257,7 +285,7 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         self._set(q)
         a, b = self._closure
         pos = np.linalg.norm(self.data.site_xpos[a] - self.data.site_xpos[b])
-        rot = _rotation_error(
+        rot = _finite_rotation_error(
             self.data.site_xmat[a].reshape(3, 3), self.data.site_xmat[b].reshape(3, 3)
         )
         return float(pos), float(np.linalg.norm(rot))
@@ -302,6 +330,51 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             rows.append(w * (world_axis - target))
             jacs.append(w * (-skew @ jr)[:, self._dof])
 
+    def constraint_residual_jacobian(
+        self, q: Array, options: ConstraintOptions
+    ) -> ConstraintLinearization:
+        """Return fixed grip XYZ/rotation XYZ/declared-sphere rows at a pose.
+
+        Ground rows describe configured native geometry, not observed contact.
+        Zero weights retain rows. Jacobians are analytic away from the SO(3)
+        principal-log branch and the unpinned ground depth kink.
+        """
+        if not isinstance(options, ConstraintOptions):
+            raise ValueError("Constraint options must be validated ConstraintOptions")
+        if len(self._closure) != 2 or not self._spheres:
+            raise NotImplementedError("Native grip/ground constraints are unavailable")
+        pinned = frozenset(options.pinned_spheres)
+        if not pinned.issubset(self.sphere_names):
+            raise ValueError(
+                "Pinned contact identities must be declared native spheres"
+            )
+        self._set(q)
+        rows: list[Array] = []
+        jacs: list[Array] = []
+        self._append_closure(rows, jacs, 1.0, 1.0)
+        self._append_ground(rows, jacs, options.ground, 1.0, pinned)
+        factors = np.concatenate(
+            (
+                np.full(3, np.sqrt(options.position_weight) / options.position_scale_m),
+                np.full(
+                    3, np.sqrt(options.rotation_weight) / options.rotation_scale_rad
+                ),
+                np.full(
+                    len(self.sphere_names),
+                    np.sqrt(options.ground_weight) / options.ground_scale_m,
+                ),
+            )
+        )
+        labels = tuple(f"grip_position:{axis}" for axis in "xyz")
+        labels += tuple(f"grip_rotation:{axis}" for axis in "xyz")
+        labels += tuple(f"ground:{name}" for name in self.sphere_names)
+        return ConstraintLinearization(
+            np.concatenate(rows) * factors,
+            np.vstack(jacs) * factors[:, None],
+            self.coordinate_order,
+            labels,
+        )
+
     def _append_closure(
         self,
         rows: list[Array],
@@ -326,12 +399,13 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
             jacs.append(w * (jp_a - jp_b)[:, self._dof])
         if rotation_weight > 0:
             wr = np.sqrt(rotation_weight)
-            rot = _rotation_error(
-                self.data.site_xmat[a].reshape(3, 3),
-                self.data.site_xmat[b].reshape(3, 3),
-            )
+            r_a = self.data.site_xmat[a].reshape(3, 3)
+            r_b = self.data.site_xmat[b].reshape(3, 3)
+            relative = r_a @ r_b.T
+            rot = _finite_rotation_error(r_a, r_b)
             rows.append(wr * rot)
-            jacs.append(wr * (jr_a - jr_b)[:, self._dof])
+            derivative = _rotation_log_jacobian(rot) @ (jr_a - relative @ jr_b)
+            jacs.append(wr * derivative[:, self._dof])
 
     def _append_ground(
         self,
@@ -350,6 +424,8 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         for name, (site, radius) in self._spheres.items():
             depth = float(self.data.site_xpos[site] @ n - ground.height_m - radius)
             if depth >= 0.0 and name not in pinned:
+                rows.append(np.zeros(1))
+                jacs.append(np.zeros((1, len(self._dof))))
                 continue
             jp = np.zeros((3, nv))
             self._mj.mj_jacSite(self.model, self.data, jp, None, site)

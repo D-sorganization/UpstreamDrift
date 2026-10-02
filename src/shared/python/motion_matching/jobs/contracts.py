@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 JOBS_SCHEMA = "motion-matching-jobs/1.0.0"
 _GOVERNING_ISSUE = 10379
@@ -46,6 +46,36 @@ class AcceptanceState(str, Enum):
     INTERRUPTED = "interrupted"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
+
+
+@dataclass(frozen=True, slots=True)
+class MatchingWorkOutcome:
+    """Explicit qualification supplied by work that completed computationally.
+
+    Research work returns rejected with evidence blockers. A successful return
+    alone is not a scientific acceptance decision for callers using this contract.
+    """
+
+    acceptance: AcceptanceState
+    blockers: tuple[str, ...] = ()
+    message: str = "completed"
+    publish: Callable[[], Any] | None = field(default=None, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        if self.acceptance not in {AcceptanceState.ACCEPTED, AcceptanceState.REJECTED}:
+            raise ValueError("Completed work requires a terminal acceptance state")
+        blockers = tuple(self.blockers)
+        if any(not isinstance(value, str) or not value.strip() for value in blockers):
+            raise ValueError("Work blockers must be nonempty strings")
+        if self.acceptance == AcceptanceState.ACCEPTED and blockers:
+            raise ValueError("Accepted work cannot retain qualification blockers")
+        if self.acceptance == AcceptanceState.REJECTED and not blockers:
+            raise ValueError("Rejected work requires qualification blockers")
+        if not isinstance(self.message, str) or not self.message.strip():
+            raise ValueError("Completed work requires a message")
+        if self.publish is not None and not callable(self.publish):
+            raise ValueError("Result publication must be callable")
+        object.__setattr__(self, "blockers", blockers)
 
 
 class FaultKind(str, Enum):

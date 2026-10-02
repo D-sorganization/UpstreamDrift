@@ -8,6 +8,21 @@ vi.mock('@/api/necromatcher', () => api);
 beforeEach(() => { Object.values(api).forEach((mock) => mock.mockReset()); });
 
 describe('Historical Library Actions', () => {
+  it('imports a research fit JSON under the selected swing', async () => {
+    api.importAsset.mockResolvedValue({});
+    const user = userEvent.setup();
+    const changed = vi.fn();
+    render(<LibraryActions player="ben-hogan" swing="hogan-drive" onChanged={changed} />);
+    await user.selectOptions(screen.getByLabelText('Import Type'), 'fits');
+    await user.type(screen.getByLabelText('Version ID'), 'hogan-fit-v2');
+    await user.type(screen.getByLabelText('Source Path'), 'C:/captures/fit.json');
+    await user.click(screen.getByRole('button', {name: 'Import Version'}));
+    await waitFor(() => expect(changed).toHaveBeenCalledOnce());
+    expect(api.importAsset).toHaveBeenCalledExactlyOnceWith('hogan-drive', 'fits', {
+      id: 'hogan-fit-v2', source_path: 'C:/captures/fit.json',
+    });
+    expect(screen.queryByLabelText('Ordered Joint Names')).not.toBeInTheDocument();
+  });
   it('does not carry a swing draft to a different selected player', async () => {
     const user = userEvent.setup();
     const changed = vi.fn();

@@ -11,13 +11,17 @@ from __future__ import annotations
 import json
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, fields
-from typing import Any, TypeAlias
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import least_squares
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.constraint_kinematics import (
+    ConstraintLinearization,
+    ConstraintOptions,
+)
 from src.shared.python.motion_matching.marker_calibration import Offsets, Pose
 from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
@@ -28,7 +32,11 @@ ClosureFn: TypeAlias = Callable[[Array], Array]
 
 @dataclass(frozen=True)
 class PoseFit:
-    """Result of one pose solve."""
+    """Result of one pose solve.
+
+    ``iterations`` counts LM loop iterations for the default solver and
+    residual evaluations (SciPy ``nfev``) for opt-in TRF.
+    """
 
     q: Array
     marker_rms_m: float
@@ -61,6 +69,7 @@ class SolvePoseOptions:
         Mapping[str, tuple[Sequence[float], Sequence[float], float]] | None
     ) = None
     com_target: tuple[Sequence[float], float] | None = None
+    solver: Literal["lm", "trf"] = "lm"
 
 
 @dataclass(frozen=True)
@@ -189,6 +198,50 @@ def _run_lm_loop(
             if lam > 1e12:
                 break
     return q, done
+
+
+def _run_trf_loop(
+    residual_fn: Callable[[Array], tuple[Array, Array]],
+    q_init: Array,
+    free: NDArray[np.bool_],
+    low: Array,
+    high: Array,
+    *,
+    iterations: int,
+) -> tuple[Array, int]:
+    """Bounded trust-region solve on free DOFs, preserving every locked value."""
+    if not np.any(free):
+        residual_fn(q_init)
+        return q_init.copy(), 0
+    cached_x: Array | None = None
+    cached_pair: tuple[Array, Array] | None = None
+
+    def evaluate(x: Array) -> tuple[Array, Array]:
+        nonlocal cached_x, cached_pair
+        if cached_x is None or not np.array_equal(x, cached_x):
+            pose = q_init.copy()
+            pose[free] = x
+            cached_pair = residual_fn(pose)
+            cached_x = x.copy()
+        if cached_pair is None:
+            raise RuntimeError("TRF residual evaluation produced no result")
+        return cached_pair
+
+    result = least_squares(
+        lambda x: evaluate(x)[0],
+        q_init[free],
+        jac=lambda x: evaluate(x)[1],
+        bounds=(low[free], high[free]),
+        method="trf",
+        x_scale="jac",
+        # A seed on an active bound starts with a tiny trust region. Cost-only
+        # stopping would mistake its first tiny improving step for convergence.
+        ftol=None,
+        max_nfev=iterations,
+    )
+    pose = q_init.copy()
+    pose[free] = result.x
+    return pose, int(result.nfev)
 
 
 def solve_full_body_ik_trajectory(
@@ -344,6 +397,8 @@ class _PosePrep:
 class BaseFullBodyIK:
     """Base class for engine-specific full-body IK adapters."""
 
+    supports_trf: bool = False
+
     def __init__(
         self,
         specification: Mapping[str, Any] | bytes | str | None = None,
@@ -370,6 +425,12 @@ class BaseFullBodyIK:
     def closure_residuals(self, q: Array) -> Array:
         """Evaluate position residual between dual-grip weld frames/sites in world."""
         raise NotImplementedError  # tracked: #10330
+
+    def constraint_residual_jacobian(
+        self, q: Array, options: ConstraintOptions
+    ) -> ConstraintLinearization:
+        """Linearize declared geometry, or explicitly reject unsupported engines."""
+        raise NotImplementedError("Native constraint linearization is unsupported")
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""
@@ -711,12 +772,36 @@ class BaseFullBodyIK:
     ) -> PoseFit:
         """Least-squares pose for one frame of marker targets."""
         opts = SolvePoseOptions(**kwargs) if options is None else options
+        if opts.solver not in ("lm", "trf"):
+            raise ValueError("Pose solver must be 'lm' or 'trf'")
+        if opts.solver == "trf" and not self.supports_trf:
+            raise ValueError("Provider does not support fixed-row TRF pose solving")
         targets = np.asarray(targets, dtype=float)
         prep = self._prepare_pose_fit(targets, valid, q_init, ground, opts)
+        if opts.solver == "trf" and (
+            not np.isfinite(prep.q).all()
+            or np.any(prep.q < prep.low)
+            or np.any(prep.q > prep.high)
+        ):
+            raise ValueError(
+                "Locked coordinates must be finite and inside authored bounds"
+            )
 
         def residuals(q_k: Array) -> tuple[Array, Array]:
             return self._pose_residual_stack(q_k, prep, targets, q_init, ground, opts)
 
+        if opts.solver == "trf":
+            q, done = _run_trf_loop(
+                residuals,
+                prep.q,
+                prep.free,
+                prep.low,
+                prep.high,
+                iterations=opts.iterations,
+            )
+            return self._finalize_pose_fit(
+                q, targets, prep, ground=ground, iterations=done
+            )
         q, done = _run_lm_loop(
             residuals,
             prep.q,

@@ -17,12 +17,23 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#11234 — Necromatcher Historical Player Workspace
+### DL-#11235 — Necromatcher Native Fit
 
 - **State:** in_progress
 - **Owner:** codex
+- **Issue:** #11235; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** shared matching plant, native MuJoCo model, historical fitting integration and source-bound workspace fit storage
+- **Last verified:** 2026-10-02 — 88 focused fitting/spline/IK tests, 142 workspace unit tests pass; ruff clean; native video and research refit controls integrated.
+- **Summary:** Repaired closure and added source-bound native image fitting with preserved Hermite splines. Source-bound kinematic fit versions survive library recall and portable export with Hogan and Tiger frames. Native video export, research refit controls, ground placement, and effort bindings integrated with fail-closed validation. [Turnover](necromatcher-turnover.md).
+
+### DL-#11234 — Necromatcher Historical Player Workspace
+
+- **State:** shipped
+- **Owner:** codex
 - **Issue:** #11234; parent #11232
-- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239), draft over #11237
+- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239)
 - **Branch:** `feat/necromatcher-workspace-11234`
 - **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
 - **Last verified:** 2026-10-02 — 31 library/API/native/launcher tests, 10 inventory tests, 20 UI tests and 71 launcher/atlas tests passed; resolved launcher logo family gate for matched_swing_browser.svg under category:tool, classified necromatcher in capability migration baseline and reconciled companion catalog counts and screenshot records; mypy, ruff and all green gates pass.

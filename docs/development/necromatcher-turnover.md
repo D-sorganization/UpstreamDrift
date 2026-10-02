@@ -15,6 +15,56 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
+### Sequential Repair and Review Exports
+
+The current uncommitted `repair_native_motion` change reuses the canonical
+`solve_trajectory` with native bounded TRF. The previous repaired pose supplies
+the next initialization and weak prior; the first source pose initializes the
+first solve. Reports identify `initialization=previous_repaired_pose` and
+`prior_target=previous_repaired_pose_or_first_source_pose`. Marker targets still
+come from the original inferred native world positions. They are not measured
+3D landmarks. Twelve repair tests pass, but this method change has no new formal
+whole-track execution receipt yet. Earlier LM and independent-TRF receipts retain
+their actual algorithms, budgets, source hashes and failed midpoint evidence.
+
+The public workspace facade now provides `export_fit_video(library, fit_id,
+destination, selected_frames=...)`. It uses the bound native model and original
+source-sized capture PNGs as backgrounds. The blue projected rig is a native
+body-origin joint tree and attachment markers, not a rendered body mesh or an
+observed silhouette. Green observations and yellow residuals retain their
+distinct meanings. Original capture bytes remain unchanged. Export admits only
+contiguous uniformly timed source frames; sparse or irregular timing requires a
+separate export method instead of a fabricated constant physical clock.
+
+Each new output directory contains a verified MP4, selected lossless overlay
+PNGs and a completion manifest. The manifest binds fit/model/capture hashes,
+original PNG hashes, exact rational frame PTS, output hashes, missing rig data,
+physical-time qualification false, unqualified camera/anatomy flags and research
+qualification. MP4 presentation uses the
+source frame rate; the manifest is the authority for original PTS. Codec
+readback checks decoded frame count and source dimensions. Existing destinations
+are rejected; the manifest publishes last after staging and parent revalidation.
+
+The actual Desktop review package is
+`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01`. New `Tiger Overlay` and
+`Hogan Overlay` subfolders contain the v6 research overlay MP4s, selected PNGs
+(Tiger 0/103/209; Hogan 0/549/749), and manifests. These depict the original
+authored-ground hypotheses, not the unpublished repaired candidates. The
+`Report` subfolder contains the compiled methods PDF and its LaTeX source;
+the repository source is [Necromatcher Methods](necromatcher-methods.tex).
+Built-in compilation failed with `Unable to find standard directories for
+platform`; the installed MiKTeX PDF export was used without installing packages.
+The standalone report is a methods/turnover artifact; canonical manual authority
+and its blocked release inventory remain unchanged.
+
+For repeatable export, follow the clean native-SDK process and new-directory
+example in [Historical Capture Procedure](historical-capture-procedure.md).
+API/UI export execution controls remain tracked in #11246; compiled report and
+Desktop delivery are tracked in #11247. Physical-clock qualification, usable
+continuous constrained motion, authored historical control recovery, downstream
+simulation/impact/analysis and AffineDrift acceptance remain open under #11235
+and #11232. No local artifact implies remote green CI or scientific acceptance.
+
 Workspace CI completed three story remediation cycles: cleanup LoD, source-bound
 launcher context/atlas freshness, and the GUI-thread heuristic. A new test
 verifies a blocked background operation leaves Qt responsive and applies its
@@ -148,3 +198,116 @@ The existing `ModelMatchHandoffCoordinator` currently generates fixed output art
 ## Capture Foundation CI
 
 PR #11231 failed the 100-line function budget. Receipt and source-identity helpers reduce the function below the limit; local architecture check and 12 capture tests pass. Capture commit `c029a23e6b` also regenerates the required divergence inventory after the full unit gate exposed the missing capture entry (19,873 passed, one inventory failure). The inventory suite passed after regeneration; new CI is running. Earlier saved capture receipts correctly retain the pre-refactor implementation hash. The prior head passed repository-structure validation; current capture CI is running after the inventory update.
+
+## Owned Native and Web Video Export Controls
+
+Issue #11246 now uses NativeVideoSession over the existing matching-job service,
+a clean SDK subprocess and guarded ZIP publication. Shared API routes admit,
+poll, cancel and download by fit/run identity. Native and web controls bind the
+selected source version; web URLs retain export_run during frame navigation.
+Downloads require succeeded computation and execution_verified plus
+download_available; scientific acceptance remains rejected research. Native
+saves are exclusive, outside the library, and checked against source SHA-256.
+
+Red-first API and native tests prove unknown identities, duplicate admission,
+remote-client rejection, guarded download, response ownership, asynchronous
+submission, cancellation, closed-state guards and corrupted-transfer cleanup.
+The frontend extracts common refit/export polling and preserves prior refit
+regressions; 37 related UI tests, TypeScript and scoped ESLint pass.
+
+A wider run first exposed an intermittent request-reader failure whose exact
+exception was truncated; subsequent focused and broad repetitions passed.
+Separately, a held Windows reader decisively reproduced atomic promotion
+WinError 5. Canonical io_atomic now retries only Windows permission/sharing
+errors 5/32/33 for six attempts, with 0.31 seconds total backoff; permanent and
+unrelated errors remain visible and owned stages are cleaned. Fifty focused
+atomic-I/O, service and video-job cases pass. This evidence does not claim to
+identify the original unknown reader exception or cure every filesystem race.
+
+Gemini Flash 3.8 via tool-free agy audited supplied native/worker source. Its
+transfer-integrity finding led to a failing corrupted-copy regression and
+SHA-256 postcondition. Its claims about uncontrolled worker cancellation and
+missing cleanup guards were checked against canonical ProcessGuard ownership
+tests and the existing closed/worker guards; they were not treated as proven
+failures. Actual UI exports and current committed-source identities will be
+recorded below after the live journey. See necromatcher-video-export.md for the
+repeatable control contract.
+
+## Live Video Export Review — October 2, 2026
+
+Source commit `3c73001a7c` was committed and pushed with normal commit and
+pre-push gates passing. The live local desktop API was restarted from that
+source before both exports. Actual web buttons started Tiger run
+`165988043c994250aed72d3a57ebf027` and Hogan run
+`f6daf6efec0d4dd8aa36a8a2424036cd`. Both reached succeeded execution with rejected
+scientific acceptance and exposed verified downloads. Tiger frame navigation
+preserved the export-run query. Hogan page reload and reopening Models and
+Controls recalled the same completed run and download link.
+
+The actual visible links downloaded both ZIPs into Downloads. Hash-checked
+copies and expanded MP4/manifest/first-middle-last PNG sets were saved in
+`Desktop/Necromatcher Review 2026-10-01/Tiger Web Overlay` and `Hogan Web Overlay`.
+Independent OpenCV decode counted all 210 Tiger and 750 Hogan frames; every
+video and PNG hash matched its manifest. Exact ZIP and manifest hashes are in
+`historical_capture/live-web-export-review.json`. The UI proof screenshot is
+`hogan-web-overlay-export-proof.png` in the Desktop review folder.
+
+Final validation included pinned mypy, scoped Ruff, 50 atomic writer/job/export
+tests, two combined 43-test Python runs, 37 UI tests, TypeScript and scoped
+ESLint, API type freshness, manual governance and all normal Git hooks. These
+are engineering checks; continuous grip/ground, anatomy, camera, physical time,
+control replay and downstream acceptance remain unresolved.
+
+### Compiled Methods Report Refresh
+
+The polished standalone report now has 17 pages (490,594 bytes). Two existing
+MiKTeX passes with installer disabled succeeded after removing a forced appendix
+break and suppressing title-page anchors. Visual review of all rendered pages
+found no clipping or overlap. Duplicate-anchor and overfull warnings are gone;
+underfull paragraph warnings remain. Built-in compiler infrastructure remains
+unavailable as recorded earlier; this is a verified fallback compilation.
+
+Final Desktop PDF SHA-256:
+`ab167d5a8571cbb0ed6d3f29a9bf10f6385cc2a370e24df140c354281e7d8650`.
+Source SHA-256:
+`867d90bbdba0b3ce50fb92b68449e505cd4c981b776a3490e0252d59085964c6`.
+`Report/render-review-20261002-inventory-final` retains the 17 page renders.
+README and `review-manifest.json` now cover 41 verified review artifacts,
+including the live web export packages and proof. Render PNGs and compiler
+intermediates are deliberately excluded from that review inventory.
+
+## Interior Constraints and Spline Extrema — October 2, 2026
+
+The public native constraint boundary now returns fixed 6D grip and declared
+sphere-ground rows with analytic pose Jacobians, explicit sqrt(weight)/m-or-rad
+scaling, ordered coordinates and immutable labels. Unsupported providers fail
+explicitly. The historical solver opts into authored knot-interior fractions,
+evaluates the union with original source PTS, and chains native constraints
+through exact canonical spline bases. Image, prior, speed, RMS and point counts
+continue to use original observations only. Default fits retain prior behavior.
+
+Validated JSON configuration decoding preserves nested ground/options and
+fractions across worker transport. The worker stores `constraint_assessment`
+with `tested_times` (the source-clock union, including authored probes), row
+labels, dimensionless residuals, a maximum and `continuous_certified=false`.
+These timestamps do not create observed frame identities.
+
+A separate typed helper assesses each scalar Hermite segment at endpoints and
+real derivative roots. It reports extrema/worst times and finite two-sided
+bound violations, including equal locked limits. Source samples must agree with
+the stored spline at atol 1e-10 and rtol 1e-8. One-sided/infinite limits are
+explicitly unsupported by this assessment and must remain separately recorded;
+they are not silently cleared. Grip and ground remain `not_assessed` by the
+coordinate helper. Neither assessment nor soft constraints enforce hard bounds
+or establish accepted continuous historical motion.
+
+Red-first suites cover overshoot, malformed/unsupported capabilities, fixed
+contact rows, analytic coefficient derivatives, immutable/time-bounded reports,
+unchanged image evidence, JSON/default compatibility and worker receipt
+persistence. The combined new assessment/native/probe/image/worker/refit lane
+passed 108 cases. Scoped Ruff and the repository-pinned mypy hook passed; a
+separate CI-pinned direct native mypy attempt remains unverified and does not
+supply a remote-green verdict. Procedures are in necromatcher-continuous-
+assessment.md, necromatcher-native-constraint-boundary.md and
+necromatcher-constraint-probes.md. Actual whole-track fitting must follow from
+committed source, with independent feasibility and original-image review.

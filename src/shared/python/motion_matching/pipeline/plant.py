@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 import logging
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -19,11 +19,36 @@ from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.full_body_step import FullBodyPlant
 
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.full_body_forward_dynamics import (
+        FullBodySimulator,
+    )
+
+
 logger = logging.getLogger(__name__)
 
 
 class EngineUnavailableError(RuntimeError):
     """Raised when an engine is not registered or its native SDK is not installed."""
+
+
+@runtime_checkable
+class ScalarCoordinateUnits(Protocol):
+    """Optional compiled scalar-unit capability; absence never implies radians."""
+
+    @property
+    def coordinate_units(self) -> tuple[str, ...]:
+        """Return native m/rad units in the plant's declared coordinate order."""
+        ...
+
+
+@runtime_checkable
+class ForwardSimulationPlant(Protocol):
+    """Optional forward simulator factory without exposing engine internals."""
+
+    def create_forward_simulator(self) -> FullBodySimulator:
+        """Create the canonical zero-feedback full-body simulator."""
+        ...
 
 
 @runtime_checkable
