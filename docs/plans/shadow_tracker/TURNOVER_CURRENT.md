@@ -1,5 +1,27 @@
 # Shadow Tracker Current Review and Turnover
 
+## Synthetic Segmentation Fallback Boundary and Release Qualification Hardening — 2026-10-02
+
+Issue #11227, refs #11226 and #10122.
+Branch `fix/shadow-tracker-synthetic-11227`.
+
+### Architectural and Contract Changes
+
+1. **Explicit Inference Provider vs. Synthetic Fixture Distinction:**
+   - `ModelSegmentationProvider` enforces that automated neural inference requires an active `inference_engine` callable.
+   - When no inference engine is configured, the provider fails closed with an actionable `RuntimeError` (`"Model ... has no active inference engine configured. Absent model inference cannot produce observed masks."`).
+   - Synthetic silhouettes are permitted solely under explicit opt-in (`allow_synthetic=True`) for unit and integration testing fixtures.
+2. **Unambiguous Provenance Labelling:**
+   - Synthetic masks emit `producer_id` prefixed with `synthetic:` (e.g. `synthetic:<model_name>:<checkpoint_sha256[:16]>`) and a distinct `correction_note` (`"Synthetic silhouette fallback fixture (unobserved model output)"`).
+   - Synthetic segmentation requests report `provenance="synthetic:..."`, while legitimate neural inference reports `provenance="model_inference:..."`.
+   - `MaskFrame.is_synthetic` deterministically inspects mask provenance.
+3. **Qualification Gate and Release Hardening:**
+   - Release qualification (`GateProfile.default_release_profile()`, `allow_synthetic=False`) strictly rejects synthetic observations at Gate G0 (`"Synthetic observations cannot satisfy release qualification"`).
+   - `classify_evidence_quality` demotes candidates derived from synthetic observations or synthetic backends to `dynamic_candidate`, preventing synthetic observations from achieving `validated_profile` evidence quality.
+   - `DefaultShadowTrackerService.fit()` detects synthetic masks in the session and marks fit results as `is_synthetic=True`.
+4. **Current Status of Real Historical Analysis:**
+   - No actual historical video (e.g. Tiger 2000 or Ben Hogan footage) has been processed using automated neural segmentation weights; all historical evidence workflows must use reviewed gold masks (`ManualMaskProvider`) until real model checkpoints are fully qualified.
+
 ## Revision Integrity and Persistence — 2026-09-18
 
 Issue #10233, ST-04 / epic #10122. Branch `fix/shadow-tracker-10233-pr`;
