@@ -112,7 +112,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
-| `shadow_tracker` | 0 | 0 | 0 | 20 | 0 | 0 |
+| `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `sidekick` | 212 | 66 | 23 | 36 | 76 | 278 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |

@@ -1,0 +1,32 @@
+{
+  "schema_version": "historical-capture/1.0.0",
+  "subject_id": "ben-hogan",
+  "source": {
+    "schema_version": "shadow-tracker/source/1.0.0",
+    "asset_id": "source-b91d2a45d189dfc1d92204b71349a06ed88bbb2789b5f14751d7a095364eba81",
+    "source_uri": "urn:asset:source-b91d2a45d189dfc1d92204b71349a06ed88bbb2789b5f14751d7a095364eba81",
+    "content_sha256": "b91d2a45d189dfc1d92204b71349a06ed88bbb2789b5f14751d7a095364eba81",
+    "width_px": 1920,
+    "height_px": 1080,
+    "rights_status": "unknown",
+    "rights_note": ""
+  },
+  "window_presentation_s": [253.0, 267.0],
+  "frame_count": 839,
+  "detected_count": 769,
+  "observations_sha256": "06132d5462b028dc4cd3361cff6d10f024588b4339f763f5f9e9c998210def8d",
+  "detector": {
+    "name": "MediaPipeEstimator",
+    "version": "1.0.1",
+    "model_sha256": "4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad",
+    "smoothing": false,
+    "min_detection_confidence": 0.5,
+    "min_tracking_confidence": 0.5
+  },
+  "qualification": "image_observations_only",
+  "recording_year": null,
+  "physical_time_verified": false,
+  "shot_continuity_reviewed": false,
+  "publication_permitted": false,
+  "implementation_sha256": "12e29649ff0eccdf3859efa21127b67f26a46f77bf9357bbcad002d9bec209a5"
+}

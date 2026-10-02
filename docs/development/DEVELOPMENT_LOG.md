@@ -17,18 +17,33 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11230 — Historical Player Capture
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11230; epics #11226 and #11229
+- **Branch:** `feat/historical-player-capture-11226`
+- **PR:** [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231)
+- **Paths:** `src/shared/python/shadow_tracker/historical_capture.py`, `scripts/historical_capture.py`, `docs/development/historical-capture-procedure.md`
+- **Last verified:** 2026-10-01 at ab2c869813a2b2be2f14b512ee34647694614377 — 364 Shadow Tracker tests passed; final Hogan 750/739 detected and Tiger 2000/1994 detected; observations only.
+- **Summary:** Streaming source-bound detector observations; final reproducibility runs completed; dense review pending. Camera/time calibration, dense 3D fitting, native parity, dynamics, held-out evaluation and website integration remain open.
+
 ### DL-#11095 — Qualify OpenSim Native Dual-Club Dynamics and Replay
+
 - **Issue:** #11095
 - **Branch:** `feat/mmr-10o-opensim-dual-club-11095`
 - **Paths:** `src/engines/physics_engines/opensim/python/native_qualification.py`, `tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/opensim/`
 - **Last verified:** 2026-09-29 at d5dd606ffa6dafc11408614676a2576764a5e092 — 17 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native OpenSim qualification NOT achieved: opensim bindings unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10O] dual-club OpenSim qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite values all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records. Real qualification still requires the opensim bindings on a pinned host via the native lane.
+
 ### DL-#11096 — Qualify MyoSuite Native Dual-Club Dynamics and Replay
+
 - **Issue:** #11096
 - **Branch:** `feat/mmr-10m-myosuite-dual-club-11096`
 - **Paths:** `src/engines/physics_engines/myosuite/python/native_qualification.py`, `tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/myosuite/`
 - **Last verified:** 2026-09-29 at 613b0e28ed88b5af4719ecccfe876d5d9db90419 — 19 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native MyoSuite qualification NOT achieved: myosuite/MuJoCo unavailable on all reachable hosts.
 - **Summary:** Fail-closed conversion of the [MMR-10M] dual-club MyoSuite qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, non-finite values, and unnormalized root quaternions all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records (README model hashes marked as regeneration targets, not evidence). Real qualification still requires the myosuite/MuJoCo stack on a pinned host via the native lane.
+
 ### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
 
 - **Owner:** UDFixTrio10x
