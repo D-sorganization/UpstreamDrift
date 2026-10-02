@@ -980,6 +980,216 @@ unqualified. These receipts validate exact start preservation and conditional
 research computation; the separately verified V9 overlays are documented in the video-review
 section below and do not change this qualification.
 
+\subsection{Authored Contact Phases on the Source Clock}
+\label{sec:contact-phases}
+A constant whole-track heel pin can conflict with visible release and later
+unobservable feet. The canonical phase boundary therefore records an authored
+contact hypothesis rather than promoting a shoe silhouette to measured
+contact. It reuses the existing native constraint provider and MAP estimator;
+no separate geometry, contact solver, or force inference is introduced.
+
+\paragraph{Typed Schedule, Binding, and Resolution.}
+\code{ContactPinPhase} contains rational \code{start_pts} and \code{end_pts},
+immutable named \code{pinned_spheres}, and immutable
+\code{review_frame_sha256} references. \code{ContactPinSchedule} binds its
+ordered phases to \code{capture_id}, \code{capture_sha256}, and
+\code{status="authored_contact_hypothesis"}. Rational pairs have integer
+numerators and positive integer denominators. Phases increase and cover the
+complete fitted interval without gaps or overlap. The interval convention is
+$[t_k,t_{k+1})$, with the final schedule endpoint included; a shared boundary
+belongs to its following phase.
+
+The workspace binder runs before optimization against the hash-verified
+parent and original capture. It validates capture identity, source asset,
+shot, swing, and camera identifiers; each rational boundary must resolve to
+one exact original frame PTS. Every reviewed decoded-frame hash must resolve
+to one frame in its phase's boundary-inclusive evidence interval; this review
+convention is separate from half-open pin selection. Wrong-phase or ambiguous repeated-image
+references fail. Schedule hashes use the \code{sha256:} prefix; the existing
+capture's bare decoded-frame hashes are normalized for comparison. These
+hashes identify decoded image content and must not be replaced with the
+different PNG-byte hashes. Matching stored camera identifiers does not
+calibrate the changing source framing.
+
+\code{ScheduledConstraintOptions} wraps existing \code{ConstraintOptions}
+in \code{base} and \code{schedule}; the eight-field \code{ImageFitConfig}
+retains this complete nested wrapper. At each evaluation time,
+\code{resolve} copies the base with the active named pin set and calls the
+same public native residual/Jacobian method. Native row identities and
+dimensions remain fixed, including released and inactive ground rows.
+Recipe recall and scalar edits must retain the wrapper, not flatten away its
+phase or evidence identities. A legacy unscheduled configuration preserves
+its former semantics.
+
+\paragraph{Normal Height Is Not No-Slip Contact.}
+For declared sphere $s$, let $h_s(\mathbf q)$ be its signed normal height
+relative to the authored ground plane and $P(t)$ the active pin set. Its
+scaled ground row is
+\begin{equation}
+ r_s(\mathbf q,t)=\frac{\sqrt{w_g}}{s_g}
+ \begin{cases}
+ h_s(\mathbf q),&s\in P(t),\\
+ \min\{0,h_s(\mathbf q)\},&s\notin P(t).
+ \end{cases}
+\end{equation}
+Pinning targets zero normal height; releasing a sphere retains the unilateral
+penetration penalty, even in an unknown phase whose equality-pin set is empty.
+Neither case anchors tangential position, enforces no-slip velocity, specifies
+a toe pivot, identifies friction, or measures ground reaction force. The
+sphere geometry, plane, weights, scales, and selected pin identities remain
+model assumptions. Ground-height agreement alone cannot qualify contact.
+
+\paragraph{Exact Boundaries and Separate Floating-Point Probes.}
+Phase endpoints retain exact rational source identities, and their floating
+representations must remain distinct. The canonical objective includes source
+times, configured interior probes, and phase boundaries in its constraint
+assessment. It adds no image observation, confidence, or physical timestamp.
+The independent audit also evaluates both representable one-sided neighbors
+\code{nextafter(t,-infinity)} and \code{nextafter(t,+infinity)} where they lie
+inside the fitted interval. Those are numerical probes of phase selection;
+they are not rational decoded-frame timestamps or a measured time before or
+after heel release. Their labels and active pins remain distinct from exact
+boundary records. Source frames, rational adjacent-frame midpoints, and
+canonical scalar extrema remain in the audit. Neither finite probing nor
+one-sided branch checks certify continuous nonlinear motion.
+
+\paragraph{Original-Frame Review and Its Uncertainty.}
+The external \path{Contact Phase Review V10} package preserves 32 unchanged
+original PNGs---21 Tiger and 11 Hogan---with detached detector observations,
+exact rational PTS, decoded-frame identities, and PNG-byte hashes. All were
+visually inspected; the full review receipt has SHA-256
+\hash{88973ff55f29df194d8e1e6b133558dab74a743891ef922e3c5fadbfea4889cd}.
+Tiger frame 80 ($53053/3000$ source seconds) shows apparently low shoes,
+frame 85 is transitional and blurred, and frame 90 ($9009/500$) shows a
+heel-up, toe-pivot-like trail-shoe silhouette. Thus 80--90 brackets release
+uncertainty, not an observed release instant. Frames 0--105
+($3003/200$--$37037/2000$) form a conservative full-shoe review window.
+Frame 105 retains both shoes, while 110 ($7007/375$) clips the trail toe;
+later walking onset cannot be established from cropped feet.
+
+Hogan frames 0--499 ($110$--$3799/30$ source seconds) retain the body and shoes
+through the first swing and early follow-through. At $320\times240$, blur
+prevents a defensible narrow heel-release bracket; frame 499 does not certify
+a completed finish. High detector heel/foot visibility remains inference and
+cannot resolve contact or repair clipping. A possible stance supports only
+an explicitly authored hypothesis with retained review references.
+
+\paragraph{Declared V10 Research Targets and Trial Policy.}
+The V10 trial producer is
+\hash{9c21eda8baae1192b66640467b4d67219878b958}, separately identified from the
+V9 producer. Its declared research checks are maximum sampled grip gap
+$\leq10$ mm, rotation $\leq5$ deg, penetration $\leq2$ mm, all 32 authored
+ranges admitted, and dense image RMS no worse than its reference within
+$10^{-8}$ px roundoff allowance. These are operator-selected research targets,
+not accepted biomechanical tolerances or a scientific release gate.
+The retained exact restart still spans its full parent knot interval; selecting
+a shorter fitting window would require a separately disclosed initialization.
+
+The authored Tiger policy pins both heel spheres before frame 80, only the
+lead/left heel from 80 to 105, and neither heel from 105 through the full
+parent endpoint 209. Frame 80 is a conservative operator choice within the
+80--90 uncertainty bracket, not an inferred event. Hogan's full parent
+interval has no equality heel pins because contact is unresolved. In both
+cases all declared sphere penetration rows remain active. The conservative
+visible review windows are therefore not silently substituted for full
+restart intervals; uncertain and cropped phases remain explicit.
+The completed V10 receipt results and fresh standalone verification are
+reported below. Live phase-interface and video-integrity checks remain
+separate evidence paths.
+
+\subsection{Actual V10 Phase Trials and Research Target Failures}
+The completed \path{authored-contact-phase-v10-receipt.json} has SHA-256
+\hash{37d0bf47cb2d483a7da1a07b8983ecb45d3343953ac5f411bb686f143ee1f4a1}.
+Tiger run \code{c0e5a397e1d34e06b40f89fb1ee83d10} saved
+\code{tiger-authored-contact-phase-fit-v10}; Hogan run
+\code{262586cb55d34206bee08f8b1c942e66} saved
+\code{hogan-authored-contact-phase-fit-v10}. Both computations succeeded,
+but both remain nonconverged and rejected research. They preserve
+\code{optimizer_ran=true}, \code{initialization=null}, and
+\code{initialization_source="preserved_spline"}. Fresh initial training RMS
+matches the V9 parent's original final training value. Parent version and
+review/driver/audit artifact hashes remain unchanged in the receipt's checks.
+These facts establish the declared numerical trial's provenance, not
+scientific acceptance. Fresh standalone verification is recorded separately
+below.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Player & Initial & Final Training & Dense & Held Out\\\midrule
+Tiger & 58.533085 & 32.683132 & 35.752077 & 36.092889\\
+Hogan & 8.936815 & 8.200449 & 10.699637 & 10.767257\\
+\bottomrule
+\end{tabular}
+\caption{Actual V10 Image RMS in Pixels. Source Observations Are Unchanged;
+Each New Job Uses Its V9 Parent's First Pose as the New Prior Reference.}
+\end{table}
+The full MAP cost remains unavailable from the saved contract. Training and
+held-out image improvements therefore cannot be substituted for total
+objective convergence or compared as a fixed-prior sequence of jobs.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Player & Audit Grip (mm) & Rotation (deg) & Depth (mm) & Phase Probes\\\midrule
+Tiger & 68.450912 & 28.841177 & 3.708722 & 10\\
+Hogan & 15.368414 & 15.903982 & 20.007510 & 4\\
+\bottomrule
+\end{tabular}
+\caption{V10 Receipt Audit Maxima and Tagged Phase Probe Counts.
+The Finite Set Includes Original Source Frames, Rational Midpoints, Scalar
+Extrema, Exact Phase Boundaries, and Numerically Distinct One-Sided Neighbors.}
+\end{table}
+The audit retains 210 Tiger source times with 209 midpoints, and 750 Hogan
+source times with 749 midpoints. Phase probe counts include both endpoints
+and their in-interval one-sided neighbors, not ten or four additional
+observations. Both candidates pass the conservative coordinate-domain check
+for all 32 authored ranges, with twelve coordinates explicitly unbounded.
+The saved original-source-only maximum grip gaps are 67.885612 mm and
+15.368414 mm; the larger Tiger audit maximum includes the additional finite
+probes and must not be substituted silently into the dense-source metric.
+
+Both candidates pass the declared range and dense-RMS nonregression checks,
+but both fail the predeclared grip-gap, rotation, and penetration targets.
+Thus \code{research_targets_met=false} for each. Relative to the V9 receipt
+assessments, Tiger's image RMS and penetration improve while its sampled grip
+gap worsens from 48.567834 to 68.450912 mm. Hogan's image RMS improves, while
+grip gap worsens from 13.514332 to 15.368414 mm and penetration rises from
+2.894115 to 20.007510 mm. Releasing equality pins changes an authored normal
+height hypothesis; it does not make the remaining contact geometry physically
+correct. These tradeoffs prevent interpreting the pixel improvements as
+uniform reconstruction progress.
+
+The receipt's canonical audit and fresh standalone reproduction remain finite
+and source-clock based. They supply no continuous
+nonlinear certificate, physical swing clock, measured ground forces, no-slip
+contact, or accepted historical anatomy. Original source review uncertainty
+remains binding even when a numerical target passes. No additional optimizer
+run, video-integrity verification, or live phase-interface acceptance is
+asserted by these numerical tables.
+
+\paragraph{Fresh Standalone Verification.}
+The separately executed \path{authored-contact-phase-v10-independent-assessment.json}
+(SHA-256
+\hash{fc89cec983b1e7e07d1a42ba5f09b092741c5ad0720cc25bdcea7528c5fbfff4})
+exactly reproduces both candidates' reported native maxima and image metrics
+without optimization. The fuller verification receipt
+\path{authored-contact-phase-v10-verification.json} has SHA-256
+\hash{656ec33c542dddbed17c472d70b9463df7b92c3c51fd8b89cdf3cbdeac7c457c}.
+It independently confirms exact six-field initial identities, canonical
+$q/v/a$ equality at 419 Tiger and 1499 Hogan probes, fresh native initial image
+RMS, 286 positive-weight training observations in each job, full configuration
+and image/confidence preservation, capture-phase binding, and unchanged
+source/runtime and artifact brackets. Tiger uses 22 training frames; Hogan
+uses 23, so equal observed-point counts do not imply equal frame counts.
+
+The concise declared-target review has SHA-256
+\hash{80062c983cf0715efac333648dea91c7e81ddd10a1b17af91240d6ce2cfba4fd}.
+It confirms that both range and dense-image nonregression checks pass for each
+candidate, while all three grip-gap, rotation, and penetration checks fail.
+Neither independent receipt rehashes the original raw video file or upgrades
+physical time, measured contact, continuous certification, or scientific
+acceptance. Reproduction establishes the stated conditional metrics; it does
+not resolve the source-review ambiguity.
+
 \subsection{Jobs, Recall, and Cancellation}
 \code{start_native_refit} reuses \code{MatchingJobService}; native and web shells
 share \code{NativeRefitSession}. Requests retain source indices, knot count,
@@ -988,6 +1198,21 @@ The clean worker verifies source/runtime stamps before and after execution.
 Cancellation before publication prevents a new library version; cancellation
 after committed publication does not rewrite a completed result as interrupted.
 Saved manifests are recalled without automatically rerunning the job.
+
+\paragraph{Actual V10 Web Recipe Verification.}
+The tracked \path{phase-contact-v10-web-review.json} records live web run
+\code{baa679197668403d9c41a3cb4a2552aa}, which saved
+\code{hogan-contact-phase-web-review-v10} with succeeded computation and
+rejected scientific qualification at producer \code{9c21eda8ba}.
+The one-evaluation request preserved its selected parent's complete nested
+phase configuration except \code{max_iterations=1}, verified the exact
+six-field spline start and capture-phase binding, and reproduced initial
+training RMS 8.200449410624524 px. Its initial coefficient identity is
+\hash{3ddf08efede1695e1561748a25af5e3db5755eac34c62ac195cac6b8429a0f78}.
+The stored result and external \path{hogan-contact-phase-web-result-v10.png}
+screenshot verify actual interface transport and publication; the subsequent
+draft resets to the parent's evaluation budget of 30. This short interface
+check supplies no motion improvement or scientific acceptance claim.
 
 \reportsection{Authored Ground Placement and Image Invariance}
 \subsection{A New World Hypothesis, Preserving the Original}
@@ -1383,16 +1608,89 @@ Segments Do Not Establish Anatomical Surfaces, Shaft Geometry, or Physical Motio
 \end{figure}
 
 \paragraph{Portable Artifact Root and Compilation Directory.}
-The six PNGs remain external review artifacts, outside Git. The document's
+All embedded PNGs remain external review artifacts, outside Git. The document's
 \code{reviewartifactroot} defaults to \code{..}; compile the copied source
 with the working directory set to
 \path{Desktop/Necromatcher Review 2026-10-01/Report}. The parent review directory
 contains both external player overlay directories. To compile from another
 location, define \code{reviewartifactroot} before inputting this source, for
 example \verb|\def\reviewartifactroot{../../review-files}|.
-That root must directly contain \path{Tiger Exact V9 Overlay} and
-\path{Hogan Exact V9 Overlay}. No absolute user directory or copied media is embedded
+That root must directly contain the Tiger/Hogan \path{Exact V9 Overlay} and
+\path{Phase V10 Overlay} review directories. No absolute user directory or copied media is embedded
 in the tracked source.
+
+\subsection{V10 Phase Candidate Projections}
+Figures~\ref{fig:tiger-v10-overlay} and~\ref{fig:hogan-v10-overlay} present the
+unchanged first, middle, and last PNGs exported from the V10 phase candidates.
+Their source-image underlays remain original evidence; blue generic native
+body trees and attachment seeds remain conditional model projections.
+Tiger's middle frame retains substantial head/arm discrepancies and the final
+frame crops the feet. Hogan's source remains blurred and low resolution, with
+blue extensions that do not identify the visible club shaft. Apparent image
+alignment cannot certify contact: phase pinning specifies normal-height
+hypotheses, and the three contact targets still fail for both players.
+These figures preserve rejected qualification. The independent export receipt
+\path{authored-contact-v10-overlay-verification.json} has SHA-256
+\hash{41b091501edd441cdcf25ecb52ca68b6b0381d4060aa7dbf8fdc3d201c00c2e0}.
+It verifies all 960 decoded frames, capture/model/fit bindings, every manifest
+source-frame record against its saved fit, MP4 and six PNG hashes, ZIP member
+bytes/CRC, and source/runtime export brackets. Rejection captions remain
+readable. This verification establishes the exported conditional artifacts;
+it does not certify measured contact or historical motion.
+
+The selected Tiger matched-marker RMS values are 12.662664, 78.575992, and
+38.921827 px at frames 0, 105, and 209. Frame 105 has displaced upper-body/arm
+projections despite visible trail-heel raise, and a blue club-attachment seed
+extends left. Hogan's corresponding values are 7.655802, 5.849548, and
+10.502846 px at 0, 375, and 749. Its projected body is closer in some images,
+but blur and the blue club seed do not identify the visible shaft. These
+single-frame matched RMS values differ from the weighted training/dense job
+metrics, and the players' source resolutions differ. Export verification does
+not replace live phase-interface request and recall checks.
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Phase V10 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Phase V10 Overlay/frame-000105.png}\\[3pt]
+\small\textbf{Middle Source Frame: 105}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Phase V10 Overlay/frame-000209.png}\\[3pt]
+\small\textbf{Last Source Frame: 209}
+\end{minipage}
+\caption{Tiger V10 Phase Candidate: Rejected Monocular Research.
+Visible Residuals Persist at Follow-Through; Cropped Feet in the Final Frame Leave Contact Unresolved.
+Blue Body-Origin Trees, Attachment Seeds, and Native Proxies Are Declared
+Generic Geometry, Not an Inferred Anatomical Mesh or Reconstructed Club Shaft.}
+\label{fig:tiger-v10-overlay}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Phase V10 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Phase V10 Overlay/frame-000375.png}\\[3pt]
+\small\textbf{Middle Source Frame: 375}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Phase V10 Overlay/frame-000749.png}\\[3pt]
+\small\textbf{Last Source Frame: 749}
+\end{minipage}
+\caption{Hogan V10 Phase Candidate: Rejected Monocular Research.
+Blur and Low Resolution Limit Image Alignment and Heel Interpretation; Native Extensions Are Not an Identified Shaft.
+Blue Body-Origin Trees, Attachment Seeds, and Native Proxies Are Declared
+Generic Geometry, Not an Inferred Anatomical Mesh or Reconstructed Club Shaft.}
+\label{fig:hogan-v10-overlay}
+\end{figure}
 
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
@@ -1609,6 +1907,8 @@ Capture Catalog & \path{source-catalog.json}\\
 Capture Receipts & \path{hogan-final-receipt.json}; \path{tiger-usga-range-final-receipt.json}\\
 Native Fit and Resources & \path{necromatcher-native-fit.md}; \path{necromatcher-native-resources.md}\\
 Saved and Preserved Starts & \path{necromatcher-saved-spline-restart.md}; \path{necromatcher-preserved-spline-restart.md}\\
+Contact Phase Procedure & \path{necromatcher-contact-phases.md}\\
+V10 Summary and Web & \path{phase-contact-v10-summary.json}; \path{phase-contact-v10-web-review.json}\\
 Independent Bounds Audit & \path{necromatcher-bounded-trial-audit.md}\\
 V9 Summary Receipts & \path{exact-restart-v9-summary.json}; \path{exact-restart-v9-independent-summary.json}\\
 Authored Efforts and Replay & \path{necromatcher-effort-profiles.md}; \path{necromatcher-replay.md}\\
