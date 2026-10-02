@@ -68,12 +68,12 @@ own model/runtime identity. The owner foot-orientation changes are small and
 mixed. These are exploratory position-tracking selections, with no anatomical
 or physical acceptance claim.
 
-| Evidence | What It Establishes | Remaining Boundary |
-| --- | --- | --- |
-| [Current Exports](main_video_verification_20261002.json) | Native receipts, separate position/foot metrics and complete MP4 decoding | IK visualization only |
-| [Runtime Comparison](capture_runtime_comparison_20261002.json) | Canonical SI positions, validity masks, labels and rates agree under recorded importers | Full solver/runtime equivalence unresolved |
-| [Native Helper Review](native_helper_review_20261002.json) | 18 pose-mapping and 8 cluster tests; both native target-expression/FK roundtrips pass after mask refresh | Priorities, controller references and physical initialization unqualified |
-| [Head-Track Audit](head_track_audit_20261002.json) | Cluster data available in both captures, with explicit pair-distance variation | Body-frame calibration and head-constrained fit under review |
+| Evidence                                                       | What It Establishes                                                                                      | Remaining Boundary                                                        |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [Current Exports](main_video_verification_20261002.json)       | Native receipts, separate position/foot metrics and complete MP4 decoding                                | IK visualization only                                                     |
+| [Runtime Comparison](capture_runtime_comparison_20261002.json) | Canonical SI positions, validity masks, labels and rates agree under recorded importers                  | Full solver/runtime equivalence unresolved                                |
+| [Native Helper Review](native_helper_review_20261002.json)     | 18 pose-mapping and 8 cluster tests; both native target-expression/FK roundtrips pass after mask refresh | Priorities, controller references and physical initialization unqualified |
+| [Head-Track Audit](head_track_audit_20261002.json)             | Cluster data available in both captures, with explicit pair-distance variation                           | Body-frame calibration and head-constrained fit under review              |
 
 The controlled tour comparison used current source/runtime with both model
 binaries and produced identical poses. It does not explain the difference
