@@ -404,5 +404,7 @@ and rejected qualification are displayed independently, with rejection reasons.
 Validation includes 90 focused Python checks and five new controller/API/native
 tests, actual rejected clean
 worker HTTP submission, cancellation and saved-manifest recall, Qt responsiveness,
-18 web form/page checks, generated request types, TypeScript and scoped ESLint.
-Actual Hogan/Tiger submissions through both controls remain to be verified.
+19 web form/page checks, generated request types, TypeScript and scoped ESLint.
+Actual Hogan native-dialog and Tiger browser submissions now saved 750/210-frame v5 versions with source/runtime stamps and explicit rejected qualification. Canonical status reopened through the API after native host shutdown. The tracked V5 Interface Receipt records exact IDs, input options and source scope; the one-evaluation budget validates interfaces, not motion acceptance.
+
+[V5 Interface Receipt](historical_capture/native-web-control-receipt-v5.json) records both runs. A red-first web URL-completion race regression prevents suppression of the new-version refresh when a newly submitted job finishes during URL persistence. Archived terminal jobs still reopen without repeated refreshes.

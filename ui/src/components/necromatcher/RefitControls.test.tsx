@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -51,4 +52,22 @@ it('reopens a terminal run without repeatedly refreshing the library', async () 
   render(<RefitControls fit="old" initialRunId="saved" onStored={changed} />);
   expect(await screen.findByRole('status')).toHaveTextContent('succeeded · rejected');
   expect(changed).not.toHaveBeenCalled();
+});
+
+
+it('refreshes a newly submitted run that finishes while its URL is being saved', async () => {
+  const changed = vi.fn();
+  api.submitRefit.mockResolvedValue({run_id: 'new-run', source_fit_id: 'old', new_fit_id: 'new', status: 'running', acceptance: 'partial', blockers: [], message: 'Computing'});
+  api.fetchRefit.mockResolvedValue({run_id: 'new-run', source_fit_id: 'old', new_fit_id: 'new', status: 'succeeded', acceptance: 'rejected', blockers: [], message: 'Stored'});
+  function Harness() {
+    const [run, setRun] = useState('');
+    return <RefitControls fit="old" initialRunId={run} onRun={setRun} onStored={changed} />;
+  }
+  render(<Harness />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Coordinate Prior Scales');
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  await user.type(screen.getByLabelText('Coordinate Prior Scales'), '1');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  await waitFor(() => expect(changed).toHaveBeenCalledOnce());
 });

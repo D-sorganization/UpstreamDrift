@@ -14,9 +14,9 @@ execution message; absence of a handle does not prove worker termination.
 
 Ninety focused Python checks pass, including five new controller/API/native checks
 and a real clean worker rejected
-for absent model assumptions. Eighteen web page/form controls pass; TypeScript,
+for absent model assumptions. Nineteen web page/form controls pass; TypeScript,
 scoped ESLint and three changed source modules pass type validation. Continue
-actual player submissions through both interfaces, anatomical bounds/closed motion,
+anatomical bounds/closed motion,
 mixed effort units, independent replay and downstream handoffs. The full goal
 and #11235 remain open; no scientific acceptance or green CI is claimed.
 
