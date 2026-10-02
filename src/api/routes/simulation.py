@@ -20,8 +20,10 @@ from src.shared.python.core.error_utils import (
     EngineNotAvailableError,
     ModelLoadError,
     PhysicsSimulationError,
+    SimulationBusyError,
     ValidationError,
 )
+
 
 from ..dependencies import get_logger, get_simulation_service, get_task_manager
 from ..models.requests import SimulationRequest
@@ -40,6 +42,8 @@ def _raise_simulation_failure_http_error(err: Any) -> None:
     msg = getattr(err, "message", "Simulation failed") if err else "Simulation failed"
     if code == "invalid_input":
         status_code = 400
+    elif code == "busy":
+        status_code = 409
     elif code in ("engine_unavailable", "model_load_error"):
         status_code = 503 if code == "engine_unavailable" else 400
     elif code == "timeout":
@@ -93,45 +97,61 @@ async def run_simulation(
         return result
     except HTTPException:
         raise
-    except TimeoutError as exc:
+    except Exception as exc:
+        raise _map_simulation_exception_to_http_error(exc, logger) from exc
+
+
+def _map_simulation_exception_to_http_error(
+    exc: Exception, logger: Any
+) -> HTTPException:
+    """Map simulation exceptions to structured HTTPExceptions."""
+    if isinstance(exc, SimulationBusyError):
+        if logger:
+            logger.warning("Simulation service busy: %s", exc)
+        return HTTPException(
+            status_code=409,
+            detail=str(exc),
+            headers={"X-Error-Code": "busy", "X-Error-Stage": "preparation"},
+        )
+    if isinstance(exc, TimeoutError):
         if logger:
             logger.warning("Simulation timeout: %s", exc)
-        raise HTTPException(
+        return HTTPException(
             status_code=504,
             detail="Simulation timed out",
             headers={"X-Error-Code": "timeout", "X-Error-Stage": "execution"},
-        ) from exc
-    except (ValueError, ValidationError) as exc:
+        )
+    if isinstance(exc, (ValueError, ValidationError)):
         if logger:
             logger.warning("Invalid simulation parameters: %s", exc)
-        raise HTTPException(
+        return HTTPException(
             status_code=400,
             detail="Invalid simulation parameters",
             headers={"X-Error-Code": "invalid_input", "X-Error-Stage": "preparation"},
-        ) from exc
-    except (EngineNotAvailableError, EngineLaunchError) as exc:
+        )
+    if isinstance(exc, (EngineNotAvailableError, EngineLaunchError)):
         if logger:
             logger.warning("Physics engine unavailable: %s", exc)
-        raise HTTPException(
+        return HTTPException(
             status_code=503,
             detail="Physics engine not available",
             headers={
                 "X-Error-Code": "engine_unavailable",
                 "X-Error-Stage": "preparation",
             },
-        ) from exc
-    except ModelLoadError as exc:
+        )
+    if isinstance(exc, ModelLoadError):
         if logger:
             logger.warning("Model load error: %s", exc)
-        raise HTTPException(
+        return HTTPException(
             status_code=400,
             detail="Model file failed to load",
             headers={
                 "X-Error-Code": "model_load_error",
                 "X-Error-Stage": "preparation",
             },
-        ) from exc
-    except (RuntimeError, PhysicsSimulationError) as exc:
+        )
+    if isinstance(exc, (RuntimeError, PhysicsSimulationError)):
         if logger:
             logger.exception("Simulation runtime error")
         code = (
@@ -139,19 +159,18 @@ async def run_simulation(
             if isinstance(exc, PhysicsSimulationError) or "diverged" in str(exc).lower()
             else "runtime_error"
         )
-        raise HTTPException(
+        return HTTPException(
             status_code=500,
             detail="Internal simulation error",
             headers={"X-Error-Code": code, "X-Error-Stage": "execution"},
-        ) from exc
-    except ImportError as exc:
-        if logger:
-            logger.exception("Unexpected simulation error")
-        raise HTTPException(
-            status_code=500,
-            detail="Internal simulation error",
-            headers={"X-Error-Code": "internal_error", "X-Error-Stage": "preparation"},
-        ) from exc
+        )
+    if logger:
+        logger.exception("Unexpected simulation error")
+    return HTTPException(
+        status_code=500,
+        detail="Internal simulation error",
+        headers={"X-Error-Code": "internal_error", "X-Error-Stage": "preparation"},
+    )
 
 
 @router.post("/simulate/async")

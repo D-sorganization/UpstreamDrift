@@ -99,6 +99,24 @@ class SimulationResponse(BaseModel):
     run_id: str | None = Field(
         default=None, description="Run or correlation identifier"
     )
+    requested_duration: float | None = Field(
+        default=None, description="Requested simulation duration in seconds", ge=0
+    )
+    integrated_duration: float | None = Field(
+        default=None,
+        description="Actual integrated simulation horizon in seconds",
+        ge=0,
+    )
+    step_count: int | None = Field(
+        default=None,
+        description="Number of physics integration steps executed",
+        ge=0,
+    )
+    retained_samples: int | None = Field(
+        default=None,
+        description="Number of retained state samples including t=0",
+        ge=0,
+    )
 
     @model_validator(mode="after")
     def check_data_on_success(self) -> SimulationResponse:
