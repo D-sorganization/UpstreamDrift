@@ -668,6 +668,10 @@ class DefaultShadowTrackerService:
             self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id)
             for obs in obs_list
         ]
+        has_synthetic_masks = any(
+            getattr(mask, "is_synthetic", False) for mask in mask_list
+        )
+        is_synthetic = is_synthetic or has_synthetic_masks
         time_points = [
             float(time_s)
             for obs in obs_list
