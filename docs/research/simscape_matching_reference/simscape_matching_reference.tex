@@ -923,6 +923,305 @@ required. The latest LaTeX source remains uncompiled because the built-in
 compiler reports a platform-directory error. Software checks do not qualify
 PDF rendering or the open physical gates.
 
+
+\subsection{Optional Head Tracking: Contract Review in Progress}
+The refined Human ellipsoid model remains the common matching representation.
+The new optional head term shares the foot term's normalized chordal rotation
+residual rather than duplicating its mathematics. For $K$ rotations,
+\[
+ e_k=\frac{R_{\mathrm{pred},k}-R_{\mathrm{target},k}}{\sqrt{2}},
+ \qquad r_k=w\,\mathrm{vec}(e_k),
+ \qquad \|e_k\|_F=2\sin(\theta_k/2).
+\]
+Rotation errors are reported in degrees independently of the 14 position
+errors. Predicted rotations must be proper even when a target is missing.
+An explicitly missing target contributes zero residual and unavailable
+orientation diagnostics; a measured invalid rotation raises an error.
+
+The canonical head input is a real $3\times3\times N$ sequence with an explicit
+logical gap vector of length $N$. Validation covers the entire sequence,
+including calibration frames, before any model setup. A positive weight
+requires these inputs. With no head data and weight zero, the candidate
+retains the original solver output layout. A corrected native comparison against the frozen original solver is now
+recorded below. Passing contract tests alone does not establish equivalent
+fitted motion over other frames or configurations.
+
+Actual MATLAB R2025b TDD first failed with the new helpers absent. The initial
+implementation then passed 28 checks and failed three: malformed frame arrays
+and a vector weight raised incorrect errors, and an empty rotation sequence
+was accepted. After correcting those guards, all 31 focused checks passed,
+with zero failures or incomplete tests and natural exit zero at
+\texttt{2026-10-02T11:06:54Z}. Ten existing foot checks are included in that
+total. A second native TDD check failed all 12 calibration/solver-input checks before
+integration (four were incomplete because the calibrator was absent). After
+integration, all 12 passed with zero failures or incomplete tests and natural
+exit zero at \texttt{2026-10-02T11:17:58Z}. These are contract checks; the corrected paired fitted-motion comparison
+is recorded separately below. The candidate
+has not replaced either selected Desktop swing or qualified forward dynamics.
+A paired native probe must use the actual fitted model head orientation at
+address, fixed existing body geometry and offsets, identical frames/options,
+and separate position, head and foot errors. Address alignment is an explicit
+kinematic assumption, not an anatomical calibration.
+
+
+\subsection{Native Controller Reference Inventory}
+A read-only audit of the current Human model completed with natural exit zero
+at \texttt{2026-10-02T11:17:20Z}, inventorying 836 model-workspace variables.
+The model file retained its recorded SHA-256. No simulation or model save was
+performed. The first audit attempt failed because its block query included
+the model root; restricting that query to blocks resolved the error.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Native reference & Stored shape \\
+\midrule
+\texttt{LegReferenceAngle}, \texttt{LegReferenceRate} & $12\times654$ \\
+\texttt{LegReferenceTime} & $1\times654$ \\
+\texttt{LegAngleReference} & $12\times1$ \\
+\texttt{BalanceCOMRef}, \texttt{BalanceCOMRate} & $3\times654$ \\
+\texttt{BalanceFootRef} & $6\times654$ \\
+\texttt{BalanceGain} & $12\times3\times654$ \\
+\texttt{UpperBodyTrackTime} & $1\times654$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The \texttt{Lower Body/Leg Torque Commands} chart consumes
+\texttt{LegReferenceAngle}, rate and time. The audit found no native chart consumer for
+\texttt{LegAngleReference}. The external leg-reference builder does use it
+as a seed; assigning only that similarly named value does
+not establish a controller reference update. The stored balance and upper-body
+tracking switches were both enabled. These are facts about the stored model,
+not proof that its profiles are compatible with the owner capture or the
+newly mapped initial pose.
+
+A forward-dynamics initialization must resolve the actual chart ordering,
+angle/time units and balance/upper-body consumers, then construct mutually
+consistent pose and reference profiles. Empty unit metadata is not a license
+to assume degrees or radians. Initial target expressions, contact-plane
+registration, gravity and support must be checked separately. This inventory
+neither qualifies quiet stance nor explains the earlier failed stance runs.
+
+
+\subsection{Geometry Lifecycle and Paired-Comparison Guards}
+The expanded software/parameter suite passed 246 native MATLAB checks with
+zero failures or incomplete tests and natural exit zero at
+\texttt{2026-10-02T11:32:53Z}. This does not qualify a fitted head candidate.
+Review of the first paired comparison found a setup defect in the private
+probe: it applied personal geometry for address calibration, closed that
+unsaved model, then reloaded the stored model for fitting. Those trials did
+not retain the intended personal geometry and must not select a replacement
+match or establish personal-capture improvement.
+
+An independent native lifecycle check first verified all requested owner
+geometry fields. Closing and reloading then reverted seven fitted lengths,
+and the check failed with natural exit one at
+\texttt{2026-10-02T11:36:37Z}. Keeping the owned model open passed the same
+check with natural exit zero at \texttt{2026-10-02T11:38:16Z}. The corrected
+comparison checks every requested geometry field before each solve and
+verifies its declared direct source inventory at completion. That inventory
+is not a complete transitive dependency closure. Model saves remain disabled.
+The corrected A/O comparison completed with natural exit zero at
+\texttt{2026-10-02T11:55:53Z}; its scope and results are recorded below.
+
+For reproducible comparisons, a capture hash and cached geometry record
+must be accompanied by an audit of the live model configuration at each
+solver invocation. A load/close boundary can invalidate an unsaved
+configuration without changing the model file hash. Record failed attempts,
+verify actual natural process exits, and separate software acceptance from
+candidate selection and full-capture visual/physical acceptance.
+
+\subsection{Controller Units and Quiet-Reference Preparation}
+The native leg chart delegates to \texttt{gs3dx\_balance\_command}. Its
+reference contract is degrees for angles, degrees per second for rates,
+metres for COM and foot positions, and degrees per metre for the balance
+Jacobian. The leg servo orders left hip XYZ, knee, ankle XY, then the same
+six right-leg channels. \texttt{gs3dx\_leg\_table} and the controller builder
+state gains in N\,m/degree and N\,m/(degree/second).
+
+The inspected upper-body chart calls \texttt{gs3dx\_track\_torque} when
+\texttt{UpperBodyTracking} is enabled, replacing the earlier torque-mode
+selection. Thus setting the general torque mode alone does not create a
+quiet reference. \texttt{Neck Reference} reads the time-column matrix
+\texttt{[LegReferenceTime(:), NeckReference.']}; its time base must stay
+consistent with the neck channels. Inspection of the actual model converters
+shows that these prescribed neck-motion inputs use \emph{radians}, while
+the neck joint initial-position target parameters use \emph{degrees}. The
+neck joints have \texttt{InputMotion} actuation; those channels are prescribed
+even when other joints use torque-driven computed motion. Reference construction should reuse the
+shared joint table and validated initial-pose conversion rather than
+introducing another spherical/Euler conversion.
+
+A constant reference can set matching angle columns and zero desired rates.
+Zero feedforward torque is an explicit exploratory choice, not gravity
+compensation or proof of equilibrium. Balance COM/feet/gain references,
+contact-plane registration, primitive initialization/actuation flags and
+actual assembled state require separate native checks. The current owner contact/parameter audit is recorded below; no new
+simulation result is claimed.
+
+
+\subsection{Corrected Head Comparison and Candidate Selection}
+The paired native probe retained the requested geometry throughout each
+capture and verified all declared direct source hashes before and after.
+For both captures, the original solver, the new solver without head data,
+and the new solver with head targets at weight zero produced exactly equal
+joint coordinates and predicted positions on the four tested frames.
+This proves compatibility for those controlled cases, not every capture.
+All tested solves returned native kinematic status one. The model was not
+saved and no forward simulation was executed.
+
+Head targets use the measured head-frame sequence and its gap mask, aligned
+at address to the actual fitted model head rotation obtained by native FK:
+\[
+ R_{\rm target}(f)=R_{\rm measured}(f)
+ R_{\rm measured}(1)^T R_{\rm model,address}.
+\]
+The address rotation is a kinematic alignment assumption. The three
+remaining frame errors are held out from that head alignment; body geometry
+and marker offsets were inherited from the capture fit, so this is not
+fully held-out validation of the entire modeling process.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture / weight & Mean RMS (mm) & Max RMS (mm) & Head mean ($^\circ$) & Head max ($^\circ$) \\
+\midrule
+A / 0 & 29.397 & 42.381 & 50.744 & 81.447 \\
+A / 0.01 & 27.605 & 69.061 & 67.199 & 137.469 \\
+A / 0.03 & 31.378 & 43.098 & 78.922 & 175.025 \\
+O / 0 & 88.454 & 141.690 & 111.330 & 177.578 \\
+O / 0.01 & 59.220 & 132.530 & 140.434 & 179.974 \\
+O / 0.03 & 62.124 & 88.766 & 62.037 & 75.326 \\
+\bottomrule
+\end{tabular}
+\end{center}
+RMS summarizes the same 14 positional targets; head columns summarize the
+three frames after address. Frames were A: 1, 217, 433, 649 and O: 1, 169,
+249, 361. Fixed offsets, forward-only solving and identical residual weights
+were used. Sparse warm starts and smoothing differ from the full sampled
+selected clips; their RMS values must not be presented as those clips' errors.
+
+Before seeing these results, the exploratory screening limits required all
+native statuses to be one, mean/worst positional RMS increases no greater
+than 0.5/1 mm, head mean improvement at least 30\%, no worse head maximum,
+and no foot maximum increase above $2^\circ$. Both tour candidates and
+owner weight 0.01 failed that screen. Owner weight 0.03 passed the coarse
+screen, reducing mean head error by approximately 44.3\%. Its left-foot
+maximum increased by $1.9971^\circ$, leaving only $0.0029^\circ$ margin.
+It is not an accepted replacement: its positional errors are much larger
+than the selected owner clip's 16.643/36.865 mm mean/maximum RMS.
+
+The full 46-frame owner comparison completed with natural exit zero at
+\texttt{2026-10-02T12:33:07Z}. Weight zero gave 38.524/81.119 mm mean/maximum
+position RMS and $75.517^\circ/129.297^\circ$ post-address mean/maximum head
+error. Weight 0.03 gave 26.612/37.606 mm and
+$27.456^\circ/54.163^\circ$, respectively. All 46 native statuses were one.
+The left/right foot maxima decreased from $20.986^\circ/22.468^\circ$ to
+$19.556^\circ/20.345^\circ$; each foot had 45 valid measurements, with the
+missing frame excluded from orientation statistics. This confirms improvement
+against the controlled cold-start baseline, but the 26.612 mm mean position
+error remains worse than the selected 16.643 mm owner clip. No replacement
+video is selected.
+
+Both runs used the same personalized geometry and fixed offsets. The scope
+is a cold-start comparison, not a replay of the offset-calibration pipeline.
+Code inspection shows that calibration retains a fitted first-pose seed,
+while supplying fixed offsets skips that calibration and starts from the
+target-free model seed. A keyed initial-pose extension is under review to
+evaluate this branch dependence without conflating it with head residual
+improvement. Candidate promotion requires completed native receipts, full
+sequence diagnostics and visual inspection in both standard views. Joint
+component differences grouped by native units are not SO(3) angular
+velocities, anatomical validation or physical qualification. Desktop clips
+remain the previously selected kinematic exports.
+
+\subsection{Quiet-Reference Mapping and Current Owner Contact Audit}
+The pure \texttt{gs3dx\_quiet\_reference\_profiles} helper consumes the
+existing validated initial-target mapping and shared upper-joint table.
+It emits two constant columns over $[0,t_{\rm end}]$, leg and upper-body
+angles in degrees, zero rates in degrees per second, zero upper-body
+feedforward torques in N\,m, and neck prescribed profiles in radians.
+It does not assign the model or configure balance, actuation or support.
+For example, initial neck targets $90^\circ$ and $-180^\circ$ map to
+motion inputs $\pi/2$ and $-\pi$, not 90 and $-180$ radians.
+
+Native TDD first failed with the helper absent. The initial implementation
+then passed 15 checks and failed four, with one incomplete, exposing degree
+versus radian profiles, mixed numeric rounding and nonscalar qualification
+handling. The corrected implementation passed all 19 checks with zero
+failures or incomplete tests and natural exit zero at
+\texttt{2026-10-02T12:03:35Z}. These are mapping-contract tests, not stance
+validation. Two further contract tests first failed with 19 passed and two failed,
+exposing integer right-ankle concatenation and malformed neck-unit metadata.
+After correction, the combined suite passed \emph{267 checks}, with zero
+failed or incomplete tests and natural exit zero at
+\texttt{2026-10-02T12:34:19Z}. Each leg input is converted to double before
+concatenation; neck-unit metadata must be scalar nonmissing degree text.
+
+The current owner audit completed with native status one and natural exit
+zero at \texttt{2026-10-02T12:06:25Z}, retaining the recorded Human model
+hash and personal geometry. Subject mass was configured as 104.3 kg; no
+model save or simulation occurred. Ten actual native FK contact-sphere
+centres were compared with their 10 mm radii and the stored ground rigid
+transform. The ground plane pose comes from validated native transform
+parameters; it is \emph{not} a KinematicsSolver output, because that API
+rejects frame variables between rigidly connected world and ground frames.
+Signed clearance is
+\[
+ c_i=n^T(p_i-p_{\rm ground})-r_i.
+\]
+Clearances ranged from $-64.462$ to $-48.262$ mm, with a 16.199 mm spread.
+All ten spheres penetrated the configured plane at the requested FK pose.
+This is a contact-registration defect to resolve before interpreting a
+quiet stance; translating a plane alone cannot remove the differing sole
+heights or establish force balance.
+
+The stored midfoot position and velocity target switches were off, and neck
+targets were off under prescribed motion. Other primitives had mixed
+priorities. The audit did not establish the actual assembled initial state.
+The next dynamics stage must record requested versus assembled pose, active
+reference profiles and units, contact forces, support distribution and root
+drift. FK closure, numerical mass consistency, zero reference rates and a
+successful software test suite do not qualify forward dynamics or explain
+player skill from the rendered motion.
+
+
+\subsection{Assembled State and 20 ms Contact Diagnostic}
+The next native probe completed with natural exit zero at
+\texttt{2026-10-02T12:38:27Z}. It applied the validated 48-coordinate pose
+mapping, literal neck and midfoot targets, personalized geometry and
+104.3 kg subject physics. Constant leg and upper-body references were used;
+neck motion was supplied in radians. Stored primitive target switches and
+priorities were retained. Upper-body tracking was enabled, capture-derived
+balance correction disabled, and upper feedforward torque zero. This isolates
+assembly and initial contact under those controls; it is not an open-loop
+full-swing acceptance run or a quiet equilibrium test.
+
+Logged scalar joint coordinates at $t=0$ agreed with the requested pose to
+zero translation error and $5.43\times10^{-9}$ degree maximum scalar
+rotation error. A subsequent native postprocess audit of all five spherical joints compared
+rotation matrices, avoiding ambiguous raw axis components. It passed with
+maximum Frobenius matrix difference $1.34\times10^{-10}$ and natural exit
+zero at \texttt{2026-10-02T12:47:09Z}. Scalar and spherical rotation-invariant
+checks therefore agree with the requested assembled pose under this probe's
+stated reference and control settings; no additional simulation was run. Reconstructed native
+FK of the actual assembled pose returned status one and retained the same
+$-64.462$ to $-48.262$ mm contact clearances. The configured ground mismatch
+therefore survives assembly; it was not merely an error in reading target
+expressions. Model geometry was reapplied after the existing stance helper
+closed its unsaved model, before reconstructing the logged pose.
+
+The 104.693 kg body-plus-equipment mechanism produced initial logged normal
+forces of 32.205 kN left and 24.407 kN right. By 20 ms, these were 106.684 N
+left and zero right; maximum pelvis displacement was 38.370 mm. These are
+measured simulation diagnostics, replacing speculative spring-force or
+collapse predictions from FK alone. They demonstrate that this setup is not
+a qualified quiet stance. Ground/contact registration, both-foot support,
+consistent balance references and gravity-support torques must be resolved
+before longer forward replay or physical claims. No model save occurred,
+and the model SHA-256 remained unchanged. Detailed trajectories and native
+logs remain private; repository evidence contains sanitized aggregates.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

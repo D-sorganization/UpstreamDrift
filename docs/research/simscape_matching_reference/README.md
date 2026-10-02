@@ -100,3 +100,48 @@ still requires a fresh run after regenerating the monolith register. The
 leaderboard runner's missing local action remains unexplained: its checkout
 log already records sparse-checkout disable, so an additional cleanup patch
 was not accepted on the proposed explanation alone.
+
+### Head and Quiet-Reference Review Checkpoint
+
+The reviewed head residual shares the normalized SO(3) chordal helper with
+feet and validates complete head sequences and masks before model setup.
+The combined MATLAB R2025b suite passed **267 checks**, zero failed or
+incomplete, with natural exit zero at **12:34:19Z**. Two added quiet-reference
+guards first failed (19 passed, two failed), then passed in the combined
+suite: integer right-ankle inputs preserve other leg fractions, and malformed
+neck-unit metadata raises the contract error. Neck prescribed profiles use
+**radians**; native initial neck targets use **degrees**. Zero feedforward
+does not establish gravity compensation or equilibrium.
+
+The corrected four-frame A/O native comparison retains personalized geometry
+and preserves original joint/position outputs exactly when head tracking is
+disabled. An earlier private probe lost seven owner geometry values across
+an unsaved close/reload boundary and is excluded from selection evidence.
+Both tour head candidates failed screening. Owner weight 0.03 passed only
+the coarse screen, with left-foot maximum worsening 1.9971 degrees.
+
+The completed **46-frame owner** cold-start, fixed-offset comparison at weight
+0.03 improves mean/max head error from 75.517/129.297 to 27.456/54.163 degrees,
+and mean/max position RMS from 38.524/81.119 to 26.612/37.606 mm. All native
+statuses are one and the process exited naturally at **12:33:07Z**. It does
+not replace the selected 16.643/36.865 mm owner clip. Fixed-offset solving
+skips calibration's fitted starting pose; keyed warm-start review is ongoing.
+
+Current owner FK contact-sphere clearances are **-64.462 to -48.262 mm**, a
+16.199 mm spread, under the validated stored native ground transform. That
+audit exited naturally at **12:06:25Z**, without simulation or model save.
+The ground transform is parameter-derived, not a KinematicsSolver output.
+The assembled 20 ms diagnostic exited naturally at **12:38:27Z**. Scalar
+joints at t0 match requested targets (zero translation error, maximum scalar
+rotation error 5.43e-9 degrees); all five spherical rotation matrices also match (maximum matrix error 1.34e-10, native postprocess natural exit zero at 12:47:09Z). The contact clearance mismatch survives actual assembly. Initial
+left/right normal force is 32.205/24.407 kN, falling to 106.684/0 N at 20 ms;
+maximum pelvis displacement is 38.370 mm. This uses constant references,
+stored primitive flags, upper tracking enabled and balance correction disabled.
+It does not qualify equilibrium or open-loop full-swing dynamics. No force
+magnitude or collapse prediction is accepted from FK alone.
+
+See [Sanitized Review Evidence](head_and_quiet_review_20261002.json) and
+[Combined Native Test Inventory](native_head_and_quiet_integration_tests_20261002.json).
+Desktop selections are unchanged. All physical gates remain open. Latest
+LaTeX compilation still fails with `Unable to find standard directories for platform`;
+the prior PDF does not validate the new sections. Protected CI and review remain required.

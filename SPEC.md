@@ -7667,6 +7667,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11256 | Reviewed optional Human head-orientation IK with shared SO(3) residual, strict masks and keyed calibration; native baseline parity and 267 software checks pass. Constant-reference mapping distinguishes degree initial targets from radian neck motion. Full owner trial improves against a cold start but does not replace selected clips; native assembled 20 ms contact diagnostic confirms initial penetration and excessive force. Standalone LaTeX reference and sanitized evidence updated; physical gates remain open. |
 | 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
 
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
