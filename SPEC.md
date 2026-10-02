@@ -1,3 +1,13 @@
+## Companion Publication Hardening and Sparse-Checkout Isolation (#11257)
+
+Specifies clean workspace isolation, sparse-checkout resets, and fail-closed checkout verification for release and companion publication workflows:
+- **Worktree Sparse-Checkout Hygiene (`.github/workflows/package-standalone-sidekick.yml`)**:
+  - The `Disable sparse-checkout` post-step restores full working tree checkout (`git checkout -- .`) after disabling sparse checkout (`git sparse-checkout disable`), preventing omitted directories (such as `scripts/`) from lingering on persistent self-hosted runners.
+- **Fail-Closed Companion Publication Checkout (`.github/workflows/release.yml`)**:
+  - `companion-protected-main` and `build` jobs run a pre-checkout clean step that disables any residual sparse-checkout state and cleans the workspace prior to `actions/checkout`.
+  - A post-checkout validation step verifies that `scripts/companion_publication.py` is present, restoring `scripts` from `HEAD` if a prior sparse checkout corrupted the index, and failing closed if missing.
+  - Step-level `PYTHONPATH: ${{ github.workspace }}` ensures `python3 -m scripts.companion_publication` unambiguously resolves to the authoritative checkout root.
+
 ## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
 
 Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
