@@ -4,6 +4,7 @@
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs,longtable,array}
+\usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{xurl}
 \usepackage{hyperref}
@@ -34,6 +35,7 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\skewmat}[1]{[#1]_{\times}}
 \newcommand{\reportsection}[1]{\section{#1}}
+\providecommand{\reviewartifactroot}{..}
 
 \begin{document}
 \hypersetup{pageanchor=false}
@@ -54,7 +56,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; later sequential exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; exact restart and V9 producer \code{7a2359eadd}; later sequential exploration identified separately.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -72,14 +74,15 @@ design manual. That manual's editable authority remains
 \hypersetup{pageanchor=true}
 
 {\scriptsize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
-\vspace{0.15in}
+
+\clearpage
+\reportsection{Scope, Evidence Classes, and Success Criteria}
 \note{Reading Guide}{Sections 1--4 explain evidence and the image fit.
 Sections 5--7 explain placement, closure, and constrained repair. Sections
 8--10 cover controls, repeatability, and remaining acceptance. The appendices
 bind numerical statements to exact artifacts.}
 
-\clearpage
-\reportsection{Scope, Evidence Classes, and Success Criteria}
+
 \subsection{What the Current Workflow Provides}
 Necromatcher creates a persistent player and swing library, imports immutable
 capture versions, reviews original source frames with observations, binds saved
@@ -547,15 +550,16 @@ Dense and Held Out Use Original Source Frames. Grip Is the Saved Dense-Source
 Maximum; Scaled Max Is the Finite Constraint-Probe Maximum.}
 \end{table}
 
-A subsequent fit does not replay the authored seed's exact Hermite coefficients.
-The worker samples the saved parent's source poses, constructs new knots, and
-explicitly applies the initialization policy again. Consequently Tiger's
+In these V8 jobs, the subsequent fit did not replay the authored seed's exact
+Hermite coefficients. The worker sampled the saved parent's source poses, constructed new knots, and
+explicitly applied the initialization policy again. Consequently Tiger's
 61.717592 px seed becomes a 62.451437 px fit baseline; Hogan's 12.285791 px
 seed becomes a 13.027773 px baseline. Within each job the original observations
 and prior remain unchanged. Across jobs, the new fit's prior is its saved seed
 parent's first pose, not the preceding V7 prior. These V8 jobs used sampled-parent initialization. The subsequently implemented
 preserved-spline restart described below addresses coefficient replay with
-explicit parent/prior identity; no new player result is asserted here.
+explicit parent/prior identity. The V9 restart receipts below are separate
+experiments and do not alter the V8 metrics or qualification.
 
 \begin{table}[ht]
 \centering\small
@@ -881,9 +885,100 @@ and initialization source retain their separate request fields.
 recipe transport, exact start identity and strict preconditions, unavailable
 legacy starts, source-selection reset, and preservation of bounds/contact
 options when scalar controls change. These are software checks. Actual
-numerical preserved-restart validation and new player receipts remain pending;
-the V8 artifacts retain their original sampled initialization and rejected
-research qualification.}
+numerical evidence is reported separately in the V9 receipts below. The V8
+artifacts retain their original sampled initialization and rejected research
+qualification.}
+
+\subsection{Actual V9 Preserved-Spline Restart Trials}
+The immutable \code{tiger-exact-spline-restart-fit-v9} and
+\code{hogan-exact-spline-restart-fit-v9} versions were produced from their V8
+bounded-fit parents by source
+\hash{7a2359eaddf1d795124ae9d7decf5c57260db103}.
+The receipt \path{exact-spline-restart-v9-receipt.json} has SHA-256
+\hash{fb86a8d5eca26cb65a1a653000bce5fda4451ea03f191da54c20b99fff702787}.
+Both requests used \code{preserved_spline}, strict policy, twelve original
+knots, thirty evaluations, and a 300 s wall budget; Tiger retained 22 original
+training frames and Hogan 23. Both jobs succeeded computationally with
+\code{optimizer_ran=true}, \code{converged=false},
+\code{initialization=null}, and \code{acceptance=rejected}.
+The absence of an authored initialization receipt means no projection or
+slope-zeroing step was applied, not that the optimizer lacked an initial state.
+
+All six fields of each returned \code{initial_spline} exactly matched its
+parent's preserved record, including these initial coefficient identities:
+\begin{quote}\small
+\textbf{Tiger:}
+\hash{51cfe69adf3828f08bcbbc39554d258af2c81cae0e36239682b7bf16f3e4c4a6}\\
+\textbf{Hogan:}
+\hash{6cc6c58dd4776e586090f6dd12e761f15e2b142c27c240fe0cfc5d6e74d34099}
+\end{quote}
+Preflight and returned-start checks found zero differences in canonical
+$q$, $dq/dt^{\mathrm{src}}$, and $d^2q/d(t^{\mathrm{src}})^2$ for all declared
+free coordinates at 419 Tiger and 1499 Hogan source/midpoint times. The driver
+used floating-point adjacent-source averages for this identity check; the
+separate independent audit below retains exact rational midpoint identities.
+These derivatives are source-PTS derivatives, not qualified physical rates or
+accelerations. Parent version hashes remained unchanged. Fresh initial
+training image RMS matched the V8 parent's original final training RMS,
+resolving the sampled-initialization baseline discrepancy documented above.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Player & Initial & Final Training & Dense & Held Out\\\midrule
+Tiger & 69.423194 & 58.533085 & 58.887565 & 58.928753\\
+Hogan & 12.649875 & 8.936815 & 10.828360 & 10.881284\\
+\bottomrule
+\end{tabular}
+\caption{Actual V9 Image RMS in Pixels. Initial Values Reproduce the V8 Parent
+Training Baseline; Final Values Are Returned by Separate Nonconverged Jobs.}
+\end{table}
+The saved fit contract does not expose the complete MAP objective:
+\code{objective=null} and
+\code{objective_availability="not_exposed_by_saved_fit_contract"}.
+Image RMS is therefore not reported as the optimizer's complete cost or as a
+certificate of monotonic objective reduction. The new parent-first-pose prior
+also prevents treating V8 and V9 as an unchanged-objective optimization history.
+
+The separate \path{exact-spline-restart-v9-independent-assessment.json}
+has SHA-256
+\hash{0e6dd374ba666addc5c216062624742a03672f71393a7925829e1055c3d5b883}.
+It performs no optimization, brackets parent and source/runtime identities,
+and checks the returned canonical splines through the existing Bernstein-domain
+and scalar-extrema APIs. Both candidates pass all 32 authored coordinate
+ranges, including locked coordinates, with zero range violations; twelve
+native coordinates remain explicitly unbounded. This continuous coordinate
+bound result remains separate from finite nonlinear geometry checks.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Player & Dense Grip (mm) & Audit Grip (mm) & Audit Rotation (deg) & Audit Depth (mm)\\\midrule
+Tiger & 48.138196 & 48.567834 & 29.203124 & 23.216542\\
+Hogan & 13.501532 & 13.514332 & 15.942734 & 2.894115\\
+\bottomrule
+\end{tabular}
+\caption{V9 Native Geometry. Dense Grip Is the Saved Original-Source Maximum;
+Audit Maxima Include Source Frames, Rational Midpoints, and Canonical Extrema.
+Depth Is Maximum Declared Sphere Penetration into the Authored Ground.}
+\end{table}
+The Tiger audit evaluates 210 original PTS and 209 adjacent midpoints; the
+Hogan audit evaluates 750 and 749, respectively. Each also includes 88 tagged
+coordinate minimum/maximum requests for 44 coordinates, not 88 distinct
+additional timestamps. Tiger has 47 distinct extrema times and 464 distinct
+overall evaluation times; Hogan has 51 and 1548. The rotation norms before
+conversion to degrees are 0.509690657134 rad and 0.278253203177 rad.
+The independent sample set explains why its maximum grip gaps exceed the
+original-source-only values.
+
+The lower image residuals do not establish acceptable historical motion or
+uniform improvement in native geometry: Tiger's finite rotation maximum is
+larger than in the V8 independent audit. The constant two-heel pin hypothesis
+remains unobserved and inadequate as the recorded motion evolves. Substantial
+grip/rotation discrepancies and residual penetration remain, and finite
+sampling does not certify continuous nonlinear constraints. Physical time,
+camera, historical anatomy, dynamics, impact, and site acceptance remain
+unqualified. These receipts validate exact start preservation and conditional
+research computation; the separately verified V9 overlays are documented in the video-review
+section below and do not change this qualification.
 
 \subsection{Jobs, Recall, and Cancellation}
 \code{start_native_refit} reuses \code{MatchingJobService}; native and web shells
@@ -1220,6 +1315,85 @@ manifests. \texttt{Tiger Interior V7 Overlay/} and
 Artifact verification establishes transferred bytes and frame counts, not
 accepted player motion or continuous closure.
 
+\subsection{Actual V9 Overlay Artifacts and Visual Review}
+The Desktop verification receipt \path{exact-v9-overlay-verification.json}
+(SHA-256
+\hash{125de76d04b18af859a10fa9654d8d5a48760b9e9f333c2d280d2b6305a458f2})
+independently decoded all 960 exported frames: 210 Tiger frames at
+$1280\times720$ and 750 Hogan frames at $320\times240$. Selected PNG and MP4
+hashes matched the export manifests; ZIP CRC checks passed and extracted
+members matched the Desktop artifact bytes. The receipt binds the V9 producer
+\code{7a2359eaddf1d795124ae9d7decf5c57260db103} and the saved V9 fit identities.
+This check establishes artifact integrity and decodability; it does not itself
+reverify the complete original source/model/capture lineage or certify motion.
+
+Figures~\ref{fig:tiger-v9-overlay} and~\ref{fig:hogan-v9-overlay} embed the
+unaltered first, middle, and last exported PNGs, including their original
+source-image underlays and research captions. Green observations, blue native
+projections, and yellow matched residuals remain visibly distinct. Blue
+segments represent declared body-origin joint trees and attachment seeds,
+not an inferred anatomical mesh or reconstructed club shaft. Tiger's
+follow-through and walking frames show marked upper-body and attachment
+mismatch. Hogan's low-resolution, blurred subject retains a visible club
+mismatch; pixel residuals at these two different source resolutions are not
+directly comparable. Both exported candidates remain rejected research.
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Exact V9 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Exact V9 Overlay/frame-000105.png}\\[3pt]
+\small\textbf{Middle Source Frame: 105}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Exact V9 Overlay/frame-000209.png}\\[3pt]
+\small\textbf{Last Source Frame: 209}
+\end{minipage}
+\caption{Tiger V9 Source-Underlay Native Projections: Rejected Research.
+The Original PNGs Retain Visible Observation-to-Model Residuals; Follow-Through
+and Walking Expose Upper-Body and Attachment Mismatch. Blue Joint Trees and
+Attachment Seeds Are Declared Geometry, Not an Inferred Mesh or Club Shaft.}
+\label{fig:tiger-v9-overlay}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Exact V9 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Exact V9 Overlay/frame-000375.png}\\[3pt]
+\small\textbf{Middle Source Frame: 375}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Exact V9 Overlay/frame-000749.png}\\[3pt]
+\small\textbf{Last Source Frame: 749}
+\end{minipage}
+\caption{Hogan V9 Source-Underlay Native Projections: Rejected Research.
+Enlarged Presentation Retains the Original Low-Resolution PNG Bytes; Blurred
+Image Evidence and Club Mismatch Remain Visible. Blue Body-Origin and Attachment
+Segments Do Not Establish Anatomical Surfaces, Shaft Geometry, or Physical Motion.}
+\label{fig:hogan-v9-overlay}
+\end{figure}
+
+\paragraph{Portable Artifact Root and Compilation Directory.}
+The six PNGs remain external review artifacts, outside Git. The document's
+\code{reviewartifactroot} defaults to \code{..}; compile the copied source
+with the working directory set to
+\path{Desktop/Necromatcher Review 2026-10-01/Report}. The parent review directory
+contains both external player overlay directories. To compile from another
+location, define \code{reviewartifactroot} before inputting this source, for
+example \verb|\def\reviewartifactroot{../../review-files}|.
+That root must directly contain \path{Tiger Exact V9 Overlay} and
+\path{Hogan Exact V9 Overlay}. No absolute user directory or copied media is embedded
+in the tracked source.
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -1341,8 +1515,9 @@ progress implementation vehicle. Local numerical progress does not resolve
 its documented CI remediation limit, remote checks, or complete project goal.
 The V8 trials exercised the canonical coordinate domain and explicit authored
 initializer with retained image tradeoffs and independent nonlinear audits.
-Next implement exact coefficient restart and reviewed swing/stance intervals
-with time-varying contact hypotheses, alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
+Exact coefficient restart has now been exercised by the rejected V9 trials.
+Next review swing/stance intervals with time-varying contact hypotheses,
+alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled
 report/Desktop package in \#11247. The Desktop review package contains
@@ -1402,24 +1577,8 @@ unpublished sequential NPZ remain outside Git under
 
 \section{Source Map and Resume Instructions}
 {\footnotesize
-\begin{longtable}{@{}p{2.3in}p{4.0in}@{}}
-\toprule Authority & Repository Path / Purpose\\\midrule\endhead
-Capture Catalog & \path{docs/development/historical_capture/source-catalog.json}\\
-Capture Receipts & \path{docs/development/historical_capture/hogan-final-receipt.json}; \path{docs/development/historical_capture/tiger-usga-range-final-receipt.json}\\
-Native Fit Procedure & \path{docs/development/necromatcher-native-fit.md}\\
-Native Resources & \path{docs/development/necromatcher-native-resources.md}\\
-Authored Efforts & \path{docs/development/necromatcher-effort-profiles.md}\\
-Replay Procedure & \path{docs/development/necromatcher-replay.md}\\
-Placement Procedure & \path{docs/development/necromatcher-ground-placement.md}\\
-Constrained Repair & \path{docs/development/necromatcher-constrained-repair.md}\\
-LM Receipt & \path{docs/development/historical_capture/constrained-repair-probe-receipt.json}\\
-TRF Receipt & External \path{Downloads/historical-capture/native-fit-research/constrained-repair-trf-probe-receipt.json}; verify hashes before treating it as reproduced evidence.\\
-Image Fit Boundary & \path{src/shared/python/motion_matching/historical_fit/}\\
-Native Marker/Closure & \path{src/engines/physics_engines/mujoco/python/full_body_ik.py}\\
-Shared Pose Solver & \path{src/shared/python/motion_matching/full_body_ik.py}\\
-Root Turnover & \path{AGENT_HANDOFF.md} and \path{docs/development/HANDOFF.md}\\
-\bottomrule
-\end{longtable}
+\setlength{\parskip}{3pt}
+\renewcommand{\arraystretch}{1.05}
 Before resuming, inspect the current worktree, source revision, live leases,
 owned workers, and stored manifests. Read the applicable turnover documents;
 their later evidence may supersede this snapshot. Reopen exact immutable fit
@@ -1428,7 +1587,6 @@ options. Keep earlier failure receipts as evidence rather than replacing them
 with a later narrative of success.
 
 \begin{verbatim}
-# From the owned repository worktree; Qt remains offscreen.
 $env:QT_QPA_PLATFORM='offscreen'
 $env:MPLBACKEND='Agg'
 python3 -m pytest tests/unit/motion_matching/test_pose_trf.py `
@@ -1438,9 +1596,31 @@ pre-commit run mypy --hook-stage pre-push --files `
   src/engines/physics_engines/mujoco/python/full_body_ik.py
 python3 -m scripts.check_design_manual_governance
 \end{verbatim}
-The focused commands test the bounded native solver and its geometry
-derivatives. They do not replace the combined library/API/replay regression
-lane, original-image review, continuous-motion audits, or remote checks.
+Run these focused native solver/geometry checks from the owned worktree.
+They supplement library/API/replay regressions, original-image review,
+continuous-motion audits, and remote checks; they do not replace them.
+
+Procedure filenames below are relative to \path{docs/development/}; capture
+and summary filenames are relative to its \path{historical_capture/} directory.
+Source boundaries retain repository-relative paths.
+\begin{longtable}{@{}p{1.85in}p{4.45in}@{}}
+\toprule Authority & Relative Filename / Boundary\\\midrule\endhead
+Capture Catalog & \path{source-catalog.json}\\
+Capture Receipts & \path{hogan-final-receipt.json}; \path{tiger-usga-range-final-receipt.json}\\
+Native Fit and Resources & \path{necromatcher-native-fit.md}; \path{necromatcher-native-resources.md}\\
+Saved and Preserved Starts & \path{necromatcher-saved-spline-restart.md}; \path{necromatcher-preserved-spline-restart.md}\\
+Independent Bounds Audit & \path{necromatcher-bounded-trial-audit.md}\\
+V9 Summary Receipts & \path{exact-restart-v9-summary.json}; \path{exact-restart-v9-independent-summary.json}\\
+Authored Efforts and Replay & \path{necromatcher-effort-profiles.md}; \path{necromatcher-replay.md}\\
+Placement and Repair & \path{necromatcher-ground-placement.md}; \path{necromatcher-constrained-repair.md}\\
+LM Receipt & \path{constrained-repair-probe-receipt.json}\\
+TRF Receipt & External \path{constrained-repair-trf-probe-receipt.json} under \path{Downloads/historical-capture/native-fit-research/}; verify hashes before reuse.\\
+Image Fit Boundary & \path{src/shared/python/motion_matching/historical_fit/}\\
+Native Marker/Closure & \path{src/engines/physics_engines/mujoco/python/full_body_ik.py}\\
+Shared Pose Solver & \path{src/shared/python/motion_matching/full_body_ik.py}\\
+Root Turnover & Repository \path{AGENT_HANDOFF.md}; \path{docs/development/HANDOFF.md}\\
+\bottomrule
+\end{longtable}
 
 }
 \end{document}

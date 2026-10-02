@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — 374 focused Python/parity tests and 39 UI tests pass; scoped Ruff, pinned mypy, TypeScript and ESLint pass. Exact saved-spline identity and full native/web recipe transport are implemented; actual committed restart trials follow source freeze.
+- **Last verified:** 2026-10-02 at V9 producer 7a2359eaddf1d795124ae9d7decf5c57260db103 — 374 Python/parity tests pass. Actual Tiger/Hogan strict preserved restarts verified exact coefficient hashes and initial pixel RMS; both remain rejected/nonconverged. Live one-evaluation Hogan web submission retained the complete recipe; fractional form constraints and ES2020 endpoint access were repaired and application type checks and 52 UI/API tests pass.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Run committed exact-spline Tiger/Hogan restarts, compare starting hashes and fresh pixel RMS, retain Desktop evidence and compiled report updates, then implement reviewed swing/stance intervals and time-varying contact before dynamics/downstream qualification.
+- **Next step:** Review swing/stance source intervals and implement explicit phase-dependent contact hypotheses using the exact restart path. Reassess camera/landmark evidence, image/closure/contact behavior and controls before dynamics, native actual-player UI acceptance and downstream qualification.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
@@ -39,7 +39,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at producer 2ad99b870a — both V8 exports verified; all 960 MP4 frames decoded, six stills visually reviewed and output hashes checked. Live Hogan V8 web recall downloaded the same SHA256 as the guarded CLI ZIP.
+- **Last verified:** 2026-10-02 at V9 producer 7a2359eadd — both exact-restart exports verified; all 960 MP4 frames decoded, six stills visually reviewed, output hashes and ZIP member bytes checked. Earlier V8 web recall evidence is retained.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
 - **Next step:** Revalidate native legacy save with an actual stored player package.
 
@@ -52,7 +52,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — final 25-page methods PDF compiled twice with installer-disabled MiKTeX and all pages reviewed; 89 Desktop artifacts hash-verified. PDF SHA-256: e40bc030acce622ee5af22abbc4be967e720ab53c5a779273a7d7f1cc3d1671d. Built-in platform-directory failure remains.
+- **Last verified:** 2026-10-02 — final 31-page V9 methods PDF compiled in three installer-disabled MiKTeX passes and all pages independently reviewed; 171 Desktop artifacts hash-verified. PDF SHA-256: 8aab44335da065341a6bb4de86c11d84d9e2f8b6ff547544d1d54b199ef2f572. Built-in platform-directory failure remains.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
 - **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
 

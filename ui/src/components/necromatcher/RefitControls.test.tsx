@@ -171,3 +171,33 @@ it('requires both saved interval endpoint frames when resuming and restores samp
   await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
   expect(api.submitRefit.mock.calls[0][1].config.initialization_policy).toBe('authored_range_project_zero_slopes');
 });
+
+
+it('submits small saved weights and continuous scalar precision through native form validation', async () => {
+  const plan = boundedPlan();
+  const config = {...boundedConfig, prior_weight: 0.001, smoothness_weight: 0.0001, closure_weight: 0.125};
+  api.fetchRefitPlan.mockResolvedValue({...plan, baseline_config: config,
+    recorded_options: {...plan.recorded_options, config, budget_wall_s: 300.0001, unknown_visibility_weight: 0.333333}});
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Coordinate Prior Scales');
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  for (const label of ['Pose Prior Weight', 'Smoothness Weight', 'Grip Closure Weight', 'Wall Budget (Seconds)', 'Unknown Visibility Weight']) {
+    expect(screen.getByLabelText(label)).toBeValid();
+  }
+  expect(screen.getByLabelText('New Fit Version').closest('form')).toBeValid();
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  expect(api.submitRefit).toHaveBeenCalledOnce();
+  expect(api.submitRefit.mock.calls[0][1]).toMatchObject({config, budget_wall_s: 300.0001, unknown_visibility_weight: 0.333333});
+});
+
+it.each(['Spline Knots', 'Evaluation Budget'])('retains integer form validation for %s', async (label) => {
+  api.fetchRefitPlan.mockResolvedValue(boundedPlan());
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Coordinate Prior Scales');
+  await user.clear(screen.getByLabelText(label));
+  await user.type(screen.getByLabelText(label), '2.5');
+  expect(screen.getByLabelText(label)).toBeInvalid();
+});

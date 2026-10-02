@@ -1,0 +1,25 @@
+{
+  "schema": "necromatcher/preserved-recipe-web-review/1",
+  "producer_source_commit": "7a2359eaddf1d795124ae9d7decf5c57260db103",
+  "api_process_id": 30324,
+  "run_id": "4773bf40ec504975a9bdbca1550c9d28",
+  "new_fit_id": "hogan-exact-spline-web-review-v9",
+  "status": "succeeded",
+  "scientific_acceptance": "rejected",
+  "initialization_source": "preserved_spline",
+  "complete_recipe_retained": true,
+  "evaluation_budget": 1,
+  "initial_coefficient_sha256": "sha256:6cc6c58dd4776e586090f6dd12e761f15e2b142c27c240fe0cfc5d6e74d34099",
+  "initial_rms_pixels": 12.649874969308826,
+  "rms_pixels": 12.649874969257802,
+  "screenshot": "hogan-exact-web-trial-proof.png",
+  "draft_form_reset_to_parent_defaults_after_store": true,
+  "frontend_source_committed_at_request": false,
+  "frontend_source_sha256": "39d5daa588731324d8ab63c1de563eebf4dfab10186aff8dfcd8e5be77845073",
+  "observed_and_repaired_form_defects": [
+    "Invalid UTF-8 separator",
+    "Fractional number step mismatch",
+    "ES2020 endpoint access"
+  ],
+  "qualified_historical_reconstruction": false
+}

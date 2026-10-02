@@ -1,0 +1,56 @@
+{
+  "schema": "necromatcher/exact-restart-summary/1",
+  "producer_source_commit": "7a2359eaddf1d795124ae9d7decf5c57260db103",
+  "full_receipt_sha256": "fb86a8d5eca26cb65a1a653000bce5fda4451ea03f191da54c20b99fff702787",
+  "scientific_acceptance": "rejected",
+  "runs": [
+    {
+      "player": "tiger",
+      "source_fit_id": "tiger-bounded-heel-hypothesis-fit-v8",
+      "new_fit_id": "tiger-exact-spline-restart-fit-v9",
+      "run_id": "04385ad739a343b692b072f6f73eddf8",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "fit_hash": "sha256:8dcdc459f7b3fd1f4e48e5e8622b02f781192253186ab9390b38f5ead4986960",
+      "initial_spline_hash": "sha256:51cfe69adf3828f08bcbbc39554d258af2c81cae0e36239682b7bf16f3e4c4a6",
+      "exact_start_verified": true,
+      "metrics": {
+        "converged": false,
+        "dense_rms_pixels": 58.88756498294924,
+        "held_out_rms_pixels": 58.92875320323722,
+        "initial_rms_pixels": 69.42319412520281,
+        "initialization": null,
+        "initialization_source": "preserved_spline",
+        "max_grip_separation_m": 0.048138195970822945,
+        "objective": null,
+        "objective_availability": "not_exposed_by_saved_fit_contract",
+        "optimizer_ran": true,
+        "rms_pixels": 58.533085264494886
+      }
+    },
+    {
+      "player": "hogan",
+      "source_fit_id": "hogan-bounded-heel-hypothesis-fit-v8",
+      "new_fit_id": "hogan-exact-spline-restart-fit-v9",
+      "run_id": "101398eb762d408f9773aec839f0d9ad",
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "fit_hash": "sha256:ee4ba9f2111495feb5cfa11f6c28a1f6d0aab93e46b4ff982a9723b9a7a0c65b",
+      "initial_spline_hash": "sha256:6cc6c58dd4776e586090f6dd12e761f15e2b142c27c240fe0cfc5d6e74d34099",
+      "exact_start_verified": true,
+      "metrics": {
+        "converged": false,
+        "dense_rms_pixels": 10.82836023923382,
+        "held_out_rms_pixels": 10.881283997620255,
+        "initial_rms_pixels": 12.649874969308826,
+        "initialization": null,
+        "initialization_source": "preserved_spline",
+        "max_grip_separation_m": 0.013501531681481153,
+        "objective": null,
+        "objective_availability": "not_exposed_by_saved_fit_contract",
+        "optimizer_ran": true,
+        "rms_pixels": 8.93681476623195
+      }
+    }
+  ]
+}

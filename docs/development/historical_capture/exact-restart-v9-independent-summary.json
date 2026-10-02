@@ -1,0 +1,47 @@
+{
+  "schema": "necromatcher/exact-restart-independent-summary/1",
+  "full_receipt_sha256": "0e6dd374ba666addc5c216062624742a03672f71393a7925829e1055c3d5b883",
+  "producer_source_commit": "7a2359eaddf1d795124ae9d7decf5c57260db103",
+  "runs": [
+    {
+      "fit_id": "tiger-exact-spline-restart-fit-v9",
+      "fit_hash": "sha256:8dcdc459f7b3fd1f4e48e5e8622b02f781192253186ab9390b38f5ead4986960",
+      "source_frame_count": 210,
+      "midpoint_count": 209,
+      "tagged_coordinate_extrema_count": 88,
+      "evaluation_records": 507,
+      "distinct_evaluation_times": 464,
+      "authored_bounded_coordinates": 32,
+      "unbounded_coordinates": 12,
+      "continuous_scalar_domain_verified": true,
+      "maximum_sampled_grip_gap_m": 0.04856783383793688,
+      "maximum_sampled_grip_angle_deg": 29.20312351100232,
+      "maximum_sampled_ground_penetration_m": 0.02321654231628765,
+      "dense_original_rms_pixels": 58.88756498294924,
+      "continuous_nonlinear_certified": false,
+      "scientific_acceptance": false,
+      "audit_source_runtime_unchanged": true,
+      "audit_script_sha256": "sha256:1b98b631941029594f46411400e85a106f6cbc48b223f65a7eb09c50d1ddccb3"
+    },
+    {
+      "fit_id": "hogan-exact-spline-restart-fit-v9",
+      "fit_hash": "sha256:ee4ba9f2111495feb5cfa11f6c28a1f6d0aab93e46b4ff982a9723b9a7a0c65b",
+      "source_frame_count": 750,
+      "midpoint_count": 749,
+      "tagged_coordinate_extrema_count": 88,
+      "evaluation_records": 1587,
+      "distinct_evaluation_times": 1548,
+      "authored_bounded_coordinates": 32,
+      "unbounded_coordinates": 12,
+      "continuous_scalar_domain_verified": true,
+      "maximum_sampled_grip_gap_m": 0.013514331995921164,
+      "maximum_sampled_grip_angle_deg": 15.942734178057792,
+      "maximum_sampled_ground_penetration_m": 0.0028941153768071715,
+      "dense_original_rms_pixels": 10.82836023923382,
+      "continuous_nonlinear_certified": false,
+      "scientific_acceptance": false,
+      "audit_source_runtime_unchanged": true,
+      "audit_script_sha256": "sha256:1b98b631941029594f46411400e85a106f6cbc48b223f65a7eb09c50d1ddccb3"
+    }
+  ]
+}

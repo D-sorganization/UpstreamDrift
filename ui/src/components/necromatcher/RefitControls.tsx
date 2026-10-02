@@ -47,7 +47,7 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const interval = savedSpline?.source_interval;
   const ranges = config.coordinate_bounds?.length ?? 0;
   const pins = config.constraint_options?.pinned_spheres ?? [];
-  const valid = plan && id.trim() && indices.length >= 2 && indices.every((n, i) => Number.isInteger(n) && plan.frame_indices.includes(n) && (i === 0 || n > indices[i - 1])) && priorScales.length === plan.coordinate_order.length && priorScales.every((n) => Number.isFinite(n) && n > 0) && knotCount >= 2 && knotCount <= indices.length && (!resume || (savedSpline?.available && interval && indices[0] === plan.frame_indices[0] && indices.at(-1) === plan.frame_indices.at(-1)));
+  const valid = plan && id.trim() && indices.length >= 2 && indices.every((n, i) => Number.isInteger(n) && plan.frame_indices.includes(n) && (i === 0 || n > indices[i - 1])) && priorScales.length === plan.coordinate_order.length && priorScales.every((n) => Number.isFinite(n) && n > 0) && knotCount >= 2 && knotCount <= indices.length && (!resume || (savedSpline?.available && interval && indices[0] === plan.frame_indices[0] && indices[indices.length - 1] === plan.frame_indices[plan.frame_indices.length - 1]));
   const busy = submitting || Boolean(run && ['pending', 'running'].includes(run.status));
   const error = planError || job.error;
   return <section aria-label="Research Refit" className="space-y-3 border-t border-gray-600 pt-4">
@@ -61,7 +61,7 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
           <option value="preserved_spline" disabled={!savedSpline?.available}>Resume Saved Spline</option>
         </select></label>
         {!savedSpline?.available && savedSpline?.reason && <p className="text-xs">Saved Spline Unavailable: {savedSpline.reason}</p>}
-        <p className="text-xs">{ranges} Authored Range{ranges === 1 ? '' : 's'} · {pins.filter((name) => name === 'heel_r' || name === 'heel_l').length} Authored Heel Pins. Source Timing Remains Unknown. Saved Contact and Range Hypotheses Are Retained.</p>
+        <p className="text-xs">{ranges} Authored Range{ranges === 1 ? '' : 's'}; {pins.filter((name) => name === 'heel_r' || name === 'heel_l').length} Authored Heel Pins. Source Timing Remains Unknown. Saved Contact and Range Hypotheses Are Retained.</p>
         {resume && interval && <p className="text-xs">Full Saved Source Interval: {interval[0]} to {interval[1]}. Preserved Knot Clock and Strict Initialization; Include Both Endpoint Frames.</p>}
         <label className="block">Source Frame Indices<textarea className={field} value={frames} onChange={(event) => setFrames(event.target.value)} /></label>
         <p className="text-xs">Coordinate Order: {plan.coordinate_order.map((name, i) => `${name} (${plan.coordinate_units[i]})`).join(', ')}</p>
@@ -69,12 +69,12 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
         <p className="text-xs">Enter one positive scale per coordinate in the units above. Scales are fitting priors, not measured anatomy.</p>
         {([
           ['knot_count', 'Spline Knots', 2, 1],
-          ['budget_wall_s', 'Wall Budget (Seconds)', 0.01, 0.01],
-          ['unknown_visibility_weight', 'Unknown Visibility Weight', 0, 0.01],
+          ['budget_wall_s', 'Wall Budget (Seconds)', 0.01, 'any'],
+          ['unknown_visibility_weight', 'Unknown Visibility Weight', 0, 'any'],
         ] as const).map(([key, label, min, step]) => <label className="block" key={key}>{label}<input className={field} type="number" required min={min} step={step} max={key === 'unknown_visibility_weight' ? 1 : undefined} disabled={key === 'knot_count' && resume} value={key === 'knot_count' ? knotCount : options[key]} onChange={(event) => setOptions({...options, [key]: Number(event.target.value)})} /></label>)}
         {([
-          ['max_iterations', 'Evaluation Budget', 1, 1], ['prior_weight', 'Pose Prior Weight', 0, 0.01],
-          ['smoothness_weight', 'Smoothness Weight', 0, 0.01], ['closure_weight', 'Grip Closure Weight', 0, 1],
+          ['max_iterations', 'Evaluation Budget', 1, 1], ['prior_weight', 'Pose Prior Weight', 0, 'any'],
+          ['smoothness_weight', 'Smoothness Weight', 0, 'any'], ['closure_weight', 'Grip Closure Weight', 0, 'any'],
         ] as const).map(([key, label, min, step]) => <label className="block" key={key}>{label}<input className={field} type="number" required min={min} step={step} value={config[key]} onChange={(event) => setConfig({...config, [key]: Number(event.target.value)})} /></label>)}
         <button className="rounded bg-blue-700 px-3 py-2 disabled:opacity-50" disabled={!valid || busy} type="submit">Start Research Refit</button>
       </fieldset>
@@ -84,4 +84,3 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
     {error && <p role="alert">{error}</p>}
   </section>;
 }
-
