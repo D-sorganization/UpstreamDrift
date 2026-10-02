@@ -15,6 +15,16 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
+Workspace CI completed three story remediation cycles: cleanup LoD, source-bound
+launcher context/atlas freshness, and the GUI-thread heuristic. A new test
+verifies a blocked background operation leaves Qt responsive and applies its
+completion on the owner thread. Five native GUI/overlay tests pass; no GUI
+ratchet baseline was increased. The remaining unit-lane failure is a runner Rust
+toolchain install conflict before tests. See [Workspace CI Report](../ci-failures/11234-20261001.md);
+keep delivery in progress. The generated API contract is now refreshed through
+the library dependency, all six freshness tests pass, and web forms reuse the
+canonical request types.
+
 CI follow-up for draft #11237: its full unit lane reported 19,886 passing,
 241 skipped and two failures. The API type freshness failure was reproduced
 locally before regenerating `ui/src/api/generated/types.ts`; the added request
@@ -41,6 +51,95 @@ The export-mutation test failed before final ZIP byte verification was added. Ex
 - The workspace and API suite passed 43 tests; scoped mypy passed for both library modules. A malformed-profile shape test then failed before an explicit JSON-object guard was added; final suite rerun passed.
 
 ## Remaining Work
+
+Workspace #11234 now has a registered Necromatcher tile, React route, native
+entry point and lazy embeddable adapter. A public default-library factory keeps
+both hosts on one configured store. Shared `CaptureReview` checks the archive
+hash once per opened version, retains original observation rows, verifies PNG
+ZIP CRCs and rejects changes to the opened file's size/mtime. HTTP previews cache
+up to four open captures; image reads never extract arbitrary archive paths.
+Web forms save players/swings and import capture/model/profile versions.
+The shared image overlay also replaces Video Analyzer's duplicate SVG overlay.
+Frame requests hide old imagery while loading and retain source PTS/missingness.
+
+Native review supports player/swing creation, recalled original PNGs and portable
+export. Shared background workers perform costly verification outside the Qt
+thread; a timer applies results on the UI thread. A failing KeyError test exposed
+the worker adapter's limited exception contract; the adapter boundary now
+translates expected lookup/type errors to a reported ValueError.
+Thirteen UI tests and native recall/failure/import/overlay tests pass. Native
+import forms and landmark overlays are implemented. A real Hogan practice frame
+was rendered from the persistent capture ZIP, with PTS 3300000 × 1/30000 seconds,
+750 source frames and physical time unknown. Preview outside Git:
+`C:/Users/diete/Downloads/historical-capture/necromatcher-native-hogan-font-20261001.png`.
+The Windows offscreen Qt plugin exposes no system font families; the verification
+harness explicitly loaded the installed Segoe UI font. No product font fallback
+or user preference was changed to accommodate that headless renderer.
+Real web review on `http://127.0.0.1:5191/tools/necromatcher` against the owned
+local API on port 8019 rendered both Hogan and Tiger PNGs and landmark overlays.
+Hogan navigation reached source frame 750/750 at PTS 134.967 s. Physical time
+remained unknown. Both player/swing selections recalled their proper captures.
+The in-app browser review tab is marked for continuation. Backend/Vite process
+sessions are 46801/73969; inspect their current state before reuse or shutdown.
+Further form tests and final validation remain active. Navigation regressions
+were reproduced before fixing the shared scoped request state: recalling another
+player URL must hide the previous assets and swings immediately, failed frame
+loads must stop their loading message and allow retry, and mismatched player/swing
+URLs must not expose imports or exports. Sixteen UI tests now pass. Cleanup LoD
+fix `d762816466` passes native tests, the global baseline and its CI gate.
+Form verification now passes four additional tests: swing drafts reset when the
+selected player changes, import drafts reset when the selected swing changes,
+failed saves retain values for correction, and a pending model import retains
+its original engine/joint payload. Gemini Flash 3.8 through `agy` supplied a
+tool-free source audit; its potential asynchronous payload mutation claim was
+rejected by the actual request-snapshot test. Twenty focused UI tests pass.
+The official USGA source capture also renders its actual original PNG and
+210-frame review in the browser at source PTS 15.015 s, physical time unknown.
+
+CI cycle 2 identified stale agent-context generated views and launcher boundary
+review. Reviewed the existing launcher-to-atlas contract, regenerated capability
+atlas outputs and agent-context views, and renewed the source-bound review with
+its explicit limitation: registry membership does not establish scientific
+qualification. The atlas freshness test failed before regeneration.
+
+Current checks: 31 library/API/native/launcher tests, 10 generated inventory tests,
+13 UI tests; scoped mypy passes eight production files. Route-producer,
+architecture, document title, catalog and design-manual governance checks pass.
+Capture-cache retry testing failed before invalidation was added: a changed
+archive returns 409 and clears the cached review; retry must hash-check anew.
+Archive byte corruption remains rejected. Source PNGs and observations are
+never changed by the desktop's detached overlay rendering.
+
+The official USGA broadcast source now has a downloaded 2981–3267-second
+excerpt outside Git, 1280×720 AV1 with audio, 30000/1001 presentation FPS,
+clip duration 286.031 seconds and SHA-256
+`6618fd8caf6a3c17ba4121d23b9bcdd576eff868a73045166f0a260705c30dde`.
+Path: `C:/Users/diete/Downloads/historical-capture/tiger_2000/usga/bado2QdgD3c-teeoff-2981-3267.mp4`.
+Its chapter label is insufficient golfer identity evidence: the contact sheet
+mostly shows other players. The subsequent 3267–3616-second window is downloaded
+(349.013 s, SHA-256 `e6b524474db4b800bafe8b98e754c8fc6d2fe7e43feec86b15db45adbac7889b`)
+and shows Tiger warming up at its beginning, with Tiger/Ernie Els tee-time graphics.
+A single 3250–3295-second excerpt now contains the full-body practice swing around
+clip PTS 15–22 s; file `bado2QdgD3c-range-3250-3295.mp4`, duration 45.025 s,
+SHA-256 `99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673`.
+The contact sheet shows address, follow-through and subsequent camera zoom;
+dense continuous-shot review is next. Do not promote broadcast playback time to
+physical swing time without independent timing review.
+
+The 15–22 s range-swing extraction is complete: 210 frames, 210 detections using
+the same full MediaPipe model and strict source/PTS contracts. It is recalled
+from the persistent library as swing `tiger-usopen-2000-range`, capture version
+`tiger-usga-range-capture-v1`, archive hash
+`sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357`.
+The original generic receipt retains unqualified timing/year fields; separate
+source-catalog evidence attributes the official archive event to 2000.
+No receipt fields were rewritten to manufacture scientific qualification.
+Library PR #11237 is published as a draft over capture PR #11231.
+
+Capture PR #11231's generated inventory correction passes unit/structure checks.
+Its documentation check fails on `.jules/bolt.md:208`, inherited from main's
+unrelated quaternion optimization. Record this external failure; the CI skill
+forbids modifying pre-existing failures outside the story.
 
 Real imports are complete and verified after reopening: Hogan practice 750 frames, perfection 899, compilation 839; Tiger practice 2,000. Library root: `C:/Users/diete/AppData/Local/upstream-drift/upstream-drift/launcher/necromatcher`. Media stays outside Git. Library validation passed: 43 workspace/API tests, 13 library tests after the ZIP typing correction, scoped mypy for all three production modules, repo-wide Ruff lint and format (8,269 files). Draft PR #11237 is published. Keep it draft until the base capture PR is accepted and dependency tracking is resolved. The public workspace facade and native-model/driving-profile/image-capture artifact contracts are registered. Implement the tile/web/desktop child #11234 under #11232, then wire real dense fitting and native downstream adapters under #11235 with evidence.
 

@@ -15,6 +15,17 @@ Specifies continuous forward model optimization, zero-assistance physical audit 
 - **Monocular Kinetic Identifiability Boundary (`create_evaluated_result_bundle`)**:
   - Result bundles explicitly record `forces_and_torques` with status `model_dependent_unidentifiable` and `is_identified: False`, warning that joint torques and contact forces cannot be uniquely recovered from monocular video without ground reaction force evidence.
 
+## Companion Publication Hardening and Sparse-Checkout Isolation (#11257)
+
+Specifies clean workspace isolation, sparse-checkout resets, and fail-closed checkout verification for release and companion publication workflows:
+- **Worktree Sparse-Checkout Hygiene (`.github/workflows/package-standalone-sidekick.yml`)**:
+  - The `Disable sparse-checkout` post-step restores full working tree checkout (`git checkout -- .`) after disabling sparse checkout (`git sparse-checkout disable`), preventing omitted directories (such as `scripts/`) from lingering on persistent self-hosted runners.
+- **Fail-Closed Companion Publication Checkout (`.github/workflows/release.yml`)**:
+  - `companion-protected-main` and `build` jobs run a pre-checkout clean step that disables any residual sparse-checkout state and cleans the workspace prior to `actions/checkout`.
+  - A post-checkout validation step verifies that `scripts/companion_publication.py` is present, restoring `scripts` from `HEAD` if a prior sparse checkout corrupted the index, and failing closed if missing.
+  - Step-level `PYTHONPATH: ${{ github.workspace }}` ensures `python3 -m scripts.companion_publication` unambiguously resolves to the authoritative checkout root.
+
+
 ## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
 
 Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
@@ -7685,6 +7696,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-02 | #11265 | [MMR-15] Wire Continuous Shadow Optimization With Uncertainty and Abstention: continuous whole-body forward rollouts with zero state resets (reset_count == 1) and zero ghost pelvis assistance, forward model is_qualified capability gate, synchronized held-out C3D phase-stratified tracking validation (evaluate_phase_stratified_tracking), archive stress set resilience against cuts, motion blur, and unknown cameras (evaluate_archive_stress_resilience), nominal 90% confidence coverage assessment with structured abstention on holdouts, and model-dependent unidentifiable labeling for monocular joint torques and contact forces (#11101). |
+| 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |
