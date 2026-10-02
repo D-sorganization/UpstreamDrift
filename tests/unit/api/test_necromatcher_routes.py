@@ -95,3 +95,60 @@ def test_remote_client_cannot_read_or_modify_local_library(client):
             == 403
         )
     assert library.players() == []
+
+
+def test_capture_preview_http_preserves_source_frame_and_image(client, tmp_path):
+    import json
+    from zipfile import ZipFile
+    from src.shared.python.workspace import SessionProjectStore, compute_file_sha256
+
+    connection, library = client
+    library.add_player("hogan", "Ben Hogan")
+    library.add_swing("practice", "hogan", "Practice")
+    path = tmp_path / "fixture.zip"
+    image = b"synthetic-test-only-png-bytes"
+    row = {
+        "image": "frame-7.png",
+        "frame": {
+            "pts_ticks": 7,
+            "timebase_numerator": 1,
+            "timebase_denominator": 30,
+            "physical_time_s": None,
+        },
+        "observation": {"status": "missing", "landmarks": {}},
+    }
+    with ZipFile(path, "w") as archive:
+        archive.writestr(
+            "receipt.json",
+            json.dumps(
+                {"source": {"width_px": 320, "height_px": 240}, "frame_count": 1}
+            ),
+        )
+        archive.writestr("observations.jsonl", json.dumps(row) + "\n")
+        archive.writestr("frame-7.png", image)
+    SessionProjectStore(library.root).register_dataset(
+        "capture",
+        "practice",
+        path,
+        "image_capture",
+        metadata={
+            "hash": compute_file_sha256(path),
+            "schema": "necromatcher/image-capture/1",
+        },
+    )
+    response = connection.get("/necromatcher/captures/capture/frames/0")
+    assert response.status_code == 200
+    assert response.json()["capture_id"] == "capture"
+    assert response.json()["frame"]["physical_time_s"] is None
+    assert response.json()["observation"]["landmarks"] == {}
+    response = connection.get("/necromatcher/captures/capture/frames/0/image")
+    assert response.status_code == 200
+    assert response.content == image
+    assert connection.get("/necromatcher/captures/capture/frames/1").status_code == 404
+    # A changed file must invalidate cached review, then retry must hash-check anew.
+    import os
+
+    stamp = path.stat()
+    os.utime(path, ns=(stamp.st_atime_ns, stamp.st_mtime_ns + 2_000_000_000))
+    assert connection.get("/necromatcher/captures/capture/frames/0").status_code == 409
+    assert connection.get("/necromatcher/captures/capture/frames/0").status_code == 200

@@ -1,3 +1,4 @@
+import { KeypointOverlay } from '@/components/visualization/KeypointOverlay';
 /**
  * VideoAnalyzer - Video-based swing analysis tool page.
  *
@@ -52,31 +53,10 @@ function PoseOverlay({
 }) {
   if (!frame || !frame.keypoints) return null;
 
-  const entries = Object.entries(frame.keypoints);
-  if (entries.length === 0) return null;
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      data-testid="pose-overlay"
-    >
-      {entries.map(([name, coords]) => {
-        if (!coords || coords.length < 2) return null;
-        return (
-          <circle
-            key={name}
-            cx={coords[0]}
-            cy={coords[1]}
-            r={4}
-            fill="rgba(0, 255, 100, 0.8)"
-            stroke="white"
-            strokeWidth={1}
-          />
-        );
-      })}
-    </svg>
-  );
+  const points = Object.fromEntries(Object.entries(frame.keypoints)
+    .filter(([, coords]) => coords && coords.length >= 2)
+    .map(([name, coords]) => [name, {x: coords[0], y: coords[1], visibility: null}]));
+  return <KeypointOverlay points={points} coordinates="image_pixels" width={width} height={height} />;
 }
 
 /**
