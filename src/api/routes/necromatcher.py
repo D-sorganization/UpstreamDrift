@@ -16,7 +16,12 @@ from starlette.background import BackgroundTask
 
 from src.api.routes.matched_swings import require_local_client
 from src.shared.python.core.contracts.exceptions import StateError
-from src.shared.python.workspace import DatasetMetadata, NecromatcherLibrary
+from src.shared.python.workspace import (
+    DatasetMetadata,
+    NecromatcherLibrary,
+    project_fit_frame,
+)
+from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableError
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
 
@@ -63,6 +68,8 @@ def _errors() -> Iterator[None]:
         yield
     except StateError as exc:
         raise HTTPException(409, str(exc)) from exc
+    except EngineUnavailableError as exc:
+        raise HTTPException(503, str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(404, "Unknown library identity") from exc
     except IndexError as exc:
@@ -214,6 +221,13 @@ def fit_frame(fit_id: str, frame_index: int, library: Library) -> dict[str, Any]
                 )
             },
         }
+
+
+@router.get("/fits/{fit_id}/frames/{frame_index}/projection")
+def fit_projection(fit_id: str, frame_index: int, library: Library) -> dict[str, Any]:
+    """Project verified native samples with their explicit research camera."""
+    with _errors():
+        return project_fit_frame(library, fit_id, frame_index)
 
 
 @router.get("/swings/{swing_id}/export")

@@ -31,6 +31,7 @@ from src.shared.python.workspace import (
     CaptureReview,
     NecromatcherLibrary,
     default_necromatcher_library,
+    NativeFitProjectionProcess,
 )
 from .image_review import landmark_overlay
 
@@ -46,7 +47,11 @@ class NecromatcherWidget(QWidget):
     ) -> None:
         super().__init__(parent)
         self.library = library or default_necromatcher_library()
+        self._projection_process = NativeFitProjectionProcess(self.library.root)
         self._review: CaptureReview | None = None
+        self._fit_id: str | None = None
+        self._pending_projection: int | None = None
+        self._pending_review = False
         self._worker: BackgroundWorker | None = None
         self._completed: Callable[[Any], None] | None = None
         self._generation = 0
@@ -139,6 +144,9 @@ class NecromatcherWidget(QWidget):
 
     def _assets_changed(self) -> None:
         self._generation += 1
+        self._fit_id = None
+        self._pending_projection = None
+        self._pending_review = False
         self.slider.setEnabled(False)
         self.image.clear()
         if self._review:
@@ -149,14 +157,27 @@ class NecromatcherWidget(QWidget):
         if not identity or not swing:
             return
         asset = next(x for x in self.library.assets(swing) if x.dataset_id == identity)
-        if asset.kind != "image_capture":
+        if asset.kind not in {"image_capture", "kinematic_fit"}:
             self.status.setText(
                 "Saved version; native accuracy and dynamics require independent qualification."
             )
             return
+        if self._worker:
+            self._pending_review = True
+            return
         generation = self._generation
+        if asset.kind == "kinematic_fit":
+            self._fit_id = identity
+        fit_id = self._fit_id
+
+        def target() -> CaptureReview:
+            capture_id = (
+                self.library.load_fit(fit_id)["capture_id"] if fit_id else identity
+            )
+            return CaptureReview(self.library, capture_id)
+
         self._run(
-            lambda: CaptureReview(self.library, identity),
+            target,
             lambda review: self._capture_loaded(review, generation),
         )
 
@@ -167,20 +188,65 @@ class NecromatcherWidget(QWidget):
                 self._assets_changed()
             return
         self._review = review
-        self.slider.setRange(0, review.frame_count - 1)
-        self.slider.setValue(0)
+        blocked = self.slider.blockSignals(True)
+        try:
+            self.slider.setRange(0, review.frame_count - 1)
+            self.slider.setValue(0)
+        finally:
+            self.slider.blockSignals(blocked)
         self.slider.setEnabled(True)
         self._show_frame(0)
 
     def _show_frame(self, index: int) -> None:
         if not self._review:
             return
+        if self._fit_id:
+            self.image.clear()
+            self._request_projection(index)
+            return
+        self._paint_frame(index)
+
+    def _request_projection(self, index: int) -> None:
+        fit_id = self._fit_id
+        if fit_id is None:
+            return
+        if self._worker:
+            self._pending_projection = index
+            return
+        self._pending_projection = None
+        generation = self._generation
+        self._run(
+            partial(self._projection_process.project, fit_id, index),
+            lambda projection: self._projection_loaded(projection, generation),
+        )
+
+    def _projection_loaded(self, projection: dict[str, Any], generation: int) -> None:
+        if generation != self._generation or self._closed:
+            return
+        index = projection["frame_index"]
+        if projection["fit_id"] == self._fit_id and index == self.slider.value():
+            self._paint_frame(index, projection)
+
+    def _paint_frame(
+        self, index: int, projection: dict[str, Any] | None = None
+    ) -> None:
+        if not self._review:
+            return
         try:
             frame = self._review.frame(index)
+            if projection and projection["frame"] != frame["frame"]:
+                raise ValueError("Native projection source frame identity differs")
             pixmap = QPixmap()
             if not pixmap.loadFromData(self._review.image(index), "PNG"):
                 raise ValueError("Stored source image cannot be decoded")
             pixmap = landmark_overlay(pixmap, frame["observation"]["landmarks"])
+            if projection:
+                pixmap = landmark_overlay(
+                    pixmap,
+                    projection["points"],
+                    pixel_coordinates=True,
+                    native_model=True,
+                )
             self.image.setPixmap(
                 pixmap.scaled(
                     self.image.size(),
@@ -191,6 +257,11 @@ class NecromatcherWidget(QWidget):
             clock = frame["frame"]
             self.status.setText(
                 f"Frame {index + 1}/{frame['frame_count']} · PTS {clock['pts_ticks']} × {clock['timebase_numerator']}/{clock['timebase_denominator']} s · Physical Time Unknown · {frame['observation']['status']}"
+                + (
+                    " · Rings: Native Projection · Camera Unqualified"
+                    if projection
+                    else ""
+                )
             )
         except (ValueError, OSError, RuntimeError, KeyError) as exc:
             self.image.clear()
@@ -227,6 +298,14 @@ class NecromatcherWidget(QWidget):
             self.status.setText(str(worker.error))
         elif completed:
             completed(worker.result)
+        if self._pending_review and not self._worker and not self._closed:
+            self._assets_changed()
+        elif (
+            self._pending_projection is not None
+            and not self._worker
+            and not self._closed
+        ):
+            self._request_projection(self._pending_projection)
 
     def _identity(self, title: str) -> tuple[str, str] | None:
         identity, accepted = QInputDialog.getText(self, title, "Permanent ID")
@@ -278,7 +357,12 @@ class NecromatcherWidget(QWidget):
             self,
             "Import Version",
             "Evidence Type",
-            ["Capture Folder", "Native Model", "Torque Profile"],
+            [
+                "Capture Folder",
+                "Native Model",
+                "Torque Profile",
+                "Kinematic Research Fit",
+            ],
             0,
             False,
         )
@@ -300,6 +384,8 @@ class NecromatcherWidget(QWidget):
             target = partial(self.library.add_capture, identity, swing, Path(source))
         elif kind == "Torque Profile":
             target = partial(self.library.add_profile, identity, swing, Path(source))
+        elif kind == "Kinematic Research Fit":
+            target = partial(self.library.add_fit, identity, swing, Path(source))
         else:
             engine, accepted = QInputDialog.getItem(
                 self,
@@ -340,3 +426,4 @@ class NecromatcherWidget(QWidget):
         if self._review:
             self._review.close()
             self._review = None
+        self._projection_process.close()

@@ -44,6 +44,8 @@ from .model_match_handoff import (
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_review import CaptureReview
+from .necromatcher_projection import project_fit_frame
+from .necromatcher_projection_process import NativeFitProjectionProcess
 from .project_store import (
     DatasetMetadata,
     ProjectMetadata,
@@ -297,6 +299,8 @@ __all__ = [
     "is_backend_available",
     "list_available_backends",
     "register_artifact_adapter",
+    "project_fit_frame",
+    "NativeFitProjectionProcess",
     "resolve_matching_route",
     "validate_run_compatibility",
 ]

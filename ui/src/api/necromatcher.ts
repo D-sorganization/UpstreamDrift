@@ -7,7 +7,7 @@ export interface HistoricalPlayer { subject_id: string; display_name: string; me
 export interface HistoricalSwing { session_id: string; subject_id: string; name: string; metadata: Record<string, unknown> }
 export interface HistoricalAsset {
   dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit';
-  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; hash?: string };
+  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; capture_id?: string; hash?: string };
 }
 export interface CaptureFrame {
   capture_id: string; frame_index: number; frame_count: number; image_width: number; image_height: number;
@@ -18,6 +18,12 @@ export const fetchPlayers = () => apiFetch<{ players: HistoricalPlayer[] }>(`${r
 export const fetchSwings = (player: string) => apiFetch<{ swings: HistoricalSwing[] }>(`${root}/swings?player_id=${encodeURIComponent(player)}`);
 export const fetchAssets = (swing: string) => apiFetch<{ assets: HistoricalAsset[] }>(`${root}/swings/${encodeURIComponent(swing)}/assets`);
 export const fetchCaptureFrame = (capture: string, frame: number) => apiFetch<CaptureFrame>(`${root}/captures/${encodeURIComponent(capture)}/frames/${frame}`);
+export interface FitProjection {
+  fit_id: string; capture_id: string; frame_index: number; frame: CaptureFrame['frame'];
+  points: CaptureFrame['observation']['landmarks']; coordinates: 'image_pixels';
+  qualification: 'monocular_research_hypothesis'; camera_qualified: false; physical_time_qualified: false;
+}
+export const fetchFitProjection = (fit: string, frame: number) => apiFetch<FitProjection>(`${root}/fits/${encodeURIComponent(fit)}/frames/${frame}/projection`);
 export const captureFrameImageUrl = (capture: string, frame: number) => `${getApiBase()}${root}/captures/${encodeURIComponent(capture)}/frames/${frame}/image`;
 export const swingExportUrl = (swing: string) => `${getApiBase()}${root}/swings/${encodeURIComponent(swing)}/export`;
 export const createPlayer = (id: string, name: string) => apiFetch<HistoricalPlayer>(`${root}/players`, { method: 'POST', body: JSON.stringify({ id, name } satisfies IdentityRequest) });

@@ -1,5 +1,17 @@
 # Active Necromatcher Delivery
 
+## Native and Web Projection Review
+
+The saved 750-frame Hogan and 210-frame Tiger fits now have native/web model
+projection review using exact source frames and verified native XML bindings.
+A real Windows Qt DLL-order failure was reproduced and fixed with a reusable
+clean-interpreter worker; a fresh Qt-parent regression guards it. Twenty-five
+fit/storage/API/GUI/overlay checks pass. Camera and physical time remain
+unqualified; continue fit jobs, closed motion, effort units and downstream replay.
+Native PR #11240 exhausted its three CI remediation cycles; the exact prior
+head's remaining shallow-checkout failure is recorded in
+[Native CI Report](../ci-failures/11235-20261001.md).
+
 ## Persistent Fit Storage
 
 The immutable library now stores and recalls exact source-bound kinematic fit

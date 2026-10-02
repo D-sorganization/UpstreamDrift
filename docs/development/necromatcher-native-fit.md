@@ -253,7 +253,40 @@ native samples are available at `GET /necromatcher/fits/{fit_id}` and
 samples return 404; stale model/capture bindings reject recall. The frame response
 retains exact source identity, coordinate order/units and research qualification.
 Seventeen fit-storage/API tests and fourteen web page/form tests pass.
-Native trajectory overlays, fit-job submission,
+Fit-job submission,
 resource-validated model import, physical-clock qualification, generalized
 effort profiles and independently verified simulation/impact handoffs remain
 required. Preserve the existing rejection evidence during that work.
+
+## Verified Native and Web Fit Review
+
+Saved Hogan and Tiger fits now project their bound native model onto their exact
+source frames in both review interfaces. The shared projection validates the
+capture/model hashes, reproduces the stored XML from its generic definition,
+checks coordinate order and uses the stored camera hypothesis. The API exposes
+`GET /necromatcher/fits/{fit_id}/frames/{source_frame_index}/projection`.
+Selecting Review Fit in the web workspace or a fit asset in the native workspace
+loads its bound capture. Slider changes discard stale projections.
+
+A fresh Windows Qt application reproduced MuJoCo plugin DLL initialization error
+1114 when projection ran in a thread or multiprocessing spawn child. The native
+review now reuses a clean interpreter through the shared secure subprocess facade.
+Its JSON-line worker imports no Qt application main; requests remain serialized,
+timeouts terminate the owned process, and cleanup releases pipes and the worker.
+A fresh Qt-parent regression checks actual native projection independently of
+warm SDK import order. The UI responsiveness regression checks that an old frame
+cannot paint after the slider advances.
+
+Actual review loaded both stored versions: Hogan 750 frames and Tiger 210 frames,
+with thirteen native attachment projections per reviewed frame. Local offscreen
+PNG renders live beside the research artifacts, outside Git. The harness loads
+an installed Windows font explicitly because the offscreen platform does not
+resolve its font database normally; this is a harness accommodation. Browser
+review independently displayed each source image, observed landmarks, native
+projections and the unqualified camera/time labels.
+
+The 25 fit-storage/API/projection/GUI/overlay checks pass. Seventeen web page/form/overlay
+checks passed, with TypeScript and ESLint. These verify storage and review only;
+the original nonconvergence, grip separation, ROM and timing rejection evidence
+still governs the fits. Production fit jobs, bounded closed motion, generalized
+effort profiles and qualified downstream replay remain open.
