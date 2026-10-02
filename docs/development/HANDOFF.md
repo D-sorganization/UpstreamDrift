@@ -393,20 +393,24 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    last frame is 476, so the series is not even
    (`gs3dx:legref`, EXIT 0). The even grid from frame 1 at stride 10
    ends at 471. Human `LegReferenceAngle` is 12 by 654 and
-   `LegReferenceTime` has 654 samples (probe EXIT 0). A MATLAB job
-   started 2026-10-01 17:53 local is still running
-   (`%TEMP%/gs3dx_shift_leg_sim.m`, lock owner pid 71392). That script
-   uses frames `1:10:471` and then linearly resamples `ref.q` onto the
-   654-sample time base. No ROW lines had been written when this
-   handoff was committed. Do not treat that resample as the
-   size-matched measurement. Wait for `EXIT` in
-   `%TEMP%/gs3dx_shift_leg_sim.log` before starting another MATLAB.
-   Do not kill that process if you did not start it. Next action after
-   it exits: if the log has eleven ROW lines, record them as the
-   resampled run only. A size-matched override still has not been
-   done, because 48 IK frames are not 654 samples. Do not save. Do not
-   write the shift into the model. Do not claim the 5 % bar. Do not
-   rerun the quiet raised-ground state. Do not rerun 1.809 s.
+   `LegReferenceTime` has 654 samples (probe EXIT 0). The unsaved
+   1.0 s run (`%TEMP%/gs3dx_shift_leg_sim.m`, EXIT 0, STATUS success)
+   built that even-grid reference and linearly resampled `ref.q` onto
+   the 654-sample time base. It is not a size-matched override.
+   Tilt, pelvis z, right-ankle z, and vertical force, every 0.10 s:
+   22.5 deg, z 0, ankle -0.883 m, 0 N; 50.9 deg, -0.118 m, -0.557 m, 0 N;
+   99.9 deg, -0.321 m, 0.334 m, 0 N; 69.3 deg, -0.420 m, 0.347 m, 0 N;
+   64.3 deg, -0.680 m, -0.520 m, 0 N; 62.5 deg, -1.131 m, -0.760 m, 0 N;
+   88.0 deg, -1.563 m, -1.000 m, 5818 N; 110.3 deg, -1.736 m, -0.891 m,
+   399 N; 109.3 deg, -1.893 m, -0.916 m, 1539 N; 100.3 deg, -1.944 m,
+   -1.054 m, 3587 N; 101.3 deg, -1.768 m, -1.025 m, 113 N. The vertical
+   force is 0 through 0.50 s while the pelvis falls. At 1.0 s the tilt
+   is 101 deg and the pelvis is at z -1.77 m. Capture impact is at
+   1.319 s, so this run does not measure impact support. The 0.2
+   body-weight bar is not met. Do not repeat this resample. Do not
+   save. Do not write the shift into the model. Do not claim the 5 %
+   bar. Do not rerun the quiet raised-ground state. Do not rerun
+   1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed

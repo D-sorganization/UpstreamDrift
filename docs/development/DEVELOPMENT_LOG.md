@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-01 — the shifted-pelvis IK is 6.8 mm RMS versus 11.1 mm free on the capture, and the pelvis point is 18.9 mm RMS off the capture. Frames `1:10:impact` plus impact are not even (49 frames, last frame 476). The even grid ends at 471. Human `LegReferenceAngle` is 12 by 654. A resampled 1.0 s run on that grid was still in MATLAB at 17:53 local (`%TEMP%/gs3dx_shift_leg_sim.m`) and is not a size-matched result. The shift is not in the model. The 5 % bar is not claimed.
+- **Last verified:** 2026-10-01 — the resampled shifted-leg reference (frames `1:10:471` onto 654 samples, EXIT 0) leaves the vertical force at 0 through 0.50 s. Tilt is 22.5 deg at the start, 99.9 deg at 0.20 s, and 101.3 deg at 1.0 s, with the pelvis at z -1.77 m. This is not a size-matched override and it does not reach capture impact at 1.319 s. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Wait for `%TEMP%/gs3dx_shift_leg_sim.log` to print `EXIT`. Record any ROW lines as the resampled run only. Do not start another MATLAB while that lock is live, and do not kill it. A size-matched leg-reference override is still open because 48 frames are not 654 samples. Do not save. Do not write the shift into the model. Do not claim the 5 % bar. Do not rerun the quiet raised-ground state or 1.809 s.
+- **Next step:** Leave the resampled shifted-leg run as recorded. It does not hold the pelvis up. Do not repeat it. Do not write the shift into the model. Do not claim the 5 % bar. Do not save. Do not rerun the quiet raised-ground state or 1.809 s. #11156 and #11160 stay with the owner. #11157 and #11159 still have no documented degree limits.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
