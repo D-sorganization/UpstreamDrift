@@ -146,6 +146,7 @@ def test_unowned_running_manifest_does_not_invent_worker_termination(fit_case):
         session.close()
 
 
+@pytest.mark.requires_mujoco
 def test_api_submits_real_worker_and_reports_rejection_without_publishing(fit_case):
     import time
     from fastapi import FastAPI

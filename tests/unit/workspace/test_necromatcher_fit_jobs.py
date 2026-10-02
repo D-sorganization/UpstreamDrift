@@ -65,6 +65,7 @@ def test_refit_options_reject_invalid_sampling_and_budgets():
             replace(valid, **change)
 
 
+@pytest.mark.requires_mujoco
 def test_refit_job_persists_start_identity_and_fails_without_native_assumptions(
     fit_case,
     monkeypatch,

@@ -139,6 +139,9 @@ def _execute_worker(
     request_path: Path, budget: float, cancelled: Callable[[], bool]
 ) -> dict[str, Any]:
     guard = ProcessGuard()
+    env = repo_python_environment(get_repo_root())
+    if sys.platform.startswith("linux"):
+        env.setdefault("MUJOCO_GL", "osmesa")
     process = secure_popen(
         [
             sys.executable,
@@ -148,7 +151,7 @@ def _execute_worker(
             str(request_path),
         ],
         cwd=get_repo_root(),
-        env=repo_python_environment(get_repo_root()),
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

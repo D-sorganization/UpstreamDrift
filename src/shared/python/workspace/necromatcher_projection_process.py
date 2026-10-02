@@ -42,10 +42,13 @@ class NativeFitProjectionProcess:
         self._closed = False
 
     def _start(self) -> subprocess.Popen[str]:
+        env = repo_python_environment(get_repo_root())
+        if sys.platform.startswith("linux"):
+            env.setdefault("MUJOCO_GL", "osmesa")
         process = secure_popen(
             [sys.executable, "-u", "-m", WORKER_MODULE],
             cwd=get_repo_root(),
-            env=repo_python_environment(get_repo_root()),
+            env=env,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             text=True,

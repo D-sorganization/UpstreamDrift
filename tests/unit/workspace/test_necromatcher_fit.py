@@ -108,6 +108,7 @@ def test_api_import_and_source_frame_recall_use_verified_library(fit_case):
         assert client.get("/necromatcher/fits/fit-v1/frames/2").status_code == 422
 
 
+@pytest.mark.requires_mujoco
 def test_native_projection_verifies_rebuilt_model_and_uses_stored_camera(
     fit_case, tmp_path, monkeypatch
 ):

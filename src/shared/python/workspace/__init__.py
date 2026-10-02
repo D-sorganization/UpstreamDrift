@@ -320,8 +320,10 @@ __all__ = [
     "register_artifact_adapter",
     "project_fit_frame",
     "NativeFitProjectionProcess",
+    "NativeRefitOptions",
     "NativeRefitSession",
     "refit_plan",
     "resolve_matching_route",
+    "start_native_refit",
     "validate_run_compatibility",
 ]
