@@ -419,7 +419,10 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    tilt is 108 deg, the pelvis is at z -1.93 m, and the vertical force
    is 3591 N, of which the left heel carries 1991 N. Do not repeat this
    combination. It does not reach capture impact at 1.319 s. The 0.2
-   body-weight bar is not met. Do not save. Do not write the shift into
+   body-weight bar is not met. The next unsaved 1.0 s check keeps that
+   quiet start and GroundOffset z -0.95297, and replaces the moving leg
+   reference with its first sample held for every column and
+   LegReferenceRate set to 0. Do not save. Do not write the shift into
    the model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
