@@ -1,3 +1,20 @@
+## Continuous Shadow Optimization With Uncertainty and Abstention (MMR-15, #11101)
+
+Specifies continuous forward model optimization, zero-assistance physical audit compliance, held-out C3D phase stratification, archive stress resilience, and monocular kinetic identifiability boundaries:
+- **Continuous Whole-Body Replay and Zero Assistance (`src/shared/python/shadow_tracker/evaluation.py`, `forward_model.py`)**:
+  - Continuous forward rollouts enforce zero intermediate state resets (`reset_count == 1`) and zero undeclared root/pelvis actuation ($F_{\text{root}} = 0$). Any ghost pelvis forces or mid-trajectory resets fail physical acceptance.
+  - Forward models declare `is_qualified: bool` capability; unqualified engines cannot attain release-certified evidence quality.
+- **Phase-Stratified Tracking Validation Against Held-Out C3D (`evaluate_phase_stratified_tracking`, `PhaseStratifiedReport`)**:
+  - Validates continuous fitted trajectories against synchronized held-out C3D motion capture benchmarks stratified across swing phases (address, backswing, downswing, impact, follow-through).
+  - Computes per-phase joint angle RMSE (rad), marker RMSE (m), and clubhead contour error (m).
+- **Archive Stress Resilience Evaluation (`evaluate_archive_stress_resilience`)**:
+  - Evaluates candidate and observation resilience under historical archive stresses: shot cuts/telecine jumps, severe motion blur (inflating clubhead uncertainty and abstaining near impact), and unknown/uncalibrated cameras (demoting SI kinetics to kinematic-only mode).
+- **Holdout Coverage Calibration and Structured Abstention (`assess_holdout_coverage_and_abstention`)**:
+  - Assesses empirical coverage of nominal 90% confidence intervals against held-out ground truth.
+  - Returns structured abstention reasons for unidentifiable visual ambiguities and occlusions.
+- **Monocular Kinetic Identifiability Boundary (`create_evaluated_result_bundle`)**:
+  - Result bundles explicitly record `forces_and_torques` with status `model_dependent_unidentifiable` and `is_identified: False`, warning that joint torques and contact forces cannot be uniquely recovered from monocular video without ground reaction force evidence.
+
 ## Companion Publication Hardening and Sparse-Checkout Isolation (#11257)
 
 Specifies clean workspace isolation, sparse-checkout resets, and fail-closed checkout verification for release and companion publication workflows:
@@ -7,6 +24,7 @@ Specifies clean workspace isolation, sparse-checkout resets, and fail-closed che
   - `companion-protected-main` and `build` jobs run a pre-checkout clean step that disables any residual sparse-checkout state and cleans the workspace prior to `actions/checkout`.
   - A post-checkout validation step verifies that `scripts/companion_publication.py` is present, restoring `scripts` from `HEAD` if a prior sparse checkout corrupted the index, and failing closed if missing.
   - Step-level `PYTHONPATH: ${{ github.workspace }}` ensures `python3 -m scripts.companion_publication` unambiguously resolves to the authoritative checkout root.
+
 
 ## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
 
@@ -7677,6 +7695,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11265 | [MMR-15] Wire Continuous Shadow Optimization With Uncertainty and Abstention: continuous whole-body forward rollouts with zero state resets (reset_count == 1) and zero ghost pelvis assistance, forward model is_qualified capability gate, synchronized held-out C3D phase-stratified tracking validation (evaluate_phase_stratified_tracking), archive stress set resilience against cuts, motion blur, and unknown cameras (evaluate_archive_stress_resilience), nominal 90% confidence coverage assessment with structured abstention on holdouts, and model-dependent unidentifiable labeling for monocular joint torques and contact forces (#11101). |
 | 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
