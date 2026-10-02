@@ -461,9 +461,15 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    at 10.7556 deg/s. None is 22.5 deg, so the level check did not
    simulate (EXIT 0). The 22.5 deg tilt is the composed pelvis up
    axis, not one start parameter. Do not zero one of these angles.
-   Do not change FootContactStiffness. Do not save. Do not write the
-   shift into the model. Do not claim the 5 % bar. Do not rerun
-   1.809 s.
+   The next unsaved check keeps the still freeze and the saved
+   damping. It reads the pelvis rotation, applies the single rotation
+   about the facing axis that takes the measured up vector
+   [0, -0.382683, 0.92388] to [0, 0, 1], converts that pose back to
+   HipStartPosition X Y Z with the joint's intrinsic X-Y-Z sequence,
+   sets the three hip rates to 0, and stops at 0.02 s. If the middle
+   angle reaches 80 deg, do not run that second check. Do not change
+   FootContactStiffness. Do not save. Do not write the shift into the
+   model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed

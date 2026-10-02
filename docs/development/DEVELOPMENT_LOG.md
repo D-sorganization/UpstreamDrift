@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-26
 - **Last verified:** 2026-10-01 — hip starts are X -30.3159 deg, Y 41.0041 deg, Z 131.077 deg, with rates -13.1026, -12.0027, and 10.7556 deg/s. None is 22.5 deg, so the level check did not simulate. The 22.5 deg figure is the composed pelvis up axis. The left ankle remains 17.3 mm above the right. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Leave the hip-start readout as recorded. Do not zero X, Y, or Z to chase the 22.5 deg composed tilt. Do not raise the ground into the right heel. Do not write the shift into the model. Do not claim the 5 % bar. Do not save. Do not rerun 1.809 s. #11156 and #11160 stay with the owner. #11157 and #11159 still have no documented degree limits.
+- **Next step:** One unsaved 0.02 s check that keeps the still freeze and saved damping, replaces the hip start with the intrinsic X-Y-Z angles of the pose whose up axis is world up, and sets the three hip rates to 0. If the middle angle reaches 80 deg, do not run it. Do not zero a single saved angle. Do not raise the ground. Do not save. Do not write the shift into the model. Do not claim the 5 % bar.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
