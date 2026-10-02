@@ -1378,6 +1378,18 @@
       "evidence": "src/tools/matched_swing_browser/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "necromatcher": {
+      "id": "necromatcher",
+      "name": "Necromatcher Historical Player Library",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation", "capture"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
     "analysis.analysis_tools_api": {
       "id": "analysis.analysis_tools_api",
       "name": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
@@ -1880,6 +1892,18 @@
       "lifecycle": "active_feature",
       "alias_target": null,
       "evidence": "src/tools/matched_swing_browser/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "tools.necromatcher": {
+      "id": "tools.necromatcher",
+      "name": "Historical Player Library And Source Review",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["capture", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_green": {

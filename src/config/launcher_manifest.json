@@ -1151,7 +1151,7 @@
       "id": "necromatcher",
       "name": "Necromatcher",
       "description": "Historical player library, source frames, model candidates and authored torque profiles",
-      "category": "motion_capture",
+      "category": "tool",
       "type": "special_app",
       "path": "src/tools/necromatcher/__main__.py",
       "logo": "matched_swing_browser.svg",
