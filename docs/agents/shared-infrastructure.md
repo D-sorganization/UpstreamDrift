@@ -511,3 +511,13 @@ Run module commands with cwd set to repo_root. It prioritizes repo_root/src for
 bare package imports, preserves SDK/runtime settings and does not mutate the
 parent mapping. Regression tests cover absent PYTHONPATH, duplicate source
 roots, idempotence and real native workers launched by a fresh Qt parent.
+
+### Historical Research Refit Controls
+
+workspace.NativeRefitSession owns bounded live handles over MatchingJobService
+and reopens canonical run manifests for history. submit/view/cancel/close are
+shared by the native modeless dialog and local-client HTTP routes. refit_plan
+returns verified coordinate/sample choices and recorded priors. It does not
+invent missing scales. project_store.validate_workspace_id exposes the existing
+identity contract for early admission before native work. UI request types are
+generated from the strict RefitRequest schema.

@@ -1,5 +1,25 @@
 # Active Necromatcher Delivery
 
+## Native and Web Research Refit Controls
+
+Necromatcher now submits, polls and cancels immutable research refits through
+one shared NativeRefitSession over the canonical matching executor. Admission
+permits one active run per host; terminal views reopen canonical manifests.
+Requests are saved before execution, with execution_started distinguishing queued
+identity from actual worker start. Native dialogs submit off the Qt thread;
+web controls retain job IDs in URLs, reject stale source completions and expose
+explicit coordinate scales, sampling, priors and budgets. Saved nonterminal runs
+without an owned handle retain their recorded status with an explicit unverified
+execution message; absence of a handle does not prove worker termination.
+
+Ninety focused Python checks pass, including five new controller/API/native checks
+and a real clean worker rejected
+for absent model assumptions. Eighteen web page/form controls pass; TypeScript,
+scoped ESLint and three changed source modules pass type validation. Continue
+actual player submissions through both interfaces, anatomical bounds/closed motion,
+mixed effort units, independent replay and downstream handoffs. The full goal
+and #11235 remain open; no scientific acceptance or green CI is claimed.
+
 ## Source-Stamped Native Research Jobs
 
 Canonical matching jobs now execute immutable native warm-start refits in a clean

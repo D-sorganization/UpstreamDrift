@@ -36,6 +36,7 @@ from src.shared.python.core import repo_python_environment
 from src.shared.python.version_info import get_repo_root, read_git_commit
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
+from .project_store import validate_workspace_id
 
 _SOURCE_DIRECTORIES = (
     "src/shared/python/core",
@@ -190,6 +191,7 @@ def start_native_refit(
     The service owns scheduling. A clean worker owns native SDK execution;
     cancellation, changed inputs/code or failed computation prevent publication.
     """
+    validate_workspace_id(new_fit_id, "new_fit_id")
     source = library.load_fit(source_fit_id)
     asset = library.load_asset(source_fit_id)
     if new_fit_id in {item.dataset_id for item in library.assets(asset.session_id)}:
@@ -207,6 +209,7 @@ def start_native_refit(
         "new_fit_id": new_fit_id,
         "options": asdict(options),
         "execution_stamp": queued_stamp,
+        "execution_started": False,
     }
     spec = MatchingJobSpec(
         run_root.name,
@@ -231,6 +234,7 @@ def start_native_refit(
         if stamp["source_sha256"] != spec.hashes.solver_hash:
             raise ValueError("Fit implementation changed before execution")
         request["execution_stamp"] = stamp
+        request["execution_started"] = True
         request_path = atomic_write_json(run_root / "request.json", request)
         progress(
             JobProgress(
@@ -265,4 +269,5 @@ def start_native_refit(
             publish=publish,
         )
 
+    atomic_write_json(run_root / "request.json", request)
     return service.start(spec, work=work), run_root

@@ -32,8 +32,11 @@ from src.shared.python.workspace import (
     NecromatcherLibrary,
     default_necromatcher_library,
     NativeFitProjectionProcess,
+    NativeRefitSession,
+    refit_plan,
 )
 from .image_review import landmark_overlay
+from .refit_dialog import ResearchRefitDialog
 
 
 class NecromatcherWidget(QWidget):
@@ -48,6 +51,8 @@ class NecromatcherWidget(QWidget):
         super().__init__(parent)
         self.library = library or default_necromatcher_library()
         self._projection_process = NativeFitProjectionProcess(self.library.root)
+        self._refits = NativeRefitSession(self.library)
+        self._refit_dialogs: list[ResearchRefitDialog] = []
         self._review: CaptureReview | None = None
         self._fit_id: str | None = None
         self._pending_projection: int | None = None
@@ -77,6 +82,7 @@ class NecromatcherWidget(QWidget):
             ("Add Swing", self._add_swing),
             ("Import Version", self._import_version),
             ("Export Swing", self._export),
+            ("Refit Selected Version", self._refit),
         ):
             button = QPushButton(name)
             button.clicked.connect(callback)
@@ -413,6 +419,22 @@ class NecromatcherWidget(QWidget):
             )
         self._run(target, lambda _: self._swings_changed())
 
+    def _refit(self) -> None:
+        source_id = self._fit_id
+        if not source_id:
+            self.status.setText("Select a saved research fit to refit.")
+            return
+
+        def show(plan: dict[str, Any]) -> None:
+            if self._closed or self._fit_id != source_id:
+                return
+            dialog = ResearchRefitDialog(source_id, plan, self._refits, self)
+            dialog.stored.connect(self._swings_changed)
+            self._refit_dialogs.append(dialog)
+            dialog.show()
+
+        self._run(lambda: refit_plan(self.library, source_id), show)
+
     def cleanup(self) -> None:
         """Drain owned I/O before releasing archive and worker handles."""
         self._closed = True
@@ -427,3 +449,6 @@ class NecromatcherWidget(QWidget):
             self._review.close()
             self._review = None
         self._projection_process.close()
+        self._refits.close()
+        for dialog in self._refit_dialogs:
+            dialog.cleanup()

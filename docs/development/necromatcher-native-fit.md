@@ -373,3 +373,36 @@ Actual native projections at Hogan frames 0/375/749 and Tiger frames 0/105/209
 returned all 13 stored attachments with PYTHONPATH removed from the parent.
 Portable swing exports retained each exact v4 fit hash recorded in the receipt.
 These are recall/export checks, not independent physical replay.
+
+## Native and Web Refit Controls
+
+Select a stored research fit, then use Refit Selected Version in the native
+launcher or Research Refit in the web Models and Controls panel. Enter a new
+version identity, reviewed source indices, knot count, one positive prior scale
+per ordered native coordinate, weights and budgets. Recorded v4 settings can be
+reused explicitly; older fits without recorded scales require operator input.
+Source PTS remains the clock. These controls do not infer calibrated anatomy or
+physical timing. Native submission runs in the canonical background adapter.
+
+Both shells use NativeRefitSession over MatchingJobService; no second scheduler
+is introduced. One active run per host prevents queued duplicates. Status and
+cancellation use the owned public handle; terminal history reopens canonical
+request/run manifests. A request is persisted before scheduling; execution_started
+becomes true only at worker execution. A saved running record without an owned
+handle remains unverified, since the absence of a control handle cannot prove
+worker termination. Verify the prior host before starting replacement work.
+
+Local-client API routes are POST fits/{fit_id}/refits, GET fits/{fit_id}/refit-plan,
+GET refits/{run_id}, and POST refits/{run_id}/cancel under the Necromatcher prefix.
+Body contracts reject extra fields, invalid samples/scales and unbounded HTTP
+budgets. Host shutdown cancels owned jobs and drains the canonical executor.
+The web run query preserves job recall across refresh and source-frame changes;
+completion for an old source does not update a newly selected player. Reopened
+terminal runs do not trigger repeated library refreshes. Computational success
+and rejected qualification are displayed independently, with rejection reasons.
+
+Validation includes 90 focused Python checks and five new controller/API/native
+tests, actual rejected clean
+worker HTTP submission, cancellation and saved-manifest recall, Qt responsiveness,
+18 web form/page checks, generated request types, TypeScript and scoped ESLint.
+Actual Hogan/Tiger submissions through both controls remain to be verified.

@@ -47,6 +47,7 @@ from .necromatcher_review import CaptureReview
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
+from .necromatcher_refits import NativeRefitSession, refit_plan
 from .project_store import (
     DatasetMetadata,
     ProjectMetadata,
@@ -302,6 +303,8 @@ __all__ = [
     "register_artifact_adapter",
     "project_fit_frame",
     "NativeFitProjectionProcess",
+    "NativeRefitSession",
+    "refit_plan",
     "resolve_matching_route",
     "validate_run_compatibility",
 ]

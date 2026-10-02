@@ -1,8 +1,26 @@
 import { apiFetch } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest } from './generated/types';
+import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest, RefitRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
+export type RefitOptions = Required<Omit<RefitRequest, 'new_fit_id'>>;
+export interface RefitPlan {
+  source_fit_id: string; frame_indices: number[]; coordinate_order: string[]; coordinate_units: string[];
+  recorded_options: (Omit<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'> & {
+    config: Pick<RefitOptions, 'max_iterations' | 'prior_weight' | 'smoothness_weight' | 'closure_weight'>;
+  }) | null;
+}
+export interface RefitRun {
+  run_id: string; source_fit_id: string; new_fit_id: string;
+  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  acceptance: 'partial' | 'interrupted' | 'accepted' | 'rejected';
+  blockers: string[]; message: string; fraction: number | null;
+  control_available?: boolean;
+}
+export const fetchRefitPlan = (fit: string) => apiFetch<RefitPlan>(`${root}/fits/${encodeURIComponent(fit)}/refit-plan`);
+export const submitRefit = (fit: string, payload: RefitOptions & {new_fit_id: string}) => apiFetch<RefitRun>(`${root}/fits/${encodeURIComponent(fit)}/refits`, {method: 'POST', body: JSON.stringify(payload)});
+export const fetchRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}`);
+export const cancelRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export interface HistoricalPlayer { subject_id: string; display_name: string; metadata: Record<string, unknown> }
 export interface HistoricalSwing { session_id: string; subject_id: string; name: string; metadata: Record<string, unknown> }
 export interface HistoricalAsset {

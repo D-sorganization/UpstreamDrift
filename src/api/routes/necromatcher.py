@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, asynccontextmanager
 from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Annotated, Any, Iterator, Literal
+from typing import Annotated, Any, Iterator, Literal, AsyncIterator
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse, Response
@@ -20,15 +20,31 @@ from src.shared.python.workspace import (
     DatasetMetadata,
     NecromatcherLibrary,
     project_fit_frame,
+    NativeRefitSession,
+    NativeRefitOptions,
+    refit_plan,
 )
+from src.shared.python.motion_matching.historical_fit import ImageFitConfig
 from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableError
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
+
+
+@asynccontextmanager
+async def refits_lifespan(_app: object) -> AsyncIterator[None]:
+    try:
+        yield
+    finally:
+        if get_refits.cache_info().currsize:
+            get_refits().close()
+            get_refits.cache_clear()
+
 
 router = APIRouter(
     prefix="/necromatcher",
     tags=["necromatcher"],
     dependencies=[Depends(require_local_client)],
+    lifespan=refits_lifespan,
 )
 
 
@@ -39,6 +55,43 @@ def get_library() -> NecromatcherLibrary:
 
 
 Library = Annotated[NecromatcherLibrary, Depends(get_library)]
+
+
+@lru_cache(maxsize=1)
+def get_refits() -> NativeRefitSession:
+    return NativeRefitSession(get_library())
+
+
+Refits = Annotated[NativeRefitSession, Depends(get_refits)]
+
+
+class RefitRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+    new_fit_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+    frame_indices: list[int] = Field(min_length=2, max_length=1000)
+    knot_count: int = Field(ge=2, le=1000)
+    coordinate_scales: list[float] = Field(min_length=1, max_length=256)
+    max_iterations: int = Field(default=100, ge=1, le=10000)
+    prior_weight: float = Field(default=0.1, ge=0)
+    smoothness_weight: float = Field(default=0.01, ge=0)
+    closure_weight: float = Field(default=100.0, ge=0)
+    unknown_visibility_weight: float = Field(default=0.5, ge=0, le=1)
+    budget_wall_s: float = Field(default=600.0, gt=0, le=3600)
+
+    def options(self) -> NativeRefitOptions:
+        return NativeRefitOptions(
+            tuple(self.frame_indices),
+            self.knot_count,
+            tuple(self.coordinate_scales),
+            ImageFitConfig(
+                self.max_iterations,
+                self.prior_weight,
+                self.smoothness_weight,
+                self.closure_weight,
+            ),
+            self.unknown_visibility_weight,
+            self.budget_wall_s,
+        )
 
 
 class IdentityRequest(BaseModel):
@@ -88,6 +141,33 @@ def _asset_response(asset: DatasetMetadata) -> dict[str, Any]:
         "kind": asset.kind,
         "metadata": asset.metadata,
     }
+
+
+@router.get("/fits/{fit_id}/refit-plan")
+def get_refit_plan(fit_id: str, library: Library) -> dict[str, Any]:
+    with _errors():
+        return refit_plan(library, fit_id)
+
+
+@router.post("/fits/{fit_id}/refits", status_code=202)
+def submit_refit(fit_id: str, request: RefitRequest, refits: Refits) -> dict[str, Any]:
+    with _errors():
+        try:
+            return refits.submit(fit_id, request.new_fit_id, request.options())
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/refits/{run_id}")
+def view_refit(run_id: str, refits: Refits) -> dict[str, Any]:
+    with _errors():
+        return refits.view(run_id)
+
+
+@router.post("/refits/{run_id}/cancel")
+def cancel_refit(run_id: str, refits: Refits) -> dict[str, Any]:
+    with _errors():
+        return refits.cancel(run_id)
 
 
 @router.get("/players")
