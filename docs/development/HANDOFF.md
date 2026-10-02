@@ -3,10 +3,10 @@
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/elegant-tesla-f2heae`; commit SELF; PR: see the planning PR for this branch.
 - Objective: plan (not execute) markerless reconstruction of the owner's capture-session video and its comparison with `capture-O` and the matched models.
 - Completed: epic #11268 and children #11269–#11279 (COV-1 to COV-11) with TDD/DbC/LoD/DRY contracts, hosts and dependencies; `docs/development/capture-o-video/procedure.md`; development-log entry `DL-#11268`.
-- Key decisions: neutral ids only (`capture-O`, `cov-NN`, `subject-O`); media and the album locator stay in `$CAPTURE_DATA_DIR/capture-O-video/`; comparison protocol COV-3 is `tier:strong` and must be frozen before results are inspected.
+- Key decisions: neutral ids only (`capture-O`, `cov-NN`, `subject-O`); media stays in `$CAPTURE_DATA_DIR/capture-O-video/`; the album link is public by owner decision (https://photos.app.goo.gl/XU322J42Rg8mev2aA); comparison protocol COV-3 is `tier:strong` and must be frozen before results are inspected.
 - Validation: document title check, Ruff and the development-log validator on the changed files (see the PR body).
-- Blockers: album link not yet supplied; PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
-- Next steps: 1) owner supplies the album privately; 2) fleet agent runs COV-1 #11269; 3) COV-2 #11270; 4) frontier/owner decision COV-3 #11271.
+- Blockers: album download needs a fleet machine (cloud proxy returns 403); PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
+- Next steps: 1) fleet agent downloads the album and runs COV-1 #11269; 2) COV-2 #11270; 3) frontier/owner decision COV-3 #11271.
 
 # Simscape Matching Review and Continuation Handoff
 
