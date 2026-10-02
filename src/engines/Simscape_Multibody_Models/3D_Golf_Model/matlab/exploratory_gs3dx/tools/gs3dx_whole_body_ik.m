@@ -1,7 +1,7 @@
 function ik = gs3dx_whole_body_ik(jc, opts)
-%GS3DX_WHOLE_BODY_IK  Least-squares whole-body IK of GS3DX_Fit to the capture (#10979).
+%GS3DX_WHOLE_BODY_IK  Least-squares whole-body IK of GS3DX_Human to the capture (#10979).
 %
-%   IK = GS3DX_WHOLE_BODY_IK(JC) fits the joint positions of GS3DX_Fit to
+%   IK = GS3DX_WHOLE_BODY_IK(JC) fits the joint positions of GS3DX_Human to
 %   the joint-centre estimates JC (GS3DX_CAPTURE_JOINT_CENTRES), frame by
 %   frame, in the least-squares sense.  The capture's address target frame
 %   [facing, toward target, up] is used as the model World (both are Z-up;
@@ -11,7 +11,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %   itself, so the fit sees the model's real geometry.  The solver cannot
 %   take more targets than degrees of freedom, so the least squares is done
 %   here (lsqnonlin, Levenberg-Marquardt) over the independent joint
-%   coordinates (e.g. 33 for Fit).  Both hands are welded to the club, so the
+%   coordinates (e.g. 37 for Human, 33 for Fit).  Both hands are welded to the club, so the
 %   elbow and wrist are not parameters: the solver closes that loop for
 %   every evaluation.  Spherical joints are parameterized by rotation
 %   vectors.
@@ -34,12 +34,16 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %   they are then held fixed while FRAMES are tracked.
 %
 %   Options:
-%     model               (GS3DX_Fit)
+%     model               (GS3DX_Human)
 %     frames              frames to track (default all)
 %     calibration_frames  (default every 3rd frame of FRAMES)
 %     calibration_rounds  (3)
 %     offsets             struct of 3x1 offsets (m) per target: skips the
 %                         calibration when given
+%     initial_pose        (struct([])) optional keyed initial pose struct with
+%                         canonical joint_keys, native joint values, explicit
+%                         units, and status == 1. Warm-starts tracking from a
+%                         valid GS3DX_Human pose, avoiding cold target-free solve.
 %     verbose             (false) print every frame fit
 %     posture_weight      (0, m/rad) pull the redundant trunk coordinates
 %                         (spine tilt, torso twist, both scapulae) toward
@@ -112,6 +116,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %
 %   IK fields:
 %     .model       the model fitted
+%     .seed_source (explicit initial_pose only) kinematic seed provenance ('target_free_solve' or 'initial_pose');
+%                  indicates solver warm-start origin, not physical acceptance
 %     .names       target names; .offsets (struct, m, body frame)
 %     .frames      tracked frames; .t (s)
 %     .joint_ids   KinematicsSolver joint position variables; .joint
@@ -133,7 +139,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 
     arguments
         jc (1,1) struct
-        opts.model (1,:) char = char(gs3dx_names().variants.fit)
+        opts.model (1,:) char = char(gs3dx_names().variants.human)
         opts.frames (1,:) double {mustBeInteger, mustBePositive} = 1:size(jc.pelvis, 2)
         opts.calibration_frames (1,:) double {mustBeInteger, mustBePositive} = []
         opts.calibration_rounds (1,1) double {mustBeInteger, mustBeNonnegative} = 3
@@ -148,6 +154,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.target_weight = []
         opts.foot_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.head_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
+        opts.initial_pose = struct([])
     end
     assert(isscalar(opts.foot_orientation_weight) && isreal(opts.foot_orientation_weight) && ...
         isfinite(opts.foot_orientation_weight) && opts.foot_orientation_weight >= 0, ...
@@ -155,6 +162,11 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     assert(isscalar(opts.head_orientation_weight) && isreal(opts.head_orientation_weight) && ...
         isfinite(opts.head_orientation_weight) && opts.head_orientation_weight >= 0, ...
         'gs3dx:ik', 'head_orientation_weight must be a finite real non-negative scalar');
+    p_seed = gs3dx_ik_initial_pose(opts.initial_pose);
+    if ~isempty(p_seed)
+        assert(strcmp(opts.model, char(gs3dx_names().variants.human)), 'gs3dx:ik', ...
+            'initial_pose keyed warm-start is restricted to model %s', char(gs3dx_names().variants.human));
+    end
     head_data = gs3dx_head_input_data(jc, opts.frames, ...
         opts.calibration_frames, opts.head_orientation_weight);
     s = local_setup(opts.model, head_data.active);
@@ -179,10 +191,15 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
 
-    % With the posture pull, the seed has the trunk at zero: (a, b) and
-    % (a + 180, 180 - b) of a universal joint place its distal point alike,
-    % and the local fit stays on the branch it starts from.
-    [p, g] = local_seed(s, jc.pelvis(:, opts.frames(1)), opts.posture_weight > 0);
+    % Warm-start seed: if initial_pose is provided, use validated pose directly;
+    % otherwise use standard target-free solve with pelvis translation shift.
+    if isempty(p_seed)
+        [p, g] = local_seed(s, jc.pelvis(:, opts.frames(1)), opts.posture_weight > 0);
+        seed_source = 'target_free_solve';
+    else
+        [p, g] = local_apply_initial_pose(s, p_seed);
+        seed_source = 'initial_pose';
+    end
     if isempty(opts.offsets)
         cal = opts.calibration_frames;
         if isempty(cal)
@@ -214,6 +231,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     best = local_track(s, opts.frames, p, g, off, data, weight, feet, head_fn, lm);
 
     ik.model = opts.model;
+    if ~isempty(p_seed), ik.seed_source = seed_source; end
     ik.independent_coordinate_count = s.roles.n_independent;
     ik.names = s.names;
     ik.offsets = cell2struct(num2cell(off, 1).', s.names, 1);
@@ -478,6 +496,13 @@ function [p, g] = local_seed(s, pelvis, trunk_zero)
     end
     [q, st] = solve(ks0, zero, []);
     assert(st == 1, 'gs3dx:ik', 'The target-free solve did not close the loop (status %d)', st);
+    [p, g] = local_pack_pose(s, q);
+    P = local_fk(s, p, g);
+    p(s.roles.pelvis_trans_indices) = p(s.roles.pelvis_trans_indices) + pelvis - P(:, 1);
+end
+
+function [p, g] = local_pack_pose(s, q)
+% Pack KinematicsSolver variable vector q into parameter vector p and closed guess g.
     p = zeros(sum([s.layout.n]), 1);
     si = @(vid) q(s.ids == vid) * (1 + (pi / 180 - 1) * s.isdeg(char(vid)));
     i = 0;
@@ -492,8 +517,29 @@ function [p, g] = local_seed(s, pelvis, trunk_zero)
         i = i + s.layout(k).n;
     end
     g = q(s.closed);
-    P = local_fk(s, p, g);
-    p(s.roles.pelvis_trans_indices) = p(s.roles.pelvis_trans_indices) + pelvis - P(:, 1);
+end
+
+function [p, g] = local_apply_initial_pose(s, p_seed)
+% Map validated keyed initial pose into model coordinates and verify loop closure.
+    if numel(p_seed.joint_keys) ~= numel(s.jkeys)
+        error('gs3dx:ik', 'initial_pose key count (%d) does not match model joint count (%d)', ...
+            numel(p_seed.joint_keys), numel(s.jkeys));
+    end
+    [found, loc] = ismember(s.jkeys, p_seed.joint_keys);
+    if ~all(found) || any(~ismember(p_seed.joint_keys, s.jkeys))
+        error('gs3dx:ik', 'initial_pose keys do not exactly match model joint keys');
+    end
+    expected_units = string(s.ks.jointPositionVariables.Unit);
+    actual_units = p_seed.units(loc);
+    if any(actual_units ~= expected_units)
+        error('gs3dx:ik', 'initial_pose unit mismatch for model joint coordinates');
+    end
+    q = p_seed.joint(loc);
+    [p, g] = local_pack_pose(s, q);
+    [~, ~, st, g] = local_fk(s, p, g);
+    if st ~= 1
+        error('gs3dx:ik', 'initial_pose did not close the kinematic loop (status %d)', st);
+    end
 end
 
 function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, hd, lm)

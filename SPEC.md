@@ -7667,6 +7667,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11256 | Human ellipsoid model becomes the direct IK default; legacy Fit consumers are explicit. Keyed warm-start TDD and native full-structure parity support reproducible matching; 277 native software checks pass. Prospective head0.10 tour/owner candidates pass numerical screens and four reviewed H264 videos are saved on the local Desktop. Ground registration removes penetration but bilateral stance and forward dynamics remain unqualified. Standalone LaTeX/evidence updated; compiler and protected CI completion remain pending. |
 | 2026-10-02 | #11256 | Reviewed optional Human head-orientation IK with shared SO(3) residual, strict masks and keyed calibration; native baseline parity and 267 software checks pass. Constant-reference mapping distinguishes degree initial targets from radian neck motion. Full owner trial improves against a cold start but does not replace selected clips; native assembled 20 ms contact diagnostic confirms initial penetration and excessive force. Standalone LaTeX reference and sanitized evidence updated; physical gates remain open. |
 | 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
 

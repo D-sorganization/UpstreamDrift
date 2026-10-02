@@ -240,7 +240,11 @@ classdef test_gs3dx_human < matlab.unittest.TestCase
         function ik = address_ik(testCase)
             if isempty(testCase.ik)
                 jc = gs3dx_capture_joint_centres(gs3dx_capture_markers());
-                testCase.ik = gs3dx_whole_body_ik(jc, frames=1, calibration_frames=1:15:jc.impact_frame - 90);
+                % Explicitly pin to GS3DX_Fit to preserve historical neck-injection test:
+                % neck_address_is_geometry_and_the_pivot_is_at_c7 expects a 33-DOF Fit IK
+                % without neck coordinates so it can manually splice Rx.q and Ry.q.
+                testCase.ik = gs3dx_whole_body_ik(jc, model=char(gs3dx_names().variants.fit), ...
+                    frames=1, calibration_frames=1:15:jc.impact_frame - 90);
             end
             ik = testCase.ik;
         end

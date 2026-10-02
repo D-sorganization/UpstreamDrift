@@ -1222,6 +1222,235 @@ before longer forward replay or physical claims. No model save occurred,
 and the model SHA-256 remained unchanged. Detailed trajectories and native
 logs remain private; repository evidence contains sanitized aggregates.
 
+
+\subsection{Keyed Initial Pose and Reproducible Starting Conditions}
+An explicit starting pose now has a pure contract with four canonical fields:
+\texttt{joint\_keys}, \texttt{joint}, \texttt{units} and \texttt{status}.
+Keys and units must be 48-element string or cell-string vectors with nonempty,
+nonmissing values; keys must be unique. Coordinates must be one finite real
+numeric vector of length 48. The supplied status must be a finite real scalar
+one. Multiple frame columns are rejected instead of silently selecting the
+first. Aliases do not satisfy the canonical schema. Empty numeric or struct
+input retains the existing initialization path.
+
+The validator reuses \texttt{gs3dx\_initial\_target\_values} for the Human
+layout, unit-axis and mapping-singularity invariants. This imposes that mapper's
+gimbal-singularity restriction even when a native rotation otherwise exists;
+the restriction is explicit rather than hidden behind a fallback. A supplied
+status is input metadata, not proof of current native closure or physical
+acceptance. Integration maps keys against the actual model table, compares
+native units, packs the existing independent/closed coordinates using the
+shared joint roles, and checks native loop closure again.
+
+For a spherical native angle $\theta$ in degrees and unit axis $u$, the
+existing solver pack uses the rotation vector
+\[
+ p_{\rm rot}=\frac{\pi}{180}\theta u.
+\]
+That packing code is shared by the historical target-free seed and the new
+keyed seed. An explicit seed preserves its calibrated trunk coordinates and
+pelvis position instead of zeroing the trunk or shifting the pelvis before
+optimization. With no explicit seed, the historical path is retained.
+The \texttt{seed\_source} field is emitted only for an explicit seed, so
+default output layout stays unchanged. It describes initial seed origin,
+not final optimizer convergence or scientific validation.
+
+Actual MATLAB TDD first failed all eight pure helper tests with the helper
+absent (two incomplete). After implementation, all eight passed with zero
+failed or incomplete tests and natural exit zero at
+\texttt{2026-10-02T13:00:01Z}. The integrated source then passed the combined
+\emph{275 checks}, with zero failed or incomplete tests and natural exit
+zero at \texttt{2026-10-02T13:08:09Z}. These establish software contracts;
+both-capture comparisons against a frozen pre-extension solver and full
+seeded head comparisons completed separately, as recorded below.
+
+Caller provenance must identify the source pose, capture/model hashes,
+personal geometry, frame/time and all fit options. A compatible seed from
+another configuration is only a numerical starting guess. Calibrated offsets
+and a calibrated starting pose form distinct parts of a replay recipe;
+preserving one does not preserve the other. All native matching receipts must
+distinguish kinematic loop status from optimizer termination, positional and
+orientation errors, missing measurements and physical qualification.
+
+
+\subsection{Completed Seeded Tour and Owner Comparisons}
+The full sampled-chain comparison completed with natural exit zero at
+\texttt{2026-10-02T13:26:50Z} in MATLAB R2025b. Both captures used the
+current Human model, their recorded personalized geometry, fixed calibrated
+offsets, and a validated keyed address pose. All 55 tour frames and 46 owner
+frames returned native loop status one. Before these trials, the entire
+default output structure matched the frozen pre-extension solver exactly at
+three sampled frames per capture, with \emph{explicit Human selection}.
+This verifies that seam; it does not establish equivalence of an intentionally
+changed omitted-model default, optimizer global optimality, or anatomy.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture and Head Weight & Mean RMS (mm) & Peak RMS (mm) & Head Mean ($^\circ$) & Head Peak ($^\circ$) \\
+\midrule
+Tour, $0$ & 13.365 & 41.385 & 35.392 & 61.418 \\
+Tour, $0.03$ & 13.349 & 42.116 & 27.331 & 50.315 \\
+Owner, $0$ & 16.621 & 36.865 & 36.231 & 66.056 \\
+Owner, $0.03$ & 16.596 & 36.746 & 27.667 & 54.064 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Head statistics exclude the calibration address frame. They measure the
+cluster-relative head target after address registration, not an independently
+validated anatomical head frame. Offsets, geometry and starting-pose fitting
+remain part of calibration; these are not whole-pipeline held-out results.
+
+The prospective screen requires at least 30\% mean head-error improvement,
+no increase in peak head error, at most 0.5 mm mean and 1 mm peak body-RMS
+increase, at most $2^\circ$ increase in each foot's peak error, and native
+status one throughout. The $0.03$ head term improved mean head error by
+22.8\% for tour and 23.6\% for owner. Both missed the head threshold.
+Tour peak body RMS also exceeded the selected Desktop match by about
+1.995 mm. Neither candidate was promoted. The existing selected videos
+remain the reference shareable IK outputs. Weights $0.06$ and $0.10$ are a
+separate prospective experiment with the same thresholds against both the
+seeded baseline and the selected Desktop metrics; changing thresholds after
+seeing results would not constitute acceptance.
+
+\subsection{Tangent Ground Plane: An Isolated Contact Diagnostic}
+To isolate ground registration from pose assembly, keep all 48 requested
+coordinates, personalized geometry, mass and primitive settings fixed.
+Let the proper ground rotation define a unit normal $n$, let $p_g$ be its
+original translation, and let $P_i$ and $r_i$ be the native contact-centre
+position and radius. The signed clearance is
+\[
+ c_i=n^{\mathsf T}(P_i-p_g)-r_i.
+\]
+Translate only the plane along its normal using
+\[
+ p_g^{\rm touch}=p_g+n\min_i c_i,
+ \qquad c_i^{\rm touch}=c_i-\min_j c_j\geq0.
+\]
+This makes the lowest sphere tangent and removes initial penetration. It
+does not make both feet tangent or establish static equilibrium. The native
+probe derived a $-64.462$ mm normal translation. Actual assembled FK retained
+status one, with contact clearances from zero to 16.199 mm and scalar pose
+errors unchanged at at most $5.43\times10^{-9}$ degree and zero metres.
+
+The 20 ms simulation completed with natural exit zero at
+\texttt{2026-10-02T13:30:55Z}. Initial logged normal forces were zero on both
+feet; final forces were 588.495 N left and zero right. Maximum pelvis
+displacement was 1.505 mm. These replace the penetrating setup's initial
+56.612 kN total normal force and 38.370 mm maximum displacement under the
+earlier stated controls. They isolate the initial penetration contribution;
+the right contacts still began about 15--16.2 mm above this plane. Zero right
+normal force alone does not prove that the entire right foot or body was
+airborne, and displacement magnitude does not identify a vertical trajectory.
+
+Upper-body tracking remained enabled, balance correction disabled, and upper
+feedforward torque zero. This is neither gravity compensation nor an
+independently driven open-loop replay. The diagnostic is explicitly
+\emph{minimum-touch unilateral boundary evidence}, not bilateral or quiet
+stance acceptance. Next steps must qualify both-foot contact geometry and
+capture-consistent pose, support distribution, centre of mass, reference
+units and gravity-support torques before extending dynamics duration.
+No model save occurred. Detailed arrays and trajectories remain private;
+sanitized aggregate evidence is available in
+\texttt{seeded\_head\_and\_contact\_review\_20261002.json}.
+
+
+\subsection{Prospective Head-Weight Follow-Up and Render Review}
+The separately registered $0.06$ and $0.10$ trials completed naturally at
+\texttt{2026-10-02T13:48:01Z}. They reused the prior seeded weight-zero
+baseline only after asserting identical direct solver-source inventory,
+model hash, sampled frames and stored baseline loop statuses. All new
+sampled poses returned native status one. The baseline was not refitted to
+improve the comparison. Calibration geometry and offsets remain fixed.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture and Head Weight & Mean RMS (mm) & Peak RMS (mm) & Head Mean ($^\circ$) & Head Peak ($^\circ$) \\
+\midrule
+Tour, $0.06$ & 13.447 & 41.388 & 18.641 & 33.927 \\
+Tour, $0.10$ & 13.540 & 40.368 & 10.671 & 18.918 \\
+Owner, $0.06$ & 16.599 & 36.758 & 19.392 & 37.952 \\
+Owner, $0.10$ & 16.754 & 36.987 & 11.318 & 22.169 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The $0.10$ candidate passes every prospective kinematic screen for both
+captures. Mean post-address head error improves by 69.8\% for tour and
+68.8\% for owner relative to their seeded weight-zero baselines. Tour
+mean/peak body RMS differs from the earlier selected Desktop clip by
+$+0.352/+0.247$ mm; owner differs by $+0.111/+0.122$ mm. Each foot's peak
+orientation change remains below $2^\circ$. Missing orientation samples
+remain missing; valid-frame counts are recorded in sanitized evidence.
+Tour $0.06$ fails the peak positional limit against the selected clip.
+
+Passing the numerical screen authorizes a render review, not promotion or
+physical acceptance. Both face-on and down-the-line views must be checked
+for style, chronology, joint/limb continuity, clipping, head orientation
+and correspondence to the stated capture. Exports must preserve sampled
+capture timing, use the actual personalized Human geometry, fully decode,
+and record native rendering receipts and hashes. The ground drawn by the
+renderer is decorative and must not be treated as the registered native
+contact plane. Until that review completes, Desktop selections remain the
+earlier verified clips. See
+\texttt{head\_weight\_followup\_review\_20261002.json} for individual gates,
+the pre-registered plan and direct source hashes.
+
+
+\subsection{Human Default Migration and Reviewed Desktop Delivery}
+The direct whole-body IK API now defaults to
+\texttt{gs3dx\_names().variants.human}. Previously, omitting the model
+selected Fit, despite the Human requirement on public exports. This is an
+intentional model-policy change. Historical Fit builder chains, ROM tests,
+neck-injection tests and reproduction examples now select Fit explicitly;
+their intended baseline is retained. New matches use Human. The reviewed
+change leaves the optimizer mathematics and keyed-seed packing unchanged.
+
+Native TDD first failed both policy tests: the omitted-model call selected
+Fit, lacked Human neck/midfoot coordinates, differed from explicit Human
+output, and rejected the Human-only keyed seed. One test was incomplete
+because of that expected contract error. The implementation then passed
+both tests with no failures or incomplete tests and natural exit zero at
+\texttt{2026-10-02T13:58:47Z}. The tests map anatomical keys from the actual
+native joint table, read the model's actual unit column, and compare the
+entire output structure. They do not guess units from key suffixes or use
+nonexistent IK metadata. The combined reviewed suite passed
+\emph{277 native software/parameter checks}, zero failed or incomplete,
+with natural exit zero at \texttt{2026-10-02T14:07:07Z}. Neither result
+constitutes whole-swing dynamics or anatomical qualification.
+
+Both $0.10$ head candidates were rendered in the recorded personalized
+Human geometry in both views. The first render attempt produced one view
+but failed its empty-struct provenance assignment; its failure receipt and
+artifacts remain private. The corrected render stage completed with natural
+exit zero at \texttt{2026-10-02T14:02:59Z}. No fitting was repeated during
+rendering, no model was saved, and the Human model hash stayed unchanged.
+All four H.264 MP4s fully decoded at 800 by 600 pixels and 30 fps, with
+55 tour and 46 owner frames. The sampled spans are 1.8 and 1.5 seconds;
+container durations are 1.833 and 1.533 seconds because the final frame is
+displayed for one playback interval.
+
+Every decoded sampled frame was reviewed in ordered contact sheets for
+both views, alongside the overview and native stills. This verified the
+ellipsoid style, chronological progression and absence of obvious projected
+head/limb flips or viewport clipping at this review scale. It is a media
+review, not an independent anatomical comparison to raw capture footage.
+The screened candidates were promoted to the local Desktop folder
+\texttt{Best\_Human\_Matches\_20261002\_HeadTracked}, with a matching ZIP,
+four MP4s, preview, sanitized selection criteria, provenance and complete
+decode verification. Earlier packages are retained. The ZIP SHA-256 is
+\texttt{48c34d60a50610879f9f9f12ee90526c9fe091d45c72dc1d1c7744cb93089108}.
+No raw capture, joint-coordinate cache or credentials are included.
+
+The promoted clips remain \emph{IK visualizations}. They do not qualify
+the visible floor as a contact surface, establish player skill, remove
+marker-offset or anatomical ambiguity, or demonstrate independent forward
+dynamics. Both-foot contact staging, consistent balance references,
+gravity support, native replay and optimizer-termination diagnostics remain
+separate modeling work. The latest LaTeX source is maintained in the same
+editor; compilation is unverified because the built-in compiler cannot
+find its platform directories. The prior PDF is not this revision.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

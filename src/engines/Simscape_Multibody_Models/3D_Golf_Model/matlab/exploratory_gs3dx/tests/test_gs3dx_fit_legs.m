@@ -20,7 +20,9 @@ classdef test_gs3dx_fit_legs < matlab.unittest.TestCase
             cap = gs3dx_capture_markers();
             jc = gs3dx_capture_joint_centres(cap);
             f0 = jc.impact_frame;
-            ik = gs3dx_whole_body_ik(jc, frames=1:18:f0, calibration_frames=1:15:f0 - 90);
+            % Explicitly pin historically Fit-based test harness call to variants.fit
+            ik = gs3dx_whole_body_ik(jc, model=char(gs3dx_names().variants.fit), ...
+                frames=1:18:f0, calibration_frames=1:15:f0 - 90);
             testCase.ref = gs3dx_leg_reference(ik, jc, cap, cutoff_hz=6);
             testCase.mdl = char(gs3dx_names().variants.fit_legs);
             if ~isfile(fullfile(testCase.info.models_dir, [testCase.mdl '.slx']))

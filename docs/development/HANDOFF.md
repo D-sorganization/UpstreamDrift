@@ -1225,3 +1225,86 @@ See [Sanitized Review Evidence](../research/simscape_matching_reference/head_and
 Desktop selections are unchanged. All physical gates remain open. Latest
 LaTeX compilation still fails with `Unable to find standard directories for platform`;
 the prior PDF does not validate the new sections. Protected CI and review remain required.
+
+### Keyed Seed and Contact Checkpoint
+
+The keyed initial-pose contract and integration passed **275 native MATLAB
+R2025b software checks**, with zero failed or incomplete tests and natural
+exit zero at **13:08:09Z**. The full output structure, with explicit Human
+selection, matched the frozen pre-extension solver at three sampled frames
+for each capture. The full seeded comparison completed naturally at
+**13:26:50Z**, all 55 tour and 46 owner native statuses one.
+
+At head weight 0.03, tour mean/peak position RMS is **13.349/42.116 mm**,
+head post-address mean/peak **27.331/50.315 degrees**; owner position RMS is
+**16.596/36.746 mm**, head **27.667/54.064 degrees**. Both missed the
+prospective 30% head-improvement criterion. Tour peak position RMS also
+exceeds the selected Desktop clip by 1.995 mm. **Neither is selected.**
+Further weights 0.06 and 0.10 are a separate prospective experiment with
+unchanged acceptance limits against the same-source seeded baseline and
+selected clips. Current native loop success does not establish physical
+acceptance or anatomical calibration.
+
+The tangent-plane contact diagnostic completed naturally at **13:30:55Z**.
+It changes only the ground normal translation by **-64.462 mm**, retaining
+the actual assembled pose. Native clearances become **0 to 16.199 mm**.
+Initial left/right normal forces are **0/0 N**, final 20 ms forces
+**588.495/0 N**, maximum pelvis displacement **1.505 mm**. Upper tracking
+remains enabled, balance correction disabled and upper feedforward zero;
+this is a unilateral minimum-touch diagnostic, not bilateral equilibrium
+or open-loop replay. Both-foot support, capture-consistent geometry/pose,
+COM/balance references and gravity-support torques remain required.
+
+See `seeded_head_and_contact_review_20261002.json` in the standalone research
+reference directory for sanitized aggregates, direct source inventory and
+actual receipts. The updated LaTeX source remains in the same editor; its
+built-in compiler still reports `Unable to find standard directories for platform`.
+No new rendered PDF is claimed. CI Standard run **37010261028** on published
+79d3b97 failed MyPy/core tests; exact-log review is active, protected review
+remains required. The Human-default migration is a separate policy change
+under source review, not covered by explicit-Human parity. Physical gates
+#11156, #11160 and #11173 remain open.
+
+### Human Default and Reviewed Head-Tracked Delivery
+
+New direct whole-body IK calls default to **GS3DX_Human**. Historical Fit
+builders, neck-injection harnesses and reproduction examples explicitly
+select Fit. This intentional policy change leaves solver mathematics
+unchanged. Native RED exposed the wrong default and Human-only seed
+rejection; native GREEN passed both policy tests at **13:58:47Z**. The full
+reviewed suite passed **277 software/parameter checks**, zero failed or
+incomplete, with natural exit zero at **14:07:07Z**. These do not qualify
+physical replay or anatomical calibration.
+
+The prospective **head weight 0.10** screen passes both captures. Mean/peak
+body RMS is **13.540/40.368 mm tour**, **16.754/36.987 mm owner**. Mean/peak
+post-address head error is **10.671/18.918 degrees tour**, **11.318/22.169
+degrees owner**; mean head error improves 69.8%/68.8% against their seeded
+weight-zero baselines. Each foot remains within the recorded peak limits.
+Tour 0.06 fails the peak body-RMS criterion against the prior Desktop clip.
+
+Both-view rendering completed naturally at **14:02:59Z** after preserving
+the first attempt's failed provenance-write receipt. All four H.264 MP4s
+fully decoded at 800x600, 30 fps, with 55 tour and 46 owner frames. Every
+sampled frame was reviewed in ordered contact sheets for both views; no
+obvious projected limb/head flips or scene clipping were observed at that
+scale. The new selections are saved on the **local user Desktop** in
+`Best_Human_Matches_20261002_HeadTracked`, with a matching ZIP and sanitized
+provenance/verification. ZIP SHA-256:
+`48c34d60a50610879f9f9f12ee90526c9fe091d45c72dc1d1c7744cb93089108`.
+Earlier packages are preserved. These are IK videos; the floor is decorative,
+head targets cluster-relative, and contact/balance/forward dynamics remain
+unqualified. The videos cannot establish player skill.
+
+See `head_weight_followup_review_20261002.json`,
+`human_default_policy_review_20261002.json`,
+`native_human_policy_integration_tests_20261002.json` and
+`desktop_head_tracking_delivery_20261002.json` in the research reference.
+The same LaTeX source/editor is updated; built-in compilation remains
+unverified with the platform-directory error. CI run 37010261028 failed
+dispatch-context coverage/base-ref checks and a whole-repo MyPy baseline;
+all 2,563 executed core tests passed. Source and workflow-context review
+does not establish passing protected CI. Current main reconciliation,
+fresh checks and protected review remain required. Bilateral contact,
+capture-consistent balance/gravity support and full native dynamics remain
+active requirements; physical gates are open.
