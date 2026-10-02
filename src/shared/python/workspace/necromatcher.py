@@ -14,19 +14,24 @@ import json
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 from zipfile import ZIP_STORED, ZipFile
-
-import numpy as np
 
 from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.motion_matching.piecewise_polynomial import (
     PiecewisePolynomialTorque,
-    PolynomialSegment,
 )
 from .artifact_handoff import ArtifactKind, ArtifactReference, compute_file_sha256
 from .necromatcher_capture import build_capture_archive
+from .necromatcher_fit import FIT_SCHEMA, read_kinematic_fit
+from .necromatcher_efforts import (
+    EFFORT_SCHEMA,
+    AuthoredEffortProfile,
+    read_effort_profile,
+    read_segments,
+    validate_authored_provenance,
+)
 from .project_store import (
     DatasetMetadata,
     SessionMetadata,
@@ -34,10 +39,15 @@ from .project_store import (
     SubjectMetadata,
 )
 
+if TYPE_CHECKING:
+    from src.shared.python.simulation_backends import Trace
+
 _ARTIFACT_KINDS = {
     "native_model": ArtifactKind.MODEL,
     "torque_profile": ArtifactKind.DRIVING_PROFILE,
     "image_capture": ArtifactKind.OBSERVATION,
+    "kinematic_fit": ArtifactKind.TRAJECTORY,
+    "authored_replay": ArtifactKind.TRAJECTORY,
 }
 
 
@@ -229,27 +239,49 @@ class NecromatcherLibrary:
             or payload.get("timebase") != "physical_seconds"
         ):
             raise ValueError("Profiles require N*m torques in physical_seconds")
-        provenance = payload.get("provenance", {})
-        if (
-            provenance.get("kind") != "authored"
-            or not provenance.get("description", "").strip()
-        ):
-            raise ValueError(
-                "Authored profiles require an explicit provenance description"
-            )
-        segments = tuple(
-            PolynomialSegment(
-                start_s=x["start_s"],
-                end_s=x["end_s"],
-                coefficients=np.asarray(x["coefficients"], dtype=float),
-                is_bernstein=x["is_bernstein"],
-            )
-            for x in payload["segments"]
-        )
-        torque = PiecewisePolynomialTorque(segments)
+        for asset in self.assets(swing_id):
+            if (
+                asset.kind == "kinematic_fit"
+                and asset.metadata["model_id"] == model.dataset_id
+            ):
+                if "m" in self.load_fit(asset.dataset_id)["coordinate_units"]:
+                    raise ValueError(
+                        "Legacy torque units cannot represent model translation"
+                    )
+        validate_authored_provenance(payload)
+        torque = read_segments(payload)
         if torque.n_channels != len(model.metadata["dofs"]):
             raise ValueError("Profile channel count must match model DOFs")
         return payload, torque
+
+    def add_fit(self, fit_id: str, swing_id: str, source: Path) -> DatasetMetadata:
+        """Preserve source-bound research samples without certifying dynamics."""
+        with self._write_lock():
+            source_hash = compute_file_sha256(source)
+            payload = read_kinematic_fit(source, self, swing_id)
+            return self._save_asset(
+                fit_id,
+                swing_id,
+                source,
+                "kinematic_fit",
+                {
+                    "schema": FIT_SCHEMA,
+                    "hash": source_hash,
+                    "model_id": payload["model_id"],
+                    "capture_id": payload["capture_id"],
+                    "frame_count": len(payload["frame_indices"]),
+                    "qualification": "monocular_research_hypothesis",
+                    "physical_time_qualified": False,
+                    "dynamics_replayed": False,
+                },
+            )
+
+    def load_fit(self, fit_id: str) -> dict[str, Any]:
+        """Recall detached samples after verifying both immutable parent versions."""
+        asset = self.load_asset(fit_id)
+        if asset.kind != "kinematic_fit":
+            raise ValueError("Fit recall requires a kinematic-fit asset")
+        return read_kinematic_fit(Path(asset.path), self, asset.session_id)
 
     def add_profile(
         self, profile_id: str, swing_id: str, source: Path
@@ -257,7 +289,11 @@ class NecromatcherLibrary:
         """Save model-bound authored controls without claiming measured torque."""
         with self._write_lock():
             source_hash = compute_file_sha256(source)
-            payload, _ = self._read_profile(source, swing_id)
+            raw = json.loads(source.read_text(encoding="utf-8"))
+            if isinstance(raw, dict) and raw.get("schema_version") == EFFORT_SCHEMA:
+                payload, _ = read_effort_profile(source, self, swing_id)
+            else:
+                payload, _ = self._read_profile(source, swing_id)
             return self._save_asset(
                 profile_id,
                 swing_id,
@@ -276,14 +312,85 @@ class NecromatcherLibrary:
         profile = self.load_asset(profile_id)
         if profile.kind != "torque_profile" or profile.metadata["model_id"] != model_id:
             raise ValueError("Profile is incompatible with requested model revision")
+        if profile.metadata["schema"] == EFFORT_SCHEMA:
+            raise ValueError(
+                "Use load_effort_profile to preserve generalized effort units"
+            )
         _, torque = self._read_profile(Path(profile.path), profile.session_id)
         return torque
+
+    def load_effort_profile(
+        self, profile_id: str, model_id: str
+    ) -> AuthoredEffortProfile:
+        """Recall authored generalized controls without discarding channel units."""
+        profile = self.load_asset(profile_id)
+        if profile.kind != "torque_profile" or profile.metadata["model_id"] != model_id:
+            raise ValueError("Profile is incompatible with requested model revision")
+        _, controls = read_effort_profile(Path(profile.path), self, profile.session_id)
+        return controls
+
+    def add_replay(
+        self, replay_id: str, swing_id: str, source: Path
+    ) -> DatasetMetadata:
+        """Publish a checked immutable authored trace without scientific acceptance."""
+        from .necromatcher_replay_storage import (
+            REPLAY_TRACE_SCHEMA,
+            read_authored_replay,
+        )
+
+        with self._write_lock():
+            source_hash = compute_file_sha256(source)
+            trace = read_authored_replay(source, self, swing_id)
+            return self._save_asset(
+                replay_id,
+                swing_id,
+                source,
+                "authored_replay",
+                {
+                    "schema": REPLAY_TRACE_SCHEMA,
+                    "profile_id": trace.meta["profile_id"],
+                    "model_id": trace.meta["model_id"],
+                    "fit_id": trace.meta["fit_id"],
+                    "qualification": "unqualified_authored_replay",
+                    "hash": source_hash,
+                },
+            )
+
+    def load_replay(self, replay_id: str) -> Trace:
+        """Recall detached trace arrays after checking all immutable parent versions."""
+        from .necromatcher_replay_storage import (
+            REPLAY_TRACE_SCHEMA,
+            read_authored_replay,
+        )
+
+        asset = self.load_asset(replay_id)
+        if asset.kind != "authored_replay":
+            raise ValueError("Replay recall requires an authored replay asset")
+        trace = read_authored_replay(Path(asset.path), self, asset.session_id)
+        if asset.metadata["schema"] != REPLAY_TRACE_SCHEMA or any(
+            asset.metadata.get(key) != trace.meta[key]
+            for key in ("profile_id", "model_id", "fit_id")
+        ):
+            raise ValueError("Replay asset metadata differs from its immutable trace")
+        return trace
 
     def export_swing(self, swing_id: str, destination: Path) -> None:
         """Export checked versions and portable identities for downstream tools."""
         session = self._store.load_session(swing_id)
         player = self._store.load_project().subjects[session.subject_id]
         assets = [self.load_asset(x.dataset_id) for x in self.assets(swing_id)]
+        for asset in assets:
+            if asset.kind == "authored_replay":
+                self.load_replay(asset.dataset_id)
+            elif asset.kind == "kinematic_fit":
+                self.load_fit(asset.dataset_id)
+            elif asset.kind == "torque_profile":
+                if asset.metadata["schema"] == EFFORT_SCHEMA:
+                    self.load_effort_profile(
+                        asset.dataset_id, asset.metadata["model_id"]
+                    )
+                else:
+                    self.load_torque(asset.dataset_id, asset.metadata["model_id"])
         manifest = {
             "schema_version": "necromatcher/swing-package/1",
             "player": asdict(player),

@@ -39,13 +39,13 @@
       "rationale": "Issue #11234 adds the Necromatcher historical-player tile to native and web registries. Reclassified tile to category tool to align with logo family gate and matched_swing_browser. Reviewed launcher loader and atlas contract; identifiers remain canonical, feature parity remains gap pending acceptance, and registry metadata does not claim fitted models or scientific qualification."
     },
     "model-backends": {
-      "fingerprint": "519c109b4976a80b0fb4bc3975bc8690de37bbde0897657fb3dc1abe8d0a22d6",
+      "fingerprint": "650c2625f17de855d0c9fd9bd3cb60b010677b742db47194e88db02823d3528d",
       "inputs": {
         "docs/agent_context/contracts/model-backends.md": "b816f8f612a186b8e2a06b9d5ab075d52e421979700afde51b0c210eb1974254",
         "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
         "src/shared/python/simulation_backends/mjcf.py": "985f5abcedea3354d4bf2f8c530748dc861754e024e4b43a59ecd984175dddff",
         "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
-        "src/shared/python/simulation_backends/protocol.py": "d4330b8cce3d25f754ea134dcf07c3bf8e72ef18a745d816b08c1709b9d44f1f",
+        "src/shared/python/simulation_backends/protocol.py": "19393823b6036c887e09c10977aacba53f8a6263cdd2fd31fdff7d5976284da9",
         "tests/unit/simulation_backends/test_foundation.py": "cab3b398da6f172ea3d33203d1514ef29c1928179131a697943f44de8e775b48"
       },
       "rationale": "Reviewed SI parameter ownership, declared degree fields, lazy backend capabilities and the shared analytical/MJCF renderers including mjcf.py. Existing test_foundation.py passed in the 41-test boundary run on 2026-09-09; GPU readiness is not inferred."

@@ -77,6 +77,76 @@ PNG compression level 1 reduces CPU cost without changing decoded pixels.
 9. Integrate eligible artifacts with UpstreamDrift and AffineDrift. Publication
    requires source permission and the applicable scientific/product gates.
 
+## Export a Bound Native Research Overlay
+
+After capture import and native research-fit storage, reuse the workspace facade
+to review the actual model against its exact original source frames. Run from
+the owned repository root in a clean SDK process; the documented Windows worker
+boundary imports MuJoCo before workspace code. For an uninstalled checkout,
+configure this repository's `src` on `PYTHONPATH` as above. Set an unused output
+directory; export never overwrites an earlier review version.
+
+```python
+from pathlib import Path
+
+import mujoco  # Initialize the native SDK in the clean process.
+from src.shared.python import workspace
+
+library = workspace.default_necromatcher_library()
+destination = Path.home() / "Desktop" / "Tiger Overlay New Version"
+manifest = workspace.export_fit_video(
+    library,
+    "tiger-authored-ground-fit-v6",
+    destination,
+    selected_frames=(0, 103, 209),
+)
+```
+
+For Hogan, use `hogan-authored-ground-fit-v6` with selected frames `(0, 549, 749)`
+and another new destination. These immutable IDs refer to stored authored-ground
+research hypotheses. Preserve rejected research qualification rather than
+relabelling export as accepted reconstruction.
+
+The exporter draws on source-sized original PNG backgrounds. Its blue native
+body-origin joint tree and attachment markers are not a body mesh or an observed
+silhouette. Green detector observations and yellow residuals separate observed
+image inference from model projection. Overlays and video encoding do not alter
+the original capture archive. The output includes `overlay.mp4`, selected
+losslessly verified overlay PNGs and `manifest.json`, with exact original PTS,
+frame/asset/output hashes, recorded missing rig data and physical-time
+qualification false. Source frames must be contiguous with a uniform rational
+presentation rate; irregular or sparse clocks are rejected. Original frame PTS
+remain authoritative in the manifest, not the exported MP4's playback labels.
+
+Current deliverables are in
+`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Overlay` and
+`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Hogan Overlay`.
+The `Report` subfolder holds the compiled methods report; its editable
+standalone source is [Necromatcher Methods](necromatcher-methods.tex). The report
+documents source hashes, equations, failed constraints and repeatability; it is
+separate from the canonical engineering design manual. API/UI export execution
+controls remain under #11246 and report/Desktop delivery under #11247.
+
+## Continue Sequential Constrained Repair
+
+The current uncommitted `workspace.repair_native_motion(binding, iterations=150)`
+method uses canonical native `solve_trajectory` with bounded TRF. Initialize the
+first solve from the first source pose; subsequent solves use the previous
+repaired pose as initialization and weak prior. Reports retain
+`initialization=previous_repaired_pose` and
+`prior_target=previous_repaired_pose_or_first_source_pose`. Targets are still
+world marker positions inferred from the original native fit, not measured 3D
+motion. The twelve-test repair regression checks this method/metadata change.
+There is no new formal whole-track receipt for this uncommitted change yet;
+do not rewrite the earlier independent LM/TRF results or promote the exploratory
+sequential Tiger run to scientific acceptance.
+
+After any repair, compare original image residuals, authored bounds, grip and
+ground at all source frames and between them. Discrete closure and bounded
+samples do not qualify a continuous interpolated motion. Keep prior versions
+and actual failed midpoint checks. Timing, historical effort identification,
+independent replay, downstream analysis and site integration remain open.
+
 ## Validation Evidence
 
 Tests were written and run before implementation: absent module produced a

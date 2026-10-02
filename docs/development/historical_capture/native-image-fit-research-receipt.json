@@ -1,0 +1,78 @@
+{
+  "accepted": false,
+  "code_files": [
+    {
+      "sha256": "29b1b1062f2a0b5bae40170ffb6877b481c7d3e0837093480bbc3d3e4526a44b",
+      "name": "__init__.py"
+    },
+    {
+      "sha256": "dd4b378a3235da4c705792b5ae7bddb6d52e39bf45dcc221e7c558b5e388b613",
+      "name": "camera.py"
+    },
+    {
+      "sha256": "4da9d1e64631fd28d6abf267298b0dd457bfff17f08204fb17ebbddb22f7a5cc",
+      "name": "capture.py"
+    },
+    {
+      "sha256": "932c349bee402c26172a505ed22c5a9febd01c45da0451df044586fb935d8443",
+      "name": "contracts.py"
+    },
+    {
+      "sha256": "6005a151adb44f77971cec3169014313aba6ad430bc0ccbdd03a63dd7b83870c",
+      "name": "solver.py"
+    }
+  ],
+  "configuration": {
+    "max_evaluations": 30,
+    "knot_count": 4,
+    "prior_weight": 3.0,
+    "free_coordinate_count": 17,
+    "sample_count": 25,
+    "closure_weight": 100.0,
+    "smoothness_weight": 1.0,
+    "camera": "fixed pose-conditioned PnP, fx=fy=image width, zero distortion",
+    "geometry": "generic driver, not player-qualified"
+  },
+  "runs": [
+    {
+      "artifact": "hogan-practice-capture-v1-sparse-fit.json",
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "initial_rms_pixels": 23.841856893665394,
+      "model_spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+      "artifact_sha256": "f7e6fcb0143b93fa22af40e25b0bb82300dfc5c00e51b36bb1e6fd48b2e6886a",
+      "rms_pixels": 13.168311645161289,
+      "source_archive_sha256": "199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "converged": false,
+      "capture_id": "hogan-practice-capture-v1",
+      "dense_source_evaluation": {
+        "held_out_rms_pixels": 13.682963070966014,
+        "frame_count": 750,
+        "artifact": "hogan-practice-capture-v1-dense-source-evaluation-v1.json",
+        "dynamics_replayed": false,
+        "sha256": "fd88eed367356bbb37fb408c6907b4df395f303be5037debd8f19a195b8cc985",
+        "held_out_frame_count": 725
+      }
+    },
+    {
+      "artifact": "tiger-usga-range-capture-v1-sparse-fit.json",
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "initial_rms_pixels": 130.19791885259917,
+      "model_spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+      "artifact_sha256": "e70e7af13de27ad496917fdcc61805b36d52180c396960bc5f8df7e07bcd0bc0",
+      "rms_pixels": 28.526482493065213,
+      "source_archive_sha256": "d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "converged": false,
+      "capture_id": "tiger-usga-range-capture-v1",
+      "dense_source_evaluation": {
+        "held_out_rms_pixels": 28.968343497763186,
+        "frame_count": 210,
+        "artifact": "tiger-usga-range-capture-v1-dense-source-evaluation-v1.json",
+        "dynamics_replayed": false,
+        "sha256": "829bd49b8ce91b07c6d324b16560bbc007f55935194d67d42ed461a50b304bd2",
+        "held_out_frame_count": 185
+      }
+    }
+  ],
+  "schema_version": "necromatcher-research-fit/1",
+  "physical_time_qualified": false
+}

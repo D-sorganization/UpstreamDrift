@@ -7,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
+from scipy.spatial.transform import Rotation
 
 from src.engines.physics_engines.mujoco.python import full_body_markers as module
 from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -19,6 +21,105 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 SPEC = ROOT / "docs/development/full_body_models/full_body_spec_v1.json"
 GROUND = GroundPlane(normal=(0.0, 0.0, 1.0), height_m=0.0)
+
+
+def test_native_rotation_residual_preserves_half_turn() -> None:
+    """A reversed weld has pi radians of error, never zero."""
+    from src.engines.physics_engines.mujoco.python import full_body_ik
+
+    rotation = Rotation.from_rotvec([np.pi, 0.0, 0.0]).as_matrix()
+    residual = full_body_ik._finite_rotation_error(rotation, np.eye(3))
+    assert np.linalg.norm(residual) == pytest.approx(np.pi)
+    np.testing.assert_allclose(
+        full_body_ik._finite_rotation_error(np.eye(3), np.eye(3)), 0.0, atol=1e-12
+    )
+
+
+def test_native_ground_rows_remain_fixed_with_correct_branch_derivatives(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Inactive ground penalties retain zero rows and contact Jacobians are exact."""
+    row_counts = []
+    for height in (-1.0, 2.0):
+        q = np.zeros(len(kinematics.coordinate_order))
+        q[2] = height
+
+        def residual(pose: np.ndarray) -> np.ndarray:
+            kinematics._set(pose)
+            rows: list[np.ndarray] = []
+            kinematics._append_ground(rows, [], GROUND, 1.0, frozenset())
+            return np.concatenate(rows)
+
+        kinematics._set(q)
+        rows: list[np.ndarray] = []
+        jacobians: list[np.ndarray] = []
+        kinematics._append_ground(rows, jacobians, GROUND, 1.0, frozenset())
+        row_counts.append(len(rows))
+        step = 1e-6
+        numeric = np.column_stack(
+            [
+                (residual(q + step * axis) - residual(q - step * axis)) / (2 * step)
+                for axis in np.eye(len(q))
+            ]
+        )
+        np.testing.assert_allclose(np.vstack(jacobians), numeric, atol=2e-7)
+    assert row_counts == [len(kinematics.sphere_names)] * 2
+
+
+def test_native_trf_recovers_a_bounded_pose_and_preserves_locks(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Opt-in TRF exercises actual native FK with authored coordinate bounds."""
+    seed = np.zeros(len(kinematics.coordinate_order))
+    seed[2] = 1.2
+    truth = seed.copy()
+    truth[0] = 0.3
+    targets = kinematics.marker_positions(truth)
+    free_name = kinematics.coordinate_order[0]
+    locked = dict(zip(kinematics.coordinate_order[1:], seed[1:], strict=True))
+    fit = kinematics.solve_pose(
+        targets,
+        np.ones(len(targets), dtype=bool),
+        seed,
+        ground=GROUND,
+        solver="trf",
+        bounds={free_name: (-0.5, 0.5)},
+        locked=locked,
+        ground_weight=1.0,
+        closure_weight=0.0,
+        prior_weight=0.0,
+    )
+    assert fit.q[0] == pytest.approx(0.3, abs=1e-7)
+    np.testing.assert_array_equal(fit.q[1:], seed[1:])
+    assert fit.marker_rms_m < 1e-7
+
+
+@pytest.mark.parametrize("scale", [0.4, 0.9])
+def test_native_closure_jacobian_matches_finite_rotation_difference(
+    kinematics: module.FullBodyMarkerKinematics, scale: float
+) -> None:
+    """The native log residual derivative holds away from aligned frames."""
+    q = np.zeros(len(kinematics.coordinate_order))
+    q[6:] = np.random.default_rng(7).uniform(-scale, scale, len(q) - 6)
+
+    def residual(pose: np.ndarray) -> np.ndarray:
+        kinematics._set(pose)
+        rows: list[np.ndarray] = []
+        kinematics._append_closure(rows, [], 0.0, 1.0)
+        return rows[0]
+
+    kinematics._set(q)
+    rows: list[np.ndarray] = []
+    jacobians: list[np.ndarray] = []
+    kinematics._append_closure(rows, jacobians, 0.0, 1.0)
+    step = 1e-6
+    numeric = np.column_stack(
+        [
+            (residual(q + step * axis) - residual(q - step * axis)) / (2 * step)
+            for axis in np.eye(len(q))
+        ]
+    )
+    np.testing.assert_allclose(jacobians[0], numeric, atol=2e-7, rtol=2e-6)
 
 
 @pytest.fixture(scope="module")
@@ -76,9 +177,15 @@ def test_marker_positions_follow_attached_bodies(
         kinematics.marker_positions(q[:-1])
 
 
-def test_pose_ik_recovers_markers_and_respects_ground_and_locks(
+def _pose_recovery_inputs(
     kinematics: module.FullBodyMarkerKinematics,
-) -> None:
+) -> tuple[
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.bool_],
+    NDArray[np.float64],
+]:
+    """Provide identical deterministic native targets for recovery and bounds."""
     rng = np.random.default_rng(3)
     n = len(kinematics.coordinate_order)
     q_true = np.zeros(n)
@@ -88,6 +195,13 @@ def test_pose_ik_recovers_markers_and_respects_ground_and_locks(
     valid = np.ones(len(targets), dtype=bool)
     valid[4] = False
     q_start = q_true + rng.normal(0.0, 0.05, n)
+    return q_true, targets, valid, q_start
+
+
+def test_pose_ik_recovers_markers_and_respects_ground_and_locks(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    q_true, targets, valid, q_start = _pose_recovery_inputs(kinematics)
     fit = kinematics.solve_pose(
         targets, valid, q_start, ground=GROUND, closure_weight=0.0, prior_weight=1e-6
     )
@@ -169,6 +283,12 @@ def test_pose_ik_recovers_markers_and_respects_ground_and_locks(
         kinematics.solve_pose(
             targets, valid, q_start, ground=GROUND, locked={"nope": 0.0}
         )
+
+
+def test_pose_ik_respects_coordinate_bounds_and_rejects_reversed_bounds(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    _, targets, valid, q_start = _pose_recovery_inputs(kinematics)
     bounded = kinematics.solve_pose(
         targets,
         valid,
@@ -596,3 +716,165 @@ def test_delegating_properties_satisfy_lod(
         assert isinstance(body, str)
         assert isinstance(offset, np.ndarray)
         assert offset.shape == (3,)
+
+
+def test_public_native_constraints_match_pose_jacobian_and_fixed_ground_rows(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    options = ConstraintOptions(GROUND, 4.0, 9.0, 16.0, 0.5, 0.25, 0.2)
+    for height in (-1.0, 2.0):
+        q = np.random.default_rng(7).uniform(-0.3, 0.3, kinematics.nq)
+        q[2] = height
+        value = kinematics.constraint_residual_jacobian(q, options)
+        assert value.coordinate_order == kinematics.coordinate_order
+        assert value.residual.shape == (6 + len(kinematics.sphere_names),)
+        assert value.jacobian.shape == (len(value.residual), len(q))
+        assert value.row_labels[6:] == tuple(
+            "ground:" + name for name in kinematics.sphere_names
+        )
+        epsilon = 1e-6
+        numeric = np.column_stack(
+            [
+                (
+                    kinematics.constraint_residual_jacobian(
+                        q + epsilon * axis, options
+                    ).residual
+                    - kinematics.constraint_residual_jacobian(
+                        q - epsilon * axis, options
+                    ).residual
+                )
+                / (2 * epsilon)
+                for axis in np.eye(len(q))
+            ]
+        )
+        np.testing.assert_allclose(value.jacobian, numeric, atol=2e-6)
+        assert not value.residual.flags.writeable
+        assert not value.jacobian.flags.writeable
+
+
+def test_public_constraint_zero_weights_preserve_rows_and_reject_unknown_contacts(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    zero = ConstraintOptions(GROUND, 0, 0, 0, 1, 1, 1)
+    value = kinematics.constraint_residual_jacobian(np.zeros(kinematics.nq), zero)
+    assert value.residual.shape == (6 + len(kinematics.sphere_names),)
+    np.testing.assert_array_equal(value.residual, 0)
+    np.testing.assert_array_equal(value.jacobian, 0)
+    with pytest.raises(ValueError, match="contact"):
+        kinematics.constraint_residual_jacobian(
+            np.zeros(kinematics.nq),
+            ConstraintOptions(GROUND, 1, 1, 1, 1, 1, 1, ("unknown",)),
+        )
+    with pytest.raises(ValueError, match="finite"):
+        kinematics.constraint_residual_jacobian(np.full(kinematics.nq, np.nan), zero)
+
+
+@pytest.mark.parametrize(
+    "weight,scale", [(float("nan"), 1), (-1, 1), (1, 0), (1, float("inf"))]
+)
+def test_public_constraint_options_validate_finite_weights_and_scales(
+    weight: float, scale: float
+) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    with pytest.raises(ValueError):
+        ConstraintOptions(GROUND, weight, 1, 1, scale, 1, 1)
+
+
+def test_unsupported_ik_cannot_claim_constraint_capability() -> None:
+    from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    with pytest.raises(NotImplementedError, match="constraint"):
+        BaseFullBodyIK(coordinate_order=("hip",)).constraint_residual_jacobian(
+            np.zeros(1), ConstraintOptions(GROUND, 1, 1, 1, 1, 1, 1)
+        )
+
+
+def test_public_constraints_scale_native_errors_and_preserve_pinned_depth(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    q = np.zeros(kinematics.nq)
+    q[2] = 2.0
+    pinned = kinematics.sphere_names[0]
+    options = ConstraintOptions(GROUND, 4, 9, 16, 0.5, 0.25, 0.2, (pinned,))
+    value = kinematics.constraint_residual_jacobian(q, options)
+    position, rotation = kinematics.closure_error(q)
+    assert np.linalg.norm(value.residual[:3]) == pytest.approx(position * 4)
+    assert np.linalg.norm(value.residual[3:6]) == pytest.approx(rotation * 12)
+    heights = kinematics.sphere_heights(q, GROUND)
+    assert value.residual[6] == pytest.approx(heights[pinned] * 20)
+    assert value.residual[6] > 0
+    np.testing.assert_array_equal(value.residual[7:], 0)
+    epsilon = 1e-6
+    axis = np.eye(kinematics.nq)[2]
+    numeric = (
+        kinematics.constraint_residual_jacobian(q + epsilon * axis, options).residual
+        - kinematics.constraint_residual_jacobian(q - epsilon * axis, options).residual
+    ) / (2 * epsilon)
+    np.testing.assert_allclose(value.jacobian[:, 2], numeric, atol=2e-6)
+
+
+@pytest.mark.parametrize("invalid", ["shape", "finite", "identities", "empty"])
+def test_public_constraint_result_rejects_invalid_boundary_data(invalid: str) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintLinearization,
+    )
+
+    residual = np.ones(2)
+    jacobian = np.ones((2, 1))
+    labels = ("a", "b")
+    if invalid == "shape":
+        jacobian = np.ones((1, 2))
+    elif invalid == "finite":
+        residual[0] = np.nan
+    elif invalid == "identities":
+        labels = ("a", "a")
+    else:
+        labels = ()
+    with pytest.raises(ValueError):
+        ConstraintLinearization(residual, jacobian, ("hip",), labels)
+
+
+def test_public_constraint_result_defensively_copies_arrays() -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintLinearization,
+    )
+
+    residual = np.ones(1)
+    jacobian = np.ones((1, 1))
+    value = ConstraintLinearization(residual, jacobian, ("hip",), ("row",))
+    residual[0] = 7
+    jacobian[0, 0] = 8
+    np.testing.assert_array_equal(value.residual, 1)
+    np.testing.assert_array_equal(value.jacobian, 1)
+
+
+def test_public_native_constraints_reject_empty_geometry(
+    kinematics: module.FullBodyMarkerKinematics, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+
+    monkeypatch.setattr(kinematics, "_spheres", {})
+    with pytest.raises(NotImplementedError, match="constraints"):
+        kinematics.constraint_residual_jacobian(
+            np.zeros(kinematics.nq), ConstraintOptions(GROUND, 0, 0, 0, 1, 1, 1)
+        )

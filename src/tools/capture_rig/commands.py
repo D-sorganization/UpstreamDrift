@@ -8,7 +8,6 @@ session bundle on disk is the same either way (#9619).
 
 from __future__ import annotations
 
-import os
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -16,6 +15,7 @@ from pathlib import Path
 
 from src.motion_capture.rig.plan import CameraControls, CaptureMode
 from src.shared.python.core.contracts import require
+from src.shared.python.core import repo_python_environment
 
 RIG_MODULE = "src.motion_capture.rig"
 
@@ -75,12 +75,7 @@ def child_environment(base: Mapping[str, str] | None = None) -> dict[str, str]:
     which resolve only with ``src`` on the path (the test suite adds it the
     same way). Postcondition: every other variable of ``base`` is kept.
     """
-    env = dict(os.environ if base is None else base)
-    src = str(repo_root() / "src")
-    existing = env.get("PYTHONPATH", "")
-    parts = [p for p in existing.split(os.pathsep) if p and p != src]
-    env["PYTHONPATH"] = os.pathsep.join([src, *parts])
-    return env
+    return repo_python_environment(repo_root(), base)
 
 
 def python_module_command(args: Sequence[str]) -> list[str]:

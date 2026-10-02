@@ -145,6 +145,11 @@ class SimState:
 class Trace:
     """Time history of a single rollout — the common backend output.
 
+    The units below describe the rotational reference model. Mixed scalar
+    full-body producers must record ordered ``coordinate_units_json`` and
+    ``effort_units_json`` metadata; consumers must check those before analysis.
+    Their velocity units are the corresponding coordinate units per second.
+
     Attributes:
         t: Sample times, shape ``(T,)`` [s].
         q: Positions, shape ``(T, nq)`` [rad].

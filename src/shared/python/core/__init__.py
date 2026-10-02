@@ -42,6 +42,7 @@ from .constants import (
     SUITE_ROOT,
 )
 from .version import __version__
+from .process_environment import repo_python_environment
 
 __all__ = [
     "DEFAULT_TIME_STEP",
@@ -62,6 +63,7 @@ __all__ = [
     "get_logger",
     "setup_logging",
     "setup_structured_logging",
+    "repo_python_environment",
 ]
 
 

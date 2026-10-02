@@ -605,9 +605,13 @@ def _run_from_dict(raw: dict[str, Any]) -> RunMetadata:
     )
 
 
-def _validate_id(value: str, name: str) -> None:
+def validate_workspace_id(value: str, name: str) -> None:
+    """Validate a workspace identity before starting expensive owned work."""
     if not isinstance(value, str) or _ID_RE.fullmatch(value) is None:
         raise ValueError(f"{name} must match {_ID_RE.pattern}")
+
+
+_validate_id = validate_workspace_id
 
 
 def _validate_non_empty(value: str, name: str) -> None:

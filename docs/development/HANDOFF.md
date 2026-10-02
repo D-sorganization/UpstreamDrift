@@ -1,6 +1,14 @@
-# Active Necromatcher Delivery
+# Active Necromatcher Native Fit Delivery — #11240
 
-Current branch `feat/necromatcher-workspace-11234` adds the player tile, web route,
+Current branch `feat/necromatcher-native-fit-11235` (PR #11240) retargeted to `main` following merge of workspace #11239. It adds source-bound native trajectory fitting with preserved Hermite splines, native video export, research refit controls, ground placement, and effort bindings. All 88 fitting/spline/IK tests and 142 workspace unit tests pass locally.
+
+- Issue: #11235; parent #11232
+- PR: #11240 (retargeted to `main`)
+- Branch: `feat/necromatcher-native-fit-11235`
+- Validation: 88 fitting tests, 142 workspace tests pass; Ruff lint/format clean.
+
+# Active Necromatcher Workspace Delivery — #11239 (Merged)
+
 native adapter and shared source-frame archive reader. Sixteen UI tests, desktop
 recall and worker failure tests pass. Web type checking and scoped ESLint pass.
 Native import/overlay and actual Hogan/Tiger web review are implemented. URL
