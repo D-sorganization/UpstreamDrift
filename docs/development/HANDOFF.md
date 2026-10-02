@@ -407,10 +407,15 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    force is 0 through 0.50 s while the pelvis falls. At 1.0 s the tilt
    is 101 deg and the pelvis is at z -1.77 m. Capture impact is at
    1.319 s, so this run does not measure impact support. The 0.2
-   body-weight bar is not met. Do not repeat this resample. Do not
-   save. Do not write the shift into the model. Do not claim the 5 %
-   bar. Do not rerun the quiet raised-ground state. Do not rerun
-   1.809 s.
+   body-weight bar is not met. Do not repeat this resample by itself.
+   The next unsaved 1.0 s check combines that same resampled reference
+   with the quiet start (upper-body positions matched to their track
+   angles, upper-body rates 0, both wrist track gains 0, BalanceGain
+   rows 1-12 zero) and GroundOffset z -0.95297. That combination has
+   not been run. As of 19:48 local the MATLAB lock is held by another
+   session (`export_tour.m`); the runner queues, so do not kill that
+   process. Do not save. Do not write the shift into the model. Do not
+   claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
