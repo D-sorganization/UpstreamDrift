@@ -517,6 +517,34 @@ class SimscapeForceAdapter(SyntheticMultibodyFixture):
         return out
 
 
+class PinocchioSyntheticForceAdapter(SyntheticMultibodyFixture):
+    """Pinocchio synthetic multibody adapter for test fixtures and synthetic benchmarking."""
+
+    @property
+    def engine_type(self) -> EngineType:
+        return EngineType.PINOCCHIO
+
+    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
+        m_mat = np.diag(self._get_mass_diag())
+        b_vec = np.zeros(self._nv, dtype=np.float64)
+        b_vec[2] = self._mass_scale * 9.81
+        return m_mat @ a + b_vec
+
+
+class MujocoSyntheticForceAdapter(SyntheticMultibodyFixture):
+    """MuJoCo synthetic multibody adapter for test fixtures and synthetic benchmarking."""
+
+    @property
+    def engine_type(self) -> EngineType:
+        return EngineType.MUJOCO
+
+    def compute_inverse_dynamics(self, q: Array, v: Array, a: Array) -> Array:
+        m_mat = np.diag(self._get_mass_diag())
+        b_vec = np.zeros(self._nv, dtype=np.float64)
+        b_vec[2] = self._mass_scale * 9.81
+        return m_mat @ a + b_vec
+
+
 class MultiEngineTorqueAllocator:
     """Universal multi-engine torque allocator orchestrating full trajectory kinetics."""
 
@@ -671,20 +699,37 @@ def create_engine_force_adapter(
     strictly quarantined and only permitted when allow_synthetic=True (#10439).
     """
     e = EngineType(engine)
+    repo_root = Path(__file__).resolve().parents[4]
     if e == EngineType.PINOCCHIO:
-        from src.engines.physics_engines.pinocchio.python.force_adapter import (
-            PinocchioForceAdapter,
-        )
-
+        if spec_path is None and allow_synthetic and nv != 41:
+            return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         p = Path(
             spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
         )
-        require(p.is_file(), f"Pinocchio specification not found: {p}")
-        return PinocchioForceAdapter(p.read_bytes())
+        if not p.is_file():
+            p = repo_root / p
+        if not p.is_file() and allow_synthetic:
+            return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        try:
+            from src.engines.physics_engines.pinocchio.python.force_adapter import (
+                PinocchioForceAdapter,
+            )
+
+            return PinocchioForceAdapter(p.read_bytes())
+        except Exception:
+            if allow_synthetic:
+                return PinocchioSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+            raise
     if e == EngineType.MUJOCO:
-        if spec_path is None:
-            spec_path = Path("docs/development/full_body_models/full_body_spec_v1.json")
-        p = Path(spec_path)
+        if spec_path is None and allow_synthetic and nv != 41:
+            return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
+        p = Path(
+            spec_path or "docs/development/full_body_models/full_body_spec_v1.json"
+        )
+        if not p.is_file():
+            p = repo_root / p
+        if not p.is_file() and allow_synthetic:
+            return MujocoSyntheticForceAdapter(nv=nv, n_spheres=n_spheres)
         require(p.is_file(), f"MuJoCo specification not found: {p}")
         return MujocoForceAdapter(p.read_bytes())
     if e == EngineType.DRAKE:
