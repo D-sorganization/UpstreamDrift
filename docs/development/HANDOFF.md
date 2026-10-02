@@ -1,3 +1,16 @@
+# Force and Torque Conversions Delivery — #11285 / #11287
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11287-conversions`; commit SELF; PR: #11323.
+- Objective: implement FTO-2 (#11287) shared force/torque conversions, coordinate transformations, wrench relocation, and axial load projection from reaction wrenches.
+- Completed:
+  - `src/shared/python/force_overlay/conversions.py` (260 lines, under 400 line limit).
+  - Functions: `joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`.
+  - Re-exported via `src/shared/python/force_overlay/__init__.py`.
+  - 23 unit tests in `tests/unit/force_overlay/test_conversions.py` with 99.3% line coverage on `conversions.py`.
+  - Documented in `docs/user_guide/body_part_viz/force_colors.md`.
+- Validation: Ruff check and format clean; 23 unit tests passing; line coverage 99.3% (98.7% package total); file size budget and error ratchet passed.
+- Next steps: Review and merge FTO-2 (#11287); dispatch FTO-3 (#11288) glyph builder.
+
 # Force and Torque Overlay Contract — #11286 (FTO-1)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`
