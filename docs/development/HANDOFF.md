@@ -1,3 +1,19 @@
+# Force and Torque Overlay Delivery [FTO-4] — #11289
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11289-color-utils`; parent epic: #11285; issue: #11289.
+- Objective: DRY hex/RGBA conversion helpers and register the tension/compression colormap.
+- Implemented:
+  - `src/shared/python/plot_style/color_utils.py`: Added canonical `hex_to_rgba` and `rgba_to_hex` helpers with strict bounds checking in `[0.0, 1.0]`, `#rgb`/`#rrggbb`/`#rrggbbaa` parsing, and re-export in `plot_style/__init__.py`.
+  - Replaced duplicate ad-hoc conversions in `meshcat_force_colors.py`, `mujoco_force_colors.py`, `pyqtgl_renderer.py`, and `meshcat_adapter.py`.
+  - Registered `ColormapId.TENSION_COMPRESSION` in `plot_style/colormaps.py` and `registry.py` with 3 stops (`DEFAULT_COMPRESSION_COLOR`, `DEFAULT_NEUTRAL_COLOR`, `DEFAULT_TENSION_COLOR`) read directly from `body_part_viz/force_colors.py`.
+  - Added convention comment to `kinetics.py` above `pcolormesh`.
+  - Updated `docs/user_guide/plot_style/colormap_author_guide.md` with `TENSION_COMPRESSION`.
+- Validation:
+  - TDD red-green cycle in `tests/unit/plot_style/test_color_utils.py` (24 passed).
+  - Existing `plot_style` and `body_part_viz` test suites pass (97 passed, 2 skipped).
+  - Clean `ruff check`, `ruff format`, `check_file_size_budget.py`, and `check_error_handling_ratchet.py`.
+- Next steps: Wave B child tasks (FTO-2, FTO-3, FTO-24) upon Wave A completion.
+
 # Force and Torque Overlay Planning — #11285
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/force-torque-overlays-smwke2`; commit SELF; PR: see the planning PR for this branch.

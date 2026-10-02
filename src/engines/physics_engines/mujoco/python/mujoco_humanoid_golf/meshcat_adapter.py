@@ -15,6 +15,7 @@ from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.plot_style.color_utils import rgba_to_hex
 
 try:
     import meshcat
@@ -89,7 +90,7 @@ class MuJoCoMeshcatAdapter:
 
             # Material/Color
             material = g.MeshPhongMaterial(
-                color=self._rgba_to_hex(rgba), opacity=rgba[3]
+                color=self._rgba_to_int(rgba), opacity=rgba[3]
             )  # noqa: E501
 
             shape = None
@@ -519,8 +520,11 @@ class MuJoCoMeshcatAdapter:
             )
         )
 
-    def _rgba_to_hex(self, rgba: Any) -> int:
+    def _rgba_to_int(self, rgba: Any) -> int:
         if rgba is None:
             return 0
-        r, g, b = (int(c * 255) for c in rgba[:3])
-        return (r << 16) + (g << 8) + b
+        hex_str = rgba_to_hex(
+            (float(rgba[0]), float(rgba[1]), float(rgba[2])),
+            include_alpha=False,
+        )
+        return int(hex_str[1:], 16)

@@ -530,6 +530,9 @@ class KineticsRenderer(BaseRenderer):
 
         joint_edges = np.arange(heatmap_data.shape[0] + 1)
 
+        # Generic signed quantity (joint torque / actuator power) where RdBu_r
+        # convention applies (red = positive, blue = negative).
+        # Axial loads use ColormapId.TENSION_COMPRESSION (blue = tension, red = compression).
         im = ax.pcolormesh(
             time_edges,
             joint_edges,

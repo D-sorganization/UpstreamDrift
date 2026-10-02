@@ -13,10 +13,24 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Final
 
-from matplotlib.colors import is_color_like
+from matplotlib import colormaps
+from matplotlib.colors import LinearSegmentedColormap, is_color_like
 
-__all__ = ["ColormapId", "CustomColormap", "SEMANTIC_COLORMAP_ALIASES"]
+from src.shared.python.body_part_viz.force_colors import (
+    DEFAULT_COMPRESSION_COLOR,
+    DEFAULT_NEUTRAL_COLOR,
+    DEFAULT_TENSION_COLOR,
+)
+
+__all__ = [
+    "ColormapId",
+    "CustomColormap",
+    "SEMANTIC_COLORMAP_ALIASES",
+    "TENSION_COMPRESSION_COLORMAP",
+    "resolve_colormap_alias",
+]
 
 
 class ColormapId(str, Enum):
@@ -43,6 +57,7 @@ class ColormapId(str, Enum):
     ACCELERATION = "acceleration"
     HEIGHT = "height"
     GENERIC_DIVERGING = "generic_diverging"
+    TENSION_COMPRESSION = "tension_compression"
 
     def __str__(self) -> str:
         return self.value
@@ -129,3 +144,34 @@ class CustomColormap:
                 raise ValueError(
                     f"stop hex {hex_value!r} is not a parseable matplotlib color"
                 )
+
+
+TENSION_COMPRESSION_STOPS: Final[tuple[tuple[float, str], ...]] = (
+    (0.0, DEFAULT_COMPRESSION_COLOR),
+    (0.5, DEFAULT_NEUTRAL_COLOR),
+    (1.0, DEFAULT_TENSION_COLOR),
+)
+
+TENSION_COMPRESSION_COLORMAP: Final[CustomColormap] = CustomColormap(
+    name=ColormapId.TENSION_COMPRESSION.value,
+    stops=TENSION_COMPRESSION_STOPS,
+)
+
+
+def _register_tension_compression() -> LinearSegmentedColormap:
+    # Use N=257 (odd size) so 0.5 is an exact LUT entry (neutral white)
+    cmap = LinearSegmentedColormap.from_list(
+        ColormapId.TENSION_COMPRESSION.value,
+        [(pos, hex_val) for pos, hex_val in TENSION_COMPRESSION_STOPS],
+        N=257,
+    )
+    try:
+        colormaps.register(cmap, name=ColormapId.TENSION_COMPRESSION.value, force=True)
+    except AttributeError:  # Older matplotlib fallback
+        from matplotlib import cm
+
+        cm.register_cmap(ColormapId.TENSION_COMPRESSION.value, cmap)
+    return cmap
+
+
+_TENSION_COMPRESSION_MPL_CMAP = _register_tension_compression()

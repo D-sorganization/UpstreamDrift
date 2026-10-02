@@ -29,6 +29,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-10-02 at SELF — deep-dive assessment, ADR-0052 (proposed, indexed, revised for review findings: optional wrench halves, serialized GlyphSet wire) and 30 child issues filed and revised; no implementation performed.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
 - **Next step:** A CLI-tier agent implements FTO-1 (#11286), the contract module and wire schema.
+- **Child deliveries:**
+  - **FTO-4 (#11289) · Colour utilities DRY and tension/compression colormap**: Implemented in branch `feat/fto-11289-color-utils` by `antigravity`. Consolidated hex/RGBA conversions into `color_utils.py` (`hex_to_rgba`, `rgba_to_hex`), eliminated ad-hoc parsers in `meshcat_force_colors.py`, `mujoco_force_colors.py`, `pyqtgl_renderer.py`, and `meshcat_adapter.py`, registered `ColormapId.TENSION_COMPRESSION` diverging colormap reading `ForceColorScale` default constants, documented conventions in `kinetics.py`, updated colormap author guide, and verified green across 24 new and 97 existing tests with zero regressions.
 
 ### DL-#11268 · Capture-O Video Companion
 

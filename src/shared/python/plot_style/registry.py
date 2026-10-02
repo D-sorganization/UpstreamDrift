@@ -45,6 +45,7 @@ _BUILTIN_MPL_NAME: Final[dict[ColormapId, str]] = {
     ColormapId.TURBO: "turbo",
     ColormapId.COOLWARM: "coolwarm",
     ColormapId.SPECTRAL: "Spectral",
+    ColormapId.TENSION_COMPRESSION: "tension_compression",
 }
 
 

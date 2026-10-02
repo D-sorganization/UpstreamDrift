@@ -133,17 +133,20 @@ The semantic aliases ship the perceptually-uniform pick for each data
 family — prefer them over the underlying matplotlib name at call
 sites:
 
-| Semantic alias      | Underlying built-in | Use-case                      |
-| ------------------- | ------------------- | ----------------------------- |
-| `VELOCITY`          | `PLASMA`            | Speed magnitudes (0 → max)    |
-| `FORCE`             | `INFERNO`           | Force / pressure magnitudes   |
-| `ACCELERATION`      | `TURBO`             | Higher-frequency derivatives  |
-| `HEIGHT`            | `VIRIDIS`           | Vertical position / elevation |
-| `GENERIC_DIVERGING` | `COOLWARM`          | Signed deviations around zero |
+| Semantic alias        | Underlying built-in   | Use-case                                                  |
+| --------------------- | --------------------- | --------------------------------------------------------- |
+| `VELOCITY`            | `PLASMA`              | Speed magnitudes (0 → max)                                |
+| `FORCE`               | `INFERNO`             | Force / pressure magnitudes                               |
+| `ACCELERATION`        | `TURBO`               | Higher-frequency derivatives                              |
+| `HEIGHT`              | `VIRIDIS`             | Vertical position / elevation                             |
+| `GENERIC_DIVERGING`   | `COOLWARM`            | Signed deviations around zero                             |
+| `TENSION_COMPRESSION` | `tension_compression` | Axial load (red=compression, white=neutral, blue=tension) |
 
 Using the alias keeps call sites readable — and if a future review
 changes the underlying matplotlib pick, every existing caller updates
-for free.
+for free. `TENSION_COMPRESSION` is a 3-stop diverging colormap built from
+`ForceColorScale` defaults (`#ff0000` compression → `#ffffff` neutral → `#0000ff` tension),
+shared across 2D plots and 3D overlays to prevent convention drift.
 
 For **categorical** data (engine names, marker groups, target ids)
 prefer a qualitative palette via `PaletteColor`: `tab10`, `Set2`,
