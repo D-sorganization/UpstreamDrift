@@ -2570,6 +2570,41 @@ Neutral aggregate data and receipts are in
 \texttt{observability\_native\_geometry\_checkpoint\_20261002.json};
 clean coordinates and individual trajectories remain private.
 % END NATIVE GEOMETRY OBSERVABILITY
+% BEGIN OWNER SEED FEASIBILITY
+\subsection{Native Owner Seeds and Rejected Fixed-Offset Address Fits}
+A native seed search exited naturally at
+\texttt{2026-10-02T22:13:04Z}. All six families close the two-hand grip
+loop while holding the original seven root representation values,
+16 lower-body values and two neck values fixed; maximum native-value
+difference is $2.85\times10^{-14}$. Free-variable counts are native
+representation counts, not independent degrees of freedom. Four
+families satisfy both existing elbow-range rows. A prospective seed
+with lead/trail primitives $+25^\circ/-30^\circ$ has no flagged rows
+in the current table at this single address pose. This does not
+qualify absolute hip/pelvis ranges or wrist neutrals; a one-frame
+wrist arc is zero regardless of its absolute angle.
+
+A controlled address-only refit exited naturally at
+\texttt{22:18:45Z}, preserving the original geometry, marker offsets,
+head calibration and all solver weights. The original keyed seed
+reproduces the selected address marker RMS of 6.061 mm. The bilateral
+marker-proxy seed yields 30.745 mm and the milder seed yields
+40.683 mm; head errors increase from $0.039^\circ$ to
+$2.239^\circ/6.510^\circ$. The proxy seed retains one flagged elbow
+row after fitting, while the milder fit has zero flagged rows.
+Neither result is promoted: table feasibility alone does not outweigh
+this large fit degradation. No full-swing acceptance is inferred from
+an address-only trial.
+
+The next controlled investigation must distinguish branch-dependent
+marker-offset calibration from weak orientation observability, with
+calibration and held-out frames frozen before comparison. Changing
+the global elbow signs, inventing anatomical offset bounds or relaxing
+existing fit gates is not supported by these experiments. The neutral
+report \texttt{owner\_seed\_feasibility\_checkpoint\_20261002.json}
+retains the natural-exit receipts and aggregate results; seed vectors
+and fitted coordinates remain private.
+% END OWNER SEED FEASIBILITY
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
@@ -2594,6 +2629,7 @@ Historical results are attributed to that turnover unless a fresh receipt
 identifies a new execution.
 \end{thebibliography}
 \end{document}
+
 
 
 
