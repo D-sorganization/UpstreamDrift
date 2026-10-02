@@ -39,6 +39,7 @@ def test_repair_preserves_source_and_enforces_declared_limits(repair_binding):
     assert report["frame_indices"] == binding.fit["frame_indices"]
     assert report["scientifically_qualified"] is False
     assert report["physical_time_qualified"] is False
+    assert report["solver_options"]["solver"] == "trf"
     assert report["target_kind"] == "inferred_native_world_markers"
     assert report["interpolation"] == "none_discrete_samples_only"
     assert len(report["diagnostics"]) == len(original)

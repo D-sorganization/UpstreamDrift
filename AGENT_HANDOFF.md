@@ -10,8 +10,15 @@ reports soft closure/ground penalties, per-frame budgets and pixel changes.
 Targets are inferred native markers; returned discrete candidates are separate
 research reports, not source-observation refits or published library fits.
 See [Constrained Repair Procedure](docs/development/necromatcher-constrained-repair.md).
-Full-track image review, continuous closed motion, controls and independent replay
-remain required. Original v6 assets are preserved.
+Actual full-track probes from 7d8c04946d satisfy authored ranges but fail closure
+and image fidelity: Tiger/Hogan maximum grip gaps are 23.3/13.8 mm and dense
+source-image RMS worsens to 34.094/12.508 px. Every frame reaches its 150-iteration
+budget; Hogan midpoint penetration reaches 53.2 mm. Exact candidate hashes and
+metrics are recorded in the turnover receipt. Opt-in native bounded TRF now preserves locks and mixed finite/infinite bounds
+with fixed inactive ground rows; the combined suite passes 169 tests. Worst-frame
+experiments reduce both gaps below 0.15 micrometres. Continue full-track TRF
+execution and image review, continuous closed motion, controls and
+independent replay. Original v6 assets are preserved.
 
 ## Authored Ground Placement
 

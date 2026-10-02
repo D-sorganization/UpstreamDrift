@@ -34,6 +34,65 @@ def test_native_rotation_residual_preserves_half_turn() -> None:
     )
 
 
+def test_native_ground_rows_remain_fixed_with_correct_branch_derivatives(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Inactive ground penalties retain zero rows and contact Jacobians are exact."""
+    row_counts = []
+    for height in (-1.0, 2.0):
+        q = np.zeros(len(kinematics.coordinate_order))
+        q[2] = height
+
+        def residual(pose: np.ndarray) -> np.ndarray:
+            kinematics._set(pose)
+            rows: list[np.ndarray] = []
+            kinematics._append_ground(rows, [], GROUND, 1.0, frozenset())
+            return np.concatenate(rows)
+
+        kinematics._set(q)
+        rows: list[np.ndarray] = []
+        jacobians: list[np.ndarray] = []
+        kinematics._append_ground(rows, jacobians, GROUND, 1.0, frozenset())
+        row_counts.append(len(rows))
+        step = 1e-6
+        numeric = np.column_stack(
+            [
+                (residual(q + step * axis) - residual(q - step * axis)) / (2 * step)
+                for axis in np.eye(len(q))
+            ]
+        )
+        np.testing.assert_allclose(np.vstack(jacobians), numeric, atol=2e-7)
+    assert row_counts == [len(kinematics.sphere_names)] * 2
+
+
+def test_native_trf_recovers_a_bounded_pose_and_preserves_locks(
+    kinematics: module.FullBodyMarkerKinematics,
+) -> None:
+    """Opt-in TRF exercises actual native FK with authored coordinate bounds."""
+    seed = np.zeros(len(kinematics.coordinate_order))
+    seed[2] = 1.2
+    truth = seed.copy()
+    truth[0] = 0.3
+    targets = kinematics.marker_positions(truth)
+    free_name = kinematics.coordinate_order[0]
+    locked = dict(zip(kinematics.coordinate_order[1:], seed[1:], strict=True))
+    fit = kinematics.solve_pose(
+        targets,
+        np.ones(len(targets), dtype=bool),
+        seed,
+        ground=GROUND,
+        solver="trf",
+        bounds={free_name: (-0.5, 0.5)},
+        locked=locked,
+        ground_weight=1.0,
+        closure_weight=0.0,
+        prior_weight=0.0,
+    )
+    assert fit.q[0] == pytest.approx(0.3, abs=1e-7)
+    np.testing.assert_array_equal(fit.q[1:], seed[1:])
+    assert fit.marker_rms_m < 1e-7
+
+
 @pytest.mark.parametrize("scale", [0.4, 0.9])
 def test_native_closure_jacobian_matches_finite_rotation_difference(
     kinematics: module.FullBodyMarkerKinematics, scale: float

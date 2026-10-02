@@ -121,6 +121,8 @@ class MujocoFullBodyIK(BaseFullBodyIK):
 class FullBodyMarkerKinematics(BaseFullBodyIK):
     """MuJoCo marker kinematics and pose inverse kinematics adapter."""
 
+    supports_trf = True
+
     def __init__(
         self,
         adapter: NativeMujocoFullBodyModel,
@@ -373,6 +375,8 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         for name, (site, radius) in self._spheres.items():
             depth = float(self.data.site_xpos[site] @ n - ground.height_m - radius)
             if depth >= 0.0 and name not in pinned:
+                rows.append(np.zeros(1))
+                jacs.append(np.zeros((1, len(self._dof))))
                 continue
             jp = np.zeros((3, nv))
             self._mj.mj_jacSite(self.model, self.data, jp, None, site)

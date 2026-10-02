@@ -58,6 +58,7 @@ def repair_native_motion(
     valid = np.ones(len(attachments), dtype=bool)
     options = SolvePoseOptions(
         iterations=iterations,
+        solver="trf",
         bounds=bounds,
         closure_weight=_CONSTRAINT_WEIGHT,
         closure_rotation_weight=_CONSTRAINT_WEIGHT,
@@ -135,6 +136,8 @@ def _repair_record(
         ],
         "solver_options": {
             "iterations": iterations,
+            "solver": "trf",
+            "budget_kind": "residual_evaluations",
             "constraint_weight": _CONSTRAINT_WEIGHT,
             "prior_weight": _PRIOR_WEIGHT,
         },
