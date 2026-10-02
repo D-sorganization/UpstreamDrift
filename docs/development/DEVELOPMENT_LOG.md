@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at V9 producer 7a2359eaddf1d795124ae9d7decf5c57260db103 — 374 Python/parity tests pass. Actual Tiger/Hogan strict preserved restarts verified exact coefficient hashes and initial pixel RMS; both remain rejected/nonconverged. Live one-evaluation Hogan web submission retained the complete recipe; fractional form constraints and ES2020 endpoint access were repaired and application type checks and 52 UI/API tests pass.
+- **Last verified:** 2026-10-02 — phase-contact core, capture binding, native/web transport and independent finite audit: 424 Python/parity cases and 57 UI/API cases pass; type/lint/architecture/current shared inventory/manual-blocker checks pass. Actual V9 restarts remain producer 7a2359eaddf1d795124ae9d7decf5c57260db103 and rejected/nonconverged. Reviewed 32 unchanged original source PNGs with exact PTS/hash receipts; no V10 optimization claimed.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Review swing/stance source intervals and implement explicit phase-dependent contact hypotheses using the exact restart path. Reassess camera/landmark evidence, image/closure/contact behavior and controls before dynamics, native actual-player UI acceptance and downstream qualification.
+- **Next step:** Freeze a committed phase-contact producer and run source-bound authored contact-hypothesis trials with declared tolerances, exact starts and independent boundary/interior audits. Retain uncertain/cropped phases as unknown; reassess camera/landmarks, native actual-player UI and qualified controls/dynamics/consumer handoffs.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 

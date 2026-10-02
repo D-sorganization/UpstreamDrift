@@ -201,3 +201,27 @@ it.each(['Spline Knots', 'Evaluation Budget'])('retains integer form validation 
   await user.type(screen.getByLabelText(label), '2.5');
   expect(screen.getByLabelText(label)).toBeInvalid();
 });
+
+
+it('discloses authored phase hypotheses and preserves the entire scheduled recipe on edits', async () => {
+  const plan = boundedPlan();
+  const config = {...boundedConfig, constraint_options: {base: boundedConfig.constraint_options,
+    schedule: {capture_id: 'capture', capture_sha256: 'sha256:' + 'a'.repeat(64), status: 'authored_contact_hypothesis', phases: [
+      {start_pts: [20, 2], end_pts: [22, 2], pinned_spheres: ['heel_r'], review_frame_sha256: ['sha256:' + 'b'.repeat(64)]},
+      {start_pts: [22, 2], end_pts: [24, 2], pinned_spheres: [], review_frame_sha256: ['sha256:' + 'c'.repeat(64)]},
+    ]}}};
+  api.fetchRefitPlan.mockResolvedValue({...plan, baseline_config: config});
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Coordinate Prior Scales');
+  expect(screen.getByText(/2 Authored Contact Phases/)).toHaveTextContent('Review Source Interval: 10 to 12');
+  expect(screen.getByText(/2 Authored Contact Phases/)).toHaveTextContent('Authored Contact Hypothesis');
+  expect(screen.getByText(/2 Authored Contact Phases/)).toHaveTextContent('heel_r');
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  await user.clear(screen.getByLabelText('Pose Prior Weight'));
+  await user.type(screen.getByLabelText('Pose Prior Weight'), '0.003');
+  await user.selectOptions(screen.getByLabelText('Initialization Source'), 'preserved_spline');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  expect(api.submitRefit.mock.calls[0][1].config).toEqual({...config, prior_weight: 0.003, initialization_policy: 'strict'});
+});

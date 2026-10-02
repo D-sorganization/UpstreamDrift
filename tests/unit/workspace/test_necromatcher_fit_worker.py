@@ -274,3 +274,211 @@ def test_worker_rejects_incompatible_preserved_identity(change):
         binding.plant.coordinate_order = ("other",)
     with pytest.raises(ValueError):
         worker._preserved_start(binding, options, times)
+
+
+class _ScheduledWorkerReview:
+    capture_id = "capture"
+    frame_count = 3
+
+    def __init__(self):
+        self.closed = False
+        self.frames = [
+            {
+                "asset_id": "video",
+                "shot_id": "shot",
+                "camera_id": "camera",
+                "swing_id": "swing",
+                "pts_ticks": i + 10,
+                "timebase_numerator": 1,
+                "timebase_denominator": 3,
+                "frame_sha256": str(i) * 64,
+            }
+            for i in range(3)
+        ]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.closed = True
+
+    def frame(self, index):
+        return {"frame": self.frames[index]}
+
+
+def _scheduled_worker_fixture(monkeypatch):
+    from dataclasses import asdict
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+    from src.shared.python.motion_matching.contact_law import GroundPlane
+    from src.shared.python.motion_matching.historical_fit import (
+        ContactPinPhase,
+        ContactPinSchedule,
+        ImageFitConfig,
+        ScheduledConstraintOptions,
+    )
+    from src.shared.python.workspace import necromatcher_fit_worker as worker
+
+    review = _ScheduledWorkerReview()
+    capture_hash = "sha256:" + "a" * 64
+    schedule = ContactPinSchedule(
+        "capture",
+        capture_hash,
+        (
+            ContactPinPhase((10, 3), (11, 3), ("heel_r",), ("sha256:" + "0" * 64,)),
+            ContactPinPhase((11, 3), (12, 3), (), ("sha256:" + "2" * 64,)),
+        ),
+    )
+    config = ImageFitConfig(
+        constraint_options=ScheduledConstraintOptions(
+            ConstraintOptions(GroundPlane((0, 0, 1), 0), 1, 1, 1, 1, 1, 1),
+            schedule,
+        )
+    )
+    original = {
+        "free_coordinates": ["joint"],
+        "camera": {},
+        "attachments": {"marker": ["body", [0, 0, 0]]},
+    }
+    source = {
+        "capture_id": "capture",
+        "capture_hash": capture_hash,
+        "frame_indices": [0, 1, 2],
+        "frames": review.frames,
+        "q": [[0.0], [0.0], [0.0]],
+        "coordinate_order": ["joint"],
+        "provenance": {"native_definition": {}},
+        "evidence": {"original_fit": original},
+    }
+    native = SimpleNamespace(closure_residuals=lambda q: np.zeros(3))
+    binding = SimpleNamespace(
+        fit=source,
+        plant=native,
+        project=lambda index: None,
+        review_inputs=lambda: (object(), original["attachments"]),
+    )
+    stamp = {
+        "source_sha256": "source",
+        "runtime_sha256": "runtime",
+        "started_at_utc": "now",
+    }
+    request = {
+        "library_root": "unused",
+        "source_fit_id": "parent",
+        "source_fit_hash": "parent-hash",
+        "execution_stamp": stamp,
+        "options": {
+            "frame_indices": [0, 2],
+            "knot_count": 2,
+            "coordinate_scales": [1.0],
+            "unknown_visibility_weight": 0.5,
+            "config": asdict(config),
+        },
+    }
+    monkeypatch.setattr(worker, "fit_execution_stamp", lambda: stamp)
+    monkeypatch.setattr(
+        worker,
+        "NecromatcherLibrary",
+        lambda root: SimpleNamespace(
+            load_asset=lambda identity: SimpleNamespace(
+                metadata={"hash": "parent-hash"}
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        worker, "load_native_fit_binding", lambda library, identity: binding
+    )
+    monkeypatch.setattr(worker, "CaptureReview", lambda library, identity: review)
+    return worker, request, review
+
+
+@pytest.mark.parametrize("mismatch", ["capture_id", "capture_sha256", "review_hash"])
+def test_compute_worker_rejects_foreign_schedule_before_evidence_or_optimizer(
+    monkeypatch, mismatch
+):
+    worker, request, review = _scheduled_worker_fixture(monkeypatch)
+    schedule = request["options"]["config"]["constraint_options"]["schedule"]
+    if mismatch == "review_hash":
+        # A real source image, but outside this phase: membership alone is insufficient.
+        schedule["phases"][0]["review_frame_sha256"] = ["sha256:" + "2" * 64]
+    else:
+        schedule[mismatch] = (
+            "foreign" if mismatch == "capture_id" else "sha256:" + "b" * 64
+        )
+    monkeypatch.setattr(
+        worker,
+        "read_capture_evidence",
+        lambda *args, **kwargs: pytest.fail("evidence read before binding"),
+    )
+    monkeypatch.setattr(
+        worker, "_compute_operation", lambda *args: pytest.fail("optimizer reached")
+    )
+    with pytest.raises(ValueError, match="capture|review"):
+        worker.compute_native_refit(request)
+    assert review.closed
+
+
+def test_compute_worker_retains_bound_schedule_and_original_evidence(monkeypatch):
+    from copy import deepcopy
+    from src.shared.python.motion_matching.historical_fit import (
+        ScheduledConstraintOptions,
+    )
+
+    worker, request, review = _scheduled_worker_fixture(monkeypatch)
+    before = deepcopy(request)
+    calls = []
+
+    def evidence(review, markers, indices, **kwargs):
+        return SimpleNamespace(
+            source_times=np.array([(i + 10) / 3 for i in indices]),
+            observed_pixels=np.zeros((len(indices), 1, 2)),
+            confidence=np.ones((len(indices), 1)),
+            frame_indices=indices,
+        )
+
+    def compute(operation, native, attachments, camera, inputs, config, initial):
+        assert isinstance(config.constraint_options, ScheduledConstraintOptions)
+        np.testing.assert_array_equal(inputs.observed_pixels, np.zeros((2, 1, 2)))
+        np.testing.assert_array_equal(inputs.source_times, [10 / 3, 4.0])
+        calls.append(config)
+        return SimpleNamespace(
+            source_times=inputs.source_times,
+            q=np.zeros((2, 1)),
+            coordinate_order=("joint",),
+            free_coordinates=("joint",),
+            knot_times=inputs.knot_times,
+            spline_coefficients=np.zeros(4),
+            initial_rms_pixels=1.0,
+            rms_pixels=1.0,
+            converged=False,
+            optimizer_ran=True,
+            initialization=None,
+            initial_spline=None,
+            model_sha="c" * 64,
+            optimizer_message="Fixture budget exhausted",
+            constraint_times=np.array([10 / 3, 11 / 3, 4.0]),
+            constraint_row_labels=("ground:heel_r",),
+            constraint_residuals=np.zeros((3, 1)),
+            maximum_constraint_residual=0.0,
+            evaluate_source_times=lambda times: np.zeros((len(times), 1)),
+        )
+
+    monkeypatch.setattr(worker, "read_capture_evidence", evidence)
+    monkeypatch.setattr(worker, "_compute_operation", compute)
+    monkeypatch.setattr(
+        worker, "_dense_reprojection_metrics", lambda *args: {"dense_rms_pixels": 1.0}
+    )
+    output = worker.compute_native_refit(request)
+    assert len(calls) == 1 and review.closed
+    assert request == before
+    assert output["evidence"]["original_fit"]["config"] == request["options"]["config"]
+    receipt = output["provenance"]["contact_schedule_binding"]
+    assert receipt["capture_hash"] == "sha256:" + "a" * 64
+    assert receipt["phases"][0]["boundary_frame_indices"] == [0, 1]
+    assert receipt["phases"][1]["review_frame_indices"] == [2]
+    assert receipt["phases"][1]["pinned_spheres"] == []
+    assert receipt["continuous_certified"] is False
+    assert receipt["normal_height_hypothesis_only"] is True
+    assert "optimizer_not_converged" in output["evidence"]["rejection_reasons"]
+    assert output["frames"] == review.frames

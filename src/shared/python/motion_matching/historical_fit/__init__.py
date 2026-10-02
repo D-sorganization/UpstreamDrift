@@ -12,6 +12,9 @@ from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "ContactPinPhase",
+    "ContactPinSchedule",
+    "ScheduledConstraintOptions",
     "CaptureImageEvidence",
     "read_capture_evidence",
     "CameraProjection",
@@ -23,3 +26,9 @@ __all__ = [
     "initialize_image_trajectory",
     "initialize_camera_hypothesis",
 ]
+
+from .contact_schedule import (
+    ContactPinPhase,
+    ContactPinSchedule,
+    ScheduledConstraintOptions,
+)

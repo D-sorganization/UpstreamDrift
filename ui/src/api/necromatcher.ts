@@ -9,9 +9,20 @@ export interface FitConstraintRecipe {
   position_scale_m: number; rotation_scale_rad: number; ground_scale_m: number;
   pinned_spheres?: string[];
 }
+export interface ContactPinPhaseRecipe {
+  start_pts: [number, number]; end_pts: [number, number];
+  pinned_spheres: string[]; review_frame_sha256: string[];
+}
+export interface ContactPinScheduleRecipe {
+  capture_id: string; capture_sha256: string;
+  status: 'authored_contact_hypothesis'; phases: ContactPinPhaseRecipe[];
+}
+export interface ScheduledFitConstraintRecipe {
+  base: FitConstraintRecipe; schedule: ContactPinScheduleRecipe;
+}
 export interface ImageFitRecipe {
   max_iterations: number; prior_weight: number; smoothness_weight: number; closure_weight: number;
-  constraint_options?: FitConstraintRecipe | null;
+  constraint_options?: FitConstraintRecipe | ScheduledFitConstraintRecipe | null;
   interior_fractions?: number[];
   coordinate_bounds?: [string, number, number][];
   initialization_policy?: 'strict' | 'authored_range_project_zero_slopes';

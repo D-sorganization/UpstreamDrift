@@ -217,3 +217,174 @@ def test_public_parent_hash_change_rejects_audit(changed: str):
     )
     with pytest.raises(ValueError, match="parent identity changed"):
         _check_parents(Library(), binding)
+
+
+class _PhaseProbe(_NativeProbe):
+    def constraint_residual_jacobian(self, q, options):
+        result = super().constraint_residual_jacobian(q, options)
+        residual = result.residual.copy()
+        height = 1.0 - float(q[0])
+        residual[-1] = height if "foot" in options.pinned_spheres else min(0.0, height)
+        return ConstraintLinearization(
+            residual, result.jacobian, result.coordinate_order, result.row_labels
+        )
+
+    def sphere_heights(self, q, ground):
+        return {"foot": 1.0 - float(q[0])}
+
+
+def test_phase_audit_assesses_boundary_and_distinct_neighbors_with_raw_rows():
+    from docs.development.historical_capture.audit_bounded_trial import audit_trajectory
+    from src.shared.python.motion_matching.historical_fit import (
+        ContactPinPhase,
+        ContactPinSchedule,
+        ScheduledConstraintOptions,
+    )
+
+    fit, bounds, frames = _fixture()
+    identity = "sha256:" + "a" * 64
+    schedule = ContactPinSchedule(
+        "capture",
+        identity,
+        (
+            ContactPinPhase((0, 1), (1, 1), ("foot",), (identity,)),
+            ContactPinPhase((1, 1), (2, 1), (), (identity,)),
+        ),
+    )
+    ground = GroundPlane((0, 0, 1), 0)
+    options = ScheduledConstraintOptions(
+        ConstraintOptions(ground, 4, 9, 16, 0.1, 0.2, 0.3), schedule
+    )
+    report = audit_trajectory(fit, bounds, frames, _PhaseProbe(), ground, options)
+    boundary = next(
+        row
+        for row in report["sampled_native_constraints"]
+        if row["kind"] == "contact_phase_boundary" and row["source_time"] == 1
+    )
+    assert boundary["active_pinned_spheres"] == []
+    assert boundary["pts_rational"] == {"numerator": 1, "denominator": 1}
+    neighbors = [
+        row
+        for row in report["sampled_native_constraints"]
+        if row["kind"] == "contact_phase_neighbor"
+        and abs(row["source_time"] - 1) < 0.01
+    ]
+    assert len(neighbors) == 2
+    assert neighbors[0]["source_time"] < 1 < neighbors[1]["source_time"]
+    assert neighbors[0]["active_pinned_spheres"] == ["foot"]
+    assert neighbors[1]["active_pinned_spheres"] == []
+    assert report["contact_phase_binding"]["external_capture_binding_required"] is True
+    assert report["source_frame_count"] == 2
+    assert all(
+        not row["image_objective_point_added"]
+        for row in report["sampled_native_constraints"]
+    )
+    assert report["continuous_nonlinear_certified"] is False
+
+
+def test_pinned_positive_height_audit_remains_unscaled_and_finite():
+    from docs.development.historical_capture.audit_bounded_trial import audit_trajectory
+
+    fit, bounds, frames = _fixture()
+    ground = GroundPlane((0, 0, 1), 0)
+    options = ConstraintOptions(ground, 4, 9, 16, 0.1, 0.2, 0.3, ("foot",))
+    report = audit_trajectory(fit, bounds, frames, _PhaseProbe(), ground, options)
+    first = report["sampled_native_constraints"][0]
+    assert first["raw_ground_constraint_m"] == {"foot": 1.0}
+    assert first["ground_penetration_m"] == 0
+    assert first["active_pinned_spheres"] == ["foot"]
+
+
+def test_phase_interval_mismatch_and_nonfinite_geometry_rejected():
+    from docs.development.historical_capture.audit_bounded_trial import audit_trajectory
+    from src.shared.python.motion_matching.historical_fit import (
+        ContactPinPhase,
+        ContactPinSchedule,
+        ScheduledConstraintOptions,
+    )
+
+    fit, bounds, frames = _fixture()
+    ground = GroundPlane((0, 0, 1), 0)
+    identity = "sha256:" + "a" * 64
+    wrapper = ScheduledConstraintOptions(
+        ConstraintOptions(ground, 1, 1, 1, 1, 1, 1),
+        ContactPinSchedule(
+            "capture", identity, (ContactPinPhase((0, 1), (3, 1), (), (identity,)),)
+        ),
+    )
+    with pytest.raises(ValueError, match="interval"):
+        audit_trajectory(fit, bounds, frames, _PhaseProbe(), ground, wrapper)
+
+    class InfiniteGround(_NativeProbe):
+        def sphere_heights(self, q, ground):
+            return {"foot": float("inf")}
+
+    with pytest.raises(ValueError, match="finite"):
+        audit_trajectory(fit, bounds, frames, InfiniteGround(), ground)
+
+
+def test_source_archive_resolution_uses_library_root(tmp_path):
+    from docs.development.historical_capture.audit_bounded_trial import (
+        _source_video_record,
+    )
+    from zipfile import ZipFile
+    import json
+
+    archive = tmp_path / "relative-capture.zip"
+    with ZipFile(archive, "w") as stream:
+        stream.writestr("receipt.json", json.dumps({"source": {"sha256": "source"}}))
+    library = SimpleNamespace(
+        root=tmp_path,
+        load_asset=lambda identity: SimpleNamespace(path="relative-capture.zip"),
+    )
+    assert _source_video_record(library, "capture") == {"sha256": "source"}
+
+
+def test_real_native_phase_audit_reports_signed_height_then_release():
+    pytest.importorskip("mujoco")
+    from tests.unit.motion_matching.test_historical_image_fit import native_problem
+    from docs.development.historical_capture.audit_bounded_trial import (
+        _Point,
+        _native_row,
+        _raw_options,
+    )
+    from src.shared.python.motion_matching.historical_fit import (
+        ContactPinPhase,
+        ContactPinSchedule,
+        ScheduledConstraintOptions,
+    )
+
+    native, attachments, _, inputs = native_problem()
+    ik = native.create_ik(attachments)
+    identity = "sha256:" + "a" * 64
+    ground = GroundPlane((0, 0, 1), -10)
+    options = ScheduledConstraintOptions(
+        ConstraintOptions(ground, 4, 9, 16, 0.1, 0.2, 0.3),
+        ContactPinSchedule(
+            "capture",
+            identity,
+            (
+                ContactPinPhase((110, 1), (221, 2), ("heel_r",), (identity,)),
+                ContactPinPhase((221, 2), (111, 1), (), (identity,)),
+            ),
+        ),
+    )
+    before = _native_row(
+        ik,
+        inputs.seed,
+        _Point(110, "source_frame", ()),
+        _raw_options(options, ground, 110),
+    )
+    after = _native_row(
+        ik,
+        inputs.seed,
+        _Point(111, "source_frame", ()),
+        _raw_options(options, ground, 111),
+    )
+    assert before["raw_ground_constraint_m"]["heel_r"] == pytest.approx(
+        before["contact_sphere_heights_m"]["heel_r"]
+    )
+    assert before["raw_ground_constraint_m"]["heel_r"] > 0
+    assert after["raw_ground_constraint_m"]["heel_r"] == 0
+    assert after["ground_penetration_m"] == 0
+    assert before["grip_gap_m"] == after["grip_gap_m"]

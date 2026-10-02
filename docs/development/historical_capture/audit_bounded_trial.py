@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from fractions import Fraction
 from itertools import pairwise
@@ -26,7 +26,11 @@ if TYPE_CHECKING:
         ConstraintOptions,
     )
     from src.shared.python.motion_matching.contact_law import GroundPlane
-    from src.shared.python.motion_matching.historical_fit import ImageFitResult
+    from src.shared.python.motion_matching.historical_fit import (
+        ImageFitResult,
+        ScheduledConstraintOptions,
+        ContactPinSchedule,
+    )
     from src.shared.python.workspace import NecromatcherLibrary, NativeFitBinding
     from src.shared.python.workspace.necromatcher_ranges import AuthoredCoordinateBounds
 
@@ -49,7 +53,11 @@ class NativeAuditIK(Protocol):
 class _Point:
     time: float
     kind: Literal[
-        "source_frame", "adjacent_source_midpoint", "coordinate_global_extremum"
+        "source_frame",
+        "adjacent_source_midpoint",
+        "coordinate_global_extremum",
+        "contact_phase_boundary",
+        "contact_phase_neighbor",
     ]
     indices: tuple[int, ...]
     rational: Fraction | None = None
@@ -134,6 +142,63 @@ def _sample_points(sources: list[_Point], assessment: Any) -> list[_Point]:
     return points
 
 
+def _phase_points(
+    schedule: ContactPinSchedule, interval: tuple[float, float]
+) -> list[_Point]:
+    """Assess exact boundaries and one floating neighbor on each available side."""
+    import numpy as np
+
+    boundaries = schedule.boundary_times()
+    if (boundaries[0], boundaries[-1]) != interval:
+        raise ValueError(
+            "Audit contact schedule interval differs from preserved spline"
+        )
+    points = []
+    rationals = [Fraction(*phase.start_pts) for phase in schedule.phases]
+    rationals.append(Fraction(*schedule.phases[-1].end_pts))
+    for rational in rationals:
+        time = float(rational)
+        points.append(_Point(time, "contact_phase_boundary", (), rational))
+        for direction in (-np.inf, np.inf):
+            neighbor = float(np.nextafter(time, direction))
+            if interval[0] <= neighbor <= interval[1] and neighbor != time:
+                points.append(_Point(neighbor, "contact_phase_neighbor", ()))
+    return points
+
+
+def _raw_options(
+    options: ConstraintOptions | ScheduledConstraintOptions | None,
+    ground: GroundPlane,
+    time: float,
+) -> ConstraintOptions:
+    """Independently query raw metre/radian geometry regardless of optimizer scales."""
+    from src.shared.python.motion_matching.constraint_kinematics import (
+        ConstraintOptions,
+    )
+    from src.shared.python.motion_matching.historical_fit import (
+        ScheduledConstraintOptions,
+    )
+
+    if options is None:
+        return ConstraintOptions(ground, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+    value = (
+        options.resolve(time)
+        if isinstance(options, ScheduledConstraintOptions)
+        else options
+    )
+    if not isinstance(value, ConstraintOptions) or value.ground != ground:
+        raise ValueError("Audit requires matching declared ground options")
+    return replace(
+        value,
+        position_weight=1.0,
+        rotation_weight=1.0,
+        ground_weight=1.0,
+        position_scale_m=1.0,
+        rotation_scale_rad=1.0,
+        ground_scale_m=1.0,
+    )
+
+
 def _evaluate(
     result: ImageFitResult, times: NDArray[np.float64]
 ) -> NDArray[np.float64]:
@@ -203,7 +268,10 @@ def _native_row(
     labels = tuple(f"ground:{name}" for name in heights)
     if value.row_labels[6:] != labels or not np.allclose(
         value.residual[6:],
-        [min(0.0, height) for height in heights.values()],
+        [
+            height if name in options.pinned_spheres else min(0.0, height)
+            for name, height in heights.items()
+        ],
         atol=1e-10,
         rtol=1e-10,
     ):
@@ -215,9 +283,15 @@ def _native_row(
         "pts_rational": None
         if rational is None
         else {"numerator": rational.numerator, "denominator": rational.denominator},
-        "time_representation": "exact_container_pts"
-        if rational is not None
-        else "canonical_float_source_clock",
+        "time_representation": (
+            "numerically_distinct_one_sided_source_probe"
+            if point.kind == "contact_phase_neighbor"
+            else "exact_authored_source_pts_boundary"
+            if point.kind == "contact_phase_boundary"
+            else "exact_container_pts"
+            if rational is not None
+            else "canonical_float_source_clock"
+        ),
         "source_frame_indices": list(point.indices),
         "source_frame": None if point.frame is None else dict(point.frame),
         "coordinate": point.coordinate,
@@ -227,6 +301,13 @@ def _native_row(
         "grip_angle_deg": float(np.rad2deg(angle)),
         "ground_penetration_m": max(0.0, -min(heights.values())),
         "contact_sphere_heights_m": heights,
+        "active_pinned_spheres": list(options.pinned_spheres),
+        "raw_ground_constraint_m": dict(
+            zip(heights, map(float, value.residual[6:]), strict=True)
+        ),
+        "nonpenetration_depth_m": {
+            name: max(0.0, -height) for name, height in heights.items()
+        },
         "image_objective_point_added": False,
     }
 
@@ -237,23 +318,32 @@ def audit_trajectory(
     source_frames: Sequence[tuple[int, Mapping[str, Any]]],
     ik: NativeAuditIK,
     ground: GroundPlane,
+    constraint_options: ConstraintOptions | ScheduledConstraintOptions | None = None,
 ) -> dict[str, Any]:
     """Audit canonical q extrema and finite nonlinear samples as separate claims."""
     import numpy as np
     from src.shared.python.motion_matching.historical_fit.assessment import (
         assess_spline_bounds,
     )
-    from src.shared.python.motion_matching.constraint_kinematics import (
-        ConstraintOptions,
+    from src.shared.python.motion_matching.historical_fit import (
+        ScheduledConstraintOptions,
     )
 
     assessment = assess_spline_bounds(result, bounds.named_bounds)
     sources = _source_points(source_frames, assessment.source_interval)
     points = _sample_points(sources, assessment)
+    schedule = (
+        constraint_options.schedule
+        if isinstance(constraint_options, ScheduledConstraintOptions)
+        else None
+    )
+    if schedule is not None:
+        points.extend(_phase_points(schedule, assessment.source_interval))
     poses = _evaluate(result, np.asarray([point.time for point in points]))
-    options = ConstraintOptions(ground, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
     rows = [
-        _native_row(ik, pose, point, options)
+        _native_row(
+            ik, pose, point, _raw_options(constraint_options, ground, point.time)
+        )
         for pose, point in zip(poses, points, strict=True)
     ]
     extrema = {
@@ -270,6 +360,18 @@ def audit_trajectory(
         "midpoint_count": len(sources) - 1,
         "canonical_global_extrema_count": 2 * len(assessment.coordinates),
         "sampled_native_constraints": rows,
+        "contact_phase_binding": None
+        if schedule is None
+        else {
+            **asdict(schedule),
+            "external_capture_binding_required": True,
+            "continuous_certified": False,
+            "normal_height_hypothesis_only": True,
+            "tangential_no_slip_enforced": False,
+        },
+        "contact_phase_probe_count": sum(
+            point.kind.startswith("contact_phase_") for point in points
+        ),
         "maximum_sampled_grip_gap_m": max(row["grip_gap_m"] for row in rows),
         "maximum_sampled_grip_rotation_rad": max(
             row["grip_rotation_rad"] for row in rows
@@ -320,7 +422,11 @@ def _pixel_metrics(
 
 def _reconstruct(binding: NativeFitBinding, evidence: Any) -> ImageFitResult:
     import numpy as np
-    from src.shared.python.motion_matching.historical_fit import ImageFitResult
+    from src.shared.python.motion_matching.historical_fit import (
+        ImageFitResult,
+        ScheduledConstraintOptions,
+        ContactPinSchedule,
+    )
 
     original = binding.fit["evidence"]["original_fit"]
     if not np.array_equal(evidence.source_times, original["source_times"]):
@@ -379,17 +485,32 @@ def _verify_audit_stamp(
         raise ValueError("Audit implementation or runtime changed during assessment")
 
 
+def _source_video_record(
+    library: NecromatcherLibrary, capture_id: str
+) -> dict[str, Any]:
+    """Resolve canonical project-relative archive paths through the library root."""
+    import json
+
+    capture = library.load_asset(capture_id)
+    with ZipFile(library.root / capture.path) as archive:
+        return cast(dict[str, Any], json.loads(archive.read("receipt.json"))["source"])
+
+
 def audit_saved_fit(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]:
     """Audit one existing saved fit with source and parent identities bracketed."""
     import numpy as np
-    import json
     from src.shared.python.workspace import load_native_fit_binding
     from src.shared.python.workspace.necromatcher_review import CaptureReview
     from src.shared.python.workspace.necromatcher_fit_jobs import fit_execution_stamp
     from src.shared.python.workspace.artifact_handoff import compute_file_sha256
     from src.shared.python.motion_matching.historical_fit import (
         ImageFitConfig,
+        ScheduledConstraintOptions,
         read_capture_evidence,
+    )
+
+    from src.shared.python.workspace.necromatcher_contacts import (
+        contact_schedule_binding,
     )
 
     before, script_hash = fit_execution_stamp(), compute_file_sha256(Path(__file__))
@@ -397,8 +518,10 @@ def audit_saved_fit(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]
     _check_parents(library, binding)
     fit, original = binding.fit, binding.fit["evidence"]["original_fit"]
     _, attachments = binding.review_inputs()
+    config = ImageFitConfig.from_record(original["config"])
     unknown = fit["provenance"]["request_options"]["unknown_visibility_weight"]
     with CaptureReview(library, fit["capture_id"]) as review:
+        contact_binding = contact_schedule_binding(config, fit, review)
         evidence = read_capture_evidence(
             review,
             tuple(attachments),
@@ -428,16 +551,27 @@ def audit_saved_fit(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]
     )
     if not np.allclose(stored, fit["q"], rtol=1e-8, atol=1e-10):
         raise ValueError("Saved dense poses disagree with preserved spline")
-    options = ImageFitConfig.from_record(original["config"]).constraint_options
+    options = config.constraint_options
     if options is None:
         raise ValueError("Audit requires an explicitly declared ground plane")
     ik = cast(NativeAuditIK, binding.plant.create_ik(attachments))
     report = audit_trajectory(
-        result, binding.authored_coordinate_bounds(), frames, ik, options.ground
+        result,
+        binding.authored_coordinate_bounds(),
+        frames,
+        ik,
+        options.base.ground
+        if isinstance(options, ScheduledConstraintOptions)
+        else options.ground,
+        options,
     )
-    capture = library.load_asset(fit["capture_id"])
-    with ZipFile(capture.path) as archive:
-        source = json.loads(archive.read("receipt.json"))["source"]
+    if contact_binding is not None:
+        report["contact_phase_binding"] = {
+            **contact_binding,
+            "external_capture_binding_required": False,
+            "capture_binding_verified": True,
+        }
+    source = _source_video_record(library, fit["capture_id"])
     _check_parents(library, binding)
     after = fit_execution_stamp()
     _verify_audit_stamp(before, after, script_hash, compute_file_sha256(Path(__file__)))

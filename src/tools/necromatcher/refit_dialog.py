@@ -17,7 +17,10 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+from src.shared.python.motion_matching.historical_fit import (
+    ImageFitConfig,
+    ScheduledConstraintOptions,
+)
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import NativeRefitOptions, NativeRefitSession
 
@@ -164,7 +167,21 @@ class ResearchRefitDialog(QDialog):
     def _update_recipe_summary(self) -> None:
         config = self._baseline_config
         constraints = config.constraint_options
-        pins = constraints.pinned_spheres if constraints else ()
+        schedule_summary = ""
+        if isinstance(constraints, ScheduledConstraintOptions):
+            phases = constraints.schedule.phases
+            pins = tuple(
+                sorted({pin for phase in phases for pin in phase.pinned_spheres})
+            )
+            boundaries = constraints.schedule.boundary_times()
+            start, end = boundaries[0], boundaries[-1]
+            schedule_summary = (
+                f"{len(phases)} Authored Contact Phases; "
+                f"Review Source Interval: {start:g} to {end:g}; "
+                "Authored Contact Hypothesis. "
+            )
+        else:
+            pins = constraints.pinned_spheres if constraints else ()
         policy = (
             "strict"
             if self.initialization.currentIndex() == 1
@@ -180,7 +197,7 @@ class ResearchRefitDialog(QDialog):
             f"{len(config.coordinate_bounds)} Authored Bounds; "
             f"{len(config.interior_fractions)} Interior Fractions "
             f"{config.interior_fractions}; Pins: {', '.join(pins) or 'None'}; "
-            f"Initialization Policy: {policy}. {resume}. "
+            f"Initialization Policy: {policy}. {resume}. {schedule_summary}"
             "Grip, Contact, Camera and Physical Time Remain Unqualified."
         )
 

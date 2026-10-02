@@ -24,6 +24,7 @@ from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
 )
+from .contact_schedule import ScheduledConstraintOptions
 from .contracts import (
     CameraProjection,
     ImageFitConfig,
@@ -65,6 +66,16 @@ class _Fit:
             for left, right in zip(knots[:-1], knots[1:], strict=True)
             for fraction in config.interior_fractions
         ]
+        if isinstance(config.constraint_options, ScheduledConstraintOptions):
+            boundaries = config.constraint_options.schedule.boundary_times()
+            if (
+                boundaries[0] != inputs.source_times[0]
+                or boundaries[-1] != inputs.source_times[-1]
+            ):
+                raise ValueError(
+                    "Contact schedule interval must match image source interval"
+                )
+            probes.extend(boundaries)
         self.evaluation_times = np.unique(np.concatenate([inputs.source_times, probes]))
         self.source_indices = np.searchsorted(
             self.evaluation_times, inputs.source_times
@@ -95,13 +106,25 @@ class _Fit:
             a_basis=evaluation.a_basis[indices],
         )
 
-    def constraint_linearizations(self, q: np.ndarray) -> list[ConstraintLinearization]:
+    def constraint_linearizations(
+        self, q: np.ndarray, times: np.ndarray | None = None
+    ) -> list[ConstraintLinearization]:
         """Use the declared public IK capability with stable rows and native order."""
         if self.ik is None or self.config.constraint_options is None:
             return []
+        if times is None:
+            times = self.evaluation_times
+        if times.shape != (len(q),) or not np.isfinite(times).all():
+            raise ValueError("Constraint times must match finite pose rows")
+        options = self.config.constraint_options
         rows = [
-            self.ik.constraint_residual_jacobian(pose, self.config.constraint_options)
-            for pose in q
+            self.ik.constraint_residual_jacobian(
+                pose,
+                options.resolve(float(time))
+                if isinstance(options, ScheduledConstraintOptions)
+                else options,
+            )
+            for pose, time in zip(q, times, strict=True)
         ]
         if any(not isinstance(row, ConstraintLinearization) for row in rows):
             raise ValueError(
@@ -152,7 +175,7 @@ class _Fit:
                     [
                         row.residual
                         for row in self.constraint_linearizations(
-                            self.expand(evaluation.q)
+                            self.expand(evaluation.q), evaluation.times
                         )
                     ]
                 )
@@ -229,7 +252,9 @@ class _Fit:
             speed.reshape(-1, columns),
         ]
         if self.ik is not None:
-            rows = self.constraint_linearizations(self.expand(evaluation.q))
+            rows = self.constraint_linearizations(
+                self.expand(evaluation.q), evaluation.times
+            )
             pieces.append(
                 np.vstack(
                     [
@@ -358,7 +383,8 @@ def _fit_result(
         np.sum(weighted[valid] ** 2, axis=1) / inputs.confidence[valid]
     )
     rows = fit.constraint_linearizations(
-        fit.expand(trajectory.evaluate(coefficients, fit.evaluation_times).q)
+        fit.expand(trajectory.evaluate(coefficients, fit.evaluation_times).q),
+        fit.evaluation_times,
     )
     return ImageFitResult(
         inputs.source_times.copy(),

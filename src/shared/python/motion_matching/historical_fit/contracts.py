@@ -1,6 +1,7 @@
 """Validated image evidence and explicitly unqualified native fit records."""
 
 from __future__ import annotations
+from .contact_schedule import ScheduledConstraintOptions, constraint_options_from_record
 
 from dataclasses import dataclass, field
 from collections.abc import Mapping
@@ -198,7 +199,7 @@ class ImageFitConfig:
     prior_weight: float = 0.1
     smoothness_weight: float = 0.01
     closure_weight: float = 100.0
-    constraint_options: ConstraintOptions | None = None
+    constraint_options: ConstraintOptions | ScheduledConstraintOptions | None = None
     interior_fractions: tuple[float, ...] = ()
     coordinate_bounds: tuple[tuple[str, float, float], ...] = ()
 
@@ -248,7 +249,9 @@ class ImageFitConfig:
                 ConstraintOptions,
             )
 
-            if not isinstance(self.constraint_options, ConstraintOptions):
+            if not isinstance(
+                self.constraint_options, (ConstraintOptions, ScheduledConstraintOptions)
+            ):
                 raise ValueError(
                     "Fit constraint options must be a ConstraintOptions record"
                 )
@@ -272,24 +275,7 @@ class ImageFitConfig:
         nested = values.get("constraint_options")
         try:
             if nested is not None:
-                from src.shared.python.motion_matching.constraint_kinematics import (
-                    ConstraintOptions,
-                )
-                from src.shared.python.motion_matching.contact_law import GroundPlane
-
-                if not isinstance(nested, Mapping) or not isinstance(
-                    nested.get("ground"), Mapping
-                ):
-                    raise ValueError(
-                        "Fit constraint configuration must contain a ground object"
-                    )
-                options = dict(nested)
-                options["ground"] = GroundPlane(**dict(options["ground"]))
-                pinned = options.get("pinned_spheres", ())
-                if not isinstance(pinned, (tuple, list)):
-                    raise ValueError("Pinned sphere names must be an array")
-                options["pinned_spheres"] = tuple(pinned)
-                values["constraint_options"] = ConstraintOptions(**options)
+                values["constraint_options"] = constraint_options_from_record(nested)
             return cls(**values)
         except (TypeError, KeyError) as exc:
             raise ValueError("Malformed fit configuration") from exc

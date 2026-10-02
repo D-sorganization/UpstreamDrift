@@ -28,6 +28,7 @@ from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
 from .necromatcher_spline import preserved_fit_spline
+from .necromatcher_contacts import contact_schedule_binding
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +247,7 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         [source["frame_indices"].index(i) for i in indices]
     ]
     with CaptureReview(library, source["capture_id"]) as review:
+        contact_binding = contact_schedule_binding(config, source, review)
         evidence = read_capture_evidence(
             review,
             tuple(attachments),
@@ -287,6 +289,8 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
     )
     output["provenance"]["coordinate_bounds_provenance"] = ranges
+    if contact_binding is not None:
+        output["provenance"]["contact_schedule_binding"] = contact_binding
     if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
         raise ValueError("Native worker implementation changed during execution")
     return output

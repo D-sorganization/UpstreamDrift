@@ -211,3 +211,41 @@ def test_refit_resume_retains_edited_training_sample_ids(monkeypatch):
     dialog.initialization.setCurrentIndex(0)
     assert dialog.frames.text() == "3, 5, 7"
     dialog.cleanup()
+
+
+def test_refit_scheduled_recipe_summary_and_scalar_edit_preserve_phases(monkeypatch):
+    from dataclasses import asdict, replace
+    from src.shared.python.motion_matching.historical_fit import (
+        ContactPinPhase,
+        ContactPinSchedule,
+        ScheduledConstraintOptions,
+    )
+
+    config, plan = _recipe_plan()
+    schedule = ContactPinSchedule(
+        "capture",
+        "sha256:" + "a" * 64,
+        (
+            ContactPinPhase((20, 2), (22, 2), ("heel_r",), ("sha256:" + "b" * 64,)),
+            ContactPinPhase((22, 2), (24, 2), (), ("sha256:" + "c" * 64,)),
+        ),
+    )
+    config = replace(
+        config,
+        constraint_options=ScheduledConstraintOptions(
+            config.constraint_options, schedule
+        ),
+    )
+    plan["baseline_config"] = asdict(config)
+    app, dialog = _recipe_dialog(monkeypatch, plan)
+    summary = dialog.recipe_summary.text()
+    assert "2 Authored Contact Phases" in summary
+    assert "Review Source Interval: 10" in summary
+    assert "12" in summary
+    assert "Authored Contact Hypothesis" in summary
+    assert "heel_r" in summary
+    dialog.fields["prior_weight"].setText("0.003")
+    assert dialog._options().config == replace(config, prior_weight=0.003)
+    dialog.initialization.setCurrentIndex(1)
+    assert dialog._options().config.constraint_options == config.constraint_options
+    dialog.cleanup()

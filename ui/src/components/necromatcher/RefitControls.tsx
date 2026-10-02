@@ -1,6 +1,6 @@
 import { useResearchJob } from './useResearchJob';
 import { useEffect, useState } from 'react';
-import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions, type ImageFitRecipe } from '@/api/necromatcher';
+import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions, type ImageFitRecipe, type ScheduledFitConstraintRecipe } from '@/api/necromatcher';
 
 const refitApi = {submit: submitRefit, view: fetchRefit, cancel: cancelRefit};
 
@@ -8,6 +8,8 @@ type Props = {fit: string; onStored: () => void; initialRunId?: string; onRun?: 
 const errorText = (error: unknown) => error instanceof Error ? error.message : 'The research job could not be reached.';
 const parseNumbers = (text: string) => text.trim() ? text.split(',').map((value) => value.trim() ? Number(value) : NaN) : [];
 const defaultConfig: ImageFitRecipe = {max_iterations: 100, prior_weight: 0.1, smoothness_weight: 0.01, closure_weight: 100};
+const isScheduled = (options: ImageFitRecipe['constraint_options']): options is ScheduledFitConstraintRecipe => Boolean(options && 'schedule' in options);
+const sourceSeconds = ([numerator, denominator]: [number, number]) => numerator / denominator;
 const field = 'block w-full rounded bg-gray-900 border border-gray-600 p-2 mt-1';
 
 export function RefitControls(props: Props) {
@@ -46,7 +48,9 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const knotCount = resume ? savedSpline?.knot_count ?? 0 : options.knot_count;
   const interval = savedSpline?.source_interval;
   const ranges = config.coordinate_bounds?.length ?? 0;
-  const pins = config.constraint_options?.pinned_spheres ?? [];
+  const constraints = config.constraint_options;
+  const schedule = isScheduled(constraints) ? constraints.schedule : null;
+  const pins = isScheduled(constraints) ? [...new Set(constraints.schedule.phases.flatMap((phase) => phase.pinned_spheres))] : constraints?.pinned_spheres ?? [];
   const valid = plan && id.trim() && indices.length >= 2 && indices.every((n, i) => Number.isInteger(n) && plan.frame_indices.includes(n) && (i === 0 || n > indices[i - 1])) && priorScales.length === plan.coordinate_order.length && priorScales.every((n) => Number.isFinite(n) && n > 0) && knotCount >= 2 && knotCount <= indices.length && (!resume || (savedSpline?.available && interval && indices[0] === plan.frame_indices[0] && indices[indices.length - 1] === plan.frame_indices[plan.frame_indices.length - 1]));
   const busy = submitting || Boolean(run && ['pending', 'running'].includes(run.status));
   const error = planError || job.error;
@@ -62,6 +66,7 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
         </select></label>
         {!savedSpline?.available && savedSpline?.reason && <p className="text-xs">Saved Spline Unavailable: {savedSpline.reason}</p>}
         <p className="text-xs">{ranges} Authored Range{ranges === 1 ? '' : 's'}; {pins.filter((name) => name === 'heel_r' || name === 'heel_l').length} Authored Heel Pins. Source Timing Remains Unknown. Saved Contact and Range Hypotheses Are Retained.</p>
+        {schedule && <p className="text-xs">{schedule.phases.length} Authored Contact Phases; Review Source Interval: {sourceSeconds(schedule.phases[0].start_pts)} to {sourceSeconds(schedule.phases[schedule.phases.length - 1].end_pts)}. Authored Contact Hypothesis; Phase Pins: {pins.join(', ') || 'None'}. Contact Remains Unqualified.</p>}
         {resume && interval && <p className="text-xs">Full Saved Source Interval: {interval[0]} to {interval[1]}. Preserved Knot Clock and Strict Initialization; Include Both Endpoint Frames.</p>}
         <label className="block">Source Frame Indices<textarea className={field} value={frames} onChange={(event) => setFrames(event.target.value)} /></label>
         <p className="text-xs">Coordinate Order: {plan.coordinate_order.map((name, i) => `${name} (${plan.coordinate_units[i]})`).join(', ')}</p>
