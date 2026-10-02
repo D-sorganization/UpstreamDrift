@@ -1,13 +1,16 @@
-# Force and Torque Overlay Planning — #11285
+# Force and Torque Overlay Delivery — #11285 / #11286
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `claude/force-torque-overlays-smwke2`; commit SELF; PR: see the planning PR for this branch.
-- Objective: plan (not execute) force/torque arrows and tension/compression shading for MuJoCo, Drake, Pinocchio, OpenSim and Simscape models, and their overlay on source footage.
-- Completed: deep-dive assessment (`docs/development/force_torque_overlay_epic.md` §2); ADR-0052 (status Proposed); epic #11285 with children #11286–#11315 (FTO-1 … FTO-30) carrying TDD/DbC/LoD/DRY contracts and dependency waves; development-log entry `DL-#11285`.
-- Review fixes (Codex on #11316): `OverlayWrench` has optional force/torque halves (reuses `SpatialWrench` validation/transforms, no fabricated halves); serialized `GlyphSet` (`glyph-set-v1`) is the only rendering wire, so the web renders server glyphs; Simscape already logs `<J>Logs_Rotation_Transform_*` (global = R·local), so FTO-18 draws every joint and FTO-19 is rescoped to the simulation-output path; children open ready-for-review PRs (never drafts); retired public renderers keep one-release `DeprecationWarning` shims.
-- Key decisions: build on `SpatialWrench` and `AxialLoadFrame` rather than adding an eighth vector type; one pure glyph builder; engine SDK renderers live beside their engine; unavailable channels are never drawn as zero; video reuses `PinholeCamera`, `TimeMapping` and the existing compositors; Necromatcher layer (FTO-28) waits for #11246.
-- Validation: development-log validator, Ruff (no Python changed) and document checks (see the PR body).
-- Blockers: ADR-0052 needs owner acceptance; FTO-19 needs an R2025b MATLAB host (it no longer blocks Simscape joint arrows); FTO-27 is `tier:strong`.
-- Next steps: 1) owner reviews and accepts ADR-0052; 2) dispatch Wave A (FTO-1 #11286, FTO-4 #11289); 3) Wave B (FTO-2, FTO-3, FTO-24) once FTO-1 merges.
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11286-contracts`; commit SELF; PR: ready-for-review PR for FTO-1 (#11286).
+- Objective: implement FTO-1 (#11286) engine-agnostic force/torque overlay contract, wire schema and fixtures under ADR-0052.
+- Completed:
+  - `src/shared/python/force_overlay/`: `contracts.py`, `series.py`, `__init__.py` with explicit `__all__`, all files strictly under 400 lines.
+  - Contracts: `WrenchKind` enum, `OverlayWrench` (immutable, optional force/torque halves in world frame, `to_spatial_wrench`), `ForceTorqueFrame` (unique labels, strict axial load timestamp matching, `to_dict`/`from_dict`), `ForceTorqueSeries` (linear interpolation, `allow_pickle=False` npz I/O with boolean masks), `ForceTorqueProvider` protocol and `read_force_torque_frame`.
+  - Promoted `validate_vec3` to public in `motion_matching/force_torque.py` with alias.
+  - Wire schema: `schemas/force-torque-frame-v1.json` (JSON Schema 2020-12) and `schemas/force-torque-frame-examples.json` with 7 test cases.
+  - Headless import test and unit tests in `tests/unit/force_overlay/` with 98.5% coverage.
+  - Documented in `docs/agents/shared-infrastructure.md`.
+- Validation: Ruff check and format clean; 16 unit tests passing; line coverage 98.5%; file size budget and error ratchet passed.
+- Next steps: Review and merge FTO-1 (#11286); dispatch Wave B (FTO-2 #11287, FTO-3 #11288, FTO-24 #11309).
 
 # Capture-O Video Companion Planning — #11268
 

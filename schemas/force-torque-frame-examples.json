@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ForceTorqueFrameExamples",
+  "cases": [
+    {
+      "name": "valid_torque_only",
+      "is_valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "pinocchio",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "joint_actuator",
+            "label": "joint:hip_flexion",
+            "body": "femur_r",
+            "point_m": [0.1, 0.2, 0.3],
+            "force_n": null,
+            "torque_nm": [0.0, 10.5, 0.0],
+            "source": "pinocchio"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "valid_force_only",
+      "is_valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 1.0,
+        "engine": "drake",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:heel_r",
+            "body": "calcn_r",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 500.0],
+            "torque_nm": null,
+            "source": "drake"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "valid_both_halves",
+      "is_valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 1.25,
+        "engine": "simscape",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "grip",
+            "label": "grip:lead_hand",
+            "body": "hand_lead",
+            "point_m": [0.2, 0.1, 1.2],
+            "force_n": [10.0, -5.0, 20.0],
+            "torque_nm": [1.0, 2.0, -0.5],
+            "source": "simscape"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "valid_with_axial_loads",
+      "is_valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "joint_actuator",
+            "label": "joint:lumbar_ext",
+            "body": "torso",
+            "point_m": [0.0, 0.0, 0.8],
+            "force_n": null,
+            "torque_nm": [20.0, 0.0, 0.0],
+            "source": "mujoco"
+          }
+        ],
+        "axial_loads": {
+          "time_s": 0.5,
+          "values_n": {
+            "femur_r": -120.0,
+            "tibia_r": null
+          },
+          "source": "mujoco",
+          "units": "N",
+          "sign_convention": "tension-positive"
+        }
+      }
+    },
+    {
+      "name": "invalid_both_halves_null",
+      "is_valid": false,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:heel_r",
+            "body": "foot",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": null,
+            "torque_nm": null,
+            "source": "mujoco"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "invalid_duplicate_labels",
+      "is_valid": false,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:foot",
+            "body": "foot_r",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco"
+          },
+          {
+            "kind": "contact",
+            "label": "contact:foot",
+            "body": "foot_l",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco"
+          }
+        ],
+        "axial_loads": null
+      }
+    },
+    {
+      "name": "invalid_nan",
+      "is_valid": false,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": {
+          "force": "N",
+          "torque": "N*m",
+          "length": "m"
+        },
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:heel",
+            "body": "foot",
+            "point_m": ["NaN", 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "mujoco"
+          }
+        ],
+        "axial_loads": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/D-sorganization/UpstreamDrift/schemas/force-torque-frame-v1.json",
+  "title": "ForceTorqueFrame",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "time_s",
+    "engine",
+    "world_frame",
+    "units",
+    "wrenches"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "force-torque-frame-v1"
+    },
+    "time_s": {
+      "type": "number"
+    },
+    "engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "world_frame": {
+      "type": "string",
+      "const": "world_Zup"
+    },
+    "units": {
+      "type": "object",
+      "required": ["force", "torque", "length"],
+      "properties": {
+        "force": { "type": "string" },
+        "torque": { "type": "string" },
+        "length": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "wrenches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "label", "body", "point_m", "source"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "joint_actuator",
+              "joint_reaction",
+              "contact",
+              "grip",
+              "external",
+              "gravity",
+              "muscle"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "pattern": "^[a-z_]+:[A-Za-z0-9_.:-]+$"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "point_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "force_n": {
+            "oneOf": [
+              { "type": "null" },
+              {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 3,
+                "maxItems": 3
+              }
+            ]
+          },
+          "torque_nm": {
+            "oneOf": [
+              { "type": "null" },
+              {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 3,
+                "maxItems": 3
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "anyOf": [
+          {
+            "properties": { "force_n": { "type": "array" } },
+            "required": ["force_n"]
+          },
+          {
+            "properties": { "torque_nm": { "type": "array" } },
+            "required": ["torque_nm"]
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "axial_loads": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": [
+            "time_s",
+            "values_n",
+            "source",
+            "units",
+            "sign_convention"
+          ],
+          "properties": {
+            "time_s": { "type": "number" },
+            "values_n": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [{ "type": "null" }, { "type": "number" }]
+              }
+            },
+            "source": { "type": "string" },
+            "units": { "type": "string" },
+            "sign_convention": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

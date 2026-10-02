@@ -16,6 +16,15 @@ the modules most often missed.
 - `capabilities` — feature-capability declarations per engine.
 - `mock_engine` — fallback for headless / CI tests.
 
+### Force/Torque Overlay
+
+`src/shared/python/force_overlay/` — engine-agnostic physical wrench and overlay telemetry ([ADR 0052](../adr/0052-force-torque-overlay-contract.md)).
+
+- `WrenchKind`, `OverlayWrench` — immutable world-frame rigid body wrenches with optional force/torque halves.
+- `ForceTorqueFrame` — timestamped collection of wrenches with `AxialLoadFrame` alignment and wire serialization (`force-torque-frame-v1`).
+- `ForceTorqueSeries` — time series with linear interpolation and lossless `npz` boolean mask storage.
+- `ForceTorqueProvider`, `read_force_torque_frame` — runtime protocol and guarded reader.
+
 ### Simulation Backends (GPU-Ready, Backend-Agnostic)
 
 `src/shared/python/simulation_backends/` — interchangeable physics backends
