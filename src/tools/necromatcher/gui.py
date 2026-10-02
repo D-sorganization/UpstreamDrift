@@ -473,5 +473,5 @@ class NecromatcherWidget(QWidget):
             dialog.cleanup()
         if self._video_session:
             self._video_session.close()
-        for dialog in self._video_dialogs:
-            dialog.cleanup()
+        for video_dialog in self._video_dialogs:
+            video_dialog.cleanup()

@@ -167,7 +167,9 @@ def _check_samples(
     expected_efforts = np.asarray(
         [controls.evaluate(float(min(t, controls.end_s))) for t in trace.t]
     )
-    if not np.allclose(trace.u, expected_efforts, rtol=0, atol=1e-12):
+    if trace.u is None or not np.allclose(
+        trace.u, expected_efforts, rtol=0, atol=1e-12
+    ):
         raise ValueError("Replay commands differ from their bound authored profile")
     for key in (
         "initial_grip_gap_m",

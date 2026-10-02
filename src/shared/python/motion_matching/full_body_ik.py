@@ -227,10 +227,16 @@ def _run_trf_loop(
             raise RuntimeError("TRF residual evaluation produced no result")
         return cached_pair
 
+    def _residual_fn(x: np.ndarray) -> np.ndarray:
+        return evaluate(x)[0]
+
+    def _jacobian_fn(x: np.ndarray) -> np.ndarray:
+        return evaluate(x)[1]
+
     result = least_squares(
-        lambda x: evaluate(x)[0],
+        _residual_fn,
         q_init[free],
-        jac=lambda x: evaluate(x)[1],
+        jac=_jacobian_fn,
         bounds=(low[free], high[free]),
         method="trf",
         x_scale="jac",
