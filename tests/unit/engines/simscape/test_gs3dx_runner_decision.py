@@ -366,4 +366,3 @@ def test_windows_nonzero_multiple_of_256_mapped_to_nonzero_fail_closed(
     assert outcome.final_exit_code == 1
     assert outcome.actual_process_exit_code == nonzero_code
     assert outcome.to_receipt()["actual_process_exit_code"] == nonzero_code
-
