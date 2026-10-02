@@ -72,7 +72,8 @@ def _build_revision(
     original = binding.fit
     q = np.asarray(original["q"], dtype=float)
     anchor = q[position]
-    normal = np.asarray(binding.plant.ground_plane.normal, dtype=float)
+    ground_plane = binding.plant.ground_plane
+    normal = np.asarray(ground_plane.normal, dtype=float)
     normal /= np.linalg.norm(normal)
     revised_anchor = preload_feet(simulator, anchor, preload=False)
     revised_anchor[:3] += np.linalg.solve(

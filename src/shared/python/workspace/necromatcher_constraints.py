@@ -80,8 +80,10 @@ def repair_native_motion(
         )
         if not np.isfinite(pixel_changes).all() or not np.isfinite(result.q).all():
             raise ValueError("Repaired states and projections must be finite")
+        coord_order = binding.plant.coordinate_order
         for name, (low, high) in bounds.items():
-            value = result.q[binding.plant.coordinate_order.index(name)]
+            coord_idx = coord_order.index(name)
+            value = result.q[coord_idx]
             if not low <= value <= high:
                 raise ValueError("Native repair violated authored coordinate bounds")
         samples.append(result.q.tolist())
