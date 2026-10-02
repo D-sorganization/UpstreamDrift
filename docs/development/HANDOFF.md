@@ -450,9 +450,12 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    At 1.0 s the tilt is 117 deg, the pelvis is at z -1.83 m, and the
    vertical force is 1814 N on the left heel. The larger damping does
    not keep a stance, and the first strike is larger. Do not repeat
-   this damping change. Do not change FootContactStiffness. Do not
-   save. Do not write the shift into the model. Do not claim the 5 %
-   bar. Do not rerun 1.809 s.
+   this damping change. The next unsaved check keeps the still
+   upper-body freeze and the saved damping, stops at 0.02 s, and
+   records both ankle heights, the pelvis up vector, and all ten
+   contact forces at the first sample. Do not change
+   FootContactStiffness. Do not save. Do not write the shift into the
+   model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
