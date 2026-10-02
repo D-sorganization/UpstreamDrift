@@ -46,9 +46,12 @@ COV-3 ratifies or amends these; its protocol document supersedes this table.
 
 ## Privacy
 
-- Owner media, decoded frames, overlays, per-frame numbers and the album
-  locator stay under `$CAPTURE_DATA_DIR/capture-O-video/`. They never enter Git,
-  issues, pull requests, logs or public screenshots.
+- Owner media, decoded frames, overlays and per-frame numbers stay under
+  `$CAPTURE_DATA_DIR/capture-O-video/`. They never enter Git, issues, pull
+  requests, logs or public screenshots.
+- The source album is public by owner decision (2026-10-02):
+  <https://photos.app.goo.gl/XU322J42Rg8mev2aA>. Cloud sandboxes receive HTTP
+  403 for it; download on a fleet machine as described in COV-1 (#11269).
 - Public text uses neutral ids only: `capture-O`, `cov-NN`, `cov-NN-sK`,
   `subject-O`. No vendor names, personal names or private paths.
 - Set `NECROMATCHER_LIBRARY_ROOT` inside the private store before any
@@ -60,7 +63,7 @@ COV-3 ratifies or amends these; its protocol document supersedes this table.
 
 ```text
 $CAPTURE_DATA_DIR/capture-O-video/
-  PRIVATE_SOURCE.md        album locator, consent, retention, owner recollection
+  SOURCE.md                album link, consent, retention, owner recollection
   originals/               untouched downloaded bytes, read-only
   originals.sha256
   ffprobe/                 per-file ffprobe JSON
