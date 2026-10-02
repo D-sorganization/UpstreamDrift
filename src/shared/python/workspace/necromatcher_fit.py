@@ -107,4 +107,7 @@ def read_kinematic_fit(
         for index, identity in zip(indices, frames, strict=True):
             if index >= review.frame_count or identity != review.frame(index)["frame"]:
                 raise ValueError("Fit source frame identity mismatch")
+    from .necromatcher_placement import validate_placement_lineage
+
+    validate_placement_lineage(payload, library, swing_id)
     return payload

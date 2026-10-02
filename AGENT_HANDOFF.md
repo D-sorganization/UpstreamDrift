@@ -1,5 +1,17 @@
 # Necromatcher Handoff
 
+## Authored Ground Placement
+
+The shared author_ground_placement operation creates separate source-linked fits
+using canonical native foot placement, a compensating camera translation and
+all-frame rigid/pixel conservation checks. It preserves original solver evidence
+in the immutable source version and records fresh source/runtime fingerprints.
+Placement lineage is revalidated during import, recall and export. Thirteen new
+cases pass; the combined suite is 136 passed and one unavailable Drake skip.
+See [Ground Placement Procedure](docs/development/necromatcher-ground-placement.md).
+Next: apply committed code to actual Hogan/Tiger versions, inspect residual
+whole-track penetration, then closure/control recovery and downstream consumers.
+
 ## Authored Forward Replay
 
 `workspace.replay_authored_profile` connects exact bound effort profiles to the
