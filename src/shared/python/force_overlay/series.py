@@ -89,10 +89,12 @@ def _interpolate_axial_loads(
     f0: ForceTorqueFrame, f1: ForceTorqueFrame, alpha: float, t: float
 ) -> AxialLoadFrame | None:
     """Linearly interpolate axial load frames if both are present."""
-    if f0.axial_loads is None or f1.axial_loads is None:
+    al0_frame = f0.axial_loads
+    al1_frame = f1.axial_loads
+    if al0_frame is None or al1_frame is None:
         return None
-    al0 = f0.axial_loads.values_n
-    al1 = f1.axial_loads.values_n
+    al0 = al0_frame.values_n
+    al1 = al1_frame.values_n
     all_segs = sorted(set(al0.keys()) | set(al1.keys()))
     interp_values: dict[str, float | None] = {}
     for seg in all_segs:
@@ -105,7 +107,7 @@ def _interpolate_axial_loads(
     return AxialLoadFrame(
         time_s=t,
         values_n=interp_values,
-        source=f0.axial_loads.source,
+        source=al0_frame.source,
     )
 
 
@@ -258,8 +260,9 @@ class ForceTorqueSeries:
         all_segments: list[str] = []
         seen_segs: set[str] = set()
         for f in self.frames:
-            if f.axial_loads is not None:
-                for seg in f.axial_loads.values_n:
+            axial = f.axial_loads
+            if axial is not None:
+                for seg in axial.values_n:
                     if seg not in seen_segs:
                         seen_segs.add(seg)
                         all_segments.append(seg)
@@ -272,9 +275,11 @@ class ForceTorqueSeries:
         axial_sources = np.zeros((n_frames,), dtype="U64")
 
         for i, f in enumerate(self.frames):
-            if f.axial_loads is not None:
-                axial_sources[i] = f.axial_loads.source
-                for seg, val in f.axial_loads.values_n.items():
+            axial = f.axial_loads
+            if axial is not None:
+                axial_sources[i] = axial.source
+                vals = axial.values_n
+                for seg, val in vals.items():
                     s = seg_to_idx[seg]
                     if val is not None:
                         axial_values[i, s] = val
