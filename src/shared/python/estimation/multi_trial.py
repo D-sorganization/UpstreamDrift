@@ -292,6 +292,10 @@ def shared_parameter_covariance(
 
 
 def _validate_problem(problem: MultiTrialMapProblem) -> None:
+    if problem.options.trajectory_domain is not None:
+        raise ValueError(
+            "Hermite trajectory domain is supported by single-trial MAP only"
+        )
     require(len(problem.observations) > 0, "at least one observation is required")
     keys = [observation.key for observation in problem.observations]
     require(len(keys) == len(set(keys)), "trial/view keys must be unique")

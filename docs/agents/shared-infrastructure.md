@@ -540,3 +540,7 @@ named order. Projection and native refitting reuse this resource; efforts checks
 exact model/fit hashes, ordered units and authored timing before native command
 mapping. Scientific acceptance remains independent. See the
 [Native Resource Procedure](../development/necromatcher-native-resources.md).
+
+### Bounded Hermite Coordinate Domain
+
+`src.shared.python.estimation.HermiteBoundsDomain` represents a conservative C1 whole-segment bound through Bernstein controls. `MapEstimatorOptions.trajectory_domain` preserves physical callback/saved coefficient contracts while the existing single-trial MAP solver optimizes bounded internal positions/slopes. `ImageFitConfig.coordinate_bounds` binds immutable named native limits; unsupported names or infeasible seeds fail before solving. Reuse this domain instead of clipping stored trajectories or introducing another fitting scheduler. Active branch ties use an explicitly documented generalized derivative; bounds do not qualify nonlinear grip/contact or dynamics. See [Hermite Bounds Procedure](../development/necromatcher-hermite-bounds.md).

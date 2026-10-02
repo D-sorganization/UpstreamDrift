@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from pathlib import Path
 from threading import Event
 import time
@@ -12,6 +13,12 @@ from zipfile import ZipFile
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+def _freeze_execution_stamp(jobs, monkeypatch):
+    """Isolate fake-worker availability tests from concurrent source edits."""
+    stamp = jobs.fit_execution_stamp()
+    monkeypatch.setattr(jobs, "fit_execution_stamp", lambda: stamp)
 
 
 def _wait(session, run):
@@ -319,3 +326,134 @@ def test_json_polling_preserves_missing_and_malformed_errors(tmp_path):
     path.write_text("[]", encoding="utf-8")
     with pytest.raises(ValueError, match="JSON object"):
         jobs._read(path)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "output",
+        "parent",
+        "parent_fit",
+        "parent_capture",
+        "missing",
+        "extra",
+        "symlink",
+        "metadata",
+        "malformed_metadata",
+    ],
+)
+def test_polling_invalidates_changed_artifacts_without_hashing(
+    fit_case, monkeypatch, mutation
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        overlay = library.root / "video-runs" / run / "overlay"
+        if mutation == "output":
+            (overlay / "overlay.mp4").write_bytes(b"changed")
+        elif mutation.startswith("parent"):
+            identity = {
+                "parent": "model-v1",
+                "parent_fit": "source",
+                "parent_capture": "capture-v1",
+            }[mutation]
+            Path(library.load_asset(identity).path).write_bytes(b"changed")
+        elif mutation == "missing":
+            (overlay / "frame-000000.png").unlink()
+        elif mutation == "extra":
+            (overlay / "extra.txt").write_text("undeclared")
+        elif mutation == "metadata":
+            actual_assets = library.assets
+
+            def changed_assets(swing):
+                assets = deepcopy(actual_assets(swing))
+                next(
+                    asset for asset in assets if asset.dataset_id == "model-v1"
+                ).metadata["hash"] = "changed"
+                return assets
+
+            monkeypatch.setattr(library, "assets", changed_assets)
+        elif mutation == "malformed_metadata":
+            from src.shared.python.core.contracts.exceptions import StateError
+
+            def malformed_assets(swing):
+                raise StateError("Malformed relevant project metadata")
+
+            monkeypatch.setattr(library, "assets", malformed_assets)
+        else:
+            target = overlay / "overlay.mp4"
+            actual = Path.is_symlink
+            # Windows privilege restrictions do not weaken the symlink guard test.
+            monkeypatch.setattr(
+                Path, "is_symlink", lambda path: path == target or actual(path)
+            )
+        view = session.view(run)
+        assert view["execution_verified"]
+        assert not view["download_available"]
+        assert view["artifact_state"] == "changed_or_unverified"
+    finally:
+        session.close()
+
+
+def test_polling_uses_metadata_and_ignores_unrelated_fit_versions(
+    fit_case, monkeypatch
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        library.add_fit("unrelated", "practice", source)
+
+        def no_verification(*args, **kwargs):
+            raise AssertionError("Polling must not fully hash parents or output")
+
+        monkeypatch.setattr(jobs, "_parents", no_verification)
+        monkeypatch.setattr(jobs, "_outputs", no_verification)
+        monkeypatch.setattr(library, "load_asset", no_verification)
+        for _ in range(3):
+            assert session.view(run)["download_available"]
+    finally:
+        session.close()
+
+
+def test_legacy_completion_requires_explicit_download_verification(
+    fit_case, monkeypatch
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    _freeze_execution_stamp(jobs, monkeypatch)
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        run = session.submit("source")["run_id"]
+        assert _wait(session, run)["download_available"]
+        complete_path = library.root / "video-runs" / run / "complete.json"
+        complete = json.loads(complete_path.read_text())
+        complete.pop("artifact_baseline", None)
+        complete_path.write_text(json.dumps(complete))
+        view = session.view(run)
+        assert view["execution_verified"]
+        assert not view["download_available"]
+        assert view["producer_source_commit"]
+        assert session.download(run).is_file()
+        assert session.view(run)["download_available"]
+    finally:
+        session.close()

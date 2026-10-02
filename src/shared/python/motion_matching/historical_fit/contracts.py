@@ -166,6 +166,30 @@ class ImageFitInputs:
             object.__setattr__(self, "initial_samples", samples)
 
 
+def _validate_coordinate_bounds(bounds: tuple[tuple[str, float, float], ...]) -> None:
+    """Require unique named two-sided finite limits in native coordinate units."""
+    if not isinstance(bounds, tuple):
+        raise ValueError("Coordinate bounds must be immutable named tuples")
+    names: set[str] = set()
+    for bound in bounds:
+        if not isinstance(bound, tuple) or len(bound) != 3:
+            raise ValueError("Coordinate bounds require name, lower and upper")
+        name, lower, upper = bound
+        if not isinstance(name, str) or not name.strip() or name in names:
+            raise ValueError("Coordinate bounds require unique nonempty names")
+        if (
+            any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not np.isfinite(value)
+                for value in (lower, upper)
+            )
+            or lower > upper
+        ):
+            raise ValueError("Coordinate bounds require ordered finite endpoints")
+        names.add(name)
+
+
 @dataclass(frozen=True)
 class ImageFitConfig:
     max_iterations: int = 100
@@ -174,8 +198,10 @@ class ImageFitConfig:
     closure_weight: float = 100.0
     constraint_options: ConstraintOptions | None = None
     interior_fractions: tuple[float, ...] = ()
+    coordinate_bounds: tuple[tuple[str, float, float], ...] = ()
 
     def __post_init__(self) -> None:
+        _validate_coordinate_bounds(self.coordinate_bounds)
         if (
             isinstance(self.max_iterations, bool)
             or not isinstance(self.max_iterations, int)
@@ -218,6 +244,12 @@ class ImageFitConfig:
         if not isinstance(record, Mapping):
             raise ValueError("Fit configuration must be an object")
         values = dict(record)
+        bounds = values.get("coordinate_bounds", ())
+        if not isinstance(bounds, (tuple, list)) or any(
+            not isinstance(bound, (tuple, list)) for bound in bounds
+        ):
+            raise ValueError("Coordinate bounds must be an array of named limits")
+        values["coordinate_bounds"] = tuple(tuple(bound) for bound in bounds)
         fractions = values.get("interior_fractions", ())
         if not isinstance(fractions, (tuple, list)):
             raise ValueError("Interior fractions must be an array")

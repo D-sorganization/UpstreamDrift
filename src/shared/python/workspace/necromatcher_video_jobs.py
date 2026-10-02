@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -190,6 +191,82 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     return manifest, paths
 
 
+def _file_identity(library_root: Path, path: Path) -> dict[str, Any]:
+    """Bound a regular file to its owned path without reading its contents."""
+    relative = path.absolute().relative_to(library_root.absolute())
+    if ".." in relative.parts:
+        raise ValueError("Artifact baseline path must stay inside the library")
+    for ancestor in (path, *path.parents):
+        if ancestor.is_symlink():
+            raise ValueError("Artifact baseline may not use symlink paths")
+        if ancestor == library_root:
+            break
+    value = path.stat()
+    if not stat.S_ISREG(value.st_mode):
+        raise ValueError("Artifact baseline requires regular files")
+    return {
+        "path": relative.as_posix(),
+        "identity": [
+            value.st_dev,
+            value.st_ino,
+            value.st_size,
+            value.st_mtime_ns,
+            value.st_ctime_ns,
+        ],
+    }
+
+
+def _asset_bindings(
+    library: NecromatcherLibrary, swing: str, identities: list[str]
+) -> list[dict[str, Any]]:
+    assets = {asset.dataset_id: asset for asset in library.assets(swing)}
+    return [
+        {
+            "id": identity,
+            "path": assets[identity].path,
+            "kind": assets[identity].kind,
+            "hash": assets[identity].metadata["hash"],
+        }
+        for identity in identities
+    ]
+
+
+def _artifact_baseline(
+    library: NecromatcherLibrary, root: Path, request: dict[str, Any], swing: str
+) -> dict[str, Any]:
+    """Capture bounded metadata around an authoritative owned hash check."""
+    identities = [request["source_fit_id"], request["model_id"], request["capture_id"]]
+    bindings = _asset_bindings(library, swing, identities)
+    names = sorted(path.name for path in (root / "overlay").iterdir())
+    if len(names) > 5:
+        raise ValueError("Overlay contains too many artifact files")
+    paths = [root / "request.json", *(root / "overlay" / name for name in names)]
+    for binding in bindings:
+        path = Path(binding["path"])
+        paths.append(path if path.is_absolute() else library.root / path)
+    return {
+        "swing_id": swing,
+        "bindings": bindings,
+        "output_names": names,
+        "files": [_file_identity(library.root, path) for path in paths],
+    }
+
+
+def _artifact_available(
+    library: NecromatcherLibrary, root: Path, request: dict[str, Any]
+) -> bool:
+    """Fail closed on legacy or changed artifacts using only bounded metadata."""
+    try:
+        baseline = _read(root / "complete.json").get("artifact_baseline")
+        if not isinstance(baseline, dict) or len(baseline.get("files", [])) > 9:
+            return False
+        return baseline == _artifact_baseline(
+            library, root, request, baseline["swing_id"]
+        )
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
 class NativeVideoSession:
     """Own bounded job handles; durable manifests never invent worker termination."""
 
@@ -300,6 +377,8 @@ class NativeVideoSession:
                 raise ValueError(
                     "Video implementation or runtime changed during execution"
                 )
+            swing = self.library.load_asset(request["source_fit_id"]).session_id
+            baseline = _artifact_baseline(self.library, root, request, swing)
             _parents(self.library, request)
             _outputs(root, request)
             if (
@@ -307,6 +386,8 @@ class NativeVideoSession:
                 != "sha256:" + response["manifest_sha256"]
             ):
                 raise ValueError("Worker overlay manifest hash mismatch")
+            if baseline != _artifact_baseline(self.library, root, request, swing):
+                raise ValueError("Overlay metadata changed during verification")
 
             def publish() -> None:
                 atomic_write_json(
@@ -320,6 +401,7 @@ class NativeVideoSession:
                         ),
                         "source_sha256": spec.hashes.solver_hash,
                         "runtime_sha256": spec.hashes.runtime_hash,
+                        "artifact_baseline": baseline,
                     },
                 )
                 progress(
@@ -405,6 +487,7 @@ class NativeVideoSession:
             else AcceptanceState.PARTIAL
         )
         verified = self._verified(root, request, manifest) if manifest else False
+        available = verified and _artifact_available(self.library, root, request)
         message = result.message if result else "Source-bound research overlay export"
         if handle is None and status in {JobStatus.PENDING, JobStatus.RUNNING}:
             message = "Execution state unverified; this host has no live control handle"
@@ -428,7 +511,13 @@ class NativeVideoSession:
             "control_available": handle is not None,
             "execution_started": request.get("execution_started") is True,
             "execution_verified": verified,
-            "download_available": verified,
+            "download_available": available,
+            "artifact_state": "verified_stat_baseline"
+            if available
+            else "changed_or_unverified",
+            "producer_source_commit": request.get("execution_stamp", {}).get(
+                "source_commit"
+            ),
         }
 
     def view(self, run_id: str) -> dict[str, Any]:
@@ -460,6 +549,8 @@ class NativeVideoSession:
             root, request = self._record(run_id)
             _parents(self.library, request)
             _, files = _outputs(root, request)
+            swing = self.library.load_asset(request["source_fit_id"]).session_id
+            baseline = _artifact_baseline(self.library, root, request, swing)
             expected = {path.name: compute_file_sha256(path) for path in files}
             with TemporaryDirectory(prefix="video-download-", dir=root) as temporary:
                 archive_path = Path(temporary) / "overlay.zip"
@@ -482,6 +573,13 @@ class NativeVideoSession:
                     path.name: compute_file_sha256(path) for path in current_files
                 } != expected or not self._view(run_id)["execution_verified"]:
                     raise ValueError("Overlay changed during download packaging")
+                if baseline != _artifact_baseline(self.library, root, request, swing):
+                    raise ValueError(
+                        "Overlay metadata changed during download packaging"
+                    )
                 destination = root / ("overlay-" + uuid4().hex + ".zip")
                 os.link(archive_path, destination)
+            complete = _read(root / "complete.json")
+            complete["artifact_baseline"] = baseline
+            atomic_write_json(root / "complete.json", complete)
             return destination

@@ -25,6 +25,58 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def test_named_hard_bounds_survive_config_json() -> None:
+    from dataclasses import asdict
+    import json
+
+    original = ImageFitConfig(coordinate_bounds=(("REInput", -0.4, 0.0),))
+    decoded = ImageFitConfig.from_record(json.loads(json.dumps(asdict(original))))
+    assert decoded.coordinate_bounds == original.coordinate_bounds
+    with pytest.raises(ValueError, match="bounds"):
+        ImageFitConfig(coordinate_bounds=(("REInput", -0.4, 0.0), ("REInput", 0, 1)))
+
+
+def test_native_image_fit_enforces_bounds_between_observed_frames() -> None:
+    from src.shared.python.motion_matching.historical_fit.assessment import (
+        assess_spline_bounds,
+    )
+
+    native, attachments, camera, inputs = native_problem()
+    result = fit_image_trajectory(
+        native,
+        attachments,
+        camera,
+        inputs,
+        ImageFitConfig(
+            max_iterations=80,
+            prior_weight=0,
+            smoothness_weight=0,
+            closure_weight=0,
+            coordinate_bounds=(("REInput", -0.4, 0.0),),
+        ),
+    )
+    assessment = assess_spline_bounds(result, {"REInput": (-0.4, 0.0)})
+    assert not assessment.violating_coordinates
+    assert result.observed_point_count == 6
+    assert result.qualification == "monocular_research_hypothesis"
+
+
+def test_native_named_bounds_reject_unknown_and_infeasible_locked_seed() -> None:
+    native, attachments, camera, inputs = native_problem()
+    for bounds in (
+        (("unknown", -1.0, 1.0),),
+        ((native.coordinate_order[0], 1.0, 2.0),),
+    ):
+        with pytest.raises(ValueError, match="bounds|coordinate"):
+            fit_image_trajectory(
+                native,
+                attachments,
+                camera,
+                inputs,
+                ImageFitConfig(coordinate_bounds=bounds),
+            )
+
+
 def test_warm_start_uses_saved_native_samples_without_mutating_them():
     from dataclasses import replace
 

@@ -2,10 +2,97 @@
 
 from pathlib import Path
 import threading
+from dataclasses import dataclass
+from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
 pytestmark = pytest.mark.unit
+
+
+@dataclass
+class _Control:
+    enabled: bool = False
+    text: str = ""
+
+    def setEnabled(self, value: bool) -> None:
+        self.enabled = value
+
+    def setText(self, value: str) -> None:
+        self.text = value
+
+
+def _stored_overlay_probe(status: str = "succeeded") -> SimpleNamespace:
+    """Exercise control policy without constructing the Qt application."""
+    return SimpleNamespace(
+        run={
+            "status": status,
+            "acceptance": "rejected",
+            "qualification": "monocular_research_hypothesis",
+            "message": "Historical completion",
+            "blockers": [],
+            "control_available": False,
+            "download_available": False,
+            "execution_verified": True,
+            "run_id": "owned",
+            "producer_source_commit": "older-commit",
+        },
+        _closed=False,
+        _worker=None,
+        status=_Control(),
+        start=_Control(),
+        cancel=_Control(),
+        save=_Control(),
+        _timer=SimpleNamespace(stop=lambda: None),
+    )
+
+
+def test_historical_native_overlay_offers_explicit_guarded_verification() -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    probe = _stored_overlay_probe()
+    VideoExportDialog._render(probe)
+    assert probe.save.enabled
+    assert probe.save.text == "Verify Stored Overlay Package"
+    assert "Readiness unverified" in probe.status.text
+    assert "can reject changed files" in probe.status.text
+    assert "older-commit" in probe.status.text
+
+
+@pytest.mark.parametrize("status", ["failed", "cancelled", "running"])
+def test_native_stored_verification_requires_successful_history(status: str) -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    probe = _stored_overlay_probe(status)
+    VideoExportDialog._render(probe)
+    assert not probe.save.enabled
+
+
+def test_native_unverified_package_uses_authoritative_guard_before_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.tools.necromatcher.video_dialog import VideoExportDialog, QFileDialog
+
+    probe = _stored_overlay_probe()
+    operations: list[tuple[str, Any]] = []
+    destination = tmp_path / "save.zip"
+    probe.library_root = tmp_path / "library"
+    probe._work = lambda operation, target: operations.append((operation, target))
+
+    def reject_download(run: str) -> Path:
+        assert run == "owned"
+        raise ValueError("Stored artifact hash changed")
+
+    probe.session = SimpleNamespace(download=reject_download)
+    monkeypatch.setattr(
+        QFileDialog, "getSaveFileName", lambda *args: (str(destination), "")
+    )
+    VideoExportDialog._save(probe)
+    assert len(operations) == 1
+    with pytest.raises(ValueError, match="hash changed"):
+        operations[0][1]()
+    assert not destination.exists()
 
 
 def test_export_submission_is_responsive_and_download_requires_success(

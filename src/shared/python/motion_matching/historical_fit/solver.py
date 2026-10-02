@@ -10,6 +10,7 @@ import numpy as np
 
 from src.shared.python.estimation import (
     CubicHermiteSplineTrajectory,
+    HermiteBoundsDomain,
     MapEstimatorOptions,
     MapEstimatorProblem,
     SharedParameterBlock,
@@ -234,6 +235,25 @@ class _Fit:
         return np.vstack(pieces)
 
 
+def _trajectory_domain(fit: _Fit, knots: np.ndarray) -> HermiteBoundsDomain | None:
+    """Bind explicit native named limits without changing fixed coordinates."""
+    if not fit.config.coordinate_bounds:
+        return None
+    bounds = {
+        name: (lower, upper) for name, lower, upper in fit.config.coordinate_bounds
+    }
+    for name, (lower, upper) in bounds.items():
+        if name not in fit.native.coordinate_order:
+            raise ValueError("Coordinate bounds name an unknown native coordinate")
+        if name not in fit.inputs.free_coordinates:
+            value = fit.inputs.seed[fit.native.coordinate_order.index(name)]
+            if not lower <= value <= upper:
+                raise ValueError("Coordinate bounds reject the locked native seed")
+    return HermiteBoundsDomain(
+        tuple(knots), tuple(bounds.get(name) for name in fit.inputs.free_coordinates)
+    )
+
+
 def fit_image_trajectory(
     native: MatchingPlant,
     attachments: Mapping[str, tuple[str, Sequence[float]]],
@@ -264,7 +284,9 @@ def fit_image_trajectory(
         fit.residual,
         jacobian=fit.jacobian,
         options=MapEstimatorOptions(
-            max_iterations=config.max_iterations, non_finite_policy="raise"
+            max_iterations=config.max_iterations,
+            non_finite_policy="raise",
+            trajectory_domain=_trajectory_domain(fit, knots),
         ),
     )
     solved = solve_single_trial_map(problem)

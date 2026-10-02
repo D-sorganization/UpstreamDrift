@@ -48,3 +48,17 @@ it('does not advertise orphan cancellation or unverified download', async () => 
   api.fetchVideoExport.mockResolvedValue(run({control_available:false,download_available:true})); render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
   await screen.findByRole('status'); expect(screen.queryByRole('button',{name:'Cancel Overlay Export'})).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
+it('offers guarded verification for historically completed stored packages', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({status:'succeeded',acceptance:'rejected',execution_verified:true,download_available:false,control_available:false,producer_source_commit:'older-commit'}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByRole('link',{name:'Verify Stored Overlay Package'})).toHaveAttribute('href','/export/export-1/download');
+  expect(screen.queryByRole('link',{name:'Download Overlay Package'})).not.toBeInTheDocument();
+  expect(screen.getByText(/Download Readiness Unverified/)).toHaveTextContent('Guarded verification can reject changed files');
+  expect(screen.getByText(/Producer Commit/)).toHaveTextContent('older-commit');
+});
+it.each(['failed','cancelled','running'])('never offers stored verification for %s runs', async (status) => {
+  api.fetchVideoExport.mockResolvedValue(run({status,execution_verified:true,download_available:false,control_available:false}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  await screen.findByRole('status');
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+});

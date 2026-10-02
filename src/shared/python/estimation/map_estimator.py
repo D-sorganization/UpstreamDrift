@@ -14,8 +14,9 @@ from dataclasses import asdict, dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from scipy.optimize import least_squares
+from scipy.optimize import OptimizeResult, least_squares
 
+from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
 from src.shared.python.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
@@ -507,6 +508,7 @@ class MapEstimatorOptions:
     method: Literal["trf", "lm"] = "trf"
     non_finite_policy: NonFinitePolicy = "sentinel"
     identifiability: IdentifiabilityGateOptions | None = None
+    trajectory_domain: HermiteBoundsDomain | None = None
 
 
 @dataclass(frozen=True)
@@ -557,7 +559,11 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
     gate_report, locked = _apply_identifiability_gate(problem)
     if locked:
         problem = _with_locked_parameters(problem, locked)
-    x0 = _pack_decision(problem.initial_coefficients, problem.shared_parameters)
+    x0 = _pack_decision(
+        problem.initial_coefficients,
+        problem.shared_parameters,
+        problem.options.trajectory_domain,
+    )
     lower, upper = _decision_bounds(problem)
     layout = MapDecisionLayout(
         trajectory_size=problem.trajectory.coefficient_size,
@@ -577,16 +583,22 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
     method = problem.options.method
     if method == "lm" and _has_finite_bounds(lower, upper):
         method = "trf"
-    result = least_squares(
-        residual_for_solver,
-        x0,
-        jac=jacobian_for_solver if jacobian_for_solver is not None else "2-point",
-        bounds=(lower, upper),
-        method=method,
-        max_nfev=problem.options.max_iterations,
-        xtol=problem.options.xtol,
-        ftol=problem.options.ftol,
-        gtol=problem.options.gtol,
+    result = (
+        least_squares(
+            residual_for_solver,
+            x0,
+            jac=jacobian_for_solver if jacobian_for_solver is not None else "2-point",
+            bounds=(lower, upper),
+            method=method,
+            max_nfev=problem.options.max_iterations,
+            xtol=problem.options.xtol,
+            ftol=problem.options.ftol,
+            gtol=problem.options.gtol,
+        )
+        if x0.size
+        else OptimizeResult(
+            x=x0, success=True, nfev=0, message="All decisions explicitly fixed"
+        )
     )
     residual = residual_for_solver(result.x)
     coefficients, parameter_values = _unpack_decision(problem, result.x)
@@ -687,6 +699,17 @@ def _validate_problem(problem: MapEstimatorProblem) -> None:
     )
     require(bool(np.all(np.isfinite(coeffs))), "initial_coefficients must be finite")
     require(problem.options.max_iterations > 0, "max_iterations must be positive")
+    domain = problem.options.trajectory_domain
+    if domain is not None:
+        if not isinstance(domain, HermiteBoundsDomain):
+            raise ValueError("Trajectory domain must be HermiteBoundsDomain")
+        if domain.n_dof != problem.trajectory.n_dof or not np.array_equal(
+            domain.knot_times, problem.trajectory.knot_times
+        ):
+            raise ValueError("Trajectory domain must match coordinates and knot clock")
+        domain.encode(
+            coeffs
+        )  # Reject infeasible initial coefficients before callbacks.
 
 
 def _require_times_within_knot_span(
@@ -713,6 +736,7 @@ def _require_times_within_knot_span(
 def _pack_decision(
     coefficients: np.ndarray,
     parameter_block: SharedParameterBlock,
+    domain: HermiteBoundsDomain | None = None,
 ) -> np.ndarray:
     """Trajectory coefficients followed by the **unlocked** parameters.
 
@@ -722,7 +746,12 @@ def _pack_decision(
     while a caller had asked for them to be held fixed.
     """
     return np.concatenate(
-        [np.asarray(coefficients, dtype=float), parameter_block.free_initial_vector()]
+        [
+            np.asarray(coefficients, dtype=float)
+            if domain is None
+            else domain.encode(coefficients),
+            parameter_block.free_initial_vector(),
+        ]
     )
 
 
@@ -732,16 +761,26 @@ def _unpack_decision(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(coefficients, all-parameter values)`` from a decision vector."""
     x = np.asarray(decision, dtype=float)
-    split = problem.trajectory.coefficient_size
+    domain = problem.options.trajectory_domain
+    split = (
+        problem.trajectory.coefficient_size if domain is None else domain.decision_size
+    )
     free_values = x[split:]
-    return x[:split], problem.shared_parameters.expand_free_vector(free_values)
+    coefficients = x[:split] if domain is None else domain.decode(x[:split])
+    return coefficients, problem.shared_parameters.expand_free_vector(free_values)
 
 
 def _decision_bounds(problem: MapEstimatorProblem) -> tuple[np.ndarray, np.ndarray]:
     trajectory_size = problem.trajectory.coefficient_size
     param_lower, param_upper = problem.shared_parameters.free_bounds()
-    lower = np.concatenate([np.full(trajectory_size, -np.inf), param_lower])
-    upper = np.concatenate([np.full(trajectory_size, np.inf), param_upper])
+    domain = problem.options.trajectory_domain
+    trajectory_lower, trajectory_upper = (
+        (np.full(trajectory_size, -np.inf), np.full(trajectory_size, np.inf))
+        if domain is None
+        else domain.decision_bounds()
+    )
+    lower = np.concatenate([trajectory_lower, param_lower])
+    upper = np.concatenate([trajectory_upper, param_upper])
     return lower, upper
 
 
@@ -824,14 +863,25 @@ def _objective_jacobian(
     )
     if data_jacobian.ndim != 2 or data_jacobian.shape[1] != layout.size:
         raise ValueError(f"jacobian callable must return (*, {layout.size})")
+    domain = problem.options.trajectory_domain
+    internal_trajectory_size = layout.trajectory_size
+    if domain is not None:
+        internal_trajectory_size = domain.decision_size
+        data_jacobian = np.column_stack(
+            [
+                data_jacobian[:, : layout.trajectory_size]
+                @ domain.decode_jacobian(decision[:internal_trajectory_size]),
+                data_jacobian[:, layout.trajectory_size :],
+            ]
+        )
     prior_parameter_jacobian = problem.shared_parameters.free_prior_jacobian()
     if prior_parameter_jacobian.shape[0] == 0:
         return data_jacobian
     prior_jacobian = np.zeros(
-        (prior_parameter_jacobian.shape[0], layout.size),
+        (prior_parameter_jacobian.shape[0], data_jacobian.shape[1]),
         dtype=float,
     )
-    prior_jacobian[:, layout.trajectory_size :] = prior_parameter_jacobian
+    prior_jacobian[:, internal_trajectory_size:] = prior_parameter_jacobian
     return np.vstack([data_jacobian, prior_jacobian])
 
 

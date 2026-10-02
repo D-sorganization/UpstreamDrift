@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 108 focused cases passed; subsequent native test refactor passed 34 cases; independent v7 audit checked 419 Tiger and 1499 Hogan poses. These receipts precede the b50e8fd91e branch merge.
-- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Both v7 candidates remain rejected: joint-limit violations and grip/contact errors require hard feasibility constraints. [Turnover](necromatcher-turnover.md).
-- **Next step:** Implement canonical whole-Hermite coordinate bounds with red-first overshoot tests.
+- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 106 current canonical/domain/native image/job cases and pinned mypy pass; v7 scientific audit remains rejected.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds now use a canonical Bernstein-admissible domain; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
+- **Next step:** Run both player trials from an explicitly authored feasible bounded initialization.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
@@ -39,9 +39,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — all 210 Tiger and 750 Hogan v7 output frames decoded with matching hashes; prior live web v6 jobs and downloaded packages verified.
+- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 20 video job cases passed; bounded availability baselines preserve historical execution and fail closed on mutated output/parents.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Revalidate export-job recall and download guards against the merged branch.
+- **Next step:** Exercise guarded legacy overlay verification through both visible interfaces.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 

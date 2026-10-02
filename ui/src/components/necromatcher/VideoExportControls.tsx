@@ -10,6 +10,7 @@ function VideoExportForm(props: Props) {
   const {run, error, submitting, controlAvailable} = job;
   const active = Boolean(run && ['pending', 'running'].includes(run.status));
   const ready = run?.status === 'succeeded' && run.execution_verified && run.download_available;
+  const stored = run?.status === 'succeeded' && run.execution_verified && !run.download_available;
   return <section aria-label="Research Overlay Export" className="space-y-3 border-t border-gray-600 pt-4">
     <h3 className="font-semibold">Research Overlay Export</h3>
     <p className="text-sm">Export the original source frames with the native research model overlay, first/middle/last stills and an exact provenance manifest.</p>
@@ -18,6 +19,8 @@ function VideoExportForm(props: Props) {
     {run && <div><p role="status">{run.status} · {run.acceptance} · {run.message}</p><p className="text-xs">Run: {run.run_id} · Source Fit: {run.source_fit_id}</p>{run.blockers.map((reason) => <p key={reason} className="text-xs text-orange-300">{reason}</p>)}</div>}
     {active && controlAvailable && <button type="button" className="rounded border p-2" onClick={() => void job.cancel()}>Cancel Overlay Export</button>}
     {ready && <a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Download Overlay Package</a>}
+    {stored && <div className="space-y-2"><p className="text-xs text-orange-300">Download Readiness Unverified. Guarded verification can reject changed files.</p><a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Verify Stored Overlay Package</a></div>}
+    {run?.producer_source_commit && <p className="text-xs">Producer Commit: {run.producer_source_commit} · Historical Execution; Current Source Equality Unverified.</p>}
     {error && <p role="alert">{error}</p>}
   </section>;
 }

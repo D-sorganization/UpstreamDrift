@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -69,6 +70,7 @@ __all__ = [
     "NON_FINITE_RESIDUAL_SENTINEL",
     "CubicHermiteSplineTrajectory",
     "ForwardModel",
+    "HermiteBoundsDomain",
     "GroundTruthRigResult",
     "IdentifiabilityGateOptions",
     "IdentifiabilityGateReport",

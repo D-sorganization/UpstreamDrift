@@ -159,18 +159,33 @@ class VideoExportDialog(QDialog):
     def _render(self) -> None:
         if not self.run or self._closed:
             return
+        historical = (
+            self.run["status"] == "succeeded"
+            and self.run.get("execution_verified") is True
+        )
+        stored = historical and not self.run["download_available"]
+        note = (
+            "\nReadiness unverified; guarded verification can reject changed files."
+            if stored
+            else ""
+        )
+        producer = self.run.get("producer_source_commit")
+        if producer:
+            note += (
+                f"\nProducer commit: {producer}; current source equality unverified."
+            )
         self.status.setText(
             f"{self.run['status']} · {self.run['acceptance']} · {self.run['qualification']}\n{self.run['message']}\n"
             + "\n".join(self.run["blockers"])
+            + note
         )
         active = self.run["status"] in {"pending", "running"}
         self.start.setEnabled(not active)
         self.cancel.setEnabled(active and bool(self.run["control_available"]))
-        self.save.setEnabled(
-            self.run["status"] == "succeeded"
-            and self.run["download_available"]
-            and self.run.get("execution_verified") is True
+        self.save.setText(
+            "Verify Stored Overlay Package" if stored else "Save Checked ZIP"
         )
+        self.save.setEnabled(historical)
         if not active:
             self._timer.stop()
 
@@ -184,7 +199,6 @@ class VideoExportDialog(QDialog):
             or self._worker
             or not self.run
             or self.run["status"] != "succeeded"
-            or not self.run["download_available"]
             or self.run.get("execution_verified") is not True
         ):
             return

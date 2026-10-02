@@ -21,6 +21,8 @@ export interface RefitRun extends ResearchRun {new_fit_id: string}
 export interface VideoExportRun extends ResearchRun {
   qualification: 'monocular_research_hypothesis'; download_available: boolean;
   execution_started: boolean; execution_verified: boolean;
+  artifact_state?: 'verified_stat_baseline' | 'changed_or_unverified';
+  producer_source_commit?: string | null;
 }
 export const submitVideoExport = (fit: string) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST'});
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
