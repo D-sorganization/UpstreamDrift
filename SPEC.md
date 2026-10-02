@@ -1,3 +1,22 @@
+## Unify Camera, Morphology and Native State for Shadow Fitting (MMR-14, #11100)
+
+Specifies mathematical, kinematic, and renderer unification for monocular shadow fitting across native multibody states and canonical articulated representations:
+- **Quaternion Velocity Jacobian and Tangent Projector (`src/shared/python/shadow_tracker/forward_model.py`)**:
+  - Exact algebraic quaternion velocity Jacobian $J_{\text{quat}}(q)$ ($4\times 3$) and left inverse $J_{\text{quat}}^{\dagger}(q)$ ($3\times 4$) satisfying $J^{\dagger} J = I_3$ and $J J^{\dagger} = I_4 - q q^T$ tangent space projection.
+  - Exact transformations between body angular velocity $\omega \in \mathbb{R}^3$ and quaternion time-derivative $\dot{q} \in \mathbb{R}^4$ via `body_omega_to_quat_derivative` and `quat_derivative_to_body_omega`.
+- **Bidirectional Canonical-Native Full-Body State Mapping (`canonical_37_to_native_41`, `native_41_to_canonical_37`)**:
+  - Converts between 37-dimensional canonical state vectors (Euler angles in radians/degrees) and 41-dimensional native multibody state vectors (pelvis position, unit orientation quaternion, and 34 articulatory joint degrees of freedom).
+  - Preserves SI units (meters, radians) and exact roundtrip identity $S_{37} \to S_{41} \to S_{37}$.
+- **Closed-Loop Grip Kinematic Setup and Closure Verification (`closed_grip_golfer_setup`, `evaluate_grip_closure`, `GripClosureResult`)**:
+  - Closed-loop address pose where hands meet on the grip within $4.3\text{ mm}$ translation residual and aligned wrist rotation axes.
+  - Decoupled translation ($\le 0.05\text{ m}$) and rotation ($\le 0.1\text{ rad}$) tolerance gates in `evaluate_grip_closure` returning structured `GripClosureResult`.
+- **Multi-Convention Articulated Renderer Support (`src/shared/python/shadow_tracker/articulated_renderer.py`, `src/shared/python/shadow_tracker/contracts.py`)**:
+  - Extended `_VALID_RENDER_STATE_CONVENTIONS` to include `native_full_body_v1` (41 elements) and `canonical_v2_full_body` (42 elements).
+  - Request validation and transcoding guaranteeing exact forward kinematics and rendering parity with canonical 37 articulated requests.
+- **Fitting Priors and Multi-Hypothesis Generation (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - `FittingPriors` dataclass with Design by Contract validation enforcing positive, physically plausible bounds on camera distance, golfer height, club length, and frame rate.
+  - `generate_monocular_hypotheses` generating diverse initialization hypotheses covering yaw, depth, and scale combinations to prevent local minima traps during single-camera fitting.
+
 ## Freeze Dual-Club Observation, Calibration and Accuracy Contracts (MMR-02, #11086)
 
 Specifies frozen observation manifests, independent error metrics, holdout protection, and measurement uncertainty floors for dual-club motion matching:
@@ -7634,6 +7653,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11100 | [MMR-14] Unify Camera, Morphology and Native State for Shadow Fitting: exact algebraic quaternion velocity Jacobian J_quat and left inverse with tangent projector (I - q q^T), bidirectional canonical_37 to native_41 state transformations preserving SI units, closed_grip_golfer_setup address pose with 4.3 mm hand separation and decoupled translation/rotation tolerance gates, multi-convention articulated renderer support for native_full_body_v1 and canonical_v2_full_body, and FittingPriors validation with multi-hypothesis generation across yaw, depth, and scale (#11100). |
 | 2026-10-01 | #11086 | [MMR-02] Freeze Dual-Club Observation, Calibration and Accuracy Contracts: versioned Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) observation manifests, bit-for-bit frame validity verification rejecting unmeasured/interpolated samples from measured holdout scoring, holdout protection during geometry calibration, comprehensive multi-metric evaluation (pooled RMSE, frame distribution, p95/max, per-phase, per-segment), common-target candidate comparison with explicit coverage visibility, and justified model floor documentation (18.5 mm pooled RMSE floor) (#11086). |
 | 2026-10-01 | #11155 | [R12] Define and Validate Neural Data-Efficiency Claims Statistically: Design by Contract budget validation rejecting unsorted, non-positive, and duplicate budgets; equal-curve non-superiority ([0.5, 0.5] vs [0.5, 0.5] -> False); undefined/inconclusive zero-reference and unattained-target handling (None, not 1.0 default); distinct descriptive mean ratio, trapezoidal AUC ratio, and horizontal budget-to-target sample savings; multi-seed statistical uncertainty evaluation (evaluate_multi_seed_data_efficiency, MultiSeedEfficiencySummary); and truthful diagnostic documentation and receipt updates (#11155). |
 | 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
