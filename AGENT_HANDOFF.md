@@ -1,5 +1,17 @@
 # Necromatcher Handoff
 
+## Compiled Native Resources and Authored Controls
+
+NativeFitBinding now shares one hash-checked compiled plant between projection
+review and refitting. Named compiled joints independently establish ordered m/rad
+units; missing capability and declaration mismatch fail. Authored controls must
+match exact model/fit hashes, order and N/N\*m units before native effort mapping.
+Detached sample metadata cannot change retained compiled model identity.
+96 focused checks pass; one unavailable real-Drake check skips. See
+[Native Resource Procedure](docs/development/necromatcher-native-resources.md). Historical driving controls, independent
+replay and downstream/site integration remain open; no scientific acceptance is
+claimed. Actual Hogan/Tiger source-stamped resource verification is next.
+
 ## Unit-Preserving Authored Controls
 
 The new effort-profile/2 format binds exact model and research-fit hashes and
@@ -12,7 +24,7 @@ accepts the format. See [Authored Effort Procedure](docs/development/necromatche
 A separate red-first canonical handoff regression now preserves mixed units,
 exact asset hashes, draft status and unqualified controls; 31 effort/handoff
 checks pass after schema registration.
-Native unit qualification, actual historical driving controls and independent
+Actual historical driving controls and independent
 replay remain open; source timing and scientific acceptance remain unqualified.
 
 ## Native and Web Research Refit Controls

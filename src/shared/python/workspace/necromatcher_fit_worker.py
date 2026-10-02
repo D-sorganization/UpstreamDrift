@@ -20,10 +20,10 @@ from src.shared.python.motion_matching.historical_fit import (
     fit_image_trajectory,
     read_capture_evidence,
 )
-from src.shared.python.motion_matching.pipeline.plant import MatchingPlant, get_plant
+from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_projection import project_fit_frame
+from .necromatcher_native import load_native_fit_binding
 from .necromatcher_review import CaptureReview
 
 logger = logging.getLogger(__name__)
@@ -75,18 +75,17 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         )
     library = NecromatcherLibrary(request["library_root"])
     identity = request["source_fit_id"]
-    source = library.load_fit(identity)
     if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
         raise ValueError("Warm-start fit differs from launch identity")
+    binding = load_native_fit_binding(library, identity)
+    source = binding.fit
     options = request["options"]
     indices = tuple(options["frame_indices"])
     # Reuse native XML, camera and attachment validation from the review path.
-    project_fit_frame(library, identity, indices[0])
-    definition = source["provenance"]["native_definition"]
+    binding.project(indices[0])
     original = source["evidence"]["original_fit"]
-    native = get_plant("mujoco", json.dumps(definition).encode("utf-8"))
-    attachments = original["attachments"]
-    camera = CameraProjection(**original["camera"])
+    native = binding.plant
+    camera, attachments = binding.review_inputs()
     samples = np.asarray(source["q"])[
         [source["frame_indices"].index(i) for i in indices]
     ]

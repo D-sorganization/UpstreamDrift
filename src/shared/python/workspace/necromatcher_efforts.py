@@ -42,6 +42,15 @@ _FIELDS = {
 _EFFORT_UNITS = {"m": "N", "rad": "N*m"}
 
 
+def effort_units_for_coordinates(units: tuple[str, ...]) -> tuple[str, ...]:
+    """Map explicit scalar SI coordinate units to conjugate generalized efforts."""
+    if not units or any(
+        not isinstance(unit, str) or unit not in _EFFORT_UNITS for unit in units
+    ):
+        raise ValueError("Effort coordinates require declared m or rad units")
+    return tuple(_EFFORT_UNITS[unit] for unit in units)
+
+
 @dataclass(frozen=True)
 class AuthoredEffortProfile:
     """Checked ordered units with an explicitly bounded authored time interval."""
@@ -159,7 +168,7 @@ def read_effort_profile(
         or payload["coordinate_units"] != fit["coordinate_units"]
     ):
         raise ValueError("Profile model, coordinate order and units must match its fit")
-    expected = [_EFFORT_UNITS[unit] for unit in fit["coordinate_units"]]
+    expected = list(effort_units_for_coordinates(tuple(fit["coordinate_units"])))
     if payload["effort_units"] != expected:
         raise ValueError("Effort units require N for m coordinates and N*m for rad")
     validate_authored_provenance(payload)

@@ -530,3 +530,13 @@ coordinates. Import and export reuse canonical PiecewisePolynomialTorque with
 strict JSON validation and bounded finite evaluation. Native units and source
 physical timing remain separate qualification requirements. See the
 [Authored Effort Procedure](../development/necromatcher-effort-profiles.md).
+
+### Compiled Historical Model Resources
+
+workspace.load_native_fit_binding returns one NativeFitBinding over the canonical
+MatchingPlant factory. MuJoCo exposes compiled coordinate_units through the
+optional ScalarCoordinateUnits protocol, with slide m and hinge rad units in
+named order. Projection and native refitting reuse this resource; efforts checks
+exact model/fit hashes, ordered units and authored timing before native command
+mapping. Scientific acceptance remains independent. See the
+[Native Resource Procedure](../development/necromatcher-native-resources.md).

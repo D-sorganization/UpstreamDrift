@@ -50,6 +50,11 @@ class MujocoMatchingPlant:
         return tuple(self.adapter.coordinate_order)
 
     @property
+    def coordinate_units(self) -> tuple[str, ...]:
+        """SI units verified from named compiled scalar joints, in declared order."""
+        return self.adapter.coordinate_units
+
+    @property
     def ground_plane(self) -> GroundPlane:
         return self.adapter.ground_plane
 

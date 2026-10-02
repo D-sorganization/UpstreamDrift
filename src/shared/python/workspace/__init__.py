@@ -44,6 +44,7 @@ from .model_match_handoff import (
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
+from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
@@ -169,6 +170,8 @@ from .feature_preservation_audit import (
 )
 
 __all__ = [
+    "NativeFitBinding",
+    "load_native_fit_binding",
     "AuthoredEffortProfile",
     "EFFORT_SCHEMA",
     "NecromatcherLibrary",

@@ -27,6 +27,16 @@ class EngineUnavailableError(RuntimeError):
 
 
 @runtime_checkable
+class ScalarCoordinateUnits(Protocol):
+    """Optional compiled scalar-unit capability; absence never implies radians."""
+
+    @property
+    def coordinate_units(self) -> tuple[str, ...]:
+        """Return native m/rad units in the plant's declared coordinate order."""
+        ...
+
+
+@runtime_checkable
 class MatchingPlant(FullBodyPlant, Protocol):
     """High-level physics plant protocol required by the motion-matching pipeline."""
 
