@@ -146,6 +146,16 @@ shared Python plotters (`shared/python/motion_matching/plot_*.py`); only
 engine-specific 3D viewers (Drake Visualizer, MuJoCo Viewer, OpenSim's GUI,
 Meshcat for Pinocchio) need engine-bespoke code.
 
+### 2.5.0 Force-overlay channels (ADR-0052, #11285)
+
+Engines expose force/torque overlays through the `ForceTorqueProvider` and
+`AxialLoadProvider` capabilities. Wrenches are world-frame (Z-up), SI, and are
+the wrench applied to the named body.
+
+| Engine        | Channel                                                                                                     | Source                                                    | Status                                       |
+| ------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------- |
+| **Pinocchio** | `JOINT_REACTION` (`data.f` via RNEA with actual `a`), `JOINT_ACTUATOR` (`tau`), `CONTACT`, axial load (N) | `pinocchio_force_torque.py::PinocchioForceTorqueSource`   | FTO-13 (#11298); `force_visualization=FULL` |
+
 ### 2.5.1 Ball-flight physical benchmark gate
 
 Ball-flight engines and UI/API adapters must preserve the same measured-shot

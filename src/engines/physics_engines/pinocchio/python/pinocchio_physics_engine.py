@@ -9,10 +9,12 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Literal, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
 
+from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.core.contracts import (
     check_finite,
     invariant,
@@ -29,7 +31,12 @@ from src.shared.python.engine_core.capabilities import (
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
+from src.shared.python.force_overlay import ForceTorqueFrame
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.motion_matching.contact_law import ContactSample
+
+if TYPE_CHECKING:
+    from .pinocchio_force_torque import PinocchioForceTorqueSource
 
 # Pinocchio imports - only import if available
 if PINOCCHIO_AVAILABLE:
@@ -72,6 +79,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.v: np.ndarray = np.array([])
         self.a: np.ndarray = np.array([])
         self.tau: np.ndarray = np.array([])
+        self._contact_samples: tuple[ContactSample, ...] = ()
+        self._force_torque_source: PinocchioForceTorqueSource | None = None
         self.time: float = 0.0
         self.integrator: PinocchioIntegrator = "rk4"
 
@@ -125,6 +134,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
             contact_forces=CapabilityLevel.NONE,
+            force_visualization=CapabilityLevel.FULL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
             extra={"spatial_jacobian_order": "angular_linear"},
@@ -361,8 +371,63 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([0.0, 0.0, 0.0])
 
-        # Return zero vector; callers check norm and fall back to gravity
-        return np.array([0.0, 0.0, 0.0])
+        if not self._contact_samples:
+            # No contact model: callers check norm and fall back to gravity
+            return np.array([0.0, 0.0, 0.0])
+        total = np.zeros(3)
+        for sample in self._contact_samples:
+            total += np.asarray(sample.normal_force_n) + np.asarray(
+                sample.friction_force_n
+            )
+        return total
+
+    def set_contact_samples(self, samples: Sequence[ContactSample]) -> None:
+        """Attach world-frame contact records from an external contact model.
+
+        Args:
+            samples: ``ContactSample`` records; replaces any previous set.
+
+        Raises:
+            TypeError: If any item is not a ``ContactSample``.
+        """
+        items = tuple(samples)
+        if not all(isinstance(s, ContactSample) for s in items):
+            raise TypeError("samples must contain ContactSample items")
+        self._contact_samples = items
+
+    def get_applied_torques(self) -> np.ndarray:
+        """Return a read-only copy of the last applied generalized torque."""
+        tau = self.tau.copy()
+        tau.flags.writeable = False
+        return tau
+
+    def get_force_torque_frame(self) -> ForceTorqueFrame | None:
+        """Return the current world-frame force/torque overlay frame.
+
+        Uses the current ``q``, ``v``, last computed ``a`` and applied ``tau``.
+        Returns None when no model is loaded.
+        """
+        if self.model is None or self.data is None:
+            return None
+        if self._force_torque_source is None or (
+            self._force_torque_source.model is not self.model
+        ):
+            from .pinocchio_force_torque import PinocchioForceTorqueSource
+
+            self._force_torque_source = PinocchioForceTorqueSource(self.model)
+        return self._force_torque_source.sample(
+            self.q,
+            self.v,
+            self.a,
+            self.tau,
+            self._contact_samples,
+            time_s=self.time,
+        )
+
+    def get_segment_axial_loads(self) -> AxialLoadFrame | None:
+        """Return tension-positive proximal axial loads per joint segment."""
+        frame = self.get_force_torque_frame()
+        return None if frame is None else frame.axial_loads
 
     @precondition(
         lambda self, body_name: self.is_initialized,
