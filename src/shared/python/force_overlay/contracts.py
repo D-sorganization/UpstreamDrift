@@ -26,6 +26,11 @@ DEFAULT_OVERLAY_UNITS: MappingProxyType[str, str] = MappingProxyType(
     {"force": "N", "torque": "N*m", "length": "m"}
 )
 
+
+def _default_overlay_units() -> MappingProxyType[str, str]:
+    return DEFAULT_OVERLAY_UNITS
+
+
 _ALLOWED_WRENCH_KEYS = frozenset(
     {"kind", "label", "body", "point_m", "force_n", "torque_nm", "source"}
 )
@@ -174,7 +179,7 @@ class ForceTorqueFrame:
     wrenches: tuple[OverlayWrench, ...] = ()
     axial_loads: AxialLoadFrame | None = None
     world_frame: str = "world_Zup"
-    units: Mapping[str, str] = DEFAULT_OVERLAY_UNITS
+    units: Mapping[str, str] = field(default_factory=_default_overlay_units)
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
