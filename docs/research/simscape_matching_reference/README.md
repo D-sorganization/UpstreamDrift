@@ -244,8 +244,8 @@ correspondence, anatomical limits, or independent forward dynamics.
 Fresh native FK evaluated BOTH promoted head0.10 addresses without simulation
 or model save. Per-foot lowest-contact heights differ **29.081 mm tour** and
 **15.097 mm owner**; within-foot spreads are below 1.5 mm. With the ground normal
-fixed, one plane translation cannot remove this two-foot discrepancy. A bounded
-stance correction is staged with prospective geometry/pose-preservation gates;
+fixed, one plane translation cannot remove this two-foot discrepancy. The bounded
+native correction passes both captures: each minimum clearance 0.250 mm, sole spreads below 1.5 mm, foot XY/orientation retained, leg rotations at most 8.731 degrees tour / 4.229 degrees owner. Root/upper coordinates, passive midfoot and fitted geometry are unchanged. The accepted address candidates are staged for assembled-state/contact diagnostics;
 equilibrium, gravity torques and forward replay remain open. The selected Desktop
 MP4s are unchanged IK visualizations. See the standalone LaTeX reference and
 `leg_orientation_contract_review_20261002.json`,
@@ -257,3 +257,38 @@ fails with `Unable to find standard directories for platform`; no new PDF is
 claimed. Changelog duplicates for PR #11256 were consolidated. Subsequent CI
 code-quality failed a GitHub fetch because of runner certificate verification;
 no certificate validation was disabled and protected review remains required.
+
+### Bilateral Address and Assembled Gravity Diagnostics
+
+Both selected Human address candidates pass their prospectively fixed native
+geometry gates. Each foot minimum clearance is 0.250 mm against one plane;
+horizontal foot-solid position/orientation, root/trunk/upper coordinates,
+passive midfoot coordinates and fitted geometry are retained. Maximum leg
+rotation changes are 8.731 degrees tour and 4.229 degrees owner. These are
+address corrections, not a new measured whole-swing fit or Desktop promotion.
+
+Separate 20 ms R2025b simulations verify the actual assembled scalar and
+spherical pose plus all ten contact clearances. Both feet develop support:
+at 20 ms, tour left/right normal force is 443.969/407.322 N, owner
+502.848/407.399 N. Maximum pelvis displacement is 1.513/1.482 mm. Both
+native processes exited naturally with zero status; geometry/physics were
+reapplied before logged-pose FK and the Human binary was not saved. The
+tour body mass is model-default 80 kg, owner 104.3 kg; total mechanism
+masses include unchanged equipment. Zero initial force reflects 0.25 mm
+clearance. Endpoint support does not establish standing equilibrium.
+
+A separate one-second constant-reference hold is registered before results:
+each foot >=0.05 BW and summed normal force 0.8-1.2 BW over 0.5-1 s;
+whole-run sum peak <=2 BW, pelvis displacement <=5 mm and rotation change
+<=1 degree. It retains upper PD tracking, prescribed neck and zero upper
+feedforward, with balance correction off. Even a passing hold is not
+independent open-loop replay. Actual gravity and native mass define BW.
+
+Read `bilateral_stance_geometry_review_20261002.json` and
+`bilateral_assembled_contact_review_20261002.json` alongside the same
+standalone LaTeX reference. Its abstract now identifies the latest head0.10
+Desktop selections; historical force trials are explicitly attributed and
+zero support is not treated as proof of airborne geometry. PDF compilation
+remains unavailable. Full-swing physical gates and protected review stay open.
+
+The tour one-second hold is rejected: all three force screens pass, but pelvis displacement 246.153 mm and rotation 14.989 degrees violate the fixed 5 mm / 1 degree bounds. Native process exits naturally with zero at 15:18:18Z; successful execution does not establish physical success. Owner hold and reference/torque/COM diagnosis remain separate active work. See `tour_constant_hold_review_20261002.json`.

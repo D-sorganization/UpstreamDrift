@@ -33,12 +33,18 @@ This reference documents tour-reference and owner optical-capture matching with
 the \texttt{GS3DX\_Human} ellipsoid model under MATLAB R2025b. It defines SI
 capture transformations, joint-role mapping, closed-grip inverse kinematics,
 marker-offset calibration, full foot orientation and model/runtime provenance.
-Selected shareable videos have mean/max frame position RMS of 13.188/40.121 mm
-for the tour and 16.643/36.865 mm for the owner. They are IK visualizations;
+The latest selected shareable videos have mean/max frame position RMS of
+13.540/40.368 mm for the tour and 16.754/36.987 mm for the owner. Their
+cluster-relative head-error means are 10.671 and 11.318 degrees. Earlier
+selections remain historical baselines. These are IK visualizations;
 these residuals do not establish anatomical, contact or forward-dynamics
 qualification. The model lineage, intrinsic Euler and torque mappings, inertia
 assumptions, controller experiments and rejected contact-load results remain
-available for reproduction. Native execution, software checks, visual review
+available for reproduction. A half-turn leg-orientation false acceptance was
+reproduced and repaired; 287 native software/parameter checks pass. Bounded
+bilateral address corrections pass their geometry gates, and both feet
+develop support in separately verified 20 ms gravity probes. Longer holds
+and full swing physics remain unqualified. Native execution, software checks, visual review
 and physical acceptance are recorded separately. Gates \#11156, \#11160 and
 \#11173 remain open, and cross-execution reproducibility concerns are explicit.
 \end{abstract}
@@ -64,9 +70,10 @@ Reviewed source branch: \nolinkurl{feat/simscape-reference-20261001}.\par
 Published integration branch:
 \nolinkurl{feat/simscape-matching-review-main-20261002}, draft PR \#11256.
 \begin{itemize}
-    \item \textbf{Branch Head Source Commit:} \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511} (October 1, 2026).
+    \item \textbf{Reviewed Turnover Source Commit:} \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511} (October 1, 2026).
+    \item \textbf{Reviewed Leg-Contract Implementation:} \texttt{55ea7339b0494460a1a0b85d564886ade26f6500}. The 287-test receipt identifies its precommit baseline and direct source hashes. Empty CI-trigger commit \texttt{5bdc2ed8e} changes no files.
     \item \textbf{Historical Handoff Baseline:} \texttt{2d5830d18}. This historical attribution is not a verified current remote baseline.
-    \item \textbf{Active Draft PR:} \#11179 (exploratory GS3DX continuation).
+    \item \textbf{Original Worker PR:} \#11179 (exploratory GS3DX continuation); reviewed integration work is tracked separately in PR \#11256.
     \item \textbf{Primary Governing Issues:} Epic \#10950 (children \#10951--\#10959, \#10985, \#10986, \#11011; active \#10979); Quality gates \#11156, \#11157, \#11158, \#11159, \#11160; Forward dynamics objective \#11173; Subject matching epic \#11161.
 \end{itemize}
 
@@ -400,10 +407,12 @@ Contact normal force formulations in Simscape utilize internal smoothing; formul
 
 \section{Stability Analysis: Distinguishing Baselines From Unstable Dynamics}
 
-\subsection{Stable Baselines vs. Current Unstable Human Dynamics}
+\subsection{Historical Baselines and Unstable Human Trials}
+The following results are attributed to the October 1 turnover, rather than
+the newly corrected bilateral address probes recorded later in this reference.
 \begin{itemize}
     \item \textbf{Stable Baselines:} \texttt{GS3DX\_Baseline}, \texttt{GS3DX\_Slim}, and \texttt{GS3DX\_Quat} integrate the impact drive cleanly across 344 steps; \texttt{GS3DX\_FullBodyContact} and \texttt{GS3DX\_Golfer} stand stably from rest (slip $\le 2.1$~mm, lift 0~mm, Newton residual 0.71~N$\cdot$s).
-    \item \textbf{Current Unstable Dynamics:} Full-swing simulations of \texttt{GS3DX\_Human} exhibit transient instability through impact and finish.
+    \item \textbf{Historical Unstable Dynamics:} The recorded full-swing \texttt{GS3DX\_Human} trials exhibited transient instability through impact and finish; they do not characterize every subsequent corrected model state.
 \end{itemize}
 
 \subsection{Rejection of Extreme Transient Force Spikes}
@@ -411,11 +420,11 @@ Historical simulation logs recorded extreme vertical contact force spikes:
 \begin{enumerate}
     \item \textbf{2,466~BW Spike ($t = 0.386$~s):} Integrator stall at $h_{\min}$ due to derivative rate steps.
     \item \textbf{365~BW Spike ($t = 0.449$~s):}
-    Simulation with active balance and leg servo produced a 365~BW ($287{,}500$~N) spike on the right lesser toe. At $t = 0.35$--$0.40$~s, the golfer was airborne. On row 12, servo ($-3{,}755.6$~N$\cdot$m) and balance ($+2{,}130.0$~N$\cdot$m) fought, driving the ankle into $42.5^\circ$ plantarflexion before singular toe impact. Near impact, support dropped to 0.0~BW (kinematic demand is 1.85~BW).
+    Simulation with active balance and leg servo recorded a 365~BW ($287{,}500$~N) spike on the right lesser toe. The turnover interpreted the $t = 0.35$--$0.40$~s phase as airborne; zero normal support alone does not establish geometric separation. On row 12, opposing servo ($-3{,}755.6$~N$\cdot$m) and balance ($+2{,}130.0$~N$\cdot$m) contributions accompanied $42.5^\circ$ plantarflexion before the toe-force spike. Their causal role remains unqualified. Near impact, recorded support dropped to 0.0~BW (kinematic estimate 1.85~BW).
     \item \textbf{22.6~BW Spike ($t = 0.418$~s):}
     With row 12 balance gain zeroed, the right ankle dropped $0.661$~m in $0.060$~s before strike; midfoot angle stepped from $+0.013$ to $-5.452$~rad in 10~ms. Pelvis tilt diverged from $22.5^\circ$ to $101.9^\circ$. Refining maximum step size to $0.0001$~s yielded an identical 23.1~BW spike.
 \end{enumerate}
-Both the \textbf{365~BW and 22.6~BW readings reject physical qualification}. Controller conflict and airborne strike are suspected causes; the causal explanation is not yet experimentally established. The model does \textbf{not} possess an open-loop stable swing.
+Both the \textbf{365~BW and 22.6~BW readings reject physical qualification of those trials}. Controller interaction and loss of contact are hypotheses; their causal explanation is not yet experimentally established. No independently replayed open-loop stable swing has been qualified in this review.
 
 \section{Current Acceptance Gates, Open Work, and Red Thresholds}
 
@@ -1554,6 +1563,127 @@ both-foot force support, consistent balance references and gravity torque
 qualification before any whole-swing forward replay. See
 \texttt{selected\_contact\_geometry\_review\_20261002.json} for the
 sanitized measured aggregates and direct source inventory.
+
+\subsection{Bounded Bilateral Address Correction: Geometry Gates Passed}
+The registered stance experiment solved each leg through native FK rather
+than assuming an analytical ankle-to-foot-solid transform. Its six controls
+were a three-component hip rotation vector, knee angle and ankle XY angles
+in degrees; the hip controls were explicitly converted to a unit axis and
+angle for the native spherical primitive. Canonical keys selected each axis
+in order, actual native units were checked, and the selected passive midfoot
+coordinate was retained. The root, trunk, upper-body coordinates and fitted
+geometry were unchanged. The ground normal was verified to be World Z, so
+World XY was the horizontal plane for this experiment.
+
+The same fixed-normal ground plane was translated by
+$\delta=(m_L+m_R)/2$. For each foot the least-squares residual combined
+minimum sphere clearance relative to a 0.25 mm target, horizontal
+foot-solid displacement and the shared normalized chordal orientation
+residual. Weights were 500~m$^{-1}$ for clearance, 200~m$^{-1}$ for each
+horizontal component and 10 for the nine dimensionless rotation
+components. Thirty damped iterations used $10^{-4}$ degree central
+differences; trial controls were projected inside a 9.9 degree component
+box around the seed. Final acceptance additionally measured the true
+relative hip SO(3) angle, not merely its rotation-vector components.
+Stationary numerical termination was not equated with physical support.
+
+Both candidates passed every prospective geometry gate with native FK
+status one and natural process exit zero at
+\texttt{2026-10-02T15:02:52Z}. Both left and right minimum clearances
+were 0.250 mm. Foot orientation and horizontal position changed by less
+than $10^{-8}$ degrees and $10^{-8}$ mm respectively at native numerical
+precision. Within-foot clearance spreads remained 0.637/1.462 mm for the
+tour and 0.100/1.102 mm for the owner. Maximum leg rotation changes were
+$8.731^\circ$ and $4.229^\circ$, within the fixed ten-degree limit.
+The model binary remained unchanged; the corrected pose and plane were
+retained in private experiment outputs, without replacing the Desktop
+whole-swing selections.
+
+These are \emph{accepted address geometry candidates}, not qualified
+standing models. Raising both lowest spheres above the plane intentionally
+starts with zero contact compression. Whether gravity then produces
+bilateral support, excessive transient forces, tracking errors or drift
+requires a distinct assembled-state and time-domain experiment. Preserved
+foot-solid poses constrain horizontal location and orientation; the
+necessary vertical corrections are not a new fit to independently measured
+marker trajectories. See
+\texttt{bilateral\_stance\_geometry\_review\_20261002.json} for the
+fixed gates, source hashes, observed metrics and terminal receipt.
+
+\subsection{Assembled Bilateral Addresses and Short Gravity Probes}
+Separate R2025b simulations loaded each accepted stance pose and its common
+plane, applied the actual mixed-unit initial-target mapper and constant
+reference helper, and ran for 20 ms. Upper-body tracking was enabled,
+balance correction disabled and upper-body feedforward zero. The neck
+remained motion prescribed. Native post-simulation FK reapplied the exact
+geometry after the stance helper closed its model, preventing the prior
+geometry-lifecycle error.
+
+Both simulations verified the assembled initial state against the requested
+pose: scalar errors were below $4.45\times10^{-9}$ degrees and zero metres;
+maximum spherical rotation-matrix difference was below
+$1.10\times10^{-10}$. The ten assembled sphere clearances agreed with the
+requested FK clearances within $10^{-7}$ m. Natural process exits were zero
+at \texttt{2026-10-02T15:08:49Z} for the tour and
+\texttt{2026-10-02T15:12:02Z} for the owner. No model was saved.
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture & \shortstack{Mass\\(kg)} & \shortstack{Left Force\\at 20 ms (N)} & \shortstack{Right Force\\at 20 ms (N)} & \shortstack{Maximum Pelvis\\Shift (mm)} \\
+\midrule
+Tour Average & 80.393 & 443.969 & 407.322 & 1.513 \\
+Owner GEARS & 104.693 & 502.848 & 407.399 & 1.482 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Total masses include unchanged equipment. The tour uses the model-default
+80 kg body mass; this is not a measured tour-population mass. The owner uses
+the recorded 104.3 kg body mass. Initial contact forces were zero because
+the lowest spheres started 0.25 mm above the plane; both feet developed
+normal support during the short transient. Endpoint values were also the
+per-foot maxima over these 20 ms, substantially below the earlier deeply
+penetrating diagnostic. Forces are newtons, not impulses. Positive endpoint
+forces do not prove a quiet or stable hold.
+
+A separate one-second constant-reference hold is registered before its
+results. Over $0.5\le t\le1$ s it requires each foot's normal force to be
+at least 0.05 body weights and total normal force between 0.8 and 1.2 body
+weights, without requiring equal left/right forces. Across the full second,
+total normal-force peak must not exceed two body weights, pelvis
+displacement from its initial pose must not exceed 5 mm and pelvis rotation
+change must not exceed one degree. Body weight uses the native total mass
+and the actual mechanism gravity-vector magnitude. The initial-pose checks
+remain mandatory. Failure is recorded without changing these limits.
+This hold retains PD assistance and the prescribed neck, so even a passing
+screen would not establish independently replayed open-loop dynamics.
+
+The private raw 20 ms report inherited an ``unmodified pose'' ground-source
+label from the earlier probe. Its actual executable loads the accepted
+corrected bilateral pose and plane. The raw report remains preserved; the
+sanitized outer evidence explicitly corrects that label rather than
+rewriting execution history. See
+\texttt{bilateral\_assembled\_contact\_review\_20261002.json} for
+metrics, script hashes, terminal receipts and the registered hold gates.
+
+\subsection{Rejected Tour Hold: Support Forces Do Not Establish Stability}
+The tour's registered one-second hold completed with natural exit zero at
+\texttt{2026-10-02T15:18:18Z}, but failed physical acceptance. Both feet
+passed the settled minimum-force criterion, summed force stayed within
+0.8--1.2 body weights over the settled interval, and the whole-run two-body-
+weight peak bound passed. Final left/right normal forces were
+380.832/362.511 N. Nevertheless, maximum pelvis displacement was
+246.153 mm and maximum rotation change was $14.989^\circ$, violating
+the unchanged 5 mm and one-degree limits. Body weight was 788.385 N,
+derived from the native 80.393 kg total mass and mechanism gravity.
+
+This is a \emph{rejected constant-reference PD-assisted hold}, not a stable
+swing or a successful physical qualification. The observation separates
+maintained force support from pose stability. Missing gravity compensation,
+reference/torque mismatches, slipping feet and absent COM balance are
+candidate explanations requiring separate native joint, foot and COM
+diagnostics; none is established merely by the force endpoints. The owner
+hold and shared-interface review remain separate work, and the registered
+limits are retained for subsequent controlled experiments.
 
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
