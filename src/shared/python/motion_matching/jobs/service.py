@@ -8,8 +8,10 @@ concurrency is a local thread pool only for owned work callables.
 from __future__ import annotations
 
 from concurrent.futures import Future, ThreadPoolExecutor
+from contextlib import AbstractContextManager
 from dataclasses import dataclass, field
 from pathlib import Path
+from threading import Lock
 from typing import Any, Callable, Mapping
 
 from src.shared.python.training.contracts import ThreadingCancelToken
@@ -28,6 +30,7 @@ from .contracts import (
     JobStage,
     JobStatus,
     MatchingJobSpec,
+    MatchingWorkOutcome,
     PartialOutputRejectedError,
     RunManifest,
     UnsupportedHostError,
@@ -108,6 +111,14 @@ class ResumeOutcome:
     payload: Mapping[str, Any] = field(default_factory=dict)
 
 
+@dataclass
+class _CompletionGate:
+    """Serialize cancellation against immutable result publication."""
+
+    lock: AbstractContextManager[Any] = field(default_factory=Lock)
+    committed: bool = False
+
+
 class JobHandle:
     """Opaque handle for cancel + join (not a scheduler ticket)."""
 
@@ -117,14 +128,19 @@ class JobHandle:
         cancel_token: ThreadingCancelToken,
         future: Future[JobResult],
         process_guard: ProcessGuard,
+        completion_gate: _CompletionGate | None = None,
     ) -> None:
         self._cancel_token = cancel_token
         self._future = future
         self._process_guard = process_guard
+        self._completion_gate = completion_gate or _CompletionGate()
 
     def request_cancel(self) -> None:
-        self._cancel_token.request_cancel()
-        self._process_guard.terminate_all(reason="cancel")
+        with self._completion_gate.lock:
+            if self._completion_gate.committed:
+                return
+            self._cancel_token.request_cancel()
+            self._process_guard.terminate_all(reason="cancel")
 
     def join(self, timeout: float | None = None) -> JobResult:
         return self._future.result(timeout=timeout)
@@ -155,13 +171,39 @@ class MatchingJobService:
         """Start owned work under the shared cancel/progress contract."""
         cancel_token = ThreadingCancelToken()
         process_guard = ProcessGuard()
+        completion_gate = _CompletionGate()
         future = self._executor.submit(
-            self._run, spec, work, cancel_token, process_guard
+            self._run, spec, work, cancel_token, process_guard, completion_gate
         )
         return JobHandle(
             cancel_token=cancel_token,
             future=future,
             process_guard=process_guard,
+            completion_gate=completion_gate,
+        )
+
+    def close(self) -> None:
+        """Drain owned jobs and release the bounded executor."""
+        self._executor.shutdown(wait=True)
+
+    @staticmethod
+    def _completed_result(
+        spec: MatchingJobSpec,
+        outcome: Any,
+        last_progress: JobProgress | None,
+    ) -> JobResult:
+        explicit = isinstance(outcome, MatchingWorkOutcome)
+        return JobResult(
+            run_id=spec.run_id,
+            status=JobStatus.SUCCEEDED,
+            acceptance=outcome.acceptance if explicit else AcceptanceState.ACCEPTED,
+            stage=spec.stage,
+            provenance="fresh",
+            blockers=tuple(dict.fromkeys((*spec.blockers, *outcome.blockers)))
+            if explicit
+            else spec.blockers,
+            last_progress=last_progress,
+            message=outcome.message if explicit else "succeeded",
         )
 
     def _run(
@@ -170,6 +212,7 @@ class MatchingJobService:
         work: WorkCallable,
         cancel_token: ThreadingCancelToken,
         process_guard: ProcessGuard,
+        completion_gate: _CompletionGate,
     ) -> JobResult:
         del process_guard  # reserved for owned subprocess registration by callers
         run_root = Path(spec.run_root)
@@ -204,19 +247,25 @@ class MatchingJobService:
         try:
             if cancel_check():
                 raise JobCancelledError("cancelled before start")
-            work(progress_cb, cancel_check)
-            if cancel_check():
-                raise JobCancelledError("cancelled after work returned")
-            result = JobResult(
-                run_id=spec.run_id,
-                status=JobStatus.SUCCEEDED,
-                acceptance=AcceptanceState.ACCEPTED,
-                stage=spec.stage,
-                provenance="fresh",
-                blockers=spec.blockers,
-                last_progress=last_progress,
-                message="succeeded",
-            )
+            outcome = work(progress_cb, cancel_check)
+            with completion_gate.lock:
+                if cancel_check():
+                    raise JobCancelledError("cancelled after work returned")
+                if (
+                    isinstance(outcome, MatchingWorkOutcome)
+                    and outcome.acceptance == AcceptanceState.ACCEPTED
+                    and spec.blockers
+                ):
+                    raise ValueError(
+                        "Accepted work cannot bypass job qualification blockers"
+                    )
+                if (
+                    isinstance(outcome, MatchingWorkOutcome)
+                    and outcome.publish is not None
+                ):
+                    outcome.publish()
+                result = self._completed_result(spec, outcome, last_progress)
+                completion_gate.committed = True
         except JobCancelledError as exc:
             diagnostics = self._write_diagnostics(run_root, exc, FaultKind.CANCEL)
             result = JobResult(

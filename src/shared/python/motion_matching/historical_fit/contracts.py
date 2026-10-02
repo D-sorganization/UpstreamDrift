@@ -91,6 +91,7 @@ class ImageFitInputs:
     coordinate_scales: np.ndarray
     free_coordinates: tuple[str, ...]
     knot_times: np.ndarray | None = None
+    initial_samples: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         for name in (
@@ -149,6 +150,13 @@ class ImageFitInputs:
                 "Spline knots must increase and span the exact source interval"
             )
         object.__setattr__(self, "knot_times", knots)
+        if self.initial_samples is not None:
+            samples = _array(self.initial_samples, "Warm-start samples")
+            if samples.shape != (len(times), len(self.seed)):
+                raise ValueError(
+                    "Warm-start samples must match source frames and coordinates"
+                )
+            object.__setattr__(self, "initial_samples", samples)
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,229 @@
+"""Clean-interpreter native refit producer; invoked by the owned job service."""
+
+from __future__ import annotations
+
+from dataclasses import asdict
+import json
+import logging
+from pathlib import Path
+import sys
+from typing import Any
+
+import numpy as np
+
+from src.shared.python.motion_matching.historical_fit import (
+    CameraProjection,
+    CaptureImageEvidence,
+    ImageFitConfig,
+    ImageFitInputs,
+    ImageFitResult,
+    fit_image_trajectory,
+    read_capture_evidence,
+)
+from src.shared.python.motion_matching.pipeline.plant import MatchingPlant, get_plant
+from .necromatcher import NecromatcherLibrary
+from .necromatcher_fit_jobs import fit_execution_stamp
+from .necromatcher_projection import project_fit_frame
+from .necromatcher_review import CaptureReview
+
+logger = logging.getLogger(__name__)
+
+
+def _dense_reprojection_metrics(
+    native: MatchingPlant,
+    camera: CameraProjection,
+    attachments: dict[str, Any],
+    evidence: CaptureImageEvidence,
+    q: np.ndarray,
+    fit_indices: tuple[int, ...],
+) -> dict[str, float | None]:
+    residuals = np.array(
+        [
+            camera.residual(
+                native.marker_positions(pose, attachments), observed, weights
+            )
+            for pose, observed, weights in zip(
+                q, evidence.observed_pixels, evidence.confidence, strict=True
+            )
+        ]
+    )
+    held_out = np.array([index not in fit_indices for index in evidence.frame_indices])
+    result: dict[str, float | None] = {}
+    for name, selected in (
+        ("dense_rms_pixels", np.ones(len(q), dtype=bool)),
+        ("held_out_rms_pixels", held_out),
+    ):
+        weight = float(np.sum(evidence.confidence[selected]))
+        result[name] = (
+            float(np.sqrt(np.sum(residuals[selected] ** 2) / weight))
+            if weight > 0
+            else None
+        )
+    return result
+
+
+def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
+    """Compute a source-clock fit; never declare dynamics qualification."""
+    stamp = fit_execution_stamp()
+    expected = request["execution_stamp"]
+    if (
+        stamp["source_sha256"] != expected["source_sha256"]
+        or stamp["runtime_sha256"] != expected["runtime_sha256"]
+    ):
+        raise ValueError(
+            "Native worker implementation or runtime differs from launch stamp"
+        )
+    library = NecromatcherLibrary(request["library_root"])
+    identity = request["source_fit_id"]
+    source = library.load_fit(identity)
+    if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
+        raise ValueError("Warm-start fit differs from launch identity")
+    options = request["options"]
+    indices = tuple(options["frame_indices"])
+    # Reuse native XML, camera and attachment validation from the review path.
+    project_fit_frame(library, identity, indices[0])
+    definition = source["provenance"]["native_definition"]
+    original = source["evidence"]["original_fit"]
+    native = get_plant("mujoco", json.dumps(definition).encode("utf-8"))
+    attachments = original["attachments"]
+    camera = CameraProjection(**original["camera"])
+    samples = np.asarray(source["q"])[
+        [source["frame_indices"].index(i) for i in indices]
+    ]
+    with CaptureReview(library, source["capture_id"]) as review:
+        evidence = read_capture_evidence(
+            review,
+            tuple(attachments),
+            indices,
+            unknown_visibility_weight=options["unknown_visibility_weight"],
+        )
+        inputs = ImageFitInputs(
+            evidence.source_times,
+            evidence.observed_pixels,
+            evidence.confidence,
+            samples[0],
+            np.asarray(options["coordinate_scales"]),
+            tuple(original["free_coordinates"]),
+            np.linspace(
+                evidence.source_times[0],
+                evidence.source_times[-1],
+                options["knot_count"],
+            ),
+            samples,
+        )
+        result = fit_image_trajectory(
+            native, attachments, camera, inputs, ImageFitConfig(**options["config"])
+        )
+        dense_indices = tuple(
+            i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
+        )
+        dense = read_capture_evidence(
+            review,
+            tuple(attachments),
+            dense_indices,
+            unknown_visibility_weight=options["unknown_visibility_weight"],
+        )
+        q = result.evaluate_source_times(dense.source_times)
+        frames = [review.frame(i)["frame"] for i in dense_indices]
+    closure = np.array([native.closure_residuals(pose) for pose in q])
+    output = _build_fit_payload(
+        request,
+        source,
+        result,
+        (dense_indices, frames, q),
+        stamp,
+        float(np.max(np.linalg.norm(closure, axis=1))),
+    )
+    output["evidence"]["original_fit"].update(
+        _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
+    )
+    if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
+        raise ValueError("Native worker implementation changed during execution")
+    return output
+
+
+def _build_fit_payload(
+    request: dict[str, Any],
+    source: dict[str, Any],
+    result: ImageFitResult,
+    dense_output: tuple[tuple[int, ...], list[dict[str, Any]], np.ndarray],
+    stamp: dict[str, Any],
+    max_grip: float,
+) -> dict[str, Any]:
+    original = source["evidence"]["original_fit"]
+    attachments = original["attachments"]
+    options = request["options"]
+    indices = options["frame_indices"]
+    dense_indices, frames, q = dense_output
+    blockers = [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "anatomical_ranges_not_enforced",
+    ]
+    if not result.converged:
+        blockers.append("optimizer_not_converged")
+    output = {
+        **source,
+        "frame_indices": list(dense_indices),
+        "frames": frames,
+        "q": q.tolist(),
+        "provenance": {
+            "native_definition": source["provenance"]["native_definition"],
+            "warm_start_provenance": source["provenance"],
+            "description": "Source-stamped native warm-start research refit",
+            "warm_start_fit_id": request["source_fit_id"],
+            "warm_start_fit_hash": request["source_fit_hash"],
+            "request_options": options,
+            "execution_stamp": request["execution_stamp"],
+            "worker_stamp": {
+                key: stamp[key]
+                for key in ("started_at_utc", "source_sha256", "runtime_sha256")
+            },
+        },
+        "evidence": {
+            "rejection_reasons": blockers,
+            "original_fit": {
+                "camera": original["camera"],
+                "attachments": attachments,
+                "free_coordinates": list(result.free_coordinates),
+                "coordinate_order": list(result.coordinate_order),
+                "frame_indices": list(indices),
+                "source_times": result.source_times.tolist(),
+                "q": result.q.tolist(),
+                "knot_times": result.knot_times.tolist(),
+                "spline_coefficients": result.spline_coefficients.tolist(),
+                "initial_rms_pixels": result.initial_rms_pixels,
+                "rms_pixels": result.rms_pixels,
+                "converged": result.converged,
+                "message": result.optimizer_message,
+                "config": asdict(ImageFitConfig(**options["config"])),
+                "max_grip_separation_m": max_grip,
+            },
+        },
+    }
+    return output
+
+
+def main() -> None:
+    """Serve one trusted local request and return its finite JSON fit."""
+    try:
+        request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+        fit = compute_native_refit(request)
+        sys.stdout.write(json.dumps({"fit": fit}, allow_nan=False))
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        IndexError,
+        RuntimeError,
+        ImportError,
+    ):
+        logger.exception("Native research refit failed")
+        raise SystemExit(1) from None
+
+
+if __name__ == "__main__":
+    main()

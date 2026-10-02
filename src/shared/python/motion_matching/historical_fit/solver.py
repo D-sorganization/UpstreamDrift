@@ -39,6 +39,13 @@ class _Fit:
         if any(name not in order for name in inputs.free_coordinates):
             raise ValueError("Free coordinates must belong to the native model")
         self.indices = np.array([order.index(name) for name in inputs.free_coordinates])
+        if inputs.initial_samples is not None:
+            locked = [index for index in range(len(order)) if index not in self.indices]
+            if not np.array_equal(
+                inputs.initial_samples[:, locked],
+                np.tile(inputs.seed[locked], (len(inputs.source_times), 1)),
+            ):
+                raise ValueError("Warm-start samples cannot change locked coordinates")
 
     def expand(self, free: np.ndarray) -> np.ndarray:
         result = np.tile(self.inputs.seed, (len(free), 1))
@@ -150,11 +157,17 @@ def fit_image_trajectory(
     fit = _Fit(native, attachments, camera, inputs, config)
     knots = inputs.source_times if inputs.knot_times is None else inputs.knot_times
     trajectory = CubicHermiteSplineTrajectory(knots, len(fit.indices))
-    initial = np.tile(inputs.seed[fit.indices], (len(inputs.source_times), 1))
+    initial = (
+        np.tile(inputs.seed[fit.indices], (len(inputs.source_times), 1))
+        if inputs.initial_samples is None
+        else inputs.initial_samples[:, fit.indices]
+    )
     coefficients = trajectory.initial_coefficients_from_samples(
         inputs.source_times, initial
     )
-    initial_residual = fit.image_residuals(fit.expand(initial))
+    initial_residual = fit.image_residuals(
+        fit.expand(trajectory.evaluate(coefficients, inputs.source_times).q)
+    )
     problem = MapEstimatorProblem(
         trajectory,
         inputs.source_times,

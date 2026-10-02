@@ -1,5 +1,15 @@
 # Necromatcher Handoff
 
+## Source-Stamped Native Research Jobs
+
+Canonical matching jobs now execute immutable native warm-start refits in a clean
+interpreter with source/runtime/input fingerprints captured at execution. Explicit
+work outcomes preserve rejection after successful computation. Cancellation and
+publication share a commit gate, and dense/held-out errors retain source confidence.
+Seventy-two fitting/job/storage/API/native review checks pass. Final committed-source
+Hogan/Tiger runs and their receipts are next; UI/API job submission, bounded closed
+motion, effort units and qualified downstream replay still require work.
+
 ## Native and Web Projection Review
 
 The saved 750-frame Hogan and 210-frame Tiger fits now have native/web model

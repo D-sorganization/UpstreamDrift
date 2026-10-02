@@ -491,3 +491,14 @@ The root Bushing Joint also exposes six actuator-sensing channels under HipLogs.
 `pose_estimation.estimate_keypoint_offset` is reused by the Simscape `calibrate_pose_attachments.py` reproduction command for confidence-weighted fixed local marker attachments from verified native body frames. Preserve its proper-rotation checks, covariance/scatter reporting and valid-observation selection; fitted attachment candidates require fresh forward-state qualification.
 
 `tour_fit_state.verify_native_initial_state` requires declared q/qd and native kinematic marker projection to agree with a forward replay, while reporting nonzero capture residual independently. This allows calibrated geometry/attachments without falsely requiring perfect initial marker fit or relaxing physical-state verification.
+
+## Historical Research Fit Jobs
+
+The workspace facade exports `NativeRefitOptions` and `start_native_refit` for
+immutable source-bound historical refits. Reuse `motion_matching.jobs` for owned
+job execution, cancellation, manifests and recovery. `MatchingWorkOutcome`
+retains explicit rejection after computational success and serializes publication
+against cancellation. The native worker uses canonical image evidence and Hermite
+MAP fitting with immutable warm-start samples; source PTS and unqualified camera
+assumptions cannot certify physical derivatives or joint efforts. See the
+[Necromatcher Native Fitting Procedure](../development/necromatcher-native-fit.md).

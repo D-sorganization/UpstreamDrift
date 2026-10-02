@@ -46,6 +46,7 @@ from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_review import CaptureReview
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
+from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
 from .project_store import (
     DatasetMetadata,
     ProjectMetadata,

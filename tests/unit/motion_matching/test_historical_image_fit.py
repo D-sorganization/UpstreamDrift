@@ -25,6 +25,78 @@ pytestmark = pytest.mark.unit
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def test_warm_start_uses_saved_native_samples_without_mutating_them():
+    from dataclasses import replace
+
+    native, attachments, camera, inputs = native_problem()
+    samples = np.tile(inputs.seed, (2, 1))
+    samples[:, native.coordinate_order.index("REInput")] = [-0.3, -0.8]
+    warm = replace(inputs, initial_samples=samples)
+    samples[:, :] = 99
+    result = fit_image_trajectory(
+        native,
+        attachments,
+        camera,
+        warm,
+        ImageFitConfig(
+            max_iterations=1, prior_weight=0, smoothness_weight=0, closure_weight=0
+        ),
+    )
+    assert result.initial_rms_pixels < 1e-8
+    assert result.rms_pixels < 1e-8
+    assert not warm.initial_samples.flags.writeable
+    with pytest.raises(ValueError, match="Warm"):
+        replace(inputs, initial_samples=np.zeros((1, len(inputs.seed))))
+    bad = np.tile(inputs.seed, (2, 1))
+    bad[:, 0] = 1.0
+    with pytest.raises(ValueError, match="locked"):
+        fit_image_trajectory(
+            native, attachments, camera, replace(inputs, initial_samples=bad)
+        )
+
+
+def test_warm_start_baseline_measures_the_actual_initial_spline():
+    from dataclasses import replace
+
+    native, attachments, camera, original = native_problem()
+    times = np.linspace(110.0, 111.0, 5)
+    samples = np.tile(original.seed, (5, 1))
+    index = native.coordinate_order.index("REInput")
+    samples[:, index] = [-0.3, -0.8, -0.3, -0.8, -0.3]
+    observed = np.array(
+        [camera.project(native.marker_positions(q, attachments)) for q in samples]
+    )
+    inputs = replace(
+        original,
+        source_times=times,
+        observed_pixels=observed,
+        confidence=np.ones((5, 3)),
+        knot_times=times[[0, -1]],
+        initial_samples=samples,
+    )
+    trajectory = CubicHermiteSplineTrajectory(inputs.knot_times, 1)
+    coefficients = trajectory.initial_coefficients_from_samples(
+        times, samples[:, [index]]
+    )
+    initial = np.tile(original.seed, (5, 1))
+    initial[:, [index]] = trajectory.evaluate(coefficients, times).q
+    projected = np.array(
+        [camera.project(native.marker_positions(q, attachments)) for q in initial]
+    )
+    expected = float(np.sqrt(np.sum((projected - observed) ** 2) / 15))
+    assert expected > 0.1
+    result = fit_image_trajectory(
+        native,
+        attachments,
+        camera,
+        inputs,
+        ImageFitConfig(
+            max_iterations=1, prior_weight=0, smoothness_weight=0, closure_weight=0
+        ),
+    )
+    assert result.initial_rms_pixels == pytest.approx(expected)
+
+
 def test_spline_chain_jacobian_matches_independent_coefficient_differences(monkeypatch):
     native, attachments, camera, original = native_problem()
     times = np.array([110.0, 110.35, 111.0])

@@ -253,7 +253,7 @@ native samples are available at `GET /necromatcher/fits/{fit_id}` and
 samples return 404; stale model/capture bindings reject recall. The frame response
 retains exact source identity, coordinate order/units and research qualification.
 Seventeen fit-storage/API tests and fourteen web page/form tests pass.
-Fit-job submission,
+Fit-job UI/API submission,
 resource-validated model import, physical-clock qualification, generalized
 effort profiles and independently verified simulation/impact handoffs remain
 required. Preserve the existing rejection evidence during that work.
@@ -290,3 +290,53 @@ checks passed, with TypeScript and ESLint. These verify storage and review only;
 the original nonconvergence, grip separation, ROM and timing rejection evidence
 still governs the fits. Production fit jobs, bounded closed motion, generalized
 effort profiles and qualified downstream replay remain open.
+
+## Source-Stamped Research Refit Jobs
+
+`start_native_refit(library, source_fit_id, new_fit_id, options, service)` now
+runs actual native fitting through `MatchingJobService`. `NativeRefitOptions`
+requires increasing source indices, explicit coordinate scales, knot count,
+visibility prior, solver configuration and wall budget. The source fit must
+contain every selected sample; the new fit identity must be unused.
+
+A clean interpreter verifies the source-fit hash, compiled model binding,
+camera/attachment assumptions and launch fingerprints before native execution.
+Warm starts copy saved full native samples and reject changes to locked
+coordinates. Source PTS remains the trajectory clock. Dense and held-out pixel
+RMS use the original observation confidence; held-out frames exclude training
+indices, and missing observations contribute no fabricated target.
+
+Execution stamps record selected workspace, matching, estimation, numerical and
+MuJoCo source-file hashes, their combined digest, the Git context, Python and
+installed numerical/SDK versions, platform and Tools checkout commit. The
+worker verifies the launch source/runtime digests and checks source freshness
+again after solving. These are scoped reproduction identities, not approval of
+all runtime dependencies or evidence of camera/physical-clock calibration.
+The original exploratory v2 results remain unchanged.
+
+`MatchingWorkOutcome` separates computational completion from qualification.
+Necromatcher jobs return succeeded/rejected and retain their actual rejection
+reasons in the canonical run manifest. Explicit accepted outcomes cannot bypass
+job blockers. Existing legacy work-return semantics remain compatible and must
+not be cited as scientific acceptance. Publication runs under the same completion
+gate as cancellation: cancellation before commit prevents a new library version;
+a late cancellation cannot relabel a committed version as interrupted.
+Unpublished candidates and diagnostic manifests may remain in the owned run
+folder for inspection. The worker is terminated on cancellation or wall timeout.
+
+To Refit a Saved Player Version:
+
+1. Open the configured library and call `load_fit` on the immutable prior version.
+2. Choose reviewed continuous-shot source indices and a new version identity.
+3. Build `NativeRefitOptions` with explicit native coordinate scales and priors.
+4. Reuse one `MatchingJobService`, call `start_native_refit`, retain the returned
+   handle and run folder, and use `request_cancel` or `join` as appropriate.
+5. Inspect `request.json`, `run_manifest.json` and rejection evidence; reopen the
+   stored fit with `load_fit` and review its model projections before export.
+6. Call `service.close()` after owned jobs finish. Preserve previous versions.
+
+Seventy-two fitting/job/storage/API/native review checks pass, including red-first
+outcome, warm-start, cancellation, publication, input-contract and held-out-metric
+regressions. Job submission through native/web controls, anatomical bounds,
+closed motion, physical-clock qualification, mixed effort units and independently
+verified downstream replay remain open. The full goal and #11235 remain active.
