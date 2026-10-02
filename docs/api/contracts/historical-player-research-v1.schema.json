@@ -1,0 +1,308 @@
+{
+  "$id": "urn:upstreamdrift:historical-player-research:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "distribution": {
+      "additionalProperties": false,
+      "properties": {
+        "contains_original_media": {
+          "const": false
+        },
+        "decision": {
+          "const": "not_authorized_for_publication"
+        },
+        "scope": {
+          "const": "local_research_only"
+        }
+      },
+      "required": ["scope", "decision", "contains_original_media"],
+      "type": "object"
+    },
+    "provider": {
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "const": "D-sorganization/UpstreamDrift"
+        },
+        "source_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "source_url": {
+          "pattern": "^https://github.com/D-sorganization/UpstreamDrift/tree/[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": ["repository", "source_commit", "source_url"],
+      "type": "object"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "continuous_certified": {
+            "const": false
+          },
+          "execution_status": {
+            "const": "succeeded"
+          },
+          "fit_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,127}$",
+            "type": "string"
+          },
+          "hashes": {
+            "additionalProperties": false,
+            "properties": {
+              "capture": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "fit": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "input": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "model": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "source": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              }
+            },
+            "required": ["source", "capture", "model", "fit", "input"],
+            "type": "object"
+          },
+          "image_counts": {
+            "additionalProperties": false,
+            "properties": {
+              "dense_observation_count": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "source_frame_count": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "training_frame_count": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "training_observation_count": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "training_frame_count",
+              "source_frame_count",
+              "training_observation_count",
+              "dense_observation_count"
+            ],
+            "type": "object"
+          },
+          "limitations": {
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "metric_definition": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "metrics": {
+            "additionalProperties": false,
+            "properties": {
+              "dense_rms_px": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "grip_angle_deg": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "grip_gap_mm": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "held_out_rms_px": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "penetration_mm": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "training_rms_px": {
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "training_rms_px",
+              "held_out_rms_px",
+              "dense_rms_px",
+              "grip_gap_mm",
+              "grip_angle_deg",
+              "penetration_mm"
+            ],
+            "type": "object"
+          },
+          "optimizer_converged": {
+            "const": false
+          },
+          "player_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,127}$",
+            "type": "string"
+          },
+          "player_name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "producer_commit": {
+            "pattern": "^[0-9a-f]{40}$",
+            "type": "string"
+          },
+          "qualification": {
+            "const": "monocular_research_hypothesis"
+          },
+          "rights": {
+            "additionalProperties": false,
+            "properties": {
+              "distribution": {
+                "const": "not_authorized"
+              },
+              "status": {
+                "enum": ["unresolved", "restricted", "documented_local_use"]
+              }
+            },
+            "required": ["status", "distribution"],
+            "type": "object"
+          },
+          "scientific_acceptance": {
+            "const": "rejected"
+          },
+          "source_clock": {
+            "additionalProperties": false,
+            "properties": {
+              "end": {
+                "additionalProperties": false,
+                "properties": {
+                  "denominator": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "numerator": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["numerator", "denominator"],
+                "type": "object"
+              },
+              "frame_count": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "origin": {
+                "const": "video_presentation_time"
+              },
+              "physical_time": {
+                "const": "unknown"
+              },
+              "start": {
+                "additionalProperties": false,
+                "properties": {
+                  "denominator": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "numerator": {
+                    "type": "integer"
+                  }
+                },
+                "required": ["numerator", "denominator"],
+                "type": "object"
+              }
+            },
+            "required": [
+              "start",
+              "end",
+              "origin",
+              "frame_count",
+              "physical_time"
+            ],
+            "type": "object"
+          },
+          "swing_id": {
+            "pattern": "^[a-z0-9][a-z0-9-]{0,127}$",
+            "type": "string"
+          },
+          "targets": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "pattern": "^[a-z0-9][a-z0-9-]{0,127}$",
+                  "type": "string"
+                },
+                "passed": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["id", "passed"],
+              "type": "object"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          },
+          "unknown_visibility_weight": {
+            "const": 0.5
+          }
+        },
+        "required": [
+          "player_id",
+          "player_name",
+          "swing_id",
+          "fit_id",
+          "producer_commit",
+          "hashes",
+          "source_clock",
+          "execution_status",
+          "qualification",
+          "scientific_acceptance",
+          "optimizer_converged",
+          "continuous_certified",
+          "targets",
+          "metrics",
+          "metric_definition",
+          "unknown_visibility_weight",
+          "rights",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema": {
+      "const": "upstreamdrift/historical-player-research/v1"
+    }
+  },
+  "required": ["schema", "provider", "distribution", "records"],
+  "title": "Historical-Player Local Research Handoff Version 1",
+  "type": "object"
+}

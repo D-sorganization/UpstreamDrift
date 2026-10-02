@@ -1,0 +1,59 @@
+{
+  "schema": "necromatcher/independent-tiger-v13-overlay-verification/1",
+  "fit_id": "tiger-lower-knot-variant-fit-v13",
+  "run_id": "7cf989de5a5d41fc9e3375b551f599b0",
+  "export_producer": "dafab40c107dbcd22d1c3a91bfcc79b102076f65",
+  "numerical_producer": "dafab40c107dbcd22d1c3a91bfcc79b102076f65",
+  "decoded_total_frames": 210,
+  "image_size": [1280, 720],
+  "review_receipt_sha256": "73960b08e16fd632a88aba6bc1525841a112bcb9090c83ba264461ecd44c2aaa",
+  "zip_sha256": "a2656f11515be212b5418f2edd1371ac175bee426ae254eb79e8383ad721dfa5",
+  "zip_crc_and_member_bytes_verified": true,
+  "all_original_source_frame_identities_verified": true,
+  "selected_original_png_hashes_verified": true,
+  "producer_runtime_parent_audit_brackets_verified": true,
+  "dense_audit": {
+    "assessment_path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment.json",
+    "assessment_sha256": "e4e82f4a09b3e2d75f7894562efbfd15cd7f4dc5a364540da0fdc76495b78de9",
+    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\lower-knot-v13-independent-assessment-tiger-lower-knot-variant-fit-v13-audit.json",
+    "sha256": "1587efb2b62f5e1aae612afdbb0e3d0935bf149f0bea5c080121e4afb77f4cb0",
+    "fit_id": "tiger-lower-knot-variant-fit-v13",
+    "dense_original_rms_pixels": 28.781548513185022,
+    "source_interval": [15.015, 21.988633333333333],
+    "continuous_nonlinear_certified": false
+  },
+  "png_sha256": {
+    "frame-000000.png": "f4c3a78381624fccbaed81dfbd47715c1a59f4ae6df188e215939c87496debd8",
+    "frame-000105.png": "14fd59a54be26918e8bf9f929e3bb5fc08d4e549195c2e25ce9d76dfd3f69e78",
+    "frame-000209.png": "bdcf969702bf989f8a58b59c2cee5d9ea2a935fc42fe8af940391ec604dc0067"
+  },
+  "selected_rms_pixels": [
+    6.1970942407539376, 59.3616661582886, 14.16134658201634
+  ],
+  "qualification": "monocular_research_hypothesis",
+  "scientific_acceptance": "rejected",
+  "continuous_certified": false,
+  "visual_review": {
+    "status": "actual_three_stills_reviewed",
+    "method": "Direct full-size view_image inspection of all exported first/middle/end PNGs; no manual OS interaction claim.",
+    "reviewed_frame_indices": [0, 105, 209],
+    "findings": [
+      {
+        "frame_index": 0,
+        "finding": "Body projection is broadly near the observed address pose, but the long blue rig/seed extension points down-left while the visible white club points down-right; anatomical and club identity remain unqualified."
+      },
+      {
+        "frame_index": 105,
+        "finding": "The follow-through retains a conspicuous upper-body/arm mismatch and long yellow residuals between green observations and blue projected geometry. The source-sized overlay and research caption are readable; selected matched RMS is 59.36 px."
+      },
+      {
+        "frame_index": 209,
+        "finding": "The blue torso and arm projection partly follows the walking pose, but the long blue seed extension points right whereas the visible club shaft points down-left. Feet lie outside the crop, preventing visual contact assessment."
+      }
+    ],
+    "legend_and_caption": "Existing green observations, blue native rig/seeds and yellow residuals remain explicit. Camera/anatomy unqualified and physical time unknown labels are visible on all three stills.",
+    "limitations": "Inspection verifies presented output and mismatches, not 3D anatomy, ground contact, club attachment identity or continuous nonlinear feasibility. The scalar dense metric and selected-frame RMS use different frame selections.",
+    "scientific_acceptance": "rejected",
+    "continuous_certified": false
+  }
+}

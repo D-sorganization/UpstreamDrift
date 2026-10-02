@@ -6,6 +6,8 @@ Current branch `feat/necromatcher-native-fit-11235` (PR #11240) retargeted to `m
 - PR: #11240 (retargeted to `main`)
 - Branch: `feat/necromatcher-native-fit-11235`
 - Validation: 88 fitting tests, 142 workspace tests pass; Ruff lint/format clean.
+- Latest verified numerical evidence: V13 authored12/6 and V14 exact-six collective geometry-weight trials at `dafab40c107`; all candidates remain rejected/nonconverged. V13 selected dense28.781549px still fails grip/ground; V14 variant dense25.522536px/grip2.198523mm passes four finite checks but ground3.859638mm fails2mm between objective nodes.
+- Evidence: [V14 Summary](historical_capture/geometry-weight-v14-summary.json); full hash-checked Desktop numerical copies and actual210-frame V13 overlay verified, with all three stills inspected. No V14 overlay or new report publication; see turnover for immutable receipt hashes and prior edition preservation.
 
 # Active Necromatcher Workspace Delivery — #11239 (Merged)
 

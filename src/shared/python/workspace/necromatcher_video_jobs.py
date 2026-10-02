@@ -34,7 +34,10 @@ from src.shared.python.motion_matching.jobs import (
     ProcessGuard,
     RunManifest,
 )
-from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
+from src.shared.python.motion_matching.jobs.io_atomic import (
+    atomic_write_json,
+    read_text,
+)
 from src.shared.python.motion_matching.jobs.service import JobHandle
 from src.shared.python.security import secure_popen
 from src.shared.python.version_info import get_repo_root
@@ -53,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 
 def _read(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(read_text(path))
     if not isinstance(value, dict):
         raise ValueError("Video job record must be a JSON object")
     return value

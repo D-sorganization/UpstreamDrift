@@ -488,3 +488,44 @@ def test_legacy_completion_requires_explicit_download_verification(
         assert session.view(run)["download_available"]
     finally:
         session.close()
+
+
+def test_video_record_read_retries_verified_sharing_fault(tmp_path, monkeypatch):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+    from src.shared.python.motion_matching.jobs import io_atomic
+
+    path = tmp_path / "request.json"
+    path.write_text('{"status": "running"}', encoding="utf-8")
+    original = Path.read_text
+    attempts = []
+    error = PermissionError("verified sharing fault")
+    error.winerror = 32
+
+    def read(self, *args, **kwargs):
+        attempts.append(self)
+        if len(attempts) == 1:
+            raise error
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read)
+    monkeypatch.setattr(io_atomic.time, "sleep", lambda _: None)
+    assert jobs._read(path) == {"status": "running"}
+    assert len(attempts) == 2
+
+
+@pytest.mark.parametrize(
+    "payload,exception", [("{", json.JSONDecodeError), ("[]", ValueError)]
+)
+def test_video_record_malformed_json_is_not_retried(
+    tmp_path, monkeypatch, payload, exception
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+    from src.shared.python.motion_matching.jobs import io_atomic
+
+    path = tmp_path / "request.json"
+    path.write_text(payload, encoding="utf-8")
+    delays = []
+    monkeypatch.setattr(io_atomic.time, "sleep", delays.append)
+    with pytest.raises(exception):
+        jobs._read(path)
+    assert not delays

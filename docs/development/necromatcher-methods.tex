@@ -1370,6 +1370,321 @@ false. Original-footage overlay export and verification are documented
 separately below; they do not promote this numerical target pass to
 historical acceptance.
 
+\subsection{V13 Authored Knot-Count Protocol and Results}
+V13 compares twelve- and six-knot representations of the same rejected Tiger
+V12 higher-speed-weight parent. The numerical producer is
+\hash{dafab40c107dbcd22d1c3a91bfcc79b102076f65}; the frozen driver is
+\hash{bed8a23d6ec6607806d6dd68f3df7cf3da5158250f07922d9127a5edf7fedb0c}.
+The independent \path{lower-knot-v13-independent-assessment.json}, SHA-256
+\hash{e4e82f4a09b3e2d75f7894562efbfd15cd7f4dc5a364540da0fdc76495b78de9},
+verifies all four immutable seed/fit outputs without optimization. Its full
+per-case audit references retain exact byte identities and nonlinear samples.
+
+\paragraph{Matched Geometry Times, Different Authored Curves.}
+Both representations resample the same saved parent poses at their own
+uniform knot times over source PTS 15.015--21.9886333333 s. Each explicitly
+runs \code{authored_range_project_zero_slopes} once. In these actual seeds,
+all knot positions already satisfy their authored ranges: maximum positional
+projection displacement is zero in every free coordinate. All 372 free
+knot slopes in the twelve-knot seed and all 186 in the six-knot seed become
+zero, including unbounded free coordinates. The canonical domain admits
+both resulting curves, with 32 authored bounded and twelve unbounded native
+coordinates. This scalar certificate does not enforce closed grips or ground
+contact; neither seed was optimized or converged.
+
+The 31 free coordinates give 744 versus 372 scalar position/slope
+coefficients. Local interior fractions are chosen to produce the same global
+geometry grid. For interval $[t_0,t_1]$ and normalized time $u$, define
+\begin{equation}
+\begin{aligned}
+G &= \left\{\frac{2j+1}{110}:j=0,\ldots,54\right\},
+& t(u)&=t_0+(t_1-t_0)u,\\
+F_{12}&=\{1,3,5,7,9\}/10,
+& F_6&=\{1,3,\ldots,21\}/22,\\
+G&=\bigcup_{k=0}^{10}\left\{\frac{k+f}{11}:f\in F_{12}\right\}
+ =\bigcup_{k=0}^{4}\left\{\frac{k+f}{5}:f\in F_6\right\}.
+\end{aligned}
+\label{eq:v13-common-grid}
+\end{equation}
+The deduplicated union of these 55 interior locations, the same 22 original
+training frames, and authored contact boundaries contains 78 tested times.
+Time agreement is checked within $10^{-12}$ s; pins, row labels, scales and
+per-row weights are identical. Twelve native rows per time give 936 rows in
+each objective. Geometry coverage and potential quadratic row mass therefore
+match, unlike the V12 Hogan coverage comparison. Image evidence is still
+source-only: 286 original training landmarks, identical confidences and RMS
+denominator, no added observations at the interior locations.
+
+Both jobs preserve the original camera, attachments and coordinate bounds;
+position/rotation/ground weights remain 1000, with scales 0.01 m, 0.1 rad and
+0.01 m. The prior and source-speed weights are each 0.001. The common soft
+prior is the saved V12 parent's first pose. It is an objective prior, not a
+requirement that the optimized first pose remain fixed. Each fit strictly
+restarts its \emph{own} immutable authored seed, preserves its initial
+coefficients exactly and performs no second initialization. V13 is thus a
+comparison of representation \emph{and different authored starting curves},
+not an exact restart of V12 or a same-start isolated knot-count experiment.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule Knots & Stage & Initial & Training & Held Out & Dense\\\midrule
+12 & Authored seed & --- & 25.737774 & 30.373164 & 29.922765\\
+12 & Strict fit & 25.737774 & 16.130001 & 42.083163 & 40.165223\\
+6 & Authored seed & --- & 40.443374 & 43.293543 & 43.004784\\
+6 & Strict fit & 40.443374 & 25.747790 & 29.114671 & 28.781549\\
+\bottomrule
+\end{tabular}
+\caption{V13 Original-Image RMS in Pixels. Seed Rows Are Authored Without
+Optimization; Initial Fit RMS Reproduces Its Own Saved Seed. Held-Out Frames
+Have Been Examined Repeatedly and Are Not Unbiased Final Validation.}
+\end{table}
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule Knots & Stage & Grip (mm) & Angle (deg) & Depth (mm) & Wall (s)\\\midrule
+12 & Authored seed & 179.568994 & 20.072504 & 6.878560 & 6.066\\
+12 & Strict fit & 4.380123 & 1.487076 & 3.091303 & 34.640\\
+6 & Authored seed & 296.815351 & 33.843403 & 4.639009 & 5.626\\
+6 & Strict fit & 12.155403 & 3.083181 & 3.736460 & 27.132\\
+\bottomrule
+\end{tabular}
+\caption{V13 Independent Finite Native Maxima and Owned Job Wall Time.
+Each Audit Retains 210 Original PTS, 209 Adjacent Midpoints, 88 Coordinate
+Extremum Records and Ten Contact-Phase Probes; These Are Finite Evaluations,
+Not an All-Time Nonlinear Certificate.}
+\end{table}
+Both strict fits complete computationally but exhaust thirty evaluations
+without convergence under the same 300-second worker guard. Both authored
+seeds have large grip gaps and rotations despite scalar range feasibility.
+The twelve-knot fit passes the fixed grip and angle checks but fails image
+nonregression and nonpenetration. The six-knot fit improves dense RMS against
+both its paired twelve-knot result and the fixed historical V10 baseline,
+but its 12.155403 mm grip gap and 3.736460 mm penetration still fail the fixed
+10 mm and 2 mm limits. All four complete outputs remain rejected research;
+all pass the 32-range scalar certificate, and none establishes continuous
+nonlinear validity, anatomy, physical time or dynamic acceptance.
+
+The selected six-knot fit is \code{tiger-lower-knot-variant-fit-v13}, SHA-256
+\hash{9128ec06b7aafd5cdf0b0762289f48a17c734a2dd91a754ab9ad4ae4535185dd}.
+Selecting it for inspection preserves the twelve-knot tradeoff and both
+closure-failing authored seeds. Better dense pixels alone do not identify
+a historical swing or justify releasing the contact/closure checks.
+
+\subsection{V14 Matched Geometry-Weight Continuations}
+V14 resumes the exact selected V13 six-knot spline in both arms, with the
+same first-pose soft prior, original camera/image/confidence evidence,
+32 authored bounded and twelve unbounded coordinates, strict initialization,
+and 78 geometry times containing 936 fixed rows. Only the three geometric
+weights change collectively from 1000 to 4000; their dimensional scales and
+contact schedule remain unchanged. Both starts reproduce training RMS
+25.747790 px. The native preflight independently checks every residual and
+Jacobian row at all 78 times: multiplying configured weights by four
+multiplies scaled residuals and Jacobians by two. Coverage remains fixed;
+potential quadratic penalty mass increases fourfold.
+
+The numerical producer remains \code{dafab40c107}; the frozen driver is
+\hash{c87ab4fe9e626b835a0a4757d84c273b757f9ef630187291e53832906dfdb00a}.
+Fresh \path{geometry-weight-v14-independent-assessment.json} has SHA-256
+\hash{0bc1525fd4e8b3b289a1608ce567960ca68d32f27c884965a308c252d2c6779e}.
+It verifies both immutable outputs, exact starts, initial RMS, complete
+recipe difference, original observations and confidence denominators,
+source/probe identities, all scaled native node rows, and source/runtime,
+parent and helper brackets. It performs no optimization. Both actual jobs
+complete computationally but exhaust thirty evaluations without convergence,
+under the same 300-second worker guard, and remain \code{succeeded/rejected}.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Arm & Training & Held Out & Dense Original & Wall (s)\\\midrule
+Current weights & 23.210722 & 26.325357 & 26.017591 & 37.779\\
+Fourfold weights & 22.899275 & 25.811021 & 25.522536 & 30.596\\
+\bottomrule
+\end{tabular}
+\caption{V14 Image RMS in Pixels and Owned Job Wall Time. Both Arms Resume
+Exactly the Same V13 Six-Knot Coefficients; Earlier Experiments Are Historical
+Progress References, Not These Matched Controls.}
+\end{table}
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Arm & Grip (mm) & Angle (deg) & Dense Depth (mm) & Node Depth (mm)\\\midrule
+Current weights & 3.730507 & 1.596292 & 2.938022 & 2.787463\\
+Fourfold weights & 2.198523 & 0.724221 & 3.859638 & 1.379912\\
+\bottomrule
+\end{tabular}
+\caption{V14 Finite Native Maxima. Dense Depth Covers the Independent
+Original/Midpoint/Extremum/Phase Audit; Node Depth Covers Only the 78
+Configured Objective Times. Neither Is a Continuous Nonlinear Certificate.}
+\end{table}
+Both continuations pass four fixed finite research checks: historical dense
+image nonregression, all 32 authored finite ranges, grip gap at most 10 mm,
+and grip rotation at most 5 degrees. Both fail the unchanged 2 mm
+nonpenetration target. The higher-weight arm improves image, grip and angle
+against its paired control, but worsens independent penetration from
+2.938022 to 3.859638 mm. No combination of these improvements promotes the
+remaining ground failure or the unqualified physical clock to acceptance.
+No V14 original-footage overlay is claimed here.
+
+\paragraph{A Between-Node Ground Failure.}
+The separate \path{geometry-weight-v14-ground-diagnosis.json}, SHA-256
+\hash{9dfc897af4a0d4eaac3ddd0ffe8583021f58c97b37c7488f913ab59dfc3098bd},
+binds its source to the fresh assessment and diagnoses authored sphere/plane
+geometry without fitting. The higher-weight arm's maximum objective-node
+penetration is only 1.379912 mm, below 2 mm, yet its independent worst depth
+is 3.859638 mm at the adjacent-source midpoint of frames 87/88,
+$t=17.9345833333$ s. The offending sphere is \code{toe_r}, in the left-heel-only
+phase with the right foot released from equality pinning. Release still
+retains its nonpenetration hinge; it does not authorize penetration.
+The nearest later objective probe at 17.9946433333 s is 60.060 ms away and
+has 1.379912 mm depth; the earlier probe at 17.867850 s is 66.733 ms away
+and has 0.912966 mm depth. The finite node loss therefore misses this
+between-node violation. By contrast, the current-weight arm already fails
+at an objective node: its worst original frame is frame 98,
+$t=18.2849333333$ s, with 2.938022 mm \code{heel_l} depth. The nearby node at
+18.248230 s, 36.703 ms away, has 2.787463 mm depth and also exceeds the target.
+
+\paragraph{Separating Future Coverage From Weight Mass.}
+A future V15 protocol can test additional geometry times while retaining the
+same curve, observations, prior and contact assumptions. Because the canonical
+objective sums squared scaled rows, increasing the number of fixed rows also
+increases potential penalty mass unless normalization is declared. For a
+proposed grid of $N$ times with the same row families, a mass-matched comparison
+to the 78-time V14 grid would use
+\begin{equation}
+ \widetilde{\mathbf r}_g(t)
+ =\sqrt{\frac{78}{N}}\,\mathbf r_g(t),
+ \qquad \widetilde w_g=\frac{78}{N}w_g,
+ \qquad N\widetilde w_g=78w_g.
+ \label{eq:future-coverage-normalization}
+\end{equation}
+The same factor must apply to the exact native-to-spline Jacobian; dimensional
+scales and the source-only image objective remain unchanged. This preserves
+potential fixed-row mass, not identical realized residual cost or a temporal
+quadrature interpretation. Pin activation and hinge values still vary at the
+new times. This is a proposed reproducibility control, not an executed V15
+result or implemented continuous-contact certificate. Reusing diagnosed worst
+times is adaptive research and must remain distinct from unbiased final
+validation. A denser finite test can reveal further violations; it cannot
+prove all-time nonlinear feasibility, anatomy or historical dynamics.
+
+\subsection{Immutable Research Provider and Consumer Boundary}
+\label{sec:research-handoff}
+UpstreamDrift issue \#11317 supplies an SDK-free, sanitized research package
+for the AffineDrift consumer tracked by \#4828. The versioned contract is
+\code{upstreamdrift/historical-player-research/v1}, with schema identity
+\code{urn:upstreamdrift:historical-player-research:v1}. Both repositories pin
+identical normalized schema bytes:
+\hash{a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30}.
+This is a local research boundary. Version 1 admits succeeded computations
+only as rejected, nonconverged \code{monocular_research_hypothesis} records;
+finite target passes cannot promote scientific acceptance or distribution
+rights. Source-club evidence remains a separate follow-up under \#11318.
+
+\paragraph{Immutable Evidence and Revision Identities.}
+The public workspace facade accepts one typed \code{ResearchAuditPin} per
+selected immutable fit. Each pin identifies an independently hashed summary,
+a separately hashed fresh full audit, and the original downloaded video used
+only for read-only identity verification. The selected summary run must be
+unique and its full-audit reference must resolve to those exact bytes. Saved
+fit, capture and native model hashes, source-video identity, numerical execution
+stamp, metrics and evidence counts must agree. Unsupported assessment protocols
+fail explicitly. Current adapters cover the V12 and V14 summary formats;
+player identity does not select a special fitting or admission algorithm.
+
+Let $J(x)$ denote UTF-8 JSON with sorted keys, two-space indentation, no
+nonfinite values and exactly one final newline. The exported input commitment is
+\begin{equation}
+ H_{\mathrm{input}}=\operatorname{SHA256}\!\left(J(B)\right),\qquad
+ B=\left\{\begin{array}{l}
+ \text{schema: historical-research/input-binding/1},\\
+ \text{fit\_sha256: }H_{\mathrm{fit}},\\
+ \text{request\_options: complete saved options object},\\
+ \text{assessment\_sha256: }H_{\mathrm{assessment}},\\
+ \text{full\_audit\_sha256: }H_{\mathrm{audit}}
+ \end{array}\right\}.
+ \label{eq:research-input-binding}
+\end{equation}
+The options entry is the actual nested JSON object, not a string or selected
+subset. Independent summary and full-audit commitments remain distinct.
+Original media and audit paths are excluded from the exported binding. Record
+and target order is canonical, and the provider re-reads the bound inputs
+before returning candidate bytes; changed identities refuse export.
+
+\begin{longtable}{@{}p{1.65in}p{4.65in}@{}}
+\toprule Identity & Meaning and Limit\\\midrule\endhead
+Numerical Producer & Each record's \code{producer\_commit} identifies the saved computation and must agree with its independent audit.\\
+Research Export Source & \code{provider.source\_commit} identifies the exact 40-hex implementation used to assemble sanitized JSON. Its repository tree URL is a logical code reference, not proof of hosted package availability.\\
+Overlay Producer & Video exports retain their separate historical producer and verified package bindings. A research metadata export does not regenerate footage or replace that identity.\\
+Consumer Evidence & Independent manifest/schema SHA-256 and byte-size pins bind admission and local recall; successful provider assembly alone does not prove consumer integration.\\
+\bottomrule
+\end{longtable}
+
+\paragraph{Exact Clock, Units and Coverage.}
+The source interval is formed from the first and last original
+\code{FrameIdentity.presentation\_time} values. Each endpoint is a rational
+number of seconds, serialized as integer numerator and positive denominator.
+Original container PTS must be exact and strictly increasing; the clock origin
+is \code{video\_presentation\_time} and physical playback time remains unknown.
+The source-video byte hash, capture archive hash and fit hash identify different
+objects and cannot substitute for one another.
+
+Training, held-out and dense image RMS retain the confidence-weighted Euclidean
+landmark definition and unknown-visibility weight $0.5$. Provider comparisons
+require agreement with saved and independent evidence within $10^{-8}$ pixels
+absolute tolerance. Native grip gap and penetration are converted from meters
+to millimeters, and grip rotation from radians to degrees. These maxima are
+finite model-conditioned assessments, not measured anatomy, forces or
+continuous nonlinear certificates. Explicit image counts distinguish source
+frames, training frames, dense observations and training observations. Admission
+requires the source count to equal the clock's frame count, training frames not
+to exceed source frames, and training observations not to exceed dense
+observations. Partial training coverage is valid; counts do not imply new image
+objective points or a more densely sampled nonlinear certificate.
+
+\paragraph{Strict Local Admission and Atomic Recall.}
+The strict schema rejects unknown fields. Both boundaries reject malformed or
+duplicate-key JSON, nonfinite values and local machine paths. Exported records
+contain no source pixels, original media, optimizer arrays or private runtime
+paths. Rights may be unresolved, restricted or documented for local use;
+all retain \code{not\_authorized} distribution and the package retains
+\code{not\_authorized\_for\_publication}. Generic player, swing and fit IDs
+support future historical figures while preserving per-player ownership and
+immutable evidence. A new figure still needs source-bound capture evidence,
+a supported independent assessment and explicit rights review.
+
+The public provider build operation performs no numerical computation or
+library mutation. Its file exporter creates a new destination exclusively;
+existing evidence is never overwritten. The Affine
+\code{HistoricalResearchConsumer} reuses the canonical public transport,
+\code{ConsumerPolicy}, \code{ImportRequest} and \code{SnapshotStore} boundaries.
+Inspection validates bounded byte size, exact hashes, schema identity, reviewed
+source revision and immutable transport URLs before storage. Redirects and
+conflicting acquisition pins fail. Installation is atomic and idempotent within
+a separate \code{historical-player-research-v1} snapshot namespace. The shared
+storage lock remains a draft envelope, not a scientific release attestation.
+Recall revalidates stored bytes, provider, transport, schema and research
+semantics; it does not trust a previously rendered page.
+
+Storage ancestry is checked for symbolic links and Windows junctions, including
+snapshot parents and target directories, before acquisition or writes.
+Regression tests exercise both junction locations and contradictory optional
+counts, while retaining valid partial training coverage. Other focused tests
+cover changed source/audit/library bindings, deterministic generic third-player
+output, hostile labels, duplicate keys, unavailable schema validation and
+qualification promotion attempts. These synthetic regressions test the
+boundary; they are not actual historical-package execution evidence.
+
+\paragraph{Execution Evidence Pending.}
+Actual provider export and independent Affine installation, recall and QMD
+preview have not yet been executed for this report draft. No package receipt,
+consumer preview result or publication approval is asserted here. The final
+handoff must record those separately after the owning workflow freezes the
+provider source. The deterministic local preview must retain rejected status,
+metric units, evidence coverage and rights limitations. It creates no public
+route or qualified release-registry entry. The procedures are
+\path{docs/development/necromatcher-research-package.md} in UpstreamDrift and
+\path{docs/development/necromatcher-research-handoff.md} in AffineDrift.
+
 \subsection{Authored Contact Phases on the Source Clock}
 \label{sec:contact-phases}
 A constant whole-track heel pin can conflict with visible release and later
@@ -1870,10 +2185,39 @@ The canonical writer now retries only permission/sharing errors 5, 32 and 33
 for six attempts with 0.31 seconds total backoff; permanent and unrelated errors
 still propagate and owned staging files are cleaned. Fifty atomic-I/O, service
 and video-job tests passed, as did two 43-case broad runs and 37 frontend cases.
-An earlier truncated intermittent reader exception remains unidentified; the
-verified writer fix is not presented as proof of that error's cause. Tool-free
+At that earlier checkpoint, a truncated intermittent reader exception was
+unidentified; the writer fix alone did not establish its cause. Tool-free
 Gemini Flash review informed the corrupted-transfer regression, while process
 ownership and teardown claims were checked against actual source and tests.
+
+\paragraph{Verified Windows Read and Promotion Repeatability.}
+A later 448-case broad run completed 447 cases and failed one actual video-job
+metadata read with \code{PermissionError}, errno 13, while the worker atomically
+replaced JSON. An owned exclusive \code{CreateFileW} handle reproduced the
+Windows CRT behavior: \code{Path.read\_text} omitted \code{winerror}, while
+immediate raw \code{GetLastError} reported sharing code 32; reading succeeded
+after that owned handle closed. The canonical atomic-I/O boundary now shares
+one bounded retry policy between promotion and UTF-8 reads: six attempts and
+five delays of 0.01/0.02/0.04/0.08/0.16 seconds, totaling 0.31 seconds of backoff.
+Windows error functions are bound before I/O with
+\code{use\_last\_error=False}; native error state is cleared before each read
+and captured as the first statement on failure. Explicit \code{winerror}
+takes precedence; only permission failures with verified codes 5/32/33 retry.
+Neither errno 13 alone nor stale ambient error state establishes eligibility.
+Immediate capture follows Microsoft's thread-error guidance, while Python's
+\code{ctypes} private last-error copy is deliberately excluded.\footnote{
+Microsoft, \href{https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror}{GetLastError Function};
+Python 3.13, \href{https://docs.python.org/3.13/library/ctypes.html}{ctypes: A Foreign Function Library for Python}.}
+
+Ninety-one focused atomic-I/O, video-session, stored-recall and research-provider
+cases passed after the fix, including an actual owned-handle release regression,
+bounded exhaustion, stale-state rejection and strict \code{Path} preconditions.
+Unknown, permanent, non-Windows and unrelated failures propagate; UTF-8 decoding,
+malformed JSON and non-object records are not retried or promoted into successful
+status. File contents and caller JSON validation remain unchanged. This focused
+result supersedes the earlier unidentified-reader diagnosis. The final expanded
+source suite then passed all 476 cases with no failures. It is infrastructure
+repeatability evidence, not scientific acceptance or historical fitting evidence.
 
 \subsection{Actual Native Stored Overlay Recall}
 Issue \#11282 closes the native dialog's previously missing persisted-export
@@ -2288,6 +2632,55 @@ Residuals, Not an Inferred Surface Mesh, Historical Shaft, or Measured Contact.}
 \label{fig:hogan-v12-overlay}
 \end{figure}
 
+\subsection{Actual V13 Lower-Knot Candidate Overlay}
+Figure~\ref{fig:tiger-v13-overlay} preserves the first/middle/last source
+exports from the selected rejected six-knot Tiger fit. The public owned
+video job is \code{7cf989de5a5d41fc9e3375b551f599b0}; numerical and exporter
+producer identities both remain \code{dafab40c107}. Its retained ZIP SHA-256 is
+\hash{a2656f11515be212b5418f2edd1371ac175bee426ae254eb79e8383ad721dfa5}.
+The frozen independent \path{lower-knot-v13-overlay-verification.json}, SHA-256
+\hash{c4ede9dfe817cbca9970f20df662401f949cff9d24584a705e8dfe2eed733c0f},
+verifies all 210 decoded frames at 1280-by-720 original source dimensions,
+three PNGs, ZIP CRC and member bytes, original frame identities and selected
+original PNG hashes, both independent numerical audit references, and
+producer/runtime/parent brackets. This is package verification, not a new
+numerical fit or scientific acceptance.
+
+Direct full-size visual review of frames 0/105/209 confirms readable research
+labels and matched-marker RMS 6.197094/59.361666/14.161347 px. At address, the
+body projection is broadly near observations but the long blue seed points
+down-left while the visible white club points down-right. The follow-through
+retains conspicuous upper-body/arm mismatch and long yellow residuals. In
+the walking frame, the blue extension points right while the visible shaft
+points down-left; feet are cropped and cannot establish contact. The dense
+28.781549 px audit metric refers to all original source frames, not these
+three selected views. Camera/anatomy remain unqualified and physical time
+unknown. No surface mesh or historically identified shaft is inferred.
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Lower-Knot V13 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Lower-Knot V13 Overlay/frame-000105.png}\\[3pt]
+\small\textbf{Middle Source Frame: 105}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Lower-Knot V13 Overlay/frame-000209.png}\\[3pt]
+\small\textbf{Last Source Frame: 209}
+\end{minipage}
+\caption{Tiger V13 Six-Knot Candidate: Rejected Monocular Research.
+Improved Dense Image RMS Does Not Remove Follow-Through Arm Misalignment,
+Club-Seed Disagreement or Unobservable Final Feet. Blue Body-Origin Trees
+and Attachment Seeds Are Generic Native Geometry, Green Points Are
+Observations, and Yellow Lines Are Residuals, Not a Surface Mesh, Historical
+Shaft or Measured Contact.}
+\label{fig:tiger-v13-overlay}
+\end{figure}
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -2410,8 +2803,11 @@ its documented CI remediation limit, remote checks, or complete project goal.
 The V8 trials exercised the canonical coordinate domain and explicit authored
 initializer with retained image tradeoffs and independent nonlinear audits.
 Exact coefficient restart has now been exercised by the rejected V9 trials.
-Next review swing/stance intervals with time-varying contact hypotheses,
-alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
+Authored time-varying contact phases and matched wrist/coverage trials are
+now recorded. V13 additionally compares explicit twelve- and six-knot
+authored curves with matched geometry coverage; its selected six-knot
+research candidate still fails grip and ground targets. Next resolve these
+failures alongside source shot/crop, camera and correspondence review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled
 report/Desktop package in \#11247. The Desktop review package contains
@@ -2509,6 +2905,12 @@ V11 Matched Trial Receipts & External \path{wrist-expansion-v11-attempt2-receipt
 V11 Overlay Verification & Desktop \path{wrist-expanded-v11-overlay-verification.json}\\
 V12 Controlled Receipts & External \path{controlled-regularization-probe-density-v12-receipt.json}; \path{controlled-v12-independent-assessment.json}\\
 V12 Overlay Verification & Desktop \path{controlled-v12-overlay-verification.json}\\
+V13 Lower-Knot Assessment & External \path{lower-knot-v13-independent-assessment.json}; tracked \path{lower-knot-v13-summary.json}\\
+V13 Overlay Verification & Desktop \path{lower-knot-v13-overlay-verification.json}; tracked \path{lower-knot-v13-overlay-review.json}\\
+V14 Weight Assessment & External \path{geometry-weight-v14-independent-assessment.json}; \path{geometry-weight-v14-ground-diagnosis.json}\\
+Research Provider Procedure & UpstreamDrift \path{docs/development/necromatcher-research-package.md}; public \path{src/shared/python/workspace/historical_research.py}\\
+Research Consumer Procedure & AffineDrift \path{docs/development/necromatcher-research-handoff.md}; public \path{src/affine_control/historical_research/}\\
+Research Schema & UpstreamDrift \path{docs/api/contracts/historical-player-research-v1.schema.json}; exact Affine mirror \path{schemas/historical-player-research-v1.schema.json}\\
 Native V11 Recall Summary & \path{native-stored-overlay-v11-review-summary.json}\\
 Native Stored Overlay Review & \path{native-stored-overlay-review-summary.json}\\
 V10 Summary and Web & \path{phase-contact-v10-summary.json}; \path{phase-contact-v10-web-review.json}\\

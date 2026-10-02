@@ -42,6 +42,12 @@ from .model_match_handoff import (
     list_available_backends,
     resolve_matching_route,
 )
+from .historical_research import (
+    ResearchAuditPin,
+    build_historical_research_package,
+    export_historical_research_package,
+    historical_research_schema_bytes,
+)
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
@@ -315,6 +321,10 @@ __all__ = [
     "WorkspaceJob",
     "WorkspaceJobKind",
     "WorkspaceJobState",
+    "ResearchAuditPin",
+    "build_historical_research_package",
+    "export_historical_research_package",
+    "historical_research_schema_bytes",
     "compute_file_sha256",
     "convert_artifact",
     "get_engine_qualification",
