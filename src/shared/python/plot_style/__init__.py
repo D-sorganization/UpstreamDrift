@@ -47,6 +47,7 @@ from .colormaps import (
 )
 from .colors import ColorScale, DataDrivenColor, PaletteColor, StaticColor
 from .contracts import ColorResolver, MarkerRenderer, MarkerShapeRenderer
+from .force_palette import FORCE_KIND_PALETTE
 from .markers import CustomMeshSpec, MarkerShape, MarkerStyle
 from .persistence import SCHEMA_VERSION, PlotStyleSet, PlotStyleSpec
 from .preset_library import BUILTIN_PRESET_NAMES, PresetLibrary
@@ -93,6 +94,7 @@ __all__ = [
     "ColormapId",
     "CustomColormap",
     "CustomMeshSpec",
+    "FORCE_KIND_PALETTE",
     "DataChannel",
     "DataDrivenColor",
     "MarkerRenderer",

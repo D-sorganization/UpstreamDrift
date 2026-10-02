@@ -229,9 +229,9 @@ class ForceTorqueFrame:
             "world_frame": self.world_frame,
             "units": dict(self.units),
             "wrenches": [w.to_dict() for w in self.wrenches],
-            "axial_loads": self.axial_loads.to_dict()
-            if self.axial_loads is not None
-            else None,
+            "axial_loads": (
+                self.axial_loads.to_dict() if self.axial_loads is not None else None
+            ),
         }
 
     @classmethod
