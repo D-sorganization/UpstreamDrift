@@ -1,3 +1,13 @@
+# Force and Torque Overlay Planning — #11285
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/force-torque-overlays-smwke2`; commit SELF; PR: see the planning PR for this branch.
+- Objective: plan (not execute) force/torque arrows and tension/compression shading for MuJoCo, Drake, Pinocchio, OpenSim and Simscape models, and their overlay on source footage.
+- Completed: deep-dive assessment (`docs/development/force_torque_overlay_epic.md` §2); ADR-0052 (status Proposed); epic #11285 with children #11286–#11315 (FTO-1 … FTO-30) carrying TDD/DbC/LoD/DRY contracts and dependency waves; development-log entry `DL-#11285`.
+- Key decisions: build on `SpatialWrench` and `AxialLoadFrame` rather than adding an eighth vector type; one pure glyph builder; engine SDK renderers live beside their engine; unavailable channels are never drawn as zero; video reuses `PinholeCamera`, `TimeMapping` and the existing compositors; Necromatcher layer (FTO-28) waits for #11246.
+- Validation: development-log validator, Ruff (no Python changed) and document checks (see the PR body).
+- Blockers: ADR-0052 needs owner acceptance; FTO-19 needs an R2025b MATLAB host; FTO-27 is `tier:strong`.
+- Next steps: 1) owner reviews and accepts ADR-0052; 2) dispatch Wave A (FTO-1 #11286, FTO-4 #11289); 3) Wave B (FTO-2, FTO-3, FTO-24) once FTO-1 merges.
+
 # Capture-O Video Companion Planning — #11268
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/elegant-tesla-f2heae`; commit SELF; PR: see the planning PR for this branch.
