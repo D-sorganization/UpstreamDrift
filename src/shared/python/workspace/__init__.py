@@ -46,6 +46,7 @@ from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_constraints import repair_native_motion
+from .necromatcher_video import export_fit_video
 from .necromatcher_placement import author_ground_placement
 from .necromatcher_replay import ReplayOptions, replay_authored_profile
 from .necromatcher_review import CaptureReview
@@ -176,6 +177,7 @@ __all__ = [
     "NativeFitBinding",
     "author_ground_placement",
     "repair_native_motion",
+    "export_fit_video",
     "ReplayOptions",
     "replay_authored_profile",
     "load_native_fit_binding",

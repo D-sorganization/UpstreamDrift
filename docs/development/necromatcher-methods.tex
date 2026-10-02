@@ -1,0 +1,769 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.88in,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,array}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\definecolor{ink}{HTML}{15334A}
+\definecolor{accent}{HTML}{007C91}
+\definecolor{light}{HTML}{EEF5F7}
+\definecolor{warning}{HTML}{895620}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=accent,
+ pdftitle={Necromatcher: Historical Motion Reconstruction Methods},
+ pdfauthor={UpstreamDrift Development},
+ pdfsubject={Reproducible Image Evidence, Native Research Fits, and Replay}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{\textbf{NECROMATCHER} / METHODS}}
+\fancyhead[R]{\small UpstreamDrift}
+\fancyfoot[L]{\small Research Evidence / Not Scientific Acceptance}
+\fancyfoot[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{1em}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.16}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\hash}[1]{{\footnotesize\nolinkurl{#1}}}
+\newcommand{\note}[2]{\begin{quote}\textcolor{accent}{\textbf{#1}}\quad #2\end{quote}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\skewmat}[1]{[#1]_{\times}}
+\newcommand{\reportsection}[1]{\section{#1}}
+
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\vspace*{0.7in}
+{\large\textcolor{accent}{UPSTREAMDRIFT / TECHNICAL METHODS}}\par
+\vspace{0.3in}
+{\Huge\bfseries\textcolor{ink}{Necromatcher}}\par
+\vspace{0.18in}
+{\LARGE Historical Motion Reconstruction,\par Native Model Review, and Replay}\par
+\vspace{0.35in}
+{\large Tiger Woods and Ben Hogan Research Workflow}\par
+\vspace{0.45in}
+\begin{tabular}{@{}p{1.35in}p{4.5in}@{}}
+\toprule
+Purpose & Preserve a repeatable process for additional historical players.\\
+Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
+Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
+Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; later sequential exploration identified separately.\\
+\bottomrule
+\end{tabular}
+\vfill
+\textcolor{warning}{\textbf{Interpretation Boundary}}\par
+This report documents an engineering research workflow. Image agreement does
+not identify historical depth, anatomy, physical swing time, joint efforts, or
+an accepted golf shot. Authored geometry, camera, ground, and control assumptions
+remain visible throughout the process.
+
+\vspace{0.2in}
+This standalone report is a turnover artifact, not the canonical engineering
+design manual. That manual's editable authority remains
+\code{manuals/upstreamdrift}; its scientific release inventory remains blocked.
+\end{titlepage}
+
+{\footnotesize\linespread{0.95}\selectfont\setlength{\parskip}{0pt}\tableofcontents}
+\vspace{0.15in}
+\note{Reading Guide}{Sections 1--4 explain evidence and the image fit.
+Sections 5--7 explain placement, closure, and constrained repair. Sections
+8--10 cover controls, repeatability, and remaining acceptance. The appendices
+bind numerical statements to exact artifacts.}
+
+\clearpage
+\reportsection{Scope, Evidence Classes, and Success Criteria}
+\subsection{What the Current Workflow Provides}
+Necromatcher creates a persistent player and swing library, imports immutable
+capture versions, reviews original source frames with observations, binds saved
+native models to research fits, and exports a portable swing package. Web and
+native presenters consume shared storage and fitting boundaries. Source-stamped
+refit jobs preserve request options, cancellation state, outcomes, and rejection
+reasons. A reusable implementation therefore extends beyond a pair of player
+scripts: an additional historical figure uses the same acquisition, admission,
+review, model binding, and job procedure.
+
+The present technical work has produced real image-constrained MuJoCo hypotheses
+for both players. Their residuals are computed from the original observations;
+their native models are compiled resources. The hypotheses remain rejected
+research because the clock, anatomy, closed continuous motion, and historical
+control recovery have not met acceptance. Computational completion and scientific
+qualification are deliberately separate fields.
+
+\subsection{Four Distinct Evidence Classes}
+\begin{longtable}{@{}p{1.15in}p{2.4in}p{2.90in}@{}}
+\toprule
+Class & Retained Evidence & Permitted Interpretation\\\midrule
+Observed Images & Original PNG bytes, image hashes, exact rational PTS, source identity. & A decoded presentation frame from a particular source asset.\\
+Image Inference & Detector landmarks, recorded visibility/confidence, missingness, model hash. & Detector estimates in image coordinates; no measured depth or joint torque.\\
+Research Hypothesis & Generic native geometry, camera assumption, fitted native coordinates, source-stamped residuals. & A conditional model that explains some observed pixels; not an identified historical reconstruction.\\
+Qualified Dynamics & Fresh continuous replay, physics/contact audits, timing and initial-state evidence. & This class requires independent gates; no current historical candidate has reached it.\\
+\bottomrule
+\end{longtable}
+Saving an artifact never promotes its evidence class. A checksum proves identity,
+not correctness. Native compilation proves that an engine can load a model,
+not that the model represents the golfer. A small pixel residual proves neither
+anatomical plausibility nor usable grip closure.
+
+\subsection{Concrete Acceptance for a Future Player}
+The repeatable delivery must retain original evidence; reproduce a bound native
+candidate from explicit assumptions; review image residuals at fitting and
+held-out frames; satisfy authored ranges and usable closure throughout a
+continuous motion; and independently replay the controls with mixed units,
+unactuated root, contact, and refinement diagnostics. Simulation, impact, and
+whole-analysis consumers must preserve these identities and qualification.
+AffineDrift publication is a separate integration and source-rights decision.
+The current report does not claim those remaining stages complete.
+
+\reportsection{Acquisition, Archive Provenance, and Exact Time}
+\subsection{Sources and Selection}
+The user-provided Tiger video is \url{https://www.youtube.com/watch?v=t_J6Vik3Tss}.
+Its uploader title claims a 2000 swing; event lineage was not independently
+established for that compilation. The user-provided Hogan compilation is
+\url{https://www.youtube.com/watch?v=DJDYMjmvFwg}. Its presentation rate is 60 fps,
+but separate archival angles are not synchronized multiview observations.
+Owner-provided Hogan practice and ``In Pursuit of Perfection'' MP4 files supply
+additional baselines. Their recording dates and rights remain unknown.
+
+A stronger Tiger event source is the official USGA final-round broadcast,
+\url{https://www.youtube.com/watch?v=bado2QdgD3c}. A downloaded presentation
+window of 3250--3295 seconds contains the reviewed range sequence at clip PTS
+15--22 seconds. Broadcast graphics identify the 2000 U.S. Open context and
+Tiger/Ernie Els tee-time context. Earlier chapter-based navigation showed other
+players: a chapter title alone was insufficient identity evidence.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Capture & Pixels & Source Window (s) & Frames & Detections\\\midrule
+Hogan Practice & $320\times240$ & $[110,135)$ & 750 & 739\\
+Hogan Perfection & $720\times432$ & $[95,125)$ & 899 & 892\\
+Hogan Compilation & $1920\times1080$ & $[253,267)$ & 839 & 769\\
+Tiger User Source & $1920\times1080$ & $[110,150)$ & 2000 & 1994\\
+Tiger USGA Range & $1280\times720$ & $[15,22)$ & 210 & 210\\
+\bottomrule
+\end{tabular}
+\caption{Actual Captures. Detection Counts Are Image-Pipeline Outputs, Not
+Motion-Qualification Rates. The Main Native Experiments Use Hogan Practice and
+Tiger USGA Range.}
+\end{table}
+
+\subsection{Presentation Time Is Not Physical Time}
+For each decoded frame, retain the integer PTS $p_i$ and rational time base
+$a/b$, giving source presentation time
+\begin{equation}t_i^{\mathrm{src}}=p_i\frac{a}{b}.\end{equation}
+The exact tuple belongs to the original frame identity. Do not replace it with
+the rounded slider label, a generated frame number divided by nominal fps,
+or a newly remuxed clip's assumed broadcast offset. Keyframe preroll and
+stream-copy boundaries can alter the relation between clip and original time.
+
+A physical clock requires a separately justified mapping
+$t^{\mathrm{phys}}=f(t^{\mathrm{src}})$. Slow motion, duplicate frames,
+telecine, edits, and unknown playback scale make $f(t)=t$ an assumption.
+The current captures retain unknown physical time. Even if a local mapping were
+affine, $t^{\mathrm{phys}}=\alpha t^{\mathrm{src}}+\beta$, source-clock
+velocities and accelerations would scale by $1/\alpha$ and $1/\alpha^2$.
+Physical effort identification therefore cannot ignore this unknown scale.
+
+\subsection{Acquisition and Integrity Procedure}
+Download one authorized source at a time with \code{yt-dlp}, retaining metadata,
+format identifiers, title/uploader, acquisition version, and complete asset hash.
+Prefer bounded official archive windows when they reduce transfer and review
+cost. Decode the selected half-open interval using the existing capture CLI;
+retain increasing rational PTS, original observation JSONL, and lossless PNGs.
+Record detector and implementation hashes. Review continuity, identity, camera
+changes, and duplicate source lineage before selecting a fit window.
+
+Raw media stays outside Git. The capture archive contains its evidence, so
+subsequent recall does not require the original Downloads path. Import checks
+source identity, normalized observation validity, frame order, interval,
+dimensions, counts, decoded image hashes, and observation-byte hashes.
+Unknown rights and \code{publication_permitted=false} remain explicit.
+
+\reportsection{Image Observations, Native Geometry, and Camera Hypotheses}
+\subsection{Image Coordinates and Missingness}
+MediaPipe 1.0.1 uses the full pose model, with smoothing disabled and detection
+and tracking thresholds of 0.5. The archived output remains image inference.
+The fit associates thirteen image landmarks with assumed native attachments:
+nose, both shoulders, elbows, wrists, hips, knees, and ankles. These attachment
+positions are generic anatomy assumptions, not calibrated skin markers.
+
+For normalized landmark $(x_{ij},y_{ij})$ and image dimensions $(W,H)$, the
+pixel target is
+\[\mathbf u_{ij}=(W x_{ij},H y_{ij})^T.\]
+Missing observations
+have zero objective weight and null reported error. Unknown visibility is not
+silently known visibility: the experiments explicitly use weight 0.5 for that
+case. Recorded visibility is used as an objective weight where present; it is
+not a calibrated probability of anatomical accuracy.
+
+\subsection{One Generic Resource and Explicit Ordered Units}
+The actual generic driver resource compiles to 44 scalar coordinates: three
+translations in metres and 41 rotations in radians. Coordinates are ordered by
+the compiled native binding, with named hinge/slide types used to verify units.
+Model import alone does not prove this native ordering. Resource validation
+checks the immutable model/fit/capture bindings and reproduces compiled XML from
+its generic definition.
+
+Thirty-two coordinates have explicit authored angular ranges. Twelve remain
+unbounded: root translations and rotations, and both three-axis shoulder
+coordinates. Authored ranges are converted from degrees to radians only after
+checking named compiled angular units. They constrain this research experiment;
+they are not measured Tiger or Hogan range-of-motion limits.
+
+\subsection{Camera Model and Conditional Initialization}
+Let $\mathbf X_j(\mathbf q)$ be the native world position of attachment $j$,
+and let $R\in SO(3)$ and $\mathbf t\in\R^3$ map world points to camera points.
+With intrinsic matrix $K$, prediction is
+\begin{equation}
+ \mathbf x_c=R\mathbf X_j(\mathbf q)+\mathbf t,
+ \qquad \widehat{\mathbf u}_j=\pi(K\mathbf x_c),\quad
+ \pi([v_1,v_2,v_3]^T)=[v_1/v_3,v_2/v_3]^T.
+\end{equation}
+Positive depth, proper orthonormal rotation, finite inputs, positive focal
+lengths, and a homogeneous intrinsic bottom row are validated.
+
+The first research initialization assumes focal lengths equal to image width,
+principal point at image centre, and zero distortion. OpenCV SQPnP followed by
+LM refinement uses at least six nondegenerate correspondences, conditional on
+an authored address seed and generic geometry. This obtains an initial camera
+hypothesis. It is not an independently calibrated camera. Monocular depth,
+scale, geometry, camera orientation, and joint pose can trade off while
+retaining similar pixels; the report keeps those ambiguities separate from
+detector evidence.
+
+\reportsection{Spline MAP Fitting and Source-Stamped Jobs}
+\subsection{Objective and Native Derivatives}
+Free native coordinates are represented with the shared cubic Hermite spline;
+locked coordinates retain the supplied seed. For coefficients $\mathbf c$ and
+source time $t_i$, let $\mathbf q_i=\mathbf q(t_i;\mathbf c)$ and
+$\mathbf v_i=d\mathbf q/dt^{\mathrm{src}}$. The implemented residual stack is
+\begin{equation}\label{eq:map}
+\mathbf r(\mathbf c)=
+\begin{bmatrix}
+ \{\sqrt{w_{ij}}(\widehat{\mathbf u}_{ij}-\mathbf u_{ij})\}_{i,j}\\
+ \{\lambda_p D^{-1}(\mathbf q_i-\mathbf q_0)\}_i\\
+ \{\lambda_s T D_f^{-1}\mathbf v_{i,f}\}_i\\
+ \{\lambda_g\mathbf g(\mathbf q_i)\}_i
+\end{bmatrix},\qquad
+\min_{\mathbf c}\tfrac12\|\mathbf r(\mathbf c)\|_2^2.
+\end{equation}
+$D$ contains explicit native coordinate scales, $f$ denotes free coordinates,
+$T$ is the selected source duration, and $\mathbf g$ is the native positional
+grip-separation residual. Weights shown in Equation~\ref{eq:map} multiply
+residuals, so their squared values weight squared costs. Source derivatives
+are not physical velocities. The original image spline objective does not
+include the later finite orientation repair or hard anatomical bounds.
+
+Native frame-pose derivatives use the canonical central-difference helper;
+the estimator then applies exact spline basis derivatives. This avoids
+recomputing a native derivative for every coefficient perturbation. The method
+reuses the existing shared MAP estimator rather than maintaining a second
+optimization framework. The original estimator leaves trajectory coefficients
+unbounded; fitting a low image residual can therefore produce implausible
+coordinates or open grip geometry.
+
+\subsection{Reporting Fit Error}
+The reported confidence-weighted Euclidean landmark RMS is
+\begin{equation}
+ \mathrm{RMS}_{\mathrm{px}}=
+ \sqrt{\frac{\sum_{i,j}w_{ij}\|\widehat{\mathbf u}_{ij}-\mathbf u_{ij}\|_2^2}
+ {\sum_{i,j}w_{ij}}}.
+\end{equation}
+It is per landmark, not per image axis. Fitting-set, held-out, and dense errors
+must be labelled separately. A held-out frame excludes optimization indices,
+but adjacent frames from one video do not supply an independent camera,
+subject, or source lineage. Keep the warm-start spline's actual initial error;
+the unsmoothed prior samples can have a different initial residual.
+
+\subsection{Actual Early and Subsequent Runs}
+The first experiments used 25 selected frames, four knots, seventeen free
+upper-body/root coordinates, and weights $3/1/100$ for prior, smoothness, and
+position closure. With a 30-evaluation budget, Hogan fitting RMS decreased
+23.842 to 13.168 px; Tiger decreased 130.198 to 28.526 px. Both exhausted the
+evaluation budget. Saved splines were evaluated at all 750/210 source frames.
+These were measured software outputs, not accepted motion.
+
+Later source-stamped v4 experiments used sixty selected samples, twelve knots,
+and ten evaluations. Hogan training RMS changed 9.672 to 7.252 px and held-out
+RMS was 7.635 px. Tiger training RMS changed 21.456 to 11.350 px and held-out
+RMS was 11.861 px. Grip gaps remained about 0.123 and 0.257 m. Subsequent v5
+native/web runs validated actual job interfaces with a one-evaluation budget,
+preserving rejected qualification. Results from different options or source
+revisions must not be pooled into a claimed convergence trend.
+
+\subsection{Jobs, Recall, and Cancellation}
+\code{start_native_refit} reuses \code{MatchingJobService}; native and web shells
+share \code{NativeRefitSession}. Requests retain source indices, knot count,
+scales, weights, budgets, new immutable version ID, and parent identities.
+The clean worker verifies source/runtime stamps before and after execution.
+Cancellation before publication prevents a new library version; cancellation
+after committed publication does not rewrite a completed result as interrupted.
+Saved manifests are recalled without automatically rerunning the job.
+
+\reportsection{Authored Ground Placement and Image Invariance}
+\subsection{A New World Hypothesis, Preserving the Original}
+The v5 initial states intersected their authored ground. A diagnostic with
+explicit zero rates reported Hogan penetration 0.850056 m and Tiger 0.495267 m,
+with corresponding model static normal-force magnitudes of 241764 N and
+127246 N. These are generic model-placement diagnostics, not observed human
+forces. Silently lifting a replay would hide the incompatibility with its saved
+initial pose.
+
+Instead, \code{author_ground_placement} creates a separate immutable fit
+version. It selects an exact source frame, nonnegative clearance, and an
+explicit description of assumed ground. The existing foot-placement helper
+applies one root world translation to every saved sample; joint rotations
+remain unchanged. The new version retains the exact parent, capture, and model
+bindings, source frames, and false physical-time/dynamics flags.
+
+\subsection{Camera Compensation Is Algebraic}
+For a world translation $\mathbf d$, the transformed hypothesis is
+$\mathbf X'_j=\mathbf X_j+\mathbf d$ with camera translation
+$\mathbf t'=\mathbf t-R\mathbf d$. Therefore
+\begin{equation}
+ R\mathbf X'_j+\mathbf t'
+ =R(\mathbf X_j+\mathbf d)+\mathbf t-R\mathbf d
+ =R\mathbf X_j+\mathbf t,
+\end{equation}
+so every predicted pixel is conserved. This invariance exposes the
+non-identifiability of world origin from images; it does not calibrate ground.
+The producer verifies rigid marker translation within $10^{-8}$ m and pixel
+conservation within $10^{-7}$ px at all saved frames.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrr@{}}\toprule
+Diagnostic & Hogan v6 & Tiger v6\\\midrule
+World-Z Root Shift (m) & 0.850056 & 0.495267\\
+Maximum Pixel Difference (px) & $5.68\times10^{-14}$ & $2.84\times10^{-13}$\\
+Maximum Penetration Before (m) & 1.319760 & 0.495267\\
+Maximum Penetration After (m) & 0.469704 & approximately zero\\
+Initial Grip Gap (m) & 0.088525 & 0.053893\\\bottomrule
+\end{tabular}
+\caption{Actual Authored Placement Revisions from Source \code{2c5129eab9}.
+The Anchor Placement Preserves Image Evidence but Does Not Repair Closed Motion.}
+\end{table}
+
+Hogan's worst penetration occurs at source index 549, a follow-through with
+cropped feet; reviewed framing/horizon also vary. This warrants swing-window
+and missingness review before imposing a fixed-ground full-track hypothesis.
+It is not evidence of calibrated camera motion. Placement versions omit obsolete
+optimizer coefficients and metrics; complete original optimization evidence
+remains on the immutable parent.
+
+\reportsection{Finite Rotation Closure and Bounded Native Repair}
+\subsection{Why the Former Rotation Residual Failed}
+Let $R_a,R_b$ denote grip-site world rotations and $E=R_aR_b^T$ their relative
+rotation. The previous small-angle residual was
+\begin{equation}
+ \mathbf r_{\sin}=\tfrac12\operatorname{vee}(E-E^T)
+ =\sin\theta\,\mathbf n.
+\end{equation}
+It falsely vanishes at a half turn. The native MuJoCo implementation now uses
+the principal logarithm, computed with SciPy \code{Rotation.as_rotvec}:
+\begin{equation}\boldsymbol\phi=\operatorname{Log}(E)^\vee
+ =\theta\mathbf n,\quad 0\leq\theta\leq\pi.\end{equation}
+Its norm correctly reports $\pi$ at reversal. The principal logarithm still
+has an inherent branch discontinuity at a half turn; local correctness does
+not prove global convergence. Shared/Drake legacy rotation semantics remain
+unchanged by this native-only repair.
+
+\subsection{Exact Local Logarithm Derivative}
+If $J_a,J_b$ map native coordinate variations to world angular velocities,
+the left perturbation of $E$ is $J_a-EJ_b$. The residual derivative is
+\begin{align}
+ \frac{\partial\boldsymbol\phi}{\partial\mathbf q}
+ &=J_l^{-1}(\boldsymbol\phi)(J_a-EJ_b),\\
+ J_l^{-1}(\boldsymbol\phi)
+ &=I-\tfrac12\skewmat{\boldsymbol\phi}
+ +\left(\frac{1-(\theta/2)\cot(\theta/2)}{\theta^2}\right)
+ \skewmat{\boldsymbol\phi}^{\,2}.
+\end{align}
+The implementation uses the stable small-angle coefficient
+$1/12+\theta^2/720$ near zero. Multiplying only $J_a-J_b$ was an
+infinitesimal approximation and failed finite-angle derivative tests.
+Central differences at two non-small native poses validate the implemented
+derivative with absolute tolerance $2\times10^{-7}$ and relative tolerance
+$2\times10^{-6}$. The half-turn regression verifies nonzero reversal error.
+
+\subsection{Opt-In Trust-Region Reflective Solver}
+The existing LM loop computes an unconstrained normal-equation step and clips
+it to bounds. This can stagnate at active bounds. Native callers may now use
+\code{SolvePoseOptions(solver="trf")}. The default LM behavior remains.
+TRF reuses preparation, residual/Jacobian stacking, and final diagnostics; only
+free coordinates enter SciPy \code{least_squares}, with finite or infinite
+authored bounds and \code{x_scale="jac"}. Paired residual/Jacobian evaluations
+at the same free vector share native FK results.
+
+Locked coordinates remain exact. A locked value outside its bound, nonfinite
+lock, unknown solver, or unsupported provider fails. All-locked requests
+evaluate once without invoking SciPy. Native ground penalties have fixed row
+count: inactive unpinned contacts contribute zero residual and zero derivative;
+pinned contacts retain signed height. This preserves the old objective while
+preventing dimension changes inside TRF. Providers without fixed-row support
+reject the opt-in path.
+
+An active-bound seed initially exposed a false cost-only convergence: SciPy's
+tiny first trust-region step returned approximately $2\times10^{-10}$ instead
+of the bounded optimum 1 in the synthetic regression. Opt-in \code{ftol=None}
+prevents that cost-only early stop; existing step/gradient criteria and the
+evaluation cap remain. TRF's reported budget is residual evaluations
+(\code{nfev}), while default LM reports loop iterations. Neither budget
+exhaustion nor a solver success flag establishes scientific acceptance.
+
+\reportsection{Whole-Track Results and Continuous-Motion Failure Modes}
+\subsection{Discrete Repair Experiment}
+\code{repair_native_motion} targets the original fitted model's world marker
+positions, with each original pose used as its prior. Those targets are inferred
+geometry, not measured 3D landmarks or original image targets. The experiment
+uses closure position, finite orientation, and ground weights $10^6$ and pose
+prior $10^{-4}$ in the existing IK cost. These are soft penalties rather than
+hard grip/ground constraints. Bounds are independently checked at every
+returned sample, and projected changes are evaluated against original images.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}lrrrr@{}}\toprule
+ & \multicolumn{2}{c}{Clipped LM, \code{7d8c04946d}} &
+ \multicolumn{2}{c}{Independent TRF, \code{cee6d9d55e}}\\
+Diagnostic & Tiger & Hogan & Tiger & Hogan\\\midrule
+Frames & 210 & 750 & 210 & 750\\
+Maximum Sample Grip Gap (mm) & 23.295 & 13.759 & 12.141 & 13.973\\
+Maximum Sample Rotation (deg) & 0.623 & 0.221 & 0.051 & 0.061\\
+Dense Image RMS (px) & 34.094 & 12.508 & 44.291 & 15.528\\
+Maximum Pixel Change (px) & 188.932 & 28.425 & 419.223 & 46.057\\
+Maximum Midpoint Grip Gap (mm) & 23.530 & 13.590 & 424.954 & 137.005\\
+Maximum Midpoint Rotation (deg) & 0.621 & 0.218 & 42.865 & 28.917\\
+Maximum Midpoint Penetration (mm) & 0.060 & 53.227 & 10.508 & 76.835\\
+Frames Reaching Budget & 210 & 750 & 210 & 748\\
+Elapsed Time (s) & 13.81 & 63.75 & 122.53 & 461.83\\\bottomrule
+\end{tabular}
+\caption{Actual Whole-Track Research Diagnostics. Original v6 Dense Image RMS
+Is 21.352 px for Tiger and 9.849 px for Hogan. Neither Repair Passes Motion Acceptance.}
+\end{table}
+
+TRF improves angular closure at samples but worsens image fidelity and introduces
+large inter-frame branch differences when frames are solved independently.
+The source v6 tracks remain unchanged. Original diagnostic maximum gaps were
+243.580 mm and 111.762 mm, with rotations 156.876 and 45.162 degrees for Tiger
+and Hogan. Eight Tiger coordinate ranges were violated; Hogan's right knee
+violated its authored range at all 750 samples.
+
+\subsection{Discrete Samples Do Not Define a Valid Continuous Path}
+Midpoint checks above use arithmetic averages of adjacent coordinates.
+Nonlinear FK does not preserve closed grip geometry under that averaging.
+The checks are counterexamples to a continuity claim, not a qualified
+interpolation method. Hermite knots bounded at samples can also overshoot
+coordinate ranges between knots. For a cubic coordinate, extrema require
+checking endpoints and the real roots of its quadratic derivative within the
+segment. Even passing all scalar extrema cannot alone certify nonlinear
+closure/contact throughout a segment.
+
+An exploratory sequential Tiger TRF run, warm-starting temporal state, reported
+maximum sample gap $9.14\,\mu$m, image RMS 29.089 px, midpoint gap 32.091 mm,
+and midpoint rotation 4.057 degrees in 57.7 seconds with one BLAS thread.
+This is an unpublished experiment, not a formal source-stamped artifact in the
+committed receipt set. Its midpoint failures remain material. It may guide the
+next coupled constrained solve but cannot replace recorded acceptance evidence.
+
+\subsection{Current Warm-Start Method and Performance Interpretation}
+The current continuation changes discrete repair to reuse the canonical
+\code{solve_trajectory} path: each previous repaired pose initializes the next
+frame and supplies its weak prior, while marker targets remain the original
+inferred world geometry. A twelve-test repair regression validates this
+metadata/method change. At this snapshot the method change is not yet committed
+or accompanied by a new formal whole-track receipt. It must not be presented
+as the algorithm that produced the independent TRF table.
+
+The exploratory sequential Tiger run also reported maximum adjacent joint
+jump 0.77446 rad. Its 57.73-second runtime and the independent TRF runtime
+122.53 seconds differ in both algorithm and BLAS threading. Consequently,
+their difference cannot be attributed solely to threading, nor treated as a
+controlled benchmark. Record algorithm, thread settings, hardware, source,
+frame set, budgets, residuals, and convergence together for a future comparison.
+
+\reportsection{Authored Controls, Independent Replay, and Model Review}
+\subsection{Mixed SI Generalized Efforts}
+A translation coordinate in metres is conjugate to force in newtons; a rotation
+coordinate in radians is conjugate to torque in newton-metres. A 44-channel
+profile is therefore a generalized-effort profile, not forty-four torques.
+The versioned \code{effort-profile/2} binds exact model/fit hashes, ordered
+coordinates, coordinate units, effort units, authored clock, and provenance.
+Canonical piecewise polynomial storage is reused. Evaluation rejects
+extrapolation and nonfinite overflow; immutable coefficients prevent changing
+retained evidence through array mutation.
+
+Authored seconds describe the operator's control experiment, not calibrated
+historical time. Root commands are unactuated: the complete polynomials for
+all six root coordinates must be identically zero, including interior
+coefficients. Checking only endpoint commands would miss nonzero interior
+root forcing. Native compilation independently confirms effort mapping and
+ordered units before replay.
+
+\subsection{Fresh Continuous Forward Replay}
+\code{ReplayOptions} supplies exact saved initial frame, ordered initial rates,
+duration, and step. Initial rates are explicit operator assumptions in m/s and
+rad/s. The implementation reuses \code{FullBodySimulator} RK4 with native
+mass/gravity, contact, and closure dynamics. A fresh compiled resource repeats
+integration at a finer step, default refinement factor four, with a maximum
+4096 fine steps. Commands depend on authored time only.
+
+The canonical Trace retains commands evaluated at saved state times, ordered
+mixed units, source identity, profile/model/fit/capture hashes, and initial
+conditions. Translation and rotation refinement differences are reported
+separately; adding metres and radians into one unlabeled norm is inadmissible.
+HDF5 read/write and immutable replay admission preserve these fields. Storage
+checks trace consistency and parents but does not rerun physics or certify
+producer assertions. Historical fits remain unqualified regardless of
+numerical refinement agreement.
+
+\subsection{Reproducible Source-Sized Video Export}
+The shared \code{export_fit_video(library, fit_id, destination,
+selected_frames=(...))} operation renders every stored native pose over the
+original capture PNG at its exact frame identity. It retains original image
+size and uniform rational source PTS; irregular timing or gaps are rejected.
+Native body-origin joint links and declared finite anatomical attachment
+seeds are blue, detector observations are green, and same-identity residuals
+are yellow. This is a joint-tree wireframe, not a surface mesh or measured
+skin-marker reconstruction. Missing attachment offsets remain omitted.
+
+The local Desktop review package contains Tiger's 210-frame, $1280\times720$
+overlay at $30000/1001$ source frames per second, and Hogan's 750-frame,
+$320\times240$ overlay at 30 source frames per second. Selected PNGs include
+Tiger frames 0, 103, 209 and Hogan frames 0, 549, 749. Each export's JSON
+manifest binds the exact fit, model, capture, original frame hashes, rational
+PTS, output hashes, codec, implementation hash and qualification flags.
+The source-sized MP4 is decoded completely and selected PNGs are losslessly
+read back before a new destination is published. Existing destinations are
+never overwritten. Exported playback has no audio and does not establish
+physical swing time. Native/web export controls remain tracked in \#11246.
+
+Visual review of frame 103 exposes Tiger's raised-arm mismatch, while frame
+549 exposes Hogan's cropped-foot framing. These outputs support falsifiable
+comparison rather than visual acceptance; they do not erase closure, depth,
+anatomy or camera uncertainty.
+
+\subsection{Interpreting the Video Overlay}
+Review the original PNG and detector landmarks beside native attachment
+projections at the same exact frame identity. Mark image observations and
+model projections distinctly; show missingness, source PTS, unknown physical
+time, and research qualification. A shared overlay avoids renderer-specific
+coordinate conversion. Selecting a new frame hides stale imagery/projections
+while its request is loading, so asynchronous completion cannot paint the
+previous frame over the new one.
+
+High residuals can indicate camera, correspondence, generic geometry, pose,
+occlusion, or detector errors; they are not automatically evidence of a
+particular anatomical defect. Low residuals can conceal open grips,
+inter-frame branch jumps, or wrong depth. The review must therefore include
+grip/ground/range plots, worst frames, and observed-foot visibility, rather than
+accepting visual similarity alone.
+
+Windows Qt/native projection uses a clean serialized SDK subprocess because
+native plugin initialization failed in a Qt-parent thread/spawn context.
+The worker verifies resource and source identities; timeout/cancellation
+terminates only its owned process. This boundary is shared infrastructure,
+not a second geometry or inference implementation.
+
+\reportsection{Repeatable Procedure and Engineering Verification}
+\subsection{Run Checklist for an Additional Historical Player}
+\begin{enumerate}
+\item Check issue ownership and post an appropriate lease. Use an isolated
+topic worktree; read local policy and shared-infrastructure boundaries.
+\item Catalog source URLs, owner-provided files, footage lineage, source dates,
+rights, metadata, format identifiers, and exact file hashes. Review identity
+and continuity before choosing a bounded capture window.
+\item Extract original frames and observations with exact PTS; retain detector
+weights/version, implementation hash, lossless frame hashes, and missingness.
+\item Import through the checked capture API; reopen the archive and verify
+frame identities and source images before numerical work.
+\item Bind an immutable native resource to that swing, verifying exact compiled
+coordinates/units and all needed model resources. Document geometry and
+camera assumptions before fitting.
+\item Create a new source-stamped research fit using explicit samples, knots,
+scales, weights, budgets, and visibility prior. Preserve originals; inspect
+training, held-out, and dense residuals plus model/video overlays.
+\item If placement is revised, create a separate authored version and apply
+camera compensation. Verify image invariance and all-frame ground diagnostics.
+\item Repair bounds and closed motion; measure source-image tradeoffs. Audit
+all samples and intermediate motion, not only anchor or fitting frames.
+\item Author controls only with explicit clock/units/provenance, preserve an
+unactuated root, then perform fresh-resource replay and refinement.
+\item Export through checked swing packaging. Admit downstream simulation,
+impact, and analysis only when their exact capability and evidence gates hold.
+\end{enumerate}
+
+\subsection{Canonical Public Calls}
+Run from the repository root in a clean native-SDK process; import MuJoCo
+before the workspace when following the documented Windows SDK boundary.
+Use the configured library root rather than copying local paths into code.
+The following call sequence is schematic: identifiers/options must match
+an actual stored player version and reviewed source interval.
+\begin{verbatim}
+import mujoco
+from src.shared.python import workspace
+
+library = workspace.default_necromatcher_library()
+fit = library.load_fit(source_fit_id)
+binding = workspace.load_native_fit_binding(library, source_fit_id)
+candidate = workspace.repair_native_motion(binding, iterations=150)
+# Persist diagnostic candidates outside Git; retain exact receipt hashes.
+# New authored controls require exact parent bindings and mixed SI units.
+\end{verbatim}
+Refit jobs use \code{NativeRefitOptions} and \code{start_native_refit}; replay
+uses \code{ReplayOptions} and \code{replay_authored_profile}. Reuse the existing
+job service and public storage interfaces. Close owned services and preserve
+diagnostic manifests even when a candidate is rejected.
+
+\subsection{TDD, Design by Contract, LoD, and DRY}
+New behavior is introduced with failing tests. Finite native rotation tests
+first exposed a missing log residual and large analytic derivative errors;
+their corrected native implementation passed central differences. TRF tests
+first exposed the missing solver option, then the active-bound early-stop
+case. Additional contracts cover mixed bounds, lock conflicts, exact locks,
+all-locked requests, unsupported providers, contact branch derivatives,
+stable ground row count, and actual native FK recovery.
+
+Inputs validate finite values, dimensions, proper rotations, increasing times,
+exact identities, named units, horizon bounds, immutable parents, and ownership.
+Public plant, estimator, simulator, background-worker, and storage boundaries
+keep orchestration narrow; canonical camera, spline, polynomial, Trace, and
+hash interfaces avoid duplicate numerical authorities. Current combined local
+verification reports 169 passing tests. Scoped Ruff and pinned mypy, file and
+function budgets, title conventions, and manual-governance checks pass.
+These local checks do not establish remote green CI or scientific release.
+
+\reportsection{Limitations, Decision Records, and Next Work}
+\subsection{Conditions Still Preventing Acceptance}
+\begin{longtable}{@{}p{1.35in}p{2.3in}p{2.8in}@{}}
+\toprule
+Boundary & Present Evidence & Required Next Evidence\\\midrule
+Physical Clock & Exact PTS; playback scale unknown. & Reviewed clock mapping and lineage, with duplicate/edit handling.\\
+Player Geometry & Compiled generic driver, authored ranges. & Explicit morphology uncertainty and appropriate independent calibration/evidence.\\
+Camera & Conditional pinhole hypothesis. & Camera/scene assumptions reviewed against continuous shots and framing changes.\\
+Closed Motion & Improved discrete samples; failed midpoints. & Coupled continuous constraints, inter-sample checks, and retained image fidelity.\\
+Historical Efforts & Authored mixed-SI profile schema and native mapping. & Identifiable physical timing, usable initial state/path, and independently checked control recovery.\\
+Replay Consumers & Checked trace storage and portable data. & Unit-aware simulation/impact/whole-analysis admission and functional execution controls.\\
+Publication & Unknown rights; publication flag false. & Source rights and site integration decisions; AffineDrift delivery verified separately.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Do Not Substitute Legacy False Success}
+The existing \code{ModelMatchHandoffCoordinator} writes fixed trajectory stamps
+and hard-coded fit metrics. Those values are not historical fitting evidence.
+An older torque procedure comparing a reference to itself is not independent
+forward replay. Shadow Tracker's synthetic segmentation fallback is tracked
+under \#11227; landmarks must not be converted to masks and called observed
+segmentation. Every new evidence path must continue to fail when native
+capability or genuine source evidence is unavailable.
+
+\subsection{Tracked Continuation}
+The integrated epic is \#11232, with player epics \#11226 and \#11229 and
+native fitting/downstream issue \#11235. Draft PR \#11240 remains a work-in-
+progress implementation vehicle. Local numerical progress does not resolve
+its documented CI remediation limit, remote checks, or complete project goal.
+The next numerical step is a temporally coupled, bounded closed path that
+controls image tradeoffs and audits intermediate geometry, alongside a Hogan
+shot/crop review. Replay execution controls, qualified downstream analysis,
+and AffineDrift integration remain open.
+Overlay/export delivery is tracked in \#11246, and this detailed compiled
+report/Desktop package in \#11247. A Desktop review package has fourteen
+hash-verified artifacts; that transfer verifies bytes, not scientific validity.
+
+MATLAB R2025b is required for any Simscape scientific acceptance. Other runtime
+availability must be proved independently rather than inferred from a registry
+or synthetic adapter. The canonical design manual still requires its
+calculation inventory and release governance. This methods report records
+current evidence and repeatability; it grants no scientific approval.
+
+\clearpage\appendix
+\section{Exact Source, Artifact, and Runtime Identities}
+\subsection{Capture Identity}
+\begin{longtable}{@{}p{1.45in}p{4.85in}@{}}
+\toprule Item & SHA-256 / Identity\\\midrule\endhead
+Tiger USGA MP4 & \hash{99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673}\\
+Tiger Observations & \hash{d72b901f8853d24dce282b19420a4191ffbfc1c777f846a0513c14aebbbc9418}\\
+Tiger Capture ZIP & \hash{d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357}\\
+Hogan Practice MP4 & \hash{8424c562eb3f58c11a3791cc7a6bb83631fe23c172ca8b228a31a63accbc49eb}\\
+Hogan Observations & \hash{4f43bd1adcf2d3ac0bdf3b9d7c84c3909ff9c994a5ead9d2ce663f923ffb61e4}\\
+Hogan Capture ZIP & \hash{199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e}\\
+Full Detector Weights & \hash{4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad}\\
+Generic Native XML & \hash{99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd}\\
+\bottomrule
+\end{longtable}
+Both \code{hogan-generic-native-model-v2} and
+\code{tiger-generic-native-model-v2} bind the same generic XML bytes.
+Their distinct player/session identities do not imply different measured
+anthropometry.
+
+\subsection{Parent Fits and Whole-Track Repair Artifacts}
+\begin{longtable}{@{}p{1.45in}p{4.85in}@{}}
+\toprule Item & SHA-256 / Identity\\\midrule\endhead
+Tiger v6 Fit & \hash{a9c2fc96921cf9c8ee3eeb10395faf541de4c2d7c81d64cc07fa35132a19ac52}\\
+Hogan v6 Fit & \hash{caa2c308a3ebfb5da58c9f916c6a0ae9c0a790378199d002ecf39dcc7595e91a}\\
+LM Source Commit & \hash{7d8c04946d9ebb69a698d1e83d9d67322e76c87c}\\
+LM Scoped Source & \hash{898676a7a0d7962d739a6e52e80c9cf63a79954432d7c1372bba41e6290ca048}\\
+LM Tiger Candidate & \hash{d20c18b9c4c491cee330ee157f0b4a50cba4b113a9551ff41ad12159e1ec093f}\\
+LM Hogan Candidate & \hash{a8ade8b34ffd992a425bcf1c5a2c8d28f752294a1881a6f7e0514fe09015fe9a}\\
+TRF Source Commit & \hash{cee6d9d55eed63a16939f912e2479d461ce7abc3}\\
+TRF Scoped Source & \hash{4e59278db14f361ecc2253245fd99e175837f598cbb3e08585f6359e9c9fda5b}\\
+TRF Tiger Candidate & \hash{828f69b6801ccf2464b9696eb45026726e47789a2d067e6f0f6efa472f648f78}\\
+TRF Hogan Candidate & \hash{375a8b8278a2dd0ea92530b8f73be22c1c1ebe466c5ad4a2d6e8ae23172a755d}\\
+Runtime Fingerprint & \hash{e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5}\\
+Tools Pin & \hash{3678409fc51024150ab28970b72e3b468935f345}\\
+\bottomrule
+\end{longtable}
+The repair receipts report Python 3.13.5, NumPy 2.4.1, SciPy 1.16.0,
+MuJoCo 3.3.4, OpenCV-Python 4.13.0.90, and Windows
+\code{Windows-11-10.0.26300-SP0}. Fingerprints identify the scoped producer;
+they are not complete dependency certification. Full candidate JSON and
+unpublished sequential NPZ remain outside Git under
+\code{Downloads/historical-capture/native-fit-research}.
+
+\section{Source Map and Resume Instructions}
+\begin{longtable}{@{}p{2.3in}p{4.0in}@{}}
+\toprule Authority & Repository Path / Purpose\\\midrule\endhead
+Capture Catalog & \path{docs/development/historical_capture/source-catalog.json}\\
+Capture Receipts & \path{docs/development/historical_capture/hogan-final-receipt.json}; \path{docs/development/historical_capture/tiger-usga-range-final-receipt.json}\\
+Native Fit Procedure & \path{docs/development/necromatcher-native-fit.md}\\
+Native Resources & \path{docs/development/necromatcher-native-resources.md}\\
+Authored Efforts & \path{docs/development/necromatcher-effort-profiles.md}\\
+Replay Procedure & \path{docs/development/necromatcher-replay.md}\\
+Placement Procedure & \path{docs/development/necromatcher-ground-placement.md}\\
+Constrained Repair & \path{docs/development/necromatcher-constrained-repair.md}\\
+LM Receipt & \path{docs/development/historical_capture/constrained-repair-probe-receipt.json}\\
+TRF Receipt & External \path{Downloads/historical-capture/native-fit-research/constrained-repair-trf-probe-receipt.json}; verify hashes before treating it as reproduced evidence.\\
+Image Fit Boundary & \path{src/shared/python/motion_matching/historical_fit/}\\
+Native Marker/Closure & \path{src/engines/physics_engines/mujoco/python/full_body_ik.py}\\
+Shared Pose Solver & \path{src/shared/python/motion_matching/full_body_ik.py}\\
+Root Turnover & \path{AGENT_HANDOFF.md} and \path{docs/development/HANDOFF.md}\\
+\bottomrule
+\end{longtable}
+Before resuming, inspect the current worktree, source revision, live leases,
+owned workers, and stored manifests. Read the applicable turnover documents;
+their later evidence may supersede this snapshot. Reopen exact immutable fit
+versions, verify hashes, and repeat numerical checks from recorded source and
+options. Keep earlier failure receipts as evidence rather than replacing them
+with a later narrative of success.
+
+\begin{verbatim}
+# From the owned repository worktree; Qt remains offscreen.
+$env:QT_QPA_PLATFORM='offscreen'
+$env:MPLBACKEND='Agg'
+python3 -m pytest tests/unit/motion_matching/test_pose_trf.py `
+  tests/unit/motion_matching/test_full_body_markers.py -q
+pre-commit run mypy --hook-stage pre-push --files `
+  src/shared/python/motion_matching/full_body_ik.py `
+  src/engines/physics_engines/mujoco/python/full_body_ik.py
+python3 -m scripts.check_design_manual_governance
+\end{verbatim}
+The focused commands test the bounded native solver and its geometry
+derivatives. They do not replace the combined library/API/replay regression
+lane, original-image review, continuous-motion audits, or remote checks.
+
+\end{document}

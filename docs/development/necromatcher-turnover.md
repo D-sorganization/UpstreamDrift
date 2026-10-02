@@ -15,6 +15,56 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 
 ## Current Delivery
 
+### Sequential Repair and Review Exports
+
+The current uncommitted `repair_native_motion` change reuses the canonical
+`solve_trajectory` with native bounded TRF. The previous repaired pose supplies
+the next initialization and weak prior; the first source pose initializes the
+first solve. Reports identify `initialization=previous_repaired_pose` and
+`prior_target=previous_repaired_pose_or_first_source_pose`. Marker targets still
+come from the original inferred native world positions. They are not measured
+3D landmarks. Twelve repair tests pass, but this method change has no new formal
+whole-track execution receipt yet. Earlier LM and independent-TRF receipts retain
+their actual algorithms, budgets, source hashes and failed midpoint evidence.
+
+The public workspace facade now provides `export_fit_video(library, fit_id,
+destination, selected_frames=...)`. It uses the bound native model and original
+source-sized capture PNGs as backgrounds. The blue projected rig is a native
+body-origin joint tree and attachment markers, not a rendered body mesh or an
+observed silhouette. Green observations and yellow residuals retain their
+distinct meanings. Original capture bytes remain unchanged. Export admits only
+contiguous uniformly timed source frames; sparse or irregular timing requires a
+separate export method instead of a fabricated constant physical clock.
+
+Each new output directory contains a verified MP4, selected lossless overlay
+PNGs and a completion manifest. The manifest binds fit/model/capture hashes,
+original PNG hashes, exact rational frame PTS, output hashes, missing rig data,
+physical-time qualification false, unqualified camera/anatomy flags and research
+qualification. MP4 presentation uses the
+source frame rate; the manifest is the authority for original PTS. Codec
+readback checks decoded frame count and source dimensions. Existing destinations
+are rejected; the manifest publishes last after staging and parent revalidation.
+
+The actual Desktop review package is
+`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01`. New `Tiger Overlay` and
+`Hogan Overlay` subfolders contain the v6 research overlay MP4s, selected PNGs
+(Tiger 0/103/209; Hogan 0/549/749), and manifests. These depict the original
+authored-ground hypotheses, not the unpublished repaired candidates. The
+`Report` subfolder contains the compiled methods PDF and its LaTeX source;
+the repository source is [Necromatcher Methods](necromatcher-methods.tex).
+Built-in compilation failed with `Unable to find standard directories for
+platform`; the installed MiKTeX PDF export was used without installing packages.
+The standalone report is a methods/turnover artifact; canonical manual authority
+and its blocked release inventory remain unchanged.
+
+For repeatable export, follow the clean native-SDK process and new-directory
+example in [Historical Capture Procedure](historical-capture-procedure.md).
+API/UI export execution controls remain tracked in #11246; compiled report and
+Desktop delivery are tracked in #11247. Physical-clock qualification, usable
+continuous constrained motion, authored historical control recovery, downstream
+simulation/impact/analysis and AffineDrift acceptance remain open under #11235
+and #11232. No local artifact implies remote green CI or scientific acceptance.
+
 Workspace CI completed three story remediation cycles: cleanup LoD, source-bound
 launcher context/atlas freshness, and the GUI-thread heuristic. A new test
 verifies a blocked background operation leaves Qt responsive and applies its

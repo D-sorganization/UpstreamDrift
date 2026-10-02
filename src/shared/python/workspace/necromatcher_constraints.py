@@ -11,7 +11,6 @@ from typing import Any
 import numpy as np
 from copy import deepcopy
 
-from src.shared.python.motion_matching.full_body_ik import SolvePoseOptions
 from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_native import NativeFitBinding
 
@@ -46,7 +45,7 @@ def repair_native_motion(
 ) -> dict[str, Any]:
     """Repair each stored pose; report bounds and soft-constraint tradeoffs.
 
-    The unchanged source pose is the prior for each independent solve. No
+    The previous repaired pose is the warm start and weak prior. No
     spline, physical rates, effort profile, or historical accuracy is inferred.
     """
     if type(iterations) is not int or not 1 <= iterations <= 1000:
@@ -55,8 +54,15 @@ def repair_native_motion(
     bounds = _authored_ranges(binding)
     camera, attachments = binding.review_inputs()
     ik = binding.plant.create_ik(attachments)
-    valid = np.ones(len(attachments), dtype=bool)
-    options = SolvePoseOptions(
+    sources = np.asarray(binding.fit["q"], dtype=float)
+    targets = np.asarray(
+        [binding.plant.marker_positions(row, attachments) for row in sources]
+    )
+    _, fits = ik.solve_trajectory(
+        targets,
+        np.ones(targets.shape[:2], dtype=bool),
+        sources[0],
+        ground=binding.plant.ground_plane,
         iterations=iterations,
         solver="trf",
         bounds=bounds,
@@ -66,16 +72,11 @@ def repair_native_motion(
         prior_weight=_PRIOR_WEIGHT,
     )
     samples, diagnostics = [], []
-    for index, row in enumerate(binding.fit["q"]):
-        source = np.asarray(row, dtype=float)
-        targets = binding.plant.marker_positions(source, attachments)
+    for index, (source, result) in enumerate(zip(sources, fits, strict=True)):
         before = ik.closure_error(source)
-        result = ik.solve_pose(
-            targets, valid, source, ground=binding.plant.ground_plane, options=options
-        )
         points = binding.plant.marker_positions(result.q, attachments)
         pixel_changes = np.linalg.norm(
-            camera.project(points) - camera.project(targets), axis=1
+            camera.project(points) - camera.project(targets[index]), axis=1
         )
         if not np.isfinite(pixel_changes).all() or not np.isfinite(result.q).all():
             raise ValueError("Repaired states and projections must be finite")
@@ -127,6 +128,8 @@ def _repair_record(
         "frame_indices": list(binding.fit["frame_indices"]),
         "frames": deepcopy(binding.fit["frames"]),
         "target_kind": "inferred_native_world_markers",
+        "initialization": "previous_repaired_pose",
+        "prior_target": "previous_repaired_pose_or_first_source_pose",
         "interpolation": "none_discrete_samples_only",
         "scientifically_qualified": False,
         "physical_time_qualified": False,
