@@ -150,13 +150,8 @@ class GripClosureResult:
     passed: bool
 
 
-def quat_velocity_jacobian_body(q: Sequence[float] | np.ndarray) -> np.ndarray:
-    """Calculate the 4x3 body-frame quaternion velocity Jacobian.
-
-    Relates body-fixed angular velocity to quaternion rate:
-    q_dot = 0.5 * G(q) @ omega_body
-    where G(q) is the 4x3 matrix for scalar-first unit quaternion q = [w, x, y, z].
-    """
+def _normalize_unit_quaternion(q: Sequence[float] | np.ndarray) -> np.ndarray:
+    """Validate and normalize a 4-element scalar-first unit quaternion."""
     q_arr = np.asarray(q, dtype=np.float64).reshape(-1)
     if q_arr.shape != (4,):
         raise ValueError(f"Expected quaternion shape (4,), got {q_arr.shape}")
@@ -165,7 +160,17 @@ def quat_velocity_jacobian_body(q: Sequence[float] | np.ndarray) -> np.ndarray:
     norm = float(np.linalg.norm(q_arr))
     if norm < 1e-12:
         raise ValueError("cannot normalize a zero-norm quaternion")
-    w, x, y, z = q_arr / norm
+    return q_arr / norm
+
+
+def quat_velocity_jacobian_body(q: Sequence[float] | np.ndarray) -> np.ndarray:
+    """Calculate the 4x3 body-frame quaternion velocity Jacobian.
+
+    Relates body-fixed angular velocity to quaternion rate:
+    q_dot = 0.5 * G(q) @ omega_body
+    where G(q) is the 4x3 matrix for scalar-first unit quaternion q = [w, x, y, z].
+    """
+    w, x, y, z = _normalize_unit_quaternion(q)
     return 0.5 * np.array(
         [
             [-x, -y, -z],
@@ -183,15 +188,7 @@ def quat_velocity_jacobian_body_inv(q: Sequence[float] | np.ndarray) -> np.ndarr
     Relates quaternion rate to body-fixed angular velocity:
     omega_body = 2.0 * G(q).T @ q_dot
     """
-    q_arr = np.asarray(q, dtype=np.float64).reshape(-1)
-    if q_arr.shape != (4,):
-        raise ValueError(f"Expected quaternion shape (4,), got {q_arr.shape}")
-    if not np.all(np.isfinite(q_arr)):
-        raise ValueError("Quaternion must contain only finite numbers")
-    norm = float(np.linalg.norm(q_arr))
-    if norm < 1e-12:
-        raise ValueError("cannot normalize a zero-norm quaternion")
-    w, x, y, z = q_arr / norm
+    w, x, y, z = _normalize_unit_quaternion(q)
     return 2.0 * np.array(
         [
             [-x, w, z, -y],
