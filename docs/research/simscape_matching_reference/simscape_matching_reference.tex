@@ -1980,6 +1980,217 @@ are retained. Raw joint/torque traces remain private; aggregate metrics,
 input/probe hashes and receipts are in
 \texttt{saved\_leg\_servo\_diagnosis\_review\_20261002.json}.
 
+
+\subsection{Native Actuator Effort and the Stiffness Tradeoff}
+Independent read-only SLX graph tracing confirms the actual hip logging
+path in \texttt{GS3DX\_KDS\_Spherical}: the three torque inports feed
+\texttt{Axis Torques}, which branches to the actuator-log demux and the
+\texttt{XYZ Torque} chart. The chart applies the documented virtual-work
+map through a follower-frame converter explicitly declared in N\,m.
+Thus the blank-unit hip log fields are generalized XYZ command torques,
+not a sensed Cartesian torque vector. Their physical power is
+\begin{equation}
+ \tau_{\mathrm{eff}}=\tau-D\dot q_{\mathrm{deg}},\qquad
+ P=\tau_{\mathrm{eff}}^\top\dot q_{\mathrm{rad}}=T^\top\omega,
+ \qquad T=E^{-\top}\tau_{\mathrm{eff}},
+ \quad \dot q_{\mathrm{rad}}=\frac{\pi}{180}\dot q_{\mathrm{deg}}.
+\end{equation}
+The current hip instances have $D=0$, so their logged command equals
+$\tau_{\mathrm{eff}}$; the general expression retains the damping term.
+Knee and ankle channels come from native primitive actuator-torque sensors,
+with recorded N\,m or equivalent kg\,m$^2$/s$^2$ units. Transmitted or
+constraint torque channels are not substituted for actuator torque.
+
+A native R2025b reader completed naturally at
+\texttt{2026-10-02T18:38:51Z}. It checked the original hold input hashes,
+finite strictly increasing logged times, declared units, sample coverage,
+and the previous servo reconstruction before linearly resampling the
+12 actuator channels on the same 2 ms grid. With $C_0=0$,
+\begin{equation}
+ \Delta\tau_{\mathrm{balance}}=
+ \tau_{\mathrm{actuator}}-\tau_{\mathrm{servo}}.
+\end{equation}
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Capture & Net Effort RMS & Servo RMS & Balance Residual RMS \\
+ & (N\,m) & (N\,m) & (N\,m) \\
+\midrule
+Tour & 45.954 & 226.583 & 216.449 \\
+Owner & 56.019 & 236.384 & 227.404 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The whole-run cosine between servo and balance-residual arrays is
+$-0.9795$ for tour and $-0.9716$ for owner. This documents substantial
+offsetting components; it does not prove harmful controller cancellation.
+The previously observed late-window motion still prevents interpreting
+the net mean as a unique static gravity solution. The initial reader
+rejected object-valued unit metadata; the corrected reader handles the
+actual unit object's \texttt{Name} property. Both receipts are retained.
+
+A controlled tour-only sensitivity run multiplied leg stiffness by four
+and damping by two, keeping nominal second-order damping ratio for fixed
+inertia. It preserved the accepted address, geometry, ground, contacts,
+reference and all five original gates. It completed naturally at
+\texttt{2026-10-02T18:36:44Z}, without saving the model:
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Tour Configuration & Maximum Pelvis Motion & Rotation & Peak Normal Force \\
+ & (mm) & ($^\circ$) & (Bodyweights) \\
+\midrule
+Original Gains & 20.041 & 5.582 & 1.981 \\
+Stiffness $\times4$, Damping $\times2$ & 6.128 & 1.751 & 2.263 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The revised run rejects three gates: translation exceeds 5 mm, rotation
+exceeds $1^\circ$, and peak normal force exceeds two bodyweights at
+10.007 ms. The two settled support-force gates pass. This is evidence of
+a compliance/contact-transient tradeoff, not an accepted model improvement.
+No owner gain-four run or independent replay is claimed.
+
+Reproduce the read-only source trace using
+\texttt{trace\_leg\_actuation\_xml.py} with the model directory and a private
+JSON output path. Run \texttt{reconstruct\_saved\_leg\_net\_actuation.m}
+and \texttt{capture\_A\_bilateral\_balance\_on\_gain4\_hold\_1s.m}
+with the explicit R2025b locked runner and unique private logs, using
+\texttt{-TimeoutMin 8} and \texttt{-TimeoutMin 18}, respectively.
+The required private hold caches and accepted stance are the inputs
+described in the preceding sections. Probe/source hashes, actual source
+library hashes, anonymous aggregate metrics and natural-exit receipts are
+in \texttt{saved\_leg\_net\_actuation\_review\_20261002.json}; raw traces
+remain private. The AGY Gemini 3.8 proposal was independently checked
+against actual graph edges. Its unexecuted native auditor is not runtime
+evidence. Full forward-dynamics qualification remains open.
+
+
+\subsection{Time-Varying Leg Feedforward Profiles}
+The balance command now accepts either its historical constant 12-vector
+$C_0$ (row or column) or a real, finite $12\times N$ torque table on the
+same $N$-sample leg-reference time grid $T$. It checks type, finite values
+and shape before balance arithmetic; malformed, complex or higher-dimensional
+arrays fail explicitly. The existing shared bracketing routine supplies
+$k,k_2,w$ with time clamped to the reference endpoints:
+\begin{equation}
+ C_0(t)=C_{0,:,k}+w(C_{0,:,k_2}-C_{0,:,k}).
+\end{equation}
+Only this feedforward term changes. COM/foot feedback, units, torque
+mapping and the constant-vector behavior remain the documented equations.
+Disabling balance correction retains feedforward. This enables explicitly
+scheduled support trials without changing prescribed base motion or adding
+external support forces. It does not itself identify a torque profile or
+qualify independent replay.
+
+Native R2025b TDD recorded one pass, eight failures and four incomplete
+tests against the original helper. The revised helper and existing balance
+regression then recorded \textbf{16 passes, zero failures/incomplete},
+with a natural exit at \texttt{2026-10-02T18:51:03Z}. Tests cover constant
+row/column equivalence, profile endpoints and interpolation, time clamping,
+a zero-initial ramp, balance-off retention, invalid shapes, nonfinite values,
+complex input and higher-dimensional input. The historical 0.3 s
+\texttt{GS3DX\_FitBalance} replay retains its own 17.5 mm maximum COM-error
+bound (rounded measured RMS 10.1 mm, maximum 16.5 mm). That historical check
+does not qualify Human contact or its stricter pelvis hold limits.
+
+Reproduce using the same locked R2025b runner with
+\texttt{run\_leg\_feedforward\_profile\_red.m} against the preceding
+implementation and \texttt{run\_leg\_feedforward\_profile\_green.m}
+against the revised helper; the suites are
+\texttt{test\_gs3dx\_leg\_feedforward\_profile} and
+\texttt{test\_gs3dx\_fit\_balance}. Use unique private logs and
+\texttt{-TimeoutMin 18} for the legacy native replay.
+\texttt{leg\_feedforward\_profile\_review\_20261002.json} records the
+executed source/test hashes, exact test names and natural-exit receipts.
+Actual configured Human profile acceptance is a separate execution.
+
+
+\subsection{Configured Human Ramped Support Trial}
+The tour Human run used the measured generalized net-torque means from
+the moving baseline's $0.5$--$1.0$ s window as an empirical trial seed.
+It used the original gains and zero feedforward until 50 ms, linearly
+ramped to that seed at 200 ms, then held it through one second. Each
+seed component was bounded to 150 N\,m before simulation. This is a
+bounded support experiment, not static gravity identification. Upper-body
+feedback and the prescribed constant neck remained active; the root was
+unactuated and no support force was added.
+
+The native neck \texttt{FromWorkspace} input is bound to
+\texttt{[LegReferenceTime(:), NeckReference.']}. Its reference table must
+therefore have the same columns as the leg time grid, in radians. The
+first attempt rejected a two-column neck table paired with the new four
+times, before simulation. The corrected caller checks that actual binding
+and repeats the same constant neck angles over four columns; it also
+aligns the leg angles/rates, COM/foot references and balance-gain table.
+It does not change the neck motion or model binary.
+
+The corrected R2025b run exited naturally at
+\texttt{2026-10-02T19:06:38Z}. It measured \textbf{11.012 mm} maximum
+pelvis motion and \textbf{$2.773^\circ$} rotation, compared with the
+original 20.041 mm/$5.582^\circ$. All three original force gates pass;
+the peak remains 1.981 bodyweights. Both fixed pose gates still reject
+the run. This verifies execution of sampled feedforward in the actual
+Human model and an improvement in this diagnostic, not an accepted
+quiet stance or independent full-swing replay. The separate owner run exited naturally at
+\texttt{2026-10-02T19:16:13Z}, measuring \textbf{7.256 mm} and
+\textbf{$2.171^\circ$}, compared with 14.818 mm/$4.408^\circ$ in its
+original balance-enabled hold. All three force gates pass, while both
+unchanged pose gates reject. The aggregate receipt is recorded in
+\texttt{owner\_ramped\_leg\_feedforward\_review\_20261002.json}.
+Both captures remain unqualified for quiet stance and independent replay.
+
+Reproduce with \texttt{capture\_A\_bilateral\_ramped\_empirical\_leg\_hold\_1s.m}
+through the locked R2025b runner, \texttt{-TimeoutMin 18}, and a unique
+private log. The source is the same accepted stance and original saved
+hold described above. Anonymous metrics, fixed gate outcomes, source/probe
+hashes, the failed setup receipt and the successful native receipt are in
+\texttt{tour\_ramped\_leg\_feedforward\_review\_20261002.json}. Private
+raw states and torque profiles remain outside Git. The next qualification
+step must address remaining whole-body posture error while retaining
+contact-force and anatomical constraints; visual or software success
+cannot replace those checks.
+
+
+\subsection{Owner Session Video as an Independent Comparison}
+Epic \#11268 adds a video companion to the marker-based owner matching
+epic \#11161. Its eleven slices cover original-byte acquisition,
+source timing and grading, a frozen comparison protocol, virtual-camera
+registration, registered markerless backends, confidence-based swing
+pairing, 2D and 3D comparisons, marker-anchored Necromatcher fitting,
+Simscape overlays, and an error budget. The maintained procedure is
+\path{docs/development/capture-o-video/procedure.md}. Draft PR \#11172
+owns the reusable capture registry, exports and comparison services;
+these authorities must be reconciled rather than duplicated.
+
+Session membership does not establish that a video shows a particular
+marker capture. Comparisons must first grade each clip and assess its
+pairing against the 13-swing owner envelope, with explicit abstention
+when the evidence cannot distinguish swings. Presentation timestamps
+are not a measured physical clock. Unknown intrinsics remain unknown
+or estimated with uncertainty. Segment lengths come from the owner
+marker calibration; video fitting must not silently recalibrate them.
+
+The comparison ladder separates visual review (L0), unpaired envelope
+comparison (L1), paired image-plane agreement (L2), and paired 3D
+agreement (L3). Freeze landmark correspondence, camera fitting,
+offset-calibration partitions, timing anchors, pairing thresholds and
+reporting metrics before inspecting comparison results. Camera and
+offset fitting must not consume the same observations used to claim
+held-out accuracy. Report phase-stratified median, 95th-percentile and
+worst errors, alongside owner swing-to-swing variation. Monocular depth
+ambiguity and image-plane error remain separate uncertainty sources.
+
+Keep original media, locators, decoded frames, overlays and per-frame
+results in the private capture store. Public evidence uses neutral IDs,
+hashes and owner-approved body-height-normalized aggregates. Preserve
+imperfect clips with a documented grade or rejection reason. Backend
+or weight unavailability is a typed result, not fabricated observations.
+This comparison adds observational evidence; it cannot replace the
+fixed contact, posture, actuator-control and independent dynamics gates.
+Original footage acquisition and comparison results have not yet been
+verified in this review; the epic is incorporated as ongoing work.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

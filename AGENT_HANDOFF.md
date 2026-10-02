@@ -359,10 +359,10 @@ owner is 14.818 mm / 4.408 degrees.
 Hold screens: tour REJECT, owner REJECT.
 Improvement is not physical acceptance. See
 `human_ankle_gain_interface_review_20261002.json` and
-`balance_enabled_hold_comparison_review_20261002.json`. The existing upper-only
-learning API hardcodes FitTrack and overwrites starts; a private Gemini TDD
-proposal is not accepted code or full forward-dynamics evidence.
+`balance_enabled_hold_comparison_review_20261002.json`. The historical upper-only API hardcoded FitTrack and overwrote starts;
+that restriction is resolved by the configured-model implementation and native
+lifecycle probes below. Those probes do not qualify full forward dynamics.
 
 Simscape #11256: configured Human upper learning now has 19 native contract GREEN tests and successful two-iteration tour/owner lifecycle probes preserving 837 workspace values and initial states. Native parent-mask policy trace resolves child-target overwrite. See configured_human_learning_review_20261002.json and the same LaTeX reference; short learning is not full forward replay. Combined native/legacy regression311 GREEN at17:26:58Z; original legacy short replay limits retained. PDF, current-head protected CI and full gravity/torque qualification remain separately open.
 
-Simscape #11256: saved-leg servo/late-window diagnostic passed17:47:04Z, no new simulation/FK/modelsave. Both holds still move during0.5-1s, so mean servo torque is not qualified gravity feedforward. See new aggregate evidence and LaTeX; recover actual balance/net actuation next. Combined native311 remains GREEN. Duplicate owned SPEC row corrected after exact CI failure; current-head protected CI/PDF/full forward remain open.
+Simscape #11256: the native reader and independent logger trace establish actual net leg effort of 45.954/56.019 N m RMS. Sampled feedforward TDD and balance regression passed 16 tests with zero failures/incomplete. The actual Human tour ramp improves motion to 11.012 mm/2.773 degrees; all three force gates pass, but both fixed pose gates reject. The gain-four diagnostic also rejects peak force. Owner execution is separate; no new best video or independent replay is claimed. Source, the maintained LaTeX reference and aggregate evidence agree. Earlier head 78918cde CI passed; new-head checks, PDF review and full physical qualification remain open.

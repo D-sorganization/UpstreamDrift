@@ -1425,9 +1425,9 @@ owner is 14.818 mm / 4.408 degrees.
 Hold screens: tour REJECT, owner REJECT.
 Improvement is not physical acceptance. See
 `human_ankle_gain_interface_review_20261002.json` and
-`balance_enabled_hold_comparison_review_20261002.json`. The existing upper-only
-learning API hardcodes FitTrack and overwrites starts; a private Gemini TDD
-proposal is not accepted code or full forward-dynamics evidence.
+`balance_enabled_hold_comparison_review_20261002.json`. The historical upper-only API hardcoded FitTrack and overwrote starts;
+that restriction is resolved by the configured-model implementation and native
+lifecycle probes below. Those probes do not qualify full forward dynamics.
 
 ### Configured Human Upper-Body Learning and Native Lifecycle Evidence
 
@@ -1497,3 +1497,38 @@ Current PDF remains unverified because the built-in compiler is unavailable.
 CI Standard run37042119516 executed published3187eccd0 and exposed an owned
 duplicate #11256 SPEC row; it is consolidated and the duplicate/version
 checks pass locally. Fresh current-head protected checks remain required.
+
+### Generalized Leg Effort and Sampled Feedforward
+
+Read-only native reconstruction confirms net leg actuator effort of **45.954 N m RMS
+tour** and **56.019 N m RMS owner**, compared with servo-only 226.583/236.384 N m.
+Hip logs are generalized XYZ command taps before the follower-frame virtual-work
+map; knee/ankle channels are native actuator sensors. Balance corrections offset
+much of the baseline servo effort. These moving windows are not static gravity
+identification; offsetting terms do not alone prove harmful cancellation.
+
+The leg command now accepts a finite real 12-vector or a 12-by-reference-samples
+feedforward table, using the shared time interpolation. Native TDD exposed the
+missing interface (one pass/eight failures/four incomplete); the implementation
+and existing balance replay then passed **16 tests, zero failed/incomplete** at
+18:51:03Z. Constant behavior and the original legacy COM bound are retained.
+
+The configured Human tour profile, zero through 50 ms and ramped to the empirical
+seed at 200 ms, completed naturally at 19:06:38Z. It reduces pelvis motion to
+**11.012 mm / 2.773 degrees** and passes all three fixed force gates (peak 1.981
+bodyweights), but still rejects both fixed pose gates (5 mm/1 degree). The
+gain-four/damping-two tour experiment is also rejected: 6.128 mm/1.751 degrees
+and peak 2.263 bodyweights. No model binary was saved. Owner profile execution
+is separate and not claimed complete here. Prescribed neck and feedback remain;
+full independent Human replay is unqualified.
+
+The neck input uses `[LegReferenceTime(:), NeckReference.']`; its radian table
+must match the leg grid. The failed initial profile setup and corrected actual
+model execution are retained. See the three new aggregate evidence files and
+the same maintained LaTeX reference. PDF verification remains blocked by the
+built-in compiler's platform-directory error. Earlier head 78918cde passed all
+reported checks; these new changes require their own protected checks.
+
+### Owner Session Video Integration — #11268
+
+The owner requested incorporating the capture-session video companion into this active Simscape goal. Reviewed parent #11161, epic #11268, children #11269–#11279, acquisition and frozen protocol. Planning PR #11280 is on main. Registry/export/comparison draft #11172 remains open and conflicting; reuse its authorities. Acquire originals privately, grade clips, freeze camera/landmark/pairing/timing choices before evaluation, compare against the 13-swing envelope with abstention, then compare markerless/Necromatcher and matched Simscape projections at supported L0–L3 levels. Media, locator and per-frame results remain private; public comparison summaries need owner approval and normalized aggregates. No session video observations or pairing verified here yet. LaTeX includes this scope and actual separate owner ramp outcome. Full forward-dynamics qualification remains open.
