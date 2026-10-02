@@ -1,3 +1,7 @@
+# Active Necromatcher Delivery
+
+Owner priority is the integrated historical-player workspace (#11232), with library #11233, tile/review #11234 and real fitting/downstream qualification #11235. See [Necromatcher Turnover](necromatcher-turnover.md) for contracts, TDD evidence, real capture imports and current PR state. Tiger #11226 and Hogan #11229 remain open.
+
 # Historical Player Capture Handoff
 
 ## Active: Tiger 2000 and Ben Hogan

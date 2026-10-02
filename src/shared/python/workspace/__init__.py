@@ -42,6 +42,7 @@ from .model_match_handoff import (
     list_available_backends,
     resolve_matching_route,
 )
+from .necromatcher import NecromatcherLibrary
 from .project_store import (
     DatasetMetadata,
     ProjectMetadata,
@@ -162,6 +163,7 @@ from .feature_preservation_audit import (
 )
 
 __all__ = [
+    "NecromatcherLibrary",
     "ActionAvailability",
     "ArtifactKind",
     "ArtifactReference",

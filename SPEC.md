@@ -7667,6 +7667,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |
 | 2026-10-01 | #11231 | Add reusable historical-player streaming image observations with rational PTS, source/frame/model hashes, explicit missingness and unqualified receipts; track Hogan #11229 and Tiger #11226. |
