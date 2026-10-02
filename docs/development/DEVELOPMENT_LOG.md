@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-01 — freezing 12 upper-body TrackAngle series on the first column, with the leg reference held, the quiet start, zero balance, and raised ground z -0.95297 (EXIT 0), still unloads. At 0.50 s the tilt is 13.2 deg, the pelvis is at z -0.007 m, and the vertical force is 0. At 1.0 s the tilt is 124 deg and the pelvis is at z -1.88 m. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
+- **Last verified:** 2026-10-01 — FootContactDamping 10000, ten times the saved 1000, with the still upper-body freeze and raised ground (EXIT 0) puts 15513 N on the right heel at the first sample. At 0.50 s the tilt is 15.2 deg, the pelvis is at z 0.010 m, and the vertical force is 109 N. At 1.0 s the tilt is 117 deg and the pelvis is at z -1.83 m. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** One unsaved 1.0 s Human run that keeps the still upper-body freeze and multiplies the existing FootContactDamping by 10. Do not change FootContactStiffness. Do not save. Do not write the shift into the model. Do not claim the 5 % bar. Do not rerun the undamped freeze or 1.809 s.
+- **Next step:** Leave the ten-times damping run as recorded. The first strike grew to 15513 N and the pelvis is at z -1.83 m by 1.0 s. Do not repeat that damping change or the undamped freeze. Do not change FootContactStiffness. Do not write the shift into the model. Do not claim the 5 % bar. Do not save. Do not rerun 1.809 s. #11156 and #11160 stay with the owner. #11157 and #11159 still have no documented degree limits.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
