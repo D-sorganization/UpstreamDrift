@@ -10,7 +10,10 @@ Detached sample metadata cannot change retained compiled model identity.
 96 focused checks pass; one unavailable real-Drake check skips. See
 [Native Resource Procedure](necromatcher-native-resources.md). Historical driving controls, independent
 replay and downstream/site integration remain open; no scientific acceptance is
-claimed. Actual Hogan/Tiger source-stamped resource verification is next.
+claimed. Actual Hogan/Tiger resource checks from source 54d8f6fb13 verify
+750/210 saved frames, three compiled translation and 41 rotation coordinates,
+and thirteen projected attachments at start/middle/end. The native-resource
+receipt preserves exact identities; motion qualification remains rejected research.
 
 ## Unit-Preserving Authored Controls
 

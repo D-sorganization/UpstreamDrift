@@ -53,3 +53,16 @@ units, camera mapping errors, absent control mapping and mutable identity bypass
 The combined profile/library/fit/refit/handoff/native suite passes 96 tests;
 one real-Drake check skips because the installed runtime is mocked. Native and
 source-clock qualification remain separate from these software-contract checks.
+
+## Actual Saved Player Resources
+
+The [Native Resource Receipt](historical_capture/native-unit-resource-receipt-v1.json)
+records execution from exact Python source commit `54d8f6fb136fcdab2ed7349df1c78217369df34b` with runtime/source
+fingerprints. Hogan's 750-frame v5 fit and Tiger's 210-frame v5 fit bind their
+saved native XML and research definitions. Each compiles with three translation
+and 41 rotation units. Start/middle/end review returns thirteen native attachments
+per player. The same compiled binding is reused across these three projections.
+
+No historical controls were evaluated in this resource check. Physical timing,
+dynamics replay, anatomy and independent motion acceptance remain unqualified.
+The full source-file receipt is retained outside Git with the analysis artifacts.
