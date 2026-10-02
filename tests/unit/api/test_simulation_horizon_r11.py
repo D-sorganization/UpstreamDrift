@@ -100,18 +100,10 @@ class TestSimulationTimingPlanCalculations:
         assert plan.requested_duration == 0.025
         assert plan.retained_samples == 3
 
-    def test_sub_step_duration_with_variable_step(self) -> None:
-        """Sub-step durations (duration < timestep) execute a single bounded step."""
-        plan = compute_simulation_timing(
-            duration=0.0005, timestep=0.001, allow_remainder_step=True
-        )
-        assert plan.is_divisible is False
-        assert plan.has_remainder_step is True
-        assert plan.step_count == 1
-        assert len(plan.step_sizes) == 1
-        assert plan.step_sizes[0] == pytest.approx(0.0005)
-        assert plan.integrated_duration == pytest.approx(0.0005)
-        assert plan.retained_samples == 2
+    def test_timestep_exceeding_duration_rejected(self) -> None:
+        """Timestep greater than duration must be rejected with ValueError."""
+        with pytest.raises(ValueError, match="must not exceed duration"):
+            compute_simulation_timing(duration=0.0005, timestep=0.001)
 
     def test_invalid_timing_inputs_rejected(self) -> None:
         """Non-positive or non-finite timing parameters must fail-closed."""
@@ -130,7 +122,7 @@ class TestDeterministicEngineClockAccumulation:
 
     def test_engine_recording_proves_final_time_equals_sum_of_steps(self) -> None:
         engine = MockPhysicsEngine()
-        recorder = GenericPhysicsRecorder(engine)
+        recorder = GenericPhysicsRecorder(engine)  # type: ignore[arg-type]
         recorder.start()
 
         # Step with mixed dt: 0.01, 0.01, 0.005
@@ -197,10 +189,10 @@ class TestRestSimulationSeparatedDurationsAndTruthfulClocks:
         assert times[-1] == pytest.approx(response.integrated_duration)
 
     @pytest.mark.anyio
-    async def test_rest_simulation_sub_step_duration(
+    async def test_rest_simulation_timestep_exceeds_duration_rejected(
         self, service: SimulationService
     ) -> None:
-        """REST simulation supports sub-step duration without raising timestep-exceeds error."""
+        """REST simulation rejects timestep > duration with preparation failure."""
         request = SimulationRequest.model_validate(
             {
                 "engine_type": "pendulum",
@@ -210,14 +202,10 @@ class TestRestSimulationSeparatedDurationsAndTruthfulClocks:
         )
 
         response = await service.run_simulation(request)
-        assert response.success is True
-        assert response.requested_duration == 0.0005
-        assert response.integrated_duration == pytest.approx(0.0005)
-        assert response.duration == pytest.approx(0.0005)
-        assert response.step_count == 1
-        assert response.retained_samples == 2
-        assert response.frames == 2
-        assert response.data["times"][-1] == pytest.approx(0.0005)
+        assert response.success is False
+        assert response.error is not None
+        assert response.error.code == "invalid_input"
+        assert response.error.stage == "preparation"
 
     @pytest.mark.anyio
     async def test_rest_simulation_fixed_step_non_divisible_truthful_clock(
@@ -330,7 +318,11 @@ class TestWebSocketTruthfulClocks:
             "speed_factor": 1000.0,
         }
 
-        frame, elapsed = await ws_module._run_simulation_loop(ws, engine, config)
+        frame, elapsed = await ws_module._run_simulation_loop(
+            ws,
+            engine,
+            config,  # type: ignore[arg-type]
+        )
         assert frame == 3
         assert elapsed == pytest.approx(0.025)
         assert engine.steps == [0.01, 0.01, 0.005]

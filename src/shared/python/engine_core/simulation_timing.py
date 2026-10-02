@@ -91,34 +91,6 @@ def _build_divisible_plan(
     )
 
 
-def _build_substep_plan(
-    duration: float, timestep: float, can_variable_step: bool
-) -> SimulationTimingPlan:
-    if can_variable_step:
-        return SimulationTimingPlan(
-            requested_duration=duration,
-            timestep=timestep,
-            step_count=1,
-            step_sizes=(duration,),
-            integrated_duration=duration,
-            retained_samples=2,
-            has_remainder_step=True,
-            remainder_dt=duration,
-            is_divisible=False,
-        )
-    return SimulationTimingPlan(
-        requested_duration=duration,
-        timestep=timestep,
-        step_count=0,
-        step_sizes=(),
-        integrated_duration=0.0,
-        retained_samples=1,
-        has_remainder_step=False,
-        remainder_dt=None,
-        is_divisible=False,
-    )
-
-
 def _build_multistep_plan(
     duration: float, timestep: float, can_variable_step: bool
 ) -> SimulationTimingPlan:
@@ -196,6 +168,8 @@ def compute_simulation_timing(
 
     duration = float(duration)
     timestep = float(timestep)
+    if timestep > duration:
+        raise ValueError(f"Timestep ({timestep}) must not exceed duration ({duration})")
     can_variable_step = allow_remainder_step and engine_supports_variable_step(engine)
 
     ratio = duration / timestep
@@ -204,8 +178,5 @@ def compute_simulation_timing(
         rounded_steps * timestep, duration, rel_tol=1e-9, abs_tol=1e-12
     ):
         return _build_divisible_plan(duration, timestep, rounded_steps)
-
-    if duration < timestep:
-        return _build_substep_plan(duration, timestep, can_variable_step)
 
     return _build_multistep_plan(duration, timestep, can_variable_step)
