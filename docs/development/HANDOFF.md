@@ -430,10 +430,17 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    the vertical force is 6717 N, of which the left heel carries
    4716 N. Holding the address angles does not keep a stance. Do not
    repeat this hold. The upper-body TrackAngle series were still the
-   swing in that run. The next unsaved 1.0 s check keeps the quiet
-   start, zero balance, GroundOffset z -0.95297, and the frozen leg
-   reference, and also holds every upper-body TrackAngle on its first
-   column and every TrackRate at 0. Do not save. Do not write the
+   swing in that run. Holding every upper-body TrackAngle on its
+   first column (12 variables) and every TrackRate at 0, with the
+   frozen leg reference, the quiet start, and GroundOffset z -0.95297,
+   finished (EXIT 0). The right heel takes 3180 N at the first sample.
+   The right foot then carries 736 N, 794 N, and 480 N at 0.20 s,
+   0.30 s, and 0.40 s. At 0.50 s the tilt is 13.2 deg, the pelvis is
+   at z -0.007 m, the right ankle is at z -0.767 m, and the vertical
+   force is 0. At 1.0 s the tilt is 124 deg, the pelvis is at
+   z -1.88 m, and the vertical force is 2786 N, of which the left heel
+   carries 2429 N. Freezing the upper-body targets does not keep a
+   stance. Do not repeat this freeze. Do not save. Do not write the
    shift into the model. Do not claim the 5 % bar. Do not rerun
    1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are

@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-gs3dx-exploratory`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-01 — holding the leg reference on its first sample (654 columns, rates 0) with the quiet start, zero balance, and raised ground z -0.95297 (EXIT 0) still unloads. At 0.50 s the tilt is 14.5 deg, the pelvis is at z 0.008 m, and the vertical force is 0. At 1.0 s the tilt is 114 deg and the pelvis is at z -1.85 m. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
+- **Last verified:** 2026-10-01 — freezing 12 upper-body TrackAngle series on the first column, with the leg reference held, the quiet start, zero balance, and raised ground z -0.95297 (EXIT 0), still unloads. At 0.50 s the tilt is 13.2 deg, the pelvis is at z -0.007 m, and the vertical force is 0. At 1.0 s the tilt is 124 deg and the pelvis is at z -1.88 m. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** One unsaved 1.0 s Human run with the quiet start, BalanceGain rows 1-12 zero, GroundOffset z -0.95297, the leg reference frozen on its first sample, and every upper-body TrackAngle frozen on its first column with TrackRate 0. Do not save. Do not write the shift into the model. Do not claim the 5 % bar. Do not rerun the address-hold fall or 1.809 s.
+- **Next step:** Leave the still upper-body freeze as recorded. It does not stand. Do not repeat it, the address hold, or the moving shifted-leg run. Do not write the shift into the model. Do not claim the 5 % bar. Do not save. Do not rerun 1.809 s. #11156 and #11160 stay with the owner. #11157 and #11159 still have no documented degree limits.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
