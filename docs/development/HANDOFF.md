@@ -440,9 +440,12 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    force is 0. At 1.0 s the tilt is 124 deg, the pelvis is at
    z -1.88 m, and the vertical force is 2786 N, of which the left heel
    carries 2429 N. Freezing the upper-body targets does not keep a
-   stance. Do not repeat this freeze. Do not save. Do not write the
-   shift into the model. Do not claim the 5 % bar. Do not rerun
-   1.809 s.
+   stance. Do not repeat this freeze. The same first sample is a
+   3180 N right-heel strike, then the force is 0 at 0.10 s. The next
+   unsaved 1.0 s check keeps that freeze and multiplies the existing
+   FootContactDamping by 10. Do not change FootContactStiffness. Do
+   not save. Do not write the shift into the model. Do not claim the
+   5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
