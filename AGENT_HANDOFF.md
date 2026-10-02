@@ -330,3 +330,10 @@ zero support is not treated as proof of airborne geometry. PDF compilation
 remains unavailable. Full-swing physical gates and protected review stay open.
 
 The tour one-second hold is rejected: all three force screens pass, but pelvis displacement 246.153 mm and rotation 14.989 degrees violate the fixed 5 mm / 1 degree bounds. Native process exits naturally with zero at 15:18:18Z; successful execution does not establish physical success. Owner hold and reference/torque/COM diagnosis remain separate active work. See `tour_constant_hold_review_20261002.json`.
+
+The owner one-second hold also rejects the fixed pose limits: force screens
+pass but pelvis displacement is 118.109 mm and rotation change 7.866 degrees.
+Native exit is naturally zero at 15:23:43Z; final left/right forces are
+531.659/499.520 N. Both captures require controller/reference/COM diagnosis;
+neither hold qualifies standing stability or independent open-loop motion.
+Read `owner_constant_hold_review_20261002.json`. Gates remain unchanged.

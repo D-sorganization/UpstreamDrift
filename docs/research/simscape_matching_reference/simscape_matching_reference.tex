@@ -1682,8 +1682,29 @@ maintained force support from pose stability. Missing gravity compensation,
 reference/torque mismatches, slipping feet and absent COM balance are
 candidate explanations requiring separate native joint, foot and COM
 diagnostics; none is established merely by the force endpoints. The owner
-hold and shared-interface review remain separate work, and the registered
+hold below and shared-interface review remain separate evidence, and the registered
 limits are retained for subsequent controlled experiments.
+
+\subsection{Rejected Owner Hold and Next Diagnostic Boundary}
+The owner hold also completed naturally with exit zero, at
+\texttt{2026-10-02T15:23:43Z}, and failed the same two physical gates.
+All three force screens passed; final left/right normal forces were
+531.659/499.520 N at a native body weight of 1026.687 N. Maximum pelvis
+displacement was 118.109 mm and rotation change $7.866^\circ$.
+These values exceed the unchanged 5 mm and one-degree bounds. Both
+captures therefore reject this constant-reference, balance-off PD hold.
+
+The next diagnostic must compare requested and actual terminal joint
+rotations, horizontal foot slip, native COM relative to the support region,
+and actual servo/balance torque interfaces. A controlled balance-enabled
+hold must initialize COM and foot references from the same assembled pose,
+reuse a verified Human-compatible gain interface and retain the registered
+force/drift gates. Merely enabling a legacy balance trajectory would mix
+reference states. Source review confirms that the current
+\texttt{gs3dx\_track\_learn} selects the legacy FitTrack variant; it
+cannot be assumed to replay Human without a reviewed adaptation. No
+gravity-feedforward or independently replayed Human swing is qualified by
+these runs. See \texttt{owner\_constant\_hold\_review\_20261002.json}.
 
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
