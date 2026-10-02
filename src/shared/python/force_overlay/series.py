@@ -29,6 +29,86 @@ from src.shared.python.force_overlay.contracts import (
 _ALLOWED_SERIES_KEYS = frozenset({"schema_version", "engine", "frames"})
 
 
+def _interpolate_wrenches(
+    f0: ForceTorqueFrame, f1: ForceTorqueFrame, alpha: float
+) -> tuple[OverlayWrench, ...]:
+    """Linearly interpolate matching wrenches between two frames."""
+    w0_map = {w.label: w for w in f0.wrenches}
+    w1_map = {w.label: w for w in f1.wrenches}
+    interp: list[OverlayWrench] = []
+
+    for label, w0 in w0_map.items():
+        if label not in w1_map:
+            continue
+        w1 = w1_map[label]
+
+        # Interpolate point_m
+        p = (
+            float((1.0 - alpha) * w0.point_m[0] + alpha * w1.point_m[0]),
+            float((1.0 - alpha) * w0.point_m[1] + alpha * w1.point_m[1]),
+            float((1.0 - alpha) * w0.point_m[2] + alpha * w1.point_m[2]),
+        )
+
+        # Interpolate force_n
+        fn: tuple[float, float, float] | None = None
+        if w0.force_n is not None and w1.force_n is not None:
+            fn = (
+                float((1.0 - alpha) * w0.force_n[0] + alpha * w1.force_n[0]),
+                float((1.0 - alpha) * w0.force_n[1] + alpha * w1.force_n[1]),
+                float((1.0 - alpha) * w0.force_n[2] + alpha * w1.force_n[2]),
+            )
+
+        # Interpolate torque_nm
+        tnm: tuple[float, float, float] | None = None
+        if w0.torque_nm is not None and w1.torque_nm is not None:
+            tnm = (
+                float((1.0 - alpha) * w0.torque_nm[0] + alpha * w1.torque_nm[0]),
+                float((1.0 - alpha) * w0.torque_nm[1] + alpha * w1.torque_nm[1]),
+                float((1.0 - alpha) * w0.torque_nm[2] + alpha * w1.torque_nm[2]),
+            )
+
+        # If both halves become None, wrench cannot be represented -> omit
+        if fn is None and tnm is None:
+            continue
+
+        interp.append(
+            OverlayWrench(
+                kind=w0.kind,
+                label=label,
+                body=w0.body,
+                point_m=p,
+                force_n=fn,
+                torque_nm=tnm,
+                source=w0.source,
+            )
+        )
+    return tuple(interp)
+
+
+def _interpolate_axial_loads(
+    f0: ForceTorqueFrame, f1: ForceTorqueFrame, alpha: float, t: float
+) -> AxialLoadFrame | None:
+    """Linearly interpolate axial load frames if both are present."""
+    if f0.axial_loads is None or f1.axial_loads is None:
+        return None
+    al0 = f0.axial_loads.values_n
+    al1 = f1.axial_loads.values_n
+    all_segs = sorted(set(al0.keys()) | set(al1.keys()))
+    interp_values: dict[str, float | None] = {}
+    for seg in all_segs:
+        v0 = al0.get(seg)
+        v1 = al1.get(seg)
+        if v0 is not None and v1 is not None:
+            interp_values[seg] = float((1.0 - alpha) * v0 + alpha * v1)
+        else:
+            interp_values[seg] = None
+    return AxialLoadFrame(
+        time_s=t,
+        values_n=interp_values,
+        source=f0.axial_loads.source,
+    )
+
+
 @dataclass(frozen=True)
 class ForceTorqueSeries:
     """Immutable, time-indexed sequence of ForceTorqueFrames from a single engine."""
@@ -116,82 +196,13 @@ class ForceTorqueSeries:
             return None
 
         alpha = (t - f0.time_s) / gap
-
-        # Interpolate wrenches
-        w0_map = {w.label: w for w in f0.wrenches}
-        w1_map = {w.label: w for w in f1.wrenches}
-        interp_wrenches: list[OverlayWrench] = []
-
-        for label, w0 in w0_map.items():
-            if label not in w1_map:
-                continue
-            w1 = w1_map[label]
-
-            # Interpolate point_m
-            p = (
-                float((1.0 - alpha) * w0.point_m[0] + alpha * w1.point_m[0]),
-                float((1.0 - alpha) * w0.point_m[1] + alpha * w1.point_m[1]),
-                float((1.0 - alpha) * w0.point_m[2] + alpha * w1.point_m[2]),
-            )
-
-            # Interpolate force_n
-            fn: tuple[float, float, float] | None = None
-            if w0.force_n is not None and w1.force_n is not None:
-                fn = (
-                    float((1.0 - alpha) * w0.force_n[0] + alpha * w1.force_n[0]),
-                    float((1.0 - alpha) * w0.force_n[1] + alpha * w1.force_n[1]),
-                    float((1.0 - alpha) * w0.force_n[2] + alpha * w1.force_n[2]),
-                )
-
-            # Interpolate torque_nm
-            tnm: tuple[float, float, float] | None = None
-            if w0.torque_nm is not None and w1.torque_nm is not None:
-                tnm = (
-                    float((1.0 - alpha) * w0.torque_nm[0] + alpha * w1.torque_nm[0]),
-                    float((1.0 - alpha) * w0.torque_nm[1] + alpha * w1.torque_nm[1]),
-                    float((1.0 - alpha) * w0.torque_nm[2] + alpha * w1.torque_nm[2]),
-                )
-
-            # If both halves become None, wrench cannot be represented -> omit
-            if fn is None and tnm is None:
-                continue
-
-            interp_wrenches.append(
-                OverlayWrench(
-                    kind=w0.kind,
-                    label=label,
-                    body=w0.body,
-                    point_m=p,
-                    force_n=fn,
-                    torque_nm=tnm,
-                    source=w0.source,
-                )
-            )
-
-        # Interpolate axial loads
-        interp_axial_loads: AxialLoadFrame | None = None
-        if f0.axial_loads is not None and f1.axial_loads is not None:
-            al0 = f0.axial_loads.values_n
-            al1 = f1.axial_loads.values_n
-            all_segs = sorted(set(al0.keys()) | set(al1.keys()))
-            interp_values: dict[str, float | None] = {}
-            for seg in all_segs:
-                v0 = al0.get(seg)
-                v1 = al1.get(seg)
-                if v0 is not None and v1 is not None:
-                    interp_values[seg] = float((1.0 - alpha) * v0 + alpha * v1)
-                else:
-                    interp_values[seg] = None
-            interp_axial_loads = AxialLoadFrame(
-                time_s=t,
-                values_n=interp_values,
-                source=f0.axial_loads.source,
-            )
+        interp_wrenches = _interpolate_wrenches(f0, f1, alpha)
+        interp_axial_loads = _interpolate_axial_loads(f0, f1, alpha, t)
 
         return ForceTorqueFrame(
             time_s=t,
             engine=self.engine,
-            wrenches=tuple(interp_wrenches),
+            wrenches=interp_wrenches,
             axial_loads=interp_axial_loads,
             world_frame=f0.world_frame,
             units=f0.units,
