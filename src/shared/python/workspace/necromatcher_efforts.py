@@ -64,6 +64,24 @@ class AuthoredEffortProfile:
     effort_units: tuple[str, ...]
     _curve: PiecewisePolynomialTorque
 
+    @property
+    def start_s(self) -> float:
+        """Beginning of the operator-authored clock."""
+        return self._curve.start_s
+
+    @property
+    def end_s(self) -> float:
+        """End of the operator-authored clock."""
+        return self._curve.end_s
+
+    def channels_are_zero(self, names: tuple[str, ...]) -> bool:
+        """Check entire polynomials, including commands between sampled endpoints."""
+        indices = [self.dofs.index(name) for name in names]
+        return all(
+            not np.any(segment.coefficients[indices])
+            for segment in self._curve.segments
+        )
+
     def evaluate(self, time_s: float) -> NDArray[np.float64]:
         """Reject extrapolation instead of extending controls by endpoint clamping."""
         if (

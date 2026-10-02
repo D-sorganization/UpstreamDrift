@@ -1,6 +1,8 @@
 """Shared immutable research-fit storage specimens; no native acceptance."""
 
 import json
+from pathlib import Path
+import numpy as np
 from zipfile import ZipFile
 import pytest
 from src.shared.python.workspace import NecromatcherLibrary
@@ -60,5 +62,49 @@ def fit_case(tmp_path):
         "evidence": {"rejection_reasons": ["No physical clock"]},
     }
     source = tmp_path / "fit.json"
+    source.write_text(json.dumps(payload))
+    return library, source, payload
+
+
+@pytest.fixture
+def native_fit_case(fit_case, tmp_path):
+    pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.full_body_mjcf import (
+        export_full_body_mjcf,
+    )
+
+    library, source, payload = fit_case
+    definition = json.loads(
+        (
+            Path(__file__).resolve().parents[3]
+            / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+        ).read_text()
+    )
+    xml, _ = export_full_body_mjcf(json.dumps(definition).encode())
+    model_path = tmp_path / "native.xml"
+    model_path.write_text(xml, encoding="utf-8")
+    model = library.add_model(
+        "native-model",
+        "practice",
+        model_path,
+        engine="mujoco",
+        dofs=tuple(definition["coordinate_order"]),
+    )
+    payload.update(
+        model_id=model.dataset_id,
+        model_hash=model.metadata["hash"],
+        coordinate_order=definition["coordinate_order"],
+        coordinate_units=["m"] * 3 + ["rad"] * 41,
+        q=np.zeros((2, 44)).tolist(),
+    )
+    payload["provenance"]["native_definition"] = definition
+    payload["evidence"]["original_fit"] = {
+        "camera": {
+            "intrinsics": [[100, 0, 16], [0, 100, 16], [0, 0, 1]],
+            "rotation": np.eye(3).tolist(),
+            "translation": [0, 0, 4],
+        },
+        "attachments": {"origin": [definition["joints"][0]["child"], [0, 0, 0]]},
+    }
     source.write_text(json.dumps(payload))
     return library, source, payload

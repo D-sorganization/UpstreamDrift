@@ -13,6 +13,9 @@ from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.plant import integrate_euler_step
 
 if TYPE_CHECKING:
+    from src.shared.python.motion_matching.full_body_forward_dynamics import (
+        FullBodySimulator,
+    )
     from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
@@ -57,6 +60,14 @@ class MujocoMatchingPlant:
     @property
     def ground_plane(self) -> GroundPlane:
         return self.adapter.ground_plane
+
+    def create_forward_simulator(self) -> FullBodySimulator:
+        """Reuse native mass, gravity, contact and closure dynamics."""
+        from src.shared.python.motion_matching.full_body_forward_dynamics import (
+            FullBodySimulator,
+        )
+
+        return FullBodySimulator(self.adapter)
 
     def create_ik(
         self,
