@@ -1420,3 +1420,46 @@ Improvement is not physical acceptance. See
 `balance_enabled_hold_comparison_review_20261002.json`. The existing upper-only
 learning API hardcodes FitTrack and overwrites starts; a private Gemini TDD
 proposal is not accepted code or full forward-dynamics evidence.
+
+### Configured Human Upper-Body Learning and Native Lifecycle Evidence
+
+`gs3dx_track_learn` accepts an explicit already-loaded model with
+`initialization="configured"`. This mode preserves the caller workspace and
+initial-state configuration, bypasses legacy drive/TrackStart replacements,
+and leaves the caller model loaded. Historical FitTrack behavior remains
+available through default legacy initialization. References, gains,
+feedforward, timing, filter support and enabled tracking are checked before
+native dynamics. The returned feedforward is the best profile actually
+simulated, with explicit upper-only qualification and first-reference-sample
+state provenance. The original Q-filter learning law is retained.
+
+Native R2025b TDD progressed from **1 pass, 13 failed, 13 incomplete** on the
+old API to **19 passed, zero failed/incomplete** on the strengthened contracts.
+MATLAB marks assertion-aborted RED tests both failed and incomplete. The
+valid configured Human probes completed two 0.1 s constant-reference
+iterations: tour angle RMS **0.104749 -> 0.021832 degrees**, PD RMS
+**5.092613 -> 1.456887 N m**; owner **0.152201 -> 0.022887 degrees**,
+**8.803216 -> 1.482412 N m**. Both preserved all **837 workspace values**,
+including **620 independently snapshotted parameter values**, caller dirty
+state and initial upper angles/rates within the registered 1e-5 bounds.
+Neither saved the model binary. Parent mask velocity priority controls the
+primitive target; native tracing explains why a child-only override failed.
+Three unsuccessful probes and their natural-exit receipts remain recorded.
+
+These are short upper-learning integration checks with balance/feedback,
+zero leg feedforward and prescribed neck. They do not qualify full-swing
+learning or independent forward dynamics. The physical hold gates still
+reject both captures (tour 20.041 mm / 5.582 degrees; owner 14.818 mm / 4.408
+degrees, against 5 mm / 1 degree). Separate actual servo and balance torques
+and verify settling before treating any empirical leg offset as gravity
+feedforward; a rejected transient is not a unique static solution.
+
+See `configured_human_learning_review_20261002.json` and the updated LaTeX
+equations/contracts/reproduction account. The combined native regression suite completed naturally at 17:26:58Z:
+**311 passed, zero failed/incomplete**, including the five legacy FitTrack
+checks. Its 0.3 s historical replay remained within original limits
+(rounded angle RMS 0.28 degrees, worst joint 0.49 degrees, PD 16.7 N m).
+See `native_configured_learning_integration_tests_20261002.json`; this
+short legacy replay does not qualify the configured Human full swing. Built-in LaTeX compilation remains
+unavailable: `Unable to find standard directories for platform`. PDF review,
+current-head protected CI and full-body replay remain open.

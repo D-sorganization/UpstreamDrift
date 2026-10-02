@@ -1825,9 +1825,106 @@ unchanged gains, per-foot force summaries and individual acceptance results
 are recorded in
 \texttt{balance\_enabled\_hold\_comparison\_review\_20261002.json}.
 Full-body gravity/torque qualification and independent Human swing replay
-remain separate requirements. The current upper-body learning helper
-hardcodes the legacy FitTrack model and replaces initial states; it requires
-a contract-tested adaptation before reuse with configured Human states.
+remain separate requirements. The legacy upper-body helper previously hardcoded FitTrack and replaced
+initial states. The configured Human adaptation and its native lifecycle
+evidence are described below; full-body gravity support remains open.
+
+\subsection{Robust Q-Filtered Upper-Body Iterative Learning and Configured Model Lifecycle}
+\label{subsec:upper_body_iterative_learning}
+
+Upper-body feedforward torques are identified via iterative learning control (ILC)
+on the contact-supported model using \texttt{gs3dx\_track\_learn.m} and \texttt{gs3dx\_track\_state.m}.
+At iteration $k$, the next feedforward profile $F_{k+1}$ across the 12 tracked upper joints is:
+\begin{align}
+  u_{\mathrm{PD},k}(t) &= K_p \odot \bigl(A(t) - q_k(t)\bigr) + K_d \odot \bigl(R(t) - \dot{q}_k(t)\bigr), \label{eq:ilc_pd_torque} \\
+  F_{k+1}(t) &= \mathcal{Q}\Bigl(F_k(t) + \alpha \, u_{\mathrm{PD},k}(t)\Bigr), \label{eq:ilc_q_update}
+\end{align}
+where joint angles $A, q$ are in degrees ($\mathrm{deg}$), rates $R, \dot{q}$ in $\mathrm{deg/s}$, gains $K_p \ge 0$ in $\mathrm{N\cdot m/deg}$, $K_d \ge 0$ in $\mathrm{N\cdot m/(deg/s)}$, and feedforward torques $F, u_{\mathrm{PD}}$ in $\mathrm{N\cdot m}$. The scalar learning gain is $\alpha > 0$. Filtering the full updated signal rather than the increment alone ($\mathcal{Q}$-filtering via zero-phase 4th-order forward-backward \texttt{filtfilt}) attenuates high-frequency content in the full updated profile; it is not a brick-wall frequency cutoff.
+
+Preflight contract verification requires:
+\begin{enumerate}
+  \item \textbf{Timing and Filter Bounds:} $T$ must be a finite, strictly monotonic, uniformly spaced 1D vector. The selected reference interval $T(\mathrm{use})$ must satisfy $N_{\mathrm{samples}} > 12$ for filter padding, and cutoff frequency must obey $0 < f_c < f_s / 2$ with $f_s = 1/\Delta t$.
+  \item \textbf{Signal Dimensions:} For joint prefix $P$ with $n_{\mathrm{axes}} \in \{1, 2, 3\}$, reference arrays $A, R, F$ must be $[n_{\mathrm{axes}} \times N_T]$ with $N_T=\operatorname{numel}(T)$, and gains $K_p, K_d$ must be $[n_{\mathrm{axes}} \times 1]$. Tracking enable requires $\mathtt{UpperBodyTracking} == 1$.
+  \item \textbf{Model Lifecycle Modes:} \texttt{initialization="legacy"} manages historical \texttt{GS3DX\_FitTrack}, applying \texttt{gs3dx\_drive}, zeroing workspace names containing \texttt{StartVelocity}, and overriding \texttt{TrackStart}. Conversely, \texttt{initialization="configured"} requires an explicit already-loaded model, such as \texttt{GS3DX\_Human}, preserving caller model workspace, dirty state, and pre-fitted geometry without drive or velocity overwrites.
+  \item \textbf{Best-Used Semantics:} Returned \texttt{out.feedforward} is the profile $F_k$ that was \emph{actually simulated} in the iteration achieving minimal RMS PD torque, not the subsequent updated profile $F_{k+1}$.
+  \item \textbf{Initial Sample Provenance:} \texttt{out.initial\_joint\_states} records state sampled at the first reference sample $T(\mathrm{use}_1)$; this does not imply physical $t=0$ if reference start time is non-zero.
+\end{enumerate}
+
+\paragraph{Qualification Scope and Native Status.}
+A zero-PD upper fixed point is not whole-body inverse dynamics: it does not qualify leg feedforward, prescribed neck kinematics, floating-base support, or independent forward replay (\emph{upper-only learning with existing feedback}). Contract tests in \texttt{test\_gs3dx\_track\_learn\_configuration.m} report 19 GREEN passes (0 failed, 0 incomplete; baseline RED was 1 pass, 13 fail, 13 incomplete). Physical hold gates remain rejected ($20.041\,\mathrm{mm},\,5.582^\circ$ tour; $14.818\,\mathrm{mm},\,4.408^\circ$ owner). Both valid configured Human probes completed two native R2025b
+iterations over a 0.1 s constant-reference interval, with 16 reference
+samples. Each preserved all 837 model-workspace values, including 620
+independently snapshotted parameter values, the caller's loaded dirty model,
+and initial upper-joint angles and rates within $10^{-5}$ degrees and
+degrees/s respectively. A configured torso rate of $0.001$ degrees/s was
+retained despite a contradictory legacy \texttt{TrackStart} value. No model
+binary was saved. Native results are:
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture & Angle RMS 1 & Angle RMS 2 & PD RMS 1 & PD RMS 2 \\
+ & ($^\circ$) & ($^\circ$) & (N\,m) & (N\,m) \\
+\midrule
+Tour & 0.104749 & 0.021832 & 5.092613 & 1.456887 \\
+Owner & 0.152201 & 0.022887 & 8.803216 & 1.482412 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Both returned the feedforward actually used by iteration 2. Balance and leg
+feedback remained active; leg feedforward was zero and neck motion was
+prescribed. This short diagnostic does not qualify full-swing learning,
+independent replay, gravity feedforward, or the rejected physical holds.
+
+Three failed attempts are preserved: an incorrect revolute-mask parameter,
+an incorrect assumed velocity expression, and a completed two-iteration
+run that failed child-target preservation. Read-only native tracing isolated
+the third boundary. The primitive's velocity expression is
+\texttt{StartVelocity}, scoped by its parent to
+\texttt{TorsoStartVelocity}. The parent mask's
+\texttt{RzVelocityTargetPriority=None} switches the child target off during
+\texttt{KinematicsSolver} import, overriding a direct child switch.
+Configuring the parent priority \texttt{High} is the supported caller policy;
+the successful probes verify that policy and the original expression.
+The helper does not promise preservation of inconsistent child-only mask
+overrides. See
+\texttt{configured\_human\_learning\_review\_20261002.json} for natural-exit
+receipts, source/probe hashes, errors, lifecycle checks and failed attempts.
+
+\paragraph{Reproduction Skeleton.}
+From the authoritative worktree root, native execution uses the serialized
+R2025b locked runner and the actual private probe:
+\begin{verbatim}
+$Root='src/engines/Simscape_Multibody_Models/' +
+      '3D_Golf_Model/matlab/exploratory_gs3dx'
+$Private=$env:SIMSCAPE_REVIEW_PRIVATE_DIR
+$LockDir=$env:SIMSCAPE_SHARED_MATLAB_LOCK_DIR
+$Script="$Private/capture_A_native_configured_learning.m"
+& "$Root/tools/run_matlab_locked.ps1" -Script $Script `
+  -Log "$Private/capture-A-native-configured-learning.log" `
+  -TimeoutMin 18 -LockDir $LockDir
+\end{verbatim}
+For the owner probe, replace capture A with capture O in the two basenames.
+The actual executed log basename and hash must follow the specific receipt;
+earlier failed attempts remain separate. Caller workspace inputs and raw
+capture coordinates remain private. No model binary is saved by these probes.
+
+The private-directory and shared-lock environment variables are operator
+configuration; use the workstation lock used by the recorded native runner.
+The private probes require the recorded accepted stance and capture cache.
+
+
+\paragraph{Combined Regression and Legacy Compatibility.}
+The combined R2025b suite completed naturally at
+\texttt{2026-10-02T17:26:58Z}: 311 passed, zero failed and zero incomplete.
+It includes the 19 configured-learning contracts and the existing five
+FitTrack checks. The saved historical FitTrack 0.3 s replay retained its
+original limits ($0.35^\circ$ overall angle RMS, $0.6^\circ$ worst-joint RMS
+and 20 N\,m PD RMS): observed rounded values were $0.28^\circ$, $0.49^\circ$
+and 16.7 N\,m. This suite exercises a caller-loaded legacy model; it does
+not claim a separate valid helper-owned lifecycle probe. Software,
+parameter and short historical replay evidence does not qualify the
+configured Human full swing. See
+\texttt{native\_configured\_learning\_integration\_tests\_20261002.json}.
 
 \begin{thebibliography}{9}
 \bibitem{ezc3d}

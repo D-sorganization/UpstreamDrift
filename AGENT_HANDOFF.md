@@ -366,3 +366,5 @@ Improvement is not physical acceptance. See
 `balance_enabled_hold_comparison_review_20261002.json`. The existing upper-only
 learning API hardcodes FitTrack and overwrites starts; a private Gemini TDD
 proposal is not accepted code or full forward-dynamics evidence.
+
+Simscape #11256: configured Human upper learning now has 19 native contract GREEN tests and successful two-iteration tour/owner lifecycle probes preserving 837 workspace values and initial states. Native parent-mask policy trace resolves child-target overwrite. See configured_human_learning_review_20261002.json and the same LaTeX reference; short learning is not full forward replay. Combined native/legacy regression311 GREEN at17:26:58Z; original legacy short replay limits retained. PDF, current-head protected CI and full gravity/torque qualification remain separately open.
