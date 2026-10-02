@@ -2474,6 +2474,102 @@ remain outside Git; neutral aggregates and natural-exit receipts are
 in \texttt{selective\_gap\_contract\_checkpoint\_20261002.json}.
 % END SELECTIVE GAP CONTRACT
 
+% BEGIN BRANCH ROM AUDIT
+\subsection{Native Rotation Steps and Implementation Range Diagnostics}
+A separate R2025b no-model audit completed naturally at
+\texttt{2026-10-02T21:48:02Z}. It uses the validated native axis--angle
+coordinates and the existing \texttt{gs3dx\_orientation\_residual}
+authority for adjacent SO(3) distances, independently of the Euler
+reference channels. The largest tour leg-coordinate change is
+$22.312^\circ$ (source frames 517--529), where the left hip rotates
+$24.581^\circ$. The selective owner change is $34.090^\circ$
+(frames 241--249), where the left hip rotates $26.710^\circ$,
+compared with $30.025^\circ$ for the selected owner output. Thus,
+coordinate wrapping alone does not explain those changes. A large
+sampled rotation is not by itself evidence of incorrect motion:
+measured segment motion, event timing and missing-observation
+transitions must distinguish actual swing motion from fitting errors.
+
+The same audit applies the existing \texttt{gs3dx\_rom\_check} to
+all available keyed primitive rows, without changing any limits.
+Twelve tour rows and thirteen owner rows depart from the implementation
+table. Both owner elbow primitives conflict with the table's signed
+flexion ranges throughout the 46 sampled frames. This requires native
+clean joint-centre geometry and offset-calibration review: the fitted
+\texttt{ik.points} include body-frame offsets and cannot substitute
+for the model's unoffset shoulder, elbow and wrist centres.
+
+These diagnostics are not capture-specific anatomical calibration or
+clinical findings. The table has no absolute hip/free-pelvis bounds;
+wrist rows have arc limits but no anatomical neutral. Existing
+soft penalties do not enforce hard feasibility, and correct marker
+residuals or loop closure do not resolve those limitations. The
+preceding report had unintended struct-array expansion from an
+unwrapped cell field; it is retained privately as rejected reporting
+output. The corrected audit asserts scalar reports and retains
+natural-exit provenance in
+\texttt{selected\_candidate\_branch\_ROM\_checkpoint\_20261002.json}.
+% END BRANCH ROM AUDIT
+% BEGIN NATIVE GEOMETRY OBSERVABILITY
+\subsection{Unoffset Native Geometry and Marker Observability}
+Three additional R2025b audits completed naturally: marker/proxy
+observability at \texttt{21:53:49Z}, configured-model clean joint
+geometry at \texttt{21:57:38Z}, and pelvis-cluster alignment at
+\texttt{22:00:13Z} on 2026-10-02. The model and solver hashes are
+checked and no model is saved or dynamics simulated.
+
+Clean elbow flexion is the unsigned angle between the native
+shoulder-to-elbow and elbow-to-wrist vectors,
+\[
+ \theta_e=\arccos\!\left(
+ \frac{(\mathbf p_e-\mathbf p_s)\cdot(\mathbf p_w-\mathbf p_e)}
+ {\lVert\mathbf p_e-\mathbf p_s\rVert
+  \lVert\mathbf p_w-\mathbf p_e\rVert}\right).
+\]
+At owner address it is $27.80^\circ/40.40^\circ$ (left/right),
+with negative lead and positive trail elbow primitives. Tour address
+is $47.69^\circ/39.06^\circ$, with the opposite primitive signs.
+Across four reviewed stages per run, unsigned geometry agrees with
+the absolute primitive. This does not refute a zero straight-elbow
+neutral or justify reversing signs globally. A native closed-loop
+seed search must evaluate the alternate owner branch before any
+convention changes; anatomical bending direction is still unqualified.
+
+The joint-centre estimator uses generic proxy offsets: 90 mm hip
+half-width, 100 mm hip drop, 50 mm knee inset, 35 mm ankle inset and
+40 mm shoulder drop. They are assumptions, not measured anatomical
+calibration of this golfer. The owner fitted wrist offsets are
+56.5/63.5 mm and club-head offset is 105.6 mm; these are body-frame
+calibration norms, not independently verified anatomical displacements.
+The tour largest-step interval has measured pelvis-relative thigh
+changes of $1.568^\circ/3.302^\circ$ and a pelvis-cluster change of
+$9.022^\circ$. A thigh direction does not identify axial twist.
+The owner interval includes a missing pelvis endpoint, so its pelvis
+rotation error remains NaN rather than an observed zero or inferred
+measured rotation. The source-declared rates are 360 Hz for tour
+and 240 Hz for owner; the source event proxies are frames 476 and
+246, respectively. The tour interval 517--529 is after its event
+proxy, not the impact interval guessed in the rejected agent proposal.
+
+The pelvis audit reuses the existing cluster-relative orientation
+mapping. With raw marker-cluster rotations $C_f$ and native address
+rotation $R_1$, its target is
+\[
+ R_f^{\rm target}=C_f C_1^{\mathsf T}R_1.
+\]
+The native root-to-world mapping is checked against all 101 saved
+native FK rotations to matrix error below $1.2\times10^{-15}$.
+Missing marker clusters are masked. The resulting mean/peak errors
+are $9.831^\circ/35.017^\circ$ for tour (55 measured samples) and
+$11.494^\circ/38.666^\circ$ for selected owner (45 measured, one
+missing). Means include the address calibration sample. Selective
+owner gap weights yield $11.477^\circ/38.665^\circ$, indicating
+that this separate orientation mismatch remains. Address-relative
+cluster agreement is not anatomical calibration or dynamics evidence.
+Neutral aggregate data and receipts are in
+\texttt{observability\_native\_geometry\_checkpoint\_20261002.json};
+clean coordinates and individual trajectories remain private.
+% END NATIVE GEOMETRY OBSERVABILITY
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
@@ -2498,4 +2594,6 @@ Historical results are attributed to that turnover unless a fresh receipt
 identifies a new execution.
 \end{thebibliography}
 \end{document}
+
+
 
