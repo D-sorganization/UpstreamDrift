@@ -50,3 +50,28 @@ remaining whole-track penetration, then address closure and historical control
 recovery. Replay execution controls, unit-aware impact/whole-analysis consumers,
 AffineDrift integration and full player acceptance remain open under #11235 and
 #11232. PR #11240 remains draft and its CI remediation budget remains exhausted.
+
+## Actual Committed Player Revisions
+
+The [Placement Receipt](historical_capture/ground-placement-receipt-v6.json) records
+execution from exact source 2c5129eab97d1d0d6b9a3110a4164e35212a1a3b with source/runtime
+fingerprints and immutable parent identities. New versions are
+hogan-authored-ground-fit-v6 (750 frames) and tiger-authored-ground-fit-v6
+(210 frames). Their root shifts are 0.850056 and 0.495267 m along world Z;
+anchor clearance is zero within floating-point precision. All-frame maximum
+pixel differences are 5.68e-14 and 2.84e-13 px.
+
+Hogan's whole-track maximum penetration decreases from 1.319760 to 0.469704 m;
+Tiger's decreases from 0.495267 m to floating-point zero. Initial grip separations
+remain 0.088525 and 0.053893 m. These hypotheses preserve source image evidence
+and do not correct anatomy, camera calibration, missing foot observations or
+closure. Both remain rejected research.
+
+Read-only source inspection at Hogan indices 0, 549 and 749 finds the worst
+penetration at index 549, a follow-through with the feet cropped from the frame.
+The reviewed horizon/crop also varies. This supports reviewing swing windows and
+landmark missingness before forcing a fixed-ground whole-track fit; it does not
+prove calibrated camera motion. Raw PNGs and the full receipt remain outside Git
+in the historical-capture/native-fit-research directory. The next actual fitting
+work is bounded closed motion for Tiger and source-window/visibility review for
+Hogan, followed by authored controls and independent replay.

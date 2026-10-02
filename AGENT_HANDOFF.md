@@ -9,8 +9,11 @@ in the immutable source version and records fresh source/runtime fingerprints.
 Placement lineage is revalidated during import, recall and export. Thirteen new
 cases pass; the combined suite is 136 passed and one unavailable Drake skip.
 See [Ground Placement Procedure](docs/development/necromatcher-ground-placement.md).
-Next: apply committed code to actual Hogan/Tiger versions, inspect residual
-whole-track penetration, then closure/control recovery and downstream consumers.
+Actual v6 versions from source 2c5129eab9 preserve all 750/210 frame projections.
+Tiger whole-track penetration is zero; Hogan retains 0.470 m at cropped-foot
+follow-through frame 549. Initial grip gaps remain 0.089/0.054 m. Next: bounded
+closed Tiger motion and Hogan swing-window/visibility review, then controls and
+downstream consumers. Neither player is scientifically qualified.
 
 ## Authored Forward Replay
 
