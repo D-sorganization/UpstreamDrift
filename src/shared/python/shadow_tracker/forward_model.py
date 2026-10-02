@@ -584,6 +584,7 @@ class FullBodyForwardModel:
         coordinate_names: Sequence[str] | None = None,
         max_translation_tol_m: float = 1e-3,
         max_rotation_tol_rad: float = 0.05,
+        is_qualified: bool = False,
     ) -> None:
         self.model = model
         self.coordinate_names: tuple[str, ...] = (
@@ -593,6 +594,7 @@ class FullBodyForwardModel:
         )
         self.max_translation_tol_m = float(max_translation_tol_m)
         self.max_rotation_tol_rad = float(max_rotation_tol_rad)
+        self._is_qualified = bool(is_qualified)
 
     def capabilities(self) -> ModelCapabilities:
         """Return declared forward model capabilities and engine availability."""
@@ -603,6 +605,7 @@ class FullBodyForwardModel:
             actuator_modes=("torque_polynomial_deg6",),
             contact_modes=("hunt_crossley_regularized_coulomb",),
             is_available=is_available,
+            is_qualified=self._is_qualified,
         )
 
     def rollout(self, request: RolloutRequest) -> RolloutResult:

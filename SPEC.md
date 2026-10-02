@@ -1,3 +1,31 @@
+## Continuous Shadow Optimization With Uncertainty and Abstention (MMR-15, #11101)
+
+Specifies continuous forward model optimization, zero-assistance physical audit compliance, held-out C3D phase stratification, archive stress resilience, and monocular kinetic identifiability boundaries:
+- **Continuous Whole-Body Replay and Zero Assistance (`src/shared/python/shadow_tracker/evaluation.py`, `forward_model.py`)**:
+  - Continuous forward rollouts enforce zero intermediate state resets (`reset_count == 1`) and zero undeclared root/pelvis actuation ($F_{\text{root}} = 0$). Any ghost pelvis forces or mid-trajectory resets fail physical acceptance.
+  - Forward models declare `is_qualified: bool` capability; unqualified engines cannot attain release-certified evidence quality.
+- **Phase-Stratified Tracking Validation Against Held-Out C3D (`evaluate_phase_stratified_tracking`, `PhaseStratifiedReport`)**:
+  - Validates continuous fitted trajectories against synchronized held-out C3D motion capture benchmarks stratified across swing phases (address, backswing, downswing, impact, follow-through).
+  - Computes per-phase joint angle RMSE (rad), marker RMSE (m), and clubhead contour error (m).
+- **Archive Stress Resilience Evaluation (`evaluate_archive_stress_resilience`)**:
+  - Evaluates candidate and observation resilience under historical archive stresses: shot cuts/telecine jumps, severe motion blur (inflating clubhead uncertainty and abstaining near impact), and unknown/uncalibrated cameras (demoting SI kinetics to kinematic-only mode).
+- **Holdout Coverage Calibration and Structured Abstention (`assess_holdout_coverage_and_abstention`)**:
+  - Assesses empirical coverage of nominal 90% confidence intervals against held-out ground truth.
+  - Returns structured abstention reasons for unidentifiable visual ambiguities and occlusions.
+- **Monocular Kinetic Identifiability Boundary (`create_evaluated_result_bundle`)**:
+  - Result bundles explicitly record `forces_and_torques` with status `model_dependent_unidentifiable` and `is_identified: False`, warning that joint torques and contact forces cannot be uniquely recovered from monocular video without ground reaction force evidence.
+
+## Companion Publication Hardening and Sparse-Checkout Isolation (#11257)
+
+Specifies clean workspace isolation, sparse-checkout resets, and fail-closed checkout verification for release and companion publication workflows:
+- **Worktree Sparse-Checkout Hygiene (`.github/workflows/package-standalone-sidekick.yml`)**:
+  - The `Disable sparse-checkout` post-step restores full working tree checkout (`git checkout -- .`) after disabling sparse checkout (`git sparse-checkout disable`), preventing omitted directories (such as `scripts/`) from lingering on persistent self-hosted runners.
+- **Fail-Closed Companion Publication Checkout (`.github/workflows/release.yml`)**:
+  - `companion-protected-main` and `build` jobs run a pre-checkout clean step that disables any residual sparse-checkout state and cleans the workspace prior to `actions/checkout`.
+  - A post-checkout validation step verifies that `scripts/companion_publication.py` is present, restoring `scripts` from `HEAD` if a prior sparse checkout corrupted the index, and failing closed if missing.
+  - Step-level `PYTHONPATH: ${{ github.workspace }}` ensures `python3 -m scripts.companion_publication` unambiguously resolves to the authoritative checkout root.
+
+
 ## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
 
 Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
@@ -7670,7 +7698,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-10-02 | #11256 | Human ellipsoid model becomes the direct IK default; legacy Fit consumers are explicit. Keyed warm-start TDD and native full-structure parity support reproducible matching; 277 native software checks pass. Prospective head0.10 tour/owner candidates pass numerical screens and four reviewed H264 videos are saved on the local Desktop. Ground registration removes penetration but bilateral stance and forward dynamics remain unqualified. Standalone LaTeX/evidence updated; compiler and protected CI completion remain pending. |
 | 2026-10-02 | #11256 | Reviewed optional Human head-orientation IK with shared SO(3) residual, strict masks and keyed calibration; native baseline parity and 267 software checks pass. Constant-reference mapping distinguishes degree initial targets from radian neck motion. Full owner trial improves against a cold start but does not replace selected clips; native assembled 20 ms contact diagnostic confirms initial penetration and excessive force. Standalone LaTeX reference and sanitized evidence updated; physical gates remain open. |
 | 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
-
+| 2026-10-02 | #11265 | [MMR-15] Wire Continuous Shadow Optimization With Uncertainty and Abstention: continuous whole-body forward rollouts with zero state resets (reset_count == 1) and zero ghost pelvis assistance, forward model is_qualified capability gate, synchronized held-out C3D phase-stratified tracking validation (evaluate_phase_stratified_tracking), archive stress set resilience against cuts, motion blur, and unknown cameras (evaluate_archive_stress_resilience), nominal 90% confidence coverage assessment with structured abstention on holdouts, and model-dependent unidentifiable labeling for monocular joint torques and contact forces (#11101). |
+| 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
 | 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
 | 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |

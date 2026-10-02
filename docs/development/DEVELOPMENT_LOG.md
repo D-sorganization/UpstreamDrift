@@ -17,7 +17,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
-### DL-#10950 · Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
+### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress
 - **Owner:** codex (Gemini 3.8 CLI delegates)
@@ -29,6 +29,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Last verified:** 2026-10-02 14:07Z: 277 native MATLAB R2025b software/parameter checks passed, zero failed/incomplete, natural exit zero. Human-default policy TDD2 GREEN follows expected RED2; explicit-Human full-output parity holds against the frozen solver. Prospective head0.10 tour/owner candidates pass all recorded numerical gates, and all four H264 views were fully decoded and reviewed. New head-tracked selections and ZIP are saved on the local user Desktop; earlier clips remain preserved. A minimum-touch plane removes initial penetration, but bilateral stance/gravity support and forward replay remain unqualified. Latest standalone LaTeX source updated; built-in PDF compilation unavailable. See research reference and sanitized receipts for historical experiments, rejected candidates and exact provenance.
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Reconcile current main and publish the reviewed source through normal protected CI/review. Repair the staged bilateral-contact experiment against actual native/helper interfaces; compare the corrected capture-specific stance pose to measured targets, then qualify both-foot support, consistent balance references and gravity torques before full forward replay. Keep optimizer termination and physical gates distinct from IK loop status and video delivery.
+
+### DL-#11234 — Necromatcher Historical Player Workspace
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11234; parent #11232
+- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239), draft over #11237
+- **Branch:** `feat/necromatcher-workspace-11234`
+- **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
+- **Last verified:** 2026-10-02 — 31 library/API/native/launcher tests, 10 inventory tests, 20 UI tests and 71 launcher/atlas tests passed; resolved launcher logo family gate for matched_swing_browser.svg under category:tool, classified necromatcher in capability migration baseline and reconciled companion catalog counts and screenshot records; mypy, ruff and all green gates pass.
+- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. Reconciled launcher manifest and capability migration inventories. Further form tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
 
 ### DL-#11233 — Necromatcher Persistent Library
 

@@ -5,20 +5,20 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import asdict
 from functools import lru_cache
-import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Annotated, Any, Iterator, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.background import BackgroundTask
 
 from src.api.routes.matched_swings import require_local_client
 from src.shared.python.core.contracts.exceptions import StateError
-from src.shared.python.data_io.user_config_root import user_config_path
 from src.shared.python.workspace import DatasetMetadata, NecromatcherLibrary
+from src.shared.python.workspace.necromatcher import default_necromatcher_library
+from src.shared.python.workspace.necromatcher_review import CaptureReview
 
 router = APIRouter(
     prefix="/necromatcher",
@@ -30,16 +30,7 @@ router = APIRouter(
 @lru_cache(maxsize=1)
 def get_library() -> NecromatcherLibrary:
     """Resolve a configurable library beneath the canonical user-state root."""
-    configured = os.environ.get("NECROMATCHER_LIBRARY_ROOT")
-    root = Path(configured) if configured else user_config_path("necromatcher")
-    try:
-        return NecromatcherLibrary(root)
-    except KeyError:
-        try:
-            return NecromatcherLibrary.create(root)
-        except StateError:
-            # A concurrent request may have finished creating this project.
-            return NecromatcherLibrary(root)
+    return default_necromatcher_library()
 
 
 Library = Annotated[NecromatcherLibrary, Depends(get_library)]
@@ -74,6 +65,8 @@ def _errors() -> Iterator[None]:
         raise HTTPException(409, str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(404, "Unknown library identity") from exc
+    except IndexError as exc:
+        raise HTTPException(404, str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(409, "Referenced evidence is missing") from exc
     except (ValueError, TypeError) as exc:
@@ -175,3 +168,37 @@ def export_swing(swing_id: str, library: Library) -> FileResponse:
     except (HTTPException, OSError):
         temporary.cleanup()
         raise
+
+
+@lru_cache(maxsize=4)
+def _capture_review(root: str, capture_id: str) -> CaptureReview:
+    """Verify an archive once per active review rather than hash it per frame."""
+    return CaptureReview(NecromatcherLibrary(root), capture_id)
+
+
+@contextmanager
+def _review_access(
+    library: NecromatcherLibrary, capture_id: str
+) -> Iterator[CaptureReview]:
+    """Invalidate changed evidence so a retry must verify the archive anew."""
+    with _errors():
+        try:
+            yield _capture_review(str(library.root), capture_id)
+        except StateError:
+            _capture_review.cache_clear()
+            raise
+
+
+@router.get("/captures/{capture_id}/frames/{frame_index}")
+def capture_frame(
+    capture_id: str, frame_index: int, library: Library
+) -> dict[str, Any]:
+    with _review_access(library, capture_id) as review:
+        return review.frame(frame_index)
+
+
+@router.get("/captures/{capture_id}/frames/{frame_index}/image")
+def capture_image(capture_id: str, frame_index: int, library: Library) -> Response:
+    with _review_access(library, capture_id) as review:
+        image = review.image(frame_index)
+        return Response(image, media_type="image/png")

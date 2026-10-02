@@ -56,21 +56,41 @@ jobs:
       id-token: write
       attestations: write
     steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           submodules: recursive
           persist-credentials: false
+      - name: Verify clean source tree and scripts
+        shell: bash
+        run: |
+          git sparse-checkout disable 2>/dev/null || true
+          if [ ! -f scripts/companion_publication.py ]; then
+            echo "::warning::scripts/ missing from checkout; checking out from HEAD"
+            git checkout HEAD -- scripts
+          fi
+          test -f scripts/companion_publication.py
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: "3.11"
       - name: Install companion publication dependencies
         run: python3 -m pip install jsonschema==4.26.0 pyyaml==6.0.3
       - name: Build companion publication bundle
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: >-
           python3 -m scripts.companion_publication build
           --authority protected-main --output-dir dist/companion
       - name: Verify companion publication bundle
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: >-
           python3 -m scripts.companion_publication verify-bundle
           --bundle-dir dist/companion
@@ -128,6 +148,13 @@ jobs:
       companion_attestation_id: ${{ steps.companion-attestation.outputs.attestation-id }}
       companion_attestation_url: ${{ steps.companion-attestation.outputs.attestation-url }}
     steps:
+      - name: Clean workspace and disable sparse-checkout
+        shell: bash
+        run: |
+          if [ -d .git ]; then
+            git sparse-checkout disable 2>/dev/null || true
+            git clean -ffdx 2>/dev/null || true
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
