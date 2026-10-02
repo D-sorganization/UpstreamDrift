@@ -76,7 +76,7 @@ design manual. That manual's editable authority remains
 % Compact Only the Contents Section Gaps; Preserve Font, Hierarchy, and Entries.
 {\scriptsize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}
 \let\contentsaddvspace\addvspace
-\renewcommand{\addvspace}[1]{\contentsaddvspace{0.55em}}
+\renewcommand{\addvspace}[1]{\contentsaddvspace{0.40em}}
 \tableofcontents}
 
 \clearpage
@@ -1178,6 +1178,198 @@ correction was committed in the actual producer before these runs, preserving
 the clean native-SDK worker boundary. Neither recovery changed observations,
 geometry, contact assumptions, solver budget, or the paired experiment.
 
+\subsection{V12 Generalization and Probe-Coverage Protocol}
+\label{sec:v12-protocol}
+Issue \#11284 declares two separate matched experiments using the existing
+canonical configuration, preserved starts, analytic Jacobian chain, and durable
+native refit jobs. The protocol was declared before the completed numerical
+runs below; overlay and fresh reproduction evidence remain separate. Each
+player's two arms start from its same rejected 31-coordinate V11 wrist spline,
+with twelve original knots, identical original observations/confidence,
+fixed camera and geometry, complete source clock, authored contact schedule,
+32 finite bounds, thirty evaluations, and a 300 s guard. Both arms use the
+V11 first pose as their new prior. The earlier V11 jobs used the V10 first-pose
+prior; comparing against historical V11 alone is therefore not a matched
+causal comparison. Keep a separately stored current-recipe continuation
+control for each new variant.
+
+\paragraph{Tiger: Increase Only the Existing Speed Penalty.}
+The declared comparison changes \code{smoothness_weight} from $10^{-4}$ in
+the control to $10^{-3}$ in the variant. The existing residual at original
+training time $t_i^{\mathrm{src}}$ is
+\begin{equation}
+ r^{\mathrm{speed}}_{ij}
+ =\lambda_s\,\Delta t^{\mathrm{src}}
+ \frac{\dot q_j(t_i^{\mathrm{src}})}{s_j},
+ \qquad
+ \Delta t^{\mathrm{src}}=t_N^{\mathrm{src}}-t_0^{\mathrm{src}},
+\end{equation}
+where $s_j$ is the declared coordinate scale and the derivative is with respect
+to source presentation time. The tenfold residual multiplier makes this
+component's squared least-squares contribution one hundred times larger for
+an unchanged trajectory. It is a duration-scaled speed penalty sampled at
+training times, not an acceleration penalty, integrated whole-interval cost,
+or physical-motion/continuous-validity certificate. Knot count, free selection,
+image rows, constraints, prior weight, and the complete remaining recipe stay
+fixed between arms.
+
+The motivation is the V11 wrist training RMS of 27.447020 px versus held-out
+45.394077 px and its genuine dense regression relative to V10. With twelve
+knots and 31 free coordinates there are 744 position/velocity coefficients,
+while 286 positive-weight image observations contribute 572 scalar pixel rows.
+That count alone does not prove the complete MAP Jacobian rank deficient:
+priors, native closure/ground rows, and their time probes also contribute
+information. The experiment tests a declared regularization tradeoff rather
+than inferring overfitting solely from a coefficient-to-pixel ratio.
+
+\paragraph{Hogan: Increase Only Constraint-Interior Density.}\mbox{}\\*
+The control retains fractions $(1/4,1/2,3/4)$; the variant requests
+$f_k=k/32$, $k=1,\ldots,31$, through the existing canonical constraint-only
+probe union. Read-only preflight resolves 56 versus 364 optimization probe
+times. These evaluations add native constraint rows without adding image
+observations, changing confidence weights or RMS denominators, or changing
+source/phase identity. Exact boundary and one-sided phase semantics remain
+as documented above. The authored floor is fixed and heel contact remains
+unresolved; no shoe-derived pins or force assumptions are introduced.
+
+The rejected V11 Hogan candidate's maximum independent penetration was
+18.965425 mm at 128.05 source seconds, the midpoint between original frames
+541 and 542, approximately 0.46 s from its nearest optimization probe. The
+maximum at the original optimization probes was approximately 1.1767 mm.
+That mismatch motivates denser finite coverage; it does not establish a
+measured historical ground plane or guarantee feasibility between the denser
+nodes. Weights, camera, knots, full interval, prior, image evidence, contact
+schedule, and bounds remain identical between these two arms.
+
+\paragraph{Coverage and Aggregate Penalty Are Coupled.}
+Native closure/ground residuals keep the same per-row weights when the probe
+set grows from 56 to 364 times. The constraint row count grows from 672
+to 4368, a factor of 6.5 in potential quadratic penalty mass at unchanged
+per-row residual values; the actual objective also depends on those values. Changing the single \code{interior_fractions} configuration field
+changes both temporal coverage and aggregate constraint penalty strength;
+it does not isolate a pure coverage effect. Original image rows and RMS
+denominators remain unchanged. A later fixed-node-count/higher-weight control
+or declared normalized quadrature could distinguish the two effects, but
+neither was executed here and neither may retroactively relabel these targets.
+
+
+\paragraph{Execution, Cost, and Independent Assessment.}
+Before submission, verify the exact preserved start, fresh initial image RMS,
+complete matched recipe, parent/source/runtime hashes, and unchanged original
+image arrays. Durable job journaling must retain identities and meaningful
+status changes without serializing full audit arrays at every poll; write full
+terminal assessments once and preserve failed orchestration evidence. Record
+runtime and resolved probe/row counts so the added cost is visible. This
+journal procedure belongs to execution provenance, independently of the
+scientific model and its acceptance gates.
+
+Audit each of the four immutable outputs at original PTS, adjacent midpoints,
+authored phase boundaries, and canonical scalar extrema, retaining separate
+training, held-out, dense, coordinate-certificate, and finite nonlinear metrics.
+The predeclared grip/angle/penetration, dense-nonregression, and authored-range
+targets remain research checks, with all required to pass; physical time,
+anatomy/\allowbreak camera, dynamics, and historical acceptance remain unqualified.
+Changing knots later would require separately named initialization seeds and
+fresh initial RMS, not an exact restart. A forearm-coordinate experiment is
+also a separate hypothesis and is deferred from these controls.
+
+\subsection{Actual V12 Controlled Numerical Results}
+The four immutable outputs were produced by
+\hash{b32878a828d3b96bfc796bee368ef60cb692d117} through the unchanged driver
+\hash{d4256367708704ac1296874071122abeb3070f9009a965654e08e066a2cfc858}.
+The complete \path{controlled-regularization-probe-density-v12-receipt.json}
+has SHA-256
+\hash{a2254f3e434d8e4435fff2c90964b533dbe0df7363e2f7aa7f8170112606d1bf}.
+All four jobs completed computationally, ran optimization, reached the
+thirty-evaluation limit without convergence, and remained
+\code{succeeded/rejected}. Tiger's initial training RMS was 27.447020 px in
+both arms; Hogan's was 7.496569 px. Both pairs resumed the exact V11 saved
+spline and used its first-pose prior, while preserving all original image
+observations and confidence weights. The actual versions are
+\code{tiger-speed-prior-control-fit-v12},
+\code{tiger-speed-prior-variant-fit-v12},
+\code{hogan-probe-density-control-fit-v12}, and
+\code{hogan-probe-density-variant-fit-v12}.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule Player & Arm & Training & Held Out & Dense Original\\\midrule
+Tiger & Current speed weight & 22.513061 & 43.566538 & 41.866270\\
+Tiger & Higher speed weight & 22.132803 & 43.437430 & 41.724716\\
+Hogan & Current probe density & 7.330755 & 10.413472 & 10.334868\\
+Hogan & Higher probe density & 7.404547 & 10.430912 & 10.353482\\
+\bottomrule
+\end{tabular}
+\caption{Actual V12 Image RMS in Pixels. Same-Parent Paired Controls Retain
+Image Rows and Denominators; Historical V10 Nonregression Is a Separate Target.}
+\end{table}
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule Player & Arm & Grip (mm) & Angle (deg) & Depth (mm) & Probes & Wall (s)\\\midrule
+Tiger & Control & 16.281994 & 6.375202 & 10.892139 & 56 & 45.329\\
+Tiger & Variant & 21.860233 & 6.717231 & 9.332494 & 56 & 41.576\\
+Hogan & Control & 4.520133 & 0.895338 & 17.056639 & 56 & 33.558\\
+Hogan & Variant & 2.326740 & 0.483060 & 0.263904 & 364 & 61.246\\
+\bottomrule
+\end{tabular}
+\caption{V12 Finite Native Maxima and Observed Job Wall Time. Runtime Includes
+Owned Driver Job Observation, Not a Hardware-Independent Solver Benchmark.}
+\end{table}
+All four outputs pass the canonical continuous scalar certificate for the
+32 authored finite ranges; twelve coordinates remain unbounded. Native grip,
+rotation, and penetration maxima are separate finite evaluations at original
+PTS, adjacent midpoints, phase boundaries, and coordinate extrema. They are
+not continuous nonlinear certificates.
+
+Tiger's stronger speed weight slightly improves training, held-out, and dense
+RMS relative to its matched current-weight continuation, while worsening grip
+and angle and reducing penetration. Both arms still exceed the historical
+V10 dense baseline of 35.752077 px and fail all three declared contact targets.
+A better training or paired dense metric therefore does not meet the complete
+research target set or establish generalization to historical motion.
+
+Hogan's denser variant reduces independent penetration from 17.056639 to
+0.263904 mm and improves grip/angle relative to the matched control. Its dense
+RMS is slightly worse than that control (10.353482 versus 10.334868 px), but
+better than the unchanged historical V10 target baseline of 10.699637 px.
+The variant passes all five fixed finite research checks: historical image
+nonregression, 32 authored ranges, grip gap, grip angle, and penetration. This
+is the first such target-set pass in these recorded experiments, not scientific
+acceptance. Camera/anatomy and physical time remain unqualified, twelve native
+coordinates have no authored limits, optimization remains nonconverged, and
+nonlinear continuous validity and independent dynamics are not established.
+Its outcome combines denser temporal coverage with increased aggregate
+constraint penalty; pure coverage causality cannot be assigned from this pair.
+
+The main receipt retains compact terminal metrics and each case's external
+full audit path/hash in \code{independent_audit}. These four immutable full
+audits accompany the receipt under the same capture-research directory;
+no polling journal substitutes for them. Preserve both target-passing and
+failed candidates and the fixed historical thresholds rather than changing
+targets after observing outcomes.
+
+\paragraph{Fresh Four-Case Independent Verification.}
+The separate \path{controlled-v12-independent-assessment.json} has SHA-256
+\hash{fa6ab49aa07cebba96a4b92ed0b6f79e1ae01ff558926b0db7c3b9e1456a7abd}.
+It performs no optimization and brackets the producer/runtime, frozen driver,
+original parent/seed/evidence, complete options, and all audit references.
+All four exact preserved starts and fresh initial image RMS reproduce; original
+image confidences, training/held-out/dense denominators, source/probe identities,
+and canonical scaled node residual values are independently checked.
+The same confidence-weighted Euclidean RMS definition reproduces the reported
+metrics and historical comparisons. All 32 range certificates, twelve
+unbounded coordinates, and the absence of added image points are verified.
+
+The node reconstruction confirms 672 versus 4368 native constraint rows for
+Hogan, at the same per-row weights: finite coverage and potential aggregate
+penalty strength changed together. The Hogan variant's five fixed finite
+research checks pass in the fresh assessment as well; scientific acceptance,
+physical-time qualification, and continuous nonlinear certification remain
+false. Original-footage overlay export and verification are documented
+separately below; they do not promote this numerical target pass to
+historical acceptance.
+
 \subsection{Authored Contact Phases on the Source Clock}
 \label{sec:contact-phases}
 A constant whole-track heel pin can conflict with visible release and later
@@ -1715,6 +1907,26 @@ dialog acceptance. Checked download created owned ZIPs and refreshed
 verification baselines; original capture and fit evidence was unchanged.
 No optimizer, fit version, or new render job was created by this review.
 
+\paragraph{Actual V11 Recall and Validation-Driver Addendum.}
+A later programmatic review selected both stored V11 fits/exports and saved
+checked ZIPs through the same public Qt controls, with 102 immutable parent
+files byte-verified unchanged. The UI source was \code{b32878a828}, distinct
+from historical numerical/export producer \code{f570e5f421}; no new fit or
+render job was created. The original review driver exited after both successful
+saves because its mutation whitelist compared Windows backslash keys with
+slash prefixes. Its failure log and receipt were retained. Independent path
+normalization confirmed only one new owned checked ZIP and refreshed
+\code{complete.json} baseline for each selected run, with original parent and
+production bytes unchanged. This was a review-driver path representation
+failure, not a native UI or parent-binding failure; no repeat optimization or
+render was used to replace it. The independent addendum has SHA-256
+\hash{a681b20915de629ab82b7789bf809495cdcb3b70eab3dcfb5387d105fc8506f0}.
+Controlled Qt save destinations and offscreen QTest remain distinct from
+native OS/manual acceptance, which is unverified. The tracked
+\path{native-stored-overlay-v11-review-summary.json} preserves this
+separation and has SHA-256
+\hash{fce5d5438e691461d8bd85eff619dadee7b9b74b5fa850b9bc359a836945579f}.
+
 \subsection{Historical Execution and Present Overlay Readiness}
 A successful historical execution receipt and present download readiness are
 separate claims. \code{execution_verified} describes the persisted successful
@@ -1997,6 +2209,85 @@ Mesh or Inferred Shaft; Improved Grip Does Not Resolve Ground Penetration.}
 \label{fig:hogan-v11-overlay}
 \end{figure}
 
+\subsection{Actual V12 Controlled Candidate Overlays}
+Figures~\ref{fig:tiger-v12-overlay} and~\ref{fig:hogan-v12-overlay} show the
+unchanged first/middle/last exports from the higher-speed-weight Tiger variant
+and denser-probe Hogan variant. The independent
+\path{controlled-v12-overlay-verification.json} has SHA-256
+\hash{1c11e163703404ce5cb531216daacd7f4a9d4524a843988d127eeab78712f166}.
+It verifies all 210 Tiger and 750 Hogan source-sized decoded frames, six PNG
+hashes and original source bindings, ZIP CRC and member bytes, and parent and
+producer/runtime brackets at \code{b32878a828}, the same producer as the V12
+numerical runs. Both exports remain rejected monocular research. Their run
+identities are \code{d40e5852e53b4bd9a6811a5f1b6c9a24} for Tiger and
+\code{8558165cdc424feb87a934f132372a53} for Hogan; retained ZIP identities are
+\begin{quote}\small
+\textbf{Tiger:}
+\hash{afe49038f301fefad072c89fcfff842197eb606bf28ff8a290af14c25d25a0a9}\\
+\textbf{Hogan:}
+\hash{7aa9bc4e9194c8489c538591d01f13a8e586fb7e489125edf3af77dcb0a9eb32}
+\end{quote}
+
+The selected matched-marker RMS is 6.240430/66.631743/16.318071 px for Tiger
+frames 0/105/209 and 6.834237/5.114767/9.154082 px for Hogan frames 0/375/749.
+The actual Hogan final caption reads 9.15 px for thirteen matched markers;
+these per-frame values do not replace confidence-weighted dense or held-out
+metrics. Both independent and root visual reviews inspected all six originals.
+Tiger's high follow-through residual and final cropped feet persist, and the
+blue club attachment seed disagrees with the visible shaft. Hogan's body is
+comparatively closer but blurred at 320-by-240 resolution; its leftward blue
+seed at frame 375 does not identify the visible lower shaft. Passing Hogan's
+finite numerical targets therefore does not imply historical club alignment,
+measured ground contact, anatomical surface recovery, or physical acceptance.
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Controlled V12 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Controlled V12 Overlay/frame-000105.png}\\[3pt]
+\small\textbf{Middle Source Frame: 105}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Controlled V12 Overlay/frame-000209.png}\\[3pt]
+\small\textbf{Last Source Frame: 209}
+\end{minipage}
+\caption{Tiger V12 Higher-Speed-Weight Variant: Rejected Monocular Research.
+Strong Upper-Body and Arm Misalignment Persists at Frame 105; Final Cropped
+Feet and a Rightward Blue Seed Disagreeing with the Visible Downward-Left
+Shaft Limit Interpretation. Blue Body-Origin Trees and Attachment Seeds Are
+Generic Native Geometry, Green Points Are Observations, and Yellow Lines Are
+Residuals, Not an Inferred Surface Mesh or Historical Shaft.}
+\label{fig:tiger-v12-overlay}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Controlled V12 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Controlled V12 Overlay/frame-000375.png}\\[3pt]
+\small\textbf{Middle Source Frame: 375}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Hogan Controlled V12 Overlay/frame-000749.png}\\[3pt]
+\small\textbf{Last Source Frame: 749}
+\end{minipage}
+\caption{Hogan V12 Denser-Probe Variant: Finite Research Targets Pass,
+Scientific Qualification Remains Rejected. Body Alignment Is Comparatively
+Closer, but Source Blur and a Leftward Blue Seed Disagreeing with the Visible
+Lower Shaft Persist. Blue Body-Origin Trees and Attachment Seeds Are Generic
+Native Geometry, Green Points Are Observations, and Yellow Lines Are
+Residuals, Not an Inferred Surface Mesh, Historical Shaft, or Measured Contact.}
+\label{fig:hogan-v12-overlay}
+\end{figure}
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -2216,6 +2507,9 @@ Contact Phase Procedure & \path{necromatcher-contact-phases.md}\\
 Coordinate Expansion & \path{necromatcher-coordinate-expansion.md}\\
 V11 Matched Trial Receipts & External \path{wrist-expansion-v11-attempt2-receipt.json}; \path{wrist-expansion-v11-independent-assessment.json}; retained failed \path{wrist-expansion-v11-receipt.json}\\
 V11 Overlay Verification & Desktop \path{wrist-expanded-v11-overlay-verification.json}\\
+V12 Controlled Receipts & External \path{controlled-regularization-probe-density-v12-receipt.json}; \path{controlled-v12-independent-assessment.json}\\
+V12 Overlay Verification & Desktop \path{controlled-v12-overlay-verification.json}\\
+Native V11 Recall Summary & \path{native-stored-overlay-v11-review-summary.json}\\
 Native Stored Overlay Review & \path{native-stored-overlay-review-summary.json}\\
 V10 Summary and Web & \path{phase-contact-v10-summary.json}; \path{phase-contact-v10-web-review.json}\\
 Independent Bounds Audit & \path{necromatcher-bounded-trial-audit.md}\\

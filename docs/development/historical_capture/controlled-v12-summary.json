@@ -1,0 +1,738 @@
+{
+  "schema": "necromatcher/controlled-v12-summary/1",
+  "producer": "b32878a828d3b96bfc796bee368ef60cb692d117",
+  "input_receipt_sha256": "sha256:a2254f3e434d8e4435fff2c90964b533dbe0df7363e2f7aa7f8170112606d1bf",
+  "frozen_driver_sha256": "sha256:d4256367708704ac1296874071122abeb3070f9009a965654e08e066a2cfc858",
+  "independent_audit_script_sha256": "sha256:9a36eb7ed771c1fb2066902747320d71bba01b5670177e31055d04de67500aed",
+  "independent_restart_verifier_sha256": "sha256:37669071da3ef8bbd0e7e79c6bc56a9380812b47af7abb2b90a5b1238ea87d98",
+  "all_four_verified": true,
+  "optimization_performed": false,
+  "source_runtime_driver_artifact_reference_brackets_verified": true,
+  "scientific_acceptance": false,
+  "continuous_certified": false,
+  "physical_time_qualified": false,
+  "probe_density_caveat": "56 to364 fixed per-row weights increases row count and potential quadratic penalty mass6.5x; not pure coverage isolation",
+  "initial_RMS_tolerance_px": 1e-8,
+  "scaled_node_rows_rtol_atol": [1e-9, 1e-8],
+  "declared_targets": {
+    "authored_finite_range_count": 32,
+    "dense_rms_nonregression_roundoff_px": 1e-8,
+    "grip_angle_deg": 5.0,
+    "grip_gap_m": 0.01,
+    "penetration_m": 0.002
+  },
+  "matched_comparisons": [
+    {
+      "continuous_certified": false,
+      "factor": "smoothness_weight",
+      "player": "tiger",
+      "same_initial_motion_prior_camera_observations": true,
+      "scientific_acceptance": false,
+      "variant_minus_control": {
+        "dense_original_rms_pixels": -0.14155429620346638,
+        "maximum_sampled_grip_gap_m": 0.005578238819177666,
+        "maximum_sampled_grip_rotation_rad": 0.005969541854653884,
+        "maximum_sampled_ground_penetration_m": -0.0015596452520415804
+      }
+    },
+    {
+      "continuous_certified": false,
+      "factor": "interior_fractions",
+      "player": "hogan",
+      "same_initial_motion_prior_camera_observations": true,
+      "scientific_acceptance": false,
+      "variant_minus_control": {
+        "dense_original_rms_pixels": 0.018614789152263,
+        "maximum_sampled_grip_gap_m": -0.0021933931964116583,
+        "maximum_sampled_grip_rotation_rad": -0.00719560328381021,
+        "maximum_sampled_ground_penetration_m": -0.016792735806336105
+      }
+    }
+  ],
+  "full_independent_assessment": {
+    "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment.json",
+    "sha256": "sha256:fa6ab49aa07cebba96a4b92ed0b6f79e1ae01ff558926b0db7c3b9e1456a7abd"
+  },
+  "runs": [
+    {
+      "player": "tiger",
+      "role": "control",
+      "fit_id": "tiger-speed-prior-control-fit-v12",
+      "fit_sha256": "sha256:d7c4a3e76da25db0775cfb2134c2fb4222d3edf0045b9b325d9736287e63bb94",
+      "metrics": {
+        "fit_id": "tiger-speed-prior-control-fit-v12",
+        "fit_hash": "sha256:d7c4a3e76da25db0775cfb2134c2fb4222d3edf0045b9b325d9736287e63bb94",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 22.513060961601532,
+        "dense_original_rms_pixels": 41.86627041020235,
+        "maximum_sampled_grip_gap_m": 0.01628199401947724,
+        "maximum_sampled_grip_rotation_rad": 0.11126826074599758,
+        "maximum_sampled_ground_penetration_m": 0.01089213900566962,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-control-fit-v12-audit.json",
+        "sha256": "sha256:d7eb880893b77e74e8f43928d67a5fe346c13c1f46a7f02b60c0879321ae9dce"
+      },
+      "producer_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-control-fit-v12-audit.json",
+        "sha256": "sha256:d83bf948de2182fcdf4c20b6af2a904505c1b0289f6e97d0f94b851e69214395"
+      },
+      "initial_restart_and_images": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:bc27445273557bf9c470461403c169fc1b050aa2d105996f185763ccbf25a57f",
+        "fresh_initial_rms_pixels": 27.44701952610302,
+        "training_rms_pixels": 22.513060961601532,
+        "held_out_rms_pixels": 43.56653838208167,
+        "training_frame_count": 22,
+        "dense_frame_count": 210,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 2730,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.5076258278536608, -0.15769256852800803, 0.9046856090309273,
+          -0.1137288175384102, -0.26168096176434785, 0.1799428366956309,
+          0.2561170970395359, 0.723006705556126, -0.06697633969072216,
+          0.08726646250912402, 0.0, 0.0, 0.0, -0.6251195534490286,
+          0.9358229219940698, 0.1421316655670433, -0.07831546800159819,
+          0.0698762331829416, 0.06334258170374503, 0.0, 0.0, 0.0,
+          0.4019061469075516, 0.9136545749671888, -0.09503329422306585,
+          0.0011699466121888463, -0.08075405591925583, 0.0, 0.0, 0.0,
+          -0.13185747405298381, 0.10076586969079687, 0.6813474375424076,
+          0.11028541391061923, 0.25314995179801336, 0.0, 0.0,
+          0.00936535525329946, 0.3216566055184856, 0.6709724069351318,
+          -0.08280707268472536, 0.04486846791186495, 0.0, 0.0
+        ]
+      },
+      "nodes": {
+        "time_count": 56,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 672,
+        "nonzero_ground_residual_row_count": 49,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 1916.7528673304298,
+          "grip_rotation": 1001.5413094444416,
+          "ground": 392.3525116734358
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 1680000000.0,
+          "grip_rotation_rad_inverse_squared": 16799999.999999996,
+          "ground_m_inverse_squared": 3360000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.004467182036415874,
+          "source_time": 20.403716666666668
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.04365764521247218,
+          "source_time": 18.501816666666667
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0028529400940689453,
+          "source_time": 17.86785
+        }
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "targets": {
+        "fixed_historical_V10_targets": {
+          "checks": {
+            "dense_rms_nonregression": false,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": false,
+            "sampled_grip_angle": false,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "V11_parent_progress_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": false,
+            "sampled_grip_angle": false,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "scientific_acceptance": false,
+        "continuous_certified": false
+      },
+      "driver_job_elapsed_wall_s": 45.32860929999151,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "parent_model_capture_options_evidence_runtime_verified": true,
+      "bound_certificate_keys": [
+        "conservative_bernstein_q_domain_verified",
+        "continuous_nonlinear_certified",
+        "method",
+        "reason"
+      ],
+      "full_certificate_preserved_in_external_audit": true
+    },
+    {
+      "player": "tiger",
+      "role": "variant",
+      "fit_id": "tiger-speed-prior-variant-fit-v12",
+      "fit_sha256": "sha256:63895261cc8471dd18295b294a5dff6caf854157e8066e84a6d2a1f12c97e773",
+      "metrics": {
+        "fit_id": "tiger-speed-prior-variant-fit-v12",
+        "fit_hash": "sha256:63895261cc8471dd18295b294a5dff6caf854157e8066e84a6d2a1f12c97e773",
+        "model_id": "tiger-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "tiger-usga-range-capture-v1",
+        "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+        "observed_original_rms_pixels": 22.132802805418386,
+        "dense_original_rms_pixels": 41.72471611399888,
+        "maximum_sampled_grip_gap_m": 0.021860232838654906,
+        "maximum_sampled_grip_rotation_rad": 0.11723780260065146,
+        "maximum_sampled_ground_penetration_m": 0.00933249375362804,
+        "source_frame_count": 210,
+        "midpoint_count": 209,
+        "contact_phase_probe_count": 10,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 2730,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-tiger-speed-prior-variant-fit-v12-audit.json",
+        "sha256": "sha256:0890e7eb6fc8f5aa461c8e08a4e728bb4d4b8b2c5fa923a42174f8d5e4da7cf4"
+      },
+      "producer_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-tiger-speed-prior-variant-fit-v12-audit.json",
+        "sha256": "sha256:357e4aebfdecfa96d6c31ba91ee9ec238d990d26dfe6adc33ae2a5f8102afaeb"
+      },
+      "initial_restart_and_images": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:bc27445273557bf9c470461403c169fc1b050aa2d105996f185763ccbf25a57f",
+        "fresh_initial_rms_pixels": 27.44701952610302,
+        "training_rms_pixels": 22.132802805418386,
+        "held_out_rms_pixels": 43.43743029164304,
+        "training_frame_count": 22,
+        "dense_frame_count": 210,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 2730,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.5076258278536608, -0.15769256852800803, 0.9046856090309273,
+          -0.1137288175384102, -0.26168096176434785, 0.1799428366956309,
+          0.2561170970395359, 0.723006705556126, -0.06697633969072216,
+          0.08726646250912402, 0.0, 0.0, 0.0, -0.6251195534490286,
+          0.9358229219940698, 0.1421316655670433, -0.07831546800159819,
+          0.0698762331829416, 0.06334258170374503, 0.0, 0.0, 0.0,
+          0.4019061469075516, 0.9136545749671888, -0.09503329422306585,
+          0.0011699466121888463, -0.08075405591925583, 0.0, 0.0, 0.0,
+          -0.13185747405298381, 0.10076586969079687, 0.6813474375424076,
+          0.11028541391061923, 0.25314995179801336, 0.0, 0.0,
+          0.00936535525329946, 0.3216566055184856, 0.6709724069351318,
+          -0.08280707268472536, 0.04486846791186495, 0.0, 0.0
+        ]
+      },
+      "nodes": {
+        "time_count": 56,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 672,
+        "nonzero_ground_residual_row_count": 50,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 1393.0891230221546,
+          "grip_rotation": 929.4386238163415,
+          "ground": 255.5433952445846
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 1680000000.0,
+          "grip_rotation_rad_inverse_squared": 16799999.999999996,
+          "ground_m_inverse_squared": 3360000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.003742171342602898,
+          "source_time": 19.611258333333332
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.048928692041251234,
+          "source_time": 18.501816666666667
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.0018357410611579,
+          "source_time": 17.86785
+        }
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 210,
+          "adjacent_source_midpoint": 209,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 4,
+          "contact_phase_neighbor": 6
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "targets": {
+        "fixed_historical_V10_targets": {
+          "checks": {
+            "dense_rms_nonregression": false,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": false,
+            "sampled_grip_angle": false,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "V11_parent_progress_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": false,
+            "sampled_grip_angle": false,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "scientific_acceptance": false,
+        "continuous_certified": false
+      },
+      "driver_job_elapsed_wall_s": 41.57583829999203,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "parent_model_capture_options_evidence_runtime_verified": true,
+      "bound_certificate_keys": [
+        "conservative_bernstein_q_domain_verified",
+        "continuous_nonlinear_certified",
+        "method",
+        "reason"
+      ],
+      "full_certificate_preserved_in_external_audit": true
+    },
+    {
+      "player": "hogan",
+      "role": "control",
+      "fit_id": "hogan-probe-density-control-fit-v12",
+      "fit_sha256": "sha256:d4326d429c8ed6a8e9af826c14d8bef742d8013c2c04fbdd09827206e2cb5235",
+      "metrics": {
+        "fit_id": "hogan-probe-density-control-fit-v12",
+        "fit_hash": "sha256:d4326d429c8ed6a8e9af826c14d8bef742d8013c2c04fbdd09827206e2cb5235",
+        "model_id": "hogan-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "hogan-practice-capture-v1",
+        "capture_hash": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+        "observed_original_rms_pixels": 7.330755453478839,
+        "dense_original_rms_pixels": 10.33486760332411,
+        "maximum_sampled_grip_gap_m": 0.004520132782497111,
+        "maximum_sampled_grip_rotation_rad": 0.01562659440926141,
+        "maximum_sampled_ground_penetration_m": 0.017056639411698597,
+        "source_frame_count": 750,
+        "midpoint_count": 749,
+        "contact_phase_probe_count": 4,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 9607,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-control-fit-v12-audit.json",
+        "sha256": "sha256:887da87d2ce13299d26d17a897b15eb8b82b6afd49bb83edf3b152d989dd0ecf"
+      },
+      "producer_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-control-fit-v12-audit.json",
+        "sha256": "sha256:efaf6097b60b1370e56aae468fd40b2889076859776b43f1d245cf05e8a0ac9e"
+      },
+      "initial_restart_and_images": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:a2ab902fc904f2a411e95f2dc9179048524c27199fec529876266da548c4db50",
+        "fresh_initial_rms_pixels": 7.496568801810243,
+        "training_rms_pixels": 7.330755453478839,
+        "held_out_rms_pixels": 10.413472153095473,
+        "training_frame_count": 23,
+        "dense_frame_count": 750,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 9607,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.18460663304163616, -0.05742564132187439, 0.9321276416057944,
+          -0.08238207121068061, 0.0011104041517153009, 0.0340869767664779,
+          0.23223010623771606, 0.36372140918445506, 0.2290645947746309,
+          -0.011888443370114996, 0.0, 0.0, 0.0, -0.5991565264007235,
+          0.2649990630744483, -1.3838962129166632, -0.061143043750336724,
+          0.003789298041177342, -1.252341537420009, 0.0, 0.0, 0.0,
+          0.564601746323699, 0.7281179197366846, -1.1134755418200062,
+          0.022095213233489376, -0.0581332692937633, 0.0, 0.0, 0.0,
+          0.19591857265271825, -0.06020710092152641, -0.37145242182762,
+          0.1638606209286606, 0.14245608424063433, 0.0, 0.0,
+          0.33259271868271395, 0.15064282676420657, 0.18237147646794388,
+          -0.2895187133839465, 0.15513261243440132, 0.0, 0.0
+        ]
+      },
+      "nodes": {
+        "time_count": 56,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 672,
+        "nonzero_ground_residual_row_count": 20,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 94.72560808762395,
+          "grip_rotation": 22.37921057851907,
+          "ground": 0.23577476642032344
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 1680000000.0,
+          "grip_rotation_rad_inverse_squared": 16799999.999999996,
+          "ground_m_inverse_squared": 3360000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.0010434595489636116,
+          "source_time": 117.0
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.006664512327025526,
+          "source_time": 116.24166666666667
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 8.561116465763408e-5,
+          "source_time": 114.66666666666667
+        }
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 750,
+          "adjacent_source_midpoint": 749,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 2,
+          "contact_phase_neighbor": 2
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "targets": {
+        "fixed_historical_V10_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": true,
+            "sampled_grip_angle": true,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "V11_parent_progress_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": true,
+            "sampled_grip_angle": true,
+            "sampled_nonpenetration": false
+          },
+          "research_targets_met": false,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "scientific_acceptance": false,
+        "continuous_certified": false
+      },
+      "driver_job_elapsed_wall_s": 33.557534299994586,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "parent_model_capture_options_evidence_runtime_verified": true,
+      "bound_certificate_keys": [
+        "conservative_bernstein_q_domain_verified",
+        "continuous_nonlinear_certified",
+        "method",
+        "reason"
+      ],
+      "full_certificate_preserved_in_external_audit": true
+    },
+    {
+      "player": "hogan",
+      "role": "variant",
+      "fit_id": "hogan-probe-density-variant-fit-v12",
+      "fit_sha256": "sha256:e8724f903ab3cb8de53acfc9dd2d936e0bb30fe6bbe2bed63d3b716e32a480e2",
+      "metrics": {
+        "fit_id": "hogan-probe-density-variant-fit-v12",
+        "fit_hash": "sha256:e8724f903ab3cb8de53acfc9dd2d936e0bb30fe6bbe2bed63d3b716e32a480e2",
+        "model_id": "hogan-generic-native-model-v2",
+        "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+        "capture_id": "hogan-practice-capture-v1",
+        "capture_hash": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+        "observed_original_rms_pixels": 7.404547039954838,
+        "dense_original_rms_pixels": 10.353482392476373,
+        "maximum_sampled_grip_gap_m": 0.0023267395860854527,
+        "maximum_sampled_grip_rotation_rad": 0.0084309911254512,
+        "maximum_sampled_ground_penetration_m": 0.00026390360536249213,
+        "source_frame_count": 750,
+        "midpoint_count": 749,
+        "contact_phase_probe_count": 4,
+        "canonical_global_extrema_count": 88,
+        "dense_observed_point_count": 9607,
+        "added_image_objective_points": 0,
+        "optimization_performed": false,
+        "saved_optimizer_ran": true,
+        "saved_optimizer_converged": false,
+        "scientific_acceptance": false,
+        "physical_time_qualified": false,
+        "continuous_nonlinear_certified": false
+      },
+      "fresh_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-v12-independent-assessment-hogan-probe-density-variant-fit-v12-audit.json",
+        "sha256": "sha256:35862927fd4cfb3f58f03d04c9602643d29838ef03dd7e2e5dcd304ec4f16078"
+      },
+      "producer_full_audit": {
+        "path": "C:\\Users\\diete\\Downloads\\historical-capture\\native-fit-research\\controlled-regularization-probe-density-v12-receipt-hogan-probe-density-variant-fit-v12-audit.json",
+        "sha256": "sha256:bca8581d5b6c47b47e75b070ef0b94dc54a57d96b311a48692c40bf15306f84a"
+      },
+      "initial_restart_and_images": {
+        "initial_spline_six_fields_exact": true,
+        "initial_coefficient_sha256": "sha256:a2ab902fc904f2a411e95f2dc9179048524c27199fec529876266da548c4db50",
+        "fresh_initial_rms_pixels": 7.496568801810243,
+        "training_rms_pixels": 7.404547039954838,
+        "held_out_rms_pixels": 10.430912270901452,
+        "training_frame_count": 23,
+        "dense_frame_count": 750,
+        "training_observed_point_count": 286,
+        "dense_observed_point_count": 9607,
+        "unknown_visibility_weight": 0.5,
+        "initializer_optimizer_ran": false,
+        "prior_pose": [
+          0.18460663304163616, -0.05742564132187439, 0.9321276416057944,
+          -0.08238207121068061, 0.0011104041517153009, 0.0340869767664779,
+          0.23223010623771606, 0.36372140918445506, 0.2290645947746309,
+          -0.011888443370114996, 0.0, 0.0, 0.0, -0.5991565264007235,
+          0.2649990630744483, -1.3838962129166632, -0.061143043750336724,
+          0.003789298041177342, -1.252341537420009, 0.0, 0.0, 0.0,
+          0.564601746323699, 0.7281179197366846, -1.1134755418200062,
+          0.022095213233489376, -0.0581332692937633, 0.0, 0.0, 0.0,
+          0.19591857265271825, -0.06020710092152641, -0.37145242182762,
+          0.1638606209286606, 0.14245608424063433, 0.0, 0.0,
+          0.33259271868271395, 0.15064282676420657, 0.18237147646794388,
+          -0.2895187133839465, 0.15513261243440132, 0.0, 0.0
+        ]
+      },
+      "nodes": {
+        "time_count": 364,
+        "row_labels": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "rows_per_time": 12,
+        "total_fixed_constraint_rows": 4368,
+        "nonzero_ground_residual_row_count": 18,
+        "saved_scaled_rows_independently_recomputed": true,
+        "sum_squared_dimensionless_residual_by_family": {
+          "grip_position": 682.5033979485936,
+          "grip_rotation": 113.55396860441098,
+          "ground": 0.7191359508349554
+        },
+        "per_row_weight_and_scale": {
+          "position_weight": 1000,
+          "position_scale_m": 0.01,
+          "rotation_weight": 1000,
+          "rotation_scale_rad": 0.1,
+          "ground_weight": 1000,
+          "ground_scale_m": 0.01
+        },
+        "potential_quadratic_row_weight_mass_by_family": {
+          "grip_position_m_inverse_squared": 10920000000.0,
+          "grip_rotation_rad_inverse_squared": 109199999.99999999,
+          "ground_m_inverse_squared": 21840000000.0
+        },
+        "maximum_node_grip_gap_m": {
+          "value": 0.0023267395860854527,
+          "source_time": 110.0
+        },
+        "maximum_node_grip_rotation_rad": {
+          "value": 0.00842678585890748,
+          "source_time": 114.46846590909091
+        },
+        "maximum_node_ground_penetration_m": {
+          "value": 0.00018150824515503206,
+          "source_time": 115.67424242424244
+        }
+      },
+      "source_and_probe_identities": {
+        "counts": {
+          "source_frame": 750,
+          "adjacent_source_midpoint": 749,
+          "coordinate_global_extremum": 88,
+          "contact_phase_boundary": 2,
+          "contact_phase_neighbor": 2
+        },
+        "source_png_and_exact_pts_metadata_verified": true,
+        "midpoint_rational_identities_verified": true,
+        "physical_time_qualified": false
+      },
+      "targets": {
+        "fixed_historical_V10_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": true,
+            "sampled_grip_angle": true,
+            "sampled_nonpenetration": true
+          },
+          "research_targets_met": true,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "V11_parent_progress_targets": {
+          "checks": {
+            "dense_rms_nonregression": true,
+            "all_32_authored_finite_ranges": true,
+            "sampled_grip_gap": true,
+            "sampled_grip_angle": true,
+            "sampled_nonpenetration": true
+          },
+          "research_targets_met": true,
+          "scientific_acceptance": false,
+          "continuous_certified": false,
+          "physical_time_qualified": false
+        },
+        "scientific_acceptance": false,
+        "continuous_certified": false
+      },
+      "driver_job_elapsed_wall_s": 61.24613350001164,
+      "optimizer_converged": false,
+      "optimizer_message": "The maximum number of function evaluations is exceeded.",
+      "parent_model_capture_options_evidence_runtime_verified": true,
+      "bound_certificate_keys": [
+        "conservative_bernstein_q_domain_verified",
+        "continuous_nonlinear_certified",
+        "method",
+        "reason"
+      ],
+      "full_certificate_preserved_in_external_audit": true
+    }
+  ]
+}
