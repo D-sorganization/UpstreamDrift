@@ -2195,8 +2195,9 @@ imperfect clips with a documented grade or rejection reason. Backend
 or weight unavailability is a typed result, not fabricated observations.
 This comparison adds observational evidence; it cannot replace the
 fixed contact, posture, actuator-control and independent dynamics gates.
-Original footage acquisition and comparison results have not yet been
-verified in this review; the epic is incorporated as ongoing work.
+At the initial stream-acquisition checkpoint, source-original provenance
+and comparison results remained unverified; the epic was incorporated
+as ongoing work. The subsequent source-export verification follows below.
 The exact-pinned OpenPose BODY\_25 files have passed the repository's
 size/hash resolver. The registered OpenCV DNN estimator subsequently
 loaded those files and completed a synthetic-image forward pass at
@@ -2210,6 +2211,21 @@ decreasing presentation timestamps. This is a decoding and presentation
 timing check, not original-camera or physical-clock qualification.
 Unreviewed duration-based swing windows and default-valued container
 metadata are excluded from the accepted evidence.
+The album's unauthenticated \emph{Download all} control then produced
+a six-entry ZIP export. All six exported media entries exactly match
+the staged streams by SHA-256 and byte count. The archive contains
+88,738,421 uncompressed media bytes; its own SHA-256 and the neutral
+media inventory are retained in the acquisition evidence. This verifies
+the bytes delivered by the observed source-export operation. It does
+not establish untouched raw-camera provenance, physical capture rate
+or exact GEARS swing pairing.
+
+Sparse visual review distinguishes one indoor marker-equipped clip,
+edited across two views, from five driving-range recordings. The
+indoor clip's slowed presentation and edit require separate view/time
+segments. Camera handling, repeated swings and sideways footage require
+explicit grading elsewhere. Album membership and appearance cannot
+establish which of the 13 marker swings a clip depicts.
 
 \subsection{Selected Motion Clock and Coordinate Contract}
 A native read-only audit exited naturally at
@@ -2254,6 +2270,47 @@ $22.3^\circ$ for A and $38.4^\circ$ for O on the 30 Hz grids. Their
 continuity, branch choice and marker residuals require review before
 constructing moving controller references; filtering alone cannot
 establish measurement fidelity.
+
+\subsection{Owner Gap Transition and Local Continuity Trial}
+The largest owner step occurs between source frames 241 and 249
+($t=1.000$--$1.033$ s): approximately 53.926 mm of pelvis translation
+and $38.380^\circ$ of the largest leg-coordinate change. Direct raw
+capture review finds gap-filled pelvis, hip, knee and ankle targets
+at frame 241, with measured observations returning at 249. Foot
+orientation targets are also missing at 241. Missing orientation is
+not zero-error measurement. The temporal penalty acts on rotation
+coordinates; it does not regularize root translation. These facts
+identify an observability transition, not a proven unique cause.
+
+A seven-frame local research trial exited naturally at
+\texttt{2026-10-02T20:56:58Z}. It reused the selected frame-217 keyed
+seed, fixed offsets, calibrated head targets and existing weights,
+comparing rotational smoothing 0.025 with 0.05. A separate pure mapping
+audit exited at \texttt{20:58:48Z}. Stronger smoothing reduces the
+largest leg-coordinate step from $37.828^\circ$ in the local control
+to $31.546^\circ$, but increases the corresponding root-translation
+step from 54.334 to 56.236 mm. Mean measured-marker RMS also increases
+from 20.138 to 21.456 mm. The selected original has a 53.926 mm step
+and 20.614 mm mean RMS in this window. The stronger-smoothing trial
+is not promoted: it does not resolve the root transition. All original
+selected poses and Desktop videos remain preserved. Gap-filled
+observations must retain their provenance during subsequent experiments;
+interpolation cannot be relabeled as measurement.
+
+A second local research trial exited at
+\texttt{2026-10-02T21:07:10Z}, retaining smoothing 0.025 and changing
+only the existing gap-observation weight from its 0.1 baseline to
+0.5 or 1.0. The named-mapping audit exited at \texttt{21:08:15Z}.
+The transition's root-coordinate step decreases to 23.664 mm at weight
+0.5 and 17.292 mm at weight 1.0. The latter window's largest root step
+is 24.723 mm elsewhere, and its largest leg-coordinate step remains
+$33.844^\circ$. Mean measured-marker RMS is 20.172 and 20.140 mm,
+respectively, versus 20.138 mm in the reused local control. These
+results support sensitivity to the treatment of missing observations;
+they do not prove physical fidelity or eliminate all discontinuities.
+Weight 1.0 gives interpolated positions equal objective weight to
+measured positions, but their reported provenance stays nonmeasured.
+Neither candidate is promoted without full-chain and uncertainty review.
 
 
 \subsection{Startup Transient Versus Terminal Posture}

@@ -145,7 +145,142 @@
     "owned_pids": [52440],
     "timestamp": "2026-10-02T20:40:53.521876+00:00"
   },
-  "video_source_qualification": "SOURCE_SERVED_BYTES_ORIGINAL_UNVERIFIED",
+  "video_source_qualification": "OBSERVED_SOURCE_DOWNLOAD_ALL_EXPORT_BYTES_VERIFIED",
+  "source_export_archive": {
+    "qualification": "OBSERVED_SOURCE_DOWNLOAD_ALL_EXPORT_BYTES_VERIFIED",
+    "utc": "2026-10-02T21:02:08.330395+00:00",
+    "archive_sha256": "20a43484a9445014f7798b492161824d4a69f2b656816771c49c3afe89a7b354",
+    "archive_bytes": 88753631,
+    "all_six_export_entries_exactly_match_previously_served_streams": true,
+    "camera_original_provenance": "UNKNOWN_NOT_ESTABLISHED_BY_ALBUM_EXPORT",
+    "physical_clock": "UNKNOWN"
+  },
+  "owner_local_smoothing_trial": {
+    "qualification": "LOCAL_CONTINUITY_RESEARCH_TRIAL_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "trials": {
+      "smooth_0_025": {
+        "mean_marker_RMS_m": 0.020138371189862687,
+        "max_marker_RMS_m": 0.02696230116166824,
+        "mean_head_error_deg": 8.047023583757511,
+        "max_head_error_deg": 19.27604133615139,
+        "max_foot_error_deg": 19.81633583236613
+      },
+      "smooth_0_05": {
+        "mean_marker_RMS_m": 0.02145552980026835,
+        "max_marker_RMS_m": 0.02773206694657944,
+        "mean_head_error_deg": 7.125566992989055,
+        "max_head_error_deg": 18.878476099562107,
+        "max_foot_error_deg": 19.78705945570261
+      },
+      "original_selected": {
+        "mean_marker_RMS_m": 0.020613674780841335,
+        "max_marker_RMS_m": 0.026933617197850045,
+        "mean_head_error_deg": 7.244918001354501,
+        "max_head_error_deg": 19.12061107076902,
+        "max_foot_error_deg": 19.83390706800691
+      }
+    },
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "solver_sha256": "67f7cc00c3f1eac495483bcd108ed1e51b162fa33d9c2188fcdf6e86adca484c",
+    "no_candidate_promoted": true
+  },
+  "owner_local_smoothing_continuity": {
+    "qualification": "LOCAL_CANDIDATE_CONTINUITY_AUDIT_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "model_loaded": false,
+    "results": {
+      "smooth_0_025": {
+        "max_adjacent_leg_coordinate_step_deg": 37.827920187325226,
+        "root_joint_translation_step_241_to_249_m": 0.0543343498646525,
+        "max_adjacent_root_joint_translation_step_m": 0.0543343498646525,
+        "leg_coordinate_step_241_to_249_deg": 37.827920187325226,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      },
+      "smooth_0_05": {
+        "max_adjacent_leg_coordinate_step_deg": 31.545803691793843,
+        "root_joint_translation_step_241_to_249_m": 0.056235949435455,
+        "max_adjacent_root_joint_translation_step_m": 0.056235949435455,
+        "leg_coordinate_step_241_to_249_deg": 31.545803691793843,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      },
+      "original_selected": {
+        "max_adjacent_leg_coordinate_step_deg": 38.3799868689029,
+        "root_joint_translation_step_241_to_249_m": 0.05392632614617937,
+        "max_adjacent_root_joint_translation_step_m": 0.05392632614617937,
+        "leg_coordinate_step_241_to_249_deg": 38.3799868689029,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      }
+    }
+  },
+  "owner_local_gap_weight_trial": {
+    "qualification": "LOCAL_CONTINUITY_RESEARCH_TRIAL_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "trials": {
+      "gap_0_5": {
+        "mean_marker_RMS_m": 0.02017162775959472,
+        "max_marker_RMS_m": 0.026958307103214337,
+        "mean_head_error_deg": 7.777380958072768,
+        "max_head_error_deg": 19.27604133615139,
+        "max_foot_error_deg": 19.818025269145654
+      },
+      "gap_1": {
+        "mean_marker_RMS_m": 0.020139724491889256,
+        "max_marker_RMS_m": 0.02691396351190431,
+        "mean_head_error_deg": 7.639653413047735,
+        "max_head_error_deg": 19.27604133615139,
+        "max_foot_error_deg": 19.826518987666187
+      },
+      "prior_local_control": {
+        "mean_marker_RMS_m": 0.020138371189862687,
+        "max_marker_RMS_m": 0.02696230116166824,
+        "mean_head_error_deg": 8.047023583757511,
+        "max_head_error_deg": 19.27604133615139,
+        "max_foot_error_deg": 19.81633583236613
+      },
+      "original_selected": {
+        "mean_marker_RMS_m": 0.020613674780841335,
+        "max_marker_RMS_m": 0.026933617197850045,
+        "mean_head_error_deg": 7.244918001354501,
+        "max_head_error_deg": 19.12061107076902,
+        "max_foot_error_deg": 19.83390706800691
+      }
+    },
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "solver_sha256": "67f7cc00c3f1eac495483bcd108ed1e51b162fa33d9c2188fcdf6e86adca484c",
+    "no_candidate_promoted": true,
+    "interpolated_positions_remain_nonmeasured": true
+  },
+  "owner_local_gap_weight_continuity": {
+    "qualification": "LOCAL_CANDIDATE_CONTINUITY_AUDIT_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "model_loaded": false,
+    "results": {
+      "gap_0_5": {
+        "max_adjacent_leg_coordinate_step_deg": 38.53240177182654,
+        "root_joint_translation_step_241_to_249_m": 0.02366391169375609,
+        "max_adjacent_root_joint_translation_step_m": 0.02366391169375609,
+        "leg_coordinate_step_241_to_249_deg": 38.53240177182654,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      },
+      "gap_1": {
+        "max_adjacent_leg_coordinate_step_deg": 33.84447019982834,
+        "root_joint_translation_step_241_to_249_m": 0.017291781912135627,
+        "max_adjacent_root_joint_translation_step_m": 0.024722623697634366,
+        "leg_coordinate_step_241_to_249_deg": 33.84447019982834,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      },
+      "original_selected": {
+        "max_adjacent_leg_coordinate_step_deg": 38.3799868689029,
+        "root_joint_translation_step_241_to_249_m": 0.05392632614617937,
+        "max_adjacent_root_joint_translation_step_m": 0.05392632614617937,
+        "leg_coordinate_step_241_to_249_deg": 38.3799868689029,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false
+      }
+    }
+  },
   "video_original_camera_provenance_verified": false,
   "owner_comparison_executed": false,
   "video_served_items": [
