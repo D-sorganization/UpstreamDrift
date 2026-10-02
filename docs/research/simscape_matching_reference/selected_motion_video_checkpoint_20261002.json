@@ -1,0 +1,308 @@
+{
+  "qualification": "SELECTED_REFERENCE_AND_VIDEO_ACQUISITION_CHECKPOINT_NOT_FULL_DYNAMICS",
+  "selected_motion_metadata": {
+    "qualification": "READ_ONLY_SELECTED_IK_REFERENCE_METADATA_NOT_DYNAMIC_EXECUTION",
+    "simulation_executed": false,
+    "model_loaded": false,
+    "model_saved": false,
+    "captures": {
+      "capture_A": {
+        "capture_alias": "capture-A",
+        "base_cache_sha256": "0cc6531052595353402f6972fa1892e2986a19c2206d70ff1b802efb24295b03",
+        "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+        "selected_pose_source_sha256": "9d33d818156a9e77c6ecf5cba3494910b090e9b17845fe768101a85ecfe01342",
+        "head_weight": 0.1,
+        "sample_count": 55,
+        "physical_time_start_s": 0,
+        "physical_time_end_s": 1.8,
+        "duration_s": 1.8,
+        "rate_hz": 30,
+        "frame_step": 12,
+        "all_native_IK_status_equal_1": true,
+        "joint_coordinate_count": 48,
+        "root_coordinate_count": 7,
+        "neck_coordinate_count": 2,
+        "lower_coordinate_count_including_passive_midfoot": 16,
+        "upper_coordinate_count": 23,
+        "neck_source_units": "deg",
+        "neck_motion_reference_units": "rad",
+        "spherical_axis_units": "1",
+        "coordinate_mapping": "ordered named solver IDs verified against native manifest"
+      },
+      "capture_O": {
+        "capture_alias": "capture-O",
+        "base_cache_sha256": "994ebdae85b8f4f503edad6d3c36d77341f71f9469487c50cc886196c2dcf7b6",
+        "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+        "selected_pose_source_sha256": "9d33d818156a9e77c6ecf5cba3494910b090e9b17845fe768101a85ecfe01342",
+        "head_weight": 0.1,
+        "sample_count": 46,
+        "physical_time_start_s": 0,
+        "physical_time_end_s": 1.5,
+        "duration_s": 1.5,
+        "rate_hz": 30,
+        "frame_step": 8,
+        "all_native_IK_status_equal_1": true,
+        "joint_coordinate_count": 48,
+        "root_coordinate_count": 7,
+        "neck_coordinate_count": 2,
+        "lower_coordinate_count_including_passive_midfoot": 16,
+        "upper_coordinate_count": 23,
+        "neck_source_units": "deg",
+        "neck_motion_reference_units": "rad",
+        "spherical_axis_units": "1",
+        "coordinate_mapping": "ordered named solver IDs verified against native manifest"
+      }
+    }
+  },
+  "named_mapping": {
+    "qualification": "PURE_NAMED_MAPPING_ALL_SELECTED_FRAMES_NOT_DYNAMIC_OR_FK_QUALIFICATION",
+    "source_sha256": "9d33d818156a9e77c6ecf5cba3494910b090e9b17845fe768101a85ecfe01342",
+    "model_loaded": false,
+    "model_saved": false,
+    "authorities": [
+      "gs3dx_initial_target_values",
+      "gs3dx_quiet_reference_profiles"
+    ],
+    "captures": {
+      "capture_A": {
+        "capture_alias": "capture-A",
+        "sample_count": 55,
+        "duration_s": 1.8,
+        "all_frame_named_mapping_passed": true,
+        "max_adjacent_leg_step_deg": 22.312295185415422,
+        "max_adjacent_neck_step_rad": 0.14115410663415973,
+        "stance_correction_applied": false,
+        "velocity_reference_created": false,
+        "native_FK_verified": false,
+        "simulation_executed": false
+      },
+      "capture_O": {
+        "capture_alias": "capture-O",
+        "sample_count": 46,
+        "duration_s": 1.5,
+        "all_frame_named_mapping_passed": true,
+        "max_adjacent_leg_step_deg": 38.3799868689029,
+        "max_adjacent_neck_step_rad": 0.25374582851871363,
+        "stance_correction_applied": false,
+        "velocity_reference_created": false,
+        "native_FK_verified": false,
+        "simulation_executed": false
+      }
+    }
+  },
+  "named_mapping_native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('audit_selected_motion_mapping_reviewed.m')",
+    "owned_pids": [40344],
+    "timestamp": "2026-10-02T20:37:51.325357+00:00"
+  },
+  "configured_Human_native_FK": {
+    "qualification": "NATIVE_FK_RESIDUAL_AUDIT_NOT_DYNAMIC_QUALIFICATION",
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "model_saved": false,
+    "captures": {
+      "capture_A": {
+        "capture_alias": "capture-A",
+        "sample_count": 55,
+        "max_native_ankle_position_residual_m": 1.1957669250157798e-15,
+        "max_native_ankle_rotation_matrix_residual": 3.251321643117037e-15,
+        "all_native_FK_status_equal_1": true,
+        "stance_correction_applied": false,
+        "simulation_executed": false
+      },
+      "capture_O": {
+        "capture_alias": "capture-O",
+        "sample_count": 46,
+        "max_native_ankle_position_residual_m": 1.4887444978910354e-15,
+        "max_native_ankle_rotation_matrix_residual": 3.445718055958501e-15,
+        "all_native_FK_status_equal_1": true,
+        "stance_correction_applied": false,
+        "simulation_executed": false
+      }
+    }
+  },
+  "configured_Human_native_FK_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('audit_selected_motion_fk_reviewed.m')",
+    "owned_pids": [17580],
+    "timestamp": "2026-10-02T20:42:55.887395+00:00"
+  },
+  "failed_world_uniqueness_probe_receipt": {
+    "actual_process_exit_code": 1,
+    "final_exit_code": 1,
+    "termination_reason": "natural_exit",
+    "done_marker": false,
+    "script_status": "failed",
+    "command_identity": "run('audit_selected_motion_fk_reviewed.m')",
+    "owned_pids": [52440],
+    "timestamp": "2026-10-02T20:40:53.521876+00:00"
+  },
+  "video_source_qualification": "SOURCE_SERVED_BYTES_ORIGINAL_UNVERIFIED",
+  "video_original_camera_provenance_verified": false,
+  "owner_comparison_executed": false,
+  "video_served_items": [
+    {
+      "neutral_id": "cov-01",
+      "byte_size": 3428975,
+      "sha256": "d8ac8deff966227687dde28a68edafb8d7348c2844a8a5c367d63f5bec48caa1",
+      "status": "SUCCESS"
+    },
+    {
+      "neutral_id": "cov-02",
+      "byte_size": 17959502,
+      "sha256": "cd80752b4ad35234986672e99d2e31e1fadc5b7121b771b5878232197257ae85",
+      "status": "SUCCESS"
+    },
+    {
+      "neutral_id": "cov-03",
+      "byte_size": 17936236,
+      "sha256": "0cc25f11dbf90627b495a2eae8dff27f6d41c2e6a66286f3fcaa2b24d9e04567",
+      "status": "SUCCESS"
+    },
+    {
+      "neutral_id": "cov-04",
+      "byte_size": 18022687,
+      "sha256": "63020e811480fc544b3607d3171342e3719433b5af278bca77c05ef3d6df1cf1",
+      "status": "SUCCESS"
+    },
+    {
+      "neutral_id": "cov-05",
+      "byte_size": 2608104,
+      "sha256": "0a7ee407dce37c1a78dbc3f87d28cb8ea6f40c95029acc3d3382742449e855c3",
+      "status": "SUCCESS"
+    },
+    {
+      "neutral_id": "cov-06",
+      "byte_size": 28782917,
+      "sha256": "426695b779f8e1d886cf9ccd70be3aa98866509847df2357bd3fbb64316bf1ca",
+      "status": "SUCCESS"
+    }
+  ],
+  "served_video_full_decode": {
+    "qualification": "ACTUAL_FFMPEG_FULL_DECODE_AND_FRAME_PTS_NOT_PHYSICAL_CLOCK",
+    "utc": "2026-10-02T20:43:29.869515+00:00",
+    "executable_sha256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
+    "all_six_full_decodes_exit_zero": true,
+    "records": [
+      {
+        "neutral_id": "cov-01",
+        "sha256": "d8ac8deff966227687dde28a68edafb8d7348c2844a8a5c367d63f5bec48caa1",
+        "decode_exit_code": 0,
+        "decoded_frames": 741,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "30/1",
+        "PTS_first": 0,
+        "PTS_last": 2220000,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      },
+      {
+        "neutral_id": "cov-02",
+        "sha256": "cd80752b4ad35234986672e99d2e31e1fadc5b7121b771b5878232197257ae85",
+        "decode_exit_code": 0,
+        "decoded_frames": 1793,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "349/12",
+        "PTS_first": 0,
+        "PTS_last": 5550661,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      },
+      {
+        "neutral_id": "cov-03",
+        "sha256": "0cc25f11dbf90627b495a2eae8dff27f6d41c2e6a66286f3fcaa2b24d9e04567",
+        "decode_exit_code": 0,
+        "decoded_frames": 2040,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "89/3",
+        "PTS_first": 0,
+        "PTS_last": 6190043,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      },
+      {
+        "neutral_id": "cov-04",
+        "sha256": "63020e811480fc544b3607d3171342e3719433b5af278bca77c05ef3d6df1cf1",
+        "decode_exit_code": 0,
+        "decoded_frames": 1214,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "119/4",
+        "PTS_first": 0,
+        "PTS_last": 3667607,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      },
+      {
+        "neutral_id": "cov-05",
+        "sha256": "0a7ee407dce37c1a78dbc3f87d28cb8ea6f40c95029acc3d3382742449e855c3",
+        "decode_exit_code": 0,
+        "decoded_frames": 617,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "179/6",
+        "PTS_first": 0,
+        "PTS_last": 1856353,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      },
+      {
+        "neutral_id": "cov-06",
+        "sha256": "426695b779f8e1d886cf9ccd70be3aa98866509847df2357bd3fbb64316bf1ca",
+        "decode_exit_code": 0,
+        "decoded_frames": 3134,
+        "decoded_frame_PTS_time_base": "1/90000",
+        "filter_input_frame_rate_rational": "59/2",
+        "PTS_first": 0,
+        "PTS_last": 9565763,
+        "duplicate_or_decreasing_PTS_count": 0,
+        "physical_clock": "UNKNOWN",
+        "camera_original": "UNVERIFIED",
+        "swing_windows": "UNREVIEWED_NO_DURATION_BASED_WINDOW_INFERENCE"
+      }
+    ],
+    "supersedes_unreviewed_metadata_defaults": true,
+    "ffprobe_executed": false
+  },
+  "openpose_synthetic_runtime": {
+    "qualification": "PINNED_NETWORK_LOAD_AND_SYNTHETIC_FORWARD_ONLY",
+    "utc": "2026-10-02T20:33:36.894223+00:00",
+    "owner_media_processed": false,
+    "physical_clock_qualified": false,
+    "files": [
+      {
+        "name": "openpose_body25_pose_deploy.prototxt",
+        "bytes": 42330,
+        "sha256": "44d6ed3a5268d8d41ca59b3a040491277d876975c3234d82cf7ec0539b4b1f61"
+      },
+      {
+        "name": "openpose_body25_pose_iter_584000.caffemodel",
+        "bytes": 104715850,
+        "sha256": "44e3d7ebd8c8b62d4366d67127f1b562611a9e8fd0f4f3cdeeb4bb4a6ed12be6"
+      }
+    ],
+    "native_forward_completed": true,
+    "result_type": "PoseEstimationResult",
+    "status": "PASS_SYNTHETIC_RUNTIME_ONLY"
+  },
+  "latex_compilation": {
+    "status": "INFRASTRUCTURE_UNAVAILABLE",
+    "diagnostic": "Unable to find standard directories for platform"
+  }
+}

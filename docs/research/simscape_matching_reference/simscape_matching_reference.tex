@@ -2181,7 +2181,14 @@ held-out accuracy. Report phase-stratified median, 95th-percentile and
 worst errors, alongside owner swing-to-swing variation. Monocular depth
 ambiguity and image-plane error remain separate uncertainty sources.
 
-Keep original media, locators, decoded frames, overlays and per-frame
+The owner-approved album locator is public by explicit owner decision,
+recorded in the maintained procedure and its \texttt{SOURCE.md} contract.
+Fleet access returned HTTP 200; the page inventory contains six video
+entries. Page metadata and served playback bytes do not establish original
+camera-byte provenance or a physical clock. Original-byte acquisition
+remains a separately verified requirement.
+
+Keep original media, decoded frames, overlays and per-frame
 results in the private capture store. Public evidence uses neutral IDs,
 hashes and owner-approved body-height-normalized aggregates. Preserve
 imperfect clips with a documented grade or rejection reason. Backend
@@ -2190,6 +2197,63 @@ This comparison adds observational evidence; it cannot replace the
 fixed contact, posture, actuator-control and independent dynamics gates.
 Original footage acquisition and comparison results have not yet been
 verified in this review; the epic is incorporated as ongoing work.
+The exact-pinned OpenPose BODY\_25 files have passed the repository's
+size/hash resolver. The registered OpenCV DNN estimator subsequently
+loaded those files and completed a synthetic-image forward pass at
+\texttt{2026-10-02T20:33:36Z}. This qualifies network loading and execution
+only: no owner frame, pairing or detection-accuracy result is claimed.
+Missing alternative backends retain their explicit unavailable status.
+Six source-served MP4s were subsequently retained privately with rechecked
+SHA-256 checksums. An explicit FFmpeg full decode returned zero for all
+six streams and recovered 9,539 frame timestamps without duplicate or
+decreasing presentation timestamps. This is a decoding and presentation
+timing check, not original-camera or physical-clock qualification.
+Unreviewed duration-based swing windows and default-valued container
+metadata are excluded from the accepted evidence.
+
+\subsection{Selected Motion Clock and Coordinate Contract}
+A native read-only audit exited naturally at
+\texttt{2026-10-02T20:10:11Z}, without loading or saving a model or running
+a simulation. It inspected the exact selected head-weight-0.1 poses and
+crosschecked their ordered named solver IDs, frame grid and time vector
+against the base caches and native manifest. Capture A has 55 samples over
+0--1.8 s; capture O has 46 over 0--1.5 s. Both selected grids sample at
+30 Hz, with source frame steps 12 and 8 respectively. These stored motion
+times are not derived from presentation-video FPS.
+
+Each solution stores 48 coordinates: seven root representation values,
+two neck values, sixteen lower-body values including passive midfoot,
+and twenty-three upper-body representation values. These counts are
+not counts of independently actuated physical degrees of freedom.
+Spherical-joint axis components are dimensionless and their scalar
+angle is in degrees. Neck source primitive angles are in degrees, while
+the motion-reference binding requires radians. Adapters must resolve
+named IDs and documented joint/frame conventions; selecting the first
+twelve rows as leg angles would corrupt the reference. Neither this
+metadata audit nor the passing supported holds establishes full-motion
+tracking or independent actuator-driven replay.
+
+The existing \texttt{gs3dx\_initial\_target\_values} and
+\texttt{gs3dx\_quiet\_reference\_profiles} authorities subsequently mapped
+all 101 selected poses at \texttt{2026-10-02T20:37:51Z}, with no model
+loaded. This reuses their named-coordinate, unit, spherical-axis and
+Euler-singularity contracts instead of introducing a second adapter.
+A separate native FK audit of both capture-specific Human geometries
+exited naturally at \texttt{2026-10-02T20:42:55Z}. Across every selected
+frame, mapped leg FK agrees with native ankle-follower position within
+$1.5\times10^{-15}$ m and rotation matrices within
+$3.5\times10^{-15}$ in Frobenius norm. These are representation-consistency
+residuals, not agreement with measured markers or physical dynamics.
+The first audit attempt incorrectly required a unique World Frame block;
+its failure and corrected native receipt remain separate. World frames
+share the same inertial reference.
+
+No accepted-stance correction or velocity profile is applied by these
+audits. Maximum adjacent leg-coordinate changes are approximately
+$22.3^\circ$ for A and $38.4^\circ$ for O on the 30 Hz grids. Their
+continuity, branch choice and marker residuals require review before
+constructing moving controller references; filtering alone cannot
+establish measurement fidelity.
 
 
 \subsection{Startup Transient Versus Terminal Posture}

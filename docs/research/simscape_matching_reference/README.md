@@ -174,3 +174,9 @@ The controlled 20–50 ms empirical leg-torque ramp passed all five unchanged on
 
 - [Controlled Early Ramp Review](tour_early_leg_feedforward_review_20261002.json)
 - [Contact-Guarded Hold Review](guarded_leg_feedforward_hold_review_20261002.json)
+
+## Selected Motion and Video Acquisition Checkpoint
+
+The owner-approved public album source recorded by main #11283 is accessible from DeskComputer. Six source-served MP4s are saved privately with rechecked sizes and SHA-256; original camera-byte provenance remains unverified. The pinned OpenPose BODY_25 network loaded and completed synthetic inference at 20:33:36Z; this is runtime evidence, not owner detection accuracy. The selected head-weight-0.1 references have 55 tour / 46 owner samples over 1.8 / 1.5 seconds. All 101 frames passed the existing named native-target and quiet-reference mapper at 20:37:51Z, with no model loaded. A subsequent native audit at 20:42:55Z verified ankle FK against both configured Human models to numerical precision across all frames. All six streams fully decoded with FFmpeg and 9,539 increasing presentation timestamps. No stance correction, velocity reference, full-motion dynamics, video pairing or camera comparison is qualified by those audits.
+
+[Neutral provenance evidence](selected_motion_video_checkpoint_20261002.json) retains native receipts and explicit qualification boundaries.
