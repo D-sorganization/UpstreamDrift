@@ -2627,6 +2627,8 @@ export interface SimulationRequest {
   analysis_config?: Record<string, unknown> | null;
   /** Optional unique identifier for the simulation run */
   run_id?: string | null;
+  /** Whether to permit a variable remainder step for non-divisible durations */
+  allow_remainder_step: boolean;
 }
 
 /**
@@ -2655,6 +2657,14 @@ export interface SimulationResponse {
   error?: SimulationErrorInfo | null;
   /** Run or correlation identifier */
   run_id?: string | null;
+  /** Requested simulation duration in seconds */
+  requested_duration?: number | null;
+  /** Actual integrated simulation horizon in seconds */
+  integrated_duration?: number | null;
+  /** Number of physics integration steps executed */
+  step_count?: number | null;
+  /** Number of retained state samples including t=0 */
+  retained_samples?: number | null;
 }
 
 /**

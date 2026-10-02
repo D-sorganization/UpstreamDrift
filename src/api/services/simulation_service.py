@@ -31,6 +31,10 @@ from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.data_io._format_handlers import OutputFormat
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.simulation_timing import (
+    SimulationTimingPlan,
+    compute_simulation_timing,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..models.requests import SimulationRequest
@@ -503,26 +507,26 @@ class SimulationService:
         engine: Any,
         recorder: GenericPhysicsRecorder,
         request: SimulationRequest,
-        timestep: float,
-        steps: int,
+        timestep: float = 0.001,
+        steps: int = 1000,
         run_stats: SimulationStats | None = None,
         run: SimulationRunRecord | None = None,
+        timing_plan: SimulationTimingPlan | None = None,
     ) -> None:
-        """Execute the main simulation stepping loop with cancellation and deadline checks (R03).
-
-        Args:
-            engine: Physics engine instance.
-            recorder: Recording object for simulation data.
-            request: Simulation request with control inputs.
-            timestep: Time step per simulation step.
-            steps: Total number of steps to execute.
-            run_stats: Optional per-run stats instance to update.
-            run: Optional simulation run record for cooperative cancellation and deadline checks.
-        """
+        """Execute simulation stepping loop with cancellation and deadline checks (R03/R11)."""
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
         if not (engine is not None):
             raise ValueError("engine must be provided")
+
+        if timing_plan is None:
+            timing_plan = compute_simulation_timing(
+                duration=request.duration,
+                timestep=timestep,
+                allow_remainder_step=getattr(request, "allow_remainder_step", True),
+                engine=engine,
+            )
+
         if not recorder.is_recording:
             recorder.start()
         recorder.is_recording = True
@@ -531,7 +535,7 @@ class SimulationService:
         recorder.record_step(control_input=None)
 
         early_stopped = False
-        for step in range(steps):
+        for step, dt_step in enumerate(timing_plan.step_sizes):
             if run is not None:
                 if run.is_cancelled():
                     run.status = "cancelled"
@@ -564,7 +568,7 @@ class SimulationService:
                 if torques is not None:
                     engine.set_control(torques)
 
-            engine.step(timestep)
+            engine.step(dt_step)
             recorder.record_step(control_input=torques)
             self._stats.frame_count += 1
             if run_stats is not None:
@@ -574,7 +578,7 @@ class SimulationService:
             recorder.is_recording = False
             return
 
-        expected_samples = steps + 1
+        expected_samples = timing_plan.retained_samples
         retained_samples = getattr(recorder, "current_idx", expected_samples)
         if getattr(recorder, "buffer_exhausted", False) is True or (
             isinstance(retained_samples, int) and retained_samples < expected_samples
@@ -655,30 +659,31 @@ class SimulationService:
         )
 
     def _validate_simulation_timing(
-        self, request: SimulationRequest
-    ) -> tuple[float, int, int]:
+        self, request: SimulationRequest, engine: Any = None
+    ) -> SimulationTimingPlan:
         timestep = request.timestep or 0.001
-        if timestep <= 0:
-            raise ValueError(f"Timestep must be positive, got {timestep}")
-        if timestep > request.duration:
-            raise ValueError(
-                f"Timestep ({timestep}) must not exceed duration ({request.duration})"
-            )
-        steps = int(request.duration / timestep)
-        return timestep, steps, steps + 1
+        allow_remainder = getattr(request, "allow_remainder_step", True)
+        return compute_simulation_timing(
+            duration=request.duration,
+            timestep=timestep,
+            allow_remainder_step=allow_remainder,
+            engine=engine,
+        )
 
     def _create_and_run_recorder(
         self,
         engine: Any,
         request: SimulationRequest,
-        timestep: float,
-        steps: int,
-        expected_frames: int,
         run_stats: SimulationStats | None = None,
         run: SimulationRunRecord | None = None,
+        timing_plan: SimulationTimingPlan | None = None,
+        **_kwargs: Any,
     ) -> GenericPhysicsRecorder:
+        if timing_plan is None:
+            timing_plan = self._validate_simulation_timing(request, engine=engine)
+        expected_samples = timing_plan.retained_samples
         recorder = GenericPhysicsRecorder(
-            engine, max_samples=max(100000, expected_frames)
+            engine, max_samples=max(100000, expected_samples)
         )
         if self._biomechanics_binding is not None:
             recorder.configure_biomechanics(self._biomechanics_binding)
@@ -690,10 +695,9 @@ class SimulationService:
                 engine,
                 recorder,
                 request,
-                timestep,
-                steps,
                 run_stats=run_stats,
                 run=run,
+                timing_plan=timing_plan,
             )
         finally:
             recorder.stop()
@@ -702,7 +706,11 @@ class SimulationService:
         self._last_recording_meta = {
             "engine": request.engine_type,
             "model": str(request.model_path) if request.model_path else None,
-            "duration": request.duration,
+            "duration": timing_plan.integrated_duration,
+            "requested_duration": request.duration,
+            "integrated_duration": timing_plan.integrated_duration,
+            "step_count": timing_plan.step_count,
+            "retained_samples": timing_plan.retained_samples,
         }
         return recorder
 
@@ -711,10 +719,10 @@ class SimulationService:
         run: SimulationRunRecord,
         run_id: str,
         recorder: GenericPhysicsRecorder,
-        timestep: float,
+        timing_plan: SimulationTimingPlan,
         simulation_data: dict[str, Any],
     ) -> SimulationResponse:
-        """Construct a terminal SimulationResponse for a cancelled or timed-out run (R03)."""
+        """Construct a terminal SimulationResponse for a cancelled or timed-out run (R03/R11)."""
         recorded_frames = getattr(recorder, "current_idx", 0)
         self._finish_last_run(status=run.status, frames=recorded_frames)
         err_code = "cancelled" if run.status == "cancelled" else "timeout"
@@ -729,9 +737,16 @@ class SimulationService:
             retriable=True,
             retry_guidance="Restart simulation with a new run ID.",
         )
+        times = simulation_data.get("times", [])
+        actual_duration = float(times[-1] - times[0]) if len(times) > 0 else 0.0
+        steps_executed = max(0, recorded_frames - 1)
         return SimulationResponse(
             success=False,
-            duration=round(recorded_frames * timestep, 6),
+            duration=round(actual_duration, 6),
+            requested_duration=timing_plan.requested_duration,
+            integrated_duration=round(actual_duration, 6),
+            step_count=steps_executed,
+            retained_samples=recorded_frames,
             frames=recorded_frames,
             data=simulation_data,
             analysis_results=None,
@@ -804,6 +819,25 @@ class SimulationService:
             run.status = "failed"
             raise
 
+    def _execute_analysis_phase(
+        self,
+        recorder: Any,
+        analysis_config: dict[str, Any] | None,
+        frames: int,
+    ) -> tuple[dict[str, Any] | None, str]:
+        results, status, summary = None, "not_requested", None
+        if analysis_config:
+            results = self._perform_analysis(recorder, analysis_config)
+            status = results.get("_status", "completed") if results else "completed"
+            if isinstance(results, dict) and results:
+                summary = "analysis: " + ", ".join(
+                    sorted(str(k) for k in results if not str(k).startswith("_"))
+                )
+        self._finish_last_run(
+            status="completed", frames=frames, analysis_summary=summary
+        )
+        return results, status
+
     def _execute_sync_pipeline(
         self,
         request: SimulationRequest,
@@ -814,15 +848,9 @@ class SimulationService:
         engine = self._prepare_engine(request, run_id=run_id)
         run.engine = engine
 
-        timestep, steps, expected_frames = self._validate_simulation_timing(request)
+        timing_plan = self._validate_simulation_timing(request, engine=engine)
         recorder = self._create_and_run_recorder(
-            engine,
-            request,
-            timestep,
-            steps,
-            expected_frames,
-            run_stats=run.stats,
-            run=run,
+            engine, request, run_stats=run.stats, run=run, timing_plan=timing_plan
         )
 
         simulation_data = self._extract_simulation_data(recorder)
@@ -832,7 +860,7 @@ class SimulationService:
                 run=run,
                 run_id=run_id,
                 recorder=recorder,
-                timestep=timestep,
+                timing_plan=timing_plan,
                 simulation_data=simulation_data,
             )
         is_mock_rec = (
@@ -842,26 +870,13 @@ class SimulationService:
         )
         self._validate_simulation_data(
             simulation_data=simulation_data,
-            expected_frames=expected_frames,
+            expected_frames=timing_plan.retained_samples,
             has_controls=bool(request.control_inputs),
             is_mock=is_mock_rec,
         )
 
-        analysis_results = None
-        analysis_status = "not_requested"
-        if request.analysis_config:
-            analysis_results = self._perform_analysis(recorder, request.analysis_config)
-            analysis_status = analysis_results.get("_status", "completed")
-
-        analysis_summary = None
-        if isinstance(analysis_results, dict) and analysis_results:
-            analysis_summary = "analysis: " + ", ".join(
-                sorted(str(k) for k in analysis_results if not str(k).startswith("_"))
-            )
-        self._finish_last_run(
-            status="completed",
-            frames=expected_frames,
-            analysis_summary=analysis_summary,
+        analysis_results, analysis_status = self._execute_analysis_phase(
+            recorder, request.analysis_config, timing_plan.retained_samples
         )
 
         export_paths, persistence_status, persistence_error = (
@@ -869,28 +884,37 @@ class SimulationService:
                 request,
                 simulation_data,
                 analysis_results,
-                expected_frames,
+                timing_plan.retained_samples,
                 run_id=run_id,
             )
         )
 
+        meta = {
+            "engine": request.engine_type,
+            "model": str(request.model_path) if request.model_path else None,
+            "duration": timing_plan.integrated_duration,
+            "requested_duration": request.duration,
+            "integrated_duration": timing_plan.integrated_duration,
+            "step_count": timing_plan.step_count,
+            "retained_samples": timing_plan.retained_samples,
+        }
         self.register_completed_run(
             run_id=run_id,
             engine=engine,
             recorder=recorder,
-            meta={
-                "engine": request.engine_type,
-                "model": str(request.model_path) if request.model_path else None,
-                "duration": request.duration,
-            },
+            meta=meta,
             simulation_data=simulation_data,
             analysis_results=analysis_results,
         )
 
         return SimulationResponse(
             success=True,
-            duration=request.duration,
-            frames=expected_frames,
+            duration=timing_plan.integrated_duration,
+            requested_duration=request.duration,
+            integrated_duration=timing_plan.integrated_duration,
+            step_count=timing_plan.step_count,
+            retained_samples=timing_plan.retained_samples,
+            frames=timing_plan.retained_samples,
             data=simulation_data,
             analysis_results=analysis_results,
             export_paths=export_paths,

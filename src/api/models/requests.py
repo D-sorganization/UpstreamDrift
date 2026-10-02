@@ -138,6 +138,10 @@ class SimulationRequest(BaseModel):
     run_id: str | None = Field(
         None, description="Optional unique identifier for the simulation run"
     )
+    allow_remainder_step: bool = Field(
+        True,
+        description="Whether to permit a variable remainder step for non-divisible durations",
+    )
 
     @field_validator("duration")
     @classmethod
