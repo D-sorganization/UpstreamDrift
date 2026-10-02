@@ -112,31 +112,13 @@ def parse_script_status(log_content: str) -> str | None:
     return str(matches[-1]).lower()
 
 
-def decide_run_outcome(
+def _validate_preconditions(
     actual_process_exit_code: int | None,
     termination_reason: str,
-    log_content: str,
-    stderr_content: str,
     command_identity: str,
     owned_pids: Sequence[int],
-    timestamp: str | None = None,
-) -> RunOutcome:
-    """Evaluate run evidence and determine final truthful exit code and receipt.
-
-    Adheres strictly to Design-by-Contract (DbC):
-      Preconditions:
-        - command_identity must be a non-empty string.
-        - owned_pids must be a non-empty sequence of positive integers (booleans rejected).
-        - termination_reason must be in ALLOWED_TERMINATION_REASONS.
-        - actual_process_exit_code must be int or None (booleans rejected).
-      Postconditions:
-        - final_exit_code in 0..255.
-        - forced watchdog kills never synthesize exit code 0.
-        - hung_after_done yields 125.
-        - timeout yields 124.
-        - script_status not in KNOWN_SUCCESS_STATUSES fails closed (yields 1).
-    """
-    # Preconditions check: reject booleans as integers
+) -> None:
+    """Validate DbC preconditions for decide_run_outcome."""
     if isinstance(actual_process_exit_code, bool):
         raise PreconditionError(
             f"actual_process_exit_code cannot be bool, got {actual_process_exit_code!r}."
@@ -166,85 +148,92 @@ def decide_run_outcome(
             f"termination_reason {termination_reason!r} not in allowed: {sorted(ALLOWED_TERMINATION_REASONS)}"
         )
 
-    ts = timestamp or datetime.now(UTC).isoformat()
-    pids_list = [int(p) for p in owned_pids]
-    done_marker = has_exact_done_marker(log_content)
-    script_status = parse_script_status(log_content)
 
-    final_exit_code: int
-    summary_message: str
-    verified_actual_code: int | None
+def _map_nonzero_exit_code(actual_process_exit_code: int) -> int:
+    """Map native exit code sanely to 1..255 for non-zero process exits."""
+    if 0 <= actual_process_exit_code <= 255:
+        return actual_process_exit_code
+    mapped = actual_process_exit_code & 0xFF
+    return mapped if mapped != 0 else 1
 
-    if termination_reason == TERMINATION_TIMEOUT:
-        # Overall watchdog timeout: killed by watchdog, process code unavailable
-        final_exit_code = EXIT_CODE_TIMEOUT
-        verified_actual_code = None
-        summary_message = "WATCHDOG: killed after timeout deadline (exit code unverified; returncode 124)"
-    elif termination_reason == TERMINATION_HUNG_AFTER_DONE:
-        # Script emitted GS3DX_BATCH_DONE but MATLAB hung at exit and had to be killed
-        # Never synthesize native 0 on forced kill; return distinct shutdown-unverified code 125
-        final_exit_code = EXIT_CODE_SHUTDOWN_UNVERIFIED
-        verified_actual_code = None
-        summary_message = (
-            "RUNNER: script finished (GS3DX_BATCH_DONE); MATLAB hung at exit and was killed "
-            "(exit code unverified; returncode 125)"
+
+def _resolve_natural_exit(
+    actual_process_exit_code: int | None,
+    script_status: str | None,
+) -> tuple[int, int | None, str]:
+    """Resolve exit code, verified process code, and summary message for natural exits."""
+    if actual_process_exit_code is None:
+        return (
+            EXIT_CODE_SHUTDOWN_UNVERIFIED,
+            None,
+            "RUNNER: natural exit missing integer exit code; fail closed with returncode 125",
         )
-    elif termination_reason == TERMINATION_UNVERIFIED:
-        # Exit code was missing/null or process state could not be verified
-        final_exit_code = EXIT_CODE_SHUTDOWN_UNVERIFIED
-        verified_actual_code = None
-        summary_message = (
-            "RUNNER: process exit unverified or null; fail closed with returncode 125"
-        )
-    elif termination_reason == TERMINATION_NATURAL:
-        if actual_process_exit_code is None:
-            # Null / non-integer exit code must fail closed
-            final_exit_code = EXIT_CODE_SHUTDOWN_UNVERIFIED
-            verified_actual_code = None
-            summary_message = "RUNNER: natural exit missing integer exit code; fail closed with returncode 125"
-        elif actual_process_exit_code != 0:
-            verified_actual_code = actual_process_exit_code
-            # Map Windows native exit codes (which can be large or negative) sanely to 1..255
-            if 0 <= actual_process_exit_code <= 255:
-                final_exit_code = actual_process_exit_code
-            else:
-                mapped = actual_process_exit_code & 0xFF
-                final_exit_code = mapped if mapped != 0 else 1
-            summary_message = f"RUNNER: process exited naturally with error code {actual_process_exit_code}"
-        else:
-            # Process exited with code 0.
-            verified_actual_code = 0
-            if script_status is not None:
-                if script_status in KNOWN_SUCCESS_STATUSES:
-                    final_exit_code = EXIT_CODE_SUCCESS
-                    summary_message = f"RUNNER: completed successfully with status '{script_status}' and returncode 0"
-                else:
-                    # Explicit non-success or unknown status fails closed
-                    final_exit_code = EXIT_CODE_SCRIPT_FAILED
-                    summary_message = (
-                        f"RUNNER: process exited 0 but script recorded non-success STATUS '{script_status}'; "
-                        f"failing run with returncode {EXIT_CODE_SCRIPT_FAILED}"
-                    )
-            else:
-                # Absent status: legacy natural exit passes if done marker present
-                final_exit_code = EXIT_CODE_SUCCESS
-                summary_message = "RUNNER: completed successfully with returncode 0"
-    else:
-        raise PreconditionError(f"Unhandled termination reason: {termination_reason}")
 
-    outcome = RunOutcome(
-        final_exit_code=final_exit_code,
-        actual_process_exit_code=verified_actual_code,
-        termination_reason=termination_reason,
-        done_marker=done_marker,
-        script_status=script_status,
-        command_identity=command_identity,
-        owned_pids=pids_list,
-        timestamp=ts,
-        summary_message=summary_message,
+    if actual_process_exit_code != 0:
+        final_exit_code = _map_nonzero_exit_code(actual_process_exit_code)
+        return (
+            final_exit_code,
+            actual_process_exit_code,
+            f"RUNNER: process exited naturally with error code {actual_process_exit_code}",
+        )
+
+    if script_status is not None:
+        if script_status in KNOWN_SUCCESS_STATUSES:
+            return (
+                EXIT_CODE_SUCCESS,
+                0,
+                f"RUNNER: completed successfully with status '{script_status}' and returncode 0",
+            )
+        return (
+            EXIT_CODE_SCRIPT_FAILED,
+            0,
+            f"RUNNER: process exited 0 but script recorded non-success STATUS '{script_status}'; "
+            f"failing run with returncode {EXIT_CODE_SCRIPT_FAILED}",
+        )
+
+    return (
+        EXIT_CODE_SUCCESS,
+        0,
+        "RUNNER: completed successfully with returncode 0",
     )
 
-    # Postcondition validation
+
+def _resolve_exit_decision(
+    termination_reason: str,
+    actual_process_exit_code: int | None,
+    script_status: str | None,
+) -> tuple[int, int | None, str]:
+    """Resolve final exit code, verified process exit code, and summary message."""
+    if termination_reason == TERMINATION_TIMEOUT:
+        return (
+            EXIT_CODE_TIMEOUT,
+            None,
+            "WATCHDOG: killed after timeout deadline (exit code unverified; returncode 124)",
+        )
+
+    if termination_reason == TERMINATION_HUNG_AFTER_DONE:
+        return (
+            EXIT_CODE_SHUTDOWN_UNVERIFIED,
+            None,
+            "RUNNER: script finished (GS3DX_BATCH_DONE); MATLAB hung at exit and was killed "
+            "(exit code unverified; returncode 125)",
+        )
+
+    if termination_reason == TERMINATION_UNVERIFIED:
+        return (
+            EXIT_CODE_SHUTDOWN_UNVERIFIED,
+            None,
+            "RUNNER: process exit unverified or null; fail closed with returncode 125",
+        )
+
+    if termination_reason == TERMINATION_NATURAL:
+        return _resolve_natural_exit(actual_process_exit_code, script_status)
+
+    raise PreconditionError(f"Unhandled termination reason: {termination_reason}")
+
+
+def _validate_postconditions(outcome: RunOutcome) -> None:
+    """Validate DbC postconditions on RunOutcome."""
     if not (0 <= outcome.final_exit_code <= 255):
         raise PostconditionError(
             f"final_exit_code {outcome.final_exit_code} out of bounds [0, 255]."
@@ -280,6 +269,62 @@ def decide_run_outcome(
             "Postcondition violated: missing actual process exit code must never yield exit code 0."
         )
 
+
+def decide_run_outcome(
+    actual_process_exit_code: int | None,
+    termination_reason: str,
+    log_content: str,
+    stderr_content: str,
+    command_identity: str,
+    owned_pids: Sequence[int],
+    timestamp: str | None = None,
+) -> RunOutcome:
+    """Evaluate run evidence and determine final truthful exit code and receipt.
+
+    Adheres strictly to Design-by-Contract (DbC):
+      Preconditions:
+        - command_identity must be a non-empty string.
+        - owned_pids must be a non-empty sequence of positive integers (booleans rejected).
+        - termination_reason must be in ALLOWED_TERMINATION_REASONS.
+        - actual_process_exit_code must be int or None (booleans rejected).
+      Postconditions:
+        - final_exit_code in 0..255.
+        - forced watchdog kills never synthesize exit code 0.
+        - hung_after_done yields 125.
+        - timeout yields 124.
+        - script_status not in KNOWN_SUCCESS_STATUSES fails closed (yields 1).
+    """
+    _validate_preconditions(
+        actual_process_exit_code=actual_process_exit_code,
+        termination_reason=termination_reason,
+        command_identity=command_identity,
+        owned_pids=owned_pids,
+    )
+
+    ts = timestamp or datetime.now(UTC).isoformat()
+    pids_list = [int(p) for p in owned_pids]
+    done_marker = has_exact_done_marker(log_content)
+    script_status = parse_script_status(log_content)
+
+    final_exit_code, verified_actual_code, summary_message = _resolve_exit_decision(
+        termination_reason=termination_reason,
+        actual_process_exit_code=actual_process_exit_code,
+        script_status=script_status,
+    )
+
+    outcome = RunOutcome(
+        final_exit_code=final_exit_code,
+        actual_process_exit_code=verified_actual_code,
+        termination_reason=termination_reason,
+        done_marker=done_marker,
+        script_status=script_status,
+        command_identity=command_identity,
+        owned_pids=pids_list,
+        timestamp=ts,
+        summary_message=summary_message,
+    )
+
+    _validate_postconditions(outcome)
     return outcome
 
 

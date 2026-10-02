@@ -347,3 +347,23 @@ def test_dbc_preconditions() -> None:
             command_identity="run('test.m')",
             owned_pids=[1001],
         )
+
+
+@pytest.mark.parametrize("nonzero_code", [256, 512, 1024])
+def test_windows_nonzero_multiple_of_256_mapped_to_nonzero_fail_closed(
+    nonzero_code: int,
+) -> None:
+    """Non-zero exit codes where code & 0xFF == 0 must map to 1 and never synthesize 0."""
+    rd = _get_runner_module()
+    outcome = rd.decide_run_outcome(
+        actual_process_exit_code=nonzero_code,
+        termination_reason="natural_exit",
+        log_content="Process exited with non-zero code\n",
+        stderr_content="",
+        command_identity="run('crash256.m')",
+        owned_pids=[1012],
+    )
+    assert outcome.final_exit_code == 1
+    assert outcome.actual_process_exit_code == nonzero_code
+    assert outcome.to_receipt()["actual_process_exit_code"] == nonzero_code
+

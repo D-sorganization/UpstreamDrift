@@ -779,6 +779,34 @@ with zero failed or incomplete tests, including Human visual/physical parameter
 checks, and 44 focused Python checks. Full-swing matching against that model
 remains required before replacing the selected outputs. The historical-player capture
 handoff is preserved as a separate continuation scope in the canonical record.
+
+\subsection{Current Model Comparison and Publication}
+The reviewed continuation is published as draft PR
+\href{https://github.com/D-sorganization/UpstreamDrift/pull/11256}{\#11256}.
+Integration commit \texttt{7a315dd32} preserves current main through
+\texttt{80dd2f7be}. The tour export using Human model \texttt{91997471}
+exited naturally with code zero at \texttt{2026-10-02T07:49:26Z}; its
+mean/max frame position RMS is 13.366/41.385 mm. Both are worse than the
+selected \texttt{9a26ee80} Human result (13.188/40.121 mm), so this candidate
+does not replace the selected Desktop clips. The newer run used NumPy 2.2.6
+and ezc3d 1.6.3, while the selected run used NumPy 2.4.4 and ezc3d 1.7.2;
+both used MATLAB R2025b Update 5. Model and runtime changed together, so
+these observations alone cannot identify the cause of the difference.
+The owner export exited naturally with code zero at
+\texttt{2026-10-02T08:39:18Z}, improving mean/max position RMS to
+16.643/36.865 mm. All current-model clips fully decoded. Owner left foot
+mean/max angular errors are 4.517/19.556 degrees and right 9.421/20.299
+degrees, with 45 measured samples per foot out of 46. Orientation changes
+are mixed: left maximum and right mean worsen slightly. The selected Desktop
+package uses the earlier model for the tour and the current model for the
+owner, recording each separately. It selects exploratory position tracking,
+not anatomical or physical acceptance. Canonical SI XYZ, validity masks,
+ordered-label digests and capture rates match exactly under the two recorded
+NumPy/ezc3d runtimes. This narrows importer concerns but does not establish
+solver equivalence or explain the model difference. A controlled native
+model/default comparison remains pending. Software tests, a published draft and natural IK export
+receipts do not establish contact, anatomical or forward-dynamics acceptance.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

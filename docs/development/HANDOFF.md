@@ -15,13 +15,21 @@ Four 800 by 600 H.264 MP4s were completely decoded at 30 fps, with 55 tour and 4
 
 Owner wrist offsets remain approximately 55/62 mm and the club-target offset 106 mm. Native parameter and grip-contract tests pass; the functional-grip fit worsened held-out position errors and was rejected. These are IK clips; forward dynamics remains unqualified.
 
+## Current Main Model Comparison and Selected Delivery
+
+The current model (`91997471`) full tour export exited naturally at 07:49:26Z, but mean/max RMS 13.366/41.385 mm is worse than the selected `9a26ee80` tour result. The current owner export exited naturally at 08:39:18Z and improves mean/max RMS to 16.643/36.865 mm. Both current-model clips per capture fully decoded. Owner foot orientation remains measured in 45/46 samples: left mean/max 4.517/19.556 degrees and right 9.421/20.299 degrees. Small mixed orientation changes remain explicit; left max and right mean are slightly worse than prior. This selection prioritizes position tracking with calibrated feet, not anatomical or physical acceptance.
+
+Latest selected Desktop delivery: `Simscape_Matches_20261001/Best_Human_Matches_20261002.zip`, SHA256 `a97db61e9fb43dbae4961b24727526554ce68abe081f60c79146b7b29b302cb3`. It includes the earlier model's tour clips and current model's owner clips, separately identified hashes/runtime/provenance, all four fully decoded MP4s, no raw captures or private pose caches. Prior packages are retained.
+
+Selected and current runtime versions differ (NumPy 2.4.4/ezc3d 1.7.2 versus 2.2.6/1.6.3). Read-only canonical SI XYZ/validity/ordered-label digests match exactly for both captures under those runtimes. This narrows the importer concern; it does not prove equivalent numerical solver behavior or identify why the model fit changed. Continue a controlled native model/default comparison and physical initialization review. No saved-model geometry is overwritten to force prior fit.
+
 ## Identity and Branch Status
 
 - **Repository**: D-sorganization/UpstreamDrift
 - **Active Branch**: `feat/simscape-matching-review-main-20261002`; commit `SELF` contains this continuation handoff.
 - **Reviewed Baseline Source**: `144e81188dd7bb106f81d89b7a7330dd20cce511` on `feat/simscape-gs3dx-exploratory` (unpublished baseline commit).
 - **Original Worker Commit Turnover**: Commits `144e81188` through `f2ca443a0` (documentation-only continuation) reviewed and preserved.
-- **Draft PR and Governing Issues**: Original draft PR #11179; continuation PR not created; governing issues #10950, #10979, #11156, #11160, #11161, #11173.
+- **Draft PR and Governing Issues**: Original draft PR #11179; reviewed continuation draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256); governing issues #10950, #10979, #11156, #11160, #11161, #11173.
 - **Coordination**: Session `simscape-20261001-codex`, governing #11173; check live lease/presence before expansion or handoff. Mailbox evidence is incomplete; do not infer absence of peers.
 - **Development Log**: Existing `DL-#10950`, updated in place.
 - **Historical Context**: Prior turnovers remain recoverable via `git show 144e81188:docs/development/HANDOFF.md`.
