@@ -46,7 +46,7 @@ production replay never changes saved initial geometry.
 Actual historical fits have large grip gaps, unknown source clocks and generic
 anatomy. The bridge does not establish accepted historical motion, measured
 controls or a qualified golf shot. Continue initial-state admissibility,
-immutable replay storage and impact/whole-analysis consumers under #11235 and
+replay job controls and impact/whole-analysis consumers under #11235 and
 #11232. PR #11240 remains draft; the documented CI remediation budget remains
 exhausted.
 
