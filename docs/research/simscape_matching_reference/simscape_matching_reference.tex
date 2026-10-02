@@ -2191,6 +2191,39 @@ fixed contact, posture, actuator-control and independent dynamics gates.
 Original footage acquisition and comparison results have not yet been
 verified in this review; the epic is incorporated as ongoing work.
 
+
+\subsection{Startup Transient Versus Terminal Posture}
+A separate native read-only audit of the saved ramped runs exited
+naturally at \texttt{2026-10-02T19:37:01Z}. It loaded no model and ran
+no new simulation. Signed translation and relative rotation were measured
+over the intervals 0--50, 50--200, 200--500 and 500--1000 ms. For each
+sample, the relative rotation is $E(t)=R(0)^\mathsf{T}R(t)$, with
+\[
+ v(t)=\tfrac12\begin{bmatrix}E_{32}-E_{23}\\E_{13}-E_{31}\\E_{21}-E_{12}\end{bmatrix},
+ \qquad
+ \theta(t)=\operatorname{atan2}\!\left(\|v(t)\|,\tfrac{\operatorname{tr}E(t)-1}{2}\right).
+\]
+The rotation vector $\theta v/\|v\|$ uses the initial pelvis frame; its
+components are not calibrated anatomical pitch, roll or yaw. This small
+rotation audit does not use the formula at the ambiguous $\pi$ branch.
+
+The tour first exceeds $1^\circ$ at 75.288 ms and 5 mm at 167.171 ms;
+the owner crosses at 86.346 and 161.093 ms respectively. Both occur
+during the 50--200 ms feedforward ramp. The whole-run maxima arise in
+the early transient, while the one-second endpoints return much closer
+to the initial pose. Vertical displacement changes sign in both runs;
+the data do not support a claim of sustained downward sag or a unique
+pitch direction. Terminal improvement does not excuse a whole-run gate
+failure. The anonymous interval aggregates and source hashes are in
+\texttt{ramped\_hold\_posture\_review\_20261002.json}.
+
+The next controlled experiment retains the same empirical seed, time
+grid, gains, geometry, contacts and upper/neck policy. It changes only
+the torque ramp to 0--50 ms. This tests whether delayed startup support
+contributes to the transient; it is not an identified gravity solution.
+All original whole-run posture and force gates remain prospective.
+No acceptance or causal conclusion is claimed before native results.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

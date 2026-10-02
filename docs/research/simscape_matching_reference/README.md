@@ -150,3 +150,15 @@ reported checks; new source changes require fresh protected checks.
 The owner-session video companion is tracked by [epic #11268](https://github.com/D-sorganization/UpstreamDrift/issues/11268). Its original-byte acquisition, grading, frozen camera/pairing protocol, markerless comparison and error budget are incorporated in the maintained LaTeX reference; no video pairing or comparison result is claimed yet.
 
 - [Owner Ramped Leg Feedforward Review](owner_ramped_leg_feedforward_review_20261002.json)
+
+## Startup Transient Audit
+
+A native read-only audit of the saved ramped runs completed at 19:37:01Z. Both
+captures first breach the 1-degree gate during the 50–200 ms torque ramp, then
+return closer to the original pose by one second. Signed vertical displacement
+changes direction; sustained downward sag and a unique anatomical pitch direction
+are not established. Whole-run gates remain rejected. The next controlled native
+experiment changes only the ramp to 0–50 ms, retaining all force/posture limits.
+It is a prospective test, with no outcome claimed here.
+
+- [Ramped Hold Posture Review](ramped_hold_posture_review_20261002.json)
