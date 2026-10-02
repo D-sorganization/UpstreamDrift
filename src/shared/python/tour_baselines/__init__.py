@@ -146,10 +146,14 @@ from .discovery import (
     export_to_ledger_rows,
 )
 from .observation_manifest import (
+    CommonTargetComparison,
+    ComprehensiveErrorMetrics,
     MarkerObservationSpec,
     ObservationManifest,
     build_frozen_observation_manifest,
     calibrate_with_manifest_protection,
+    compute_common_target_comparison,
+    compute_comprehensive_error_metrics,
     compute_frame_wise_rms,
     compute_pooled_rmse,
 )
@@ -185,6 +189,8 @@ __all__ = [
     "CampaignResult",
     "CandidateRanking",
     "CanonicalTourTarget",
+    "CommonTargetComparison",
+    "ComprehensiveErrorMetrics",
     "ConstraintEvaluationResult",
     "CoverageCell",
     "DetectionMethod",
@@ -255,6 +261,8 @@ __all__ = [
     "calibrate_fixed_geometry",
     "calibrate_with_manifest_protection",
     "clear_golf_model_registry",
+    "compute_common_target_comparison",
+    "compute_comprehensive_error_metrics",
     "compute_fit_metrics",
     "compute_frame_wise_rms",
     "compute_landmark_signature",
