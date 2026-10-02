@@ -27,6 +27,8 @@ from src.shared.python.motion_matching.diagnostics.reference_pose import (
 
 from .contracts import (
     CANONICAL_ARTICULATED_CONVENTION,
+    CANONICAL_V2_FULL_BODY_CONVENTION,
+    NATIVE_FULL_BODY_CONVENTION,
     RenderRequest,
     RenderResult,
     SilhouetteRenderer,
@@ -283,16 +285,39 @@ class ArticulatedSilhouetteRenderer:
     ) -> tuple[PinholeCameraModel, int, int]:
         camera, width, height = resolve_camera_and_dimensions(self._cameras, request)
 
-        if request.state_convention != CANONICAL_ARTICULATED_CONVENTION:
+        valid_conventions = (
+            CANONICAL_ARTICULATED_CONVENTION,
+            NATIVE_FULL_BODY_CONVENTION,
+            CANONICAL_V2_FULL_BODY_CONVENTION,
+        )
+        if request.state_convention not in valid_conventions:
             raise ValueError(
-                f"ArticulatedSilhouetteRenderer requires state_convention={CANONICAL_ARTICULATED_CONVENTION!r}, "
-                f"got {request.state_convention!r}"
+                f"ArticulatedSilhouetteRenderer requires state_convention={CANONICAL_ARTICULATED_CONVENTION!r} "
+                f"(or one of {sorted(valid_conventions)}), got {request.state_convention!r}"
             )
 
-        if len(request.state) not in (_CANONICAL_FIELD_COUNT, 27):
+        if request.state_convention == CANONICAL_ARTICULATED_CONVENTION and len(
+            request.state
+        ) not in (_CANONICAL_FIELD_COUNT, 27):
             raise ValueError(
                 f"ArticulatedSilhouetteRenderer requires {_CANONICAL_FIELD_COUNT} (or 27) state elements for "
                 f"{CANONICAL_ARTICULATED_CONVENTION!r}, got {len(request.state)}"
+            )
+        if (
+            request.state_convention == NATIVE_FULL_BODY_CONVENTION
+            and len(request.state) != 41
+        ):
+            raise ValueError(
+                f"ArticulatedSilhouetteRenderer requires 41 state elements for "
+                f"{NATIVE_FULL_BODY_CONVENTION!r}, got {len(request.state)}"
+            )
+        if (
+            request.state_convention == CANONICAL_V2_FULL_BODY_CONVENTION
+            and len(request.state) != 42
+        ):
+            raise ValueError(
+                f"ArticulatedSilhouetteRenderer requires 42 state elements for "
+                f"{CANONICAL_V2_FULL_BODY_CONVENTION!r}, got {len(request.state)}"
             )
 
         return camera, width, height
@@ -373,7 +398,17 @@ class ArticulatedSilhouetteRenderer:
         """Render articulated body and club silhouettes from canonical state vector."""
         camera, width, height = self._validate_request(request)
 
-        angles = state_vector_to_joint_dict(request.state)
+        if request.state_convention in (
+            NATIVE_FULL_BODY_CONVENTION,
+            CANONICAL_V2_FULL_BODY_CONVENTION,
+        ):
+            from .forward_model import native_41_to_canonical_37
+
+            state_37 = native_41_to_canonical_37(request.state)
+            angles = state_vector_to_joint_dict(state_37)
+        else:
+            angles = state_vector_to_joint_dict(request.state)
+
         pose = forward_kinematics(
             angles,
             lengths=self._segment_lengths,

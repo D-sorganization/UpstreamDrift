@@ -9,7 +9,7 @@ from types import MappingProxyType
 from typing import Any, Literal
 
 
-from ._validation import check_id, check_pos_float, check_str
+from ._validation import check_id, check_pos_float, check_str, check_strict_float
 from .contracts import (
     CANONICAL_ARTICULATED_CONVENTION,
     Handedness,
@@ -27,6 +27,41 @@ from .projection import (
 HypothesisLabel = Literal["observed", "inferred", "prior"]
 _VALID_HYPOTHESIS_LABELS = frozenset(("observed", "inferred", "prior"))
 _VALID_HANDEDNESS = frozenset(("right", "left"))
+
+
+# ---------------------------------------------------------------------------
+# Priors Declaration (MMR-14)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class FittingPriors:
+    """Declared priors for camera distance, subject morphology, and club geometry."""
+
+    nominal_depths_m: tuple[float, ...] = (2.5, 3.5)
+    yaw_options_deg: tuple[float, ...] = (-15.0, 0.0, 15.0)
+    subject_height_prior_m: tuple[float, float] = (1.50, 2.10)
+    club_length_prior_m: tuple[float, float] = (0.90, 1.30)
+    frame_rate_prior_hz: float = 30.0
+
+    def __post_init__(self) -> None:
+        for d in self.nominal_depths_m:
+            check_pos_float(d, "nominal_depth_m")
+        for y in self.yaw_options_deg:
+            check_strict_float(y, "yaw_deg")
+        if (
+            self.subject_height_prior_m[0] <= 0.0
+            or self.subject_height_prior_m[1] <= self.subject_height_prior_m[0]
+        ):
+            raise ValueError(
+                f"Invalid subject_height_prior_m: {self.subject_height_prior_m}"
+            )
+        if (
+            self.club_length_prior_m[0] <= 0.0
+            or self.club_length_prior_m[1] <= self.club_length_prior_m[0]
+        ):
+            raise ValueError(f"Invalid club_length_prior_m: {self.club_length_prior_m}")
+        check_pos_float(self.frame_rate_prior_hz, "frame_rate_prior_hz")
 
 
 # ---------------------------------------------------------------------------
@@ -221,6 +256,7 @@ def generate_monocular_hypotheses(
     subject_binding: SubjectModelBinding,
     nominal_depths_m: Sequence[float],
     handedness_options: Sequence[Handedness],
+    yaw_options_deg: Sequence[float] = (0.0,),
 ) -> tuple[InitialHypothesis, ...]:
     """Generate discrete depth, scale, and handedness hypotheses for ambiguous monocular views."""
     top, left, bottom, right = observed_body_bbox
@@ -234,21 +270,26 @@ def generate_monocular_hypotheses(
             check_pos_float(depth_m, "nominal_depth_m")
             # Image projection scale: h_px = f_y * (H * scale) / depth => scale = h_px * depth / (f_y * H)
             scale = (bbox_h_px * depth_m) / (camera.fy * nominal_height_m)
-            idx += 1
-            hyp = InitialHypothesis(
-                hypothesis_id=f"hyp_{camera.camera_id}_{idx:03d}",
-                subject_id=subject_binding.subject_id,
-                camera_id=camera.camera_id,
-                scale=scale,
-                depth_m=depth_m,
-                handedness=handedness,
-                pose=(0.0, 0.0, depth_m, 1.0, 0.0, 0.0, 0.0),
-                velocity=(0.0, 0.0, 0.0),
-                score=0.5,
-                label="inferred",
-                provenance="monocular_depth_grid",
-            )
-            hypotheses.append(hyp)
+            for yaw_deg in yaw_options_deg:
+                check_strict_float(yaw_deg, "yaw_deg")
+                idx += 1
+                half_yaw = math.radians(yaw_deg) * 0.5
+                qw = math.cos(half_yaw)
+                qz = math.sin(half_yaw)
+                hyp = InitialHypothesis(
+                    hypothesis_id=f"hyp_{camera.camera_id}_{idx:03d}",
+                    subject_id=subject_binding.subject_id,
+                    camera_id=camera.camera_id,
+                    scale=scale,
+                    depth_m=depth_m,
+                    handedness=handedness,
+                    pose=(0.0, 0.0, depth_m, qw, 0.0, 0.0, qz),
+                    velocity=(0.0, 0.0, 0.0),
+                    score=0.5,
+                    label="inferred",
+                    provenance="monocular_depth_grid",
+                )
+                hypotheses.append(hyp)
     return tuple(hypotheses)
 
 
