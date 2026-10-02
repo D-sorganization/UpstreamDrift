@@ -1,6 +1,6 @@
 # Simscape Matching Review and Continuation Handoff
 
-## Verified Full Human Exports
+## Earlier Verified Full Human Exports
 
 Both full sampled swings now use GS3DX_Human ellipsoids with calibrated foot orientation and freshly calibrated marker offsets. Native solves exited naturally with code zero at 2026-10-02T05:15:54Z (A) and 05:23:22Z (O). Position RMS excludes orientation residuals.
 
@@ -22,6 +22,14 @@ The current model (`91997471`) full tour export exited naturally at 07:49:26Z, b
 Latest selected Desktop delivery: `Simscape_Matches_20261001/Best_Human_Matches_20261002.zip`, SHA256 `a97db61e9fb43dbae4961b24727526554ce68abe081f60c79146b7b29b302cb3`. It includes the earlier model's tour clips and current model's owner clips, separately identified hashes/runtime/provenance, all four fully decoded MP4s, no raw captures or private pose caches. Prior packages are retained.
 
 Selected and current runtime versions differ (NumPy 2.4.4/ezc3d 1.7.2 versus 2.2.6/1.6.3). Read-only canonical SI XYZ/validity/ordered-label digests match exactly for both captures under those runtimes. This narrows the importer concern; it does not prove equivalent numerical solver behavior or identify why the model fit changed. The controlled earlier-model run on current source/runtime produced joint arrays identical to the current-model tour run (maximum difference zero); both give 13.366/41.385 mm. The first wrapper exited one after solving because it read an absent return-report field; the corrected JSON-provenance check reused the verified pose cache and exited naturally at 08:59:42Z. Recorded solve-source hashes match the earlier selected execution, whose poses differ, but full transitive/runtime equivalence is not established. The model binary alone does not explain this difference under common tested conditions. Continue cross-execution reproducibility and physical initialization review. No saved-model geometry is overwritten to force prior fit.
+
+## Native Mapping and Head-Cluster Review
+
+The selected shareable clips remain tour 13.188/40.121 mm and owner 16.643/36.865 mm mean/max frame position RMS. Both use Human ellipsoids and IK; full forward dynamics remains unqualified. The controlled common-source/runtime tour comparison produced identical poses with the old and current model, so the newer model binary alone does not explain the changed fit.
+
+Two new pure helpers passed 18 native initialization-mapping tests and 8 marker-cluster tests, with zero failed/incomplete tests. Parent review added actual failing regressions for matrix-shaped poses and a scale-dependent degeneracy cutoff before fixes passed. These counts are separate from the earlier 187-test integration suite. The first native state-target-expression check failed (original loop status 1, mapped -1, scalar discrepancy 16.320 degrees). A compiled diagram update refreshed stale masked start values; a fresh KinematicsSolver then reproduced all 22 joint frames for both captures, with maximum translation error 4.44e-16 m and rotation-matrix error below 9.49e-15. The run exited naturally with code zero at 10:03:13Z. No simulation ran and no model was saved; state-target priorities, controller references and physical initialization remain unqualified.
+
+HeadTop/HeadFront/HeadSide tracks are finite and nondegenerate in all 654 tour and 367 owner frames. Pair-distance variation reaches 6.761% for the owner; cluster axes require body-frame calibration and do not establish anatomical orientation. A conservative optional head-motion candidate is under development and has not replaced selected clips. See `native_helper_review_20261002.json` and `head_track_audit_20261002.json` in the research reference directory. The latest LaTeX source remains uncompiled: the built-in compiler reports `Unable to find standard directories for platform`.
 
 ## Identity and Branch Status
 
@@ -1154,3 +1162,21 @@ current documentation commit and retry from a clean worktree.
 ## Main Refresh
 
 Commit `SELF` merges current main at `80dd2f7be`, retaining both SPEC changelog entries. No exploratory GS3DX source or model files changed upstream from the previously tested integration base. The 187 native integration tests and 44 focused Python checks therefore retain their stated scope. Tour matching on the current-main Human model exited naturally with code zero at 07:49:26Z, but mean/max frame position RMS increased to 13.366/41.385 mm, so it has not replaced the earlier selected tour clips. Owner matching and same-runtime/model delta diagnosis remain pending. Draft continuation PR: https://github.com/D-sorganization/UpstreamDrift/pull/11256.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.

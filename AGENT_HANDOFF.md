@@ -10,9 +10,9 @@
 
 # Historical Player Capture Handoff
 
-## Simscape Matching Review (2026-10-01)
+## Simscape Matching Review (2026-10-02)
 
-Active review branch: `feat/simscape-matching-review-main-20261002`; draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256), latest published integration `7a315dd32`. Source and runtime qualification remain in progress; no merge, complete goal, or physical acceptance is claimed. Reviewed original worker commits `144e81188` through `f2ca443a0` (documentation-only continuation); unpublished original `144e81188` baseline.
+Active review branch: `feat/simscape-matching-review-main-20261002`; draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256), reviewed continuation commit `SELF`. Source and runtime qualification remain in progress; no merge, complete goal, or physical acceptance is claimed. Reviewed original worker commits `144e81188` through `f2ca443a0` (documentation-only continuation); unpublished original `144e81188` baseline.
 See [Current Handoff](docs/development/HANDOFF.md), [Modeling Reference](docs/research/simscape_matching_reference/README.md), and [Refinement Requirements](docs/research/simscape_matching_reference/MATCHING_REFINEMENT.md).
 
 - **Captures and Avatars**: Capture A is the tour reference (360 Hz, 654 frames); Capture O is the owner's optical capture (240 Hz, 367 frames). Golfer skill or athletic ability cannot and must not be inferred from avatar appearance or kinematic fitting distortions.
@@ -30,6 +30,14 @@ See [Current Handoff](docs/development/HANDOFF.md), [Modeling Reference](docs/re
 Main integration passed 187 native MATLAB tests and 44 focused Python tests against model hash `919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f`. The verified Desktop clips retain the separately identified `9a26ee80` model. Current-main anatomical meshes, compiled-budget diagnostics and promoted model files are preserved.
 
 Latest selected package: `Best_Human_Matches_20261002.zip` on Desktop. Tour retains model `9a26ee80` (13.188/40.121 mm); current-model `91997471` owner improves to 16.643/36.865 mm with small mixed foot-orientation changes. Both current-model native exports exited naturally; all four selected clips fully decoded. Forty-two runner tests and five reference checks pass after the function-budget refactor; current protected CI remains pending. See canonical handoff for receipts and exact limits.
+
+### Native Target Binding and Head-Cluster Continuation
+
+The selected shareable clips remain tour 13.188/40.121 mm and owner 16.643/36.865 mm mean/max frame position RMS. Both use Human ellipsoids and IK; full forward dynamics remains unqualified. The controlled common-source/runtime tour comparison produced identical poses with the old and current model, so the newer model binary alone does not explain the changed fit.
+
+Two new pure helpers passed 18 native initialization-mapping tests and 8 marker-cluster tests, with zero failed/incomplete tests. Parent review added actual failing regressions for matrix-shaped poses and a scale-dependent degeneracy cutoff before fixes passed. These counts are separate from the earlier 187-test integration suite. The first native state-target-expression check failed (original loop status 1, mapped -1, scalar discrepancy 16.320 degrees). A compiled diagram update refreshed stale masked start values; a fresh KinematicsSolver then reproduced all 22 joint frames for both captures, with maximum translation error 4.44e-16 m and rotation-matrix error below 9.49e-15. The run exited naturally with code zero at 10:03:13Z. No simulation ran and no model was saved; state-target priorities, controller references and physical initialization remain unqualified.
+
+HeadTop/HeadFront/HeadSide tracks are finite and nondegenerate in all 654 tour and 367 owner frames. Pair-distance variation reaches 6.761% for the owner; cluster axes require body-frame calibration and do not establish anatomical orientation. A conservative optional head-motion candidate is under development and has not replaced selected clips. See `native_helper_review_20261002.json` and `head_track_audit_20261002.json` in the research reference directory. The latest LaTeX source remains uncompiled: the built-in compiler reports `Unable to find standard directories for platform`.
 
 ## Active: Tiger 2000 and Ben Hogan
 
@@ -222,3 +230,21 @@ PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837), [#108
 - Epic #10584 and all child packages TB-00 through TB-12 are closed. Full-body models remain under governing programs (#10363, #10378, #10430, #10440).
 - Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.

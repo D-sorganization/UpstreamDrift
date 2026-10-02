@@ -58,3 +58,45 @@ These checks verify source presence, standalone structure, the governance
 notice and obvious private-path leakage. They do not validate equations or
 physical claims. Native Simscape probes, mathematical tests, compiled PDF
 inspection and complete video decoding provide distinct evidence.
+
+## Current Evidence and Selection
+
+The selected Desktop package is `Best_Human_Matches_20261002.zip`. Tour clips
+retain the earlier Human model (13.188/40.121 mm mean/max frame position RMS);
+owner clips use the current model (16.643/36.865 mm). Each capture records its
+own model/runtime identity. The owner foot-orientation changes are small and
+mixed. These are exploratory position-tracking selections, with no anatomical
+or physical acceptance claim.
+
+| Evidence | What It Establishes | Remaining Boundary |
+| --- | --- | --- |
+| [Current Exports](main_video_verification_20261002.json) | Native receipts, separate position/foot metrics and complete MP4 decoding | IK visualization only |
+| [Runtime Comparison](capture_runtime_comparison_20261002.json) | Canonical SI positions, validity masks, labels and rates agree under recorded importers | Full solver/runtime equivalence unresolved |
+| [Native Helper Review](native_helper_review_20261002.json) | 18 pose-mapping and 8 cluster tests; both native target-expression/FK roundtrips pass after mask refresh | Priorities, controller references and physical initialization unqualified |
+| [Head-Track Audit](head_track_audit_20261002.json) | Cluster data available in both captures, with explicit pair-distance variation | Body-frame calibration and head-constrained fit under review |
+
+The controlled tour comparison used current source/runtime with both model
+binaries and produced identical poses. It does not explain the difference
+from the earlier selected execution. All physical gates remain open.
+
+The latest `.tex` source remains uncompiled: the built-in compiler reports
+`Unable to find standard directories for platform`. The previously reviewed
+16-page PDF is a prior revision and does not validate these newer sections.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.

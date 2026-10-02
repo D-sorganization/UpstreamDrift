@@ -1,0 +1,56 @@
+{
+  "capture-A": {
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "frames": 654,
+    "finite_nonnegative_residual_samples": 654,
+    "nondegenerate_cluster_samples": 654,
+    "address_sample_valid": true,
+    "minimum_valid_pair_sine": 0.9655947722580702,
+    "pair_distance_stats": {
+      "top_front": {
+        "mean_m": 0.15559181109825915,
+        "range_m": 0.0015828155390549548,
+        "relative_range": 0.010172871746157495
+      },
+      "top_side": {
+        "mean_m": 0.13385617638541475,
+        "range_m": 0.0021006819785951425,
+        "relative_range": 0.015693575263547102
+      },
+      "front_side": {
+        "mean_m": 0.17792407647201577,
+        "range_m": 0.0018433262164918585,
+        "relative_range": 0.010360184259727099
+      }
+    },
+    "qualification": "CAPTURE_TRACK_GEOMETRY_ONLY",
+    "limitation": "Labels and rigidity do not prove anatomical axes, direct measurement provenance or head-model calibration."
+  },
+  "capture-O": {
+    "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+    "frames": 367,
+    "finite_nonnegative_residual_samples": 367,
+    "nondegenerate_cluster_samples": 367,
+    "address_sample_valid": true,
+    "minimum_valid_pair_sine": 0.9516347857939057,
+    "pair_distance_stats": {
+      "top_front": {
+        "mean_m": 0.111527692866052,
+        "range_m": 0.0011242729946849411,
+        "relative_range": 0.010080662172714588
+      },
+      "top_side": {
+        "mean_m": 0.14170306116090278,
+        "range_m": 0.007810213540143773,
+        "relative_range": 0.0551167594839418
+      },
+      "front_side": {
+        "mean_m": 0.15211204647001722,
+        "range_m": 0.010285007295542548,
+        "relative_range": 0.0676146796668719
+      }
+    },
+    "qualification": "CAPTURE_TRACK_GEOMETRY_ONLY",
+    "limitation": "Labels and rigidity do not prove anatomical axes, direct measurement provenance or head-model calibration."
+  }
+}

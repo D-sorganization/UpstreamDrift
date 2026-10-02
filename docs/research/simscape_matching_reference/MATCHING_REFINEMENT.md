@@ -1,5 +1,15 @@
 # Simscape Motion Matching Refinement Requirements and Evidence Status
 
+## Current Verified Status (October 2, 2026)
+
+The selected shareable clips remain tour 13.188/40.121 mm and owner 16.643/36.865 mm mean/max frame position RMS. Both use Human ellipsoids and IK; full forward dynamics remains unqualified. The controlled common-source/runtime tour comparison produced identical poses with the old and current model, so the newer model binary alone does not explain the changed fit.
+
+Two new pure helpers passed 18 native initialization-mapping tests and 8 marker-cluster tests, with zero failed/incomplete tests. Parent review added actual failing regressions for matrix-shaped poses and a scale-dependent degeneracy cutoff before fixes passed. These counts are separate from the earlier 187-test integration suite. The first native state-target-expression check failed (original loop status 1, mapped -1, scalar discrepancy 16.320 degrees). A compiled diagram update refreshed stale masked start values; a fresh KinematicsSolver then reproduced all 22 joint frames for both captures, with maximum translation error 4.44e-16 m and rotation-matrix error below 9.49e-15. The run exited naturally with code zero at 10:03:13Z. No simulation ran and no model was saved; state-target priorities, controller references and physical initialization remain unqualified.
+
+HeadTop/HeadFront/HeadSide tracks are finite and nondegenerate in all 654 tour and 367 owner frames. Pair-distance variation reaches 6.761% for the owner; cluster axes require body-frame calibration and do not establish anatomical orientation. A conservative optional head-motion candidate is under development and has not replaced selected clips. See `native_helper_review_20261002.json` and `head_track_audit_20261002.json` in the research reference directory. The latest LaTeX source remains uncompiled: the built-in compiler reports `Unable to find standard directories for platform`.
+
+## Historical Experiments and Requirements
+
 ## Verified Full Human Exports
 
 Both full sampled swings now use GS3DX_Human ellipsoids with calibrated foot orientation and freshly calibrated marker offsets. Native solves exited naturally with code zero at 2026-10-02T05:15:54Z (A) and 05:23:22Z (O). Position RMS excludes orientation residuals.
@@ -134,4 +144,22 @@ Both actual C3D files specify metres and contain no EVENT parameter group. Under
 
 ## Import/Export Hardening Checks
 
-Capture-unit and missingness conversion: 13 native tests pass. Runtime fingerprint: 17 native tests pass. Export contracts plus live runtime query: 12 native tests pass. All have zero incomplete tests; actual runtime values are recorded in the handoff. Fresh full A/O exports remain pending; existing selected clips have not been replaced. The inventory records direct components and selected sources, not all transitive packages or external mesh assets.
+Capture-unit and missingness conversion: 13 native tests pass. Runtime fingerprint: 17 native tests pass. Export contracts plus live runtime query: 12 native tests pass. All have zero incomplete tests; actual runtime values are recorded in the handoff. Fresh full A/O exports subsequently completed; current selected outputs and model/runtime identities are recorded in the current status and canonical handoff. The inventory records direct components and selected sources, not all transitive packages or external mesh assets.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.

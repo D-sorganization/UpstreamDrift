@@ -22,14 +22,25 @@
 
 \title{\textbf{Simscape Multibody Golf Swing Modeling: Mechanics, Identifiability, and Diagnostics}}
 \author{UpstreamDrift Modeling Reference}
-\date{October 1, 2026 --- Source Revision \texttt{144e81188}}
+\date{October 2, 2026 --- Review Continuation, PR \#11256}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-This reference documents the Simscape Multibody golf swing model lineage from the legacy kinetic model to the contact-supported \texttt{GS3DX\_Human} variant under MATLAB R2025b (Home license: 1,000-block limit, 25-block diagnostic reserve). It details coordinate transformations, address waist origins, intrinsic Euler mappings, and power-preserving torque duals. We record parameter identifiability limits, iterative learning control with inertia-scaled gains, foot-pose Jacobian balance feedback, and closed-loop internal force spaces. Point-force contact diagnostics (21.863~N$\cdot$m RMS residual) and transient load spikes (365~BW and 22.6~BW) are evaluated, rejecting unqualified contact loads. Active red acceptance gates (\#11156, \#11160, \#11173) and operational qualification protocols are established.
+This reference documents tour-reference and owner optical-capture matching with
+the \texttt{GS3DX\_Human} ellipsoid model under MATLAB R2025b. It defines SI
+capture transformations, joint-role mapping, closed-grip inverse kinematics,
+marker-offset calibration, full foot orientation and model/runtime provenance.
+Selected shareable videos have mean/max frame position RMS of 13.188/40.121 mm
+for the tour and 16.643/36.865 mm for the owner. They are IK visualizations;
+these residuals do not establish anatomical, contact or forward-dynamics
+qualification. The model lineage, intrinsic Euler and torque mappings, inertia
+assumptions, controller experiments and rejected contact-load results remain
+available for reproduction. Native execution, software checks, visual review
+and physical acceptance are recorded separately. Gates \#11156, \#11160 and
+\#11173 remain open, and cross-execution reproducibility concerns are explicit.
 \end{abstract}
 
 \tableofcontents
@@ -49,7 +60,9 @@ This document serves strictly as a dedicated research, experiment, and biomechan
 \subsection{Branch Provenance and Baseline Commit Ledger}
 Historical metrics are attributed to the October 1 turnover.\par
 Turnover branch: \nolinkurl{feat/simscape-gs3dx-exploratory}.\par
-Reviewed branch: \nolinkurl{feat/simscape-reference-20261001}.
+Reviewed source branch: \nolinkurl{feat/simscape-reference-20261001}.\par
+Published integration branch:
+\nolinkurl{feat/simscape-matching-review-main-20261002}, draft PR \#11256.
 \begin{itemize}
     \item \textbf{Branch Head Source Commit:} \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511} (October 1, 2026).
     \item \textbf{Historical Handoff Baseline:} \texttt{2d5830d18}. This historical attribution is not a verified current remote baseline.
@@ -819,6 +832,97 @@ alone does not explain the observed tour fit change under the tested common
 conditions. Software tests, a published draft and natural IK export
 receipts do not establish contact, anatomical or forward-dynamics acceptance.
 
+
+\subsection{Solved Poses and Native Initialization Targets}
+An IK pose is not automatically a valid simulation initial condition. The
+current Human model exposes 48 joint position variables across 22 joint
+blocks. A pure, permutation-invariant adapter maps one finite pose vector
+to 33 workspace position fields, 33 explicitly quiet velocity fields and
+four literal neck/midfoot position targets. It validates exact joint keys
+and native units. Spherical axis--angle states are converted to intrinsic
+follower $X$--$Y$--$Z$ angles, preserving the rotation matrix rather than
+the numerical representation\cite{MathWorksEuler}. The adapter rejects
+nonunit axes for nonzero angles and Euler singularities; it does not
+change state-target priorities, motion inputs or controller references.
+
+Eighteen native MATLAB tests pass with zero incomplete tests. A parent
+review exposed acceptance of a matrix in place of the required single pose
+vector: the added regression test failed before an explicit vector check
+and passed after it. These are \texttt{PURE\_MAPPING\_ONLY} checks. The
+first native target-expression roundtrip failed: the original tour pose
+closed the kinematic loop, but the resolved mapped targets did not
+(statuses $1$ and $-1$). A non-spherical target discrepancy of 16.320
+degrees remained. A subsequent probe identified stale masked start values
+after model-workspace assignment. A compiled diagram update using
+\texttt{set\_param(mdl,'SimulationCommand','update')} refreshed the masks;
+a newly constructed KinematicsSolver then closed both original and mapped
+poses for both captures. All 22 joint follower frames agreed: maximum
+translation error $4.44\times10^{-16}$ m, and maximum rotation-matrix
+Frobenius errors $1.16\times10^{-15}$ (tour) and $9.49\times10^{-15}$ (owner).
+The run exited naturally with code zero at \texttt{10:03:13Z}. The earlier
+failure remains recorded. This is a target-expression/FK roundtrip, with
+diagram update but no simulation or saved model. Compatible state-target
+priorities, closed-arm initialization, controller references and ground
+placement must still be established before a forward-dynamics replay can
+be accepted. These two tested poses do not prove every masked subsystem
+or all possible states have equivalent behavior.
+
+\subsection{Head-Cluster Observability and Candidate Calibration}
+Both recordings contain finite, nondegenerate \texttt{HeadTop},
+\texttt{HeadFront} and \texttt{HeadSide} tracks at every sampled frame
+(654 tour, 367 owner). The minimum sine between cluster vectors is
+0.966 and 0.952 respectively. Pair-distance ranges are 1.583--2.101 mm
+for the tour and 1.124--10.285 mm for the owner; the latter includes
+relative ranges up to 6.761\%. Thus these tracks provide orientation
+information, but their labels and approximate rigidity do not establish
+anatomical skull axes or direct-measurement provenance.
+
+For points $p_0,p_1,p_2$, define $x$ along $p_1-p_0$, $y$ along the
+component of $p_2-p_0$ orthogonal to $x$, and $z=x\times y$.
+The resulting cluster frame $F=[x\ y\ z]$ is distinct from a calibrated
+body frame. A prospective relative-motion target is
+\[
+  R_{\mathrm{head,target}}(f)
+  =F(f)F(f_a)^T R_{\mathrm{head,model}}(f_a),
+\]
+where the measured address cluster and the model address orientation
+must both be valid. This retains the explicitly assumed model orientation
+at address. The model's two neck degrees of freedom need not reproduce
+an arbitrary three-axis target. Missing clusters must remain missing;
+position and orientation errors must be reported separately.
+
+The cluster helper passed eight native tests, including known rotations,
+rigid transformations, missing data, degeneracy and finite-scale cases.
+Parent review found an absolute machine-epsilon cutoff that rejected a
+valid cluster scaled to $10^{-20}$; the new test failed before correction.
+Common-component normalization now avoids norm overflow/underflow and
+uses the declared relative $10^{-6}$ degeneracy guard. Every valid result
+must satisfy proper-rotation postconditions. These tests cover represented
+finite inputs, not arbitrary translation/scale combinations that lose
+coordinate differences to floating-point cancellation. A head-constrained
+IK candidate remains under development; neither this helper nor these
+track statistics qualify anatomical orientation or replace selected clips.
+
+\subsection{Reviewed Helper Integration Checkpoint}
+The combined suite passed 213 native MATLAB R2025b software/parameter checks,
+with zero failed or incomplete tests and natural exit zero at
+\texttt{2026-10-02T10:27:31Z}. The 18 mapping and eight cluster tests are
+included in that total. The unfinished head extension was withheld after
+review found insufficient gap/coverage validation and no comparison proving
+baseline preservation. Its source and partial evidence are retained privately;
+the baseline IK source was restored before the combined check. No
+head-constrained candidate or replacement selected clip is established.
+
+The generated monolith register was regenerated after a protected unit gate
+passed 19,980 tests and failed its register-sync check. Five focused register
+tests then passed locally. A separate leaderboard job could not locate a
+tracked local action despite its checkout log recording sparse-checkout
+disable. The proposed cleanup explanation is not established; no speculative
+workflow patch was accepted. Fresh protected CI and formal review remain
+required. The latest LaTeX source remains uncompiled because the built-in
+compiler reports a platform-directory error. Software checks do not qualify
+PDF rendering or the open physical gates.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
@@ -831,6 +935,9 @@ P.~de~Leva. Adjustments to Zatsiorsky--Seluyanov's segment inertia parameters.
 MathWorks. \emph{Spherical Joint: Simscape Multibody Documentation}.
 \url{https://www.mathworks.com/help/sm/ref/sphericaljoint.html}.
 Quaternion state representation does not remove the adapter's Euler singularity.
+\bibitem{MathWorksEuler}
+MathWorks. \emph{eul2rotm: Convert Euler Angles to Rotation Matrix}.
+\url{https://www.mathworks.com/help/robotics/ref/eul2rotm.html}.
 \bibitem{Implementation}
 UpstreamDrift. \emph{GS3DX Implementation and October 1 Turnover Record}.
 Reviewed source commit \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511}.
