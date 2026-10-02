@@ -1926,6 +1926,60 @@ parameter and short historical replay evidence does not qualify the
 configured Human full swing. See
 \texttt{native\_configured\_learning\_integration\_tests\_20261002.json}.
 
+
+\subsection{Saved Leg Servo Effort and Late-Window Motion}
+A read-only native R2025b analysis completed naturally at
+\texttt{2026-10-02T17:47:04Z}. It reconstructed chart-coordinate angles
+and rates from both saved one-second balance-enabled holds through
+\texttt{gs3dx\_track\_state}, on a diagnostic 2 ms grid. The constant
+references came from the shared unit-keyed initial-target and quiet-profile
+mappers; initial leg-angle closure was below $10^{-6}$ degrees for both.
+The actual recorded servo gains give the baseline component
+\begin{equation}
+ \tau_{\mathrm{servo}}(t)=K_p\odot[A-q(t)]-K_d\odot\dot q(t).
+\end{equation}
+This excludes the active balance correction. From the existing command
+equation, the chart-coordinate net command also includes
+$K_p\odot(Gs+f)+K_d\odot(Gv_s)$ and the leg feedforward offset $C_0$;
+here $C_0=0$. The shift $s$ is in metres, the foot correction $f$ in
+degrees, and $v_s$ is the commanded rate correction in metres/s. In the
+implementation $v_s=-\mathtt{BalanceKp}\,\dot e$; it is not the full
+time derivative of the damped, limited shift. Large baseline servo effort
+therefore cannot by itself be
+called total actuation, gravity torque, or evidence of harmful cancellation.
+Balance offsets intentionally change the servo target. Spherical joints
+still require the documented virtual-work map to physical torque vectors.
+
+The $0.5$--$1.0$ s interval is an analysis window, not a verified static
+equilibrium. Maximum pelvis motion is measured relative to the first
+sample in that window, rather than relative to address:
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Capture & Servo RMS & Pelvis Motion & Pelvis Rotation & Largest Axis Rate RMS \\
+ & (N\,m) & (mm) & ($^\circ$) & ($^\circ$/s) \\
+\midrule
+Tour & 226.583 & 10.439 & 3.147 & 7.691 \\
+Owner & 236.384 & 5.893 & 1.283 & 7.275 \\
+\bottomrule
+\end{tabular}
+\end{center}
+These late-window motions and nonzero joint rates prevent promotion of an
+average servo torque as an established static gravity solution. The original
+hold gates remain rejected. Internal upper-body torques can alter posture,
+COM and contact reactions; they do not directly actuate the floating base.
+Their influence must be measured rather than ruled out a priori.
+
+The saved top-level logs include pelvis pose, whole-mechanism COM/mass,
+contact forces and six per-joint datasets. Their nested fields and controller
+signals must be checked before recovering total actuation and balance
+contributions. The corrected reader loads its own unchanged Human model
+only for persisted block-path resolution, then closes it without saving;
+no new FK or dynamics runs. Failed relative-path and unloaded-model attempts
+are retained. Raw joint/torque traces remain private; aggregate metrics,
+input/probe hashes and receipts are in
+\texttt{saved\_leg\_servo\_diagnosis\_review\_20261002.json}.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

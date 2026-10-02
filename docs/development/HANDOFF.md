@@ -1471,3 +1471,29 @@ See `native_configured_learning_integration_tests_20261002.json`; this
 short legacy replay does not qualify the configured Human full swing. Built-in LaTeX compilation remains
 unavailable: `Unable to find standard directories for platform`. PDF review,
 current-head protected CI and full-body replay remain open.
+
+### Saved Leg Servo Effort and Late-Window Motion
+
+Read-only native R2025b analysis completed naturally at **17:47:04Z**.
+The 2 ms diagnostic grid reconstructs baseline leg servo feedback from the
+saved balance-enabled holds and actual gains, excluding balance correction
+and total actuation. Initial reference closure is below 1e-6 degrees.
+Whole-run baseline servo RMS is **226.583 N m tour**, **236.384 N m owner**.
+The 0.5-1.0 s analysis window still moves: pelvis maximum displacement and
+rotation relative to its first window sample are **10.439 mm / 3.147 degrees
+tour**, **5.893 mm / 1.283 degrees owner**. Largest per-axis leg-rate RMS is
+**7.691 / 7.275 degrees/s**. This is not verified static equilibrium; no
+mean torque is promoted to gravity feedforward and the fixed hold gates
+remain rejected. Large baseline effort cannot alone establish harmful
+cancellation because balance deliberately shifts the servo target.
+
+The reader loaded its own unchanged Human model only for saved block-path
+resolution and closed it without saving. No new dynamics/FK ran. Two failed
+path-resolution attempts are retained. Raw traces remain private; see
+`saved_leg_servo_diagnosis_review_20261002.json` and the same updated LaTeX
+source. Inspect nested joint datasets/controller signals to recover actual
+net actuation and balance terms before a bounded support-control change.
+Current PDF remains unverified because the built-in compiler is unavailable.
+CI Standard run37042119516 executed published3187eccd0 and exposed an owned
+duplicate #11256 SPEC row; it is consolidated and the duplicate/version
+checks pass locally. Fresh current-head protected checks remain required.
