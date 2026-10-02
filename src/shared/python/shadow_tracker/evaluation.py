@@ -354,15 +354,11 @@ def classify_evidence_quality(
     return "validated_profile"
 
 
-def audit_gate_profile(
+def _evaluate_g0(
     candidate: CandidateResult,
     observations: Sequence[FrameObservation],
     profile: GateProfile,
-) -> tuple[bool, tuple[GateStatus, ...]]:
-    """Audit candidate against versioned Gate G0 through G5 thresholds."""
-    statuses: list[GateStatus] = []
-
-    # G0: Input integrity
+) -> GateStatus:
     has_synthetic = (
         bool(candidate.diagnostics.get("is_synthetic", False))
         or any(obs.confidence_provenance == "synthetic" for obs in observations)
@@ -384,15 +380,22 @@ def audit_gate_profile(
         g0_reason = (
             "Input frames valid" if g0_pass else "Missing/invalid observation frames"
         )
-    statuses.append(
-        GateStatus(
-            gate_id="G0",
-            passed=g0_pass,
-            score=1.0 if g0_pass else 0.0,
-            threshold=1.0,
-            reason=g0_reason,
-        )
+    return GateStatus(
+        gate_id="G0",
+        passed=g0_pass,
+        score=1.0 if g0_pass else 0.0,
+        threshold=1.0,
+        reason=g0_reason,
     )
+
+
+def audit_gate_profile(
+    candidate: CandidateResult,
+    observations: Sequence[FrameObservation],
+    profile: GateProfile,
+) -> tuple[bool, tuple[GateStatus, ...]]:
+    """Audit candidate against versioned Gate G0 through G5 thresholds."""
+    statuses: list[GateStatus] = [_evaluate_g0(candidate, observations, profile)]
 
     # G1/G2: Silhouette Fidelity
     mean_iou = float(candidate.diagnostics.get("mean_iou", 0.0))
