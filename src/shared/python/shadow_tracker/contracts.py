@@ -890,8 +890,15 @@ class SegmentationResult:
 
 POINT_LANDMARKS_CONVENTION: Final[str] = "point_landmarks"
 CANONICAL_ARTICULATED_CONVENTION: Final[str] = "canonical_articulated_v1"
+NATIVE_FULL_BODY_CONVENTION: Final[str] = "native_full_body_v1"
+CANONICAL_V2_FULL_BODY_CONVENTION: Final[str] = "canonical_v2_full_body"
 _VALID_RENDER_STATE_CONVENTIONS: frozenset[str] = frozenset(
-    (POINT_LANDMARKS_CONVENTION, CANONICAL_ARTICULATED_CONVENTION)
+    (
+        POINT_LANDMARKS_CONVENTION,
+        CANONICAL_ARTICULATED_CONVENTION,
+        NATIVE_FULL_BODY_CONVENTION,
+        CANONICAL_V2_FULL_BODY_CONVENTION,
+    )
 )
 
 
