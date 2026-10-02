@@ -27,7 +27,7 @@ For **Simscape, MuJoCo, Drake, Pinocchio and OpenSim**, we want to:
 | Drake data                     | Inverse dynamics only; GUI "forces" are gravity                                                                                                                            | reaction-force, net-actuation and hydroelastic outputs unused                                                                                                                                                                         |
 | Pinocchio data                 | `data.f` computed in GUI only; adapter contact = zeros                                                                                                                     | one mixin draws local-frame wrenches as world                                                                                                                                                                                         |
 | OpenSim data                   | Inverse dynamics + scalar muscle forces; no reactions or contact read                                                                                                      | `HuntCrossleyForce` built but never read; grip forces placeholder `{}`                                                                                                                                                                |
-| Simscape data                  | **Rich force logs exist** (per-joint constraint/total F/T, hand-on-club, base-on-hip) in the `.slx` sensing and the exported CSV datasets; Python adapter reads only `tau` | `3D_Golf_Model/golf_swing_dataset_20250907_bk/*.csv`; `src/engines/simscape/_simscape_io.py`. Per-joint "Local" columns lack a logged joint rotation                                                                                  |
+| Simscape data                  | **Rich force logs exist** (per-joint constraint/total F/T, hand-on-club, base-on-hip) in the `.slx` sensing and the exported CSV datasets; Python adapter reads only `tau` | `3D_Golf_Model/golf_swing_dataset_20250907_bk/*.csv`; `src/engines/simscape/_simscape_io.py`. Per-joint "Local" columns come with `<J>Logs_Rotation_Transform_I11..I33` (global = R·local, as in `calculateForceMoments.m`)           |
 | Web                            | Three.js arrows exist, fed by a route that **fabricates geometry**; round trip drops `force_type`                                                                          | `src/api/routes/force_overlays.py`, `ui/src/pages/Simulation.tsx`, `Scene3D.tsx`                                                                                                                                                      |
 | Video                          | Calibrated cameras, time maps and footage compositors exist; **no vector projection**; trace import drops torques/wrench; no calibrated engine render                      | `motion_capture/reconstruct/cameras.py`, `reference/registration.py`, `reference/synchronization.py`, `tools/capture_rig/reference_rendering.py`, `overlay_render.py`, `workspace/necromatcher_video.py`                              |
 
@@ -104,11 +104,11 @@ Every renderer child must meet this bar. Its golden images prove it.
 | 16  | #11301 | OpenSim muscle lines of action                                                     | cli    | 15                         |
 | 17  | #11302 | OpenSim animated playback with arrows and segment shading                          | cli    | 7, 15                      |
 | 18  | #11303 | Simscape Python force loader (CSV/.mat → `ForceTorqueSeries`)                      | cli    | 1, 2                       |
-| 19  | #11304 | Simscape MATLAB logging of joint rotations and force export (R2025b host)          | cli    | 18                         |
+| 19  | #11304 | Simscape simulation-output force channels (`SimscapeOutput`, R2025b host)          | cli    | 18                         |
 | 20  | #11305 | Simscape 3D viewer arrows and segment shading                                      | cli    | 7, 18                      |
 | 21  | #11306 | Cross-engine physical parity suite for forces                                      | cli    | 9, 11, 13, 15, 18          |
 | 22  | #11307 | API and WebSocket: real provider frames replace fabricated geometry                | cli    | 1, 3, 9                    |
-| 23  | #11308 | Web three.js overlay on the wire schema                                            | cli    | 22                         |
+| 23  | #11308 | Web three.js overlay rendering the serialized `GlyphSet`                           | cli    | 22                         |
 | 24  | #11309 | Force series through trace import, time maps and video frames                      | cli    | 1                          |
 | 25  | #11310 | Arrow layer in the reference-comparison and capture-rig video compositors          | cli    | 2, 8, 24                   |
 | 26  | #11311 | Engine-agnostic model-on-footage layer with tension/compression fill               | cli    | 8, 24                      |
@@ -173,10 +173,16 @@ Every renderer child must meet this bar. Its golden images prove it.
 - **LoD:** no chains deeper than `a.b.c()`. UIs call a service or provider;
   renderers see only `GlyphSet`.
 - **DRY:**
-  - Reuse `SpatialWrench`, `AxialLoadFrame`, `ForceColorScale`, `PinholeCamera`,
-    `TimeMapping` and the compositors.
-  - When you replace a duplicate, delete it and its now-dead tests in the same
-    PR.
+  - Reuse `SpatialWrench` (its vector validation and transforms),
+    `AxialLoadFrame`, `ForceColorScale`, `PinholeCamera`, `TimeMapping` and the
+    compositors.
+  - When you replace a duplicate, delete private helpers and their now-dead
+    tests in the same PR. A **public, importable** module or function that
+    moves keeps a thin shim at the old path: a one-line re-export plus a
+    `DeprecationWarning`, for one release cycle (AGENTS.md "relocating
+    something").
+  - Remote clients render the serialized `GlyphSet` (`glyph-set-v1`). They
+    never reimplement the glyph algorithm.
 - **Headless:** `QT_QPA_PLATFORM=offscreen`, `MPLBACKEND=Agg`,
   `MUJOCO_GL=egl` (or `osmesa`). MATLAB runs only with `-batch` on an R2025b
   host by explicit path.
@@ -196,5 +202,7 @@ Every renderer child must meet this bar. Its golden images prove it.
   - Add one SPEC.md §12 row keyed by your PR.
   - User-facing changes update `src/config/feature_parity.json` and regenerate
     the matrix.
-  - Open a **draft** PR with `Refs #11285` and `Closes #<N>` only when every
-    acceptance box passes.
+  - Open a **ready-for-review** PR, never a draft (AGENTS.md,
+    Repository_Management#1390), with `Refs #11285`. Use `Closes #<N>` only
+    when every acceptance box passes. A frontier agent or the owner reviews it
+    before merge.

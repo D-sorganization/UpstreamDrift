@@ -26,7 +26,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `claude/force-torque-overlays-smwke2` (planning only)
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — deep-dive assessment, ADR-0052 (proposed, indexed in the ADR README) and 30 child issues filed; no implementation performed.
+- **Last verified:** 2026-10-02 at SELF — deep-dive assessment, ADR-0052 (proposed, indexed, revised for review findings: optional wrench halves, serialized GlyphSet wire) and 30 child issues filed and revised; no implementation performed.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
 - **Next step:** A CLI-tier agent implements FTO-1 (#11286), the contract module and wire schema.
 

@@ -62,12 +62,22 @@ engine adapter ──► ForceTorqueFrame ──► GlyphSet ──► renderer 
   - `label: str`: a stable id such as `"joint:left_elbow"` or
     `"contact:right_foot:0"`.
   - `body: str`: the body the wrench acts **on**.
-  - `wrench: SpatialWrench`: must use `application_frame == "world"`,
-    `direction_convention == "applied_to_body"`, and a point at the physical
-    application point (joint anchor, contact point, muscle insertion).
-  - `force_available: bool` and `torque_available: bool`. An unavailable half
-    is never drawn, and is never reported as zero.
+  - `point_m: tuple[float, float, float]`: the physical application point
+    (joint anchor, contact point, muscle insertion) in the world frame.
+  - `force_n: tuple[float, float, float] | None` and
+    `torque_nm: tuple[float, float, float] | None`: each half is **optional**,
+    and at least one must be present. An unavailable half is stored as `None`
+    and serialized as `null`. It is never fabricated, never drawn and never
+    reported as zero.
   - `source: str`: the engine and method, e.g. `"mujoco:cfrc_int"`.
+  - The frame is always `"world"` and the direction convention is always
+    `"applied_to_body"`. Neither is a field, so neither can be set wrongly.
+  - Why not embed `SpatialWrench`: it requires both halves to be finite
+    3-vectors, so a torque-only or force-only channel would have to invent the
+    missing half. `OverlayWrench` reuses `SpatialWrench`'s vector validation
+    (`_validate_vec3`) and transforms (see conversions). `to_spatial_wrench()`
+    returns a `SpatialWrench` only when both halves are present, and raises
+    `ValueError` otherwise.
 - `ForceTorqueFrame` is a frozen dataclass with these fields:
   - `time_s: float`.
   - `engine: str`.
@@ -93,7 +103,11 @@ engine adapter ──► ForceTorqueFrame ──► GlyphSet ──► renderer 
     builds a moment vector `tau·axis` at the joint anchor. It is used for
     scalar per-DOF torques; multi-DOF joints sum per-axis moments at one anchor.
   - `world_wrench_from_local(label, body, kind, force_local, torque_local,
-rotation_world_from_local, point_world, source)` wraps `transform_wrench`.
+rotation_world_from_local, point_world, source)` wraps `transform_wrench`
+    when both halves are present. With one half `None`, it rotates the present
+    half only. Moving a wrench to a **different** point changes the torque by
+    `r × F`, so `move_wrench_point(...)` returns `torque_nm=None` when the force
+    half is unknown, rather than guessing.
   - `axial_loads_from_reactions(frame, segment_axes)` returns an
     `AxialLoadFrame`. It calls `axial_force_from_proximal_reaction` on each
     `JOINT_REACTION` wrench, using a `SegmentAxis(proximal_m, distal_m)` map.
@@ -115,6 +129,14 @@ rotation_world_from_local, point_world, source)` wraps `transform_wrench`.
   - Deterministic.
   - Clamps lengths and records the clamping in `Glyph.clamped`.
   - Skips unavailable halves.
+- `GlyphSet` is serializable: `to_dict()` / `from_dict()` against
+  `schemas/glyph-set-v1.json`. **This serialized `GlyphSet` is the only
+  rendering wire format.** Every remote or non-Python client (web three.js,
+  web SVG-on-video) renders it as received. No client reimplements scaling,
+  clamping, availability or arc geometry, so the web cannot drift from the
+  native and video renderers. The physics wire format
+  (`force-torque-frame-v1`) stays available for analysis and export, not for
+  drawing.
 - `GlyphSet` contains the following:
   - `arrows: tuple[ArrowGlyph, ...]`. Each `ArrowGlyph` has `tail_m`, `tip_m`,
     `head_base_m`, `radius_m`, `rgba`, `kind`, `label`, `magnitude` and
@@ -163,9 +185,10 @@ clip_image=False)` and clips with `cv2.clipLine`.
   - Handles glyphs behind the camera.
   - Draws the legend box.
 - Web: `ui/src/components/visualization/ForceOverlay.tsx` renders the
-  `force-torque-frame-v1` wire schema directly. Torque arcs are drawn from
-  `TorqueArcGlyph` or recomputed client-side by the same algorithm, validated
-  against the shared fixtures.
+  serialized `glyph-set-v1` payload produced server-side by `build_glyphs`. It
+  turns each `ArrowGlyph` into a cylinder and cone, and each
+  `TorqueArcGlyph.polyline_m` into a tube and cone. It has no client-side glyph
+  algorithm; scale changes are a new request to the server.
 
 ### 4. Engine Adapters
 
