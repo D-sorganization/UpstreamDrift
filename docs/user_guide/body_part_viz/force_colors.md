@@ -54,6 +54,16 @@ Store emitted settings using `scale.to_dict()` and restore them with
 `ForceColorScale.from_dict()`. Invalid edits preserve the last valid scale, and
 the toggle can always turn off the display even when an unapplied edit is invalid.
 
+### Producing Loads From Reaction Wrenches
+
+When an engine or inverse-dynamics solver computes full 6D reaction wrenches at
+joints or segment boundaries, `axial_loads_from_reactions` extracts the scalar
+signed axial component along each segment's designated anatomical or geometric
+axis (positive tension, negative compression). For a complete `ForceTorqueFrame`,
+`frame_with_axial_loads` populates `axial_loads_n` for all segments having a
+matching reaction wrench and declared `SegmentAxis`, ensuring consistent tension/compression
+shading across renderers without manual vector projection.
+
 ## Web Hosts
 
 `Scene3D` has a collapsible Segment Force Colors panel. Supply the optional

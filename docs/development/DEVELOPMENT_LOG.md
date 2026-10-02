@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/fto-11286-contracts`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `schemas/force-torque-frame-*.json`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-1 (#11286) implemented with 98.5% test coverage; OverlayWrench (optional halves), ForceTorqueFrame (Z-up world frame), ForceTorqueSeries (interpolation + npz masks), JSON schema and 7 fixture cases verified.
+- **Last verified:** 2026-10-02 at SELF — FTO-1 (#11286) implemented with 98.5% test coverage (PR #11319 opened). FTO-4 (#11289) implemented with color utils and colormap (PR #11320 opened). FTO-2 (#11287) implemented conversions.py with 99.3% test coverage and user guide documentation.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Submit ready-for-review PR for FTO-1 (#11286); dispatch Wave B issues once Wave A merges.
+- **Next step:** Submit ready-for-review PR for FTO-2 (#11287); dispatch FTO-3 (#11288) glyph builder.
 
 ### DL-#11268 · Capture-O Video Companion
 
