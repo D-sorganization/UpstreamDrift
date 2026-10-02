@@ -162,3 +162,15 @@ experiment changes only the ramp to 0–50 ms, retaining all force/posture limit
 It is a prospective test, with no outcome claimed here.
 
 - [Ramped Hold Posture Review](ramped_hold_posture_review_20261002.json)
+
+## Supported Posture Checkpoint
+
+The controlled 20–50 ms empirical leg-torque ramp passed all five unchanged one-second hold gates in separate native runs: tour 3.176 mm / 0.836 degrees, peak 1.981 BW (19:54:39Z); owner 2.321 mm / 0.699 degrees, peak 1.730 BW (20:01:28Z). The preceding 0–50 ms tour ramp passed posture but rejected peak 2.000907 BW; rounding cannot change that verdict. Gains, geometry, contacts and model binaries were retained. This is supported posture with feedback and prescribed neck, not identified static gravity or independent full-swing replay.
+
+| Capture | Maximum Pelvis Motion | Rotation Change | Peak Force | Registered One-Second Screen |
+| ------- | --------------------- | --------------- | ---------- | ---------------------------- |
+| Tour    | 3.176 mm              | 0.836 deg       | 1.981 BW   | All Five Gates Pass          |
+| Owner   | 2.321 mm              | 0.699 deg       | 1.730 BW   | All Five Gates Pass          |
+
+- [Controlled Early Ramp Review](tour_early_leg_feedforward_review_20261002.json)
+- [Contact-Guarded Hold Review](guarded_leg_feedforward_hold_review_20261002.json)

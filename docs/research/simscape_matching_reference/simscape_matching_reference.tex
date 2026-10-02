@@ -2217,12 +2217,65 @@ pitch direction. Terminal improvement does not excuse a whole-run gate
 failure. The anonymous interval aggregates and source hashes are in
 \texttt{ramped\_hold\_posture\_review\_20261002.json}.
 
-The next controlled experiment retains the same empirical seed, time
+The first controlled startup experiment retains the same empirical seed, time
 grid, gains, geometry, contacts and upper/neck policy. It changes only
 the torque ramp to 0--50 ms. This tests whether delayed startup support
 contributes to the transient; it is not an identified gravity solution.
 All original whole-run posture and force gates remain prospective.
-No acceptance or causal conclusion is claimed before native results.
+The actual result and the subsequent contact-guarded experiment follow below.
+
+
+\subsection{Early Feedforward: Pose Improvement With a Rejected Force Peak}
+The controlled tour run with the same seed ramped from 0--50 ms exited
+naturally at \texttt{2026-10-02T19:45:43Z}. Maximum pelvis motion was
+\textbf{2.093 mm} and relative rotation \textbf{$0.556^\circ$}, passing
+both original posture gates. Both settled support-force gates also pass.
+However, the whole-run force peak is \textbf{2.000907 bodyweights} at
+\textbf{13.103 ms}, exceeding the unchanged 2.0 limit. The run remains
+rejected. Rounding that value to 2.00 cannot convert failure to acceptance.
+
+An inherited assertion initially required zero torque at the 50 ms
+endpoint and stopped the first attempt before simulation. The corrected
+caller checks that endpoint against the same seed; its failed and successful
+receipts remain distinct in
+\texttt{tour\_early\_leg\_feedforward\_review\_20261002.json}.
+No owner application of this schedule or independent replay is claimed.
+
+This result supports a contribution from startup torque timing to the
+observed posture transient, without identifying a unique static gravity
+solution or excluding coupled feedback effects. The next prospective
+test separates the initial contact transient from later support: torque
+remains zero through 20 ms, ramps to the same seed by 50 ms, then remains
+constant. Its reference grid is $[0,0.02,0.05,1]$ s, with the same
+constant joint, neck and balance references aligned to four columns.
+The earlier unforced initial peak and this run's 13.1 ms peak motivate
+that timing; geometry, gains, contact physics and every gate remain
+unchanged. This contact-guarded trial is unqualified until its native
+receipt and whole-run results are checked.
+
+
+% BEGIN GUARDED HOLD RESULT
+\subsection{Contact-Guarded Holds Pass Their Registered Screens}
+The tour run with zero empirical feedforward through 20 ms and a ramp
+to the same seed by 50 ms exited naturally at
+\texttt{2026-10-02T19:54:39Z}. Maximum pelvis motion is
+\textbf{3.176 mm} with \textbf{$0.836^\circ$} relative rotation.
+All five unchanged one-second hold gates pass, including the whole-run
+2.0-bodyweight force limit and both settled support-force limits.
+The contact-guarded result is the first passing screen in this controlled
+startup sequence; it uses the original gains, geometry and contact physics.
+
+This is a supported-posture checkpoint with upper-body feedback and
+prescribed neck motion. It is not a demonstration of zero-error static
+equilibrium, anatomical qualification of every joint, pure open-loop
+support or independent full-swing dynamics. The empirical torque seed
+still originates in a moving baseline. The separate owner run exited naturally at
+\texttt{2026-10-02T20:01:28Z}, measuring \textbf{2.321 mm} and
+\textbf{$0.699^\circ$}; all five of its unchanged gates also pass.
+Owner success is measured directly, not inferred from the tour result. Anonymous gate results,
+exact peaks and native/probe hashes are maintained in
+\texttt{guarded\_leg\_feedforward\_hold\_review\_20261002.json}.
+% END GUARDED HOLD RESULT
 
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
