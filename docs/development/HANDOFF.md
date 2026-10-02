@@ -429,8 +429,13 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    is 0. At 1.0 s the tilt is 114 deg, the pelvis is at z -1.85 m, and
    the vertical force is 6717 N, of which the left heel carries
    4716 N. Holding the address angles does not keep a stance. Do not
-   repeat this hold. Do not save. Do not write the shift into the
-   model. Do not claim the 5 % bar. Do not rerun 1.809 s.
+   repeat this hold. The upper-body TrackAngle series were still the
+   swing in that run. The next unsaved 1.0 s check keeps the quiet
+   start, zero balance, GroundOffset z -0.95297, and the frozen leg
+   reference, and also holds every upper-body TrackAngle on its first
+   column and every TrackRate at 0. Do not save. Do not write the
+   shift into the model. Do not claim the 5 % bar. Do not rerun
+   1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
