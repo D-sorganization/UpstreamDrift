@@ -455,9 +455,13 @@ owner: never kill them. Scratch batch scripts live under `%TEMP%`
    ankle is at z -0.882753 m, so the left ankle is 17.3 mm higher. The
    pelvis up vector is [0, -0.382683, 0.92388]. The ten contact forces
    are 0 except the right heel at 3180 N. Do not raise the ground into
-   that heel. Do not change FootContactStiffness. Do not save. Do not
-   write the shift into the model. Do not claim the 5 % bar. Do not
-   rerun 1.809 s.
+   that heel. The pelvis up axis is world up rotated 22.5 deg about
+   the facing axis. The next unsaved 0.02 s check keeps the still
+   freeze and the saved damping, and sets the hip start angle that is
+   already 22.5 deg to 0, with the three hip start rates at 0. If no
+   hip start angle is 22.5 deg, do not simulate. Do not change
+   FootContactStiffness. Do not save. Do not write the shift into the
+   model. Do not claim the 5 % bar. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
 5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed

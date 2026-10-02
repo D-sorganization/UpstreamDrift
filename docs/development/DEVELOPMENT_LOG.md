@@ -28,7 +28,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Started:** 2026-09-26
 - **Last verified:** 2026-10-01 — at the first sample of the still freeze with saved damping (EXIT 0), the left ankle is at z -0.865495 m and the right ankle is at z -0.882753 m. The left ankle is 17.3 mm higher. The pelvis up vector is [0, -0.382683, 0.92388]. Only the right heel is loaded, at 3180 N. The 0.2 body-weight bar is not met. The shift is not in the model. The 5 % bar is not claimed.
 - **Summary:** Agent-editable, uniquely named (`GS3DX_`) clones of the hand-built 3D kinetic model in a separate folder, with guards that keep the originals untouched. Used to move to quaternion joints and to build a full-body model within the Home-license block limit.
-- **Next step:** Leave the both-soles measurement as recorded. The left ankle is 17.3 mm above the right, and only the right heel carries 3180 N. Do not raise the ground into that heel. Do not repeat the damping change. Do not write the shift into the model. Do not claim the 5 % bar. Do not save. Do not rerun 1.809 s. #11156 and #11160 stay with the owner. #11157 and #11159 still have no documented degree limits.
+- **Next step:** One unsaved 0.02 s check with the still freeze and saved damping. If one of HipStartPositionX/Y/Z is 22.5 deg, set that angle to 0 and the three hip start rates to 0, then record both ankles and the ten contact forces. If none is 22.5 deg, do not simulate. Do not raise the ground. Do not save. Do not write the shift into the model. Do not claim the 5 % bar.
 
 ### DL-#10944 · Bump `vendor/ud-tools` to Tools Main With K0 and K3a
 
