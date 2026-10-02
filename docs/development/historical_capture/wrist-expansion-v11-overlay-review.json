@@ -1,0 +1,126 @@
+{
+  "schema": "necromatcher/independent-overlay-verification/1",
+  "source_commit": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+  "export_producer": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+  "numerical_producer": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+  "review_receipt_sha256": "b9011b09a638a9d17feaa22969a581baea53e55f1566409019e6a283dfb11dc6",
+  "source_runtime_export_bracket_verified": true,
+  "qualification": "monocular_research_hypothesis",
+  "scientific_acceptance": "rejected",
+  "continuous_certified": false,
+  "decoded_total_frames": 960,
+  "runs": [
+    {
+      "player": "tiger",
+      "run_id": "d0ce1c135e594dbdb019335f5f172aae",
+      "decoded_frames": 210,
+      "image_size": [1280, 720],
+      "zip_sha256": "f49ed55b99a77543a0b19dbb16f92c99f28651bc4de922418a324530608551c7",
+      "zip_crc_and_member_bytes_verified": true,
+      "manifest_video_and_png_hashes_verified": true,
+      "capture_model_fit_bindings_verified": true,
+      "all_manifest_source_frame_records_match_saved_fit": true,
+      "all_original_capture_frame_identities_verified": true,
+      "selected_original_capture_png_hashes_verified": true,
+      "parent_hash_bracket_verified": true,
+      "numerical_stamp": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_commit": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+        "source_sha256": "sha256:9452685bbe53287f37dc13ccb20413b7f7a5e7fbfeb7fa0bbc0caea73bd3b603"
+      },
+      "selected_rms_pixels": [
+        8.468825427115743, 72.8677896081464, 23.44788035782639
+      ],
+      "png_sha256": {
+        "frame-000000.png": "cbe706c6c954427a9a9fc4b70caa069fce232ff67ad83894d74af3d5be6f5b02",
+        "frame-000105.png": "53751d90d8e869cf799f648067981f5b033baf0fbb4fe13b150ece77ca0d35f6",
+        "frame-000209.png": "150cf81d2dce7293c4957721c3c7a7de61067acd5e17b2879082afd4551fea74"
+      }
+    },
+    {
+      "player": "hogan",
+      "run_id": "3175527f24994a769bde92e29232e33a",
+      "decoded_frames": 750,
+      "image_size": [320, 240],
+      "zip_sha256": "75cce2f1380ce67caa824423a8ac2eace823f853ed5dbc6e7b5763a4891d381b",
+      "zip_crc_and_member_bytes_verified": true,
+      "manifest_video_and_png_hashes_verified": true,
+      "capture_model_fit_bindings_verified": true,
+      "all_manifest_source_frame_records_match_saved_fit": true,
+      "all_original_capture_frame_identities_verified": true,
+      "selected_original_capture_png_hashes_verified": true,
+      "parent_hash_bracket_verified": true,
+      "numerical_stamp": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_commit": "f570e5f421d84d54275f7c7b36ab3d4051aa0112",
+        "source_sha256": "sha256:9452685bbe53287f37dc13ccb20413b7f7a5e7fbfeb7fa0bbc0caea73bd3b603"
+      },
+      "selected_rms_pixels": [
+        7.028135233742054, 5.158168567401303, 9.262393369123242
+      ],
+      "png_sha256": {
+        "frame-000000.png": "a879b243b7ef38547c088b97458be07268c283f28fe166ae2ee7bd34d6e658e1",
+        "frame-000375.png": "14cbd90264a41741fb53cb28d40c3340d38b0876445a4a92a3799180c4ea9c45",
+        "frame-000749.png": "e26637a4e6cc7529536ccd3b48e68e7618fd8b48423671787e2da7bc68a4367a"
+      }
+    }
+  ],
+  "visual_review": {
+    "reviewed_at_utc": "2026-10-02T20:24:36.599814+00:00",
+    "review_method": "Direct view_image inspection of all six actual exported PNGs; receipt identity, inventory and viewed PNG hashes checked independently. Automated decoder/CRC/parent verification scope is recorded by the previously executed verifier.",
+    "viewed_frames": [
+      {
+        "player": "tiger",
+        "frame_index": 0,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Wrist V11 Overlay\\frame-000000.png",
+        "png_sha256": "cbe706c6c954427a9a9fc4b70caa069fce232ff67ad83894d74af3d5be6f5b02"
+      },
+      {
+        "player": "tiger",
+        "frame_index": 105,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Wrist V11 Overlay\\frame-000105.png",
+        "png_sha256": "53751d90d8e869cf799f648067981f5b033baf0fbb4fe13b150ece77ca0d35f6"
+      },
+      {
+        "player": "tiger",
+        "frame_index": 209,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Tiger Wrist V11 Overlay\\frame-000209.png",
+        "png_sha256": "150cf81d2dce7293c4957721c3c7a7de61067acd5e17b2879082afd4551fea74"
+      },
+      {
+        "player": "hogan",
+        "frame_index": 0,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Wrist V11 Overlay\\frame-000000.png",
+        "png_sha256": "a879b243b7ef38547c088b97458be07268c283f28fe166ae2ee7bd34d6e658e1"
+      },
+      {
+        "player": "hogan",
+        "frame_index": 375,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Wrist V11 Overlay\\frame-000375.png",
+        "png_sha256": "14cbd90264a41741fb53cb28d40c3340d38b0876445a4a92a3799180c4ea9c45"
+      },
+      {
+        "player": "hogan",
+        "frame_index": 749,
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Hogan Wrist V11 Overlay\\frame-000749.png",
+        "png_sha256": "e26637a4e6cc7529536ccd3b48e68e7618fd8b48423671787e2da7bc68a4367a"
+      }
+    ],
+    "tiger": "Frame0 body markers partly track the image, but blue club/attachment seed points diagonally left instead of the visible shaft. Frame105 retains large upper-body/arm mismatch and yellow residuals during turned follow-through; blue extension points off upper-left, and raised trailing heel is source imagery rather than contact proof. Frame209 is cropped at the feet and retains body/arm offsets plus a long blue extension to the right, unlike the visible downward club. Wrist expansion does not resolve these discrepancies.",
+    "hogan": "Body projection is comparatively close in these selected images, but 320x240 source blur limits joint/heel interpretation. At frame375 the blue seed runs almost horizontally left while the visible shaft is lower; first/last also retain seed/shaft mismatch. A declared blue attachment extension is not an inferred club mesh or measured shaft.",
+    "captions": "All six captions are visible without obvious clipping, preserve MONOCULAR RESEARCH, unknown physical time and unqualified camera/anatomy, and use the existing green observations/blue native rig-seeds/yellow residual legend.",
+    "selected_rms_pixels": {
+      "tiger": [8.468825427115743, 72.8677896081464, 23.44788035782639],
+      "hogan": [7.028135233742054, 5.158168567401303, 9.262393369123242]
+    },
+    "receipt_scope_confirmed": [
+      "Exactly Tiger210 and Hogan750 decoded frames, source-size dimensions, six first/middle/last PNGs",
+      "ZIP CRC/member bytes and video/PNG hashes",
+      "All original source frame identities, selected original PNG bytes, capture/model/fit bindings and hash brackets",
+      "Separate full numerical/export producer identities and source/runtime bracket"
+    ],
+    "scientific_acceptance": "rejected",
+    "continuous_certified": false,
+    "limitations": "Selected matched-marker RMS is not weighted job image RMS, cannot establish nonlinear closure/contact/dynamics, and is not directly comparable across player resolutions."
+  }
+}

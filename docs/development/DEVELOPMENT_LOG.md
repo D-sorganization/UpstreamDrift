@@ -21,14 +21,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281
+- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — committed producer 9c21eda8baae1192b66640467b4d67219878b958 completed exact-start V10 Tiger/Hogan phase trials. Independent audit reproduces dense RMS 35.752077/10.699637px; both pass pixels/scalar bounds and fail grip/rotation/penetration research targets, remain rejected/nonconverged. Live one-evaluation Hogan web submission retains the complete phase recipe and exact start. Latest coordinate-seed/native-recall implementation validation: 471 broad Python/parity cases and 42 final seed/worker/receipt cases pass; pinned source mypy, Ruff and architecture budgets pass. Clean historical-fit-first subprocess tests and the actual V11 driver preflight pass after repairing a facade initialization cycle. No wrist optimization claimed before the committed producer runs. Earlier 57 UI/API phase cases remain verified.
+- **Last verified:** 2026-10-02 — remotely verified producer f570e5f421d84d54275f7c7b36ab3d4051aa0112 completed four matched 27-coordinate continuation/31-coordinate wrist trials. Fresh independent audits retain exact starts and unchanged evidence/options/source/parent brackets. Tiger wrist dense 43.864861px improves against 48.846115px control but regresses against 35.752077px V10; gap37.958430mm/angle17.652389degrees/penetration4.550243mm fail. Hogan wrist dense 10.393302px/gap 4.597625mm/angle 1.073365degrees pass, penetration 18.965425mm fails. All 32finite bounds pass/12 unbounded; both rejected/nonconverged. Earlier 471 broad and 42 final focused cases plus normal push hooks pass. Failed pre-seed tuple/JSON orchestration attempt retained; actual-parent red/green preflight and separate retry completed.
 - **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Freeze the public coordinate-expansion and canonical seed serializer, then run bounded wrist-only Tiger/Hogan trials with unchanged geometry/camera/contact/evidence and independent audits. Preserve rejected V10 baselines; continue qualified controls/dynamics/consumer handoffs.
+- **Next step:** Retain matched controls and independently audited rejected candidates; review Tiger held-out/interpolation failure and Hogan ground geometry/contact hypotheses before the next declared bounded trial. Continue physical-clock/anatomy/camera qualification and controls/dynamics/consumer handoffs.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 
@@ -39,9 +39,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — both actual V10 player/capture/fit packages recalled through canonical offscreen QTest widgets, first/middle/end projections rendered, stored exports selected without run injection and guarded ZIP saves matched independent hashes. Receipt 48b28fc4dc12ddd0520fc795f0e84dda6234066ea34699ee329765f201c0b8df records working-tree source hashes and programmatic scope. V10 exports retain all 960 verified frames; native OS/manual acceptance remains separate.
+- **Last verified:** 2026-10-02 — both V11 source overlays completed from f570e5f421d84d54275f7c7b36ab3d4051aa0112. Independent checks cover all 960frames, six exact stills, original-frame identities, parent bindings, numerical/export producer stamps, ZIP CRC/member bytes and copied hashes. Both three-still panels visually reviewed; Tiger follow-through mismatch and Hogan blur/club-seed limits retained. Native V10 stored-run offscreen QTest recall/saves remain verified separately from OS/manual acceptance.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Publish durable native stored-run recall and boundary tests; retain programmatic evidence separately from manual native OS acceptance, then export and independently review wrist-only candidates.
+- **Next step:** Retain current guarded native/web recall and versioned Desktop evidence; improve qualified fitting rather than treating successful research export as physical validation. Manual native OS acceptance and qualified downstream review remain open.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 
@@ -52,9 +52,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 — final 37-page V10 methods PDF compiled in three installer-disabled MiKTeX passes and all pages independently visually reviewed; 205 Desktop artifacts hash-verified. PDF SHA-256: fbb0b0b575b9f251d49048f55c4db678a2bad3b4098b77c3cc0ef72823a28226. Exact 31/25/21-page snapshots preserved. Built-in platform-directory failure remains.
+- **Last verified:** 2026-10-02 — polished 43-page V11 methods PDF compiled in three installer-disabled MiKTeX passes and every page independently visually reviewed, including repaired TOC, equations, matched tables and both new source overlay panels. 244 Desktop artifacts hash-verified; exact 37/31/25/21-page snapshots preserved. PDF SHA-256: a95c0eba03215cacc87ba228c2e75f4206f7f0007ee1f4c2aec17d5bd2b76caa. Built-in platform-directory failure remains.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
-- **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
+- **Next step:** Retain current hash-bound repeatability evidence; document controlled probe-density/generalization experiments under #11284 and continue qualified downstream work. Built-in compilation criterion remains open.
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 
