@@ -126,18 +126,18 @@ Desktop delivery folder: `Simscape_Matches_20261001` on ControlTower. Four Deskt
 - **1-Second Stance Simulation Failures**:
   - 1-second resampled, quiet, frozen address, and still upper-body tests all fail physical stance stability.
   - Ground reaction normal force decays to zero after 0.5 s.
-  - At 1.0 s, body tilt reaches 101 deg, 108 deg, 114 deg, and 124 deg.
+  - At 1.0 s, the reported frame-tilt metric reaches 101 deg, 108 deg, 114 deg, and 124 deg.
   - The pelvis drops far below the floor plane.
   - Historical process `EXIT 0` was an unhardened execution receipt, not physical stance qualification.
 - **Queued Damping Experiment**:
   - The unsaved damping-times-ten test completed and failed: initial right-heel force 15,513 N, force zero by 0.60 s, tilt 117 deg and pelvis z -1.83 m at 1.0 s. It must not be repeated alone. The original worker subsequently queued a composed pelvis-level pose check stopping at 0.02 s; no outcome is claimed.
-  - Do not duplicate, cancel, save, or claim success for the original worker's pending composed-pose check. The original worker process is ongoing and must be preserved.
+  - Do not duplicate, cancel, save, or claim success for the original worker's pending composed-pose check. The original worker state must be preserved; verify its live process and receipt before attributing any new result.
 
 ## Open Scientific Gates
 
 - **Gate #11156 (Lead Elbow and Wrist Tracking)**: **RED**. 20-degree elbow limit and 15-mm tracking penalty remain active.
 - **Gate #11160 (Clubhead Kinematics and Contact-Face Error)**: **RED**. Head RMS/max, shaft maximum, speed, and contact-face limits remain frozen.
-- **Gate #11173 (Open-Loop Full-Swing Forward Dynamics)**: **RED**. Contact spikes, airborne phases, and competing balance torques prevent qualification.
+- **Gate #11173 (Open-Loop Full-Swing Forward Dynamics)**: **RED**. Contact spikes, intervals with zero measured normal force, and competing balance torques prevent qualification. Zero force alone does not establish that the entire body is airborne.
 - **Owner matching** remains unqualified in Simscape. Capture registry delivery is a separate workstream; external MuJoCo ZMP diagnostics do not establish Simscape feasibility.
 
 ## Software Test Inventory and Verification Boundaries
@@ -173,21 +173,25 @@ The sphere solver passed 15 tests and the controlled grip contract passed 12 tes
 
 A read-only native forward-kinematics audit of the selected owner's first pose, with fitted Human geometry and declared 104.3 kg mass, exited naturally with code zero at 06:42:14Z. Against the existing model ground plane, the ten contact-sphere clearances ranged from -64.399 to -48.619 mm (15.780 mm spread). This geometric penetration is not a simulated force measurement. Simulation initial targets were not updated, no dynamics was run and no model was saved. The pelvis frame's local up vector tilted 57.889 degrees; that frame-relative quantity does not establish an anatomical torso angle or a causal instability mechanism. Existing World Frame selection matches the cached IK. Ground placement and a consistent gravity/contact initialization must be verified separately.
 
-Both actual C3D files specify metres and contain no EVENT parameter group. Under ezc3d 1.7.2, A has 717 negative-residual samples, all already nonfinite in XYZ; O has no negative residuals but 1,173 nonfinite XYZ samples. These counts cover all marker tracks. The fourth point row is homogeneous XYZ1, not residual metadata. Neither peak-speed timing nor address-line crossing establishes measured ball contact. Importer units/missingness contracts and export dependency/runtime provenance are under review; no new export identity is yet accepted.
+Both actual C3D files specify metres and contain no EVENT parameter group. Under ezc3d 1.7.2, A has 717 negative-residual samples, all already nonfinite in XYZ; O has no negative residuals but 1,173 nonfinite XYZ samples. These counts cover all marker tracks. The fourth point row is homogeneous XYZ1, not residual metadata. Neither peak-speed timing nor address-line crossing establishes measured ball contact. Importer units/missingness contracts and recorded dependency/runtime provenance passed focused tests and fresh full exports; current-model comparisons are recorded above.
 
 ## Importer and Runtime Contract Verification
 
-Thirteen pure importer tests, seventeen pure runtime-fingerprint tests, and twelve exporter precondition tests pass with zero incomplete tests. The live runtime is MATLAB R2025b Update 5, Simulink/Simscape/Multibody 25.2, Python 3.12.10, NumPy 2.4.4 and ezc3d 1.7.2. Required recorded source hashes fail closed; optional resolver absence is explicit. Direct runtime components are recorded, not every transitive package or external STL asset. Fresh A/O exports are in a private candidate folder pending natural exit and full-video comparison; selected Desktop clips remain unchanged.
+Thirteen pure importer tests, seventeen pure runtime-fingerprint tests, and twelve exporter precondition tests pass with zero incomplete tests. The live runtime is MATLAB R2025b Update 5, Simulink/Simscape/Multibody 25.2, Python 3.12.10, NumPy 2.4.4 and ezc3d 1.7.2. Required recorded source hashes fail closed; optional resolver absence is explicit. Direct runtime components are recorded, not every transitive package or external STL asset. Fresh A/O exports exited naturally and all four clips fully decoded; current-model owner selection and prior-model tour selection are recorded above.
 
 ## Current-Main Integration Boundary
 
-This continuation is based on `cee0a65e0`. Current-main model promotion, compiled home-budget diagnostics and anatomical mesh work (#11207, #11208, #11209) are preserved. The current-main Human model SHA256 begins `91997471`; existing verified Desktop matches use the separate `9a26ee80` source. Their successful receipts do not qualify the new integration. The integrated source passed 187 native MATLAB tests (zero incomplete) and 44 focused Python tests. Full matching on the preserved new model remains pending.
+This continuation is based on `cee0a65e0`. Current-main model promotion, compiled home-budget diagnostics and anatomical mesh work (#11207, #11208, #11209) are preserved. The current-main Human model SHA256 begins `91997471`; existing verified Desktop matches use the separate `9a26ee80` source. Their successful receipts do not qualify the new integration. The integrated source passed 187 native MATLAB tests (zero incomplete) and 44 focused Python tests. Both preserved-model full matches exited naturally; the selected owner improves position tracking and the prior-model tour remains selected, as recorded above. Forward dynamics remains unqualified.
 
 ## Historical Player Capture Continuation Preserved From Main
 
 The following separate continuation state was present on current main and is retained without treating its validation as evidence for Simscape matching.
 
-### Historical Player Capture Handoff
+# Active Necromatcher Delivery
+
+Owner priority is the integrated historical-player workspace (#11232), with library #11233, tile/review #11234 and real fitting/downstream qualification #11235. See [Necromatcher Turnover](necromatcher-turnover.md) for contracts, TDD evidence, real capture imports and current PR state. Tiger #11226 and Hogan #11229 remain open.
+
+# Historical Player Capture Handoff
 
 ## Active: Tiger 2000 and Ben Hogan
 

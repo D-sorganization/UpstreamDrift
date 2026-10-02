@@ -30,6 +30,17 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Qualify IK-to-native initial targets and contact geometry before another bounded stance experiment; resolve current-main conflicts and protected CI.
 
+### DL-#11233 — Necromatcher Persistent Library
+
+- **State:** in_progress
+- **Owner:** codex
+- **PR:** [#11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237)
+- **Issue:** #11233; parent #11232; player epics #11226 and #11229
+- **Branch:** `feat/necromatcher-library-11233`
+- **Paths:** `src/shared/python/workspace/necromatcher.py`, `src/shared/python/workspace/necromatcher_capture.py`, `src/api/routes/necromatcher.py`
+- **Last verified:** 2026-10-01 — 43 workspace/API tests passed; scoped library mypy passed; four real captures imported and recalled. Final rerun passed.
+- **Summary:** Reuse project/session spine, artifact hashes and canonical torque evaluation for immutable historical-player library; captures remain image observations and model bytes remain unqualified candidates. [Turnover](necromatcher-turnover.md).
+
 ### DL-#11230 — Historical Player Capture
 
 - **State:** in_progress

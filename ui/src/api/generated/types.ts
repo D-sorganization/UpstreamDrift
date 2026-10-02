@@ -319,6 +319,11 @@ export interface ArmShotResponse {
   state: string;
 }
 
+export interface AssetRequest {
+  id: string;
+  source_path: string;
+}
+
 /**
  * One descriptive association or a typed unavailable state.
  */
@@ -1549,6 +1554,11 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface IdentityRequest {
+  id: string;
+  name: string;
+}
+
 /**
  * One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay. ``record`` is accepted as an opaque JSON object rather than a typed model on purpose: the wire's own shape is validated by the vendored Tools reader (fail-closed), not re-declared here. Passing it through unmodified means every field the reader checks — unknown fields, missing fields, malformed provenance, non-monotone samples — is enforced exactly as the wire defines it, from either flight-model family (issue #9352, ADR-0047).
  */
@@ -2021,6 +2031,13 @@ export interface ModelProvenanceV2 {
   code_commit?: string | null;
   configuration_sha256?: string | null;
   relationship_to_vendor: "independent_physics" | "vendor_comparable_surrogate" | "vendor_reported_output" | "unknown";
+}
+
+export interface ModelRequest {
+  id: string;
+  source_path: string;
+  engine: "mujoco" | "drake" | "pinocchio" | "opensim" | "simscape";
+  dofs: string[];
 }
 
 /**
@@ -2905,6 +2922,12 @@ export interface SwingObjectiveCompareRequest {
   node_count: number;
   /** Optional subset of objective keys to compare (minimum 2) */
   objective_keys?: string[] | null;
+}
+
+export interface SwingRequest {
+  id: string;
+  name: string;
+  player_id: string;
 }
 
 /**
