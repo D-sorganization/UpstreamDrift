@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/D-sorganization/UpstreamDrift/schemas/force-torque-frame-v1.json",
+  "title": "ForceTorqueFrame",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "time_s",
+    "engine",
+    "wrenches",
+    "world_frame",
+    "units"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "force-torque-frame-v1"
+    },
+    "time_s": {
+      "type": "number"
+    },
+    "engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "world_frame": {
+      "type": "string",
+      "minLength": 1
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "axial_loads": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "wrenches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OverlayWrench"
+      }
+    }
+  },
+  "$defs": {
+    "Vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "OverlayWrench": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "label", "body", "point_m", "source"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "joint_actuator",
+            "joint_reaction",
+            "contact",
+            "grip",
+            "external",
+            "gravity",
+            "muscle"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "pattern": "^[a-z_]+:[A-Za-z0-9_.:-]+$"
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1
+        },
+        "point_m": {
+          "$ref": "#/$defs/Vec3"
+        },
+        "force_n": {
+          "oneOf": [{ "$ref": "#/$defs/Vec3" }, { "type": "null" }]
+        },
+        "torque_nm": {
+          "oneOf": [{ "$ref": "#/$defs/Vec3" }, { "type": "null" }]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "force_n": { "$ref": "#/$defs/Vec3" }
+          },
+          "required": ["force_n"]
+        },
+        {
+          "properties": {
+            "torque_nm": { "$ref": "#/$defs/Vec3" }
+          },
+          "required": ["torque_nm"]
+        }
+      ]
+    }
+  }
+}

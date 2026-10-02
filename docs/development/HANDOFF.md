@@ -1,3 +1,15 @@
+# Force and Torque Overlay Core Contracts Delivery — #11286
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11286-core-contracts`; issue #11286 (FTO-1).
+- Objective: implement core engine-agnostic force/torque overlay contracts (`OverlayWrench`, `ForceTorqueFrame`, `ForceTorqueSeries`, `ForceTorqueProvider`), wire schema (`force-torque-frame-v1.json`), and fixtures (`force-torque-frame-examples.json`).
+- Completed:
+  - Promoted `validate_vec3` in `motion_matching/force_torque.py` and maintained alias `_validate_vec3`.
+  - Built `src/shared/python/force_overlay/contracts.py` and `__init__.py` with explicit `__all__`.
+  - Validated headless import isolation (no matplotlib, PyQt6, mujoco, etc. imported).
+  - Authored JSON Schema 2020-12 `schemas/force-torque-frame-v1.json` and 7 test fixtures `schemas/force-torque-frame-examples.json`.
+  - Authored full unit test suite `tests/unit/force_overlay/` with 23/23 tests passing and 97.4% line coverage.
+- Next steps: Review and merge PR; proceed to Wave B issues (FTO-2, FTO-3, FTO-24).
+
 # Force and Torque Overlay Planning — #11285
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/force-torque-overlays-smwke2`; commit SELF; PR: see the planning PR for this branch.

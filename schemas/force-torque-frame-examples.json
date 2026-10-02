@@ -1,0 +1,184 @@
+{
+  "description": "Cross-runtime force/torque overlay test cases for ADR-0052 contract validation",
+  "cases": [
+    {
+      "name": "valid: torque-only joint actuator",
+      "valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.1,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "joint_actuator",
+            "label": "joint:left_elbow",
+            "body": "forearm",
+            "point_m": [0.0, 0.25, 0.6],
+            "force_n": null,
+            "torque_nm": [0.0, 15.5, -2.0],
+            "source": "mujoco:actuator"
+          }
+        ]
+      }
+    },
+    {
+      "name": "valid: force-only contact",
+      "valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.2,
+        "engine": "drake",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:right_foot_0",
+            "body": "right_foot",
+            "point_m": [0.15, -0.1, 0.0],
+            "force_n": [5.0, 10.0, 650.0],
+            "torque_nm": null,
+            "source": "drake:hydroelastic"
+          }
+        ]
+      }
+    },
+    {
+      "name": "valid: both halves",
+      "valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.3,
+        "engine": "pinocchio",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "grip",
+            "label": "grip:club_handle",
+            "body": "club",
+            "point_m": [0.2, 0.3, 0.8],
+            "force_n": [12.0, -8.0, 45.0],
+            "torque_nm": [1.5, 2.5, -0.5],
+            "source": "pinocchio:rnea"
+          }
+        ]
+      }
+    },
+    {
+      "name": "valid: frame with axial loads",
+      "valid": true,
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.4,
+        "engine": "simscape",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": {
+          "time_s": 0.4,
+          "values_n": { "shaft_proximal": 120.0, "shaft_distal": -45.0 },
+          "source": "simscape:logged_loads",
+          "units": "N",
+          "sign_convention": "tension-positive"
+        },
+        "wrenches": [
+          {
+            "kind": "joint_reaction",
+            "label": "reaction:lead_wrist",
+            "body": "hand",
+            "point_m": [0.18, 0.22, 0.75],
+            "force_n": [50.0, -20.0, 110.0],
+            "torque_nm": [3.0, 1.0, 4.0],
+            "source": "simscape:reaction"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid: both halves null",
+      "valid": false,
+      "expected_error": "At least one of force_n or torque_nm",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.5,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "external",
+            "label": "ext:empty",
+            "body": "torso",
+            "point_m": [0.0, 0.0, 1.0],
+            "force_n": null,
+            "torque_nm": null,
+            "source": "test"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid: duplicate labels",
+      "valid": false,
+      "expected_error": "Duplicate wrench labels",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.6,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "contact",
+            "label": "contact:lead_foot",
+            "body": "foot",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 100.0],
+            "torque_nm": null,
+            "source": "test"
+          },
+          {
+            "kind": "external",
+            "label": "contact:lead_foot",
+            "body": "foot",
+            "point_m": [0.0, 0.0, 0.0],
+            "force_n": [0.0, 0.0, 50.0],
+            "torque_nm": null,
+            "source": "test"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid: NaN",
+      "valid": false,
+      "expected_error": "finite",
+      "data": {
+        "schema_version": "force-torque-frame-v1",
+        "time_s": 0.7,
+        "engine": "mujoco",
+        "world_frame": "world_Zup",
+        "units": { "force": "N", "torque": "N*m", "length": "m" },
+        "axial_loads": null,
+        "wrenches": [
+          {
+            "kind": "gravity",
+            "label": "gravity:club",
+            "body": "club",
+            "point_m": ["NaN", 0.0, 0.0],
+            "force_n": [0.0, 0.0, -9.81],
+            "torque_nm": null,
+            "source": "test"
+          }
+        ]
+      }
+    }
+  ]
+}
