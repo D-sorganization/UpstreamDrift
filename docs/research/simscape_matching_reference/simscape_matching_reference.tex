@@ -1451,6 +1451,110 @@ separate modeling work. The latest LaTeX source is maintained in the same
 editor; compilation is unverified because the built-in compiler cannot
 find its platform directories. The prior PDF is not this revision.
 
+\subsection{Leg Orientation Acceptance and the Half-Turn Regression}
+The analytical leg helper returns the ankle follower frame, with angles
+ordered hip XYZ, knee, ankle XY in degrees. Its correspondence to the
+personalized Human foot-solid frame requires a separate native check; the
+two frames must not be silently interchanged when constructing contact
+references. The historical orientation residual used
+\begin{equation}
+ E=R_{\rm target}^{T}R,\qquad
+ r_{\rm skew}=\tfrac12\operatorname{vex}(E-E^{T})
+             =\sin(\theta)u.
+\end{equation}
+At a half turn, $E=2uu^{T}-I$ is symmetric and this residual vanishes.
+Consequently, a seed with correct position but opposite orientation could
+return success without solving the target. A native R2025b regression
+reproduced that false success before changing the implementation: one of
+six contract tests passed and five failed, with no incomplete tests and
+natural process exit one at \texttt{2026-10-02T14:46:23Z}. The reachable
+trajectory passed; the opposite orientation and malformed-input contracts
+failed for their recorded reasons.
+
+The repaired helper delegates to the existing shared SO(3) residual:
+\begin{equation}
+ e(q)=\begin{bmatrix}p(q)-p_{\rm target}\\
+ \operatorname{vec}\bigl((R(q)-R_{\rm target})/\sqrt{2}\bigr)\end{bmatrix},
+ \qquad \|r_{\rm rot}\|=2\sin(\theta/2).
+\end{equation}
+The twelve-component residual requires a $12\times6$ central-difference
+Jacobian. The existing damping schedule, degree perturbation
+$h=10^{-6}$, hundred-iteration bound and previous-pose warm start are
+retained. Translation components are metres and rotation components are
+dimensionless; the combined norm is a numerical fitting objective, not a
+physical energy or a single-unit pose distance. The damped update is
+\begin{equation}
+ \Delta q=-(J^{T}J+\lambda I_6)^{-1}J^{T}e.
+\end{equation}
+Acceptance separately requires $\|\Delta p\|<10^{-9}$ m and
+$\|r_{\rm rot}\|<2\sin(10^{-9}/2)$, equivalent to an angular error below
+$10^{-9}$ rad on $[0,\pi]$. This avoids the loss of precision of
+$\arccos$ near identity. Proper-rotation validation is shared with the
+existing orientation helper; finite real geometry, positive scalar segment
+lengths and matching nonempty pelvis sequences are checked before solving.
+
+All six focused tests passed with zero failures or incomplete tests and
+natural process exit zero at \texttt{2026-10-02T14:48:21Z}. They verify
+actual FK pose agreement on a reachable five-pose trajectory and require
+the opposite-orientation case to either solve the true target or reject it
+with the documented nonconvergence error. This repair prevents false
+acceptance; it does not guarantee convergence from a half-turn stationary
+point, impose anatomical bounds, or establish contact equilibrium. The
+selected whole-body videos use their separate existing orientation term;
+this helper defect alone does not diagnose a backwards-looking avatar.
+Reproduce with \texttt{runtests('test\_gs3dx\_leg\_ik\_contract.m')}
+after \texttt{gs3dx\_setup} in the documented serialized R2025b runner.
+
+\subsection{Selected Address Contact Geometry: Tour and Owner}
+A fresh native FK audit evaluated the promoted $0.10$ head candidates,
+rather than reusing the older address diagnostics. It reapplied each
+capture's fitted Human geometry and the recorded subject-physics policy,
+mapped all 48 native joint targets by explicit IDs, and obtained the ten
+sphere centres plus foot-solid and pelvis poses. Ground rotation and
+translation came from resolved native rigid-transform parameters and were
+checked against their workspace values; they were not ground-pose solver
+outputs. The unchanged Human binary and selected-pose cache were hashed.
+No simulation ran and no model was saved. The corrected audit completed
+with natural exit zero at \texttt{2026-10-02T14:52:48Z}. A prior attempt
+failed before script execution because of an invalid MATLAB script name;
+its terminal receipt remains distinct from the corrected run.
+
+With the stored ground normal $n$, sphere centre $p_i$, plane point $p_g$
+and radius $r_i$, the signed clearance remains
+$c_i=n^{T}(p_i-p_g)-r_i$. For each foot $s$, let
+$m_s=\min_{i\in s}c_i$ and
+$d_s=\max_{i\in s}c_i-m_s$. The selected addresses gave:
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Capture & $m_L$ (mm) & $m_R$ (mm) & $d_L$ (mm) & $d_R$ (mm) & $|m_L-m_R|$ (mm) \\
+\midrule
+Tour Average & $-13.973$ & $15.108$ & $0.637$ & $1.462$ & $29.081$ \\
+Owner GEARS & $-64.540$ & $-49.443$ & $0.100$ & $1.102$ & $15.097$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+A plane translation along the unchanged normal subtracts the same value
+from every clearance and therefore cannot change $m_L-m_R$. Removing
+penetration by moving this plane alone leaves one foot above contact.
+The small within-foot spreads suggest a bounded leg-pose correction is
+worth testing; they do not prove all five spheres can carry load, establish
+equilibrium, or show that measured foot targets are anatomically exact.
+
+The next native stance experiment is prospectively constrained to preserve
+root, trunk and upper-body coordinates and all fitted geometry. For both
+feet it requires native FK status one, minimum clearance between zero and
+0.5 mm, no sphere penetration below $-0.1$ mm, sole spread at most 2 mm,
+horizontal foot displacement at most 2 mm, foot rotation change at most
+$2^\circ$, and leg rotation changes at most $10^\circ$. Its fixed-normal
+plane starts at the mean of the two original minimum clearances. A failed
+gate remains a rejected candidate; bounds cannot be relaxed after observing
+results. Accepted geometry would still require assembled-state checks,
+both-foot force support, consistent balance references and gravity torque
+qualification before any whole-swing forward replay. See
+\texttt{selected\_contact\_geometry\_review\_20261002.json} for the
+sanitized measured aggregates and direct source inventory.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

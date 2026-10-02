@@ -266,3 +266,32 @@ was not accepted on the proposed explanation alone.
 Simscape #11256 continuation: keyed seed software275 GREEN; full seeded A/O head0.03 candidates miss the 30% screen and remain unselected. Minimum-touch ground registration removes initial penetration but bilateral support remains unqualified. See the current calculation-level research reference and sanitized seeded/contact receipts; Human-default migration and protected CI repair remain active.
 
 Simscape #11256 latest: Human-default native TDD2 GREEN and combined277 GREEN; head0.10 candidates pass prospective body/head/foot screens and all four H264 views are reviewed, fully decoded and saved on the local user Desktop in Best_Human_Matches_20261002_HeadTracked.zip. Earlier selections preserved. Standalone LaTeX updated but compiler unavailable. See current research reference/evidence; protected CI/current-main reconciliation and bilateral-contact/gravity-support/full forward replay remain active.
+
+### Leg Orientation Contract and Selected Contact Geometry
+
+The analytical leg IK previously accepted a 180-degree orientation mismatch because
+its skew residual vanished. Native R2025b TDD reproduced false success (RED: one
+pass, five failures, zero incomplete), then passed all six contract tests after
+reusing the shared SO(3) chordal residual with a 12x6 Jacobian and separate final
+position/orientation bounds. The existing welded-foot native FK test, reachable
+IK and trajectory tests also pass. The combined suite passed **287 native
+software/parameter checks**, zero failed/incomplete, natural exit zero at
+**2026-10-02T14:57:32Z**. This does not qualify Human ankle-to-foot-solid frame
+correspondence, anatomical limits, or independent forward dynamics.
+
+Fresh native FK evaluated BOTH promoted head0.10 addresses without simulation
+or model save. Per-foot lowest-contact heights differ **29.081 mm tour** and
+**15.097 mm owner**; within-foot spreads are below 1.5 mm. With the ground normal
+fixed, one plane translation cannot remove this two-foot discrepancy. A bounded
+stance correction is staged with prospective geometry/pose-preservation gates;
+equilibrium, gravity torques and forward replay remain open. The selected Desktop
+MP4s are unchanged IK visualizations. See the standalone LaTeX reference and
+`leg_orientation_contract_review_20261002.json`,
+`selected_contact_geometry_review_20261002.json`, and
+`native_leg_contact_integration_tests_20261002.json` for equations and receipts.
+
+Latest LaTeX source is maintained in the same editor. Built-in compilation still
+fails with `Unable to find standard directories for platform`; no new PDF is
+claimed. Changelog duplicates for PR #11256 were consolidated. Subsequent CI
+code-quality failed a GitHub fetch because of runner certificate verification;
+no certificate validation was disabled and protected review remains required.

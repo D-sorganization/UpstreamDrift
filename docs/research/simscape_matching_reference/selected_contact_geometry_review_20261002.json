@@ -1,0 +1,73 @@
+{
+  "qualification": "NATIVE_KINEMATICSSOLVER_CONTACT_GEOMETRY_AUDIT_NOT_EQUILIBRIUM_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "matlab_release": "2025b",
+  "model_saved": false,
+  "simulation_executed": false,
+  "sanitized_aggregates": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "fk_status": 1,
+      "left_min_clearance_mm": -13.97259293286023,
+      "left_max_clearance_mm": -13.335816682635828,
+      "left_spread_mm": 0.6367762502244023,
+      "left_tangent_shift_mm": -13.97259293286023,
+      "right_min_clearance_mm": 15.108118323873606,
+      "right_max_clearance_mm": 16.570609473994477,
+      "right_spread_mm": 1.4624911501208686,
+      "right_tangent_shift_mm": 15.108118323873606,
+      "unilateral_shift_mm": -13.97259293286023,
+      "overall_spread_mm": 30.543202406854707,
+      "bilateral_gap_mm": 29.08071125673384
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "fk_status": 1,
+      "left_min_clearance_mm": -64.54028648482367,
+      "left_max_clearance_mm": -64.44053588121943,
+      "left_spread_mm": 0.09975060360423171,
+      "left_tangent_shift_mm": -64.54028648482367,
+      "right_min_clearance_mm": -49.44288194681756,
+      "right_max_clearance_mm": -48.34081652603372,
+      "right_spread_mm": 1.1020654207838376,
+      "right_tangent_shift_mm": -49.44288194681756,
+      "unilateral_shift_mm": -64.54028648482367,
+      "overall_spread_mm": 16.19946995878995,
+      "bilateral_gap_mm": 15.097404538006113
+    }
+  },
+  "direct_source_inventory": {
+    "gs3dx_setup": "d387f7abd5a37a6fc656d239a9542384873741998b67332fe95038269890fb00",
+    "gs3dx_joint_keys": "a4f272516ddf3fb4321b3206228d4fa40e0f45ded854428f53f026b0e8a5658b",
+    "gs3dx_fit_human_visuals": "77994f7e7535375f8af8afa20d577aef9ed3ff6a611c610dc8298fd14999c480",
+    "gs3dx_apply_subject_physics": "ff38d2edd047cf495351b9ea0bc20c4d69f89244297beb35a4df5fcaa421e14c",
+    "gs3dx_leg_fk": "0b13bb2d41ea396779872d82fdbda60d527b35abd01e11a4a8e245841c3621ff",
+    "probe": "2a340158bdaa6bdfe8054dde4932e440f23b07f8a01e37b2bb49cf610c807b37"
+  },
+  "pose_file_sha256": "9d33d818156a9e77c6ecf5cba3494910b090e9b17845fe768101a85ecfe01342",
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('selected_contact_geometry_audit_reviewed.m')",
+    "owned_pids": [51344],
+    "timestamp": "2026-10-02T14:52:48.961796+00:00"
+  },
+  "inventory_is_full_transitive_closure": false,
+  "ground_pose_from_native_rigid_transform_parameters": true,
+  "ground_pose_solver_output": false,
+  "equilibrium_qualified": false,
+  "forward_replay_qualified": false,
+  "prospective_stance_gates": {
+    "minimum_clearance_mm": [0, 0.5],
+    "no_penetration_below_mm": -0.1,
+    "sole_spread_max_mm": 2,
+    "foot_horizontal_displacement_max_mm": 2,
+    "foot_rotation_change_max_deg": 2,
+    "leg_rotation_change_max_deg": 10,
+    "preserve_root_trunk_upper_coordinates": true,
+    "preserve_fitted_geometry": true
+  }
+}
