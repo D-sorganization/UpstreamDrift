@@ -10,8 +10,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %   Forward kinematics comes from Simscape's KinematicsSolver on the model
 %   itself, so the fit sees the model's real geometry.  The solver cannot
 %   take more targets than degrees of freedom, so the least squares is done
-%   here (lsqnonlin, Levenberg-Marquardt) over the 33 independent joint
-%   coordinates.  Both hands are welded to the club, so the right shoulder,
+%   here (lsqnonlin, Levenberg-Marquardt) over the independent joint
+%   coordinates (e.g. 33 for Fit).  Both hands are welded to the club, so the
 %   elbow and wrist are not parameters: the solver closes that loop for
 %   every evaluation.  Spherical joints are parameterized by rotation
 %   vectors.
@@ -58,6 +58,13 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         translation, and the fit wanders 15-36 cm; the
 %                         interpolated targets hold it.  The offset
 %                         calibration uses measured samples only.
+%     target_weight       (ones per target) extra scale on each target's
+%                         position residual, multiplied with the gap/valid
+%                         weight inside the least-squares fit.  A struct with
+%                         one field per target name, or a 1 x numel(names)
+%                         vector in .names order.  Omitted names, wrong
+%                         length, or negative values error with gs3dx:ik.
+%                         Does not change reported .residual (Euclidean m).
 %     rom_weight          (0, m/rad) penalize every joint angle outside the
 %                         normal human range (GS3DX_JOINT_ROM rows with a
 %                         neutral): the residual gains, per such joint,
@@ -77,6 +84,19 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         per frame; with the weights above, false keeps one
 %                         continuous forward solution (the lower-cost frame
 %                         of either pass may sit on another branch)
+%     foot_orientation_weight (0, m per normalized orientation error) identify
+%                         the unconstrained ankle rotations from calibrated
+%                         full 3D foot orientation targets (jc.foot_R_L/R).
+%                         Evaluates normalized chordal SO(3) distance over 18
+%                         residual components (9 per foot), constraining
+%                         roll, pitch, and yaw (identifying inverted soles
+%                         and backward flips alike).  Flat sole at address
+%                         is a kinematic assumption, not ground contact or
+%                         dynamics qualification; no knee-torsion magically
+%                         solved.  Gap-filled or nonfinite measurements are
+%                         masked with zero residual without inventing data.
+%                         Does not alter the 14 position target names,
+%                         .residual, or .rms.
 %
 %   IK fields:
 %     .model       the model fitted
@@ -86,9 +106,15 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                  (ids x frames, solver units: m, deg, axis components)
 %     .residual    targets x frames distance (m), NaN where gap-filled;
 %                  .rms (1 x frames, m, over the measured targets)
+%     .points      3 x targets x frames predicted target positions (m);
+%                  column order matches .names; .residual is the distance
+%                  from each column to the measured joint centre (NaN where
+%                  gap-filled)
 %     .status      KinematicsSolver status per frame (1 = loop closed)
 %     .regularization  struct of posture_weight, smooth_weight, backward,
-%                  gap_weight, rom_weight
+%                  gap_weight, rom_weight, foot_orientation_weight
+%     .foot_orientation_error_deg  2 x frames 3D orientation error angle (deg,
+%                  Left then Right), NaN where gap-filled or nonfinite
 
     arguments
         jc (1,1) struct
@@ -104,16 +130,28 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.rom_weight (1,1) double {mustBeNonnegative} = 0
         opts.rom table = gs3dx_joint_rom()
         opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
+        opts.target_weight = []
+        opts.foot_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
     end
+    assert(isscalar(opts.foot_orientation_weight) && isreal(opts.foot_orientation_weight) && ...
+        isfinite(opts.foot_orientation_weight) && opts.foot_orientation_weight >= 0, ...
+        'gs3dx:ik', 'foot_orientation_weight must be a finite real non-negative scalar');
     s = local_setup(opts.model);
     s.verbose = opts.verbose;
     s.backward = opts.backward;
+    s.foot_orientation_weight = opts.foot_orientation_weight;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
     s.rom = local_rom(s, opts.rom_weight, opts.rom);
+    has_foot_R = isfield(jc, 'foot_R_L') && isfield(jc, 'foot_R_R');
+    if opts.foot_orientation_weight > 0
+        assert(has_foot_R, 'gs3dx:ik', 'jc must contain foot_R_L and foot_R_R when foot_orientation_weight > 0');
+    end
+    feet = @(f) local_foot_data(jc, f, has_foot_R);
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
-    weight = @(f) valid(f) + opts.gap_weight * ~valid(f);   % residual weight per target
+    tw = local_target_weight(s.names, opts.target_weight);
+    weight = @(f) (valid(f) + opts.gap_weight * ~valid(f)) .* tw;   % residual weight per target
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
@@ -129,7 +167,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         end
         off = zeros(3, nt);
         for round = 1:opts.calibration_rounds
-            best = local_track(s, cal, p, g, off, data, weight, lm);
+            best = local_track(s, cal, p, g, off, data, weight, feet, lm);
             acc = zeros(3, nt);
             cnt = zeros(1, nt);
             for i = 1:numel(cal)
@@ -150,9 +188,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     end
 
     n = numel(opts.frames);
-    best = local_track(s, opts.frames, p, g, off, data, weight, lm);
+    best = local_track(s, opts.frames, p, g, off, data, weight, feet, lm);
 
     ik.model = opts.model;
+    ik.independent_coordinate_count = s.roles.n_independent;
     ik.names = s.names;
     ik.offsets = cell2struct(num2cell(off, 1).', s.names, 1);
     ik.frames = opts.frames;
@@ -160,20 +199,55 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     ik.joint_ids = s.ids;
     ik.joint = zeros(numel(s.ids), n);
     ik.residual = zeros(nt, n);
+    ik.points = zeros(3, nt, n);
     ik.status = zeros(1, n);
+    ik.foot_orientation_error_deg = zeros(2, n);
+    names_ref = ik.names;
     for i = 1:n
-        [P, R, st] = local_fk(s, best(i).p, best(i).g);
+        [P, R, st, ~, R_feet] = local_fk(s, best(i).p, best(i).g);
         ik.joint(~s.closed, i) = local_targets(s, best(i).p);
         ik.joint(s.closed, i) = best(i).g;
         pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, nt)), 3, nt);
-        ik.residual(:, i) = vecnorm(pts - data(opts.frames(i))).';
+        ik.points(:, :, i) = pts;
+        d = data(opts.frames(i));
+        ik.residual(:, i) = vecnorm(ik.points(:, :, i) - d).';
         ik.residual(~valid(opts.frames(i)), i) = NaN;   % gap-filled: not a measurement
         ik.status(i) = st;
+        fd_i = feet(opts.frames(i));
+        [~, finfo] = gs3dx_foot_orientation_residual(R_feet, fd_i.R_target, fd_i.gaps, 0);
+        ik.foot_orientation_error_deg(:, i) = finfo.err_deg.';
+        ik.foot_orientation_error_deg(~finfo.valid, i) = NaN;
     end
+    assert(size(ik.points, 1) == 3 && size(ik.points, 2) == numel(ik.names) && ...
+        size(ik.points, 3) == numel(ik.frames), 'gs3dx:ik', 'IK points size mismatch');
+    assert(isequal(ik.names, names_ref), 'gs3dx:ik', 'IK names changed');
     ik.rms = sqrt(mean(ik.residual .^ 2, 1, 'omitnan'));
     ik.regularization = struct('posture_weight', opts.posture_weight, ...
         'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
-        'rom_weight', opts.rom_weight);
+        'rom_weight', opts.rom_weight, 'foot_orientation_weight', opts.foot_orientation_weight);
+end
+
+function tw = local_target_weight(names, tw_in)
+% Per-target scale on the position residual (1 x numel(names)); default all ones.
+    n = numel(names);
+    if isempty(tw_in)
+        tw = ones(1, n);
+        return;
+    end
+    if isstruct(tw_in)
+        tw = zeros(1, n);
+        for k = 1:n
+            nm = names{k};
+            assert(isfield(tw_in, nm), 'gs3dx:ik', 'target_weight missing field %s', nm);
+            tw(k) = tw_in.(nm);
+        end
+    elseif isnumeric(tw_in) && isvector(tw_in)
+        assert(numel(tw_in) == n, 'gs3dx:ik', 'target_weight length must match targets (%d)', n);
+        tw = tw_in(:).';
+    else
+        assert(false, 'gs3dx:ik', 'target_weight must be a struct or vector');
+    end
+    assert(all(isfinite(tw)) && all(tw >= 0), 'gs3dx:ik', 'target_weight must be non-negative');
 end
 
 function rom = local_rom(s, weight, t)
@@ -216,7 +290,7 @@ function reg = local_regularization(s, posture, smooth)
 % Weights per coordinate of the parameter vector: the posture pull on the
 % redundant trunk coordinates, the smoothing on every rotation coordinate.
     keys = repelem(string({s.layout.key}), [s.layout.n]);
-    trunk = startsWith(keys, ["j2.", "j3.", "j6.", "j17."]);   % spine, torso, scapulae
+    trunk = s.roles.is_trunk_coord;
     assert(nnz(trunk) == 7, 'gs3dx:ik', 'Expected 7 trunk coordinates, found %d', nnz(trunk));
     reg.posture = posture * double(trunk(:));
     reg.smooth = smooth * double(~endsWith(keys(:), [".Px", ".Py", ".Pz"]));
@@ -224,7 +298,7 @@ function reg = local_regularization(s, posture, smooth)
     reg.wrap = ~endsWith(keys(:), [".Px", ".Py", ".Pz"]) & ~contains(keys(:), ".S");   % single angles
 end
 
-function best = local_track(s, frames, p, g, off, data, weight, lm)
+function best = local_track(s, frames, p, g, off, data, weight, feet, lm)
 % Forward then backward over FRAMES, each fit warm-started from its
 % neighbour; the lower cost per frame is kept.  With the range penalty the
 % warm starts come from a chain fitted without it, and each frame is then
@@ -246,12 +320,13 @@ function best = local_track(s, frames, p, g, off, data, weight, lm)
             t0 = tic;
             d = data(frames(i));
             w = weight(frames(i));
-            [p, g, cost, iters] = local_fit(free, p, g, off, d, w, lm);
+            fd = feet(frames(i));
+            [p, g, cost, iters] = local_fit(free, p, g, off, d, w, fd, lm);
             if cost < chain(i).cost
                 chain(i) = struct('p', p, 'g', g, 'cost', cost);
             end
             if s.rom.on
-                [pr, gr, cost, it] = local_fit(s, chain(i).p, chain(i).g, off, d, w, lm);
+                [pr, gr, cost, it] = local_fit(s, chain(i).p, chain(i).g, off, d, w, fd, lm);
                 iters = iters + it;
             else
                 [pr, gr] = deal(p, g);
@@ -269,8 +344,8 @@ function best = local_track(s, frames, p, g, off, data, weight, lm)
 end
 
 function s = local_setup(mdl)
-% KinematicsSolver with the target points, the body rotations and the
-% right-arm loop joints as outputs.
+% KinematicsSolver with the target points, the body rotations, the foot solid
+% rotation frames and the right-arm loop joints as outputs.
     load_system(mdl);
     wf = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
         'ReferenceBlock', 'sm_lib/Frames and Transforms/World Frame');
@@ -306,28 +381,58 @@ function s = local_setup(mdl)
     for b = 1:numel(bodies)
         addFrameVariables(ks, sprintf('r%d', b), 'Rotation', world, bodies{b});
     end
-    s.closed = startsWith(ids, ["j15.", "j18.", "j19."]);   % right elbow, shoulder, wrist
-    s.tv = ids(~s.closed);
+
+    % Foot solid rotation frames (native foot frame +x is forward axis per Human / contact model)
+    foot_l = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'RegExp', 'on', 'Name', '^(L Foot|Left Foot)$');
+    foot_r = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'RegExp', 'on', 'Name', '^(R Foot|Right Foot)$');
+    assert(~isempty(foot_l) && ~isempty(foot_r), 'gs3dx:ik', 'Could not locate L/R Foot solid blocks in %s', mdl);
+    foot_l_blk = foot_l{1};
+    for k = 1:numel(foot_l)
+        ph = get_param(foot_l{k}, 'PortHandles');
+        if isfield(ph, 'RConn') && ~isempty(ph.RConn)
+            foot_l_blk = foot_l{k};
+            break;
+        end
+    end
+    foot_r_blk = foot_r{1};
+    for k = 1:numel(foot_r)
+        ph = get_param(foot_r{k}, 'PortHandles');
+        if isfield(ph, 'RConn') && ~isempty(ph.RConn)
+            foot_r_blk = foot_r{k};
+            break;
+        end
+    end
+    addFrameVariables(ks, 'r_foot_1', 'Rotation', world, [foot_l_blk '/R']);
+    addFrameVariables(ks, 'r_foot_2', 'Rotation', world, [foot_r_blk '/R']);
+
+    % Model-independent identification of invariant joint roles
+    roles = gs3dx_ik_joint_roles(jp);
+    s.roles = roles;
+    s.closed = roles.closed_mask;
+    s.tv = roles.target_ids;
     addTargetVariables(ks, s.tv);
-    addOutputVariables(ks, [string(ks.frameVariables.ID); ids(s.closed)]);
-    addInitialGuessVariables(ks, ids(s.closed));
+    addOutputVariables(ks, [string(ks.frameVariables.ID); roles.closed_ids]);
+    addInitialGuessVariables(ks, roles.closed_ids);
     s.ks = ks;
     s.ids = ids;
     s.jkeys = gs3dx_joint_keys(mdl, jp);
     s.nt = size(T, 1);
     s.nb = numel(bodies);
     s.isdeg = containers.Map(cellstr(ids), num2cell(jp.Unit == "deg"));
-    parts = split(s.tv, '.');
-    keys = unique(parts(:, 1) + "." + parts(:, 2), 'stable');
-    s.layout = struct('key', num2cell(keys), 'n', num2cell(1 + 2 * endsWith(keys, '.S')));
-    assert(sum([s.layout.n]) == 33, 'gs3dx:ik', 'Expected 33 independent coordinates, found %d', sum([s.layout.n]));
+    s.layout = roles.layout;
+    assert(roles.n_independent > 0 && isfinite(roles.n_independent), 'gs3dx:ik', ...
+        'Independent coordinates count must be positive and finite');
+    assert(numel(roles.pelvis_trans_indices) == 3, 'gs3dx:ik', ...
+        'Pelvis translation coordinate indices missing');
+    assert(nnz(roles.is_trunk_coord) == 7, 'gs3dx:ik', ...
+        'Expected exactly 7 trunk coordinates');
 end
 
 function [p, g] = local_seed(s, pelvis, trunk_zero)
 % A pose that closes the grip loop (a target-free solve), moved onto PELVIS.
     ks0 = simscape.multibody.KinematicsSolver(s.ks.ModelName);
     addOutputVariables(ks0, s.ids);
-    trunk = s.ids(startsWith(s.ids, ["j2.", "j3.", "j6.", "j17."]));
+    trunk = s.roles.trunk_ids;
     zero = [];
     if trunk_zero
         addTargetVariables(ks0, trunk);
@@ -350,24 +455,24 @@ function [p, g] = local_seed(s, pelvis, trunk_zero)
     end
     g = q(s.closed);
     P = local_fk(s, p, g);
-    p(1:3) = p(1:3) + pelvis - P(:, 1);   % j1 Px, Py, Pz lead the layout
+    p(s.roles.pelvis_trans_indices) = p(s.roles.pelvis_trans_indices) + pelvis - P(:, 1);
 end
 
-function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, lm)
+function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, lm)
     if s.reg.on   % the same pose, each single angle on (-pi, pi]: the branch the posture pull sees
         p(s.reg.wrap) = p(s.reg.wrap) - 2 * pi * round(p(s.reg.wrap) / (2 * pi));
     end
     p0 = p;   % the warm start: the neighbour frame's solution
-    r = @(pp) local_residual(s, pp, g, off, d, w, p0);
+    r = @(pp) local_residual(s, pp, g, off, d, w, fd, p0);
     [p, cost, ~, ~, out] = lsqnonlin(r, p, [], [], lm);
     iters = out.iterations;
     [~, ~, ~, g] = local_fk(s, p, g);
 end
 
-function r = local_residual(s, p, g, off, d, w, p0)
-    [P, R, st, gc] = local_fk(s, p, g);
+function r = local_residual(s, p, g, off, d, w, fd, p0)
+    [P, R, st, gc, R_feet] = local_fk(s, p, g);
     if st < 1
-        r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on + s.rom.n, 1);   % loop not closed: reject the step
+        r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on + s.rom.n + 18 * (s.foot_orientation_weight > 0), 1);   % loop not closed: reject the step
         return;
     end
     pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, s.nt)), 3, s.nt);
@@ -378,9 +483,13 @@ function r = local_residual(s, p, g, off, d, w, p0)
     if s.rom.on
         r = [r; local_rom_residual(s.rom, p, gc)];
     end
+    if s.foot_orientation_weight > 0
+        r_feet = gs3dx_foot_orientation_residual(R_feet, fd.R_target, fd.gaps, s.foot_orientation_weight);
+        r = [r; r_feet];
+    end
 end
 
-function [P, R, st, g] = local_fk(s, p, g)
+function [P, R, st, g, R_feet] = local_fk(s, p, g)
     [o, st] = solve(s.ks, local_targets(s, p), g);
     P = reshape(o(1:3 * s.nt), 3, s.nt);
     a = reshape(o(3 * s.nt + 1:3 * (s.nt + s.nb)), 3, s.nb) * pi / 180;
@@ -388,7 +497,13 @@ function [P, R, st, g] = local_fk(s, p, g)
     for b = 1:s.nb   % intrinsic X-Y-Z, the KinematicsSolver 'Rotation' convention
         R(:, :, b) = local_rx(a(1, b)) * local_ry(a(2, b)) * local_rz(a(3, b));
     end
-    g = o(3 * (s.nt + s.nb) + 1:end);
+    idx_feet = 3 * (s.nt + s.nb) + (1:6);
+    a_feet = reshape(o(idx_feet), 3, 2) * pi / 180;
+    R_feet = zeros(3, 3, 2);
+    for k = 1:2
+        R_feet(:, :, k) = local_rx(a_feet(1, k)) * local_ry(a_feet(2, k)) * local_rz(a_feet(3, k));
+    end
+    g = o(3 * (s.nt + s.nb + 2) + 1:end);
 end
 
 function T = local_targets(s, p)
@@ -431,4 +546,26 @@ end
 
 function R = local_rz(a)
     R = [cos(a) -sin(a) 0; sin(a) cos(a) 0; 0 0 1];
+end
+
+function fd = local_foot_data(jc, f, has_foot_R)
+    if ~has_foot_R
+        fd.R_target = repmat(eye(3), [1 1 2]);
+        fd.gaps = [true, true];
+        return;
+    end
+    fd.R_target = cat(3, jc.foot_R_L(:, :, f), jc.foot_R_R(:, :, f));
+    gap_L = local_is_gap(jc, 'foot_R_L', f);
+    gap_R = local_is_gap(jc, 'foot_R_R', f);
+    fd.gaps = [gap_L, gap_R];
+end
+
+function g = local_is_gap(jc, name, f)
+    g = false;
+    if isfield(jc, 'gap') && isstruct(jc.gap) && isfield(jc.gap, name)
+        gap_vec = jc.gap.(name);
+        if f <= numel(gap_vec)
+            g = logical(gap_vec(f));
+        end
+    end
 end

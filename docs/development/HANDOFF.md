@@ -1,4 +1,185 @@
-# Historical Player Capture Handoff
+# Simscape Matching Review and Continuation Handoff
+
+## Verified Full Human Exports
+
+Both full sampled swings now use GS3DX_Human ellipsoids with calibrated foot orientation and freshly calibrated marker offsets. Native solves exited naturally with code zero at 2026-10-02T05:15:54Z (A) and 05:23:22Z (O). Position RMS excludes orientation residuals.
+
+| Capture  | Fit mean / max frame RMS (mm) | Human mean / max frame RMS (mm) | Measured foot samples |
+| -------- | ----------------------------- | ------------------------------- | --------------------- |
+| A, tour  | 12.746 / 40.209               | 13.188 / 40.121                 | 55 per foot           |
+| O, owner | 26.558 / 116.576              | 16.767 / 37.626                 | 45 of 46 per foot     |
+
+The owner fit improves both position metrics. The tour fit has a small mean position tradeoff while resolving the reversed-foot ambiguity. Maximum left/right foot angular errors are 12.83/19.82 degrees for A and 19.55/20.38 degrees for O; these diagnostics do not establish anatomical or contact qualification.
+
+Four 800 by 600 H.264 MP4s were completely decoded at 30 fps, with 55 tour and 46 owner frames. Native caption-corrected rerenders exited naturally at 05:28:11Z and 05:31:30Z. The Desktop shareable ZIP contains both views, sanitized provenance, hashes and a same-capture/same-frame comparison; no raw captures or pose caches. Original Fit clips remain preserved.
+
+Owner wrist offsets remain approximately 55/62 mm and the club-target offset 106 mm. Native parameter and grip-contract tests pass; the functional-grip fit worsened held-out position errors and was rejected. These are IK clips; forward dynamics remains unqualified.
+
+## Identity and Branch Status
+
+- **Repository**: D-sorganization/UpstreamDrift
+- **Active Branch**: `feat/simscape-matching-review-main-20261002`; commit `SELF` contains this continuation handoff.
+- **Reviewed Baseline Source**: `144e81188dd7bb106f81d89b7a7330dd20cce511` on `feat/simscape-gs3dx-exploratory` (unpublished baseline commit).
+- **Original Worker Commit Turnover**: Commits `144e81188` through `f2ca443a0` (documentation-only continuation) reviewed and preserved.
+- **Draft PR and Governing Issues**: Original draft PR #11179; continuation PR not created; governing issues #10950, #10979, #11156, #11160, #11161, #11173.
+- **Coordination**: Session `simscape-20261001-codex`, governing #11173; check live lease/presence before expansion or handoff. Mailbox evidence is incomplete; do not infer absence of peers.
+- **Development Log**: Existing `DL-#10950`, updated in place.
+- **Historical Context**: Prior turnovers remain recoverable via `git show 144e81188:docs/development/HANDOFF.md`.
+- **Documentation Authority**:
+  - The editable standalone research reference is [simscape_matching_reference.tex](../research/simscape_matching_reference/simscape_matching_reference.tex) (earlier 16-page revision compiled and visually reviewed; latest full-export additions remain uncompiled because the built-in compiler reports a platform directory error).
+  - The canonical engineering design manual remains governed under `manuals/upstreamdrift` QMD.
+
+## Current State and Operational Scope
+
+Review work proceeds within this isolated worktree while preserving the original agent worktree and unpublished branch states.
+The parent owns LaTeX, export pipelines, source code, development log (DL), AGENTS, and SPEC definitions; delegates handle bounded drafting and runner hardening.
+
+- **Current Goal**: Verified full Human ellipsoid exports for Capture A and Capture O, continued tour and owner physical matching, and formal review through protected branch delivery. The goal remains actively in progress and **unfinished**.
+- **Kinematic vs Dynamics Distinction**: All current video exports are kinematic inverse kinematics (IK) visualizations, not forward-dynamics-driven swings. No forward dynamics qualification is claimed.
+- **Impact Acceptance**: Club acceptance strictly requires at most 2.0 degrees of face error at explicit `phases.contact`. Missing contact fails qualification. Peak head speed is not ball contact.
+- **Receipt Integrity**: The serialized MATLAB runner returns nonzero for failed script status, timeouts, or forced termination. Read `<log>.receipt.json`: historical process exit 0 without a hardened receipt does not establish native success.
+
+## Verified Baseline Desktop IK Exports
+
+Desktop delivery folder: `Simscape_Matches_20261001` on ControlTower. Four Desktop Fit IK H.264 30 fps clips represent the verified baseline:
+
+- **Capture A Baseline (Tour Reference, 360 Hz, 654 frames)**:
+  - Sample coverage: 55 frames.
+  - Mean measured-target RMS: 12.745748 mm.
+  - Maximum measured-target RMS: 40.208544 mm.
+  - Diagnostic worst sampled target: `trailElbow` at 96.517 mm (frame 517).
+  - Process receipt: Natural exit 0.
+- **Capture O Baseline (Owner optical, 240 Hz, 367 frames)**:
+  - Sample coverage: 46 frames.
+  - Mean measured-target RMS: 26.558095 mm.
+  - Maximum measured-target RMS: 116.576104 mm.
+  - Diagnostic worst sampled target: `clubhead` at 375.358 mm (frame 89).
+  - Process receipt: Natural exit 0.
+  - Skill assessment rule: Golfer ability cannot and must not be inferred from avatar distortions.
+- **Baseline Policy**: These four clips are preserved historical baselines using the legacy GS3DX_Fit cylinder model; they are not refined ellipsoid clips yet.
+
+## Candidate Evaluations and Backward-Pass Rejection
+
+- **Owner Backward Pass**:
+  - Tested on identical model identity and marker offset sets.
+  - Mean measured-target RMS: 32.185137 mm.
+  - Maximum measured-target RMS: 46.052114 mm.
+  - Process receipt: Natural exit 0 (receipt timestamp: `03:57:32.790355Z`).
+  - Outcome: **REJECTED**. The backward pass improved peak residual (46.05 mm vs 116.58 mm) but substantially worsened mean tracking (32.19 mm vs 26.56 mm).
+- **Marker Offset Distributions**:
+  - Owner fitted marker offset norms cluster in the 70–100 mm range, whereas tour reference offsets are substantially smaller.
+  - Hypothesis: Offset magnitudes indicate capture definition differences and geometric compensation, not provenance or swing technique evidence.
+
+## Kinematic Topology and Joint Role Resolution
+
+- **Independent Fit Coordinates (37 vs 39 vs 33)**:
+  - The Human model kinematic topology possesses **37 independent coordinates** during fitting with a closed grip loop.
+  - The earlier hardcoded 33-coordinate failure incorrectly reported a 39-coordinate count due to mismatched coordinate indexing in the legacy solver. Clarifying that actual joint roles yield 37 independent degrees of freedom resolves the structural index bug.
+- **Native 3-Frame Fit Probe**:
+  - Frame sample: `[1, 13, 25]`.
+  - Position RMS: 13.296 mm, 12.536 mm, 12.374 mm (finite; numerical conditioning was not assessed).
+  - Left foot orientation residual: 165.0 deg, 167.0 deg, 167.2 deg against calibrated shoe orientation $R$.
+  - Process receipt: Natural exit 0 (receipt timestamp: `04:54:21.730288Z`).
+  - Core finding: Minimizing positional marker residuals alone does not identify or constrain foot orientation.
+
+## Foot Orientation Formulation and Calibration Trials
+
+- **Calibrated Foot Orientation Methodology**:
+  - Evaluated using shared calibrated foot triads and SVD address mean orientation:
+    $$R = F_f F_0^T R_z(\text{yaw})$$
+  - The flat sole condition at address (frame 1) is a geometric modeling assumption, **not** dynamic ground reaction force evidence. If frame 1 is missing, the routine fails closed.
+- **Foot Orientation Weighting Trial**:
+  - Weight 0.1 applied to foot orientation residual, reusing existing Fit offsets.
+  - Position RMS degraded: 51.263 mm, 43.243 mm, 39.399 mm.
+  - Left foot orientation error improved: 36.505 deg, 17.058 deg, 13.764 deg.
+  - Process receipt: Natural exit 0 (receipt timestamp: `04:57:13.758186Z`).
+  - Outcome: **REJECTED**. Position degradation was too severe for production substitution.
+- **Active Probe Status**:
+  - Fresh Human offset calibration at frames [1, 13, 25] completed with natural exit 0 (2026-10-02T05:01:00.641030Z). Position RMS is 1.188/1.195/1.208 mm and all foot angular errors are below 0.7 deg. These same frames were used for calibration; this is not held-out or full-swing validation.
+  - Full $\text{SO}(3)$ 18-component chordal formulation with weight 0.1 is exploratory and not certified (excludes position RMS; gap foot metric returns `NaN`).
+
+## Model Adapters and Visual Scaling Limits
+
+- **Human Ellipsoid Adapter**:
+  - 10 native MATLAB adapter tests pass with natural exit 0.
+  - Scales capture longitudinal segment geometry to match subject proportions.
+  - Artistic widths, head geometry, and shoe dimensions remain fixed.
+  - Baseline segment mass and inertia properties are **NOT** scaled to the owner's 104.3 kg body mass.
+  - Forward dynamics remain unqualified.
+- **Future Ellipsoid Export Policy**:
+  - Future shareable matches must use the stylish Human ellipsoid model.
+  - Calibrated foot roll/pitch/yaw must be constrained and their residuals reported.
+  - Public capture aliases and hashes provide provenance; private raw captures and pose caches remain uncommitted.
+  - Independently record 14 target RMS errors and orientation residuals.
+  - Head and neck orientation is not yet constrained by this solver and require future orientation constraints; do not describe the model as anatomically complete.
+
+## Physical Stance Tests and Forward Dynamics Status
+
+- **1-Second Stance Simulation Failures**:
+  - 1-second resampled, quiet, frozen address, and still upper-body tests all fail physical stance stability.
+  - Ground reaction normal force decays to zero after 0.5 s.
+  - At 1.0 s, body tilt reaches 101 deg, 108 deg, 114 deg, and 124 deg.
+  - The pelvis drops far below the floor plane.
+  - Historical process `EXIT 0` was an unhardened execution receipt, not physical stance qualification.
+- **Queued Damping Experiment**:
+  - The unsaved damping-times-ten test completed and failed: initial right-heel force 15,513 N, force zero by 0.60 s, tilt 117 deg and pelvis z -1.83 m at 1.0 s. It must not be repeated alone. The original worker subsequently queued a composed pelvis-level pose check stopping at 0.02 s; no outcome is claimed.
+  - Do not duplicate, cancel, save, or claim success for the original worker's pending composed-pose check. The original worker process is ongoing and must be preserved.
+
+## Open Scientific Gates
+
+- **Gate #11156 (Lead Elbow and Wrist Tracking)**: **RED**. 20-degree elbow limit and 15-mm tracking penalty remain active.
+- **Gate #11160 (Clubhead Kinematics and Contact-Face Error)**: **RED**. Head RMS/max, shaft maximum, speed, and contact-face limits remain frozen.
+- **Gate #11173 (Open-Loop Full-Swing Forward Dynamics)**: **RED**. Contact spikes, airborne phases, and competing balance torques prevent qualification.
+- **Owner matching** remains unqualified in Simscape. Capture registry delivery is a separate workstream; external MuJoCo ZMP diagnostics do not establish Simscape feasibility.
+
+## Software Test Inventory and Verification Boundaries
+
+- **Pure Mathematics and Architecture Tests**: 102 tests PASS, 0 skipped, following initial full orientation helper implementation.
+- **Strict Validator Tests**: The five additional validator tests now pass within the 102-test suite, including missing address calibration and ambiguous orientation rejection.
+- **LaTeX Reference Compilation**: Earlier 16-page revision compiled and visually reviewed. Latest full-export source additions remain uncompiled: built-in compiler reports Unable to find standard directories for platform.
+- **Overall Goal Status**: Full refined A/O exports, continued tour and owner physical matching, and protected delivery remain unfinished.
+
+## Reproduction and Operational Constraints
+
+- Set `GS3DX_CAPTURE_ID` to `capture-A` or `capture-O`.
+- Explicitly define `GS3DX_OUTPUT_DIR`, `CAPTURE_REGISTRY_REPO`, and `MATLAB_PYTHON_EXE`.
+- Execute via `tools/run_matlab_locked.ps1` using MATLAB R2025b (`C:/Program Files/MATLAB/R2025b/bin/matlab.exe`).
+- Do not kill live processes or duplicate queued stance runs.
+- Public records must use only neutral aliases (`capture-A`, `capture-O`) and cryptographic hashes.
+
+## Next Actions
+
+1. Verify importer and export-provenance contracts, then evaluate further wrist/club/head refinements against held-out samples.
+2. Review position and orientation diagnostics and decoded ellipsoid videos before selecting replacements.
+3. Preserve original worker tasks; review the pending composed pelvis-level check without duplicating it.
+4. Preserve the verified Human clips and enforce ellipsoid rendering for future accepted improvements; report position and orientation separately.
+5. Review the isolated branch through protected delivery without premature qualification claims.
+
+## Subject Physics and Rejected Functional-Grip Candidate
+
+The native subject-physics adapter/catalog passed 18 tests with zero incomplete tests (natural exit 0, 2026-10-02T06:03:51Z). It applies a declared mass and whitelisted fitted lengths in memory, preserves joint expressions and parameter metadata, and audits equipment through the existing native inertia catalog. Parameter consistency is not a dynamics qualification. The selected Human videos still use the baseline physical parameters because mass does not drive IK.
+
+The sphere solver passed 15 tests and the controlled grip contract passed 12 tests, both with zero incomplete tests. A functional-grip owner candidate completed naturally with code zero at 06:15:53Z. Its 24 held-out samples worsened mean/max frame RMS from 26.011/37.626 to 27.969/41.278 mm; full-swing values worsened from 16.767/37.626 to 17.948/41.278 mm. It was rejected. Its smaller lead-wrist offset alone is insufficient for selection. Capture lengths were estimated from the complete recording; held-out status concerns grip/offset calibration only. See `grip_candidate_comparison_20261001.json`.
+
+## Fresh Contact Geometry and Capture Metadata
+
+A read-only native forward-kinematics audit of the selected owner's first pose, with fitted Human geometry and declared 104.3 kg mass, exited naturally with code zero at 06:42:14Z. Against the existing model ground plane, the ten contact-sphere clearances ranged from -64.399 to -48.619 mm (15.780 mm spread). This geometric penetration is not a simulated force measurement. Simulation initial targets were not updated, no dynamics was run and no model was saved. The pelvis frame's local up vector tilted 57.889 degrees; that frame-relative quantity does not establish an anatomical torso angle or a causal instability mechanism. Existing World Frame selection matches the cached IK. Ground placement and a consistent gravity/contact initialization must be verified separately.
+
+Both actual C3D files specify metres and contain no EVENT parameter group. Under ezc3d 1.7.2, A has 717 negative-residual samples, all already nonfinite in XYZ; O has no negative residuals but 1,173 nonfinite XYZ samples. These counts cover all marker tracks. The fourth point row is homogeneous XYZ1, not residual metadata. Neither peak-speed timing nor address-line crossing establishes measured ball contact. Importer units/missingness contracts and export dependency/runtime provenance are under review; no new export identity is yet accepted.
+
+## Importer and Runtime Contract Verification
+
+Thirteen pure importer tests, seventeen pure runtime-fingerprint tests, and twelve exporter precondition tests pass with zero incomplete tests. The live runtime is MATLAB R2025b Update 5, Simulink/Simscape/Multibody 25.2, Python 3.12.10, NumPy 2.4.4 and ezc3d 1.7.2. Required recorded source hashes fail closed; optional resolver absence is explicit. Direct runtime components are recorded, not every transitive package or external STL asset. Fresh A/O exports are in a private candidate folder pending natural exit and full-video comparison; selected Desktop clips remain unchanged.
+
+## Current-Main Integration Boundary
+
+This continuation is based on `cee0a65e0`. Current-main model promotion, compiled home-budget diagnostics and anatomical mesh work (#11207, #11208, #11209) are preserved. The current-main Human model SHA256 begins `91997471`; existing verified Desktop matches use the separate `9a26ee80` source. Their successful receipts do not qualify the new integration. The integrated source passed 187 native MATLAB tests (zero incomplete) and 44 focused Python tests. Full matching on the preserved new model remains pending.
+
+## Historical Player Capture Continuation Preserved From Main
+
+The following separate continuation state was present on current main and is retained without treating its validation as evidence for Simscape matching.
+
+### Historical Player Capture Handoff
 
 ## Active: Tiger 2000 and Ben Hogan
 

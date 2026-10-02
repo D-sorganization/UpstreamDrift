@@ -1,0 +1,802 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[protrusion=true,expansion=false]{microtype}
+
+\geometry{margin=1in}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!50!black,
+    urlcolor=blue!80!black
+}
+
+\title{\textbf{Simscape Multibody Golf Swing Modeling: Mechanics, Identifiability, and Diagnostics}}
+\author{UpstreamDrift Modeling Reference}
+\date{October 1, 2026 --- Source Revision \texttt{144e81188}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This reference documents the Simscape Multibody golf swing model lineage from the legacy kinetic model to the contact-supported \texttt{GS3DX\_Human} variant under MATLAB R2025b (Home license: 1,000-block limit, 25-block diagnostic reserve). It details coordinate transformations, address waist origins, intrinsic Euler mappings, and power-preserving torque duals. We record parameter identifiability limits, iterative learning control with inertia-scaled gains, foot-pose Jacobian balance feedback, and closed-loop internal force spaces. Point-force contact diagnostics (21.863~N$\cdot$m RMS residual) and transient load spikes (365~BW and 22.6~BW) are evaluated, rejecting unqualified contact loads. Active red acceptance gates (\#11156, \#11160, \#11173) and operational qualification protocols are established.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Document Governance and Authority Notice}
+
+\subsection{Canonical Manual Governance Relationship}
+This document serves strictly as a dedicated research, experiment, and biomechanical modeling reference record for the exploratory Simscape Multibody matching continuation. In compliance with repository policy specified in \texttt{CLAUDE.md}, \texttt{AGENTS.md}, and \nolinkurl{scripts/config/design_manual_governance.json}:
+\begin{enumerate}
+    \item The sole editable scientific authority for the calculation-level engineering design manual is located at \texttt{manuals/upstreamdrift} (QMD source).
+    \item This reference document is \textbf{a separate research and experiment record, not the engineering design manual}, and does not alter the canonical calculation registry.
+    \item Generated outputs of the canonical manual remain non-editable artifacts governed by automated cryptographic provenance checks.
+    \item This document is maintained independently within \nolinkurl{docs/research/simscape_matching_reference/} to record experimental findings, architectural derivations, diagnostic falsifications, and handoff criteria.
+\end{enumerate}
+
+\subsection{Branch Provenance and Baseline Commit Ledger}
+Historical metrics are attributed to the October 1 turnover.\par
+Turnover branch: \nolinkurl{feat/simscape-gs3dx-exploratory}.\par
+Reviewed branch: \nolinkurl{feat/simscape-reference-20261001}.
+\begin{itemize}
+    \item \textbf{Branch Head Source Commit:} \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511} (October 1, 2026).
+    \item \textbf{Historical Handoff Baseline:} \texttt{2d5830d18}. This historical attribution is not a verified current remote baseline.
+    \item \textbf{Active Draft PR:} \#11179 (exploratory GS3DX continuation).
+    \item \textbf{Primary Governing Issues:} Epic \#10950 (children \#10951--\#10959, \#10985, \#10986, \#11011; active \#10979); Quality gates \#11156, \#11157, \#11158, \#11159, \#11160; Forward dynamics objective \#11173; Subject matching epic \#11161.
+\end{itemize}
+
+\subsection{Data Anonymization and Privacy Policy}
+In strict adherence to fleet-wide data security standards, no proprietary athlete identities, personal health identifiers, commercial measurement hardware vendor names, or private absolute local filesystem paths are committed to version control:
+\begin{itemize}
+    \item All private motion capture directories are resolved at runtime via the environment variable \texttt{\$env:CAPTURE\_DATA\_DIR}.
+    \item Motion capture datasets are referenced via standardized anonymized aliases:
+    \begin{itemize}
+        \item \texttt{capture-A}: Tour driver reference dataset; no population-average qualification is implied.
+        \item \texttt{capture-B}: Secondary professional trial datasets.
+        \item \texttt{capture-O}: Custom subject evaluation dataset (1.956~m height, 104.3~kg mass).
+    \end{itemize}
+\end{itemize}
+
+\section{Coordinate Frames, Units, and Sign Conventions}
+
+\subsection{Global World, Capture, and Address Coordinate Systems}
+The simulation environment enforces standard SI metric units: lengths in meters (m), masses in kilograms (kg), forces in Newtons (N), torques in Newton-meters (N$\cdot$m), angles in radians (rad) for mathematical formulations, and degrees ($^\circ$) for tabular reporting.
+
+\begin{itemize}
+    \item \textbf{Simscape World Frame ($\mathcal{F}_W$):} Defined with $+Z_W$ vertical against gravity ($\mathbf{g} = [0, 0, -9.80665]^T$~m/s$^2$), $+X_W$ pointing forwards across the golfer's frontal plane at address (facing direction), and $+Y_W$ pointing laterally down the target line to the golfer's left.
+    \item \textbf{Native Capture Coordinate Frame ($\mathcal{F}_C$):} Optical motion capture systems natively export trajectories with $+Y_C$ pointing upwards. The loader \texttt{gs3dx\_capture\_markers.m} performs an orthogonal mapping into the Simscape world frame:
+    \begin{equation}
+        \mathbf{p}_W = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{bmatrix} \mathbf{p}_C = \begin{bmatrix} x_C \\ -z_C \\ y_C \end{bmatrix}.
+    \end{equation}
+    \item \textbf{Address Frame ($\mathcal{F}_{\text{addr}}$) and Waist Origin:} In \texttt{gs3dx\_capture\_address\_transform.m}, the address origin $\mathbf{p}_{\text{origin}}$ is defined as the mean position of the \textbf{four waist markers} at frame 1 ($t = 0$):
+    \begin{equation}
+        \mathbf{p}_{\text{origin}} = \frac{1}{4} \left(\mathbf{p}_{\text{WaistLeft}} + \mathbf{p}_{\text{WaistRight}} + \mathbf{p}_{\text{WaistLBack}} + \mathbf{p}_{\text{WaistRBack}}\right)_{t=0}.
+    \end{equation}
+    The address origin is \textbf{not} the ankle midpoint or ground datum. Point positions transform to local address coordinates via the basis matrix $\mathbf{S} = [\mathbf{s}_{\text{facing}}, \mathbf{s}_{\text{target}}, \mathbf{s}_{\text{up}}]$:
+    \begin{equation}
+        \mathbf{p}_{\text{addr}} = \mathbf{S}^T (\mathbf{p}_W - \mathbf{p}_{\text{origin}}).
+    \end{equation}
+    Under this change of frame, forces transform purely by rotation:
+    \begin{equation}
+        \mathbf{f}_{\text{addr}} = \mathbf{S}^T \mathbf{f}_W,
+    \end{equation}
+    For a resultant moment $\mathbf{m}_W$ taken about the World origin,
+    moments transform by incorporating the lever arm of the origin shift:
+    \begin{equation}
+        \mathbf{m}_{\text{addr}} = \mathbf{S}^T \mathbf{m}_W - (\mathbf{S}^T \mathbf{p}_{\text{origin}}) \times \mathbf{f}_{\text{addr}}.
+    \end{equation}
+    \item \textbf{Ground Datum vs. Address Origin:} The waist origin sits at elevated vertical position. The ground height belongs to the selected model workspace and experiment. A recorded run used $Z_W \approx -1.00027$~m and ankle height $0.0702$~m; these are not universal constants or the capture address origin. Record the actual floor transform for each replay.
+\end{itemize}
+
+\subsection{Joint Sign Conventions and Anatomical Definitions}
+Joint rotations are parameterized as intrinsic transformations. For revolute and universal primitives, the anatomical angle $A_j$ is related to the raw Simscape generalized coordinate $q_j$ via:
+\begin{equation}
+    A_j = s_j \cdot \text{wrap}_{180}(q_j - q_{j,0}),
+\end{equation}
+where $s_j \in \{+1, -1\}$ is the structural joint direction sign, $q_{j,0}$ is the anatomical neutral angle, and $\text{wrap}_{180}(\theta) = \theta - 360^\circ \cdot \lfloor(\theta + 180^\circ)/360^\circ\rfloor$.
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\caption{Anatomical Joint Kinematic Signs, Neutrals, and Primary Physiological Boundaries}
+\label{tab:joint_signs}
+\begin{tabularx}{\textwidth}{p{2.6cm} >{\raggedright\arraybackslash}X c p{3.4cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Joint Axis / Type} & \textbf{Positive Motion ($s_j$)} & \textbf{Neutral ($q_0$)} & \textbf{ROM Range} & \textbf{Primary Source} \\
+\midrule
+Neck Rx \newline \textit{Universal} & Trunk lateral bend ($+1$) & $24.01^\circ$ & $\pm 45^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Neck Ry \newline \textit{Universal} & Trunk extension ($+1$) & $7.67^\circ$ & $\pm 45^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Spine Rx \newline \textit{Universal} & Trunk lateral flexion ($+1$) & $0.00^\circ$ & $-25^\circ \dots +80^\circ$ & AAOS thoracolumbar \\
+\addlinespace[2pt]
+Spine Ry \newline \textit{Universal} & Trunk lateral bend ($+1$) & $0.00^\circ$ & $\pm 35^\circ$ & AAOS thoracolumbar \\
+\addlinespace[2pt]
+Torso Rz \newline \textit{Revolute} & Axial thorax twist ($+1$) & $-26.81^\circ$ & $\pm 60^\circ$ & Cheetham et al. (2008) \\
+\addlinespace[2pt]
+Lead Elbow \newline \textit{Revolute} & Elbow flexion ($+1$) & $0.00^\circ$ & $-5^\circ \dots +150^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Trail Elbow \newline \textit{Revolute} & Elbow flexion ($-1$) & $0.00^\circ$ & $-5^\circ \dots +150^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Forearms \newline \textit{Revolute} & Forearm pronation ($+1$ L / $-1$ R) & $90.00^\circ$ & $\pm 80^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Scapulae \newline \textit{Universal} & Protraction / Elev. ($+1$ L / $-1$ R) & $0.00^\circ$ & $\pm 25^\circ / -10^\circ \dots 40^\circ$ & Ludewig et al. (2009) \\
+\addlinespace[2pt]
+Knees Rz \newline \textit{Revolute} & Knee flexion ($-1$) & $0.00^\circ$ & $-5^\circ \dots +135^\circ$ & Winter (2009) \\
+\addlinespace[2pt]
+Ankles Rx/Ry \newline \textit{Universal} & Inversion / Dorsiflex. ($-1/+1, -1$) & $0.00^\circ$ & $-15^\circ \dots 35^\circ / -50^\circ \dots 20^\circ$ & AAOS (1965) \\
+\addlinespace[2pt]
+Midfoot Rz \newline \textit{Revolute} & Toe extension ($-1$) & $0.00^\circ$ & $-45^\circ \dots +70^\circ$ & AAOS first MTP \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Multibody Topology, Block Budget, and Variant Ladder}
+
+\subsection{Compiled Block Budget and License Governance}
+Execution of multibody golf swing models within MATLAB R2025b is bounded by the strict non-virtual block constraint of the Home license:
+\begin{itemize}
+    \item \textbf{Theoretical Hard Ceiling:} Exactly 1,000 compiled non-virtual blocks. Probed synthetically via \texttt{gs3dx\_license\_limit\_probe.m}, 1,000 blocks compile and simulate; 1,001 blocks abort with an unrecoverable Simulink compiler error.
+    \item \textbf{Compiled Count Evaluation:} Evaluated exclusively on the compiled system:
+    \begin{equation}
+        N_{\text{compiled}} = \text{length}\left(\text{find\_system}(mdl, \text{'Compiled'}, \text{'on'}, \text{'Virtual'}, \text{'off'})\right).
+    \end{equation}
+    \item \textbf{Mandatory Validation Reserve:} All models must maintain a 25-block reserve, enforcing a hard upper ceiling of \textbf{975 compiled blocks} to accommodate transient in-memory instrumentation blocks added by diagnostic harnesses (e.g., \texttt{gs3dx\_contact\_check}, which appends 10 compiled sensing blocks).
+\end{itemize}
+
+\subsection{The GS3DX Model Progression Ladder}
+The architectural lineage spans thirteen programmatically constructed variants. Entries record historical diagnostic evidence from the turnover handoff, not physical qualification:
+
+\begin{table}[!htb]
+\centering
+\footnotesize
+\caption{The Simscape Multibody GS3DX Structural Model Progression Ladder}
+\label{tab:variant_ladder}
+\begin{tabularx}{\textwidth}{p{4.2cm} >{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Model Variant / Builder} & \textbf{Structural Modifications} & \textbf{Blocks} & \textbf{Historical Diagnostic Evidence} \\
+\midrule
+\texttt{GS3DX\_Baseline} \newline \textit{\texttt{gs3dx\_clone\_baseline}} & Verbatim renamed clone of legacy model & 941 & Match on 413 signals across 344 steps \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Slim} \newline \textit{\texttt{gs3dx\_build\_slim}} & Direct \texttt{InputTorque} drive; drops sources & 773 & Matches baseline to $6 \times 10^{-14}$~m clubhead diff \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Quat} \newline \textit{\texttt{gs3dx\_build\_quat}} & Quaternion Spherical shoulders and 6-DOF hip & 740 & Eliminates joint lock; 7--9\% fewer steps \\
+\addlinespace[2pt]
+\texttt{GS3DX\_FullBody} \newline \textit{\texttt{gs3dx\_build\_lower\_body}} & Lower body legs added; feet welded to World & 945 & Passive legs; knee hyperextends ($+67^\circ$) \\
+\addlinespace[2pt]
+\texttt{GS3DX\_FullBodyContact} \newline \textit{\texttt{gs3dx\_build\_contact}} & 3 sole spheres/foot on plane; free pelvis & 967 & Stands from rest (slip $\le 2.1$~mm; lift 0~mm) \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Golfer} \newline \textit{\texttt{gs3dx\_build\_golfer}} & de Leva 80~kg masses assigned to 15 solids & 967 & Sensed mass 80.393~kg; stands from rest \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Fit} \newline \textit{\texttt{gs3dx\_build\_fit}} & Capture lengths; fitted hand-grip standoffs & 967 & Wrist IK errors reduced from 88 to 18~mm \\
+\addlinespace[2pt]
+\texttt{GS3DX\_FitLegs} \newline \textit{\texttt{gs3dx\_build\_fit\_legs}} & Leg servo reference trajectories from IK & 967 & Stance holds under passive upper-body drive \\
+\addlinespace[2pt]
+\texttt{GS3DX\_FitTrack} \newline \textit{\texttt{gs3dx\_build\_fit\_track}} & Feedforward + PD on 12 upper-body joints & 967 & Angle error $0.25^\circ$; pelvis tips without balance \\
+\addlinespace[2pt]
+\texttt{GS3DX\_FitBalance} \newline \textit{\texttt{gs3dx\_build\_fit\_balance}} & Damped inverse-Jacobian COM balance loop & 973 & Pelvis error at impact reduced 503 to 73~mm \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Shape} \newline \textit{\texttt{gs3dx\_build\_shape}} & de Leva gyration inertia; visual ellipsoids & 973 & Vertical COM error reduced to 2.9~mm RMS \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Neck} \newline \textit{\texttt{gs3dx\_build\_neck}} & 2-axis Universal neck driven by head markers & 975 & Vertical head error reduced 52.2 to 36.8~mm \\
+\addlinespace[2pt]
+\texttt{GS3DX\_Human} \newline \textit{\texttt{gs3dx\_build\_human}} & 5 contacts/foot; sprung midfoot; STL mesh & 965 & Square face at address; unstable finish dynamics \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Quaternion-to-Euler Mapping and Torque Duality}
+\texttt{GS3DX\_Quat} replaces Gimbal joints with native Spherical Joints parameterized by unit quaternions $\mathbf{q} = [q_w, q_x, q_y, q_z]^T$. As documented by MathWorks~\cite{MathWorksSpherical}, the underlying joint primitive eliminates quaternion orientation singularities. However, to interface with legacy Euler-angle signal buses, \texttt{gs3dx\_xyz\_map.m} extracts intrinsic $X$-$Y$-$Z$ angles using the exact sequence:
+\begin{equation}
+    \mathbf{R} = \mathbf{R}_x(a) \mathbf{R}_y(b) \mathbf{R}_z(c).
+\end{equation}
+Let $\mathbf{R} \in \mathbb{R}^{3 \times 3}$ denote the rotation matrix computed from unit quaternion $\mathbf{q}$. The extracted angles are evaluated as:
+\begin{align}
+    a &= \text{atan2}(-R_{23}, R_{33}), \\
+    b &= \text{atan2}(R_{13}, \text{hypot}(R_{11}, R_{12})), \\
+    c &= \text{atan2}(-R_{12}, R_{11}),
+\end{align}
+with $a$ and $c$ unwrapped to the continuous branch of reference angles $\mathbf{q}_{\text{ref}}$.
+\begin{quote}
+\textbf{Singularity Caveat:} The adapter mapping remains \textbf{singular where $\cos(b) = 0$ ($|b| = 90^\circ$)}. While the Spherical Joint itself does not lock, representing motion through this adapter re-introduces the kinematic singularity; full singularity removal is not achieved.
+\end{quote}
+
+The kinematic velocity mapping relates Euler angle rates $\dot{\mathbf{q}}_r = [\dot{a}, \dot{b}, \dot{c}]^T$ (in radians/s) to the follower-frame angular velocity $\boldsymbol{\omega}_F$:
+\begin{equation}
+    \boldsymbol{\omega}_F = \mathbf{E}(b, c) \dot{\mathbf{q}}_r, \quad \text{where} \quad \mathbf{E}(b, c) = \begin{bmatrix} \cos b \cos c & \sin c & 0 \\ -\cos b \sin c & \cos c & 0 \\ \sin b & 0 & 1 \end{bmatrix}.
+\end{equation}
+By the principle of virtual power, mechanical power is invariant under generalized coordinates: $\mathbf{T}^T \boldsymbol{\omega}_F = \boldsymbol{\tau}_q^T \dot{\mathbf{q}}_r$. The torque dual transformation mapping Gimbal axis torques $\boldsymbol{\tau}$ and joint damping to follower-frame torque $\mathbf{T}$ is:
+\begin{equation}
+    \mathbf{T} = \mathbf{E}^{-T} \left(\boldsymbol{\tau} - \mathbf{D} \dot{\mathbf{q}}_{\text{deg}}\right),
+\end{equation}
+accounting explicitly for conversion between degrees and radians ($\dot{\mathbf{q}}_{\text{deg}} = \dot{\mathbf{q}}_r \times 180 / \pi$).
+
+\section{Anthropometry, Mass Distribution, and Inertial Calibration}
+
+\subsection{Standardized Segment Masses and Inertia Tensors}
+The model's mass distribution is parameterized according to de Leva's (1996)~\cite{deLeva1996} anatomical adjustments to Zatsiorsky-Seluyanov's gamma-ray scanning standards for adult males. For an 80.0~kg golfer, the segments, masses, center of mass fractions, and central radii of gyration are detailed in Table~\ref{tab:de_leva_masses}. Total system mass equals $80.393$~kg, which incorporates 80.000~kg of human biological tissue plus 0.393~kg of equipment (0.330~kg club shaft and head, 0.057~kg grip assembly, and 0.006~kg contact sphere representations).
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{Segment Anthropometry, Mass Allocation, and Inertial Parameters for 80~kg Golfer}
+\label{tab:de_leva_masses}
+\begin{tabularx}{\textwidth}{lcccccX}
+\toprule
+\textbf{Segment} & \textbf{Fraction} & \textbf{Mass (kg)} & \textbf{COM ($z/L$)} & \textbf{$r_{xx}/L$} & \textbf{$r_{yy}/L$} & \textbf{$r_{zz}/L$} \\
+\midrule
+Head + Neck & 0.0694 & 5.552 & 0.5002 & 0.303 & 0.315 & 0.261 \\
+Thorax (Upper Trunk) & 0.1596 & 12.768 & 0.5066 & 0.505 & 0.449 & 0.347 \\
+Abdomen (Mid Trunk) & 0.1633 & 13.064 & 0.3989 & 0.482 & 0.383 & 0.468 \\
+Pelvis (Lower Trunk) & 0.1117 & 8.936 & 0.6014 & 0.615 & 0.551 & 0.587 \\
+Thigh (each) & 0.1416 & 11.328 & 0.4095 & 0.329 & 0.329 & 0.149 \\
+Shank (each) & 0.0433 & 3.464 & 0.4459 & 0.282 & 0.282 & 0.092 \\
+Foot Rearfoot (each) & 0.0106 & 0.846 & 0.4415 & 0.257 & 0.245 & 0.124 \\
+Foot Forefoot (each) & 0.0031 & 0.250 & 0.5000 & 0.200 & 0.200 & 0.100 \\
+Upper Arm (each) & 0.0271 & 2.168 & 0.5772 & 0.285 & 0.269 & 0.158 \\
+Forearm (each) & 0.0162 & 1.296 & 0.4574 & 0.276 & 0.265 & 0.121 \\
+Hand (each) & 0.0061 & 0.488 & 0.7900 & 0.628 & 0.513 & 0.332 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Parametric Segment Dimensions From Capture Geometry}
+Using \texttt{gs3dx\_capture\_joint\_centres.m}, segment lengths are extracted from marker triad centroids and mapped into parameter variables ($Fit*$) that cannot be overwritten by drive files:
+\begin{itemize}
+    \item Thigh length ($L_{\text{thigh}}$): 0.460~m (hip joint center to knee axis).
+    \item Shank length ($L_{\text{shank}}$): 0.424~m (knee axis to ankle joint center).
+    \item Forearm length ($L_{\text{forearm}}$): 0.280~m (elbow joint center to wrist joint center).
+    \item Upper arm length ($L_{\text{arm}}$): 0.305~m (shoulder joint center to elbow axis).
+    \item Pelvis-to-shoulder trunk line ($L_{\text{trunk}}$): 0.490~m.
+\end{itemize}
+
+\subsection{Midfoot Joint Architecture and Mass Partitioning}
+In \texttt{GS3DX\_Human}, a sprung revolute joint is introduced at the metatarsophalangeal (MTP) boundary, positioned at 73\% of foot length from the posterior heel and 25~mm above the sole:
+\begin{equation}
+    \tau_{\text{MTP}} = -K_{\text{midfoot}} \theta_{\text{MTP}} - C_{\text{midfoot}} \dot{\theta}_{\text{MTP}},
+\end{equation}
+where $K_{\text{midfoot}} = 2,000$~N$\cdot$m/rad and $C_{\text{midfoot}} = 0.5$~N$\cdot$m$\cdot$s/rad. Total foot mass (1.096~kg) is partitioned into a 0.250~kg forefoot solid carrying the toe contacts and a 0.846~kg rearfoot solid carrying the heel and ball contacts.
+
+\section{Motion Capture Calibration, Inverse Kinematics, and Identifiability}
+
+\subsection{Capture Pre-Processing and Trajectory Gaps}
+The reference motion (\texttt{capture-A}) is sampled at 360~Hz over 654 frames ($T = 1.814$~s). Key temporal events are:
+\begin{itemize}
+    \item \textbf{Top of Backswing:} Frame 378 ($t = 1.050$~s), defined by pelvis yaw reversal.
+    \item \textbf{Peak Clubhead Speed:} Frame 476 ($t = 1.319$~s), reaching 50.7~m/s approximately 16~cm before ball impact.
+    \item \textbf{Ball Contact:} Frame 477 ($t = 1.322$~s), when the clubhead returns to address position along the target line; head speed drops to 41.4~m/s across contact.
+\end{itemize}
+Marker dropouts occur on the clubhead at frame 445, frames 519--551, and frames 653--654. The inverse kinematics algorithm omits gap-filled samples from the residual vector (\texttt{jc.gap}); fitting linearly interpolated points introduces severe tracking distortion ($> 0.5$~m) through follow-through.
+
+\subsection{Levenberg--Marquardt Inverse Kinematics Formulation}
+Inverse kinematics minimizes residual tracking errors over 33 independent coordinates $\mathbf{q} \in \mathbb{R}^{33}$ using \texttt{KinematicsSolver} as forward kinematics:
+\begin{equation}
+    \min_{\mathbf{q}_k} \frac{1}{2} \|\mathbf{r}_{\text{marker}}(\mathbf{q}_k)\|^2 + \frac{w_p^2}{2} \|\mathbf{q}_k - \mathbf{q}_{\text{posture}}\|^2 + \frac{w_s^2}{2} \|\mathbf{q}_k - \mathbf{q}_{k-1}\|^2 + \frac{w_{\text{rom}}^2}{2} \|\mathbf{r}_{\text{rom}}(\mathbf{q}_k)\|^2,
+\end{equation}
+where $w_p = 0.01$~m/rad pulls trunk coordinates toward neutral, $w_s = 0.02$~m/rad penalizes frame-to-frame coordinate difference (note: this is a coordinate step penalty, not velocity without division by $\Delta t$), and $w_{\text{rom}} = 3.0$~m/rad penalizes joint range violations:
+\begin{equation}
+    r_{\text{rom}, j}(\mathbf{q}) = \max\left(0, A_j(\mathbf{q}) - A_{j,\max}\right) + \max\left(0, A_{j,\min} - A_j(\mathbf{q})\right).
+\end{equation}
+
+\subsection{Joint Angle and Standoff Identifiability Limits}
+\begin{enumerate}
+    \item \textbf{Lead Elbow Flexion Identifiability:} Fitting unconstrained skin markers yields an unphysiological lead elbow flexion of $51.8^\circ$--$65.9^\circ$. When marker offsets are calibrated against an unconstrained fit, they absorb marker error; enforcing an anatomical ROM penalty thereafter causes severe conflict, inflating tracking RMS from 23.3~mm to 43.2~mm. Offsets must be calibrated under the constrained prior.
+    \item \textbf{Hand-on-Grip Standoff Identifiability:} Total hand separation across the shaft ($72$--$74$~mm) is identifiable; however, the lateral shift of the shaft relative to the hands is unidentifiable because sideways shaft movement is absorbed by clubhead marker offsets. The standoff is partitioned symmetrically ($1.46$~in on each side).
+\end{enumerate}
+
+\section{Control Architecture: Feedforward, Feedback, and Balance}
+
+\subsection{Upper-Body Feedforward and PD Tracking}
+Upper-body actuation operates under \texttt{UpperBodyTracking} with an unactuated 6-DOF pelvis (\texttt{ModelingMode} 0):
+\begin{equation}
+    \boldsymbol{\tau}_{\text{upper}}(t) = \boldsymbol{\tau}_{\text{ff}}(t) + \mathbf{K}_p (\mathbf{q}_{\text{ref}}(t) - \mathbf{q}(t)) + \mathbf{K}_d (\dot{\mathbf{q}}_{\text{ref}}(t) - \dot{\mathbf{q}}(t)).
+\end{equation}
+In \texttt{gs3dx\_track\_gains.m}, gains are critically damped ($\zeta = 1.0$) at natural frequency $\omega_n = 2\pi \times 6.0$~rad/s based on reflected segment inertia $I_j$ (in kg$\cdot$m$^2$). The continuous radian gains are converted to Simscape degree units by multiplying by $\pi / 180$:
+\begin{equation}
+    K_{p, j} = I_j \omega_n^2 \left(\frac{\pi}{180}\right), \quad K_{d, j} = 2 \zeta I_j \omega_n \left(\frac{\pi}{180}\right).
+\end{equation}
+
+\subsection{Iterative Learning Control (ILC) Formulation}
+Feedforward torques $\mathbf{F}(t)$ are updated via a filtered P-D learning law:
+\begin{equation}
+    \mathbf{F}^{(k+1)}(t) = \mathcal{Q}\left(\mathbf{F}^{(k)}(t) + \gamma \cdot \left(\mathbf{K}_p \mathbf{e}^{(k)}(t) + \mathbf{K}_d \dot{\mathbf{e}}^{(k)}(t)\right)\right),
+\end{equation}
+where $\mathcal{Q}$ is a zero-phase 4th-order Butterworth low-pass filter (cutoff 12~Hz), $\gamma$ is the learning gain (default 1.0), $\mathbf{e}^{(k)} = \mathbf{q}_{\text{ref}} - \mathbf{q}^{(k)}$, and $\dot{\mathbf{e}}^{(k)} = \dot{\mathbf{q}}_{\text{ref}} - \dot{\mathbf{q}}^{(k)}$.
+
+\begin{quote}
+\textbf{Convergence Caveat:} Because $\mathcal{Q}$ attenuates high-frequency content, an ILC fixed point $\mathbf{F}^* = \mathcal{Q}(\mathbf{F}^* + \gamma \mathbf{u}_{\text{pd}}^*)$ does \textbf{not} imply that PD torque vanishes. In historical tests, Iteration 2 exhibited the lowest observed PD torque ($10.3$~N$\cdot$m RMS), but is not a proven global optimum. Later iterations exhibited growing PD torque (14.7~N$\cdot$m at iteration 3; 20.7~N$\cdot$m at iteration 4).
+\end{quote}
+
+\subsection{Leg Servo and Damped Inverse-Jacobian Balance Feedback}
+The lower body is actuated by twelve joint coordinates $\mathbf{q}_{\text{leg}} \in \mathbb{R}^{12}$. The balance gain $\mathbf{G}(t)$ is computed in \texttt{gs3dx\_balance\_gain.m} from the per-foot $6 \times 6$ foot pose Jacobian $\mathbf{J}$ (position in m, rotation vector in rad scaled by $\text{lever\_m} = 0.5$~m), using central finite differences in degrees ($h = 10^{-3}$ deg). Damped least-squares inversion with damping $\lambda = 0.002$~m/deg yields:
+\begin{equation}
+    \mathbf{G}_{\text{leg}}(t) = -\mathbf{J}^T \left(\mathbf{J} \mathbf{J}^T + \lambda^2 \mathbf{I}\right)^{-1} \begin{bmatrix} \mathbf{I}_D \\ \mathbf{0}_{6-D, D} \end{bmatrix},
+\end{equation}
+where $D = 3$ (or 2 for horizontal axes). In \texttt{gs3dx\_balance\_command.m}, the commanded torque vector is:
+\begin{equation}
+    \mathbf{cmd} = \mathbf{C}_0 + \mathbf{K}_p \odot \left(\mathbf{A}(t) + \mathbf{G}(t) \mathbf{s} + \mathbf{foot}\right) + \mathbf{K}_d \odot \left(\mathbf{R}(t) + \mathbf{G}(t) \mathbf{r}_s\right),
+\end{equation}
+with shift $\mathbf{s} = \text{sat}_{\text{limit}}(-k_p \mathbf{e} - k_d \dot{\mathbf{e}})$, separately commanded rate $\mathbf{r}_s = -k_p \dot{\mathbf{e}}$, and separate foot displacement. This rate is not the exact derivative of the saturated shift: it omits acceleration and saturation derivatives. The implementation uses this approximation:
+\begin{equation}
+    \mathbf{foot}_{\text{leg}} = \mathbf{G}_{\text{leg}}(t) \cdot \text{sat}_{\text{limit}}\left(k_f \mathbf{e}_{\text{foot}}\right).
+\end{equation}
+Builder defaults are $k_p = 3.0$, $k_d = 0.4$, $k_f = 1.0$, and $\text{limit} = 0.10$~m.
+
+\section{Theoretical Caveats: Nullspaces and Under-Actuation}
+
+\subsection{Closed-Loop Internal Force Nullspace Hypothesis}
+Let $\mathbf{J}_c \in \mathbb{R}^{6 \times n}$ denote the constraint Jacobian governing the grip closure. Internal constraint torques satisfy:
+\begin{equation}
+    \boldsymbol{\tau}_{\text{int}} = \mathbf{J}_c^T \boldsymbol{\lambda} \in \text{range}(\mathbf{J}_c^T).
+\end{equation}
+Let $\mathbf{Z}$ denote a matrix whose columns span $\text{null}(\mathbf{J}_c)$ (so $\mathbf{J}_c \mathbf{Z} = \mathbf{0}$). For any constraint-compatible generalized velocity $\mathbf{v} = \mathbf{Z} \boldsymbol{\nu}$:
+\begin{equation}
+    \mathbf{Z}^T \boldsymbol{\tau}_{\text{int}} = \mathbf{Z}^T \mathbf{J}_c^T \boldsymbol{\lambda} = (\mathbf{J}_c \mathbf{Z})^T \boldsymbol{\lambda} = \mathbf{0}.
+\end{equation}
+For quaternion configurations, $\dot{\mathbf{q}}=\mathbf{N}(\mathbf{q})\mathbf{v}$; configuration and velocity dimensions may differ. The constraint Jacobian acts on velocity. Full multibody dynamics include actuation $\mathbf{B} \mathbf{u}$ and ground contact wrenches:
+\begin{equation}
+    \mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{h}(\mathbf{q}, \mathbf{v}) = \mathbf{B} \mathbf{u} + \mathbf{J}_c^T \boldsymbol{\lambda} + \mathbf{J}_{\text{contact}}^T \mathbf{w}_{\text{contact}}.
+\end{equation}
+To generate a selected internal torque using commanded actuators alone, that
+torque must lie in the actuated image $\text{range}(\mathbf{B})$. Passive
+constraint reactions are not independent control inputs.
+\begin{quote}
+\textbf{Theoretical Note:} The explanation of torque drift as accumulation within closed-loop kinematic nullspaces represents a \textbf{plausible scientific hypothesis}, supported by simulation observations, but is \textbf{not an established mathematical proof}.
+\end{quote}
+
+\subsection{Rank-Deficiency vs. Global Dynamic Infeasibility}
+\begin{quote}
+\textbf{Mathematical Caveat:} The instantaneous \textbf{rank-deficiency of contact wrench or kinematic Jacobian matrices does not prove the global infeasibility} of the forward-dynamics swing matching problem.
+\end{quote}
+Local Jacobian rank-deficiency demonstrates the limitation of static linear inversion schemes, but does not establish global dynamic infeasibility. Conversely, unproven claims of Lie algebraic nonholonomic controllability must be avoided without rigorous proof.
+
+\section{Contact Wrench Mechanics, Support Hull, and Ground Reactions}
+
+\subsection{Planar Support Hull and Point-Force Contact Diagnostic}
+The point-force diagnostic in \texttt{gs3dx\_contact\_wrench.m} projects demanded center of mass accelerations onto the planar foot support hull under assumed Coulomb friction $\mu = 0.8$. Dynamic equilibrium equations are:
+\begin{align}
+    \sum_{i} \mathbf{f}_i + M \mathbf{g} &= M \mathbf{a}_{\text{COM}}, \\
+    \sum_{i} (\mathbf{p}_i - \mathbf{r}_{\text{COM}}) \times \mathbf{f}_i + \sum_{i} \boldsymbol{\tau}_{\text{contact}, i} &= \dot{\mathbf{h}}_{\text{COM}}.
+\end{align}
+\begin{quote}
+\textbf{Diagnostic Scope:} The frozen residuals (\textbf{21.863~N$\cdot$m RMS through impact; 81.427~N$\cdot$m at impact}) represent a \textbf{point-force diagnostic on a planar support polygon}, omitting ground reaction yaw couples and full 3D segment angular momentum rates. Passing this diagnostic does \textbf{not} establish complete dynamic admissibility.
+\end{quote}
+Contact normal force formulations in Simscape utilize internal smoothing; formulas $F_n = \max(0, -K_c z - C_c \dot{z})$ are schematic linear approximations.
+
+\subsection{Measured Ground Reactions vs. Kinematic GRF Estimates}
+\begin{itemize}
+    \item \textbf{No Empirical Force Plates:} The capture source file contains zero analog force plate channels.
+    \item \textbf{Kinematic GRF Estimates:} Total GRF is estimated from segment accelerations:
+    \begin{equation}
+        \mathbf{F}_{\text{kin\_GRF}}(t) = \sum_{i} m_i (\ddot{\mathbf{r}}_i(t) - \mathbf{g}) + m_{\text{club}} (\ddot{\mathbf{r}}_{\text{club}}(t) - \mathbf{g}).
+    \end{equation}
+    At address, $\mathbf{F}_{\text{kin\_GRF}} = 1.001$~BW. Prior to impact, filtered peak is $1.24$--$1.33$~BW (raw peak $1.853$~BW at $-55.6$~ms). Club acceleration contributes $+0.57$~BW. Contact compliance parameters remain uncalibrated assumptions.
+\end{itemize}
+
+\section{Stability Analysis: Distinguishing Baselines From Unstable Dynamics}
+
+\subsection{Stable Baselines vs. Current Unstable Human Dynamics}
+\begin{itemize}
+    \item \textbf{Stable Baselines:} \texttt{GS3DX\_Baseline}, \texttt{GS3DX\_Slim}, and \texttt{GS3DX\_Quat} integrate the impact drive cleanly across 344 steps; \texttt{GS3DX\_FullBodyContact} and \texttt{GS3DX\_Golfer} stand stably from rest (slip $\le 2.1$~mm, lift 0~mm, Newton residual 0.71~N$\cdot$s).
+    \item \textbf{Current Unstable Dynamics:} Full-swing simulations of \texttt{GS3DX\_Human} exhibit transient instability through impact and finish.
+\end{itemize}
+
+\subsection{Rejection of Extreme Transient Force Spikes}
+Historical simulation logs recorded extreme vertical contact force spikes:
+\begin{enumerate}
+    \item \textbf{2,466~BW Spike ($t = 0.386$~s):} Integrator stall at $h_{\min}$ due to derivative rate steps.
+    \item \textbf{365~BW Spike ($t = 0.449$~s):}
+    Simulation with active balance and leg servo produced a 365~BW ($287{,}500$~N) spike on the right lesser toe. At $t = 0.35$--$0.40$~s, the golfer was airborne. On row 12, servo ($-3{,}755.6$~N$\cdot$m) and balance ($+2{,}130.0$~N$\cdot$m) fought, driving the ankle into $42.5^\circ$ plantarflexion before singular toe impact. Near impact, support dropped to 0.0~BW (kinematic demand is 1.85~BW).
+    \item \textbf{22.6~BW Spike ($t = 0.418$~s):}
+    With row 12 balance gain zeroed, the right ankle dropped $0.661$~m in $0.060$~s before strike; midfoot angle stepped from $+0.013$ to $-5.452$~rad in 10~ms. Pelvis tilt diverged from $22.5^\circ$ to $101.9^\circ$. Refining maximum step size to $0.0001$~s yielded an identical 23.1~BW spike.
+\end{enumerate}
+Both the \textbf{365~BW and 22.6~BW readings reject physical qualification}. Controller conflict and airborne strike are suspected causes; the causal explanation is not yet experimentally established. The model does \textbf{not} possess an open-loop stable swing.
+
+\section{Current Acceptance Gates, Open Work, and Red Thresholds}
+
+\subsection{Gate 1: Lead Arm Straight Extension (\#11156)}
+\begin{itemize}
+    \item \textbf{Requirement:} Lead elbow flexion $\le 20.0^\circ$; tracking penalty $\le \text{free} + 15.0$~mm (ceiling $38.3$~mm).
+    \item \textbf{Current Status: RED.} Free calibration yields $18.5^\circ$--$41.7^\circ$ flexion and 43.2~mm RMS; banded calibration yields $65.8^\circ$ flexion and 76.8~mm RMS. Thresholds cannot be loosened without owner sign-off.
+\end{itemize}
+
+\subsection{Gate 2: Clubhead Spatial-Temporal Matching (\#11160)}
+\begin{itemize}
+    \item \textbf{Requirement:} Defined in \texttt{gs3dx\_club\_match.m}:
+    \begin{enumerate}
+        \item Clubhead path: $\le 10.0$~mm RMS and $\le 20.0$~mm maximum.
+        \item Shaft orientation: $\le 2.0^\circ$ maximum.
+        \item Impact clubhead speed error: $\le 2.0\%$.
+        \item Clubface orientation error at contact: $\le 2.0^\circ$.
+    \end{enumerate}
+    \item \textbf{Current Status: RED.} Actual values: head RMS 20.012~mm, head max 41.987~mm, shaft max $3.11^\circ$, speed error $-2.009\%$, wrist max 53.5 / 68.6~mm (limit 35~mm). Missing \texttt{phases.contact} keeps \texttt{.face} false and rejects the match; peak speed is not contact. 16 synthetic R2025b tests passed after 7 red.
+\end{itemize}
+
+\subsection{Gate 3: Dynamically Consistent Leg Reference (\#11173 Step 4)}
+\begin{itemize}
+    \item \textbf{Requirement:} Pelvis residual wrench $< 5\%$ body weight; impact support within $0.20$~BW of kinematic GRF.
+    \item \textbf{Current Status: RED.} Support near impact is 0.0~BW. Leg servo ($327.6$~N$\cdot$m RMS) and balance ($314.3$~N$\cdot$m RMS) destructively cancel ($\approx 101$~N$\cdot$m net).
+\end{itemize}
+
+\section{Multi-Engine Evaluation and Subject Matching Workflows}
+
+Under epic \#11161, biomechanics are evaluated across Simscape, MuJoCo, Drake, Pinocchio, and OpenSim:
+\begin{itemize}
+    \item \textbf{MuJoCo Benchmark (\#11166):} Scaling \texttt{capture-A} to subject geometry (\texttt{capture-O}, 1.956~m, 104.3~kg) tracked with $0.060$~m drift, whereas raw \texttt{capture-O} diverged ($0.567$~m drift).
+    \item \textbf{ZMP Support Margin:} This experiment indicated that for \texttt{capture-O}, the reference ZMP fell outside the physical support hull in 86\% of frames (vs. 47\% for \texttt{capture-A}). This is an attributed multi-engine observation; \texttt{capture-O} is not yet Simscape qualified.
+\end{itemize}
+
+\section{Visualization, Offscreen Rendering, and Asset Provenance}
+
+\subsection{Headless Offscreen Graphics Architecture}
+\texttt{gs3dx\_render.m} extracts Cartesian poses via \texttt{KinematicsSolver} and renders offscreen figures under batch execution:
+\begin{itemize}
+    \item \textbf{Face-On View:} Camera on $+X_W$ (azimuth $90^\circ$, elevation $5^\circ$).
+    \item \textbf{Down-the-Line View:} Camera on $-Y_W$ (azimuth $0^\circ$, elevation $5^\circ$).
+    \item \textbf{Top View:} Camera on $+Z_W$ (azimuth $0^\circ$, elevation $90^\circ$).
+\end{itemize}
+
+\subsection{Parametric Driver Head Provenance}
+Rendered from parametric binary STL \texttt{models/gs3dx\_driver\_head.stl} ($124 \times 115 \times 61$~mm, $10.5^\circ$ loft) attached as a massless File Solid with \texttt{FaceSquareRoll} $-20.73^\circ$.
+
+\section{Operational Qualification Protocol and New-Agent Checklist}
+
+\subsection{Process Concurrency and Safety Rules}
+\begin{enumerate}
+    \item \textbf{Serialized Runner Protocol:} Never launch MATLAB directly when the user home lock file (\texttt{gs3dx\_matlab.lock}) contains an active process ID. Always use the serialized runner script \texttt{exploratory\_gs3dx/tools/run\_matlab\_locked.ps1}.
+    \item \textbf{Simulink Cache Redirection:} \texttt{gs3dx\_setup.m} redirects cache to \texttt{tempdir}. Never call \texttt{setup\_matlab\_environment.m} (\texttt{savepath} contamination).
+    \item \textbf{Immutable Source Models:} Never load or write original models in \nolinkurl{../src/model/GolfSwing3D_Kinetic.slx}. All writes must be routed through \texttt{gs3dx\_save\_model.m}, enforcing compiled blocks $\le 975$.
+\end{enumerate}
+
+\subsection{New-Agent Execution Checklist}
+\begin{enumerate}
+    \item Verify working directory is within the isolated worktree checkout; pin current appropriate source commit hash.
+    \item Verify MATLAB version is explicitly R2025b (\nolinkurl{C:/Program Files/MATLAB/R2025b/bin/matlab.exe}).
+    \item Run unit safety tests via the serialized runner.
+    \item Execute document contract tests:
+    \begin{quote}\footnotesize\ttfamily
+    python3 -m pytest \\
+    docs/research/simscape\_matching\_reference/test\_simscape\_matching\_reference.py
+    \end{quote}
+    \item Check red gate blockers (\#11156, \#11160, \#11173) and do not attempt to loosen frozen numerical tolerances.
+\end{enumerate}
+
+
+
+\section{Reproducible Capture-Specific Export}
+
+The entry is \texttt{gs3dx\_export\_batch.m}, invoked through
+\texttt{run\_matlab\_locked.ps1}. Set
+\nolinkurl{GS3DX_CAPTURE_ID} (neutral alias),
+\nolinkurl{GS3DX_OUTPUT_DIR} (explicit destination),
+\nolinkurl{CAPTURE_REGISTRY_REPO} (provider checkout),
+\nolinkurl{MATLAB_PYTHON_EXE} (compatible Python with ezc3d), and, when needed,
+\nolinkurl{CAPTURE_DATA_DIR} (private capture root).
+Private data and checkpoints must not enter git.
+\begin{verbatim}
+# Run from the exploratory GS3DX directory.
+$env:GS3DX_CAPTURE_ID = 'capture-O'
+# Set output/provider/Python variables before this call.
+$exportArgs = @('-Script', 'tools/gs3dx_export_batch.m',
+          '-Log', "$env:TEMP/gs3dx-export.log",
+          '-TimeoutMin', '60')
+powershell -NoProfile -File tools/run_matlab_locked.ps1 @exportArgs
+\end{verbatim}
+
+This entry exports an inverse-kinematics visualization, not a forward dynamic
+rollout. Both captures use segment lengths measured by
+\texttt{gs3dx\_fit\_lengths}. The unsaved model workspace used for solving and
+rendering is identical. Kinematic lengths do not identify body mass or inertia;
+the owner capture's known mass is not established by this geometry fit.
+
+For sample rate $f_s$, integer stride $s$, and capture index $k_i$:
+\[
+  t_i=(k_i-1)/f_s,\qquad f_{\mathrm{video}}=f_s/s.
+\]
+Indices must have constant spacing. A 360-Hz capture sampled every 12 frames
+and a 240-Hz capture sampled every 8 frames both play at 30 fps.
+Do not append a nonuniform final frame. The final sampled timestamp and full
+capture endpoint are recorded separately. A video with $N$ frames has container
+duration $N/f_{\mathrm{video}}$; the first-to-last sampled timestamp span is
+$(N-1)/f_{\mathrm{video}}$.
+
+The marker overlay is $3\times n_{\mathrm{targets}}\times N$ in the address
+waist frame, subset in the same order as pose columns. Still requests refer to
+capture frames and are mapped to pose columns; filenames record the actual
+selected index. Peak speed is a distinct event from contact.
+
+The private IK checkpoint includes capture, model and source hashes, fitted
+geometry, and requested frames. A differing identity forces a fresh solve.
+Source mutation during a solve rejects the checkpoint identity. A successful
+checkpoint or render does not pass anatomical, club, contact, or dynamics gates.
+
+Before sharing, verify the natural successful-exit receipt, capture/model/code
+identity, qualification label, complete decode, codec, frame rate, and
+representative address, backswing, contact-near, and final sampled frames.
+Historical clips without recovered identity or physical timing retain that
+uncertainty.
+
+\subsection{Fresh Baseline Fits and Required Refinement}
+Capture A is the tour reference; capture O is the owner's optical capture.
+The October 1 fresh exports use capture-specific geometry in
+\texttt{GS3DX\_Fit} and inverse-kinematics poses. Forward dynamics does not
+drive these videos. Their mean and maximum sampled-frame measured-target RMS
+errors are respectively 12.745748/40.208544~mm for A and
+26.558095/116.576104~mm for O. These aggregate joint-centre and club-target
+residuals are not the separate club-head acceptance metrics.
+
+Both final native export jobs exited naturally with code zero. Complete H.264
+decoding verified 55 tour frames and 46 owner frames at 30~fps. Native success
+and successful decoding do not qualify the physical matching gates. The
+scratch mirror reports an unknown Git commit; exact capture, model, exporter,
+IK and sampling file hashes identify the executed inputs instead.
+
+Future matches and shareable exports must use the refined ellipsoid reference
+style. The current Fit graphics are retained as comparison baselines. The
+backwards-looking tour feed/feet require checks of time ordering, camera,
+handedness and foot frames. The owner's larger residuals require per-target
+and per-phase diagnostics of marker definitions, calibrated offsets,
+capture-specific lengths, spine/neck freedom and solver continuity.
+Avatar appearance does not establish player skill. Migrating a model's graphics
+must preserve or explicitly requalify frames, joints, masses and inertias;
+kinematic equivalence cannot establish dynamic equivalence.
+
+
+\section{Refined Human Matching: Orientation and Identifiability}
+The former Fit pose solver assumed 33 independent coordinates; the Human
+model has additional neck coordinates. Joint roles must therefore be resolved
+from unique native block paths and validated joint schemas. A graphics
+replacement cannot substitute for a compatible kinematic model. The refined
+exporter selects Human explicitly, fits its longitudinal ellipsoid dimensions
+to the capture, and records the exact solve and rendering dependency hashes.
+Transverse artistic proportions and uncalibrated subject inertias remain
+limitations. Native model tests are required in addition to pure helper tests.
+
+The 14 position targets do not determine every segment orientation. In
+particular, ankle position alone leaves foot rotation ambiguous; a forward
+axis alone also leaves roll ambiguous. Raw ankle-to-toe direction includes
+the height difference between markers and is not the shoe's native forward
+axis. Let $a_f$ denote ankle position and $t_{i,f},t_{o,f}$ the toe markers.
+Construct the proper marker triad
+\[
+ x_f=\frac{(t_{i,f}+t_{o,f})/2-a_f}{\|(t_{i,f}+t_{o,f})/2-a_f\|},\quad
+ z_f=\frac{x_f\times(t_{i,f}-t_{o,f})}{\|x_f\times(t_{i,f}-t_{o,f})\|},\quad
+ F_f=[x_f,\ z_f\times x_f,\ z_f].
+\]
+For explicitly measured address frames, obtain the proper polar mean
+$F_0=U\operatorname{diag}(1,1,\det(UV^T))V^T$ from the SVD of their triad sum.
+The target shoe orientation is
+\[
+ R_{t,f}=F_fF_0^TR_z(\psi_0).
+\]
+Here horizontal address yaw $\psi_0$ comes from the capture. A horizontal sole
+at address is an explicit calibration assumption, not force or contact
+evidence. Missing address calibration, degenerate triads and unmeasured
+markers must fail closed or remain explicitly masked; interpolation must not
+be described as measured orientation.
+
+For each foot, append the nine-component residual
+\[
+ r_{R,f}=w_R\operatorname{vec}(R_{p,f}-R_{t,f})/\sqrt{2},\qquad
+ \|r_{R,f}\|=2w_R\sin(\theta_f/2).
+\]
+The two feet contribute 18 residual components. The weight has units of
+metres per normalized orientation error, so it is a modeling tradeoff with
+the position residuals; it is not an anatomical accuracy threshold.
+Backward yaw and an inverted sole both receive a nonzero penalty.
+The reported 14-target position RMS excludes this orientation term, and
+angular errors must be reported separately. Full foot orientation does not
+resolve missing thorax, pelvis or head orientation observations.
+
+An owner reverse-pass candidate illustrates why appearance alone cannot
+select a match: its mean sampled frame RMS increased from 26.558 to
+32.185~mm while its maximum decreased from 116.576 to 46.052~mm.
+Its native execution exited naturally with code zero, but it was rejected
+as a replacement because it did not improve both metrics. Separate
+target diagnostics locate a sampled owner club-head error of 375.358~mm
+at capture frame 89 and a tour trail-elbow error of 96.517~mm at frame 517.
+These are fitting defects to investigate, not evidence of golfer skill.
+
+Fresh Human calibration on frames 1, 13 and 25 gives position RMS
+1.188, 1.195 and 1.208~mm with both foot angular errors below $0.7^\circ$.
+The native probe exited naturally with code zero at
+\texttt{2026-10-02T05:01:00.641030Z}. These are the same frames used for
+calibration, not held-out evidence. In contrast, applying the orientation
+term with inherited Fit offsets gave 51.263, 43.243 and 39.399~mm position
+RMS and was rejected. The full refined exports must test generalization
+beyond this address interval and report marker-offset magnitudes explicitly.
+Native joint-role extraction reports 37 independent Human fit coordinates
+with grip closure. The earlier erroneous count of 39 resulted from selecting
+closed-loop variables by the old model's joint identifiers.
+
+The original worker's damping-times-ten stance experiment also failed:
+initial heel force rose to 15,513~N, support vanished by 0.60~s, and at 1~s
+pelvis tilt was $117^\circ$ with pelvis height $-1.83$~m. A composed pelvis
+up-axis tilt of $22.5^\circ$ is not an individual hip start angle; zeroing
+one start angle is not a valid leveling operation. The original worker queued
+a composed-pose check stopping at 0.02~s; no outcome or full-swing qualification
+is asserted here. Preserve that work rather than duplicating its queue.
+
+\subsection{Full-Swing Refined Exports and Comparison}
+The final Human fits use the same measured captures, sampled frames and
+capture-specific lengths as their Fit baselines. Natural successful native
+solve receipts are dated \texttt{2026-10-02T05:15:54Z} for A and
+\texttt{2026-10-02T05:23:22Z} for O. These times identify new execution,
+not approval of the physical gates. The model SHA-256 begins
+\texttt{9a26ee80761f5108}; the accompanying provenance records its full hash,
+recorded solve dependencies, geometry and capture hashes. The scratch source
+mirror has no verified Git revision; its reported commit remains unknown.
+
+\begin{table}[!htb]
+\centering
+\caption{Measured-target position RMS in mm, over identical sampled frames.
+Each maximum is a maximum frame RMS, not a maximum individual target error.}
+\begin{tabular}{lrrrr}
+\toprule
+Capture & Fit mean & Human mean & Fit maximum & Human maximum \\
+\midrule
+A: tour & 12.746 & 13.188 & 40.209 & 40.121 \\
+O: owner & 26.558 & 16.767 & 116.576 & 37.626 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The owner match improves both position metrics. The tour match exchanges a
+small increase in mean position error for calibrated foot orientations;
+it is not an improvement of every metric. Left/right measured foot angular
+errors have maxima $12.83^\circ/19.82^\circ$ for A and
+$19.55^\circ/20.38^\circ$ for O. A supplies 55 measured foot samples per side;
+O supplies 45 of 46, with the missing sample explicitly masked. These are
+orientation-fit diagnostics, not new acceptance thresholds.
+
+All four shareable clips use the Human ellipsoid model, H.264 encoding,
+800 by 600 pixels and 30 fps. Complete decoding verifies 55 frames for A
+and 46 for O; their first-to-last sampled spans are 1.80 and 1.50 seconds.
+Final captions distinguish pose sample number from measured capture frame.
+Two views per capture are supplied: face-on and down-the-line. The original
+Fit clips remain available for comparison. The shareable package excludes
+raw optical recordings, pose caches and local private paths.
+
+The Human owner fit still has wrist-offset norms of approximately 55 and
+62 mm and a club-target offset norm of 106 mm. These magnitudes require
+review of grip geometry, target definitions and offset identifiability.
+The decorative ground plane is not a measured ball-contact plane.
+Head and neck orientation are not constrained by the present IK objective,
+although the capture may contain relevant head markers. Neither anatomical
+orientation accuracy nor subject-specific inertia follows from low position
+RMS. Forward dynamics does not drive these videos; all physical matching
+gates remain unqualified.
+\subsection{Subject Physics and a Rejected Grip-Calibration Candidate}
+Capture-fitted lengths alone do not update the subject's physical model.
+The in-memory Human adapter accepts a declared positive subject mass and
+whitelisted segment lengths, verifies native solid expressions and SI units,
+and preserves joint definitions and parameter metadata. It never saves the
+model. The shared de Leva catalog scales segment mass as $m_s=f_sM$ and
+principal moments as $I_i=m_s(k_iL_s)^2$, with the documented axisymmetric
+transverse averaging. Forearm halves use the parallel-axis construction
+already specified above. Split-foot rear mass is total foot mass minus the
+fixed structural forefoot mass; the rear centre offset compensates the
+forefoot lever arm. This is a model construction assumption, not a measured
+individual inertia tensor.
+
+Eighteen native adapter/catalog tests pass with zero incomplete tests and a
+natural successful exit at \texttt{2026-10-02T06:03:51Z}. They cover baseline
+parameters, subject mass scaling, length scaling, moment triangle inequalities,
+forearm lumping, parameter metadata, unsupported fields and units, and
+unchanged joint expressions. Equipment mass is obtained through the existing
+solid inertia audit, which respects native inertia mode. A Custom zero-mass
+visual must not be classified using an inactive density parameter. These
+tests establish parameter consistency; they do not establish contact
+equilibrium or a qualified forward-dynamics swing.
+
+Functional grip calibration treats the wrist marker's trajectory in the
+club-marker frame as a sphere. After centering and scaling the samples,
+solve the algebraic least-squares system
+\[
+ [2P^T\;\mathbf{1}]
+ \begin{bmatrix}c\\w\end{bmatrix}
+ = \bigl[\|p_1\|^2,\ldots,\|p_n\|^2\bigr]^T,
+ \qquad r^2=w+\|c\|^2.
+\]
+The design matrix must have numerical rank four; coplanar arcs, repeated
+points and nonfinite input fail closed. Recover physical units after solving
+and report radial residuals and matrix conditioning. The algebraic fit is
+not a guarantee of unbiased anatomical joint-centre recovery. Fifteen pure
+sphere tests and twelve controlled grip-contract tests pass with no incomplete
+tests. Grip and marker-offset calibration samples are recorded separately;
+reference club frames and shaft-axis estimates use only calibration samples.
+Missing markers remain excluded. Equal bilateral transverse standoff is an
+explicit gauge assumption.
+
+The owner's functional-grip candidate used frames 1, 9,\ldots,169 for grip
+calibration and retained 24 later sampled frames for evaluation. Native
+execution exited naturally with code zero at \texttt{2026-10-02T06:15:53Z}.
+Held-out mean/maximum frame RMS worsened from 26.011/37.626 to
+27.969/41.278~mm; full-swing values worsened from 16.767/37.626 to
+17.948/41.278~mm. The candidate was rejected and did not replace the best
+Human clips, even though its lead-wrist offset norm dropped to 15.6~mm.
+Capture lengths were shared estimates from the complete capture; held-out
+status here applies to grip and offset calibration, not anthropometry.
+The candidate applied the declared 104.3-kg subject mass and evaluated
+0.3929236~kg of equipment, but mass does not drive the IK objective. No
+improved dynamics or playing ability is inferred from this experiment.
+\subsection{Fresh Contact Geometry and Imported Event Semantics}
+A read-only native forward-kinematics audit of the selected owner address
+pose completed with natural exit zero at \texttt{2026-10-02T06:42:14Z}.
+It used fitted Human lengths and the declared 104.3-kg subject mass.
+Against the existing model plane, the ten contact-sphere clearances ranged
+from $-64.399$ to $-48.619$~mm, a 15.780-mm spread. Negative clearance
+denotes geometric penetration, not a force measurement. No dynamics was
+run, no simulation initial targets were changed, and no model was saved.
+Ground placement and a consistent contact/gravity initialization therefore
+remain separate verification steps. The pelvis frame's local up vector
+tilted 57.889 degrees in this pose; this frame-relative quantity does not
+establish an anatomical torso angle or a cause of instability.
+
+Both imported recordings declare \texttt{POINT:UNITS} as metres and have no
+\texttt{EVENT} parameter group. Under ezc3d 1.7.2, capture A has 717
+negative-residual samples, all already nonfinite in XYZ; capture O has no
+negative residuals but 1,173 nonfinite XYZ samples. Counts cover all marker
+tracks. The fourth point row is homogeneous XYZ1; invalidity belongs to
+\texttt{data.meta\_points.residuals}, not that row\cite{ezc3d}.
+Neither peak club-head speed nor an address-line crossing establishes a
+measured ball-contact event. Thirteen importer-contract tests, seventeen
+runtime-fingerprint tests and twelve exporter-contract tests pass with zero
+incomplete tests. Live component versions are MATLAB R2025b Update 5,
+Simulink/Simscape/Multibody 25.2, Python 3.12.10, NumPy 2.4.4 and ezc3d 1.7.2.
+The importer validates declared units, converts supported metres/centimetres/
+millimetres to SI, and masks an entire marker sample when XYZ or residual
+metadata is invalid. Required recorded source hashes fail closed; direct
+runtime components are recorded without claiming all transitive packages or
+external STL assets are frozen. Fresh exports exited naturally with code zero
+at \texttt{2026-10-02T07:04:47Z} (A) and \texttt{07:13:40Z} (O).
+All four MP4s fully decoded, with 55 tour and 46 owner samples; cache joint
+arrays match the earlier selected Human fits within $10^{-12}$, with identical
+capture/model hashes, geometry and frames. A new shareable ZIP contains these
+clips and sanitized fresh runtime/source provenance. The earlier packages
+remain available. This is an evidence update, not a new numerical improvement.
+
+\subsection{Integration With Current Repository Models}
+The continuation was committed as \texttt{69b4bd99f} after normal repository
+hooks passed. Current main at \texttt{cee0a65e0} includes subsequent compiled
+home-budget diagnostics, model promotion and anatomical meshes. Those changes
+are preserved during integration. Its Human model SHA256 begins
+\texttt{91997471}; the verified Desktop matches use the separately identified
+\texttt{9a26ee80} model. Their successful receipts do not qualify the newer
+model's full-swing fit. The integrated source passed 187 native MATLAB tests
+with zero failed or incomplete tests, including Human visual/physical parameter
+checks, and 44 focused Python checks. Full-swing matching against that model
+remains required before replacing the selected outputs. The historical-player capture
+handoff is preserved as a separate continuation scope in the canonical record.
+\begin{thebibliography}{9}
+\bibitem{ezc3d}
+pyomeca. \emph{ezc3d: Python C3D reader documentation}.
+\url{https://github.com/pyomeca/ezc3d}.
+\bibitem{deLeva1996}
+P.~de~Leva. Adjustments to Zatsiorsky--Seluyanov's segment inertia parameters.
+\emph{Journal of Biomechanics}, 29(9):1223--1230, 1996.
+\href{https://doi.org/10.1016/0021-9290(95)00178-6}{doi:10.1016/0021-9290(95)00178-6}.
+\bibitem{MathWorksSpherical}
+MathWorks. \emph{Spherical Joint: Simscape Multibody Documentation}.
+\url{https://www.mathworks.com/help/sm/ref/sphericaljoint.html}.
+Quaternion state representation does not remove the adapter's Euler singularity.
+\bibitem{Implementation}
+UpstreamDrift. \emph{GS3DX Implementation and October 1 Turnover Record}.
+Reviewed source commit \texttt{144e81188dd7bb106f81d89b7a7330dd20cce511}.
+Nominal ROM source labels are inherited from \texttt{gs3dx\_joint\_rom.m};
+they are implementation priors, not newly established clinical limits.
+Historical results are attributed to that turnover unless a fresh receipt
+identifies a new execution.
+\end{thebibliography}
+\end{document}

@@ -113,6 +113,18 @@ function out = gs3dx_render(mdl, q, opts)
     solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve);
 
     % Format camera view
+    % Freeze whole-animation bounds so the club cannot leave the camera.
+    solids(1).scene_bounds = gs3dx_scene_bounds(solids);
+    foot = find(contains(string({solids.block}), "foot", 'IgnoreCase', true));
+    floor_z = -1.02;
+    for i = foot
+        vertices = solids(i).vertices_world{frames_to_solve(1)};
+        if ~isempty(vertices)
+            floor_z = min(vertices(3, :));
+            break;
+        end
+    end
+    solids(1).visual_ground_z = floor_z;
     [az, el] = local_parse_view(opts.view);
     focus = local_focus(solids, opts.focus, opts.focus_width);
 
@@ -594,7 +606,7 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
     % Ground plane at shoe sole level (~ -1.02 m)
     if draw_ground
         [Xg, Yg] = meshgrid(-0.8:0.25:1.6, -1.6:0.25:1.6);
-        Zg = -1.02 * ones(size(Xg));
+        Zg = solids(1).visual_ground_z * ones(size(Xg));
         surf(ax, Xg, Yg, Zg, 'FaceColor', [0.88 0.90 0.88], 'EdgeColor', [0.80 0.82 0.80], ...
             'FaceAlpha', 0.6, 'AmbientStrength', 0.5);
     end
@@ -628,9 +640,10 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
     % Scene bounds and appearance
     axis(ax, 'equal');
     if isempty(focus)
-        xlim(ax, [-0.6 1.4]);
-        ylim(ax, [-1.2 1.2]);
-        zlim(ax, [-1.15 1.15]);
+        bounds = solids(1).scene_bounds;
+        xlim(ax, bounds(1, :));
+        ylim(ax, bounds(2, :));
+        zlim(ax, bounds(3, :));
     else
         c = focus.centre(f);
         w = focus.width;
@@ -654,18 +667,19 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
     % Text overlay
     header_str = scene_title;
     if ~isnan(t_val)
-        time_str = sprintf('t = %.3f s | Frame %d', t_val, f);
+        time_str = sprintf('t = %.3f s | Pose sample %d', t_val, f);
     else
-        time_str = sprintf('Frame %d', f);
+        time_str = sprintf('Pose sample %d', f);
     end
     if isempty(header_str)
         annot_str = time_str;
     else
-        annot_str = sprintf('%s | %s', header_str, time_str);
+        header_str = strrep(header_str, ' | Frames', sprintf('\nFrames'));
+        annot_str = sprintf('%s\n%s', header_str, time_str);
     end
-    text(ax, 0.03, 0.95, annot_str, 'Units', 'normalized', 'FontSize', 11, ...
+    text(ax, 0.03, 0.95, annot_str, 'Units', 'normalized', 'FontSize', 11, 'VerticalAlignment', 'top', ...
         'FontWeight', 'bold', 'Color', [0.15 0.15 0.15], 'BackgroundColor', [1 1 1 0.8], ...
-        'Margin', 4);
+        'Margin', 4, 'Interpreter', 'none');
 end
 
 % -------------------------------------------------------------------------
