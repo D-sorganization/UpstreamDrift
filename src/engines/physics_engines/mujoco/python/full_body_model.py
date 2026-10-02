@@ -55,11 +55,23 @@ class NativeMujocoFullBodyModel:
             for joint in spec["joints"]
         }
         self._indices: dict[str, int] = {}
+        coordinate_units: list[str] = []
+        native_units = {
+            int(mj.mjtJoint.mjJNT_SLIDE): "m",
+            int(mj.mjtJoint.mjJNT_HINGE): "rad",
+        }
         for name in self.coordinate_order:
             j = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_JOINT, name)
             if j < 0:
                 raise ValueError(f"Coordinate {name} missing from MuJoCo model")
+            unit = native_units.get(int(self.model.jnt_type[j]))
+            if unit is None:
+                raise ValueError(
+                    "Coordinate units require compiled scalar slide or hinge joints"
+                )
+            coordinate_units.append(unit)
             self._indices[name] = int(self.model.jnt_dofadr[j])
+        self._coordinate_units = tuple(coordinate_units)
 
         if self.model.nq != len(self._indices) or self.model.nv != len(self._indices):
             raise ValueError("All coordinates must be scalar 1-DOF joints")
@@ -100,6 +112,11 @@ class NativeMujocoFullBodyModel:
 
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
 
+    @property
+    def coordinate_units(self) -> tuple[str, ...]:
+        """Return immutable units verified from this compiled scalar model."""
+        return self._coordinate_units
+
     def _vector(self, values: Mapping[str, float]) -> np.ndarray:
         return _pack_vector(
             self._indices,
@@ -113,6 +130,14 @@ class NativeMujocoFullBodyModel:
         self.data.qpos[:] = self._vector(coordinates)
         self._mj.mj_kinematics(self.model, self.data)
         return _extract_frame_poses(self.data, self._sites)
+
+    def kinematic_closure_residuals(
+        self, coordinates: Mapping[str, float]
+    ) -> np.ndarray:
+        """Return detached world-space grip separation in metres at this pose."""
+        self.frame_poses(coordinates)
+        a, b = self._closure
+        return np.asarray(self.data.site_xpos[a] - self.data.site_xpos[b], dtype=float)
 
     def evaluate_contact_samples(
         self,

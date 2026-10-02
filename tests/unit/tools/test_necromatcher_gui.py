@@ -6,6 +6,93 @@ from src.shared.python.workspace import NecromatcherLibrary
 pytestmark = pytest.mark.unit
 
 
+def test_native_fit_projection_keeps_qt_responsive_and_discards_old_frames(
+    tmp_path, monkeypatch
+):
+    import threading
+
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    pytest.importorskip("PyQt6.QtWidgets")
+    from PyQt6.QtCore import QBuffer, QIODevice, QTimer
+    from PyQt6.QtGui import QImage
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher import gui
+
+    app = QApplication.instance() or QApplication([])
+    image = QImage(32, 32, QImage.Format.Format_RGB32)
+    image.fill(0)
+    buffer = QBuffer()
+    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
+    image.save(buffer, "PNG")
+    original_bytes = bytes(buffer.data())
+    entered, release = threading.Event(), threading.Event()
+    calls, ticks = [], []
+
+    class Review:
+        def frame(self, index):
+            return {
+                "frame_count": 2,
+                "frame": {
+                    "pts_ticks": index,
+                    "timebase_numerator": 1,
+                    "timebase_denominator": 10,
+                },
+                "observation": {"landmarks": {}, "status": "missing"},
+            }
+
+        def image(self, index):
+            return original_bytes
+
+        def close(self):
+            pass
+
+    def project(library, fit_id, index):
+        calls.append(index)
+        if index == 0:
+            entered.set()
+            if not release.wait(2):
+                raise RuntimeError("Projection test was not released")
+        return {
+            "fit_id": fit_id,
+            "frame_index": index,
+            "frame": Review().frame(index)["frame"],
+            "points": {"wrist": {"x": 16, "y": 16, "visibility": None}},
+        }
+
+    monkeypatch.setattr(
+        gui.NativeFitProjectionProcess,
+        "project",
+        lambda service, fit_id, index: project(None, fit_id, index),
+    )
+    widget = gui.NecromatcherWidget(
+        library=NecromatcherLibrary.create(tmp_path / "library")
+    )
+    try:
+        widget._review = Review()
+        widget._fit_id = "fit-v2"
+        widget.slider.setRange(0, 1)
+        widget._show_frame(0)
+        assert entered.wait(1)
+        QTimer.singleShot(0, lambda: ticks.append(threading.get_ident()))
+        app.processEvents()
+        assert ticks == [threading.get_ident()]
+        widget.slider.setValue(1)
+        release.set()
+        assert widget._worker.wait(2)
+        widget._poll()
+        assert widget.image.pixmap() is None or widget.image.pixmap().isNull()
+        assert widget._worker.wait(2)
+        widget._poll()
+        assert calls == [0, 1]
+        assert "Frame 2/2" in widget.status.text()
+        assert "Native Projection" in widget.status.text()
+        assert Review().image(0) == original_bytes
+    finally:
+        release.set()
+        widget.cleanup()
+        widget.close()
+
+
 def test_library_operation_keeps_qt_responsive_and_completes_on_owner_thread(
     tmp_path, monkeypatch
 ):

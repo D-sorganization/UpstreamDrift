@@ -60,6 +60,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py`                                                                                                                |
 | 1063 | `src/bunkershot3d/metrics/divot.py`                                                                                                                                           |
 | 1053 | `src/tools/tour_matching_viewer/core.py`                                                                                                                                      |
+| 1046 | `src/shared/python/motion_matching/pinocchio_g2_g3.py`                                                                                                                        |
 | 1042 | `src/shared/python/physics/flight_models.py`                                                                                                                                  |
 | 1040 | `src/bunkershot3d/solvers/mpm/order_of_accuracy.py`                                                                                                                           |
 | 1040 | `src/tools/tour_matching_viewer/gui.py`                                                                                                                                       |

@@ -1,0 +1,163 @@
+{
+  "schema_version": "necromatcher/research-refit-receipt/1",
+  "qualification": "monocular_research_hypothesis",
+  "physical_time_qualified": false,
+  "dynamics_replayed": false,
+  "runs": [
+    {
+      "player": "hogan",
+      "fit_id": "hogan-source-stamped-research-fit-v4",
+      "fit_sha256": "sha256:9cf39b97dbcc0de92f0b2d4d36f858449840bd5390b154aba9cbbe0f427136de",
+      "source_fit_id": "hogan-full-body-research-fit-v2",
+      "source_fit_sha256": "sha256:ca068b138ef0999072c0a7137ef64b98907f80a7fff81edb6ed4d04a9859b5f7",
+      "capture_id": "hogan-practice-capture-v1",
+      "capture_sha256": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "model_id": "hogan-generic-native-model-v2",
+      "model_sha256": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "frame_count": 750,
+      "run_id": "81e650499933418ca05e94d2e9ebcedf",
+      "elapsed_s": 27.684720599994762,
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "execution_identity": {
+        "source_commit": "5038b0748bec967931ab76a07593aa1af14ca2d8",
+        "started_at_utc": "2026-10-02T01:12:21.985254+00:00",
+        "source_sha256": "sha256:49bef88a7c6286328fa55de66e12bd424112c9a90de57d236aa00782fddbd288",
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "runtime": {
+          "mujoco": "3.3.4",
+          "numpy": "2.4.1",
+          "opencv-python": "4.13.0.90",
+          "platform": "Windows-11-10.0.26300-SP0",
+          "python": "3.13.5",
+          "scipy": "1.16.0",
+          "tools_commit": "3678409fc51024150ab28970b72e3b468935f345"
+        }
+      },
+      "source_file_count": 467,
+      "worker_identity": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_sha256": "sha256:49bef88a7c6286328fa55de66e12bd424112c9a90de57d236aa00782fddbd288",
+        "started_at_utc": "2026-10-02T01:12:24.559492+00:00"
+      },
+      "metrics": {
+        "initial_rms_pixels": 9.672397858007116,
+        "rms_pixels": 7.251870327016474,
+        "dense_rms_pixels": 7.6050911076426875,
+        "held_out_rms_pixels": 7.634508199010429,
+        "max_grip_separation_m": 0.12307596900196435,
+        "converged": false,
+        "message": "The maximum number of function evaluations is exceeded."
+      },
+      "rejection_reasons": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "anatomical_ranges_not_enforced",
+        "optimizer_not_converged"
+      ],
+      "configuration": {
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100,
+          "max_iterations": 10,
+          "prior_weight": 3,
+          "smoothness_weight": 1
+        },
+        "coordinate_scales": [
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 12, 25, 38, 50, 63, 76, 88, 101, 114, 126, 139, 152, 165, 177, 190,
+          203, 215, 228, 241, 253, 266, 279, 291, 304, 317, 330, 342, 355, 368,
+          380, 393, 406, 418, 431, 444, 457, 469, 482, 495, 507, 520, 533, 545,
+          558, 571, 583, 596, 609, 622, 634, 647, 660, 672, 685, 698, 710, 723,
+          736, 749
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      }
+    },
+    {
+      "player": "tiger",
+      "fit_id": "tiger-source-stamped-research-fit-v4",
+      "fit_sha256": "sha256:45fe8046d3a08d4d97e051c073fdc212c187f83424dc62e69cbae6cbd8835f8c",
+      "source_fit_id": "tiger-full-body-research-fit-v2",
+      "source_fit_sha256": "sha256:fe43a760155172a978014c39c059a37c58fdd7b2985d2219a830e13c03c1913d",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "capture_sha256": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "model_id": "tiger-generic-native-model-v2",
+      "model_sha256": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "frame_count": 210,
+      "run_id": "7d6bb73a07484950abc9261a419ad529",
+      "elapsed_s": 21.98759629999404,
+      "status": "succeeded",
+      "acceptance": "rejected",
+      "execution_identity": {
+        "source_commit": "5038b0748bec967931ab76a07593aa1af14ca2d8",
+        "started_at_utc": "2026-10-02T01:12:50.180186+00:00",
+        "source_sha256": "sha256:49bef88a7c6286328fa55de66e12bd424112c9a90de57d236aa00782fddbd288",
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "runtime": {
+          "mujoco": "3.3.4",
+          "numpy": "2.4.1",
+          "opencv-python": "4.13.0.90",
+          "platform": "Windows-11-10.0.26300-SP0",
+          "python": "3.13.5",
+          "scipy": "1.16.0",
+          "tools_commit": "3678409fc51024150ab28970b72e3b468935f345"
+        }
+      },
+      "source_file_count": 467,
+      "worker_identity": {
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "source_sha256": "sha256:49bef88a7c6286328fa55de66e12bd424112c9a90de57d236aa00782fddbd288",
+        "started_at_utc": "2026-10-02T01:12:53.275841+00:00"
+      },
+      "metrics": {
+        "initial_rms_pixels": 21.45624629899966,
+        "rms_pixels": 11.34991358544604,
+        "dense_rms_pixels": 11.717446513962239,
+        "held_out_rms_pixels": 11.861330490945369,
+        "max_grip_separation_m": 0.2569643133972689,
+        "converged": false,
+        "message": "The maximum number of function evaluations is exceeded."
+      },
+      "rejection_reasons": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "anatomical_ranges_not_enforced",
+        "optimizer_not_converged"
+      ],
+      "configuration": {
+        "budget_wall_s": 300,
+        "config": {
+          "closure_weight": 100,
+          "max_iterations": 10,
+          "prior_weight": 3,
+          "smoothness_weight": 1
+        },
+        "coordinate_scales": [
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 3, 7, 10, 14, 17, 21, 24, 28, 31, 35, 38, 42, 46, 49, 53, 56, 60,
+          63, 67, 70, 74, 77, 81, 85, 88, 92, 95, 99, 102, 106, 109, 113, 116,
+          120, 123, 127, 131, 134, 138, 141, 145, 148, 152, 155, 159, 162, 166,
+          170, 173, 177, 180, 184, 187, 191, 194, 198, 201, 205, 209
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      }
+    }
+  ]
+}

@@ -43,7 +43,18 @@ from .model_match_handoff import (
     resolve_matching_route,
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
+from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
+from .necromatcher_native import NativeFitBinding, load_native_fit_binding
+from .necromatcher_constraints import repair_native_motion
+from .necromatcher_video import export_fit_video
+from .necromatcher_video_jobs import NativeVideoSession
+from .necromatcher_placement import author_ground_placement
+from .necromatcher_replay import ReplayOptions, replay_authored_profile
 from .necromatcher_review import CaptureReview
+from .necromatcher_projection import project_fit_frame
+from .necromatcher_projection_process import NativeFitProjectionProcess
+from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
+from .necromatcher_refits import NativeRefitSession, refit_plan
 from .project_store import (
     DatasetMetadata,
     ProjectMetadata,
@@ -164,6 +175,16 @@ from .feature_preservation_audit import (
 )
 
 __all__ = [
+    "NativeFitBinding",
+    "author_ground_placement",
+    "repair_native_motion",
+    "export_fit_video",
+    "NativeVideoSession",
+    "ReplayOptions",
+    "replay_authored_profile",
+    "load_native_fit_binding",
+    "AuthoredEffortProfile",
+    "EFFORT_SCHEMA",
     "NecromatcherLibrary",
     "CaptureReview",
     "default_necromatcher_library",
@@ -297,6 +318,12 @@ __all__ = [
     "is_backend_available",
     "list_available_backends",
     "register_artifact_adapter",
+    "project_fit_frame",
+    "NativeFitProjectionProcess",
+    "NativeRefitOptions",
+    "NativeRefitSession",
+    "refit_plan",
     "resolve_matching_route",
+    "start_native_refit",
     "validate_run_compatibility",
 ]

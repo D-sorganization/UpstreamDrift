@@ -2459,6 +2459,19 @@ export interface RecordingInfo {
   joint_names: string[];
 }
 
+export interface RefitRequest {
+  new_fit_id: string;
+  frame_indices: number[];
+  knot_count: number;
+  coordinate_scales: number[];
+  max_iterations: number;
+  prior_weight: number;
+  smoothness_weight: number;
+  closure_weight: number;
+  unknown_visibility_weight: number;
+  budget_wall_s: number;
+}
+
 /**
  * Request body for token refresh endpoint.
  */

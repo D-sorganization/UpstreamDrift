@@ -46,7 +46,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `contracts.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `control_features_registry.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `control_interface.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `core` | 0 | 0 | 0 | 21 | 0 | 0 |
+| `core` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 19 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 254 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 261 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -132,8 +132,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 19 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1543** | **770** | **680** |
+| `workspace` | 0 | 0 | 0 | 35 | 0 | 0 |
+| **Total** | **406** | **274** | **123** | **1567** | **770** | **680** |
 
 ## Diverged Files by Package
 
