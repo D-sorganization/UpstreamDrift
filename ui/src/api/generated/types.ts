@@ -421,11 +421,15 @@ export interface BallFlightSimulationResponse {
  * Scalar trajectory metrics.
  */
 export interface BallFlightSummary {
-  carry_m: number;
+  carry_m?: number | null;
   apex_m: number;
   flight_time_s: number;
-  landing_angle_deg: number;
-  lateral_deviation_m: number;
+  landing_angle_deg?: number | null;
+  lateral_deviation_m?: number | null;
+  termination: string;
+  terminal_event: boolean;
+  actual_horizon_s: number;
+  landed: boolean;
 }
 
 /**
@@ -793,6 +797,8 @@ export interface CounterfactualRequest {
   kind: string;
   /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
   run_post_hoc: boolean;
+  /** Optional simulation run ID to analyze. If omitted, uses active/latest run. */
+  run_id?: string | null;
 }
 
 export interface CourseStateColumnsV1 {
@@ -2582,6 +2588,26 @@ export interface SimulationDefaultsSettings {
 }
 
 /**
+ * Structured error outcome for simulation failures (issue #11149, R09).
+ */
+export interface SimulationErrorInfo {
+  /** Stable machine-readable error code */
+  code: string;
+  /** Safe user-facing error message */
+  message: string;
+  /** Pipeline stage where failure occurred: preparation, execution, analysis, persistence */
+  stage: string;
+  /** Run or correlation identifier */
+  run_id?: string | null;
+  /** Whether the operation can be retried */
+  retriable: boolean;
+  /** Actionable retry guidance */
+  retry_guidance?: string | null;
+  /** Safe contextual metadata without leaking internals */
+  details?: Record<string, unknown> | null;
+}
+
+/**
  * Request model for physics simulation. Preconditions: - engine_type must be a known engine identifier - duration must be in (0, 300] seconds - timestep (if given) must be in [1e-6, 0.1] seconds
  */
 export interface SimulationRequest {
@@ -2599,6 +2625,10 @@ export interface SimulationRequest {
   control_inputs?: Record<string, unknown>[] | null;
   /** Analysis configuration */
   analysis_config?: Record<string, unknown> | null;
+  /** Optional unique identifier for the simulation run */
+  run_id?: string | null;
+  /** Whether to permit a variable remainder step for non-divisible durations */
+  allow_remainder_step: boolean;
 }
 
 /**
@@ -2617,6 +2647,24 @@ export interface SimulationResponse {
   analysis_results?: Record<string, unknown> | null;
   /** Paths to exported files */
   export_paths?: string[] | null;
+  /** Calculation status: completed, failed, cancelled */
+  calculation_status: string;
+  /** Analysis status: not_requested, completed, partial, failed */
+  analysis_status: string;
+  /** Persistence status: not_requested, persisted, failed */
+  persistence_status: string;
+  /** Structured error details if failure occurred */
+  error?: SimulationErrorInfo | null;
+  /** Run or correlation identifier */
+  run_id?: string | null;
+  /** Requested simulation duration in seconds */
+  requested_duration?: number | null;
+  /** Actual integrated simulation horizon in seconds */
+  integrated_duration?: number | null;
+  /** Number of physics integration steps executed */
+  step_count?: number | null;
+  /** Number of retained state samples including t=0 */
+  retained_samples?: number | null;
 }
 
 /**

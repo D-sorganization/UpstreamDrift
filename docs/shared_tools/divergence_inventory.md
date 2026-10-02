@@ -57,7 +57,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `deprecation.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `diagnostics` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `engine_core` | 0 | 0 | 0 | 23 | 0 | 0 |
+| `engine_core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `estimation` | 0 | 0 | 0 | 10 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -79,7 +79,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 19 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 253 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 254 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -112,7 +112,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `scripting` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
-| `shadow_tracker` | 0 | 0 | 0 | 20 | 0 | 0 |
+| `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `sidekick` | 212 | 66 | 23 | 36 | 76 | 278 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
@@ -133,7 +133,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 16 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1537** | **770** | **680** |
+| **Total** | **406** | **274** | **123** | **1539** | **770** | **680** |
 
 ## Diverged Files by Package
 

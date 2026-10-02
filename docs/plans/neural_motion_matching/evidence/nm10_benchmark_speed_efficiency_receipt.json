@@ -61,7 +61,7 @@
         "wall_time_break_even_queries": 8109,
         "dollar_break_even_queries": 4000
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 4.52
     },
     {
@@ -106,7 +106,7 @@
         "wall_time_break_even_queries": 8511,
         "dollar_break_even_queries": 4286
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 5.15
     },
     {
@@ -151,16 +151,25 @@
         "wall_time_break_even_queries": 9412,
         "dollar_break_even_queries": 4737
       },
-      "promotion": "PROMOTED",
+      "promotion": "DIAGNOSTIC_ONLY",
       "median_speedup": 5.14
     }
   ],
   "sample_data_efficiency": {
-    "active_acquisition_vs_random_multiplier": 1.48,
+    "active_acquisition_vs_random_multiplier": 1.33,
+    "mean_acceptance_ratio": 1.33,
+    "budget_weighted_auc_ratio": 1.31,
     "budget_points": [100, 250, 500, 1000],
     "active_acceptance_curve": [0.45, 0.65, 0.82, 0.92],
     "random_acceptance_curve": [0.3, 0.48, 0.62, 0.74],
-    "confirmed_superiority": true
+    "budget_to_target_efficiency": {
+      "target_acceptance": 0.74,
+      "active_episodes_required": 382.4,
+      "random_episodes_required": 1000.0,
+      "budget_savings_multiplier": 2.62
+    },
+    "confirmed_superiority": true,
+    "diagnostic_status": "HISTORICAL_DIAGNOSTIC_ONLY"
   },
   "three_seed_uncertainty": {
     "seeds": [42, 123, 999],

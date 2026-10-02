@@ -577,6 +577,18 @@ class SimulationTimeoutError(PhysicsSimulationError):
         super().__init__(f"Simulation timed out after {timeout_seconds}s")
 
 
+class SimulationBusyError(GolfSuiteError):
+    """Raised when simulation service is busy under single-run or capacity containment."""
+
+    def __init__(
+        self,
+        message: str = "Simulation service is busy with another run",
+        active_run_id: str | None = None,
+    ) -> None:
+        self.active_run_id = active_run_id
+        super().__init__(message)
+
+
 # ============================================================================
 # Network/API exceptions
 # ============================================================================
@@ -676,6 +688,7 @@ __all__ = [
     "SimulationStepError",
     "ModelLoadError",
     "SimulationTimeoutError",
+    "SimulationBusyError",
     # API errors
     "APIError",
     "RateLimitExceededError",

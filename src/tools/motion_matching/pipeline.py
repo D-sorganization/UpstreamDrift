@@ -143,6 +143,10 @@ class MatchRequest:
     native_path: Path | str | None = None
     osim_path: Path | str | None = None
     candidate_path: Path | str | None = None
+    neural_mode: str = "classical"
+    neural_model: str = "driven_double_pendulum"
+    allow_fallback: bool = True
+    checkpoint_path: Path | str | None = None
 
     def __post_init__(self) -> None:
         if self.capture not in CAPTURES:
@@ -184,6 +188,27 @@ class MatchRequest:
             raise ValueError("shooting_gain must be in [0, 1]")
         if self.cutoff_hz is not None and not (0.0 < self.cutoff_hz < 180.0):
             raise ValueError("cutoff_hz must be positive and below Nyquist (180 Hz)")
+        valid_modes = {
+            "classical": "classical",
+            "classical only": "classical",
+            "classical_only": "classical",
+            "preview": "preview",
+            "neural preview": "preview",
+            "neural_preview": "preview",
+            "verified": "verified",
+            "neural verified": "verified",
+            "neural_verified": "verified",
+        }
+        mode_key = str(self.neural_mode).strip().lower()
+        if mode_key not in valid_modes:
+            raise ValueError(
+                f"neural_mode must be one of 'classical', 'preview', 'verified', got {self.neural_mode!r}"
+            )
+        object.__setattr__(self, "neural_mode", valid_modes[mode_key])
+
+    @property
+    def allow_classical_fallback(self) -> bool:
+        return self.allow_fallback
 
     @property
     def document_name(self) -> str:
@@ -327,6 +352,14 @@ def match_command(request: MatchRequest) -> list[str]:
         cmd.extend(["--shooting-gain", str(request.shooting_gain)])
     elif request.shooting_gain != 0.7:
         cmd.extend(["--shooting-gain", str(request.shooting_gain)])
+    if request.neural_mode != "classical":
+        cmd.extend(["--neural-mode", request.neural_mode])
+        if request.neural_model:
+            cmd.extend(["--neural-model", request.neural_model])
+        if not request.allow_fallback:
+            cmd.append("--no-neural-fallback")
+        if request.checkpoint_path is not None:
+            cmd.extend(["--neural-checkpoint", str(request.checkpoint_path)])
     return cmd
 
 

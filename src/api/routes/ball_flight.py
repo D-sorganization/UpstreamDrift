@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
+import anyio
 from fastapi import APIRouter
 from pydantic import BaseModel, Field, model_validator
 
@@ -28,6 +29,10 @@ from src.api.routes._ball_flight_trajectory_import import (
 )
 
 router = APIRouter(prefix="/tools/ball-flight", tags=["ball-flight"])
+
+MIN_FLIGHT_TIMESTEP_S: float = 0.0001
+MAX_FLIGHT_SAMPLES: int = 50_000
+MAX_FLIGHT_MODELS_BATCH: int = 10
 
 
 class FlightModelInfo(BaseModel):
@@ -84,16 +89,52 @@ class BallFlightSimulationRequest(BaseModel):
         10.0, description="Maximum simulation time [s]", gt=0.0, le=30.0
     )
     time_step_s: float = Field(
-        0.01, description="Returned trajectory sample interval [s]", gt=0.0, le=0.25
+        0.01,
+        description="Returned trajectory sample interval [s]",
+        ge=MIN_FLIGHT_TIMESTEP_S,
+        le=0.25,
     )
 
     @model_validator(mode="after")
     def validate_time_step(self) -> BallFlightSimulationRequest:
-        """Keep time discretization bounded by the requested integration window."""
+        """Keep time discretization bounded by the requested integration window (R03)."""
+        numeric_fields = [
+            ("ball_speed_mps", self.ball_speed_mps),
+            ("launch_angle_deg", self.launch_angle_deg),
+            ("azimuth_angle_deg", self.azimuth_angle_deg),
+            ("spin_rate_rpm", self.spin_rate_rpm),
+            ("spin_axis_tilt_deg", self.spin_axis_tilt_deg),
+            ("wind_speed_mps", self.wind_speed_mps),
+            ("wind_direction_deg", self.wind_direction_deg),
+            ("max_time_s", self.max_time_s),
+            ("time_step_s", self.time_step_s),
+        ]
+        for name, val in numeric_fields:
+            if not math.isfinite(val):
+                raise ValueError(f"{name} must be a finite number; got {val!r}")
+
+        if self.time_step_s < MIN_FLIGHT_TIMESTEP_S:
+            raise ValueError(
+                f"time_step_s ({self.time_step_s}) must be greater than or equal to {MIN_FLIGHT_TIMESTEP_S}"
+            )
         if self.time_step_s > self.max_time_s:
             raise ValueError("time_step_s must be less than or equal to max_time_s")
-        if self.models is not None and not self.models:
-            raise ValueError("models must contain at least one flight model")
+
+        sample_count = int(self.max_time_s / self.time_step_s)
+        if sample_count > MAX_FLIGHT_SAMPLES:
+            raise ValueError(
+                f"Calculated flight samples ({sample_count}) exceeds maximum allowed "
+                f"({MAX_FLIGHT_SAMPLES}). Increase time_step_s or reduce max_time_s."
+            )
+
+        if self.models is not None:
+            if not self.models:
+                raise ValueError("models must contain at least one flight model")
+            if len(self.models) > MAX_FLIGHT_MODELS_BATCH:
+                raise ValueError(
+                    f"Requested models batch ({len(self.models)}) exceeds maximum "
+                    f"allowed ({MAX_FLIGHT_MODELS_BATCH})"
+                )
         return self
 
     def requested_models(self) -> list[FlightModelType]:
@@ -125,11 +166,15 @@ class BallFlightTrajectorySample(BaseModel):
 class BallFlightSummary(BaseModel):
     """Scalar trajectory metrics."""
 
-    carry_m: float
+    carry_m: float | None = None
     apex_m: float
     flight_time_s: float
-    landing_angle_deg: float
-    lateral_deviation_m: float
+    landing_angle_deg: float | None = None
+    lateral_deviation_m: float | None = None
+    termination: str = "landed"
+    terminal_event: bool = True
+    actual_horizon_s: float = 0.0
+    landed: bool = True
 
 
 class BallFlightModelResult(BaseModel):
@@ -186,11 +231,27 @@ def _simulate_one(
         coefficients={k: float(v) for k, v in result.coefficients.items()},
         trajectory=_trajectory_samples(result.trajectory),
         summary=BallFlightSummary(
-            carry_m=float(result.carry_distance),
+            carry_m=(
+                float(result.carry_distance)
+                if result.carry_distance is not None
+                else None
+            ),
             apex_m=float(result.max_height),
             flight_time_s=float(result.flight_time),
-            landing_angle_deg=float(result.landing_angle),
-            lateral_deviation_m=float(result.lateral_deviation),
+            landing_angle_deg=(
+                float(result.landing_angle)
+                if result.landing_angle is not None
+                else None
+            ),
+            lateral_deviation_m=(
+                float(result.lateral_deviation)
+                if result.lateral_deviation is not None
+                else None
+            ),
+            termination=result.termination.value,
+            terminal_event=result.terminal_event,
+            actual_horizon_s=float(result.actual_horizon),
+            landed=result.landed,
         ),
     )
 
@@ -226,8 +287,14 @@ async def simulate_ball_flight(
 
     Accepts either a single ``model_name`` (legacy) or a ``models`` list
     for multi-model overlay comparison. See issues #7218 and #7456.
+    Computation is offloaded to a worker thread via ``anyio.to_thread.run_sync``
+    so event-loop health checks remain responsive (R03).
     """
-    results = [_simulate_one(mt, payload) for mt in payload.requested_models()]
+
+    def _execute_simulation() -> list[BallFlightModelResult]:
+        return [_simulate_one(mt, payload) for mt in payload.requested_models()]
+
+    results = await anyio.to_thread.run_sync(_execute_simulation)
     first = results[0]
     return BallFlightSimulationResponse(
         model_name=first.model_name,
@@ -314,13 +381,12 @@ def _imported_response(
         for sample in imported.samples
     ]
     summary = summarize_imported_trajectory(imported)
-    key_suffix = (
-        f":{imported.source_id}"
-        if imported.source_id
-        else f":{imported.parameter_digest[:8]}"
-        if imported.parameter_digest
-        else ""
-    )
+    if imported.source_id:
+        key_suffix = f":{imported.source_id}"
+    elif imported.parameter_digest:
+        key_suffix = f":{imported.parameter_digest[:8]}"
+    else:
+        key_suffix = ""
     return ImportedBallFlightResponse(
         model_name=imported.model_name,
         model_key=f"{imported.model_family}:{imported.model_name}{key_suffix}",
@@ -335,6 +401,10 @@ def _imported_response(
             flight_time_s=summary.flight_time_s,
             landing_angle_deg=summary.landing_angle_deg,
             lateral_deviation_m=summary.lateral_deviation_m,
+            termination=summary.termination,
+            terminal_event=summary.terminal_event,
+            actual_horizon_s=summary.actual_horizon_s,
+            landed=summary.landed,
         ),
     )
 

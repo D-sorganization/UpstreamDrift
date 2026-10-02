@@ -14,7 +14,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -254,19 +254,126 @@ class TrajectoryPoint:
     velocity: np.ndarray
 
 
+class FlightTermination(Enum):
+    """Reason the flight simulation stopped.
+
+    Distinguishes physical ground landing from truncation at the time horizon,
+    numerical solver failure, or external cancellation. Landing-derived metrics
+    (carry, landing angle, lateral deviation at landing) are only well-defined
+    for LANDED trajectories.
+    """
+
+    LANDED = "landed"
+    TIME_LIMIT = "time_limit"
+    SOLVER_FAILED = "solver_failed"
+    CANCELLED = "cancelled"
+
+    @property
+    def flight_completed(self) -> bool:
+        """Whether the flight ran to a terminal ground landing event."""
+        return self is FlightTermination.LANDED
+
+    @property
+    def landed(self) -> bool:
+        """Alias for flight_completed."""
+        return self is FlightTermination.LANDED
+
+
+class IncompleteFlightError(RuntimeError):
+    """Raised when landing metrics or terminal state are requested prematurely.
+
+    Carries the partial result so a caller can still inspect the trace -- the
+    trace is evidence, and refusing to export a conclusion is not a reason to
+    discard it.
+    """
+
+    def __init__(self, result: FlightResult) -> None:
+        self.result = result
+        self.termination = result.termination
+        final_z = float(result.trajectory[-1].position[2]) if result.trajectory else 0.0
+        final_t = float(result.trajectory[-1].time) if result.trajectory else 0.0
+        super().__init__(
+            f"cannot export landing metrics from flight that did not land: "
+            f"termination={result.termination.value}, "
+            f"final time={final_t:.4f} s, "
+            f"final height={final_z:.4f} m. "
+            f"Inspect .result for the partial trace."
+        )
+
+
+class FlightSimulationCancelled(RuntimeError):
+    """Signal cooperative cancellation before a flight result is published."""
+
+    def __init__(
+        self,
+        message: str = "flight simulation cancelled",
+        *,
+        result: FlightResult | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.result = result
+
+
+class FlightCancellationCallbackError(RuntimeError):
+    """Signal a raising or contract-invalid flight cancellation callback."""
+
+
 @dataclass
 class FlightResult:
     """Result of simulation."""
 
     trajectory: list[TrajectoryPoint]
     model_name: str
-    carry_distance: float = 0.0
+    carry_distance: float | None = None
     max_height: float = 0.0
     flight_time: float = 0.0
-    landing_angle: float = 0.0
-    lateral_deviation: float = 0.0
+    landing_angle: float | None = None
+    lateral_deviation: float | None = None
     #: Coefficient set the producing model integrated with (issue #8978).
     coefficients: dict[str, float] = field(default_factory=dict)
+    termination: FlightTermination = FlightTermination.LANDED
+    terminal_event: bool = True
+    actual_horizon: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.termination, FlightTermination):
+            raise TypeError(
+                f"termination must be a FlightTermination; got {self.termination!r}"
+            )
+        if self.termination.landed:
+            if self.carry_distance is None:
+                self.carry_distance = 0.0
+            if self.landing_angle is None:
+                self.landing_angle = 0.0
+            if self.lateral_deviation is None:
+                self.lateral_deviation = 0.0
+        else:
+            if (
+                self.carry_distance is not None
+                or self.landing_angle is not None
+                or self.lateral_deviation is not None
+            ):
+                raise ValueError(
+                    "Landing metrics (carry_distance, landing_angle, "
+                    "lateral_deviation) must be None when flight did not land "
+                    f"(termination={self.termination.value})"
+                )
+
+    @property
+    def flight_completed(self) -> bool:
+        """Whether the flight ran to a terminal ground landing event."""
+        return self.termination.flight_completed
+
+    @property
+    def landed(self) -> bool:
+        """Whether the flight reached the ground."""
+        return self.termination.landed
+
+    def require_landing(self) -> FlightResult:
+        """Assert that the flight reached the ground, or raise IncompleteFlightError."""
+        if not self.landed:
+            raise IncompleteFlightError(self)
+        return self
 
     def to_position_array(self) -> np.ndarray:
         """Convert trajectory to Nx3 position array."""
@@ -298,7 +405,11 @@ class BallFlightModel(ABC):
 
     @abstractmethod
     def simulate(
-        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: UnifiedLaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        cancellation_requested: Callable[[], bool] | None = None,
     ) -> FlightResult:
         """Simulate ball flight and return the trajectory result."""
         ...
@@ -312,23 +423,63 @@ class BallFlightModel(ABC):
         """
         return {}
 
-    def _compute_metrics(self, trajectory: list[TrajectoryPoint]) -> FlightResult:
+    def _compute_metrics(
+        self,
+        trajectory: list[TrajectoryPoint],
+        *,
+        termination: FlightTermination = FlightTermination.LANDED,
+        terminal_event: bool = True,
+        actual_horizon: float | None = None,
+    ) -> FlightResult:
         """Standardized metrics computation (Consolidated for DRY)."""
         if trajectory is None:
             raise ValueError("trajectory must be provided")
+        horizon = (
+            actual_horizon
+            if actual_horizon is not None
+            else (trajectory[-1].time if trajectory else 0.0)
+        )
         if not trajectory:
-            return FlightResult([], self.name, coefficients=dict(self.coefficients))
+            return FlightResult(
+                [],
+                self.name,
+                carry_distance=0.0 if termination.landed else None,
+                max_height=0.0,
+                flight_time=0.0,
+                landing_angle=0.0 if termination.landed else None,
+                lateral_deviation=0.0 if termination.landed else None,
+                coefficients=dict(self.coefficients),
+                termination=termination,
+                terminal_event=terminal_event,
+                actual_horizon=horizon,
+            )
 
         pos = np.array([p.position for p in trajectory])
+        max_h = float(np.max(pos[:, 2]))
+        time = trajectory[-1].time
+
+        if not termination.landed:
+            return FlightResult(
+                trajectory,
+                self.name,
+                carry_distance=None,
+                max_height=max_h,
+                flight_time=time,
+                landing_angle=None,
+                lateral_deviation=None,
+                coefficients=dict(self.coefficients),
+                termination=termination,
+                terminal_event=terminal_event,
+                actual_horizon=horizon,
+            )
+
         carry = math.hypot(
             pos[-1, 0], pos[-1, 1]
         )  # ⚡ Bolt: math.hypot is ~1.5x faster than math.sqrt(x**2 + y**2)
-        max_h = float(np.max(pos[:, 2]))
-        time = trajectory[-1].time
         lateral = float(pos[-1, 1])
 
         angle = 0.0
-        if len(trajectory) >= 2:
+        if len(trajectory) >= 1:
             v = trajectory[-1].velocity
             v_horiz = math.hypot(
                 v[0], v[1]
@@ -342,12 +493,15 @@ class BallFlightModel(ABC):
         return FlightResult(
             trajectory,
             self.name,
-            carry,
-            max_h,
-            time,
-            angle,
-            lateral,
+            carry_distance=carry,
+            max_height=max_h,
+            flight_time=time,
+            landing_angle=angle,
+            lateral_deviation=lateral,
             coefficients=dict(self.coefficients),
+            termination=termination,
+            terminal_event=terminal_event,
+            actual_horizon=horizon,
         )
 
     def _run_ode_simulation(
@@ -356,6 +510,7 @@ class BallFlightModel(ABC):
         deriv_func: Callable[[float, np.ndarray], np.ndarray],
         max_time: float,
         dt: float,
+        cancellation_requested: Callable[[], bool] | None = None,
     ) -> FlightResult:
         """Unified ODE integration loop (Consolidated for DRY)."""
         if launch is None:
@@ -371,28 +526,107 @@ class BallFlightModel(ABC):
         setattr(ground_ev, "terminal", True)  # noqa: B010
         setattr(ground_ev, "direction", -1)  # noqa: B010
 
-        sol = solve_ivp(
-            deriv_func,
-            (0, max_time),
-            y0,
-            method="RK45",
-            events=ground_ev,
-            dense_output=True,
-            max_step=0.1,
+        last_state = [(0.0, y0.copy())]
+
+        def wrapped_deriv(t: float, y: np.ndarray) -> np.ndarray:
+            last_state[0] = (float(t), y.copy())
+            _check_flight_cancellation(cancellation_requested)
+            return deriv_func(t, y)
+
+        try:
+            _check_flight_cancellation(cancellation_requested)
+            sol = solve_ivp(
+                wrapped_deriv,
+                (0, max_time),
+                y0,
+                method="RK45",
+                events=ground_ev,
+                dense_output=True,
+                max_step=0.1,
+            )
+        except FlightSimulationCancelled as exc:
+            last_t, last_y = last_state[0]
+            partial_points = [TrajectoryPoint(last_t, last_y[:3], last_y[3:])]
+            partial_result = self._compute_metrics(
+                partial_points,
+                termination=FlightTermination.CANCELLED,
+                terminal_event=False,
+                actual_horizon=last_t,
+            )
+            raise FlightSimulationCancelled(
+                str(exc) or "flight simulation cancelled",
+                result=partial_result,
+            ) from exc
+
+        termination, terminal_event, actual_horizon = _determine_ode_termination(sol)
+        points = _extract_ode_trajectory_points(sol, dt)
+
+        return self._compute_metrics(
+            points,
+            termination=termination,
+            terminal_event=terminal_event,
+            actual_horizon=actual_horizon,
         )
 
-        t_eval = np.arange(0, sol.t[-1], dt)
-        # dense_output=True guarantees a dense interpolant; narrow for mypy.
-        assert sol.sol is not None
-        points = [
-            TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
-        ]
-        if sol.t[-1] not in t_eval:
-            points.append(
-                TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1])
-            )
 
-        return self._compute_metrics(points)
+def _check_flight_cancellation(
+    cancellation_requested: Callable[[], bool] | None,
+) -> None:
+    """Evaluate cooperative cancellation callback with fail-closed error handling."""
+    if cancellation_requested is None:
+        return
+    try:
+        requested = cancellation_requested()
+        if type(requested) is not bool:
+            raise TypeError("cancellation_requested must return an exact bool")
+    except Exception as error:
+        if not isinstance(error, FlightSimulationCancelled):
+            raise FlightCancellationCallbackError(
+                "flight cancellation callback failed"
+            ) from error
+        raise
+    if requested:
+        raise FlightSimulationCancelled("flight simulation cancelled")
+
+
+def _determine_ode_termination(sol: Any) -> tuple[FlightTermination, bool, float]:
+    """Inspect ODE solver status and resolve flight termination category and horizon."""
+    success = getattr(sol, "success", True)
+    status = getattr(sol, "status", 0)
+    t_events = getattr(sol, "t_events", None)
+
+    if not success or status < 0:
+        actual_horizon = float(sol.t[-1]) if len(sol.t) > 0 else 0.0
+        return FlightTermination.SOLVER_FAILED, False, actual_horizon
+    if status == 1 and t_events and len(t_events[0]) > 0:
+        return FlightTermination.LANDED, True, float(t_events[0][0])
+    if status == 1:
+        return FlightTermination.LANDED, True, float(sol.t[-1])
+    return FlightTermination.TIME_LIMIT, False, float(sol.t[-1])
+
+
+MAX_ODE_TRAJECTORY_POINTS: int = 50_000
+
+
+def _extract_ode_trajectory_points(sol: Any, dt: float) -> list[TrajectoryPoint]:
+    """Sample dense ODE output into trajectory points at fixed step intervals."""
+    if not (math.isfinite(dt) and dt > 0.0):
+        raise ValueError(f"dt must be finite and positive; got {dt!r}")
+    final_t = float(sol.t[-1])
+    if not (math.isfinite(final_t) and final_t >= 0.0):
+        raise ValueError(f"sol.t[-1] must be finite and >= 0; got {final_t!r}")
+    estimated_samples = int(final_t / dt) + 1
+    if estimated_samples > MAX_ODE_TRAJECTORY_POINTS:
+        raise ValueError(
+            f"Requested ODE trajectory points ({estimated_samples}) exceeds limit "
+            f"({MAX_ODE_TRAJECTORY_POINTS}). Increase dt or shorten simulation interval."
+        )
+    t_eval = np.arange(0, final_t, dt)
+    assert sol.sol is not None
+    points = [TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval]
+    if final_t not in t_eval:
+        points.append(TrajectoryPoint(final_t, sol.y[:3, -1], sol.y[3:, -1]))
+    return points
 
 
 class WaterlooPennerModel(BallFlightModel):
@@ -431,7 +665,11 @@ class WaterlooPennerModel(BallFlightModel):
         return "Penner (2003); McPhee et al. (Waterloo)"
 
     def simulate(
-        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: UnifiedLaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        cancellation_requested: Callable[[], bool] | None = None,
     ) -> FlightResult:
         """Simulate ball flight using the Waterloo/Penner quadratic coefficient model."""
         if launch is None:
@@ -484,7 +722,13 @@ class WaterlooPennerModel(BallFlightModel):
             acc[2] -= launch.gravity
             return np.array([v_val[0], v_val[1], v_val[2], acc[0], acc[1], acc[2]])
 
-        return self._run_ode_simulation(launch, derivatives, max_time, dt)
+        return self._run_ode_simulation(
+            launch,
+            derivatives,
+            max_time,
+            dt,
+            cancellation_requested=cancellation_requested,
+        )
 
 
 class MacDonaldHanzelyModel(BallFlightModel):
@@ -516,7 +760,11 @@ class MacDonaldHanzelyModel(BallFlightModel):
         return "MacDonald & Hanzely (1991)"
 
     def simulate(
-        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: UnifiedLaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        cancellation_requested: Callable[[], bool] | None = None,
     ) -> FlightResult:
         """Simulate ball flight using the MacDonald-Hanzely spin-decay model."""
         if launch is None:
@@ -568,7 +816,13 @@ class MacDonaldHanzelyModel(BallFlightModel):
             acc[2] -= launch.gravity
             return np.array([v_val[0], v_val[1], v_val[2], acc[0], acc[1], acc[2]])
 
-        return self._run_ode_simulation(launch, derivatives, max_time, dt)
+        return self._run_ode_simulation(
+            launch,
+            derivatives,
+            max_time,
+            dt,
+            cancellation_requested=cancellation_requested,
+        )
 
 
 @dataclass(frozen=True)
@@ -620,7 +874,11 @@ class ConstantCoefficientModel(BallFlightModel):
         return self._spec.reference
 
     def simulate(
-        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+        self,
+        launch: UnifiedLaunchConditions,
+        max_time: float = 10.0,
+        dt: float = 0.01,
+        cancellation_requested: Callable[[], bool] | None = None,
     ) -> FlightResult:
         """Simulate ball flight using constant drag and lift coefficients."""
         if launch is None:
@@ -672,7 +930,13 @@ class ConstantCoefficientModel(BallFlightModel):
             acc[2] -= launch.gravity
             return np.array([v_val[0], v_val[1], v_val[2], acc[0], acc[1], acc[2]])
 
-        return self._run_ode_simulation(launch, derivatives, max_time, dt)
+        return self._run_ode_simulation(
+            launch,
+            derivatives,
+            max_time,
+            dt,
+            cancellation_requested=cancellation_requested,
+        )
 
 
 class FlightModelRegistry:
@@ -763,12 +1027,16 @@ class FlightModelRegistry:
 
 
 def compare_models(
-    launch: UnifiedLaunchConditions, models: list[BallFlightModel]
+    launch: UnifiedLaunchConditions,
+    models: list[BallFlightModel],
+    cancellation_requested: Callable[[], bool] | None = None,
 ) -> dict[str, FlightResult]:
     """Compare multiple models for the same launch conditions."""
     if launch is None:
         raise ValueError("launch must be provided")
     results = {}
     for model in models:
-        results[model.name] = model.simulate(launch)
+        results[model.name] = model.simulate(
+            launch, cancellation_requested=cancellation_requested
+        )
     return results

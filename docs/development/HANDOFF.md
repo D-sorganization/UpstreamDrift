@@ -1,4 +1,60 @@
+# Historical Player Capture Handoff
+
+## Active: Tiger 2000 and Ben Hogan
+
+- Repository/worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`.
+- Branch: `feat/historical-player-capture-11226`; implementation commit: ab2c869813a2b2be2f14b512ee34647694614377; handoff refresh: SELF.
+- PR: https://github.com/D-sorganization/UpstreamDrift/pull/11231; open, CI pending. Epics: #11226 (Tiger), #11229 (Hogan); shared runner: #11230.
+- Objective: complete both source-grounded historical reconstructions and make future players repeatable.
+- Implemented: bounded PyAV streaming, existing SourceAsset/FrameIdentity contracts,
+  existing MediaPipe estimator, normalized image XY/visibility/missingness, exact
+  container PTS, lossless decoded PNGs, source/frame/observations/model/code hashes.
+- Source authority: `docs/development/historical_capture/source-catalog.json`.
+- Procedure: `docs/development/historical-capture-procedure.md`.
+- Media/results: `C:/Users/diete/Downloads/historical-capture/` (outside Git).
+- Tiger download: requested t_J6Vik3Tss, complete 1080p50 video, separate audio,
+  metadata/description, and losslessly remuxed video with audio. Uploader claims
+  2000; upload date is 2022-06-10 and does not verify the recording year.
+- Final Hogan run: 110–135 presentation seconds, 750 frames, 739 detections,
+  MediaPipe 1.0.1; missing detections preserved. Tiger final run: 2000 frames, 1994 detections (110-150 s).
+- Earlier MediaPipe 0.10.32 pilot receipts are historical evidence, not current
+  runner qualification. Final runs use content-based asset/frame IDs.
+- TDD: missing module failed collection, then absent export function failed the
+  streaming test; invalid local URI and decimal/Fraction boundary tests failed
+  before correction. Last focused suite: 35 passed; latest capture suite: 12 passed.
+- Checks: repository-wide Ruff lint passed; format check passed (8263 files);
+  tracked file-size budget passed; procedure title check passed; design-manual
+  governance verified existing `blocked-inventory-required` release state.
+- Commands: `python3 -m pytest tests/unit/shadow_tracker/test_historical_capture.py tests/unit/shadow_tracker/test_footage_workflows.py tests/unit/shadow_tracker/test_fail_closed_fitting.py -q -o addopts=''`; `python3 -m ruff check .`; `python3 -m ruff format --check .`; `python3 scripts/ci/check_file_size_budget.py`.
+- Whole Shadow Tracker suite passed: 364 tests in 36.28 s. Scoped mypy passed. Existing import deprecation warnings
+  remain. No native-engine, scientific, or website acceptance is claimed.
+- Ownership: this worktree started clean from fb1ac44949 on origin/main. Original
+  checkout/other worktrees and their user-owned files were preserved. Partial
+  failed output directories have no receipt and are not valid capture results.
+
+## Ordered Continuation
+
+1. Final Tiger/Hogan receipts collected; inspect dense source-bound landmark
+   overlays and split each window at every cut/identity change. Contact-sheet
+   inspection shows foreground body tracking, with errors/low-confidence joints.
+2. Higher-resolution Hogan source processed: 899 frames, 892 detections; select clean continuous swings,
+   and review P1–P10 checkpoint and impact intervals.
+3. Monitor published shared-runner PR #11231 using the
+   repository ci-watch-and-fix skill. Keep parent epics open.
+4. Resolve recording/event lineage, playback scale and usage permissions; fit
+   cameras and subject anthropometry with declared priors/uncertainty.
+5. Fit dense constrained kinematics, compare native MuJoCo/Drake/Pinocchio FK,
+   then independently qualify uninterrupted forward replay where supported.
+6. Evaluate held-out film lineages and integrate eligible comparison artifacts
+   into UpstreamDrift/AffineDrift. Do not claim completion until epic evidence exists.
+
+# Historical Capture Continuation
+
+Current authority: [Root Agent Handoff](../../AGENT_HANDOFF.md).
+Shared runner #11230, Tiger #11226 and Hogan #11229: streaming extraction is implemented; reconstruction acceptance remains open.
+
 # Current Handoff — Qualify OpenSim Native Dual-Club Dynamics and Replay (#11095)
+
 - Branch: `feat/mmr-10o-opensim-dual-club-11095`
 - Pull request: Refs #11095 (partial: fail-closed conversion; native qualification still requires opensim bindings on a pinned host/native CI lane).
 - Done: OpenSim qualification schema plus **fail-closed conversion** after review audit (placeholder receipts, gates that always qualified, invented marker metrics):
@@ -7,7 +63,9 @@
   - Committed club receipts replaced with honest fail-closed UNAVAILABLE records (empty evidence fields, enumerated `missing_evidence`, remedy names the native lane command).
 - Tests: 17 unit tests passed (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN); Ruff check and format clean.
 - Limitation: no native OpenSim execution exists anywhere in this evidence; real qualification requires the opensim bindings on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine opensim`.
+
 # Current Handoff — Qualify MyoSuite Native Dual-Club Dynamics and Replay (#11096)
+
 - Branch: `feat/mmr-10m-myosuite-dual-club-11096`
 - Pull request: Refs #11096 (partial: fail-closed conversion; native qualification still requires myosuite/MuJoCo on a pinned host/native CI lane).
 - Done: MyoSuite qualification schema plus **fail-closed conversion** after review audit (placeholder receipts, gates that always qualified, invented marker metrics):
@@ -17,6 +75,7 @@
   - Committed club receipts replaced with honest fail-closed UNAVAILABLE records (empty evidence fields, enumerated `missing_evidence`, remedy names the native lane command); README model hashes demoted to regeneration targets.
 - Tests: 19 unit tests passed (`tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN); Ruff check and format clean.
 - Limitation: no native MyoSuite execution exists anywhere in this evidence; real qualification requires the myosuite/MuJoCo stack on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine myosuite`.
+
 # Current Handoff — Qualify Drake Native Dual-Club Dynamics and Replay (#11094)
 
 - Branch: `feat/mmr-10d-drake-dual-club-11094`
@@ -862,3 +921,39 @@ main and GS3DX branch evidence, metrics and licensing budgets, and Shadow Tracke
 integration/qualification gaps. No implementation issues claimed or closed.
 375 focused tests and full Ruff lint/format passed. Board approval and native
 qualification are separate next steps; preserve the active #10979 work.
+
+## Current Coordination Limits
+
+Issue leases succeeded. The presence inbox reported incomplete board evidence
+(page limit and malformed comments); absence of messages is not evidence that
+the repository is unoccupied. This owned isolated worktree preserves all others.
+The original root handoff already exceeded its 150-line guideline; unrelated
+active sections were preserved. No full-repository pytest/coverage run was made;
+364 scoped tests and all configured pre-push checks (including mypy, Bandit and
+core/DbC/utils tests) passed. A guessed SPEC test path was absent; no SPEC-test
+pass is claimed. Required commit and design-manual governance hooks passed.
+
+## Publication Refresh
+
+Merged origin/main 51a0c1bfa4 into the owned branch without conflicts, retaining
+both SPEC rows. Post-merge focused Shadow Tracker tests are being verified;
+source/model receipts remain unchanged. Pre-push checks must pass on the merge.
+
+## Additional Hogan Source
+
+Owner-requested DJDYMjmvFwg was downloaded with yt-dlp, including audio and
+metadata: 10 Minutes of Ben Hogan (Every Angle Ever Recorded), Sonic Titan Golf,
+10:23, 1920x1080 at 60 presentation fps. SHA-256 is recorded in source-catalog.json.
+Original archive cadence, individual recording dates and film overlap are unknown;
+this compilation must not be treated as synchronized multiview or independent
+held-out footage. Local media: Downloads/historical-capture/ben_hogan/.
+
+The new Hogan compilation window 253-267 presentation seconds was processed:
+839 frames, 769 detections and 70 explicit missing detections. Receipt and hashes
+are committed; source-bound frames and observations remain outside Git. This
+window is unreviewed and may cross cuts; 60 presentation fps does not establish
+original film timing or independent multiview.
+
+The first post-merge push was stopped because documentation changed while the
+security hook was running (no security issues were identified). Finish the
+current documentation commit and retry from a clean worktree.
