@@ -65,6 +65,84 @@ def test_refit_options_reject_invalid_sampling_and_budgets():
             replace(valid, **change)
 
 
+def test_refit_operation_defaults_to_fit_and_rejects_unknown_values():
+    from src.shared.python.workspace.necromatcher_fit_jobs import NativeRefitOptions
+
+    valid = NativeRefitOptions((0, 2), 2, (1.0,))
+    assert valid.operation == "fit"
+    for operation in (None, True, [], "initialize", ""):
+        with pytest.raises(ValueError, match="operation"):
+            replace(valid, operation=operation)
+    with pytest.raises(ValueError, match="policy"):
+        replace(valid, operation="author_initialization")
+
+
+def test_author_job_publishes_separate_rejected_version_and_preserves_source(
+    fit_case, monkeypatch
+):
+    from copy import deepcopy
+    from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+    from src.shared.python.motion_matching.jobs import (
+        MatchingJobService,
+        JobStatus,
+        AcceptanceState,
+    )
+    from src.shared.python.workspace import necromatcher_fit_jobs as jobs
+
+    library, source, original = fit_case
+    library.add_fit("old-author", "practice", source)
+    requests = []
+
+    def execute(request_path, budget, cancelled):
+        request = json.loads(request_path.read_text())
+        requests.append(request)
+        payload = deepcopy(original)
+        payload["provenance"]["operation"] = "author_initialization"
+        payload["evidence"] = {
+            "rejection_reasons": ["authored_initialization_only"],
+            "original_fit": {
+                "optimizer_ran": False,
+                "rms_pixels": 9.0,
+                "converged": False,
+            },
+        }
+        return {"fit": payload}
+
+    monkeypatch.setattr(jobs, "_execute_worker", execute)
+    config = ImageFitConfig(
+        initialization_policy="authored_range_project_zero_slopes",
+        coordinate_bounds=(("hip", -1.0, 1.0),),
+    )
+    options = jobs.NativeRefitOptions(
+        (0, 2), 2, (1.0,), config=config, operation="author_initialization"
+    )
+    service = MatchingJobService()
+    try:
+        handle, run_root = jobs.start_native_refit(
+            library, "old-author", "new-author", options, service
+        )
+        result = handle.join(timeout=20)
+        assert (
+            result.status == JobStatus.SUCCEEDED
+            and result.acceptance == AcceptanceState.REJECTED
+        )
+        assert requests[0]["options"]["operation"] == "author_initialization"
+        assert (
+            json.loads((run_root / "request.json").read_text())["execution_started"]
+            is True
+        )
+        saved = library.load_fit("new-author")
+        assert saved["evidence"]["original_fit"]["optimizer_ran"] is False
+        assert saved["evidence"]["original_fit"]["rms_pixels"] == 9.0
+        assert library.load_fit("old-author") == original
+        assert (
+            library.load_asset("new-author").metadata["hash"]
+            != library.load_asset("old-author").metadata["hash"]
+        )
+    finally:
+        service.close()
+
+
 @pytest.mark.requires_mujoco
 def test_refit_job_persists_start_identity_and_fails_without_native_assumptions(
     fit_case,

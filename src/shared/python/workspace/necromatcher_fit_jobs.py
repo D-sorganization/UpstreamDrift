@@ -12,7 +12,7 @@ import platform
 import subprocess
 import sys
 import time
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 from uuid import uuid4
 
 import numpy as np
@@ -73,8 +73,14 @@ class NativeRefitOptions:
     config: ImageFitConfig = field(default_factory=ImageFitConfig)
     unknown_visibility_weight: float = 0.5
     budget_wall_s: float = 600.0
+    operation: Literal["fit", "author_initialization"] = "fit"
 
     def __post_init__(self) -> None:
+        if not isinstance(self.operation, str) or self.operation not in (
+            "fit",
+            "author_initialization",
+        ):
+            raise ValueError("Refit operation must be fit or author_initialization")
         indices = tuple(self.frame_indices)
         if (
             len(indices) < 2
@@ -96,6 +102,14 @@ class NativeRefitOptions:
             raise ValueError("Refit coordinate scales must be finite and positive")
         if not isinstance(self.config, ImageFitConfig):
             raise ValueError("Refit requires validated image-fit configuration")
+        if (
+            self.operation == "author_initialization"
+            and self.config.initialization_policy
+            != "authored_range_project_zero_slopes"
+        ):
+            raise ValueError(
+                "Author operation requires explicit authored initialization policy"
+            )
         if not np.isfinite(self.budget_wall_s) or self.budget_wall_s <= 0:
             raise ValueError("Refit wall budget must be finite and positive")
         if (

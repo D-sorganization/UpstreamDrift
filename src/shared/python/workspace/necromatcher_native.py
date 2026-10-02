@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from .necromatcher import NecromatcherLibrary
 
 from .necromatcher_efforts import AuthoredEffortProfile, effort_units_for_coordinates
+from .necromatcher_ranges import AuthoredCoordinateBounds, extract_authored_bounds
 
 
 @dataclass(frozen=True)
@@ -37,6 +38,21 @@ class NativeFitBinding:
     fit: dict[str, Any]
     plant: MatchingPlant
     coordinate_units: tuple[str, ...]
+    definition_bytes: bytes = b""
+
+    def authored_coordinate_bounds(self) -> AuthoredCoordinateBounds:
+        """Extract authored hypotheses from the captured exact bound definition."""
+        if (
+            not isinstance(self.plant, ScalarCoordinateUnits)
+            or self.plant.coordinate_units != self.coordinate_units
+        ):
+            raise ValueError("Authored range units differ from compiled native units")
+        return extract_authored_bounds(
+            self.definition_bytes,
+            self.model_hash,
+            tuple(self.plant.coordinate_order),
+            self.plant.coordinate_units,
+        )
 
     def efforts(
         self, controls: AuthoredEffortProfile, time_s: float
@@ -166,4 +182,5 @@ def load_native_fit_binding(
         fit,
         native,
         units,
+        model_bytes,
     )

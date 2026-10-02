@@ -503,6 +503,8 @@ MAP fitting with immutable warm-start samples; source PTS and unqualified camera
 assumptions cannot certify physical derivatives or joint efforts. See the
 [Necromatcher Native Fitting Procedure](../development/necromatcher-native-fit.md).
 
+The canonical estimation facade exports `initialize_authored_hermite` and its immutable receipt DTOs. Historical fitting exports `initialize_image_trajectory` for explicit seed authoring without optimization; `fit_image_trajectory` shares preparation/result assembly while preserving original priors and pixels. Reuse `NativeFitBinding.authored_coordinate_bounds()` for captured definition/XML/unit-bound authored radian ranges; compiled joint limits remain disabled. See [Authored Initialization](../development/necromatcher-authored-initialization.md) and [Authored Ranges](../development/necromatcher-authored-ranges.md).
+
 ### Repository Python Worker Environments
 
 `core.repo_python_environment(repo_root, base=None)` is the public, pure

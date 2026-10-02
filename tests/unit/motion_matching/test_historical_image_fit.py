@@ -367,3 +367,152 @@ def test_capture_reader_preserves_missingness_and_source_clock():
 def test_invalid_camera_rotation_is_rejected(rotation):
     with pytest.raises(ValueError, match="proper orthonormal"):
         CameraProjection(np.eye(3), rotation, np.zeros(3))
+
+
+def test_authored_initializer_is_explicit_and_measures_actual_initial_rms() -> None:
+    from dataclasses import replace
+    from src.shared.python.motion_matching.historical_fit import (
+        initialize_image_trajectory,
+    )
+
+    native, attachments, camera, original = native_problem()
+    index = native.coordinate_order.index("REInput")
+    samples = np.tile(original.seed, (2, 1))
+    samples[:, index] = [-0.3, -0.8]
+    inputs = replace(original, initial_samples=samples)
+    strict = ImageFitConfig(coordinate_bounds=(("REInput", -0.4, 0.0),))
+    with pytest.raises(ValueError, match="initial|bounds|Bernstein"):
+        fit_image_trajectory(native, attachments, camera, inputs, strict)
+    authored = replace(
+        strict, initialization_policy="authored_range_project_zero_slopes"
+    )
+    result = initialize_image_trajectory(native, attachments, camera, inputs, authored)
+    expected_q = samples.copy()
+    expected_q[:, index] = [-0.3, -0.4]
+    residual = np.array(
+        [
+            camera.residual(native.marker_positions(q, attachments), observed, weights)
+            for q, observed, weights in zip(
+                expected_q, inputs.observed_pixels, inputs.confidence, strict=True
+            )
+        ]
+    )
+    expected_rms = np.sqrt(np.sum(residual**2) / np.sum(inputs.confidence))
+    np.testing.assert_allclose(result.q, expected_q)
+    assert result.initial_rms_pixels == pytest.approx(expected_rms)
+    assert result.rms_pixels == pytest.approx(expected_rms)
+    assert not result.optimizer_ran and not result.converged
+    assert result.initialization is not None and len(result.initialization.changes) == 2
+    np.testing.assert_array_equal(inputs.seed, original.seed)
+    np.testing.assert_array_equal(inputs.initial_samples, samples)
+    assert result.observed_point_count == 6
+    assert result.qualification == "monocular_research_hypothesis"
+
+
+def test_authored_initializer_preserves_original_prior() -> None:
+    from dataclasses import replace
+    from src.shared.python.motion_matching.historical_fit import (
+        initialize_image_trajectory,
+    )
+
+    native, attachments, camera, original = native_problem()
+    index = native.coordinate_order.index("REInput")
+    samples = np.tile(original.seed, (2, 1))
+    samples[:, index] = [-0.3, -0.8]
+    inputs = replace(original, initial_samples=samples)
+    config = ImageFitConfig(
+        prior_weight=1,
+        closure_weight=0,
+        smoothness_weight=0,
+        coordinate_bounds=(("REInput", -0.4, 0.0),),
+        initialization_policy="authored_range_project_zero_slopes",
+    )
+    result = initialize_image_trajectory(native, attachments, camera, inputs, config)
+    evaluation = CubicHermiteSplineTrajectory(result.knot_times, 1).evaluate(
+        result.spline_coefficients,
+        inputs.source_times,
+    )
+    actual = _Fit(native, attachments, camera, inputs, config).residual(evaluation, {})
+    pixel_size = inputs.observed_pixels.size
+    prior = actual[pixel_size : pixel_size + inputs.seed.size * 2].reshape(2, -1)
+    np.testing.assert_allclose(prior[:, index], [-0.3, -0.4])
+
+
+@pytest.mark.parametrize("policy", ["unknown", True, None])
+def test_invalid_initialization_policy_is_rejected(policy: object) -> None:
+    with pytest.raises(ValueError, match="initialization"):
+        ImageFitConfig(initialization_policy=policy)
+
+
+def test_authoring_requires_bounds_and_does_not_repair_locked_coordinates() -> None:
+    with pytest.raises(ValueError, match="bounds"):
+        ImageFitConfig(initialization_policy="authored_range_project_zero_slopes")
+    native, attachments, camera, inputs = native_problem()
+    with pytest.raises(ValueError, match="locked"):
+        fit_image_trajectory(
+            native,
+            attachments,
+            camera,
+            inputs,
+            ImageFitConfig(
+                initialization_policy="authored_range_project_zero_slopes",
+                coordinate_bounds=((native.coordinate_order[0], 1.0, 2.0),),
+            ),
+        )
+
+
+def test_seed_authoring_never_invokes_optimizer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.motion_matching.historical_fit import (
+        initialize_image_trajectory,
+    )
+    from src.shared.python.motion_matching.historical_fit import solver
+
+    def unexpected_optimizer(*args: object) -> None:
+        raise AssertionError("Seed authoring must not invoke optimizer")
+
+    monkeypatch.setattr(solver, "solve_single_trial_map", unexpected_optimizer)
+    native, attachments, camera, inputs = native_problem()
+    config = ImageFitConfig(
+        coordinate_bounds=(("REInput", -0.4, 0.0),),
+        initialization_policy="authored_range_project_zero_slopes",
+    )
+    result = initialize_image_trajectory(native, attachments, camera, inputs, config)
+    assert not result.optimizer_ran
+    assert result.rms_pixels == result.initial_rms_pixels
+    with pytest.raises(ValueError, match="explicit initialization"):
+        initialize_image_trajectory(
+            native, attachments, camera, inputs, ImageFitConfig()
+        )
+
+
+def test_authored_fit_uses_feasible_start_and_retains_receipt() -> None:
+    from dataclasses import replace
+
+    native, attachments, camera, original = native_problem()
+    index = native.coordinate_order.index("REInput")
+    samples = np.tile(original.seed, (2, 1))
+    samples[:, index] = [-0.3, -0.8]
+    inputs = replace(original, initial_samples=samples)
+    result = fit_image_trajectory(
+        native,
+        attachments,
+        camera,
+        inputs,
+        ImageFitConfig(
+            max_iterations=2,
+            closure_weight=0,
+            coordinate_bounds=(("REInput", -0.4, 0.0),),
+            initialization_policy="authored_range_project_zero_slopes",
+        ),
+    )
+    assert result.optimizer_ran and result.initialization is not None
+    assert (
+        result.initialization.original_coefficient_sha256
+        != result.initialization.initialized_coefficient_sha256
+    )
+    q = result.evaluate_source_times(np.linspace(110, 111, 101))[:, index]
+    assert np.min(q) >= -0.4 - 1e-12 and np.max(q) <= 1e-12
+    with pytest.raises(ValueError, match="Convergence"):
+        replace(result, optimizer_ran=False, converged=True)

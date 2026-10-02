@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
 - **Started:** 2026-10-01
-- **Last verified:** 2026-10-02 on base 73b76c7b58465ace8e04932bc2820b2b2d37d0f7 — 106 current canonical/domain/native image/job cases and pinned mypy pass; v7 scientific audit remains rejected.
-- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds now use a canonical Bernstein-admissible domain; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
-- **Next step:** Implement the explicit authored initialization policy in necromatcher-feasible-initialization-plan.md.
+- **Last verified:** 2026-10-02 on base 96aefc36e0576993a7f970e416279bd31e416870 — 150 canonical initialization/domain/image, native range/extrema and owned worker/job/session cases passed; pinned mypy and scoped Ruff passed. No new bounded player trial yet.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Opt-in named hard bounds use a canonical Bernstein-admissible domain with explicit logged authored initialization and immutable native definition/range identities; v7 candidates remain rejected and require new feasible trials plus grip/contact qualification. [Turnover](necromatcher-turnover.md).
+- **Next step:** Freeze owned initialization job persistence and independent audit, run new exact-range Tiger/Hogan seed and bounded-fit versions, then publish source overlays and update compiled methods evidence.
 
 ### DL-#11246 · Necromatcher Source Video Overlays
 

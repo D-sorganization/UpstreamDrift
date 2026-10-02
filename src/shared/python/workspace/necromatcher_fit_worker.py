@@ -23,10 +23,64 @@ from src.shared.python.motion_matching.historical_fit import (
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_native import load_native_fit_binding
+from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
 
 logger = logging.getLogger(__name__)
+
+
+def _compute_operation(
+    operation: str,
+    native: MatchingPlant,
+    attachments: dict[str, Any],
+    camera: CameraProjection,
+    inputs: ImageFitInputs,
+    config: ImageFitConfig,
+) -> ImageFitResult:
+    if operation == "fit":
+        return fit_image_trajectory(native, attachments, camera, inputs, config)
+    if operation != "author_initialization":
+        raise ValueError("Unknown native fit operation")
+    if config.initialization_policy != "authored_range_project_zero_slopes":
+        raise ValueError(
+            "Author operation requires explicit authored initialization policy"
+        )
+    from src.shared.python.motion_matching.historical_fit import (
+        initialize_image_trajectory,
+    )
+
+    result = initialize_image_trajectory(native, attachments, camera, inputs, config)
+    if (
+        result.optimizer_ran is not False
+        or result.converged is not False
+        or result.initialization is None
+    ):
+        raise ValueError(
+            "Author initialization returned a contradictory execution receipt"
+        )
+    return result
+
+
+def _range_provenance(
+    binding: NativeFitBinding, config: ImageFitConfig, operation: str
+) -> dict[str, Any]:
+    configured = {
+        name: (lower, upper) for name, lower, upper in config.coordinate_bounds
+    }
+    if not configured and operation == "fit":
+        return {"range_source": "none"}
+    authored = binding.authored_coordinate_bounds()
+    if configured != dict(authored.named_bounds):
+        if operation == "author_initialization":
+            raise ValueError(
+                "Author initialization requires all exact native authored ranges"
+            )
+        return {"range_source": "custom_coordinate_bounds"}
+    if not configured:
+        raise ValueError(
+            "Author initialization requires nonempty native authored ranges"
+        )
+    return authored.to_record()
 
 
 def _dense_reprojection_metrics(
@@ -80,6 +134,9 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     binding = load_native_fit_binding(library, identity)
     source = binding.fit
     options = request["options"]
+    operation = options.get("operation", "fit")
+    config = ImageFitConfig.from_record(options["config"])
+    ranges = _range_provenance(binding, config, operation)
     indices = tuple(options["frame_indices"])
     # Reuse native XML, camera and attachment validation from the review path.
     binding.project(indices[0])
@@ -110,12 +167,13 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             ),
             samples,
         )
-        result = fit_image_trajectory(
+        result = _compute_operation(
+            operation,
             native,
             attachments,
             camera,
             inputs,
-            ImageFitConfig.from_record(options["config"]),
+            config,
         )
         dense_indices = tuple(
             i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
@@ -136,13 +194,84 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         (dense_indices, frames, q),
         stamp,
         float(np.max(np.linalg.norm(closure, axis=1))),
+        ranges,
     )
     output["evidence"]["original_fit"].update(
         _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
     )
+    output["provenance"]["coordinate_bounds_provenance"] = ranges
     if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
         raise ValueError("Native worker implementation changed during execution")
     return output
+
+
+def _research_blockers(
+    result: ImageFitResult, config: ImageFitConfig, ranges: dict[str, Any] | None
+) -> list[str]:
+    blockers = [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "nonlinear_continuous_constraints_not_certified",
+        "historical_anatomy_unqualified",
+    ]
+    configured = {
+        name: [lower, upper] for name, lower, upper in config.coordinate_bounds
+    }
+    exact = (
+        bool(configured)
+        and ranges is not None
+        and ranges.get("range_source")
+        == "bound_native_definition.coordinate_ranges_deg"
+        and ranges.get("named_bounds") == configured
+    )
+    if not exact:
+        blockers.append("anatomical_ranges_not_enforced")
+        blockers.append("native_authored_ranges_not_fully_enforced")
+    elif ranges and ranges.get("unbounded_names"):
+        blockers.append("native_coordinates_without_authored_ranges")
+    if not result.optimizer_ran:
+        blockers.append("authored_initialization_only")
+    elif not result.converged:
+        blockers.append("optimizer_not_converged")
+    return blockers
+
+
+def _fit_evidence(
+    result: ImageFitResult,
+    original: dict[str, Any],
+    options: dict[str, Any],
+    max_grip: float,
+) -> dict[str, Any]:
+    return {
+        "camera": original["camera"],
+        "attachments": original["attachments"],
+        "free_coordinates": list(result.free_coordinates),
+        "coordinate_order": list(result.coordinate_order),
+        "frame_indices": list(options["frame_indices"]),
+        "source_times": result.source_times.tolist(),
+        "q": result.q.tolist(),
+        "knot_times": result.knot_times.tolist(),
+        "spline_coefficients": result.spline_coefficients.tolist(),
+        "initial_rms_pixels": result.initial_rms_pixels,
+        "rms_pixels": result.rms_pixels,
+        "converged": result.converged,
+        "optimizer_ran": result.optimizer_ran,
+        "initialization": asdict(result.initialization)
+        if result.initialization is not None
+        else None,
+        "message": result.optimizer_message,
+        "config": asdict(ImageFitConfig.from_record(options["config"])),
+        "max_grip_separation_m": max_grip,
+        "constraint_assessment": {
+            "tested_times": result.constraint_times.tolist(),
+            "row_labels": list(result.constraint_row_labels),
+            "scaled_residuals": result.constraint_residuals.tolist(),
+            "maximum_dimensionless_residual": result.maximum_constraint_residual,
+            "continuous_certified": False,
+        },
+    }
 
 
 def _build_fit_payload(
@@ -152,21 +281,14 @@ def _build_fit_payload(
     dense_output: tuple[tuple[int, ...], list[dict[str, Any]], np.ndarray],
     stamp: dict[str, Any],
     max_grip: float,
+    ranges: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     original = source["evidence"]["original_fit"]
-    attachments = original["attachments"]
     options = request["options"]
-    indices = options["frame_indices"]
     dense_indices, frames, q = dense_output
-    blockers = [
-        "monocular_research_only",
-        "physical_clock_unknown",
-        "camera_unqualified",
-        "independent_dynamics_not_replayed",
-        "anatomical_ranges_not_enforced",
-    ]
-    if not result.converged:
-        blockers.append("optimizer_not_converged")
+    blockers = _research_blockers(
+        result, ImageFitConfig.from_record(options["config"]), ranges
+    )
     output = {
         **source,
         "frame_indices": list(dense_indices),
@@ -175,7 +297,9 @@ def _build_fit_payload(
         "provenance": {
             "native_definition": source["provenance"]["native_definition"],
             "warm_start_provenance": source["provenance"],
-            "description": "Source-stamped native warm-start research refit",
+            "description": "Source-stamped native research "
+            + options.get("operation", "fit"),
+            "operation": options.get("operation", "fit"),
             "warm_start_fit_id": request["source_fit_id"],
             "warm_start_fit_hash": request["source_fit_hash"],
             "request_options": options,
@@ -187,30 +311,7 @@ def _build_fit_payload(
         },
         "evidence": {
             "rejection_reasons": blockers,
-            "original_fit": {
-                "camera": original["camera"],
-                "attachments": attachments,
-                "free_coordinates": list(result.free_coordinates),
-                "coordinate_order": list(result.coordinate_order),
-                "frame_indices": list(indices),
-                "source_times": result.source_times.tolist(),
-                "q": result.q.tolist(),
-                "knot_times": result.knot_times.tolist(),
-                "spline_coefficients": result.spline_coefficients.tolist(),
-                "initial_rms_pixels": result.initial_rms_pixels,
-                "rms_pixels": result.rms_pixels,
-                "converged": result.converged,
-                "message": result.optimizer_message,
-                "config": asdict(ImageFitConfig.from_record(options["config"])),
-                "max_grip_separation_m": max_grip,
-                "constraint_assessment": {
-                    "tested_times": result.constraint_times.tolist(),
-                    "row_labels": list(result.constraint_row_labels),
-                    "scaled_residuals": result.constraint_residuals.tolist(),
-                    "maximum_dimensionless_residual": result.maximum_constraint_residual,
-                    "continuous_certified": False,
-                },
-            },
+            "original_fit": _fit_evidence(result, original, options, max_grip),
         },
     }
     return output

@@ -398,6 +398,130 @@ identity coefficient domain. The checked public procedure is
 New historical bounded trials, image tradeoffs and nonlinear contact audits
 remain required; this implementation is not a new historical execution receipt.
 
+\subsection{Exact Native Authored Range Provenance}
+\code{NativeFitBinding.authored_coordinate_bounds()} derives ranges from the
+immutable definition bytes captured by the loader. These are the exact JSON
+serialization bytes already used to export and compile the binding, not a
+later serialization of mutable fit metadata or a replacement definition.
+The public MJCF exporter must reproduce the binding's exact XML hash before
+any ranges are admitted. The two identities remain distinct:
+\begin{equation}
+ \begin{aligned}
+ H_{\rm def}&=\mathrm{SHA256}(\text{captured definition bytes}),\\
+ H_{\rm XML}&=\mathrm{SHA256}(\text{exported XML UTF-8 bytes}).
+ \end{aligned}
+\end{equation}
+A definition hash identifies that loader serialization; it does not claim
+identity with an original external JSON file. A matching XML hash binds the
+reproduced native resource, not historical anatomical correctness.
+
+The captured coordinate order must match the compiled public native order.
+Every exported coordinate must be a named scalar hinge or slide whose type
+agrees with the independently compiled units. Authored
+\code{coordinate_ranges_deg} entries may name only known hinges with radian
+units. Finite ordered degree limits convert in that same native order as
+\begin{equation}
+ [L_j,U_j]_{\rm rad}=\frac{\pi}{180}[L_j,U_j]_{\rm deg}.
+\end{equation}
+Unknown names, translation-coordinate degree ranges, malformed endpoints,
+unit/order mismatches, or failure to reproduce the exact XML are errors.
+Undeclared coordinates remain explicitly unbounded; no fallback limit is
+invented. The detached immutable result retains named bounds, ordered
+unbounded names, both hashes, and
+\code{range_source=bound_native_definition.coordinate_ranges_deg}.
+
+Every scalar joint in this export has \code{limited="false"}; the extractor verifies that
+declaration and records \code{compiled_limits_enforced=false}. The authored numeric ranges are
+not compiled MuJoCo limits. Their enforcement belongs to the explicit optimizer coefficient
+domain. They remain model hypotheses rather than measured Tiger/Hogan range of motion.
+Extraction reuses public binding/export contracts without private SDK state or another native
+compilation. The detailed procedure is \path{docs/development/necromatcher-authored-ranges.md}.
+
+\subsection{Explicit Authored Feasible Initialization}
+The default \code{ImageFitConfig.initialization_policy="strict"} continues to
+reject an infeasible starting spline. The explicit alternative,
+\code{authored_range_project_zero_slopes}, changes only a newly authored
+optimizer initialization. It is not a repair or clipping of a finished fitted
+output. Named bounds are required, and locked native seed coordinates outside
+those bounds remain errors.
+
+Let $q_{kj}^{\rm old}$ and $v_{kj}^{\rm old}$ be the canonical free-coordinate
+knot positions and source-clock slopes before initialization. Exactly once,
+for each bounded free coordinate, the public initializer sets
+\begin{equation}
+ q_{kj}^{\rm init}=\min\!\left(U_j,
+                   \max\!\left(L_j,q_{kj}^{\rm old}\right)\right),\qquad
+ v_{kj}^{\rm init}=0.
+\end{equation}
+Unbounded free positions remain unchanged, but \emph{all} free knot slopes
+become zero, including those of unbounded coordinates. Equal limits produce
+constant position and zero slope. This is an explicit modeling choice; zero
+slopes are not velocities inferred from footage. With zero slopes, each
+segment's Bernstein controls reduce to its two endpoint positions, so bounded
+endpoints supply a feasible conservative start. The public
+\code{domain.encode(initialized_coefficients)} call verifies that feasibility
+as a postcondition rather than applying another correction.
+
+The pure initializer copies its inputs and calls no optimizer or native engine. The image-fit
+integration retains the original observations, confidence, missingness, source identities and
+\mbox{\code{ImageFitInputs.seed}}. Consequently, the pose-prior target remains the original seed; it
+is not silently replaced by projected knots. \code{initial_rms_pixels} measures the actual
+initialized spline against the original image evidence, with the original confidence-weighted
+landmark denominator. A prior sample RMS must not be substituted for this initialized baseline.
+
+A reproducible authoring sequence is:
+\begin{enumerate}
+\item Load the exact fit/model/capture binding; retain original parents and
+verify the captured definition, exported XML, native order and compiled units.
+\item Extract declared authored bounds and explicit unbounded names; reject
+locked-coordinate conflicts. Construct the canonical free-coordinate domain.
+\item Construct the original physical Hermite coefficients from the selected
+source samples and knot clock. Explicitly select the authored policy and apply
+one position projection plus zero slopes.
+\item Verify \code{domain.encode}; retain the original/initialized coefficient
+hashes, per-knot changes, per-coordinate position displacements, units and clock.
+\item Evaluate the initialized spline against unchanged source observations.
+Publish a new source-bound research seed only with these identities and fresh
+metrics; run optimization separately when explicitly requested.
+\end{enumerate}
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}p{1.8in}p{4.4in}@{}}
+\toprule Initialization Receipt & Meaning and Required Context\\\midrule
+Coefficient Hashes & SHA-256 of canonical little-endian float64 bytes,
+C order: all knot positions, then all knot slopes, each knot-major and
+coordinate-minor. Both original and initialized coefficient identities are retained.\\
+Changed Knots & Native name, knot index, source time, and old/new position
+and slope for every changed knot/coordinate; unchanged entries are omitted.\\
+Position Displacement & Maximum $|q_{kj}^{\rm init}-q_{kj}^{\rm old}|$ for each
+coordinate, in that coordinate's own native unit. No mixed metre/radian
+aggregate; unrepresentable magnitudes fail.\\
+Separate Bindings & Model/definition/XML hashes, source fit/capture identities,
+coordinate names and units, knot times and policy. Coefficient hashes alone
+do not identify these assumptions.\\
+\bottomrule
+\end{tabular}
+\caption{Immutable Authored Initialization Evidence. Hashes Identify Bytes;
+They Do Not Establish Historical Accuracy or Scientific Acceptance.}
+\end{table}
+
+\code{initialize_image_trajectory} provides the initializer-only evidence
+path. Its result says \mbox{\code{optimizer_ran=false}}, \code{converged=false}, and
+``Authored feasible initialization; optimizer not run,'' while retaining
+\code{monocular_research_hypothesis} and false physical-time qualification.
+It does not inherit a parent's convergence or claim a successful fitted motion.
+The canonical fitting call may subsequently optimize from this explicit start
+and preserve its initialization receipt; named hard limits remain active
+throughout that solve. The checked procedure is
+\path{docs/development/necromatcher-authored-initialization.md}.
+
+No bounded Tiger or Hogan player trial has run in this report snapshot. The prior V7 results
+below remain their original rejected outputs. Feasible scalar initialization and coordinate
+bounds do not establish nonlinear grip closure, planted contact, camera/anatomy correctness,
+physical timing, controls or independent dynamics. Fresh historical trials and source/midpoint,
+polynomial-extrema, image-fidelity and nonlinear-contact audits remain required.
+
 \subsection{Constraint Wiring Verification and Historical Trials}
 The earlier interior-constraint implementation at \code{b92732e725} reported
 108 passing cases in its combined local verification;
@@ -990,8 +1114,8 @@ The integrated epic is \#11232, with player epics \#11226 and \#11229 and
 native fitting/downstream issue \#11235. Draft PR \#11240 remains a work-in-
 progress implementation vehicle. Local numerical progress does not resolve
 its documented CI remediation limit, remote checks, or complete project goal.
-The newly implemented canonical coordinate domain must next be exercised with
-explicit feasible historical initialization, retained image tradeoffs and
+The canonical coordinate domain and explicit authored initializer must next be
+exercised in historical trials with retained image tradeoffs and
 nonlinear grip/planted-contact audits, alongside a Hogan shot/crop review. Replay execution controls, qualified downstream analysis,
 and AffineDrift integration remain open.
 Overlay/export delivery is tracked in \#11246, and this detailed compiled

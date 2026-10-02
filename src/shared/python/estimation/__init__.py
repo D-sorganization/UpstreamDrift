@@ -3,6 +3,12 @@
 from __future__ import annotations
 
 from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
+from src.shared.python.estimation.hermite_initialization import (
+    AuthoredHermiteInitialization,
+    AuthoredKnotChange,
+    CoordinateDisplacement,
+    initialize_authored_hermite,
+)
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -67,6 +73,10 @@ from src.shared.python.estimation.synthetic_ground_truth import (
 )
 
 __all__ = [
+    "AuthoredHermiteInitialization",
+    "AuthoredKnotChange",
+    "CoordinateDisplacement",
+    "initialize_authored_hermite",
     "NON_FINITE_RESIDUAL_SENTINEL",
     "CubicHermiteSplineTrajectory",
     "ForwardModel",

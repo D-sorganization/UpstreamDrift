@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from src.shared.python.estimation import (
+    AuthoredHermiteInitialization,
     CubicHermiteSplineTrajectory,
     project_pinhole,
     reprojection_residual_from_points,
@@ -200,7 +201,20 @@ class ImageFitConfig:
     interior_fractions: tuple[float, ...] = ()
     coordinate_bounds: tuple[tuple[str, float, float], ...] = ()
 
+    initialization_policy: Literal["strict", "authored_range_project_zero_slopes"] = (
+        "strict"
+    )
+
     def __post_init__(self) -> None:
+        if self.initialization_policy not in (
+            "strict",
+            "authored_range_project_zero_slopes",
+        ):
+            raise ValueError("Unknown initialization policy")
+        if self.initialization_policy != "strict" and not self.coordinate_bounds:
+            raise ValueError(
+                "Authored initialization requires explicit coordinate bounds"
+            )
         _validate_coordinate_bounds(self.coordinate_bounds)
         if (
             isinstance(self.max_iterations, bool)
@@ -300,6 +314,8 @@ class ImageFitResult:
     constraint_times: np.ndarray = field(default_factory=lambda: np.empty(0))
     constraint_residuals: np.ndarray = field(default_factory=lambda: np.empty((0, 0)))
     constraint_row_labels: tuple[str, ...] = ()
+    optimizer_ran: bool = True
+    initialization: AuthoredHermiteInitialization | None = None
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
@@ -313,6 +329,14 @@ class ImageFitResult:
             "constraint_residuals",
         ):
             object.__setattr__(self, name, _array(getattr(self, name), name))
+        if not isinstance(self.optimizer_ran, bool) or (
+            self.converged and not self.optimizer_ran
+        ):
+            raise ValueError("Convergence requires an executed optimizer")
+        if self.initialization is not None and not isinstance(
+            self.initialization, AuthoredHermiteInitialization
+        ):
+            raise ValueError("Initialization must be a typed authored receipt")
         errors = self.pixel_errors.copy()
         errors.setflags(write=False)
         object.__setattr__(self, "pixel_errors", errors)
