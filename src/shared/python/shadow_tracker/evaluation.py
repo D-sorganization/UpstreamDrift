@@ -619,6 +619,58 @@ def create_evaluated_result_bundle(
 # ---------------------------------------------------------------------------
 
 
+def _rmse(values_sq: Sequence[float]) -> float:
+    return math.sqrt(sum(values_sq) / len(values_sq)) if values_sq else 0.0
+
+
+def _evaluate_single_phase_tracking(
+    p_name: str,
+    idxs: Sequence[int],
+    cand_traj: Sequence[Sequence[float]],
+    ref_joints: Sequence[Any],
+    ref_markers: Sequence[Any],
+) -> tuple[PhaseEvaluationResult, list[float], list[float], list[float]]:
+    p_joint_diffs_sq: list[float] = []
+    p_marker_diffs_sq: list[float] = []
+    p_club_diffs_sq: list[float] = []
+    is_club_observed = True
+
+    for idx in idxs:
+        row = cand_traj[idx]
+        cand_joints = row[7:42] if len(row) >= 42 else row
+        if idx < len(ref_joints):
+            ref_j = ref_joints[idx]
+            n_j = min(len(cand_joints), len(ref_j))
+            for j_idx in range(n_j):
+                diff = float(cand_joints[j_idx]) - float(ref_j[j_idx])
+                p_joint_diffs_sq.append(diff * diff)
+
+        if idx < len(ref_markers) and isinstance(ref_markers[idx], dict):
+            m_dict = ref_markers[idx]
+            cand_pos = np.asarray(row[:3], dtype=np.float64)
+            if "pelvis" in m_dict:
+                ref_pelvis = np.asarray(m_dict["pelvis"], dtype=np.float64)
+                dist = float(np.linalg.norm(cand_pos - ref_pelvis))
+                p_marker_diffs_sq.append(dist * dist)
+
+            if "club_head" in m_dict:
+                ref_club = np.asarray(m_dict["club_head"], dtype=np.float64)
+                c_dist = float(np.linalg.norm(cand_pos - ref_club))
+                p_club_diffs_sq.append(c_dist * c_dist)
+            else:
+                is_club_observed = False
+
+    result = PhaseEvaluationResult(
+        phase_name=p_name,
+        joint_rmse_rad=_rmse(p_joint_diffs_sq),
+        marker_rmse_m=_rmse(p_marker_diffs_sq),
+        club_error_m=_rmse(p_club_diffs_sq),
+        is_club_observed=is_club_observed,
+        sample_count=len(idxs),
+    )
+    return result, p_joint_diffs_sq, p_marker_diffs_sq, p_club_diffs_sq
+
+
 def evaluate_phase_stratified_tracking(
     candidate_trajectory: Sequence[Sequence[float]],
     time_points_s: Sequence[float],
@@ -648,87 +700,19 @@ def evaluate_phase_stratified_tracking(
 
     for p_name in phase_order:
         idxs = phase_indices[p_name]
-        p_joint_diffs_sq: list[float] = []
-        p_marker_diffs_sq: list[float] = []
-        p_club_diffs_sq: list[float] = []
-        is_club_observed = True
-
-        for idx in idxs:
-            row = cand_traj[idx]
-            cand_joints = row[7:42] if len(row) >= 42 else row
-            if idx < len(ref_joints):
-                ref_j = ref_joints[idx]
-                n_j = min(len(cand_joints), len(ref_j))
-                for j_idx in range(n_j):
-                    diff = float(cand_joints[j_idx]) - float(ref_j[j_idx])
-                    p_joint_diffs_sq.append(diff * diff)
-                    all_joint_diffs_sq.append(diff * diff)
-
-            if idx < len(ref_markers) and isinstance(ref_markers[idx], dict):
-                m_dict = ref_markers[idx]
-                cand_pos = np.asarray(row[:3], dtype=np.float64)
-                if "pelvis" in m_dict:
-                    ref_pelvis = np.asarray(m_dict["pelvis"], dtype=np.float64)
-                    dist = float(np.linalg.norm(cand_pos - ref_pelvis))
-                    p_marker_diffs_sq.append(dist * dist)
-                    all_marker_diffs_sq.append(dist * dist)
-
-                if "club_head" in m_dict:
-                    ref_club = np.asarray(m_dict["club_head"], dtype=np.float64)
-                    c_dist = float(np.linalg.norm(cand_pos - ref_club))
-                    p_club_diffs_sq.append(c_dist * c_dist)
-                    all_club_diffs_sq.append(c_dist * c_dist)
-                else:
-                    is_club_observed = False
-
-        j_rmse = (
-            math.sqrt(sum(p_joint_diffs_sq) / len(p_joint_diffs_sq))
-            if p_joint_diffs_sq
-            else 0.0
+        res, j_diffs, m_diffs, c_diffs = _evaluate_single_phase_tracking(
+            p_name, idxs, cand_traj, ref_joints, ref_markers
         )
-        m_rmse = (
-            math.sqrt(sum(p_marker_diffs_sq) / len(p_marker_diffs_sq))
-            if p_marker_diffs_sq
-            else 0.0
-        )
-        c_err = (
-            math.sqrt(sum(p_club_diffs_sq) / len(p_club_diffs_sq))
-            if p_club_diffs_sq
-            else 0.0
-        )
-
-        phase_results.append(
-            PhaseEvaluationResult(
-                phase_name=p_name,
-                joint_rmse_rad=j_rmse,
-                marker_rmse_m=m_rmse,
-                club_error_m=c_err,
-                is_club_observed=is_club_observed,
-                sample_count=len(idxs),
-            )
-        )
-
-    overall_j = (
-        math.sqrt(sum(all_joint_diffs_sq) / len(all_joint_diffs_sq))
-        if all_joint_diffs_sq
-        else 0.0
-    )
-    overall_m = (
-        math.sqrt(sum(all_marker_diffs_sq) / len(all_marker_diffs_sq))
-        if all_marker_diffs_sq
-        else 0.0
-    )
-    overall_c = (
-        math.sqrt(sum(all_club_diffs_sq) / len(all_club_diffs_sq))
-        if all_club_diffs_sq
-        else 0.0
-    )
+        phase_results.append(res)
+        all_joint_diffs_sq.extend(j_diffs)
+        all_marker_diffs_sq.extend(m_diffs)
+        all_club_diffs_sq.extend(c_diffs)
 
     return PhaseStratifiedReport(
         phase_results=tuple(phase_results),
-        overall_joint_rmse_rad=overall_j,
-        overall_marker_rmse_m=overall_m,
-        overall_club_error_m=overall_c,
+        overall_joint_rmse_rad=_rmse(all_joint_diffs_sq),
+        overall_marker_rmse_m=_rmse(all_marker_diffs_sq),
+        overall_club_error_m=_rmse(all_club_diffs_sq),
     )
 
 
