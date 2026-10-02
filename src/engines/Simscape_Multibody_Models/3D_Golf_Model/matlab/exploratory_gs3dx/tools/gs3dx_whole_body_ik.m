@@ -58,6 +58,13 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         translation, and the fit wanders 15-36 cm; the
 %                         interpolated targets hold it.  The offset
 %                         calibration uses measured samples only.
+%     target_weight       (ones per target) extra scale on each target's
+%                         position residual, multiplied with the gap/valid
+%                         weight inside the least-squares fit.  A struct with
+%                         one field per target name, or a 1 x numel(names)
+%                         vector in .names order.  Omitted names, wrong
+%                         length, or negative values error with gs3dx:ik.
+%                         Does not change reported .residual (Euclidean m).
 %     rom_weight          (0, m/rad) penalize every joint angle outside the
 %                         normal human range (GS3DX_JOINT_ROM rows with a
 %                         neutral): the residual gains, per such joint,
@@ -86,6 +93,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                  (ids x frames, solver units: m, deg, axis components)
 %     .residual    targets x frames distance (m), NaN where gap-filled;
 %                  .rms (1 x frames, m, over the measured targets)
+%     .points      3 x targets x frames predicted target positions (m);
+%                  column order matches .names; .residual is the distance
+%                  from each column to the measured joint centre (NaN where
+%                  gap-filled)
 %     .status      KinematicsSolver status per frame (1 = loop closed)
 %     .regularization  struct of posture_weight, smooth_weight, backward,
 %                  gap_weight, rom_weight
@@ -104,6 +115,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.rom_weight (1,1) double {mustBeNonnegative} = 0
         opts.rom table = gs3dx_joint_rom()
         opts.gap_weight (1,1) double {mustBeInRange(opts.gap_weight, 0, 1)} = 0
+        opts.target_weight = []
     end
     s = local_setup(opts.model);
     s.verbose = opts.verbose;
@@ -113,7 +125,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
-    weight = @(f) valid(f) + opts.gap_weight * ~valid(f);   % residual weight per target
+    tw = local_target_weight(s.names, opts.target_weight);
+    weight = @(f) (valid(f) + opts.gap_weight * ~valid(f)) .* tw;   % residual weight per target
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
@@ -160,20 +173,50 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     ik.joint_ids = s.ids;
     ik.joint = zeros(numel(s.ids), n);
     ik.residual = zeros(nt, n);
+    ik.points = zeros(3, nt, n);
     ik.status = zeros(1, n);
+    names_ref = ik.names;
     for i = 1:n
         [P, R, st] = local_fk(s, best(i).p, best(i).g);
         ik.joint(~s.closed, i) = local_targets(s, best(i).p);
         ik.joint(s.closed, i) = best(i).g;
         pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, nt)), 3, nt);
-        ik.residual(:, i) = vecnorm(pts - data(opts.frames(i))).';
+        ik.points(:, :, i) = pts;
+        d = data(opts.frames(i));
+        ik.residual(:, i) = vecnorm(ik.points(:, :, i) - d).';
         ik.residual(~valid(opts.frames(i)), i) = NaN;   % gap-filled: not a measurement
         ik.status(i) = st;
     end
+    assert(size(ik.points, 1) == 3 && size(ik.points, 2) == numel(ik.names) && ...
+        size(ik.points, 3) == numel(ik.frames), 'gs3dx:ik', 'IK points size mismatch');
+    assert(isequal(ik.names, names_ref), 'gs3dx:ik', 'IK names changed');
     ik.rms = sqrt(mean(ik.residual .^ 2, 1, 'omitnan'));
     ik.regularization = struct('posture_weight', opts.posture_weight, ...
         'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
         'rom_weight', opts.rom_weight);
+end
+
+function tw = local_target_weight(names, tw_in)
+% Per-target scale on the position residual (1 x numel(names)); default all ones.
+    n = numel(names);
+    if isempty(tw_in)
+        tw = ones(1, n);
+        return;
+    end
+    if isstruct(tw_in)
+        tw = zeros(1, n);
+        for k = 1:n
+            nm = names{k};
+            assert(isfield(tw_in, nm), 'gs3dx:ik', 'target_weight missing field %s', nm);
+            tw(k) = tw_in.(nm);
+        end
+    elseif isnumeric(tw_in) && isvector(tw_in)
+        assert(numel(tw_in) == n, 'gs3dx:ik', 'target_weight length must match targets (%d)', n);
+        tw = tw_in(:).';
+    else
+        assert(false, 'gs3dx:ik', 'target_weight must be a struct or vector');
+    end
+    assert(all(isfinite(tw)) && all(tw >= 0), 'gs3dx:ik', 'target_weight must be non-negative');
 end
 
 function rom = local_rom(s, weight, t)

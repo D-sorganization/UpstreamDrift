@@ -70,52 +70,18 @@ function k = gs3dx_kinematic_grf(opts)
         opts.trunk (1,1) string {mustBeMember(opts.trunk, ["c7" "joint_centres"])} = "c7"
     end
     cap = gs3dx_capture_markers(opts.file);
-    a = gs3dx_anthropometry(opts.body_mass);
-    f = a.fraction;
-    c = a.com;
-    fill = @(x) fillmissing(x, 'linear', 2, 'EndValues', 'nearest');
-    m = @(name) fill(cap.marker(name));
-    along = @(p, d, r) p + r * (d - p);
-    drop = [0; 0; opts.hip_drop];
-
-    waist = (m("WaistLeft") + m("WaistRight") + m("WaistLBack") + m("WaistRBack")) / 4;
-    if opts.trunk == "c7"
-        trunk = along(m("BackTop"), waist - drop, c.trunk);
-    else
-        jc = gs3dx_capture_joint_centres(cap);
-        back = @(p) cap.target_frame * p + waist(:, 1);   % jc: target axes, address waist origin
-        trunk = along(back((jc.shoulder_L + jc.shoulder_R) / 2), back((jc.hip_L + jc.hip_R) / 2), c.trunk);
+    [mass, pos] = gs3dx_capture_segments( ...
+        file=opts.file, body_mass=opts.body_mass, hip_drop=opts.hip_drop, ...
+        club_head_mass=opts.club_head_mass, club_rest_mass=opts.club_rest_mass, ...
+        trunk=opts.trunk);
+    M = sum(mass);
+    P = numel(mass);
+    n = size(pos, 3);
+    com = zeros(3, n);
+    for i = 1:P
+        com = com + mass(i) * reshape(pos(:, i, :), 3, n);
     end
-    parts = {
-        f.head,  (m("HeadTop") + m("HeadFront") + m("HeadSide")) / 3
-        f.trunk, trunk
-        };
-    shoulder = struct('L', "LShoulderTop", 'R', "RShoulderBack");
-    hip = struct('L', "WaistLeft", 'R', "WaistRight");
-    for s = ["L", "R"]
-        elbow = m(s + "ElbowOut");
-        wrist = m(s + "WristTop");
-        knee = m(s + "KneeOut");
-        ankle = m(s + "AnkleOut");
-        toe = (m(s + "ToeIn") + m(s + "ToeOut")) / 2;
-        parts = [parts; {
-            f.upper_arm, along(m(shoulder.(s)), elbow, c.upper_arm)
-            f.forearm,   along(elbow, wrist, c.forearm)
-            f.hand,      wrist
-            f.thigh,     along(m(hip.(s)) - drop, knee, c.thigh)
-            f.shank,     along(knee, ankle, c.shank)
-            f.foot,      along(ankle, toe, c.foot)}]; %#ok<AGROW>
-    end
-    w = cell2mat(parts(:, 1));
-    assert(abs(sum(w) - 1) < 1e-9, 'gs3dx:kgrf', 'Segment fractions sum to %.6f, not 1', sum(w));
-    M = opts.body_mass + opts.club_head_mass + opts.club_rest_mass;
-    parts = [parts; {opts.club_head_mass / opts.body_mass, fill(cap.club_head); ...
-                     opts.club_rest_mass / opts.body_mass, fill(cap.club_grip)}];
-    w = cell2mat(parts(:, 1)) * opts.body_mass / M;
-    com = zeros(3, cap.n_frames);
-    for i = 1:numel(w)
-        com = com + w(i) * parts{i, 2};
-    end
+    com = com / M;
 
     fs = cap.rate_hz;
     [b, aa] = butter(4, opts.cutoff_hz / (fs / 2));

@@ -53,11 +53,13 @@ function grip = gs3dx_fit_grip(cap, ik)
     assert(all(isfield(ik, {'frames', 'joint', 'joint_ids', 'model'})), 'gs3dx:grip', ...
         'IK must be a GS3DX_WHOLE_BODY_IK result');
     in = 0.0254;
-    [X, ok] = local_club_markers(cap);
+    tf = gs3dx_capture_address_transform(cap);
+    [X, ok] = gs3dx_club_markers_address(cap);
+    assert(nnz(ok) >= 3, 'gs3dx:grip', 'Too few frames with all six club markers');
     ref = find(ok, 1);
     M0 = X(:, :, ref);
     c0 = mean(M0, 2);
-    pose = @(f) local_kabsch(M0, c0, X(:, :, f));
+    pose = @(f) gs3dx_kabsch(M0, c0, X(:, :, f));
 
     % 2. Functional wrist centres in the club-marker frame.
     wrists = {cap.marker("LWristTop"), cap.marker("RWristTop")};
@@ -65,18 +67,16 @@ function grip = gs3dx_fit_grip(cap, ik)
     grip.sphere = struct('radius', {0, 0}, 'rms', {0, 0});
     for s = 1:2
         P = nan(3, cap.n_frames);
-        for f = find(ok & all(~isnan(wrists{s}), 1))
+        for f = find(ok & all(isfinite(wrists{s}), 1))
             [R, c] = pose(f);
-            P(:, f) = R.' * (wrists{s}(:, f) - c) + c0;
+            P(:, f) = R.' * (tf.local(wrists{s}(:, f)) - c) + c0;
         end
         P = P(:, all(~isnan(P), 1));
         [grip.centre(:, s), grip.sphere(s).radius, grip.sphere(s).rms] = local_sphere(P);
     end
 
     % 3. Shaft axis (the model's hand-sphere centres) in the club-marker frame.
-    [hand, ikf] = local_model_hands(ik);
-    S = cap.target_frame;
-    origin = local_origin(cap);
+    [hand, ikf] = gs3dx_hand_centres(ik);
     keep = ok(ik.frames(ikf));
     ikf = ikf(keep);
     hand = hand(:, :, keep);
@@ -84,10 +84,9 @@ function grip = gs3dx_fit_grip(cap, ik)
     A = zeros(3, numel(ikf));
     for i = 1:numel(ikf)
         [R, c] = pose(ik.frames(ikf(i)));
-        lab = S * hand(:, :, i) + origin;   % address target frame -> capture
-        U(:, i) = R.' * (lab(:, 2) - lab(:, 1));
+        U(:, i) = R.' * (hand(:, 2, i) - hand(:, 1, i));
         U(:, i) = U(:, i) / norm(U(:, i));
-        A(:, i) = R.' * (lab(:, 1) - c) + c0;
+        A(:, i) = R.' * (hand(:, 1, i) - c) + c0;
     end
     u = mean(U, 2);
     u = u / norm(u);
@@ -113,62 +112,12 @@ function grip = gs3dx_fit_grip(cap, ik)
         'Postcondition: every grip length is positive (%s)', jsonencode(g));
 end
 
-function [X, ok] = local_club_markers(cap)
-% The six club markers, 3 x 6 x frames; OK marks frames with all six.
-    idx = find(startsWith(cap.labels, ["Marker_2:2:", "Marker_3:3:"]));
-    assert(numel(idx) == 6, 'gs3dx:grip', 'Expected six club markers, found %d', numel(idx));
-    X = zeros(3, 6, cap.n_frames);
-    for k = 1:6
-        X(:, k, :) = reshape(cap.marker(cap.labels(idx(k))), 3, 1, []);
-    end
-    ok = reshape(all(~isnan(X), [1 2]), 1, []);
-    assert(nnz(ok) >= 3, 'gs3dx:grip', 'Too few frames with all six club markers');
-end
-
-function [R, c] = local_kabsch(M0, c0, M)
-% Rotation R and centroid c with M - c = R (M0 - c0) in the least squares.
-    c = mean(M, 2);
-    [U, ~, V] = svd((M0 - c0) * (M - c).');
-    R = V * diag([1 1 det(V * U.')]) * U.';
-end
-
 function [c, r, e] = local_sphere(P)
 % Algebraic least-squares sphere through the columns of P.
     x = [2 * P.', ones(size(P, 2), 1)] \ sum(P .^ 2, 1).';
     c = x(1:3);
     r = sqrt(x(4) + sum(c .^ 2));
     e = rms(vecnorm(P - c) - r);
-end
-
-function origin = local_origin(cap)
-% Address waist centre: the origin of GS3DX_CAPTURE_JOINT_CENTRES.
-    w = (cap.marker("WaistLeft") + cap.marker("WaistRight") + ...
-        cap.marker("WaistLBack") + cap.marker("WaistRBack")) / 4;
-    origin = w(:, find(all(~isnan(w), 1), 1));
-end
-
-function [hand, ikf] = local_model_hands(ik)
-% Lead and trail hand-sphere centres of IK.model (address target frame),
-% 3 x 2 x frames, for the IK frames whose grip loop closed.
-    mdl = ik.model;
-    load_system(mdl);
-    wf = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
-        'ReferenceBlock', 'sm_lib/Frames and Transforms/World Frame');
-    ks = simscape.multibody.KinematicsSolver(mdl);
-    ids = string(ks.jointPositionVariables.ID);
-    assert(isequal(ids(:), string(ik.joint_ids(:))), 'gs3dx:grip', 'IK.joint_ids do not match %s', mdl);
-    addFrameVariables(ks, 'lead', 'Translation', [wf{1} '/W'], [mdl '/Grip/LHand/R']);
-    addFrameVariables(ks, 'trail', 'Translation', [wf{1} '/W'], [mdl '/Grip/RHand/R']);
-    closed = startsWith(ids, ["j15.", "j18.", "j19."]);   % the right-arm loop, as in the IK
-    addTargetVariables(ks, ids(~closed));
-    addOutputVariables(ks, string(ks.frameVariables.ID));
-    addInitialGuessVariables(ks, ids(closed));
-    ikf = find(ik.status >= 1);
-    hand = zeros(3, 2, numel(ikf));
-    for i = 1:numel(ikf)
-        o = solve(ks, ik.joint(~closed, ikf(i)), ik.joint(closed, ikf(i)));
-        hand(:, :, i) = reshape(o(1:6), 3, 2);
-    end
 end
 
 function v = local_model_var(mdl, name, default)

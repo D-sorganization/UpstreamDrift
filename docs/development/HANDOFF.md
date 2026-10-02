@@ -12,14 +12,14 @@
 - Lease session: `claude-gs3dx-shape-20260928` (#10979); expired, not renewed at turnover: the next agent posts its own lease
 - Development log: `DL-#10950`
 
-## Turnover (2026-09-30): Start Here
+## Turnover (2026-10-01): Start Here
 
-Work was paused at the owner's request so the project can be handed to other
-agents. Nothing is running: no MATLAB job of this session is alive and the
-MATLAB lock is free (a stale `%USERPROFILE%/gs3dx_matlab.lock` whose owner is
-dead is cleared by the runner itself). The two MATLAB processes started
-2026-09-25 and 2026-09-29 (`modes.m`, `probe_signs.m`) belong to the owner:
-never kill them.
+Work was paused so another agent can continue. Do not start a second MATLAB
+while `%USERPROFILE%/gs3dx_matlab.lock` names a live process. A stale lock
+whose owner is dead is cleared by the runner itself. The two MATLAB processes
+started 2026-09-25 and 2026-09-29 (`modes.m`, `probe_signs.m`) belong to the
+owner: never kill them. Scratch batch scripts live under `%TEMP%`
+(`gs3dx_shift_leg_sim.m`, `gs3dx_shift_leg_probe2.m`); they are not in git.
 
 **Where things live**
 
@@ -53,40 +53,379 @@ never kill them.
 
 **Open work, in order (each with its first action)**
 
-1. **#11156 lead arm straight (in progress, test RED).** Added `gs3dx_golf_rom`
-   (lead elbow flexion band <= 20 deg), the IK option `rom=` (any ROM table)
+1. **#11156 lead arm straight (blocked on the owner, test RED).** Added
+   `gs3dx_golf_rom` (lead elbow flexion band <= 20 deg), the IK option `rom=`
    and `tests/test_gs3dx_lead_arm.m`. `the_golf_band_narrows_only_the_lead_elbow`
-   passes; `the_ik_keeps_the_lead_arm_straight` FAILS: held 18.5-41.7 deg
-   (limit 21), RMS 43.2 mm against 23.3 mm free (limit free + 15 mm). The free
-   IK already flexes the lead elbow 52-66 deg; the raw capture markers say
-   31-62 deg; elbow angle and marker offsets are not jointly identifiable, so
-   the offsets calibrated with a free elbow fight the band. First action: run
-   the unfinished probe (it was stopped before any output; ~1 h): calibrate
-   the offsets WITH the band,
-   `off = gs3dx_whole_body_ik(jc, frames=1, calibration_frames=1:15:f0-90, rom_weight=3, rom=gs3dx_golf_rom()).offsets`,
-   then fit every 10th frame to impact with and without the band and report
-   the lead-elbow range and RMS. If the band then holds within 15 mm, change
-   the test to calibrate under the band. If not, record the RMS cost with the
-   owner on #11156 before loosening anything (never loosen the 20 deg or 15 mm
-   bounds on your own).
-2. **#11160 club motion matches.** `gs3dx_club_match` (pure metric, 8/8 tests)
-   exists. Missing: model-side club points. The IK computes the predicted
-   target points in its per-frame loop (`pts`, `gs3dx_whole_body_ik.m` near
-   line 168) but only returns residuals: add `ik.points` (3 x targets x frames),
-   then a test that builds REF from `jc.club_head`/`jc.club_grip` and SIM from
-   `ik.points` and asserts `M.ok.all`. It must fail today (`test_gs3dx_fit`
-   only bounds the club-head residual at 40 mm; the targets are 10 mm RMS /
-   20 mm max). The face normal needs a head-cluster frame
-   from the capture markers (`gs3dx_capture_markers` `local_club`) and a
-   constant body-frame normal calibrated like the marker offsets.
-3. **#11173 roadmap step 4** (balance-consistent leg reference) before step 2;
-   see the playbook's next-step line.
+   passes. Free-elbow calibration still fails the IK test: held 18.5-41.7 deg
+   (limit 21), RMS 43.2 mm against 23.3 mm free. The 2026-09-30 banded-offset
+   probe also fails, so do not switch the test to band calibration and do not
+   re-run that probe. Both fits below used offsets calibrated with
+   `rom_weight=3` and `rom=gs3dx_golf_rom()` on `calibration_frames=1:15:f0-90`,
+   then every 10th frame to impact (regularization 0.01/0.02/false/0.5). The
+   free column is not the old free-elbow calibration.
+
+   | Fit                           | Lead elbow (deg) | Mean RMS (mm) |
+   | ----------------------------- | ---------------- | ------------- |
+   | Free, band-calibrated offsets | 57.7 to 120.1    | 37.0          |
+   | Held, same offsets, weight 3  | 2.6 to 65.8      | 76.8          |
+
+   Held max 65.8 deg exceeds 21. Held RMS is 39.8 mm above free (cap is free +
+   15 mm = 52.0 mm). Wall 2778 s, batch exit 0. Scratch mat
+   `lead_arm_probe_11156.mat` under the session temp probe folder, not in git.
+   Next action is an owner decision on #11156. Do not loosen 20 deg or 15 mm.
+
+2. **#11160 club motion matches (acceptance red).** `gs3dx_club_match` is unchanged
+   (10 mm head RMS, 20 mm head max, 2 deg shaft max, 2 % impact speed).
+   `ik.points` is in place. `gs3dx_club_prediction` reports head, grip and a
+   face normal; `gs3dx_hand_centres` is the shared hand-sphere solve.
+   `frame_one_has_finite_club_geometry` and `residual_matches_points_to_capture`
+   passed. `the_club_matches_the_capture` failed on every 10th frame to impact
+   (free-elbow offset calibration, regularization 0.01/0.02/false/0.5):
+
+   | head RMS mm | head max mm | grip RMS mm | shaft RMS deg | face RMS deg | impact speed err % |
+   | ----------- | ----------- | ----------- | ------------- | ------------ | ------------------ |
+   | 20.012      | 41.987      | 28.344      | 1.609         | 54.206       | -2.009             |
+
+   `M.ok` failed head RMS, head max, shaft max (the max was not logged; RMS is
+   under 2 deg) and speed. Grip is not part of `M.ok`. Head, grip and speed are
+   in the address frame and are the model gap. The face normal now stays in
+   that frame (`Rk * e`, fast tests EXIT 0). A fresh match gives face RMS
+   12.0 deg and shaft max 3.11 deg. The head error is not a constant length
+   bias: along-shaft mean 1.0 mm, along-shaft RMS 19.5 mm, perpendicular
+   RMS 4.3 mm. The simulated grip-to-head length is rigid at 787.1 mm. The
+   worst frame is capture 441, 97 ms before impact (frame 476), 41.7 mm
+   along the shaft and 4.6 mm perpendicular. Do not add a constant shaft
+   Wrist maximums at that weight are 53.5 mm lead and 68.6 mm trail, past the
+   35 mm maximum in `test_gs3dx_fit`. Grip error is sideways: 24.8 mm RMS and
+   50.7 mm max, which is the 3.70 deg shaft angle on the 787 mm shaft. The
+   printed "worst frame 1" is not usable (the index was broadcast). Weight 10
+   is rejected. Equal weights already miss the shaft at 3.11 deg, so do not
+   try another head weight. Next action is an owner decision: the 10 mm head
+   bar and the 35 mm wrist bar were not met together, and the 2 deg shaft bar
+   was missed at both weights. Do not loosen those numbers.
+
+3. **#11173 roadmap step 4** (balance-consistent leg reference) before step 2.
+   `gs3dx_foot_split` is the closed-form two-foot split (5/5 synthetic tests,
+   EXIT 0). `gs3dx_capture_foot_residual` reports the split on a kinematic
+   GRF. The scratch figure moment RMS 857 N·m is not evidence: `k.com` is
+   rotated into the target axes but keeps the capture origin, while the
+   ankle centres use the address waist origin. With `com_offset = S.' * origin`
+   the address COM is 0.149 m from the ankle midpoint, and the scratch is
+   force RMS 0, moment RMS 152.5 N·m (0.193 body-weights at a 1 m lever),
+   impact vertical GRF 1.41 body weights (EXIT 0). The 857 N·m figure is
+   void. The vertical part is 100.2 N·m and the horizontal part is 109.0 N·m.
+   `gs3dx_hull_moment` on the heel-and-toe hull (foot length from
+   `gs3dx_leg_table`, 3/3 tests, EXIT 0) is 0 N·m RMS on the capture: the
+   address-frame centre of mass stays inside that hull, so the 100.2 N·m
+   figure is the two-ankle line, not a centre of mass outside the feet.
+   `gs3dx_support_residual` (5/5 tests, EXIT 0) puts that shear shift on the
+   same hull: force residual 0, tip moment 29.4 N·m RMS (0.037 body-weights
+   at a 1 m lever) and 89.7 N·m at impact. `gs3dx_com_shift` (3/3 tests,
+   EXIT 0) is the smallest horizontal centre-of-mass move that lands that
+   centre of pressure on the hull: 35.7 mm RMS, 183.9 mm max, 80.6 mm at
+   impact. The corrected moment is 0 only because the ground force is held
+   fixed. Do not apply that shift. The 184 mm sample is frame 539, 0.175 s
+   after impact, inside the club-head gap (0.12–0.21 s after impact), so it
+   is not a pelvis correction. To impact the zero-moment shift is 21.4 mm
+   RMS. Point-mass angular momentum does not remove the residual: to impact
+   it rises from 24.8 N·m to 31.8 N·m RMS (0.040 body-weights at a 1 m
+   lever), and at impact from 89.7 N·m to 143.6 N·m, with |hdot| 55.8 N·m
+   (7/7 support tests, 2/2 momentum tests, 3/3 kinematic GRF tests, EXIT 0).
+   Segment spin is not in that rate. The capture toe is shorter than the
+   model toe (141 mm versus 205 mm ahead of the ankle). At impact the
+   zero-moment centre of pressure is 163 mm ahead of the right ankle: 43 mm
+   inside the model toe and 22 mm past the capture toe. A capture-toe hull
+   raises the to-impact residual from 24.8 N·m to 42.3 N·m. Do not use the
+   capture toe. `gs3dx_foot_contacts` spaces heel and toe by the stance foot
+   width (tests EXIT 0). At impact the zero-moment centre of pressure is
+   587 mm across the right-foot axis (half-width 55 mm). The eight-point
+   hull only trims the to-impact residual from 24.8 N·m to 21.9 N·m, and
+   with point-mass angular momentum from 31.8 N·m to 29.3 N·m (0.037
+   body-weights at a 1 m lever). Impact stays 81.4 N·m, or 135.4 N·m with
+   that rate. At impact the centre of pressure is 73 mm past the left toe
+   (along the foot 276 mm, toe at 205 mm), with the vertical force at 1.41
+   body weights. Thirty of the 476 frames through impact are outside the
+   hull; the largest gap is 105 mm, 19 ms before impact. A pelvis nudge
+   that covers 73 mm inside the downswing adds a horizontal force large
+   enough to move the centre of pressure again, so do not apply
+   `gs3dx_com_shift` to the pelvis. Trunk spin (`gs3dx_trunk_spin`, tests
+   EXIT 0) does not close it: the to-impact residual goes from 21.9 N·m to
+   29.3 N·m with point-mass angular momentum and to 32.5 N·m with trunk spin
+   (0.041 body-weights at a 1 m lever). Impact goes from 81.4 N·m to 135.4
+   N·m and then 130.3 N·m. Keep the foot-width residual without those rates:
+   21.9 N·m through impact, 81.4 N·m at impact. `gs3dx_vertical_share`
+   (3/3 tests, EXIT 0) places that vertical force on the clipped centre of
+   pressure. `gs3dx_contact_wrench` compares the tip moment only (4/4 tests,
+   EXIT 0). On the capture foot-width hull it does not error, the force
+   residual is 0, and the moment is 21.863 N·m through impact and 81.427
+   N·m at impact. That is the one contact solve. It is 0.028 body-weights
+   at a 1 m lever. `tests/test_gs3dx_contact_solve.m` pins those three
+   numbers (1/1, EXIT 0). A finish-phase `gs3dx_contact_check` of
+   `GS3DX_Human` to 1.809 s threw at 0.389 s (nonlinear step at hmin,
+   EXIT 1, 2026-09-30). The stored rates were then replaced by the
+   derivative of those angles (SAVED 1). Lead-elbow track row 1 at 1.458 s
+   stepped from 150 deg to -5 deg. That sample was held at 150 deg
+   (LE_STEP 0, SAVED 1, EXIT 0). The range table was not changed. The
+   0.389 s solver stop is still earlier than this sample. A later run to
+   1.809 s returned status success (EXIT 0) with a vertical ground
+   reaction of 2466 body weights at 0.386 s, and 12.5 body weights within
+   0.05 s of impact, against a kinematic peak of 1.85 body weights. The
+   2466 body-weight sample is the same instant the previous run died, so
+   the 12.5 figure is not the impact-support measurement. Between 0.30 s
+   and 0.45 s the largest reference step is 1.15 deg (lead forearm, at
+   0.447 s). Arc-only wrists were then shifted by whole turns (SAVED 1):
+   lead flexion median -1095 deg to -15.4 deg, lead radial -376.5 to
+   -16.5, trail flexion -1406 to 34.3. Spans stayed 50 and 150 deg. The
+   rerun to 1.809 s finished (EXIT 0) with 365 body weights at 0.449 s and
+   0 body weights within 0.05 s of capture impact. The kinematic peak is
+   1.85 body weights. The 365 body-weight sample is not the impact-support
+   measurement, and the near-impact zero is after that spike. The 5 % bar
+   is not claimed. At 0.45 s the lead and trail ankle references sit
+   0.23 mm and 0.27 mm below the address floor. The deepest reference
+   penetration is 26.6 mm on the lead foot at 1.814 s. The 0.45 s
+   clearance does not explain the 365 body-weight spike. At that sample
+   the ankle track values are about -12, -9, 13 and -4 deg. Trail ankle
+   dorsiflexion track reaches 30.5 deg; with sign -1 that is about 14 deg
+   of dorsiflexion, inside the -50 to 20 deg table.
+   `human_references_stay_in_the_human_range` passed again (EXIT 0).
+   A run to 0.55 s puts the whole 365 body-weight spike at 0.449 s on
+   the right lesser-toe sphere, which is the only contact loaded then.
+   A kinematics pose at that sample puts the sphere origin 13 mm above
+   the address sole. Zeroing the trail-inversion target left that height
+   unchanged, so this pose does not show the roll burying the sphere.
+   At 0.45 s the simulated trail inversion is 14.5 deg against a 13.5 deg
+   reference, but dorsiflexion is 42.5 deg against -4.3 deg and the
+   midfoot is 22.4 deg from 0. That plantarflexion, not the reference
+   pose, loads the lesser toe. Trail-ankle Kp is 50 and Kd is 1 on both
+   axes. Midfoot stiffness is 2000 N\*m/rad. One run to 0.55 s with
+   feedback on (EXIT 0, 2026-10-01) splits row 12 at 0.45 s into servo
+   -3755.6 N\*m and balance +2130.0 N\*m (sum -1625.5 N\*m). A second run
+   to 0.55 s (EXIT 0) samples the same axis before that instant. At 0.35 s
+   and 0.40 s the vertical ground reaction is 0, the track is +32.3 deg
+   and +35.2 deg against references -5.1 deg and -4.7 deg, and the balance
+   term (+1964.9 N\*m, then +2039.6 N\*m) cancels the servo
+   (-1946.1 N\*m, then -2019.0 N\*m). The ankle is already about 37 deg
+   off the reference with both feet in the air. Contact is present by
+   0.42 s (18479 N, 9935 N of it on the right lesser toe). The 365
+   body-weight peak remains the 0.449 s sample between these prints.
+   The gains stay as they are. A run to 0.36 s (EXIT 0) splits the
+   +1964.9 N\*m balance term at 0.35 s into a centre-of-mass shift of
+   451.2 N\*m, a foot term of 503.8 N\*m, and a rate term of 1009.9 N\*m.
+   The shift is -8.7 mm, +5.1 mm, and +99.5 mm. Support over that run
+   stays 0. At the first sample the servo torque is 0, so the servo
+   angle matches the reference; the joint log's -340 deg reading is a
+   different branch. An unsaved run to 0.55 s with BalanceGain row 12
+   zeroed (EXIT 0) drops that balance torque to 0 and the servo torque
+   at 0.35 s to -7.2 N\*m. The joint log reads -285 deg there, which
+   would take about 14000 N\*m of servo torque, so that reading is not
+   the servo angle. The peak support in this run is 22.6 body weights
+   at 0.418 s (17821 N, 9797 N on the right lesser toe), against 365
+   body weights at 0.449 s with the saved gain. The same unsaved
+   override run to 1.809 s (EXIT 0) repeats that peak: 22.6 body
+   weights at 0.418 s, and the only loaded contacts are the right big
+   toe (8024 N) and the right lesser toes (9797 N). Within 0.05 s of
+   capture impact the vertical support is 0, against a kinematic peak
+   of 1.85 body weights. The 0.2 body-weight bar is not met. The saved
+   gains are unchanged. A further unsaved run to 0.55 s (EXIT 0) repeats
+   the 22.6 body-weight peak. At 0.35 s the right midfoot is 1.35 deg
+   and the row-12 servo is -7.2 N\*m. At the 0.42 s sample the servo is
+   +153.3 N\*m and the midfoot log reads -312.4 deg. The documented
+   positive midfoot angle bends the toes down, so this single sample
+   does not establish the spring angle. The 0.01 s series (EXIT 0)
+   keeps the joint in radians: 0.0236 rad (1.35 deg) at 0.35 s, falling
+   to 0.0128 rad (0.73 deg) at 0.41 s, then -5.452 rad at 0.42 s. The
+   22.6 body-weight peak at 0.418 s sits in that one step. The spring
+   is still nearly straight before the strike. From 0.35 s through
+   0.41 s the row-12 servo stays between -7.2 and -4.1 N\*m and every
+   contact force is 0. At 0.42 s the servo is +499 N\*m and the only
+   vertical forces are the right big toe (2294 N) and the right lesser
+   toes (4708 N). The strike is the first contact, and it is those two
+   spheres. The kinematics solve for those contact points returned
+   status -1, so those positions are not a pose. The simulated ankle
+   at 0.41 s is at world z -0.705 m. The address sole is at z -1.000 m,
+   so the ankle is 0.295 m above that plane eight milliseconds before
+   the strike. The midfoot log steps from 0.013 rad to -5.45 rad in
+   that same interval. The saved maximum step is 0.001 s. An unsaved
+   run with the maximum step set to 0.0001 s (EXIT 0) still has the
+   midfoot at 0.0128 rad at 0.41 s and -5.323 rad at 0.42 s, and the
+   support peak is 23.1 body weights at 0.418 s. The joint-centre
+   kinematic vertical ground reaction at the 360 Hz sample nearest
+   that time is 1.018 body weights. At capture impact it is 1.410
+   body weights, and its peak is 1.853 body weights, 0.0556 s before
+   impact. The model peak is not that kinematic peak, and the model
+   support at impact is 0. Over that strike the simulated right
+   ankle falls from z -0.045 m at 0.35 s to z -0.705 m at 0.41 s,
+   0.661 m in 0.06 s, while the vertical force is still 0. The step
+   from 0.40 s to 0.41 s is 0.116 m. After the toes load, the ankle
+   stops near z -0.82 m. The impact drive has no pelvis position
+   time series. Its hip signals are polynomial torque coefficients
+   (`HipInputZA`, `HipInputZB`, `HipInputZC`), not a prescribed height.
+   With row 12 zeroed, the pelvis falls from z 0 at the start to
+   z -0.424 m at 0.30 s, while the right ankle rises from z -0.883 m
+   to z 0.354 m. The ankle is then 0.778 m above the pelvis, and the
+   vertical force is still 0. Both are falling by 0.41 s, and the
+   toes load at 0.418 s. At 0.30 s the right-leg servo and the
+   balance loop cancel: hip Y is -3378 N\*m against +3350 N\*m, hip Z
+   is +636 N\*m against -633 N\*m, and the knee is -6869 N\*m against
+   +7030 N\*m. The vertical force is 0. With BalanceGain rows 7
+   through 12 zeroed (EXIT 0) the knee balance torque is 0 and the
+   knee servo is -2.1 N\*m, so the knee is on the reference, and the
+   ankle is still at z 0.411 m against a pelvis at z -0.433 m. The
+   support peak falls from 22.6 to 16.4 body weights, at 0.421 s.
+   The saved right-leg reference at that time is hip -11.7, -36.0,
+   -4.0 deg, knee -23.7 deg, and ankle 13.1, -5.5 deg. Those angles
+   are a small bend. At that same sample the pelvis frame in world,
+   columns then rows, is [0.545 0.765 -0.344; 0.421 -0.604 -0.676;
+   -0.725 0.223 -0.651]. Its axis nearest world up is 77 deg from
+   vertical. The capture pelvis up-axis is 18.8 deg from vertical at
+   that time, 18.7 deg at address, and 7.9 deg at impact. The capture
+   right ankle at 0.30 s is 0.919 m below the pelvis. With rows 7
+   through 12 zeroed, the pelvis tilt from vertical is 22.5 deg at
+   the start, 50.9 deg at 0.10 s, 102 deg at 0.20 s, and 77.1 deg at
+   0.30 s. The vertical force is 0 through all four samples, and by
+   0.20 s the ankle is already above the pelvis. The ground origin
+   is at z -1.00027 m and AnkleHeight is 0.0702 m. A sole that far
+   below the starting right ankle (z -0.883 m) would sit at z -0.953 m,
+   47 mm above the ground. Raising the ground by 47.3 mm, still
+   with rows 7 through 12 zeroed (EXIT 0), puts 3180 N on the feet
+   at the first sample. By 0.10 s the force is 0 again. The tilt is
+   22.5 deg, then 40.8, 85.4, and 110 deg at 0.30 s. The pelvis
+   start rate is -13.1, -12.0, and 10.8 deg/s, a magnitude of 20.8
+   deg/s. The translation start rate is -0.031, 0.005, and 0.0002 m/s.
+   The tilt angle changes by about 80 deg in the first 0.20 s. The Hip
+   Torque Output chart commands
+   JointTorqueHip = HexPolyInputFunction(HipInput*A..G, Time)*Killswitch.
+   At 0, 0.10, and 0.20 s that torque is (-174, -112, 6.6), (-107, 815,
+   502), and (1199, -293, -14) N·m. These are chart outputs, not a measured
+   joint reaction. Holding KillswitchInitialValue and KillswitchFinalValue
+   at 0, with rows 7 through 12 still zeroed, reproduces the same four
+   tilt samples (22.5, 50.9, 101.9, and 77.1 deg) and the same pelvis and
+   ankle heights. The impact drive sets ModelingMode 0, which already
+   zeros the original joint actuators, so that chart is not the moment in
+   these runs. With rows 7 through 12 still zeroed, a 0.35 s feedback
+   run (MODE 0) has leg servos at 0 at the start and Spine X feedback
+   of 6545 N·m. The left balance torque at that sample is 199, 318,
+   -207, -457, -205, and -304 N·m. By 0.30 s the left knee servo and
+   balance are -7124 and 7219 N·m, while the right hip Y servo is
+   -133 N·m and the right knee servo is -2.1 N·m. The largest upper
+   torque is then RScap X at -1169 N·m. The saved spine start is not
+   that sample. SpineTrackAngle begins at 80 and 22.4 deg,
+   SpineStartPosition is 14.2 and 11.8 deg, and the start rates are
+   101 and 63.0 deg/s against reference rates 0 and 289 deg/s. With
+   Kp 74.4 N·m/deg that start pose is 4498 and 1685 N·m, not the
+   logged 6545 N·m. The impact drive sets SpineStartPositionX to 0.
+   The logged joint at the first sample is angle 0 and 0 deg and rate
+   -150 and 300 deg/s, against the reference 80 and 22.4 deg and rate
+   0 and 289 deg/s. That error is the logged 6545 N·m (position term
+   5953, rate term 592). Across the 21 upper-body axes the largest
+   initial torques are Spine X 6545, LS Z -2488, RS X 1853, and Spine Y
+   1625 N·m. Setting those 42 start angles and rates to the first
+   reference frame, still with rows 7 through 12 zeroed, leaves the
+   tilt at 22.5, 19.4, 46.9, and 69.2 deg. At 0.30 s the ankle is at
+   z -0.060 m and the pelvis at z -0.544 m. The largest upper-body
+   torque on that run is the right wrist Y: -1210 N·m at the start
+   and -2730 N·m at 0.30 s. The right-wrist joint start parameters
+   are RWStartPositionX/Y and RWStartVelocityX/Y. The chart's tracking
+   branch sets the wrist torque from gs3dx_track_torque. The impact
+   drive's own wrist start is -38.8 and -72.0 deg, at 909 and
+   -478 deg/s. With the 42 starts matched, the logged spine is
+   80 and 22.4 deg at the set rates, and its feedback is 0. The
+   logged right wrist is 28.2 and 194.0 deg, at 69.2 and 46.7 deg/s,
+   against the set -50.0 and 34.3 deg. That gap is the -608 and
+   -1210 N·m. The right-wrist position and velocity target priorities
+   are None. The grip loop is Club/Weld Joint plus
+   Grip/LeftHandOnClubForce and Grip/RightHandOnClubForce. Setting
+   both wrists' position and velocity priorities to High, without
+   saving, puts the right wrist at -48.9 and 34.5 deg against the
+   targets -50.0 and 34.3 deg. The run then fails at 0 s in the right
+   shoulder gimbal acceleration loop. The saved priorities stay None.
+   With the wrist tracking gains at zero, the same matched starts,
+   and rows 7 through 12 still zeroed, the tilt is 22.5, 20.5, 46.0,
+   and 72.9 deg. The vertical force is 0 at all four samples. At
+   0.30 s the ankle is at z -0.073 m and the pelvis at z -0.559 m.
+   The largest upper-body torque is then the lead scapula Y at 723
+   N·m at the start and the trail shoulder Z at 222 N·m. Zeroing
+   the other six balance rows as well leaves the tilt at 22.5, 23.2,
+   46.8, and 82.5 deg, still with no vertical force. At 0.30 s the
+   ankle is at z -0.024 m and the pelvis at z -0.574 m. The leg
+   servos are then at most 92 N·m, and the balance torque is 0.
+   Setting the 21 upper-body start rates to zero, positions still
+   matched, leaves the tilt at 22.5, 17.8, 42.6, and 58.2 deg, with
+   no vertical force. At 0.30 s the ankle is at z -0.147 m and the
+   pelvis at z -0.498 m. Setting the 12 upper-body tracking gains
+   to zero as well leaves the tilt at 22.5, 20.0, 64.9, and 74.1 deg,
+   still with no vertical force. At 0.30 s the ankle is at z 0.304 m
+   and the pelvis at z -0.520 m. The same quiet state with
+   GroundOffset z raised by 47.3 mm, to -0.95297 m, puts 3180 N on
+   the feet at the first sample, 0 at 0.10 s, 722 N at 0.20 s, and
+   794 N at 0.30 s. The tilt is 22.5, 26.5, 36.6, and 51.0 deg. The
+   pelvis stays near z 0.09 m and the ankle near z -0.86 m.
+   Through 0.55 s that load is the right heel at the first sample
+   (3180 N), nothing at 0.10 s, the right ball at 0.20 s (386 N of
+   722 N), and the right lesser toes alone at 0.30 s (794 N) and
+   0.40 s (505 N). At 0.50 s the tilt is back to 19.6 deg, the
+   vertical force is 0, the pelvis is at z 0.012 m, and the ankle
+   is at z -0.771 m. By 1.0 s the tilt is 109 deg, the pelvis
+   is at z -1.87 m, the ankle is at z -0.989 m, and the vertical
+   force is 8667 N, of which the left heel carries 5232 N. The
+   feet are unloaded from 0.50 s through 0.70 s. At address the
+   capture centre of mass projects to 0.509 on the ankle segment,
+   and it stands 0.149 m forward of that segment. The table foot
+   length is 0.274 m, so the toe line is 0.205 m forward of the
+   ankle and the weight line is inside the sole. The contact wrench
+   at that first frame has force residual about 0 and moment 0.
+   The swing residual stays the pinned 21.863 N·m RMS, and 81.427
+   N·m at impact. The unapplied centre-of-mass shift that would
+   put the centre of pressure on the foot hull is 0 at address,
+   1.7 cm RMS through impact, 7.3 cm at impact, and 10.5 cm at
+   1.303 s. `capture_com_shift_matches_the_foot_width_lever` pins
+   those values (2 passed, EXIT 0). It is not applied. An IK
+   on every 10th frame, scored against its own pelvis target,
+   gives 11.1 mm free and 6.6 mm with the shift subtracted, a
+   difference of -4.5 mm. That score is not the error against
+   the capture pelvis. Scored against the original capture, the
+   free fit is 11.1 mm and the shifted fit is 6.8 mm, a difference
+   of -4.3 mm. The shifted pelvis point is 18.9 mm RMS from the
+   capture pelvis. The 15 mm stop is not triggered. The shift is
+   not written into the model. The 5 % bar is not claimed. The
+   first attempt to feed that IK to `gs3dx_leg_reference` failed:
+   `unique([1:10:impact impact])` is 49 frames, stride 10, and the
+   last frame is 476, so the series is not even
+   (`gs3dx:legref`, EXIT 0). The even grid from frame 1 at stride 10
+   ends at 471. Human `LegReferenceAngle` is 12 by 654 and
+   `LegReferenceTime` has 654 samples (probe EXIT 0). A MATLAB job
+   started 2026-10-01 17:53 local is still running
+   (`%TEMP%/gs3dx_shift_leg_sim.m`, lock owner pid 71392). That script
+   uses frames `1:10:471` and then linearly resamples `ref.q` onto the
+   654-sample time base. No ROW lines had been written when this
+   handoff was committed. Do not treat that resample as the
+   size-matched measurement. Wait for `EXIT` in
+   `%TEMP%/gs3dx_shift_leg_sim.log` before starting another MATLAB.
+   Do not kill that process if you did not start it. Next action after
+   it exits: if the log has eleven ROW lines, record them as the
+   resampled run only. A size-matched override still has not been
+   done, because 48 IK frames are not 654 samples. Do not save. Do not
+   write the shift into the model. Do not claim the 5 % bar. Do not
+   rerun the quiet raised-ground state. Do not rerun 1.809 s.
 4. **#11157 grip/wrists**, **#11159 less spine motion**: not started; both are
    bands like #11156 (add rows to `gs3dx_golf_rom`, one acceptance test each).
-5. **#11158 follow-up**: `human_references_stay_in_the_human_range` stays red
-   until the reference pipeline is rebuilt from the range-limited IK.
-6. Finish-phase trail-foot lift (see #10979 notes below): trail-foot vertical
-   load loop idea.
+5. **#11158 follow-up**: `human_references_stay_in_the_human_range` passed
+   (EXIT 0, 2026-09-30) after `GS3DX_Human` references were rewritten.
+   The range-limited IK (rom weight 3, every 10th frame to impact) is
+   37.7 mm RMS versus 23.3 mm free. Bounded rows were at most 0.71°
+   outside and were projected onto the anatomical limit. Wrist arcs,
+   which that penalty does not bound, were scaled to the anatomical span
+   after interpolation. Lead and trail ankles were clamped onto their
+   existing limits (lead dorsiflexion had been 2.29° over). The ROM table
+   was not loosened. Block count stayed within 975.
+6. Finish-phase trail-foot lift (see #10979 notes below). The law is
+   `gs3dx_trail_load` (3/3, EXIT 0, 2026-09-30): after 1.35 s,
+   `gs3dx_trail_preload` integrates `ki * max(preload - fz, 0)` and
+   `gs3dx_trail_foot_reference` subtracts that height from row 6 only.
+   Defaults are 1.35 s, 0.1*80*9.81 N, and 1e-4 m/(N·s). `GS3DX_Human`
+   compiles to 965 blocks. The 975 cap leaves the rest for the in-memory
+   sensors in `gs3dx_contact_check`, so this loop is not added to the saved
+   model. `BalanceFootRef` is unchanged.
 
 ## Objective and Status
 
@@ -495,8 +834,8 @@ Creator` (newline); find it by BlockType.
 rom_weight=W)` applies the range penalty by continuation (free chain for the warm
      starts, then a penalized polish per frame). Every 10th frame to impact: 23.3 mm free,
      37.7 mm with weight 3 and every bounded range within 0.71 deg.
-     `test_gs3dx_joint_rom`: 5 of 6 pass; `human_references_stay_in_the_human_range` stays
-     red until the reference pipeline is rebuilt from the range-limited IK (11 rows out).
+     `test_gs3dx_joint_rom`: `human_references_stay_in_the_human_range` passed
+     (EXIT 0, 2026-09-30) after the reference rewrite. See item 5 above.
    - **Forward-dynamics goal (#11173, 2026-09-30):** `docs/FORWARD_DYNAMICS.md` is the
      playbook (ladder L0-L4, every lesson with evidence, convergence ideas, roadmap).
      Step 1 tooling: `gs3dx_feedback_torque` (pure; `test_gs3dx_feedback_torque` 5/5
