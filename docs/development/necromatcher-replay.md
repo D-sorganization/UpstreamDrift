@@ -75,7 +75,26 @@ Admission checks consistency and integrity; it does not rerun dynamics or certif
 those assertions. Historical capture fits retain their rejected status. Actual
 Hogan/Tiger initial-state admissibility and motion/control recovery remain open.
 
-Sixteen additional red-first storage/API cases cover duplicate versions, portable
+Seventeen additional red-first storage/API cases cover duplicate versions, portable
 bytes, relabelled hashes/units/source frames/qualification, initial state, command
 and clock mismatch, corrupt parents, malformed HDF5, API recall/download and the
 canonical root order. A real uneven-stride replay verifies terminal sampling.
+
+## Actual Initial-State Probe
+
+A read-only native geometry/contact check of the saved v5 initial frames uses
+explicit zero diagnostic rates and the existing authored ground plane. Hogan's
+fit c48e053e28 has 0.088525 m grip separation, 0.850056 m maximum ground
+penetration and 241764 N total static normal-force magnitude. Tiger's fit
+7667df1e82 has 0.053893 m separation, 0.495267 m penetration and 127246 N total
+static normal-force magnitude. These are model/placement diagnostics, not human
+measurements or historical forces. Raw initial-frame identities and hashes are
+retained outside Git in historical-capture/native-fit-research/
+replay-initial-state-probe-v1.json.
+
+The next fitting step must revise world-ground/camera placement explicitly and
+retain the original fit as immutable evidence. Silently preloading a replay would
+change its stored initial pose and hide this problem. A new authored placement
+hypothesis must preserve/recheck reprojection, report the ground assumption and
+keep source timing, anatomy and motion acceptance unqualified. Grip closure and
+control recovery follow that admissibility work.

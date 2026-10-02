@@ -40,7 +40,7 @@ def read_authored_replay(
         raise ValueError("Replay file is not a valid canonical trace") from exc
     if not isinstance(trace, Trace) or trace.schema_version != SCHEMA_VERSION:
         raise ValueError("Authored replay requires a canonical single trace v2.1.0")
-    meta = dict(trace.meta)
+    meta: dict[str, Any] = dict(trace.meta)
     if (
         meta.get("schema") != "necromatcher/authored-replay/1"
         or meta.get("scientific_qualified") is not False
@@ -89,14 +89,23 @@ def read_authored_replay(
     rates = _json_value(meta, "initial_rates_json")
     if not isinstance(rates, list):
         raise ValueError("Replay initial rates require a numeric array")
+    for key in (
+        "source_frame_index",
+        "duration_s",
+        "record_every",
+        "verification_refinement",
+        "max_steps",
+    ):
+        if key not in meta:
+            raise ValueError(f"Replay requires explicit option metadata: {key}")
     options = ReplayOptions(
-        meta.get("source_frame_index"),
+        meta["source_frame_index"],
         tuple(rates),
-        meta.get("duration_s"),
+        meta["duration_s"],
         trace.dt,
-        meta.get("record_every"),
-        meta.get("verification_refinement"),
-        meta.get("max_steps"),
+        meta["record_every"],
+        meta["verification_refinement"],
+        meta["max_steps"],
     )
     _check_samples(trace, controls, fit, options)
     return trace
@@ -109,7 +118,7 @@ def _check_samples(
     options: ReplayOptions,
 ) -> None:
     """Validate clock, finite arrays, exact initial sample and time-aligned controls."""
-    meta = dict(trace.meta)
+    meta: dict[str, Any] = dict(trace.meta)
     if controls.dofs[: len(ROOT_COORDINATES)] != ROOT_COORDINATES:
         raise ValueError("Replay requires the canonical native root coordinate order")
     try:
@@ -167,7 +176,12 @@ def _check_samples(
         "verification_max_rotation_difference_rad",
     ):
         value = meta.get(key)
-        if type(value) not in (float, int) or not np.isfinite(value) or value < 0:
+        if (
+            value is None
+            or type(value) not in (float, int)
+            or not np.isfinite(value)
+            or value < 0
+        ):
             raise ValueError("Replay diagnostics require finite nonnegative values")
     if meta["max_grip_gap_m"] < meta["initial_grip_gap_m"]:
         raise ValueError("Replay maximum grip gap must include its initial state")

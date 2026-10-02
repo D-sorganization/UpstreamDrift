@@ -9,8 +9,9 @@ fresh model at a finer step. Canonical Trace metadata preserves ordered SI units
 source frames and parent hashes. Numerical agreement and grip gaps are separate;
 scientific and source-clock qualification remain false. See
 [Replay Procedure](docs/development/necromatcher-replay.md). Immutable replay library storage, recall, export and shared local API
-transport now revalidate source-bound traces and all parents. Next: actual player
-initial-state admissibility, then controls and
+transport now revalidate source-bound traces and all parents. Next: explicit world-ground/camera placement revision
+(the actual initial poses penetrate the assumed ground by 0.850/0.495 m), then
+closure, controls and
 unit-aware impact/whole-analysis consumers. The full goal remains active.
 
 ## Compiled Native Resources and Authored Controls

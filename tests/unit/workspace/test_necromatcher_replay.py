@@ -202,6 +202,7 @@ def test_replay_versions_survive_recall_and_portable_export(replay_trace):
         "controls",
         "clock",
         "diagnostic",
+        "missing_option",
     ],
 )
 def test_replay_import_rejects_relabelled_or_malformed_evidence(replay_trace, mutation):
@@ -227,6 +228,8 @@ def test_replay_import_rejects_relabelled_or_malformed_evidence(replay_trace, mu
         trace.t[-1] += 0.001
     elif mutation == "diagnostic":
         meta["max_grip_gap_m"] = float("nan")
+    elif mutation == "missing_option":
+        meta.pop("duration_s")
     trace.meta = meta
     source = library.root / "invalid.h5"
     write_trace(trace, source)
