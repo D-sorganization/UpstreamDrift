@@ -18,9 +18,15 @@ def test_appearance_controls_preserve_colour_and_other_layer_settings() -> None:
     controls.ellipsoids.setChecked(True)
     controls.club.setChecked(False)
     controls.volume_alpha.setValue(0.45)
+    controls.forces.setChecked(False)
+    controls.torques.setChecked(True)
+    controls.legend.setChecked(False)
+    controls.scale.setValue(2.5)
     result = controls.updated(original)
     assert result.draw_ellipsoids and not result.draw_club
     assert result.ellipsoid_opacity == 0.45
+    assert not result.draw_forces and result.draw_torques and not result.draw_legend
+    assert result.force_scale == 2.5
     assert result.opacity == original.opacity and result.line_width == 5
     controls.close()
     app.processEvents()
