@@ -1,17 +1,26 @@
-"""Project shared body-part ellipsoid meshes into the calibrated comparison view."""
+"""Project shared body-part segment meshes into the calibrated comparison view."""
 
 from __future__ import annotations
 
-import math
-import cv2
+from typing import Any
+
 import numpy as np
 
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.motion_capture.reference.comparison import ComparisonLayer
-from src.motion_capture.reference.registration import project_reference_to_camera
+from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.body_part_viz.bindings import BindingKind, MarkerBinding
 from src.shared.python.body_part_viz.fitters import BetweenTwoMarkersFitter
+from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.body_part_viz.shapes import EllipsoidShape
+from src.shared.python.force_overlay.conversions import SegmentAxis
+from src.shared.python.force_overlay.renderers.opencv_glyphs import PinholeProjector
+from src.shared.python.force_overlay.renderers.opencv_segments import (
+    SegmentPose,
+    SegmentShading,
+    draw_segment_meshes_on_frame,
+    segment_poses_from_axes,
+)
 from src.shared.python.pose_estimation.observations import CameraCalibration
 
 Camera = PinholeCamera | CameraCalibration
@@ -27,25 +36,14 @@ def segment_mesh(
     """
     if a.shape != (3,) or b.shape != (3,) or not np.isfinite([a, b]).all():
         raise ValueError("Segment endpoints must be finite 3-vectors")
-    length = float(
-        np.sqrt((b - a).dot(b - a))
-    )  # ⚡ Bolt: ndarray.dot + sqrt is ~2x faster than np.linalg.norm for small 1D arrays
+    diff = b - a
+    length = float(np.sqrt(diff.dot(diff)))
     if length <= 1e-9 or not np.isfinite(radius_ratio) or not 0 < radius_ratio <= 0.5:
         raise ValueError("Segment needs positive length and radius ratio in (0, 0.5]")
     shape = EllipsoidShape(length / 2, length * radius_ratio, length * radius_ratio)
     binding = MarkerBinding(BindingKind.BETWEEN_TWO, ("a", "b"), (length,))
     fitted = BetweenTwoMarkersFitter().fit(shape, binding, {"a": a[None], "b": b[None]})
     return shape.transform(fitted)[0], shape.faces()
-
-
-def _camera_pose(camera: Camera) -> tuple[np.ndarray, np.ndarray]:
-    if isinstance(camera, PinholeCamera):
-        return camera.rotation_world_from_camera, camera.translation_world_from_camera_m
-    extrinsics = camera.extrinsics
-    return (
-        extrinsics.rotation_world_from_camera,
-        extrinsics.translation_world_from_camera_m,
-    )
 
 
 def draw_segment_volumes(
@@ -55,46 +53,66 @@ def draw_segment_volumes(
     edges: tuple[tuple[int, int], ...],
     camera: Camera,
     layer: ComparisonLayer,
+    *,
+    loads: AxialLoadFrame | None = None,
+    color_scale: ForceColorScale | None = None,
 ) -> np.ndarray:
-    """Shade depth-sorted mesh triangles, then composite volume alpha once.
+    """Shade depth-sorted segment meshes, then composite volume alpha once (FTO-26).
 
-    Missing and zero-length skeleton links cannot define a volume. Near-plane
-    crossing triangles are omitted; OpenCV clips polygons at image borders.
+    Replaces separate volume renderers with the shared OpenCV segment renderer.
     """
-    if not layer.draw_ellipsoids or layer.ellipsoid_opacity <= 0:
+    draw_vol = layer.draw_ellipsoids or getattr(layer, "draw_model_volumes", False)
+    if not draw_vol or layer.ellipsoid_opacity <= 0 or camera is None:
         return frame
-    rotation, position = _camera_pose(camera)
-    triangles = []
+
+    axes: list[SegmentAxis] = []
     for a, b in edges:
-        diff = points[b] - points[a]
-        if not (valid[a] and valid[b]) or np.vdot(diff, diff) <= 1e-18:
+        if not (valid[a] and valid[b]):
             continue
-        vertices, faces = segment_mesh(points[a], points[b], layer.segment_radius_ratio)
-        pixels, visible = project_reference_to_camera(
-            vertices, np.ones(len(vertices), dtype=bool), camera, clip_image=False
+        p = points[a]
+        d = points[b]
+        diff = d - p
+        if np.vdot(diff, diff) <= 1e-12:
+            continue
+        axes.append(
+            SegmentAxis(
+                segment=f"segment_{a}_{b}",
+                joint_label=f"joint_{a}_{b}",
+                proximal_m=(float(p[0]), float(p[1]), float(p[2])),
+                distal_m=(float(d[0]), float(d[1]), float(d[2])),
+            )
         )
-        camera_vertices = (vertices - position) @ rotation
-        for face in faces:
-            if not visible[face].all() or np.abs(pixels[face]).max() > 1e7:
-                continue
-            xyz = camera_vertices[face]
-            normal = np.cross(xyz[1] - xyz[0], xyz[2] - xyz[0])
-            norm = float(math.sqrt(np.vdot(normal, normal)))
-            if norm <= 1e-12:
-                continue
-            shade = 0.35 + 0.65 * abs(float(normal[2])) / norm
-            colour = tuple(round(c * shade) for c in layer.colour_bgr)
-            triangles.append((float(xyz[:, 2].mean()), pixels[face], colour))
-    drawn = frame.copy()
-    for _, triangle, colour in sorted(
-        triangles, key=lambda item: item[0], reverse=True
-    ):
-        cv2.fillConvexPoly(
-            drawn, np.rint(triangle).astype(np.int32), colour, cv2.LINE_AA
-        )
-    return np.asarray(
-        cv2.addWeighted(
-            drawn, layer.ellipsoid_opacity, frame, 1 - layer.ellipsoid_opacity, 0
-        ),
-        dtype=np.uint8,
+
+    if not axes:
+        return frame
+
+    poses: list[SegmentPose] = []
+    for axis in axes:
+        p = np.asarray(axis.proximal_m, dtype=float)
+        d = np.asarray(axis.distal_m, dtype=float)
+        diff = d - p
+        length = float(np.linalg.norm(diff))
+        radius = length * layer.segment_radius_ratio
+        sub_poses = segment_poses_from_axes([axis], radius_m=radius)
+        for sp in sub_poses:
+            poses.append(
+                SegmentPose(
+                    name=sp.name,
+                    mesh_id=sp.mesh_id,
+                    T_world_segment=sp.T_world_segment,
+                    scale=sp.scale,
+                    base_color=layer.colour,
+                )
+            )
+
+    projector = PinholeProjector(camera)
+    shading = SegmentShading(ambient=0.35, opacity=layer.ellipsoid_opacity)
+    receipt = draw_segment_meshes_on_frame(
+        frame,
+        poses,
+        projector,
+        shading=shading,
+        loads=loads,
+        color_scale=color_scale,
     )
+    return receipt.frame if receipt.frame is not None else frame
