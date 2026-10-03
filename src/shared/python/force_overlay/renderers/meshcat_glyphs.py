@@ -56,9 +56,9 @@ def align_y_to(
     norm_d = float(np.linalg.norm(d))
     if norm_d < 1e-12:
         return np.eye(3, dtype=np.float64)
-    d = d / norm_d
+    unit_d = d / norm_d
 
-    d_x, d_y, d_z = float(d[0]), float(d[1]), float(d[2])
+    d_x, d_y, d_z = float(unit_d[0]), float(unit_d[1]), float(unit_d[2])
 
     # Case 1: Already aligned with +y
     if d_y >= 1.0 - 1e-8:
