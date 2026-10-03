@@ -59,6 +59,8 @@ class PinocchioVisualizationMixin:
     - Toggle handlers for frames, COMs, forces, torques
     """
 
+    force_overlay_view: Any | None = None
+
     def _init_meshcat_viewer(self: Any) -> None:
         """Initialize the Meshcat viewer."""
         self.viewer: Any | None = None
@@ -272,10 +274,8 @@ class PinocchioVisualizationMixin:
 
     def _get_force_overlay_toggles(self: Any) -> dict[str, Any]:
         color_session = getattr(self, "segment_force_colors", None)
-        scale_enabled = (
-            getattr(color_session, "_scale", None) is not None
-            and color_session._scale.enabled
-        )
+        scale = getattr(color_session, "_scale", None)
+        scale_enabled = bool(getattr(scale, "enabled", False))
         forces_enabled = (
             bool(self.chk_forces.isChecked()) if hasattr(self, "chk_forces") else True
         )

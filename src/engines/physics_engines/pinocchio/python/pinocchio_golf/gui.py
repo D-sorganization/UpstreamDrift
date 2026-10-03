@@ -32,6 +32,8 @@ from src.shared.python.logging_pkg.logging_config import (
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 from src.shared.python.ui.widgets import LogPanel
 
+from .force_overlay_view import PinocchioForceOverlayView
+
 # Mixin imports
 from .gui_simulation import SimulationMixin
 from .gui_ui_setup import UISetupMixin
@@ -105,6 +107,7 @@ class PinocchioGUI(
 
         self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
         self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+        self.force_overlay_view: PinocchioForceOverlayView | None = None
 
         self.recorder = PinocchioRecorder(engine=self)
         self.sim_time = 0.0
@@ -195,6 +198,34 @@ class PinocchioGUI(
         self.log.append(text)
         logger.info(text)
 
+    def _init_model_visualizer(self) -> None:
+        """Initialize Pinocchio MeshcatVisualizer and force overlay view."""
+        if MESHCAT_AVAILABLE and self.viewer is not None:
+            try:
+                self.viewer["robot"].delete()
+                self.viewer["overlays"].delete()
+
+                self.viz = MeshcatVisualizer(
+                    self.model, self.collision_model, self.visual_model
+                )
+                self.viz.initViewer(viewer=self.viewer, open=False)
+                self.viz.loadViewerModel()
+
+                self.force_overlay_view = PinocchioForceOverlayView(
+                    self, self.viz, self.segment_force_colors
+                )
+                self.force_overlay_view.bind_color_session(
+                    self.model, self.visual_model, self.viewer
+                )
+            except (RuntimeError, ValueError, OSError) as e:
+                self.log_write(f"Warning: Visualizer init failed: {e}")
+                self.viz = None
+                self.force_overlay_view = None
+        else:
+            self.log_write("Model loaded without 3D visualization.")
+            self.viz = None
+            self.force_overlay_view = None
+
     def load_urdf(self, fname: str | None = None) -> None:  # noqa: C901
         """Load a URDF model and initialize the viewer."""
         if not fname:
@@ -243,35 +274,8 @@ class PinocchioGUI(
                 self.btn_record.setChecked(False)
                 self.btn_record.setText("Record")
 
-            # Initialize Pinocchio MeshcatVisualizer
-            # (Imports handled at module level)
-            if MESHCAT_AVAILABLE and self.viewer is not None:
-                try:
-                    self.viewer["robot"].delete()
-                    self.viewer["overlays"].delete()
-
-                    self.viz = MeshcatVisualizer(
-                        self.model, self.collision_model, self.visual_model
-                    )
-                    self.viz.initViewer(viewer=self.viewer, open=False)
-                    self.viz.loadViewerModel()
-
-                    from .force_overlay_view import PinocchioForceOverlayView
-
-                    self.force_overlay_view = PinocchioForceOverlayView(
-                        self, self.viz, self.segment_force_colors
-                    )
-                    self.force_overlay_view.bind_color_session(
-                        self.model, self.visual_model, self.viewer
-                    )
-                except (RuntimeError, ValueError, OSError) as e:
-                    self.log_write(f"Warning: Visualizer init failed: {e}")
-                    self.viz = None
-                    self.force_overlay_view = None
-            else:
-                self.log_write("Model loaded without 3D visualization.")
-                self.viz = None
-                self.force_overlay_view = None
+            # Initialize Pinocchio MeshcatVisualizer and force overlay view
+            self._init_model_visualizer()
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
