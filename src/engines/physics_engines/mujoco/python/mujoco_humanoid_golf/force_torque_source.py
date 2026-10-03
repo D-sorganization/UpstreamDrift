@@ -12,10 +12,13 @@ All calculations operate on an internal scratch MjData, preserving live simulati
 
 from __future__ import annotations
 
+from typing import Any
+
 import mujoco
 import numpy as np
 
 from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
+from src.shared.python.engine_core.mujoco_compat import copy_mjdata_state
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
     OverlayWrench,
@@ -30,6 +33,10 @@ from src.shared.python.motion_matching.force_torque import (
 __all__ = ["MujocoForceTorqueSource"]
 
 _ENGINE = "mujoco"
+
+
+def _vec3(seq: Any) -> tuple[float, float, float]:
+    return (float(seq[0]), float(seq[1]), float(seq[2]))
 
 
 class MujocoForceTorqueSource:
@@ -60,7 +67,7 @@ class MujocoForceTorqueSource:
             j_name = (
                 mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, j) or f"joint_{j}"
             )
-            anchor = tuple(float(x) for x in scratch.xanchor[j])
+            anchor = _vec3(scratch.xanchor[j])
 
             if jnt_type == mujoco.mjtJoint.mjJNT_HINGE:
                 axis = scratch.xaxis[j]
@@ -82,7 +89,7 @@ class MujocoForceTorqueSource:
                 norm = float(np.linalg.norm(axis))
                 force_val = float(scratch.qfrc_actuator[dofadr])
                 if norm > 1e-12 and abs(force_val) > 1e-9:
-                    f_vec = tuple(float(x) for x in (force_val * (axis / norm)))
+                    f_vec = _vec3(force_val * (axis / norm))
                     actuators.append(
                         OverlayWrench(
                             kind=WrenchKind.JOINT_ACTUATOR,
@@ -98,7 +105,7 @@ class MujocoForceTorqueSource:
                 tau_local = scratch.qfrc_actuator[dofadr : dofadr + 3]
                 if float(np.linalg.norm(tau_local)) > 1e-9:
                     rot = scratch.xmat[body_id].reshape(3, 3)
-                    t_world = tuple(float(x) for x in (rot @ tau_local))
+                    t_world = _vec3(rot @ tau_local)
                     actuators.append(
                         OverlayWrench(
                             kind=WrenchKind.JOINT_ACTUATOR,
@@ -113,9 +120,9 @@ class MujocoForceTorqueSource:
             elif jnt_type == mujoco.mjtJoint.mjJNT_FREE:
                 qfrc = scratch.qfrc_actuator[dofadr : dofadr + 6]
                 if float(np.linalg.norm(qfrc)) > 1e-9:
-                    pos = tuple(float(x) for x in scratch.xpos[body_id])
-                    f_free = tuple(float(x) for x in qfrc[:3])
-                    t_free = tuple(float(x) for x in qfrc[3:6])
+                    pos = _vec3(scratch.xpos[body_id])
+                    f_free = _vec3(qfrc[:3])
+                    t_free = _vec3(qfrc[3:6])
                     actuators.append(
                         OverlayWrench(
                             kind=WrenchKind.EXTERNAL,
@@ -144,18 +151,19 @@ class MujocoForceTorqueSource:
             anchor = scratch.xanchor[j_start] if j_num > 0 else scratch.xpos[b]
 
             cfrc = scratch.cfrc_int[b]
-            f_world = tuple(float(x) for x in cfrc[3:])
-            t_com = tuple(float(x) for x in cfrc[:3])
+            f_world = _vec3(cfrc[3:])
+            t_com = _vec3(cfrc[:3])
 
-            w_com = SpatialWrench("world", com, f_world, t_com)
-            w_anchor = transform_wrench(w_com, "world", anchor)
+            w_com = SpatialWrench("world", _vec3(com), f_world, t_com)
+            anchor_pt = _vec3(anchor)
+            w_anchor = transform_wrench(w_com, "world", anchor_pt)
 
             reactions.append(
                 OverlayWrench(
                     kind=WrenchKind.JOINT_REACTION,
                     label=f"reaction:{b_name}",
                     body=b_name,
-                    point_m=tuple(float(x) for x in anchor),
+                    point_m=anchor_pt,
                     force_n=w_anchor.force_n,
                     torque_nm=w_anchor.torque_nm,
                     source=_ENGINE,
@@ -175,9 +183,9 @@ class MujocoForceTorqueSource:
 
             mujoco.mj_contactForce(model, scratch, i, c_force)
             frame = con.frame.reshape(3, 3)
-            f_world = frame.T @ c_force[:3]
-            t_world = frame.T @ c_force[3:6] if con.dim >= 4 else None
-            pt = tuple(float(x) for x in con.pos)
+            f_world = _vec3(frame.T @ c_force[:3])
+            t_world = _vec3(frame.T @ c_force[3:6]) if con.dim >= 4 else None
+            pt = _vec3(con.pos)
 
             b1 = int(model.geom_bodyid[con.geom1])
             if b1 != 0:
@@ -191,10 +199,12 @@ class MujocoForceTorqueSource:
                         label=f"contact:{b1_name}:{i}",
                         body=b1_name,
                         point_m=pt,
-                        force_n=tuple(float(-x) for x in f_world),
-                        torque_nm=tuple(float(-x) for x in t_world)
-                        if t_world is not None
-                        else None,
+                        force_n=(-f_world[0], -f_world[1], -f_world[2]),
+                        torque_nm=(
+                            (-t_world[0], -t_world[1], -t_world[2])
+                            if t_world is not None
+                            else None
+                        ),
                         source=_ENGINE,
                     )
                 )
@@ -211,10 +221,8 @@ class MujocoForceTorqueSource:
                         label=f"contact:{b2_name}:{i}",
                         body=b2_name,
                         point_m=pt,
-                        force_n=tuple(float(x) for x in f_world),
-                        torque_nm=tuple(float(x) for x in t_world)
-                        if t_world is not None
-                        else None,
+                        force_n=f_world,
+                        torque_nm=t_world,
                         source=_ENGINE,
                     )
                 )
@@ -229,16 +237,12 @@ class MujocoForceTorqueSource:
                 b_name = (
                     mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, b) or f"body_{b}"
                 )
-                pt = tuple(float(x) for x in scratch.xipos[b])
+                pt = _vec3(scratch.xipos[b])
                 f_val = (
-                    tuple(float(x) for x in xfrc[:3])
-                    if float(np.linalg.norm(xfrc[:3])) > 1e-9
-                    else None
+                    _vec3(xfrc[:3]) if float(np.linalg.norm(xfrc[:3])) > 1e-9 else None
                 )
                 t_val = (
-                    tuple(float(x) for x in xfrc[3:])
-                    if float(np.linalg.norm(xfrc[3:])) > 1e-9
-                    else None
+                    _vec3(xfrc[3:]) if float(np.linalg.norm(xfrc[3:])) > 1e-9 else None
                 )
                 if f_val is not None or t_val is not None:
                     externals.append(
@@ -266,13 +270,13 @@ class MujocoForceTorqueSource:
                 b_name = (
                     mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, b) or f"body_{b}"
                 )
-                f_grav = tuple(float(mass * g_comp) for g_comp in grav)
+                f_grav = _vec3(mass * grav)
                 gravity_wrenches.append(
                     OverlayWrench(
                         kind=WrenchKind.GRAVITY,
                         label=f"gravity:{b_name}",
                         body=b_name,
-                        point_m=tuple(float(x) for x in scratch.xipos[b]),
+                        point_m=_vec3(scratch.xipos[b]),
                         force_n=f_grav,
                         torque_nm=None,
                         source=_ENGINE,
@@ -292,14 +296,7 @@ class MujocoForceTorqueSource:
             raise TypeError("data must belong to this source's model")
 
         scratch = self._scratch
-        scratch.time = float(data.time)
-        np.copyto(scratch.qpos, data.qpos)
-        np.copyto(scratch.qvel, data.qvel)
-        np.copyto(scratch.qacc, data.qacc)
-        np.copyto(scratch.ctrl, data.ctrl)
-        np.copyto(scratch.act, data.act)
-        np.copyto(scratch.qfrc_applied, data.qfrc_applied)
-        np.copyto(scratch.xfrc_applied, data.xfrc_applied)
+        copy_mjdata_state(scratch, data)
         mujoco.mj_forward(self._model, scratch)
         mujoco.mj_rnePostConstraint(self._model, scratch)
 
