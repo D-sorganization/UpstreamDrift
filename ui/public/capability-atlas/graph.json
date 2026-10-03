@@ -310,6 +310,20 @@
       "id": "mocap.breadth"
     },
     {
+      "feature_id": "mujoco.force_overlays",
+      "title": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "status": "gap",
+      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "api": null,
+      "web": null,
+      "issue": 11308,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308).",
+      "id": "mujoco.force_overlays"
+    },
+    {
       "feature_id": "onboarding.about_version",
       "title": "About/version info + onboarding",
       "status": "gap",
@@ -2900,7 +2914,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "082471387473e2d70a48a6ebaeec99c9724120a249a94b51391700aba49a64da",
+    "src/config/feature_parity.json": "de63845641e42542250e4aa7e960b0ea60463600eaadeadc9da1f3af5314fd36",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
