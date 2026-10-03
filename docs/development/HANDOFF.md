@@ -36,8 +36,6 @@
 
 # Past Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
-# <<<<<<< HEAD
-
 # Force Overlay Gallery, Golden Regressions, and User Guide — #11285 / #11315 (FTO-30)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11397 (`Closes #11315`, `Refs #11285`)
