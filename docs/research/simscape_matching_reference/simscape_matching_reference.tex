@@ -33,16 +33,17 @@ This reference documents tour-reference and owner optical-capture matching with
 the \texttt{GS3DX\_Human} ellipsoid model under MATLAB R2025b. It defines SI
 capture transformations, joint-role mapping, closed-grip inverse kinematics,
 marker-offset calibration, full foot orientation and model/runtime provenance.
-The earlier selected full-head-tracked videos have mean/max frame position
-RMS of 13.540/40.368 mm for the tour and 16.754/36.987 mm for the owner.
-Their cluster-relative head-error means are 10.671 and 11.318 degrees.
-The newer eight-clip torso-refined Desktop candidate has corresponding
-position metrics of 16.573/32.842 and 19.814/37.778 mm, with improved
-head long-axis alignment but unresolved full head orientation. Neither
-family improves every criterion; earlier files and provenance are retained.
-Both families are IK visualizations;
-these residuals do not establish anatomical, contact or forward-dynamics
-qualification. The model lineage, intrinsic Euler and torque mappings, inertia
+The current shared package contains eight 1080p H.264 videos using the
+refined Human ellipsoid geometry. Selected club-orientation fits have
+mean derived-position RMS of 16.944 mm for the tour and 20.762 mm for
+the owner, with mean club-orientation errors of 5.476 and 19.287 degrees.
+Selection balances orientation error against joint-step regularity;
+these values are fit diagnostics rather than anatomical accuracy.
+An anchor-seeded native position/velocity audit accepts all 733 owner
+anchor and midpoint states, while the tour accepts 1,306 of 1,307.
+Between-sample branch continuity, dependent acceleration, calibrated
+contact and independent full-swing forward dynamics remain unqualified.
+The model lineage, intrinsic Euler and torque mappings, inertia
 assumptions, controller experiments and rejected contact-load results remain
 available for reproduction. A half-turn leg-orientation false acceptance was
 reproduced and repaired; a historical receipt records 287 passing native software/parameter checks. Bounded
@@ -68,14 +69,15 @@ kinematics (IK), rather than independently simulated full-swing motion.
 \toprule
 Evidence Area & Current Meaning and Remaining Work \\
 \midrule
-Selected A/O Videos & Two camera views per capture are available as
-MP4s. The selected positional fits and head tracking are reference
-outputs. Foot/head orientation errors, missing observations and joint
-branch diagnostics remain part of their limitations. \\
-Owner Continuity & Selective lower-body gap weighting reduces the
-missing-to-measured root step while preserving the stated marker-fit
-screen. It remains a candidate pending orientation, range, visual and
-physics review. Interpolated positions never become measurements. \\
+Selected A/O Videos & Eight verified 1080p MP4s cover two views per
+capture, each clean and with marker overlays. The current club-refined
+package is on both Desktops. Original source videos were also downloaded
+and decoded; exact optical-trial pairing remains unresolved. \\
+Owner Continuity & Seeding original anchors from their saved closed-arm
+configuration resolves a sampled branch mismatch: all 733 owner anchor
+and midpoint states pass native position, velocity and fresh-state checks.
+Large rates and between-sample behavior still require assessment.
+Interpolated positions never become measurements. \\
 Pelvis and Arms & Address-relative pelvis targets have private native
 RED/GREEN contract evidence and configured-model parity. Full sampled
 pelvis trials show marker-fit improvement with adverse orientation and
@@ -91,10 +93,12 @@ Dense review identifies an indoor cross-dissolve and a sideways stream.
 Pose detection has run on sparse owner images; accuracy, camera
 identification, trial pairing and the thirteen-swing envelope remain
 separate open tasks. \\
-Delivery & The draft integration PR remains open. Its latest checked
-head has CI failures; this is not a protected release. The built-in
-LaTeX compiler has a platform-directory failure, so PDF compilation and
-page review are unverified. \\
+Delivery & Documentation/export PR \#11256 merged at commit
+\texttt{7db86ff17365}; the newer continuity findings remain under review.
+The private production candidate passes 17 pre-model contracts, with
+numerical parity verification pending. Canonical manual coverage remains
+blocked. The built-in LaTeX compiler has a platform-directory failure,
+so PDF compilation and page review are unverified. \\
 \bottomrule
 \end{tabularx}
 
@@ -5041,6 +5045,62 @@ clips. This delivery is the current reviewed preview selection; residual
 marker offsets, exact source-video pairing, continuous physical trajectory
 and forward-dynamics qualification remain open.
 
+\subsection{Selected Club Fits: Native Midpoint and Velocity Audit}
+The selected club fits were independently evaluated at all source anchors
+and interval midpoints, using the existing scalar and rotation-valued
+$C^2$ interpolator. Six preparation contract tests passed. Source hashes,
+coordinate identities and subject geometry were checked before native
+evaluation. Three solver stages checked position closure, compatible
+velocity and a fresh full 91-variable state. Only accepted states supplied
+the next seed; this is an explicit solver policy, not a unique physical
+branch-selection rule.
+
+The native process exited naturally with code zero at 20:08:34 UTC on
+2026-10-03. The tour fit accepted 1,306 of 1,307 states, including all
+654 original anchors. Midpoint sample 998 failed the position solve.
+The owner fit accepted 732 of 733 states. All solver statuses were one,
+but sample 517 (source anchor 259) failed the original closed-arm branch
+comparison with a physical coordinate residual of approximately
+$0.01146$, above the $10^{-7}$ acceptance threshold. Solver success
+alone therefore does not establish agreement with the saved pose.
+
+Peak absolute dependent angular rates among accepted states were
+approximately $1,639$ and $4,118$ degrees per second for tour and owner.
+Peak prescribed independent angular accelerations were approximately
+$1.289\times10^6$ and $2.883\times10^6$ degrees per second squared.
+These are diagnostic trajectory quantities, not physiological acceptance
+or independently solved dependent accelerations. Both complete-pilot
+gates remain false. The isolated failures require seed and local-path
+analysis; neither midpoint sampling nor the successful process exit
+qualifies all-time closure, contact or forward dynamics.
+
+A targeted diagnostic exited naturally at 20:18:49 UTC. It tested six
+seed policies over nine existing grid points around each failure, with
+unavailable policies explicitly excluded. No tested seed recovered the
+tour midpoint at $t=1.3847222$ s. This finite search does not prove that
+the prescribed state is infeasible. The owner's state at $t=1.075$ s
+passed all three native stages and the anchor comparison when seeded
+from that original anchor. The preceding accepted-state seed reproduced
+the branch mismatch. This identifies a recoverable sampled-state
+selection issue; a changed policy still requires a complete trajectory
+rerun and examination of branch continuity.
+
+The complete anchor-seeded rerun exited naturally at 20:31:23 UTC.
+All 733 owner states passed, including all 367 original anchors and
+366 midpoints. Maximum anchor residual was $1.73\times10^{-15}$;
+the maximum adjacent closed-arm physical residual was approximately
+$0.14273$ with unit weights. The tour still rejected midpoint 998,
+while all 654 anchors agreed within $1.03\times10^{-15}$.
+Peak dependent angular rates were unchanged. This rerun closes the
+owner's sampled-state gate only; all-time branch continuity remains open.
+
+An isolated production integration candidate subsequently passed 17
+native pre-model contract cases at 20:20:58 UTC. The parent rejected the
+new options; the candidate enforced the intended clock, direction,
+rotation and missing-data contracts. Valid cases reached an absent-model
+sentinel, and no Human model was loaded. These checks do not establish
+baseline numerical parity, fitted-pose quality or production delivery.
+
 \section{Native Actuator Discovery: Evidence and Remaining Work}
 \label{sec:actuator-discovery}
 An independent 0.02 s native pilot of the nominal 80 kg model verified
@@ -5068,6 +5128,35 @@ exercise the matched moving swing, free root and contact, followed by a
 fresh independent feedback-off replay. The present shared videos remain
 inverse-kinematic reconstructions; this short nominal pilot is not a
 torque-driven reproduction of either captured swing.
+
+A whole-log follow-up exited naturally with code zero at 19:44:11 UTC
+on 2026-10-03. It traversed the complete available native log to depth
+six, reading 99 leaf series without child or leaf read errors and without
+hitting the depth or leaf-count bounds. None converted to N\,m; recorded
+conversion failures identify incompatible physical dimensions. This
+establishes the content of this configured pilot log, not a general
+absence of actuator torque in Simscape.
+
+An attempted 27-connection branch-tap probe verified the structural
+inventory but stopped before simulation: editing one referenced Revolute
+Joint instance locked sibling instances sharing its subsystem file.
+The failure is retained, and original model files were not saved.
+The instrumentation design must account for reference sharing and verify
+baseline equivalence before using a modified measurement configuration
+for a full moving-swing claim.
+
+A subsequent first-instance subset probe selected six connections
+covering eight actuator components while avoiding sibling edits. Native
+compilation then rejected a direct physical-signal converter-to-converter
+measurement connection, before simulation. Two unity physical-signal gain
+branch variants then failed compilation with inconsistent physical-port
+dimensions at the shoulder's three-component input, including the variant
+with a three-element unity parameter. Neither reached integration. An
+isolated converter/gain test additionally required a solver configuration;
+its failed update contradicts the proposal's unsupported assertion that
+an isolated physical-signal chain needs none. Original failures are
+retained. A vector-compatible measurement configuration remains to be
+qualified, including its effect on the unmodified joint drive and dynamics.
 
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
