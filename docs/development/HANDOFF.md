@@ -1,3 +1,29 @@
+# MuJoCo Force/Torque Provider — #11294 (FTO-9)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11294`
+- Branch: `feat/fto-11294-mujoco-force-provider`; commit: SELF; PR: not created
+- Governing issue: #11294 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-9] MuJoCo force/torque provider: actuator torques, joint reactions, per-contact forces (and stale cfrc fixes).
+- Completed:
+  - Unit tests in `tests/unit/engines/mujoco/test_force_torque_source.py` (314 lines, strictly < 400 lines) covering 8 comprehensive test cases (hanging pendulum reaction force $(0, 0, +mg)$ at pivot, sign agreement between `axial_loads_from_reactions` and native `MujocoAxialLoadSource`, actuated hinge torque using `qfrc_actuator`, non-axis-aligned 2-joint chain verifying `scratch.xaxis[j]` row slicing, resting box contact forces summing to $(0, 0, mg)$ on ground plane, caller `MjData` mutation isolation, single construction of `MujocoAxialLoadSource` across repeated calls, schema validation against `schemas/force-torque-frame-v1.json`).
+  - Implemented `MujocoForceTorqueSource` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` (335 lines, strictly < 400 lines):
+    - Cached scratch `MjData` with dynamic state field copying (`qpos`, `qvel`, `ctrl`, `qacc_warmstart`, `qfrc_applied`, `xfrc_applied`, `act`, `mocap_pos`, `mocap_quat`, `userdata`) avoiding allocations.
+    - Actuator torques and forces using `scratch.qfrc_actuator` and `scratch.xaxis[j]` (shape `(njnt, 3)` row slice for hinge/slide; ball joint axis/angle rotation; free joint external wrench).
+    - Joint reactions from `cfrc_int[b]` moved from `subtree_com[b]` to first joint anchor (or `xpos[b]`).
+    - Contact wrenches from `mj_contactForce` with frame rotation, applying $+f_{world}$ on geom2 and equal-opposite $-f_{world}$ on geom1; dimensional torque for friction contacts with `dim >= 4`.
+    - Axial loads delegated to cached `MujocoAxialLoadSource` with fallback for non-capsule geometries (leaf distal to body COM) achieving exact parity with analytic models.
+  - Engine integration & fixes:
+    - Fixed `src/shared/python/body_part_viz/mujoco_axial_loads.py`: replaced nonexistent `native.mj_copyData` with dynamic field copying into scratch `MjData`.
+    - Updated `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/physics_engine.py`: cached `_force_torque_source`, implemented `get_force_torque_frame()` satisfying `ForceTorqueProvider`, delegated `get_segment_axial_loads()`, and fixed `get_contact_forces()` with `mj_rnePostConstraint` before reading `cfrc_ext` to eliminate stale data. Updated capabilities to `force_visualization=CapabilityLevel.FULL`.
+  - Benchmark: full humanoid golf model (`FULL_BODY_GOLF_SWING_XML`, 20 bodies, 17 joints, 15 actuators) takes 6.22 ms per sample / 161 Hz throughput (> 60 Hz interactive target).
+- Validation:
+  - `pytest tests/unit/engines/mujoco/test_force_torque_source.py tests/unit/test_mujoco_physics_engine.py tests/unit/body_part_viz/test_mujoco_axial_loads.py`: 30 passed.
+  - `pytest tests/integration/cross_engine/test_force_overlay_parity.py -k mujoco`: 5 passed.
+  - `ruff check`: passed.
+  - `ruff format`: passed.
+  - `check_file_size_budget.py`: all touched files < 400 lines budget.
+- Next steps: Wave D GUI rewiring (FTO-10 #11295 MuJoCo GUI controls with native + MeshCat).
+
 # Glyph Builder and Force Kind Palette — #11288 (FTO-3)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
