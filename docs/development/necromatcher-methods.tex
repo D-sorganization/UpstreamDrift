@@ -74,9 +74,9 @@ design manual. That manual's editable authority remains
 \hypersetup{pageanchor=true}
 
 % Compact Only the Contents Section Gaps; Preserve Font, Hierarchy, and Entries.
-{\scriptsize\linespread{0.90}\selectfont\setlength{\parskip}{0pt}
+{\scriptsize\linespread{0.88}\selectfont\setlength{\parskip}{0pt}
 \let\contentsaddvspace\addvspace
-\renewcommand{\addvspace}[1]{\contentsaddvspace{0.40em}}
+\renewcommand{\addvspace}[1]{\contentsaddvspace{0.05em}}
 \tableofcontents}
 
 \clearpage
@@ -1543,13 +1543,13 @@ at an objective node: its worst original frame is frame 98,
 $t=18.2849333333$ s, with 2.938022 mm \code{heel_l} depth. The nearby node at
 18.248230 s, 36.703 ms away, has 2.787463 mm depth and also exceeds the target.
 
-\paragraph{Separating Future Coverage From Weight Mass.}
-A future V15 protocol can test additional geometry times while retaining the
-same curve, observations, prior and contact assumptions. Because the canonical
+\paragraph{Separating Coverage From Weight Mass.}
+The V15 protocol below tests denser geometry times while retaining the same
+starting curve, observations, prior and contact assumptions. Because the canonical
 objective sums squared scaled rows, increasing the number of fixed rows also
 increases potential penalty mass unless normalization is declared. For a
-proposed grid of $N$ times with the same row families, a mass-matched comparison
-to the 78-time V14 grid would use
+grid of $N$ times with the same row families, a mass-matched comparison
+to the 78-time V14 grid uses
 \begin{equation}
  \widetilde{\mathbf r}_g(t)
  =\sqrt{\frac{78}{N}}\,\mathbf r_g(t),
@@ -1561,11 +1561,107 @@ The same factor must apply to the exact native-to-spline Jacobian; dimensional
 scales and the source-only image objective remain unchanged. This preserves
 potential fixed-row mass, not identical realized residual cost or a temporal
 quadrature interpretation. Pin activation and hinge values still vary at the
-new times. This is a proposed reproducibility control, not an executed V15
-result or implemented continuous-contact certificate. Reusing diagnosed worst
+new times. The actual V15 comparison uses this reproducibility control; it is not a
+continuous-contact certificate. Reusing diagnosed worst
 times is adaptive research and must remain distinct from unbiased final
 validation. A denser finite test can reveal further violations; it cannot
 prove all-time nonlinear feasibility, anatomy or historical dynamics.
+
+\subsection{Actual V15 Normalized-Coverage Continuations}
+\label{sec:v15-coverage}
+The two completed V15 jobs use numerical producer
+\code{6654881b0788c77620a0afb8a9a6763f3ee1ccb9}. The actual receipt
+\path{normalized-coverage-v15-receipt.json} has SHA-256
+\hash{ed1208faa1d568596b720787a61ee978d2fa17e9fb19c1873a55b98c8482ebe6};
+the fresh independent assessment has SHA-256
+\hash{f7f1be7ce6b6742895c279ff348773b6f758a2b25eca2594ed84358cf6c11818}.
+The frozen driver is
+\hash{b23736899016c635fad566d9379894f61bbd7c6d0161d8f84b845885c86e1871}.
+Independent review verifies both saved versions, source/runtime/parent/evidence
+brackets and scaled native rows without further optimization.
+
+\paragraph{Identical Starts and Normalized Geometry Mass.}
+Both arms resume the exact six-knot Tiger V14 higher-weight variant through
+\code{preserved\_spline}, with strict initialization and no second initializer.
+Both reproduce initial training RMS 22.899275 px and the same little-endian
+coefficient hash
+\hash{7fe01891f243ac56d3faf3d052b65409218349c471ff47dbeb8f5300553def04}.
+The first-pose prior, camera, image/confidence arrays, 22 training frames,
+286 positive image observations, authored bounds, geometry scales and
+capture-bound contact schedule remain identical. No interior image points
+are added. This is a matched V15 comparison; the earlier V10--V14 results
+are historical progress references, not these controls.
+
+The control retains eleven odd-over-22 fractions per knot interval and 78
+union times, with 936 fixed native rows. The variant uses
+$F=\{j/32:j=1,\ldots,31\}$, yielding 178 union times and 2,136 rows.
+This replaces the interior grid with a denser grid; it does not claim every
+old probe is retained. Twelve row families remain per time. Each geometry
+weight changes from 4000 to
+$4000(78/178)=1752.808988764045$, with identical dimensional scales. At the
+same pose and pin state, residual and exact Jacobian scaling is
+$\sqrt{78/178}=0.6619684639$ relative to the control. The independent preflight
+checks that scale and equal potential family row mass to relative tolerance
+$10^{-14}$. Realized ground cost differs because the curves and hinge
+activation differ. Equal potential mass is neither equal realized cost nor
+an unbiased quadrature of physical time. The denser grid follows the V14
+missed-event diagnosis; this is adaptive research rather than unseen validation.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Arm & Training & Held Out & Dense Original & Wall (s)\\\midrule
+78-Time Control & 22.545891 & 25.324055 & 25.048392 & 53.556\\
+178-Time Variant & 22.598246 & 25.442249 & 25.160335 & 49.317\\
+\bottomrule
+\end{tabular}
+\caption{V15 Matched Image RMS in Pixels and Owned Job Wall Time. Both Arms
+Resume Identical Coefficients and Exhaust Thirty Evaluations Without Convergence.}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule Arm & Grip (mm) & Angle (deg) & Audit Depth (mm) & Node Depth (mm)\\\midrule
+78-Time Control & 1.905599 & 0.703158 & 3.437775 & 0.989639\\
+178-Time Variant & 1.955344 & 0.715385 & 1.852699 & 1.849812\\
+\bottomrule
+\end{tabular}
+\caption{V15 Finite Native Maxima. The Denser Variant Passes All Five Fixed
+Research Checks; Both Fits Remain Rejected, Nonconverged Research.}
+\end{table}
+
+\paragraph{A Finite Target Pass Without Physical Qualification.}
+Both computations succeeded operationally but exhausted thirty evaluations
+under the same 300-second guard. Both satisfy the canonical continuous scalar
+certificate for 32 authored coordinate ranges; twelve coordinates remain
+explicitly unbounded. The independent nonlinear audit evaluates 210 original
+source PTS, 209 adjacent midpoints, 88 coordinate-extremum records and ten
+contact-boundary/neighbor probes. Those finite records do not prove all-time
+nonlinear feasibility. Control passes image nonregression, ranges, grip gap
+and grip angle but fails the fixed 2 mm penetration criterion. The variant
+passes all five finite criteria, including dense image nonregression against
+the declared historical V10 baseline; its image RMS is nevertheless 0.111943 px
+higher than the matched control. Target passes are separate from optimizer
+convergence, anatomy, calibrated depth, physical timing, dynamics and rights.
+Both saved versions remain scientifically rejected, with
+\code{continuous\_certified=false} and \code{physical\_time\_qualified=false}.
+
+The separate ground diagnosis has SHA-256
+\hash{af703bf7c11d777134336bd6a569ffbac820006c68a815ad7d9a5e4710bcfe58}.
+Both audit maxima occur at right-toe sphere \code{toe\_r}, source midpoint
+87/88, exact rational PTS $43043/2400$ seconds
+($17.934583333333332$ s), in the left-heel-only pin phase. The released right
+foot still has a nonpenetration hinge. The control's largest objective-node
+penetration is only 0.989639 mm, yet its between-node audit reaches 3.437775 mm.
+The variant's nearby objective time is 0.625625 ms from that audit midpoint,
+with 1.849812 mm depth; its independent maximum is 1.852699 mm. Improved coverage
+therefore resolves this finite 2 mm test while retaining the model/plane and
+unobserved-contact assumptions. No all-time contact certificate follows.
+The actual V15 overlay is documented in the source-video review section; its
+visible alignment limitations remain despite the finite target passes. The
+actual Affine package below still contains Tiger V14 and Hogan V12, not this
+later V15 result.
 
 \subsection{Immutable Research Provider and Consumer Boundary}
 \label{sec:research-handoff}
@@ -1674,16 +1770,78 @@ output, hostile labels, duplicate keys, unavailable schema validation and
 qualification promotion attempts. These synthetic regressions test the
 boundary; they are not actual historical-package execution evidence.
 
-\paragraph{Execution Evidence Pending.}
-Actual provider export and independent Affine installation, recall and QMD
-preview have not yet been executed for this report draft. No package receipt,
-consumer preview result or publication approval is asserted here. The final
-handoff must record those separately after the owning workflow freezes the
-provider source. The deterministic local preview must retain rejected status,
-metric units, evidence coverage and rights limitations. It creates no public
-route or qualified release-registry entry. The procedures are
+\paragraph{Actual Frozen Provider Export and Actual Consumer Evidence.}
+The provider was executed from published source
+\code{6654881b0788c77620a0afb8a9a6763f3ee1ccb9}. Its verified local receipt,
+\path{historical-research-export-v1-receipt.json}, has SHA-256
+\hash{5d024fa8afe4c9e88639f20de46b4f7098b44e8a70b121ec1e96dc2c70e9f7ed}.
+The actual 6,849-byte \path{historical-player-research-v1.json} has SHA-256
+\hash{757a644c5408e4f5fc54904bd2918290f2c3af7d77d9a3b4045420334f1bc93d};
+the exact normalized schema is 8,745 bytes with the schema hash stated above.
+Public build and exclusive export returned identical manifest bytes. Source
+fingerprint
+\hash{0e36ff102e21393582257f6804265163613ec3a7aee797db2e5aa0a9ec2e221a},
+runtime fingerprint, library assets and external evidence remained unchanged
+across export; the before/after observation timestamps legitimately differ.
+No optimizer was run and no original media was copied.
+
+The package contains Tiger's V14 geometry-weight variant and Hogan's V12
+probe-density variant. Their historical numerical producers remain
+\code{dafab40c107} and \code{b32878a828}, respectively, distinct from the research
+export source. Tiger retains 210 source frames and 22 training frames with
+2,730 dense and 286 training observations; Hogan retains 750 source frames
+and 23 training frames with 9,607 dense and 286 training observations.
+Their exact source intervals are $[3003/200,659659/30000]$ and
+$[110,4049/30]$ presentation seconds. Both remain rejected and nonconverged,
+with unknown physical timing, unresolved rights and no distribution authority.
+Even Hogan's finite target passes do not change these package gates.
+
+\paragraph{Actual Affine Admission, Draft Recall and Browser Preview.}
+The actual local admission receipt,
+\path{local-admission-preview-receipt.json}, is 21,943 bytes with SHA-256
+\hash{ccf4615f4eb3d51a51b6b3a1af98b9bfd92abda4683be20b26744ff6c67136c2}.
+Inspection wrote no files. Exclusive draft installation, idempotent reinstall,
+exact-byte recall and deterministic recalled QMD succeeded through the public
+consumer and canonical snapshot store. Input, source, driver and authoritative
+registry brackets remained unchanged. The consumer was the tested working tree
+on checkout base \code{29472661de971899bfb7cdc4a3f92b3e9eee19aa}, with scoped
+source fingerprint
+\hash{4c712713d0aa4dde9afc34876a3b73a0074bbe04515b23215cca9f410cc6af09};
+this is not a claim that those consumer changes were committed at that base.
+The published Upstream export revision and the two historical numerical
+producers remain separately identified above.
+
+Quarto 1.8.26 rendered a standalone local preview with \code{--no-execute},
+exit code zero. The 4,850-byte QMD has SHA-256
+\hash{811e52a380d275d119525bc9f7b013711c8cf8f2f33fe585ec60e268c48ace19};
+the 26,172-byte HTML has SHA-256
+\hash{079655676dbc588731a9c82c195e0e24db922eec11b4e5f35c7124e39340abe8}.
+A separate actual browser review used the accessibility tree and three
+screenshots to inspect the local-research title, Hogan and Tiger statuses,
+metrics, Tiger's finite ground failure and declared limitations. Its receipt
+has SHA-256
+\hash{f39ffed5532bbc8700b32e50053abf4e0dafd335ad838c6b255130d3c6edadef}.
+No clipping or overlap was found in those reviewed default 1234-by-712 viewport
+screenshots. This is bounded programmatic browser evidence, not manual user
+acceptance, all-viewport accessibility certification or a public deployment.
+
+After an output-preserving function/signature-budget refactor, 42 focused
+consumer cases passed with 95.35\% module coverage; strict mypy, Black and Ruff
+passed. The earlier 6,681-pass offline result predates that refactor. The first
+post-refactor full run stopped after 4,638 passes on generated packaging scratch;
+those bytes were preserved externally and six hygiene cases passed. The unchanged
+clean SDK-first full-suite rerun then passed 6,685 tests, with 26 skips, 187
+existing-marker deselections and 61 warnings in 600.28 seconds. Host Python
+3.13.5 remains distinct from the repository target 3.12; no separate 3.12 run
+is claimed. The local package still binds Hogan V12 and
+Tiger V14, keeps both scientifically rejected and retains unresolved rights.
+No optimizer, media import or authoritative registry mutation occurred, and
+no public route or qualified release was created. Procedures are
 \path{docs/development/necromatcher-research-package.md} in UpstreamDrift and
-\path{docs/development/necromatcher-research-handoff.md} in AffineDrift.
+\path{docs/development/necromatcher-research-handoff.md} in AffineDrift. The
+previously reviewed 49-page edition and its exact source and receipts are
+preserved separately. Each expanded edition requires a fresh compilation,
+all-page visual review and hash-bound publication receipt.
 
 \subsection{Authored Contact Phases on the Source Clock}
 \label{sec:contact-phases}
@@ -2681,6 +2839,74 @@ Shaft or Measured Contact.}
 \label{fig:tiger-v13-overlay}
 \end{figure}
 
+\subsection{Actual V15 Normalized-Coverage Candidate Overlay}
+Figure~\ref{fig:tiger-v15-overlay} preserves all three selected source PNGs
+from \code{tiger-normalized-coverage-variant-fit-v15}, fit SHA-256
+\hash{d16babdc84452cc61f5ca725825c34dc68a289c09f7cd5aca093c417dc2af7a0}.
+The canonical public video session produced run
+\code{97b1b96fea0c4a2da403004a4985f390}; numerical and export producer are both
+\code{6654881b0788c77620a0afb8a9a6763f3ee1ccb9}. The frozen programmatic journal,
+\path{normalized-coverage-v15-overlay-review.json}, is 324,021 bytes with SHA-256
+\hash{3c108c1aa97f6ea54278776a844b461c141aeb499974a1d51c3e50b93c48f3be}.
+It records verified decoding of all 210 frames at original 1280-by-720 size,
+original PNG/source-frame/PTS bindings, fit/model/capture identities, ZIP CRC
+and member bytes, and unchanged source/runtime/driver/audit brackets.
+Artifact identities are:
+\begin{quote}\small
+\textbf{MP4:}
+\hash{c68060f614f319a2bd46558d10b3e8e703b3484285bb54987ba770b28584cb34}\\
+\textbf{Manifest:}
+\hash{08ed1c0ead10650353646c89478bda941cd85d564ac27ce0c264baf0ed8ec36b}\\
+\textbf{ZIP:}
+\hash{335e0c82b755731050c4500e536b908c3cca87995acbbe5fc0b70d6fd67d7c58}
+\end{quote}
+The journal's visual-review flag remains false: it is frozen programmatic
+package evidence. Subsequent direct visual review by both the independent
+report reviewer and owning workflow inspected the actual frames 0/105/209,
+without modifying that journal. The separate 2,649-byte
+\path{normalized-coverage-v15-independent-still-review.json} has SHA-256
+\hash{ca46a15129d238c06391f6ee1b05c0cfa6bc14cd6be95075d738841798d4b369}.
+It binds the unchanged execution journal and the three actual reviewed PNGs.
+All 210 frames were verified programmatically, but only these three were
+visually inspected; manual user acceptance remains false.
+
+At address, the body projection is near the observations, but the blue native
+club attachment extends down-left while the visible white shaft extends
+down-right. Frame 105 retains clear upper-body/arm displacement and long yellow
+residuals; the visible distal club is cropped. At frame 209 the blue attachment
+extends right while the visible club extends down-left, and feet are cropped.
+The selected unweighted 13-marker image RMS values are
+6.327017/49.997675/13.938689 px. They are per-frame matched-marker values, not
+the confidence-weighted all-source RMS of 25.160335 px. Finite grip/range/ground
+passes therefore do not establish visible shaft alignment, anatomy, measured
+contact, calibrated camera or physical motion. Source-bound club-axis segment
+evidence remains planned under \#11318; no such observation contract or
+shaft-fitting implementation is credited by this figure.
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Normalized-Coverage V15 Overlay/frame-000000.png}\\[3pt]
+\small\textbf{First Source Frame: 0}
+\end{minipage}\hfill
+\begin{minipage}{0.485\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Normalized-Coverage V15 Overlay/frame-000105.png}\\[3pt]
+\small\textbf{Middle Source Frame: 105}
+\end{minipage}
+\par\vspace{12pt}
+\begin{minipage}{0.70\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Tiger Normalized-Coverage V15 Overlay/frame-000209.png}\\[3pt]
+\small\textbf{Last Source Frame: 209}
+\end{minipage}
+\caption{Tiger V15 Normalized-Coverage Variant: All Five Finite Targets Pass,
+Scientific Qualification Remains Rejected. Visible Club-Seed Disagreement,
+Follow-Through Arm Residuals and Cropped Final Feet Persist. Blue Body-Origin
+Trees and Attachment Seeds Are Generic Native Geometry, Green Points Are
+Observations, and Yellow Lines Are Residuals, Not a Surface Mesh, Historical
+Shaft or Measured Contact.}
+\label{fig:tiger-v15-overlay}
+\end{figure}
+
 \subsection{Interpreting the Video Overlay}
 Review the original PNG and detector landmarks beside native attachment
 projections at the same exact frame identity. Mark image observations and
@@ -2908,6 +3134,8 @@ V12 Overlay Verification & Desktop \path{controlled-v12-overlay-verification.jso
 V13 Lower-Knot Assessment & External \path{lower-knot-v13-independent-assessment.json}; tracked \path{lower-knot-v13-summary.json}\\
 V13 Overlay Verification & Desktop \path{lower-knot-v13-overlay-verification.json}; tracked \path{lower-knot-v13-overlay-review.json}\\
 V14 Weight Assessment & External \path{geometry-weight-v14-independent-assessment.json}; \path{geometry-weight-v14-ground-diagnosis.json}\\
+V15 Coverage Assessment & External \path{normalized-coverage-v15-independent-assessment.json}; \path{normalized-coverage-v15-ground-diagnosis.json}\\
+V15 Overlay Journal & Desktop \path{normalized-coverage-v15-overlay-review.json}; \path{normalized-coverage-v15-independent-still-review.json} records separate direct three-still visual review.\\
 Research Provider Procedure & UpstreamDrift \path{docs/development/necromatcher-research-package.md}; public \path{src/shared/python/workspace/historical_research.py}\\
 Research Consumer Procedure & AffineDrift \path{docs/development/necromatcher-research-handoff.md}; public \path{src/affine_control/historical_research/}\\
 Research Schema & UpstreamDrift \path{docs/api/contracts/historical-player-research-v1.schema.json}; exact Affine mirror \path{schemas/historical-player-research-v1.schema.json}\\

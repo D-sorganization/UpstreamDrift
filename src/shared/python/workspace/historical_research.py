@@ -27,6 +27,10 @@ _DIGEST = re.compile(r"^[0-9a-f]{64}$")
 _COMMIT = re.compile(r"^[0-9a-f]{40}$")
 _AUDIT_LIMIT = 20_000_000
 _SUMMARIES = {
+    "necromatcher/normalized-coverage-v15-independent-assessment/1": (
+        "both_runs_verified",
+        "source_runtime_parent_artifact_evidence_brackets_verified",
+    ),
     "necromatcher/geometry-weight-v14-independent-assessment/1": (
         "both_runs_verified",
         "source_runtime_parent_artifact_evidence_brackets_verified",

@@ -134,3 +134,77 @@ attachment-seed/visible-shaft mismatch. This export preserves that limitation;
 it does not turn generic seed geometry into a measured shaft, public player
 model, or accepted historical reconstruction. Additional club evidence requires
 its own source-bound contract and validation before it can change qualification.
+
+## Actual Frozen Provider Export
+
+The published export implementation was
+`6654881b0788c77620a0afb8a9a6763f3ee1ccb9`. The actual local receipt
+`historical-research-export-v1-receipt.json` is hash-verified as
+`5d024fa8afe4c9e88639f20de46b4f7098b44e8a70b121ec1e96dc2c70e9f7ed`.
+The exclusive Desktop `Affine Local Research V1` bundle contains:
+
+| Artifact                                    | Bytes | Plain SHA-256                                                      |
+| ------------------------------------------- | ----: | ------------------------------------------------------------------ |
+| `historical-player-research-v1.json`        | 6,849 | `757a644c5408e4f5fc54904bd2918290f2c3af7d77d9a3b4045420334f1bc93d` |
+| `historical-player-research-v1.schema.json` | 8,745 | `a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30` |
+
+Public build and export bytes were equal. Source fingerprint
+`0e36ff102e21393582257f6804265163613ec3a7aee797db2e5aa0a9ec2e221a`,
+runtime fingerprint
+`e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5`,
+library assets and external evidence were unchanged across the export. The
+before/after stamp observation timestamps differ as expected; complete stamp
+objects are not claimed byte-identical. The operation ran no optimizer and
+copied no original media.
+
+The selected Tiger record is `tiger-geometry-weight-variant-fit-v14`, produced
+numerically by `dafab40c107dbcd22d1c3a91bfcc79b102076f65`; the Hogan record is
+`hogan-probe-density-variant-fit-v12`, produced by
+`b32878a828d3b96bfc796bee368ef60cb692d117`. Tiger retains 210 source frames,
+22 training frames, 2,730 dense observations and 286 training observations;
+Hogan retains 750 source frames, 23 training frames, 9,607 dense observations
+and 286 training observations. Exact presentation-time intervals are
+`[3003/200, 659659/30000]` and `[110, 4049/30]` seconds respectively.
+
+Both records remain rejected, nonconverged monocular research with unresolved
+rights, unknown physical timing and distribution not authorized. Normal
+commit/push hooks passed, including pytest, and the subsequent 476-case
+Upstream integration selection passed. These implementation checks do not
+promote either record. Actual Affine admission, atomic install/recall and local QMD preview were
+subsequently recorded separately below. The provider export alone does not
+prove that consumer stage or authorize publication.
+
+## Actual Local Affine Consumer Evidence
+
+The separate actual receipt `local-admission-preview-receipt.json` is 21,943
+bytes, SHA-256 `ccf4615f4eb3d51a51b6b3a1af98b9bfd92abda4683be20b26744ff6c67136c2`.
+Public inspection wrote no files. Exclusive draft installation, idempotent
+installation, exact-byte recall and deterministic recalled QMD succeeded;
+input, source, driver and authoritative registry brackets remained unchanged.
+The consumer checkout base was `29472661de971899bfb7cdc4a3f92b3e9eee19aa`, with
+tested working-tree source fingerprint
+`4c712713d0aa4dde9afc34876a3b73a0074bbe04515b23215cca9f410cc6af09`.
+That base does not identify a commit containing the consumer changes.
+
+Quarto 1.8.26 rendered the standalone local HTML with `--no-execute` and exit
+code zero. QMD identity: 4,850 bytes,
+`811e52a380d275d119525bc9f7b013711c8cf8f2f33fe585ec60e268c48ace19`;
+HTML identity: 26,172 bytes,
+`079655676dbc588731a9c82c195e0e24db922eec11b4e5f35c7124e39340abe8`.
+A separate actual browser accessibility-tree/three-screenshot review recorded
+`browser-review-receipt.json`, SHA-256
+`f39ffed5532bbc8700b32e50053abf4e0dafd335ad838c6b255130d3c6edadef`.
+It inspected title, Hogan/Tiger rejected statuses, metrics, finite Tiger ground
+failure and limitations, with no clipping/overlap in the reviewed default
+1234-by-712 viewport. Manual user acceptance, public deployment and general
+accessibility qualification were not established.
+
+The package still contains Hogan V12 and Tiger V14. No new optimization,
+original-media import, scientific promotion or authoritative registry mutation
+occurred. Post-budget-refactor focused consumer validation passed 42 cases with
+95.35% module coverage and strict mypy/Black/Ruff. The final unchanged SDK-first
+offline run passed 6,685 tests, with 26 skips, 187 existing-marker deselections
+and 61 warnings in 600.28 seconds. The earlier 6,681-pass run is historical
+before the budget refactor. Host Python 3.13.5 remains distinct from the
+repository target 3.12. Keep the exact local receipts and preview separate from
+future consumer commits and publication review.

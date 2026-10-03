@@ -1,0 +1,142 @@
+{
+  "schema": "necromatcher/normalized-coverage-v15-overlay-review-summary/1",
+  "scope": "Actual local original-source overlay export and bounded review; no public release",
+  "export_run_id": "97b1b96fea0c4a2da403004a4985f390",
+  "fit_id": "tiger-normalized-coverage-variant-fit-v15",
+  "fit_sha256": "d16babdc84452cc61f5ca725825c34dc68a289c09f7cd5aca093c417dc2af7a0",
+  "model_id": "tiger-generic-native-model-v2",
+  "model_sha256": "99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+  "capture_id": "tiger-usga-range-capture-v1",
+  "capture_sha256": "d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+  "source_video_sha256": "99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+  "numerical_producer": "6654881b0788c77620a0afb8a9a6763f3ee1ccb9",
+  "export_producer": "6654881b0788c77620a0afb8a9a6763f3ee1ccb9",
+  "export_implementation_sha256": "cea9d5fd4a79553cd4a6cf44914327f20d35dcea01d227b73185aad68de982c1",
+  "execution_status": "succeeded",
+  "scientific_acceptance": "rejected",
+  "qualification": "monocular_research_hypothesis",
+  "physical_time_qualified": false,
+  "camera_qualified": false,
+  "anatomy_qualified": false,
+  "continuous_nonlinear_certified": false,
+  "geometry": {
+    "body": "declared joint-tree body origins; not skin markers or a surface mesh",
+    "club": "declared attachment points only; no mesh or inferred shaft"
+  },
+  "source_clock": {
+    "origin": "video_presentation_time",
+    "physical_time": "unknown",
+    "frame_count": 210,
+    "interval_seconds": [15.015, 21.988633333333333],
+    "frame_rate": {
+      "numerator": 30000,
+      "denominator": 1001
+    }
+  },
+  "independent_audit": {
+    "assessment_path": "normalized-coverage-v15-independent-assessment.json",
+    "assessment_sha256": "f7f1be7ce6b6742895c279ff348773b6f758a2b25eca2594ed84358cf6c11818",
+    "dense_original_rms_pixels": 25.160335189636992,
+    "full_audit_path": "normalized-coverage-v15-independent-assessment-tiger-normalized-coverage-variant-fit-v15-audit.json",
+    "full_audit_sha256": "07f642d7665df42e9da1638b0d5c10de9336b036e7b5c10d033d1b04afc02609",
+    "source_interval": [15.015, 21.988633333333333]
+  },
+  "artifacts": {
+    "execution_receipt": {
+      "filename": "normalized-coverage-v15-overlay-review.json",
+      "sha256": "3c108c1aa97f6ea54278776a844b461c141aeb499974a1d51c3e50b93c48f3be",
+      "bytes": 324021
+    },
+    "zip": {
+      "filename": "tiger-normalized-coverage-v15-97b1b96fea0c4a2da403004a4985f390.zip",
+      "sha256": "335e0c82b755731050c4500e536b908c3cca87995acbbe5fc0b70d6fd67d7c58",
+      "bytes": 9720209
+    },
+    "manifest": {
+      "filename": "manifest.json",
+      "sha256": "08ed1c0ead10650353646c89478bda941cd85d564ac27ce0c264baf0ed8ec36b",
+      "bytes": 246173
+    },
+    "video": {
+      "filename": "overlay.mp4",
+      "sha256": "c68060f614f319a2bd46558d10b3e8e703b3484285bb54987ba770b28584cb34",
+      "bytes": 6486374
+    },
+    "selected_stills": [
+      {
+        "frame_index": 0,
+        "png": {
+          "filename": "frame-000000.png",
+          "sha256": "692d2340ece44ba48d534e7759d44addbfd7699f4d31b43cfb91cefe79adc6cb",
+          "bytes": 954032
+        },
+        "original_png_sha256": "c5ff8e515a3fde971c7bff490575b5bc497d481a43528c1252d0fefeadfdf2d8",
+        "matched_marker_count": 13,
+        "matched_rms_pixels": 6.327016754682319,
+        "source_pts_ticks": 450450,
+        "source_timebase_numerator": 1,
+        "source_timebase_denominator": 30000
+      },
+      {
+        "frame_index": 105,
+        "png": {
+          "filename": "frame-000105.png",
+          "sha256": "d9053dff99e7cabfa2e43a5badf26c3b26bf6b8ce4e1278702cc60e0eec2138e",
+          "bytes": 981564
+        },
+        "original_png_sha256": "1d976263d6ad59935f321a9ef814bd86c2c44c841297ffb914c2250d60b35393",
+        "matched_marker_count": 13,
+        "matched_rms_pixels": 49.99767450327421,
+        "source_pts_ticks": 555555,
+        "source_timebase_numerator": 1,
+        "source_timebase_denominator": 30000
+      },
+      {
+        "frame_index": 209,
+        "png": {
+          "filename": "frame-000209.png",
+          "sha256": "1c7285e4181abca9b975562e4c939a35d29c481c37276ea5b18ae6df94257eee",
+          "bytes": 1051520
+        },
+        "original_png_sha256": "dae7d48c913d170db1301e8d7186270e3a9ea1ba5741719f975f0e1b84dd9d5b",
+        "matched_marker_count": 13,
+        "matched_rms_pixels": 13.938688664443417,
+        "source_pts_ticks": 659659,
+        "source_timebase_numerator": 1,
+        "source_timebase_denominator": 30000
+      }
+    ],
+    "repeatability_receipt": {
+      "filename": "copy-verification.json",
+      "sha256": "f6e259e0c3a9a2bf8bd56e0f9693bf4a44714483fa9bde9bc4c38c6c759d9776",
+      "bytes": 1578
+    }
+  },
+  "programmatic_verification": {
+    "decoded_frames": 210,
+    "source_image_size": [1280, 720],
+    "all_manifest_frame_identities_match_saved_fit_and_capture": true,
+    "selected_original_png_hashes_checked": true,
+    "zip_crc_inventory_and_member_bytes_verified": true,
+    "source_runtime_audit_driver_dependency_brackets_unchanged": true,
+    "execution_receipt_visual_review_completed": false
+  },
+  "visual_review": {
+    "root_reviewed_frame_indices": [0, 105, 209],
+    "all_video_frames_visually_reviewed": false,
+    "independent_addendum": {
+      "filename": "normalized-coverage-v15-independent-still-review.json",
+      "sha256": "ca46a15129d238c06391f6ee1b05c0cfa6bc14cd6be95075d738841798d4b369",
+      "bytes": 2649
+    },
+    "findings": [
+      "Frame 0: blue club attachment seed extends down-left, unlike the visible rightward club.",
+      "Frame 105: upper-body and arm displacement persists; matched-marker RMS 49.99767450327421 px.",
+      "Frame 209: blue club seed extends right, unlike the visible leftward club; feet are cropped."
+    ],
+    "scope": "Three actual saved PNGs; no accepted reconstruction, inferred shaft, or manual OS acceptance.",
+    "independent_reviewer_reviewed_frame_indices": [0, 105, 209],
+    "manual_user_acceptance": false
+  },
+  "public_release": false
+}

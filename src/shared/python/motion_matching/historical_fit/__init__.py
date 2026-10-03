@@ -7,11 +7,22 @@ from .contracts import (
     ImageFitResult,
     ImageSplineStart,
 )
+from .shaft_observations import (
+    ShaftAxisEvidence,
+    ShaftAxisSegment,
+    SourceBoundShaftFrame,
+)
+from .shaft_geometry import AuthoredShaftAxis, resolve_authored_shaft_axis
 from .solver import fit_image_trajectory, initialize_image_trajectory
 from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "AuthoredShaftAxis",
+    "resolve_authored_shaft_axis",
+    "ShaftAxisEvidence",
+    "ShaftAxisSegment",
+    "SourceBoundShaftFrame",
     "SplineCoordinateExpansion",
     "expand_image_spline_coordinates",
     "ContactPinPhase",

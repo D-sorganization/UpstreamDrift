@@ -477,3 +477,64 @@ def test_schema_validation_dependency_is_required_without_fallback(
     monkeypatch.setattr(builtins, "__import__", unavailable)
     with pytest.raises(RuntimeError, match="requires.*jsonschema"):
         build_historical_research_package(library, (pin,), COMMIT)
+
+
+def test_v15_assessment_adapter_preserves_generic_pins_and_rejection(research_case):
+    library, pin, summary, _, _ = research_case
+    summary["schema"] = "necromatcher/normalized-coverage-v15-independent-assessment/1"
+    pin = replace(pin, assessment_sha256=save_json(pin.assessment_path, summary))
+    payload = build_historical_research_package(library, (pin,), "b" * 40)
+    record = json.loads(payload)["records"][0]
+    assert record["player_name"] == "Third Player"
+    assert record["producer_commit"] == COMMIT
+    assert record["scientific_acceptance"] == "rejected"
+    assert record["source_clock"]["physical_time"] == "unknown"
+    assert record["continuous_certified"] is False
+    assert record["image_counts"]["training_observation_count"] == 26
+    assert build_historical_research_package(library, (pin,), "b" * 40) == payload
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["both_runs_verified", "source_runtime_parent_artifact_evidence_brackets_verified"],
+)
+@pytest.mark.parametrize("value", [None, False])
+def test_v15_assessment_requires_both_explicit_verification_flags(
+    research_case, field, value
+):
+    library, pin, summary, _, _ = research_case
+    summary["schema"] = "necromatcher/normalized-coverage-v15-independent-assessment/1"
+    if value is None:
+        summary.pop(field)
+    else:
+        summary[field] = value
+    pin = replace(pin, assessment_sha256=save_json(pin.assessment_path, summary))
+    with pytest.raises(ValueError, match="unverified independent assessment"):
+        build_historical_research_package(library, (pin,), COMMIT)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "scientific_acceptance",
+        "continuous_certified",
+        "physical_time_qualified",
+        "optimization_performed",
+    ],
+)
+def test_v15_rehashed_assessment_cannot_promote_research_states(research_case, field):
+    library, pin, summary, _, _ = research_case
+    summary["schema"] = "necromatcher/normalized-coverage-v15-independent-assessment/1"
+    summary[field] = True
+    pin = replace(pin, assessment_sha256=save_json(pin.assessment_path, summary))
+    with pytest.raises(ValueError, match=f"cannot promote {field}"):
+        build_historical_research_package(library, (pin,), COMMIT)
+
+
+def test_v15_rehashed_assessment_fit_digest_cannot_override_saved_parent(research_case):
+    library, pin, summary, _, _ = research_case
+    summary["schema"] = "necromatcher/normalized-coverage-v15-independent-assessment/1"
+    summary["runs"][0]["fit_sha256"] = "sha256:" + "0" * 64
+    pin = replace(pin, assessment_sha256=save_json(pin.assessment_path, summary))
+    with pytest.raises(ValueError, match="fit identity differs"):
+        build_historical_research_package(library, (pin,), COMMIT)
