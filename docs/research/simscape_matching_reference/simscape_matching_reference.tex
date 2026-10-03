@@ -3028,8 +3028,9 @@ frames, affecting three of the forty-six sampled IK frames. All 38,250
 raw-finite retained coordinates are exactly unchanged; 216 missing
 scalar coordinates remain unfilled. Long and boundary gaps are preserved.
 The original observation/interpolation mask is now recovered privately,
-but still needs propagation into the solver input and scoring. Reported
-position RMS currently follows exported-data gap flags and cannot be
+and its subsequent propagation and full owner refit are documented in
+the Source Observation Masks subsection. Historical exported-data
+position RMS follows exported-data gap flags and cannot be
 claimed as independent raw-measurement-only accuracy.
 
 In ezc3d, the fourth point-data row is the homogeneous coordinate in
@@ -3043,6 +3044,61 @@ measurement qualification. Lower residuals and native loop closure do
 not establish independent accuracy.
 
 % END PELVIS PROSPECTIVE CONTRACT
+
+\subsection{Native Prescribed-Neck Torque Recovery in the Owner Supported Hold}
+The native run completed naturally at \texttt{2026-10-03T01:49:23Z}.
+The owner retained the accepted one-second constant reference, the existing
+20--50 ms empirical leg-torque ramp, upper-body tracking and balance feedback,
+personalized geometry, contacts and all five previously registered hold gates.
+Both neck primitives retained \texttt{ComputedTorque} and \texttt{InputMotion}.
+Enabling torque sensing alone left inspected Simscape primitive logs with
+\texttt{q/w/b} channels and no recovered actuation torque. That preliminary
+probe is not torque-recovery evidence.
+
+The successful probe enabled one primitive sensor at a time and asserted the
+new unconnected physical-signal output, preserving existing frame and motion
+connections. Each output was connected to a PS--Simulink Converter with its
+unit asserted as \texttt{N*m}, followed by a Terminator and logged signal.
+The two converters and two terminators were temporary runtime additions;
+the Human model file was never saved and its SHA-256 was unchanged.
+Signals \texttt{NeckActuatorTorqueRx} and \texttt{NeckActuatorTorqueRy}
+each contained 1,483 finite scalar samples, strictly increasing times starting
+at zero and covering one second. Converter configuration establishes units;
+empty Simulink signal-unit metadata is not treated as an independent unit check.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Primitive & Sample RMS (N\,m) & Peak absolute torque (N\,m)\\
+\midrule
+Rx & 5.950843 & 9.530841\\
+Ry & 3.574840 & 5.157831\\
+\bottomrule
+\end{tabular}
+\end{center}
+Reported RMS is $\sqrt{N^{-1}\sum_i \tau_i^2}$ on the native adaptive sample
+grid, not a time-weighted integral. A later energy audit must use actual
+times and primitive velocities in radians per second:
+\[
+ P_{\rm neck}(t)=\tau_{Rx}(t)\dot q_{Rx}(t)+
+                 \tau_{Ry}(t)\dot q_{Ry}(t),\qquad
+ E_{\rm neck}=\int P_{\rm neck}(t)\,dt .
+\]
+Those power and energy quantities have not yet been computed or qualified.
+Recovered primitive actuation torques must not be substituted for total joint
+constraint reactions or anatomical-axis moments without a frame/dual mapping.
+
+All five original support gates passed: both settled feet at least $0.05$ BW,
+settled total normal force within $0.8$--$1.2$ BW, whole-run peak at most
+$2$ BW, pelvis displacement at most $5$ mm and rotation change at most
+$1$ degree. Maximum pelvis displacement and rotation remained
+$2.321210$ mm and $0.699395$ degrees, identical to the preserved control.
+This establishes two measured native actuator channels in a feedback-supported,
+prescribed-neck hold. It does not establish a unique static gravity solution,
+moving-swing torque recovery, neck torque-driven motion, all-actuator coverage
+or a fresh independent forward replay. Returned native output was saved
+privately before analysis; the public checkpoint contains only aggregate values.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
