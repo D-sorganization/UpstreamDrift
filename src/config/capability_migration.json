@@ -1414,6 +1414,18 @@
       "evidence": "src/shared/python/biomechanics/ztcf.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "mujoco.force_overlays": {
+      "id": "mujoco.force_overlays",
+      "name": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "acceptance_owner": "tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py"
+    },
     "analysis.cross_engine_robustness": {
       "id": "analysis.cross_engine_robustness",
       "name": "Cross-engine robustness dashboard (perturbation/CV)",
