@@ -340,10 +340,10 @@ def axial_loads_from_reactions(
 
     values_n: dict[str, float | None] = {}
     for axis in axes:
-        w = reactions.get(axis.joint_label)
-        if w is not None and w.force_n is not None:
+        reaction = reactions.get(axis.joint_label)
+        if reaction is not None and reaction.force_n is not None:
             val = axial_force_from_proximal_reaction(
-                w.force_n, axis.proximal_m, axis.distal_m
+                reaction.force_n, axis.proximal_m, axis.distal_m
             )
             values_n[axis.segment] = val
         else:
