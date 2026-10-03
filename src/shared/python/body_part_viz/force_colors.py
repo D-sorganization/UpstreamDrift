@@ -11,7 +11,18 @@ import re
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from numbers import Real
-from typing import Any
+from typing import Any, Final
+
+DEFAULT_TENSION_COLOR: Final[str] = "#0000ff"
+DEFAULT_COMPRESSION_COLOR: Final[str] = "#ff0000"
+DEFAULT_NEUTRAL_COLOR: Final[str] = "#ffffff"
+
+__all__ = [
+    "DEFAULT_COMPRESSION_COLOR",
+    "DEFAULT_NEUTRAL_COLOR",
+    "DEFAULT_TENSION_COLOR",
+    "ForceColorScale",
+]
 
 
 @dataclass(frozen=True)
@@ -27,9 +38,9 @@ class ForceColorScale:
     tension_limit_n: float = 1000.0
     compression_limit_n: float = 1000.0
     deadband_n: float = 0.0
-    tension_color: str = "#0000ff"
-    compression_color: str = "#ff0000"
-    neutral_color: str = "#ffffff"
+    tension_color: str = DEFAULT_TENSION_COLOR
+    compression_color: str = DEFAULT_COMPRESSION_COLOR
+    neutral_color: str = DEFAULT_NEUTRAL_COLOR
 
     def __post_init__(self) -> None:
         if not isinstance(self.enabled, bool):

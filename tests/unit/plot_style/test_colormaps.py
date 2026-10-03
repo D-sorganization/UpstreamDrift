@@ -107,3 +107,22 @@ def test_custom_colormap_rejects_non_numeric_position() -> None:
 def test_custom_colormap_rejects_empty_hex() -> None:
     with pytest.raises(ValueError, match="non-empty"):
         CustomColormap(name="x", stops=((0.0, ""), (1.0, "#fff")))
+
+
+@pytest.mark.unit
+def test_tension_compression_colormap() -> None:
+    """ColormapId.TENSION_COMPRESSION evaluates to ForceColorScale default colors at 0, 0.5, 1."""
+    from src.shared.python.body_part_viz.force_colors import ForceColorScale
+    from src.shared.python.plot_style.color_utils import hex_to_rgba
+    from src.shared.python.plot_style.registry import get_colormap
+
+    scale = ForceColorScale()
+    cmap = get_colormap(ColormapId.TENSION_COMPRESSION)
+
+    c0 = cmap(0.0)
+    c05 = cmap(0.5)
+    c1 = cmap(1.0)
+
+    assert c0 == pytest.approx(hex_to_rgba(scale.compression_color), abs=1e-3)
+    assert c05 == pytest.approx(hex_to_rgba(scale.neutral_color), abs=1e-3)
+    assert c1 == pytest.approx(hex_to_rgba(scale.tension_color), abs=1e-3)

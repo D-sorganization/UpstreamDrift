@@ -39,13 +39,20 @@ from .channels import (
     magnitude_channel,
     slice_channel,
 )
+from .color_utils import hex_to_rgba, rgba_to_hex
 from .colormaps import (
     SEMANTIC_COLORMAP_ALIASES,
     ColormapId,
     CustomColormap,
     resolve_colormap_alias,
 )
-from .colors import ColorScale, DataDrivenColor, PaletteColor, StaticColor
+from .colors import (
+    ColorScale,
+    DataDrivenColor,
+    FORCE_KIND_PALETTE,
+    PaletteColor,
+    StaticColor,
+)
 from .contracts import ColorResolver, MarkerRenderer, MarkerShapeRenderer
 from .markers import CustomMeshSpec, MarkerShape, MarkerStyle
 from .persistence import SCHEMA_VERSION, PlotStyleSet, PlotStyleSpec
@@ -95,6 +102,7 @@ __all__ = [
     "CustomMeshSpec",
     "DataChannel",
     "DataDrivenColor",
+    "FORCE_KIND_PALETTE",
     "MarkerRenderer",
     "MarkerShape",
     "MarkerShapeRenderer",
@@ -109,10 +117,12 @@ __all__ = [
     "StaticColor",
     "derivative_channel",
     "get_colormap",
+    "hex_to_rgba",
     "list_colormaps",
     "magnitude_channel",
     "register_custom_colormap",
     "resolve_colormap_alias",
+    "rgba_to_hex",
     "slice_channel",
     "unregister_custom_colormap",
 ]

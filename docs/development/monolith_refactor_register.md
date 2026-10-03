@@ -181,6 +181,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  806 | `src/launchers/_launcher_navigation_ui.py`                                                                                                                                    |
 |  803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py`                                                                                                          |
 |  802 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |
+|  802 | `src/shared/python/plotting/renderers/kinetics.py`                                                                                                                            |
 |  801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py`                                                                                                   |
 |  801 | `src/shared/python/sidekick/ui/tools_sidebar/sidebar.py`                                                                                                                      |
 |  801 | `src/tools/model_explorer/mesh_browser.py`                                                                                                                                    |

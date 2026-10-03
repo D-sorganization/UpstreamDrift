@@ -53,11 +53,13 @@ def _import_pyqtgraph_opengl() -> Any:
     return gl
 
 
-def _hex_or_name_to_rgba(
-    color: str, opacity: float
-) -> tuple[float, float, float, float]:
-    """Convert a matplotlib-recognised colour string to an RGBA tuple."""
-    from matplotlib.colors import to_rgba  # noqa: PLC0415 - lightweight, no extra dep
+def _color_to_rgba(color: str, opacity: float) -> tuple[float, float, float, float]:
+    """Convert a colour string to an RGBA tuple with opacity scaling."""
+    if color.startswith("#"):
+        from ...plot_style.color_utils import hex_to_rgba
+
+        return hex_to_rgba(color, alpha=opacity)
+    from matplotlib.colors import to_rgba  # noqa: PLC0415 - lightweight fallback for named colors
 
     r, g, b, a = to_rgba(color)
     return (float(r), float(g), float(b), float(a) * float(opacity))
@@ -156,7 +158,7 @@ class PyQtGLRenderer:
 
         faces = np.asarray(shape.faces())
         is_line = faces.shape[0] == 0
-        rgba = _hex_or_name_to_rgba(theme.color, theme.opacity)
+        rgba = _color_to_rgba(theme.color, theme.opacity)
 
         if is_line:
             verts = np.asarray(shape.vertices_at_rest(), dtype=np.float32)
@@ -177,7 +179,7 @@ class PyQtGLRenderer:
                 color=rgba,
                 shader="shaded",
                 drawEdges=theme.edge_width > 0.0,
-                edgeColor=_hex_or_name_to_rgba(theme.edge_color, 1.0),
+                edgeColor=_color_to_rgba(theme.edge_color, 1.0),
             )
 
         self._widget.addItem(item)
@@ -217,7 +219,7 @@ class PyQtGLRenderer:
             raise KeyError(f"Unknown handle: {handle!r}")
         resolved = entry.theme.color if color is None else color
         ShapeTheme(color=resolved)
-        rgba = _hex_or_name_to_rgba(resolved, entry.theme.opacity)
+        rgba = _color_to_rgba(resolved, entry.theme.opacity)
         if entry.is_line:
             entry.item.setData(color=rgba)
         else:

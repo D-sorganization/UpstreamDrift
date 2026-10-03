@@ -15,6 +15,59 @@
 
 ---
 
+# Colour Utilities DRY — #11289 (FTO-4)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`
+- Branch: `feat/fto-11289-colour-utils-dry`; commit: SELF; PR: #11338
+- Governing issue: #11289 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-4] Colour utilities DRY: one hex/RGBA helper and a registered tension/compression colormap.
+- Completed:
+  - `src/shared/python/plot_style/color_utils.py`:
+    - `hex_to_rgba`: parses `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA` formats with strict length validation, case-insensitivity, and optional override alpha `[0.0, 1.0]`. Returns normalized 4-tuple float RGBA in `[0.0, 1.0]`.
+    - `rgba_to_hex`: formats normalized RGBA or RGB sequences into 7-character `#rrggbb` hex strings.
+    - Re-exported both in `src/shared/python/plot_style/__init__.py`.
+  - Registered `ColormapId.TENSION_COMPRESSION = "tension_compression"` in `src/shared/python/plot_style/colormaps.py` with `TENSION_COMPRESSION_STOPS = ((0.0, "#2166AC"), (0.5, "#F7F7F7"), (1.0, "#B2182B"))`.
+  - Registered colormap in `src/shared/python/plot_style/registry.py` with `LinearSegmentedColormap(name, ..., N=257)` to guarantee exact neutral center sampling at position 0.5.
+  - Replaced ad-hoc parsers in `meshcat_force_colors.py`, `mujoco_force_colors.py`, `pyqtgl_renderer.py`, `_viewer_3d_segments.py`, and `meshcat_adapter.py`.
+  - Replaced hardcoded default hex colors in `src/shared/python/body_part_viz/force_colors.py` with registered constants `DEFAULT_TENSION_COLOR`, `DEFAULT_COMPRESSION_COLOR`, and `DEFAULT_NEUTRAL_COLOR`.
+  - Documented signed quantity convention in `kinetics.py` and added `TENSION_COMPRESSION` section to `docs/user_guide/plot_style/colormap_author_guide.md`.
+  - 20 unit tests in `tests/unit/plot_style/test_color_utils.py` and `tests/unit/plot_style/test_colormaps.py`.
+- Next steps: Wave B child issues: FTO-5 (#11290) PySide/PyQtGL overlay renderer and FTO-24 (#11309) video camera projection.
+
+# Glyph Builder and Force Kind Palette — #11288 (FTO-3)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
+- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341
+- Governing issue: #11288 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, scale_for_view and FORCE_KIND_PALETTE.
+- Completed:
+  - `FORCE_KIND_PALETTE` registered in `src/shared/python/plot_style/colors.py` with 7 categorical hex colors compliant with ADR-0052 (strictly avoiding pure blue `#0000ff` and pure red `#ff0000` reserved for axial tension/compression). Exported from `src/shared/python/plot_style/__init__.py`.
+  - Palette documented in `docs/user_guide/plot_style/colormap_author_guide.md` under `### Force and Torque Overlay Palette (ADR-0052)` with hex swatch table and rationale.
+  - Implemented `ForceGlyphStyle`, `ArrowGlyph`, `TorqueArcGlyph`, `LegendSpec`, `GlyphSet`, `build_glyphs`, and `scale_for_view` in `src/shared/python/force_overlay/glyphs.py` (387 lines, within 400-line budget, LoD <= 2, DbC validation on inputs and postconditions).
+  - Wired into `src/shared/python/force_overlay/__init__.py` with headless import guards and clean `__all__`.
+  - Wire schema `schemas/glyph-set-v1.json` (Draft 2020-12) and generator `scripts/generate_glyph_set_examples.py` producing 4 synthetic fixture cases in `schemas/glyph-set-examples.json`.
+  - 14 comprehensive unit tests in `tests/unit/force_overlay/test_glyphs.py` and `tests/unit/force_overlay/test_glyph_serialization.py` covering styling, clamping, right-hand torque arcs, view scaling, schema validation, and headless import purity.
+- Validation:
+  - `python3 -m ruff check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/plot_style/`: 0 violations.
+  - `python3 -m ruff format --check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/plot_style/`: 0 diffs.
+  - `python3 -m pytest tests/unit/force_overlay -n auto --timeout=60`: 39 passed.
+  - `python3 scripts/ci/check_file_size_budget.py`: OK.
+  - `python3 scripts/ci/check_architecture_budget.py`: OK.
+  - `python3 scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `python3 scripts/ci/check_lod.py src --baseline scripts/ci/lod_baseline.txt`: OK (clean no-growth scan, 0 new violations).
+- Next steps: Wave C renderers (FTO-5 MeshCat, FTO-6 MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV Video) consuming serialized `GlyphSet`.
+
+# Force Overlay Parity Suite — #11306 (FTO-21)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11306`
+- Branch: `feat/issue-11306-fto21-force-parity`; commit: SELF; PR: see the PR for this branch (`Closes #11306`, `Refs #11285`)
+- Governing issue: #11306 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `tests/integration/cross_engine/test_force_overlay_parity.py` and `force_overlay_fixtures.py` (one validated parameter set; per-engine model builders beside the test; `assert_wrench`; tolerances set once). Drake, Pinocchio and OpenSim rows are live; MuJoCo skips until FTO-9 (#11294) adds `get_force_torque_frame` and then runs unchanged; Pinocchio and Simscape skip the resting-contact case with a stated reason; a Simscape synthetic-CSV row checks the FTO-18 loader keeps world/applied-to-body; a sign guard proves the suite bites. `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.3.
+- Findings (providers untouched): `OpenSimPhysicsEngine.set_state` raises `TypeError` on OpenSim 4.x and `set_control` never marks controls valid so they read as zero (the builders bake state and the hold torque into the model instead); Drake omits the axial load of a terminal segment with no child joint (Pinocchio/OpenSim fall back to the centre of mass), so the shared URDF welds a massless tip.
+- Validation: `python3 -m pytest tests/integration/cross_engine/test_force_overlay_parity.py -o addopts=""` (23 passed, 6 skipped); ruff, file-size, error-handling, DRY, suite-marker and title-case checks clean.
+- CI gap: no required lane runs the Drake/Pinocchio rows yet (workflow change shipped alone, tracked in #11346).
+- Next steps: when FTO-9 lands, confirm the MuJoCo rows go green (MJCF builders are pre-validated by `test_mujoco_models_are_statically_consistent`); fix the two OpenSim engine defects in a follow-up.
+
 # OpenSim Muscle Lines of Action — #11301 (FTO-16)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11301`
