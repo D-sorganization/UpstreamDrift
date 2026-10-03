@@ -7712,8 +7712,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
+| 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
+| 2026-10-02 | #11337 | [FTO-5] MeshCat glyph renderer: real cylinder+cone arrows and torque arcs, MeshcatSink protocol, caching, and Drake sink (#11290). |
+| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
 | 2026-10-03 | #11349 | `MujocoAxialLoadSource` axis discovery compares geom/joint types via `int()` so it works on mujoco 3.14 (enum vs numpy int); regression tests added. |
 | 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |
 | 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |

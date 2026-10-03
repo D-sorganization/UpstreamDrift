@@ -20,7 +20,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_progress
-- **Owner:** claude
+- **Owner:** antigravity
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** #11375
 - **Branch:** `feat/issue-11346-impl`
@@ -29,7 +29,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
 - **Next step:** Merge PR #11375; proceed with remaining FTO issues.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR #11355; proceed with remaining Wave C renderers (FTO-7, FTO-8).
+- **Next step:** Land FTO-8 into main; unblock video camera projection FTO-24 and video overlays FTO-25 to FTO-29.
 
 ### DL-#11268 · Capture-O Video Companion
 
