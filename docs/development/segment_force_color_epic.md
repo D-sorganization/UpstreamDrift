@@ -39,8 +39,9 @@ load at a declared section; it is not a spatial stress field or a tissue safety 
       material adapter; retain original materials on disable and missing data.
 - [x] Concrete force-source adapters qualified with analytical tension/compression
       fixtures, including sign/frame conventions and unsupported engine behavior.
-- [ ] Regression and native renderer checks, user guide, parity registry, SPEC and
-      handoff updates; publish epic/children and merge through protected PR checks.
+- [x] Regression and native renderer checks, user guide, parity registry, SPEC and
+      handoff updates; published under FTO-30 (#11315), golden visual regression tests,
+      and docs/user_guide/force_overlay.md.
 
 ## Acceptance and Engineering Contracts
 

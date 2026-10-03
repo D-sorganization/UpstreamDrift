@@ -1,4 +1,20 @@
+## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
+
+Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
+- **Reproducible Gallery Generator (`scripts/render_force_overlay_gallery.py`)**:
+  - Headless execution across all supported engines and renderers under `MPLBACKEND=Agg`, `QT_QPA_PLATFORM=offscreen`, and `MUJOCO_GL=egl`.
+  - Generates sharp stills, clip manifests, and interactive `index.html` recording engine versions, model hashes, and `VideoGlyphReceipt` verification metrics (`drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`).
+  - Unsupported or uninstalled engines fail open with structured skip reasons rather than crashing.
+- **Golden Image Visual Regression Suite (`tests/visual/force_overlay/test_golden_force_overlays.py`)**:
+  - Headless 320x240 golden regression fixtures verifying Matplotlib 3D, OpenCV calibrated pinhole projection, and MuJoCo EGL native offscreen renders against committed golden images.
+  - Perceptual tolerance enforced strictly via `MAX_MEAN_ABS_DIFF = 2.0` on $[0, 255]$ ($2/255$ scale); threshold relaxation is prohibited.
+- **Authoritative Force Overlay Documentation & Parity Records**:
+  - User Guide in `docs/user_guide/force_overlay.md` detailing the 7-kind `FORCE_KIND_PALETTE`, axial tension/compression color scales, desktop GUI controls, web Three.js/SVG toggles, video compositing labels, and engine-specific limits.
+  - Cross-linked from `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Feature parity ledger (`src/config/feature_parity.json`) updated to record multi-engine producer wiring, and `force_overlays` tile in `launcher_manifest.json` promoted to `ready`.
+
 ## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
 
 Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
 - **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
@@ -7726,6 +7742,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11315 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
 | 2026-10-03 | #11353 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
 | 2026-10-03 | #11377 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence (#11308). |
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill: opencv_segments renderer with painter depth sorting, back-face culling, Lambert shading, and reference_volumes integration (#11311). |

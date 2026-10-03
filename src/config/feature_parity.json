@@ -490,7 +490,7 @@
       "web": "ui/src/components/visualization/ForceColorControls.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305)."
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures; producers now wired across MuJoCo, Simscape, Drake, Pinocchio, and OpenSim (ADR-0052, #11305, #11315)."
     }
   }
 }
