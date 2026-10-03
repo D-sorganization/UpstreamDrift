@@ -2,7 +2,8 @@
 
 - Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Published scope checkpoint `3a1a6a8e428afffc20346d7a32044b4c602d4c1b`; upload responsiveness follow-up SELF.
 - Registered raw reviews, exact selected-domain checks and native/web/export provenance are implemented. Root 294 Python/39 UI cases and static checks pass. Preserved failures and procedures are in [Camera and Scope Procedure](docs/development/necromatcher-conditional-camera-and-scope.md).
-- Next: restrict the authored contact schedule explicitly, run a new controlled Tiger [0,191) fit and independently verify new overlays. No new historical fit, physical qualification or ControlTower transfer is claimed. Full goal remains active.
+- Restricted trial at published `6695085027bdf4f354d867136930931591002d80`: explicit contact restriction retained existing 105/120 anchors, author stage saved `tiger-both-hands-authored-seed-v21`; strict fitting timed out at unchanged 300-second wall budget. Session 32543 closed exit 1; no final fit/candidate/completion. Original non-index bytes/index records preserved; ten allowed files added. Solver evaluations/elapsed unavailable. This is an unoptimized seed, not a successful match.
+- Next: independent partial-stage closure, public read-only setup profiling and same-domain parent/seed assessment before retrying; explicitly labelled source-bound seed overlays after fresh pilot review. No physical qualification or new ControlTower transfer is claimed. Full goal remains active.
 
 # Isolated Native Hypothesis Admission — #11376
 

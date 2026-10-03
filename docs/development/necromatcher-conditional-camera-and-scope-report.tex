@@ -3,19 +3,19 @@
 \usepackage{amsmath,amssymb,booktabs,longtable,xcolor,hyperref,fancyhdr}
 \definecolor{ink}{HTML}{16324F}
 \hypersetup{colorlinks=true,linkcolor=ink,urlcolor=ink}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V2}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V3}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
 \newcommand{\digest}[1]{\texttt{\small\detokenize{#1}}}
 \begin{document}
 \begin{center}
 {\LARGE\color{ink}\bfseries Conditional Camera Initialization\\and Two-Hand Scope Methods}\par
 \vspace{8pt}{\large A Source-Bound Tiger Woods and Ben Hogan Supplement}\par
-\vspace{8pt}3 October 2026\quad\textbullet\quad Independently Reviewed Methods V2
+\vspace{8pt}3 October 2026\quad\textbullet\quad Methods V3: Partial Trial Recorded
 \end{center}
 \section*{Status and Purpose}
 This supplement describes one closed, read-only conditional-camera diagnostic and the exclusion of Tiger's uncertain late hand-release phase. It accompanies exact serialized data; it is not a calibration report or an accepted historical reconstruction. Root observed producer session 74740 and independent checker session 92074 close with exit code zero. Root accepted the independent serialized-output and complete-byte preservation review. This acceptance does not independently recompute native projections or reconstruct the capture clock.
 
-No conditional camera was adopted or registered. No motion optimizer ran, no library asset changed, no roles were adopted, and scientific qualification remains false. The public initializer internally refines camera pose; ``no optimizer'' here means no trajectory-fitting optimization, not an assertion that RefineLM performs no numerical refinement.
+In the camera experiment, no conditional camera was adopted or registered, no motion optimizer ran, and no library asset changed; no roles were adopted, and scientific qualification remains false. The public initializer internally refines camera pose; ``no optimizer'' here means no trajectory-fitting optimization, not an assertion that RefineLM performs no numerical refinement.
 
 The diagnostic holds each saved native model, trajectory and assumed intrinsics fixed. It changes only a conditional static camera's extrinsics, then freshly evaluates unchanged and conditional camera states over identical source-bound scopes. It asks whether this existing initialization procedure improves image agreement for the fixed inferred motion. It does not establish the historical camera or resolve model geometry, grip topology or physical timing.
 \section*{Preregistered Comparison Scope}
@@ -31,7 +31,7 @@ The portable \texttt{results-data.json} contains exact scalar values, role array
 \section*{Source Scope and Reviewed Boundary}
 Tiger retains frame indices $0,\ldots,190$, expressed as the half-open interval $[0,191)$. The root's authenticated original-frame review chose a conservative cutoff before the uncertain release transition. This follows the user's instruction to match the interval with both hands on the club. It does not measure an exact physical release instant or certify every retained frame's contact state. Original frame identities and encoded presentation timestamps bind the choice to this capture.
 
-Tiger's retained training rows are $0,10,\ldots,190$. Hogan retains the unchanged interval $[0,750)$ and its original 23 training frames. The full historical assets remain intact. This read-only diagnostic restricts actual primary body and shaft evaluation; it does not retroactively change old full-capture fits or pretend that a durable fitting-scope API has already been implemented.
+Tiger's retained training rows are $0,10,\ldots,190$. Hogan retains the unchanged interval $[0,750)$ and its original 23 training frames. The full historical assets remain intact. This read-only diagnostic restricts actual primary body and shaft evaluation; it does not retroactively change old full-capture fits or alter their original whole-capture provenance. Durable scope integration was implemented after this diagnostic, as described later in this edition.
 
 The original Tiger record with shaft evidence at frame 209 is excluded before term construction and evaluation. It is not evaluated with zero weight, converted into an abstention or counted as a passed constraint. The original point coordinates and role labels of retained evidence are unchanged.
 \section*{Clock and Image Identity}
@@ -126,8 +126,46 @@ Root release and actual finally-preservation digests are:
 Complete source, library, project, runtime and helper/config facets are captured before and after. Complete expected source/library/project maps are compared before SDK import; the worker imports MuJoCo before workspace-dependent native interfaces. Checked helper buffers authenticate transitive imports and reject foreign module caches. SDK import failure is cached without retry. Preservation retains primary failures and collects remaining facets; success requires zero library delta. The frozen SDK-free preparation has 42 green tests, Ruff and mypy checks, plus retained earlier failure logs.
 
 The independently preserved scope contains 14,805 canonical tracked files and 391 library files; four Gitlink directories are not counted as tracked file bytes. These counts do not replace full-map identity. Root reran 17 SDK-free checker tests and accepted the completed check. Its root acceptance SHA256 is \digest{852d579c442bda76793ad959beda6e172e49df6b254e46f8e986b1acc8890d5f}. Exact machine manifests carry paths, byte sizes and hashes; command details are copied verbatim in \texttt{REPLAY.md}. Use the known Python 3.13 executable with \texttt{-X utf8}, repository/src/shared-python import paths and one-thread BLAS environment. Do not rerun the exclusive completed output directory or treat archived authorization as permission for a new invocation.
-\section*{Proposed Durable Scoped Fit}
-A subsequent fitting recipe could use original Tiger training indices $0,10,\ldots,190$ and \texttt{sampled\_parent} initialization, creating a new immutable fit with explicit original parent lineage. Contact phases must validate against the restricted exact source clock, and the same shaft subsets must exclude frame 209 before term construction. Camera, objective, dense grip assessment and exports must share the same scope. No zeroed post-release loss may masquerade as a passed grip constraint.
+\section*{Implemented Durable Scope}
+The durable \texttt{SourceFitScope} now binds capture/hash/complete-clock identity, reviewed first and excluded frame identities, half-open bounds and authored uncertainty. Native and web consumers import the exact immutable raw review through a common owner. Queue admission, worker compilation, publication, recall and overlays freshly rebind it. Descendants inherit or narrow the window; excluded body, shaft and contact rows reject rather than silently vanish. Root implementation validation passed 294 Python and 39 interface cases; a separate 13-case upload check verifies registration stays off the event loop. These checks do not qualify historical reconstruction.
 
-A durable \texttt{SourceFitScope} remains proposed, not implemented here: capture/hash/clock identity, reviewed boundary frames, half-open interval, rationale and parent lineage; canonical admission and publication rebinding; inherited refit/audit/export restrictions. Fail-first tests should prove excluded providers are never called and mismatched boundaries reject before work. Old whole-capture fits remain immutable. This report does not authorize that implementation or any new fit.
+\newpage
+\section*{Restricted Trial: Initialization and Failure}
+The trial producer is:\begin{center}\digest{6695085027bdf4f354d867136930931591002d80}\end{center}Tiger uses 20 training indices $0,10,\ldots,190$, six Hermite knots and the unchanged saved camera/model. The final unpinned contact phase ends at frame 190; existing review anchors at 105 and 120 remain in domain. Shaft training retains frame 0 and explicitly excludes frame 209. No exact physical hand-contact measurement was introduced.
+
+\subsection*{Strict Admission Before Authored Initialization}
+Sampling the original longer spline onto the shorter knot domain failed the public Bernstein control-bound check: physical velocity violated its bounds. This preserved failure motivated a separate author-initialization operation. It was not accepted as an exact strict restart, and no optimizer or Library writes occurred during that feasibility probe.
+
+The public authored policy sets 198 knot velocities to zero while preserving every knot position. Native preflight authenticated the exact selected source domain and unchanged complete source/Library maps. Its training body RMS is $31.8610147$ px and maximum scaled geometric constraint residual is $656.3979098$. Thus admissible initialization does not establish geometric feasibility. The resulting coefficient SHA256 is:
+\begin{center}\digest{039799006ed95b3530999434a86ae221f5cb460bd94c462979390f1dc8da5174}\end{center}
+
+\subsection*{Actual Two-Stage Outcome}
+The author stage saved \texttt{tiger-both-hands-authored-seed-v21}; its worker elapsed time was $59.480674$ s, with no optimizer invocation. The strict fitting stage then restarted from that exact new seed with preserved-spline initialization. The evaluation cap remained 120 and the worker wall cap remained 300 s. This stage exceeded the wall cap. Root observed process session 32543 close with exit 1; no final fit, final candidate or completion receipt was published.
+
+Solver evaluation counts and solver elapsed time are null because the killed child did not deliver its terminal receipt. Neither zero iterations nor 300 seconds of solver work may be inferred. The saved seed is an unoptimized research artifact, not a successful fitted match. Its immutable asset SHA256 is:
+\begin{center}\digest{a8c62a72cd313e552fe3ee78e7869b1b3d694c07f559470738d819693f9d6e52}\end{center}
+
+\newpage
+\section*{Partial Publication and Repeatability}
+Before execution, full maps captured 14,825 canonical tracked source files and 391 Library files. The failed-run preservation receipt retained all original non-index Library bytes and original index records. Exactly ten allowlisted files were added: two assets, four successful-author-run files and four failed-strict-run files. Index metadata changed only through the permitted publication path; no active run remains. Full-map comparison governs acceptance, not file-count equality.
+
+\begin{center}\small
+Released Configuration\\
+\digest{e916e9cf423b06fd60fd94b3cfa7b604ee75a2819f986aaa88e66eebb49d1948}\\[5pt]
+Released Freeze\\
+\digest{32b2d35598850909e42c0c90c2dffca1ecb4ecf143ff75d3cd85c3bcec28f7d0}\\[5pt]
+Closed-Process Proof\\
+\digest{f6c0f971ad60444d9d6d656f6b6ce3b19d48146aa0cd819412780f027dbaaa41}\\[5pt]
+Finally Preservation\\
+\digest{ed77ca0b8e0c80a16fe258c4337cd5243ebed297832693a0f2267b7d2390d90b}\\[5pt]
+Durable Journal\\
+\digest{58e7f4328acb851f83a9d610523b72b79dea1ac44dda73689f869611226f13ff}\\[5pt]
+\end{center}
+
+The root partial acceptance checks observed exit status, frozen pre-execution maps, original asset bytes, exact added-file identities and absence of a final artifact. Independent canonical-stage and seed-provenance checking is pending. The separately frozen successful-writer checker and final-fit rendering proposal remain ineligible; a failed run must not be converted into a successful receipt by weakening their criteria.
+
+\subsection*{Next Controlled Measurement}
+Capture fresh complete baselines, then profile public native binding, source authentication, exact strict seed initialization and canonical metrics without optimization or writes. Compare parent and seed on the identical 191-frame dense and 20-frame training domains, with separate shaft buckets. Measured stage costs must guide any efficiency change before a retry or budget change. Preservation and identity checks remain required.
+
+Interim overlays must explicitly state that the artifact is an unoptimized authored research seed. Retain original imagery, model shapes, skeletons, variable opacity and source-clock identity. Fresh pilot review precedes selected stills or full-video export; neither a rendered shape nor low image error establishes anatomical, camera, shutter, ROM or dynamics validity. No new ControlTower transfer is claimed. The Tiger/Hogan Necromatcher goal remains active.
 \end{document}

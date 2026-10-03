@@ -175,18 +175,74 @@ loaded, preserving canonical error mapping and real native-bound admission.
 The first follow-up runner lacked that plugin; its two runner failures are
 retained separately from the implementation RED case.
 
-A future scoped Tiger fit uses original training frames `0,10,...,190`, creates a
-new immutable version and records `sampled_parent` initialization honestly.
+The restricted Tiger trial uses original training frames `0,10,...,190` and
+creates immutable versions with explicit initialization provenance.
 The raw receipt preparation is
 `Repositories/Temp/tiger-two-hand-receipt-preparation-v1/tiger-both-hands-review.json`
 (2,636 bytes; SHA256
 `a71221938c31e57719440566d5e91a9871fc428cc285c63ed08326bec95f94dc`).
 It adapts the exact root human review and passes typed byte/schema validation;
-it is not registered in the historical library. Fresh canonical capture binding
-and controlled execution remain required. The preparation gate is disabled.
+the controlled author stage registered these exact bytes in the historical
+library. Fresh canonical capture binding remains required on reuse.
 The whole-capture preserved spline cannot silently be claimed as an exact
 restricted restart. The existing authored contact schedule ends at frame 209;
-it needs an explicit source-clock restriction with new in-domain review anchors.
+its explicit source-clock restriction ends at frame 190, retaining the existing
+in-domain review anchors at frames 105 and 120 for the final unpinned phase.
 Do not silently drop contact records or zero post-release grip losses and report
 them as passed constraints. Scope integration and a new actual motion fit remain
 separate acceptance steps. The full Necromatcher goal remains active.
+
+### Restricted Trial and Partial Publication
+
+Producer `6695085027bdf4f354d867136930931591002d80` first tested the shorter
+sampled-parent initializer without optimizing or writing the library. The public
+Hermite domain rejected it because physical velocity violated Bernstein control
+bounds. This failure motivated a separate authored initialization operation;
+it did not justify silently projecting a strict restart.
+
+The native preflight preserved all 14,825 tracked source files and 391 library
+files. The authored initialization changed 198 knot velocities to zero and
+changed no knot positions. Its initial training body RMS was 31.8610 px; its
+maximum scaled geometric residual was 656.398. These describe the seed and do
+not establish complete constraint feasibility or scientific qualification.
+
+The two-stage execution saved `tiger-both-hands-authored-seed-v21`, then started
+a strict preserved-spline fit from that exact new seed. The authored worker
+reported 59.4807 seconds and no optimizer invocation. The strict worker exceeded
+the unchanged 300-second wall budget; root observed session 32543 close with
+exit 1. No final `tiger-both-hands-scoped-fit-v21`, final candidate or completion
+receipt was published. Terminal evaluation counts and solver elapsed time are
+unavailable; the failure cannot distinguish setup costs from solver costs.
+
+The failure receipt verifies original non-index asset bytes and original index
+records were preserved. Ten allowlisted files were added: the registered scope
+review, authored seed, successful author-run records and failed strict-run
+records. No active run remains. The partial closure proof is in
+`Repositories/Temp/tiger-both-hands-fit-preparation-v2/root-execution-release-v1`;
+the durable journal and preservation receipt are in
+`Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Scoped Fit V1`.
+
+Do not run the completed-writer assessment or final-fit rendering proposal on
+this partial result. Next, independently check both canonical stage records and
+the seed provenance, capture fresh complete baselines, and profile the public
+binding and strict initializer without optimization or writes. Compare parent
+and seed using identical 191-frame dense and 20-frame training domains. Render
+seed previews only with explicit unoptimized authored-seed captions, fresh
+source-bound pilot review and preserved shape/skeleton layers. Do not increase
+the budget or retry until measured costs identify the appropriate next change.
+
+Canonical captions now derive authored-seed status from the authenticated fit's
+operation, request policy and strict false optimizer/convergence fields. They
+display **UNOPTIMIZED AUTHORED RESEARCH SEED** above the existing research and
+clock text. Publication/download reconstructs this label from fresh canonical
+fit metadata and rejects a forged or omitted seed declaration. Legacy captions
+retain their existing layout. Root passed 58 caption/video/job regression cases;
+Ruff and pinned mypy passed. This implements truthful labelling; no new export
+has yet been rendered. Root also passed 29 synthetic profile/partial-check cases.
+
+The eight-page Methods V3 source/PDF and root page review are in the existing
+Desktop report folder. All eight pages were visually reviewed; unchanged final
+page images were byte-compared after the last wording correction. Compilation
+used existing MiKTeX with installer disabled because the built-in compiler could
+not locate platform directories. There are no overfull/underfull boxes. Exact
+Methods V2 source/PDF/review remain under `accepted-methods-v2` in that folder.

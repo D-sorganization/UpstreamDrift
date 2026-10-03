@@ -247,7 +247,7 @@ def _check_caption_manifest(manifest: dict[str, Any], request: dict[str, Any]) -
         (row["frame_index"], row["frame"]) for row in manifest.get("frames", [])
     ] != list(zip(fit["frame_indices"], fit["frames"], strict=True)):
         raise ValueError("Caption frames differ from bound source identities")
-    validate_caption_manifest(manifest, options)
+    validate_caption_manifest(manifest, options, fit)
 
 
 def _check_shape_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:

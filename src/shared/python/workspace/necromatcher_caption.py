@@ -40,6 +40,7 @@ class CaptionFrame:
     count: int
     shaft: bool = False
     shape_opacity: float | None = None
+    authored_seed: bool = False
 
     def __post_init__(self) -> None:
         if (
@@ -49,7 +50,11 @@ class CaptionFrame:
             or self.count < 0
         ):
             raise ValueError("Caption identities require nonnegative integer counts")
-        if not isinstance(self.pts, Fraction) or type(self.shaft) is not bool:
+        if (
+            not isinstance(self.pts, Fraction)
+            or type(self.shaft) is not bool
+            or type(self.authored_seed) is not bool
+        ):
             raise ValueError("Caption requires exact rational PTS and shaft flag")
         for value in (self.rms, self.shape_opacity):
             if value is not None and (
@@ -110,6 +115,40 @@ def caption_provenance(options: CaptionOverlayOptions) -> dict[str, Any]:
     }
 
 
+def authored_seed_status(fit: Mapping[str, Any]) -> bool:
+    """Derive an unoptimized authored seed from canonical fit metadata only.
+
+    Missing legacy provenance is not relabelled. Contradictory authored-operation
+    records reject; callers cannot supply a display option that claims seed status.
+    """
+    if not isinstance(fit, Mapping):
+        raise ValueError("Caption requires a canonical fit record")
+    provenance = fit.get("provenance", {})
+    if not isinstance(provenance, Mapping):
+        raise ValueError("Caption requires canonical fit provenance")
+    if provenance.get("operation") != "author_initialization":
+        return False
+    evidence = fit.get("evidence", {})
+    if not isinstance(evidence, Mapping):
+        raise ValueError("Caption requires canonical fit evidence")
+    original = evidence.get("original_fit", {})
+    request = provenance.get("request_options", {})
+    policy = "authored_range_project_zero_slopes"
+    if (
+        not isinstance(original, Mapping)
+        or original.get("optimizer_ran") is not False
+        or original.get("converged") is not False
+        or not isinstance(original.get("initialization"), Mapping)
+        or original["initialization"].get("policy") != policy
+        or not isinstance(request, Mapping)
+        or request.get("operation") != "author_initialization"
+        or not isinstance(request.get("config"), Mapping)
+        or request["config"].get("initialization_policy") != policy
+    ):
+        raise ValueError("Authored seed caption contradicts canonical fit metadata")
+    return True
+
+
 def _texts(frame: CaptionFrame) -> tuple[str, ...]:
     clock = f"{frame.pts.numerator}/{frame.pts.denominator}s"
     metric = f"RMS {frame.rms:.2f}px" if frame.rms is not None else "RMS unavailable"
@@ -118,6 +157,8 @@ def _texts(frame: CaptionFrame) -> tuple[str, ...]:
         f"Physical Time Unknown | F{frame.index} | PTS {clock}",
         f"{metric} | G:Obs B:Rig Y:Residuals",
     ]
+    if frame.authored_seed:
+        lines.insert(0, "UNOPTIMIZED AUTHORED RESEARCH SEED")
     extra = "M:Fragment C:Axis" if frame.shaft else ""
     if frame.shape_opacity is not None and frame.shape_opacity > 0:
         extra += (
@@ -187,11 +228,19 @@ def draw_caption(image: np.ndarray, layout: CaptionLayout) -> None:
 
 
 def validate_caption_manifest(
-    manifest: dict[str, Any], options: CaptionOverlayOptions
+    manifest: dict[str, Any],
+    options: CaptionOverlayOptions,
+    fit: Mapping[str, Any] | None = None,
 ) -> None:
     """Recompute complete semantic/layout metadata before owned publication/download."""
     if manifest.get("caption_overlay") != caption_provenance(options):
         raise ValueError("Caption qualification or options differ from request")
+    seed = authored_seed_status(fit) if fit is not None else False
+    if "authored_initialization_seed" in manifest:
+        if manifest["authored_initialization_seed"] is not True or not seed:
+            raise ValueError("Seed caption requires authenticated canonical fit")
+    elif seed:
+        raise ValueError("Authored seed manifest is missing its visible status")
     shape = manifest.get("shape_overlay", {}).get("options", {})
     for row in manifest["frames"]:
         identity = row["frame"]
@@ -206,6 +255,7 @@ def validate_caption_manifest(
             row["matched_marker_count"],
             "shaft_overlay" in manifest,
             shape.get("opacity"),
+            seed,
         )
         expected = caption_layout(
             tuple(manifest["image_size"]), frame, options
