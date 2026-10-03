@@ -9,8 +9,6 @@ import { useMemo } from 'react';
 import type { GlyphSetV1 } from '@/types/glyphs';
 import { buildForceOverlayScene } from './forceOverlayScene';
 
-export type { ForceVector3D } from '@/api/generated/types';
-
 /** Legacy overlay configuration interface */
 export interface ForceOverlayConfig {
   enabled: boolean;
@@ -24,8 +22,6 @@ export interface ForceOverlayConfig {
 export interface ForceOverlayProps {
   /** Serialized GlyphSet from WebSocket frame or REST endpoint */
   glyphs?: GlyphSetV1 | null;
-  /** Deprecated backward-compatible vectors list */
-  vectors?: unknown[];
 }
 
 /**

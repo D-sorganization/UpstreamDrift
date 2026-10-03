@@ -29,7 +29,6 @@ from src.api.models.responses import (
     AIPHandshakeResponse,
     AIPJsonRpcResponse,
     ForceOverlayResponse,
-    ForceVector3D,
     ModelCompareResponse,
     ModelExplorerResponse,
     URDFTreeNode,
@@ -78,77 +77,44 @@ class TestForceOverlayRequestContract:
         assert req.body_filter == ["torso", "hand"]
 
 
-class TestForceVector3DContract:
-    """Validate ForceVector3D response model."""
+class TestForceVector3DRemoved:
+    """The deprecated ForceVector3D model and ``vectors`` field are gone (#11362)."""
 
-    def test_basic_vector(self) -> None:
-        """Basic force vector creation."""
-        vec = ForceVector3D(
-            body_name="torso",
-            force_type="applied",
-            origin=[0.0, 1.0, 0.0],
-            direction=[1.0, 0.0, 0.0],
-            magnitude=50.0,
-        )
-        assert vec.body_name == "torso"
-        assert vec.force_type == "applied"
-        assert vec.magnitude == 50.0
-        assert vec.color == [1.0, 0.0, 0.0, 1.0]  # Default red
+    def test_model_removed(self) -> None:
+        """ForceVector3D must no longer exist in the response models."""
+        from src.api.models import responses
 
-    def test_custom_color_and_label(self) -> None:
-        """Custom color and label."""
-        vec = ForceVector3D(
-            body_name="arm",
-            force_type="gravity",
-            origin=[0.0, 0.5, 0.0],
-            direction=[0.0, -1.0, 0.0],
-            magnitude=9.80665,
-            color=[0.0, 0.0, 1.0, 0.8],
-            label="9.80665 N",
-        )
-        assert vec.color == [0.0, 0.0, 1.0, 0.8]
-        assert vec.label == "9.80665 N"
+        assert not hasattr(responses, "ForceVector3D")
 
 
 class TestForceOverlayResponseContract:
     """Validate ForceOverlayResponse model."""
 
     def test_empty_response(self) -> None:
-        """Response with no vectors."""
+        """Response with no glyphs."""
         resp = ForceOverlayResponse(
             sim_time=0.0,
-            vectors=[],
             total_force_magnitude=0.0,
             total_torque_magnitude=0.0,
         )
         assert resp.sim_time == 0.0
-        assert len(resp.vectors) == 0
+        assert resp.glyphs is None
 
-    def test_response_with_vectors(self) -> None:
-        """Response with multiple vectors."""
-        vectors = [
-            ForceVector3D(
-                body_name="torso",
-                force_type="applied",
-                origin=[0.0, 1.0, 0.0],
-                direction=[1.0, 0.0, 0.0],
-                magnitude=50.0,
-            ),
-            ForceVector3D(
-                body_name="arm",
-                force_type="gravity",
-                origin=[0.0, 0.5, 0.0],
-                direction=[0.0, -1.0, 0.0],
-                magnitude=9.80665,
-            ),
-        ]
+    def test_vectors_field_removed(self) -> None:
+        """The deprecated ``vectors`` field is absent from model and schema."""
+        assert "vectors" not in ForceOverlayResponse.model_fields
+        assert "vectors" not in ForceOverlayResponse(sim_time=0.0).model_dump()
+        assert "vectors" not in ForceOverlayResponse.model_json_schema()["properties"]
+
+    def test_response_with_totals(self) -> None:
+        """Response carries glyphs and totals."""
         resp = ForceOverlayResponse(
             sim_time=1.5,
-            vectors=vectors,
+            glyphs={"schema_version": "glyph-set-v1"},
             total_force_magnitude=59.81,
             total_torque_magnitude=50.0,
         )
-        assert len(resp.vectors) == 2
+        assert resp.glyphs == {"schema_version": "glyph-set-v1"}
         assert resp.total_force_magnitude == pytest.approx(59.81)
 
 

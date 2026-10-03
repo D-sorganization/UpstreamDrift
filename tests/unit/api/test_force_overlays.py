@@ -55,7 +55,7 @@ def test_build_overlay_response_disabled() -> None:
     assert resp.glyphs is None
     assert resp.frame is None
     assert resp.unavailable_reason == "Force overlay disabled in request"
-    assert resp.vectors == []
+    assert not hasattr(resp, "vectors")
     assert resp.total_force_magnitude == 0.0
 
 

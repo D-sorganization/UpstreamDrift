@@ -113,18 +113,8 @@ def test_get_force_overlays_with_provider(provider_client: TestClient) -> None:
     torque_arc = glyphs["torque_arcs"][0]
     assert torque_arc["center_m"] == [0.12, 0.34, 0.56]
 
-    # Backward-compatible vectors
-    vectors = data["vectors"]
-    assert len(vectors) == 2
-    # Check that origins match provider points
-    origins = [v["origin"] for v in vectors]
-    assert [0.25, -0.15, 0.0] in origins
-    assert [0.12, 0.34, 0.56] in origins
-
-    # Ensure no fabricated demo pattern (y = 0.5 + 0.3 * i) exists
-    for v in vectors:
-        assert v["origin"] != [0.0, 0.5, 0.0]
-        assert v["origin"] != [0.0, 0.8, 0.0]
+    # The deprecated legacy ``vectors`` list is removed (#11362)
+    assert "vectors" not in data
 
 
 def test_get_force_overlays_without_engine() -> None:
@@ -140,7 +130,7 @@ def test_get_force_overlays_without_engine() -> None:
 
     assert data["glyphs"] is None
     assert data["frame"] is None
-    assert data["vectors"] == []
+    assert "vectors" not in data
     assert data["unavailable_reason"] is not None
     # No demo vectors!
     assert data["total_force_magnitude"] == 0.0
@@ -162,7 +152,7 @@ def test_get_force_overlays_non_provider_engine() -> None:
 
     assert data["glyphs"] is None
     assert data["frame"] is None
-    assert data["vectors"] == []
+    assert "vectors" not in data
     assert data["unavailable_reason"] is not None
 
 
