@@ -146,7 +146,7 @@ shared Python plotters (`shared/python/motion_matching/plot_*.py`); only
 engine-specific 3D viewers (Drake Visualizer, MuJoCo Viewer, OpenSim's GUI,
 Meshcat for Pinocchio) need engine-bespoke code.
 
-### 2.5.0 Force-overlay channels (ADR-0052, #11285)
+### 2.5.0 Force-Overlay Channels (ADR-0052, #11285)
 
 Engines expose force/torque overlays through the `ForceTorqueProvider` and
 `AxialLoadProvider` capabilities. Wrenches are world-frame (Z-up), SI, and are
