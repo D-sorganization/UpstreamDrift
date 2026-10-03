@@ -11,6 +11,7 @@ import math
 from collections.abc import Callable, Mapping, Sequence
 from numbers import Real
 
+from ..plot_style.color_utils import hex_to_rgba
 from .axial_loads import AxialLoadFrame
 from .force_colors import ForceColorScale
 
@@ -143,8 +144,8 @@ class MeshcatForceColors:
             color = scale.color(force, "")
             for path, base in objects.items():
                 if color:
-                    rgb = [int(color[i : i + 2], 16) / 255 for i in (1, 3, 5)]
-                    self._setter(path, "color", [*rgb, base[3]])
+                    rgba = hex_to_rgba(color, alpha=base[3])
+                    self._setter(path, "color", list(rgba))
                     self._overridden.add(path)
                 elif path in self._overridden:
                     self._setter(path, "color", list(base))
