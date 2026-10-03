@@ -424,6 +424,14 @@ class TestCIEnvironmentCompatibility:
         guard = next(s for n, s in steps.items() if "actually ran" in n)
         assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
         assert "${{ matrix.evidence }}" in guard["run"]
+        names = list(steps)
+        isolate = next(n for n in names if n.startswith("Isolate Python tool cache"))
+        setup = next(n for n in names if n.startswith("Set up Python"))
+        assert names.index(isolate) < names.index(setup)
+        # Shared contract changes must trigger the parity lanes (push and PR).
+        for trigger in ("push", "pull_request"):
+            triggers = data.get("on", data.get(True, {}))
+            assert "src/shared/python/force_overlay/**" in triggers[trigger]["paths"]
 
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
         self,
