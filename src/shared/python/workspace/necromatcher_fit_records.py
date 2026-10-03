@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 import numpy as np
+import json
 from src.shared.python.motion_matching.historical_fit.contracts import (
     ImageFitConfig,
     ImageFitResult,
@@ -15,6 +16,13 @@ from src.shared.python.motion_matching.historical_fit.spline_expansion import (
 )
 from src.shared.python.estimation import CubicHermiteSplineTrajectory
 from .necromatcher_spline import preserved_fit_spline
+from .necromatcher_fit_jobs import _digest, _parse_shaft_recipe
+from src.shared.python.motion_matching.historical_fit.shaft_geometry import (
+    AuthoredShaftAxis,
+)
+from src.shared.python.motion_matching.historical_fit.shaft_residuals import (
+    ShaftAxisAssessment,
+)
 
 
 def _validate_seed_samples(
@@ -217,6 +225,61 @@ def native_fit_evidence(
     }
 
 
+def _add_shaft_record(
+    output: dict[str, Any], request: dict[str, Any], result: ImageFitResult
+) -> None:
+    if "shaft_images" not in request:
+        if getattr(result, "additional_image_assessments", ()):
+            raise ValueError("Shaft diagnostics require an explicit admitted recipe")
+        return
+    recipe = request["shaft_images"]
+    declared, _ = _parse_shaft_recipe(recipe)
+    evidence = declared.evidence
+    assessments = result.additional_image_assessments
+    if (
+        len(assessments) != 1
+        or not isinstance(assessments[0], ShaftAxisAssessment)
+        or assessments[0].evidence_sha256 != evidence.sha256
+    ):
+        raise ValueError("Shaft diagnostics differ from explicit recipe evidence")
+    assessment = assessments[0]
+    times = tuple(float(frame.frame.presentation_time) for frame in evidence.frames)
+    if (
+        assessment.frame_indices
+        != tuple(frame.frame_index for frame in evidence.frames)
+        or assessment.source_times != times
+        or min(times) < result.source_times[0]
+        or max(times) > result.source_times[-1]
+    ):
+        raise ValueError("Shaft raw diagnostic source frames differ from recipe")
+    if not isinstance(request.get("shaft_axis"), dict):
+        raise ValueError("Shaft recipe requires an explicit typed authored axis record")
+    raw_axis = dict(request["shaft_axis"])
+    if raw_axis.pop("semantic", None) != "infinite_authored_shaft_axis":
+        raise ValueError("Shaft authored axis semantic differs")
+    axis = AuthoredShaftAxis(**raw_axis)
+    if (
+        axis.native_model_sha != result.model_sha
+        or recipe["evidence_sha256"] != evidence.sha256
+    ):
+        raise ValueError("Shaft axis/model/evidence identity differs from result")
+    output["provenance"]["shaft_images"] = {
+        "recipe_sha256": _digest(recipe),
+        "axis_sha256": _digest(axis.to_record()),
+        "axis": axis.to_record(),
+    }
+    output["evidence"]["shaft_axis"] = {
+        "recipe": recipe,
+        "assessments": [asdict(assessment)],
+        "body_rms_pixels": result.rms_pixels,
+        "body_observed_point_count": result.observed_point_count,
+        "shaft_raw_metric": "unweighted_perpendicular_scalar_pixel_rms",
+        "confidence_uncertainty_status": "authored_uncalibrated",
+        "physical_time_qualified": False,
+        "physical_geometry_qualified": False,
+    }
+
+
 def build_native_fit_payload(
     request: dict[str, Any],
     source: dict[str, Any],
@@ -267,4 +330,5 @@ def build_native_fit_payload(
     }
     if coordinate_expansion is not None:
         output["provenance"]["coordinate_expansion"] = asdict(coordinate_expansion)
+    _add_shaft_record(output, request, result)
     return output

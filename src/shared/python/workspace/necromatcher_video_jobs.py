@@ -44,6 +44,8 @@ from src.shared.python.version_info import get_repo_root
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
+from .necromatcher_shaft_evidence import bind_fit_shaft_evidence
+from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -122,6 +124,28 @@ def _execute_worker(
                 stream.close()
 
 
+def video_shaft_evidence(
+    library: NecromatcherLibrary, fit: dict[str, Any], request: dict[str, Any]
+) -> ShaftAxisEvidence | None:
+    """Reopen reviewed PNGs and source clock; a request receipt is not admission."""
+    if "shaft_overlay" not in request:
+        return None
+    recipe = request["shaft_overlay"]
+    if not isinstance(recipe, dict) or set(recipe) != {
+        "evidence",
+        "evidence_sha256",
+        "source_clock_sha256",
+    }:
+        raise ValueError("Malformed shaft overlay request")
+    evidence = ShaftAxisEvidence.from_record(recipe["evidence"])
+    if evidence.sha256 != recipe["evidence_sha256"]:
+        raise ValueError("Video shaft evidence hash differs from request")
+    bound = bind_fit_shaft_evidence(library, fit, evidence)
+    if bound.source_clock_sha256 != recipe["source_clock_sha256"]:
+        raise ValueError("Video shaft source clock differs from request")
+    return evidence
+
+
 def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str, Any]:
     fit = library.load_fit(request["source_fit_id"])
     if (
@@ -140,6 +164,7 @@ def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str,
             != fit[f"{kind}_hash"]
         ):
             raise ValueError("Video parent bytes changed")
+    video_shaft_evidence(library, fit, request)
     return fit
 
 
@@ -151,6 +176,21 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     manifest = _read(manifest_path)
     if manifest.get("schema") != "necromatcher/source-overlay-video/1":
         raise ValueError("Unsupported overlay manifest")
+    if "shaft_overlay" in request:
+        shaft = manifest.get("shaft_overlay")
+        if not isinstance(shaft, dict) or any(
+            shaft.get(key) != expected
+            for key, expected in request["shaft_overlay"].items()
+        ):
+            raise ValueError("Overlay shaft evidence differs from the request")
+        if (
+            shaft.get("schema") != "necromatcher/shaft-video-overlay/1"
+            or shaft.get("uncertainty_calibrated") is not False
+            or shaft.get("physical_geometry_qualified") is not False
+        ):
+            raise ValueError("Overlay shaft qualification is malformed")
+    elif "shaft_overlay" in manifest:
+        raise ValueError("Disabled shaft overlay cannot include evidence")
     for name, expected in (
         ("fit_id", request["source_fit_id"]),
         ("fit_hash", request["source_fit_hash"]),
@@ -290,7 +330,9 @@ class NativeVideoSession:
             raise KeyError(run_id)
         return root
 
-    def submit(self, fit_id: str) -> dict[str, Any]:
+    def submit(
+        self, fit_id: str, shaft_evidence: ShaftAxisEvidence | None = None
+    ) -> dict[str, Any]:
         """Schedule a new overlay with owned paths and first/middle/last stills."""
         with self._lock:
             if self._closed:
@@ -323,6 +365,18 @@ class NativeVideoSession:
                 "execution_stamp": stamp,
                 "execution_started": False,
             }
+            hash_options: Any = request["selected_frames"]
+            if shaft_evidence is not None:
+                bound = bind_fit_shaft_evidence(self.library, fit, shaft_evidence)
+                request["shaft_overlay"] = {
+                    "evidence": shaft_evidence.to_record(),
+                    "evidence_sha256": shaft_evidence.sha256,
+                    "source_clock_sha256": bound.source_clock_sha256,
+                }
+                hash_options = {
+                    "selected_frames": request["selected_frames"],
+                    "shaft_overlay": request["shaft_overlay"],
+                }
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -332,7 +386,7 @@ class NativeVideoSession:
                     fit["capture_hash"],
                     fit["model_hash"],
                     stamp["runtime_sha256"],
-                    _digest(request["selected_frames"]),
+                    _digest(hash_options),
                     stamp["source_sha256"],
                 ),
                 budget_wall_s=_BUDGET_WALL_S,
@@ -395,6 +449,8 @@ class NativeVideoSession:
                 raise ValueError("Overlay metadata changed during verification")
 
             def publish() -> None:
+                if "shaft_overlay" in request:
+                    _parents(self.library, request)
                 atomic_write_json(
                     root / "complete.json",
                     {

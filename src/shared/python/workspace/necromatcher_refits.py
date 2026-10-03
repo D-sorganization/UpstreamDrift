@@ -20,7 +20,10 @@ from src.shared.python.motion_matching.jobs.service import JobHandle
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
 from .necromatcher_spline import preserved_fit_spline
-from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+from src.shared.python.motion_matching.historical_fit import (
+    ImageFitConfig,
+    ShaftAxisEvidence,
+)
 
 
 class NativeRefitSession:
@@ -39,7 +42,11 @@ class NativeRefitSession:
         self._closed = False
 
     def submit(
-        self, source_fit_id: str, new_fit_id: str, options: NativeRefitOptions
+        self,
+        source_fit_id: str,
+        new_fit_id: str,
+        options: NativeRefitOptions,
+        shaft_evidence: ShaftAxisEvidence | None = None,
     ) -> dict[str, Any]:
         with self._lock:
             if self._closed:
@@ -49,8 +56,17 @@ class NativeRefitSession:
                     handle.join(timeout=0)
                 except TimeoutError as exc:
                     raise RuntimeError("A research refit is already running") from exc
-            handle, root = start_native_refit(
-                self.library, source_fit_id, new_fit_id, options, self._service
+            arguments = (
+                self.library,
+                source_fit_id,
+                new_fit_id,
+                options,
+                self._service,
+            )
+            handle, root = (
+                start_native_refit(*arguments, shaft_evidence)
+                if shaft_evidence is not None
+                else start_native_refit(*arguments)
             )
             self._handles[root.name] = (handle, source_fit_id, new_fit_id)
             while len(self._handles) > 32:

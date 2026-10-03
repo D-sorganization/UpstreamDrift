@@ -60,6 +60,7 @@ from .necromatcher_review import CaptureReview
 from .necromatcher_shaft_evidence import (
     BoundShaftEvidence,
     bind_shaft_axis_evidence,
+    bind_fit_shaft_evidence,
     load_shaft_image_residuals,
 )
 from .necromatcher_projection import project_fit_frame
@@ -190,6 +191,7 @@ from .necromatcher_fit_records import build_native_fit_payload
 __all__ = [
     "BoundShaftEvidence",
     "bind_shaft_axis_evidence",
+    "bind_fit_shaft_evidence",
     "load_shaft_image_residuals",
     "build_native_fit_payload",
     "NativeFitBinding",

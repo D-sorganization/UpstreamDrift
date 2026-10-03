@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping
+from typing import Any
 import hashlib
 import json
 import re
@@ -132,25 +134,8 @@ def load_shaft_image_residuals(
     if not isinstance(evidence, ShaftAxisEvidence):
         raise ValueError("Typed shaft evidence required")
     binding = load_native_fit_binding(library, fit_id)
-    fit = binding.fit
-    if (
-        fit.get("capture_id") != evidence.capture_id
-        or fit.get("capture_hash") != evidence.capture_sha256
-    ):
-        raise ValueError("Shaft evidence capture differs from canonical fit binding")
-    frames = fit.get("frames")
-    if (
-        not isinstance(frames, list)
-        or not frames
-        or any(
-            not isinstance(frame, dict)
-            or frame.get("camera_id") != evidence.frames[0].frame.camera_id
-            for frame in frames
-        )
-    ):
-        raise ValueError("Shaft source camera differs from canonical fit frames")
     binding.review_inputs()
-    bound = bind_shaft_axis_evidence(library, evidence)
+    bound = bind_fit_shaft_evidence(library, binding.fit, evidence)
     axis = resolve_authored_shaft_axis(
         binding.definition_bytes, binding.plant.plant_sha
     )
@@ -167,3 +152,32 @@ def load_shaft_image_residuals(
     bundle = AdditionalImageResiduals(identity, (term,))
     bundle.validate(binding.plant)
     return binding, bundle
+
+
+def bind_fit_shaft_evidence(
+    library: NecromatcherLibrary, fit: Mapping[str, Any], evidence: ShaftAxisEvidence
+) -> BoundShaftEvidence:
+    """SDK-free rebind against a freshly canonical-loaded fit and source capture.
+
+    A caller mapping is not authentication. Queue/worker/publish callers must
+    obtain it from the canonical library loader at each admission boundary.
+    """
+    if not isinstance(evidence, ShaftAxisEvidence) or not isinstance(fit, Mapping):
+        raise ValueError("Typed shaft evidence and canonical fit mapping required")
+    if (
+        fit.get("capture_id") != evidence.capture_id
+        or fit.get("capture_hash") != evidence.capture_sha256
+    ):
+        raise ValueError("Shaft evidence capture differs from canonical fit binding")
+    frames = fit.get("frames")
+    if (
+        not isinstance(frames, list)
+        or not frames
+        or any(
+            not isinstance(frame, dict)
+            or frame.get("camera_id") != evidence.frames[0].frame.camera_id
+            for frame in frames
+        )
+    ):
+        raise ValueError("Shaft source camera differs from canonical fit frames")
+    return bind_shaft_axis_evidence(library, evidence)

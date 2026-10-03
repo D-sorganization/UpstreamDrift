@@ -328,3 +328,20 @@ def test_residual_admission_rejects_actual_binding_tamper(
     with pytest.raises(ValueError):
         load_shaft_image_residuals(library, "fit", value, 0.5)
     assert len(calls) == 1
+
+
+def test_fit_source_admission_guard_reuses_canonical_capture(binding_inputs):
+    from src.shared.python.workspace import bind_fit_shaft_evidence
+
+    library, value, _, _ = binding_inputs
+    fit = {
+        "capture_id": value.capture_id,
+        "capture_hash": value.capture_sha256,
+        "frames": [value.frames[0].frame.to_dict()],
+    }
+    assert bind_fit_shaft_evidence(library, fit, value) == bind_shaft_axis_evidence(
+        library, value
+    )
+    fit["frames"][0]["camera_id"] = "other"
+    with pytest.raises(ValueError, match="camera"):
+        bind_fit_shaft_evidence(library, fit, value)

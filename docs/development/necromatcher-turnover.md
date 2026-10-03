@@ -13,6 +13,17 @@ Owner priority: integrate historical footage matching as **Necromatcher**, with 
 - Canonical `user_config_path`: persistent local library location; `NECROMATCHER_LIBRARY_ROOT` can select another root.
 - API route discovery: shared by server and packaged desktop; new Necromatcher routes require local evidence access, like the existing matched-swing browser.
 
+## Current Source-Bound Shaft Delivery
+
+The current reviewed optional evidence job/persistence, native/web input and
+original-video shaft overlay implementations are documented in
+[Source-Bound Shaft Trials and Review](necromatcher-shaft-trials.md). That record
+separates implementation tests from the earlier actual V15/V12 numerical
+producers, current 66-page publication and prospective four-arm protocol. Follow
+its exact admission, saved-final-start, train/holdout and source-bracketing
+procedure; do not infer scientific qualification from a finite target pass.
+The historical sections below retain their original execution checkpoints.
+
 ## Current Delivery
 
 ### Sequential Repair and Review Exports

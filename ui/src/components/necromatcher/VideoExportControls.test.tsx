@@ -6,6 +6,22 @@ const api = vi.hoisted(() => ({submitVideoExport: vi.fn(), fetchVideoExport: vi.
 vi.mock('@/api/necromatcher', () => api);
 const run = (values = {}) => ({run_id:'export-1',source_fit_id:'fit-1',status:'running',acceptance:'partial',qualification:'monocular_research_hypothesis',blockers:[],message:'Encoding',fraction:null,control_available:true,execution_started:true,execution_verified:false,download_available:false,...values});
 beforeEach(() => {api.submitVideoExport.mockReset(); api.fetchVideoExport.mockReset(); api.cancelVideoExport.mockReset();});
+it('opts into reviewed shaft lines and clears the record for a different source', async () => {
+  api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
+  const view = render(<VideoExportControls fit="fit-1" />);
+  const record = {schema: 'necromatcher/shaft-axis-evidence/1', capture_id: 'capture', frames: [{frame_index: 0}]};
+  const file = new File([JSON.stringify(record)], 'review.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue(JSON.stringify(record));
+  const user = userEvent.setup();
+  await user.upload(screen.getByLabelText('Reviewed Shaft Evidence'), file);
+  await screen.findByText(/1 Reviewed Frame/);
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenCalledWith('fit-1', {shaft_evidence: record});
+  view.rerender(<VideoExportControls fit="fit-2" />);
+  expect(screen.queryByText(/1 Reviewed Frame/)).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenLastCalledWith('fit-2');
+});
 it('submits once and downloads verified computation with rejected scientific acceptance', async () => {
   api.submitVideoExport.mockResolvedValue(run());
   api.fetchVideoExport.mockResolvedValue(run({status:'succeeded',acceptance:'rejected',execution_verified:true,download_available:true,blockers:['physical_clock_unknown']}));

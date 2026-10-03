@@ -227,6 +227,10 @@ bundle and all original receipts remain unchanged. The new cohort contains
 | `historical-player-research-v1.schema.json`         |   8,745 | `a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30` |
 | `affine-local-research-v15-v12-export-receipt.json` | 167,922 | `65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd` |
 
+The bundle directory contains only the JSON and schema. The export receipt
+listed above is a sibling file in the parent Desktop review directory,
+`Necromatcher Review 2026-10-01`, rather than a third bundle member.
+
 V15 admission uses explicit `both_runs_verified` and
 `source_runtime_parent_artifact_evidence_brackets_verified` gates. The public
 DTO/schema and original V12/V14 admission remain unchanged. Ten added provider

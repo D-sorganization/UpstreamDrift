@@ -37,6 +37,10 @@ from src.shared.python.version_info import get_repo_root, read_git_commit
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .project_store import validate_workspace_id
+from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evidence
+from src.shared.python.motion_matching.historical_fit.shaft_observations import (
+    ShaftAxisEvidence,
+)
 
 _SOURCE_DIRECTORIES = (
     "src/shared/python/core",
@@ -210,53 +214,77 @@ def _execute_worker(
                 stream.close()
 
 
-def start_native_refit(
-    library: NecromatcherLibrary,
-    source_fit_id: str,
-    new_fit_id: str,
-    options: NativeRefitOptions,
-    service: MatchingJobService,
-) -> tuple[JobHandle, Path]:
-    """Run a new immutable research version, preserving the original fit.
-
-    The service owns scheduling. A clean worker owns native SDK execution;
-    cancellation, changed inputs/code or failed computation prevent publication.
-    """
-    validate_workspace_id(new_fit_id, "new_fit_id")
-    source = library.load_fit(source_fit_id)
-    asset = library.load_asset(source_fit_id)
-    if new_fit_id in {item.dataset_id for item in library.assets(asset.session_id)}:
-        raise ValueError("Refit requires a new immutable fit identity")
-    if len(options.coordinate_scales) != len(source["coordinate_order"]):
-        raise ValueError("Refit scales must match bound native coordinate order")
-    if any(index not in source["frame_indices"] for index in options.frame_indices):
-        raise ValueError("Warm-start samples must exist in the source fit")
-    run_root = library.root / "runs" / uuid4().hex
-    queued_stamp = fit_execution_stamp()
-    request = {
-        "library_root": str(library.root),
-        "source_fit_id": source_fit_id,
-        "source_fit_hash": asset.metadata["hash"],
-        "new_fit_id": new_fit_id,
-        "options": asdict(options),
-        "execution_stamp": queued_stamp,
-        "execution_started": False,
+def _shaft_record(bound: BoundShaftEvidence, weight: float) -> dict[str, Any]:
+    if (
+        isinstance(weight, bool)
+        or not isinstance(weight, (int, float))
+        or not np.isfinite(weight)
+        or not 0 <= weight <= 1
+    ):
+        raise ValueError("Shaft unknown visibility weight must be finite in [0,1]")
+    return {
+        "schema": "necromatcher/shaft-image-recipe/1",
+        "evidence": bound.evidence.to_record(),
+        "evidence_sha256": bound.evidence.sha256,
+        "binding": {
+            "source_clock_sha256": bound.source_clock_sha256,
+            "reviewed_frame_count": bound.reviewed_frame_count,
+            "observed_segment_count": bound.observed_segment_count,
+        },
+        "unknown_visibility_weight": weight,
     }
-    spec = MatchingJobSpec(
-        run_root.name,
-        "mujoco",
-        JobStage.IK,
-        run_root,
-        HashBundle(
-            source["capture_hash"],
-            source["model_hash"],
-            queued_stamp["runtime_sha256"],
-            _digest(asdict(options)),
-            queued_stamp["source_sha256"],
-        ),
-        budget_wall_s=options.budget_wall_s,
-        blockers=_BLOCKERS,
-    )
+
+
+def _queue_shaft_recipe(
+    library: NecromatcherLibrary,
+    source: dict[str, Any],
+    evidence: ShaftAxisEvidence,
+    weight: float,
+) -> dict[str, Any]:
+    return _shaft_record(bind_fit_shaft_evidence(library, source, evidence), weight)
+
+
+def _parse_shaft_recipe(recipe: dict[str, Any]) -> tuple[BoundShaftEvidence, float]:
+    """Validate a declared receipt before native/source I/O; never authenticate it."""
+    if not isinstance(recipe, dict) or set(recipe) != {
+        "schema",
+        "evidence",
+        "evidence_sha256",
+        "binding",
+        "unknown_visibility_weight",
+    }:
+        raise ValueError("Malformed shaft image recipe")
+    evidence = ShaftAxisEvidence.from_record(recipe["evidence"])
+    if not isinstance(recipe["binding"], dict):
+        raise ValueError("Malformed shaft recipe binding")
+    try:
+        bound = BoundShaftEvidence(evidence, **recipe["binding"])
+    except TypeError as exc:
+        raise ValueError("Malformed shaft recipe binding") from exc
+    weight = recipe["unknown_visibility_weight"]
+    if _shaft_record(bound, weight) != recipe:
+        raise ValueError("Shaft image recipe differs from declared binding identities")
+    return bound, weight
+
+
+def _verify_shaft_request(
+    library: NecromatcherLibrary, source: dict[str, Any], recipe: dict[str, Any]
+) -> None:
+    declared, weight = _parse_shaft_recipe(recipe)
+    if _queue_shaft_recipe(library, source, declared.evidence, weight) != recipe:
+        raise ValueError("Shaft image recipe binding changed since queue admission")
+
+
+def _refit_work(
+    library: NecromatcherLibrary,
+    options: NativeRefitOptions,
+    request: dict[str, Any],
+    spec: MatchingJobSpec,
+    session_id: str,
+) -> Callable[[Callable[[JobProgress], None], Callable[[], bool]], MatchingWorkOutcome]:
+    run_root = spec.run_root
+    source_fit_id, new_fit_id = request["source_fit_id"], request["new_fit_id"]
+    shaft_recipe = request.get("shaft_images")
 
     def work(
         progress: Callable[[JobProgress], None], cancelled: Callable[[], bool]
@@ -282,11 +310,24 @@ def start_native_refit(
             != request["source_fit_hash"]
         ):
             raise ValueError("Warm-start fit changed during execution")
+        if shaft_recipe is not None:
+            _verify_shaft_request(
+                library, library.load_fit(source_fit_id), shaft_recipe
+            )
+            if (
+                response["fit"].get("evidence", {}).get("shaft_axis", {}).get("recipe")
+                != shaft_recipe
+            ):
+                raise ValueError("Worker shaft recipe differs from admitted request")
         candidate = run_root / "candidate.json"
         atomic_write_json(candidate, response["fit"])
 
         def publish() -> None:
-            library.add_fit(new_fit_id, asset.session_id, candidate)
+            if shaft_recipe is not None:
+                _verify_shaft_request(
+                    library, library.load_fit(source_fit_id), shaft_recipe
+                )
+            library.add_fit(new_fit_id, session_id, candidate)
             progress(
                 JobProgress(
                     JobStage.IK, 1.0, "Research fit stored; dynamics remain unqualified"
@@ -300,5 +341,70 @@ def start_native_refit(
             publish=publish,
         )
 
+    return work
+
+
+def start_native_refit(
+    library: NecromatcherLibrary,
+    source_fit_id: str,
+    new_fit_id: str,
+    options: NativeRefitOptions,
+    service: MatchingJobService,
+    shaft_evidence: ShaftAxisEvidence | None = None,
+) -> tuple[JobHandle, Path]:
+    """Run a new immutable research version, preserving the original fit.
+
+    The service owns scheduling. A clean worker owns native SDK execution;
+    cancellation, changed inputs/code or failed computation prevent publication.
+    """
+    validate_workspace_id(new_fit_id, "new_fit_id")
+    source = library.load_fit(source_fit_id)
+    asset = library.load_asset(source_fit_id)
+    if new_fit_id in {item.dataset_id for item in library.assets(asset.session_id)}:
+        raise ValueError("Refit requires a new immutable fit identity")
+    if len(options.coordinate_scales) != len(source["coordinate_order"]):
+        raise ValueError("Refit scales must match bound native coordinate order")
+    if any(index not in source["frame_indices"] for index in options.frame_indices):
+        raise ValueError("Warm-start samples must exist in the source fit")
+    shaft_recipe = (
+        _queue_shaft_recipe(
+            library, source, shaft_evidence, options.unknown_visibility_weight
+        )
+        if shaft_evidence is not None
+        else None
+    )
+    run_root = library.root / "runs" / uuid4().hex
+    queued_stamp = fit_execution_stamp()
+    request = {
+        "library_root": str(library.root),
+        "source_fit_id": source_fit_id,
+        "source_fit_hash": asset.metadata["hash"],
+        "new_fit_id": new_fit_id,
+        "options": asdict(options),
+        "execution_stamp": queued_stamp,
+        "execution_started": False,
+    }
+    hash_options: Any = asdict(options)
+    if shaft_recipe is not None:
+        request["shaft_images"] = shaft_recipe
+        hash_options = {"options": hash_options, "shaft_images": shaft_recipe}
+    spec = MatchingJobSpec(
+        run_root.name,
+        "mujoco",
+        JobStage.IK,
+        run_root,
+        HashBundle(
+            source["capture_hash"],
+            source["model_hash"],
+            queued_stamp["runtime_sha256"],
+            _digest(hash_options),
+            queued_stamp["source_sha256"],
+        ),
+        budget_wall_s=options.budget_wall_s,
+        blockers=_BLOCKERS,
+    )
+
     atomic_write_json(run_root / "request.json", request)
-    return service.start(spec, work=work), run_root
+    return service.start(
+        spec, work=_refit_work(library, options, request, spec, asset.session_id)
+    ), run_root

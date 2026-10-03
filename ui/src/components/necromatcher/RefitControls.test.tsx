@@ -28,6 +28,30 @@ beforeEach(() => {
   api.fetchRefitPlan.mockResolvedValue({source_fit_id: 'old', frame_indices: [0, 2], coordinate_order: ['hip'], coordinate_units: ['rad'], recorded_options: null});
 });
 
+it('submits reviewed shaft evidence only when explicitly loaded and clears it on source change', async () => {
+  api.fetchRefitPlan.mockResolvedValue(boundedPlan());
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  const view = render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Coordinate Prior Scales');
+  const record = {schema: 'necromatcher/shaft-axis-evidence/1', capture_id: 'capture', frames: [{frame_index: 0}]};
+  const file = new File([JSON.stringify(record)], 'review.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue(JSON.stringify(record));
+  await user.upload(screen.getByLabelText('Reviewed Shaft Evidence'), file);
+  await screen.findByText(/1 Reviewed Frame/);
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  expect(api.submitRefit.mock.calls[0][1].shaft_evidence).toEqual(record);
+  api.fetchRefitPlan.mockResolvedValue({...boundedPlan(), source_fit_id: 'other'});
+  view.rerender(<RefitControls fit="other" onStored={vi.fn()} />);
+  await screen.findByLabelText('Reviewed Shaft Evidence');
+  expect(screen.queryByText(/1 Reviewed Frame/)).not.toBeInTheDocument();
+  await user.type(screen.getByLabelText('New Fit Version'), 'new-other');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  await waitFor(() => expect(api.submitRefit).toHaveBeenCalledTimes(2));
+  expect(api.submitRefit.mock.calls[1][1]).not.toHaveProperty('shaft_evidence');
+});
+
 it('transports the complete nested bounded contact recipe without flattened config keys', async () => {
   api.fetchRefitPlan.mockResolvedValue(boundedPlan());
   api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});

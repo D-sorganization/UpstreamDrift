@@ -1,4 +1,5 @@
 import { useResearchJob } from './useResearchJob';
+import { ShaftEvidenceInput } from './ShaftEvidenceInput';
 import { useEffect, useState } from 'react';
 import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions, type ImageFitRecipe, type ScheduledFitConstraintRecipe } from '@/api/necromatcher';
 
@@ -25,6 +26,8 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const [config, setConfig] = useState<ImageFitRecipe>(defaultConfig);
   const [initialization, setInitialization] = useState<'sampled_parent' | 'preserved_spline'>('sampled_parent');
   const [planError, setPlanError] = useState('');
+  const [shaftEvidence, setShaftEvidence] = useState<Record<string, unknown> | null>(null);
+  const [shaftBlocked, setShaftBlocked] = useState(false);
   const job = useResearchJob<RefitRun, RefitOptions & {new_fit_id: string}>({fit, onCompleted: onStored, initialRunId, onRun, api: refitApi});
   const {run, submitting, controlAvailable} = job;
   useEffect(() => {
@@ -57,7 +60,7 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   return <section aria-label="Research Refit" className="space-y-3 border-t border-gray-600 pt-4">
     <h3 className="font-semibold">Research Refit</h3><p className="text-sm">Source Version: {fit}. A new version preserves the original. Physical Time, Camera and Dynamics Remain Unqualified.</p>
     {!plan && !error && <p>Loading Source Choices…</p>}
-    {plan && <form onSubmit={(event) => {event.preventDefault(); void job.start({...options, knot_count: knotCount, config: {...config, ...(resume ? {initialization_policy: 'strict' as const} : {})}, operation: 'fit', initialization_source: initialization, new_fit_id: id.trim(), frame_indices: indices, coordinate_scales: priorScales});}}>
+    {plan && <form onSubmit={(event) => {event.preventDefault(); if (shaftBlocked) return; void job.start({...options, knot_count: knotCount, config: {...config, ...(resume ? {initialization_policy: 'strict' as const} : {})}, operation: 'fit', initialization_source: initialization, new_fit_id: id.trim(), frame_indices: indices, coordinate_scales: priorScales, ...(shaftEvidence ? {shaft_evidence: shaftEvidence} : {})});}}>
       <fieldset disabled={busy} className="space-y-2">
         <label className="block">New Fit Version<input className={field} required pattern="[A-Za-z0-9][A-Za-z0-9_.-]{0,127}" value={id} onChange={(event) => setId(event.target.value)} /></label>
         <label className="block">Initialization Source<select className={field} value={initialization} onChange={(event) => setInitialization(event.target.value as typeof initialization)}>
@@ -81,7 +84,8 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
           ['max_iterations', 'Evaluation Budget', 1, 1], ['prior_weight', 'Pose Prior Weight', 0, 'any'],
           ['smoothness_weight', 'Smoothness Weight', 0, 'any'], ['closure_weight', 'Grip Closure Weight', 0, 'any'],
         ] as const).map(([key, label, min, step]) => <label className="block" key={key}>{label}<input className={field} type="number" required min={min} step={step} value={config[key]} onChange={(event) => setConfig({...config, [key]: Number(event.target.value)})} /></label>)}
-        <button className="rounded bg-blue-700 px-3 py-2 disabled:opacity-50" disabled={!valid || busy} type="submit">Start Research Refit</button>
+        <ShaftEvidenceInput disabled={busy} onChange={(record, blocked) => {setShaftEvidence(record); setShaftBlocked(blocked);}} />
+        <button className="rounded bg-blue-700 px-3 py-2 disabled:opacity-50" disabled={!valid || busy || shaftBlocked} type="submit">Start Research Refit</button>
       </fieldset>
     </form>}
     {run && <div><p role="status">{run.status} · {run.acceptance} · {run.message}</p><p className="text-xs">Run: {run.run_id} · New Version: {run.new_fit_id}</p>{run.blockers.map((reason) => <p className="text-xs text-orange-300" key={reason}>{reason}</p>)}</div>}

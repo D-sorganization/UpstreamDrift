@@ -11,7 +11,6 @@ from typing import Any
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QComboBox,
-    QDialog,
     QFileDialog,
     QLabel,
     QPushButton,
@@ -20,6 +19,10 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import compute_file_sha256
+from src.tools.necromatcher.refit_dialog import (
+    ReviewedShaftDialog,
+    read_reviewed_shaft_evidence,
+)
 
 
 def copy_export(source: Path, destination: Path, library_root: Path) -> Path:
@@ -44,7 +47,7 @@ def copy_export(source: Path, destination: Path, library_root: Path) -> Path:
     return destination
 
 
-class VideoExportDialog(QDialog):
+class VideoExportDialog(ReviewedShaftDialog):
     """Observe an owned job without running native physics in the Qt process."""
 
     def __init__(
@@ -74,6 +77,7 @@ class VideoExportDialog(QDialog):
         self.stored_runs.setAccessibleName("Stored Overlay Exports")
         self.stored_runs.addItem("Select a Stored Overlay Export", None)
         layout.addWidget(self.stored_runs)
+        self._build_shaft_inputs(layout)
         self.start = QPushButton("Render Original-Footage Overlay")
         self.cancel = QPushButton("Cancel Export")
         self.save = QPushButton("Save Checked ZIP")
@@ -157,17 +161,31 @@ class VideoExportDialog(QDialog):
         self.start.setEnabled(False)
         self.save.setEnabled(False)
         self.stored_runs.setEnabled(False)
+        self._shaft_controls(True)
         self._worker.start()
         self._timer.start()
 
     def _start(self) -> None:
         if self._worker or self._closed:
             return
+        if self._shaft_path is not None and self._shaft_owner != self.source_fit_id:
+            self.status.setText("Remove evidence selected for another source fit")
+            return
+        source, path = self.source_fit_id, self._shaft_path
+
+        def submit() -> dict[str, Any]:
+            evidence = read_reviewed_shaft_evidence(path)
+            return (
+                self.session.submit(source)
+                if evidence is None
+                else self.session.submit(source, evidence)
+            )
+
         self.run = None
         self._cancel_requested = False
         self.cancel.setEnabled(True)
         self.status.setText("Submitting Research Overlay…")
-        self._work("submit", lambda: self.session.submit(self.source_fit_id))
+        self._work("submit", submit)
 
     def _poll(self) -> None:
         if self._closed:
@@ -184,6 +202,7 @@ class VideoExportDialog(QDialog):
                 self._timer.stop()
                 self.cancel.setEnabled(False)
                 self.start.setEnabled(True)
+                self._shaft_controls(False)
                 return
             if self._operation == "save":
                 self._render()
@@ -198,6 +217,7 @@ class VideoExportDialog(QDialog):
             except ValueError as exc:
                 self.status.setText(str(exc))
                 self.start.setEnabled(True)
+                self._shaft_controls(False)
                 self.cancel.setEnabled(False)
                 self._timer.stop()
                 return
@@ -249,6 +269,8 @@ class VideoExportDialog(QDialog):
         )
         active = self.run["status"] in {"pending", "running"}
         self.start.setEnabled(not active)
+        if hasattr(self, "shaft_import"):
+            self._shaft_controls(active)
         self.cancel.setEnabled(active and bool(self.run["control_available"]))
         self.save.setText(
             "Verify Stored Overlay Package" if stored else "Save Checked ZIP"

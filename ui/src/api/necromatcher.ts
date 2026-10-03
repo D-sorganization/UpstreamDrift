@@ -32,6 +32,7 @@ export interface RefitOptions {
   unknown_visibility_weight: number; budget_wall_s: number; config: ImageFitRecipe;
   operation?: 'fit' | 'author_initialization';
   initialization_source?: 'sampled_parent' | 'preserved_spline';
+  shaft_evidence?: Record<string, unknown>;
 }
 export interface RefitPlan {
   source_fit_id: string; frame_indices: number[]; coordinate_order: string[]; coordinate_units: string[];
@@ -53,7 +54,7 @@ export interface VideoExportRun extends ResearchRun {
   artifact_state?: 'verified_stat_baseline' | 'changed_or_unverified';
   producer_source_commit?: string | null;
 }
-export const submitVideoExport = (fit: string) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST'});
+export const submitVideoExport = (fit: string, options?: {shaft_evidence: Record<string, unknown>}) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST', ...(options ? {body: JSON.stringify(options)} : {})});
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;

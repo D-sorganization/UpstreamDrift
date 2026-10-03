@@ -9,9 +9,15 @@ from pathlib import Path
 import sys
 from typing import Any
 
+if __name__ == "__main__":
+    import mujoco  # noqa: F401 -- clean worker loads SDK before workspace/native helpers
+
 import numpy as np
 
 from src.shared.python.motion_matching.historical_fit import (
+    AdditionalImageResiduals,
+    ShaftAxisEvidence,
+    ShaftAxisResidualTerm,
     CameraProjection,
     CaptureImageEvidence,
     ImageFitConfig,
@@ -24,7 +30,13 @@ from src.shared.python.motion_matching.historical_fit import (
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from src.shared.python.estimation import CubicHermiteSplineTrajectory
 from .necromatcher import NecromatcherLibrary
-from .necromatcher_fit_jobs import fit_execution_stamp
+from .necromatcher_fit_jobs import (
+    fit_execution_stamp,
+    _shaft_record,
+    _parse_shaft_recipe,
+    _verify_shaft_request,
+)
+from .necromatcher_shaft_evidence import BoundShaftEvidence, load_shaft_image_residuals
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
 from .necromatcher_spline import preserved_fit_spline
@@ -45,10 +57,14 @@ def _compute_operation(
     inputs: ImageFitInputs,
     config: ImageFitConfig,
     initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
 ) -> ImageFitResult:
     if operation == "fit":
-        return fit_image_trajectory(
-            native, attachments, camera, inputs, config, initial_spline
+        arguments = (native, attachments, camera, inputs, config, initial_spline)
+        return (
+            fit_image_trajectory(*arguments, additional_images)
+            if additional_images is not None
+            else fit_image_trajectory(*arguments)
         )
     if operation != "author_initialization":
         raise ValueError("Unknown native fit operation")
@@ -62,7 +78,13 @@ def _compute_operation(
         initialize_image_trajectory,
     )
 
-    result = initialize_image_trajectory(native, attachments, camera, inputs, config)
+    result = (
+        initialize_image_trajectory(
+            native, attachments, camera, inputs, config, None, additional_images
+        )
+        if additional_images is not None
+        else initialize_image_trajectory(native, attachments, camera, inputs, config)
+    )
     if (
         result.optimizer_ran is not False
         or result.converged is not False
@@ -220,6 +242,28 @@ def _dense_reprojection_metrics(
     return result
 
 
+def _load_refit_binding(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> tuple[NativeFitBinding, AdditionalImageResiduals | None]:
+    if "shaft_images" not in request:
+        return load_native_fit_binding(library, request["source_fit_id"]), None
+    recipe = request["shaft_images"]
+    declared, weight = _parse_shaft_recipe(recipe)
+    evidence = declared.evidence
+    binding, bundle = load_shaft_image_residuals(
+        library, request["source_fit_id"], evidence, weight
+    )
+    bound = BoundShaftEvidence(
+        evidence,
+        bundle.source_identity.source_clock_sha256,
+        len(evidence.frames),
+        sum(frame.segment.status == "observed" for frame in evidence.frames),
+    )
+    if _shaft_record(bound, recipe["unknown_visibility_weight"]) != recipe:
+        raise ValueError("Worker shaft recipe binding differs from queue admission")
+    return binding, bundle
+
+
 def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     """Compute a source-clock fit; never declare dynamics qualification."""
     stamp = fit_execution_stamp()
@@ -235,7 +279,7 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     identity = request["source_fit_id"]
     if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
         raise ValueError("Warm-start fit differs from launch identity")
-    binding = load_native_fit_binding(library, identity)
+    binding, additional_images = _load_refit_binding(library, request)
     source = binding.fit
     options = request["options"]
     operation = options.get("operation", "fit")
@@ -259,7 +303,7 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             unknown_visibility_weight=options["unknown_visibility_weight"],
         )
         inputs, initial_spline = _worker_inputs(binding, options, evidence, samples)
-        result = _compute_operation(
+        arguments = (
             operation,
             native,
             attachments,
@@ -267,6 +311,11 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             inputs,
             config,
             initial_spline,
+        )
+        result = (
+            _compute_operation(*arguments, additional_images)
+            if additional_images is not None
+            else _compute_operation(*arguments)
         )
         dense_indices = tuple(
             i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
@@ -280,6 +329,14 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         q = result.evaluate_source_times(dense.source_times)
         frames = [review.frame(i)["frame"] for i in dense_indices]
     closure = np.array([native.closure_residuals(pose) for pose in q])
+    if additional_images is not None:
+        term = additional_images.terms[0]
+        if not isinstance(term, ShaftAxisResidualTerm):
+            raise ValueError("Native shaft worker requires a typed shaft term")
+        request = {**request, "shaft_axis": term.axis.to_record()}
+        _verify_shaft_request(
+            library, library.load_fit(identity), request["shaft_images"]
+        )
     output = _build_fit_payload(
         request,
         source,

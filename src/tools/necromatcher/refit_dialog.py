@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import asdict, replace
+import json
+from pathlib import Path
 from typing import Any, cast
 
 from PyQt6.QtCore import QTimer, pyqtSignal
@@ -11,6 +13,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QFormLayout,
+    QFileDialog,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -20,12 +23,69 @@ from PyQt6.QtWidgets import (
 from src.shared.python.motion_matching.historical_fit import (
     ImageFitConfig,
     ScheduledConstraintOptions,
+    ShaftAxisEvidence,
 )
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import NativeRefitOptions, NativeRefitSession
 
 
-class ResearchRefitDialog(QDialog):
+def read_reviewed_shaft_evidence(path: Path | None) -> ShaftAxisEvidence | None:
+    """Read typed evidence in a worker; canonical session admission rebinds sources."""
+    if path is None:
+        return None
+    record = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(record, dict):
+        raise ValueError("Reviewed shaft evidence must be a JSON object")
+    return ShaftAxisEvidence.from_record(record)
+
+
+class ReviewedShaftDialog(QDialog):
+    """Source-owned optional evidence controls shared by refit and export forms."""
+
+    source_fit_id: str
+
+    def _build_shaft_inputs(self, layout: QVBoxLayout) -> None:
+        self._shaft_path: Path | None = None
+        self._shaft_owner: str | None = None
+        self.shaft_import = QPushButton("Choose Reviewed Shaft JSON")
+        self.shaft_remove = QPushButton("Remove Shaft Evidence")
+        self.shaft_remove.setEnabled(False)
+        self.shaft_status = QLabel()
+        self.shaft_status.setWordWrap(True)
+        self.shaft_import.clicked.connect(self._choose_shaft)
+        self.shaft_remove.clicked.connect(self._remove_shaft)
+        for widget in (self.shaft_import, self.shaft_remove, self.shaft_status):
+            layout.addWidget(widget)
+        self._remove_shaft()
+
+    def _choose_shaft(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Choose Reviewed Shaft Evidence", "", "Reviewed Evidence (*.json)"
+        )
+        if path:
+            self._shaft_path = Path(path)
+            self._shaft_owner = self.source_fit_id
+            self.shaft_status.setText(
+                f"Selected: {self._shaft_path.name}; validation pending. "
+                "Confidence and uncertainty are authored, uncalibrated; no physical endpoint claims."
+            )
+            self.shaft_remove.setEnabled(True)
+
+    def _remove_shaft(self) -> None:
+        self._shaft_path = None
+        self._shaft_owner = None
+        self.shaft_remove.setEnabled(False)
+        self.shaft_status.setText(
+            "Shaft evidence disabled. Optional reviewed image fragments; "
+            "authored, uncalibrated confidence and uncertainty."
+        )
+
+    def _shaft_controls(self, active: bool) -> None:
+        self.shaft_import.setEnabled(not active)
+        self.shaft_remove.setEnabled(not active and self._shaft_path is not None)
+
+
+class ResearchRefitDialog(ReviewedShaftDialog):
     """Own a source-scoped form and observer; execution stays in the shared service."""
 
     stored = pyqtSignal()
@@ -52,6 +112,7 @@ class ResearchRefitDialog(QDialog):
         label.setWordWrap(True)
         layout.addWidget(label)
         layout.addLayout(self._build_form(plan))
+        self._build_shaft_inputs(layout)
         self.start = QPushButton("Start Research Refit")
         self.start.clicked.connect(self._start)
         self.cancel = QPushButton("Cancel Research Refit")
@@ -237,20 +298,34 @@ class ResearchRefitDialog(QDialog):
         )
 
     def _start(self) -> None:
+        if self._worker:
+            return
+        if self._shaft_path is not None and self._shaft_owner != self.source_fit_id:
+            self.status.setText("Remove evidence selected for another source fit")
+            return
         try:
             options = self._options()
         except ValueError as exc:
             self.status.setText(str(exc))
             return
         identity = self.identity.text().strip()
+        source, path = self.source_fit_id, self._shaft_path
+
+        def submit() -> dict[str, Any]:
+            evidence = read_reviewed_shaft_evidence(path)
+            if evidence is None:
+                return self.session.submit(source, identity, options)
+            return self.session.submit(source, identity, options, evidence)
+
         self._worker = get_worker_adapter(
-            lambda: self.session.submit(self.source_fit_id, identity, options),
+            submit,
             force_threading=True,
         )
         self._cancel_requested = False
         self._notified = False
         self.run = None
         self.start.setEnabled(False)
+        self._shaft_controls(True)
         self.cancel.setEnabled(True)
         self.status.setText("Submitting Research Refit…")
         self._worker.start()
@@ -265,6 +340,7 @@ class ResearchRefitDialog(QDialog):
         )
         active = self.run["status"] in {"running", "pending"}
         self.start.setEnabled(not active)
+        self._shaft_controls(active)
         self.cancel.setEnabled(active)
         if not active:
             self._timer.stop()
@@ -280,6 +356,7 @@ class ResearchRefitDialog(QDialog):
             if worker.error:
                 self.status.setText(str(worker.error))
                 self.start.setEnabled(True)
+                self._shaft_controls(False)
                 self.cancel.setEnabled(False)
                 self._timer.stop()
                 return

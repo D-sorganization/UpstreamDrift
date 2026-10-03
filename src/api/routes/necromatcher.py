@@ -25,7 +25,10 @@ from src.shared.python.workspace import (
     NativeRefitOptions,
     refit_plan,
 )
-from src.shared.python.motion_matching.historical_fit import ImageFitConfig
+from src.shared.python.motion_matching.historical_fit import (
+    ImageFitConfig,
+    ShaftAxisEvidence,
+)
 from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableError
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
@@ -91,6 +94,7 @@ class RefitRequest(BaseModel):
     unknown_visibility_weight: float = Field(default=0.5, ge=0, le=1)
     budget_wall_s: float = Field(default=600.0, gt=0, le=3600)
     config: dict[str, Any] | None = None
+    shaft_evidence: dict[str, Any] | None = None
     operation: Literal["fit", "author_initialization"] = "fit"
     initialization_source: Literal["sampled_parent", "preserved_spline"] = (
         "sampled_parent"
@@ -125,6 +129,11 @@ class RefitRequest(BaseModel):
             self.operation,
             self.initialization_source,
         )
+
+
+class VideoExportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+    shaft_evidence: dict[str, Any] | None = None
 
 
 class IdentityRequest(BaseModel):
@@ -186,7 +195,11 @@ def get_refit_plan(fit_id: str, library: Library) -> dict[str, Any]:
 def submit_refit(fit_id: str, request: RefitRequest, refits: Refits) -> dict[str, Any]:
     with _errors():
         try:
-            return refits.submit(fit_id, request.new_fit_id, request.options())
+            options = request.options()
+            if request.shaft_evidence is None:
+                return refits.submit(fit_id, request.new_fit_id, options)
+            evidence = ShaftAxisEvidence.from_record(request.shaft_evidence)
+            return refits.submit(fit_id, request.new_fit_id, options, evidence)
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 
@@ -204,11 +217,16 @@ def cancel_refit(run_id: str, refits: Refits) -> dict[str, Any]:
 
 
 @router.post("/fits/{fit_id}/video-exports", status_code=202)
-def submit_video_export(fit_id: str, exports: VideoExports) -> dict[str, Any]:
+def submit_video_export(
+    fit_id: str, exports: VideoExports, request: VideoExportRequest | None = None
+) -> dict[str, Any]:
     """Queue a source-bound video review without accepting a host output path."""
     with _errors():
         try:
-            return exports.submit(fit_id)
+            if request is None or request.shaft_evidence is None:
+                return exports.submit(fit_id)
+            evidence = ShaftAxisEvidence.from_record(request.shaft_evidence)
+            return exports.submit(fit_id, evidence)
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 

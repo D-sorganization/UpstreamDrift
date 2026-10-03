@@ -23,12 +23,24 @@ def video_case(native_fit_case, tmp_path):
             ok, png = cv2.imencode(".png", image)
             assert ok
             frame = {
+                "schema_version": "shadow-tracker/frame/1.1.0",
+                "asset_id": "source-" + "a" * 64,
+                "shot_id": "video-shot",
+                "swing_id": "practice",
+                "camera_id": "source-camera",
                 "frame_id": f"video-{i}",
                 "frame_sha256": hashlib.sha256(image.tobytes()).hexdigest(),
                 "pts_ticks": i,
                 "timebase_numerator": 1,
                 "timebase_denominator": 30,
                 "physical_time_s": None,
+                "physical_time_reason": "Synthetic source physical clock unknown",
+                "timing_mode": "container_pts",
+                "is_timing_exact": True,
+                "clock_evidence": "Synthetic exact fixture PTS",
+                "decoder_name": "synthetic",
+                "decoder_version": "1",
+                "pixel_format": "bgr24",
             }
             rows.append(
                 {
@@ -60,7 +72,7 @@ def video_case(native_fit_case, tmp_path):
         "practice",
         archive_path,
         "image_capture",
-        {"schema": "necromatcher/image-capture/1"},
+        {"schema": "necromatcher/image-capture/1", "source_sha256": "a" * 64},
     )
     payload.update(
         capture_id=capture.dataset_id,
