@@ -96,15 +96,19 @@ class PinocchioForceTorqueSource:
     def __init__(self, model: Any) -> None:  # pin.Model (loosely typed stubs)
         if not isinstance(model, pin.Model):
             raise TypeError("model must be a pinocchio.Model")
-        self.model: Any = model
-        self._data: Any = model.createData()
+        # Pinocchio's bundled stubs omit FrameType and Model.parents, so the
+        # untyped surface is accessed through Any-typed bindings.
+        native: Any = pin
+        raw_model: Any = model
+        self.model: Any = raw_model
+        self._data: Any = raw_model.createData()
         self._body_by_joint: dict[int, str] = {}
-        for frame in model.frames:
-            if frame.type == pin.FrameType.BODY:
+        for frame in raw_model.frames:
+            if frame.type == native.FrameType.BODY:
                 self._body_by_joint.setdefault(int(frame.parentJoint), frame.name)
         self._children: dict[int, list[int]] = {}
-        for j in range(1, model.njoints):
-            self._children.setdefault(int(model.parents[j]), []).append(j)
+        for j in range(1, raw_model.njoints):
+            self._children.setdefault(int(raw_model.parents[j]), []).append(j)
 
     def body_name(self, joint_id: int) -> str:
         """Name of the body frame attached to ``joint_id`` (joint name if none)."""
