@@ -228,3 +228,16 @@ PRs [#10837](https://github.com/D-sorganization/UpstreamDrift/pull/10837), [#108
 - Epic #10584 and all child packages TB-00 through TB-12 are closed. Full-body models remain under governing programs (#10363, #10378, #10430, #10440).
 - Manual governance: UP-D0 (#9066) and UP-D1 (#9067) remain release blockers. Edit only the `manuals/upstreamdrift` QMD source and run `python3 -m scripts.check_design_manual_governance` for governed changes.
 - Update this handoff, the development-log entry, and exactly one `SPEC.md` change-log row for every substantive PR.
+
+## Raw Shaft Fragment Diagnostic Core Handoff (#11357)
+
+Pure typed historical-fit diagnostics now reuse public marker derivatives and
+camera projection, with immutable raw px/rad rows, finite authored bound checks,
+explicit unavailable/null states and disabled no-provider behavior. Curated
+exports and execution-fingerprint inclusion are covered by SDK-free synthetic
+regressions. Source/PNG/model/clock rebind and future workspace/job/native/web
+integration remain required; no historical fit, role or objective changed.
+See [Procedure](docs/development/necromatcher-shaft-fragment-diagnostics.md) and
+[Turnover](docs/development/necromatcher-turnover.md). Registered calculations
+remain incomplete and canonical manual release remains blocked; local derivative
+agreement grants no clinical, historical or physical-time qualification.

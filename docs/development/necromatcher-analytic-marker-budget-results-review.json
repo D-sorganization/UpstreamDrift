@@ -1,0 +1,67 @@
+{
+  "schema": "necromatcher/analytic-marker-results-report-review/1",
+  "compiled": true,
+  "pages": 4,
+  "all_pages_visually_reviewed": true,
+  "compiler": "Installed MiKTeX pdflatex; installer disabled",
+  "builtin_compiler_available": false,
+  "scientific_qualified": false,
+  "files": [
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\analytic-marker-budget-results.tex",
+      "bytes": 10054,
+      "sha256": "0efdff5ef61ef630bfb19c0e8e755ad60a8b7a31945a372dc573857e9e42f4f1"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\analytic-marker-budget-results.pdf",
+      "bytes": 199460,
+      "sha256": "d38cd7842f8cc19a90760fadb18658f76b7222d046d1ae399c4a5bebbe68d805"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\results-data.json",
+      "bytes": 18316,
+      "sha256": "028dd5b2db97c524dca78d04ec6ac499b97ada99e7bac760de6804625d228a3b"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\input-pins.json",
+      "bytes": 13043,
+      "sha256": "22368ad568ca3beb2c08bf9ac1376c61a4072583765235369cd3e7995dd36a3e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\compiler-diagnostics.json",
+      "bytes": 336,
+      "sha256": "fddf70ed9387af084481e869594352cca29658a7d66df90524683e4d419b9b73"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\render-review-final\\page-1.png",
+      "bytes": 180594,
+      "sha256": "137ef6a6391f12ab8f04c119febc7a64ca0c97a51bb9a57e7a2234edff9e70e4"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\render-review-final\\page-2.png",
+      "bytes": 167117,
+      "sha256": "42f346999e728044a6a78cdf6bef9affe90b0d4ff2bb1a09804d1fc7e1a013a9"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\render-review-final\\page-3.png",
+      "bytes": 154313,
+      "sha256": "8bbf7359f63a247ee811d0cfca12e8962aaaecf3ecd2abe387816a6796c38016"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Analytic Marker Budget Results 2026-10-03 V1\\render-review-final\\page-4.png",
+      "bytes": 208835,
+      "sha256": "0d4af41140350f7a7b1d72ef50a71224ded3a150cf0668bc68b6433fbdde308c"
+    }
+  ],
+  "preparation_freeze": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\analytic-marker-results-supplement-v2\\preparation-freeze-v1.json",
+    "bytes": 810,
+    "sha256": "c1b7b4994f238febf01fe521206050cc1fe6eee1a4de2f17335507d129f10360"
+  },
+  "compile_log": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-budget-results-latex-final.log",
+    "bytes": 6062,
+    "sha256": "522ee8afe16d819c69e0b4ecd520c8c56027029f038e2c9ec0b67486866e06c5"
+  },
+  "transfer_performed": false
+}

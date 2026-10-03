@@ -22,6 +22,13 @@ from .shaft_residuals import (
     ShaftAxisResidualTerm,
     project_authored_shaft_line,
 )
+from .shaft_fragment_diagnostics import (
+    FragmentDerivativeOptions,
+    FragmentDerivativeCheck,
+    FragmentDerivativeAssessment,
+    assess_fragment_derivatives,
+    optional_fragment_derivatives,
+)
 from .shaft_row_timing import (
     ShaftRowTiming,
     RowTimedShaftAssessment,
@@ -32,6 +39,11 @@ from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "FragmentDerivativeOptions",
+    "FragmentDerivativeCheck",
+    "FragmentDerivativeAssessment",
+    "assess_fragment_derivatives",
+    "optional_fragment_derivatives",
     "AdditionalImageResiduals",
     "ImageResidualTerm",
     "ImageResidualAssessment",

@@ -710,3 +710,43 @@ Four actual original-footage exports in Desktop `Matched Shaft Display Exports V
 The published report is now 74 pages: PDF SHA-256 `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, exact source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`, independent all-page review `8b4fb44f2b0cd552c7a443f5e90ada9d95f624ff3711d4514f3f70e6708db6ee`, and separate root review `6fe30a6978fcc61fbb3192df6641b3da93515155e21bec6cc3852ef832854c5c`. Three installer-disabled MiKTeX passes completed without actual warnings, overfull boxes or unresolved references. Desktop manifest verifies 1,504 artifacts, SHA-256 `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`. Exact prior 66-page source/PDF/reviews, 1,260-artifact index and README are preserved under `Report/handoff-shaft-66-page-publication`; older editions remain unchanged.
 
 PR #11240 and Affine PR #4834 were merged; follow-up integration remains separate. Historical actual 605/8fde sanitized handoff receipts retain their cohort and producer identities; no new sanitized shaft-fit export or public deployment is claimed. Head observations/errors and physical shaft endpoints remain unmeasured. #11318 remains partial, with no camera/anatomy/physical-time/continuous dynamics/impact qualification or issue closure inferred.
+
+## Pure Raw Shaft Fragment Diagnostic Core (#11357)
+
+The reusable historical-fit facade now exposes typed immutable raw fragment
+FD options/checks/assessments and opt-in assessment functions. They reuse public
+marker linearization and camera projection, preserve units/order and explicit
+abstention/degenerate/bound-limited nulls, and make no provider calls when
+disabled. This source-only integration changes no saved fit, body denominator,
+constraint/objective rows or evidence role. Source/frame/model/clock admission
+and future job/native/web consumers remain separate. See the
+[Procedure](necromatcher-shaft-fragment-diagnostics.md).
+
+The [Local Axis and Fragment Methods Source](necromatcher-shaft-fragment-methods.tex)
+and [Review](necromatcher-shaft-fragment-methods-review.json), and
+[Original-Start Budget Results Source](necromatcher-analytic-marker-budget-results.tex)
+and [Review](necromatcher-analytic-marker-budget-results-review.json) are separate
+standalone reports. Preserve their actual pins and prior reports. No old summary
+number is substituted for actual receipts; no scientific/clinical/physical-clock
+or manual-release qualification is asserted.
+
+## Original-Start Analytic Fit and Selected-Shape Checkpoint
+
+Tiger V20 and Hogan V17 control/forearm variants completed from their declared
+original starts at producer `6fe04eac5b05e3914e85aaefac853415a7b9d958`.
+All four reached 120 evaluations without convergence and remain rejected.
+Dense body RMS was 24.2485/23.5827 px for Tiger and 10.1301/10.1364 px for
+Hogan. Raw shaft mismatch remains large, including about 82 degrees at Hogan
+frame 200. Aggregate improvement does not establish improvement at every frame.
+
+Twelve selected source-sized shape-plus-skeleton stills at opacity 0.35 and six
+original copies passed independent image/provenance verification; root visually
+reviewed all twelve, without claiming full-clip visual review. Receipt SHA256:
+`1a65093a1b8c3f8d89e395b451b81e658225ea69761d7c5047d420ed8f1d087d`.
+Export/verification preserved all 14,793 then-tracked source and 383 library files.
+The four-page budget and three-page fragment reports are compiled and all pages
+reviewed locally. New ControlTower delivery awaits existing SSH authentication;
+earlier byte-verified videos/reports remain preserved. A nominal-profile
+read-only audit rejected the legacy rescaling helper for both current model
+definitions (UpperTorsoBase has no segment axis); no candidate was produced or
+registered. Use actual builder/axis semantics before morphology experiments.

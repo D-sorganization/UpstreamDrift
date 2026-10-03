@@ -3770,3 +3770,14 @@ No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
 No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
 No material development-log change — Bolt np.linalg.norm → sqrt(einsum) in rigidity.py (#11189) is a behaviour-preserving micro-optimisation with no feature entry.
+
+## DL-#11357 — Pure Raw Shaft Fragment Derivative Diagnostics
+
+- **Change:** Canonical immutable options/check/result contracts and public
+  raw fragment analytic/central FD diagnostics; canonical camera/marker reuse.
+- **Validation:** Repository fail-first scaffold regression followed by focused
+  native-free synthetic tests, curated exports and fingerprint inclusion.
+- **Limits:** No historical native/Library/render/fit operation, no objective
+  or evidence-role change, and no clinical/scientific qualification.
+- **Next Step:** Review typed core, then separately design authenticated
+  workspace consumers using existing job/store/renderer boundaries.

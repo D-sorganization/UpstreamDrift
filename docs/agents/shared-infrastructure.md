@@ -604,3 +604,14 @@ Reuse `historical_fit.ContactPinSchedule` / `ScheduledConstraintOptions` for exa
 Reuse public `historical_fit.expand_image_spline_coordinates` and `SplineCoordinateExpansion` to expand a checked Hermite decision selection without changing geometry or old coefficients. Added coordinates remain constant before optimization, with a detached reference-pose receipt and changed decision identity. Reuse `workspace.build_native_fit_payload` for canonical worker/derived-seed serialization; expansion-only records cannot inherit optimized/converged metadata. Strict initializer and native authored-range extraction remain authoritative. See [Coordinate Expansion Procedure](../development/necromatcher-coordinate-expansion.md).
 
 `NativeVideoSession.stored_runs(fit_id)` and `view_for_fit(fit_id, run_id)` reuse canonical status and current parent binding checks for durable native recall. The dialog selector submits no new job. Guarded downloads/transfer remain shared; successful research exports remain rejected. Unreadable unpublished run directories are logged and omitted, while selected binding corruption is rejected. No full video hashing is added to polling.
+
+### Raw Shaft Fragment Derivative Diagnostics
+
+Reuse the curated `motion_matching.historical_fit.FragmentDerivativeOptions`,
+`FragmentDerivativeCheck`, `FragmentDerivativeAssessment`,
+`assess_fragment_derivatives` and `optional_fragment_derivatives`. The pure core
+uses canonical `CameraProjection` and public `MarkerLinearizer` data; no native
+state, FK, solver or renderer is duplicated. Results are immutable raw px/rad
+checks with strict order/units and explicit unavailable/bound-limited nulls.
+Source/model/clock authentication remains in canonical workspace admission.
+See [Procedure](../development/necromatcher-shaft-fragment-diagnostics.md).
