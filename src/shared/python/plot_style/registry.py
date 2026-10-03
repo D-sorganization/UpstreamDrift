@@ -23,7 +23,12 @@ from typing import Final
 import matplotlib.colors as mcolors
 from matplotlib import colormaps as _mpl_colormaps
 
-from .colormaps import ColormapId, CustomColormap, resolve_colormap_alias
+from .colormaps import (
+    TENSION_COMPRESSION_STOPS,
+    ColormapId,
+    CustomColormap,
+    resolve_colormap_alias,
+)
 
 __all__ = [
     "get_colormap",
@@ -45,7 +50,29 @@ _BUILTIN_MPL_NAME: Final[dict[ColormapId, str]] = {
     ColormapId.TURBO: "turbo",
     ColormapId.COOLWARM: "coolwarm",
     ColormapId.SPECTRAL: "Spectral",
+    ColormapId.TENSION_COMPRESSION: "tension_compression",
 }
+
+# 3-stop diverging colormap for axial tension (blue) and compression (red) (ADR-0052, #11289)
+# N=257 ensures the central neutral value at 0.5 maps exactly to integer index 128.
+_TENSION_COMPRESSION_CMAP: Final[mcolors.Colormap] = (
+    mcolors.LinearSegmentedColormap.from_list(
+        "tension_compression",
+        [(pos, hex_) for pos, hex_ in TENSION_COMPRESSION_STOPS],
+        N=257,
+    )
+)
+
+try:
+    _mpl_colormaps.register(
+        _TENSION_COMPRESSION_CMAP, name="tension_compression", force=True
+    )
+except Exception:  # pragma: no cover
+    import matplotlib.cm as _cm
+
+    _reg = getattr(_cm, "register_cmap", None)
+    if _reg is not None:
+        _reg(name="tension_compression", cmap=_TENSION_COMPRESSION_CMAP)
 
 
 # Process-global registry for user-defined colormaps. Keyed by
