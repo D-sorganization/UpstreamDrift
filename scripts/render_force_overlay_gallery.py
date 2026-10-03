@@ -286,15 +286,8 @@ def _render_synthetic_composite(
     }
 
 
-def render_gallery(
-    out_dir: Path,
-    synthetic_only: bool = False,
-) -> tuple[Path, Path]:
-    """Render gallery stills, receipts, manifest.json and index.html."""
-    out_dir.mkdir(parents=True, exist_ok=True)
-    images_dir = out_dir / "images"
-    images_dir.mkdir(parents=True, exist_ok=True)
-
+def _render_synthetic_entries(out_dir: Path) -> list[dict[str, Any]]:
+    """Render matplotlib, opencv and composite snapshots."""
     entries: list[dict[str, Any]] = []
 
     # 1. Matplotlib Renderer (3D)
@@ -340,70 +333,41 @@ def render_gallery(
             "receipt": comp_receipt,
         }
     )
+    return entries
 
-    # 4. MuJoCo Offscreen
+
+def _render_mujoco_entry(out_dir: Path, synthetic_only: bool) -> dict[str, Any]:
+    """Render MuJoCo snapshot or return skipped entry."""
     if not synthetic_only:
         try:
             mj_img = render_mujoco_snapshot(STANDARD, 480, 360)
             mj_file = "images/mujoco_offscreen.png"
             cv2.imwrite(str(out_dir / mj_file), mj_img)
-            entries.append(
-                {
-                    "engine": "mujoco",
-                    "title": "MuJoCo Native 3D Offscreen Render",
-                    "renderer": "add_glyphs_to_scene",
-                    "status": "rendered",
-                    "image_file": mj_file,
-                    "receipt": {"renderer": "mujoco_render", "resolution": [480, 360]},
-                }
-            )
+            return {
+                "engine": "mujoco",
+                "title": "MuJoCo Native 3D Offscreen Render",
+                "renderer": "add_glyphs_to_scene",
+                "status": "rendered",
+                "image_file": mj_file,
+                "receipt": {"renderer": "mujoco_render", "resolution": [480, 360]},
+            }
         except Exception as exc:  # noqa: BLE001
-            entries.append(
-                {
-                    "engine": "mujoco",
-                    "title": "MuJoCo Native 3D Offscreen Render",
-                    "status": "skipped",
-                    "skip_reason": str(exc),
-                }
-            )
-    else:
-        entries.append(
-            {
+            return {
                 "engine": "mujoco",
                 "title": "MuJoCo Native 3D Offscreen Render",
                 "status": "skipped",
-                "skip_reason": "synthetic_only mode enabled",
+                "skip_reason": str(exc),
             }
-        )
-
-    # 5. Drake / Pinocchio / OpenSim / Simscape
-    for engine_name, engine_title in (
-        ("drake", "Drake Multi-Body Plant Overlay"),
-        ("pinocchio", "Pinocchio Native Replay Overlay"),
-        ("opensim", "OpenSim Animated Playback"),
-        ("simscape", "Simscape 3D Multibody Overlay"),
-    ):
-        entries.append(
-            {
-                "engine": engine_name,
-                "title": engine_title,
-                "status": "skipped",
-                "skip_reason": (
-                    "Live headless capture skipped in standard lane; validated via FTO-21 parity suite and playback recorder."
-                ),
-            }
-        )
-
-    manifest = {
-        "schema_version": GALLERY_SCHEMA,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "entries": entries,
+    return {
+        "engine": "mujoco",
+        "title": "MuJoCo Native 3D Offscreen Render",
+        "status": "skipped",
+        "skip_reason": "synthetic_only mode enabled",
     }
-    manifest_path = out_dir / "manifest.json"
-    with open(manifest_path, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
 
-    # Generate index.html
+
+def _generate_gallery_html(entries: list[dict[str, Any]]) -> str:
+    """Generate self-contained accessible HTML dashboard for the force overlay gallery."""
     html_cards: list[str] = []
     for e in entries:
         if e["status"] == "rendered":
@@ -427,7 +391,7 @@ def render_gallery(
             """
         html_cards.append(card)
 
-    index_html = f"""<!DOCTYPE html>
+    return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -455,8 +419,49 @@ def render_gallery(
 </body>
 </html>
 """
+
+
+def render_gallery(
+    out_dir: Path,
+    synthetic_only: bool = False,
+) -> tuple[Path, Path]:
+    """Render gallery stills, receipts, manifest.json and index.html."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    images_dir = out_dir / "images"
+    images_dir.mkdir(parents=True, exist_ok=True)
+
+    entries = _render_synthetic_entries(out_dir)
+    entries.append(_render_mujoco_entry(out_dir, synthetic_only))
+
+    # Drake / Pinocchio / OpenSim / Simscape
+    for engine_name, engine_title in (
+        ("drake", "Drake Multi-Body Plant Overlay"),
+        ("pinocchio", "Pinocchio Native Replay Overlay"),
+        ("opensim", "OpenSim Animated Playback"),
+        ("simscape", "Simscape 3D Multibody Overlay"),
+    ):
+        entries.append(
+            {
+                "engine": engine_name,
+                "title": engine_title,
+                "status": "skipped",
+                "skip_reason": (
+                    "Live headless capture skipped in standard lane; validated via FTO-21 parity suite and playback recorder."
+                ),
+            }
+        )
+
+    manifest = {
+        "schema_version": GALLERY_SCHEMA,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "entries": entries,
+    }
+    manifest_path = out_dir / "manifest.json"
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+
     index_path = out_dir / "index.html"
-    index_path.write_text(index_html, encoding="utf-8")
+    index_path.write_text(_generate_gallery_html(entries), encoding="utf-8")
     return manifest_path, index_path
 
 
