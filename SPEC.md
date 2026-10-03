@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11308 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence. |
 | 2026-10-03 | #11294 | [FTO-9] MuJoCo force/torque provider: `MujocoForceTorqueSource` (cached scratch MjData, world-frame joint reactions from cfrc_int, actuator torques/forces from qfrc_actuator and xaxis, contact wrenches from mj_contactForce with equal-opposite reaction on geom1, axial load calculation, stale cfrc_ext fixes), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_contact_forces`, `force_visualization=FULL`. |
 | 2026-10-03 | #11307 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362. |
 | 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |

@@ -1,3 +1,42 @@
+# Web Three.Js Force Overlay — #11308 (FTO-23)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11308`
+- Branch: `feat/fto-11308-web-threejs-overlay`; commit: SELF; PR: not created
+- Governing issue: #11308 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-23] Web three.js overlay: render the serialized GlyphSet, fix the lossy round trip, live torque arcs.
+- Completed:
+  - Created `ui/src/types/glyphs.ts`: `GlyphSetV1`, `ArrowGlyph`, `TorqueArcGlyph`, `LegendSpec`, `WrenchKind`, `Vec3`, `RGBA`.
+  - Created `ui/src/components/visualization/forceOverlayScene.ts` (181 lines, strictly < 400 lines):
+    - `alignYTo`: maps +y onto direction unit vector, handling antiparallel $[0, -1, 0]$ via $\pi$ rotation around X axis.
+    - `getCylinderEndpoints`, `getConeEndpoints`: mesh bounding/geometry inspection utilities.
+    - `buildArrowMeshGroup`: constructs shaft cylinder and head cone matching server coordinates directly without physics or client-side scaling.
+    - `buildTorqueArcMeshGroup`: constructs `TubeGeometry` along `CatmullRomCurve3` centripetal curve through `polyline_m` points plus head cone from `head_base_m` to `head_tip_m`.
+    - `buildForceOverlayScene`: validates `schema_version === "glyph-set-v1"` (DbC boundary rejection), returns complete Three.js `Group`.
+  - Rewrote `ui/src/components/visualization/ForceOverlay.tsx` (48 lines, strictly < 400 lines):
+    - Pure `<primitive object={scene} />` rendering, zero client-side scaling/clamping math.
+  - Created `ui/src/components/visualization/ForceLegend.tsx` (114 lines, strictly < 400 lines):
+    - Displays scale reference bars and arcs with formatted values and units, wrench kind swatches from `FORCE_KIND_PALETTE`, unavailable channel badges, and engine attribution.
+  - Updated `ui/src/components/visualization/ForceOverlayPanel.tsx` (215 lines, strictly < 400 lines):
+    - Wires WebSocket `SimulationFrame.force_overlay` live stream. Disables REST polling while socket is connected.
+    - Falls back to 2 Hz REST polling when disconnected. Computes derived totals via `useMemo` (zero client-side scaling math).
+  - Updated `ui/src/components/visualization/Scene3D.tsx` (375 lines, strictly < 400 lines):
+    - Passes `glyphs` payload directly without lossy `mappedVectors` mapping. Renders `ForceOverlay` and `ForceLegend`.
+  - Updated `ui/src/pages/Simulation.tsx`:
+    - Manages `forceGlyphs` state directly from WebSocket or REST, eliminating lossy `sceneForceOverlays` translation.
+  - Automated Playwright headless screenshot capture in `scripts/ci/capture_web_force_overlay_screenshot.py`:
+    - Captured screenshot evidence showing teal contact arrow, orange torque arc, and interactive legend card at `docs/development/evidence/web_force_overlay_evidence.png`.
+  - Parity & Documentation:
+    - Updated `src/config/feature_parity.json` for `simulation.controls_wiring` (`status: "parity"`, recorded evidence path) and regenerated `docs/development/feature_parity_matrix.md`.
+    - Updated `SPEC.md` Section 12 changelog and `DEVELOPMENT_LOG.md` under `DL-#11285`.
+- Validation:
+  - Full Vitest suite: 106 test files passed, 983 tests passed (0 failures).
+  - `tsc -b --noEmit --force`: passed cleanly.
+  - `eslint .`: passed cleanly (0 errors, 0 warnings).
+  - `npm run build`: built production bundle in 38.59s cleanly.
+  - `rg -n "torque_scale|force_scale|clamp\(" ui/src/components/visualization/`: 0 matches (zero client-side math).
+  - Playwright screenshot: generated and visually verified.
+- Next steps: Dispatch next issue in Epic #11285 (e.g. FTO-10 #11295 MuJoCo GUI controls, FTO-12 #11297 Drake GUI controls, FTO-14 #11299 Pinocchio GUI controls, or FTO-30 #11315 Gallery & Close-out).
+
 # Force Overlay API and WebSocket Streaming — #11307 (FTO-22)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11307`

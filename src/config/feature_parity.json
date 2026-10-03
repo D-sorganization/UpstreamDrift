@@ -155,10 +155,10 @@
       "pyqt": "src/launchers/launcher_simulation.py",
       "api": "src/api/routes/force_overlays.py",
       "web": "ui/src/components/simulation/SimulationControls.tsx",
-      "status": "gap",
+      "status": "parity",
       "issue": 7452,
       "tiles": ["force_overlays", "actuator_controls"],
-      "notes": "Real ForceTorqueProvider frames and GlyphSet streaming implemented over REST and WebSocket (#11307, FTO-22); web three.js glyph rendering active under #11308 (FTO-23)."
+      "notes": "Real ForceTorqueProvider frames and GlyphSet streaming implemented over REST and WebSocket (#11307, FTO-22); Web Three.js glyph rendering and live torque arcs verified with Playwright evidence at docs/development/evidence/web_force_overlay_evidence.png (#11308, FTO-23)."
     },
     "chat.live_context": {
       "title": "Live app/engine context in chat",
