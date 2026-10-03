@@ -158,15 +158,15 @@ the canonical categorical palette is `FORCE_KIND_PALETTE`. It uses color-blind-s
 Okabe–Ito hues and reserves pure `#0000ff` and `#ff0000` strictly for axial tension
 and compression fills:
 
-| Kind | Hex Code | Visual Swatch / Notes |
-| --- | --- | --- |
-| `joint_actuator` | `#E69F00` | Orange (Okabe–Ito) |
-| `joint_reaction` | `#CC79A7` | Reddish purple (Okabe–Ito) |
-| `contact` | `#009E73` | Bluish green (Okabe–Ito) |
-| `grip` | `#56B4E9` | Sky blue (Okabe–Ito) |
-| `external` | `#000000` | Black (light) / `#FFFFFF` White (dark) |
-| `gravity` | `#999999` | Medium gray (Okabe–Ito) |
-| `muscle` | `#D55E00` | Vermilion (Okabe–Ito) |
+| Kind             | Hex Code  | Visual Swatch / Notes                  |
+| ---------------- | --------- | -------------------------------------- |
+| `joint_actuator` | `#E69F00` | Orange (Okabe–Ito)                     |
+| `joint_reaction` | `#CC79A7` | Reddish purple (Okabe–Ito)             |
+| `contact`        | `#009E73` | Bluish green (Okabe–Ito)               |
+| `grip`           | `#56B4E9` | Sky blue (Okabe–Ito)                   |
+| `external`       | `#000000` | Black (light) / `#FFFFFF` White (dark) |
+| `gravity`        | `#999999` | Medium gray (Okabe–Ito)                |
+| `muscle`         | `#D55E00` | Vermilion (Okabe–Ito)                  |
 
 ### Accessibility
 
