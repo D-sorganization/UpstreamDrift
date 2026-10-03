@@ -334,13 +334,22 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_force_scale_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
-        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
+        self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
+        self._connect_force_legend_to_status_bar()
 
         ellipsoid_group = self._create_ellipsoid_group()
 
         return force_group, ellipsoid_group
+
+    def _connect_force_legend_to_status_bar(self) -> None:
+        """Show the force overlay legend line in the status bar while it is on."""
+        status_bar = getattr(self.window(), "statusBar", None)
+        signal = getattr(self.sim_widget, "force_legend_changed", None)
+        if status_bar is None or signal is None:
+            return
+        signal.connect(lambda text: status_bar().showMessage(text))
 
     def _create_force_checkboxes(self, force_layout: QtWidgets.QVBoxLayout) -> None:
         if force_layout is None:
