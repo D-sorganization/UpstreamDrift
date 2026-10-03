@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -32,9 +32,12 @@ from src.shared.python.force_overlay import (
     OverlayWrench,
     WrenchKind,
 )
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.contact_law import ContactSample
 
 __all__ = ["PinocchioForceTorqueSource"]
+
+logger = get_logger(__name__)
 
 _ENGINE = "pinocchio"
 _REACTION_SOURCE = "pinocchio:rnea:data.f"
@@ -95,6 +98,28 @@ class PinocchioForceTorqueSource:
             raise TypeError("model must be a pinocchio.Model")
         self.model: Any = model
         self._data: Any = model.createData()
+        self._body_by_joint: dict[int, str] = {}
+        for frame in model.frames:
+            if frame.type == pin.FrameType.BODY:
+                self._body_by_joint.setdefault(int(frame.parentJoint), frame.name)
+        self._children: dict[int, list[int]] = {}
+        for j in range(1, model.njoints):
+            self._children.setdefault(int(model.parents[j]), []).append(j)
+
+    def body_name(self, joint_id: int) -> str:
+        """Name of the body frame attached to ``joint_id`` (joint name if none)."""
+        return self._body_by_joint.get(joint_id, str(self.model.names[joint_id]))
+
+    def acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
+        """Forward dynamics (ABA) acceleration at ``(q, v, tau)``, shape ``(nv,)``.
+
+        Uses the private data; external contact forces are not included.
+        """
+        model = self.model
+        q_arr = _require_vector("q", q, model.nq)
+        v_arr = _require_vector("v", v, model.nv)
+        tau_arr = _require_vector("tau", tau, model.nv)
+        return np.array(pin.aba(model, self._data, q_arr, v_arr, tau_arr))
 
     def sample(
         self,
@@ -102,10 +127,9 @@ class PinocchioForceTorqueSource:
         v: np.ndarray,
         a: np.ndarray,
         tau_applied: np.ndarray,
-        contact_samples: Sequence[ContactSample] = (),
+        contact_samples: Mapping[str, ContactSample] | None = None,
         *,
         time_s: float = 0.0,
-        contact_body: str = "world",
     ) -> ForceTorqueFrame:
         """Return the overlay frame for the given state.
 
@@ -114,14 +138,15 @@ class PinocchioForceTorqueSource:
             v: Velocity, shape ``(nv,)``.
             a: Actual acceleration, shape ``(nv,)``.
             tau_applied: Applied generalized torque, shape ``(nv,)``.
-            contact_samples: World-frame contact records, passed through.
+            contact_samples: Mapping of body (frame) name to its world-frame
+                ``ContactSample``, passed through. Entries whose name is not
+                a frame of the model are omitted, never relabelled.
             time_s: Frame timestamp [s].
-            contact_body: Body name recorded on contact wrenches (the
-                ``ContactSample`` record does not carry one).
 
         Raises:
             ValueError: On wrongly sized or non-finite inputs.
-            TypeError: If a contact sample is not a ``ContactSample``.
+            TypeError: If ``contact_samples`` is not a mapping of
+                ``ContactSample`` values.
         """
         model = self.model
         q_arr = _require_vector("q", q, model.nq)
@@ -142,11 +167,11 @@ class PinocchioForceTorqueSource:
             if _is_free_flyer(joint):
                 continue
             wrenches.append(self._reaction(i))
-            axial[model.names[i]] = self._axial_load(i, wrenches[-1])
+            axial[self.body_name(i)] = self._axial_load(i, wrenches[-1])
             actuator = self._actuator(i, joint, tau_arr)
             if actuator is not None:
                 wrenches.append(actuator)
-        wrenches.extend(self._contacts(contact_samples, contact_body))
+        wrenches.extend(self._contacts(contact_samples))
 
         loads = (
             AxialLoadFrame(time_s=time_s, values_n=axial, source=_REACTION_SOURCE)
@@ -164,7 +189,7 @@ class PinocchioForceTorqueSource:
         return OverlayWrench(
             kind=WrenchKind.JOINT_REACTION,
             label=_label("reaction", self.model.names[i]),
-            body=self.model.names[i],
+            body=self.body_name(i),
             point_m=_vec3(placement.translation),
             force_n=_vec3(rotation @ spatial.linear),
             torque_nm=_vec3(rotation @ spatial.angular),
@@ -184,42 +209,57 @@ class PinocchioForceTorqueSource:
         return OverlayWrench(
             kind=WrenchKind.JOINT_ACTUATOR,
             label=_label("actuator", self.model.names[i]),
-            body=self.model.names[i],
+            body=self.body_name(i),
             point_m=_vec3(placement.translation),
             torque_nm=_vec3(moment),
             source=_ACTUATOR_SOURCE,
         )
 
-    def _segment_distal_point(self, i: int) -> np.ndarray:
-        """First child joint origin, else the body centre of mass (world)."""
-        for j in range(i + 1, self.model.njoints):
-            if self.model.parents[j] == i:
-                return np.asarray(self._data.oMi[j].translation)
+    def _segment_distal_point(self, i: int) -> np.ndarray | None:
+        """Distal end of body ``i`` in the world frame, or None if ambiguous.
+
+        Exactly one child joint: that joint origin. No children: the body
+        centre of mass. Several children (branching) is ambiguous and yields
+        None rather than depending on joint ordering.
+        """
+        children = self._children.get(i, [])
+        if len(children) == 1:
+            return np.asarray(self._data.oMi[children[0]].translation)
+        if children:
+            return None
         lever = self.model.inertias[i].lever
         return np.asarray(self._data.oMi[i].act(lever))
 
     def _axial_load(self, i: int, reaction: OverlayWrench) -> float | None:
         proximal = np.asarray(self._data.oMi[i].translation)
         distal = self._segment_distal_point(i)
-        if np.linalg.norm(distal - proximal) <= _MIN_SEGMENT_LENGTH_M:
-            return None
+        if distal is None or np.linalg.norm(distal - proximal) <= _MIN_SEGMENT_LENGTH_M:
+            return None  # ambiguous or degenerate axis: unavailable, never guessed
         assert reaction.force_n is not None  # reactions always carry both halves
         return axial_force_from_proximal_reaction(reaction.force_n, proximal, distal)
 
-    @staticmethod
-    def _contacts(samples: Sequence[ContactSample], body: str) -> list[OverlayWrench]:
+    def _contacts(
+        self, samples: Mapping[str, ContactSample] | None
+    ) -> list[OverlayWrench]:
+        if samples is None:
+            return []
+        if not isinstance(samples, Mapping):
+            raise TypeError("contact_samples must be a mapping of body name to sample")
         wrenches = []
-        for n, sample in enumerate(samples):
+        for body, sample in samples.items():
             if not isinstance(sample, ContactSample):
                 raise TypeError("contact_samples must contain ContactSample items")
+            if not self.model.existFrame(str(body)):
+                logger.warning("Omitting contact on unknown body %r", body)
+                continue
             total = np.asarray(sample.normal_force_n) + np.asarray(
                 sample.friction_force_n
             )
             wrenches.append(
                 OverlayWrench(
                     kind=WrenchKind.CONTACT,
-                    label=_label("contact", f"{body}:{n}"),
-                    body=body,
+                    label=_label("contact", str(body)),
+                    body=str(body),
                     point_m=_vec3(sample.contact_point_m),
                     force_n=_vec3(total),
                     source=_CONTACT_SOURCE,

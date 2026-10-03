@@ -9,7 +9,7 @@ initialization patterns.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
@@ -79,7 +79,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.v: np.ndarray = np.array([])
         self.a: np.ndarray = np.array([])
         self.tau: np.ndarray = np.array([])
-        self._contact_samples: tuple[ContactSample, ...] = ()
+        self._contact_samples: dict[str, ContactSample] = {}
         self._force_torque_source: PinocchioForceTorqueSource | None = None
         self.time: float = 0.0
         self.integrator: PinocchioIntegrator = "rk4"
@@ -375,23 +375,26 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             # No contact model: callers check norm and fall back to gravity
             return np.array([0.0, 0.0, 0.0])
         total = np.zeros(3)
-        for sample in self._contact_samples:
+        for sample in self._contact_samples.values():
             total += np.asarray(sample.normal_force_n) + np.asarray(
                 sample.friction_force_n
             )
         return total
 
-    def set_contact_samples(self, samples: Sequence[ContactSample]) -> None:
+    def set_contact_samples(self, samples: Mapping[str, ContactSample]) -> None:
         """Attach world-frame contact records from an external contact model.
 
         Args:
-            samples: ``ContactSample`` records; replaces any previous set.
+            samples: Mapping of body (frame) name to its ``ContactSample``;
+                replaces any previous set.
 
         Raises:
-            TypeError: If any item is not a ``ContactSample``.
+            TypeError: If ``samples`` is not a mapping of ``ContactSample``.
         """
-        items = tuple(samples)
-        if not all(isinstance(s, ContactSample) for s in items):
+        if not isinstance(samples, Mapping):
+            raise TypeError("samples must be a mapping of body name to ContactSample")
+        items = dict(samples)
+        if not all(isinstance(s, ContactSample) for s in items.values()):
             raise TypeError("samples must contain ContactSample items")
         self._contact_samples = items
 
@@ -404,7 +407,10 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     def get_force_torque_frame(self) -> ForceTorqueFrame | None:
         """Return the current world-frame force/torque overlay frame.
 
-        Uses the current ``q``, ``v``, last computed ``a`` and applied ``tau``.
+        Uses the current ``q``, ``v`` and applied ``tau``; the acceleration is
+        recomputed with ABA at that state because ``self.a`` goes stale after
+        ``set_state``/``set_control``. External contact forces are not part of
+        that acceleration.
         Returns None when no model is loaded.
         """
         if self.model is None or self.data is None:
@@ -415,10 +421,11 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             from .pinocchio_force_torque import PinocchioForceTorqueSource
 
             self._force_torque_source = PinocchioForceTorqueSource(self.model)
-        return self._force_torque_source.sample(
+        source = self._force_torque_source
+        return source.sample(
             self.q,
             self.v,
-            self.a,
+            source.acceleration(self.q, self.v, self.tau),
             self.tau,
             self._contact_samples,
             time_s=self.time,
