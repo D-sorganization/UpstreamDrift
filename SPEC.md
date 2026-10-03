@@ -7726,6 +7726,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
 | 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
 | 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
