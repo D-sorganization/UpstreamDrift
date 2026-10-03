@@ -1,3 +1,61 @@
+# Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
+- Governing issue: #11310 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-25] Force and torque arrow layer in the reference-comparison and capture-rig video compositors (preview + export).
+- Completed:
+  - `src/motion_capture/reconstruct/model/kinetics_series.py`:
+    - `kinetics_to_force_series(kinetics, model) -> ForceTorqueSeries`:
+      - Samples model forward kinematics (`forward_frames`) at each frame time.
+      - Maps generalized torques $\tau$ per rotational DOF to joint moments using joint rotation axes in `adr0041_world`.
+      - Reconstructs `JOINT_ACTUATOR` moments via `joint_torque_wrench` at joint centers.
+      - Gracefully skips joints without rotation axes (`is_available=False`).
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_forces`, `draw_torques`, `draw_legend`, `force_scale` to `ComparisonLayer`.
+    - Added `ForceLayer` variant to `ComparisonLayer` with `series` and `style` excluded from JSON serialization.
+    - Added `glyph_receipts` and `force_series_hash` to `ComparisonExportSidecarSpec` and `build_comparison_sidecar`.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - `ComparisonRenderer`: renders force/torque vector layer via `force_frame_for_video`, `build_glyphs`, `scale_for_view`, and `draw_glyphs_on_frame` using context camera through `PinholeProjector`.
+    - Blended with layer opacity using `cv2.addWeighted`.
+    - Tracks per-frame `VideoGlyphReceipt` in `renderer.receipts` and `renderer.last_receipt`.
+  - `src/tools/capture_rig/reference_export.py`:
+    - Populates `glyph_receipts` and SHA256 `force_series_hash` in `export_comparison_video` metadata sidecar.
+  - `src/tools/capture_rig/overlay_render.py`:
+    - Added `joint_torques`, `torques`, `force_series`, `camera`, `style` parameters to `render_frame` and `export_overlay`.
+    - Renders torque arcs and glyphs directly onto frames via `PinholeProjector` and `draw_glyphs_on_frame`.
+  - UI Toggles:
+    - `VariantOverlayBox` (`overlay_box.py`): added "Joint torques", "Forces", "Torques", "Legend" checkboxes and horizontal scale slider.
+    - `MotionAppearanceControls` (`reference_appearance.py`): added "Show Forces", "Show Torques", "Show Legend" checkboxes and "Force Scale" spinbox, persisting into `ComparisonLayer`.
+  - Feature parity & documentation:
+    - Updated `src/config/feature_parity.json` for `tools.capture_rig` and regenerated `docs/development/feature_parity_matrix.md`.
+    - Added row to `SPEC.md` Change Log table (#11390).
+- Validation:
+  - Unit and integration tests all passing:
+    - `tests/motion_capture/reconstruct/model/test_kinetics_series.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed)
+    - `tests/tools/capture_rig/test_overlay_render.py` (4 passed)
+    - `tests/tools/capture_rig/test_overlay_box.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_appearance_controls.py` (2 passed)
+- Next steps: Merge PR; unblocks FTO-30.
+
+---
+
+# Force-Overlay Parity MuJoCo Lane Evidence — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `chore/mujoco-parity-lane-evidence`; commit SELF; PR: see branch (`Refs #11346`, `Refs #11285`)
+- Completed: the `force-overlay-parity` mujoco matrix entry now requires `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` (the MuJoCo provider row, FTO-9 / #11294, merged in #11361; labels and fixture fixed in #11381) instead of the stand-in `test_mujoco_models_are_statically_consistent`.
+- Validation: `pytest -o addopts="" tests/integration/cross_engine/test_force_overlay_parity.py -m requires_mujoco` (5 pass) then `scripts/ci/require_junit_test_passed.py <junit> "test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]"` passes locally.
+- Limits: the parity lanes are still not branch-protection required checks; promoting them is a repository-admin setting.
+- Next steps: a repository admin decides whether to make the force-overlay parity lanes required.
+
+# Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
+- Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
+- Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
+- Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
 # Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment-video`; commit SELF; PR: #11378 (`Closes #11309`, `Refs #11285`)
