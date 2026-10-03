@@ -75,6 +75,14 @@
 
 ---
 
+# Force-Overlay Parity MuJoCo Lane Evidence — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `chore/mujoco-parity-lane-evidence`; commit SELF; PR: see branch (`Refs #11346`, `Refs #11285`)
+- Completed: the `force-overlay-parity` mujoco matrix entry now requires `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` (the MuJoCo provider row, FTO-9 / #11294, merged in #11361; labels and fixture fixed in #11381) instead of the stand-in `test_mujoco_models_are_statically_consistent`.
+- Validation: `pytest -o addopts="" tests/integration/cross_engine/test_force_overlay_parity.py -m requires_mujoco` (5 pass) then `scripts/ci/require_junit_test_passed.py <junit> "test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]"` passes locally.
+- Limits: the parity lanes are still not branch-protection required checks; promoting them is a repository-admin setting.
+- Next steps: a repository admin decides whether to make the force-overlay parity lanes required.
+
 # Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: #11385 (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
