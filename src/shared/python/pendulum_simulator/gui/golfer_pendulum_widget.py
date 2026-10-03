@@ -336,66 +336,17 @@ class GolferPendulumWidget(BasePendulumWidget):
             return
 
         pos = self._result.positions_at(self._current_idx)
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._force_scale / max_mag
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        joint_pos_map = {
-            "hub": pos.get("hub"),
-            "re": pos.get("re"),
-            "rh": pos.get("rh"),
-            "le": pos.get("le"),
-            "lh": pos.get("lh"),
-            "club_tip": pos.get("club_tip"),
-        }
-
-        from src.shared.python.force_overlay.contracts import (
-            ForceTorqueFrame,
-            OverlayWrench,
-            WrenchKind,
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_REACTION,
+            label_prefix="joint",
+            color_name=self.COLOR_FORCE.name(),
+            engine_name="golfer_pendulum",
         )
-        from src.shared.python.force_overlay.glyphs import (
-            ForceGlyphStyle,
-            build_glyphs,
-        )
-        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
-            draw_glyphs_2d,
-        )
-
-        wrenches = []
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            jp = joint_pos_map.get(key)
-            if jp is None:
-                continue
-            fx, fy = force
-            wrenches.append(
-                OverlayWrench(
-                    kind=WrenchKind.JOINT_REACTION,
-                    label=f"joint:{key}",
-                    body=key,
-                    point_m=(float(jp[0]), float(jp[1]), 0.0),
-                    force_n=(float(fx * scale), float(fy * scale), 0.0),
-                    torque_nm=None,
-                    source="golfer_pendulum",
-                )
-            )
-        if not wrenches:
-            return
-        frame = ForceTorqueFrame(
-            time_s=float(self._result.t[self._current_idx]),
-            engine="golfer_pendulum",
-            wrenches=tuple(wrenches),
-        )
-        style = ForceGlyphStyle(
-            force_scale_m_per_n=1.0,
-            min_length_m=1e-4,
-            max_length_m=1e5,
-            palette={WrenchKind.JOINT_REACTION: self.COLOR_FORCE.name()},
-        )
-        glyphs = build_glyphs(frame, style=style)
-        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter) -> None:
         """Draw zero-torque (passive drift) force vectors at each joint (#1148)."""
@@ -407,66 +358,17 @@ class GolferPendulumWidget(BasePendulumWidget):
             return
 
         pos = self._result.positions_at(self._current_idx)
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._force_scale / max_mag
+        from src.shared.python.force_overlay.contracts import WrenchKind
 
-        joint_pos_map = {
-            "hub": pos.get("hub"),
-            "re": pos.get("re"),
-            "rh": pos.get("rh"),
-            "le": pos.get("le"),
-            "lh": pos.get("lh"),
-            "club_tip": pos.get("club_tip"),
-        }
-
-        from src.shared.python.force_overlay.contracts import (
-            ForceTorqueFrame,
-            OverlayWrench,
-            WrenchKind,
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_ACTUATOR,
+            label_prefix="ztcf",
+            color_name=self.COLOR_ZERO_TORQUE.name(),
+            engine_name="golfer_pendulum",
         )
-        from src.shared.python.force_overlay.glyphs import (
-            ForceGlyphStyle,
-            build_glyphs,
-        )
-        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
-            draw_glyphs_2d,
-        )
-
-        wrenches = []
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            jp = joint_pos_map.get(key)
-            if jp is None:
-                continue
-            fx, fy = force
-            wrenches.append(
-                OverlayWrench(
-                    kind=WrenchKind.JOINT_ACTUATOR,
-                    label=f"ztcf:{key}",
-                    body=key,
-                    point_m=(float(jp[0]), float(jp[1]), 0.0),
-                    force_n=(float(fx * scale), float(fy * scale), 0.0),
-                    torque_nm=None,
-                    source="golfer_pendulum",
-                )
-            )
-        if not wrenches:
-            return
-        frame = ForceTorqueFrame(
-            time_s=float(self._result.t[self._current_idx]),
-            engine="golfer_pendulum",
-            wrenches=tuple(wrenches),
-        )
-        style = ForceGlyphStyle(
-            force_scale_m_per_n=1.0,
-            min_length_m=1e-4,
-            max_length_m=1e5,
-            palette={WrenchKind.JOINT_ACTUATOR: self.COLOR_ZERO_TORQUE.name()},
-        )
-        glyphs = build_glyphs(frame, style=style)
-        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
 
     # ------------------------------------------------------------------
     # Torque vector drawing (#1119, #1170)
