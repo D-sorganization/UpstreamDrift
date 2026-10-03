@@ -4230,9 +4230,72 @@ The corrected harness passes all seven and exits naturally with zero at
 \texttt{11:18:45Z}. Tests use independent translation, wrapped-angle and
 finite-rotation oracles, nonuniform sampling intervals, representation
 invariance, immutable inputs and invalid/unrepresentable time ratios.
-The adapter has not yet been ported into the matcher. Full-output default
-parity, address-prior handling and new fit/closure/velocity audits are
-required before any rate-normalized fitting candidate is qualified.
+A private matcher port now accepts an explicit positive reference time.
+The timing policy activates only with positive full-pose regularity weight;
+zero-weight runs preserve the complete baseline output. The first frame
+uses the reference interval for its address-seed prior, rather than claiming
+a zero-time velocity. Subsequent frames use elapsed source timestamps.
+Three native clock-contract tests pass with natural process exit zero.
+Other historical smoothness priors remain per-frame, so the entire objective
+is not claimed to be sampling invariant. Production source is unchanged.
+
+\subsection{Normalized-Rate Window Results}
+Four trials per capture preserve the original geometry, address seed,
+observation weights and fitted marker offsets. They cover 75 tour and 59
+owner poses per trial, including a sparse prefix and dense problem window.
+The low setting uses angular weight $0.01$ and zero translation weight;
+the high setting uses $0.02$ and $0.0625$, with reference interval $1/30$ s.
+The fitting process writes all trials but fails its shutdown gate (receipt
+125, actual exit unavailable). A separate fresh native process subsequently
+reassembles all 536 saved full 48-coordinate poses and exits naturally with
+zero at \texttt{11:56:24Z}; complete zero-weight output parity also passes.
+Both receipts must be retained: the independent check qualifies saved
+positions, without retroactively qualifying the original process exit.
+
+\begin{center}
+\begin{tabular}{llrrrrr}
+\hline
+Capture & Setting & Derived RMS & Back RMS & Wrist step & Shoulder step & Root step\\
+ & & mm & mm & deg & deg & mm\\
+\hline
+Tour & Baseline & 26.26 & 14.91 & 4.83 & 3.88 & 2.17\\
+Tour & Low & 27.24 & 15.91 & 4.51 & 3.31 & 2.04\\
+Tour & High & 30.11 & 19.30 & 4.21 & 3.28 & 2.19\\
+Owner & Baseline & 35.66 & 22.44 & 83.89 & 11.40 & 2.73\\
+Owner & Low & 36.66 & 22.71 & 6.80 & 4.36 & 2.33\\
+Owner & High & 37.99 & 24.69 & 1.86 & 3.12 & 2.55\\
+\hline
+\end{tabular}
+\end{center}
+RMS entries are mean frame residuals; step entries are dense-window maxima.
+Derived targets are joint-centre/club estimates, while back residuals use
+three directly observed markers. The owner high setting reduces the window
+wrist step substantially, but worsens marker fit. Its sparse-prefix boundary
+wrist step increases from $24.94$ to $31.82$ degrees; that boundary is reported
+separately and must not be hidden by the window maximum. Tour low is a better
+regularity hypothesis than tour high, without establishing a universal default.
+No result yet qualifies the complete capture, between-sample motion, native
+velocity or acceleration, contact, held-out fit or forward dynamics.
+
+\subsection{Native Neck Actuation Inspection}
+A fresh read-only native inspection exits naturally with zero and confirms
+that both neck axes use \texttt{InputMotion} and \texttt{ComputedTorque}.
+Their existing converters use radians, second-order filtering and the
+\texttt{NeckFilterTime} parameter. The native allowed dynamic modes are
+\texttt{ComputedMotion} and \texttt{InputTorque}; prescribed neck motion is
+therefore not evidence of two commanded torque axes. Four native contract
+tests fail with the proposed in-memory torque adapter absent, providing
+actual RED evidence before implementation. Source-only adapter work and
+interface tests cannot establish delivered torque, a moving forward plant
+or the required fresh feedback-off 35-axis replay.
+The private adapter subsequently passes all four native interface tests.
+The first GREEN process exits naturally with zero but its wrapper reports
+failure because the runner omitted the exact completion marker; that receipt
+is preserved. The corrected runner passes all four tests and exits naturally
+with both process and wrapper zero at \texttt{12:35:53Z}. It verifies two torque
+input axes, newton-metre converters, preserved references and filtering,
+idempotent updates, invalid-command rejection, unchanged block count and the
+native 48-position/43-velocity schema. No simulation is executed in these tests.
 
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,

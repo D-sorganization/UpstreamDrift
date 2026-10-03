@@ -1070,7 +1070,321 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T11:13:10.818113+00:00"
   },
-  "normalized_rate_helper_scope": "Private first-order chordal/scalar/translation proxy scaled by explicit dimensionless dt_ref/dt. Initial GREEN runner omitted shared orientation helper path; corrected runner passes seven tests. Not ported to matcher or tested as native trajectory velocity.",
+  "normalized_rate_helper_scope": "Private first-order chordal/scalar/translation proxy scaled by explicit dimensionless dt_ref/dt. Initial GREEN runner omitted shared orientation helper path; corrected runner passes seven tests. Private matcher port tested for complete zero-weight parity and three clock contracts; not native trajectory velocity.",
+  "normalized_rate_matcher_clock_contracts": {
+    "dynamics_qualified": false,
+    "failed": 0,
+    "incomplete": 0,
+    "model_loaded": false,
+    "native_fit_qualified": false,
+    "passed": 3,
+    "phase": "GREEN_PRIVATE_MATCHER_CLOCK_GUARDS_ONLY",
+    "total": 3,
+    "whole_output_parity_qualified": false
+  },
+  "normalized_rate_matcher_clock_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:31:56.169623+00:00"
+  },
+  "normalized_rate_saved_pose_recheck": {
+    "acceleration_qualified": false,
+    "contact_qualified": false,
+    "dynamics_qualified": false,
+    "fresh_pose_rechecks": 536,
+    "initial_normalized_fitter_exit_qualified": false,
+    "model_saved": false,
+    "native_velocity_qualified": false,
+    "qualification": "INDEPENDENT_SAVED_WINDOW_POSE_RECHECK_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "baseline": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        },
+        "normalized_angular_0_01_linear_0": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 6.2803698347351e-16
+        },
+        "normalized_angular_0_02_linear_0_0625": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 7.850462293418875e-16
+        },
+        "zero": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "normalized_angular_0_01_linear_0": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 6.2803698347351e-16
+        },
+        "normalized_angular_0_02_linear_0_0625": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "zero": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        }
+      }
+    },
+    "whole_capture_qualified": false,
+    "whole_output_zero_parity": true
+  },
+  "normalized_rate_saved_pose_recheck_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:56:24.070638+00:00"
+  },
+  "normalized_rate_window_refit": {
+    "acceleration": false,
+    "contact": false,
+    "dynamics": false,
+    "markers_anatomy": false,
+    "model_saved": false,
+    "native_velocity": false,
+    "new_candidate_promoted": false,
+    "normalized_reference_time_s": 0.03333333333333333,
+    "production_modified": false,
+    "qualification": "NORMALIZED_RATE_REFIT_WINDOW_AUDIT_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "baseline": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461, 16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "normalized_angular_0_01_linear_0": {
+          "angular_weight": 0.01,
+          "back_marker_mean_rms_mm": 15.913422245771736,
+          "boundary_step_right_shoulder_deg": 23.668408269974062,
+          "boundary_step_right_wrist_deg": 6.6287961731239875,
+          "boundary_step_root_mm": 12.455701861011018,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            8.908575710383507, 16.81638907011247
+          ],
+          "head_axis_mean_error_deg": 0.11392244556036009,
+          "head_orientation_mean_error_deg": 15.678537222124136,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.3077066919012332,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.512800755422006,
+          "max_interior_root_step_mm": 2.03565911408503,
+          "mean_window_target_rms_mm": 27.241758411163776,
+          "peak_window_target_rms_mm": 34.15978938755396,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "normalized_angular_0_02_linear_0_0625": {
+          "angular_weight": 0.02,
+          "back_marker_mean_rms_mm": 19.304237754001516,
+          "boundary_step_right_shoulder_deg": 22.472131935172282,
+          "boundary_step_right_wrist_deg": 4.377476081426977,
+          "boundary_step_root_mm": 12.7948100063593,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            11.789864129922883, 17.17398044818545
+          ],
+          "head_axis_mean_error_deg": 0.3987636153869647,
+          "head_orientation_mean_error_deg": 15.03229165971133,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0.0625,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.2837191565680173,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.208976425649013,
+          "max_interior_root_step_mm": 2.1937663012343456,
+          "mean_window_target_rms_mm": 30.114843379965116,
+          "peak_window_target_rms_mm": 41.813207732853364,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "zero": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461, 16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953, 17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "normalized_angular_0_01_linear_0": {
+          "angular_weight": 0.01,
+          "back_marker_mean_rms_mm": 22.70576291222185,
+          "boundary_step_right_shoulder_deg": 13.367666981764494,
+          "boundary_step_right_wrist_deg": 28.16382122128283,
+          "boundary_step_root_mm": 13.634466238554594,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            12.524369488661112, 17.746917928611694
+          ],
+          "head_axis_mean_error_deg": 0.06541824894428518,
+          "head_orientation_mean_error_deg": 23.821099744740344,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 4.359827618591445,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 6.799086047120171,
+          "max_interior_root_step_mm": 2.3290813240323143,
+          "mean_window_target_rms_mm": 36.65992179884834,
+          "peak_window_target_rms_mm": 39.285300676279434,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "normalized_angular_0_02_linear_0_0625": {
+          "angular_weight": 0.02,
+          "back_marker_mean_rms_mm": 24.687248076451215,
+          "boundary_step_right_shoulder_deg": 14.041421198862693,
+          "boundary_step_right_wrist_deg": 31.817233394608078,
+          "boundary_step_root_mm": 13.616048239198705,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            13.81499905421553, 18.159681680520915
+          ],
+          "head_axis_mean_error_deg": 0.2005803771143465,
+          "head_orientation_mean_error_deg": 21.976900065975332,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.0625,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.1164409004979436,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 1.8618526703398288,
+          "max_interior_root_step_mm": 2.547284264438813,
+          "mean_window_target_rms_mm": 37.98933287316288,
+          "peak_window_target_rms_mm": 40.4928780634916,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "zero": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953, 17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        }
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture": false,
+    "whole_output_zero_parity": true
+  },
+  "normalized_rate_window_shutdown_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T11:52:17.555500+00:00"
+  },
   "original_anchor_pose_steps": {
     "qualification": "ORIGINAL_FITTED_ANCHOR_POSE_STEP_DIAGNOSTIC_NOT_DYNAMICS",
     "records": {
@@ -1387,6 +1701,32 @@
     "parent_red_failed": 2,
     "parent_red_passed": 2,
     "strict_clock_fix": true
+  },
+  "private_neck_interface_contracts": {
+    "dynamics_qualified": false,
+    "failed": 0,
+    "incomplete": 0,
+    "model_saved": false,
+    "passed": 4,
+    "phase": "GREEN_PRIVATE_NECK_TORQUE_INTERFACE",
+    "simulation_executed": false,
+    "total": 4
+  },
+  "private_neck_interface_original_harness_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": false,
+    "final_exit_code": 1,
+    "script_status": "done",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T12:33:59.605735+00:00"
+  },
+  "private_neck_interface_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T12:35:53.912789+00:00"
   },
   "private_source_sha256": {
     "analyze_c2_pilot_branches_reviewed.py": "683eef008f44b0cf55c5f5c1443dbcb21d11b30c7bf67d8cb60e5c170e47f11c",
