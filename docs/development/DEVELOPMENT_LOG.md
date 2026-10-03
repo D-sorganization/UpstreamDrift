@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `feat/fto-11287-shared-conversions`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/simscape/force_channels.py`
+- **Branch:** `feat/fto-11294-mujoco-force-provider`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/plot_style/**`, `src/engines/physics_engines/mujoco/**`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-2 (#11287) implemented shared force conversions in `src/shared/python/force_overlay/conversions.py` (`joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`); 13 unit tests pass; earlier: FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
+- **Last verified:** 2026-10-03 at SELF — FTO-9 (#11294) in progress: MuJoCo force/torque provider (actuator torques, joint reactions, per-contact forces); earlier: FTO-20 (#11305) Simscape 3D viewer; FTO-17 (#11302) animated force playback; FTO-6 (#11291) MjvScene glyph renderer; FTO-7 (#11292) Matplotlib 3D and QPainter 2D renderers; FTO-3 (#11288) glyph builder; FTO-21 (#11306) parity suite; FTO-16 (#11301) muscle lines of action; FTO-13 (#11298) Pinocchio provider; FTO-11 (#11296) Drake provider; FTO-19 (#11304) Simscape simulation output; FTO-15 (#11300) OpenSim provider; FTO-2 (#11287) conversions; FTO-18 (#11303) Simscape loader; FTO-1 (#11286) contracts.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Dispatch FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+- **Next step:** Complete FTO-9 (#11294) red tests and implementation; unblocks FTO-10 (MuJoCo GUI).
 
 ### DL-#11268 · Capture-O Video Companion
 

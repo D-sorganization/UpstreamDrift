@@ -83,6 +83,10 @@ class OpenSimMuscleAnalyzer:
 
         Section J Requirement: Muscle force computation using Hill-type model.
 
+        These are scalar fiber forces. For drawable lines of action (tendon
+        force wrenches at the origin and insertion) see
+        ``OpenSimForceTorqueSource.muscle_wrenches`` in ``opensim_force_torque``.
+
         Returns:
             Dictionary mapping muscle names to forces [N]
         """
