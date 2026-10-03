@@ -1,3 +1,11 @@
+# Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
+- Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
+- Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
+- Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
 # Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment-video`; commit SELF; PR: #11378 (`Closes #11309`, `Refs #11285`)

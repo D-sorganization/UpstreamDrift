@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "b487a03472d1229f7d35728fab67024d2d7da8c9f834679903ee30a7a6b6e98e",
+      "fingerprint": "cb0987111f01c68c32cd8063c3564c9c8bfc4fcb4f7f90b3ab38914a64a1a059",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "5bf681798c978d71d542b51bd08a8cf0b3c8f10e2398022b1cf05188ba2e0c7e",
+        "src/config/feature_parity.json": "32b91eac827edd4bc4379a938483b464a326869c861f65b67c1003cebb0076da",
         "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
         "src/config/launcher_manifest_loader.py": "222144b05e4d8e1904188853ce12ae01f66c658624a2fa45a76322e1a4585aa4",
         "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "FTO-10 (#11295) adds one feature_parity.json registry entry, mujoco.force_overlays, status gap with web issue #11308. It keeps the parity/gap/exempt distinction, claims no web parity or scientific qualification, and leaves launcher_manifest.json, models.yaml and the capability_connections authority unchanged. Verified: capability atlas regenerated with generate_capability_atlas, its --check passes, and tests/scripts/test_capability_atlas.py plus tests/config/feature_parity pass (50 passed)."
+      "rationale": "Reviewed after merging main into the Drake GUI overlay PR: feature_parity.json and capability_migration.json now carry both drake.gui_force_overlay (this PR) and mujoco.force_overlays (#11295), both gap entries with web follow-up #11308; atlas regenerated and --check clean; ORG01 baseline total 164 and companion catalog 49 features / 95 surface paths match the registry; no launcher tile added or removed."
     },
     "model-backends": {
       "fingerprint": "650c2625f17de855d0c9fd9bd3cb60b010677b742db47194e88db02823d3528d",
