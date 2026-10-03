@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image
 import pytest
 
+pytestmark = [pytest.mark.unit]
+
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.shared.python.force_overlay import (
