@@ -41,10 +41,9 @@ these residuals do not establish anatomical, contact or forward-dynamics
 qualification. The model lineage, intrinsic Euler and torque mappings, inertia
 assumptions, controller experiments and rejected contact-load results remain
 available for reproduction. A half-turn leg-orientation false acceptance was
-reproduced and repaired; 287 native software/parameter checks pass. Bounded
+reproduced and repaired; a historical receipt records 287 passing native software/parameter checks. Bounded
 bilateral address corrections pass their geometry gates, and both feet
-develop support in separately verified 20 ms gravity probes. Longer holds
-and full swing physics remain unqualified. Native execution, software checks, visual review
+develop support in separately verified 20 ms gravity probes. Later one-second supported holds pass their stated gates with retained upper-body feedback and prescribed neck motion. Full-swing independent forward dynamics remain unqualified. Native execution, software checks, visual review
 and physical acceptance are recorded separately. Gates \#11156, \#11160 and
 \#11173 remain open, and cross-execution reproducibility concerns are explicit.
 \end{abstract}
@@ -52,6 +51,53 @@ and physical acceptance are recorded separately. Gates \#11156, \#11160 and
 \tableofcontents
 \newpage
 
+\section{Current Reader Guide and Qualification Status}
+Capture A is the tour-average reference; capture O is the owner optical
+GEARS capture. Differences in the rendered motion are evaluated as
+matching, calibration or observability questions, not player-skill
+judgments. New shareable matches use the refined Human ellipsoid model.
+Its Simscape dynamics capability does not establish the mode used by an
+export: the currently selected videos replay closed-grip inverse
+kinematics (IK), rather than independently simulated full-swing motion.
+
+\begin{tabularx}{\textwidth}{@{}p{0.21\textwidth}X@{}}
+\toprule
+Evidence Area & Current Meaning and Remaining Work \\
+\midrule
+Selected A/O Videos & Two camera views per capture are available as
+MP4s. The selected positional fits and head tracking are reference
+outputs. Foot/head orientation errors, missing observations and joint
+branch diagnostics remain part of their limitations. \\
+Owner Continuity & Selective lower-body gap weighting reduces the
+missing-to-measured root step while preserving the stated marker-fit
+screen. It remains a candidate pending orientation, range, visual and
+physics review. Interpolated positions never become measurements. \\
+Pelvis and Arms & Address-relative pelvis targets have private native
+RED/GREEN contract evidence; configured-model parity and full-swing
+comparison remain pending. Alternate owner arm seeds fit poorly with the
+original offsets. Calibration must be branch-consistent and tested on
+held-out observations. \\
+Dynamics & Supported one-second holds and bounded feedback-learning
+probes have their own receipts. They do not establish the full moving
+reference, all-actuator torque recovery (including the prescribed neck),
+or a fresh independent forward replay. \\
+Video Companion & Source export and full decoding are verified.
+Dense review identifies an indoor cross-dissolve and a sideways stream.
+Pose detection has run on sparse owner images; accuracy, camera
+identification, trial pairing and the thirteen-swing envelope remain
+separate open tasks. \\
+Delivery & The draft integration PR remains open. Its latest checked
+head has CI failures; this is not a protected release. The built-in
+LaTeX compiler has a platform-directory failure, so PDF compilation and
+page review are unverified. \\
+\bottomrule
+\end{tabularx}
+
+The calculation sections below define the coordinate and torque maps,
+calibration assumptions, residuals and acceptance boundaries. The dated
+experiment records retain rejected candidates and actual native receipts.
+A successful optimizer, test suite or rendered video proves only the
+specific scope recorded with that evidence.
 \section{Document Governance and Authority Notice}
 
 \subsection{Canonical Manual Governance Relationship}
@@ -2605,6 +2651,174 @@ report \texttt{owner\_seed\_feasibility\_checkpoint\_20261002.json}
 retains the natural-exit receipts and aggregate results; seed vectors
 and fitted coordinates remain private.
 % END OWNER SEED FEASIBILITY
+% BEGIN PELVIS PROSPECTIVE CONTRACT
+\subsection{Prospective Pelvis Orientation and Video Parameter Provenance}
+The next pelvis constraint must distinguish the raw marker-cluster rotation
+$C_f$ from the explicitly calibrated World-to-pelvis target
+\[
+ R^{\mathrm{target}}_f=C_fC_a^{\mathsf T}R^{\mathrm{model}}_a.
+\]
+Here $a$ is a measured calibration frame. This establishes an
+address-relative kinematic reference, not anatomical pelvis axes. The
+prospective input is \texttt{jc.pelvis\_target\_R}, with a separate logical
+\texttt{jc.gap.pelvis\_target\_R}; raw \texttt{jc.pelvis\_R} must not be
+silently treated as the target. Reuse the existing native pelvis body
+rotation and shared SO(3) residual. The prospective term is
+\[
+ r_f=w_p\,\operatorname{vec}\!\left(
+       (R^{\mathrm{model}}_f-R^{\mathrm{target}}_f)/\sqrt{2}\right).
+\]
+Missing observations contribute zero optimization residual and NaN
+reported angle error. With the option omitted, the entire existing
+output must remain exactly equal, including head/foot terms, keyed
+initial pose, offsets and the fourteen positional targets. Positive
+weights require finite proper measured rotations and valid indices before
+model setup. The private implementation has native R2025b contract evidence: corrected
+RED exits naturally at \texttt{23:06:01Z}, with eight existing seed tests
+passing and ten new contracts failing (one residual contract passes).
+GREEN exits naturally at \texttt{23:07:17Z}, with all eleven new contracts
+and thirty-five existing head/foot/seed tests passing. These contract runs
+load no model. The implementation shares the input validator and reuses
+the existing pelvis body rotation without adding native frame outputs.
+It remains private while concurrent scapula changes are reviewed.
+Configured-model R2025b evidence now includes a naturally completed
+three-frame probe at \texttt{23:47:11Z}. The entire baseline output equals
+the private implementation with the option omitted, and omission equals
+an explicit zero weight. Supplying targets at zero weight adds diagnostics
+without changing joint coordinates or marker RMS. A missing pelvis
+observation retains NaN diagnostic error. At positive weight $0.1$, the
+two observed-frame errors decrease from $0.734$ to $0.596$ degrees and
+from $13.199$ to $10.599$ degrees; these are isolated probe observations,
+not full-swing acceptance. The configured Human model hash remains
+unchanged and no model is saved. Broader tour and owner trials are
+running with capture geometry retained through both fitting and control
+forward kinematics. Full-swing acceptance and dynamic replay remain open.
+
+\paragraph{Concurrent Scapula Experiments and Controlled Calibration.}
+The independently run scapula/head-weight comparison completed naturally
+at \texttt{23:43:18Z}. Both tour candidates improve head error but raise
+mean marker RMS from $13.540$ to $18.014$ and $19.351$ mm. Owner mean
+marker RMS rises from $16.754$ to $23.014$ and $43.902$ mm; the latter
+candidate reaches $715.180$ mm peak marker RMS. All four exceed the
+existing mean-RMS degradation screen of $0.5$ mm. They are not promoted
+to the selected matches. Reduced torso excursion in the tour candidates
+does not qualify the overall match, and owner torso excursion increases.
+Scapula bounds and head weights change together in this experiment;
+their separate effects are not identified.
+
+A prospective owner comparison separates initial-pose and offset effects:
+old versus mild bilateral elbow seeds crossed with original versus
+address-only recalibrated offsets. Calibration uses frame one and three
+rounds, then freezes offsets before fitting the same forty-six sampled
+source frames. Capture geometry, original head calibration and other
+weights remain fixed. Poor alternate-seed fits suggest a possible branch
+or calibration conflict, but do not establish its cause. Address fit alone
+cannot qualify the alternative: marker/head/foot errors, native closure,
+signed ROM and trajectory continuity require subsequent review. Dynamic
+frames are still optimization observations; evaluating those fitted
+frames is not independent predictive validation.
+
+The private video protocol now distinguishes marker-derived geometry
+from generic joint-centre offsets, assumed anatomical axes and mass/inertia
+priors. Optical marker trajectories alone do not establish mass or
+inertia. Freeze these parameters for comparison; video evaluation must
+not silently recalibrate them. A thirteen-swing envelope requires a
+verified registry roster, hashes and trial boundaries; do not assume all
+trials are in the selected C3D. Presentation timebase must be verified
+per stream: the confirmed $1/90000$ value for one stream cannot be
+assigned to the others. Physical capture timing and exact trial pairing
+remain unverified. The corrected protocol remains under review.
+A fresh headless detector probe processed six previously decoded,
+downsampled owner JPEG samples with the pinned BODY\_25 network. Raw
+keypoint counts were 17, 19, 25, 25, 20 and zero. An explicit
+$90^\circ$ counterclockwise display correction on the sideways sample
+restored twenty raw detections. These are runtime observations, not
+accuracy gates: visual review shows ambiguous limb labels and crowded
+or misplaced estimates. Full-resolution processing, independent
+held-out annotation, camera/event segmentation and subject association
+remain necessary. No exact pairing, physical video clock or model
+acceptance is inferred from detection counts.
+Dense sequential video review distinguishes a camera cross-dissolve
+from a hard cut: multiple frames contain both camera views. A
+conservative exclusion interval of zero-based frames 349--401 is recorded
+for the indoor stream; it includes extra pre/post-transition frames and
+does not claim the exact blend endpoints. RGB jump ranking was dominated
+by recurring background lighting changes. Edge-based candidate ranking
+and adjacent-frame inspection revealed the blend. Camera calibration,
+pose metrics and projected comparisons must omit this interval and treat
+each retained view separately. Event/stability review of retained
+intervals is still required; neither physical timing nor exact pairing
+is established.
+A subsequent Gemini-dispatched probe sequentially decoded six selected
+full-resolution source frames and verified the source manifest and pinned
+network hashes. It retained $720\times720$ indoor resolution and
+$1920\times1080$ display-corrected range resolution. Raw keypoint counts
+were 18, 17, 25, 25, 19 and 22. Full-resolution overlays remain ambiguous
+where arms overlap; one selected range frame is walk-away rather than a
+qualified swing phase. That sample is a detector diagnostic only. The
+raw confidences, coordinates, source-frame IDs and display correction
+remain private. No independent annotated coordinate reference or
+empirically calibrated confidence gate is established.
+
+\subsection{Full Sampled Pelvis Trials: Improvement With Explicit Tradeoffs}
+The serialized native process completed naturally at
+\texttt{2026-10-03T00:04:02Z}, with unchanged Human model and private solver
+hashes. The tour trial covers fifty-five samples and each owner trial
+forty-six samples; this is sampled IK coverage, not dense dynamic replay.
+All trial loop statuses equal one. The baseline pelvis errors are newly
+evaluated by native forward kinematics against exactly the same calibrated
+targets used by the candidates; they supersede comparisons based on a
+different root-derived calibration. Model geometry is retained throughout
+fitting and control evaluation, and no model is saved.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{lrrrr}
+\toprule
+Match & Marker mean & Marker peak & Pelvis mean & Head peak \\
+ & (mm) & (mm) & (degrees) & (degrees) \\
+\midrule
+Tour control & 13.540 & 40.368 & 10.005 & 18.918 \\
+Tour pelvis $0.1$ & 13.447 & 38.387 & 7.074 & 28.375 \\
+Owner control & 16.754 & 36.987 & 12.081 & 22.169 \\
+Owner pelvis $0.1$ & 16.543 & 36.396 & 9.755 & 22.413 \\
+Owner pelvis + selective gaps & 16.544 & 36.392 & 9.743 & 22.413 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Pelvis means exclude address and missing observations. Marker means use
+all sampled frames and only measured position residuals. Peak pelvis
+error decreases from $34.978$ to $24.865$ degrees for the tour, and from
+$39.394$ to approximately $32.824$ degrees for the owner. The owner
+selective-gap control has mean/peak marker RMS $16.753/36.975$ mm and
+post-address pelvis mean $12.063$ degrees, preserving the distinction
+between the two controls.
+
+The marker degradation screen passes, but this does not qualify the
+candidates. Tour post-address mean head error rises from $10.671$ to
+$11.246$ degrees and peak head error rises substantially. Owner peak foot
+error rises from $20.573$ to about $20.732$ degrees; the tour peak foot
+error improves from $19.809$ to $18.914$ degrees. Continuity, signed ROM,
+anatomical observability and both-view review remain necessary. No
+candidate is promoted, no simulation runs, and no force/contact or
+independent forward-dynamics claim follows from these IK results.
+
+\paragraph{Verified Private Trial Roster.}
+A bounded read-only binary audit at \texttt{2026-10-03T00:09:15Z}
+verified thirteen decoded owner trials and the selected exported dataset
+against their private manifest hashes before and after reading. All
+thirteen declare 240 Hz and metre units, with 361--391 frames and
+thirty-five point labels each. The selected dataset has 367 frames and
+thirty-eight labels in its reference-layout export. Its actual SUBJECT
+source-trial parameter and manifest source hash identify trial twelve.
+No populated header event labels or EVENT parameter groups were found.
+The audit does not establish the club type for every trial, event
+correspondence, video pairing, anatomical calibration or a shared
+physical clock. The collection is now located and verified; a qualified
+multi-trial envelope still requires the shared event/comparison
+authorities and explicit uncertainty. The selected export is preserved;
+the private export utility must not be run indiscriminately because it
+overwrites that dataset and its manifest entry.
+% END PELVIS PROSPECTIVE CONTRACT
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

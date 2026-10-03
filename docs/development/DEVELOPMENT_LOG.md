@@ -26,22 +26,22 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
 - **Started:** 2026-09-26
-- **Last verified:** 2026-10-02: sampled leg feedforward passed 16 native seam/regression checks. Saved-state audit identified early transient dominance. Controlled 0–50 ms tour passed posture but rejected peak 2.000907 BW. Separate 20–50 ms ramp runs passed all five original one-second hold gates: tour 3.176 mm / 0.836 deg at 19:54:39Z; owner 2.321 mm / 0.699 deg at 20:01:28Z. Model unchanged. Both retain feedback/prescribed neck; full independent dynamics remains unqualified. Prior b21836863 checks passed; new changes need protected checks. Built-in compiler infrastructure remains unavailable.
+- **Last verified:** 2026-10-02: private pelvis native contracts GREEN (11 new + 35 existing); configured-Human three-sample exact baseline/omitted/zero parity exited naturally at 23:47:11Z. Five document/privacy checks pass. Full sampled pelvis trials exited naturally at 2026-10-03T00:04:02Z with marker/pelvis improvement and adverse head/foot tradeoffs; continuity/ROM review pending and no promotion. Four-cell owner calibration now running. Previously qualified one-second supported holds retain feedback/prescribed neck, so full dynamics remains unqualified. Published 98ae8e1b CI dispatch failed (mypy baseline, coverage scope, missing origin/main); protected checks/merge remain open. Built-in compiler infrastructure unavailable.
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
-- **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
+- **Next step:** Complete and review full sampled pelvis trials and four-cell owner seed/offset calibration; preserve measured geometry and frozen calibration. Audit continuity, native ROM, head/foot and marker degradation before new media. Continue moving references, all-actuator/neck torque recovery and independent full-swing replay. Integrate #11161/#11268 via shared resolver/metrics and graded video protocol; build the envelope from the hash/header-verified private thirteen-trial roster with explicit club/event and camera/timing/pairing qualification. Publish through normal protected review after current-main integration.
 
 ### DL-#11268 · Capture-O Video Companion
 
-- **State:** proposed
-- **Owner:** claude
+- **State:** in_progress
+- **Owner:** claude (planning); codex (local execution with Gemini 3.8 CLI)
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** not created
+- **PR:** #11256 (draft, Simscape/video evidence); registry dependency #11172 remains separate
 - **Branch:** `claude/elegant-tesla-f2heae` (planning only)
 - **Paths:** `docs/development/capture-o-video/**`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — album link supplied and published by owner decision; COV-1 updated; no media acquired (cloud proxy 403) and no implementation performed.
+- **Last verified:** 2026-10-02: six privately acquired album streams match archive hashes; all 9,539 frames decoded with increasing integer PTS. Dense indoor review records a conservative cross-dissolve exclusion; six full-resolution OpenPose samples executed with pinned source/network hashes. These are runtime/provenance observations, not independent accuracy or exact pairing. Timebase confirmed for one stream only; thirteen private trials now hash/header-verified (selected source trial 12); camera originals, club/event qualification, protocol freeze and comparison remain open.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** A fleet agent downloads the public album and executes COV-1 (#11269).
+- **Next step:** Complete per-clip event/camera/timing grading, qualify club/event correspondence in the verified thirteen-trial roster and freeze comparison protocol using shared authorities. Keep acquisition/detector receipts separate from accuracy; investigate subject association, paired projection and uncertainty at supported L0-L3 levels. No epics or child issues closed.
 
 ### DL-#11235 · Necromatcher Native Fit
 
