@@ -115,15 +115,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#11268 · Capture-O Video Companion
 
 - **State:** in_progress
-- **Owner:** claude (planning); codex (local execution with Gemini 3.8 CLI)
+- **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** #11256 (draft, Simscape/video evidence); registry dependency #11172 remains separate
-- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
-- **Paths:** `docs/development/capture-o-video/**`
+- **PR:** #11417 (Closes #11273, Refs #11268)
+- **Branch:** `feat/cov-5-runner-matrix-11273`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02: six privately acquired album streams match archive hashes; all 9,539 frames decoded with increasing integer PTS. Dense indoor review records a conservative cross-dissolve exclusion; six full-resolution OpenPose samples executed with pinned source/network hashes. These are runtime/provenance observations, not independent accuracy or exact pairing. Timebase confirmed for one stream only; thirteen private trials now hash/header-verified (selected source trial 12); camera originals, club/event qualification, protocol freeze and comparison remain open. Local six-video archive/MP4 hashes were verified again on 2026-10-03 UTC; marker-region review is recorded in the maintained LaTeX reference, without exact-label or trial-pairing claims.
+- **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** Complete per-clip event/camera/timing grading, qualify club/event correspondence in the verified thirteen-trial roster and freeze comparison protocol using shared authorities. Keep acquisition/detector receipts separate from accuracy; investigate subject association, paired projection and uncertainty at supported L0-L3 levels. No epics or child issues closed.
+- **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
 ### DL-#11235 · Necromatcher Native Fit
 
