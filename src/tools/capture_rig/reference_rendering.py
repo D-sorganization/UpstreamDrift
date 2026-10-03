@@ -77,8 +77,20 @@ def _motion_image(
     projected, visibility = project_reference_to_camera(world, mask, camera)
     club_edges = set(ctx.asset.club_edges)
     body_edges = tuple(edge for edge in ctx.asset.edges if edge not in club_edges)
+    loads = None
+    if ctx.force_layer is not None and ctx.force_layer.series is not None:
+        try:
+            ft_frame = force_frame_for_video(
+                ctx.force_layer.series,
+                video_time_s=time,
+                registration=ctx.registration,
+            )
+            if ft_frame is not None:
+                loads = ft_frame.axial_loads
+        except (KeyError, ValueError, AttributeError, RuntimeError):
+            loads = None
     drawn = draw_segment_volumes(
-        frame, world[0], mask[0], body_edges, camera, layer
+        frame, world[0], mask[0], body_edges, camera, layer, loads=loads
     ).copy()
     points, visible = projected[0], visibility[0]
     if not layer.draw_club:
