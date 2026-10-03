@@ -4277,6 +4277,98 @@ regularity hypothesis than tour high, without establishing a universal default.
 No result yet qualifies the complete capture, between-sample motion, native
 velocity or acceleration, contact, held-out fit or forward dynamics.
 
+\subsection{Full Capture Refit and Independent Position Recheck}
+The next experiment fits every source-clock frame, including the previously
+omitted five tour and six owner tail frames: 654 tour samples over
+$1.8138889$ s and 367 owner samples over $1.525$ s. Nominal source rates
+are 360 and 240 Hz; these are not independently calibrated video clocks.
+The tour setting uses angular weight $0.01$ and zero linear weight; the
+owner setting uses $0.02$ and $0.0625$, both at reference interval $1/30$ s.
+All samples preserve the existing calibrated geometry, offsets, address
+priors, observation masks and gap-target weights. Seven lower-body targets
+remain estimates. Observed derived-target availability ranges from seven to
+fourteen per frame, and back residuals use three direct raw markers.
+
+\begin{center}
+\begin{tabular}{llrrrrr}
+\hline
+Capture & Setting & Derived RMS & Back RMS & Wrist Step & Shoulder Step & Root Step\\
+ & & mm & mm & deg & deg & mm\\
+\hline
+Tour & Baseline & 16.71 & 26.82 & 18.72 & 39.41 & 5.17\\
+Tour & Rate & 16.89 & 26.96 & 4.51 & 4.48 & 3.25\\
+Owner & Baseline & 19.86 & 37.63 & 83.51 & 45.39 & 5.98\\
+Owner & Rate & 20.80 & 38.54 & 13.24 & 11.77 & 6.54\\
+\hline
+\end{tabular}
+\end{center}
+RMS entries are mean frame residuals over the complete source clock; step
+entries are maxima over every adjacent pair. The tour peak derived residual
+falls from $61.70$ to $34.10$ mm, while the owner peak rises from $38.34$ to
+$48.08$ mm. The owner's peak left-foot orientation error also rises from
+$20.74$ to $30.65$ degrees. Improved arm continuity therefore carries explicit
+fit, foot and root tradeoffs. Full-head mean orientation errors remain near
+$42.5$ degrees despite close long-axis agreement; that observability limit
+is retained. A better-looking animation alone cannot resolve these issues.
+
+The fitting process writes all four trials and passes its numerical gates,
+then hangs after its completion marker. Its watchdog receipt is 125 with
+actual exit unavailable. A separate fresh native process subsequently
+reassembles all 2,042 saved 48-coordinate poses, verifies exact inclusive
+source clocks and unchanged model source, and exits naturally with process
+and wrapper zero at \texttt{13:15:23Z}. Maximum physical pose residual is
+below $10^{-15}$ in the declared mixed-unit metric. This is a checked-position
+scope, not an anatomical accuracy or continuous-trajectory tolerance.
+The original shutdown failure remains recorded. No new full-capture
+zero-weight parity test, between-sample continuity, native velocity,
+acceleration, held-out marker fit, contact or forward-dynamics acceptance is
+claimed. These candidates remain private and do not replace Desktop best
+matches pending the remaining checks.
+
+\subsection{Refitted C2 Source and Midpoint Audit}
+The existing C2 interpolator is reused with all newly fitted source poses,
+rather than the previous sparse 101-anchor set. Native role metadata is
+unchanged: 41 prescribed position representation values and 37 prescribed
+velocity variables, with seven closed-arm position and six velocity variables
+resolved by the native loop solve. These are declared variable roles,
+not a global rank result or 37 actuators. The four prescribed spherical
+groups are the torso hip, left shoulder and both lower-body hips; the neck
+is a two-axis Universal Joint. Frame conventions remain native follower
+frames for the spherical groups.
+
+Five adapter tests pass after missing-helper RED and a separate clock-drift
+RED. A $0.1\%$ clock drift was wrongly admitted by the original loose
+tolerance; the corrected input adapter uses $10^{-10}$ s absolute tolerance
+and zero relative tolerance. It rejects missing tails and reordered native
+coordinate identities. Shared interpolation preserves every source pose
+physically, with scalar errors below $3\times10^{-14}$ and rotation-matrix
+errors below $6\times10^{-16}$ before native loop reconstruction.
+
+The native audit probes each source frame and every interval midpoint.
+All 1,307 tour states pass position, velocity, fresh full-state and original
+anchor gates. The owner passes 729 of 733 states: one midpoint native solve
+fails, while three original anchors miss the strict physical pose tolerance
+of $10^{-7}$. Two of those discrepancies are numerical tolerance failures,
+with angular differences below $0.00005$ degrees; the remaining anchor
+changes right-shoulder orientation by about $10.956$ degrees and a right-arm
+scalar angle by $9.033$ degrees. No acceptance gate is relaxed and no failed
+state is hidden. The audit exits naturally with process and wrapper zero at
+\texttt{13:32:59Z}; that execution success does not qualify the rejected owner
+trajectory.
+
+Peak dependent angular rates are $1,626.16$ deg/s for the complete tested tour
+set and $4,249.57$ deg/s for the accepted owner subset. The owner statistic
+excludes four rejected states and is not a full-path bound. Peak prescribed
+angular accelerations are $1.30017\times10^6$ and
+$2.93367\times10^6$ deg/s$^2$. They come from the interpolant inputs, not
+an independently measured native dependent-acceleration signal. Native
+dependent acceleration, behaviour between probes, marker-fit conservation,
+contact, bounded actuator effort and independent dynamics remain unchecked.
+Neither candidate is promoted to a dynamics reference or new Desktop best
+match. The next fitting change must address acceleration and branch
+consistency alongside marker fidelity; original fitted anchors are an
+experimental control, not a user-imposed constraint.
+
 \subsection{Native Neck Actuation Inspection}
 A fresh read-only native inspection exits naturally with zero and confirms
 that both neck axes use \texttt{InputMotion} and \texttt{ComputedTorque}.
@@ -4296,6 +4388,30 @@ with both process and wrapper zero at \texttt{12:35:53Z}. It verifies two torque
 input axes, newton-metre converters, preserved references and filtering,
 idempotent updates, invalid-command rejection, unchanged block count and the
 native 48-position/43-velocity schema. No simulation is executed in these tests.
+
+A separate bounded native pilot then switches both neck axes to
+\texttt{ComputedMotion}/\texttt{InputTorque} and integrates for $0.02$ s.
+It reuses the previously verified sequential primitive-sensor discovery,
+with one newton-metre PS--Simulink converter and one terminated logged output
+per axis: four temporary blocks, with all original actuation and frame
+connections checked. Constraint and total-torque sensing remain off.
+The first pilot fails while indexing the native log's time method; its
+natural-exit-one receipt is retained. The corrected reader passes actual
+time-span, finite joint-state, sensor-unit and torque-series gates and exits
+naturally with process and wrapper zero at \texttt{13:22:47Z}.
+
+Both measured primitive actuation torque streams contain 186 finite samples
+from zero to $0.02$ s, reading $+0.25$ and $-0.25$ N\,m respectively.
+These are native connected sensor outputs, rather than substituted command
+arrays. Constant commands coincide in this pilot; the existing second-order
+filtering is preserved and equality is not assumed for arbitrary commands.
+The source model hash is unchanged and no model is saved. Initial posture,
+mass and controller settings are inherited defaults, rather than a calibrated
+matched-swing initialization or a verified feedback-off configuration.
+This qualifies the bounded two-neck torque-input and measurement capability;
+all 35 axes, subject-specific contact, full-swing tracking, energy/power
+and fresh independent replay remain unqualified.
+
 
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,
