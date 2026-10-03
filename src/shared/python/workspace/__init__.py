@@ -69,7 +69,7 @@ from .necromatcher_hypothesis import (
     author_native_hypothesis,
 )
 from .necromatcher_constraints import repair_native_motion
-from .necromatcher_video import export_fit_video
+from .necromatcher_video import export_fit_stills, export_fit_video
 from .necromatcher_caption import CaptionOverlayOptions
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from .necromatcher_shape_overlay import shape_overlay_provenance
@@ -227,6 +227,7 @@ __all__ = [
     "author_ground_placement",
     "repair_native_motion",
     "export_fit_video",
+    "export_fit_stills",
     "ShapeOverlayOptions",
     "CaptionOverlayOptions",
     "shape_overlay_provenance",

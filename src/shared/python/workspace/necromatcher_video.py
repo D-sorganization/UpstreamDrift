@@ -546,12 +546,7 @@ def export_fit_video(
     PNG indices inside that fit. Postcondition: source bytes remain untouched and
     output hashes, frame identities and unqualified scientific status are recorded.
     """
-    if shape_overlay is not None and not isinstance(shape_overlay, ShapeOverlayOptions):
-        raise TypeError("Shape export requires typed options")
-    if caption_overlay is not None and not isinstance(
-        caption_overlay, CaptionOverlayOptions
-    ):
-        raise TypeError("Caption export requires typed options")
+    _validate_overlay_options(shape_overlay, caption_overlay)
     destination = Path(destination)
     if destination.exists():
         raise FileExistsError(destination)
@@ -560,16 +555,8 @@ def export_fit_video(
     rate = source_frame_rate(indices, frames)
     if any(type(index) is not int or index not in indices for index in selected_frames):
         raise ValueError("Selected PNG frames must belong to the bound fit")
-    anatomy, missing = _anatomical_attachments(binding)
-    shaft = (
-        prepare_shaft_overlay(library, binding, shaft_evidence)
-        if shaft_evidence is not None
-        else None
-    )
-    shapes = (
-        NativeShapeOverlay.prepare(binding, shape_overlay)
-        if shape_overlay is not None
-        else None
+    anatomy, missing, overlays = _prepare_export_layers(
+        library, binding, shaft_evidence, shape_overlay, caption_overlay
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(
@@ -585,19 +572,105 @@ def export_fit_video(
             set(selected_frames),
             anatomy,
             missing,
-            VideoOverlayLayers(shaft, shapes, caption_overlay),
+            overlays,
         )
-        # Existing library authority rechecks parent and fit hashes before publication.
-        if library.load_asset(fit_id).metadata["hash"] != binding.fit_hash:
-            raise ValueError("Fit bytes changed during overlay export")
-        library.load_fit(fit_id)
-        if shaft is not None:
-            if (
-                bind_fit_shaft_evidence(library, binding.fit, shaft.bound.evidence)
-                != shaft.bound
-            ):
-                raise ValueError("Shaft source clock changed during overlay export")
+        _verify_export_binding(library, binding, overlays.shaft)
         _publish(staging, destination)
+    return manifest
+
+
+def export_fit_stills(
+    library: NecromatcherLibrary,
+    fit_id: str,
+    destination: Path,
+    *,
+    selected_frames: Sequence[int],
+    shaft_evidence: ShaftAxisEvidence | None = None,
+    shape_overlay: ShapeOverlayOptions | None = None,
+    caption_overlay: CaptionOverlayOptions | None = None,
+) -> dict[str, Any]:
+    """Publish selected source-sized PNGs using canonical video composition.
+
+    Selection is nonempty, unique and source-bound. Only selected poses are
+    rendered; no codec, frame-rate inference or physical-clock assumption occurs.
+    Exact source identities/PTS and lossless output hashes accompany the manifest.
+    """
+    _validate_overlay_options(shape_overlay, caption_overlay)
+    selected = tuple(selected_frames)
+    if (
+        not selected
+        or any(type(index) is not int for index in selected)
+        or len(set(selected)) != len(selected)
+    ):
+        raise ValueError(
+            "Selected still frames must be nonempty unique integer indices"
+        )
+    destination = Path(destination)
+    if destination.exists():
+        raise FileExistsError(destination)
+    binding = load_native_fit_binding(library, fit_id)
+    if any(index not in binding.fit["frame_indices"] for index in selected):
+        raise ValueError("Selected still frames must belong to the bound fit")
+    anatomy, missing, overlays = _prepare_export_layers(
+        library, binding, shaft_evidence, shape_overlay, caption_overlay
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(
+        prefix="necromatcher-stills-", dir=destination.parent
+    ) as temporary:
+        staging = Path(temporary) / "export"
+        staging.mkdir()
+        manifest = _write_stills(
+            binding, library, staging, selected, anatomy, missing, overlays
+        )
+        _verify_export_binding(library, binding, overlays.shaft)
+        _publish(staging, destination)
+    return manifest
+
+
+def _write_stills(
+    binding: NativeFitBinding,
+    library: NecromatcherLibrary,
+    staging: Path,
+    selected: tuple[int, ...],
+    anatomy: dict[str, Any],
+    missing: list[str],
+    overlays: VideoOverlayLayers,
+) -> dict[str, Any]:
+    records, pngs, times = [], [], []
+    with CaptureReview(library, binding.fit["capture_id"]) as review:
+        first = review.frame(selected[0])
+        size = [first["image_width"], first["image_height"]]
+        for index in selected:
+            image, record = _render_layers(binding, review, index, anatomy, overlays)
+            if list(image.shape[:2][::-1]) != size:
+                raise ValueError("Selected still changed original source dimensions")
+            frame = record["frame"]
+            pts = Fraction(
+                frame["pts_ticks"] * frame["timebase_numerator"],
+                frame["timebase_denominator"],
+            )
+            records.append(record)
+            times.append(
+                {
+                    "frame_index": index,
+                    "numerator": pts.numerator,
+                    "denominator": pts.denominator,
+                }
+            )
+            pngs.append(_save_png(staging / f"frame-{index:06d}.png", image))
+    manifest = _export_manifest(
+        binding,
+        library,
+        records,
+        pngs,
+        anatomy,
+        missing,
+        overlays,
+        {"schema": "necromatcher/source-overlay-stills/1", "image_size": size},
+    )
+    manifest["frame_pts"] = times
+    _save_manifest(staging, manifest)
     return manifest
 
 
@@ -658,9 +731,6 @@ def _write_export(
 ) -> dict[str, Any]:
     import cv2
 
-    shaft = overlays.shaft if overlays else None
-    shapes = overlays.shapes if overlays else None
-
     records, pngs = [], []
     with CaptureReview(library, binding.fit["capture_id"]) as review:
         first = review.frame(binding.fit["frame_indices"][0])
@@ -686,8 +756,43 @@ def _write_export(
         finally:
             writer.release()
     _verify_video(staging / "overlay.mp4", len(records), size)
-    manifest = {
+    media = {
         "schema": "necromatcher/source-overlay-video/1",
+        "source_frame_rate": {
+            "numerator": rate.numerator,
+            "denominator": rate.denominator,
+        },
+        "image_size": list(size),
+        "video": {
+            "path": "overlay.mp4",
+            "codec": "mp4v",
+            "sha256": _sha(staging / "overlay.mp4"),
+            "bytes": (staging / "overlay.mp4").stat().st_size,
+        },
+    }
+    manifest = _export_manifest(
+        binding, library, records, pngs, anatomy, missing, overlays, media
+    )
+    _save_manifest(staging, manifest)
+    return manifest
+
+
+def _export_manifest(
+    binding: NativeFitBinding,
+    library: NecromatcherLibrary,
+    records: list[dict[str, Any]],
+    pngs: list[dict[str, str]],
+    anatomy: dict[str, Any],
+    missing: list[str],
+    overlays: VideoOverlayLayers | None,
+    media: dict[str, Any],
+) -> dict[str, Any]:
+    import cv2
+
+    shaft = overlays.shaft if overlays else None
+    shapes = overlays.shapes if overlays else None
+    manifest = {
+        "schema": media["schema"],
         "fit_id": binding.fit_id,
         "fit_hash": binding.fit_hash,
         "model_id": binding.model_id,
@@ -703,11 +808,12 @@ def _write_export(
         "export_implementation_sha256": _sha(Path(__file__)),
         "opencv_version": cv2.__version__,
         "physical_time_qualified": False,
-        "source_frame_rate": {
-            "numerator": rate.numerator,
-            "denominator": rate.denominator,
-        },
-        "image_size": list(size),
+        **(
+            {"source_frame_rate": media["source_frame_rate"]}
+            if "source_frame_rate" in media
+            else {}
+        ),
+        "image_size": media["image_size"],
         "frames": records,
         "anatomical_marker_names": list(anatomy),
         "missing_anatomical_offsets": missing,
@@ -719,12 +825,7 @@ def _write_export(
         ],
         "club_representation": "declared attachment points only; no mesh or inferred shaft",
         "pngs": pngs,
-        "video": {
-            "path": "overlay.mp4",
-            "codec": "mp4v",
-            "sha256": _sha(staging / "overlay.mp4"),
-            "bytes": (staging / "overlay.mp4").stat().st_size,
-        },
+        **({"video": media["video"]} if "video" in media else {}),
     }
     if shapes is not None:
         manifest["shape_overlay"] = shapes.provenance
@@ -738,7 +839,60 @@ def _write_export(
         )
     if overlays and overlays.captions:
         manifest["caption_overlay"] = caption_provenance(overlays.captions)
+    return manifest
+
+
+def _save_manifest(staging: Path, manifest: dict[str, Any]) -> None:
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )
-    return manifest
+
+
+def _verify_export_binding(
+    library: NecromatcherLibrary,
+    binding: NativeFitBinding,
+    shaft: ShaftVideoOverlay | None,
+) -> None:
+    """Recheck immutable fit/parents and optional source evidence before publication."""
+    if library.load_asset(binding.fit_id).metadata["hash"] != binding.fit_hash:
+        raise ValueError("Fit bytes changed during overlay export")
+    library.load_fit(binding.fit_id)
+    if shaft is not None:
+        if (
+            bind_fit_shaft_evidence(library, binding.fit, shaft.bound.evidence)
+            != shaft.bound
+        ):
+            raise ValueError("Shaft source clock changed during overlay export")
+
+
+def _validate_overlay_options(
+    shape_overlay: ShapeOverlayOptions | None,
+    caption_overlay: CaptionOverlayOptions | None,
+) -> None:
+    if shape_overlay is not None and not isinstance(shape_overlay, ShapeOverlayOptions):
+        raise TypeError("Shape export requires typed options")
+    if caption_overlay is not None and not isinstance(
+        caption_overlay, CaptionOverlayOptions
+    ):
+        raise TypeError("Caption export requires typed options")
+
+
+def _prepare_export_layers(
+    library: NecromatcherLibrary,
+    binding: NativeFitBinding,
+    shaft_evidence: ShaftAxisEvidence | None,
+    shape_overlay: ShapeOverlayOptions | None,
+    caption_overlay: CaptionOverlayOptions | None,
+) -> tuple[dict[str, Any], list[str], VideoOverlayLayers]:
+    anatomy, missing = _anatomical_attachments(binding)
+    shaft = (
+        prepare_shaft_overlay(library, binding, shaft_evidence)
+        if shaft_evidence is not None
+        else None
+    )
+    shapes = (
+        NativeShapeOverlay.prepare(binding, shape_overlay)
+        if shape_overlay is not None
+        else None
+    )
+    return anatomy, missing, VideoOverlayLayers(shaft, shapes, caption_overlay)
