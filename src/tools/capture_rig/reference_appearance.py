@@ -70,7 +70,6 @@ class MotionAppearanceControls(QWidget):
                 "draw_joints": self.joints.isChecked(),
                 "draw_club": self.club.isChecked(),
                 "draw_ellipsoids": self.ellipsoids.isChecked(),
-                "draw_model_volumes": self.ellipsoids.isChecked(),
                 "ellipsoid_opacity": self.volume_alpha.value(),
                 "segment_radius_ratio": self.radius.value(),
                 "draw_forces": self.forces.isChecked(),
