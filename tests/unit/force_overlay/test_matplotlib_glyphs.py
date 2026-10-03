@@ -29,6 +29,8 @@ from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (
     draw_legend,
 )
 
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
 
 @pytest.fixture
 def sample_glyphs() -> GlyphSet:

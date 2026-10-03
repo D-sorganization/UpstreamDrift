@@ -25,6 +25,8 @@ from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
     draw_glyphs_2d,
 )
 
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
+
 
 @pytest.fixture
 def sample_glyphs() -> GlyphSet:
