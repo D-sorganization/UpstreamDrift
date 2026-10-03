@@ -1,6 +1,6 @@
 # Force Overlay Gallery, Golden Regressions, and User Guide — #11285 / #11315 (FTO-30)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11315 (`Closes #11315`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11397 (`Closes #11315`, `Refs #11285`)
 - Governing issue: #11315 (parent epic #11285, design authority ADR-0052, `force_torque_overlay_epic.md`)
 - Objective: [FTO-30] Gallery generator script, golden image visual regression suite, authoritative user guide, and parity ledger close-out for the force/torque overlay program.
 - Completed:
@@ -73,8 +73,6 @@
 
 ---
 
----
-
 # Engine-Agnostic Model-on-Footage Layer — #11285 / #11311 (FTO-26)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-model-footage-11311`; commit SELF; PR: #11391 (`Closes #11311`, `Refs #11285`)
@@ -107,8 +105,6 @@
   - 17 unit and tool tests passing (`test_opencv_segments.py`, `test_reference_volumes.py`, `test_reference_appearance_controls.py`, `test_reference_force_layer.py`).
   - Architecture budget, file size budget, error handling ratchet, ruff check/format, and mypy passing.
 - Next steps: Merge PR; unblocks FTO-27.
-
----
 
 ---
 

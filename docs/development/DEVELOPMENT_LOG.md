@@ -21,12 +21,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_review
 - **Owner:** antigravity
-- **PR:** #11315
+- **PR:** #11397
 - **Branch:** `feat/fto-30-gallery-docs-11315`
 - **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
-- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed. All parent dependencies consolidated.
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed. FTO-27 (#11312, PR #11393) and FTO-25 (#11310, PR #11390) merged in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Frontier agent or owner review before merge; owner closes epic #11285.
+- **Next step:** Merge PR #11397 once CI completes; closes out epic #11285.
 
 ### DL-#11268 · Capture-O Video Companion
 
