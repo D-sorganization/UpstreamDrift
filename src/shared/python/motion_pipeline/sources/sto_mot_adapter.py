@@ -18,6 +18,7 @@ with a synthetic 1-DOF-per-column skeleton; a richer mapping to a real
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 import numpy as np
@@ -43,6 +44,18 @@ class OpenSimSTOMOTAdapter(MocapSourceAdapter):
 
     format_name = "opensim_sto_mot"
     file_extensions = (".sto", ".mot")
+
+    def __init__(self, translational_coordinates: Iterable[str] = ()) -> None:
+        """Create the parser.
+
+        Args:
+            translational_coordinates: Columns holding translations (metres).
+                ``inDegrees=yes`` never converts them to radians. Names absent
+                from a file are ignored. The default is empty because a bare
+                STO/MOT does not say which columns are translations; callers
+                with the OpenSim model (see ``osim_coordinates``) supply them.
+        """
+        self._translational = frozenset(translational_coordinates)
 
     @classmethod
     def supports(cls, path: Path) -> bool:
@@ -118,6 +131,8 @@ class OpenSimSTOMOTAdapter(MocapSourceAdapter):
             raise ValueError("OpenSim STO/MOT has no joint columns")
 
         in_degrees = meta.get("inDegrees", "no").strip().lower() == "yes"
+        translational = [c for c in joint_cols if c in self._translational]
+        convert = np.array([c not in self._translational for c in joint_cols])
         joints: dict[str, JointDef] = {}
         # Synthetic skeleton: a single root with one chained joint per column.
         prev = None
@@ -147,7 +162,7 @@ class OpenSimSTOMOTAdapter(MocapSourceAdapter):
             except ValueError as e:
                 raise ValueError(f"Non-numeric data in STO/MOT row {idx}") from e
             if in_degrees:
-                vals = [float(np.deg2rad(v)) for v in vals]
+                vals = np.where(convert, np.deg2rad(vals), vals).tolist()
             frames.append(JointStateFrame(timestamp=t, q=vals, frame_index=idx))
         if not frames:
             raise ValueError(f"OpenSim STO/MOT {p} has no data rows")
@@ -156,7 +171,11 @@ class OpenSimSTOMOTAdapter(MocapSourceAdapter):
             id=f"opensim-traj-{p.stem}",
             skeleton=skeleton,
             frames=frames,
-            metadata={"source_file": str(p), "header": meta},
+            metadata={
+                "source_file": str(p),
+                "header": meta,
+                "translational_coordinates": translational,
+            },
         )
         return MotionTrajectory(
             id=f"opensim-motion-{p.stem}",

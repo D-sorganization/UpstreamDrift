@@ -116,7 +116,17 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
-        # Data
+        self._init_data_and_poses()
+        self._init_display_flags()
+        self._init_playback_state()
+        self._init_phase_and_event_state()
+
+        self._build_ui()
+        self._apply_camera_preset(_DEFAULT_CAMERA)
+        self._load_default_capture()
+
+    def _init_data_and_poses(self) -> None:
+        """Initialize mocap data, pose slots, and the rigid-body transform."""
         self.df: pd.DataFrame | None = None
         self.events = MocapEvents()
         self._events_original = copy.deepcopy(self.events)
@@ -149,6 +159,8 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
                 self.transform.pivot = tuple(slot.skeleton.joints["hub"])
                 break
 
+    def _init_display_flags(self) -> None:
+        """Initialize the viewport's toggleable display flags."""
         self.show_clubhead_trace = False
         self.show_midhands_trace = False
         self.show_ball = True
@@ -157,7 +169,8 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         self.lock_xy_rotation = True  # Rx/Ry locked by default
         self.auto_fit_axes = True  # use shared equalize_3d_axes per redraw
 
-        # Playback state
+    def _init_playback_state(self) -> None:
+        """Initialize frame-playback and animation-timer state."""
         self.current_frame: int = 0
         self.frame_override_active: bool = False  # use slider frame for mocap target?
         self.is_playing: bool = False
@@ -172,17 +185,19 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._advance_frame)
 
-        # Phase window state keeps the user/session display label for legacy
-        # compatibility; drawing paths normalize it back to a logical key.
-        self.phase_window: str = _DEFAULT_PHASE
-        self.manual_window_start: int = 0
-        self.manual_window_end: int = 0
-
         # Playback target — what advances when the timer fires:
         #   "Mocap"     animate the mocap target only (skeleton stays static)
         #   "Skeleton"  animate the skeleton through its trajectory CSV
         #   "Both"      animate both, time-aligned at the impact frame
         self.playback_target: str = "Mocap"
+
+    def _init_phase_and_event_state(self) -> None:
+        """Initialize phase-window, body-skeleton style, and event-label state."""
+        # Phase window state keeps the user/session display label for legacy
+        # compatibility; drawing paths normalize it back to a logical key.
+        self.phase_window: str = _DEFAULT_PHASE
+        self.manual_window_start: int = 0
+        self.manual_window_end: int = 0
 
         # Body-skeleton renderer style — "lines" | "library_shapes" (issue #4767).
         self.body_skeleton_style: BodySkeletonStyleLiteral = (
@@ -204,12 +219,20 @@ class MainWidget(_RenderMixin, _BuildersMixin, _SessionMixin, QWidget):
         # so it has to exist with a sentinel value before that runs.
         self._live_body_target: Any | None = None
 
-        self._build_ui()
-        self._apply_camera_preset(_DEFAULT_CAMERA)
+    def _load_default_capture(self) -> None:
+        """Load the default club workbook, via the capture registry when available."""
+        try:
+            from src.motion_capture.capture_registry import (
+                CaptureRegistryError,
+                resolve_capture,
+            )
 
-        default_xlsx = Path(__file__).with_name("Wiffle_ProV1_club_3D_data.xlsx")
-        if default_xlsx.exists():
+            default_xlsx = resolve_capture("club-workbook-wiffle")
             self._load_xlsx(str(default_xlsx))
+        except CaptureRegistryError:
+            default_xlsx = Path(__file__).with_name("Wiffle_ProV1_club_3D_data.xlsx")
+            if default_xlsx.exists():
+                self._load_xlsx(str(default_xlsx))
 
     # ===================================================================== #
     # UI                                                                    #

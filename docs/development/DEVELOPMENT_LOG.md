@@ -46,6 +46,31 @@ Tangent/C2 review (2026-10-03 UTC): fresh native checking passes all 48 saved q/
 
 Aligned refined-objective review (2026-10-03 UTC): actual sparse refined previews have zero consecutive source-frame transitions; largest root increments are 17.827 mm (A) and 30.166 mm (O) over 1/30 s. Address-prefix controlled eight-pose windows preserve the spine prior. Private parameter TDD has eight RED failures/eight GREEN passes. The original 344-pose fit wrapper returned 125 after completion; a fresh independent saved-pose recheck exited naturally with zero and verified all 344 poses plus exact whole-output zero parity. Small root improvements accompany worse wrist increments; no candidate is promoted. Native counts distinguish 48 position variables, 43 velocity variables, 37 floating IK parameters and 35 requested control axes. See aligned_refined_checkpoint_20261003.json and the maintained LaTeX. Full continuous references, contact, all 35 input torques including the neck, independent replay and PDF qualification remain open.
 
+### DL-#11161 — Capture Registry, Capture Export and Swing Comparison (Owner Swing vs Tour Average)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11161
+- **Branch:** `feat/capture-registry-11161`
+- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`
+- **Started:** 2026-09-29
+- **Last verified:** 2026-09-30 — turnover: HANDOFF lists the ordered open work (#11190, #11166, #11167-#11169, #11182); leaderboard freshness red until #11190. Earlier: architecture budget OK after splitting nine functions; #11170 per-capture leaderboard folded in; scoped motion_matching/swing_comparison tests pass apart from pre-existing local failures (handoff).
+- **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
+- **Next step:** Fix #11190 (Stage 1 varies non-tunable joint targets under FastRestart) with a failing Stage-1 residual test first, then regenerate `LEADERBOARD.md`.
+
+### DL-#11400 · OpenCap to OpenSim Integration
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
+- **PR:** #11410
+- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
+- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF (branch from `b8e9f884`) — CI `security-scans` (Semgrep `use-defused-xml`) flagged a type-only `xml.etree` import in `osim_coordinates.py`; replaced with a structural `Element` Protocol so the module never imports `xml`. 249 tests pass in `tests/unit/motion_pipeline/sources/` + marker maps + `test_opencap_boundary.py`; ruff, mypy and bandit clean; real `LaiUhlrich2022.osim` still classifies 35 coordinates with only `pelvis_tx/ty/tz` translational.
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
+- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_review
@@ -3780,3 +3805,21 @@ No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
 No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
 No material development-log change — Bolt np.linalg.norm → sqrt(einsum) in rigidity.py (#11189) is a behaviour-preserving micro-optimisation with no feature entry.
+
+## Capture Registry Parent Integration - #11162 / #11172
+
+Accepted-main synchronization preserves capture-registry, export and swing-comparison source changes. Record conflicts retain distinct entries from both branches. All 133 ordered matched-swing ledger rows and non-timestamp metadata are identical; retain accepted-main timestamp. Regenerate the monolith register from merged source. Scientific matching/dynamics acceptance remains separate.
+
+Record validation: all five monolith-register tests pass; no duplicate primary headings or conflict markers; all 133 ledger rows and non-timestamp metadata preserved exactly; registry/export/comparison source unchanged. Broader capture tests are pending pinned Tools initialization; first collection attempt stopped on the missing submodule. Protected parent CI and full scoped rerun remain required before merge.
+
+## Capture Comparison DRY Gate Remediation - #11162 / #11172
+
+CI identified duplicated club endpoint selection in angular-speed and wrist metrics. A shared private helper preserves explicit endpoint precedence, measured-marker aliases, array identity and missing-endpoint/shaft-axis behavior. AGY Gemini Flash supplied the bounded extraction; root reviewed the exact diff. Existing focused regression suite passes 190 tests with 15 unavailable-private-workbook skips, zero errors/failures, natural exit 0. Ruff format/check and full DRY duplication gate pass without changing baselines. Regenerate the monolith register for the revised file length. Current-head protected CI remains required.
+
+## Capture Leaderboard Suite Classification - #11162 / #11172
+
+Protected CI verified the DRY extraction, then identified 14 net-new unmarked tests in TestPerCaptureLeaderboard. Mark this pure-Python class as unit; all 14 execute and pass under unit selection with no skips/errors. Full suite-marker ratchet passes without baseline changes. Broader focused capture/comparison qualification remains 190 passed and 15 unavailable-private-workbook skips. Protected current-head CI remains required before merge.
+
+## Capture Comparison Inventory Integration - #11162 / #11172
+
+CI at bd1ee9a8e passes repository structure and 20,546 unit cases; its only unit failure identifies five new swing_comparison paths missing from the shared-tools divergence inventory. Regenerate JSON and Markdown with the authoritative generator against the pinned Tools tree. All five paths classify as UD-only; existing overlap totals remain unchanged. All ten inventory tests pass with no errors/skips, including the committed-tree freshness test, and generator --check succeeds. Protected current-head CI remains required before merging.
