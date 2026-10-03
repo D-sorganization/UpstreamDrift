@@ -39,15 +39,14 @@ from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import BodyIndex, RevoluteJoint
 from pydrake.systems.framework import Context
 
-from src.shared.python.body_part_viz.axial_loads import (
-    AxialLoadFrame,
-    axial_force_from_proximal_reaction,
-)
+from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
     OverlayWrench,
     WrenchKind,
+    axial_loads_from_reactions,
+    joint_torque_wrench,
 )
 from src.shared.python.force_overlay.segment_axes import (
     segment_axes_from_joint_tree,
@@ -74,21 +73,6 @@ def _unique_names(items: Sequence[tuple[Any, str, str]]) -> dict[Any, str]:
         full = name if counts[name] == 1 else f"{instance}.{name}"
         out[key] = _BAD_LABEL_CHARS.sub("_", full)
     return out
-
-
-def _joint_torque_wrench(
-    label: str, body: str, point: Any, axis_world: Any, torque_nm: float, source: str
-) -> OverlayWrench:
-    """Pure torque wrench about ``axis_world`` (force half stays unavailable)."""
-    axis = np.asarray(axis_world, dtype=float)
-    return OverlayWrench(
-        kind=WrenchKind.JOINT_ACTUATOR,
-        label=label,
-        body=body,
-        point_m=_vec(point),
-        torque_nm=_vec(axis * float(torque_nm)),
-        source=source,
-    )
 
 
 class DrakeForceTorqueSource:
@@ -201,13 +185,13 @@ class DrakeForceTorqueSource:
                 frame = joint.frame_on_child()
                 pose = plant.CalcRelativeTransform(ctx, plant.world_frame(), frame)
                 out.append(
-                    _joint_torque_wrench(
+                    joint_torque_wrench(
                         label,
                         self._body_name(joint.child_body().index()),
-                        pose.translation(),
+                        float(net[actuator.input_start()]),
                         np.asarray(pose.rotation().matrix())
                         @ np.asarray(joint.revolute_axis()),
-                        float(net[actuator.input_start()]),
+                        _vec(pose.translation()),
                         "drake:net_actuation_port",
                     )
                 )
@@ -306,7 +290,6 @@ class DrakeForceTorqueSource:
         origins: dict[str, np.ndarray] = {}
         body_of_joint: dict[str, str] = {}
         child_joint_of: dict[str, list[str]] = {}
-        parent_label: dict[str, str] = {}
         for joint in self._joints:
             name = self._joint_names[joint.index()]
             origins[name] = np.asarray(
@@ -315,21 +298,17 @@ class DrakeForceTorqueSource:
                 ).translation()
             )
             body_of_joint[name] = self._body_name(joint.child_body().index())
-            parent_label[body_of_joint[name]] = f"joint_reaction:{name}"
             parent = self._body_name(joint.parent_body().index())
             child_joint_of.setdefault(parent, []).append(name)
         axes, _ = segment_axes_from_joint_tree(origins, child_joint_of, body_of_joint)
-        force_on = {w.label: w.force_n for w in reactions if w.force_n is not None}
-        values = {
-            axis.body: axial_force_from_proximal_reaction(
-                force_on[parent_label[axis.body]], axis.proximal_m, axis.distal_m
-            )
-            for axis in axes
-            if parent_label[axis.body] in force_on
-        }
-        if not values:
+        if not axes:
             return None
-        return AxialLoadFrame(time_s, values, "drake:joint_reaction_proximal")
+        reaction_frame = ForceTorqueFrame(
+            time_s=time_s, engine=self.ENGINE, wrenches=tuple(reactions)
+        )
+        return axial_loads_from_reactions(
+            reaction_frame, axes, "drake:joint_reaction_proximal"
+        )
 
     # -- public API --------------------------------------------------------
     def sample(

@@ -10,33 +10,14 @@ Headless import safe: numpy only.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
 
 import numpy as np
 
-__all__ = ["SegmentAxis", "segment_axes_from_joint_tree"]
+from .conversions import SegmentAxis
+
+__all__ = ["segment_axes_from_joint_tree"]
 
 Vec3 = tuple[float, float, float]
-
-
-@dataclass(frozen=True)
-class SegmentAxis:
-    """Proximal-to-distal axis of one body, in world coordinates (metres)."""
-
-    body: str
-    proximal_m: Vec3
-    distal_m: Vec3
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.body, str) or not self.body.strip():
-            raise ValueError("body must be a non-empty string")
-        for name in ("proximal_m", "distal_m"):
-            vec = np.asarray(getattr(self, name), dtype=float)
-            if vec.shape != (3,) or not np.isfinite(vec).all():
-                raise ValueError(f"{name} must be a finite 3-vector")
-            object.__setattr__(self, name, tuple(float(x) for x in vec))
-        if np.linalg.norm(np.subtract(self.distal_m, self.proximal_m)) <= 0.0:
-            raise ValueError("segment axis must have positive length")
 
 
 def _origin(origins: Mapping[str, np.ndarray], joint: str) -> Vec3 | None:
@@ -62,7 +43,8 @@ def segment_axes_from_joint_tree(
         body_of_joint: joint name -> the (child) body that joint attaches.
 
     Returns:
-        ``(axes, skipped)``. ``axes`` holds one axis per body that has exactly
+        ``(axes, skipped)``. ``axes`` holds one ``SegmentAxis`` (whose
+        ``joint_label`` is ``joint_reaction:<parent joint>``), one axis per body that has exactly
         one child joint and known proximal/distal origins; ``skipped`` lists
         every other body (leaf, branching, or missing joint), sorted by name.
 
@@ -97,5 +79,12 @@ def segment_axes_from_joint_tree(
         if proximal is None or distal is None or proximal == distal:
             skipped.append(body)
             continue
-        axes.append(SegmentAxis(body, proximal, distal))
+        axes.append(
+            SegmentAxis(
+                segment=body,
+                joint_label=f"joint_reaction:{parent}",
+                proximal_m=proximal,
+                distal_m=distal,
+            )
+        )
     return tuple(axes), tuple(skipped)
