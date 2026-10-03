@@ -43,6 +43,7 @@ from src.shared.python.motion_matching.historical_fit.shaft_observations import 
 )
 
 _SOURCE_DIRECTORIES = (
+    "src/shared/python/body_part_viz",
     "src/shared/python/core",
     "src/shared/python/workspace",
     "src/shared/python/motion_matching",

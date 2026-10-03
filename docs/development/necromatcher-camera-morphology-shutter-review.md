@@ -118,6 +118,47 @@ optics, depth or metric scale.
    same camera/geometry/evidence/priors/budget and separately frozen recipes.
    Review sensitivity and body/club outcomes before changing further variables.
 
+## Executed Authored Geometry Audit
+
+The read-only four-fit audit ran at clean published producer
+`7228fabe9b47813e60fe74d2f581acda1ff09b3f`. Its exclusive Desktop receipt,
+`Authored Club Geometry Diagnostic V1/geometry-diagnostic-receipt.json`, has
+SHA256 `2cddb400a82d41c270857de6e26c571e013b597f4209a9720c5df6f4c8bffd7e`
+and 23,586,614 bytes. Exact whole tracked-source, runtime, library,
+config, driver and helper snapshots agreed before and after. All 1,920 saved
+poses across the four fits passed public marker/body-pose FK and separate
+native closure agreement checks. No optimizer or library write ran.
+
+Marker FK agreement was within 8.89e-16 m. Maximum authored right-grip
+translation closure across source poses was 1.8303/1.8681 mm for Tiger
+control/variant and 2.1867/2.1852 mm for Hogan. These are source-pose authored
+attachment residuals, not measured physical grip error or the same sampling
+as every stored fit diagnostic.
+
+At first/middle/last source poses, both forearm coordinates were locked at zero.
+The `LFInput` club-reference pixel Jacobian norm ranged approximately
+178.47–480.76 px/rad for Tiger and 83.97–143.45 px/rad for Hogan. `RFInput`
+had zero direct club-reference sensitivity in this authored kinematic tree but
+nonzero body-marker sensitivity; closed-grip effects must be evaluated jointly.
+These local two-step finite differences support a separately controlled
+31-to-33-free-coordinate experiment. They do not identify observed pronation,
+clinical ROM, global sensitivity or an accepted historical swing.
+
+The authored club-head solid COM differs from its named frame by 0.5 mm;
+its tested projection difference was at most 0.231 px for Tiger and 0.061 px
+for Hogan. That convention difference is too small to explain the current
+gross shaft mismatch. Wrist/body marker derivatives alone do not measure
+grip-closure influence or establish absence of a joint effect. The independent
+geometry verification receipt has SHA256
+`2dc1fb9397224e4103d8a2edeed95072c132afdd7e2388861eecb3145b979ab4`.
+
+Preserve the complete old Hermite motion with shared
+`expand_image_spline_coordinates`, validate source and interior q/v/a, record
+an explicitly unoptimized coordinate-expansion seed, then use the standard
+native refit session. Keep model, camera, source/evidence roles, knot clock,
+priors, geometry times and budget unchanged. Compare body, shaft and closure
+outcomes before further adjustments.
+
 ## Shutter, Exposure and Flexure Hypotheses
 
 Keep an exact zero-readout baseline. A proposed row-time model must expose its
@@ -144,6 +185,14 @@ time/row mapping and fresh observation review. Compare it against originals;
 never silently replace evidence or interpret visual improvement as validity.
 
 ## Trial and Display Acceptance
+
+The canonical execution fingerprint must include shared `body_part_viz` source,
+including projection, opacity and shape-transform code. Model/visual-description
+hashes alone cannot identify renderer behavior. Fixed-commit mutation regressions
+verify that changes in these dependencies invalidate the same source digest used
+by native video jobs and publication guards. Earlier geometry diagnostics keep
+their actual producer and full tracked-source brackets; no retroactive identity
+change is claimed.
 
 Declare train/evaluation roles, assumptions, priors, parameter bounds, gauge,
 uncertainty and stopping rules before each comparison. Current V1/V2 shaft labels
