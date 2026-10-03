@@ -1495,7 +1495,7 @@
     "whole_capture": false,
     "whole_output_zero_parity": true
   },
-  "club_orientation_window_scope": "Completed club-orientation window evaluation tests baseline, zero, and two positive weights across 536 window poses (four trials each, 75 tour poses and 59 owner poses per trial). Zero weight establishes exact whole-output parity. The original window fitter saves results and hangs at shutdown 125; a fresh independent native audit verifies all 536 poses and exits naturally 0 at 18:18:38 UTC. Mean club orientation error improves from 10.30 to 5.92 deg (Tour) and 19.20 to 10.73 deg (Owner), with minor position target changes (27.242 to 27.248 mm Tour, 37.989 to 38.014 mm Owner) and boundary transition tradeoffs between sparse 1/30 s and dense steps. Production remains unchanged; no candidate is promoted, full-clock club comparison results remain pending, and contact/dynamics qualification remains pending.",
+  "club_orientation_window_scope": "Completed club-orientation window evaluation tests baseline, zero, and two positive weights across 536 window poses (four trials each, 75 tour poses and 59 owner poses per trial). Zero weight establishes exact whole-output parity. The original window fitter saves results and hangs at shutdown 125; a fresh independent native audit verifies all 536 poses and exits naturally 0 at 18:18:38 UTC. Mean club orientation error improves from 10.30 to 5.92 deg (Tour) and 19.20 to 10.73 deg (Owner), with minor position target changes (27.242 to 27.248 mm Tour, 37.989 to 38.014 mm Owner) and boundary transition tradeoffs between sparse 1/30 s and dense steps. Production remains unchanged; no candidate is promoted, full-clock club comparison is separately recorded in global_club_orientation_report, and contact/dynamics qualification remains pending.",
   "club_orientation_window_second_probe_receipt": {
     "actual_process_exit_code": 1,
     "done_marker": true,
@@ -2198,6 +2198,542 @@
     "termination_reason": "hung_after_done",
     "timestamp": "2026-10-03T17:46:00.978875+00:00"
   },
+  "global_club_orientation_original_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T19:13:08.906109+00:00"
+  },
+  "global_club_orientation_report": {
+    "acceleration_reference_time_s": 0.03333333333333333,
+    "actual_capture_clock_counts": {
+      "capture_A": 654,
+      "capture_O": 367
+    },
+    "alignment_mat_hashes": {
+      "capture_A": "77f0551024e69eb09e7d2a737298a4427a8d2fdfe1408a9ce7631fcfb7ed62cc",
+      "capture_O": "ac7955794b90237920f20864bceef611783294f35c97ec12abd0156aee0114ff"
+    },
+    "alignment_sha256": {
+      "capture_A": "77f0551024e69eb09e7d2a737298a4427a8d2fdfe1408a9ce7631fcfb7ed62cc",
+      "capture_O": "ac7955794b90237920f20864bceef611783294f35c97ec12abd0156aee0114ff"
+    },
+    "audit_proof_sha256": "bceb58a4f7ee44f17414bf3944bc80f8d1ae40a5f9bebc67763ce017b7527842",
+    "audit_receipt_sha256": "6ca9522fa29fd3ec55bd374dd427819da01ed1b91c6f4720004da8998fdd39bb",
+    "baseline_audit_source": "retained_from_previous_global_rate_refit_trials_no_new_fit",
+    "between_sample_qualified": false,
+    "club_runtime_sha256": "01ea755f225fab0716f8d09e2a338ae8cb478b2551f3c4cccb85a589b5984718",
+    "contact": false,
+    "current_geometry_cache_sha256": {
+      "capture_A": "0cc6531052595353402f6972fa1892e2986a19c2206d70ff1b802efb24295b03",
+      "capture_O": "994ebdae85b8f4f503edad6d3c36d77341f71f9469487c50cc886196c2dcf7b6"
+    },
+    "derived_target_notice": "Full 14 derived target RMS; not raw marker anatomy",
+    "dynamics": false,
+    "full_source_sample_pose_scope": true,
+    "heldout_marker_validation": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_acceleration": false,
+    "native_velocity": false,
+    "new_candidate_promoted": false,
+    "new_fitted_poses": 2042,
+    "normalized_reference_time_s": 0.03333333333333333,
+    "production_modified": false,
+    "qualification": "GLOBAL_CLUB_ORIENTATION_FULL_SOURCE_SAMPLE_POSE_AUDIT_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "raw_input_sha256": {
+      "capture_A": "fe1b4dc376378f0e4aaa93cb8a3d5b6eef97b099a10f6e2f85dff1d4f63db168",
+      "capture_O": "cd50fe33e7f40fb469af47bfbddd46bbb487036b144b9b7ce404eee767a71eea"
+    },
+    "records": {
+      "capture_A": {
+        "club_025": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.01,
+          "club_orientation_mean_chordal_err": 0.17954829341629286,
+          "club_orientation_mean_error_deg": 10.322004581877708,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 26.835765455177874,
+          "club_orientation_weight": 0.025,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            2.164195063264523, 5.89297522520013
+          ],
+          "foot_orientation_peak_error_deg": [
+            15.774102826976538, 20.441029720881307
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.06942952862384165,
+          "head_axis_peak_error_deg": 0.5085180336255912,
+          "head_full_3d_mean_error_deg": 42.543778418446685,
+          "head_full_3d_peak_error_deg": 78.41652596362843,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 4.470167569571098,
+          "max_root_translation_step_mm": 3.253535594660567,
+          "max_wrapped_right_wrist_step_deg": 4.517726300252946,
+          "mean_direct_raw_back_rms_mm": 26.971896628082042,
+          "mean_target_14_derived_rms_mm": 16.864705353439415,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.895025134819555,
+          "peak_target_14_derived_rms_mm": 34.177489405070595,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        },
+        "club_075": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.01,
+          "club_orientation_mean_chordal_err": 0.09548174678044496,
+          "club_orientation_mean_error_deg": 5.475690179331709,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 14.030389658542134,
+          "club_orientation_weight": 0.075,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            2.166580976586931, 5.89602703681301
+          ],
+          "foot_orientation_peak_error_deg": [
+            15.785062087135813, 20.449694684569103
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.06943581986853482,
+          "head_axis_peak_error_deg": 0.5080017031995494,
+          "head_full_3d_mean_error_deg": 42.596693841692236,
+          "head_full_3d_peak_error_deg": 78.52862732384256,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 4.448476241674417,
+          "max_root_translation_step_mm": 3.261931925527381,
+          "max_wrapped_right_wrist_step_deg": 4.542051361597714,
+          "mean_direct_raw_back_rms_mm": 27.016050742125106,
+          "mean_target_14_derived_rms_mm": 16.94361515844784,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.625141502734124,
+          "peak_target_14_derived_rms_mm": 34.37794064833639,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        },
+        "rate_control": {
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_weight": 0.01,
+          "club_orientation_mean_chordal_err": 0.20607781211432366,
+          "club_orientation_mean_error_deg": 11.85853306381983,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 30.4144848556494,
+          "club_orientation_weight": 0,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            2.163469167016995, 5.892093606716574
+          ],
+          "foot_orientation_peak_error_deg": [
+            15.770866915996297, 20.43879275257763
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.0694385863187135,
+          "head_axis_peak_error_deg": 0.5087037681959534,
+          "head_full_3d_mean_error_deg": 42.52671561087157,
+          "head_full_3d_peak_error_deg": 78.38474653376008,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 4.475311603352517,
+          "max_root_translation_step_mm": 3.251363129298133,
+          "max_wrapped_right_wrist_step_deg": 4.506419194964906,
+          "mean_direct_raw_back_rms_mm": 26.9598060029733,
+          "mean_target_14_derived_rms_mm": 16.887470186742828,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.97659913682679,
+          "peak_target_14_derived_rms_mm": 34.10336359135635,
+          "rate_control_source": "retained_from_previous_global_rate_refit_trials_no_new_fit",
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        }
+      },
+      "capture_O": {
+        "club_025": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.02,
+          "club_orientation_mean_chordal_err": 0.33305539265495226,
+          "club_orientation_mean_error_deg": 19.287301149380177,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 58.74482091591332,
+          "club_orientation_weight": 0.025,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            5.293373468778138, 8.506896899711775
+          ],
+          "foot_orientation_peak_error_deg": [
+            30.654785554772342, 19.224378690677188
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.36385178942009017,
+          "head_axis_peak_error_deg": 1.4305341368702804,
+          "head_full_3d_mean_error_deg": 42.57090517223106,
+          "head_full_3d_peak_error_deg": 85.55622240481125,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 7.850462293418875e-16,
+          "max_right_shoulder_so3_geodesic_deg": 11.590351260123532,
+          "max_root_translation_step_mm": 6.394824697172318,
+          "max_wrapped_right_wrist_step_deg": 13.059712097754499,
+          "mean_direct_raw_back_rms_mm": 38.5310717263156,
+          "mean_target_14_derived_rms_mm": 20.761585644390824,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.35232712093809,
+          "peak_target_14_derived_rms_mm": 47.56354784348822,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        },
+        "club_075": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.02,
+          "club_orientation_mean_chordal_err": 0.21550017720002393,
+          "club_orientation_mean_error_deg": 12.412191329441676,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 54.78972552128597,
+          "club_orientation_weight": 0.075,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            5.301746269804098, 8.51076180520837
+          ],
+          "foot_orientation_peak_error_deg": [
+            30.67261924613957, 19.221408550234102
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.3628945331599064,
+          "head_axis_peak_error_deg": 1.434153999730776,
+          "head_full_3d_mean_error_deg": 42.65158455317064,
+          "head_full_3d_peak_error_deg": 85.83351967527173,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 7.850462293418875e-16,
+          "max_right_shoulder_so3_geodesic_deg": 12.534314146775301,
+          "max_root_translation_step_mm": 7.006382222903841,
+          "max_wrapped_right_wrist_step_deg": 17.536446653274226,
+          "mean_direct_raw_back_rms_mm": 38.491361614168866,
+          "mean_target_14_derived_rms_mm": 20.91477166852857,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 83.8687961776177,
+          "peak_target_14_derived_rms_mm": 49.82425368759722,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        },
+        "rate_control": {
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_weight": 0.02,
+          "club_orientation_mean_chordal_err": 0.3644748592570144,
+          "club_orientation_mean_error_deg": 21.14281539221777,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 60.898830323930774,
+          "club_orientation_weight": 0,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            5.291673837174305, 8.505019679718789
+          ],
+          "foot_orientation_peak_error_deg": [
+            30.65038232374536, 19.218308435808275
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.3633419440786883,
+          "head_axis_peak_error_deg": 1.4298054901145278,
+          "head_full_3d_mean_error_deg": 42.54907408251285,
+          "head_full_3d_peak_error_deg": 85.49649723290291,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 6.2803698347351e-16,
+          "max_right_shoulder_so3_geodesic_deg": 11.773307629915816,
+          "max_root_translation_step_mm": 6.540386319415424,
+          "max_wrapped_right_wrist_step_deg": 13.24045272947356,
+          "mean_direct_raw_back_rms_mm": 38.54297358170565,
+          "mean_target_14_derived_rms_mm": 20.799984299105198,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.4549058022966,
+          "peak_target_14_derived_rms_mm": 48.07628807452194,
+          "rate_control_source": "retained_from_previous_global_rate_refit_trials_no_new_fit",
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        }
+      }
+    },
+    "retained_rate_control_poses_audited": 1021,
+    "retained_rate_trials_sha256": "0e299d0519b3ca5e5b16f1077d09b24e4c713f333700feef699d64ae6578b2c1",
+    "simulation_executed": false,
+    "source_file_sha256": "32b37e601721fabb6fc01abb5e4df6e1a18d8f01cec4adff4ea397977455c7d7",
+    "total_fresh_audited_poses": 3063,
+    "window_zero_parity_referenced": true,
+    "zero_fullclock_parity_not_newly_tested": true
+  },
+  "global_club_orientation_scope": "Completed full source-clock club orientation comparison fits every source sample: 654 tour poses at 360 Hz and 367 owner poses at 240 Hz. Two positive weights produce 2,042 new poses; 1,021 rate-control poses are retained without refitting. Observed club triad available at 618 tour and 345 owner samples; missing observations excluded. Original fitting process saved poses before shutdown hang (receipt 125 at 19:13:08 UTC); separate fresh native R2025b audit verified all 3,063 saved poses, club rotation matrices, observation masks, and source hashes with maximum joint residual <= 9.93e-16, exiting naturally with process/wrapper 0 at 19:15:18 UTC. Zero-weight whole-output parity established separately in 536 window poses. Private preview selection selects tour weight 0.075 and owner weight 0.025 as a documented tradeoff pending visual review: tour mean club error improves from 11.859 to 5.476 deg (derived position RMS 16.887 to 16.944 mm, near-unchanged steps); owner weight 0.025 improves mean club error from 21.143 to 19.287 deg (derived RMS 20.800 to 20.762 mm, reduced steps), whereas stronger owner weight 0.075 worsens max wrist step to 17.536 deg and is not selected for default preview. Previews are inverse-kinematic visualizations, not forward dynamics. Full 35-axis moving swing, contact, and feedback-off replay remain open.",
+  "global_club_preview_desktop_delivery": {
+    "archive_bytes": 4083966,
+    "archive_name": "Simscape_Matches_20261003_Club_Refined_1080p.zip",
+    "archive_sha256": "52c9160b195ff2f32328885a0351af542c787ced64608138470d0ab7700afcca",
+    "decoded_frames": 404,
+    "local_and_desk_hash_verified": true,
+    "videos": 8,
+    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-GEARS trial pairing or anatomical calibration."
+  },
+  "global_club_preview_media": {
+    "clips": [
+      {
+        "codec": "h264",
+        "decoded_frames": 55,
+        "file": "Tour_Reference_down-the-line_clean_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 55,
+          "joint_count": 48,
+          "max_joint_physical_residual": 9.921048172113442e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "630d5160df677bf615d466dba1259f2d1d59c6b07b9a146b797d656bc31534a6",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 55,
+        "file": "Tour_Reference_down-the-line_markers_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 55,
+          "joint_count": 48,
+          "max_joint_physical_residual": 9.921048172113442e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "e8896cdc94f12d831361be60a78c2ed4dc7792ab02cddcbc7f2185e0384453ea",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 55,
+        "file": "Tour_Reference_face-on_clean_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 55,
+          "joint_count": 48,
+          "max_joint_physical_residual": 9.921048172113442e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "2638635abfa58b75d73149dc7303af3335df40e1b82c0922a206adbc4883d151",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 55,
+        "file": "Tour_Reference_face-on_markers_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 55,
+          "joint_count": 48,
+          "max_joint_physical_residual": 9.921048172113442e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "27f4c9a8437609fd4e961ef8ccee93c96b2b81c18fc485ca4cad7c59ae948e2e",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 46,
+        "file": "Owner_GEARS_IK_Match_down-the-line_clean_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 46,
+          "joint_count": 48,
+          "max_joint_physical_residual": 5.495323605393213e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "3b3b6ef5ac392c25b6fcf0f83dbcc1bd6c2c788957cd9a7747faf0458b894c92",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 46,
+        "file": "Owner_GEARS_IK_Match_down-the-line_markers_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 46,
+          "joint_count": 48,
+          "max_joint_physical_residual": 5.495323605393213e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "42eb36ecd8589a199212dbae9a5b7bd1e190764535ae654b6cee55cd55df78dc",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 46,
+        "file": "Owner_GEARS_IK_Match_face-on_clean_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 46,
+          "joint_count": 48,
+          "max_joint_physical_residual": 5.495323605393213e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "5c6d7ca3d8bb86f86f3234857ddcb46a16c33cfebea74d317a9b3da9811fc8d5",
+        "width": 1920
+      },
+      {
+        "codec": "h264",
+        "decoded_frames": 46,
+        "file": "Owner_GEARS_IK_Match_face-on_markers_1080p.mp4",
+        "fps": 30.0,
+        "height": 1080,
+        "native_pose_parity": {
+          "frame_count": 46,
+          "joint_count": 48,
+          "max_joint_physical_residual": 5.495323605393213e-16,
+          "max_world_position_error_m": 0,
+          "max_world_rotation_geodesic_rad": 2.9802322387695312e-8,
+          "model": "GS3DX_Human",
+          "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+          "passed": true,
+          "solid_count": 41,
+          "status": "success"
+        },
+        "pts_verified": true,
+        "sha256": "aa5bd56b939829aa7677db4c3a43894822bba7414790f772097629d676b8b0c1",
+        "width": 1920
+      }
+    ],
+    "manifest_sha256": "5aa7f595fdc3544644526d1d341b70483075d8f9f0e992e9371f5c592f434f1d",
+    "opencv_version": "4.13.0",
+    "qualification": "IK_PREVIEW_DECODE_AND_SAVED_POSE_PARITY_NOT_DYNAMICS",
+    "total_decoded_frames": 404,
+    "visual_findings": "Consistent Human ellipsoid bodies, no observed body/club cropping in inspected frames; cyan back/waist overlays visible. Residual marker offsets remain. No claim of identical camera framing across captures.",
+    "visual_review_completed": true,
+    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-GEARS trial pairing or anatomical calibration."
+  },
+  "global_club_preview_media_export_status": "VERIFIED_PREVIEWS_DELIVERED_LOCAL_AND_DESK_DESKTOP_NOT_DYNAMICS",
+  "global_club_preview_media_verified": true,
+  "global_club_preview_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T19:32:57.255676+00:00"
+  },
   "global_source_clock_refit": {
     "acceleration": false,
     "actual_capture_clock_counts": {
@@ -2804,6 +3340,177 @@
     "timestamp": "2026-10-03T10:10:01.934122+00:00"
   },
   "native_acceleration_qualified": false,
+  "native_actuator_discovery_audit": {
+    "capabilities": {
+      "all35_measured": false,
+      "all35_qualified": false,
+      "compile_update_succeeded": true,
+      "contact_allocated": false,
+      "forward_replay_qualified": false,
+      "neck_delivered_torque_observable": true,
+      "simulation_integrated_0p02s": true,
+      "whole_swing_qualified": false
+    },
+    "discovery_summary": {
+      "all35_measured": false,
+      "joint_blocks_discovered_count": 25,
+      "note": "Simlog child named t is NOT qualified as actuator torque; no N*m assigned without conversion"
+    },
+    "joint_blocks_discovered_count": 25,
+    "logged_leaf_read_errors": 0,
+    "logged_leaf_series_count": 99,
+    "model_name": "GS3DX_Human",
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "proven_neck": {
+      "neck_state": {
+        "Rx": {
+          "q": {
+            "final_val": 0.003918211269371096,
+            "initial_val": 0,
+            "max_val": 0.003918211269371096,
+            "min_val": 0,
+            "samples": 186,
+            "unit": "rad"
+          },
+          "w": {
+            "final_val": 0.5550415300261728,
+            "initial_val": 0,
+            "max_val": 0.5550415300261728,
+            "min_val": 0,
+            "samples": 186,
+            "unit": "rad/s"
+          }
+        },
+        "Ry": {
+          "q": {
+            "final_val": 0.028670345310792714,
+            "initial_val": 0,
+            "max_val": 0.028670345310792714,
+            "min_val": 0,
+            "samples": 186,
+            "unit": "rad"
+          },
+          "w": {
+            "final_val": 2.498572660991089,
+            "initial_val": 0,
+            "max_val": 2.498572660991089,
+            "min_val": 0,
+            "samples": 186,
+            "unit": "rad/s"
+          }
+        }
+      },
+      "torque_receipt": {
+        "Rx": {
+          "RMS_N_m": 0.25,
+          "basis": "INPUT_TORQUE_PRIMITIVE_ACTUATION_SENSOR_VIA_VERIFIED_N_M_CONVERTER",
+          "final_N_m": 0.25,
+          "initial_N_m": 0.25,
+          "peak_abs_N_m": 0.25,
+          "samples": 186,
+          "unit": "N*m"
+        },
+        "Ry": {
+          "RMS_N_m": 0.25,
+          "basis": "INPUT_TORQUE_PRIMITIVE_ACTUATION_SENSOR_VIA_VERIFIED_N_M_CONVERTER",
+          "final_N_m": -0.25,
+          "initial_N_m": -0.25,
+          "peak_abs_N_m": 0.25,
+          "samples": 186,
+          "unit": "N*m"
+        }
+      }
+    },
+    "qualification": "BOUNDED_ALL35_LOG_DISCOVERY_AUDIT_NOT_ALL35_QUALIFIED",
+    "stop_time_s": 0.02,
+    "subject_mass_kg": 80,
+    "subject_mass_note": "INHERITED_MODEL_WORKSPACE_MASS_NOT_CAPTURE_CALIBRATED",
+    "unmet_actuator_gates": {
+      "all35_measured": false,
+      "contact_allocated": false,
+      "forward_replay_qualified": false,
+      "remaining_axes_unmeasured": 33,
+      "spherical_reaction_distinction": "Spherical joint total/constraint torque is reaction wrench, not isolated actuator torque",
+      "unverified_t_semantics": "Simlog child t is unverified internal signal without physical converter N*m instrumentation",
+      "whole_swing_qualified": false
+    }
+  },
+  "native_actuator_discovery_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T18:48:51.591556+00:00"
+  },
+  "native_actuator_input_graph_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T19:01:59.287538+00:00"
+  },
+  "native_actuator_peers_audit": {
+    "actuated_axes_count": 35,
+    "actuated_joint_blocks_count": 19,
+    "capabilities": {
+      "all35_input_torque_ports_mapped": false,
+      "all35_qualified": false,
+      "simulation_executed": false,
+      "torque_qualified_from_graph_alone": false
+    },
+    "counts_summary": {
+      "floating_base_joints": 1,
+      "passive_midfoot_joints": 2,
+      "revolute_axes": 7,
+      "revolute_joints": 7,
+      "spherical_axes": 12,
+      "spherical_joints": 4,
+      "universal_axes": 16,
+      "universal_joints": 8,
+      "weld_joints": 3
+    },
+    "model_name": "GS3DX_Human",
+    "model_saved": false,
+    "model_sha256_after": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "model_sha256_before": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "passive_or_unactuated_joint_blocks_count": 6,
+    "qualification": "READ_ONLY_NATIVE_ACTUATION_PEERS_INVENTORY_NOT_TORQUE_SIMULATION",
+    "simulation_executed": false,
+    "source_hash_preserved": true,
+    "subject_mass_kg": 80,
+    "subject_mass_note": "DEFAULT_80KG_NOT_CALIBRATED_ANTHROPOMETRY_NO_OWNER_PHYSICS",
+    "total_connection_ports_audited": 267,
+    "total_immediate_peers_resolved": 303,
+    "total_joint_blocks_discovered": 25,
+    "unmet_actuator_gates": "Native port semantics and delivered physical-signal units/frames require verification; no input port index is assumed"
+  },
+  "native_actuator_peers_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T19:20:48.603844+00:00"
+  },
+  "native_input_units_parameter_inventory": {
+    "all35_dynamics_qualified": false,
+    "all35_input_torque_measured": false,
+    "breakdown_details": {
+      "neck_universal_torque_drive_nm": 2,
+      "revolute_scalar_unit_1": 7,
+      "spherical_vector_follower_torque_nm": 4,
+      "universal_body_scalar_unit_1": 14
+    },
+    "neck_converters_nm_count": 2,
+    "qualification": "ONLY_PARAMETER_INVENTORY_NOT_PHYSICAL_MEASUREMENT",
+    "scalar_converters_unit_1_count": 21,
+    "scope": "Documentation of native input parameter units in aggregate: 21 scalar Unit 1 (7 revolute axes, 14 universal axes across 7 body joints), 2 neck N*m (adapted torque drive), 4 spherical vector N*m (3D vectors in FollowerFrame across 4 spherical joints); Input Unit 1 applies no scaling; physical output units are inferred from destination. Parameter inventory only, NOT physical measurement.",
+    "spherical_vector_converters_nm_count": 4,
+    "total_actuated_axes_accounted": 35,
+    "total_driving_ps_converters": 27
+  },
   "native_joint_inventory": {
     "added_block_count": 1711,
     "all35_input_torque_claimed": false,
@@ -3667,6 +4374,21 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T14:15:18.805846+00:00"
   },
+  "parent_global_club_selection": {
+    "audit_report_sha256": "df88128421da3fae9d55c1cb4051a1e5cce6db0d4d27aa75b1aacc556911786b",
+    "autopromote": false,
+    "parent_reviewed_both_captures": true,
+    "producer_trials_sha256": "70e337276fdf5d3f7a81a7a2422f3f7c2278cf370d6324c025e14de1cedaea7a",
+    "purpose": "Private preview selection pending actual render parity and visual review; not globally optimal or dynamics-qualified",
+    "rationale": {
+      "capture_A": "Mean club error 11.859 to 5.476 deg; mean derived position RMS 16.887 to 16.944 mm, near-unchanged wrist/root steps",
+      "capture_O": "Moderate constraint improves mean club error 21.143 to 19.287 deg, derived RMS 20.800 to 20.762 mm and reduces wrist/shoulder/root steps. Stronger constraint worsens max wrist step to 17.536 deg and is not selected for default preview."
+    },
+    "selected_trials": {
+      "capture_A": "club_075",
+      "capture_O": "club_025"
+    }
+  },
   "private_c2_tdd": {
     "body_rate_oracle": true,
     "original_agent_red_scope": "Missing module collection error; exact original process exit unsupported by stored log",
@@ -3717,13 +4439,22 @@
     "gs3dx_joint_acceleration_residual.m": "7b640d843664468136b1193e9a0ef9f2e936d964fd876727759a0a6dc8c1360b",
     "gs3dx_joint_rate_residual.m": "694e387415c4f63b70f8d66af66ea6d931aa3d8a7188409ec1a41ebaeeede65e",
     "gs3dx_neck_torque_drive.m": "e2d889eb6ee8bb76c4f46b97675bc5dc88a6e2b9bbc26e240839a56d9fae2377",
+    "gs3dx_verify_rendered_pose.m": "b863f7ef3827d57e2aa5236d132120fc95afd7ef967002875403e88894524b93",
     "gs3dx_whole_body_ik.m": "69aebcd423626271a5c5ce41ee73bfe8b812019f9c043278ca189c7c3ba7b2f9",
+    "parent-global-club-selection.json": "a5c672e2b73634424f932585a56b02ccefc69dd5adb6e7db1a57e0e7794f98bd",
     "prepare_anchor_seeded_c2_payload_reviewed.py": "3c7ff283664d2c826bbae751da00e937f515843b97118e3df3b46cf7fbc8ab27",
     "probe_acceleration_tests_reviewed.m": "e8fb838c122fc8516806e8a812721984a3a05e855f8f4cb7504de565c33038be",
+    "probe_actuation_input_graph_cleanup_corrected.m": "5befe3230496fae49f65467bd2a9fe0d8be2fa6a7074cc279e75f9c66d049000",
+    "probe_actuation_native_peers_reviewed.m": "09056ebe4db7d6e273669955841b28e92945b6ce6ec4f81ad4c750a4191517e2",
+    "probe_all35_log_discovery_reviewed.m": "ef24dc27dcc575421b0c67707d67207ebde607ca46f31d4c854cefbf5296e024",
+    "probe_all35_log_discovery_time_corrected.m": "a5d5a55e05cccc56eb5471ea3e69bc7d3f5f173e9c13480713c5a1b174715daf",
     "probe_alternate_closed_arm_velocity_gain_reviewed.m": "3d6d6a9caf786c4ffc54606390fbb75b75ad3d03a5eefb1cf3d4860817cf5ee8",
     "probe_closed_arm_velocity_gain_reviewed.m": "0587a820fe5ba92a4cc75c51cacaa03605c04ee850002989d76edcaecd15470a",
     "probe_club_orientation_window_frame_selection_corrected_reviewed.m": "d437186a4e13e9c421f182c5919695760804b94077e080a3ab9fe565a5a4c50b",
+    "probe_export_global_club_previews_corrected.m": "56373b5734dd65827a11f0cf1272a2bf92f39e66532f296feb8667b5dc6c88c6",
+    "probe_export_global_club_previews_reviewed.m": "56daff83ecee25d3ac8680251a4afaf482e3be68a1e015d9216ebd0bde817585",
     "probe_failed_c2_assembly_reviewed.m": "dd67c088db92bc992a45624e75f89350e0e6164aa36944ae7394aeae68d0ba4d",
+    "probe_global_club_orientation_reviewed.m": "fcaf99f3c3df6d95c432d9f9dfd7f25de1a23a51f5436006acb23b062c6ca564",
     "probe_global_rate_refit_reviewed.m": "519f53853eb2f7689190901814de9dfc89e9e2ca746bb5fef7564f469de3aae4",
     "probe_native_c2_anchor_midpoints_reviewed.m": "be19e956f76d0074c9110707402c883f1afb59a6bb6f7243e0414b1bfa9943f7",
     "probe_native_c2_anchor_seeded_source_frames_reviewed.m": "9e679c4bb4c1087478630bb9ad8508dab924ad8a6f338ee64712c3c17e935f69",
@@ -3736,6 +4467,7 @@
     "probe_normalized_rate_refit_reviewed.m": "dad3a0fcc568c07a85ad6084518f33ceb1106dd2c3354c61a816a9c177c20870",
     "probe_recheck_saved_acceleration_window_refit_reviewed.m": "fd4b9caf124a344a85ebcaef76ed9bcb772f8f97cc5e923af65ad828bc22c1c1",
     "probe_recheck_saved_club_window_reviewed.m": "5104b4c053e9516d03d9b806a4d805038ee1ecf06e029be9ca6cc64fb9491289",
+    "probe_recheck_saved_global_club_reviewed.m": "1f904c550c311dc9d9ccde77d052de8154442b9bbbfbea09316c8242c9ffdcc0",
     "probe_recheck_saved_global_rate_refit_reviewed.m": "35cbb528ab590ba260fd3f7b7357cbf468423af61cdd5955ff313e45000e50c8",
     "probe_recheck_saved_normalized_rate_refit_reviewed.m": "f5165e32d26d174861b84bc70b97b426242ca0c2c627bf4d123f06f23f150a4f",
     "probe_refined_tangents_reviewed.m": "57814956c0f2ba823bb7b7045d20e2f149c95f12489eedd9ee661599c049155e",
@@ -4444,6 +5176,138 @@
     "script_status": "success",
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T18:18:38.105580+00:00"
+  },
+  "saved_global_club_audit": {
+    "acceleration_qualified": false,
+    "actual_capture_clock_counts": {
+      "capture_A": 654,
+      "capture_O": 367
+    },
+    "alignment_sha256": {
+      "capture_A": "77f0551024e69eb09e7d2a737298a4427a8d2fdfe1408a9ce7631fcfb7ed62cc",
+      "capture_O": "ac7955794b90237920f20864bceef611783294f35c97ec12abd0156aee0114ff"
+    },
+    "audit_proof_sha256": "bceb58a4f7ee44f17414bf3944bc80f8d1ae40a5f9bebc67763ce017b7527842",
+    "audit_receipt_sha256": "6ca9522fa29fd3ec55bd374dd427819da01ed1b91c6f4720004da8998fdd39bb",
+    "club_runtime_sha256": "01ea755f225fab0716f8d09e2a338ae8cb478b2551f3c4cccb85a589b5984718",
+    "contact_qualified": false,
+    "current_geometry_cache_sha256": {
+      "capture_A": "0cc6531052595353402f6972fa1892e2986a19c2206d70ff1b802efb24295b03",
+      "capture_O": "994ebdae85b8f4f503edad6d3c36d77341f71f9469487c50cc886196c2dcf7b6"
+    },
+    "dynamics_qualified": false,
+    "fresh_pose_rechecks": 3063,
+    "full_source_sample_pose_scope": true,
+    "max_joint_physical_error": 9.921048172113442e-16,
+    "model_file_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "model_saved": false,
+    "native_frame_ids_verified": [
+      "r_club.Rotation.x",
+      "r_club.Rotation.y",
+      "r_club.Rotation.z"
+    ],
+    "native_velocity_qualified": false,
+    "new_candidate_promoted": false,
+    "new_poses_fitted_by_this_audit": 0,
+    "original_parent_receipt_evaluated_separately": true,
+    "parent_final_exit_code": 125,
+    "parent_receipt_sha256": "52e452cb56486065912eb7ed149a61c9ce0a81f1e020a1ef2f38aece6d934a06",
+    "parent_termination_reason": "hung_after_done",
+    "preserve_125_exit_code_if_occurred": true,
+    "producer_new_fitted_poses_rechecked": 2042,
+    "qualification": "INDEPENDENT_SAVED_GLOBAL_CLUB_ORIENTATION_NATIVE_AUDIT_NOT_FULL_CLOCK_ZERO_OR_DYNAMICS",
+    "raw_input_sha256": {
+      "capture_A": "fe1b4dc376378f0e4aaa93cb8a3d5b6eef97b099a10f6e2f85dff1d4f63db168",
+      "capture_O": "cd50fe33e7f40fb469af47bfbddd46bbb487036b144b9b7ce404eee767a71eea"
+    },
+    "records": {
+      "capture_A": {
+        "club_025": {
+          "candidate_club_R_verified": true,
+          "candidate_gap_mask_verified": true,
+          "club_orientation_mean_chordal_err": 0.17954829341629286,
+          "club_orientation_mean_error_deg": 10.322004581877708,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 26.835765455177874,
+          "fresh_pose_rechecks": 654,
+          "max_physical_pose_error": 9.921048172113442e-16
+        },
+        "club_075": {
+          "candidate_club_R_verified": true,
+          "candidate_gap_mask_verified": true,
+          "club_orientation_mean_chordal_err": 0.09548174678044496,
+          "club_orientation_mean_error_deg": 5.475690179331709,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 14.030389658542134,
+          "fresh_pose_rechecks": 654,
+          "max_physical_pose_error": 9.921048172113442e-16
+        },
+        "rate_control": {
+          "candidate_club_R_verified": false,
+          "candidate_gap_mask_verified": false,
+          "club_orientation_mean_chordal_err": 0.20607781211432366,
+          "club_orientation_mean_error_deg": 11.85853306381983,
+          "club_orientation_observed_frames_count": 618,
+          "club_orientation_peak_error_deg": 30.4144848556494,
+          "fresh_pose_rechecks": 654,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "rate_control_source": "retained_from_previous_global_rate_refit_trials_no_new_fit",
+          "retained_control_no_new_fit_verified": true
+        }
+      },
+      "capture_O": {
+        "club_025": {
+          "candidate_club_R_verified": true,
+          "candidate_gap_mask_verified": true,
+          "club_orientation_mean_chordal_err": 0.33305539265495226,
+          "club_orientation_mean_error_deg": 19.287301149380177,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 58.74482091591332,
+          "fresh_pose_rechecks": 367,
+          "max_physical_pose_error": 7.850462293418875e-16
+        },
+        "club_075": {
+          "candidate_club_R_verified": true,
+          "candidate_gap_mask_verified": true,
+          "club_orientation_mean_chordal_err": 0.21550017720002393,
+          "club_orientation_mean_error_deg": 12.412191329441676,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 54.78972552128597,
+          "fresh_pose_rechecks": 367,
+          "max_physical_pose_error": 7.850462293418875e-16
+        },
+        "rate_control": {
+          "candidate_club_R_verified": false,
+          "candidate_gap_mask_verified": false,
+          "club_orientation_mean_chordal_err": 0.3644748592570144,
+          "club_orientation_mean_error_deg": 21.14281539221777,
+          "club_orientation_observed_frames_count": 345,
+          "club_orientation_peak_error_deg": 60.898830323930774,
+          "fresh_pose_rechecks": 367,
+          "max_physical_pose_error": 6.2803698347351e-16,
+          "rate_control_source": "retained_from_previous_global_rate_refit_trials_no_new_fit",
+          "retained_control_no_new_fit_verified": true
+        }
+      }
+    },
+    "report_sha256": "a9951afcf7f6c80fbd8808cb6f6b2e0dbcd66d0e6ce6a413b3dbd72c93c93b3f",
+    "retained_control_no_new_fit": true,
+    "retained_rate_control_poses_audited": 1021,
+    "retained_rate_trials_sha256": "0e299d0519b3ca5e5b16f1077d09b24e4c713f333700feef699d64ae6578b2c1",
+    "saved_trials_sha256": "70e337276fdf5d3f7a81a7a2422f3f7c2278cf370d6324c025e14de1cedaea7a",
+    "source_file_sha256": "32b37e601721fabb6fc01abb5e4df6e1a18d8f01cec4adff4ea397977455c7d7",
+    "total_fresh_audited_poses": 3063,
+    "whole_capture_qualified": false,
+    "window_zero_parity_referenced": true,
+    "zero_fullclock_parity_claimed": false
+  },
+  "saved_global_club_audit_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T19:15:18.447827+00:00"
   },
   "saved_refit_fresh_native_recheck": {
     "acceleration_qualified": false,

@@ -4839,7 +4839,109 @@ codes zero at 2026-10-03 18:18:38 UTC. The independent success does not
 replace the original shutdown receipt. No candidate is promoted by this
 window comparison. Native velocity, contact, torque-driven motion and
 feedback-off replay remain unqualified.
+\section{Full Source-Clock Club Comparison and Preview Selection}
+\label{sec:global-club-comparison}
+The subsequent comparison fits every source sample: 654 tour poses at
+360 Hz and 367 owner poses at 240 Hz. Two positive weights produce 2,042
+new poses; the 1,021 rate-control poses are retained without refitting.
+The observed club triad is available at 618 tour and 345 owner samples.
+Orientation statistics exclude missing observations; missing frames are
+not evidence of orientation agreement.
+\begin{center}
+\begin{tabular}{lrrrrr}
+\hline
+Capture & Weight & Mean club ($^\circ$) & Peak club ($^\circ$) & RMS (mm) & Wrist step ($^\circ$)\\
+\hline
+A & 0 & 11.859 & 30.414 & 16.887 & 4.506\\
+A & 0.025 & 10.322 & 26.836 & 16.865 & 4.518\\
+A & 0.075 & 5.476 & 14.030 & 16.944 & 4.542\\
+O & 0 & 21.143 & 60.899 & 20.800 & 13.240\\
+O & 0.025 & 19.287 & 58.745 & 20.762 & 13.060\\
+O & 0.075 & 12.412 & 54.790 & 20.915 & 17.536\\
+\hline
+\end{tabular}
+\end{center}
+RMS is the mean per-frame fourteen-derived-target position RMS; wrist
+step is the maximum wrapped right-wrist step over consecutive source
+samples. It is not an independently measured joint velocity. The moderate
+owner weight also reduces the maximum shoulder geodesic step from
+$11.773^\circ$ to $11.590^\circ$ and root displacement from 6.540 to
+6.395 mm. The stronger owner weight increases both to $12.534^\circ$
+and 7.006 mm. A lower club error alone therefore does not justify selecting
+that candidate as the best overall motion.
+
+The original fitting process saved its results but retained shutdown
+receipt 125 at 19:13:08 UTC on 2026-10-03. A separate native R2025b
+audit rechecked all 3,063 saved poses, actual club-frame outputs, positive
+candidate rotation matrices, observation masks, metrics, and source hashes.
+Its maximum physical joint residual was $9.93\times10^{-16}$ or less;
+it exited naturally with process and wrapper codes zero at 19:15:18 UTC.
+This audit made no new fits. Full-clock zero-weight equivalence was not
+newly tested; the window parity evidence remains separately scoped.
+
+The review selects weight 0.075 for the tour and 0.025 for the owner for
+private video previews, pending render parity and visual review. This is
+a documented tradeoff, not a global optimum or production promotion.
+Previews use the same refined Human ellipsoid geometry and exact audited
+poses at 30 frames per second: every twelfth tour sample and every eighth
+owner sample. This yields 55 and 46 display frames respectively, omitting
+five and six trailing source samples (less than $1/30$ s). Display labels
+do not resample the trajectory. Native solid transforms must agree with
+the supplied 48-coordinate poses before an export is accepted.
+
+\subsection{Verified Preview Delivery}
+Eight H.264 MP4 files were rendered at $1920\times1080$ and 30 frames
+per second, covering both captures, face-on and down-the-line views,
+and clean and measured-marker overlays. Each clip passed an independent
+native solid-transform comparison against its supplied 48-coordinate
+poses. The rendering process exited naturally with code zero at
+19:32:57 UTC on 2026-10-03. A separate decoder verified all 404 frames,
+dimensions, codec, strictly increasing presentation timestamps and file
+hashes. Four sampled frames per clip were visually reviewed for geometry,
+framing and overlays; this is not every-frame anatomical acceptance.
+
+The package is saved on both local and DeskComputer Desktops as
+\texttt{Simscape\_Matches\_20261003\_Club\_Refined\_1080p}, alongside
+a ZIP with the same stem. The 4,083,966-byte ZIP and extracted MP4 hashes
+were verified on both machines. Historical packages remain unchanged.
+The refined Human ellipsoid geometry is consistent across all eight
+clips. This delivery is the current reviewed preview selection; residual
+marker offsets, exact source-video pairing, continuous physical trajectory
+and forward-dynamics qualification remain open.
+
+\section{Native Actuator Discovery: Evidence and Remaining Work}
+\label{sec:actuator-discovery}
+An independent 0.02 s native pilot of the nominal 80 kg model verified
+the two neck actuator streams at $+0.25$ and $-0.25$ N\,m across 186
+samples and exited naturally at 18:48:51 UTC on 2026-10-03. Discovery
+found 25 joint blocks and 99 finite logged leaf series with no read
+errors, but these leaves expose state and acceleration quantities, not
+measured actuator torque for every joint. A subsequent instance-parameter
+inspection identifies 35 actuated components across 19 blocks. The
+spherical joints use the follower actuation frame. Neither these counts
+nor reaction-torque sensor settings establish all-axis input measurement.
+The resolved graph contains 27 physical-signal converter connections:
+23 scalar connections and four three-component spherical connections.
+Twenty-one scalar converters specify input unit \texttt{1}; this setting
+does not by itself identify a unit error. MathWorks documents that the
+destination determines the physical output unit and \texttt{1} applies
+no input scaling~\cite{MathWorksPSUnits}. Native unit checking and delivered
+signal measurement remain necessary before asserting N\,m values for
+these actual connections.
+
+The next qualification must resolve actual instance connections and
+measure the physical signal entering each joint after conversion and
+filtering, with verified units and axis/frame conventions. It must then
+exercise the matched moving swing, free root and contact, followed by a
+fresh independent feedback-off replay. The present shared videos remain
+inverse-kinematic reconstructions; this short nominal pilot is not a
+torque-driven reproduction of either captured swing.
+
 \begin{thebibliography}{9}
+\bibitem{MathWorksPSUnits}
+MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
+\url{https://www.mathworks.com/help/simscape/ref/simulinkpsconverter.html}.
+Accessed 2026-10-03; installed R2025b behavior is checked separately by native probes.
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
 \url{https://www.mathworks.com/help/sm/ref/simscape.multibody.kinematicssolver.solve.html}.
