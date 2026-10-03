@@ -1,3 +1,31 @@
+# MuJoCo Force/Torque Provider — #11294 (FTO-9)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `UpstreamDrift-worktrees/agy-11294`
+- Branch: `feat/fto-11294-mujoco-provider`; commit: SELF; PR: to be opened
+- Governing issue: #11294 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Objective: [FTO-9] MuJoCo force/torque provider and overlay bug fixes.
+- Completed:
+  - Implemented `MujocoForceTorqueSource` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` (282 lines, within budget).
+  - Emits world-frame `OverlayWrench` instances for:
+    - `JOINT_ACTUATOR`: applied actuator torques/forces from `qfrc_actuator` mapped with `xaxis[j]`.
+    - `JOINT_REACTION`: parent-on-child internal reactions from `cfrc_int`, transformed from subtree center of mass to joint anchor via `transform_wrench(w_com, "world", anchor)`.
+    - `CONTACT`: active contact pair forces from `mj_contactForce`, transformed from contact frame to world frame, with equal-and-opposite signs on interacting bodies and non-geom IDs safely skipped.
+    - `EXTERNAL`: applied spatial wrenches from `xfrc_applied`.
+    - `GRAVITY`: optional mass \* g body wrenches.
+  - Implemented bit-identical state snapshotting to internal scratch `MjData` using direct numpy `copyto` on `qpos`, `qvel`, `qacc`, `ctrl`, `act`, `qfrc_applied`, `xfrc_applied`, and `time` (resolving missing `mujoco.mj_copyData` in Python bindings across `force_torque_source.py` and `src/shared/python/body_part_viz/mujoco_axial_loads.py`).
+  - Integrated into `MujocoPhysicsEngine` (`get_force_torque_frame`, `get_segment_axial_loads`, `get_contact_forces`, `force_visualization=FULL`).
+  - Unit tests: 8 comprehensive tests in `tests/unit/engines/mujoco/test_force_torque_source.py` (hanging pendulum equilibrium, sign agreement with `MujocoAxialLoadSource`, actuated hinge with clamping, non-axis-aligned joint indexing, box on floor contact equilibrium, caller data immutability, engine source caching, and schema serialization round-trip).
+  - Benchmark on `golfer.xml`: `sample()` cost is ~15 ms per frame.
+- Validation:
+  - `python -m pytest tests/unit/engines/mujoco/test_force_torque_source.py`: 8 passed.
+  - `python -m pytest tests/unit/test_mujoco_physics_engine.py`: 16 passed.
+  - `python -m pytest tests/unit/scripts/test_divergence_inventory.py`: 10 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check .` & `ruff format --check .`: Clean.
+- Next steps: Land FTO-9 PR; proceed with FTO-10 (#11295) MuJoCo GUI rewiring.
+
 # Colour Utilities DRY — #11289 (FTO-4)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`
@@ -74,12 +102,13 @@
 - Key decisions: FTO-2 (#11287, `conversions.py`) and FTO-11 (`segment_axes.py`) are not on main, so the world-frame conversion, torque wrench and segment axes are minimal private helpers in the new module. Axis rule: one child joint gives that joint origin, a leaf gives the body COM, a branching body or a zero-length axis is reported unavailable (None), never guessed. Wrench `body` is the BODY frame attached to the joint; the joint name appears only in labels (`reaction:<joint>`, `actuator:<joint>`, `contact:<body>`). Contacts are passed as a mapping of body (frame) name to `ContactSample`; unknown bodies are omitted. The engine recomputes acceleration with ABA at the sampled (q, v, tau) because `self.a` goes stale; ABA excludes external contact forces. Replace the private helpers when FTO-2/FTO-11 land.
 - Validation: `ruff check`/`ruff format --check` clean on changed files; `pytest tests/unit/engines/pinocchio/test_pinocchio_force_torque.py tests/engines/physics_engines/test_pinocchio_engine.py`: all pass.
 - Next steps: FTO-14 (Pinocchio GUI) consumes the provider; FTO-21 parity; swap private helpers for FTO-2/FTO-11 modules.
+
 # Drake Force/Torque Provider — #11296 (FTO-11)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11296-fto11-drake-provider`; commit: SELF; PR: see the FTO-11 PR.
 - Governing issue: #11296 (epic #11285, ADR-0052; development log `DL-#11285`).
 - Completed: `drake_force_torque.py` (`DrakeForceTorqueSource`: joint reaction, net actuation, point and hydroelastic contact, opt-in gravity, axial loads); `force_overlay/segment_axes.py`; engine wiring (`get_force_torque_frame`, `get_segment_axial_loads`, `force_visualization=FULL`, hydroelastic-aware `compute_contact_forces`).
-- Key decisions: Drake's reaction port is expressed in the child joint frame, so it is rotated to world; unavailable actuation is listed in `source.unavailable_labels` because `ForceTorqueFrame` has no legend; FTO-2 converters (`joint_torque_wrench`, `SegmentAxis`, `axial_loads_from_reactions`) are reused; `compute_contact_forces` now returns the force on non-world bodies (+m*g at rest).
+- Key decisions: Drake's reaction port is expressed in the child joint frame, so it is rotated to world; unavailable actuation is listed in `source.unavailable_labels` because `ForceTorqueFrame` has no legend; FTO-2 converters (`joint_torque_wrench`, `SegmentAxis`, `axial_loads_from_reactions`) are reused; `compute_contact_forces` now returns the force on non-world bodies (+m\*g at rest).
 - Validation: `python3 -m pytest tests/engines/drake/test_drake_force_torque.py tests/unit/force_overlay` (40 passed with the capability test); ruff check/format clean on changed files.
 - Known limits: discrete-time plants read zero reactions before the first step; point contact on a box face yields one unstable point, so the point test uses a sphere.
 - Next steps: FTO-12 Drake GUI; FTO-21 parity.

@@ -86,7 +86,14 @@ class MujocoAxialLoadSource:
         if any(get_callback() is not None for get_callback in callbacks):
             return None
         scratch = self._scratch
-        native.mj_copyData(scratch, model, data)
+        scratch.time = float(data.time)
+        np.copyto(scratch.qpos, data.qpos)
+        np.copyto(scratch.qvel, data.qvel)
+        np.copyto(scratch.qacc, data.qacc)
+        np.copyto(scratch.ctrl, data.ctrl)
+        np.copyto(scratch.act, data.act)
+        np.copyto(scratch.qfrc_applied, data.qfrc_applied)
+        np.copyto(scratch.xfrc_applied, data.xfrc_applied)
         native.mj_forward(model, scratch)
         native.mj_rnePostConstraint(model, scratch)
         values = {}
