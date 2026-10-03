@@ -18,6 +18,7 @@ from typing import Any, Sequence, cast
 import numpy as np
 
 from src.shared.python.motion_matching import default_body_segments
+from src.shared.python.shadow_tracker.source_records import VariableFrameRateError
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
@@ -56,8 +57,12 @@ def source_frame_rate(
         ticks, numerator, denominator = cast(list[int], values)
         times.append(Fraction(ticks * numerator, denominator))
     steps = [b - a for a, b in zip(times, times[1:], strict=False)]
-    if steps[0] <= 0 or any(step != steps[0] for step in steps):
-        raise ValueError("Video source PTS must be strictly increasing and uniform")
+    if steps[0] <= 0:
+        raise ValueError("Video source PTS must be strictly increasing")
+    if any(step != steps[0] for step in steps):
+        raise VariableFrameRateError(
+            "Video source PTS must be strictly increasing and uniform"
+        )
     return 1 / steps[0]
 
 

@@ -1,3 +1,30 @@
+## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
+
+Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
+- **Capture Registry Extension (`src/motion_capture/capture_registry.py`)**:
+  - Extends `CaptureInfo` schema with `kind` (defaulting to `"c3d"`, explicit `"video"` for video clips).
+  - Pure function `register_capture(info, repo_root=...)` registers neutral IDs `capture-O-video/cov-NN` under `$CAPTURE_DATA_DIR/capture-O-video/originals/` with SHA-256 and container facts.
+  - Fail-closed SHA-256 integrity verification raises `CaptureIntegrityError` upon content mismatches.
+- **Timing Evidence & Clock Qualification (`src/shared/python/shadow_tracker/source_records.py`)**:
+  - `VideoTimingEvidence`: frozen dataclass holding `container_fps`, `r_frame_rate`, `avg_frame_rate`, `is_vfr`, `physical_clock`, `slow_motion_tags`, `rotation_degrees`, `rotation_applied`, `creation_time`, `capture_fps`, `playback_fps`, `capture_to_playback_ratio`.
+  - Fail-closed clock classification: missing slow-motion tags require `physical_clock == "unknown"`; attempting to declare `"known"` or `"ratio_known"` without slow-motion tags raises `ValueError`.
+  - Rotation handling: camera rotation (e.g. 90°) is explicitly flagged with `rotation_applied = False` and `rotation_degrees in {0, 90, 180, 270}`.
+- **Variable Frame Rate (VFR) Rejection (`VariableFrameRateError`)**:
+  - Streams with varying frame rates are flagged (`is_vfr = True`).
+  - Uniform-PTS consumer `source_frame_rate` in `necromatcher_video.py` strictly rejects non-uniform PTS sequences with typed `VariableFrameRateError` (subclassing `ValueError`).
+- **Swing Window Intervals & View Classification (`SwingWindow`, `validate_swing_windows`)**:
+  - Represents continuous swing candidates with half-open intervals `[start_pts_s, end_pts_s)`.
+  - `validate_swing_windows` strictly forbids overlapping intervals for the same clip, raising `ValueError`.
+- **Usability Grading Rubric (`grade_swing_window`, `SwingGradeResult`)**:
+  - Pure function returning `SwingGradeResult` with mandatory reasons (empty reasons raise `ValueError`).
+  - Classifies swings into grades:
+    - **A**: Full body + club visible address to finish, >= 60 fps, low blur at impact, static camera (usable for L0-L3).
+    - **B**: Full body visible, club partly lost/blurred in downswing, or 30 fps (usable for L0-L2).
+    - **C**: Body partly cropped / heavy occlusion / moving camera, but swing is identifiable (usable for L0-L1).
+    - **R**: Not a swing or unusable; retained with mandatory recorded reasons.
+- **Catalog Privacy Protection (`docs/development/historical_capture/source-catalog.json`)**:
+  - Public catalog entries for private sources declare `private: true` and strictly exclude `original_filename`, `source_url`, and `title`.
+
 ## Capture-O Video Companion: Acquisition Receipt and Provenance Contracts (COV-1, #11269)
 
 Specifies fail-closed video asset acquisition, SHA-256 integrity verification, ffprobe metadata embedding, lineage tracking, and atomic receipt emission for the capture-O companion video program (#11268, #11269):
@@ -7753,6 +7780,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |
 | 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
 | 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |

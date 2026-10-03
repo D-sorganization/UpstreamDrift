@@ -169,3 +169,64 @@ def test_require_capture_skips_when_unavailable(
     monkeypatch.delenv("CAPTURE_DATA_DIR", raising=False)
     with pytest.raises(pytest.skip.Exception):
         require_capture("capture-O")
+
+
+def test_capture_info_video_kind_schema() -> None:
+    """Capture registry supports video kind and defaults to c3d for legacy entries."""
+    from src.motion_capture.capture_registry import register_capture
+
+    # Legacy dictionary without kind defaults to c3d
+    legacy_info = CaptureInfo.from_dict(
+        {
+            "id": "legacy-item",
+            "where": "public",
+            "relative_path": "path/test.c3d",
+            "sha256": "0" * 64,
+            "bytes": 100,
+        }
+    )
+    assert legacy_info.kind == "c3d"
+
+    # Video kind is preserved
+    video_info = CaptureInfo(
+        id="capture-O-video/cov-01",
+        kind="video",
+        where="private",
+        relative_path="capture-O-video/originals/cov-01.mp4",
+        sha256="1" * 64,
+        bytes=1000,
+        sample_rate_hz=30.0,
+        frame_count=300,
+    )
+    assert video_info.kind == "video"
+    roundtrip = CaptureInfo.from_dict(video_info.to_dict())
+    assert roundtrip.kind == "video"
+    assert roundtrip.id == "capture-O-video/cov-01"
+
+
+def test_register_capture(tmp_path: Path) -> None:
+    """register_capture persists and updates registry manifest correctly."""
+    from src.motion_capture.capture_registry import register_capture
+
+    repo_dir = tmp_path / "repo"
+    data_dir = repo_dir / "data"
+    data_dir.mkdir(parents=True)
+    manifest_file = data_dir / "capture_registry.json"
+    manifest_file.write_text("{}", encoding="utf-8")
+
+    info = CaptureInfo(
+        id="capture-O-video/cov-test",
+        kind="video",
+        where="private",
+        relative_path="capture-O-video/originals/cov-test.mp4",
+        sha256="2" * 64,
+        bytes=500,
+        sample_rate_hz=60.0,
+        frame_count=180,
+    )
+    register_capture(info, repo_root=repo_dir)
+
+    loaded = capture_info("capture-O-video/cov-test", repo_root=repo_dir)
+    assert loaded.id == "capture-O-video/cov-test"
+    assert loaded.kind == "video"
+    assert loaded.sample_rate_hz == 60.0
