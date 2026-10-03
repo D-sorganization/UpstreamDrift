@@ -151,6 +151,23 @@ prefer a qualitative palette via `PaletteColor`: `tab10`, `Set2`,
 colormap for categories — equal-spaced category indices look like
 ordered values, which they aren't.
 
+### Force and Torque Overlay Palette (ADR-0052)
+
+For engine-agnostic force and torque visualization (`src/shared/python/force_overlay/`),
+the canonical categorical palette is `FORCE_KIND_PALETTE`. It uses color-blind-safe
+Okabe–Ito hues and reserves pure `#0000ff` and `#ff0000` strictly for axial tension
+and compression fills:
+
+| Kind | Hex Code | Visual Swatch / Notes |
+| --- | --- | --- |
+| `joint_actuator` | `#E69F00` | Orange (Okabe–Ito) |
+| `joint_reaction` | `#CC79A7` | Reddish purple (Okabe–Ito) |
+| `contact` | `#009E73` | Bluish green (Okabe–Ito) |
+| `grip` | `#56B4E9` | Sky blue (Okabe–Ito) |
+| `external` | `#000000` | Black (light) / `#FFFFFF` White (dark) |
+| `gravity` | `#999999` | Medium gray (Okabe–Ito) |
+| `muscle` | `#D55E00` | Vermilion (Okabe–Ito) |
+
 ### Accessibility
 
 The `cividis` built-in is the recommended sequential colormap for
