@@ -378,10 +378,7 @@ jobs:
           - engine: mujoco
             python-version: "3.11"
             install: 'pip install "mujoco>=3.6.0,<4.0.0"'
-            # The MuJoCo provider row (FTO-9, #11294) is not on main yet, so
-            # the evidence is the provider-independent MJCF statics check.
-            # Switch to the hanging-pendulum [mujoco] case when #11294 lands.
-            evidence: "test_mujoco_models_are_statically_consistent"
+            evidence: "test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]"
 
     steps:
       - name: Checkout repository
