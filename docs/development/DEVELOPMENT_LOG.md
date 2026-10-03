@@ -158,6 +158,13 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-7 (#11275) per-landmark and phase-stratified comparison harness.
 
+- **PR:** (draft, Closes #11275, Refs #11268)
+- **Branch:** `feat/cov-7-2d-comparison-11275`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at HEAD — COV-7 (#11275): Implemented 2D comparison harness between markerless backends and projected capture-O landmarks (`src/motion_capture/reference/comparison_2d.py`). Features `ComparisonLevel` ('L1', 'L2'), `MetricSpread`, `L1ComparisonResult`, `L2ComparisonResult`, `Comparison2DReceipt`, pure functions `compute_l1_envelope_comparison`, `compute_l2_paired_comparison`, `propagate_camera_uncertainty`, `build_2d_comparison_receipt`. Phase-stratified, visibility-weighted metrics (RMSE, median bias, p90 error, DTW residual distance, L1 envelope inside-fraction and signed distance), camera uncertainty propagation to metric spread, fail-closed guards for offset calibration leakage, unpaired swings, and mismatched input hashes. 7 unit tests pass in `tests/unit/motion_capture/test_cov7_2d_comparison.py`. Pre-commit checks (architecture budgets, file size budget, error handling ratchet, ruff, mypy) pass cleanly.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-8 (#11276) 3D comparison: direct 3D vs marker-capture ground truth.
+
 ### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress

@@ -1,3 +1,48 @@
+# Current Handoff — Capture-O Video Companion: 2D Comparison of Markerless Backends vs Projected Capture-O Landmarks (COV-7, #11275)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-7-2d-comparison-11275`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-7-11275`
+- Commit: `SELF`
+- Governing issue: #11275 (parent epic #11268, depends on #11270, #11272, #11273, #11274)
+- Objective: [COV-7] Implement 2D comparison harness between markerless backends and projected capture-O landmarks under L1 (envelope) and L2 (paired) comparison levels under strict DbC, LoD, and DRY.
+- Completed:
+  - `src/motion_capture/reference/comparison_2d.py`:
+    - Core domain types:
+      - `ComparisonLevel`: literal type `'L1' | 'L2'`.
+      - `MetricSpread`: p5, p50, p95 spread over propagated camera uncertainty samples.
+      - `L1ComparisonResult`: inside-fraction, signed distance (px), phase-stratified inside fractions.
+      - `L2ComparisonResult`: visibility-weighted RMSE (px and height-normalized), median bias (signed dx, dy), p90 error, DTW residual distance, missingness report, per-phase breakdown.
+      - `Comparison2DReceipt`: provenance metadata (backend, model_version, weights_hash, camera_result_hash, pairing_receipt_hash, input_data_hash, receipt_hash), level, L1 and L2 results, camera uncertainty propagation spread, timestamp.
+    - Pure computational functions:
+      - `compute_l1_envelope_comparison`: evaluates 2D observations against phase-normalized p5..p95 envelopes, calculating fraction of frames inside envelope and median signed distance (0 for inside, signed distance to nearest band boundary when outside).
+      - `compute_l2_paired_comparison`: evaluates paired swing observations against projected capture-O landmarks, computing visibility-weighted RMSE, signed median bias, p90 error, and DTW distance. Excludes occluded/invisible frames without zero-filling and reports counts in `missingness_report`.
+      - `propagate_camera_uncertainty`: samples camera parameters from Gaussian covariance distribution `P`, projects 3D capture landmarks, recalculates metrics across perturbed projections, and yields p5, p50, p95 `MetricSpread`. Reports `resolvable: False` if nominal metric difference is smaller than camera spread.
+      - `build_2d_comparison_receipt`: constructs sealed `Comparison2DReceipt` enforcing hash invariants, fail-closed guards against calibration frame leakage, unpaired swing rejection for L2, and SHA-256 integrity receipt hash computation.
+    - Exported public API in `src/motion_capture/reference/__init__.py`.
+  - Comprehensive unit test suite in `tests/unit/motion_capture/test_cov7_2d_comparison.py`:
+    - 7 rigorous unit tests covering:
+      - Known bias recovery: +5 px horizontal bias recovered as median dx bias under noiseless projections.
+      - Unpaired swing failure: attempting L2 paired comparison on unpaired swing raises `ValueError`.
+      - Calibration leakage guard: calibration frames (indices < calibration_frames) explicitly excluded from metric evaluation.
+      - Missingness / occlusion handling: occluded/invisible landmarks excluded from visibility-weighted RMSE, never zero-filled, and tracked in `missingness_report`.
+      - Camera uncertainty propagation: wider camera parameter covariance yields wider `MetricSpread`; metric diff < spread marked `resolvable: False`.
+      - Hash mismatch refusal: mismatched input data hash or stale receipt raises `ValueError`.
+      - L1 envelope bounds: observations inside envelope yield inside_fraction=1.0 and signed_distance=0.0; outside points yield positive signed distance.
+  - Updated `SPEC.md` with COV-7 section and §12 Change Log table row.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_cov7_2d_comparison.py`: 7 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `python scripts/ci/check_spec_changelog_duplicates.py`: OK.
+  - `python scripts/check_spec_paths.py`: OK.
+  - `ruff check src/motion_capture/reference/ tests/unit/motion_capture/`: OK.
+  - `ruff format --check src/motion_capture/reference/ tests/unit/motion_capture/`: OK.
+  - `python scripts/ci/run_mypy.py --follow-imports=silent src/motion_capture/reference/comparison_2d.py tests/unit/motion_capture/test_cov7_2d_comparison.py`: OK (0 issues).
+- Next steps: Advance to COV-8 (#11276) direct 3D vs marker-capture ground truth comparison.
+
 # [COV-4] Virtual Camera Fitting and 2D Swing Envelope — #11272
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-4-virtual-camera-11272`; commit SELF; PR: #11272 (`Closes #11272`, `Refs #11268`)

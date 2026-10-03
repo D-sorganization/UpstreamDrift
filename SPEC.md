@@ -1,3 +1,24 @@
+## 2D Comparison of Markerless Backends vs Projected Capture-O Landmarks (COV-7, #11275)
+
+Specifies 2D comparison between markerless backends and projected capture-O reference landmarks at the highest level each swing supports (COV-7, #11275, parent epic #11268):
+- **Comparison Level Separation (`ComparisonLevel`)**:
+  - `L1` (Envelope comparison, applicable to all graded A–C swings): evaluates fraction of frames inside the 13-swing variation envelope ($p_5 \le \text{observed} \le p_{95}$), signed distance to envelope median ($p_{50}$) in pixels and body-height-normalized units, and DTW distance relative to inter-swing spread.
+  - `L2` (Paired comparison): strictly requires paired swing status (`PairingDecisionStatus.PAIRED`) with confidence margin $\Delta \ge \tau_{\text{pair}}$ and non-null `paired_capture_swing_id`. An unpaired or ambiguous swing raises `ValueError`.
+- **Per-Landmark Residuals & Missingness Tracking (`L2ComparisonResult`)**:
+  - Reports pixel residuals and body-height-normalized residuals as $p_{50}$, $p_{95}$, and worst (maximum) per landmark and aggregated.
+  - Dual RMSE variants: visibility-weighted RMSE ($\sqrt{\sum v_i r_i^2 / \sum v_i}$) and unweighted RMSE.
+  - Missing and occluded landmarks ($v_i = 0$ or non-finite) are excluded from visibility weighting and counted in the structured `missingness_report`, never filled with zeros.
+- **Leakage Guard for Keypoint Offset Calibration**:
+  - Calibration frames used for offset estimation are strictly excluded from the evaluation set.
+  - If a caller supplies an evaluated set containing calibration frames, the leakage guard raises `ValueError`.
+- **Camera Uncertainty Propagation (`propagate_camera_uncertainty`, `MetricSpread`)**:
+  - Propagates virtual camera parameter covariance by sampling camera extrinsics perturbations and reprojecting reference landmarks to establish empirical metric spread ($p_{95} - p_5$).
+  - Larger camera covariance yields wider metric spread.
+  - When comparing backend differences, any difference smaller than the camera metric spread is reported as `is_resolvable = False` and status `"not resolvable"`.
+- **Receipt Input Hash Integrity (`build_2d_comparison_receipt`, `Comparison2DReceipt`)**:
+  - Enforces bitwise input hash verification across observations, camera, pairing, and profile SHA-256 digests.
+  - A stale or mismatched hash raises immediate refusal (`ValueError`).
+
 ## Virtual Camera Fitting and 2D Swing Variation Envelope (COV-4, #11272)
 
 Specifies the virtual camera estimation and 2D swing-to-swing envelope projection for comparing owner video swings against the 13 capture-O reference swings (COV-4, #11272, parent #11268):
@@ -7830,7 +7851,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11272 | [COV-4] Virtual camera fitting and 2D swing envelope: fit_virtual_camera with condition number, covariance, and degeneracy handling; compute_2d_envelope for phase-normalized p5/p50/p95 bands with sample counts and missing-frame tracking; CameraProjection adapter (#11272). |
-| 2026-10-02 | #11256 | Default future matches to refined Human ellipsoids; add capture-bound exports, calibrated foot/head orientation, keyed starts, selective gap weights and source observation masks with native default-parity tests and caller-bound export/cache contracts. Support configured upper-body learning, native block-bound Human moving references with explicit geometry-preserving conversion; native moving-velocity/midpoint, dense branch, derived-target availability and source-masked full-pose continuity experiments recorded without promotion; distinguish the refined-preview objective, verify private translation parameter contracts and native address-prefix comparison with independent 344-pose rechecking, and twelve-axis leg feedforward; preserve failed exit receipts and separate 48/43/37/35 native coordinate/control counts; fresh 48-state tangent recheck passes; original source-rate C2 rejection retained, guess correction preserves anchors, and refined/alternate-chart dense candidates remain rejected; record the GS3DX canonical-manual inventory blocker without release promotion; independently recheck all 2,042 full-source-clock fitted poses after retained shutdown failure, audit tour1307/1307 and owner729/733 C2 states plus bounded measured InputTorque neck capability; retain the earlier 536 saved-window-pose review after retained shutdown failure, measure capture-specific fit/continuity tradeoffs and native RED/GREEN normalized-rate helper contracts without full-path promotion; dense target/back-marker fit and projection-conditioned visual foot direction independently measured; parent verifies 104 comparison MP4s without dynamics promotion. Maintain calculation-level LaTeX, failed-trial evidence and tour/owner Desktop H.264 IK videos. Contact-supported one-second holds pass their fixed gates; full-swing torque recovery, independent replay, PDF qualification and protected delivery remain open. |
+| 2026-10-03 | #11275 | [COV-7] 2D comparison of markerless backends vs capture-O landmarks: L1 envelope comparison, L2 paired comparison, visibility-weighted and unweighted residuals, offset calibration leakage guard, camera uncertainty propagation, and receipt input hash verification (#11275). |
 | 2026-10-03 | #11274 | [COV-6] Pair video swings with capture-O swings: similarity matrix, confidence and abstention contracts, DTW inter-capture normalization, leakage guard, and event time mapping (#11274). |
 | 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
