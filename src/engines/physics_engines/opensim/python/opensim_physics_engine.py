@@ -60,6 +60,9 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         self._model = None
         self._state = None
         self._manager = None
+        # Controls written through set_control; None while the model's own
+        # controllers drive the actuators.
+        self._controls: np.ndarray | None = None
         self._model_path = ""
         self._time_step = 0.01
         self._force_torque_source: OpenSimForceTorqueSource | None = None
@@ -193,6 +196,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         if self._model and self._state:
             # Re-initialize the system to defaults
             self._state = self._model.initializeState()
+            self._controls = None
             self._model.equilibrateMuscles(self._state)
             self._manager.setSessionTime(0.0)
             self._manager.setIntegrator(opensim.RungeKuttaMersonIntegrator(self._model))
@@ -244,43 +248,98 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         return q, v
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set coordinate positions and speeds on the model state."""
+        """Set coordinate positions and speeds on the model state.
+
+        Preconditions:
+            ``q`` has one entry per coordinate and ``v`` one per speed.
+        Postconditions:
+            The state holds ``q`` and ``v``, its time is unchanged and it is
+            realized to the Velocity stage.
+
+        Raises:
+            ValueError: If ``q`` or ``v`` is missing or has the wrong length.
+        """
         if q is None:
             raise ValueError("q must be provided")
+        if v is None:
+            raise ValueError("v must be provided")
         if not self._model or not self._state:
             return
 
-        # Set Q
         n_q = self._model.getNumCoordinates()
-        if len(q) == n_q:
-            q_vec = opensim.Vector(n_q)
-            for i in range(n_q):
-                q_vec.set(i, float(q[i]))
-            self._state.setQ(q_vec)
-
-        # Set U
+        if len(q) != n_q:
+            raise ValueError(f"q must have {n_q} entries, got {len(q)}")
         n_u = self._model.getNumSpeeds()
-        if len(v) == n_u:
-            u_vec = opensim.Vector(n_u)
-            for i in range(n_u):
-                u_vec.set(i, float(v[i]))
-            self._state.setU(u_vec)
+        if len(v) != n_u:
+            raise ValueError(f"v must have {n_u} entries, got {len(v)}")
 
+        # OpenSim 4.x only binds Vector(), Vector(Vector), Vector(int, double)
+        # and Vector(list): there is no single-argument size constructor.
+        self._state.setQ(opensim.Vector([float(x) for x in q]))
+        self._state.setU(opensim.Vector([float(x) for x in v]))
+        # Changing q or u drops controls already realized on the state, so put
+        # back the ones set_control wrote.
+        self._apply_controls()
         self._model.realizeVelocity(self._state)
 
+    def _apply_controls(self) -> None:
+        """Write the retained set_control values onto the current state."""
+        if self._controls is None or self._model is None or self._state is None:
+            return
+        # Model.setControls writes the controls, marks them valid (else the
+        # next realization recomputes them from the controllers) and
+        # invalidates already-realized Dynamics, which a bare
+        # updControls + markControlsAsValid does not. It requires the state to
+        # be realized at least to Position.
+        self._model.realizePosition(self._state)
+        self._model.setControls(
+            self._state, opensim.Vector([float(x) for x in self._controls])
+        )
+
+    def _restore_controls(self, saved: np.ndarray | None) -> None:
+        """Re-establish the controls captured before a counterfactual."""
+        self._controls = saved
+        if self._model is None or self._state is None:
+            return
+        if saved is None:
+            self._model.markControlsAsInvalid(self._state)
+        else:
+            self._apply_controls()
+
     def set_control(self, u: np.ndarray) -> None:
-        """Set controls for the model."""
+        """Set the controls the model reads at the current state.
+
+        Preconditions:
+            ``u`` has one entry per model control.
+        Postconditions:
+            The controls are marked valid, so actuators realized from this
+            state report ``u`` instead of the controller output (zeros when the
+            model has no controller).
+
+        The values are retained and re-applied by ``set_state`` (changing q or
+        u otherwise drops them) until ``reset`` clears them.
+
+        Limitation:
+            ``step`` integrates
+            through the Manager, which recomputes controls from the model's
+            controllers, so a control set here does not persist across steps
+            unless the model carries a controller that reproduces it.
+
+        Raises:
+            ValueError: If ``u`` is missing or has the wrong length.
+        """
         if u is None:
             raise ValueError("u must be provided")
         if not self._model or not self._state:
             return
 
+        n_controls = self._model.getNumControls()
+        if len(u) != n_controls:
+            raise ValueError(f"u must have {n_controls} entries, got {len(u)}")
+
         try:
-            # Get writable reference to controls
-            controls = self._model.updControls(self._state)
-            if len(u) == controls.size():
-                for i in range(len(u)):
-                    controls.set(i, float(u[i]))
+            self._controls = np.array([float(x) for x in u])
+            self._apply_controls()
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to set OpenSim controls: {e}")
 
@@ -892,37 +951,32 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return np.array([])
 
         try:
-            # Save current state and controls
-            q_saved, v_saved = self.get_state()
-            controls_saved = opensim.Vector(self._model.updControls(self._state))
-
-            # Set desired state
-            self.set_state(q, v)
-
-            # Set zero control
-            n_controls = self._model.getNumControls()
-            zero_controls = np.zeros(n_controls)
-            self.set_control(zero_controls)
-
-            # Compute forward dynamics
-            # Note: realizeDynamics computes accelerations (udot) in the state
-            self._model.realizeDynamics(self._state)
-
-            # Extract accelerations
-            n_u = self._model.getNumSpeeds()
-            udot = self._state.getUDot()
-            a_ztcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state and controls
-            self._model.updControls(self._state).update(controls_saved)
-
-            self.set_state(q_saved, v_saved)
-
-            return a_ztcf
-
+            return self._zero_control_udot(q, v)
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZTCF: {e}")
             return np.array([])
+
+    def _zero_control_udot(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Return udot at (q, v) with zero control, always restoring the caller's state.
+
+        Restoration runs in ``finally`` so a failure mid-counterfactual cannot
+        leave the temporary state or zeroed controls installed.
+        """
+        model, state = self._model, self._state
+        if model is None or state is None:
+            raise RuntimeError("OpenSim model is not loaded")
+        q_saved, v_saved = self.get_state()
+        controls_saved = None if self._controls is None else self._controls.copy()
+        try:
+            self.set_state(q, v)
+            self.set_control(np.zeros(model.getNumControls()))
+            # realizeDynamics computes accelerations (udot) in the state
+            model.realizeDynamics(state)
+            udot = state.getUDot()
+            return np.array([udot.get(i) for i in range(model.getNumSpeeds())])
+        finally:
+            self.set_state(q_saved, v_saved)
+            self._restore_controls(controls_saved)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
@@ -942,29 +996,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
             return np.array([])
 
         try:
-            # Save current state and controls
-            q_saved, v_saved = self.get_state()
-            controls_saved = opensim.Vector(self._model.updControls(self._state))
-
-            # Set state with zero velocity
-            n_u = self._model.getNumSpeeds()
-            self.set_state(q, np.zeros(n_u))
-
-            # Canonical ZVCF zeros the declared applied-control channel.
-            self.set_control(np.zeros(self._model.getNumControls()))
-            # Compute forward dynamics
-            self._model.realizeDynamics(self._state)
-
-            # Extract accelerations
-            udot = self._state.getUDot()
-            a_zvcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state and controls
-            self._model.updControls(self._state).update(controls_saved)
-            self.set_state(q_saved, v_saved)
-
-            return a_zvcf
-
+            return self._zero_control_udot(q, np.zeros(self._model.getNumSpeeds()))
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])
