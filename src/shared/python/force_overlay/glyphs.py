@@ -304,14 +304,14 @@ class TorqueArcGlyph:
 class LegendSpec:
     """Renderer-neutral legend specification containing scales and metadata."""
 
-    force_reference_n: float | None
-    force_reference_length_m: float | None
-    torque_reference_nm: float | None
-    torque_reference_radius_m: float | None
-    kinds_present: tuple[WrenchKind, ...]
-    unavailable_labels: tuple[str, ...]
-    engine: str
-    source_labels: tuple[str, ...]
+    force_reference_n: float | None = None
+    force_reference_length_m: float | None = None
+    torque_reference_nm: float | None = None
+    torque_reference_radius_m: float | None = None
+    kinds_present: tuple[Any, ...] = ()
+    unavailable_labels: tuple[str, ...] = ()
+    engine: str = ""
+    source_labels: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Convert legend spec to JSON dictionary."""
@@ -320,7 +320,10 @@ class LegendSpec:
             "force_reference_length_m": self.force_reference_length_m,
             "torque_reference_nm": self.torque_reference_nm,
             "torque_reference_radius_m": self.torque_reference_radius_m,
-            "kinds_present": [k.value for k in self.kinds_present],
+            "kinds_present": [
+                k.value if hasattr(k, "value") else str(k)
+                for k in self.kinds_present
+            ],
             "unavailable_labels": list(self.unavailable_labels),
             "engine": self.engine,
             "source_labels": list(self.source_labels),
