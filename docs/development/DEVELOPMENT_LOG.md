@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11400 · OpenCap to OpenSim Integration
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
+- **PR:** not created
+- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
+- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF (branch from `a9515fb04e`) — 67 OpenCap/STO/marker-map/architecture tests pass (red first for each new test); `tests/unit/motion_pipeline/sources/` 246 passed; ruff check and format clean repo-wide; mypy clean on the 7 changed source files; `read_osim_coordinates` classifies the real `LaiUhlrich2022.osim` (35 coordinates, only `pelvis_tx/ty/tz` translational). 17 motion-pipeline/architecture failures in this sandbox reproduce identically on `main` (missing engines, `AGENT_HANDOFF.md` over its 150-line cap).
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
+- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_progress

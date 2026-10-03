@@ -1,3 +1,8 @@
+# Active: OpenCap to OpenSim Integration — #11400
+
+- Branch `claude/opencap-upstreamdrift-integration-e7ev4n` at SELF; PR not created at commit time. Slice covers #11401 (ADR-0053), #11402 (LaiUhlrich2022 marker vocabulary), #11403 (`load_opencap_session`: model, SI kinematics, subject).
+- Validation, constraints and the next step: `DL-#11400` in `docs/development/DEVELOPMENT_LOG.md`. Blocked children: #11404 waits on #11169, #11405 on #9627; #11408 needs a physical reference capture.
+
 # Active: Necromatcher Native Fit Delivery — #11240
 
 - Current implementation: `feat/necromatcher-native-fit-11235` (PR #11240) retargeted to `main` following merge of workspace #11239.

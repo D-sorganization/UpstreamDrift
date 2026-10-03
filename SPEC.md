@@ -7726,6 +7726,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
 | 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
 | 2026-10-03 | #11393 | [FTO-27] Calibrated MuJoCo mesh render composited onto source footage: camera mapping from K, R, t via `mujoco_camera_from_pinhole`, enlarged-frame crop for off-centre principal point, lens distortion footage undistortion policy, segmentation alpha compositing with feathering, and force glyph/color shading integration (#11312). |
