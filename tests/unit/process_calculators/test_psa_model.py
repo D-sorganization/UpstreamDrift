@@ -2,8 +2,35 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
+from pathlib import Path
+
 import numpy as np
 import pytest
+
+# The psa_package lives in the pinned Tools tree (vendor/ud-tools); the
+# UpstreamDrift shadow copy of sidekick/process_calculators no longer carries
+# it. ``sidekick.process_calculators`` may already resolve to the UD shadow
+# package, so extend its module search path with the vendored
+# ``process_calculators`` before importing (mirrors the seam __path__
+# extension behaviour in _seam_redirect).
+_VENDOR_TOOLS_SHARED = (
+    Path(__file__).resolve().parents[3] / "vendor/ud-tools/src/shared/python"
+)
+_VENDOR_CALC = "sidekick.process_calculators"
+_vendor_calc = importlib.import_module(_VENDOR_CALC)
+if not any(
+    str(p).endswith("vendor/ud-tools/src/shared/python/sidekick/process_calculators")
+    for p in _vendor_calc.__path__
+):
+    _vendor_calc.__path__.append(
+        str(_VENDOR_TOOLS_SHARED / "sidekick" / "process_calculators")
+    )
+if not (
+    _VENDOR_TOOLS_SHARED / "sidekick/process_calculators/psa_package/psa_model.py"
+).is_file():
+    pytest.skip("vendored psa_package not checked out", allow_module_level=True)
 from sidekick.process_calculators.psa_package.psa_model import (
     DEFAULT_COMPONENTS,
     PSAModel,

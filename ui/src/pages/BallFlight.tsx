@@ -16,6 +16,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   type ChangeEvent,
 } from "react";
 import {
@@ -37,7 +38,11 @@ import {
   invalidLaunchFields,
   importedCurveLabel,
   modelColor,
+  areInputsChanged,
+  areModelsChanged,
+  snapshotSummary,
   type LaunchFieldId,
+  type BallFlightInputSnapshot,
 } from "./ballFlightModel";
 
 /** Flight-model metadata from GET /tools/ball-flight/models. See issue #7456 */
@@ -71,6 +76,7 @@ export interface BallFlightModelResult {
   model_key: string;
   trajectory: TrajectorySample[];
   summary: BallFlightSummary;
+  coefficients?: Record<string, number>;
 }
 
 /** Full simulate response (top-level mirrors first model; results has all). */
@@ -191,6 +197,11 @@ export function BallFlightPage() {
   const [imports, setImports] = useState<ImportedBallFlightResult[]>([]);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [currentSnapshot, setCurrentSnapshot] =
+    useState<BallFlightInputSnapshot | null>(null);
+  const [isPreviousResult, setIsPreviousResult] = useState(false);
+  const [statusAnnouncement, setStatusAnnouncement] = useState("");
+  const requestIdRef = useRef(0);
 
   // Load the shared flight-model registry once.
   useEffect(() => {
@@ -215,6 +226,14 @@ export function BallFlightPage() {
 
   const invalidFields = useMemo(() => invalidLaunchFields(values), [values]);
 
+  const inputsChanged = useMemo(
+    () =>
+      currentSnapshot !== null &&
+      (areInputsChanged(values, currentSnapshot) ||
+        areModelsChanged(selected, currentSnapshot)),
+    [values, selected, currentSnapshot],
+  );
+
   const toggleModel = useCallback((key: string) => {
     setSelected((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
@@ -222,8 +241,14 @@ export function BallFlightPage() {
   }, []);
 
   const handleSimulate = useCallback(async () => {
+    const reqId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
+    setStatusAnnouncement("Running simulation…");
+    const snapshot: BallFlightInputSnapshot = {
+      values: { ...values },
+      models: [...selected],
+    };
     try {
       const body: Record<string, unknown> = { models: selected };
       for (const fieldId of LAUNCH_FIELD_IDS) {
@@ -233,13 +258,27 @@ export function BallFlightPage() {
         "/api/tools/ball-flight/simulate",
         { method: "POST", body: JSON.stringify(body) },
       );
-      setResults(data.results);
+      if (reqId === requestIdRef.current) {
+        setResults(data.results);
+        setCurrentSnapshot(snapshot);
+        setIsPreviousResult(false);
+        setStatusAnnouncement("Simulation complete");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Simulation failed");
+      if (reqId === requestIdRef.current) {
+        const msg = err instanceof Error ? err.message : "Simulation failed";
+        setError(msg);
+        setStatusAnnouncement(`Simulation failed: ${msg}`);
+        if (results !== null) {
+          setIsPreviousResult(true);
+        }
+      }
     } finally {
-      setLoading(false);
+      if (reqId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
-  }, [selected, values]);
+  }, [selected, values, results]);
 
   /**
    * Import one `ball_flight_trajectory/1` record for overlay (ADR-0047 H3).
@@ -320,8 +359,7 @@ export function BallFlightPage() {
     [overlayResults, colorByKey],
   );
 
-  const canSimulate =
-    !loading && selected.length > 0 && invalidFields.length === 0;
+  const canSimulate = selected.length > 0 && invalidFields.length === 0;
 
   const leftPanel = (
     <div className="flex flex-col flex-1 min-h-0">
@@ -344,7 +382,6 @@ export function BallFlightPage() {
             onChange={(raw) =>
               setValues((prev) => ({ ...prev, [fieldId]: raw }))
             }
-            disabled={loading}
           />
         ))}
         {invalidFields.length > 0 && (
@@ -479,6 +516,49 @@ export function BallFlightPage() {
 
   const mainContent = (
     <div className="flex-1 flex flex-col bg-gray-950 min-w-0 min-h-0 overflow-y-auto">
+      <div
+        role="status"
+        aria-live="polite"
+        className="sr-only"
+        data-testid="ball-flight-status-announcer"
+      >
+        {statusAnnouncement}
+      </div>
+      {currentSnapshot && (
+        <div
+          className="p-3 bg-gray-900 border-b border-gray-800 flex flex-wrap items-center justify-between gap-2 text-xs"
+          data-testid="result-provenance-banner"
+        >
+          <div className="flex items-center gap-2">
+            {isPreviousResult ? (
+              <span
+                className="px-2 py-0.5 rounded bg-amber-900/60 text-amber-300 font-semibold"
+                data-testid="previous-result-badge"
+              >
+                Previous Result
+              </span>
+            ) : (
+              <span
+                className="px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 font-semibold"
+                data-testid="committed-result-badge"
+              >
+                Committed Run
+              </span>
+            )}
+            <span className="text-gray-300" data-testid="snapshot-summary">
+              {snapshotSummary(currentSnapshot)}
+            </span>
+          </div>
+          {inputsChanged && (
+            <div
+              className="text-amber-400 bg-amber-950/60 border border-amber-800/50 px-2 py-0.5 rounded flex items-center gap-1"
+              data-testid="inputs-changed-indicator"
+            >
+              Inputs modified since this run was calculated
+            </div>
+          )}
+        </div>
+      )}
       <div className="h-64 sm:h-80 flex-shrink-0">
         <BallFlightScene3D trajectories={trajectories3d} />
       </div>
@@ -548,6 +628,17 @@ export function BallFlightPage() {
                       style={{ backgroundColor: colorByKey[r.model_key] }}
                     />
                     {r.model_name}
+                    {r.coefficients &&
+                      Object.keys(r.coefficients).length > 0 && (
+                        <div
+                          className="text-[10px] text-gray-400 mt-0.5 font-mono"
+                          data-testid={`coefficients-${r.model_key}`}
+                        >
+                          {Object.entries(r.coefficients)
+                            .map(([k, v]) => `${k}=${v}`)
+                            .join(" · ")}
+                        </div>
+                      )}
                   </td>
                   <td className="py-1.5 pr-2 font-mono">
                     {r.summary.carry_m.toFixed(1)}

@@ -151,6 +151,16 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - See `docs/user_guide/body_part_viz/` for end-user workflow guides
   and `docs/api/body_part_viz.md` for the full API surface.
 
+### Force and Torque Overlay Pipeline
+
+`src/shared/python/force_overlay/` — engine-agnostic physical vector and moment contracts (ADR-0052, #11285).
+
+- `WrenchKind`, `OverlayWrench`, `ForceTorqueFrame` — immutable data layer with optional halves (unavailable is `None`, never zero) and Z-up world frame.
+- `ForceTorqueSeries` — strictly increasing time series with gap-bounded linear interpolation and pickle-free NPZ serialization.
+- `ForceTorqueProvider`, `read_force_torque_frame` — runtime-checkable Protocol and validated accessor for engine providers.
+- Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
+- User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
+
 ### Anthropometrics
 
 `src/shared/python/anthropometrics/`
@@ -491,3 +501,52 @@ The root Bushing Joint also exposes six actuator-sensing channels under HipLogs.
 `pose_estimation.estimate_keypoint_offset` is reused by the Simscape `calibrate_pose_attachments.py` reproduction command for confidence-weighted fixed local marker attachments from verified native body frames. Preserve its proper-rotation checks, covariance/scatter reporting and valid-observation selection; fitted attachment candidates require fresh forward-state qualification.
 
 `tour_fit_state.verify_native_initial_state` requires declared q/qd and native kinematic marker projection to agree with a forward replay, while reporting nonzero capture residual independently. This allows calibrated geometry/attachments without falsely requiring perfect initial marker fit or relaxing physical-state verification.
+
+## Historical Research Fit Jobs
+
+The workspace facade exports `NativeRefitOptions` and `start_native_refit` for
+immutable source-bound historical refits. Reuse `motion_matching.jobs` for owned
+job execution, cancellation, manifests and recovery. `MatchingWorkOutcome`
+retains explicit rejection after computational success and serializes publication
+against cancellation. The native worker uses canonical image evidence and Hermite
+MAP fitting with immutable warm-start samples; source PTS and unqualified camera
+assumptions cannot certify physical derivatives or joint efforts. See the
+[Necromatcher Native Fitting Procedure](../development/necromatcher-native-fit.md).
+
+### Repository Python Worker Environments
+
+`core.repo_python_environment(repo_root, base=None)` is the public, pure
+repository-worker environment builder shared by Capture Rig and Necromatcher.
+Run module commands with cwd set to repo_root. It prioritizes repo_root/src for
+bare package imports, preserves SDK/runtime settings and does not mutate the
+parent mapping. Regression tests cover absent PYTHONPATH, duplicate source
+roots, idempotence and real native workers launched by a fresh Qt parent.
+
+### Historical Research Refit Controls
+
+workspace.NativeRefitSession owns bounded live handles over MatchingJobService
+and reopens canonical run manifests for history. submit/view/cancel/close are
+shared by the native modeless dialog and local-client HTTP routes. refit_plan
+returns verified coordinate/sample choices and recorded priors. It does not
+invent missing scales. project_store.validate_workspace_id exposes the existing
+identity contract for early admission before native work. UI request types are
+generated from the strict RefitRequest schema.
+
+### Historical Authored Generalized Efforts
+
+workspace.AuthoredEffortProfile and NecromatcherLibrary.load_effort_profile
+preserve exact model/fit bindings and ordered N/N\*m channels for declared m/rad
+coordinates. Import and export reuse canonical PiecewisePolynomialTorque with
+strict JSON validation and bounded finite evaluation. Native units and source
+physical timing remain separate qualification requirements. See the
+[Authored Effort Procedure](../development/necromatcher-effort-profiles.md).
+
+### Compiled Historical Model Resources
+
+workspace.load_native_fit_binding returns one NativeFitBinding over the canonical
+MatchingPlant factory. MuJoCo exposes compiled coordinate_units through the
+optional ScalarCoordinateUnits protocol, with slide m and hinge rad units in
+named order. Projection and native refitting reuse this resource; efforts checks
+exact model/fit hashes, ordered units and authored timing before native command
+mapping. Scientific acceptance remains independent. See the
+[Native Resource Procedure](../development/necromatcher-native-resources.md).

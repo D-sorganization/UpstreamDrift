@@ -54,6 +54,10 @@ Store emitted settings using `scale.to_dict()` and restore them with
 `ForceColorScale.from_dict()`. Invalid edits preserve the last valid scale, and
 the toggle can always turn off the display even when an unapplied edit is invalid.
 
+### Producing Loads From Reaction Wrenches
+
+For non-MuJoCo engines, `axial_loads_from_reactions(frame, axes, source)` in `src/shared/python/force_overlay/conversions.py` provides the single shared path to compute segment axial loads from `JOINT_REACTION` overlay wrenches. By mapping each segment to its proximal reaction joint via `SegmentAxis(segment, joint_label, proximal_m, distal_m)`, it invokes `axial_force_from_proximal_reaction` to yield an `AxialLoadFrame` (or `frame_with_axial_loads` to produce an annotated `ForceTorqueFrame`) with positive values for tension and negative for compression. Missing reaction wrenches or force-less reactions leave corresponding segment values as `None` (never zero-filled).
+
 ## Web Hosts
 
 `Scene3D` has a collapsible Segment Force Colors panel. Supply the optional
@@ -103,17 +107,23 @@ Pinocchio GUI's `model` or Drake GUI's `plant`. Submit an `AxialLoadFrame` with
 the actual native leaf paths and original RGBA values; they are never guessed.
 The session clears bindings on model replacement and restores base colors for
 stale frames. Rebind after changing materials. Both native GUIs have been tested
-for settings, redraw, binding, blue output and disabled restoration with Pinocchio
-4.1.0 and Drake 1.56.0. These hosts do not automatically infer axial forces.
-In particular, Drake's sampled reaction output requires explicit time alignment.
-OpenSim's current desktop GUI contains result plots, not an animated 3D scene;
-future scene consumers can use the same renderer and load contracts.
+4.1.0 and Drake 1.56.0. Pinocchio does not automatically infer axial forces.
+The Drake GUI now produces loads: it samples `DrakeForceTorqueSource` each tick,
+binds the session to the MeshCat illustration geometry
+(`visualizer/<frame>/<geometry>/<object>`, discovered through
+`SceneGraphInspector`) and submits the provider's `AxialLoadFrame` while the
+View menu toggle is on. Only bodies with a single child joint are shaded.
+OpenSim supports animated playback (recorded) via `record_force_series` / `record_force_and_segment_series` in `opensim_force_recording.py` and `render_force_playback` in `src.shared.python.force_overlay.playback`. Recorded series with proximal/distal segment endpoints are rendered as stick/capsule geometry shaded in tension (blue) and compression (red), alongside 3D force/torque glyphs and legend. Future interactive scene consumers can use the same renderer and load contracts.
 
-The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
-`set_segment_axial_loads(loads, segment_indices)` method accepts a qualified
-`SegmentLoadSeries` and an explicit load-ID to segment-index mapping. Sample times
-must exactly equal the model's point times. Replacing the model or segment set
-clears loads to prevent stale bindings. Motion capture alone supplies no axial loads.
+The C3D/Simscape viewer exposes the same controls for user-defined shapes. When
+a Simscape trial CSV is loaded, the viewer automatically loads its `ForceTorqueSeries`
+via `load_simscape_force_series` (#11303, #11305), draws 3D force arrows, torque arcs,
+and legend glyphs with GUI toggles for Forces, Torques, and Grip/Hand, and feeds
+`frame.axial_loads` into `set_segment_axial_loads` on frame change. The method accepts
+either an `AxialLoadFrame` per frame or a qualified `SegmentLoadSeries` with explicit
+load-ID to segment-index mapping. Sample times must match model point times. Replacing
+the model or segment set clears loads to prevent stale bindings. Motion capture alone
+supplies no axial loads.
 
 The shared policy, native renderer updates, controls and web scene wiring have
 local automated coverage. Native MuJoCo raster verification confirms blue tension,
@@ -121,3 +131,16 @@ red compression and pixel-exact off restoration. PyQtGraph OpenGL object tests
 do not qualify GPU raster output. Delivery is tracked in
 [epic #9833](https://github.com/D-sorganization/UpstreamDrift/issues/9833) and
 [PR #9840](https://github.com/D-sorganization/UpstreamDrift/pull/9840).
+
+## 3D Force and Torque Overlays in MeshCat
+
+In addition to surface segment shading, 3D force arrows and torque arcs are rendered
+into MeshCat using `src.shared.python.force_overlay.renderers.MeshcatGlyphRenderer`.
+
+- **Force Arrows:** rendered as real 3D geometry with a cylinder shaft and a cone head (`radius_top=0`).
+- **Torque Arcs:** rendered as a circular polyline chain of cylinder segments with an oriented cone head.
+- **Backend Portability:** talks to the `MeshcatSink` protocol, with out-of-the-box implementations for both `meshcat-python` (`MeshcatPythonSink`) and Drake MeshCat (`DrakeMeshcatSink`).
+- **Performance:** cylinder geometries are cached on the visualizer tree; unchanged shapes only update their 4x4 affine transform. Disappearing glyph labels are automatically cleaned up.
+- **Headless & Golden Capture:** offscreen raster capture for gallery fixtures and user guide documentation is completed in FTO-30.
+
+See also the comprehensive [Force and Torque Overlays User Guide](../force_overlay.md) for full details on vector palettes, torque arcs, and video compositing.

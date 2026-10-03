@@ -1,10 +1,12 @@
 """Request models for Golf Modeling Suite API."""
 
+from __future__ import annotations
+
 import math
 from collections.abc import Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # Valid engine types — keep in sync with EngineType enum
 VALID_ENGINE_TYPES = {
@@ -41,10 +43,11 @@ MAX_SIMULATION_DURATION = 300.0  # 5 minutes max
 MIN_TIMESTEP = 1e-6
 MAX_TIMESTEP = 0.1
 
-# Input-size bounds (issue #6948): cap unbounded collections to avoid
+# Input-size bounds (issues #6948, #11144 R03): cap unbounded collections to avoid
 # memory/CPU DoS on a rate-limited-but-not-size-limited endpoint.
 MAX_CONTROL_INPUTS = 100_000
 MAX_STATE_VECTOR_LEN = 10_000
+MAX_SIMULATION_STEPS = 100_000
 
 
 def _validate_export_format(value: str) -> str:
@@ -132,6 +135,21 @@ class SimulationRequest(BaseModel):
     analysis_config: dict[str, Any] | None = Field(
         None, description="Analysis configuration"
     )
+    run_id: str | None = Field(
+        None, description="Optional unique identifier for the simulation run"
+    )
+    allow_remainder_step: bool = Field(
+        True,
+        description="Whether to permit a variable remainder step for non-divisible durations",
+    )
+
+    @field_validator("duration")
+    @classmethod
+    def validate_duration_finite(cls, v: float) -> float:
+        """Precondition: duration must be finite."""
+        if not math.isfinite(v):
+            raise ValueError("duration must be a finite positive number")
+        return v
 
     @field_validator("engine_type")
     @classmethod
@@ -147,13 +165,28 @@ class SimulationRequest(BaseModel):
     @field_validator("timestep")
     @classmethod
     def validate_timestep_range(cls, v: float | None) -> float | None:
-        """Precondition: timestep must be physically reasonable."""
-        if v is not None and v < MIN_TIMESTEP:
-            raise ValueError(
-                f"Timestep {v} is below minimum {MIN_TIMESTEP}. "
-                "Sub-microsecond timesteps are not supported."
-            )
+        """Precondition: timestep must be physically reasonable and finite."""
+        if v is not None:
+            if not math.isfinite(v):
+                raise ValueError("timestep must be a finite positive number")
+            if v < MIN_TIMESTEP:
+                raise ValueError(
+                    f"Timestep {v} is below minimum {MIN_TIMESTEP}. "
+                    "Sub-microsecond timesteps are not supported."
+                )
         return v
+
+    @model_validator(mode="after")
+    def validate_step_budget(self) -> SimulationRequest:
+        """Enforce aggregate simulation step budget before engine creation (R03)."""
+        effective_dt = self.timestep if self.timestep is not None else 0.001
+        steps = int(self.duration / effective_dt)
+        if steps > MAX_SIMULATION_STEPS:
+            raise ValueError(
+                f"Calculated simulation steps ({steps}) exceeds maximum allowed "
+                f"({MAX_SIMULATION_STEPS}). Increase timestep or reduce duration."
+            )
+        return self
 
     @field_validator("initial_state")
     @classmethod
@@ -241,6 +274,10 @@ class CounterfactualRequest(BaseModel):
             "When true and no counterfactual data is stored yet, replay the "
             "recorded frames through the engine (expensive)"
         ),
+    )
+    run_id: str | None = Field(
+        None,
+        description="Optional simulation run ID to analyze. If omitted, uses active/latest run.",
     )
 
     @field_validator("kind")
@@ -519,7 +556,19 @@ class MeasurementRequest(BaseModel):
 #  AIP JSON-RPC (#1199, #1198, #1200, #763)
 # ──────────────────────────────────────────────────────────────
 
-VALID_FORCE_TYPES = {"applied", "gravity", "contact", "bias", "all"}
+VALID_FORCE_TYPES = {
+    "all",
+    "applied",
+    "bias",
+    "contact",
+    "external",
+    "gravity",
+    "grip",
+    "joint_actuator",
+    "joint_reaction",
+    "muscle",
+    "reaction",
+}
 
 VALID_ACTUATOR_CONTROL_TYPES = {"constant", "polynomial", "pd_gains", "trajectory"}
 

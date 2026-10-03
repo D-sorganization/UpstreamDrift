@@ -319,6 +319,11 @@ export interface ArmShotResponse {
   state: string;
 }
 
+export interface AssetRequest {
+  id: string;
+  source_path: string;
+}
+
 /**
  * One descriptive association or a typed unavailable state.
  */
@@ -421,11 +426,15 @@ export interface BallFlightSimulationResponse {
  * Scalar trajectory metrics.
  */
 export interface BallFlightSummary {
-  carry_m: number;
+  carry_m?: number | null;
   apex_m: number;
   flight_time_s: number;
-  landing_angle_deg: number;
-  lateral_deviation_m: number;
+  landing_angle_deg?: number | null;
+  lateral_deviation_m?: number | null;
+  termination: string;
+  terminal_event: boolean;
+  actual_horizon_s: number;
+  landed: boolean;
 }
 
 /**
@@ -793,6 +802,8 @@ export interface CounterfactualRequest {
   kind: string;
   /** When true and no counterfactual data is stored yet, replay the recorded frames through the engine (expensive) */
   run_post_hoc: boolean;
+  /** Optional simulation run ID to analyze. If omitted, uses active/latest run. */
+  run_id?: string | null;
 }
 
 export interface CourseStateColumnsV1 {
@@ -1398,12 +1409,18 @@ export interface ForceOverlayRequest {
 }
 
 /**
- * Response model for force/torque overlay data. See issue #1199
+ * Response model for force/torque overlay data. See issues #1199, #11307 (FTO-22).
  */
 export interface ForceOverlayResponse {
   /** Current simulation time */
   sim_time: number;
-  /** All active force vectors */
+  /** Serialized GlyphSet (glyph-set-v1) drawing payload */
+  glyphs?: Record<string, unknown> | null;
+  /** Serialized ForceTorqueFrame (force-torque-frame-v1) physics inspection payload */
+  frame?: Record<string, unknown> | null;
+  /** Explanation if force overlays are unavailable, or None if available */
+  unavailable_reason?: string | null;
+  /** Deprecated: use glyphs instead. Backward-compatible vector list. */
   vectors?: ForceVector3D[];
   /** Sum of all force magnitudes */
   total_force_magnitude: number;
@@ -1414,12 +1431,12 @@ export interface ForceOverlayResponse {
 }
 
 /**
- * A single force/torque vector for 3D overlay rendering. See issue #1199
+ * A single force/torque vector for 3D overlay rendering. .. deprecated:: Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs`` instead. This model will be removed in a future release.
  */
 export interface ForceVector3D {
   /** Body this force acts on */
   body_name: string;
-  /** Type: applied, gravity, contact, bias */
+  /** Type: applied, gravity, contact, bias, or WrenchKind */
   force_type: string;
   /** Application point [x, y, z] */
   origin: number[];
@@ -1541,6 +1558,11 @@ export interface GroupingDimensionV1 {
 
 export interface HTTPValidationError {
   detail?: ValidationError[];
+}
+
+export interface IdentityRequest {
+  id: string;
+  name: string;
 }
 
 /**
@@ -2017,6 +2039,13 @@ export interface ModelProvenanceV2 {
   relationship_to_vendor: "independent_physics" | "vendor_comparable_surrogate" | "vendor_reported_output" | "unknown";
 }
 
+export interface ModelRequest {
+  id: string;
+  source_path: string;
+  engine: "mujoco" | "drake" | "pinocchio" | "opensim" | "simscape";
+  dofs: string[];
+}
+
 /**
  * Toast notification preferences.
  */
@@ -2436,6 +2465,19 @@ export interface RecordingInfo {
   joint_names: string[];
 }
 
+export interface RefitRequest {
+  new_fit_id: string;
+  frame_indices: number[];
+  knot_count: number;
+  coordinate_scales: number[];
+  max_iterations: number;
+  prior_weight: number;
+  smoothness_weight: number;
+  closure_weight: number;
+  unknown_visibility_weight: number;
+  budget_wall_s: number;
+}
+
 /**
  * Request body for token refresh endpoint.
  */
@@ -2582,6 +2624,26 @@ export interface SimulationDefaultsSettings {
 }
 
 /**
+ * Structured error outcome for simulation failures (issue #11149, R09).
+ */
+export interface SimulationErrorInfo {
+  /** Stable machine-readable error code */
+  code: string;
+  /** Safe user-facing error message */
+  message: string;
+  /** Pipeline stage where failure occurred: preparation, execution, analysis, persistence */
+  stage: string;
+  /** Run or correlation identifier */
+  run_id?: string | null;
+  /** Whether the operation can be retried */
+  retriable: boolean;
+  /** Actionable retry guidance */
+  retry_guidance?: string | null;
+  /** Safe contextual metadata without leaking internals */
+  details?: Record<string, unknown> | null;
+}
+
+/**
  * Request model for physics simulation. Preconditions: - engine_type must be a known engine identifier - duration must be in (0, 300] seconds - timestep (if given) must be in [1e-6, 0.1] seconds
  */
 export interface SimulationRequest {
@@ -2599,6 +2661,10 @@ export interface SimulationRequest {
   control_inputs?: Record<string, unknown>[] | null;
   /** Analysis configuration */
   analysis_config?: Record<string, unknown> | null;
+  /** Optional unique identifier for the simulation run */
+  run_id?: string | null;
+  /** Whether to permit a variable remainder step for non-divisible durations */
+  allow_remainder_step: boolean;
 }
 
 /**
@@ -2609,7 +2675,7 @@ export interface SimulationResponse {
   success: boolean;
   /** Actual simulation duration */
   duration: number;
-  /** Number of simulation frames */
+  /** Number of recorded simulation frames, including initial sample at t=0 */
   frames: number;
   /** Simulation data (states, controls, etc.) */
   data: Record<string, unknown>;
@@ -2617,6 +2683,24 @@ export interface SimulationResponse {
   analysis_results?: Record<string, unknown> | null;
   /** Paths to exported files */
   export_paths?: string[] | null;
+  /** Calculation status: completed, failed, cancelled */
+  calculation_status: string;
+  /** Analysis status: not_requested, completed, partial, failed */
+  analysis_status: string;
+  /** Persistence status: not_requested, persisted, failed */
+  persistence_status: string;
+  /** Structured error details if failure occurred */
+  error?: SimulationErrorInfo | null;
+  /** Run or correlation identifier */
+  run_id?: string | null;
+  /** Requested simulation duration in seconds */
+  requested_duration?: number | null;
+  /** Actual integrated simulation horizon in seconds */
+  integrated_duration?: number | null;
+  /** Number of physics integration steps executed */
+  step_count?: number | null;
+  /** Number of retained state samples including t=0 */
+  retained_samples?: number | null;
 }
 
 /**
@@ -2857,6 +2941,12 @@ export interface SwingObjectiveCompareRequest {
   node_count: number;
   /** Optional subset of objective keys to compare (minimum 2) */
   objective_keys?: string[] | null;
+}
+
+export interface SwingRequest {
+  id: string;
+  name: string;
+  player_id: string;
 }
 
 /**

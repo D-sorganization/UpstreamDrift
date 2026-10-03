@@ -906,7 +906,7 @@
       "path": "",
       "web_route": "/api/force-overlays",
       "logo": "movement_optimizer_icon.svg",
-      "status": "experimental",
+      "status": "ready",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
       "order": 38,
       "web": {
@@ -1146,6 +1146,23 @@
       "web": {
         "mode": "native-window"
       }
+    },
+    {
+      "id": "necromatcher",
+      "name": "Necromatcher",
+      "description": "Historical player library, source frames, model candidates and authored torque profiles",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/necromatcher/__main__.py",
+      "logo": "matched_swing_browser.svg",
+      "status": "utility",
+      "capabilities": [
+        "historical_library",
+        "source_frame_review",
+        "swing_package_export"
+      ],
+      "order": 51,
+      "web": { "mode": "route", "route": "/tools/necromatcher" }
     },
     {
       "id": "matched_swing_browser",

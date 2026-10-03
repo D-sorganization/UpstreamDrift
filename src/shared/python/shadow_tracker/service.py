@@ -37,6 +37,7 @@ from .contracts import (
     ShadowTrackerService,
     Shot,
     SilhouetteRenderer,
+    Segmenter,
 )
 from .evaluation import create_evaluated_result_bundle
 from .fitting import (
@@ -90,6 +91,7 @@ class DefaultShadowTrackerService:
         self._renderer: SilhouetteRenderer | None = None
         self._camera: PinholeCameraModel | None = None
         self._checkpoints: list[OptimizationCheckpoint] = []
+        self._segmenter: Segmenter | None = None
 
     @property
     def is_cancelled(self) -> bool:
@@ -105,6 +107,17 @@ class DefaultShadowTrackerService:
     def checkpoints(self) -> tuple[OptimizationCheckpoint, ...]:
         """Return all recorded optimization checkpoints from the most recent run."""
         return tuple(self._checkpoints)
+
+    @property
+    def segmenter(self) -> Segmenter | None:
+        """Return registered segmenter provider or None if manual."""
+        return self._segmenter
+
+    def register_segmenter(self, segmenter: Segmenter) -> None:
+        """Register an optional automated segmentation provider."""
+        if not isinstance(segmenter, Segmenter):
+            raise TypeError(f"Expected Segmenter, got {type(segmenter).__name__}")
+        self._segmenter = segmenter
 
     def register_backend(
         self,
@@ -325,7 +338,12 @@ class DefaultShadowTrackerService:
             self._mask_provider.get_revision_history(frame_id, shot_id=obs.shot_id)
         )
         content_hash = hashlib.sha256(body + club + valid).hexdigest()[:8]
-        new_rev_id = f"{parent_revision_id or 'rev'}-m{rev_seq}-{content_hash}"
+        prefix = (
+            f"{parent_revision_id}-{obs.shot_id}"
+            if parent_revision_id is not None and obs.shot_id not in parent_revision_id
+            else (parent_revision_id or f"rev-{obs.shot_id}")
+        )
+        new_rev_id = f"{prefix}-m{rev_seq}-{content_hash}"
 
         new_mask = MaskFrame(
             schema_version=MASK_SCHEMA_VERSION,
@@ -408,9 +426,9 @@ class DefaultShadowTrackerService:
             )
 
         current_mask_revs = tuple(
-            self._mask_provider.get_mask(fid).revision_id
-            for fid in sorted({obs.frame_id for obs in self._observations_order})
-            if self._mask_provider.has_mask(fid)
+            self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id).revision_id
+            for obs in self._observations_order
+            if self._mask_provider.has_mask(obs.frame_id, shot_id=obs.shot_id)
         )
         if checkpoint.mask_revision_ids != current_mask_revs:
             raise StaleCheckpointError(
@@ -581,24 +599,9 @@ class DefaultShadowTrackerService:
 
         return bundle
 
-    def fit(
-        self,
-        request: FitRequest,
-        *,
-        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
-    ) -> ResultBundle:
-        """Run forward model fitting with fail-closed capability gates and cancellation wiring."""
-        (
-            forward_model,
-            renderer,
-            camera,
-            caps,
-            is_synthetic,
-        ) = self._validate_fit_capabilities(request)
-
-        if self._is_cancelled:
-            return self._build_cancelled_bundle(request)
-
+    def _collect_windowed_observations(
+        self, request: FitRequest
+    ) -> list[FrameObservation]:
         window_start_pts = int(request.time_window_start_pts)
         window_end_pts = int(request.time_window_end_pts)
         if window_end_pts < window_start_pts:
@@ -635,18 +638,44 @@ class DefaultShadowTrackerService:
             )
 
         missing_masks = [
-            obs.frame_id
+            f"{obs.shot_id}/{obs.frame_id}"
             for obs in windowed_obs
-            if not self._mask_provider.has_mask(obs.frame_id)
+            if not self._mask_provider.has_mask(obs.frame_id, shot_id=obs.shot_id)
         ]
         if missing_masks:
             raise ValueError(
                 "Cannot fit: incomplete observation/mask coverage — the following "
                 f"frame(s) lack a manual mask: {', '.join(missing_masks)}."
             )
+        return list(windowed_obs)
 
-        obs_list = list(windowed_obs)
-        mask_list = [self._mask_provider.get_mask(obs.frame_id) for obs in obs_list]
+    def fit(
+        self,
+        request: FitRequest,
+        *,
+        initial_controls: np.ndarray | Sequence[Sequence[float]] | None = None,
+    ) -> ResultBundle:
+        """Run forward model fitting with fail-closed capability gates and cancellation wiring."""
+        (
+            forward_model,
+            renderer,
+            camera,
+            caps,
+            is_synthetic,
+        ) = self._validate_fit_capabilities(request)
+
+        if self._is_cancelled:
+            return self._build_cancelled_bundle(request)
+
+        obs_list = self._collect_windowed_observations(request)
+        mask_list = [
+            self._mask_provider.get_mask(obs.frame_id, shot_id=obs.shot_id)
+            for obs in obs_list
+        ]
+        has_synthetic_masks = any(
+            getattr(mask, "is_synthetic", False) for mask in mask_list
+        )
+        is_synthetic = is_synthetic or has_synthetic_masks
         time_points = [
             float(time_s)
             for obs in obs_list

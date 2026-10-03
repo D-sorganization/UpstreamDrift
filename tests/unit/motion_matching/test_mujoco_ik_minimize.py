@@ -103,7 +103,9 @@ def test_mujoco_minimize_marker_rms_matches_lm(
     fit_min = minimize.solve_pose(targets, valid, q_start, ground=ground, iterations=30)
     min_elapsed = time.perf_counter() - t1
 
-    assert abs(fit_min.marker_rms_m - fit_lm.marker_rms_m) <= MARKER_RMS_EQUIVALENCE_M
+    # Minimize backend must reach marker RMS at least within equivalence
+    # tolerance of hand-rolled LM (equal or better accuracy).
+    assert fit_min.marker_rms_m <= fit_lm.marker_rms_m + MARKER_RMS_EQUIVALENCE_M
     _ = min_elapsed / max(
         lm_elapsed, 1e-9
     )  # recorded for MS-16 timing; not an acceptance gate

@@ -25,9 +25,168 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/capture-registry-11161`
 - **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`, `src/shared/python/motion_matching/pipeline/`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-30 — #11166 owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
-- **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
+- **Last verified:** 2026-10-03 — Part 1 merged (#11172); Part 2 (#11166, PR #11174): owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
+- **Summary:** Epic #11161: neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, engine-independent swing events and metrics, and Capture-O pipeline execution through MuJoCo. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
+- **Next step:** Land PR #11174 (Part 2, #11166). Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
+
+### DL-#11400 · OpenCap to OpenSim Integration
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
+- **PR:** #11410
+- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
+- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF (branch from `b8e9f884`) — CI `security-scans` (Semgrep `use-defused-xml`) flagged a type-only `xml.etree` import in `osim_coordinates.py`; replaced with a structural `Element` Protocol so the module never imports `xml`. 249 tests pass in `tests/unit/motion_pipeline/sources/` + marker maps + `test_opencap_boundary.py`; ruff, mypy and bandit clean; real `LaiUhlrich2022.osim` still classifies 35 coordinates with only `pelvis_tx/ty/tz` translational.
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
+- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+
+### DL-#11285 · Force and Torque Overlays for Every Engine
+
+- **State:** in_review
+- **Owner:** antigravity
+- **PR:** #11397
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
+- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
+- **Next step:** Review and merge PR #11397; owner closes epic #11285.
+
+### DL-#11268 · Capture-O Video Companion
+
+- **State:** proposed
+- **Owner:** claude
+- **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** not created
+- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
+- **Paths:** `docs/development/capture-o-video/**`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 at SELF — album link supplied and published by owner decision; COV-1 updated; no media acquired (cloud proxy 403) and no implementation performed.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** A fleet agent downloads the public album and executes COV-1 (#11269).
+
+### DL-#11235 · Necromatcher Native Fit
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11235; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 108 focused cases passed; subsequent native test refactor passed 34 cases; independent v7 audit checked 419 Tiger and 1499 Hogan poses. These receipts precede the b50e8fd91e branch merge.
+- **Summary:** Source-bound native fits retain canonical Hermite coefficients and optional analytic interior constraints. Both v7 candidates remain rejected: joint-limit violations and grip/contact errors require hard feasibility constraints. [Turnover](necromatcher-turnover.md).
+- **Next step:** Implement canonical whole-Hermite coordinate bounds with red-first overshoot tests.
+
+### DL-#11246 · Necromatcher Source Video Overlays
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11246; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — all 210 Tiger and 750 Hogan v7 output frames decoded with matching hashes; prior live web v6 jobs and downloaded packages verified.
+- **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
+- **Next step:** Revalidate export-job recall and download guards against the merged branch.
+
+### DL-#11247 · Necromatcher Reproducible Methods Report
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11247; parent #11232
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240)
+- **Branch:** `feat/necromatcher-native-fit-11235`
+- **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
+- **Started:** 2026-10-01
+- **Last verified:** 2026-10-02 at b92732e72579bfb72ba77d16f671f5f657a1b37c — 19-page PDF compiled with existing MiKTeX installer disabled; all pages visually reviewed and 60 Desktop artifact hashes verified.
+- **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
+- **Next step:** Reconcile the built-in compilation criterion with the verified fallback receipt.
+
+### DL-#11234 — Necromatcher Historical Player Workspace
+
+- **State:** shipped
+- **Owner:** codex
+- **Issue:** #11234; parent #11232
+- **PR:** [#11239](https://github.com/D-sorganization/UpstreamDrift/pull/11239)
+- **Branch:** `feat/necromatcher-workspace-11234`
+- **Paths:** `src/tools/necromatcher`, `ui/src/pages/Necromatcher.tsx`, `src/shared/python/workspace/necromatcher_review.py`, launcher registries
+- **Last verified:** 2026-10-02 — 31 library/API/native/launcher tests, 10 inventory tests, 20 UI tests and 71 launcher/atlas tests passed; resolved launcher logo family gate for matched_swing_browser.svg under category:tool, classified necromatcher in capability migration baseline and reconciled companion catalog counts and screenshot records; mypy, ruff and all green gates pass.
+- **Summary:** Shared persistent library, historical tiles, source-frame review, native/web version imports and portable exports. Reconciled launcher manifest and capability migration inventories. Further form tests, final parity acceptance and qualified fitting remain active. [Turnover](necromatcher-turnover.md).
+
+### DL-#11233 — Necromatcher Persistent Library
+
+- **State:** in_progress
+- **Owner:** codex
+- **PR:** [#11237](https://github.com/D-sorganization/UpstreamDrift/pull/11237)
+- **Issue:** #11233; parent #11232; player epics #11226 and #11229
+- **Branch:** `feat/necromatcher-library-11233`
+- **Paths:** `src/shared/python/workspace/necromatcher.py`, `src/shared/python/workspace/necromatcher_capture.py`, `src/api/routes/necromatcher.py`
+- **Last verified:** 2026-10-01 — 43 workspace/API tests passed; scoped library mypy passed; four real captures imported and recalled. Final rerun passed.
+- **Summary:** Reuse project/session spine, artifact hashes and canonical torque evaluation for immutable historical-player library; captures remain image observations and model bytes remain unqualified candidates. [Turnover](necromatcher-turnover.md).
+
+### DL-#11230 — Historical Player Capture
+
+- **State:** in_progress
+- **Owner:** codex
+- **Issue:** #11230; epics #11226 and #11229
+- **Branch:** `feat/historical-player-capture-11226`
+- **PR:** [#11231](https://github.com/D-sorganization/UpstreamDrift/pull/11231)
+- **Paths:** `src/shared/python/shadow_tracker/historical_capture.py`, `scripts/historical_capture.py`, `docs/development/historical-capture-procedure.md`
+- **Last verified:** 2026-10-01 at ab2c869813a2b2be2f14b512ee34647694614377 — 364 Shadow Tracker tests passed; final Hogan 750/739 detected and Tiger 2000/1994 detected; observations only.
+- **Summary:** Streaming source-bound detector observations; final reproducibility runs completed; dense review pending. Camera/time calibration, dense 3D fitting, native parity, dynamics, held-out evaluation and website integration remain open.
+
+### DL-#11095 — Qualify OpenSim Native Dual-Club Dynamics and Replay
+
+- **Issue:** #11095
+- **Branch:** `feat/mmr-10o-opensim-dual-club-11095`
+- **Paths:** `src/engines/physics_engines/opensim/python/native_qualification.py`, `tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/opensim/`
+- **Last verified:** 2026-09-29 at d5dd606ffa6dafc11408614676a2576764a5e092 — 17 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native OpenSim qualification NOT achieved: opensim bindings unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10O] dual-club OpenSim qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite values all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records. Real qualification still requires the opensim bindings on a pinned host via the native lane.
+
+### DL-#11096 — Qualify MyoSuite Native Dual-Club Dynamics and Replay
+
+- **Issue:** #11096
+- **Branch:** `feat/mmr-10m-myosuite-dual-club-11096`
+- **Paths:** `src/engines/physics_engines/myosuite/python/native_qualification.py`, `tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`, `docs/development/matched_swing_program/evidence/myosuite/`
+- **Last verified:** 2026-09-29 at 613b0e28ed88b5af4719ecccfe876d5d9db90419 — 19 unit tests passed; red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native MyoSuite qualification NOT achieved: myosuite/MuJoCo unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10M] dual-club MyoSuite qualification (review audit follow-up): receipts carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, non-finite values, and unnormalized root quaternions all reject); SPEC-claimed tolerances that were never enforced and invented marker metrics were removed as fabricated, along with placeholder sha256 club receipts replaced by honest fail-closed UNAVAILABLE evidence records (README model hashes marked as regeneration targets, not evidence). Real qualification still requires the myosuite/MuJoCo stack on a pinned host via the native lane.
+
+### DL-#11094 — Qualify Drake Native Dual-Club Dynamics and Replay
+
+- **Owner:** UDFixTrio10x
+- **Issue:** #11094
+- **Branch:** `feat/mmr-10d-drake-dual-club-11094`
+- **Paths:** `src/engines/physics_engines/drake/python/native_qualification.py`, `tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`, `tests/scripts/test_run_native_engine_lane.py`, `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json`, `docs/development/matched_swing_program/evidence/drake/`
+- **Last verified:** 2026-09-29 at 3b23bd41502a7b7d028f291564997b6460f14cbc — 36 focused tests passed (test_drake_dual_club_qualification.py 16, test_run_native_engine_lane.py + test_native_lane_freshness.py 20); red evidence recorded for the 7 new fail-closed tests against the pre-fix placeholder path; ruff check and format clean on changed files. Native Drake qualification NOT achieved: pydrake unavailable on all reachable hosts.
+- **Summary:** Fail-closed conversion of the [MMR-10D] dual-club Drake qualification (review audit follow-up): receipts now carry `missing_evidence` + `remedy`; gates consult every recorded check (unavailable runtime ⇒ UNAVAILABLE even with a replay payload; unknown native test counts, absent rollout/marker data, derivative mismatch, and non-finite energy all reject); fabricated marker metrics (scaled early/terminal/clubhead RMS, hardcoded pelvis_yaw_error_pct) and placeholder sha256 receipts (`c0ffee…`/`deadbeef…`) removed and replaced with honest fail-closed UNAVAILABLE evidence records. Adds drake to the nightly lane runner. Real qualification still requires pydrake on a pinned host via the native lane.
+- **Next step:** Merge drivers follow; native qualification remains blocked on engine availability (recorded in receipts, not silently).
+
+### DL-#11184 — Restore the High-Severity UI Npm Audit Gate
+
+- **State:** in_review
+- **Owner:** codex
+- **Issue:** #11184
+- **Branch:** `fix/main-npm-audit-11184`
+- **Paths:** `ui/package-lock.json`, `ui/src/test/dependencySecurityContract.test.ts`, `SPEC.md`
+- **Started:** 2026-09-30
+- **Last verified:** 2026-09-30 at `d3b3a27bea` — baseline audit reproduced two HIGH and two MODERATE advisories; after the lock-only patch `npm ci` passed, `npm audit --audit-level=high` passed with two MODERATE findings remaining, contract 2 passed, lint/type-check passed, UI tests 936 passed, and production build passed. Normal commit and push hooks passed.
+- **Summary:** Raised only the compatible transitive resolutions for `brace-expansion` (5.0.9 → 5.0.12) and `undici` (8.10.0 → 8.11.2); added a lockfile security contract. Manifest dependencies, overrides, audit threshold, and the two moderate findings are unchanged.
+- **Next step:** Root reviews draft PR #11187 and decides whether it is ready for merge.
+
+### DL-#11175 — Fix the PreconditionError Exception-Identity Split at the Shared Contracts Seam
+
+- **State:** in_review
+- **Owner:** fleet-orchestrator (agent: claude)
+- **Issue:** N/A (references the main CI red surfaced after the #11171 restore, `27632bd195`)
+- **Branch:** `bot/contracts-exception-identity`; PR #11175
+- **Paths:** `src/shared/python/_contracts_exceptions.py`, `tests/unit/motion_matching/test_stability_matrix.py`
+- **Started:** 2026-09-30
+- **Last verified:** 2026-09-30 — `pytest tests/unit/motion_matching/test_stability_matrix.py` 27 passed (red on main HEAD `27632bd195` with the new identity assertion before the fix); shard contract suites 95 passed; ruff check + format clean on changed files.
+- **Summary:** `_contracts_exceptions.py` redefined the DbC exceptions in parallel with the public `contracts` module, so `@precondition` violations raised via `contracts` could not be caught as the shard-imported `PreconditionError` — `TestStabilityMatrix::test_get_canonical_test_invalid` stayed red on main. The shard now re-exports the same class objects; both import paths remain usable and referentially identical, asserted in the test.
+- **Next step:** Merge PR #11175 (squash) and confirm main unit lane is green.
 
 ### DL-#11124 — Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parentheticals
 
@@ -3615,3 +3774,23 @@ Never place credentials, tokens, or customer data in a development log.
 No material development-log change — Bolt `np.linalg.norm` → `einsum` consolidation (#11073, #11074, #11076) is a behaviour-preserving micro-optimisation with no feature entry.
 No material development-log change — Bolt `np.linalg.norm` → `sqrt(einsum)`/`math.sqrt(np.vdot)` consolidation (#11112, #11128, #11129) is a behaviour-preserving micro-optimisation with no feature entry.
 No material development-log change — PyJWT floor/lock bump to 2.14.0 for OSV GHSA-w6j9-cwv2-h6wq (#11153) is a dependency-only change with no feature entry.
+No material development-log change — urllib3 (2.8.0, CVE-2026-97687) and PyJWT (2.15.0, CVE-2026-101918) floor/lock bumps (#11191) are dependency-only changes with no feature entry.
+No material development-log change — Bolt np.linalg.norm → sqrt(einsum) in rigidity.py (#11189) is a behaviour-preserving micro-optimisation with no feature entry.
+
+## Capture Registry Parent Integration - #11162 / #11172
+
+Accepted-main synchronization preserves capture-registry, export and swing-comparison source changes. Record conflicts retain distinct entries from both branches. All 133 ordered matched-swing ledger rows and non-timestamp metadata are identical; retain accepted-main timestamp. Regenerate the monolith register from merged source. Scientific matching/dynamics acceptance remains separate.
+
+Record validation: all five monolith-register tests pass; no duplicate primary headings or conflict markers; all 133 ledger rows and non-timestamp metadata preserved exactly; registry/export/comparison source unchanged. Broader capture tests are pending pinned Tools initialization; first collection attempt stopped on the missing submodule. Protected parent CI and full scoped rerun remain required before merge.
+
+## Capture Comparison DRY Gate Remediation - #11162 / #11172
+
+CI identified duplicated club endpoint selection in angular-speed and wrist metrics. A shared private helper preserves explicit endpoint precedence, measured-marker aliases, array identity and missing-endpoint/shaft-axis behavior. AGY Gemini Flash supplied the bounded extraction; root reviewed the exact diff. Existing focused regression suite passes 190 tests with 15 unavailable-private-workbook skips, zero errors/failures, natural exit 0. Ruff format/check and full DRY duplication gate pass without changing baselines. Regenerate the monolith register for the revised file length. Current-head protected CI remains required.
+
+## Capture Leaderboard Suite Classification - #11162 / #11172
+
+Protected CI verified the DRY extraction, then identified 14 net-new unmarked tests in TestPerCaptureLeaderboard. Mark this pure-Python class as unit; all 14 execute and pass under unit selection with no skips/errors. Full suite-marker ratchet passes without baseline changes. Broader focused capture/comparison qualification remains 190 passed and 15 unavailable-private-workbook skips. Protected current-head CI remains required before merge.
+
+## Capture Comparison Inventory Integration - #11162 / #11172
+
+CI at bd1ee9a8e passes repository structure and 20,546 unit cases; its only unit failure identifies five new swing_comparison paths missing from the shared-tools divergence inventory. Regenerate JSON and Markdown with the authoritative generator against the pinned Tools tree. All five paths classify as UD-only; existing overlap totals remain unchanged. All ten inventory tests pass with no errors/skips, including the committed-tree freshness test, and generator --check succeeds. Protected current-head CI remains required before merging.

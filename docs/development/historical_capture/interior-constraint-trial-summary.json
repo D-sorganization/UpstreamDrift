@@ -1,0 +1,184 @@
+{
+  "schema": "necromatcher/interior-constraint-trial/1",
+  "qualification": "research_only",
+  "runs": [
+    {
+      "player": "tiger",
+      "source_fit_id": "tiger-authored-ground-fit-v6",
+      "new_fit_id": "tiger-interior-constraint-fit-v7",
+      "view": {
+        "run_id": "ba798cbef97845539f856eae372b1ae5",
+        "source_fit_id": "tiger-authored-ground-fit-v6",
+        "new_fit_id": "tiger-interior-constraint-fit-v7",
+        "status": "succeeded",
+        "acceptance": "rejected",
+        "blockers": [
+          "monocular_research_only",
+          "physical_clock_unknown",
+          "camera_unqualified",
+          "independent_dynamics_not_replayed",
+          "anatomical_ranges_not_enforced",
+          "optimizer_not_converged"
+        ],
+        "message": "Research computation completed; dynamics not qualified",
+        "fraction": 1.0,
+        "control_available": true
+      },
+      "metrics": {
+        "rms_pixels": 26.671572474784103,
+        "initial_rms_pixels": 19.033458477045116,
+        "dense_rms_pixels": 30.408969934470633,
+        "held_out_rms_pixels": 30.81520465463037,
+        "max_grip_separation_m": 0.03811605368991679,
+        "converged": false,
+        "constraint_assessment": {
+          "continuous_certified": false,
+          "maximum_dimensionless_residual": 155.78773882541245,
+          "row_labels": [
+            "grip_position:x",
+            "grip_position:y",
+            "grip_position:z",
+            "grip_rotation:x",
+            "grip_rotation:y",
+            "grip_rotation:z",
+            "ground:heel_r",
+            "ground:forefoot_r",
+            "ground:toe_r",
+            "ground:heel_l",
+            "ground:forefoot_l",
+            "ground:toe_l"
+          ]
+        }
+      },
+      "stored_fit_hash": "sha256:d77f55bf901279145f87fdaeedc4aba503c4324a65945d2ff67b440517309877",
+      "source_fit_hash": "sha256:a9c2fc96921cf9c8ee3eeb10395faf541de4c2d7c81d64cc07fa35132a19ac52",
+      "options": {
+        "budget_wall_s": 180,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": [],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 20,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        },
+        "coordinate_scales": [
+          0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      },
+      "execution_source_sha256": "sha256:797441e6f29016b7f2b4638b385f563eafa0647b19a3bc3bd17f756db597dcb9",
+      "execution_runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5"
+    },
+    {
+      "player": "hogan",
+      "source_fit_id": "hogan-authored-ground-fit-v6",
+      "new_fit_id": "hogan-interior-constraint-fit-v7",
+      "view": {
+        "run_id": "3b704ac13c8a4da8b9fe625f54157c64",
+        "source_fit_id": "hogan-authored-ground-fit-v6",
+        "new_fit_id": "hogan-interior-constraint-fit-v7",
+        "status": "succeeded",
+        "acceptance": "rejected",
+        "blockers": [
+          "monocular_research_only",
+          "physical_clock_unknown",
+          "camera_unqualified",
+          "independent_dynamics_not_replayed",
+          "anatomical_ranges_not_enforced",
+          "optimizer_not_converged"
+        ],
+        "message": "Research computation completed; dynamics not qualified",
+        "fraction": 1.0,
+        "control_available": true
+      },
+      "metrics": {
+        "rms_pixels": 8.171889653515018,
+        "initial_rms_pixels": 10.579293361677543,
+        "dense_rms_pixels": 10.801429771006733,
+        "held_out_rms_pixels": 10.872171874097862,
+        "max_grip_separation_m": 0.006292341273858785,
+        "converged": false,
+        "constraint_assessment": {
+          "continuous_certified": false,
+          "maximum_dimensionless_residual": 31.594861368174087,
+          "row_labels": [
+            "grip_position:x",
+            "grip_position:y",
+            "grip_position:z",
+            "grip_rotation:x",
+            "grip_rotation:y",
+            "grip_rotation:z",
+            "ground:heel_r",
+            "ground:forefoot_r",
+            "ground:toe_r",
+            "ground:heel_l",
+            "ground:forefoot_l",
+            "ground:toe_l"
+          ]
+        }
+      },
+      "stored_fit_hash": "sha256:3fd610a20ae7982f66af59cf0e1680e04ff1202c150ef2ebf6fd5cec4b6d65a4",
+      "source_fit_hash": "sha256:caa2c308a3ebfb5da58c9f916c6a0ae9c0a790378199d002ecf39dcc7595e91a",
+      "options": {
+        "budget_wall_s": 180,
+        "config": {
+          "closure_weight": 100.0,
+          "constraint_options": {
+            "ground": {
+              "height_m": 0,
+              "normal": [0.0, 0.0, 1.0]
+            },
+            "ground_scale_m": 0.01,
+            "ground_weight": 1000,
+            "pinned_spheres": [],
+            "position_scale_m": 0.01,
+            "position_weight": 1000,
+            "rotation_scale_rad": 0.1,
+            "rotation_weight": 1000
+          },
+          "interior_fractions": [0.25, 0.5, 0.75],
+          "max_iterations": 20,
+          "prior_weight": 0.001,
+          "smoothness_weight": 0.0001
+        },
+        "coordinate_scales": [
+          0.1, 0.1, 0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490,
+          525, 560, 595, 630, 665, 700, 735, 749
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      },
+      "execution_source_sha256": "sha256:797441e6f29016b7f2b4638b385f563eafa0647b19a3bc3bd17f756db597dcb9",
+      "execution_runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5"
+    }
+  ],
+  "source_commit": "b92732e72579bfb72ba77d16f671f5f657a1b37c",
+  "evidence_boundary": "Trial summary only; exact options/tested times/residual arrays and producer stamps remain in the local original receipt. Independent dense/midpoint/bounds assessment pending."
+}

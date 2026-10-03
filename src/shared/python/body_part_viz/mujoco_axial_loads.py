@@ -35,18 +35,20 @@ class MujocoAxialLoadSource:
     def _discover_axes(self) -> dict[int, tuple[str, np.ndarray, np.ndarray]]:
         model, native = self.model, self._native
         axes = {}
-        rods = (native.mjtGeom.mjGEOM_CAPSULE, native.mjtGeom.mjGEOM_CYLINDER)
+        # int() both sides: numpy ints vs pybind enums compare differently by version.
+        rods = {int(native.mjtGeom.mjGEOM_CAPSULE), int(native.mjtGeom.mjGEOM_CYLINDER)}
+        free = int(native.mjtJoint.mjJNT_FREE)
         for body in range(1, model.nbody):
             name = native.mj_id2name(model, native.mjtObj.mjOBJ_BODY, body)
             if not name or model.body_geomnum[body] != 1:
                 continue
             geom = model.body_geomadr[body]
-            if model.geom_type[geom] not in rods:
+            if int(model.geom_type[geom]) not in rods:
                 continue
             start = model.body_jntadr[body]
             count = model.body_jntnum[body]
             joints = list(range(start, start + count))
-            if any(model.jnt_type[j] == native.mjtJoint.mjJNT_FREE for j in joints):
+            if any(int(model.jnt_type[j]) == free for j in joints):
                 continue
             anchor = model.jnt_pos[joints[0]] if joints else np.zeros(3)
             if any(
@@ -85,8 +87,10 @@ class MujocoAxialLoadSource:
         )
         if any(get_callback() is not None for get_callback in callbacks):
             return None
+        from src.shared.python.engine_core.mujoco_compat import copy_mjdata_state
+
         scratch = self._scratch
-        native.mj_copyData(scratch, model, data)
+        copy_mjdata_state(scratch, data)
         native.mj_forward(model, scratch)
         native.mj_rnePostConstraint(model, scratch)
         values = {}

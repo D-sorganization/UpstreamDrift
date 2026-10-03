@@ -9,10 +9,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
-from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.plant import integrate_euler_step
 
 if TYPE_CHECKING:
+    from src.shared.python.motion_matching.full_body_forward_dynamics import (
+        FullBodySimulator,
+    )
     from src.engines.physics_engines.mujoco.python.full_body_ik import (
         FullBodyMarkerKinematics,
     )
@@ -50,15 +52,28 @@ class MujocoMatchingPlant:
         return tuple(self.adapter.coordinate_order)
 
     @property
+    def coordinate_units(self) -> tuple[str, ...]:
+        """SI units verified from named compiled scalar joints, in declared order."""
+        return self.adapter.coordinate_units
+
+    @property
     def ground_plane(self) -> GroundPlane:
         return self.adapter.ground_plane
+
+    def create_forward_simulator(self) -> FullBodySimulator:
+        """Reuse native mass, gravity, contact and closure dynamics."""
+        from src.shared.python.motion_matching.full_body_forward_dynamics import (
+            FullBodySimulator,
+        )
+
+        return FullBodySimulator(self.adapter)
 
     def create_ik(
         self,
         attachments: Mapping[str, tuple[str, Sequence[float]]],
         *,
         ik_backend: str = "lm",
-    ) -> BaseFullBodyIK:
+    ) -> FullBodyMarkerKinematics:
         from src.engines.physics_engines.mujoco.python.full_body_ik import (
             FullBodyMarkerKinematics,
         )
@@ -89,9 +104,14 @@ class MujocoMatchingPlant:
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
     ) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        q_array = np.asarray(q, dtype=float)
+        if (
+            q_array.shape != (len(self.coordinate_order),)
+            or not np.isfinite(q_array).all()
+        ):
+            raise ValueError("Coordinates must be a finite vector of model size")
         ik = self.create_ik(mapping)
-        raw_poses = ik.pose_fn(q)
-        return {b: (pose[0], pose[1]) for b, pose in raw_poses.items()}
+        return ik.body_poses(q_array, tuple(body for body, _ in mapping.values()))
 
     def marker_positions(
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
@@ -127,8 +147,13 @@ class MujocoMatchingPlant:
         return self.adapter.evaluate_contact_samples(coordinates, rates)
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
-        ik = self.create_ik({})
-        return np.asarray(ik.closure_residuals(q), dtype=float)
+        """Evaluate grip separation without requiring observation markers."""
+        q_array = np.asarray(q, dtype=float)
+        order = self.coordinate_order
+        if q_array.shape != (len(order),) or not np.isfinite(q_array).all():
+            raise ValueError("Coordinates must be a finite vector of model size")
+        coordinates = dict(zip(order, q_array, strict=True))
+        return self.adapter.kinematic_closure_residuals(coordinates)
 
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float

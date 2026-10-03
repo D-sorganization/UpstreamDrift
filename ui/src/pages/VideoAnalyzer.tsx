@@ -1,3 +1,4 @@
+import { KeypointOverlay } from '@/components/visualization/KeypointOverlay';
 /**
  * VideoAnalyzer - Video-based swing analysis tool page.
  *
@@ -7,9 +8,14 @@
  * See issue #1206
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { apiFetchForm } from '@/api/fetch';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
+import {
+  VideoForceOverlay,
+  type ProjectedGlyphSetPayload,
+} from '@/components/video/VideoForceOverlay';
+
 
 /** Video analysis result from the API. See issue #1206 */
 export interface VideoAnalysisResult {
@@ -52,31 +58,10 @@ function PoseOverlay({
 }) {
   if (!frame || !frame.keypoints) return null;
 
-  const entries = Object.entries(frame.keypoints);
-  if (entries.length === 0) return null;
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      data-testid="pose-overlay"
-    >
-      {entries.map(([name, coords]) => {
-        if (!coords || coords.length < 2) return null;
-        return (
-          <circle
-            key={name}
-            cx={coords[0]}
-            cy={coords[1]}
-            r={4}
-            fill="rgba(0, 255, 100, 0.8)"
-            stroke="white"
-            strokeWidth={1}
-          />
-        );
-      })}
-    </svg>
-  );
+  const points = Object.fromEntries(Object.entries(frame.keypoints)
+    .filter(([, coords]) => coords && coords.length >= 2)
+    .map(([name, coords]) => [name, {x: coords[0], y: coords[1], visibility: null}]));
+  return <KeypointOverlay points={points} coordinates="image_pixels" width={width} height={height} />;
 }
 
 /**
@@ -118,6 +103,27 @@ function JointAngleChart({
   );
 }
 
+function findFrameIndex(
+  currentTime: number,
+  poseData?: PoseFrame[],
+  defaultFps: number = 30,
+): number {
+
+  if (!poseData || poseData.length === 0) {
+    return Math.max(0, Math.round(currentTime * defaultFps));
+  }
+  let closestIdx = 0;
+  let minDiff = Math.abs(currentTime - poseData[0].timestamp);
+  for (let i = 1; i < poseData.length; i++) {
+    const diff = Math.abs(currentTime - poseData[i].timestamp);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIdx = i;
+    }
+  }
+  return closestIdx;
+}
+
 /**
  * VideoAnalyzerPage - Full video analysis tool page.
  *
@@ -133,8 +139,94 @@ export function VideoAnalyzerPage() {
   const [estimatorType, setEstimatorType] = useState('mediapipe');
   const [minConfidence, setMinConfidence] = useState(0.5);
   const [showOverlay, setShowOverlay] = useState(true);
+  const [showForceOverlay, setShowForceOverlay] = useState(true);
+  const [forceScale, setForceScale] = useState(1.0);
+  const [forceGlyphs, setForceGlyphs] = useState<ProjectedGlyphSetPayload | null>(null);
+  const [videoDimensions, setVideoDimensions] = useState<{ width: number; height: number }>({
+    width: 640,
+    height: 480,
+  });
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle video metadata loading (resolves actual video resolution)
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current) {
+      const w = videoRef.current.videoWidth || 640;
+      const h = videoRef.current.videoHeight || 480;
+      setVideoDimensions({ width: w, height: h });
+    }
+  }, []);
+
+  // Frame synchronization: requestVideoFrameCallback with timeupdate fallback
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let callbackId: number | null = null;
+    let isMounted = true;
+
+    type FrameCallback = (now: DOMHighResTimeStamp, metadata?: { mediaTime?: number }) => void;
+    const videoWithRfc = video as unknown as {
+      requestVideoFrameCallback?: (cb: FrameCallback) => number;
+      cancelVideoFrameCallback?: (id: number) => void;
+    };
+
+    const onFrame: FrameCallback = (_now, metadata) => {
+      if (!isMounted) return;
+      const t = metadata?.mediaTime ?? video.currentTime;
+      const idx = findFrameIndex(t, analysis?.pose_data);
+      setCurrentFrameIdx(idx);
+      if (typeof videoWithRfc.requestVideoFrameCallback === 'function') {
+        callbackId = videoWithRfc.requestVideoFrameCallback(onFrame);
+      }
+    };
+
+    if (typeof videoWithRfc.requestVideoFrameCallback === 'function') {
+      callbackId = videoWithRfc.requestVideoFrameCallback(onFrame);
+    }
+
+    return () => {
+      isMounted = false;
+      if (callbackId !== null && typeof videoWithRfc.cancelVideoFrameCallback === 'function') {
+        videoWithRfc.cancelVideoFrameCallback(callbackId);
+      }
+    };
+  }, [analysis, videoUrl]);
+
+  const handleTimeUpdate = useCallback(() => {
+    const video = videoRef.current;
+    if (video && typeof (video as unknown as { requestVideoFrameCallback?: unknown }).requestVideoFrameCallback !== 'function') {
+      const t = video.currentTime;
+      const idx = findFrameIndex(t, analysis?.pose_data);
+      setCurrentFrameIdx(idx);
+    }
+  }, [analysis]);
+
+
+  // Fetch projected force glyphs when enabled
+  useEffect(() => {
+    if (!showForceOverlay || !analysis?.filename) {
+      setForceGlyphs(null);
+      return;
+    }
+    const sourceId = encodeURIComponent(analysis.filename);
+    const url = `/api/overlays/video/${sourceId}/frames/${currentFrameIdx}/glyphs?scale=${forceScale}`;
+    let isMounted = true;
+    fetch(url)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: ProjectedGlyphSetPayload | null) => {
+        if (isMounted && data) {
+          setForceGlyphs(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setForceGlyphs(null);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [showForceOverlay, analysis?.filename, currentFrameIdx, forceScale]);
 
   // Handle file selection
   const handleFileSelect = useCallback(
@@ -192,12 +284,27 @@ export function VideoAnalyzerPage() {
       : null;
 
   const handlePrevFrame = useCallback(() => {
-    setCurrentFrameIdx((prev) => Math.max(0, prev - 1));
-  }, []);
+    setCurrentFrameIdx((prev) => {
+      const nextIdx = Math.max(0, prev - 1);
+      if (videoRef.current) {
+        const targetTime = analysis?.pose_data[nextIdx]?.timestamp ?? nextIdx / 30;
+        videoRef.current.currentTime = targetTime;
+      }
+      return nextIdx;
+    });
+  }, [analysis]);
 
   const handleNextFrame = useCallback(() => {
-    setCurrentFrameIdx((prev) => Math.min(totalFrames - 1, prev + 1));
-  }, [totalFrames]);
+    setCurrentFrameIdx((prev) => {
+      const nextIdx = Math.min(totalFrames - 1, prev + 1);
+      if (videoRef.current) {
+        const targetTime = analysis?.pose_data[nextIdx]?.timestamp ?? nextIdx / 30;
+        videoRef.current.currentTime = targetTime;
+      }
+      return nextIdx;
+    });
+  }, [totalFrames, analysis]);
+
 
   const leftPanel = (
     <div className="flex flex-col flex-1 min-h-0">
@@ -281,7 +388,38 @@ export function VideoAnalyzerPage() {
             />
             <span className="text-xs text-gray-300">Show Pose Overlay</span>
           </label>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showForceOverlay}
+              onChange={(e) => setShowForceOverlay(e.target.checked)}
+              className="rounded border-gray-600 bg-gray-700"
+              data-testid="force-overlay-toggle"
+            />
+            <span className="text-xs text-gray-300">Show Force / Torque Overlay</span>
+          </label>
+
+          {showForceOverlay && (
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">
+                Force Scale: {forceScale.toFixed(1)}x
+              </label>
+              <input
+                type="range"
+                min={0.1}
+                max={5.0}
+                step={0.1}
+                value={forceScale}
+                onChange={(e) => setForceScale(parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                aria-label="Force scale"
+                data-testid="force-scale-slider"
+              />
+            </div>
+          )}
         </div>
+
 
         {/* Analyze Button */}
         <div className="p-4 border-b border-gray-700">
@@ -348,19 +486,29 @@ export function VideoAnalyzerPage() {
   const mainContent = (
     <div className="flex-1 flex items-center justify-center bg-gray-950 relative min-w-0 min-h-0 p-2 sm:p-4">
         {videoUrl ? (
-          <div className="relative w-full max-w-3xl aspect-video">
+          <div className="relative w-full max-w-3xl aspect-video" data-testid="video-overlay-container">
             <video
               ref={videoRef}
               src={videoUrl}
               controls
+              onLoadedMetadata={handleLoadedMetadata}
+              onTimeUpdate={handleTimeUpdate}
               className="w-full h-full rounded-lg"
               data-testid="video-player"
             />
             {showOverlay && currentFrame && (
               <PoseOverlay
                 frame={currentFrame}
-                width={640}
-                height={480}
+                width={videoDimensions.width}
+                height={videoDimensions.height}
+              />
+            )}
+            {showForceOverlay && (
+              <VideoForceOverlay
+                glyphs={forceGlyphs}
+                width={videoDimensions.width}
+                height={videoDimensions.height}
+                scale={forceScale}
               />
             )}
           </div>

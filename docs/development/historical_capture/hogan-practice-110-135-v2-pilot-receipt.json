@@ -1,0 +1,31 @@
+{
+  "schema_version": "historical-capture/1.0.0",
+  "subject_id": "ben-hogan",
+  "source": {
+    "schema_version": "shadow-tracker/source/1.0.0",
+    "asset_id": "ben-hogan-source",
+    "source_uri": "urn:asset:ben-hogan-source",
+    "content_sha256": "8424c562eb3f58c11a3791cc7a6bb83631fe23c172ca8b228a31a63accbc49eb",
+    "width_px": 320,
+    "height_px": 240,
+    "rights_status": "unknown",
+    "rights_note": ""
+  },
+  "window_presentation_s": [110.0, 135.0],
+  "frame_count": 750,
+  "detected_count": 740,
+  "observations_sha256": "c74093705bb218f0ea6bde8e01839d43a11b78ef2bdb1a76d67893c7149d4e45",
+  "detector": {
+    "name": "MediaPipeEstimator",
+    "version": "0.10.32",
+    "model_sha256": "4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad",
+    "smoothing": false,
+    "min_detection_confidence": 0.5,
+    "min_tracking_confidence": 0.5
+  },
+  "qualification": "image_observations_only",
+  "recording_year": null,
+  "physical_time_verified": false,
+  "shot_continuity_reviewed": false,
+  "publication_permitted": false
+}

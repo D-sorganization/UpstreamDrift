@@ -129,11 +129,15 @@ class ImportedBallFlightSummary:
     regardless of which optional channels it declares.
     """
 
-    carry_m: float
+    carry_m: float | None
     apex_m: float
     flight_time_s: float
-    landing_angle_deg: float
-    lateral_deviation_m: float
+    landing_angle_deg: float | None
+    lateral_deviation_m: float | None
+    termination: str = "landed"
+    terminal_event: bool = True
+    actual_horizon_s: float = 0.0
+    landed: bool = True
 
 
 def _flight_frame_samples(
@@ -310,10 +314,31 @@ def summarize_imported_trajectory(
     samples = trajectory.samples
     first, last = samples[0], samples[-1]
     apex_m = max(sample.position_m[2] for sample in samples)
+    flight_time_s = last.time_s - first.time_s
+    actual_horizon_s = flight_time_s
+
     previous = samples[-2]
     dx = last.position_m[0] - previous.position_m[0]
     dy = last.position_m[1] - previous.position_m[1]
     dz = last.position_m[2] - previous.position_m[2]
+
+    # Landing requires the final sample to be at ground level (z <= 0.05m)
+    # and descending (dz <= 0.0) or minimal samples.
+    landed = last.position_m[2] <= 0.05 and (dz <= 0.0 or len(samples) <= 2)
+
+    if not landed:
+        return ImportedBallFlightSummary(
+            carry_m=None,
+            apex_m=apex_m,
+            flight_time_s=flight_time_s,
+            landing_angle_deg=None,
+            lateral_deviation_m=None,
+            termination="time_limit",
+            terminal_event=False,
+            actual_horizon_s=actual_horizon_s,
+            landed=False,
+        )
+
     horizontal = math.hypot(dx, dy)
     landing_angle_deg = (
         math.degrees(math.atan2(-dz, horizontal))
@@ -323,7 +348,11 @@ def summarize_imported_trajectory(
     return ImportedBallFlightSummary(
         carry_m=last.position_m[0],
         apex_m=apex_m,
-        flight_time_s=last.time_s - first.time_s,
+        flight_time_s=flight_time_s,
         landing_angle_deg=landing_angle_deg,
         lateral_deviation_m=last.position_m[1],
+        termination="landed",
+        terminal_event=True,
+        actual_horizon_s=actual_horizon_s,
+        landed=True,
     )

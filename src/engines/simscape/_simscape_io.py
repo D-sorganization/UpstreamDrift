@@ -18,6 +18,7 @@ importable without MATLAB installed.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -130,6 +131,11 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
     ``time``, ``q``, ``qd``, ``qdd``, ``tau``, ``omega``,
     ``r_butt``, ``r_clubhead``, ``q_club``, ``v_clubhead``.
 
+    An optional ``forces`` key (#11304, FTO-19) maps dataset column names to
+    per-sample vectors and becomes ``SimscapeOutput.force_columns``;
+    produced by ``extract_sim_out.m`` on MATLAB forward calls. Old producers
+    that omit it keep working.
+
     The MATLAB side guarantees that ``time`` starts at 0 and
     ``q_club`` rows are unit-norm; we re-validate via
     :class:`SimscapeOutput`'s ``__post_init__``.
@@ -164,7 +170,21 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
             f"logsout missing required field(s): {sorted(missing)}"
         )
 
+    raw_forces = logsout.get("forces")
+    if raw_forces is not None and not isinstance(raw_forces, Mapping):
+        raise SimscapeSimulationError(
+            "logsout 'forces' must be a mapping of channel name to samples; "
+            f"got {type(raw_forces).__name__}"
+        )
     try:
+        force_columns = (
+            None
+            if raw_forces is None
+            else {
+                str(k): _as_ndarray_1d(v, name=f"forces.{k}")
+                for k, v in raw_forces.items()
+            }
+        )
         return SimscapeOutput(
             time=_as_ndarray_1d(logsout["time"], name="time"),
             q=_as_ndarray_2d(logsout["q"], name="q"),
@@ -176,6 +196,7 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
             r_clubhead=_as_ndarray_2d(logsout["r_clubhead"], name="r_clubhead"),
             q_club=_as_ndarray_2d(logsout["q_club"], name="q_club"),
             v_clubhead=_as_ndarray_2d(logsout["v_clubhead"], name="v_clubhead"),
+            force_columns=force_columns,
         )
     except (TypeError, ValueError) as exc:
         raise SimscapeSimulationError(

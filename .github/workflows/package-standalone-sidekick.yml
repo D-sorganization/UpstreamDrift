@@ -210,4 +210,6 @@ jobs:
       - name: Disable sparse-checkout
         if: always()
         shell: bash
-        run: git sparse-checkout disable 2>/dev/null || true
+        run: |
+          git sparse-checkout disable 2>/dev/null || true
+          git checkout -- . 2>/dev/null || true

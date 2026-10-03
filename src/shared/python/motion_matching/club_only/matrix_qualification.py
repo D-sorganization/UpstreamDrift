@@ -322,10 +322,16 @@ class MatrixCellResult:
 def assert_matrix_not_all_complete_with_unresolved(report: Any) -> None:
     """Validate that matrix cannot claim all-complete while unresolved cells remain."""
     claims_all_complete = getattr(report, "claims_all_complete", False)
-    unresolved = getattr(report, "unresolved_cells", None)
-    if unresolved is None:
-        cells = getattr(report, "cells", ())
-        unresolved = tuple(c for c in cells if getattr(c, "status", None) != "scored")
+    required = getattr(report, "unresolved_required_cells", None)
+    if required is not None:
+        unresolved = required
+    else:
+        unresolved = getattr(report, "unresolved_cells", None)
+        if unresolved is None:
+            cells = getattr(report, "cells", ())
+            unresolved = tuple(
+                c for c in cells if getattr(c, "status", None) != "scored"
+            )
     if claims_all_complete and len(unresolved) > 0:
         raise ValueError(
             "matrix cannot show all-complete while required cells are unresolved"
@@ -346,6 +352,7 @@ class MatrixQualificationReport:
     native_g1_pass: bool = False
     comparison_rule: str = "common_observables_not_weighted_objectives"
     claims_all_complete: bool = False
+    required_model_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.schema != MATRIX_SCHEMA:
@@ -363,8 +370,18 @@ class MatrixQualificationReport:
         return tuple(c for c in self.cells if c.status != "scored")
 
     @property
+    def unresolved_required_cells(self) -> tuple[MatrixCellResult, ...]:
+        if self.required_model_ids:
+            return tuple(
+                c
+                for c in self.unresolved_cells
+                if c.model_id in self.required_model_ids
+            )
+        return self.unresolved_cells
+
+    @property
     def is_complete(self) -> bool:
-        return len(self.unresolved_cells) == 0
+        return len(self.unresolved_required_cells) == 0
 
 
 def validate_package_integrity(
@@ -827,6 +844,7 @@ def build_matrix_qualification_report(
     trial_ids: Sequence[str] | None = None,
     outcomes: Mapping[tuple[str, str], Mapping[str, Any]] | None = None,
     claims_all_complete: bool = False,
+    required_model_ids: Sequence[str] | None = None,
 ) -> MatrixQualificationReport:
     """Build the trial × roster matrix with frozen CO-02 gates."""
     roster, models, trials = resolve_roster_matrix_scope(
@@ -880,6 +898,9 @@ def build_matrix_qualification_report(
         claims_native_qualification=False,
         native_g1_pass=False,
         claims_all_complete=claims_all_complete,
+        required_model_ids=(
+            tuple(required_model_ids) if required_model_ids is not None else ()
+        ),
     )
 
 

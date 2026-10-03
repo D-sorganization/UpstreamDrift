@@ -176,6 +176,45 @@ if analyzer:
         print(f"{muscle}: {accel} rad/s²")
 ```
 
+### 4. Force Overlay Channels
+
+`OpenSimForceTorqueSource` (`opensim_force_torque.py`, FTO-15, #11300) turns an
+OpenSim state into a world-frame `ForceTorqueFrame` (ADR-0052). The engine
+exposes it as `get_force_torque_frame()`, `get_segment_axial_loads()` and
+`compute_contact_forces()`.
+
+```python
+frame = engine.get_force_torque_frame()  # realizes the state to Acceleration
+for wrench in frame.by_kind(WrenchKind.CONTACT):
+    print(wrench.label, wrench.point_m, wrench.force_n)
+```
+
+| Kind             | Source                                                               | Notes                                                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JOINT_REACTION` | `Joint.calcReactionOnChildExpressedInGround`                         | Per joint, label `reaction:<joint>`, body is the child body, point is the child-frame origin                                                                                             |
+| `JOINT_ACTUATOR` | `CoordinateActuator.getActuation`                                    | Label `actuator:<joint>.<coordinate>`; torque is `actuation * axis`. `PinJoint` uses the child-frame z axis; a `CustomJoint` needs a single rotation mapped 1:1 (LinearFunction slope 1) |
+| `CONTACT`        | `HuntCrossleyForce` / `SmoothSphereHalfSpaceForce` records           | One sphere and one half-space per force. Point is the sphere's lowest point; the record torque (about the body origin) is moved to that point                                            |
+| `MUSCLE`         | `Muscle.getTendonForce` along `GeometryPath.getPointForceDirections` | Labels `muscle:<name>:origin` / `muscle:<name>:insertion`; force is tendon force times the end direction, at the attachment; torque unavailable                                          |
+| axial loads      | `axial_force_from_proximal_reaction`                                 | Tension positive; a branching body or zero-length segment is `None`                                                                                                                      |
+
+Conventions and limits:
+
+- The state is realized to `Acceleration` inside `sample` (idempotent), because
+  joint reactions need accelerations.
+- OpenSim ground is Y-up. One rotation, `R_ZUP_FROM_OPENSIM_GROUND`
+  (+90 deg about x, det +1), maps points and vectors to the Z-up world.
+- Unsupported items are omitted, never reported as zero: translational
+  coordinates, multi-rotation custom joints, forces with several spheres.
+- `grip:*` wrenches are absent. `OpenSimGripModel.compute_grip_constraint_forces`
+  is still a placeholder (#11161, #10286), so grip is unavailable.
+- Muscle lines of action (FTO-16, #11301): `OpenSimForceTorqueSource.muscle_wrenches`
+  runs from `sample` unless `include_muscles=False`. Only the **end attachments**
+  are drawn; wrapping surfaces and via points bend the end directions but the
+  path polyline is a follow-up. Disabled muscles and muscles whose path has no point geometry (`FunctionBasedPath`, `Scholz2015GeometryPath`) are omitted; a negative or
+  non-finite tendon force raises `AssertionError`. `get_muscle_forces` (scalar
+  fiber force) is unchanged. Rajagopal muscles stay gated by
+  `POST_MVP_MUSCLES.md` and are not enabled here.
+
 ---
 
 ## OpenSim API Concepts

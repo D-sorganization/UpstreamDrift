@@ -112,6 +112,8 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._runs_combo = QtWidgets.QComboBox()
         self._runs_combo.setMinimumWidth(160)
         self._runs_combo.currentIndexChanged.connect(self._on_run_selected)
+        self._runs_combo.setAccessibleName("Runs and ledger selector")
+        self._runs_combo.setToolTip("Select run or candidate from ledger")
         header_layout.addWidget(self._runs_combo)
 
         self._title_label = QtWidgets.QLabel("Tour Matching Viewer — No replay loaded")
@@ -125,14 +127,19 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         header_layout.addWidget(self._rms_label)
 
         self._export_gif_btn = QtWidgets.QPushButton("Export GIF…")
+        self._export_gif_btn.setAccessibleName("Export animation GIF button")
+        self._export_gif_btn.setToolTip("Export current replay as animated GIF")
         self._export_gif_btn.clicked.connect(self._on_export_gif_clicked)
         header_layout.addWidget(self._export_gif_btn)
 
         self._open_btn = QtWidgets.QPushButton("Open Replay…")
+        self._open_btn.setAccessibleName("Open replay file button")
+        self._open_btn.setToolTip("Open replay archive (.npz or .mot)")
         self._open_btn.clicked.connect(self._on_open_clicked)
         header_layout.addWidget(self._open_btn)
 
         self._open_native_btn = QtWidgets.QPushButton("Open Native…")
+        self._open_native_btn.setAccessibleName("Open in native viewer button")
         self._open_native_btn.setToolTip(
             "Launch current candidate in native 3D engine (MeshCat, Gepetto, MuJoCo, etc.)"
         )
@@ -151,6 +158,10 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
         sub_layout.addWidget(QtWidgets.QLabel("View:"))
         self._camera_combo = QtWidgets.QComboBox()
+        self._camera_combo.setAccessibleName("Camera viewpoint selector")
+        self._camera_combo.setToolTip(
+            "Select camera orientation (perspective, front, side, top, isometric)"
+        )
         self._camera_combo.addItems(
             ["perspective", "front", "side", "top", "isometric"]
         )
@@ -159,6 +170,10 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
 
         sub_layout.addWidget(QtWidgets.QLabel("Preset:"))
         self._appearance_combo = QtWidgets.QComboBox()
+        self._appearance_combo.setAccessibleName("Visual appearance preset selector")
+        self._appearance_combo.setToolTip(
+            "Select appearance preset (default, high_contrast, residual_vectors, dots_and_mesh)"
+        )
         self._appearance_combo.addItems(
             ["default", "high_contrast", "residual_vectors", "dots_and_mesh"]
         )
@@ -171,6 +186,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         )
         sub_layout.addWidget(self._worst_residual_label)
         self._select_worst_btn = QtWidgets.QPushButton("Worst Residual")
+        self._select_worst_btn.setAccessibleName("Jump to worst residual frame button")
         self._select_worst_btn.setToolTip(
             "Jump to the frame and phase with the maximum marker residual"
         )
@@ -182,6 +198,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         self._rejection_banner = QtWidgets.QLabel(
             "⚠ REJECTED CANDIDATE FIT — Visual inspection only; fit criteria not met"
         )
+        self._rejection_banner.setAccessibleName("Candidate rejection verdict banner")
         self._rejection_banner.setStyleSheet(
             "background-color: darkred; color: white; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
         )
@@ -274,9 +291,74 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
         return self._capabilities_label.text()
 
     @property
+    def is_accepted(self) -> bool:
+        """Whether the currently loaded candidate meets acceptance criteria."""
+        return self._is_accepted
+
+    @property
+    def verdict(self) -> str:
+        """Numerical verdict ('PASSED' or 'REJECTED: <reason>')."""
+        if self._is_accepted:
+            return "PASSED"
+        if self._rejection_reason:
+            return f"REJECTED: {self._rejection_reason}"
+        return "REJECTED"
+
+    @property
+    def failure_badge_visible(self) -> bool:
+        """Whether the visual rejection/failure badge is currently visible."""
+        return not self._rejection_banner.isHidden()
+
+    @property
+    def failure_badge_text(self) -> str:
+        """Text displayed on the failure/rejection badge."""
+        return self._rejection_banner.text()
+
+    @property
+    def residual_summary(self) -> ResidualSummary | None:
+        """Comprehensive residual summary across all frames and markers."""
+        if self._residual_summary is None and self._replay is not None:
+            self._residual_summary = compute_residual_summary(self._replay)
+        return self._residual_summary
+
+    @property
     def force_widget(self) -> Any:
         """Force/torque and counterfactual inspection widget."""
         return self._force_widget
+
+    def _jump_to_frame_index(self, frame_idx: int) -> None:
+        """Internal helper to navigate transport and canvas to a target frame index."""
+        if self._replay is None or not (0 <= frame_idx < self._replay.frame_count):
+            return
+        t = float(self._replay.time_s[frame_idx])
+        if hasattr(self, "_transport") and self._transport is not None:
+            self._transport.blockSignals(True)
+            self._transport.jump_to_time(t)
+            self._transport.blockSignals(False)
+        self._current_frame = frame_idx
+        self.render_frame(frame_idx)
+
+    def select_worst_marker(self, marker: str | int) -> int:
+        """Navigate to the discrete frame with highest residual error for the marker."""
+        if self._residual_summary is None and self._replay is not None:
+            self._residual_summary = compute_residual_summary(self._replay)
+        if self._residual_summary is None or self._replay is None:
+            return self._current_frame
+
+        frame_idx = self._residual_summary.worst_frame_for_marker(marker)
+        self._jump_to_frame_index(frame_idx)
+        return frame_idx
+
+    def select_worst_phase(self, phase: str) -> int:
+        """Navigate to the discrete frame with highest RMS error within the specified phase."""
+        if self._residual_summary is None and self._replay is not None:
+            self._residual_summary = compute_residual_summary(self._replay)
+        if self._residual_summary is None or self._replay is None:
+            return self._current_frame
+
+        frame_idx = self._residual_summary.worst_frame_for_phase(phase)
+        self._jump_to_frame_index(frame_idx)
+        return frame_idx
 
     def select_worst_residual(self) -> None:
         """Jump to the exact frame and phase with the worst residual error."""
@@ -286,14 +368,7 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
             return
 
         worst_idx = self._residual_summary.worst_frame_idx
-        if 0 <= worst_idx < self._replay.frame_count:
-            t = float(self._replay.time_s[worst_idx])
-            if hasattr(self, "_transport") and self._transport is not None:
-                self._transport.blockSignals(True)
-                self._transport.jump_to_time(t)
-                self._transport.blockSignals(False)
-            self._current_frame = worst_idx
-            self.render_frame(worst_idx)
+        self._jump_to_frame_index(worst_idx)
 
     def set_camera_view(self, view: str) -> None:
         """Set camera view preset ('perspective', 'front', 'side', 'top', 'isometric')."""
@@ -897,9 +972,9 @@ class TourMatchingViewerWidget(QtWidgets.QWidget):
                 markers_m=active.model_markers_m,
                 target_m=active.target_markers_m,
                 valid=active.valid_mask,
-                coordinate_order=list(active.coordinate_names)
-                if active.coordinate_names
-                else None,
+                coordinate_order=(
+                    list(active.coordinate_names) if active.coordinate_names else None
+                ),
             )
             cfg = ViewerLaunchConfig(speed=1.0, view_mode="fitted")
             res = open_in_native_viewer(sim_data, engine, config=cfg)

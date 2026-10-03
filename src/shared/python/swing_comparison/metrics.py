@@ -524,14 +524,22 @@ def _lead_arm_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.nd
     return np.degrees(np.linalg.norm(du_arm, axis=-1))
 
 
-def _club_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.ndarray:
-    """Return the 3D angular speed (deg/s) of the grip-to-clubhead shaft vector."""
+def _club_endpoints(
+    motion: SwingMotion,
+) -> tuple[np.ndarray | None, np.ndarray | None]:
+    """Return (club_head, grip) point arrays, falling back to Capture-A marker names."""
     head_pt = motion.club_head
     if head_pt is None and "Marker_2:2:1" in motion.markers:
         head_pt = motion.markers["Marker_2:2:1"]
     grip_pt = motion.grip
     if grip_pt is None and "Marker_3:3:1" in motion.markers:
         grip_pt = motion.markers["Marker_3:3:1"]
+    return head_pt, grip_pt
+
+
+def _club_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.ndarray:
+    """Return the 3D angular speed (deg/s) of the grip-to-clubhead shaft vector."""
+    head_pt, grip_pt = _club_endpoints(motion)
 
     if head_pt is None or grip_pt is None:
         return np.zeros(n, dtype=np.float64)
@@ -738,12 +746,7 @@ def compute_wrist_metrics(
         v_forearm = np.tile([0.0, 1.0, 0.0], (n, 1))
 
     # Shaft: grip -> head
-    head_pt = motion.club_head
-    if head_pt is None and "Marker_2:2:1" in motion.markers:
-        head_pt = motion.markers["Marker_2:2:1"]
-    grip_pt = motion.grip
-    if grip_pt is None and "Marker_3:3:1" in motion.markers:
-        grip_pt = motion.markers["Marker_3:3:1"]
+    head_pt, grip_pt = _club_endpoints(motion)
 
     if head_pt is not None and grip_pt is not None:
         v_shaft = _fill_nans_3d(head_pt) - _fill_nans_3d(grip_pt)

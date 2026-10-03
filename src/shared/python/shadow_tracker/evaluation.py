@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import logging
+import math
 from typing import Any, Final, Literal
 
 import numpy as np
@@ -70,6 +71,7 @@ class GateProfile:
     max_grip_rotation_error_rad: float = 0.05
     require_exact_timing: bool = True
     require_club_evidence: bool = True
+    allow_synthetic: bool = False
 
     def __post_init__(self) -> None:
         check_str(self.profile_version, "profile_version")
@@ -83,6 +85,10 @@ class GateProfile:
     @classmethod
     def default_development_profile(cls) -> GateProfile:
         return cls()
+
+    @classmethod
+    def default_release_profile(cls) -> GateProfile:
+        return cls(allow_synthetic=False)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -155,6 +161,34 @@ class CoverageMetric:
     nominal_rate: float
     average_interval_width: float
     is_well_calibrated: bool
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class PhaseEvaluationResult:
+    """Stratified tracking error metrics for an individual swing phase."""
+
+    phase_name: str
+    joint_rmse_rad: float
+    marker_rmse_m: float
+    club_error_m: float
+    is_club_observed: bool = True
+    sample_count: int = 0
+
+    def __post_init__(self) -> None:
+        check_str(self.phase_name, "phase_name")
+        check_nonneg_float(self.joint_rmse_rad, "joint_rmse_rad")
+        check_nonneg_float(self.marker_rmse_m, "marker_rmse_m")
+        check_nonneg_float(self.club_error_m, "club_error_m")
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class PhaseStratifiedReport:
+    """Full trajectory validation report stratified by swing phase."""
+
+    phase_results: tuple[PhaseEvaluationResult, ...]
+    overall_joint_rmse_rad: float
+    overall_marker_rmse_m: float
+    overall_club_error_m: float
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -309,6 +343,18 @@ def classify_evidence_quality(
     """Classify evidence quality under deterministic Gate G0-G5 rules."""
     active_profile = profile or GateProfile.default_development_profile()
 
+    # Rule 0: Synthetic observation, mask, or candidate blocks validated_profile
+    if (
+        bool(candidate.diagnostics.get("is_synthetic", False))
+        or any(obs.confidence_provenance == "synthetic" for obs in observations)
+        or any(getattr(obs, "is_synthetic", False) for obs in observations)
+    ):
+        logger.info(
+            "Synthetic observations or candidate blocks validated_profile for candidate %s",
+            candidate.candidate_id,
+        )
+        return "dynamic_candidate"
+
     # Rule 1: Physical Replay Audit Check (Gate G4)
     audit = candidate.replay_audit
     if audit is None or not audit.is_physically_accepted or audit.reset_count != 1:
@@ -337,35 +383,48 @@ def classify_evidence_quality(
     return "validated_profile"
 
 
+def _evaluate_g0(
+    candidate: CandidateResult,
+    observations: Sequence[FrameObservation],
+    profile: GateProfile,
+) -> GateStatus:
+    has_synthetic = (
+        bool(candidate.diagnostics.get("is_synthetic", False))
+        or any(obs.confidence_provenance == "synthetic" for obs in observations)
+        or any(getattr(obs, "is_synthetic", False) for obs in observations)
+    )
+    if has_synthetic and not profile.allow_synthetic:
+        g0_pass = False
+        g0_reason = "Synthetic observations cannot satisfy release qualification"
+    else:
+        g0_pass = bool(
+            observations
+            and all(
+                isinstance(obs.frame_id, str)
+                and len(obs.frame_id.strip()) > 0
+                and obs.pts_ticks >= 0
+                for obs in observations
+            )
+        )
+        g0_reason = (
+            "Input frames valid" if g0_pass else "Missing/invalid observation frames"
+        )
+    return GateStatus(
+        gate_id="G0",
+        passed=g0_pass,
+        score=1.0 if g0_pass else 0.0,
+        threshold=1.0,
+        reason=g0_reason,
+    )
+
+
 def audit_gate_profile(
     candidate: CandidateResult,
     observations: Sequence[FrameObservation],
     profile: GateProfile,
 ) -> tuple[bool, tuple[GateStatus, ...]]:
     """Audit candidate against versioned Gate G0 through G5 thresholds."""
-    statuses: list[GateStatus] = []
-
-    # G0: Input integrity
-    g0_pass = bool(
-        observations
-        and all(
-            isinstance(obs.frame_id, str)
-            and len(obs.frame_id.strip()) > 0
-            and obs.pts_ticks >= 0
-            for obs in observations
-        )
-    )
-    statuses.append(
-        GateStatus(
-            gate_id="G0",
-            passed=g0_pass,
-            score=1.0 if g0_pass else 0.0,
-            threshold=1.0,
-            reason="Input frames valid"
-            if g0_pass
-            else "Missing/invalid observation frames",
-        )
-    )
+    statuses: list[GateStatus] = [_evaluate_g0(candidate, observations, profile)]
 
     # G1/G2: Silhouette Fidelity
     mean_iou = float(candidate.diagnostics.get("mean_iou", 0.0))
@@ -522,6 +581,20 @@ def create_evaluated_result_bundle(
         quality = "insufficient_evidence"
         bundle_metrics = {"status": "no_candidates"}
 
+    # In monocular video tracking, joint torques and contact forces cannot be
+    # uniquely identified without ground reaction force data (ST-09 / MMR-15).
+    bundle_metrics.setdefault(
+        "forces_and_torques",
+        {
+            "status": "model_dependent_unidentifiable",
+            "is_identified": False,
+            "warning": (
+                "Forces and torques are model-dependent and unidentifiable "
+                "from monocular video without ground reaction force data."
+            ),
+        },
+    )
+
     # Deterministic hash of candidate trajectory evidence
     traj_bytes = json.dumps([c.to_dict() for c in candidates], sort_keys=True).encode(
         "utf-8"
@@ -539,3 +612,178 @@ def create_evaluated_result_bundle(
         metrics=bundle_metrics,
         hashes={"candidates_sha256": traj_hash},
     )
+
+
+# ---------------------------------------------------------------------------
+# MMR-15 Continuous Replay & Benchmark Qualification
+# ---------------------------------------------------------------------------
+
+
+def _rmse(values_sq: Sequence[float]) -> float:
+    return math.sqrt(sum(values_sq) / len(values_sq)) if values_sq else 0.0
+
+
+def _evaluate_single_phase_tracking(
+    p_name: str,
+    idxs: Sequence[int],
+    cand_traj: Sequence[Sequence[float]],
+    ref_joints: Sequence[Any],
+    ref_markers: Sequence[Any],
+) -> tuple[PhaseEvaluationResult, list[float], list[float], list[float]]:
+    p_joint_diffs_sq: list[float] = []
+    p_marker_diffs_sq: list[float] = []
+    p_club_diffs_sq: list[float] = []
+    is_club_observed = True
+
+    for idx in idxs:
+        row = cand_traj[idx]
+        cand_joints = row[7:42] if len(row) >= 42 else row
+        if idx < len(ref_joints):
+            ref_j = ref_joints[idx]
+            n_j = min(len(cand_joints), len(ref_j))
+            for j_idx in range(n_j):
+                diff = float(cand_joints[j_idx]) - float(ref_j[j_idx])
+                p_joint_diffs_sq.append(diff * diff)
+
+        if idx < len(ref_markers) and isinstance(ref_markers[idx], dict):
+            m_dict = ref_markers[idx]
+            cand_pos = np.asarray(row[:3], dtype=np.float64)
+            if "pelvis" in m_dict:
+                ref_pelvis = np.asarray(m_dict["pelvis"], dtype=np.float64)
+                dist = float(np.linalg.norm(cand_pos - ref_pelvis))
+                p_marker_diffs_sq.append(dist * dist)
+
+            if "club_head" in m_dict:
+                ref_club = np.asarray(m_dict["club_head"], dtype=np.float64)
+                c_dist = float(np.linalg.norm(cand_pos - ref_club))
+                p_club_diffs_sq.append(c_dist * c_dist)
+            else:
+                is_club_observed = False
+
+    result = PhaseEvaluationResult(
+        phase_name=p_name,
+        joint_rmse_rad=_rmse(p_joint_diffs_sq),
+        marker_rmse_m=_rmse(p_marker_diffs_sq),
+        club_error_m=_rmse(p_club_diffs_sq),
+        is_club_observed=is_club_observed,
+        sample_count=len(idxs),
+    )
+    return result, p_joint_diffs_sq, p_marker_diffs_sq, p_club_diffs_sq
+
+
+def evaluate_phase_stratified_tracking(
+    candidate_trajectory: Sequence[Sequence[float]],
+    time_points_s: Sequence[float],
+    reference_data: Mapping[str, Any],
+) -> PhaseStratifiedReport:
+    """Evaluate candidate trajectory against synchronized held-out C3D data stratified by swing phase."""
+    phases = list(reference_data.get("phases", ()))
+    ref_joints = list(reference_data.get("joint_angles_rad", ()))
+    ref_markers = list(reference_data.get("marker_positions_m", ()))
+
+    cand_traj = [tuple(float(v) for v in row) for row in candidate_trajectory]
+    n_frames = min(len(cand_traj), len(phases))
+
+    phase_order: list[str] = []
+    phase_indices: dict[str, list[int]] = {}
+    for i in range(n_frames):
+        p_name = str(phases[i])
+        if p_name not in phase_indices:
+            phase_order.append(p_name)
+            phase_indices[p_name] = []
+        phase_indices[p_name].append(i)
+
+    phase_results: list[PhaseEvaluationResult] = []
+    all_joint_diffs_sq: list[float] = []
+    all_marker_diffs_sq: list[float] = []
+    all_club_diffs_sq: list[float] = []
+
+    for p_name in phase_order:
+        idxs = phase_indices[p_name]
+        res, j_diffs, m_diffs, c_diffs = _evaluate_single_phase_tracking(
+            p_name, idxs, cand_traj, ref_joints, ref_markers
+        )
+        phase_results.append(res)
+        all_joint_diffs_sq.extend(j_diffs)
+        all_marker_diffs_sq.extend(m_diffs)
+        all_club_diffs_sq.extend(c_diffs)
+
+    return PhaseStratifiedReport(
+        phase_results=tuple(phase_results),
+        overall_joint_rmse_rad=_rmse(all_joint_diffs_sq),
+        overall_marker_rmse_m=_rmse(all_marker_diffs_sq),
+        overall_club_error_m=_rmse(all_club_diffs_sq),
+    )
+
+
+def evaluate_archive_stress_resilience(
+    observations: Sequence[FrameObservation],
+    stress_type: str,
+    *,
+    blur_kernel_size_px: int = 0,
+) -> dict[str, Any]:
+    """Evaluate candidate/observation resilience to archive stresses: cuts, blur, or unknown camera."""
+    if stress_type == "cuts":
+        has_discontinuity = False
+        flags: list[str] = []
+        for i in range(1, len(observations)):
+            t_prev = observations[i - 1].physical_time_s
+            t_curr = observations[i].physical_time_s
+            if t_prev is not None and t_curr is not None:
+                dt = t_curr - t_prev
+                if dt > 0.15:
+                    has_discontinuity = True
+                    flags.append(f"cut_detected_at_step_{i}")
+        return {
+            "has_discontinuity": has_discontinuity,
+            "flags": flags,
+            "stress_type": "cuts",
+        }
+
+    if stress_type == "blur":
+        inflation = (
+            1.0 + (float(blur_kernel_size_px) * 0.1) if blur_kernel_size_px > 0 else 1.0
+        )
+        return {
+            "clubhead_uncertainty_inflation": inflation,
+            "abstain_on_high_speed_impact": blur_kernel_size_px >= 10,
+            "blur_kernel_size_px": blur_kernel_size_px,
+            "stress_type": "blur",
+        }
+
+    if stress_type == "unknown_camera":
+        is_calibrated = all(
+            obs.is_timing_exact and obs.physical_time_s is not None
+            for obs in observations
+        )
+        return {
+            "si_kinetics_permitted": is_calibrated,
+            "status": "validated_profile" if is_calibrated else "kinematic_only",
+            "stress_type": "unknown_camera",
+        }
+
+    raise ValueError(f"Unknown stress_type: {stress_type!r}")
+
+
+def assess_holdout_coverage_and_abstention(
+    intervals: Sequence[tuple[float, float]],
+    ground_truth: Sequence[float],
+    *,
+    nominal_coverage: float = 0.90,
+    unidentifiable_cases: Sequence[str] = (),
+    tolerance: float = 0.05,
+) -> dict[str, Any]:
+    """Assess empirical coverage calibration on holdout benchmarks alongside structured abstention."""
+    cov = compute_empirical_coverage(
+        intervals=intervals,
+        ground_truths=ground_truth,
+        nominal_rate=nominal_coverage,
+        tolerance=tolerance,
+    )
+    return {
+        "empirical_coverage": cov.empirical_coverage,
+        "nominal_rate": cov.nominal_rate,
+        "average_interval_width": cov.average_interval_width,
+        "is_well_calibrated": cov.is_well_calibrated,
+        "abstention_reasons": list(unidentifiable_cases),
+    }

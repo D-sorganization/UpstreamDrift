@@ -27,6 +27,8 @@ class ArtifactKind(str, Enum):
     OBSERVATION = "observation"
     TRAJECTORY = "trajectory"
     RECEIPT = "receipt"
+    MODEL = "model"
+    DRIVING_PROFILE = "driving_profile"
 
 
 SUPPORTED_KINDS: Final[frozenset[str]] = frozenset(
@@ -46,6 +48,8 @@ SUPPORTED_FRAMES: Final[frozenset[str]] = frozenset(
     }
 )
 
+EFFORT_PROFILE_SCHEMA: Final[str] = "necromatcher/effort-profile/2"
+
 SUPPORTED_SCHEMAS: Final[frozenset[str]] = frozenset(
     {
         "pose_interchange/canonical/1",
@@ -56,6 +60,11 @@ SUPPORTED_SCHEMAS: Final[frozenset[str]] = frozenset(
         "workspace.handoff/1.0.0",
         "dataset/c3d",
         "dataset/h5",
+        "necromatcher/native-model/1",
+        "necromatcher/torque-profile/1",
+        EFFORT_PROFILE_SCHEMA,
+        "necromatcher/image-capture/1",
+        "necromatcher/kinematic-fit/1",
     }
 )
 

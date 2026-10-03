@@ -1,0 +1,131 @@
+{
+  "schema_version": "necromatcher/interface-run-receipt/1",
+  "purpose": "interface-lifecycle-verification",
+  "qualification": "monocular_research_hypothesis",
+  "physical_time_qualified": false,
+  "dynamics_replayed": false,
+  "source_scope_note": "Python jobs executed from committed source 950a32e33f; browser verification includes the subsequent uncommitted UI URL-race correction identified by the hashes below. These one-evaluation runs validate interfaces, not fitted motion acceptance.",
+  "web_source_files": {
+    "ui/src/components/necromatcher/RefitControls.tsx": "sha256:4873bf14ce13b82e6842d03346622cc2668bd004b676a07a33ad7384d65701b6",
+    "ui/src/pages/Necromatcher.tsx": "sha256:36172abb03b76141580ce494ad853319a5dc5b8cd4385c241fd5fec4b08ba3ee",
+    "ui/src/api/necromatcher.ts": "sha256:5357f53db50405d45399925cb818422537f10127b72bd2ffedf4cefc2c36f55e",
+    "ui/src/api/generated/types.ts": "sha256:f3cc180a5a55e0ab7b6bb4fb8ada97f088741608ba3b9bcd10b5e7b9fce4c6a5"
+  },
+  "runs": [
+    {
+      "interface": "native_dialog",
+      "fit_id": "hogan-native-control-research-fit-v5",
+      "source_fit_id": "hogan-source-stamped-research-fit-v4",
+      "run_id": "b6a77ded5e13468ab7ed164a90895326",
+      "frame_count": 750,
+      "fit_sha256": "sha256:c48e053e28bd1c79db639c1d13293c09a19cd410067a6c0852879992e8625e6a",
+      "reopened_status": "succeeded",
+      "reopened_acceptance": "rejected",
+      "reopened_control_available": false,
+      "execution_identity": {
+        "source_commit": "950a32e33f1cbe84b4cab5f0cdbf283e58e01bd3",
+        "started_at_utc": "2026-10-02T02:03:09.851292+00:00",
+        "source_sha256": "sha256:5cb601d8f735a723937966b4afb664e1361be124b312c1066866ae5b5ecf6d28",
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "runtime": {
+          "mujoco": "3.3.4",
+          "numpy": "2.4.1",
+          "opencv-python": "4.13.0.90",
+          "platform": "Windows-11-10.0.26300-SP0",
+          "python": "3.13.5",
+          "scipy": "1.16.0",
+          "tools_commit": "3678409fc51024150ab28970b72e3b468935f345"
+        }
+      },
+      "options": {
+        "budget_wall_s": 300.0,
+        "config": {
+          "closure_weight": 100.0,
+          "max_iterations": 1,
+          "prior_weight": 3.0,
+          "smoothness_weight": 1.0
+        },
+        "coordinate_scales": [
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 12, 25, 38, 50, 63, 76, 88, 101, 114, 126, 139, 152, 165, 177, 190,
+          203, 215, 228, 241, 253, 266, 279, 291, 304, 317, 330, 342, 355, 368,
+          380, 393, 406, 418, 431, 444, 457, 469, 482, 495, 507, 520, 533, 545,
+          558, 571, 583, 596, 609, 622, 634, 647, 660, 672, 685, 698, 710, 723,
+          736, 749
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      },
+      "rejection_reasons": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "anatomical_ranges_not_enforced",
+        "optimizer_not_converged"
+      ]
+    },
+    {
+      "interface": "web_browser",
+      "fit_id": "tiger-web-control-research-fit-v5",
+      "source_fit_id": "tiger-source-stamped-research-fit-v4",
+      "run_id": "2af89a0639a74024bab97f5fb974dc2e",
+      "frame_count": 210,
+      "fit_sha256": "sha256:7667df1e82d8290083720cef6c920677fa85519f1b5070c14717656c8b742567",
+      "reopened_status": "succeeded",
+      "reopened_acceptance": "rejected",
+      "reopened_control_available": true,
+      "execution_identity": {
+        "source_commit": "950a32e33f1cbe84b4cab5f0cdbf283e58e01bd3",
+        "started_at_utc": "2026-10-02T02:04:52.378117+00:00",
+        "source_sha256": "sha256:5cb601d8f735a723937966b4afb664e1361be124b312c1066866ae5b5ecf6d28",
+        "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5",
+        "runtime": {
+          "mujoco": "3.3.4",
+          "numpy": "2.4.1",
+          "opencv-python": "4.13.0.90",
+          "platform": "Windows-11-10.0.26300-SP0",
+          "python": "3.13.5",
+          "scipy": "1.16.0",
+          "tools_commit": "3678409fc51024150ab28970b72e3b468935f345"
+        }
+      },
+      "options": {
+        "budget_wall_s": 300.0,
+        "config": {
+          "closure_weight": 100.0,
+          "max_iterations": 1,
+          "prior_weight": 3.0,
+          "smoothness_weight": 1.0
+        },
+        "coordinate_scales": [
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+          1.0, 1.0
+        ],
+        "frame_indices": [
+          0, 3, 7, 10, 14, 17, 21, 24, 28, 31, 35, 38, 42, 46, 49, 53, 56, 60,
+          63, 67, 70, 74, 77, 81, 85, 88, 92, 95, 99, 102, 106, 109, 113, 116,
+          120, 123, 127, 131, 134, 138, 141, 145, 148, 152, 155, 159, 162, 166,
+          170, 173, 177, 180, 184, 187, 191, 194, 198, 201, 205, 209
+        ],
+        "knot_count": 12,
+        "unknown_visibility_weight": 0.5
+      },
+      "rejection_reasons": [
+        "monocular_research_only",
+        "physical_clock_unknown",
+        "camera_unqualified",
+        "independent_dynamics_not_replayed",
+        "anatomical_ranges_not_enforced",
+        "optimizer_not_converged"
+      ]
+    }
+  ]
+}

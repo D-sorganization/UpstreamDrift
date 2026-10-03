@@ -91,3 +91,25 @@ def test_club_can_be_shown_without_body_sticks() -> None:
         ComparisonLayer(draw_skeleton=False, draw_joints=False, draw_club=True),
     )
     assert np.any(shown)
+
+
+def test_shaded_model_volumes_layer_renders() -> None:
+    asset = sample_motion()
+    reg = ReferenceRegistration(reference_id=asset.id, calibration_id="test")
+    camera = two_camera_rig()[0]
+    frame = np.full((1080, 1920, 3), 50, dtype=np.uint8)
+    rendered = draw_reference_overlay(
+        frame,
+        asset,
+        0.5,
+        reg,
+        camera,
+        ComparisonLayer(
+            draw_skeleton=False,
+            draw_joints=False,
+            draw_ellipsoids=False,
+            draw_model_volumes=True,
+            model_volume_opacity=0.8,
+        ),
+    )
+    assert np.count_nonzero(rendered != frame) > 100

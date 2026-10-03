@@ -80,9 +80,9 @@ def test_parse_registry_produces_valid_payloads() -> None:
     )
     assert "records" in parsed
     assert "summary" in parsed
-    assert parsed["summary"]["screenshot_records"] == 76
+    assert parsed["summary"]["screenshot_records"] == 77
     assert parsed["summary"]["captured_screenshot_records"] == 6
-    assert parsed["summary"]["pending_screenshot_records"] == 70
+    assert parsed["summary"]["pending_screenshot_records"] == 71
 
 
 def test_parse_registry_rejects_dangling_program_id() -> None:

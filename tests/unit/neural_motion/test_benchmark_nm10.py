@@ -286,8 +286,14 @@ def test_data_efficiency_active_vs_random() -> None:
         random_acquisition_acceptance=random_acc,
     )
     assert len(curve.budget_points) == 4
-    assert curve.sample_efficiency_multiplier > 1.0
+    assert (
+        curve.sample_efficiency_multiplier is not None
+        and curve.sample_efficiency_multiplier > 1.0
+    )
+    assert curve.mean_acceptance_ratio is not None and curve.mean_acceptance_ratio > 1.0
+    assert curve.auc_acceptance_ratio is not None and curve.auc_acceptance_ratio > 1.0
     assert curve.active_superiority_confirmed is True
+    assert curve.is_inconclusive is False
 
 
 def test_three_seed_uncertainty_aggregation() -> None:

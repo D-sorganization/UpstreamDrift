@@ -77,7 +77,7 @@ def _driver_payload(model_name: str) -> dict[str, float | str]:
         "wind_speed_mps": 0.0,
         "wind_direction_deg": 0.0,
         "model_name": model_name,
-        "max_time_s": 1.0,
+        "max_time_s": 10.0,
         "time_step_s": 0.05,
     }
 
@@ -98,6 +98,28 @@ def test_simulate_ball_flight_happy_path_per_model(
     assert data["summary"]["apex_m"] > 0.0
     assert data["summary"]["flight_time_s"] > 0.0
     assert "lateral_deviation_m" in data["summary"]
+    assert data["summary"]["landed"] is True
+    assert data["summary"]["termination"] == "landed"
+    assert data["summary"]["terminal_event"] is True
+
+
+def test_simulate_ball_flight_incomplete_time_limit_gates_landing_metrics(
+    client: TestClient,
+) -> None:
+    payload = _driver_payload(FlightModelType.WATERLOO_PENNER.value)
+    payload["max_time_s"] = 1.0  # Incomplete flight (hits time limit while in air)
+
+    response = client.post("/tools/ball-flight/simulate", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    summary = data["summary"]
+    assert summary["termination"] == "time_limit"
+    assert summary["terminal_event"] is False
+    assert summary["landed"] is False
+    assert summary["carry_m"] is None
+    assert summary["landing_angle_deg"] is None
+    assert summary["lateral_deviation_m"] is None
+    assert summary["flight_time_s"] == pytest.approx(1.0, abs=0.05)
 
 
 @pytest.mark.parametrize(
@@ -262,7 +284,10 @@ def test_trajectory_is_structurally_sound(
     assert summary["carry_m"] > 0.0
     assert summary["apex_m"] > 0.0
     assert summary["flight_time_s"] > 0.0
-    assert all(math.isfinite(v) for v in summary.values())
+    assert summary["landed"] is True
+    assert summary["termination"] == "landed"
+    numeric_summary = {k: v for k, v in summary.items() if isinstance(v, (int, float))}
+    assert all(math.isfinite(v) for v in numeric_summary.values())
 
 
 # =============================================================================
@@ -281,7 +306,7 @@ def _ud_family_record() -> dict[str, Any]:
             fm.UnifiedLaunchConditions(
                 ball_speed=70.0, launch_angle=math.radians(12.0), spin_rate=2600.0
             ),
-            max_time=1.0,
+            max_time=10.0,
             dt=0.05,
         )
     finally:
@@ -360,7 +385,10 @@ def test_import_accepts_records_from_either_family(
         values = [sample["time_s"], *sample["position_m"]]
         assert all(math.isfinite(v) for v in values)
     summary = data["summary"]
-    assert all(math.isfinite(v) for v in summary.values())
+    assert summary["landed"] is True
+    assert summary["termination"] == "landed"
+    numeric_summary = {k: v for k, v in summary.items() if isinstance(v, (int, float))}
+    assert all(math.isfinite(v) for v in numeric_summary.values())
 
 
 @requires_flight_interchange

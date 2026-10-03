@@ -21,7 +21,12 @@ from enum import Enum
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
+
+if TYPE_CHECKING:
+    from src.shared.python.motion_matching.named_state import (
+        CaptureAttachmentDeclaration,
+    )
 
 import numpy as np
 from numpy.typing import NDArray
@@ -54,6 +59,13 @@ __all__ = [
     "RobustnessCheck",
     "RobustnessCheckKind",
     "build_continuation_schedule",
+    "CandidatePromotionRequest",
+    "CandidatePromotionVerdict",
+    "CrossEngineTransferMatrix",
+    "EngineTransferVerdict",
+    "TorqueTransferTolerances",
+    "evaluate_candidate_promotion",
+    "evaluate_cross_engine_torque_transfer",
     "evaluate_integrator_parity",
     "export_independent_replay_package",
     "import_independent_replay_package",
@@ -582,3 +594,453 @@ def ms111_contract_status() -> dict[str, Any]:
             "ControlTower desk success is not claimed."
         ),
     }
+
+
+@dataclass(frozen=True, slots=True)
+class CandidatePromotionRequest:
+    """Request to promote a Pinocchio native fitting candidate to qualified status."""
+
+    club: ClubKind
+    target_horizon: Horizon
+    solver_converged: bool
+    solver_cost: float
+    solve_integrator: IntegratorConfig
+    replay_integrator: IntegratorConfig
+    capture_declaration: CaptureAttachmentDeclaration
+    physical_audit: Mapping[str, Any]
+    metrics: Mapping[str, Any]
+    g1_accepted: bool = False
+    g1_receipt: Mapping[str, Any] | None = None
+    rom_violations: Mapping[str, Any] | None = None
+    max_penetration_m: float = 0.010
+    max_closure_m: float = 0.005
+    max_closure_rad: float = 0.05
+    max_normal_force_bw: float = 3.0
+    min_weight_fraction: float = 0.20
+    max_rom_excess_deg: float = 0.5
+    claims_native_success: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class CandidatePromotionVerdict:
+    """Verdict of candidate promotion evaluation."""
+
+    promoted: bool
+    rejection_reasons: tuple[str, ...]
+    club: ClubKind
+    target_horizon: Horizon
+    claims_native_success: bool = False
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "promoted": self.promoted,
+            "rejection_reasons": list(self.rejection_reasons),
+            "club": self.club.value,
+            "target_horizon": self.target_horizon.value,
+            "claims_native_success": self.claims_native_success,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class TorqueTransferTolerances:
+    """Declared numerical tolerances for cross-engine torque transfer."""
+
+    max_acceleration_parity_m_s2: float = 0.05
+    max_equilibrium_residual: float = 1e-3
+    max_root_residual_n_m: float = 1e-3
+    engine_tolerances: Mapping[str, float] | None = None
+    engine_equilibrium_tolerances: Mapping[str, float] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EngineTransferVerdict:
+    """Outcome of importing controls/torques into a specific target engine."""
+
+    target_engine: str
+    accepted: bool
+    acceleration_parity_residual: float
+    max_equilibrium_residual: float
+    declared_tolerance: float
+    diagnostics: dict[str, Any]
+    reason: str = ""
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "target_engine": self.target_engine,
+            "accepted": self.accepted,
+            "acceleration_parity_residual": self.acceleration_parity_residual,
+            "max_equilibrium_residual": self.max_equilibrium_residual,
+            "declared_tolerance": self.declared_tolerance,
+            "diagnostics": self.diagnostics,
+            "reason": self.reason,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class CrossEngineTransferMatrix:
+    """Transfer matrix capturing per-engine verdicts and diagnostics."""
+
+    source_engine: str
+    club: ClubKind
+    target_verdicts: dict[str, EngineTransferVerdict]
+    all_accepted: bool
+    declared_armature_kg_m2: float
+    tracking_gains: dict[str, float]
+    residual_root_assistance_included: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "source_engine": self.source_engine,
+            "club": self.club.value,
+            "target_verdicts": {
+                k: v.as_dict() for k, v in self.target_verdicts.items()
+            },
+            "all_accepted": self.all_accepted,
+            "declared_armature_kg_m2": self.declared_armature_kg_m2,
+            "tracking_gains": dict(self.tracking_gains),
+            "residual_root_assistance_included": self.residual_root_assistance_included,
+        }
+
+
+def _check_club_and_capture(request: CandidatePromotionRequest) -> list[str]:
+    reasons: list[str] = []
+    decl = request.capture_declaration
+    if request.club == ClubKind.IRON:
+        if decl.club != ClubKind.IRON:
+            reasons.append(
+                "cross-club attachment contamination: iron candidate cannot use driver capture declaration"
+            )
+        if "driver" in decl.document_id.lower():
+            reasons.append(
+                f"cross-club document contamination: iron candidate cannot use driver document ({decl.document_id})"
+            )
+        if "driver" in decl.attachment_calibration_hash.lower():
+            reasons.append(
+                "cross-club calibration contamination: iron candidate cannot use driver calibration"
+            )
+    elif request.club == ClubKind.DRIVER:
+        if decl.club != ClubKind.DRIVER:
+            reasons.append(
+                "cross-club attachment contamination: driver candidate cannot use iron capture declaration"
+            )
+        if "iron" in decl.document_id.lower():
+            reasons.append(
+                f"cross-club document contamination: driver candidate cannot use iron document ({decl.document_id})"
+            )
+        if "iron" in decl.attachment_calibration_hash.lower():
+            reasons.append(
+                "cross-club calibration contamination: driver candidate cannot use iron calibration"
+            )
+    return reasons
+
+
+def _check_integrator_and_horizon(request: CandidatePromotionRequest) -> list[str]:
+    reasons: list[str] = []
+    parity = evaluate_integrator_parity(
+        request.solve_integrator, request.replay_integrator
+    )
+    if not parity.accepted:
+        reasons.append(f"integrator parity failed: {parity.reason}")
+    if request.target_horizon in (Horizon.G2, Horizon.G3):
+        if not request.g1_accepted:
+            reasons.append("G1 must pass before G2/G3 promotion")
+    return reasons
+
+
+def _check_physics_and_solver(request: CandidatePromotionRequest) -> list[str]:
+    reasons: list[str] = []
+    if not request.solver_converged:
+        reasons.append("solver convergence is required for promotion")
+
+    audit = request.physical_audit
+    bw = audit.get("max_normal_force_body_weights")
+    if bw is None and "max_normal_force_n" in audit:
+        bw = float(audit["max_normal_force_n"]) / (80.0 * 9.81)
+    if bw is not None and float(bw) > request.max_normal_force_bw:
+        reasons.append(
+            f"max normal force {float(bw):.2f} BW exceeds limit {request.max_normal_force_bw:.2f} BW"
+        )
+
+    pen = audit.get("max_penetration_m")
+    if pen is not None and float(pen) > request.max_penetration_m:
+        reasons.append(
+            f"max ground penetration {float(pen) * 1e3:.2f} mm exceeds limit {request.max_penetration_m * 1e3:.2f} mm"
+        )
+
+    closure_m = audit.get("closure_translation_error_max_m") or audit.get(
+        "max_closure_m"
+    )
+    if closure_m is not None and float(closure_m) > request.max_closure_m:
+        reasons.append(
+            f"max weld closure translation {float(closure_m) * 1e3:.2f} mm exceeds limit {request.max_closure_m * 1e3:.2f} mm"
+        )
+
+    closure_rad = audit.get("closure_rotation_error_max_rad") or audit.get(
+        "max_closure_rad"
+    )
+    if closure_rad is not None and float(closure_rad) > request.max_closure_rad:
+        reasons.append(
+            f"max weld closure rotation {float(closure_rad):.4f} rad exceeds limit {request.max_closure_rad:.4f} rad"
+        )
+
+    wf_min = audit.get("weight_fraction_min")
+    if wf_min is None and isinstance(audit.get("weight_fraction"), Mapping):
+        wf_min = audit["weight_fraction"].get("min")
+    if wf_min is not None and float(wf_min) < request.min_weight_fraction:
+        reasons.append(
+            f"min weight fraction {float(wf_min):.2f} below support floor {request.min_weight_fraction:.2f}"
+        )
+
+    if request.rom_violations:
+        violating = []
+        for coord, excess in request.rom_violations.items():
+            val = getattr(excess, "max_excess_deg", excess)
+            if float(val) > request.max_rom_excess_deg:
+                violating.append(coord)
+        if violating:
+            reasons.append(
+                f"range of motion (RoM) violated on coordinates: {sorted(violating)}"
+            )
+    return reasons
+
+
+def evaluate_candidate_promotion(
+    request: CandidatePromotionRequest,
+) -> CandidatePromotionVerdict:
+    """Evaluate candidate against Pinocchio native qualification contracts."""
+    reasons = (
+        _check_club_and_capture(request)
+        + _check_integrator_and_horizon(request)
+        + _check_physics_and_solver(request)
+    )
+    return CandidatePromotionVerdict(
+        promoted=len(reasons) == 0,
+        rejection_reasons=tuple(reasons),
+        club=request.club,
+        target_horizon=request.target_horizon,
+        claims_native_success=False,
+    )
+
+
+def _eval_step_parity_and_residual(
+    adapter: Any,
+    allocator: Any,
+    q_k: NDArray[np.float64],
+    v_k: NDArray[np.float64],
+    a_k: NDArray[np.float64],
+    u_k: NDArray[np.float64],
+    delta_root_k: NDArray[np.float64] | None,
+) -> tuple[float, float]:
+    tau_rnea = adapter.compute_inverse_dynamics(q_k, v_k, a_k)
+    j_g = adapter.compute_contact_jacobian(q_k)
+    j_w = adapter.compute_grip_jacobian(q_k)
+    tau_bounds = (u_k, u_k)
+    alloc = allocator.allocator.allocate(
+        tau_rnea=tau_rnea,
+        j_ground=j_g,
+        j_grip=j_w,
+        tau_bounds=tau_bounds,
+    )
+    eq_res = float(alloc.equilibrium_residual)
+
+    tau_full = np.zeros(adapter.nv, dtype=np.float64)
+    tau_full[adapter.actuated_indices] = u_k
+    root_force = (
+        delta_root_k[:6]
+        if delta_root_k is not None and np.any(delta_root_k)
+        else alloc.delta_tau_root
+    )
+    root_full = np.concatenate([root_force, np.zeros(adapter.nv - 6)])
+    tau_eff = tau_full + j_g.T @ alloc.f_ground + j_w.T @ alloc.lambda_grip + root_full
+    parity_err = float(
+        adapter.verify_acceleration_parity(
+            q=q_k, v=v_k, tau_effective=tau_eff, a_target=a_k
+        )
+    )
+    return parity_err, eq_res
+
+
+@dataclass(frozen=True)
+class _EngineTransferContext:
+    target_engine: str
+    time_s: NDArray[np.float64]
+    q: NDArray[np.float64]
+    v: NDArray[np.float64]
+    a: NDArray[np.float64]
+    controls_u: NDArray[np.float64]
+    coordinate_names: tuple[str, ...]
+    declared_armature_kg_m2: float
+    delta_tau_root: NDArray[np.float64] | None
+    tolerances: TorqueTransferTolerances
+    adapter: Any | None = None
+
+
+def _compute_parity_residuals(
+    ctx: _EngineTransferContext,
+    adapter: Any,
+    allocator: Any,
+) -> tuple[float, float, float]:
+    n_eval = len(ctx.time_s)
+    sample_indices = (
+        [0, n_eval // 2, n_eval - 1] if n_eval >= 3 else list(range(n_eval))
+    )
+    parity_residuals: list[float] = []
+    max_eq_res = 0.0
+
+    for idx in sample_indices:
+        q_k, v_k, a_k = ctx.q[idx], ctx.v[idx], ctx.a[idx]
+        u_k = ctx.controls_u[idx][: len(adapter.actuated_indices)]
+        delta_k = ctx.delta_tau_root[idx] if ctx.delta_tau_root is not None else None
+        p_err, eq_res = _eval_step_parity_and_residual(
+            adapter=adapter,
+            allocator=allocator,
+            q_k=q_k,
+            v_k=v_k,
+            a_k=a_k,
+            u_k=u_k,
+            delta_root_k=delta_k,
+        )
+        parity_residuals.append(p_err)
+        max_eq_res = max(max_eq_res, eq_res)
+
+    max_parity = float(np.max(parity_residuals)) if parity_residuals else 0.0
+    mean_parity = float(np.mean(parity_residuals)) if parity_residuals else 0.0
+    return max_parity, max_eq_res, mean_parity
+
+
+def _evaluate_single_engine_transfer(
+    ctx: _EngineTransferContext,
+) -> EngineTransferVerdict:
+    tols = ctx.tolerances
+    target_engine = ctx.target_engine
+    tol = (
+        tols.engine_tolerances.get(target_engine, tols.max_acceleration_parity_m_s2)
+        if tols.engine_tolerances and target_engine in tols.engine_tolerances
+        else tols.max_acceleration_parity_m_s2
+    )
+    eq_tol = (
+        tols.engine_equilibrium_tolerances.get(
+            target_engine, tols.max_equilibrium_residual
+        )
+        if tols.engine_equilibrium_tolerances
+        and target_engine in tols.engine_equilibrium_tolerances
+        else tols.max_equilibrium_residual
+    )
+    try:
+        adapter = ctx.adapter
+        if adapter is None:
+            from src.shared.python.motion_matching.multi_engine_torque_allocator import (
+                create_engine_force_adapter,
+            )
+
+            adapter = create_engine_force_adapter(
+                target_engine, allow_synthetic=True, nv=len(ctx.coordinate_names)
+            )
+
+        if getattr(adapter, "nv", len(ctx.coordinate_names)) != len(
+            ctx.coordinate_names
+        ):
+            return EngineTransferVerdict(
+                target_engine=target_engine,
+                accepted=False,
+                acceleration_parity_residual=float("inf"),
+                max_equilibrium_residual=float("inf"),
+                declared_tolerance=tol,
+                diagnostics={"error": "nv mismatch"},
+                reason=f"coordinate count mismatch ({adapter.nv} != {len(ctx.coordinate_names)})",
+            )
+
+        from src.shared.python.motion_matching.multi_engine_torque_allocator import (
+            MultiEngineTorqueAllocator,
+        )
+
+        allocator = MultiEngineTorqueAllocator(adapter)
+        max_p, max_eq, mean_p = _compute_parity_residuals(ctx, adapter, allocator)
+
+        reasons_failed: list[str] = []
+        if max_p > tol:
+            reasons_failed.append(
+                f"acceleration parity error {max_p:.6f} exceeds declared tolerance {tol:.6f}"
+            )
+        if max_eq > eq_tol:
+            reasons_failed.append(
+                f"equilibrium residual {max_eq:.6f} exceeds declared tolerance {eq_tol:.6f}"
+            )
+
+        return EngineTransferVerdict(
+            target_engine=target_engine,
+            accepted=len(reasons_failed) == 0,
+            acceleration_parity_residual=max_p,
+            max_equilibrium_residual=max_eq,
+            declared_tolerance=tol,
+            diagnostics={
+                "mean_parity_residual": mean_p,
+                "max_parity_residual": max_p,
+                "max_equilibrium_residual": max_eq,
+                "armature_kg_m2": ctx.declared_armature_kg_m2,
+            },
+            reason="; ".join(reasons_failed),
+        )
+    except Exception as exc:
+        return EngineTransferVerdict(
+            target_engine=target_engine,
+            accepted=False,
+            acceleration_parity_residual=float("inf"),
+            max_equilibrium_residual=float("inf"),
+            declared_tolerance=tol,
+            diagnostics={"error": str(exc)},
+            reason=f"target engine evaluation failed: {exc}",
+        )
+
+
+def evaluate_cross_engine_torque_transfer(
+    *args: Any,
+    **kwargs: Any,
+) -> CrossEngineTransferMatrix:
+    """Evaluate controls transferred into MuJoCo, Simscape, and other target engines."""
+    source_engine: str = kwargs["source_engine"]
+    club: ClubKind = kwargs["club"]
+    target_engines: tuple[str, ...] = tuple(kwargs["target_engines"])
+    time_s: NDArray[np.float64] = kwargs["time_s"]
+    q: NDArray[np.float64] = kwargs["q"]
+    v: NDArray[np.float64] = kwargs["v"]
+    a: NDArray[np.float64] = kwargs["a"]
+    controls_u: NDArray[np.float64] = kwargs["controls_u"]
+    coordinate_names: tuple[str, ...] = tuple(kwargs["coordinate_names"])
+    declared_armature: float = kwargs.get(
+        "declared_armature_kg_m2", DEFAULT_ARMATURE_KG_M2
+    )
+    delta_root: NDArray[np.float64] | None = kwargs.get("delta_tau_root")
+    gains: dict[str, float] | None = kwargs.get("tracking_gains")
+    tol: TorqueTransferTolerances = (
+        kwargs.get("tolerances") or TorqueTransferTolerances()
+    )
+    custom_adapters: Mapping[str, Any] | None = kwargs.get("custom_adapters")
+
+    verdicts: dict[str, EngineTransferVerdict] = {}
+    for engine in target_engines:
+        ctx = _EngineTransferContext(
+            target_engine=engine,
+            time_s=time_s,
+            q=q,
+            v=v,
+            a=a,
+            controls_u=controls_u,
+            coordinate_names=coordinate_names,
+            declared_armature_kg_m2=declared_armature,
+            delta_tau_root=delta_root,
+            tolerances=tol,
+            adapter=custom_adapters.get(engine) if custom_adapters else None,
+        )
+        verdicts[engine] = _evaluate_single_engine_transfer(ctx)
+
+    all_accepted = len(verdicts) > 0 and all(v.accepted for v in verdicts.values())
+    return CrossEngineTransferMatrix(
+        source_engine=source_engine,
+        club=club,
+        target_verdicts=verdicts,
+        all_accepted=all_accepted,
+        declared_armature_kg_m2=declared_armature,
+        tracking_gains=gains or {},
+        residual_root_assistance_included=delta_root is not None,
+    )

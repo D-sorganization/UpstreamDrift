@@ -32,6 +32,30 @@ class EngineStatusResponse(BaseModel):
     description: str = Field("", description="Engine description")
 
 
+class SimulationErrorInfo(BaseModel):
+    """Structured error outcome for simulation failures (issue #11149, R09)."""
+
+    code: str = Field(..., description="Stable machine-readable error code")
+    message: str = Field(..., description="Safe user-facing error message")
+    stage: str = Field(
+        ...,
+        description="Pipeline stage where failure occurred: preparation, execution, analysis, persistence",
+    )
+    run_id: str | None = Field(
+        default=None, description="Run or correlation identifier"
+    )
+    retriable: bool = Field(
+        default=False, description="Whether the operation can be retried"
+    )
+    retry_guidance: str | None = Field(
+        default=None, description="Actionable retry guidance"
+    )
+    details: dict[str, Any] | None = Field(
+        default=None,
+        description="Safe contextual metadata without leaking internals",
+    )
+
+
 class SimulationResponse(BaseModel):
     """Response model for simulation results.
 
@@ -43,20 +67,88 @@ class SimulationResponse(BaseModel):
 
     success: bool = Field(..., description="Whether simulation completed successfully")
     duration: float = Field(..., description="Actual simulation duration", ge=0)
-    frames: int = Field(..., description="Number of simulation frames", ge=0)
+    frames: int = Field(
+        ...,
+        description="Number of recorded simulation frames, including initial sample at t=0",
+        ge=0,
+    )
     data: dict[str, Any] = Field(
         ..., description="Simulation data (states, controls, etc.)"
     )
     analysis_results: dict[str, Any] | None = Field(
-        None, description="Analysis results if requested"
+        default=None, description="Analysis results if requested"
     )
-    export_paths: list[str] | None = Field(None, description="Paths to exported files")
+    export_paths: list[str] | None = Field(
+        default=None, description="Paths to exported files"
+    )
+    calculation_status: str = Field(
+        default="completed",
+        description="Calculation status: completed, failed, cancelled",
+    )
+    analysis_status: str = Field(
+        default="not_requested",
+        description="Analysis status: not_requested, completed, partial, failed",
+    )
+    persistence_status: str = Field(
+        default="not_requested",
+        description="Persistence status: not_requested, persisted, failed",
+    )
+    error: SimulationErrorInfo | None = Field(
+        default=None, description="Structured error details if failure occurred"
+    )
+    run_id: str | None = Field(
+        default=None, description="Run or correlation identifier"
+    )
+    requested_duration: float | None = Field(
+        default=None, description="Requested simulation duration in seconds", ge=0
+    )
+    integrated_duration: float | None = Field(
+        default=None,
+        description="Actual integrated simulation horizon in seconds",
+        ge=0,
+    )
+    step_count: int | None = Field(
+        default=None,
+        description="Number of physics integration steps executed",
+        ge=0,
+    )
+    retained_samples: int | None = Field(
+        default=None,
+        description="Number of retained state samples including t=0",
+        ge=0,
+    )
 
     @model_validator(mode="after")
     def check_data_on_success(self) -> SimulationResponse:
-        """Postcondition: successful simulations must include state data."""
-        if self.success and not self.data:
-            raise ValueError("Successful simulation must include non-empty data")
+        """Postcondition: successful simulations must include non-empty, aligned state data."""
+        if self.success:
+            if not self.data:
+                raise ValueError("Successful simulation must include non-empty data")
+            if "times" in self.data:
+                if len(self.data["times"]) == 0:
+                    raise ValueError("Successful simulation cannot have empty times")
+                n_times = len(self.data["times"])
+                for channel in (
+                    "joint_positions",
+                    "joint_velocities",
+                    "joint_accelerations",
+                ):
+                    if channel in self.data:
+                        val = self.data[channel]
+                        if len(val) == 0:
+                            raise ValueError(
+                                f"Channel '{channel}' cannot be empty on successful simulation"
+                            )
+                        if len(val) != n_times:
+                            raise ValueError(
+                                f"Channel '{channel}' length ({len(val)}) does not match times length ({n_times})"
+                            )
+                if "control_inputs" in self.data:
+                    ctrls = self.data["control_inputs"]
+                    if len(ctrls) != n_times:
+                        raise ValueError(
+                            f"Channel 'control_inputs' length ({len(ctrls)}) does not match times length ({n_times})"
+                        )
         return self
 
     @property
@@ -123,6 +215,19 @@ class TaskStatusResponse(BaseModel):
     progress: float | None = Field(None, description="Progress percentage (0-100)")
     result: dict[str, Any] | None = Field(None, description="Task result if completed")
     error: str | None = Field(None, description="Error message if failed")
+    error_code: str | None = Field(
+        None, description="Machine-readable error code if failed"
+    )
+    error_stage: str | None = Field(
+        None, description="Pipeline stage where failure occurred"
+    )
+    retriable: bool | None = Field(None, description="Whether the task can be retried")
+    retry_guidance: str | None = Field(
+        None, description="Guidance for retrying or fixing"
+    )
+    error_info: SimulationErrorInfo | None = Field(
+        None, description="Structured error information"
+    )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -538,11 +643,15 @@ class MeasurementToolsResponse(BaseModel):
 class ForceVector3D(BaseModel):
     """A single force/torque vector for 3D overlay rendering.
 
-    See issue #1199
+    .. deprecated::
+        Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs``
+        instead. This model will be removed in a future release.
     """
 
     body_name: str = Field(..., description="Body this force acts on")
-    force_type: str = Field(..., description="Type: applied, gravity, contact, bias")
+    force_type: str = Field(
+        ..., description="Type: applied, gravity, contact, bias, or WrenchKind"
+    )
     origin: list[float] = Field(..., description="Application point [x, y, z]")
     direction: list[float] = Field(..., description="Force direction [dx, dy, dz]")
     magnitude: float = Field(..., description="Force magnitude (N or N*m)")
@@ -556,12 +665,24 @@ class ForceVector3D(BaseModel):
 class ForceOverlayResponse(BaseModel):
     """Response model for force/torque overlay data.
 
-    See issue #1199
+    See issues #1199, #11307 (FTO-22).
     """
 
     sim_time: float = Field(..., description="Current simulation time")
+    glyphs: dict[str, Any] | None = Field(
+        None, description="Serialized GlyphSet (glyph-set-v1) drawing payload"
+    )
+    frame: dict[str, Any] | None = Field(
+        None,
+        description="Serialized ForceTorqueFrame (force-torque-frame-v1) physics inspection payload",
+    )
+    unavailable_reason: str | None = Field(
+        None,
+        description="Explanation if force overlays are unavailable, or None if available",
+    )
     vectors: list[ForceVector3D] = Field(
-        default_factory=list, description="All active force vectors"
+        default_factory=list,
+        description="Deprecated: use glyphs instead. Backward-compatible vector list.",
     )
     total_force_magnitude: float = Field(0.0, description="Sum of all force magnitudes")
     total_torque_magnitude: float = Field(

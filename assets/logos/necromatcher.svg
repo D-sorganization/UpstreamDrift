@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-labelledby="title description">
+  <title id="title">Necromatcher</title>
+  <desc id="description">A golfer and a returning motion arc representing historical swing reconstruction.</desc>
+  <g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 76 A38 38 0 1 1 81 24" stroke-width="3" opacity="0.55"/>
+    <path d="M81 14 V25 H70" stroke-width="3" opacity="0.75"/>
+    <circle cx="47" cy="30" r="7" stroke-width="3"/>
+    <path d="M47 38 L50 59 L36 81 M50 59 L63 81 M48 43 L62 48 L72 37" stroke-width="3.5"/>
+    <path d="M71 38 L79 65 L85 63" stroke-width="2.5"/>
+  </g>
+  <g fill="white" opacity="0.65">
+    <circle cx="48" cy="43" r="3"/><circle cx="62" cy="48" r="3"/>
+    <circle cx="50" cy="59" r="3"/>
+  </g>
+</svg>

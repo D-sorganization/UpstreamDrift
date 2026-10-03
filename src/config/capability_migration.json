@@ -1378,6 +1378,18 @@
       "evidence": "src/tools/matched_swing_browser/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "necromatcher": {
+      "id": "necromatcher",
+      "name": "Necromatcher Historical Player Library",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation", "capture"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
     "analysis.analysis_tools_api": {
       "id": "analysis.analysis_tools_api",
       "name": "Analysis Tools REST endpoints (swing metrics, biomechanics)",
@@ -1401,6 +1413,30 @@
       "alias_target": null,
       "evidence": "src/shared/python/biomechanics/ztcf.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "drake.gui_force_overlay": {
+      "id": "drake.gui_force_overlay",
+      "name": "Drake GUI force/torque arrows and live tension/compression shading",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/drake/python/src/drake_force_overlay.py",
+      "acceptance_owner": "tests/unit/engines/drake/test_drake_gui_force_overlay.py"
+    },
+    "mujoco.force_overlays": {
+      "id": "mujoco.force_overlays",
+      "name": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "acceptance_owner": "tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py"
     },
     "analysis.cross_engine_robustness": {
       "id": "analysis.cross_engine_robustness",
@@ -1882,6 +1918,18 @@
       "evidence": "src/tools/matched_swing_browser/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.necromatcher": {
+      "id": "tools.necromatcher",
+      "name": "Historical Player Library And Source Review",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["capture", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "tools.putting_green": {
       "id": "tools.putting_green",
       "name": "Putting green simulation",
@@ -1928,6 +1976,42 @@
       "lifecycle": "active_feature",
       "alias_target": null,
       "evidence": "src/shared/python/body_part_viz/force_color_controls.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "necromatcher": {
+      "id": "necromatcher",
+      "name": "Necromatcher Historical Player Workspace",
+      "entity_kind": "tile",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "tools.necromatcher": {
+      "id": "tools.necromatcher",
+      "name": "Necromatcher Historical Player Workspace",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis", "simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/necromatcher/gui.py",
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "tools.video_analyzer": {
+      "id": "tools.video_analyzer",
+      "name": "Video Analyzer (pose tracking and force/torque overlay)",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/video_analyzer/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     }
   },

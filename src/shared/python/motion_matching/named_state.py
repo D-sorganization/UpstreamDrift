@@ -399,6 +399,60 @@ class SmallBodyVirtualWorkOracle:
         return w_joint, w_cart
 
 
+class SphericalJointVirtualWorkOracle:
+    """Analytical spherical joint (SO(3) unit quaternion) virtual work and duality oracle."""
+
+    @staticmethod
+    def quaternion_to_rotation_matrix(q: Array) -> Array:
+        """Convert unit quaternion [w, x, y, z] to 3x3 rotation matrix."""
+        arr = np.asarray(q, dtype=np.float64)
+        require(arr.shape == (4,), "quaternion must have shape (4,)")
+        norm = float(np.linalg.norm(arr))
+        require(norm > 0.0, "quaternion must have non-zero norm")
+        w, x, y, z = arr / norm
+        return np.array(
+            [
+                [
+                    1.0 - 2.0 * (y * y + z * z),
+                    2.0 * (x * y - z * w),
+                    2.0 * (x * z + y * w),
+                ],
+                [
+                    2.0 * (x * y + z * w),
+                    1.0 - 2.0 * (x * x + z * z),
+                    2.0 * (y * z - x * w),
+                ],
+                [
+                    2.0 * (x * z - y * w),
+                    2.0 * (y * z + x * w),
+                    1.0 - 2.0 * (x * x + y * y),
+                ],
+            ],
+            dtype=np.float64,
+        )
+
+    @staticmethod
+    def compute_virtual_work(torque: Array, omega: Array, dt: float) -> float:
+        """Compute virtual work delta_W = tau^T * omega * dt."""
+        tau = np.asarray(torque, dtype=np.float64)
+        w = np.asarray(omega, dtype=np.float64)
+        require(tau.shape == (3,), "torque shape must be (3,)")
+        require(w.shape == (3,), "omega shape must be (3,)")
+        require(dt > 0.0, "dt must be positive", dt)
+        return float(np.dot(tau, w) * dt)
+
+    def verify_virtual_work_duality(
+        self, q: Array, omega: Array, torque: Array, dt: float
+    ) -> tuple[float, float]:
+        """Verify that Cartesian moment work M^T * d_theta equals joint work tau^T * omega * dt."""
+        w_joint = self.compute_virtual_work(torque, omega, dt)
+        r_mat = self.quaternion_to_rotation_matrix(q)
+        m_cart = r_mat @ np.asarray(torque, dtype=np.float64)
+        d_theta = r_mat @ (np.asarray(omega, dtype=np.float64) * dt)
+        w_cart = float(np.dot(m_cart, d_theta))
+        return w_joint, w_cart
+
+
 class NamedStateConformanceAdapter:
     """Fail-closed conformance adapter verifying state mapping and attachment bounds."""
 

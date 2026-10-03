@@ -81,11 +81,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     loading_started = QtCore.pyqtSignal()
     loading_finished = QtCore.pyqtSignal(bool)
+    force_legend_changed = QtCore.pyqtSignal(str)
 
     def _init_visualization_toggles(self) -> None:
         from src.shared.python.body_part_viz import ForceColorScale
 
         self.axial_color_scale = ForceColorScale()
+        self.force_legend_text = ""
         self.show_force_vectors = False
         self.show_torque_vectors = False
         self.force_scale = 0.1
@@ -837,7 +839,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.cf_vector_type = cf_type
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
-        """Toggle native MuJoCo contact force rendering."""
+        """Toggle the optional MuJoCo native contact debug view (mjVIS_CONTACTFORCE)."""
         self.show_contact_forces = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled

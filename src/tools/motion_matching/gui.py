@@ -47,6 +47,18 @@ from PyQt6.QtWidgets import (
 )
 
 from src.tools.motion_matching import pipeline
+from src.tools.motion_matching.badge_utils import (
+    resolve_acceptance_badge_style,
+    resolve_neural_badge,
+)
+from src.tools.motion_matching.controller import (
+    MotionMatchingController,
+    RunDisposition,
+    format_neural_explanation,
+    open_results_browser_dialog,
+    open_tour_matching_viewer,
+    setup_neural_group,
+)
 from src.tools.motion_matching.tour_baselines_presenter import (
     ComputeBudgetView,
     EvidenceInspectionReport,
@@ -57,67 +69,13 @@ from src.tools.motion_matching.tour_baselines_presenter import (
 
 WINDOW_TITLE = "Motion Matching"
 
-
-class RunWorker(QObject):
-    """Executes a queue of external CLI commands sequentially via QProcess."""
-
-    started = pyqtSignal()
-    output_received = pyqtSignal(str)
-    finished = pyqtSignal(int)
-
-    def __init__(self, parent: QObject | None = None) -> None:
-        super().__init__(parent)
-        self._process: QProcess | None = None
-        self._queue: list[list[str]] = []
-        self._cwd: Path = pipeline.REPO_ROOT
-
-    def is_running(self) -> bool:
-        return self._process is not None
-
-    def start(self, commands: list[list[str]], cwd: Path | None = None) -> None:
-        if self._process is not None:
-            return
-        if not commands:
-            self.finished.emit(0)
-            return
-        self._queue = list(commands)
-        self._cwd = cwd or pipeline.REPO_ROOT
-        self.started.emit()
-        self._next()
-
-    def _next(self) -> None:
-        if not self._queue:
-            self._process = None
-            self.finished.emit(0)
-            return
-        command = self._queue.pop(0)
-        self.output_received.emit("$ " + " ".join(command) + "\n")
-        process = QProcess(self)
-        process.setWorkingDirectory(str(self._cwd))
-        process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
-        process.readyReadStandardOutput.connect(
-            lambda: self.output_received.emit(
-                process.readAllStandardOutput().data().decode(errors="replace")
-            )
-        )
-        process.finished.connect(self._on_step_finished)
-        self._process = process
-        process.start(command[0], command[1:])
-
-    def _on_step_finished(self, code: int, _status: object) -> None:
-        self._process = None
-        if code != 0:
-            self._queue.clear()
-            self.finished.emit(code)
-            return
-        self._next()
-
-    def stop(self) -> None:
-        self._queue.clear()
-        if self._process is not None:
-            self._process.kill()
-            self._process = None
-            self.finished.emit(-1)
+from src.tools.motion_matching.process_lifecycle import (  # noqa: E402
+    RunContext,
+    RunResult,
+    RunStatus,
+    RunWorker,
+    format_failure_diagnostic,
+)
 
 
 class MotionMatchingWidget(QWidget):
@@ -131,6 +89,8 @@ class MotionMatchingWidget(QWidget):
         super().__init__(parent)
         self._tb_presenter = tb_presenter or TourBaselinesPresenter()
         self._worker = RunWorker(self)
+        self.controller = MotionMatchingController()
+        self.last_run_disposition: RunDisposition | None = None
         self._request: pipeline.MatchRequest | None = None
         self._exp_request: pipeline.ExperimentRequest | None = None
         self.ik_movie: QMovie | None = None
@@ -141,25 +101,11 @@ class MotionMatchingWidget(QWidget):
 
         self.tabs = QTabWidget(self)
 
-        # Tab 1: Matching
-        match_widget = self._create_matching_tab()
-        self.tabs.addTab(match_widget, "Matching")
-
-        # Tab 2: Downswing experiment
-        exp_widget = self._create_experiment_tab()
-        self.tabs.addTab(exp_widget, "Downswing experiment")
-
-        # Tab 3: MJX
-        mjx_widget = self._create_mjx_tab()
-        self.tabs.addTab(mjx_widget, "MJX")
-
-        # Tab 4: Club-Only Excel (CO-09 #10613)
-        club_widget = self._create_club_only_tab()
-        self.tabs.addTab(club_widget, "Club-Only")
-
-        # Tab 5: Tour Baselines (TB-11 #10596)
-        baselines_widget = self._create_tour_baselines_tab()
-        self.tabs.addTab(baselines_widget, "Tour Baselines")
+        self.tabs.addTab(self._create_matching_tab(), "Matching")
+        self.tabs.addTab(self._create_experiment_tab(), "Downswing experiment")
+        self.tabs.addTab(self._create_mjx_tab(), "MJX")
+        self.tabs.addTab(self._create_club_only_tab(), "Club-Only")
+        self.tabs.addTab(self._create_tour_baselines_tab(), "Tour Baselines")
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
@@ -227,16 +173,12 @@ class MotionMatchingWidget(QWidget):
         self.shooting_gain = self._double_spin(0.70, 0.0, 1.0, 0.05)
 
         # Mutual exclusion between free and bound wrists
-        def _on_free_wrists(checked: bool) -> None:
-            if checked:
-                self.bound_wrists.setChecked(False)
-
-        def _on_bound_wrists(checked: bool) -> None:
-            if checked:
-                self.free_wrists.setChecked(False)
-
-        self.free_wrists.toggled.connect(_on_free_wrists)
-        self.bound_wrists.toggled.connect(_on_bound_wrists)
+        self.free_wrists.toggled.connect(
+            lambda c: self.bound_wrists.setChecked(False) if c else None
+        )
+        self.bound_wrists.toggled.connect(
+            lambda c: self.free_wrists.setChecked(False) if c else None
+        )
 
         stages_layout.addRow(self.free_wrists)
         stages_layout.addRow(self.bound_wrists)
@@ -270,30 +212,14 @@ class MotionMatchingWidget(QWidget):
         return widget
 
     def _create_neural_group(self) -> QGroupBox:
-        """Create neural-assisted matching controls (NM-11, #10626)."""
-        box = QGroupBox("Neural-Assisted Motion Matching")
-        layout = QFormLayout(box)
-        self.neural_mode = QComboBox()
-        self.neural_mode.addItems(
-            ["Classical Only", "Neural Preview", "Neural Verified"]
-        )
-        self.neural_mode.setCurrentText("Classical Only")
-
-        self.neural_model_selector = QComboBox()
-        self.neural_model_selector.addItems(
-            [
-                "driven_double_pendulum",
-                "mujoco_humanoid_3d",
-                "pinocchio_golf_arm",
-            ]
-        )
-
-        self.allow_classical_fallback = QCheckBox("Allow classical fallback")
-        self.allow_classical_fallback.setChecked(True)
-
-        layout.addRow("Inference Mode:", self.neural_mode)
-        layout.addRow("Neural Model:", self.neural_model_selector)
-        layout.addRow(self.allow_classical_fallback)
+        """Create neural-assisted matching controls (NM-11, #10626, R07 #11147)."""
+        (
+            box,
+            self.neural_mode,
+            self.neural_model_selector,
+            self.allow_classical_fallback,
+            self.neural_explanation_label,
+        ) = setup_neural_group(self)
         return box
 
     def _create_results_section(self) -> QGroupBox:
@@ -834,13 +760,13 @@ class MotionMatchingWidget(QWidget):
         return box
 
     def _browse_dir(self, line_edit: QLineEdit, caption: str) -> None:
-        chosen = QFileDialog.getExistingDirectory(self, caption)
-        if chosen:
+        if chosen := QFileDialog.getExistingDirectory(self, caption):
             line_edit.setText(chosen)
 
     def _browse_file(self, line_edit: QLineEdit, filter_str: str) -> None:
-        chosen, _ = QFileDialog.getOpenFileName(self, "Select file", filter=filter_str)
-        if chosen:
+        if chosen := QFileDialog.getOpenFileName(
+            self, "Select file", filter=filter_str
+        )[0]:
             line_edit.setText(chosen)
 
     def _default_club(self, capture: str) -> None:
@@ -868,6 +794,9 @@ class MotionMatchingWidget(QWidget):
             ik_backend=self.ik_backend.currentText(),
             tracking=self.tracking.currentText(),
             step_mode=self.step_mode.currentText(),
+            neural_mode=self.neural_mode.currentText(),
+            neural_model=self.neural_model_selector.currentText().strip(),
+            allow_fallback=self.allow_classical_fallback.isChecked(),
         )
 
     def experiment_request(self) -> pipeline.ExperimentRequest:
@@ -908,13 +837,39 @@ class MotionMatchingWidget(QWidget):
             return
         self._request = self.request()
         self.log.clear()
-        self.results.setText("Running matching pipeline...")
+        self.clear_neural_metrics()
+        disp = self.controller.prepare_run(self._request)
+        self.last_run_disposition = disp
+
+        if disp.status == "rejected":
+            self.results.setText(f"Run rejected: {disp.reason}")
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {"status": "REJECTED", "is_preview": disp.is_preview}
+                )
+            )
+            return
+
+        if disp.status == "classical_fallback":
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {"status": "CLASSICAL_FALLBACK", "is_preview": disp.is_preview}
+                )
+            )
+            self.results.setText("Running matching pipeline (classical fallback)...")
+        else:
+            self.results.setText("Running matching pipeline...")
+
         self._set_active_buttons(self.run_button, self.stop_button, running=True)
-        commands = [
-            pipeline.build_command(self._request),
-            pipeline.match_command(self._request),
-        ]
-        self._worker.start(commands)
+        commands = list(disp.commands)
+        ctx = RunContext(
+            owning_panel="matching",
+            stage_name="build",
+            request=self._request,
+            output_dir=self._request.output_dir,
+            commands=tuple(tuple(c) for c in commands),
+        )
+        self._worker.start(commands, context=ctx, stage_names=["build", "match"])
 
     def start_experiment(self) -> None:
         if self._worker.is_running():
@@ -923,7 +878,15 @@ class MotionMatchingWidget(QWidget):
         self.exp_log.clear()
         self.exp_results.setText("Running downswing experiment...")
         self._set_active_buttons(self.exp_run_btn, self.exp_stop_btn, running=True)
-        self._worker.start([self.experiment_command()])
+        cmd = self.experiment_command()
+        ctx = RunContext(
+            owning_panel="experiment",
+            stage_name="downswing_experiment",
+            request=self._exp_request,
+            output_dir=Path(self._exp_request.run),
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["downswing_experiment"])
 
     def start_mjx_export(self) -> None:
         if self._worker.is_running():
@@ -931,7 +894,13 @@ class MotionMatchingWidget(QWidget):
         self.mjx_log.clear()
         self.mjx_results.setText("Exporting MJX package...")
         self._set_active_buttons(self.mjx_export_btn, self.mjx_stop_btn, running=True)
-        self._worker.start([self.mjx_export_command()])
+        cmd = self.mjx_export_command()
+        ctx = RunContext(
+            owning_panel="mjx",
+            stage_name="mjx_export",
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["mjx_export"])
 
     def start_mjx_validation(self) -> None:
         if self._worker.is_running():
@@ -939,7 +908,13 @@ class MotionMatchingWidget(QWidget):
         self.mjx_log.clear()
         self.mjx_results.setText("Validating MJX reference...")
         self._set_active_buttons(self.mjx_validate_btn, self.mjx_stop_btn, running=True)
-        self._worker.start([self.mjx_validate_command()])
+        cmd = self.mjx_validate_command()
+        ctx = RunContext(
+            owning_panel="mjx",
+            stage_name="mjx_validate",
+            commands=(tuple(cmd),),
+        )
+        self._worker.start([cmd], context=ctx, stage_names=["mjx_validate"])
 
     def stop(self) -> None:
         self._worker.stop()
@@ -951,16 +926,16 @@ class MotionMatchingWidget(QWidget):
         stop_btn.setEnabled(running)
 
     def _on_output(self, text: str) -> None:
-        # Route output to current active tab log
-        idx = self.tabs.currentIndex()
-        if idx == 0:
+        ctx = self._worker.current_context
+        panel = ctx.owning_panel if ctx is not None else None
+        if panel == "matching" or (panel is None and self.tabs.currentIndex() == 0):
             self.log.appendPlainText(text)
-        elif idx == 1:
+        elif panel == "experiment" or (panel is None and self.tabs.currentIndex() == 1):
             self.exp_log.appendPlainText(text)
-        elif idx == 2:
+        elif panel == "mjx" or (panel is None and self.tabs.currentIndex() == 2):
             self.mjx_log.appendPlainText(text)
 
-    def _on_finished(self, code: int) -> None:
+    def _on_finished(self, code: int, result: RunResult | None = None) -> None:
         self._set_active_buttons(self.run_button, self.stop_button, running=False)
         self._set_active_buttons(self.exp_run_btn, self.exp_stop_btn, running=False)
         self._set_active_buttons(self.mjx_export_btn, self.mjx_stop_btn, running=False)
@@ -968,18 +943,27 @@ class MotionMatchingWidget(QWidget):
             self.mjx_validate_btn, self.mjx_stop_btn, running=False
         )
 
-        idx = self.tabs.currentIndex()
-        if code != 0:
-            msg = f"Step failed with exit code {code}; see log for details."
-            if idx == 0:
+        res = result or self._worker.last_result
+        panel = res.context.owning_panel if res is not None else None
+        if panel is None:
+            idx = self.tabs.currentIndex()
+            panel = "matching" if idx == 0 else ("experiment" if idx == 1 else "mjx")
+
+        if code != 0 or (res is not None and not res.is_success):
+            msg = (
+                format_failure_diagnostic(res)
+                if res is not None
+                else f"Step failed with exit code {code}; see log for details."
+            )
+            if panel == "matching":
                 self.results.setText(msg)
-            elif idx == 1:
+            elif panel == "experiment":
                 self.exp_results.setText(msg)
-            elif idx == 2:
+            elif panel == "mjx":
                 self.mjx_results.setText(msg)
             return
 
-        if idx == 0 and self._request is not None:
+        if panel == "matching" and self._request is not None:
             try:
                 summary = pipeline.read_summary(self._request.output_dir)
                 metrics, verdict = pipeline.extract_five_metrics_and_acceptance(summary)
@@ -988,7 +972,7 @@ class MotionMatchingWidget(QWidget):
                 )
             except ValueError as exc:
                 self.results.setText(str(exc))
-        elif idx == 1 and self._exp_request is not None:
+        elif panel == "experiment" and self._exp_request is not None:
             try:
                 summary = pipeline.read_experiment_summary(
                     self._exp_request.run, self._exp_request.name
@@ -1003,7 +987,7 @@ class MotionMatchingWidget(QWidget):
                 )
             except ValueError as exc:
                 self.exp_results.setText(str(exc))
-        elif idx == 2:
+        elif panel == "mjx":
             self.mjx_results.setText("MJX operation completed successfully.")
 
     def _update_results_ui(
@@ -1015,24 +999,16 @@ class MotionMatchingWidget(QWidget):
     ) -> None:
         self._metrics = metrics
         self.acceptance_badge.setText(verdict)
-        if verdict in ("PASSED", "QUALIFIED"):
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: green;")
-        elif verdict == "REJECTED":
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: red;")
-        else:
-            self.acceptance_badge.setStyleSheet("font-weight: bold; color: gray;")
+        _, v_style = resolve_acceptance_badge_style(verdict)
+        self.acceptance_badge.setStyleSheet(v_style)
 
-        def _fmt_mm(val: Any) -> str:
-            return f"{val} mm" if val is not None else "-"
+        def fmt(k: str) -> str:
+            return f"{metrics[k]} mm" if metrics.get(k) is not None else "-"
 
-        self.metric_ik_rms.setText(_fmt_mm(metrics.get("full_capture_ik_rms_mm")))
-        self.metric_address_rms.setText(_fmt_mm(metrics.get("address_marker_rms_mm")))
-        self.metric_backswing_root.setText(
-            _fmt_mm(metrics.get("backswing_root_error_max_mm"))
-        )
-        self.metric_whole_run_root.setText(
-            _fmt_mm(metrics.get("whole_run_root_rms_mm"))
-        )
+        self.metric_ik_rms.setText(fmt("full_capture_ik_rms_mm"))
+        self.metric_address_rms.setText(fmt("address_marker_rms_mm"))
+        self.metric_backswing_root.setText(fmt("backswing_root_error_max_mm"))
+        self.metric_whole_run_root.setText(fmt("whole_run_root_rms_mm"))
         frac = metrics.get("inside_support_polygon_fraction")
         self.metric_support_polygon.setText(f"{frac:.2f}" if frac is not None else "-")
 
@@ -1060,14 +1036,32 @@ class MotionMatchingWidget(QWidget):
 
         neural_info = summary.get("neural_inference") or metrics.get("neural_inference")
         if isinstance(neural_info, dict):
-            self.update_neural_metrics(
-                status=str(neural_info.get("status", "NEURAL_ACCEPTED")),
-                is_preview=bool(neural_info.get("is_preview", False)),
-                confidence=neural_info.get("confidence"),
-                t_neural_s=float(neural_info.get("t_neural_s", 0.0)),
-                t_polish_s=float(neural_info.get("t_polish_s", 0.0)),
-                t_total_s=float(neural_info.get("t_total_s", 0.0)),
+            active_model = self.neural_model_selector.currentText().strip()
+            self._apply_neural_badge(resolve_neural_badge(neural_info, active_model))
+        elif (
+            self.last_run_disposition is not None
+            and self.last_run_disposition.status == "classical_fallback"
+        ):
+            self._apply_neural_badge(
+                resolve_neural_badge(
+                    {
+                        "status": "CLASSICAL_FALLBACK",
+                        "is_preview": self.last_run_disposition.is_preview,
+                    }
+                )
             )
+        else:
+            self.clear_neural_metrics()
+
+    def _apply_neural_badge(self, nb: dict[str, Any]) -> None:
+        self.neural_status_badge.setText(nb["badge_text"])
+        self.neural_status_badge.setStyleSheet(nb["badge_style"])
+        self.metric_neural_confidence.setText(nb["confidence_text"])
+        self.metric_time_breakdown.setText(nb["timing_text"])
+
+    def clear_neural_metrics(self) -> None:
+        """Clear neural-assisted status badge, empirical confidence, and time breakdown (R06, #11146)."""
+        self._apply_neural_badge(resolve_neural_badge(None))
 
     def update_neural_metrics(
         self,
@@ -1079,37 +1073,19 @@ class MotionMatchingWidget(QWidget):
         t_polish_s: float = 0.0,
         t_total_s: float = 0.0,
     ) -> None:
-        """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626)."""
-        if is_preview:
-            self.neural_status_badge.setText(f"PREVIEW ({status})")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: darkorange; background-color: cornsilk; border-radius: 4px; padding: 2px 6px;"
+        """Update neural-assisted status badge, empirical confidence, and time breakdown (NM-11, #10626, #11146)."""
+        self._apply_neural_badge(
+            resolve_neural_badge(
+                {
+                    "status": status,
+                    "is_preview": is_preview,
+                    "confidence": confidence,
+                    "t_neural_s": t_neural_s,
+                    "t_polish_s": t_polish_s,
+                    "t_total_s": t_total_s,
+                }
             )
-        elif status in ("VERIFIED", "NEURAL_ACCEPTED"):
-            self.neural_status_badge.setText("VERIFIED")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: forestgreen; background-color: honeydew; border-radius: 4px; padding: 2px 6px;"
-            )
-        elif status == "CLASSICAL_FALLBACK":
-            self.neural_status_badge.setText("CLASSICAL FALLBACK")
-            self.neural_status_badge.setStyleSheet(
-                "font-weight: bold; color: royalblue; background-color: aliceblue; border-radius: 4px; padding: 2px 6px;"
-            )
-        else:
-            self.neural_status_badge.setText(status)
-            self.neural_status_badge.setStyleSheet("font-weight: bold; color: gray;")
-
-        if confidence is not None:
-            self.metric_neural_confidence.setText(f"{confidence:.3f} (domain support)")
-        else:
-            self.metric_neural_confidence.setText("-")
-
-        if t_total_s > 0.0:
-            self.metric_time_breakdown.setText(
-                f"Neural: {t_neural_s * 1000:.1f}ms | Polish: {t_polish_s * 1000:.1f}ms | Total: {t_total_s * 1000:.1f}ms"
-            )
-        else:
-            self.metric_time_breakdown.setText("-")
+        )
 
     def metrics_values(self) -> dict[str, Any]:
         """Return the extracted five headline metrics from the last matching run."""
@@ -1140,45 +1116,13 @@ class MotionMatchingWidget(QWidget):
 
     def _on_open_results_browser(self) -> None:
         """Open or show the Matched Swing Results Browser dialog."""
-        try:
-            from PyQt6.QtWidgets import QDialog, QTableWidget, QTableWidgetItem
-
-            from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
-
-            model = MatchedSwingBrowserModel()
-            dialog = QDialog(self)
-            dialog.setWindowTitle("Matched Swing Results Browser")
-            dialog.resize(800, 400)
-            d_layout = QVBoxLayout(dialog)
-            table = QTableWidget(dialog)
-            rows = model.load_ledger()
-            table.setColumnCount(5)
-            table.setHorizontalHeaderLabels(
-                ["Receipt Path", "Engine", "Lane", "Capture", "Verdict"]
-            )
-            table.setRowCount(len(rows))
-            for i, r in enumerate(rows):
-                table.setItem(i, 0, QTableWidgetItem(str(r.receipt_path)))
-                table.setItem(i, 1, QTableWidgetItem(str(r.engine)))
-                table.setItem(i, 2, QTableWidgetItem(str(r.lane)))
-                table.setItem(i, 3, QTableWidgetItem(str(r.capture or "")))
-                verdict = model.extract_verdict_string(r)
-                table.setItem(i, 4, QTableWidgetItem(verdict))
-            d_layout.addWidget(table)
-            self._browser_window = dialog
-            dialog.show()
-        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
-            self.log.appendPlainText(f"Could not open results browser: {exc}\n")
+        self._browser_window = open_results_browser_dialog(
+            self, self.log.appendPlainText
+        )
 
     def _on_open_viewer(self) -> None:
         """Open or show the Tour Matching Viewer window."""
-        try:
-            from src.tools.tour_matching_viewer.gui import TourMatchingViewerWindow
-
-            self._viewer_window = TourMatchingViewerWindow()
-            self._viewer_window.show()
-        except (RuntimeError, ValueError, OSError, AttributeError, ImportError) as exc:
-            self.log.appendPlainText(f"Could not open viewer: {exc}\n")
+        self._viewer_window = open_tour_matching_viewer(self.log.appendPlainText)
 
 
 def get_dockable_ui() -> QMainWindow:
@@ -1197,4 +1141,13 @@ def main(argv: list[str] | None = None) -> int:
     return app.exec()
 
 
-__all__ = ["MotionMatchingWidget", "RunWorker", "get_dockable_ui", "main"]
+__all__ = [
+    "MotionMatchingWidget",
+    "RunContext",
+    "RunResult",
+    "RunStatus",
+    "RunWorker",
+    "format_failure_diagnostic",
+    "get_dockable_ui",
+    "main",
+]

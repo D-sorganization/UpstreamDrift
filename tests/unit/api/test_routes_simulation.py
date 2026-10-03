@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from src.api.routes.simulation import router
 from src.api.dependencies import get_simulation_service, get_task_manager
 
+pytestmark = pytest.mark.unit
+
 
 class MockSimulationService:
     async def run_simulation(self, request):

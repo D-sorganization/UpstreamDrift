@@ -1,10 +1,10 @@
 # Shadow Tracker
 
-**Status: Image-Contract Handoff Ready; Fitter Runtime Not Implemented.**
+**Status: Core Ingestion, Segmentation, and Forward-Dynamics Service Implemented; Neural Model Inference Requires Qualified Weights (Absent Inference Fails Closed).**
 
 Epic: [#10122](https://github.com/D-sorganization/UpstreamDrift/issues/10122).
 Source inspection baseline: `f8daa71aa263a60c54c785b1ac2d4bc060eb2a71`,
-2026-09-14. Recheck interfaces at the implementation commit.
+2026-09-14. Updated 2026-10-02 (#11227).
 
 Shadow Tracker turns video of a golfer into timestamped body and club outlines,
 fits a subject and initial state, then searches for controls whose **continuous

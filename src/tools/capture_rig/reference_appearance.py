@@ -24,12 +24,19 @@ class MotionAppearanceControls(QWidget):
         self.club.setToolTip(
             "Requires club connectivity saved with the reference asset."
         )
-        self.ellipsoids = QCheckBox("Show 3D Segment Ellipsoids")
+        self.ellipsoids = QCheckBox("Model volumes (shaded)")
+        self.model_volumes = self.ellipsoids
+        self.forces = QCheckBox("Show Forces")
+        self.torques = QCheckBox("Show Torques")
+        self.legend = QCheckBox("Show Legend")
         for field, value in (
             (self.skeleton, layer.draw_skeleton),
             (self.joints, layer.draw_joints),
             (self.club, layer.draw_club),
             (self.ellipsoids, layer.draw_ellipsoids),
+            (self.forces, layer.draw_forces),
+            (self.torques, layer.draw_torques),
+            (self.legend, layer.draw_legend),
         ):
             field.setChecked(value)
             field.toggled.connect(self.changed.emit)
@@ -38,9 +45,13 @@ class MotionAppearanceControls(QWidget):
         self.volume_alpha.setValue(layer.ellipsoid_opacity)
         self.radius = number("Segment Radius / Length", (0.01, 0.5), 0.01)
         self.radius.setValue(layer.segment_radius_ratio)
+        self.scale = number("Force Scale", (0.01, 10.0), 0.1)
+        self.scale.setValue(layer.force_scale)
+        self.force_scale = self.scale
         for label, numeric_field in (
             ("Ellipsoid Opacity", self.volume_alpha),
             ("Radius / Length", self.radius),
+            ("Force Scale", self.scale),
         ):
             numeric_field.valueChanged.connect(self.changed.emit)
             form.addRow(label, numeric_field)
@@ -61,5 +72,9 @@ class MotionAppearanceControls(QWidget):
                 "draw_ellipsoids": self.ellipsoids.isChecked(),
                 "ellipsoid_opacity": self.volume_alpha.value(),
                 "segment_radius_ratio": self.radius.value(),
+                "draw_forces": self.forces.isChecked(),
+                "draw_torques": self.torques.isChecked(),
+                "draw_legend": self.legend.isChecked(),
+                "force_scale": self.scale.value(),
             }
         )

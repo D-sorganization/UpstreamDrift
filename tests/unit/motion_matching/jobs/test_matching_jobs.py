@@ -52,6 +52,137 @@ from src.shared.python.motion_matching.jobs import (
 pytestmark = pytest.mark.unit
 
 
+def test_completed_research_work_preserves_rejection_in_manifest(
+    tmp_path: Path,
+) -> None:
+    from src.shared.python.motion_matching.jobs import MatchingWorkOutcome
+
+    service = MatchingJobService()
+    outcome = MatchingWorkOutcome(
+        AcceptanceState.REJECTED,
+        blockers=("physical_clock_unknown", "camera_unqualified"),
+        message="Research fit computed; independent dynamics not qualified",
+    )
+    try:
+        result = service.start(_spec(tmp_path), work=lambda *_: outcome).join(timeout=5)
+        assert result.status == JobStatus.SUCCEEDED
+        assert result.acceptance == AcceptanceState.REJECTED
+        assert "physical_clock_unknown" in result.blockers
+        manifest = RunManifest.from_dict(
+            json.loads((tmp_path / "run_manifest.json").read_text())
+        )
+        assert manifest.acceptance == AcceptanceState.REJECTED
+        with pytest.raises(PartialOutputRejectedError):
+            service.advertise_as_accepted(manifest)
+    finally:
+        service.close()
+
+
+def test_explicit_work_acceptance_requires_no_blockers() -> None:
+    from src.shared.python.motion_matching.jobs import MatchingWorkOutcome
+
+    with pytest.raises(ValueError, match="blockers"):
+        MatchingWorkOutcome(AcceptanceState.ACCEPTED, blockers=("camera_unknown",))
+    with pytest.raises(ValueError, match="terminal"):
+        MatchingWorkOutcome(AcceptanceState.INTERRUPTED)
+
+
+def test_cancel_before_publication_does_not_expose_result(tmp_path: Path) -> None:
+    from src.shared.python.motion_matching.jobs import MatchingWorkOutcome
+
+    ready, finish = threading.Event(), threading.Event()
+    published = []
+
+    def work(*_):
+        ready.set()
+        assert finish.wait(5)
+        return MatchingWorkOutcome(
+            AcceptanceState.REJECTED,
+            ("research_only",),
+            publish=lambda: published.append("fit"),
+        )
+
+    service = MatchingJobService()
+    try:
+        handle = service.start(_spec(tmp_path), work=work)
+        assert ready.wait(5)
+        handle.request_cancel()
+        finish.set()
+        assert handle.join(5).status == JobStatus.CANCELLED
+        assert published == []
+    finally:
+        finish.set()
+        service.close()
+
+
+def test_publication_commits_before_a_late_cancel(tmp_path: Path) -> None:
+    from src.shared.python.motion_matching.jobs import MatchingWorkOutcome
+
+    publishing, finish, cancelling = (
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+    )
+    published = []
+
+    def publish():
+        publishing.set()
+        assert finish.wait(5)
+        published.append("fit")
+
+    service = MatchingJobService()
+    try:
+        handle = service.start(
+            _spec(tmp_path),
+            work=lambda *_: MatchingWorkOutcome(
+                AcceptanceState.REJECTED, ("research_only",), publish=publish
+            ),
+        )
+        assert publishing.wait(5)
+
+        def cancel():
+            cancelling.set()
+            handle.request_cancel()
+
+        thread = threading.Thread(target=cancel)
+        thread.start()
+        assert cancelling.wait(5)
+        finish.set()
+        result = handle.join(5)
+        thread.join(5)
+        assert not thread.is_alive()
+        assert result.status == JobStatus.SUCCEEDED
+        assert result.acceptance == AcceptanceState.REJECTED
+        assert published == ["fit"]
+    finally:
+        finish.set()
+        service.close()
+
+
+@pytest.mark.parametrize(
+    "blockers,expected",
+    [((), JobStatus.SUCCEEDED), (("clock_unknown",), JobStatus.FAILED)],
+)
+def test_explicit_acceptance_checks_job_blockers_before_publication(
+    tmp_path: Path, blockers, expected
+) -> None:
+    from src.shared.python.motion_matching.jobs import MatchingWorkOutcome
+
+    published = []
+    service = MatchingJobService()
+    try:
+        outcome = MatchingWorkOutcome(
+            AcceptanceState.ACCEPTED, publish=lambda: published.append("fit")
+        )
+        result = service.start(
+            _spec(tmp_path, blockers=blockers), work=lambda *_: outcome
+        ).join(5)
+        assert result.status == expected
+        assert published == ([] if blockers else ["fit"])
+    finally:
+        service.close()
+
+
 def _hashes(**overrides: str) -> HashBundle:
     base = {
         "data_hash": "sha256:" + "a" * 64,

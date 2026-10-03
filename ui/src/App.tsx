@@ -100,6 +100,9 @@ const MatchedSwingsPage = lazy(() =>
     default: m.MatchedSwingsPage,
   })),
 );
+const NecromatcherPage = lazy(() =>
+  import("./pages/Necromatcher").then((m) => ({ default: m.NecromatcherPage })),
+);
 const CrossEngineDashboardPage = lazy(() =>
   import("./pages/CrossEngineDashboard").then((m) => ({
     default: m.CrossEngineDashboardPage,
@@ -149,6 +152,7 @@ export function RoutedContent() {
           <Route path="/tools/data-explorer" element={<DataExplorerPage />} />
           <Route path="/tools/motion-capture" element={<MotionCapturePage />} />
           <Route path="/tools/matched-swings" element={<MatchedSwingsPage />} />
+          <Route path="/tools/necromatcher" element={<NecromatcherPage />} />
           <Route
             path="/tools/cross-engine"
             element={<CrossEngineDashboardPage />}

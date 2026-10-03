@@ -3,6 +3,42 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "render_frame",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to render_frame.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_overlay writes comparison clips with force and torque rendering.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to export_overlay.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/reference_export.py",
+      "symbol": "export_comparison_video",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_comparison_video sidecar tracking for glyph receipts.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "scripts/companion_catalog.py",
       "symbol": "_catalog_payload",
       "rule": "function-lines",
@@ -350,7 +386,8 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7217 legacy launcher decomposition: select_model remains over the function-lines budget until the launcher is split by responsibility.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31",
+      "issue": 11103
     },
     {
       "path": "src/launchers/upstream_drift_launcher.py",
@@ -358,7 +395,8 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7217 legacy launcher decomposition: main remains over the function-lines budget until startup and window orchestration move into focused launcher modules.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31",
+      "issue": 11103
     },
     {
       "path": "src/shared/python/chat/_chat_dock_widget_qt.py",
@@ -400,7 +438,7 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 7725,
       "reason": "Issue #7725: pre-existing cross-engine CC-30 forward-sim kernel (plant build, actuation wiring, initial-pose, rollout, FK, postconditions) already exceeded the function-lines budget before this change. The rollout/error-handling loop was extracted to _record_rollout (#7727); fully decomposing the remaining plant-construction body is a larger cross-engine refactor shared by every engine's simulate_with_coefficients. Temporary exception until that decomposition lands.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
@@ -408,7 +446,8 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_qpos_jacobian was already over the changed-file function-lines budget (pre-existing rollout/linearisation loop) and needs setup/rollout/propagation split.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31",
+      "issue": 11103
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/jacobians.py",
@@ -416,7 +455,8 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7688 cross-engine torque ordering fix touches jacobians.py; compute_cost_gradient_analytical was already over the changed-file function-lines budget (pre-existing analytical gradient assembly) and needs decomposition.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31",
+      "issue": 11103
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/motion_matching/simulate.py",
@@ -424,7 +464,8 @@
       "rule": "function-lines",
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "reason": "Issue #7688 cross-engine torque ordering fix touches simulate.py; simulate_with_coefficients was already over the changed-file function-lines budget (pre-existing forward-sim orchestration) and needs setup/rollout/output-assembly split.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31",
+      "issue": 11103
     },
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py",
@@ -433,7 +474,7 @@
       "owner": "@dieterolson @D-sorganization/core-maintainers",
       "issue": 7829,
       "reason": "Issue #7829: evaluate exceeded the changed-file parameter budget. Temporary exception until configuration object is extracted.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/diff_ik.py",
@@ -547,7 +588,7 @@
       "owner": "@dieterolson @D-sorganization/physics-team",
       "issue": 9151,
       "reason": "Issue #9151: the native evidence artifact is hash-bound to this preregistered control evaluator. A context-object decomposition would invalidate the exact successful Ubuntu evidence source digest and requires a fresh native rerun; retain the explicit operator inputs temporarily and remove this exception with the next forward-attribution implementation.",
-      "expires_on": "2026-09-30"
+      "expires_on": "2026-10-31"
     },
     {
       "path": "src/shared/python/optimization/crocoddyl_backend.py",

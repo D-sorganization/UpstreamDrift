@@ -1,3 +1,455 @@
+## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
+
+Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
+- **Reproducible Gallery Generator (`scripts/render_force_overlay_gallery.py`)**:
+  - Headless execution across all supported engines and renderers under `MPLBACKEND=Agg`, `QT_QPA_PLATFORM=offscreen`, and `MUJOCO_GL=egl`.
+  - Generates sharp stills, clip manifests, and interactive `index.html` recording engine versions, model hashes, and `VideoGlyphReceipt` verification metrics (`drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`).
+  - Unsupported or uninstalled engines fail open with structured skip reasons rather than crashing.
+- **Golden Image Visual Regression Suite (`tests/visual/force_overlay/test_golden_force_overlays.py`)**:
+  - Headless 320x240 golden regression fixtures verifying Matplotlib 3D, OpenCV calibrated pinhole projection, and MuJoCo EGL native offscreen renders against committed golden images.
+  - Perceptual tolerance enforced strictly via `MAX_MEAN_ABS_DIFF = 2.0` on $[0, 255]$ ($2/255$ scale); threshold relaxation is prohibited.
+- **Authoritative Force Overlay Documentation & Parity Records**:
+  - User Guide in `docs/user_guide/force_overlay.md` detailing the 7-kind `FORCE_KIND_PALETTE`, axial tension/compression color scales, desktop GUI controls, web Three.js/SVG toggles, video compositing labels, and engine-specific limits.
+  - Cross-linked from `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Feature parity ledger (`src/config/feature_parity.json`) updated to record multi-engine producer wiring, and `force_overlays` tile in `launcher_manifest.json` promoted to `ready`.
+
+## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
+
+Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
+- **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
+  - `evaluate_candidate_promotion` enforces strict gate contracts: iron candidates must not use driver capture declarations, document IDs, or attachment calibration hashes; driver candidates must not use iron assets.
+  - Fail-closed integrator parity verification: solve and replay integrators must match exactly in scheme (`rk45`, `euler`, etc.), relative/absolute tolerances, and step configuration before promotion.
+  - G1-before-G2/G3 prerequisite: G2/G3 promotion strictly rejects candidates when G1 is unaccepted.
+  - Multibody physical audit gating: enforces normal force limits ($\le 2.5\text{ BW}$), ground penetration ($\le 5\text{ mm}$), weld closure translation ($\le 5\text{ mm}$), weld closure rotation ($\le 0.05\text{ rad}$), min weight fraction ($\ge 0.85$), and anatomical range of motion (RoM) excess bounds ($\le 0.0^\circ$) beyond mere solver convergence.
+- **Cross-Engine Torque Transfer & Parity Evaluation (`evaluate_cross_engine_torque_transfer`, `EngineTransferVerdict`, `CrossEngineTransferMatrix`)**:
+  - Validates transfer of optimal control torques and contact allocations computed by Pinocchio into downstream target dynamics engines (MuJoCo, Simscape).
+  - Evaluates forward acceleration parity $\ddot{q}_{\text{target}}$ against target accelerations and equilibrium residuals against engine-specific declared tolerances (`engine_tolerances`, `engine_equilibrium_tolerances`).
+  - Preserves declared actuator armature inertia ($5 \times 10^{-3}\text{ kg}\cdot\text{m}^2$), tracking gains, and residual root wrench assistance across engine boundaries.
+  - Employs synthetic force adapters (`PinocchioSyntheticForceAdapter`, `MujocoSyntheticForceAdapter`) with explicit opt-in (`allow_synthetic=True`) for non-native test environments.
+- **Quaternion Spherical Joint Virtual Work Duality (`src/shared/python/motion_matching/named_state.py`)**:
+  - `SphericalJointVirtualWorkOracle` verifies exact virtual work duality $\tau^T \omega = \tau_q^T \dot{q}$ for spherical joints with quaternion coordinates.
+  - Enforces coordinate name-to-index permutation invariance, ensuring packed state vectors and physical poses remain strictly invariant under dictionary key reordering while failing closed on missing or unexpected coordinates.
+
+## Continuous Shadow Optimization With Uncertainty and Abstention (MMR-15, #11101)
+
+Specifies continuous forward model optimization, zero-assistance physical audit compliance, held-out C3D phase stratification, archive stress resilience, and monocular kinetic identifiability boundaries:
+- **Continuous Whole-Body Replay and Zero Assistance (`src/shared/python/shadow_tracker/evaluation.py`, `forward_model.py`)**:
+  - Continuous forward rollouts enforce zero intermediate state resets (`reset_count == 1`) and zero undeclared root/pelvis actuation ($F_{\text{root}} = 0$). Any ghost pelvis forces or mid-trajectory resets fail physical acceptance.
+  - Forward models declare `is_qualified: bool` capability; unqualified engines cannot attain release-certified evidence quality.
+- **Phase-Stratified Tracking Validation Against Held-Out C3D (`evaluate_phase_stratified_tracking`, `PhaseStratifiedReport`)**:
+  - Validates continuous fitted trajectories against synchronized held-out C3D motion capture benchmarks stratified across swing phases (address, backswing, downswing, impact, follow-through).
+  - Computes per-phase joint angle RMSE (rad), marker RMSE (m), and clubhead contour error (m).
+- **Archive Stress Resilience Evaluation (`evaluate_archive_stress_resilience`)**:
+  - Evaluates candidate and observation resilience under historical archive stresses: shot cuts/telecine jumps, severe motion blur (inflating clubhead uncertainty and abstaining near impact), and unknown/uncalibrated cameras (demoting SI kinetics to kinematic-only mode).
+- **Holdout Coverage Calibration and Structured Abstention (`assess_holdout_coverage_and_abstention`)**:
+  - Assesses empirical coverage of nominal 90% confidence intervals against held-out ground truth.
+  - Returns structured abstention reasons for unidentifiable visual ambiguities and occlusions.
+- **Monocular Kinetic Identifiability Boundary (`create_evaluated_result_bundle`)**:
+  - Result bundles explicitly record `forces_and_torques` with status `model_dependent_unidentifiable` and `is_identified: False`, warning that joint torques and contact forces cannot be uniquely recovered from monocular video without ground reaction force evidence.
+
+## Companion Publication Hardening and Sparse-Checkout Isolation (#11257)
+
+Specifies clean workspace isolation, sparse-checkout resets, and fail-closed checkout verification for release and companion publication workflows:
+- **Worktree Sparse-Checkout Hygiene (`.github/workflows/package-standalone-sidekick.yml`)**:
+  - The `Disable sparse-checkout` post-step restores full working tree checkout (`git checkout -- .`) after disabling sparse checkout (`git sparse-checkout disable`), preventing omitted directories (such as `scripts/`) from lingering on persistent self-hosted runners.
+- **Fail-Closed Companion Publication Checkout (`.github/workflows/release.yml`)**:
+  - `companion-protected-main` and `build` jobs run a pre-checkout clean step that disables any residual sparse-checkout state and cleans the workspace prior to `actions/checkout`.
+  - A post-checkout validation step verifies that `scripts/companion_publication.py` is present, restoring `scripts` from `HEAD` if a prior sparse checkout corrupted the index, and failing closed if missing.
+  - Step-level `PYTHONPATH: ${{ github.workspace }}` ensures `python3 -m scripts.companion_publication` unambiguously resolves to the authoritative checkout root.
+
+
+## Fail Closed on Absent Inference and Isolate Synthetic Silhouette Fallback (#11227)
+
+Specifies fail-closed execution boundaries, synthetic provenance isolation, and release gate disqualification for Shadow Tracker silhouette segmentation:
+- **Fail-Closed Absent Inference Contract (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `ModelSegmentationProvider` enforces explicit opt-in for synthetic fallback via `allow_synthetic: bool = False`.
+  - In absence of an active `inference_engine` (e.g. `inference_engine=None`), attempting segmentation without `allow_synthetic=True` raises `RuntimeError` ("Model ... has no active inference engine configured. Absent model inference cannot produce observed masks").
+  - When explicitly enabled (`allow_synthetic=True`), synthetic fixtures are branded with distinct provenance (`producer_id="synthetic:..."`, `correction_note="Synthetic procedural fallback; unverified against model inference"`), preventing synthetic fallbacks from masquerading as verified pinned model outputs.
+- **Release Gate Qualification Disqualification (`src/shared/python/shadow_tracker/evaluation.py`)**:
+  - `GateProfile` and `default_release_profile()` configure `allow_synthetic: bool = False`. Gate G0 strictly rejects fitting sessions containing synthetic segmentation masks under release evaluation.
+  - `classify_evidence_quality` demotes candidates derived from synthetic observations or providers to `dynamic_candidate`, preventing synthetic evidence from attaining `validated_profile` certification.
+- **Fitting Session Provenance Tracking (`src/shared/python/shadow_tracker/service.py`, `src/shared/python/shadow_tracker/mask_records.py`)**:
+  - `MaskFrame.is_synthetic` dynamically detects synthetic masks via producer prefix or correction notes.
+  - `ShadowTrackerService.fit()` surfaces `is_synthetic=True` on `FittingResult` when any observation in the fitting window originates from synthetic generators.
+
+## Unify Camera, Morphology and Native State for Shadow Fitting (MMR-14, #11100)
+
+Specifies mathematical, kinematic, and renderer unification for monocular shadow fitting across native multibody states and canonical articulated representations:
+- **Quaternion Velocity Jacobian and Tangent Projector (`src/shared/python/shadow_tracker/forward_model.py`)**:
+  - Exact algebraic quaternion velocity Jacobian $J_{\text{quat}}(q)$ ($4\times 3$) and left inverse $J_{\text{quat}}^{\dagger}(q)$ ($3\times 4$) satisfying $J^{\dagger} J = I_3$ and $J J^{\dagger} = I_4 - q q^T$ tangent space projection.
+  - Exact transformations between body angular velocity $\omega \in \mathbb{R}^3$ and quaternion time-derivative $\dot{q} \in \mathbb{R}^4$ via `body_omega_to_quat_derivative` and `quat_derivative_to_body_omega`.
+- **Bidirectional Canonical-Native Full-Body State Mapping (`canonical_37_to_native_41`, `native_41_to_canonical_37`)**:
+  - Converts between 37-dimensional canonical state vectors (Euler angles in radians/degrees) and 41-dimensional native multibody state vectors (pelvis position, unit orientation quaternion, and 34 articulatory joint degrees of freedom).
+  - Preserves SI units (meters, radians) and exact roundtrip identity $S_{37} \to S_{41} \to S_{37}$.
+- **Closed-Loop Grip Kinematic Setup and Closure Verification (`closed_grip_golfer_setup`, `evaluate_grip_closure`, `GripClosureResult`)**:
+  - Closed-loop address pose where hands meet on the grip within $4.3\text{ mm}$ translation residual and aligned wrist rotation axes.
+  - Decoupled translation ($\le 0.05\text{ m}$) and rotation ($\le 0.1\text{ rad}$) tolerance gates in `evaluate_grip_closure` returning structured `GripClosureResult`.
+- **Multi-Convention Articulated Renderer Support (`src/shared/python/shadow_tracker/articulated_renderer.py`, `src/shared/python/shadow_tracker/contracts.py`)**:
+  - Extended `_VALID_RENDER_STATE_CONVENTIONS` to include `native_full_body_v1` (41 elements) and `canonical_v2_full_body` (42 elements).
+  - Request validation and transcoding guaranteeing exact forward kinematics and rendering parity with canonical 37 articulated requests.
+- **Fitting Priors and Multi-Hypothesis Generation (`src/shared/python/shadow_tracker/initialization.py`)**:
+  - `FittingPriors` dataclass with Design by Contract validation enforcing positive, physically plausible bounds on camera distance, golfer height, club length, and frame rate.
+  - `generate_monocular_hypotheses` generating diverse initialization hypotheses covering yaw, depth, and scale combinations to prevent local minima traps during single-camera fitting.
+
+## Freeze Dual-Club Observation, Calibration and Accuracy Contracts (MMR-02, #11086)
+
+Specifies frozen observation manifests, independent error metrics, holdout protection, and measurement uncertainty floors for dual-club motion matching:
+- **Authoritative Dual-Club Observation Manifests (`src/shared/python/tour_baselines/observation_manifest.py`)**:
+  - `ObservationManifest`: versioned, immutable per-club schema for Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) captures.
+  - Frozen frame-by-marker validity mask: bit-for-bit reconstructed from per-marker missing spans, verified against caller masks to reject gap-filled, interpolated, or unmeasured samples from measured evidence.
+  - Disjoint calibration and holdout intervals: address through top-of-backswing frames (frame 397 driver / 394 iron) reserved for static/fixed geometry calibration; downswing, impact window, and follow-through frames strictly held out.
+- **Holdout Protection Contract (`calibrate_with_manifest_protection`)**:
+  - Fixed-geometry calibration functions consume calibration frames only, preventing holdout observations from updating calibrated body dimensions or club offsets.
+- **Independent Multi-Metric Error Evaluation (`ComprehensiveErrorMetrics`, `compute_comprehensive_error_metrics`)**:
+  - Distinct metric breakdown: pooled 3D Euclidean RMSE, median frame RMS, mean frame RMS, 95th percentile error (p95), and maximum error computed distinctly.
+  - Median frame RMS is mathematically proven not to substitute for pooled RMSE when observation counts vary across frames.
+  - Per-phase error evaluation: computes distinct RMSE across address, backswing, downswing, impact window, and follow-through intervals.
+  - Per-segment error evaluation: computes distinct RMSE across anatomical body markers, shaft cluster, and clubhead cluster.
+- **Common-Target Model Comparison with Visible Coverage (`CommonTargetComparison`, `compute_common_target_comparison`)**:
+  - Compares competing candidate models on their exact common valid observation target ($A \cap B$) while preserving explicit visibility into coverage counts, exclusive observation sets, and coverage ratios.
+- **Documented Measurement Uncertainty and Justified Model Floors (`docs/plans/tour_baselines/observation_uncertainty_and_floors.md`)**:
+  - Documents optical capture uncertainty breakdown: instrument calibration (0.5 - 1.5 mm), soft tissue artifact (5.0 - 15.0 mm), club marker flutter (2.0 - 4.0 mm), and joint center estimation (10.0 - 25.0 mm).
+  - Establishes justified model floor of 18.5 mm (0.0185 m) pooled RMSE for full swing motion matching, preventing optimizer overfitting of soft tissue artifacts.
+
+## Define and Validate Neural Data-Efficiency Claims Statistically (R12, #11155)
+
+Specifies Design by Contract input validation, honest estimand distinction, undefined/inconclusive zero-reference and unattained-target handling, and multi-seed statistical uncertainty evaluation for neural data efficiency:
+- **Strict Budget & Input Preconditions (`src/shared/python/neural_motion/benchmark/efficiency.py`)**:
+  - Strictly positive simulation budgets: rejects non-positive budgets ($b \le 0$) fail-closed with `ValueError`.
+  - Strictly increasing monotone sequence without duplicates: validates $b_{i+1} > b_i$, rejecting unsorted budgets (e.g. `[100, 1]`) and duplicate budgets (e.g. `[100, 100, 200]`) with explicit `ValueError`.
+  - Bounded acceptance values: validates all values in $[0.0, 1.0]$ and finite.
+- **Truthful Descriptive Estimands vs Horizontal Sample-Budget Savings**:
+  - `mean_acceptance_ratio`: unweighted arithmetic mean acceptance ratio ($\bar{a} / \bar{r}$).
+  - `auc_acceptance_ratio`: budget-weighted learning-curve area ratio using trapezoidal numerical integration ($\text{AUC}_{\text{active}} / \text{AUC}_{\text{random}}$ via `trapezoidal_auc`).
+  - `budget_to_target_ratio` (`compute_budget_to_target_ratio`): horizontal sample-budget savings calculating the ratio of random to active simulation budget required to attain a specified target acceptance rate ($B_{\text{random}}(T) / B_{\text{active}}(T)$ via linear interpolation).
+- **Undefined Zero-Reference and Unattained-Target Outcomes**:
+  - Zero-reference random baseline ($\bar{r} \le 10^{-9}$ or $\text{AUC}_r \le 10^{-9}$): sets ratios to `None`, `is_inconclusive=True`, and `active_superiority_confirmed=False`, strictly preventing false $1.0\times$ default success assertions.
+  - Unattained targets ($T > \max(a)$ or $T > \max(r)$): returns `None`, rejecting speculative extrapolation when target performance is unachieved within the evaluated budget window.
+  - Equal curves (`[0.5, 0.5]` vs `[0.5, 0.5]`): sets `active_superiority_confirmed=False`, requiring strict superiority at $\ge 1$ point ($a > r + 10^{-6}$) in addition to non-inferiority ($a \ge r - 10^{-6}$).
+- **Multi-Seed Uncertainty & Statistical Hypothesis Testing (`evaluate_multi_seed_data_efficiency`, `MultiSeedEfficiencySummary`)**:
+  - Aggregates point-wise means and standard errors across independent repeated seed runs.
+  - Paired learning-curve AUC hypothesis test (Student's $t$ paired test with declared confidence level $\alpha = 1 - \text{confidence\_level}$): requires mean AUC difference $> 0$, $p < \alpha$, and point-wise lower confidence bounds $\ge$ random upper bounds to confirm statistical superiority.
+  - Overlapping or high-variance seed distributions fail closed with `active_statistically_superior=False` and `is_inconclusive=True`.
+- **Honest Documentation and Diagnostic Evidence Receipts**:
+  - `docs/plans/neural_motion_matching/benchmark_accepted_speed.md`: updates section 3 with truthful definitions distinguishing arithmetic mean (1.33x), trapezoidal AUC (1.31x), and target budget savings (2.62x at 74% target).
+  - `docs/plans/neural_motion_matching/evidence/nm10_benchmark_speed_efficiency_receipt.json`: updates `sample_data_efficiency` with truthful metrics and explicit `HISTORICAL_DIAGNOSTIC_ONLY` status.
+
+## Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs (R11, #11151)
+
+Specifies truthful simulation clock calculation, endpoint-inclusive discrete sampling, remainder step execution, and separation of requested vs integrated horizons:
+- **Simulation Timing Plan & Clock Calculation (`src/shared/python/engine_core/simulation_timing.py`)**:
+  - `SimulationTimingPlan`: immutable integration plan encapsulating `requested_duration`, `timestep`, `step_count`, `step_sizes`, `integrated_duration`, `retained_samples`, `has_remainder_step`, `remainder_dt`, `is_divisible`, and `sampling_policy`. Supports 3-tuple iteration unpacking `(timestep, step_count, retained_samples)` for backwards compatibility.
+  - Floating-point boundary precision: replaces naive integer division (`int(duration / timestep)`) with close-boundary rounding (`math.isclose(round(d/dt)*dt, d)`), eliminating integer truncation on floating boundaries (e.g. `0.03 / 0.01` resolving to 3 steps, not 2).
+  - Sub-step duration support: allows sub-step simulations (`duration < timestep`) without raising invalid `ValueError("Timestep must not exceed duration")`, taking a single bounded step of `dt = duration` on engines supporting variable steps.
+  - Remainder step handling: when `allow_remainder_step=True` and horizon is non-divisible, executes full steps plus a bounded final remainder step (`remainder_dt = duration - k * dt`), reaching exact integrated duration without physics state drift.
+  - Fixed-step non-divisible fallback: when variable final steps are disallowed (`allow_remainder_step=False`), executes $k$ integer steps and reports the truthful actual integrated duration ($k \times \mathrm{dt}$), strictly forbidding artificial relabeling of states to an unreached requested horizon.
+- **Separated Horizon Fields on API Contracts (`src/api/models/requests.py`, `src/api/models/responses.py`)**:
+  - `SimulationRequest`: exposes `allow_remainder_step: bool = True` controlling fractional final step adoption.
+  - `SimulationResponse`: distinctly reports `requested_duration`, `integrated_duration`, `step_count`, and `retained_samples` alongside legacy `duration` and `frames`.
+- **Truthful Clocks in Synchronous Stepping & Streaming Loops (`src/api/services/simulation_service.py`, `src/api/routes/simulation_ws.py`)**:
+  - REST stepping loop: iterates through `timing_plan.step_sizes` and records initial state at $t=0$, guaranteeing $N = \text{step\_count} + 1$ endpoint-inclusive state samples where final timestamp equals `timing_plan.integrated_duration`.
+  - WebSocket streaming loop: eliminates `min(duration, frame * timestep)` artificial clamping, steps physics batches with `final_step_dt` when executing remainder steps, emits truthful wire timestamps, and completes with `requested_duration`, `integrated_duration`, and `step_count`.
+- **Cross-Engine Variable-Step Capability Declaration (`engine_supports_variable_step`)**:
+  - Explicit capability check via `supports_variable_step` attribute or backend protocol capabilities; prevents silent per-backend reinterpretation.
+
+## Bound Simulation Work and Preserve Cancellable Jobs Under Load (R03, #11144)
+
+Specifies aggregate step budget validation, trajectory sampling safety bounds, worker-thread event-loop offloading, active job retention under load, and cooperative cancellation contracts:
+- **Aggregate Step Budget & Finiteness Validation (`src/api/models/requests.py`)**:
+  - `MAX_SIMULATION_STEPS = 100_000`: bounds `duration / effective_dt` across single and multi-engine simulation requests.
+  - Fail-closed validation rejects nonfinite (`NaN`, `Inf`) inputs, negative durations, non-positive timesteps, and over-budget step ratios (`422 Unprocessable Entity`) before engine creation or heavy resource allocation.
+- **Flight Trajectory & ODE Sample Guards (`src/api/routes/ball_flight.py`, `src/shared/python/physics/flight_models.py`)**:
+  - `MIN_FLIGHT_TIMESTEP_S = 0.0001`, `MAX_FLIGHT_SAMPLES = 50_000`, `MAX_FLIGHT_MODELS_BATCH = 10`, `MAX_ODE_TRAJECTORY_POINTS = 50_000`: prevent multi-gigabyte memory allocations and runaway integration loops.
+  - Offloads synchronous CPU-bound trajectory integration in `simulate_ball_flight` to worker threads via `anyio.to_thread.run_sync`, keeping FastAPI event loop and health/heartbeat endpoints responsive under load.
+- **TaskManager Active Job Retention & Capacity Admission (`src/api/task_manager.py`)**:
+  - Explicit active job retention: tasks in `pending`, `running`, or `started` states are protected from TTL expiration and LRU eviction under memory/size pressure.
+  - `admit_active()`, `can_admit_active()`, and `in_flight_count()`: enforce concurrency capacity bounds while keeping active jobs queryable and cancellable.
+  - `cancel_task()`: marks active background tasks as cancelled and tracks cancellation reasons.
+- **Cooperative Simulation Loop Cancellation & Distinct Response States (`src/api/services/simulation_service.py`, `src/api/services/simulation_runs.py`)**:
+  - Stepping loop cooperative checks (`run.is_cancelled()`, `run.is_deadline_exceeded()`): gracefully halts stepping within 1 step without raising buffer exhaustion or unhandled exceptions.
+  - Terminal response distinction: sets `calculation_status="cancelled"`, distinct from persistence failures or completed calculations, returning partial trajectory data with actionable error metadata.
+
+## Isolate Engine, Recorder, and Analysis State per Simulation Run (R02, #11143)
+
+Specifies multi-engine isolation, run-addressed recorder state, explicit concurrency bounds, and independent lifecycle cleanup across REST and WebSocket simulation sessions:
+- **Engine Concurrency & Deterministic Isolation (`src/shared/python/engine_core/engine_manager.py`)**:
+  - `create_engine(engine_type: EngineType) -> PhysicsEngine`: instantiates and configures isolated, unshared physics engine instances without mutating global active engine references (`active_physics_engine`).
+  - Deterministic barrier test verifies two overlapping preparations cannot acquire, mutate, or cross-contaminate each other's engine, model, or configuration.
+- **Run-Addressed Session Isolation & Independent Controls (`src/api/services/simulation_service.py`, `src/api/models/requests.py`)**:
+  - `SimulationRunRecord`: encapsulates per-run state (`run_id`, `engine_type`, `stats`, `recorder`, `joint_names`, `meta`, `simulation_data`, `analysis_results`, `engine`, `status`, `cleaned_up`).
+  - `SimulationRequest` and `CounterfactualRequest`: accept optional `run_id` to explicitly address simulation and post-hoc rollouts.
+  - Independent clocks, frame counts, and speed adjustments: WebSocket and REST runs maintain connection- and run-isolated `SimulationStats` instances (`ws.state.sim_stats` and `run.stats`), ensuring speed adjustments and stat resets on one channel do not mutate concurrent runs.
+- **Explicit Busy Response & Concurrency Containment (`src/shared/python/core/error_utils.py`, `src/api/routes/simulation.py`)**:
+  - `SimulationBusyError(GolfSuiteError)`: raised when execution is constrained to single-run mode and another run is active.
+  - Maps to HTTP 409 Conflict with `code="busy"`, `stage="preparation"`, and `retriable=True`, rejecting contending runs explicitly rather than allowing undefined state clobbering.
+- **Immutable Run-Addressed Analysis & Export (`src/api/routes/analysis.py`, `src/api/routes/analysis_plots.py`, `src/api/routes/recordings.py`)**:
+  - Analysis plot data (`/analysis/plot-data/{plot_type}`), counterfactual analyses (`/analysis/counterfactual`), and recording persistence (`/recordings`) accept optional `run_id`.
+  - Fetching analysis or persisting recordings explicitly references the targeted run record; completion of a newer or concurrent simulation run cannot alter or overwrite the analyzed dataset.
+- **Isolated, Idempotent Engine Cleanup**:
+  - `cleanup_run_engine(run_id)`: idempotent cleanup occurs once per owning run; one run cannot unload, close, or interfere with another run's active engine.
+
+## Keep Ball-Flight Results Attached to Input Snapshot and Provenance (R10, #11150)
+
+Specifies immutable execution input snapshots, provenance tracking, and out-of-order response protection on the BallFlight comparison page (`ui/src/pages/BallFlight.tsx`, `ui/src/pages/ballFlightModel.ts`):
+- **Immutable Input Snapshot & Provenance Banner (`ballFlightModel.ts`, `BallFlight.tsx`)**:
+  - `BallFlightInputSnapshot`: captures exact launch condition values and selected model keys at simulation submission time.
+  - Active simulation results remain explicitly bound to their input snapshot. A prominent result provenance banner displays whether the visible result is a `"Committed Run"` or a preserved `"Previous Result"`.
+  - Snapshot summary renders formatted launch conditions (ball speed, launch angle, spin rate, spin axis tilt, wind speed and direction).
+- **Post-Execution Input Modification Warning**:
+  - `areInputsChanged` and `areModelsChanged` dynamically compare current form state against the committed snapshot.
+  - An `"Inputs modified since this run was calculated"` banner alerts the user whenever input parameters diverge from the calculated results, preventing stale interpretations while preserving visible data.
+- **Previous Result Retention on Simulation Failure**:
+  - When a subsequent simulation fails, previously computed results and their associated input snapshot are retained rather than cleared, labeled with a `"Previous Result"` status badge alongside the failure alert.
+- **Monotonic Request Sequence Protection**:
+  - Monotonic `requestIdRef` tracks simulation requests, ensuring slow out-of-order network responses can never overwrite newer simulation runs or input snapshots.
+- **Model Coefficients & Assistive Technology Announcements**:
+  - Propagates API-computed flight coefficients (`cd`, `cl`, `spin_decay`) in per-model metrics tables.
+  - WCAG live region (`div[role="status"][aria-live="polite"]`) announces simulation start, completion, and failure transitions.
+
+## Wire Neural Matching Controls to Executed Requests and Validate Executability (R07, #11147)
+
+Specifies the end-to-end integration and fail-closed validation contracts connecting UI neural matching controls to executed pipeline requests:
+- **Typed Request & Command Surface (`src/tools/motion_matching/pipeline.py`, `src/shared/python/motion_matching/pipeline/cli.py`)**:
+  - `MatchRequest`: incorporates `neural_mode` (`classical`, `preview`, `verified`), `neural_model` (canonical model ID or identifier), `allow_fallback` (boolean, defaults to `True`), and optional `checkpoint_path`. Canonical modes and model strings are normalized on initialization.
+  - Property `allow_classical_fallback`: exposes backward-compatible boolean fallback toggle.
+  - CLI bindings: `--neural-mode`, `--neural-model`, `--no-neural-fallback`, and `--neural-checkpoint` serialized consistently in `MatchRequest.match_command()` and parsed in pipeline CLI parser.
+- **Qualified Registry Model Availability & Honest Disclosure (`src/tools/motion_matching/controller.py`)**:
+  - `get_neural_model_availability`: evaluates candidate models against the qualified tour baselines registry (`build_neural_model_roster()`) and active runtime environment.
+  - Returns structured `NeuralModelAvailability` records detailing whether a model is qualified for production, pilot-eligible for research/preview, or unavailable, along with an actionable explanation and clear next action.
+  - Replaces misleading effective-looking controls with unambiguous availability status for unsupported or research models.
+- **Fail-Closed Execution Preparation & Verified-Inference Orchestration (`src/tools/motion_matching/controller.py`)**:
+  - `MotionMatchingController.validate_request` and `prepare_run`: drives candidate requests through `VerifiedInferenceOrchestrator` target-distribution bounds checking and qualification checks.
+  - Disabling fallback is strictly honored: when `allow_fallback=False` and neural verification or proposal generation fails, execution is rejected with named reasons (`Missing checkpoint file`, `Checkpoint architecture mismatch`, `Distribution bounds violated`) rather than silently falling back.
+  - Preview promotion protection: unverified preview proposals can never be promoted to verified status; fallback execution produces a `classical_fallback` disposition with explicit user notification.
+  - Returns immutable `RunDisposition` containing status (`executable`, `rejected`, `classical_fallback`), commands, preview flag, model ID, and diagnostic reason.
+- **UI Run-Bound Disposition & Feature Parity Documentation (`src/tools/motion_matching/gui.py`, `src/config/feature_parity.json`)**:
+  - UI interaction binds execution through controller `prepare_run()`, updating badges (`PREVIEW (REJECTED)`, `PREVIEW (CLASSICAL_FALLBACK)`, `UNVERIFIED`) and log panes consistently before dispatching worker processes.
+  - `feature_parity.json` updated under `tools.motion_matching` documenting wired neural controls, verified inference orchestrator gate, and intentional platform parity gap across operating platforms.
+
+## Propagate Flight Termination Before Reporting Landing Metrics (R04, #11145)
+
+Specifies the explicit flight termination states, fail-closed metric gating, and provider-to-API-to-viewer contracts:
+- **Flight Termination States (`src/shared/python/physics/flight_models.py`)**:
+  - `FlightTermination` enum distinguishes physical ground landing (`LANDED`) from truncation at time horizon (`TIME_LIMIT`), numerical solver failure (`SOLVER_FAILED`), and external cooperative cancellation (`CANCELLED`).
+  - Terminal event evidence (`terminal_event: bool`) and actual integration horizon (`actual_horizon: float`) are preserved on every `FlightResult`.
+- **Fail-Closed Metric Gating & Contract Validation**:
+  - Landing-derived metrics (`carry_distance`, `landing_angle`, `lateral_deviation`) are strictly populated only when `termination is FlightTermination.LANDED`; otherwise they are gated to `None`.
+  - `FlightResult.__post_init__` enforces that non-landed flights have `None` landing metrics, rejecting invalid states with `ValueError`.
+  - `FlightResult.require_landing()` asserts `self.landed` and raises `IncompleteFlightError(RuntimeError)` carrying `self.result` for partial trace inspection when the flight did not reach the ground.
+  - Cooperative cancellation via `cancellation_requested` raises `FlightSimulationCancelled(RuntimeError)` carrying partial `FlightResult` with `termination=FlightTermination.CANCELLED`.
+- **API & Viewer Integration**:
+  - REST route `/tools/ball-flight/simulate` and `/tools/ball-flight/import` propagate `termination`, `terminal_event`, `actual_horizon_s`, and `landed` within `BallFlightSummary`, safely exposing nullable landing metrics (`float | None`).
+  - Shot Tracer viewer table formatting (`_shot_tracer_gui._update_results_table`) formats `carry_distance` and `landing_angle` as `"N/A"` on incomplete trajectories without raising `TypeError`.
+  - Contract parity between Tools flight backend (`swing_sim.flight`) and UpstreamDrift physics models is verified across all five termination scenarios (time-cap ascending, normal landing, negative launch, solver failure, cancellation).
+
+## Bind Matcher Process Events to Their Run and Handle Failed Starts (R08, #11148)
+
+Specifies the process lifecycle, immutable run context, and tab-routing contracts for the Motion Matching launcher tile:
+- **Process Lifecycle Management (`src/tools/motion_matching/process_lifecycle.py`)**:
+  - `RunContext`: immutable dataclass binding run ID, owning panel (`"matching"`, `"experiment"`, `"mjx"`), active stage name, request, and output directory.
+  - `RunWorker`: robust sequential command queue executor backed by `QProcess`.
+  - Failed-start handling: connects `QProcess.errorOccurred` to capture startup failures (e.g. `QProcess.ProcessError.FailedToStart` when an executable is missing or denied execution permission) without hanging in a running state indefinitely.
+  - Idempotent finalizer: handles failed starts, crashes (`QProcess.ProcessError.Crashed`), user cancellations (`worker.stop()`), and nonzero exits through a single terminal finalizer (`_finalize`) that guarantees exactly one terminal callback is emitted.
+  - Resource disposal: disconnects signals, unparents processes, and disposes completed/terminated process instances via `QProcess.deleteLater()`, preventing object leaks across repeated executions.
+  - Context-bound tab routing: `_on_output` and `_on_finished` route logs and outcomes strictly to the panel identified by `RunContext.owning_panel`, preserving logs and results even when the user switches tabs during execution.
+  - Actionable diagnostics: `format_failure_diagnostic` identifies the failing stage, error reason, and actionable recovery steps while retaining user inputs.
+- **Unit Test Suite (`tests/tools/motion_matching/test_matcher_process_lifecycle.py`)**:
+  - Tests covering missing executables, denied permissions, process crashes, user cancellation, normal completion, multi-tab switching, repeated start/stop process disposal, and stage-specific failure recovery reporting.
+
+
+## Simulation Error Outcomes and Partial-Result States (R09, #11149)
+Specifies machine-readable error modeling, pipeline stage isolation, and partial-result resilience across sync and background simulation execution paths:
+- **Structured Error Outcome Model (`SimulationErrorInfo` in `src/api/models/responses.py`)**:
+  - `SimulationErrorInfo`: defines typed fields `code`, `message`, `stage`, `run_id`, `retriable`, `retry_guidance`, and `details`.
+  - Distinguishes pipeline failure stages: `preparation`, `execution`, `analysis`, and `persistence`.
+  - Enforces safe, non-leaky error messages that never expose raw internal filesystem paths or database credentials to clients.
+- **REST Status Codes & Machine-Readable Response Headers (`src/api/routes/simulation.py`)**:
+  - Sync execution failures map domain errors to specific HTTP status codes: HTTP 400 for invalid inputs/parameters, HTTP 503 for unavailable engines, HTTP 500 for internal/numerical/physics errors, and HTTP 504 for timeout conditions.
+  - Injects `X-Error-Code` and `X-Error-Stage` headers on HTTP error responses to provide zero-cost client observability without requiring JSON parsing.
+- **Partial-Result State Preservation & Storage Failure Resilience (`src/api/services/simulation_service.py`)**:
+  - Distinguishes calculation completion from persistence failure: when simulation calculation succeeds but disk/cloud storage fails, results are preserved in memory with `calculation_status="completed"`, `persistence_status="failed"`, `export_paths=[]`, and structured retry guidance.
+  - Per-channel analysis status tracking: records `_channel_status` for requested channels (`ztcf`, `zvcf`, `track_drift`), setting overall `_status` to `"completed"`, `"partial"`, or `"failed"`.
+  - Asynchronous background task recording: persists machine-readable `error_code`, `error_stage`, `retriable`, `retry_guidance`, and full `error_info` dictionary into `active_tasks`.
+- **Regression Test Suite (`tests/unit/api/test_simulation_r09.py`)**:
+  - Behavioral tests verifying HTTP status code mappings (400, 503, 500), response headers, in-memory result preservation during persistence failure, per-channel analysis status labeling, and background task error record consistency.
+
+## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
+
+Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
+- **Compiled Budget Enforcement & Diagnostics (`src/shared/python/motion_matching/simscape_block_budget.py`)**:
+  - `BlockBudgetProfile`: execution and verification profiles (`PRODUCTION`, `AUDIT`, `INSTRUMENTED`).
+  - Strict budget ceilings: actual R2025b production count <= 975 with mandatory 25-block instrumentation reserve documented independently of the 1,000-block Home license ceiling.
+  - Audit profile: exact required audit variant compiles <= 1,000 nonvirtual blocks with diagnostic instrumentation.
+  - Fail-closed validation on over-budget models: deliberately over-budget clones fail with actionable diagnostics reporting the exact error, license limit, headroom, and offending subsystems ranked by compilation growth.
+  - Observability contract (`ObservabilityEvidenceType`): ensures no consumer loses mass, COM, energy, contact, or closure evidence when sensors are removed. Dropping consumed sensors without replacement offline diagnostics is rejected with actionable diagnostics identifying the orphaned consumer.
+  - Subsystem breakdown (`SubsystemBlockCount`): requires explicit per-subsystem uncompiled and compiled counts matching totals, rejecting inferred icon counts.
+  - JSON parser: `parse_matlab_block_budget_json` deserializes MATLAB-generated block budget JSON into typed reports with canonical observability manifests.
+- **MATLAB Exploratory Infrastructure (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`)**:
+  - `gs3dx_block_budget.m`: updated to categorize nonvirtual blocks by top-level subsystem for both uncompiled and compiled diagrams, computing compilation growth and exporting structured subsystem tables.
+  - Actionable compilation error handling: wraps license ceiling compile errors with actionable remediation steps.
+- **Test Suite (`tests/unit/motion_matching/test_simscape_block_budget.py`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_block_budget.m`)**:
+  - Regression tests for production <= 975 ceiling with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, missing observability evidence detection, orphaned consumer detection on sensor removal, empty/inconsistent subsystem rejection, and roundtrip JSON parsing.
+
+## Promote GS3DX Variants With Reproducible R2025b Evidence (MMR-03, #11087)
+Specifies reproducible evidence promotion and qualification contracts for the 10 Simscape Multibody GS3DX variants under MATLAB R2025b:
+- **GS3DX Variants Promotion & Evidence Contracts (`src/shared/python/motion_matching/gs3dx_variants.py`)**:
+  - Enforces canonical inventory and per-variant machine-readable receipts across all 10 lineage stages: Baseline, Slim, Quat, FullBody, Contact, Golfer, Fit, Shape, Neck, and Human.
+  - Implements fail-closed clean-host build, save, and reopen verification strictly on MATLAB R2025b; explicitly rejects R2026a and all non-R2025b substitutions, dirty models, and unrecorded builder hosts.
+  - Guarantees protection of original hand-built models (`GolfSwing3D_Kinetic.slx`, `Kinetically_Driven_Gimbal_Joint.slx`, `Kinetically_Driven_Revolute_Joint.slx`, `Kinetically_Driven_Universal_Joint.slx`) via immutable content digests (`verify_original_models_protection`), failing closed upon tampering.
+  - Strictly distinguishes stable-drive equivalence (impact torque drive reproduction on Baseline/Slim/Quat) from C3D motion capture marker fitting (Fit/Shape/Neck/Human); prohibits claiming full-swing C3D qualification for stable-drive variants.
+  - Explicitly separates motion-prescribed neck actuation (`NeckReference`, 2-axis Universal Joint with 5 ms filter) and damped inverse-Jacobian leg servo tracking from autonomous balance or neuromuscular control.
+  - Records exact cold-replay commands, provider/model/capture provenance, and enforces candidate/model/image/metric hash integrity (`validate_candidate_package_integrity`).
+  - Implements main ledger consumption gate (`filter_promotable_ledger_variants`) allowing only reviewed promoted variants (`GS3DX_Human`) to enter the primary motion matching ledger while rejecting intermediate variants.
+  - Implements reported MATLAB test suite rerun validator (`validate_matlab_suite_run`) requiring exact promoted SHA verification and explicit disclosure of all skipped tests with reasons.
+- **Unit Test Suite (`tests/unit/motion_matching/test_gs3dx_variants_promotion.py`)**:
+  - Tests covering complete 10-variant inventory, receipt serialization/deserialization lifecycle, clean-host R2025b validation failures, original model protection, drive classification distinctions, motion prescription disclosures, package integrity, ledger consumption filtering, and MATLAB suite rerun verification.
+
+## Add Anatomical Meshes Without Changing Qualified Physics (MMR-05, #11089)
+Specifies anatomical mesh substitution, visual presets, physical and kinematic invariance, provenance tracking, compiled block budget, and reusable segment adapter:
+- **Physical & Kinematic Invariance (`src/shared/python/motion_matching/anatomical_meshes.py`)**:
+  - One-segment File Solid substitution behind optional visual preset (`VisualPreset.ANATOMICAL_MESH`, `VisualPreset.HYBRID`) strictly preserves exact body mass sum, per-solid mass (`mass_kg`), center of mass (`com_m`), inertia (`inertia_com_kg_m2`), placement transforms, and joint attachment frames.
+  - Forward kinematics marker positions are strictly invariant across swing phases (address, top, impact, follow-through) with zero drift ($< 1\times 10^{-12}$ m).
+- **Design by Contract & Graceful Fallback**:
+  - Validates SI mesh units (`m`, `mm`, `cm`) and finite positive bounding boxes (`BoundingBox3D`).
+  - Wrong units, non-finite/inverted bounds, or missing asset files fail closed (`InvalidMeshUnitsError`, `NonFiniteMeshBoundsError`, `MissingMeshAssetError`) when `allow_fallback=False`.
+  - When `allow_fallback=True`, documents and records graceful fallback (`VisualFallbackStatus.FALLBACK_TO_PRIMITIVE`) to default primitive shapes (ellipsoid/box).
+- **Asset Provenance & Redistribution Tracking**:
+  - `MeshAssetProvenance` records asset name, source repository, commit, license (e.g. CC-BY-SA 2.0), license URL, attribution, and redistribution permissions.
+  - Direct integration with bundled human models in `src/tools/model_explorer/bundled_assets/`.
+- **MMR-04 Compiled Block Budget Enforcement**:
+  - Enforces Simscape nonvirtual compiled block limits under MATLAB R2025b Home license:
+    - Direct File Solid substitution: 0 delta blocks, preserving compiled count within production ceiling ($\le 975$, with 25-block reserve from 1,000 license ceiling).
+    - External visual solids: 7 blocks per segment (measured in `SHAPE.md`), failing closed if total exceeds 975.
+- **Reusable Segment Adapter (`AnatomicalSegmentAdapter`)**:
+  - Prototype support across pelvis, trunk, head, hand, and shoe.
+  - Bilateral handedness mirroring (`mirror_bilateral_metadata`) for hands and shoes across lateral planes.
+  - Multi-phase swing clearance and collision checking (`check_segment_clearance`) across adjacent segments.
+
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
+
+## Publish a Best-Candidate Viewer With Honest Residuals (MMR-16, #11102)
+Specifies the best-candidate viewer, honest marker residuals, drive mode filtering, visual presets, board-ready video/still export, and web/API parity:
+- **Observation Immutability & Residual Data Structures (`src/tools/tour_matching_viewer/core.py`)**:
+  - Guards raw observations by setting numpy array flags `writeable = False` on `time_s`, `coordinates`, `target_markers_m`, `model_markers_m`, and `valid_mask` in `ReplayData.__post_init__`.
+  - Implements `worst_frame_for_marker` and `worst_frame_for_phase` on `ResidualSummary` to locate exact discrete frame indices for targeted residual inspection.
+  - Implements `export_board_ready_video` and `export_board_ready_still` generating animations and high-DPI stills with observed dots, model skeleton, residual vector lines, SI units (mm, s, m), and metadata banners (Candidate SHA, Engine, Drive Mode, Frame, RMS, Verdict, Evidence link).
+- **Tour Matching Viewer GUI (`src/tools/tour_matching_viewer/gui.py`)**:
+  - Exposes public `is_accepted`, `verdict`, `failure_badge_visible`, `failure_badge_text`, and `residual_summary` properties.
+  - Implements `select_worst_marker` and `select_worst_phase` jumping directly to discrete frame indices, ensuring synchronized clocks without decoupled indices.
+  - Ensures numerical verdict, candidate hash, failure badges, and physics scores are strictly invariant under camera orientation and visual preset changes.
+  - Configures full accessibility annotations (`setAccessibleName`, `setToolTip`) across interactive controls.
+- **Web & API Parity (`src/api/services/matched_swings_service.py`, `src/api/routes/matched_swings.py`)**:
+  - Extends `MatchedSwingsService.list_runs` with `capture`, `drive_mode`, and `ranked` filters, sorting candidates in ascending whole-marker RMSE order while honestly preserving rejections.
+  - Implements `candidate_preview_frame` returning observed target dots, fitted model joints, residual vectors, and frame RMS for web 3D clients.
+  - Implements `candidate_preview_residual_summary` and `GET /matched-swings/{run_id}/residuals` exposing swing-wide residual timelines.
+
+## Integrate and Benchmark Real Body and Club Segmentation (MMR-13, #11099)
+Specifies neural silhouette segmentation provider interface, model card and checkpoint verification, separated body/club channels, and benchmark evaluation:
+- **Segmentation Provider & Architecture Card (`src/shared/python/shadow_tracker/segmentation.py`)**:
+  - `SegmentationModelCard`: records architecture (SAM-ViT-B, MobileSAM), version, license (Apache-2.0), parameter counts, input resolutions, hardware requirements, redistribution terms, and known failure modes (motion blur, thin shafts, occlusion).
+  - Pinned weight hashes: `SAM_VIT_B_GOLF_SHA256` and `MOBILESAM_GOLF_SHA256`.
+  - `verify_checkpoint`: fail-closed validation rejecting corrupt or arbitrary weight files (`RuntimeError`) and missing files (`FileNotFoundError`) with zero hidden network downloads.
+  - `ModelSegmentationProvider`: lazy and optional segmentation adapter fulfilling the `Segmenter` protocol, separating body and club binary masks across valid foreground pixels and preserving frame/checkpoint provenance hashes (`producer_id`, `revision_id`, `frame_sha256`).
+  - `evaluate_segmentation_benchmark`: bounded evaluation suite testing held-out modern high-speed (120 fps blur), historical archive (1953 shaft dropouts), and occluded adverse clips, reporting body IoU, club recall, boundary F1, correction effort edits, latency, memory, and occlusion detection.
+- **Service Integration (`src/shared/python/shadow_tracker/service.py`)**:
+  - `register_segmenter` and `segmenter` property on `DefaultShadowTrackerService`, allowing automated segmenters to feed initial masks into `ManualMaskProvider` while keeping purely manual operation operational when unconfigured.
+- **Verification (`tests/unit/shadow_tracker/test_silhouette_segmentation.py`)**:
+  - Unit tests verifying fail-closed checkpoint validation on corrupt weights, lazy optional initialization, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback with parent-revision branching, and multi-clip benchmark evaluation.
+
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
+## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
+Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
+- **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
+  - `update_mask`: namespaces newly generated mask revisions with `obs.shot_id`, preventing revision ID collisions across multiple shots when updating manual masks.
+  - Multi-shot resolution: scopes mask lookup and presence checks (`has_mask`, `get_mask`) to `(obs.shot_id, obs.frame_id)` across `fit()` and `resume_from_checkpoint()`, preventing ambiguous match errors when local frame IDs collide across distinct shots.
+  - Downstream invalidation: ensures candidate fits and checkpoints are immediately cleared upon manual mask corrections.
+  - Timing preservation: preserves container presentation timestamps, exact timebases, and physical time mappings (affine / piecewise) across VFR decode, cuts, and slow-motion playback.
+  - Safe error recovery: corrupt media imports and tampered bundle loads fail closed without corrupting or resetting pre-existing session state.
+- **Shadow Tracker GUI Workbench (`src/tools/shadow_tracker/gui.py`)**:
+  - Auto-Fit toolbar button (`btn_fit`) and `Key_F` keyboard shortcut: requests fitting and displays honest status when forward dynamics gates (ST-07..ST-10) are unqualified.
+  - Widget mask update: exposes `update_mask` method on `ShadowTrackerWidget` to record manual body/club silhouette corrections, mark session dirty, and update display status.
+  - Import cancellation and recovery: displays clear cancelled or error statuses in `lbl_status` while keeping active sessions recoverable.
+- **Test Suite (`tests/unit/shadow_tracker/test_service.py`, `tests/tools/shadow_tracker/test_shadow_tracker_gui.py`)**:
+  - Regression tests verifying complete VFR import -> correction -> save -> reopen round-trip with downstream candidate invalidation, multi-shot duplicate local frame ID collision avoidance, honest auto-fit refusal, and session recovery after corrupt media imports.
+
+## Qualify OpenSim Native Dual-Club Dynamics and Replay (MMR-10O, #11095) [Scope: Fail-Closed Conversion]
+Specifies the native OpenSim qualification pipeline and receipt verification for Driver and 7-Iron models:
+- **Native OpenSim Qualification Module (`src/engines/physics_engines/opensim/python/native_qualification.py`)**:
+  - `OPENSIM_ENGINE_LIMITATIONS`: documents Hill-type activation dynamics, force-velocity-length multipliers, tendon elasticity equilibrium, coordinate limit forces, and ground contact external wrenches.
+  - `OpenSimQualificationStatus`: enum (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - `OpenSimQualificationReceipt`: dataclass with serialization (`as_dict()`, `save()`, `load()`) and fail-closed `missing_evidence`/`remedy` fields.
+  - `validate_opensim_candidate_replay`: fail-closed gates — rejects copied/cloned state trajectories and FK-only replays, treats absent `is_fresh_simulation`/`actuation_applied` flags as unverified, requires a recorded nonzero native test count (an unknown count blocks), rejects when the `opensim` runtime is unavailable even if a replay payload is supplied, requires recorded `native_state`/`time_s` rollout data with finite values, checks derivative consistency ($dq/dt \approx v$) and rejects on mismatch, validates physiological muscle activation bounds ($a \in [0.0, 1.0]$), and requires aligned marker observations (`markers_m`/`target_m`) from which only `whole_rms_m` is computed. Previously claimed tolerances (phase/clubhead/pelvis-yaw metrics) were never enforced or data-derived and are removed.
+  - `assess_opensim_qualification`: detects host `opensim` runtime; returns `UNAVAILABLE` when missing without crashing headless test runners.
+- **Evidence Package (`docs/development/matched_swing_program/evidence/opensim/`)**:
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; both are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native OpenSim qualification exists yet.
+  - `README.md`: documents model topology, Hill-type muscle models, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
+- **Test Suite (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py`)**:
+  - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
+## Qualify MyoSuite Native Dual-Club Dynamics and Replay (MMR-10M, #11096) [Scope: Fail-Closed Conversion]
+Specifies the native MyoSuite qualification pipeline and receipt verification for Driver and 7-Iron models:
+- **Native MyoSuite Qualification Module (`src/engines/physics_engines/myosuite/python/native_qualification.py`)**:
+  - `MYOSUITE_ENGINE_LIMITATIONS`: documents musculoskeletal excitation-activation dynamics, Hill-type force-length-velocity multipliers, free-joint quaternion orientation normalization ($w^2 + x^2 + y^2 + z^2 = 1$), dual-grip weld constraints, four-foot Hunt-Crossley contact spheres, and absence of native joint-torque inverse dynamics.
+  - `MyoSuiteQualificationStatus`: enum (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`).
+  - `MyoSuiteQualificationReceipt`: dataclass with serialization (`as_dict()`, `save()`, `load()`) and fail-closed `missing_evidence`/`remedy` fields.
+  - `validate_myosuite_candidate_replay`: fail-closed gates — rejects copied/cloned state trajectories and FK-only replays, treats absent `is_fresh_simulation`/`actuation_applied` flags as unverified, requires a recorded nonzero native test count (an unknown count blocks), rejects when the `myosuite`/MuJoCo runtime is unavailable even if a replay payload is supplied, requires recorded `native_state`/`time_s` rollout data with finite values and root quaternion unit normalization, checks derivative consistency ($dq/dt \approx v$) and rejects on mismatch, validates physiological muscle activation bounds ($a \in [0.0, 1.0]$), and requires aligned marker observations (`markers_m`/`target_m`) from which only `whole_rms_m` is computed. Previously claimed tolerances (energy bound, phase/clubhead/pelvis-yaw metrics) were never enforced or data-derived and are removed.
+  - `assess_myosuite_qualification`: detects host `myosuite` runtime; returns `UNAVAILABLE` when missing without crashing headless test runners.
+- **Evidence Package (`docs/development/matched_swing_program/evidence/myosuite/`)**:
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; both are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native MyoSuite qualification exists yet.
+  - `README.md`: documents model topology, muscle excitation-activation dynamics, coordinate limits, fail-closed receipt policy, and replay regeneration procedure.
+- **Test Suite (`tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py`)**:
+  - Unit tests verifying valid complete-payload qualification, fail-closed rejection of copied trajectories, FK-only playback, zero/unrecorded native tests, non-finite state data, unphysiological muscle activations, unnormalized root quaternions, unavailable runtime with payload, missing rollout/marker data, derivative mismatch, computed-not-invented metrics, serialization round-trips, and committed receipt fail-closed honesty.
+## Qualify Drake Native Dual-Club Dynamics and Replay (#11094) [Scope: Fail-Closed Conversion]
+Implements [MMR-10D] native dual-club dynamic qualification and automated nightly lane integration for Drake:
+- **Drake Dynamic Qualification Module (`src/engines/physics_engines/drake/python/native_qualification.py`)**:
+  - Implements `DrakeQualificationReceipt` and `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`) enforcing strict fail-closed dynamic simulation contracts.
+  - Rejects copied state trajectories, FK-only playbacks without dynamic simulation, and zero or unrecorded collected native tests on pinned host (an unknown test count cannot be assumed nonzero).
+  - Verifies host runtime availability: when `pydrake` is missing on host, reports `UNAVAILABLE` rather than false green — including when a replay payload is present (a payload cannot qualify without the engine).
+  - Gates `QUALIFIED` on every recorded check: fresh simulation, actuation applied, recorded rollout data, derivative consistency (`dq/dt ≈ v`), finite energy accounting, and aligned marker observations; missing rollout/marker data is enumerated in `missing_evidence` with a resolvable `remedy`.
+  - Emits only metrics computed from recorded data (`whole_rms_m`): previously present synthesized phase/clubhead/pelvis-yaw values were removed as fabricated.
+  - Discloses engine-specific limitations (`upper_body_27dof_float_pathway`, `rigid_weld_closure`, `continuous_polynomial_actuation`, `ground_contact_requires_full_body`).
+  - Supports dual-club models across both `driver` and `7-iron`.
+- **Nightly CI Lane Harness Integration (`scripts/ci/run_native_engine_lane.py`, `scripts/ci/run_native_engine_lane.sh`)**:
+  - Adds `"drake"` configuration to `ENGINE_LANES` (`pytest_marker: "requires_drake"`, `python_module: "pydrake"`, `receipt_filename: "drake_receipt.json"`).
+  - Emits and validates honest native lane receipts in `docs/development/matched_swing_program/evidence/nightly/drake_receipt.json` (unavailable engine ⇒ `status: fail`, 0 executed tests).
+- **Evidence Package (`docs/development/matched_swing_program/evidence/drake/`)**:
+  - `driver_receipt.json` and `iron_receipt.json` corrected: previous placeholder sha256 digests and invented metric values were removed; the receipts are now honest fail-closed UNAVAILABLE records with empty evidence fields, enumerated `missing_evidence`, and a resolvable `remedy`. No native Drake qualification exists yet.
+  - Documents evidence scope and constraints in `docs/development/matched_swing_program/evidence/drake/README.md`.
+- **TDD Test Coverage (`tests/unit/engines/drake/test_drake_dual_club_qualification.py`, `tests/scripts/test_run_native_engine_lane.py`, `tests/docs/test_native_lane_freshness.py`)**:
+  - Unit and script tests verifying contract rejection logic, derivative checking, energy balance, fail-closed behavior for unavailable runtimes, unrecorded test counts, missing rollout/marker data computed-not-invented metrics, and committed receipt integrity.
+## PreconditionError Exception-Identity Repair at the Shared Contracts Seam (#11175)
+
+- **Duplicate DbC exception class objects eliminated (`_contracts_exceptions` re-export seam)**:
+  - `src/shared/python/_contracts_exceptions.py` no longer redefines `ContractViolationError`, `PreconditionError`, `PostconditionError`, or `InvariantError`; it re-exports the SAME class objects from the public `src.shared.python.contracts` module, while keeping shard-local `ContractEvaluationError` (with message validation).
+  - Both import paths (`src.shared.python.contracts` and `src.shared.python._contracts_exceptions`) now yield referentially identical classes, so `@precondition`/`@postcondition` failures raised in decorated code are catchable by code importing either seam — unblocks `tests/unit/motion_matching/test_stability_matrix.py::TestStabilityMatrix::test_get_canonical_test_invalid`, red on main since the #11171 restore.
+  - Regression guard strengthens the test with an object-identity assertion (`contracts.PreconditionError is _contracts_exceptions.PreconditionError`) plus `errisinstance` on the raised violation.
+
 ## Anti-Phantom-Merge Path Extraction for Scripts, Workflows, and Parenthetical Filtering (#11124)
 
 Resolves Rule 3 path-matching false positives in anti-phantom-merge checks (`scripts/ci/check_phantom_guard_paths.py`):
@@ -7291,6 +7743,80 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
+| 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
+| 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
+| 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
+| 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
+| 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
+| 2026-10-03 | #11393 | [FTO-27] Calibrated MuJoCo mesh render composited onto source footage: camera mapping from K, R, t via `mujoco_camera_from_pinhole`, enlarged-frame crop for off-centre principal point, lens distortion footage undistortion policy, segmentation alpha compositing with feathering, and force glyph/color shading integration (#11312). |
+| 2026-10-03 | #11377 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence (#11308). |
+| 2026-10-03 | #11353 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
+| 2026-10-03 | #11354 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
+| 2026-10-03 | #11363 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362 (#11307). |
+| 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
+| 2026-10-03 | #11346 | `force-overlay-parity` mujoco lane now requires the real `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` case to pass instead of the stand-in MJCF statics check, now that the MuJoCo provider row is on main |
+| 2026-10-03 | #11297 | [FTO-12] Drake GUI draws real force/torque glyphs through MeshcatGlyphRenderer (new Gravity checkbox, headless `ForceOverlayController`) replacing the gravity-only drawing, and feeds the segment force-colour session from the provider's axial loads with illustration-geometry path bindings. |
+| 2026-10-03 | #11378 | [FTO-24] Align force/torque series with video frames and trace import: force_frame_for_video, load_trace_forces/write_trace_forces HDF5 group, series_to_viewport_payload_wrench (#11309). |
+| 2026-10-03 | #11295 | [FTO-10] MuJoCo GUI draws force/torque overlays through the shared renderers: native viewer adds shaded 3D geoms via `add_glyphs_to_scene` and MeshCat uses `MeshcatGlyphRenderer`, both fed by one `get_force_torque_frame()` sample per frame and a headless toggle-to-glyph mapping; legacy cv2 arrow code and the flat `xaxis[3*j]` slices removed; legend line in the status bar; native contact view relabelled as a debug view. |
+| 2026-10-03 | #11375 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
+| 2026-10-03 | #11381 | MuJoCo provider labels joint reactions by joint name (`reaction:<joint>`, body name only when a body has no joint) to match Drake, Pinocchio and OpenSim; the FTO-21 MuJoCo pendulum MJCF gains a non-colliding rod so the native axial source reports; found by the first run of the per-engine parity lanes |
+| 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
+| 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
+| 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
+| 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
+| 2026-10-02 | #11337 | [FTO-5] MeshCat glyph renderer: real cylinder+cone arrows and torque arcs, MeshcatSink protocol, caching, and Drake sink (#11290). |
+| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
+| 2026-10-03 | #11349 | `MujocoAxialLoadSource` axis discovery compares geom/joint types via `int()` so it works on mujoco 3.14 (enum vs numpy int); regression tests added. |
+| 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |
+| 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
+| 2026-10-03 | #11301 | [FTO-16] OpenSim muscle lines of action: `OpenSimForceTorqueSource.muscle_wrenches` emits `MUSCLE` wrenches (tendon force along the effective end directions) at each enabled muscle's origin and insertion, labels `muscle:<name>:origin`/`:insertion`; only end attachments drawn. |
+| 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: `PinocchioForceTorqueSource` (world-frame RNEA joint reactions, applied-torque actuator wrenches, contact pass-through, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_applied_torques`, `force_visualization=FULL`. |
+| 2026-10-02 | #11296 | [FTO-11] Drake force/torque provider: DrakeForceTorqueSource over reaction, net-actuation and point/hydroelastic contact ports, axial loads, shared segment_axes helper, force_visualization=FULL. |
+| 2026-10-03 | #11304 | [FTO-19] Carry optional logged force channels through `SimscapeOutput.force_columns` and `logsout_to_simscape_output` (`forces` key); `SimscapeOutput.to_force_series()` delegates to the shared `force_series_from_columns` core (Python side only; MATLAB exporter pending R2025b host). |
+| 2026-10-03 | #11300 | [FTO-15] OpenSim force/torque provider: `OpenSimForceTorqueSource` (world Z-up joint reactions, coordinate-actuator torques, Hunt-Crossley/smooth sphere contacts moved to the sphere bottom, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`compute_contact_forces`, `contact_forces` and `force_visualization` PARTIAL. |
+| 2026-10-02 | #11289 | [FTO-4] Colour utilities DRY: one hex/RGBA helper and a registered tension/compression colormap (#11289). |
+| 2026-10-02 | #11288 | [FTO-3] Implement glyph builder (ForceGlyphStyle, build_glyphs, scale_for_view), glyph-set-v1 wire schema and examples, and FORCE_KIND_PALETTE registration (#11288). |
+| 2026-10-02 | #11287 | [FTO-2] Implement shared force conversions: joint torque to moment vector, local to world, point translation with moment-arm adjustment, and reaction wrenches to axial loads (#11287). |
+| 2026-10-02 | #11303 | [FTO-18] Add the pure-Python Simscape force loader `load_simscape_force_series` (declarative channel table, logged-R rotation, orthonormality validation) and `SimscapeAdapter.load_force_series`; documented in CROSS_ENGINE_PARITY_SPEC section 3.1. |
+| 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |
+| 2026-10-02 | #11285 | Plan the force/torque overlay epic: ADR-0052 engine-agnostic force/torque contract (proposed), assessment of every engine and the video stack, and 30 dependency-ordered child issues including tension/compression producers and source-footage overlays. |
+| 2026-10-02 | #11268 | Plan the capture-O video companion epic: procedure for markerless, Necromatcher and Simscape comparison of the owner's session video against the marker capture, with graded comparison levels and private-data rules. |
+| 2026-10-01 | #11240 | Add native historical image fitting using canonical spline MAP estimation, explicit camera hypotheses, immutable evidence, efficient derivatives and measured Hogan/Tiger residuals; preserve exact source-bound research fit versions through library recall/export, add verified native/web projection review with a clean-interpreter SDK worker, add source-stamped warm-start job execution with explicit rejection and cancellation-safe publication, record committed Hogan/Tiger refits and clean-worker environment regressions, expose native/web submit-status-cancel controls through the canonical session with durable research run recall, add unit-preserving model/fit-bound authored effort profiles with strict import/recall/export checks and canonical unqualified handoff transport, add compiled scalar-unit verification and shared native fit/control bindings, verify both actual player resources from committed source, add bounded authored open-loop replay with fresh-resource step refinement and canonical SI trace metadata, add immutable replay admission/recall/export and shared local API transport with source/parent/clock/control checks, add explicit source-linked ground/camera placement hypotheses with all-frame conservation and lineage validation, record actual committed Hogan/Tiger placement revisions and remaining cropped-foot/closure failures, preserve research qualification, repair native frame-alias queries and finite-angle grip IK derivatives, add source-stamped discrete authored bounded repair with explicit soft constraints and pixel tradeoffs, record full-track failed LM probes and add opt-in native analytic bounded TRF with fixed contact rows and preserved locked states, add canonical sequential warm starts, source-sized native joint-tree MP4/PNG overlays with exact source PTS and immutable manifests, and a compiled reproducible LaTeX methods report/Desktop review package tracked by #11246/#11247; add owned native/web video export jobs, clean SDK workers, durable status/cancellation, guarded downloads, native transfer hash verification and bounded canonical Windows atomic-promotion retries; add public scaled 6D native grip/ground Jacobians, opt-in interior spline constraints with source-only image evidence, immutable tested-time receipts and independently assessed cubic coordinate extrema; repair governed inventories and continue qualified replay and downstream handoffs under #11235. |
+| 2026-10-02 | #11093 | [MMR-09] Finish Pinocchio Native Fitting and Cross-Engine Torque Transfer: candidate promotion gating enforcing iron/driver capture declaration isolation, solve/replay integrator parity, G1-before-G2/G3 promotion, and physical audit/RoM gates; cross-engine torque transfer matrix reproducing declared parity and equilibrium tolerances across MuJoCo and Simscape with diagnostic rejection; spherical joint virtual work duality and coordinate permutation invariance (#11093). |
+| 2026-10-02 | #11265 | [MMR-15] Wire Continuous Shadow Optimization With Uncertainty and Abstention: continuous whole-body forward rollouts with zero state resets (reset_count == 1) and zero ghost pelvis assistance, forward model is_qualified capability gate, synchronized held-out C3D phase-stratified tracking validation (evaluate_phase_stratified_tracking), archive stress set resilience against cuts, motion blur, and unknown cameras (evaluate_archive_stress_resilience), nominal 90% confidence coverage assessment with structured abstention on holdouts, and model-dependent unidentifiable labeling for monocular joint torques and contact forces (#11101). |
+| 2026-10-01 | #11239 | Register Necromatcher historical-player tile, web route and native adapter; share persistent library and source-frame review, preserve source PTS/missingness, provide native/web version imports and portable exports; record official Tiger 2000 range capture evidence. Final parity acceptance and qualified historical fitting remain active. |
+| 2026-10-01 | #11237 | Add Necromatcher historical-player library on the existing session/project store: immutable hash-checked capture/model/control versions, model-bound authored torque profiles, portable swing packages and shared local web/desktop API; full matching and downstream qualification remain open under #11232. |
+| 2026-10-01 | n/a | Optimize math_utils by replacing np.linalg.norm with faster equivalents (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11227 | Shadow Tracker: Synthetic segmentation fallback must not masquerade as observed model inference: ModelSegmentationProvider fails closed with RuntimeError when inference_engine is absent unless allow_synthetic=True is explicitly set, synthetic masks branded with synthetic: producer_id and explicit correction note, Gate G0 rejects synthetic masks under release qualification, and classify_evidence_quality demotes synthetic evidence to dynamic_candidate (#11227). |
+| 2026-10-01 | #11231 | Add reusable historical-player streaming image observations with rational PTS, source/frame/model hashes, explicit missingness and unqualified receipts; track Hogan #11229 and Tiger #11226. |
+| 2026-10-01 | #11100 | [MMR-14] Unify Camera, Morphology and Native State for Shadow Fitting: exact algebraic quaternion velocity Jacobian J_quat and left inverse with tangent projector (I - q q^T), bidirectional canonical_37 to native_41 state transformations preserving SI units, closed_grip_golfer_setup address pose with 4.3 mm hand separation and decoupled translation/rotation tolerance gates, multi-convention articulated renderer support for native_full_body_v1 and canonical_v2_full_body, and FittingPriors validation with multi-hypothesis generation across yaw, depth, and scale (#11100). |
+| 2026-10-01 | #11086 | [MMR-02] Freeze Dual-Club Observation, Calibration and Accuracy Contracts: versioned Driver (654 frames @ 360 Hz) and 7-Iron (657 frames @ 359 Hz) observation manifests, bit-for-bit frame validity verification rejecting unmeasured/interpolated samples from measured holdout scoring, holdout protection during geometry calibration, comprehensive multi-metric evaluation (pooled RMSE, frame distribution, p95/max, per-phase, per-segment), common-target candidate comparison with explicit coverage visibility, and justified model floor documentation (18.5 mm pooled RMSE floor) (#11086). |
+| 2026-10-01 | #11155 | [R12] Define and Validate Neural Data-Efficiency Claims Statistically: Design by Contract budget validation rejecting unsorted, non-positive, and duplicate budgets; equal-curve non-superiority ([0.5, 0.5] vs [0.5, 0.5] -> False); undefined/inconclusive zero-reference and unattained-target handling (None, not 1.0 default); distinct descriptive mean ratio, trapezoidal AUC ratio, and horizontal budget-to-target sample savings; multi-seed statistical uncertainty evaluation (evaluate_multi_seed_data_efficiency, MultiSeedEfficiencySummary); and truthful diagnostic documentation and receipt updates (#11155). |
+| 2026-10-01 | #11151 | [R11] Report Actual Integrated Horizon Consistently Across REST and WebSocket Runs: SimulationTimingPlan and compute_simulation_timing for truthful clocks across divisible, floating-point-boundary, non-divisible, and sub-step horizons; allow_remainder_step toggle; eliminate min(duration, frame*timestep) WebSocket clamping; separated requested_duration, integrated_duration, step_count, and retained_samples fields on SimulationResponse; and cross-engine variable-step capability contracts (#11151). |
+| 2026-10-01 | #11144 | [R03] Bound Simulation Work and Preserve Cancellable Jobs Under Load: aggregate step budget validation (MAX_SIMULATION_STEPS=100k), minimum flight timestep and sample bounds (MAX_FLIGHT_SAMPLES=50k, MAX_ODE_TRAJECTORY_POINTS=50k), event-loop offloading via anyio.to_thread.run_sync for flight simulation, TaskManager active task retention against TTL and LRU eviction with capacity admission, and cooperative stepping loop cancellation within 1 step with distinct calculation_status='cancelled' terminal responses (#11144). |
+| 2026-10-01 | #11143 | [R02] Isolate Engine, Recorder, and Analysis State per Simulation Run: isolated unshared engine creation (create_engine), per-run SimulationRunRecord state, connection-isolated WebSocket stats, explicit busy response (SimulationBusyError -> 409 Conflict) under single-run mode, run-addressed analysis/plot/recording routes, and idempotent per-run engine cleanup (#11143). |
+| 2026-10-01 | n/a | Micro-optimize quaternion normalization by replacing np.linalg.norm(..., axis=1) with np.sqrt(np.einsum('ij,ij->i', ..., ...)) (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11150 | [R10] Keep Ball-Flight Results Attached to Input Snapshot and Provenance: immutable execution input snapshots (launch conditions, model selections), active results tied to snapshot with committed/previous status badges, visual indicator for post-execution input modifications, previous results retained on failure, monotonic request sequence IDs guarding out-of-order responses, exposed model coefficients, and WCAG live region status announcements (#11150). |
+| 2026-10-01 | #11223 | [R07] Wire Neural Matching Controls to Executed Requests: wire neural mode, model selector, and fallback checkboxes to MatchRequest, validate models and dispositions via MotionMatchingController, update badges and metrics with fail-closed behavior, document platform gap in feature_parity.json (#11147). |
+| 2026-10-01 | #11145 | [R04] Propagate Flight Termination Before Reporting Landing Metrics: propagate explicit FlightTermination states (LANDED, TIME_LIMIT, SOLVER_FAILED, CANCELLED) with terminal-event evidence and actual horizon, gate landing metrics (carry, landing angle, lateral deviation) to None on unlanded flights, raise IncompleteFlightError carrying partial result on require_landing(), support cooperative cancellation via FlightSimulationCancelled, update BallFlightSummary and trajectory import to reflect termination status, and handle None metrics safely in Shot Tracer results table (#11145). |
+| 2026-10-01 | #11148 | [R08] Bind Matcher Process Events to Their Run and Handle Failed Starts: immutable RunContext tracking initiating run and panel, idempotent finalizer handling failed start, nonzero exit, crash, and cancellation, QProcess disposal via deleteLater(), strict context-bound output and result tab routing, and failing stage and recovery action reporting (#11148). |
+| 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
+| 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
+| 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
+| 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
+| 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
+| 2026-10-01 | #11089 | [MMR-05] Add Anatomical Meshes Without Changing Qualified Physics (#11089): one-segment File Solid and visual preset substitution preserving exact mass, COM, inertia, joint frames, and same-state forward kinematics marker invariance; Design by Contract validation for SI units, finite bounds, and missing assets with documented graceful fallback; asset provenance and redistribution terms tracking; MMR-04 compiled block budget enforcement (<=975 production ceiling); reusable segment adapter for pelvis, trunk, head, hand, and shoe prototypes with bilateral handedness mirroring and multi-phase swing clearance verification. |
+| 2026-10-01 | #11210 | [MMR-18] Benchmark MATLAB Iteration Throughput and Portable Model Exchange (#11104): cold/warm timing and peak memory tracking on same hardware/capture, 7-axis content-addressed cache invalidation, session reuse rebuild guards on topology and operating-point edits, metric parity tolerances, uncached native cold replay verification for optimization winners, and fail-closed rejection of unsupported neck/contact/muscle dynamics in portable exchange. |
+| 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
+| 2026-10-01 | #11097 | [MMR-11] Repair reduced-model and club-only product claims: enforce exploratory/disqualified pendulum receipts, block matrix completion on unresolved required cells with required_model_ids support, reject spatial planar floor failure before optimization, verify raw-to-package reproduction, and enforce labeled inferred body posture (#11097). |
+| 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
+| 2026-10-01 | #11196 | [MMR-17] Establish Clean-Host End-to-End and Native Release Gates (#11103): clean-installation bounded journeys, native receipt ingestion across all six engines (opensim, myosuite, drake, mujoco, pinocchio, simscape), adverse path rejection (tampered package, missing engine, unsupported model, corrupt capture), and fail-closed release qualification matrix. |
+| 2026-10-01 | #11102 | [MMR-16] Publish a Best-Candidate Viewer With Honest Residuals (#11102): raw observations guarded read-only, selection invariant under visual/camera switching, worst marker/phase jumping with clock synchronization, full web/API parity with residual endpoints, board-ready video/still exports with legible SI units and evidence links, visual failure badges and accessibility annotations. |
+| 2026-09-30 | #11193 | Ensure simulation recorder lifecycle, reject empty results, retain commanded control inputs, and surface buffer capacity exhaustion (#11142). |
+| 2026-09-30 | n/a | Optimize worst marker norm extraction with einsum in Tour Matching Viewer (spec-exempt: micro-optimization) |
+| 2026-09-30 | #11192 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `urllib3>=2.8.0` and `PyJWT>=2.15.0`; both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved `urllib3` from `2.7.0` to `2.8.0` (resolves CVE-2026-97687) and `pyjwt` from `2.14.0` to `2.15.0` (resolves CVE-2026-101918) (#11191); no consumer-code change. |
+| 2026-09-30 | #11189 | Optimize `rigid_attachment_residuals` calculation in rigidity check with `np.sqrt(np.einsum)` (spec-exempt: micro-optimization) |
+| 2026-09-30 | #11187 | Restores the UI `npm audit --audit-level=high` gate with compatible `brace-expansion` and `undici` patched lockfile resolutions, guarded by a focused UI lockfile contract test; audit policy and manifest dependencies remain unchanged. |
 | 2026-09-29 | #11153 | Dependency-only security bump: `pyproject.toml`/`environment.yml` floor `PyJWT>=2.14.0` and both pip-compile locks (`requirements.lock`, `requirements-dev.lock`) moved from `pyjwt==2.13.0` to `pyjwt==2.14.0`, the first release clearing OSV GHSA-w6j9-cwv2-h6wq / CVE-2026-102274 that left every pip-audit lane (code-quality, dependency-consistency) red on the untouched upstream lockfiles; no consumer-code change. |
 | 2026-09-29 | #11130 | [MMR-11] Fail-closed reduced-model/club-only claims repair for #11097: planar-floor gate compares the current target's butt/clubhead plane distances (not the calibrated plane's stale residual) against a DbC-validated finite-positive `max_marker_rmse_m`; driven-triple receipts disqualified at projection time; promoted-package hash/residual integrity gates; club-only fresh continuous replay + labeled inferred posture; matrix all-complete claims fail closed on unresolved cells. All are code-level gates; no package regeneration, Board cell selection, or native runs performed. |
 | 2026-09-29 | #11132 | [MMR-16] Review fixes for the best-candidate viewer (#11102): `rank_candidates` is wired into the matched-swing browser's real list-build path so the auto-selected first row is the best comparable candidate (ascending `whole_marker_rmse_m`, rejected rows kept visible with their verdicts), the viewer residual summary, rendered-frame and multi-candidate captions pool per-marker 3D distances like `tour_metrics.compute_shared_metrics`, frames with zero valid markers are excluded from global-worst selection and mean statistics, and the browser open-viewer path forwards the selected row's provenance (candidate hash, engine, drive mode, verdict) into the viewer load path; web/API parity and accessibility review remain open on the issue. |
@@ -7601,7 +8127,9 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
-| 2026-09-29 | #11107 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |
+| 2026-10-01 | #11147 | Wire neural matching controls to executed requests, populate qualified registry model availability, honor disabled fallbacks with named reasons, prevent preview promotion to verified, and update feature parity docs (R07 #11147). |
+| 2026-10-01 | #11107 | Complete Simscape continuous-replay qualification harness integration (MMR-07-I #11107): add test_simscape_replay_harness contract suite, integrate continuous-replay qualification receipt evaluation into test_acceptance, and verify full-marker channel evaluation. |
+| 2026-09-29 | #11126 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |
 | 2026-09-19 | #10480 | Reuse shared physical-time playback across Qt React and native viewers (MV-04): PhysicalTimePlayback driving evaluation by continuous physical time using Tools playback_transport, quaternion SLERP with antipodal continuity, dropped-draw handling without timescale drift, discrete knot stepping, and PlaybackAdapter matrix (Qt, React web payload, MeshCat, Gepetto, MediaVideo with offset and documented mute reason). |
 | 2026-09-19 | #10479 | Bind saved candidates to viewer and analysis sessions (MV-03): CandidateSession ingestion with SHA-256 integrity, WSL host boundary probe, multi-candidate replay overlay with ENGINE_COLORS, conspicuous rejected fit banner, and GIF export. |
 | 2026-09-18 | #10395 | Freeze the OpenSim anatomical baseline and failure fixtures (OG-01): pure-XML model audit verifying SHA-256 hashes (051d61ea/7dd1da17), body/coord/actuator counts (23/39/39/0), detecting empty Club attached geometry and unscaled arm meshes, with fail-closed qualification verification. |
@@ -9166,3 +9694,11 @@ Establishes the independent qualification service for candidate tour baseline pa
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
 
+
+### Capture Registry Comparison Integration - #11172
+
+Accepted-main records and ledger metadata are reconciled while preserving all 133 receipt rows. Club endpoint lookup is shared between angular-speed and wrist metrics with identical fallback behavior. Focused validation: 190 passed, 15 private-workbook skips; Ruff and the full DRY gate pass. Protected CI and physical matching acceptance remain separate.
+
+The 14 new per-capture leaderboard contracts are explicitly unit tests; selected execution and the full suite-marker ratchet pass without changing baselines.
+
+Shared-tools divergence inventory is regenerated for all five new swing_comparison source paths; ten inventory checks and current-tree freshness pass.
