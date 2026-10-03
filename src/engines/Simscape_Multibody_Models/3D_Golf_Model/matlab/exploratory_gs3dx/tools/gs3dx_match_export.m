@@ -639,6 +639,7 @@ function dep = local_dependency_inventory()
     dep.solve.initial_target_values = local_resolve_which('gs3dx_initial_target_values');
     dep.solve.head_input_data = local_resolve_which('gs3dx_head_input_data');
     dep.solve.spine_bounds = local_resolve_which('gs3dx_spine_bounds');
+    dep.solve.target_scope = local_resolve_which('gs3dx_ik_target_scope');
     dep.solve.scapula_bounds = local_resolve_which('gs3dx_scapula_bounds');
     dep.solve.scapula_phase = local_resolve_which('gs3dx_scapula_phase');
     dep.solve.backswing_top_frame = local_resolve_which('gs3dx_backswing_top_frame');

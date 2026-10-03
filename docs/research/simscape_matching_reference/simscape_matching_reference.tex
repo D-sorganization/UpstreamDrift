@@ -2715,6 +2715,33 @@ the legacy path. Missing observations remain missing. Private native
 receipts retain input, model, source and trajectory identities; timed-out
 or watchdog-terminated executions are not counted as success.
 
+\subsection{Native Target Selection Across Moving-Scapula Models}
+The refinement scope includes all 13 registered moving-scapula variants.
+The initial whole-body entrypoint assumed feet and 14 position targets,
+which excluded the upper-body-only Baseline, Slim and Quat models.
+Automatic native target selection now uses eight pelvis, arm and club
+targets on those models, and 14 targets on a complete native leg graph.
+Partial or ambiguous lower-body graphs fail closed. Models without feet
+have no foot rotation outputs; their foot errors remain missing and a
+positive foot-orientation weight is rejected.
+
+The earlier FullBody construction stage has feet rigidly attached to
+World. Its automatic fit selects upper-body targets and solves the leg
+coordinates as native loop-closure guesses. Contact and later stages keep
+their floating-foot whole-body layouts. This adapter preserves the model
+topology; its native convergence and closure evaluation is still pending.
+
+Non-Human keyed seeds are checked against the actual native keys and
+units, including spherical unit axes and loop closure. The original
+Human 48-coordinate seed contract and full-body output layout remain
+unchanged. The 59-test target-contract lane passed, as did exact complete
+disabled-feature Human output parity. Native three-frame fitting pilots
+passed for all three upper-body-only variants. Complete quiet-torso
+trajectories are currently being evaluated with original model dimensions
+and fixed address-calibrated marker offsets. Baseline has completed both
+55/46-frame trajectories. These intermediate results do not establish
+acceptance of the remaining complete model trajectories.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

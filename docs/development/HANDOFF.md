@@ -10,6 +10,9 @@
 - Dependency: branch base includes 31 parent commits from draft #11256, including shared-capture #11172. Review this refinement's own commits separately. Do not merge the unqualified parent scientific program through this dependent draft.
 - Next step: Desktop previews are complete. Source PR #11351 remains draft pending parent acceptance; no protected-main merge or CI success is claimed. Main documentation conflicts were resolved preserving concurrent records; tested Simscape sources and models were unchanged.
 
+- Variant refinement: `target_scope=auto` selects available native targets, masks unavailable foot diagnostics and validates keyed seeds against actual native coordinates. Baseline/Slim/Quat complete sampled A/O trajectories have passed. Contact, Golfer and Fit have also completed both swings; remaining stages are running. The rigid-foot FullBody stage keeps its topology and needs native acceptance of the new closed-leg/upper-body adapter. An independent all-frame native replay is queued. Do not interpret static schema coverage as complete variant matching acceptance.
+- Current checks: 76 native contracts pass, including original Human warm-start contracts; exact disabled-feature Human output parity passed before the final grounded-stage adapter. The CI retry ran 20,336 passing tests and found a stale generated monolith register; regeneration passes five focused tests. Full CI success and protected-main integration remain pending.
+
 ---
 
 # OpenSim Muscle Lines of Action — #11301 (FTO-16)

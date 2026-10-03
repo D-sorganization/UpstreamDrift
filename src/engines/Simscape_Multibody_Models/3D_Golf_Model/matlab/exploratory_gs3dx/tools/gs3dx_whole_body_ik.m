@@ -34,6 +34,13 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %   they are then held fixed while FRAMES are tracked.
 %
 %   Options:
+%     target_scope ("auto") resolves complete native leg graphs to 14 targets
+%                         and upper-only graphs to pelvis plus seven arm/club
+%                         targets. Partial lower-body topology fails closed.
+%                         Explicit "whole_body" and "upper_body" are available.
+%                         Missing native feet have no orientation observations;
+%                         requesting positive foot weight without feet fails.
+%                         Upper-only outputs identify unavailable capabilities.
 %     model               (GS3DX_Human)
 %     frames              frames to track (default all)
 %     calibration_frames  (default every 3rd frame of FRAMES)
@@ -175,6 +182,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     arguments
         jc (1,1) struct
         opts.model (1,:) char = char(gs3dx_names().variants.human)
+        opts.target_scope (1,1) string {mustBeMember(opts.target_scope,["auto","whole_body","upper_body"])} = "auto"
         opts.frames (1,:) double {mustBeInteger, mustBePositive} = 1:size(jc.pelvis, 2)
         opts.calibration_frames (1,:) double {mustBeInteger, mustBePositive} = []
         opts.calibration_rounds (1,1) double {mustBeInteger, mustBeNonnegative} = 3
@@ -217,10 +225,13 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     assert(isreal(opts.scapula_protraction_deg) && isfinite(opts.scapula_protraction_deg) && ...
         (opts.scapula_protraction_deg == 0 || (opts.scapula_protraction_deg >= 5 && opts.scapula_protraction_deg <= 10)), ...
         'gs3dx:ik:scapula', 'scapula_protraction_deg must be 0 or 5..10 degrees');
-    p_seed = gs3dx_ik_initial_pose(opts.initial_pose);
-    if ~isempty(p_seed)
-        assert(strcmp(opts.model, char(gs3dx_names().variants.human)), 'gs3dx:ik', ...
-            'initial_pose keyed warm-start is restricted to model %s', char(gs3dx_names().variants.human));
+    human_model=strcmp(opts.model,char(gs3dx_names().variants.human));
+    p_seed=struct([]);
+    if human_model,p_seed=gs3dx_ik_initial_pose(opts.initial_pose);end
+    if ~isempty(opts.initial_pose)
+        supported=string(struct2cell(gs3dx_names().variants));
+        assert(ismember(string(opts.model),supported),'gs3dx:ik', ...
+            'Keyed warm-start requires a registered GS3DX variant');
     end
     head_data = gs3dx_head_input_data(jc, opts.frames, ...
         opts.calibration_frames, opts.head_orientation_weight);
@@ -238,7 +249,11 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         assert(isfield(jc,'back_marker_points') && size(jc.back_marker_points,1)==3 && size(jc.back_marker_points,2)==3 && size(jc.back_marker_points,3)==size(jc.pelvis,2),'gs3dx:ik:body','Require three raw back markers over capture frames');
         assert(all(isfinite(opts.back_marker_offsets),'all'),'gs3dx:ik:body','Back marker offsets must be finite');
     end
-    s = local_setup(opts.model, head_data.active,body_active);
+    s = local_setup(opts.model, head_data.active,body_active,opts.target_scope);
+    if ~human_model
+        native_schema=struct('joint_keys',s.jkeys,'units',string(s.jp.Unit));
+        p_seed=gs3dx_ik_initial_pose(opts.initial_pose,native_schema=native_schema);
+    end
     s.back_marker_weight=opts.back_marker_weight;s.back_marker_offsets=opts.back_marker_offsets;
     s.verbose = opts.verbose;
     s.backward = opts.backward;
@@ -248,9 +263,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     s.scapula.top=top;s.scapula.impact=impact;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
     s.rom = local_rom(s, opts.rom_weight, opts.rom);
-    has_foot_R = isfield(jc, 'foot_R_L') && isfield(jc, 'foot_R_R');
+    has_foot_R = s.n_feet>0 && isfield(jc, 'foot_R_L') && isfield(jc, 'foot_R_R');
     if opts.foot_orientation_weight > 0
-        assert(has_foot_R, 'gs3dx:ik', 'jc must contain foot_R_L and foot_R_R when foot_orientation_weight > 0');
+        assert(has_foot_R, 'gs3dx:ik', 'Native model and capture must provide movable foot orientation frames when foot_orientation_weight > 0');
     end
     feet = @(f) local_foot_data(jc, f, has_foot_R);
     head_fn = @(f) local_body_head_data(head_data,jc,body_active,f);
@@ -258,7 +273,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
     tw = local_target_weight(s.names, opts.target_weight);
-    assert(isequal(s.names, canonical_names), 'gs3dx:ik', 'Position target order mismatch');
+    [found,target_at]=ismember(s.names,canonical_names);
+    assert(all(found),'gs3dx:ik','Unknown position target');
+    gap_weights=gap_weights(target_at);
+    assert(isequal(s.names,canonical_names(s.scope.target_indices)),'gs3dx:ik','Position target order mismatch');
     weight = @(f) (valid(f) + gap_weights .* ~valid(f)) .* tw;   % residual weight per target
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
@@ -317,6 +335,11 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     if head_data.active && opts.head_orientation_mode=="axis",ik.head_axis_error_deg=nan(1,numel(opts.frames));end
     if s.spine.active,ik.spine_excursion_deg=zeros(3,numel(opts.frames));ik.spine_native_keys=s.spine.keys;end
 
+    if s.scope.name=="upper_body"
+        ik.target_scope='upper_body';
+        ik.capabilities=struct('lower_body_position_targets',false,'native_feet',s.native_feet, ...
+            'foot_orientation_targets',s.n_feet>0,'grounded_leg_loop',s.grounded_legs);
+    end
     ik.model = opts.model;
     if ~isempty(p_seed), ik.seed_source = seed_source; end
     ik.independent_coordinate_count = s.roles.n_independent;
@@ -538,7 +561,7 @@ function best = local_track(s, frames, p, g, off, data, weight, feet, head, lm)
     end
 end
 
-function s = local_setup(mdl, with_head,with_body)
+function s = local_setup(mdl, with_head,with_body,requested_scope)
 % KinematicsSolver with the target points, the body rotations, the foot solid
 % rotation frames and the right-arm loop joints as outputs.
     load_system(mdl);
@@ -570,7 +593,17 @@ function s = local_setup(mdl, with_head,with_body)
         [joint('Right Wrist') '/F'],      [joint('Right Wrist') '/B']
         [club{1} '/R'],                   [club{1} '/R']
         };
+    % FullBody is the construction stage whose feet are rigidly connected to
+    % World (gs3dx_build_lower_body). Contact and later stages have free feet.
+    s.grounded_legs=strcmp(mdl,char(gs3dx_names().variants.fullbody));
+    if s.grounded_legs
+        assert(requested_scope~="whole_body",'gs3dx:ik:scope', ...
+            'Rigid-foot FullBody requires upper_body targets; auto selects them');
+        requested_scope="upper_body";
+    end
+    s.scope=gs3dx_ik_target_scope(jp,requested_scope);
     T = [canonical_names, target_paths];
+    T=T(s.scope.target_indices,:);
     s.names = T(:, 1);
     [bodies, ~, s.body] = unique(T(:, 3), 'stable');
     for k = 1:size(T, 1)
@@ -583,25 +616,32 @@ function s = local_setup(mdl, with_head,with_body)
     % Foot solid rotation frames (native foot frame +x is forward axis per Human / contact model)
     foot_l = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'RegExp', 'on', 'Name', '^(L Foot|Left Foot)$');
     foot_r = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', 'RegExp', 'on', 'Name', '^(R Foot|Right Foot)$');
-    assert(~isempty(foot_l) && ~isempty(foot_r), 'gs3dx:ik', 'Could not locate L/R Foot solid blocks in %s', mdl);
-    foot_l_blk = foot_l{1};
-    for k = 1:numel(foot_l)
-        ph = get_param(foot_l{k}, 'PortHandles');
-        if isfield(ph, 'RConn') && ~isempty(ph.RConn)
-            foot_l_blk = foot_l{k};
-            break;
+    assert(isempty(foot_l)==isempty(foot_r),'gs3dx:ik:scope', ...
+        'Native feet must be present bilaterally or absent bilaterally');
+    s.native_feet=~isempty(foot_l);
+    s.n_feet=0;
+    if s.native_feet && ~s.grounded_legs
+        s.n_feet=2;
+        foot_l_blk = foot_l{1};
+        for k = 1:numel(foot_l)
+            ph = get_param(foot_l{k}, 'PortHandles');
+            if isfield(ph, 'RConn') && ~isempty(ph.RConn)
+                foot_l_blk = foot_l{k};
+                break;
+            end
         end
-    end
-    foot_r_blk = foot_r{1};
-    for k = 1:numel(foot_r)
-        ph = get_param(foot_r{k}, 'PortHandles');
-        if isfield(ph, 'RConn') && ~isempty(ph.RConn)
-            foot_r_blk = foot_r{k};
-            break;
+        foot_r_blk = foot_r{1};
+        for k = 1:numel(foot_r)
+            ph = get_param(foot_r{k}, 'PortHandles');
+            if isfield(ph, 'RConn') && ~isempty(ph.RConn)
+                foot_r_blk = foot_r{k};
+                break;
+            end
         end
+        addFrameVariables(ks, 'r_foot_1', 'Rotation', world, [foot_l_blk '/R']);
+        addFrameVariables(ks, 'r_foot_2', 'Rotation', world, [foot_r_blk '/R']);
+
     end
-    addFrameVariables(ks, 'r_foot_1', 'Rotation', world, [foot_l_blk '/R']);
-    addFrameVariables(ks, 'r_foot_2', 'Rotation', world, [foot_r_blk '/R']);
 
     s.head_active = with_head;
     if with_head
@@ -614,7 +654,7 @@ function s = local_setup(mdl, with_head,with_body)
         addFrameVariables(ks,'r_back_body','Rotation',world,[joint('Left Scapula') '/B']);
     end
     % Model-independent identification of invariant joint roles
-    roles = gs3dx_ik_joint_roles(jp);
+    roles = gs3dx_ik_joint_roles(jp,[],grounded_legs=s.grounded_legs);
     s.roles = roles;
     s.closed = roles.closed_mask;
     s.tv = roles.target_ids;
@@ -763,24 +803,27 @@ function [P, R, st, g, R_feet, R_head,P_body,R_body] = local_fk(s, p, g)
     for b = 1:s.nb   % intrinsic X-Y-Z, the KinematicsSolver 'Rotation' convention
         R(:, :, b) = local_rx(a(1, b)) * local_ry(a(2, b)) * local_rz(a(3, b));
     end
-    idx_feet = 3 * (s.nt + s.nb) + (1:6);
-    a_feet = reshape(o(idx_feet), 3, 2) * pi / 180;
-    R_feet = zeros(3, 3, 2);
-    for k = 1:2
-        R_feet(:, :, k) = local_rx(a_feet(1, k)) * local_ry(a_feet(2, k)) * local_rz(a_feet(3, k));
+    R_feet=repmat(eye(3),[1 1 2]); % masked placeholders for models without feet
+    if s.n_feet>0
+        idx_feet = 3 * (s.nt + s.nb) + (1:6);
+        a_feet = reshape(o(idx_feet), 3, 2) * pi / 180;
+        R_feet = zeros(3, 3, 2);
+        for k = 1:2
+            R_feet(:, :, k) = local_rx(a_feet(1, k)) * local_ry(a_feet(2, k)) * local_rz(a_feet(3, k));
+        end
     end
     R_head = nan(3, 3);
     if s.head_active
-        idx_head = 3 * (s.nt + s.nb + 2) + (1:3);
+        idx_head = 3 * (s.nt + s.nb + s.n_feet) + (1:3);
         a_head = o(idx_head) * pi / 180;
         R_head = local_rx(a_head(1)) * local_ry(a_head(2)) * local_rz(a_head(3));
     end
     P_body=nan(3,1);R_body=nan(3);
     if s.body_active
-        base=3*(s.nt+s.nb+2+double(s.head_active));P_body=o(base+(1:3));a=o(base+(4:6))*pi/180;
+        base=3*(s.nt+s.nb+s.n_feet+double(s.head_active));P_body=o(base+(1:3));a=o(base+(4:6))*pi/180;
         R_body=local_rx(a(1))*local_ry(a(2))*local_rz(a(3));
     end
-    g = o(3 * (s.nt + s.nb + 2 + double(s.head_active)+2*double(s.body_active)) + 1:end);
+    g = o(3 * (s.nt + s.nb + s.n_feet + double(s.head_active)+2*double(s.body_active)) + 1:end);
 end
 
 function T = local_targets(s, p)
