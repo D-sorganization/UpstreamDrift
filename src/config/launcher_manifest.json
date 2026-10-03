@@ -906,7 +906,7 @@
       "path": "",
       "web_route": "/api/force-overlays",
       "logo": "movement_optimizer_icon.svg",
-      "status": "experimental",
+      "status": "ready",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
       "order": 38,
       "web": {

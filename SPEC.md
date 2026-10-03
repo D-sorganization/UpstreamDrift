@@ -1,4 +1,20 @@
+## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
+
+Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
+- **Reproducible Gallery Generator (`scripts/render_force_overlay_gallery.py`)**:
+  - Headless execution across all supported engines and renderers under `MPLBACKEND=Agg`, `QT_QPA_PLATFORM=offscreen`, and `MUJOCO_GL=egl`.
+  - Generates sharp stills, clip manifests, and interactive `index.html` recording engine versions, model hashes, and `VideoGlyphReceipt` verification metrics (`drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`).
+  - Unsupported or uninstalled engines fail open with structured skip reasons rather than crashing.
+- **Golden Image Visual Regression Suite (`tests/visual/force_overlay/test_golden_force_overlays.py`)**:
+  - Headless 320x240 golden regression fixtures verifying Matplotlib 3D, OpenCV calibrated pinhole projection, and MuJoCo EGL native offscreen renders against committed golden images.
+  - Perceptual tolerance enforced strictly via `MAX_MEAN_ABS_DIFF = 2.0` on $[0, 255]$ ($2/255$ scale); threshold relaxation is prohibited.
+- **Authoritative Force Overlay Documentation & Parity Records**:
+  - User Guide in `docs/user_guide/force_overlay.md` detailing the 7-kind `FORCE_KIND_PALETTE`, axial tension/compression color scales, desktop GUI controls, web Three.js/SVG toggles, video compositing labels, and engine-specific limits.
+  - Cross-linked from `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Feature parity ledger (`src/config/feature_parity.json`) updated to record multi-engine producer wiring, and `force_overlays` tile in `launcher_manifest.json` promoted to `ready`.
+
 ## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
 
 Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
 - **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
@@ -7728,6 +7744,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-10-02 | #11256 | Default future matches to refined Human ellipsoids; add capture-bound exports, calibrated foot/head orientation, keyed starts, selective gap weights and source observation masks with native default-parity tests and caller-bound export/cache contracts. Support configured upper-body learning, native block-bound Human moving references with explicit geometry-preserving conversion; native moving-velocity/midpoint, dense branch, derived-target availability and source-masked full-pose continuity experiments recorded without promotion; distinguish the refined-preview objective, verify private translation parameter contracts and native address-prefix comparison with independent 344-pose rechecking, and twelve-axis leg feedforward; preserve failed exit receipts and separate 48/43/37/35 native coordinate/control counts; fresh 48-state tangent recheck passes; original source-rate C2 rejection retained, guess correction preserves anchors, and refined/alternate-chart dense candidates remain rejected; record the GS3DX canonical-manual inventory blocker without release promotion; independently recheck all 2,042 full-source-clock fitted poses after retained shutdown failure, audit tour1307/1307 and owner729/733 C2 states plus bounded measured InputTorque neck capability; retain the earlier 536 saved-window-pose review after retained shutdown failure, measure capture-specific fit/continuity tradeoffs and native RED/GREEN normalized-rate helper contracts without full-path promotion; dense target/back-marker fit and projection-conditioned visual foot direction independently measured; parent verifies 104 comparison MP4s without dynamics promotion. Maintain calculation-level LaTeX, failed-trial evidence and tour/owner Desktop H.264 IK videos. Contact-supported one-second holds pass their fixed gates; full-swing torque recovery, independent replay, PDF qualification and protected delivery remain open. |
 | 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
+| 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
 | 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
 | 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
