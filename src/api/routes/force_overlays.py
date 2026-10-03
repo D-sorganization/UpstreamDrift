@@ -2,8 +2,7 @@
 
 Provides endpoints for streaming force/torque visualization data
 from the active simulation engine provider. Emits renderer-neutral
-GlyphSet payloads (glyph-set-v1) and ForceTorqueFrame inspection payloads,
-retaining backward-compatible ForceVector3D items.
+GlyphSet payloads (glyph-set-v1) and ForceTorqueFrame inspection payloads.
 
 No demo or fabricated vectors.
 """
@@ -18,7 +17,6 @@ from src.api.middleware.error_handler import handle_api_errors
 from src.api.services.force_overlay_service import (
     current_force_frame,
     force_overlay_payload,
-    glyphs_to_legacy_vectors,
     style_from_request_params,
 )
 from src.shared.python.core.contracts import precondition
@@ -61,7 +59,6 @@ def _build_overlay_response(
             glyphs=None,
             frame=None,
             unavailable_reason="Force overlay disabled in request",
-            vectors=[],
             total_force_magnitude=0.0,
             total_torque_magnitude=0.0,
             overlay_config={
@@ -87,18 +84,12 @@ def _build_overlay_response(
     payload = force_overlay_payload(frame, style, body_filter=config.body_filter)
 
     if payload["glyphs"] is not None:
-        vectors = glyphs_to_legacy_vectors(
-            payload["glyphs"],
-            frame,
-            show_labels=config.show_labels,
-        )
         sim_time = frame.time_s if frame is not None else 0.0
         total_force = sum(a["magnitude"] for a in payload["glyphs"].get("arrows", []))
         total_torque = sum(
             t["magnitude"] for t in payload["glyphs"].get("torque_arcs", [])
         )
     else:
-        vectors = []
         sim_time = _get_sim_time(engine_manager)
         total_force = 0.0
         total_torque = 0.0
@@ -108,7 +99,6 @@ def _build_overlay_response(
         glyphs=payload["glyphs"],
         frame=payload["frame"],
         unavailable_reason=payload.get("unavailable_reason"),
-        vectors=vectors,
         total_force_magnitude=total_force,
         total_torque_magnitude=total_torque,
         overlay_config={

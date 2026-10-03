@@ -640,28 +640,6 @@ class MeasurementToolsResponse(BaseModel):
 # ──────────────────────────────────────────────────────────────
 
 
-class ForceVector3D(BaseModel):
-    """A single force/torque vector for 3D overlay rendering.
-
-    .. deprecated::
-        Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs``
-        instead. This model will be removed in a future release.
-    """
-
-    body_name: str = Field(..., description="Body this force acts on")
-    force_type: str = Field(
-        ..., description="Type: applied, gravity, contact, bias, or WrenchKind"
-    )
-    origin: list[float] = Field(..., description="Application point [x, y, z]")
-    direction: list[float] = Field(..., description="Force direction [dx, dy, dz]")
-    magnitude: float = Field(..., description="Force magnitude (N or N*m)")
-    color: list[float] = Field(
-        default_factory=lambda: [1.0, 0.0, 0.0, 1.0],
-        description="RGBA color for rendering",
-    )
-    label: str | None = Field(None, description="Optional display label")
-
-
 class ForceOverlayResponse(BaseModel):
     """Response model for force/torque overlay data.
 
@@ -679,10 +657,6 @@ class ForceOverlayResponse(BaseModel):
     unavailable_reason: str | None = Field(
         None,
         description="Explanation if force overlays are unavailable, or None if available",
-    )
-    vectors: list[ForceVector3D] = Field(
-        default_factory=list,
-        description="Deprecated: use glyphs instead. Backward-compatible vector list.",
     )
     total_force_magnitude: float = Field(0.0, description="Sum of all force magnitudes")
     total_torque_magnitude: float = Field(
