@@ -35,6 +35,8 @@ from src.shared.python.swing_comparison.motion import (
     CAPTURE_A_PELVIS_RIGHT_LABELS,
     CAPTURE_A_SHOULDER_LEFT_LABELS,
     CAPTURE_A_SHOULDER_RIGHT_LABELS,
+    CAPTURE_A_TRUNK_LEFT_LABELS,
+    CAPTURE_A_TRUNK_RIGHT_LABELS,
     SwingMotion,
     swing_motion_from_markers,
 )
@@ -140,6 +142,13 @@ KINEMATIC_SEGMENTS: tuple[str, ...] = ("pelvis", "thorax", "lead_arm", "club")
 """Kinematic-sequence segments, proximal to distal."""
 
 
+POST_IMPACT_MARGIN_FRACTION = 0.15
+"""Post-impact search margin as a fraction of the downswing duration."""
+
+POST_IMPACT_MARGIN_S = 0.015
+"""Fixed post-impact search margin in seconds (about 5 frames at 360 Hz)."""
+
+
 @dataclass(frozen=True)
 class KinematicSequenceMetrics:
     """Kinematic sequence peak angular speeds and temporal ordering.
@@ -151,6 +160,9 @@ class KinematicSequenceMetrics:
         club: Club kinematic peak info.
         order: Tuple of segment names ordered chronologically by peak speed time.
         is_proximal_to_distal: True if order matches standard proximal-to-distal sequence.
+        thorax_proxy: Which markers measured thorax yaw: "trunk_back_markers"
+            (BackLeft/BackRight), "shoulder_line" (acromion fallback, includes
+            scapular motion) or "unavailable".
     """
 
     pelvis: SegmentKinematicPeak
@@ -159,6 +171,7 @@ class KinematicSequenceMetrics:
     club: SegmentKinematicPeak
     order: tuple[str, ...]
     is_proximal_to_distal: bool
+    thorax_proxy: str = "unavailable"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -168,6 +181,7 @@ class KinematicSequenceMetrics:
             "club": self.club.to_dict(),
             "order": list(self.order),
             "is_proximal_to_distal": bool(self.is_proximal_to_distal),
+            "thorax_proxy": self.thorax_proxy,
         }
 
 
@@ -501,6 +515,49 @@ def _segment_yaw_angular_speed(
     return np.degrees(np.abs(np.gradient(yaw, t)))
 
 
+def _has_marker_pair(
+    motion: SwingMotion,
+    left_labels: tuple[str, ...],
+    right_labels: tuple[str, ...],
+) -> bool:
+    """Return True if a left and a right marker with finite data both exist."""
+
+    def _usable(labels: tuple[str, ...]) -> bool:
+        return any(
+            lbl in motion.markers and not np.all(np.isnan(motion.markers[lbl]))
+            for lbl in labels
+        )
+
+    return _usable(left_labels) and _usable(right_labels)
+
+
+def _thorax_yaw_angular_speed(
+    motion: SwingMotion, t: np.ndarray
+) -> tuple[np.ndarray, str]:
+    """Return (thorax yaw speed deg/s, proxy name) for the kinematic sequence.
+
+    Prefers the BackLeft/BackRight trunk markers; the acromion shoulder line is
+    only a fallback because it keeps rotating with the arms after impact.
+    """
+    if _has_marker_pair(
+        motion, CAPTURE_A_TRUNK_LEFT_LABELS, CAPTURE_A_TRUNK_RIGHT_LABELS
+    ):
+        labels, proxy = (
+            (CAPTURE_A_TRUNK_LEFT_LABELS, CAPTURE_A_TRUNK_RIGHT_LABELS),
+            "trunk_back_markers",
+        )
+    elif _has_marker_pair(
+        motion, CAPTURE_A_SHOULDER_LEFT_LABELS, CAPTURE_A_SHOULDER_RIGHT_LABELS
+    ):
+        labels, proxy = (
+            (CAPTURE_A_SHOULDER_LEFT_LABELS, CAPTURE_A_SHOULDER_RIGHT_LABELS),
+            "shoulder_line",
+        )
+    else:
+        return np.zeros(len(t), dtype=np.float64), "unavailable"
+    return _segment_yaw_angular_speed(motion, t, *labels), proxy
+
+
 def _lead_arm_angular_speed(motion: SwingMotion, t: np.ndarray, n: int) -> np.ndarray:
     """Return the 3D angular speed (deg/s) of the shoulder-to-wrist vector."""
     sh_pt: np.ndarray | None = None
@@ -601,16 +658,17 @@ def compute_kinematic_sequence(
     omega_pelvis = _segment_yaw_angular_speed(
         motion, t, CAPTURE_A_PELVIS_LEFT_LABELS, CAPTURE_A_PELVIS_RIGHT_LABELS
     )
-    omega_thorax = _segment_yaw_angular_speed(
-        motion, t, CAPTURE_A_SHOULDER_LEFT_LABELS, CAPTURE_A_SHOULDER_RIGHT_LABELS
-    )
+    omega_thorax, thorax_proxy = _thorax_yaw_angular_speed(motion, t)
     omega_arm = _lead_arm_angular_speed(motion, t, n)
     omega_club = _club_angular_speed(motion, t, n)
 
-    # Search window: downswing plus small follow-through margin
-    margin = max(3, int(0.15 * (events.impact_idx - events.top_idx) + 5))
+    # Search window: downswing plus a follow-through margin defined in seconds
+    # so the window does not depend on the capture rate.
+    downswing_s = float(t[events.impact_idx] - t[events.top_idx])
+    margin_s = POST_IMPACT_MARGIN_FRACTION * downswing_s + POST_IMPACT_MARGIN_S
     w_start = events.top_idx
-    w_end = min(n, events.impact_idx + margin)
+    w_end = int(np.searchsorted(t, t[events.impact_idx] + margin_s, side="right"))
+    w_end = min(n, max(w_end, events.impact_idx + 1))
     window = slice(w_start, w_end)
 
     peak_p = _extract_kinematic_peak(
@@ -639,6 +697,7 @@ def compute_kinematic_sequence(
         club=peak_c,
         order=order,
         is_proximal_to_distal=is_p2d,
+        thorax_proxy=thorax_proxy,
     )
 
 
