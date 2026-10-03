@@ -110,8 +110,7 @@ stale frames. Rebind after changing materials. Both native GUIs have been tested
 for settings, redraw, binding, blue output and disabled restoration with Pinocchio
 4.1.0 and Drake 1.56.0. These hosts do not automatically infer axial forces.
 In particular, Drake's sampled reaction output requires explicit time alignment.
-OpenSim's current desktop GUI contains result plots, not an animated 3D scene;
-future scene consumers can use the same renderer and load contracts.
+OpenSim supports animated playback (recorded) via `record_force_series` / `record_force_and_segment_series` in `opensim_force_recording.py` and `render_force_playback` in `src.shared.python.force_overlay.playback`. Recorded series with proximal/distal segment endpoints are rendered as stick/capsule geometry shaded in tension (blue) and compression (red), alongside 3D force/torque glyphs and legend. Future interactive scene consumers can use the same renderer and load contracts.
 
 The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
 `set_segment_axial_loads(loads, segment_indices)` method accepts a qualified

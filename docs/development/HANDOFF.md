@@ -1,8 +1,30 @@
+# OpenSim Animated Playback and Generic Force Playback Delivery — #11285 / #11302 (FTO-17)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11302-opensim-force-playback`; PR: #11353 (`Closes #11302`, `Refs #11285`).
+- Objective: [FTO-17] OpenSim animated playback with force/torque arrows and tension/compression segment shading.
+- Completed:
+  - `src/shared/python/force_overlay/playback.py`:
+    - `SegmentSeries`: Time-indexed segment endpoint geometry with `to_npz` and `from_npz` (`allow_pickle=False`).
+    - `render_force_playback`: Generic engine-agnostic 3D animated playback with stick/capsule geometry shaded in tension/compression via `ForceColorScale`, 3D force/torque glyphs via `draw_glyphs_3d`, inset legend via `draw_legend`, and global camera limits (`equalize_3d_axes`) across all frames.
+    - Exports to MP4 via `FFMpegWriter` or image sequence of PNG frames.
+    - `PlaybackReceipt`: Documents frame count, encoder, output path, dimensions, fps, and segment count.
+    - `save_segment_series` / `load_segment_series`: NPZ sidecar file helpers.
+  - `src/engines/physics_engines/opensim/python/opensim_force_recording.py`:
+    - `record_force_series`: Records `ForceTorqueSeries` across OpenSim states.
+    - `record_force_and_segment_series`: Records both `ForceTorqueSeries` and `SegmentSeries` across OpenSim states.
+    - CLI entrypoint `main`: Accepts `--model`, `--motion`, `--out`, `--fps` with logging.
+  - User guide:
+    - Updated `docs/user_guide/body_part_viz/force_colors.md` OpenSim row to document animated playback (recorded) with tension/compression shading.
+  - Tests:
+    - `tests/unit/force_overlay/test_playback.py`: 4 tests (NPZ roundtrip, PNG frame rendering and receipt verification, pixel color assertions verifying bluish tension and reddish compression and greenish reaction arrows, input validation).
+    - `tests/unit/engines/opensim/test_opensim_force_recording.py`: Real pendulum test and mocked recorder test.
+- Validation: Ruff lint & format clean, pytest clean, file size budgets respected (< 400 lines).
+- Next steps: Review and merge FTO-17 (#11302); unblocks FTO-20 and FTO-30.
+
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11291-mujoco-glyphs`; commit: a9515fb04e; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
-- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
     - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
@@ -18,7 +40,7 @@
 - Validation:
   - Ruff check and format clean.
   - Pytest 5/5 passed.
-- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
+
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
