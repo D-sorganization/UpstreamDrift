@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** antigravity
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `feat/fto-11288-glyphs-main`
+- **Branch:** `feat/fto-11293-opencv-glyphs`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `schemas/glyph-set-*.json`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-03 at SELF — FTO-3 (#11288) implemented: ForceGlyphStyle, FORCE_KIND_PALETTE in plot_style, deterministic build_glyphs, GlyphSet serialization, schema glyph-set-v1.json, and fixtures. 35 unit tests pass (97.8% coverage). FTO-1, FTO-2, FTO-11, FTO-13, FTO-15, FTO-18, FTO-19 landed in main.
+- **Last verified:** 2026-10-03 at SELF — FTO-8 (#11293) implemented: OpenCV video glyph renderer `draw_glyphs_on_frame`, `PinholeProjector`, `HypothesisProjector`, `draw_legend_box`, `VideoGlyphReceipt`, `VideoGlyphStyle`, 13 unit tests pass, synthetic verification PNG generated. Earlier: FTO-3 (#11288) glyph builder; FTO-1, FTO-2, FTO-11, FTO-13, FTO-15, FTO-18, FTO-19 landed in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Land FTO-3 into main; proceed with renderers FTO-5 to FTO-8 and video projection FTO-24.
+- **Next step:** Land FTO-8 into main; unblock video projection FTO-24 and video overlays FTO-25 to FTO-29.
 
 ### DL-#11268 · Capture-O Video Companion
 
