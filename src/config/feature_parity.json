@@ -173,11 +173,12 @@
     "simulation.controls_wiring": {
       "title": "Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls)",
       "pyqt": "src/launchers/launcher_simulation.py",
-      "api": null,
+      "api": "src/api/routes/force_overlays.py",
       "web": "ui/src/components/simulation/SimulationControls.tsx",
       "status": "gap",
       "issue": 7452,
-      "tiles": ["force_overlays", "actuator_controls"]
+      "tiles": ["force_overlays", "actuator_controls"],
+      "notes": "Real ForceTorqueProvider frames and GlyphSet streaming implemented over REST and WebSocket (#11307, FTO-22); web three.js glyph rendering active under #11308 (FTO-23)."
     },
     "chat.live_context": {
       "title": "Live app/engine context in chat",
@@ -480,7 +481,7 @@
       "web": "ui/src/components/visualization/ForceColorControls.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md."
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305)."
     }
   }
 }
