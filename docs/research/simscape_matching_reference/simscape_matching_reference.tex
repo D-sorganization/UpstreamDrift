@@ -3119,6 +3119,80 @@ torque recovery in their supported holds. This does not qualify a moving
 reference, all-actuator torque recovery, neck torque-driven motion or an
 independent full-swing replay.
 
+
+\subsection{Block-Bound Human Upper-Body Moving References}
+The historical upper-body reference helper used Fit's numbered solver IDs.
+Adding Human's neck renumbers subsequent joints; those numbers must not be
+reused for Human. The helper now accepts the native
+\texttt{jointPositionVariables} table as \texttt{joint\_variables} and
+uses the shared \texttt{gs3dx\_joint\_keys} authority to resolve
+\[
+ K=\text{relative native block path}\;|\;\text{primitive coordinate}.
+\]
+The provided table must identify the same model and exactly the unique IDs
+in the trajectory. Each tracked coordinate's unit is checked: primitive
+angles are degrees and spherical axis components are dimensionless.
+The public twelve-joint manifest supplies block roles and primitive suffixes;
+input table and trajectory row order may change without changing results.
+The historical unbound interface is retained only for explicitly named Fit
+input. Human and other renumbered models require the explicit table.
+This pure conversion helper does not load or save a model. A caller must
+still bind the table to actual model/source hashes and fitted geometry.
+
+For primitive angles, the existing continuous branch is
+$q_u=\operatorname{rad2deg}(\operatorname{unwrap}(\operatorname{deg2rad}(q)))$.
+Shoulder spherical states continue to use the existing intrinsic XYZ chart
+mapping, with the previous chart branch carried between samples. The method
+then retains its fourth-order, zero-phase Butterworth filtering and existing
+uniform-grid numerical differentiation:
+\[
+ q_f=\operatorname{filtfilt}(B_4(f_c/f_N),q_u),\qquad
+ \dot q_f=\operatorname{gradient}(q_f,1/f_s).
+\]
+Angle and rate units remain degrees and degrees per second, matching the
+existing tracking charts. Physical sample times must be finite, strictly
+increasing and uniform within relative $10^{-6}$ tolerance; capture-frame
+indices must be positive, strictly increasing, uniformly spaced integers.
+The trajectory must contain at least sixteen samples, finite native values,
+valid statuses and unique IDs. The finite cutoff must lie below Nyquist.
+Filtering and chart conversion do not establish anatomical calibration,
+marker accuracy, physically feasible accelerations or dynamics acceptance.
+
+The corrected native RED contract run reported one passing and six failing
+tests before implementation. The first harness invocation discovered no
+test functions because their names lacked the required test prefix; it is
+retained privately and is not evidence of a product failure. GREEN then
+passed all seven contract tests with zero failures or incomplete tests.
+The committed tests use known constant chart-angle fixtures for legacy units,
+Human renumbering, reordered rows, foreign/missing/duplicate bindings,
+incorrect units and malformed clock/coordinate inputs. A private preserved
+baseline independently retains the historical numerical implementation.
+
+The native full selected-trajectory probe completed naturally at
+\texttt{2026-10-03T02:18:59Z}. Both actual Human tables were bound to their
+fitted geometry and unchanged model hash. For the tour's 55 samples over
+$1.8$ seconds and owner's 46 samples over $1.5$ seconds, the 21 upper
+actuator-coordinate references at $30$ Hz match the preserved filter and
+rate calculations exactly after verified block-role remapping. All start
+values match that numerical control. This is 23 native upper-body
+representation values converted into 21 actuator coordinates; it is not
+a claim about total model degrees of freedom. Private arrays are saved for
+the subsequent dynamic experiment; no simulation or model save occurred.
+
+\begin{verbatim}
+% With the actual fitted model already loaded and source identity verified:
+ks = simscape.multibody.KinematicsSolver('GS3DX_Human');
+uref = gs3dx_upper_body_reference(ik, ...
+    joint_variables=ks.jointPositionVariables);
+delete(ks);
+runtests('tests/test_gs3dx_upper_body_reference_binding.m');
+\end{verbatim}
+The moving-reference start positions and rates must next be reconciled with
+the accepted contact stance and native initialization; a zero-velocity
+supported hold is not automatically a valid moving start. Leg and neck
+profiles, support references, actuator recovery and independent replay
+remain required. No selected match or video is promoted by this conversion.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
