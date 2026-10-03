@@ -10,6 +10,8 @@ from src.shared.python.motion_pipeline.sources.sto_mot_adapter import (
     OpenSimSTOMOTAdapter,
 )
 
+pytestmark = pytest.mark.unit
+
 _STO = """name=tiny
 version=1
 nRows=3

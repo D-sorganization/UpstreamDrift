@@ -31,6 +31,8 @@ from tests.unit.motion_pipeline.sources.opencap_fixtures import (
     write_trc,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_real_opencap_session_imports_to_canonical_observations(
     tmp_path: Path,

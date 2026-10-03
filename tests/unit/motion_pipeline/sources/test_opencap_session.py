@@ -22,6 +22,8 @@ from tests.unit.motion_pipeline.sources.opencap_fixtures import (
     write_scaled_model,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _full_session(tmp_path: Path, trials: tuple[str, ...]) -> Path:
     session = write_opencap_session(tmp_path, trials)
