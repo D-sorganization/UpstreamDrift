@@ -66,6 +66,8 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         self._model_path = ""
         self._time_step = 0.01
         self._force_torque_source: OpenSimForceTorqueSource | None = None
+        self._kinematics: Any = None
+        self._opencap_session: Any = None
 
         if opensim is None:
             logger.error("OpenSim library is not installed.")
@@ -189,6 +191,31 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         except (PermissionError, OSError) as e:
             logger.error("Failed to load OpenSim model from string: %s", e)
             raise
+
+    @property
+    def kinematics(self) -> Any:
+        """Get currently assigned kinematics trajectory."""
+        return self._kinematics
+
+    @kinematics.setter
+    def kinematics(self, value: Any) -> None:
+        self._kinematics = value
+
+    @property
+    def opencap_session(self) -> Any:
+        """Get currently assigned OpenCap session."""
+        return self._opencap_session
+
+    @opencap_session.setter
+    def opencap_session(self, value: Any) -> None:
+        self._opencap_session = value
+
+    def load_opencap_session(self, session: Any) -> None:
+        """Load an OpenCap session: model file and kinematics trajectory."""
+        if getattr(session, "model_file", None) is not None:
+            self.load_from_path(str(session.model_file))
+        self._kinematics = getattr(session, "kinematics", None)
+        self._opencap_session = session
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def reset(self) -> None:

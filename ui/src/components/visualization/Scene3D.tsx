@@ -12,7 +12,7 @@ import { useRef, useMemo, useState, useCallback, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, TransformControls } from '@react-three/drei';
 import * as THREE from 'three';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+type OrbitControlsImpl = React.ComponentRef<typeof OrbitControls>;
 import type { SimulationFrame } from '@/api/client';
 import { URDFViewer } from './URDFViewer';
 import type { URDFModel } from './URDFViewer';
