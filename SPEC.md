@@ -7725,9 +7725,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | Date | PR | Changes |
-| --- | --- | --- |
-| 2026-10-03 | #11302 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
-| 2026-10-03 | #11292 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
+| 2026-10-03 | #11353 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
 | 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
 | 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
