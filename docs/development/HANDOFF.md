@@ -1,3 +1,12 @@
+# MuJoCo Reaction Labels and Parity Fixture Rod — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
+- Branch: `fix/mujoco-reaction-label-joint-name`; commit: SELF; PR: not yet numbered when written; see the PR for this branch (`Refs #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11346 (per-engine parity lanes, PR #11375); epic #11285
+- Completed: the first real run of the new MuJoCo parity lane failed two rows. `MujocoForceTorqueSource` labelled joint reactions by body name while Drake, Pinocchio and OpenSim use the joint name, and its own actuator label already uses the joint name. Reactions now use the first joint's name (the joint whose anchor is reported); a joint-less body keeps its body name. The parity MJCF pendulum had only an `<inertial>`, so MuJoCo's native axial source (rods only) returned nothing; a non-colliding capsule from the pivot to the COM fixes that without changing mass or inertia and without touching any tolerance.
+- Validation: `tests/unit/engines/mujoco/test_force_torque_source.py` and `tests/integration/cross_engine/test_force_overlay_parity.py` (RED before: label test and two `[mujoco]` rows; GREEN after; 18 passed with the mujoco/label/axial selection, `tests/integration/cross_engine` all pass). Unrelated local failures: PyQt6 GUI tests in `tests/unit/body_part_viz` (PyQt6 not installed in this venv) and one pre-existing `test_biomechanics` failure that also fails on main.
+- Next steps: after this lands, #11375 switches the mujoco lane evidence from the statics check to the `[mujoco]` hanging-pendulum row.
+
 # Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11292-matplotlib-qpainter-glyphs`; commit SELF; PR: #11348 (`Closes #11292`, `Refs #11285`)

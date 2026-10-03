@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11346 | MuJoCo provider labels joint reactions by joint name (`reaction:<joint>`, body name only when a body has no joint) to match Drake, Pinocchio and OpenSim; the FTO-21 MuJoCo pendulum MJCF gains a non-colliding rod so the native axial source reports; found by the first run of the per-engine parity lanes |
 | 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
 | 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
 | 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
