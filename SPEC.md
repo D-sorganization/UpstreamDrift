@@ -7726,6 +7726,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
 | 2026-10-03 | #11346 | `force-overlay-parity` mujoco lane now requires the real `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` case to pass instead of the stand-in MJCF statics check, now that the MuJoCo provider row is on main |
 | 2026-10-03 | #11297 | [FTO-12] Drake GUI draws real force/torque glyphs through MeshcatGlyphRenderer (new Gravity checkbox, headless `ForceOverlayController`) replacing the gravity-only drawing, and feeds the segment force-colour session from the provider's axial loads with illustration-geometry path bindings. |
 | 2026-10-03 | #11378 | [FTO-24] Align force/torque series with video frames and trace import: force_frame_for_video, load_trace_forces/write_trace_forces HDF5 group, series_to_viewport_payload_wrench (#11309). |
