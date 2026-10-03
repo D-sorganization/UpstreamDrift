@@ -1,0 +1,47 @@
+{
+  "capture-A": {
+    "id": "capture-A",
+    "where": "public",
+    "relative_path": "data/C3D_TA_Driver.c3d",
+    "sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "bytes": 402432,
+    "sample_rate_hz": 360.0,
+    "frame_count": 654
+  },
+  "capture-B": {
+    "id": "capture-B",
+    "where": "public",
+    "relative_path": "data/C3D_TA_Iron.c3d",
+    "sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
+    "bytes": 404480,
+    "sample_rate_hz": 360.0,
+    "frame_count": 657
+  },
+  "capture-O": {
+    "id": "capture-O",
+    "where": "private",
+    "relative_path": "datasets/capture-O/capture-O_driver.c3d",
+    "sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+    "bytes": 225280,
+    "sample_rate_hz": 240.0,
+    "frame_count": 367
+  },
+  "club-workbook-main": {
+    "id": "club-workbook-main",
+    "where": "private",
+    "relative_path": "club_workbooks/Club_Data/e91f760171f5.xlsx",
+    "sha256": "5d9183e1d01ea7c6f9c162375dd6855c076ee26a96b76c90e59e9cf2679dde25",
+    "bytes": null,
+    "sample_rate_hz": null,
+    "frame_count": null
+  },
+  "club-workbook-wiffle": {
+    "id": "club-workbook-wiffle",
+    "where": "private",
+    "relative_path": "club_workbooks/Wiffle_ProV1_club_3D_data/d61999450688.xlsx",
+    "sha256": "88d3eb31541d886031f6c5ad7c82493b0e3ee4e3f73a8652372277cc14d02234",
+    "bytes": 907474,
+    "sample_rate_hz": null,
+    "frame_count": null
+  }
+}

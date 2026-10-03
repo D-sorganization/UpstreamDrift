@@ -310,15 +310,11 @@ end
 %% =====================================================================
 function p = local_default_input_mat()
 %LOCAL_DEFAULT_INPUT_MAT  Best-effort path to 3DModelInputs_Impact.mat.
-%   Resolves relative to this .m file when running inside the repo; falls
-%   back to the bare filename so MATLAB's path search can find it.
-    here = fileparts(mfilename("fullpath"));
-    % shared/ -> motion_matching/ -> matlab/ -> 3D_Golf_Model/
-    engine_root = fileparts(fileparts(fileparts(here)));
-    candidate   = fullfile(engine_root, "src", "model", "inputs", ...
-                           "3DModelInputs_Impact.mat");
+%   The committed file (DEFAULT_IMPACT_INPUT_MAT) when present; falls back
+%   to the bare filename so MATLAB's path search can find it.
+    candidate = default_impact_input_mat();
     if isfile(candidate)
-        p = char(candidate);
+        p = candidate;
     else
         p = "3DModelInputs_Impact.mat";
     end

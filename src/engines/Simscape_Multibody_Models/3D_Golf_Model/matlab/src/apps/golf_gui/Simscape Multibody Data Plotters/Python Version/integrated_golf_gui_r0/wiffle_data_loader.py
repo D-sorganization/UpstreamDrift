@@ -138,6 +138,16 @@ class MotionDataLoader:
         Returns:
             Dictionary with 'ProV1' and 'Wiffle' DataFrames
         """
+        try:
+            from src.motion_capture.capture_registry import (
+                CaptureRegistryError,
+                resolve_capture,
+            )
+
+            return self.load_excel_data(str(resolve_capture("club-workbook-wiffle")))
+        except CaptureRegistryError:
+            pass
+
         # Try to find the Excel file in common locations
         possible_paths = [
             Path("../../../Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"),
@@ -647,19 +657,30 @@ def main() -> None:
     logger.info("[TEST] Testing Wiffle Data Loader")
 
     # Find the Excel file - try multiple possible paths
-    possible_paths = [
-        Path("../../../Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"),
-        Path("Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
-        Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
-        Path("../../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
-        Path("Wiffle_ProV1_club_3D_data.xlsx"),
-    ]
-
     excel_file = None
-    for path in possible_paths:
-        if path.exists():
-            excel_file = path
-            break
+    try:
+        from src.motion_capture.capture_registry import (
+            CaptureRegistryError,
+            resolve_capture,
+        )
+
+        excel_file = resolve_capture("club-workbook-wiffle")
+    except CaptureRegistryError:
+        pass
+
+    if excel_file is None:
+        possible_paths = [
+            Path("../../../Motion Capture Plotter/Wiffle_ProV1_club_3D_data.xlsx"),
+            Path("Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
+            Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
+            Path("../../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"),
+            Path("Wiffle_ProV1_club_3D_data.xlsx"),
+        ]
+
+        for path in possible_paths:
+            if path.exists():
+                excel_file = path
+                break
 
     if excel_file is None:
         logger.info("[ERROR] Excel file not found. Tried paths:")

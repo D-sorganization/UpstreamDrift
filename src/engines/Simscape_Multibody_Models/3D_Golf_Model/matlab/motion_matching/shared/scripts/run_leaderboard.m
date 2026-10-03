@@ -170,6 +170,11 @@ function p = local_resolve_xlsx(arg)
         p = char(arg);
         return;
     end
+    try
+        p = resolve_capture("club-workbook-wiffle");
+        return;
+    catch
+    end
     here = fileparts(mfilename("fullpath"));
     % shared/scripts -> shared -> motion_matching -> matlab -> 3D_Golf_Model
     engine_root = fileparts(fileparts(fileparts(fileparts(here))));
@@ -233,6 +238,17 @@ function [row, skip_reason] = local_run_one(trial_id, opt_name, ...
         return;
     end
 
+    pipeline_option = local_pipeline_option_for(opt_name);
+    if pipeline_option == ""
+        skip_reason = sprintf("%s is not dispatched by fit_swing_full_pipeline " + ...
+            "(needs a trained cVAE checkpoint, #4076)", opt_name);
+        if verbose
+            fprintf("[run_leaderboard] %s/%s -> SKIP (%s)\n", ...
+                trial_id, opt_name, skip_reason);
+        end
+        return;
+    end
+
     if ~isfile(xlsx_path)
         skip_reason = sprintf("xlsx not found: %s", xlsx_path);
         if verbose
@@ -247,7 +263,7 @@ function [row, skip_reason] = local_run_one(trial_id, opt_name, ...
 
     fit_opts = struct();
     fit_opts.sheet    = char(trial_id);
-    fit_opts.option   = char(local_pipeline_option_for(opt_name));
+    fit_opts.option   = char(pipeline_option);
     fit_opts.save_dir = char(save_dir);
     fit_opts.verbose  = verbose;
     fit_opts.render_figures = false;
@@ -343,15 +359,13 @@ end
 %% =====================================================================
 function s = local_pipeline_option_for(opt_name)
 %LOCAL_PIPELINE_OPTION_FOR  Map driver label -> fit_swing_full_pipeline opt.
+%   "" when the pipeline does not dispatch the option: Option 3 (#4076,
+%   fit_swing_inverse) needs a trained cVAE checkpoint and is not wired
+%   through the pipeline, so its cell stays pending.
     switch lower(string(opt_name))
         case "fmincon",   s = "fmincon";
         case "surrogate", s = "surrogateopt";
-        case "inverse"
-            % Option 3 (#4076) doesn't yet wire through the pipeline; the
-            % skip-missing path catches this when fit_swing_inverse isn't
-            % present, but if a future PR registers it as a dispatch we
-            % map it here.
-            s = "inverse";
+        case "inverse",   s = "";
         case "hybrid",    s = "hybrid";
         otherwise
             s = lower(string(opt_name));
@@ -525,9 +539,9 @@ function local_write_meta(meta_path, git_commit)
     end
     closer = onCleanup(@() fclose(fid)); %#ok<NASGU>
 
-    fprintf(fid, "{\n");
-    fprintf(fid, "  \"schema_version\": 1,\n");
-    fprintf(fid, "  \"git_head\": \"%s\",\n", sha);
-    fprintf(fid, "  \"regenerated_at\": \"%s\"\n", iso);
-    fprintf(fid, "}\n");
+    fprintf(fid, '{\n');
+    fprintf(fid, '  "schema_version": 1,\n');
+    fprintf(fid, '  "git_head": "%s",\n', sha);
+    fprintf(fid, '  "regenerated_at": "%s"\n', iso);
+    fprintf(fid, '}\n');
 end

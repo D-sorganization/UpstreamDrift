@@ -52,11 +52,9 @@ def test_example_produces_output(example_file: Path) -> None:
             )
 
     if example_file.name == "motion_training_demo.py":
-        data_file = repo_root / "data" / "Wiffle_ProV1_club_3D_data.xlsx"
-        if not data_file.exists():
-            pytest.skip(
-                "motion_training_demo.py requires data/Wiffle_ProV1_club_3D_data.xlsx fixture"
-            )
+        from src.motion_capture.capture_registry import require_capture
+
+        require_capture("club-workbook-wiffle", repo_root=repo_root)
 
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_root)
