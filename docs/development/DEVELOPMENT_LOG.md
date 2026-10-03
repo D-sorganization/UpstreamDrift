@@ -23,12 +23,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `feat/fto-11286-force-torque-overlay-contract`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`
+- **Branch:** `feat/fto-11287-shared-conversions`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/simscape/force_channels.py`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-1 (#11286, PR #11319), FTO-4 (#11289, PR #11320), FTO-2 (#11287, PR #11323), FTO-3 (#11288, PR #11324), FTO-24 (#11309, PR #11331), FTO-5 (#11290, PR #11337) opened. FTO-6 (#11291) implemented: MuJoCo MjvScene glyph renderer with 3D arrows, torque arc polyline capsules and arrow heads, connector version detection, buffer overflow protection, and 5 unit tests including offscreen pixel rendering.
-- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Submit ready-for-review PR for FTO-6 (#11291); proceed with remaining Wave C renderers (FTO-7, FTO-8).
+- **Branch:** `feat/fto-11291-mujoco-glyphs`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/physics_engines/mujoco/python/mujoco_glyph_renderer.py`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at SELF — FTO-6 (#11291) implemented MjvScene glyph renderer for MuJoCo; FTO-13 (#11298) added Pinocchio provider; FTO-11 (#11296) added Drake provider; earlier: FTO-15, FTO-2, FTO-18, FTO-1.
 
 ### DL-#11268 · Capture-O Video Companion
 
