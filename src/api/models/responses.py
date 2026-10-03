@@ -643,11 +643,15 @@ class MeasurementToolsResponse(BaseModel):
 class ForceVector3D(BaseModel):
     """A single force/torque vector for 3D overlay rendering.
 
-    See issue #1199
+    .. deprecated::
+        Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs``
+        instead. This model will be removed in a future release.
     """
 
     body_name: str = Field(..., description="Body this force acts on")
-    force_type: str = Field(..., description="Type: applied, gravity, contact, bias")
+    force_type: str = Field(
+        ..., description="Type: applied, gravity, contact, bias, or WrenchKind"
+    )
     origin: list[float] = Field(..., description="Application point [x, y, z]")
     direction: list[float] = Field(..., description="Force direction [dx, dy, dz]")
     magnitude: float = Field(..., description="Force magnitude (N or N*m)")
@@ -661,12 +665,24 @@ class ForceVector3D(BaseModel):
 class ForceOverlayResponse(BaseModel):
     """Response model for force/torque overlay data.
 
-    See issue #1199
+    See issues #1199, #11307 (FTO-22).
     """
 
     sim_time: float = Field(..., description="Current simulation time")
+    glyphs: dict[str, Any] | None = Field(
+        None, description="Serialized GlyphSet (glyph-set-v1) drawing payload"
+    )
+    frame: dict[str, Any] | None = Field(
+        None,
+        description="Serialized ForceTorqueFrame (force-torque-frame-v1) physics inspection payload",
+    )
+    unavailable_reason: str | None = Field(
+        None,
+        description="Explanation if force overlays are unavailable, or None if available",
+    )
     vectors: list[ForceVector3D] = Field(
-        default_factory=list, description="All active force vectors"
+        default_factory=list,
+        description="Deprecated: use glyphs instead. Backward-compatible vector list.",
     )
     total_force_magnitude: float = Field(0.0, description="Sum of all force magnitudes")
     total_torque_magnitude: float = Field(
