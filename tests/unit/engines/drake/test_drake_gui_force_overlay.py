@@ -264,7 +264,12 @@ _PENDULUM_URDF = """<?xml version="1.0"?>
 
 def test_real_drake_plant_draws_arrows_and_binds_shading() -> None:
     """Offscreen smoke: real plant, real MeshCat, no browser, one tick."""
-    pytest.importorskip("pydrake")
+    pydrake = pytest.importorskip("pydrake")
+    if type(pydrake).__module__ == "unittest.mock":
+        pytest.skip(
+            "pydrake is mocked by tests/unit/conftest.py; this smoke test needs "
+            "the real Drake bindings"
+        )
     from pydrake.geometry import Meshcat, MeshcatVisualizer, SceneGraph
     from pydrake.multibody.parsing import Parser
     from pydrake.systems.analysis import Simulator

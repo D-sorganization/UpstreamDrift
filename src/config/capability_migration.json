@@ -1414,6 +1414,18 @@
       "evidence": "src/shared/python/biomechanics/ztcf.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "drake.gui_force_overlay": {
+      "id": "drake.gui_force_overlay",
+      "name": "Drake GUI force/torque arrows and live tension/compression shading",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/drake/python/src/drake_force_overlay.py",
+      "acceptance_owner": "tests/unit/engines/drake/test_drake_gui_force_overlay.py"
+    },
     "analysis.cross_engine_robustness": {
       "id": "analysis.cross_engine_robustness",
       "name": "Cross-engine robustness dashboard (perturbation/CV)",
