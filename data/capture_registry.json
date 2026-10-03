@@ -43,5 +43,15 @@
     "bytes": 907474,
     "sample_rate_hz": null,
     "frame_count": null
+  },
+  "capture-O-video/cov-01": {
+    "id": "capture-O-video/cov-01",
+    "kind": "video",
+    "where": "private",
+    "relative_path": "capture-O-video/originals/cov-01.mp4",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "sample_rate_hz": 30.0,
+    "frame_count": 300
   }
 }

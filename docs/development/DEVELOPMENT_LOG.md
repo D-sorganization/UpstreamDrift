@@ -117,6 +117,13 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** #11416 (Closes #11270, Refs #11268)
+- **Branch:** `feat/cov-2-register-sources-11270`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at SELF — COV-2 (#11270): registered capture-O video sources, timing evidence validation (`VideoTimingEvidence`), variable frame rate rejection (`VariableFrameRateError`), swing candidate intervals (`SwingWindow`, `validate_swing_windows`), usability grading rubric (`grade_swing_window`, `SwingGradeResult`), capture registry `video` kind schema extension, and catalog privacy invariants; all focused tests pass.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
+
 - **PR:** #11413 (Closes #11269, Refs #11268)
 - **Branch:** `feat/cov-1-acquisition-11269`
 - **Started:** 2026-10-02
