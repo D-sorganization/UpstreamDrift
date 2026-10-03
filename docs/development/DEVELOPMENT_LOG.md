@@ -99,6 +99,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
 
 
+
+- **PR:** #11413 (Closes #11269, Refs #11268)
+- **Branch:** `feat/cov-1-acquisition-11269`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at SELF — COV-1 (#11269): `build_acquisition_receipt` implemented with fail-closed validation, SHA-256 integrity checks, ffprobe metadata embedding, lineage tracking, deterministic rerun idempotency, atomic persistence, and privacy path safety; 11 unit tests passing.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-2 (#11270) video source registration and swing window grading.
+
 - **PR:** #11417 (Closes #11273, Refs #11268)
 - **Branch:** `feat/cov-5-runner-matrix-11273`
 - **Started:** 2026-10-02
