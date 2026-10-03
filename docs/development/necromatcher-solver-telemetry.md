@@ -45,6 +45,15 @@ it binds run identity, exact raw request SHA, source fit identity/hash and sourc
 and runtime digests. Source request paths must be regular and link-free. No
 user-selected telemetry path or second result store is introduced.
 
+The owner compares the live queue recipe with the stored request in the finite
+JSON domain: typed tuple sequences and JSON arrays represent the same ordered
+values. Mapping keys must be strings, and Boolean, integer and floating-point
+values retain distinct encodings. Changed nested values and nonfinite numbers
+are rejected. This comparison does not replace the exact raw request SHA in
+the sidecar binding; even a semantically equal byte rewrite invalidates an
+existing receipt. It does not rewrite historical failed runs or publish their
+unpublished results.
+
 Child success and named failure can publish measured worker duration. A killed
 child without a terminal receipt leaves all missing child measurements null and
 the parent records `child_terminal_receipt_unavailable`. Generic job manifests

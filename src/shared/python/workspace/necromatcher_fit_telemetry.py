@@ -16,6 +16,26 @@ from src.shared.python.motion_matching.jobs.io_atomic import (
 )
 
 
+def _request_json(value: Any) -> str:
+    """Compare finite JSON values, preserving scalar types and array order."""
+
+    def check_keys(item: Any) -> None:
+        if isinstance(item, dict):
+            if any(type(key) is not str for key in item):
+                raise ValueError("Telemetry request binding requires string keys")
+            for nested in item.values():
+                check_keys(nested)
+        elif isinstance(item, (list, tuple)):
+            for nested in item:
+                check_keys(nested)
+
+    check_keys(value)
+    try:
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Telemetry request binding requires finite JSON") from exc
+
+
 def _request_binding(path: Path, request: dict[str, Any]) -> dict[str, str]:
     """Reject redirected paths before writing any child measurement."""
     if not isinstance(path, Path) or path.name != "request.json":
@@ -27,7 +47,7 @@ def _request_binding(path: Path, request: dict[str, Any]) -> dict[str, str]:
     if path.is_symlink() or not path.is_file() or path.resolve() != path.absolute():
         raise ValueError("Telemetry owned run must be link-free and regular")
     raw = path.read_bytes()
-    if json.loads(raw) != request:
+    if _request_json(json.loads(raw)) != _request_json(request):
         raise ValueError("Telemetry request binding changed")
     return {
         "run_id": root.name,
