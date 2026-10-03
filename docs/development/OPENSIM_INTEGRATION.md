@@ -189,12 +189,12 @@ for wrench in frame.by_kind(WrenchKind.CONTACT):
     print(wrench.label, wrench.point_m, wrench.force_n)
 ```
 
-| Kind | Source | Notes |
-| --- | --- | --- |
-| `JOINT_REACTION` | `Joint.calcReactionOnChildExpressedInGround` | Per joint, label `reaction:<joint>`, body is the child body, point is the child-frame origin |
-| `JOINT_ACTUATOR` | `CoordinateActuator.getActuation` | Label `actuator:<joint>.<coordinate>`; torque is `actuation * axis`. `PinJoint` uses the child-frame z axis; a `CustomJoint` needs a single rotation mapped 1:1 (LinearFunction slope 1) |
-| `CONTACT` | `HuntCrossleyForce` / `SmoothSphereHalfSpaceForce` records | One sphere and one half-space per force. Point is the sphere's lowest point; the record torque (about the body origin) is moved to that point |
-| axial loads | `axial_force_from_proximal_reaction` | Tension positive; a branching body or zero-length segment is `None` |
+| Kind             | Source                                                     | Notes                                                                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JOINT_REACTION` | `Joint.calcReactionOnChildExpressedInGround`               | Per joint, label `reaction:<joint>`, body is the child body, point is the child-frame origin                                                                                             |
+| `JOINT_ACTUATOR` | `CoordinateActuator.getActuation`                          | Label `actuator:<joint>.<coordinate>`; torque is `actuation * axis`. `PinJoint` uses the child-frame z axis; a `CustomJoint` needs a single rotation mapped 1:1 (LinearFunction slope 1) |
+| `CONTACT`        | `HuntCrossleyForce` / `SmoothSphereHalfSpaceForce` records | One sphere and one half-space per force. Point is the sphere's lowest point; the record torque (about the body origin) is moved to that point                                            |
+| axial loads      | `axial_force_from_proximal_reaction`                       | Tension positive; a branching body or zero-length segment is `None`                                                                                                                      |
 
 Conventions and limits:
 
