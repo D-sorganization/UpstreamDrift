@@ -83,15 +83,20 @@ def _to_subject_response(subject: Any) -> SubjectResponse:
     )
 
 
-@router.post("/inspect", response_model=InspectSessionResponse)
-async def inspect_session(request: InspectSessionRequest) -> InspectSessionResponse:
-    """Inspect an OpenCap session directory without loading large observation arrays."""
-    path = Path(request.session_dir)
+def _validate_session_dir(session_dir: str) -> Path:
+    path = Path(session_dir)
     if not path.is_dir():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"OpenCap session directory not found: {request.session_dir}",
+            detail=f"OpenCap session directory not found: {session_dir}",
         )
+    return path
+
+
+@router.post("/inspect", response_model=InspectSessionResponse)
+async def inspect_session(request: InspectSessionRequest) -> InspectSessionResponse:
+    """Inspect an OpenCap session directory without loading large observation arrays."""
+    path = _validate_session_dir(request.session_dir)
 
     try:
         meta: OpenCapSessionMetadata = inspect_opencap_session(path)
@@ -116,12 +121,7 @@ async def inspect_session(request: InspectSessionRequest) -> InspectSessionRespo
 @router.post("/import", response_model=ImportTrialResponse)
 async def import_trial(request: ImportTrialRequest) -> ImportTrialResponse:
     """Load a specific trial from an OpenCap session directory."""
-    path = Path(request.session_dir)
-    if not path.is_dir():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"OpenCap session directory not found: {request.session_dir}",
-        )
+    path = _validate_session_dir(request.session_dir)
 
     try:
         session = load_opencap_session(path, trial=request.trial)
