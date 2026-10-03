@@ -30,6 +30,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Complete and review full sampled pelvis trials and four-cell owner seed/offset calibration; preserve measured geometry and frozen calibration. Audit continuity, native ROM, head/foot and marker degradation before new media. Continue moving references, all-actuator/neck torque recovery and independent full-swing replay. Integrate #11161/#11268 via shared resolver/metrics and graded video protocol; build the envelope from the hash/header-verified private thirteen-trial roster with explicit club/event and camera/timing/pairing qualification. Publish through normal protected review after current-main integration.
 
+### DL-#11285 · Force and Torque Overlays for Every Engine
+
+- **State:** proposed
+- **Owner:** claude
+- **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
+- **PR:** not created
+- **Branch:** `claude/force-torque-overlays-smwke2` (planning only)
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02 at SELF — deep-dive assessment, ADR-0052 (proposed, indexed, revised for review findings: optional wrench halves, serialized GlyphSet wire) and 30 child issues filed and revised; no implementation performed.
+- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
+- **Next step:** A CLI-tier agent implements FTO-1 (#11286), the contract module and wire schema.
+
 ### DL-#11268 · Capture-O Video Companion
 
 - **State:** in_progress
