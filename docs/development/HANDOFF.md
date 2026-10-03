@@ -1,3 +1,10 @@
+# MuJoCo 3.14 Axial-Load Axis Discovery — #11349
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
+- Completed: `MujocoAxialLoadSource._discover_axes` compares geom and joint types via `int()` (numpy int vs pybind enum `in`/`==` is direction-dependent and False on mujoco 3.14, so no rods were found and `sample()` returned None). Regression tests for capsule/cylinder discovery and free/non-rod exclusion in `tests/unit/body_part_viz/test_mujoco_axial_loads.py`.
+- Validation: `pytest tests/unit/body_part_viz/test_mujoco_axial_loads.py` 9 passed on mujoco 3.14.0. Failures outside scope here: tests needing PyQt6 (not installed in this venv).
+- Next steps: none for this fix; other mujoco 3.14 drift is listed in the PR body.
+
 # OpenSim Engine State and Control Setters Under OpenSim 4 — #11344
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11344`
