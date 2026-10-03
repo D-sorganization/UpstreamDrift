@@ -72,6 +72,7 @@ conda install -c opensim-org opensim
 
 ```python
 import opensim
+
 print(f"OpenSim version: {opensim.GetVersion()}")
 ```
 
@@ -125,9 +126,7 @@ marker_data = analyzer.load_markers("swing_markers.trc")
 
 # Solve inverse kinematics
 ik_results = analyzer.solve_inverse_kinematics(
-    marker_data=marker_data,
-    time_range=(0, 2.0),
-    accuracy=1e-5
+    marker_data=marker_data, time_range=(0, 2.0), accuracy=1e-5
 )
 
 # Get joint angles
@@ -139,8 +138,7 @@ joint_angles = ik_results.get_coordinates()
 ```python
 # Solve inverse dynamics
 id_results = analyzer.solve_inverse_dynamics(
-    motion_file="ik_results.mot",
-    grfs_file="ground_reaction_forces.mot"
+    motion_file="ik_results.mot", grfs_file="ground_reaction_forces.mot"
 )
 
 # Get joint torques
@@ -157,14 +155,11 @@ muscle_analyzer = OpenSimMuscleAnalyzer(model_file="golfer_muscles.osim")
 
 # Analyze muscle moment arms
 moment_arms = muscle_analyzer.compute_moment_arms(
-    coordinate="shoulder_flexion",
-    position_range=(-90, 90)
+    coordinate="shoulder_flexion", position_range=(-90, 90)
 )
 
 # Compute muscle fiber lengths during motion
-muscle_lengths = muscle_analyzer.analyze_muscle_kinematics(
-    motion_file="golf_swing.mot"
-)
+muscle_lengths = muscle_analyzer.analyze_muscle_kinematics(motion_file="golf_swing.mot")
 ```
 
 ## Available Models
@@ -360,9 +355,7 @@ print(f"Deltoid length: {muscle_lengths['deltoid_anterior']} m")
 from cross_engine_validator import validate_across_engines
 
 results = validate_across_engines(
-    engines=["mujoco", "opensim"],
-    motion_file="swing_motion.csv",
-    tolerance=1e-3
+    engines=["mujoco", "opensim"], motion_file="swing_motion.csv", tolerance=1e-3
 )
 
 results.plot_comparison()

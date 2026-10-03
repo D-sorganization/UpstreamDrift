@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import math
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -27,7 +27,12 @@ from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
+from src.shared.python.body_part_viz import AxialLoadFrame
+from src.shared.python.force_overlay import ForceTorqueFrame, WrenchKind
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from .opensim_force_torque import OpenSimForceTorqueSource
 
 # Configure logging
 logger = get_logger(__name__)
@@ -57,6 +62,7 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         self._manager = None
         self._model_path = ""
         self._time_step = 0.01
+        self._force_torque_source: OpenSimForceTorqueSource | None = None
 
         if opensim is None:
             logger.error("OpenSim library is not installed.")
@@ -76,13 +82,17 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         dynamics, and a drift counterfactual. OpenSim's strength is muscle
         actuation, so ``muscles`` is ``FULL``. Joint-torque ZVCF and native
         contact-force reporting are not first-class engine methods, so they
-        stay ``NONE``.
+        stay ``NONE``. Contact forces and force overlays come from the state-based
+        provider (FTO-15, #11300) and are ``PARTIAL``: only sphere/half-space
+        contacts, joint reactions and rotational coordinate-actuator torques
+        are produced; other contact models and actuators are omitted.
         """
         return EngineCapabilities(
             engine_name="OpenSim",
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.NONE,
+            contact_forces=CapabilityLevel.PARTIAL,
+            force_visualization=CapabilityLevel.PARTIAL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.PARTIAL,
             forward_sim=CapabilityLevel.FULL,
@@ -199,11 +209,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         current_time = self._state.getTime()
 
         # Integrate to new time
-        self._manager.setInitialTime(current_time)
-        self._manager.setFinalTime(current_time + step_size)
+        if hasattr(self._manager, "initialize"):
+            # OpenSim 4.x Manager API: seed the manager with the current state.
+            self._manager.initialize(self._state)
+        else:
+            self._manager.setInitialTime(current_time)
+            self._manager.setFinalTime(current_time + step_size)
 
-        # Integrate
-        self._manager.integrate(current_time + step_size)
+        # The manager owns the advanced state: keep a copy as the engine state.
+        advanced = self._manager.integrate(current_time + step_size)
+        self._state = opensim.State(advanced)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
@@ -686,6 +701,40 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         return a_control
 
     # -------- Section J: Muscle Model Integration --------
+
+    def get_force_torque_frame(self) -> ForceTorqueFrame | None:
+        """Return the world-frame (Z-up) force/torque overlay frame.
+
+        Realizes the engine state to the Acceleration stage (the provider needs
+        accelerations for joint reactions). Returns None when no model is loaded.
+        """
+        if not self.is_initialized:
+            return None
+        source = self._force_torque_source
+        if source is None or source.model is not self._model:
+            from .opensim_force_torque import OpenSimForceTorqueSource
+
+            source = OpenSimForceTorqueSource(self._model)
+            self._force_torque_source = source
+        return source.sample(self._state)
+
+    def get_segment_axial_loads(self) -> AxialLoadFrame | None:
+        """Return tension-positive proximal axial loads per joint segment."""
+        frame = self.get_force_torque_frame()
+        return None if frame is None else frame.axial_loads
+
+    def compute_contact_forces(self) -> np.ndarray:
+        """Return the world-frame (Z-up) sum of all contact forces, shape ``(3,)``.
+
+        Sums the ``CONTACT`` wrenches of :meth:`get_force_torque_frame`. Models
+        with no supported contact force (or no loaded model) give zeros.
+        """
+        frame = self.get_force_torque_frame()
+        total = np.zeros(3)
+        if frame is not None:
+            for wrench in frame.by_kind(WrenchKind.CONTACT):
+                total += np.asarray(wrench.force_n)
+        return total
 
     def get_muscle_analyzer(self) -> Any | None:
         """Get muscle analyzer for biomechanical analysis.
