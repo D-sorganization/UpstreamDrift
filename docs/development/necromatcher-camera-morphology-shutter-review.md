@@ -209,3 +209,52 @@ changes presentation, not geometry, residuals, evidence roles or qualification.
 Report convergence, rejection, body error, raw shaft error and closure/contact
 units separately. Camera fit, subject geometry, coupled ROM, physical endpoints,
 time, dynamics, impact and torque qualification remain explicit acceptance work.
+
+## Executed Shape Comparisons and Report Turnover
+
+At producer `6ac96d0c6ff3ce36c2f6ada9c68a7e94a9803832`, the surface-only
+pilot generated Tiger V16 frames 0/150/209 and Hogan V13 frames 200/375/550.
+Each includes original imagery, opacity 0/0.35/1, canonical surface pixels,
+silhouette and depth/Unicode geometry IDs. All six were independently recomputed
+with exact pixel/array equality and canonical decoded source identity/PTS checks.
+The 14,739-file source, runtime and 318-file library brackets remained unchanged.
+These pilots deliberately omit skeleton annotations; the final export retains them.
+The images expose approximate body agreement and gross club-orientation mismatch.
+
+The initial Hogan pilot failed the unchanged 600-second export gate before its
+precise timings were persisted. Preserve that failure; fresh measurements cannot
+replace lost values. Independent later measurements yielded Hogan 0.517303,
+0.837356 and 0.908099 seconds per composite, predicting 681.074 seconds from
+the maximum times 750. This heuristic still fails; no full shaded video is claimed.
+The preserved profile receipt is
+`5e370c13096345f09ad2ef8c77a85087327aa17b5d8cfc8b582b09b993d2317d`;
+its external preservation receipt is
+`5fe2702b26687781de98e6e521b92a4ba74fbd7dd4e13000a84e7127f02af4f2`.
+
+ControlTower Desktop delivery has two new exclusive folders:
+
+- `Necromatcher 3D Shape Still Review 2026-10-03 V2`: 48 individually size/SHA
+  verified comparison and audit files; remote receipt
+  `e14e913d70b74908165a92e3d87f4b0189e6f423220fbeb14fa02fae8bde1462`.
+- `Necromatcher Geometry and Shape Report 2026-10-03 V1`: 16 verified files
+  comprising final PDF, LaTeX, log, review receipt and 12 relative figure assets;
+  remote receipt
+  `f2f7eb74f9efe9c046f2e1ea6721e91ce18944036daeeb3c85f4ef833a8fbcdd`.
+
+The canonical supplement source is
+[LaTeX](necromatcher-model-geometry-shape-supplement.tex), with the exact
+[review and asset inventory](necromatcher-model-geometry-shape-supplement-review.json).
+The delivered 11-page PDF hash is
+`1248b3072dea863825269c1b3fe9dc5845694fae878a273ef73a17b9c0ef1011`.
+Two final installer-disabled MiKTeX passes succeeded; all eleven pages were
+rendered and visually reviewed, with no overfull boxes. The built-in compiler's
+platform-directory failure is recorded separately. Keep the source open in the
+editor; do not install a replacement compiler as a prerequisite.
+
+To repeat the artifact build, stage a copy of the canonical LaTeX beside the
+delivered relative `assets/` tree, verify all twelve image hashes against the
+inventory, then compile with the already available compiler. Assets remain
+external acquisition evidence; they are not committed as public source files.
+Inspect every rendered page and issue a new immutable review receipt after any
+change. Earlier 74-page methods and nine-page source/shutter reports, the old
+Desktop index and prior ControlTower deliveries remain preserved.

@@ -114,7 +114,11 @@ def _clipped_triangle(world: np.ndarray, depths: np.ndarray) -> list[np.ndarray]
 
 
 def _raster_triangle(
-    layer: _SurfaceBuffers, pixels: np.ndarray, depths: np.ndarray, mesh: SurfaceMesh
+    layer: _SurfaceBuffers,
+    pixels: np.ndarray,
+    depths: np.ndarray,
+    mesh: SurfaceMesh,
+    grid: tuple[np.ndarray, np.ndarray],
 ) -> None:
     """Perspective-correct depth evaluated at integer pixel centers."""
     h, w = layer.mask.shape
@@ -126,9 +130,9 @@ def _raster_triangle(
     denom = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
     if abs(denom) <= 1e-12:
         return
-    xs, ys = np.meshgrid(
-        np.arange(int(lo[0]), int(hi[0]) + 1), np.arange(int(lo[1]), int(hi[1]) + 1)
-    )
+    rows = slice(int(lo[1]), int(hi[1]) + 1)
+    columns = slice(int(lo[0]), int(hi[0]) + 1)
+    xs, ys = grid[0][rows, columns], grid[1][rows, columns]
     u = ((b[1] - c[1]) * (xs - c[0]) + (c[0] - b[0]) * (ys - c[1])) / denom
     v = ((c[1] - a[1]) * (xs - c[0]) + (a[0] - c[0]) * (ys - c[1])) / denom
     t = 1 - u - v
@@ -188,18 +192,20 @@ def render_surface_layer(
         np.full((h, w), np.inf),
         np.full((h, w), "", dtype=object),
     )
+    grid_x, grid_y = np.meshgrid(np.arange(w), np.arange(h))
+    grid = (grid_x, grid_y)
     for mesh in sorted(meshes, key=lambda m: m.identity):
         depths = camera.camera_points(mesh.vertices)[:, 2]
         if np.all(depths >= 1e-6):
             projected = camera.project(mesh.vertices)
             for face in _raster_faces(projected, mesh.faces, size):
-                _raster_triangle(layer, projected[face], depths[face], mesh)
+                _raster_triangle(layer, projected[face], depths[face], mesh, grid)
             continue
         for face in mesh.faces:
             for triangle in _clipped_triangle(mesh.vertices[face], depths[face]):
                 projected = camera.project(triangle)
                 z = camera.camera_points(triangle)[:, 2]
-                _raster_triangle(layer, projected, z, mesh)
+                _raster_triangle(layer, projected, z, mesh, grid)
     return SurfaceLayer(layer.pixels, layer.mask, layer.depth, layer.geometry_ids)
 
 

@@ -1,0 +1,90 @@
+{
+  "scientific_acceptance": false,
+  "schema": "necromatcher/geometry-shape-report-review/1",
+  "full_shaded_video_verified": false,
+  "figure_assets_exact_source_copies": true,
+  "files": [
+    {
+      "sha256": "9c4f75203d3ce0f75c499f9b7709e92f12b25a1242b755f68555594fe395fe6b",
+      "bytes": 22293,
+      "path": "model-geometry-shape-supplement.tex"
+    },
+    {
+      "sha256": "1248b3072dea863825269c1b3fe9dc5845694fae878a273ef73a17b9c0ef1011",
+      "bytes": 5980973,
+      "path": "model-geometry-shape-supplement.pdf"
+    },
+    {
+      "sha256": "032f3e418dce8b9067b6a0542a2692fefb34e18976360f73d7a471cc1aa11682",
+      "bytes": 30118,
+      "path": "model-geometry-shape-supplement.log"
+    },
+    {
+      "sha256": "2c092dbf1a0def5626360669e33f1051b6d6fbb9a1c715f1b347ec46b4ed3531",
+      "bytes": 72806,
+      "path": "assets/hogan/frame-000200/original.png"
+    },
+    {
+      "sha256": "9d65031ed414e0ee7933c1c1edf69e7a60ecbd65c57f4c2d1e8fa6fef5efcdb2",
+      "bytes": 93232,
+      "path": "assets/hogan/frame-000200/surface-only-alpha-0.35.png"
+    },
+    {
+      "sha256": "b940150f4f8dbc41e12bb8f13c8e67ddeeff36ac1a521765d18ce5113c56756c",
+      "bytes": 71993,
+      "path": "assets/hogan/frame-000375/original.png"
+    },
+    {
+      "sha256": "6e9821d7f503c31c1a357c369e0f1723de17001a1ecc48f7e53ba406b0bc8f33",
+      "bytes": 91837,
+      "path": "assets/hogan/frame-000375/surface-only-alpha-0.35.png"
+    },
+    {
+      "sha256": "28d105d464ee6f1536f5010e33605cd289432b53df0d46d6e05d14759da928ee",
+      "bytes": 70631,
+      "path": "assets/hogan/frame-000550/original.png"
+    },
+    {
+      "sha256": "fe9374f9f0219b7fed83f79a1931319ecf3be00587d91c10e21f1baae3f18c20",
+      "bytes": 92795,
+      "path": "assets/hogan/frame-000550/surface-only-alpha-0.35.png"
+    },
+    {
+      "sha256": "c5ff8e515a3fde971c7bff490575b5bc497d481a43528c1252d0fefeadfdf2d8",
+      "bytes": 749151,
+      "path": "assets/tiger/frame-000000/original.png"
+    },
+    {
+      "sha256": "69b85cc5523d00cb738283abcf56693d6b437160f9e4490f99c7dc78daeda139",
+      "bytes": 883697,
+      "path": "assets/tiger/frame-000000/surface-only-alpha-0.35.png"
+    },
+    {
+      "sha256": "e19941536d8155321cbcd0ad7b6017586e3dd23f8685de728c1dde74c6540448",
+      "bytes": 828855,
+      "path": "assets/tiger/frame-000150/original.png"
+    },
+    {
+      "sha256": "227b1756368205cf01862dcb42b7d100ece9c62d4985a830825db791618f993a",
+      "bytes": 945829,
+      "path": "assets/tiger/frame-000150/surface-only-alpha-0.35.png"
+    },
+    {
+      "sha256": "dae7d48c913d170db1301e8d7186270e3a9ea1ba5741719f975f0e1b84dd9d5b",
+      "bytes": 824789,
+      "path": "assets/tiger/frame-000209/original.png"
+    },
+    {
+      "sha256": "c9a619ca0a0a4da7930c80e8b40e41652c8bb314992e64248a380f359c72a9c2",
+      "bytes": 963374,
+      "path": "assets/tiger/frame-000209/surface-only-alpha-0.35.png"
+    }
+  ],
+  "all_pages_rendered_and_visually_reviewed": true,
+  "forearm_optimizer_executed": false,
+  "compiler": "Installed MiKTeX pdflatex; --disable-installer; two final passes",
+  "overfull_boxes": 0,
+  "pages": 11,
+  "built_in_compiler": "Platform standard directories unavailable; source preserved in editor",
+  "figure_assets_count": 12
+}
