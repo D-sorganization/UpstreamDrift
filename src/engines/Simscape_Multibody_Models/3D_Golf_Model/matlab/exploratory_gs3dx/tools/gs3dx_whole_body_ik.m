@@ -250,6 +250,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         assert(all(isfinite(opts.back_marker_offsets),'all'),'gs3dx:ik:body','Back marker offsets must be finite');
     end
     s = local_setup(opts.model, head_data.active,body_active,opts.target_scope);
+    if s.grounded_legs
+        solver_handle=s.ks;
+        solver_cleanup=onCleanup(@() delete(solver_handle)); %#ok<NASGU>
+    end
     if ~human_model
         native_schema=struct('joint_keys',s.jkeys,'units',string(s.jp.Unit));
         p_seed=gs3dx_ik_initial_pose(opts.initial_pose,native_schema=native_schema);
@@ -281,6 +285,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
+    if s.grounded_legs
+        lm.FiniteDifferenceStepSize=1e-4;lm.FiniteDifferenceType='central';
+    end
     if s.scapula.active
         lm.Algorithm = 'trust-region-reflective';
     end
@@ -339,6 +346,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         ik.target_scope='upper_body';
         ik.capabilities=struct('lower_body_position_targets',false,'native_feet',s.native_feet, ...
             'foot_orientation_targets',s.n_feet>0,'grounded_leg_loop',s.grounded_legs);
+        if s.grounded_legs,ik.capabilities.tracking_method='Alternating native upper-body and pelvis blocks';end
     end
     ik.model = opts.model;
     if ~isempty(p_seed), ik.seed_source = seed_source; end
@@ -753,7 +761,37 @@ function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, hd, lm)
     if isempty(lb),lm.Algorithm='levenberg-marquardt';end
     p0 = p;   % the warm start: the neighbour frame's solution
     r = @(pp) local_residual(s, pp, g, off, d, w, fd, hd, p0);
-    [p, cost, ~, ~, out] = lsqnonlin(r, p, lb, ub, lm);
+    if s.grounded_legs
+        % Fixed-foot loop failures must not freeze the unconstrained arms.
+        % Alternate upper and pelvis fits, refreshing native loop guesses
+        % after each accepted block. Every returned pose still closes KS.
+        root_prefix=extractBefore(s.roles.pelvis_trans_keys(1),".");
+        active=true(size(p));first=0;
+        for k=1:numel(s.layout)
+            if startsWith(s.layout(k).key,root_prefix+".")
+                active(first+(1:s.layout(k).n))=false;
+            end
+            first=first+s.layout(k).n;
+        end
+        assert(nnz(~active)==6,'gs3dx:ik:grounded','Require six native pelvis coordinates');
+        upper=active;total_iterations=0;
+        for block=[0 1 0 1 0]
+            active=upper;if block,active=~upper;end
+            fixed=p;rlb=[];rub=[];if ~isempty(lb),rlb=lb(active);rub=ub(active);end
+            r = @(pp) local_residual(s, pp, g, off, d, w, fd, hd, p0);
+            reduced=@(x) r(local_expand_block(fixed,active,x));
+            block_opts=lm;if block,block_opts.MaxIterations=40;end
+            [x,cost,~,~,out]=lsqnonlin(reduced,p(active),rlb,rub,block_opts);
+            trial=local_expand_block(fixed,active,x);
+            [~,~,st,new_g]=local_fk(s,trial,g);
+            if st==1,p=trial;g=new_g;end
+            total_iterations=total_iterations+out.iterations;
+        end
+        cost=sum(local_residual(s,p,g,off,d,w,fd,hd,p0).^2);
+        out.iterations=total_iterations;
+    else
+        [p, cost, ~, ~, out] = lsqnonlin(r, p, lb, ub, lm);
+    end
     iters = out.iterations;
     [~, ~, ~, g] = local_fk(s, p, g);
 end
@@ -917,4 +955,8 @@ end
 
 function hd=local_body_head_data(head,jc,active,f)
  hd=local_head_data(head,f);if active,hd.back_points=jc.back_marker_points(:,:,f);end
+end
+
+function p=local_expand_block(p,active,x)
+    p(active)=x;
 end

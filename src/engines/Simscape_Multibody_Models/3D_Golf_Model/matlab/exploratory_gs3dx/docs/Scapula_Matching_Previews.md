@@ -56,9 +56,14 @@ paths = string(unique(jp.BlockPath,'stable'));
 torso_base = char(paths(contains(paths,'Left Scapula')));
 addFrameVariables(ks,'p','Translation',[world{1} '/W'],[torso_base '/B']);
 addFrameVariables(ks,'r','Rotation',[world{1} '/W'],[torso_base '/B']);
-addTargetVariables(ks,string(jp.ID));
+grounded = strcmp(mdl,char(gs3dx_names().variants.fullbody));
+roles = gs3dx_ik_joint_roles(jp,[],grounded_legs=grounded);
+addTargetVariables(ks,roles.target_ids);
+addInitialGuessVariables(ks,roles.closed_ids);
 addOutputVariables(ks,string(ks.frameVariables.ID));
-[native,status] = solve(ks,baseline.joint(at,1),[]); assert(status==1);
+[found,t] = ismember(roles.target_ids,string(baseline.joint_ids)); assert(all(found));
+[found,g] = ismember(roles.closed_ids,string(baseline.joint_ids)); assert(all(found));
+[native,status] = solve(ks,baseline.joint(t,1),baseline.joint(g,1)); assert(status==1);
 R0 = eul2rotm(deg2rad(native(4:6).'),'XYZ');
 back_offsets = R0.'*(jc.back_marker_points(:,:,1)-native(1:3));
 delete(ks);
@@ -90,4 +95,10 @@ FullBody is an earlier construction stage with feet rigidly connected to World. 
 
 Keyed initial poses use exact native model keys and units. The caller obtains the optional `native_schema` from KinematicsSolver for non-Human variants, validates spherical axes and verifies native loop closure. The original Human 48-coordinate initialization contract is retained. These seeds do not transfer missing joints from another model.
 
-Current qualification: all 13 native role schemas were inspected; native three-frame matching pilots passed for Baseline, Slim and Quat. The 59-test target-contract lane and entire disabled-feature Human output parity passed. Complete quiet-torso fits are being evaluated with each model's dimensions retained and address-calibrated offsets fixed. Baseline has completed both 55/46-frame trajectories. Full Human trajectories and the eight delivered Desktop videos were already qualified separately. Schema or pilot checks alone are not acceptance of the remaining complete trajectories.
+Current native qualification: complete 55/46-frame trajectories exist for both captures on all 13 registered variants. The 12 floating-foot or upper-body variants have approximately 13--24 mm mean measured target RMS; their eight- or fourteen-target layouts must be considered when comparing scores. The fixed-foot FullBody stage has 27/34 mm mean and 43/53 mm peak RMS on its eight active targets. Both complete FullBody reruns, 95 native contract/regression tests and final entire disabled-feature Human output/default-explicit parity have natural process exit-zero receipts. Original marker offsets and saved FullBody model bytes are preserved. The three back-marker RMS values remain separate diagnostics; fixed-foot FullBody back RMS is approximately 52/61 mm, so it is not the closest body-marker representation.
+
+FullBody uses alternating native upper-body and six-coordinate pelvis fits. Every accepted block refreshes the native loop-closure guesses. Larger central differences on this stage avoid the earlier finite-difference stalls, while the separate coordinate blocks keep a failed pelvis step from freezing the arms. The monolithic 376--532 mm fits and intermediate 128--169 mm finite-difference fits remain rejected. Scapula and spine bounds are enforced through the backswing exactly as on the other models.
+
+The renderer measures the two welded foot solids relative to the moving pelvis, then composes the native pelvis/foot transforms to World. Direct World-to-welded-foot frame variables are rejected by native KinematicsSolver. Independent native RED/GREEN probes reproduce the expected fixed-foot transforms within 1e-7 across two moving-pelvis poses. A capture-free regression also checks two upper-body poses, fixed-foot transforms and native 1920x1080 PNG output.
+
+Final all-model replay and media delivery remain in progress. Baseline, Slim and Quat have native exit-zero replay/export receipts for 24 neutral 1080p videos, with all 1,212 frames independently decoded and Desktop copies hash-verified. The eight previously qualified Human videos remain unchanged. The older all-model replay passed numerical assertions but hung at shutdown (watchdog 125); smaller final native batches replace that acceptance gap. No source merge or full all-model media completion is implied by completed fit or schema checks.

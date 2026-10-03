@@ -103,7 +103,7 @@ function out = gs3dx_render(mdl, q, opts)
     end
 
     % Set up KinematicsSolver with frame variables
-    [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids);
+    [ks, closed, tv, ids, keys, fixed_reference] = local_build_ks(mdl, solids);
 
     % Parse poses Q and resolve per-frame joint positions
     [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, keys, mdl, closed, tv, opts.time);
@@ -121,7 +121,7 @@ function out = gs3dx_render(mdl, q, opts)
     assert(~isempty(frames_to_solve), 'gs3dx:render', 'No valid frame indices to render');
 
     % Solve forward kinematics for solid poses
-    solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve);
+    solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve, fixed_reference);
 
     % Format camera view
     % Freeze whole-animation bounds so the club cannot leave the camera.
@@ -335,7 +335,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Build KinematicsSolver with solid frame variables
 % -------------------------------------------------------------------------
-function [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids)
+function [ks, closed, tv, ids, keys, fixed_reference] = local_build_ks(mdl, solids)
     wf = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
         'ReferenceBlock', 'sm_lib/Frames and Transforms/World Frame');
     assert(~isempty(wf), 'gs3dx:render', 'World Frame not found in %s', mdl);
@@ -345,18 +345,47 @@ function [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids)
     jp = ks.jointPositionVariables;
     [keys, ids] = gs3dx_joint_keys(mdl, jp);
 
-    for i = 1:numel(solids)
-        s_port = [solids(i).block '/R'];
-        addFrameVariables(ks, sprintf('p%d', i), 'Translation', world, s_port);
+    names = gs3dx_names();
+    grounded=strcmp(string(mdl),names.variants.fullbody);
+    fixed_reference=false(1,numel(solids));
+    base_frames=repmat({world},1,numel(solids));
+    if grounded
+        pelvis_paths=unique(string(jp.BlockPath(contains(string(jp.BlockPath),'Hip Kinetically Driven/Hip Joint'))));
+        assert(numel(pelvis_paths)==1,'gs3dx:render','Grounded pelvis must resolve uniquely');
+        pelvis_frame=char(pelvis_paths(1)+"/F");
+        for i=1:numel(solids)
+            % A World-to-welded-foot measurement is rejected by native KS.
+            % Measure the foot relative to moving pelvis and compose both
+            % native frame measurements to World after solving each pose.
+            fixed_reference(i)=ismember(string(solids(i).block), ...
+                string(mdl)+["/Lower Body/L Foot","/Lower Body/R Foot"]);
+            if fixed_reference(i),base_frames{i}=pelvis_frame;end
+        end
+        assert(nnz(fixed_reference)==2,'gs3dx:render','Expected two native rigid-foot solids');
     end
     for i = 1:numel(solids)
         s_port = [solids(i).block '/R'];
-        addFrameVariables(ks, sprintf('r%d', i), 'Rotation', world, s_port);
+        addFrameVariables(ks, sprintf('p%d', i), 'Translation', base_frames{i}, s_port);
+    end
+    for i = 1:numel(solids)
+        s_port = [solids(i).block '/R'];
+        addFrameVariables(ks, sprintf('r%d', i), 'Rotation', base_frames{i}, s_port);
+    end
+    if grounded
+        addFrameVariables(ks,'ground_pelvis_p','Translation',world,pelvis_frame);
+        addFrameVariables(ks,'ground_pelvis_r','Rotation',world,pelvis_frame);
     end
 
     % Grip loop closed joints (right elbow, shoulder, wrist), by block path:
-    % a joint added to a variant renumbers the IDs after it
-    closed = startsWith(keys, ["Right Elbow Joint/" "Right Shoulder Joint/" "Right Wrist and Hand/"]);
+    % a joint added to a variant renumbers the IDs after it. For registered
+    % GS3DX_FullBody, rigid-foot loop closure also grounds both legs.
+    names = gs3dx_names();
+    if strcmp(string(mdl), names.variants.fullbody)
+        roles = gs3dx_ik_joint_roles(jp.BlockPath, ids, 'grounded_legs', true);
+        closed = roles.closed_mask;
+    else
+        closed = startsWith(keys, ["Right Elbow Joint/" "Right Shoulder Joint/" "Right Wrist and Hand/"]);
+    end
     tv = ids(~closed);
 
     addTargetVariables(ks, tv);
@@ -441,7 +470,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Solve poses and build World geometry
 % -------------------------------------------------------------------------
-function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve)
+function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve, fixed_reference)
     ns = numel(solids);
     n_total_frames = size(q_mat, 2);
 
@@ -466,6 +495,12 @@ function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_sol
             rot_deg = sol(3*ns + 3*(s_idx - 1) + 1 : 3*ns + 3*s_idx);
             rot_rad = rot_deg * (pi / 180);
             R_world = local_rx(rot_rad(1)) * local_ry(rot_rad(2)) * local_rz(rot_rad(3));
+            if fixed_reference(s_idx)
+                p_ref=sol(6*ns+(1:3));a_ref=sol(6*ns+(4:6))*(pi/180);
+                R_ref=local_rx(a_ref(1))*local_ry(a_ref(2))*local_rz(a_ref(3));
+                p_world=p_ref+R_ref*p_world;
+                R_world=R_ref*R_world;
+            end
 
             solids(s_idx).pose.P(:, f) = p_world;
             solids(s_idx).pose.R(:, :, f) = R_world;
