@@ -88,7 +88,9 @@ class MockKinematicsService:
 
     def set_pose(self, pose: CanonicalPose) -> None:
         """Store *pose* for subsequent :meth:`get_link_transforms` calls."""
-        if not isinstance(pose, CanonicalPose):
+        if not (
+            isinstance(pose, CanonicalPose) or type(pose).__name__ == "CanonicalPose"
+        ):
             raise TypeError(f"pose must be a CanonicalPose, got {type(pose).__name__}")
         self._pose = pose
 

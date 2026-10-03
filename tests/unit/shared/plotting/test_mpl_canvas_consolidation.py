@@ -34,11 +34,8 @@ _TOOLS_OWNED_DEFINITIONS = {
     # Has a same-relative counterpart in the Tools repository.
     Path("src/shared/python/signal_toolkit/widget.py"),
     Path("src/shared/python/signal_toolkit/polynomial_generator.py"),
-    Path("src/shared/python/sidekick/process_calculators/psa_package/psa_gui.py"),
-    Path(
-        "src/shared/python/sidekick/process_calculators/psa_package/ui/"
-        "sensitivity_plot.py"
-    ),
+    # psa_package copies moved to vendor/ud-tools with the sidekick seam
+    # migration; the UpstreamDrift shadow paths were retired (c2a102a1b9).
 }
 
 # The documented headless fallback in plotting/base.py: not a duplicate

@@ -31,6 +31,639 @@
 
 # Past Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
+# Engine-Agnostic Projected Segment Meshes With Tension/Compression Fill — #11285 / #11311 (FTO-26)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-model-footage-11311`; commit SELF; PR: #11391 (`Closes #11311`, `Refs #11285`)
+- Governing issue: #11311 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_segments.py`:
+    - `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`.
+    - `draw_segment_meshes_on_frame`: Painter's algorithm depth-sorted rendering of capsule segment meshes onto calibrated video frames.
+    - Features: back-face culling via signed screen-space cross product, Lambertian directional shading with configurable ambient, `ForceColorScale` mapping of axial loads (tension blue, compression red, neutral grey), alpha compositing with opacity fast-path (opacity 0 returns unmodified frame), and triangle budget enforcement.
+    - `segment_poses_from_axes`: transforms `SegmentAxis` proximal $\to$ distal vectors into aligned segment poses.
+  - `src/shared/python/force_overlay/renderers/__init__.py`:
+    - Re-exported `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`, `draw_segment_meshes_on_frame`, `segment_poses_from_axes`.
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_model_volumes: bool = False` and `model_volume_opacity: float = 0.55` to `ComparisonLayer`.
+  - `src/tools/capture_rig/reference_volumes.py`:
+    - Wired `draw_segment_meshes_on_frame` into `draw_segment_volumes` with fallback to ellipsoid meshes when axes cannot be constructed.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - Passes extracted `axial_loads` from force layer series into `draw_segment_volumes`.
+  - Acceptance demo artifact:
+    - Generated visual still: `docs/development/fto_26_demo_still.png` showing 3-segment arm under tension and compression with FTO-8 force arrows on gradient background.
+- Validation:
+  - `tests/unit/force_overlay/test_opencv_segments.py` (9 passed, 100% coverage including DbC validation and visual demo still).
+  - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
+  - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
+  - All pre-commit linters, formatting, and CI budgets passed.
+- Next steps: Merge PR; proceed with FTO-29 / FTO-30.
+
+---
+
+# Calibrated MuJoCo Mesh Render Composited Onto Source Footage — #11285 / #11312 (FTO-27)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-27-mujoco-mesh-render-11312`; commit SELF; PR: #11393 (`Closes #11312`, `Refs #11285`)
+- Governing issue: #11312 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-27] Render actual MuJoCo model meshes with force arrows (FTO-6) and segment shading from a camera matching calibrated intrinsics and extrinsics, then alpha-composite onto source footage.
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/footage_composite.py`:
+    - `mujoco_camera_from_pinhole(camera, world_from_mj) -> MjCameraSpec`:
+      - Derives MuJoCo camera position, xyaxes, and vertical field of view ($2 \cdot \text{atan}(H_{\text{render}} / (2 \cdot f_y))$).
+      - Converts OpenGL/MuJoCo coordinate convention (flipping OpenCV +y down and +z forward to MuJoCo +y up and -z viewing direction).
+      - Implements Decision 2: enlarged frame and crop rectangle to precisely center principal point $(c_x, c_y)$ without non-linear image warping.
+    - `apply_camera_spec_to_scene(scene, spec)`:
+      - Sets up `scene.camera[0]` and `scene.camera[1]` poses, frustum clipping, and aligns headlights with the optical axis.
+    - `registration_to_world_from_mj(registration)`:
+      - Maps `ReferenceRegistration` or 4x4 matrix into the canonical Z-up to ADR-0041 world coordinate transformation.
+    - `composite_model_on_frame(frame_bgr, model, data, camera, registration, glyphs, loads, opts) -> (frame, receipt)`:
+      - Renders MuJoCo segmentation buffer (`enable_segmentation_rendering`) and RGB buffer.
+      - Crops both buffers to the calibrated frame window.
+      - Computes alpha channel from model geoms (`segid != -1`), feathered by 1 px (`cv2.GaussianBlur`).
+      - Implements Decision 3: undistorts source footage frame with camera coefficients (`cv2.undistort`) so rectilinear mesh and arrow layer (FTO-8 `opencv_glyphs.py`) agree within 1.5 px.
+      - Integrates 3D force glyphs via `add_glyphs_to_scene` and axial loads via `apply_mujoco_scene_colors`.
+      - Blends render over destination frame with alpha channel and user-specified opacity.
+  - `docs/adr/0052-force-torque-overlay-contract.md`:
+    - Added Addendum for Decisions 2 (enlarged frame crop for principal point) and 3 (lens distortion policy).
+  - Tests:
+    - 6 unit tests in `tests/unit/engines/mujoco/test_footage_composite.py`:
+      - Reprojection error $\le 1.0\text{ px}$ against `PinholeCamera.project` for off-centre principal point.
+      - Axis flip maps camera forward to MuJoCo -z.
+      - Background pixels strictly untouched in alpha composite.
+      - Lens distortion policy verifies mesh and FTO-8 arrow root agree within 1.5 px.
+      - DbC precondition contract validation.
+      - Full integration with `ReferenceRegistration`, `AxialLoadFrame`, and `GlyphSet`.
+  - Artifacts:
+    - Synthetic composite verified and generated: `docs/development/fto_27_synthetic_composite.png`.
+- Validation:
+  - `pytest tests/unit/engines/mujoco/test_footage_composite.py`: 6 passed.
+  - Pre-commit gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check src/ tests/`: Clean.
+  - `ruff format --check src/ tests/`: Clean.
+  - `python scripts/ci/run_mypy.py`: Clean (0 issues).
+- Next steps: Merged in main (PR #11393).
+
+---
+
+# Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
+- Governing issue: #11310 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-25] Force and torque arrow layer in the reference-comparison and capture-rig video compositors (preview + export).
+- Completed:
+  - `src/motion_capture/reconstruct/model/kinetics_series.py`:
+    - `kinetics_to_force_series(kinetics, model) -> ForceTorqueSeries`:
+      - Samples model forward kinematics (`forward_frames`) at each frame time.
+      - Maps generalized torques $\tau$ per rotational DOF to joint moments using joint rotation axes in `adr0041_world`.
+      - Reconstructs `JOINT_ACTUATOR` moments via `joint_torque_wrench` at joint centers.
+      - Gracefully skips joints without rotation axes (`is_available=False`).
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_forces`, `draw_torques`, `draw_legend`, `force_scale` to `ComparisonLayer`.
+    - Added `ForceLayer` variant to `ComparisonLayer` with `series` and `style` excluded from JSON serialization.
+    - Added `glyph_receipts` and `force_series_hash` to `ComparisonExportSidecarSpec` and `build_comparison_sidecar`.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - `ComparisonRenderer`: renders force/torque vector layer via `force_frame_for_video`, `build_glyphs`, `scale_for_view`, and `draw_glyphs_on_frame` using context camera through `PinholeProjector`.
+    - Blended with layer opacity using `cv2.addWeighted`.
+    - Tracks per-frame `VideoGlyphReceipt` in `renderer.receipts` and `renderer.last_receipt`.
+  - `src/tools/capture_rig/reference_export.py`:
+    - Populates `glyph_receipts` and SHA256 `force_series_hash` in `export_comparison_video` metadata sidecar.
+  - `src/tools/capture_rig/overlay_render.py`:
+    - Added `joint_torques`, `torques`, `force_series`, `camera`, `style` parameters to `render_frame` and `export_overlay`.
+    - Renders torque arcs and glyphs directly onto frames via `PinholeProjector` and `draw_glyphs_on_frame`.
+  - UI Toggles:
+    - `VariantOverlayBox` (`overlay_box.py`): added "Joint torques", "Forces", "Torques", "Legend" checkboxes and horizontal scale slider.
+    - `MotionAppearanceControls` (`reference_appearance.py`): added "Show Forces", "Show Torques", "Show Legend" checkboxes and "Force Scale" spinbox, persisting into `ComparisonLayer`.
+  - Feature parity & documentation:
+    - Updated `src/config/feature_parity.json` for `tools.capture_rig` and regenerated `docs/development/feature_parity_matrix.md`.
+    - Added row to `SPEC.md` Change Log table (#11390).
+- Validation:
+  - Unit and integration tests all passing:
+    - `tests/motion_capture/reconstruct/model/test_kinetics_series.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed)
+    - `tests/tools/capture_rig/test_overlay_render.py` (4 passed)
+    - `tests/tools/capture_rig/test_overlay_box.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_appearance_controls.py` (2 passed)
+- Next steps: Merge PR; unblocks FTO-30.
+
+---
+
+# Force-Overlay Parity MuJoCo Lane Evidence — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `chore/mujoco-parity-lane-evidence`; commit SELF; PR: see branch (`Refs #11346`, `Refs #11285`)
+- Completed: the `force-overlay-parity` mujoco matrix entry now requires `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` (the MuJoCo provider row, FTO-9 / #11294, merged in #11361; labels and fixture fixed in #11381) instead of the stand-in `test_mujoco_models_are_statically_consistent`.
+- Validation: `pytest -o addopts="" tests/integration/cross_engine/test_force_overlay_parity.py -m requires_mujoco` (5 pass) then `scripts/ci/require_junit_test_passed.py <junit> "test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]"` passes locally.
+- Limits: the parity lanes are still not branch-protection required checks; promoting them is a repository-admin setting.
+- Next steps: a repository admin decides whether to make the force-overlay parity lanes required.
+
+# Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
+- Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
+- Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
+- Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
+# Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment-video`; commit SELF; PR: #11378 (`Closes #11309`, `Refs #11285`)
+- Governing issue: #11309 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-24] Carry force/torque series through trace import, time maps and registration onto video frames.
+- Completed:
+  - `src/shared/python/force_overlay/contracts.py` & `schemas/force-torque-frame-v1.json`:
+    - Extended `ForceTorqueFrame.world_frame` to accept `"adr0041_world"` alongside `"world_Zup"`.
+    - Added `ForceTorqueFrame.metadata` mapping field.
+  - `src/motion_capture/reference/force_alignment.py`:
+    - `force_frame_for_video(series, *, video_time_s, registration, max_gap_s=0.1) -> ForceTorqueFrame | None`:
+      - Resolves video timestamp to reference time via `registration.time_mapping.scene_to_reference(video_time_s)`.
+      - Samples `ForceTorqueSeries.frame_at(ref_time_s, max_gap_s=max_gap_s)` (returns `None` when gap exceeds threshold).
+      - Converts spatial positions via `registration.place_points()` into ADR-0041 camera world coordinate system.
+      - Transforms direction vectors: forces as polar vectors ($F_{world} = A F_{can}$), torques as axial vectors / pseudovectors ($\tau_{world} = \det(A) (A \tau_{can})$), preserving physical vector magnitudes without scaling.
+      - Applies parity reflection ($\det(A) = -1$) when `registration.mirror_lateral` is True.
+      - Reconstructs aligned `AxialLoadFrame` if present at `video_time_s`.
+      - Preserves scale in `metadata["registration_scale"] = registration.transform.scale`.
+    - `write_trace_forces(path, series)` & `load_trace_forces(path)`:
+      - Persists and roundtrips `ForceTorqueSeries` losslessly in trace HDF5 file under group `force_torque_series`.
+      - Fallback loader parses root `wrench` (T, 6) if and only if declared `wrench_point` or `root_point` exists in trace meta; returns `None` without fabricated points if undeclared.
+    - `series_to_viewport_payload_wrench(series) -> np.ndarray`:
+      - Returns (T, 6) array summing contact and external wrenches about world origin ($r \times F + \tau$).
+  - `src/motion_capture/reference/trace_import.py`:
+    - Updated `_preflight` to recognize and count dataset sizes inside the `force_torque_series` HDF5 group without rejecting it as a non-dataset root key.
+  - Tests:
+    - 8 comprehensive unit tests in `tests/motion_capture/test_force_alignment.py`:
+      - Time mapping affine alignment.
+      - Canonical Z-up +z force to ADR-0041 +y world mapping.
+      - 90° rotation, translation, and scale (unscaled vector magnitude).
+      - Mirrored registration polar vs axial vector parity flip.
+      - Gap rejection returning `None`.
+      - HDF5 `force_torque_series` roundtrip.
+      - Undeclared wrench point returning `None`.
+      - Net origin wrench payload summation.
+- Validation:
+  - `pytest tests/motion_capture/test_force_alignment.py tests/motion_capture/test_trace_reference_import.py tests/motion_capture/test_reference_registration.py tests/unit/force_overlay`: 129 passed.
+  - Local CI gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_dry_duplication_gate.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check` & `ruff format --check`: Clean.
+  - `mypy`: Clean (0 issues).
+- Next steps: Merge PR; unblocks FTO-25 (#11310) and FTO-26 (#11311).
+
+---
+
+# MuJoCo GUI Force and Torque Overlays Through Shared Renderers - #11295 (FTO-10)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11295-gui`; commit SELF; PR: see `Closes #11295` / `Refs #11285`; DL entry `DL-#11285`
+- Completed: `sim_rendering_mixin.py` now samples `engine.get_force_torque_frame()` once per frame, maps the toggles and scale sliders to glyphs through the new headless `force_glyph_overlay.py`, and draws them with `add_glyphs_to_scene` (native/offscreen) and `MuJoCoMeshcatAdapter.draw_glyphs` (`MeshcatGlyphRenderer`). Removed `_add_force_torque_overlays`, `_draw_torque_vectors`, `_draw_force_vectors` and the MeshCat `draw_vectors`. Legend line goes to the status bar through `force_legend_changed`. The contact checkbox is labelled "MuJoCo native contact debug". `feature_parity.json` gains `mujoco.force_overlays`.
+- Decisions: induced and counterfactual vectors are joint accelerations, not wrenches, so they stay on their own screen-space/MeshCat path with only the slice fixed to `xaxis[j]`. `_world_to_screen` is kept (still used by manipulation, swing-plane, frame/COM and live-kinematics overlays). `draw_arrow_line` is kept (swing-plane normal, not a force). `PyQt6.QtGui` is imported lazily in `_render_once` so the glyph path is importable headless.
+- Limits: before/after offscreen screenshots were not produced (no EGL here); Qt widget wiring (status bar connection, tab label) is untested because PyQt6 is not installed here.
+- Validation: `pytest -o addopts="" tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py` passes (12); ruff and gates clean.
+- Next steps: attach offscreen screenshots on a GL-capable host; FTO-30 builds on this.
+
+# MuJoCo Reaction Labels and Parity Fixture Rod — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
+- Branch: `fix/mujoco-reaction-label-joint-name`; commit: SELF; PR: #11381 (open; `Refs #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11346 (per-engine parity lanes, PR #11375); epic #11285
+- Completed: the first real run of the new MuJoCo parity lane failed two rows. `MujocoForceTorqueSource` labelled joint reactions by body name while Drake, Pinocchio and OpenSim use the joint name, and its own actuator label already uses the joint name. Reactions now use the first joint's name (the joint whose anchor is reported); a joint-less body keeps its body name. The parity MJCF pendulum had only an `<inertial>`, so MuJoCo's native axial source (rods only) returned nothing; a non-colliding capsule from the pivot to the COM fixes that without changing mass or inertia and without touching any tolerance.
+- Validation: `tests/unit/engines/mujoco/test_force_torque_source.py` and `tests/integration/cross_engine/test_force_overlay_parity.py` (RED before: label test and two `[mujoco]` rows; GREEN after; 18 passed with the mujoco/label/axial selection, `tests/integration/cross_engine` all pass). Unrelated local failures: PyQt6 GUI tests in `tests/unit/body_part_viz` (PyQt6 not installed in this venv) and one pre-existing `test_biomechanics` failure that also fails on main.
+- Next steps: after this lands, #11375 switches the mujoco lane evidence from the statics check to the `[mujoco]` hanging-pendulum row.
+
+# Per-Engine Force Overlay Parity Lanes — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11346-impl`; commit: SELF; PR: #11375 (`Closes #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: new `force-overlay-parity` job in `.github/workflows/cross-engine-equivalence.yml` (matrix drake, pinocchio, opensim, mujoco) installs one engine, runs `test_force_overlay_parity.py -m requires_<engine>` and then `scripts/ci/require_junit_test_passed.py` on a named evidence testcase so an all-skipped report fails. Structure test in `tests/ci/test_ci_infrastructure.py`.
+- Limits: the MuJoCo lane's evidence is the provider-independent MJCF statics test until FTO-9 (#11294) lands; switch it to the hanging-pendulum `[mujoco]` case then. The opensim lane is `continue-on-error` (wheel not installable everywhere). Lanes are not required checks; making them required is a repo-admin setting. Not run on a real runner here.
+- Validation: YAML parses; the new structure test passes; ruff check/format clean. 20 other tests in `tests/ci/test_ci_infrastructure.py` fail in this venv (missing optional deps) and are unrelated.
+- Next steps: watch the first CI run of each lane; update the mujoco evidence after #11294.
+
+---
+
+# Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11292-matplotlib-qpainter-glyphs`; commit SELF; PR: #11348 (`Closes #11292`, `Refs #11285`)
+- Governing issue: #11292 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers with dark halos, 12-facet cone heads, and migrated legacy vector overlays.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/matplotlib_glyphs.py`:
+    - `draw_glyphs_3d(ax, glyphs, *, linewidth_pt=2.0, halo=True) -> list[Artist]`: draws 3D force arrows (with 12-facet cone heads via `Poly3DCollection`) and 3D torque arcs (polyline + cone head) onto a Matplotlib 3D axes, optionally underlaid with a dark halo. Returns list of created artists supporting `.remove()`.
+    - `draw_legend(ax, glyphs, *, loc='upper right', fontsize=9.0) -> Artist`: renders deterministic legend showing active force/torque kinds.
+  - `src/shared/python/force_overlay/renderers/qpainter_glyphs.py`:
+    - `draw_glyphs_2d(painter, project, glyphs, *, px_width=2.0, halo=True) -> None`: draws 2D projected force arrows and torque arcs using QPainter with anti-aliasing and optional dark halos.
+  - Migrated legacy vector renderers:
+    - `src/shared/python/plotting/renderers/force_vectors.py`: delegates to `draw_glyphs_3d`.
+    - `src/shared/python/movement_optimizer/gui/vector_overlay.py`: delegates to `draw_glyphs_2d`.
+  - Extracted common `_render_joint_forces_overlay` in pendulum simulator widgets and eliminated duplicate drawing boilerplate.
+  - Tests:
+    - Unit tests in `tests/unit/force_overlay/test_matplotlib_glyphs.py` and `tests/unit/force_overlay/test_qpainter_glyphs.py`.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest passed.
+- Next steps: Merge PR #11348; unblocks remaining renderers.
+
+---
+
+# MuJoCo Force/Torque Provider — #11294 (FTO-9)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `UpstreamDrift-worktrees/agy-11294`
+- Branch: `feat/fto-11294-mujoco-provider`; commit: SELF; PR: #11361 (`Closes #11294`, `Refs #11285`)
+- Governing issue: #11294 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Objective: [FTO-9] MuJoCo force/torque provider and overlay bug fixes.
+- Completed:
+  - Implemented `MujocoForceTorqueSource` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` (282 lines, within budget).
+  - Emits world-frame `OverlayWrench` instances for:
+    - `JOINT_ACTUATOR`: applied actuator torques/forces from `qfrc_actuator` mapped with `xaxis[j]`.
+    - `JOINT_REACTION`: parent-on-child internal reactions from `cfrc_int`, transformed from subtree center of mass to joint anchor via `transform_wrench(w_com, "world", anchor)`.
+    - `CONTACT`: active contact pair forces from `mj_contactForce`, transformed from contact frame to world frame, with equal-and-opposite signs on interacting bodies and non-geom IDs safely skipped.
+    - `EXTERNAL`: applied spatial wrenches from `xfrc_applied`.
+    - `GRAVITY`: optional mass \* g body wrenches.
+  - Implemented bit-identical state snapshotting to internal scratch `MjData` using direct numpy `copyto` on `qpos`, `qvel`, `qacc`, `ctrl`, `act`, `qfrc_applied`, `xfrc_applied`, and `time` (resolving missing `mujoco.mj_copyData` in Python bindings across `force_torque_source.py` and `src/shared/python/body_part_viz/mujoco_axial_loads.py`).
+  - Integrated into `MujocoPhysicsEngine` (`get_force_torque_frame`, `get_segment_axial_loads`, `get_contact_forces`, `force_visualization=FULL`).
+  - Unit tests: 8 comprehensive tests in `tests/unit/engines/mujoco/test_force_torque_source.py` (hanging pendulum equilibrium, sign agreement with `MujocoAxialLoadSource`, actuated hinge with clamping, non-axis-aligned joint indexing, box on floor contact equilibrium, caller data immutability, engine source caching, and schema serialization round-trip).
+  - Benchmark on `golfer.xml`: `sample()` cost is ~15 ms per frame.
+- Validation:
+  - `python -m pytest tests/unit/engines/mujoco/test_force_torque_source.py`: 8 passed.
+  - `python -m pytest tests/unit/test_mujoco_physics_engine.py`: 16 passed.
+  - `python -m pytest tests/unit/scripts/test_divergence_inventory.py`: 10 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check .` & `ruff format --check .`: Clean.
+- Next steps: Land FTO-9 PR; proceed with FTO-10 (#11295) MuJoCo GUI rewiring.
+
+# OpenCV Video Glyph Renderer Delivery — #11285 / #11293 (FTO-8)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (merged; `Closes #11293`, `Refs #11285`)
+- Governing issue: #11293 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-8] OpenCV video glyph renderer with calibrated camera projection, anti-aliased dark halo underlays, inset legend box, and deterministic styling (#11293).
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
+    - `ImageProjector`: Protocol defining the camera projection contract.
+    - `PinholeProjector`: OpenCV-compatible projector supporting `K`, `dist_coeffs`, `R`, `tvec` or camera frame extrinsics with boundary clipping.
+    - `HypothesisProjector`: Adapts `CameraHypothesis` directly.
+    - `VideoGlyphStyle`: Configuration dataclass for colors, stroke widths, halo scaling, arrow head sizing, font face/scale.
+    - `VideoGlyphReceipt`: Dataclass reporting rendered frame dimensions, arrow/arc counts, legend placement, and clipping stats.
+    - `draw_legend_box`: renders semi-transparent dark background card, color swatches, reference scale texts, and unavailable notes.
+    - `draw_glyphs_on_frame`: projects `ArrowGlyph` and `TorqueArcGlyph` polylines and heads, clips against image boundary with `cv2.clipLine`, applies anti-aliased dark halo layer via `cv2.addWeighted`, draws heads with `cv2.fillConvexPoly`, preserves input frame when `inplace=False`.
+  - Re-exports in `src/shared/python/force_overlay/renderers/__init__.py`.
+  - Synthetic scene verification PNG: `docs/development/assets/fto_8_opencv_glyph_example.png`.
+  - Tests: `tests/unit/force_overlay/test_opencv_glyphs.py` (13 unit tests pass, 100% green).
+- Validation: Ruff check/format clean, strict mypy clean on new modules, file size budget passed.
+- Next steps: Land FTO-8 into main; unblocks video camera projection FTO-24 (#11309) and video overlay pipeline FTO-25 to FTO-29.
+
+# MeshCat Force and Torque Glyph Renderer Delivery — #11285 / #11290
+
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11290-meshcat-glyphs`; commit: 476ae53678; PR: #11337 (merged; `Closes #11290`, `Refs #11285`)
+- Governing issue: #11290 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Completed:
+  - MeshCat glyph renderer with MeshcatSink protocol, cylinder+cone 3D arrows, 32-segment torque arcs, transform caching, disappearing label cleanup, DrakeMeshcatSink adapter, and unit tests.
+
+# MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
+
+- Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
+    - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
+    - `segment_geom_count(glyphs: GlyphSet) -> int`: pure function returning exact geom capacity required for arrows and torque arc capsules/heads.
+    - `add_glyphs_to_scene(scene: mujoco.MjvScene, glyphs: GlyphSet, *, arc_width_m: float = 0.006) -> SceneGlyphReceipt`:
+      - Appends `mjGEOM_ARROW` connectors for `ArrowGlyph` using 2·shaft_radius_m.
+      - Appends `mjGEOM_CAPSULE` connectors along the polyline of `TorqueArcGlyph` plus a final `mjGEOM_ARROW` connector from `head_base_m` to `head_tip_m`.
+      - Detects and adapts both modern `mujoco.mjv_connector` and legacy `mujoco.mjv_makeConnector`.
+      - Enforces strict buffer overflow protection (`scene.ngeom < scene.maxgeom`) and records dropped geoms without exceptions or out-of-bounds writes.
+  - `tests/unit/engines/mujoco/test_force_glyphs.py`:
+    - 5 tests covering 1-arrow geom and endpoint matching within 1e-9, 32-segment arc (32 capsules + 1 arrow), overflow recording with capacity bounds, `segment_geom_count`, and offscreen pixel rendering with `mujoco.Renderer` verifying arrow color detection.
+  - Updated `SPEC.md` §12 changelog table row.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest 5/5 passed.
+
+# MuJoCo 3.14 Axial-Load Axis Discovery — #11349
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
+- Completed: `MujocoAxialLoadSource._discover_axes` compares geom and joint types via `int()` (numpy int vs pybind enum `in`/`==` is direction-dependent and False on mujoco 3.14, so no rods were found and `sample()` returned None). Regression tests for capsule/cylinder discovery and free/non-rod exclusion in `tests/unit/body_part_viz/test_mujoco_axial_loads.py`.
+- Validation: `pytest tests/unit/body_part_viz/test_mujoco_axial_loads.py` 9 passed on mujoco 3.14.0. Failures outside scope here: tests needing PyQt6 (not installed in this venv).
+- Next steps: none for this fix; other mujoco 3.14 drift is listed in the PR body.
+
+# OpenSim Engine State and Control Setters Under OpenSim 4 — #11344
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11344`
+- Branch: `fix/issue-11344-opensim-set-state`; commit: SELF; PR: #11352 (merged; `Closes #11344`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `OpenSimPhysicsEngine.set_state` builds vectors with `opensim.Vector(list)` (4.x has no `Vector(int)`), keeps time, realizes Velocity and raises `ValueError` on length mismatch. `set_control` goes through `Model.setControls` (a bare `updControls` + `markControlsAsValid` does not invalidate an already-realized Dynamics stage, so actuation stayed 0); the values are retained in `self._controls` and re-applied by `set_state` because changing q/u drops realized controls. ZTCF/ZVCF snapshot and restore that retained value. `tests/unit/engines/opensim/test_opensim_set_state_control.py` (10 live tests, including a nonzero actuator torque in the force/torque frame) and `tests/integration/cross_engine/test_opensim_engine_state_control_parity.py` (engine set_state/set_control gives the same force/torque frame as a model with state and PrescribedController baked in).
+- Known limits: `step()` integrates through the Manager, which recomputes controls from the model controllers, so a `set_control` value does not persist across steps without a controller. Not fixed here: `reset()` calls `Manager.setSessionTime` (absent in 4.x), `compute_inverse_dynamics` uses `Vector(n_u)` (so `compute_gravity_forces`/`compute_bias_forces` return empty arrays on 4.x). The parity builders in `tests/integration/cross_engine/test_force_overlay_parity.py` (PR #11345) can switch from baked-in state/controller to `set_state`/`set_control`.
+- Validation: `python3 -m pytest tests/unit/engines/opensim` passes with the new file; the wider opensim/analytical/audit set shows the same 50 failures before and after (pre-existing in this environment).
+- Next steps: fix `reset()` and the inverse-dynamics `Vector` call in a follow-up; update the parity builders after #11345 merges.
+  > > > > > > > origin/main
+
+# Colour Utilities DRY — #11289 (FTO-4)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`
+- Branch: `feat/fto-11289-colour-utils-dry`; commit: SELF; PR: #11338
+- Governing issue: #11289 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-4] Colour utilities DRY: one hex/RGBA helper and a registered tension/compression colormap.
+- Completed:
+  - `src/shared/python/plot_style/color_utils.py`:
+    - `hex_to_rgba`: parses `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA` formats with strict length validation, case-insensitivity, and optional override alpha `[0.0, 1.0]`. Returns normalized 4-tuple float RGBA in `[0.0, 1.0]`.
+    - `rgba_to_hex`: formats normalized RGBA or RGB sequences into 7-character `#rrggbb` hex strings.
+    - Re-exported both in `src/shared/python/plot_style/__init__.py`.
+  - Registered `ColormapId.TENSION_COMPRESSION = "tension_compression"` in `src/shared/python/plot_style/colormaps.py` with `TENSION_COMPRESSION_STOPS = ((0.0, "#2166AC"), (0.5, "#F7F7F7"), (1.0, "#B2182B"))`.
+  - Registered colormap in `src/shared/python/plot_style/registry.py` with `LinearSegmentedColormap(name, ..., N=257)` to guarantee exact neutral center sampling at position 0.5.
+  - Replaced ad-hoc parsers in `meshcat_force_colors.py`, `mujoco_force_colors.py`, `pyqtgl_renderer.py`, `_viewer_3d_segments.py`, and `meshcat_adapter.py`.
+  - Replaced hardcoded default hex colors in `src/shared/python/body_part_viz/force_colors.py` with registered constants `DEFAULT_TENSION_COLOR`, `DEFAULT_COMPRESSION_COLOR`, and `DEFAULT_NEUTRAL_COLOR`.
+  - Documented signed quantity convention in `kinetics.py` and added `TENSION_COMPRESSION` section to `docs/user_guide/plot_style/colormap_author_guide.md`.
+  - 20 unit tests in `tests/unit/plot_style/test_color_utils.py` and `tests/unit/plot_style/test_colormaps.py`.
+- Next steps: Wave B child issues: FTO-5 (#11290) PySide/PyQtGL overlay renderer and FTO-24 (#11309) video camera projection.
+
+# Force and Torque Glyph Builder Delivery — #11285 / #11288
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
+- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11288
+- Governing issue: #11288 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, scale_for_view and FORCE_KIND_PALETTE.
+- Completed:
+  - `FORCE_KIND_PALETTE` registered in `src/shared/python/plot_style/colors.py` with 7 categorical hex colors compliant with ADR-0052 (strictly avoiding pure blue `#0000ff` and pure red `#ff0000` reserved for axial tension/compression). Exported from `src/shared/python/plot_style/__init__.py`.
+  - Palette documented in `docs/user_guide/plot_style/colormap_author_guide.md` under `### Force and Torque Overlay Palette (ADR-0052)` with hex swatch table and rationale.
+  - Implemented `ForceGlyphStyle`, `ArrowGlyph`, `TorqueArcGlyph`, `LegendSpec`, `GlyphSet`, `build_glyphs`, and `scale_for_view` in `src/shared/python/force_overlay/glyphs.py` (387 lines, within 400-line budget, LoD <= 2, DbC validation on inputs and postconditions).
+  - Wired into `src/shared/python/force_overlay/__init__.py` with headless import guards and clean `__all__`.
+  - Wire schema `schemas/glyph-set-v1.json` (Draft 2020-12) and generator `scripts/generate_glyph_set_examples.py` producing 4 synthetic fixture cases in `schemas/glyph-set-examples.json`.
+  - 14 comprehensive unit tests in `tests/unit/force_overlay/test_glyphs.py` and `tests/unit/force_overlay/test_glyph_serialization.py` covering styling, clamping, right-hand torque arcs, view scaling, schema validation, and headless import purity.
+- Validation:
+  - `python3 -m ruff check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/plot_style/`: 0 violations.
+  - `python3 -m ruff format --check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/plot_style/`: 0 diffs.
+  - `python3 -m pytest tests/unit/force_overlay -n auto --timeout=60`: 39 passed.
+  - `python3 scripts/ci/check_file_size_budget.py`: OK.
+  - `python3 scripts/ci/check_architecture_budget.py`: OK.
+  - `python3 scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `python3 scripts/ci/check_lod.py src --baseline scripts/ci/lod_baseline.txt`: OK (clean no-growth scan, 0 new violations).
+- Next steps: Wave C renderers (FTO-5 MeshCat, FTO-6 MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV Video) consuming serialized `GlyphSet`.
+
+# Force Overlay Parity Suite — #11306 (FTO-21)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11306`
+- Branch: `feat/issue-11306-fto21-force-parity`; commit: SELF; PR: see the PR for this branch (`Closes #11306`, `Refs #11285`)
+- Governing issue: #11306 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `tests/integration/cross_engine/test_force_overlay_parity.py` and `force_overlay_fixtures.py` (one validated parameter set; per-engine model builders beside the test; `assert_wrench`; tolerances set once). Drake, Pinocchio and OpenSim rows are live; MuJoCo skips until FTO-9 (#11294) adds `get_force_torque_frame` and then runs unchanged; Pinocchio and Simscape skip the resting-contact case with a stated reason; a Simscape synthetic-CSV row checks the FTO-18 loader keeps world/applied-to-body; a sign guard proves the suite bites. `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.3.
+- Findings (providers untouched): `OpenSimPhysicsEngine.set_state` raises `TypeError` on OpenSim 4.x and `set_control` never marks controls valid so they read as zero (the builders bake state and the hold torque into the model instead); Drake omits the axial load of a terminal segment with no child joint (Pinocchio/OpenSim fall back to the centre of mass), so the shared URDF welds a massless tip.
+- Validation: `python3 -m pytest tests/integration/cross_engine/test_force_overlay_parity.py -o addopts=""` (23 passed, 6 skipped); ruff, file-size, error-handling, DRY, suite-marker and title-case checks clean.
+- CI gap: no required lane runs the Drake/Pinocchio rows yet (workflow change shipped alone, tracked in #11346).
+- Next steps: when FTO-9 lands, confirm the MuJoCo rows go green (MJCF builders are pre-validated by `test_mujoco_models_are_statically_consistent`); fix the two OpenSim engine defects in a follow-up.
+
+# OpenSim Muscle Lines of Action — #11301 (FTO-16)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11301`
+- Branch: `feat/issue-11301-fto16-opensim-muscle-lines`; commit: SELF; PR: see the PR for this branch (`Closes #11301`, `Refs #11285`)
+- Governing issue: #11301 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `OpenSimForceTorqueSource.muscle_wrenches(state)` plus `include_muscles=True` constructor flag; `sample` includes them. `MUSCLE` wrenches at the first and last force-carrying `getPointForceDirections` points (force = tendon force x ground direction, rotated to Z-up with the FTO-15 rotation; torque None); labels `muscle:<name>:origin|insertion`. `tests/unit/engines/opensim/test_opensim_muscle_wrenches.py` (10 tests: hanging-block equilibrium, equal and opposite ends, passive force at zero activation, no muscles, disabled, via point, postcondition). Docs: OPENSIM_INTEGRATION.md; cross-reference in `get_muscle_forces` docstring.
+- Review fixes (Codex P1): the path is read with `getPath()` and a `GeometryPath.safeDownCast` (non-point paths are omitted, not a `bad_cast`); every `PointForceDirection` is released after use (the array only stores pointers). Tests: FunctionBasedPath muscle, RSS growth over 40k samples.
+- Decisions: a leading/trailing path point on the same body as its neighbour has zero direction in OpenSim, so the effective ends are the first/last points with a nonzero direction (never a zero wrench). Negative or non-finite tendon force raises AssertionError (issue postcondition). Only end attachments are drawn; the full polyline is a follow-up.
+- Validation: `python3 -m pytest tests/unit/engines/opensim/test_opensim_muscle_wrenches.py tests/unit/engines/opensim/test_opensim_force_torque.py` passes on Linux with opensim 4.6; ruff clean.
+- Next steps: FTO-17 playback; open follow-up issue for the full muscle path polyline.
+
+# Pinocchio Force/Torque Provider — #11298 (FTO-13)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11298`
+- Branch: `feat/issue-11298-fto13-pinocchio-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11298`, `Refs #11285`)
+- Governing issue: #11298 (parent epic #11285, ADR-0052 section 4)
+- Completed:
+  - `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`: `PinocchioForceTorqueSource` with its own `pin.Data`; RNEA with the actual acceleration, world-frame `JOINT_REACTION` at the joint origin, `JOINT_ACTUATOR` for RX/RY/RZ/RUB/RevoluteUnaligned/Spherical joints (free-flyer omitted), `CONTACT` pass-through of `ContactSample`, axial loads via `axial_force_from_proximal_reaction`.
+  - `pinocchio_physics_engine.py`: `get_force_torque_frame`, `get_segment_axial_loads`, `get_applied_torques`, `set_contact_samples` (`compute_contact_forces` sums them; zeros when none), `force_visualization=FULL`.
+  - `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.0: Pinocchio force-overlay channel row.
+- Key decisions: FTO-2 (#11287, `conversions.py`) and FTO-11 (`segment_axes.py`) are not on main, so the world-frame conversion, torque wrench and segment axes are minimal private helpers in the new module. Axis rule: one child joint gives that joint origin, a leaf gives the body COM, a branching body or a zero-length axis is reported unavailable (None), never guessed. Wrench `body` is the BODY frame attached to the joint; the joint name appears only in labels (`reaction:<joint>`, `actuator:<joint>`, `contact:<body>`). Contacts are passed as a mapping of body (frame) name to `ContactSample`; unknown bodies are omitted. The engine recomputes acceleration with ABA at the sampled (q, v, tau) because `self.a` goes stale; ABA excludes external contact forces. Replace the private helpers when FTO-2/FTO-11 land.
+- Validation: `ruff check`/`ruff format --check` clean on changed files; `pytest tests/unit/engines/pinocchio/test_pinocchio_force_torque.py tests/engines/physics_engines/test_pinocchio_engine.py`: all pass.
+- Next steps: FTO-14 (Pinocchio GUI) consumes the provider; FTO-21 parity; swap private helpers for FTO-2/FTO-11 modules.
+
+# Drake Force/Torque Provider — #11296 (FTO-11)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11296-fto11-drake-provider`; commit: SELF; PR: see the FTO-11 PR.
+- Governing issue: #11296 (epic #11285, ADR-0052; development log `DL-#11285`).
+- Completed: `drake_force_torque.py` (`DrakeForceTorqueSource`: joint reaction, net actuation, point and hydroelastic contact, opt-in gravity, axial loads); `force_overlay/segment_axes.py`; engine wiring (`get_force_torque_frame`, `get_segment_axial_loads`, `force_visualization=FULL`, hydroelastic-aware `compute_contact_forces`).
+- Key decisions: Drake's reaction port is expressed in the child joint frame, so it is rotated to world; unavailable actuation is listed in `source.unavailable_labels` because `ForceTorqueFrame` has no legend; FTO-2 converters (`joint_torque_wrench`, `SegmentAxis`, `axial_loads_from_reactions`) are reused; `compute_contact_forces` now returns the force on non-world bodies (+m\*g at rest).
+- Validation: `python3 -m pytest tests/engines/drake/test_drake_force_torque.py tests/unit/force_overlay` (40 passed with the capability test); ruff check/format clean on changed files.
+- Known limits: discrete-time plants read zero reactions before the first step; point contact on a box face yields one unstable point, so the point test uses a sphere.
+- Next steps: FTO-12 Drake GUI; FTO-21 parity.
+  > > > > > > > origin/main
+
+# Simscape Output Force Channels — #11304 (FTO-19)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11304`
+- Branch: `feat/issue-11304-fto19-simscape-output-force-channels`; commit: SELF; PR: see the PR for this branch (`Refs #11304`, `Refs #11285`)
+- Governing issue: #11304 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed (Python side, no MATLAB): `SimscapeOutput.force_columns` (optional, validated) and `to_force_series()`; `logsout_to_simscape_output` reads an optional `forces` key; the CSV loader was split so `force_series_from_columns` is the single core (DRY); `tests/engines/simscape/test_output_force_columns.py`; parity spec section 3.1 note. Review fixes: live output wrenches carry source `simscape_output` (CSV keeps `simscape_csv`, via `wrench_source`); non-mapping `forces` raises `SimscapeSimulationError`.
+- Not done (needs a Windows R2025b host, not faked): channel audit of `GolfSwing3D_Kinetic.slx` / GS3DX logsout, `extract_sim_out.m` emitting `forces`, one-candidate evidence run, trimmed fixture from real output. Issue #11304 stays open for these.
+- Validation: `python3 -m pytest tests/engines/simscape tests/unit/engines/simscape/test_force_channels.py -n auto --timeout=60` passes; ruff, mypy, file-size, error-handling clean.
+- Next steps: on the R2025b host run the audit, extend `extract_sim_out.m`, record release string, model SHA and channel count.
+
+# OpenSim Force/Torque Provider — #11300 (FTO-15)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11300`
+- Branch: `feat/issue-11300-fto15-opensim-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11300`, `Refs #11285`)
+- Governing issue: #11300 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `src/engines/physics_engines/opensim/python/opensim_force_torque.py` (`OpenSimForceTorqueSource`, `R_ZUP_FROM_OPENSIM_GROUND`); engine `get_force_torque_frame`, `get_segment_axial_loads`, `compute_contact_forces`; `contact_forces` and `force_visualization` PARTIAL; `tests/unit/engines/opensim/test_opensim_force_torque.py` (25 tests); capability test updated; "Force Overlay Channels" section in `docs/development/OPENSIM_INTEGRATION.md`.
+- Decisions: FTO-2 (#11287) conversions landed on main while this PR was open but FTO-11 segment axes did not, so the world conversion, torque shift (reuses `motion_matching.force_torque.transform_wrench`) and segment axes are private helpers; swapping to `force_overlay.conversions` is a follow-up. Review fixes: the up axis is read from model gravity (Z-up models are not rotated), `step()` keeps the manager state, actuator labels use the actuator name, capabilities are PARTIAL. `sample` realizes the state to Acceleration itself because the Python bindings cannot read the stage. The existing `coord_map._R_YUP_TO_ZUP` is an axis swap with det -1 (a reflection), so a new proper rotation is defined instead; fixing the old constant is a separate follow-up. Record torque of HuntCrossley/Smooth forces is about the body origin (verified by the offset-mass-centre test). Wrench labels: `reaction:<joint>`, `actuator:<joint>.<coordinate>`, `contact:<force>`; body is the base body name.
+- Known: `OpenSimPhysicsEngine.set_state` calls `opensim.Vector(n)` with one argument, which the 4.6 bindings reject (pre-existing, untouched). Programmatic `CustomJoint` construction segfaults the 4.6 bindings, so that test loads an XML model.
+- Validation: `python3 -m pytest tests/unit/engines/opensim tests/unit/engines/test_mujoco_opensim_capabilities_7050.py` passes (104) on a Linux host with opensim 4.6; ruff check/format clean on changed files.
+- Next steps: FTO-16 muscles; FTO-17 playback; FTO-21 parity; replace private helpers with FTO-2/FTO-11 modules.
+
+# Force Conversions — #11287 (FTO-2)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11287`
+- Branch: `feat/fto-11287-shared-conversions`; commit: SELF; PR: #11287
+- Governing issue: #11287 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-2] Shared force conversions: joint torque to moment vector, local to world, reactions to tension/compression.
+- Completed:
+  - `src/shared/python/force_overlay/conversions.py`:
+    - `joint_torque_wrench`: 1D revolute or multi-axis gimbal moments with unit-norm axis validation within 1e-6 (never silently normalized).
+    - `world_wrench_from_local`: SO(3) orthonormal validation within 1e-9; routes all rotations (both full wrenches and single-half wrenches) through `transform_wrench` (DRY).
+    - `move_wrench_point`: moment-arm adjustment `tau_B = tau_A + (p_A - p_B) x F`; validates `force_n is not None` when moving to a new point (raises ValueError if force_n is None since torque_nm is unknown and an OverlayWrench cannot have both halves None).
+    - `SegmentAxis`: frozen dataclass defining segment endpoints, rejecting coincident proximal/distal points.
+    - `axial_loads_from_reactions`: maps `JOINT_REACTION` wrenches to `axial_force_from_proximal_reaction` yielding `AxialLoadFrame` (tension positive, compression negative, missing reactions None).
+    - `frame_with_axial_loads`: returns a copy of `ForceTorqueFrame` with `axial_loads` populated.
+  - Re-exported functions from `src/shared/python/force_overlay/__init__.py`.
+  - Added user guide paragraph in `docs/user_guide/body_part_viz/force_colors.md` ("Producing loads from reaction wrenches").
+  - 13 unit tests in `tests/unit/force_overlay/test_conversions.py` covering all contract branches, red-first TDD, and synthetic two-link chain agreement.
+- Next steps: Wave B child issues: FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+
+# Simscape Force Loader — #11303 (FTO-18)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11303`
+- Branch: `feat/issue-11303-fto18-simscape-loader`; commit: SELF; PR: see PR for #11303
+- Governing issue: #11303 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `src/engines/simscape/force_channels.py` (channel table, `load_simscape_force_series`), `SimscapeAdapter.load_force_series`, `tests/unit/engines/simscape/test_force_channels.py`, parity spec section 3.1.
+- Decisions: FTO-2 (#11287) is not on main, so rotation (`R @ v`) and CSV column reading are private helpers here; swap to `world_wrench_from_local` when FTO-2 lands. Axial loads (step 4) deferred to FTO-2's `axial_loads_from_reactions`.
+- Review fixes: adapter forwards `rotation_tol`; actuator axes are per joint per `calculateJointPowerWork.m::getActuatorTorques` (Torso has no axis, omitted; LF/RF Z column is not in the committed trial so it is reported missing).
+- Findings: the committed trial logs R only orthonormal to ~6e-3, so the 1e-6 default rejects it; real-data tests pass `rotation_tol=1e-2` explicitly. The only local/global pairs (MP couple/hand) satisfy world = R^T @ local, so the joint `R @ v` convention is unconfirmed on real data. Needs owner/MATLAB review.
+- Validation: `python3 -m pytest tests/unit/engines/simscape/test_force_channels.py tests/unit/force_overlay -n auto --timeout=60` passes; ruff check/format, file-size, error-handling ratchet clean.
+- Next steps: FTO-2 integration; FTO-19/20/21; resolve the R tolerance and convention questions.
+
+# Force and Torque Overlay Contract — #11286 (FTO-1)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`
+- Branch: `feat/fto-11286-force-torque-overlay-contract`; commit: SELF; PR: #11286
+- Governing issue: #11286 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-1] Force/torque overlay contract: ForceTorqueFrame, wire schema and shared fixtures.
+- Completed:
+  - `src/shared/python/force_overlay/__init__.py`: explicit `__all__`, headless import guard.
+  - `src/shared/python/force_overlay/contracts.py`: `WrenchKind` (7 categorical values), `OverlayWrench` (frozen dataclass with optional halves, DbC validation, `to_spatial_wrench`, `to_dict`/`from_dict`), `ForceTorqueFrame` (frozen dataclass, `by_kind`, `axial_loads` temporal alignment within 1e-12, `to_dict`/`from_dict`), `ForceTorqueProvider` protocol, `read_force_torque_frame`.
+  - `src/shared/python/force_overlay/series.py`: `ForceTorqueSeries` (strictly increasing times, single engine, `frame_at` with linear interpolation and gap-bounding, pickle-free NPZ serialization with boolean masks, dict round-trip).
+  - Promoted `validate_vec3` to public in `src/shared/python/motion_matching/force_torque.py` with `_validate_vec3` backward-compatible alias.
+  - Wire schema `schemas/force-torque-frame-v1.json` (JSON Schema Draft 2020-12) and 7 conformance cases in `schemas/force-torque-frame-examples.json`.
+  - 25 unit tests in `tests/unit/force_overlay/` (contracts, series, schema fixtures, headless import purity).
+- Validation:
+  - `python3 -m ruff check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 violations.
+  - `python3 -m ruff format --check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 diffs.
+  - `python3 -m pytest tests/unit/force_overlay -n auto --timeout=60`: 25 passed.
+  - `python3 scripts/ci/check_file_size_budget.py`: OK.
+  - `python3 scripts/ci/check_error_handling_ratchet.py`: OK.
+- Next steps: Wave B child issues: FTO-2 (#11287) shared conversions and FTO-3 (#11288) glyph builder.
+
+# Capture-O Video Companion Planning — #11268
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/elegant-tesla-f2heae`; commit SELF; PR: see the planning PR for this branch.
+- Objective: plan (not execute) markerless reconstruction of the owner's capture-session video and its comparison with `capture-O` and the matched models.
+- Completed: epic #11268 and children #11269–#11279 (COV-1 to COV-11) with TDD/DbC/LoD/DRY contracts, hosts and dependencies; `docs/development/capture-o-video/procedure.md`; development-log entry `DL-#11268`.
+- Key decisions: neutral ids only (`capture-O`, `cov-NN`, `subject-O`); media stays in `$CAPTURE_DATA_DIR/capture-O-video/`; the album link is public by owner decision (https://photos.app.goo.gl/XU322J42Rg8mev2aA); comparison protocol COV-3 is `tier:strong` and must be frozen before results are inspected.
+- Validation: document title check, Ruff and the development-log validator on the changed files (see the PR body).
+- Blockers: album download needs a fleet machine (cloud proxy returns 403); PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
+- Next steps: 1) fleet agent downloads the album and runs COV-1 #11269; 2) COV-2 #11270; 3) frontier/owner decision COV-3 #11271.
+
+# Active Necromatcher Native Fit Delivery — #11240
+
+Current branch `feat/necromatcher-native-fit-11235` (PR #11240) retargeted to `main` following merge of workspace #11239. It adds source-bound native trajectory fitting with preserved Hermite splines, native video export, research refit controls, ground placement, and effort bindings. All 88 fitting/spline/IK tests and 142 workspace unit tests pass locally.
+
+- Issue: #11235; parent #11232
+- PR: #11240 (retargeted to `main`)
+- Branch: `feat/necromatcher-native-fit-11235`
+- Validation: 88 fitting tests, 142 workspace tests pass; Ruff lint/format clean.
+
+# Active Necromatcher Workspace Delivery — #11239 (Merged)
+
+native adapter and shared source-frame archive reader. Sixteen UI tests, desktop
+recall and worker failure tests pass. Web type checking and scoped ESLint pass.
+Native import/overlay and actual Hogan/Tiger web review are implemented. URL
+navigation now hides stale results, verifies player/swing/capture ownership and
+supports retry after frame loading errors. Further form tests, final parity and
+fitted-model handoffs remain in progress. CI cycle 2 refreshes canonical launcher
+context/atlas views after their freshness checks failed. Library draft PR #11237
+depends on capture PR #11231. The capture
+PR has an unrelated inherited title-case failure at `.jules/bolt.md:208`; do not
+mark it accepted or change unrelated work under this delivery.
+
+Owner priority is the integrated historical-player workspace (#11232), with library #11233, tile/review #11234 and real fitting/downstream qualification #11235. See [Necromatcher Turnover](necromatcher-turnover.md) for contracts, TDD evidence, real capture imports and current PR state. Tiger #11226 and Hogan #11229 remain open.
+
+# Historical Player Capture Handoff
+
+## Active: Tiger 2000 and Ben Hogan
+
+- Repository/worktree: `C:/Users/diete/Repositories/Worktrees/UpstreamDrift-historical-capture`.
+- Branch: `feat/historical-player-capture-11226`; implementation commit: ab2c869813a2b2be2f14b512ee34647694614377; handoff refresh: SELF.
+- PR: https://github.com/D-sorganization/UpstreamDrift/pull/11231; open, CI pending. Epics: #11226 (Tiger), #11229 (Hogan); shared runner: #11230.
+- Objective: complete both source-grounded historical reconstructions and make future players repeatable.
+- Implemented: bounded PyAV streaming, existing SourceAsset/FrameIdentity contracts,
+  existing MediaPipe estimator, normalized image XY/visibility/missingness, exact
+  container PTS, lossless decoded PNGs, source/frame/observations/model/code hashes.
+- Source authority: `docs/development/historical_capture/source-catalog.json`.
+- Procedure: `docs/development/historical-capture-procedure.md`.
+- Media/results: `C:/Users/diete/Downloads/historical-capture/` (outside Git).
+- Tiger download: requested t_J6Vik3Tss, complete 1080p50 video, separate audio,
+  metadata/description, and losslessly remuxed video with audio. Uploader claims
+  2000; upload date is 2022-06-10 and does not verify the recording year.
+- Final Hogan run: 110–135 presentation seconds, 750 frames, 739 detections,
+  MediaPipe 1.0.1; missing detections preserved. Tiger final run: 2000 frames, 1994 detections (110-150 s).
+- Earlier MediaPipe 0.10.32 pilot receipts are historical evidence, not current
+  runner qualification. Final runs use content-based asset/frame IDs.
+- TDD: missing module failed collection, then absent export function failed the
+  streaming test; invalid local URI and decimal/Fraction boundary tests failed
+  before correction. Last focused suite: 35 passed; latest capture suite: 12 passed.
+- Checks: repository-wide Ruff lint passed; format check passed (8263 files);
+  tracked file-size budget passed; procedure title check passed; design-manual
+  governance verified existing `blocked-inventory-required` release state.
+- Commands: `python3 -m pytest tests/unit/shadow_tracker/test_historical_capture.py tests/unit/shadow_tracker/test_footage_workflows.py tests/unit/shadow_tracker/test_fail_closed_fitting.py -q -o addopts=''`; `python3 -m ruff check .`; `python3 -m ruff format --check .`; `python3 scripts/ci/check_file_size_budget.py`.
+- Whole Shadow Tracker suite passed: 364 tests in 36.28 s. Scoped mypy passed. Existing import deprecation warnings
+  remain. No native-engine, scientific, or website acceptance is claimed.
+- Ownership: this worktree started clean from fb1ac44949 on origin/main. Original
+  checkout/other worktrees and their user-owned files were preserved. Partial
+  failed output directories have no receipt and are not valid capture results.
+
+## Ordered Continuation
+
+1. Final Tiger/Hogan receipts collected; inspect dense source-bound landmark
+   overlays and split each window at every cut/identity change. Contact-sheet
+   inspection shows foreground body tracking, with errors/low-confidence joints.
+2. Higher-resolution Hogan source processed: 899 frames, 892 detections; select clean continuous swings,
+   and review P1–P10 checkpoint and impact intervals.
+3. Monitor published shared-runner PR #11231 using the
+   repository ci-watch-and-fix skill. Keep parent epics open.
+4. Resolve recording/event lineage, playback scale and usage permissions; fit
+   cameras and subject anthropometry with declared priors/uncertainty.
+5. Fit dense constrained kinematics, compare native MuJoCo/Drake/Pinocchio FK,
+   then independently qualify uninterrupted forward replay where supported.
+6. Evaluate held-out film lineages and integrate eligible comparison artifacts
+   into UpstreamDrift/AffineDrift. Do not claim completion until epic evidence exists.
+
+# Historical Capture Continuation
+
+Current authority: [Root Agent Handoff](../../AGENT_HANDOFF.md).
+Shared runner #11230, Tiger #11226 and Hogan #11229: streaming extraction is implemented; reconstruction acceptance remains open.
+
+# Current Handoff — Qualify OpenSim Native Dual-Club Dynamics and Replay (#11095)
+
+- Branch: `feat/mmr-10o-opensim-dual-club-11095`
+- Pull request: Refs #11095 (partial: fail-closed conversion; native qualification still requires opensim bindings on a pinned host/native CI lane).
+- Done: OpenSim qualification schema plus **fail-closed conversion** after review audit (placeholder receipts, gates that always qualified, invented marker metrics):
+  - `OpenSimQualificationReceipt` records `missing_evidence` and a resolvable `remedy`; status gated on every recorded check.
+  - Unavailable `opensim` runtime ⇒ `UNAVAILABLE` even with a replay payload; unknown native test counts and absent `is_fresh_simulation`/`actuation_applied` flags are missing evidence (never assumed satisfied); missing rollout/marker data and non-finite values reject; derivative mismatch (`dq/dt` vs `v`) rejects.
+  - Committed club receipts replaced with honest fail-closed UNAVAILABLE records (empty evidence fields, enumerated `missing_evidence`, remedy names the native lane command).
+- Tests: 17 unit tests passed (`tests/unit/engines/opensim/test_opensim_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN); Ruff check and format clean.
+- Limitation: no native OpenSim execution exists anywhere in this evidence; real qualification requires the opensim bindings on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine opensim`.
+
+# Current Handoff — Qualify MyoSuite Native Dual-Club Dynamics and Replay (#11096)
+
+- Branch: `feat/mmr-10m-myosuite-dual-club-11096`
+- Pull request: Refs #11096 (partial: fail-closed conversion; native qualification still requires myosuite/MuJoCo on a pinned host/native CI lane).
+- Done: MyoSuite qualification schema plus **fail-closed conversion** after review audit (placeholder receipts, gates that always qualified, invented marker metrics):
+  - `MyoSuiteQualificationReceipt` records `missing_evidence` and a resolvable `remedy`; status gated on every recorded check.
+  - Unavailable `myosuite`/MuJoCo runtime ⇒ `UNAVAILABLE` even with a replay payload; unknown native test counts and absent `is_fresh_simulation`/`actuation_applied` flags are missing evidence (never assumed satisfied); missing rollout/marker data, non-finite values, and unnormalized root quaternions reject; derivative mismatch (`dq/dt` vs `v`) rejects.
+  - Removed SPEC-claimed but never-enforced tolerances and fabricated values (scaled early/terminal/clubhead RMS, hardcoded `pelvis_yaw_error_pct`); only `whole_rms_m` computed from recorded `markers_m`/`target_m` is emitted.
+  - Committed club receipts replaced with honest fail-closed UNAVAILABLE records (empty evidence fields, enumerated `missing_evidence`, remedy names the native lane command); README model hashes demoted to regeneration targets.
+- Tests: 19 unit tests passed (`tests/unit/engines/myosuite/test_myosuite_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN); Ruff check and format clean.
+- Limitation: no native MyoSuite execution exists anywhere in this evidence; real qualification requires the myosuite/MuJoCo stack on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine myosuite`.
+
+# Current Handoff — Qualify Drake Native Dual-Club Dynamics and Replay (#11094)
+
+- Branch: `feat/mmr-10d-drake-dual-club-11094`
+- Pull request: Refs #11094 (partial: fail-closed conversion; native qualification still requires pydrake on a pinned host/native CI lane).
+- Done: [MMR-10D] Drake qualification contracts plus **fail-closed conversion** after review audit (placeholder receipts `c0ffee`/`deadbeef`/`cafebabe`, gates that always qualified, invented marker metrics):
+  - `DrakeQualificationReceipt` now records `missing_evidence` and a resolvable `remedy`; `DrakeQualificationStatus` (`QUALIFIED`, `REJECTED`, `UNAVAILABLE`) is gated on every recorded check.
+  - Unavailable `pydrake` runtime ⇒ `UNAVAILABLE` even when a replay payload is supplied; unknown native test counts are treated as missing evidence (never assumed nonzero); absent `is_fresh_simulation`/`actuation_applied` flags are unverified (fail-closed), not assumed fresh.
+  - Missing `native_state`/`time_s` rollout or `markers_m`/`target_m` marker data is recorded as missing evidence and blocks qualification; derivative (`dq/dt` vs `v`) mismatch and non-finite state/energy values reject.
+  - Removed synthesized marker metrics (scaled early/terminal/clubhead RMS, hardcoded `pelvis_yaw_error_pct`); only `whole_rms_m` computed from recorded observations is emitted.
+  - Committed club receipts replaced with honest fail-closed UNAVAILABLE records (empty evidence fields, enumerated `missing_evidence`, remedy names the native lane command). Nightly lane receipt remains honest `status: fail` (0 executed tests, engine unavailable).
+  - Added `"drake"` to `ENGINE_LANES` in `scripts/ci/run_native_engine_lane.py` and updated `scripts/ci/run_native_engine_lane.sh`.
+- Tests: 36 focused tests passed (16 `tests/unit/engines/drake/test_drake_dual_club_qualification.py` incl. 7 new fail-closed tests shown RED against the pre-fix placeholder path, then GREEN; 20 lane/freshness tests). Ruff check and format clean on changed files.
+- Limitation: no native Drake execution exists anywhere in this evidence; real qualification requires pydrake on a pinned host via `scripts/ci/run_native_engine_lane.sh --engine drake`.
+- Next step: merge drivers follow; do not treat UNAVAILABLE receipts as engine qualification.
+
+# Current Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+
+# Current Handoff — Restore the High-Severity UI Npm Audit Gate (#11184)
+
+- Repository: D-sorganization/UpstreamDrift
+- Worktree: `C:/Users/diete/Repositories/Worktrees/luna-upstream11184-20260930`
+- Branch: `fix/main-npm-audit-11184`
+- Commit: `SELF` (publication metadata update; implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667`)
+- Pull request: [#11187](https://github.com/D-sorganization/UpstreamDrift/pull/11187), draft with `agent:codex` label; branch `fix/main-npm-audit-11184`.
+- Governing issue: #11184 — restore the UI `npm audit --audit-level=high` gate using only compatible patched transitive resolutions.
+- Done: added `ui/src/test/dependencySecurityContract.test.ts`; moved only `brace-expansion` 5.0.9 → 5.0.12 and `undici` 8.10.0 → 8.11.2 in `ui/package-lock.json`; added one SPEC row and an active development-log entry. No manifest, override, audit-policy, or moderate-advisory changes.
+- RED evidence: baseline `npm ci` completed with 2 HIGH and 2 MODERATE advisories; baseline `npm audit --audit-level=high` exited 1. The regression contract failed on old lock versions 5.0.9 and 8.10.0.
+- GREEN evidence: final `npm ci` passed; `npm audit --audit-level=high` passed with 2 MODERATE findings left (`@humanfs/node` 0.16.7 and nested `fflate` 0.6.10); `npm ls brace-expansion undici --all` showed only 5.0.12 and 8.11.2 on the affected paths. Contract: 2 passed; lint and type-check passed; all UI tests passed (99 files, 936 tests); build passed. Vitest emitted jsdom `scrollTo` notices; build emitted a large-chunk warning.
+- Documentation checks: SPEC changelog validation and fleet hook passed. The repository development-log validator still exits 1 on pre-existing duplicate IDs, portfolio WIP/active-entry ceilings, and file-size ceiling; it reports no DL-#11184 finding.
+- Compatibility evidence: registry metadata confirms the published patch releases and parent ranges `minimatch@10.2.5` → `^5.0.5`, `jsdom@30.0.1` → `^8.9.0`. The selected versions stay within those ranges.
+- Coordination: fresh Repository_Management inbox was complete with no conflicts or new messages since 2026-09-29. Renewed the existing `codex-luna-upstream11184-20260930` presence, preserving its issue, branch and goal and adding `ui/src/test` and `docs/development`; presence expires at 13:04 UTC. Scoped REST lookup found no pre-existing PR for this branch. Authenticated `git ls-remote` confirmed `origin/main` remained exactly `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5` before publication.
+- Publication: root reviewed and accepted the bounded source, lockfile and test diff plus RED→GREEN evidence. Implementation commit `d3b3a27bea36070c2db3a06e6e7be727a30e9667` and metadata commit `5d2f3257ed2342bd2c6064aebed6a99a9564700e` passed normal pre-commit hooks; both branch pushes passed normal pre-push hooks. Draft PR #11187 is open with `Closes #11184` in its body and `agent:codex` label. SPEC uses actual PR key #11187. Remote refs were verified after publication: topic branch at `5d2f3257ed2342bd2c6064aebed6a99a9564700e`, main still at `aeb2edbca47c8b91a504fe199ed77c2e377fa6d5`. Two MODERATE audit findings remain (`@humanfs/node@0.16.7` and nested `fflate@0.6.10`). Root alone decides readiness and merge.
+- Worktree state: clean after publication metadata; no merge, release, cleanup, or unrelated changes were performed. The primary checkout’s pre-existing untracked paths and other worktrees remain untouched.
+- Next step: root decides whether draft PR #11187 is ready for review/merge. Do not mark ready, merge, release, or clean up as part of this handoff.
+
+---
+
+# Previous Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/w-ud-bolt-cons`
 - Branch: `claude/ud-bolt-consolidated-0929` (baseline `origin/main`)
@@ -837,3 +1470,39 @@ main and GS3DX branch evidence, metrics and licensing budgets, and Shadow Tracke
 integration/qualification gaps. No implementation issues claimed or closed.
 375 focused tests and full Ruff lint/format passed. Board approval and native
 qualification are separate next steps; preserve the active #10979 work.
+
+## Current Coordination Limits
+
+Issue leases succeeded. The presence inbox reported incomplete board evidence
+(page limit and malformed comments); absence of messages is not evidence that
+the repository is unoccupied. This owned isolated worktree preserves all others.
+The original root handoff already exceeded its 150-line guideline; unrelated
+active sections were preserved. No full-repository pytest/coverage run was made;
+364 scoped tests and all configured pre-push checks (including mypy, Bandit and
+core/DbC/utils tests) passed. A guessed SPEC test path was absent; no SPEC-test
+pass is claimed. Required commit and design-manual governance hooks passed.
+
+## Publication Refresh
+
+Merged origin/main 51a0c1bfa4 into the owned branch without conflicts, retaining
+both SPEC rows. Post-merge focused Shadow Tracker tests are being verified;
+source/model receipts remain unchanged. Pre-push checks must pass on the merge.
+
+## Additional Hogan Source
+
+Owner-requested DJDYMjmvFwg was downloaded with yt-dlp, including audio and
+metadata: 10 Minutes of Ben Hogan (Every Angle Ever Recorded), Sonic Titan Golf,
+10:23, 1920x1080 at 60 presentation fps. SHA-256 is recorded in source-catalog.json.
+Original archive cadence, individual recording dates and film overlap are unknown;
+this compilation must not be treated as synchronized multiview or independent
+held-out footage. Local media: Downloads/historical-capture/ben_hogan/.
+
+The new Hogan compilation window 253-267 presentation seconds was processed:
+839 frames, 769 detections and 70 explicit missing detections. Receipt and hashes
+are committed; source-bound frames and observations remain outside Git. This
+window is unreviewed and may cross cuts; 60 presentation fps does not establish
+original film timing or independent multiview.
+
+The first post-merge push was stopped because documentation changed while the
+security hook was running (no security issues were identified). Finish the
+current documentation commit and retry from a clean worktree.

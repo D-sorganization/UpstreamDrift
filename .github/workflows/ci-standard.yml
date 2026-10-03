@@ -1776,7 +1776,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m ensurepip --upgrade || true
           python -m pip install "pip-audit==2.10.0"
-          python -m pip_audit -r requirements.lock
+          mapfile -t pip_audit_waiver_flags < <(
+            python scripts/ci/check_pip_audit_waivers.py \
+              --waiver-file scripts/config/pip_audit_waivers.json
+          )
+          python -m pip_audit -r requirements.lock "${pip_audit_waiver_flags[@]}"
 
   tests:
     needs: [pick-runner, changed-paths]

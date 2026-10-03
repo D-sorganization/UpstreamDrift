@@ -192,3 +192,20 @@
 ## 2024-05-25 - [Optimize Quaternion and Vector Norm Calculation in Pre-Impact Contracts]
 **Learning:** In the physics pre-impact contracts (`src/shared/python/physics/_pre_impact_contracts.py`), calculating the magnitude of 1D arrays (like quaternions and 3D vectors) using `np.linalg.norm` incurs significant overhead due to NumPy's internal function dispatch and instance checks. Replacing `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for small 1D arrays completely bypasses this overhead, resulting in a ~2x performance speedup. This mirrors similar optimizations made across the codebase.
 **Action:** Replace `np.linalg.norm(array)` with `math.sqrt(np.vdot(array, array))` for calculating the magnitude of small, static 1D arrays like vectors or quaternions, especially in contract validation or heavily evaluated numerical loops.
+
+## 2026-09-30 - [Optimize worst marker residual extraction in Tour Matching Viewer]
+**Learning:** [In NumPy, using `np.einsum` to calculate squared differences (`np.einsum("ij,ij->i", diff, diff)`) avoids the significant overhead of intermediate array allocations present in `np.linalg.norm(diff, axis=-1)`. The latter internally requires computing differences, squaring them, summing, and taking the square root across the specified axis, which creates temporary arrays at each step. For calculating metrics like the maximum norm where relative ordering is sufficient, applying the square root only to the final selected element after finding the maximum squared difference reduces both allocations and computationally expensive root operations, yielding a tangible speedup on inner loops.]
+**Action:** [When finding the maximum distance or computing norms along an inner-most axis (e.g. `axis=-1`), replace `np.linalg.norm` with `np.einsum` to compute squared norms first, find the target index or maximum value, and apply `np.sqrt` only when necessary to the final result.]
+
+## 2026-09-30 - Faster Euclidean Norms in Rigidity
+**Learning:** Using `np.linalg.norm(..., axis=1)` for computing Euclidean distances along an axis creates temporary arrays and incurs NumPy dispatch overhead. Replacing it with `np.sqrt(np.einsum('ij,ij->i', diff, diff))` is roughly 1.7x faster for these operations, significantly speeding up inner loops calculating residuals.
+**Action:** Always prefer `np.sqrt(np.einsum('ij,ij->i', diff, diff))` or `np.sqrt(np.sum(diff * diff, axis=1))` when calculating Euclidean norms across rows in performance-critical code over `np.linalg.norm(..., axis=1)`.
+
+## 2026-10-01 - math.sqrt(ndarray.dot) vs np.linalg.norm
+**Learning:** For small 1D arrays, `math.sqrt(x.dot(x))` is significantly faster than `np.linalg.norm`.
+**Action:** Replace `np.linalg.norm` with `math.sqrt(x.dot(x))` for small 1D vectors in inner loops for performance boosts.
+
+## 2026-10-01 - Micro-Optimize Quaternion Normalization With Np.Einsum
+**Learning:** Using `np.linalg.norm(..., axis=1)` to compute magnitudes of 2D quaternion arrays (e.g. `(N, 4)`) incurs significant NumPy dispatch overhead and allocates temporary arrays. Using `np.einsum('ij,ij->i', quats, quats)` to compute squared norms first, then `np.sqrt()`, provides a ~2-3x speedup.
+**Action:** Replace `np.linalg.norm(..., axis=1)` with `np.sqrt(np.einsum('ij,ij->i', ..., ...))` for quaternion normalization and magnitude calculations in performance critical sections.
+

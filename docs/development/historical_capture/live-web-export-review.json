@@ -1,0 +1,26 @@
+{
+  "schema": "necromatcher/live-web-export-review/1",
+  "source_commit": "3c73001a7c",
+  "runs": [
+    {
+      "player": "tiger",
+      "run_id": "165988043c994250aed72d3a57ebf027",
+      "frames_decoded": 210,
+      "zip_sha256": "cadb023c9a99d7a9a61f1001e534582e961e44c88e9d7bc49b70826a6d370f3c",
+      "manifest_sha256": "0e2bf09dbb89a0949da6c10ce929c3aa36f942a93e3e5e938a681ea93eb216a0",
+      "qualification": "monocular_research_hypothesis",
+      "scientific_acceptance": "rejected",
+      "desktop_zip": "tiger-web-overlay-165988043c994250aed72d3a57ebf027.zip"
+    },
+    {
+      "player": "hogan",
+      "run_id": "f6daf6efec0d4dd8aa36a8a2424036cd",
+      "frames_decoded": 750,
+      "zip_sha256": "49aa8296d86e9414a3683e40237dd89e045de32560d99d2d0866ffe061456418",
+      "manifest_sha256": "b24fbc1418e8552025c341b756c3dae8ff9870a7f890a7e1f5638338bda1bfb9",
+      "qualification": "monocular_research_hypothesis",
+      "scientific_acceptance": "rejected",
+      "desktop_zip": "hogan-web-overlay-f6daf6efec0d4dd8aa36a8a2424036cd.zip"
+    }
+  ]
+}

@@ -13,10 +13,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Final
 
 from matplotlib.colors import is_color_like
 
-__all__ = ["ColormapId", "CustomColormap", "SEMANTIC_COLORMAP_ALIASES"]
+from ..body_part_viz.force_colors import (
+    DEFAULT_COMPRESSION_COLOR,
+    DEFAULT_NEUTRAL_COLOR,
+    DEFAULT_TENSION_COLOR,
+)
+
+__all__ = [
+    "SEMANTIC_COLORMAP_ALIASES",
+    "TENSION_COMPRESSION_STOPS",
+    "ColormapId",
+    "CustomColormap",
+]
 
 
 class ColormapId(str, Enum):
@@ -43,9 +55,17 @@ class ColormapId(str, Enum):
     ACCELERATION = "acceleration"
     HEIGHT = "height"
     GENERIC_DIVERGING = "generic_diverging"
+    TENSION_COMPRESSION = "tension_compression"
 
     def __str__(self) -> str:
         return self.value
+
+
+TENSION_COMPRESSION_STOPS: Final[tuple[tuple[float, str], ...]] = (
+    (0.0, DEFAULT_COMPRESSION_COLOR),
+    (0.5, DEFAULT_NEUTRAL_COLOR),
+    (1.0, DEFAULT_TENSION_COLOR),
+)
 
 
 # Resolve a semantic alias -> built-in matplotlib name.

@@ -1,0 +1,30 @@
+{
+  "schema_version": "necromatcher/research-storage-receipt/1",
+  "fits": [
+    {
+      "fit_id": "hogan-full-body-research-fit-v2",
+      "fit_hash": "sha256:ca068b138ef0999072c0a7137ef64b98907f80a7fff81edb6ed4d04a9859b5f7",
+      "model_id": "hogan-generic-native-model-v2",
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "hogan-practice-capture-v1",
+      "capture_hash": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "frame_count": 750,
+      "qualification": "monocular_research_hypothesis",
+      "physical_time_qualified": false,
+      "dynamics_replayed": false
+    },
+    {
+      "fit_id": "tiger-full-body-research-fit-v2",
+      "fit_hash": "sha256:fe43a760155172a978014c39c059a37c58fdd7b2985d2219a830e13c03c1913d",
+      "model_id": "tiger-generic-native-model-v2",
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "frame_count": 210,
+      "qualification": "monocular_research_hypothesis",
+      "physical_time_qualified": false,
+      "dynamics_replayed": false
+    }
+  ],
+  "acceptance": "Rejected for scientific dynamics; persistent storage is not acceptance"
+}

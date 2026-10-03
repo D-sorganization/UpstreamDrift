@@ -146,6 +146,16 @@ shared Python plotters (`shared/python/motion_matching/plot_*.py`); only
 engine-specific 3D viewers (Drake Visualizer, MuJoCo Viewer, OpenSim's GUI,
 Meshcat for Pinocchio) need engine-bespoke code.
 
+### 2.5.0 Force-Overlay Channels (ADR-0052, #11285)
+
+Engines expose force/torque overlays through the `ForceTorqueProvider` and
+`AxialLoadProvider` capabilities. Wrenches are world-frame (Z-up), SI, and are
+the wrench applied to the named body.
+
+| Engine        | Channel                                                                                                   | Source                                                  | Status                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------- |
+| **Pinocchio** | `JOINT_REACTION` (`data.f` via RNEA with actual `a`), `JOINT_ACTUATOR` (`tau`), `CONTACT`, axial load (N) | `pinocchio_force_torque.py::PinocchioForceTorqueSource` | FTO-13 (#11298); `force_visualization=FULL` |
+
 ### 2.5.1 Ball-flight physical benchmark gate
 
 Ball-flight engines and UI/API adapters must preserve the same measured-shot
@@ -166,6 +176,42 @@ canonical gate:
   driver carry within the benchmark bands.
 - Humid-air density uses the two-gas dry-air/water-vapor formula; saturated air
   at 30 C must be less dense than dry air at the same pressure.
+
+### 2.5.2 Force Overlay Channels
+
+Engines that implement `ForceTorqueProvider` (ADR-0052) emit world-frame wrenches by kind. Unavailable channels are omitted, never zero-filled.
+
+| Engine | `joint_reaction`                                 | `joint_actuator`                   | `contact`                           | `gravity` | Axial loads                               |
+| :----- | :----------------------------------------------- | :--------------------------------- | :---------------------------------- | :-------- | :---------------------------------------- |
+| Drake  | reaction-forces port, rotated from `Jc` to world | net-actuation port (revolute only) | point-pair and hydroelastic results | opt-in    | from joint reactions, single-child bodies |
+
+### 2.5.3 Force Overlay Parity
+
+`tests/integration/cross_engine/test_force_overlay_parity.py` proves every
+engine's overlay shows the same physics with the same sign conventions (#11306,
+FTO-21). One shared parameter set (`force_overlay_fixtures.py`) feeds one small
+model builder per engine, and every case asserts on the provider frame
+(`get_force_torque_frame()`) only, through one `assert_wrench` helper with
+tolerances set once at the top of the file.
+
+| Fixture                           | Expected (world, Z-up, applied to the body)                                                        | Drake            | Pinocchio                | OpenSim              | MuJoCo                     | Simscape                                |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------- | :--------------- | :----------------------- | :------------------- | :------------------------- | :-------------------------------------- |
+| Static hanging pendulum           | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension)                                  | live             | live                     | live                 | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
+| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live             | live                     | live                 | skips until FTO-9          | not applicable (file-based)             |
+| Body resting on ground            | contact forces sum to `(0, 0, +m*g)`; points on the ground plane                                   | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9          | skips (file-based)                      |
+
+A sign-convention guard flips each expected sign and requires the row to fail,
+so the suite cannot pass by accident. Rows skip only for an absent engine or an
+absent provider, with the reason in the skip message, and become live without
+edits when the provider lands.
+
+CI status: the file is marked `integration` and `requires_<engine>`, and lives
+under `tests/integration/cross_engine/`. The `cross-engine-equivalence` workflow
+does not yet run the engine rows: its forward-sim step lists three explicit paths,
+and the `adapter-core` conformance job collects the directory but its marker
+expression excludes `requires_pinocchio`, `requires_drake` and `requires_mujoco`,
+so only the unmarked checks and (where installed) OpenSim rows run there. Per-engine
+lanes are tracked in #11346.
 
 ### 2.6 Body model (humanoid + club)
 
@@ -281,6 +327,49 @@ Authoritative cross-engine evaluation is generated by `src/shared/python/motion_
 | **Simscape**  | Native-Model Observable | Reference `.slx`         | ✅ MATLAB Home         | 🟡 R2025b runner qualification  | **Reference**       |
 
 <!-- END GENERATED PARITY MATRIX -->
+
+### 3.1 Simscape Logged Force/Torque Channels (#11303, FTO-18)
+
+`src/engines/simscape/force_channels.py::load_simscape_force_series(csv_path)`
+turns the exported dataset columns (`<Group>Logs_<Signal>_<1|2|3>`) into a
+world-frame `ForceTorqueSeries` with no MATLAB. The declarative table
+`SIMSCAPE_FORCE_CHANNELS` is the single source; `SimscapeAdapter.load_force_series`
+delegates to it. A missing column makes that half `None` (never zero) and is
+listed in the returned `missing` tuple (`"<label>:force"` / `"<label>:torque"`).
+
+| Label                         | Kind             | Body     | Columns                                                                                                                                 | Frame                | Point                                                     |
+| ----------------------------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- |
+| `joint_reaction:<J>`          | `JOINT_REACTION` | `<J>`    | `<J>Logs_ConstraintForceLocal_*`, `..._ConstraintTorqueLocal_*`                                                                         | joint-local, `R @ v` | `<J>Logs_GlobalPosition_*`                                |
+| `joint_total:<J>`             | `EXTERNAL`       | `<J>`    | `<J>Logs_ForceLocal_*`, `..._TorqueLocal_*`                                                                                             | joint-local, `R @ v` | same                                                      |
+| `joint_actuator:<J>`          | `JOINT_ACTUATOR` | `<J>`    | `<J>Logs_ActuatorTorque{X,Y,Z}` per joint (LScap/RScap/Spine X,Y; LS/RS X,Y,Z; LF/RF Z; Torso none; undriven axes exact 0; torque only) | joint-local, `R @ v` | same                                                      |
+| `external:base_on_hip`        | `EXTERNAL`       | `pelvis` | `HipLogs_BaseonHipForceGlobal_*`, `..._TorqueGlobal_*`                                                                                  | world                | `HipLogs_HipGlobalPosition_dim*`                          |
+| `grip:total_hand`             | `GRIP`           | `club`   | `CalculatedSignalsLogs_TotalHandForceGlobal_*`, `..._TorqueGlobal_*`                                                                    | world                | `MidpointCalcsLogs_MPGlobalPosition_*`                    |
+| `grip:lh_mof` / `grip:rh_mof` | `GRIP`           | `club`   | `MomentandCoupleLogs_LHMOFonClubGlobal_*` / `RHMOF...` (torque only)                                                                    | world                | `LWLogs_LHGlobalPosition_*` / `RWLogs_RHGlobalPosition_*` |
+| `grip:midpoint_couple`        | `GRIP`           | `club`   | `MomentandCoupleLogs_EquivalentMidpointCoupleGlobal_*` (torque only)                                                                    | world                | MP position                                               |
+
+`<J>` is one of `LScap, RScap, LS, RS, LF, RF, Spine, Torso`. Rotation:
+`R = [[I11, I12, I13], [I21, I22, I23], [I31, I32, I33]]` from
+`<J>Logs_Rotation_Transform_I..`, `v_world = R @ v_local`, as in
+`calculateForceMoments.m`. A joint-local channel without its rotation is
+unavailable, not drawn unrotated. Every R is validated orthonormal (default
+tolerance 1e-6, keyword `rotation_tol`); a violation raises `ValueError` naming
+the joint and row. The hip uses the Global columns only (`BaseonHipForceHipBase`
+is a different frame). The committed trial CSVs log R only to about 6e-3
+orthonormality, so loading them needs an explicit `rotation_tol`; the default is
+not loosened.
+
+#### Simulation-Output Path (#11304, FTO-19)
+
+`SimscapeOutput` carries an optional `force_columns` mapping (dataset column
+name to a finite `(N,)` array, rotations flattened to `_I11.._I33`). The
+default `None` is unchanged behaviour. `logsout_to_simscape_output` fills it
+from an optional `forces` key of the MATLAB struct, and
+`SimscapeOutput.to_force_series()` delegates to
+`force_channels.force_series_from_columns`, the same core the CSV loader uses,
+so there is one channel table and one rotation convention. A run without
+`force_columns` raises `ValueError` rather than returning zeros. The MATLAB
+exporter (`extract_sim_out.m` emitting `forces`) and the R2025b channel audit
+need a live host and are not part of this Python slice.
 
 ---
 

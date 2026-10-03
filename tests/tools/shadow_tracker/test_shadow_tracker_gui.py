@@ -14,6 +14,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PyQt6 import QtWidgets
 
 from src.shared.python.shadow_tracker.contracts import FrameObservation
+from src.shared.python.shadow_tracker.mask_records import MaskFrame
+from src.shared.python.shadow_tracker.source_records import (
+    FrameIdentity,
+    SourceAsset,
+)
 from src.tools.shadow_tracker.gui import (
     ShadowTrackerViewportWidget,
     ShadowTrackerWidget,
@@ -344,5 +349,113 @@ def test_viewport_renders_imported_frame_with_unknown_physical_time(qapp: Any) -
         # Renders synchronously; a TypeError from formatting None aborts here.
         pixmap = viewport.grab()
         assert not pixmap.isNull()
+    finally:
+        widget.cleanup()
+
+
+def test_gui_btn_fit_and_manual_mask_update_installed_journey(
+    qapp: Any, tmp_path: Path
+) -> None:
+    """Installed PyQt review journey: Auto-Fit button presence and honest refusal,
+    direct widget mask correction, and session recovery on corrupt media (MMR-12)."""
+    from PyQt6 import QtCore, QtGui
+
+    widget = ShadowTrackerWidget()
+    try:
+        # Auto-fit toolbar button exists and has receiver
+        assert hasattr(widget, "btn_fit")
+        assert widget.btn_fit.receivers(widget.btn_fit.clicked) > 0
+
+        # Set up a session with 1 observation
+        obs = _dummy_observation()
+        widget.model.service.initialize_session(
+            source_asset=SourceAsset(
+                schema_version="shadow-tracker/source/1.0.0",
+                asset_id="asset-gui-test",
+                source_uri="https://example.com/test.mp4",
+                content_sha256="0" * 64,
+                width_px=640,
+                height_px=480,
+                rights_status="permitted",
+                rights_note="test",
+            ),
+            observations=[obs],
+            initial_masks=[
+                MaskFrame(
+                    schema_version="shadow-tracker/mask/1.0.0",
+                    frame=FrameIdentity(
+                        schema_version="shadow-tracker/frame/1.0.0",
+                        asset_id="asset-gui-test",
+                        shot_id="shot-001",
+                        swing_id="swing-001",
+                        camera_id="cam-001",
+                        frame_id=obs.frame_id,
+                        pts_ticks=obs.pts_ticks,
+                        timebase_numerator=1,
+                        timebase_denominator=1000,
+                        physical_time_s=obs.physical_time_s,
+                        physical_time_reason="container_pts",
+                        frame_sha256="0" * 64,
+                        timing_mode="container_pts",
+                        is_timing_exact=True,
+                        clock_evidence="container_pts_metadata",
+                        decoder_name="opencv",
+                    ),
+                    width_px=4,
+                    height_px=4,
+                    body=bytes([0] * 16),
+                    club=bytes([0] * 16),
+                    valid=bytes([1] * 16),
+                    revision_id="rev-init-shot-001-frame-001",
+                    parent_revision_id=None,
+                    producer_id="reviewer",
+                    correction_note="initial",
+                )
+            ],
+        )
+        widget._update_display()
+        assert widget.model.frame_count == 1
+
+        # 1. Trigger Auto-Fit button -> displays honest refusal
+        widget.btn_fit.click()
+        assert "auto-fit unavailable" in widget.lbl_status.text().lower()
+
+        # Key_F shortcut triggers auto-fit refusal as well
+        event_f = QtGui.QKeyEvent(
+            QtCore.QEvent.Type.KeyPress,
+            QtCore.Qt.Key.Key_F,
+            QtCore.Qt.KeyboardModifier.NoModifier,
+        )
+        widget.keyPressEvent(event_f)
+        assert "auto-fit unavailable" in widget.lbl_status.text().lower()
+
+        # 2. Direct widget update_mask method
+        assert widget.is_dirty() is False
+        new_mask = widget.update_mask(
+            body=bytes([1] * 16),
+            club=bytes([1] * 16),
+            valid=bytes([1] * 16),
+            parent_revision_id="rev-init-shot-001-frame-001",
+            correction_note="manual review fix via widget",
+        )
+        assert widget.is_dirty() is True
+        assert new_mask.body == bytes([1] * 16)
+        assert "updated mask" in widget.lbl_status.text().lower()
+
+        # 3. Import corrupt media via GUI preserves session and reports error
+        corrupt_file = tmp_path / "corrupt_gui.mp4"
+        corrupt_file.write_bytes(b"INVALID_MEDIA_HEADER")
+        with patch.object(
+            QtWidgets.QFileDialog,
+            "getOpenFileName",
+            return_value=(str(corrupt_file), "All Files (*)"),
+        ):
+            widget._on_import_video()
+            assert "error" in widget.lbl_status.text().lower()
+
+        # Previous session is still fully intact and recoverable
+        assert widget.model.frame_count == 1
+        assert widget.model.get_current_observation().frame_id == obs.frame_id
+        assert widget.model.get_current_mask().revision_id == new_mask.revision_id
     finally:
         widget.cleanup()

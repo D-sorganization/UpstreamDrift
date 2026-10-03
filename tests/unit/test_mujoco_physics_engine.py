@@ -44,12 +44,14 @@ def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies) -> Generator[type, None, 
 
     mock_mujoco, _mock_interfaces = mock_mujoco_dependencies
 
+    original_mujoco = getattr(mod, "mujoco", None)
     # Inject the mock so module-level `mujoco.xxx` calls see it
     mod.mujoco = mock_mujoco
 
     yield mod.MuJoCoPhysicsEngine
 
-    # No restore needed – the module patch is torn down by the fixture above.
+    if original_mujoco is not None:
+        mod.mujoco = original_mujoco
 
 
 @pytest.fixture

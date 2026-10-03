@@ -1,0 +1,32 @@
+{
+  "schema_version": "historical-capture/1.0.0",
+  "subject_id": "tiger-woods",
+  "source": {
+    "schema_version": "shadow-tracker/source/1.0.0",
+    "asset_id": "source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "source_uri": "urn:asset:source-99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "content_sha256": "99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673",
+    "width_px": 1280,
+    "height_px": 720,
+    "rights_status": "unknown",
+    "rights_note": ""
+  },
+  "window_presentation_s": [15.0, 22.0],
+  "frame_count": 210,
+  "detected_count": 210,
+  "observations_sha256": "d72b901f8853d24dce282b19420a4191ffbfc1c777f846a0513c14aebbbc9418",
+  "detector": {
+    "name": "MediaPipeEstimator",
+    "version": "1.0.1",
+    "model_sha256": "4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad",
+    "smoothing": false,
+    "min_detection_confidence": 0.5,
+    "min_tracking_confidence": 0.5
+  },
+  "qualification": "image_observations_only",
+  "recording_year": null,
+  "physical_time_verified": false,
+  "shot_continuity_reviewed": false,
+  "publication_permitted": false,
+  "implementation_sha256": "e14ce2be1379f4586337baf3e24f4b7464be5dc11958e309f560a2266b638ae8"
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": "necromatcher/ground-placement-receipt/1",
+  "source_commit": "2c5129eab97d1d0d6b9a3110a4164e35212a1a3b",
+  "players": [
+    {
+      "fit_id": "hogan-authored-ground-fit-v6",
+      "fit_hash": "sha256:caa2c308a3ebfb5da58c9f916c6a0ae9c0a790378199d002ecf39dcc7595e91a",
+      "frame_count": 750,
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "hogan-practice-capture-v1",
+      "capture_hash": "sha256:199777c2fc5834f6c7a0ebd834c65b658c443acde5494ba7af73c39a4503c30e",
+      "initial_grip_gap_m": 0.08852478809167041,
+      "scientific_qualified": false,
+      "physical_source_time_qualified": false,
+      "placement": {
+        "schema_version": "necromatcher/authored-ground-placement/1",
+        "kind": "authored",
+        "source_fit_id": "hogan-native-control-research-fit-v5",
+        "source_fit_hash": "sha256:c48e053e28bd1c79db639c1d13293c09a19cd410067a6c0852879992e8625e6a",
+        "source_frame_index": 0,
+        "description": "Authored flat-ground world-origin hypothesis: anchor the first saved frame at zero lowest-foot clearance and compensate the camera; not observed calibration or physical-time qualification.",
+        "requested_clearance_m": 0.0,
+        "root_coordinate_offset": [0.0, 0.0, 0.8500555959656673],
+        "world_translation_m": [0.0, 0.0, 0.8500555959656673],
+        "anchor_ground_clearance_m": 2.1510571102112408e-16,
+        "max_reprojection_difference_pixels": 5.684341886080802e-14,
+        "max_ground_penetration_before_m": 1.319759505867507,
+        "max_ground_penetration_after_m": 0.46970390990183974,
+        "execution_stamp": {
+          "source_commit": "2c5129eab97d1d0d6b9a3110a4164e35212a1a3b",
+          "started_at_utc": "2026-10-02T04:33:54.932310+00:00",
+          "source_sha256": "sha256:9c206fed7c158cd1b31aff7304e0d46a2c5fbd5d50593e11814d9dec93c6f867",
+          "runtime": {
+            "python": "3.13.5",
+            "platform": "Windows-11-10.0.26300-SP0",
+            "tools_commit": "3678409fc51024150ab28970b72e3b468935f345",
+            "numpy": "2.4.1",
+            "scipy": "1.16.0",
+            "mujoco": "3.3.4",
+            "opencv-python": "4.13.0.90"
+          },
+          "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5"
+        }
+      }
+    },
+    {
+      "fit_id": "tiger-authored-ground-fit-v6",
+      "fit_hash": "sha256:a9c2fc96921cf9c8ee3eeb10395faf541de4c2d7c81d64cc07fa35132a19ac52",
+      "frame_count": 210,
+      "model_hash": "sha256:99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd",
+      "capture_id": "tiger-usga-range-capture-v1",
+      "capture_hash": "sha256:d4c10da4ac450d1e555ef08c04b1fc2e4688a0289c82afa70bcb9140ac4a7357",
+      "initial_grip_gap_m": 0.05389278691214406,
+      "scientific_qualified": false,
+      "physical_source_time_qualified": false,
+      "placement": {
+        "schema_version": "necromatcher/authored-ground-placement/1",
+        "kind": "authored",
+        "source_fit_id": "tiger-web-control-research-fit-v5",
+        "source_fit_hash": "sha256:7667df1e82d8290083720cef6c920677fa85519f1b5070c14717656c8b742567",
+        "source_frame_index": 0,
+        "description": "Authored flat-ground world-origin hypothesis: anchor the first saved frame at zero lowest-foot clearance and compensate the camera; not observed calibration or physical-time qualification.",
+        "requested_clearance_m": 0.0,
+        "root_coordinate_offset": [0.0, 0.0, 0.4952670744175085],
+        "world_translation_m": [0.0, 0.0, 0.4952670744175085],
+        "anchor_ground_clearance_m": -6.245004513516506e-17,
+        "max_reprojection_difference_pixels": 2.8421709430404007e-13,
+        "max_ground_penetration_before_m": 0.4952670744175085,
+        "max_ground_penetration_after_m": 6.245004513516506e-17,
+        "execution_stamp": {
+          "source_commit": "2c5129eab97d1d0d6b9a3110a4164e35212a1a3b",
+          "started_at_utc": "2026-10-02T04:33:57.439775+00:00",
+          "source_sha256": "sha256:9c206fed7c158cd1b31aff7304e0d46a2c5fbd5d50593e11814d9dec93c6f867",
+          "runtime": {
+            "python": "3.13.5",
+            "platform": "Windows-11-10.0.26300-SP0",
+            "tools_commit": "3678409fc51024150ab28970b72e3b468935f345",
+            "numpy": "2.4.1",
+            "scipy": "1.16.0",
+            "mujoco": "3.3.4",
+            "opencv-python": "4.13.0.90"
+          },
+          "runtime_sha256": "sha256:e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5"
+        }
+      }
+    }
+  ]
+}

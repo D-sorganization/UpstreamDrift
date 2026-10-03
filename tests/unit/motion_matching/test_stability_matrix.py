@@ -207,12 +207,17 @@ class TestStabilityMatrix:
         assert case.theta.shape == (23,)
 
     def test_get_canonical_test_invalid(self) -> None:
-        """Test retrieving invalid test raises."""
+        """Test retrieving invalid test raises the canonical contract exception."""
         matrix = StabilityMatrix()
+        from src.shared.python import contracts as contracts_mod
         from src.shared.python._contracts_exceptions import PreconditionError
 
-        with pytest.raises(PreconditionError):
+        # The seam contract: both import paths must yield the SAME class object.
+        assert contracts_mod.PreconditionError is PreconditionError
+
+        with pytest.raises(PreconditionError) as excinfo:
             matrix.get_canonical_test("nonexistent_test")
+        assert excinfo.errisinstance(PreconditionError)
 
     def test_get_safe_operating_region(self) -> None:
         """Test safe operating region retrieval."""

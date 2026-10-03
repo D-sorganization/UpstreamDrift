@@ -48,7 +48,7 @@ def test_expired_task_not_returned_despite_throttle() -> None:
     # tiny TTL so the entry is logically expired after a brief wait.
     tm = TaskManager(ttl_seconds=0.01)
     tm.CLEANUP_INTERVAL_SECONDS = 1000.0
-    tm.set("gone", {"status": "running"})
+    tm.set("gone", {"status": "completed"})
     time.sleep(0.05)
 
     # Read path is throttled (no forced purge), but TTL correctness holds.
@@ -62,7 +62,7 @@ def test_expired_task_not_returned_despite_throttle() -> None:
 def test_active_count_forces_exact_sweep() -> None:
     """active_count/len report only non-expired tasks (force a sweep)."""
     tm = TaskManager(ttl_seconds=0.01)
-    tm.set("a", {"status": "running"})
+    tm.set("a", {"status": "completed"})
     time.sleep(0.05)
     # active_count/len force an exact sweep, so the expired entry is gone.
     assert tm.active_count() == 0

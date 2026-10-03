@@ -24,6 +24,10 @@ from src.api.models.requests import (
 )
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
+from src.shared.python.engine_core.simulation_timing import (
+    SimulationTimingPlan,
+    compute_simulation_timing,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 router = APIRouter()
@@ -320,17 +324,10 @@ def _engine_analysis_to_dict(engine: object) -> dict[str, Any]:
 
 
 def _resolve_sim_stats(websocket: WebSocket) -> Any:
-    """Return the shared simulation-service ``stats`` object, or ``None``.
-
-    Collapses the ``websocket.app.state.simulation_service.stats`` reach-through
-    chain into a single Law-of-Demeter-respecting accessor so the five call
-    sites cannot drift apart (DRY; finding #7740). Every ``getattr`` defaults to
-    ``None`` so a partially-initialised app state (or a test double missing any
-    link) yields ``None`` rather than raising.
-
-    Postcondition: returns the ``stats`` object when fully resolvable, else
-    ``None``.
-    """
+    """Return the isolated WebSocket simulation stats, or fall back to shared stats."""
+    ws_state = getattr(websocket, "state", None)
+    if ws_state is not None and hasattr(ws_state, "sim_stats"):
+        return ws_state.sim_stats
     app_state = getattr(getattr(websocket, "app", None), "state", None)
     simulation_service = getattr(app_state, "simulation_service", None)
     return getattr(simulation_service, "stats", None)
@@ -431,11 +428,15 @@ async def _load_simulation_engine(
     )
     try:
         enum_type = _engine_type_from_str(engine_type)
-        success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
-        if not success:
-            raise ValueError("Could not load engine")
+        create_fn = getattr(engine_manager, "create_engine", None)
+        if callable(create_fn):
+            engine = create_fn(enum_type)
+        else:
+            success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
+            if not success:
+                raise ValueError("Could not load engine")
+            engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
 
-        engine = engine_manager.get_active_physics_engine()  # type: ignore[attr-defined]
         if not engine:
             raise ValueError("Could not load engine")
 
@@ -464,7 +465,8 @@ def _apply_set_speed(
         config: Simulation configuration dict (mutated in place).
         msg: The decoded client message; ``speed_factor`` is read from it.
     """
-    speed_factor = _clamp_speed_factor(msg.get("speed_factor", _DEFAULT_SPEED_FACTOR))
+    raw_speed = msg.get("speed_factor", msg.get("value", _DEFAULT_SPEED_FACTOR))
+    speed_factor = _clamp_speed_factor(raw_speed)
     config["speed_factor"] = speed_factor
     stats = _resolve_sim_stats(websocket)
     if stats is not None:
@@ -532,13 +534,19 @@ async def _wait_for_resume_or_stop(
             _apply_set_speed(websocket, config, msg)
 
 
-def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
+def _step_physics_batch(
+    engine: Any,
+    timestep: float,
+    step_count: int,
+    final_step_dt: float | None = None,
+) -> int:
     """Step the physics engine synchronously for a batch of integration steps.
 
     Args:
         engine: The physics engine instance.
-        timestep: Delta time for each step in seconds.
+        timestep: Delta time for standard steps in seconds.
         step_count: Number of steps to advance.
+        final_step_dt: Optional custom delta time for the final step (R11 remainder step).
 
     Returns:
         Number of steps successfully executed.
@@ -546,8 +554,13 @@ def _step_physics_batch(engine: Any, timestep: float, step_count: int) -> int:
     require(timestep > 0, "Simulation timestep must be positive", timestep)
     require(step_count >= 0, "Step count cannot be negative", step_count)
     if hasattr(engine, "step"):
-        for _ in range(step_count):
-            engine.step(timestep)
+        for i in range(step_count):
+            dt = (
+                final_step_dt
+                if (i == step_count - 1 and final_step_dt is not None)
+                else timestep
+            )
+            engine.step(dt)
     return step_count
 
 
@@ -594,6 +607,34 @@ async def _send_simulation_frame(
         # the same wire timestamp rounding used by the geometry frame.
         loads["time_s"] = frame_data["time"]
         frame_data["segment_loads"] = loads
+
+    if config.get("force_overlay"):
+        from src.api.services.force_overlay_service import (
+            current_force_frame,
+            force_overlay_payload,
+            style_from_request_params,
+        )
+
+        try:
+            frame_obj = current_force_frame(engine)
+            if frame_obj is not None:
+                style_cfg = config.get("force_overlay_style")
+                if isinstance(style_cfg, dict):
+                    style = style_from_request_params(
+                        force_types=style_cfg.get("force_types"),
+                        scale_factor=float(style_cfg.get("scale_factor", 0.01)),
+                        show_labels=bool(style_cfg.get("show_labels", False)),
+                    )
+                else:
+                    style = style_from_request_params()
+                fo_payload = force_overlay_payload(frame_obj, style)
+                if fo_payload.get("glyphs") is not None:
+                    fo_payload["glyphs"]["time_s"] = frame_data["time"]
+                if fo_payload.get("frame") is not None:
+                    fo_payload["frame"]["time_s"] = frame_data["time"]
+                frame_data["force_overlay"] = fo_payload
+        except Exception:
+            logger.exception("Force overlay provider unavailable for current frame")
 
     await websocket.send_json(frame_data)
 
@@ -654,6 +695,57 @@ async def _process_pending_client_commands(
     return recv_task, "continue"
 
 
+def _prepare_timing_plan(
+    websocket: WebSocket,
+    engine: object,
+    config: dict[str, Any],
+) -> SimulationTimingPlan:
+    duration = config.get("duration", 3.0)
+    timestep = config.get("timestep", 0.002)
+    require(duration > 0, "Simulation duration must be positive", duration)
+    require(timestep > 0, "Simulation timestep must be positive", timestep)
+
+    allow_remainder = config.get("allow_remainder_step", True)
+    timing_plan = compute_simulation_timing(
+        duration=duration,
+        timestep=timestep,
+        allow_remainder_step=allow_remainder,
+        engine=engine,
+    )
+    if hasattr(websocket, "state") and websocket.state is not None:
+        websocket.state.timing_plan = timing_plan
+    return timing_plan
+
+
+def _compute_loop_time(
+    engine: object,
+    frame: int,
+    total_steps: int,
+    timing_plan: SimulationTimingPlan,
+) -> float:
+    if hasattr(engine, "get_time") and callable(engine.get_time):
+        return float(engine.get_time())
+    if frame >= total_steps:
+        return timing_plan.integrated_duration
+    return sum(timing_plan.step_sizes[:frame])
+
+
+async def _handle_pause_or_stop(
+    websocket: WebSocket,
+    config: dict[str, Any],
+    recv_task: asyncio.Task[Any] | None,
+) -> tuple[asyncio.Task[Any] | None, bool]:
+    if recv_task is not None and not recv_task.done():
+        recv_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await recv_task
+        recv_task = None
+    stopped = await _wait_for_resume_or_stop(websocket, config)
+    if stopped:
+        return None, True
+    return asyncio.create_task(websocket.receive_json()), False
+
+
 async def _run_simulation_loop(
     websocket: WebSocket,
     engine: object,
@@ -671,22 +763,20 @@ async def _run_simulation_loop(
     """
     if not (websocket is not None):
         raise ValueError("websocket must be provided")
-    duration = config.get("duration", 3.0)
-    timestep = config.get("timestep", 0.002)
 
-    require(duration > 0, "Simulation duration must be positive", duration)
-    require(timestep > 0, "Simulation timestep must be positive", timestep)
+    timing_plan = _prepare_timing_plan(websocket, engine, config)
+    timestep = timing_plan.timestep
+    total_steps = timing_plan.step_count
 
-    await websocket.send_json({"status": "running", "duration": duration})
+    await websocket.send_json(
+        {"status": "running", "duration": timing_plan.requested_duration}
+    )
 
     time_elapsed = 0.0
     frame = 0
-
-    # Calculate frame skip for ~60fps UI updates
     target_fps = 60
     steps_per_second = 1.0 / timestep
     frame_skip = max(1, int(steps_per_second / target_fps))
-    total_steps = max(1, int(math.ceil(duration / timestep)))
     loop = asyncio.get_running_loop()
     stats = _resolve_sim_stats(websocket)
 
@@ -702,23 +792,27 @@ async def _run_simulation_loop(
             if command == "stop":
                 break
             if command == "pause":
-                if recv_task is not None and not recv_task.done():
-                    recv_task.cancel()
-                    with contextlib.suppress(asyncio.CancelledError):
-                        await recv_task
-                    recv_task = None
-                stopped = await _wait_for_resume_or_stop(websocket, config)
+                recv_task, stopped = await _handle_pause_or_stop(
+                    websocket, config, recv_task
+                )
                 if stopped:
                     break
-                recv_task = asyncio.create_task(websocket.receive_json())
 
             batch_steps = min(frame_skip, total_steps - frame)
+            is_final_batch = frame + batch_steps >= total_steps
+            final_dt = (
+                timing_plan.remainder_dt
+                if (is_final_batch and timing_plan.has_remainder_step)
+                else None
+            )
+
             await anyio.to_thread.run_sync(
-                _step_physics_batch, engine, timestep, batch_steps
+                _step_physics_batch, engine, timestep, batch_steps, final_dt
             )
 
             frame += batch_steps
-            time_elapsed = min(duration, frame * timestep)
+            time_elapsed = _compute_loop_time(engine, frame, total_steps, timing_plan)
+
             if stats is not None:
                 stats.frame_count = frame
 
@@ -728,7 +822,11 @@ async def _run_simulation_loop(
                 )
 
             speed_factor = _get_simulation_speed_factor(websocket, config)
-            batch_duration = batch_steps * timestep
+            batch_duration = (
+                ((batch_steps - 1) * timestep + final_dt)
+                if (final_dt is not None and batch_steps > 0)
+                else (batch_steps * timestep)
+            )
             delay = _compute_real_time_sleep_delay(
                 batch_duration,
                 speed_factor,
@@ -743,6 +841,59 @@ async def _run_simulation_loop(
                 await recv_task
 
     return frame, time_elapsed
+
+
+async def _parse_and_validate_start_message(
+    websocket: WebSocket,
+    engine_type: str,
+) -> dict[str, Any] | None:
+    start_msg = await websocket.receive_json()
+    if start_msg.get("action") != "start":
+        await websocket.send_json({"error": "Expected 'start' action"})
+        return None
+
+    raw_config = start_msg.get("config", {}) or {}
+    ws_error = _validate_ws_numeric_fields(
+        raw_config if isinstance(raw_config, dict) else {}
+    )
+    if ws_error is not None:
+        await websocket.send_json({"error": ws_error})
+        return None
+
+    try:
+        config = _validate_start_config(engine_type, raw_config)
+    except (ValidationError, ValueError):
+        await websocket.send_json({"error": "Invalid simulation config"})
+        return None
+    _reset_simulation_stats(websocket, config)
+    return config
+
+
+async def _send_simulation_completion(
+    websocket: WebSocket,
+    config: dict[str, Any],
+    frame: int,
+    time_elapsed: float,
+) -> None:
+    timing_plan = getattr(getattr(websocket, "state", None), "timing_plan", None)
+    req_dur = (
+        timing_plan.requested_duration
+        if timing_plan is not None
+        else config.get("duration", time_elapsed)
+    )
+    int_dur = (
+        timing_plan.integrated_duration if timing_plan is not None else time_elapsed
+    )
+    await websocket.send_json(
+        {
+            "status": "complete",
+            "total_frames": frame,
+            "total_time": round(time_elapsed, 4),
+            "requested_duration": req_dur,
+            "integrated_duration": round(int_dur, 6),
+            "step_count": frame,
+        }
+    )
 
 
 @router.websocket("/ws/simulate/{engine_type}")
@@ -762,6 +913,13 @@ async def simulation_stream(
     if user is None:
         return
     await websocket.accept()
+    if not hasattr(websocket, "state") or websocket.state is None:
+        import types
+
+        setattr(websocket, "state", types.SimpleNamespace())  # noqa: B010
+    from src.api.services.simulation_service import SimulationStats
+
+    setattr(websocket.state, "sim_stats", SimulationStats())  # noqa: B010
 
     try:
         engine_manager = get_ws_engine_manager(websocket)
@@ -774,27 +932,9 @@ async def simulation_stream(
             )
             return
 
-        # Wait for start command
-        start_msg = await websocket.receive_json()
-
-        if start_msg.get("action") != "start":
-            await websocket.send_json({"error": "Expected 'start' action"})
+        config = await _parse_and_validate_start_message(websocket, engine_type)
+        if config is None:
             return
-
-        raw_config = start_msg.get("config", {}) or {}
-        ws_error = _validate_ws_numeric_fields(
-            raw_config if isinstance(raw_config, dict) else {}
-        )
-        if ws_error is not None:
-            await websocket.send_json({"error": ws_error})
-            return
-
-        try:
-            config = _validate_start_config(engine_type, raw_config)
-        except (ValidationError, ValueError):
-            await websocket.send_json({"error": "Invalid simulation config"})
-            return
-        _reset_simulation_stats(websocket, config)
 
         # Load engine
         engine = await _load_simulation_engine(engine_manager, engine_type, websocket)
@@ -802,7 +942,6 @@ async def simulation_stream(
             return
 
         # Set initial state if provided, using the (q, v) engine contract.
-        # Reject oversized q/v with an error frame before allocating (#7056).
         if "initial_state" in config:
             state_error = _apply_initial_state(engine, config["initial_state"])
             if state_error is not None:
@@ -813,13 +952,7 @@ async def simulation_stream(
         frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
 
         # Send completion
-        await websocket.send_json(
-            {
-                "status": "complete",
-                "total_frames": frame,
-                "total_time": round(time_elapsed, 4),
-            }
-        )
+        await _send_simulation_completion(websocket, config, frame, time_elapsed)
 
     except WebSocketDisconnect:
         pass  # Client disconnected

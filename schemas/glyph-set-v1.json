@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/force_overlay/glyph-set-v1.json",
+  "title": "GlyphSet (v1)",
+  "description": "Renderer-neutral geometric force and torque glyph set (ADR-0052, #11288).",
+  "type": "object",
+  "required": ["schema_version", "time_s", "arrows", "torque_arcs", "legend"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "glyph-set-v1"
+    },
+    "time_s": {
+      "type": "number"
+    },
+    "arrows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/arrowGlyph" }
+    },
+    "torque_arcs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/torqueArcGlyph" }
+    },
+    "legend": {
+      "$ref": "#/$defs/legendSpec"
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "rgba": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "wrenchKind": {
+      "type": "string",
+      "enum": [
+        "joint_actuator",
+        "joint_reaction",
+        "contact",
+        "grip",
+        "external",
+        "gravity",
+        "muscle"
+      ]
+    },
+    "arrowGlyph": {
+      "type": "object",
+      "required": [
+        "label",
+        "kind",
+        "tail_m",
+        "tip_m",
+        "head_base_m",
+        "shaft_radius_m",
+        "head_radius_m",
+        "rgba",
+        "magnitude",
+        "units",
+        "clamped"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/wrenchKind" },
+        "tail_m": { "$ref": "#/$defs/vec3" },
+        "tip_m": { "$ref": "#/$defs/vec3" },
+        "head_base_m": { "$ref": "#/$defs/vec3" },
+        "shaft_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "head_radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "rgba": { "$ref": "#/$defs/rgba" },
+        "magnitude": { "type": "number" },
+        "units": { "type": "string" },
+        "clamped": { "type": "boolean" }
+      }
+    },
+    "torqueArcGlyph": {
+      "type": "object",
+      "required": [
+        "label",
+        "kind",
+        "center_m",
+        "axis_unit",
+        "radius_m",
+        "polyline_m",
+        "head_tip_m",
+        "head_base_m",
+        "rgba",
+        "magnitude",
+        "units",
+        "clamped"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/wrenchKind" },
+        "center_m": { "$ref": "#/$defs/vec3" },
+        "axis_unit": { "$ref": "#/$defs/vec3" },
+        "radius_m": { "type": "number", "exclusiveMinimum": 0 },
+        "polyline_m": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/vec3" },
+          "minItems": 2
+        },
+        "head_tip_m": { "$ref": "#/$defs/vec3" },
+        "head_base_m": { "$ref": "#/$defs/vec3" },
+        "rgba": { "$ref": "#/$defs/rgba" },
+        "magnitude": { "type": "number" },
+        "units": { "type": "string" },
+        "clamped": { "type": "boolean" }
+      }
+    },
+    "legendSpec": {
+      "type": "object",
+      "required": [
+        "force_reference_n",
+        "force_reference_length_m",
+        "torque_reference_nm",
+        "torque_reference_radius_m",
+        "kinds_present",
+        "unavailable_labels",
+        "engine",
+        "source_labels"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "force_reference_n": { "type": ["number", "null"] },
+        "force_reference_length_m": { "type": ["number", "null"] },
+        "torque_reference_nm": { "type": ["number", "null"] },
+        "torque_reference_radius_m": { "type": ["number", "null"] },
+        "kinds_present": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/wrenchKind" }
+        },
+        "unavailable_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "engine": { "type": "string" },
+        "source_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

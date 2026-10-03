@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.dev/schemas/force_overlay/force-torque-frame-v1.json",
+  "title": "ForceTorqueFrame (v1)",
+  "description": "Engine-agnostic instantaneous force and torque overlay frame with SI units in world Z-up frame (ADR-0052).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "time_s",
+    "engine",
+    "world_frame",
+    "units",
+    "wrenches"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "force-torque-frame-v1"
+    },
+    "time_s": {
+      "type": "number"
+    },
+    "engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "world_frame": {
+      "type": "string",
+      "enum": ["world_Zup", "adr0041_world"]
+    },
+    "units": {
+      "type": "object",
+      "required": ["force", "torque", "length"],
+      "additionalProperties": false,
+      "properties": {
+        "force": { "type": "string", "const": "N" },
+        "torque": { "type": "string", "const": "N*m" },
+        "length": { "type": "string", "const": "m" }
+      }
+    },
+    "wrenches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/overlayWrench" }
+    },
+    "axial_loads": {
+      "type": ["object", "null"],
+      "required": ["time_s", "values_n", "source", "units", "sign_convention"],
+      "additionalProperties": false,
+      "properties": {
+        "time_s": { "type": "number" },
+        "values_n": {
+          "type": "object",
+          "additionalProperties": { "type": ["number", "null"] }
+        },
+        "source": { "type": "string", "minLength": 1 },
+        "units": { "type": "string", "const": "N" },
+        "sign_convention": { "type": "string", "const": "tension-positive" }
+      }
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "vec3": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "overlayWrench": {
+      "type": "object",
+      "required": ["kind", "label", "body", "point_m", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "joint_actuator",
+            "joint_reaction",
+            "contact",
+            "grip",
+            "external",
+            "gravity",
+            "muscle"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "pattern": "^[a-z_]+:[A-Za-z0-9_.:-]+$"
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1
+        },
+        "point_m": {
+          "$ref": "#/$defs/vec3"
+        },
+        "force_n": {
+          "oneOf": [{ "$ref": "#/$defs/vec3" }, { "type": "null" }]
+        },
+        "torque_nm": {
+          "oneOf": [{ "$ref": "#/$defs/vec3" }, { "type": "null" }]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "force_n": { "$ref": "#/$defs/vec3" }
+          },
+          "required": ["force_n"]
+        },
+        {
+          "properties": {
+            "torque_nm": { "$ref": "#/$defs/vec3" }
+          },
+          "required": ["torque_nm"]
+        }
+      ]
+    }
+  }
+}

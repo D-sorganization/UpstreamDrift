@@ -584,3 +584,31 @@ def test_evidence_integrity_zero_rmse_with_replay_not_rejected_by_nonzero_residu
     verdict = evaluate(receipt, horizon=Horizon.G1)
     gate_map = {g.name: g for g in verdict.gates}
     assert "nonzero_residual_evidence" not in gate_map
+
+
+def test_simscape_continuous_replay_qualification_receipt_evaluates_in_acceptance() -> (
+    None
+):
+    """Simscape continuous-replay qualification receipt feeds into acceptance evaluator (#11107)."""
+    simscape_qualification_path = (
+        REPO_ROOT
+        / "docs"
+        / "development"
+        / "simscape_tour_matching"
+        / "native_evidence"
+        / "two_window_fit_9967_102"
+        / "simscape_replay_qualification.json"
+    )
+    receipt = _load_json(simscape_qualification_path)
+    receipt_payload = receipt.get("receipt_dict", receipt)
+    verdict = evaluate(receipt_payload, horizon=Horizon.G1)
+
+    assert isinstance(verdict, AcceptanceVerdict)
+    assert verdict.is_physically_accepted is False
+    assert verdict.status == "REJECTED"
+
+    terminal_gate = next(
+        g for g in verdict.gates if g.name in ("terminal", "terminal_marker_rmse_m")
+    )
+    assert terminal_gate.status == GateStatus.FAILED
+    assert terminal_gate.measured is not None and terminal_gate.measured > 0.035

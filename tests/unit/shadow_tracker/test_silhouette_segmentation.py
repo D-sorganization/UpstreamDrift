@@ -12,6 +12,7 @@ Tests verify:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 import hashlib
 from pathlib import Path
 import pytest
@@ -855,3 +856,489 @@ def test_atomic_save_and_reopen_all_revisions(
     assert restored.get_mask("f-010", shot_id="shot-01").revision_id == "rev-save-02"
     history = restored.get_revision_history("f-010", shot_id="shot-01")
     assert [h.revision_id for h in history] == ["rev-save-01", "rev-save-02"]
+
+
+# ---------------------------------------------------------------------------
+# 11. MMR-13 (#11099): Real / Synthetic Neural Segmentation Contracts
+# ---------------------------------------------------------------------------
+
+
+def test_checkpoint_validation_fails_closed_on_corrupt_or_arbitrary_weights(
+    tmp_path: Path,
+) -> None:
+    """Arbitrary/corrupt checkpoints cannot pass validation."""
+    corrupt_ckpt = tmp_path / "corrupt_weights.pth"
+    corrupt_ckpt.write_bytes(b"corrupted binary data that does not match pinned hash")
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=corrupt_ckpt,
+    )
+
+    req = SegmentationRequest(shot_id="shot-01", frame_ids=("f-01",))
+    with pytest.raises(
+        RuntimeError,
+        match="not a valid model checkpoint|hash mismatch",
+    ):
+        provider.segment(req)
+
+
+def test_no_hidden_unauthenticated_downloads(tmp_path: Path) -> None:
+    """Missing weights must fail closed with actionable error and zero network traffic."""
+    nonexistent = tmp_path / "missing_dir" / "weights.pth"
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=nonexistent,
+    )
+
+    req = SegmentationRequest(shot_id="shot-01", frame_ids=("f-01",))
+    with pytest.raises(
+        FileNotFoundError, match="Hidden network downloads are disallowed"
+    ):
+        provider.segment(req)
+
+
+def test_provider_is_lazy_and_optional(tmp_path: Path) -> None:
+    """Instantiating provider does not trigger file I/O or network until execution."""
+    missing = tmp_path / "nonexistent.pth"
+    # Should not raise on initialization
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=missing,
+    )
+    assert not provider.is_loaded
+    assert provider.model_name == "sam-vit-b-golf"
+    assert provider.checkpoint_path == missing
+
+
+def test_inference_adapter_separates_person_and_club_masks(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Inference adapter separates person and club into distinct binary channels."""
+    content = b"valid dummy weights for synthetic/real segmentation harness"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt_file = tmp_path / "test_model.pth"
+    ckpt_file.write_bytes(content)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt_file,
+        expected_sha256=content_sha,
+        allow_synthetic=True,
+    )
+
+    mask = provider.infer_frame(base_frame_identity, width_px=32, height_px=32)
+
+    assert isinstance(mask, MaskFrame)
+    assert mask.width_px == 32
+    assert mask.height_px == 32
+    assert len(mask.body) == 32 * 32
+    assert len(mask.club) == 32 * 32
+    assert len(mask.valid) == 32 * 32
+
+    # Separate person and club masks: both are nonempty
+    body_count = mask.body.count(1)
+    club_count = mask.club.count(1)
+    assert body_count > 0, "Person/body mask must contain detected foreground pixels"
+    assert club_count > 0, "Club mask must contain detected foreground pixels"
+
+    # Distinct separation: pixels where valid is 0 cannot be foreground
+    for idx, (b, c, v) in enumerate(zip(mask.body, mask.club, mask.valid, strict=True)):
+        if v == 0:
+            assert b == 0 and c == 0, f"Foreground at {idx} where valid=0"
+
+
+def test_inference_generates_mask_artifacts_with_provenance_hashes(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Generated mask artifacts record frame and checkpoint provenance SHA-256 hashes."""
+    content = b"verified checkpoint binary payload"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt_file = tmp_path / "verified_model.pth"
+    ckpt_file.write_bytes(content)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt_file,
+        expected_sha256=content_sha,
+        allow_synthetic=True,
+    )
+
+    mask = provider.infer_frame(base_frame_identity, width_px=16, height_px=16)
+
+    # Frame SHA-256 provenance is preserved
+    assert mask.frame.frame_sha256 == base_frame_identity.frame_sha256
+    # Checkpoint provenance hash is embedded in producer_id and revision_id
+    assert content_sha[:8] in mask.revision_id
+    assert content_sha[:8] in mask.producer_id
+    # Deterministic observation hash
+    assert len(mask.observation_hash) == 64
+
+    # Fulfills SegmentationRequest as a Segmenter
+    req = SegmentationRequest(
+        shot_id=base_frame_identity.shot_id,
+        frame_ids=(base_frame_identity.frame_id,),
+    )
+    res = provider.segment(req)
+    assert isinstance(res, SegmentationResult)
+    assert res.mask_count == 1
+    assert content_sha[:8] in res.provenance
+
+
+def test_manual_path_works_when_provider_is_absent_and_lineage_preserved(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Manual path works when provider is unconfigured, and manual touchups branch from model revisions."""
+    from shared.python.shadow_tracker.service import DefaultShadowTrackerService
+    from shared.python.shadow_tracker.contracts import FrameObservation
+    from shared.python.shadow_tracker.source_records import SourceAsset
+
+    # 1. Unconfigured service operates purely manual
+    service = DefaultShadowTrackerService()
+    assert service.segmenter is None
+
+    # 2. When provider is registered, model masks feed manual provider and support manual correction
+    content = b"checkpoint bytes for service test"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt_file = tmp_path / "service_model.pth"
+    ckpt_file.write_bytes(content)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt_file,
+        expected_sha256=content_sha,
+        allow_synthetic=True,
+    )
+    service.register_segmenter(provider)
+    assert service.segmenter is not None
+    assert isinstance(service.segmenter, ModelSegmentationProvider)
+    assert provider is not None
+
+    # Model generates initial mask
+    model_mask = provider.infer_frame(base_frame_identity, width_px=4, height_px=4)
+
+    obs = FrameObservation(
+        schema_version="shadow-tracker/frame-observation/1.0.0",
+        shot_id=base_frame_identity.shot_id,
+        camera_id=base_frame_identity.camera_id,
+        frame_id=base_frame_identity.frame_id,
+        pts_ticks=base_frame_identity.pts_ticks,
+        timebase_numerator=base_frame_identity.timebase_numerator,
+        timebase_denominator=base_frame_identity.timebase_denominator,
+        physical_time_s=base_frame_identity.physical_time_s,
+        physical_time_reason="standard_shutter",
+        body_mask_ref="mask-body-01",
+        club_mask_ref="mask-club-01",
+        valid_mask_ref="mask-valid-01",
+        confidence_provenance="model_draft",
+    )
+    asset = SourceAsset(
+        schema_version="shadow-tracker/source/1.0.0",
+        asset_id=base_frame_identity.asset_id,
+        source_uri="urn:asset:golf-01",
+        content_sha256="e" * 64,
+        width_px=4,
+        height_px=4,
+        rights_status="permitted",
+        rights_note="test",
+    )
+    service.initialize_session(
+        source_asset=asset,
+        observations=[obs],
+        initial_masks=[model_mask],
+    )
+
+    # Human reviewer performs correction
+    corrected_club = bytes([0] * 15 + [1])
+    revised = service.update_mask(
+        frame_id=base_frame_identity.frame_id,
+        body=model_mask.body,
+        club=corrected_club,
+        valid=model_mask.valid,
+        parent_revision_id=model_mask.revision_id,
+        producer_id="reviewer-human",
+        correction_note="Touched up clubhead boundary",
+    )
+
+    assert revised.parent_revision_id == model_mask.revision_id
+    history = service.get_mask_history(base_frame_identity.frame_id)
+    assert len(history) == 2
+    assert history[0].revision_id == model_mask.revision_id
+    assert history[1].revision_id == revised.revision_id
+
+
+def test_evaluate_segmentation_benchmark_modern_archive_occluded(
+    tmp_path: Path,
+) -> None:
+    """Benchmark evaluates modern high-speed, archive historical, and occluded clips."""
+    from shared.python.shadow_tracker.segmentation import (
+        BenchmarkClip,
+        evaluate_segmentation_benchmark,
+    )
+
+    content = b"pinned weights for benchmark evaluation suite"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt = tmp_path / "model.pth"
+    ckpt.write_bytes(content)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt,
+        expected_sha256=content_sha,
+        allow_synthetic=True,
+    )
+
+    clips = [
+        BenchmarkClip(
+            clip_id="modern-120fps",
+            clip_type="modern_high_speed",
+            description="120 fps modern launch monitor footage with high-speed swing blur",
+            width_px=32,
+            height_px=32,
+            adverse_conditions=("blur_120fps",),
+        ),
+        BenchmarkClip(
+            clip_id="archive-1953",
+            clip_type="archive_historical",
+            description="1953 archival film scan with shaft dropouts",
+            width_px=32,
+            height_px=32,
+            adverse_conditions=("thin_shaft_loss",),
+        ),
+        BenchmarkClip(
+            clip_id="occluded-gallery",
+            clip_type="occluded_adverse",
+            description="Tour clip with spectator railing occlusion",
+            width_px=32,
+            height_px=32,
+            adverse_conditions=("partial_occlusion_spectator",),
+        ),
+    ]
+
+    report = evaluate_segmentation_benchmark(provider, clips)
+    assert report["schema_version"] == 1
+    assert len(report["clips"]) == 3
+
+    # Check metrics
+    modern_m = report["clips"][0]
+    archive_m = report["clips"][1]
+    occ_m = report["clips"][2]
+
+    assert 0.0 <= modern_m["body_iou"] <= 1.0
+    assert 0.0 <= modern_m["club_recall"] <= 1.0
+    assert modern_m["latency_ms_per_frame"] >= 0.0
+    assert modern_m["peak_memory_mb"] > 0.0
+
+    assert occ_m["occlusion_detected"] is True
+
+
+# ---------------------------------------------------------------------------
+# 11. Issue #11227: Synthetic Fallback Must Not Masquerade as Observed Model Inference
+# ---------------------------------------------------------------------------
+
+
+def test_absent_inference_engine_fails_closed_without_producing_unverified_masks(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Absent inference engine must fail closed instead of silently returning synthetic masks."""
+    content = b"pinned weights bytes"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt = tmp_path / "model.pth"
+    ckpt.write_bytes(content)
+
+    # Default provider without inference_engine and allow_synthetic=False
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt,
+        expected_sha256=content_sha,
+    )
+    assert not provider.allow_synthetic
+
+    # infer_frame must fail closed
+    with pytest.raises(
+        RuntimeError,
+        match="no active inference engine configured|cannot produce observed masks",
+    ):
+        provider.infer_frame(base_frame_identity, width_px=16, height_px=16)
+
+    # segment must also fail closed
+    req = SegmentationRequest(
+        shot_id=base_frame_identity.shot_id,
+        frame_ids=(base_frame_identity.frame_id,),
+    )
+    with pytest.raises(
+        RuntimeError,
+        match="no active inference engine configured|cannot produce observed masks",
+    ):
+        provider.segment(req)
+
+
+def test_explicit_synthetic_mode_labels_provenance_and_marks_is_synthetic(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Explicit allow_synthetic=True marks MaskFrame and SegmentationResult with synthetic provenance."""
+    content = b"pinned weights bytes for synthetic fixture"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt = tmp_path / "model.pth"
+    ckpt.write_bytes(content)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt,
+        expected_sha256=content_sha,
+        allow_synthetic=True,
+    )
+    assert provider.allow_synthetic
+
+    mask = provider.infer_frame(base_frame_identity, width_px=16, height_px=16)
+    assert mask.is_synthetic is True
+    assert mask.producer_id.startswith("synthetic:")
+    assert (
+        "Automated inference from verified pinned model weights"
+        not in mask.correction_note
+    )
+    assert "Synthetic" in mask.correction_note
+
+    req = SegmentationRequest(
+        shot_id=base_frame_identity.shot_id,
+        frame_ids=(base_frame_identity.frame_id,),
+    )
+    res = provider.segment(req)
+    assert res.provenance.startswith("synthetic:")
+
+
+def test_real_injected_inference_produces_model_labeled_masks(
+    tmp_path: Path,
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Injected real inference engine produces legitimate model-labeled masks."""
+    content = b"pinned weights bytes for real inference"
+    content_sha = hashlib.sha256(content).hexdigest()
+    ckpt = tmp_path / "model.pth"
+    ckpt.write_bytes(content)
+
+    called = False
+
+    def dummy_inference(
+        frame: FrameIdentity,
+        width: int,
+        height: int,
+        adverse: Sequence[str],
+    ) -> tuple[bytes, bytes, bytes]:
+        nonlocal called
+        called = True
+        total = width * height
+        return bytes([1] * total), bytes([0] * total), bytes([1] * total)
+
+    provider = ModelSegmentationProvider(
+        model_name="sam-vit-b-golf",
+        checkpoint_path=ckpt,
+        expected_sha256=content_sha,
+        inference_engine=dummy_inference,
+    )
+    assert not provider.allow_synthetic
+
+    mask = provider.infer_frame(base_frame_identity, width_px=8, height_px=8)
+    assert called is True
+    assert mask.is_synthetic is False
+    assert mask.producer_id.startswith("model:")
+    assert (
+        mask.correction_note == "Automated inference from verified pinned model weights"
+    )
+
+    req = SegmentationRequest(
+        shot_id=base_frame_identity.shot_id,
+        frame_ids=(base_frame_identity.frame_id,),
+    )
+    res = provider.segment(req)
+    assert res.provenance.startswith("model_inference:")
+
+
+def test_synthetic_observations_and_masks_block_release_qualification(
+    base_frame_identity: FrameIdentity,
+) -> None:
+    """Synthetic observations or masks cannot qualify for release (Gate G0 failure and dynamic_candidate demotion)."""
+    from shared.python.shadow_tracker.contracts import (
+        CandidateResult,
+        FrameObservation,
+        ReplayAudit,
+    )
+    from shared.python.shadow_tracker.evaluation import (
+        GateProfile,
+        audit_gate_profile,
+        classify_evidence_quality,
+    )
+
+    synth_obs = FrameObservation(
+        schema_version="shadow-tracker/frame-observation/1.0.0",
+        shot_id=base_frame_identity.shot_id,
+        camera_id=base_frame_identity.camera_id,
+        frame_id=base_frame_identity.frame_id,
+        pts_ticks=10,
+        timebase_numerator=1,
+        timebase_denominator=1000,
+        physical_time_s=0.01,
+        physical_time_reason="standard_shutter",
+        body_mask_ref="mask-body-synth",
+        club_mask_ref="mask-club-synth",
+        valid_mask_ref="mask-valid-synth",
+        confidence_provenance="synthetic",
+    )
+
+    audit = ReplayAudit(
+        schema_version="shadow-tracker/replay-audit/1.0.0",
+        candidate_id="cand-01",
+        reset_count=1,
+        integrator_name="mujoco",
+        integrator_version="3.3.0",
+        coverage_start_s=0.0,
+        coverage_end_s=0.1,
+        max_grip_translation_error_m=0.001,
+        max_grip_rotation_error_rad=0.01,
+        is_physically_accepted=True,
+    )
+
+    candidate = CandidateResult(
+        schema_version="shadow-tracker/candidate-result/1.0.0",
+        candidate_id="cand-01",
+        request_id="req-01",
+        initial_state=(0.0,) * 42,
+        trajectory=((0.0,) * 42,),
+        diagnostics={"mean_iou": 0.95, "is_synthetic": True},
+        uncertainty_method="empirical_holdout",
+        replay_audit=audit,
+        is_accepted=True,
+    )
+
+    # Release profile rejects synthetic observations
+    release_profile = GateProfile(allow_synthetic=False)
+    all_passed, statuses = audit_gate_profile(candidate, (synth_obs,), release_profile)
+    assert not all_passed
+    g0 = next(s for s in statuses if s.gate_id == "G0")
+    assert not g0.passed
+    assert "Synthetic" in g0.reason
+
+    # Classification demotes to dynamic_candidate rather than validated_profile
+    from shared.python.shadow_tracker.contracts import FitRequest
+
+    req = FitRequest(
+        schema_version="shadow-tracker/fit-request/1.0.0",
+        request_id="req-01",
+        shot_id="shot-01",
+        model_hash="c" * 64,
+        candidate_count=1,
+        objective_profile="standard",
+        time_window_start_pts=0,
+        time_window_end_pts=100,
+        budget_seconds=10.0,
+        engine_capability_requirement=(),
+    )
+    quality = classify_evidence_quality(
+        req, candidate, (audit,), (synth_obs,), release_profile
+    )
+    assert quality == "dynamic_candidate"

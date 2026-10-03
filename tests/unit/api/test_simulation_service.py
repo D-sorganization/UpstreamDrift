@@ -14,8 +14,15 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 import contextlib
 
-# Configure async tests to use asyncio backend only
-pytestmark = pytest.mark.anyio
+# Configure async tests to use asyncio backend only and unit suite marker
+pytestmark = [pytest.mark.anyio, pytest.mark.unit]
+
+try:
+    import mujoco  # noqa: F401
+
+    _MUJOCO_AVAILABLE = True
+except ImportError:
+    _MUJOCO_AVAILABLE = False
 
 # Explicit attribute list for GenericPhysicsRecorder mocks because the test
 # relies on instance attributes (is_recording) that are set in __init__, not
@@ -202,7 +209,7 @@ class TestRunSimulation:
 
             assert result.success is True
             assert result.duration == 0.01
-            assert result.frames == 10  # 0.01 / 0.001
+            assert result.frames == 11  # 0.01 / 0.001 steps + 1 initial frame at t=0
 
     async def test_simulation_loads_model(self, mock_engine_manager) -> None:
         """Test that simulation loads model when path provided."""
@@ -416,6 +423,12 @@ class MockTaskManager:
     # mirrors that synchronous contract.
     def __init__(self):
         self.tasks = {}
+
+    def exists(self, task_id: str) -> bool:
+        return task_id in self.tasks
+
+    def get(self, task_id: str) -> dict | None:
+        return self.tasks.get(task_id)
 
     def set(self, task_id: str, data: dict):
         self.tasks[task_id] = data
@@ -770,3 +783,283 @@ class TestSimulationServiceStatsTracking:
             after = time.time()
 
             assert before <= service.stats.start_time <= after
+
+
+class TestSimulationRecorderLifecycleAndValidation:
+    """TDD tests for issue #11142: Real recorder lifecycle, control preservation,
+
+    data validation, and buffer exhaustion visibility.
+    """
+
+    async def test_real_recorder_lifecycle_with_fake_engine(self) -> None:
+        """Deterministic fake engine + real recorder produces initial & stepped samples,
+
+        nonzero commanded controls, aligned lengths, and stopped lifecycle.
+        """
+        from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        fake_engine = MockPhysicsEngine(num_joints=2)
+        fake_engine.load_model("test_model")
+        mock_engine_manager = MagicMock(spec=EngineManager)
+        mock_engine_manager._load_engine = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=fake_engine
+        )
+
+        with patch("src.api.services.simulation_service.EngineType", MockEngineType):
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                duration=0.003,
+                timestep=0.001,
+                control_inputs=[
+                    {"torques": [1.0, 2.0]},
+                    {"torques": [3.0, 4.0]},
+                    {"torques": [5.0, 6.0]},
+                ],
+            )
+
+            result = await service.run_simulation(request)
+
+            assert result.success is True
+            # 1 initial sample (t=0) + 3 steps = 4 frames
+            assert result.frames == 4
+            assert "times" in result.data
+            assert len(result.data["times"]) == 4
+            np.testing.assert_allclose(result.data["times"], [0.0, 0.001, 0.002, 0.003])
+
+            # Aligned state channels
+            assert len(result.data["joint_positions"]) == 4
+            assert len(result.data["joint_velocities"]) == 4
+            assert len(result.data["joint_accelerations"]) == 4
+
+            # Commanded controls preserved
+            assert "control_inputs" in result.data
+            assert len(result.data["control_inputs"]) == 4
+            np.testing.assert_allclose(result.data["control_inputs"][1], [1.0, 2.0])
+            np.testing.assert_allclose(result.data["control_inputs"][2], [3.0, 4.0])
+            np.testing.assert_allclose(result.data["control_inputs"][3], [5.0, 6.0])
+
+            # Recorder lifecycle
+            recorder = service.active_recorder
+            assert recorder is not None
+            assert recorder.current_idx == 4
+            assert recorder.is_recording is False
+
+    async def test_real_recorder_both_rest_paths(self, tmp_path) -> None:
+        """Both sync (/simulate) and async (/simulate/async) REST paths return aligned results."""
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        from src.api.routes.simulation import router as simulation_router
+        from src.api.dependencies import get_simulation_service, get_task_manager
+        from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
+        from src.api.services.simulation_service import SimulationService
+        from src.shared.python.data_io.output_manager import OutputManager
+
+        fake_engine = MockPhysicsEngine(num_joints=2)
+        fake_engine.load_model("test_model")
+        mock_engine_manager = MagicMock(spec=EngineManager)
+        mock_engine_manager._load_engine = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=fake_engine
+        )
+
+        with patch("src.api.services.simulation_service.EngineType", MockEngineType):
+            out_mgr = OutputManager(base_path=tmp_path)
+            service = SimulationService(mock_engine_manager, output_manager=out_mgr)
+            task_mgr = MockTaskManager()
+
+            app = FastAPI()
+            app.include_router(simulation_router)
+            app.dependency_overrides[get_simulation_service] = lambda: service
+            app.dependency_overrides[get_task_manager] = lambda: task_mgr
+
+            client = TestClient(app)
+            payload = {
+                "engine_type": "mujoco",
+                "duration": 0.002,
+                "timestep": 0.001,
+                "control_inputs": [{"torques": [1.0, 2.0]}, {"torques": [3.0, 4.0]}],
+            }
+
+            # 1. Sync path: POST /simulate
+            res_sync = client.post("/simulate", json=payload)
+            assert res_sync.status_code == 200
+            data_sync = res_sync.json()
+            assert data_sync["success"] is True
+            assert data_sync["frames"] == 3
+            assert len(data_sync["data"]["times"]) == 3
+            assert len(data_sync["data"]["control_inputs"]) == 3
+            assert data_sync["data"]["control_inputs"][1] == [1.0, 2.0]
+
+            # 2. Async path: POST /simulate/async -> GET /simulate/status/{id}
+            fake_engine.reset()
+            res_async = client.post("/simulate/async", json=payload)
+            assert res_async.status_code == 200
+            task_id = res_async.json()["task_id"]
+
+            res_status = client.get(f"/simulate/status/{task_id}")
+            assert res_status.status_code == 200
+            status_data = res_status.json()
+            assert status_data["status"] == "completed"
+            async_result = status_data["result"]
+            assert async_result["success"] is True
+            assert async_result["frames"] == 3
+            assert len(async_result["data"]["times"]) == 3
+            assert len(async_result["data"]["control_inputs"]) == 3
+
+    async def test_reject_zero_recorded_samples(self) -> None:
+        """A simulation producing zero recorded samples cannot return successful status."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine_manager = MagicMock(spec=EngineManager)
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_rec = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_rec.is_recording = False
+            mock_rec.current_idx = 0
+            # get_time_series returns empty arrays
+            mock_rec.get_time_series.return_value = (np.array([]), np.array([]))
+            MockRecorder.return_value = mock_rec
+
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                duration=0.002,
+                timestep=0.001,
+            )
+
+            result = await service.run_simulation(request)
+            assert result.success is False
+            assert result.frames == 0
+            assert service.stats.last_run is not None
+            assert service.stats.last_run["status"] == "failed"
+
+    async def test_buffer_exhaustion_is_explicit(self) -> None:
+        """Buffer exhaustion surfaces explicitly and counts cannot silently disagree."""
+        from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
+        from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        fake_engine = MockPhysicsEngine(num_joints=2)
+        fake_engine.load_model("test_model")
+        mock_engine_manager = MagicMock(spec=EngineManager)
+        mock_engine_manager._load_engine = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=fake_engine
+        )
+
+        with (
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder",
+                lambda eng, **kwargs: GenericPhysicsRecorder(
+                    eng, max_samples=2, initial_capacity=2
+                ),
+            ),
+        ):
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                duration=0.005,  # 5 steps -> 6 requested samples, exceeds max_samples=2
+                timestep=0.001,
+            )
+
+            result = await service.run_simulation(request)
+            assert result.success is False
+            assert service.stats.last_run is not None
+            assert service.stats.last_run["status"] == "failed"
+            error_msg = service.stats.last_run["error"]
+            assert error_msg is not None
+            assert "capacity exhausted" in error_msg.lower()
+
+    @pytest.mark.smoke
+    @pytest.mark.requires_mujoco
+    @pytest.mark.skipif(not _MUJOCO_AVAILABLE, reason="MuJoCo runtime is not installed")
+    async def test_mujoco_smoke_journey_run_record_analyze_export_reload(
+        self, tmp_path: Path
+    ) -> None:
+        """One installed MuJoCo smoke journey runs -> records -> analyzes -> exports -> reloads."""
+        import json
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+        from src.shared.python.data_io.output_manager import OutputManager
+
+        engine_manager = EngineManager()
+        output_manager = OutputManager(base_path=tmp_path / "output")
+        service = SimulationService(engine_manager, output_manager=output_manager)
+
+        request = SimulationRequest(
+            engine_type="mujoco",
+            duration=0.01,
+            timestep=0.001,
+            analysis_config={"zvcf": True, "ztcf": True},
+        )
+
+        # 1. Run & Record
+        response = await service.run_simulation(request)
+        assert response.success is True
+        assert response.duration == 0.01
+        # 10 steps + 1 initial sample at t=0 = 11 frames
+        assert response.frames == 11
+        assert response.data is not None
+
+        times = response.data["times"]
+        assert len(times) == 11
+        assert np.isclose(times[0], 0.0)
+        assert np.isclose(times[-1], 0.01)
+
+        for channel in ("joint_positions", "joint_velocities", "joint_accelerations"):
+            assert channel in response.data
+            assert len(response.data[channel]) == 11
+
+        # 2. Analyze
+        assert response.analysis_results is not None
+        assert "zvcf_acceleration" in response.analysis_results
+        assert "ztcf_acceleration" in response.analysis_results
+
+        # 3. Export
+        assert response.export_paths is not None
+        assert len(response.export_paths) == 1
+        export_file = Path(response.export_paths[0])
+        assert export_file.is_file()
+
+        # 4. Reload and verify matching run identity and values
+        reloaded = json.loads(export_file.read_text(encoding="utf-8"))
+        assert reloaded.get("engine") == "mujoco"
+        assert reloaded["metadata"].get("duration") == response.duration
+        assert reloaded["metadata"].get("frames") == response.frames
+
+        # Verify values match between original response and reloaded export
+        assert reloaded["results"]["times"] == response.data["times"]
+        assert (
+            reloaded["results"]["joint_positions"] == response.data["joint_positions"]
+        )
+        assert (
+            reloaded["results"]["joint_velocities"] == response.data["joint_velocities"]
+        )
+        assert (
+            reloaded["results"]["joint_accelerations"]
+            == response.data["joint_accelerations"]
+        )
+        assert (
+            reloaded["metadata"]["analysis_results"]["zvcf_acceleration"]
+            == response.analysis_results["zvcf_acceleration"]
+        )
+        assert (
+            reloaded["metadata"]["analysis_results"]["ztcf_acceleration"]
+            == response.analysis_results["ztcf_acceleration"]
+        )

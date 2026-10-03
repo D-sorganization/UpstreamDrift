@@ -23,10 +23,14 @@ from src.shared.python.tour_baselines.events import (
     SWING_EVENTS_IRON,
 )
 from src.shared.python.tour_baselines.observation_manifest import (
+    CommonTargetComparison,
+    ComprehensiveErrorMetrics,
     MarkerObservationSpec,
     ObservationManifest,
     build_frozen_observation_manifest,
     calibrate_with_manifest_protection,
+    compute_common_target_comparison,
+    compute_comprehensive_error_metrics,
     compute_frame_wise_rms,
     compute_pooled_rmse,
 )
@@ -431,3 +435,155 @@ def test_manifest_round_trip_serialization() -> None:
     as_json = manifest.to_json()
     from_json = ObservationManifest.from_json(as_json)
     assert from_json == manifest
+
+
+def test_interpolated_observation_excluded_from_measured_holdout_scoring() -> None:
+    """An interpolated shoulder observation must be excluded from measured holdout scoring.
+
+    TDD First Failing Test requirement from MMR-02:
+    Mark an interpolated shoulder observation and assert it is excluded from measured
+    holdout scoring. Gap-filled samples can never become measured evidence.
+    """
+    manifest_base = _small_manifest()
+    # Mark marker A (representing shoulder) as interpolated for frames 8..9
+    markers = dict(manifest_base.markers)
+    markers["A"] = MarkerObservationSpec(
+        label="A",
+        segment="body",
+        is_tracked=True,
+        valid_count=8,
+        missing_count=2,
+        is_interpolated=False,
+        missing_spans=((6, 7),),
+        interpolated_spans=((8, 9),),
+    )
+    manifest = ObservationManifest(
+        capture_kind="driver",
+        source_file="test.c3d",
+        source_sha256="abc123",
+        frame_count=10,
+        rate_hz=360.0,
+        units="m",
+        handedness="right",
+        calibration_frames=manifest_base.calibration_frames,
+        holdout_frames=manifest_base.holdout_frames,
+        markers=markers,
+    )
+
+    measured_mask = manifest.measured_frame_validity()
+    # In full frame validity, frames 8 and 9 for marker 0 (A) are nominally valid (not missing)
+    full_mask = manifest.frame_validity()
+    col_a = sorted(manifest.markers).index("A")
+    assert bool(full_mask[8, col_a]) is True
+    assert bool(full_mask[9, col_a]) is True
+
+    # But in measured_frame_validity, frames 8 and 9 for marker A are strictly False (excluded)
+    assert bool(measured_mask[8, col_a]) is False
+    assert bool(measured_mask[9, col_a]) is False
+
+    # Evaluating with measured_only=True rejects any mask that includes interpolated samples
+    pred = np.zeros((10, 3, 3), dtype=np.float64)
+    obs = np.zeros((10, 3, 3), dtype=np.float64)
+    with pytest.raises(ValueError, match="measured"):
+        compute_pooled_rmse(pred, obs, full_mask, manifest=manifest, measured_only=True)
+
+    # Valid evaluation with measured_mask succeeds
+    rmse = compute_pooled_rmse(
+        pred, obs, measured_mask, manifest=manifest, measured_only=True
+    )
+    assert rmse == 0.0
+
+
+def test_comprehensive_error_metrics() -> None:
+    """Comprehensive error metrics evaluate pooled RMSE, frame distribution, p95/max, and per-phase/segment."""
+    n_frames = 10
+    n_markers = 3
+    pred = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    obs = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    valid = np.ones((n_frames, n_markers), dtype=bool)
+
+    # Create errors:
+    # Frame 0-4 (address/backswing): 0.01 m error on body markers (0, 1)
+    pred[0:5, 0, 0] = 0.01
+    pred[0:5, 1, 0] = 0.01
+    # Frame 5-9 (downswing/follow-through): 0.05 m error on club marker (2)
+    pred[5:10, 2, 0] = 0.05
+
+    phases = {
+        "address": (0, 2),
+        "backswing": (3, 4),
+        "downswing": (5, 7),
+        "follow_through": (8, 9),
+    }
+    segments = {
+        "marker_0": "body",
+        "marker_1": "body",
+        "marker_2": "club",
+    }
+
+    metrics = compute_comprehensive_error_metrics(
+        pred,
+        obs,
+        valid,
+        phase_spans=phases,
+        segment_mapping=segments,
+    )
+
+    assert isinstance(metrics, ComprehensiveErrorMetrics)
+    assert metrics.pooled_rmse > 0.0
+    assert metrics.p95_error > 0.0
+    assert metrics.max_error >= metrics.p95_error
+    assert math.isclose(metrics.max_error, 0.05, rel_tol=1e-7)
+    assert "address" in metrics.per_phase_rmse
+    assert "downswing" in metrics.per_phase_rmse
+    assert "body" in metrics.per_segment_rmse
+    assert "club" in metrics.per_segment_rmse
+    assert metrics.total_valid_observations == n_frames * n_markers
+    assert metrics.valid_frames == n_frames
+
+
+def test_common_target_comparison_preserves_coverage_visibility() -> None:
+    """Common-target comparison evaluates common valid subset while preserving coverage differences."""
+    n_frames = 10
+    n_markers = 4
+    pred_a = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    pred_b = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+    obs = np.zeros((n_frames, n_markers, 3), dtype=np.float64)
+
+    # Candidate A valid on markers 0, 1, 2 (30 valid samples)
+    valid_a = np.zeros((n_frames, n_markers), dtype=bool)
+    valid_a[:, :3] = True
+    pred_a[:, 0, 0] = 0.02
+
+    # Candidate B valid on markers 1, 2, 3 (30 valid samples)
+    valid_b = np.zeros((n_frames, n_markers), dtype=bool)
+    valid_b[:, 1:] = True
+    pred_b[:, 1, 0] = 0.04
+
+    comp = compute_common_target_comparison(pred_a, pred_b, obs, valid_a, valid_b)
+    assert isinstance(comp, CommonTargetComparison)
+
+    # Common valid count must be 20 (markers 1 and 2 across 10 frames)
+    assert comp.common_valid_count == 20
+    assert comp.valid_count_a == 30
+    assert comp.valid_count_b == 30
+    assert comp.exclusive_valid_count_a == 10
+    assert comp.exclusive_valid_count_b == 10
+    assert math.isclose(comp.coverage_ratio_a, 30.0 / 40.0)
+    assert math.isclose(comp.coverage_ratio_b, 30.0 / 40.0)
+    assert math.isclose(comp.common_coverage_ratio, 20.0 / 40.0)
+
+    # On common markers (1, 2):
+    # Candidate A has error 0.0 (error was on marker 0)
+    assert math.isclose(comp.common_pooled_rmse_a, 0.0, abs_tol=1e-12)
+    # Candidate B has error 0.04 on marker 1 and 0.0 on marker 2
+    expected_rmse_b = math.sqrt((10 * 0.04**2) / 20.0)
+    assert math.isclose(comp.common_pooled_rmse_b, expected_rmse_b, rel_tol=1e-7)
+
+    # Disjoint masks fail closed
+    disjoint_b = np.zeros((n_frames, n_markers), dtype=bool)
+    disjoint_b[:, 3] = True
+    disjoint_a = np.zeros((n_frames, n_markers), dtype=bool)
+    disjoint_a[:, 0] = True
+    with pytest.raises(ValueError, match="common valid observations"):
+        compute_common_target_comparison(pred_a, pred_b, obs, disjoint_a, disjoint_b)
