@@ -2273,6 +2273,41 @@ segments. Camera handling, repeated swings and sideways footage require
 explicit grading elsewhere. Album membership and appearance cannot
 establish which of the 13 marker swings a clip depicts.
 
+\subsection{Local Acquisition and Marker-Placement Review}
+The active goal explicitly includes local-machine acquisition and
+marker-placement review of the owner's session videos. On 3 October UTC,
+the complete previously acquired source export was copied from the fleet
+workstation to the operator's local machine. The archive and all six
+extracted MP4 files were verified by SHA-256 and byte count against the
+acquisition receipt: 88,753,631 archive bytes and 88,738,421 media bytes.
+Neutral filenames and private storage preserve the original evidence.
+Exact marker-trial pairing, camera-original provenance and physical video
+timing remain unverified.
+
+Direct review of two decoded indoor frames and the existing contact sheet
+shows surface markers attached to the cap, torso and waist garments,
+limbs, shoes and club. Exact capture labels, occluded-side assignments
+and anatomical joint centres cannot be recovered from these images alone.
+Review the edited camera views separately and retain the recorded
+cross-dissolve exclusion. Marker placement supplies calibration evidence
+with uncertainty; a surface point is not a measured joint centre.
+
+For marker $i$ attached to body $b$, the model and camera relationship is
+\[
+ p_i^W=o_b^W+R_b^W d_i^b,\qquad
+ u_i=\pi_{K,D}(R_{CW}p_i^W+t_{CW}).
+\]
+The positions and offsets are in metres, rotations dimensionless, and
+$u_i$ in pixels. Body-local offset $d_i^b$, camera intrinsics $K$,
+distortion $D$ and extrinsics require evidence or explicit uncertainty.
+Unknown video labels remain unknown. Reuse the existing source/frame,
+registration and comparison authorities. Hip, knee, ankle and shoulder
+centre offsets remain anatomical proxies until independently calibrated.
+Visibility, raw-source missingness and interpolation status accompany
+each scored observation. Separate declared calibration observations from
+held-out validation; fitting the same target again does not establish
+independent measurement accuracy.
+
 \subsection{Selected Motion Clock and Coordinate Contract}
 A native read-only audit exited naturally at
 \texttt{2026-10-02T20:10:11Z}, without loading or saving a model or running
