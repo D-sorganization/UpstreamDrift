@@ -396,7 +396,12 @@ def mujoco_pendulum_mjcf(fx: PendulumFixture) -> str:
         f'<body name="{LINK}" pos="0 0 {fx.pivot_height}">'
         f'<joint name="{HINGE}" type="hinge" axis="0 1 0"/>'
         f'<inertial pos="0 0 {-fx.com_distance}" mass="{fx.mass}" '
-        f'diaginertia="{_INERTIA} {_INERTIA} {_INERTIA}"/></body>'
+        f'diaginertia="{_INERTIA} {_INERTIA} {_INERTIA}"/>'
+        # Non-colliding rod from the pivot to the COM: MuJoCo's native axial
+        # source only reports rods. The explicit <inertial> above keeps the
+        # body mass and inertia unchanged.
+        f'<geom type="capsule" fromto="0 0 0 0 0 {-fx.com_distance}" '
+        'size="0.01" contype="0" conaffinity="0" group="3"/></body>'
     )
     motor = f'<actuator><motor name="motor" joint="{HINGE}" gear="1"/></actuator>'
     return _mjcf(fx, body, motor)
