@@ -11,6 +11,9 @@ Builds a world-frame (Z-up) :class:`ForceTorqueFrame` from an OpenSim state:
   omitted (their axis is ambiguous), never reported as zero.
 * ``CONTACT`` for every sphere/half-space ``HuntCrossleyForce`` and
   ``SmoothSphereHalfSpaceForce``, applied at the sphere's lowest point.
+* ``MUSCLE`` wrenches (FTO-16, #11301): for every enabled ``Muscle`` the tendon
+  force along the path's effective end directions, one wrench at the origin and
+  one at the insertion (labels ``muscle:<name>:origin`` / ``:insertion``).
 * Axial loads of each joint-child segment from its proximal reaction.
 
 ``grip:*`` wrenches are deliberately absent: the OpenSim grip model still
@@ -67,7 +70,9 @@ _ENGINE = "opensim"
 _REACTION_SOURCE = "opensim:Joint.calcReactionOnChildExpressedInGround"
 _ACTUATOR_SOURCE = "opensim:CoordinateActuator.getActuation"
 _CONTACT_SOURCE = "opensim:ContactForce.getRecordValues"
+_MUSCLE_SOURCE = "opensim:Muscle.getTendonForce"
 _MIN_SEGMENT_LENGTH_M = 1e-12
+_MIN_DIRECTION_NORM = 1e-9  # PointForceDirection with no force transfer
 _HALF_SPACE_OUTWARD_LOCAL = np.array([-1.0, 0.0, 0.0])  # Simbody HalfSpace normal
 
 
@@ -141,13 +146,16 @@ class OpenSimForceTorqueSource:
     Preconditions: ``model`` is an initialized ``opensim.Model`` (``initSystem``
     has been called) and states passed to :meth:`sample` belong to it.
     Postconditions: ``sample`` returns a frame in the Z-up world; unsupported
-    joints, coordinates and forces are omitted, never zero-filled.
+    joints, coordinates and forces are omitted, never zero-filled. Muscle
+    wrenches are included by default (a model without muscles has none); pass
+    ``include_muscles=False`` to skip them.
     """
 
-    def __init__(self, model: Any) -> None:
+    def __init__(self, model: Any, *, include_muscles: bool = True) -> None:
         if not isinstance(model, opensim.Model):
             raise TypeError("model must be an opensim.Model")
         self._model = model
+        self._include_muscles = bool(include_muscles)
         self._to_world = _rotation_to_z_up(model)
 
     def _world(self, v: Iterable[float]) -> np.ndarray:
@@ -181,6 +189,8 @@ class OpenSimForceTorqueSource:
         wrenches.extend(self._reactions(state))
         wrenches.extend(self._actuators(state))
         wrenches.extend(self._contacts(state))
+        if self._include_muscles:
+            wrenches.extend(self.muscle_wrenches(state))
         axial = self._axial_loads(state)
         loads = (
             AxialLoadFrame(time_s=time_s, values_n=axial, source=_REACTION_SOURCE)
@@ -287,6 +297,77 @@ class OpenSimForceTorqueSource:
                     point_m=_tuple3(self._world(_vec3(point))),
                     torque_nm=_tuple3(self._world(moment)),
                     source=_ACTUATOR_SOURCE,
+                )
+            )
+        return wrenches
+
+    def muscle_wrenches(self, state: Any) -> tuple[OverlayWrench, ...]:
+        """``MUSCLE`` wrenches at the first and last effective path points.
+
+        For each enabled muscle the tendon force (N, from
+        ``Muscle.getTendonForce``) times the unit direction OpenSim reports at
+        the end points of ``GeometryPath.getPointForceDirections`` (the force
+        the path applies to the body, in ground), applied at the attachment in
+        ground and rotated to the Z-up world. Torque is unavailable (``None``).
+        Wrapping surfaces and via points shape the path and the end directions
+        but **only the end attachments are drawn** (leading or trailing points
+        on the same body as their neighbour carry no force and are skipped); the full path polyline is
+        a recorded follow-up. Complements the scalar fiber forces of
+        ``muscle_analysis.get_muscle_forces``, which is unchanged.
+
+        Preconditions: ``state`` is realized to Dynamics or later (``sample``
+        does this). Postcondition: every force is finite with a norm equal to
+        the tendon force, which is >= 0 (tendons only pull); a muscle with a
+        degenerate path (fewer than two effective points) is omitted, never
+        reported as zero.
+
+        Raises:
+            AssertionError: If a tendon force is negative or not finite.
+        """
+        wrenches: list[OverlayWrench] = []
+        forces = self._model.getForceSet()
+        for i in range(forces.getSize()):
+            muscle = opensim.Muscle.safeDownCast(forces.get(i))
+            if muscle is None or not muscle.appliesForce(state):
+                continue
+            wrenches.extend(self._muscle_end_wrenches(muscle, state))
+        return tuple(wrenches)
+
+    def _muscle_end_wrenches(self, muscle: Any, state: Any) -> list[OverlayWrench]:
+        tendon_n = float(muscle.getTendonForce(state))
+        if not math.isfinite(tendon_n) or tendon_n < 0.0:
+            raise AssertionError(
+                f"muscle {muscle.getName()!r}: tendon force must be finite and "
+                f">= 0 N, got {tendon_n}"
+            )
+        directions = opensim.ArrayPointForceDirection()
+        muscle.getGeometryPath().getPointForceDirections(state, directions)
+        # Consecutive path points on one body exchange force internally, so
+        # OpenSim reports a zero direction there; the effective ends are the
+        # first and last points that transmit force to a body.
+        carrying = [
+            pfd
+            for pfd in (directions.get(k) for k in range(directions.getSize()))
+            if np.linalg.norm(_vec3(pfd.direction())) > _MIN_DIRECTION_NORM
+        ]
+        if len(carrying) < 2:
+            logger.info("Omitting muscle %s: path has < 2 points", muscle.getName())
+            return []
+        ends = (("origin", carrying[0]), ("insertion", carrying[-1]))
+        wrenches = []
+        for end, pfd in ends:
+            frame = pfd.frame()
+            point = frame.findStationLocationInGround(state, pfd.point())
+            wrenches.append(
+                OverlayWrench(
+                    kind=WrenchKind.MUSCLE,
+                    label=f"{_label('muscle', muscle.getName())}:{end}",
+                    body=_base_name(frame),
+                    point_m=_tuple3(self._world(_vec3(point))),
+                    force_n=_tuple3(
+                        self._world(tendon_n * np.asarray(_vec3(pfd.direction())))
+                    ),
+                    source=_MUSCLE_SOURCE,
                 )
             )
         return wrenches

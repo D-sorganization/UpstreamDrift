@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11301 | [FTO-16] OpenSim muscle lines of action: `OpenSimForceTorqueSource.muscle_wrenches` emits `MUSCLE` wrenches (tendon force along the effective end directions) at each enabled muscle's origin and insertion, labels `muscle:<name>:origin`/`:insertion`; only end attachments drawn. |
 | 2026-10-03 | #11300 | [FTO-15] OpenSim force/torque provider: `OpenSimForceTorqueSource` (world Z-up joint reactions, coordinate-actuator torques, Hunt-Crossley/smooth sphere contacts moved to the sphere bottom, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`compute_contact_forces`, `contact_forces` and `force_visualization` PARTIAL. |
 | 2026-10-02 | #11287 | [FTO-2] Implement shared force conversions: joint torque to moment vector, local to world, point translation with moment-arm adjustment, and reaction wrenches to axial loads (#11287). |
 | 2026-10-02 | #11303 | [FTO-18] Add the pure-Python Simscape force loader `load_simscape_force_series` (declarative channel table, logged-R rotation, orthonormality validation) and `SimscapeAdapter.load_force_series`; documented in CROSS_ENGINE_PARITY_SPEC section 3.1. |
