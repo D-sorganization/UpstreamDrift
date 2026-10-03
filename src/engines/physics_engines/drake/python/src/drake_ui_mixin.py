@@ -278,8 +278,11 @@ class DrakeUIMixin:
         self.chk_show_forces.toggled.connect(self._on_visualization_changed)
         self.chk_show_torques = QtWidgets.QCheckBox("Show Torques")
         self.chk_show_torques.toggled.connect(self._on_visualization_changed)
+        self.chk_show_gravity = QtWidgets.QCheckBox("Show Gravity")
+        self.chk_show_gravity.toggled.connect(self._on_visualization_changed)
         ft_grid.addWidget(self.chk_show_forces, 0, 0)
         ft_grid.addWidget(self.chk_show_torques, 0, 1)
+        ft_grid.addWidget(self.chk_show_gravity, 0, 2)
         vis_layout.addLayout(ft_grid)
 
         # Ellipsoid Toggles

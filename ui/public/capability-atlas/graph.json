@@ -159,6 +159,20 @@
       "id": "docs.document_library"
     },
     {
+      "feature_id": "drake.gui_force_overlay",
+      "title": "Drake GUI force/torque arrows and live tension/compression shading",
+      "status": "gap",
+      "pyqt": "src/engines/physics_engines/drake/python/src/drake_force_overlay.py",
+      "api": null,
+      "web": null,
+      "issue": 11308,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308.",
+      "id": "drake.gui_force_overlay"
+    },
+    {
       "feature_id": "engines.dashboards",
       "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
       "status": "exempt",
@@ -2914,7 +2928,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "de63845641e42542250e4aa7e960b0ea60463600eaadeadc9da1f3af5314fd36",
+    "src/config/feature_parity.json": "07140df1f7864913a65fcf78f80fd592d8ffa30d302a0954569457edb04ffa65",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
