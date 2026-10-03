@@ -7727,6 +7727,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11377 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence (#11308). |
+| 2026-10-03 | #11354 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
 | 2026-10-03 | #11363 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362 (#11307). |
 | 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
 | 2026-10-03 | #11346 | `force-overlay-parity` mujoco lane now requires the real `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` case to pass instead of the stand-in MJCF statics check, now that the MuJoCo provider row is on main |
