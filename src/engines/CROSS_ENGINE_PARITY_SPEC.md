@@ -167,7 +167,7 @@ canonical gate:
 - Humid-air density uses the two-gas dry-air/water-vapor formula; saturated air
   at 30 C must be less dense than dry air at the same pressure.
 
-### 2.5.2 Force overlay channels
+### 2.5.2 Force Overlay Channels
 
 Engines that implement `ForceTorqueProvider` (ADR-0052) emit world-frame wrenches by kind. Unavailable channels are omitted, never zero-filled.
 
