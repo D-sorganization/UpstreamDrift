@@ -1,7 +1,8 @@
 # Active: OpenCap to OpenSim Integration — #11400
 
-- Branch `claude/opencap-upstreamdrift-integration-e7ev4n` at SELF; PR #11410. Slice covers #11401 (ADR-0053), #11402 (LaiUhlrich2022 marker vocabulary), #11403 (`load_opencap_session`: model, SI kinematics, subject).
-- Validation, constraints and the next step: `DL-#11400` in `docs/development/DEVELOPMENT_LOG.md`. Blocked children: #11404 waits on #11169, #11405 on #9627; #11408 needs a physical reference capture.
+- Branch `feat/opencap-import-11409` at SELF; PR #11409. Slice covers #11409 (OpenCap: Import Session Action in PyQt6 and React/Tauri).
+- Implemented: `OpenCapImportAction` and `OpenCapImportDialog` in PyQt6 (`src/engines/physics_engines/opensim/python/opencap_import_action.py`), `MainWidget` OpenCap session loading in `opensim_gui.py`, `load_opencap_session` in `OpenSimPhysicsEngine`, `OpenCapImportModal` in React/Tauri (`ui/src/components/opencap/OpenCapImportModal.tsx`), FastAPI routes in `src/api/routes/opencap.py`, and `inspect_opencap_session` in `opencap_session.py`.
+- Validation: 21 Python tests passing in `tests/ui/engines/opensim/test_opencap_import_action.py`, `tests/unit/api/test_routes_opencap.py`, and `tests/unit/motion_pipeline/sources/test_opencap_session.py`; 5 Vitest tests passing in `OpenCapImportModal.test.tsx`; 39 feature parity tests passing; ruff lint/format clean.
 
 # Active: Necromatcher Native Fit Delivery — #11240
 
