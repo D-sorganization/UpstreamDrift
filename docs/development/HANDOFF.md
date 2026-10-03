@@ -1,3 +1,47 @@
+# Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment-video`; commit SELF; PR: #11378 (`Closes #11309`, `Refs #11285`)
+- Governing issue: #11309 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-24] Carry force/torque series through trace import, time maps and registration onto video frames.
+- Completed:
+  - `src/shared/python/force_overlay/contracts.py` & `schemas/force-torque-frame-v1.json`:
+    - Extended `ForceTorqueFrame.world_frame` to accept `"adr0041_world"` alongside `"world_Zup"`.
+    - Added `ForceTorqueFrame.metadata` mapping field.
+  - `src/motion_capture/reference/force_alignment.py`:
+    - `force_frame_for_video(series, *, video_time_s, registration, max_gap_s=0.1) -> ForceTorqueFrame | None`:
+      - Resolves video timestamp to reference time via `registration.time_mapping.scene_to_reference(video_time_s)`.
+      - Samples `ForceTorqueSeries.frame_at(ref_time_s, max_gap_s=max_gap_s)` (returns `None` when gap exceeds threshold).
+      - Converts spatial positions via `registration.place_points()` into ADR-0041 camera world coordinate system.
+      - Transforms direction vectors: forces as polar vectors ($F_{world} = A F_{can}$), torques as axial vectors / pseudovectors ($\tau_{world} = \det(A) (A \tau_{can})$), preserving physical vector magnitudes without scaling.
+      - Applies parity reflection ($\det(A) = -1$) when `registration.mirror_lateral` is True.
+      - Reconstructs aligned `AxialLoadFrame` if present at `video_time_s`.
+      - Preserves scale in `metadata["registration_scale"] = registration.transform.scale`.
+    - `write_trace_forces(path, series)` & `load_trace_forces(path)`:
+      - Persists and roundtrips `ForceTorqueSeries` losslessly in trace HDF5 file under group `force_torque_series`.
+      - Fallback loader parses root `wrench` (T, 6) if and only if declared `wrench_point` or `root_point` exists in trace meta; returns `None` without fabricated points if undeclared.
+    - `series_to_viewport_payload_wrench(series) -> np.ndarray`:
+      - Returns (T, 6) array summing contact and external wrenches about world origin ($r \times F + \tau$).
+  - `src/motion_capture/reference/trace_import.py`:
+    - Updated `_preflight` to recognize and count dataset sizes inside the `force_torque_series` HDF5 group without rejecting it as a non-dataset root key.
+  - Tests:
+    - 8 comprehensive unit tests in `tests/motion_capture/test_force_alignment.py`:
+      - Time mapping affine alignment.
+      - Canonical Z-up +z force to ADR-0041 +y world mapping.
+      - 90° rotation, translation, and scale (unscaled vector magnitude).
+      - Mirrored registration polar vs axial vector parity flip.
+      - Gap rejection returning `None`.
+      - HDF5 `force_torque_series` roundtrip.
+      - Undeclared wrench point returning `None`.
+      - Net origin wrench payload summation.
+- Validation:
+  - `pytest tests/motion_capture/test_force_alignment.py tests/motion_capture/test_trace_reference_import.py tests/motion_capture/test_reference_registration.py tests/unit/force_overlay`: 129 passed.
+  - Local CI gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_dry_duplication_gate.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check` & `ruff format --check`: Clean.
+  - `mypy`: Clean (0 issues).
+- Next steps: Merge PR; unblocks FTO-25 (#11310) and FTO-26 (#11311).
+
+---
+
 # MuJoCo GUI Force and Torque Overlays Through Shared Renderers - #11295 (FTO-10)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11295-gui`; commit SELF; PR: see `Closes #11295` / `Refs #11285`; DL entry `DL-#11285`
@@ -23,6 +67,8 @@
 - Limits: the MuJoCo lane's evidence is the provider-independent MJCF statics test until FTO-9 (#11294) lands; switch it to the hanging-pendulum `[mujoco]` case then. The opensim lane is `continue-on-error` (wheel not installable everywhere). Lanes are not required checks; making them required is a repo-admin setting. Not run on a real runner here.
 - Validation: YAML parses; the new structure test passes; ruff check/format clean. 20 other tests in `tests/ci/test_ci_infrastructure.py` fail in this venv (missing optional deps) and are unrelated.
 - Next steps: watch the first CI run of each lane; update the mujoco evidence after #11294.
+
+---
 
 # Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
 
