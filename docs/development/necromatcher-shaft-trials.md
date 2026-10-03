@@ -1,11 +1,11 @@
 # Source-Bound Shaft Trials and Review
 
 Issues: #11318 (optional shaft fitting and persistence), #11246 (original-video
-overlays), #11247 (methods report), #11235 (native fitting), and PR #11240.
+overlays), #11247 (methods report), #11235 (native fitting), and merged PR #11240; follow-up integration remains separate.
 
 ## Current Execution Boundary
 
-The published `8989d9cdecafdd9cad4aceba283fd5db3c6890ae` checkpoint provides
+The historical published `8989d9cdecafdd9cad4aceba283fd5db3c6890ae` checkpoint provides
 generic additional-image residuals, immutable sparse shaft observations and
 canonical capture/PNG/clock/native-axis admission. It does not contain an actual
 shaft-informed Tiger or Hogan fit. Existing Tiger V15 and Hogan V12 outputs
@@ -92,7 +92,7 @@ passed without a timeout change. Root's stable 41-case video/job/API lane
 passed. The cause of that timing overrun is unproven; source rejection worked.
 These synthetic tests are not historical video exports.
 
-## Prospective Holdout Admission Wrapper
+## Holdout Admission Wrapper and Historical Preflight
 
 The independently reviewed authoring plan fixes Tiger frame 150 at confidence
 0.5 and sigma 4 pixels, Hogan frame 200 at 0.4 and 3 pixels, and Hogan frame
@@ -106,8 +106,9 @@ bindings and checks actual body-training membership. Its native adapter reuses
 one compiled binding and resolves the axis from exact `definition_bytes`.
 Eleven SDK-free tests passed after red-first missing-driver, native-axis adapter
 and valid-range weight-mutation failures. Full input/source/runtime/parent
-brackets and exclusive failure journals precede any later admission. Current
-preflight performed no native admission, optimizer or library write.
+brackets and exclusive failure journals precede any later admission. That historical
+preflight performed no native admission, optimizer or library write. Subsequent
+actual admission and paired execution are recorded below.
 
 ## Matched Continuation Procedure
 
@@ -152,27 +153,27 @@ shaft length, calibrated camera/anatomy, physical time, dynamics or historical
 impact truth. The existing five finite research targets remain distinct from
 scientific qualification.
 
+## Actual Matched Trials, Exports, and Report Publication
+
+Committed producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` completed four matched saved-final-start jobs: `tiger-shaft-paired-control-fit-v16`, `tiger-shaft-paired-variant-fit-v16`, `hogan-shaft-paired-control-fit-v13`, and `hogan-shaft-paired-variant-fit-v13`. Both arms retain identical starts, body evidence, geometry times, priors, bounds and budgets; only the variant receives V1 shaft training evidence. All four succeeded computationally, exhausted 30 evaluations without convergence, and remain rejected research. Independent canonical-baselines assessment SHA-256 `b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e` verifies all five fixed finite historical targets and 32 authored scalar ranges, with 12 coordinates explicitly unbounded. Finite nonlinear probes are not an all-time physical certificate.
+
+| Player | Version         | Raw Shaft Training RMS (px) | Raw Shaft Holdout RMS (px) |
+| ------ | --------------- | --------------------------- | -------------------------- |
+| Tiger  | Saved Parent    | 146.485174                  | 160.100500                 |
+| Tiger  | Matched Control | 147.658424                  | 148.510840                 |
+| Tiger  | Shaft Variant   | 136.754847                  | 155.662105                 |
+| Hogan  | Saved Parent    | 39.509246                   | 31.746597                  |
+| Hogan  | Matched Control | 39.212558                   | 31.851775                  |
+| Hogan  | Shaft Variant   | 36.969614                   | 31.857107                  |
+
+Training improves relative to the matched control, but Tiger holdout worsens and Hogan holdout is essentially unchanged. These raw unweighted perpendicular line distances are separate from body-marker RMS and weighted objective rows. Actual V2 admission receipt `8c2327b6af8a1c5977adb424ccf38e5b73e2b4a5ffc132a1bda762c2a00956e1` retains Tiger 150 as withheld shaft labels on an existing body-training image, Hogan 200/550 outside body training, and Tiger 60 abstention. Authored confidence/sigma remain uncalibrated; earlier candidate declarations are unchanged.
+
+Four actual original-footage exports in Desktop `Matched Shaft Display Exports V16-V13` use a display-only V1/V2 union after fitting with explicit per-frame roles, preserving abstentions and original evidence pins without changing any objective. Completion receipt `e9764222852b86c287d5dab6818fb734ed850654ee112189bc17811eba4e1404` and independent export review `f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0` verify all 1,920 source-sized decoded frames, every original PNG/PTS binding, output hashes and recomputed projections/body/shaft metrics. All 318 immutable library files and source/runtime/helper/config brackets remained unchanged. The independent visual scope is twelve selected overlays and six original images; all-frame visual review and manual OS acceptance remain false. Visible shaft mismatch persists. Exact rational source PTS are preserved in manifests; Tiger encoded rate 2997/100 versus source 30000/1001 has maximum relative drift 6.9736403069736406 microseconds, while Hogan 30/1 is exact. These display clocks do not identify physical historical time.
+
+The published report is now 74 pages: PDF SHA-256 `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, exact source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`, independent all-page review `8b4fb44f2b0cd552c7a443f5e90ada9d95f624ff3711d4514f3f70e6708db6ee`, and separate root review `6fe30a6978fcc61fbb3192df6641b3da93515155e21bec6cc3852ef832854c5c`. Three installer-disabled MiKTeX passes completed without actual warnings, overfull boxes or unresolved references. Desktop manifest verifies 1,504 artifacts, SHA-256 `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`. Exact prior 66-page source/PDF/reviews, 1,260-artifact index and README are preserved under `Report/handoff-shaft-66-page-publication`; older editions remain unchanged.
+
+PR #11240 and Affine PR #4834 were merged; follow-up integration remains separate. Historical actual 605/8fde sanitized handoff receipts retain their cohort and producer identities; no new sanitized shaft-fit export or public deployment is claimed. Head observations/errors and physical shaft endpoints remain unmeasured. #11318 remains partial, with no camera/anatomy/physical-time/continuous dynamics/impact qualification or issue closure inferred.
+
 ## Desktop Review and Repeatability
 
-`C:/Users/diete/Desktop/Necromatcher Review 2026-10-01` contains the 66-page
-methods PDF and exact editable LaTeX in `Report`, completed Tiger V15 and Hogan
-V12 original-footage overlays, admitted V1 shaft inspection images and draft V2
-candidate review. `Prospective Paired Shaft Trial Plan` now preserves the generic
-protocol, exact saved-final-start configurations, seven SDK-free configuration
-tests, input pins and root read-only review. No canonical admission or optimizer
-was run to create that planning folder.
-
-The refreshed index verifies 1,226 artifacts, SHA-256
-`ee5f45166976849d46ac3ed1ce55fb728abdf40d180c90ef4f528878b408db8b`.
-The preceding 1,216-artifact index and README are preserved in
-`Report/desktop-index-before-paired-shaft-plan`. The compiled report remains
-unchanged: PDF SHA-256
-`f31f1fbd6c0917254b358bae3852e42de8e5d898b1f60d47b3b08c63427f3228`,
-source SHA-256
-`1702e35d4a04b95d0c5de13b04db34325cfef7b8e2ad47f50ea47da45354991c`.
-
-The headless Flash text audit found no incorrect supplied hash or cohort. A
-procedure paragraph was clarified to locate the export receipt beside the
-two-file bundle. Different producer/consumer configuration prefixes and a
-human-readable browser addendum label do not denote mismatched artifacts;
-the report's repeatability table supplies the exact browser receipt filename.
+The Desktop package retains the prior planning folders and their no-write preflight receipts as historical evidence. The current 74-page publication and 1,504-artifact manifest above supersede current-availability wording only; earlier66/60/49-page editions, indices and original receipts remain preserved. Canonical captures, pinned runtimes, original evidence and reviewed helpers are prerequisites; exclusive output guards must not be bypassed.

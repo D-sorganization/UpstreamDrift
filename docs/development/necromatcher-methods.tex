@@ -35,7 +35,7 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\skewmat}[1]{[#1]_{\times}}
 \newcommand{\reportsection}[1]{\section{#1}}
-\providecommand{\reviewartifactroot}{..}
+\providecommand{\reviewartifactroot}{C:/Users/diete/Desktop/Necromatcher Review 2026-10-01}
 
 \begin{document}
 \hypersetup{pageanchor=false}
@@ -55,8 +55,8 @@
 Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
-Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; exact restart and V9 producer \code{7a2359eadd}; phase V10 \code{9c21eda8ba}; matched wrist V11 \code{f570e5f421}; later exploration identified separately; latest local handoff/shaft admission \code{605c695259}, with committed Affine consumer \code{8fdebad14d}.\\
+Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; merged PRs \#11240 and Affine \#4834; follow-up integration pending.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; exact restart and V9 producer \code{7a2359eadd}; phase V10 \code{9c21eda8ba}; matched wrist V11 \code{f570e5f421}; later exploration identified separately; earlier local handoff/shaft admission \code{605c695259}; actual matched shaft fits and exports \code{3ab5c2ac87}; historical Affine consumer receipt \code{8fdebad14d}, with PR \#4834 subsequently merged. These producer checkpoints remain distinct.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -3112,7 +3112,8 @@ itself. Camera, generic geometry, uncertainty, and correspondence remain
 explicit hypotheses.
 
 \note{Prospective Solver Boundary}{These equations explain possible Slice B
-use at the \code{605c695259} admission checkpoint. The completed execution
+use at the \code{605c695259} admission checkpoint. The later actual
+execution and its limits are reported in Section~\ref{sec:actual-shaft-execution}. The completed execution
 only admitted and inspected sparse evidence; it did not add line residuals to
 the actual V15/V12 fits or run a new optimizer. Later implementation tests
 cannot retroactively establish fitted outputs at this checkpoint. A reviewed
@@ -3182,6 +3183,354 @@ Is Claimed.}
 \end{figure}
 \clearpage
 
+
+% TEMP Draft Only; Not a Published Report or Historical Trial Receipt.
+% Intended insertion: after the current sparse-evidence inspection figures,
+% immediately before Repeatable Procedure and Engineering Verification.
+% Reuses the canonical report preamble, reportsection/code/hash/note macros,
+% booktabs/longtable and existing mathematical notation. No standalone compile.
+
+\reportsection{Optional Shaft Evidence Execution and Matched Trial Outcomes}
+\label{sec:actual-shaft-execution}
+\subsection{Canonical Queue, Worker, and Persistence Boundaries}
+The reviewed implementation adds an opt-in shaft-image recipe to the existing
+refit service. It introduces no second optimizer, scheduler, or capture store.
+A disabled term retains the earlier submission shape and output layout.
+An enabled request records the exact evidence and authored-axis recipe hashes;
+its canonical parser rejects malformed typed fields, including boolean or
+floating-point values masquerading as integer binding counts, before source
+or native-model reads. A caller-supplied source context is a declaration,
+not authentication or permission to bypass fresh library admission.
+
+Queue admission checks the selected fit's capture, camera and immutable source
+identities. The worker loads the canonical native binding once, resolves the
+axis from the exact native definition bytes, and rebinds original PNG hashes
+and the complete source clock. Result publication repeats the image/clock
+check. A changed source therefore rejects the operation rather than preserving
+an earlier successful validation as authority. Separate raw image assessments
+are persisted alongside the body and finite geometry diagnostics; a shaft
+assessment does not replace body-image RMS or promote scientific acceptance.
+
+Exact rational PTS identify reviewed source frames. Floating-point times are
+numerical evaluation coordinates derived from that bound clock, not evidence
+of physical swing time. Evidence SHA, complete clock SHA, capture/source SHA,
+fit/model identity, native definition SHA and exported XML SHA have distinct
+hash domains. The definition identifies authored geometry; the XML identifies
+its exported native representation. Neither equality of hashes nor a typed
+record establishes calibrated anatomy, camera, time or uncertainty.
+
+\subsection{Image-Line Objective and Separate Raw Diagnostics}
+Let $v_a(q),v_b(q)\in\R^2$ be the conditional camera projections of the two
+native authored solid-center reference points. Define
+\begin{equation}
+ t(q)=v_b(q)-v_a(q),\qquad
+ n(q)=\frac{(-t_y,t_x)^\mathsf{T}}{\lVert t(q)\rVert},\qquad
+ d_{ij}(q)=n(q)^\mathsf{T}\bigl(u_{ij}-v_a(q)\bigr),\quad j=1,2.
+\end{equation}
+The two reviewed image points $u_{i1},u_{i2}$ are interior fragment locations,
+not measured physical endpoints. Nonfinite or degenerate projected axes fail
+explicitly. For authored confidence $c_i$, perpendicular scale $\sigma_i$ in
+pixels, and visibility factor $\nu_i$, the optional objective rows are
+\begin{equation}
+ r_{ij}(q)=\frac{\sqrt{c_i\nu_i}}{\sigma_i}\,d_{ij}(q).
+\end{equation}
+Unknown visibility uses the explicitly configured prior; abstentions retain
+two zero objective slots with no fabricated raw distance or angle. Authored
+confidence and sigma are uncalibrated weighting declarations, not estimated
+probabilities, measured uncertainty or statistical coverage guarantees.
+
+Raw perpendicular RMS uses only observed fragments and no objective weights:
+\begin{equation}
+ \operatorname{RMS}_{\perp}
+ =\sqrt{\frac{1}{2N_{\mathrm{obs}}}
+   \sum_{i\in\mathcal O}\sum_{j=1}^{2}d_{ij}^{\,2}}.
+\end{equation}
+It is absent when no segment is observed. The separately reported unoriented
+angle is in degrees and lies in $[0,90]$. These line distances are not the
+Euclidean marker errors used by body-image RMS; comparing their numerical
+values as one common accuracy score would mix different measurements.
+The canonical spline estimator composes the optional pose-space image term
+with its existing coefficient chain. Sparse shaft evaluation times do not add
+body-image, pose-prior, smoothness or finite geometry rows merely because a
+shaft label is present. No-term regression checks retain legacy behavior.
+
+\subsection{Responsive Optional Evidence Controls and Checked Overlays}
+Native refit and export dialogs share the reviewed-evidence selection control.
+Selecting a file stores a source-owned path and labels validation as pending;
+file reads, typed JSON decoding and canonical submission occur in a background
+worker. Removing the selection restores the disabled path. Missing or malformed
+files show an error and restore controls without submitting a job; a selection
+owned by another chosen fit is blocked. The shared service still performs
+actual foreign capture, clock and PNG admission. A filename or UI ownership
+check is not sufficient source authentication.
+
+The HTTP/web optional seam uses the same typed recipe and canonical job
+boundary. At this reviewed checkpoint, the native offscreen lane has 32 passing
+cases, the web lane 30, and the optional API lane 10. These are scoped local
+implementation checks, with possible shared coverage; they are not one summed
+independent acceptance count. The queue/worker/persistence lane has 102 combined
+passing cases after fail-first strict-count regressions. No historical trial
+outcome follows from these test counts. Programmatic Qt checks do not establish
+manual operating-system interaction or user acceptance.
+
+Enabled overlay rendering reuses the existing native binding and original
+source-sized PNG/PTS sequence. Cyan depicts the projected infinite native
+shaft axis clipped to the image rectangle; magenta depicts the reviewed image
+fragment. The cyan line's image-edge intersections are drawing limits, not
+observed club endpoints or evidence of shaft length. Per-frame raw perpendicular
+pixel RMS and angular diagnostics are separate from the body marker caption.
+Checked packages retain evidence, axis, fit/model, source-clock and frame hashes.
+Queue, execution, publication and guarded download retain fresh binding checks.
+A disabled overlay preserves the legacy output. Reviewed synthetic rendering
+checks establish this implementation boundary, not an actual new historical
+shaft-enabled video or a physically accepted fit.
+
+\subsection{Matched Protocol and Holdout Roles}
+The executed pair starts both arms from the selected parent's identical saved
+final spline coefficients, with equal free-coordinate position, velocity and
+acceleration evaluations. Full saved options, body-image observations, camera,
+coordinate scales and bounds, authored contact schedule, geometry probe times
+and row identities, budgets and selected body training frames remain matched.
+The pose prior is the selected parent's first pose for both new jobs; it is
+not asserted to equal a historical parent's earlier optimization prior.
+Only the enabled arm adds the previously admitted V1 shaft-image objective.
+V2 labels are reserved for raw assessment and enter neither initialization nor
+the shaft objective. Result receipts must verify actual starts and retained
+body/geometry assessment identities, rather than assuming the request was obeyed.
+
+The pretrial V2 authoring plan is pinned by
+\hash{4b359bf71f0386ab169989869e138a109895bb44377fdc1364525cc1bd0086b9}.
+Its declarations precede trials and do not retroactively assign weights to
+older candidate reviews. The reviewed roles and authored values are:
+\begin{longtable}{@{}p{0.78in}p{0.55in}p{1.35in}p{0.58in}p{0.58in}p{2.18in}@{}}
+\toprule Player & Frame & Interior Points (px) & $c$ & $\sigma$ (px) & Assessment Role\\
+\midrule\endhead
+Tiger & 60 & None & --- & --- & Abstain: broad motion blur; no unique axis.\\
+Tiger & 150 & $(558,19)$; $(566,64)$ & 0.5 & 4 & Shaft-label holdout; image already used for body training.\\
+Hogan & 200 & $(116,81)$; $(128,61)$ & 0.4 & 3 & Shaft-label holdout outside body training.\\
+Hogan & 550 & $(57,48)$; $(108,75)$ & 0.7 & 2 & Shaft-label holdout outside body training.\\
+\bottomrule
+\end{longtable}
+Tiger frame 150 therefore tests withheld shaft labels, not a wholly unseen
+image. Hogan's two frames have the stronger distinct body-training exclusion,
+but remain a very small authored sample. Holdout diagnostics are raw and
+unweighted. Abstention is preserved rather than replaced with a motion-blur
+line chosen to improve the objective.
+
+The repaired runner consumes the externally authenticated config and frozen
+helper bytes, checks the loaded public producer before creating output or a
+session, and rechecks source/runtime/input brackets after execution. It writes
+an untuned raw shaft assessment of the saved final parent before either arm,
+then each arm's intent, owned run ID, terminal status and independent audits.
+The actual holdout admission receipt is
+\hash{8c2327b6af8a1c5977adb424ccf38e5b73e2b4a5ffc132a1bda762c2a00956e1};
+its independent review is
+\hash{f78bd3edc33f4b32ed71386b6756f432d812bbc59da1994610b2aa7810415447}.
+These identities supplement the authored plan; they do not convert confidence
+or sigma into calibrated measurements.
+
+\subsection{Matched Shaft Trial Outcomes and Generalization Failure}
+Four canonical computations completed as succeeded research jobs under producer
+\code{3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5}: Tiger control and enabled
+versions \code{tiger-shaft-paired-control-fit-v16} and
+\code{tiger-shaft-paired-variant-fit-v16}; Hogan versions
+\code{hogan-shaft-paired-control-fit-v13} and
+\code{hogan-shaft-paired-variant-fit-v13}. Each exhausted its thirty-evaluation
+budget without convergence, with a 300-second wall guard. All four remain
+scientifically rejected. The shared runtime fingerprint is
+\hash{e927059cdd87573bb5c3bfd78c509429ef251caa5a1d3c6fd67cb8e3e64f3ba5}.
+
+Tiger uses six knots and 22 body-training frames; Hogan uses twelve knots and
+23. The fresh independent assessment verifies identical six-field parent-final
+initial curves within each pair, including coefficient and free-coordinate
+position/velocity/acceleration hashes at all original PTS and adjacent
+midpoints: 419 Tiger and 1,499 Hogan times. Complete options, image observations
+and geometry row/time identities remain matched. Tiger retains 178 geometry
+nodes and Hogan 364, with twelve rows per node; sparse shaft times do not
+inflate those geometry counts or body/prior terms.
+
+\begin{longtable}{@{}p{0.65in}p{1.00in}p{1.15in}p{1.15in}p{1.70in}@{}}
+\toprule Player & Version & Raw Shaft Training (px) & Raw Shaft Held Out (px) & Interpretation\\
+\midrule\endhead
+Tiger & Saved Parent & 146.485174 & 160.100500 & Untuned initial shaft baseline.\\
+Tiger & Control & 147.658424 & 148.510840 & No shaft-image objective.\\
+Tiger & Enabled & 136.754847 & 155.662105 & Training improves; held-out error worsens versus control.\\
+Hogan & Saved Parent & 39.509246 & 31.746597 & Untuned initial shaft baseline.\\
+Hogan & Control & 39.212558 & 31.851775 & No shaft-image objective.\\
+Hogan & Enabled & 36.969614 & 31.857107 & Training improves; held-out error is essentially unchanged versus control.\\
+\bottomrule
+\end{longtable}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.98\linewidth]{\reviewartifactroot/Matched Shaft Numerical Review V16-V13/matched-shaft-training-heldout-v3.pdf}
+\caption{Matched Shaft Continuations: Raw Training and Held-Out Image Agreement.
+The Enabled Arm Improves Training Relative to Its Matched Control, but Held-Out
+Agreement Does Not Improve. Panels Use Separate Scales; Abstentions Are Excluded.
+Tiger's Held-Out Shaft Label Is on an Image Already Used for Body Training.
+Authored Weights Are Uncalibrated; No Statistical Error Bars or Calibration
+Claim Is Supplied. All Four Fits Remain Scientifically Rejected.}
+\end{figure}
+The source-bound vector figure is
+\hash{b653a9a6eaec91734589bf4883b38870d14faeb965a4a1d4b9d6dc00320a2fd4};
+its figure-verification receipt is
+\hash{8063b5b32dd8b2f3f46e4bb36d5952072b3438231094d0619925d1218a24f184}.
+The values are raw scalar perpendicular distances, not weighted objective rows
+or Euclidean body-marker error.
+
+These are unweighted perpendicular distances to the infinite projected authored
+axis. Tiger training has two observed fragments and held-out assessment one;
+Hogan training has one and held-out assessment two. Point-free abstentions are
+excluded from raw RMS. The enabled arm improves its training shaft metric for
+both players, but provides no held-out generalization advantage. Tiger's
+held-out angle also worsens from $27.956286^\circ$ to $30.822720^\circ$.
+Hogan's frame-200 angle remains approximately $89.86^\circ$, illustrating
+that a moderate line-distance RMS can coexist with nearly perpendicular
+bearings. Distance and angle must remain separate diagnostics.
+
+\begin{longtable}{@{}p{0.55in}p{0.68in}p{0.75in}p{0.75in}p{0.75in}p{0.68in}p{0.70in}@{}}
+\toprule Player & Arm & Body Train (px) & Body Dense (px) & Body Held Out (px) & Gap (mm) & Depth (mm)\\
+\midrule\endhead
+Tiger & Control & 22.256825 & 24.681622 & 24.948982 & 1.830338 & 1.742101\\
+Tiger & Enabled & 22.474796 & 24.978769 & 25.254540 & 1.872021 & 1.295674\\
+Hogan & Control & 7.384541 & 10.346505 & 10.424210 & 2.186715 & 0.275994\\
+Hogan & Enabled & 7.385376 & 10.345130 & 10.422785 & 2.185173 & 0.275645\\
+\bottomrule
+\end{longtable}
+Body RMS remains the confidence-weighted Euclidean marker metric with its
+own observation set. All four pass the five fixed historical finite targets:
+body-image regression against the immutable V10 dense reference, scalar
+coordinate bounds, grip gap, grip rotation and penetration depth. The maximum
+grip angles are $0.915128^\circ$ and $0.892290^\circ$ for Tiger control/enabled,
+and $0.450140^\circ$ and $0.450020^\circ$ for Hogan. All 32 authored bounded
+coordinates pass the scalar certificate; twelve remain explicitly unbounded.
+Finite nonlinear probes do not supply an all-time physical certificate.
+
+The canonical-baseline assessment is
+\hash{b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e}.
+It retains the provisional assessment and resolves the historical Hogan dense
+threshold directly from immutable V10 bytes as 10.699636639303057 pixels,
+rather than a rounded threshold differing by about $4\times10^{-9}$ pixels.
+No recomputed metric or target outcome changed. The independent audit performs
+no optimization or library mutation and verifies source/runtime/input brackets.
+
+These outcomes test implemented software and a declared sparse line hypothesis;
+they do not validate historical club motion. A tiny, authored, uncalibrated
+sample cannot establish camera or generic-model geometry, depth, club length,
+roll, anatomical correctness, physical time or dynamic feasibility. Tiger frame
+150 remains only a shaft-label holdout because its body markers were already
+trained. The issue's requested head observations/errors and physical shaft
+endpoints remain unmeasured; an infinite-axis implementation cannot satisfy or
+close that broader acceptance scope by itself.
+
+\subsection{Actual Display-Only Exports and Selected-Frame Review}
+All four original-footage exports completed through the public renderer under
+source \code{3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5}. The execution completion
+receipt is \hash{e9764222852b86c287d5dab6818fb734ed850654ee112189bc17811eba4e1404}.
+The source checkout, scoped implementation, runtime, reviewed helper/config
+bytes, parent/source/evidence inputs and library inventory remain unchanged.
+No optimization occurs in this export stage. Equal numerical/export commits
+in this execution do not merge their identity domains: a fit hash identifies
+the numerical candidate, a renderer stamp identifies export code/runtime,
+and a manifest/video/PNG hash identifies its particular rendered output.
+
+Both arms DISPLAY the same V1 training and V2 held-out fragments only after
+fitting. Separate receipts retain both original evidence JSON pins, combined
+evidence SHA and full source clock, with \code{display_only=true} and
+\code{fit_objective_modified=false}. Per-frame roles are Tiger 0/209 training
+and 60/150 held-out display; Hogan 0/375 training and 200/550 held-out display.
+Tiger 60 and Hogan 0 remain point-free abstentions, despite their role-map
+membership. The combined display is not an objective recipe and does not
+retroactively train withheld shaft labels. Cyan is the infinite projected
+authored axis; magenta is the reviewed visible fragment. Neither depicts
+measured historical head or shaft endpoints.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.96\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/tiger-shaft-paired-control-fit-v16-overlay/frame-000150.png}\par
+{\small\textbf{Control: Source Frame 150}}\par\vspace{5pt}
+\includegraphics[width=0.96\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/tiger-shaft-paired-variant-fit-v16-overlay/frame-000150.png}\par
+{\small\textbf{Enabled Shaft Objective: Source Frame 150}}\par
+\caption{Tiger Shaft-Label Holdout: Matched Control and Enabled Candidate.
+The Original 1280-by-720 Frames Retain Their Aspect Ratio and Source Underlay.
+Magenta Is the Authored Interior Fragment; Cyan Is the Clipped Infinite Native
+Axis. The Enabled Candidate Worsens Raw Held-Out Distance from 148.510840 to
+155.662105 Pixels and Angle from 27.956286 to 30.822720 Degrees. This Image
+Already Participates in Body Training. Visible Mismatch, Crop and Generic
+Geometry Prevent a Validated Historical Club-Motion Claim.}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-control-fit-v13-overlay/frame-000200.png}\par
+{\small\textbf{Control: Frame 200}}
+\end{minipage}\hfill
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-variant-fit-v13-overlay/frame-000200.png}\par
+{\small\textbf{Enabled: Frame 200}}
+\end{minipage}\par\vspace{6pt}
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-control-fit-v13-overlay/frame-000375.png}\par
+{\small\textbf{Control: Frame 375}}
+\end{minipage}\hfill
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-variant-fit-v13-overlay/frame-000375.png}\par
+{\small\textbf{Enabled: Frame 375}}
+\end{minipage}\par\vspace{6pt}
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-control-fit-v13-overlay/frame-000550.png}\par
+{\small\textbf{Control: Frame 550}}
+\end{minipage}\hfill
+\begin{minipage}{0.47\linewidth}\centering
+\includegraphics[width=\linewidth]{\reviewartifactroot/Matched Shaft Display Exports V16-V13/hogan-shaft-paired-variant-fit-v13-overlay/frame-000550.png}\par
+{\small\textbf{Enabled: Frame 550}}
+\end{minipage}
+\caption{Hogan Matched Shaft Display Comparisons at Original 320-by-240 Aspect.
+Frames 200 and 550 Are Shaft Holdouts Outside Body Training; Frame 375 Is the
+One Observed Training Fragment. Cyan and Magenta Retain Their Distinct Infinite
+Axis and Authored Fragment Meanings. Training RMS Improves, but the Held-Out
+RMS Remains Essentially Unchanged. The Approximately 89.86-Degree Frame-200
+Disagreement and Low-Resolution Interlacing Remain Visible. No Physical
+Endpoints, Calibrated Geometry or Scientific Acceptance Are Established.}
+\end{figure}
+
+Direct review covered all twelve selected overlay PNGs and the separate raw
+Tiger frame 150 and Hogan frames 200, 375 and 550 source images used for these comparisons. Tiger's
+address and final walking frames retain large shaft-axis displacement; the
+held-out frame worsens in the enabled arm. Hogan's enabled/control images
+remain nearly identical: the backswing bearing is almost perpendicular, the
+training fragment remains displaced/oriented incorrectly, and follow-through
+retains broad angular error. Research and authored-uncertainty captions remain
+visible. This selected-frame inspection is not visual review of every decoded
+video frame, manual operating-system interaction, user acceptance or physical
+qualification. Software provenance and finite historical target passes do
+not resolve the failed sparse shaft generalization.
+
+\subsection{Independent Export Verification and Clock Representation}
+The frozen independent export review is
+\hash{f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0};
+its machine-verification receipt is
+\hash{716311842378557836e0afd0939b9a835db52f15d28b9b970a51bb36fec2ddd6}.
+Across two Tiger and two Hogan outputs it decodes all 1,920 frames at the
+original dimensions, checks every original PNG hash and exact source PTS,
+recomputes axis projections and per-frame body matched RMS/count and raw shaft
+RMS/angles, and verifies unchanged source/runtime/config/helper brackets and
+all 318 immutable library files. The independent visual scope is twelve
+selected overlays and six corresponding original images, not continuous video
+viewing or visual inspection of every encoded frame. The present report review
+adds selected-image comparison without expanding those scope claims. A separate
+root selected-image review pins all twelve overlays as
+\hash{05f03f8d2520d9ef08b8aa269464ffc794ccb035c759321f4537169ba5f5bf4e}.
+
+Original rational source PTS are retained exactly in the manifest. Encoded
+MP4 presentation time is a distinct relative display clock: Tiger's encoder
+uses $2997/100$ frames per second versus source $30000/1001$, with maximum
+relative drift $6.9736403069736406\times10^{-6}$ seconds across the exported
+interval. Hogan uses exactly $30/1$. Thus source identity is exact while the
+Tiger display rate has a small documented rational rounding. Neither clock
+establishes historical physical swing time. This distinction prevents a checked
+source manifest from being misrepresented as bit-exact encoder timing or a
+physical-time certificate.
 
 \reportsection{Repeatable Procedure and Engineering Verification}
 \subsection{Run Checklist for an Additional Historical Player}
@@ -3277,9 +3626,10 @@ capability or genuine source evidence is unavailable.
 
 \subsection{Tracked Continuation}
 The integrated epic is \#11232, with player epics \#11226 and \#11229 and
-native fitting/downstream issue \#11235. Draft PR \#11240 remains a work-in-
-progress implementation vehicle. Local numerical progress does not resolve
-its documented CI remediation limit, remote checks, or complete project goal.
+native fitting/downstream issue \#11235. PR \#11240 and Affine PR \#4834
+were subsequently merged; the matched shaft implementation awaits follow-up
+integration. Those repository outcomes do not confer public deployment,
+physical qualification, or complete project acceptance.
 The V8 trials exercised the canonical coordinate domain and explicit authored
 initializer with retained image tradeoffs and independent nonlinear audits.
 Exact coefficient restart has now been exercised by the rejected V9 trials.
