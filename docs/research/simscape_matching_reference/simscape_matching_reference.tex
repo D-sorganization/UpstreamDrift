@@ -3463,6 +3463,52 @@ provides no curve acceptance. Its corrected rerun is a diagnostic, not a
 full-swing dynamics or independent-replay result. All-actuator torque,
 contact, power and energy gates remain open.
 
+
+\subsection{Dense Curve Branch Comparison}
+\label{sec:dense-curve-branch-comparison}
+Two diagnostic reruns completed naturally with native exit zero at
+\texttt{04:07:12Z} and \texttt{04:12:28Z}. They reconstruct each spherical
+rotation from a continuous XYZ chart, evaluate PCHIP and its analytic
+derivative on the physical source clock, and solve the canonical dependent
+right-arm coordinates using the shared joint-role authority. Position and
+velocity units, physical rotation errors and an independent all-target
+native recheck are retained separately. All original sampled poses also
+pass zero-velocity control assembly. No model was saved or simulated.
+
+The previous-successful-pose guess policy produced 649/649 accepted dense
+tour states and 357/361 owner states. However, it preserved only 42/55 tour
+and 35/46 owner fitted anchors: maximum physical shoulder differences were
+approximately $180.0^\circ$ and $177.5^\circ$. This is a different assembly
+branch, not an axis-angle representation difference. Passing assembly
+does not establish preservation of the fitted swing.
+
+Using the original analytic closed coordinates as the guess at every frame
+preserved all 55 tour and 46 owner anchor configurations, within scalar,
+translation and rotation-matrix gates. This resolves the anchor-drift
+diagnostic, but still accepts only 357/361 owner dense states. Owner source
+frames 253--256 fail assembly. The largest adjacent spherical rotation
+changes are $45.76^\circ$ for the tour at 360 Hz and $101.81^\circ$ for the
+owner at 240 Hz. These large between-frame changes require a global branch
+and temporal-consistency investigation before promotion.
+
+Both policies passed 20 selected interior local derivative probes per
+capture at step sizes $10^{-4}$ and $5\times10^{-5}$ seconds. The angular
+gate is $0.1$ degrees/s plus $10^{-3}$ times the native rate, and the linear
+gate is $10^{-5}$ m/s. The largest angular discrepancy decreases from
+0.04148 to 0.01037 degrees/s for the tour and from 0.08697 to 0.02174
+degrees/s for the owner when the step is halved. Such local convergence
+supports the tangent calculation near the tested states; it cannot certify
+all between-frame transitions or the rejected owner interval. Peak sampled
+angular rates remain about 2819 and 5244 degrees/s in the source-seeded
+diagnostic.
+
+Neither curve is promoted. The next fit must jointly enforce closure,
+source-anchor fidelity, branch continuity and temporal residuals, and must
+retain every rejected frame. Choosing an independent solve at every frame
+or a warm start alone is insufficient. A complete forward-dynamics run
+must await a qualified continuous reference and native moving-contact
+initialization; these diagnostics do not replace that evidence.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
