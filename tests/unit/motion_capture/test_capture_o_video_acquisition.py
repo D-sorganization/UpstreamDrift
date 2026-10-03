@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 import pytest
 
-from src.shared.python.motion_capture.acquisition_receipt import (
+from src.motion_capture.acquisition_receipt import (
     AcquisitionEntry,
     AcquisitionError,
     AcquisitionReceipt,
