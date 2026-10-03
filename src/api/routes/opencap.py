@@ -127,7 +127,8 @@ async def import_trial(request: ImportTrialRequest) -> ImportTrialResponse:
         session = load_opencap_session(path, trial=request.trial)
         kinematics_columns: list[str] = []
         if session.kinematics is not None:
-            kinematics_columns = list(session.kinematics.skeleton.joints)
+            skeleton = session.kinematics.skeleton
+            kinematics_columns = list(skeleton.joints)
 
         return ImportTrialResponse(
             session_dir=str(path),

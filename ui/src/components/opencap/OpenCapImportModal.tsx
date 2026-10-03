@@ -143,7 +143,7 @@ export const OpenCapImportModal: React.FC<OpenCapImportModalProps> = ({
             Select Trial to Import
           </label>
           {trials.length === 0 ? (
-            <div className="text-xs italic text-gray-500 py-3 text-center">
+            <div className="text-xs italic text-gray-400 py-3 text-center">
               No trials available in session.
             </div>
           ) : (
