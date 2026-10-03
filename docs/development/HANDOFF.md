@@ -42,6 +42,15 @@
 
 ---
 
+# MuJoCo GUI Force and Torque Overlays Through Shared Renderers - #11295 (FTO-10)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11295-gui`; commit SELF; PR: see `Closes #11295` / `Refs #11285`; DL entry `DL-#11285`
+- Completed: `sim_rendering_mixin.py` now samples `engine.get_force_torque_frame()` once per frame, maps the toggles and scale sliders to glyphs through the new headless `force_glyph_overlay.py`, and draws them with `add_glyphs_to_scene` (native/offscreen) and `MuJoCoMeshcatAdapter.draw_glyphs` (`MeshcatGlyphRenderer`). Removed `_add_force_torque_overlays`, `_draw_torque_vectors`, `_draw_force_vectors` and the MeshCat `draw_vectors`. Legend line goes to the status bar through `force_legend_changed`. The contact checkbox is labelled "MuJoCo native contact debug". `feature_parity.json` gains `mujoco.force_overlays`.
+- Decisions: induced and counterfactual vectors are joint accelerations, not wrenches, so they stay on their own screen-space/MeshCat path with only the slice fixed to `xaxis[j]`. `_world_to_screen` is kept (still used by manipulation, swing-plane, frame/COM and live-kinematics overlays). `draw_arrow_line` is kept (swing-plane normal, not a force). `PyQt6.QtGui` is imported lazily in `_render_once` so the glyph path is importable headless.
+- Limits: before/after offscreen screenshots were not produced (no EGL here); Qt widget wiring (status bar connection, tab label) is untested because PyQt6 is not installed here.
+- Validation: `pytest -o addopts="" tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py` passes (12); ruff and gates clean.
+- Next steps: attach offscreen screenshots on a GL-capable host; FTO-30 builds on this.
+
 # MuJoCo Reaction Labels and Parity Fixture Rod — #11346
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
