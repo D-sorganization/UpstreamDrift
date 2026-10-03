@@ -97,9 +97,16 @@ def render_frame(
     frame_index: int,
     *,
     legend: bool = True,
+    torques: bool = False,
+    joint_torques: bool = False,
+    force_series: Any = None,
+    camera: Any = None,
+    style: Any = None,
+    fps: float = 30.0,
 ) -> npt.NDArray[np.uint8]:
     """Every track's visible points and bones on a copy of the frame."""
-    out = frame_bgr
+    draw_torques = joint_torques or torques
+    out = frame_bgr.copy() if draw_torques else frame_bgr
     for track in tracks:
         pose = track.at(frame_index)
         if pose is None:
@@ -114,6 +121,42 @@ def render_frame(
             edge_colour=track.colour,
             thickness=2 if track.kind == "joints" else 1,
         )
+
+    if draw_torques and force_series is not None and camera is not None:
+        time_s = float(frame_index / fps) if fps > 0 else float(frame_index)
+        ft_frame = force_series.frame_at(time_s)
+        if ft_frame is None and hasattr(force_series, "frames"):
+            if 0 <= frame_index < len(force_series.frames):
+                ft_frame = force_series.frames[frame_index]
+        if ft_frame is not None:
+            from src.shared.python.force_overlay.glyphs import (
+                ForceGlyphStyle,
+                build_glyphs,
+            )
+            from src.shared.python.force_overlay.renderers.opencv_glyphs import (
+                PinholeProjector,
+                VideoGlyphStyle,
+                draw_glyphs_on_frame,
+            )
+
+            glyph_style = (
+                style if isinstance(style, ForceGlyphStyle) else ForceGlyphStyle()
+            )
+            glyphs = build_glyphs(ft_frame, glyph_style)
+            projector = PinholeProjector(camera, world_frame=ft_frame.world_frame)
+            vstyle = VideoGlyphStyle(legend_box=False)
+            drawn = out.copy()
+            draw_glyphs_on_frame(
+                drawn,
+                glyphs,
+                projector,
+                style=vstyle,
+                world_frame=ft_frame.world_frame,
+                inplace=True,
+                qualification="capture-model inverse dynamics (point-mass model)",
+            )
+            out = drawn
+
     return draw_legend(out, tracks) if legend else np.ascontiguousarray(out)
 
 
@@ -188,6 +231,9 @@ def export_overlay(
     clip: ClipRange | None = None,
     observation_set: str = "observations",
     legend: bool = True,
+    joint_torques: bool = False,
+    torques: bool = False,
+    force_series: Any = None,
 ) -> dict[str, Any]:
     """Write ``out`` (mp4) and ``out.with_suffix(".json")``; returns the sidecar.
 
@@ -203,6 +249,42 @@ def export_overlay(
     assert playable is not None
     spec = OverlaySpec.build(session, view, variants)
     observed = observed_track(session, view, observation_set)
+
+    active_torques = joint_torques or torques
+    camera = None
+    if active_torques:
+        from src.motion_capture.reconstruct.overlay3d import camera_for_view
+
+        try:
+            camera = camera_for_view(session, variants[0] if variants else "", view)
+        except (ValueError, KeyError, OSError, RuntimeError):
+            pass
+
+        if force_series is None:
+            kin_path = session / "model" / "kinetics.json"
+            angles_path = session / "model" / "joint_angles.json"
+            if kin_path.is_file() and angles_path.is_file():
+                import json
+
+                from src.motion_capture.reconstruct.model.kinematics import (
+                    ArticulatedModel,
+                )
+                from src.motion_capture.reconstruct.model.kinetics_series import (
+                    kinetics_to_force_series,
+                )
+                from src.motion_capture.reconstruct.model.registry import get_model
+
+                try:
+                    kin_data = json.loads(kin_path.read_text(encoding="utf-8"))
+                    angles_data = json.loads(angles_path.read_text(encoding="utf-8"))
+                    kin_data["q"] = angles_data.get("q")
+                    model_name = kin_data.get("model", "golfer")
+                    registered = get_model(model_name)
+                    model = ArticulatedModel(registered.spec)
+                    force_series = kinetics_to_force_series(kin_data, model)
+                except (ValueError, KeyError, OSError, RuntimeError, TypeError):
+                    pass
+
     with VideoReader(playable) as reader:
         last = (
             reader.frame_count - 1
@@ -218,7 +300,16 @@ def export_overlay(
                 frame = reader.read(index)
                 if frame is None:
                     break
-                image = render_frame(frame, spec.tracks, index, legend=legend)
+                image = render_frame(
+                    frame,
+                    spec.tracks,
+                    index,
+                    legend=legend,
+                    joint_torques=active_torques,
+                    force_series=force_series,
+                    camera=camera,
+                    fps=reader.fps or 30.0,
+                )
                 writer.write(_stamp(image, f"{view} f{index}"))
                 written += 1
         finally:
@@ -231,7 +322,9 @@ def export_overlay(
         "speed": speed,
         "video": str(out),
         "tracks": track_metrics(spec, observed),
+        "joint_torques": active_torques,
     }
+
     write_stamped(
         out.with_suffix(".json"),
         sidecar,

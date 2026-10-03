@@ -4,22 +4,25 @@
 
 """MuJoCo sim widget rendering mixin.
 
-Extracts frame rendering, overlay compositing, force/torque/induced/CF
-vector drawing, manipulation overlays, swing plane overlays, and
+Extracts frame rendering, overlay compositing, force/torque glyphs
+(shared renderers), induced/CF vector drawing, manipulation overlays, swing plane overlays, and
 frame/COM overlays from MuJoCoSimWidget.
 """
 
 from __future__ import annotations
 
-import math
 from collections.abc import Callable
 from typing import Any
 
 import mujoco
 import numpy as np
-from PyQt6 import QtGui
 
+from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+from .force_glyph_overlay import build_overlay_glyphs
+from .force_glyphs import add_glyphs_to_scene
 
 # Lazy loading for OpenCV (mutable holder avoids 'global' keyword)
 _cv2_state: dict[str, Any] = {"lib": None, "invalid": False}
@@ -55,7 +58,6 @@ def get_cv2() -> Any:
 
 logger = get_logger(__name__)
 MIN_CAMERA_DEPTH = 0.1
-FORCE_VISUALIZATION_THRESHOLD = 1e-5
 
 
 class SimRenderingMixin:
@@ -63,8 +65,8 @@ class SimRenderingMixin:
 
     Provides:
     - ``render`` / ``_render_once``: Frame rendering pipeline
-    - ``_add_force_torque_overlays``: Force/torque/induced/CF screen overlays
-    - ``_draw_torque_vectors`` / ``_draw_force_vectors``
+    - ``_render_force_glyphs``: Force/torque 3D glyphs via the shared renderers
+    - ``_add_acceleration_overlays``: Induced/CF acceleration screen overlays
     - ``_draw_induced_vectors`` / ``_draw_cf_vectors``
     - ``_add_manipulation_overlays``: Selected body / constraint overlays
     - ``_add_swing_plane_overlays``: Club trajectory / swing plane overlays
@@ -109,14 +111,17 @@ class SimRenderingMixin:
 
         axial_frame, scale = self._apply_axial_scene_colors()
 
+        # One provider sample per frame feeds both the native and MeshCat views.
+        glyphs = self._build_force_glyphs()
+        self._render_force_glyphs(self.renderer.scene, glyphs)
+
         try:
             rgb = self.renderer.render()
         except MemoryError as exc:
             logger.error("MemoryError during renderer.render(): %s", exc)
             raise
 
-        # Add force/torque/accel overlays
-        rgb = self._add_force_torque_overlays(rgb)
+        rgb = self._add_acceleration_overlays(rgb)
 
         if self.manipulator is not None and (
             self.show_selected_body or self.show_constraints
@@ -137,13 +142,7 @@ class SimRenderingMixin:
                 self.meshcat_adapter.update(self.data)
                 if scale is not None:
                     self.meshcat_adapter.update_force_colors(axial_frame, scale)
-                self.meshcat_adapter.draw_vectors(
-                    self.data,
-                    self.show_force_vectors,
-                    self.show_torque_vectors,
-                    self.force_scale,
-                    self.torque_scale,
-                )
+                self.meshcat_adapter.draw_glyphs(glyphs)
 
                 if self.show_induced_vectors:
                     self.meshcat_adapter.draw_induced_vectors(
@@ -170,6 +169,8 @@ class SimRenderingMixin:
 
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
             return
+
+        from PyQt6 import QtGui  # lazy: keeps the glyph path importable headless
 
         h, w, _ = rgb.shape
         image = QtGui.QImage(rgb.data, w, h, 3 * w, QtGui.QImage.Format.Format_RGB888)
@@ -351,16 +352,70 @@ class SimRenderingMixin:
             self._update_background_colors()
             self._render_once()
 
-    def _add_force_torque_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:  # noqa: C901
-        """Overlay torque/force/accel vectors using screen-space arrows."""
+    def _set_force_legend(self: Any, text: str) -> None:
+        """Store the legend line and announce it (status bar) when it changes."""
+        if text == getattr(self, "force_legend_text", ""):
+            return
+        self.force_legend_text = text
+        signal = getattr(self, "force_legend_changed", None)
+        if signal is not None:
+            signal.emit(text)
+
+    def _build_force_glyphs(self: Any) -> GlyphSet | None:
+        """Sample the engine provider once and build glyphs for the toggles.
+
+        Postcondition: returns ``None`` when both toggles are off (the provider
+        is then not called) or the engine has no frame.
+        """
+        if not (self.show_force_vectors or self.show_torque_vectors):
+            self._set_force_legend("")
+            return None
+        body_name = None
+        if self.isolate_forces_visualization and self.manipulator:
+            body_id = self.manipulator.selected_body_id
+            if body_id is not None:
+                body_name = self.manipulator.get_body_name(body_id)
+        glyphs = build_overlay_glyphs(
+            self.engine.get_force_torque_frame(),
+            show_force=self.show_force_vectors,
+            show_torque=self.show_torque_vectors,
+            force_scale=self.force_scale,
+            torque_scale=self.torque_scale,
+            body_name=body_name,
+        )
+        self._set_force_legend("" if glyphs is None else legend_text(glyphs))
+        return glyphs
+
+    def _render_force_glyphs(
+        self: Any, scene: Any, glyphs: GlyphSet | None = None
+    ) -> GlyphSet | None:
+        """Add the force/torque glyphs to ``scene`` as shaded 3D geoms.
+
+        Call after ``mjv_updateScene``/``Renderer.update_scene``. Samples the
+        engine provider once unless ``glyphs`` is supplied.
+        """
+        if glyphs is None:
+            glyphs = self._build_force_glyphs()
+        if glyphs is not None:
+            add_glyphs_to_scene(scene, glyphs)
+        return glyphs
+
+    def _add_acceleration_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
+        """Overlay induced/counterfactual acceleration arrows (screen space).
+
+        These are joint accelerations, not wrenches, so they do not fit the
+        ``ForceTorqueFrame`` contract and keep their own screen-space path.
+        """
         if rgb is None:
             raise ValueError("rgb must be provided")
-        if self.model is None or self.data is None:
+        if self.model is None or self.data is None or not self.latest_bio_data:
+            return rgb
+        if not (self.show_induced_vectors or self.show_cf_vectors):
             return rgb
 
         cv2 = get_cv2()
         if cv2 is None:
-            logger.warning("OpenCV not installed, cannot draw force/torque overlays.")
+            logger.warning("OpenCV not installed, cannot draw acceleration overlays.")
             return rgb
 
         img = rgb.copy()
@@ -371,108 +426,17 @@ class SimRenderingMixin:
             color: tuple[int, int, int],
         ) -> None:
             """Draw a screen-space arrow between two world positions."""
-            if start is None:
-                raise ValueError("start must be provided")
             start_px = self._world_to_screen(start)
             end_px = self._world_to_screen(end)
             if start_px is None or end_px is None:
                 return
-            cv2.arrowedLine(
-                img,
-                start_px,
-                end_px,
-                color,
-                thickness=2,
-                tipLength=0.2,
-            )
+            cv2.arrowedLine(img, start_px, end_px, color, thickness=2, tipLength=0.2)
 
-        if self.show_torque_vectors:
-            self._draw_torque_vectors(draw_arrow)
-
-        if self.show_force_vectors:
-            self._draw_force_vectors(draw_arrow)
-
-        if self.show_induced_vectors and self.latest_bio_data:
+        if self.show_induced_vectors:
             self._draw_induced_vectors(draw_arrow)
-
-        if self.show_cf_vectors and self.latest_bio_data:
+        if self.show_cf_vectors:
             self._draw_cf_vectors(draw_arrow)
-
         return img
-
-    def _draw_torque_vectors(self: Any, draw_arrow_func: Callable) -> None:
-        if draw_arrow_func is None:
-            raise ValueError("draw_arrow_func must be provided")
-        if self.model is None or self.data is None:
-            return
-
-        selected_id = None
-        if self.isolate_forces_visualization and self.manipulator:
-            selected_id = self.manipulator.selected_body_id
-
-        for i in range(self.model.nu):
-            joint_id = self.model.actuator_trnid[i, 0]
-            if joint_id < 0 or joint_id >= self.model.njnt:
-                continue
-            body_id = self.model.jnt_bodyid[joint_id]
-            if body_id < 0 or body_id >= self.model.nbody:
-                continue
-
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            torque = float(self.data.ctrl[i])
-            if abs(torque) < 1e-6:
-                continue
-            joint_axis = self.data.xaxis[3 * joint_id : 3 * joint_id + 3]
-            joint_pos = self.data.xpos[body_id].copy()
-            arrow_length = abs(torque) * self.torque_scale
-            arrow_dir = joint_axis * np.sign(torque) * arrow_length
-            arrow_end = joint_pos + arrow_dir
-            color = (255, 0, 0) if torque >= 0 else (0, 0, 255)
-            draw_arrow_func(joint_pos, arrow_end, color)
-
-    def _draw_force_vectors(self: Any, draw_arrow_func: Callable) -> None:  # noqa: C901
-        if draw_arrow_func is None:
-            raise ValueError("draw_arrow_func must be provided")
-        if self.data is None or self.model is None:
-            return
-
-        selected_id = None
-        if self.isolate_forces_visualization and self.manipulator:
-            selected_id = self.manipulator.selected_body_id
-
-        external_forces = self.data.cfrc_ext.reshape(-1, 6)
-        for body_id in range(1, self.model.nbody):
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            world_force = external_forces[body_id, 3:6]
-            magnitude = float(
-                math.hypot(world_force[0], world_force[1], world_force[2])
-            )
-            # ⚡ Bolt: math.hypot is faster than np.linalg.norm
-            if magnitude < FORCE_VISUALIZATION_THRESHOLD:
-                continue
-            body_pos = self.data.xpos[body_id].copy()
-            arrow_end = body_pos + world_force * self.force_scale
-            draw_arrow_func(body_pos, arrow_end, (0, 255, 0))
-
-        internal_forces = self.data.cfrc_int.reshape(-1, 6)
-        for body_id in range(1, self.model.nbody):
-            if selected_id is not None and body_id != selected_id:
-                continue
-
-            joint_force = internal_forces[body_id, 3:6]
-            magnitude = float(
-                math.hypot(joint_force[0], joint_force[1], joint_force[2])
-            )
-            # ⚡ Bolt: math.hypot is faster than np.linalg.norm
-            if magnitude < FORCE_VISUALIZATION_THRESHOLD:
-                continue
-            body_pos = self.data.xpos[body_id].copy()
-            arrow_end = body_pos + joint_force * self.force_scale
-            draw_arrow_func(body_pos, arrow_end, (0, 255, 255))
 
     def _draw_induced_vectors(self: Any, draw_arrow_func: Callable) -> None:  # noqa: C901
         """Draw Induced Acceleration vectors (Magenta)."""
@@ -508,7 +472,7 @@ class SimRenderingMixin:
                 continue
 
             joint_pos = self.data.xpos[body_id].copy()
-            joint_axis = self.data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = self.data.xaxis[j]
 
             arrow_len = acc * self.torque_scale * 0.5
             arrow_dir = joint_axis * arrow_len
@@ -538,7 +502,7 @@ class SimRenderingMixin:
 
             body_id = self.model.jnt_bodyid[j]
             joint_pos = self.data.xpos[body_id].copy()
-            joint_axis = self.data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = self.data.xaxis[j]
 
             arrow_len = val * self.torque_scale * 0.5
             arrow_dir = joint_axis * arrow_len

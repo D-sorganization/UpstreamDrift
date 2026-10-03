@@ -159,6 +159,20 @@
       "id": "docs.document_library"
     },
     {
+      "feature_id": "drake.gui_force_overlay",
+      "title": "Drake GUI force/torque arrows and live tension/compression shading",
+      "status": "gap",
+      "pyqt": "src/engines/physics_engines/drake/python/src/drake_force_overlay.py",
+      "api": null,
+      "web": null,
+      "issue": 11308,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308.",
+      "id": "drake.gui_force_overlay"
+    },
+    {
       "feature_id": "engines.dashboards",
       "title": "Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio)",
       "status": "exempt",
@@ -310,6 +324,20 @@
       "id": "mocap.breadth"
     },
     {
+      "feature_id": "mujoco.force_overlays",
+      "title": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "status": "gap",
+      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "api": null,
+      "web": null,
+      "issue": 11308,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308).",
+      "id": "mujoco.force_overlays"
+    },
+    {
       "feature_id": "onboarding.about_version",
       "title": "About/version info + onboarding",
       "status": "gap",
@@ -400,9 +428,9 @@
     {
       "feature_id": "simulation.controls_wiring",
       "title": "Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls)",
-      "status": "gap",
+      "status": "parity",
       "pyqt": "src/launchers/launcher_simulation.py",
-      "api": null,
+      "api": "src/api/routes/force_overlays.py",
       "web": "ui/src/components/simulation/SimulationControls.tsx",
       "issue": 7452,
       "reason": null,
@@ -411,7 +439,7 @@
         "force_overlays",
         "actuator_controls"
       ],
-      "notes": "",
+      "notes": "Real ForceTorqueProvider frames and GlyphSet streaming implemented over REST and WebSocket (#11307, FTO-22); Web Three.js glyph rendering and live torque arcs verified with Playwright evidence at docs/development/evidence/web_force_overlay_evidence.png (#11308, FTO-23).",
       "id": "simulation.controls_wiring"
     },
     {
@@ -496,7 +524,7 @@
     },
     {
       "feature_id": "tools.capture_rig",
-      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports",
+      "title": "Capture Rig camera controller with the live view as the central pane and every control in a movable dock (step rail with the next action, settings tabs, action grid, log drawer) with saved layouts, themed header with status strip and workflow-grouped actions that reflow to fit a narrow pane, transport-style recorder (countdown, presets, REC readout, live view during the take), overlay player, camera-subset matching (variants), model-on-video overlays, provenance viewer and manual point annotation/editing; layout model with named layout presets, an interactive layout editor, live preview and playback composited through the chosen multiview layout, and composite multiview video export; non-destructive swing trim/crop and separate video export, visible capture library with durable swing notes, import/open/edit, archive/restore and storage management; saved coaching lines/arrows/circles/ellipses/rectangles with selection, resize, undo/redo, frame visibility and annotated still/video exports; reference comparison and overlay player force/torque vector arrow layers (FTO-25, #11310)",
       "status": "exempt",
       "pyqt": "src/tools/capture_rig/__main__.py",
       "api": null,
@@ -507,7 +535,7 @@
       "tiles": [
         "capture_rig"
       ],
-      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse requires explicit optics/scene confirmation, retains portable original evidence and revalidates it before processing. Physical accuracy and packaged-runtime qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. Shared metric readouts and Trace v2 marker/club imports use the same controls (#9942). Native Camera Setup #9952 adds background ELP discovery, named views, mode selection, connection checks and versioned plans linked from the wizard. These desktop routes do not establish web parity.",
+      "notes": "Editing/library #9860/#9861 run in the native capture app. Saved selections preserve original media, pixel coordinates and frame clocks; exports carry source hashes and edit provenance. Coaching drawings #9862 provide native saved shape references, undo/redo, source-frame visibility and annotated still/video export. Expert reference imports #9864 add a native library and explicit C3D/CIR/body-target mappings; 2D video references remain distinct. Camera registration, synchronized overlays and expert alignment controls shipped through #9896. Capture journey #9913 adds persistent swing identity, saved per-capture action outcomes, detector/edit associations, linked workflow help and provenance, and Qt pop-out/redock/fullscreen controls. My Clubs #9905 adds native catalog/custom equipment editing, unit-aware partial measurements, archive/restore, capture assignment and immutable equipment context in fit reports; current body models apply no club constraints. Common-reference calibration #9898/#9900 adds capture-owned paper/ruler observations, original-frame point editing, repeated placements, asynchronous canonical camera estimation, reviewable result history and shared native/generated help; lens profiles remain required. Guided cross-capture reuse requires explicit optics/scene confirmation, retains portable original evidence and revalidates it before processing. Physical accuracy and packaged-runtime qualification remain pending under #9897. Model-only analysis and Draw on Comparison reuse the coaching editor, appearance, club/ellipsoid/handedness controls and scene-bound metric planes/points. Comparison drawing PNGs preserve original pixels; video applies the saved crop. Shared metric readouts and Trace v2 marker/club imports use the same controls (#9942). Native Camera Setup #9952 adds background ELP discovery, named views, mode selection, connection checks and versioned plans linked from the wizard. Reference comparison and capture-rig overlay player render calibrated force and torque vector layers on source footage with sidecar receipts and provenance (FTO-25, #11310). These desktop routes do not establish web parity.",
       "id": "tools.capture_rig"
     },
     {
@@ -745,7 +773,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md.",
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305).",
       "id": "visualization.force_color_controls"
     }
   ],
@@ -2900,7 +2928,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "e1a6e2a0445c9b6a024d197278a57ac78a1068256bb19bc7b4f756a1053caa36",
+    "src/config/feature_parity.json": "1ca5e632a5d8a9ad79e7bf5077663195ac773f10a4b6c64efe2988c8b1fd0b0d",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

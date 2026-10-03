@@ -34,6 +34,7 @@ from src.shared.python.engine_core.capabilities import (
     EngineCapabilities,
 )
 from src.shared.python.engine_core.mujoco_compat import full_mass_matrix
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -83,6 +84,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         self.model: mujoco.MjModel | None = None
         self.data: mujoco.MjData | None = None
         self.xml_path: str | None = None
+        self._force_torque_source: Any | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -128,6 +130,7 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             forward_sim=CapabilityLevel.FULL,
             contact_step=CapabilityLevel.FULL,
             dataset_export=CapabilityLevel.PARTIAL,
+            force_visualization=CapabilityLevel.FULL,
             extra={
                 "contact_model": "soft_constraint_pgs",
                 "spatial_jacobian_order": "angular_linear",
@@ -367,10 +370,38 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
             raise ValueError("MuJoCo model does not expose six IMU channels")
         return qvel[:6].copy()
 
+    def get_force_torque_frame(
+        self, *, include_gravity: bool = False
+    ) -> ForceTorqueFrame | None:
+        """Return the current world-frame force/torque overlay frame.
+
+        Uses cached MujocoForceTorqueSource with internal scratch MjData to ensure
+        fresh cfrc_ext/cfrc_int computations without mutating simulation state.
+        Returns None when no model or data is loaded.
+        """
+        if self.model is None or self.data is None:
+            return None
+        if (
+            self._force_torque_source is None
+            or self._force_torque_source.model is not self.model
+        ):
+            from .force_torque_source import MujocoForceTorqueSource
+
+            self._force_torque_source = MujocoForceTorqueSource(self.model)
+        return self._force_torque_source.sample(
+            self.data, include_gravity=include_gravity
+        )
+
     def get_contact_forces(self) -> np.ndarray:
         """Return aggregate external contact wrench from MuJoCo contact forces."""
         self.require_initialized("get_contact_forces")
         assert self.data is not None
+        assert self.model is not None
+        self.get_force_torque_frame()
+        if self._force_torque_source is not None:
+            cfrc_ext = getattr(self._force_torque_source._scratch, "cfrc_ext", None)
+            if cfrc_ext is not None:
+                return np.asarray(cfrc_ext).sum(axis=0).copy()
         contact_forces = getattr(self.data, "cfrc_ext", None)
         if contact_forces is None:
             raise ValueError("MuJoCo data does not expose external contact forces")
@@ -384,13 +415,8 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
 
     def get_segment_axial_loads(self) -> AxialLoadFrame | None:
         """Return qualified current rod reactions, or None for unavailable models."""
-        from src.shared.python.body_part_viz.mujoco_axial_loads import (
-            MujocoAxialLoadSource,
-        )
-
-        if self.model is None or self.data is None:
-            return None
-        return MujocoAxialLoadSource(self.model).sample(self.data)
+        frame = self.get_force_torque_frame()
+        return None if frame is None else frame.axial_loads
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""

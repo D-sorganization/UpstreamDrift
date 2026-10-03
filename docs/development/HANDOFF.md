@@ -15,9 +15,265 @@
 
 ---
 
+# Engine-Agnostic Projected Segment Meshes With Tension/Compression Fill — #11285 / #11311 (FTO-26)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-model-footage-11311`; commit SELF; PR: #11391 (`Closes #11311`, `Refs #11285`)
+- Governing issue: #11311 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_segments.py`:
+    - `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`.
+    - `draw_segment_meshes_on_frame`: Painter's algorithm depth-sorted rendering of capsule segment meshes onto calibrated video frames.
+    - Features: back-face culling via signed screen-space cross product, Lambertian directional shading with configurable ambient, `ForceColorScale` mapping of axial loads (tension blue, compression red, neutral grey), alpha compositing with opacity fast-path (opacity 0 returns unmodified frame), and triangle budget enforcement.
+    - `segment_poses_from_axes`: transforms `SegmentAxis` proximal $\to$ distal vectors into aligned segment poses.
+  - `src/shared/python/force_overlay/renderers/__init__.py`:
+    - Re-exported `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`, `draw_segment_meshes_on_frame`, `segment_poses_from_axes`.
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_model_volumes: bool = False` and `model_volume_opacity: float = 0.55` to `ComparisonLayer`.
+  - `src/tools/capture_rig/reference_volumes.py`:
+    - Wired `draw_segment_meshes_on_frame` into `draw_segment_volumes` with fallback to ellipsoid meshes when axes cannot be constructed.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - Passes extracted `axial_loads` from force layer series into `draw_segment_volumes`.
+  - Acceptance demo artifact:
+    - Generated visual still: `docs/development/fto_26_demo_still.png` showing 3-segment arm under tension and compression with FTO-8 force arrows on gradient background.
+- Validation:
+  - `tests/unit/force_overlay/test_opencv_segments.py` (9 passed, 100% coverage including DbC validation and visual demo still).
+  - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
+  - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
+  - All pre-commit linters, formatting, and CI budgets passed.
+- Next steps: Merge PR; proceed with FTO-29 / FTO-30.
+
+---
+
+# Calibrated MuJoCo Mesh Render Composited Onto Source Footage — #11285 / #11312 (FTO-27)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-27-mujoco-mesh-render-11312`; commit SELF; PR: #11393 (`Closes #11312`, `Refs #11285`)
+- Governing issue: #11312 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-27] Render actual MuJoCo model meshes with force arrows (FTO-6) and segment shading from a camera matching calibrated intrinsics and extrinsics, then alpha-composite onto source footage.
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/footage_composite.py`:
+    - `mujoco_camera_from_pinhole(camera, world_from_mj) -> MjCameraSpec`:
+      - Derives MuJoCo camera position, xyaxes, and vertical field of view ($2 \cdot \text{atan}(H_{\text{render}} / (2 \cdot f_y))$).
+      - Converts OpenGL/MuJoCo coordinate convention (flipping OpenCV +y down and +z forward to MuJoCo +y up and -z viewing direction).
+      - Implements Decision 2: enlarged frame and crop rectangle to precisely center principal point $(c_x, c_y)$ without non-linear image warping.
+    - `apply_camera_spec_to_scene(scene, spec)`:
+      - Sets up `scene.camera[0]` and `scene.camera[1]` poses, frustum clipping, and aligns headlights with the optical axis.
+    - `registration_to_world_from_mj(registration)`:
+      - Maps `ReferenceRegistration` or 4x4 matrix into the canonical Z-up to ADR-0041 world coordinate transformation.
+    - `composite_model_on_frame(frame_bgr, model, data, camera, registration, glyphs, loads, opts) -> (frame, receipt)`:
+      - Renders MuJoCo segmentation buffer (`enable_segmentation_rendering`) and RGB buffer.
+      - Crops both buffers to the calibrated frame window.
+      - Computes alpha channel from model geoms (`segid != -1`), feathered by 1 px (`cv2.GaussianBlur`).
+      - Implements Decision 3: undistorts source footage frame with camera coefficients (`cv2.undistort`) so rectilinear mesh and arrow layer (FTO-8 `opencv_glyphs.py`) agree within 1.5 px.
+      - Integrates 3D force glyphs via `add_glyphs_to_scene` and axial loads via `apply_mujoco_scene_colors`.
+      - Blends render over destination frame with alpha channel and user-specified opacity.
+  - `docs/adr/0052-force-torque-overlay-contract.md`:
+    - Added Addendum for Decisions 2 (enlarged frame crop for principal point) and 3 (lens distortion policy).
+  - Tests:
+    - 6 unit tests in `tests/unit/engines/mujoco/test_footage_composite.py`:
+      - Reprojection error $\le 1.0\text{ px}$ against `PinholeCamera.project` for off-centre principal point.
+      - Axis flip maps camera forward to MuJoCo -z.
+      - Background pixels strictly untouched in alpha composite.
+      - Lens distortion policy verifies mesh and FTO-8 arrow root agree within 1.5 px.
+      - DbC precondition contract validation.
+      - Full integration with `ReferenceRegistration`, `AxialLoadFrame`, and `GlyphSet`.
+  - Artifacts:
+    - Synthetic composite verified and generated: `docs/development/fto_27_synthetic_composite.png`.
+- Validation:
+  - `pytest tests/unit/engines/mujoco/test_footage_composite.py`: 6 passed.
+  - Pre-commit gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check src/ tests/`: Clean.
+  - `ruff format --check src/ tests/`: Clean.
+  - `python scripts/ci/run_mypy.py`: Clean (0 issues).
+- Next steps: Merged in main (PR #11393).
+
+---
+
+# Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
+- Governing issue: #11310 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-25] Force and torque arrow layer in the reference-comparison and capture-rig video compositors (preview + export).
+- Completed:
+  - `src/motion_capture/reconstruct/model/kinetics_series.py`:
+    - `kinetics_to_force_series(kinetics, model) -> ForceTorqueSeries`:
+      - Samples model forward kinematics (`forward_frames`) at each frame time.
+      - Maps generalized torques $\tau$ per rotational DOF to joint moments using joint rotation axes in `adr0041_world`.
+      - Reconstructs `JOINT_ACTUATOR` moments via `joint_torque_wrench` at joint centers.
+      - Gracefully skips joints without rotation axes (`is_available=False`).
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_forces`, `draw_torques`, `draw_legend`, `force_scale` to `ComparisonLayer`.
+    - Added `ForceLayer` variant to `ComparisonLayer` with `series` and `style` excluded from JSON serialization.
+    - Added `glyph_receipts` and `force_series_hash` to `ComparisonExportSidecarSpec` and `build_comparison_sidecar`.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - `ComparisonRenderer`: renders force/torque vector layer via `force_frame_for_video`, `build_glyphs`, `scale_for_view`, and `draw_glyphs_on_frame` using context camera through `PinholeProjector`.
+    - Blended with layer opacity using `cv2.addWeighted`.
+    - Tracks per-frame `VideoGlyphReceipt` in `renderer.receipts` and `renderer.last_receipt`.
+  - `src/tools/capture_rig/reference_export.py`:
+    - Populates `glyph_receipts` and SHA256 `force_series_hash` in `export_comparison_video` metadata sidecar.
+  - `src/tools/capture_rig/overlay_render.py`:
+    - Added `joint_torques`, `torques`, `force_series`, `camera`, `style` parameters to `render_frame` and `export_overlay`.
+    - Renders torque arcs and glyphs directly onto frames via `PinholeProjector` and `draw_glyphs_on_frame`.
+  - UI Toggles:
+    - `VariantOverlayBox` (`overlay_box.py`): added "Joint torques", "Forces", "Torques", "Legend" checkboxes and horizontal scale slider.
+    - `MotionAppearanceControls` (`reference_appearance.py`): added "Show Forces", "Show Torques", "Show Legend" checkboxes and "Force Scale" spinbox, persisting into `ComparisonLayer`.
+  - Feature parity & documentation:
+    - Updated `src/config/feature_parity.json` for `tools.capture_rig` and regenerated `docs/development/feature_parity_matrix.md`.
+    - Added row to `SPEC.md` Change Log table (#11390).
+- Validation:
+  - Unit and integration tests all passing:
+    - `tests/motion_capture/reconstruct/model/test_kinetics_series.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed)
+    - `tests/tools/capture_rig/test_overlay_render.py` (4 passed)
+    - `tests/tools/capture_rig/test_overlay_box.py` (2 passed)
+    - `tests/tools/capture_rig/test_reference_appearance_controls.py` (2 passed)
+- Next steps: Merge PR; unblocks FTO-30.
+
+---
+
+# Force-Overlay Parity MuJoCo Lane Evidence — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `chore/mujoco-parity-lane-evidence`; commit SELF; PR: see branch (`Refs #11346`, `Refs #11285`)
+- Completed: the `force-overlay-parity` mujoco matrix entry now requires `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` (the MuJoCo provider row, FTO-9 / #11294, merged in #11361; labels and fixture fixed in #11381) instead of the stand-in `test_mujoco_models_are_statically_consistent`.
+- Validation: `pytest -o addopts="" tests/integration/cross_engine/test_force_overlay_parity.py -m requires_mujoco` (5 pass) then `scripts/ci/require_junit_test_passed.py <junit> "test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]"` passes locally.
+- Limits: the parity lanes are still not branch-protection required checks; promoting them is a repository-admin setting.
+- Next steps: a repository admin decides whether to make the force-overlay parity lanes required.
+
+# Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
+- Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
+- Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
+- Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
+# Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment-video`; commit SELF; PR: #11378 (`Closes #11309`, `Refs #11285`)
+- Governing issue: #11309 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-24] Carry force/torque series through trace import, time maps and registration onto video frames.
+- Completed:
+  - `src/shared/python/force_overlay/contracts.py` & `schemas/force-torque-frame-v1.json`:
+    - Extended `ForceTorqueFrame.world_frame` to accept `"adr0041_world"` alongside `"world_Zup"`.
+    - Added `ForceTorqueFrame.metadata` mapping field.
+  - `src/motion_capture/reference/force_alignment.py`:
+    - `force_frame_for_video(series, *, video_time_s, registration, max_gap_s=0.1) -> ForceTorqueFrame | None`:
+      - Resolves video timestamp to reference time via `registration.time_mapping.scene_to_reference(video_time_s)`.
+      - Samples `ForceTorqueSeries.frame_at(ref_time_s, max_gap_s=max_gap_s)` (returns `None` when gap exceeds threshold).
+      - Converts spatial positions via `registration.place_points()` into ADR-0041 camera world coordinate system.
+      - Transforms direction vectors: forces as polar vectors ($F_{world} = A F_{can}$), torques as axial vectors / pseudovectors ($\tau_{world} = \det(A) (A \tau_{can})$), preserving physical vector magnitudes without scaling.
+      - Applies parity reflection ($\det(A) = -1$) when `registration.mirror_lateral` is True.
+      - Reconstructs aligned `AxialLoadFrame` if present at `video_time_s`.
+      - Preserves scale in `metadata["registration_scale"] = registration.transform.scale`.
+    - `write_trace_forces(path, series)` & `load_trace_forces(path)`:
+      - Persists and roundtrips `ForceTorqueSeries` losslessly in trace HDF5 file under group `force_torque_series`.
+      - Fallback loader parses root `wrench` (T, 6) if and only if declared `wrench_point` or `root_point` exists in trace meta; returns `None` without fabricated points if undeclared.
+    - `series_to_viewport_payload_wrench(series) -> np.ndarray`:
+      - Returns (T, 6) array summing contact and external wrenches about world origin ($r \times F + \tau$).
+  - `src/motion_capture/reference/trace_import.py`:
+    - Updated `_preflight` to recognize and count dataset sizes inside the `force_torque_series` HDF5 group without rejecting it as a non-dataset root key.
+  - Tests:
+    - 8 comprehensive unit tests in `tests/motion_capture/test_force_alignment.py`:
+      - Time mapping affine alignment.
+      - Canonical Z-up +z force to ADR-0041 +y world mapping.
+      - 90° rotation, translation, and scale (unscaled vector magnitude).
+      - Mirrored registration polar vs axial vector parity flip.
+      - Gap rejection returning `None`.
+      - HDF5 `force_torque_series` roundtrip.
+      - Undeclared wrench point returning `None`.
+      - Net origin wrench payload summation.
+- Validation:
+  - `pytest tests/motion_capture/test_force_alignment.py tests/motion_capture/test_trace_reference_import.py tests/motion_capture/test_reference_registration.py tests/unit/force_overlay`: 129 passed.
+  - Local CI gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_dry_duplication_gate.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check` & `ruff format --check`: Clean.
+  - `mypy`: Clean (0 issues).
+- Next steps: Merge PR; unblocks FTO-25 (#11310) and FTO-26 (#11311).
+
+---
+
+# MuJoCo GUI Force and Torque Overlays Through Shared Renderers - #11295 (FTO-10)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11295-gui`; commit SELF; PR: see `Closes #11295` / `Refs #11285`; DL entry `DL-#11285`
+- Completed: `sim_rendering_mixin.py` now samples `engine.get_force_torque_frame()` once per frame, maps the toggles and scale sliders to glyphs through the new headless `force_glyph_overlay.py`, and draws them with `add_glyphs_to_scene` (native/offscreen) and `MuJoCoMeshcatAdapter.draw_glyphs` (`MeshcatGlyphRenderer`). Removed `_add_force_torque_overlays`, `_draw_torque_vectors`, `_draw_force_vectors` and the MeshCat `draw_vectors`. Legend line goes to the status bar through `force_legend_changed`. The contact checkbox is labelled "MuJoCo native contact debug". `feature_parity.json` gains `mujoco.force_overlays`.
+- Decisions: induced and counterfactual vectors are joint accelerations, not wrenches, so they stay on their own screen-space/MeshCat path with only the slice fixed to `xaxis[j]`. `_world_to_screen` is kept (still used by manipulation, swing-plane, frame/COM and live-kinematics overlays). `draw_arrow_line` is kept (swing-plane normal, not a force). `PyQt6.QtGui` is imported lazily in `_render_once` so the glyph path is importable headless.
+- Limits: before/after offscreen screenshots were not produced (no EGL here); Qt widget wiring (status bar connection, tab label) is untested because PyQt6 is not installed here.
+- Validation: `pytest -o addopts="" tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py` passes (12); ruff and gates clean.
+- Next steps: attach offscreen screenshots on a GL-capable host; FTO-30 builds on this.
+
+# MuJoCo Reaction Labels and Parity Fixture Rod — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
+- Branch: `fix/mujoco-reaction-label-joint-name`; commit: SELF; PR: #11381 (open; `Refs #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11346 (per-engine parity lanes, PR #11375); epic #11285
+- Completed: the first real run of the new MuJoCo parity lane failed two rows. `MujocoForceTorqueSource` labelled joint reactions by body name while Drake, Pinocchio and OpenSim use the joint name, and its own actuator label already uses the joint name. Reactions now use the first joint's name (the joint whose anchor is reported); a joint-less body keeps its body name. The parity MJCF pendulum had only an `<inertial>`, so MuJoCo's native axial source (rods only) returned nothing; a non-colliding capsule from the pivot to the COM fixes that without changing mass or inertia and without touching any tolerance.
+- Validation: `tests/unit/engines/mujoco/test_force_torque_source.py` and `tests/integration/cross_engine/test_force_overlay_parity.py` (RED before: label test and two `[mujoco]` rows; GREEN after; 18 passed with the mujoco/label/axial selection, `tests/integration/cross_engine` all pass). Unrelated local failures: PyQt6 GUI tests in `tests/unit/body_part_viz` (PyQt6 not installed in this venv) and one pre-existing `test_biomechanics` failure that also fails on main.
+- Next steps: after this lands, #11375 switches the mujoco lane evidence from the statics check to the `[mujoco]` hanging-pendulum row.
+
+# Per-Engine Force Overlay Parity Lanes — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11346-impl`; commit: SELF; PR: #11375 (`Closes #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: new `force-overlay-parity` job in `.github/workflows/cross-engine-equivalence.yml` (matrix drake, pinocchio, opensim, mujoco) installs one engine, runs `test_force_overlay_parity.py -m requires_<engine>` and then `scripts/ci/require_junit_test_passed.py` on a named evidence testcase so an all-skipped report fails. Structure test in `tests/ci/test_ci_infrastructure.py`.
+- Limits: the MuJoCo lane's evidence is the provider-independent MJCF statics test until FTO-9 (#11294) lands; switch it to the hanging-pendulum `[mujoco]` case then. The opensim lane is `continue-on-error` (wheel not installable everywhere). Lanes are not required checks; making them required is a repo-admin setting. Not run on a real runner here.
+- Validation: YAML parses; the new structure test passes; ruff check/format clean. 20 other tests in `tests/ci/test_ci_infrastructure.py` fail in this venv (missing optional deps) and are unrelated.
+- Next steps: watch the first CI run of each lane; update the mujoco evidence after #11294.
+
+---
+
+# Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11292-matplotlib-qpainter-glyphs`; commit SELF; PR: #11348 (`Closes #11292`, `Refs #11285`)
+- Governing issue: #11292 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers with dark halos, 12-facet cone heads, and migrated legacy vector overlays.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/matplotlib_glyphs.py`:
+    - `draw_glyphs_3d(ax, glyphs, *, linewidth_pt=2.0, halo=True) -> list[Artist]`: draws 3D force arrows (with 12-facet cone heads via `Poly3DCollection`) and 3D torque arcs (polyline + cone head) onto a Matplotlib 3D axes, optionally underlaid with a dark halo. Returns list of created artists supporting `.remove()`.
+    - `draw_legend(ax, glyphs, *, loc='upper right', fontsize=9.0) -> Artist`: renders deterministic legend showing active force/torque kinds.
+  - `src/shared/python/force_overlay/renderers/qpainter_glyphs.py`:
+    - `draw_glyphs_2d(painter, project, glyphs, *, px_width=2.0, halo=True) -> None`: draws 2D projected force arrows and torque arcs using QPainter with anti-aliasing and optional dark halos.
+  - Migrated legacy vector renderers:
+    - `src/shared/python/plotting/renderers/force_vectors.py`: delegates to `draw_glyphs_3d`.
+    - `src/shared/python/movement_optimizer/gui/vector_overlay.py`: delegates to `draw_glyphs_2d`.
+  - Extracted common `_render_joint_forces_overlay` in pendulum simulator widgets and eliminated duplicate drawing boilerplate.
+  - Tests:
+    - Unit tests in `tests/unit/force_overlay/test_matplotlib_glyphs.py` and `tests/unit/force_overlay/test_qpainter_glyphs.py`.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest passed.
+- Next steps: Merge PR #11348; unblocks remaining renderers.
+
+---
+
+# MuJoCo Force/Torque Provider — #11294 (FTO-9)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `UpstreamDrift-worktrees/agy-11294`
+- Branch: `feat/fto-11294-mujoco-provider`; commit: SELF; PR: #11361 (`Closes #11294`, `Refs #11285`)
+- Governing issue: #11294 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Objective: [FTO-9] MuJoCo force/torque provider and overlay bug fixes.
+- Completed:
+  - Implemented `MujocoForceTorqueSource` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` (282 lines, within budget).
+  - Emits world-frame `OverlayWrench` instances for:
+    - `JOINT_ACTUATOR`: applied actuator torques/forces from `qfrc_actuator` mapped with `xaxis[j]`.
+    - `JOINT_REACTION`: parent-on-child internal reactions from `cfrc_int`, transformed from subtree center of mass to joint anchor via `transform_wrench(w_com, "world", anchor)`.
+    - `CONTACT`: active contact pair forces from `mj_contactForce`, transformed from contact frame to world frame, with equal-and-opposite signs on interacting bodies and non-geom IDs safely skipped.
+    - `EXTERNAL`: applied spatial wrenches from `xfrc_applied`.
+    - `GRAVITY`: optional mass \* g body wrenches.
+  - Implemented bit-identical state snapshotting to internal scratch `MjData` using direct numpy `copyto` on `qpos`, `qvel`, `qacc`, `ctrl`, `act`, `qfrc_applied`, `xfrc_applied`, and `time` (resolving missing `mujoco.mj_copyData` in Python bindings across `force_torque_source.py` and `src/shared/python/body_part_viz/mujoco_axial_loads.py`).
+  - Integrated into `MujocoPhysicsEngine` (`get_force_torque_frame`, `get_segment_axial_loads`, `get_contact_forces`, `force_visualization=FULL`).
+  - Unit tests: 8 comprehensive tests in `tests/unit/engines/mujoco/test_force_torque_source.py` (hanging pendulum equilibrium, sign agreement with `MujocoAxialLoadSource`, actuated hinge with clamping, non-axis-aligned joint indexing, box on floor contact equilibrium, caller data immutability, engine source caching, and schema serialization round-trip).
+  - Benchmark on `golfer.xml`: `sample()` cost is ~15 ms per frame.
+- Validation:
+  - `python -m pytest tests/unit/engines/mujoco/test_force_torque_source.py`: 8 passed.
+  - `python -m pytest tests/unit/test_mujoco_physics_engine.py`: 16 passed.
+  - `python -m pytest tests/unit/scripts/test_divergence_inventory.py`: 10 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check .` & `ruff format --check .`: Clean.
+- Next steps: Land FTO-9 PR; proceed with FTO-10 (#11295) MuJoCo GUI rewiring.
+
 # OpenCV Video Glyph Renderer Delivery — #11285 / #11293 (FTO-8)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (`Closes #11293`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (merged; `Closes #11293`, `Refs #11285`)
 - Governing issue: #11293 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-8] OpenCV video glyph renderer with calibrated camera projection, anti-aliased dark halo underlays, inset legend box, and deterministic styling (#11293).
 - Completed:
@@ -45,8 +301,8 @@
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
+
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
-- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
     - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
@@ -62,7 +318,6 @@
 - Validation:
   - Ruff check and format clean.
   - Pytest 5/5 passed.
-- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
@@ -103,7 +358,7 @@
 # Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
-- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341
+- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11288
 - Governing issue: #11288 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, scale_for_view and FORCE_KIND_PALETTE.
 - Completed:
