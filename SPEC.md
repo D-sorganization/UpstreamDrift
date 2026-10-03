@@ -7743,6 +7743,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
+| 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
 | 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
 | 2026-10-03 | #11393 | [FTO-27] Calibrated MuJoCo mesh render composited onto source footage: camera mapping from K, R, t via `mujoco_camera_from_pinhole`, enlarged-frame crop for off-centre principal point, lens distortion footage undistortion policy, segmentation alpha compositing with feathering, and force glyph/color shading integration (#11312). |
