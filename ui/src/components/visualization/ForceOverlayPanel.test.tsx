@@ -105,4 +105,65 @@ describe('ForceOverlayPanel polling (#8941)', () => {
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });
+
+  it('uses socket payload when connected and disables REST polling', async () => {
+    const onGlyphsChange = vi.fn();
+    const fakeGlyphs = {
+      schema_version: 'glyph-set-v1',
+      time_s: 0.1,
+      arrows: [],
+      torque_arcs: [],
+      legend: {
+        force_reference_n: null,
+        force_reference_length_m: null,
+        torque_reference_nm: null,
+        torque_reference_radius_m: null,
+        kinds_present: [],
+        unavailable_labels: [],
+        engine: 'test',
+        source_labels: [],
+      },
+    };
+
+    render(
+      <ForceOverlayPanel
+        onGlyphsChange={onGlyphsChange}
+        isRunning={true}
+        isConnected={true}
+        socketForceOverlay={fakeGlyphs}
+      />,
+    );
+    enableOverlay();
+    await flush();
+
+    // Verify socket payload was received
+    expect(onGlyphsChange).toHaveBeenCalledWith(fakeGlyphs);
+
+    // Advance time - REST fetch should NOT be called because socket is connected
+    await act(async () => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('falls back to REST polling while socket is disconnected', async () => {
+    const onGlyphsChange = vi.fn();
+    render(
+      <ForceOverlayPanel
+        onGlyphsChange={onGlyphsChange}
+        isRunning={true}
+        isConnected={false}
+      />,
+    );
+    enableOverlay();
+    await flush();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+    await flush();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
