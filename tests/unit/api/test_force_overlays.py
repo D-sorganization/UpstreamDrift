@@ -1,68 +1,76 @@
+"""Unit tests for internal helper functions in force overlays route (#1199, #11307)."""
+
+from __future__ import annotations
+
 from unittest.mock import Mock
+import pytest
 
 from src.api.models.requests import ForceOverlayRequest
 from src.api.routes.force_overlays import (
-    _is_filtered_out,
-    _magnitude_to_color,
-    _resolve_body_name,
-    _resolve_joint_names,
-    _should_include_force_type,
+    _build_overlay_response,
+    _get_sim_time,
 )
 
-
-def test_magnitude_to_color() -> None:
-    assert _magnitude_to_color(0, 10) == [0.0, 1.0, 1.0, 1.0]
-    assert _magnitude_to_color(5, 10) == [1.0, 1.0, 0.0, 1.0]
-    assert _magnitude_to_color(10, 10) == [1.0, 0.0, 0.0, 1.0]  # based on t logic
+pytestmark = pytest.mark.unit
 
 
-def test_resolve_joint_names() -> None:
+def test_get_sim_time_none_engine() -> None:
+    manager = Mock()
+    manager.get_active_engine.return_value = None
+    assert _get_sim_time(manager) == 0.0
+
+
+def test_get_sim_time_dict_state() -> None:
     engine = Mock()
-    engine.joint_names = ["j1", "j2"]
-    assert _resolve_joint_names(engine, 2) == ["j1", "j2"]
+    engine.get_state.return_value = {"time": 1.25}
+    manager = Mock()
+    manager.get_active_engine.return_value = engine
+    assert _get_sim_time(manager) == 1.25
 
-    engine = Mock(spec=[])
-    assert _resolve_joint_names(engine, 2) == ["joint_0", "joint_1"]
+
+def test_get_sim_time_time_attribute() -> None:
+    engine = Mock(spec=["time"])
+    engine.time = 2.5
+    manager = Mock()
+    manager.get_active_engine.return_value = engine
+    assert _get_sim_time(manager) == 2.5
 
 
-def test_should_include_force_type() -> None:
-    req = ForceOverlayRequest(
+def test_get_sim_time_exception_handling() -> None:
+    manager = Mock()
+    manager.get_active_engine.side_effect = RuntimeError("Engine unavailable")
+    assert _get_sim_time(manager) == 0.0
+
+
+def test_build_overlay_response_disabled() -> None:
+    manager = Mock()
+    manager.get_active_engine.return_value = None
+    config = ForceOverlayRequest(
+        enabled=False,
+        force_types=["applied"],
+        color_by_magnitude=True,
+        scale_factor=0.01,
+    )
+    resp = _build_overlay_response(manager, config)
+    assert resp.glyphs is None
+    assert resp.frame is None
+    assert resp.unavailable_reason == "Force overlay disabled in request"
+    assert resp.vectors == []
+    assert resp.total_force_magnitude == 0.0
+
+
+def test_build_overlay_response_no_engine() -> None:
+    manager = Mock()
+    manager.get_active_engine.side_effect = RuntimeError("No active engine")
+    config = ForceOverlayRequest(
         enabled=True,
         force_types=["applied"],
         color_by_magnitude=True,
         scale_factor=0.01,
     )
-    assert _should_include_force_type(req, "applied")
-    assert not _should_include_force_type(req, "contact")
-
-    req = ForceOverlayRequest(
-        enabled=True, force_types=["all"], color_by_magnitude=True, scale_factor=0.01
+    resp = _build_overlay_response(manager, config)
+    assert resp.glyphs is None
+    assert resp.frame is None
+    assert (
+        resp.unavailable_reason == "No force/torque frame available from active engine"
     )
-    assert _should_include_force_type(req, "contact")
-
-
-def test_resolve_body_name() -> None:
-    names = ["j1", "j2"]
-    assert _resolve_body_name(names, 0) == "j1"
-    assert _resolve_body_name(names, 2) == "joint_2"
-
-
-def test_is_filtered_out() -> None:
-    req = ForceOverlayRequest(
-        enabled=True,
-        force_types=["all"],
-        body_filter=["j1"],
-        scale_factor=0.01,
-        color_by_magnitude=True,
-    )
-    assert not _is_filtered_out(req, "j1")
-    assert _is_filtered_out(req, "j2")
-
-    req = ForceOverlayRequest(
-        enabled=True,
-        force_types=["all"],
-        body_filter=None,
-        scale_factor=0.01,
-        color_by_magnitude=True,
-    )
-    assert not _is_filtered_out(req, "j1")
