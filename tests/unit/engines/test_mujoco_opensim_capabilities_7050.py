@@ -38,8 +38,9 @@ def test_opensim_reports_capabilities() -> None:
     assert caps.inverse_dynamics == CapabilityLevel.FULL
     assert caps.muscles == CapabilityLevel.FULL
     assert caps.forward_sim == CapabilityLevel.FULL
-    # OpenSim has no first-class joint-torque contact reporting.
-    assert caps.contact_forces == CapabilityLevel.NONE
+    # Contact forces come from the FTO-15 state-based provider (#11300).
+    assert caps.contact_forces == CapabilityLevel.PARTIAL
+    assert caps.force_visualization == CapabilityLevel.PARTIAL
     assert caps.extra["jacobian_method"] == "simbody_calcStationJacobian"
 
 

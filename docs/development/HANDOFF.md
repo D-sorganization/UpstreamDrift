@@ -12,6 +12,113 @@
 
 ---
 
+# OpenSim Muscle Lines of Action — #11301 (FTO-16)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11301`
+- Branch: `feat/issue-11301-fto16-opensim-muscle-lines`; commit: SELF; PR: see the PR for this branch (`Closes #11301`, `Refs #11285`)
+- Governing issue: #11301 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `OpenSimForceTorqueSource.muscle_wrenches(state)` plus `include_muscles=True` constructor flag; `sample` includes them. `MUSCLE` wrenches at the first and last force-carrying `getPointForceDirections` points (force = tendon force x ground direction, rotated to Z-up with the FTO-15 rotation; torque None); labels `muscle:<name>:origin|insertion`. `tests/unit/engines/opensim/test_opensim_muscle_wrenches.py` (10 tests: hanging-block equilibrium, equal and opposite ends, passive force at zero activation, no muscles, disabled, via point, postcondition). Docs: OPENSIM_INTEGRATION.md; cross-reference in `get_muscle_forces` docstring.
+- Review fixes (Codex P1): the path is read with `getPath()` and a `GeometryPath.safeDownCast` (non-point paths are omitted, not a `bad_cast`); every `PointForceDirection` is released after use (the array only stores pointers). Tests: FunctionBasedPath muscle, RSS growth over 40k samples.
+- Decisions: a leading/trailing path point on the same body as its neighbour has zero direction in OpenSim, so the effective ends are the first/last points with a nonzero direction (never a zero wrench). Negative or non-finite tendon force raises AssertionError (issue postcondition). Only end attachments are drawn; the full polyline is a follow-up.
+- Validation: `python3 -m pytest tests/unit/engines/opensim/test_opensim_muscle_wrenches.py tests/unit/engines/opensim/test_opensim_force_torque.py` passes on Linux with opensim 4.6; ruff clean.
+- Next steps: FTO-17 playback; open follow-up issue for the full muscle path polyline.
+
+# Pinocchio Force/Torque Provider — #11298 (FTO-13)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11298`
+- Branch: `feat/issue-11298-fto13-pinocchio-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11298`, `Refs #11285`)
+- Governing issue: #11298 (parent epic #11285, ADR-0052 section 4)
+- Completed:
+  - `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`: `PinocchioForceTorqueSource` with its own `pin.Data`; RNEA with the actual acceleration, world-frame `JOINT_REACTION` at the joint origin, `JOINT_ACTUATOR` for RX/RY/RZ/RUB/RevoluteUnaligned/Spherical joints (free-flyer omitted), `CONTACT` pass-through of `ContactSample`, axial loads via `axial_force_from_proximal_reaction`.
+  - `pinocchio_physics_engine.py`: `get_force_torque_frame`, `get_segment_axial_loads`, `get_applied_torques`, `set_contact_samples` (`compute_contact_forces` sums them; zeros when none), `force_visualization=FULL`.
+  - `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.0: Pinocchio force-overlay channel row.
+- Key decisions: FTO-2 (#11287, `conversions.py`) and FTO-11 (`segment_axes.py`) are not on main, so the world-frame conversion, torque wrench and segment axes are minimal private helpers in the new module. Axis rule: one child joint gives that joint origin, a leaf gives the body COM, a branching body or a zero-length axis is reported unavailable (None), never guessed. Wrench `body` is the BODY frame attached to the joint; the joint name appears only in labels (`reaction:<joint>`, `actuator:<joint>`, `contact:<body>`). Contacts are passed as a mapping of body (frame) name to `ContactSample`; unknown bodies are omitted. The engine recomputes acceleration with ABA at the sampled (q, v, tau) because `self.a` goes stale; ABA excludes external contact forces. Replace the private helpers when FTO-2/FTO-11 land.
+- Validation: `ruff check`/`ruff format --check` clean on changed files; `pytest tests/unit/engines/pinocchio/test_pinocchio_force_torque.py tests/engines/physics_engines/test_pinocchio_engine.py`: all pass.
+- Next steps: FTO-14 (Pinocchio GUI) consumes the provider; FTO-21 parity; swap private helpers for FTO-2/FTO-11 modules.
+
+# Drake Force/Torque Provider — #11296 (FTO-11)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11296-fto11-drake-provider`; commit: SELF; PR: see the FTO-11 PR.
+- Governing issue: #11296 (epic #11285, ADR-0052; development log `DL-#11285`).
+- Completed: `drake_force_torque.py` (`DrakeForceTorqueSource`: joint reaction, net actuation, point and hydroelastic contact, opt-in gravity, axial loads); `force_overlay/segment_axes.py`; engine wiring (`get_force_torque_frame`, `get_segment_axial_loads`, `force_visualization=FULL`, hydroelastic-aware `compute_contact_forces`).
+- Key decisions: Drake's reaction port is expressed in the child joint frame, so it is rotated to world; unavailable actuation is listed in `source.unavailable_labels` because `ForceTorqueFrame` has no legend; FTO-2 converters (`joint_torque_wrench`, `SegmentAxis`, `axial_loads_from_reactions`) are reused; `compute_contact_forces` now returns the force on non-world bodies (+m\*g at rest).
+- Validation: `python3 -m pytest tests/engines/drake/test_drake_force_torque.py tests/unit/force_overlay` (40 passed with the capability test); ruff check/format clean on changed files.
+- Known limits: discrete-time plants read zero reactions before the first step; point contact on a box face yields one unstable point, so the point test uses a sphere.
+- Next steps: FTO-12 Drake GUI; FTO-21 parity.
+
+# Simscape Output Force Channels — #11304 (FTO-19)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11304`
+- Branch: `feat/issue-11304-fto19-simscape-output-force-channels`; commit: SELF; PR: see the PR for this branch (`Refs #11304`, `Refs #11285`)
+- Governing issue: #11304 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed (Python side, no MATLAB): `SimscapeOutput.force_columns` (optional, validated) and `to_force_series()`; `logsout_to_simscape_output` reads an optional `forces` key; the CSV loader was split so `force_series_from_columns` is the single core (DRY); `tests/engines/simscape/test_output_force_columns.py`; parity spec section 3.1 note. Review fixes: live output wrenches carry source `simscape_output` (CSV keeps `simscape_csv`, via `wrench_source`); non-mapping `forces` raises `SimscapeSimulationError`.
+- Not done (needs a Windows R2025b host, not faked): channel audit of `GolfSwing3D_Kinetic.slx` / GS3DX logsout, `extract_sim_out.m` emitting `forces`, one-candidate evidence run, trimmed fixture from real output. Issue #11304 stays open for these.
+- Validation: `python3 -m pytest tests/engines/simscape tests/unit/engines/simscape/test_force_channels.py -n auto --timeout=60` passes; ruff, mypy, file-size, error-handling clean.
+- Next steps: on the R2025b host run the audit, extend `extract_sim_out.m`, record release string, model SHA and channel count.
+
+# OpenSim Force/Torque Provider — #11300 (FTO-15)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11300`
+- Branch: `feat/issue-11300-fto15-opensim-provider`; commit: SELF; PR: see the PR for this branch (`Closes #11300`, `Refs #11285`)
+- Governing issue: #11300 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `src/engines/physics_engines/opensim/python/opensim_force_torque.py` (`OpenSimForceTorqueSource`, `R_ZUP_FROM_OPENSIM_GROUND`); engine `get_force_torque_frame`, `get_segment_axial_loads`, `compute_contact_forces`; `contact_forces` and `force_visualization` PARTIAL; `tests/unit/engines/opensim/test_opensim_force_torque.py` (25 tests); capability test updated; "Force Overlay Channels" section in `docs/development/OPENSIM_INTEGRATION.md`.
+- Decisions: FTO-2 (#11287) conversions landed on main while this PR was open but FTO-11 segment axes did not, so the world conversion, torque shift (reuses `motion_matching.force_torque.transform_wrench`) and segment axes are private helpers; swapping to `force_overlay.conversions` is a follow-up. Review fixes: the up axis is read from model gravity (Z-up models are not rotated), `step()` keeps the manager state, actuator labels use the actuator name, capabilities are PARTIAL. `sample` realizes the state to Acceleration itself because the Python bindings cannot read the stage. The existing `coord_map._R_YUP_TO_ZUP` is an axis swap with det -1 (a reflection), so a new proper rotation is defined instead; fixing the old constant is a separate follow-up. Record torque of HuntCrossley/Smooth forces is about the body origin (verified by the offset-mass-centre test). Wrench labels: `reaction:<joint>`, `actuator:<joint>.<coordinate>`, `contact:<force>`; body is the base body name.
+- Known: `OpenSimPhysicsEngine.set_state` calls `opensim.Vector(n)` with one argument, which the 4.6 bindings reject (pre-existing, untouched). Programmatic `CustomJoint` construction segfaults the 4.6 bindings, so that test loads an XML model.
+- Validation: `python3 -m pytest tests/unit/engines/opensim tests/unit/engines/test_mujoco_opensim_capabilities_7050.py` passes (104) on a Linux host with opensim 4.6; ruff check/format clean on changed files.
+- Next steps: FTO-16 muscles; FTO-17 playback; FTO-21 parity; replace private helpers with FTO-2/FTO-11 modules.
+
+# Force Conversions — #11287 (FTO-2)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11287`
+- Branch: `feat/fto-11287-shared-conversions`; commit: SELF; PR: #11287
+- Governing issue: #11287 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-2] Shared force conversions: joint torque to moment vector, local to world, reactions to tension/compression.
+- Completed:
+  - `src/shared/python/force_overlay/conversions.py`:
+    - `joint_torque_wrench`: 1D revolute or multi-axis gimbal moments with unit-norm axis validation within 1e-6 (never silently normalized).
+    - `world_wrench_from_local`: SO(3) orthonormal validation within 1e-9; routes all rotations (both full wrenches and single-half wrenches) through `transform_wrench` (DRY).
+    - `move_wrench_point`: moment-arm adjustment `tau_B = tau_A + (p_A - p_B) x F`; validates `force_n is not None` when moving to a new point (raises ValueError if force_n is None since torque_nm is unknown and an OverlayWrench cannot have both halves None).
+    - `SegmentAxis`: frozen dataclass defining segment endpoints, rejecting coincident proximal/distal points.
+    - `axial_loads_from_reactions`: maps `JOINT_REACTION` wrenches to `axial_force_from_proximal_reaction` yielding `AxialLoadFrame` (tension positive, compression negative, missing reactions None).
+    - `frame_with_axial_loads`: returns a copy of `ForceTorqueFrame` with `axial_loads` populated.
+  - Re-exported functions from `src/shared/python/force_overlay/__init__.py`.
+  - Added user guide paragraph in `docs/user_guide/body_part_viz/force_colors.md` ("Producing loads from reaction wrenches").
+  - 13 unit tests in `tests/unit/force_overlay/test_conversions.py` covering all contract branches, red-first TDD, and synthetic two-link chain agreement.
+- Next steps: Wave B child issues: FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+
+# Simscape Force Loader — #11303 (FTO-18)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11303`
+- Branch: `feat/issue-11303-fto18-simscape-loader`; commit: SELF; PR: see PR for #11303
+- Governing issue: #11303 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `src/engines/simscape/force_channels.py` (channel table, `load_simscape_force_series`), `SimscapeAdapter.load_force_series`, `tests/unit/engines/simscape/test_force_channels.py`, parity spec section 3.1.
+- Decisions: FTO-2 (#11287) is not on main, so rotation (`R @ v`) and CSV column reading are private helpers here; swap to `world_wrench_from_local` when FTO-2 lands. Axial loads (step 4) deferred to FTO-2's `axial_loads_from_reactions`.
+- Review fixes: adapter forwards `rotation_tol`; actuator axes are per joint per `calculateJointPowerWork.m::getActuatorTorques` (Torso has no axis, omitted; LF/RF Z column is not in the committed trial so it is reported missing).
+- Findings: the committed trial logs R only orthonormal to ~6e-3, so the 1e-6 default rejects it; real-data tests pass `rotation_tol=1e-2` explicitly. The only local/global pairs (MP couple/hand) satisfy world = R^T @ local, so the joint `R @ v` convention is unconfirmed on real data. Needs owner/MATLAB review.
+- Validation: `python3 -m pytest tests/unit/engines/simscape/test_force_channels.py tests/unit/force_overlay -n auto --timeout=60` passes; ruff check/format, file-size, error-handling ratchet clean.
+- Next steps: FTO-2 integration; FTO-19/20/21; resolve the R tolerance and convention questions.
+
+# Force and Torque Overlay Contract — #11286 (FTO-1)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11286`
+- Branch: `feat/fto-11286-force-torque-overlay-contract`; commit: SELF; PR: #11286
+- Governing issue: #11286 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-1] Force/torque overlay contract: ForceTorqueFrame, wire schema and shared fixtures.
+- Completed:
+  - `src/shared/python/force_overlay/__init__.py`: explicit `__all__`, headless import guard.
+  - `src/shared/python/force_overlay/contracts.py`: `WrenchKind` (7 categorical values), `OverlayWrench` (frozen dataclass with optional halves, DbC validation, `to_spatial_wrench`, `to_dict`/`from_dict`), `ForceTorqueFrame` (frozen dataclass, `by_kind`, `axial_loads` temporal alignment within 1e-12, `to_dict`/`from_dict`), `ForceTorqueProvider` protocol, `read_force_torque_frame`.
+  - `src/shared/python/force_overlay/series.py`: `ForceTorqueSeries` (strictly increasing times, single engine, `frame_at` with linear interpolation and gap-bounding, pickle-free NPZ serialization with boolean masks, dict round-trip).
+  - Promoted `validate_vec3` to public in `src/shared/python/motion_matching/force_torque.py` with `_validate_vec3` backward-compatible alias.
+  - Wire schema `schemas/force-torque-frame-v1.json` (JSON Schema Draft 2020-12) and 7 conformance cases in `schemas/force-torque-frame-examples.json`.
+  - 25 unit tests in `tests/unit/force_overlay/` (contracts, series, schema fixtures, headless import purity).
+- Validation:
+  - `python3 -m ruff check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 violations.
+  - `python3 -m ruff format --check src/shared/python/force_overlay/ tests/unit/force_overlay/ src/shared/python/motion_matching/force_torque.py`: 0 diffs.
+  - `python3 -m pytest tests/unit/force_overlay -n auto --timeout=60`: 25 passed.
+  - `python3 scripts/ci/check_file_size_budget.py`: OK.
+  - `python3 scripts/ci/check_error_handling_ratchet.py`: OK.
+- Next steps: Wave B child issues: FTO-2 (#11287) shared conversions and FTO-3 (#11288) glyph builder.
+
 # Capture-O Video Companion Planning — #11268
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/elegant-tesla-f2heae`; commit SELF; PR: see the planning PR for this branch.
