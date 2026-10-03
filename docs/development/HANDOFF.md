@@ -1,8 +1,15 @@
+# Per-Engine Force Overlay Parity Lanes — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11346-impl`; commit: SELF; PR: #11375 (`Closes #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: new `force-overlay-parity` job in `.github/workflows/cross-engine-equivalence.yml` (matrix drake, pinocchio, opensim, mujoco) installs one engine, runs `test_force_overlay_parity.py -m requires_<engine>` and then `scripts/ci/require_junit_test_passed.py` on a named evidence testcase so an all-skipped report fails. Structure test in `tests/ci/test_ci_infrastructure.py`.
+- Limits: the MuJoCo lane's evidence is the provider-independent MJCF statics test until FTO-9 (#11294) lands; switch it to the hanging-pendulum `[mujoco]` case then. The opensim lane is `continue-on-error` (wheel not installable everywhere). Lanes are not required checks; making them required is a repo-admin setting. Not run on a real runner here.
+- Validation: YAML parses; the new structure test passes; ruff check/format clean. 20 other tests in `tests/ci/test_ci_infrastructure.py` fail in this venv (missing optional deps) and are unrelated.
+- Next steps: watch the first CI run of each lane; update the mujoco evidence after #11294.
+
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11291-mujoco-glyphs`; commit: a9515fb04e; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
-- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
     - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
@@ -18,7 +25,7 @@
 - Validation:
   - Ruff check and format clean.
   - Pytest 5/5 passed.
-- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
+
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 

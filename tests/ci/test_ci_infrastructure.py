@@ -388,6 +388,43 @@ class TestCIEnvironmentCompatibility:
         assert "scripts/ci/require_junit_test_passed.py" in workflow
         assert "test_jaxsim_pinocchio_free_body_dynamics_terms_match" in workflow
 
+    def test_cross_engine_equivalence_runs_force_overlay_parity_per_engine(
+        self,
+    ) -> None:
+        """Issue #11346: each engine runs the force-overlay parity file.
+
+        Every lane must install its engine, select ``requires_<engine>`` and
+        require a named testcase to pass so an all-skipped report fails.
+        """
+        try:
+            import yaml
+        except ImportError:
+            pytest.skip("PyYAML is required for workflow structure checks")
+
+        data = yaml.safe_load(
+            (
+                REPO_ROOT / ".github" / "workflows" / "cross-engine-equivalence.yml"
+            ).read_text(encoding="utf-8")
+        )
+        job = data["jobs"]["force-overlay-parity"]
+        lanes = {lane["engine"]: lane for lane in job["strategy"]["matrix"]["include"]}
+        assert set(lanes) == {"drake", "pinocchio", "opensim", "mujoco"}
+        for lane in lanes.values():
+            assert lane["install"]
+            assert lane["evidence"].startswith("test_")
+        steps = {step["name"]: step for step in job["steps"] if "name" in step}
+        run_step = next(
+            s for n, s in steps.items() if n.startswith("Run force-overlay")
+        )
+        assert (
+            "tests/integration/cross_engine/test_force_overlay_parity.py"
+            in (run_step["run"])
+        )
+        assert "requires_${{ matrix.engine }}" in run_step["run"]
+        guard = next(s for n, s in steps.items() if "actually ran" in n)
+        assert "scripts/ci/require_junit_test_passed.py" in guard["run"]
+        assert "${{ matrix.evidence }}" in guard["run"]
+
     def test_jaxsim_upgrade_guard_runs_pinned_equivalence_and_gradient_checks(
         self,
     ) -> None:
