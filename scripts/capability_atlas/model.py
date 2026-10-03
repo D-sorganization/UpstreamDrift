@@ -114,7 +114,15 @@ def source_path(root: Path, value: str) -> None:
     path = root / value
     if Path(value).is_absolute() or ".." in Path(value).parts:
         raise ValueError(f"Unsafe evidence path: {value}")
-    if not path.exists() or not path.resolve().is_relative_to(root.resolve()):
+    resolved = path.resolve()
+    root_resolved = root.resolve()
+    vendor_resolved = (root / "vendor" / "ud-tools").resolve()
+    vendor_src_resolved = (root / "vendor" / "ud-tools" / "src").resolve()
+    if not path.exists() or not (
+        resolved.is_relative_to(root_resolved)
+        or resolved.is_relative_to(vendor_resolved)
+        or resolved.is_relative_to(vendor_src_resolved)
+    ):
         raise ValueError(
             f"Missing evidence path: {value}; initialize pinned submodules"
         )
