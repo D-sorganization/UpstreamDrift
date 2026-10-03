@@ -65,15 +65,15 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#11400 · OpenCap to OpenSim Integration
 
 - **State:** in_review
-- **Owner:** claude
-- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
-- **PR:** #11410
-- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
-- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **Owner:** local
+- **Issue:** #11400; children #11401–#11409 (this slice: #11409)
+- **PR:** #11409
+- **Branch:** `feat/opencap-import-11409`
+- **Paths:** `src/engines/physics_engines/opensim/python/opencap_import_action.py`, `src/engines/physics_engines/opensim/python/opensim_gui.py`, `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`, `src/api/routes/opencap.py`, `src/shared/python/motion_pipeline/sources/opencap_session.py`, `ui/src/components/opencap/OpenCapImportModal.tsx`, `src/config/feature_parity.json`, `docs/development/feature_parity_matrix.md`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-03 at SELF (branch from `b8e9f884`) — CI `security-scans` (Semgrep `use-defused-xml`) flagged a type-only `xml.etree` import in `osim_coordinates.py`; replaced with a structural `Element` Protocol so the module never imports `xml`. 249 tests pass in `tests/unit/motion_pipeline/sources/` + marker maps + `test_opencap_boundary.py`; ruff, mypy and bandit clean; real `LaiUhlrich2022.osim` still classifies 35 coordinates with only `pelvis_tx/ty/tz` translational.
-- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
-- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+- **Last verified:** 2026-10-03 at SELF — #11409 OpenCap session import action in PyQt6 and React/Tauri completed: 21 Python tests pass across PyQt6 UI, API routes, and motion pipeline sources; 5 Vitest tests pass in OpenCapImportModal; 39 feature parity tests pass; ruff lint/format clean; architecture and file size budgets verified.
+- **Summary:** OpenCap session import action added in PyQt6 desktop (`OpenCapImportAction`, `OpenCapImportDialog`) and React/Tauri web UI (`OpenCapImportModal`); inspects session trials, loads chosen trial via `load_opencap_session`, and hands scaled model and kinematics to OpenSim engine target.
+- **Next step:** Merge PR for #11409 and close issue.
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 

@@ -132,6 +132,29 @@ class OpenSimGolfGUI(QMainWindow):
         return self._main_widget.btn_load
 
     @property
+    def btn_import_opencap(self) -> QPushButton:
+        return self._main_widget.btn_import_opencap
+
+    @property
+    def kinematics(self) -> Any:
+        return self._main_widget.kinematics
+
+    @kinematics.setter
+    def kinematics(self, value: Any) -> None:
+        self._main_widget.kinematics = value
+
+    @property
+    def opencap_session(self) -> Any:
+        return self._main_widget.opencap_session
+
+    @opencap_session.setter
+    def opencap_session(self, value: Any) -> None:
+        self._main_widget.opencap_session = value
+
+    def load_opencap_session(self, session: Any) -> None:
+        self._main_widget.load_opencap_session(session)
+
+    @property
     def btn_help(self) -> QPushButton:
         return self._main_widget.btn_help
 
@@ -181,6 +204,8 @@ class MainWidget(QWidget):
         # Model state
         self.model: GolfSwingModel | None = None
         self.model_path = model_path
+        self.kinematics: Any = None
+        self.opencap_session: Any = None
         self.result: Any = None
         self.initialization_error: str | None = None
         self._opensim_available: bool = False
@@ -327,6 +352,14 @@ class MainWidget(QWidget):
         )
         controls.addWidget(self.btn_load)
 
+        self.btn_import_opencap = QPushButton("Import OpenCap")
+        self.btn_import_opencap.clicked.connect(self._import_opencap_dialog)
+        self.btn_import_opencap.setFixedWidth(150)
+        self.btn_import_opencap.setStyleSheet(
+            "background-color: #28a745; color: white; padding: 10px; font-weight: bold;"
+        )
+        controls.addWidget(self.btn_import_opencap)
+
         self.btn_run = QPushButton("Run Simulation")
         self.btn_run.clicked.connect(self.run_simulation)
         self.btn_run.setFixedWidth(200)
@@ -378,6 +411,35 @@ class MainWidget(QWidget):
         if file_path:
             self.model_path = file_path
             self._try_load_model()
+
+    def _import_opencap_dialog(self) -> None:
+        """Open OpenCap session import dialog."""
+        from .opencap_import_action import OpenCapImportAction
+
+        action = OpenCapImportAction(target_engine=self, parent=self)
+        action.open_import_dialog()
+
+    def load_opencap_session(self, session: Any) -> None:
+        """Load OpenCap session into OpenSim GUI."""
+        self.opencap_session = session
+        self.kinematics = session.kinematics
+        if session.model_file is not None:
+            self.model_path = str(session.model_file)
+            if self._opensim_available:
+                self._try_load_model()
+            else:
+                self.initialization_error = "OpenSim library is not installed"
+        self._update_status(f"OpenCap Session Loaded ({session.trial})", "green")
+        details = (
+            f"OpenCap Session: {session.trial}\n"
+            f"Trials: {', '.join(session.trials)}\n"
+            f"Subject mass: {session.subject.mass_kg} kg, height: {session.subject.height_m} m\n"
+            f"Kinematics: {'Loaded' if session.kinematics is not None else 'None'}\n"
+            f"Model: {session.model_file.name if session.model_file else 'None'}"
+        )
+        if session.notes:
+            details += f"\nNotes: {'; '.join(session.notes)}"
+        self.lbl_details.setText(details)
 
     def run_simulation(self) -> None:
         """Execute the loaded OpenSim simulation and display results."""
