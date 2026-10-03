@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # Per-Engine Force Overlay Parity Lanes — #11346
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11346-impl`; commit: SELF; PR: #11375 (`Closes #11346`, `Refs #11285`); DL entry `DL-#11285`
@@ -7,10 +5,6 @@
 - Limits: the MuJoCo lane's evidence is the provider-independent MJCF statics test until FTO-9 (#11294) lands; switch it to the hanging-pendulum `[mujoco]` case then. The opensim lane is `continue-on-error` (wheel not installable everywhere). Lanes are not required checks; making them required is a repo-admin setting. Not run on a real runner here.
 - Validation: YAML parses; the new structure test passes; ruff check/format clean. 20 other tests in `tests/ci/test_ci_infrastructure.py` fail in this venv (missing optional deps) and are unrelated.
 - Next steps: watch the first CI run of each lane; update the mujoco evidence after #11294.
-
-# MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
-
-- # Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11291-mujoco-glyphs`; commit: a9515fb04e; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 
 # Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
 
@@ -33,7 +27,6 @@
   - Ruff check and format clean.
   - Pytest passed.
 - Next steps: Merge PR #11348; unblocks remaining renderers.
-  > > > > > > > origin/main
 
 ---
 
