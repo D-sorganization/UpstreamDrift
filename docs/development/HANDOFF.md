@@ -32,7 +32,6 @@
 - Next steps: Merge PR; unblocks FTO-27.
 
 ---
-
 # Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
