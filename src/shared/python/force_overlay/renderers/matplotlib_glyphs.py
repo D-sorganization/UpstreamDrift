@@ -63,6 +63,103 @@ def _build_cone_facets(
     return facets
 
 
+def _draw_single_arrow_3d(
+    ax: Any,
+    arrow: ArrowGlyph,
+    linewidth_pt: float,
+    halo: bool,
+) -> list[Artist]:
+    """Render a single 3D force arrow with optional halo."""
+    artists: list[Artist] = []
+    tail = np.asarray(arrow.tail_m, dtype=float)
+    head_base = np.asarray(arrow.head_base_m, dtype=float)
+    tip = np.asarray(arrow.tip_m, dtype=float)
+
+    if halo:
+        halo_shaft = ax.plot(
+            [tail[0], head_base[0]],
+            [tail[1], head_base[1]],
+            [tail[2], head_base[2]],
+            color="#202020",
+            linewidth=linewidth_pt * 1.5,
+            alpha=0.6,
+            solid_capstyle="round",
+        )[0]
+        artists.append(halo_shaft)
+
+    shaft = ax.plot(
+        [tail[0], head_base[0]],
+        [tail[1], head_base[1]],
+        [tail[2], head_base[2]],
+        color=arrow.rgba,
+        linewidth=linewidth_pt,
+        solid_capstyle="round",
+    )[0]
+    artists.append(shaft)
+
+    cone_facets = _build_cone_facets(head_base, tip, arrow.head_radius_m, 12)
+    if cone_facets:
+        cone = Poly3DCollection(
+            cone_facets,
+            facecolors=arrow.rgba,
+            edgecolors=arrow.rgba,
+            alpha=arrow.rgba[3] if len(arrow.rgba) > 3 else 1.0,
+        )
+        ax.add_collection3d(cone)
+        artists.append(cone)
+
+    return artists
+
+
+def _draw_single_torque_arc_3d(
+    ax: Any,
+    arc: TorqueArcGlyph,
+    linewidth_pt: float,
+    halo: bool,
+) -> list[Artist]:
+    """Render a single 3D torque arc with polyline and cone head."""
+    artists: list[Artist] = []
+    pts = np.asarray(arc.polyline_m, dtype=float)
+    if len(pts) >= 2:
+        if halo:
+            halo_arc = ax.plot(
+                pts[:, 0],
+                pts[:, 1],
+                pts[:, 2],
+                color="#202020",
+                linewidth=linewidth_pt * 1.5,
+                alpha=0.6,
+                solid_capstyle="round",
+            )[0]
+            artists.append(halo_arc)
+
+        fg_arc = ax.plot(
+            pts[:, 0],
+            pts[:, 1],
+            pts[:, 2],
+            color=arc.rgba,
+            linewidth=linewidth_pt,
+            solid_capstyle="round",
+        )[0]
+        artists.append(fg_arc)
+
+    hb = np.asarray(arc.head_base_m, dtype=float)
+    ht = np.asarray(arc.head_tip_m, dtype=float)
+    head_len = float(np.linalg.norm(ht - hb))
+    cone_facets = _build_cone_facets(hb, ht, max(1e-4, head_len * 0.35), 12)
+    if cone_facets:
+        cone = Poly3DCollection(
+            cone_facets,
+            facecolors=arc.rgba,
+            edgecolors=arc.rgba,
+            alpha=arc.rgba[3] if len(arc.rgba) > 3 else 1.0,
+        )
+        ax.add_collection3d(cone)
+        artists.append(cone)
+
+    return artists
+
+
 def draw_glyphs_3d(
     ax: Any,
     glyphs: GlyphSet,
@@ -94,85 +191,10 @@ def draw_glyphs_3d(
         raise TypeError(f"glyphs must be GlyphSet, got {type(glyphs)}")
 
     artists: list[Artist] = []
-
-    # 1. Force arrows
     for arrow in glyphs.arrows:
-        tail = np.asarray(arrow.tail_m, dtype=float)
-        head_base = np.asarray(arrow.head_base_m, dtype=float)
-        tip = np.asarray(arrow.tip_m, dtype=float)
-
-        if halo:
-            halo_shaft = ax.plot(
-                [tail[0], head_base[0]],
-                [tail[1], head_base[1]],
-                [tail[2], head_base[2]],
-                color="#202020",
-                linewidth=linewidth_pt * 1.5,
-                alpha=0.6,
-                solid_capstyle="round",
-            )[0]
-            artists.append(halo_shaft)
-
-        shaft = ax.plot(
-            [tail[0], head_base[0]],
-            [tail[1], head_base[1]],
-            [tail[2], head_base[2]],
-            color=arrow.rgba,
-            linewidth=linewidth_pt,
-            solid_capstyle="round",
-        )[0]
-        artists.append(shaft)
-
-        cone_facets = _build_cone_facets(head_base, tip, arrow.head_radius_m, 12)
-        if cone_facets:
-            cone = Poly3DCollection(
-                cone_facets,
-                facecolors=arrow.rgba,
-                edgecolors=arrow.rgba,
-                alpha=arrow.rgba[3] if len(arrow.rgba) > 3 else 1.0,
-            )
-            ax.add_collection3d(cone)
-            artists.append(cone)
-
-    # 2. Torque arcs
+        artists.extend(_draw_single_arrow_3d(ax, arrow, linewidth_pt, halo))
     for arc in glyphs.torque_arcs:
-        pts = np.asarray(arc.polyline_m, dtype=float)
-        if len(pts) >= 2:
-            if halo:
-                halo_arc = ax.plot(
-                    pts[:, 0],
-                    pts[:, 1],
-                    pts[:, 2],
-                    color="#202020",
-                    linewidth=linewidth_pt * 1.5,
-                    alpha=0.6,
-                    solid_capstyle="round",
-                )[0]
-                artists.append(halo_arc)
-
-            fg_arc = ax.plot(
-                pts[:, 0],
-                pts[:, 1],
-                pts[:, 2],
-                color=arc.rgba,
-                linewidth=linewidth_pt,
-                solid_capstyle="round",
-            )[0]
-            artists.append(fg_arc)
-
-        hb = np.asarray(arc.head_base_m, dtype=float)
-        ht = np.asarray(arc.head_tip_m, dtype=float)
-        head_len = float(np.linalg.norm(ht - hb))
-        cone_facets = _build_cone_facets(hb, ht, max(1e-4, head_len * 0.35), 12)
-        if cone_facets:
-            cone = Poly3DCollection(
-                cone_facets,
-                facecolors=arc.rgba,
-                edgecolors=arc.rgba,
-                alpha=arc.rgba[3] if len(arc.rgba) > 3 else 1.0,
-            )
-            ax.add_collection3d(cone)
-            artists.append(cone)
+        artists.extend(_draw_single_torque_arc_3d(ax, arc, linewidth_pt, halo))
 
     return artists
 
