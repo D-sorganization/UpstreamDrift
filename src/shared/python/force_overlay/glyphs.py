@@ -321,8 +321,7 @@ class LegendSpec:
             "torque_reference_nm": self.torque_reference_nm,
             "torque_reference_radius_m": self.torque_reference_radius_m,
             "kinds_present": [
-                k.value if hasattr(k, "value") else str(k)
-                for k in self.kinds_present
+                k.value if hasattr(k, "value") else str(k) for k in self.kinds_present
             ],
             "unavailable_labels": list(self.unavailable_labels),
             "engine": self.engine,

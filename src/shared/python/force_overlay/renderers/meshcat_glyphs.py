@@ -122,129 +122,125 @@ class MeshcatGlyphRenderer:
             str, tuple[float, float, float, tuple[float, float, float, float]]
         ] = {}
 
-    def update(self, glyphs: GlyphSet) -> None:
-        """Update MeshCat scene with current glyph geometry, caching unchanged shapes."""
-        current_labels: set[str] = set()
-        new_active_paths_by_label: dict[str, set[str]] = {}
+    def _render_arrow(self, arrow: ArrowGlyph) -> set[str]:
+        """Render shaft cylinder and head cone for a single force arrow."""
+        label = arrow.label
+        label_paths: set[str] = set()
 
-        # 1. Render Force Arrows
-        for arrow in glyphs.arrows:
-            label = arrow.label
-            current_labels.add(label)
-            label_paths: set[str] = set()
-
-            # Shaft cylinder
-            shaft_path = f"{self._root}/{label}/shaft"
-            shaft_len, shaft_tf = _make_segment_transform(
-                arrow.tail_m, arrow.head_base_m
+        # Shaft cylinder
+        shaft_path = f"{self._root}/{label}/shaft"
+        shaft_len, shaft_tf = _make_segment_transform(arrow.tail_m, arrow.head_base_m)
+        if shaft_len > 1e-6:
+            label_paths.add(shaft_path)
+            geom_key = (
+                round(shaft_len, 6),
+                round(arrow.shaft_radius_m, 6),
+                round(arrow.shaft_radius_m, 6),
+                arrow.rgba,
             )
-            if shaft_len > 1e-6:
-                label_paths.add(shaft_path)
-                geom_key = (
-                    round(shaft_len, 6),
-                    round(arrow.shaft_radius_m, 6),
-                    round(arrow.shaft_radius_m, 6),
+            if self._geometry_cache.get(shaft_path) != geom_key:
+                self._sink.set_cylinder(
+                    shaft_path,
+                    shaft_len,
+                    arrow.shaft_radius_m,
+                    arrow.shaft_radius_m,
                     arrow.rgba,
                 )
-                if self._geometry_cache.get(shaft_path) != geom_key:
-                    self._sink.set_cylinder(
-                        shaft_path,
-                        shaft_len,
-                        arrow.shaft_radius_m,
-                        arrow.shaft_radius_m,
-                        arrow.rgba,
-                    )
-                    self._geometry_cache[shaft_path] = geom_key
-                self._sink.set_transform(shaft_path, shaft_tf)
+                self._geometry_cache[shaft_path] = geom_key
+            self._sink.set_transform(shaft_path, shaft_tf)
 
-            # Head cone (radius_top = 0.0)
-            head_path = f"{self._root}/{label}/head"
-            head_len, head_tf = _make_segment_transform(arrow.head_base_m, arrow.tip_m)
-            if head_len > 1e-6:
-                label_paths.add(head_path)
-                geom_key = (
-                    round(head_len, 6),
+        # Head cone (radius_top = 0.0)
+        head_path = f"{self._root}/{label}/head"
+        head_len, head_tf = _make_segment_transform(arrow.head_base_m, arrow.tip_m)
+        if head_len > 1e-6:
+            label_paths.add(head_path)
+            geom_key = (
+                round(head_len, 6),
+                0.0,
+                round(arrow.head_radius_m, 6),
+                arrow.rgba,
+            )
+            if self._geometry_cache.get(head_path) != geom_key:
+                self._sink.set_cylinder(
+                    head_path,
+                    head_len,
                     0.0,
-                    round(arrow.head_radius_m, 6),
+                    arrow.head_radius_m,
                     arrow.rgba,
                 )
-                if self._geometry_cache.get(head_path) != geom_key:
-                    self._sink.set_cylinder(
-                        head_path,
-                        head_len,
-                        0.0,
-                        arrow.head_radius_m,
-                        arrow.rgba,
-                    )
-                    self._geometry_cache[head_path] = geom_key
-                self._sink.set_transform(head_path, head_tf)
+                self._geometry_cache[head_path] = geom_key
+            self._sink.set_transform(head_path, head_tf)
 
-            new_active_paths_by_label[label] = label_paths
+        return label_paths
 
-        # 2. Render Torque Arcs
-        for arc in glyphs.torque_arcs:
-            label = arc.label
-            current_labels.add(label)
-            label_paths = new_active_paths_by_label.get(label, set())
+    def _render_torque_arc(
+        self, arc: TorqueArcGlyph, existing_paths: set[str] | None = None
+    ) -> set[str]:
+        """Render polyline segments and cone head for a single torque arc."""
+        label = arc.label
+        label_paths = set(existing_paths) if existing_paths else set()
 
-            poly = arc.polyline_m
-            head_len_est = float(
-                np.linalg.norm(np.array(arc.head_tip_m) - np.array(arc.head_base_m))
-            )
-            arc_tube_radius = (
-                max(0.002, head_len_est * 0.15)
-                if head_len_est > 0
-                else max(0.002, arc.radius_m * 0.04)
-            )
+        poly = arc.polyline_m
+        head_len_est = float(
+            np.linalg.norm(np.array(arc.head_tip_m) - np.array(arc.head_base_m))
+        )
+        arc_tube_radius = (
+            max(0.002, head_len_est * 0.15)
+            if head_len_est > 0
+            else max(0.002, arc.radius_m * 0.04)
+        )
 
-            for i in range(len(poly) - 1):
-                seg_path = f"{self._root}/{label}/arc/{i}"
-                seg_len, seg_tf = _make_segment_transform(poly[i], poly[i + 1])
-                if seg_len > 1e-6:
-                    label_paths.add(seg_path)
-                    geom_key = (
-                        round(seg_len, 6),
-                        round(arc_tube_radius, 6),
-                        round(arc_tube_radius, 6),
-                        arc.rgba,
-                    )
-                    if self._geometry_cache.get(seg_path) != geom_key:
-                        self._sink.set_cylinder(
-                            seg_path,
-                            seg_len,
-                            arc_tube_radius,
-                            arc_tube_radius,
-                            arc.rgba,
-                        )
-                        self._geometry_cache[seg_path] = geom_key
-                    self._sink.set_transform(seg_path, seg_tf)
-
-            # Arc cone head
-            head_path = f"{self._root}/{label}/head"
-            head_len, head_tf = _make_segment_transform(arc.head_base_m, arc.head_tip_m)
-            if head_len > 1e-6:
-                label_paths.add(head_path)
-                cone_base_r = arc_tube_radius * 2.5
+        for i in range(len(poly) - 1):
+            seg_path = f"{self._root}/{label}/arc/{i}"
+            seg_len, seg_tf = _make_segment_transform(poly[i], poly[i + 1])
+            if seg_len > 1e-6:
+                label_paths.add(seg_path)
                 geom_key = (
-                    round(head_len, 6),
-                    0.0,
-                    round(cone_base_r, 6),
+                    round(seg_len, 6),
+                    round(arc_tube_radius, 6),
+                    round(arc_tube_radius, 6),
                     arc.rgba,
                 )
-                if self._geometry_cache.get(head_path) != geom_key:
+                if self._geometry_cache.get(seg_path) != geom_key:
                     self._sink.set_cylinder(
-                        head_path,
-                        head_len,
-                        0.0,
-                        cone_base_r,
+                        seg_path,
+                        seg_len,
+                        arc_tube_radius,
+                        arc_tube_radius,
                         arc.rgba,
                     )
-                    self._geometry_cache[head_path] = geom_key
-                self._sink.set_transform(head_path, head_tf)
+                    self._geometry_cache[seg_path] = geom_key
+                self._sink.set_transform(seg_path, seg_tf)
 
-            new_active_paths_by_label[label] = label_paths
+        # Arc cone head
+        head_path = f"{self._root}/{label}/head"
+        head_len, head_tf = _make_segment_transform(arc.head_base_m, arc.head_tip_m)
+        if head_len > 1e-6:
+            label_paths.add(head_path)
+            cone_base_r = arc_tube_radius * 2.5
+            geom_key = (
+                round(head_len, 6),
+                0.0,
+                round(cone_base_r, 6),
+                arc.rgba,
+            )
+            if self._geometry_cache.get(head_path) != geom_key:
+                self._sink.set_cylinder(
+                    head_path,
+                    head_len,
+                    0.0,
+                    cone_base_r,
+                    arc.rgba,
+                )
+                self._geometry_cache[head_path] = geom_key
+            self._sink.set_transform(head_path, head_tf)
 
-        # 3. Clean up disappeared labels and unused paths
+        return label_paths
+
+    def _cleanup_unused_paths(
+        self, new_active_paths_by_label: dict[str, set[str]]
+    ) -> None:
+        """Clean up disappeared labels and unused visualizer paths."""
         for old_label, old_paths in self._active_paths_by_label.items():
             current_paths = new_active_paths_by_label.get(old_label, set())
             dead_paths = old_paths - current_paths
@@ -252,6 +248,20 @@ class MeshcatGlyphRenderer:
                 self._sink.delete(dead_path)
                 self._geometry_cache.pop(dead_path, None)
 
+    def update(self, glyphs: GlyphSet) -> None:
+        """Update MeshCat scene with current glyph geometry, caching unchanged shapes."""
+        new_active_paths_by_label: dict[str, set[str]] = {}
+
+        for arrow in glyphs.arrows:
+            new_active_paths_by_label[arrow.label] = self._render_arrow(arrow)
+
+        for arc in glyphs.torque_arcs:
+            existing = new_active_paths_by_label.get(arc.label, set())
+            new_active_paths_by_label[arc.label] = self._render_torque_arc(
+                arc, existing
+            )
+
+        self._cleanup_unused_paths(new_active_paths_by_label)
         self._active_paths_by_label = new_active_paths_by_label
 
     def clear(self) -> None:
