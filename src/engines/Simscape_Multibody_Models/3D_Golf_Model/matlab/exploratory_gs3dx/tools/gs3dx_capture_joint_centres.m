@@ -17,6 +17,8 @@ function jc = gs3dx_capture_joint_centres(cap, opts)
 %                 the pelvis left axis
 %     ankle_L/R   AnkleOut moved ankle_inset toward the midline likewise
 %     toe_L/R     mean of ToeIn and ToeOut
+%     foot_R_L/R  3 x 3 x frames calibrated foot orientation frames (SO(3))
+%     foot_calibration  per-foot calibration metadata (L/R) including assumptions
 %     c7          BackTop
 %     shoulder_L/R  acromion marker lowered shoulder_drop along the thorax
 %                 up axis; RShoulderTop is missing in 80% of frames, so it
@@ -88,6 +90,7 @@ function jc = gs3dx_capture_joint_centres(cap, opts)
         'shoulder_L', gap(["LShoulderTop", "BackTop", "BackLeft", "BackRight"]), ...
         'shoulder_R', gap(["RShoulderBack", "BackTop", "BackLeft", "BackRight"]), ...
         'club_grip', any(isnan(cap.club_grip), 1), 'club_head', any(isnan(cap.club_head), 1));
+    jc.foot_calibration = struct();
     for s = ["L", "R"]
         jc.gap.("hip_" + s) = waist_gap;
         jc.gap.("knee_" + s) = gap([s + "KneeOut", "WaistLeft", "WaistRight", "WaistLBack", "WaistRBack"]);
@@ -95,6 +98,21 @@ function jc = gs3dx_capture_joint_centres(cap, opts)
         jc.gap.("toe_" + s) = gap([s + "ToeIn", s + "ToeOut"]);
         jc.gap.("elbow_" + s) = gap(s + "ElbowOut");
         jc.gap.("wrist_" + s) = gap(s + "WristTop");
+
+        foot_gap = jc.gap.("ankle_" + s) | jc.gap.("toe_" + s);
+        if foot_gap(1)
+            error('gs3dx:capture_joint_centres:frame1_missing', ...
+                'Foot %s markers are missing or gap-filled at address frame 1; calibration requires measured frame 1', s);
+        end
+        dx = jc.("toe_" + s)(1, 1) - jc.("ankle_" + s)(1, 1);
+        dy = jc.("toe_" + s)(2, 1) - jc.("ankle_" + s)(2, 1);
+        yaw_deg = atan2d(dy, dx);
+        [foot_R, foot_gap_out, foot_meta] = gs3dx_foot_marker_frame(jc.("ankle_" + s), ...
+            m(s + "ToeIn"), m(s + "ToeOut"), foot_gap, ...
+            'address_frames', 1, 'address_yaw_deg', yaw_deg);
+        jc.("foot_R_" + s) = foot_R;
+        jc.gap.("foot_R_" + s) = foot_gap_out;
+        jc.foot_calibration.(s) = foot_meta;
     end
     jc.t = (0:n - 1) / cap.rate_hz;
     jc.impact_frame = cap.impact_frame;

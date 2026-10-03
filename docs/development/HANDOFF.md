@@ -35,6 +35,42 @@
 
 # Past Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
 
+---
+
+# OpenCap: Import Session Action in PyQt6 and React/Tauri — #11400 / #11409
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-import-11409`; commit SELF; PR: #11409 (`Closes #11409`, `Refs #11400`)
+- Governing issue: #11409 (parent epic #11400, depends on #11403)
+- Objective: Add an "Import OpenCap session" action that lists the session's trials, loads the chosen one through `load_opencap_session`, and hands the scaled model plus kinematics to the OpenSim engine.
+- Completed:
+  - `src/shared/python/motion_pipeline/sources/opencap_session.py`:
+    - Added `OpenCapSessionMetadata` dataclass and `inspect_opencap_session(session_dir)` to discover session trials, subject anthropometry, scaled model path, and kinematics without full marker parsing.
+  - `src/engines/physics_engines/opensim/python/opencap_import_action.py`:
+    - Added `OpenCapImportAction` and `OpenCapImportDialog` (PyQt6) providing session directory selection, trial enumeration, user trial selection, and handoff to OpenSim engine targets.
+  - `src/engines/physics_engines/opensim/python/opensim_gui.py`:
+    - Added `btn_import_opencap` button to `MainWidget` and `OpenSimGolfGUI`.
+    - Added `load_opencap_session` to `MainWidget` and `OpenSimGolfGUI` with status updates, subject details, and model loading.
+  - `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`:
+    - Added `load_opencap_session`, `kinematics`, and `opencap_session` properties to `OpenSimPhysicsEngine`.
+  - `src/api/routes/opencap.py` & `src/api/route_registry.py`:
+    - Added REST endpoints `POST /tools/opencap/inspect` and `POST /tools/opencap/import` for session inspection and trial loading.
+  - `ui/src/components/opencap/OpenCapImportModal.tsx`:
+    - Accessible React/Tauri modal component displaying session details, subject anthropometry, and trial selection, dispatching `onImport` event.
+  - Feature parity and documentation:
+    - Added `opencap.session_import` feature entry to `src/config/feature_parity.json`.
+    - Regenerated `docs/development/feature_parity_matrix.md`.
+    - Recorded in `SPEC.md` Change Log (#11409) and `docs/development/DEVELOPMENT_LOG.md` (DL-#11400).
+- Validation:
+  - 21 Python unit/UI tests pass across `tests/ui/engines/opensim/test_opencap_import_action.py`, `tests/unit/api/test_routes_opencap.py`, and `tests/unit/motion_pipeline/sources/test_opencap_session.py`.
+  - 5 Vitest unit/UI tests pass in `ui/src/components/opencap/OpenCapImportModal.test.tsx`.
+  - 39 feature parity tests pass in `tests/config/feature_parity/`.
+  - Architecture budget, file size budget, error handling ratchet, ruff check/format, and mypy clean.
+- Next steps: Merge PR #11409.
+
+---
+
+# Current Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
+
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-epic-11161`
 - Branch: `feat/capture-registry-11161` (baseline `origin/main` `c2a102a1b`)
@@ -49,6 +85,11 @@
 - Tests: `python -m pytest -q -o addopts="" -p no:cacheprovider --timeout=300` over every touched test file: 169 passed, 24 skipped (private data absent), 2 failed — `test_club_observation_contracts.py::test_public_input_validation_survives_python_dash_o` fails identically on `origin/main` (recorded in the #11138 handoff) and `test_examples_produce_output.py[01_basic_simulation.py]` passes alone (timed out under the parallel load). With `CAPTURE_DATA_DIR` set to the private data checkout the workbook tests run and pass. Ruff check/format clean.
 - CI fixes (second commit): the two cross-engine/cross-option leaderboard runners resolve the Wiffle workbook through the registry (`club-workbook-wiffle`; `CaptureDataUnavailable` is a `FileNotFoundError`, so a missing workbook still skips the trial) and `test_simscape_row_is_explicit_unavailable` skips without private data; `SwingMetrics.peak_speed(segment)`/`peak_time(segment)` replace 24 three-deep chains flagged by `check_lod`; the monolith register and `reports/matched_swing_ledger.json` regenerated (the ledger's receipt hashes were already stale on `origin/main`). Still red and not caused here: the vendor `psa_package` removal (psa belongs in the gasification repo) and `test_tour_matching_viewer_residuals` (passes locally). `check LEADERBOARD.md is committed` needs `run_leaderboard.m` re-run with the private workbook: the sidecar's `git_head` was rewritten by the history scrub.
 - Third commit: the nine functions over the 100-line architecture budget are split into private helpers with the same signatures and outputs (`run_cross_option_leaderboard` insights/visualizations, `capture_export.relabel_markers`/`detect_impact_frame`, `build_club_workbook_identity`, `swing_comparison` `detect_events`/`compute_kinematic_sequence`/`compare`, `MainWidget.__init__`); no budget exception added. #11170 (per-capture leaderboard) lands here too: `LeaderboardRow.capture`/`verdict` (a verdict is only ever echoed, never invented; an unavailable or unrun row reads "not run"), `group_by_capture` keyed by (trial, engine, capture), `Leaderboard`, `render_per_capture_markdown`, `render_side_by_side_table`, and the nested `<trial>/<capture>/<engine>.json` layout. Checks: `check_architecture_budget.py` OK; ruff clean; `tests/unit/motion_matching`, `tests/unit/swing_comparison`, `test_capture_export.py` pass except pre-existing local failures that import nothing changed here (`test_event_alignment` patches a `c3d_reader.load_c3d` absent from the local sidekick tree; `test_stability_matrix`/`test_pinocchio_id_rust_parity` contract-class identity under `PYTHONPATH=.;src`; two Rust speed benches under MATLAB load).
+- Part 2, #11166 (stacked draft PR from `feat/capture-o-pipeline-11166` on this branch): the MuJoCo native ground-support pipeline runs `capture-O` (`--capture owner`, resolved lazily through the registry; `--anthropometric 1.956 104.3`). `rate_from_times` is the single capture-rate helper (DbC, no silent default); out-of-range timeline samples are skipped, not clamped (`root_error_1_4s_m` is `None` past the capture); `prepare_hip_spec` sets the contact ground from each lane's toe calibration (owner -8.8 mm fails the 1 mm spec check otherwise; driver moves 0.26 mm); `CAPTURES`/`CAPTURE_NAMES`/`capture_path`. Measured with the private data: IK marker RMS 0.083 m (driver 0.052), **dynamics 0.567 m (driver 0.089)**, so the owner dynamics match is not done: `test_ground_support_capture_smoke[owner]` is a strict xfail against the 0.15 m bound, and #11166 stays open. Checks: 105 passed over the pipeline unit tests, trajectory-optimiser selection, rate independence and weld manifold; the wider `tests/unit/motion_matching` failures are the same pre-existing set as part 1; ruff clean; `_persist_dynamics_artifacts` takes the lane (no silent 360 Hz default).
+- Review note: the capture-A tempo is 4.12 (backswing timed from the address event, not the takeaway), so the plausibility band in `test_integration_capture_a.py` is 2.0-4.2; tighten once takeaway detection lands.
+- Risks: `vendor/ud-tools` must be initialized for these tests (`git submodule update --init vendor/ud-tools`).
+- Next step: make the owner dynamics fit track (0.567 m to under 0.15 m marker RMS): start by comparing the scaled rig's segment lengths with the owner IK, then re-run `run_leaderboard.m` with `CAPTURE_DATA_DIR` set and commit the refreshed `LEADERBOARD.md` and sidecar.
+
 - `run_leaderboard.m` wrote its freshness sidecar with `\"` escapes, which are invalid in MATLAB double-quoted strings (the file did not parse, so the sidecar was never machine-written); the format strings are now single-quoted. The refresh runs next from this commit.
 - `ba473a26d`: the first real leaderboard run failed every cell. `fit_swing_full_pipeline` resolved its default `3DModelInputs_Impact.mat` one directory too high; the new shared `default_impact_input_mat` (test `test_default_impact_input_mat`) fixes it for the pipeline and `load_impact_starting_position`. The `inverse` cell is now pending with its reason, because the pipeline cannot dispatch it without a trained cVAE checkpoint (`test_inverse_stays_pending_without_a_pipeline_dispatch`). MATLAB: `test_default_impact_input_mat`, `test_run_leaderboard` (minus the real-fit smoke) and `test_fit_swing_full_pipeline` give 12 passed and 1 incomplete, an assumption skip.
 - The leaderboard cannot be regenerated locally yet (#11190). Stage 1 (`solve_starting_pose`) varies non-tunable joint targets under the `FastRestart=on` set in `prepare_fast_sim_input`, so Simulink ignores them: 80k warnings, and a 742 mm grip residual after 690 s. Stage 2 fmincon on the first option was still running at the 5-hour limit. `run_leaderboard` also needs `src/` on the path for `GolfSwing3D_Kinetic`; `setup_matlab_environment` calls `savepath`, so avoid it in batch. `LEADERBOARD.md` and its sidecar are left as they were, so the freshness check stays red until #11190 lands.
@@ -648,8 +689,225 @@
 - Completed: epic #11268 and children #11269–#11279 (COV-1 to COV-11) with TDD/DbC/LoD/DRY contracts, hosts and dependencies; `docs/development/capture-o-video/procedure.md`; development-log entry `DL-#11268`.
 - Key decisions: neutral ids only (`capture-O`, `cov-NN`, `subject-O`); media stays in `$CAPTURE_DATA_DIR/capture-O-video/`; the album link is public by owner decision (https://photos.app.goo.gl/XU322J42Rg8mev2aA); comparison protocol COV-3 is `tier:strong` and must be frozen before results are inspected.
 - Validation: document title check, Ruff and the development-log validator on the changed files (see the PR body).
-- Blockers: album download needs a fleet machine (cloud proxy returns 403); PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
-- Next steps: 1) fleet agent downloads the album and runs COV-1 #11269; 2) COV-2 #11270; 3) frontier/owner decision COV-3 #11271.
+- Blockers: local fleet acquisition and six-video hash verification completed; exact pairing/camera qualification remain open; PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
+- Next steps: 1) continue COV-2 #11270 marker-placement/event/camera review from the verified local archive; 2) preserve acquisition receipts and private original bytes; 3) frontier/owner decision COV-3 #11271.
+
+# Simscape Matching Review and Continuation Handoff
+
+Original-fit regularity review (2026-10-03 UTC): the separate LaTeX reference and `tangent_c2_checkpoint_20261003.json` contain the equations, source hashes, actual receipts and rejected experiments. Full-clock rate fitting has an independent 2,042-pose audit; adding low/moderate acceleration regularization produces another 2,042 poses. The acceleration fitter saves its results but hangs at shutdown (watchdog 125); a fresh independent native process rechecks all new poses and exits naturally with process/wrapper 0 at 17:47:42 UTC. Stronger smoothing reduces the owner's maximum wrist step from 13.24 to 9.53 degrees, but increases root motion from 6.54 to 9.39 mm and worsens marker error. The tour also trades better shoulder continuity for worse wrist motion. No new best video is promoted. These sampled position checks and finite-window derivative proxies do not qualify continuous motion, contact or independent dynamics.
+
+The current 14-position-target objective includes the clubhead, not the grip centroid. Raw club triads provide an orientation observation with address fixture alignment, while changing relative head/grip orientation prevents an unsupported rigid observation assumption. Ten native input-contract tests verify scalar validation and mask isolation without model loading. Completed club-orientation window evaluation tests baseline, zero, and two positive weights across 536 window poses (four trials each, 75 tour poses and 59 owner poses per trial), establishing exact whole-output parity at zero weight. The original window fitter saves results and hangs at shutdown (watchdog 125); a fresh independent native audit rechecks all 536 new poses and exits naturally with process/wrapper 0 at 18:18:38 UTC. Mean club orientation error improves from 10.30 to 5.92 degrees for Tour (capture_A) and 19.20 to 10.73 degrees for Owner (capture_O), while position target error shifts from 27.242 to 27.248 mm (Tour) and 37.989 to 38.014 mm (Owner), with boundary transition tradeoffs from sparse dt 1/30 s into dense steps.
+
+A subsequent full source-clock club comparison evaluates 3,063 trial poses across both captures (three trials each, with 654 tour poses at 360 Hz and 367 owner poses at 240 Hz per trial), producing 2,042 new poses from positive weights (0.025 and 0.075) and retaining 1,021 rate-control poses without refitting. Observed club triads are available at 618 tour and 345 owner samples; missing frames remain excluded rather than counted as agreement. The original fitting process saved all poses before hanging at shutdown (receipt 125 at 19:13:08 UTC); a separate fresh native R2025b audit verified all 3,063 saved poses, club rotation matrices, observation masks, metrics, and source hashes with maximum physical joint residual <= 9.93e-16, exiting naturally with process/wrapper 0 at 19:15:18 UTC. For private video previews at 30 fps (55 tour display frames, 46 owner display frames), owner weight 0.025 and tour weight 0.075 are selected as a documented tradeoff: tour mean club error improves from 11.859 to 5.476 degrees with derived 14-target position RMS shifting from 16.887 to 16.944 mm and near-unchanged wrist and root steps, while owner weight 0.025 improves mean club error from 21.143 to 19.287 degrees, reduces derived position RMS from 20.800 to 20.762 mm, and reduces maximum wrist step from 13.240 to 13.060 degrees as well as shoulder geodesic and root displacement. The stronger owner weight 0.075 worsens maximum wrist step to 17.536 degrees (shoulder step to 12.534 degrees, root displacement to 7.006 mm) and is not selected for default preview.
+
+Eight Human ellipsoid H.264 MP4 previews are delivered on both Desktops in Simscape_Matches_20261003_Club_Refined_1080p, with a verified ZIP. Native render-to-pose parity, independent full decoding of 404 frames, 1080p/30fps/PTS checks, hashes and sampled visual review pass; the render process exits naturally with code 0 at 19:32:57 UTC. These previews remain inverse-kinematic (IK) visualizations, not forward dynamics (FD). Native actuator discovery on the nominal 80 kg model identifies 25 joint blocks (19 actuated spanning 35 active actuator axes, 6 passive/unactuated blocks) and 99 logged leaf series in an independent 0.02 s pilot with verified neck torque (+/-0.25 N*m) exiting naturally with code 0 at 18:48:51 UTC, but leaves expose state and acceleration quantities rather than measured actuator torque. Native peer and input-graph audits across 267 connection ports and 27 driving converters document native input parameter units in aggregate: 21 scalar converters with Unit 1 (7 revolute axes, 14 universal axes across 7 body joints), 2 neck converters with N*m (adapted torque drive), and 4 spherical vector converters with N\*m (FollowerFrame 3D torque vectors across 4 spherical joints). Input Unit 1 applies no scaling and does not by itself imply a torque-unit error; physical output units are inferred from the destination. This is a parameter inventory, not physical torque measurement. Moving swing, contact, and feedback-off replay across all 35 axes remain outstanding without speculative all-35 measurement or anatomical truth.
+
+The controller XYZ chart remains a separate concern: the owner's left-shoulder peak condition number rises from 21.2 to 54.2 after rate smoothing. Native joint inventory identifies 33 input-torque components plus two prescribed neck axes; only the bounded two-neck pilot has measured primitive-actuator evidence. The complete 35-axis moving/contact/open-loop goal remains open. Six owner session videos are locally downloaded and decoded; exact GEARS trial pairing and anatomical calibration remain unresolved. Existing Human ellipsoid Desktop previews remain kinematic fits. Canonical manual governance still reports two QMD sources, zero registered calculations and an owned inventory blocker. The existing LaTeX editor continues to report its standard-directories platform error; no compiled-PDF claim is made.
+
+Closed-arm regularity and foot review (2026-10-03 UTC): six additional assembled support poses retain all 101 original anchors and 11 prior projections. Native dense acceptance improves to A 1,295/1,297 and O 721/721; remaining two tour failures are midpoints. The returned velocities nevertheless reach right-wrist peaks of 113,025 and 169,742 degrees/s, and the owner has a 99.72-degree wrapped scalar step and 115.22-degree shoulder SO(3) step across consecutive accepted samples. Both curves remain rejected for moving-reference/dynamics promotion; pointwise compatibility is insufficient. A fresh native styled-foot audit shows forefoot-minus-rearfoot direction aligned with sole forward axis (dot above 0.9937), with small address yaw errors. Later right-foot horizontal reversals occur when projection lengths are small; their 3D marker-to-visual angles remain about 24 degrees for tour and 11 degrees for owner despite near-180-degree projected yaw. Preserve the documented ankle-marker-height/flat-sole calibration assumptions; no blind shoe flip is justified. Initial World-Frame uniqueness probe exit-one is retained alongside corrected natural-zero audits. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. Alternate coordinate-target allocation is a private unqualified hypothesis; no physical model/actuator authority change is claimed.
+
+Denser C2/fit review (2026-10-03 UTC): evaluating the SAME candidate curves at 2,018 source and midpoint samples reproduces all 1,010 source samples exactly, but native acceptance is A 1,294/1,297 and O 718/721: three new midpoint assembly failures per capture. Original source samples and all 101 anchors still pass; full-path acceptance is rejected. The new failure diagnostic finds six nearby assembled states with unchanged root translation and all 11 controls passing. A separate native dense fit audit exits naturally zero with original anchor point/RMS parity: mean/peak derived target RMS is 16.98/38.02 mm for A and 21.06/59.60 mm for O; mean/peak directly measured three-back-marker RMS is 26.77/54.66 mm and 38.41/88.12 mm respectively. Valid derived target coverage is 7..14 per frame, with gaps excluded. These mean per-frame RMS scores use different sampling from sparse previews and are not direct model/golfer rankings. No curve or video is promoted to full-path or forward-dynamics acceptance. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX.
+
+Tangent/C2 review (2026-10-03 UTC): fresh native checking passes all 48 saved q/v states; original timeout 124 and tour shutdown 125 remain recorded. Private C2 TDD passes 19 tests. Closed-arm guess correction eliminates all 11 owner anchor mismatches while preserving independent targets bitwise; 6 tour and 5 owner assembly failures remain. Nearby assembled states pass fresh position gates, but a same-target closest-seed retry recovers none of the 11 failures (six controls pass). A controlled projected C2 curve adds eleven upper-limb support poses, preserves original 55/46 fitted anchors, root motion, lower body and unaffected curves, and naturally exits zero with ALL 649 tour and 361 owner source-rate q/v/fresh-state checks accepted. Maximum scalar/spherical target deformation is 0.112/0.173 degrees for A and 0.338/0.343 degrees for O; dense raw-marker RMS is not evaluated. Three axis-contract tests pass after real RED/GREEN correction. The candidate remains unpromoted pending between-state closure, acceleration, full raw-clock coverage, all 35 input torques including neck, contact and independent full-swing forward replay. Parent verifies 104 Desktop video hashes and 5,252 decoded 1080p frames; comparison topologies differ and Human ellipsoids remain the new matching standard. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. PDF compilation remains unavailable due to missing platform standard directories.
+
+Aligned refined-objective review (2026-10-03 UTC): actual sparse refined previews have zero consecutive source-frame transitions; largest root increments are 17.827 mm (A) and 30.166 mm (O) over 1/30 s. Address-prefix controlled eight-pose windows preserve the spine prior. Private parameter TDD has eight RED failures/eight GREEN passes. The original 344-pose fit wrapper returned 125 after completion; a fresh independent saved-pose recheck exited naturally with zero and verified all 344 poses plus exact whole-output zero parity. Small root improvements accompany worse wrist increments; no candidate is promoted. Native counts distinguish 48 position variables, 43 velocity variables, 37 floating IK parameters and 35 requested control axes. See aligned_refined_checkpoint_20261003.json and the maintained LaTeX. Full continuous references, contact, all 35 input torques including the neck, independent replay and PDF qualification remain open.
+
+- **2026-10-03 04:27 UTC observation export update**: The actual owner two-frame hash/forwarding/cache probe exited naturally with success; 39 production contracts pass. The optional source observation contract is caller-bound and declares physical measurement unverified. Six Google Photos originals are verified locally. Refined peer PR11351 previews remain IK candidates. Dense source-seeded reconstruction preserves all anchors but rejects owner frames 253--256 and contains large adjacent rotations. Continuous fitting and full 35-actuator forward dynamics/replay remain open. See the maintained LaTeX and observation_export_contract_checkpoint_20261003.json.
+
+## Earlier Verified Full Human Exports
+
+Both full sampled swings now use GS3DX_Human ellipsoids with calibrated foot orientation and freshly calibrated marker offsets. Native solves exited naturally with code zero at 2026-10-02T05:15:54Z (A) and 05:23:22Z (O). Position RMS excludes orientation residuals.
+
+| Capture  | Fit mean / max frame RMS (mm) | Human mean / max frame RMS (mm) | Measured foot samples |
+| -------- | ----------------------------- | ------------------------------- | --------------------- |
+| A, tour  | 12.746 / 40.209               | 13.188 / 40.121                 | 55 per foot           |
+| O, owner | 26.558 / 116.576              | 16.767 / 37.626                 | 45 of 46 per foot     |
+
+The owner fit improves both position metrics. The tour fit has a small mean position tradeoff while resolving the reversed-foot ambiguity. Maximum left/right foot angular errors are 12.83/19.82 degrees for A and 19.55/20.38 degrees for O; these diagnostics do not establish anatomical or contact qualification.
+
+Four 800 by 600 H.264 MP4s were completely decoded at 30 fps, with 55 tour and 46 owner frames. Native caption-corrected rerenders exited naturally at 05:28:11Z and 05:31:30Z. The Desktop shareable ZIP contains both views, sanitized provenance, hashes and a same-capture/same-frame comparison; no raw captures or pose caches. Original Fit clips remain preserved.
+
+Owner wrist offsets remain approximately 55/62 mm and the club-target offset 106 mm. Native parameter and grip-contract tests pass; the functional-grip fit worsened held-out position errors and was rejected. These are IK clips; forward dynamics remains unqualified.
+
+## Current Main Model Comparison and Selected Delivery
+
+The current model (`91997471`) full tour export exited naturally at 07:49:26Z, but mean/max RMS 13.366/41.385 mm is worse than the selected `9a26ee80` tour result. The current owner export exited naturally at 08:39:18Z and improves mean/max RMS to 16.643/36.865 mm. Both current-model clips per capture fully decoded. Owner foot orientation remains measured in 45/46 samples: left mean/max 4.517/19.556 degrees and right 9.421/20.299 degrees. Small mixed orientation changes remain explicit; left max and right mean are slightly worse than prior. This selection prioritizes position tracking with calibrated feet, not anatomical or physical acceptance.
+
+Latest selected Desktop delivery: `Simscape_Matches_20261001/Best_Human_Matches_20261002.zip`, SHA256 `a97db61e9fb43dbae4961b24727526554ce68abe081f60c79146b7b29b302cb3`. It includes the earlier model's tour clips and current model's owner clips, separately identified hashes/runtime/provenance, all four fully decoded MP4s, no raw captures or private pose caches. Prior packages are retained.
+
+Selected and current runtime versions differ (NumPy 2.4.4/ezc3d 1.7.2 versus 2.2.6/1.6.3). Read-only canonical SI XYZ/validity/ordered-label digests match exactly for both captures under those runtimes. This narrows the importer concern; it does not prove equivalent numerical solver behavior or identify why the model fit changed. The controlled earlier-model run on current source/runtime produced joint arrays identical to the current-model tour run (maximum difference zero); both give 13.366/41.385 mm. The first wrapper exited one after solving because it read an absent return-report field; the corrected JSON-provenance check reused the verified pose cache and exited naturally at 08:59:42Z. Recorded solve-source hashes match the earlier selected execution, whose poses differ, but full transitive/runtime equivalence is not established. The model binary alone does not explain this difference under common tested conditions. Continue cross-execution reproducibility and physical initialization review. No saved-model geometry is overwritten to force prior fit.
+
+## Native Mapping and Head-Cluster Review
+
+The selected shareable clips remain tour 13.188/40.121 mm and owner 16.643/36.865 mm mean/max frame position RMS. Both use Human ellipsoids and IK; full forward dynamics remains unqualified. The controlled common-source/runtime tour comparison produced identical poses with the old and current model, so the newer model binary alone does not explain the changed fit.
+
+Two new pure helpers passed 18 native initialization-mapping tests and 8 marker-cluster tests, with zero failed/incomplete tests. Parent review added actual failing regressions for matrix-shaped poses and a scale-dependent degeneracy cutoff before fixes passed. These counts are separate from the earlier 187-test integration suite. The first native state-target-expression check failed (original loop status 1, mapped -1, scalar discrepancy 16.320 degrees). A compiled diagram update refreshed stale masked start values; a fresh KinematicsSolver then reproduced all 22 joint frames for both captures, with maximum translation error 4.44e-16 m and rotation-matrix error below 9.49e-15. The run exited naturally with code zero at 10:03:13Z. No simulation ran and no model was saved; state-target priorities, controller references and physical initialization remain unqualified.
+
+HeadTop/HeadFront/HeadSide tracks are finite and nondegenerate in all 654 tour and 367 owner frames. Pair-distance variation reaches 6.761% for the owner; cluster axes require body-frame calibration and do not establish anatomical orientation. A conservative optional head-motion candidate is under development and has not replaced selected clips. See `native_helper_review_20261002.json` and `head_track_audit_20261002.json` in the research reference directory. The latest LaTeX source remains uncompiled: the built-in compiler reports `Unable to find standard directories for platform`.
+
+## Identity and Branch Status
+
+- **Repository**: D-sorganization/UpstreamDrift
+- **Active Branch**: `feat/simscape-matching-review-main-20261002`; commit `SELF` contains this continuation handoff.
+- **Reviewed Baseline Source**: `144e81188dd7bb106f81d89b7a7330dd20cce511` on `feat/simscape-gs3dx-exploratory` (unpublished baseline commit).
+- **Original Worker Commit Turnover**: Commits `144e81188` through `f2ca443a0` (documentation-only continuation) reviewed and preserved.
+- **Draft PR and Governing Issues**: Original draft PR #11179; reviewed continuation draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256); governing issues #10950, #10979, #11156, #11160, #11161, #11173.
+- **Coordination**: Session `simscape-20261001-codex`, governing #11173; check live lease/presence before expansion or handoff. Mailbox evidence is incomplete; do not infer absence of peers.
+- **Development Log**: Existing `DL-#10950`, updated in place.
+- **Historical Context**: Prior turnovers remain recoverable via `git show 144e81188:docs/development/HANDOFF.md`.
+- **Documentation Authority**:
+  - The editable standalone research reference is [simscape_matching_reference.tex](../research/simscape_matching_reference/simscape_matching_reference.tex) (earlier 16-page revision compiled and visually reviewed; latest full-export additions remain uncompiled because the built-in compiler reports a platform directory error).
+  - The canonical engineering design manual remains governed under `manuals/upstreamdrift` QMD.
+
+## Current State and Operational Scope
+
+Review work proceeds within this isolated worktree while preserving the original agent worktree and unpublished branch states.
+The parent owns LaTeX, export pipelines, source code, development log (DL), AGENTS, and SPEC definitions; delegates handle bounded drafting and runner hardening.
+
+- **Current Goal**: Verified full Human ellipsoid exports for Capture A and Capture O, continued tour and owner physical matching, and formal review through protected branch delivery. The goal remains actively in progress and **unfinished**.
+- **Kinematic vs Dynamics Distinction**: All current video exports are kinematic inverse kinematics (IK) visualizations, not forward-dynamics-driven swings. No forward dynamics qualification is claimed.
+- **Impact Acceptance**: Club acceptance strictly requires at most 2.0 degrees of face error at explicit `phases.contact`. Missing contact fails qualification. Peak head speed is not ball contact.
+- **Receipt Integrity**: The serialized MATLAB runner returns nonzero for failed script status, timeouts, or forced termination. Read `<log>.receipt.json`: historical process exit 0 without a hardened receipt does not establish native success.
+
+## Verified Baseline Desktop IK Exports
+
+Desktop delivery folder: `Simscape_Matches_20261001` on ControlTower. Four Desktop Fit IK H.264 30 fps clips represent the verified baseline:
+
+- **Capture A Baseline (Tour Reference, 360 Hz, 654 frames)**:
+  - Sample coverage: 55 frames.
+  - Mean measured-target RMS: 12.745748 mm.
+  - Maximum measured-target RMS: 40.208544 mm.
+  - Diagnostic worst sampled target: `trailElbow` at 96.517 mm (frame 517).
+  - Process receipt: Natural exit 0.
+- **Capture O Baseline (Owner optical, 240 Hz, 367 frames)**:
+  - Sample coverage: 46 frames.
+  - Mean measured-target RMS: 26.558095 mm.
+  - Maximum measured-target RMS: 116.576104 mm.
+  - Diagnostic worst sampled target: `clubhead` at 375.358 mm (frame 89).
+  - Process receipt: Natural exit 0.
+  - Skill assessment rule: Golfer ability cannot and must not be inferred from avatar distortions.
+- **Baseline Policy**: These four clips are preserved historical baselines using the legacy GS3DX_Fit cylinder model; they are not refined ellipsoid clips yet.
+
+## Candidate Evaluations and Backward-Pass Rejection
+
+- **Owner Backward Pass**:
+  - Tested on identical model identity and marker offset sets.
+  - Mean measured-target RMS: 32.185137 mm.
+  - Maximum measured-target RMS: 46.052114 mm.
+  - Process receipt: Natural exit 0 (receipt timestamp: `03:57:32.790355Z`).
+  - Outcome: **REJECTED**. The backward pass improved peak residual (46.05 mm vs 116.58 mm) but substantially worsened mean tracking (32.19 mm vs 26.56 mm).
+- **Marker Offset Distributions**:
+  - Owner fitted marker offset norms cluster in the 70–100 mm range, whereas tour reference offsets are substantially smaller.
+  - Hypothesis: Offset magnitudes indicate capture definition differences and geometric compensation, not provenance or swing technique evidence.
+
+## Kinematic Topology and Joint Role Resolution
+
+- **Independent Fit Coordinates (37 vs 39 vs 33)**:
+  - The Human model kinematic topology possesses **37 independent coordinates** during fitting with a closed grip loop.
+  - The earlier hardcoded 33-coordinate failure incorrectly reported a 39-coordinate count due to mismatched coordinate indexing in the legacy solver. Clarifying that actual joint roles yield 37 independent degrees of freedom resolves the structural index bug.
+- **Native 3-Frame Fit Probe**:
+  - Frame sample: `[1, 13, 25]`.
+  - Position RMS: 13.296 mm, 12.536 mm, 12.374 mm (finite; numerical conditioning was not assessed).
+  - Left foot orientation residual: 165.0 deg, 167.0 deg, 167.2 deg against calibrated shoe orientation $R$.
+  - Process receipt: Natural exit 0 (receipt timestamp: `04:54:21.730288Z`).
+  - Core finding: Minimizing positional marker residuals alone does not identify or constrain foot orientation.
+
+## Foot Orientation Formulation and Calibration Trials
+
+- **Calibrated Foot Orientation Methodology**:
+  - Evaluated using shared calibrated foot triads and SVD address mean orientation:
+    $$R = F_f F_0^T R_z(\text{yaw})$$
+  - The flat sole condition at address (frame 1) is a geometric modeling assumption, **not** dynamic ground reaction force evidence. If frame 1 is missing, the routine fails closed.
+- **Foot Orientation Weighting Trial**:
+  - Weight 0.1 applied to foot orientation residual, reusing existing Fit offsets.
+  - Position RMS degraded: 51.263 mm, 43.243 mm, 39.399 mm.
+  - Left foot orientation error improved: 36.505 deg, 17.058 deg, 13.764 deg.
+  - Process receipt: Natural exit 0 (receipt timestamp: `04:57:13.758186Z`).
+  - Outcome: **REJECTED**. Position degradation was too severe for production substitution.
+- **Active Probe Status**:
+  - Fresh Human offset calibration at frames [1, 13, 25] completed with natural exit 0 (2026-10-02T05:01:00.641030Z). Position RMS is 1.188/1.195/1.208 mm and all foot angular errors are below 0.7 deg. These same frames were used for calibration; this is not held-out or full-swing validation.
+  - Full $\text{SO}(3)$ 18-component chordal formulation with weight 0.1 is exploratory and not certified (excludes position RMS; gap foot metric returns `NaN`).
+
+## Model Adapters and Visual Scaling Limits
+
+- **Human Ellipsoid Adapter**:
+  - 10 native MATLAB adapter tests pass with natural exit 0.
+  - Scales capture longitudinal segment geometry to match subject proportions.
+  - Artistic widths, head geometry, and shoe dimensions remain fixed.
+  - Baseline segment mass and inertia properties are **NOT** scaled to the owner's 104.3 kg body mass.
+  - Forward dynamics remain unqualified.
+- **Future Ellipsoid Export Policy**:
+  - Future shareable matches must use the stylish Human ellipsoid model.
+  - Calibrated foot roll/pitch/yaw must be constrained and their residuals reported.
+  - Public capture aliases and hashes provide provenance; private raw captures and pose caches remain uncommitted.
+  - Independently record 14 target RMS errors and orientation residuals.
+  - Head and neck orientation is not yet constrained by this solver and require future orientation constraints; do not describe the model as anatomically complete.
+
+## Physical Stance Tests and Forward Dynamics Status
+
+- **1-Second Stance Simulation Failures**:
+  - 1-second resampled, quiet, frozen address, and still upper-body tests all fail physical stance stability.
+  - Ground reaction normal force decays to zero after 0.5 s.
+  - At 1.0 s, the reported frame-tilt metric reaches 101 deg, 108 deg, 114 deg, and 124 deg.
+  - The pelvis drops far below the floor plane.
+  - Historical process `EXIT 0` was an unhardened execution receipt, not physical stance qualification.
+- **Queued Damping Experiment**:
+  - The unsaved damping-times-ten test completed and failed: initial right-heel force 15,513 N, force zero by 0.60 s, tilt 117 deg and pelvis z -1.83 m at 1.0 s. It must not be repeated alone. The original worker subsequently queued a composed pelvis-level pose check stopping at 0.02 s; no outcome is claimed.
+  - Do not duplicate, cancel, save, or claim success for the original worker's pending composed-pose check. The original worker state must be preserved; verify its live process and receipt before attributing any new result.
+
+## Open Scientific Gates
+
+- **Gate #11156 (Lead Elbow and Wrist Tracking)**: **RED**. 20-degree elbow limit and 15-mm tracking penalty remain active.
+- **Gate #11160 (Clubhead Kinematics and Contact-Face Error)**: **RED**. Head RMS/max, shaft maximum, speed, and contact-face limits remain frozen.
+- **Gate #11173 (Open-Loop Full-Swing Forward Dynamics)**: **RED**. Contact spikes, intervals with zero measured normal force, and competing balance torques prevent qualification. Zero force alone does not establish that the entire body is airborne.
+- **Owner matching** remains unqualified in Simscape. Capture registry delivery is a separate workstream; external MuJoCo ZMP diagnostics do not establish Simscape feasibility.
+
+## Software Test Inventory and Verification Boundaries
+
+- **Pure Mathematics and Architecture Tests**: 102 tests PASS, 0 skipped, following initial full orientation helper implementation.
+- **Strict Validator Tests**: The five additional validator tests now pass within the 102-test suite, including missing address calibration and ambiguous orientation rejection.
+- **LaTeX Reference Compilation**: Earlier 16-page revision compiled and visually reviewed. Latest full-export source additions remain uncompiled: built-in compiler reports Unable to find standard directories for platform.
+- **Overall Goal Status**: Full refined A/O exports, continued tour and owner physical matching, and protected delivery remain unfinished.
+
+## Reproduction and Operational Constraints
+
+- Set `GS3DX_CAPTURE_ID` to `capture-A` or `capture-O`.
+- Explicitly define `GS3DX_OUTPUT_DIR`, `CAPTURE_REGISTRY_REPO`, and `MATLAB_PYTHON_EXE`.
+- Execute via `tools/run_matlab_locked.ps1` using MATLAB R2025b (`C:/Program Files/MATLAB/R2025b/bin/matlab.exe`).
+- Do not kill live processes or duplicate queued stance runs.
+- Public records must use only neutral aliases (`capture-A`, `capture-O`) and cryptographic hashes.
+
+## Next Actions
+
+1. Verify importer and export-provenance contracts, then evaluate further wrist/club/head refinements against held-out samples.
+2. Review position and orientation diagnostics and decoded ellipsoid videos before selecting replacements.
+3. Preserve original worker tasks; review the pending composed pelvis-level check without duplicating it.
+4. Preserve the verified Human clips and enforce ellipsoid rendering for future accepted improvements; report position and orientation separately.
+5. Review the isolated branch through protected delivery without premature qualification claims.
+
+## Subject Physics and Rejected Functional-Grip Candidate
+
+The native subject-physics adapter/catalog passed 18 tests with zero incomplete tests (natural exit 0, 2026-10-02T06:03:51Z). It applies a declared mass and whitelisted fitted lengths in memory, preserves joint expressions and parameter metadata, and audits equipment through the existing native inertia catalog. Parameter consistency is not a dynamics qualification. The selected Human videos still use the baseline physical parameters because mass does not drive IK.
+
+The sphere solver passed 15 tests and the controlled grip contract passed 12 tests, both with zero incomplete tests. A functional-grip owner candidate completed naturally with code zero at 06:15:53Z. Its 24 held-out samples worsened mean/max frame RMS from 26.011/37.626 to 27.969/41.278 mm; full-swing values worsened from 16.767/37.626 to 17.948/41.278 mm. It was rejected. Its smaller lead-wrist offset alone is insufficient for selection. Capture lengths were estimated from the complete recording; held-out status concerns grip/offset calibration only. See `grip_candidate_comparison_20261001.json`.
+
+## Fresh Contact Geometry and Capture Metadata
+
+A read-only native forward-kinematics audit of the selected owner's first pose, with fitted Human geometry and declared 104.3 kg mass, exited naturally with code zero at 06:42:14Z. Against the existing model ground plane, the ten contact-sphere clearances ranged from -64.399 to -48.619 mm (15.780 mm spread). This geometric penetration is not a simulated force measurement. Simulation initial targets were not updated, no dynamics was run and no model was saved. The pelvis frame's local up vector tilted 57.889 degrees; that frame-relative quantity does not establish an anatomical torso angle or a causal instability mechanism. Existing World Frame selection matches the cached IK. Ground placement and a consistent gravity/contact initialization must be verified separately.
+
+Both actual C3D files specify metres and contain no EVENT parameter group. Under ezc3d 1.7.2, A has 717 negative-residual samples, all already nonfinite in XYZ; O has no negative residuals but 1,173 nonfinite XYZ samples. These counts cover all marker tracks. The fourth point row is homogeneous XYZ1, not residual metadata. Neither peak-speed timing nor address-line crossing establishes measured ball contact. Importer units/missingness contracts and recorded dependency/runtime provenance passed focused tests and fresh full exports; current-model comparisons are recorded above.
+
+## Importer and Runtime Contract Verification
+
+Thirteen pure importer tests, seventeen pure runtime-fingerprint tests, and twelve exporter precondition tests pass with zero incomplete tests. The live runtime is MATLAB R2025b Update 5, Simulink/Simscape/Multibody 25.2, Python 3.12.10, NumPy 2.4.4 and ezc3d 1.7.2. Required recorded source hashes fail closed; optional resolver absence is explicit. Direct runtime components are recorded, not every transitive package or external STL asset. Fresh A/O exports exited naturally and all four clips fully decoded; current-model owner selection and prior-model tour selection are recorded above.
+
+## Current-Main Integration Boundary
+
+This continuation is based on `cee0a65e0`. Current-main model promotion, compiled home-budget diagnostics and anatomical mesh work (#11207, #11208, #11209) are preserved. The current-main Human model SHA256 begins `91997471`; existing verified Desktop matches use the separate `9a26ee80` source. Their successful receipts do not qualify the new integration. The integrated source passed 187 native MATLAB tests (zero incomplete) and 44 focused Python tests. Both preserved-model full matches exited naturally; the selected owner improves position tracking and the prior-model tour remains selected, as recorded above. Forward dynamics remains unqualified.
+
+## Historical Player Capture Continuation Preserved From Main
+
+The following separate continuation state was present on current main and is retained without treating its validation as evidence for Simscape matching.
 
 # Active Necromatcher Native Fit Delivery — #11240
 
@@ -769,6 +1027,8 @@ Shared runner #11230, Tiger #11226 and Hogan #11229: streaming extraction is imp
 - Next step: merge drivers follow; do not treat UNAVAILABLE receipts as engine qualification.
 
 # Current Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
+
+> > > > > > > origin/main
 
 # Current Handoff — Restore the High-Severity UI Npm Audit Gate (#11184)
 
@@ -1634,6 +1894,432 @@ original film timing or independent multiview.
 The first post-merge push was stopped because documentation changed while the
 security hook was running (no security issues were identified). Finish the
 current documentation commit and retry from a clean worktree.
+
+## Main Refresh
+
+Commit `SELF` merges current main at `80dd2f7be`, retaining both SPEC changelog entries. No exploratory GS3DX source or model files changed upstream from the previously tested integration base. The 187 native integration tests and 44 focused Python checks therefore retain their stated scope. Tour matching on the current-main Human model exited naturally with code zero at 07:49:26Z, but mean/max frame position RMS increased to 13.366/41.385 mm, so it has not replaced the earlier selected tour clips. Owner matching and same-runtime/model delta diagnosis remain pending. Draft continuation PR: https://github.com/D-sorganization/UpstreamDrift/pull/11256.
+
+### Reviewed Native Helper Checkpoint
+
+The combined suite passed 213 MATLAB R2025b checks with zero failed or
+incomplete tests; the serialized process exited naturally with code zero at
+10:27:31Z. The 18 mapping and 8 cluster tests are included in that total.
+See `native_helper_integration_tests_20261002.json` in the research reference
+directory. These are software/parameter checks, with no physical acceptance.
+
+The unfinished head prototype was withheld after review found insufficient
+gap/coverage validation and an unproven baseline-preservation claim. Its
+source, tests and partial execution evidence are retained privately for
+continuation; the baseline IK source was restored before the combined check.
+No head-constrained candidate or new selected video is claimed. Protected CI
+still requires a fresh run after regenerating the monolith register. The
+leaderboard runner's missing local action remains unexplained: its checkout
+log already records sparse-checkout disable, so an additional cleanup patch
+was not accepted on the proposed explanation alone.
+
+### Head and Quiet-Reference Review Checkpoint
+
+The reviewed head residual shares the normalized SO(3) chordal helper with
+feet and validates complete head sequences and masks before model setup.
+The combined MATLAB R2025b suite passed **267 checks**, zero failed or
+incomplete, with natural exit zero at **12:34:19Z**. Two added quiet-reference
+guards first failed (19 passed, two failed), then passed in the combined
+suite: integer right-ankle inputs preserve other leg fractions, and malformed
+neck-unit metadata raises the contract error. Neck prescribed profiles use
+**radians**; native initial neck targets use **degrees**. Zero feedforward
+does not establish gravity compensation or equilibrium.
+
+The corrected four-frame A/O native comparison retains personalized geometry
+and preserves original joint/position outputs exactly when head tracking is
+disabled. An earlier private probe lost seven owner geometry values across
+an unsaved close/reload boundary and is excluded from selection evidence.
+Both tour head candidates failed screening. Owner weight 0.03 passed only
+the coarse screen, with left-foot maximum worsening 1.9971 degrees.
+
+The completed **46-frame owner** cold-start, fixed-offset comparison at weight
+0.03 improves mean/max head error from 75.517/129.297 to 27.456/54.163 degrees,
+and mean/max position RMS from 38.524/81.119 to 26.612/37.606 mm. All native
+statuses are one and the process exited naturally at **12:33:07Z**. It does
+not replace the selected 16.643/36.865 mm owner clip. Fixed-offset solving
+skips calibration's fitted starting pose; keyed warm-start review is ongoing.
+
+Current owner FK contact-sphere clearances are **-64.462 to -48.262 mm**, a
+16.199 mm spread, under the validated stored native ground transform. That
+audit exited naturally at **12:06:25Z**, without simulation or model save.
+The ground transform is parameter-derived, not a KinematicsSolver output.
+The assembled 20 ms diagnostic exited naturally at **12:38:27Z**. Scalar
+joints at t0 match requested targets (zero translation error, maximum scalar
+rotation error 5.43e-9 degrees); all five spherical rotation matrices also match (maximum matrix error 1.34e-10, native postprocess natural exit zero at 12:47:09Z). The contact clearance mismatch survives actual assembly. Initial
+left/right normal force is 32.205/24.407 kN, falling to 106.684/0 N at 20 ms;
+maximum pelvis displacement is 38.370 mm. This uses constant references,
+stored primitive flags, upper tracking enabled and balance correction disabled.
+It does not qualify equilibrium or open-loop full-swing dynamics. No force
+magnitude or collapse prediction is accepted from FK alone.
+
+See [Sanitized Review Evidence](../research/simscape_matching_reference/head_and_quiet_review_20261002.json) and
+[Combined Native Test Inventory](../research/simscape_matching_reference/native_head_and_quiet_integration_tests_20261002.json).
+Desktop selections are unchanged. All physical gates remain open. Latest
+LaTeX compilation still fails with `Unable to find standard directories for platform`;
+the prior PDF does not validate the new sections. Protected CI and review remain required.
+
+### Keyed Seed and Contact Checkpoint
+
+The keyed initial-pose contract and integration passed **275 native MATLAB
+R2025b software checks**, with zero failed or incomplete tests and natural
+exit zero at **13:08:09Z**. The full output structure, with explicit Human
+selection, matched the frozen pre-extension solver at three sampled frames
+for each capture. The full seeded comparison completed naturally at
+**13:26:50Z**, all 55 tour and 46 owner native statuses one.
+
+At head weight 0.03, tour mean/peak position RMS is **13.349/42.116 mm**,
+head post-address mean/peak **27.331/50.315 degrees**; owner position RMS is
+**16.596/36.746 mm**, head **27.667/54.064 degrees**. Both missed the
+prospective 30% head-improvement criterion. Tour peak position RMS also
+exceeds the selected Desktop clip by 1.995 mm. **Neither is selected.**
+Further weights 0.06 and 0.10 are a separate prospective experiment with
+unchanged acceptance limits against the same-source seeded baseline and
+selected clips. Current native loop success does not establish physical
+acceptance or anatomical calibration.
+
+The tangent-plane contact diagnostic completed naturally at **13:30:55Z**.
+It changes only the ground normal translation by **-64.462 mm**, retaining
+the actual assembled pose. Native clearances become **0 to 16.199 mm**.
+Initial left/right normal forces are **0/0 N**, final 20 ms forces
+**588.495/0 N**, maximum pelvis displacement **1.505 mm**. Upper tracking
+remains enabled, balance correction disabled and upper feedforward zero;
+this is a unilateral minimum-touch diagnostic, not bilateral equilibrium
+or open-loop replay. Both-foot support, capture-consistent geometry/pose,
+COM/balance references and gravity-support torques remain required.
+
+See `seeded_head_and_contact_review_20261002.json` in the standalone research
+reference directory for sanitized aggregates, direct source inventory and
+actual receipts. The updated LaTeX source remains in the same editor; its
+built-in compiler still reports `Unable to find standard directories for platform`.
+No new rendered PDF is claimed. CI Standard run **37010261028** on published
+79d3b97 failed MyPy/core tests; exact-log review is active, protected review
+remains required. The Human-default migration is a separate policy change
+under source review, not covered by explicit-Human parity. Physical gates
+#11156, #11160 and #11173 remain open.
+
+### Human Default and Reviewed Head-Tracked Delivery
+
+New direct whole-body IK calls default to **GS3DX_Human**. Historical Fit
+builders, neck-injection harnesses and reproduction examples explicitly
+select Fit. This intentional policy change leaves solver mathematics
+unchanged. Native RED exposed the wrong default and Human-only seed
+rejection; native GREEN passed both policy tests at **13:58:47Z**. The full
+reviewed suite passed **277 software/parameter checks**, zero failed or
+incomplete, with natural exit zero at **14:07:07Z**. These do not qualify
+physical replay or anatomical calibration.
+
+The prospective **head weight 0.10** screen passes both captures. Mean/peak
+body RMS is **13.540/40.368 mm tour**, **16.754/36.987 mm owner**. Mean/peak
+post-address head error is **10.671/18.918 degrees tour**, **11.318/22.169
+degrees owner**; mean head error improves 69.8%/68.8% against their seeded
+weight-zero baselines. Each foot remains within the recorded peak limits.
+Tour 0.06 fails the peak body-RMS criterion against the prior Desktop clip.
+
+Both-view rendering completed naturally at **14:02:59Z** after preserving
+the first attempt's failed provenance-write receipt. All four H.264 MP4s
+fully decoded at 800x600, 30 fps, with 55 tour and 46 owner frames. Every
+sampled frame was reviewed in ordered contact sheets for both views; no
+obvious projected limb/head flips or scene clipping were observed at that
+scale. The new selections are saved on the **local user Desktop** in
+`Best_Human_Matches_20261002_HeadTracked`, with a matching ZIP and sanitized
+provenance/verification. ZIP SHA-256:
+`48c34d60a50610879f9f9f12ee90526c9fe091d45c72dc1d1c7744cb93089108`.
+Earlier packages are preserved. These are IK videos; the floor is decorative,
+head targets cluster-relative, and contact/balance/forward dynamics remain
+unqualified. The videos cannot establish player skill.
+
+See `head_weight_followup_review_20261002.json`,
+`human_default_policy_review_20261002.json`,
+`native_human_policy_integration_tests_20261002.json` and
+`desktop_head_tracking_delivery_20261002.json` in the research reference.
+The same LaTeX source/editor is updated; built-in compilation remains
+unverified with the platform-directory error. CI run 37010261028 failed
+dispatch-context coverage/base-ref checks and a whole-repo MyPy baseline;
+all 2,563 executed core tests passed. Source and workflow-context review
+does not establish passing protected CI. Current main reconciliation,
+fresh checks and protected review remain required. Bilateral contact,
+capture-consistent balance/gravity support and full native dynamics remain
+active requirements; physical gates are open.
+
+### Leg Orientation Contract and Selected Contact Geometry
+
+The analytical leg IK previously accepted a 180-degree orientation mismatch because
+its skew residual vanished. Native R2025b TDD reproduced false success (RED: one
+pass, five failures, zero incomplete), then passed all six contract tests after
+reusing the shared SO(3) chordal residual with a 12x6 Jacobian and separate final
+position/orientation bounds. The existing welded-foot native FK test, reachable
+IK and trajectory tests also pass. The combined suite passed **287 native
+software/parameter checks**, zero failed/incomplete, natural exit zero at
+**2026-10-02T14:57:32Z**. This does not qualify Human ankle-to-foot-solid frame
+correspondence, anatomical limits, or independent forward dynamics.
+
+Fresh native FK evaluated BOTH promoted head0.10 addresses without simulation
+or model save. Per-foot lowest-contact heights differ **29.081 mm tour** and
+**15.097 mm owner**; within-foot spreads are below 1.5 mm. With the ground normal
+fixed, one plane translation cannot remove this two-foot discrepancy. The bounded
+native correction passes both captures: each minimum clearance 0.250 mm, sole spreads below 1.5 mm, foot XY/orientation retained, leg rotations at most 8.731 degrees tour / 4.229 degrees owner. Root/upper coordinates, passive midfoot and fitted geometry are unchanged. The accepted address candidates are staged for assembled-state/contact diagnostics;
+equilibrium, gravity torques and forward replay remain open. The selected Desktop
+MP4s are unchanged IK visualizations. See the standalone LaTeX reference and
+`leg_orientation_contract_review_20261002.json`,
+`selected_contact_geometry_review_20261002.json`, and
+`native_leg_contact_integration_tests_20261002.json` for equations and receipts.
+
+Latest LaTeX source is maintained in the same editor. Built-in compilation still
+fails with `Unable to find standard directories for platform`; no new PDF is
+claimed. Changelog duplicates for PR #11256 were consolidated. Subsequent CI
+code-quality failed a GitHub fetch because of runner certificate verification;
+no certificate validation was disabled and protected review remains required.
+
+### Bilateral Address and Assembled Gravity Diagnostics
+
+Both selected Human address candidates pass their prospectively fixed native
+geometry gates. Each foot minimum clearance is 0.250 mm against one plane;
+horizontal foot-solid position/orientation, root/trunk/upper coordinates,
+passive midfoot coordinates and fitted geometry are retained. Maximum leg
+rotation changes are 8.731 degrees tour and 4.229 degrees owner. These are
+address corrections, not a new measured whole-swing fit or Desktop promotion.
+
+Separate 20 ms R2025b simulations verify the actual assembled scalar and
+spherical pose plus all ten contact clearances. Both feet develop support:
+at 20 ms, tour left/right normal force is 443.969/407.322 N, owner
+502.848/407.399 N. Maximum pelvis displacement is 1.513/1.482 mm. Both
+native processes exited naturally with zero status; geometry/physics were
+reapplied before logged-pose FK and the Human binary was not saved. The
+tour body mass is model-default 80 kg, owner 104.3 kg; total mechanism
+masses include unchanged equipment. Zero initial force reflects 0.25 mm
+clearance. Endpoint support does not establish standing equilibrium.
+
+A separate one-second constant-reference hold is registered before results:
+each foot >=0.05 BW and summed normal force 0.8-1.2 BW over 0.5-1 s;
+whole-run sum peak <=2 BW, pelvis displacement <=5 mm and rotation change
+<=1 degree. It retains upper PD tracking, prescribed neck and zero upper
+feedforward, with balance correction off. Even a passing hold is not
+independent open-loop replay. Actual gravity and native mass define BW.
+
+Read `bilateral_stance_geometry_review_20261002.json` and
+`bilateral_assembled_contact_review_20261002.json` alongside the same
+standalone LaTeX reference. Its abstract now identifies the latest head0.10
+Desktop selections; historical force trials are explicitly attributed and
+zero support is not treated as proof of airborne geometry. PDF compilation
+remains unavailable. Full-swing physical gates and protected review stay open.
+
+The tour one-second hold is rejected: all three force screens pass, but pelvis displacement 246.153 mm and rotation 14.989 degrees violate the fixed 5 mm / 1 degree bounds. Native process exits naturally with zero at 15:18:18Z; successful execution does not establish physical success. Owner hold and reference/torque/COM diagnosis remain separate active work. See `tour_constant_hold_review_20261002.json`.
+
+The owner one-second hold also rejects the fixed pose limits: force screens
+pass but pelvis displacement is 118.109 mm and rotation change 7.866 degrees.
+Native exit is naturally zero at 15:23:43Z; final left/right forces are
+531.659/499.520 N. Both captures require controller/reference/COM diagnosis;
+neither hold qualifies standing stability or independent open-loop motion.
+Read `owner_constant_hold_review_20261002.json`. Gates remain unchanged.
+
+Saved native endpoint diagnosis completed naturally in R2025b at 15:54:34Z.
+COM horizontal displacement is 230.802 mm (tour) and 110.766 mm (owner);
+terminal projected COM lies outside the contact-point hull by 167.030 and
+13.899 mm. Native ankle rotations change 12.485/12.476 degrees (tour L/R)
+and 4.069/4.525 degrees (owner L/R). This is endpoint motion, not continuous
+contact-slip measurement or a causal diagnosis. Initial forces are zero;
+there is no initial active support hull. Native workspace and hold scripts
+confirm zero leg feedforward and unchanged servo gains. A preliminary probe
+rejected its incorrect rigid five-sphere constellation assumption; the
+corrected probe measures ankle followers directly and preserves midfoot
+articulation. No new simulation or model save occurred. See
+`saved_native_hold_diagnosis_review_20261002.json` and the updated LaTeX.
+Next: verify Human ankle FK/gain compatibility before a same-stance
+balance-enabled hold with the unchanged registered force/drift gates.
+
+Native Human ankle/gain interface checks passed for both exact fitted address
+stances (R2025b natural exit zero at16:03:31Z). Native/analytical Jacobian
+differences are below2.3e-13 m/degree and gain differences below7.5e-9 degree/m.
+Same-stance balance-on holds retain all original gains, zero feedforward,
+prescribed neck and fixed force/drift gates. Tour pelvis displacement/rotation
+is 20.041 mm / 5.582 degrees;
+owner is 14.818 mm / 4.408 degrees.
+Hold screens: tour REJECT, owner REJECT.
+Improvement is not physical acceptance. See
+`human_ankle_gain_interface_review_20261002.json` and
+`balance_enabled_hold_comparison_review_20261002.json`. The historical upper-only API hardcoded FitTrack and overwrote starts;
+that restriction is resolved by the configured-model implementation and native
+lifecycle probes below. Those probes do not qualify full forward dynamics.
+
+### Configured Human Upper-Body Learning and Native Lifecycle Evidence
+
+`gs3dx_track_learn` accepts an explicit already-loaded model with
+`initialization="configured"`. This mode preserves the caller workspace and
+initial-state configuration, bypasses legacy drive/TrackStart replacements,
+and leaves the caller model loaded. Historical FitTrack behavior remains
+available through default legacy initialization. References, gains,
+feedforward, timing, filter support and enabled tracking are checked before
+native dynamics. The returned feedforward is the best profile actually
+simulated, with explicit upper-only qualification and first-reference-sample
+state provenance. The original Q-filter learning law is retained.
+
+Native R2025b TDD progressed from **1 pass, 13 failed, 13 incomplete** on the
+old API to **19 passed, zero failed/incomplete** on the strengthened contracts.
+MATLAB marks assertion-aborted RED tests both failed and incomplete. The
+valid configured Human probes completed two 0.1 s constant-reference
+iterations: tour angle RMS **0.104749 -> 0.021832 degrees**, PD RMS
+**5.092613 -> 1.456887 N m**; owner **0.152201 -> 0.022887 degrees**,
+**8.803216 -> 1.482412 N m**. Both preserved all **837 workspace values**,
+including **620 independently snapshotted parameter values**, caller dirty
+state and initial upper angles/rates within the registered 1e-5 bounds.
+Neither saved the model binary. Parent mask velocity priority controls the
+primitive target; native tracing explains why a child-only override failed.
+Three unsuccessful probes and their natural-exit receipts remain recorded.
+
+These are short upper-learning integration checks with balance/feedback,
+zero leg feedforward and prescribed neck. They do not qualify full-swing
+learning or independent forward dynamics. The physical hold gates still
+reject both captures (tour 20.041 mm / 5.582 degrees; owner 14.818 mm / 4.408
+degrees, against 5 mm / 1 degree). Separate actual servo and balance torques
+and verify settling before treating any empirical leg offset as gravity
+feedforward; a rejected transient is not a unique static solution.
+
+See `configured_human_learning_review_20261002.json` and the updated LaTeX
+equations/contracts/reproduction account. The combined native regression suite completed naturally at 17:26:58Z:
+**311 passed, zero failed/incomplete**, including the five legacy FitTrack
+checks. Its 0.3 s historical replay remained within original limits
+(rounded angle RMS 0.28 degrees, worst joint 0.49 degrees, PD 16.7 N m).
+See `native_configured_learning_integration_tests_20261002.json`; this
+short legacy replay does not qualify the configured Human full swing. Built-in LaTeX compilation remains
+unavailable: `Unable to find standard directories for platform`. PDF review,
+current-head protected CI and full-body replay remain open.
+
+### Saved Leg Servo Effort and Late-Window Motion
+
+Read-only native R2025b analysis completed naturally at **17:47:04Z**.
+The 2 ms diagnostic grid reconstructs baseline leg servo feedback from the
+saved balance-enabled holds and actual gains, excluding balance correction
+and total actuation. Initial reference closure is below 1e-6 degrees.
+Whole-run baseline servo RMS is **226.583 N m tour**, **236.384 N m owner**.
+The 0.5-1.0 s analysis window still moves: pelvis maximum displacement and
+rotation relative to its first window sample are **10.439 mm / 3.147 degrees
+tour**, **5.893 mm / 1.283 degrees owner**. Largest per-axis leg-rate RMS is
+**7.691 / 7.275 degrees/s**. This is not verified static equilibrium; no
+mean torque is promoted to gravity feedforward and the fixed hold gates
+remain rejected. Large baseline effort cannot alone establish harmful
+cancellation because balance deliberately shifts the servo target.
+
+The reader loaded its own unchanged Human model only for saved block-path
+resolution and closed it without saving. No new dynamics/FK ran. Two failed
+path-resolution attempts are retained. Raw traces remain private; see
+`saved_leg_servo_diagnosis_review_20261002.json` and the same updated LaTeX
+source. Inspect nested joint datasets/controller signals to recover actual
+net actuation and balance terms before a bounded support-control change.
+Current PDF remains unverified because the built-in compiler is unavailable.
+CI Standard run37042119516 executed published3187eccd0 and exposed an owned
+duplicate #11256 SPEC row; it is consolidated and the duplicate/version
+checks pass locally. Fresh current-head protected checks remain required.
+
+### Generalized Leg Effort and Sampled Feedforward
+
+Read-only native reconstruction confirms net leg actuator effort of **45.954 N m RMS
+tour** and **56.019 N m RMS owner**, compared with servo-only 226.583/236.384 N m.
+Hip logs are generalized XYZ command taps before the follower-frame virtual-work
+map; knee/ankle channels are native actuator sensors. Balance corrections offset
+much of the baseline servo effort. These moving windows are not static gravity
+identification; offsetting terms do not alone prove harmful cancellation.
+
+The leg command now accepts a finite real 12-vector or a 12-by-reference-samples
+feedforward table, using the shared time interpolation. Native TDD exposed the
+missing interface (one pass/eight failures/four incomplete); the implementation
+and existing balance replay then passed **16 tests, zero failed/incomplete** at
+18:51:03Z. Constant behavior and the original legacy COM bound are retained.
+
+The configured Human tour profile, zero through 50 ms and ramped to the empirical
+seed at 200 ms, completed naturally at 19:06:38Z. It reduces pelvis motion to
+**11.012 mm / 2.773 degrees** and passes all three fixed force gates (peak 1.981
+bodyweights), but still rejects both fixed pose gates (5 mm/1 degree). The
+gain-four/damping-two tour experiment is also rejected: 6.128 mm/1.751 degrees
+and peak 2.263 bodyweights. No model binary was saved. Owner profile execution
+is separate and not claimed complete here. Prescribed neck and feedback remain;
+full independent Human replay is unqualified.
+
+The neck input uses `[LegReferenceTime(:), NeckReference.']`; its radian table
+must match the leg grid. The failed initial profile setup and corrected actual
+model execution are retained. See the three new aggregate evidence files and
+the same maintained LaTeX reference. PDF verification remains blocked by the
+built-in compiler's platform-directory error. Earlier head 78918cde passed all
+reported checks; these new changes require their own protected checks.
+
+### Owner Session Video Integration — #11268
+
+The owner requested incorporating the capture-session video companion into this active Simscape goal. Reviewed parent #11161, epic #11268, children #11269–#11279, acquisition and frozen protocol. Planning PR #11280 is on main. Registry/export/comparison draft #11172 remains open and conflicting; reuse its authorities. Acquire originals privately, grade clips, freeze camera/landmark/pairing/timing choices before evaluation, compare against the 13-swing envelope with abstention, then compare markerless/Necromatcher and matched Simscape projections at supported L0–L3 levels. Media, locator and per-frame results remain private; public comparison summaries need owner approval and normalized aggregates. No session video observations or pairing verified here yet. LaTeX includes this scope and actual separate owner ramp outcome. Full forward-dynamics qualification remains open.
+
+### Ramped Hold Startup Transient — Native Audit
+
+The reviewed read-only audit exited naturally at 19:37:01Z without loading a model or simulating. First 1-degree crossings are 75.288/86.346 ms (tour/owner), and 5 mm crossings 167.171/161.093 ms, during the delayed empirical ramp. The one-second pose is much closer to the initial pose; both signed vertical ranges include upward and downward motion. This contradicts an unsupported sustained-sag diagnosis. Rotation-vector axes are initial pelvis coordinates, not anatomical pitch. Whole-run maxima remain rejected. The prospective intervention changes only the same bounded torque seed to a 0–50 ms ramp; no result is claimed yet. Its first setup attempt stopped before simulation due to an inherited zero-at-50-ms assertion; the failed script/receipt are preserved and the corrected caller validates the new endpoint. The active serial native trial must be resumed through its existing process handle, never duplicated.
+
+### Supported Posture Checkpoint — Both Captures
+
+The controlled 20–50 ms empirical leg-torque ramp passed all five unchanged one-second hold gates in separate native runs: tour 3.176 mm / 0.836 degrees, peak 1.981 BW (19:54:39Z); owner 2.321 mm / 0.699 degrees, peak 1.730 BW (20:01:28Z). The preceding 0–50 ms tour ramp passed posture but rejected peak 2.000907 BW; rounding cannot change that verdict. Gains, geometry, contacts and model binaries were retained. This is supported posture with feedback and prescribed neck, not identified static gravity or independent full-swing replay.
+
+Next verify physical timing and named solver-ID/unit mappings for the selected head-tracked IK poses, then prepare moving references through existing upper/leg authorities. Do not infer duration from video FPS, silently carry initial stance offsets, invent looser tracking gates, or omit prescribed-neck controls from independent replay. The public album source is located and six served streams are privately acquired; untouched-camera provenance remains unresolved. OpenPose BODY_25 pinned weights now resolve and its registered DNN completed synthetic inference; alternative backends remain unavailable or unconfigured. No video inference or pairing is claimed. Exact pinned Tools 3678409fc51024150ab28970b72e3b468935f345 is now initialized in this worktree for normal public imports.
+
+### Selected Motion and Owner Video Acquisition
+
+The owner-approved public album source recorded by main #11283 is accessible from DeskComputer. Its observed Download all ZIP contains six source-export MP4s that exactly match the previously staged streams by size and SHA-256; raw-camera provenance remains unverified. The pinned OpenPose BODY_25 network loaded and completed synthetic inference at 20:33:36Z; this is runtime evidence, not owner detection accuracy. The selected head-weight-0.1 references have 55 tour / 46 owner samples over 1.8 / 1.5 seconds. All 101 frames passed the existing named native-target and quiet-reference mapper at 20:37:51Z, with no model loaded. A subsequent native audit at 20:42:55Z verified ankle FK against both configured Human models to numerical precision across all frames. All six streams fully decoded with FFmpeg and 9,539 increasing presentation timestamps. A controlled local owner trial confirmed a gap-to-measured transition near the largest root step. Stronger rotational smoothing reduces leg-coordinate jumps but worsens root discontinuity and mean marker RMS, so it is not promoted. Separate gap-weight trials reduce the transition root step to 23.664 / 17.292 mm, with interpolation provenance retained; neither is promoted before full-chain and uncertainty review. No stance correction, velocity reference, full-motion dynamics, video pairing or camera comparison is qualified by those audits.
+
+Next review selected-coordinate continuity and explicit accepted-stance correction before developing motion references. Grade the private streams and freeze camera, pairing, timing and held-out comparison protocols before reporting agreement. Draft #11172 retains ownership of shared capture services; #11268 supplements #11161 rather than replacing marker evidence.
+
+### Selective Missing-Position Contracts
+
+The full owner trial with global missing-position weight 1 is rejected: measured-marker mean/peak RMS increased from 16.754/36.987 mm to 18.791/49.148 mm despite reducing the transition root step. Optional selective missing-position scales now preserve measured targets, offset masks and head/foot terms; default metadata remains unchanged. Native R2025b RED retained eight passing seed tests and exposed ten new failures; GREEN passed ten new and 35 existing tests. Actual-model comparison confirms exact complete-output parity for omitted/empty overrides against the previous solver at source frames 1, 241 and 249. The full 46-frame selective lower-body trial reduces the transition root step from 53.926 to 17.350 mm and the maximum leg step from 38.380 to 34.090 degrees while retaining measured-marker mean/peak RMS at 16.753/36.975 mm. The body-fit screen passes, but remaining 34-degree leg discontinuity, observability, ROM and both-view visual review preclude promotion. Full forward-dynamics qualification remains open.
+
+### Native Branch and Range Diagnostics
+
+A native no-model audit separately measures true adjacent SO(3) rotations and checks the existing implementation ROM table. The largest tour leg-coordinate step is 22.312 degrees at source frames 517–529, with a 24.581-degree left-hip rotation. The selective owner step is 34.090 degrees at 241–249, with a 26.710-degree left-hip rotation (30.025 degrees for the selected owner output). These changes are not solely coordinate wrapping; their agreement with measured swing motion and observation gaps remains under review. The current table flags 12 tour and 13 owner rows, including both owner elbow signs across all 46 samples. This is an implementation-range diagnostic, not a clinical diagnosis: hips/free pelvis lack absolute ranges and wrists lack anatomical neutrals. Native clean joint-centre geometry and offset calibration must be checked before revising conventions or penalties. No candidate is promoted.
+
+### Native Unoffset Geometry and Marker Observability
+
+Native unoffset geometry confirms owner address elbow angles of 27.80/40.40 degrees with LE negative/RE positive, while tour address has 47.69/39.06 degrees with LE positive/RE negative. Unsigned native flexion agrees with the absolute primitive at all reviewed stages; this does not justify globally reversing the ROM signs. Generic joint-centre proxy offsets remain assumptions rather than subject-specific anatomical calibration. The tour largest-step interval has measured thigh-direction changes of 1.568/3.302 degrees and a 9.022-degree pelvis-cluster rotation; axial thigh twist remains unobserved. The corresponding owner interval has a missing-to-measured transition, so an observed pelvis rotation cannot be asserted there. Address-relative pelvis-cluster alignment averages 9.831 degrees for tour and 11.494 degrees for selected owner (peaks 35.017/38.666 degrees); selective owner gap weights scarcely change this. Next review native closed-loop seed families and an optional measured pelvis-orientation constraint, preserving missing masks and unchanged body/head/foot gates. No new video is promoted.
+
+### Owner Seed Feasibility and Rejected Address Fits
+
+Six native owner seed families close the grip loop while preserving the original root, lower-body and neck values to numerical precision. Four families satisfy both elbow rows; one seed has zero flagged rows in the current implementation table at address. Those are feasibility checks, not match acceptance. Re-fitting address with the original offsets gives marker RMS 30.745/40.683 mm for the two bilateral seeds versus 6.061 mm for the original control. The mild seed retains zero flagged rows but degrades marker and head fit; both alternatives are rejected for promotion. Next investigate branch-consistent offset calibration with a frozen calibration/held-out split, and measured pelvis-orientation constraints. No global sign reversal or threshold relaxation is justified.
+
+## Private Pelvis Parity and Concurrent Candidate Review
+
+The private optional pelvis-orientation implementation passed exact configured-Human output parity on three native samples: baseline equals omission equals explicit zero; diagnostic targets at zero weight preserve joint coordinates and marker RMS, and missing pelvis error remains NaN. The native process exited naturally at 23:47:11Z. Positive-weight observations are limited probes; full tour/owner trials are running and no candidate is promoted. Four concurrent scapula/head-weight candidates exceed the existing mean-marker-RMS degradation screen; they do not replace selected Desktop IK videos. A separate four-cell owner seed/offset calibration comparison is queued, preserving geometry/head calibration and freezing address-only offsets before same-source tracking. The existing LaTeX editor source contains these findings; five document/privacy checks pass, while built-in PDF compilation remains unavailable with Unable to find standard directories for platform. Full forward dynamics, all-actuator/prescribed-neck torque recovery and fresh independent replay remain required. Epics #11161 and #11268 and peer draft #11172 remain open dependencies.
+
+The full sampled private pelvis trials completed naturally at 2026-10-03T00:04:02Z: 55 tour samples and two owner trials of 46 samples, all native loop statuses one, with unchanged model/solver hashes and no model save or simulation. Tour marker mean/peak RMS improves to 13.447/38.387 mm; owner pelvis-only gives 16.543/36.396 mm and pelvis plus selective missing lower targets gives 16.544/36.392 mm. Same-target native control pelvis FK establishes post-address means 10.005 to 7.074 degrees (tour) and 12.081 to 9.755 degrees (owner), with 9.743 degrees for the combined owner trial. Tour head peak worsens 18.918 to 28.375 degrees; owner foot peak also worsens slightly. No candidate is promoted. Continuity/ROM/both-view/anatomical and independent dynamics reviews remain required. The four-cell owner seed/offset trial is now running. See pelvis_orientation_full_sampled_checkpoint_20261003.json and the maintained LaTeX reference.
+
+The full private thirteen-trial collection is now located and hash/header-verified, with 361-391 frames per trial, declared 240 Hz/metre units and 35 point labels. The selected capture-O export has 367 frames/38 reference-layout labels; actual source-trial metadata and manifest SHA identify trial 12. Inputs and selected export are unchanged. No populated header event labels or EVENT parameter groups were found. Club type for every trial, event/camera correspondence, paired physical timing and a qualified multi-trial envelope remain open. Reuse shared resolver/event/comparison authorities; do not run the private single-export script indiscriminately because it overwrites the selected export and manifest.
+
+The four-cell owner seed/offset comparison exited naturally at 2026-10-03T00:17:56Z. Original/original reproduces selected control metrics exactly. Marker mean/peak RMS is 16.754/36.987 mm original/original, 39.008/257.266 mild/original, 18.201/35.645 original/recalibrated and 25.640/38.811 mild/recalibrated. Both address-only offset calibrations are frozen before tracking the same 46 samples, and new offsets are seed-specific. Every alternative fails the existing mean-marker degradation screen and retains signed implementation-ROM flags. None is promoted. Offset recalibration alone does not resolve the problem under this tested configuration; no causal or clinical-anatomy claim follows. Private model/solver hashes remain unchanged, no model saved, no simulation. Continue pelvis continuity/ROM review, independent anatomy/observability and full dynamics rather than applying a global sign flip or relaxing thresholds.
+
+Native pelvis continuity/ROM review exited naturally at 00:25:08Z: marker screens pass but tour maximum root step increases to 32.495 mm and head peak worsens; owner pelvis-only root transition is 54.714 mm, while selective-gap-only and combined are 17.350/17.585 mm. Combined owner leg max step 36.417 deg worsens relative to selective-gap-only 34.090 deg. No candidate is promoted. A separate hash-preserving source/export audit verifies 69 filled scalar coordinates in 23 marker frames, with three sampled IK frames affected. Raw finite coordinates remain exactly unchanged; 216 missing scalar coordinates remain unfilled. Residuals and camera flags in ezc3d meta_points do not distinguish filled observations; points fourth row is homogeneous XYZ1, not residual. Current RMS uses exported-data gap flags and must not be claimed as independent raw-measurement-only accuracy until original validity masks are propagated. Both original files and selected Desktop clips remain preserved.
+
+Local acquisition update (2026-10-03 UTC): the complete six-video source export is now also on the operator local machine; archive and all MP4 hashes verified. Indoor surface-marker placements were reviewed, with exact labels, anatomical offsets, trial pairing and physical clock still unverified. Private source-mask TDD passed 13 baseline and nine new tests after RED; actual owner importer default data/callback parity and masked callbacks passed. No production integration, candidate promotion or full forward-dynamics qualification. The existing LaTeX editor remains open; compilation is unverified because the built-in compiler cannot find platform standard directories. See `local_video_marker_placement_checkpoint_20261003.json` and the reference acquisition subsection.
+
+Source observation update (2026-10-03 UTC): optional logical masks now enter the canonical converter before importer callbacks. Native production integration passed 13 existing and nine new contract tests and exact tour/owner default data, callback, joint-centre and head-target parity. Full owner refit on the same 627 source-available targets changed mean RMS 16.677 to 16.658 mm and peak 36.987 to 37.050 mm; largest root increment increased 53.926 to 55.295 mm and 13 signed implementation-ROM rows remain flagged. No candidate/video promotion or dynamics qualification. See `source_mask_full_owner_checkpoint_20261003.json` and the maintained LaTeX reference. Existing unmasked caches/media cannot be relabelled as source-mask-qualified.
+
+Native neck recovery checkpoint (2026-10-03 UTC): the owner one-second supported hold recovered Rx/Ry computed primitive actuation torques through two verified N*m PS–Simulink logging converters. Sample RMS/peak values are 5.950843/9.530841 and 3.574840/5.157831 N*m (1,483 finite samples per primitive). All five original hold gates still pass, with the same 2.321210 mm / 0.699395 degree pelvis motion as the preserved control. Sensing-only logs lacked these channels; connected outputs establish recovery. Neck motion remains prescribed and upper/balance feedback remains active. Four temporary blocks were discarded without saving the model. This is not full-swing torque recovery or independent replay. See `owner_neck_supported_hold_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Tour neck recovery repetition (2026-10-03 UTC): natural R2025b completion at 02:04:26Z recovered Rx/Ry computed actuation torques (sample RMS/peak 3.827226/7.366211 and 2.061589/3.959804 N\*m; 1,587 finite samples per primitive). All five unchanged supported-hold gates pass; full-precision pelvis displacement/rotation match the preserved control exactly (3.175803 mm / 0.836223 degrees). Both captures now verify the connected prescribed-neck logging route. Neck motion and upper/balance feedback remain present; full-swing recovery and independent replay remain unqualified. See `tour_neck_supported_hold_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Human moving-reference binding update (2026-10-03 UTC): the upper-body reference helper now accepts an explicit native joint-variable table and resolves block-path/primitive keys through the shared key authority. Human never reuses Fit numbered IDs; legacy explicit Fit retains its unbound interface. Seven contract tests pass. Production native integration completed naturally at 02:21:45Z for all 55 tour and 46 owner selected samples: 21 upper actuator-coordinate references at 30 Hz match the preserved numerical filter/rate/start calculations exactly after verified native block/ID/unit binding. Model hash unchanged, no simulation or save. Moving-start/contact reconciliation and full-swing torque recovery/replay remain open. See `upper_reference_binding_checkpoint_20261003.json` and the maintained LaTeX reference.
+
+Closed-chain reference update (2026-10-03 UTC): independent upper-angle filtering returns native status -1 for all 55 tour and 46 owner requested poses (model constraints satisfied, some targets missed). Native-adjusted poses pass a complete target recheck. The explicit `filter_reference=false` conversion preserves checked sample geometry; eight contract tests and production native roundtrips pass for all selected and adjusted A/O poses. Dependent-arm trials and their adverse changes remain unpromoted. Tangent velocities, between-sample interpolation, moving contact initialization and complete torque coverage still need verification; saved holds have neck/leg datasets but no upper torque buses. See `reference_filter_closure_checkpoint_20261003.json` and the maintained LaTeX reference. No dynamics or new best-video qualification is claimed.
+
+Native moving-reference audit (2026-10-03 UTC): all 101 original sampled poses accept zero native velocity. All 101 differentiated moving requests and all 99 complete-coordinate chart midpoint requests return status -1, missing some complete native targets. A separate nonzero root-rotation/frame-output control verifies follower-resolved spherical velocity. The native results do not qualify an accepted continuous curve, unchanged returned moving poses, measured player velocities or full dynamics. Preserve these adverse outcomes and require constraint-aware trajectory construction, derivative consistency and native initialization before complete torque recovery/replay. See `reference_velocity_midpoint_checkpoint_20261003.json` and the maintained LaTeX calculations. No model save, simulation or new best-video promotion occurred.
+
+## Full Native Pose Continuity and Local Acquisition Review (2026-10-03)
+
+`continuity_experiment_checkpoint_20261003.json` records private full-pose rotational continuity experiments and their natural-exit receipts. All 16 pure helper tests pass after genuine RED isolation. Zero-weight whole-output parity passes on eight owner frames and 53 tour frames. All 305 poses across the sparse owner and dense owner/tour trials pass fresh native position rechecking. This is sampled closure evidence, not continuous velocity, contact or forward-dynamics acceptance.
+
+The owner dense window improves mean target RMS 28.739→28.131 mm and maximum interior wrist increment 24.327→20.356 degrees, while retaining an adverse approximately 40 mm root increment. The tour window improves RMS 26.396→26.154 mm but worsens interior wrist/root increments (7.850→10.231 degrees; 2.180→2.757 mm). Seed boundaries are reported separately. The prototype is private and unpromoted; production solver code, model bytes and existing Desktop MP4s are unchanged by these experiments.
+
+The local download and marker-placement review requested by the owner are complete: six originals, 88,738,421 bytes, verified archive and additional original-name copies. The supplemental private acquisition-review receipt is deterministic, SHA-256 `691b97b68ce58412e400fd552d849f46a5bd2c14f4f442afa72ee87bd5fb345d`. COV-1/#11269 remains open for additional catalog/software acceptance, ffprobe JSON, camera-original provenance and owner recollection. Exact video-trial pairing, camera calibration and anatomical marker offsets remain unqualified. Source media and filenames stay private.
+
+The standalone LaTeX reference now distinguishes historical and newer torso-refined Desktop candidates, corrects mask tensor indexing and defines source-verified balance command units and net torque subtraction. The compiler still reports `Unable to find standard directories for platform`; the latest PDF is unverified. Full moving references, all 35 actuators including the neck, contact acceptance and fresh independent A/O replay remain open. PR #11256 stays draft; no protected merge or full-goal completion is claimed.
+
+Current-main integration after the continuity checkpoint: merged source 4eb3051c3 includes MuJoCo enum comparisons and OpenSim state/control fixes; MATLAB matcher/model files are unchanged. The updated MuJoCo suite has five passes and four failures on this host because its installed binding lacks mj_copyData; two OpenSim suites skip because OpenSim is absent. Initial EGL selection was rejected on Windows; the retry disabled OpenGL entirely. These are inherited optional-engine limitations, not Simscape or full-physics acceptance. No tolerance, skip rule, dependency or foreign engine code is changed to conceal them. The merge preserves both SPEC row sets and the single PR11256 row; protected delivery remains open.
+
+Root-availability review (2026-10-03 UTC): saved-array analysis reproduces the legacy owner-window root-step maxima and associates the largest approximately 40 mm increment with restoration of seven derived lower-body targets. Waist-marker gaps can propagate through the pelvis-axis joint-centre estimator despite visible raw leg markers. This is association, not causation. The current refined preview uses a different head-axis, back-marker, spine/scapula and gap-weight objective; the legacy-window maximum does not establish its root error. The private translation-option TDD completed naturally with eight RED failures and eight GREEN passes, no incomplete tests and no model/simulation. The aligned refined port remains source-only and unpromoted. See root_availability_checkpoint_20261003.json and the maintained LaTeX calculations. Full moving references, contact, all 35 actuators, independent replay and PDF qualification remain open.
 
 ## Capture Comparison DRY Gate Remediation - #11162 / #11172
 

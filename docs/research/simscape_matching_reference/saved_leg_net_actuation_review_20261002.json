@@ -1,0 +1,335 @@
+{
+  "qualification": "NATIVE_SAVED_NET_ACTUATION_AND_REJECTED_STIFFNESS_EXPERIMENT",
+  "forward_dynamics_qualified": false,
+  "model_and_library_source_sha256": {
+    "GS3DX_Human": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "GS3DX_KDS_Spherical": "5707cbeca1a976a7b02a1b8414acfc286b4364b510a7731b6e67071b97cc0c3c",
+    "GS3DX_KDS_Revolute": "5a2e7d8d18708d86bccf26f2310c766f17cfb9f6b12e056863a738343466f75e",
+    "GS3DX_KDS_Universal": "5e5e84f4270c20b3033820e78245647202569cb66cb311634d9e973597ae4ac3"
+  },
+  "reconstruction": {
+    "qualification": "READ_ONLY_SAVED_NATIVE_NET_ACTUATION_RECONSTRUCTION",
+    "provenance_sha256": "c5df237f6daf5e77eb2a9f5e94ad35c59acc073e3c64022d0467271139e70d5f",
+    "captures": {
+      "capture_A": {
+        "capture_alias": "capture-A",
+        "input_mat_sha256": "72178304085751e74a0099e938d5c7d55f98979904ee6fb53ff74840e978e3d8",
+        "servo_raw_mat_sha256": "bac36a45e3aa000ee6905996e6ba51a591a0ac85c9e1ecb11ef11e85af9c8148",
+        "source_model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+        "qualification": "SAVED_GENERALIZED_LEG_ACTUATOR_EFFORT_DIAGNOSTIC_NOT_STATIC_GRAVITY",
+        "signal_provenance": {
+          "axis1": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis2": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis3": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueZ",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis4": {
+            "dataset": "LKneeLogs",
+            "field": "ActuatorTorque",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "N*m",
+            "sample_count": 1563
+          },
+          "axis5": {
+            "dataset": "LAnkleLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1563
+          },
+          "axis6": {
+            "dataset": "LAnkleLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1563
+          },
+          "axis7": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis8": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis9": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueZ",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1563
+          },
+          "axis10": {
+            "dataset": "RKneeLogs",
+            "field": "ActuatorTorque",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "N*m",
+            "sample_count": 1563
+          },
+          "axis11": {
+            "dataset": "RAnkleLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1563
+          },
+          "axis12": {
+            "dataset": "RAnkleLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1563
+          }
+        },
+        "sample_time_s": 0.002,
+        "window_s": [0.5, 1],
+        "net_rms_N_m": 45.95412371097929,
+        "net_rms_per_axis_N_m": [
+          57.27377408951579, 52.68838772385468, 10.023856614887373,
+          40.28662613478858, 21.038428409024668, 66.33077701011412,
+          43.08428879515436, 68.73794701650101, 6.436412766989629,
+          47.8975653348611, 11.326177494648107, 60.614365176106304
+        ],
+        "net_peak_abs_per_axis_N_m": [
+          67.04005827162987, 61.739426109252236, 21.0750192669124,
+          98.66610831787364, 24.493069465130667, 73.6318641552138,
+          51.18924990945244, 75.06086670802011, 25.9543351202774,
+          53.75814143579564, 17.406072991475995, 70.13252172214013
+        ],
+        "servo_rms_N_m": 226.5828085129624,
+        "balance_residual_rms_N_m": 216.44926688492225,
+        "balance_servo_cosine_diagnostic": -0.9795173128753005,
+        "late_net_mean_per_axis_N_m": [
+          -56.9378477435139, 55.70087486216374, -1.9719862828795958,
+          -39.84365211697816, 20.96465774500964, 68.93321964139335,
+          41.35069362346384, 71.80883933363393, -4.3321506793695335,
+          -49.89486322411739, 10.412126517922397, 62.451334409313596
+        ],
+        "late_net_std_per_axis_N_m": [
+          6.262914877252864, 4.068475672570061, 4.54173486571948,
+          6.254606383487673, 0.6293953092603624, 5.227708694901113,
+          6.90270100387538, 1.6640842570514203, 3.7228639468646527,
+          3.838521383021044, 0.5774299927576236, 6.600539731189833
+        ],
+        "late_window_static_equilibrium_verified": false,
+        "simulation_executed": false,
+        "model_saved": false,
+        "hip_torque_is_pre_virtual_work_map": true,
+        "hip_intrinsic_damping_in_current_model": 0,
+        "no_claim_of_harmful_cancellation_or_unique_gravity_solution": true
+      },
+      "capture_O": {
+        "capture_alias": "capture-O",
+        "input_mat_sha256": "523e50fef0d0dfabbd1927e20375352a4e480021b7e7555c3cfc158c31049ab4",
+        "servo_raw_mat_sha256": "98ef558593579eb24ad8e75917eda9a6d786f7846336e2f8784271cf7e132eba",
+        "source_model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+        "qualification": "SAVED_GENERALIZED_LEG_ACTUATOR_EFFORT_DIAGNOSTIC_NOT_STATIC_GRAVITY",
+        "signal_provenance": {
+          "axis1": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis2": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis3": {
+            "dataset": "LHipLogs",
+            "field": "ActuatorTorqueZ",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis4": {
+            "dataset": "LKneeLogs",
+            "field": "ActuatorTorque",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "N*m",
+            "sample_count": 1504
+          },
+          "axis5": {
+            "dataset": "LAnkleLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1504
+          },
+          "axis6": {
+            "dataset": "LAnkleLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1504
+          },
+          "axis7": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis8": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis9": {
+            "dataset": "RHipLogs",
+            "field": "ActuatorTorqueZ",
+            "basis": "DIRECT_GENERALIZED_XYZ_COMMAND_TAP_N_M",
+            "declared_units": "",
+            "sample_count": 1504
+          },
+          "axis10": {
+            "dataset": "RKneeLogs",
+            "field": "ActuatorTorque",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "N*m",
+            "sample_count": 1504
+          },
+          "axis11": {
+            "dataset": "RAnkleLogs",
+            "field": "ActuatorTorqueX",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1504
+          },
+          "axis12": {
+            "dataset": "RAnkleLogs",
+            "field": "ActuatorTorqueY",
+            "basis": "NATIVE_SCALAR_PRIMITIVE_ACTUATION_SENSOR_N_M",
+            "declared_units": "kg*m^2/s^2",
+            "sample_count": 1504
+          }
+        },
+        "sample_time_s": 0.002,
+        "window_s": [0.5, 1],
+        "net_rms_N_m": 56.019174070416476,
+        "net_rms_per_axis_N_m": [
+          56.993374406610144, 102.5103285294932, 8.07477388610566,
+          55.59227131753865, 12.305069254246446, 60.89586821561626,
+          59.897332402805354, 84.82716005597494, 10.339804193413935,
+          49.97225487861729, 13.236260833952754, 57.64602467518937
+        ],
+        "net_peak_abs_per_axis_N_m": [
+          67.66340776306284, 111.18542930564197, 24.241048219544485,
+          109.31971496467398, 19.397032734866855, 87.22847862327706,
+          78.54462934457064, 94.40655431741422, 29.901175016536264,
+          71.16995881229192, 20.236934917175894, 77.82389572800301
+        ],
+        "servo_rms_N_m": 236.38383096299515,
+        "balance_residual_rms_N_m": 227.4041122142112,
+        "balance_servo_cosine_diagnostic": -0.9715604862304394,
+        "late_net_mean_per_axis_N_m": [
+          -54.62495541236967, 109.0650042356779, 2.5296879044607614,
+          -48.61420822705644, 9.943177117494125, 52.842096383803636,
+          56.23559230547111, 83.57245378278324, -5.82824298717156,
+          -45.8375679504177, 10.655010228645548, 54.388570605704935
+        ],
+        "late_net_std_per_axis_N_m": [
+          3.326830383297516, 1.5278946529278763, 2.289802521503589,
+          4.909227928792917, 1.2405938175465494, 6.872085890419063,
+          2.8276332037394076, 1.041493438217664, 4.328654843237987,
+          3.665001647567832, 1.1935524421753978, 5.683420134571694
+        ],
+        "late_window_static_equilibrium_verified": false,
+        "simulation_executed": false,
+        "model_saved": false,
+        "hip_torque_is_pre_virtual_work_map": true,
+        "hip_intrinsic_damping_in_current_model": 0,
+        "no_claim_of_harmful_cancellation_or_unique_gravity_solution": true
+      }
+    }
+  },
+  "reconstruction_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('reconstruct_saved_leg_net_actuation.m')",
+    "owned_pids": [58016],
+    "timestamp": "2026-10-02T18:38:51.589265+00:00"
+  },
+  "failed_unit_object_reader_receipt": {
+    "actual_process_exit_code": 1,
+    "final_exit_code": 1,
+    "termination_reason": "natural_exit",
+    "done_marker": false,
+    "script_status": "failed",
+    "command_identity": "run('reconstruct_saved_leg_net_actuation.m')",
+    "owned_pids": [41952],
+    "timestamp": "2026-10-02T18:37:40.876293+00:00"
+  },
+  "private_probe_sha256": "d88ead954add03560e3aac4c90263b42be213c60064d118a3cf33aa01f6d8d99",
+  "source_trace_sha256": "7362e08a37ea884a1a6d5e006637dbf239a38945f9c3a9af0f404ac1939ed644",
+  "tour_baseline": {
+    "pelvis_max_displacement_m": 0.020041021966138554,
+    "pelvis_max_rotation_change_deg": 5.5820985871380975,
+    "peak_bodyweights": 1.9814141026034733,
+    "peak_time_s": 0.013139542843692351
+  },
+  "tour_gain4_damping2": {
+    "qualification": "CONSTANT_REFERENCE_1S_LEG_STIFFNESS_GAIN4_DIAGNOSTIC_NOT_OPEN_LOOP",
+    "hold_screen_passed": false,
+    "gates": {
+      "both_feet_settled_minimum_005BW": true,
+      "settled_total_080_to_120BW": true,
+      "whole_run_peak_at_most_200BW": false,
+      "pelvis_displacement_at_most_5mm": false,
+      "pelvis_rotation_change_at_most_1deg": false
+    },
+    "pelvis_max_displacement_m": 0.006127830686344268,
+    "pelvis_max_rotation_change_deg": 1.7510408071648915,
+    "peak_bodyweights": 2.2629230230011466,
+    "peak_time_s": 0.010006594495272091,
+    "receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('capture_A_bilateral_balance_on_gain4_hold_1s.m')",
+      "owned_pids": [46496],
+      "timestamp": "2026-10-02T18:36:44.012759+00:00"
+    },
+    "private_probe_sha256": "19a2ee64bef2483a5ec88d48391d67d19c720f314fd599b390a8707fc412f8fe"
+  },
+  "delegation": {
+    "cli": "agy",
+    "model": "gemini-3.8-flash-high",
+    "conversation_id": "680c7edc-c4eb-4ec4-957e-da2e9c1c9698",
+    "actual_review_sha256": "2f62c9613d819b3f971cb646a9c9e31746e4e6478d87fd2a60408a96ca00ffd2",
+    "parent_review": "Independent SLX graph tracing confirms library references, torque tap paths and converter units; proposed native auditor was not executed."
+  }
+}

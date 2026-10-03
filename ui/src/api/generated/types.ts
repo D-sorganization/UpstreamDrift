@@ -1585,6 +1585,30 @@ export interface ImportResponse {
 }
 
 /**
+ * Request model for importing a single trial from an OpenCap session.
+ */
+export interface ImportTrialRequest {
+  /** Path to the OpenCap session directory */
+  session_dir: string;
+  /** Trial name to load (defaults to first motion trial) */
+  trial?: string | null;
+}
+
+/**
+ * Response model for trial import.
+ */
+export interface ImportTrialResponse {
+  session_dir: string;
+  trial: string;
+  trials: string[];
+  subject: SubjectResponse;
+  model_file?: string | null;
+  has_kinematics: boolean;
+  kinematics_columns: string[];
+  notes: string[];
+}
+
+/**
  * An accepted import, in the same shape the page already plots. ``model_name`` and ``trajectory``/``summary`` mirror :class:`BallFlightModelResult` so the page can render an imported curve through the same 3D scene, profile charts, and metrics table as a computed one. ``model_family`` and ``parameter_digest`` carry the provenance the wire mandates; the page always labels an imported curve with both ``model_family`` and ``model_name`` (ADR-0047), never ``model_name`` alone, so it is never confused with a computed curve from the UD registry.
  */
 export interface ImportedBallFlightResponse {
@@ -1605,6 +1629,26 @@ export interface ImportedTrajectorySample {
   time_s: number;
   position_m: number[];
   velocity_mps?: number[] | null;
+}
+
+/**
+ * Request model for inspecting an OpenCap session.
+ */
+export interface InspectSessionRequest {
+  /** Path to the OpenCap session directory */
+  session_dir: string;
+}
+
+/**
+ * Response model for session inspection.
+ */
+export interface InspectSessionResponse {
+  session_dir: string;
+  trials: string[];
+  subject: SubjectResponse;
+  model_file?: string | null;
+  kinematics_trials: string[];
+  notes: string[];
 }
 
 /**
@@ -2834,6 +2878,17 @@ export interface StrokesGainedUncertaintyV1 {
   benchmark_method: string;
   benchmark_standard_error_mean?: number | null;
   assumptions: string[];
+}
+
+/**
+ * Subject anthropometry and model choice.
+ */
+export interface SubjectResponse {
+  mass_kg?: number | null;
+  height_m?: number | null;
+  sex?: string | null;
+  opensim_model?: string | null;
+  subject_id?: string | null;
 }
 
 export interface SubmissionReceiptResponse {

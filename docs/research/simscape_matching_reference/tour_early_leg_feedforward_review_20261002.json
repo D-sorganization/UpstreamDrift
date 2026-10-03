@@ -1,0 +1,43 @@
+{
+  "qualification": "CONTROLLED_EARLY_EMPIRICAL_FEEDFORWARD_REJECTED_BY_WHOLE_PEAK_FORCE_GATE",
+  "capture_alias": "capture-A",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "balance_command_sha256": "904abca11df99b5533d59aeec63d64db122234f7bb80fdb5ab3dae7e5efd3c19",
+  "private_probe_sha256": "c5054e700a2923f960b14c4eaa1ee15cb9a25b33d95604ae39edf5246dd0ca16",
+  "receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('capture_A_bilateral_early_empirical_leg_hold_1s.m')",
+    "owned_pids": [91672],
+    "timestamp": "2026-10-02T19:45:43.871877+00:00"
+  },
+  "failed_setup_receipt": {
+    "actual_process_exit_code": 1,
+    "final_exit_code": 1,
+    "termination_reason": "natural_exit",
+    "done_marker": false,
+    "script_status": "failed",
+    "command_identity": "run('capture_A_bilateral_early_empirical_leg_hold_1s.m')",
+    "owned_pids": [71228],
+    "timestamp": "2026-10-02T19:40:04.951472+00:00"
+  },
+  "feedforward_source": "MOVING_BASELINE_LATE_NET_MEAN_EARLY_RAMPED_0_TO_50MS_EMPIRICAL_TRIAL_NOT_STATIC_GRAVITY",
+  "time_s": [0, 0.05, 0.2, 1],
+  "pelvis_max_displacement_m": 0.0020930991705705635,
+  "pelvis_max_rotation_change_deg": 0.5560399500157095,
+  "whole_peak_bodyweights": 2.000907240838022,
+  "peak_time_s": 0.013102748937635494,
+  "gates": {
+    "both_feet_settled_minimum_005BW": true,
+    "settled_total_080_to_120BW": true,
+    "whole_run_peak_at_most_200BW": false,
+    "pelvis_displacement_at_most_5mm": true,
+    "pelvis_rotation_change_at_most_1deg": true
+  },
+  "hold_screen_passed": false,
+  "model_saved": false,
+  "independent_forward_qualified": false
+}
