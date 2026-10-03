@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import type { ForceVector3D, ForceOverlayConfig } from './ForceOverlay';
+import type { ForceOverlayConfig } from './ForceOverlay';
 import type { GlyphSetV1 } from '@/types/glyphs';
 import { apiFetch } from '@/api/fetch';
 import { usePolling } from '@/hooks/usePolling';
@@ -15,8 +15,6 @@ import { usePolling } from '@/hooks/usePolling';
 export interface ForceOverlayPanelProps {
   /** Primary callback when serialized GlyphSet updates (FTO-23) */
   onGlyphsChange?: (glyphs: GlyphSetV1 | null) => void;
-  /** Backward-compatible callback when vector list updates */
-  onVectorsChange?: (vectors: ForceVector3D[]) => void;
   /** Whether simulation is running */
   isRunning: boolean;
   /** Whether WebSocket simulation stream is currently connected */
@@ -52,7 +50,6 @@ const FORCE_TYPE_OPTIONS = [
 
 export function ForceOverlayPanel({
   onGlyphsChange,
-  onVectorsChange,
   isRunning,
   isConnected = false,
   socketForceOverlay,
@@ -71,9 +68,8 @@ export function ForceOverlayPanel({
   useEffect(() => {
     if (!config.enabled) {
       onGlyphsChange?.(null);
-      onVectorsChange?.([]);
     }
-  }, [config.enabled, onGlyphsChange, onVectorsChange]);
+  }, [config.enabled, onGlyphsChange]);
 
   // Handle real-time WebSocket payloads when connected
   useEffect(() => {
@@ -141,7 +137,6 @@ export function ForceOverlayPanel({
 
       const data = await apiFetch<{
         glyphs?: GlyphSetV1 | null;
-        vectors?: ForceVector3D[];
         total_force_magnitude?: number;
         total_torque_magnitude?: number;
       }>(`/api/simulation/forces?${params}`);
@@ -149,7 +144,6 @@ export function ForceOverlayPanel({
       if (data.glyphs && data.glyphs.schema_version === 'glyph-set-v1') {
         onGlyphsChange?.(data.glyphs);
       }
-      onVectorsChange?.(data.vectors || []);
       setPolledTotals({
         force: data.total_force_magnitude || 0,
         torque: data.total_torque_magnitude || 0,
@@ -157,7 +151,7 @@ export function ForceOverlayPanel({
     } catch {
       // Silently ignore network errors during background polling
     }
-  }, [config, isConnected, onGlyphsChange, onVectorsChange]);
+  }, [config, isConnected, onGlyphsChange]);
 
   // Poll only while enabled, running, socket disconnected, and tab visible
   usePolling(fetchVectors, {

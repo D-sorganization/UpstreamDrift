@@ -34,6 +34,74 @@
   - MyPy (`run_mypy.py`): pass (0 errors).
 - Next steps: COV-5 (#11273) 2D detector keypoint extraction across viewpoints and backends.
 
+# Current Handoff — Capture-O Video Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-2-register-sources-11270`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-2-11270`
+- Commit: `SELF`
+- Governing issue: #11270 (parent epic #11268)
+- Objective: [COV-2] Register capture-O video sources into the capture registry and public catalog, extract and validate timing evidence from container/stream metadata, define non-overlapping swing candidate intervals with view classification, and implement pure usability grading under DbC.
+- Completed:
+  - `src/shared/python/shadow_tracker/source_records.py`:
+    - `VideoTimingEvidence`: frozen dataclass capturing container fps, `r_frame_rate`, `avg_frame_rate`, VFR flag, slow motion tags, rotation, creation time, `physical_clock` (`known`, `ratio_known`, `unknown`). Enforces fail-closed invariant that missing slow-motion tags cannot claim known physical clock.
+    - `extract_video_timing_evidence`: pure parser of ffprobe metadata for stream/format tags, displaymatrix rotation, Apple/Android slow motion tags, and playback-to-capture ratio.
+    - `VariableFrameRateError` / `NonUniformPTSError`: typed exception when VFR streams are encountered by uniform-PTS consumers.
+    - `SwingWindow`: half-open interval `[start_pts_s, end_pts_s)` tracking address/top/impact/finish frames, view classification (`face_on`, `down_the_line`, `oblique`, `other`), azimuth, cuts, partial/practice flags, and feature visibility.
+    - `validate_swing_windows`: checks interval order and strictly forbids overlapping swing windows within the same clip.
+    - `SwingGradeResult` and `grade_swing_window`: pure usability grading returning grades (A, B, C, R) and mandatory non-empty reasons (raising `ValueError` if empty).
+  - `src/shared/python/workspace/necromatcher_video.py`:
+    - `source_frame_rate`: raises typed `VariableFrameRateError` when non-uniform PTS steps occur in VFR streams.
+  - `src/motion_capture/capture_registry.py`:
+    - Extended `CaptureInfo` schema with `kind` field (defaulting to `"c3d"` for backward compatibility, `"video"` for video clips).
+    - Added `register_capture(info, repo_root=...)` for registering neutral IDs into `data/capture_registry.json`.
+  - `data/capture_registry.json`:
+    - Registered neutral entry for `capture-O-video/cov-01` (`kind: "video"`, `where: "private"`).
+  - `docs/development/historical_capture/source-catalog.json`:
+    - Added neutral entry for `cov-01` (`private: true`, with no filename, URL, or title).
+  - Tests in `tests/unit/motion_capture/test_cov2_source_registration.py`: 7 comprehensive behavioral unit tests covering all required contracts.
+  - Tests in `tests/motion_capture/test_capture_registry.py`: added schema tests for `kind` and `register_capture`.
+  - Updated `SPEC.md` top specification section and §12 Change Log table.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_cov2_source_registration.py`: 7 passed.
+  - `pytest tests/motion_capture/test_capture_registry.py`: 12 passed.
+  - `pytest tests/unit/workspace/test_necromatcher_video.py`: 6 passed.
+  - `pytest tests/unit/shadow_tracker/test_source_records.py`: 71 passed.
+  - `pytest tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passed.
+  - Architecture budget: OK.
+  - File size budget: OK.
+  - Error handling ratchet: OK.
+
+---
+
+# Past Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
+
+---
+
+# Current Handoff — Remove Deprecated ForceVector3D and Force Overlay `vectors` (#11362)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree `/home/user/ud-wt/a11362`
+- Branch: `feat/issue-11362-remove-force-vector3d`; commit `SELF`; PR: see the PR for this branch (`Closes #11362`, `Refs #11285`)
+- Governing issue: #11362 (epic #11285); follows #11363 (glyph streaming) and #11377 (React GlyphSet migration)
+- Objective: Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and the `glyphs_to_legacy_vectors` translation helper now that the UI renders the serialized GlyphSet.
+- Premise check: on `origin/main` no API or UI consumer read `vectors` (only unused `onVectorsChange` / `forceOverlays` plumbing and tests); the OpenAPI-derived `ui/src/api/generated/types.ts` was the only contract snapshot.
+- Completed:
+  - `src/api/models/responses.py`: deleted `ForceVector3D` and `ForceOverlayResponse.vectors`.
+  - `src/api/services/force_overlay_service.py`: deleted `glyphs_to_legacy_vectors` and its now-unused imports.
+  - `src/api/routes/force_overlays.py`: response no longer builds or returns `vectors`.
+  - `ui/src/api/generated/types.ts`: regenerated with `scripts/generate_ui_api_types.py` (only the two removals).
+  - `ui/src/components/visualization/{ForceOverlay,ForceOverlayPanel,Scene3D}.tsx`: removed `ForceVector3D` re-export, `vectors` prop, `onVectorsChange`, `forceOverlays` prop and the local `ForceOverlay` interface that only they used.
+  - Tests updated first (RED then GREEN): assert model and field are absent from the model, schema and route JSON; `scripts/config/suite_marker_baseline.json` entries renamed to match.
+- Breaking change: `/api/simulation/forces` responses no longer contain `vectors`; clients must read `glyphs`.
+- Validation:
+  - RED: 7 updated tests failed before the removal; GREEN after.
+  - `pytest tests/api/test_phase4_api.py tests/api/wave5_api/test_models_responses.py tests/unit/api tests/api/test_generated_ui_api_types.py tests/config/feature_parity tests/unit/ci/test_suite_marker_ratchet.py`: the same 30 failures with and without this change (sandbox environment: missing UI build/alembic/launcher); no new failures.
+  - `ruff check` / `ruff format --check` on changed Python: OK; `check_file_size_budget.py`, `check_error_handling_ratchet.py`, `check_suite_marker_ratchet.py`: OK.
+  - `cd ui && npx vitest run` (Scene3D, ForceOverlayPanel, ForceOverlay tests): 46 passed; `npx tsc -b --noEmit`: clean.
+- Next steps: review and merge; the owner closes epic #11285 once its remaining children land.
+- No material development-log change — DL-#11285 Paths are untouched.
+
 ---
 
 # Current Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
