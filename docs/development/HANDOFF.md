@@ -18,6 +18,45 @@
 - Validation: Ruff check/format clean, strict mypy clean on new modules, file size budget passed.
 - Next steps: Land FTO-8 into main; unblocks video camera projection FTO-24 (#11309) and video overlay pipeline FTO-25 to FTO-29.
 
+# MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
+    - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
+    - `segment_geom_count(glyphs: GlyphSet) -> int`: pure function returning exact geom capacity required for arrows and torque arc capsules/heads.
+    - `add_glyphs_to_scene(scene: mujoco.MjvScene, glyphs: GlyphSet, *, arc_width_m: float = 0.006) -> SceneGlyphReceipt`:
+      - Appends `mjGEOM_ARROW` connectors for `ArrowGlyph` using 2·shaft_radius_m.
+      - Appends `mjGEOM_CAPSULE` connectors along the polyline of `TorqueArcGlyph` plus a final `mjGEOM_ARROW` connector from `head_base_m` to `head_tip_m`.
+      - Detects and adapts both modern `mujoco.mjv_connector` and legacy `mujoco.mjv_makeConnector`.
+      - Enforces strict buffer overflow protection (`scene.ngeom < scene.maxgeom`) and records dropped geoms without exceptions or out-of-bounds writes.
+  - `tests/unit/engines/mujoco/test_force_glyphs.py`:
+    - 5 tests covering 1-arrow geom and endpoint matching within 1e-9, 32-segment arc (32 capsules + 1 arrow), overflow recording with capacity bounds, `segment_geom_count`, and offscreen pixel rendering with `mujoco.Renderer` verifying arrow color detection.
+  - Updated `SPEC.md` §12 changelog table row.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest 5/5 passed.
+- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
+
+# MuJoCo 3.14 Axial-Load Axis Discovery — #11349
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
+- Completed: `MujocoAxialLoadSource._discover_axes` compares geom and joint types via `int()` (numpy int vs pybind enum `in`/`==` is direction-dependent and False on mujoco 3.14, so no rods were found and `sample()` returned None). Regression tests for capsule/cylinder discovery and free/non-rod exclusion in `tests/unit/body_part_viz/test_mujoco_axial_loads.py`.
+- Validation: `pytest tests/unit/body_part_viz/test_mujoco_axial_loads.py` 9 passed on mujoco 3.14.0. Failures outside scope here: tests needing PyQt6 (not installed in this venv).
+- Next steps: none for this fix; other mujoco 3.14 drift is listed in the PR body.
+
+# OpenSim Engine State and Control Setters Under OpenSim 4 — #11344
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11344`
+- Branch: `fix/issue-11344-opensim-set-state`; commit: SELF; PR: #11352 (merged; `Closes #11344`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `OpenSimPhysicsEngine.set_state` builds vectors with `opensim.Vector(list)` (4.x has no `Vector(int)`), keeps time, realizes Velocity and raises `ValueError` on length mismatch. `set_control` goes through `Model.setControls` (a bare `updControls` + `markControlsAsValid` does not invalidate an already-realized Dynamics stage, so actuation stayed 0); the values are retained in `self._controls` and re-applied by `set_state` because changing q/u drops realized controls. ZTCF/ZVCF snapshot and restore that retained value. `tests/unit/engines/opensim/test_opensim_set_state_control.py` (10 live tests, including a nonzero actuator torque in the force/torque frame) and `tests/integration/cross_engine/test_opensim_engine_state_control_parity.py` (engine set_state/set_control gives the same force/torque frame as a model with state and PrescribedController baked in).
+- Known limits: `step()` integrates through the Manager, which recomputes controls from the model controllers, so a `set_control` value does not persist across steps without a controller. Not fixed here: `reset()` calls `Manager.setSessionTime` (absent in 4.x), `compute_inverse_dynamics` uses `Vector(n_u)` (so `compute_gravity_forces`/`compute_bias_forces` return empty arrays on 4.x). The parity builders in `tests/integration/cross_engine/test_force_overlay_parity.py` (PR #11345) can switch from baked-in state/controller to `set_state`/`set_control`.
+- Validation: `python3 -m pytest tests/unit/engines/opensim` passes with the new file; the wider opensim/analytical/audit set shows the same 50 failures before and after (pre-existing in this environment).
+- Next steps: fix `reset()` and the inverse-dynamics `Vector` call in a follow-up; update the parity builders after #11345 merges.
+  > > > > > > > origin/main
+
 # Colour Utilities DRY — #11289 (FTO-4)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`

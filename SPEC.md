@@ -7712,7 +7712,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-03 | #11293 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
+| 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
+| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
+| 2026-10-03 | #11349 | `MujocoAxialLoadSource` axis discovery compares geom/joint types via `int()` so it works on mujoco 3.14 (enum vs numpy int); regression tests added. |
+| 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |
 | 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
 | 2026-10-03 | #11301 | [FTO-16] OpenSim muscle lines of action: `OpenSimForceTorqueSource.muscle_wrenches` emits `MUSCLE` wrenches (tendon force along the effective end directions) at each enabled muscle's origin and insertion, labels `muscle:<name>:origin`/`:insertion`; only end attachments drawn. |
 | 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: `PinocchioForceTorqueSource` (world-frame RNEA joint reactions, applied-torque actuator wrenches, contact pass-through, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_applied_torques`, `force_visualization=FULL`. |
