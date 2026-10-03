@@ -8,7 +8,7 @@ Points passed to this renderer must already be in the camera's world frame (ADR-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, Sequence
 
 import cv2
 import numpy as np
@@ -30,14 +30,25 @@ if TYPE_CHECKING:
     )
     from src.shared.python.pose_estimation.observations import CameraCalibration
 
+from src.shared.python.force_overlay.projection import (
+    ProjectedArrowGlyph,
+    ProjectedGlyphSet,
+    ProjectedTorqueArcGlyph,
+    project_glyphs,
+)
+
 __all__ = [
     "HypothesisProjector",
     "ImageProjector",
     "PinholeProjector",
+    "ProjectedArrowGlyph",
+    "ProjectedGlyphSet",
+    "ProjectedTorqueArcGlyph",
     "VideoGlyphReceipt",
     "VideoGlyphStyle",
     "draw_glyphs_on_frame",
     "draw_legend_box",
+    "project_glyphs",
 ]
 
 
@@ -205,31 +216,23 @@ class _DrawContext:
     halo_w: int
 
 
-def _draw_item(
-    segments: list[tuple[np.ndarray, np.ndarray]],
-    head: tuple[np.ndarray, np.ndarray] | None,
+def _draw_projected_item(
+    segments: Sequence[tuple[tuple[float, float], tuple[float, float]]],
+    head_poly: Sequence[tuple[float, float]] | np.ndarray | None,
     bgr: tuple[int, int, int],
     ctx: _DrawContext,
 ) -> bool:
     any_drawn = False
     for p1, p2 in segments:
-        ok, s, e = _clip_segment(
-            ctx.rect, tuple(np.rint(p1).astype(int)), tuple(np.rint(p2).astype(int))
-        )
+        s_int = (int(round(p1[0])), int(round(p1[1])))
+        e_int = (int(round(p2[0])), int(round(p2[1])))
+        ok, s, e = _clip_segment(ctx.rect, s_int, e_int)
         if ok:
             cv2.line(ctx.halo_img, s, e, ctx.halo_bgr, ctx.halo_px, cv2.LINE_AA)
             ctx.shafts.append((s, e, bgr))
             any_drawn = True
-    if head is not None:
-        tip_px, base_px = head
-        v = tip_px - base_px
-        vl = float(np.hypot(v[0], v[1]))
-        u = v / vl if vl > 1e-4 else np.array([0.0, 1.0])
-        norm = np.array([-u[1], u[0]]) * (float(ctx.head_px) / 2.0)
-        poly = np.array(
-            [np.rint(tip_px), np.rint(base_px + norm), np.rint(base_px - norm)],
-            np.int32,
-        )
+    if head_poly is not None:
+        poly = np.rint(np.array(head_poly)).astype(np.int32)
         if any(0 <= pt[0] < ctx.rect[2] and 0 <= pt[1] < ctx.rect[3] for pt in poly):
             cv2.fillConvexPoly(ctx.halo_img, poly, ctx.halo_bgr, cv2.LINE_AA)
             cv2.polylines(
@@ -300,59 +303,6 @@ def draw_legend_box(
         ty += dy
 
 
-def _draw_arrows(
-    glyphs: GlyphSet,
-    projector: ImageProjector,
-    ctx: _DrawContext,
-) -> tuple[int, int, int]:
-    """Draw arrows from GlyphSet. Returns (drawn, skipped_behind, skipped_out)."""
-    drawn, skipped_behind, skipped_out = 0, 0, 0
-    for arrow in glyphs.arrows:
-        pts = np.array([arrow.tail_m, arrow.tip_m, arrow.head_base_m], float)
-        pix, val = projector.project(pts)
-        if not (val[0] and val[1]):
-            skipped_behind += 1
-            continue
-        base = pix[2] if val[2] else pix[1]
-        bgr = _rgba_to_bgr(arrow.rgba)
-        if _draw_item([(pix[0], base)], (pix[1], base), bgr, ctx):
-            drawn += 1
-        else:
-            skipped_out += 1
-    return drawn, skipped_behind, skipped_out
-
-
-def _draw_torque_arcs(
-    glyphs: GlyphSet,
-    projector: ImageProjector,
-    ctx: _DrawContext,
-) -> tuple[int, int, int]:
-    """Draw torque arcs from GlyphSet. Returns (drawn, skipped_behind, skipped_out)."""
-    drawn, skipped_behind, skipped_out = 0, 0, 0
-    for arc in glyphs.torque_arcs:
-        if not arc.polyline_m:
-            continue
-        pts = np.vstack(
-            [
-                np.array(arc.polyline_m, float),
-                np.array([arc.head_tip_m, arc.head_base_m], float),
-            ]
-        )
-        pix, val = projector.project(pts)
-        n = len(arc.polyline_m)
-        if not (val[0] and val[n - 1]):
-            skipped_behind += 1
-            continue
-        segs = [(pix[i], pix[i + 1]) for i in range(n - 1) if val[i] and val[i + 1]]
-        head = (pix[n], pix[n + 1]) if (val[n] and val[n + 1]) else None
-        bgr = _rgba_to_bgr(arc.rgba)
-        if _draw_item(segs, head, bgr, ctx):
-            drawn += 1
-        else:
-            skipped_out += 1
-    return drawn, skipped_behind, skipped_out
-
-
 def draw_glyphs_on_frame(
     frame_bgr: np.ndarray,
     glyphs: GlyphSet,
@@ -396,11 +346,24 @@ def draw_glyphs_on_frame(
         halo_w=halo_w,
     )
 
-    d_arr, behind_arr, out_arr = _draw_arrows(glyphs, projector, ctx)
-    d_arc, behind_arc, out_arc = _draw_torque_arcs(glyphs, projector, ctx)
-    drawn = d_arr + d_arc
-    skipped_behind = behind_arr + behind_arc
-    skipped_out = out_arr + out_arc
+    projected = project_glyphs(glyphs, projector, style=s, image_size_px=(w, h))
+
+    for arrow in projected.arrows:
+        bgr = _rgba_to_bgr(arrow.rgba)
+        _draw_projected_item(
+            [(arrow.polyline_px[0], arrow.polyline_px[1])],
+            arrow.head_poly_px,
+            bgr,
+            ctx,
+        )
+
+    for arc in projected.torque_arcs:
+        bgr = _rgba_to_bgr(arc.rgba)
+        arc_segs = [
+            (arc.polyline_px[i], arc.polyline_px[i + 1])
+            for i in range(len(arc.polyline_px) - 1)
+        ]
+        _draw_projected_item(arc_segs, arc.head_poly_px, bgr, ctx)
 
     cv2.addWeighted(halo_overlay, s.halo_alpha, out, 1.0 - s.halo_alpha, 0, out)
     for start, end, bgr in shafts:
@@ -411,9 +374,9 @@ def draw_glyphs_on_frame(
         draw_legend_box(out, glyphs.legend, s, qualification=qualification)
 
     return VideoGlyphReceipt(
-        drawn=drawn,
-        skipped_behind_camera=skipped_behind,
-        skipped_out_of_frame=skipped_out,
-        unavailable_labels=tuple(glyphs.legend.unavailable_labels),
+        drawn=projected.receipt.drawn,
+        skipped_behind_camera=projected.receipt.skipped_behind_camera,
+        skipped_out_of_frame=projected.receipt.skipped_out_of_frame,
+        unavailable_labels=tuple(projected.receipt.unavailable_labels),
         frame=out,
     )
