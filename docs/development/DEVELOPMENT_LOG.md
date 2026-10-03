@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
-- **PR:** not created
+- **PR:** #11410
 - **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
 - **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
 - **Started:** 2026-10-03
