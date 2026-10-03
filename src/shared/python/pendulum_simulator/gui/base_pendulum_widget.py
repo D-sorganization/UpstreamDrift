@@ -800,3 +800,73 @@ class BasePendulumWidget(QWidget):
         painter.setPen(QPen(QColor(0, 0, 0, 40), 1))
         painter.setBrush(QBrush(grad))
         painter.drawPolygon(poly)
+
+    def _render_force_overlay_2d(
+        self,
+        painter: QPainter,
+        forces: dict[str, Any],
+        joint_positions: dict[str, Any],
+        *,
+        kind: Any,
+        label_prefix: str,
+        color_name: str,
+        engine_name: str,
+    ) -> None:
+        """Render 2D joint forces using ForceTorqueFrame and QPainter glyph renderer."""
+        if not forces:
+            return
+        res = getattr(self, "_result", None)
+        if res is None or not hasattr(res, "t"):
+            return
+        curr_idx = getattr(self, "_current_idx", 0)
+
+        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
+        max_mag = max(1.0, max(magnitudes))
+        scale = 0.4 * self._force_scale / max_mag
+
+        from src.shared.python.force_overlay.contracts import (
+            ForceTorqueFrame,
+            OverlayWrench,
+        )
+        from src.shared.python.force_overlay.glyphs import (
+            ForceGlyphStyle,
+            build_glyphs,
+        )
+        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
+            draw_glyphs_2d,
+        )
+
+        wrenches: list[OverlayWrench] = []
+        for key, force in forces.items():
+            if self._visible_segments is not None and key not in self._visible_segments:
+                continue
+            jp = joint_positions.get(key)
+            if jp is None:
+                continue
+            fx, fy = force
+            wrenches.append(
+                OverlayWrench(
+                    kind=kind,
+                    label=f"{label_prefix}:{key}",
+                    body=key,
+                    point_m=(float(jp[0]), float(jp[1]), 0.0),
+                    force_n=(float(fx * scale), float(fy * scale), 0.0),
+                    torque_nm=None,
+                    source=engine_name,
+                )
+            )
+        if not wrenches:
+            return
+        frame = ForceTorqueFrame(
+            time_s=float(res.t[curr_idx]),
+            engine=engine_name,
+            wrenches=tuple(wrenches),
+        )
+        style = ForceGlyphStyle(
+            force_scale_m_per_n=1.0,
+            min_length_m=1e-4,
+            max_length_m=1e5,
+            palette={kind: color_name},
+        )
+        glyphs = build_glyphs(frame, style=style)
+        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)

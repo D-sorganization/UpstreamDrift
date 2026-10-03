@@ -409,73 +409,6 @@ class PendulumWidget(BasePendulumWidget):
     # Force vectors
     # ------------------------------------------------------------------
 
-    def _render_joint_forces_overlay(
-        self,
-        painter: QPainter,
-        pos: dict,
-        forces: dict[str, Any],
-        kind: Any,
-        color_name: str,
-        label_prefix: str,
-    ) -> None:
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._force_scale / max_mag
-
-        joint_map = {
-            "shoulder": pos.get("shoulder"),
-            "wrist": pos.get("wrist"),
-            "wrist1": pos.get("wrist1"),
-            "wrist2": pos.get("wrist2"),
-        }
-
-        from src.shared.python.force_overlay.contracts import (
-            ForceTorqueFrame,
-            OverlayWrench,
-        )
-        from src.shared.python.force_overlay.glyphs import (
-            ForceGlyphStyle,
-            build_glyphs,
-        )
-        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
-            draw_glyphs_2d,
-        )
-
-        wrenches = []
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            joint_pos = joint_map.get(key)
-            if joint_pos is None:
-                continue
-            fx, fy = force
-            wrenches.append(
-                OverlayWrench(
-                    kind=kind,
-                    label=f"{label_prefix}:{key}",
-                    body=key,
-                    point_m=(float(joint_pos[0]), float(joint_pos[1]), 0.0),
-                    force_n=(float(fx * scale), float(fy * scale), 0.0),
-                    torque_nm=None,
-                    source="pendulum",
-                )
-            )
-        if not wrenches:
-            return
-        frame = ForceTorqueFrame(
-            time_s=float(self._result.t[self._current_idx]),
-            engine="pendulum",
-            wrenches=tuple(wrenches),
-        )
-        style = ForceGlyphStyle(
-            force_scale_m_per_n=1.0,
-            min_length_m=1e-4,
-            max_length_m=1e5,
-            palette={kind: color_name},
-        )
-        glyphs = build_glyphs(frame, style=style)
-        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
-
     def _draw_force_vectors(self, painter: QPainter, pos: dict) -> None:
         """Draw net force vectors at joints."""
         assert painter is not None, "painter must be provided"
@@ -484,15 +417,17 @@ class PendulumWidget(BasePendulumWidget):
         forces = self._result.joint_forces_at(self._current_idx)
         if not forces:
             return
+
         from src.shared.python.force_overlay.contracts import WrenchKind
 
-        self._render_joint_forces_overlay(
+        self._render_force_overlay_2d(
             painter,
-            pos,
             forces,
-            WrenchKind.JOINT_REACTION,
-            self.COLOR_FORCE.name(),
-            "joint",
+            pos,
+            kind=WrenchKind.JOINT_REACTION,
+            label_prefix="joint",
+            color_name=self.COLOR_FORCE.name(),
+            engine_name="pendulum",
         )
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter, pos: dict) -> None:
@@ -505,13 +440,14 @@ class PendulumWidget(BasePendulumWidget):
             return
         from src.shared.python.force_overlay.contracts import WrenchKind
 
-        self._render_joint_forces_overlay(
+        self._render_force_overlay_2d(
             painter,
-            pos,
             forces,
-            WrenchKind.JOINT_ACTUATOR,
-            self.COLOR_ZERO_TORQUE.name(),
-            "ztcf",
+            pos,
+            kind=WrenchKind.JOINT_ACTUATOR,
+            label_prefix="ztcf",
+            color_name=self.COLOR_ZERO_TORQUE.name(),
+            engine_name="pendulum",
         )
 
     # ------------------------------------------------------------------

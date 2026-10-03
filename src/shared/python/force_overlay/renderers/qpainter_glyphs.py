@@ -39,6 +39,38 @@ def _to_qcolor(rgba: tuple[float, ...]) -> Any:
     )
 
 
+def _draw_arrowhead_2d(
+    painter: Any,
+    p_base: Any,
+    p_tip: Any,
+    perp: tuple[float, float],
+    head_w: float,
+    fg_col: Any,
+    halo: bool,
+    halo_color: Any,
+) -> None:
+    """Render a 2D triangular arrowhead with optional anti-aliased halo."""
+    from PyQt6.QtCore import QPointF
+    from PyQt6.QtGui import QBrush, QPen, QPolygonF
+
+    perp_x, perp_y = perp
+    w1 = QPointF(p_base.x() + head_w * perp_x, p_base.y() + head_w * perp_y)
+    w2 = QPointF(p_base.x() - head_w * perp_x, p_base.y() - head_w * perp_y)
+    tri = QPolygonF([p_tip, w1, w2])
+
+    if halo:
+        painter.setPen(QPen(halo_color, 1))
+        painter.setBrush(QBrush(halo_color))
+        h_w = head_w * 1.4
+        hw1 = QPointF(p_base.x() + h_w * perp_x, p_base.y() + h_w * perp_y)
+        hw2 = QPointF(p_base.x() - h_w * perp_x, p_base.y() - h_w * perp_y)
+        painter.drawPolygon(QPolygonF([p_tip, hw1, hw2]))
+
+    painter.setPen(QPen(fg_col, 1))
+    painter.setBrush(QBrush(fg_col))
+    painter.drawPolygon(tri)
+
+
 def _draw_single_arrow_2d(
     painter: Any,
     project: Any,
@@ -49,7 +81,7 @@ def _draw_single_arrow_2d(
 ) -> None:
     """Render a single 2D force arrow using QPainter."""
     from PyQt6.QtCore import QPointF
-    from PyQt6.QtGui import QBrush, QPen, QPolygonF
+    from PyQt6.QtGui import QPen
 
     p_tail: QPointF = _project_point(project, arrow.tail_m)
     p_base: QPointF = _project_point(project, arrow.head_base_m)
@@ -67,26 +99,27 @@ def _draw_single_arrow_2d(
     perp_x, perp_y = -uy, ux
 
     head_w = max(3.0, px_width * 2.2)
-    w1 = QPointF(p_base.x() + head_w * perp_x, p_base.y() + head_w * perp_y)
-    w2 = QPointF(p_base.x() - head_w * perp_x, p_base.y() - head_w * perp_y)
-    tri = QPolygonF([p_tip, w1, w2])
     fg_col = _to_qcolor(arrow.rgba)
 
     if halo:
         h_pen = QPen(halo_color, px_width * 1.6)
         painter.setPen(h_pen)
         painter.drawLine(p_tail, p_base)
-        painter.setBrush(QBrush(halo_color))
-        h_w = head_w * 1.4
-        hw1 = QPointF(p_base.x() + h_w * perp_x, p_base.y() + h_w * perp_y)
-        hw2 = QPointF(p_base.x() - h_w * perp_x, p_base.y() - h_w * perp_y)
-        painter.drawPolygon(QPolygonF([p_tip, hw1, hw2]))
 
     fg_pen = QPen(fg_col, px_width)
     painter.setPen(fg_pen)
     painter.drawLine(p_tail, p_base)
-    painter.setBrush(QBrush(fg_col))
-    painter.drawPolygon(tri)
+
+    _draw_arrowhead_2d(
+        painter,
+        p_base,
+        p_tip,
+        (perp_x, perp_y),
+        head_w,
+        fg_col,
+        halo,
+        halo_color,
+    )
 
 
 def _draw_single_torque_arc_2d(
@@ -98,8 +131,7 @@ def _draw_single_torque_arc_2d(
     halo_color: Any,
 ) -> None:
     """Render a single 2D torque arc using QPainter."""
-    from PyQt6.QtCore import QPointF
-    from PyQt6.QtGui import QBrush, QPen, QPolygonF
+    from PyQt6.QtGui import QPen
 
     pts = [_project_point(project, pt) for pt in arc.polyline_m]
     fg_col = _to_qcolor(arc.rgba)
@@ -124,21 +156,16 @@ def _draw_single_torque_arc_2d(
     perp_x, perp_y = -uy, ux
 
     head_w = max(3.0, px_width * 2.2)
-    w1 = QPointF(p_base.x() + head_w * perp_x, p_base.y() + head_w * perp_y)
-    w2 = QPointF(p_base.x() - head_w * perp_x, p_base.y() - head_w * perp_y)
-    tri = QPolygonF([p_tip, w1, w2])
-
-    if halo:
-        painter.setPen(QPen(halo_color, 1))
-        painter.setBrush(QBrush(halo_color))
-        h_w = head_w * 1.4
-        hw1 = QPointF(p_base.x() + h_w * perp_x, p_base.y() + h_w * perp_y)
-        hw2 = QPointF(p_base.x() - h_w * perp_x, p_base.y() - h_w * perp_y)
-        painter.drawPolygon(QPolygonF([p_tip, hw1, hw2]))
-
-    painter.setPen(QPen(fg_col, 1))
-    painter.setBrush(QBrush(fg_col))
-    painter.drawPolygon(tri)
+    _draw_arrowhead_2d(
+        painter,
+        p_base,
+        p_tip,
+        (perp_x, perp_y),
+        head_w,
+        fg_col,
+        halo,
+        halo_color,
+    )
 
 
 def draw_glyphs_2d(

@@ -324,75 +324,6 @@ class GolferPendulumWidget(BasePendulumWidget):
     # Force vectors
     # ------------------------------------------------------------------
 
-    def _render_joint_forces_overlay(
-        self,
-        painter: QPainter,
-        forces: dict[str, Any],
-        kind: Any,
-        color_name: str,
-        label_prefix: str,
-    ) -> None:
-        pos = self._result.positions_at(self._current_idx)
-        magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
-        max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._force_scale / max_mag
-
-        joint_pos_map = {
-            "hub": pos.get("hub"),
-            "re": pos.get("re"),
-            "rh": pos.get("rh"),
-            "le": pos.get("le"),
-            "lh": pos.get("lh"),
-            "club_tip": pos.get("club_tip"),
-        }
-
-        from src.shared.python.force_overlay.contracts import (
-            ForceTorqueFrame,
-            OverlayWrench,
-        )
-        from src.shared.python.force_overlay.glyphs import (
-            ForceGlyphStyle,
-            build_glyphs,
-        )
-        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
-            draw_glyphs_2d,
-        )
-
-        wrenches = []
-        for key, force in forces.items():
-            if self._visible_segments is not None and key not in self._visible_segments:
-                continue
-            jp = joint_pos_map.get(key)
-            if jp is None:
-                continue
-            fx, fy = force
-            wrenches.append(
-                OverlayWrench(
-                    kind=kind,
-                    label=f"{label_prefix}:{key}",
-                    body=key,
-                    point_m=(float(jp[0]), float(jp[1]), 0.0),
-                    force_n=(float(fx * scale), float(fy * scale), 0.0),
-                    torque_nm=None,
-                    source="golfer_pendulum",
-                )
-            )
-        if not wrenches:
-            return
-        frame = ForceTorqueFrame(
-            time_s=float(self._result.t[self._current_idx]),
-            engine="golfer_pendulum",
-            wrenches=tuple(wrenches),
-        )
-        style = ForceGlyphStyle(
-            force_scale_m_per_n=1.0,
-            min_length_m=1e-4,
-            max_length_m=1e5,
-            palette={kind: color_name},
-        )
-        glyphs = build_glyphs(frame, style=style)
-        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
-
     def _draw_force_vectors(self, painter: QPainter) -> None:
         assert painter is not None, "painter must be provided"
         if self._result is None:
@@ -404,10 +335,17 @@ class GolferPendulumWidget(BasePendulumWidget):
             return
         if not forces:
             return
+        pos = self._result.positions_at(self._current_idx)
         from src.shared.python.force_overlay.contracts import WrenchKind
 
-        self._render_joint_forces_overlay(
-            painter, forces, WrenchKind.JOINT_REACTION, self.COLOR_FORCE.name(), "joint"
+        self._render_force_overlay_2d(
+            painter,
+            forces,
+            pos,
+            kind=WrenchKind.JOINT_REACTION,
+            label_prefix="joint",
+            color_name=self.COLOR_FORCE.name(),
+            engine_name="golfer_pendulum",
         )
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter) -> None:
@@ -418,14 +356,17 @@ class GolferPendulumWidget(BasePendulumWidget):
         forces = self._zero_torque_forces[self._current_idx]
         if not forces:
             return
+        pos = self._result.positions_at(self._current_idx)
         from src.shared.python.force_overlay.contracts import WrenchKind
 
-        self._render_joint_forces_overlay(
+        self._render_force_overlay_2d(
             painter,
             forces,
-            WrenchKind.JOINT_ACTUATOR,
-            self.COLOR_ZERO_TORQUE.name(),
-            "ztcf",
+            pos,
+            kind=WrenchKind.JOINT_ACTUATOR,
+            label_prefix="ztcf",
+            color_name=self.COLOR_ZERO_TORQUE.name(),
+            engine_name="golfer_pendulum",
         )
 
     # ------------------------------------------------------------------
