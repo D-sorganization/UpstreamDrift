@@ -608,6 +608,34 @@ async def _send_simulation_frame(
         loads["time_s"] = frame_data["time"]
         frame_data["segment_loads"] = loads
 
+    if config.get("force_overlay"):
+        from src.api.services.force_overlay_service import (
+            current_force_frame,
+            force_overlay_payload,
+            style_from_request_params,
+        )
+
+        try:
+            frame_obj = current_force_frame(engine)
+            if frame_obj is not None:
+                style_cfg = config.get("force_overlay_style")
+                if isinstance(style_cfg, dict):
+                    style = style_from_request_params(
+                        force_types=style_cfg.get("force_types"),
+                        scale_factor=float(style_cfg.get("scale_factor", 0.01)),
+                        show_labels=bool(style_cfg.get("show_labels", False)),
+                    )
+                else:
+                    style = style_from_request_params()
+                fo_payload = force_overlay_payload(frame_obj, style)
+                if fo_payload.get("glyphs") is not None:
+                    fo_payload["glyphs"]["time_s"] = frame_data["time"]
+                if fo_payload.get("frame") is not None:
+                    fo_payload["frame"]["time_s"] = frame_data["time"]
+                frame_data["force_overlay"] = fo_payload
+        except Exception:
+            logger.exception("Force overlay provider unavailable for current frame")
+
     await websocket.send_json(frame_data)
 
 

@@ -23,6 +23,11 @@ export interface SetSpeedResult {
 
 export interface SimulationFrame {
   segment_loads?: SegmentForceFrame;
+  force_overlay?: {
+    glyphs?: Record<string, unknown> | null;
+    frame?: Record<string, unknown> | null;
+    style?: Record<string, unknown> | null;
+  };
   frame: number;
   time: number;
   state: Record<string, number[]>;
@@ -37,6 +42,12 @@ export interface SimulationConfig {
   duration?: number;
   timestep?: number;
   live_analysis?: boolean;
+  force_overlay?: boolean;
+  force_overlay_style?: {
+    force_types?: string[];
+    scale_factor?: number;
+    show_labels?: boolean;
+  };
   initial_state?: Record<string, number[]>;
 }
 
