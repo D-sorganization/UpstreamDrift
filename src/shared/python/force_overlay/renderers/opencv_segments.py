@@ -408,7 +408,7 @@ def _resolve_shape_library(shape_library: ShapeLibrary | None) -> ShapeLibrary |
         from src.shared.python.body_part_viz.asset_library import ShapeLibrary
 
         return ShapeLibrary.default()
-    except Exception as exc:  # noqa: BLE001
+    except (ImportError, FileNotFoundError, RuntimeError, ValueError, OSError) as exc:
         logger.debug("ShapeLibrary default could not be loaded: %s", exc)
         return None
 
