@@ -8,17 +8,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 import logging
-import math
 from typing import Any
 
 import numpy as np
 
-from src.api.models.responses import ForceVector3D
 from src.shared.python.force_overlay import (
     ForceGlyphStyle,
     ForceTorqueFrame,
     ForceTorqueProvider,
-    GlyphSet,
     WrenchKind,
     build_glyphs,
 )
@@ -28,7 +25,6 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "current_force_frame",
     "force_overlay_payload",
-    "glyphs_to_legacy_vectors",
     "style_from_request_params",
 ]
 
@@ -177,88 +173,3 @@ def force_overlay_payload(
         "frame": frame_to_use.to_dict(),
         "style": style_obj.to_dict(),
     }
-
-
-def glyphs_to_legacy_vectors(
-    glyphs_data: GlyphSet | dict[str, Any],
-    frame_data: ForceTorqueFrame | dict[str, Any] | None = None,
-    *,
-    show_labels: bool = False,
-) -> list[ForceVector3D]:
-    """Derive backward-compatible ForceVector3D items from generated glyphs.
-
-    Args:
-        glyphs_data: GlyphSet instance or serialized glyph-set-v1 dictionary.
-        frame_data: Optional corresponding ForceTorqueFrame to resolve body names.
-        show_labels: Whether to format string labels.
-
-    Returns:
-        List of ForceVector3D models.
-    """
-    if isinstance(glyphs_data, GlyphSet):
-        glyphs_dict = glyphs_data.to_dict()
-    else:
-        glyphs_dict = glyphs_data
-
-    # Map wrench labels to body names
-    label_to_body: dict[str, str] = {}
-    if frame_data is not None:
-        if isinstance(frame_data, ForceTorqueFrame):
-            for w in frame_data.wrenches:
-                label_to_body[w.label] = w.body
-        elif isinstance(frame_data, dict):
-            for w_dict in frame_data.get("wrenches", []):
-                label_to_body[w_dict.get("label", "")] = w_dict.get("body", "unknown")
-
-    vectors: list[ForceVector3D] = []
-
-    # 1. Arrows (Forces)
-    for arrow in glyphs_dict.get("arrows", []):
-        tail = arrow["tail_m"]
-        tip = arrow["tip_m"]
-        dx = tip[0] - tail[0]
-        dy = tip[1] - tail[1]
-        dz = tip[2] - tail[2]
-        length = math.sqrt(dx * dx + dy * dy + dz * dz)
-        if length > 1e-12:
-            direction = [dx / length, dy / length, dz / length]
-        else:
-            direction = [0.0, 0.0, 1.0]
-
-        mag = float(arrow["magnitude"])
-        label_text = f"{mag:.1f} {arrow.get('units', 'N')}" if show_labels else None
-        body = label_to_body.get(arrow["label"], "unknown")
-
-        vectors.append(
-            ForceVector3D(
-                body_name=body,
-                force_type=str(arrow["kind"]),
-                origin=list(tail),
-                direction=direction,
-                magnitude=mag,
-                color=list(arrow["rgba"]),
-                label=label_text,
-            )
-        )
-
-    # 2. Torque arcs (Torques)
-    for arc in glyphs_dict.get("torque_arcs", []):
-        center = arc["center_m"]
-        axis = arc["axis_unit"]
-        mag = float(arc["magnitude"])
-        label_text = f"{mag:.1f} {arc.get('units', 'N*m')}" if show_labels else None
-        body = label_to_body.get(arc["label"], "unknown")
-
-        vectors.append(
-            ForceVector3D(
-                body_name=body,
-                force_type=str(arc["kind"]),
-                origin=list(center),
-                direction=list(axis),
-                magnitude=mag,
-                color=list(arc["rgba"]),
-                label=label_text,
-            )
-        )
-
-    return vectors

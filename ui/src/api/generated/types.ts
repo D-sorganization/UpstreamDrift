@@ -1420,34 +1420,12 @@ export interface ForceOverlayResponse {
   frame?: Record<string, unknown> | null;
   /** Explanation if force overlays are unavailable, or None if available */
   unavailable_reason?: string | null;
-  /** Deprecated: use glyphs instead. Backward-compatible vector list. */
-  vectors?: ForceVector3D[];
   /** Sum of all force magnitudes */
   total_force_magnitude: number;
   /** Sum of all torque magnitudes */
   total_torque_magnitude: number;
   /** Current overlay configuration */
   overlay_config?: Record<string, unknown>;
-}
-
-/**
- * A single force/torque vector for 3D overlay rendering. .. deprecated:: Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs`` instead. This model will be removed in a future release.
- */
-export interface ForceVector3D {
-  /** Body this force acts on */
-  body_name: string;
-  /** Type: applied, gravity, contact, bias, or WrenchKind */
-  force_type: string;
-  /** Application point [x, y, z] */
-  origin: number[];
-  /** Force direction [dx, dy, dz] */
-  direction: number[];
-  /** Force magnitude (N or N*m) */
-  magnitude: number;
-  /** RGBA color for rendering */
-  color?: number[];
-  /** Optional display label */
-  label?: string | null;
 }
 
 /**

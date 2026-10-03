@@ -16,6 +16,31 @@
 
 ---
 
+# Current Handoff — Remove Deprecated ForceVector3D and Force Overlay `vectors` (#11362)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree `/home/user/ud-wt/a11362`
+- Branch: `feat/issue-11362-remove-force-vector3d`; commit `SELF`; PR: see the PR for this branch (`Closes #11362`, `Refs #11285`)
+- Governing issue: #11362 (epic #11285); follows #11363 (glyph streaming) and #11377 (React GlyphSet migration)
+- Objective: Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and the `glyphs_to_legacy_vectors` translation helper now that the UI renders the serialized GlyphSet.
+- Premise check: on `origin/main` no API or UI consumer read `vectors` (only unused `onVectorsChange` / `forceOverlays` plumbing and tests); the OpenAPI-derived `ui/src/api/generated/types.ts` was the only contract snapshot.
+- Completed:
+  - `src/api/models/responses.py`: deleted `ForceVector3D` and `ForceOverlayResponse.vectors`.
+  - `src/api/services/force_overlay_service.py`: deleted `glyphs_to_legacy_vectors` and its now-unused imports.
+  - `src/api/routes/force_overlays.py`: response no longer builds or returns `vectors`.
+  - `ui/src/api/generated/types.ts`: regenerated with `scripts/generate_ui_api_types.py` (only the two removals).
+  - `ui/src/components/visualization/{ForceOverlay,ForceOverlayPanel,Scene3D}.tsx`: removed `ForceVector3D` re-export, `vectors` prop, `onVectorsChange`, `forceOverlays` prop and the local `ForceOverlay` interface that only they used.
+  - Tests updated first (RED then GREEN): assert model and field are absent from the model, schema and route JSON; `scripts/config/suite_marker_baseline.json` entries renamed to match.
+- Breaking change: `/api/simulation/forces` responses no longer contain `vectors`; clients must read `glyphs`.
+- Validation:
+  - RED: 7 updated tests failed before the removal; GREEN after.
+  - `pytest tests/api/test_phase4_api.py tests/api/wave5_api/test_models_responses.py tests/unit/api tests/api/test_generated_ui_api_types.py tests/config/feature_parity tests/unit/ci/test_suite_marker_ratchet.py`: the same 30 failures with and without this change (sandbox environment: missing UI build/alembic/launcher); no new failures.
+  - `ruff check` / `ruff format --check` on changed Python: OK; `check_file_size_budget.py`, `check_error_handling_ratchet.py`, `check_suite_marker_ratchet.py`: OK.
+  - `cd ui && npx vitest run` (Scene3D, ForceOverlayPanel, ForceOverlay tests): 46 passed; `npx tsc -b --noEmit`: clean.
+- Next steps: review and merge; the owner closes epic #11285 once its remaining children land.
+- No material development-log change — DL-#11285 Paths are untouched.
+
+---
+
 # Current Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
 
 - Repository: `D-sorganization/UpstreamDrift`
