@@ -1,4 +1,4 @@
-function pose_out = gs3dx_ik_initial_pose(initial_pose)
+function pose_out = gs3dx_ik_initial_pose(initial_pose, opts)
 %GS3DX_IK_INITIAL_POSE  Pure contract validator and normalizer for IK initial pose (#10979).
 %
 %   POSE_OUT = GS3DX_IK_INITIAL_POSE(INITIAL_POSE) validates and normalizes an
@@ -28,10 +28,15 @@ function pose_out = gs3dx_ik_initial_pose(initial_pose)
 %       units, SO(3) spherical unit axes, and gimbal singularities.
 %     - Emits uniform error 'gs3dx:ik' for all contract violations; does not catch
 %       unrelated environment errors (e.g., missing helper functions).
-%     - Keyed seed is restricted to GS3DX_Human kinematic layout.
+%     - Default retains the GS3DX_Human 48-coordinate initialization contract.
+%       Optional native_schema (joint_keys, units) validates exact native keys,
+%       units and spherical unit axes for another registered variant. The IK
+%       caller supplies this schema from KinematicsSolver and verifies closure.
+%       Native mode does not map workspace initial targets or extract Euler angles.
 
     arguments
         initial_pose
+        opts.native_schema = struct([])
     end
 
     % 1. Empty default handling: allow numeric [] or struct([]) only
@@ -63,45 +68,77 @@ function pose_out = gs3dx_ik_initial_pose(initial_pose)
         error('gs3dx:ik', 'initial_pose status must be finite real scalar 1.');
     end
 
+    native_mode=~isempty(opts.native_schema);
+    count=48;
+    if native_mode
+        schema=opts.native_schema;
+        assert(isstruct(schema) && isscalar(schema) && isfield(schema,'joint_keys') && isfield(schema,'units'), ...
+            'gs3dx:ik','Native schema requires joint_keys and units');
+        assert((isstring(schema.joint_keys)||iscellstr(schema.joint_keys)) && isvector(schema.joint_keys) && ...
+            (isstring(schema.units)||iscellstr(schema.units)) && isvector(schema.units), ...
+            'gs3dx:ik','Native schema keys and units must be text vectors');
+        expected_keys=string(schema.joint_keys(:));expected_units=string(schema.units(:));
+        count=numel(expected_keys);
+        assert(count>0 && numel(expected_units)==count && numel(unique(expected_keys))==count && ...
+            ~any(ismissing(expected_keys)|strlength(strtrim(expected_keys))==0) && ...
+            ~any(ismissing(expected_units)|strlength(strtrim(expected_units))==0), ...
+            'gs3dx:ik','Invalid native schema keys or units');
+    end
+
     % 5. Joint values contract: single native pose real finite vector 48 (no multi-frame matrix)
     j = initial_pose.joint;
-    if ~isnumeric(j) || ~isreal(j) || ~isvector(j) || numel(j) ~= 48 || any(~isfinite(j(:)))
-        error('gs3dx:ik', 'initial_pose joint must be a real finite 48-element numeric vector.');
+    if ~isnumeric(j) || ~isreal(j) || ~isvector(j) || numel(j) ~= count || any(~isfinite(j(:)))
+        error('gs3dx:ik', 'initial_pose joint must be a real finite %d-element numeric vector.',count);
     end
     joint_vec = double(j(:));
 
     % 6. Joint keys contract: string or cellstr vector, 48 nonempty nonmissing unique text keys
     jk = initial_pose.joint_keys;
-    if (~isstring(jk) && ~iscellstr(jk)) || ~isvector(jk) || numel(jk) ~= 48
-        error('gs3dx:ik', 'initial_pose joint_keys must be a 48-element string or cellstr vector.');
+    if (~isstring(jk) && ~iscellstr(jk)) || ~isvector(jk) || numel(jk) ~= count
+        error('gs3dx:ik', 'initial_pose joint_keys must be a %d-element string or cellstr vector.',count);
     end
     jk_str = string(jk(:));
     if any(ismissing(jk_str)) || any(strlength(strtrim(jk_str)) == 0)
         error('gs3dx:ik', 'initial_pose joint_keys must contain nonempty nonmissing text values.');
     end
-    if numel(unique(jk_str)) ~= 48
+    if numel(unique(jk_str)) ~= count
         error('gs3dx:ik', 'initial_pose joint_keys contains duplicate entries.');
     end
 
     % 7. Units contract: string or cellstr vector, 48 nonempty nonmissing text units
     u = initial_pose.units;
-    if (~isstring(u) && ~iscellstr(u)) || ~isvector(u) || numel(u) ~= 48
-        error('gs3dx:ik', 'initial_pose units must be a 48-element string or cellstr vector.');
+    if (~isstring(u) && ~iscellstr(u)) || ~isvector(u) || numel(u) ~= count
+        error('gs3dx:ik', 'initial_pose units must be a %d-element string or cellstr vector.',count);
     end
     u_str = string(u(:));
     if any(ismissing(u_str)) || any(strlength(strtrim(u_str)) == 0)
         error('gs3dx:ik', 'initial_pose units must contain nonempty nonmissing text values.');
     end
 
-    % 8. Canonical schema, unit, spherical axis, and gimbal validation via public helper
-    try
-        gs3dx_initial_target_values(jk_str, u_str, joint_vec);
-    catch me
-        if startsWith(me.identifier, 'gs3dx:')
-            error('gs3dx:ik', '%s', me.message);
-        else
-            rethrow(me);
+    if native_mode
+        [found,at]=ismember(expected_keys,jk_str);
+        assert(all(found) && all(ismember(jk_str,expected_keys)), ...
+            'gs3dx:ik','initial_pose keys must exactly match the native model');
+        assert(isequal(u_str(at),expected_units),'gs3dx:ik','initial_pose units must match the native model');
+        for qi=find(endsWith(jk_str,'|S.q')).'
+            axis_keys=extractBefore(jk_str(qi),'|')+["|S.ax_x";"|S.ax_y";"|S.ax_z"];
+            [found_axis,axis_at]=ismember(axis_keys,jk_str);
+            assert(all(found_axis),'gs3dx:ik','Native spherical seed lacks axis coordinates');
+            assert(abs(joint_vec(qi))<=1e-12 || abs(norm(joint_vec(axis_at))-1)<=1e-4, ...
+                'gs3dx:ik','Nonzero native spherical seed requires a unit axis');
         end
+    else
+        % 8. Canonical schema, unit, spherical axis, and gimbal validation via public helper
+        try
+            gs3dx_initial_target_values(jk_str, u_str, joint_vec);
+        catch me
+            if startsWith(me.identifier, 'gs3dx:')
+                error('gs3dx:ik', '%s', me.message);
+            else
+                rethrow(me);
+            end
+        end
+
     end
 
     % 9. Normalized output struct

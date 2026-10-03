@@ -25,3 +25,16 @@ function testEmptySceneRejected(t)
     solid = struct('vertices_world', {{[]}});
     verifyError(t, @() gs3dx_scene_bounds(solid), 'gs3dx:scene_bounds');
 end
+
+function testMeasuredMarkersInsideFrozenBounds(t)
+    solid=struct('vertices_world',{{[0 1;0 1;0 1]}});
+    markers=[5 NaN -2;2 1e9 -4;8 1e9 0];
+    bounds=gs3dx_scene_bounds(solid,markers);
+    verifyTrue(t,all(markers(:,[1 3])>=bounds(:,1) & markers(:,[1 3])<=bounds(:,2),'all'));
+    verifyLessThan(t,max(bounds,[],'all'),10);
+    verifyEqual(t,gs3dx_scene_bounds(solid,NaN(3,4)),gs3dx_scene_bounds(solid));
+end
+function testMalformedMarkerShapeRejected(t)
+    solid=struct('vertices_world',{{zeros(3,1)}});
+    verifyError(t,@()gs3dx_scene_bounds(solid,zeros(4,2)),'gs3dx:scene_bounds');
+end

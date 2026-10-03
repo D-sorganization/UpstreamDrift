@@ -19,10 +19,14 @@ function report = gs3dx_match_export(capture_id, opts)
         opts.stills (1,:) double = []
         opts.stride (1,1) double = 0
         opts.overlay_markers (1,1) logical = true
+        opts.display_name (1,1) string = ""
+        opts.resolution (1,2) double {mustBeInteger,mustBePositive,mustBeFinite} = [1920 1080]
+        opts.video_quality (1,1) double {mustBeInteger,mustBeNonnegative,mustBeFinite} = 100
         opts.frames (1,:) double = []
         opts.pose_source = []
         opts.registry_repo (1,1) string = ""
         opts.checkpoint_dir (1,1) string = string(fullfile(tempdir, "gs3dx_export_cache"))
+        opts.scapula_protraction_deg (1,1) double = 7.5
         opts.observed_mask = []
         opts.observation_contract struct = struct([])
     end
@@ -84,7 +88,8 @@ function report = gs3dx_match_export(capture_id, opts)
         'solve_hashes', deps_hashes.solve, ...
         'geometry', personal_lengths.vars, ...
         'frames', frames_to_render, ...
-        'runtime', runtime);
+        'runtime', runtime, ...
+        'scapula_protraction_deg', opts.scapula_protraction_deg);
 
     % Bind observation metadata into cache identity for masked requests via wrapper seam helper
     identity = local_bind_cache_identity(identity, obs_identity);
@@ -98,17 +103,27 @@ function report = gs3dx_match_export(capture_id, opts)
     [poses, t_vec] = local_obtain_poses(mdl_name, jc, cap.rate_hz, ...
         frames_to_render, opts.pose_source, personal_lengths, checkpoint_file, identity, deps.solve);
 
+    display_name=opts.display_name;
+    if strlength(display_name)==0
+        display_name="Model Swing";
+        if cap_alias=="capture-A",display_name="Model Swing 1";end
+        if cap_alias=="capture-O",display_name="Model Swing 2";end
+    end
+    public_alias=regexprep(display_name,'[^A-Za-z0-9_-]','_');
+    export_alias=public_alias+"_clean";
+    if opts.overlay_markers,export_alias=public_alias+"_markers";end
     % 8. Map stills from capture frames to pose column indices
     [stills_cols, still_names_map] = local_resolve_stills(opts.stills, ...
-        poses.frames, cap, jc, opts.views, cap_alias, opts.export_stills);
+        poses.frames, cap, jc, opts.views, export_alias, opts.export_stills);
 
     % 9. Format scene title for overlay: honest IK qualification labeling
     coverage_str = sprintf('Frames %d-%d (%.2f-%.2fs, %.0fHz, stride %d)', ...
         poses.frames(1), poses.frames(end), t_vec(1), t_vec(end), cap.rate_hz, stride);
-    scene_title = sprintf('%s [%s] | IK / DYNAMICS UNQUALIFIED | %s', cap_alias, mdl_name, coverage_str);
+    scene_title = char(display_name);
 
     % 10. Prepare marker overlays (S'*(p-origin), waist origin, subset-aligned)
-    markers_overlay = local_build_overlay_markers(cap, jc, poses.frames, opts.overlay_markers);
+    marker_reference=gs3dx_capture_marker_overlay(cap,poses.frames);
+    markers_overlay=[];if opts.overlay_markers,markers_overlay=marker_reference;end
 
     % Create the public output directory only after input and pose validation.
     if ~isfolder(opts.output_dir)
@@ -116,20 +131,26 @@ function report = gs3dx_match_export(capture_id, opts)
     end
     % 11. Execute rendering per view through gs3dx_render
     [rendered_videos, rendered_stills, setup_info] = local_render_views(mdl_name, poses, ...
-        opts.views, cap_alias, opts.output_dir, opts.export_video, opts.export_stills, ...
-        stills_cols, still_names_map, markers_overlay, t_vec, fps, scene_title, personal_lengths);
+        opts.views, export_alias, opts.output_dir, opts.export_video, opts.export_stills, ...
+        stills_cols, still_names_map, markers_overlay, marker_reference, t_vec, fps, scene_title, personal_lengths, opts.resolution, opts.video_quality);
 
     % 12. Build and save structured provenance JSON
     report = local_build_report(cap_alias, cap_sha256, mdl_name, poses, cap, ...
         stride, fps, t_vec, personal_lengths, rendered_videos, rendered_stills, ...
         opts.output_dir, model_sha256, deps_hashes, setup_info, jc.foot_calibration, ...
-        deps, runtime, obs_identity);
+        deps, runtime, obs_identity, opts);
 end
 
 % -------------------------------------------------------------------------
 % Helper: Validate options fail-closed before writes (GS3DX_Human ONLY)
 % -------------------------------------------------------------------------
 function local_validate_options(capture_id, opts)
+    assert(isreal(opts.scapula_protraction_deg) && isfinite(opts.scapula_protraction_deg) && ...
+        (opts.scapula_protraction_deg==0 || (opts.scapula_protraction_deg>=5 && opts.scapula_protraction_deg<=10)), ...
+        'gs3dx:ik:scapula','Protraction must be 0 (legacy) or 5..10 degrees');
+    assert(all(mod(opts.resolution,2)==0) && all(opts.resolution>=64), ...
+        'gs3dx:match_export:InvalidResolution','Video dimensions must be even and at least 64 pixels');
+    assert(opts.video_quality<=100,'gs3dx:match_export:InvalidQuality','Video quality must be from 0 to 100');
     assert(strlength(capture_id) > 0, 'gs3dx:match_export:EmptyCaptureId', ...
         'Capture ID cannot be empty');
     assert(strlength(opts.output_dir) > 0, 'gs3dx:match_export:MissingOutputDir', ...
@@ -375,7 +396,8 @@ function [poses, t_vec] = local_obtain_poses(mdl, jc, rate_hz, frames_to_render,
         % Opt into shared IK foot refinement (foot_orientation_weight=0.1)
         poses = gs3dx_whole_body_ik(jc, frames=frames_to_render, calibration_frames=cal, ...
             model=mdl, backward=false, posture_weight=0.04, smooth_weight=0.025, ...
-            gap_weight=0.1, rom_weight=0.025, foot_orientation_weight=0.1, verbose=true);
+            gap_weight=0.1, rom_weight=0.025, foot_orientation_weight=0.1, ...
+            scapula_protraction_deg=identity.scapula_protraction_deg, verbose=true);
         clear cleanup;
 
         % Verify all recorded solve dependency hashes remain equal after fresh solve
@@ -458,26 +480,8 @@ end
 % Helper: Detect top of backswing frame from joint centres
 % -------------------------------------------------------------------------
 function f_top = local_detect_top_frame(jc, f_impact)
-    if isfield(jc, 'pelvis_R')
-        yaw = squeeze(atan2(jc.pelvis_R(2, 1, :), jc.pelvis_R(1, 1, :)));
-        search_range = 1:min(f_impact, numel(yaw));
-        [~, rel_top] = min(yaw(search_range));
-        f_top = search_range(rel_top);
-    else
-        f_top = max(1, round(0.7 * f_impact));
-    end
-end
-
-% -------------------------------------------------------------------------
-% Helper: Build marker overlay (transformed to waist origin and aligned)
-% -------------------------------------------------------------------------
-function pts_subset = local_build_overlay_markers(cap, jc, pose_frames, overlay_markers)
-    if ~overlay_markers
-        pts_subset = [];
-        return;
-    end
-
-    pts_subset = gs3dx_marker_overlay(jc, pose_frames);
+    jc.impact_frame=f_impact;
+    f_top=gs3dx_backswing_top_frame(jc);
 end
 
 % -------------------------------------------------------------------------
@@ -485,7 +489,7 @@ end
 % -------------------------------------------------------------------------
 function [rendered_videos, rendered_stills, setup_info] = local_render_views(mdl, poses, ...
     views, cap_alias, output_dir, export_video, export_stills, stills_cols, ...
-    still_names_map, markers_overlay, t_vec, fps, scene_title, personal_lengths)
+    still_names_map, markers_overlay, marker_reference, t_vec, fps, scene_title, personal_lengths, resolution, video_quality)
 
     rendered_videos = containers.Map('KeyType', 'char', 'ValueType', 'char');
     rendered_stills = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -519,7 +523,8 @@ function [rendered_videos, rendered_stills, setup_info] = local_render_views(mdl
             fps=fps, ...
             stills=stills_cols, ...
             still_files=s_names, ...
-            markers=markers_overlay, ...
+            markers=markers_overlay, scene_markers=marker_reference, ...
+            resolution=resolution, video_quality=video_quality, ...
             time=t_vec, ...
             output_dir=out_dir_char, ...
             title=title_char, ...
@@ -560,7 +565,7 @@ end
 function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
     stride, fps, t_vec, personal_lengths, rendered_videos, rendered_stills, ...
     output_dir, model_sha256, deps_hashes, setup_info, foot_calibration, ...
-    deps, runtime, obs_identity)
+    deps, runtime, obs_identity, opts)
 
     provenance = struct();
     provenance.capture_alias = char(cap_alias);
@@ -617,7 +622,14 @@ function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
         'foot_orientation_weight', 0.1, ...
         'foot_orientation_unit', 'm per normalized chordal SO(3) error', ...
         'foot_orientation_disclaimer', 'Marker triad calibrated at frame 1 assuming flat soles; dynamic contact unqualified', ...
-        'rms_basis', '14 anatomical marker position residuals (orientation term excluded from residual RMS)');
+        'rms_basis', '14 anatomical marker position residuals (orientation term excluded from measured-position RMS)');
+    if isfield(poses.regularization,'scapula_protraction_deg')
+        provenance.regularization.scapula_protraction_deg=poses.regularization.scapula_protraction_deg;
+        provenance.regularization.scapula_backswing_end_frame=poses.regularization.scapula_backswing_end_frame;
+        provenance.regularization.scapula_release_end_frame=poses.regularization.scapula_release_end_frame;
+        provenance.regularization.scapula_policy=poses.regularization.scapula_policy;
+        provenance.regularization.scapula_disclaimer='Requested matching prior; phase uses a measured pelvis-yaw proxy; scapular anatomy is unmeasured';
+    end
 
     provenance.red_gates = { ...
         "DynamicsUnsimulated: Pure kinematic geometry fit (torques/forces unmodeled; dynamic qualification unestablished)", ...
@@ -646,6 +658,10 @@ function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
         'duration_s', t_vec(end) - t_vec(1));
 
     provenance.personal_geometry = personal_lengths.vars;
+    [~, marker_info]=gs3dx_capture_marker_overlay(cap,poses.frames);
+    provenance.marker_overlay=marker_info;
+    provenance.marker_overlay.shown=opts.overlay_markers;
+    provenance.video=struct('resolution_pixels',opts.resolution,'quality',opts.video_quality);
 
     if isfield(poses, 'rms')
         provenance.metrics = struct('mean_rms_mm', mean(poses.rms) * 1000, ...
@@ -671,7 +687,8 @@ function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
 
     provenance.timestamp = datestr(now, 'yyyy-mm-ddTHH:MM:SS');
 
-    prov_file = fullfile(output_dir, sprintf('provenance_%s_ik.json', cap_alias));
+    mode='clean';if opts.overlay_markers,mode='markers';end
+    prov_file = fullfile(output_dir, sprintf('provenance_%s_ik_%s.json', cap_alias, mode));
     fid = fopen(prov_file, 'w');
     assert(fid ~= -1, 'gs3dx:match_export', 'Could not open provenance file: %s', prov_file);
     cleanup_fid = onCleanup(@() fclose(fid));
@@ -708,12 +725,21 @@ function dep = local_dependency_inventory()
     dep.solve.resolve_capture = local_resolve_which('resolve_capture');
     dep.solve.ik = local_resolve_which('gs3dx_whole_body_ik');
     dep.solve.ik_joint_roles = local_resolve_which('gs3dx_ik_joint_roles');
+    dep.solve.ik_target_names = local_resolve_which('gs3dx_ik_target_names');
+    dep.solve.ik_gap_weights = local_resolve_which('gs3dx_ik_gap_weights');
     dep.solve.joint_keys = local_resolve_which('gs3dx_joint_keys');
     dep.solve.joint_rom = local_resolve_which('gs3dx_joint_rom');
     dep.solve.names = local_resolve_which('gs3dx_names');
     dep.solve.foot_orientation_residual = local_resolve_which('gs3dx_foot_orientation_residual');
     dep.solve.orientation_residual = local_resolve_which('gs3dx_orientation_residual');
-    dep.solve.head_input_data = local_resolve_which('gs3dx_ik_initial_pose', 'gs3dx_initial_target_values', 'gs3dx_head_input_data');
+    dep.solve.initial_pose = local_resolve_which('gs3dx_ik_initial_pose');
+    dep.solve.initial_target_values = local_resolve_which('gs3dx_initial_target_values');
+    dep.solve.head_input_data = local_resolve_which('gs3dx_head_input_data');
+    dep.solve.spine_bounds = local_resolve_which('gs3dx_spine_bounds');
+    dep.solve.target_scope = local_resolve_which('gs3dx_ik_target_scope');
+    dep.solve.scapula_bounds = local_resolve_which('gs3dx_scapula_bounds');
+    dep.solve.scapula_phase = local_resolve_which('gs3dx_scapula_phase');
+    dep.solve.backswing_top_frame = local_resolve_which('gs3dx_backswing_top_frame');
     dep.solve.head_orientation_residual = local_resolve_which('gs3dx_head_orientation_residual');
     dep.solve.foot_marker_frame = local_resolve_which('gs3dx_foot_marker_frame');
     dep.solve.fit_lengths = local_resolve_which('gs3dx_fit_lengths');
@@ -724,9 +750,10 @@ function dep = local_dependency_inventory()
 
     % 2. Render-only dependencies (recorded in provenance; do NOT invalidate IK checkpoint)
     dep.render = struct();
+    dep.render.export_pixels = local_resolve_which('gs3dx_export_pixels');
     dep.render.render = local_resolve_which('gs3dx_render');
     dep.render.scene_bounds = local_resolve_which('gs3dx_scene_bounds');
-    dep.render.marker_overlay = local_resolve_which('gs3dx_marker_overlay');
+    dep.render.marker_overlay = local_resolve_which('gs3dx_capture_marker_overlay');
     dep.render.sampling = local_resolve_which('gs3dx_video_sampling');
     dep.render.diagnostics = local_resolve_which('gs3dx_ik_diagnostics');
     dep.render.joint_keys = local_resolve_which('gs3dx_joint_keys');
