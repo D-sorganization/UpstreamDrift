@@ -39,6 +39,7 @@ from .channels import (
     magnitude_channel,
     slice_channel,
 )
+from .color_utils import hex_to_rgba, rgba_to_hex
 from .colormaps import (
     SEMANTIC_COLORMAP_ALIASES,
     ColormapId,
@@ -116,10 +117,12 @@ __all__ = [
     "StaticColor",
     "derivative_channel",
     "get_colormap",
+    "hex_to_rgba",
     "list_colormaps",
     "magnitude_channel",
     "register_custom_colormap",
     "resolve_colormap_alias",
+    "rgba_to_hex",
     "slice_channel",
     "unregister_custom_colormap",
 ]
