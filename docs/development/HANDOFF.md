@@ -1,3 +1,21 @@
+# Current Handoff — Kinematic-Sequence Thorax Proxy and Window Margin (#11182)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `fix/issue-11182-kinematic-sequence`
+- Worktree: `/home/user/ud-wt/a11182`
+- Commit: `SELF`
+- Pull request: opened from this branch (Closes #11182, Refs #11161)
+- Objective: make `swing_comparison.metrics.compute_kinematic_sequence` measure thorax yaw from trunk markers and use a rate-independent post-impact window.
+- Completed:
+  - `motion.py`: `CAPTURE_A_TRUNK_LEFT_LABELS`/`CAPTURE_A_TRUNK_RIGHT_LABELS` (`BackLeft`/`BackRight`).
+  - `metrics.py`: thorax speed prefers the trunk pair, falls back to the acromion shoulder line, else zeros; the proxy is recorded in the new defaulted field `KinematicSequenceMetrics.thorax_proxy` (`trunk_back_markers`, `shoulder_line`, `unavailable`; also in `to_dict`). The post-impact margin is `0.15 * downswing_s + 0.015 s`, converted to a window end via `searchsorted` (was `max(3, int(0.15*frames + 5))`).
+  - `tests/unit/swing_comparison/test_metrics.py`: `TestKinematicSequenceThoraxProxy` (trunk peak despite later scapular rotation, fallback recorded, 240 vs 360 Hz agreement, margin in seconds).
+- Compatibility: dataclass field added with a default; no existing field or signature changed. `compute_segment_rotations` (X-factor) still uses the shoulder line and is untouched.
+- Validation: see PR body. No private capture data was available, so the real capture-A/capture-O numbers in the issue were not re-measured.
+- Next steps: re-run the issue probe on capture-A and capture-O when `CAPTURE_DATA_DIR` is available; decide separately whether X-factor thorax yaw should also move to the trunk markers.
+
+---
+
 # Current Handoff — Capture-O Video Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 - Repository: `D-sorganization/UpstreamDrift`

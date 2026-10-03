@@ -7795,6 +7795,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |
 | 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
 | 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |

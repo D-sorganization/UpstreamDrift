@@ -74,6 +74,10 @@ CAPTURE_A_GRIP_LABELS: tuple[str, ...] = (
 
 CAPTURE_A_PELVIS_LEFT_LABELS: tuple[str, ...] = ("WaistLeft", "WaistLBack")
 CAPTURE_A_PELVIS_RIGHT_LABELS: tuple[str, ...] = ("WaistRight", "WaistRBack")
+# Trunk (thorax) markers: fixed to the rib cage, unlike the acromion markers
+# below whose line keeps rotating with the arms through follow-through.
+CAPTURE_A_TRUNK_LEFT_LABELS: tuple[str, ...] = ("BackLeft",)
+CAPTURE_A_TRUNK_RIGHT_LABELS: tuple[str, ...] = ("BackRight",)
 CAPTURE_A_SHOULDER_LEFT_LABELS: tuple[str, ...] = ("LShoulderBack", "LShoulderTop")
 CAPTURE_A_SHOULDER_RIGHT_LABELS: tuple[str, ...] = ("RShoulderBack", "RShoulderTop")
 

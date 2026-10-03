@@ -242,6 +242,110 @@ class TestKinematicSequenceMetrics:
         assert np.isclose(res.club.peak_time, 1.38, atol=0.02)
 
 
+def _yaw_pair(rad: np.ndarray, half: float, z: float) -> tuple[np.ndarray, np.ndarray]:
+    n = len(rad)
+    left = np.column_stack([half * np.cos(rad), half * np.sin(rad), np.full(n, z)])
+    right = np.column_stack([-half * np.cos(rad), -half * np.sin(rad), np.full(n, z)])
+    return left, right
+
+
+def _synthetic_swing(
+    rate_hz: float, *, scapular: bool = False
+) -> tuple[SwingMotion, SwingEvents]:
+    """Z-up synthetic swing with rate-independent physical timing.
+
+    Pelvis peaks at 1.10 s, trunk (BackLeft/BackRight) at 1.20 s, arm at
+    1.30 s, club at 1.38 s; impact at 1.45 s.  With ``scapular`` the acromion
+    (shoulder-line) markers carry an extra, larger rotation at 1.47 s, i.e.
+    after impact, the way the arms keep rotating through follow-through.
+    """
+    dt = 1.0 / rate_hz
+    t = np.arange(0.0, 2.0, dt)
+    n = len(t)
+
+    def angle(t_peak: float, w_peak: float) -> np.ndarray:
+        w = w_peak * np.exp(-((t - t_peak) ** 2) / (2 * 0.04**2))
+        return np.radians(np.cumsum(w) * dt)
+
+    rad_p, rad_t = angle(1.10, 350.0), angle(1.20, 600.0)
+    rad_a, rad_c = angle(1.30, 1000.0), angle(1.38, 2200.0)
+    wl, wr = _yaw_pair(rad_p, 0.15, 0.9)
+    bl, br = _yaw_pair(rad_t, 0.15, 1.3)
+    rad_s = angle(1.47, 900.0) if scapular else rad_t
+    sl, sr = _yaw_pair(rad_s, 0.20, 1.4)
+    wrist = sl + np.column_stack(
+        [0.55 * np.cos(rad_a), 0.55 * np.sin(rad_a), np.zeros(n)]
+    )
+    club = wrist + np.column_stack([np.cos(rad_c), np.sin(rad_c), np.zeros(n)])
+    markers = {
+        "WaistLeft": wl,
+        "WaistRight": wr,
+        "BackLeft": bl,
+        "BackRight": br,
+        "LShoulderBack": sl,
+        "RShoulderBack": sr,
+        "LWristTop": wrist,
+    }
+    motion = SwingMotion(t=t, markers=markers, club_head=club, grip=wrist.copy())
+    idx = lambda sec: int(round(sec * rate_hz))  # noqa: E731
+    events = SwingEvents(
+        address_idx=0,
+        address_time=0.0,
+        top_idx=idx(0.9),
+        top_time=0.9,
+        impact_idx=idx(1.45),
+        impact_time=1.45,
+        finish_idx=idx(1.9),
+        finish_time=1.9,
+    )
+    return motion, events
+
+
+@pytest.mark.unit
+class TestKinematicSequenceThoraxProxy:
+    """Issue #11182: trunk-marker thorax proxy and seconds-based window."""
+
+    def test_trunk_peak_reported_despite_later_scapular_rotation(self) -> None:
+        motion, events = _synthetic_swing(240.0, scapular=True)
+        res = compute_kinematic_sequence(motion, events)
+        assert res.thorax_proxy == "trunk_back_markers"
+        assert abs(res.thorax.peak_time - 1.20) <= 0.02
+        assert res.order == ("pelvis", "thorax", "lead_arm", "club")
+
+    def test_shoulder_line_fallback_is_recorded(self) -> None:
+        motion, events = _synthetic_swing(240.0)
+        for lbl in ("BackLeft", "BackRight"):
+            del motion.markers[lbl]
+        res = compute_kinematic_sequence(motion, events)
+        assert res.thorax_proxy == "shoulder_line"
+        assert res.to_dict()["thorax_proxy"] == "shoulder_line"
+        assert abs(res.thorax.peak_time - 1.20) <= 0.02
+
+    def test_sample_rate_does_not_change_order_or_peak_times(self) -> None:
+        res240 = compute_kinematic_sequence(*_synthetic_swing(240.0, scapular=True))
+        res360 = compute_kinematic_sequence(*_synthetic_swing(360.0, scapular=True))
+        assert res240.order == res360.order
+        for seg in ("pelvis", "thorax", "lead_arm", "club"):
+            a = getattr(res240, seg).peak_time
+            b = getattr(res360, seg).peak_time
+            assert abs(a - b) <= 1.0 / 240.0, seg
+
+    def test_post_impact_margin_is_in_seconds(self) -> None:
+        """A pulse 18 ms after impact is inside the window at both rates."""
+        for rate in (240.0, 360.0, 120.0):
+            motion, events = _synthetic_swing(rate)
+            t = motion.t
+            late = 1.45 + 0.012
+            n = len(t)
+            rad = np.radians(np.cumsum(5000 * np.exp(-((t - late) ** 2) / 2e-5)) / rate)
+            motion.markers["BackLeft"], motion.markers["BackRight"] = _yaw_pair(
+                rad, 0.15, 1.3
+            )
+            res = compute_kinematic_sequence(motion, events)
+            assert res.thorax.peak_time == pytest.approx(late, abs=1.5 / rate), rate
+            assert n > 0
+
+
 @pytest.mark.unit
 class TestLeadArmMetrics:
     """Test suite for lead elbow included angle and maximum flexion."""
