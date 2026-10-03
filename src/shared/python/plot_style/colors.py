@@ -70,7 +70,10 @@ def _get_matplotlib_colormap(cmap_id: ColormapId) -> Colormap:
         return cast(Colormap, colormaps[resolved.value])
     except (KeyError, ValueError):
         # Fallback: matplotlib older API
-        return cast(Colormap, cm.get_cmap(resolved.value))
+        get_cmap = getattr(cm, "get_cmap", None)
+        if get_cmap is not None:
+            return cast(Colormap, get_cmap(resolved.value))
+        raise
 
 
 @dataclass(frozen=True)
