@@ -6,8 +6,12 @@ import numpy as np
 import pytest
 
 pin = pytest.importorskip("pinocchio")
-if not all(hasattr(pin, n) for n in ("rnea", "buildModelFromXML", "SE3")):
-    pytest.skip("real pinocchio is unavailable (stub wheel)", allow_module_level=True)
+if type(pin).__module__ == "unittest.mock" or not all(
+    hasattr(pin, n) for n in ("rnea", "buildModelFromXML", "SE3", "Model")
+):  # tests/unit/conftest.py mocks pinocchio when it is not installed
+    pytest.skip(
+        "real pinocchio runtime required (found mock/stub)", allow_module_level=True
+    )
 
 from src.engines.physics_engines.pinocchio.python.pinocchio_force_torque import (  # noqa: E402
     PinocchioForceTorqueSource,
