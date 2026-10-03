@@ -5,7 +5,7 @@
  * allows user selection, and dispatches the import event to the OpenSim target.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 
 export interface OpenCapSessionSubject {
   mass_kg?: number | null;
@@ -56,21 +56,11 @@ export const OpenCapImportModal: React.FC<OpenCapImportModalProps> = ({
     return initialTrials;
   }, [metadata, initialTrials]);
 
-  const [selectedTrial, setSelectedTrial] = useState<string>('');
-  const [currentDir, setCurrentDir] = useState<string>(
-    sessionDir || metadata?.session_dir || ''
-  );
+  const [userSelectedTrial, setUserSelectedTrial] = useState<string | null>(null);
 
-  useEffect(() => {
-    setCurrentDir(sessionDir || metadata?.session_dir || '');
-  }, [sessionDir, metadata]);
-
-  useEffect(() => {
-    if (trials.length > 0 && !selectedTrial) {
-      const preferred = trials.find((t) => t.toLowerCase() !== 'neutral') || trials[0];
-      setSelectedTrial(preferred);
-    }
-  }, [trials, selectedTrial]);
+  const currentDir = sessionDir || metadata?.session_dir || '';
+  const defaultTrial = trials.find((t) => t.toLowerCase() !== 'neutral') || trials[0] || '';
+  const selectedTrial = userSelectedTrial ?? defaultTrial;
 
   if (!isOpen) {
     return null;
@@ -167,7 +157,7 @@ export const OpenCapImportModal: React.FC<OpenCapImportModalProps> = ({
                     type="button"
                     role="button"
                     aria-pressed={isSelected}
-                    onClick={() => setSelectedTrial(trial)}
+                    onClick={() => setUserSelectedTrial(trial)}
                     className={`w-full flex items-center justify-between rounded px-3 py-2 text-left text-xs transition-colors ${
                       isSelected
                         ? 'bg-blue-600/30 border border-blue-500 text-blue-100 font-medium'
