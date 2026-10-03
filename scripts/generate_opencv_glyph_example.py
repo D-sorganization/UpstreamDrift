@@ -28,17 +28,19 @@ from src.shared.python.force_overlay.renderers.opencv_glyphs import (
 )
 
 
-def generate_example_png() -> Path:
-    w, h = 1920, 1080
-    # Gradient background from dark slate (30, 35, 45) to dark navy (15, 20, 30)
+def _make_background(w: int, h: int) -> np.ndarray:
+    """Create a vertical gradient background."""
     y_coords = np.linspace(0.0, 1.0, h)[:, None, None]
     top_color = np.array([45, 35, 30], dtype=float)  # BGR
     bottom_color = np.array([25, 20, 15], dtype=float)
     background = (y_coords * bottom_color + (1.0 - y_coords) * top_color).astype(
         np.uint8
     )
-    background = np.broadcast_to(background, (h, w, 3)).copy()
+    return np.broadcast_to(background, (h, w, 3)).copy()
 
+
+def _make_projector(w: int, h: int) -> PinholeProjector:
+    """Construct a calibrated pinhole projector looking at scene origin."""
     k = intrinsics_from_fov(w, h, 55.0)
     pos = np.array([0.0, 1.0, 4.0])
     tgt = np.array([0.0, 0.2, 0.0])
@@ -50,8 +52,11 @@ def generate_example_png() -> Path:
         translation_world_from_camera_m=pos,
         image_size_px=(w, h),
     )
-    projector = PinholeProjector(cam)
+    return PinholeProjector(cam)
 
+
+def _make_sample_glyphs() -> GlyphSet:
+    """Build a realistic sample GlyphSet with arrows and a torque arc."""
     arrows = [
         ArrowGlyph(
             label="joint_reaction:hip",
@@ -135,18 +140,26 @@ def generate_example_png() -> Path:
         engine="pinocchio",
         source_labels=("rnea", "contacts"),
     )
-    glyphs = GlyphSet(
+    return GlyphSet(
         time_s=1.25, arrows=tuple(arrows), torque_arcs=(arc,), legend=legend
     )
 
-    out_frame, receipt = draw_glyphs_on_frame(
+
+def generate_example_png() -> Path:
+    """Generate rendered example frame and save to docs/development/assets."""
+    w, h = 1920, 1080
+    background = _make_background(w, h)
+    projector = _make_projector(w, h)
+    glyphs = _make_sample_glyphs()
+
+    out_frame, _receipt = draw_glyphs_on_frame(
         background,
         glyphs,
         projector,
         qualification="synthetic calibrated verification",
     )
 
-    out_dir = Path("docs/assets")
+    out_dir = Path("docs/development/assets")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "fto_8_opencv_glyph_example.png"
     cv2.imwrite(str(out_path), out_frame)

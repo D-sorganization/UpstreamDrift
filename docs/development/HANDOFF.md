@@ -13,7 +13,7 @@
     - `draw_legend_box`: renders bottom-left legend box with reference values, units, kind swatches, engine/source, and optional caller qualification.
     - `draw_glyphs_on_frame`: projects `ArrowGlyph` and `TorqueArcGlyph` polylines and heads, clips against image boundary with `cv2.clipLine`, applies anti-aliased dark halo layer via `cv2.addWeighted`, draws heads with `cv2.fillConvexPoly`, preserves input frame when `inplace=False`.
   - Re-exports in `src/shared/python/force_overlay/renderers/__init__.py`.
-  - Synthetic scene verification PNG: `docs/assets/fto_8_opencv_glyph_example.png`.
+  - Synthetic scene verification PNG: `docs/development/assets/fto_8_opencv_glyph_example.png`.
   - Tests: `tests/unit/force_overlay/test_opencv_glyphs.py` (13 unit tests pass, 100% green).
 - Validation: Ruff check/format clean, strict mypy clean on new modules, file size budget passed.
 - Next steps: Land FTO-8 into main; unblocks video camera projection FTO-24 (#11309) and video overlay pipeline FTO-25 to FTO-29.

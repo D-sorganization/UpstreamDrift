@@ -186,42 +186,49 @@ def _clip_segment(
     return ok, (int(s[0]), int(s[1])), (int(e[0]), int(e[1]))
 
 
+@dataclass
+class _DrawContext:
+    rect: tuple[int, int, int, int]
+    head_px: int
+    halo_px: int
+    halo_img: np.ndarray
+    halo_bgr: tuple[int, int, int]
+    shafts: list[tuple[tuple[int, int], tuple[int, int], tuple[int, int, int]]]
+    heads: list[tuple[np.ndarray, tuple[int, int, int]]]
+    halo_w: int
+
+
 def _draw_item(
     segments: list[tuple[np.ndarray, np.ndarray]],
     head: tuple[np.ndarray, np.ndarray] | None,
     bgr: tuple[int, int, int],
-    rect: tuple[int, int, int, int],
-    head_px: int,
-    halo_px: int,
-    halo_img: np.ndarray,
-    halo_bgr: tuple[int, int, int],
-    shafts: list[tuple[tuple[int, int], tuple[int, int], tuple[int, int, int]]],
-    heads: list[tuple[np.ndarray, tuple[int, int, int]]],
-    halo_w: int,
+    ctx: _DrawContext,
 ) -> bool:
     any_drawn = False
     for p1, p2 in segments:
         ok, s, e = _clip_segment(
-            rect, tuple(np.rint(p1).astype(int)), tuple(np.rint(p2).astype(int))
+            ctx.rect, tuple(np.rint(p1).astype(int)), tuple(np.rint(p2).astype(int))
         )
         if ok:
-            cv2.line(halo_img, s, e, halo_bgr, halo_px, cv2.LINE_AA)
-            shafts.append((s, e, bgr))
+            cv2.line(ctx.halo_img, s, e, ctx.halo_bgr, ctx.halo_px, cv2.LINE_AA)
+            ctx.shafts.append((s, e, bgr))
             any_drawn = True
     if head is not None:
         tip_px, base_px = head
         v = tip_px - base_px
         vl = float(np.hypot(v[0], v[1]))
         u = v / vl if vl > 1e-4 else np.array([0.0, 1.0])
-        norm = np.array([-u[1], u[0]]) * (float(head_px) / 2.0)
+        norm = np.array([-u[1], u[0]]) * (float(ctx.head_px) / 2.0)
         poly = np.array(
             [np.rint(tip_px), np.rint(base_px + norm), np.rint(base_px - norm)],
             np.int32,
         )
-        if any(0 <= pt[0] < rect[2] and 0 <= pt[1] < rect[3] for pt in poly):
-            cv2.fillConvexPoly(halo_img, poly, halo_bgr, cv2.LINE_AA)
-            cv2.polylines(halo_img, [poly], True, halo_bgr, halo_w, cv2.LINE_AA)
-            heads.append((poly, bgr))
+        if any(0 <= pt[0] < ctx.rect[2] and 0 <= pt[1] < ctx.rect[3] for pt in poly):
+            cv2.fillConvexPoly(ctx.halo_img, poly, ctx.halo_bgr, cv2.LINE_AA)
+            cv2.polylines(
+                ctx.halo_img, [poly], True, ctx.halo_bgr, ctx.halo_w, cv2.LINE_AA
+            )
+            ctx.heads.append((poly, bgr))
             any_drawn = True
     return any_drawn
 
@@ -285,6 +292,59 @@ def draw_legend_box(
         ty += dy
 
 
+def _draw_arrows(
+    glyphs: GlyphSet,
+    projector: ImageProjector,
+    ctx: _DrawContext,
+) -> tuple[int, int, int]:
+    """Draw arrows from GlyphSet. Returns (drawn, skipped_behind, skipped_out)."""
+    drawn, skipped_behind, skipped_out = 0, 0, 0
+    for arrow in glyphs.arrows:
+        pts = np.array([arrow.tail_m, arrow.tip_m, arrow.head_base_m], float)
+        pix, val = projector.project(pts)
+        if not (val[0] and val[1]):
+            skipped_behind += 1
+            continue
+        base = pix[2] if val[2] else pix[1]
+        bgr = _rgba_to_bgr(arrow.rgba)
+        if _draw_item([(pix[0], base)], (pix[1], base), bgr, ctx):
+            drawn += 1
+        else:
+            skipped_out += 1
+    return drawn, skipped_behind, skipped_out
+
+
+def _draw_torque_arcs(
+    glyphs: GlyphSet,
+    projector: ImageProjector,
+    ctx: _DrawContext,
+) -> tuple[int, int, int]:
+    """Draw torque arcs from GlyphSet. Returns (drawn, skipped_behind, skipped_out)."""
+    drawn, skipped_behind, skipped_out = 0, 0, 0
+    for arc in glyphs.torque_arcs:
+        if not arc.polyline_m:
+            continue
+        pts = np.vstack(
+            [
+                np.array(arc.polyline_m, float),
+                np.array([arc.head_tip_m, arc.head_base_m], float),
+            ]
+        )
+        pix, val = projector.project(pts)
+        n = len(arc.polyline_m)
+        if not (val[0] and val[n - 1]):
+            skipped_behind += 1
+            continue
+        segs = [(pix[i], pix[i + 1]) for i in range(n - 1) if val[i] and val[i + 1]]
+        head = (pix[n], pix[n + 1]) if (val[n] and val[n + 1]) else None
+        bgr = _rgba_to_bgr(arc.rgba)
+        if _draw_item(segs, head, bgr, ctx):
+            drawn += 1
+        else:
+            skipped_out += 1
+    return drawn, skipped_behind, skipped_out
+
+
 def draw_glyphs_on_frame(
     frame_bgr: np.ndarray,
     glyphs: GlyphSet,
@@ -308,75 +368,31 @@ def draw_glyphs_on_frame(
 
     out = frame_bgr if inplace else frame_bgr.copy()
     h, w = out.shape[:2]
-    rect = (0, 0, w, h)
     s = style or VideoGlyphStyle()
     line_px = s.resolve_line_px(h)
     halo_px = s.resolve_halo_px(line_px)
     head_px = s.resolve_head_px(line_px)
     halo_w = halo_px - line_px + 1
     halo_overlay = out.copy()
-    drawn, skipped_behind, skipped_out = 0, 0, 0
     shafts: list[tuple[tuple[int, int], tuple[int, int], tuple[int, int, int]]] = []
     heads: list[tuple[np.ndarray, tuple[int, int, int]]] = []
 
-    for arrow in glyphs.arrows:
-        pts = np.array([arrow.tail_m, arrow.tip_m, arrow.head_base_m], float)
-        pix, val = projector.project(pts)
-        if not (val[0] and val[1]):
-            skipped_behind += 1
-            continue
-        base = pix[2] if val[2] else pix[1]
-        bgr = _rgba_to_bgr(arrow.rgba)
-        if _draw_item(
-            [(pix[0], base)],
-            (pix[1], base),
-            bgr,
-            rect,
-            head_px,
-            halo_px,
-            halo_overlay,
-            s.halo_color_bgr,
-            shafts,
-            heads,
-            halo_w,
-        ):
-            drawn += 1
-        else:
-            skipped_out += 1
+    ctx = _DrawContext(
+        rect=(0, 0, w, h),
+        head_px=head_px,
+        halo_px=halo_px,
+        halo_img=halo_overlay,
+        halo_bgr=s.halo_color_bgr,
+        shafts=shafts,
+        heads=heads,
+        halo_w=halo_w,
+    )
 
-    for arc in glyphs.torque_arcs:
-        if not arc.polyline_m:
-            continue
-        pts = np.vstack(
-            [
-                np.array(arc.polyline_m, float),
-                np.array([arc.head_tip_m, arc.head_base_m], float),
-            ]
-        )
-        pix, val = projector.project(pts)
-        n = len(arc.polyline_m)
-        if not (val[0] and val[n - 1]):
-            skipped_behind += 1
-            continue
-        segs = [(pix[i], pix[i + 1]) for i in range(n - 1) if val[i] and val[i + 1]]
-        head = (pix[n], pix[n + 1]) if (val[n] and val[n + 1]) else None
-        bgr = _rgba_to_bgr(arc.rgba)
-        if _draw_item(
-            segs,
-            head,
-            bgr,
-            rect,
-            head_px,
-            halo_px,
-            halo_overlay,
-            s.halo_color_bgr,
-            shafts,
-            heads,
-            halo_w,
-        ):
-            drawn += 1
-        else:
-            skipped_out += 1
+    d_arr, behind_arr, out_arr = _draw_arrows(glyphs, projector, ctx)
+    d_arc, behind_arc, out_arc = _draw_torque_arcs(glyphs, projector, ctx)
+    drawn = d_arr + d_arc
+    skipped_behind = behind_arr + behind_arc
+    skipped_out = out_arr + out_arc
 
     cv2.addWeighted(halo_overlay, s.halo_alpha, out, 1.0 - s.halo_alpha, 0, out)
     for start, end, bgr in shafts:
