@@ -21,12 +21,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **PR:** #11310
-- **Branch:** `feat/fto-25-video-compositors-11310`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/motion_capture/reference/**`, `src/motion_capture/reconstruct/model/**`, `src/tools/capture_rig/**`, `src/shared/python/force_overlay/**`, `tests/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-25 (#11310) implemented ForceLayer in ComparisonRenderer with cv2.addWeighted, sidecar VideoGlyphReceipt per-frame and force_series_hash in export_comparison_video, kinetics_to_force_series mapping inverse dynamics τ to ADR-0041 joint moments, render_frame / export_overlay torque arc drawing, and UI checkboxes (Forces/Torques/Legend) + scale sliders in ReferenceComparisonDialog and VariantOverlayBox.
+- **PR:** #11311
+- **Branch:** `feat/fto-26-model-footage-11311`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/renderers/opencv_segments.py`, `src/tools/capture_rig/**`, `tests/**`
+- **Last verified:** 2026-10-03 at SELF — FTO-26 (#11311) implemented engine-agnostic projected segment meshes on camera footage (`opencv_segments.py` with `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`, `segment_poses_from_axes`, `draw_segment_meshes_on_frame`). Painter's algorithm depth sorting, back-face culling, camera-space Lambert shading, and axial load coloring via `ForceColorScale`. Unified with `draw_segment_volumes` in `src/tools/capture_rig/reference_volumes.py` and wired into `MotionAppearanceControls`. 17 focused unit/tool tests pass; architecture/file budgets, error-handling ratchet, ruff, and mypy clean.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR; unblocks FTO-30 and consumers COV-10 #11278 and #11268.
+- **Next step:** Merge PR; unblocks FTO-27 and consumers COV-10 #11278 and #11268.
 
 ### DL-#11268 · Capture-O Video Companion
 

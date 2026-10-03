@@ -3,6 +3,42 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "render_frame",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to render_frame.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_overlay writes comparison clips with force and torque rendering.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/overlay_render.py",
+      "symbol": "export_overlay",
+      "rule": "parameters",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 added optional torque and force parameters to export_overlay.",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "src/tools/capture_rig/reference_export.py",
+      "symbol": "export_comparison_video",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 11310,
+      "reason": "Issue #11310: FTO-25 export_comparison_video sidecar tracking for glyph receipts.",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "scripts/companion_catalog.py",
       "symbol": "_catalog_payload",
       "rule": "function-lines",
