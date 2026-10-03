@@ -258,3 +258,56 @@ external acquisition evidence; they are not committed as public source files.
 Inspect every rendered page and issue a new immutable review receipt after any
 change. Earlier 74-page methods and nine-page source/shutter reports, the old
 Desktop index and prior ControlTower deliveries remain preserved.
+
+## Solver Budget, Fixed Row-Time and ROI Checkpoint
+
+This checkpoint supersedes earlier pending-diagnostic statements without
+rewriting their historical producer evidence. The balanced four-arm forearm comparison with a requested budget of 30 evaluations and twelve original shape pilots remain rejected research.
+The later comparison with a requested budget of 120 evaluations was partial: two Tiger results
+were nonconverged/rejected, Hogan control reached the unchanged 300-second wall
+guard without a result, and the fourth arm was not submitted. Only the requested
+evaluation budget changed; actual canonical evaluation count and elapsed time
+remain unavailable. Numerical producer was `00b7d9846bd2fb2572b7c84f03cfc6c9699323cb`.
+The original 336 library files were preserved with eleven owned additions,
+producing 347 current files. See the [Three-Page Budget Source](necromatcher-solver-budget-checkpoint.tex)
+and [Exact Review Receipt](necromatcher-solver-budget-checkpoint-review.json).
+
+At producer `e0042ba61870f88543cb1305e3f6d21903c97fb8`, actual fixed row-time
+sensitivity evaluated saved final trajectories without optimization, registration
+or new annotations: 56 cases, 44 supported and twelve whole-role rejections.
+Eight zero cases exactly match legacy results and all four training baselines
+match stored assessments. Nonzero common-time angles remain null. Tiger training
+nonzero cases leave spline support and have no fabricated curves or zeros;
+seen-role changes reach about 2.23 pixels for Tiger and 0.021 pixels for Hogan.
+The different-resolution series are plotted separately. Authored fractions of
+the encoded interval do not estimate physical shutter, exposure, flexure,
+anatomy, clinical ROM or contact timing. See the [Four-Page Row-Time Source](necromatcher-fixed-row-time-sensitivity.tex)
+and [Exact Review and Delivery Receipt](necromatcher-fixed-row-time-sensitivity-review.json).
+
+Fresh twelve-pose ROI parity uses e004 execution source and retains old 00b
+artifact/numerical provenance. Original pixels, alpha 0/0.35/1 composites,
+silhouettes, depths and Unicode geometry IDs match the old twelve poses exactly.
+All 14,767 source files and 347 library files remain unchanged. Independent
+receipt `d7b91254e7f5911e1aedef85d25096295fc99b411e2efa5b0958a9861cd4657b`
+compares saved artifacts without rerunning native geometry. The sampled
+maximum-frame-cost times source-count estimates are 120.216768, 164.599596,
+255.013650 and 248.651175 seconds, all below the unchanged 600-second guard.
+These are sampled heuristics, not full-clip execution or timing certificates.
+The last compile-log write was 09:53:03.469 UTC and the last rendered-page
+write was 09:53:03.805 UTC; the first pose folder was written at 09:53:49 UTC.
+Exact OS process-exit UTC was not recorded. These file-write observations
+precede the first pose by about 45 seconds and do not establish hardware isolation. Full-source shaped videos and new fitted camera diagnostics
+remain pending separate authorization and execution.
+
+The reviewed budget and row-time bundles are delivered to distinct exclusive
+ControlTower Desktop folders. Row-time has thirteen verified payloads totaling
+5,242,778 bytes; budget has eleven totaling 525,303 bytes. Both exact sources,
+PDF/review hashes and delivery proofs are recorded in the compact receipts.
+To reproduce, copy the canonical TEX into its delivered bundle root, verify
+the external relative plot `assets/seen-delta-rms.pdf` and raw-row hashes, and
+compile with an available compiler. Preserve the built-in platform-directory
+failure separately from installer-disabled MiKTeX success; inspect every page
+after any change. Generated PDFs, original footage, private figure assets and
+raw machine inventories remain external. The budget report's no-row-executed
+statement retains its historical checkpoint meaning. No physical qualification,
+public deployment or goal completion is claimed.

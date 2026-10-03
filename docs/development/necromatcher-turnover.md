@@ -4,7 +4,24 @@
 
 Owner priority: integrate historical footage matching as **Necromatcher**, with player tiles, persistent swing/model/control versions and downstream simulation/impact/analysis handoffs. Epic #11232 supersedes the narrower capture-only delivery scope. Tiger #11226 and Hogan #11229 remain open until reconstruction and real native replay qualify.
 
-## Camera, Morphology and Shutter Qualification
+## Current Checkpoint: Budget, Row-Time and Model Surfaces
+
+Follow the [Current Camera, Morphology and Shutter Procedure](necromatcher-camera-morphology-shutter-review.md#solver-budget-fixed-row-time-and-roi-checkpoint)
+and its exact three-page budget/four-page row-time source and review receipts.
+The balanced four-arm forearm comparison with a requested budget of 30 evaluations,
+the partial comparison with a requested budget of 120 evaluations,
+56 fixed row-time cases and twelve current ROI-parity pilots have actually run.
+Actual evaluation counts remain unavailable; fit results remain nonconverged
+and rejected. Twelve selected model-proxy surface
+poses are actual outputs; full-source shaded videos and fitted camera diagnostics
+remain separate pending work. Exact source, raw metrics, uncertainty and physical
+qualification remain distinct. The two new standalone reports are verified on
+ControlTower Desktop; row-time delivery contains thirteen hash-checked payloads
+and 5,242,778 bytes. All earlier reports, receipts and producer identities remain
+preserved. Historical no-diagnostic/no-shape statements below apply only to their
+recorded earlier checkpoints, not this current status.
+
+## Historical Camera, Morphology and Shutter Qualification
 
 Follow [Camera, Morphology, Shutter and Human Motion Qualification](necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original960 frames are verified; no new native diagnostic or optimizer has run. The nine-page source supplement and77-file source audit package are verified on ControlTower Desktop. Shape overlays under#11356 are under implementation/review; actual shaded exports remain pending.
 
@@ -17,7 +34,7 @@ Follow [Camera, Morphology, Shutter and Human Motion Qualification](necromatcher
 - Canonical `user_config_path`: persistent local library location; `NECROMATCHER_LIBRARY_ROOT` can select another root.
 - API route discovery: shared by server and packaged desktop; new Necromatcher routes require local evidence access, like the existing matched-swing browser.
 
-## Current Source-Bound Shaft Delivery
+## Historical Source-Bound Shaft Delivery Checkpoint
 
 The current reviewed optional evidence job/persistence, native/web input and
 original-video shaft overlay implementations are documented in
@@ -28,7 +45,7 @@ its exact admission, saved-final-start, train/holdout and source-bracketing
 procedure; do not infer scientific qualification from a finite target pass.
 The historical sections below retain their original execution checkpoints.
 
-## Current Delivery
+## Historical Delivery Checkpoints
 
 ### Sequential Repair and Review Exports
 
