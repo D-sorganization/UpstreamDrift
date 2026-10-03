@@ -218,7 +218,7 @@ class _RenderContext:
 
 
 def _draw_single_frame(ctx: _RenderContext, t_idx: int) -> None:
-    ax = ctx.fig.axes[0]
+    ax: Any = ctx.fig.axes[0]
     xlim, ylim, zlim = ctx.limits
     ax.cla()
     ax.view_init(elev=ctx.opts.camera_elevation, azim=ctx.opts.camera_azimuth)
