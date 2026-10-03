@@ -11,6 +11,8 @@ import pytest
 from PyQt6.QtCore import QPointF
 from PyQt6.QtGui import QColor, QImage, QPainter
 
+pytestmark = [pytest.mark.unit]
+
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
     OverlayWrench,

@@ -27,6 +27,18 @@ def _project_point(project: Any, pt: Sequence[float]) -> Any:
     return QPointF(float(res[0]), float(res[1]))
 
 
+def _rgba_to_qcolor(rgba: Sequence[float]) -> Any:
+    """Convert an RGBA tuple with values in [0, 1] to a PyQt6 QColor."""
+    from PyQt6.QtGui import QColor
+
+    return QColor(
+        int(rgba[0] * 255),
+        int(rgba[1] * 255),
+        int(rgba[2] * 255),
+        int(rgba[3] * 255) if len(rgba) > 3 else 255,
+    )
+
+
 def _draw_single_arrow_2d(
     painter: Any,
     project: Any,
@@ -37,7 +49,7 @@ def _draw_single_arrow_2d(
 ) -> None:
     """Render a single 2D force arrow using QPainter."""
     from PyQt6.QtCore import QPointF
-    from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
+    from PyQt6.QtGui import QBrush, QPen, QPolygonF
 
     p_tail: QPointF = _project_point(project, arrow.tail_m)
     p_base: QPointF = _project_point(project, arrow.head_base_m)
@@ -59,13 +71,7 @@ def _draw_single_arrow_2d(
     w2 = QPointF(p_base.x() - head_w * perp_x, p_base.y() - head_w * perp_y)
     tri = QPolygonF([p_tip, w1, w2])
 
-    rgba = arrow.rgba
-    fg_col = QColor(
-        int(rgba[0] * 255),
-        int(rgba[1] * 255),
-        int(rgba[2] * 255),
-        int(rgba[3] * 255) if len(rgba) > 3 else 255,
-    )
+    fg_col = _rgba_to_qcolor(arrow.rgba)
 
     if halo:
         h_pen = QPen(halo_color, px_width * 1.6)
@@ -94,7 +100,9 @@ def _draw_single_torque_arc_2d(
 ) -> None:
     """Render a single 2D torque arc using QPainter."""
     from PyQt6.QtCore import QPointF
-    from PyQt6.QtGui import QBrush, QColor, QPen, QPolygonF
+    from PyQt6.QtGui import QBrush, QPen, QPolygonF
+
+    fg_col = _rgba_to_qcolor(arc.rgba)
 
     pts = [_project_point(project, pt) for pt in arc.polyline_m]
     if len(pts) >= 2:
@@ -104,13 +112,6 @@ def _draw_single_torque_arc_2d(
             for i in range(len(pts) - 1):
                 painter.drawLine(pts[i], pts[i + 1])
 
-        rgba = arc.rgba
-        fg_col = QColor(
-            int(rgba[0] * 255),
-            int(rgba[1] * 255),
-            int(rgba[2] * 255),
-            int(rgba[3] * 255) if len(rgba) > 3 else 255,
-        )
         fg_pen = QPen(fg_col, px_width)
         painter.setPen(fg_pen)
         for i in range(len(pts) - 1):
@@ -128,14 +129,6 @@ def _draw_single_torque_arc_2d(
     w1 = QPointF(p_base.x() + head_w * perp_x, p_base.y() + head_w * perp_y)
     w2 = QPointF(p_base.x() - head_w * perp_x, p_base.y() - head_w * perp_y)
     tri = QPolygonF([p_tip, w1, w2])
-
-    rgba = arc.rgba
-    fg_col = QColor(
-        int(rgba[0] * 255),
-        int(rgba[1] * 255),
-        int(rgba[2] * 255),
-        int(rgba[3] * 255) if len(rgba) > 3 else 255,
-    )
 
     if halo:
         painter.setPen(QPen(halo_color, 1))
