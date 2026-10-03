@@ -2818,6 +2818,47 @@ multi-trial envelope still requires the shared event/comparison
 authorities and explicit uncertainty. The selected export is preserved;
 the private export utility must not be run indiscriminately because it
 overwrites that dataset and its manifest entry.
+
+\subsection{Owner Offset Recalibration Does Not Qualify the Alternate Branch}
+The four-cell native comparison completed naturally at
+\texttt{2026-10-03T00:17:56Z}. The original seed with original offsets
+reproduces the selected control metrics exactly. Two address-only
+calibrations use frame one and three rounds; their offsets are then
+frozen before the same forty-six sampled source frames are tracked.
+The recalibrated offsets are seed-specific, so this is a controlled
+four-cell comparison rather than an independent crossing of one common
+new offset set with both seeds. Capture geometry, original head
+calibration and other weights remain fixed, with no pelvis term added.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{lrrrr}
+\toprule
+Seed / offsets & Marker mean & Marker peak & Head mean & ROM flags \\
+ & (mm) & (mm) & (degrees) & (rows) \\
+\midrule
+Original / original & 16.754 & 36.987 & 11.318 & 13 \\
+Mild / original & 39.008 & 257.266 & 12.582 & 12 \\
+Original / recalibrated & 18.201 & 35.645 & 11.058 & 13 \\
+Mild / recalibrated & 25.640 & 38.811 & 13.133 & 10 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Head means exclude address. Marker means use all sampled observations;
+post-address marker means are $16.991$, $38.971$, $18.548$ and $25.799$ mm,
+respectively. ROM flags refer to the existing signed implementation
+table, not newly validated clinical limits. Recalibration reduces the
+alternate seed's error relative to its fixed-offset trial, but neither
+recalibrated result satisfies the existing $0.5$ mm mean-degradation
+screen relative to the selected control. Offset changes alone do not
+resolve the matching problem under this tested configuration. The
+alternate recalibration changes the offset-matrix Frobenius norm by
+$148.666$ mm relative to the original; no independent anatomical offset
+bound is established, and the magnitude alone is not a clinical verdict.
+All alternatives remain unpromoted. More address accuracy or fewer
+signed-table flags cannot substitute for acceptable full sampled tracking
+and independent validation. The model and solver hashes are preserved;
+no model is saved and no simulation is performed.
+
 % END PELVIS PROSPECTIVE CONTRACT
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
