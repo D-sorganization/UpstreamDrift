@@ -14,7 +14,7 @@ function forcesResponse() {
     status: 200,
     headers: new Headers(),
     json: () =>
-      Promise.resolve({ vectors: [], total_force_magnitude: 1, total_torque_magnitude: 2 }),
+      Promise.resolve({ total_force_magnitude: 1, total_torque_magnitude: 2 }),
   };
 }
 
@@ -46,7 +46,7 @@ describe('ForceOverlayPanel polling (#8941)', () => {
   });
 
   it('does not poll while the overlay is off', async () => {
-    render(<ForceOverlayPanel onVectorsChange={vi.fn()} isRunning={true} />);
+    render(<ForceOverlayPanel isRunning={true} />);
     await act(async () => {
       vi.advanceTimersByTime(5000);
     });
@@ -54,7 +54,7 @@ describe('ForceOverlayPanel polling (#8941)', () => {
   });
 
   it('does not poll while the simulation is stopped', async () => {
-    render(<ForceOverlayPanel onVectorsChange={vi.fn()} isRunning={false} />);
+    render(<ForceOverlayPanel isRunning={false} />);
     enableOverlay();
     await act(async () => {
       vi.advanceTimersByTime(5000);
@@ -63,7 +63,7 @@ describe('ForceOverlayPanel polling (#8941)', () => {
   });
 
   it('polls at 2 Hz by default (was 5 Hz)', async () => {
-    render(<ForceOverlayPanel onVectorsChange={vi.fn()} isRunning={true} />);
+    render(<ForceOverlayPanel isRunning={true} />);
     enableOverlay();
     await flush();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ describe('ForceOverlayPanel polling (#8941)', () => {
   });
 
   it('pauses while the tab is hidden', async () => {
-    render(<ForceOverlayPanel onVectorsChange={vi.fn()} isRunning={true} />);
+    render(<ForceOverlayPanel isRunning={true} />);
     enableOverlay();
     await flush();
     act(() => {
@@ -98,7 +98,7 @@ describe('ForceOverlayPanel polling (#8941)', () => {
 
   it('clears its interval on unmount', async () => {
     const { unmount } = render(
-      <ForceOverlayPanel onVectorsChange={vi.fn()} isRunning={true} />,
+      <ForceOverlayPanel isRunning={true} />,
     );
     enableOverlay();
     await flush();
