@@ -149,6 +149,13 @@ class MujocoForceTorqueSource:
             j_start = int(model.body_jntadr[b])
             j_num = int(model.body_jntnum[b])
             anchor = scratch.xanchor[j_start] if j_num > 0 else scratch.xpos[b]
+            # Label by joint (the cross-engine convention); a joint-less body
+            # keeps its body name.
+            j_label = (
+                mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, j_start)
+                if j_num > 0
+                else None
+            ) or b_name
 
             cfrc = scratch.cfrc_int[b]
             f_world = _vec3(cfrc[3:])
@@ -161,7 +168,7 @@ class MujocoForceTorqueSource:
             reactions.append(
                 OverlayWrench(
                     kind=WrenchKind.JOINT_REACTION,
-                    label=f"reaction:{b_name}",
+                    label=f"reaction:{j_label}",
                     body=b_name,
                     point_m=anchor_pt,
                     force_n=w_anchor.force_n,
