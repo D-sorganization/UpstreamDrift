@@ -29,7 +29,7 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T15:14:39.816703+00:00"
   },
-  "acceleration_helper_scope": "Ten native pure-helper tests and five fitter contract tests pass; independently rechecked 536 window poses establish exact zero-weight whole-output parity. Full-clock acceleration trials and fresh physical trajectory audits remain pending.",
+  "acceleration_helper_scope": "Ten native pure-helper tests and five fitter contract tests pass; independently rechecked 536 window poses establish exact zero-weight whole-output parity. Four full-clock acceleration trials save2042new poses and hang on shutdown125; a fresh independent native2042pose audit exits naturally0. Between-sample physical trajectory, contact and replay qualification remain pending.",
   "acceleration_matcher_corrected_green": {
     "failed": 0,
     "incomplete": 0,
@@ -995,6 +995,75 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T09:10:49.061089+00:00"
   },
+  "club_orientation_contract_dependency-corrected-green": {
+    "failed": 2,
+    "incomplete": 0,
+    "model_loaded": false,
+    "passed": 8,
+    "runtime_release": "2025b",
+    "simulation_executed": false,
+    "test_count": 10
+  },
+  "club_orientation_contract_dependency-corrected-green_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:32:51.719357+00:00"
+  },
+  "club_orientation_contract_initial-green": {
+    "failed": 10,
+    "incomplete": 0,
+    "model_loaded": false,
+    "passed": 0,
+    "runtime_release": "2025b",
+    "simulation_executed": false,
+    "test_count": 10
+  },
+  "club_orientation_contract_initial-green_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:29:18.121630+00:00"
+  },
+  "club_orientation_contract_parent-corrected-green": {
+    "failed": 0,
+    "incomplete": 0,
+    "model_loaded": false,
+    "passed": 10,
+    "runtime_release": "2025b",
+    "simulation_executed": false,
+    "test_count": 10
+  },
+  "club_orientation_contract_parent-corrected-green_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:35:06.507600+00:00"
+  },
+  "club_orientation_contract_red": {
+    "failed": 9,
+    "incomplete": 0,
+    "model_loaded": false,
+    "passed": 0,
+    "runtime_release": "2025b",
+    "simulation_executed": false,
+    "test_count": 9
+  },
+  "club_orientation_contract_red_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:23:42.105116+00:00"
+  },
+  "club_orientation_contract_scope": "Private optional orientation term only. Nine original RED tests fail missing option. Initial GREEN lacks shared ROM helper in remote bundle; dependency-corrected run passes eight of ten, exposing scalar-guard order and wrong-head-mask substitution. Parent corrections pass all ten with natural process/wrapper0. Human model not loaded, no simulation; complete output zero parity and active window fit remain pending.",
   "club_orientation_diagnostic": {
     "captures": [
       {
@@ -1115,6 +1184,24 @@
     }
   },
   "club_orientation_scope": "Separate triads provide possible future orientation observations. Algebraic orthogonality is not physical rigidity; changing head/grip relative orientation is not attributed to an identified cause. Fixture alignment and exact native-body assignment remain unqualified.",
+  "club_orientation_window_initial_probe_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:49:35.195962+00:00"
+  },
+  "club_orientation_window_initial_probe_scope": "Stops before fitting because probe incorrectly assumes a unique World Frame. Separate corrected probe matches authoritative IK frame-selection policy and records selected native frame privately; no pose result is claimed from this failed run.",
+  "club_orientation_window_second_probe_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:52:40.600988+00:00"
+  },
+  "club_orientation_window_second_probe_scope": "Stops before fitting on the same unsupported uniqueness assumption for Clubhead blocks. Subsequent probe uses both authoritative IK frame selectors and records paths privately; neither failed attempt produced a fit.",
   "club_position_target_scope": "Authoritative fourteen-position-target objective includes club_head only. club_grip is derived by capture processing but omitted from the IK target list. Clubhead native /R position and body rotation support its calibrated offset; no two-centroid fit claim.",
   "contact_qualified": false,
   "desktop_media": {
@@ -1378,6 +1465,435 @@
     "source_flat_mat_sha256": "fe59bb1c3529fcc3b4fe38ba344360c9236ed69139206fb3d5f060251a35b5e6",
     "source_module_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
     "spherical_velocity_frame": "follower_body"
+  },
+  "global_acceleration_independent_pose_audit": {
+    "acceleration_qualified": false,
+    "contact_qualified": false,
+    "dynamics_qualified": false,
+    "fresh_pose_rechecks": 2042,
+    "full_source_sample_position_scope": true,
+    "initial_fitter_exit_qualification_recorded_separately": true,
+    "model_saved": false,
+    "native_velocity_qualified": false,
+    "new_full_capture_zero_parity_test": false,
+    "qualification": "INDEPENDENT_FULL_SOURCE_CLOCK_POSITION_RECHECK_NOT_CONTINUOUS_TRAJECTORY_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "rate_plus_low_acceleration": {
+          "fresh_pose_rechecks": 654,
+          "max_physical_pose_error": 9.921048172113442e-16
+        },
+        "rate_plus_moderate_acceleration": {
+          "fresh_pose_rechecks": 654,
+          "max_physical_pose_error": 9.921048172113442e-16
+        }
+      },
+      "capture_O": {
+        "rate_plus_low_acceleration": {
+          "fresh_pose_rechecks": 367,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "rate_plus_moderate_acceleration": {
+          "fresh_pose_rechecks": 367,
+          "max_physical_pose_error": 7.065416064076988e-16
+        }
+      }
+    },
+    "retained_baseline_and_rate_reexecuted": false,
+    "saved_trials_sha256": "2a48bcea2c56359365467bf86623fadb6e4d4d693ec50bbc48b7db8d2b70df78",
+    "whole_capture_qualified": false
+  },
+  "global_acceleration_independent_pose_audit_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T17:47:42.865446+00:00"
+  },
+  "global_acceleration_refit": {
+    "acceleration_ik_sha256": "7221f41405b2c5c743d4ae82d31fcd0cffd0c764c102a8b25926251088905ac2",
+    "acceleration_reference_time_s": 0.03333333333333333,
+    "actual_capture_clock_counts": {
+      "capture_A": 654,
+      "capture_O": 367
+    },
+    "baseline_audit_source": "retained_from_previous_independently_rechecked_fresh_2042_audit_no_new_execution",
+    "between_sample_qualified": false,
+    "contact": false,
+    "dynamics": false,
+    "finite_window_metric_notice": "Three-frame scalar/follower-body differences at source samples; not independently measured native acceleration or all-time bounds",
+    "full_source_sample_pose_scope": true,
+    "heldout_marker_validation": false,
+    "joint_acceleration_residual_sha256": "7b640d843664468136b1193e9a0ef9f2e936d964fd876727759a0a6dc8c1360b",
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_acceleration": false,
+    "native_velocity": false,
+    "new_candidate_promoted": false,
+    "normalized_reference_time_s": 0.03333333333333333,
+    "production_modified": false,
+    "qualification": "GLOBAL_ACCELERATION_REFIT_FULL_SOURCE_SAMPLE_POSE_AUDIT_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "baseline": {
+          "acceleration_reference_time_s": 0,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0,
+          "baseline_source": "retained_from_previous_independently_rechecked_fresh_2042_audit_no_new_execution",
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            1.9803267263661521, 5.782199451269062
+          ],
+          "foot_orientation_peak_error_deg": [
+            12.831018734374203, 19.826518757177517
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.002666018906412782,
+          "head_axis_peak_error_deg": 0.8178434958239756,
+          "head_full_3d_mean_error_deg": 42.58168170562266,
+          "head_full_3d_peak_error_deg": 78.42149516868211,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 39.40582581965509,
+          "max_root_translation_step_mm": 5.1675991936627055,
+          "max_wrapped_right_wrist_step_deg": 18.715697340822317,
+          "mean_direct_raw_back_rms_mm": 26.81794718854656,
+          "mean_target_14_derived_rms_mm": 16.71420375844238,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 51.08593386667243,
+          "peak_target_14_derived_rms_mm": 61.70157308548369,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        },
+        "rate_control": {
+          "acceleration_reference_time_s": 0,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.01,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            2.163469167016995, 5.892093606716574
+          ],
+          "foot_orientation_peak_error_deg": [
+            15.770866915996297, 20.43879275257763
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.0694385863187135,
+          "head_axis_peak_error_deg": 0.5087037681959534,
+          "head_full_3d_mean_error_deg": 42.52671561087157,
+          "head_full_3d_peak_error_deg": 78.38474653376008,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 4.475311603352517,
+          "max_root_translation_step_mm": 3.251363129298133,
+          "max_wrapped_right_wrist_step_deg": 4.506419194964906,
+          "mean_direct_raw_back_rms_mm": 26.9598060029733,
+          "mean_target_14_derived_rms_mm": 16.887470186742828,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.97659913682679,
+          "peak_target_14_derived_rms_mm": 34.10336359135635,
+          "rate_control_source": "retained_from_previous_independently_rechecked_fresh_2042_audit_no_new_execution",
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        },
+        "rate_plus_low_acceleration": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0.0002,
+          "angular_weight": 0.01,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_three_frame_count": 652,
+          "finite_window_angular_component_peak_deg_s2": 684958.8903090014,
+          "finite_window_angular_component_rms_deg_s2": 14782.777023577799,
+          "finite_window_translation_component_peak_m_s2": 313.13660089211066,
+          "finite_window_translation_component_rms_m_s2": 19.523719589668904,
+          "foot_orientation_mean_error_deg": [
+            2.1639852862721423, 5.892078715947079
+          ],
+          "foot_orientation_peak_error_deg": [
+            15.869158974967412, 20.441770174784747
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.06958905969499278,
+          "head_axis_peak_error_deg": 0.5200431475479692,
+          "head_full_3d_mean_error_deg": 42.5268339171577,
+          "head_full_3d_peak_error_deg": 78.38531067776594,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 4.249070996338861,
+          "max_root_translation_step_mm": 3.244032463793471,
+          "max_wrapped_right_wrist_step_deg": 4.50568025398735,
+          "mean_direct_raw_back_rms_mm": 26.961368601492108,
+          "mean_target_14_derived_rms_mm": 16.888407316205676,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.97533964649918,
+          "peak_target_14_derived_rms_mm": 34.11882962866287,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        },
+        "rate_plus_moderate_acceleration": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 654,
+          "additional_dense_samples_count": 599,
+          "angular_acceleration_weight": 0.002,
+          "angular_weight": 0.01,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_three_frame_count": 652,
+          "finite_window_angular_component_peak_deg_s2": 419849.3239553118,
+          "finite_window_angular_component_rms_deg_s2": 9893.035435975544,
+          "finite_window_translation_component_peak_m_s2": 282.3437309473286,
+          "finite_window_translation_component_rms_m_s2": 20.513811233179233,
+          "foot_orientation_mean_error_deg": [
+            2.2309289902167784, 5.905543855314698
+          ],
+          "foot_orientation_peak_error_deg": [
+            18.879753841213915, 20.605416575087016
+          ],
+          "frames_with_direct_raw_back_observations_count": 654,
+          "frames_with_observed_derived_targets_count": 654,
+          "fresh_pose_rechecks": 654,
+          "head_axis_mean_error_deg": 0.10420116094916596,
+          "head_axis_peak_error_deg": 1.0093886912317067,
+          "head_full_3d_mean_error_deg": 42.535642427098,
+          "head_full_3d_peak_error_deg": 78.42686721692031,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 9.921048172113442e-16,
+          "max_right_shoulder_so3_geodesic_deg": 3.4236140086394435,
+          "max_root_translation_step_mm": 3.0545912494747065,
+          "max_wrapped_right_wrist_step_deg": 5.1313987521785975,
+          "mean_direct_raw_back_rms_mm": 27.218506911381137,
+          "mean_target_14_derived_rms_mm": 16.95604949967846,
+          "nominal_source_rate_hz": 360,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.891437308868502,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 50.94292993509911,
+          "peak_target_14_derived_rms_mm": 35.66195332232972,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.8138888888888889,
+          "trailing_frames_added_count": 5
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "acceleration_reference_time_s": 0,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0,
+          "baseline_source": "retained_from_previous_independently_rechecked_fresh_2042_audit_no_new_execution",
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            4.712602932933573, 8.381772832654642
+          ],
+          "foot_orientation_peak_error_deg": [
+            20.736564901714974, 18.852527708891323
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.008747919602032167,
+          "head_axis_peak_error_deg": 0.6928691569113387,
+          "head_full_3d_mean_error_deg": 42.791108554394185,
+          "head_full_3d_peak_error_deg": 85.15734258587953,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0,
+          "max_physical_pose_error": 6.2803698347351e-16,
+          "max_right_shoulder_so3_geodesic_deg": 45.386819074739584,
+          "max_root_translation_step_mm": 5.976762769875711,
+          "max_wrapped_right_wrist_step_deg": 83.50734910076386,
+          "mean_direct_raw_back_rms_mm": 37.62579637572594,
+          "mean_target_14_derived_rms_mm": 19.86349713565827,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.50009143683039,
+          "peak_target_14_derived_rms_mm": 38.34067842512156,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        },
+        "rate_control": {
+          "acceleration_reference_time_s": 0,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0,
+          "angular_weight": 0.02,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "foot_orientation_mean_error_deg": [
+            5.291673837174305, 8.505019679718789
+          ],
+          "foot_orientation_peak_error_deg": [
+            30.65038232374536, 19.218308435808275
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.3633419440786883,
+          "head_axis_peak_error_deg": 1.4298054901145278,
+          "head_full_3d_mean_error_deg": 42.54907408251285,
+          "head_full_3d_peak_error_deg": 85.49649723290291,
+          "linear_acceleration_weight": 0,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 6.2803698347351e-16,
+          "max_right_shoulder_so3_geodesic_deg": 11.773307629915816,
+          "max_root_translation_step_mm": 6.540386319415424,
+          "max_wrapped_right_wrist_step_deg": 13.24045272947356,
+          "mean_direct_raw_back_rms_mm": 38.54297358170565,
+          "mean_target_14_derived_rms_mm": 20.799984299105198,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.4549058022966,
+          "peak_target_14_derived_rms_mm": 48.07628807452194,
+          "rate_control_source": "retained_from_previous_independently_rechecked_fresh_2042_audit_no_new_execution",
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        },
+        "rate_plus_low_acceleration": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0.0002,
+          "angular_weight": 0.02,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_three_frame_count": 365,
+          "finite_window_angular_component_peak_deg_s2": 1424459.439247323,
+          "finite_window_angular_component_rms_deg_s2": 31247.885718881913,
+          "finite_window_translation_component_peak_m_s2": 551.0896164953667,
+          "finite_window_translation_component_rms_m_s2": 29.67915029911026,
+          "foot_orientation_mean_error_deg": [
+            5.2917276772717035, 8.505020428010827
+          ],
+          "foot_orientation_peak_error_deg": [
+            30.677287881099765, 19.21861820225672
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.3634587594626496,
+          "head_axis_peak_error_deg": 1.431447833391278,
+          "head_full_3d_mean_error_deg": 42.54905900045206,
+          "head_full_3d_peak_error_deg": 85.49656316780302,
+          "linear_acceleration_weight": 0.000625,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 5.495323605393213e-16,
+          "max_right_shoulder_so3_geodesic_deg": 11.750596803914025,
+          "max_root_translation_step_mm": 6.5680682345957155,
+          "max_wrapped_right_wrist_step_deg": 13.186893070168452,
+          "mean_direct_raw_back_rms_mm": 38.54353736822819,
+          "mean_target_14_derived_rms_mm": 20.800330762532326,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.45487387980538,
+          "peak_target_14_derived_rms_mm": 48.10579460624774,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        },
+        "rate_plus_moderate_acceleration": {
+          "acceleration_reference_time_s": 0.03333333333333333,
+          "actual_evaluated_frames": 367,
+          "additional_dense_samples_count": 321,
+          "angular_acceleration_weight": 0.002,
+          "angular_weight": 0.02,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_three_frame_count": 365,
+          "finite_window_angular_component_peak_deg_s2": 1168559.863692067,
+          "finite_window_angular_component_rms_deg_s2": 26996.680598967247,
+          "finite_window_translation_component_peak_m_s2": 878.2219236705498,
+          "finite_window_translation_component_rms_m_s2": 40.863320479803704,
+          "foot_orientation_mean_error_deg": [
+            5.304164665459358, 8.506656941872885
+          ],
+          "foot_orientation_peak_error_deg": [
+            32.68670358136068, 19.261945911130947
+          ],
+          "frames_with_direct_raw_back_observations_count": 367,
+          "frames_with_observed_derived_targets_count": 367,
+          "fresh_pose_rechecks": 367,
+          "head_axis_mean_error_deg": 0.3804075371828152,
+          "head_axis_peak_error_deg": 1.5870747196997577,
+          "head_full_3d_mean_error_deg": 42.549576090662946,
+          "head_full_3d_peak_error_deg": 85.50156962091368,
+          "linear_acceleration_weight": 0.00625,
+          "linear_weight": 0.0625,
+          "max_physical_pose_error": 7.065416064076988e-16,
+          "max_right_shoulder_so3_geodesic_deg": 10.459452663366092,
+          "max_root_translation_step_mm": 9.389973215107846,
+          "max_wrapped_right_wrist_step_deg": 9.527104473340813,
+          "mean_direct_raw_back_rms_mm": 38.6569721368203,
+          "mean_target_14_derived_rms_mm": 20.87311603059933,
+          "nominal_source_rate_hz": 240,
+          "normalized_reference_time_s": 0.03333333333333333,
+          "observed_derived_targets_per_frame_max": 14,
+          "observed_derived_targets_per_frame_mean": 13.822888283378747,
+          "observed_derived_targets_per_frame_min": 7,
+          "peak_direct_raw_back_rms_mm": 84.45542239486147,
+          "peak_target_14_derived_rms_mm": 51.46837151513655,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "source_clock_duration_s": 1.525,
+          "trailing_frames_added_count": 6
+        }
+      }
+    },
+    "retained_baseline_trials_sha256": "0e299d0519b3ca5e5b16f1077d09b24e4c713f333700feef699d64ae6578b2c1",
+    "simulation_executed": false
+  },
+  "global_acceleration_refit_original_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T17:46:00.978875+00:00"
   },
   "global_source_clock_refit": {
     "acceleration": false,
@@ -2894,6 +3410,7 @@
     "build_native_c2_payload_reviewed.py": "2594ed47b9abc5c3172b79072373f34051b5e7de5d126b124a40c18d7401fafd",
     "build_refitted_c2_payload_reviewed.py": "1f6b09577527e57e332452009a1bc6acc23f26d66e5c5341ddaeee283f4142d8",
     "c2_reference.py": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+    "club-runtime/gs3dx_whole_body_ik.m": "01ea755f225fab0716f8d09e2a338ae8cb478b2551f3c4cccb85a589b5984718",
     "gs3dx_joint_acceleration_residual.m": "7b640d843664468136b1193e9a0ef9f2e936d964fd876727759a0a6dc8c1360b",
     "gs3dx_joint_rate_residual.m": "694e387415c4f63b70f8d66af66ea6d931aa3d8a7188409ec1a41ebaeeede65e",
     "gs3dx_neck_torque_drive.m": "e2d889eb6ee8bb76c4f46b97675bc5dc88a6e2b9bbc26e240839a56d9fae2377",

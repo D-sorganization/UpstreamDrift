@@ -4548,6 +4548,113 @@ or club-face calibration, and does not justify forcing head and grip into
 one rigid orientation. No orientation residual has yet been added to the
 matcher. Exact session-video pairing remains unresolved.
 
+\subsection{Full-Clock Acceleration-Regularized Fits}
+Two acceleration weights are evaluated on every source frame: 654 tour
+frames at 360 Hz and 367 owner frames at 240 Hz. The low angular weight is
+0.0002 and the moderate angular weight is 0.002, both in the normalized
+residual's m/rad convention. Owner translation weights are 0.000625 and
+0.00625; tour translation weights remain zero. Both reference intervals
+are $1/30$ s. Rate weights, geometry, marker offsets, source clocks, phase
+priors and initial states are retained from the rate-only comparison.
+The four new trials contain 2,042 poses. Baseline and rate-control results
+are retained from the preceding independent audit; they are not presented
+as newly executed controls.
+
+\begin{center}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Capture & Trial & RMS (mm) & Wrist ($^\circ$) & Shoulder ($^\circ$) & Root (mm)\\
+\midrule
+Tour & Rate control & 16.887 & 4.506 & 4.475 & 3.251\\
+Tour & Low acceleration & 16.888 & 4.506 & 4.249 & 3.244\\
+Tour & Moderate acceleration & 16.956 & 5.131 & 3.424 & 3.055\\
+Owner & Rate control & 20.800 & 13.240 & 11.773 & 6.540\\
+Owner & Low acceleration & 20.800 & 13.187 & 11.751 & 6.568\\
+Owner & Moderate acceleration & 20.873 & 9.527 & 10.459 & 9.390\\
+\bottomrule
+\end{tabular}
+\end{center}
+RMS is the mean reported error across the 14 derived position targets.
+Wrist is the maximum wrapped right-wrist coordinate step; shoulder is the
+maximum right-shoulder geodesic step; root is the maximum translation step.
+These are source-sample diagnostics, not native velocity or acceleration
+measurements. Direct raw-back mean error also rises from 26.960 to
+27.219 mm for the tour and from 38.543 to 38.657 mm for the owner when
+moving from rate control to moderate acceleration weight.
+
+Between low and moderate acceleration weights, the angular finite-window
+component peak decreases from approximately $6.85\times10^5$ to
+$4.20\times10^5$ deg/s$^2$ for the tour, and from $1.42\times10^6$ to
+$1.17\times10^6$ deg/s$^2$ for the owner. However, the owner's translation
+component peak rises from about 551 to 878 m/s$^2$. These proxies are
+computed from source-sample three-frame differences using the documented
+body-coordinate conversion; they are not independently observed native
+accelerations or bounds between samples.
+
+All four trials save their fitted states and complete the in-process native
+position checks. The fitting process then hangs after its completion marker;
+the preserved receipt is watchdog 125 with native exit unverified at
+17:46:00 UTC. A fresh independent process subsequently rechecks all 2,042
+saved poses against the full 48-position native targets and exact source
+clocks, with unchanged saved-data hash. It exits naturally with process and
+wrapper zero at 17:47:42 UTC; this does not rewrite the original shutdown
+failure. The tradeoffs do not justify promoting a new
+best match: the owner's smaller wrist step accompanies a larger root step,
+while the tour's smoother shoulder accompanies a larger wrist step. Neither
+trial establishes continuous closure, contact feasibility or independent
+forward-dynamics replay.
+
+\subsection{Optional Club-Orientation Contract}
+A private experimental matcher adds a default-zero club-orientation weight.
+It reuses the already evaluated clubhead body rotation, the shared proper
+rotation validator and the shared normalized chordal residual:
+\[
+ r_{\mathrm{club},i}=\frac{w_c}{\sqrt{2}}
+ \operatorname{vec}\!\left(R_{\mathrm{native},i}
+       -R_{\mathrm{target},i}\right).
+\]
+There are nine residual components when the weight is positive, including
+nine zero components for an explicitly masked observation. The failed
+kinematics-solve penalty has the same residual dimension. Free and
+range-penalty tracking passes use the same source-frame target; the
+optimizer does not recalibrate the fixture alignment. The 14 position
+targets and position-only RMS definition remain unchanged.
+
+Positive weight requires a real finite nonnegative scalar, a $3\times3\times N$
+target array, and a separate logical club-observation mask. The adapter
+isolates club inputs from head inputs before calling the shared validator.
+In particular, a head mask cannot substitute for a missing club mask.
+Native body-orientation diagnostics are optional outputs when club data
+are supplied. Complete zero-weight output parity with no club data remains
+a required integration check, not a conclusion of the input tests.
+
+Nine initial contract tests fail because the option is absent, with a
+natural R2025b process exit of one. The first implementation run encounters
+a missing range-of-motion helper in the remote test bundle; this failed
+run is retained. After fixing the bundle, eight of ten tests pass. The two
+remaining failures expose a scalar-validation ordering error and unintended
+head-mask substitution. The reviewed implementation fixes both and reuses
+the existing frame-target accessor instead of duplicating it. All ten tests
+then pass, with natural process and wrapper zero at 17:35:06 UTC on
+3 October 2026. This test lane reaches an exact deliberate absent-model
+sentinel; it neither loads the Human model nor simulates dynamics.
+
+A separate window experiment is prepared to compare the original matcher,
+the new zero-weight path, and club-orientation weights 0.025 and 0.075.
+Its first two native attempts stop before fitting because the probe
+incorrectly requires unique World Frame and Clubhead block names; the model
+contains multiple matches. Both preserved processes exit naturally with
+code one. The corrected probe uses the same frame selections as the
+authoritative IK setup and records both paths in its private alignment evidence.
+It retains the previous window, capture-specific geometry, position offsets,
+body/head/foot priors and rate weights. Raw clubhead triads are not filled;
+address alignment must use an observed nondegenerate triad and a freshly
+accepted native address pose. Orientation error is to be evaluated over
+the same observed frames for every trial, alongside marker fidelity and
+pose-step diagnostics. This experiment has not yet established parity,
+improved matching, anatomical calibration or a better shareable output.
+
 \subsection{Controller XYZ Chart Conditioning}
 The existing spherical-joint controller converts native orientation to
 intrinsic XYZ coordinates, $R=R_x(a)R_y(b)R_z(c)$. Its follower-frame angular
