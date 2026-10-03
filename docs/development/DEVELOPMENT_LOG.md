@@ -64,16 +64,16 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
-- **State:** in_review
+- **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11400; child #11407 (hosted download; follows #11401–#11403 landed in #11410 and #11409 landed in #11412)
-- **PR:** #11415
-- **Branch:** `feat/opencap-hosted-download-11407`
-- **Paths:** `src/shared/python/motion_pipeline/sources/opencap_download.py`, `tests/unit/motion_pipeline/sources/test_opencap_download.py`, `tests/architecture/test_opencap_boundary.py`
+- **Issue:** #11400; child #11406 (local opencap-core sidecar runner; follows #11401–#11403, #11409, and #11407)
+- **PR:** #11444
+- **Branch:** `feat/opencap-sidecar-runner-11406`
+- **Paths:** `src/motion_capture/opencap_ingest/**`, `src/motion_capture/__init__.py`, `tests/unit/motion_capture/test_opencap_launcher.py`, `tests/integration/motion_capture/test_opencap_gpu_e2e.py`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-03 at SELF — Child 6 (#11407): implemented `download_opencap_session` with opt-in `OpenCapHostedSettings`, affirmative consent verification, session discovery, and full layout reconstruction matching `load_opencap_session`. 8 focused unit tests pass; zero network calls in default test lane; all OpenCap unit and boundary tests pass; refactored to comply with architecture budget and dynamic urllib semgrep rule.
+- **Last verified:** 2026-10-03 at SELF — Child 5 (#11406): implemented `OpenCapLauncher`, `OpenCapLaunchConfig`, `OpenCapLaunchResult`, `OpenCapSidecarNotFoundError`, `run_opencap_sidecar`, and `OpenCapOutputAdapter` in `src/motion_capture/opencap_ingest`. Guaranteed subprocess cleanup via `managed_popen`; Docker support; fails closed with actionable install guidance when sidecar is absent; ADR-0053 commercial default (HRNet/mmpose) and OpenPose non-commercial opt-in check; output collection seamlessly loads via `load_opencap_session`. 16 unit tests and 1 GPU e2e test pass (skips cleanly on non-GPU host); all 63 OpenCap tests green.
 - **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in with affirmative consent.
-- **Next step:** Review and merge PR #11415 for #11407; proceed with #11406.
+- **Next step:** Review and merge PR #11444 for #11406.
 
 ### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
 
