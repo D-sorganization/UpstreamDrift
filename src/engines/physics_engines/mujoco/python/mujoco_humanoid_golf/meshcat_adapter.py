@@ -11,9 +11,17 @@ from typing import Any
 import mujoco
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyphs import (
+    filter_frame_glyphs,
+)
 from src.shared.python.biomechanics.biomechanics_data import BiomechanicalData
 from src.shared.python.body_part_viz import AxialLoadFrame, ForceColorScale
 from src.shared.python.body_part_viz.meshcat_force_colors import MeshcatForceColors
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
+    MeshcatGlyphRenderer,
+    MeshcatPythonSink,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.plot_style.color_utils import rgba_to_hex
 
@@ -34,6 +42,7 @@ class MuJoCoMeshcatAdapter:
 
     def __init__(self, model: mujoco.MjModel | None = None) -> None:
         self._force_colors: MeshcatForceColors | None = None
+        self._glyph_renderer: MeshcatGlyphRenderer | None = None
         if meshcat is None:
             logger.warning("Meshcat not installed. Visualization disabled.")
             self.vis = None
@@ -213,50 +222,39 @@ class MuJoCoMeshcatAdapter:
         data: mujoco.MjData,
         show_force: bool,
         show_torque: bool,
-        force_scale: float = 0.1,
-        torque_scale: float = 0.1,
+        force_scale: float = 0.001,
+        torque_scale: float = 0.005,
+        frame: ForceTorqueFrame | None = None,
     ) -> None:
-        """
-        Draws force/torque vectors at joints.
-        """
+        """Draws force and torque vectors at joints through MeshcatGlyphRenderer (FTO-10)."""
         if data is None:
             raise ValueError("data must be provided")
-        if self.vis is None or self.model is None:
+        if self.vis is None:
             return
 
-        model = self.model
-
-        if not show_force:
-            self.vis["overlays/forces"].delete()
-        if not show_torque:
-            self.vis["overlays/torques"].delete()
+        if self._glyph_renderer is None:
+            self._glyph_renderer = MeshcatGlyphRenderer(MeshcatPythonSink(self.vis))
 
         if not (show_force or show_torque):
+            self._glyph_renderer.clear()
             return
 
-        # Iterate over bodies (skipping world 0)
-        for i in range(1, model.nbody):
-            body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
-            if not body_name:
-                body_name = f"body_{i}"
+        if frame is None and self.model is not None:
+            from .force_torque_source import MujocoForceTorqueSource
 
-            if data.cfrc_int is None:
-                continue
-            wrench = data.cfrc_int[i]  # type: ignore[index]
-            f = wrench[3:]
-            t = wrench[:3]
+            frame = MujocoForceTorqueSource(self.model).sample(data)
 
-            pos = data.xpos[i]
+        if frame is None:
+            return
 
-            if show_force and np.linalg.norm(f) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000
-                )  # noqa: E501
-
-            if show_torque and np.linalg.norm(t) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
-                )  # noqa: E501
+        active_glyphs = filter_frame_glyphs(
+            frame,
+            show_forces=show_force,
+            show_torques=show_torque,
+            force_scale=force_scale,
+            torque_scale=torque_scale,
+        )
+        self._glyph_renderer.update(active_glyphs)
 
     def draw_induced_vectors(  # noqa: C901
         self,
@@ -315,7 +313,7 @@ class MuJoCoMeshcatAdapter:
                 continue
 
             joint_pos = data.xpos[body_id]
-            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = data.xaxis[j]
 
             arrow_len = acc * scale * 0.5
             arrow_dir = joint_axis * arrow_len
@@ -363,7 +361,7 @@ class MuJoCoMeshcatAdapter:
 
             body_id = self.model.jnt_bodyid[j]
             joint_pos = data.xpos[body_id]
-            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+            joint_axis = data.xaxis[j]
 
             arrow_len = val * scale * 0.5
             arrow_dir = joint_axis * arrow_len

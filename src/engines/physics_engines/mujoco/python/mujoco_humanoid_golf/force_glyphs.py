@@ -24,7 +24,12 @@ import mujoco
 import numpy as np
 import numpy.typing as npt
 
-from src.shared.python.force_overlay.glyphs import GlyphSet
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.force_overlay.glyphs import (
+    ForceGlyphStyle,
+    GlyphSet,
+    build_glyphs,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +93,30 @@ def segment_geom_count(glyphs: GlyphSet) -> int:
         segments = max(0, n_pts - 1)
         count += segments + 1
     return count
+
+
+def filter_frame_glyphs(
+    frame: ForceTorqueFrame,
+    *,
+    show_forces: bool,
+    show_torques: bool,
+    force_scale: float = 0.001,
+    torque_scale: float = 0.005,
+) -> GlyphSet:
+    """Build and filter a GlyphSet from a ForceTorqueFrame based on visibility toggles."""
+    style = ForceGlyphStyle(
+        force_scale_m_per_n=force_scale,
+        torque_scale_m_per_nm=torque_scale,
+    )
+    glyphs = build_glyphs(frame, style)
+    arrows = glyphs.arrows if show_forces else ()
+    torque_arcs = glyphs.torque_arcs if show_torques else ()
+    return GlyphSet(
+        time_s=glyphs.time_s,
+        arrows=arrows,
+        torque_arcs=torque_arcs,
+        legend=glyphs.legend,
+    )
 
 
 def _append_connector(

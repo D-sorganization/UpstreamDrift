@@ -334,7 +334,7 @@ class VisualizationTab(QtWidgets.QWidget):
         self._create_force_scale_controls(force_layout)
         self._create_advanced_vector_overlays(force_layout)
 
-        self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
+        self.show_contacts_cb = QtWidgets.QCheckBox("MuJoCo native contact debug")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
 

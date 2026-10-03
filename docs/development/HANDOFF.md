@@ -1,3 +1,40 @@
+# MuJoCo GUI Force/Torque Overlays Through Shared Renderers — #11285 / #11295 (FTO-10)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `UpstreamDrift-worktrees/agy-11295`
+- Branch: `feat/fto-11295-mujoco-gui-glyphs`; commit: SELF; PR: pending (`Closes #11295`, `Refs #11285`)
+- Governing issue: #11295 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`); DL entry `DL-#11285`
+- Objective: [FTO-10] MuJoCo GUI: draw force/torque overlays through shared renderers (native viewer MjvSceneGlyphRenderer + MeshCat MeshcatGlyphRenderer).
+- Completed:
+  - Shared Helper (`src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`):
+    - Added `filter_frame_glyphs(frame, style, show_arrows=True, show_torque_arcs=True)` to eliminate duplicated AST logic between native and web renderers, satisfying DRY gate.
+  - Native Viewer (`src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py`):
+    - Replaced `_add_force_torque_overlays`, `_draw_torque_vectors`, and `_draw_force_vectors` with `_render_force_glyphs(scene)` calling `MjvSceneGlyphRenderer(scene)`.
+    - Shrunk net line count while eliminating pixel-space arrow drawing.
+    - Preserved `_world_to_screen` for manipulation and swing plane overlays.
+    - Preserved induced acceleration and counterfactual vectors in `_add_induced_and_cf_overlays(rgb)` with joint axis slicing bug fixed from `xaxis[3*j:3*j+3]` to `xaxis[j]`.
+  - MeshCat Adapter (`src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py`):
+    - Replaced manual line drawing in `draw_vectors` with `MeshcatGlyphRenderer(MeshcatPythonSink(self.vis))` via `filter_frame_glyphs`.
+    - Fixed `data.xaxis[3*j:3*j+3]` joint axis slicing bug to `data.xaxis[j]`.
+  - GUI Toggle Relabeled (`src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py`):
+    - Relabeled contact force debug checkbox to `"MuJoCo native contact debug"`.
+  - Parity Registry:
+    - Added `visualization.mujoco_force_overlays` to `src/config/feature_parity.json` and regenerated matrix in `docs/development/feature_parity_matrix.md`.
+  - Visual Evidence:
+    - Generated offscreen rendered screenshots in `docs/development/screenshots/`:
+      - `mujoco_golf_humanoid_before_fto10.png`
+      - `mujoco_golf_humanoid_after_fto10.png`
+  - Tests:
+    - 5 tests in `tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_sim_rendering_mixin_glyphs.py` including regression test proving 0 occurrences of `xaxis[3*...` in `src/`.
+    - 38 timer lifetime tests in `test_sim_widget_timer_lifetime.py` all passing (43 passed total).
+- Validation:
+  - `ruff check .` & `ruff format --check .`: Clean.
+  - `scripts/ci/check_file_size_budget.py`: Passed.
+  - `scripts/ci/check_error_handling_ratchet.py`: Passed (-2 noqa_BLE001).
+  - `scripts/ci/check_dry_duplication_gate.py`: Clean (0 exit code).
+- Next steps: Merge PR; proceed with Drake GUI (FTO-12) or video compositor (FTO-25).
+
+---
+
 # MuJoCo Force/Torque Provider — #11294 (FTO-9)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `UpstreamDrift-worktrees/agy-11294`
