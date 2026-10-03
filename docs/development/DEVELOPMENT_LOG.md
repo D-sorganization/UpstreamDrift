@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** codex (Gemini 3.8 Flash CLI reviews)
 - **Issue:** #11329
-- **PR:** pending; depends on draft #11256 and shared-capture #11172.
+- **PR:** #11351; depends on draft #11256 and shared-capture #11172.
 - **Branch:** `feat/simscape-scapula-protraction-20261002`
 - **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_spine_bounds.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02: R2025b focused lane passed 50 tests; entire disabled-feature native output equals legacy output; default and explicit scapula priors agree. Native mirrored schemas cover 13 moving-scapula variants; full trajectories are qualified only for Human. Public Human poses exactly match the successful native quiet-spine trial. Pinned Ruff 0.15.17 format/lint passed. Corrected aspect-preserving video exports are running. Built-in LaTeX compilation is unavailable (platform directories missing).
+- **Last verified:** 2026-10-02: R2025b focused lane passed 50 tests; entire disabled-feature native output equals legacy output; default and explicit scapula priors agree. Native mirrored schemas cover 13 moving-scapula variants; full trajectories are qualified only for Human. Published Human full fits exited naturally with code 0 and exactly match the successful native quiet-spine trial. Pinned Ruff 0.15.17 format/lint passed. All eight replacement native 1080P MP4 exports exited with code 0; all 404 frames passed decoding/dimensions/rate/count checks and both views were reviewed. Desktop files and the 11-member ZIP were hash/CRC verified. Built-in LaTeX compilation is unavailable (platform directories missing).
 - **Summary:** Scapula address/backswing bands, direct measured back-marker fitting, native spine excursion bands through top with soft continuation afterwards, two-coordinate-neck head-axis guide, complete measured-marker overlays, cyan back/waist highlights, neutral Model Swing labels and undistorted native 1080P pixels. Full 3D head yaw remains imperfect and is separately reported. Fixed dimensions/position offsets and private source identities are preserved. Independent dynamics remains outside this scope and unqualified.
-- **Next step:** Finish and decode the eight replacement Desktop videos, inspect both views, package neutral companion files and publish the dependent source review.
+- **Next step:** Source review #11351 remains a draft pending #11256/#11172 acceptance; private Desktop deliverables are complete. No protected-main merge or CI success is claimed.
 
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 

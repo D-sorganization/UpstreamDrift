@@ -2669,6 +2669,7 @@ Quantity & Model Swing 1 & Model Swing 2 \\
 Previous spine bending excursions ($^\circ$) & 47.57 / 60.65 & 39.34 / 49.38 \\
 Refined spine bending excursions ($^\circ$) & 15.44 / 16.53 & 17.49 / 15.17 \\
 Refined torso twist excursion ($^\circ$) & 45.24 & 45.00 \\
+Original / refined backswing trail-hub shift (mm) & 166.77 / 80.11 & 85.80 / 69.48 \\
 14-target mean / peak RMS (mm) & 16.57 / 32.84 & 19.81 / 37.78 \\
 Raw three-back-marker mean RMS (mm) & 26.73 & 38.23 \\
 Head-axis mean error ($^\circ$) & 0.005 & 0.053 \\
@@ -2695,8 +2696,10 @@ down-the-line image. The shared pixel exporter now sets
 \texttt{PreserveAspectRatio='on'} and checks actual dimensions. Portrait
 and landscape circle probes fail with the old stretched operation and
 pass with the corrected export. The focused native R2025b lane passes
-50 tests with zero failures or incomplete results. Every final video must
-also pass full decoding, pixel/rate/count and visual checks.
+50 tests with zero failures or incomplete results. All eight final MP4
+exports exited successfully in native MATLAB; all 404 frames were decoded
+and passed pixel/rate/count checks. Both views were visually reviewed.
+The shareable Desktop package contains only neutral titles and metadata.
 
 To reproduce, call \texttt{gs3dx\_setup}, retain the original keyed address
 seed, dimensions and 14 offsets, populate
