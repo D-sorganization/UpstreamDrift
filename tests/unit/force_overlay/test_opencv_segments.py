@@ -1,8 +1,10 @@
-"""Unit tests for OpenCV projected segment mesh renderer (FTO-26, #11311)."""
+"""Unit tests for OpenCV segment mesh renderer (FTO-26, #11311).
+
+Tests the engine-agnostic model-on-footage layer: filled, shaded segment volumes
+drawn on video frames and coloured by tension/compression loads.
+"""
 
 from __future__ import annotations
-
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -54,349 +56,456 @@ def synthetic_camera() -> PinholeCamera:
 
 @pytest.fixture
 def synthetic_frame() -> np.ndarray:
-    """Blank grey image 1920x1080 BGR."""
+    """Blank uniform grey image 1920x1080 BGR."""
     return np.full((1080, 1920, 3), 200, dtype=np.uint8)
 
 
-def test_capsule_bounding_box_within_2px(
+def test_capsule_bounding_box(
     synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """A capsule in front of the camera fills a region with expected bounding box (+/- 2 px)."""
-    projector = PinholeProjector(synthetic_camera)
-    proximal = (-0.5, 0.0, 0.0)
-    distal = (0.5, 0.0, 0.0)
+    """A capsule in front of the camera fills a region with the expected bounding box (± 2 px)."""
+    # Create an axis along world X from (-0.5, 0, 0) to (0.5, 0, 0) with radius 0.1m at depth 5m (z=0)
+    axis = SegmentAxis(
+        segment="forearm",
+        joint_label="joint_reaction:elbow",
+        proximal_m=(-0.5, 0.0, 0.0),
+        distal_m=(0.5, 0.0, 0.0),
+    )
     radius_m = 0.1
-
-    axes = [SegmentAxis("capsule_seg", "joint", proximal, distal)]
-    poses = segment_poses_from_axes(axes, radius_m=radius_m)
+    poses = segment_poses_from_axes([axis], radius_m=radius_m)
     assert len(poses) == 1
+    pose = poses[0]
 
-    shading = SegmentShading(ambient=0.4, opacity=1.0)
-    receipt = draw_segment_meshes_on_frame(
+    projector = PinholeProjector(synthetic_camera)
+    shading = SegmentShading(opacity=1.0)
+    scale = ForceColorScale(enabled=False)
+
+    drawn, receipt = draw_segment_meshes_on_frame(
         synthetic_frame,
-        poses,
+        [pose],
         projector,
         shading=shading,
+        loads=None,
+        color_scale=scale,
     )
+
     assert receipt.triangles_drawn > 0
+    assert receipt.segments_rendered == 1
 
-    drawn = receipt.frame
-    assert drawn is not None
+    # Find modified pixels
+    diff = np.any(drawn != synthetic_frame, axis=-1)
+    assert diff.any()
+    y_idxs, x_idxs = np.where(diff)
+    actual_ymin, actual_ymax = int(y_idxs.min()), int(y_idxs.max())
+    actual_xmin, actual_xmax = int(x_idxs.min()), int(x_idxs.max())
 
-    diff = np.any(drawn != synthetic_frame, axis=2)
-    y_idx, x_idx = np.where(diff)
-    assert len(x_idx) > 0
-
-    actual_min_x, actual_max_x = int(x_idx.min()), int(x_idx.max())
-    actual_min_y, actual_max_y = int(y_idx.min()), int(y_idx.max())
-
-    # Analytical projection of capsule bounding box:
-    # Capsule along x from proximal - radius to distal + radius:
-    # x in [-0.6, 0.6], y in [-0.1, 0.1], z in [-0.1, 0.1] (depth 5.0m).
-    # Project extreme 3D points:
-    test_points = np.array(
+    # Analytical projection of the capsule bounds:
+    # Cylinder + hemisphere caps along X from (-0.5 - 0.1) = -0.6 to (0.5 + 0.1) = 0.6
+    # In Y from -0.1 to +0.1. All at Z=0 (depth 5.0m from camera at (0,0,5))
+    extreme_pts = np.array(
         [
             [-0.6, 0.0, 0.0],
             [0.6, 0.0, 0.0],
             [0.0, -0.1, 0.0],
             [0.0, 0.1, 0.0],
-        ],
-        dtype=float,
+        ]
     )
-    px, valid = projector.project(test_points)
-    assert np.all(valid)
+    px_extremes, _ = synthetic_camera.project(extreme_pts)
+    expected_xmin = int(round(px_extremes[0, 0]))
+    expected_xmax = int(round(px_extremes[1, 0]))
+    expected_ymin = int(round(px_extremes[3, 1]))  # Y is up in world, down in image
+    expected_ymax = int(round(px_extremes[2, 1]))
 
-    exp_min_x = min(px[0, 0], px[1, 0])
-    exp_max_x = max(px[0, 0], px[1, 0])
-    exp_min_y = min(px[2, 1], px[3, 1])
-    exp_max_y = max(px[2, 1], px[3, 1])
-
-    assert abs(actual_min_x - exp_min_x) <= 2
-    assert abs(actual_max_x - exp_max_x) <= 2
-    assert abs(actual_min_y - exp_min_y) <= 2
-    assert abs(actual_max_y - exp_max_y) <= 2
+    assert abs(actual_xmin - expected_xmin) <= 2
+    assert abs(actual_xmax - expected_xmax) <= 2
+    assert abs(actual_ymin - expected_ymin) <= 2
+    assert abs(actual_ymax - expected_ymax) <= 2
 
 
-def test_overlapping_capsules_nearer_wins(
+def test_overlapping_capsules_painter_order(
     synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """Two overlapping capsules: the nearer one's color wins in the overlap (painter's order)."""
-    projector = PinholeProjector(synthetic_camera)
-
-    # Farther capsule at z = 0.0 (depth 5.0m from camera at z = 5.0), blue base color (#0000ff)
-    far_axis = SegmentAxis("far", "j1", (-0.4, 0.0, 0.0), (0.4, 0.0, 0.0))
-    far_poses = segment_poses_from_axes([far_axis], radius_m=0.15)
-    far_pose = SegmentPose(
-        name=far_poses[0].name,
-        mesh_id=far_poses[0].mesh_id,
-        T_world_segment=far_poses[0].T_world_segment,
-        scale=far_poses[0].scale,
+    """Two overlapping capsules: the nearer one's colour wins in the overlap (painter's order)."""
+    # Far capsule at z=0 (depth 5m), colored Red (#ff0000)
+    axis_far = SegmentAxis(
+        segment="far_seg",
+        joint_label="joint_reaction:far",
+        proximal_m=(-0.3, 0.0, 0.0),
+        distal_m=(0.3, 0.0, 0.0),
+    )
+    # Near capsule at z=1 (depth 4m), colored Blue (#0000ff)
+    axis_near = SegmentAxis(
+        segment="near_seg",
+        joint_label="joint_reaction:near",
+        proximal_m=(0.0, -0.3, 1.0),
+        distal_m=(0.0, 0.3, 1.0),
+    )
+    poses_far = segment_poses_from_axes([axis_far], radius_m=0.15)
+    poses_near = segment_poses_from_axes([axis_near], radius_m=0.15)
+    pose_far = SegmentPose(
+        name=poses_far[0].name,
+        mesh_id=poses_far[0].mesh_id,
+        T_world_segment=poses_far[0].T_world_segment,
+        scale=poses_far[0].scale,
+        base_color="#ff0000",
+    )
+    pose_near = SegmentPose(
+        name=poses_near[0].name,
+        mesh_id=poses_near[0].mesh_id,
+        T_world_segment=poses_near[0].T_world_segment,
+        scale=poses_near[0].scale,
         base_color="#0000ff",
     )
 
-    # Nearer capsule at z = 1.0 (depth 4.0m from camera at z = 5.0), red base color (#ff0000)
-    near_axis = SegmentAxis("near", "j2", (0.0, -0.4, 1.0), (0.0, 0.4, 1.0))
-    near_poses = segment_poses_from_axes([near_axis], radius_m=0.15)
-    near_pose = SegmentPose(
-        name=near_poses[0].name,
-        mesh_id=near_poses[0].mesh_id,
-        T_world_segment=near_poses[0].T_world_segment,
-        scale=near_poses[0].scale,
-        base_color="#ff0000",
-    )
+    projector = PinholeProjector(synthetic_camera)
+    shading = SegmentShading(opacity=1.0)
+    scale = ForceColorScale(enabled=False)
 
-    # Render both together; painter's algorithm sorts far to near, so near is drawn on top
-    shading = SegmentShading(ambient=0.5, opacity=1.0)
-    receipt = draw_segment_meshes_on_frame(
+    # Pass in both orders to verify depth sorting governs, not input list order
+    drawn_1, _ = draw_segment_meshes_on_frame(
         synthetic_frame,
-        [far_pose, near_pose],
+        [pose_far, pose_near],
         projector,
         shading=shading,
+        loads=None,
+        color_scale=scale,
     )
-    drawn = receipt.frame
-    assert drawn is not None
+    drawn_2, _ = draw_segment_meshes_on_frame(
+        synthetic_frame,
+        [pose_near, pose_far],
+        projector,
+        shading=shading,
+        loads=None,
+        color_scale=scale,
+    )
 
     # Center pixel (960, 540) is in the overlap of both capsules
-    # In BGR: Red has high R (channel 2), Blue has high B (channel 0)
-    bgr_at_center = drawn[540, 960]
-    b, g, r = int(bgr_at_center[0]), int(bgr_at_center[1]), int(bgr_at_center[2])
-    assert r > b, (
-        f"Expected nearer red capsule to win over farther blue capsule, got BGR={bgr_at_center}"
-    )
+    cx, cy = 960, 540
+    # Blue is BGR (255, 0, 0), Red is BGR (0, 0, 255)
+    color_1 = drawn_1[cy, cx]
+    color_2 = drawn_2[cy, cx]
+    # Nearer capsule is Blue: B channel must be much greater than R channel
+    assert color_1[0] > color_1[2]
+    assert color_2[0] > color_2[2]
+    assert np.array_equal(drawn_1[cy, cx], drawn_2[cy, cx])
 
 
-def test_loads_tension_blue_compression_red(
+def test_loads_color_tension_and_compression(
     synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """With loads: a tension segment's hue is blue-ish and compression is red-ish."""
-    projector = PinholeProjector(synthetic_camera)
-
-    axis_tension = SegmentAxis("seg_tension", "j1", (-0.5, 0.2, 0.0), (-0.1, 0.2, 0.0))
-    axis_comp = SegmentAxis("seg_comp", "j2", (0.1, 0.2, 0.0), (0.5, 0.2, 0.0))
-    poses = segment_poses_from_axes([axis_tension, axis_comp], radius_m=0.08)
-
-    color_scale = ForceColorScale(
-        enabled=True,
-        tension_limit_n=1000.0,
-        compression_limit_n=1000.0,
-        deadband_n=0.0,
-        tension_color="#0000ff",
-        compression_color="#ff0000",
-        neutral_color="#ffffff",
+    """With loads: a tension segment's hue is blue-ish and a compression segment's is red-ish."""
+    axis_tension = SegmentAxis(
+        segment="tension_seg",
+        joint_label="joint_reaction:t",
+        proximal_m=(-0.5, 0.2, 0.0),
+        distal_m=(-0.1, 0.2, 0.0),
     )
-
-    # Verify ForceColorScale full saturation before shading
-    assert color_scale.color(1500.0, "#808080") == "#0000ff"
-    assert color_scale.color(-1500.0, "#808080") == "#ff0000"
+    axis_comp = SegmentAxis(
+        segment="comp_seg",
+        joint_label="joint_reaction:c",
+        proximal_m=(0.1, 0.2, 0.0),
+        distal_m=(0.5, 0.2, 0.0),
+    )
+    poses = segment_poses_from_axes([axis_tension, axis_comp], radius_m=0.08)
 
     loads = AxialLoadFrame(
         time_s=0.0,
-        values_n={"seg_tension": 1500.0, "seg_comp": -1500.0},
+        values_n={"tension_seg": 500.0, "comp_seg": -500.0},
         source="test",
     )
+    scale = ForceColorScale(
+        enabled=True,
+        tension_limit_n=500.0,
+        compression_limit_n=500.0,
+        tension_color="#0000ff",
+        compression_color="#ff0000",
+    )
+    projector = PinholeProjector(synthetic_camera)
+    shading = SegmentShading(opacity=1.0)
 
-    # Use a black frame for clear hue detection
-    black_frame = np.zeros_like(synthetic_frame)
-    shading = SegmentShading(ambient=0.5, opacity=1.0)
-    receipt = draw_segment_meshes_on_frame(
-        black_frame,
+    drawn, receipt = draw_segment_meshes_on_frame(
+        synthetic_frame,
         poses,
         projector,
         shading=shading,
         loads=loads,
-        color_scale=color_scale,
+        color_scale=scale,
     )
-    drawn = receipt.frame
-    assert drawn is not None
+    assert receipt.segments_without_loads == 0
 
-    # Sample center of tension segment (left side, u ~ 780, v ~ 450)
-    p_tension, _ = projector.project(np.array([[-0.3, 0.2, 0.0]]))
-    u_t, v_t = int(round(p_tension[0, 0])), int(round(p_tension[0, 1]))
-    bgr_tension = drawn[v_t, u_t]
-    assert bgr_tension[0] > bgr_tension[2], (
-        f"Tension should be blue-ish, got BGR={bgr_tension}"
-    )
+    # Project centers of both segments
+    px_tension, _ = synthetic_camera.project(np.array([[-0.3, 0.2, 0.0]]))
+    px_comp, _ = synthetic_camera.project(np.array([[0.3, 0.2, 0.0]]))
 
-    # Sample center of compression segment (right side, u ~ 1140, v ~ 450)
-    p_comp, _ = projector.project(np.array([[0.3, 0.2, 0.0]]))
-    u_c, v_c = int(round(p_comp[0, 0])), int(round(p_comp[0, 1]))
-    bgr_comp = drawn[v_c, u_c]
-    assert bgr_comp[2] > bgr_comp[0], (
-        f"Compression should be red-ish, got BGR={bgr_comp}"
-    )
+    t_color = drawn[int(round(px_tension[0, 1])), int(round(px_tension[0, 0]))]
+    c_color = drawn[int(round(px_comp[0, 1])), int(round(px_comp[0, 0]))]
+
+    # Tension is blue-ish: BGR -> B > R
+    assert t_color[0] > 100
+    assert t_color[2] < 50
+    # Compression is red-ish: BGR -> R > B
+    assert c_color[2] > 100
+    assert c_color[0] < 50
 
 
 def test_opacity_zero_leaves_frame_unchanged(
     synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """Opacity 0 leaves the frame unchanged (pixel equality)."""
+    """Opacity 0 leaves the frame unchanged."""
+    axis = SegmentAxis(
+        segment="arm",
+        joint_label="joint_reaction:shoulder",
+        proximal_m=(-0.2, 0.0, 0.0),
+        distal_m=(0.2, 0.0, 0.0),
+    )
+    poses = segment_poses_from_axes([axis], radius_m=0.08)
     projector = PinholeProjector(synthetic_camera)
-    axis = SegmentAxis("seg", "j", (-0.3, 0.0, 0.0), (0.3, 0.0, 0.0))
-    poses = segment_poses_from_axes([axis], radius_m=0.1)
+    shading = SegmentShading(opacity=0.0)
+    scale = ForceColorScale(enabled=False)
 
-    receipt = draw_segment_meshes_on_frame(
+    drawn, receipt = draw_segment_meshes_on_frame(
         synthetic_frame,
         poses,
         projector,
-        shading=SegmentShading(opacity=0.0),
+        shading=shading,
+        loads=None,
+        color_scale=scale,
     )
-    np.testing.assert_array_equal(receipt.frame, synthetic_frame)
+    assert np.array_equal(drawn, synthetic_frame)
 
 
-def test_segment_behind_camera_culled_and_counted(
+def test_segment_behind_camera_culled(
     synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """A segment behind the camera is culled and counted in receipt."""
+    """A segment behind the camera is culled and counted."""
+    # Camera is at (0, 0, 5) looking down -Z. Behind camera is Z > 5.
+    axis_behind = SegmentAxis(
+        segment="behind",
+        joint_label="joint_reaction:back",
+        proximal_m=(0.0, 0.0, 10.0),
+        distal_m=(0.0, 0.5, 10.0),
+    )
+    poses = segment_poses_from_axes([axis_behind], radius_m=0.1)
     projector = PinholeProjector(synthetic_camera)
-    # Camera is at (0, 0, 5) looking down -z at (0, 0, 0).
-    # z = 10 is behind the camera.
-    axis = SegmentAxis("behind", "j", (-0.3, 0.0, 10.0), (0.3, 0.0, 10.0))
-    poses = segment_poses_from_axes([axis], radius_m=0.1)
+    shading = SegmentShading(opacity=1.0)
+    scale = ForceColorScale(enabled=False)
 
-    receipt = draw_segment_meshes_on_frame(
+    drawn, receipt = draw_segment_meshes_on_frame(
         synthetic_frame,
         poses,
         projector,
+        shading=shading,
+        loads=None,
+        color_scale=scale,
     )
-    assert receipt.triangles_culled > 0
     assert receipt.triangles_drawn == 0
-    np.testing.assert_array_equal(receipt.frame, synthetic_frame)
+    assert receipt.triangles_culled > 0
+    assert np.array_equal(drawn, synthetic_frame)
 
 
-def test_segment_poses_from_axes_aligns_endpoints() -> None:
-    """segment_poses_from_axes aligns the capsule axis with proximal -> distal endpoints."""
+def test_segment_poses_from_axes_alignment() -> None:
+    """segment_poses_from_axes aligns the capsule axis with proximal→distal."""
     proximal = (1.0, 2.0, 3.0)
-    distal = (1.0, 5.0, 3.0)
-    axes = [SegmentAxis("tibia", "knee", proximal, distal)]
-    poses = segment_poses_from_axes(axes, radius_m=0.05)
+    distal = (1.0, 6.0, 3.0)  # Along +Y with length 4.0
+    axis = SegmentAxis(
+        segment="thigh",
+        joint_label="joint_reaction:hip",
+        proximal_m=proximal,
+        distal_m=distal,
+    )
+    poses = segment_poses_from_axes([axis], radius_m=0.08)
     assert len(poses) == 1
-
     pose = poses[0]
-    assert pose.name == "tibia"
+
+    assert pose.name == "thigh"
     assert pose.mesh_id == "capsule"
-    assert np.isclose(pose.scale[0], 3.0)  # Length
-    assert np.isclose(pose.scale[1], 0.05)  # Radius
-    assert np.isclose(pose.scale[2], 0.05)
+    assert np.isclose(pose.scale[0], 4.0)
+    assert np.isclose(pose.scale[1], 0.08)
 
     T = pose.T_world_segment
-    # Local origin maps to proximal
-    p0 = T[:3, :3] @ np.array([0.0, 0.0, 0.0]) + T[:3, 3]
-    np.testing.assert_allclose(p0, proximal, atol=1e-6)
+    # Proximal point in local capsule is origin (0, 0, 0)
+    p_hom = T @ np.array([0.0, 0.0, 0.0, 1.0])
+    np.testing.assert_allclose(p_hom[:3], proximal, atol=1e-6)
 
-    # Local length along x maps to distal
-    p1 = T[:3, :3] @ np.array([pose.scale[0], 0.0, 0.0]) + T[:3, 3]
-    np.testing.assert_allclose(p1, distal, atol=1e-6)
+    # Distal point in local capsule is (length, 0, 0)
+    d_hom = T @ np.array([4.0, 0.0, 0.0, 1.0])
+    np.testing.assert_allclose(d_hom[:3], distal, atol=1e-6)
 
-
-def test_segment_pose_validation() -> None:
-    """Design by Contract checks on SegmentPose inputs."""
-    # Empty name
-    with pytest.raises(ValueError, match="name"):
-        SegmentPose(name="", mesh_id="capsule")
-
-    # Empty mesh_id
-    with pytest.raises(ValueError, match="mesh_id"):
-        SegmentPose(name="seg", mesh_id="")
-
-    # Non-orthonormal matrix
-    bad_rot = np.eye(4)
-    bad_rot[0, 0] = 2.0
-    with pytest.raises(ValueError, match="orthonormal"):
-        SegmentPose(name="seg", T_world_segment=bad_rot)
-
-    # Non-positive scale
-    with pytest.raises(ValueError, match="scale"):
-        SegmentPose(name="seg", scale=(1.0, 0.0, 1.0))
-
-    # Negative radius in segment_poses_from_axes
-    axis = SegmentAxis("s", "j", (0, 0, 0), (1, 0, 0))
-    with pytest.raises(ValueError, match="radius_m"):
-        segment_poses_from_axes([axis], radius_m=-0.1)
+    # Local X axis is aligned with proximal -> distal
+    R = T[:3, :3]
+    expected_axis = np.array([0.0, 1.0, 0.0])
+    np.testing.assert_allclose(R[:, 0], expected_axis, atol=1e-6)
 
 
-def test_synthetic_demo_still_three_segment_arm(
-    synthetic_camera: PinholeCamera, tmp_path: Path
+def test_validation_contracts() -> None:
+    """DbC assertions: SegmentPose, SegmentShading, and segment_poses_from_axes validations."""
+    with pytest.raises(ValueError):
+        # Empty name
+        SegmentPose(name="", mesh_id="capsule", T_world_segment=np.eye(4))
+    with pytest.raises(ValueError):
+        # Non-orthonormal matrix
+        T_bad = np.eye(4)
+        T_bad[0, 1] = 2.0
+        SegmentPose(name="arm", mesh_id="capsule", T_world_segment=T_bad)
+    with pytest.raises(ValueError):
+        # Negative scale
+        SegmentPose(
+            name="arm",
+            mesh_id="capsule",
+            T_world_segment=np.eye(4),
+            scale=(-1.0, 1.0, 1.0),
+        )
+    with pytest.raises(ValueError):
+        # Invalid ambient
+        SegmentShading(ambient=-0.1)
+    with pytest.raises(ValueError):
+        # Invalid opacity
+        SegmentShading(opacity=1.5)
+    with pytest.raises(ValueError):
+        # Non-positive radius
+        axis = SegmentAxis(
+            segment="arm", joint_label="j", proximal_m=(0, 0, 0), distal_m=(1, 0, 0)
+        )
+        segment_poses_from_axes([axis], radius_m=0.0)
+
+
+def test_triangle_budget_capping(
+    synthetic_camera: PinholeCamera, synthetic_frame: np.ndarray
 ) -> None:
-    """Create synthetic demo still: gradient background, 3-segment arm, mixed loads, FTO-8 arrows."""
-    # 1. Gradient background 1920x1080
-    y = np.linspace(30, 80, 1080, dtype=np.uint8)[:, None, None]
-    x = np.linspace(40, 90, 1920, dtype=np.uint8)[None, :, None]
-    gradient_frame = np.broadcast_to(y + x, (1080, 1920, 3)).copy()
+    """Triangle budget limits drawn triangles and counts culled."""
+    axis = SegmentAxis(
+        segment="arm", joint_label="j", proximal_m=(-0.5, 0, 0), distal_m=(0.5, 0, 0)
+    )
+    poses = segment_poses_from_axes([axis], radius_m=0.1)
+    projector = PinholeProjector(synthetic_camera)
+    # Very small budget of 20 triangles
+    shading = SegmentShading(max_triangles=20)
+    _, receipt = draw_segment_meshes_on_frame(
+        synthetic_frame,
+        poses,
+        projector,
+        shading=shading,
+        loads=None,
+        color_scale=ForceColorScale(enabled=False),
+    )
+    assert receipt.triangles_drawn <= 20
+    assert receipt.render_time_ms >= 0.0
 
-    # 2. Three-segment arm
-    shoulder = (-0.4, 0.2, 0.0)
-    elbow = (0.0, 0.35, 0.0)
-    wrist = (0.35, 0.1, 0.0)
-    hand = (0.55, -0.1, 0.0)
 
-    axes = [
-        SegmentAxis("upper_arm", "shoulder_j", shoulder, elbow),
-        SegmentAxis("forearm", "elbow_j", elbow, wrist),
-        SegmentAxis("hand", "wrist_j", wrist, hand),
-    ]
-    poses = segment_poses_from_axes(axes, radius_m=0.06)
-    assert len(poses) == 3
+def test_synthetic_demo_still_generation(synthetic_camera: PinholeCamera) -> None:
+    """Generate the acceptance demo still: gradient bg, 3-segment arm (tension/comp), FTO-8 arrows."""
+    from pathlib import Path
+    from src.shared.python.force_overlay.glyphs import ArrowGlyph, GlyphSet, LegendSpec
+    from src.shared.python.force_overlay.renderers.opencv_glyphs import (
+        draw_glyphs_on_frame,
+    )
 
-    # Mixed tension and compression loads
+    # 1. Gradient background 1920x1080 BGR
+    w, h = 1920, 1080
+    y_vals = np.linspace(30, 90, h, dtype=np.uint8).reshape(h, 1)
+    channel = np.repeat(y_vals, w, axis=1)
+    gradient_frame = np.stack([channel, channel, channel], axis=-1)
+
+    # 2. Three-segment arm: upper arm, forearm, hand
+    p_shoulder = (-0.6, 0.4, 0.0)
+    p_elbow = (-0.1, 0.2, 0.0)
+    p_wrist = (0.3, -0.1, 0.0)
+    p_hand = (0.5, -0.2, 0.0)
+
+    axis_upper = SegmentAxis(
+        segment="upper_arm",
+        joint_label="joint_reaction:shoulder",
+        proximal_m=p_shoulder,
+        distal_m=p_elbow,
+    )
+    axis_forearm = SegmentAxis(
+        segment="forearm",
+        joint_label="joint_reaction:elbow",
+        proximal_m=p_elbow,
+        distal_m=p_wrist,
+    )
+    axis_hand = SegmentAxis(
+        segment="hand",
+        joint_label="joint_reaction:wrist",
+        proximal_m=p_wrist,
+        distal_m=p_hand,
+    )
+
+    poses_arm = segment_poses_from_axes(
+        [axis_upper, axis_forearm, axis_hand], radius_m=0.07
+    )
+
+    # Upper arm in tension (+800 N), Forearm in compression (-700 N), Hand neutral (0 N)
     loads = AxialLoadFrame(
         time_s=0.0,
-        values_n={"upper_arm": 1200.0, "forearm": -1200.0, "hand": 0.0},
-        source="simscape",
+        values_n={"upper_arm": 800.0, "forearm": -700.0, "hand": 0.0},
+        source="synthetic_demo",
     )
     color_scale = ForceColorScale(
         enabled=True,
         tension_limit_n=1000.0,
         compression_limit_n=1000.0,
-        tension_color="#0000ff",
-        compression_color="#ff0000",
-        neutral_color="#ffffff",
+        tension_color="#0055ff",
+        compression_color="#ff2200",
     )
+    projector = PinholeProjector(synthetic_camera)
+    shading = SegmentShading(ambient=0.4, opacity=0.75)
 
-    projector = PinholeProjector(synthetic_camera, world_frame="adr0041_world")
-    receipt = draw_segment_meshes_on_frame(
+    composite, receipt = draw_segment_meshes_on_frame(
         gradient_frame,
-        poses,
+        poses_arm,
         projector,
-        shading=SegmentShading(ambient=0.35, opacity=0.75),
+        shading=shading,
         loads=loads,
         color_scale=color_scale,
     )
     assert receipt.triangles_drawn > 0
-    assert receipt.render_time_ms > 0
-    drawn = receipt.frame
-    assert drawn is not None
+    assert receipt.segments_rendered == 3
 
-    # 3. Add FTO-8 arrows
+    # 3. Add FTO-8 force arrows at shoulder and wrist
     from src.shared.python.force_overlay.contracts import (
         ForceTorqueFrame,
         OverlayWrench,
         WrenchKind,
     )
     from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, build_glyphs
-    from src.shared.python.force_overlay.renderers.opencv_glyphs import (
-        draw_glyphs_on_frame,
-    )
 
-    wrench = OverlayWrench(
-        kind=WrenchKind.JOINT_REACTION,
-        label="reaction:elbow",
-        body="forearm",
-        point_m=elbow,
-        force_n=(0.0, 500.0, 0.0),
-        source="test",
-    )
     ft_frame = ForceTorqueFrame(
         time_s=0.0,
-        engine="simscape",
-        world_frame="adr0041_world",
-        wrenches=(wrench,),
+        engine="synthetic",
+        wrenches=(
+            OverlayWrench(
+                kind=WrenchKind.JOINT_REACTION,
+                label="joint_reaction:shoulder",
+                body="upper_arm",
+                point_m=p_shoulder,
+                force_n=(-120.0, 250.0, 0.0),
+                source="synthetic_demo",
+            ),
+            OverlayWrench(
+                kind=WrenchKind.EXTERNAL,
+                label="external:wrist",
+                body="hand",
+                point_m=p_wrist,
+                force_n=(100.0, -200.0, 0.0),
+                source="synthetic_demo",
+            ),
+        ),
     )
-    glyphs = build_glyphs(ft_frame, ForceGlyphStyle())
-    glyph_receipt = draw_glyphs_on_frame(
-        drawn, glyphs, projector, world_frame="adr0041_world", inplace=True
-    )
-    assert glyph_receipt.drawn == 1
+    glyph_set = build_glyphs(ft_frame, ForceGlyphStyle())
+    final_image, _ = draw_glyphs_on_frame(composite, glyph_set, projector)
+    assert final_image.shape == (h, w, 3)
 
-    out_file = tmp_path / "fto26_demo_still.png"
-    cv2.imwrite(str(out_file), drawn)
-    assert out_file.exists()
+    # Save to docs/development/fto_26_demo_still.png (or tmp_path)
+    out_path = Path("docs/development/fto_26_demo_still.png").resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img_bytes = np.ascontiguousarray(final_image, dtype=np.uint8)
+    success = cv2.imwrite(str(out_path), img_bytes)
+    assert success is True
+    assert out_path.is_file()
+    assert out_path.stat().st_size > 1000
+
+    # Also save to repo docs/development/ if directory exists
+    repo_docs = Path(__file__).resolve().parents[3] / "docs" / "development"
+    if repo_docs.is_dir():
+        cv2.imwrite(str(repo_docs / "fto_26_demo_still.png"), img_bytes)

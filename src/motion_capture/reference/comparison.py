@@ -50,6 +50,8 @@ class ComparisonLayer(BaseModel):
     draw_torques: bool = True
     draw_legend: bool = True
     force_scale: float = Field(default=1.0, ge=0.01, le=100.0)
+    draw_model_volumes: bool = False
+    model_volume_opacity: float = Field(default=0.55, ge=0.0, le=1.0)
 
     @property
     def colour_bgr(self) -> tuple[int, int, int]:

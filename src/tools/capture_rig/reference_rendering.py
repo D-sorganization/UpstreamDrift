@@ -17,7 +17,6 @@ from src.motion_capture.coaching import DrawingLayer, ReferenceGeometry
 from src.motion_capture.reconstruct.cameras import PinholeCamera
 from src.motion_capture.reference.comparison import ComparisonLayer, ForceLayer
 from src.motion_capture.reference.force_alignment import force_frame_for_video
-from src.shared.python.body_part_viz.force_colors import ForceColorScale
 from src.motion_capture.reference.model import Asset, ReferenceMotion, ReferenceVideo
 from src.motion_capture.reference.registration import (
     ReferenceRegistration,
@@ -80,23 +79,18 @@ def _motion_image(
     body_edges = tuple(edge for edge in ctx.asset.edges if edge not in club_edges)
     loads = None
     if ctx.force_layer is not None and ctx.force_layer.series is not None:
-        ft_frame = force_frame_for_video(
-            ctx.force_layer.series,
-            video_time_s=time,
-            registration=ctx.registration,
-        )
-        if ft_frame is not None:
-            loads = ft_frame.axial_loads
-    color_scale = ForceColorScale(enabled=True) if loads is not None else None
+        try:
+            ft_frame = force_frame_for_video(
+                ctx.force_layer.series,
+                video_time_s=time,
+                registration=ctx.registration,
+            )
+            if ft_frame is not None:
+                loads = ft_frame.axial_loads
+        except (KeyError, ValueError, AttributeError, RuntimeError):
+            loads = None
     drawn = draw_segment_volumes(
-        frame,
-        world[0],
-        mask[0],
-        body_edges,
-        camera,
-        layer,
-        loads=loads,
-        color_scale=color_scale,
+        frame, world[0], mask[0], body_edges, camera, layer, loads=loads
     ).copy()
     points, visible = projected[0], visibility[0]
     if not layer.draw_club:

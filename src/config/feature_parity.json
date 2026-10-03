@@ -275,6 +275,7 @@
       "status": "gap",
       "issue": 7461,
       "tiles": [
+        "video_analyzer",
         "video_processor",
         "data_processor",
         "tools_calculator_hub",
@@ -283,16 +284,6 @@
         "robotics_module"
       ],
       "notes": "External/docs-backed tiles whose web reachability is not yet contract-checked."
-    },
-    "tools.video_analyzer": {
-      "title": "Video Analyzer (pose tracking and force/torque overlay)",
-      "pyqt": "src/tools/video_analyzer/gui.py",
-      "api": "src/api/routes/video_overlays.py",
-      "web": "ui/src/pages/VideoAnalyzer.tsx",
-      "status": "parity",
-      "issue": null,
-      "tiles": ["video_analyzer"],
-      "notes": "Video pose analysis and server-projected force/torque SVG overlay (FTO-29, #11314)."
     },
     "tools.model_explorer": {
       "title": "Model Explorer (browse/select/build URDF-MJCF)",
@@ -490,7 +481,7 @@
       "web": "ui/src/components/visualization/ForceColorControls.tsx",
       "status": "parity",
       "tiles": [],
-      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures; producers now wired across MuJoCo, Simscape, Drake, Pinocchio, and OpenSim (ADR-0052, #11305, #11315)."
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305)."
     }
   }
 }
