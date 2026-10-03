@@ -417,7 +417,7 @@ class PendulumWidget(BasePendulumWidget):
 
         magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
         max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
+        scale = 0.4 * self._force_scale / max_mag
 
         joint_map = {
             "shoulder": pos.get("shoulder"),
@@ -426,7 +426,20 @@ class PendulumWidget(BasePendulumWidget):
             "wrist2": pos.get("wrist2"),
         }
 
-        painter.setPen(QPen(self.COLOR_FORCE, 2))
+        from src.shared.python.force_overlay.contracts import (
+            ForceTorqueFrame,
+            OverlayWrench,
+            WrenchKind,
+        )
+        from src.shared.python.force_overlay.glyphs import (
+            ForceGlyphStyle,
+            build_glyphs,
+        )
+        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
+            draw_glyphs_2d,
+        )
+
+        wrenches = []
         for key, force in forces.items():
             if self._visible_segments is not None and key not in self._visible_segments:
                 continue
@@ -434,11 +447,32 @@ class PendulumWidget(BasePendulumWidget):
             if joint_pos is None:
                 continue
             fx, fy = force
-            end = (
-                joint_pos[0] + fx * scale / self._pixels_per_meter,
-                joint_pos[1] + fy * scale / self._pixels_per_meter,
+            wrenches.append(
+                OverlayWrench(
+                    kind=WrenchKind.JOINT_REACTION,
+                    label=f"joint:{key}",
+                    body=key,
+                    point_m=(float(joint_pos[0]), float(joint_pos[1]), 0.0),
+                    force_n=(float(fx * scale), float(fy * scale), 0.0),
+                    torque_nm=None,
+                    source="pendulum",
+                )
             )
-            self._draw_arrow(painter, joint_pos, end)
+        if not wrenches:
+            return
+        frame = ForceTorqueFrame(
+            time_s=float(self._result.t[self._current_idx]),
+            engine="pendulum",
+            wrenches=tuple(wrenches),
+        )
+        style = ForceGlyphStyle(
+            force_scale_m_per_n=1.0,
+            min_length_m=1e-4,
+            max_length_m=1e5,
+            palette={WrenchKind.JOINT_REACTION: self.COLOR_FORCE.name()},
+        )
+        glyphs = build_glyphs(frame, style=style)
+        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter, pos: dict) -> None:
         """Draw zero-torque (passive drift) force vectors at each joint."""
@@ -451,7 +485,7 @@ class PendulumWidget(BasePendulumWidget):
 
         magnitudes = [np.hypot(f[0], f[1]) for f in forces.values()]
         max_mag = max(1.0, max(magnitudes))
-        scale = 0.4 * self._pixels_per_meter * self._force_scale / max_mag
+        scale = 0.4 * self._force_scale / max_mag
 
         joint_map = {
             "shoulder": pos.get("shoulder"),
@@ -460,8 +494,20 @@ class PendulumWidget(BasePendulumWidget):
             "wrist2": pos.get("wrist2"),
         }
 
-        pen = QPen(self.COLOR_ZERO_TORQUE, 2, Qt.PenStyle.DashLine)
-        painter.setPen(pen)
+        from src.shared.python.force_overlay.contracts import (
+            ForceTorqueFrame,
+            OverlayWrench,
+            WrenchKind,
+        )
+        from src.shared.python.force_overlay.glyphs import (
+            ForceGlyphStyle,
+            build_glyphs,
+        )
+        from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
+            draw_glyphs_2d,
+        )
+
+        wrenches = []
         for key, force in forces.items():
             if self._visible_segments is not None and key not in self._visible_segments:
                 continue
@@ -469,45 +515,32 @@ class PendulumWidget(BasePendulumWidget):
             if joint_pos is None:
                 continue
             fx, fy = force
-            end = (
-                joint_pos[0] + fx * scale / self._pixels_per_meter,
-                joint_pos[1] + fy * scale / self._pixels_per_meter,
+            wrenches.append(
+                OverlayWrench(
+                    kind=WrenchKind.JOINT_ACTUATOR,
+                    label=f"ztcf:{key}",
+                    body=key,
+                    point_m=(float(joint_pos[0]), float(joint_pos[1]), 0.0),
+                    force_n=(float(fx * scale), float(fy * scale), 0.0),
+                    torque_nm=None,
+                    source="pendulum",
+                )
             )
-            self._draw_arrow(painter, joint_pos, end)
-
-    def _draw_arrow(self, painter: QPainter, origin: tuple, end: tuple) -> None:
-        """Draw a force/torque vector with a filled triangular arrowhead."""
-        assert painter is not None, "painter must be provided"
-        p0 = self._world_to_pixel(origin[0], origin[1])
-        p1 = self._world_to_pixel(end[0], end[1])
-        painter.drawLine(p0, p1)
-
-        dx = p1.x() - p0.x()
-        dy = p1.y() - p0.y()
-        length = max(1.0, np.hypot(dx, dy))
-        ux, uy = dx / length, dy / length
-        arrow_len = 10.0
-        arrow_w = 4.0
-
-        left = QPointF(
-            p1.x() - arrow_len * ux + arrow_w * uy,
-            p1.y() - arrow_len * uy - arrow_w * ux,
+        if not wrenches:
+            return
+        frame = ForceTorqueFrame(
+            time_s=float(self._result.t[self._current_idx]),
+            engine="pendulum",
+            wrenches=tuple(wrenches),
         )
-        right = QPointF(
-            p1.x() - arrow_len * ux - arrow_w * uy,
-            p1.y() - arrow_len * uy + arrow_w * ux,
+        style = ForceGlyphStyle(
+            force_scale_m_per_n=1.0,
+            min_length_m=1e-4,
+            max_length_m=1e5,
+            palette={WrenchKind.JOINT_ACTUATOR: self.COLOR_ZERO_TORQUE.name()},
         )
-
-        path = QPainterPath()
-        path.moveTo(p1)
-        path.lineTo(left)
-        path.lineTo(right)
-        path.closeSubpath()
-
-        old_brush = painter.brush()
-        painter.setBrush(QBrush(painter.pen().color()))
-        painter.drawPath(path)
-        painter.setBrush(old_brush)
+        glyphs = build_glyphs(frame, style=style)
+        draw_glyphs_2d(painter, self._world_to_pixel, glyphs, px_width=2.0, halo=False)
 
     # ------------------------------------------------------------------
     # Torque vector drawing (#1119, #1170)
