@@ -1,6 +1,6 @@
 # Engine-Agnostic Projected Segment Meshes With Tension/Compression Fill — #11285 / #11311 (FTO-26)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-projected-segment-meshes-11311`; commit SELF; PR: #11396 (`Closes #11311`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-model-footage-11311`; commit SELF; PR: #11391 (`Closes #11311`, `Refs #11285`)
 - Governing issue: #11311 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill.
 - Completed:
@@ -24,7 +24,51 @@
   - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
   - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
   - All pre-commit linters, formatting, and CI budgets passed.
-- Next steps: Merge PR; proceed with FTO-27 / FTO-28.
+- Next steps: Merge PR; proceed with FTO-29 / FTO-30.
+
+---
+
+# Calibrated MuJoCo Mesh Render Composited Onto Source Footage — #11285 / #11312 (FTO-27)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-27-mujoco-mesh-render-11312`; commit SELF; PR: #11393 (`Closes #11312`, `Refs #11285`)
+- Governing issue: #11312 (parent epic #11285, design authority ADR-0052 §1, §6 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-27] Render actual MuJoCo model meshes with force arrows (FTO-6) and segment shading from a camera matching calibrated intrinsics and extrinsics, then alpha-composite onto source footage.
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/footage_composite.py`:
+    - `mujoco_camera_from_pinhole(camera, world_from_mj) -> MjCameraSpec`:
+      - Derives MuJoCo camera position, xyaxes, and vertical field of view ($2 \cdot \text{atan}(H_{\text{render}} / (2 \cdot f_y))$).
+      - Converts OpenGL/MuJoCo coordinate convention (flipping OpenCV +y down and +z forward to MuJoCo +y up and -z viewing direction).
+      - Implements Decision 2: enlarged frame and crop rectangle to precisely center principal point $(c_x, c_y)$ without non-linear image warping.
+    - `apply_camera_spec_to_scene(scene, spec)`:
+      - Sets up `scene.camera[0]` and `scene.camera[1]` poses, frustum clipping, and aligns headlights with the optical axis.
+    - `registration_to_world_from_mj(registration)`:
+      - Maps `ReferenceRegistration` or 4x4 matrix into the canonical Z-up to ADR-0041 world coordinate transformation.
+    - `composite_model_on_frame(frame_bgr, model, data, camera, registration, glyphs, loads, opts) -> (frame, receipt)`:
+      - Renders MuJoCo segmentation buffer (`enable_segmentation_rendering`) and RGB buffer.
+      - Crops both buffers to the calibrated frame window.
+      - Computes alpha channel from model geoms (`segid != -1`), feathered by 1 px (`cv2.GaussianBlur`).
+      - Implements Decision 3: undistorts source footage frame with camera coefficients (`cv2.undistort`) so rectilinear mesh and arrow layer (FTO-8 `opencv_glyphs.py`) agree within 1.5 px.
+      - Integrates 3D force glyphs via `add_glyphs_to_scene` and axial loads via `apply_mujoco_scene_colors`.
+      - Blends render over destination frame with alpha channel and user-specified opacity.
+  - `docs/adr/0052-force-torque-overlay-contract.md`:
+    - Added Addendum for Decisions 2 (enlarged frame crop for principal point) and 3 (lens distortion policy).
+  - Tests:
+    - 6 unit tests in `tests/unit/engines/mujoco/test_footage_composite.py`:
+      - Reprojection error $\le 1.0\text{ px}$ against `PinholeCamera.project` for off-centre principal point.
+      - Axis flip maps camera forward to MuJoCo -z.
+      - Background pixels strictly untouched in alpha composite.
+      - Lens distortion policy verifies mesh and FTO-8 arrow root agree within 1.5 px.
+      - DbC precondition contract validation.
+      - Full integration with `ReferenceRegistration`, `AxialLoadFrame`, and `GlyphSet`.
+  - Artifacts:
+    - Synthetic composite verified and generated: `docs/development/fto_27_synthetic_composite.png`.
+- Validation:
+  - `pytest tests/unit/engines/mujoco/test_footage_composite.py`: 6 passed.
+  - Pre-commit gates (`check_architecture_budget.py`, `check_file_size_budget.py`, `check_error_handling_ratchet.py`): all OK.
+  - `ruff check src/ tests/`: Clean.
+  - `ruff format --check src/ tests/`: Clean.
+  - `python scripts/ci/run_mypy.py`: Clean (0 issues).
+- Next steps: Merged in main (PR #11393).
 
 ---
 
