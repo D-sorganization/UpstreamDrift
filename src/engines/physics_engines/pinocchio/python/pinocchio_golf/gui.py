@@ -32,6 +32,8 @@ from src.shared.python.logging_pkg.logging_config import (
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase
 from src.shared.python.ui.widgets import LogPanel
 
+from .force_overlay_view import PinocchioForceOverlayView
+
 # Mixin imports
 from .gui_simulation import SimulationMixin
 from .gui_ui_setup import UISetupMixin
@@ -105,6 +107,7 @@ class PinocchioGUI(
 
         self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
         self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+        self.force_overlay_view: PinocchioForceOverlayView | None = None
 
         self.recorder = PinocchioRecorder(engine=self)
         self.sim_time = 0.0
@@ -116,44 +119,6 @@ class PinocchioGUI(
         self.operating_mode = "dynamic"
         self.is_running = False
         self.dt = DT_DEFAULT
-
-    def _init_meshcat_viewer(self) -> None:
-        self.viewer: viz.Visualizer | None = None
-        if not MESHCAT_AVAILABLE:
-            self.log_write("Warning: Meshcat not available. Visualization disabled.")
-            logger.warning("Meshcat module not found.")
-            return
-
-        try:
-            try:
-                self.viewer = viz.Visualizer(server_args=["--port", "7000"])
-            except TypeError:
-                logger.warning(
-                    "Meshcat Visualizer: server_args not supported. Using default."
-                )  # noqa: E501
-                self.viewer = viz.Visualizer()
-
-            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
-            logger.info("Internal Meshcat URL: %s", url)
-
-            self._log_meshcat_url(url)
-        except (ConnectionError, OSError, RuntimeError) as exc:
-            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
-            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-            self.log_write("Please ensure meshcat-server is running or try again.")
-
-    def _log_meshcat_url(self, url: str) -> None:
-        try:
-            port = url.split(":")[-1].split("/")[0]
-            host_url = f"http://127.0.0.1:{port}/static/"
-            logger.info(f"Host Access URL: {host_url}")
-            self.log_write("=" * 40)
-            self.log_write("VISUALIZER READY")
-            self.log_write("Open this URL in your browser:")
-            self.log_write(f"{host_url}")
-            self.log_write("=" * 40)
-        except (PermissionError, OSError):
-            logger.info("Could not determine host URL from: %s", url)
 
     def _load_default_model(self) -> None:
         default_urdf = (
@@ -233,8 +198,8 @@ class PinocchioGUI(
         self.log.append(text)
         logger.info(text)
 
-    def _init_meshcat_visualizer(self) -> None:
-        """Initialize Pinocchio MeshcatVisualizer if available."""
+    def _init_model_visualizer(self) -> None:
+        """Initialize Pinocchio MeshcatVisualizer and force overlay view."""
         if MESHCAT_AVAILABLE and self.viewer is not None:
             try:
                 self.viewer["robot"].delete()
@@ -245,27 +210,21 @@ class PinocchioGUI(
                 )
                 self.viz.initViewer(viewer=self.viewer, open=False)
                 self.viz.loadViewerModel()
-                if (
-                    hasattr(self, "segment_force_colors")
-                    and self.segment_force_colors is not None
-                    and self.visual_model is not None
-                ):
-                    from .force_overlay_view import PinocchioForceOverlayView
 
-                    self._force_overlay_view = PinocchioForceOverlayView(
-                        self,
-                        meshcat_visualizer=self.viz,
-                        color_session=self.segment_force_colors,
-                    )
-                    self._force_overlay_view.bind_color_session(
-                        self.visual_model, model=self.model, viewer=self.viewer
-                    )
+                self.force_overlay_view = PinocchioForceOverlayView(
+                    self, self.viz, self.segment_force_colors
+                )
+                self.force_overlay_view.bind_color_session(
+                    self.model, self.visual_model, self.viewer
+                )
             except (RuntimeError, ValueError, OSError) as e:
                 self.log_write(f"Warning: Visualizer init failed: {e}")
                 self.viz = None
+                self.force_overlay_view = None
         else:
             self.log_write("Model loaded without 3D visualization.")
             self.viz = None
+            self.force_overlay_view = None
 
     def load_urdf(self, fname: str | None = None) -> None:  # noqa: C901
         """Load a URDF model and initialize the viewer."""
@@ -315,8 +274,8 @@ class PinocchioGUI(
                 self.btn_record.setChecked(False)
                 self.btn_record.setText("Record")
 
-            # Initialize Pinocchio MeshcatVisualizer
-            self._init_meshcat_visualizer()
+            # Initialize Pinocchio MeshcatVisualizer and force overlay view
+            self._init_model_visualizer()
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")

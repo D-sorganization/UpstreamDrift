@@ -14,7 +14,6 @@ import numpy as np
 
 from src.shared.python.body_part_viz.meshcat_force_colors import (
     MeshcatForceColors,
-    MeshcatForceColorSession,
 )
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
@@ -98,7 +97,7 @@ class PinocchioForceOverlayView:
         self,
         engine_or_source: Any,
         meshcat_visualizer: Any = None,
-        color_session: MeshcatForceColorSession | None = None,
+        color_session: Any = None,
         *,
         root: str = "/force_overlay",
     ) -> None:
