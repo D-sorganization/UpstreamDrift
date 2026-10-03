@@ -110,4 +110,7 @@ def read_kinematic_fit(
     from .necromatcher_placement import validate_placement_lineage
 
     validate_placement_lineage(payload, library, swing_id)
+    from .necromatcher_hypothesis import validate_hypothesis_seed
+
+    validate_hypothesis_seed(library, payload)
     return payload

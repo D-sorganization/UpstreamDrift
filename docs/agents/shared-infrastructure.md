@@ -1,5 +1,16 @@
 # Shared Infrastructure Directory
 
+### Native Camera and Model Hypothesis Admission
+
+Reuse `workspace.NativeHypothesisRequest`, `bind_native_hypothesis` and
+`author_native_hypothesis` for explicit, source-authenticated unoptimized seed
+rebinding. `NativeModelBinding` verifies registered XML, native coordinate order
+and compiled scalar units without a candidate fit. Capture identities preserve
+separate encoded PNG/decoded BGR domains and the existing complete-clock digest.
+The fixed two-operation clean worker reuses refit cancellation/cleanup; candidate
+initialization and stored lineage never qualify camera, anatomy or physical time.
+See [Native Hypothesis Procedure](../development/necromatcher-native-hypothesis-admission.md).
+
 Grouped by concern, with one-line descriptions and the public symbols
 worth knowing. Not exhaustive — when in doubt, grep — but these are
 the modules most often missed.

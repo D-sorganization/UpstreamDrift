@@ -20,6 +20,12 @@ from .shaft_residuals import (
     ImageSourceIdentity,
     ShaftAxisAssessment,
     ShaftAxisResidualTerm,
+    project_authored_shaft_line,
+)
+from .shaft_row_timing import (
+    ShaftRowTiming,
+    RowTimedShaftAssessment,
+    assess_row_timed_shaft,
 )
 from .solver import fit_image_trajectory, initialize_image_trajectory
 from .capture import CaptureImageEvidence, read_capture_evidence
@@ -32,6 +38,10 @@ __all__ = [
     "ImageSourceIdentity",
     "ShaftAxisAssessment",
     "ShaftAxisResidualTerm",
+    "project_authored_shaft_line",
+    "ShaftRowTiming",
+    "RowTimedShaftAssessment",
+    "assess_row_timed_shaft",
     "AuthoredShaftAxis",
     "resolve_authored_shaft_axis",
     "ShaftAxisEvidence",

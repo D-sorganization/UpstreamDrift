@@ -139,12 +139,13 @@ def _raster_triangle(
     covered = (u >= -1e-10) & (v >= -1e-10) & (t >= -1e-10)
     inv = u / depths[0] + v / depths[1] + t / depths[2]
     z = np.divide(1.0, inv, out=np.full_like(inv, np.inf), where=covered & (inv > 0))
-    old = layer.depth[ys, xs]
+    old = layer.depth[rows, columns]
     win = covered & (z < old - 1e-10)
-    layer.depth[ys[win], xs[win]] = z[win]
-    layer.pixels[ys[win], xs[win]] = mesh.color
-    layer.mask[ys[win], xs[win]] = True
-    layer.geometry_ids[ys[win], xs[win]] = mesh.identity
+    # The ROI has unique integer cells; finish comparisons before writing views.
+    old[win] = z[win]
+    layer.pixels[rows, columns][win] = mesh.color
+    layer.mask[rows, columns][win] = True
+    layer.geometry_ids[rows, columns][win] = mesh.identity
 
 
 def _raster_faces(

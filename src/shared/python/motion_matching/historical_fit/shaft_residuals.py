@@ -227,21 +227,11 @@ class ShaftAxisResidualTerm:
         segment = self.evidence.frames[frame_index].segment
         if segment.points_px is None:
             return None
-        points = native.marker_positions(
-            pose,
-            {
-                "shaft_a": (self.axis.body, self.axis.point_a_m),
-                "shaft_b": (self.axis.body, self.axis.point_b_m),
-            },
+        origin, normal, direction, length = project_authored_shaft_line(
+            native, camera, self.axis, pose
         )
-        projected = camera.project(points)
-        direction = projected[1] - projected[0]
-        length = np.linalg.norm(direction)
-        if not np.isfinite(length) or length <= 1e-10:
-            raise ValueError("Projected shaft axis is degenerate")
-        normal = np.array([-direction[1], direction[0]]) / length
         observed = np.asarray(segment.points_px)
-        errors = (observed - projected[0]) @ normal
+        errors = (observed - origin) @ normal
         bearing = observed[1] - observed[0]
         cosine = abs(float(bearing @ direction)) / (np.linalg.norm(bearing) * length)
         angle = float(np.degrees(np.arccos(np.clip(cosine, 0, 1))))
@@ -302,3 +292,33 @@ class ShaftAxisResidualTerm:
             observed_segment_count=len(observed),
             raw_rms_pixels=rms,
         )
+
+
+def project_authored_shaft_line(
+    native: MatchingPlant,
+    camera: CameraProjection,
+    axis: AuthoredShaftAxis,
+    pose: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    """Return image origin, unit normal, direction and length of one rigid axis.
+
+    Uses the canonical native markers and saved projection. This authenticates
+    neither caller context nor historical shaft/camera geometry. Degenerate
+    projections reject instead of fabricating a bearing.
+    """
+    if axis.native_model_sha != native.plant_sha:
+        raise ValueError("Shaft axis native model identity differs")
+    points = native.marker_positions(
+        pose,
+        {
+            "shaft_a": (axis.body, axis.point_a_m),
+            "shaft_b": (axis.body, axis.point_b_m),
+        },
+    )
+    projected = camera.project(points)
+    direction = projected[1] - projected[0]
+    length = np.linalg.norm(direction)
+    if not np.isfinite(length) or length <= 1e-10:
+        raise ValueError("Projected shaft axis is degenerate")
+    normal = np.array([-direction[1], direction[0]]) / length
+    return projected[0], normal, direction, float(length)

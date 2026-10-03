@@ -9,9 +9,6 @@ from importlib.metadata import PackageNotFoundError, version
 import json
 from pathlib import Path
 import platform
-import subprocess
-import sys
-import time
 from typing import Any, Callable, Literal
 from uuid import uuid4
 
@@ -27,13 +24,11 @@ from src.shared.python.motion_matching.jobs import (
     MatchingJobService,
     MatchingJobSpec,
     MatchingWorkOutcome,
-    ProcessGuard,
 )
 from src.shared.python.motion_matching.jobs.service import JobHandle
 from src.shared.python.motion_matching.jobs.io_atomic import atomic_write_json
-from src.shared.python.security import secure_popen
-from src.shared.python.core import repo_python_environment
 from src.shared.python.version_info import get_repo_root, read_git_commit
+from .necromatcher_native_worker import execute_native_research_worker
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .project_store import validate_workspace_id
@@ -171,48 +166,8 @@ def fit_execution_stamp() -> dict[str, Any]:
 def _execute_worker(
     request_path: Path, budget: float, cancelled: Callable[[], bool]
 ) -> dict[str, Any]:
-    guard = ProcessGuard()
-    env = repo_python_environment(get_repo_root())
-    if sys.platform.startswith("linux"):
-        env.setdefault("MUJOCO_GL", "osmesa")
-    process = secure_popen(
-        [
-            sys.executable,
-            "-u",
-            "-m",
-            "src.shared.python.workspace.necromatcher_fit_worker",
-            str(request_path),
-        ],
-        cwd=get_repo_root(),
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        encoding="utf-8",
-    )
-    guard.register(process)
-    deadline = time.monotonic() + budget
-    try:
-        while True:
-            if cancelled():
-                raise JobCancelledError("Native refit cancelled before publication")
-            if time.monotonic() >= deadline:
-                raise RuntimeError("Native refit exceeded its wall execution budget")
-            try:
-                output, errors = process.communicate(
-                    timeout=max(0.001, min(0.2, deadline - time.monotonic()))
-                )
-                break
-            except subprocess.TimeoutExpired:
-                continue
-        if process.returncode:
-            raise RuntimeError(f"Native refit worker failed: {errors[-2000:]}")
-        return dict(json.loads(output))
-    finally:
-        guard.terminate_all(reason="refit complete or interrupted")
-        for stream in (process.stdout, process.stderr):
-            if stream is not None:
-                stream.close()
+    """Retain the existing three-argument monkeypatch/cancellation boundary."""
+    return execute_native_research_worker(request_path, budget, cancelled)
 
 
 def _shaft_record(bound: BoundShaftEvidence, weight: float) -> dict[str, Any]:

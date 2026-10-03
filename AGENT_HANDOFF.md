@@ -1,3 +1,12 @@
+# Isolated Native Hypothesis Admission — #11376
+
+- Branch: `feat/necromatcher-hypothesis-admission-11376`, isolated from the frozen real-player workspace.
+- Public typed request, authenticated source/model/clock binding and explicit saved-final Hermite rebinding produce an unoptimized research seed through the existing clean-worker/initializer/store path.
+- Registered model/XML hashes, compiled scalar units/order, body-local markers and complete PNG/decoded-BGR/PTS identities fail closed. Recall reauthenticates lineage; source/runtime fingerprints include all new helpers.
+- No canonical player hypothesis, optimizer job, camera/anatomy/physical-time qualification, issue closure or public release is claimed. Root owns final review/commit and subsequent trial authorization.
+- Procedure: `docs/development/necromatcher-native-hypothesis-admission.md`; focused red/green/static/native fixture evidence is reported at source freeze.
+- Validation: 160 focused/compatibility cases passed; final formatted source passed 19 native-worker, SDK-free import and fingerprint cases. Eight worker-response tamper cases reject publication, including full recipe/scales/training-frame changes. Pinned mypy, scoped Ruff/format, title case and design-manual governance passed; release remains blocked.
+
 # Active: Necromatcher Source-Bound Shaft Continuation — #11318
 
 - Branch: `feat/necromatcher-native-fit-11235`; historical PR #11240 merged; continuation PR #11359 published at dfdfeb3ad0bddaa05303ec4f385d2d4fc42e5ed0, normal push hooks passed. Parent #11232; Tiger #11226; Hogan #11229. Full goal remains active.

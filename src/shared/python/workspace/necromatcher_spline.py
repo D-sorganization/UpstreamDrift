@@ -7,6 +7,8 @@ import hashlib
 import json
 from typing import Any
 
+import numpy as np
+from src.shared.python.estimation import CubicHermiteSplineTrajectory
 from src.shared.python.motion_matching.historical_fit import ImageSplineStart
 
 
@@ -61,3 +63,30 @@ def preserved_fit_spline(fit: Mapping[str, Any]) -> ImageSplineStart | None:
     ):
         raise ValueError("Preserved spline identity differs from bound parent record")
     return start
+
+
+def verify_preserved_fit_samples(
+    source: Mapping[str, Any], start: ImageSplineStart
+) -> np.ndarray:
+    """Validate stored dense poses through the canonical Hermite provider."""
+    times = np.array(
+        [
+            frame["pts_ticks"]
+            * frame["timebase_numerator"]
+            / frame["timebase_denominator"]
+            for frame in source["frames"]
+        ]
+    )
+    if np.any(times < start.knot_times[0]) or np.any(times > start.knot_times[-1]):
+        raise ValueError("Parent source clock exceeds preserved spline interval")
+    trajectory = CubicHermiteSplineTrajectory(
+        np.asarray(start.knot_times), len(start.free_coordinates)
+    )
+    free = trajectory.evaluate(np.asarray(start.spline_coefficients), times).q
+    samples = np.asarray(source["q"], dtype=float)
+    expected = np.tile(samples[0], (len(samples), 1))
+    indices = [start.coordinate_order.index(name) for name in start.free_coordinates]
+    expected[:, indices] = free
+    if not np.allclose(samples, expected, rtol=1e-8, atol=1e-10):
+        raise ValueError("Parent samples disagree with the preserved canonical spline")
+    return expected

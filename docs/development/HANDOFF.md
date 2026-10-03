@@ -1,3 +1,12 @@
+# Isolated Native Hypothesis Admission — #11376
+
+- Branch: `feat/necromatcher-hypothesis-admission-11376`, isolated from the frozen real-player workspace.
+- Public typed request, authenticated source/model/clock binding and explicit saved-final Hermite rebinding produce an unoptimized research seed through the existing clean-worker/initializer/store path.
+- Registered model/XML hashes, compiled scalar units/order, body-local markers and complete PNG/decoded-BGR/PTS identities fail closed. Recall reauthenticates lineage; source/runtime fingerprints include all new helpers.
+- No canonical player hypothesis, optimizer job, camera/anatomy/physical-time qualification, issue closure or public release is claimed. Root owns final review/commit and subsequent trial authorization.
+- Procedure: `docs/development/necromatcher-native-hypothesis-admission.md`; focused red/green/static/native fixture evidence is reported at source freeze.
+- Validation: 160 focused/compatibility cases passed; final formatted source passed 19 native-worker, SDK-free import and fingerprint cases. Eight worker-response tamper cases reject publication, including full recipe/scales/training-frame changes. Pinned mypy, scoped Ruff/format, title case and design-manual governance passed; release remains blocked.
+
 # Active: Necromatcher Source-Bound Shaft Continuation — #11318
 
 - Branch: `feat/necromatcher-native-fit-11235`; historical PR #11240 merged; continuation PR #11359 published at dfdfeb3ad0bddaa05303ec4f385d2d4fc42e5ed0, normal push hooks passed. Parent #11232; Tiger #11226; Hogan #11229. Full goal remains active.
@@ -1116,3 +1125,33 @@ original film timing or independent multiview.
 The first post-merge push was stopped because documentation changed while the
 security hook was running (no security issues were identified). Finish the
 current documentation commit and retry from a clean worktree.
+
+## Forearm Results and Hypothesis Admission Review
+
+The standalone 12-page source and final page-review receipt are
+`necromatcher-forearm-results-supplement.tex` and
+`necromatcher-forearm-results-supplement-review.json` in this directory. The
+compiled PDF SHA-256 is
+`3935db139d694018e1e43608c4ef7f70f759a8cd8d08cef4f3879d1c37f3f5c6`.
+Required relative assets come from the verified Desktop report package; they
+are not committed private graphics. The original numerical nine-page edition,
+74-page report and earlier supplements remain unchanged.
+
+ControlTower received the separate 129-file paired-shape package and 27-file
+report package. Remote verification receipts have SHA-256
+`0652338b026f68b591d357171368eb9ae68a2018b1c1b24840e55c9ef474f372`
+and `0df25cc5a40df02af50fb491812327950030d87bc87e180fdb3a3624931f0308`,
+respectively. These are artifact deliveries, not public deployment or release.
+The actual Tiger V17/Hogan V14 results use producer
+`00b7d9846bd2fb2572b7c84f03cfc6c9699323cb`; all four remain nonconverged and
+rejected research hypotheses. Full shaded Hogan video gates failed.
+
+The isolated #11376 correction preserves exact saved first-pose references and
+uses a hypothesis-specific `rtol=0`, `atol=1e-12` canonical roundoff limit at
+admission/publication, leaving the legacy spline validator unchanged. Direct
+model definitions must use the supported canonical JSON bytes. Camera-only,
+real geometric FK change and separately fresh source-bound shaft diagnostics
+are covered by temporary fixtures; the combined compatibility lane passed 144
+cases. The row-time path separately has 53 passing software checks. Real
+historical camera/morphology calibration, further solver-budget results and
+manual release remain unclaimed and blocked pending their own reviewed evidence.
