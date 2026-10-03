@@ -4,13 +4,7 @@
   "title": "GlyphSet (v1)",
   "description": "Renderer-neutral geometric force and torque glyph set (ADR-0052, #11288).",
   "type": "object",
-  "required": [
-    "schema_version",
-    "time_s",
-    "arrows",
-    "torque_arcs",
-    "legend"
-  ],
+  "required": ["schema_version", "time_s", "arrows", "torque_arcs", "legend"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {

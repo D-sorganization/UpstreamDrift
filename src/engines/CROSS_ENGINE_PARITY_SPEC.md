@@ -152,9 +152,9 @@ Engines expose force/torque overlays through the `ForceTorqueProvider` and
 `AxialLoadProvider` capabilities. Wrenches are world-frame (Z-up), SI, and are
 the wrench applied to the named body.
 
-| Engine        | Channel                                                                                                     | Source                                                    | Status                                       |
-| ------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------- |
-| **Pinocchio** | `JOINT_REACTION` (`data.f` via RNEA with actual `a`), `JOINT_ACTUATOR` (`tau`), `CONTACT`, axial load (N) | `pinocchio_force_torque.py::PinocchioForceTorqueSource`   | FTO-13 (#11298); `force_visualization=FULL` |
+| Engine        | Channel                                                                                                   | Source                                                  | Status                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------- |
+| **Pinocchio** | `JOINT_REACTION` (`data.f` via RNEA with actual `a`), `JOINT_ACTUATOR` (`tau`), `CONTACT`, axial load (N) | `pinocchio_force_torque.py::PinocchioForceTorqueSource` | FTO-13 (#11298); `force_visualization=FULL` |
 
 ### 2.5.1 Ball-flight physical benchmark gate
 
@@ -181,9 +181,9 @@ canonical gate:
 
 Engines that implement `ForceTorqueProvider` (ADR-0052) emit world-frame wrenches by kind. Unavailable channels are omitted, never zero-filled.
 
-| Engine | `joint_reaction` | `joint_actuator` | `contact` | `gravity` | Axial loads |
-| :----- | :--------------- | :--------------- | :-------- | :-------- | :---------- |
-| Drake  | reaction-forces port, rotated from `Jc` to world | net-actuation port (revolute only) | point-pair and hydroelastic results | opt-in | from joint reactions, single-child bodies |
+| Engine | `joint_reaction`                                 | `joint_actuator`                   | `contact`                           | `gravity` | Axial loads                               |
+| :----- | :----------------------------------------------- | :--------------------------------- | :---------------------------------- | :-------- | :---------------------------------------- |
+| Drake  | reaction-forces port, rotated from `Jc` to world | net-actuation port (revolute only) | point-pair and hydroelastic results | opt-in    | from joint reactions, single-child bodies |
 
 ### 2.5.3 Force Overlay Parity
 
@@ -194,11 +194,11 @@ model builder per engine, and every case asserts on the provider frame
 (`get_force_torque_frame()`) only, through one `assert_wrench` helper with
 tolerances set once at the top of the file.
 
-| Fixture | Expected (world, Z-up, applied to the body) | Drake | Pinocchio | OpenSim | MuJoCo | Simscape |
-| :------ | :------------------------------------------ | :---- | :-------- | :------ | :----- | :------- |
-| Static hanging pendulum | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension) | live | live | live | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
-| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live | live | live | skips until FTO-9 | not applicable (file-based) |
-| Body resting on ground | contact forces sum to `(0, 0, +m*g)`; points on the ground plane | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9 | skips (file-based) |
+| Fixture                           | Expected (world, Z-up, applied to the body)                                                        | Drake            | Pinocchio                | OpenSim              | MuJoCo                     | Simscape                                |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------- | :--------------- | :----------------------- | :------------------- | :------------------------- | :-------------------------------------- |
+| Static hanging pendulum           | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension)                                  | live             | live                     | live                 | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
+| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live             | live                     | live                 | skips until FTO-9          | not applicable (file-based)             |
+| Body resting on ground            | contact forces sum to `(0, 0, +m*g)`; points on the ground plane                                   | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9          | skips (file-based)                      |
 
 A sign-convention guard flips each expected sign and requires the row to fail,
 so the suite cannot pass by accident. Rows skip only for an absent engine or an
@@ -337,15 +337,15 @@ world-frame `ForceTorqueSeries` with no MATLAB. The declarative table
 delegates to it. A missing column makes that half `None` (never zero) and is
 listed in the returned `missing` tuple (`"<label>:force"` / `"<label>:torque"`).
 
-| Label | Kind | Body | Columns | Frame | Point |
-| --- | --- | --- | --- | --- | --- |
-| `joint_reaction:<J>` | `JOINT_REACTION` | `<J>` | `<J>Logs_ConstraintForceLocal_*`, `..._ConstraintTorqueLocal_*` | joint-local, `R @ v` | `<J>Logs_GlobalPosition_*` |
-| `joint_total:<J>` | `EXTERNAL` | `<J>` | `<J>Logs_ForceLocal_*`, `..._TorqueLocal_*` | joint-local, `R @ v` | same |
-| `joint_actuator:<J>` | `JOINT_ACTUATOR` | `<J>` | `<J>Logs_ActuatorTorque{X,Y,Z}` per joint (LScap/RScap/Spine X,Y; LS/RS X,Y,Z; LF/RF Z; Torso none; undriven axes exact 0; torque only) | joint-local, `R @ v` | same |
-| `external:base_on_hip` | `EXTERNAL` | `pelvis` | `HipLogs_BaseonHipForceGlobal_*`, `..._TorqueGlobal_*` | world | `HipLogs_HipGlobalPosition_dim*` |
-| `grip:total_hand` | `GRIP` | `club` | `CalculatedSignalsLogs_TotalHandForceGlobal_*`, `..._TorqueGlobal_*` | world | `MidpointCalcsLogs_MPGlobalPosition_*` |
-| `grip:lh_mof` / `grip:rh_mof` | `GRIP` | `club` | `MomentandCoupleLogs_LHMOFonClubGlobal_*` / `RHMOF...` (torque only) | world | `LWLogs_LHGlobalPosition_*` / `RWLogs_RHGlobalPosition_*` |
-| `grip:midpoint_couple` | `GRIP` | `club` | `MomentandCoupleLogs_EquivalentMidpointCoupleGlobal_*` (torque only) | world | MP position |
+| Label                         | Kind             | Body     | Columns                                                                                                                                 | Frame                | Point                                                     |
+| ----------------------------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- |
+| `joint_reaction:<J>`          | `JOINT_REACTION` | `<J>`    | `<J>Logs_ConstraintForceLocal_*`, `..._ConstraintTorqueLocal_*`                                                                         | joint-local, `R @ v` | `<J>Logs_GlobalPosition_*`                                |
+| `joint_total:<J>`             | `EXTERNAL`       | `<J>`    | `<J>Logs_ForceLocal_*`, `..._TorqueLocal_*`                                                                                             | joint-local, `R @ v` | same                                                      |
+| `joint_actuator:<J>`          | `JOINT_ACTUATOR` | `<J>`    | `<J>Logs_ActuatorTorque{X,Y,Z}` per joint (LScap/RScap/Spine X,Y; LS/RS X,Y,Z; LF/RF Z; Torso none; undriven axes exact 0; torque only) | joint-local, `R @ v` | same                                                      |
+| `external:base_on_hip`        | `EXTERNAL`       | `pelvis` | `HipLogs_BaseonHipForceGlobal_*`, `..._TorqueGlobal_*`                                                                                  | world                | `HipLogs_HipGlobalPosition_dim*`                          |
+| `grip:total_hand`             | `GRIP`           | `club`   | `CalculatedSignalsLogs_TotalHandForceGlobal_*`, `..._TorqueGlobal_*`                                                                    | world                | `MidpointCalcsLogs_MPGlobalPosition_*`                    |
+| `grip:lh_mof` / `grip:rh_mof` | `GRIP`           | `club`   | `MomentandCoupleLogs_LHMOFonClubGlobal_*` / `RHMOF...` (torque only)                                                                    | world                | `LWLogs_LHGlobalPosition_*` / `RWLogs_RHGlobalPosition_*` |
+| `grip:midpoint_couple`        | `GRIP`           | `club`   | `MomentandCoupleLogs_EquivalentMidpointCoupleGlobal_*` (torque only)                                                                    | world                | MP position                                               |
 
 `<J>` is one of `LScap, RScap, LS, RS, LF, RF, Spine, Torso`. Rotation:
 `R = [[I11, I12, I13], [I21, I22, I23], [I31, I32, I33]]` from

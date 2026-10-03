@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import logging
 import math
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 import numpy as np
 
@@ -35,7 +35,7 @@ from src.shared.python.force_overlay import (
 
 logger = logging.getLogger(__name__)
 
-_Column = Sequence[Any] | np.ndarray
+_Column: TypeAlias = Sequence[Any] | np.ndarray
 
 __all__ = [
     "DEFAULT_ROTATION_TOL",
