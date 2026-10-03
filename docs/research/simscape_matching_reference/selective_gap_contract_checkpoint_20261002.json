@@ -1,0 +1,177 @@
+{
+  "qualification": "SELECTIVE_GAP_SOFTWARE_CONTRACTS_NOT_CANDIDATE_OR_DYNAMIC_ACCEPTANCE",
+  "red": {
+    "phase": "RED",
+    "baseline_passed": 8,
+    "baseline_failed": 0,
+    "passed": 0,
+    "failed": 10,
+    "incomplete": 8,
+    "names": [
+      "test_gs3dx_ik_gap_weights/test_authoritative_target_names",
+      "test_gs3dx_ik_gap_weights/test_default_parity_and_empty_overrides",
+      "test_gs3dx_ik_gap_weights/test_distinct_pelvis_vs_club_gap",
+      "test_gs3dx_ik_gap_weights/test_shuffled_names_alignment",
+      "test_gs3dx_ik_gap_weights/test_preservation_of_measured_weights",
+      "test_gs3dx_ik_gap_weights/test_boundary_values",
+      "test_gs3dx_ik_gap_weights/test_validation_errors",
+      "test_gs3dx_ik_gap_weights/test_pre_model_load_validation_fails_before_simulink",
+      "test_gs3dx_ik_gap_weights/test_reject_empty_identifiers_and_override_types",
+      "test_gs3dx_ik_gap_weights/test_pelvis_override_retains_club_baseline"
+    ],
+    "native_model_loaded": false
+  },
+  "green": {
+    "phase": "GREEN",
+    "baseline_passed": 35,
+    "baseline_failed": 0,
+    "passed": 10,
+    "failed": 0,
+    "incomplete": 0,
+    "names": [
+      "test_gs3dx_ik_gap_weights/test_authoritative_target_names",
+      "test_gs3dx_ik_gap_weights/test_default_parity_and_empty_overrides",
+      "test_gs3dx_ik_gap_weights/test_distinct_pelvis_vs_club_gap",
+      "test_gs3dx_ik_gap_weights/test_shuffled_names_alignment",
+      "test_gs3dx_ik_gap_weights/test_preservation_of_measured_weights",
+      "test_gs3dx_ik_gap_weights/test_boundary_values",
+      "test_gs3dx_ik_gap_weights/test_validation_errors",
+      "test_gs3dx_ik_gap_weights/test_pre_model_load_validation_fails_before_simulink",
+      "test_gs3dx_ik_gap_weights/test_reject_empty_identifiers_and_override_types",
+      "test_gs3dx_ik_gap_weights/test_pelvis_override_retains_club_baseline"
+    ],
+    "native_model_loaded": false
+  },
+  "full_global_gap_candidate_rejected": {
+    "qualification": "FULL_OWNER_CANDIDATE_CONTINUITY_AUDIT_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "model_loaded": false,
+    "results": {
+      "gap_1": {
+        "max_adjacent_leg_coordinate_step_deg": 34.0900304808911,
+        "root_joint_translation_step_241_to_249_m": 0.017350316987136565,
+        "max_adjacent_root_joint_translation_step_m": 0.02706169515502546,
+        "leg_coordinate_step_241_to_249_deg": 34.0900304808911,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false,
+        "all_native_status_equal_one": true,
+        "mean_marker_RMS_mm": 18.790902857685722,
+        "peak_marker_RMS_mm": 49.148063113257244,
+        "post_address_mean_head_error_deg": 11.21598346341364,
+        "post_address_peak_head_error_deg": 22.16892132188402,
+        "left_foot_peak_error_deg": 19.44523099023505,
+        "right_foot_peak_error_deg": 20.403992460012653,
+        "measured_left_foot_sample_count": 45,
+        "measured_right_foot_sample_count": 45
+      },
+      "original_selected": {
+        "max_adjacent_leg_coordinate_step_deg": 38.3799868689029,
+        "root_joint_translation_step_241_to_249_m": 0.05392632614617937,
+        "max_adjacent_root_joint_translation_step_m": 0.05392632614617937,
+        "leg_coordinate_step_241_to_249_deg": 38.3799868689029,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false,
+        "all_native_status_equal_one": true,
+        "mean_marker_RMS_mm": 16.75363897774976,
+        "peak_marker_RMS_mm": 36.987396368432904,
+        "post_address_mean_head_error_deg": 11.318101592895191,
+        "post_address_peak_head_error_deg": 22.16892132188402,
+        "left_foot_peak_error_deg": 19.44523099023505,
+        "right_foot_peak_error_deg": 20.57273929029672,
+        "measured_left_foot_sample_count": 45,
+        "measured_right_foot_sample_count": 45
+      }
+    }
+  },
+  "default_native_parity": {
+    "frames": [1, 241, 249],
+    "baseline_vs_omitted_exact_struct_equal": true,
+    "omitted_vs_empty_exact_struct_equal": true,
+    "head_foot_keyed_seed_retained": true
+  },
+  "selective_owner_candidate": {
+    "qualification": "FULL_OWNER_CANDIDATE_CONTINUITY_AUDIT_NO_PROMOTION_OR_DYNAMIC_QUALIFICATION",
+    "model_loaded": false,
+    "results": {
+      "lower_body_gap_1": {
+        "max_adjacent_leg_coordinate_step_deg": 34.0900304808911,
+        "root_joint_translation_step_241_to_249_m": 0.017350316987136565,
+        "max_adjacent_root_joint_translation_step_m": 0.02706169515502546,
+        "leg_coordinate_step_241_to_249_deg": 34.0900304808911,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false,
+        "all_native_status_equal_one": true,
+        "mean_marker_RMS_mm": 16.753378383709826,
+        "peak_marker_RMS_mm": 36.97539517241843,
+        "post_address_mean_head_error_deg": 11.252715043239169,
+        "post_address_peak_head_error_deg": 22.16892132188402,
+        "left_foot_peak_error_deg": 19.44523099023505,
+        "right_foot_peak_error_deg": 20.575817941048378,
+        "measured_left_foot_sample_count": 45,
+        "measured_right_foot_sample_count": 45
+      },
+      "original_selected": {
+        "max_adjacent_leg_coordinate_step_deg": 38.3799868689029,
+        "root_joint_translation_step_241_to_249_m": 0.05392632614617937,
+        "max_adjacent_root_joint_translation_step_m": 0.05392632614617937,
+        "leg_coordinate_step_241_to_249_deg": 38.3799868689029,
+        "source_frame_step": 8,
+        "selected_candidate_promoted": false,
+        "all_native_status_equal_one": true,
+        "mean_marker_RMS_mm": 16.75363897774976,
+        "peak_marker_RMS_mm": 36.987396368432904,
+        "post_address_mean_head_error_deg": 11.318101592895191,
+        "post_address_peak_head_error_deg": 22.16892132188402,
+        "left_foot_peak_error_deg": 19.44523099023505,
+        "right_foot_peak_error_deg": 20.57273929029672,
+        "measured_left_foot_sample_count": 45,
+        "measured_right_foot_sample_count": 45
+      }
+    }
+  },
+  "native_receipts": {
+    "selective-gap-red-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('run_selective_gap_red.m')",
+      "owned_pids": [14312],
+      "timestamp": "2026-10-02T21:32:30.723610+00:00"
+    },
+    "selective-gap-green-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('run_selective_gap_green.m')",
+      "owned_pids": [46180],
+      "timestamp": "2026-10-02T21:34:09.998594+00:00"
+    },
+    "owner-selective-gap-continuity-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('probe_owner_selective_gap_continuity_reviewed.m')",
+      "owned_pids": [50492],
+      "timestamp": "2026-10-02T21:39:54.293692+00:00"
+    },
+    "owner-selective-gap-continuity-audit-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('audit_owner_selective_gap_continuity_reviewed.m')",
+      "owned_pids": [98288],
+      "timestamp": "2026-10-02T21:40:23.092880+00:00"
+    }
+  },
+  "latex_compilation": {
+    "status": "INFRASTRUCTURE_UNAVAILABLE",
+    "diagnostic": "Unable to find standard directories for platform"
+  }
+}

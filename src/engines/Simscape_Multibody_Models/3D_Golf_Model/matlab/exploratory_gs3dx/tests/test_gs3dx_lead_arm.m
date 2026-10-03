@@ -41,10 +41,11 @@ classdef test_gs3dx_lead_arm < matlab.unittest.TestCase
             f0 = jc.impact_frame;
             frames = unique([1:10:f0 f0]);
             reg = {'posture_weight', 0.01, 'smooth_weight', 0.02, 'backward', false, 'gap_weight', 0.5};
-            off = gs3dx_whole_body_ik(jc, frames=1, calibration_frames=1:15:f0 - 90).offsets;
+            % Explicitly pin historically Fit-based lead arm test calls to variants.fit
+            off = gs3dx_whole_body_ik(jc, 'model', fit, frames=1, calibration_frames=1:15:f0 - 90).offsets;
             golf = gs3dx_golf_rom();
-            free = gs3dx_whole_body_ik(jc, 'frames', frames, 'offsets', off, reg{:});
-            held = gs3dx_whole_body_ik(jc, 'frames', frames, 'offsets', off, reg{:}, ...
+            free = gs3dx_whole_body_ik(jc, 'model', fit, 'frames', frames, 'offsets', off, reg{:});
+            held = gs3dx_whole_body_ik(jc, 'model', fit, 'frames', frames, 'offsets', off, reg{:}, ...
                 'rom_weight', 3, 'rom', golf);
             r0 = gs3dx_rom_check(golf, gs3dx_rom_from_ik(free, golf));
             r = gs3dx_rom_check(golf, gs3dx_rom_from_ik(held, golf));

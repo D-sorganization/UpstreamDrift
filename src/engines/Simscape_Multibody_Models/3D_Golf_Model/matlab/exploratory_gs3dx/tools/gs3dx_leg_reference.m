@@ -236,25 +236,13 @@ function [R, p] = local_foot(jc, cap, P, frames, address, yaw)
     ankle = jc.(['ankle_' P]);
     toe_in = local("ToeIn");
     toe_out = local("ToeOut");
-    F = zeros(3, 3, size(ankle, 2));
-    for f = 1:size(ankle, 2)
-        x = (toe_in(:, f) + toe_out(:, f)) / 2 - ankle(:, f);
-        x = x / norm(x);
-        z = cross(x, toe_in(:, f) - toe_out(:, f));
-        z = z / norm(z);
-        F(:, :, f) = [x, cross(z, x), z];
-    end
-    ok = address(~jc.gap.(['ankle_' P])(address));
-    assert(~isempty(ok), 'gs3dx:legref', 'No measured %s ankle in the address frames', P);
-    F0 = local_mean_rotation(F(:, :, ok));
-    R0 = [cosd(yaw) -sind(yaw) 0; sind(yaw) cosd(yaw) 0; 0 0 1];
-    R = pagemtimes(pagemtimes(F(:, :, frames), F0.'), R0);
+    gaps = jc.gap.(['ankle_' P]) | jc.gap.(['toe_' P]);
+    ok = address(~gaps(address));
+    assert(~isempty(ok), 'gs3dx:legref', 'No measured %s foot in the address frames', P);
+    R_all = gs3dx_foot_marker_frame(ankle, toe_in, toe_out, gaps, ...
+        'address_frames', address, 'address_yaw_deg', yaw);
+    R = R_all(:, :, frames);
     p = ankle(:, frames);
-end
-
-function R = local_mean_rotation(F)
-    [U, ~, V] = svd(sum(F, 3));
-    R = U * diag([1 1 det(U * V.')]) * V.';
 end
 
 function fit = local_leg_fit(geom, pelvis_R, pelvis_p, foot, knee, q0)

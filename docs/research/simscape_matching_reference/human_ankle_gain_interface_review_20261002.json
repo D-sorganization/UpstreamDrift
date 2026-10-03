@@ -1,0 +1,83 @@
+{
+  "qualification": "READ_ONLY_KINEMATICS_SOLVER_VS_ANALYTICAL_GAIN_SEAM_PROBE",
+  "model_name": "GS3DX_Human",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "gates": {
+    "pose_position_max_m": 1e-8,
+    "rotation_frobenius_max": 1e-7,
+    "max_j_diff_m_per_deg": 1e-6,
+    "max_g_diff_deg_per_m": 1e-5,
+    "damping_m_per_deg": 0.002,
+    "lever_m": 0.5,
+    "step_deg": 0.001
+  },
+  "results": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "interface_status": "VERIFIED_SEAM_PASS",
+      "initial_pose_pass": true,
+      "pelvis_consistent": true,
+      "pelvis_pos_diff_m": 1.5515838457795457e-17,
+      "pelvis_rot_fro": 9.46968425602272e-16,
+      "left_foot_pos_diff_m": 4.76364036948032e-16,
+      "left_foot_rot_fro": 5.972272531702892e-16,
+      "right_foot_pos_diff_m": 2.7755575615628914e-16,
+      "right_foot_rot_fro": 6.633241042494417e-16,
+      "gain_evaluated": true,
+      "gain_gates_pass": true,
+      "max_J_diff_left_m_per_deg": 1.7694179454963432e-13,
+      "max_J_diff_right_m_per_deg": 1.6653345369377348e-13,
+      "max_G_diff_left_deg_per_m": 2.8865372314612614e-9,
+      "max_G_diff_right_deg_per_m": 4.152155952397152e-9,
+      "gain_ref_diff_left_deg_per_m": 0,
+      "gain_ref_diff_right_deg_per_m": 0,
+      "damping_m_per_deg": 0.002,
+      "lever_m": 0.5
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "interface_status": "VERIFIED_SEAM_PASS",
+      "initial_pose_pass": true,
+      "pelvis_consistent": true,
+      "pelvis_pos_diff_m": 0,
+      "pelvis_rot_fro": 2.4835037038225095e-16,
+      "left_foot_pos_diff_m": 2.435541875787129e-16,
+      "left_foot_rot_fro": 7.176307408322877e-16,
+      "right_foot_pos_diff_m": 2.9406505148178845e-16,
+      "right_foot_rot_fro": 4.730248957533498e-16,
+      "gain_evaluated": true,
+      "gain_gates_pass": true,
+      "max_J_diff_left_m_per_deg": 2.220446049250313e-13,
+      "max_J_diff_right_m_per_deg": 2.220446049250313e-13,
+      "max_G_diff_left_deg_per_m": 4.9544723879080266e-9,
+      "max_G_diff_right_deg_per_m": 7.472834795407834e-9,
+      "gain_ref_diff_left_deg_per_m": 0,
+      "gain_ref_diff_right_deg_per_m": 0,
+      "damping_m_per_deg": 0.002,
+      "lever_m": 0.5
+    }
+  },
+  "matlab_release": "R2025b",
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('probe_human_gain_reviewed.m')",
+    "owned_pids": [4448],
+    "timestamp": "2026-10-02T16:03:31.071098+00:00"
+  },
+  "script_sha256": "10a15b3830e419a0efbdfbf9b8721abf84588deb743eb7a637386c2459ab7fa4",
+  "simulation_executed": false,
+  "model_saved": false,
+  "scope": "Both exact accepted address stances with actual fitted capture-specific geometry; ankle follower, not foot-solid or contact-sphere frame",
+  "parent_review_corrections": [
+    "Use actual scalar KinematicsSolver frame variable IDs, not invented six frame-group names",
+    "Cross-check native48 key uniqueness and all units against manifest",
+    "Reject failed gain gates explicitly; do not label every pose-passing result VERIFIED_SEAM_PASS",
+    "Include direct existing balance_gain equality in acceptance"
+  ],
+  "physical_hold_qualified": false,
+  "independent_forward_swing_qualified": false
+}

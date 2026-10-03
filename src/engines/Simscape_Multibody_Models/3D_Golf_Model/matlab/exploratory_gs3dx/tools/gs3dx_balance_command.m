@@ -6,8 +6,10 @@ function [cmd, shift] = gs3dx_balance_command(t, com, com_rate, feet, T, C0, Kp,
 %   12-axis command of the GS3DX_FitBalance leg servo, which applies
 %   CMD - [Kp Kd] [q; qd]:
 %
-%     CMD = C0 + KP .* (A(t) + G(t) SHIFT + FOOT) + KD .* (R(t) + G(t) SHIFT_RATE)
+%     CMD = C0(t) + KP .* (A(t) + G(t) SHIFT + FOOT) + KD .* (R(t) + G(t) SHIFT_RATE)
 %
+%   C0: constant 12-vector (column or row) OR 12 x numel(T) sampled feedforward
+%   on reference time grid T (N*m).
 %   A, R: leg reference angles and rates (12 x frames, deg and deg/s) on T.
 %   COM, COM_RATE: the measured whole-body centre of mass and its rate
 %   (World, m and m/s); CREF, VREF: their references (3 x frames).  The
@@ -24,8 +26,25 @@ function [cmd, shift] = gs3dx_balance_command(t, com, com_rate, feet, T, C0, Kp,
 %   command is the plain reference servo of GS3DX_FitLegs.
 %   Code-generation compatible (called by 'Lower Body/Leg Torque Commands').
 
+    assert(isnumeric(C0) && isreal(C0), 'gs3dx:balance_command:invalidType', ...
+        'Feedforward torque C0 must be a real numeric array.');
+    nT = numel(T);
+    is_const12 = (numel(C0) == 12) && (size(C0, 1) == 1 || size(C0, 2) == 1);
+    is_profile = (size(C0, 1) == 12) && (size(C0, 2) == nT);
+    assert(all(isfinite(C0(:))), 'gs3dx:balance_command:nonfinite', ...
+        'Feedforward torque C0 must be finite.');
+    assert(ismatrix(C0) && (is_const12 || is_profile), 'gs3dx:balance_command:invalidShape', ...
+        'Feedforward torque C0 must be a 12-vector or a 12 x numel(T) matrix.');
+
     [k, k2, w] = gs3dx_time_interp(t, T);
     at = @(X) X(:, k) + w * (X(:, k2) - X(:, k));
+
+    if is_profile
+        c0_now = at(C0);
+    else
+        c0_now = C0(:);
+    end
+
     d = size(G, 2);
     e = com(1:d) - at(Cref(1:d, :));
     de = com_rate(1:d) - at(Vref(1:d, :));
@@ -38,7 +57,7 @@ function [cmd, shift] = gs3dx_balance_command(t, com, com_rate, feet, T, C0, Kp,
         rows = (s - 1) * 6 + (1:6);
         foot(rows) = Gt(rows, :) * local_limit(on * kf * ef((s - 1) * 3 + (1:d)), limit);
     end
-    cmd = C0(:) + Kp(:) .* (at(A) + Gt * shift + foot) + Kd(:) .* (at(R) + Gt * shift_rate);
+    cmd = c0_now + Kp(:) .* (at(A) + Gt * shift + foot) + Kd(:) .* (at(R) + Gt * shift_rate);
 end
 
 function x = local_limit(x, limit)

@@ -1,0 +1,67 @@
+{
+  "capture_alias": "capture-O",
+  "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+  "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+  "decision": "REJECTED",
+  "selection_rule": "Do not replace when full or held-out mean/max position RMS worsens.",
+  "qualification": "IK_CANDIDATE_UNQUALIFIED",
+  "baseline_all": {
+    "mean_rms_mm": 16.76737508914212,
+    "max_frame_rms_mm": 37.62630299901011
+  },
+  "candidate_all": {
+    "mean_rms_mm": 17.94762147371688,
+    "max_frame_rms_mm": 41.278009354118915
+  },
+  "baseline_held_out": {
+    "mean_rms_mm": 26.01093343152364,
+    "max_frame_rms_mm": 37.62630299901011
+  },
+  "candidate_held_out": {
+    "mean_rms_mm": 27.96919920526858,
+    "max_frame_rms_mm": 41.278009354118915
+  },
+  "grip_calibration_frames": [
+    1, 9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 129, 137,
+    145, 153, 161, 169
+  ],
+  "held_out_sample_count": 24,
+  "offset_calibration_frames": [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151],
+  "candidate_grip_in": {
+    "FitButtToLeadHand": 6.3677775820641775,
+    "FitHandSpacing": 1.7576510491199273,
+    "FitGripToShaft": 2.374571368815895,
+    "FitLeftWristStandoff": 2.3497693143314025,
+    "FitRightWristStandoff": 2.3497693143314025
+  },
+  "candidate_subject_mass_kg": 104.3,
+  "evaluated_equipment_mass_kg": 0.39292359999999993,
+  "candidate_marker_offset_norm_mm": {
+    "pelvis": 19.475224474585456,
+    "hip_L": 13.002202665660972,
+    "hip_R": 10.114502925959215,
+    "knee_L": 8.611624062730147,
+    "knee_R": 28.86371590392665,
+    "ankle_L": 4.005809464004212,
+    "ankle_R": 15.118880319636078,
+    "shoulder_L": 12.7235532641833,
+    "shoulder_R": 6.353784214838508,
+    "elbow_L": 18.88976585638523,
+    "elbow_R": 14.771229627702002,
+    "wrist_L": 15.611517775316948,
+    "wrist_R": 64.02463043391612,
+    "club_head": 98.97162307431486
+  },
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "script_status": "success",
+    "timestamp": "2026-10-02T06:15:53.991568+00:00"
+  },
+  "limits": [
+    "Shared capture lengths were estimated from the complete capture; held-out status applies to grip/offset calibration.",
+    "Subject mass does not drive the IK objective; this is not a dynamics qualification.",
+    "Functional wrist-centre and equal-standoff assumptions are not anatomical measurements.",
+    "The existing best Human clips remain selected; the candidate is not exported."
+  ]
+}

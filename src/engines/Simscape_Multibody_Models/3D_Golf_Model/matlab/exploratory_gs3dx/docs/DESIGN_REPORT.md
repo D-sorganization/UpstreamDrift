@@ -216,7 +216,7 @@ cap = gs3dx_capture_markers();
 jc = gs3dx_capture_joint_centres(cap);
 gs3dx_build_fit(info, overwrite=true, jc=jc);
 
-ik = gs3dx_whole_body_ik(jc, posture_weight=0.01, smooth_weight=0.02, backward=false, gap_weight=0.5);
+ik = gs3dx_whole_body_ik(jc, model='GS3DX_Fit', posture_weight=0.01, smooth_weight=0.02, backward=false, gap_weight=0.5);
 ref = gs3dx_leg_reference(ik, jc, cap);
 gs3dx_build_fit_legs(info, ref, overwrite=true);
 
@@ -260,3 +260,11 @@ The model was developed through an incremental sequence of tested variants built
 - **MTP:** Metatarsophalangeal joint (ball-of-foot joint).
 - **Nonvirtual Block:** Simulink block participating in numerical integration and state execution (subject to license limits).
 - **PS Converter:** Physical-Simulink / Simulink-Physical signal interface block.
+
+## Historical Reproduction and Current Matching Policy
+
+The explicit Fit calls in this reproduction sequence preserve the historical
+model-progression builders. New whole-body IK calls default to Human; public
+exports require Human. See the maintained standalone LaTeX research reference
+for current modeling recipes and evidence. The default change is intentional;
+explicit Fit remains available for historical comparisons.
