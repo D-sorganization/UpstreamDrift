@@ -54,6 +54,10 @@ Store emitted settings using `scale.to_dict()` and restore them with
 `ForceColorScale.from_dict()`. Invalid edits preserve the last valid scale, and
 the toggle can always turn off the display even when an unapplied edit is invalid.
 
+### Producing loads from reaction wrenches
+
+For non-MuJoCo engines, `axial_loads_from_reactions(frame, axes, source)` in `src/shared/python/force_overlay/conversions.py` provides the single shared path to compute segment axial loads from `JOINT_REACTION` overlay wrenches. By mapping each segment to its proximal reaction joint via `SegmentAxis(segment, joint_label, proximal_m, distal_m)`, it invokes `axial_force_from_proximal_reaction` to yield an `AxialLoadFrame` (or `frame_with_axial_loads` to produce an annotated `ForceTorqueFrame`) with positive values for tension and negative for compression. Missing reaction wrenches or force-less reactions leave corresponding segment values as `None` (never zero-filled).
+
 ## Web Hosts
 
 `Scene3D` has a collapsible Segment Force Colors panel. Supply the optional
