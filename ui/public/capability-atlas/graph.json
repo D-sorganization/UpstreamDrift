@@ -292,7 +292,6 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [
-        "video_analyzer",
         "video_processor",
         "data_processor",
         "tools_calculator_hub",
@@ -761,6 +760,22 @@
       ],
       "notes": "Web-first tool; the desktop launcher opens the web route.",
       "id": "tools.terrain_engine"
+    },
+    {
+      "feature_id": "tools.video_analyzer",
+      "title": "Video Analyzer (pose tracking and force/torque overlay)",
+      "status": "parity",
+      "pyqt": "src/tools/video_analyzer/gui.py",
+      "api": "src/api/routes/video_overlays.py",
+      "web": "ui/src/pages/VideoAnalyzer.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "video_analyzer"
+      ],
+      "notes": "Video pose analysis and server-projected force/torque SVG overlay (FTO-29, #11314).",
+      "id": "tools.video_analyzer"
     },
     {
       "feature_id": "visualization.force_color_controls",
@@ -2928,7 +2943,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "1ca5e632a5d8a9ad79e7bf5077663195ac773f10a4b6c64efe2988c8b1fd0b0d",
+    "src/config/feature_parity.json": "186b67b844b5c64a895496390e3fe7e23a518bd980b5ca0de1f77c59bfe59060",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
