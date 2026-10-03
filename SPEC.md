@@ -7727,6 +7727,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill: opencv_segments renderer with painter depth sorting, back-face culling, Lambert shading, and reference_volumes integration (#11311). |
+| 2026-10-03 | #11353 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
 | 2026-10-03 | #11354 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
 | 2026-10-03 | #11363 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362 (#11307). |
 | 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |

@@ -107,15 +107,13 @@ Pinocchio GUI's `model` or Drake GUI's `plant`. Submit an `AxialLoadFrame` with
 the actual native leaf paths and original RGBA values; they are never guessed.
 The session clears bindings on model replacement and restores base colors for
 stale frames. Rebind after changing materials. Both native GUIs have been tested
-for settings, redraw, binding, blue output and disabled restoration with Pinocchio
 4.1.0 and Drake 1.56.0. Pinocchio does not automatically infer axial forces.
 The Drake GUI now produces loads: it samples `DrakeForceTorqueSource` each tick,
 binds the session to the MeshCat illustration geometry
 (`visualizer/<frame>/<geometry>/<object>`, discovered through
 `SceneGraphInspector`) and submits the provider's `AxialLoadFrame` while the
 View menu toggle is on. Only bodies with a single child joint are shaded.
-OpenSim's current desktop GUI contains result plots, not an animated 3D scene;
-future scene consumers can use the same renderer and load contracts.
+OpenSim supports animated playback (recorded) via `record_force_series` / `record_force_and_segment_series` in `opensim_force_recording.py` and `render_force_playback` in `src.shared.python.force_overlay.playback`. Recorded series with proximal/distal segment endpoints are rendered as stick/capsule geometry shaded in tension (blue) and compression (red), alongside 3D force/torque glyphs and legend. Future interactive scene consumers can use the same renderer and load contracts.
 
 The C3D/Simscape viewer exposes the same controls for user-defined shapes. When
 a Simscape trial CSV is loaded, the viewer automatically loads its `ForceTorqueSeries`
