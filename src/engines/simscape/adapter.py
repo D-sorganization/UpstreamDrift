@@ -50,6 +50,10 @@ from src.engines.simscape._errors import (
 )
 from src.engines.simscape._lifecycle import AdapterState, LifecycleGuard
 from src.engines.simscape._output import SimscapeOutput
+from src.engines.simscape.force_channels import (
+    DEFAULT_ROTATION_TOL,
+    load_simscape_force_series,
+)
 from src.shared.python.core.contracts import (
     invariant,
     postcondition,
@@ -719,6 +723,16 @@ class SimscapeAdapter:
             operation="compute_contact_forces",
         )
         return np.zeros(3, dtype=np.float64)
+
+    def load_force_series(
+        self, path: str | Path, *, rotation_tol: float = DEFAULT_ROTATION_TOL
+    ) -> tuple[Any, tuple[str, ...]]:
+        """Load logged force/torque channels from a dataset CSV (#11303).
+
+        Delegates to ``load_simscape_force_series``; needs no MATLAB and no
+        loaded model. Returns ``(ForceTorqueSeries, missing)``.
+        """
+        return load_simscape_force_series(path, rotation_tol=rotation_tol)
 
     def set_shaft_properties(  # noqa: ARG002
         self,
