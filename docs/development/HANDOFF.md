@@ -1,6 +1,6 @@
 # Simscape Simulation Output: Carry Logged Force Channels and Joint Rotations Through SimscapeOutput (R2025b Host) — #11285 / #11304 (FTO-19)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11304-simscape-output-forces`; commit SELF; PR: #11304 (`Closes #11304`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11304-simscape-output-forces`; commit SELF; PR: #11399 (`Closes #11304`, `Refs #11285`)
 - Governing issue: #11304 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host).
 - Completed:
