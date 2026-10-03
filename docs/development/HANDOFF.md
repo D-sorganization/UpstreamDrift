@@ -1,3 +1,33 @@
+# Engine-Agnostic Projected Segment Meshes With Tension/Compression Fill — #11285 / #11311 (FTO-26)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-projected-segment-meshes-11311`; commit SELF; PR: pending (`Closes #11311`, `Refs #11285`)
+- Governing issue: #11311 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_segments.py`:
+    - `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`.
+    - `draw_segment_meshes_on_frame`: Painter's algorithm depth-sorted rendering of capsule segment meshes onto calibrated video frames.
+    - Features: back-face culling via signed screen-space cross product, Lambertian directional shading with configurable ambient, `ForceColorScale` mapping of axial loads (tension blue, compression red, neutral grey), alpha compositing with opacity fast-path (opacity 0 returns unmodified frame), and triangle budget enforcement.
+    - `segment_poses_from_axes`: transforms `SegmentAxis` proximal $\to$ distal vectors into aligned segment poses.
+  - `src/shared/python/force_overlay/renderers/__init__.py`:
+    - Re-exported `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`, `draw_segment_meshes_on_frame`, `segment_poses_from_axes`.
+  - `src/motion_capture/reference/comparison.py`:
+    - Added `draw_model_volumes: bool = False` and `model_volume_opacity: float = 0.55` to `ComparisonLayer`.
+  - `src/tools/capture_rig/reference_volumes.py`:
+    - Wired `draw_segment_meshes_on_frame` into `draw_segment_volumes` with fallback to ellipsoid meshes when axes cannot be constructed.
+  - `src/tools/capture_rig/reference_rendering.py`:
+    - Passes extracted `axial_loads` from force layer series into `draw_segment_volumes`.
+  - Acceptance demo artifact:
+    - Generated visual still: `docs/development/fto_26_demo_still.png` showing 3-segment arm under tension and compression with FTO-8 force arrows on gradient background.
+- Validation:
+  - `tests/unit/force_overlay/test_opencv_segments.py` (9 passed, 100% coverage including DbC validation and visual demo still).
+  - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
+  - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
+  - All pre-commit linters, formatting, and CI budgets passed.
+- Next steps: Merge PR; proceed with FTO-27 / FTO-28.
+
+---
+
 # Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
