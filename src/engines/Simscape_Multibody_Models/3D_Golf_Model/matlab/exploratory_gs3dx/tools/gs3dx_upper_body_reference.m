@@ -14,10 +14,16 @@ function ref = gs3dx_upper_body_reference(ik, opts)
 %     rotation (GS3DX_XYZ_MAP, the convention of the charts' 'XYZ
 %     Kinematics'), each frame on the 360-degree branch of the previous one.
 %
-%   Every angle is filtered (zero-phase Butterworth, order 4, CUTOFF_HZ) and
-%   differentiated (gradient) for the rates.
+%   By default every angle is filtered (zero-phase Butterworth, order 4,
+%   CUTOFF_HZ) and differentiated (gradient) for the rates. FILTER_REFERENCE=false
+%   performs chart conversion and differentiation without modifying supplied
+%   pose geometry. Use it after independently verified native loop projection;
+%   componentwise filtering can invalidate a closed-chain reference.
+%   Derived rates still require consistent native velocity initialization.
 %
-%   Options: cutoff_hz (12); joint_variables (table(), legacy Fit only).
+%   Options: cutoff_hz (12, requested cutoff); filter_reference (true);
+%   joint_variables (table(), legacy Fit only). REF.filter_applied reports the
+%   actual filtering choice. CUTOFF_HZ is not applied in the explicit false mode.
 %   For Human or another renumbered model, pass the native KinematicsSolver
 %   jointPositionVariables table from the capture/model-bound IK. Block-path
 %   keys are resolved by GS3DX_JOINT_KEYS; numbered Fit IDs are never reused.
@@ -35,6 +41,7 @@ function ref = gs3dx_upper_body_reference(ik, opts)
         ik (1,1) struct
         opts.cutoff_hz (1,1) double {mustBePositive} = 12
         opts.joint_variables table = table()
+        opts.filter_reference (1,1) logical = true
     end
     required={'model','frames','t','status','joint_ids','joint'};
     assert(all(isfield(ik,required)),'gs3dx:ubref','Missing IK reference fields');
@@ -80,10 +87,12 @@ function ref = gs3dx_upper_body_reference(ik, opts)
         end
         assert(isequal(shared_ids,binding_ids),'gs3dx:ubref','Native ID mapping differs');
     end
-    [b, a] = butter(4, opts.cutoff_hz / (rate / 2));
+    if opts.filter_reference
+        [b, a] = butter(4, opts.cutoff_hz / (rate / 2));
+    end
 
     ref = struct('model', ik.model, 'frames', frames, 't', t, 'rate_hz', rate, ...
-        'cutoff_hz', opts.cutoff_hz);
+        'cutoff_hz', opts.cutoff_hz, 'filter_applied', opts.filter_reference);
     spec = gs3dx_upper_body_joints();
     for k = 1:numel(spec)
         j.prefix = spec(k).prefix;
@@ -100,7 +109,8 @@ function ref = gs3dx_upper_body_reference(ik, opts)
             j.ids=reshape(cellstr(binding_ids(rows)),size(j.ids));
         end
         raw = local_angles(ik, j);
-        j.angle = filtfilt(b, a, raw.').';
+        j.angle = raw;
+        if opts.filter_reference, j.angle = filtfilt(b, a, raw.').'; end
         j.rate = gradient(j.angle, 1 / rate);
         joints(k) = j; %#ok<AGROW> twelve joints
     end

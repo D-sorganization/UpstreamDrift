@@ -3193,7 +3193,130 @@ supported hold is not automatically a valid moving start. Leg and neck
 profiles, support references, actuator recovery and independent replay
 remain required. No selected match or video is promoted by this conversion.
 
+
+\subsection{Filtering, Native Loop Closure and Geometry-Preserving Conversion}
+\label{sec:reference-loop-closure}
+The native assembly audit completed naturally at
+\texttt{2026-10-03T02:31:08Z}. All 55 original tour poses and 46 original
+owner poses satisfy their complete native targets. Applying the existing
+$12$ Hz upper-angle filter independently preserves neither the complete
+target vector nor the starting closed-chain pose. Every filtered request
+returns status $-1$: the model constraints are satisfied by the returned
+native solution, but requested targets are missed \cite{MathWorksSolve}.
+Finite output, process success and valid model constraints must therefore
+be distinguished from exact reference tracking.
+
+For a closed mechanism with configuration $q$ and constraints $g(q)=0$,
+componentwise filtering need not preserve that manifold:
+\[
+ g(q)=0 \quad\not\Rightarrow\quad g(\mathcal F(q))=0.
+\]
+The maximum scalar-angle adjustment between filtered requests and returned
+native poses is $9.246309$ degrees for the tour and $3.785988$ degrees for
+the owner. Maximum spherical rotation-matrix discrepancies are
+$0.326313$ and $0.081334$ in Frobenius norm. Even at the filtered accepted
+stance start, scalar adjustments are $0.005988$ and $0.008085$ degrees;
+small appearance differences are not proof of exact assembly.
+
+The preserved accepted stances have minimum left/right sole-sphere
+clearances of $0.25$ mm on their fixed accepted planes. Original selected
+address poses on those same planes have left minima of $-14.540$ mm
+(tour) and $-7.549$ mm (owner), with corresponding opposite-side lift.
+This demonstrates why the accepted stance correction must be explicitly
+reconciled with moving references. It is not independent calibration of
+marker-derived ankle height, a contact-force validation or a reason to
+silently offset every frame of the full swing.
+
+A second native solve supplied the returned adjusted poses as complete
+targets. That independent recheck completed at \texttt{02:43:23Z} and
+passed all 55 tour and 46 owner samples, including both adjusted stance
+starts. Scalar angle errors are at most $2.85\times10^{-14}$ degrees;
+spherical rotation-matrix errors are at most $1.15\times10^{-15}$.
+The solver-adjusted poses are model-consistent alternatives, not asserted
+optimal projections or newly measured motion. Their marker fit, rates,
+continuity and dynamic feasibility remain separately unqualified.
+
+\paragraph{Dependent-Arm Trials Remain Unpromoted.}
+Separate native trials free the shoulder, elbow, forearm and wrist of one
+arm (seven nominal actuator coordinates, eight representation values),
+retain forty other native representation targets, and use the original
+free-arm values as explicit guesses. The corrected control comparisons
+use scalar physical units and SO(3) matrices. Comparing raw angle-axis
+coefficients initially rejected valid controls: equivalent representations
+can change sign or branch without changing rotation. The failed audit and
+diagnostic are retained; no physical gate was relaxed to hide a defect.
+The corrected probe completed naturally at \texttt{02:45:57Z}.
+All original-pose and accepted-stance controls pass. Filtered tour trials
+pass only 53/55 samples with the left arm free and 54/55 with the right
+arm free, with maximum free scalar changes of $56.318$ and $27.846$
+degrees and shoulder SO(3) changes of $47.720$ and $31.441$ degrees.
+Owner trials pass 46/46 but change free scalar angles by up to $9.196$
+or $20.858$ degrees. Loop closure alone does not qualify these large
+changes as a better match; neither branch is promoted.
+
+\paragraph{Explicit Unfiltered Conversion Preserves Checked Geometry.}
+\texttt{gs3dx\_upper\_body\_reference} now accepts
+\texttt{filter\_reference=false}. This performs the existing branch-aware
+chart conversion and uniform-grid differentiation while preserving the
+supplied sample poses. The historical default still applies the filter;
+\texttt{ref.filter\_applied} records the actual choice and
+\texttt{cutoff\_hz} records the requested cutoff, which is unused when
+filtering is disabled. A new 20 Hz fixture proves that the explicit mode
+preserves known nonconstant chart angles while the default attenuates them.
+Native RED has seven passing tests and one expected failure; GREEN has
+eight passes, zero failures and zero incomplete tests.
+
+Production native integration completed naturally at
+\texttt{2026-10-03T02:51:02Z}. Both the original selected poses and the
+solver-adjusted poses survive chart conversion, reconstruction into native
+representations and a complete native target solve at every sampled frame:
+55/55 tour and 46/46 owner per trajectory. Maximum scalar target errors are
+$2.85\times10^{-14}$ degrees and $0$ m; maximum spherical matrix error is
+$1.21\times10^{-15}$. The Human model hash is unchanged and no model is
+saved. Private references are retained; the public checkpoint contains
+aggregates only. No video or candidate match is promoted.
+
+\begin{verbatim}
+% After source/model binding and native full-target verification:
+uref = gs3dx_upper_body_reference(projectedIK, ...
+    joint_variables=ks.jointPositionVariables, ...
+    filter_reference=false);
+assert(~uref.filter_applied);
+\end{verbatim}
+This position result does not establish consistency of differentiated
+rates. With native generalized velocity $v$ in its declared physical units,
+closed-chain velocity consistency additionally requires
+\[
+ J_c(q)v=0.
+\]
+For spherical tracking charts, angular velocity is obtained through the
+existing rate-matrix authority,
+$\omega_F=E(\theta)\operatorname{deg2rad}(\dot\theta)$;
+angle-axis coefficient differences are not angular velocities. Likewise,
+independent chart interpolation between valid samples may leave the
+constraint manifold. Native velocity initialization and between-sample
+closure must be checked before relying on a moving reference. Contact
+startup, all-actuator torque recovery, independent replay and source-mask
+qualified marker scoring remain open.
+
+\paragraph{Upper-Torque Availability Is Still Incomplete.}
+A read-only audit of both saved connected-neck holds completed naturally
+at \texttt{02:31:40Z}. Logged datasets contain the two neck signals and
+six existing leg buses, but no upper-body torque buses. Thus those saved
+holds do not prove recovery of all 21 upper actuator channels. Reconstructing
+PD commands or reading \texttt{q/w/b} primitive logs cannot silently stand
+in for verified net actuator torques. The remaining logging path must
+identify native sensor or command-tap basis, units, frame/duality and actual
+time coverage before a complete replay profile can be claimed.
+
 \begin{thebibliography}{9}
+\bibitem{MathWorksSolve}
+MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
+\url{https://www.mathworks.com/help/sm/ref/simscape.multibody.kinematicssolver.solve.html}.
+Status $-1$ distinguishes satisfied model constraints from unmet targets;
+status $2$ additionally marks a singular configuration. These experiments
+require status $1$ and explicit physical target-error checks.
+
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.
 \url{https://github.com/pyomeca/ezc3d}.

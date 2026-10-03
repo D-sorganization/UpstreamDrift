@@ -128,3 +128,5 @@ runtests('tests')
 Headless: `matlab.exe -batch "cd('<this folder>'); info = gs3dx_setup(); runtests('tests')"`.
 
 For Human moving references, pass `joint_variables=ks.jointPositionVariables` to `gs3dx_upper_body_reference` from the actual capture-bound, fitted Human model. Numbered Fit joint IDs are historical only. The maintained research LaTeX reference documents filtering, units, native parity and the remaining moving-start/contact and independent dynamics gates.
+
+After native closed-chain verification, pass `filter_reference=false` to preserve supplied sample geometry during upper-body chart conversion. The historical default still filters; read `ref.filter_applied`. Componentwise filtering and between-sample chart interpolation can violate complete native targets. Derived rates require separate tangent-velocity and initialization checks. The maintained LaTeX reference and `reference_filter_closure_checkpoint_20261003.json` distinguish satisfied model constraints from missed targets and retain the rejected dependent-arm trials.

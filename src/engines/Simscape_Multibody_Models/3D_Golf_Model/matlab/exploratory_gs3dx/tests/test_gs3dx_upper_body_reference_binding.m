@@ -73,6 +73,29 @@ bad=ik;bad.joint=bad.joint(:,1:end-1);
 verifyError(testCase,@() gs3dx_upper_body_reference(bad,joint_variables=jp),'gs3dx:ubref');
 end
 
+function testUnfilteredGeometryIsPreserved(testCase)
+[ik,jp,expected_angles]=fixture('GS3DX_Human');spec=gs3dx_upper_body_joints();
+wave=sin(2*pi*20*ik.t);
+for k=1:numel(spec)
+ rows=find(string(jp.BlockPath)==string(ik.model)+"/"+spec(k).block);
+ if numel(spec(k).axes)==3
+  ik.joint(rows(4),:)=ik.joint(rows(4),:)+wave;
+  expected_angles{k}(1,:)=expected_angles{k}(1,:)+wave;
+ else
+  ik.joint(rows,:)=ik.joint(rows,:)+wave;
+  expected_angles{k}=expected_angles{k}+wave;
+ end
+end
+actual=gs3dx_upper_body_reference(ik,joint_variables=jp,filter_reference=false);
+filtered=gs3dx_upper_body_reference(ik,joint_variables=jp);
+verifyFalse(testCase,actual.filter_applied);verifyTrue(testCase,filtered.filter_applied);
+for k=1:numel(spec)
+ verifyEqual(testCase,actual.joints(k).angle,expected_angles{k},'AbsTol',1e-10);
+ verifyTrue(testCase,all(isfinite(actual.joints(k).rate),'all'));
+end
+verifyGreaterThan(testCase,max(abs(actual.joints(1).angle-filtered.joints(1).angle),[],'all'),1e-3);
+end
+
 function [ik,jp,expected_angles]=fixture(model)
 spec=gs3dx_upper_body_joints();t=(0:31)/60;
 ids=strings(0,1);paths=ids;units=ids;q=zeros(0,numel(t));expected_angles=cell(1,numel(spec));
