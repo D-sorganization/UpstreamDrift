@@ -21,10 +21,27 @@ Rules, per joint type (OpenSim 4 ``.osim``):
 from __future__ import annotations
 
 import enum
+from collections.abc import Iterator
 from pathlib import Path
-from xml.etree.ElementTree import Element
+from typing import Protocol
 
 from defusedxml import ElementTree
+
+
+class Element(Protocol):
+    """The parts of an XML element this module reads.
+
+    A structural type instead of the stdlib class, so this module never
+    imports ``xml``; parsing always goes through ``defusedxml``.
+    """
+
+    tag: str
+
+    def get(self, key: str, default: str = ...) -> str: ...
+
+    def iter(self, tag: str | None = ...) -> Iterator[Element]: ...
+
+    def findtext(self, path: str) -> str | None: ...
 
 
 class CoordinateKind(enum.Enum):
