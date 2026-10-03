@@ -714,6 +714,31 @@ Native joint-role extraction reports 37 independent Human fit coordinates
 with grip closure. The earlier erroneous count of 39 resulted from selecting
 closed-loop variables by the old model's joint identifiers.
 
+These counts describe different interfaces. The saved native Human metadata
+contain 48 joint-position variables and 43 joint-velocity variables. Five
+spherical primitives account for the difference: each position uses a
+unit-axis vector plus angle, whereas its angular velocity has three
+components. The right-arm closure partition contains seven position
+representation values and six velocity variables. After replacing the
+remaining four spherical position groups with three-parameter rotations,
+the fitter has $48-7-4=37$ numerical parameters. This count does not certify
+global Jacobian rank or eliminate singular configurations.
+
+The requested control-axis partition is
+\[
+ 43 = \underbrace{21+12+2}_{35\ \text{upper, leg and neck axes}}
+       +\underbrace{6}_{\text{floating root}}
+       +\underbrace{2}_{\text{midfoot joints}}.
+\]
+The native metadata tables are not a demonstrated dynamic integration
+state vector. Nor does the control-axis count establish that every axis is
+already configured for input torque: the supported-hold neck remains
+prescribed. Independent replay must verify the actual torque modes,
+unactuated root response and passive midfoot response, as well as all 35
+command channels. IK geometry alone does not identify unique actuator
+torques, contact reactions or internal grip-loop loads; those require the
+dynamic model and an explicit load-sharing or control policy.
+
 The original worker's damping-times-ten stance experiment also failed:
 initial heel force rose to 15,513~N, support vanished by 0.60~s, and at 1~s
 pelvis tilt was $117^\circ$ with pelvis height $-1.83$~m. A composed pelvis
@@ -3783,6 +3808,70 @@ acquisition-review hash. Its SHA-256 is
 Private experimental sources are identified for controlled reproduction;
 they are not production behavior or shipped public APIs. All earlier media
 and production solver code remain unchanged by these experiments.
+
+\subsection{Aligned Refined-Objective Comparison}
+\label{sec:aligned-refined-continuity}
+The actual selected refined previews contain 55 tour poses and 46 owner
+poses, separated by $1/30$ s. Their largest root increments are 17.827 and
+30.166 mm. None of those transitions joins consecutive original source
+frames; these saved previews therefore do not establish root continuity at
+360 or 240 Hz. The historical 40.419-mm owner increment above belongs to a
+different objective and is not a measured defect of the refined preview.
+
+The next controlled experiment preserves the refined head-axis, back-marker,
+spine, scapula and gap policies. It replays the original address prefix before
+an eight-pose dense window, rather than using a mid-swing initial pose that
+would recenter the spine prior. The original spine reference is checked to
+$10^{-12}$. Each tour trial has 40 prefix poses plus eight dense poses; each
+owner trial has 30 prefix poses plus eight dense poses. The private port's
+eight parameter tests first fail, then pass, with no incomplete tests and
+natural exit zero. Zero options reproduce the entire baseline output exactly.
+The following scores use only each eight-pose dense window; increments use
+its seven interior transitions. The right wrist has two scalar universal-joint
+coordinates: the statistic is the maximum absolute wrapped scalar increment,
+not a spherical-joint angle or a measured anatomical wrist rotation.
+\begin{center}
+\begin{tabular}{llrrr}
+\hline
+Capture & Trial & Mean RMS (mm) & Wrist step ($^{\circ}$) & Root step (mm)\\
+\hline
+A & Baseline & 28.092 & 4.613 & 2.169\\
+A & Linear 0.5 & 28.080 & 4.708 & 2.149\\
+A & Angular 0.02, linear 0.5 & 28.133 & 4.803 & 2.149\\
+O & Baseline & 19.229 & 7.427 & 5.333\\
+O & Linear 0.5 & 19.199 & 7.442 & 4.994\\
+O & Angular 0.02, linear 0.5 & 19.256 & 9.132 & 4.894\\
+\hline
+\end{tabular}
+\end{center}
+Interior intervals are $1/360$ s for A and $1/240$ s for O. The separate
+prefix-to-window boundary is $1/60$ s for A and $1/30$ s for O. The positive
+options also propagate the accepted polished pose, so their effect combines
+the penalty and warm-start policy; it cannot be attributed to the weight
+alone. Root increments improve slightly, but wrist increments worsen. The
+combined owner candidate also worsens observed-target RMS. None is promoted
+as a new best match or replaces the Desktop videos.
+
+The fit wrote all 344 pose results and its completion marker but did not exit
+naturally: its wrapper returned 125, with actual process exit unverified.
+That failed receipt is retained. A separate fresh saved-pose recheck exited
+naturally with zero at \texttt{2026-10-03T07:22:17Z}, independently checked all
+344 poses and whole-output zero parity, and found a maximum physical residual
+of $5.496\times10^{-16}$ against the $10^{-7}$ gate. Two earlier recheck
+harness failures are also retained: incorrect root frame-parameter names and
+an incompatible MATLAB structure assignment. The fresh success qualifies
+saved-pose closure and parity; it does not convert the original shutdown
+failure into a successful exit or establish velocities, between-sample
+continuity, contact, acceleration or forward dynamics.
+
+The root spherical frame settings use different parameter names from the
+four standalone spherical joints. Native inspection confirms follower-frame
+actuation and sensing resolution for all five. The root has no input torque;
+this inspection does not establish that all 35 requested control axes,
+especially the neck, are already driven by input torque. Sanitized counts,
+comparison aggregates and exact exit dispositions are recorded in
+\href{aligned_refined_checkpoint_20261003.json}{the aligned refined checkpoint}.
+
 \section{Local Acquisition Catalog Follow-Through}
 \label{sec:local-acquisition-follow-through}
 All six album-export videos are hash-verified locally, totalling
