@@ -142,3 +142,5 @@ into MeshCat using `src.shared.python.force_overlay.renderers.MeshcatGlyphRender
 - **Backend Portability:** talks to the `MeshcatSink` protocol, with out-of-the-box implementations for both `meshcat-python` (`MeshcatPythonSink`) and Drake MeshCat (`DrakeMeshcatSink`).
 - **Performance:** cylinder geometries are cached on the visualizer tree; unchanged shapes only update their 4x4 affine transform. Disappearing glyph labels are automatically cleaned up.
 - **Headless & Golden Capture:** offscreen raster capture for gallery fixtures and user guide documentation is completed in FTO-30.
+
+See also the comprehensive [Force and Torque Overlays User Guide](../force_overlay.md) for full details on vector palettes, torque arcs, and video compositing.

@@ -104,6 +104,7 @@ ProfilePhoto.jpg
 !src/launchers/assets/**/*.jpg
 !ui/src-tauri/icons/**/*.png
 !tests/fixtures/**/*.png
+!tests/visual/**/*.png
 
 # Cache directories
 .ruff_cache/
