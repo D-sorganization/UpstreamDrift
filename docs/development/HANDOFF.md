@@ -1,3 +1,11 @@
+# Settings Page Test Theme-List Race — #11441
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `fix/settings-test-theme-option-race`; commit SELF; PR: see branch (`Refs #11441`)
+- Completed: `ui/src/pages/Settings.test.tsx` "saves via PUT and applies theme + font scale immediately" selected `Light` as soon as the settings loaded, but the theme list loads separately, so on a slow run the option did not exist yet and the PUT body carried an empty `theme_id` (CI: `expected '' to be 'Light'`, which turned `main` red in #11441). The test now waits for the `Light` option, and the shared mock resolves the theme list after 50 ms so the race is exercised every run.
+- Validation: with only the 50 ms delay added, the unmodified test fails with the exact CI message; with the wait added, `npx vitest run src/pages/Settings.test.tsx` passes (14) and the full `npx vitest run` passes (108 files, 993 tests); `npx tsc -b --noEmit` and `npx eslint` on the file are clean.
+- Limits: no production code changed. `prettier --check` already flagged this test file before the change; its formatting was left alone.
+- Next steps: none for this slice; `Fleet-Main-Health` closes #11441 itself once the latest `main` run is green.
+
 # Current Handoff — Kinematic-Sequence Thorax Proxy and Window Margin (#11182)
 
 - Repository: `D-sorganization/UpstreamDrift`
