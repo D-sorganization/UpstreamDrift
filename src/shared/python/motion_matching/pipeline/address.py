@@ -428,6 +428,30 @@ class HipCalibrationOptions:
     recalibrate_upper: bool = False
 
 
+def _calibrate_ground_height(
+    hip_spec: dict[str, Any], ground_height_m: float
+) -> dict[str, Any]:
+    """Return ``hip_spec`` with ``contact.ground`` set to the lane's toe calibration.
+
+    The base document ships ``contact.ground.height_m: null`` (defaulted to
+    0.0 m downstream), which only matches a capture whose toe-calibrated
+    ground height happens to be near zero. Different subjects (different
+    stance, marker placement) calibrate to a materially different height, so
+    every capture's contact ground is set from its own lane rather than
+    relying on that default.
+    """
+    if "contact" not in hip_spec or "ground" not in hip_spec["contact"]:
+        return hip_spec
+    hip_spec = dict(hip_spec)
+    hip_spec["contact"] = dict(hip_spec["contact"])
+    hip_spec["contact"]["ground"] = {
+        **hip_spec["contact"]["ground"],
+        "height_m": float(ground_height_m),
+        "calibrated": True,
+    }
+    return hip_spec
+
+
 def prepare_hip_spec(
     lane: Lane,
     base_spec: Mapping[str, Any],
@@ -473,6 +497,7 @@ def prepare_hip_spec(
                 base_spec, hip_cal, alignment_old, zero_twist_deg=zero_twist
             )
         )
+    hip_spec = _calibrate_ground_height(hip_spec, lane.ground.height_m)
     unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
     if opts.anthropometric:
         stature_m, mass_kg = opts.anthropometric

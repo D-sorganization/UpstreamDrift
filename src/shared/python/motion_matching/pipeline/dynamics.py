@@ -29,7 +29,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     CONSISTENCY_PRIOR,
     DT_S,
     OMEGA_RAD_S,
-    RATE_HZ,
     SHOOTING_LOCKED,
     SHOOTING_RELAXATION,
     TRACKING_CUTOFF_HZ,
@@ -163,13 +162,14 @@ def replay(
         q_track,
         tracking_backend=tracking_backend,
     )
+    rate_hz = lane.rate_hz
     record = sim.run(
         q0,
         v0,
         controller,
         duration_s=float(lane.times[-1]),
         dt_s=DT_S,
-        record_every=int(round(1.0 / (RATE_HZ * DT_S))),
+        record_every=int(round(1.0 / (rate_hz * DT_S))),
     )
     sim_q = np.array(
         [
@@ -283,6 +283,7 @@ def shooting_fit(
     command = target.copy()
     history: list[dict[str, Any]] = []
     best_q, best_rms = q_track, np.inf
+    rate_hz = lane.rate_hz
     for k in range(iterations + 1):
         record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking_backend)
         scores = score_reference(
@@ -300,13 +301,17 @@ def shooting_fit(
             np.einsum("ij,ij->i", diff, diff)
         )  # ⚡ Bolt: np.sqrt(np.einsum) avoids temporary allocations and is ~2.4x faster than np.linalg.norm(..., axis=1)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
+        idx_1_4s = int(round(1.4 * rate_hz))
+        root_error_1_4s_m = (
+            float(root_err[idx_1_4s]) if idx_1_4s < len(root_err) else None
+        )
         history.append(
             {
                 "iteration": k,
                 "replay_marker_rms_m": rms,
                 "replay_segment_rms_m": scores["replay_segment_rms_m"],
                 "root_error_max_m": float(root_err.max()),
-                "root_error_1_4s_m": float(root_err[int(round(1.4 * RATE_HZ))]),
+                "root_error_1_4s_m": root_error_1_4s_m,
                 "weight_fraction_min": scores["weight_fraction_min"],
                 "reference_marker_rms_m": float(
                     np.sqrt(
@@ -324,13 +329,16 @@ def shooting_fit(
                 **zmp_summary(zmp, lane.times),
             }
         )
+        root_error_1_4s_label = (
+            f"{root_error_1_4s_m * 1e3:.0f}" if root_error_1_4s_m is not None else "n/a"
+        )
         log.info(
-            "shooting %d: replay markers %.1f mm, root max %.0f mm (1.4 s %.0f), "
+            "shooting %d: replay markers %.1f mm, root max %.0f mm (1.4 s %s), "
             "wf min %.2f, zmp outside 1.0-1.5 s %.2f",
             k,
             rms * 1e3,
             root_err.max() * 1e3,
-            history[-1]["root_error_1_4s_m"] * 1e3,
+            root_error_1_4s_label,
             history[-1]["weight_fraction_min"],
             history[-1]["outside_fraction_1s_to_1_5s"],
         )
@@ -356,7 +364,7 @@ def shooting_fit(
             bounds=lane.bounds,
             locked_per_frame=locked,
         )
-        q_track = smooth_reference(q_fit, RATE_HZ, TRACKING_CUTOFF_HZ)
+        q_track = smooth_reference(q_fit, rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
     report = {
         "locked": list(SHOOTING_LOCKED),
@@ -397,6 +405,7 @@ def zmp_filter(
         "com_weight": ZMP_COM_WEIGHT,
         "before": zmp_summary(zmp, lane.times),
     }
+    rate_hz = lane.rate_hz
     for k in range(ZMP_FILTER_ITERATIONS):
         target = np.array(
             [
@@ -423,7 +432,7 @@ def zmp_filter(
             bounds=lane.bounds,
             com_targets_per_frame=goals,
         )
-        q_track = smooth_reference(q_new, RATE_HZ, TRACKING_CUTOFF_HZ)
+        q_track = smooth_reference(q_new, rate_hz, TRACKING_CUTOFF_HZ)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
         errors = marker_errors(kin, q_track, lane.points)
         passes.append(
@@ -557,8 +566,9 @@ def _build_backswing_metrics(
     valid: np.ndarray,
     frames: int,
     record: Any,
+    rate_hz: float,
 ) -> dict[str, Any]:
-    limit = min(361, frames)
+    limit = min(int(round(1.0 * rate_hz)) + 1, frames)
     return {
         "root_error_max_m": float(
             np.sqrt(
@@ -666,6 +676,7 @@ def build_dynamics_report(
         else marker_errors(kin, sim_q, lane.points)
     )
 
+    rate_hz = lane.rate_hz
     report = {
         "duration_s": float(lane.times[-1]),
         "dt_s": DT_S,
@@ -697,18 +708,24 @@ def build_dynamics_report(
                 math.sqrt(
                     np.vdot(
                         diff := (
-                            sim_q[int(round(t * RATE_HZ)), :3]
-                            - q_ref[int(round(t * RATE_HZ)), :3]
+                            sim_q[int(round(t * rate_hz)), :3]
+                            - q_ref[int(round(t * rate_hz)), :3]
                         ),
                         diff,
                     )
                 )
             )  # ⚡ Bolt: math.sqrt(np.vdot) avoids temporary allocations and is faster than np.linalg.norm for small 1D arrays
             for t in (0.0, 0.25, 0.5, 0.75, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75)
-            if int(round(t * RATE_HZ)) < lane.frames
+            if int(round(t * rate_hz)) < lane.frames
         },
         "backswing_to_1s": _build_backswing_metrics(
-            sim_q, q_ref, sim_errors, lane.valid, lane.frames, record
+            sim_q,
+            q_ref,
+            sim_errors,
+            lane.valid,
+            lane.frames,
+            record,
+            rate_hz=rate_hz,
         ),
         "peak_joint_torque_n_m": float(np.abs(record.tau).max()),
         "lowest_sphere_height_min_m": float(record.lowest_sphere_height_m.min()),

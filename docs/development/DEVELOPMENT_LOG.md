@@ -56,11 +56,11 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #11161
 - **Branch:** `feat/capture-registry-11161`
-- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`
+- **Paths:** `data/capture_registry.json`, `src/motion_capture/capture_registry.py`, `src/motion_capture/capture_export.py`, `src/shared/python/swing_comparison/`, `src/shared/python/motion_matching/leaderboard.py`, `src/shared/python/motion_matching/pipeline/`
 - **Started:** 2026-09-29
-- **Last verified:** 2026-09-30 — turnover: HANDOFF lists the ordered open work (#11190, #11166, #11167-#11169, #11182); leaderboard freshness red until #11190. Earlier: architecture budget OK after splitting nine functions; #11170 per-capture leaderboard folded in; scoped motion_matching/swing_comparison tests pass apart from pre-existing local failures (handoff).
-- **Summary:** Part 1 of epic #11161 (#11162-#11164): neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, and engine-independent swing events and metrics. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Fix #11190 (Stage 1 varies non-tunable joint targets under FastRestart) with a failing Stage-1 residual test first, then regenerate `LEADERBOARD.md`.
+- **Last verified:** 2026-10-03 — Part 1 merged (#11172); Part 2 (#11166, PR #11174): owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
+- **Summary:** Epic #11161: neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, engine-independent swing events and metrics, and Capture-O pipeline execution through MuJoCo. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
+- **Next step:** Land PR #11174 (Part 2, #11166). Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 

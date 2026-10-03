@@ -131,6 +131,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m`                                                         |
 |  878 | `src/launchers/launcher_layout_manager.py`                                                                                                                                    |
 |  877 | `src/bunkershot3d/io/schema.py`                                                                                                                                               |
+|  877 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 |  875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py`                                                                          |
 |  874 | `src/shared/python/tour_baselines/qualification.py`                                                                                                                           |
 |  872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py`                                                                                                            |
@@ -142,7 +143,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 |  859 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/extractAllSignalsFromBus.m`                                                       |
 |  859 | `src/tools/simulation_backends_launcher/gui.py`                                                                                                                               |
 |  858 | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/visualization_tab.py`                                                                                |
-|  855 | `src/shared/python/motion_matching/pipeline/cli.py`                                                                                                                           |
 |  853 | `src/shared/python/ai/gui/assistant_panel.py`                                                                                                                                 |
 |  853 | `src/shared/python/sidekick/process_calculators/constants.py`                                                                                                                 |
 |  849 | `src/tools/training_controller/gui.py`                                                                                                                                        |
