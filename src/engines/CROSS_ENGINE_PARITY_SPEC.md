@@ -185,6 +185,27 @@ Engines that implement `ForceTorqueProvider` (ADR-0052) emit world-frame wrenche
 | :----- | :--------------- | :--------------- | :-------- | :-------- | :---------- |
 | Drake  | reaction-forces port, rotated from `Jc` to world | net-actuation port (revolute only) | point-pair and hydroelastic results | opt-in | from joint reactions, single-child bodies |
 
+### 2.5.3 Force Overlay Parity
+
+`tests/integration/cross_engine/test_force_overlay_parity.py` proves every
+engine's overlay shows the same physics with the same sign conventions (#11306,
+FTO-21). One shared parameter set (`force_overlay_fixtures.py`) feeds one small
+model builder per engine, and every case asserts on the provider frame
+(`get_force_torque_frame()`) only, through one `assert_wrench` helper with
+tolerances set once at the top of the file.
+
+| Fixture | Expected (world, Z-up, applied to the body) | Drake | Pinocchio | OpenSim | MuJoCo | Simscape |
+| :------ | :------------------------------------------ | :---- | :-------- | :------ | :----- | :------- |
+| Static hanging pendulum | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension) | live | live | live | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
+| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live | live | live | skips until FTO-9 | not applicable (file-based) |
+| Body resting on ground | contact forces sum to `(0, 0, +m*g)`; points on the ground plane | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9 | skips (file-based) |
+
+A sign-convention guard flips each expected sign and requires the row to fail,
+so the suite cannot pass by accident. Rows skip only for an absent engine or an
+absent provider, with the reason in the skip message, and become live without
+edits when the provider lands. The test lives under `tests/integration/cross_engine/`,
+so the `cross-engine-equivalence` workflow selects it per `requires_<engine>` marker.
+
 ### 2.6 Body model (humanoid + club)
 
 Every engine has **a single canonical full-body humanoid model** with the

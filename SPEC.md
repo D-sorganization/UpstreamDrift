@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
 | 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: `PinocchioForceTorqueSource` (world-frame RNEA joint reactions, applied-torque actuator wrenches, contact pass-through, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_applied_torques`, `force_visualization=FULL`. |
 | 2026-10-02 | #11296 | [FTO-11] Drake force/torque provider: DrakeForceTorqueSource over reaction, net-actuation and point/hydroelastic contact ports, axial loads, shared segment_axes helper, force_visualization=FULL. |
 | 2026-10-03 | #11304 | [FTO-19] Carry optional logged force channels through `SimscapeOutput.force_columns` and `logsout_to_simscape_output` (`forces` key); `SimscapeOutput.to_force_series()` delegates to the shared `force_series_from_columns` core (Python side only; MATLAB exporter pending R2025b host). |
