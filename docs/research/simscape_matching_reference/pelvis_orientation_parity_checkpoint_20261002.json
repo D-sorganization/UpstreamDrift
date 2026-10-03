@@ -1,0 +1,26 @@
+{
+  "qualification": "PRIVATE_THREE_FRAME_NATIVE_PARITY_AND_PELVIS_OPTION_PROBE_NOT_FULL_SWING_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "private_solver_sha256": "ecc2605f508b54e3e6f8e3ddc398f6833358a87d56b971f696a1ed9eb095ee7d",
+  "baseline_vs_omitted_exact_struct_equal": true,
+  "omitted_vs_explicit_zero_exact_struct_equal": true,
+  "zero_weight_target_diagnostics_joint_RMS_unchanged": true,
+  "model_saved": false,
+  "simulation_executed": false,
+  "sample_count": 3,
+  "observed_pelvis_samples": 2,
+  "missing_pelvis_samples": 1,
+  "diagnostic_pelvis_error_deg_observed": [
+    0.7335700827513958, 13.19915268536565
+  ],
+  "trial_pelvis_error_deg_observed": [0.5959915995841991, 10.59894089029746],
+  "missing_pelvis_error_is_nan": true,
+  "promoted": false,
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "timestamp": "2026-10-02T23:47:11.689063+00:00"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "qualification": "NATIVE_ASSEMBLED_BILATERAL_ADDRESS_20MS_DIAGNOSTIC_NOT_EQUILIBRIUM",
+  "matlab_release": "2025b",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "simulation_executed": true,
+  "stop_time_s": 0.02,
+  "model_saved": false,
+  "source_baseline": "5bdc2ed8e98e69ccf8cdbda9202181514e28c628",
+  "captures": {
+    "capture_A": {
+      "capture_alias": "capture-A",
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_A_bilateral_assembled_20ms.m')",
+        "owned_pids": [49184],
+        "timestamp": "2026-10-02T15:08:49.970832+00:00"
+      },
+      "assembled_t0_fk_status": 1,
+      "scalar_t0_max_error_by_native_unit": {
+        "deg": 2.6211921522190096e-11,
+        "m": 0
+      },
+      "assembled_spherical_matrix_max_error": 1.1663684164777967e-14,
+      "assembled_minimum_clearance_mm": 0.2499999999784428,
+      "assembled_maximum_clearance_mm": 1.712491150123294,
+      "normal_force_initial_left_N": 0,
+      "normal_force_initial_right_N": 0,
+      "normal_force_final_left_N": 443.96907157705044,
+      "normal_force_final_right_N": 407.32180344405657,
+      "normal_force_peak_left_N": 443.96907157705044,
+      "normal_force_peak_right_N": 407.32180344405657,
+      "pelvis_max_displacement_mm": 1.513407820077478,
+      "actual_total_mass_kg": 80.39292360000002,
+      "balance_on": false,
+      "upper_body_tracking": true,
+      "zero_upper_feedforward": true,
+      "neck_motion_unit": "rad",
+      "quiet_stance_qualified": false,
+      "executed_probe_sha256": "e6cb4287ee2b65472577469672aeb8669e55c2412d7225274a7e6b838e18f566"
+    },
+    "capture_O": {
+      "capture_alias": "capture-O",
+      "native_receipt": {
+        "actual_process_exit_code": 0,
+        "final_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "done_marker": true,
+        "script_status": "success",
+        "command_identity": "run('capture_O_bilateral_assembled_20ms.m')",
+        "owned_pids": [68740],
+        "timestamp": "2026-10-02T15:12:02.146194+00:00"
+      },
+      "assembled_t0_fk_status": 1,
+      "scalar_t0_max_error_by_native_unit": {
+        "deg": 4.447052504019666e-9,
+        "m": 0
+      },
+      "assembled_spherical_matrix_max_error": 1.0944495202382062e-10,
+      "assembled_minimum_clearance_mm": 0.24999999997833178,
+      "assembled_maximum_clearance_mm": 1.3520654209267045,
+      "normal_force_initial_left_N": 0,
+      "normal_force_initial_right_N": 0,
+      "normal_force_final_left_N": 502.84779533085003,
+      "normal_force_final_right_N": 407.39941572555153,
+      "normal_force_peak_left_N": 502.84779533085003,
+      "normal_force_peak_right_N": 407.39941572555153,
+      "pelvis_max_displacement_mm": 1.4818332108637549,
+      "actual_total_mass_kg": 104.69292359999999,
+      "balance_on": false,
+      "upper_body_tracking": true,
+      "zero_upper_feedforward": true,
+      "neck_motion_unit": "rad",
+      "quiet_stance_qualified": false,
+      "executed_probe_sha256": "a17fb93154d96a8123fcf2f804cf36d25632e7977e0219409fb372c57fa7c902"
+    }
+  },
+  "full_swing_dynamics_qualified": false,
+  "raw_report_annotation": "Inherited ground_pose_source label says unmodified pose; the actual probe loads the accepted corrected bilateral pose and plane. Raw receipt preserved; this outer interpretation corrects that label.",
+  "prospective_1s_hold": {
+    "settled_window_s": [0.5, 1],
+    "minimum_normal_force_each_foot_BW": 0.05,
+    "settled_total_normal_force_BW": [0.8, 1.2],
+    "whole_run_total_normal_force_peak_max_BW": 2,
+    "pelvis_displacement_max_mm": 5,
+    "pelvis_rotation_change_max_deg": 1,
+    "preserve_assembled_initial_pose": true,
+    "upper_body_tracking": true,
+    "balance_on": false,
+    "zero_upper_feedforward": true,
+    "neck_prescribed": true,
+    "independent_open_loop": false
+  }
+}
