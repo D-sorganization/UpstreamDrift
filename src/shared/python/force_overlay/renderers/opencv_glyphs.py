@@ -8,14 +8,12 @@ Points passed to this renderer must already be in the camera's world frame (ADR-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import cv2
 import numpy as np
 import numpy.typing as npt
 
-from src.motion_capture.reconstruct.cameras import PinholeCamera
-from src.motion_capture.reference.registration import project_reference_to_camera
 from src.shared.python.core.contracts import require
 from src.shared.python.force_overlay.glyphs import (
     ArrowGlyph,
@@ -24,8 +22,13 @@ from src.shared.python.force_overlay.glyphs import (
     TorqueArcGlyph,
 )
 from src.shared.python.force_overlay.palette import FORCE_KIND_PALETTE
-from src.shared.python.motion_matching.historical_fit.contracts import CameraProjection
-from src.shared.python.pose_estimation.observations import CameraCalibration
+
+if TYPE_CHECKING:
+    from src.motion_capture.reconstruct.cameras import PinholeCamera
+    from src.shared.python.motion_matching.historical_fit.contracts import (
+        CameraProjection,
+    )
+    from src.shared.python.pose_estimation.observations import CameraCalibration
 
 __all__ = [
     "HypothesisProjector",
@@ -72,6 +75,10 @@ class PinholeProjector:
         pts = np.asarray(points_world, dtype=float)
         if not np.all(np.isfinite(pts)):
             raise ValueError("points_world must contain only finite coordinates")
+        from src.motion_capture.reference.registration import (
+            project_reference_to_camera,
+        )
+
         return project_reference_to_camera(
             pts, np.ones(pts.shape[:-1], bool), self._camera, clip_image=False
         )

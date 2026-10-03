@@ -32,7 +32,25 @@ from src.shared.python.force_overlay.renderers.opencv_glyphs import (
     draw_glyphs_on_frame,
     draw_legend_box,
 )
-from src.shared.python.motion_matching.historical_fit.contracts import CameraProjection
+
+
+class _MockCameraProjection:
+    """Mock projection for testing HypothesisProjector error-handling without heavy stacks."""
+
+    def __init__(
+        self, intrinsics: np.ndarray, rotation: np.ndarray, translation: np.ndarray
+    ) -> None:
+        self.intrinsics = intrinsics
+        self.rotation = rotation
+        self.translation = translation
+
+    def project(self, points: np.ndarray) -> np.ndarray:
+        p = np.asarray(points, dtype=float)
+        cam = (p @ self.rotation.T) + self.translation
+        if np.any(cam[:, 2] <= 0):
+            raise ValueError("Point behind camera")
+        uv_norm = cam[:, :2] / cam[:, 2:3]
+        return uv_norm @ self.intrinsics[:2, :2].T + self.intrinsics[:2, 2]
 
 
 @pytest.fixture
@@ -373,7 +391,7 @@ def test_hypothesis_projector() -> None:
     k = np.array([[800.0, 0.0, 320.0], [0.0, 800.0, 240.0], [0.0, 0.0, 1.0]])
     r = np.eye(3)
     t = np.array([0.0, 0.0, 2.0])  # camera at origin looking along +z, shifted by +2
-    proj = CameraProjection(intrinsics=k, rotation=r, translation=t)
+    proj = _MockCameraProjection(intrinsics=k, rotation=r, translation=t)
     projector = HypothesisProjector(proj)
 
     # Point in front: (0, 0, 1) -> z_c = 3.0 > 0
