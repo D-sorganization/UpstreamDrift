@@ -3704,9 +3704,14 @@ The 53-frame tour comparison completed with natural exit zero at
 \texttt{2026-10-03T05:34:09Z}. All 159 poses passed fresh native full-position
 rechecking, and the zero-weight prototype reproduced the entire production
 output exactly. Tour observations use exported-coordinate validity only,
-not an asserted raw-source availability mask. The objective uses full head
-orientation, unlike the torso-preview axis objective; these window scores
-must not be compared directly with full-capture preview scores.
+not an asserted raw-source availability mask. These diagnostic windows use
+the earlier production objective. The selected torso previews instead use
+head-axis tracking, three body-local back-marker offsets, spine and scapula
+priors, a different rotational smoothing weight, and unit residual scales
+for inferred lower-body targets during gaps. Thus the objectives differ in
+more than head orientation. These window scores and root-step maxima do not
+establish the corresponding errors of the current refined previews and must
+not be compared directly with their full-capture scores.
 
 A separate saved-array analysis completed naturally at
 \texttt{05:35:02Z}, with no model loading or dynamics. It reused the joint-key
@@ -3736,6 +3741,38 @@ not interchangeable with interior increments. These are finite pose-step
 metrics, not native velocity solutions, measured anatomical rates or
 acceleration acceptance. Whole-capture, held-out marker, contact and
 independent forward-dynamics qualification remain open.
+
+\subsection{Derived-Target Availability and Root Translation}
+A subsequent read-only analysis of the saved owner-window arrays reproduced
+the root-step maxima exactly. The largest production increment, 40.419 mm,
+coincided with restoration of seven lower-body target availability flags;
+another restoration coincided with a 29.157-mm increment. This association
+does not establish causation. The joint-centre estimator derives pelvis and
+hip positions from waist markers, and also uses the pelvis lateral axis to
+offset knee and ankle skin markers. Consequently a waist-marker gap can
+invalidate all seven derived targets even when individual raw leg markers
+remain visible. These flags describe estimated-target availability, not
+seven independently measured anatomical joint centres.
+
+The earlier rotational smoother explicitly excludes the three native
+translation coordinates; the angular-only full-pose prototype likewise has
+zero translation weight. A translation penalty is therefore a reasonable
+controlled hypothesis, but it must first be tested against the actual
+refined-preview objective and the unchanged source masks. Giving an inferred
+target a unit residual scale does not convert it into an observed target:
+reported observation-only errors must continue to exclude it. Native
+zero-option parity, independent pose rechecking, positional trade-offs and
+contact gates remain mandatory before any new candidate replaces the
+selected preview. Source-only prototype generation is not runtime evidence.
+The private translation-option preconditions completed naturally at
+\texttt{2026-10-03T06:18:48Z}: eight checks failed against the earlier
+prototype and all eight passed against the extended prototype, with no
+incomplete tests, model loading or simulation. These checks cover invalid
+values and the forward-chain guard, not fitting or physical acceptance.
+The angular scale has units of metres per normalized chordal or near-radian
+increment; the translation scale is dimensionless. Sanitized evidence and
+source hashes appear in the
+\href{root_availability_checkpoint_20261003.json}{root-availability checkpoint}.
 
 The \href{continuity_experiment_checkpoint_20261003.json}{machine-readable
 continuity checkpoint} contains sanitized aggregates, the natural-exit
