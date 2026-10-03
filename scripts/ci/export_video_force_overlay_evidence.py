@@ -146,13 +146,8 @@ def render_svg_elements(glyph_dict: dict) -> str:
     return "\n".join(elements)
 
 
-def _render_page_html(svg_elements: str, glyph_dict: dict) -> str:
-    """Build complete HTML page for evidence preview."""
-    receipt = glyph_dict.get("receipt", {})
-    receipts_html = "<br>".join(
-        f"<code>{html.escape(k)}</code>: {html.escape(str(v))}"
-        for k, v in receipt.items()
-    )
+def _build_legend_html(glyph_dict: dict) -> str:
+    """Build HTML legend items from projected glyphs."""
     legend_rows = []
     for arrow in glyph_dict.get("arrows", []):
         legend_rows.append(
@@ -170,55 +165,71 @@ def _render_page_html(svg_elements: str, glyph_dict: dict) -> str:
             f"<b>{arc.get('magnitude', 0.0):.1f} {arc.get('units', 'N·m')}</b></span>"
             f"</div>"
         )
-    legend_html = "".join(legend_rows)
+    return "".join(legend_rows)
+
+
+def _get_page_css() -> str:
+    """Return styling CSS for evidence page."""
+    return """
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #0b0f17; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .header { margin-bottom: 20px; }
+    h1 { font-size: 20px; margin: 0 0 6px 0; color: #60a5fa; font-weight: 600; }
+    .subtitle { font-size: 13px; color: #9ca3af; }
+    .main-container { display: flex; gap: 24px; align-items: flex-start; }
+    .video-viewport {
+      position: relative; width: 840px; height: 472.5px;
+      background: #111827; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      border: 1px solid #374151;
+    }
+    .simulated-frame {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 60%, #1e293b 0%, #0f172a 100%);
+    }
+    .simulated-club {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .overlay-svg {
+      position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+    }
+    .sidebar {
+      flex: 1; display: flex; flex-direction: column; gap: 16px;
+    }
+    .panel {
+      background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 16px;
+    }
+    .panel h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin: 0 0 12px 0; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 4px 10px;
+      border-radius: 9999px; font-size: 12px; font-weight: 500;
+      background: #1e3a5f; color: #93c5fd; border: 1px solid #2563eb;
+    }
+    .control-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+    .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 8px; }
+    .legend-row { display: flex; align-items: center; font-size: 13px; margin-bottom: 8px; }
+    .receipts { font-size: 12px; color: #9ca3af; line-height: 1.6; }
+    .receipts code { color: #e5e7eb; background: #1f2937; padding: 2px 5px; border-radius: 4px; }
+    """
+
+
+def _render_page_html(svg_elements: str, glyph_dict: dict) -> str:
+    """Build complete HTML page for evidence preview."""
+    receipt = glyph_dict.get("receipt", {})
+    receipts_html = "<br>".join(
+        f"<code>{html.escape(k)}</code>: {html.escape(str(v))}"
+        for k, v in receipt.items()
+    )
+    legend_html = _build_legend_html(glyph_dict)
+    css_content = _get_page_css()
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Video Force/Torque Overlay Component (FTO-29, #11314)</title>
-  <style>
-    * {{ box-sizing: border-box; }}
-    body {{ margin: 0; padding: 24px; background: #0b0f17; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
-    .header {{ margin-bottom: 20px; }}
-    h1 {{ font-size: 20px; margin: 0 0 6px 0; color: #60a5fa; font-weight: 600; }}
-    .subtitle {{ font-size: 13px; color: #9ca3af; }}
-    .main-container {{ display: flex; gap: 24px; align-items: flex-start; }}
-    .video-viewport {{
-      position: relative; width: 840px; height: 472.5px;
-      background: #111827; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-      border: 1px solid #374151;
-    }}
-    .simulated-frame {{
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 60%, #1e293b 0%, #0f172a 100%);
-    }}
-    .simulated-club {{
-      position: absolute; inset: 0; pointer-events: none;
-    }}
-    .overlay-svg {{
-      position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
-    }}
-    .sidebar {{
-      flex: 1; display: flex; flex-direction: column; gap: 16px;
-    }}
-    .panel {{
-      background: #111827; border: 1px solid #374151; border-radius: 8px; padding: 16px;
-    }}
-    .panel h2 {{ font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; margin: 0 0 12px 0; }}
-    .toolbar {{ display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }}
-    .badge {{
-      display: inline-flex; align-items: center; padding: 4px 10px;
-      border-radius: 9999px; font-size: 12px; font-weight: 500;
-      background: #1e3a5f; color: #93c5fd; border: 1px solid #2563eb;
-    }}
-    .control-row {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }}
-    .swatch {{ width: 12px; height: 12px; border-radius: 2px; display: inline-block; margin-right: 8px; }}
-    .legend-row {{ display: flex; align-items: center; font-size: 13px; margin-bottom: 8px; }}
-    .receipts {{ font-size: 12px; color: #9ca3af; line-height: 1.6; }}
-    .receipts code {{ color: #e5e7eb; background: #1f2937; padding: 2px 5px; border-radius: 4px; }}
-  </style>
+  <style>{css_content}</style>
 </head>
 <body>
   <div class="header">
