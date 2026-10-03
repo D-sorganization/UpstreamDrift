@@ -181,11 +181,10 @@ Signature (must match cross-engine spec exactly):
 
 ```python
 def simulate_with_coefficients(
-    theta: np.ndarray,                  # (n_joints * 7,) torque polynomial coefficients
+    theta: np.ndarray,  # (n_joints * 7,) torque polynomial coefficients
     options: SimOptions = ...,
-    initial_pose: dict | None = None,   # StartPosition / StartVelocity overrides
-) -> SimOutput:
-    ...
+    initial_pose: dict | None = None,  # StartPosition / StartVelocity overrides
+) -> SimOutput: ...
 ```
 
 Implementation strategy:
@@ -234,8 +233,7 @@ Signature:
 def fit_swing_opensim(
     target: ClubTarget,
     options: FitOptions = ...,
-) -> FitResult:
-    ...
+) -> FitResult: ...
 ```
 
 MVP optimizer: **`scipy.optimize.minimize(method="L-BFGS-B")`** with
