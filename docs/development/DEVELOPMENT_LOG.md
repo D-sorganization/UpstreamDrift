@@ -22,13 +22,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
-- **PR:** #11361
-- **Branch:** `feat/fto-11294-mujoco-provider`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/plot_style/**`, `src/shared/python/body_part_viz/**`, `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py`, `src/engines/simscape/force_channels.py`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
-- **Started:** 2026-10-02
-- **Last verified:** 2026-10-03 at SELF — FTO-9 (#11294) implemented `MujocoForceTorqueSource` in `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` emitting world-frame JOINT_ACTUATOR, JOINT_REACTION (with cfrc_int subtree com-to-anchor transform), CONTACT, and EXTERNAL OverlayWrenches; synchronized with `MujocoAxialLoadSource` on internal scratch MjData; fixed missing `mj_copyData` across MuJoCo force providers with direct state array slicing; wired into `physics_engine.py` (`get_force_torque_frame`, `get_segment_axial_loads`, `get_contact_forces`, `force_visualization=FULL`); 8 unit tests pass in `tests/unit/engines/mujoco/test_force_torque_source.py`; benchmark on `golfer.xml` measured ~15 ms/sample; FTO-8 (#11293) merged to main (#11342); FTO-5 (#11290) merged to main (#11337); FTO-6 (#11291) merged to main (#11355); #11349 made `MujocoAxialLoadSource` axis discovery mujoco-3.14 safe (int enum compare); #11344 fixed OpenSim engine set_state/set_control on 4.x; FTO-4 (#11289) implemented DRY hex/RGBA helpers and registered `TENSION_COMPRESSION` colormap; FTO-3 (#11288) implemented glyph builder and FORCE_KIND_PALETTE; FTO-21 (#11306) added cross-engine force-overlay parity suite; FTO-16 (#11301) added OpenSim muscle lines.
+- **PR:** #11348
+- **Branch:** `feat/fto-11292-matplotlib-qpainter-glyphs`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/movement_optimizer/gui/**`, `src/shared/python/pendulum_simulator/gui/**`, `src/shared/python/plotting/renderers/**`
+- **Last verified:** 2026-10-03 at SELF — FTO-7 (#11292) implemented Matplotlib 3D and QPainter 2D glyph renderers (`draw_glyphs_3d`, `draw_glyphs_2d`, `draw_legend`) with dark halos, 12-facet cone heads, and migrated legacy vector overlays; FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); #11349 made MujocoAxialLoadSource axis discovery safe; #11344 fixed OpenSim engine; FTO-4 (#11289) merged; FTO-3 (#11288) glyph builder, FTO-21 (#11306) parity suite, FTO-16 (#11301) muscle wrenches, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Land PR #11361 for FTO-9 (#11294); proceed with FTO-10 (#11295) MuJoCo GUI rewiring.
+- **Next step:** Merge PR #11348; proceed with remaining FTO issues.
 
 ### DL-#11268 · Capture-O Video Companion
 
