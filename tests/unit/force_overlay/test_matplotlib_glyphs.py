@@ -11,6 +11,8 @@ import numpy as np
 import pytest
 from matplotlib.figure import Figure
 
+pytestmark = [pytest.mark.unit]
+
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
     OverlayWrench,
@@ -76,18 +78,20 @@ def test_draw_glyphs_3d_artist_counts_and_removal(sample_glyphs: GlyphSet) -> No
 def test_draw_glyphs_3d_renders_arrow_color_pixels_near_tip(
     sample_glyphs: GlyphSet,
 ) -> None:
-    fig = plt.figure(figsize=(4, 4), dpi=100)
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    fig = Figure(figsize=(4, 4), dpi=100)
+    canvas = FigureCanvasAgg(fig)
     ax = fig.add_subplot(111, projection="3d")
     ax.view_init(elev=0, azim=0)
     ax.set_axis_off()
 
     draw_glyphs_3d(ax, sample_glyphs, halo=False)
-    fig.canvas.draw()
+    canvas.draw()
 
-    rgba_buf = np.asarray(fig.canvas.buffer_rgba())
+    rgba_buf = np.asarray(canvas.buffer_rgba())
     # The canvas should not be entirely uniform (blank)
     assert np.any(rgba_buf[..., :3] < 250)
-    plt.close(fig)
 
 
 def test_draw_glyphs_3d_rejects_non_3d_axes(sample_glyphs: GlyphSet) -> None:

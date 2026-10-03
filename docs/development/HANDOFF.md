@@ -98,7 +98,6 @@
   - Ruff check and format clean.
   - Pytest 5/5 passed.
 
-
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
