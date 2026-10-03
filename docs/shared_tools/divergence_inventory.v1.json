@@ -8,10 +8,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 405,
-    "diverged": 275,
+    "identical": 406,
+    "diverged": 274,
     "ud-only": 1583,
-    "tools-only": 779,
+    "tools-only": 770,
     "spelling-only": 123
   },
   "packages": {
