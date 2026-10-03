@@ -20,15 +20,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_progress
-- **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
-- **PR:** #11348
-- **Branch:** `feat/fto-11292-matplotlib-qpainter-glyphs`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/movement_optimizer/gui/**`, `src/shared/python/pendulum_simulator/gui/**`, `src/shared/python/plotting/renderers/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-27 (#11312) implemented calibrated MuJoCo mesh render composited onto source footage (`composite_model_on_frame`, `mujoco_camera_from_pinhole`, `apply_camera_spec_to_scene`); ADR-0052 addendum records Decision 2 (enlarged frame and crop to center principal point cx, cy within 1 px) and Decision 3 (undistorting footage frame with camera coefficients so mesh and FTO-8 arrows agree within 1.5 px); alpha segmentation rendering with feathering; all 6 tests in `test_footage_composite.py` passed; synthetic composite verified; FTO-12 (#11297) Drake GUI now draws real force/torque glyphs and feeds segment shading (PR #11385); FTO-24 (#11309) implemented force/torque series alignment with video frames (`force_frame_for_video`) mapping canonical Z-up to ADR-0041 camera world (PR #11378); FTO-10 (#11295) routed the MuJoCo GUI force/torque overlays through the shared native and MeshCat glyph renderers (PR #11384); MuJoCo provider reaction labels now use the joint name and the parity MJCF carries a rod (found by the per-engine lanes, #11346, PR #11381); #11346 added per-engine force-overlay parity lanes (drake, pinocchio, opensim, mujoco) with a zero-executed guard (PR #11375); FTO-7 (#11292) implemented Matplotlib 3D and QPainter 2D glyph renderers (`draw_glyphs_3d`, `draw_glyphs_2d`, `draw_legend`) with dark halos, 12-facet cone heads, and migrated legacy vector overlays; FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); #11349 made MujocoAxialLoadSource axis discovery safe; #11344 fixed OpenSim engine; FTO-4 (#11289) merged; FTO-3 (#11288) glyph builder, FTO-21 (#11306) parity suite, FTO-16 (#11301) muscle wrenches, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
+- **Owner:** antigravity
+- **PR:** #11393
+- **Branch:** `feat/fto-27-mujoco-mesh-render-11312`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/footage_composite.py`, `tests/unit/engines/mujoco/test_footage_composite.py`
+- **Last verified:** 2026-10-03 at SELF — FTO-27 (#11312, PR #11393) implemented calibrated MuJoCo mesh render composited onto source footage (`composite_model_on_frame`, `mujoco_camera_from_pinhole`, `apply_camera_spec_to_scene`); ADR-0052 addendum records Decision 2 (enlarged frame and crop to center principal point cx, cy within 1 px) and Decision 3 (undistorting footage frame with camera coefficients so mesh and FTO-8 arrows agree within 1.5 px); alpha segmentation rendering with feathering; all 6 tests in `test_footage_composite.py` passed; synthetic composite verified; FTO-25 (#11310, PR #11390) merged in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for #11312; unblock FTO-28 and FTO-30.
-- **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for #11312; unblock FTO-28 and FTO-30.
+- **Next step:** Merge PR #11393; unblock FTO-28 and FTO-30.
 
 ### DL-#11268 · Capture-O Video Companion
 
