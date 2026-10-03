@@ -1,4 +1,4 @@
-"""Engine-agnostic contract for the tour-average driver capture (C3D_TA_Driver).
+"""Engine-agnostic contract for the tour-average and owner driver/iron captures.
 
 One frozen specification of the capture every engine lane matches against:
 its content hash, clock, units, vertical axis and the 38 marker labels grouped
@@ -368,9 +368,18 @@ TOUR_CAPTURE_IRON = TourCaptureSpec(  # the 7-iron swing of the same golfer
     vertical_axis="y",
     labels=TOUR_CAPTURE.labels[:35] + ("Uname*36", "Uname*37", "pelvis"),
 )
+TOUR_CAPTURE_OWNER = TourCaptureSpec(  # the repository owner's driver swing
+    sha256="2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+    rate_hz=240.0,
+    frames=367,
+    units="m",
+    vertical_axis="y",
+    labels=TOUR_CAPTURE.labels,
+)
 TOUR_CAPTURES: dict[str, TourCaptureSpec] = {
     "driver": TOUR_CAPTURE,
     "iron": TOUR_CAPTURE_IRON,
+    "owner": TOUR_CAPTURE_OWNER,
 }
 
 
@@ -383,7 +392,7 @@ def capture_kind(digest: str) -> str:
 
 
 def load_tour_capture(path: Path) -> TourCapture:
-    """Read a canonical C3D (driver or 7-iron) and verify it against its spec.
+    """Read a canonical C3D (driver, 7-iron, or owner) and verify it against its spec.
 
     Points with negative residuals or nonfinite coordinates are marked invalid.
     Rejects any file whose hash, rate, units, frame count or labels differ.
@@ -474,14 +483,68 @@ MARKER_VALIDITY_POLICY_IRON: MarkerValidityPolicy = MarkerValidityPolicy(
     }
 )
 
+_RAW_VALIDITY_DATA_OWNER: dict[str, tuple[int, int]] = {
+    "Marker_0:0:0": (367, 0),
+    "WaistLeft": (367, 0),
+    "WaistRight": (361, 6),
+    "WaistLBack": (367, 0),
+    "WaistRBack": (367, 0),
+    "BackTop": (367, 0),
+    "BackLeft": (367, 0),
+    "BackRight": (367, 0),
+    "HeadTop": (367, 0),
+    "HeadFront": (367, 0),
+    "HeadSide": (367, 0),
+    "LShoulderTop": (367, 0),
+    "LShoulderBack": (367, 0),
+    "LElbowOut": (367, 0),
+    "LUArmHigh": (367, 0),
+    "LWristTop": (367, 0),
+    "RShoulderTop": (367, 0),
+    "RShoulderBack": (367, 0),
+    "RElbowOut": (367, 0),
+    "RUArmHigh": (367, 0),
+    "RWristTop": (366, 1),
+    "LKneeOut": (367, 0),
+    "LToeIn": (367, 0),
+    "LToeOut": (367, 0),
+    "LAnkleOut": (367, 0),
+    "RKneeOut": (367, 0),
+    "RToeIn": (367, 0),
+    "RToeOut": (367, 0),
+    "RAnkleOut": (367, 0),
+    "Marker_2:2:1": (345, 22),
+    "Marker_2:2:2": (345, 22),
+    "Marker_2:2:3": (346, 21),
+    "Marker_3:3:1": (367, 0),
+    "Marker_3:3:2": (367, 0),
+    "Marker_3:3:3": (367, 0),
+    "Uname*36": (0, 367),
+    "Uname*37": (0, 367),
+    "Uname*38": (0, 367),
+}
+
+MARKER_VALIDITY_POLICY_OWNER: MarkerValidityPolicy = MarkerValidityPolicy(
+    {
+        label: MarkerPolicyEntry(
+            valid_samples=_RAW_VALIDITY_DATA_OWNER[label][0],
+            missing_samples=_RAW_VALIDITY_DATA_OWNER[label][1],
+            nominal_weight=0.0 if label in MARKER_SEGMENTS["unassigned"] else 1.0,
+            excluded=label in MARKER_SEGMENTS["unassigned"],
+        )
+        for label in TOUR_CAPTURE_OWNER.labels
+    }
+)
+
 MARKER_VALIDITY_POLICIES: dict[str, MarkerValidityPolicy] = {
     "driver": MARKER_VALIDITY_POLICY,
     "iron": MARKER_VALIDITY_POLICY_IRON,
+    "owner": MARKER_VALIDITY_POLICY_OWNER,
 }
 
 
 def get_marker_validity_policy(capture_name: str) -> MarkerValidityPolicy:
-    """Return the frozen marker validity policy for a capture ('driver' or 'iron')."""
+    """Return the frozen marker validity policy for a capture ('driver', 'iron', or 'owner')."""
     if capture_name not in MARKER_VALIDITY_POLICIES:
         raise ValueError(
             f"Unknown capture kind: {capture_name!r}; "

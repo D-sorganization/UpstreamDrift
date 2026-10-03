@@ -197,6 +197,7 @@ def test_shooting_fit_runs_a_pass(monkeypatch: pytest.MonkeyPatch) -> None:
         points=np.zeros((frames, 2, 3)),
         valid=np.ones((frames, 2), dtype=bool),
         times=np.arange(frames) / 360.0,
+        rate_hz=360.0,
         ground=None,
         labels=labels,
     )
