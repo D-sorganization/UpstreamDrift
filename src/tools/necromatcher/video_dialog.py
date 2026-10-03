@@ -25,6 +25,7 @@ from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from src.tools.necromatcher.refit_dialog import (
     ReviewedShaftDialog,
     read_reviewed_shaft_evidence,
+    source_scope_summary,
 )
 
 
@@ -300,6 +301,10 @@ class VideoExportDialog(ReviewedShaftDialog):
         if self.run.get("shape_overlay") is not None:
             shape = ShapeOverlayOptions.from_record(self.run["shape_overlay"])
             note += f"\nStored Model Proxy Opacity: {shape.opacity}; Skeleton Retained; Uncalibrated."
+        if self.run.get("source_fit_scope") is not None:
+            note += "\n" + source_scope_summary(
+                self.run["source_fit_scope"], self.run.get("source_fit_scope_binding")
+            )
         self.status.setText(
             f"{self.run['status']} · {self.run['acceptance']} · {self.run['qualification']}\n{self.run['message']}\n"
             + "\n".join(self.run["blockers"])

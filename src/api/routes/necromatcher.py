@@ -9,12 +9,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Annotated, Any, Iterator, Literal, AsyncIterator
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.background import BackgroundTask
 
 from src.api.routes.matched_swings import require_local_client
+from src.api.middleware.upload_limits import read_upload_file_bytes
 from src.shared.python.core.contracts.exceptions import StateError
 from src.shared.python.workspace import (
     DatasetMetadata,
@@ -24,6 +25,8 @@ from src.shared.python.workspace import (
     NativeVideoSession,
     NativeRefitOptions,
     refit_plan,
+    SourceFitScope,
+    import_fit_source_scope_review,
 )
 from src.shared.python.motion_matching.historical_fit import (
     ImageFitConfig,
@@ -34,6 +37,9 @@ from src.shared.python.workspace.necromatcher import default_necromatcher_librar
 from src.shared.python.workspace.necromatcher_review import CaptureReview
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from src.shared.python.workspace.necromatcher_caption import CaptionOverlayOptions
+from src.shared.python.workspace.necromatcher_scope_import import (
+    MAX_SOURCE_SCOPE_REVIEW_BYTES,
+)
 
 
 @asynccontextmanager
@@ -97,6 +103,7 @@ class RefitRequest(BaseModel):
     budget_wall_s: float = Field(default=600.0, gt=0, le=3600)
     config: dict[str, Any] | None = None
     shaft_evidence: dict[str, Any] | None = None
+    source_scope: dict[str, Any] | None = None
     operation: Literal["fit", "author_initialization"] = "fit"
     initialization_source: Literal["sampled_parent", "preserved_spline"] = (
         "sampled_parent"
@@ -195,15 +202,45 @@ def get_refit_plan(fit_id: str, library: Library) -> dict[str, Any]:
         return refit_plan(library, fit_id)
 
 
+@router.post("/fits/{fit_id}/source-scope-reviews", status_code=201)
+async def import_source_scope_review(
+    fit_id: str, file: UploadFile, library: Library
+) -> dict[str, Any]:
+    """Preserve bounded exact review bytes through canonical portable registration."""
+    raw = await read_upload_file_bytes(file, max_bytes=MAX_SOURCE_SCOPE_REVIEW_BYTES)
+    with _errors():
+        return import_fit_source_scope_review(library, fit_id, raw).to_record()
+
+
+@router.get("/source-scope-reviews/{review_id}")
+def source_scope_review(review_id: str, library: Library) -> dict[str, Any]:
+    """Recall a registered review only after fresh source and receipt validation."""
+    with _errors():
+        return library.load_source_scope_review(review_id).to_record()
+
+
 @router.post("/fits/{fit_id}/refits", status_code=202)
 def submit_refit(fit_id: str, request: RefitRequest, refits: Refits) -> dict[str, Any]:
     with _errors():
         try:
             options = request.options()
+            scope = (
+                SourceFitScope.from_record(request.source_scope)
+                if request.source_scope is not None
+                else None
+            )
             if request.shaft_evidence is None:
-                return refits.submit(fit_id, request.new_fit_id, options)
+                if scope is None:
+                    return refits.submit(fit_id, request.new_fit_id, options)
+                return refits.submit(
+                    fit_id, request.new_fit_id, options, source_scope=scope
+                )
             evidence = ShaftAxisEvidence.from_record(request.shaft_evidence)
-            return refits.submit(fit_id, request.new_fit_id, options, evidence)
+            if scope is None:
+                return refits.submit(fit_id, request.new_fit_id, options, evidence)
+            return refits.submit(
+                fit_id, request.new_fit_id, options, evidence, source_scope=scope
+            )
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 

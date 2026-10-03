@@ -1,7 +1,8 @@
 import { useResearchJob } from './useResearchJob';
 import { ShaftEvidenceInput } from './ShaftEvidenceInput';
+import { SourceScopeInput, SourceScopeSummary } from './SourceScopeInput';
 import { useEffect, useState } from 'react';
-import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions, type ImageFitRecipe, type ScheduledFitConstraintRecipe } from '@/api/necromatcher';
+import { fetchRefitPlan, submitRefit, fetchRefit, cancelRefit, type RefitPlan, type RefitRun, type RefitOptions, type ImageFitRecipe, type ScheduledFitConstraintRecipe, type SourceFitScope } from '@/api/necromatcher';
 
 const refitApi = {submit: submitRefit, view: fetchRefit, cancel: cancelRefit};
 
@@ -28,6 +29,8 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const [planError, setPlanError] = useState('');
   const [shaftEvidence, setShaftEvidence] = useState<Record<string, unknown> | null>(null);
   const [shaftBlocked, setShaftBlocked] = useState(false);
+  const [sourceScope, setSourceScope] = useState<SourceFitScope | null>(null);
+  const [scopeBlocked, setScopeBlocked] = useState(false);
   const job = useResearchJob<RefitRun, RefitOptions & {new_fit_id: string}>({fit, onCompleted: onStored, initialRunId, onRun, api: refitApi});
   const {run, submitting, controlAvailable} = job;
   useEffect(() => {
@@ -54,13 +57,15 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
   const constraints = config.constraint_options;
   const schedule = isScheduled(constraints) ? constraints.schedule : null;
   const pins = isScheduled(constraints) ? [...new Set(constraints.schedule.phases.flatMap((phase) => phase.pinned_spheres))] : constraints?.pinned_spheres ?? [];
+  const effectiveScope = sourceScope ?? plan?.source_scope;
+  const scopeValid = !effectiveScope || indices.every((index) => index >= effectiveScope.first_frame && index < effectiveScope.end_exclusive_frame);
   const valid = plan && id.trim() && indices.length >= 2 && indices.every((n, i) => Number.isInteger(n) && plan.frame_indices.includes(n) && (i === 0 || n > indices[i - 1])) && priorScales.length === plan.coordinate_order.length && priorScales.every((n) => Number.isFinite(n) && n > 0) && knotCount >= 2 && knotCount <= indices.length && (!resume || (savedSpline?.available && interval && indices[0] === plan.frame_indices[0] && indices[indices.length - 1] === plan.frame_indices[plan.frame_indices.length - 1]));
   const busy = submitting || Boolean(run && ['pending', 'running'].includes(run.status));
   const error = planError || job.error;
   return <section aria-label="Research Refit" className="space-y-3 border-t border-gray-600 pt-4">
     <h3 className="font-semibold">Research Refit</h3><p className="text-sm">Source Version: {fit}. A new version preserves the original. Physical Time, Camera and Dynamics Remain Unqualified.</p>
     {!plan && !error && <p>Loading Source Choices…</p>}
-    {plan && <form onSubmit={(event) => {event.preventDefault(); if (shaftBlocked) return; void job.start({...options, knot_count: knotCount, config: {...config, ...(resume ? {initialization_policy: 'strict' as const} : {})}, operation: 'fit', initialization_source: initialization, new_fit_id: id.trim(), frame_indices: indices, coordinate_scales: priorScales, ...(shaftEvidence ? {shaft_evidence: shaftEvidence} : {})});}}>
+    {plan && <form onSubmit={(event) => {event.preventDefault(); if (!valid || !scopeValid || shaftBlocked || scopeBlocked) return; void job.start({...options, knot_count: knotCount, config: {...config, ...(resume ? {initialization_policy: 'strict' as const} : {})}, operation: 'fit', initialization_source: initialization, new_fit_id: id.trim(), frame_indices: indices, coordinate_scales: priorScales, ...(shaftEvidence ? {shaft_evidence: shaftEvidence} : {}), ...(sourceScope ? {source_scope: sourceScope} : {})});}}>
       <fieldset disabled={busy} className="space-y-2">
         <label className="block">New Fit Version<input className={field} required pattern="[A-Za-z0-9][A-Za-z0-9_.-]{0,127}" value={id} onChange={(event) => setId(event.target.value)} /></label>
         <label className="block">Initialization Source<select className={field} value={initialization} onChange={(event) => setInitialization(event.target.value as typeof initialization)}>
@@ -85,10 +90,13 @@ function RefitForm({fit, onStored, initialRunId, onRun}: Props) {
           ['smoothness_weight', 'Smoothness Weight', 0, 'any'], ['closure_weight', 'Grip Closure Weight', 0, 'any'],
         ] as const).map(([key, label, min, step]) => <label className="block" key={key}>{label}<input className={field} type="number" required min={min} step={step} value={config[key]} onChange={(event) => setConfig({...config, [key]: Number(event.target.value)})} /></label>)}
         <ShaftEvidenceInput disabled={busy} onChange={(record, blocked) => {setShaftEvidence(record); setShaftBlocked(blocked);}} />
-        <button className="rounded bg-blue-700 px-3 py-2 disabled:opacity-50" disabled={!valid || busy || shaftBlocked} type="submit">Start Research Refit</button>
+        <SourceScopeInput fit={fit} disabled={busy} inherited={plan.source_scope} binding={plan.source_scope_binding} onChange={(record, blocked) => {setSourceScope(record); setScopeBlocked(blocked);}} />
+        {effectiveScope && <p className="text-xs">Selected Fit Frames: {indices[0]} to {indices[indices.length - 1]}. Every Selected Frame Must Be Inside the Reviewed Window.</p>}
+        <button className="rounded bg-blue-700 px-3 py-2 disabled:opacity-50" disabled={!valid || !scopeValid || busy || shaftBlocked || scopeBlocked} type="submit">Start Research Refit</button>
       </fieldset>
     </form>}
     {run && <div><p role="status">{run.status} · {run.acceptance} · {run.message}</p><p className="text-xs">Run: {run.run_id} · New Version: {run.new_fit_id}</p>{run.blockers.map((reason) => <p className="text-xs text-orange-300" key={reason}>{reason}</p>)}</div>}
+    <SourceScopeSummary scope={run?.source_fit_scope} binding={run?.source_fit_scope_binding} />
     {run && controlAvailable && ['pending', 'running'].includes(run.status) && <button type="button" className="rounded border p-2" onClick={() => void job.cancel()}>Cancel Research Refit</button>}
     {error && <p role="alert">{error}</p>}
   </section>;

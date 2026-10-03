@@ -7,6 +7,7 @@ profile never certifies reconstruction accuracy or native dynamics.
 from __future__ import annotations
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import asdict
 from functools import lru_cache
 import hashlib
@@ -41,6 +42,7 @@ from .project_store import (
 
 if TYPE_CHECKING:
     from src.shared.python.simulation_backends import Trace
+    from .necromatcher_source_scope import SourceFitScope
 
 _ARTIFACT_KINDS = {
     "native_model": ArtifactKind.MODEL,
@@ -48,7 +50,27 @@ _ARTIFACT_KINDS = {
     "image_capture": ArtifactKind.OBSERVATION,
     "kinematic_fit": ArtifactKind.TRAJECTORY,
     "authored_replay": ArtifactKind.TRAJECTORY,
+    "scope_review": ArtifactKind.RECEIPT,
 }
+
+_FIT_RECALL_CHAIN: ContextVar[tuple[tuple[str, str], ...]] = ContextVar(
+    "necromatcher_fit_recall_chain", default=()
+)
+
+
+def _scope_review_metadata(scope: SourceFitScope) -> dict[str, Any]:
+    """Use the verified scope declaration as the receipt asset's immutable index."""
+    return {
+        "schema": scope.review.artifact.schema,
+        "hash": scope.review.artifact.hash,
+        "capture_id": scope.capture_id,
+        "capture_hash": scope.capture_hash,
+        "source_clock_sha256": scope.source_clock_sha256,
+        "first_frame": scope.first_frame,
+        "end_exclusive_frame": scope.end_exclusive_frame,
+        "receipt_bytes": scope.review.receipt_bytes,
+        "qualification": "authored_uncalibrated",
+    }
 
 
 class NecromatcherLibrary:
@@ -221,6 +243,77 @@ class NecromatcherLibrary:
                     },
                 )
 
+    def _bind_scope_review(
+        self, reference: ArtifactReference, receipt_bytes: int, swing_id: str
+    ) -> SourceFitScope:
+        """Authenticate exact review bytes and original capture before storing/recall."""
+        from .necromatcher_capture_identity import capture_identity
+        from .necromatcher_source_scope import (
+            SourceFitScope,
+            bind_source_fit_scope,
+        )
+
+        scope = SourceFitScope.from_review_artifact(reference, receipt_bytes, self.root)
+        capture = self.load_asset(scope.capture_id)
+        if capture.kind != "image_capture" or capture.session_id != swing_id:
+            raise ValueError(
+                "Scope review capture must belong to the same swing session"
+            )
+        bind_source_fit_scope(
+            capture_identity(self, scope.capture_id), scope, self.root
+        )
+        return scope
+
+    def add_source_scope_review(
+        self, review_id: str, swing_id: str, source: Path
+    ) -> DatasetMetadata:
+        """Preserve an authored window receipt through the existing asset spine."""
+        from .necromatcher_source_scope import SOURCE_SCOPE_REVIEW_SCHEMA
+
+        if source.suffix.lower() != ".json":
+            raise ValueError("Scope review asset must be a JSON receipt")
+        with self._write_lock():
+            reference = ArtifactReference(
+                review_id,
+                str(source),
+                compute_file_sha256(source),
+                SOURCE_SCOPE_REVIEW_SCHEMA,
+                ArtifactKind.RECEIPT,
+            )
+            scope = self._bind_scope_review(reference, source.stat().st_size, swing_id)
+            return self._save_asset(
+                review_id,
+                swing_id,
+                source,
+                "scope_review",
+                _scope_review_metadata(scope),
+            )
+
+    def load_source_scope_review(self, review_id: str) -> SourceFitScope:
+        """Rebind a registered review using a portable library-relative reference."""
+        from .necromatcher_source_scope import SOURCE_SCOPE_REVIEW_SCHEMA
+
+        asset = self.load_asset(review_id)
+        if (
+            asset.kind != "scope_review"
+            or asset.metadata["schema"] != SOURCE_SCOPE_REVIEW_SCHEMA
+        ):
+            raise ValueError("Source scope requires a registered review receipt")
+        relative = Path(asset.path).relative_to(self.root.resolve()).as_posix()
+        reference = ArtifactReference(
+            asset.dataset_id,
+            relative,
+            asset.metadata["hash"],
+            SOURCE_SCOPE_REVIEW_SCHEMA,
+            ArtifactKind.RECEIPT,
+        )
+        scope = self._bind_scope_review(
+            reference, asset.metadata["receipt_bytes"], asset.session_id
+        )
+        if asset.metadata != _scope_review_metadata(scope):
+            raise ValueError("Scope review metadata differs from authenticated receipt")
+        return scope
+
     def _read_profile(
         self, source: Path, swing_id: str
     ) -> tuple[dict[str, Any], PiecewisePolynomialTorque]:
@@ -278,10 +371,18 @@ class NecromatcherLibrary:
 
     def load_fit(self, fit_id: str) -> dict[str, Any]:
         """Recall detached samples after verifying both immutable parent versions."""
-        asset = self.load_asset(fit_id)
-        if asset.kind != "kinematic_fit":
-            raise ValueError("Fit recall requires a kinematic-fit asset")
-        return read_kinematic_fit(Path(asset.path), self, asset.session_id)
+        key = (str(self.root.resolve()), fit_id)
+        chain = _FIT_RECALL_CHAIN.get()
+        if key in chain:
+            raise ValueError("Fit lineage contains a cycle")
+        token = _FIT_RECALL_CHAIN.set((*chain, key))
+        try:
+            asset = self.load_asset(fit_id)
+            if asset.kind != "kinematic_fit":
+                raise ValueError("Fit recall requires a kinematic-fit asset")
+            return read_kinematic_fit(Path(asset.path), self, asset.session_id)
+        finally:
+            _FIT_RECALL_CHAIN.reset(token)
 
     def add_profile(
         self, profile_id: str, swing_id: str, source: Path
@@ -384,6 +485,8 @@ class NecromatcherLibrary:
                 self.load_replay(asset.dataset_id)
             elif asset.kind == "kinematic_fit":
                 self.load_fit(asset.dataset_id)
+            elif asset.kind == "scope_review":
+                self.load_source_scope_review(asset.dataset_id)
             elif asset.kind == "torque_profile":
                 if asset.metadata["schema"] == EFFORT_SCHEMA:
                     self.load_effort_profile(

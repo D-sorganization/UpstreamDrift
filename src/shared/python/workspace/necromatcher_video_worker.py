@@ -15,6 +15,7 @@ from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_video import export_fit_video
 from .necromatcher_video_jobs import (
+    validate_video_scope,
     video_caption_options,
     video_shaft_evidence,
     video_shape_options,
@@ -56,6 +57,7 @@ def execute(request_path: Path) -> dict[str, Any]:
             or fit[f"{kind}_hash"] != request[f"{kind}_hash"]
         ):
             raise ValueError("Video parent differs from launch")
+    validate_video_scope(fit, request)
     destination = request_path.parent / "overlay"
     evidence = video_shaft_evidence(library, fit, request)
     additional: dict[str, Any] = (

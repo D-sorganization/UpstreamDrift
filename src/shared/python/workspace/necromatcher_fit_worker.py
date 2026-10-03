@@ -230,6 +230,9 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     identity = request["source_fit_id"]
     if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
         raise ValueError("Warm-start fit differs from launch identity")
+    from .necromatcher_fit_jobs import _verify_scope_request
+
+    _verify_scope_request(library, request)
     binding, additional_images = _load_refit_binding(library, request)
     source = binding.fit
     options = request["options"]
@@ -268,8 +271,12 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             if additional_images is not None
             else _compute_operation(*arguments)
         )
-        dense_indices = tuple(
-            i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
+        dense_indices = (
+            tuple(range(indices[0], indices[-1] + 1))
+            if "source_scope" in request
+            else tuple(
+                i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
+            )
         )
         dense = read_capture_evidence(
             review,
@@ -297,6 +304,7 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
         float(np.max(np.linalg.norm(closure, axis=1))),
         ranges,
     )
+    _verify_scope_request(library, request, output)
     output["evidence"]["original_fit"].update(
         _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
     )

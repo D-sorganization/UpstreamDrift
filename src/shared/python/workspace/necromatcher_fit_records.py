@@ -284,6 +284,41 @@ def _add_shaft_record(
     }
 
 
+def _add_scope_record(
+    output: dict[str, Any], request: dict[str, Any], source: dict[str, Any]
+) -> None:
+    from .necromatcher_fit import scope_record
+    from .necromatcher_source_scope import SourceFitScope
+    from src.shared.python.shadow_tracker.source_records import FrameIdentity
+
+    declared = request.get("source_scope", scope_record(source))
+    if declared is None:
+        if scope_record(source) is not None:
+            raise ValueError("Fit builder cannot erase parent source scope")
+        return
+    scope = SourceFitScope.from_record(declared)
+    indices = list(request["options"]["frame_indices"])
+    binding = request.get("source_scope_binding")
+    if binding is None:
+        inherited = source["provenance"].get("source_fit_scope_binding")
+        if inherited is not None and inherited.get("frame_indices") == indices:
+            binding = inherited
+        else:
+            frames = dict(zip(source["frame_indices"], source["frames"], strict=True))
+            first = FrameIdentity.from_dict(frames[indices[0]]).presentation_time
+            last = FrameIdentity.from_dict(frames[indices[-1]]).presentation_time
+            binding = {
+                "frame_indices": indices,
+                "first_pts": [first.numerator, first.denominator],
+                "last_pts": [last.numerator, last.denominator],
+                "source_clock_sha256": scope.source_clock_sha256,
+            }
+    output["provenance"]["source_fit_scope"] = scope.to_record()
+    output["provenance"]["source_fit_scope_binding"] = json.loads(
+        json.dumps(binding, allow_nan=False)
+    )
+
+
 def build_native_fit_payload(
     request: dict[str, Any],
     source: dict[str, Any],
@@ -334,5 +369,6 @@ def build_native_fit_payload(
     }
     if coordinate_expansion is not None:
         output["provenance"]["coordinate_expansion"] = asdict(coordinate_expansion)
+    _add_scope_record(output, request, source)
     _add_shaft_record(output, request, result)
     return output

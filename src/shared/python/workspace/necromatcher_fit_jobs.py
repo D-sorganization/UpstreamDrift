@@ -9,7 +9,7 @@ from importlib.metadata import PackageNotFoundError, version
 import json
 from pathlib import Path
 import platform
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, TYPE_CHECKING
 from uuid import uuid4
 
 import numpy as np
@@ -59,6 +59,10 @@ _BLOCKERS = (
     "camera_unqualified",
     "independent_dynamics_not_replayed",
 )
+
+
+if TYPE_CHECKING:
+    from .necromatcher_source_scope import SourceFitScope
 
 
 def _digest(value: Any) -> str:
@@ -238,6 +242,66 @@ def _verify_shaft_request(
         raise ValueError("Shaft image recipe binding changed since queue admission")
 
 
+def _verify_scope_request(
+    library: NecromatcherLibrary,
+    request: dict[str, Any],
+    candidate: dict[str, Any] | None = None,
+) -> None:
+    from .necromatcher_fit import (
+        admit_refit_scope,
+        scope_binding_record,
+        validate_scope_payload,
+        validate_scope_binding_record,
+    )
+
+    source = library.load_fit(request["source_fit_id"])
+    if "source_scope" not in request:
+        from .necromatcher_fit import scope_record
+
+        if scope_record(source) is not None:
+            raise ValueError("Request cannot delete inherited source scope")
+        return
+    recipe = request.get("shaft_images")
+    shaft = _parse_shaft_recipe(recipe)[0].evidence if recipe is not None else None
+    bound = admit_refit_scope(
+        library,
+        source,
+        tuple(request["options"]["frame_indices"]),
+        ImageFitConfig.from_record(request["options"]["config"]),
+        shaft,
+        request.get("source_scope"),
+    )
+    if bound is not None:
+        validate_scope_binding_record(
+            request.get("source_scope_binding"),
+            scope_binding_record(bound, tuple(request["options"]["frame_indices"])),
+        )
+        if candidate is not None:
+            if json.dumps(
+                candidate["provenance"].get("request_options"),
+                sort_keys=True,
+                allow_nan=False,
+            ) != json.dumps(request["options"], sort_keys=True, allow_nan=False):
+                raise ValueError("Candidate options differ from admitted request")
+            if (
+                candidate["provenance"].get("source_fit_scope")
+                != bound.scope.to_record()
+            ):
+                raise ValueError("Candidate differs from admitted source scope")
+            validate_scope_binding_record(
+                candidate["provenance"].get("source_fit_scope_binding"),
+                request["source_scope_binding"],
+            )
+            if json.dumps(
+                candidate.get("evidence", {})
+                .get("original_fit", {})
+                .get("frame_indices"),
+                allow_nan=False,
+            ) != json.dumps(request["options"]["frame_indices"], allow_nan=False):
+                raise ValueError("Candidate training differs from admitted selection")
+            validate_scope_payload(library, candidate, source)
+
+
 def _refit_work(
     library: NecromatcherLibrary,
     options: NativeRefitOptions,
@@ -292,10 +356,12 @@ def _refit_work(
                 != shaft_recipe
             ):
                 raise ValueError("Worker shaft recipe differs from admitted request")
+        _verify_scope_request(library, request, response["fit"])
         candidate = run_root / "candidate.json"
         atomic_write_json(candidate, response["fit"])
 
         def publish() -> None:
+            _verify_scope_request(library, request, response["fit"])
             if shaft_recipe is not None:
                 _verify_shaft_request(
                     library, library.load_fit(source_fit_id), shaft_recipe
@@ -345,6 +411,7 @@ def start_native_refit(
     options: NativeRefitOptions,
     service: MatchingJobService,
     shaft_evidence: ShaftAxisEvidence | None = None,
+    source_scope: SourceFitScope | None = None,
 ) -> tuple[JobHandle, Path]:
     """Run a new immutable research version, preserving the original fit.
 
@@ -360,6 +427,28 @@ def start_native_refit(
         raise ValueError("Refit scales must match bound native coordinate order")
     if any(index not in source["frame_indices"] for index in options.frame_indices):
         raise ValueError("Warm-start samples must exist in the source fit")
+    from .necromatcher_fit import admit_refit_scope, scope_binding_record
+
+    bound_scope = admit_refit_scope(
+        library,
+        source,
+        options.frame_indices,
+        options.config,
+        shaft_evidence,
+        source_scope,
+    )
+    if bound_scope is not None and options.initialization_source == "preserved_spline":
+        from .necromatcher_spline import preserved_fit_spline
+
+        start = preserved_fit_spline(source)
+        domain = bound_scope.selected_domain(options.frame_indices)
+        if start is None or (start.knot_times[0], start.knot_times[-1]) != (
+            float(domain.first_pts),
+            float(domain.last_pts),
+        ):
+            raise ValueError(
+                "Scoped preserved spline requires qualified exact interval restriction"
+            )
     shaft_recipe = (
         _queue_shaft_recipe(
             library, source, shaft_evidence, options.unknown_visibility_weight
@@ -382,6 +471,16 @@ def start_native_refit(
     if shaft_recipe is not None:
         request["shaft_images"] = shaft_recipe
         hash_options = {"options": hash_options, "shaft_images": shaft_recipe}
+    if bound_scope is not None:
+        request["source_scope"] = bound_scope.scope.to_record()
+        request["source_scope_binding"] = scope_binding_record(
+            bound_scope, options.frame_indices
+        )
+        hash_options = {
+            "options": hash_options,
+            "source_scope": request["source_scope"],
+            "source_scope_binding": request["source_scope_binding"],
+        }
     spec = MatchingJobSpec(
         run_root.name,
         "mujoco",

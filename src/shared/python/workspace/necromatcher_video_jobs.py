@@ -44,11 +44,12 @@ from src.shared.python.version_info import get_repo_root
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
-from .necromatcher_shaft_evidence import bind_fit_shaft_evidence
+from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evidence
 from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from .necromatcher_caption import CaptionOverlayOptions, validate_caption_manifest
 from .necromatcher_shape_overlay import shape_overlay_provenance
+from .necromatcher_video import video_scope_provenance, validate_video_shaft_domain
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -143,10 +144,45 @@ def video_shaft_evidence(
     evidence = ShaftAxisEvidence.from_record(recipe["evidence"])
     if evidence.sha256 != recipe["evidence_sha256"]:
         raise ValueError("Video shaft evidence hash differs from request")
-    bound = bind_fit_shaft_evidence(library, fit, evidence)
+    bound = _bind_video_shaft(library, fit, evidence)
     if bound.source_clock_sha256 != recipe["source_clock_sha256"]:
         raise ValueError("Video shaft source clock differs from request")
     return evidence
+
+
+def _bind_video_shaft(
+    library: NecromatcherLibrary, fit: dict[str, Any], evidence: ShaftAxisEvidence
+) -> BoundShaftEvidence:
+    validate_video_shaft_domain(fit, evidence)
+    return bind_fit_shaft_evidence(library, fit, evidence)
+
+
+def _selected_still_frames(indices: list[int]) -> list[int]:
+    """Retain the established first/middle/last export recipe."""
+    return sorted({indices[0], indices[len(indices) // 2], indices[-1]})
+
+
+def _scope_hash_options(
+    fit: dict[str, Any], request: dict[str, Any], options: Any
+) -> Any:
+    scope = video_scope_provenance(fit)
+    if not scope:
+        return options
+    request.update(scope)
+    return {
+        **(options if isinstance(options, dict) else {"selected_frames": options}),
+        **scope,
+    }
+
+
+def validate_video_scope(fit: dict[str, Any], request: dict[str, Any]) -> None:
+    """Require exact admitted scope; absence cannot acquire a later fit's scope."""
+    expected = video_scope_provenance(fit)
+    recorded = video_scope_provenance({"provenance": request})
+    if json.dumps(expected, sort_keys=True, allow_nan=False) != json.dumps(
+        recorded, sort_keys=True, allow_nan=False
+    ):
+        raise ValueError("Video source scope differs from admitted request")
 
 
 def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str, Any]:
@@ -167,6 +203,7 @@ def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str,
             != fit[f"{kind}_hash"]
         ):
             raise ValueError("Video parent bytes changed")
+    validate_video_scope(fit, request)
     video_shaft_evidence(library, fit, request)
     video_shape_options(request)
     video_caption_options(request)
@@ -238,6 +275,7 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     manifest = _read(manifest_path)
     if manifest.get("schema") != "necromatcher/source-overlay-video/1":
         raise ValueError("Unsupported overlay manifest")
+    validate_video_scope({"provenance": manifest}, request)
     _check_shape_manifest(manifest, request)
     _check_caption_manifest(manifest, request)
     if "shaft_overlay" in request:
@@ -345,6 +383,11 @@ def _artifact_baseline(
 ) -> dict[str, Any]:
     """Capture bounded metadata around an authoritative owned hash check."""
     identities = [request["source_fit_id"], request["model_id"], request["capture_id"]]
+    scope = video_scope_provenance({"provenance": request})
+    if scope:
+        identities.append(
+            scope["source_fit_scope"]["review"]["artifact"]["artifact_id"]
+        )
     bindings = _asset_bindings(library, swing, identities)
     names = sorted(path.name for path in (root / "overlay").iterdir())
     if len(names) > 5:
@@ -367,7 +410,8 @@ def _artifact_available(
     """Fail closed on legacy or changed artifacts using only bounded metadata."""
     try:
         baseline = _read(root / "complete.json").get("artifact_baseline")
-        if not isinstance(baseline, dict) or len(baseline.get("files", [])) > 9:
+        limit = 10 if "source_fit_scope" in request else 9
+        if not isinstance(baseline, dict) or len(baseline.get("files", [])) > limit:
             return False
         return baseline == _artifact_baseline(
             library, root, request, baseline["swing_id"]
@@ -441,15 +485,13 @@ class NativeVideoSession:
                 "model_hash": fit["model_hash"],
                 "capture_id": fit["capture_id"],
                 "capture_hash": fit["capture_hash"],
-                "selected_frames": sorted(
-                    {indices[0], indices[len(indices) // 2], indices[-1]}
-                ),
+                "selected_frames": _selected_still_frames(indices),
                 "execution_stamp": stamp,
                 "execution_started": False,
             }
             hash_options: Any = request["selected_frames"]
             if shaft_evidence is not None:
-                bound = bind_fit_shaft_evidence(self.library, fit, shaft_evidence)
+                bound = _bind_video_shaft(self.library, fit, shaft_evidence)
                 request["shaft_overlay"] = {
                     "evidence": shaft_evidence.to_record(),
                     "evidence_sha256": shaft_evidence.sha256,
@@ -472,6 +514,7 @@ class NativeVideoSession:
                 if not isinstance(hash_options, dict):
                     hash_options = {"selected_frames": hash_options}
                 hash_options["caption_overlay"] = request["caption_overlay"]
+            hash_options = _scope_hash_options(fit, request, hash_options)
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -544,7 +587,7 @@ class NativeVideoSession:
                 raise ValueError("Overlay metadata changed during verification")
 
             def publish() -> None:
-                if "shaft_overlay" in request:
+                if "shaft_overlay" in request or "source_fit_scope" in request:
                     _parents(self.library, request)
                 atomic_write_json(
                     root / "complete.json",
@@ -693,6 +736,7 @@ class NativeVideoSession:
             caption = video_caption_options(request)
             assert caption is not None
             view["caption_overlay"] = caption.to_record()
+        view.update(video_scope_provenance({"provenance": request}))
         return view
 
     def view(self, run_id: str) -> dict[str, Any]:

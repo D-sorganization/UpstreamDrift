@@ -86,6 +86,17 @@ from .necromatcher_shaft_evidence import (
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
+from .necromatcher_scope_import import import_fit_source_scope_review
+from .necromatcher_source_scope import (
+    SourceScopeReview,
+    SourceFitScope,
+    BoundSourceFitScope,
+    SourceSelectedDomain,
+    bind_source_fit_scope,
+    validate_scope_selection,
+    validate_scope_descendant,
+    resolve_source_fit_scope,
+)
 from .necromatcher_refits import NativeRefitSession, refit_plan
 from .project_store import (
     DatasetMetadata,
@@ -378,6 +389,15 @@ __all__ = [
     "project_fit_frame",
     "NativeFitProjectionProcess",
     "NativeRefitOptions",
+    "SourceScopeReview",
+    "SourceFitScope",
+    "import_fit_source_scope_review",
+    "BoundSourceFitScope",
+    "SourceSelectedDomain",
+    "bind_source_fit_scope",
+    "validate_scope_selection",
+    "validate_scope_descendant",
+    "resolve_source_fit_scope",
     "NativeRefitSession",
     "refit_plan",
     "resolve_matching_route",

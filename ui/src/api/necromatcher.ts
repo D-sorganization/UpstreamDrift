@@ -1,8 +1,23 @@
-import { apiFetch } from './fetch';
+import { apiFetch, apiFetchForm } from './fetch';
 import { getApiBase } from './backend';
 import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
+export interface SourceFitScope {
+  schema: 'necromatcher/source-fit-scope/1';
+  capture_id: string; capture_hash: string; source_clock_sha256: string;
+  first_frame: number; end_exclusive_frame: number; purpose: 'both_hands_on_club';
+  review: {
+    artifact: {artifact_id: string; path: string; hash: string; schema: string; kind: string};
+    receipt_bytes: number; first_identity: Record<string, unknown>;
+    excluded_identity: Record<string, unknown> | null;
+    reason: string; uncertainty_policy: string; contact_calibrated: false;
+  };
+}
+export interface SourceFitScopeBinding {
+  frame_indices: number[]; first_pts: [number, number]; last_pts: [number, number];
+  source_clock_sha256: string;
+}
 export interface FitConstraintRecipe {
   ground: {normal: number[]; height_m: number};
   position_weight: number; rotation_weight: number; ground_weight: number;
@@ -33,11 +48,14 @@ export interface RefitOptions {
   operation?: 'fit' | 'author_initialization';
   initialization_source?: 'sampled_parent' | 'preserved_spline';
   shaft_evidence?: Record<string, unknown>;
+  source_scope?: SourceFitScope;
 }
 export interface RefitPlan {
   source_fit_id: string; frame_indices: number[]; coordinate_order: string[]; coordinate_units: string[];
   recorded_options: RefitOptions | null;
   baseline_config?: ImageFitRecipe;
+  source_scope?: SourceFitScope | null;
+  source_scope_binding?: SourceFitScopeBinding | null;
   preserved_spline?: {available: boolean; knot_count: number | null; source_interval: [number, number] | null; reason: string};
 }
 export interface ResearchRun {
@@ -46,6 +64,8 @@ export interface ResearchRun {
   acceptance: 'partial' | 'interrupted' | 'accepted' | 'rejected';
   blockers: string[]; message: string; fraction: number | null;
   control_available?: boolean;
+  source_fit_scope?: SourceFitScope | null;
+  source_fit_scope_binding?: SourceFitScopeBinding | null;
 }
 export interface RefitRun extends ResearchRun {new_fit_id: string}
 export interface VideoExportRun extends ResearchRun {
@@ -61,6 +81,10 @@ export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${roo
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;
 export const fetchRefitPlan = (fit: string) => apiFetch<RefitPlan>(`${root}/fits/${encodeURIComponent(fit)}/refit-plan`);
+export function registerReviewedWindow(fit: string, file: File) {
+  const body = new FormData(); body.append('file', file);
+  return apiFetchForm<SourceFitScope>(`${root}/fits/${encodeURIComponent(fit)}/source-scope-reviews`, body, {timeoutMs: 300_000});
+}
 export const submitRefit = (fit: string, payload: RefitOptions & {new_fit_id: string}) => apiFetch<RefitRun>(`${root}/fits/${encodeURIComponent(fit)}/refits`, {method: 'POST', body: JSON.stringify(payload)});
 export const fetchRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}`);
 export const cancelRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/${encodeURIComponent(run)}/cancel`, {method: 'POST'});

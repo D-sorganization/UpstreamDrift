@@ -26,7 +26,59 @@ from src.shared.python.motion_matching.historical_fit import (
     ShaftAxisEvidence,
 )
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
-from src.shared.python.workspace import NativeRefitOptions, NativeRefitSession
+from src.shared.python.workspace import (
+    NativeRefitOptions,
+    NativeRefitSession,
+    SourceFitScope,
+    import_fit_source_scope_review,
+)
+from src.shared.python.workspace.necromatcher_scope_import import (
+    MAX_SOURCE_SCOPE_REVIEW_BYTES,
+)
+
+
+def read_reviewed_source_scope(
+    path: Path | None,
+    session: NativeRefitSession | None = None,
+    fit_id: str | None = None,
+) -> SourceFitScope | None:
+    """Read a typed declaration off the Qt thread; the session authenticates it."""
+    if path is None:
+        return None
+    if path.stat().st_size > MAX_SOURCE_SCOPE_REVIEW_BYTES:
+        raise ValueError("Reviewed fitting window requires nonempty bytes up to 1 MiB")
+    with path.open("rb") as stream:
+        raw = stream.read(MAX_SOURCE_SCOPE_REVIEW_BYTES + 1)
+    if not raw or len(raw) > MAX_SOURCE_SCOPE_REVIEW_BYTES:
+        raise ValueError("Reviewed fitting window requires nonempty bytes up to 1 MiB")
+    record = json.loads(raw)
+    if not isinstance(record, dict):
+        raise ValueError("Reviewed fitting window must be a JSON object")
+    if record.get("schema") == "necromatcher/source-fit-scope-review/1":
+        if session is None or fit_id is None:
+            raise ValueError(
+                "Raw reviewed window requires the selected fit and library"
+            )
+        return import_fit_source_scope_review(session.library, fit_id, raw)
+    return SourceFitScope.from_record(record)
+
+
+def source_scope_summary(
+    record: dict[str, Any], binding: dict[str, Any] | None = None
+) -> str:
+    """Describe reviewed bounds separately from the stored selected source domain."""
+    scope = SourceFitScope.from_record(record)
+    result = (
+        f"Reviewed Original Frames: {scope.first_frame} to "
+        f"{scope.end_exclusive_frame} (Exclusive). {scope.review.reason}. "
+        f"{scope.review.uncertainty_policy}. Hand contact and physical release remain unmeasured."
+    )
+    if binding is not None:
+        indices = binding["frame_indices"]
+        first = "/".join(map(str, binding["first_pts"]))
+        last = "/".join(map(str, binding["last_pts"]))
+        result += f" Stored Fit Domain: Frames {indices[0]} to {indices[-1]}; Source PTS {first} to {last}. Physical time unqualified."
+    return result
 
 
 def read_reviewed_shaft_evidence(path: Path | None) -> ShaftAxisEvidence | None:
@@ -113,6 +165,7 @@ class ResearchRefitDialog(ReviewedShaftDialog):
         layout.addWidget(label)
         layout.addLayout(self._build_form(plan))
         self._build_shaft_inputs(layout)
+        self._build_scope_inputs(layout, plan)
         self.start = QPushButton("Start Research Refit")
         self.start.clicked.connect(self._start)
         self.cancel = QPushButton("Cancel Research Refit")
@@ -126,6 +179,48 @@ class ResearchRefitDialog(ReviewedShaftDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(50)
         self._timer.timeout.connect(self._poll)
+
+    def _build_scope_inputs(self, layout: QVBoxLayout, plan: dict[str, Any]) -> None:
+        self._scope_path: Path | None = None
+        self._scope_owner: str | None = None
+        self._inherited_scope = plan.get("source_scope")
+        self._inherited_scope_binding = plan.get("source_scope_binding")
+        self.scope_import = QPushButton("Import Reviewed Window")
+        self.scope_remove = QPushButton("Remove Imported Window")
+        self.scope_status = QLabel()
+        self.scope_status.setWordWrap(True)
+        self.scope_import.clicked.connect(self._choose_scope)
+        self.scope_remove.clicked.connect(self._remove_scope)
+        for widget in (self.scope_import, self.scope_remove, self.scope_status):
+            layout.addWidget(widget)
+        self._remove_scope()
+
+    def _choose_scope(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import Reviewed Window", "", "Reviewed Window (*.json)"
+        )
+        if path:
+            self._scope_path = Path(path)
+            self._scope_owner = self.source_fit_id
+            self.scope_remove.setEnabled(True)
+            self.scope_status.setText(
+                f"Selected: {self._scope_path.name}; source and review validation pending. "
+                "Hand contact and physical release remain unmeasured."
+            )
+
+    def _remove_scope(self) -> None:
+        self._scope_path = None
+        self._scope_owner = None
+        self.scope_remove.setEnabled(False)
+        scope = self._inherited_scope
+        if scope is None:
+            self.scope_status.setText(
+                "No reviewed window imported; inherited scope is retained."
+            )
+            return
+        self.scope_status.setText(
+            source_scope_summary(scope, self._inherited_scope_binding)
+        )
 
     def _build_form(self, plan: dict[str, Any]) -> QFormLayout:
         form = QFormLayout()
@@ -303,6 +398,9 @@ class ResearchRefitDialog(ReviewedShaftDialog):
         if self._shaft_path is not None and self._shaft_owner != self.source_fit_id:
             self.status.setText("Remove evidence selected for another source fit")
             return
+        if self._scope_path is not None and self._scope_owner != self.source_fit_id:
+            self.status.setText("Remove window selected for another source fit")
+            return
         try:
             options = self._options()
         except ValueError as exc:
@@ -310,12 +408,22 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             return
         identity = self.identity.text().strip()
         source, path = self.source_fit_id, self._shaft_path
+        scope_path = self._scope_path
 
         def submit() -> dict[str, Any]:
             evidence = read_reviewed_shaft_evidence(path)
+            scope = read_reviewed_source_scope(scope_path, self.session, source)
             if evidence is None:
-                return self.session.submit(source, identity, options)
-            return self.session.submit(source, identity, options, evidence)
+                if scope is None:
+                    return self.session.submit(source, identity, options)
+                return self.session.submit(
+                    source, identity, options, source_scope=scope
+                )
+            if scope is None:
+                return self.session.submit(source, identity, options, evidence)
+            return self.session.submit(
+                source, identity, options, evidence, source_scope=scope
+            )
 
         self._worker = get_worker_adapter(
             submit,
@@ -326,6 +434,8 @@ class ResearchRefitDialog(ReviewedShaftDialog):
         self.run = None
         self.start.setEnabled(False)
         self._shaft_controls(True)
+        self.scope_import.setEnabled(False)
+        self.scope_remove.setEnabled(False)
         self.cancel.setEnabled(True)
         self.status.setText("Submitting Research Refit…")
         self._worker.start()
@@ -338,9 +448,18 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             f"{self.run['status']} · {self.run['acceptance']} · {self.run['message']}\nRun: {self.run['run_id']}\n"
             + "\n".join(self.run["blockers"])
         )
+        if self.run.get("source_fit_scope") is not None:
+            self.scope_status.setText(
+                source_scope_summary(
+                    self.run["source_fit_scope"],
+                    self.run.get("source_fit_scope_binding"),
+                )
+            )
         active = self.run["status"] in {"running", "pending"}
         self.start.setEnabled(not active)
         self._shaft_controls(active)
+        self.scope_import.setEnabled(not active)
+        self.scope_remove.setEnabled(not active and self._scope_path is not None)
         self.cancel.setEnabled(active)
         if not active:
             self._timer.stop()

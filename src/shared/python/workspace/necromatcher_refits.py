@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 import re
 from threading import Lock
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from src.shared.python.motion_matching.jobs import (
     AcceptanceState,
@@ -26,6 +26,10 @@ from src.shared.python.motion_matching.historical_fit import (
     ImageFitConfig,
     ShaftAxisEvidence,
 )
+
+
+if TYPE_CHECKING:
+    from .necromatcher_source_scope import SourceFitScope
 
 
 class NativeRefitSession:
@@ -49,6 +53,7 @@ class NativeRefitSession:
         new_fit_id: str,
         options: NativeRefitOptions,
         shaft_evidence: ShaftAxisEvidence | None = None,
+        source_scope: SourceFitScope | None = None,
     ) -> dict[str, Any]:
         with self._lock:
             if self._closed:
@@ -65,15 +70,20 @@ class NativeRefitSession:
                 options,
                 self._service,
             )
-            handle, root = (
-                start_native_refit(*arguments, shaft_evidence)
-                if shaft_evidence is not None
-                else start_native_refit(*arguments)
-            )
+            if source_scope is not None:
+                handle, root = start_native_refit(
+                    *arguments, shaft_evidence, source_scope
+                )
+            else:
+                handle, root = (
+                    start_native_refit(*arguments, shaft_evidence)
+                    if shaft_evidence is not None
+                    else start_native_refit(*arguments)
+                )
             self._handles[root.name] = (handle, source_fit_id, new_fit_id)
             while len(self._handles) > 32:
                 self._handles.popitem(last=False)
-            return self._view(root.name)
+            return _scope_view(self._view(root.name), root)
 
     def _root(self, run_id: str) -> Path:
         if not re.fullmatch(r"[a-f0-9]{32}", run_id):
@@ -147,7 +157,7 @@ class NativeRefitSession:
     def view(self, run_id: str) -> dict[str, Any]:
         """Poll without waiting; reopen canonical research status after restart."""
         with self._lock:
-            view = self._view(run_id)
+            view = _scope_view(self._view(run_id), self.library.root / "runs" / run_id)
             root = self.library.root / "runs" / run_id
             if (root / "worker-telemetry.json").exists():
                 request = json.loads(read_text(root / "request.json"))
@@ -181,7 +191,7 @@ def refit_plan(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]:
         original.get("config", previous.get("config", {}))
     )
     start = preserved_fit_spline(fit)
-    return {
+    plan = {
         "source_fit_id": fit_id,
         "frame_indices": fit["frame_indices"],
         "coordinate_order": fit["coordinate_order"],
@@ -200,3 +210,25 @@ def refit_plan(library: NecromatcherLibrary, fit_id: str) -> dict[str, Any]:
         },
         "qualification": fit["qualification"],
     }
+
+    from .necromatcher_fit import scope_record
+
+    if scope_record(fit) is not None:
+        plan["source_scope"] = scope_record(fit)
+        plan["source_scope_binding"] = fit["provenance"].get("source_fit_scope_binding")
+    return plan
+
+
+def _scope_view(view: dict[str, Any], root: Path) -> dict[str, Any]:
+    """Show admitted reviewed scope without expensive capture validation on polls."""
+    path = root / "request.json"
+    if path.is_file():
+        request = json.loads(read_text(path))
+        if "source_scope" in request:
+            from .necromatcher_source_scope import SourceFitScope
+
+            view["source_fit_scope_binding"] = request.get("source_scope_binding")
+            view["source_fit_scope"] = SourceFitScope.from_record(
+                request["source_scope"]
+            ).to_record()
+    return view

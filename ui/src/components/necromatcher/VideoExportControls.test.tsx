@@ -6,6 +6,14 @@ const api = vi.hoisted(() => ({submitVideoExport: vi.fn(), fetchVideoExport: vi.
 vi.mock('@/api/necromatcher', () => api);
 const run = (values = {}) => ({run_id:'export-1',source_fit_id:'fit-1',status:'running',acceptance:'partial',qualification:'monocular_research_hypothesis',blockers:[],message:'Encoding',fraction:null,control_available:true,execution_started:true,execution_verified:false,download_available:false,...values});
 beforeEach(() => {api.submitVideoExport.mockReset(); api.fetchVideoExport.mockReset(); api.cancelVideoExport.mockReset();});
+it('displays the stored reviewed source window when recalling an export', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({source_fit_scope: {
+    first_frame: 0, end_exclusive_frame: 191,
+    review: {reason: 'Reviewed conservative boundary', uncertainty_policy: 'Release unmeasured'},
+  }}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByText(/Reviewed Original Frames: 0 to 191/)).toHaveTextContent('Release unmeasured');
+});
 it('opts into a translucent model proxy and resets options for another fit', async () => {
   api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
   const view = render(<VideoExportControls fit="fit-1" />);

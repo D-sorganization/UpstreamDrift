@@ -28,6 +28,54 @@ beforeEach(() => {
   api.fetchRefitPlan.mockResolvedValue({source_fit_id: 'old', frame_indices: [0, 2], coordinate_order: ['hip'], coordinate_units: ['rad'], recorded_options: null});
 });
 
+it('discloses inherited reviewed window without resending or widening it', async () => {
+  api.fetchRefitPlan.mockResolvedValue({...boundedPlan(), source_scope: {
+    first_frame: 0, end_exclusive_frame: 4, purpose: 'both_hands_on_club',
+    review: {reason: 'Exclude ambiguous transition', uncertainty_policy: 'Contact unmeasured'},
+  }});
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  expect(await screen.findByText(/Reviewed Original Frames: 0.*4.*Exclusive/)).toBeInTheDocument();
+  expect(screen.getByText(/Exclude ambiguous transition/)).toBeInTheDocument();
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  expect(api.submitRefit.mock.calls[0][1]).not.toHaveProperty('source_scope');
+});
+
+it('imports a reviewed window and blocks malformed selection before submission', async () => {
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  await screen.findByLabelText('Source Frame Indices');
+  const file = new File(['{}'], 'review.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue('{}');
+  await userEvent.upload(screen.getByLabelText('Import Reviewed Window'), file);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Reviewed Fitting Window');
+  expect(screen.getByRole('button', {name: 'Start Research Refit'})).toBeDisabled();
+});
+
+it('submits an imported window only with contained frames and clears it for another fit', async () => {
+  api.fetchRefitPlan.mockResolvedValue(boundedPlan());
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  const view = render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Source Frame Indices');
+  const record = {schema: 'necromatcher/source-fit-scope/1', capture_id: 'capture', first_frame: 0, end_exclusive_frame: 3, purpose: 'both_hands_on_club', review: {reason: 'Exclude transition', uncertainty_policy: 'Unmeasured', contact_calibrated: false}};
+  const file = new File([''], 'window.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue(JSON.stringify(record));
+  await user.upload(screen.getByLabelText('Import Reviewed Window'), file);
+  await screen.findByText(/Reviewed Original Frames: 0 to 3/);
+  await user.type(screen.getByLabelText('New Fit Version'), 'new');
+  expect(screen.getByRole('button', {name: 'Start Research Refit'})).toBeDisabled();
+  await user.clear(screen.getByLabelText('Source Frame Indices'));
+  await user.type(screen.getByLabelText('Source Frame Indices'), '0, 1, 2');
+  await user.click(screen.getByRole('button', {name: 'Start Research Refit'}));
+  expect(api.submitRefit.mock.calls[0][1].source_scope).toEqual(record);
+  api.fetchRefitPlan.mockResolvedValue({...boundedPlan(), source_fit_id: 'other'});
+  view.rerender(<RefitControls fit="other" onStored={vi.fn()} />);
+  await screen.findByLabelText('Source Frame Indices');
+  expect(screen.queryByText(/Reviewed Original Frames/)).not.toBeInTheDocument();
+});
+
 it('submits reviewed shaft evidence only when explicitly loaded and clears it on source change', async () => {
   api.fetchRefitPlan.mockResolvedValue(boundedPlan());
   api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'new', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});

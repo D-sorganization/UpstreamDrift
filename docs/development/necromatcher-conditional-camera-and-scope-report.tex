@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.82in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,xcolor,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{16324F}
+\hypersetup{colorlinks=true,linkcolor=ink,urlcolor=ink}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V2}\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\digest}[1]{\texttt{\small\detokenize{#1}}}
+\begin{document}
+\begin{center}
+{\LARGE\color{ink}\bfseries Conditional Camera Initialization\\and Two-Hand Scope Methods}\par
+\vspace{8pt}{\large A Source-Bound Tiger Woods and Ben Hogan Supplement}\par
+\vspace{8pt}3 October 2026\quad\textbullet\quad Independently Reviewed Methods V2
+\end{center}
+\section*{Status and Purpose}
+This supplement describes one closed, read-only conditional-camera diagnostic and the exclusion of Tiger's uncertain late hand-release phase. It accompanies exact serialized data; it is not a calibration report or an accepted historical reconstruction. Root observed producer session 74740 and independent checker session 92074 close with exit code zero. Root accepted the independent serialized-output and complete-byte preservation review. This acceptance does not independently recompute native projections or reconstruct the capture clock.
+
+No conditional camera was adopted or registered. No motion optimizer ran, no library asset changed, no roles were adopted, and scientific qualification remains false. The public initializer internally refines camera pose; ``no optimizer'' here means no trajectory-fitting optimization, not an assertion that RefineLM performs no numerical refinement.
+
+The diagnostic holds each saved native model, trajectory and assumed intrinsics fixed. It changes only a conditional static camera's extrinsics, then freshly evaluates unchanged and conditional camera states over identical source-bound scopes. It asks whether this existing initialization procedure improves image agreement for the fixed inferred motion. It does not establish the historical camera or resolve model geometry, grip topology or physical timing.
+\section*{Preregistered Comparison Scope}
+\begin{center}\begin{tabular}{lrrr}\toprule
+Player & Retained Frames & Training Frames & Positive Correspondences\\\midrule
+Tiger Woods & 191 & 20 & 260\\
+Ben Hogan & 750 & 23 & 286\\\bottomrule
+\end{tabular}\end{center}
+There are two camera states per player, hence $2(191+750)=1,882$ native pose assessments. Positive correspondence counts refer to source-marker pairs entering camera initialization, not pose counts or two scalar coordinate rows. Neither missing observations nor new body landmarks were fabricated.
+
+The portable \texttt{results-data.json} contains exact scalar values, role arrays, scope lineage and external artifact pins. Tables here print twelve decimal places; machine data remains authoritative. This source was prepared before compilation; a separate root review receipt records compilation and page-layout inspection for the final edition.
+\newpage
+\section*{Source Scope and Reviewed Boundary}
+Tiger retains frame indices $0,\ldots,190$, expressed as the half-open interval $[0,191)$. The root's authenticated original-frame review chose a conservative cutoff before the uncertain release transition. This follows the user's instruction to match the interval with both hands on the club. It does not measure an exact physical release instant or certify every retained frame's contact state. Original frame identities and encoded presentation timestamps bind the choice to this capture.
+
+Tiger's retained training rows are $0,10,\ldots,190$. Hogan retains the unchanged interval $[0,750)$ and its original 23 training frames. The full historical assets remain intact. This read-only diagnostic restricts actual primary body and shaft evaluation; it does not retroactively change old full-capture fits or pretend that a durable fitting-scope API has already been implemented.
+
+The original Tiger record with shaft evidence at frame 209 is excluded before term construction and evaluation. It is not evaluated with zero weight, converted into an abstention or counted as a passed constraint. The original point coordinates and role labels of retained evidence are unchanged.
+\section*{Clock and Image Identity}
+The boundary-review digest is:
+\begin{center}\digest{0d63f2635b3d5ec462c3a50ac4ee9475c0e7bbf5587ff4391de313ba2c2147a5}\end{center}
+Its source clock is exact encoded container PTS, with timebase $1/30000$. Tiger's retained first and last PTS are $450450/30000$ and $640640/30000$ seconds; the first excluded frame has PTS $641641/30000$. These are rational source-clock identities, not calibrated elapsed physical swing time. Historical playback scale, sensor readout and exposure remain unknown.
+
+Decoded image-byte identity and PNG-file identity are separate domains. Canonical capture/frame admission checks the original source PNG and complete clock rather than trusting a caller-created typed receipt as authentication. Parent and subset evidence retain both their canonical record digests and external raw JSON hashes.
+\section*{Scoped Versus Historical Denominators}
+Tiger's new 191-frame body RMS cannot be treated as the same statistic as an earlier 210-frame whole-capture RMS. Removing late frames changes the observation set and its weight sum. Historical values remain useful as lineage, not as a matched comparator. The only primary comparisons in this experiment are freshly recomputed unchanged versus conditional cameras using the same retained rows, weights and canonical metrics owner. Hogan's unchanged interval still requires the same-owner fresh comparison to avoid silently mixing different metric definitions.
+\newpage
+\section*{Public Conditional Camera Method}
+The existing public \texttt{initialize\_camera\_hypothesis} performs SQPNP followed by RefineLM. It receives fixed assumed camera intrinsics and world correspondences produced through the canonical native marker provider from saved poses. At least six nondegenerate positive-confidence correspondences are required. Missing and zero-weight records are excluded rather than filled; nonfinite values, inadequate geometry and invalid depth fail admission.
+
+For native world point $X$, the camera convention is
+\[
+ X_c=RX+t,\qquad C=-R^{\mathsf T}t,\qquad
+ \pi(X_c)=\left(f_xX_{c,x}/X_{c,z}+c_x,\;
+ f_yX_{c,y}/X_{c,z}+c_y\right).
+\]
+The reported camera center $C$ is conditional on the current native model-world coordinate system and scale. Its units and orientation must not be interpreted as measured historical camera placement. Intrinsics $K$ are held exactly fixed and are assumed, not inferred sensor calibration.
+
+Correspondences are selected source-major then marker-major. Tiger supplies 260 eligible pairs distributed 91/78/91 across early/middle/late training strata; Hogan supplies 286 distributed 104/91/91. The source thirds are predefined by original retained index domain. A single static camera is fitted per player; no per-third camera, grid search or best-stratum selection occurs.
+\section*{Unweighted Initialization and Weighted Diagnostics}
+The public camera initializer uses eligible correspondences without confidence weighting in its numerical objective. Canonical confidence $w_i>0$ selects inclusion, but does not become an SQPNP or RefineLM solver weight. The separately reported canonical body diagnostic uses a confidence-weighted point RMS:
+\[
+ \mathrm{RMS}_{\mathrm{body}}=
+ \sqrt{\frac{\sum_{i\in\mathcal I}w_i
+ \lVert\pi(RX_i+t)-u_i\rVert_2^2}{\sum_{i\in\mathcal I}w_i}}.
+\]
+The denominator is the sum of point weights, not twice that sum. Consequently this unweighted pose initialization is not guaranteed to reduce the weighted reported metric. The evaluation preserves the same positive rows and weight denominators between camera states. Body, shaft training, shaft seen evaluation and newly reviewed diagnostic-seen metrics remain distinct scientific quantities.
+
+Confidence and localization uncertainty are authored and uncalibrated. A small numerical difference is not an uncertainty interval or statistical significance claim. No uncertainty propagation, clinical ROM inference or physical-time calibration is provided by this experiment.
+\newpage
+\section*{Fresh Body Results}
+\begin{center}\small\begin{tabular}{llrr}\toprule
+Player & Scope & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & Dense & 24.082673308003 & 24.780344535782 \\
+Tiger & Remaining Frames & 24.337344114034 & 25.026883245631 \\
+Hogan & Dense & 10.136350597234 & 10.090998303145 \\
+Hogan & Remaining Frames & 10.220486086558 & 10.174191400528 \\
+\bottomrule\end{tabular}\end{center}
+Tiger's scoped dense body RMS increases by approximately $0.698$ pixels. Hogan's dense body RMS decreases by approximately $0.045$ pixels. Neither change warrants adopting the conditional camera. Remaining-frame metrics exclude the body's original training frames; they do not constitute blinded or previously unseen validation.
+\section*{Predefined Temporal Strata}
+\begin{center}\small\begin{tabular}{llrrr}\toprule
+Player & Stratum & Frames & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & Training & 20 & 21.776977995696 & 22.555950153154 \\
+Tiger & Early & 64 & 10.171545654888 & 10.964173082533 \\
+Tiger & Middle & 64 & 33.583957254638 & 34.060632789004 \\
+Tiger & Late & 63 & 23.596205022253 & 24.871763077240 \\
+Hogan & Training & 23 & 6.856656444159 & 6.853373110974 \\
+Hogan & Early & 250 & 9.334854849587 & 9.316152864703 \\
+Hogan & Middle & 250 & 10.968678503150 & 10.872076102688 \\
+Hogan & Late & 250 & 10.050913590970 & 10.038290983056 \\
+\bottomrule\end{tabular}\end{center}
+Tiger thirds contain 64/64/63 retained source frames; Hogan thirds contain 250 each. The training row shown in this table is separate from the thirds. No additional image points are introduced by temporal stratification. Every stratum retains its own confidence sum and positive-point count in the machine data.
+
+Tiger worsens in each displayed dense temporal third. Hogan's changes are small and vary by third. A static-camera solution conditioned on an imperfect inferred model and motion can absorb some image error without identifying its cause. These results do not separate camera movement, model attachment error, sparse landmark localization, blur, film or broadcast processing, nor original rolling shutter. Interpretation requires that distinction rather than selecting the lowest displayed scalar.
+\newpage
+\section*{Three Separate Shaft Buckets}
+The native authored shaft line is compared with visible interior image fragments. These fragment points are not identified grip-butt, shaft-tip or clubhead endpoints, nor measured physical shaft length. Raw perpendicular pixel RMS and angular discrepancies are diagnostics, separate from weighted body metrics and any shaft objective penalty.
+\begin{center}\small\begin{tabular}{llrrr}\toprule
+Player & Bucket & Observed & Unchanged RMS (px) & Conditional RMS (px)\\\midrule
+Tiger & V1 Training & 1 & 66.690822411580 & 66.122042369971 \\
+Tiger & V2 Seen & 1 & 145.903630709799 & 131.225378293373 \\
+Tiger & New Diagnostic Seen & 2 & 131.724609752306 & 142.236114285228 \\
+Hogan & V1 Training & 1 & 16.997736205167 & 16.415242382054 \\
+Hogan & V2 Seen & 2 & 23.037824755424 & 23.645817035911 \\
+Hogan & New Diagnostic Seen & 11 & 36.890373721668 & 36.384232280393 \\
+\bottomrule\end{tabular}\end{center}
+Tiger V1 training retains frame 0 and excludes frame 209. V2 seen evaluation retains frame 60's explicit abstention and frame 150's observation. The new diagnostic-seen Tiger cohort retains 21 reviewed records, with two observed fragments and 19 abstentions. Hogan retains V1 frame 0 abstention and frame 375 observation, V2 frame 200 and 550 observations, and 31 new diagnostic records with 11 observations and 20 abstentions.
+
+An abstention contributes no observed-segment RMS denominator and has null per-frame errors. It is not a perfect match. Hogan frame 375 occurs in multiple buckets with separately preserved authored records; the buckets are not pooled or double-counted into a combined score. Reviewers had already seen source frames and global model results, so these labels cannot be called untouched unseen evidence.
+
+Hogan's seen-evaluation shaft RMS increases from approximately $23.038$ to $23.646$ pixels despite the small dense body improvement. Tiger's seen shaft error decreases, while its new diagnostic-seen error increases and dense body agreement worsens. Mixed bucket outcomes argue against declaring a camera solution from a single preferred metric.
+\section*{Limits and No-Adoption Decision}
+Both conditional cameras remain diagnostic outputs only. Models, morphology, attachment axes, continuous right-hand closure and historical timing are not qualified by this comparison. The club is driven through an authored left-wrist universal attachment with continuous right-hand closure in the historical model; the user's late-release instruction makes scope control essential. No new contact topology, coupled clinical ROM or rolling-shutter compensation was introduced. Independent serialized preservation is accepted; historical reconstruction acceptance remains unproven.
+\newpage
+\section*{Repeatability and Release Lineage}
+The closed producer is:
+\begin{center}\digest{55d17cfedf2e72e1a3c5a99c0f24ec1fa6f993cf}\end{center}
+The reviewed released configuration and freeze have SHA256 digests:
+\begin{center}
+\digest{ad1c1486880c426377c0cc203d27503fdc8f9359f4ee57fd6a2d4c8bc4827ff2}\\
+\digest{26becba9a03534d443bc194c22289e73d4e8bb720b3feb23117e5e5bf6b68bb8}
+\end{center}
+Root release and actual finally-preservation digests are:
+\begin{center}
+\digest{02671ad6ad3e6c5eb0cd87c096f2e48452a8623cc2b5fb55cdacb87ee61fd8f7}\\
+\digest{98d6cba317c227573d0439e40d995986680ab579a0ffa049e354ae19750f02ec}
+\end{center}
+Complete source, library, project, runtime and helper/config facets are captured before and after. Complete expected source/library/project maps are compared before SDK import; the worker imports MuJoCo before workspace-dependent native interfaces. Checked helper buffers authenticate transitive imports and reject foreign module caches. SDK import failure is cached without retry. Preservation retains primary failures and collects remaining facets; success requires zero library delta. The frozen SDK-free preparation has 42 green tests, Ruff and mypy checks, plus retained earlier failure logs.
+
+The independently preserved scope contains 14,805 canonical tracked files and 391 library files; four Gitlink directories are not counted as tracked file bytes. These counts do not replace full-map identity. Root reran 17 SDK-free checker tests and accepted the completed check. Its root acceptance SHA256 is \digest{852d579c442bda76793ad959beda6e172e49df6b254e46f8e986b1acc8890d5f}. Exact machine manifests carry paths, byte sizes and hashes; command details are copied verbatim in \texttt{REPLAY.md}. Use the known Python 3.13 executable with \texttt{-X utf8}, repository/src/shared-python import paths and one-thread BLAS environment. Do not rerun the exclusive completed output directory or treat archived authorization as permission for a new invocation.
+\section*{Proposed Durable Scoped Fit}
+A subsequent fitting recipe could use original Tiger training indices $0,10,\ldots,190$ and \texttt{sampled\_parent} initialization, creating a new immutable fit with explicit original parent lineage. Contact phases must validate against the restricted exact source clock, and the same shaft subsets must exclude frame 209 before term construction. Camera, objective, dense grip assessment and exports must share the same scope. No zeroed post-release loss may masquerade as a passed grip constraint.
+
+A durable \texttt{SourceFitScope} remains proposed, not implemented here: capture/hash/clock identity, reviewed boundary frames, half-open interval, rationale and parent lineage; canonical admission and publication rebinding; inherited refit/audit/export restrictions. Fail-first tests should prove excluded providers are never called and mismatched boundaries reject before work. Old whole-capture fits remain immutable. This report does not authorize that implementation or any new fit.
+\end{document}

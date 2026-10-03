@@ -1,3 +1,9 @@
+# Active: Necromatcher Reviewed Fitting Scope — #11414
+
+- Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Implementation SELF; last published head `55d17cfedf2e72e1a3c5a99c0f24ec1fa6f993cf`.
+- Registered raw reviews, exact selected-domain checks and native/web/export provenance are implemented. Root 294 Python/39 UI cases and static checks pass. Preserved failures and procedures are in [Camera and Scope Procedure](docs/development/necromatcher-conditional-camera-and-scope.md).
+- Next: publish this reviewed implementation, restrict the authored contact schedule explicitly, run a new controlled Tiger [0,191) fit and independently verify new overlays. No new historical fit, physical qualification or ControlTower transfer is claimed. Full goal remains active.
+
 # Isolated Native Hypothesis Admission — #11376
 
 - Branch: `feat/necromatcher-hypothesis-admission-11376`, isolated from the frozen real-player workspace.
@@ -244,5 +250,9 @@ agreement grants no clinical, historical or physical-time qualification.
 
 # Arm Morphology Current Continuation — #11357 / #11394
 
-- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Not yet applied to existing fits/camera studies; historical results remain unchanged.
+- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Applied to the completed conditional camera comparison; historical fits remain unchanged. Durable scope integration under #11414 is in progress.
 - Documentation SELF; four unoptimized research admissions and twelve selected stills are provenance-verified, with grip degradation and no anatomy/physical qualification. See [Current Continuation](docs/development/HANDOFF.md) and [Procedure](docs/development/necromatcher-arm-morphology-admission.md); prior reports remain unchanged.
+
+## Scoped Camera Closure Checkpoint — #11357 / #11414
+
+Producer 55d17 native session 74740 and independent session 92074 closed exit 0 with full 14,805-source/391-library preservation. Tiger [0,191) and Hogan [0,750) compared; keep saved cameras after mixed body/shaft outcomes. Six-page Methods V2 is compiled and all pages reviewed, with independent serialized preservation accepted and physical qualification unclaimed. See [Procedure](docs/development/necromatcher-conditional-camera-and-scope.md). SourceFitScope is implemented with registered portable receipts, exact selected-domain publication and scoped overlay provenance; root validation passed 294 Python and 39 interface cases. No new scoped motion fit has run. Full goal remains active.

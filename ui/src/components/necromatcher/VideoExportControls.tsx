@@ -2,6 +2,7 @@ import { submitVideoExport, fetchVideoExport, cancelVideoExport, videoExportDown
 import { useResearchJob } from './useResearchJob';
 import { useState } from 'react';
 import { ShaftEvidenceInput } from './ShaftEvidenceInput';
+import { SourceScopeSummary } from './SourceScopeInput';
 type OverlayOptions = VideoOverlayOptions | undefined;
 const exportApi = {submit: (fit: string, options: OverlayOptions) => options ? submitVideoExport(fit, options) : submitVideoExport(fit), view: fetchVideoExport, cancel: cancelVideoExport};
 type Props = {fit: string; initialRunId?: string; onRun?: (run: string) => void};
@@ -34,6 +35,7 @@ function VideoExportForm(props: Props) {
     }}>{submitting ? 'Starting Export…' : 'Export Research Overlay'}</button>
     {run && <div><p role="status">{run.status} · {run.acceptance} · {run.message}</p><p className="text-xs">Run: {run.run_id} · Source Fit: {run.source_fit_id}</p>{run.blockers.map((reason) => <p key={reason} className="text-xs text-orange-300">{reason}</p>)}</div>}
     {run?.shape_overlay && <p className="text-xs">Stored Model Proxy Opacity: {run.shape_overlay.opacity} · Uncalibrated Authored Geometry; Skeleton Retained.</p>}
+    <SourceScopeSummary scope={run?.source_fit_scope} binding={run?.source_fit_scope_binding} />
     {active && controlAvailable && <button type="button" className="rounded border p-2" onClick={() => void job.cancel()}>Cancel Overlay Export</button>}
     {ready && <a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Download Overlay Package</a>}
     {stored && <div className="space-y-2"><p className="text-xs text-orange-300">Download Readiness Unverified. Guarded verification can reject changed files.</p><a className="block text-blue-300 hover:underline" href={videoExportDownloadUrl(run.run_id)}>Verify Stored Overlay Package</a></div>}

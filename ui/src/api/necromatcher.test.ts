@@ -1,9 +1,17 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { submitVideoExport, fetchVideoExport, cancelVideoExport, videoExportDownloadUrl, submitRefit, type RefitOptions } from './necromatcher';
+import { submitVideoExport, fetchVideoExport, cancelVideoExport, videoExportDownloadUrl, submitRefit, registerReviewedWindow, type RefitOptions } from './necromatcher';
 const request = vi.hoisted(() => vi.fn());
-vi.mock('./fetch', () => ({apiFetch: request}));
+const formRequest = vi.hoisted(() => vi.fn());
+vi.mock('./fetch', () => ({apiFetch: request, apiFetchForm: formRequest}));
 vi.mock('./backend', () => ({getApiBase: () => 'http://backend.test'}));
 beforeEach(() => {request.mockReset(); request.mockResolvedValue({});});
+it('uploads exact review file bytes through the shared multipart transport', async () => {
+  const file = new File(['{ "schema": "review" }\n'], 'review.json', {type: 'application/json'});
+  await registerReviewedWindow('fit/one', file);
+  expect(formRequest).toHaveBeenCalledWith('/api/v1/necromatcher/fits/fit%2Fone/source-scope-reviews', expect.any(FormData), {timeoutMs: 300_000});
+  expect(formRequest.mock.calls[0][1].get('file')).toEqual(file);
+  expect(request).not.toHaveBeenCalled();
+});
 it('submits a bodyless export for an encoded fit identity', async () => {
   await submitVideoExport('fit/one');
   expect(request).toHaveBeenCalledExactlyOnceWith('/api/v1/necromatcher/fits/fit%2Fone/video-exports', {method:'POST'});

@@ -381,9 +381,10 @@ def _scheduled_worker_fixture(monkeypatch):
         worker,
         "NecromatcherLibrary",
         lambda root: SimpleNamespace(
+            load_fit=lambda identity: binding.fit,
             load_asset=lambda identity: SimpleNamespace(
                 metadata={"hash": "parent-hash"}
-            )
+            ),
         ),
     )
     monkeypatch.setattr(

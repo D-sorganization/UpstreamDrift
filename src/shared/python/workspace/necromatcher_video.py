@@ -79,16 +79,23 @@ class VideoOverlayLayers:
     captions: CaptionOverlayOptions | None = None
 
 
+def validate_video_shaft_domain(
+    fit: dict[str, Any], evidence: ShaftAxisEvidence
+) -> None:
+    """Reject reviewed evidence outside the exported pose domain before native work."""
+    if any(item.frame_index not in fit["frame_indices"] for item in evidence.frames):
+        raise ValueError("Shaft review frames must belong to the bound exported fit")
+
+
 def prepare_shaft_overlay(
     library: NecromatcherLibrary,
     binding: NativeFitBinding,
     evidence: ShaftAxisEvidence,
 ) -> ShaftVideoOverlay:
     """Rebind PNG/PTS/camera and resolve geometry using one existing native plant."""
+    validate_video_shaft_domain(binding.fit, evidence)
     bound = bind_fit_shaft_evidence(library, binding.fit, evidence)
     indices = binding.fit["frame_indices"]
-    if any(item.frame_index not in indices for item in evidence.frames):
-        raise ValueError("Shaft review frames must belong to the bound exported fit")
     axis = resolve_authored_shaft_axis(
         binding.definition_bytes, binding.plant.plant_sha
     )
@@ -777,6 +784,24 @@ def _write_export(
     return manifest
 
 
+def video_scope_provenance(fit: dict[str, Any]) -> dict[str, Any]:
+    """Detach scope from a canonically authenticated fit without inventing lineage."""
+    from .necromatcher_source_scope import SourceFitScope
+
+    provenance = fit.get("provenance", {})
+    keys = ("source_fit_scope", "source_fit_scope_binding")
+    if not any(key in provenance for key in keys):
+        return {}
+    if not all(key in provenance for key in keys):
+        raise ValueError("Video source scope requires its selected-domain binding")
+    SourceFitScope.from_record(provenance[keys[0]])
+    if not isinstance(provenance[keys[1]], dict):
+        raise ValueError("Video source scope binding must be a record")
+    return json.loads(
+        json.dumps({key: provenance[key] for key in keys}, allow_nan=False)
+    )
+
+
 def _export_manifest(
     binding: NativeFitBinding,
     library: NecromatcherLibrary,
@@ -827,6 +852,7 @@ def _export_manifest(
         "pngs": pngs,
         **({"video": media["video"]} if "video" in media else {}),
     }
+    manifest.update(video_scope_provenance(binding.fit))
     if shapes is not None:
         manifest["shape_overlay"] = shapes.provenance
         manifest["club_representation"] = (

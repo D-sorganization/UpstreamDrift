@@ -1,0 +1,94 @@
+{
+  "schema": "necromatcher/root-conditional-camera-report-review/1",
+  "source": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.tex",
+    "bytes": 16500,
+    "sha256": "1f02d20877d16672f2172749856ec8710c018701914624de73791cfeaf267cde"
+  },
+  "pdf": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.pdf",
+    "bytes": 158810,
+    "sha256": "fd7f379e735f2f54f38ecada7b520d0849a3fb5b712f3b9aa18c3a4b1e9988df"
+  },
+  "prepared_source": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-report-preparation-v1\\conditional-camera-two-hand-methods.tex",
+    "bytes": 16231,
+    "sha256": "229933f5047839c48cfeebfcef2d87a02eddc0f69ce3263760b701b0cb4e8997"
+  },
+  "prepared_manifest": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-report-preparation-v1\\artifact-manifest-v1.json",
+    "bytes": 3937,
+    "sha256": "22f284422a380e97c5cdfa339ca83b6e40095199fdb80c33d105d14d2426a871"
+  },
+  "data": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\results-data.json",
+    "bytes": 26485,
+    "sha256": "4f6106fd1dbd657b888a8d9c52f92f3978dda64da06d244d0ec7805d511407e9"
+  },
+  "rendered_pages": [
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-1.png",
+      "bytes": 180691,
+      "sha256": "d4b0372c8aa257b127a839abdfc9177e595f8015f1308be7def466f9172fb39c"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-2.png",
+      "bytes": 193229,
+      "sha256": "1f783a20f63ea48a7f7c09ecbfb447f783d11ad86f8b79075ff2d41df51875a4"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-3.png",
+      "bytes": 176251,
+      "sha256": "002f8d637dfd3000395074959365ea41e4521c395d2f9bd2eb224bcf4a691f0d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-4.png",
+      "bytes": 158912,
+      "sha256": "045c994ee9ff7d34b9385c8a4a77225f60bd38a1761a7c1c876f795d605f191f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-5.png",
+      "bytes": 194293,
+      "sha256": "252d199daed67f01ad4bf4804efe34c827fb9244fdcfbad09e57d2a14442a910"
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\render-review-v2\\page-6.png",
+      "bytes": 217726,
+      "sha256": "303605e2e6af94fcb302be3802ceec1f6fa7d89f94d43123c43c4c3a05af2a6e"
+    }
+  ],
+  "pages": 6,
+  "all_pages_visually_reviewed_by_root": true,
+  "layout_clipping_or_overlap": false,
+  "overfull_boxes": 0,
+  "underfull_boxes": 0,
+  "builtin_compile": "Failed: Unable to find standard directories for platform",
+  "fallback": "Existing MiKTeX pdflatex, installer disabled, two passes closed exit 0",
+  "compile_logs": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-report-v2-pass1.log",
+      "bytes": 5966,
+      "sha256": "bf6c1f42eb0e1652daa2dd0d57a8855e3aed6e7dcfde43517dde2564696346fa"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-report-v2-pass2.log",
+      "bytes": 5966,
+      "sha256": "bf6c1f42eb0e1652daa2dd0d57a8855e3aed6e7dcfde43517dde2564696346fa"
+    }
+  ],
+  "independent_camera_checker_pending": false,
+  "scientific_qualified": false,
+  "camera_adopted": false,
+  "controltower_transferred": false,
+  "source_revision": "Update independent serialized acceptance and edition labels only; numerical values unchanged",
+  "independent_root_acceptance": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-independent-close-v1\\root-release-v1\\root-acceptance-v1.json",
+    "bytes": 1686,
+    "sha256": "852d579c442bda76793ad959beda6e172e49df6b254e46f8e986b1acc8890d5f"
+  },
+  "prior_review": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\root-report-review-v1.json",
+    "bytes": 4094,
+    "sha256": "904e3203bfc0a029b78dfde43a072c476f80be62db5b9aa505acf2db7b576600"
+  }
+}
