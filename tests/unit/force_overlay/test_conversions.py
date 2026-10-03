@@ -116,6 +116,8 @@ def test_world_wrench_from_local_rotation() -> None:
         source="test",
     )
     assert w.point_m == (0.2, 0.3, 0.0)
+    assert w.force_n is not None
+    assert w.torque_nm is not None
     assert pytest.approx(w.force_n[0], abs=1e-9) == 0.0
     assert pytest.approx(w.force_n[1], abs=1e-9) == 100.0
     assert pytest.approx(w.force_n[2], abs=1e-9) == 0.0
@@ -206,6 +208,7 @@ def test_move_wrench_point_with_force_and_torque() -> None:
     w_moved = move_wrench_point(w, (0.0, 1.0, 0.0))
     assert w_moved.point_m == (0.0, 1.0, 0.0)
     assert w_moved.force_n == (0.0, 0.0, 100.0)
+    assert w_moved.torque_nm is not None
     assert pytest.approx(w_moved.torque_nm[0]) == -90.0
     assert pytest.approx(w_moved.torque_nm[1]) == 0.0
     assert pytest.approx(w_moved.torque_nm[2]) == 0.0
@@ -494,7 +497,7 @@ def test_joint_torque_wrench_additional_validation() -> None:
 
     # 2D tau_nm
     with pytest.raises(ValueError, match="1-dimensional"):
-        joint_torque_wrench("act:1", "b", [[1.0]], [[1.0, 0.0, 0.0]], (0, 0, 0), "s")
+        joint_torque_wrench("act:1", "b", [[1.0]], [[1.0, 0.0, 0.0]], (0, 0, 0), "s")  # type: ignore[arg-type,list-item]
 
     # non-finite tau_nm sequence
     with pytest.raises(ValueError, match="finite"):
