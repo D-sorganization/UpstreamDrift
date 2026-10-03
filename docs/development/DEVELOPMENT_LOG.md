@@ -22,13 +22,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
-- **PR:** #11338
-- **Branch:** `feat/fto-11289-colour-utils-dry`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/plot_style/**`, `src/shared/python/body_part_viz/**`, `src/engines/simscape/force_channels.py`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
-- **Started:** 2026-10-02
-- **Last verified:** 2026-10-03 at SELF — #11349 made `MujocoAxialLoadSource` axis discovery mujoco-3.14 safe (int enum compare); #11344 fixed OpenSim engine set_state/set_control on 4.x; FTO-4 (#11289) implemented DRY hex/RGBA helpers in `src/shared/python/plot_style/color_utils.py` and registered `TENSION_COMPRESSION` diverging colormap in `colormaps.py` and `registry.py` (with `N=257` exact center-neutral sampling); 20 unit tests pass; FTO-3 (#11288) implemented ForceGlyphStyle, build_glyphs, scale_for_view, glyph-set-v1 schema/fixtures, and FORCE_KIND_PALETTE registration; FTO-21 (#11306) added cross-engine force-overlay parity suite; FTO-16 (#11301) added muscle_wrenches to OpenSim; FTO-13 (#11298) added Pinocchio provider; FTO-11 (#11296) added Drake provider; earlier: FTO-19 (#11304) added SimscapeOutput force channels; FTO-15 (#11300) added OpenSim provider; FTO-2 (#11287) conversions; FTO-18 (#11303) Simscape loader; FTO-1 (#11286) contracts.
+- **PR:** #11355
+- **Branch:** `feat/fto-11291-mujoco-glyphs`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/physics_engines/mujoco/**`
+- **Last verified:** 2026-10-03 at SELF — FTO-6 (#11291) implemented MjvScene glyph renderer with 3D arrows, torque arc polyline capsules and arrow heads, connector version detection, buffer overflow protection, and 5 unit tests including offscreen pixel rendering; #11349 made `MujocoAxialLoadSource` axis discovery mujoco-3.14 safe (int enum compare); #11344 fixed OpenSim engine set_state/set_control on 4.x; FTO-4 (#11289) implemented DRY hex/RGBA helpers in `src/shared/python/plot_style/color_utils.py` and registered `TENSION_COMPRESSION` diverging colormap in `colormaps.py` and `registry.py` (with `N=257` exact center-neutral sampling); 20 unit tests pass; FTO-3 (#11288) implemented ForceGlyphStyle, build_glyphs, scale_for_view, glyph-set-v1 schema/fixtures, and FORCE_KIND_PALETTE registration; FTO-21 (#11306) added cross-engine force-overlay parity suite; FTO-16 (#11301) added muscle_wrenches to OpenSim; FTO-13 (#11298) added Pinocchio provider; FTO-11 (#11296) added Drake provider; earlier: FTO-19 (#11304) added SimscapeOutput force channels; FTO-15 (#11300) added OpenSim provider; FTO-2 (#11287) conversions; FTO-18 (#11303) Simscape loader; FTO-1 (#11286) contracts.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR #11338; proceed with Wave C renderers (FTO-5 MeshCat, FTO-6 MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV Video).
+- **Next step:** Merge PR #11355; proceed with remaining Wave C renderers (FTO-7, FTO-8).
 
 ### DL-#11268 · Capture-O Video Companion
 

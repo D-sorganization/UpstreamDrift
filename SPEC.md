@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |
 | 2026-10-03 | #11349 | `MujocoAxialLoadSource` axis discovery compares geom/joint types via `int()` so it works on mujoco 3.14 (enum vs numpy int); regression tests added. |
 | 2026-10-03 | #11344 | OpenSim engine `set_state`/`set_control` fixed for OpenSim 4.x: `Vector(list)` replaces the removed single-argument constructor, controls go through `Model.setControls` (valid, so actuators read them) and are retained across `set_state` and ZTCF/ZVCF; length mismatches raise `ValueError`. |
 | 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
