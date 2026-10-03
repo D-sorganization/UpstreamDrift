@@ -65,6 +65,27 @@ class OpenCapSession:
     notes: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class OpenCapSessionMetadata:
+    """Metadata and trial listing discovered for an OpenCap session.
+
+    Attributes:
+        session_dir: Root directory of the OpenCap session.
+        trials: Every trial name in the session (from MarkerData).
+        subject: Anthropometry and model metadata from sessionMetadata.
+        model_file: OpenCap's scaled .osim model file, if found.
+        kinematics_trials: Trials that have IK kinematics (.mot) files.
+        notes: Human-readable notes or warnings.
+    """
+
+    session_dir: Path
+    trials: list[str]
+    subject: OpenCapSubject
+    model_file: Path | None
+    kinematics_trials: tuple[str, ...]
+    notes: tuple[str, ...] = ()
+
+
 def _load_kinematics(mot_file: Path, model_file: Path) -> MotionTrajectory:
     kinds = read_osim_coordinates(model_file)
     translational = {
@@ -126,5 +147,37 @@ def load_opencap_session(
         kinematics=kinematics,
         model_file=model_file,
         subject=subject,
+        notes=tuple(notes),
+    )
+
+
+def inspect_opencap_session(session_dir: Path | str) -> OpenCapSessionMetadata:
+    """Inspect an OpenCap session without loading heavy marker/motion data.
+
+    Args:
+        session_dir: Root directory of the OpenCap session.
+
+    Returns:
+        OpenCapSessionMetadata summarizing trials, model, and subject info.
+
+    Raises:
+        NotADirectoryError: if session_dir is not a directory.
+        FileNotFoundError: if session has no marker data.
+        ValueError: if session metadata or layout is invalid.
+    """
+    path = Path(session_dir)
+    layout = OpenCapSessionLayout.discover(path)
+    if not layout.trials:
+        raise FileNotFoundError(f"OpenCap session has no marker trials: {path}")
+    model_file = layout.model_file()
+    notes: list[str] = []
+    if model_file is None and layout.kinematics_files:
+        notes.append("Session has kinematics files but no scaled OpenSim model file")
+    return OpenCapSessionMetadata(
+        session_dir=path,
+        trials=layout.trials,
+        subject=layout.subject,
+        model_file=model_file,
+        kinematics_trials=tuple(sorted(layout.kinematics_files.keys())),
         notes=tuple(notes),
     )

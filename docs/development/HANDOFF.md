@@ -1,3 +1,35 @@
+# OpenCap: Import Session Action in PyQt6 and React/Tauri — #11400 / #11409
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-import-11409`; commit SELF; PR: #11409 (`Closes #11409`, `Refs #11400`)
+- Governing issue: #11409 (parent epic #11400, depends on #11403)
+- Objective: Add an "Import OpenCap session" action that lists the session's trials, loads the chosen one through `load_opencap_session`, and hands the scaled model plus kinematics to the OpenSim engine.
+- Completed:
+  - `src/shared/python/motion_pipeline/sources/opencap_session.py`:
+    - Added `OpenCapSessionMetadata` dataclass and `inspect_opencap_session(session_dir)` to discover session trials, subject anthropometry, scaled model path, and kinematics without full marker parsing.
+  - `src/engines/physics_engines/opensim/python/opencap_import_action.py`:
+    - Added `OpenCapImportAction` and `OpenCapImportDialog` (PyQt6) providing session directory selection, trial enumeration, user trial selection, and handoff to OpenSim engine targets.
+  - `src/engines/physics_engines/opensim/python/opensim_gui.py`:
+    - Added `btn_import_opencap` button to `MainWidget` and `OpenSimGolfGUI`.
+    - Added `load_opencap_session` to `MainWidget` and `OpenSimGolfGUI` with status updates, subject details, and model loading.
+  - `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`:
+    - Added `load_opencap_session`, `kinematics`, and `opencap_session` properties to `OpenSimPhysicsEngine`.
+  - `src/api/routes/opencap.py` & `src/api/route_registry.py`:
+    - Added REST endpoints `POST /tools/opencap/inspect` and `POST /tools/opencap/import` for session inspection and trial loading.
+  - `ui/src/components/opencap/OpenCapImportModal.tsx`:
+    - Accessible React/Tauri modal component displaying session details, subject anthropometry, and trial selection, dispatching `onImport` event.
+  - Feature parity and documentation:
+    - Added `opencap.session_import` feature entry to `src/config/feature_parity.json`.
+    - Regenerated `docs/development/feature_parity_matrix.md`.
+    - Recorded in `SPEC.md` Change Log (#11409) and `docs/development/DEVELOPMENT_LOG.md` (DL-#11400).
+- Validation:
+  - 21 Python unit/UI tests pass across `tests/ui/engines/opensim/test_opencap_import_action.py`, `tests/unit/api/test_routes_opencap.py`, and `tests/unit/motion_pipeline/sources/test_opencap_session.py`.
+  - 5 Vitest unit/UI tests pass in `ui/src/components/opencap/OpenCapImportModal.test.tsx`.
+  - 39 feature parity tests pass in `tests/config/feature_parity/`.
+  - Architecture budget, file size budget, error handling ratchet, ruff check/format, and mypy clean.
+- Next steps: Merge PR #11409.
+
+---
+
 # Current Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
 
 - Repository: D-sorganization/UpstreamDrift

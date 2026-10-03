@@ -279,7 +279,9 @@
       "name": "Swing Optimizer",
       "entity_kind": "tile",
       "primary_workspace": "training",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -315,7 +317,9 @@
       "name": "Dataset Generator",
       "entity_kind": "cli_tool",
       "primary_workspace": "training",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1179,7 +1183,9 @@
       "name": "Swing \u2192 Flight Pipeline",
       "entity_kind": "service",
       "primary_workspace": "training",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1227,7 +1233,9 @@
       "name": "Swing Objective Lab",
       "entity_kind": "tile",
       "primary_workspace": "training",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "tools",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1263,7 +1271,9 @@
       "name": "Tools Package: contraction",
       "entity_kind": "cli_tool",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1275,7 +1285,9 @@
       "name": "Tools Package: drift_control",
       "entity_kind": "cli_tool",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1287,7 +1299,9 @@
       "name": "Tools Package: sg_optimizer",
       "entity_kind": "cli_tool",
       "primary_workspace": "training",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "planned",
       "alias_target": null,
@@ -1299,7 +1313,9 @@
       "name": "Tools Package: hmr2_sidecar",
       "entity_kind": "library",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1311,7 +1327,9 @@
       "name": "Tools Package: launch_monitor_model",
       "entity_kind": "library",
       "primary_workspace": "analysis",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1323,7 +1341,9 @@
       "name": "Tools Package: matlab_utilities",
       "entity_kind": "library",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1335,7 +1355,9 @@
       "name": "Tools Package: offline_validation",
       "entity_kind": "library",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1347,7 +1369,9 @@
       "name": "Tools Package: video_analyzer",
       "entity_kind": "library",
       "primary_workspace": "analysis",
-      "secondary_links": ["simulation"],
+      "secondary_links": [
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1359,7 +1383,9 @@
       "name": "Tools Package: model_converter",
       "entity_kind": "library",
       "primary_workspace": "simulation",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "intentionally_headless",
       "alias_target": null,
@@ -1371,7 +1397,10 @@
       "name": "Matched Swing Results Browser",
       "entity_kind": "tile",
       "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
+      "secondary_links": [
+        "simulation",
+        "capture"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1380,10 +1409,13 @@
     },
     "necromatcher": {
       "id": "necromatcher",
-      "name": "Necromatcher Historical Player Library",
+      "name": "Necromatcher Historical Player Workspace",
       "entity_kind": "tile",
-      "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
+      "primary_workspace": "capture",
+      "secondary_links": [
+        "analysis",
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1911,7 +1943,10 @@
       "name": "Matched Swing Results Browser (browse and filter matched swing execution receipts)",
       "entity_kind": "feature",
       "primary_workspace": "analysis",
-      "secondary_links": ["simulation", "capture"],
+      "secondary_links": [
+        "simulation",
+        "capture"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
@@ -1920,15 +1955,18 @@
     },
     "tools.necromatcher": {
       "id": "tools.necromatcher",
-      "name": "Historical Player Library And Source Review",
+      "name": "Necromatcher Historical Player Workspace",
       "entity_kind": "feature",
-      "primary_workspace": "analysis",
-      "secondary_links": ["capture", "simulation"],
+      "primary_workspace": "capture",
+      "secondary_links": [
+        "analysis",
+        "simulation"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
       "evidence": "src/tools/necromatcher/gui.py",
-      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
     },
     "tools.putting_green": {
       "id": "tools.putting_green",
@@ -1978,41 +2016,33 @@
       "evidence": "src/shared/python/body_part_viz/force_color_controls.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
-    "necromatcher": {
-      "id": "necromatcher",
-      "name": "Necromatcher Historical Player Workspace",
-      "entity_kind": "tile",
-      "primary_workspace": "capture",
-      "secondary_links": ["analysis", "simulation"],
-      "provider_authority": "core",
-      "lifecycle": "active_feature",
-      "alias_target": null,
-      "evidence": "src/tools/necromatcher/gui.py",
-      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
-    },
-    "tools.necromatcher": {
-      "id": "tools.necromatcher",
-      "name": "Necromatcher Historical Player Workspace",
-      "entity_kind": "feature",
-      "primary_workspace": "capture",
-      "secondary_links": ["analysis", "simulation"],
-      "provider_authority": "core",
-      "lifecycle": "active_feature",
-      "alias_target": null,
-      "evidence": "src/tools/necromatcher/gui.py",
-      "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
-    },
     "tools.video_analyzer": {
       "id": "tools.video_analyzer",
       "name": "Video Analyzer (pose tracking and force/torque overlay)",
       "entity_kind": "feature",
       "primary_workspace": "capture",
-      "secondary_links": ["analysis"],
+      "secondary_links": [
+        "analysis"
+      ],
       "provider_authority": "core",
       "lifecycle": "active_feature",
       "alias_target": null,
       "evidence": "src/tools/video_analyzer/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "opencap.session_import": {
+      "id": "opencap.session_import",
+      "name": "OpenCap session import action and OpenSim engine handoff",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": [
+        "simulation"
+      ],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/engines/physics_engines/opensim/python/opencap_import_action.py",
+      "acceptance_owner": "tests/unit/engines/opensim/test_opencap_import_action.py"
     }
   },
   "fixtures": {

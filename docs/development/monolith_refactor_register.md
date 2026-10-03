@@ -68,6 +68,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1040 | `src/tools/tour_matching_viewer/gui.py` |
 | 1037 | `src/tools/bunker_shot_gui/shot3d.py` |
 | 1035 | `src/engines/physics_engines/drake/python/motion_matching/humanoid_urdf.py` |
+| 1029 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1027 | `src/shared/python/motion_matching/force_nullspace.py` |
 | 1022 | `src/tools/bunker_shot_gui/render3d.py` |
 | 1021 | `src/tools/bunker_shot_gui/slices.py` |
@@ -77,7 +78,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1015 | `src/shared/python/motion_matching/gs3dx_variants.py` |
 | 1012 | `src/shared/python/config/model_source_providers.py` |
 | 1007 | `src/launchers/launcher_ui_setup.py` |
-| 1002 | `src/engines/physics_engines/opensim/python/opensim_physics_engine.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 1000 | `src/engines/model_inventory.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
@@ -104,8 +104,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
-| 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
-| 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
