@@ -131,6 +131,23 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         Keeps segment dimensions and marker offsets unchanged.
 %                         This is a matching assumption, not measured anatomy.
 %
+%     back_marker_weight (0) direct measured BackTop/BackLeft/BackRight cost.
+%                         Requires jc.back_marker_points (3x3xN, World m)
+%                         and fixed back_marker_offsets (3x3, torso frame m).
+%                         Missing points are omitted, never interpolated here.
+%     spine_bend_excursion_deg / torso_twist_excursion_deg (0) native-angle
+%                         excursions about the initial keyed address pose.
+%                         Hard bounds through the measured backswing top;
+%                         soft hinge penalty after top, allowing unbounded LM
+%                         tracking through impact instead of a branch jump.
+%                         Active spine policy releases hard scapula bounds
+%                         after top; scapula posture pull still fades to impact.
+%     spine_bound_weight (.35), spine_posture_weight (.12), spine_smooth_weight
+%                         (.08) residual scales in m/rad; opt-in spine only.
+%     head_orientation_mode ("full") or "axis": axis tracks the calibrated
+%                         head long axis only, appropriate to the two-DOF neck.
+%                         Full 3D head error is still reported independently.
+%
 %   IK fields:
 %     .model       the model fitted
 %     .seed_source (explicit initial_pose only) kinematic seed provenance ('target_free_solve' or 'initial_pose');
@@ -174,6 +191,14 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.foot_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.head_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.initial_pose = struct([])
+        opts.head_orientation_mode (1,1) string {mustBeMember(opts.head_orientation_mode,["full","axis"])} = "full"
+        opts.back_marker_weight (1,1) double {mustBeReal,mustBeFinite,mustBeNonnegative} = 0
+        opts.back_marker_offsets (3,3) double = zeros(3)
+        opts.spine_bend_excursion_deg (1,1) double = 0
+        opts.torso_twist_excursion_deg (1,1) double = 0
+        opts.spine_bound_weight (1,1) double {mustBeReal,mustBeFinite,mustBeNonnegative} = .35
+        opts.spine_posture_weight (1,1) double {mustBeReal,mustBeFinite,mustBeNonnegative} = .12
+        opts.spine_smooth_weight (1,1) double {mustBeReal,mustBeFinite,mustBeNonnegative} = .08
         opts.scapula_protraction_deg (1,1) double = 7.5
         opts.scapula_backswing_end_frame (1,1) double {mustBeInteger,mustBeNonnegative} = 0
     end
@@ -200,7 +225,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     head_data = gs3dx_head_input_data(jc, opts.frames, ...
         opts.calibration_frames, opts.head_orientation_weight);
     top=0;impact=0;
-    if opts.scapula_protraction_deg > 0
+    if opts.scapula_protraction_deg > 0 || opts.spine_bend_excursion_deg>0 || opts.torso_twist_excursion_deg>0
         assert(isfield(jc,'impact_frame'),'gs3dx:ik:scapula','Capture phase metadata is required; use 0 for legacy IK');
         impact=jc.impact_frame;top=opts.scapula_backswing_end_frame;
         if top==0, top=gs3dx_backswing_top_frame(jc,true); end
@@ -208,11 +233,17 @@ function ik = gs3dx_whole_body_ik(jc, opts)
             impact==fix(impact) && top>1 && top<impact && impact<=size(jc.pelvis,2), ...
             'gs3dx:ik:scapula','Require 1 < backswing top < capture impact <= capture length');
     end
-    s = local_setup(opts.model, head_data.active);
+    body_active=opts.back_marker_weight>0;
+    if body_active
+        assert(isfield(jc,'back_marker_points') && size(jc.back_marker_points,1)==3 && size(jc.back_marker_points,2)==3 && size(jc.back_marker_points,3)==size(jc.pelvis,2),'gs3dx:ik:body','Require three raw back markers over capture frames');
+        assert(all(isfinite(opts.back_marker_offsets),'all'),'gs3dx:ik:body','Back marker offsets must be finite');
+    end
+    s = local_setup(opts.model, head_data.active,body_active);
+    s.back_marker_weight=opts.back_marker_weight;s.back_marker_offsets=opts.back_marker_offsets;
     s.verbose = opts.verbose;
     s.backward = opts.backward;
     s.foot_orientation_weight = opts.foot_orientation_weight;
-    s.head_orientation_weight = opts.head_orientation_weight;
+    s.head_orientation_weight = opts.head_orientation_weight;s.head_orientation_mode=opts.head_orientation_mode;
     s.scapula = gs3dx_scapula_bounds(s.jp, s.layout, opts.scapula_protraction_deg);
     s.scapula.top=top;s.scapula.impact=impact;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
@@ -222,7 +253,7 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         assert(has_foot_R, 'gs3dx:ik', 'jc must contain foot_R_L and foot_R_R when foot_orientation_weight > 0');
     end
     feet = @(f) local_foot_data(jc, f, has_foot_R);
-    head_fn = @(f) local_head_data(head_data, f);
+    head_fn = @(f) local_body_head_data(head_data,jc,body_active,f);
     nt = numel(s.names);
     data = @(f) cell2mat(cellfun(@(n) jc.(n)(:, f), s.names, 'UniformOutput', false).');   % 3 x nt
     valid = @(f) ~cellfun(@(n) jc.gap.(n)(f), s.names).';   % 1 x nt, false where gap-filled
@@ -244,6 +275,14 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     else
         [p, g] = local_apply_initial_pose(s, p_seed);
         seed_source = 'initial_pose';
+    end
+    s.spine=gs3dx_spine_bounds(s.jp,s.layout,p,opts.spine_bend_excursion_deg,opts.torso_twist_excursion_deg);
+    s.spine.bound_weight=opts.spine_bound_weight;s.spine.in_backswing=true;
+    if s.spine.active
+        s.reg.target(s.spine.indices)=s.spine.reference(s.spine.indices);
+        s.reg.posture(s.spine.indices)=opts.spine_posture_weight;
+        s.reg.smooth(s.spine.indices)=opts.spine_smooth_weight;
+        s.reg.on=true;lm.Algorithm='trust-region-reflective';
     end
     if isempty(opts.offsets)
         cal = opts.calibration_frames;
@@ -274,6 +313,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 
     n = numel(opts.frames);
     best = local_track(s, opts.frames, p, g, off, data, weight, feet, head_fn, lm);
+    if body_active,ik.back_marker_rms=nan(1,numel(opts.frames));end
+    if head_data.active && opts.head_orientation_mode=="axis",ik.head_axis_error_deg=nan(1,numel(opts.frames));end
+    if s.spine.active,ik.spine_excursion_deg=zeros(3,numel(opts.frames));ik.spine_native_keys=s.spine.keys;end
 
     ik.model = opts.model;
     if ~isempty(p_seed), ik.seed_source = seed_source; end
@@ -292,7 +334,15 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     ik.head_R = nan(3, 3, n);
     names_ref = ik.names;
     for i = 1:n
-        [P, R, st, ~, R_feet, R_head] = local_fk(s, best(i).p, best(i).g);
+        [P, R, st, ~, R_feet, R_head,P_body,R_body] = local_fk(s, best(i).p, best(i).g);
+        if body_active
+            bd=head_fn(opts.frames(i));pred=P_body+R_body*s.back_marker_offsets;valid_body=all(isfinite(bd.back_points),1);
+            ik.back_marker_rms(i)=sqrt(mean(sum((pred(:,valid_body)-bd.back_points(:,valid_body)).^2,1)));
+        end
+        if head_data.active && opts.head_orientation_mode=="axis"
+            hd=head_fn(opts.frames(i));if ~hd.gap,ik.head_axis_error_deg(i)=acosd(max(-1,min(1,dot(R_head(:,3),hd.R_target(:,3)))));end
+        end
+        if s.spine.active,ik.spine_excursion_deg(:,i)=rad2deg(best(i).p(s.spine.indices)-s.spine.reference(s.spine.indices));end
         ik.joint(~s.closed, i) = local_targets(s, best(i).p);
         ik.joint(s.closed, i) = best(i).g;
         pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, nt)), 3, nt);
@@ -325,11 +375,28 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
         'rom_weight', opts.rom_weight, 'foot_orientation_weight', opts.foot_orientation_weight, ...
         'head_orientation_weight', opts.head_orientation_weight);
+    if body_active
+        ik.regularization.back_marker_weight=opts.back_marker_weight;
+        ik.regularization.back_marker_offsets=opts.back_marker_offsets;
+    end
+    if head_data.active && opts.head_orientation_mode=="axis"
+        ik.regularization.head_orientation_mode=opts.head_orientation_mode;
+    end
+    if s.spine.active
+        ik.regularization.spine_bend_excursion_deg=opts.spine_bend_excursion_deg;
+        ik.regularization.torso_twist_excursion_deg=opts.torso_twist_excursion_deg;
+        ik.regularization.spine_bound_weight=opts.spine_bound_weight;
+        ik.regularization.spine_posture_weight=opts.spine_posture_weight;
+        ik.regularization.spine_smooth_weight=opts.spine_smooth_weight;
+        ik.regularization.spine_reference_rad=s.spine.reference(s.spine.indices);
+        ik.regularization.spine_policy='Native address excursions: hard through top; soft hinge after top';
+    end
     if s.scapula.active
         ik.regularization.scapula_protraction_deg = opts.scapula_protraction_deg;
         ik.regularization.scapula_backswing_end_frame=top;
         ik.regularization.scapula_release_end_frame=impact;
         ik.regularization.scapula_policy = 'Address 5..10 deg; backswing 5..25 deg; cosine release to impact';
+        if s.spine.active,ik.regularization.scapula_policy='Address 5..10 deg; backswing 5..25 deg; hard bounds released after top, cosine posture pull to impact';end
     end
     if ~isempty(opts.gap_target_weight) && isstruct(opts.gap_target_weight) && ~isempty(fieldnames(opts.gap_target_weight))
         ik.regularization.gap_target_weight = opts.gap_target_weight;
@@ -430,9 +497,18 @@ function best = local_track(s, frames, p, g, off, data, weight, feet, head, lm)
         for i = order{1}
             [s.scapula.frame_lower,s.scapula.frame_upper,pull] = ...
                 gs3dx_scapula_phase(s.scapula,frames(i),s.scapula.top,s.scapula.impact);
+            s.spine.in_backswing=frames(i)<=s.scapula.top;
+            if s.spine.active && frames(i)>s.scapula.top && s.scapula.active
+                s.scapula.frame_lower=[];s.scapula.frame_upper=[];
+            end
+            free.spine=s.spine;
             free.scapula=s.scapula;
             if s.scapula.active
                 s.reg.target=s.scapula.target*pull;
+                free.reg.target=s.reg.target;
+            end
+            if s.spine.active
+                s.reg.target(s.spine.indices)=s.spine.reference(s.spine.indices);
                 free.reg.target=s.reg.target;
             end
             t0 = tic;
@@ -462,7 +538,7 @@ function best = local_track(s, frames, p, g, off, data, weight, feet, head, lm)
     end
 end
 
-function s = local_setup(mdl, with_head)
+function s = local_setup(mdl, with_head,with_body)
 % KinematicsSolver with the target points, the body rotations, the foot solid
 % rotation frames and the right-arm loop joints as outputs.
     load_system(mdl);
@@ -532,6 +608,11 @@ function s = local_setup(mdl, with_head)
         local_add_head_frame(ks, mdl, world);
     end
 
+    s.body_active=with_body;
+    if with_body
+        addFrameVariables(ks,'p_back_body','Translation',world,[joint('Left Scapula') '/B']);
+        addFrameVariables(ks,'r_back_body','Rotation',world,[joint('Left Scapula') '/B']);
+    end
     % Model-independent identification of invariant joint roles
     roles = gs3dx_ik_joint_roles(jp);
     s.roles = roles;
@@ -624,6 +705,12 @@ function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, hd, lm)
         if ~isempty(lb), p=min(max(p,lb),ub); end
         if isempty(lb), lm.Algorithm='levenberg-marquardt'; end
     end
+    if s.spine.active && s.spine.in_backswing
+        if isempty(lb),lb=s.spine.lower;ub=s.spine.upper;else,lb=max(lb,s.spine.lower);ub=min(ub,s.spine.upper);end
+        assert(all(lb<=ub),'gs3dx:ik:spine','Conflicting matching bounds');
+        p=min(max(p,lb),ub);lm.Algorithm='trust-region-reflective';
+    end
+    if isempty(lb),lm.Algorithm='levenberg-marquardt';end
     p0 = p;   % the warm start: the neighbour frame's solution
     r = @(pp) local_residual(s, pp, g, off, d, w, fd, hd, p0);
     [p, cost, ~, ~, out] = lsqnonlin(r, p, lb, ub, lm);
@@ -632,16 +719,21 @@ function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, hd, lm)
 end
 
 function r = local_residual(s, p, g, off, d, w, fd, hd, p0)
-    [P, R, st, gc, R_feet, R_head] = local_fk(s, p, g);
+    [P, R, st, gc, R_feet, R_head,P_body,R_body] = local_fk(s, p, g);
     if st < 1
         r = 10 * ones(3 * s.nt + 2 * numel(p) * s.reg.on + s.rom.n + ...
-            18 * (s.foot_orientation_weight > 0) + 9 * (s.head_orientation_weight > 0), 1);   % loop not closed: reject the step
+            18 * (s.foot_orientation_weight > 0) + 9 * (s.head_orientation_weight > 0)+9*s.body_active+3*s.spine.active, 1);   % loop not closed: reject the step
         return;
     end
     pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, s.nt)), 3, s.nt);
     r = reshape((pts - d) .* w, [], 1);
     if s.reg.on
         r = [r; s.reg.posture .* (p - s.reg.target); s.reg.smooth .* (p - p0)];
+    end
+    if s.spine.active
+        idx=s.spine.indices;
+        violation=max(0,p(idx)-s.spine.upper(idx))+max(0,s.spine.lower(idx)-p(idx));
+        r=[r;s.spine.bound_weight*violation];
     end
     if s.rom.on
         r = [r; local_rom_residual(s.rom, p, gc)];
@@ -650,13 +742,20 @@ function r = local_residual(s, p, g, off, d, w, fd, hd, p0)
         r_feet = gs3dx_foot_orientation_residual(R_feet, fd.R_target, fd.gaps, s.foot_orientation_weight);
         r = [r; r_feet];
     end
+    if s.body_active
+        pred=P_body+R_body*s.back_marker_offsets;valid_body=all(isfinite(hd.back_points),1);rb=zeros(3,3);
+        rb(:,valid_body)=s.back_marker_weight*(pred(:,valid_body)-hd.back_points(:,valid_body));r=[r;rb(:)];
+    end
     if s.head_orientation_weight > 0
         r_head = gs3dx_head_orientation_residual(R_head, hd.R_target, hd.gap, s.head_orientation_weight);
+        if s.head_orientation_mode=="axis"
+            r_head=zeros(9,1);if ~hd.gap,r_head(1:3)=s.head_orientation_weight*(R_head(:,3)-hd.R_target(:,3));end
+        end
         r = [r; r_head];
     end
 end
 
-function [P, R, st, g, R_feet, R_head] = local_fk(s, p, g)
+function [P, R, st, g, R_feet, R_head,P_body,R_body] = local_fk(s, p, g)
     [o, st] = solve(s.ks, local_targets(s, p), g);
     P = reshape(o(1:3 * s.nt), 3, s.nt);
     a = reshape(o(3 * s.nt + 1:3 * (s.nt + s.nb)), 3, s.nb) * pi / 180;
@@ -676,7 +775,12 @@ function [P, R, st, g, R_feet, R_head] = local_fk(s, p, g)
         a_head = o(idx_head) * pi / 180;
         R_head = local_rx(a_head(1)) * local_ry(a_head(2)) * local_rz(a_head(3));
     end
-    g = o(3 * (s.nt + s.nb + 2 + double(s.head_active)) + 1:end);
+    P_body=nan(3,1);R_body=nan(3);
+    if s.body_active
+        base=3*(s.nt+s.nb+2+double(s.head_active));P_body=o(base+(1:3));a=o(base+(4:6))*pi/180;
+        R_body=local_rx(a(1))*local_ry(a(2))*local_rz(a(3));
+    end
+    g = o(3 * (s.nt + s.nb + 2 + double(s.head_active)+2*double(s.body_active)) + 1:end);
 end
 
 function T = local_targets(s, p)
@@ -766,4 +870,8 @@ function local_add_head_frame(ks, mdl, world)
     assert(numel(candidates) == 1, 'gs3dx:ik', ...
         'Expected exactly one Head solid reference port in %s', mdl);
     addFrameVariables(ks, 'r_head', 'Rotation', world, [candidates{1} '/R']);
+end
+
+function hd=local_body_head_data(head,jc,active,f)
+ hd=local_head_data(head,f);if active,hd.back_points=jc.back_marker_points(:,:,f);end
 end

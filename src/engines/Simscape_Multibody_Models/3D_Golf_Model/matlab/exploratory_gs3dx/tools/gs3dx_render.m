@@ -72,6 +72,7 @@ function out = gs3dx_render(mdl, q, opts)
         opts.video_quality (1,1) double {mustBeInteger,mustBeNonnegative,mustBeFinite} = 100
         opts.view = "face-on"
         opts.markers double = []
+        opts.highlight_markers double = []
         opts.scene_markers double = []
         opts.time (1,:) double = []
         opts.output_dir (1,:) char = pwd
@@ -153,7 +154,7 @@ function out = gs3dx_render(mdl, q, opts)
             video_path = fullfile(opts.output_dir, video_path);
         end
         v_written = local_render_video(solids, frames_to_solve, t_vec, az, el, ...
-            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus, opts.resolution, opts.video_quality);
+            opts.markers, opts.highlight_markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus, opts.resolution, opts.video_quality);
         if ~isempty(v_written)
             written_files(end+1) = string(v_written);
         end
@@ -183,7 +184,7 @@ function out = gs3dx_render(mdl, q, opts)
             end
 
             local_render_still(solids, f_num, t_val, az, el, ...
-                opts.markers, opts.ground, opts.title, s_path, opts.visible, focus, opts.resolution);
+                opts.markers, opts.highlight_markers, opts.ground, opts.title, s_path, opts.visible, focus, opts.resolution);
             written_files(end+1) = string(s_path);
         end
     end
@@ -607,7 +608,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Draw scene for frame f into given axes
 % -------------------------------------------------------------------------
-function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus)
+function local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus)
     cla(ax);
     hold(ax, 'on');
 
@@ -647,6 +648,15 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
             scatter3(ax, m_f(valid_m, 1), m_f(valid_m, 2), m_f(valid_m, 3), ...
                 42, [1.0 0.42 0.04], 'filled', 'MarkerEdgeColor', [0.2 0.2 0.2]);
         end
+    end
+
+    % Highlight only measured back/waist points; NaN samples stay hidden.
+    if ~isempty(highlights) && size(highlights,3)>=f
+        h=highlights(:,:,f);
+        assert(size(h,1)==3,'gs3dx:render','Highlights must be 3xNxF');
+        valid=all(isfinite(h),1);
+        scatter3(ax,h(1,valid),h(2,valid),h(3,valid),70,[0 .75 .9], ...
+            'filled','MarkerEdgeColor',[.1 .1 .1]);
     end
 
     % Scene bounds and appearance
@@ -697,7 +707,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Render single still image
 % -------------------------------------------------------------------------
-function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis, focus, resolution)
+function local_render_still(solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, outfile, is_vis, focus, resolution)
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
@@ -705,9 +715,9 @@ function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scen
     fig = figure('Visible', vis_str, 'Color', 'w', 'Units','pixels','Position', [100 100 resolution]);
     ax = axes('Parent', fig);
     
-    local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
+    local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus);
     
-    exportgraphics(fig, outfile, 'Units','pixels','Width',resolution(1),'Height',resolution(2));
+    gs3dx_export_pixels(fig,outfile,resolution);
     close(fig);
 end
 
@@ -715,7 +725,7 @@ end
 % Helper: Render swing video (MP4 or GIF fallback)
 % -------------------------------------------------------------------------
 function video_file = local_render_video(solids, frames, t_vec, az, el, ...
-    markers, draw_ground, scene_title, fps, outfile, is_vis, focus, resolution, quality)
+    markers, highlights, draw_ground, scene_title, fps, outfile, is_vis, focus, resolution, quality)
 
     vis_str = 'off';
     if is_vis
@@ -753,13 +763,12 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         if ~isempty(t_vec) && f <= numel(t_vec)
             t_val = t_vec(f);
         end
-        local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
+        local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus);
         drawnow;
         % GETFRAME is limited by display size even for invisible figures.
         % Render native pixels explicitly; never upscale a screen capture.
-        exportgraphics(fig,frame_png,'Units','pixels','Width',resolution(1), ...
-            'Height',resolution(2),'Padding',0);
-        frame_data=struct('cdata',imread(frame_png),'colormap',[]);
+        pixels=gs3dx_export_pixels(fig,frame_png,resolution);
+        frame_data=struct('cdata',pixels,'colormap',[]);
         assert(isequal([size(frame_data.cdata,2),size(frame_data.cdata,1)],resolution), ...
             'gs3dx:render','Rendered video dimensions differ from the requested resolution');
 

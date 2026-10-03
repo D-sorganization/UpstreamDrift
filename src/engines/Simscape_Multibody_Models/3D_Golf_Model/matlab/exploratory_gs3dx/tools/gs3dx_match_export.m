@@ -18,6 +18,7 @@ function report = gs3dx_match_export(capture_id, opts)
         opts.stills (1,:) double = []
         opts.stride (1,1) double = 0
         opts.overlay_markers (1,1) logical = true
+        opts.display_name (1,1) string = ""
         opts.resolution (1,2) double {mustBeInteger,mustBePositive,mustBeFinite} = [1920 1080]
         opts.video_quality (1,1) double {mustBeInteger,mustBeNonnegative,mustBeFinite} = 100
         opts.frames (1,:) double = []
@@ -90,8 +91,15 @@ function report = gs3dx_match_export(capture_id, opts)
     [poses, t_vec] = local_obtain_poses(mdl_name, jc, cap.rate_hz, ...
         frames_to_render, opts.pose_source, personal_lengths, checkpoint_file, identity, deps.solve);
 
-    export_alias=cap_alias+"_clean";
-    if opts.overlay_markers,export_alias=cap_alias+"_markers";end
+    display_name=opts.display_name;
+    if strlength(display_name)==0
+        display_name="Model Swing";
+        if cap_alias=="capture-A",display_name="Model Swing 1";end
+        if cap_alias=="capture-O",display_name="Model Swing 2";end
+    end
+    public_alias=regexprep(display_name,'[^A-Za-z0-9_-]','_');
+    export_alias=public_alias+"_clean";
+    if opts.overlay_markers,export_alias=public_alias+"_markers";end
     % 7. Map stills from capture frames to pose column indices
     [stills_cols, still_names_map] = local_resolve_stills(opts.stills, ...
         poses.frames, cap, jc, opts.views, export_alias, opts.export_stills);
@@ -99,7 +107,7 @@ function report = gs3dx_match_export(capture_id, opts)
     % 8. Format scene title for overlay: honest IK qualification labeling
     coverage_str = sprintf('Frames %d-%d (%.2f-%.2fs, %.0fHz, stride %d)', ...
         poses.frames(1), poses.frames(end), t_vec(1), t_vec(end), cap.rate_hz, stride);
-    scene_title = sprintf('%s [%s] | IK / DYNAMICS UNQUALIFIED | %s', cap_alias, mdl_name, coverage_str);
+    scene_title = char(display_name);
 
     % 9. Prepare marker overlays (S'*(p-origin), waist origin, subset-aligned)
     marker_reference=gs3dx_capture_marker_overlay(cap,poses.frames);
@@ -630,6 +638,7 @@ function dep = local_dependency_inventory()
     dep.solve.initial_pose = local_resolve_which('gs3dx_ik_initial_pose');
     dep.solve.initial_target_values = local_resolve_which('gs3dx_initial_target_values');
     dep.solve.head_input_data = local_resolve_which('gs3dx_head_input_data');
+    dep.solve.spine_bounds = local_resolve_which('gs3dx_spine_bounds');
     dep.solve.scapula_bounds = local_resolve_which('gs3dx_scapula_bounds');
     dep.solve.scapula_phase = local_resolve_which('gs3dx_scapula_phase');
     dep.solve.backswing_top_frame = local_resolve_which('gs3dx_backswing_top_frame');
@@ -643,6 +652,7 @@ function dep = local_dependency_inventory()
 
     % 2. Render-only dependencies (recorded in provenance; do NOT invalidate IK checkpoint)
     dep.render = struct();
+    dep.render.export_pixels = local_resolve_which('gs3dx_export_pixels');
     dep.render.render = local_resolve_which('gs3dx_render');
     dep.render.scene_bounds = local_resolve_which('gs3dx_scene_bounds');
     dep.render.marker_overlay = local_resolve_which('gs3dx_capture_marker_overlay');
