@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11288 | [FTO-3] Implement glyph builder (ForceGlyphStyle, build_glyphs, scale_for_view), glyph-set-v1 wire schema and examples, and FORCE_KIND_PALETTE registration (#11288). |
 | 2026-10-02 | #11287 | [FTO-2] Implement shared force conversions: joint torque to moment vector, local to world, point translation with moment-arm adjustment, and reaction wrenches to axial loads (#11287). |
 | 2026-10-02 | #11303 | [FTO-18] Add the pure-Python Simscape force loader `load_simscape_force_series` (declarative channel table, logged-R rotation, orthonormality validation) and `SimscapeAdapter.load_force_series`; documented in CROSS_ENGINE_PARITY_SPEC section 3.1. |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |

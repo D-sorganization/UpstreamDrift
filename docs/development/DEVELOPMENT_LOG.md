@@ -22,13 +22,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
-- **PR:** not created
-- **Branch:** `feat/fto-11287-shared-conversions`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/simscape/force_channels.py`
+- **Branch:** `feat/fto-11288-glyph-builder`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/shared/python/plot_style/**`, `schemas/glyph-set-*`, `src/engines/simscape/force_channels.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-2 (#11287) implemented shared force conversions in `src/shared/python/force_overlay/conversions.py` (`joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`); 13 unit tests pass; earlier: FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
+- **Last verified:** 2026-10-02 at SELF — FTO-3 (#11288) implemented ForceGlyphStyle, build_glyphs, scale_for_view, glyph-set-v1 schema/fixtures, and FORCE_KIND_PALETTE registration; 39 unit tests pass; earlier: FTO-2 (#11287) implemented shared force conversions; FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Dispatch FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+- **Next step:** Dispatch Wave C renderers (FTO-5 MeshCat, FTO-6 MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV Video).
 
 ### DL-#11268 · Capture-O Video Companion
 
