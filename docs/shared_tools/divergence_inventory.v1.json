@@ -13,7 +13,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1575,
+    "ud-only": 1580,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -364,7 +364,7 @@
     "force_overlay": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 7,
+      "ud-only": 11,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -581,7 +581,7 @@
     "plot_style": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 35,
+      "ud-only": 36,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7981,7 +7981,19 @@
       "classification": "ud-only",
       "package": "force_overlay",
       "subpackage": "",
-      "ud_bytes": 23513,
+      "ud_bytes": 23619,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "force_overlay/palette.py",
+      "classification": "ud-only",
+      "package": "force_overlay",
+      "subpackage": "",
+      "ud_bytes": 2550,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7994,6 +8006,42 @@
       "package": "force_overlay",
       "subpackage": "",
       "ud_bytes": 12294,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "force_overlay/renderers/__init__.py",
+      "classification": "ud-only",
+      "package": "force_overlay",
+      "subpackage": "renderers",
+      "ud_bytes": 717,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "force_overlay/renderers/meshcat_glyphs.py",
+      "classification": "ud-only",
+      "package": "force_overlay",
+      "subpackage": "renderers",
+      "ud_bytes": 11755,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "force_overlay/renderers/opencv_glyphs.py",
+      "classification": "ud-only",
+      "package": "force_overlay",
+      "subpackage": "renderers",
+      "ud_bytes": 13851,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21721,7 +21769,7 @@
       "classification": "ud-only",
       "package": "plot_style",
       "subpackage": "",
-      "ud_bytes": 4577,
+      "ud_bytes": 4603,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -21794,6 +21842,18 @@
       "package": "plot_style",
       "subpackage": "",
       "ud_bytes": 4334,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "plot_style/force_palette.py",
+      "classification": "ud-only",
+      "package": "plot_style",
+      "subpackage": "",
+      "ud_bytes": 306,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

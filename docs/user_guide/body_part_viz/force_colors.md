@@ -124,3 +124,14 @@ red compression and pixel-exact off restoration. PyQtGraph OpenGL object tests
 do not qualify GPU raster output. Delivery is tracked in
 [epic #9833](https://github.com/D-sorganization/UpstreamDrift/issues/9833) and
 [PR #9840](https://github.com/D-sorganization/UpstreamDrift/pull/9840).
+
+## 3D Force and Torque Overlays in MeshCat
+
+In addition to surface segment shading, 3D force arrows and torque arcs are rendered
+into MeshCat using `src.shared.python.force_overlay.renderers.MeshcatGlyphRenderer`.
+
+- **Force Arrows:** rendered as real 3D geometry with a cylinder shaft and a cone head (`radius_top=0`).
+- **Torque Arcs:** rendered as a circular polyline chain of cylinder segments with an oriented cone head.
+- **Backend Portability:** talks to the `MeshcatSink` protocol, with out-of-the-box implementations for both `meshcat-python` (`MeshcatPythonSink`) and Drake MeshCat (`DrakeMeshcatSink`).
+- **Performance:** cylinder geometries are cached on the visualizer tree; unchanged shapes only update their 4x4 affine transform. Disappearing glyph labels are automatically cleaned up.
+- **Headless & Golden Capture:** offscreen raster capture for gallery fixtures and user guide documentation is completed in FTO-30.
