@@ -1,0 +1,133 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,booktabs,array,xcolor,fancyhdr,enumitem}
+\usepackage[hidelinks]{hyperref}
+\definecolor{ink}{HTML}{18354B}
+\definecolor{accent}{HTML}{176B87}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlist[itemize]{leftmargin=*,itemsep=2pt,topsep=3pt}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small\textcolor{ink}{UpstreamDrift / Necromatcher}}
+\fancyhead[R]{\small Scientific Qualification / V1}\fancyfoot[C]{\small\thepage}
+\setlength{\headheight}{14pt}
+\newcommand{\code}[1]{\texttt{\small\detokenize{#1}}}
+\newcommand{\status}[1]{\textcolor{accent}{\textbf{#1}}}
+\begin{document}
+{\LARGE\bfseries\color{ink} Scientific Qualification of Historical Swing Matching}\par
+{\large Camera, Anthropometry, Shaft Imaging and Human Motion}\par
+\textbf{Technical Supplement V1}\hfill 3 October 2026\par
+\rule{\linewidth}{0.7pt}
+\textbf{Status: research hypotheses remain unqualified.} This supplement records the current evidence and repeatable admission procedure for Tiger Woods and Ben Hogan. It complements the reviewed eight-page full-shape checkpoint report and its four shape-plus-skeleton videos already delivered to ControlTower. It does not certify player anatomy, camera calibration, physical playback time, clinical joint motion or a dynamically valid swing. The Necromatcher integration goal remains active.
+
+\section*{1. Evidence and Scope}
+The Tiger capture contains 210 frames at $1280\times720$; the Hogan capture contains 750 frames at $320\times240$. Source frames are indexed against exact rational presentation timestamps (PTS). Encoded PNG hashes and decoded BGR pixel identities are separate quantities. Source clips and extracted frames remain internal review materials.
+
+The reviewed overlays retain the skeleton and 32 canonical proxy surfaces (15,360 triangles) at authored opacity $\alpha=0.35$. Colors identify display proxies; surfaces are not measured skin or clothing. Transparency is a display control, not uncertainty. The new selected-still exporter renders only requested source indices through the same canonical composer as video export. Twenty-four camera-sensitivity overlays and six unchanged originals are planned; none of those new panels had been rendered at this checkpoint.
+
+\begin{center}\small
+\begin{tabular}{p{48mm}p{91mm}}
+\toprule
+\textbf{Evidence} & \textbf{Recorded Interpretation}\\\midrule
+Camera Orientation & Ten independently assessed cases; 4,800 body poses; 4,288 compared numerical leaves agree with the writer.\\
+Rolling Row Time & 56 authored sensitivity cases; observed readout and physical exposure remain unknown.\\
+Anthropometry & Dated contextual profiles; no footage-specific segment measurements or uncertainty intervals.\\
+Human Motion & 32 authored scalar bounds; 12 native coordinates are unbounded; no verified coupled physiological provider.\\
+Analytic Marker Study & One child solve reached 120 evaluations; parent telemetry comparison failed before candidate publication.\\\bottomrule
+\end{tabular}\end{center}
+
+Measurements used to optimize, subsequently viewed evidence and abstentions must remain distinct. The 52-frame shaft diagnostic contains 13 observed fragments and 39 abstentions, with a known overlap with earlier training. It is not untouched validation. Missing image fragments stay missing; their residuals must not become zeros.
+
+\newpage
+\section*{2. Camera and Anthropometric Identifiability}
+For a world point $X$, the canonical pinhole projection uses $X_c=RX+t$ followed by intrinsic projection and homogeneous division. The orientation experiment holds the camera center $C=-R^Tt$, intrinsics, model, saved coordinates and complete Hermite curve fixed:
+\[
+ R'=Q(\delta)R,\qquad t'=-R'C,\qquad \delta\in\{-2^\circ,+2^\circ\}.
+\]
+The declared axes are camera X and Y. This is conditional sensitivity, not an optimized camera search or a confidence interval. References are unchanged saved cameras. Fresh image metrics were independently recomputed; inherited scalar-bound and contact certificates were not recertified by the camera-only audit.
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\toprule\textbf{Case} & \textbf{Tiger Body RMS (px)} & \textbf{Hogan Body RMS (px)}\\\midrule
+Saved Camera &24.198&10.284\\
+Camera X $-2^\circ$ &51.645&14.988\\
+Camera X $+2^\circ$ &51.223&15.679\\
+Camera Y $-2^\circ$ &51.637&14.734\\
+Camera Y $+2^\circ$ &50.970&15.778\\\bottomrule
+\end{tabular}\end{center}
+All perturbations worsen body RMS at fixed poses. Shaft preferences differ among training, seen and diagnostic buckets; the Hogan frame-200 angular mismatch remains approximately $85.6^\circ$. These findings do not establish the saved camera as physically correct: pose, scale, morphology and camera must eventually be assessed together. Earlier fixed-pose focal perturbations also worsened body RMS.
+
+A monocular scale gauge remains: replacing $(X,t)$ with $(sX,st)$ leaves homogeneous image projection unchanged for positive $s$. Known source scale, credible anthropometric priors or additional calibrated views are needed to separate world scale from camera distance. Segment ratios and orientation may also trade off against perspective. Image alignment alone cannot determine body mass.
+
+The saved variants use population stature/mass inputs of 1.71 m and 78 kg, arm factor 1.1 and rebuilt trunk factor 1.15. Those inputs do not measure standing FK height or verified subject mass. The saved \code{anthropometric_geometry} construction rebuilds trunk geometry; the separate \code{anthropometric_candidate} helper retains supplied trunk/leg joint lengths. Their limitations must not be conflated.
+
+The official 2005 PGA Tour guide lists Tiger as 6-2 / 180; a dated 2009 fact sheet repeats those entries. His current official profile reports 6 ft 1 in / 185 lb. These inconsistent contextual records are not year-2000 measurements or an empirical uncertainty distribution. Hogan's Hall of Fame narrative gives 5 ft 7 in / 140 pounds in early-career context, not a measurement at the footage date. No value is adopted automatically. A source-only sum of all 30 saved solids is 79.3584924 kg, including 0.313 kg of explicitly named club components; subtracting those components does not verify human subject mass.
+
+\newpage
+\section*{3. Shaft Imaging and Human Motion Constraints}
+A rolling-row hypothesis evaluates a moving model at
+\[
+ t(y)=t_{\mathrm{PTS}}+d\tau\left(\frac{y}{H-1}-\frac12\right),
+\]
+where $H$ is the full encoded raster height, $d$ is the authored readout direction and $\tau$ is the authored readout duration. Source-row coordinates must not be replaced by cropped display rows. Zero readout must exactly recover the global-shutter projection. Unsupported temporal endpoints and missing observations require explicit abstention.
+
+Neither $d$ nor $\tau$ is measured here. Frame PTS does not identify exposure timing, physical playback speed, capture sensor readout, telecine/interlace history or later retiming. Shaft flexure, motion blur and occlusion may also explain apparent shaft geometry. A row-time fit must not be interpreted as identified rolling-shutter correction without additional capture evidence. The completed study produced only modest shaft changes in supported cases and does not resolve the current large mismatches. The method follows a hypothesis-testing approach consistent with rolling-shutter calibration literature [1]; it does not retrofit a measured sensor model.
+
+The next local diagnostic uses the canonical shaft reference points and public native marker derivatives. For $d_w=(X_b-X_a)/\ell$,
+\[
+ \frac{\partial d_w}{\partial q}=
+ \frac{I-d_wd_w^T}{\ell}\left(J_b-J_a\right).
+\]
+Image derivatives chain through the canonical camera projection Jacobian. Six grip-closure rows are selected by semantic position/rotation labels. Raw position residuals remain metres and rotation-log residuals radians; dimensionless weighted conditioning is reported separately using the saved scales. Finite differences at $10^{-5},10^{-6},10^{-7}$ rad must respect authored bounds. Locked-coordinate probes are off-curve model sensitivities. Projected degeneracy and unavailable capabilities remain null; principal-log behavior near $\pi$ must be flagged. Eighteen synthetic checks pass, but no historical twelve-pose diagnostic has yet run.
+
+Scalar limits cannot be copied directly into anatomical claims. The forearm primitive uses local Rz; wrist primitives use Rx/Rz even where a name ends in Y. Shoulder Euler coordinates are not automatically clinical elevation, plane of elevation and axial rotation. The model attaches the club through the left wrist and imposes continuous right-hand closure; observed holding-hand contact and release remain hypotheses.
+
+The ISB recommendations define anatomical coordinate conventions [2]. As an engineering inference, adopting physiological limits requires verified landmarks, reference frames, signs and a coordinate mapping before numerical envelopes can be applied. Pose-dependent limit research [3] further shows why independent scalar intervals can admit implausible configurations. Its learned prior is not a clinically validated envelope for either historical player. A suitable provider must retain versioned evidence, coupled domains, validity conditions and clear unsupported states; no new limits are inserted or relaxed in this checkpoint.
+
+\newpage
+\section*{4. Repeatable Execution and Turnover}
+Each experiment declares a fixed cohort, original starting curves, exact identities for the source, capture, model, camera and observations, objective options, output identities and failure behavior before native loading. All source, runtime, library, project, configuration, input and helper facets are authenticated. SDK loading follows full source admission and precedes repository/native facades. Public providers own FK, projection, grip constraints and rendering; external controllers must not implement alternative versions.
+
+\begin{enumerate}[leftmargin=*,itemsep=4pt]
+\item Freeze SDK-free preparation with failing-first contract tests. Keep execution disabled until the exact implementation, inputs and command are reviewed.
+\item Require a clean published producer and complete writer-closed file maps. Use fresh exclusive output directories. Preserve prior failures rather than overwriting or blindly resubmitting them.
+\item Load one canonical binding per candidate. Verify exact rational PTS, source pixel identities, native coordinate order/units and complete saved curve identity, including source and midpoint $q,\dot q,\ddot q$ where applicable.
+\item Run only the declared work. A first fault stops later arms. Explicit session cleanup must preserve a primary error when cleanup also fails. A cleanup-only fault must propagate.
+\item Capture every preservation facet in the finally path even after another facet fails. Retain incomplete states and actual child telemetry. Do not substitute parent waiting time for solver time or invent unavailable evaluation counts.
+\item Independently assess outputs, full file-map changes and reported metrics; visually inspect exported overlays and rendered report pages. Deliver source, PDF, media and verification receipts to an exclusive ControlTower Desktop folder.
+\end{enumerate}
+
+\textbf{Actual analytic-study outcome.} The V4 controller submitted one Tiger control run.\par
+\code{be2ac6697820420297590c470dec7c78}\par
+The child reports SciPy 1.16.0 TRF, $n_{\mathrm{fev}}=n_{\mathrm{jev}}=120$, solver elapsed 96.6943466 s and worker elapsed 100.3289851 s, ending at the maximum function-evaluation budget. The unchanged worker cap was 300 s. These scopes exclude imports/publication/transport as specified by the canonical receipt; no convergence or hardware-isolated speedup is established.
+
+The parent rejected telemetry because tuple-bearing live options were compared directly with their JSON list representation. Reconstruction finds 51 container-type differences with identical values; the child sidecar matches the exact stored request hash. The parent stopped before persisting a candidate, and the other three arms were unsubmitted. Exactly four owned run files were added: 359 original library files remain byte-identical, with 363 total after closure. Root independently rehashed all 14,783 source files and 363 library files. Index/project are unchanged. A serialization-boundary TDD repair passed 29 focused checks and was committed and integrated after closure; authentication is not bypassed. No new historical solve has run with the repair.
+
+The reviewed caption and still-export commits have subsequently been integrated into the topic worktree. Forty-four focused integration checks pass with explicit repository import bootstrap; changed-file lint/format, title and file-size checks pass. New rendering requires a fresh producer/stamp and library baseline. Existing failed attempts, unsubmitted arms, unknown physical timing and unqualified hypotheses remain visible in GitHub issues \#11356, \#11357, \#11388 and \#11394, and the open PR \#11359. No failed run is manually promoted.
+
+\newpage
+\section*{5. Receipt Register and Provenance}
+The failed analytic study ran at published source \texttt{8b1698aaf6e65e32c29b\allowbreak43b184bc30b1e934d36b}. Its source/library closure occurred before the later caption/still integration at \code{e404a6c75e}. The telemetry repair was subsequently integrated at \code{60ac11c759}. Those are distinct producer stages: these changes do not alter historical fit provenance. Subsequent native work requires the new published source identity and fresh writer-closed baseline.
+
+The companion \code{evidence} directory contains copies of the actual closure, child telemetry and root review records. The delivery inventory pins their complete byte hashes. Short digest prefixes below identify records for inspection; they do not replace complete SHA-256 admission checks.
+
+\begin{center}\small
+\begin{tabular}{p{54mm}p{79mm}}
+\toprule\textbf{Record} & \textbf{SHA-256 Prefix / Interpretation}\\\midrule
+Actual Finally & \code{824d7a9fc611932e}; complete before/after maps, owned-only run delta.\\
+Independent Closure & \code{0ea7a3d6274563d5}; SDK-free fresh full-map verification.\\
+Type Diagnosis & \code{50cbf8e1e4690d40}; 51 live/JSON container differences, same leaf values.\\
+Root Closure Review & Full digest in inventory; root live source/library rehash before integration.\\\bottomrule
+\end{tabular}\end{center}
+
+The actual child sidecar retains its exact request binding. Solver elapsed covers the backend invocation; worker elapsed covers child entry through computation or a caught failure, excluding imports, telemetry publication and transport serialization. The parent publication failure is a separate outcome. A 120-evaluation request is not evidence of convergence, and this single timing is not a paired speed benchmark. The earlier budget reports remain immutable where counts were unavailable.
+
+This standalone research supplement is separate from the governed QMD engineering manual. The existing manual governance check is valid but its publication inventory remains blocked; this PDF does not override that status. Built-in source-editor compilation failed to initialize standard platform directories. The installed local compiler was used with automatic package installation disabled, followed by PDF page inspection. No compiler or package was installed for this report.
+
+\section*{Primary References}
+\small
+[1] Oth et al. \emph{Rolling Shutter Camera Calibration}. CVPR 2013. \href{https://www.cv-foundation.org/openaccess/content_cvpr_2013/html/Oth_Rolling_Shutter_Camera_2013_CVPR_paper.html}{Official Paper}.\par
+[2] Wu et al. \emph{ISB Recommendation on Definitions of Joint Coordinate Systems, Part II}. Journal of Biomechanics, 2005. \href{https://media.isbweb.org/images/documents/standards/isb_jcs_part_ii.pdf}{ISB Original}.\par
+[3] Akhter and Black. \emph{Pose-Conditioned Joint Angle Limits for 3D Human Pose Reconstruction}. CVPR 2015. \href{https://openaccess.thecvf.com/content_cvpr_2015/html/Akhter_Pose-Conditioned_Joint_Angle_2015_CVPR_paper.html}{Official Paper}.\par
+[4] PGA Tour. \emph{2005 Media Guide}, PDF page 234 / printed 2-217; \href{https://pgatourmedia.pgatourhq.com/static-assets/page/header/files/2005_pgatour.pdf}{Original Guide}; \href{https://pgatourmedia.pgatourhq.com/static-assets/page/files/tours/2009/pgatour/arnoldpalmerinvitationalpresentedbymastercard/gCAAFactsSheet/wtv-woods-p.pdf}{2009 Victory Fact Sheet}. Contextual profile comparison: \href{https://www.pgatour.com/player/08793/tiger-woods/bio}{Current Tiger Biography}; \href{https://worldgolfhalloffame.org/members/ben-hogan.html}{Hogan Hall of Fame Biography}. Retrieved 3 October 2026.\par
+\end{document}
