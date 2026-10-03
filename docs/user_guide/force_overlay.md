@@ -50,7 +50,7 @@ For detailed segment mesh coloring and scale configuration, see [Segment Force C
 - **Menu:** View menu provides **Force Overlays** along with dedicated **Grip Forces** toggle.
 - **Controls:** Loaded automatically when opening telemetry CSVs (`load_simscape_force_series`).
 
-### Web Three.js (`Scene3D`)
+### Web Three.Js (`Scene3D`)
 - **UI:** A collapsible **Force / Torque Overlay** panel is embedded in the 3D viewport.
 - **WebSocket:** Receives JSON-serialized `ForceTorqueFrame` streams (`force-torque-frame-v1`).
 - **Toggles:** Separate toggles for Force Arrows, Torque Arcs, and Legend overlay.

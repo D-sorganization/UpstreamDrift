@@ -33,6 +33,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+for _p in (_REPO_ROOT, _REPO_ROOT / "src"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
     OverlayWrench,
@@ -290,14 +295,9 @@ def _render_mujoco_still(out_path: Path) -> dict[str, Any] | None:
         return {"status": "skipped", "reason": f"MuJoCo render error: {exc}"}
 
 
-def _generate_gallery_html(manifest: dict[str, Any]) -> str:
-    """Generate self-contained accessible HTML dashboard for the force overlay gallery."""
-    generated_at = manifest.get("generated_at", "")
-    git_commit = manifest.get("git_commit", "")
-    media_list = manifest.get("media", [])
-    engines = manifest.get("engines", {})
-
-    media_cards_html = []
+def _render_media_cards_html(media_list: list[dict[str, Any]]) -> str:
+    """Render HTML cards for gallery media items."""
+    cards = []
     for item in media_list:
         path = item.get("path", "")
         media_type = item.get("type", "still")
@@ -311,25 +311,33 @@ def _generate_gallery_html(manifest: dict[str, Any]) -> str:
         else:
             preview = f'<img src="{path}" alt="{engine} {media_type}" width="360" style="border-radius:6px; border:1px solid #444;" />'
 
-        media_cards_html.append(f"""
+        cards.append(f"""
         <div style="background:#222; border-radius:8px; padding:16px; margin:12px; width:380px; box-shadow:0 4px 6px rgba(0,0,0,0.3);">
             <h3 style="margin-top:0; color:#eee; text-transform:capitalize;">{engine} ({media_type})</h3>
             {preview}
             <p style="color:#aaa; font-size:13px; margin:8px 0 0 0;">{desc}</p>
         </div>
         """)
+    return "".join(cards)
 
-    palette_rows = []
+
+def _render_palette_rows_html() -> str:
+    """Render HTML table rows for categorical force kind palette."""
+    rows = []
     for kind_name, hex_color in FORCE_KIND_PALETTE.items():
-        palette_rows.append(f"""
+        rows.append(f"""
         <tr>
             <td style="padding:8px 12px; font-family:monospace; color:#ddd;">{kind_name}</td>
             <td style="padding:8px 12px;"><span style="display:inline-block; width:22px; height:22px; background-color:{hex_color}; border-radius:4px; vertical-align:middle; border:1px solid #fff;"></span></td>
             <td style="padding:8px 12px; font-family:monospace; color:#ddd;">{hex_color}</td>
         </tr>
         """)
+    return "".join(rows)
 
-    engine_status_rows = []
+
+def _render_engine_status_rows_html(engines: dict[str, Any]) -> str:
+    """Render HTML table rows for engine support status matrix."""
+    rows = []
     for eng_name, eng_info in engines.items():
         st = eng_info.get("status", "unknown")
         reason = eng_info.get("reason", "Ready / Rendered")
@@ -340,13 +348,23 @@ def _generate_gallery_html(manifest: dict[str, Any]) -> str:
             if st == "skipped"
             else "#f44336"
         )
-        engine_status_rows.append(f"""
+        rows.append(f"""
         <tr>
             <td style="padding:8px 12px; font-weight:bold; color:#eee; text-transform:capitalize;">{eng_name}</td>
             <td style="padding:8px 12px;"><span style="background:{color}; color:#111; padding:3px 8px; border-radius:12px; font-size:12px; font-weight:bold;">{st}</span></td>
             <td style="padding:8px 12px; color:#aaa; font-size:13px;">{reason}</td>
         </tr>
         """)
+    return "".join(rows)
+
+
+def _generate_gallery_html(manifest: dict[str, Any]) -> str:
+    """Generate self-contained accessible HTML dashboard for the force overlay gallery."""
+    generated_at = manifest.get("generated_at", "")
+    git_commit = manifest.get("git_commit", "")
+    media_cards_html = _render_media_cards_html(manifest.get("media", []))
+    palette_rows = _render_palette_rows_html()
+    engine_status_rows = _render_engine_status_rows_html(manifest.get("engines", {}))
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -379,13 +397,13 @@ def _generate_gallery_html(manifest: dict[str, Any]) -> str:
             <tr><th>Engine</th><th>Status</th><th>Notes</th></tr>
         </thead>
         <tbody>
-            {"".join(engine_status_rows)}
+            {engine_status_rows}
         </tbody>
     </table>
 
     <h2>2. Visual Artifacts</h2>
     <div style="display:flex; flex-wrap:wrap;">
-        {"".join(media_cards_html)}
+        {media_cards_html}
     </div>
 
     <h2>3. Force Palette & Conventions</h2>
@@ -394,7 +412,7 @@ def _generate_gallery_html(manifest: dict[str, Any]) -> str:
             <tr><th>Wrench Kind</th><th>Swatch</th><th>Hex Value</th></tr>
         </thead>
         <tbody>
-            {"".join(palette_rows)}
+            {palette_rows}
         </tbody>
     </table>
     <p style="color:#bbb; font-size:13px; max-width:650px; margin-top:12px;">
@@ -403,6 +421,120 @@ def _generate_gallery_html(manifest: dict[str, Any]) -> str:
 </body>
 </html>
 """
+
+
+def _collect_synthetic_media(
+    stills_dir: Path,
+    clips_dir: Path,
+    skip_clips: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Render synthetic reference media (matplotlib, opencv, composite clip)."""
+    engines: dict[str, Any] = {}
+    media: list[dict[str, Any]] = []
+
+    res_mpl = _render_synthetic_matplotlib_still(
+        stills_dir / "synthetic_matplotlib.png"
+    )
+    media.append(
+        {
+            "engine": "matplotlib",
+            "type": "still",
+            "path": f"stills/{res_mpl['path']}",
+            "source": res_mpl["source"],
+        }
+    )
+    engines["matplotlib"] = {
+        "status": "rendered",
+        "reason": "Matplotlib 3D glyph renderer",
+    }
+
+    res_cv = _render_synthetic_opencv_still(stills_dir / "synthetic_opencv.png")
+    media.append(
+        {
+            "engine": "opencv",
+            "type": "still",
+            "path": f"stills/{res_cv['path']}",
+            "source": res_cv["source"],
+        }
+    )
+    engines["opencv"] = {
+        "status": "rendered",
+        "reason": "OpenCV calibrated video projection",
+    }
+
+    if not skip_clips:
+        clip_res = _render_synthetic_composite_clip(
+            clips_dir / "synthetic_composite.mp4"
+        )
+        if clip_res:
+            media.append(
+                {
+                    "engine": "composite",
+                    "type": "clip",
+                    "path": f"clips/{clip_res['path']}",
+                    "source": clip_res["source"],
+                }
+            )
+
+    return engines, media
+
+
+def _check_optional_engine(module_name: str, display_name: str) -> dict[str, Any]:
+    """Check availability of an optional external dynamics engine."""
+    import importlib.util
+
+    if importlib.util.find_spec(module_name) is not None:
+        return {"status": "rendered", "reason": f"{display_name} available"}
+    return {
+        "status": "skipped",
+        "reason": f"{display_name} ({module_name}) not installed in environment",
+    }
+
+
+def _collect_engine_media(
+    stills_dir: Path,
+    synthetic_only: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Collect engine-specific rendering media and readiness status."""
+    engines: dict[str, Any] = {}
+    media: list[dict[str, Any]] = []
+
+    if synthetic_only:
+        for eng in ("drake", "pinocchio", "opensim", "simscape", "mujoco"):
+            engines[eng] = {"status": "skipped", "reason": "Synthetic-only run"}
+        return engines, media
+
+    mj_res = _render_mujoco_still(stills_dir / "mujoco_hanging.png")
+    if mj_res and mj_res.get("status") == "rendered":
+        media.append(
+            {
+                "engine": "mujoco",
+                "type": "still",
+                "path": f"stills/{mj_res['path']}",
+                "source": "MuJoCo offscreen rendered scene with add_glyphs_to_scene",
+            }
+        )
+        engines["mujoco"] = {
+            "status": "rendered",
+            "version": mj_res.get("version"),
+            "receipt": mj_res.get("receipt"),
+        }
+    else:
+        reason = (
+            mj_res.get("reason", "MuJoCo unavailable")
+            if mj_res
+            else "MuJoCo unavailable"
+        )
+        engines["mujoco"] = {"status": "skipped", "reason": reason}
+
+    engines["drake"] = _check_optional_engine("pydrake", "Drake")
+    engines["pinocchio"] = _check_optional_engine("pinocchio", "Pinocchio")
+    engines["opensim"] = _check_optional_engine("opensim", "OpenSim")
+    engines["simscape"] = {
+        "status": "rendered",
+        "reason": "Simscape 3D viewer force overlay verified via test datasets",
+    }
+    return engines, media
 
 
 def render_gallery(
@@ -417,165 +549,27 @@ def render_gallery(
     stills_dir.mkdir(parents=True, exist_ok=True)
     clips_dir.mkdir(parents=True, exist_ok=True)
 
-    git_commit = get_git_commit()
-    timestamp = datetime.now(timezone.utc).isoformat()
-
     manifest: dict[str, Any] = {
         "schema_version": "force-overlay-gallery-v1",
-        "generated_at": timestamp,
-        "git_commit": git_commit,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "git_commit": get_git_commit(),
         "engines": {},
         "media": [],
     }
 
-    # 1. Synthetic Matplotlib
-    res_mpl = _render_synthetic_matplotlib_still(
-        stills_dir / "synthetic_matplotlib.png"
-    )
-    manifest["media"].append(
-        {
-            "engine": "matplotlib",
-            "type": "still",
-            "path": f"stills/{res_mpl['path']}",
-            "source": res_mpl["source"],
-        }
-    )
-    manifest["engines"]["matplotlib"] = {
-        "status": "rendered",
-        "reason": "Matplotlib 3D glyph renderer",
-    }
+    syn_engines, syn_media = _collect_synthetic_media(stills_dir, clips_dir, skip_clips)
+    manifest["engines"].update(syn_engines)
+    manifest["media"].extend(syn_media)
 
-    # 2. Synthetic OpenCV
-    res_cv = _render_synthetic_opencv_still(stills_dir / "synthetic_opencv.png")
-    manifest["media"].append(
-        {
-            "engine": "opencv",
-            "type": "still",
-            "path": f"stills/{res_cv['path']}",
-            "source": res_cv["source"],
-        }
-    )
-    manifest["engines"]["opencv"] = {
-        "status": "rendered",
-        "reason": "OpenCV calibrated video projection",
-    }
-
-    # 3. Synthetic Composite Clip
-    if not skip_clips:
-        clip_res = _render_synthetic_composite_clip(
-            clips_dir / "synthetic_composite.mp4"
-        )
-        if clip_res:
-            manifest["media"].append(
-                {
-                    "engine": "composite",
-                    "type": "clip",
-                    "path": f"clips/{clip_res['path']}",
-                    "source": clip_res["source"],
-                }
-            )
-
-    # 4. Engine-specific paths (unless synthetic_only)
-    if not synthetic_only:
-        # MuJoCo
-        mj_res = _render_mujoco_still(stills_dir / "mujoco_hanging.png")
-        if mj_res and mj_res.get("status") == "rendered":
-            manifest["media"].append(
-                {
-                    "engine": "mujoco",
-                    "type": "still",
-                    "path": f"stills/{mj_res['path']}",
-                    "source": "MuJoCo offscreen rendered scene with add_glyphs_to_scene",
-                }
-            )
-            manifest["engines"]["mujoco"] = {
-                "status": "rendered",
-                "version": mj_res.get("version"),
-                "receipt": mj_res.get("receipt"),
-            }
-        else:
-            reason = (
-                mj_res.get("reason", "MuJoCo unavailable")
-                if mj_res
-                else "MuJoCo unavailable"
-            )
-            manifest["engines"]["mujoco"] = {"status": "skipped", "reason": reason}
-
-        # Drake
-        try:
-            import pydrake  # noqa: F401
-
-            manifest["engines"]["drake"] = {
-                "status": "rendered",
-                "reason": "Drake available",
-            }
-        except ImportError:
-            manifest["engines"]["drake"] = {
-                "status": "skipped",
-                "reason": "Drake (pydrake) not installed in environment",
-            }
-
-        # Pinocchio
-        try:
-            import pinocchio  # noqa: F401
-
-            manifest["engines"]["pinocchio"] = {
-                "status": "rendered",
-                "reason": "Pinocchio available",
-            }
-        except ImportError:
-            manifest["engines"]["pinocchio"] = {
-                "status": "skipped",
-                "reason": "Pinocchio not installed in environment",
-            }
-
-        # OpenSim
-        try:
-            import opensim  # noqa: F401
-
-            manifest["engines"]["opensim"] = {
-                "status": "rendered",
-                "reason": "OpenSim available",
-            }
-        except ImportError:
-            manifest["engines"]["opensim"] = {
-                "status": "skipped",
-                "reason": "OpenSim not installed in environment",
-            }
-
-        # Simscape
-        manifest["engines"]["simscape"] = {
-            "status": "rendered",
-            "reason": "Simscape 3D viewer force overlay verified via test datasets",
-        }
-    else:
-        manifest["engines"]["drake"] = {
-            "status": "skipped",
-            "reason": "Synthetic-only run",
-        }
-        manifest["engines"]["pinocchio"] = {
-            "status": "skipped",
-            "reason": "Synthetic-only run",
-        }
-        manifest["engines"]["opensim"] = {
-            "status": "skipped",
-            "reason": "Synthetic-only run",
-        }
-        manifest["engines"]["simscape"] = {
-            "status": "skipped",
-            "reason": "Synthetic-only run",
-        }
-        manifest["engines"]["mujoco"] = {
-            "status": "skipped",
-            "reason": "Synthetic-only run",
-        }
+    eng_engines, eng_media = _collect_engine_media(stills_dir, synthetic_only)
+    manifest["engines"].update(eng_engines)
+    manifest["media"].extend(eng_media)
 
     manifest_path = output_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
-    html_content = _generate_gallery_html(manifest)
     index_path = output_dir / "index.html"
-    index_path.write_text(html_content, encoding="utf-8")
+    index_path.write_text(_generate_gallery_html(manifest), encoding="utf-8")
 
     return manifest_path
 

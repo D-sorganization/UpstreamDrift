@@ -1,4 +1,4 @@
-# Force Overlay Gallery, Golden Images, User Guide and Parity Ledger Close-out — #11285 / #11315 (FTO-30)
+# Force Overlay Gallery, Golden Images, User Guide and Parity Ledger Close-Out — #11285 / #11315 (FTO-30)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-goldens-closeout-11315`; commit SELF; PR: #11398 (`Closes #11315`, `Refs #11285`)
 - Governing issue: #11315 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
