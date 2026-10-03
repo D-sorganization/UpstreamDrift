@@ -3946,6 +3946,67 @@ oracles and documented by
 dependent acceleration, held-out observations, stance contact and independently
 replayed motion from all 35 torque axes remain required.
 
+A controlled follow-up changes only the native closed-arm initial guesses.
+Its independent position, velocity, acceleration and clock payloads are
+bitwise unchanged. The guesses interpolate the original arm anchors on the
+same manifold; they are not prescribed position targets. This audit exits
+naturally with zero at \texttt{08:38:19Z}. All original anchors now preserve
+their configurations, with maximum physical residuals below
+$1.1\times10^{-15}$. Tour acceptance remains 643/649; owner acceptance improves
+to 356/361. The eleven previous owner anchor mismatches disappear, while the
+six tour and five owner assembly failures remain. These results identify an
+effective branch-initialization correction, not a qualified continuous path.
+
+A further diagnostic revisits those eleven assembly failures and six valid
+neighbor controls. It exits naturally with zero at \texttt{08:52:45Z}; all
+controls pass the original physical gates. Every failed partial-target solve
+returns status $-1$, indicating assembled model constraints with unmet
+independent targets. Fresh full-position checking confirms eleven nearby
+assembled candidates, but the original requested targets still reject.
+Their root translations do not change. Maximum independent scalar/spherical
+orientation deviations are $0.112/0.173^{\circ}$ for A and
+$0.338/0.343^{\circ}$ for O. These are candidate deformations, not measured
+source motion or silently accepted original targets. Solver initialization,
+local feasibility and admissible curve modification require separate tests;
+the diagnostic alone does not identify a unique cause or prove velocity,
+acceleration, contact, torque or replay acceptance.
+
+A same-target retry initializes each failed solve from the freshly assembled
+nearby candidate. Its native process exits naturally with zero at
+\texttt{09:10:49Z}; all six valid controls pass position, velocity and fresh
+full-state checks. None of the six tour or five owner failed targets recovers.
+This rules out that specific initialization correction as a sufficient
+solution; it does not prove unique infeasibility or identify a singularity.
+
+The next controlled experiment adds exactly eleven nearby assembled support
+poses to the interpolation: six for A and five for O. The original 55/46
+fitted anchors remain separate from these projected support poses. Only the
+affected upper-limb scalar and shoulder rotation curves change; original
+clock samples, root position/rate/acceleration, lower-body curves and all
+unaffected coordinates remain bitwise unchanged. Scalar curves and
+\(\mathrm{SO}(3)\) curves use the same public C2 adapter, with analytic body
+angular rates and accelerations. Native closed-arm coordinates remain free,
+with explicit position and velocity guesses. Parent MAT round-trip checks
+confirm these contracts. A real axis-normalization test fails twice under
+the proposal's unintended relative tolerance and passes all three tests
+after the reviewed absolute-tolerance correction.
+
+The projected source-rate audit exits naturally with zero at
+\texttt{09:40:13Z}. All 649 tour and 361 owner samples pass the independent
+position and velocity gates and a fresh 91-component position/velocity
+recheck. All original anchors retain physical residuals below
+\(1.1\times10^{-15}\); maximum fresh velocity discrepancies are
+\(2.92\times10^{-11}\,\mathrm{deg/s}\). Relative to the earlier interpolated
+targets, maximum independent scalar/spherical changes are
+\(0.112/0.173^{\circ}\) for A and \(0.338/0.343^{\circ}\) for O.
+These quantify a reference-curve deformation, not error against measured
+joint angles. Dense marker-space RMS has not yet been evaluated.
+The candidate clears this finite source-rate kinematic gate, but remains
+unpromoted: between-sample closure, native dependent acceleration, contact,
+all 35 actual actuator torques and independent forward replay are separate
+acceptance requirements. The represented clock also omits the previously
+identified trailing five tour and six owner raw source samples.
+
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,
 rejected pilot and private source hashes. It also records the parent's

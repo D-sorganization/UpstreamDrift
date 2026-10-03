@@ -1,5 +1,62 @@
 {
   "all_35_input_torque_axes_qualified": false,
+  "anchor_seeded_preparation": {
+    "guess_policy": "Independent C2 targets unchanged; six closed-arm coordinates interpolated only as native solver guesses, not prescribed targets",
+    "independent_payload_bitwise_preserved": true,
+    "new_payload_sha256": "8110433f100b150878915ffda6fe38d721704bcbc6d6fbf3c070c0c08758a9c5",
+    "original_closed_pose_anchors_preserved": true,
+    "prototype_promoted": false,
+    "qualification": "PREPARED_CLOSED_ARM_GUESS_POLICY_EXPERIMENT_NOT_NATIVE_RUNTIME_ACCEPTANCE",
+    "source_payload_sha256": "7f1b287293406839890f4c6686d0ae5cd5f5e74855a6c692f62ab0763b920dfa"
+  },
+  "anchor_seeded_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T08:38:19.527611+00:00"
+  },
+  "anchor_seeded_source_frame_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_ANCHOR_SEEDED_SOURCE_FRAME_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 643,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 643,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 649,
+        "position_status_one_count": 643,
+        "velocity_status_one_count": 643,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 356,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 356,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 361,
+        "position_status_one_count": 356,
+        "velocity_status_one_count": 356,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
   "c2_anchor_midpoint_pilot": {
     "between_pilot_samples_qualified": false,
     "model_saved": false,
@@ -67,6 +124,39 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T08:12:24.345998+00:00"
   },
+  "closest_pose_seed_retry": {
+    "independent_targets_modified": false,
+    "model_saved": false,
+    "prototype_promoted": false,
+    "qualification": "CLOSEST_POSE_INITIAL_GUESS_DIAGNOSTIC_NOT_CHANGED_TRAJECTORY_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_control_count": 2,
+        "control_count": 2,
+        "independent_targets_modified": false,
+        "original_failed_count": 6,
+        "same_target_full_qv_acceptance_count": 0,
+        "same_target_position_status_one_count": 0
+      },
+      "capture_O": {
+        "accepted_control_count": 4,
+        "control_count": 4,
+        "independent_targets_modified": false,
+        "original_failed_count": 5,
+        "same_target_full_qv_acceptance_count": 0,
+        "same_target_position_status_one_count": 0
+      }
+    },
+    "simulation_executed": false
+  },
+  "closest_pose_seed_retry_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T09:10:49.061089+00:00"
+  },
   "contact_qualified": false,
   "desktop_media": {
     "forward_dynamics_qualified": false,
@@ -81,6 +171,79 @@
     "width": 1920
   },
   "differential_scope": "Approximate rates from eight poses per case, local independent perturbations and native closed-arm position solve; angular and linear units separately reported. Tour original shutdown failure retained.",
+  "failed_assembly_diagnostic": {
+    "diagnostic_executed_successfully": true,
+    "immediate_controls_verified": true,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "nearby_feasible_state_found": true,
+    "original_failures_revisited": true,
+    "original_independent_targets_accepted": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_FAILED_ASSEMBLY_FEASIBILITY_DIAGNOSTIC_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_TORQUE_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "control_fresh_status_one_count": 2,
+        "control_partial_status_one_count": 2,
+        "control_state_count": 2,
+        "failed_fresh_status_one_count": 6,
+        "failed_partial_status_one_count": 0,
+        "failed_state_count": 6,
+        "follower_frames_verified": true,
+        "max_control_scalar_angle_deviation_deg": 2.842170943040401e-14,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_translation_deviation_m": 0,
+        "max_failed_scalar_angle_deviation_deg": 0.11180137831726711,
+        "max_failed_spherical_geodesic_deg": 0.17278278357579538,
+        "max_failed_translation_deviation_m": 0,
+        "nearby_assembled_candidate_count": 6,
+        "nearby_feasible_state_exists": true,
+        "original_independent_targets_accepted": false,
+        "revisited_state_count": 8,
+        "status_counts_partial_failed": {
+          "status_neg1": 6,
+          "status_neg2": 0,
+          "status_pos1": 0,
+          "status_zero": 0
+        }
+      },
+      "capture_O": {
+        "control_fresh_status_one_count": 4,
+        "control_partial_status_one_count": 4,
+        "control_state_count": 4,
+        "failed_fresh_status_one_count": 5,
+        "failed_partial_status_one_count": 0,
+        "failed_state_count": 5,
+        "follower_frames_verified": true,
+        "max_control_scalar_angle_deviation_deg": 5.684341886080802e-14,
+        "max_control_spherical_geodesic_deg": 0,
+        "max_control_translation_deviation_m": 0,
+        "max_failed_scalar_angle_deviation_deg": 0.33767063140709297,
+        "max_failed_spherical_geodesic_deg": 0.3426223448567056,
+        "max_failed_translation_deviation_m": 0,
+        "nearby_assembled_candidate_count": 5,
+        "nearby_feasible_state_exists": true,
+        "original_independent_targets_accepted": false,
+        "revisited_state_count": 9,
+        "status_counts_partial_failed": {
+          "status_neg1": 5,
+          "status_neg2": 0,
+          "status_pos1": 0,
+          "status_zero": 0
+        }
+      }
+    },
+    "simulation_executed": false
+  },
+  "failed_assembly_diagnostic_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T08:52:45.054437+00:00"
+  },
   "fresh_full_saved_state_recheck": {
     "fresh_full_state_count": 48,
     "model_saved": false,
@@ -265,12 +428,205 @@
     "analyze_persisted_tangent_units.py": "8147ff5f73862c0a78d262cb6f6d803551d1d963eb8d6f55bff9c273c6211fce",
     "build_native_c2_payload_reviewed.py": "2594ed47b9abc5c3172b79072373f34051b5e7de5d126b124a40c18d7401fafd",
     "c2_reference.py": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+    "prepare_anchor_seeded_c2_payload_reviewed.py": "3c7ff283664d2c826bbae751da00e937f515843b97118e3df3b46cf7fbc8ab27",
+    "probe_failed_c2_assembly_reviewed.m": "dd67c088db92bc992a45624e75f89350e0e6164aa36944ae7394aeae68d0ba4d",
     "probe_native_c2_anchor_midpoints_reviewed.m": "be19e956f76d0074c9110707402c883f1afb59a6bb6f7243e0414b1bfa9943f7",
+    "probe_native_c2_anchor_seeded_source_frames_reviewed.m": "9e679c4bb4c1087478630bb9ad8508dab924ad8a6f338ee64712c3c17e935f69",
     "probe_native_c2_source_frames_reviewed.m": "a52b9d2911ecf4b01f218aa602d28f190ef3f2f9684225f5d052f4359fcbe54f",
     "probe_refined_tangents_reviewed.m": "57814956c0f2ba823bb7b7045d20e2f149c95f12489eedd9ee661599c049155e",
     "recheck_saved_tangent_states_reviewed.m": "2d70b1ec29e31688223353c8fbaab05d4e75c91be079f218f233b1d5ec46fb1a",
     "test_c2_parent_regressions.py": "a877f15bb13f59a5baff09886ce9ad2d7961bb589f5cc9f868045299117053f0",
     "test_c2_reference.py": "f65f199e8041137910ea3295f2f1f25b9fe391372ac3ca33ebd8adc1a9ef6d42"
+  },
+  "projected_c2_axis_contract_tdd": {
+    "green_exit": 0,
+    "green_passed": 3,
+    "red_exit": 1,
+    "red_failed": 2,
+    "red_passed": 1,
+    "relative_tolerance_disabled": true
+  },
+  "projected_c2_preparation": {
+    "affected_native_keys": {
+      "scalar_position_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q"
+      ],
+      "spherical_joint_stems": [
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven"
+      ],
+      "velocity_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w"
+      ]
+    },
+    "aggregate_counts": {
+      "records": {
+        "capture_A": {
+          "affected_free_scalar_count": 3,
+          "affected_free_spherical_count": 1,
+          "affected_independent_scalar_count": 9,
+          "affected_independent_spherical_count": 1,
+          "original_anchor_count": 55,
+          "pilot_time_grid_count": 649,
+          "projected_support_knot_count": 6,
+          "total_support_knot_count": 61
+        },
+        "capture_O": {
+          "affected_free_scalar_count": 3,
+          "affected_free_spherical_count": 1,
+          "affected_independent_scalar_count": 9,
+          "affected_independent_spherical_count": 1,
+          "original_anchor_count": 46,
+          "pilot_time_grid_count": 361,
+          "projected_support_knot_count": 5,
+          "total_support_knot_count": 51
+        }
+      },
+      "total_projected_support_knots": 11
+    },
+    "flags": {
+      "all_closed_guesses_finite": true,
+      "all_independent_targets_finite": true,
+      "all_spherical_unit_axes_valid": true,
+      "full_closed_acceleration_qualified": false,
+      "measured_data": false,
+      "native_velocity_path_dynamics_proof": false,
+      "original_anchor_clock_bitwise_preserved": true,
+      "original_anchors_preserved_within_1e_minus_10": true,
+      "original_source_time_grid_bitwise_preserved": true,
+      "original_targets_accepted": false,
+      "prototype_promoted": false,
+      "root_acceleration_bitwise_preserved": true,
+      "root_meter_coordinate_affected": false,
+      "root_position_bitwise_preserved": true,
+      "root_rate_bitwise_preserved": true
+    },
+    "input_hashes": {
+      "anchor_seeded_payload_sha256": "8110433f100b150878915ffda6fe38d721704bcbc6d6fbf3c070c0c08758a9c5",
+      "c2_reference_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+      "failed_assembly_diagnostic_sha256": "12bad578f991bc7780faaf30302f78be5102f9a61c8be1120296df7ef1b26d23"
+    },
+    "parent_review": {
+      "all_evaluated_spherical_axes_and_so3_checked": true,
+      "input_hashes_unchanged_before_after": true,
+      "native_execution_proof": false,
+      "output_mat_roundtrip_clock_and_original_anchors_exact": true,
+      "output_payload_sha256": "08cbd8dbf52c8bca2099ada5d944842ba6d111f49cbddfc51a0f751a14e5c786",
+      "proposal_sha256": "4c5f0cc737cd1720c791b9c01737cbb2873752d29348d319a8702c0b0e8a83e5",
+      "reviewed_builder_sha256": "49f502f455a3b023dc227e081677e391480f12883c027b989e4d081d271664eb",
+      "root_rows_bound_by_native_meter_units": [0, 1, 2],
+      "unaffected_coordinates_bitwise_preserved": true
+    },
+    "qualification": "PREPARED_C2_PROJECTED_REFERENCE_PAYLOAD_NOT_MEASURED_DATA_OR_NATIVE_DYNAMICS",
+    "units": {
+      "scalar_angular": "deg",
+      "scalar_angular_acceleration": "deg/s^2",
+      "scalar_angular_velocity": "deg/s",
+      "scalar_translation": "m",
+      "spherical_angular_acceleration": "deg/s^2",
+      "spherical_angular_velocity": "deg/s"
+    }
+  },
+  "projected_c2_source_rate_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_PROJECTED_SOURCE_FRAME_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 649,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 649,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": 2.9103830456733704e-11,
+        "max_independent_position_error": 6.2803698347351e-16,
+        "max_independent_velocity_error": 4.547473508864641e-13,
+        "original_anchor_count": 55,
+        "pilot_state_count": 649,
+        "position_status_one_count": 649,
+        "velocity_status_one_count": 649,
+        "whole_pilot_accepted": true
+      },
+      "capture_O": {
+        "accepted_state_count": 361,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 361,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": 1.4551915228366852e-11,
+        "max_independent_position_error": 6.2803698347351e-16,
+        "max_independent_velocity_error": 4.547473508864641e-13,
+        "original_anchor_count": 46,
+        "pilot_state_count": 361,
+        "position_status_one_count": 361,
+        "velocity_status_one_count": 361,
+        "whole_pilot_accepted": true
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "projected_c2_source_rate_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T09:40:13.812867+00:00"
+  },
+  "projected_c2_target_deformation": {
+    "qualification": "TARGET_DEFORMATION_AGGREGATES_NOT_MEASURED_SOURCE_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "deformation_scope": "Candidate independent targets relative to earlier interpolated reference; not raw measured joint angles or marker-space residuals.",
+        "independent_angular_scalar_component_rms_deformation_deg": 0.0029282966412647496,
+        "independent_angular_scalar_max_deformation_deg": 0.11180137831726711,
+        "independent_spherical_joint_rms_geodesic_deformation_deg": 0.007057062179364934,
+        "independent_spherical_max_geodesic_deformation_deg": 0.1727827835786342,
+        "raw_marker_rms_evaluated": false,
+        "root_translation_rate_acceleration_bitwise_preserved": true,
+        "state_count": 649
+      },
+      "capture_O": {
+        "deformation_scope": "Candidate independent targets relative to earlier interpolated reference; not raw measured joint angles or marker-space residuals.",
+        "independent_angular_scalar_component_rms_deformation_deg": 0.009349273591692416,
+        "independent_angular_scalar_max_deformation_deg": 0.33767063140709297,
+        "independent_spherical_joint_rms_geodesic_deformation_deg": 0.013276982076306515,
+        "independent_spherical_max_geodesic_deformation_deg": 0.34262234486352844,
+        "raw_marker_rms_evaluated": false,
+        "root_translation_rate_acceleration_bitwise_preserved": true,
+        "state_count": 361
+      }
+    }
   },
   "qualification": "LOCAL_TANGENT_FRESH_STATE_RECHECK_AND_REJECTED_C2_PILOT_NOT_FORWARD_DYNAMICS_ACCEPTANCE",
   "source_frame_branch_failure_counts": {
