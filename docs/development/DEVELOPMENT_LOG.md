@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
-- **State:** proposed
+- **State:** in_progress
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `claude/force-torque-overlays-smwke2` (planning only)
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`
+- **Branch:** `feat/fto-11287-shared-conversions`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/simscape/force_channels.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — deep-dive assessment, ADR-0052 (proposed, indexed, revised for review findings: optional wrench halves, serialized GlyphSet wire) and 30 child issues filed and revised; no implementation performed.
+- **Last verified:** 2026-10-02 at SELF — FTO-2 (#11287) implemented shared force conversions in `src/shared/python/force_overlay/conversions.py` (`joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`); 13 unit tests pass; earlier: FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** A CLI-tier agent implements FTO-1 (#11286), the contract module and wire schema.
+- **Next step:** Dispatch FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
 - **Child deliveries:**
   - **FTO-4 (#11289) · Colour utilities DRY and tension/compression colormap**: Implemented in branch `feat/fto-11289-color-utils` by `antigravity`. Consolidated hex/RGBA conversions into `color_utils.py` (`hex_to_rgba`, `rgba_to_hex`), eliminated ad-hoc parsers in `meshcat_force_colors.py`, `mujoco_force_colors.py`, `pyqtgl_renderer.py`, and `meshcat_adapter.py`, registered `ColormapId.TENSION_COMPRESSION` diverging colormap reading `ForceColorScale` default constants, documented conventions in `kinetics.py`, updated colormap author guide, and verified green across 24 new and 97 existing tests with zero regressions.
 

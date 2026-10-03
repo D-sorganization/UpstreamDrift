@@ -165,12 +165,14 @@ def _register_tension_compression() -> LinearSegmentedColormap:
         [(pos, hex_val) for pos, hex_val in TENSION_COMPRESSION_STOPS],
         N=257,
     )
-    try:
+    if hasattr(colormaps, "register"):
         colormaps.register(cmap, name=ColormapId.TENSION_COMPRESSION.value, force=True)
-    except AttributeError:  # Older matplotlib fallback
+    else:
         from matplotlib import cm
 
-        cm.register_cmap(ColormapId.TENSION_COMPRESSION.value, cmap)
+        register_fn = getattr(cm, "register_cmap", None)
+        if callable(register_fn):
+            register_fn(ColormapId.TENSION_COMPRESSION.value, cmap)
     return cmap
 
 
