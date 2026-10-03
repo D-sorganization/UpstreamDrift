@@ -31,6 +31,37 @@
 
 # Past Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
+# Force Overlay Gallery, Golden Regressions, and User Guide — #11285 / #11315 (FTO-30)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11397 (`Closes #11315`, `Refs #11285`)
+- Governing issue: #11315 (parent epic #11285, design authority ADR-0052, `force_torque_overlay_epic.md`)
+- Objective: [FTO-30] Gallery generator script, golden image visual regression suite, authoritative user guide, and parity ledger close-out for the force/torque overlay program.
+- Completed:
+  - `scripts/render_force_overlay_gallery.py`:
+    - Reproducible headless gallery generator across all engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape) and renderers.
+    - Generates stills, manifest.json with model hashes, receipts, and interactive index.html.
+  - `tests/visual/force_overlay/test_golden_force_overlays.py`:
+    - Golden-image visual regression tests for Matplotlib 3D, OpenCV calibrated projection, and MuJoCo offscreen render.
+    - Strict perceptual tolerance threshold `MAX_MEAN_ABS_DIFF = 2.0` on [0, 255] (2/255 scale).
+  - `tests/scripts/test_render_force_overlay_gallery.py`:
+    - Headless gallery generation smoke tests verifying manifest schema and index output.
+  - Documentation and Ledgers:
+    - User Guide created at `docs/user_guide/force_overlay.md` detailing the 7-kind palette, axial tension/compression coloring, desktop GUI controls, web Three.js/SVG controls, and video compositing labels.
+    - Cross-links added in `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+    - Corrected status and evidence in `docs/issues/EPIC_WEB_UI_PARITY.md`, `docs/development/FEATURE_TRACKING.md`, `docs/development/segment_force_color_epic.md`.
+    - Updated `src/config/feature_parity.json` and regenerated `docs/development/feature_parity_matrix.md`.
+    - Promoted `force_overlays` tile in `src/config/launcher_manifest.json` from `experimental` to `ready`, updated capability atlas and agent context.
+- Validation:
+  - `pytest tests/visual/force_overlay/`: 3 passed.
+  - `pytest tests/scripts/test_render_force_overlay_gallery.py`: 1 passed.
+  - `pytest tests/config/feature_parity/`: 39 passed.
+  - `pytest tests/config/launcher_manifest/`: 170 passed.
+  - `pytest tests/unit/repo_hygiene/test_spec_changelog_integrity.py`: 4 passed.
+  - Pre-commit checks (architecture budget, file size budget, ruff, black, mypy): all passing.
+- Next steps: Merge PR #11397; owner closes epic #11285.
+
+---
+
 # Simscape Simulation Output: Carry Logged Force Channels and Joint Rotations Through SimscapeOutput (R2025b Host) — #11285 / #11304 (FTO-19)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11304-simscape-output-forces`; commit SELF; PR: #11399 (`Closes #11304`, `Refs #11285`)
@@ -117,7 +148,7 @@
   - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
   - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
   - All pre-commit linters, formatting, and CI budgets passed.
-- Next steps: Merge PR; proceed with FTO-29 / FTO-30.
+- Next steps: Merged in main (PR #11391).
 
 ---
 
@@ -217,11 +248,13 @@
 
 # Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: #11385 (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
 - Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
 - Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
 - Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
 - Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
+---
 
 # Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
 

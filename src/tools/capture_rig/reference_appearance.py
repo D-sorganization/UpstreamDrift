@@ -24,7 +24,8 @@ class MotionAppearanceControls(QWidget):
         self.club.setToolTip(
             "Requires club connectivity saved with the reference asset."
         )
-        self.ellipsoids = QCheckBox("Show 3D Segment Ellipsoids")
+        self.ellipsoids = QCheckBox("Model volumes (shaded)")
+        self.model_volumes = self.ellipsoids
         self.forces = QCheckBox("Show Forces")
         self.torques = QCheckBox("Show Torques")
         self.legend = QCheckBox("Show Legend")

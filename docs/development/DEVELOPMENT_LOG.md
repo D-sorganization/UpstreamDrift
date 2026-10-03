@@ -31,14 +31,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** antigravity
-- **PR:** #11399
-- **Branch:** `feat/issue-11304-simscape-output-forces`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/engines/simscape/**`, `src/engines/Simscape_Multibody_Models/**`, `tests/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-19 (#11304) simscape simulation output carries logged force channels and joint rotations through SimscapeOutput (host MATLAB R2025b Update 5): audited canonical force channels in `GolfSwing3D_Kinetic.slx` (237/239 matched, 2 1-DOF torque channels missing Z suffix preserved in .slx and handled cleanly in Python); implemented `local_extract_forces` in `extract_sim_out.m` resampling onto canonical master timegrid; added compact synthetic fixture `tests/fixtures/simscape/synthetic_simscape_force_output.json`; verified MATLAB unit test `test_output_struct_carries_optional_forces_when_logged` and 16 pytest cases in `tests/engines/simscape/test_output_force_columns.py`; FTO-29 (#11314, PR #11395) merged to main; FTO-26 (#11311, PR #11391) merged to main; FTO-27 (#11312, PR #11393) merged to main; FTO-25 (#11310, PR #11390) merged to main; FTO-12 (#11297) Drake GUI draws real force/torque glyphs and feeds segment shading (PR #11385 landed in main); FTO-24 (#11309) merged to main (#11378); FTO-10 (#11295) routed MuJoCo GUI force/torque overlays through shared native and MeshCat glyph renderers (PR #11384); MuJoCo provider reaction labels now use joint name and parity MJCF carries a rod (PR #11381); #11346 added per-engine force-overlay parity lanes; FTO-7 (#11292) merged to main (#11348); FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); FTO-4, FTO-3, FTO-21, FTO-16, FTO-13, FTO-11, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
+- **PR:** #11397
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for FTO-19 (#11304); proceed with remaining FTO tasks.
+- **Next step:** Review and merge PR #11397; owner closes epic #11285.
 
 ### DL-#11268 · Capture-O Video Companion
 
