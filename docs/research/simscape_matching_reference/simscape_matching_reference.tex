@@ -3872,6 +3872,90 @@ especially the neck, are already driven by input torque. Sanitized counts,
 comparison aggregates and exact exit dispositions are recorded in
 \href{aligned_refined_checkpoint_20261003.json}{the aligned refined checkpoint}.
 
+
+\subsection{Native Tangents and the Continuous-Reference Gate}
+\label{sec:refined-tangent-c2}
+The local tangent experiment uses the same eight dense poses per capture and
+three refined trials above. It estimates independent rates from those poses,
+then solves the six dependent right-arm velocity rows while targeting all 48
+position values and the other 37 velocity rows. Every returned state is checked
+again using all 48 position and 43 velocity targets. This tests compatibility
+of an approximate rate with native closure; it does not measure player velocity.
+For a spherical joint with relative rotation $R$, follower-frame angular rate
+and acceleration satisfy
+\[
+ [\boldsymbol\omega_b]_\times=R^T\dot R,\qquad
+ [\boldsymbol\alpha_b]_\times=
+ R^T\ddot R-[\boldsymbol\omega_b]_\times^2.
+\]
+Rates are converted to the native spherical units of degrees per second.
+Independent local perturbations use $R(t\mathbin\pm h)=R(t)
+\exp(\mathbin\pm h[\boldsymbol\omega_b]_\times)$, together with scalar and
+translation increments. The closed seven position values are solved anew at
+each neighbor. Step sizes are $10^{-4}$ and $5\times10^{-5}$ seconds.
+Analytic constant-translation and arbitrary-start constant-body-rotation
+controls run before loading saved candidate poses.
+
+The first combined audit timed out with wrapper code 124. The split owner
+audit exited naturally with zero; the split tour audit wrote its results but
+hung at shutdown and returned 125. Both failures remain recorded. A separate
+fresh audit exited naturally with zero at \texttt{2026-10-03T08:09:58Z} and
+rechecked all 48 saved position--velocity states. Every case has eight fresh
+full-state passes. Saved local differential results show angular error reducing
+at each sample when the step is halved. The largest smaller-step angular errors
+are 0.017 degrees/s for A and 0.026 degrees/s for O; translation component
+errors remain below $7\times10^{-14}$ m/s. The angular and translation maxima
+have different units and are reported separately. Fresh state rechecking does
+not change the original tour shutdown disposition or establish a complete
+continuous trajectory, acceleration, contact or dynamics.
+
+The next private prototype interpolates only the independent manifold
+$\mathbb R^{25}\times\mathrm{SO}(3)^4$, rather than the 48 position
+representation values. It reuses scalar cubic splines and rotation splines
+with continuous angular rate and acceleration. Natural scalar endpoint
+curvature is an explicit interpolation choice, not a measured boundary
+condition. Original clocks and anchor rotations are preserved; dependent
+coordinates are solved by native continuation. Parent tests exposed silent
+out-of-domain clock clamping: two regressions failed before the strict-domain
+correction, then all 19 focused tests passed. Tests include an actual angular
+wrap cut, arbitrary-start body-rate controls, noncommuting rotations and
+independent natural-curvature equations. Pure interpolation tests do not
+establish native feasibility.
+
+The first native anchor/midpoint audit exited naturally with zero at
+\texttt{08:12:24Z}, meaning the diagnostic completed, not that its candidate
+passed. Only 107 of 109 tour states and 86 of 91 owner states satisfy all
+gates. Each capture has one native assembly failure at a midpoint. One tour
+anchor and four owner anchors assemble onto different closed-arm configurations
+from the original fitted anchors. The independent coordinates match their
+anchors, so this is a dependent-branch preservation failure. The largest
+right-shoulder orientation disagreements are approximately $39.1^{\circ}$
+and $156.3^{\circ}$. This prototype is rejected for promotion. A separate source-rate audit exited naturally with zero at
+\texttt{2026-10-03T08:20:29Z}. Its represented spans contain 649 tour states
+at 360 Hz and 361 owner states at 240 Hz, preserving all 55/46 original
+anchors and their clocks. These spans do not include the uncached trailing
+source samples and are not a complete-capture qualification. It accepts
+643/649 tour states and 345/361 owner states. Tour anchor configurations now
+match, but six tour states fail native assembly. The owner has five assembly
+failures and eleven original-anchor branch mismatches. Finer sampling
+therefore does not qualify this curve or resolve the owner branch problem.
+The interpolation runtime is SciPy 1.17.1 with NumPy 2.4.6; the library's
+continuous-rate/acceleration contract is independently checked by the body-rate
+oracles and documented by
+\href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.RotationSpline.html}{SciPy RotationSpline}. Between-sample closure,
+dependent acceleration, held-out observations, stance contact and independently
+replayed motion from all 35 torque axes remain required.
+
+The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
+records the aggregate errors, original exit failures, fresh 48-state recheck,
+rejected pilot and private source hashes. It also records the parent's
+independent byte/hash and full-decode check of 104 Desktop MP4s: 5,252 frames
+at native 1920 by 1080 and 30 fps. That collection includes historical partial
+model topologies; it does not make every staged model a refined full Human
+ellipsoid. Human remains the standard for future shareable matching outputs.
+The peer's 1,313-pose replay is an IK claim and was not independently rerun in
+the parent media check. These media checks qualify files, not forward dynamics.
+
 \section{Local Acquisition Catalog Follow-Through}
 \label{sec:local-acquisition-follow-through}
 All six album-export videos are hash-verified locally, totalling

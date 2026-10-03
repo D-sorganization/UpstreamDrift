@@ -1,0 +1,343 @@
+{
+  "all_35_input_torque_axes_qualified": false,
+  "c2_anchor_midpoint_pilot": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_ANCHOR_MIDPOINT_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 107,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 108,
+        "max_anchor_physical_error": 0.6550903752636493,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 109,
+        "position_status_one_count": 108,
+        "velocity_status_one_count": 108,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 86,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 90,
+        "max_anchor_physical_error": 2.5495241333257908,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 91,
+        "position_status_one_count": 90,
+        "velocity_status_one_count": 90,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "c2_branch_failure_counts": {
+    "capture_A": {
+      "accepted_count": 107,
+      "anchor_branch_mismatch_count": 1,
+      "native_failure_midpoint_count": 1,
+      "native_failure_original_anchor_count": 0,
+      "native_solve_failure_count": 1,
+      "pilot_state_count": 109
+    },
+    "capture_O": {
+      "accepted_count": 86,
+      "anchor_branch_mismatch_count": 4,
+      "native_failure_midpoint_count": 1,
+      "native_failure_original_anchor_count": 0,
+      "native_solve_failure_count": 1,
+      "pilot_state_count": 91
+    }
+  },
+  "c2_pilot_promoted": false,
+  "c2_pilot_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T08:12:24.345998+00:00"
+  },
+  "contact_qualified": false,
+  "desktop_media": {
+    "forward_dynamics_qualified": false,
+    "fps": 30,
+    "fully_decoded_frame_count": 5252,
+    "height": 1080,
+    "native_pose_replay_parent_rechecked": false,
+    "opencv_version": "4.13.0",
+    "qualification": "Independent local byte/hash and full-decode check only; mixed historical model topologies. Human ellipsoid remains future matching standard.",
+    "source_metadata_sha256": "6037ed28e8c4692898ebf09b0ed9993e825fd3d33b03c8509381f7e7c4d1933a",
+    "video_count": 104,
+    "width": 1920
+  },
+  "differential_scope": "Approximate rates from eight poses per case, local independent perturbations and native closed-arm position solve; angular and linear units separately reported. Tour original shutdown failure retained.",
+  "fresh_full_saved_state_recheck": {
+    "fresh_full_state_count": 48,
+    "model_saved": false,
+    "original_owner_tangent_exit": 0,
+    "original_tour_tangent_exit": 125,
+    "qualification": "FRESH_SAVED_QV_STATE_RECHECK_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "angular_0_02_linear_0_5": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        },
+        "baseline": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        },
+        "linear_0_5": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        }
+      },
+      "capture_O": {
+        "angular_0_02_linear_0_5": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        },
+        "baseline": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        },
+        "linear_0_5": {
+          "fresh_full_state_count": 8,
+          "max_pose_physical_residual": 4.960524086056721e-16,
+          "max_velocity_component_residual": 9.094947017729282e-13
+        }
+      }
+    },
+    "simulation_executed": false
+  },
+  "fresh_recheck_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T08:09:58.978411+00:00"
+  },
+  "full_capture_continuous_path_qualified": false,
+  "independent_forward_dynamics_replay_qualified": false,
+  "interpolation_runtime": {
+    "numpy": "2.4.6",
+    "scipy": "1.17.1"
+  },
+  "latex_pdf_verified": false,
+  "local_differential_aggregates": {
+    "capture_A": {
+      "angular_0_02_linear_0_5": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.04630479390016262,
+        "h1_max_linear_error_m_per_s": 1.27675647831893e-14,
+        "h2_max_angular_error_deg_per_s": 0.011576207955386053,
+        "h2_max_linear_error_m_per_s": 3.3584246494910985e-14,
+        "max_angular_error_ratio": 4.000875032781108,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.9998273416930594,
+        "native_neighbor_pose_solves": 32
+      },
+      "baseline": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.04785464626615976,
+        "h1_max_linear_error_m_per_s": 1.7263968032921184e-14,
+        "h2_max_angular_error_deg_per_s": 0.011963659017283135,
+        "h2_max_linear_error_m_per_s": 3.3084646133829665e-14,
+        "max_angular_error_ratio": 4.008112209281301,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.9999972157142842,
+        "native_neighbor_pose_solves": 32
+      },
+      "linear_0_5": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.0675337981233497,
+        "h1_max_linear_error_m_per_s": 1.4488410471358293e-14,
+        "h2_max_angular_error_deg_per_s": 0.016883463068325,
+        "h2_max_linear_error_m_per_s": 3.3639757646142243e-14,
+        "max_angular_error_ratio": 4.003526687216374,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.99822890103897,
+        "native_neighbor_pose_solves": 32
+      }
+    },
+    "capture_O": {
+      "angular_0_02_linear_0_5": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.10261732736029217,
+        "h1_max_linear_error_m_per_s": 3.3834046675451646e-14,
+        "h2_max_angular_error_deg_per_s": 0.025653091415904328,
+        "h2_max_linear_error_m_per_s": 6.927791673660977e-14,
+        "max_angular_error_ratio": 4.000193415155874,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.999978876787708,
+        "native_neighbor_pose_solves": 32
+      },
+      "baseline": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.08754011238841031,
+        "h1_max_linear_error_m_per_s": 3.4389158187764224e-14,
+        "h2_max_angular_error_deg_per_s": 0.02188402055401184,
+        "h2_max_linear_error_m_per_s": 6.88338275267597e-14,
+        "max_angular_error_ratio": 4.000184160508943,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.9999734714680217,
+        "native_neighbor_pose_solves": 32
+      },
+      "linear_0_5": {
+        "accepted_qv_states": 8,
+        "angular_halving_reduces_count": 8,
+        "fresh_full_qv_rechecks": 8,
+        "h1_max_angular_error_deg_per_s": 0.09229966471468742,
+        "h1_max_linear_error_m_per_s": 3.2307490016592055e-14,
+        "h2_max_angular_error_deg_per_s": 0.023073837155493493,
+        "h2_max_linear_error_m_per_s": 6.683542608243442e-14,
+        "max_angular_error_ratio": 4.000187055697948,
+        "max_full_velocity_recheck_error": 9.094947017729282e-13,
+        "min_angular_error_ratio": 3.9999713687603653,
+        "native_neighbor_pose_solves": 32
+      }
+    }
+  },
+  "native_acceleration_qualified": false,
+  "original_combined_tangent_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": false,
+    "final_exit_code": 124,
+    "script_status": null,
+    "termination_reason": "timeout",
+    "timestamp": "2026-10-03T07:41:46.265949+00:00"
+  },
+  "original_owner_tangent_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T07:54:11.952394+00:00"
+  },
+  "original_tour_tangent_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T08:06:15.105359+00:00"
+  },
+  "private_c2_tdd": {
+    "body_rate_oracle": true,
+    "original_agent_red_scope": "Missing module collection error; exact original process exit unsupported by stored log",
+    "original_wrap_cut_anchors_preserved": true,
+    "parent_green_exit": 0,
+    "parent_green_passed": 19,
+    "parent_red_exit": 1,
+    "parent_red_failed": 2,
+    "parent_red_passed": 2,
+    "strict_clock_fix": true
+  },
+  "private_source_sha256": {
+    "analyze_c2_pilot_branches_reviewed.py": "683eef008f44b0cf55c5f5c1443dbcb21d11b30c7bf67d8cb60e5c170e47f11c",
+    "analyze_persisted_tangent_units.py": "8147ff5f73862c0a78d262cb6f6d803551d1d963eb8d6f55bff9c273c6211fce",
+    "build_native_c2_payload_reviewed.py": "2594ed47b9abc5c3172b79072373f34051b5e7de5d126b124a40c18d7401fafd",
+    "c2_reference.py": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+    "probe_native_c2_anchor_midpoints_reviewed.m": "be19e956f76d0074c9110707402c883f1afb59a6bb6f7243e0414b1bfa9943f7",
+    "probe_native_c2_source_frames_reviewed.m": "a52b9d2911ecf4b01f218aa602d28f190ef3f2f9684225f5d052f4359fcbe54f",
+    "probe_refined_tangents_reviewed.m": "57814956c0f2ba823bb7b7045d20e2f149c95f12489eedd9ee661599c049155e",
+    "recheck_saved_tangent_states_reviewed.m": "2d70b1ec29e31688223353c8fbaab05d4e75c91be079f218f233b1d5ec46fb1a",
+    "test_c2_parent_regressions.py": "a877f15bb13f59a5baff09886ce9ad2d7961bb589f5cc9f868045299117053f0",
+    "test_c2_reference.py": "f65f199e8041137910ea3295f2f1f25b9fe391372ac3ca33ebd8adc1a9ef6d42"
+  },
+  "qualification": "LOCAL_TANGENT_FRESH_STATE_RECHECK_AND_REJECTED_C2_PILOT_NOT_FORWARD_DYNAMICS_ACCEPTANCE",
+  "source_frame_branch_failure_counts": {
+    "capture_A": {
+      "accepted_count": 643,
+      "anchor_branch_mismatch_count": 0,
+      "native_failure_midpoint_count": 6,
+      "native_failure_original_anchor_count": 0,
+      "native_solve_failure_count": 6,
+      "pilot_state_count": 649
+    },
+    "capture_O": {
+      "accepted_count": 345,
+      "anchor_branch_mismatch_count": 11,
+      "native_failure_midpoint_count": 5,
+      "native_failure_original_anchor_count": 0,
+      "native_solve_failure_count": 5,
+      "pilot_state_count": 361
+    }
+  },
+  "source_frame_continuation_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_SOURCE_FRAME_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 643,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 643,
+        "max_anchor_physical_error": 1.099089680306351e-8,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 649,
+        "position_status_one_count": 643,
+        "velocity_status_one_count": 643,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 345,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 356,
+        "max_anchor_physical_error": 3.015234414272649,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 361,
+        "position_status_one_count": 356,
+        "velocity_status_one_count": 356,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "source_frame_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T08:20:29.579496+00:00"
+  },
+  "step_sizes_seconds": [0.0001, 5e-5]
+}

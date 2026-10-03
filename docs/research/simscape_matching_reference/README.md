@@ -7,6 +7,20 @@ failed experiments and reproduction. The [refinement record](MATCHING_REFINEMENT
 preserves earlier reviews; the [current handoff](../../development/HANDOFF.md)
 records outstanding delivery and scientific work.
 
+## Current Review Status
+
+| Deliverable            | Current Evidence                                                                            | Remaining Qualification                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Owner Session Videos   | Six Originals Verified Locally; Visible Marker Placement Reviewed                           | Exact GEARS Trial Pairing, Camera and Anatomical Offsets        |
+| Desktop MP4s           | Eight Refined Human Clips; 104 Comparison Clips Independently Hash/Decode Checked           | IK Only; Dynamics and Contact Unqualified                       |
+| Native Saved States    | 344 Position Poses and 48 Position/Velocity States Freshly Rechecked With Natural Exit Zero | Whole-Capture Continuous Path and Acceleration                  |
+| C2 Reference Prototype | 19 Pure Tests Pass; Native Source-Rate Audit Rejects Both Paths                             | Assembly Failures and Closed-Arm Branch Preservation            |
+| Moving Dynamics        | Fixed Supported Holds Have Their Own Recorded Gates                                         | All 35 Input Torques, Contact and Independent Full-Swing Replay |
+| LaTeX Reference        | Source Updated in the Existing Editor                                                       | PDF Compiler Reports Missing Platform Standard Directories      |
+| Protected Delivery     | Draft PR #11256 With Explicit Scientific Limits                                             | Required CI and Scientific Qualification Remain Open            |
+
+Use the [aligned comparison checkpoint](aligned_refined_checkpoint_20261003.json) and [tangent/C2 checkpoint](tangent_c2_checkpoint_20261003.json) for the latest scopes and exit dispositions. Dated experiments below retain their original acceptance limits.
+
 ## Captures and Driving Modes
 
 Capture A is the tour-average reference. Capture O is the owner's GEARS capture.
@@ -17,9 +31,7 @@ with capture-specific geometry; legacy cylinder outputs remain historical.
 
 The delivered tour/owner clips use inverse-kinematics poses and are labeled
 **IK / DYNAMICS UNQUALIFIED**. They are not torque-driven independent replay.
-The Desktop selection is `Best_Human_Matches_20261002_HeadTracked`, with two
-camera views per capture, fully decoded 800 by 600, 30 fps H.264 clips and a share ZIP.
-No rejected dynamic experiment replaces that selection.
+The current torso-refined Human selection is `Simscape_Matches_20261002_Scapula_Refined_1080p`, with eight 1920 by 1080, 30 fps H.264 clips: both captures, both views, clean and marker modes. The earlier 800 by 600 head-tracked package remains a historical comparison. The 104-video collection covers 13 construction/model variants and includes partial historical topologies; its target scores are not all directly comparable. No rejected continuity or dynamic experiment replaces the refined Human files.
 
 ## Modeling Process
 
@@ -238,5 +250,7 @@ The local download and marker-placement review requested by the owner are comple
 The standalone LaTeX reference now distinguishes historical and newer torso-refined Desktop candidates, corrects mask tensor indexing and defines source-verified balance command units and net torque subtraction. The compiler still reports `Unable to find standard directories for platform`; the latest PDF is unverified. Full moving references, all 35 actuators including the neck, contact acceptance and fresh independent A/O replay remain open. PR #11256 stays draft; no protected merge or full-goal completion is claimed.
 
 Root-availability review (2026-10-03 UTC): saved-array analysis reproduces the legacy owner-window root-step maxima and associates the largest approximately 40 mm increment with restoration of seven derived lower-body targets. Waist-marker gaps can propagate through the pelvis-axis joint-centre estimator despite visible raw leg markers. This is association, not causation. The current refined preview uses a different head-axis, back-marker, spine/scapula and gap-weight objective; the legacy-window maximum does not establish its root error. The private translation-option TDD completed naturally with eight RED failures and eight GREEN passes, no incomplete tests and no model/simulation. The aligned refined port is now natively evaluated but remains private and unpromoted. See root_availability_checkpoint_20261003.json and the maintained LaTeX calculations. Full moving references, contact, all 35 actuators, independent replay and PDF qualification remain open.
+
+Tangent/C2 review (2026-10-03 UTC): a fresh native audit naturally exited zero and independently rechecked all 48 saved q/v states from both captures and three refined trials. Original combined timeout 124 and tour shutdown 125 are retained; owner original audit exited zero. Body-rate local differential errors are reported separately in deg/s and m/s. Private C2 TDD has a real strict-clock RED/GREEN correction and 19 passing tests. Anchor/midpoint and source-rate native audits naturally completed but rejected the paths: source-rate A 643/649 and O 345/361 accepted, with 6/5 native assembly failures and 0/11 anchor-branch mismatches. No C2 path or dynamic video is promoted. Parent independently verified 104 Desktop video hashes and fully decoded 5,252 native 1080p frames; the comparison collection includes historical partial topologies. Human ellipsoids remain the standard for new shareable matching. See tangent_c2_checkpoint_20261003.json and the maintained LaTeX. All 35 input torques including neck, contact, independent full-swing replay, anatomy and PDF qualification remain open.
 
 Aligned refined-objective review (2026-10-03 UTC): actual sparse refined previews have zero consecutive source-frame transitions; largest root increments are 17.827 mm (A) and 30.166 mm (O) over 1/30 s. Address-prefix controlled eight-pose windows preserve the spine prior. Private parameter TDD has eight RED failures/eight GREEN passes. The original 344-pose fit wrapper returned 125 after completion; a fresh independent saved-pose recheck exited naturally with zero and verified all 344 poses plus exact whole-output zero parity. Small root improvements accompany worse wrist increments; no candidate is promoted. Native counts distinguish 48 position variables, 43 velocity variables, 37 floating IK parameters and 35 requested control axes. See aligned_refined_checkpoint_20261003.json and the maintained LaTeX. Full continuous references, contact, all 35 input torques including the neck, independent replay and PDF qualification remain open.
