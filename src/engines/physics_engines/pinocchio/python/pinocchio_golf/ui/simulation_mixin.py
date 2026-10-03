@@ -41,10 +41,41 @@ class SimulationMixin:
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
-    def load_urdf(self: PinocchioGUI, fname: str | None = None) -> None:  # noqa: C901
-        """Load a URDF model and initialize the viewer."""
+    def _init_meshcat_visualizer(self: PinocchioGUI) -> None:
         from . import MESHCAT_AVAILABLE, MeshcatVisualizer
 
+        if MESHCAT_AVAILABLE and self.viewer is not None:
+            try:
+                self.viewer["robot"].delete()
+                self.viewer["overlays"].delete()
+
+                self.viz = MeshcatVisualizer(
+                    self.model, self.collision_model, self.visual_model
+                )
+                self.viz.initViewer(viewer=self.viewer, open=False)
+                self.viz.loadViewerModel()
+
+                from ..force_overlay_view import PinocchioForceOverlayView
+
+                color_session = getattr(self, "segment_force_colors", None)
+                self.force_overlay_view = PinocchioForceOverlayView(
+                    self, self.viz, color_session
+                )
+                if color_session is not None:
+                    self.force_overlay_view.bind_color_session(
+                        self.model, self.visual_model, self.viewer
+                    )
+            except (RuntimeError, ValueError, OSError) as e:
+                self.log_write(f"Warning: Visualizer init failed: {e}")
+                self.viz = None
+                self.force_overlay_view = None
+        else:
+            self.log_write("Model loaded without 3D visualization.")
+            self.viz = None
+            self.force_overlay_view = None
+
+    def load_urdf(self: PinocchioGUI, fname: str | None = None) -> None:  # noqa: C901
+        """Load a URDF model and initialize the viewer."""
         if not fname:
             fname, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Select URDF File", "", "URDF Files (*.urdf *.xml)"
@@ -92,35 +123,7 @@ class SimulationMixin:
                 self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
-            if MESHCAT_AVAILABLE and self.viewer is not None:
-                try:
-                    self.viewer["robot"].delete()
-                    self.viewer["overlays"].delete()
-
-                    self.viz = MeshcatVisualizer(
-                        self.model, self.collision_model, self.visual_model
-                    )
-                    self.viz.initViewer(viewer=self.viewer, open=False)
-                    self.viz.loadViewerModel()
-
-                    from ..force_overlay_view import PinocchioForceOverlayView
-
-                    color_session = getattr(self, "segment_force_colors", None)
-                    self.force_overlay_view = PinocchioForceOverlayView(
-                        self, self.viz, color_session
-                    )
-                    if color_session is not None:
-                        self.force_overlay_view.bind_color_session(
-                            self.model, self.visual_model, self.viewer
-                        )
-                except (RuntimeError, ValueError, OSError) as e:
-                    self.log_write(f"Warning: Visualizer init failed: {e}")
-                    self.viz = None
-                    self.force_overlay_view = None
-            else:
-                self.log_write("Model loaded without 3D visualization.")
-                self.viz = None
-                self.force_overlay_view = None
+            self._init_meshcat_visualizer()
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
