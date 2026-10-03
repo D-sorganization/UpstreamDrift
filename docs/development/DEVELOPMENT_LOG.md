@@ -49,6 +49,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** codex
 - **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284; qualification child #11357
 - **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
+- **Arm Morphology Documentation Checkpoint:** Four unoptimized arm ±5% admissions and twelve selected overlays are independently provenance-verified; exact twelve-page AN1 report retained. Source 14,800 preserved, library 383→391; grip gaps worsen to 18.6–22.1 mm and anatomy remains unadopted. [Procedure](necromatcher-arm-morphology-admission.md). Documentation SELF; no behavior, evidence-role or release-qualification change.
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`, `src/shared/python/motion_matching/historical_fit/shaft_*`, `src/shared/python/workspace/necromatcher_shaft_evidence.py`
 - **Started:** 2026-10-01

@@ -241,3 +241,8 @@ See [Procedure](docs/development/necromatcher-shaft-fragment-diagnostics.md) and
 [Turnover](docs/development/necromatcher-turnover.md). Registered calculations
 remain incomplete and canonical manual release remains blocked; local derivative
 agreement grants no clinical, historical or physical-time qualification.
+
+# Arm Morphology Current Continuation — #11357 / #11394
+
+- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Not yet applied to existing fits/camera studies; historical results remain unchanged.
+- Documentation SELF; four unoptimized research admissions and twelve selected stills are provenance-verified, with grip degradation and no anatomy/physical qualification. See [Current Continuation](docs/development/HANDOFF.md) and [Procedure](docs/development/necromatcher-arm-morphology-admission.md); prior reports remain unchanged.

@@ -1,0 +1,288 @@
+{
+  "schema": "necromatcher/arm-morphology-documentation-checkpoint/1",
+  "documentation_commit": "SELF",
+  "execution_producer": "1f7fe89be67d98ca9db307905a08aa54c2d53fb2",
+  "optimizer_ran": false,
+  "scientific_qualified": false,
+  "anthropometry_adopted": false,
+  "source_files_preserved": 14800,
+  "library_before": 383,
+  "library_after": 391,
+  "native_writer": {
+    "session": 34737,
+    "exit_code": 0
+  },
+  "persistence_review": {
+    "session": 35753,
+    "exit_code": 0,
+    "root_acceptance_sha256": "f8ccb0ffbe44c4988de3a4e2bd49fe9dbbdb66a3c95f54ce74ed150e3de89869"
+  },
+  "stills_review": {
+    "operation_session": 54793,
+    "independent_session": 40776,
+    "exit_code": 0,
+    "overlay_count": 12,
+    "original_count": 6,
+    "all_overlays_root_visually_reviewed": true,
+    "root_acceptance_sha256": "bb4ad830066c4ec02d77b39b9747cf386cac5bd9bad7ec7f4b1814d5992fd8fc",
+    "independent_sha256": "366fe85fbc493f04a0444b3330f6329d39ba8633daad7b9cbe9a61083d76d7f0"
+  },
+  "report": {
+    "source": {
+      "sha256": "e263868f98b55a0458771a4f471ef5f58823537e247b606c883c2157215a795d",
+      "bytes": 25534
+    },
+    "pdf": {
+      "sha256": "0f66f42ddd8ead53404dae533d62a93020400559cdbfad8cb2f8a8f2c25eb8a7",
+      "bytes": 298748
+    },
+    "root_review": {
+      "sha256": "ceb8e77d97768a3276f7b37364aeeb26e627278a5d4f54efdaf6003a83d5345b",
+      "bytes": 8251
+    },
+    "pages": 12,
+    "overfull_boxes": 0,
+    "remaining_underfull_boxes": 2,
+    "historical_report_stills_pending_text_preserved": true,
+    "titlecase_delta_review": {
+      "passes": 2,
+      "pages_re_reviewed": [2],
+      "other_11_page_pixels_unchanged": true,
+      "prior_edition_preserved": "accepted-pre-titlecase-v3"
+    },
+    "root_review_external_filename": "root-final-report-review-v3.json",
+    "repository_review_record": "Formatter-normalized JSON may differ in bytes; retains the external V3 semantic record."
+  },
+  "cases": [
+    {
+      "player": "Tiger",
+      "factor": 0.95,
+      "parent_fit_id": "tiger-forearm-analytic-variant-fit-v20",
+      "model_id": "tiger-arms-minus-five-model-hypothesis-v1",
+      "seed_fit_id": "tiger-arms-minus-five-unoptimized-seed-v1",
+      "parent_saved_dense_rms_pixels": 23.582685919972583,
+      "body": {
+        "metrics": {
+          "dense_rms_pixels": 23.592440709190843,
+          "held_out_rms_pixels": 23.84761753939645,
+          "training_rms_pixels": 21.27835140361787
+        },
+        "training_frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "dense_frame_count": 210,
+        "training_positive_weight_points": 286,
+        "dense_positive_weight_points": 2730,
+        "unknown_visibility_weight": 0.5
+      },
+      "model_hash": "sha256:3901439e26d3549d5fe18cf404dcc67ba5a897a30b19213e136f52209b5f299a",
+      "seed_hash": "sha256:30dcaa7f6dccccb701dcd012a79e8c0fcc560eb9b0a07698a60cdcf167c57ab1",
+      "native_closure": {
+        "maximum_authored_world_site_gap_m_all_source": 0.022057212774000284,
+        "parent_saved_maximum_authored_world_site_gap_m": 0.0021237357899579305,
+        "maximum_dimensionless_constraint_component": 86.48703360355665,
+        "parent_saved_maximum_dimensionless_constraint_component": 17.023155533359613,
+        "tested_time_count": 178,
+        "row_families": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "continuous_certified": false,
+        "source_frame_count": 210,
+        "interpretation": "Authored native dual-grip world site positional separation, not measured historical hands"
+      },
+      "optimizer_ran": false,
+      "scientific_qualified": false
+    },
+    {
+      "player": "Tiger",
+      "factor": 1.05,
+      "parent_fit_id": "tiger-forearm-analytic-variant-fit-v20",
+      "model_id": "tiger-arms-plus-five-model-hypothesis-v1",
+      "seed_fit_id": "tiger-arms-plus-five-unoptimized-seed-v1",
+      "parent_saved_dense_rms_pixels": 23.582685919972583,
+      "body": {
+        "metrics": {
+          "dense_rms_pixels": 23.88632685949379,
+          "held_out_rms_pixels": 24.127237558960605,
+          "training_rms_pixels": 21.71040276153928
+        },
+        "training_frame_indices": [
+          0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150,
+          160, 170, 180, 190, 200, 209
+        ],
+        "dense_frame_count": 210,
+        "training_positive_weight_points": 286,
+        "dense_positive_weight_points": 2730,
+        "unknown_visibility_weight": 0.5
+      },
+      "model_hash": "sha256:4df07b5b3b3013594d44675b1e46525d35d2e212adf8c5a55d9a389fe03b3099",
+      "seed_hash": "sha256:fc1b9bd29e15576f715808959484815d02472c01a01f7f93757bf9ea07348083",
+      "native_closure": {
+        "maximum_authored_world_site_gap_m_all_source": 0.02195047525378828,
+        "parent_saved_maximum_authored_world_site_gap_m": 0.0021237357899579305,
+        "maximum_dimensionless_constraint_component": 83.69589816863994,
+        "parent_saved_maximum_dimensionless_constraint_component": 17.023155533359613,
+        "tested_time_count": 178,
+        "row_families": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "continuous_certified": false,
+        "source_frame_count": 210,
+        "interpretation": "Authored native dual-grip world site positional separation, not measured historical hands"
+      },
+      "optimizer_ran": false,
+      "scientific_qualified": false
+    },
+    {
+      "player": "Hogan",
+      "factor": 0.95,
+      "parent_fit_id": "hogan-forearm-analytic-variant-fit-v17",
+      "model_id": "hogan-arms-minus-five-model-hypothesis-v1",
+      "seed_fit_id": "hogan-arms-minus-five-unoptimized-seed-v1",
+      "parent_saved_dense_rms_pixels": 10.136350597234246,
+      "body": {
+        "metrics": {
+          "dense_rms_pixels": 10.055042293776493,
+          "held_out_rms_pixels": 10.13851452547023,
+          "training_rms_pixels": 6.80109186984203
+        },
+        "training_frame_indices": [
+          0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490,
+          525, 560, 595, 630, 665, 700, 735, 749
+        ],
+        "dense_frame_count": 750,
+        "training_positive_weight_points": 286,
+        "dense_positive_weight_points": 9607,
+        "unknown_visibility_weight": 0.5
+      },
+      "model_hash": "sha256:3901439e26d3549d5fe18cf404dcc67ba5a897a30b19213e136f52209b5f299a",
+      "seed_hash": "sha256:8a0637a75cbafd43e6716f33df59175d05a1cc37081528e1eb13bf2104123239",
+      "native_closure": {
+        "maximum_authored_world_site_gap_m_all_source": 0.018585246786147456,
+        "parent_saved_maximum_authored_world_site_gap_m": 0.0007330374281112822,
+        "maximum_dimensionless_constraint_component": 51.36648976910324,
+        "parent_saved_maximum_dimensionless_constraint_component": 2.2015408226166313,
+        "tested_time_count": 364,
+        "row_families": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "continuous_certified": false,
+        "source_frame_count": 750,
+        "interpretation": "Authored native dual-grip world site positional separation, not measured historical hands"
+      },
+      "optimizer_ran": false,
+      "scientific_qualified": false
+    },
+    {
+      "player": "Hogan",
+      "factor": 1.05,
+      "parent_fit_id": "hogan-forearm-analytic-variant-fit-v17",
+      "model_id": "hogan-arms-plus-five-model-hypothesis-v1",
+      "seed_fit_id": "hogan-arms-plus-five-unoptimized-seed-v1",
+      "parent_saved_dense_rms_pixels": 10.136350597234246,
+      "body": {
+        "metrics": {
+          "dense_rms_pixels": 10.262778038363114,
+          "held_out_rms_pixels": 10.347090884751173,
+          "training_rms_pixels": 6.984344372186188
+        },
+        "training_frame_indices": [
+          0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490,
+          525, 560, 595, 630, 665, 700, 735, 749
+        ],
+        "dense_frame_count": 750,
+        "training_positive_weight_points": 286,
+        "dense_positive_weight_points": 9607,
+        "unknown_visibility_weight": 0.5
+      },
+      "model_hash": "sha256:4df07b5b3b3013594d44675b1e46525d35d2e212adf8c5a55d9a389fe03b3099",
+      "seed_hash": "sha256:f4201fbb35b720ecd96e94b3a6b40a54b4844630ae9ee913d29ba684db99eef4",
+      "native_closure": {
+        "maximum_authored_world_site_gap_m_all_source": 0.01864103802946923,
+        "parent_saved_maximum_authored_world_site_gap_m": 0.0007330374281112822,
+        "maximum_dimensionless_constraint_component": 51.46413591874486,
+        "parent_saved_maximum_dimensionless_constraint_component": 2.2015408226166313,
+        "tested_time_count": 364,
+        "row_families": [
+          "grip_position:x",
+          "grip_position:y",
+          "grip_position:z",
+          "grip_rotation:x",
+          "grip_rotation:y",
+          "grip_rotation:z",
+          "ground:heel_r",
+          "ground:forefoot_r",
+          "ground:toe_r",
+          "ground:heel_l",
+          "ground:forefoot_l",
+          "ground:toe_l"
+        ],
+        "continuous_certified": false,
+        "source_frame_count": 750,
+        "interpretation": "Authored native dual-grip world site positional separation, not measured historical hands"
+      },
+      "optimizer_ran": false,
+      "scientific_qualified": false
+    }
+  ],
+  "offline_package": {
+    "manifest_sha256": "9095a5d8bd99d6115929cac4bdbefed68258ec71cd47e58f46cdaa52959219eb",
+    "zip_sha256": "6950193e132e524a444f446a2bcc5c6d83e1ac6c7c34c5dcd81254eb22645dcd",
+    "payload_files": 48,
+    "zip_members": 49,
+    "local_only": true,
+    "transferred": false,
+    "edition": "historical pre-titlecase V3; does not contain current canonical report"
+  },
+  "current_matching_scope": {
+    "both_hands_on_club_only": true,
+    "tiger_post_right_hand_release_excluded": true,
+    "boundary_pending_source_review": false,
+    "historical_whole_capture_metrics_unchanged": true,
+    "retained_frame_interval_half_open": [0, 191],
+    "last_retained_frame_inclusive": 190,
+    "excluded_from_frame": 191,
+    "exact_physical_release_time_measured": false,
+    "selected_originals_root_reviewed": 20,
+    "all_retained_frames_visually_reviewed": false,
+    "applied_to_existing_fits_or_camera_studies": false,
+    "root_review": {
+      "sha256": "0d63f2635b3d5ec462c3a50ac4ee9475c0e7bbf5587ff4391de313ba2c2147a5",
+      "bytes": 5215
+    }
+  }
+}
