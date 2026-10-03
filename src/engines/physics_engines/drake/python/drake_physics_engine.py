@@ -31,6 +31,7 @@ from src.shared.python.core.contracts import (
     precondition,
 )
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.force_overlay import WrenchKind
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Pydrake imports - only import if available
@@ -101,6 +102,8 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         self.model_name_str: str = ""
         self._is_finalized = False
         self.simulator: analysis.Simulator | None = None
+        self._force_torque_source: Any = None
+        self._force_torque_diagram: Any = None
 
     @property
     def engine_type(self) -> str:
@@ -287,6 +290,7 @@ class DrakePhysicsEngine(BasePhysicsEngine):
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
             contact_forces=CapabilityLevel.FULL,
+            force_visualization=CapabilityLevel.FULL,
             inverse_dynamics=CapabilityLevel.FULL,
             parameter_gradients=CapabilityLevel.PARTIAL,
             state_control_gradients=CapabilityLevel.FULL,
@@ -408,56 +412,59 @@ class DrakePhysicsEngine(BasePhysicsEngine):
         )
         return cast(np.ndarray, forces)
 
+    def _get_force_torque_source(self) -> Any:
+        """Return the cached ``DrakeForceTorqueSource`` for the current diagram."""
+        if self._force_torque_source is None or self._force_torque_diagram is not (
+            self.diagram
+        ):
+            from src.engines.physics_engines.drake.python.drake_force_torque import (
+                DrakeForceTorqueSource,
+            )
+
+            self._force_torque_source = DrakeForceTorqueSource(self.plant, self.diagram)
+            self._force_torque_diagram = self.diagram
+        return self._force_torque_source
+
+    def get_force_torque_frame(self) -> Any:
+        """Return the current ``ForceTorqueFrame`` (ForceTorqueProvider).
+
+        Returns None until the engine is finalized. Wrenches come from Drake's
+        reaction, net-actuation and contact-results ports; unavailable channels
+        are omitted, never zero-filled.
+        """
+        if not self.is_initialized:
+            return None
+        return self._get_force_torque_source().sample(self.plant_context)
+
+    def get_segment_axial_loads(self) -> Any:
+        """Return tension-positive segment axial loads (AxialLoadProvider)."""
+        frame = self.get_force_torque_frame()
+        return None if frame is None else frame.axial_loads
+
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def compute_contact_forces(self) -> np.ndarray:
-        """Compute total contact forces (ground reaction force, GRF).
+        """Compute total contact force on the multibody system (GRF).
 
-        Uses Drake's ContactResults API to query real contact forces from the
-        simulation context. Requires that the simulator has advanced at least
-        one step so contact results are populated.
+        Sums the point-pair AND hydroelastic contact wrenches that Drake's
+        ContactResults reports on every non-world body, so the result is the
+        ground reaction (a body resting on the ground gives +m*g along z).
 
         Returns:
-            f: (3,) vector representing total ground reaction force [N].
-                Returns zeros if no contacts exist or simulator is unavailable.
+            f: (3,) total contact force [N] in world coordinates. Zeros if no
+                contacts exist or contact results cannot be queried.
         """
         if not self.plant_context or not self.diagram or not self.context:
             return np.zeros(3)
-
         try:
-            # Get the contact results output port from the plant
-            contact_results_port = self.plant.get_contact_results_output_port()
-            contact_results = contact_results_port.Eval(self.plant_context)
-
-            # Sum all point contact forces
-            total_force = np.zeros(3)
-            n_contacts = contact_results.num_point_pair_contacts()
-
-            for i in range(n_contacts):
-                point_contact = contact_results.point_pair_contact_info(i)
-                # Contact force is along the contact normal, scaled by force magnitude
-                contact_force = point_contact.contact_force()
-                total_force += np.array(
-                    [contact_force[0], contact_force[1], contact_force[2]]
-                )  # noqa: E501
-
-            if n_contacts > 0:
-                logger.debug(
-                    "Computed GRF from %d contact points: magnitude=%.2f N",
-                    n_contacts,
-                    float(np.linalg.norm(total_force)),
-                )
-
-            return total_force
-
+            frame = self.get_force_torque_frame()
         except (AttributeError, RuntimeError, TypeError) as e:
-            # ContactResults API may not be available in all Drake configurations
-            logger.warning(
-                "Could not query ContactResults: %s. "
-                "Returning zero GRF. Ensure the simulator has advanced at "
-                "least one step for contact results to be populated.",
-                e,
-            )
+            logger.warning("Could not query ContactResults: %s", e)
             return np.zeros(3)
+        total = np.zeros(3)
+        if frame is not None:
+            for wrench in frame.by_kind(WrenchKind.CONTACT):
+                total += np.asarray(wrench.force_n)
+        return total
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""

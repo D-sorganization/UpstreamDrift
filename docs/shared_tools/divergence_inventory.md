@@ -63,6 +63,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
+| `force_overlay` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `golf_club` | 0 | 0 | 0 | 0 | 105 | 0 |
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
@@ -79,7 +80,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 19 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 263 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 266 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 55 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -132,8 +133,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `workspace` | 0 | 0 | 0 | 40 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1576** | **770** | **680** |
+| `workspace` | 0 | 0 | 0 | 41 | 0 | 0 |
+| **Total** | **406** | **274** | **123** | **1585** | **770** | **680** |
 
 ## Diverged Files by Package
 
