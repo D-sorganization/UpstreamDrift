@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from scripts import run_cross_engine_leaderboard as runner
+from src.motion_capture.capture_registry import require_capture
 from src.shared.python.motion_matching import leaderboard, provider
 
 
@@ -61,6 +62,7 @@ def test_valid_engines_equals_registry() -> None:
 @pytest.mark.unit
 def test_simscape_row_is_explicit_unavailable(tmp_path: Path) -> None:
     """simscape produces an explicit row with solver='unavailable: no python provider'."""
+    require_capture("club-workbook-wiffle")
     results_dir = tmp_path / "results"
     leaderboard_path = results_dir / "CROSS_ENGINE_LEADERBOARD.md"
 

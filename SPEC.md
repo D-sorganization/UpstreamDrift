@@ -7742,6 +7742,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
 | 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
 | 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
 | 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
@@ -9695,3 +9696,12 @@ Establishes the independent qualification service for candidate tour baseline pa
 - **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
+
+
+### Capture Registry Comparison Integration - #11172
+
+Accepted-main records and ledger metadata are reconciled while preserving all 133 receipt rows. Club endpoint lookup is shared between angular-speed and wrist metrics with identical fallback behavior. Focused validation: 190 passed, 15 private-workbook skips; Ruff and the full DRY gate pass. Protected CI and physical matching acceptance remain separate.
+
+The 14 new per-capture leaderboard contracts are explicitly unit tests; selected execution and the full suite-marker ratchet pass without changing baselines.
+
+Shared-tools divergence inventory is regenerated for all five new swing_comparison source paths; ten inventory checks and current-tree freshness pass.
