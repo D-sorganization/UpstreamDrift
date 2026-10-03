@@ -64,8 +64,15 @@ class CameraProjection:
         ) or not np.isclose(np.linalg.det(self.rotation), 1.0):
             raise ValueError("Camera rotation must be proper orthonormal")
 
+    def camera_points(self, points: np.ndarray) -> np.ndarray:
+        """Return finite camera-space points without projecting or clipping."""
+        points = np.asarray(points, dtype=float)
+        if points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all():
+            raise ValueError("Camera points must be finite (N,3)")
+        return points @ self.rotation.T + self.translation
+
     def _depth(self, points: np.ndarray) -> None:
-        if not np.all((points @ self.rotation.T + self.translation)[:, 2] > 1e-8):
+        if not np.all(self.camera_points(points)[:, 2] > 1e-8):
             raise ValueError("Model markers must be in front of the supplied camera")
 
     def project(self, points: np.ndarray) -> np.ndarray:

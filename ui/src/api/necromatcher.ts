@@ -53,8 +53,10 @@ export interface VideoExportRun extends ResearchRun {
   execution_started: boolean; execution_verified: boolean;
   artifact_state?: 'verified_stat_baseline' | 'changed_or_unverified';
   producer_source_commit?: string | null;
+  shape_overlay?: {opacity: number};
 }
-export const submitVideoExport = (fit: string, options?: {shaft_evidence: Record<string, unknown>}) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST', ...(options ? {body: JSON.stringify(options)} : {})});
+export type VideoOverlayOptions = {shaft_evidence?: Record<string, unknown>; shape_overlay?: {opacity: number}};
+export const submitVideoExport = (fit: string, options?: VideoOverlayOptions) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST', ...(options ? {body: JSON.stringify(options)} : {})});
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;

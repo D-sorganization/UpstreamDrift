@@ -5,8 +5,46 @@ import threading
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
-
 import pytest
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_native_shape_control_captures_optional_typed_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, enabled: bool
+) -> None:
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
+
+    def submit(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        calls.append((args, kwargs))
+        return {}
+
+    dialog = VideoExportDialog(
+        "fit", SimpleNamespace(submit=submit), library_root=tmp_path
+    )
+    targets: list[Any] = []
+    dialog._work = lambda operation, target: targets.append(target)
+    try:
+        assert not dialog.shape_opacity.isEnabled()
+        dialog.shape_enabled.setChecked(enabled)
+        dialog.shape_opacity.setValue(0.6)
+        assert dialog.shape_opacity.isEnabled() == enabled
+        dialog._start()
+        dialog.shape_opacity.setValue(0.9)
+        targets[0]()
+        assert calls[0][0] == ("fit",)
+        if enabled:
+            assert calls[0][1]["shape_overlay"].to_record() == {"opacity": 0.6}
+        else:
+            assert calls[0][1] == {}
+        app.processEvents()
+    finally:
+        dialog.cleanup()
+
 
 pytestmark = pytest.mark.unit
 

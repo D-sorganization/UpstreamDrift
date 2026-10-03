@@ -14,7 +14,7 @@ from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_video import export_fit_video
-from .necromatcher_video_jobs import video_shaft_evidence
+from .necromatcher_video_jobs import video_shaft_evidence, video_shape_options
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,12 @@ def execute(request_path: Path) -> dict[str, Any]:
             raise ValueError("Video parent differs from launch")
     destination = request_path.parent / "overlay"
     evidence = video_shaft_evidence(library, fit, request)
-    additional = {"shaft_evidence": evidence} if evidence is not None else {}
+    additional: dict[str, Any] = (
+        {"shaft_evidence": evidence} if evidence is not None else {}
+    )
+    shape = video_shape_options(request)
+    if shape is not None:
+        additional["shape_overlay"] = shape
     export_fit_video(
         library,
         request["source_fit_id"],

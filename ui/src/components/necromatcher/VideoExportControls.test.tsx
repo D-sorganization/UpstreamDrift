@@ -6,6 +6,34 @@ const api = vi.hoisted(() => ({submitVideoExport: vi.fn(), fetchVideoExport: vi.
 vi.mock('@/api/necromatcher', () => api);
 const run = (values = {}) => ({run_id:'export-1',source_fit_id:'fit-1',status:'running',acceptance:'partial',qualification:'monocular_research_hypothesis',blockers:[],message:'Encoding',fraction:null,control_available:true,execution_started:true,execution_verified:false,download_available:false,...values});
 beforeEach(() => {api.submitVideoExport.mockReset(); api.fetchVideoExport.mockReset(); api.cancelVideoExport.mockReset();});
+it('opts into a translucent model proxy and resets options for another fit', async () => {
+  api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
+  const view = render(<VideoExportControls fit="fit-1" />);
+  const user = userEvent.setup();
+  expect(screen.getByLabelText('Model Proxy Opacity')).toBeDisabled();
+  await user.click(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'}));
+  await user.clear(screen.getByLabelText('Model Proxy Opacity'));
+  await user.type(screen.getByLabelText('Model Proxy Opacity'), '0.6');
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenCalledWith('fit-1', {shape_overlay: {opacity: 0.6}});
+  expect(screen.getByText(/Model Proxy Retains the Skeleton/)).toBeInTheDocument();
+  view.rerender(<VideoExportControls fit="fit-2" />);
+  expect(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'})).not.toBeChecked();
+  await user.click(screen.getByRole('button', {name: 'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenLastCalledWith('fit-2');
+});
+it('blocks malformed opacity before submitting and displays recalled proxy options', async () => {
+  api.fetchVideoExport.mockResolvedValue(run({status: 'succeeded', acceptance: 'rejected', shape_overlay: {opacity: 0.4}}));
+  render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
+  expect(await screen.findByText(/Stored Model Proxy Opacity/)).toHaveTextContent('0.4');
+  const user = userEvent.setup();
+  await user.click(screen.getByRole('checkbox', {name: 'Show Translucent Model Proxy'}));
+  await user.clear(screen.getByLabelText('Model Proxy Opacity'));
+  expect(screen.getByRole('button', {name: 'Export Research Overlay'})).toBeDisabled();
+  await user.type(screen.getByLabelText('Model Proxy Opacity'), '1.2');
+  expect(screen.getByRole('button', {name: 'Export Research Overlay'})).toBeDisabled();
+  expect(api.submitVideoExport).not.toHaveBeenCalled();
+});
 it('opts into reviewed shaft lines and clears the record for a different source', async () => {
   api.submitVideoExport.mockResolvedValue(run({status: 'failed', acceptance: 'rejected'}));
   const view = render(<VideoExportControls fit="fit-1" />);

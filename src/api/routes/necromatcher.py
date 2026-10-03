@@ -32,6 +32,7 @@ from src.shared.python.motion_matching.historical_fit import (
 from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableError
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 
 
 @asynccontextmanager
@@ -134,6 +135,7 @@ class RefitRequest(BaseModel):
 class VideoExportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
     shaft_evidence: dict[str, Any] | None = None
+    shape_overlay: dict[str, Any] | None = None
 
 
 class IdentityRequest(BaseModel):
@@ -223,10 +225,25 @@ def submit_video_export(
     """Queue a source-bound video review without accepting a host output path."""
     with _errors():
         try:
-            if request is None or request.shaft_evidence is None:
+            if request is None:
                 return exports.submit(fit_id)
-            evidence = ShaftAxisEvidence.from_record(request.shaft_evidence)
-            return exports.submit(fit_id, evidence)
+            evidence = (
+                ShaftAxisEvidence.from_record(request.shaft_evidence)
+                if request.shaft_evidence is not None
+                else None
+            )
+            options: dict[str, Any] = (
+                {
+                    "shape_overlay": ShapeOverlayOptions.from_record(
+                        request.shape_overlay
+                    )
+                }
+                if request.shape_overlay is not None
+                else {}
+            )
+            if evidence is None:
+                return exports.submit(fit_id, **options)
+            return exports.submit(fit_id, evidence, **options)
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 

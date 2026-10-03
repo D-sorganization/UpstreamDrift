@@ -11,6 +11,8 @@ from typing import Any
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QComboBox,
+    QCheckBox,
+    QDoubleSpinBox,
     QFileDialog,
     QLabel,
     QPushButton,
@@ -19,6 +21,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import compute_file_sha256
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from src.tools.necromatcher.refit_dialog import (
     ReviewedShaftDialog,
     read_reviewed_shaft_evidence,
@@ -78,6 +81,7 @@ class VideoExportDialog(ReviewedShaftDialog):
         self.stored_runs.addItem("Select a Stored Overlay Export", None)
         layout.addWidget(self.stored_runs)
         self._build_shaft_inputs(layout)
+        self._build_shape_inputs(layout)
         self.start = QPushButton("Render Original-Footage Overlay")
         self.cancel = QPushButton("Cancel Export")
         self.save = QPushButton("Save Checked ZIP")
@@ -98,6 +102,28 @@ class VideoExportDialog(ReviewedShaftDialog):
         self._timer.timeout.connect(self._poll)
         self.stored_runs.currentIndexChanged.connect(self._recall)
         self._load_stored_runs()
+
+    def _build_shape_inputs(self, layout: QVBoxLayout) -> None:
+        self.shape_enabled = QCheckBox("Show Translucent Model Proxy")
+        self.shape_opacity = QDoubleSpinBox()
+        self.shape_opacity.setAccessibleName("Model Proxy Opacity")
+        self.shape_opacity.setRange(0.0, 1.0)
+        self.shape_opacity.setSingleStep(0.05)
+        self.shape_opacity.setValue(0.35)
+        self.shape_opacity.setEnabled(False)
+        self.shape_enabled.toggled.connect(self.shape_opacity.setEnabled)
+        layout.addWidget(self.shape_enabled)
+        layout.addWidget(self.shape_opacity)
+        note = QLabel(
+            "Model Proxy Retains the Skeleton; Authored Geometry Is Uncalibrated. "
+            "Historical Anatomy and Original Scene Occlusion Remain Unknown."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+    def _shape_controls(self, blocked: bool) -> None:
+        self.shape_enabled.setEnabled(not blocked)
+        self.shape_opacity.setEnabled(not blocked and self.shape_enabled.isChecked())
 
     def _load_stored_runs(self) -> None:
         """List canonical fit-scoped persisted receipts without submitting work."""
@@ -162,6 +188,7 @@ class VideoExportDialog(ReviewedShaftDialog):
         self.save.setEnabled(False)
         self.stored_runs.setEnabled(False)
         self._shaft_controls(True)
+        self._shape_controls(True)
         self._worker.start()
         self._timer.start()
 
@@ -172,13 +199,19 @@ class VideoExportDialog(ReviewedShaftDialog):
             self.status.setText("Remove evidence selected for another source fit")
             return
         source, path = self.source_fit_id, self._shaft_path
+        shape = (
+            ShapeOverlayOptions(self.shape_opacity.value())
+            if self.shape_enabled.isChecked()
+            else None
+        )
 
         def submit() -> dict[str, Any]:
             evidence = read_reviewed_shaft_evidence(path)
+            options = {"shape_overlay": shape} if shape is not None else {}
             return (
-                self.session.submit(source)
+                self.session.submit(source, **options)
                 if evidence is None
-                else self.session.submit(source, evidence)
+                else self.session.submit(source, evidence, **options)
             )
 
         self.run = None
@@ -203,6 +236,7 @@ class VideoExportDialog(ReviewedShaftDialog):
                 self.cancel.setEnabled(False)
                 self.start.setEnabled(True)
                 self._shaft_controls(False)
+                self._shape_controls(False)
                 return
             if self._operation == "save":
                 self._render()
@@ -218,6 +252,7 @@ class VideoExportDialog(ReviewedShaftDialog):
                 self.status.setText(str(exc))
                 self.start.setEnabled(True)
                 self._shaft_controls(False)
+                self._shape_controls(False)
                 self.cancel.setEnabled(False)
                 self._timer.stop()
                 return
@@ -262,6 +297,9 @@ class VideoExportDialog(ReviewedShaftDialog):
             note += (
                 f"\nProducer commit: {producer}; current source equality unverified."
             )
+        if self.run.get("shape_overlay") is not None:
+            shape = ShapeOverlayOptions.from_record(self.run["shape_overlay"])
+            note += f"\nStored Model Proxy Opacity: {shape.opacity}; Skeleton Retained; Uncalibrated."
         self.status.setText(
             f"{self.run['status']} · {self.run['acceptance']} · {self.run['qualification']}\n{self.run['message']}\n"
             + "\n".join(self.run["blockers"])
@@ -271,6 +309,8 @@ class VideoExportDialog(ReviewedShaftDialog):
         self.start.setEnabled(not active)
         if hasattr(self, "shaft_import"):
             self._shaft_controls(active)
+        if hasattr(self, "shape_enabled"):
+            self._shape_controls(active)
         self.cancel.setEnabled(active and bool(self.run["control_available"]))
         self.save.setText(
             "Verify Stored Overlay Package" if stored else "Save Checked ZIP"

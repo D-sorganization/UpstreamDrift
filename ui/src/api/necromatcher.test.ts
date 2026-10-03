@@ -8,6 +8,11 @@ it('submits a bodyless export for an encoded fit identity', async () => {
   await submitVideoExport('fit/one');
   expect(request).toHaveBeenCalledExactlyOnceWith('/api/v1/necromatcher/fits/fit%2Fone/video-exports', {method:'POST'});
 });
+it('transports optional shape and shaft display records together', async () => {
+  const options = {shape_overlay: {opacity: 0.6}, shaft_evidence: {schema: 'reviewed'}};
+  await submitVideoExport('fit/one', options);
+  expect(request).toHaveBeenCalledExactlyOnceWith('/api/v1/necromatcher/fits/fit%2Fone/video-exports', {method:'POST', body: JSON.stringify(options)});
+});
 it('polls and cancels only an encoded run identity', async () => {
   await fetchVideoExport('run/one'); await cancelVideoExport('run/one');
   expect(request).toHaveBeenNthCalledWith(1, '/api/v1/necromatcher/video-exports/run%2Fone');

@@ -26,6 +26,8 @@ from src.shared.python.motion_matching.historical_fit import (
     ShaftAxisResidualTerm,
     resolve_authored_shaft_axis,
 )
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from .necromatcher_shape_overlay import NativeShapeOverlay
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
@@ -59,6 +61,14 @@ class ShaftVideoOverlay:
             "legend": "Magenta: observed interior fragment; cyan: infinite authored axis",
         }
         return cast(dict[str, Any], json.loads(json.dumps(record, allow_nan=False)))
+
+
+@dataclass(frozen=True)
+class VideoOverlayLayers:
+    """Optional display layers share one existing binding and saved camera."""
+
+    shaft: ShaftVideoOverlay | None = None
+    shapes: NativeShapeOverlay | None = None
 
 
 def prepare_shaft_overlay(
@@ -360,6 +370,7 @@ def _render(
     index: int,
     anatomy: dict[str, Any],
     shaft: ShaftVideoOverlay | None = None,
+    shapes: NativeShapeOverlay | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     import cv2
 
@@ -385,6 +396,8 @@ def _render(
         if anatomy
         else {}
     )
+    if shapes is not None:
+        image = shapes.composite(binding, pose, image)
     _draw_rigid_skeleton(binding, pose, image)
     for segment in default_body_segments(tuple(anatomical)):
         _line(image, anatomical[segment.a], anatomical[segment.b], _NATIVE, 2)
@@ -399,6 +412,10 @@ def _render(
     shaft_record, shaft_lines = _shaft_frame(
         binding, shaft, index, pose, image, original_png
     )
+    if shapes is not None and shapes.options.opacity > 0:
+        shaft_lines.append(
+            f"Model visual proxies | Opacity {shapes.options.opacity:.2f} | Anatomy unqualified"
+        )
     identity = row["frame"]
     pts = Fraction(
         identity["pts_ticks"] * identity["timebase_numerator"],
@@ -493,6 +510,7 @@ def export_fit_video(
     *,
     selected_frames: Sequence[int] = (),
     shaft_evidence: ShaftAxisEvidence | None = None,
+    shape_overlay: ShapeOverlayOptions | None = None,
 ) -> dict[str, Any]:
     """Publish a new MP4/PNG/manifest directory only after complete codec verification.
 
@@ -500,6 +518,8 @@ def export_fit_video(
     PNG indices inside that fit. Postcondition: source bytes remain untouched and
     output hashes, frame identities and unqualified scientific status are recorded.
     """
+    if shape_overlay is not None and not isinstance(shape_overlay, ShapeOverlayOptions):
+        raise TypeError("Shape export requires typed options")
     destination = Path(destination)
     if destination.exists():
         raise FileExistsError(destination)
@@ -512,6 +532,11 @@ def export_fit_video(
     shaft = (
         prepare_shaft_overlay(library, binding, shaft_evidence)
         if shaft_evidence is not None
+        else None
+    )
+    shapes = (
+        NativeShapeOverlay.prepare(binding, shape_overlay)
+        if shape_overlay is not None
         else None
     )
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -528,7 +553,7 @@ def export_fit_video(
             set(selected_frames),
             anatomy,
             missing,
-            shaft,
+            VideoOverlayLayers(shaft, shapes),
         )
         # Existing library authority rechecks parent and fit hashes before publication.
         if library.load_asset(fit_id).metadata["hash"] != binding.fit_hash:
@@ -581,9 +606,12 @@ def _write_export(
     selected: set[int],
     anatomy: dict[str, Any],
     missing: list[str],
-    shaft: ShaftVideoOverlay | None = None,
+    overlays: VideoOverlayLayers | None = None,
 ) -> dict[str, Any]:
     import cv2
+
+    shaft = overlays.shaft if overlays else None
+    shapes = overlays.shapes if overlays else None
 
     records, pngs = [], []
     with CaptureReview(library, binding.fit["capture_id"]) as review:
@@ -599,7 +627,7 @@ def _write_export(
             if not writer.isOpened():
                 raise ValueError("MP4 encoder could not open")
             for index in binding.fit["frame_indices"]:
-                image, record = _render(binding, review, index, anatomy, shaft)
+                image, record = _render(binding, review, index, anatomy, shaft, shapes)
                 writer.write(image)
                 records.append(record)
                 if index in selected:
@@ -648,6 +676,11 @@ def _write_export(
             "bytes": (staging / "overlay.mp4").stat().st_size,
         },
     }
+    if shapes is not None:
+        manifest["shape_overlay"] = shapes.provenance
+        manifest["club_representation"] = (
+            "declared attachment points and model-conditioned visual proxies; not measured shaft anatomy"
+        )
     if shaft is not None:
         manifest["shaft_overlay"] = shaft.to_record()
         manifest["club_representation"] = (

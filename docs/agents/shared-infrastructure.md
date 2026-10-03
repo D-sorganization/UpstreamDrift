@@ -148,6 +148,14 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `urdf_bridge.shape_to_urdf_visual` — re-use the same shape vocabulary
   as URDF visual elements; a custom mesh imported in the C3D Viewer is
   re-usable as a URDF visual link without re-modelling.
+- `renderers.projective_renderer`: `SurfaceMesh`, `SurfaceLayer`, `render_surface_layer` and `composite_surface` project shared shape triangles
+  through an explicitly supplied saved camera, with near-plane clipping,
+  perspective-correct nearest depth and checked opacity. Use this for
+  source-footage registration rather than a free-view camera screenshot.
+- `ShapeOverlayOptions` validates finite opacity in [0,1]; `shapes.BoxShape`
+  joins the existing capsule/ellipsoid primitives. `visual_skeleton` remains
+  the shared native-definition visual provider. Derived surfaces are model
+  proxies where authored visual solids are absent, not measured anatomy.
 - See `docs/user_guide/body_part_viz/` for end-user workflow guides
   and `docs/api/body_part_viz.md` for the full API surface.
 

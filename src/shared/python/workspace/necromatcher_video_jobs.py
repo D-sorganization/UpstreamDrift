@@ -46,6 +46,8 @@ from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_shaft_evidence import bind_fit_shaft_evidence
 from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from .necromatcher_shape_overlay import shape_overlay_provenance
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -165,7 +167,32 @@ def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str,
         ):
             raise ValueError("Video parent bytes changed")
     video_shaft_evidence(library, fit, request)
+    video_shape_options(request)
     return fit
+
+
+def video_shape_options(request: dict[str, Any]) -> ShapeOverlayOptions | None:
+    """Validate persisted options again at worker and publication boundaries."""
+    if "shape_overlay" not in request:
+        return None
+    return ShapeOverlayOptions.from_record(request["shape_overlay"])
+
+
+def _check_shape_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:
+    options = video_shape_options(request)
+    if options is None:
+        if "shape_overlay" in manifest:
+            raise ValueError("Disabled shape overlay cannot include geometry")
+        return
+    library = NecromatcherLibrary(request["library_root"])
+    fit = library.load_fit(request["source_fit_id"])
+    expected = shape_overlay_provenance(
+        fit["provenance"]["native_definition"], fit["model_hash"], options
+    )
+    if manifest.get("shape_overlay") != expected:
+        raise ValueError(
+            "Overlay shape options or model provenance differ from request"
+        )
 
 
 def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[Path]]:
@@ -176,6 +203,7 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     manifest = _read(manifest_path)
     if manifest.get("schema") != "necromatcher/source-overlay-video/1":
         raise ValueError("Unsupported overlay manifest")
+    _check_shape_manifest(manifest, request)
     if "shaft_overlay" in request:
         shaft = manifest.get("shaft_overlay")
         if not isinstance(shaft, dict) or any(
@@ -331,9 +359,22 @@ class NativeVideoSession:
         return root
 
     def submit(
-        self, fit_id: str, shaft_evidence: ShaftAxisEvidence | None = None
+        self,
+        fit_id: str,
+        shaft_evidence: ShaftAxisEvidence | None = None,
+        *,
+        shape_overlay: ShapeOverlayOptions | None = None,
     ) -> dict[str, Any]:
         """Schedule a new overlay with owned paths and first/middle/last stills."""
+        if shape_overlay is not None and not isinstance(
+            shape_overlay, ShapeOverlayOptions
+        ):
+            raise TypeError("Shape overlay must be ShapeOverlayOptions or None")
+        shape = (
+            ShapeOverlayOptions.from_record(shape_overlay.to_record())
+            if shape_overlay is not None
+            else None
+        )
         with self._lock:
             if self._closed:
                 raise RuntimeError("Video session is closed")
@@ -377,6 +418,14 @@ class NativeVideoSession:
                     "selected_frames": request["selected_frames"],
                     "shaft_overlay": request["shaft_overlay"],
                 }
+            if shape is not None:
+                shape_overlay_provenance(
+                    fit["provenance"]["native_definition"], fit["model_hash"], shape
+                )
+                request["shape_overlay"] = shape.to_record()
+                if not isinstance(hash_options, dict):
+                    hash_options = {"selected_frames": hash_options}
+                hash_options["shape_overlay"] = request["shape_overlay"]
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -562,7 +611,7 @@ class NativeVideoSession:
         message = result.message if result else "Source-bound research overlay export"
         if handle is None and status in {JobStatus.PENDING, JobStatus.RUNNING}:
             message = "Execution state unverified; this host has no live control handle"
-        return {
+        view = {
             "run_id": run_id,
             "source_fit_id": request["source_fit_id"],
             "status": status.value,
@@ -590,6 +639,11 @@ class NativeVideoSession:
                 "source_commit"
             ),
         }
+        if "shape_overlay" in request:
+            shape = video_shape_options(request)
+            assert shape is not None
+            view["shape_overlay"] = shape.to_record()
+        return view
 
     def view(self, run_id: str) -> dict[str, Any]:
         with self._lock:

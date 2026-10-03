@@ -5,6 +5,7 @@ Concrete :class:`~body_part_viz.contracts.BodyPartShape` implementations.
 
 from __future__ import annotations
 
+from .box_shape import BoxShape
 from .capsule_shape import CapsuleShape
 from .composite_shape import CompositeShape
 from .cylinder_shape import CylinderShape
@@ -13,6 +14,7 @@ from .line_shape import LineShape
 from .mesh_shape import MeshShape
 
 __all__ = [
+    "BoxShape",
     "CapsuleShape",
     "CompositeShape",
     "CylinderShape",

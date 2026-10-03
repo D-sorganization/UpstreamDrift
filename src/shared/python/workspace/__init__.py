@@ -53,6 +53,8 @@ from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_constraints import repair_native_motion
 from .necromatcher_video import export_fit_video
+from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from .necromatcher_shape_overlay import shape_overlay_provenance
 from .necromatcher_video_jobs import NativeVideoSession
 from .necromatcher_placement import author_ground_placement
 from .necromatcher_replay import ReplayOptions, replay_authored_profile
@@ -198,6 +200,8 @@ __all__ = [
     "author_ground_placement",
     "repair_native_motion",
     "export_fit_video",
+    "ShapeOverlayOptions",
+    "shape_overlay_provenance",
     "NativeVideoSession",
     "ReplayOptions",
     "replay_authored_profile",

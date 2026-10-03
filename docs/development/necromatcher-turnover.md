@@ -4,6 +4,10 @@
 
 Owner priority: integrate historical footage matching as **Necromatcher**, with player tiles, persistent swing/model/control versions and downstream simulation/impact/analysis handoffs. Epic #11232 supersedes the narrower capture-only delivery scope. Tiger #11226 and Hogan #11229 remain open until reconstruction and real native replay qualify.
 
+## Camera, Morphology and Shutter Qualification
+
+Follow [Camera, Morphology, Shutter and Human Motion Qualification](necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original960 frames are verified; no new native diagnostic or optimizer has run. The nine-page source supplement and77-file source audit package are verified on ControlTower Desktop. Shape overlays under#11356 are under implementation/review; actual shaded exports remain pending.
+
 ## Shared Authorities
 
 - `SessionProjectStore`: durable player subjects, swing sessions and asset datasets; reused rather than creating a parallel result store.

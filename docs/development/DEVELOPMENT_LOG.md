@@ -47,8 +47,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); follow-up pending
+- **Issue:** #11235; parent #11232; explicit coordinate seeds #11281; probe/generalization trials #11284; qualification child #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/motion_matching/historical_fit/**`, `src/shared/python/workspace/necromatcher_*`, `src/engines/physics_engines/mujoco/python/**`, `src/shared/python/motion_matching/historical_fit/shaft_*`, `src/shared/python/workspace/necromatcher_shaft_evidence.py`
 - **Started:** 2026-10-01
@@ -58,7 +58,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Slice B verification:** Committed8989 generic additional-image residuals preserve ImageFitInputs and independent body/geometry timelines. Separate sparse infinite-axis residuals and raw perpendicular RMS/unoriented angles passed112 combined and33 independent cases. No historical shaft fit occurred at that checkpoint.
 - **Slice C verification:** Committed8989 canonical capture/camera/PNG/full-clock/native-axis rebind returns one reusable native binding. Tests passed96 combined and28 independent cases; compilation-count compatibility is retained.
 - **Slice D verification:** Current reviewed queue/worker/persistence source passed102 combined and19 independent cases; strict receipt parsing rejects bool/float counts before native/source I/O. Native evidence controls passed32 offscreen tests independently; web30 plus type checking/ESLint passed. Stable original-video/job/API integration passed41; renderer20/80 combined and20 independent passed. Ruff/format and pinned mypy passed. [Shaft Trial Procedures](necromatcher-shaft-trials.md) records exact freezes and the independently observed unchanged five-second test deadline overrun, followed by successful focused rerun; no speculative cause is asserted.
-- **Next step:** Integrate the source-bound continuation in a separate follow-up PR; retain all historical receipts and failed shaft generalization. Head observations/errors and physical endpoints remain unmeasured; camera/anatomy/physical timing, continuous dynamics and impact acceptance remain open.
+- **Next step:** Integrate the source-bound continuation in a separate follow-up PR; retain all historical receipts and failed shaft generalization. Head observations/errors and physical endpoints remain unmeasured; camera/anatomy/physical timing, continuous dynamics and impact acceptance remain open. Use the corrected preparation-only R,t geometry protocol before forearm/camera/morphology trials; no new native diagnostic has run. See necromatcher-camera-morphology-shutter-review.md.
 
 ### DL-#11317 · Sanitized Historical Research Provider
 
@@ -77,27 +77,27 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_review
 - **Owner:** codex
-- **Issue:** #11246; parent #11232; native stored-run recall #11282
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); follow-up pending
+- **Issue:** #11246; parent #11232; native stored-run recall #11282; translucent model-surface child #11356
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `src/shared/python/workspace/necromatcher_video*`, `src/tools/necromatcher/**`, `ui/src/components/necromatcher/**`
 - **Started:** 2026-10-01
 - **Last verified:** 2026-10-03 — Producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` exported all four original-footage shaft displays; independent receipt `f60d277ce81e7d1d3dc2ddace626a1bacd9bd3a83708375ffefe1e7dcdd39dd0` verifies 1,920 source-sized frames, original PNG/PTS bindings, projections/metrics, immutable source/library brackets and twelve selected overlays/six originals. V1/V2 union is display-only; all-frame visual and manual acceptance remain false. Exact manifest PTS are distinct from Tiger encoder rounding (maximum 6.9736403 microseconds relative drift); Hogan 30/1 is exact. Earlier verification retained: 2026-10-02 — V15 selected Tiger variant export run `97b1b96fea0c4a2da403004a4985f390` at producer `6654881b0788c77620a0afb8a9a6763f3ee1ccb9` verifies all 210 original 1280x720 frames, original PNG/PTS bindings, ZIP CRC/member hashes and immutable source/runtime/audit brackets. Actual stills 0/105/209 were separately viewed; club-seed disagreement, follow-through upper-body residuals and cropped feet remain. Combined still-review SHA-256 `ca46a15129d238c06391f6ee1b05c0cfa6bc14cd6be95075d738841798d4b369`; the execution journal retains visual_review_completed=false. All-frame visual and manual acceptance remain false. Earlier V13/V12/native stored-run review receipts remain preserved; canonical sharing-race repair and final expanded source regression passed 476 cases.
 - **Summary:** Shared owned jobs export source-clock native joint-tree wireframes, PNGs and verified ZIP packages through native and web controls. Export success remains separate from scientific acceptance. [Turnover](necromatcher-turnover.md).
-- **Next step:** Retain guarded recall and distinct machine/selected-image/scientific outcomes. Infinite authored axes and interior fragments do not establish measured head/physical shaft endpoints or validated historical club motion.
+- **Next step:** Retain guarded recall and distinct machine/selected-image/scientific outcomes. Infinite authored axes and interior fragments do not establish measured head/physical shaft endpoints or validated historical club motion. Complete independent surface-renderer review and clean published producer before actual translucent exports; disabled rendering preserves legacy behavior and displayed surfaces remain model proxies.
 
 ### DL-#11247 · Necromatcher Reproducible Methods Report
 
 - **State:** in_progress
 - **Owner:** codex
-- **Issue:** #11247; parent #11232
-- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); follow-up pending
+- **Issue:** #11247; parent #11232; source audit #11357
+- **PR:** [#11240](https://github.com/D-sorganization/UpstreamDrift/pull/11240) (merged); [#11359](https://github.com/D-sorganization/UpstreamDrift/pull/11359) (open)
 - **Branch:** `feat/necromatcher-native-fit-11235`
 - **Paths:** `docs/development/necromatcher-methods.tex`, `docs/development/historical_capture/*summary.json`, `docs/development/necromatcher-turnover.md`
 - **Started:** 2026-10-01
 - **Last verified:** 2026-10-03 at `b8b280ce2f5ed706d1778fd809250cf18eac1fb7` — Published 74-page actual matched-shaft report: PDF `36319afeb6ec6132f7684387d04c1b8cde8d2854a38cf718354325334e4fdffd`, source `41c61a755f72a3b8928c5938f545e0a8a32aa19e4f84437ffc5ac07c92d7b6e9`, independent review `8b4fb44f2b0cd552c7a443f5e90ada9d95f624ff3711d4514f3f70e6708db6ee`, root review `6fe30a6978fcc61fbb3192df6641b3da93515155e21bec6cc3852ef832854c5c`. Three installer-disabled passes completed without actual warnings/overfull/unresolved references; all page layouts reviewed. Desktop manifest 1,504 artifacts `49868b903a729a147d188b03a0fc5ecf3f68e4973345f08b0191d79de2b85228`; exact prior 66 publication and1,260 index/README preserved under Report/handoff-shaft-66-page-publication. Earlier verification retained: 2026-10-02 — Expanded 66-page latest-handoff/sparse-shaft report compiled in three installer-disabled MiKTeX passes and was independently reviewed on all pages, with full-size contents/new chapter/figures/source-map checks. No overfull boxes or unresolved references; 17 contained table-wrapping warnings were visually reviewed. Published PDF SHA-256 `f31f1fbd6c0917254b358bae3852e42de8e5d898b1f60d47b3b08c63427f3228`; exact source `1702e35d4a04b95d0c5de13b04db34325cfef7b8e2ad47f50ea47da45354991c`; independent review `0c7a85f91018a01d117e0d7b0e41dbec61087f6c52019b780ade7bbca4e27481`; separate root review `9de379e2b3a32089bff17fd1086eec9430f0f953240717bfa6093bf02e57446d`. Refreshed Desktop index verifies 1,216 retained artifacts, SHA-256 `bd89c17e27de7b7849986f6e00d36debcd0e3c988ab8530b687a0f92ff1a6e9d`. Exact prior 60-page publication, 49-page edition and historical snapshots remain preserved. No scientific acceptance or physical motion claim; built-in compiler infrastructure criterion remains open.
 - **Summary:** Polished methods report records equations, provenance, assumptions, actual interim failures and reproducibility procedures. Built-in compiler infrastructure remains unavailable, so that issue criterion remains open. [Turnover](necromatcher-turnover.md).
-- **Next step:** Preserve publication and evidence snapshots; document subsequent work only after independent execution. Built-in compiler infrastructure and scientific/manual release criteria remain open.
+- **Next step:** Preserve publication and evidence snapshots; document subsequent work only after independent execution. Built-in compiler infrastructure and scientific/manual release criteria remain open. Nine-page source-audit supplement compiled and all pages reviewed; 77 source-audit files are verified on ControlTower separately from the unchanged 74-page/1,504-artifact publication.
 
 ### DL-#11234 — Necromatcher Historical Player Workspace
 
