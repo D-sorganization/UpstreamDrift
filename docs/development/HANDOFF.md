@@ -35,7 +35,7 @@
 
 # Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11310 (`Closes #11310`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)
 - Governing issue: #11310 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-25] Force and torque arrow layer in the reference-comparison and capture-rig video compositors (preview + export).
 - Completed:
@@ -63,7 +63,7 @@
     - `MotionAppearanceControls` (`reference_appearance.py`): added "Show Forces", "Show Torques", "Show Legend" checkboxes and "Force Scale" spinbox, persisting into `ComparisonLayer`.
   - Feature parity & documentation:
     - Updated `src/config/feature_parity.json` for `tools.capture_rig` and regenerated `docs/development/feature_parity_matrix.md`.
-    - Added row to `SPEC.md` Change Log table (#11310).
+    - Added row to `SPEC.md` Change Log table (#11390).
 - Validation:
   - Unit and integration tests all passing:
     - `tests/motion_capture/reconstruct/model/test_kinetics_series.py` (2 passed)
@@ -118,6 +118,24 @@
 - Next steps: Merge PR; unblocks FTO-25 (#11310) and FTO-26 (#11311).
 
 ---
+
+# MuJoCo GUI Force and Torque Overlays Through Shared Renderers - #11295 (FTO-10)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11295-gui`; commit SELF; PR: see `Closes #11295` / `Refs #11285`; DL entry `DL-#11285`
+- Completed: `sim_rendering_mixin.py` now samples `engine.get_force_torque_frame()` once per frame, maps the toggles and scale sliders to glyphs through the new headless `force_glyph_overlay.py`, and draws them with `add_glyphs_to_scene` (native/offscreen) and `MuJoCoMeshcatAdapter.draw_glyphs` (`MeshcatGlyphRenderer`). Removed `_add_force_torque_overlays`, `_draw_torque_vectors`, `_draw_force_vectors` and the MeshCat `draw_vectors`. Legend line goes to the status bar through `force_legend_changed`. The contact checkbox is labelled "MuJoCo native contact debug". `feature_parity.json` gains `mujoco.force_overlays`.
+- Decisions: induced and counterfactual vectors are joint accelerations, not wrenches, so they stay on their own screen-space/MeshCat path with only the slice fixed to `xaxis[j]`. `_world_to_screen` is kept (still used by manipulation, swing-plane, frame/COM and live-kinematics overlays). `draw_arrow_line` is kept (swing-plane normal, not a force). `PyQt6.QtGui` is imported lazily in `_render_once` so the glyph path is importable headless.
+- Limits: before/after offscreen screenshots were not produced (no EGL here); Qt widget wiring (status bar connection, tab label) is untested because PyQt6 is not installed here.
+- Validation: `pytest -o addopts="" tests/unit/engines/physics_engines/mujoco/mujoco_humanoid_golf/test_force_glyph_gui.py` passes (12); ruff and gates clean.
+- Next steps: attach offscreen screenshots on a GL-capable host; FTO-30 builds on this.
+
+# MuJoCo Reaction Labels and Parity Fixture Rod — #11346
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mjlabel`
+- Branch: `fix/mujoco-reaction-label-joint-name`; commit: SELF; PR: #11381 (open; `Refs #11346`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11346 (per-engine parity lanes, PR #11375); epic #11285
+- Completed: the first real run of the new MuJoCo parity lane failed two rows. `MujocoForceTorqueSource` labelled joint reactions by body name while Drake, Pinocchio and OpenSim use the joint name, and its own actuator label already uses the joint name. Reactions now use the first joint's name (the joint whose anchor is reported); a joint-less body keeps its body name. The parity MJCF pendulum had only an `<inertial>`, so MuJoCo's native axial source (rods only) returned nothing; a non-colliding capsule from the pivot to the COM fixes that without changing mass or inertia and without touching any tolerance.
+- Validation: `tests/unit/engines/mujoco/test_force_torque_source.py` and `tests/integration/cross_engine/test_force_overlay_parity.py` (RED before: label test and two `[mujoco]` rows; GREEN after; 18 passed with the mujoco/label/axial selection, `tests/integration/cross_engine` all pass). Unrelated local failures: PyQt6 GUI tests in `tests/unit/body_part_viz` (PyQt6 not installed in this venv) and one pre-existing `test_biomechanics` failure that also fails on main.
+- Next steps: after this lands, #11375 switches the mujoco lane evidence from the statics check to the `[mujoco]` hanging-pendulum row.
 
 # Per-Engine Force Overlay Parity Lanes — #11346
 

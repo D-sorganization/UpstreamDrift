@@ -269,7 +269,8 @@ def draw_legend_box(
     if qualification:
         lines.append((f"Note: {qualification}", (180, 220, 255)))
     for k in legend.kinds_present:
-        lines.append((k, _hex_to_bgr(FORCE_KIND_PALETTE.get(k, "#FFFFFF"))))
+        k_str = k.value if hasattr(k, "value") else str(k)
+        lines.append((k_str, _hex_to_bgr(FORCE_KIND_PALETTE.get(k_str, "#FFFFFF"))))
     if not lines:
         return
     bw, bh = max(260, int(round(340.0 * w / 1920.0))), dy * (len(lines) + 1)

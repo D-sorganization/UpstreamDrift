@@ -209,6 +209,29 @@ def _export_metadata(
     return metadata
 
 
+def _comparison_input_paths(
+    root: Path,
+    view: str,
+    source: Path,
+    original: Any,
+    asset: Asset,
+) -> set[Path]:
+    """Collect all input paths contributing to the exported comparison video."""
+    paths = {
+        source,
+        root / EDITS_FILE,
+        layer_path(root, view),
+        geometry_path(root),
+        root / "recordings.json",
+        root / "observations" / "observations.json",
+    }
+    if original.observations:
+        paths.add(original.observations)
+    if isinstance(asset, ReferenceVideo) or asset.source_path.exists():
+        paths.add(asset.source_path)
+    return paths
+
+
 def export_comparison_video(
     root: Path,
     view: str,
@@ -248,18 +271,7 @@ def export_comparison_video(
         raise ValueError(
             "A usable camera is required to export the visible motion reference"
         )
-    paths = {
-        source,
-        root / EDITS_FILE,
-        layer_path(root, view),
-        geometry_path(root),
-        root / "recordings.json",
-        root / "observations" / "observations.json",
-    }
-    if original.observations:
-        paths.add(original.observations)
-    if isinstance(asset, ReferenceVideo) or asset.source_path.exists():
-        paths.add(asset.source_path)
+    paths = _comparison_input_paths(root, view, source, original, asset)
     before = _input_hashes(paths, opts.cancelled)
     if asset.source_path in before and before[asset.source_path] != asset.source.sha256:
         raise ValueError("Reference source changed or is unavailable; import it again")

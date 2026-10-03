@@ -132,6 +132,16 @@
       "tiles": [],
       "notes": "Reached parity via #7449 (closed completed 2026-06-12). GET /analysis/plot-types enumerates AnalysisOrchestrator.PLOT_TYPES; GET /analysis/plot-data/{plot_type} returns PlotData JSON rendered by the web PlotsSection."
     },
+    "mujoco.force_overlays": {
+      "title": "MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat)",
+      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 11308,
+      "tiles": [],
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308)."
+    },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
       "pyqt": "src/shared/python/biomechanics/ztcf.py",
