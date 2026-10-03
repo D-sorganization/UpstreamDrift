@@ -74,22 +74,6 @@ class ForceLayer(ComparisonLayer):
     draw_joints: bool = False
     draw_club: bool = False
 
-    def __init__(
-        self,
-        series: Any = None,
-        style: Any = None,
-        opacity: float = 1.0,
-        visible: bool = True,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(
-            series=series,
-            style=style,
-            opacity=opacity,
-            visible=visible,
-            **kwargs,
-        )
-
 
 class ComparisonSession(BaseModel):
     """Saved comparison session linking a capture recording to an expert reference."""
