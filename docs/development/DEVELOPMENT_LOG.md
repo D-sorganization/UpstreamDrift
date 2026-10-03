@@ -65,15 +65,15 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#11400 · OpenCap to OpenSim Integration
 
 - **State:** in_review
-- **Owner:** local
-- **Issue:** #11400; children #11401–#11409 (this slice: #11409)
-- **PR:** #11409
-- **Branch:** `feat/opencap-import-11409`
-- **Paths:** `src/engines/physics_engines/opensim/python/opencap_import_action.py`, `src/engines/physics_engines/opensim/python/opensim_gui.py`, `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`, `src/api/routes/opencap.py`, `src/shared/python/motion_pipeline/sources/opencap_session.py`, `ui/src/components/opencap/OpenCapImportModal.tsx`, `src/config/feature_parity.json`, `docs/development/feature_parity_matrix.md`
+- **Owner:** antigravity
+- **Issue:** #11400; child #11407 (hosted download; follows #11401–#11403 landed in #11410 and #11409 landed in #11412)
+- **PR:** #11415
+- **Branch:** `feat/opencap-hosted-download-11407`
+- **Paths:** `src/shared/python/motion_pipeline/sources/opencap_download.py`, `tests/unit/motion_pipeline/sources/test_opencap_download.py`, `tests/architecture/test_opencap_boundary.py`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-03 at SELF — #11409 OpenCap session import action in PyQt6 and React/Tauri completed: 21 Python tests pass across PyQt6 UI, API routes, and motion pipeline sources; 5 Vitest tests pass in OpenCapImportModal; 39 feature parity tests pass; ruff lint/format clean; architecture and file size budgets verified.
-- **Summary:** OpenCap session import action added in PyQt6 desktop (`OpenCapImportAction`, `OpenCapImportDialog`) and React/Tauri web UI (`OpenCapImportModal`); inspects session trials, loads chosen trial via `load_opencap_session`, and hands scaled model and kinematics to OpenSim engine target.
-- **Next step:** Merge PR for #11409 and close issue.
+- **Last verified:** 2026-10-03 at SELF — Child 6 (#11407): implemented `download_opencap_session` with opt-in `OpenCapHostedSettings`, affirmative consent verification, session discovery, and full layout reconstruction matching `load_opencap_session`. 8 focused unit tests pass; zero network calls in default test lane; all OpenCap unit and boundary tests pass; refactored to comply with architecture budget and dynamic urllib semgrep rule.
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in with affirmative consent.
+- **Next step:** Review and merge PR #11415 for #11407; proceed with #11406.
 
 ### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
 
@@ -123,8 +123,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-10-03 at SELF — COV-2 (#11270): registered capture-O video sources, timing evidence validation (`VideoTimingEvidence`), variable frame rate rejection (`VariableFrameRateError`), swing candidate intervals (`SwingWindow`, `validate_swing_windows`), usability grading rubric (`grade_swing_window`, `SwingGradeResult`), capture registry `video` kind schema extension, and catalog privacy invariants; all focused tests pass.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
-
-
 
 - **PR:** #11413 (Closes #11269, Refs #11268)
 - **Branch:** `feat/cov-1-acquisition-11269`

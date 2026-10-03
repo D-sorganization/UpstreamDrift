@@ -7795,6 +7795,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
 | 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |
 | 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
