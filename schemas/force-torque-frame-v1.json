@@ -95,16 +95,10 @@
           "$ref": "#/$defs/vec3"
         },
         "force_n": {
-          "oneOf": [
-            { "$ref": "#/$defs/vec3" },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "$ref": "#/$defs/vec3" }, { "type": "null" }]
         },
         "torque_nm": {
-          "oneOf": [
-            { "$ref": "#/$defs/vec3" },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "$ref": "#/$defs/vec3" }, { "type": "null" }]
         },
         "source": {
           "type": "string",
