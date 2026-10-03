@@ -10,6 +10,8 @@ from src.shared.python.motion_pipeline.sources.sto_mot_adapter import (
     OpenSimSTOMOTAdapter,
 )
 
+pytestmark = pytest.mark.unit
+
 _STO = """name=tiny
 version=1
 nRows=3
@@ -54,3 +56,20 @@ def test_sto_missing_endheader_raises(tmp_path: Path) -> None:
     p.write_text("name=foo\nversion=1\ntime col1\n0 0\n")
     with pytest.raises(ValueError, match="endheader"):
         OpenSimSTOMOTAdapter().load(p)
+
+
+def test_translational_coordinates_are_not_converted(tmp_path: Path) -> None:
+    # A translation in metres must never be scaled by pi/180 (#11403).
+    adapter = OpenSimSTOMOTAdapter(translational_coordinates={"knee_flexion"})
+    traj = adapter.load_checked(_write_sto(tmp_path)).trajectory
+    assert traj.frames[0].q[1] == pytest.approx(5.0)
+    assert traj.frames[0].q[0] == pytest.approx(0.1745, abs=1e-3)
+    assert traj.metadata["translational_coordinates"] == ["knee_flexion"]
+
+
+def test_translational_coordinates_absent_from_the_file_are_ignored(
+    tmp_path: Path,
+) -> None:
+    adapter = OpenSimSTOMOTAdapter(translational_coordinates={"pelvis_tx"})
+    traj = adapter.load_checked(_write_sto(tmp_path)).trajectory
+    assert traj.metadata["translational_coordinates"] == []
