@@ -6,7 +6,7 @@ from .clips import verify_frame_clip as _verify_encoded
 
 from src.motion_capture.coaching.geometry_storage import geometry_path, load_geometry
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -141,9 +141,32 @@ def _export_metadata(
     clip: ClipRange,
     result: dict[str, Any],
     fps: float,
+    *,
+    receipts: Sequence[Any] | None = None,
 ) -> dict[str, Any]:
     registration = ctx.registration
     times = [registration.scene_time(i / fps) for i in range(clip.first, clip.last + 1)]
+    glyph_receipts = (
+        [r.to_dict() if hasattr(r, "to_dict") else r for r in receipts]
+        if receipts
+        else None
+    )
+    from src.motion_capture.reference.comparison import ForceLayer
+
+    force_layer = (
+        ctx.force_layer
+        if ctx.force_layer is not None
+        else (ctx.layer if isinstance(ctx.layer, ForceLayer) else None)
+    )
+    series_hash: str | None = None
+    if force_layer is not None and getattr(force_layer, "series", None) is not None:
+        import hashlib
+        import io
+
+        buf = io.BytesIO()
+        force_layer.series.to_npz(buf)
+        series_hash = hashlib.sha256(buf.getvalue()).hexdigest()
+
     metadata = build_comparison_sidecar(
         ComparisonExportSidecarSpec(
             video_out=out,
@@ -157,8 +180,11 @@ def _export_metadata(
             time_mapping=registration.time_mapping,
             crop=ctx.crop,
             layer=ctx.layer,
+            glyph_receipts=glyph_receipts,
+            force_series_hash=series_hash,
         )
     )
+
     metadata.update(
         reference_asset=ctx.asset.model_dump(mode="json"),
         drawings=ctx.drawings.model_dump(mode="json") if ctx.drawings else None,
@@ -258,7 +284,10 @@ def export_comparison_video(
                 speed=opts.speed,
                 rendering=rendering,
             )
-        metadata = _export_metadata(out, source, ctx, clip, result, fps)
+            receipts = list(renderer.receipts)
+        metadata = _export_metadata(
+            out, source, ctx, clip, result, fps, receipts=receipts
+        )
         size = rendering.size(width, height)
         _verify_encoded(staged, clip.frames, size, opts.cancelled)
         metadata["output_size_px"] = size

@@ -46,6 +46,10 @@ class ComparisonLayer(BaseModel):
     ellipsoid_opacity: float = Field(default=0.3, ge=0, le=1)
     segment_radius_ratio: float = Field(default=0.12, ge=0.01, le=0.5)
     line_width: int = Field(default=2, ge=1, le=20)
+    draw_forces: bool = True
+    draw_torques: bool = True
+    draw_legend: bool = True
+    force_scale: float = Field(default=1.0, ge=0.01, le=100.0)
 
     @property
     def colour_bgr(self) -> tuple[int, int, int]:
@@ -53,6 +57,38 @@ class ComparisonLayer(BaseModel):
         clean = self.colour.lstrip("#")
         r, g, b = (int(clean[i : i + 2], 16) for i in (0, 2, 4))
         return (b, g, r)
+
+
+class ForceLayer(ComparisonLayer):
+    """Force and torque arrow layer settings for comparison rendering (FTO-25)."""
+
+    model_config = ConfigDict(
+        frozen=True, extra="allow", allow_inf_nan=False, arbitrary_types_allowed=True
+    )
+
+    series: Any = Field(default=None, exclude=True)
+    style: Any = Field(default=None, exclude=True)
+    opacity: float = Field(default=1.0, ge=0.0, le=1.0)
+    visible: bool = True
+    draw_skeleton: bool = False
+    draw_joints: bool = False
+    draw_club: bool = False
+
+    def __init__(
+        self,
+        series: Any = None,
+        style: Any = None,
+        opacity: float = 1.0,
+        visible: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            series=series,
+            style=style,
+            opacity=opacity,
+            visible=visible,
+            **kwargs,
+        )
 
 
 class ComparisonSession(BaseModel):
@@ -164,6 +200,8 @@ class ComparisonExportSidecarSpec:
     time_mapping: TimeMapping | None = None
     crop: CropRect | None = None
     layer: ComparisonLayer | None = None
+    glyph_receipts: list[dict[str, Any]] | None = None
+    force_series_hash: str | None = None
 
 
 def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any]:
@@ -233,6 +271,13 @@ def build_comparison_sidecar(spec: ComparisonExportSidecarSpec) -> dict[str, Any
             "output_frame_times": spec.output_frame_times,
         },
     }
+    if spec.glyph_receipts is not None:
+        sidecar["glyph_receipts"] = spec.glyph_receipts
+        sidecar["receipts"] = spec.glyph_receipts
+    if spec.force_series_hash is not None:
+        sidecar["force_series_hash"] = spec.force_series_hash
+        sidecar["series_source_hash"] = spec.force_series_hash
+
     inputs = [spec.source_media]
     if Path(ref_path).is_file():
         inputs.append(Path(ref_path))

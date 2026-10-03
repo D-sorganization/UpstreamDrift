@@ -7726,6 +7726,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11310 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
 | 2026-10-03 | #11378 | [FTO-24] Align force/torque series with video frames and trace import: force_frame_for_video, load_trace_forces/write_trace_forces HDF5 group, series_to_viewport_payload_wrench (#11309). |
 | 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |

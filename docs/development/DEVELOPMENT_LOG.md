@@ -21,12 +21,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **PR:** #11378
-- **Branch:** `feat/fto-11309-force-alignment-video`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/motion_capture/reference/**`, `src/shared/python/force_overlay/**`, `tests/motion_capture/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-24 (#11309) implemented force/torque series alignment with video frames (`force_frame_for_video`) mapping canonical Z-up to ADR-0041 camera world (polar forces vs axial torques with parity flip under lateral mirroring), trace import/export under HDF5 `force_torque_series` (`write_trace_forces`, `load_trace_forces`), and net origin wrench calculation (`series_to_viewport_payload_wrench`); #11346 added per-engine force-overlay parity lanes (drake, pinocchio, opensim, mujoco) with a zero-executed guard (PR #11375); FTO-7 (#11292) merged to main (#11348); FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); #11349 made MujocoAxialLoadSource axis discovery safe; #11344 fixed OpenSim engine; FTO-4 (#11289) merged; FTO-3 (#11288) glyph builder, FTO-21 (#11306) parity suite, FTO-16 (#11301) muscle wrenches, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
+- **PR:** #11310
+- **Branch:** `feat/fto-25-video-compositors-11310`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/motion_capture/reference/**`, `src/motion_capture/reconstruct/model/**`, `src/tools/capture_rig/**`, `src/shared/python/force_overlay/**`, `tests/**`
+- **Last verified:** 2026-10-03 at SELF — FTO-25 (#11310) implemented ForceLayer in ComparisonRenderer with cv2.addWeighted, sidecar VideoGlyphReceipt per-frame and force_series_hash in export_comparison_video, kinetics_to_force_series mapping inverse dynamics τ to ADR-0041 joint moments, render_frame / export_overlay torque arc drawing, and UI checkboxes (Forces/Torques/Legend) + scale sliders in ReferenceComparisonDialog and VariantOverlayBox.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR #11378; proceed with FTO-25 (#11310) and FTO-26 (#11311).
+- **Next step:** Merge PR; unblocks FTO-30 and consumers COV-10 #11278 and #11268.
 
 ### DL-#11268 · Capture-O Video Companion
 
