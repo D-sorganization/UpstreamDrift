@@ -1,3 +1,17 @@
+## Markerless Backend Matrix Runner and Registry-Selected Estimators (COV-5, #11273)
+
+Specifies the unified markerless observation runner across registered estimators, receipt verification, overwrite safety, and canonical 3D ingestion:
+- **Historical Capture Matrix Runner (`scripts/historical_capture.py`)**:
+  - Configurable `--estimator NAME` (default `mediapipe`, backward-compatible) and `--estimator-option KEY=VALUE`.
+  - Resolves estimators through `src.shared.python.pose_estimation.registry.create_estimator`.
+  - Refuses execution if destination directory already exists (overwrite guard).
+  - Validates `estimator_availability(name)`; exits non-zero with `install_hint` reason and writes no partial receipt if unavailable or unknown.
+  - Receipt detector identity records registry name, package version, and model-weights SHA-256 without implicit network downloads.
+- **HMR2 Monocular 3D Canonicalization (`src/shared/python/motion_pipeline/sources/hmr2_adapter.py`)**:
+  - `to_canonical_observations` canonicalizes HMR2 `joints3d.csv` output into `CanonicalObservations` (SMPL-22 marker set).
+  - Preserves 3D joint positions in metres under declared coordinate frame (`declared_frame="camera"`).
+  - Flags missing focal length or camera intrinsics with a typed `unqualified` status (`qualification="unqualified"`, `unqualified=True`) rather than fabricating guessed scale.
+
 ## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
 
 Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
@@ -7742,6 +7756,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11273 | [COV-5] Markerless backend matrix runner and registry-selected estimators: add `--estimator` and `--estimator-option`, explicit model-weights verification, fail-closed availability/overwrite guards in `scripts/historical_capture.py`, and HMR2 canonical 3D meters and unqualified scale flag in `sources/hmr2_adapter.py` (#11273). |
 | 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
 | 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
 | 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |

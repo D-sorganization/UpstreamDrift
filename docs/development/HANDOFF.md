@@ -1,4 +1,35 @@
-# Current Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
+# Current Handoff — [COV-5] Markerless Backend Matrix Runner & Registry Estimators (#11273)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Worktree: `UpstreamDrift-worktrees/cov-5-11273`
+- Branch: `feat/cov-5-runner-matrix-11273` (baseline `origin/main`)
+- Commit: `SELF`
+- Pull request: draft, opened from this branch; closes #11273, refs #11268.
+- Objective: [COV-5] Run the markerless backend matrix on every usable capture-O video swing (one runner, registry-selected estimators).
+- Completed:
+  - `scripts/historical_capture.py`:
+    - Added `--estimator NAME` (default `mediapipe`, backward-compatible) and repeatable `--estimator-option KEY=VALUE`.
+    - Resolves estimator factories via `src.shared.python.pose_estimation.registry.create_estimator`.
+    - Probes `estimator_availability` and exits non-zero with install hint reason without creating output or partial receipts.
+    - Added output directory overwrite guard: immediate refusal and non-zero exit if destination directory exists.
+    - Detector block records registry name, package version, and model-weights SHA-256 without silent network downloads.
+  - `src/shared/python/motion_pipeline/sources/hmr2_adapter.py`:
+    - Added `to_canonical_observations` method converting HMR2 `joints3d.csv` output into `CanonicalObservations` (SMPL-22 marker set).
+    - Preserves 3D joint positions in metres under declared coordinate frame (`declared_frame="camera"`).
+    - Sets typed `unqualified` flag (`qualification="unqualified"`, `unqualified=True`) when focal/camera parameters are absent, rather than guessing a scale.
+  - Unit Tests:
+    - `tests/unit/shadow_tracker/test_historical_capture_runner.py`: 6 focused unit tests covering default mediapipe behavior, unknown estimator refusal, unavailable dependency reporting, detector registry name and weights hash recording across backends, directory overwrite protection, and HMR2 canonicalization with qualified/unqualified camera parameters.
+  - Docs:
+    - Updated `SPEC.md` top section with COV-5 specification and §12 Change Log table row.
+    - Updated `docs/development/DEVELOPMENT_LOG.md` DL-#11268.
+- Validation:
+  - Focused unit tests passing: 6 passed in `tests/unit/shadow_tracker/test_historical_capture_runner.py`.
+  - Regression unit tests passing: 414 passed in `tests/unit/shadow_tracker/` and `tests/unit/motion_pipeline/sources/test_hmr2_adapter.py`.
+- Next step: Run matrix on capture-O video swings.
+
+---
+
+# Past Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-epic-11161`

@@ -55,16 +55,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11268 · Capture-O Video Companion
 
-- **State:** proposed
-- **Owner:** claude
+- **State:** in_progress
+- **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** not created
-- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
-- **Paths:** `docs/development/capture-o-video/**`
+- **PR:** not created (branch `feat/cov-5-runner-matrix-11273`)
+- **Branch:** `feat/cov-5-runner-matrix-11273`
+- **Paths:** `scripts/historical_capture.py`, `src/shared/python/motion_pipeline/sources/hmr2_adapter.py`, `tests/unit/shadow_tracker/test_historical_capture_runner.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — album link supplied and published by owner decision; COV-1 updated; no media acquired (cloud proxy 403) and no implementation performed.
+- **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** A fleet agent downloads the public album and executes COV-1 (#11269).
+- **Next step:** Run markerless backend matrix on usable capture-O video swings.
 
 ### DL-#11235 · Necromatcher Native Fit
 
