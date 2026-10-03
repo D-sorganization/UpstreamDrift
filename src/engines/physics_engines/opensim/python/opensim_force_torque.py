@@ -16,8 +16,9 @@ Builds a world-frame (Z-up) :class:`ForceTorqueFrame` from an OpenSim state:
 ``grip:*`` wrenches are deliberately absent: the OpenSim grip model still
 returns a placeholder (#11161, #10286), so grip is unavailable, not zero.
 
-OpenSim ground is Y-up; ADR-0026 world is Z-up. The single rotation
-:data:`R_ZUP_FROM_OPENSIM_GROUND` converts both points and vectors. (The
+OpenSim ground is Y-up by convention; ADR-0026 world is Z-up. The model's
+gravity declares its up axis: Y-up models are rotated by the single constant
+:data:`R_ZUP_FROM_OPENSIM_GROUND` and already-Z-up models (gravity -Z) are not. (The
 pre-existing ``coord_map._R_YUP_TO_ZUP`` is an axis swap with determinant -1,
 a reflection, which would flip torque handedness, so it is not reused.)
 
@@ -85,9 +86,29 @@ def _mat33(rotation: Any) -> np.ndarray:
     return np.array([[m.get(i, j) for j in range(3)] for i in range(3)])
 
 
-def _world(v: Iterable[float]) -> np.ndarray:
-    """Express an OpenSim ground-frame vector or point in the Z-up world frame."""
-    return R_ZUP_FROM_OPENSIM_GROUND @ np.asarray(tuple(v), dtype=np.float64)
+def _rotation_to_z_up(model: Any) -> np.ndarray:
+    """Rotation taking the model's declared up axis (against gravity) to +Z.
+
+    OpenSim models are Y-up by convention, but generated full-body models use
+    gravity ``(0, 0, -g)`` and are already Z-up. A Y-up model gets exactly
+    :data:`R_ZUP_FROM_OPENSIM_GROUND`; a zero-gravity model has no declared
+    axis and is treated as Y-up. Postcondition: proper rotation (det +1).
+    """
+    gravity = np.asarray(_vec3(model.get_gravity()))
+    norm = float(np.linalg.norm(gravity))
+    if norm < 1e-12:
+        return R_ZUP_FROM_OPENSIM_GROUND
+    up = -gravity / norm
+    target = np.array([0.0, 0.0, 1.0])
+    axis = np.cross(up, target)
+    sin, cos = float(np.linalg.norm(axis)), float(up @ target)
+    if sin < 1e-12:
+        if cos > 0:
+            return np.eye(3)
+        return np.diag([1.0, -1.0, -1.0])  # up is -Z: half turn about x
+    k = axis / sin
+    skew = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    return np.eye(3) + sin * skew + (1 - cos) * (skew @ skew)
 
 
 def _tuple3(v: np.ndarray) -> tuple[float, float, float]:
@@ -127,6 +148,11 @@ class OpenSimForceTorqueSource:
         if not isinstance(model, opensim.Model):
             raise TypeError("model must be an opensim.Model")
         self._model = model
+        self._to_world = _rotation_to_z_up(model)
+
+    def _world(self, v: Iterable[float]) -> np.ndarray:
+        """Express an OpenSim ground-frame vector or point in the Z-up world."""
+        return self._to_world @ np.asarray(tuple(v), dtype=np.float64)
 
     @property
     def model(self) -> Any:
@@ -174,9 +200,9 @@ class OpenSimForceTorqueSource:
         spatial = joint.calcReactionOnChildExpressedInGround(state)
         point = joint.getChildFrame().getPositionInGround(state)
         return (
-            _world(_vec3(point)),
-            _world(_vec3(spatial.get(1))),
-            _world(_vec3(spatial.get(0))),
+            self._world(_vec3(point)),
+            self._world(_vec3(spatial.get(1))),
+            self._world(_vec3(spatial.get(0))),
         )
 
     def _reactions(self, state: Any) -> list[OverlayWrench]:
@@ -256,12 +282,10 @@ class OpenSimForceTorqueSource:
             wrenches.append(
                 OverlayWrench(
                     kind=WrenchKind.JOINT_ACTUATOR,
-                    label=_label(
-                        "actuator", f"{joint.getName()}.{coordinate.getName()}"
-                    ),
+                    label=_label("actuator", f"{joint.getName()}.{actuator.getName()}"),
                     body=_base_name(joint.getChildFrame()),
-                    point_m=_tuple3(_world(_vec3(point))),
-                    torque_nm=_tuple3(_world(moment)),
+                    point_m=_tuple3(self._world(_vec3(point))),
+                    torque_nm=_tuple3(self._world(moment)),
                     source=_ACTUATOR_SOURCE,
                 )
             )
@@ -323,14 +347,14 @@ class OpenSimForceTorqueSource:
         if record is None:
             return None
         # Record torque is about the body origin, in ground (Simbody body force).
-        origin = _world(_vec3(base.getPositionInGround(state)))
+        origin = self._world(_vec3(base.getPositionInGround(state)))
         total = SpatialWrench(
             application_frame="world",
             point_m=_tuple3(origin),
-            force_n=_tuple3(_world(record[:3])),
-            torque_nm=_tuple3(_world(record[3:])),
+            force_n=_tuple3(self._world(record[:3])),
+            torque_nm=_tuple3(self._world(record[3:])),
         )
-        bottom = _world(self._sphere_bottom(sphere, plane, state))
+        bottom = self._world(self._sphere_bottom(sphere, plane, state))
         moved = transform_wrench(total, "world", _tuple3(bottom))
         return OverlayWrench(
             kind=WrenchKind.CONTACT,
@@ -398,6 +422,6 @@ class OpenSimForceTorqueSource:
                 continue
             _, force, _ = self._reaction_on_child(joint, state)
             loads[body] = axial_force_from_proximal_reaction(
-                force, _world(proximal), _world(distal)
+                force, self._world(proximal), self._world(distal)
             )
         return loads

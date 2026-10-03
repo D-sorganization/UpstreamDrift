@@ -39,8 +39,8 @@ def test_opensim_reports_capabilities() -> None:
     assert caps.muscles == CapabilityLevel.FULL
     assert caps.forward_sim == CapabilityLevel.FULL
     # Contact forces come from the FTO-15 state-based provider (#11300).
-    assert caps.contact_forces == CapabilityLevel.FULL
-    assert caps.force_visualization == CapabilityLevel.FULL
+    assert caps.contact_forces == CapabilityLevel.PARTIAL
+    assert caps.force_visualization == CapabilityLevel.PARTIAL
     assert caps.extra["jacobian_method"] == "simbody_calcStationJacobian"
 
 

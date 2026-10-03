@@ -83,15 +83,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         actuation, so ``muscles`` is ``FULL``. Joint-torque ZVCF and native
         contact-force reporting are not first-class engine methods, so they
         stay ``NONE``. Contact forces and force overlays come from the state-based
-        provider (FTO-15, #11300): sphere/half-space contacts, joint reactions
-        and coordinate-actuator torques.
+        provider (FTO-15, #11300) and are ``PARTIAL``: only sphere/half-space
+        contacts, joint reactions and rotational coordinate-actuator torques
+        are produced; other contact models and actuators are omitted.
         """
         return EngineCapabilities(
             engine_name="OpenSim",
             mass_matrix=CapabilityLevel.FULL,
             jacobian=CapabilityLevel.FULL,
-            contact_forces=CapabilityLevel.FULL,
-            force_visualization=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.PARTIAL,
+            force_visualization=CapabilityLevel.PARTIAL,
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.PARTIAL,
             forward_sim=CapabilityLevel.FULL,
@@ -208,11 +209,16 @@ class OpenSimPhysicsEngine(BasePhysicsEngine):
         current_time = self._state.getTime()
 
         # Integrate to new time
-        self._manager.setInitialTime(current_time)
-        self._manager.setFinalTime(current_time + step_size)
+        if hasattr(self._manager, "initialize"):
+            # OpenSim 4.x Manager API: seed the manager with the current state.
+            self._manager.initialize(self._state)
+        else:
+            self._manager.setInitialTime(current_time)
+            self._manager.setFinalTime(current_time + step_size)
 
-        # Integrate
-        self._manager.integrate(current_time + step_size)
+        # The manager owns the advanced state: keep a copy as the engine state.
+        advanced = self._manager.integrate(current_time + step_size)
+        self._state = opensim.State(advanced)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:

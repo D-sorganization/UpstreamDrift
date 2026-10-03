@@ -21,6 +21,9 @@ from src.engines.physics_engines.opensim.python.opensim_force_torque import (  #
     R_ZUP_FROM_OPENSIM_GROUND,
     OpenSimForceTorqueSource,
 )
+from src.engines.physics_engines.opensim.python import (  # noqa: E402
+    opensim_physics_engine as engine_module,
+)
 from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
     OpenSimPhysicsEngine,
 )
@@ -223,6 +226,51 @@ def test_zup_constant_maps_opensim_up_to_world_up_and_is_a_rotation() -> None:
     assert not R_ZUP_FROM_OPENSIM_GROUND.flags.writeable
 
 
+# --- up axis ---------------------------------------------------------------
+
+
+def _z_up_pendulum():
+    """Hanging pendulum in a model whose gravity is -Z (Z-up, as full_body_*)."""
+    model = osim.Model()
+    model.setName("synthetic_zup_pendulum")
+    model.setGravity(osim.Vec3(0, 0, -G))
+    body = osim.Body(
+        "link", MASS, osim.Vec3(0, 0, -COM_DROP_M), osim.Inertia(0.01, 0.01, 0.01)
+    )
+    model.addBody(body)
+    joint = osim.PinJoint(
+        "pin",
+        model.getGround(),
+        osim.Vec3(0, 0, PIN_HEIGHT_M),
+        osim.Vec3(0, 0, 0),
+        body,
+        osim.Vec3(0, 0, 0),
+        osim.Vec3(0, 0, 0),
+    )
+    model.addJoint(joint)
+    return model, model.initSystem()
+
+
+def test_z_up_model_is_not_rotated() -> None:
+    model, state = _z_up_pendulum()
+    frame = OpenSimForceTorqueSource(model).sample(state)
+    (w,) = frame.by_kind(WrenchKind.JOINT_REACTION)
+    np.testing.assert_allclose(w.force_n, (0, 0, MASS * G), atol=1e-6)
+    np.testing.assert_allclose(w.point_m, (0, 0, PIN_HEIGHT_M), atol=1e-9)
+    assert frame.axial_loads is not None
+    assert frame.axial_loads.values_n["link"] == pytest.approx(MASS * G, rel=1e-9)
+
+
+def test_zero_gravity_model_defaults_to_opensim_y_up() -> None:
+    model, state = _pendulum()
+    model.setGravity(osim.Vec3(0, 0, 0))
+    state = model.initSystem()
+    (w,) = (
+        OpenSimForceTorqueSource(model).sample(state).by_kind(WrenchKind.JOINT_REACTION)
+    )
+    np.testing.assert_allclose(w.point_m, (0, 0, PIN_HEIGHT_M), atol=1e-9)
+
+
 # --- joint reactions and axial loads ---------------------------------------
 
 
@@ -280,7 +328,7 @@ def test_coordinate_actuator_is_a_moment_about_the_pin_axis() -> None:
     actuator.setOverrideActuation(state, 5.0)
     frame = OpenSimForceTorqueSource(model).sample(state)
     (w,) = frame.by_kind(WrenchKind.JOINT_ACTUATOR)
-    assert w.label == "actuator:pin.pin_coord_0"
+    assert w.label == "actuator:pin.pin_motor"
     assert w.body == "link"
     assert w.force_n is None
     # Pin axis is OpenSim +z, which is world -y after the Y-up to Z-up rotation.
@@ -299,6 +347,19 @@ def test_actuator_axis_follows_the_child_frame() -> None:
         OpenSimForceTorqueSource(model).sample(state).by_kind(WrenchKind.JOINT_ACTUATOR)
     )
     np.testing.assert_allclose(w.torque_nm, (0, 2.0, 0), atol=1e-9)
+
+
+def test_two_actuators_on_one_coordinate_have_distinct_labels() -> None:
+    model, _ = _pendulum(with_actuator=True)
+    second = osim.CoordinateActuator("pin_coord")
+    second.setName("pin_motor_b")
+    model.addForce(second)
+    second.setCoordinate(model.getJointSet().get(0).updCoordinate())
+    second.setOptimalForce(1.0)
+    state = model.initSystem()
+    frame = OpenSimForceTorqueSource(model).sample(state)
+    labels = sorted(w.label for w in frame.by_kind(WrenchKind.JOINT_ACTUATOR))
+    assert labels == ["actuator:pin.pin_motor", "actuator:pin.pin_motor_b"]
 
 
 def test_translational_coordinate_actuator_is_omitted_not_zero() -> None:
@@ -320,7 +381,7 @@ def test_custom_joint_rotational_actuator_uses_its_transform_axis(
     actuator.setOverrideActuation(state, 3.0)
     frame = OpenSimForceTorqueSource(model).sample(state)
     (w,) = frame.by_kind(WrenchKind.JOINT_ACTUATOR)
-    assert w.label == "actuator:cj.q0"
+    assert w.label == "actuator:cj.motor"
     np.testing.assert_allclose(w.torque_nm, (0, -3.0, 0), atol=1e-9)
 
 
@@ -391,6 +452,12 @@ def test_sample_requires_a_state() -> None:
 # --- engine adapter ---------------------------------------------------------
 
 
+@pytest.fixture(autouse=True)
+def _real_opensim_in_engine(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Other unit modules rebind the engine's ``opensim`` to a mock; undo that."""
+    monkeypatch.setattr(engine_module, "opensim", osim)
+
+
 def _engine_with(path: Path) -> OpenSimPhysicsEngine:
     engine = OpenSimPhysicsEngine()
     engine.load_from_path(str(path))
@@ -410,8 +477,21 @@ def test_engine_exposes_provider_axial_loads_and_capabilities(tmp_path: Path) ->
     loads = engine.get_segment_axial_loads()
     assert loads is not None and loads.values_n["link"] > 0
     caps = engine.get_capabilities()
-    assert caps.force_visualization == CapabilityLevel.FULL
-    assert caps.contact_forces == CapabilityLevel.FULL
+    # PARTIAL: unsupported contact models, translational and multi-rotation
+    # actuators are omitted rather than reported.
+    assert caps.force_visualization == CapabilityLevel.PARTIAL
+    assert caps.contact_forces == CapabilityLevel.PARTIAL
+
+
+def test_engine_step_advances_the_state_the_provider_samples(tmp_path: Path) -> None:
+    engine = _engine_with(_ball_model_xml(tmp_path))
+    coordinate = engine._model.getCoordinateSet().get("free_coord_4")
+    coordinate.setValue(engine._state, 0.5)
+    engine.step(0.05)
+    assert engine.get_time() == pytest.approx(0.05)
+    frame = engine.get_force_torque_frame()
+    assert frame is not None and frame.time_s == pytest.approx(0.05)
+    assert engine.get_state()[0][4] < 0.5  # the ball fell
 
 
 def test_engine_without_model_returns_none() -> None:
