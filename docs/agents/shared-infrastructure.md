@@ -151,6 +151,15 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - See `docs/user_guide/body_part_viz/` for end-user workflow guides
   and `docs/api/body_part_viz.md` for the full API surface.
 
+### Force and Torque Overlay Pipeline
+
+`src/shared/python/force_overlay/` — engine-agnostic physical vector and moment contracts (ADR-0052, #11285).
+
+- `WrenchKind`, `OverlayWrench`, `ForceTorqueFrame` — immutable data layer with optional halves (unavailable is `None`, never zero) and Z-up world frame.
+- `ForceTorqueSeries` — strictly increasing time series with gap-bounded linear interpolation and pickle-free NPZ serialization.
+- `ForceTorqueProvider`, `read_force_torque_frame` — runtime-checkable Protocol and validated accessor for engine providers.
+- Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
+
 ### Anthropometrics
 
 `src/shared/python/anthropometrics/`

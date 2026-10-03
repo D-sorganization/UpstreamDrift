@@ -25,7 +25,7 @@ DEFAULT_FORCE_UNITS: dict[str, str] = {
 }
 
 
-def _validate_vec3(v: Sequence[float], name: str) -> tuple[float, float, float]:
+def validate_vec3(v: Sequence[float], name: str) -> tuple[float, float, float]:
     """Validate 3D vector coordinates for finite real numbers."""
     if len(v) != 3:
         raise ValueError(f"{name} must contain exactly 3 coordinates, got {len(v)}")
@@ -33,6 +33,9 @@ def _validate_vec3(v: Sequence[float], name: str) -> tuple[float, float, float]:
     if not all(math.isfinite(x) for x in coords):
         raise ValueError(f"{name} coordinates must be finite numbers, got {coords}")
     return (coords[0], coords[1], coords[2])
+
+
+_validate_vec3 = validate_vec3
 
 
 @dataclass(frozen=True)
