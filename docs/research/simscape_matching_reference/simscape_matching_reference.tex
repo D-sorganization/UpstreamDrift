@@ -2308,6 +2308,104 @@ each scored observation. Separate declared calibration observations from
 held-out validation; fitting the same target again does not establish
 independent measurement accuracy.
 
+\subsection{Source Observation Masks and the Full Owner Refit}
+The pure C3D conversion contract now has an optional
+logical source-availability mask $M\in\{0,1\}^{1\times N\times T}$.
+The default retains the original three-argument behavior. For a marker
+sample, usable decoded source availability is
+\[
+ v_{if}=M_{if}\land\operatorname{finite}(x_{if},y_{if},z_{if})
+       \land\operatorname{finite}(r_{if})\land(r_{if}\geq0).
+\]
+Here $r$ is the separate \texttt{meta\_points.residuals} array;
+the fourth homogeneous point row is not a residual. Unavailable samples
+produce NaN in all three converted coordinates. A true mask entry cannot
+revive a nonfinite coordinate or invalid residual. Standard empty double
+and logical $0\times0$ sentinels preserve the default; nonlogical masks,
+wrong dimensions and malformed empty arrays fail closed. The mask must
+enter before marker callbacks and derived targets are constructed.
+Changing a stored point array after creating its callback would leave
+the callback bound to the old coordinates.
+
+The original and exported owner sources were bound by hashes, unique
+labels, 367 frames and a declared 240 Hz clock. Export-only labels are
+not original-source observations. The mask reaches joint-centre and
+foot-orientation gap flags. These flags describe decoded source
+availability, not anatomical accuracy. Caller-side source/frame/label
+binding and mask identity remain necessary, including cache identity;
+an old unmasked cache cannot be relabelled as a masked fit.
+
+Native RED kept thirteen existing tests passing while nine new contract
+tests failed. Private GREEN passed all twenty-two tests without loading
+a model. Actual owner importer checks established exact default data and
+marker-callback parity, then verified that masked callbacks match the
+masked point array. Derived targets retain missingness rather than
+turning upstream interpolation into a measurement.
+
+The full 46-sample owner refit completed naturally on 3 October UTC at
+\texttt{01:10:06Z}, using the unchanged Human model and production solver,
+frozen capture geometry, marker offsets and solver weights. For target
+$j$ and sample $f$, interpolated targets retain the existing gap residual
+scale $s_{jf}=0.1$ in optimization, while position RMS excludes those
+targets:
+\[
+ E_{\mathrm{pos}}=\sum_{j,f}\|s_{jf}(\widehat p_{jf}-p_{jf})\|^2,
+ \qquad
+ \mathrm{RMS}_f=\sqrt{\frac{\sum_{j:v_{jf}=1}
+       \|\widehat p_{jf}-p_{jf}\|^2}{\#\{j:v_{jf}=1\}}}.
+\]
+Measured targets have $s_{jf}=1$. The scale applies to the residual,
+so $0.1$ contributes $0.01$ of its squared position cost. Both candidate
+and control are evaluated on the identical source-available target set.
+The preserved control's exported-data score is reproduced before its
+source-mask rescore; this prevents changed sample availability from
+being presented as a motion improvement.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Owner Evaluation & Mean Frame RMS (mm) & Peak Frame RMS (mm) & Target Samples\\
+\midrule
+Preserved control, exported flags & 16.754 & 36.987 & 635\\
+Preserved control, source mask & 16.677 & 36.987 & 627\\
+Refit, identical source mask & 16.658 & 37.050 & 627\\
+\bottomrule
+\end{tabular}
+\end{center}
+Head peak error remains $22.169$ degrees. Foot peak error changes from
+$20.573$ to $20.560$ degrees. The corrected continuity audit completes
+naturally at \texttt{01:17:43Z}: the largest root increment increases
+from $53.926$ to $55.295$ mm, the reviewed root transition is $54.033$ mm,
+and the largest leg-coordinate increment changes from $38.380$ to
+$38.319$ degrees. Thirteen signed implementation-ROM rows remain flagged
+in both poses. These findings do not establish clinical ROM violations,
+resolve the motion discontinuity or qualify forward dynamics. No new
+candidate or Desktop video is promoted.
+
+The importer uses a named option, while the pure converter accepts its
+fourth positional argument. With \texttt{M} already verified as a logical
+mask bound to the resolved source file, the public entry point is
+\begin{verbatim}
+gs3dx_setup();
+file = resolve_capture('capture-O');
+cap = gs3dx_capture_markers(file, observed_mask=M);
+jc = gs3dx_capture_joint_centres(cap);
+runtests('tests/test_gs3dx_capture_points.m');
+runtests('tests/test_gs3dx_capture_observation_mask.m');
+\end{verbatim}
+Run these from the exploratory GS3DX root in MATLAB R2025b with the
+shared resolver on the path. Source-mask derivation maps unique original
+labels onto exported labels without shifting frame indices. Bind source
+and export hashes, units, frame count/rate and ordered labels before
+using it. Targets require their contributing marker observations;
+derived joint centres remain estimates even when their markers are
+available. The full private experiment used the preserved 46-frame grid
+ending at source frame 361, explicit offsets to bypass recalibration,
+forward tracking, posture/smooth/gap/ROM scales $0.04/0.025/0.1/0.025$,
+and foot/head orientation scales $0.1/0.1$. Record the mask identity in
+the fit receipt and any cache key. This experiment introduces no new
+prescribed motion, feedback gains, contacts or physical acceptance.
+
 \subsection{Selected Motion Clock and Coordinate Contract}
 A native read-only audit exited naturally at
 \texttt{2026-10-02T20:10:11Z}, without loading or saving a model or running
