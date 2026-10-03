@@ -1,3 +1,14 @@
+## Capture-O Video Companion: Acquisition Receipt and Provenance Contracts (COV-1, #11269)
+
+Specifies fail-closed video asset acquisition, SHA-256 integrity verification, ffprobe metadata embedding, lineage tracking, and atomic receipt emission for the capture-O companion video program (#11268, #11269):
+- **Fail-Closed Acquisition & Hash Integrity (`src/shared/python/motion_capture/acquisition_receipt.py`)**:
+  - `build_acquisition_receipt(directory, ...)` assigns deterministic neutral identifiers `cov-01`, `cov-02`, … in sorted original-filename order.
+  - Fail-closed rejections: empty directory raises `EmptyDirectoryError` (subclassing `ValueError`); non-video files raise `NonVideoFileError`; probe or ffprobe execution failures raise `FFProbeError` naming the problematic file.
+  - Integrity validation: changes to existing file bytes raise `HashMismatchError` with expected vs actual digest evidence; unchanged runs produce byte-identical deterministic receipts.
+  - Lineage tracking: preserves original captures alongside re-encoded or album copies (`lineage: original` or `lineage: album-copy-of <cov_id>`) without overwriting evidence.
+  - Privacy and path safety: strictly strips and prohibits absolute local paths from all receipt entries, structured probe dictionaries, and JSON serializations.
+  - Atomic persistence: `AcquisitionReceipt.write_atomic` writes via sibling temporary files with flush/fsync before atomic replacement.
+
 ## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
 
 Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
@@ -7742,6 +7753,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |
 | 2026-09-29 | #11161 | Capture registry (#11162: neutral ids, SHA-256 verified, private data via `CAPTURE_DATA_DIR`, Python and MATLAB resolvers; club-workbook consumers rewired and skip without private data), capture-export pure functions (#11163) and engine-independent swing events and metrics (#11164) for comparing the owner's swing with the tour-average reference. |
 | 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
 | 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |

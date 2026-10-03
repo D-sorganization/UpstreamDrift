@@ -55,16 +55,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11268 · Capture-O Video Companion
 
-- **State:** proposed
-- **Owner:** claude
+- **State:** in_progress
+- **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
 - **PR:** not created
-- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
-- **Paths:** `docs/development/capture-o-video/**`
+- **Branch:** `feat/cov-1-acquisition-11269`
+- **Paths:** `src/shared/python/motion_capture/**`, `src/motion_capture/**`, `tests/unit/motion_capture/**`, `docs/development/capture-o-video/**`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — album link supplied and published by owner decision; COV-1 updated; no media acquired (cloud proxy 403) and no implementation performed.
+- **Last verified:** 2026-10-03 at SELF — COV-1 (#11269): `build_acquisition_receipt` implemented with fail-closed validation, SHA-256 integrity checks, ffprobe metadata embedding, lineage tracking, deterministic rerun idempotency, atomic persistence, and privacy path safety; 11 unit tests passing.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** A fleet agent downloads the public album and executes COV-1 (#11269).
+- **Next step:** Execute acquisition with downloaded originals on fleet host and review video catalog.
 
 ### DL-#11235 · Necromatcher Native Fit
 
