@@ -7713,6 +7713,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
+| 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
 | 2026-10-03 | #11342 | [FTO-8] OpenCV video glyph renderer: draw GlyphSet through calibrated camera onto frame, PinholeProjector and HypothesisProjector adapters, dark haloing, resolution-scaled lines/heads, legend box (#11293). |
 | 2026-10-02 | #11337 | [FTO-5] MeshCat glyph renderer: real cylinder+cone arrows and torque arcs, MeshcatSink protocol, caching, and Drake sink (#11290). |
 | 2026-10-02 | #11355 | [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291). |

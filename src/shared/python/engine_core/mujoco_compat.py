@@ -13,7 +13,23 @@ from typing import Any
 
 import numpy as np
 
-__all__ = ["full_mass_matrix"]
+__all__ = ["copy_mjdata_state", "full_mass_matrix"]
+
+
+def copy_mjdata_state(dst: Any, src: Any) -> None:
+    """Copy dynamic simulation state slices from src MjData into dst MjData.
+
+    Copies qpos, qvel, qacc, ctrl, act, qfrc_applied, xfrc_applied, and time
+    without requiring full MjData cloning.
+    """
+    dst.time = float(src.time)
+    np.copyto(dst.qpos, src.qpos)
+    np.copyto(dst.qvel, src.qvel)
+    np.copyto(dst.qacc, src.qacc)
+    np.copyto(dst.ctrl, src.ctrl)
+    np.copyto(dst.act, src.act)
+    np.copyto(dst.qfrc_applied, src.qfrc_applied)
+    np.copyto(dst.xfrc_applied, src.xfrc_applied)
 
 
 def full_mass_matrix(
