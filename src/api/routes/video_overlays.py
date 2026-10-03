@@ -8,7 +8,7 @@ Reuses FTO-8/FTO-22 projection and contracts (DRY).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Sequence, cast
+from typing import TYPE_CHECKING, Any, Sequence
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 
@@ -144,7 +144,7 @@ def _resolve_force_frame(
         return force_frame_for_video(
             source.series, video_time_s=time_s, registration=source.registration
         )
-    return cast("ForceTorqueFrame | None", source.series.frame_at(time_s))
+    return source.series.frame_at(time_s)
 
 
 def _build_empty_glyphs(time_s: float) -> GlyphSet:
