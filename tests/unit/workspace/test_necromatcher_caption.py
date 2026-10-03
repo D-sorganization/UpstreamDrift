@@ -132,3 +132,21 @@ def test_caption_rejects_wrong_raster_before_drawing(image: np.ndarray) -> None:
     with pytest.raises(ValueError, match="raster"):
         draw_caption(image, layout)
     np.testing.assert_array_equal(image, before)
+
+
+def test_surface_legend_declares_display_color_without_measured_material_claim() -> (
+    None
+):
+    from src.shared.python.workspace.necromatcher_caption import (
+        CaptionOverlayOptions,
+        caption_provenance,
+    )
+
+    legend = caption_provenance(CaptionOverlayOptions())["legend"]
+    assert legend["surfaces"] == (
+        "Display-colored uncalibrated model visual proxies; "
+        "colors are not measured materials"
+    )
+    assert legend["B"] == (
+        "Blue native rigid skeleton and attachment seeds, not surfaces"
+    )

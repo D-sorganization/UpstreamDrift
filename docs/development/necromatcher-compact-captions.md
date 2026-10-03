@@ -34,7 +34,7 @@ physical time, source-frame index and exact rational source presentation seconds
 The compact matched-marker RMS is display diagnostics, not the fitting objective.
 Green denotes observed landmarks, blue the native rigid rig and attachment seeds,
 yellow residuals, magenta observed interior fragments and cyan the projected
-infinite authored axis. Multicolored model surfaces receive a separate proxy
+infinite authored axis. Display-colored model surfaces receive a separate proxy
 label with opacity; blue is never relabelled as the surface mesh.
 
 Enabled manifests retain full legend/qualification/metric semantics and exact

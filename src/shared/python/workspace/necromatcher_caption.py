@@ -100,7 +100,7 @@ def caption_provenance(options: CaptionOverlayOptions) -> dict[str, Any]:
             "Y": "Yellow matched-marker residuals",
             "M": "Magenta observed interior shaft fragments",
             "C": "Cyan infinite authored shaft axis, not physical endpoints",
-            "surfaces": "Multiple model material colors; uncalibrated model visual proxies",
+            "surfaces": "Display-colored uncalibrated model visual proxies; colors are not measured materials",
         },
         "matched_rms_definition": "Unweighted Euclidean RMS of common observed/native marker identities in pixels",
         "source_time": "Exact rational video presentation seconds; physical time unknown",
