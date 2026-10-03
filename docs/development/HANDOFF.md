@@ -12,6 +12,17 @@
 - Validation: Ruff check and format clean; pytest passes; file size budget passed.
 - Next steps: Land FTO-3 (#11288); unblocks renderers FTO-5 (#11290), FTO-6 (#11291), FTO-7 (#11292), FTO-8 (#11293), and API FTO-22 (#11307).
 
+# Force Overlay Parity Suite — #11306 (FTO-21)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11306`
+- Branch: `feat/issue-11306-fto21-force-parity`; commit: SELF; PR: see the PR for this branch (`Closes #11306`, `Refs #11285`)
+- Governing issue: #11306 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `tests/integration/cross_engine/test_force_overlay_parity.py` and `force_overlay_fixtures.py` (one validated parameter set; per-engine model builders beside the test; `assert_wrench`; tolerances set once). Drake, Pinocchio and OpenSim rows are live; MuJoCo skips until FTO-9 (#11294) adds `get_force_torque_frame` and then runs unchanged; Pinocchio and Simscape skip the resting-contact case with a stated reason; a Simscape synthetic-CSV row checks the FTO-18 loader keeps world/applied-to-body; a sign guard proves the suite bites. `CROSS_ENGINE_PARITY_SPEC.md` section 2.5.3.
+- Findings (providers untouched): `OpenSimPhysicsEngine.set_state` raises `TypeError` on OpenSim 4.x and `set_control` never marks controls valid so they read as zero (the builders bake state and the hold torque into the model instead); Drake omits the axial load of a terminal segment with no child joint (Pinocchio/OpenSim fall back to the centre of mass), so the shared URDF welds a massless tip.
+- Validation: `python3 -m pytest tests/integration/cross_engine/test_force_overlay_parity.py -o addopts=""` (23 passed, 6 skipped); ruff, file-size, error-handling, DRY, suite-marker and title-case checks clean.
+- CI gap: no required lane runs the Drake/Pinocchio rows yet (workflow change shipped alone, tracked in #11346).
+- Next steps: when FTO-9 lands, confirm the MuJoCo rows go green (MJCF builders are pre-validated by `test_mujoco_models_are_statically_consistent`); fix the two OpenSim engine defects in a follow-up.
+
 # OpenSim Muscle Lines of Action — #11301 (FTO-16)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11301`

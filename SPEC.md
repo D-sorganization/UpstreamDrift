@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11306 | [FTO-21] Cross-engine force/torque overlay parity suite (`tests/integration/cross_engine/test_force_overlay_parity.py`): hanging and held-inverted pendulum and resting-body statics asserted on every engine's `get_force_torque_frame()` (Drake, Pinocchio, OpenSim live; MuJoCo skips until FTO-9) plus a Simscape-loader convention row and a sign-convention guard. |
 | 2026-10-03 | #11301 | [FTO-16] OpenSim muscle lines of action: `OpenSimForceTorqueSource.muscle_wrenches` emits `MUSCLE` wrenches (tendon force along the effective end directions) at each enabled muscle's origin and insertion, labels `muscle:<name>:origin`/`:insertion`; only end attachments drawn. |
 | 2026-10-02 | #11298 | [FTO-13] Pinocchio force/torque provider: `PinocchioForceTorqueSource` (world-frame RNEA joint reactions, applied-torque actuator wrenches, contact pass-through, axial loads), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_applied_torques`, `force_visualization=FULL`. |
 | 2026-10-02 | #11296 | [FTO-11] Drake force/torque provider: DrakeForceTorqueSource over reaction, net-actuation and point/hydroelastic contact ports, axial loads, shared segment_axes helper, force_visualization=FULL. |
