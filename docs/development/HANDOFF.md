@@ -1,4 +1,4 @@
-# Drake GUI Force Overlay And Segment Shading — #11297 (FTO-12)
+# Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
 - Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
