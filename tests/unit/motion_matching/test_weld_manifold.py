@@ -139,6 +139,7 @@ def test_replay_starts_on_the_weld(
         raise Captured
 
     monkeypatch.setattr(simulator, "run", fake_run)
+    lane = types.SimpleNamespace(times=times, rate_hz=1.0 / (times[1] - times[0]))
     with pytest.raises(Captured):
-        pipeline_dynamics.replay(simulator, types.SimpleNamespace(times=times), q_track)
+        pipeline_dynamics.replay(simulator, lane, q_track)
     assert _weld_rate_residual(simulator, captured["q"], captured["v"]) < 1e-9

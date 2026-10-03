@@ -40,6 +40,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     TRAJECTORY_RESTART_THRESHOLD_M,
     TRAJECTORY_RESTARTS,
     WRIST_COORDINATES,
+    rate_from_times,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -242,6 +243,11 @@ class Lane:
         }
         self.prior_weights: dict[str, float] = {}
         self.anthropometric = False
+
+    @property
+    def rate_hz(self) -> float:
+        """Sample rate derived from capture timestamps (see ``rate_from_times``)."""
+        return rate_from_times(self.times)
 
     def kinematics(
         self,
