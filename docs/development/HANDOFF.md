@@ -1,8 +1,33 @@
+# Simscape 3D Viewer Force Overlays and Shading — #11305 (FTO-20)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11305`
+- Branch: `feat/fto-11305-simscape-viewer-forces`; commit: SELF; PR: #11354 (`Closes #11305`, `Refs #11285`)
+- Governing issue: #11305 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed:
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/_viewer_3d_forces.py`: `ViewerForceOverlayManager` (<400 lines) with toggles (`check_forces`, `check_torques`, `check_grip`), `label_legend` status/overlay, robust `load_force_series` with `rotation_tol=1e-2` fallback, incremental glyph rendering and clean artist clearing.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/_viewer_3d_helpers.py`: Extracted pure functions (`export_markers_to_csv`, `finalize_scene_view`, `transform_positions_by_screen_axes`, `validate_speed`, `validate_frame`) keeping `viewer_3d_tab.py` within the 1200-line budget limit (1165 lines).
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/core/models.py`: Added `force_series` and `force_missing` attributes to `C3DDataModel`.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/ui/tabs/viewer_3d_tab.py`:
+    - Wired force overlay controls into UI alongside `segment_force_colors`.
+    - Automatically loads CSV force datasets in `update_from_model`.
+    - Live per-frame updates dispatching to `_force_overlay.update_frame` and feeding axial loads to `set_segment_axial_loads`.
+    - Added properties `force_glyph_count` and `active_force_kinds`.
+  - Feature parity & documentation:
+    - Updated `docs/user_guide/body_part_viz/force_colors.md` with Simscape live force overlay and axial loads.
+    - Updated `src/config/feature_parity.json` and generated `docs/development/feature_parity_matrix.md`.
+  - Evidence:
+    - Added high-resolution offscreen render at peak force (`t=0.30s`) to `docs/development/evidence/simscape_viewer_trial_001_peak_force.png`.
+  - Tests:
+    - `tests/unit/engines/simscape/three_d_gui/test_force_overlay.py`: 5 tests covering frame 0 grip arrows, frame change updates, gap-beyond-dt hiding, axial load forwarding, toggle filtering, peak force screenshot generation, and graceful degradation for missing or corrupt files.
+- Validation:
+  - All 151 tests in `tests/unit/engines/simscape/three_d_gui/` pass; all 39 parity tests pass.
+  - `ruff check`, `ruff format --check`, and `python scripts/ci/check_file_size_budget.py` pass cleanly.
+- Next steps: Review and merge PR; proceed to remaining FTO issues (FTO-21 … FTO-30).
+
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11291-mujoco-glyphs`; commit: a9515fb04e; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
-- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
     - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
@@ -18,7 +43,7 @@
 - Validation:
   - Ruff check and format clean.
   - Pytest 5/5 passed.
-- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
+
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
