@@ -1,3 +1,55 @@
+## Enforce Compiled Home Budgets and Preserve Diagnostics (MMR-04, #11088)
+
+Specifies the compiled block budget gate, subsystem breakdown, and observability preservation contracts under MATLAB R2025b Home license limits:
+- **Compiled Budget Enforcement & Diagnostics (`src/shared/python/motion_matching/simscape_block_budget.py`)**:
+  - `BlockBudgetProfile`: execution and verification profiles (`PRODUCTION`, `AUDIT`, `INSTRUMENTED`).
+  - Strict budget ceilings: actual R2025b production count <= 975 with mandatory 25-block instrumentation reserve documented independently of the 1,000-block Home license ceiling.
+  - Audit profile: exact required audit variant compiles <= 1,000 nonvirtual blocks with diagnostic instrumentation.
+  - Fail-closed validation on over-budget models: deliberately over-budget clones fail with actionable diagnostics reporting the exact error, license limit, headroom, and offending subsystems ranked by compilation growth.
+  - Observability contract (`ObservabilityEvidenceType`): ensures no consumer loses mass, COM, energy, contact, or closure evidence when sensors are removed. Dropping consumed sensors without replacement offline diagnostics is rejected with actionable diagnostics identifying the orphaned consumer.
+  - Subsystem breakdown (`SubsystemBlockCount`): requires explicit per-subsystem uncompiled and compiled counts matching totals, rejecting inferred icon counts.
+  - JSON parser: `parse_matlab_block_budget_json` deserializes MATLAB-generated block budget JSON into typed reports with canonical observability manifests.
+- **MATLAB Exploratory Infrastructure (`src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`)**:
+  - `gs3dx_block_budget.m`: updated to categorize nonvirtual blocks by top-level subsystem for both uncompiled and compiled diagrams, computing compilation growth and exporting structured subsystem tables.
+  - Actionable compilation error handling: wraps license ceiling compile errors with actionable remediation steps.
+- **Test Suite (`tests/unit/motion_matching/test_simscape_block_budget.py`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tests/test_gs3dx_block_budget.m`)**:
+  - Regression tests for production <= 975 ceiling with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, missing observability evidence detection, orphaned consumer detection on sensor removal, empty/inconsistent subsystem rejection, and roundtrip JSON parsing.
+
+## Promote GS3DX Variants With Reproducible R2025b Evidence (MMR-03, #11087)
+Specifies reproducible evidence promotion and qualification contracts for the 10 Simscape Multibody GS3DX variants under MATLAB R2025b:
+- **GS3DX Variants Promotion & Evidence Contracts (`src/shared/python/motion_matching/gs3dx_variants.py`)**:
+  - Enforces canonical inventory and per-variant machine-readable receipts across all 10 lineage stages: Baseline, Slim, Quat, FullBody, Contact, Golfer, Fit, Shape, Neck, and Human.
+  - Implements fail-closed clean-host build, save, and reopen verification strictly on MATLAB R2025b; explicitly rejects R2026a and all non-R2025b substitutions, dirty models, and unrecorded builder hosts.
+  - Guarantees protection of original hand-built models (`GolfSwing3D_Kinetic.slx`, `Kinetically_Driven_Gimbal_Joint.slx`, `Kinetically_Driven_Revolute_Joint.slx`, `Kinetically_Driven_Universal_Joint.slx`) via immutable content digests (`verify_original_models_protection`), failing closed upon tampering.
+  - Strictly distinguishes stable-drive equivalence (impact torque drive reproduction on Baseline/Slim/Quat) from C3D motion capture marker fitting (Fit/Shape/Neck/Human); prohibits claiming full-swing C3D qualification for stable-drive variants.
+  - Explicitly separates motion-prescribed neck actuation (`NeckReference`, 2-axis Universal Joint with 5 ms filter) and damped inverse-Jacobian leg servo tracking from autonomous balance or neuromuscular control.
+  - Records exact cold-replay commands, provider/model/capture provenance, and enforces candidate/model/image/metric hash integrity (`validate_candidate_package_integrity`).
+  - Implements main ledger consumption gate (`filter_promotable_ledger_variants`) allowing only reviewed promoted variants (`GS3DX_Human`) to enter the primary motion matching ledger while rejecting intermediate variants.
+  - Implements reported MATLAB test suite rerun validator (`validate_matlab_suite_run`) requiring exact promoted SHA verification and explicit disclosure of all skipped tests with reasons.
+- **Unit Test Suite (`tests/unit/motion_matching/test_gs3dx_variants_promotion.py`)**:
+  - Tests covering complete 10-variant inventory, receipt serialization/deserialization lifecycle, clean-host R2025b validation failures, original model protection, drive classification distinctions, motion prescription disclosures, package integrity, ledger consumption filtering, and MATLAB suite rerun verification.
+
+## Add Anatomical Meshes Without Changing Qualified Physics (MMR-05, #11089)
+Specifies anatomical mesh substitution, visual presets, physical and kinematic invariance, provenance tracking, compiled block budget, and reusable segment adapter:
+- **Physical & Kinematic Invariance (`src/shared/python/motion_matching/anatomical_meshes.py`)**:
+  - One-segment File Solid substitution behind optional visual preset (`VisualPreset.ANATOMICAL_MESH`, `VisualPreset.HYBRID`) strictly preserves exact body mass sum, per-solid mass (`mass_kg`), center of mass (`com_m`), inertia (`inertia_com_kg_m2`), placement transforms, and joint attachment frames.
+  - Forward kinematics marker positions are strictly invariant across swing phases (address, top, impact, follow-through) with zero drift ($< 1\times 10^{-12}$ m).
+- **Design by Contract & Graceful Fallback**:
+  - Validates SI mesh units (`m`, `mm`, `cm`) and finite positive bounding boxes (`BoundingBox3D`).
+  - Wrong units, non-finite/inverted bounds, or missing asset files fail closed (`InvalidMeshUnitsError`, `NonFiniteMeshBoundsError`, `MissingMeshAssetError`) when `allow_fallback=False`.
+  - When `allow_fallback=True`, documents and records graceful fallback (`VisualFallbackStatus.FALLBACK_TO_PRIMITIVE`) to default primitive shapes (ellipsoid/box).
+- **Asset Provenance & Redistribution Tracking**:
+  - `MeshAssetProvenance` records asset name, source repository, commit, license (e.g. CC-BY-SA 2.0), license URL, attribution, and redistribution permissions.
+  - Direct integration with bundled human models in `src/tools/model_explorer/bundled_assets/`.
+- **MMR-04 Compiled Block Budget Enforcement**:
+  - Enforces Simscape nonvirtual compiled block limits under MATLAB R2025b Home license:
+    - Direct File Solid substitution: 0 delta blocks, preserving compiled count within production ceiling ($\le 975$, with 25-block reserve from 1,000 license ceiling).
+    - External visual solids: 7 blocks per segment (measured in `SHAPE.md`), failing closed if total exceeds 975.
+- **Reusable Segment Adapter (`AnatomicalSegmentAdapter`)**:
+  - Prototype support across pelvis, trunk, head, hand, and shoe.
+  - Bilateral handedness mirroring (`mirror_bilateral_metadata`) for hands and shoes across lateral planes.
+  - Multi-phase swing clearance and collision checking (`check_segment_clearance`) across adjacent segments.
+
 ## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
 Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
 - **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
@@ -7456,10 +7508,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | 2026-10-01 | #11149 | [R09] Simulation Error and Partial-Result States (#11149): machine-readable SimulationErrorInfo model, HTTP status code mapping (400, 503, 500, 504) with X-Error-Code and X-Error-Stage headers, in-memory simulation result retention upon storage failure (calculation_status='completed', persistence_status='failed'), explicit per-channel analysis status tracking, and structured background task error persistence. |
 | 2024-05-24 | n/a | ⚡ Bolt: Replace np.linalg.norm with math.sqrt(x.dot(x)) in tour_matching_viewer core for ~2x speedup (spec-exempt: micro-optimization) |
 | 2026-10-01 | #11146 | [R06] Make Neural Verification Badges and Published Claims Fail Closed: timing-only and missing status metadata fails closed to UNVERIFIED, preview results never advertise VERIFIED, badges and metrics reset when subsequent results omit neural evidence or when runs start, mismatched model/checkpoint fail closed, and diagnostic benchmark evidence (NM-10) relabelled with explicit diagnostic warnings (#11146). |
+| 2026-10-01 | #11210 | [MMR-18] Benchmark MATLAB Iteration Throughput and Portable Model Exchange (#11104): cold/warm timing and peak memory tracking on same hardware/capture, 7-axis content-addressed cache invalidation, session reuse rebuild guards on topology and operating-point edits, metric parity tolerances, uncached native cold replay verification for optimization winners, and fail-closed rejection of unsupported neck/contact/muscle dynamics in portable exchange. |
 | 2026-10-01 | #11088 | [MMR-04] Enforce Compiled Home Budgets and Preserve Diagnostics: production count <= 975 with 25-block reserve, exact audit variant <= 1000, deliberate overflow rejection, and observability preservation for mass/COM/energy/contact/closure (#11088). |
 | 2026-10-01 | #11087 | [MMR-03] Promote GS3DX Variants With Reproducible R2025b Evidence (#11087): inventory and receipts for 10 GS3DX variants (Baseline..Human), clean-host R2025b build/save/reopen validation, immutable protection of hand-built originals, strict distinction of stable-drive equivalence from C3D fit and motion prescription from autonomous balance, cold-replay commands, candidate integrity, and main ledger consumption gate. |
 | 2026-10-01 | #11089 | [MMR-05] Add Anatomical Meshes Without Changing Qualified Physics (#11089): one-segment File Solid and visual preset substitution preserving exact mass, COM, inertia, joint frames, and same-state forward kinematics marker invariance; Design by Contract validation for SI units, finite bounds, and missing assets with documented graceful fallback; asset provenance and redistribution terms tracking; MMR-04 compiled block budget enforcement (<=975 production ceiling); reusable segment adapter for pelvis, trunk, head, hand, and shoe prototypes with bilateral handedness mirroring and multi-phase swing clearance verification. |
-| 2026-10-01 | #11210 | [MMR-18] Benchmark MATLAB Iteration Throughput and Portable Model Exchange (#11104): cold/warm timing and peak memory tracking on same hardware/capture, 7-axis content-addressed cache invalidation, session reuse rebuild guards on topology and operating-point edits, metric parity tolerances, uncached native cold replay verification for optimization winners, and fail-closed rejection of unsupported neck/contact/muscle dynamics in portable exchange. |
 | 2026-10-01 | #11099 | [MMR-13] Integrate and benchmark real body and club segmentation: neural segmentation provider with model cards, pinned SHA-256 weight verification, fail-closed checkpoint validation, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback, and multi-clip benchmark evaluation (#11099). |
 | 2026-10-01 | #11097 | [MMR-11] Repair reduced-model and club-only product claims: enforce exploratory/disqualified pendulum receipts, block matrix completion on unresolved required cells with required_model_ids support, reject spatial planar floor failure before optimization, verify raw-to-package reproduction, and enforce labeled inferred body posture (#11097). |
 | 2026-10-01 | #11106 | [MMR-06-I] Behavioral regression tests for head, trunk, and grip diagnostic receipts in test_diagnostic_receipts.py, and link exploratory GS3DX docs starting points (FIT.md, NECK.md, SHAPE.md) (#11106). |
