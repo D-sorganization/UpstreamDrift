@@ -7726,7 +7726,6 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-03 | #11294 | [FTO-9] MuJoCo force/torque provider: `MujocoForceTorqueSource` (cached scratch MjData, world-frame joint reactions from cfrc_int, actuator torques/forces from qfrc_actuator and xaxis, contact wrenches from mj_contactForce with equal-opposite reaction on geom1, axial load calculation, stale cfrc_ext fixes), engine `get_force_torque_frame`/`get_segment_axial_loads`/`get_contact_forces`, `force_visualization=FULL`. |
 | 2026-10-03 | #11363 | [FTO-22] Force overlay API and WebSocket: stream real provider force/torque frames; ForceOverlayService; remove fabricated overlay geometry; emit serialized GlyphSet and ForceTorqueFrame; backward-compatible vectors; follow-up issue #11362 (#11307). |
 | 2026-10-03 | #11390 | [FTO-25] Force/torque arrow layer in reference-comparison and capture-rig video compositors: ForceLayer with cv2.addWeighted, sidecar glyph_receipts/force_series_hash, kinetics_to_force_series, and compositor UI toggles (#11310). |
 | 2026-10-03 | #11346 | `force-overlay-parity` mujoco lane now requires the real `test_hanging_pendulum_reaction_is_weight_up_and_tension[mujoco]` case to pass instead of the stand-in MJCF statics check, now that the MuJoCo provider row is on main |
