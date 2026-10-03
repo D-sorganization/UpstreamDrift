@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from src.shared.python.estimation import (
+    SolverTelemetry,
     AuthoredHermiteInitialization,
     CubicHermiteSplineTrajectory,
     project_pinhole,
@@ -429,10 +430,18 @@ class ImageFitResult:
     initialization: AuthoredHermiteInitialization | None = None
     initial_spline: ImageSplineStart | None = None
     additional_image_assessments: tuple[ImageResidualAssessment, ...] = ()
+    telemetry: SolverTelemetry | None = None
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
+        if self.telemetry is not None:
+            if not isinstance(self.telemetry, SolverTelemetry):
+                raise ValueError("Telemetry must be a typed SolverTelemetry")
+            if not self.optimizer_ran and (
+                self.telemetry.nfev is not None or self.telemetry.njev is not None
+            ):
+                raise ValueError("Unoptimized output cannot claim solver counts")
         for name in (
             "source_times",
             "q",

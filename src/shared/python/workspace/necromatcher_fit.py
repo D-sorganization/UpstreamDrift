@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+from src.shared.python.estimation import SolverTelemetry
 
 if TYPE_CHECKING:
     from .necromatcher import NecromatcherLibrary
@@ -36,6 +37,19 @@ _FIELDS = frozenset(
         "evidence",
     }
 )
+
+
+def _validate_solver_telemetry(evidence: dict[str, Any]) -> None:
+    """New optional measurements are strict; untouched legacy evidence is absent."""
+    original = evidence.get("original_fit")
+    if isinstance(original, dict) and "solver_telemetry" in original:
+        if original["solver_telemetry"] is None:
+            raise ValueError("Present telemetry must contain its complete schema")
+        telemetry = SolverTelemetry.from_record(original["solver_telemetry"])
+        if original.get("optimizer_ran") is False and (
+            telemetry.nfev is not None or telemetry.njev is not None
+        ):
+            raise ValueError("Unoptimized output cannot claim solver counts")
 
 
 def read_kinematic_fit(
@@ -102,6 +116,7 @@ def read_kinematic_fit(
     ):
         raise ValueError("Fit requires explicit provenance and research evidence")
     # Reject non-finite auxiliary evidence as well; retain the original JSON bytes.
+    _validate_solver_telemetry(payload["evidence"])
     json.dumps(payload, allow_nan=False)
     with CaptureReview(library, payload["capture_id"]) as review:
         for index, identity in zip(indices, frames, strict=True):

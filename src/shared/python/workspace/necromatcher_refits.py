@@ -20,6 +20,8 @@ from src.shared.python.motion_matching.jobs.service import JobHandle
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
 from .necromatcher_spline import preserved_fit_spline
+from .necromatcher_fit_telemetry import read_worker_telemetry
+from src.shared.python.motion_matching.jobs.io_atomic import read_text
 from src.shared.python.motion_matching.historical_fit import (
     ImageFitConfig,
     ShaftAxisEvidence,
@@ -145,7 +147,14 @@ class NativeRefitSession:
     def view(self, run_id: str) -> dict[str, Any]:
         """Poll without waiting; reopen canonical research status after restart."""
         with self._lock:
-            return self._view(run_id)
+            view = self._view(run_id)
+            root = self.library.root / "runs" / run_id
+            if (root / "worker-telemetry.json").exists():
+                request = json.loads(read_text(root / "request.json"))
+                telemetry = read_worker_telemetry(root, request)
+                if telemetry is not None:
+                    view["solver_telemetry"] = telemetry.to_record()
+            return view
 
     def cancel(self, run_id: str) -> dict[str, Any]:
         """Request cancellation of an owned live job; never relabel terminal work."""

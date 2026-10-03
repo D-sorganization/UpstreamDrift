@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .solver_telemetry import SolverBackend, SolverTelemetry
+
 from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
 from src.shared.python.estimation.hermite_initialization import (
     AuthoredHermiteInitialization,
@@ -73,6 +75,8 @@ from src.shared.python.estimation.synthetic_ground_truth import (
 )
 
 __all__ = [
+    "SolverBackend",
+    "SolverTelemetry",
     "AuthoredHermiteInitialization",
     "AuthoredKnotChange",
     "CoordinateDisplacement",

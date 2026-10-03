@@ -180,7 +180,11 @@ def native_fit_evidence(
     max_grip: float,
 ) -> dict[str, Any]:
     """Serialize the actual evaluator result using one canonical record layout."""
+    telemetry = getattr(result, "telemetry", None)
     return {
+        **(
+            {"solver_telemetry": telemetry.to_record()} if telemetry is not None else {}
+        ),
         "camera": original["camera"],
         "attachments": original["attachments"],
         "free_coordinates": list(result.free_coordinates),

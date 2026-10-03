@@ -9,6 +9,7 @@ from functools import partial
 import numpy as np
 
 from src.shared.python.estimation import (
+    SolverTelemetry,
     AuthoredHermiteInitialization,
     CubicHermiteSplineTrajectory,
     HermiteBoundsDomain,
@@ -476,6 +477,7 @@ def _fit_result(
     converged: bool,
     message: str,
     optimizer_ran: bool,
+    telemetry: SolverTelemetry | None = None,
 ) -> ImageFitResult:
     fit, trajectory = prepared.fit, prepared.trajectory
     inputs = fit.inputs
@@ -512,6 +514,7 @@ def _fit_result(
         else np.empty((0, 0)),
         constraint_row_labels=rows[0].row_labels if rows else (),
         optimizer_ran=optimizer_ran,
+        telemetry=telemetry,
         initialization=prepared.initialization,
         initial_spline=prepared.initial_spline,
         additional_image_assessments=tuple(
@@ -586,5 +589,10 @@ def fit_image_trajectory(
     )
     solved = solve_single_trial_map(problem)
     return _fit_result(
-        prepared, solved.coefficients, solved.success, solved.message, True
+        prepared,
+        solved.coefficients,
+        solved.success,
+        solved.message,
+        True,
+        solved.telemetry,
     )

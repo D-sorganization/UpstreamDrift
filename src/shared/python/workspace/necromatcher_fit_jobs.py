@@ -36,6 +36,13 @@ from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evid
 from src.shared.python.motion_matching.historical_fit.shaft_observations import (
     ShaftAxisEvidence,
 )
+from .necromatcher_fit_telemetry import (
+    record_missing_worker_telemetry,
+    read_worker_telemetry,
+)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 _SOURCE_DIRECTORIES = (
     "src/shared/python/body_part_viz",
@@ -242,7 +249,7 @@ def _refit_work(
     source_fit_id, new_fit_id = request["source_fit_id"], request["new_fit_id"]
     shaft_recipe = request.get("shaft_images")
 
-    def work(
+    def execute(
         progress: Callable[[JobProgress], None], cancelled: Callable[[], bool]
     ) -> MatchingWorkOutcome:
         stamp = fit_execution_stamp()
@@ -257,6 +264,16 @@ def _refit_work(
             )
         )
         response = _execute_worker(request_path, options.budget_wall_s, cancelled)
+        telemetry = read_worker_telemetry(run_root, request)
+        if (
+            telemetry is not None
+            and response["fit"]
+            .get("evidence", {})
+            .get("original_fit", {})
+            .get("solver_telemetry")
+            != telemetry.to_record()
+        ):
+            raise ValueError("Worker telemetry differs from candidate result")
         if cancelled():
             raise JobCancelledError("Native refit cancelled before publication")
         if fit_execution_stamp()["source_sha256"] != spec.hashes.solver_hash:
@@ -296,6 +313,27 @@ def _refit_work(
             "Research computation completed; dynamics not qualified",
             publish=publish,
         )
+
+    def work(
+        progress: Callable[[JobProgress], None], cancelled: Callable[[], bool]
+    ) -> MatchingWorkOutcome:
+        try:
+            return execute(progress, cancelled)
+        except (
+            OSError,
+            ValueError,
+            TypeError,
+            KeyError,
+            RuntimeError,
+            JobCancelledError,
+        ) as exc:
+            try:
+                record_missing_worker_telemetry(run_root, request, str(exc))
+            except (OSError, ValueError, TypeError, KeyError):
+                logger.exception(
+                    "Telemetry publication failed; original job fault retained"
+                )
+            raise
 
     return work
 

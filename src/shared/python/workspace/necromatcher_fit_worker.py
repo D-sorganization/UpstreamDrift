@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
 import logging
 from pathlib import Path
 import sys
+import time
 from typing import Any
 
 if __name__ == "__main__":
@@ -28,7 +29,7 @@ from src.shared.python.motion_matching.historical_fit import (
     read_capture_evidence,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
-from src.shared.python.estimation import CubicHermiteSplineTrajectory
+from src.shared.python.estimation import CubicHermiteSplineTrajectory, SolverTelemetry
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import (
     fit_execution_stamp,
@@ -48,6 +49,7 @@ from .necromatcher_fit_records import (
     build_native_fit_payload as _build_fit_payload,
     native_research_blockers as _research_blockers,  # noqa: F401 -- compatibility
 )
+from .necromatcher_fit_telemetry import write_worker_telemetry
 
 logger = logging.getLogger(__name__)
 
@@ -306,11 +308,53 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     return output
 
 
+def _emit_telemetry(
+    path: Path,
+    request: dict[str, Any],
+    fit: dict[str, Any] | None,
+    elapsed: float,
+    reason: str,
+) -> None:
+    """Optional transport faults never replace a primary computation outcome."""
+    try:
+        write_worker_telemetry(path, request, fit, elapsed, reason)
+    except (OSError, ValueError, TypeError, KeyError):
+        logger.exception(
+            "Optional telemetry publication failed; primary outcome retained"
+        )
+        if fit is not None:
+            try:
+                original = fit["evidence"]["original_fit"]
+                if not isinstance(original, dict):
+                    raise TypeError("Original fit evidence must be a mapping")
+                value = SolverTelemetry.from_record(original.get("solver_telemetry"))
+                original["solver_telemetry"] = replace(
+                    value,
+                    worker_elapsed_s=None,
+                    unavailable_reason="worker_telemetry_publication_failed",
+                ).to_record()
+            except (ValueError, TypeError, KeyError):
+                logger.exception(
+                    "Malformed result telemetry retained for strict admission rejection"
+                )
+
+
 def main() -> None:
     """Serve one trusted local request and return its finite JSON fit."""
+    started = time.perf_counter()
+    request = None
+    request_path = None
     try:
-        request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+        request_path = Path(sys.argv[1])
+        request = json.loads(request_path.read_text(encoding="utf-8"))
         fit = compute_native_refit(request)
+        _emit_telemetry(
+            request_path,
+            request,
+            fit,
+            time.perf_counter() - started,
+            "Worker computed fit payload",
+        )
         sys.stdout.write(json.dumps({"fit": fit}, allow_nan=False))
     except (
         OSError,
@@ -320,7 +364,11 @@ def main() -> None:
         IndexError,
         RuntimeError,
         ImportError,
-    ):
+    ) as exc:
+        if request is not None and request_path is not None:
+            _emit_telemetry(
+                request_path, request, None, time.perf_counter() - started, str(exc)
+            )
         logger.exception("Native research refit failed")
         raise SystemExit(1) from None
 

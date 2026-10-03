@@ -18,6 +18,53 @@ from src.shared.python.workspace.necromatcher_fit_records import (
 pytestmark = pytest.mark.unit
 
 
+def test_actual_solver_telemetry_survives_canonical_fit_record():
+    from src.shared.python.estimation import SolverBackend, SolverTelemetry
+    from src.shared.python.workspace.necromatcher_fit_records import native_fit_evidence
+
+    request, source, result, *_ = specimen()
+    telemetry = SolverTelemetry(
+        3, 2, 0.25, 2.0, "early convergence", SolverBackend("scipy", "trf", "1.15")
+    )
+    measured = replace(result, telemetry=telemetry, optimizer_ran=True)
+    record = native_fit_evidence(
+        measured, source["evidence"]["original_fit"], request["options"], 0.01
+    )
+    assert SolverTelemetry.from_record(record["solver_telemetry"]) == telemetry
+    assert record["optimizer_ran"] is True
+
+
+def test_legacy_result_does_not_fabricate_or_rewrite_telemetry():
+    from src.shared.python.workspace.necromatcher_fit_records import native_fit_evidence
+
+    request, source, result, *_ = specimen()
+    before = json.dumps(source, sort_keys=True)
+    record = native_fit_evidence(
+        result, source["evidence"]["original_fit"], request["options"], 0.01
+    )
+    assert "solver_telemetry" not in record
+    assert json.dumps(source, sort_keys=True) == before
+
+
+@pytest.mark.parametrize("count", ["nfev", "njev"])
+def test_unoptimized_result_cannot_claim_either_solver_counter(count):
+    from src.shared.python.estimation import SolverTelemetry
+
+    _, _, result, *_ = specimen()
+    with pytest.raises(ValueError, match="solver counts"):
+        replace(result, telemetry=SolverTelemetry(**{count: 0}))
+
+
+def test_unoptimized_result_retains_measured_worker_duration():
+    from src.shared.python.estimation import SolverTelemetry
+
+    _, _, result, *_ = specimen()
+    measured = SolverTelemetry(
+        worker_elapsed_s=1.25, unavailable_reason="optimizer_not_run"
+    )
+    assert replace(result, telemetry=measured).telemetry == measured
+
+
 def specimen(source=None):
     if source is None:
         definition = {"coordinate_order": ["arm", "wrist"]}

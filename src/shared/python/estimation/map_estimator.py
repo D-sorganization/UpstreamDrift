@@ -12,11 +12,14 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
+import time
 
 import numpy as np
+import scipy
 from scipy.optimize import OptimizeResult, least_squares
 
 from src.shared.python.estimation.hermite_bounds import HermiteBoundsDomain
+from src.shared.python.estimation.solver_telemetry import SolverBackend, SolverTelemetry
 from src.shared.python.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.simulation_backends.provenance import ProvenanceStamp
@@ -529,6 +532,8 @@ class MapEstimatorProblem:
 class MapEstimatorResult:
     """Deterministic result of a single-trial MAP solve.
 
+    ``n_iterations`` is the historical MAP compatibility alias for backend
+    residual evaluations (``nfev``), rather than an optimizer iteration count.
     ``n_non_finite_evaluations`` counts residual evaluations in which at least
     one entry was NaN/Inf and got the sentinel (#9757); ``identifiability`` is
     the pre-solve gate report, or ``None`` when no free parameters exist or
@@ -546,6 +551,55 @@ class MapEstimatorResult:
     n_non_finite_evaluations: int = 0
     identifiability: IdentifiabilityGateReport | None = None
     locked_by_gate: tuple[str, ...] = field(default_factory=tuple)
+    telemetry: SolverTelemetry | None = None
+
+    def __post_init__(self) -> None:
+        if self.telemetry is not None and not isinstance(
+            self.telemetry, SolverTelemetry
+        ):
+            raise ValueError("Telemetry must be a typed SolverTelemetry")
+
+
+def _solve_with_telemetry(
+    problem: MapEstimatorProblem,
+    x0: np.ndarray,
+    residual: Callable[[np.ndarray], np.ndarray],
+    jacobian: Callable[[np.ndarray], np.ndarray] | None,
+    bounds: tuple[np.ndarray, np.ndarray],
+    method: str,
+) -> tuple[OptimizeResult, SolverTelemetry]:
+    """Measure the backend call alone; fixed decisions never call a solver."""
+    if not x0.size:
+        result = OptimizeResult(
+            x=x0, success=True, nfev=0, message="All decisions explicitly fixed"
+        )
+        return result, SolverTelemetry(
+            nfev=0,
+            termination_reason=str(result.message),
+            backend=SolverBackend("canonical_fixed_decisions"),
+        )
+    started = time.perf_counter()
+    result = least_squares(
+        residual,
+        x0,
+        jac=jacobian if jacobian is not None else "2-point",
+        bounds=bounds,
+        method=method,
+        max_nfev=problem.options.max_iterations,
+        xtol=problem.options.xtol,
+        ftol=problem.options.ftol,
+        gtol=problem.options.gtol,
+    )
+    elapsed = time.perf_counter() - started
+    return result, SolverTelemetry(
+        nfev=result.nfev,
+        njev=getattr(result, "njev", None),
+        solver_elapsed_s=elapsed,
+        termination_reason=str(result.message),
+        backend=SolverBackend(
+            "scipy.optimize.least_squares", method, scipy.__version__
+        ),
+    )
 
 
 def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
@@ -583,22 +637,8 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
     method = problem.options.method
     if method == "lm" and _has_finite_bounds(lower, upper):
         method = "trf"
-    result = (
-        least_squares(
-            residual_for_solver,
-            x0,
-            jac=jacobian_for_solver if jacobian_for_solver is not None else "2-point",
-            bounds=(lower, upper),
-            method=method,
-            max_nfev=problem.options.max_iterations,
-            xtol=problem.options.xtol,
-            ftol=problem.options.ftol,
-            gtol=problem.options.gtol,
-        )
-        if x0.size
-        else OptimizeResult(
-            x=x0, success=True, nfev=0, message="All decisions explicitly fixed"
-        )
+    result, telemetry = _solve_with_telemetry(
+        problem, x0, residual_for_solver, jacobian_for_solver, (lower, upper), method
     )
     residual = residual_for_solver(result.x)
     coefficients, parameter_values = _unpack_decision(problem, result.x)
@@ -615,6 +655,7 @@ def solve_single_trial_map(problem: MapEstimatorProblem) -> MapEstimatorResult:
         n_non_finite_evaluations=counter.evaluations,
         identifiability=gate_report,
         locked_by_gate=tuple(locked),
+        telemetry=telemetry,
     )
 
 
