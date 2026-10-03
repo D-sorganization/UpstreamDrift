@@ -75,6 +75,32 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in with affirmative consent.
 - **Next step:** Review and merge PR #11415 for #11407; proceed with #11406.
 
+### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
+
+- **State:** in_review
+- **Owner:** codex (Gemini 3.8 Flash CLI reviews)
+- **Issue:** #11329
+- **PR:** #11351; depends on draft #11256 and shared-capture #11172.
+- **Branch:** `feat/simscape-scapula-protraction-20261002`
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_spine_bounds.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03: 95 native R2025b contracts/regression tests pass with no failures/skips and natural exit 0. Final independent native replay checks all 1,313 sampled poses across 26 complete trajectories; final replay/export batches exit naturally with 0. All 104 neutral 1920x1080/30-fps videos across 13 moving-scapula models are delivered on Desktop, with both views and marker/clean modes. All 5,252 frames decoded; Desktop hashes and ZIP CRC/member hashes verified. Fixed-foot FullBody public-source fits reduce mean target RMS from 532/377 to 27/34 mm while preserving original offsets/model bytes; back RMS 52/61 mm remains a limitation. Final complete Human legacy/default parity passes. Source head bbe21592b6 preserves the qualified native tree after accepted-main sync; current documentation head requires CI verification. Built-in LaTeX compilation remains unavailable (platform directories missing).
+- **Summary:** Scapula address/backswing bands, direct measured back-marker fitting, native spine excursion bands through top with soft continuation afterwards, two-coordinate-neck head-axis guide, complete measured-marker overlays, cyan back/waist highlights, neutral Model Swing labels and undistorted native 1080P pixels. Full 3D head yaw remains imperfect and is separately reported. Fixed dimensions/position offsets and private source identities are preserved. Independent dynamics remains outside this scope and unqualified.
+- **Next step:** Verify current documentation-head CI and await scientific acceptance of parent drafts #11256/#11172 before protected source integration. Desktop matching/media deliverables are complete. Do not merge unqualified parent work through dependent draft #11351; no protected-main integration is claimed.
+
+### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
+
+- **State:** in_progress
+- **Owner:** codex (Gemini 3.8 CLI delegates)
+- **Issue:** #10950 (children #10951–#10959, #10979, #10985, #10986, #11011)
+- **PR:** #11256 (draft); original #11179 remains separate.
+- **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-10-02: sampled leg feedforward passed 16 native seam/regression checks. Saved-state audit identified early transient dominance. Controlled 0–50 ms tour passed posture but rejected peak 2.000907 BW. Separate 20–50 ms ramp runs passed all five original one-second hold gates: tour 3.176 mm / 0.836 deg at 19:54:39Z; owner 2.321 mm / 0.699 deg at 20:01:28Z. Model unchanged. Both retain feedback/prescribed neck; full independent dynamics remains unqualified. Prior b21836863 checks passed; new changes need protected checks. Built-in compiler infrastructure remains unavailable.
+- **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
+- **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_review

@@ -29,6 +29,8 @@ function out = gs3dx_render(mdl, q, opts)
 %     stills        (1,:) double frame indices to export as PNG stills
 %     still_files   (1,:) string filenames for the stills
 %     video         (1,:) char output video file (.mp4)
+%     resolution    [width height] pixels, default [1920 1080], even dimensions
+%     video_quality MPEG-4 quality 0..100, default 100
 %     fps           (1,1) double video playback frame rate (default 30)
 %     view          (1,:) char, string, or 1x2 double camera view
 %                   ("face-on": camera on +X, the facing axis; "down-the-line":
@@ -36,6 +38,8 @@ function out = gs3dx_render(mdl, q, opts)
 %                   "top"; or [azimuth, elevation] as for VIEW)
 %     markers       (:,:,:) double capture markers or joint centres (Nx3xF or
 %                   3xNxF, World frame, m) for overlay dots
+%     scene_markers measured markers used only for frozen camera bounds; use
+%                   the same array for marker and clean comparison videos
 %     time          (1,:) double timestamps (s) per frame for labels
 %     output_dir    (1,:) char output directory for files (default pwd)
 %     ground        (1,1) logical whether to draw a ground plane (default true)
@@ -64,8 +68,12 @@ function out = gs3dx_render(mdl, q, opts)
         opts.still_files (1,:) string = string.empty
         opts.video (1,:) char = ''
         opts.fps (1,1) double {mustBePositive} = 30
+        opts.resolution (1,2) double {mustBeInteger,mustBePositive,mustBeFinite} = [1920 1080]
+        opts.video_quality (1,1) double {mustBeInteger,mustBeNonnegative,mustBeFinite} = 100
         opts.view = "face-on"
         opts.markers double = []
+        opts.highlight_markers double = []
+        opts.scene_markers double = []
         opts.time (1,:) double = []
         opts.output_dir (1,:) char = pwd
         opts.ground (1,1) logical = true
@@ -77,6 +85,9 @@ function out = gs3dx_render(mdl, q, opts)
 
     % Preconditions
     assert(~isempty(mdl), 'gs3dx:render', 'Model name cannot be empty');
+    assert(all(mod(opts.resolution,2)==0) && all(opts.resolution>=64), ...
+        'gs3dx:render','Video dimensions must be even and at least 64 pixels');
+    assert(opts.video_quality<=100,'gs3dx:render','Video quality must be from 0 to 100');
     if ~bdIsLoaded(mdl)
         load_system(mdl);
     end
@@ -92,7 +103,7 @@ function out = gs3dx_render(mdl, q, opts)
     end
 
     % Set up KinematicsSolver with frame variables
-    [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids);
+    [ks, closed, tv, ids, keys, fixed_reference] = local_build_ks(mdl, solids);
 
     % Parse poses Q and resolve per-frame joint positions
     [q_mat, n_frames, t_vec] = local_parse_poses(q, ids, keys, mdl, closed, tv, opts.time);
@@ -110,11 +121,13 @@ function out = gs3dx_render(mdl, q, opts)
     assert(~isempty(frames_to_solve), 'gs3dx:render', 'No valid frame indices to render');
 
     % Solve forward kinematics for solid poses
-    solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve);
+    solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve, fixed_reference);
 
     % Format camera view
     % Freeze whole-animation bounds so the club cannot leave the camera.
-    solids(1).scene_bounds = gs3dx_scene_bounds(solids);
+    scene_markers=opts.scene_markers;
+    if isempty(scene_markers),scene_markers=opts.markers;end
+    solids(1).scene_bounds = gs3dx_scene_bounds(solids,scene_markers);
     foot = find(contains(string({solids.block}), "foot", 'IgnoreCase', true));
     floor_z = -1.02;
     for i = foot
@@ -141,7 +154,7 @@ function out = gs3dx_render(mdl, q, opts)
             video_path = fullfile(opts.output_dir, video_path);
         end
         v_written = local_render_video(solids, frames_to_solve, t_vec, az, el, ...
-            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus);
+            opts.markers, opts.highlight_markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus, opts.resolution, opts.video_quality);
         if ~isempty(v_written)
             written_files(end+1) = string(v_written);
         end
@@ -171,7 +184,7 @@ function out = gs3dx_render(mdl, q, opts)
             end
 
             local_render_still(solids, f_num, t_val, az, el, ...
-                opts.markers, opts.ground, opts.title, s_path, opts.visible, focus);
+                opts.markers, opts.highlight_markers, opts.ground, opts.title, s_path, opts.visible, focus, opts.resolution);
             written_files(end+1) = string(s_path);
         end
     end
@@ -322,7 +335,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Build KinematicsSolver with solid frame variables
 % -------------------------------------------------------------------------
-function [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids)
+function [ks, closed, tv, ids, keys, fixed_reference] = local_build_ks(mdl, solids)
     wf = find_system(mdl, 'LookUnderMasks', 'all', 'FollowLinks', 'on', ...
         'ReferenceBlock', 'sm_lib/Frames and Transforms/World Frame');
     assert(~isempty(wf), 'gs3dx:render', 'World Frame not found in %s', mdl);
@@ -332,18 +345,47 @@ function [ks, closed, tv, ids, keys] = local_build_ks(mdl, solids)
     jp = ks.jointPositionVariables;
     [keys, ids] = gs3dx_joint_keys(mdl, jp);
 
-    for i = 1:numel(solids)
-        s_port = [solids(i).block '/R'];
-        addFrameVariables(ks, sprintf('p%d', i), 'Translation', world, s_port);
+    names = gs3dx_names();
+    grounded=strcmp(string(mdl),names.variants.fullbody);
+    fixed_reference=false(1,numel(solids));
+    base_frames=repmat({world},1,numel(solids));
+    if grounded
+        pelvis_paths=unique(string(jp.BlockPath(contains(string(jp.BlockPath),'Hip Kinetically Driven/Hip Joint'))));
+        assert(numel(pelvis_paths)==1,'gs3dx:render','Grounded pelvis must resolve uniquely');
+        pelvis_frame=char(pelvis_paths(1)+"/F");
+        for i=1:numel(solids)
+            % A World-to-welded-foot measurement is rejected by native KS.
+            % Measure the foot relative to moving pelvis and compose both
+            % native frame measurements to World after solving each pose.
+            fixed_reference(i)=ismember(string(solids(i).block), ...
+                string(mdl)+["/Lower Body/L Foot","/Lower Body/R Foot"]);
+            if fixed_reference(i),base_frames{i}=pelvis_frame;end
+        end
+        assert(nnz(fixed_reference)==2,'gs3dx:render','Expected two native rigid-foot solids');
     end
     for i = 1:numel(solids)
         s_port = [solids(i).block '/R'];
-        addFrameVariables(ks, sprintf('r%d', i), 'Rotation', world, s_port);
+        addFrameVariables(ks, sprintf('p%d', i), 'Translation', base_frames{i}, s_port);
+    end
+    for i = 1:numel(solids)
+        s_port = [solids(i).block '/R'];
+        addFrameVariables(ks, sprintf('r%d', i), 'Rotation', base_frames{i}, s_port);
+    end
+    if grounded
+        addFrameVariables(ks,'ground_pelvis_p','Translation',world,pelvis_frame);
+        addFrameVariables(ks,'ground_pelvis_r','Rotation',world,pelvis_frame);
     end
 
     % Grip loop closed joints (right elbow, shoulder, wrist), by block path:
-    % a joint added to a variant renumbers the IDs after it
-    closed = startsWith(keys, ["Right Elbow Joint/" "Right Shoulder Joint/" "Right Wrist and Hand/"]);
+    % a joint added to a variant renumbers the IDs after it. For registered
+    % GS3DX_FullBody, rigid-foot loop closure also grounds both legs.
+    names = gs3dx_names();
+    if strcmp(string(mdl), names.variants.fullbody)
+        roles = gs3dx_ik_joint_roles(jp.BlockPath, ids, 'grounded_legs', true);
+        closed = roles.closed_mask;
+    else
+        closed = startsWith(keys, ["Right Elbow Joint/" "Right Shoulder Joint/" "Right Wrist and Hand/"]);
+    end
     tv = ids(~closed);
 
     addTargetVariables(ks, tv);
@@ -428,7 +470,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Solve poses and build World geometry
 % -------------------------------------------------------------------------
-function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve)
+function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_solve, fixed_reference)
     ns = numel(solids);
     n_total_frames = size(q_mat, 2);
 
@@ -453,6 +495,12 @@ function solids = local_solve_poses(ks, solids, q_mat, closed, tv, frames_to_sol
             rot_deg = sol(3*ns + 3*(s_idx - 1) + 1 : 3*ns + 3*s_idx);
             rot_rad = rot_deg * (pi / 180);
             R_world = local_rx(rot_rad(1)) * local_ry(rot_rad(2)) * local_rz(rot_rad(3));
+            if fixed_reference(s_idx)
+                p_ref=sol(6*ns+(1:3));a_ref=sol(6*ns+(4:6))*(pi/180);
+                R_ref=local_rx(a_ref(1))*local_ry(a_ref(2))*local_rz(a_ref(3));
+                p_world=p_ref+R_ref*p_world;
+                R_world=R_ref*R_world;
+            end
 
             solids(s_idx).pose.P(:, f) = p_world;
             solids(s_idx).pose.R(:, :, f) = R_world;
@@ -595,7 +643,7 @@ end
 % -------------------------------------------------------------------------
 % Helper: Draw scene for frame f into given axes
 % -------------------------------------------------------------------------
-function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus)
+function local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus)
     cla(ax);
     hold(ax, 'on');
 
@@ -626,15 +674,24 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
 
     % Overlay markers if available
     if ~isempty(markers)
-        if ndims(markers) == 3 && size(markers, 1) == 3 && size(markers, 2) ~= 3
+        if size(markers, 1) == 3 && size(markers, 2) ~= 3
             markers = permute(markers, [2 1 3]);
         end
         if size(markers, 3) >= f
             m_f = markers(:, :, f);
-            valid_m = ~isnan(m_f(:, 1));
+            valid_m = all(isfinite(m_f),2);
             scatter3(ax, m_f(valid_m, 1), m_f(valid_m, 2), m_f(valid_m, 3), ...
-                28, [0.85 0.325 0.098], 'filled', 'MarkerEdgeColor', [0.2 0.2 0.2]);
+                42, [1.0 0.42 0.04], 'filled', 'MarkerEdgeColor', [0.2 0.2 0.2]);
         end
+    end
+
+    % Highlight only measured back/waist points; NaN samples stay hidden.
+    if ~isempty(highlights) && size(highlights,3)>=f
+        h=highlights(:,:,f);
+        assert(size(h,1)==3,'gs3dx:render','Highlights must be 3xNxF');
+        valid=all(isfinite(h),1);
+        scatter3(ax,h(1,valid),h(2,valid),h(3,valid),70,[0 .75 .9], ...
+            'filled','MarkerEdgeColor',[.1 .1 .1]);
     end
 
     % Scene bounds and appearance
@@ -685,17 +742,17 @@ end
 % -------------------------------------------------------------------------
 % Helper: Render single still image
 % -------------------------------------------------------------------------
-function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis, focus)
+function local_render_still(solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, outfile, is_vis, focus, resolution)
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
     end
-    fig = figure('Visible', vis_str, 'Color', 'w', 'Position', [100 100 1024 768]);
+    fig = figure('Visible', vis_str, 'Color', 'w', 'Units','pixels','Position', [100 100 resolution]);
     ax = axes('Parent', fig);
     
-    local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
+    local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus);
     
-    exportgraphics(fig, outfile, 'Resolution', 120);
+    gs3dx_export_pixels(fig,outfile,resolution);
     close(fig);
 end
 
@@ -703,13 +760,13 @@ end
 % Helper: Render swing video (MP4 or GIF fallback)
 % -------------------------------------------------------------------------
 function video_file = local_render_video(solids, frames, t_vec, az, el, ...
-    markers, draw_ground, scene_title, fps, outfile, is_vis, focus)
+    markers, highlights, draw_ground, scene_title, fps, outfile, is_vis, focus, resolution, quality)
 
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
     end
-    fig = figure('Visible', vis_str, 'Color', 'w', 'Position', [100 100 800 600]);
+    fig = figure('Visible', vis_str, 'Color', 'w', 'Units','pixels','Position', [100 100 resolution]);
     ax = axes('Parent', fig);
 
     video_file = outfile;
@@ -725,7 +782,7 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         try
             vw = VideoWriter(video_file, 'MPEG-4');
             vw.FrameRate = fps;
-            vw.Quality = 85;
+            vw.Quality = quality;
             open(vw);
         catch
             use_mp4 = false;
@@ -733,15 +790,22 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         end
     end
 
+    frame_png=[tempname '.png'];
+    frame_cleanup=onCleanup(@() local_delete_frame_png(frame_png));
     for i = 1:numel(frames)
         f = frames(i);
         t_val = NaN;
         if ~isempty(t_vec) && f <= numel(t_vec)
             t_val = t_vec(f);
         end
-        local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
+        local_draw_scene(ax, solids, f, t_val, az, el, markers, highlights, draw_ground, scene_title, focus);
         drawnow;
-        frame_data = getframe(fig);
+        % GETFRAME is limited by display size even for invisible figures.
+        % Render native pixels explicitly; never upscale a screen capture.
+        pixels=gs3dx_export_pixels(fig,frame_png,resolution);
+        frame_data=struct('cdata',pixels,'colormap',[]);
+        assert(isequal([size(frame_data.cdata,2),size(frame_data.cdata,1)],resolution), ...
+            'gs3dx:render','Rendered video dimensions differ from the requested resolution');
 
         if use_mp4
             writeVideo(vw, frame_data);
@@ -775,4 +839,8 @@ end
 
 function R = local_rz(a)
     R = [cos(a) -sin(a) 0; sin(a) cos(a) 0; 0 0 1];
+end
+
+function local_delete_frame_png(path)
+    if isfile(path),delete(path);end
 end
