@@ -3509,6 +3509,63 @@ or a warm start alone is insufficient. A complete forward-dynamics run
 must await a qualified continuous reference and native moving-contact
 initialization; these diagnostics do not replace that evidence.
 
+
+\subsection{Explicit Observation Contract in the Exporter}
+\label{sec:observation-export-contract}
+The exporter now accepts an optional logical source availability mask and
+an explicit observation contract. Both must be supplied together. The mask
+is forwarded to the existing importer before joint-centre derivation,
+event detection, fitting or rendering. The shared observation-identity
+helper validates the actual C3D export SHA-256, exact ordered marker labels,
+sample rate and frame count before model setup or output/cache writes.
+Numeric masks, malformed hashes, mismatched metadata and improperly shaped
+empty sentinels fail closed. Single-frame masks retain their conceptual
+$1\times M\times1$ shape despite MATLAB's trailing-singleton convention.
+
+The raw GEARS source hash is an explicit caller attestation. It is distinct
+from the actual C3D file hash; hashing the exporter M-file would not bind the
+capture and is not used for this contract. Neither hash establishes physical
+marker accuracy. Without a mask the report declares
+\texttt{EXPORTED\_COORDINATE\_VALIDITY\_ONLY}. With a bound mask it declares
+\texttt{SOURCE\_AVAILABILITY\_MASK\_CALLER\_BOUND}. Both retain
+\texttt{physical\_measurement\_verified=false}.
+
+For mask $A\in\{0,1\}^{1\times M\times T}$, the identity digest is
+\[
+ H_A=\operatorname{SHA256}\bigl(
+   \operatorname{ASCII}(\texttt{1xMxT:})\;\Vert\;
+   \operatorname{uint8}(A(:))\bigr),
+\]
+where the header contains decimal dimension values and the payload uses
+MATLAB column-major order, with one byte per Boolean. Ordered labels and
+clock metadata are bound separately. Masked solve identities include the
+whitelisted observation metadata, so an unmasked or differently bound
+identity cannot pass the existing exact cache-identity comparison.
+Dependency hashes include the new helper. The historical unmasked identity
+layout is retained, while changed source dependency hashes still invalidate
+old solves. Existing media remain unchanged and retain their original
+qualification.
+
+Native TDD first exposed 18 expected failing tests against the old wrapper
+and missing helper. After correcting private harness path and test-call
+errors, all 18 new contract tests passed with no incomplete tests. The
+reviewed exporter was then exercised against the actual owner C3D and its
+38-marker, 367-frame, 240-Hz source availability mask in a private source
+overlay. A wrong export hash and wrong marker dimension were rejected before
+model/output/cache writes. A fresh two-frame fit saved the bound identity,
+and an identical second request reused that cache without rewriting it.
+The integration probe exited naturally with code zero at
+\texttt{2026-10-03T04:24:10Z}; the Human model hash was unchanged.
+
+After integrating the reviewed code into the repository, 39 native tests
+passed: 18 observation-identity tests, 12 existing exporter contracts and
+9 importer observation-mask regressions. This run exited naturally at
+\texttt{04:27:00Z}, without loading the model or executing dynamics.
+The two-frame integration is not full-swing fitting, rendered-video
+qualification, a calibrated marker-offset test or an independent replay.
+A changed-contract cache miss remains governed by exact identity equality;
+the actual-capture probe establishes the identical-contract reuse case.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.

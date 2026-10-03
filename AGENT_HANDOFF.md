@@ -20,6 +20,8 @@
 
 ## Simscape Matching Review (2026-10-02)
 
+- **2026-10-03 04:27 UTC observation export update**: The actual owner two-frame hash/forwarding/cache probe exited naturally with success; 39 production contracts pass. The optional source observation contract is caller-bound and declares physical measurement unverified. Six Google Photos originals are verified locally. Refined peer PR11351 previews remain IK candidates. Dense source-seeded reconstruction preserves all anchors but rejects owner frames 253--256 and contains large adjacent rotations. Continuous fitting and full 35-actuator forward dynamics/replay remain open. See the maintained LaTeX and observation_export_contract_checkpoint_20261003.json.
+
 Current reviewed evidence: **267 native checks pass** (12:34:19Z), zero failed/incomplete. Corrected A/O no-head and zero-weight parity is exact on four frames each. The 46-frame owner head candidate improves against its cold-start baseline but remains worse in mean positional RMS than the selected clip; no Desktop replacement. Owner contact clearances remain -64.462 to -48.262 mm; assembled pose verified under the diagnostic settings; stance unqualified. See the current handoff and sanitized head/quiet review evidence.
 
 Active review branch: `feat/simscape-matching-review-main-20261002`; draft PR [#11256](https://github.com/D-sorganization/UpstreamDrift/pull/11256), reviewed continuation commit `SELF`. Source and runtime qualification remain in progress; no merge, complete goal, or physical acceptance is claimed. Reviewed original worker commits `144e81188` through `f2ca443a0` (documentation-only continuation); unpublished original `144e81188` baseline.
