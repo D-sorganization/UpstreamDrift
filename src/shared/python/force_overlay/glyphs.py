@@ -1,20 +1,21 @@
-"""Glyph builder and renderer-neutral geometry (ADR-0052, #11288).
-
-Pure, deterministic builder converting ForceTorqueFrame to GlyphSet wire geometry.
-Zero rendering or GUI dependencies.
-"""
+"""Renderer-neutral force and torque glyph generation and serialization (ADR-0052, #11288)."""
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
 import math
-from typing import Any, Final
+from dataclasses import dataclass, field
+from types import MappingProxyType
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
-from .contracts import ForceTorqueFrame, OverlayWrench, WrenchKind
-from .palette import FORCE_KIND_PALETTE, hex_to_rgba
+from src.shared.python.force_overlay.contracts import (
+    ForceTorqueFrame,
+    OverlayWrench,
+    WrenchKind,
+    validate_vec3,
+)
+from src.shared.python.plot_style import FORCE_KIND_PALETTE
 
 __all__ = [
     "ArrowGlyph",
@@ -26,24 +27,42 @@ __all__ = [
     "scale_for_view",
 ]
 
-GLYPH_SCHEMA_VERSION: Final[str] = "glyph-set-v1"
+SCHEMA_VERSION = "glyph-set-v1"
 
 
-def _closest_nice_number(val: float) -> float:
-    """Find the nice number (1, 2, or 5 * 10^n) closest to val."""
+def _hex_to_rgba(hex_code: str) -> tuple[float, float, float, float]:
+    """Parse #RGB, #RRGGBB, or #RRGGBBAA hex color into float RGBA in [0, 1]."""
+    s = hex_code.strip().lstrip("#")
+    if len(s) == 3:
+        r, g, b = (int(c * 2, 16) / 255.0 for c in s)
+        return (r, g, b, 1.0)
+    if len(s) == 6:
+        r = int(s[0:2], 16) / 255.0
+        g = int(s[2:4], 16) / 255.0
+        b = int(s[4:6], 16) / 255.0
+        return (r, g, b, 1.0)
+    if len(s) == 8:
+        r = int(s[0:2], 16) / 255.0
+        g = int(s[2:4], 16) / 255.0
+        b = int(s[4:6], 16) / 255.0
+        a = int(s[6:8], 16) / 255.0
+        return (r, g, b, a)
+    raise ValueError(f"Invalid hex color code: {hex_code!r}")
+
+
+def _nice_number(val: float) -> float:
+    """Return the nice number (1, 2 or 5 * 10^n) closest to val."""
     if val <= 0.0 or not math.isfinite(val):
         return 1.0
-    p = math.floor(math.log10(val))
-    candidates = []
-    for exp in (p - 1, p, p + 1):
-        for mult in (1.0, 2.0, 5.0):
-            candidates.append(mult * (10.0**exp))
-    return min(candidates, key=lambda c: (abs(c - val), c))
+    exp = math.floor(math.log10(val))
+    scale = 10.0**exp
+    candidates = (1.0 * scale, 2.0 * scale, 5.0 * scale, 10.0 * scale)
+    return min(candidates, key=lambda c: abs(c - val))
 
 
 @dataclass(frozen=True)
 class ForceGlyphStyle:
-    """Styling and filtering configuration for force and torque glyph generation."""
+    """Configuration style for generating force and torque glyphs."""
 
     force_scale_m_per_n: float = 1.0 / 1000.0
     torque_scale_m_per_nm: float = 1.0 / 200.0
@@ -52,59 +71,125 @@ class ForceGlyphStyle:
     shaft_radius_m: float = 0.006
     head_length_ratio: float = 0.22
     head_radius_ratio: float = 2.4
-    torque_style: str = "arc"  # "arc" or "axis_double_head"
+    torque_style: str = "arc"
     arc_sweep_rad: float = 1.5 * math.pi
     arc_segments: int = 32
-    kinds: tuple[str, ...] = tuple(k.value for k in WrenchKind)
+    kinds: frozenset[WrenchKind] = field(default_factory=lambda: frozenset(WrenchKind))
     magnitude_floor_n: float = 1.0
     magnitude_floor_nm: float = 0.1
     show_labels: bool = False
-    palette: dict[str, str] = field(default_factory=lambda: dict(FORCE_KIND_PALETTE))
+    palette: Mapping[str, str] = field(
+        default_factory=lambda: MappingProxyType(dict(FORCE_KIND_PALETTE))
+    )
 
     def __post_init__(self) -> None:
-        for name, val in [
-            ("force_scale_m_per_n", self.force_scale_m_per_n),
-            ("torque_scale_m_per_nm", self.torque_scale_m_per_nm),
-            ("min_length_m", self.min_length_m),
-            ("max_length_m", self.max_length_m),
-            ("shaft_radius_m", self.shaft_radius_m),
-            ("head_length_ratio", self.head_length_ratio),
-            ("head_radius_ratio", self.head_radius_ratio),
-            ("arc_sweep_rad", self.arc_sweep_rad),
-            ("magnitude_floor_n", self.magnitude_floor_n),
-            ("magnitude_floor_nm", self.magnitude_floor_nm),
-        ]:
-            if (
-                not isinstance(val, (int, float))
-                or not math.isfinite(val)
-                or val <= 0.0
-            ):
-                raise ValueError(f"{name} must be positive and finite, got {val}")
+        for name in (
+            "force_scale_m_per_n",
+            "torque_scale_m_per_nm",
+            "min_length_m",
+            "max_length_m",
+            "shaft_radius_m",
+            "head_length_ratio",
+            "head_radius_ratio",
+            "arc_sweep_rad",
+            "magnitude_floor_n",
+            "magnitude_floor_nm",
+        ):
+            val = getattr(self, name)
+            if not isinstance(val, (int, float)) or isinstance(val, bool):
+                raise TypeError(f"{name} must be numeric")
+            if not math.isfinite(val) or val <= 0.0:
+                raise ValueError(f"{name} must be finite and positive, got {val}")
 
         if self.min_length_m >= self.max_length_m:
             raise ValueError(
-                f"min_length_m must be strictly less than max_length_m: {self.min_length_m} >= {self.max_length_m}"
+                f"min_length_m ({self.min_length_m}) must be < max_length_m ({self.max_length_m})"
             )
+
+        if not isinstance(self.arc_segments, int) or isinstance(
+            self.arc_segments, bool
+        ):
+            raise TypeError("arc_segments must be int")
+        if self.arc_segments < 3:
+            raise ValueError(f"arc_segments must be >= 3, got {self.arc_segments}")
+
         if self.torque_style not in ("arc", "axis_double_head"):
             raise ValueError(
                 f"torque_style must be 'arc' or 'axis_double_head', got {self.torque_style!r}"
             )
-        if self.arc_segments < 3:
-            raise ValueError(f"arc_segments must be >= 3, got {self.arc_segments}")
 
-        # Normalize kinds to string tuple
-        norm_kinds = tuple(
-            k.value if hasattr(k, "value") else str(k) for k in self.kinds
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize style configuration to JSON-safe dictionary."""
+        return {
+            "force_scale_m_per_n": self.force_scale_m_per_n,
+            "torque_scale_m_per_nm": self.torque_scale_m_per_nm,
+            "min_length_m": self.min_length_m,
+            "max_length_m": self.max_length_m,
+            "shaft_radius_m": self.shaft_radius_m,
+            "head_length_ratio": self.head_length_ratio,
+            "head_radius_ratio": self.head_radius_ratio,
+            "torque_style": self.torque_style,
+            "arc_sweep_rad": self.arc_sweep_rad,
+            "arc_segments": self.arc_segments,
+            "kinds": sorted(k.value for k in self.kinds),
+            "magnitude_floor_n": self.magnitude_floor_n,
+            "magnitude_floor_nm": self.magnitude_floor_nm,
+            "show_labels": self.show_labels,
+            "palette": dict(self.palette),
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> ForceGlyphStyle:
+        """Construct style from dictionary, rejecting unknown keys."""
+        valid_keys = {
+            "force_scale_m_per_n",
+            "torque_scale_m_per_nm",
+            "min_length_m",
+            "max_length_m",
+            "shaft_radius_m",
+            "head_length_ratio",
+            "head_radius_ratio",
+            "torque_style",
+            "arc_sweep_rad",
+            "arc_segments",
+            "kinds",
+            "magnitude_floor_n",
+            "magnitude_floor_nm",
+            "show_labels",
+            "palette",
+        }
+        unknown = set(data.keys()) - valid_keys
+        if unknown:
+            raise ValueError(f"Unknown fields in ForceGlyphStyle: {sorted(unknown)}")
+
+        kinds_raw = data.get("kinds")
+        kinds = (
+            frozenset(WrenchKind(k) for k in kinds_raw)
+            if kinds_raw is not None
+            else frozenset(WrenchKind)
         )
-        object.__setattr__(self, "kinds", norm_kinds)
+        palette_raw = data.get("palette")
+        palette = (
+            MappingProxyType(dict(palette_raw))
+            if palette_raw is not None
+            else MappingProxyType(dict(FORCE_KIND_PALETTE))
+        )
+
+        kwargs: dict[str, Any] = {}
+        for key in valid_keys - {"kinds", "palette"}:
+            if key in data:
+                kwargs[key] = data[key]
+        kwargs["kinds"] = kinds
+        kwargs["palette"] = palette
+        return cls(**kwargs)
 
 
 @dataclass(frozen=True)
 class ArrowGlyph:
-    """Renderer-neutral geometry for a 3D arrow glyph."""
+    """Renderer-neutral arrow specification for force or axis vectors."""
 
     label: str
-    kind: str
+    kind: WrenchKind
     tail_m: tuple[float, float, float]
     tip_m: tuple[float, float, float]
     head_base_m: tuple[float, float, float]
@@ -116,9 +201,10 @@ class ArrowGlyph:
     clamped: bool
 
     def to_dict(self) -> dict[str, Any]:
+        """Convert arrow glyph to JSON dictionary."""
         return {
             "label": self.label,
-            "kind": self.kind,
+            "kind": self.kind.value,
             "tail_m": list(self.tail_m),
             "tip_m": list(self.tip_m),
             "head_base_m": list(self.head_base_m),
@@ -132,20 +218,13 @@ class ArrowGlyph:
 
     @classmethod
     def from_dict(cls, d: Mapping[str, Any]) -> ArrowGlyph:
+        """Reconstruct arrow glyph from JSON dictionary."""
         return cls(
             label=str(d["label"]),
-            kind=str(d["kind"]),
-            tail_m=(
-                float(d["tail_m"][0]),
-                float(d["tail_m"][1]),
-                float(d["tail_m"][2]),
-            ),
-            tip_m=(float(d["tip_m"][0]), float(d["tip_m"][1]), float(d["tip_m"][2])),
-            head_base_m=(
-                float(d["head_base_m"][0]),
-                float(d["head_base_m"][1]),
-                float(d["head_base_m"][2]),
-            ),
+            kind=WrenchKind(d["kind"]),
+            tail_m=validate_vec3(d["tail_m"], "tail_m"),
+            tip_m=validate_vec3(d["tip_m"], "tip_m"),
+            head_base_m=validate_vec3(d["head_base_m"], "head_base_m"),
             shaft_radius_m=float(d["shaft_radius_m"]),
             head_radius_m=float(d["head_radius_m"]),
             rgba=(
@@ -162,10 +241,10 @@ class ArrowGlyph:
 
 @dataclass(frozen=True)
 class TorqueArcGlyph:
-    """Renderer-neutral geometry for a 3D torque arc polyline glyph."""
+    """Renderer-neutral circular arc specification for torque visualization."""
 
     label: str
-    kind: str
+    kind: WrenchKind
     center_m: tuple[float, float, float]
     axis_unit: tuple[float, float, float]
     radius_m: float
@@ -178,9 +257,10 @@ class TorqueArcGlyph:
     clamped: bool
 
     def to_dict(self) -> dict[str, Any]:
+        """Convert torque arc glyph to JSON dictionary."""
         return {
             "label": self.label,
-            "kind": self.kind,
+            "kind": self.kind.value,
             "center_m": list(self.center_m),
             "axis_unit": list(self.axis_unit),
             "radius_m": self.radius_m,
@@ -195,33 +275,19 @@ class TorqueArcGlyph:
 
     @classmethod
     def from_dict(cls, d: Mapping[str, Any]) -> TorqueArcGlyph:
+        """Reconstruct torque arc glyph from JSON dictionary."""
         return cls(
             label=str(d["label"]),
-            kind=str(d["kind"]),
-            center_m=(
-                float(d["center_m"][0]),
-                float(d["center_m"][1]),
-                float(d["center_m"][2]),
-            ),
-            axis_unit=(
-                float(d["axis_unit"][0]),
-                float(d["axis_unit"][1]),
-                float(d["axis_unit"][2]),
-            ),
+            kind=WrenchKind(d["kind"]),
+            center_m=validate_vec3(d["center_m"], "center_m"),
+            axis_unit=validate_vec3(d["axis_unit"], "axis_unit"),
             radius_m=float(d["radius_m"]),
             polyline_m=tuple(
-                (float(pt[0]), float(pt[1]), float(pt[2])) for pt in d["polyline_m"]
+                validate_vec3(pt, f"polyline_m[{i}]")
+                for i, pt in enumerate(d["polyline_m"])
             ),
-            head_tip_m=(
-                float(d["head_tip_m"][0]),
-                float(d["head_tip_m"][1]),
-                float(d["head_tip_m"][2]),
-            ),
-            head_base_m=(
-                float(d["head_base_m"][0]),
-                float(d["head_base_m"][1]),
-                float(d["head_base_m"][2]),
-            ),
+            head_tip_m=validate_vec3(d["head_tip_m"], "head_tip_m"),
+            head_base_m=validate_vec3(d["head_base_m"], "head_base_m"),
             rgba=(
                 float(d["rgba"][0]),
                 float(d["rgba"][1]),
@@ -236,24 +302,25 @@ class TorqueArcGlyph:
 
 @dataclass(frozen=True)
 class LegendSpec:
-    """Reference scaling and metadata for viewport overlay legends."""
+    """Renderer-neutral legend specification containing scales and metadata."""
 
     force_reference_n: float | None
     force_reference_length_m: float | None
     torque_reference_nm: float | None
     torque_reference_radius_m: float | None
-    kinds_present: tuple[str, ...]
+    kinds_present: tuple[WrenchKind, ...]
     unavailable_labels: tuple[str, ...]
     engine: str
     source_labels: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
+        """Convert legend spec to JSON dictionary."""
         return {
             "force_reference_n": self.force_reference_n,
             "force_reference_length_m": self.force_reference_length_m,
             "torque_reference_nm": self.torque_reference_nm,
             "torque_reference_radius_m": self.torque_reference_radius_m,
-            "kinds_present": list(self.kinds_present),
+            "kinds_present": [k.value for k in self.kinds_present],
             "unavailable_labels": list(self.unavailable_labels),
             "engine": self.engine,
             "source_labels": list(self.source_labels),
@@ -261,6 +328,7 @@ class LegendSpec:
 
     @classmethod
     def from_dict(cls, d: Mapping[str, Any]) -> LegendSpec:
+        """Reconstruct legend spec from JSON dictionary."""
         return cls(
             force_reference_n=(
                 float(d["force_reference_n"])
@@ -282,26 +350,25 @@ class LegendSpec:
                 if d.get("torque_reference_radius_m") is not None
                 else None
             ),
-            kinds_present=tuple(str(k) for k in d.get("kinds_present", ())),
-            unavailable_labels=tuple(
-                str(lbl) for lbl in d.get("unavailable_labels", ())
-            ),
-            engine=str(d.get("engine", "")),
-            source_labels=tuple(str(lbl) for lbl in d.get("source_labels", ())),
+            kinds_present=tuple(WrenchKind(k) for k in d["kinds_present"]),
+            unavailable_labels=tuple(str(lbl) for lbl in d["unavailable_labels"]),
+            engine=str(d["engine"]),
+            source_labels=tuple(str(src) for src in d["source_labels"]),
         )
 
 
 @dataclass(frozen=True)
 class GlyphSet:
-    """Collection of renderable glyphs for one instant in time."""
+    """Complete collection of generated glyphs for a single frame."""
 
     time_s: float
     arrows: tuple[ArrowGlyph, ...]
     torque_arcs: tuple[TorqueArcGlyph, ...]
     legend: LegendSpec
-    schema_version: str = GLYPH_SCHEMA_VERSION
+    schema_version: str = SCHEMA_VERSION
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize glyph set to canonical JSON dictionary."""
         return {
             "schema_version": self.schema_version,
             "time_s": self.time_s,
@@ -311,229 +378,220 @@ class GlyphSet:
         }
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> GlyphSet:
-        expected_keys = {"schema_version", "time_s", "arrows", "torque_arcs", "legend"}
-        unknown = set(d.keys()) - expected_keys
+    def from_dict(cls, data: Mapping[str, Any]) -> GlyphSet:
+        """Construct glyph set from dictionary, rejecting invalid schemas/keys."""
+        valid_keys = {"schema_version", "time_s", "arrows", "torque_arcs", "legend"}
+        unknown = set(data.keys()) - valid_keys
         if unknown:
-            raise ValueError(f"Unknown keys in GlyphSet: {unknown}")
+            raise ValueError(f"Unknown keys in GlyphSet: {sorted(unknown)}")
 
-        version = d.get("schema_version")
-        if version != GLYPH_SCHEMA_VERSION:
+        version = data.get("schema_version")
+        if version != SCHEMA_VERSION:
             raise ValueError(
-                f"schema_version must be '{GLYPH_SCHEMA_VERSION}', got {version!r}"
+                f"Unsupported schema_version {version!r}; expected {SCHEMA_VERSION!r}"
             )
 
-        return cls(
-            time_s=float(d["time_s"]),
-            arrows=tuple(ArrowGlyph.from_dict(a) for a in d.get("arrows", ())),
-            torque_arcs=tuple(
-                TorqueArcGlyph.from_dict(t) for t in d.get("torque_arcs", ())
-            ),
-            legend=LegendSpec.from_dict(d["legend"]),
-            schema_version=version,
-        )
+        time_s = float(data["time_s"])
+        arrows = tuple(ArrowGlyph.from_dict(a) for a in data["arrows"])
+        torque_arcs = tuple(TorqueArcGlyph.from_dict(t) for t in data["torque_arcs"])
+        legend = LegendSpec.from_dict(data["legend"])
+        return cls(time_s=time_s, arrows=arrows, torque_arcs=torque_arcs, legend=legend)
 
 
-def _build_torque_arc_basis(a_hat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Pick world axis e with smallest |a_hat . e| (breaking ties x, y, z) and build u, v."""
-    dx = abs(float(a_hat[0]))
-    dy = abs(float(a_hat[1]))
-    dz = abs(float(a_hat[2]))
+def _compute_arc_basis(
+    axis_unit: tuple[float, float, float],
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    """Determine deterministic orthonormal basis (u, v) in plane normal to axis_unit."""
+    ax, ay, az = axis_unit
+    dots = (abs(ax), abs(ay), abs(az))
+    min_dot = min(dots)
 
-    if dx <= dy and dx <= dz:
-        e = np.array([1.0, 0.0, 0.0], dtype=np.float64)
-    elif dy <= dz:
-        e = np.array([0.0, 1.0, 0.0], dtype=np.float64)
+    if abs(dots[0] - min_dot) <= 1e-12:
+        e = (1.0, 0.0, 0.0)
+    elif abs(dots[1] - min_dot) <= 1e-12:
+        e = (0.0, 1.0, 0.0)
     else:
-        e = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+        e = (0.0, 0.0, 1.0)
 
-    proj = e - float(np.dot(e, a_hat)) * a_hat
-    u = proj / float(np.linalg.norm(proj))
-    v = np.cross(a_hat, u)
+    e_dot_a = e[0] * ax + e[1] * ay + e[2] * az
+    proj = (e[0] - e_dot_a * ax, e[1] - e_dot_a * ay, e[2] - e_dot_a * az)
+    norm = math.sqrt(proj[0] ** 2 + proj[1] ** 2 + proj[2] ** 2)
+    u = (proj[0] / norm, proj[1] / norm, proj[2] / norm)
+
+    v = (
+        ay * u[2] - az * u[1],
+        az * u[0] - ax * u[2],
+        ax * u[1] - ay * u[0],
+    )
     return u, v
 
 
-def _build_single_arrow(
-    w: OverlayWrench,
-    kind_str: str,
-    rgba: tuple[float, float, float, float],
-    cfg: ForceGlyphStyle,
-) -> tuple[ArrowGlyph | None, float | None, bool]:
-    """Build an ArrowGlyph for wrench force. Returns (glyph, magnitude, is_unavailable)."""
-    if w.force_n is None:
-        return None, None, True
-    f_arr = np.array(w.force_n, dtype=np.float64)
-    f_mag = float(np.linalg.norm(f_arr))
-    if f_mag < cfg.magnitude_floor_n:
-        return None, None, False
+def _build_force_arrow(
+    wrench: OverlayWrench,
+    style: ForceGlyphStyle,
+    color_hex: str,
+) -> ArrowGlyph:
+    """Build ArrowGlyph from a force vector according to style specification."""
+    assert wrench.force_n is not None
+    fx, fy, fz = wrench.force_n
+    mag = math.sqrt(fx * fx + fy * fy + fz * fz)
+    f_hat = (fx / mag, fy / mag, fz / mag)
 
-    f_hat = f_arr / f_mag
-    l_des = f_mag * cfg.force_scale_m_per_n
-    l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
-    clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
+    raw_len = mag * style.force_scale_m_per_n
+    clamped = (raw_len < style.min_length_m) or (raw_len > style.max_length_m)
+    length = max(style.min_length_m, min(raw_len, style.max_length_m))
 
-    pt = np.array(w.point_m, dtype=np.float64)
-    tip = pt + l_eff * f_hat
-    head_len = cfg.head_length_ratio * l_eff
-    head_base = tip - head_len * f_hat
+    px, py, pz = wrench.point_m
+    tip = (px + length * f_hat[0], py + length * f_hat[1], pz + length * f_hat[2])
+    head_len = style.head_length_ratio * length
+    head_base = (
+        tip[0] - head_len * f_hat[0],
+        tip[1] - head_len * f_hat[1],
+        tip[2] - head_len * f_hat[2],
+    )
 
-    arrow = ArrowGlyph(
-        label=w.label,
-        kind=kind_str,
-        tail_m=(float(pt[0]), float(pt[1]), float(pt[2])),
-        tip_m=(float(tip[0]), float(tip[1]), float(tip[2])),
-        head_base_m=(float(head_base[0]), float(head_base[1]), float(head_base[2])),
-        shaft_radius_m=cfg.shaft_radius_m,
-        head_radius_m=cfg.shaft_radius_m * cfg.head_radius_ratio,
+    shaft_radius = style.shaft_radius_m
+    head_radius = shaft_radius * style.head_radius_ratio
+    rgba = _hex_to_rgba(color_hex)
+
+    return ArrowGlyph(
+        label=wrench.label,
+        kind=wrench.kind,
+        tail_m=wrench.point_m,
+        tip_m=tip,
+        head_base_m=head_base,
+        shaft_radius_m=shaft_radius,
+        head_radius_m=head_radius,
         rgba=rgba,
-        magnitude=f_mag,
+        magnitude=mag,
         units="N",
         clamped=clamped,
     )
-    return arrow, f_mag, False
 
 
-def _build_single_torque_arc(
-    w: OverlayWrench,
-    kind_str: str,
-    rgba: tuple[float, float, float, float],
-    cfg: ForceGlyphStyle,
-) -> tuple[TorqueArcGlyph | None, float | None, bool]:
-    """Build a TorqueArcGlyph for wrench torque. Returns (glyph, magnitude, is_unavailable)."""
-    if w.torque_nm is None:
-        return None, None, True
-    t_arr = np.array(w.torque_nm, dtype=np.float64)
-    t_mag = float(np.linalg.norm(t_arr))
-    if t_mag < cfg.magnitude_floor_nm:
-        return None, None, False
+def _build_torque_arc(
+    wrench: OverlayWrench,
+    style: ForceGlyphStyle,
+    color_hex: str,
+) -> TorqueArcGlyph:
+    """Build TorqueArcGlyph from a torque vector according to style specification."""
+    assert wrench.torque_nm is not None
+    tx, ty, tz = wrench.torque_nm
+    mag = math.sqrt(tx * tx + ty * ty + tz * tz)
+    a_hat = (tx / mag, ty / mag, tz / mag)
 
-    a_hat = t_arr / t_mag
-    l_des = t_mag * cfg.torque_scale_m_per_nm
-    l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
-    clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
-    radius_m = l_eff / 2.0
+    raw_len = mag * style.torque_scale_m_per_nm
+    clamped = (raw_len < style.min_length_m) or (raw_len > style.max_length_m)
+    eff_len = max(style.min_length_m, min(raw_len, style.max_length_m))
+    radius = eff_len / 2.0
 
-    center = np.array(w.point_m, dtype=np.float64)
-    u, v = _build_torque_arc_basis(a_hat)
-    thetas = np.linspace(0.0, cfg.arc_sweep_rad, cfg.arc_segments + 1)
-    pts = [center + radius_m * (math.cos(th) * u + math.sin(th) * v) for th in thetas]
-    poly = tuple((float(p[0]), float(p[1]), float(p[2])) for p in pts)
+    u, v = _compute_arc_basis(a_hat)
+    cx, cy, cz = wrench.point_m
+    n_seg = style.arc_segments
+    sweep = style.arc_sweep_rad
 
-    last_th = float(thetas[-1])
-    tangent = -math.sin(last_th) * u + math.cos(last_th) * v
-    t_norm = float(np.linalg.norm(tangent))
-    if t_norm > 0:
-        tangent = tangent / t_norm
+    pts: list[tuple[float, float, float]] = []
+    for i in range(n_seg + 1):
+        theta = sweep * (i / n_seg)
+        cos_t = math.cos(theta)
+        sin_t = math.sin(theta)
+        x = cx + radius * (cos_t * u[0] + sin_t * v[0])
+        y = cy + radius * (cos_t * u[1] + sin_t * v[1])
+        z = cz + radius * (cos_t * u[2] + sin_t * v[2])
+        pts.append((x, y, z))
 
     head_tip = pts[-1]
-    head_len = cfg.head_length_ratio * l_eff
-    head_base = head_tip - head_len * tangent
+    cos_last = math.cos(sweep)
+    sin_last = math.sin(sweep)
+    tangent = (
+        -sin_last * u[0] + cos_last * v[0],
+        -sin_last * u[1] + cos_last * v[1],
+        -sin_last * u[2] + cos_last * v[2],
+    )
+    head_len = style.head_length_ratio * eff_len
+    head_base = (
+        head_tip[0] - head_len * tangent[0],
+        head_tip[1] - head_len * tangent[1],
+        head_tip[2] - head_len * tangent[2],
+    )
+    rgba = _hex_to_rgba(color_hex)
 
-    arc = TorqueArcGlyph(
-        label=w.label,
-        kind=kind_str,
-        center_m=(float(center[0]), float(center[1]), float(center[2])),
-        axis_unit=(float(a_hat[0]), float(a_hat[1]), float(a_hat[2])),
-        radius_m=radius_m,
-        polyline_m=poly,
-        head_tip_m=(float(head_tip[0]), float(head_tip[1]), float(head_tip[2])),
-        head_base_m=(float(head_base[0]), float(head_base[1]), float(head_base[2])),
+    return TorqueArcGlyph(
+        label=wrench.label,
+        kind=wrench.kind,
+        center_m=wrench.point_m,
+        axis_unit=a_hat,
+        radius_m=radius,
+        polyline_m=tuple(pts),
+        head_tip_m=head_tip,
+        head_base_m=head_base,
         rgba=rgba,
-        magnitude=t_mag,
+        magnitude=mag,
         units="N*m",
         clamped=clamped,
     )
-    return arc, t_mag, False
 
 
-def _build_legend(
-    frame: ForceTorqueFrame,
-    cfg: ForceGlyphStyle,
-    force_mags: list[float],
-    torque_mags: list[float],
-    kinds_present_set: set[str],
-    unavailable: list[str],
-    source_labels: list[str],
-) -> LegendSpec:
-    """Build the legend metadata spec for a GlyphSet."""
-    f_ref_n = _closest_nice_number(float(np.median(force_mags))) if force_mags else None
-    f_ref_l = (
-        min(max(f_ref_n * cfg.force_scale_m_per_n, cfg.min_length_m), cfg.max_length_m)
-        if f_ref_n is not None
-        else None
-    )
-    t_ref_nm = (
-        _closest_nice_number(float(np.median(torque_mags))) if torque_mags else None
-    )
-    t_ref_r = (
-        min(
-            max(t_ref_nm * cfg.torque_scale_m_per_nm, cfg.min_length_m),
-            cfg.max_length_m,
-        )
-        / 2.0
-        if t_ref_nm is not None
-        else None
-    )
-    return LegendSpec(
-        force_reference_n=f_ref_n,
-        force_reference_length_m=f_ref_l,
-        torque_reference_nm=t_ref_nm,
-        torque_reference_radius_m=t_ref_r,
-        kinds_present=tuple(sorted(kinds_present_set)),
-        unavailable_labels=tuple(sorted(set(unavailable))),
-        engine=frame.engine,
-        source_labels=tuple(sorted(set(source_labels))),
-    )
-
-
-def build_glyphs(
-    frame: ForceTorqueFrame,
-    style: ForceGlyphStyle | None = None,
-) -> GlyphSet:
-    """Deterministic generator converting ForceTorqueFrame to GlyphSet wire geometry."""
-    cfg = style or ForceGlyphStyle()
+def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
+    """Pure, deterministic builder turning a ForceTorqueFrame into renderer-neutral glyphs."""
+    sorted_wrenches = sorted(frame.wrenches, key=lambda w: w.label)
     arrows: list[ArrowGlyph] = []
     torque_arcs: list[TorqueArcGlyph] = []
     unavailable: list[str] = []
-    source_labels: list[str] = [w.label for w in frame.wrenches]
-    force_mags: list[float] = []
-    torque_mags: list[float] = []
-    kinds_present_set: set[str] = set()
+    kinds_present_set: set[WrenchKind] = set()
+    source_labels_set: set[str] = set()
 
-    for w in sorted(frame.wrenches, key=lambda x: x.label):
-        kind_str = w.kind.value if hasattr(w.kind, "value") else str(w.kind)
-        if kind_str not in cfg.kinds:
+    for w in sorted_wrenches:
+        if w.kind not in style.kinds:
             continue
+        source_labels_set.add(w.source)
+        color = style.palette.get(
+            w.kind.value, style.palette.get(str(w.kind), "#888888")
+        )
 
-        rgba = hex_to_rgba(cfg.palette.get(kind_str, "#000000"))
-
-        arrow, f_mag, f_unavail = _build_single_arrow(w, kind_str, rgba, cfg)
-        if f_unavail:
+        if w.force_n is None:
             unavailable.append(w.label)
-        elif arrow is not None and f_mag is not None:
-            arrows.append(arrow)
-            force_mags.append(f_mag)
-            kinds_present_set.add(kind_str)
+        else:
+            mag = math.sqrt(sum(c * c for c in w.force_n))
+            if mag >= style.magnitude_floor_n:
+                arrow = _build_force_arrow(w, style, color)
+                arrows.append(arrow)
+                kinds_present_set.add(w.kind)
 
-        arc, t_mag, t_unavail = _build_single_torque_arc(w, kind_str, rgba, cfg)
-        if t_unavail:
-            unavailable.append(w.label)
-        elif arc is not None and t_mag is not None:
-            torque_arcs.append(arc)
-            torque_mags.append(t_mag)
-            kinds_present_set.add(kind_str)
+        if w.torque_nm is None:
+            if w.label not in unavailable:
+                unavailable.append(w.label)
+        else:
+            mag = math.sqrt(sum(c * c for c in w.torque_nm))
+            if mag >= style.magnitude_floor_nm:
+                arc = _build_torque_arc(w, style, color)
+                torque_arcs.append(arc)
+                kinds_present_set.add(w.kind)
 
-    arrows.sort(key=lambda a: a.label)
-    torque_arcs.sort(key=lambda t: t.label)
+    # Reference values for legend
+    force_ref_n: float | None = None
+    force_ref_len: float | None = None
+    if arrows:
+        median_f = float(np.median([a.magnitude for a in arrows]))
+        force_ref_n = _nice_number(median_f)
+        force_ref_len = force_ref_n * style.force_scale_m_per_n
 
-    legend = _build_legend(
-        frame,
-        cfg,
-        force_mags,
-        torque_mags,
-        kinds_present_set,
-        unavailable,
-        source_labels,
+    torque_ref_nm: float | None = None
+    torque_ref_rad: float | None = None
+    if torque_arcs:
+        median_t = float(np.median([t.magnitude for t in torque_arcs]))
+        torque_ref_nm = _nice_number(median_t)
+        torque_ref_rad = (torque_ref_nm * style.torque_scale_m_per_nm) / 2.0
+
+    legend = LegendSpec(
+        force_reference_n=force_ref_n,
+        force_reference_length_m=force_ref_len,
+        torque_reference_nm=torque_ref_nm,
+        torque_reference_radius_m=torque_ref_rad,
+        kinds_present=tuple(sorted(kinds_present_set, key=lambda k: k.value)),
+        unavailable_labels=tuple(sorted(unavailable)),
+        engine=frame.engine,
+        source_labels=tuple(sorted(source_labels_set)),
     )
 
     return GlyphSet(
@@ -545,77 +603,58 @@ def build_glyphs(
 
 
 def scale_for_view(glyphs: GlyphSet, scale_factor: float) -> GlyphSet:
-    """Rescale glyph visual display dimensions while keeping physical magnitudes unchanged."""
-    if (
-        not isinstance(scale_factor, (int, float))
-        or scale_factor <= 0.0
-        or not math.isfinite(scale_factor)
-    ):
+    """Rescale all coordinates and spatial dimensions while preserving magnitudes."""
+    if scale_factor <= 0.0 or not math.isfinite(scale_factor):
         raise ValueError(
             f"scale_factor must be positive and finite, got {scale_factor}"
         )
 
-    s = float(scale_factor)
-    scaled_arrows: list[ArrowGlyph] = []
-    for a in glyphs.arrows:
-        tail = np.array(a.tail_m, dtype=np.float64)
-        tip = tail + (np.array(a.tip_m, dtype=np.float64) - tail) * s
-        hb = (
-            tip
-            + (
-                np.array(a.head_base_m, dtype=np.float64)
-                - np.array(a.tip_m, dtype=np.float64)
-            )
-            * s
+    s = scale_factor
+    scaled_arrows = tuple(
+        ArrowGlyph(
+            label=a.label,
+            kind=a.kind,
+            tail_m=(a.tail_m[0] * s, a.tail_m[1] * s, a.tail_m[2] * s),
+            tip_m=(a.tip_m[0] * s, a.tip_m[1] * s, a.tip_m[2] * s),
+            head_base_m=(
+                a.head_base_m[0] * s,
+                a.head_base_m[1] * s,
+                a.head_base_m[2] * s,
+            ),
+            shaft_radius_m=a.shaft_radius_m * s,
+            head_radius_m=a.head_radius_m * s,
+            rgba=a.rgba,
+            magnitude=a.magnitude,
+            units=a.units,
+            clamped=a.clamped,
         )
-        scaled_arrows.append(
-            ArrowGlyph(
-                label=a.label,
-                kind=a.kind,
-                tail_m=a.tail_m,
-                tip_m=(float(tip[0]), float(tip[1]), float(tip[2])),
-                head_base_m=(float(hb[0]), float(hb[1]), float(hb[2])),
-                shaft_radius_m=a.shaft_radius_m * s,
-                head_radius_m=a.head_radius_m * s,
-                rgba=a.rgba,
-                magnitude=a.magnitude,
-                units=a.units,
-                clamped=a.clamped,
-            )
-        )
+        for a in glyphs.arrows
+    )
 
-    scaled_arcs: list[TorqueArcGlyph] = []
-    for t in glyphs.torque_arcs:
-        center = np.array(t.center_m, dtype=np.float64)
-        scaled_poly = tuple(
-            (
-                float(center[0] + (pt[0] - center[0]) * s),
-                float(center[1] + (pt[1] - center[1]) * s),
-                float(center[2] + (pt[2] - center[2]) * s),
-            )
-            for pt in t.polyline_m
+    scaled_arcs = tuple(
+        TorqueArcGlyph(
+            label=t.label,
+            kind=t.kind,
+            center_m=(t.center_m[0] * s, t.center_m[1] * s, t.center_m[2] * s),
+            axis_unit=t.axis_unit,
+            radius_m=t.radius_m * s,
+            polyline_m=tuple((pt[0] * s, pt[1] * s, pt[2] * s) for pt in t.polyline_m),
+            head_tip_m=(t.head_tip_m[0] * s, t.head_tip_m[1] * s, t.head_tip_m[2] * s),
+            head_base_m=(
+                t.head_base_m[0] * s,
+                t.head_base_m[1] * s,
+                t.head_base_m[2] * s,
+            ),
+            rgba=t.rgba,
+            magnitude=t.magnitude,
+            units=t.units,
+            clamped=t.clamped,
         )
-        ht = center + (np.array(t.head_tip_m, dtype=np.float64) - center) * s
-        hb = center + (np.array(t.head_base_m, dtype=np.float64) - center) * s
-        scaled_arcs.append(
-            TorqueArcGlyph(
-                label=t.label,
-                kind=t.kind,
-                center_m=t.center_m,
-                axis_unit=t.axis_unit,
-                radius_m=t.radius_m * s,
-                polyline_m=scaled_poly,
-                head_tip_m=(float(ht[0]), float(ht[1]), float(ht[2])),
-                head_base_m=(float(hb[0]), float(hb[1]), float(hb[2])),
-                rgba=t.rgba,
-                magnitude=t.magnitude,
-                units=t.units,
-                clamped=t.clamped,
-            )
-        )
+        for t in glyphs.torque_arcs
+    )
 
     old_leg = glyphs.legend
-    new_leg = LegendSpec(
+    scaled_legend = LegendSpec(
         force_reference_n=old_leg.force_reference_n,
         force_reference_length_m=(
             old_leg.force_reference_length_m * s
@@ -636,8 +675,8 @@ def scale_for_view(glyphs: GlyphSet, scale_factor: float) -> GlyphSet:
 
     return GlyphSet(
         time_s=glyphs.time_s,
-        arrows=tuple(scaled_arrows),
-        torque_arcs=tuple(scaled_arcs),
-        legend=new_leg,
+        arrows=scaled_arrows,
+        torque_arcs=scaled_arcs,
+        legend=scaled_legend,
         schema_version=glyphs.schema_version,
     )

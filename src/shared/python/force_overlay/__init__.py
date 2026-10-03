@@ -36,13 +36,11 @@ from .glyphs import (
     build_glyphs,
     scale_for_view,
 )
-from .palette import FORCE_KIND_PALETTE
 from .series import ForceTorqueSeries
 
 __all__ = [
     "ArrowGlyph",
     "DEFAULT_OVERLAY_UNITS",
-    "FORCE_KIND_PALETTE",
     "ForceGlyphStyle",
     "ForceTorqueFrame",
     "ForceTorqueProvider",

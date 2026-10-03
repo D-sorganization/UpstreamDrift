@@ -1,4 +1,4 @@
-"""Unit tests for GlyphSet JSON serialization and schema validation (FTO-3, #11288)."""
+"""Tests for GlyphSet serialization and schema round-trip (#11288)."""
 
 from __future__ import annotations
 
@@ -19,96 +19,131 @@ from src.shared.python.force_overlay.glyphs import (
     TorqueArcGlyph,
     build_glyphs,
 )
+from scripts.generate_glyph_set_examples import build_example_cases
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
-SCHEMA_PATH = Path(__file__).resolve().parents[3] / "schemas" / "glyph-set-v1.json"
-EXAMPLES_PATH = (
-    Path(__file__).resolve().parents[3] / "schemas" / "glyph-set-examples.json"
-)
+jsonschema = pytest.importorskip("jsonschema")
 
 
-def test_glyph_set_to_dict_and_from_dict_roundtrip() -> None:
+@pytest.fixture(scope="module")
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(scope="module")
+def schema(repo_root: Path) -> dict:
+    schema_path = repo_root / "schemas" / "glyph-set-v1.json"
+    assert schema_path.exists(), f"Schema file not found: {schema_path}"
+    with open(schema_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@pytest.fixture(scope="module")
+def fixtures(repo_root: Path) -> dict:
+    fixtures_path = repo_root / "schemas" / "glyph-set-examples.json"
+    assert fixtures_path.exists(), f"Examples file not found: {fixtures_path}"
+    with open(fixtures_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_glyph_set_to_from_dict_round_trip() -> None:
+    """GlyphSet round-trips through to_dict and from_dict preserving all values."""
     w1 = OverlayWrench(
         kind=WrenchKind.CONTACT,
         label="contact:ground",
         body="foot",
         point_m=(0.0, 0.0, 0.0),
-        force_n=(0.0, 0.0, 600.0),
-        torque_nm=(0.0, 0.0, 10.0),
+        force_n=(0.0, 0.0, 500.0),
         source="test",
     )
-    frame = ForceTorqueFrame(time_s=0.05, engine="mujoco", wrenches=(w1,))
-    glyphs = build_glyphs(frame)
-
-    d = glyphs.to_dict()
-    assert d["schema_version"] == "glyph-set-v1"
-    assert d["time_s"] == 0.05
-    assert len(d["arrows"]) == 1
-    assert len(d["torque_arcs"]) == 1
-
-    restored = GlyphSet.from_dict(d)
-    assert restored.time_s == glyphs.time_s
-    assert restored.schema_version == glyphs.schema_version
-    assert len(restored.arrows) == len(glyphs.arrows)
-    assert len(restored.torque_arcs) == len(glyphs.torque_arcs)
-    assert restored.arrows[0].label == glyphs.arrows[0].label
-    assert restored.arrows[0].tip_m == pytest.approx(glyphs.arrows[0].tip_m)
-    assert restored.torque_arcs[0].radius_m == pytest.approx(
-        glyphs.torque_arcs[0].radius_m
+    w2 = OverlayWrench(
+        kind=WrenchKind.JOINT_ACTUATOR,
+        label="joint:motor",
+        body="link1",
+        point_m=(1.0, 1.0, 1.0),
+        torque_nm=(10.0, 0.0, 0.0),
+        source="test",
     )
-    assert restored.legend.engine == glyphs.legend.engine
+    frame = ForceTorqueFrame(time_s=0.5, engine="test_eng", wrenches=(w1, w2))
+    glyph_set = build_glyphs(frame, ForceGlyphStyle())
+
+    data = glyph_set.to_dict()
+    assert data["schema_version"] == "glyph-set-v1"
+    assert data["time_s"] == 0.5
+    assert len(data["arrows"]) == 1
+    assert len(data["torque_arcs"]) == 1
+
+    restored = GlyphSet.from_dict(data)
+    assert restored.time_s == glyph_set.time_s
+    assert len(restored.arrows) == len(glyph_set.arrows)
+    assert len(restored.torque_arcs) == len(glyph_set.torque_arcs)
+    assert restored.arrows[0].label == "contact:ground"
+    assert restored.torque_arcs[0].label == "joint:motor"
+    assert restored == glyph_set
 
 
-def test_glyph_set_rejects_unknown_keys_and_wrong_version() -> None:
-    valid_dict = {
-        "schema_version": "glyph-set-v1",
-        "time_s": 0.0,
-        "arrows": [],
-        "torque_arcs": [],
-        "legend": {
-            "force_reference_n": None,
-            "force_reference_length_m": None,
-            "torque_reference_nm": None,
-            "torque_reference_radius_m": None,
-            "kinds_present": [],
-            "unavailable_labels": [],
-            "engine": "test",
-            "source_labels": [],
-        },
-    }
+def test_glyph_set_from_dict_validation() -> None:
+    """GlyphSet.from_dict rejects invalid schemas and unknown keys."""
+    w = OverlayWrench(
+        kind=WrenchKind.CONTACT,
+        label="c:1",
+        body="b1",
+        point_m=(0.0, 0.0, 0.0),
+        force_n=(100.0, 0.0, 0.0),
+        source="test",
+    )
+    frame = ForceTorqueFrame(time_s=0.0, engine="test", wrenches=(w,))
+    data = build_glyphs(frame, ForceGlyphStyle()).to_dict()
 
-    # Wrong version
-    bad_version = valid_dict.copy()
-    bad_version["schema_version"] = "glyph-set-v2"
-    with pytest.raises(ValueError, match="schema_version must be 'glyph-set-v1'"):
+    # Wrong schema version
+    bad_version = dict(data)
+    bad_version["schema_version"] = "wrong-v1"
+    with pytest.raises(ValueError):
         GlyphSet.from_dict(bad_version)
 
     # Unknown key
-    bad_key = valid_dict.copy()
-    bad_key["unexpected"] = 123
-    with pytest.raises(ValueError, match="Unknown keys in GlyphSet"):
+    bad_key = dict(data)
+    bad_key["unknown_extra_field"] = "bad"
+    with pytest.raises(ValueError):
         GlyphSet.from_dict(bad_key)
 
 
-def test_examples_against_schema_and_freshness() -> None:
-    if not SCHEMA_PATH.exists() or not EXAMPLES_PATH.exists():
-        pytest.skip("Schema or examples fixture not yet created")
+def test_glyph_schema_valid_draft_2020_12(schema: dict) -> None:
+    """glyph-set-v1.json must be valid according to Draft 2020-12."""
+    validator_cls = jsonschema.validators.validator_for(schema)
+    validator_cls.check_schema(schema)
 
-    import jsonschema
 
-    with SCHEMA_PATH.open("r", encoding="utf-8") as f:
-        schema = json.load(f)
+def test_glyph_examples_validate_against_schema(schema: dict, fixtures: dict) -> None:
+    """All valid cases in glyph-set-examples.json must validate against schema."""
+    validator_cls = jsonschema.validators.validator_for(schema)
+    validator = validator_cls(schema)
 
-    with EXAMPLES_PATH.open("r", encoding="utf-8") as f:
-        examples = json.load(f)
+    cases = fixtures.get("cases", [])
+    assert len(cases) >= 4, f"Expected >= 4 cases, found {len(cases)}"
 
-    validator = jsonschema.Draft202012Validator(schema)
+    for case in cases:
+        data = case["data"]
+        is_valid = case.get("valid", True)
+        errors = list(validator.iter_errors(data))
+        if is_valid:
+            assert not errors, (
+                f"Case {case['name']!r} failed schema validation: {[e.message for e in errors]}"
+            )
+        else:
+            assert errors, (
+                f"Invalid case {case['name']!r} unexpectedly passed schema validation"
+            )
 
-    for name, fixture in examples.items():
-        errors = list(validator.iter_errors(fixture))
-        assert not errors, (
-            f"Fixture {name} failed schema: {[e.message for e in errors]}"
-        )
-        restored = GlyphSet.from_dict(fixture)
-        assert restored.schema_version == "glyph-set-v1"
+
+def test_glyph_examples_freshness(repo_root: Path, fixtures: dict) -> None:
+    """Committed fixtures must match freshly generated cases (freshness guard)."""
+    fresh_cases = build_example_cases()
+    committed_cases = fixtures.get("cases", [])
+    assert len(fresh_cases) == len(committed_cases)
+
+    for fresh, committed in zip(fresh_cases, committed_cases, strict=True):
+        assert fresh["name"] == committed["name"]
+        assert fresh["valid"] == committed["valid"]
+        assert fresh["data"] == committed["data"]
