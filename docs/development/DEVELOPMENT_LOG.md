@@ -26,9 +26,9 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `feat/fto-11286-force-torque-overlay-contract`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-1 (#11286, PR #11321) merged. FTO-3 (#11288) implemented: ForceGlyphStyle, FORCE_KIND_PALETTE in plot_style, deterministic build_glyphs, GlyphSet serialization, schema glyph-set-v1.json, and fixtures. 33 tests passing with 97.8% coverage.
+- **Last verified:** 2026-10-02 at SELF — FTO-8 (#11293) implemented: ImageProjector protocol, PinholeProjector, HypothesisProjector, resolution-scaling VideoGlyphStyle, dark flanking halo rendering, legend box, and draw_glyphs_on_frame. 10 unit tests passing, all under line budget.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Submit ready-for-review PR for FTO-3 (#11288); proceed with renderer implementations (Wave C: FTO-5 to FTO-8).
+- **Next step:** Open PR for FTO-8 (#11293); proceed with Matplotlib and QPainter renderers (FTO-7, #11292).
 
 ### DL-#11268 · Capture-O Video Companion
 

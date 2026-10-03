@@ -1,3 +1,25 @@
+# OpenCV Video Glyph Renderer Delivery — #11285 / #11293
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; PR: ready-for-review PR for FTO-8 (#11293).
+- Objective: implement FTO-8 (#11293) OpenCV video glyph renderer with calibrated projection and legend under ADR-0052.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
+    - `ImageProjector` `@runtime_checkable` protocol.
+    - `PinholeProjector` (wrapping `project_reference_to_camera`, exact parity with OpenCV within 0.5 px).
+    - `HypothesisProjector` (wrapping `CameraProjection`, robust behind-camera skipping).
+    - `VideoGlyphStyle` (resolution-scaling `line_px`, `halo_px`, `head_px`, `font_scale` for 720p up to 4K).
+    - `VideoGlyphReceipt` (tracks `rendered_count`, `skipped_behind_camera`, `skipped_off_screen`).
+    - Flanking dark halo rendering with anti-aliasing (`_draw_segment_with_halo`, `_draw_arrow_head`).
+    - Legend box (`draw_legend_box`) with 30% semi-transparent dark backing, reference scales, kinds, and engine notes.
+    - `draw_glyphs_on_frame` with strict coordinate validation and `inplace=False` defensive copying.
+  - `src/shared/python/force_overlay/renderers/__init__.py`: clean re-exports.
+  - `tests/unit/force_overlay/test_opencv_glyphs.py`: 10 comprehensive unit tests covering pinhole projection, halo pixels, behind-camera clipping, edge clipping, frame mismatch rejection, 4K vs 720p scaling, immutability, OpenCV distortion parity, legend box rastering, and hypothesis projector errors.
+- Validation:
+  - Ruff lint & format pass.
+  - Pytest 10/10 tests pass.
+  - File size budget (< 350 lines per file) passed.
+- Next steps: Review and merge FTO-8; unblocks pipeline issues FTO-18 (#11303), FTO-20 (#11305), and FTO-21 (#11306).
+
 # Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11288-glyphs`; commit SELF; PR: ready-for-review PR for FTO-3 (#11288).

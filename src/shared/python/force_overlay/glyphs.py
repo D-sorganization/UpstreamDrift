@@ -238,14 +238,14 @@ class TorqueArcGlyph:
 class LegendSpec:
     """Reference scaling and metadata for viewport overlay legends."""
 
-    force_reference_n: float | None
-    force_reference_length_m: float | None
-    torque_reference_nm: float | None
-    torque_reference_radius_m: float | None
-    kinds_present: tuple[str, ...]
-    unavailable_labels: tuple[str, ...]
-    engine: str
-    source_labels: tuple[str, ...]
+    force_reference_n: float | None = None
+    force_reference_length_m: float | None = None
+    torque_reference_nm: float | None = None
+    torque_reference_radius_m: float | None = None
+    kinds_present: tuple[str, ...] = ()
+    unavailable_labels: tuple[str, ...] = ()
+    engine: str = ""
+    source_labels: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {

@@ -7711,8 +7711,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | Date | PR | Changes |
-| --- | --- | --- |
-| 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |
+| 2026-10-02 | #11293 | [FTO-8] OpenCV video glyph renderer: ImageProjector protocol, PinholeProjector, HypothesisProjector, halo rendering, legend box, and draw_glyphs_on_frame (#11293). |
 | 2026-10-02 | #11288 | [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, FORCE_KIND_PALETTE, and GlyphSet serialization (#11288). |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract: OverlayWrench, ForceTorqueFrame, ForceTorqueSeries, schema validation, and fixtures (ADR-0052, #11286). |
 | 2026-10-02 | #11285 | Plan the force/torque overlay epic: ADR-0052 engine-agnostic force/torque contract (proposed), assessment of every engine and the video stack, and 30 dependency-ordered child issues including tension/compression producers and source-footage overlays. |
