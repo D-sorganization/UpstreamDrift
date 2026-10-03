@@ -1,6 +1,25 @@
+# MeshCat Force and Torque Glyph Renderer Delivery — #11285 / #11290
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11290-meshcat-glyphs`; commit SELF; PR: #11337 (open; `Closes #11290`, `Refs #11285`)
+- Governing issue: #11290 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-5] MeshCat glyph renderer: real cylinder+cone arrows and torque arcs, MeshcatSink protocol, caching, and Drake sink (#11290).
+- Completed:
+  - `src/shared/python/force_overlay/renderers/meshcat_glyphs.py`:
+    - `@runtime_checkable class MeshcatSink(Protocol)` defining the backend contract (`set_object`, `set_transform`, `delete`).
+    - `align_y_to(direction)` using the Rodrigues rotation formula mapping +y to any unit direction in 3D, with exact handling of the -y antiparallel singularity.
+    - `MeshcatGlyphRenderer`: converts `GlyphSet` to 3D cylinder shaft + cone head (`radius_top=0.0`) for force arrows, 32-segment cylinder circular polyline chains with cone heads for torque arcs, and 2D text annotation via `legend_text`. Caches cylinder geometries on visualizer tree paths to avoid redundant allocations across frames, and deletes paths for disappearing labels.
+    - `MeshcatPythonSink`: adapter for `meshcat-python` (`meshcat.Visualizer`).
+  - `src/engines/physics_engines/drake/python/src/drake_meshcat_sink.py`:
+    - `DrakeMeshcatSink`: adapter for Drake MeshCat (`pydrake.geometry.Meshcat`).
+  - `src/shared/python/force_overlay/renderers/__init__.py`: package export with headless safety.
+  - `tests/unit/force_overlay/test_meshcat_glyphs.py`: 7 tests passing using `RecordingFakeSink`, verifying geometry construction, Rodrigues alignment, rotation determinant +1, cache reuse, disappearing label cleanup, torque arc segmentation, and legend text generation.
+  - Docs: Updated `docs/user_guide/body_part_viz/force_colors.md` and `SPEC.md` §12 table row.
+- Validation: Ruff check and format clean; pytest passes; file size budget passed; error handling ratchet passed.
+- Next steps: Review and merge FTO-5 (#11290); proceed with downstream renderers (FTO-6 MuJoCo MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV video).
+
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
@@ -55,7 +74,7 @@
   - 20 unit tests in `tests/unit/plot_style/test_color_utils.py` and `tests/unit/plot_style/test_colormaps.py`.
 - Next steps: Wave B child issues: FTO-5 (#11290) PySide/PyQtGL overlay renderer and FTO-24 (#11309) video camera projection.
 
-# Glyph Builder and Force Kind Palette — #11288 (FTO-3)
+# Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
 - Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341
