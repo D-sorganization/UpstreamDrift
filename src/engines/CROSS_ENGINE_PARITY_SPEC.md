@@ -167,6 +167,14 @@ canonical gate:
 - Humid-air density uses the two-gas dry-air/water-vapor formula; saturated air
   at 30 C must be less dense than dry air at the same pressure.
 
+### 2.5.2 Force overlay channels
+
+Engines that implement `ForceTorqueProvider` (ADR-0052) emit world-frame wrenches by kind. Unavailable channels are omitted, never zero-filled.
+
+| Engine | `joint_reaction` | `joint_actuator` | `contact` | `gravity` | Axial loads |
+| :----- | :--------------- | :--------------- | :-------- | :-------- | :---------- |
+| Drake  | reaction-forces port, rotated from `Jc` to world | net-actuation port (revolute only) | point-pair and hydroelastic results | opt-in | from joint reactions, single-child bodies |
+
 ### 2.6 Body model (humanoid + club)
 
 Every engine has **a single canonical full-body humanoid model** with the
