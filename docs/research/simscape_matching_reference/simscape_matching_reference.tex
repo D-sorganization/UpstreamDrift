@@ -4007,6 +4007,53 @@ all 35 actual actuator torques and independent forward replay are separate
 acceptance requirements. The represented clock also omits the previously
 identified trailing five tour and six owner raw source samples.
 
+A denser audit evaluates these same C2 curves at every source sample and
+every adjacent midpoint. Parent round-trip checking confirms that all
+existing 1,010 source-sample position, velocity, acceleration and guess
+values are reproduced exactly; the added clock has 2,018 samples. The native
+process exits naturally with zero at \texttt{09:51:34Z}, but rejects the
+path: A passes 1,294/1,297 and O passes 718/721 samples. All six new failures
+occur at added midpoints; original source samples and anchors still pass.
+The subsequent diagnostic exits naturally with zero at
+\texttt{09:55:21Z}. Eleven neighboring controls pass, and all six failed
+partial solves return status $-1$. Fresh full-position checks confirm nearby
+assembled candidates with unchanged root translation. Maximum additional
+scalar/spherical deviations are \(0.00834/0.00577^{\circ}\) for A and
+\(0.01607/0.01459^{\circ}\) for O. The earlier source-rate pass therefore
+does not establish continuous closure, and the candidate remains rejected
+for full-path acceptance.
+
+A separate native forward-kinematics audit evaluates fitting error over all
+1,010 represented source frames using the original calibrated offsets and
+gap masks, without re-fitting. It exits naturally with zero at
+\texttt{09:58:11Z}. Named frame-component IDs and units bind the native
+outputs; no positional-index fallback is allowed. All 101 original anchor
+target points and RMS values reproduce the selected fit within numerical
+precision (maximum point discrepancy below \(2.84\times10^{-15}\) m).
+The measured coverage varies from seven to fourteen valid derived targets.
+Fourteen derived joint-centre/club targets are reported separately from the
+three directly measured torso back markers:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+Capture & Target mean & Target peak & Back-marker mean & Back-marker peak\\
+ & \multicolumn{4}{c}{RMS distance in mm}\\
+\hline
+Tour A & 16.98 & 38.02 & 26.77 & 54.66\\
+Owner O & 21.06 & 59.60 & 38.41 & 88.12\\
+\hline
+\end{tabular}
+\end{center}
+
+Each mean is the mean of per-frame RMS distances; each peak is the maximum
+per-frame RMS distance. These dense results have different sampling from
+the sparse selected-preview scores and should not be presented as a direct
+ranking of models or golfers. Marker-placement video supplies useful
+qualitative placement evidence, but not calibrated anatomical offsets or
+verified video-to-GEARS trial identity. Full capture, contact and forward
+dynamics remain unqualified.
+
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,
 rejected pilot and private source hashes. It also records the parent's

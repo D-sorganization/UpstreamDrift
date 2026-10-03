@@ -446,6 +446,308 @@
     "red_passed": 1,
     "relative_tolerance_disabled": true
   },
+  "projected_c2_dense_marker_fit": {
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "qualification": "PRIVATE_DENSE_PROJECTED_MARKER_FIT_REVIEWED_1010_FRAMES_NOT_WHOLE_CAPTURE_FD_MASS_CONTACT_OR_ANATOMY",
+    "simulation_executed": false,
+    "summary": {
+      "capture_A": {
+        "anchor_count": 55,
+        "max_anchor_back_rms_diff_m": 2.0469737016526324e-16,
+        "max_anchor_points_diff_m": 2.55351295663786e-15,
+        "max_anchor_rms_diff_m": 2.0816681711721685e-16,
+        "mean_dense_back_rms_mm": 26.76822321618455,
+        "mean_dense_target_rms_mm": 16.984719657180737,
+        "observed_target_coverage_max": 14,
+        "observed_target_coverage_min": 7,
+        "peak_dense_back_rms_mm": 54.657048714498465,
+        "peak_dense_target_rms_mm": 38.01526175572952,
+        "state_count": 649
+      },
+      "capture_O": {
+        "anchor_count": 46,
+        "max_anchor_back_rms_diff_m": 2.983724378680108e-16,
+        "max_anchor_points_diff_m": 2.831068712794149e-15,
+        "max_anchor_rms_diff_m": 1.1449174941446927e-16,
+        "mean_dense_back_rms_mm": 38.40905032461348,
+        "mean_dense_target_rms_mm": 21.05681811157055,
+        "observed_target_coverage_max": 14,
+        "observed_target_coverage_min": 7,
+        "peak_dense_back_rms_mm": 88.1187723463373,
+        "peak_dense_target_rms_mm": 59.59547711004194,
+        "state_count": 361
+      }
+    },
+    "whole_capture_qualified": false
+  },
+  "projected_c2_dense_marker_fit_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T09:58:11.528149+00:00"
+  },
+  "projected_c2_midpoint_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_PROJECTED_SOURCE_AND_MIDPOINT_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1294,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 1294,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 1297,
+        "position_status_one_count": 1294,
+        "velocity_status_one_count": 1294,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 718,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 718,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 721,
+        "position_status_one_count": 718,
+        "velocity_status_one_count": 718,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "projected_c2_midpoint_failure_diagnostic": {
+    "diagnostic_executed_successfully": true,
+    "immediate_controls_verified": true,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "nearby_feasible_state_found": true,
+    "original_failures_revisited": true,
+    "original_independent_targets_accepted": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_PROJECTED_MIDPOINT_FAILED_ASSEMBLY_FEASIBILITY_DIAGNOSTIC_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_TORQUE_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "control_fresh_status_one_count": 6,
+        "control_partial_status_one_count": 6,
+        "control_state_count": 6,
+        "failed_fresh_status_one_count": 3,
+        "failed_partial_status_one_count": 0,
+        "failed_state_count": 3,
+        "follower_frames_verified": true,
+        "max_control_scalar_angle_deviation_deg": 5.684341886080802e-14,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_translation_deviation_m": 0,
+        "max_failed_scalar_angle_deviation_deg": 0.008333984378253945,
+        "max_failed_spherical_geodesic_deg": 0.0057617144636804745,
+        "max_failed_translation_deviation_m": 0,
+        "nearby_assembled_candidate_count": 3,
+        "nearby_feasible_state_exists": true,
+        "original_independent_targets_accepted": false,
+        "revisited_state_count": 9,
+        "status_counts_partial_failed": {
+          "status_neg1": 3,
+          "status_neg2": 0,
+          "status_pos1": 0,
+          "status_zero": 0
+        }
+      },
+      "capture_O": {
+        "control_fresh_status_one_count": 5,
+        "control_partial_status_one_count": 5,
+        "control_state_count": 5,
+        "failed_fresh_status_one_count": 3,
+        "failed_partial_status_one_count": 0,
+        "failed_state_count": 3,
+        "follower_frames_verified": true,
+        "max_control_scalar_angle_deviation_deg": 5.684341886080802e-14,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_translation_deviation_m": 0,
+        "max_failed_scalar_angle_deviation_deg": 0.01606710682582957,
+        "max_failed_spherical_geodesic_deg": 0.014587834897701251,
+        "max_failed_translation_deviation_m": 0,
+        "nearby_assembled_candidate_count": 3,
+        "nearby_feasible_state_exists": true,
+        "original_independent_targets_accepted": false,
+        "revisited_state_count": 8,
+        "status_counts_partial_failed": {
+          "status_neg1": 3,
+          "status_neg2": 0,
+          "status_pos1": 0,
+          "status_zero": 0
+        }
+      }
+    },
+    "simulation_executed": false
+  },
+  "projected_c2_midpoint_failure_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T09:55:21.570615+00:00"
+  },
+  "projected_c2_midpoint_preparation": {
+    "affected_native_keys": {
+      "scalar_position_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q"
+      ],
+      "spherical_joint_stems": [
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven"
+      ],
+      "velocity_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w"
+      ]
+    },
+    "aggregate_counts": {
+      "records": {
+        "capture_A": {
+          "midpoint_time_count": 648,
+          "original_anchor_count": 55,
+          "projected_support_knot_count": 6,
+          "source_time_count": 649,
+          "support_knot_count": 61,
+          "total_time_count": 1297
+        },
+        "capture_O": {
+          "midpoint_time_count": 360,
+          "original_anchor_count": 46,
+          "projected_support_knot_count": 5,
+          "source_time_count": 361,
+          "support_knot_count": 51,
+          "total_time_count": 721
+        }
+      },
+      "total_evaluated_samples": 2018,
+      "total_midpoint_samples": 1008,
+      "total_original_anchors": 101,
+      "total_source_samples": 1010,
+      "total_support_knots": 112
+    },
+    "flags": {
+      "all_closed_guesses_finite": true,
+      "all_existing_1010_times_validated": true,
+      "all_independent_targets_finite": true,
+      "all_spherical_unit_axes_valid": true,
+      "dense_finite_sampler_not_continuum_proof": true,
+      "input_hashes_preserved_before_after": true,
+      "measured_data": false,
+      "native_velocity_path_dynamics_proof": false,
+      "original_anchor_clock_exact_subset": true,
+      "original_anchors_preserved_within_1e_minus_10": true,
+      "original_source_time_grid_exact_subset": true,
+      "output_mat_roundtrip_verified": true,
+      "prototype_promoted": false,
+      "root_q_v_a_exact_within_strict_tolerance": true
+    },
+    "input_hashes": {
+      "c2_reference_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+      "reviewed_payload_mat_sha256": "08cbd8dbf52c8bca2099ada5d944842ba6d111f49cbddfc51a0f751a14e5c786",
+      "reviewed_preparation_json_sha256": "754e7080149d4f616ec61b07229145d4753ebbfee4f58b9a8337c347151a00b0"
+    },
+    "parent_review": {
+      "independent_mat_roundtrip_original_source_subset_exact": true,
+      "native_execution_proof": false,
+      "output_payload_sha256": "a3ff4e223e60de398e61bec62c511a206234ef8d85fb3af105ab0f4ce6940b36",
+      "proposal_sha256": "5f8b293561bb0e0b04088d0d4eb027ef935421758aea47e8833c13aa7745439b",
+      "reviewed_builder_sha256": "c9a0647ccb4b5d072214b8e366f99f41a444c68e195f335dc9ef9403461b060b"
+    },
+    "qualification": "PREPARED_C2_PROJECTED_MIDPOINT_REFERENCE_PAYLOAD_DENSE_FINITE_SAMPLER_NOT_CONTINUUM_PROOF",
+    "units": {
+      "scalar_angular": "deg",
+      "scalar_angular_acceleration": "deg/s^2",
+      "scalar_angular_velocity": "deg/s",
+      "scalar_translation": "m",
+      "spherical_angular_acceleration": "deg/s^2",
+      "spherical_angular_velocity": "deg/s"
+    },
+    "validation_errors_against_parent": {
+      "capture_A": {
+        "max_anc_sc": 2.842170943040401e-14,
+        "max_anc_so3": 6.661338147750939e-16,
+        "max_closed_v_deg_s": 0.0,
+        "max_indep_a_deg_s2": 0.0,
+        "max_indep_a_m_s2": 0.0,
+        "max_indep_v_deg_s": 0.0,
+        "max_indep_v_m_s": 0.0,
+        "max_root_a_m_s2": 0.0,
+        "max_root_p_m": 0.0,
+        "max_root_v_m_s": 0.0,
+        "max_scalar_ang_err_deg": 0.0,
+        "max_scalar_trans_err_m": 0.0,
+        "max_so3_err": 0.0,
+        "max_spherical_axis_unit_error": 2.220446049250313e-16
+      },
+      "capture_O": {
+        "max_anc_sc": 5.684341886080802e-14,
+        "max_anc_so3": 6.106226635438361e-16,
+        "max_closed_v_deg_s": 0.0,
+        "max_indep_a_deg_s2": 0.0,
+        "max_indep_a_m_s2": 0.0,
+        "max_indep_v_deg_s": 0.0,
+        "max_indep_v_m_s": 0.0,
+        "max_root_a_m_s2": 0.0,
+        "max_root_p_m": 0.0,
+        "max_root_v_m_s": 0.0,
+        "max_scalar_ang_err_deg": 0.0,
+        "max_scalar_trans_err_m": 0.0,
+        "max_so3_err": 0.0,
+        "max_spherical_axis_unit_error": 3.3306690738754696e-16
+      }
+    }
+  },
+  "projected_c2_midpoint_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T09:51:34.182511+00:00"
+  },
   "projected_c2_preparation": {
     "affected_native_keys": {
       "scalar_position_keys": [
