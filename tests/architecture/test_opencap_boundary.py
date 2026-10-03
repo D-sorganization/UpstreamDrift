@@ -56,11 +56,16 @@ def _module_scope_imports(path: Path) -> set[str]:
 
 
 def test_opencap_and_tensorflow_are_never_imported_at_module_scope() -> None:
-    offenders = [
-        f"{path.relative_to(ROOT)} imports {package}"
-        for path in SRC.rglob("*.py")
-        for package in _module_scope_imports(path) & set(_SIDECAR_ONLY_PACKAGES)
-    ]
+    targets = set(_SIDECAR_ONLY_PACKAGES)
+    offenders: list[str] = []
+    for path in SRC.rglob("*.py"):
+        try:
+            content = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if any(pkg in content for pkg in targets):
+            for package in _module_scope_imports(path) & targets:
+                offenders.append(f"{path.relative_to(ROOT)} imports {package}")
     assert not offenders, offenders
 
 

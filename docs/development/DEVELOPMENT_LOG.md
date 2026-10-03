@@ -19,16 +19,16 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
-- **State:** in_review
-- **Owner:** claude
-- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
-- **PR:** #11410
-- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
-- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11400; child #11407 (hosted download; follows #11401–#11403 landed in #11410)
+- **PR:** #11411
+- **Branch:** `feat/opencap-hosted-download-11407`
+- **Paths:** `src/shared/python/motion_pipeline/sources/opencap_download.py`, `tests/unit/motion_pipeline/sources/test_opencap_download.py`, `tests/architecture/test_opencap_boundary.py`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-03 at SELF (branch from `b8e9f884`) — CI `security-scans` (Semgrep `use-defused-xml`) flagged a type-only `xml.etree` import in `osim_coordinates.py`; replaced with a structural `Element` Protocol so the module never imports `xml`. 249 tests pass in `tests/unit/motion_pipeline/sources/` + marker maps + `test_opencap_boundary.py`; ruff, mypy and bandit clean; real `LaiUhlrich2022.osim` still classifies 35 coordinates with only `pelvis_tx/ty/tz` translational.
-- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
-- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+- **Last verified:** 2026-10-03 at SELF — Child 6 (#11407): implemented `download_opencap_session` with opt-in `OpenCapHostedSettings`, affirmative consent verification, session discovery, and full layout reconstruction matching `load_opencap_session`. 8 focused unit tests pass; zero network calls in default test lane; all 75 OpenCap unit and boundary tests pass.
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in with affirmative consent.
+- **Next step:** Open PR #11411 with auto-merge for #11407; proceed with #11409.
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 

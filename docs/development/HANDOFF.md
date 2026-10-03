@@ -1,3 +1,30 @@
+# OpenCap: Opt-In Hosted Session Download — #11400 / #11407
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-hosted-download-11407`; commit SELF; PR: #11411 (`Closes #11407`, `Refs #11400`)
+- Governing issue: #11407 (parent epic #11400, design authority ADR-0053)
+- Objective: [OpenCap Child 6] Opt-in hosted session download with affirmative consent, typed settings, and full layout reconstruction.
+- Completed:
+  - `src/shared/python/motion_pipeline/sources/opencap_download.py`:
+    - `OpenCapHostedSettings`: typed Pydantic settings with `OPENCAP_HOSTED_ENABLED` (default False), `OPENCAP_API_TOKEN`, and `OPENCAP_API_URL`.
+    - `download_opencap_session(session_id, destination_dir, ...)`:
+      - Strictly enforces affirmative recorded consent (`consent_recorded=True`) per ADR-0053.
+      - Verifies feature is enabled; rejects unauthorized (401), not-found (404), or missing tokens.
+      - Discovers and downloads `sessionMetadata.yaml`, scaled OpenSim model (`.osim`), marker trials (`.trc`), and inverse kinematics (`.mot`).
+      - Produces canonical layout that seamlessly loads via `load_opencap_session(session_dir)`.
+    - Exported in `src/shared/python/motion_pipeline/sources/__init__.py`.
+  - `tests/unit/motion_pipeline/sources/test_opencap_download.py`:
+    - 8 hermetic unit tests covering affirmative consent, disabled-by-default behavior, API token validation, 401/404 handling, session discovery, and full end-to-end integration with `load_opencap_session`.
+    - Zero network calls in the default test lane.
+  - `tests/architecture/test_opencap_boundary.py`:
+    - Optimized string filter before AST parsing to prevent test timeouts.
+- Validation:
+  - `pytest tests/unit/motion_pipeline/sources/test_opencap_download.py`: 8 passed in 6.5s.
+  - All 75 OpenCap unit and boundary tests passed in 11.7s.
+  - Ruff, Black, Mypy passing.
+- Next steps: Merge PR; proceed with #11409.
+
+---
+
 # Force Overlay Gallery, Golden Regressions, and User Guide — #11285 / #11315 (FTO-30)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11397 (`Closes #11315`, `Refs #11285`)
