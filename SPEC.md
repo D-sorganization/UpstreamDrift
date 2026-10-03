@@ -1,7 +1,7 @@
 ## Capture-O Video Companion: Acquisition Receipt and Provenance Contracts (COV-1, #11269)
 
 Specifies fail-closed video asset acquisition, SHA-256 integrity verification, ffprobe metadata embedding, lineage tracking, and atomic receipt emission for the capture-O companion video program (#11268, #11269):
-- **Fail-Closed Acquisition & Hash Integrity (`src/shared/python/motion_capture/acquisition_receipt.py`)**:
+- **Fail-Closed Acquisition & Hash Integrity (`src/motion_capture/acquisition_receipt.py`)**:
   - `build_acquisition_receipt(directory, ...)` assigns deterministic neutral identifiers `cov-01`, `cov-02`, … in sorted original-filename order.
   - Fail-closed rejections: empty directory raises `EmptyDirectoryError` (subclassing `ValueError`); non-video files raise `NonVideoFileError`; probe or ffprobe execution failures raise `FFProbeError` naming the problematic file.
   - Integrity validation: changes to existing file bytes raise `HashMismatchError` with expected vs actual digest evidence; unchanged runs produce byte-identical deterministic receipts.
