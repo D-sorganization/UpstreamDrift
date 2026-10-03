@@ -151,7 +151,7 @@ class DrakeForceTorqueSource:
 
     def _reaction_wrenches(self, ctx: Context) -> list[OverlayWrench]:
         plant = self._plant
-        reactions = plant.get_reaction_forces_output_port().Eval(ctx)
+        reactions: Any = plant.get_reaction_forces_output_port().Eval(ctx)
         out: list[OverlayWrench] = []
         for joint in self._joints:
             sf = reactions[int(joint.index())]
@@ -196,6 +196,8 @@ class DrakeForceTorqueSource:
             out: list[OverlayWrench] = []
             for actuator, label in zip(actuated, labels, strict=True):
                 joint = actuator.joint()
+                if not isinstance(joint, RevoluteJoint):
+                    continue
                 frame = joint.frame_on_child()
                 pose = plant.CalcRelativeTransform(ctx, plant.world_frame(), frame)
                 out.append(
@@ -203,7 +205,8 @@ class DrakeForceTorqueSource:
                         label,
                         self._body_name(joint.child_body().index()),
                         pose.translation(),
-                        pose.rotation().matrix() @ joint.revolute_axis(),
+                        np.asarray(pose.rotation().matrix())
+                        @ np.asarray(joint.revolute_axis()),
                         float(net[actuator.input_start()]),
                         "drake:net_actuation_port",
                     )
@@ -234,17 +237,21 @@ class DrakeForceTorqueSource:
             )
             if n_hydro and inspector is None:
                 self._unavailable += ("contact:hydroelastic",)
-                n_hydro = 0
-            for i in range(n_hydro):
-                info = results.hydroelastic_contact_info(i)
-                surface = info.contact_surface()
-                body_a = plant.GetBodyFromFrameId(inspector.GetFrameId(surface.id_M()))
-                body_b = plant.GetBodyFromFrameId(inspector.GetFrameId(surface.id_N()))
-                sf = info.F_Ac_W()
-                f, t = np.asarray(sf.translational()), np.asarray(sf.rotational())
-                centroid = surface.centroid()
-                entries.append((body_a.index(), centroid, f, t))
-                entries.append((body_b.index(), centroid, -f, -t))
+            if inspector is not None:
+                for i in range(n_hydro):
+                    info = results.hydroelastic_contact_info(i)
+                    surface = info.contact_surface()
+                    body_a = plant.GetBodyFromFrameId(
+                        inspector.GetFrameId(surface.id_M())
+                    )
+                    body_b = plant.GetBodyFromFrameId(
+                        inspector.GetFrameId(surface.id_N())
+                    )
+                    sf = info.F_Ac_W()
+                    f, t = np.asarray(sf.translational()), np.asarray(sf.rotational())
+                    centroid = surface.centroid()
+                    entries.append((body_a.index(), centroid, f, t))
+                    entries.append((body_b.index(), centroid, -f, -t))
         except RuntimeError:
             logger.warning(
                 "Drake contact results unavailable (SceneGraph query port not "
@@ -312,12 +319,13 @@ class DrakeForceTorqueSource:
             parent = self._body_name(joint.parent_body().index())
             child_joint_of.setdefault(parent, []).append(name)
         axes, _ = segment_axes_from_joint_tree(origins, child_joint_of, body_of_joint)
-        force_on = {w.label: w.force_n for w in reactions}
+        force_on = {w.label: w.force_n for w in reactions if w.force_n is not None}
         values = {
             axis.body: axial_force_from_proximal_reaction(
                 force_on[parent_label[axis.body]], axis.proximal_m, axis.distal_m
             )
             for axis in axes
+            if parent_label[axis.body] in force_on
         }
         if not values:
             return None
