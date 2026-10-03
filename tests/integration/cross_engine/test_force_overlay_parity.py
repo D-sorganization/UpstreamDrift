@@ -18,6 +18,7 @@ from src.shared.python.force_overlay import ForceTorqueFrame, WrenchKind
 
 from .force_overlay_engine_builders import (
     PENDING_PROVIDERS,
+    merged_pending_providers,
     opensim_hanging,
     opensim_inverted,
     opensim_resting_ball,
@@ -152,6 +153,15 @@ def test_sign_convention_guard_flips_every_available_engine(tmp_path: Path) -> N
             assert_wrench(frame, WrenchKind.JOINT_REACTION, force=flipped)
     if not ran:
         pytest.skip("no engine available on this host")
+
+
+def test_no_provider_has_merged_without_its_parity_rows() -> None:
+    """Fails once a pending engine's provider file exists, so its rows cannot be forgotten."""
+    overdue = merged_pending_providers()
+    assert not overdue, (
+        f"provider merged for {overdue}: add its builders and remove it from "
+        "PENDING_PROVIDERS (FTO-21 #11306)"
+    )
 
 
 def test_pending_engines_are_exactly_the_unbuilt_ones() -> None:

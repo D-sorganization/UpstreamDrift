@@ -34,6 +34,26 @@ PENDING_PROVIDERS: dict[str, str] = {
     "pinocchio": "FTO-13 #11298",
 }
 
+_ENGINES_DIR = Path(__file__).resolve().parents[3] / "src" / "engines"
+#: Provider module filename per pending engine, found anywhere under its engine
+#: directory. Its appearance on disk means the provider merged, so the suite must
+#: gain that engine's rows instead of skipping them.
+PENDING_PROVIDER_FILES: dict[str, tuple[str, str]] = {
+    "mujoco": ("physics_engines/mujoco", "force_torque_source.py"),
+    "drake": ("physics_engines/drake", "drake_force_torque.py"),
+    "pinocchio": ("physics_engines/pinocchio", "pinocchio_force_torque.py"),
+}
+
+
+def merged_pending_providers() -> list[str]:
+    """Pending engines whose provider module now exists (rows are overdue)."""
+    return sorted(
+        engine
+        for engine, (folder, name) in PENDING_PROVIDER_FILES.items()
+        if next((_ENGINES_DIR / folder).rglob(name), None) is not None
+    )
+
+
 _HUNT_CROSSLEY_XML = """<HuntCrossleyForce name="hc">
 <appliesForce>true</appliesForce>
 <HuntCrossleyForce::ContactParametersSet name="contact_parameters"><objects>
@@ -170,6 +190,9 @@ def opensim_resting_ball(directory: Path) -> ForceTorqueFrame:
 
 
 # --- Simscape (file based; encodes the same statics as a dataset CSV) --------------
+# These rows check the loader's frame and sign conventions (world, applied-to-body,
+# R @ local) against the shared statics. They do NOT exercise the Simscape model or
+# the MATLAB exporter; that needs an R2025b host (see #11304, still open).
 
 _RX_MINUS_90 = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]])
 _RX_PLUS_90 = _RX_MINUS_90.T
