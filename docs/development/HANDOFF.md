@@ -127,8 +127,6 @@
   - `python3 scripts/ci/check_lod.py src --baseline scripts/ci/lod_baseline.txt`: OK (clean no-growth scan, 0 new violations).
 - Next steps: Wave C renderers (FTO-5 MeshCat, FTO-6 MjvScene, FTO-7 Matplotlib/QPainter, FTO-8 OpenCV Video) consuming serialized `GlyphSet`.
 
-<<<<<<< HEAD
-=======
 # Force Overlay Parity Suite — #11306 (FTO-21)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11306`
@@ -1241,4 +1239,3 @@ original film timing or independent multiview.
 The first post-merge push was stopped because documentation changed while the
 security hook was running (no security issues were identified). Finish the
 current documentation commit and retry from a clean worktree.
->>>>>>> origin/main
