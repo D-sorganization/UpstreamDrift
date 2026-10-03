@@ -9,8 +9,9 @@ existing ``ContactSample`` records unchanged.
 The source owns its own ``pin.Data`` and never mutates an engine's data.
 
 Note: the world-frame conversion and torque-wrench helpers below are minimal
-private stand-ins for the FTO-2 converters (#11287), which are not on main yet.
-They should be replaced by ``force_overlay.conversions`` once it lands.
+private stand-ins for the FTO-2 converters (#11287), which landed after this
+module was written. They should be replaced by ``force_overlay.conversions``
+in a follow-up.
 """
 
 from __future__ import annotations

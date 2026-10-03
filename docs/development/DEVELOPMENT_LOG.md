@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** claude
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `feat/fto-11286-force-torque-overlay-contract`
+- **Branch:** `feat/fto-11287-shared-conversions`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`, `src/engines/simscape/force_channels.py`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-13 (#11298) added the Pinocchio provider (`PinocchioForceTorqueSource`, engine accessors, `force_visualization=FULL`); FTO-18 (#11303) added the Simscape CSV force loader (36 tests pass with force_overlay); earlier: FTO-1 (#11286) implemented engine-agnostic contracts (OverlayWrench with optional halves, ForceTorqueFrame with axial loads alignment, ForceTorqueProvider), ForceTorqueSeries with linear interpolation and pickle-free NPZ, wire schemas and 7 fixtures; 25 unit tests pass.
+- **Last verified:** 2026-10-02 at SELF — FTO-13 (#11298) added the Pinocchio provider; FTO-2 (#11287) implemented shared force conversions in `src/shared/python/force_overlay/conversions.py` (`joint_torque_wrench`, `world_wrench_from_local`, `move_wrench_point`, `SegmentAxis`, `axial_loads_from_reactions`, `frame_with_axial_loads`); 13 unit tests pass; earlier: FTO-18 (#11303) added the Simscape CSV force loader; FTO-1 (#11286) implemented engine-agnostic contracts.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Dispatch FTO-2 (#11287) shared conversions and FTO-3 (#11288) glyph builder.
+- **Next step:** Dispatch FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
 
 ### DL-#11268 · Capture-O Video Companion
 

@@ -10,6 +10,25 @@
 - Key decisions: FTO-2 (#11287, `conversions.py`) and FTO-11 (`segment_axes.py`) are not on main, so the world-frame conversion, torque wrench and segment axes are minimal private helpers in the new module. Axis rule: one child joint gives that joint origin, a leaf gives the body COM, a branching body or a zero-length axis is reported unavailable (None), never guessed. Wrench `body` is the BODY frame attached to the joint; the joint name appears only in labels (`reaction:<joint>`, `actuator:<joint>`, `contact:<body>`). Contacts are passed as a mapping of body (frame) name to `ContactSample`; unknown bodies are omitted. The engine recomputes acceleration with ABA at the sampled (q, v, tau) because `self.a` goes stale; ABA excludes external contact forces. Replace the private helpers when FTO-2/FTO-11 land.
 - Validation: `ruff check`/`ruff format --check` clean on changed files; `pytest tests/unit/engines/pinocchio/test_pinocchio_force_torque.py tests/engines/physics_engines/test_pinocchio_engine.py`: all pass.
 - Next steps: FTO-14 (Pinocchio GUI) consumes the provider; FTO-21 parity; swap private helpers for FTO-2/FTO-11 modules.
+# Force Conversions — #11287 (FTO-2)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11287`
+- Branch: `feat/fto-11287-shared-conversions`; commit: SELF; PR: #11287
+- Governing issue: #11287 (parent epic #11285, design authority ADR-0052 §1 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-2] Shared force conversions: joint torque to moment vector, local to world, reactions to tension/compression.
+- Completed:
+  - `src/shared/python/force_overlay/conversions.py`:
+    - `joint_torque_wrench`: 1D revolute or multi-axis gimbal moments with unit-norm axis validation within 1e-6 (never silently normalized).
+    - `world_wrench_from_local`: SO(3) orthonormal validation within 1e-9; routes all rotations (both full wrenches and single-half wrenches) through `transform_wrench` (DRY).
+    - `move_wrench_point`: moment-arm adjustment `tau_B = tau_A + (p_A - p_B) x F`; validates `force_n is not None` when moving to a new point (raises ValueError if force_n is None since torque_nm is unknown and an OverlayWrench cannot have both halves None).
+    - `SegmentAxis`: frozen dataclass defining segment endpoints, rejecting coincident proximal/distal points.
+    - `axial_loads_from_reactions`: maps `JOINT_REACTION` wrenches to `axial_force_from_proximal_reaction` yielding `AxialLoadFrame` (tension positive, compression negative, missing reactions None).
+    - `frame_with_axial_loads`: returns a copy of `ForceTorqueFrame` with `axial_loads` populated.
+  - Re-exported functions from `src/shared/python/force_overlay/__init__.py`.
+  - Added user guide paragraph in `docs/user_guide/body_part_viz/force_colors.md` ("Producing loads from reaction wrenches").
+  - 13 unit tests in `tests/unit/force_overlay/test_conversions.py` covering all contract branches, red-first TDD, and synthetic two-link chain agreement.
+- Next steps: Wave B child issues: FTO-3 (#11288) glyph builder and FTO-24 (#11309) video camera projection.
+
 # Simscape Force Loader — #11303 (FTO-18)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11303`
