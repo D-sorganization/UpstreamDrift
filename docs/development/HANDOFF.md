@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 # Web Three.Js Force Overlay — #11308 (FTO-23)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11308`
@@ -63,7 +65,33 @@
   - `pytest tests/api/test_generated_ui_api_types.py`: 6 passed.
   - Schema validation against `schemas/glyph-set-v1.json` and `schemas/force-torque-frame-v1.json`: passed.
   - `rg -n "_build_demo_vectors|0\.5 \+ i \* 0\.3" src/`: 0 matches.
-- Next steps: FTO-23 (#11308) Web three.js overlay rendering the serialized `GlyphSet`.
+- # Next steps: FTO-23 (#11308) Web three.js overlay rendering the serialized `GlyphSet`.
+
+# Matplotlib 3D and QPainter 2D Glyph Renderers Delivery — #11285 / #11292 (FTO-7)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11292-matplotlib-qpainter-glyphs`; commit SELF; PR: #11348 (`Closes #11292`, `Refs #11285`)
+- Governing issue: #11292 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers with dark halos, 12-facet cone heads, and migrated legacy vector overlays.
+- Completed:
+  - `src/shared/python/force_overlay/renderers/matplotlib_glyphs.py`:
+    - `draw_glyphs_3d(ax, glyphs, *, linewidth_pt=2.0, halo=True) -> list[Artist]`: draws 3D force arrows (with 12-facet cone heads via `Poly3DCollection`) and 3D torque arcs (polyline + cone head) onto a Matplotlib 3D axes, optionally underlaid with a dark halo. Returns list of created artists supporting `.remove()`.
+    - `draw_legend(ax, glyphs, *, loc='upper right', fontsize=9.0) -> Artist`: renders deterministic legend showing active force/torque kinds.
+  - `src/shared/python/force_overlay/renderers/qpainter_glyphs.py`:
+    - `draw_glyphs_2d(painter, project, glyphs, *, px_width=2.0, halo=True) -> None`: draws 2D projected force arrows and torque arcs using QPainter with anti-aliasing and optional dark halos.
+  - Migrated legacy vector renderers:
+    - `src/shared/python/plotting/renderers/force_vectors.py`: delegates to `draw_glyphs_3d`.
+    - `src/shared/python/movement_optimizer/gui/vector_overlay.py`: delegates to `draw_glyphs_2d`.
+  - Extracted common `_render_joint_forces_overlay` in pendulum simulator widgets and eliminated duplicate drawing boilerplate.
+  - Tests:
+    - Unit tests in `tests/unit/force_overlay/test_matplotlib_glyphs.py` and `tests/unit/force_overlay/test_qpainter_glyphs.py`.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest passed.
+- Next steps: Merge PR #11348; unblocks remaining renderers.
+
+---
+
+> > > > > > > origin/main
 
 # MuJoCo Force/Torque Provider — #11294 (FTO-9)
 
@@ -147,8 +175,8 @@
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
+
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
-- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
     - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
@@ -164,7 +192,6 @@
 - Validation:
   - Ruff check and format clean.
   - Pytest 5/5 passed.
-- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
 
 # MuJoCo 3.14 Axial-Load Axis Discovery — #11349
 
@@ -205,7 +232,7 @@
 # Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
-- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341
+- Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11288
 - Governing issue: #11288 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-3] Glyph builder: ForceGlyphStyle, build_glyphs, scale_for_view and FORCE_KIND_PALETTE.
 - Completed:
