@@ -1,3 +1,23 @@
+# Pinocchio GUI Visualization Consolidation & Segment Force Shading — #11285 / #11299 (FTO-14)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11299-pinocchio-gui-glyphs`; commit SELF; PR: #11356 (`Closes #11299`, `Refs #11285`)
+- Governing issue: #11299 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299).
+- Completed:
+  - `src/engines/physics_engines/pinocchio/python/pinocchio_golf/force_overlay_view.py`:
+    - `meshcat_paths_for_links`: maps URDF model links to MeshCat scene paths (`/meshcat/{prefix}/{link}`).
+    - `PinocchioForceOverlayView`: coordinates shared `MeshcatGlyphRenderer` (with cylinder shafts and cone heads) and `MeshcatForceColorSession` (for segment force colors).
+    - `update(viewer, model, data, q, force_toggles, ...)`: builds canonical `ForceTorqueFrame`, runs `build_glyphs()`, delegates to `MeshcatGlyphRenderer`, and binds segment force colors synchronously.
+  - Refactored `PinocchioVisualizationMixin` and `gui.py`:
+    - Delegated `_draw_vectors` and `_draw_cf_vectors` to `PinocchioForceOverlayView.update()`.
+    - Completely deleted duplicated `_draw_arrow` from both mixins (0 occurrences remaining in repo).
+    - Moved `_init_meshcat_viewer` and `_log_meshcat_url` to `PinocchioVisualizationMixin`.
+    - Collapsed `src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/visualization_mixin.py` to directly subclass `PinocchioVisualizationMixin`.
+    - Net line count in `src/engines/physics_engines/pinocchio/python/pinocchio_golf/` decreased by 58 lines.
+  - Tests: `tests/unit/engines/pinocchio/test_pinocchio_force_overlay_view.py` and `tests/unit/test_pinocchio_gui.py` (all tests passing, 100% green).
+- Validation: Ruff check/format clean, architecture budget passed, file size budget passed, error-handling ratchet passed.
+- Next steps: Land FTO-14 into main; unblocks FTO-15 / FTO-16 / FTO-17 (OpenSim force overlays) and FTO-21 (cross-engine parity).
+
 # OpenCV Video Glyph Renderer Delivery — #11285 / #11293 (FTO-8)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (`Closes #11293`, `Refs #11285`)

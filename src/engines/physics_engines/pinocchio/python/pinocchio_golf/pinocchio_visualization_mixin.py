@@ -24,17 +24,31 @@ except ImportError:
     MESHCAT_AVAILABLE = False
     g = None  # type: ignore[assignment]
 
+try:
+    import pinocchio.visualize as viz
+except (ImportError, AttributeError):
+    viz = None  # type: ignore[assignment]
+
 logger = get_logger(__name__)
 
 # Constants
 COM_SPHERE_RADIUS = 0.02
 COM_COLOR = 0xFFFF00
 
+__all__ = [
+    "COM_COLOR",
+    "COM_SPHERE_RADIUS",
+    "MESHCAT_AVAILABLE",
+    "PinocchioVisualizationMixin",
+]
+
 
 class PinocchioVisualizationMixin:
     """Mixin for Pinocchio GUI visualization, ellipsoids, vectors, overlays.
 
     Provides:
+    - ``_init_meshcat_viewer``: Meshcat visualizer initialization
+    - ``_log_meshcat_url``: URL logging to UI and console
     - ``_update_viewer``: Full viewer refresh with overlays
     - ``_compute_analysis``: Jacobian/mass matrix analysis
     - ``_draw_ellipsoids``: Mobility/force ellipsoid rendering
@@ -44,6 +58,51 @@ class PinocchioVisualizationMixin:
     - ``_draw_frames`` / ``_draw_coms``: Frame/COM overlays
     - Toggle handlers for frames, COMs, forces, torques
     """
+
+    def _init_meshcat_viewer(self: Any) -> None:
+        """Initialize the Meshcat viewer."""
+        self.viewer: Any | None = None
+        if not MESHCAT_AVAILABLE or viz is None:
+            if hasattr(self, "log_write"):
+                self.log_write(
+                    "Warning: Meshcat not available. Visualization disabled."
+                )
+            logger.warning("Meshcat module not found.")
+            return
+
+        try:
+            try:
+                self.viewer = viz.Visualizer(server_args=["--port", "7000"])
+            except TypeError:
+                logger.warning(
+                    "Meshcat Visualizer: server_args not supported. Using default."
+                )
+                self.viewer = viz.Visualizer()
+
+            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
+            logger.info("Internal Meshcat URL: %s", url)
+
+            self._log_meshcat_url(url)
+        except (ConnectionError, OSError, RuntimeError) as exc:
+            logger.error("Failed to initialize Meshcat viewer: %s", exc)
+            if hasattr(self, "log_write"):
+                self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+                self.log_write("Please ensure meshcat-server is running or try again.")
+
+    def _log_meshcat_url(self: Any, url: str) -> None:
+        """Log viewer URL to UI and console."""
+        try:
+            port = url.split(":")[-1].split("/")[0]
+            host_url = f"http://127.0.0.1:{port}/static/"
+            logger.info("Host Access URL: %s", host_url)
+            if hasattr(self, "log_write"):
+                self.log_write("=" * 40)
+                self.log_write("VISUALIZER READY")
+                self.log_write("Open this URL in your browser:")
+                self.log_write(f"{host_url}")
+                self.log_write("=" * 40)
+        except (PermissionError, OSError, IndexError):
+            logger.info("Could not determine host URL from: %s", url)
 
     def _update_viewer(self: Any) -> None:
         if (
@@ -69,13 +128,22 @@ class PinocchioVisualizationMixin:
             self._draw_frames()
         if self.chk_coms.isChecked():
             self._draw_coms()
-        if self.chk_forces.isChecked() or self.chk_torques.isChecked():
+        if (
+            self.chk_forces.isChecked()
+            or self.chk_torques.isChecked()
+            or self.chk_cf.isChecked()
+            or self._get_force_overlay_toggles()["shading"]
+        ):
             self._draw_vectors()
+        elif (
+            hasattr(self, "force_overlay_view") and self.force_overlay_view is not None
+        ):
+            self.force_overlay_view.update(
+                {"forces": False, "torques": False, "shading": False, "ztcf": False}
+            )
 
         if self.chk_induced.isChecked():
             self._draw_induced_vectors()
-        if self.chk_cf.isChecked():
-            self._draw_cf_vectors()
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             self._draw_ellipsoids()
@@ -191,43 +259,59 @@ class PinocchioVisualizationMixin:
 
         self.viewer[path].set_transform(T)
 
+    def _ensure_force_overlay_view(self: Any) -> Any:
+        if not hasattr(self, "force_overlay_view") or self.force_overlay_view is None:
+            from .force_overlay_view import PinocchioForceOverlayView
+
+            color_session = getattr(self, "segment_force_colors", None)
+            viz = getattr(self, "viz", None) or getattr(self, "viewer", None)
+            self.force_overlay_view = PinocchioForceOverlayView(
+                self, viz, color_session
+            )
+        return self.force_overlay_view
+
+    def _get_force_overlay_toggles(self: Any) -> dict[str, Any]:
+        color_session = getattr(self, "segment_force_colors", None)
+        scale_enabled = (
+            getattr(color_session, "_scale", None) is not None
+            and color_session._scale.enabled
+        )
+        forces_enabled = (
+            bool(self.chk_forces.isChecked()) if hasattr(self, "chk_forces") else True
+        )
+        torques_enabled = (
+            bool(self.chk_torques.isChecked()) if hasattr(self, "chk_torques") else True
+        )
+        ztcf_enabled = (
+            bool(self.chk_cf.isChecked()) if hasattr(self, "chk_cf") else False
+        )
+        shading_enabled = scale_enabled or (
+            hasattr(self, "chk_shading") and bool(self.chk_shading.isChecked())
+        )
+        force_scale = (
+            float(self.spin_force_scale.value())
+            if hasattr(self, "spin_force_scale")
+            else 0.001
+        )
+        torque_scale = (
+            float(self.spin_torque_scale.value())
+            if hasattr(self, "spin_torque_scale")
+            else 0.005
+        )
+        return {
+            "forces": forces_enabled,
+            "torques": torques_enabled,
+            "shading": shading_enabled,
+            "ztcf": ztcf_enabled,
+            "force_scale": force_scale,
+            "torque_scale": torque_scale,
+        }
+
     def _draw_vectors(self: Any) -> None:
-        """Draw force and torque vectors at joints."""
-        if self.model is None or self.data is None or self.viewer is None:
-            return
-
-        v = self.v if self.v is not None else np.zeros(self.model.nv)
-        a = pin.aba(self.model, self.data, self.q, v, np.zeros(self.model.nv))
-
-        pin.rnea(self.model, self.data, self.q, v, a)
-
-        force_scale = self.spin_force_scale.value()
-        torque_scale = self.spin_torque_scale.value()
-
-        for i in range(1, self.model.njoints):
-            joint_placement = self.data.oMi[i]
-            f_local = self.data.f[i]
-
-            f_world = joint_placement.rotation @ f_local.linear
-            t_world = joint_placement.rotation @ f_local.angular
-
-            joint_name = self.model.names[i]
-
-            if self.chk_forces.isChecked() and np.linalg.norm(f_world) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/forces/{joint_name}",
-                    joint_placement.translation,
-                    f_world * force_scale,
-                    0xFF0000,
-                )
-
-            if self.chk_torques.isChecked() and np.linalg.norm(t_world) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/torques/{joint_name}",
-                    joint_placement.translation,
-                    t_world * torque_scale,
-                    0x0000FF,
-                )
+        """Draw force and torque vectors via PinocchioForceOverlayView."""
+        view = self._ensure_force_overlay_view()
+        if view is not None:
+            view.update(self._get_force_overlay_toggles())
 
     def _draw_induced_vectors(self: Any) -> None:  # noqa: C901
         """Draw induced acceleration vectors."""
@@ -282,69 +366,21 @@ class PinocchioVisualizationMixin:
             if np.linalg.norm(vec) < 1e-6:
                 vec = a_world.linear
 
-            self._draw_arrow(
-                f"overlays/induced/{self.model.names[i]}",
-                oMi.translation,
-                vec * scale,
-                0xFF00FF,  # Magenta
-            )
+            if g is not None and self.viewer is not None:
+                points = np.vstack(
+                    [oMi.translation, oMi.translation + vec * scale]
+                ).T.astype(np.float32)
+                self.viewer[f"overlays/induced/{self.model.names[i]}"].set_object(
+                    g.Line(
+                        g.PointsGeometry(points), g.LineBasicMaterial(color=0xFF00FF)
+                    )
+                )
 
     def _draw_cf_vectors(self: Any) -> None:
-        """Draw Counterfactual vectors."""
-        if (
-            self.model is None
-            or self.data is None
-            or self.viewer is None
-            or self.latest_cf is None
-        ):  # noqa: E501
-            return
-
-        cf_type = self.combo_cf.currentText()
-        if cf_type not in self.latest_cf:
-            return
-
-        vals = self.latest_cf[cf_type]
-        scale = self.spin_torque_scale.value()
-
-        for i in range(1, self.model.njoints):
-            joint = self.model.joints[i]
-            idx_v = joint.idx_v
-            nv = joint.nv
-            if nv != 1:
-                continue
-
-            val = vals[idx_v]
-            if abs(val) < 1e-3:
-                continue
-
-            oMi = self.data.oMi[i]
-            S = joint.S
-            spatial_vec = oMi.act(S * val)
-
-            vec = spatial_vec.angular
-            if np.linalg.norm(vec) < 1e-6:
-                vec = spatial_vec.linear
-
-            self._draw_arrow(
-                f"overlays/cf/{self.model.names[i]}",
-                oMi.translation,
-                vec * scale,
-                0xFFFF00,  # Yellow
-            )
-
-    def _draw_arrow(
-        self: Any, path: str, start: np.ndarray, vector: np.ndarray, color: int
-    ) -> None:
-        """Helper to draw an arrow in Meshcat."""
-        if path is None:
-            raise ValueError("path must be provided")
-        if self.viewer is None:
-            return
-
-        points = np.vstack([start, start + vector]).T.astype(np.float32)
-        self.viewer[path].set_object(
-            g.Line(g.PointsGeometry(points), g.LineBasicMaterial(color=color))
-        )
+        """Draw Counterfactual vectors via PinocchioForceOverlayView."""
+        view = self._ensure_force_overlay_view()
+        if view is not None:
+            view.update(self._get_force_overlay_toggles())
 
     def _draw_frames(self: Any) -> None:
         if self.model is None or self.data is None or self.viewer is None:

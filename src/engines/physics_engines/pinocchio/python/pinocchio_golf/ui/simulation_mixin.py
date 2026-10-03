@@ -102,12 +102,25 @@ class SimulationMixin:
                     )
                     self.viz.initViewer(viewer=self.viewer, open=False)
                     self.viz.loadViewerModel()
+
+                    from ..force_overlay_view import PinocchioForceOverlayView
+
+                    color_session = getattr(self, "segment_force_colors", None)
+                    self.force_overlay_view = PinocchioForceOverlayView(
+                        self, self.viz, color_session
+                    )
+                    if color_session is not None:
+                        self.force_overlay_view.bind_color_session(
+                            self.model, self.visual_model, self.viewer
+                        )
                 except (RuntimeError, ValueError, OSError) as e:
                     self.log_write(f"Warning: Visualizer init failed: {e}")
                     self.viz = None
+                    self.force_overlay_view = None
             else:
                 self.log_write("Model loaded without 3D visualization.")
                 self.viz = None
+                self.force_overlay_view = None
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
