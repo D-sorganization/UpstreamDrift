@@ -7713,6 +7713,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-02 | #11296 | [FTO-11] Drake force/torque provider: DrakeForceTorqueSource over reaction, net-actuation and point/hydroelastic contact ports, axial loads, shared segment_axes helper, force_visualization=FULL. |
+| 2026-10-02 | #11303 | [FTO-18] Add the pure-Python Simscape force loader `load_simscape_force_series` (declarative channel table, logged-R rotation, orthonormality validation) and `SimscapeAdapter.load_force_series`; documented in CROSS_ENGINE_PARITY_SPEC section 3.1. |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract, ForceTorqueFrame wire schema, ForceTorqueSeries with linear interpolation and allow_pickle=False NPZ, and shared fixtures (#11286). |
 | 2026-10-02 | #11285 | Plan the force/torque overlay epic: ADR-0052 engine-agnostic force/torque contract (proposed), assessment of every engine and the video stack, and 30 dependency-ordered child issues including tension/compression producers and source-footage overlays. |
 | 2026-10-02 | #11268 | Plan the capture-O video companion epic: procedure for markerless, Necromatcher and Simscape comparison of the owner's session video against the marker capture, with graded comparison levels and private-data rules. |
