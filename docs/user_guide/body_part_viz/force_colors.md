@@ -108,8 +108,12 @@ the actual native leaf paths and original RGBA values; they are never guessed.
 The session clears bindings on model replacement and restores base colors for
 stale frames. Rebind after changing materials. Both native GUIs have been tested
 for settings, redraw, binding, blue output and disabled restoration with Pinocchio
-4.1.0 and Drake 1.56.0. These hosts do not automatically infer axial forces.
-In particular, Drake's sampled reaction output requires explicit time alignment.
+4.1.0 and Drake 1.56.0. Pinocchio does not automatically infer axial forces.
+The Drake GUI now produces loads: it samples `DrakeForceTorqueSource` each tick,
+binds the session to the MeshCat illustration geometry
+(`visualizer/<frame>/<geometry>/<object>`, discovered through
+`SceneGraphInspector`) and submits the provider's `AxialLoadFrame` while the
+View menu toggle is on. Only bodies with a single child joint are shaded.
 OpenSim's current desktop GUI contains result plots, not an animated 3D scene;
 future scene consumers can use the same renderer and load contracts.
 
