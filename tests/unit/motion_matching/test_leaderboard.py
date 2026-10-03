@@ -360,6 +360,7 @@ class TestGenerateReport:
 # --- Per-Capture Leaderboard (Issue #11170, Epic #11161) ---------------------
 
 
+@pytest.mark.unit
 class TestPerCaptureLeaderboard:
     def test_capture_field_defaults_to_driver(self) -> None:
         r = FitResult(**_good_payload())
