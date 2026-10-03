@@ -745,7 +745,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. This entry qualifies controls only; automatic solver load production and remaining desktop host wiring are pending in docs/development/segment_force_color_epic.md.",
+      "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305).",
       "id": "visualization.force_color_controls"
     }
   ],
@@ -2900,7 +2900,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "e1a6e2a0445c9b6a024d197278a57ac78a1068256bb19bc7b4f756a1053caa36",
+    "src/config/feature_parity.json": "62580c1f8e0ac2d4d726d7c628514da8a3b1fad2c8f9c60fb0e4a6148d61f32c",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
