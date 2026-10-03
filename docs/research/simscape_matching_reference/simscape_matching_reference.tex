@@ -4369,6 +4369,67 @@ match. The next fitting change must address acceleration and branch
 consistency alongside marker fidelity; original fitted anchors are an
 experimental control, not a user-imposed constraint.
 
+\subsection{Closed-Arm Velocity Charts and Acceleration Regularization}
+Fresh native audits compare two velocity reference charts at five selected
+tour and twelve selected owner poses. Each pose uses all 37 typed prescribed
+velocity basis inputs. Angular inputs are one rad/s, converted to native
+deg/s; translational inputs are one m/s. The six dependent angular outputs
+are converted to rad/s. Translation normalization uses a declared reference
+length of one metre. All 629 basis responses in each chart pass the native
+position, velocity-target and fresh full-state gates. Both audits exit
+naturally with process and wrapper zero. This is a local, scaled velocity
+mapping, not a constraint-Jacobian condition number, global rank calculation,
+actuator inventory or proof of a kinematic singularity.
+
+The original chart has largest tested singular values of $4.37765$ for the
+tour and $1,159.09922$ for the owner. Prescribing right wrist Ry while freeing
+right forearm Rz changes them to $15.93966$ and $43.42788$, respectively.
+Because input and output roles change, these values do not establish an
+invariant improvement in physical conditioning. The tour becomes worse by
+this chart-specific measure. Large owner amplification also occurs at fitted
+source poses, so interpolation alone cannot explain the sensitivity.
+
+The alternative owner C2 audit accepts all 367 source anchors and 364 of
+366 interval midpoints: 731 of 733 states overall. Two midpoint native
+position solves fail; no source-anchor branch mismatch remains at the
+existing strict tolerance. Nevertheless, the largest dependent angular rate
+over accepted states rises to $12,066.24$ deg/s, compared with $4,249.57$
+deg/s for the original chart's accepted subset. Peak prescribed angular
+acceleration is $2.58862\times10^6$ deg/s$^2$. Thus, accepting more poses
+does not establish a better motion reference. Neither chart is promoted.
+
+The next fitting prior uses three consecutive accepted poses and the actual
+nonuniform source clock. For rotations $R_o,R_p,R_n$, define
+\begin{align}
+ \delta_n &= \operatorname{Log}(R_p^\mathsf{T}R_n), &
+ \delta_p &= \operatorname{Log}(R_o^\mathsf{T}R_p),\\
+ h_c &= (h_n+h_p)/2, &
+ a_R &= \frac{\delta_n/h_n-R_p^\mathsf{T}R_o\delta_p/h_p}{h_c}.
+\end{align}
+Here Log returns a three-component rotation vector, and the second term
+uses a body-coordinate basis conversion. This discrete regularization proxy
+is not an independently measured native dependent acceleration or a claim
+of global manifold parallel transport. Scalar angles use wrapped interval
+increments; translations use ordinary finite differences. Residuals are
+$w_R h_{\rm ref}^2 a_R$ and $w_p h_{\rm ref}^2 a_p$, where $w_R$ has units
+m/rad and $w_p$ is dimensionless. Stable ratio products avoid explicitly
+squaring an extreme reference interval. Every interval and reference ratio
+must be finite and strictly positive, even at zero weights. A relative
+rotation within $10^{-6}$ rad of a half turn raises an explicit numerical
+ambiguity error; this is not a native solver singularity classification.
+
+Ten independent native pure-helper tests first fail with the helper absent
+(natural process and wrapper exit one, 15:14:39 UTC), then pass after the
+reviewed implementation (natural process and wrapper zero, 15:18:20 UTC).
+The tests cover quadratic motion on unequal intervals, scalar phase wrap,
+constant world rotation, follower-basis covariance, fixed layout, input
+validation, unrepresentable time ratios and scalar/spherical half-turn
+ambiguity. Coordinate validation and key partitioning reuse the existing
+pose-step helper. This verifies the mathematical helper only. Integration
+into the fitting objective, whole-output zero-weight parity, complete source
+clock refits and fresh native trajectory audits remain required. No artificial
+duplicate initial pose may supply the missing three-frame history.
+
 \subsection{Native Neck Actuation Inspection}
 A fresh read-only native inspection exits naturally with zero and confirms
 that both neck axes use \texttt{InputMotion} and \texttt{ComputedTorque}.

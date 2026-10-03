@@ -1,4 +1,35 @@
 {
+  "acceleration_helper_green": {
+    "failed": 0,
+    "incomplete": 0,
+    "passed": 10,
+    "simulation_executed": false,
+    "test_count": 10
+  },
+  "acceleration_helper_green_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T15:18:20.856068+00:00"
+  },
+  "acceleration_helper_red": {
+    "failed": 10,
+    "incomplete": 5,
+    "passed": 0,
+    "simulation_executed": false,
+    "test_count": 10
+  },
+  "acceleration_helper_red_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T15:14:39.816703+00:00"
+  },
+  "acceleration_helper_scope": "Native pure-helper mathematical TDD only; integration into fitting, complete output zero-weight parity, full-clock refits and fresh physical trajectory audits remain required.",
   "all_35_input_torque_axes_qualified": false,
   "alternate_basis_accepted_subset_rates": {
     "qualification": "NATIVE_CLOSED_ARM_RATE_AND_STEP_DIAGNOSTIC_POINTWISE_ACCEPTANCE_IS_NOT_DYNAMIC_REGULARITY",
@@ -1063,6 +1094,75 @@
     "scipy": "1.17.1"
   },
   "latex_pdf_verified": false,
+  "local_closed_arm_velocity_gain_alternate_chart": {
+    "angular_unit_notice": "Basis: 1 rad/s (180/pi deg/s) angular or 1 m/s translation; output dependent converted to rad/s.",
+    "between_pilot_samples_qualified": false,
+    "chart_notice": "Same frozen poses and selection windows; RightWristRy prescribed, RightForearmRz free. Gain metric depends on this declared input/output chart; no invariant physical-conditioning improvement claimed.",
+    "disclaimer": "LOCAL velocity amplification ONLY; NOT full constraint Jacobian condition/global rank/37 independent DOF/actuators/singularity certificate.",
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "public_aggregates": {
+      "capture_A": {
+        "all_37_columns_valid_count": 5,
+        "evaluated_states_count": 5,
+        "max_column_gain": 7.619682605462259,
+        "max_sigma_max": 15.939656625941131
+      },
+      "capture_O": {
+        "all_37_columns_valid_count": 12,
+        "evaluated_states_count": 12,
+        "max_column_gain": 26.400863545087162,
+        "max_sigma_max": 43.42787982411779
+      }
+    },
+    "qualification": "PRIVATE_CLOSED_ARM_VELOCITY_GAIN_DIAGNOSTIC_NOT_GLOBAL_RANK_OR_DYNAMICS",
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "local_closed_arm_velocity_gain_alternate_chart_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T14:11:05.848878+00:00"
+  },
+  "local_closed_arm_velocity_gain_original_chart": {
+    "angular_unit_notice": "Basis: 1 rad/s (180/pi deg/s) angular or 1 m/s translation; output dependent converted to rad/s.",
+    "between_pilot_samples_qualified": false,
+    "disclaimer": "LOCAL velocity amplification ONLY; NOT full constraint Jacobian condition/global rank/37 independent DOF/actuators/singularity certificate.",
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "public_aggregates": {
+      "capture_A": {
+        "all_37_columns_valid_count": 5,
+        "evaluated_states_count": 5,
+        "max_column_gain": 2.31806891990274,
+        "max_sigma_max": 4.377650653469833
+      },
+      "capture_O": {
+        "all_37_columns_valid_count": 12,
+        "evaluated_states_count": 12,
+        "max_column_gain": 731.6114654766484,
+        "max_sigma_max": 1159.0992217899707
+      }
+    },
+    "qualification": "PRIVATE_CLOSED_ARM_VELOCITY_GAIN_DIAGNOSTIC_NOT_GLOBAL_RANK_OR_DYNAMICS",
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "local_closed_arm_velocity_gain_original_chart_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T13:58:45.095163+00:00"
+  },
   "local_differential_aggregates": {
     "capture_A": {
       "angular_0_02_linear_0_5": {
@@ -2139,6 +2239,56 @@
     "termination_reason": "hung_after_done",
     "timestamp": "2026-10-03T08:06:15.105359+00:00"
   },
+  "owner_alternate_chart_branch_diagnostic": {
+    "capture_O": {
+      "accepted_count": 731,
+      "anchor_branch_mismatch_count": 0,
+      "native_failure_midpoint_count": 2,
+      "native_failure_original_anchor_count": 0,
+      "native_solve_failure_count": 2,
+      "pilot_state_count": 733
+    }
+  },
+  "owner_alternate_chart_refitted_c2_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_FULL_SOURCE_CLOCK_REFITTED_C2_MIDPOINT_NATIVE_AUDIT_NOT_ALL_TIME_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_O": {
+        "accepted_midpoint_count": 364,
+        "accepted_original_anchor_count": 367,
+        "accepted_state_count": 731,
+        "dependent_rate_scope": "Accepted native states only; rejected states explicitly counted. No all-time continuity or physiological acceptance.",
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 731,
+        "max_anchor_physical_error": 6.713997422878524e-8,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 367,
+        "peak_abs_dependent_angular_velocity_deg_s": 12066.237435904983,
+        "peak_abs_prescribed_angular_acceleration_deg_s2": 2588623.644962957,
+        "pilot_state_count": 733,
+        "position_status_one_count": 731,
+        "rejected_state_count": 2,
+        "velocity_status_one_count": 731,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "owner_alternate_chart_refitted_c2_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T14:15:18.805846+00:00"
+  },
   "private_c2_tdd": {
     "body_rate_oracle": true,
     "original_agent_red_scope": "Missing module collection error; exact original process exit unsupported by stored log",
@@ -2182,15 +2332,20 @@
     "build_native_c2_payload_reviewed.py": "2594ed47b9abc5c3172b79072373f34051b5e7de5d126b124a40c18d7401fafd",
     "build_refitted_c2_payload_reviewed.py": "1f6b09577527e57e332452009a1bc6acc23f26d66e5c5341ddaeee283f4142d8",
     "c2_reference.py": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+    "gs3dx_joint_acceleration_residual.m": "7b640d843664468136b1193e9a0ef9f2e936d964fd876727759a0a6dc8c1360b",
     "gs3dx_joint_rate_residual.m": "694e387415c4f63b70f8d66af66ea6d931aa3d8a7188409ec1a41ebaeeede65e",
     "gs3dx_neck_torque_drive.m": "e2d889eb6ee8bb76c4f46b97675bc5dc88a6e2b9bbc26e240839a56d9fae2377",
     "gs3dx_whole_body_ik.m": "69aebcd423626271a5c5ce41ee73bfe8b812019f9c043278ca189c7c3ba7b2f9",
     "prepare_anchor_seeded_c2_payload_reviewed.py": "3c7ff283664d2c826bbae751da00e937f515843b97118e3df3b46cf7fbc8ab27",
+    "probe_acceleration_tests_reviewed.m": "e8fb838c122fc8516806e8a812721984a3a05e855f8f4cb7504de565c33038be",
+    "probe_alternate_closed_arm_velocity_gain_reviewed.m": "3d6d6a9caf786c4ffc54606390fbb75b75ad3d03a5eefb1cf3d4860817cf5ee8",
+    "probe_closed_arm_velocity_gain_reviewed.m": "0587a820fe5ba92a4cc75c51cacaa03605c04ee850002989d76edcaecd15470a",
     "probe_failed_c2_assembly_reviewed.m": "dd67c088db92bc992a45624e75f89350e0e6164aa36944ae7394aeae68d0ba4d",
     "probe_global_rate_refit_reviewed.m": "519f53853eb2f7689190901814de9dfc89e9e2ca746bb5fef7564f469de3aae4",
     "probe_native_c2_anchor_midpoints_reviewed.m": "be19e956f76d0074c9110707402c883f1afb59a6bb6f7243e0414b1bfa9943f7",
     "probe_native_c2_anchor_seeded_source_frames_reviewed.m": "9e679c4bb4c1087478630bb9ad8508dab924ad8a6f338ee64712c3c17e935f69",
     "probe_native_c2_source_frames_reviewed.m": "a52b9d2911ecf4b01f218aa602d28f190ef3f2f9684225f5d052f4359fcbe54f",
+    "probe_native_owner_alternate_c2_midpoints_reviewed.m": "84cd90a8d96be99dd01b2236ae33d77fa52f284419010b474d7469fa28296dde",
     "probe_native_refitted_c2_midpoints_reviewed.m": "1a18ca7f8b42a45068df125c9c35bd43a17efb86e5f82b3ee50ef8a62f6d5aff",
     "probe_neck_contract_green.m": "0db1a1f5c7274f4a86e00204b7a2abad15434a05f8eabe55a91a961af207a203",
     "probe_neck_measured_pilot_reviewed.m": "069e3560141ab448bb1f426547a7f20901e2588e59e26aa3d7d9f7494d76020d",
@@ -2203,6 +2358,7 @@
     "refitted_c2_inputs.py": "ce64ae60e2a6f6dd7f77101bc16d52c03641c22cfc89e3c99fbfe1dcba40939f",
     "test_c2_parent_regressions.py": "a877f15bb13f59a5baff09886ce9ad2d7961bb589f5cc9f868045299117053f0",
     "test_c2_reference.py": "f65f199e8041137910ea3295f2f1f25b9fe391372ac3ca33ebd8adc1a9ef6d42",
+    "test_joint_acceleration_residual_reviewed.m": "5919fdea4b44c1aa9219984f00710e36d9e9f0d367a644bbb961f382dbd7de12",
     "test_joint_rate_residual_reviewed.m": "55b487d982cb8492cfc5764951d7ad77fd7e826e673ab2d5da09a8d637ef3899",
     "test_neck_torque_drive_reviewed.m": "401162b82a8fb55b244c71c701875815fa5812d685da29acd8cdf9b74eb066d0",
     "test_refitted_c2_inputs_reviewed.py": "91c0d63e2fa96784e3b45d293926bf2d515f64721de3ea5beb42e75f0b964525"
