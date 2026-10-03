@@ -1,3 +1,19 @@
+# MuJoCo 3.14 Axial-Load Axis Discovery — #11349
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/mj314`; branch `fix/mujoco-314-axial-load-axis`; commit: SELF; PR: see the PR for this branch (`Closes #11349`).
+- Completed: `MujocoAxialLoadSource._discover_axes` compares geom and joint types via `int()` (numpy int vs pybind enum `in`/`==` is direction-dependent and False on mujoco 3.14, so no rods were found and `sample()` returned None). Regression tests for capsule/cylinder discovery and free/non-rod exclusion in `tests/unit/body_part_viz/test_mujoco_axial_loads.py`.
+- Validation: `pytest tests/unit/body_part_viz/test_mujoco_axial_loads.py` 9 passed on mujoco 3.14.0. Failures outside scope here: tests needing PyQt6 (not installed in this venv).
+- Next steps: none for this fix; other mujoco 3.14 drift is listed in the PR body.
+
+# OpenSim Engine State and Control Setters Under OpenSim 4 — #11344
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11344`
+- Branch: `fix/issue-11344-opensim-set-state`; commit: SELF; PR: #11352 (open; `Closes #11344`, `Refs #11285`); DL entry `DL-#11285`
+- Completed: `OpenSimPhysicsEngine.set_state` builds vectors with `opensim.Vector(list)` (4.x has no `Vector(int)`), keeps time, realizes Velocity and raises `ValueError` on length mismatch. `set_control` goes through `Model.setControls` (a bare `updControls` + `markControlsAsValid` does not invalidate an already-realized Dynamics stage, so actuation stayed 0); the values are retained in `self._controls` and re-applied by `set_state` because changing q/u drops realized controls. ZTCF/ZVCF snapshot and restore that retained value. `tests/unit/engines/opensim/test_opensim_set_state_control.py` (10 live tests, including a nonzero actuator torque in the force/torque frame) and `tests/integration/cross_engine/test_opensim_engine_state_control_parity.py` (engine set_state/set_control gives the same force/torque frame as a model with state and PrescribedController baked in).
+- Known limits: `step()` integrates through the Manager, which recomputes controls from the model controllers, so a `set_control` value does not persist across steps without a controller. Not fixed here: `reset()` calls `Manager.setSessionTime` (absent in 4.x), `compute_inverse_dynamics` uses `Vector(n_u)` (so `compute_gravity_forces`/`compute_bias_forces` return empty arrays on 4.x). The parity builders in `tests/integration/cross_engine/test_force_overlay_parity.py` (PR #11345) can switch from baked-in state/controller to `set_state`/`set_control`.
+- Validation: `python3 -m pytest tests/unit/engines/opensim` passes with the new file; the wider opensim/analytical/audit set shows the same 50 failures before and after (pre-existing in this environment).
+- Next steps: fix `reset()` and the inverse-dynamics `Vector` call in a follow-up; update the parity builders after #11345 merges.
+
 # Colour Utilities DRY — #11289 (FTO-4)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11289`
@@ -1772,3 +1788,5 @@ The owner dense window improves mean target RMS 28.739→28.131 mm and maximum i
 The local download and marker-placement review requested by the owner are complete: six originals, 88,738,421 bytes, verified archive and additional original-name copies. The supplemental private acquisition-review receipt is deterministic, SHA-256 `691b97b68ce58412e400fd552d849f46a5bd2c14f4f442afa72ee87bd5fb345d`. COV-1/#11269 remains open for additional catalog/software acceptance, ffprobe JSON, camera-original provenance and owner recollection. Exact video-trial pairing, camera calibration and anatomical marker offsets remain unqualified. Source media and filenames stay private.
 
 The standalone LaTeX reference now distinguishes historical and newer torso-refined Desktop candidates, corrects mask tensor indexing and defines source-verified balance command units and net torque subtraction. The compiler still reports `Unable to find standard directories for platform`; the latest PDF is unverified. Full moving references, all 35 actuators including the neck, contact acceptance and fresh independent A/O replay remain open. PR #11256 stays draft; no protected merge or full-goal completion is claimed.
+
+Current-main integration after the continuity checkpoint: merged source 4eb3051c3 includes MuJoCo enum comparisons and OpenSim state/control fixes; MATLAB matcher/model files are unchanged. The updated MuJoCo suite has five passes and four failures on this host because its installed binding lacks mj_copyData; two OpenSim suites skip because OpenSim is absent. Initial EGL selection was rejected on Windows; the retry disabled OpenGL entirely. These are inherited optional-engine limitations, not Simscape or full-physics acceptance. No tolerance, skip rule, dependency or foreign engine code is changed to conceal them. The merge preserves both SPEC row sets and the single PR11256 row; protected delivery remains open.
