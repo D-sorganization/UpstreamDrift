@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11268 — Capture-O Video vs Marker-Capture Comparison Suite (COV-1–COV-11)
+
+- **State:** in_progress
+- **Owner:** local (session: cov-4-virtual-camera-11272)
+- **Issue:** #11268 (children #11269–#11279, #11272)
+- **PR:** #11272 (draft)
+- **Branch:** `feat/cov-4-virtual-camera-11272`
+- **Paths:** `src/motion_capture/reference/virtual_camera_fit.py`, `tests/unit/motion_capture/test_cov_virtual_camera.py`, `SPEC.md`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03: COV-4 virtual camera fitting and 2D swing envelope implemented with full TDD. Six synthetic unit tests pass verifying noiseless camera recovery within stated tolerances, noise-induced covariance widening and unbiasedness, coplanar/degenerate correspondence detection yielding degraded outcomes with stated reasons, wrong-axis (unconverted Y-up) mirrored projection detection via chirality sign test, monotone 2D percentile bands (p5 <= p50 <= p95) with missing-frame sample count tracking, and typed errors/skip for missing registry entries. Bidirectional CameraProjection adapter tested. Pre-commit checks (architecture budget, file size budget, error handling ratchet, ruff check/format, and mypy) pass clean.
+- **Summary:** Multi-level comparison framework comparing owner video swings against the 13 capture-O reference marker-capture swings. COV-4 fits virtual cameras for video viewpoints at address and projects all 13 capture swings to generate the L1 phase-normalized 2D swing-to-swing variation envelope.
+- **Next step:** COV-5 (#11273) 2D detector keypoints extraction across views and backends, followed by COV-6 (#11274) swing pairing and time mapping.
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress
@@ -123,8 +136,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-10-03 at SELF — COV-2 (#11270): registered capture-O video sources, timing evidence validation (`VideoTimingEvidence`), variable frame rate rejection (`VariableFrameRateError`), swing candidate intervals (`SwingWindow`, `validate_swing_windows`), usability grading rubric (`grade_swing_window`, `SwingGradeResult`), capture registry `video` kind schema extension, and catalog privacy invariants; all focused tests pass.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
-
-
 
 - **PR:** #11413 (Closes #11269, Refs #11268)
 - **Branch:** `feat/cov-1-acquisition-11269`

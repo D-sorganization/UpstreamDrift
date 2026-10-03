@@ -1,3 +1,39 @@
+# [COV-4] Virtual Camera Fitting and 2D Swing Envelope — #11272
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-4-virtual-camera-11272`; commit SELF; PR: #11272 (`Closes #11272`, `Refs #11268`)
+- Governing issue: #11272 (parent epic #11268, depends on #11270, #11271, #11163)
+- Objective: Fit a virtual camera for each video viewpoint mapping capture-O world landmarks into image pixel coordinates, and project all 13 capture-O reference swings into that view to compute the L1 2D phase-normalized p5/p50/p95 variation envelope.
+- Completed:
+  - `src/motion_capture/reference/virtual_camera_fit.py`:
+    - `CameraFitOutcome`: enum `fitted`, `degraded`.
+    - `VirtualCameraResult`: dataclass carrying fitted camera parameters, parameter covariance matrix, reprojection RMS in pixels, Jacobian condition number, outcome status, and degraded reason.
+    - `fit_virtual_camera`: estimates camera extrinsics via non-linear least squares reprojection minimization. Detects degenerate correspondences (collinear or coplanar rank < 3) and ill-conditioned normal equations ($\kappa(J) > 10^4$), returning `CameraFitOutcome.degraded` with declared reason and fixing parameters at priors rather than reporting a false sharp camera.
+    - Coordinate convention & chirality validation: enforces ADR-0041 frame (Y-up, X forward, Z right) and detects unconverted Y-up inputs or lateral reflections via vertical span and chirality sign tests, rejecting them with typed `ValueError`.
+    - `compute_2d_envelope`: computes per-landmark phase-normalized p5/p50/p95 bands (pixel and height-normalized), asserting 13-swing input completeness and explicitly reducing sample counts when marker frames are missing/occluded.
+    - Bidirectional adapters: `pinhole_camera_to_camera_projection` and `camera_projection_to_pinhole_camera` providing exact round-trip conversion between `PinholeCamera` (world-from-camera) and `CameraProjection` (world-to-camera).
+  - `tests/unit/motion_capture/test_cov_virtual_camera.py`:
+    - Strict TDD unit tests with synthetic data (`synthetic_*`):
+      - Noiseless recovery within declared tolerances (angle < 1e-3 rad, translation < 1e-3 m, RMS < 1e-2 px).
+      - Noise-induced covariance widening and unbiasedness under 2.0 px Gaussian noise.
+      - Coplanar/degenerate correspondence detection yielding `CameraFitOutcome.degraded` with stated reason.
+      - Unconverted Y-up / wrong axis convention detected and rejected by chirality sign test.
+      - Monotone percentile envelope bands ($p_5 \le p_{50} \le p_{95}$) with missing marker frames reducing sample counts.
+      - Typed errors for non-finite inputs, mismatched shapes, and missing registry entries.
+  - Specifications and governance:
+    - Added COV-4 Virtual Camera Fitting and 2D Swing Envelope section to `SPEC.md`.
+    - Added PR #11272 entry to `SPEC.md` Section 12 Change Log table.
+    - Added `DL-#11268` entry to `docs/development/DEVELOPMENT_LOG.md`.
+- Validation:
+  - All 6 unit tests pass in `tests/unit/motion_capture/test_cov_virtual_camera.py`.
+  - All 13 reference registration tests pass in `tests/motion_capture/test_reference_registration.py`.
+  - Architecture budget (`scripts/ci/check_architecture_budget.py`): pass (functions <= 100 lines, parameters <= 8).
+  - File size budget (`scripts/ci/check_file_size_budget.py`): pass.
+  - Error handling ratchet (`scripts/ci/check_error_handling_ratchet.py`): pass.
+  - Spec checks (`scripts/ci/check_spec_changelog_duplicates.py`, `scripts/check_spec_paths.py`): pass.
+  - Ruff check & format (`ruff check`, `ruff format --check`): pass.
+  - MyPy (`run_mypy.py`): pass (0 errors).
+- Next steps: COV-5 (#11273) 2D detector keypoint extraction across viewpoints and backends.
+
 # Current Handoff — Capture-O Video Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 - Repository: `D-sorganization/UpstreamDrift`

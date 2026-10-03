@@ -1,3 +1,17 @@
+## Virtual Camera Fitting and 2D Swing Variation Envelope (COV-4, #11272)
+
+Specifies the virtual camera estimation and 2D swing-to-swing envelope projection for comparing owner video swings against the 13 capture-O reference swings (COV-4, #11272, parent #11268):
+- **Virtual Camera Fitting (`src/motion_capture/reference/virtual_camera_fit.py`)**:
+  - `fit_virtual_camera` estimates camera extrinsics mapping ADR-0041 world coordinates (Y-up, X toward target, Z golfer's right) into 2D video pixel views using non-linear least squares reprojection minimization.
+  - Returns `VirtualCameraResult` recording estimated camera parameters, parameter covariance matrix, fit reprojection RMS in pixels, Jacobian condition number, `CameraFitOutcome` (`fitted` or `degraded`), and optional `degraded_reason`.
+  - Degeneracy handling: correspondences with coplanar or collinear geometry (rank < 3) or ill-conditioned normal equations ($\kappa(J) > \text{max\_condition\_number}$) yield `CameraFitOutcome.degraded` with declared reason and hold camera parameters at priors, refusing to report false sharp fits.
+  - Coordinate axis and chirality validation: enforces ADR-0041 convention where Y is the vertical height axis (rejecting unconverted Y-up C3D inputs missing `y_up_to_z_up`) and detects mirrored projections via chirality sign tests.
+- **2D Swing Variation Envelope (`compute_2d_envelope`, `SwingEnvelope2D`)**:
+  - Projects all 13 capture-O swings into the virtual camera view and computes phase-normalized per-landmark percentile bands ($p_5 \le p_{50} \le p_{95}$) in pixel and body-height-normalized units.
+  - Enforces monotonicity ($p_5 \le p_{50} \le p_{95}$), asserts 13-swing input completeness, and explicitly tracks valid sample counts per landmark and phase bin when marker occlusions/NaNs are present.
+- **Projection Adapters**:
+  - Tested bidirectional adapter between `PinholeCamera` (world-from-camera convention) and `CameraProjection` (world-to-camera convention) preserving camera matrix, rotation, translation, and projection geometry.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -50,6 +64,7 @@ Specifies the unified markerless observation runner across registered estimators
   - `to_canonical_observations` canonicalizes HMR2 `joints3d.csv` output into `CanonicalObservations` (SMPL-22 marker set).
   - Preserves 3D joint positions in metres under declared coordinate frame (`declared_frame="camera"`).
   - Flags missing focal length or camera intrinsics with a typed `unqualified` status (`qualification="unqualified"`, `unqualified=True`) rather than fabricating guessed scale.
+
 
 ## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
 
@@ -7795,6 +7810,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11272 | [COV-4] Virtual camera fitting and 2D swing envelope: fit_virtual_camera with condition number, covariance, and degeneracy handling; compute_2d_envelope for phase-normalized p5/p50/p95 bands with sample counts and missing-frame tracking; CameraProjection adapter (#11272). |
+| 2026-10-02 | #11256 | Default future matches to refined Human ellipsoids; add capture-bound exports, calibrated foot/head orientation, keyed starts, selective gap weights and source observation masks with native default-parity tests and caller-bound export/cache contracts. Support configured upper-body learning, native block-bound Human moving references with explicit geometry-preserving conversion; native moving-velocity/midpoint, dense branch, derived-target availability and source-masked full-pose continuity experiments recorded without promotion; distinguish the refined-preview objective, verify private translation parameter contracts and native address-prefix comparison with independent 344-pose rechecking, and twelve-axis leg feedforward; preserve failed exit receipts and separate 48/43/37/35 native coordinate/control counts; fresh 48-state tangent recheck passes; original source-rate C2 rejection retained, guess correction preserves anchors, and refined/alternate-chart dense candidates remain rejected; record the GS3DX canonical-manual inventory blocker without release promotion; independently recheck all 2,042 full-source-clock fitted poses after retained shutdown failure, audit tour1307/1307 and owner729/733 C2 states plus bounded measured InputTorque neck capability; retain the earlier 536 saved-window-pose review after retained shutdown failure, measure capture-specific fit/continuity tradeoffs and native RED/GREEN normalized-rate helper contracts without full-path promotion; dense target/back-marker fit and projection-conditioned visual foot direction independently measured; parent verifies 104 comparison MP4s without dynamics promotion. Maintain calculation-level LaTeX, failed-trial evidence and tour/owner Desktop H.264 IK videos. Contact-supported one-second holds pass their fixed gates; full-swing torque recovery, independent replay, PDF qualification and protected delivery remain open. |
 | 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
 | 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |
