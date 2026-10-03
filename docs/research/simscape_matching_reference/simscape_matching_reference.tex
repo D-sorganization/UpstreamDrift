@@ -2859,6 +2859,56 @@ signed-table flags cannot substitute for acceptable full sampled tracking
 and independent validation. The model and solver hashes are preserved;
 no model is saved and no simulation is performed.
 
+
+\subsection{Pelvis Continuity Review Preserves the Tradeoffs}
+The native continuity/ROM audit completed naturally at
+\texttt{2026-10-03T00:25:08Z}. It verifies the existing joint-key manifest
+against the shared native ROM mapper and uses actual axis-angle SO(3)
+increments, not Euler differences alone. No simulation or model save is
+performed. All candidates pass the reported position-RMS degradation
+screen, but none is promoted.
+
+For the tour, pelvis weighting reduces the largest leg-coordinate
+increment from $22.312$ to $17.649$ degrees and the reviewed left-hip
+SO(3) increment from $24.581$ to $9.310$ degrees. However, the largest
+root translation increment increases from $21.309$ to $32.495$ mm and
+signed implementation-ROM flagged rows increase from twelve to thirteen.
+This accompanies the already recorded increase in peak head error.
+
+For the owner, the original known root transition is $53.926$ mm.
+Selective missing lower-position weighting reduces it to $17.350$ mm;
+pelvis weighting alone gives $54.714$ mm, while the combined trial gives
+$17.585$ mm. The largest leg-coordinate increments are $38.380$,
+$34.090$, $39.877$ and $36.417$ degrees for original, selective-gap,
+pelvis-only and combined trials respectively. At the reviewed transition,
+left-hip SO(3) increments are $30.025$, $26.710$, $30.103$ and $27.852$
+degrees. The combined trial's largest root step over all samples is
+$26.899$ mm versus $27.062$ mm for selective gaps alone; this small
+aggregate change does not remove the adverse leg tradeoff. Pelvis trials
+retain twelve signed ROM flagged rows versus thirteen in both controls.
+These increments describe sparse sampled trajectories, not independently
+observed physiological rates or anatomical limit violations.
+
+A subsequent hash-preserving source/export audit at
+\texttt{00:28:52Z} verifies 69 filled scalar coordinates in 23 marker
+frames, affecting three of the forty-six sampled IK frames. All 38,250
+raw-finite retained coordinates are exactly unchanged; 216 missing
+scalar coordinates remain unfilled. Long and boundary gaps are preserved.
+The original observation/interpolation mask is now recovered privately,
+but still needs propagation into the solver input and scoring. Reported
+position RMS currently follows exported-data gap flags and cannot be
+claimed as independent raw-measurement-only accuracy.
+
+In ezc3d, the fourth point-data row is the homogeneous coordinate in
+XYZ1; reconstruction residuals and camera flags are separate
+\texttt{meta\_points} fields \cite{ezc3d}. The private probe was corrected
+before execution to inspect those actual fields. Both source and export
+residual values are zero and camera flags are false, including filled
+marker frames; no dedicated interpolation identity is preserved there.
+Finiteness in the decoded source is itself not independent physical
+measurement qualification. Lower residuals and native loop closure do
+not establish independent accuracy.
+
 % END PELVIS PROSPECTIVE CONTRACT
 \begin{thebibliography}{9}
 \bibitem{ezc3d}

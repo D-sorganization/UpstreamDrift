@@ -1,0 +1,78 @@
+{
+  "qualification": "NATIVE_PELVIS_CONTINUITY_AND_IMPLEMENTATION_ROM_AUDIT_NOT_ANATOMICAL_OR_DYNAMICS_ACCEPTANCE",
+  "captures": {
+    "capture_A": {
+      "control": {
+        "sample_count": 55,
+        "root_max_adjacent_step_mm": 21.30866294092842,
+        "root_reviewed_transition_step_mm": 9.637941545176176,
+        "largest_leg_coordinate_step_deg": 22.312295185415422,
+        "left_hip_reviewed_transition_SO3_step_deg": 24.581214070412045,
+        "implementation_ROM_flagged_rows": 12,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      },
+      "trial_pelvis_0_1": {
+        "sample_count": 55,
+        "root_max_adjacent_step_mm": 32.49506480143036,
+        "root_reviewed_transition_step_mm": 11.130394809674115,
+        "largest_leg_coordinate_step_deg": 17.649289786505506,
+        "left_hip_reviewed_transition_SO3_step_deg": 9.309674868391795,
+        "implementation_ROM_flagged_rows": 13,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      }
+    },
+    "capture_O": {
+      "control": {
+        "sample_count": 46,
+        "root_max_adjacent_step_mm": 53.92632614617937,
+        "root_reviewed_transition_step_mm": 53.92632614617937,
+        "largest_leg_coordinate_step_deg": 38.3799868689029,
+        "left_hip_reviewed_transition_SO3_step_deg": 30.025247451692955,
+        "implementation_ROM_flagged_rows": 13,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      },
+      "control_selective_gap": {
+        "sample_count": 46,
+        "root_max_adjacent_step_mm": 27.06169515502546,
+        "root_reviewed_transition_step_mm": 17.350316987136566,
+        "largest_leg_coordinate_step_deg": 34.0900304808911,
+        "left_hip_reviewed_transition_SO3_step_deg": 26.710446544247144,
+        "implementation_ROM_flagged_rows": 13,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      },
+      "trial_pelvis_0_1": {
+        "sample_count": 46,
+        "root_max_adjacent_step_mm": 54.71387865904936,
+        "root_reviewed_transition_step_mm": 54.71387865904936,
+        "largest_leg_coordinate_step_deg": 39.87667307803666,
+        "left_hip_reviewed_transition_SO3_step_deg": 30.102804713346938,
+        "implementation_ROM_flagged_rows": 12,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      },
+      "trial_pelvis_0_1_selective_gap_1": {
+        "sample_count": 46,
+        "root_max_adjacent_step_mm": 26.89892971333785,
+        "root_reviewed_transition_step_mm": 17.585342147384065,
+        "largest_leg_coordinate_step_deg": 36.41717004896216,
+        "left_hip_reviewed_transition_SO3_step_deg": 27.85201071266348,
+        "implementation_ROM_flagged_rows": 12,
+        "reported_position_degradation_screen_pass": true,
+        "promoted": false
+      }
+    }
+  },
+  "model_saved": false,
+  "simulation_executed": false,
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "timestamp": "2026-10-03T00:25:08.991907+00:00"
+  }
+}
