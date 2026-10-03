@@ -24,6 +24,12 @@ from .registration import (
     sample_reference_motion,
     transform_reference_motion,
 )
+from .force_alignment import (
+    force_frame_for_video,
+    load_trace_forces,
+    series_to_viewport_payload_wrench,
+    write_trace_forces,
+)
 
 __all__ = [
     "COMPARISON_EXPORT_SCHEMA",
@@ -46,9 +52,13 @@ __all__ = [
     "build_comparison_sidecar",
     "canonical_z_up_to_adr0041_world",
     "comparison_session_path",
+    "force_frame_for_video",
     "load_comparison_session",
+    "load_trace_forces",
     "project_reference_to_camera",
     "sample_reference_motion",
     "save_comparison_session",
+    "series_to_viewport_payload_wrench",
     "transform_reference_motion",
+    "write_trace_forces",
 ]

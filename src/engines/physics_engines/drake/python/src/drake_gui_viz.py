@@ -70,8 +70,6 @@ class VisualizationMixin:
         if not (
             self.chk_induced_vec.isChecked()  # type: ignore[attr-defined]
             or self.chk_cf_vec.isChecked()  # type: ignore[attr-defined]
-            or self.chk_show_forces.isChecked()  # type: ignore[attr-defined]
-            or self.chk_show_torques.isChecked()  # type: ignore[attr-defined]
         ):
             self.meshcat.Delete("overlays/vectors")  # type: ignore[attr-defined]
 
@@ -80,10 +78,6 @@ class VisualizationMixin:
 
     def _cleanup_disabled_vector_categories(self) -> None:
         if self.meshcat is not None:  # type: ignore[attr-defined]
-            if not self.chk_show_torques.isChecked():  # type: ignore[attr-defined]
-                self.meshcat.Delete("overlays/vectors/torques")  # type: ignore[attr-defined]
-            if not self.chk_show_forces.isChecked():  # type: ignore[attr-defined]
-                self.meshcat.Delete("overlays/vectors/forces")  # type: ignore[attr-defined]
             if not self.chk_induced_vec.isChecked():  # type: ignore[attr-defined]
                 self.meshcat.Delete("overlays/vectors/induced")  # type: ignore[attr-defined]
             if not self.chk_cf_vec.isChecked():  # type: ignore[attr-defined]
@@ -106,42 +100,23 @@ class VisualizationMixin:
             self.plant.GetVelocities(plant_context),  # type: ignore[attr-defined]
         )
 
-    def _draw_torque_vectors(self) -> None:
-        if not (self.plant is not None):  # type: ignore[attr-defined]
-            raise ValueError("DbC Blocked: Precondition failed.")
-        if not (self.eval_context is not None):  # type: ignore[attr-defined]
-            raise ValueError("DbC Blocked: Precondition failed.")
-        tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)  # type: ignore[attr-defined]
-        self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
+    def _update_force_glyphs(self) -> None:
+        """Draw real force/torque glyphs and feed segment shading for this tick.
 
-    def _draw_gravity_force_vectors(self) -> None:
-        if not (self.plant is not None):  # type: ignore[attr-defined]
-            raise ValueError("DbC Blocked: Precondition failed.")
-        if not (self.eval_context is not None):  # type: ignore[attr-defined]
-            raise ValueError("DbC Blocked: Precondition failed.")
-        for i in range(self.plant.num_bodies()):  # type: ignore[attr-defined]
-            body = self.plant.get_body(BodyIndex(i))  # type: ignore[attr-defined]
-            if body.name() == "world":
-                continue
-
-            mass = body.get_mass(self.eval_context)  # type: ignore[attr-defined]
-            if mass <= 1e-6:
-                continue
-
-            gravity = self.plant.gravity_field().gravity_vector()  # type: ignore[attr-defined]
-            force_vec = gravity * mass
-
-            X_WB = self.plant.EvalBodyPoseInWorld(self.eval_context, body)  # type: ignore[attr-defined]
-            com_B = body.CalcCenterOfMassInBodyFrame(self.eval_context)  # type: ignore[attr-defined]
-            pos_W = X_WB.multiply(com_B)
-
-            scale = 0.01
-            end_pos = pos_W + force_vec * scale
-
-            points = np.vstack([pos_W, end_pos]).T
-            path = f"overlays/vectors/forces/{body.name()}"
-            if self.meshcat is not None:  # type: ignore[attr-defined]
-                self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[attr-defined, arg-type]
+        Replaces the old -gravity generalized-force and m*g-only drawing: the
+        overlay controller pulls the provider frame, renders arrows through the
+        shared MeshCat renderer and updates the force-colour session.
+        """
+        overlay = getattr(self, "_force_overlay", None)
+        if overlay is None:
+            return
+        text = overlay.tick(
+            forces=bool(self.chk_show_forces.isChecked()),  # type: ignore[attr-defined]
+            torques=bool(self.chk_show_torques.isChecked()),  # type: ignore[attr-defined]
+            gravity=bool(self.chk_show_gravity.isChecked()),  # type: ignore[attr-defined]
+        )
+        if text:
+            self._update_status(text)  # type: ignore[attr-defined]
 
     def _resolve_induced_accels(self, analyzer: Any, source: str) -> np.ndarray:
         if not (self.plant is not None):  # type: ignore[attr-defined]
@@ -205,11 +180,7 @@ class VisualizationMixin:
         self._cleanup_disabled_vector_categories()
         self._sync_eval_context()
 
-        if self.chk_show_torques.isChecked():  # type: ignore[attr-defined]
-            self._draw_torque_vectors()
-
-        if self.chk_show_forces.isChecked():  # type: ignore[attr-defined]
-            self._draw_gravity_force_vectors()
+        self._update_force_glyphs()
 
         if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):  # type: ignore[attr-defined]
             return

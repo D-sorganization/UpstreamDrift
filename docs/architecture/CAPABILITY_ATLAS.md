@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**63 launcher tiles · 48 feature contracts.**
+**63 launcher tiles · 49 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -202,6 +202,7 @@ flowchart LR
 | AI chat transport (message send/stream) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_sidekick_sidebar.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/chat_ws.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Chat.tsx) |
 | Diagnostics + integrations-health panel | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/integrations_health_panel.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/diagnostics.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/ui/DiagnosticsPanel.tsx) |
 | Document library / project map viewer | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/library_widget.py) |
+| Drake GUI force/torque arrows and live tension/compression shading | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/drake/python/src/drake_force_overlay.py) |
 | Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/drake_dashboard.py) |
 | Engine load/probe + basic simulation loop | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_simulation.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/engines.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Simulation.tsx) |
 | Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/data_io/export.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/export.py) |
