@@ -24,6 +24,7 @@ on:
       - "src/engines/**"
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
+      - "src/shared/python/force_overlay/**"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
       - "tests/integration/cross_engine/**"
@@ -43,6 +44,7 @@ on:
       - "src/engines/**"
       - "!src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/**"
       - "src/shared/python/engine_core/cross_engine_validator.py"
+      - "src/shared/python/force_overlay/**"
       - "shared/models/**"
       - "tests/integration/test_cross_engine_validation.py"
       - "tests/integration/cross_engine/**"
@@ -337,4 +339,113 @@ jobs:
         with:
           name: canonical-conformance-${{ matrix.engine }}-${{ matrix.python-version }}
           path: test-results/canonical-conformance-${{ matrix.engine }}-junit.xml
+          if-no-files-found: warn
+
+  force-overlay-parity:
+    # Issue #11346 (follow-up to #11306 / PR #11345, epic #11285): runs
+    # tests/integration/cross_engine/test_force_overlay_parity.py once per
+    # engine with that engine actually installed. The conformance gate above
+    # excludes requires_<engine> markers and the forward-sim step does not
+    # collect this file, so without these lanes the Drake, Pinocchio and
+    # OpenSim rows never execute in CI. Each lane then requires named parity
+    # testcases to PASS, so an all-skipped JUnit report cannot green it.
+    # These lanes are not branch-protection required checks; promoting them is
+    # a repository-admin setting. The opensim lane is best-effort because the
+    # wheel is not installable on every runner image.
+    name: Force Overlay Parity (${{ matrix.engine }})
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 25
+    continue-on-error: ${{ matrix.engine == 'opensim' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: drake
+            python-version: "3.11"
+            install: 'pip install "drake>=1.22.0"'
+            evidence: "test_hanging_pendulum_reaction_is_weight_up_and_tension[drake]"
+          - engine: pinocchio
+            python-version: "3.11"
+            # PyPI's unrelated `pinocchio` 0.1 shadows the real `pin` package.
+            install: 'pip uninstall -y pinocchio || true; pip install --force-reinstall --no-cache-dir "pin>=2.6.0,<5.0.0"'
+            evidence: "test_hanging_pendulum_reaction_is_weight_up_and_tension[pinocchio]"
+          - engine: opensim
+            python-version: "3.11"
+            install: 'pip install "opensim>=4.4.0"'
+            evidence: "test_hanging_pendulum_reaction_is_weight_up_and_tension[opensim]"
+          - engine: mujoco
+            python-version: "3.11"
+            install: 'pip install "mujoco>=3.6.0,<4.0.0"'
+            # The MuJoCo provider row (FTO-9, #11294) is not on main yet, so
+            # the evidence is the provider-independent MJCF statics check.
+            # Switch to the hanging-pendulum [mujoco] case when #11294 lands.
+            evidence: "test_mujoco_models_are_statically_consistent"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements*.txt
+
+      - name: Fetch pinned Tools packages
+        uses: ./.github/actions/fetch-pinned-tools
+
+      - name: Install ${{ matrix.engine }} parity dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m ensurepip --upgrade || true
+          python -m pip install --ignore-installed --no-deps pip
+          python -m pip install --ignore-installed pathspec hatchling editables
+          pip install -e ".[dev]" || pip install -e ".[dev]" --no-build-isolation
+          pip uninstall -y pytest-vcr pytest-recording || true
+          ${{ matrix.install }}
+          python3 scripts/ci/bootstrap_conformance_deps.py
+
+      - name: Run force-overlay parity (${{ matrix.engine }})
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+        shell: bash
+        run: |
+          mkdir -p test-results
+          python3 -m pytest \
+            -o addopts="" \
+            tests/integration/cross_engine/test_force_overlay_parity.py \
+            -m "requires_${{ matrix.engine }}" \
+            -v -rs --tb=short -p no:xvfb \
+            --junitxml="test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml"
+
+      - name: Assert ${{ matrix.engine }} parity cases actually ran (issue #11346)
+        # Zero-executed guard: fails if the evidence testcase is missing or
+        # only skipped (engine not importable, provider absent).
+        shell: bash
+        run: |
+          python3 scripts/ci/require_junit_test_passed.py \
+            "test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml" \
+            "${{ matrix.evidence }}"
+
+      - name: Upload parity report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: force-overlay-parity-${{ matrix.engine }}
+          path: test-results/force-overlay-parity-${{ matrix.engine }}-junit.xml
           if-no-files-found: warn
