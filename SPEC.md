@@ -354,6 +354,20 @@ Specifies neural silhouette segmentation provider interface, model card and chec
 - **Verification (`tests/unit/shadow_tracker/test_silhouette_segmentation.py`)**:
   - Unit tests verifying fail-closed checkpoint validation on corrupt weights, lazy optional initialization, zero hidden downloads, distinct person and club binary channels, artifact provenance hashes, manual workflow fallback with parent-revision branching, and multi-clip benchmark evaluation.
 
+## Benchmark MATLAB Iteration Throughput and Portable Model Exchange (MMR-18, #11104)
+Specifies MATLAB iteration throughput benchmarking, Fast Restart / warm session reuse contracts, content-addressed cache invalidation, and portable model exchange conformance:
+- **Throughput Benchmarking & Memory Contracts (`src/shared/python/motion_matching/portable_exchange.py`)**:
+  - `IterationBenchmarkSample` and `record_iteration_benchmark`: records cold and warm execution timings, speedup ratio, and peak memory across identical captures and hardware with fail-closed validation on non-positive or non-finite inputs.
+- **Content-Addressed Cache Invalidation**:
+  - `compute_content_cache_key`: computes canonical 64-character SHA-256 digest covering all seven invalidation axes: model (ID and SHA-256), geometry, marker map, initial state, solver configuration/tolerances, controls, and provider revision.
+- **Session Reuse & Mandatory Rebuild Guard**:
+  - `evaluate_session_reuse` and `SessionRebuildDecision`: verifies that model topology changes (coordinate count, joint tree, neck DOFs) and operating-point changes (PlaneTilt, ground offset, gravity, cadence) mandate full model rebuilds (`SessionRebuildRequiredError`), permitting warm session reuse only for tunable controls.
+- **Metric Parity & Optimization Winner Cold Replay**:
+  - `evaluate_metric_parity`: enforces strict numerical agreement between cold and warm or repeat iterations within declared tolerances, failing closed (`ParityToleranceExceededError`) on numerical drift.
+  - `verify_optimization_winner_cold_replay`: mandates that winning candidate proposals from iterative optimizations receive an uncached native cold replay (`is_uncached_cold=True`) reproducing declared metrics within tolerance.
+- **Fail-Closed Portable Model Exchange**:
+  - `InterchangeConformanceMatrix`: defines engine support matrix across rigid multibody, polynomial actuation, torque actuation, independent neck DOFs, Hill-type muscle dynamics, and volumetric penalty contact.
+  - `export_portable_model` and `import_portable_model`: preserves named coordinates, frames, mass/inertia, contacts, and actuation while rejecting unsupported neck, contact, and muscle mappings (`UnsupportedMappingError`) to prevent silent loss of dynamics.
 ## Ship the Historical-Video Evidence Review Workflow (MMR-12, #11098)
 Specifies the historical video evidence review workflow, multi-shot isolation, timing preservation, downstream invalidation, and GUI review integration:
 - **Shadow Tracker Review Service (`src/shared/python/shadow_tracker/service.py`)**:
@@ -7714,6 +7728,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-10-03 | #11302 | [FTO-17] OpenSim animated playback: record_force_series and record_force_and_segment_series (opensim_force_recording.py), generic render_force_playback (force_overlay/playback.py) with segment tension/compression shading, 3D glyphs, legend, and fixed camera bounds, plus CLI entrypoint (#11302). |
 | 2026-10-03 | #11292 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
+| 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
 | 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
 | 2026-10-03 | #11361 | [FTO-9] MuJoCo force/torque provider: MujocoForceTorqueSource (world-frame joint actuator torques, internal joint reactions via cfrc_int with com-to-anchor transform, contact forces, and external wrenches), synchronized with MujocoAxialLoadSource on internal scratch MjData; engine get_force_torque_frame/get_segment_axial_loads/get_contact_forces, force_visualization=FULL (#11294). |
