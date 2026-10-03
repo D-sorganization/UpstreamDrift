@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "FTO-30 launcher manifest force_overlays tile promoted to ready"
+      "rationale": "\\ Sync with origin/main\\"
     },
     "model-backends": {
       "fingerprint": "650c2625f17de855d0c9fd9bd3cb60b010677b742db47194e88db02823d3528d",
