@@ -115,11 +115,15 @@ binds the session to the MeshCat illustration geometry
 View menu toggle is on. Only bodies with a single child joint are shaded.
 OpenSim supports animated playback (recorded) via `record_force_series` / `record_force_and_segment_series` in `opensim_force_recording.py` and `render_force_playback` in `src.shared.python.force_overlay.playback`. Recorded series with proximal/distal segment endpoints are rendered as stick/capsule geometry shaded in tension (blue) and compression (red), alongside 3D force/torque glyphs and legend. Future interactive scene consumers can use the same renderer and load contracts.
 
-The C3D/Simscape viewer exposes the same controls for user-defined shapes. Its
-`set_segment_axial_loads(loads, segment_indices)` method accepts a qualified
-`SegmentLoadSeries` and an explicit load-ID to segment-index mapping. Sample times
-must exactly equal the model's point times. Replacing the model or segment set
-clears loads to prevent stale bindings. Motion capture alone supplies no axial loads.
+The C3D/Simscape viewer exposes the same controls for user-defined shapes. When
+a Simscape trial CSV is loaded, the viewer automatically loads its `ForceTorqueSeries`
+via `load_simscape_force_series` (#11303, #11305), draws 3D force arrows, torque arcs,
+and legend glyphs with GUI toggles for Forces, Torques, and Grip/Hand, and feeds
+`frame.axial_loads` into `set_segment_axial_loads` on frame change. The method accepts
+either an `AxialLoadFrame` per frame or a qualified `SegmentLoadSeries` with explicit
+load-ID to segment-index mapping. Sample times must match model point times. Replacing
+the model or segment set clears loads to prevent stale bindings. Motion capture alone
+supplies no axial loads.
 
 The shared policy, native renderer updates, controls and web scene wiring have
 local automated coverage. Native MuJoCo raster verification confirms blue tension,
