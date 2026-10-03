@@ -1,0 +1,115 @@
+{
+  "qualification": "IK_VISUALIZATION_UNQUALIFIED",
+  "captures": {
+    "capture-A": {
+      "meaning": "tour reference",
+      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "model": "GS3DX_Human",
+      "independent_coordinates": 37,
+      "baseline_position_metrics": {
+        "mean_rms_mm": 12.74574813338271,
+        "max_rms_mm": 40.20854387414278
+      },
+      "refined_position_metrics": {
+        "mean_rms_mm": 13.18803994571474,
+        "max_rms_mm": 40.12129837728914
+      },
+      "foot_orientation": {
+        "left": {
+          "measured_samples": 55,
+          "mean_deg": 2.3765016064302036,
+          "max_deg": 12.828032373522632
+        },
+        "right": {
+          "measured_samples": 55,
+          "mean_deg": 6.710720843897411,
+          "max_deg": 19.819089903735986
+        }
+      },
+      "marker_offset_norm_mm": {
+        "pelvis": 11.140852771383464,
+        "hip_L": 7.653472526697887,
+        "hip_R": 7.429724234053581,
+        "knee_L": 14.238814385737623,
+        "knee_R": 19.70656768321054,
+        "ankle_L": 7.595482086221646,
+        "ankle_R": 10.524792923205405,
+        "shoulder_L": 10.28101435524124,
+        "shoulder_R": 48.534893537945,
+        "elbow_L": 6.98818839825008,
+        "elbow_R": 23.943879407290147,
+        "wrist_L": 26.29873347089305,
+        "wrist_R": 24.29228539623467,
+        "club_head": 29.286898407898565
+      },
+      "solve_receipt": {
+        "actual_process_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "script_status": "success",
+        "timestamp": "2026-10-02T05:15:54.327131+00:00"
+      },
+      "render_receipt": {
+        "actual_process_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "script_status": "success",
+        "timestamp": "2026-10-02T05:28:11.444865+00:00"
+      }
+    },
+    "capture-O": {
+      "meaning": "owner optical capture",
+      "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "model": "GS3DX_Human",
+      "independent_coordinates": 37,
+      "baseline_position_metrics": {
+        "mean_rms_mm": 26.55809486193924,
+        "max_rms_mm": 116.57610417393475
+      },
+      "refined_position_metrics": {
+        "mean_rms_mm": 16.767375089142128,
+        "max_rms_mm": 37.62630299901011
+      },
+      "foot_orientation": {
+        "left": {
+          "measured_samples": 45,
+          "mean_deg": 4.629274332059244,
+          "max_deg": 19.550696017747374
+        },
+        "right": {
+          "measured_samples": 45,
+          "mean_deg": 9.40401243996113,
+          "max_deg": 20.38098237608188
+        }
+      },
+      "marker_offset_norm_mm": {
+        "pelvis": 25.04197256320041,
+        "hip_L": 11.799109718237226,
+        "hip_R": 10.416039051331937,
+        "knee_L": 8.590158739203508,
+        "knee_R": 28.963571642806567,
+        "ankle_L": 3.8717451306431236,
+        "ankle_R": 15.20568220863965,
+        "shoulder_L": 22.474687969057555,
+        "shoulder_R": 18.442938915526977,
+        "elbow_L": 17.4284249056442,
+        "elbow_R": 5.827145998899448,
+        "wrist_L": 55.00889634356537,
+        "wrist_R": 62.17532782503396,
+        "club_head": 106.26281759068665
+      },
+      "solve_receipt": {
+        "actual_process_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "script_status": "success",
+        "timestamp": "2026-10-02T05:23:22.351403+00:00"
+      },
+      "render_receipt": {
+        "actual_process_exit_code": 0,
+        "termination_reason": "natural_exit",
+        "script_status": "success",
+        "timestamp": "2026-10-02T05:31:30.688578+00:00"
+      }
+    }
+  }
+}

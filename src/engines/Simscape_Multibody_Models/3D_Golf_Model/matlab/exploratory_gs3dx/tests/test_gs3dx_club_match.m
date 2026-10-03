@@ -7,8 +7,8 @@ classdef test_gs3dx_club_match < matlab.unittest.TestCase
 
     methods (TestClassSetup)
         function setup(~)
-            addpath(fileparts(fileparts(mfilename('fullpath'))));
-            gs3dx_setup();
+            root = fileparts(fileparts(mfilename('fullpath')));
+            addpath(fullfile(root, 'tools'));
         end
     end
 
@@ -60,6 +60,8 @@ classdef test_gs3dx_club_match < matlab.unittest.TestCase
             sim.face_normal = ref.face_normal * cos(phi) + cross(u, ref.face_normal, 1) * sin(phi);
             M = gs3dx_club_match(ref, sim, t, phases);
             testCase.verifyEqual(M.frame.face_err_deg, 8.6 * ones(numel(t), 1), 'AbsTol', 1e-9);
+            testCase.verifyFalse(M.ok.face);
+            testCase.verifyFalse(M.ok.all);
         end
 
         function a_scaled_head_speed_is_a_percent_error_at_impact(testCase)
@@ -105,5 +107,5 @@ function [ref, t, phases] = local_data()
     ref.head = 1.4 * [cos(theta); sin(theta); zeros(1, n)];
     ref.face_normal = repmat([0; 0; 1], 1, n);
     t = linspace(0, 0.3, n);
-    phases = struct('address', 1, 'top', 5, 'impact', n);
+    phases = struct('address', 1, 'top', 5, 'impact', n, 'contact', n);
 end

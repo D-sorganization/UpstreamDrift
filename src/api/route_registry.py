@@ -110,6 +110,7 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "data_explorer",
     "motion_capture",
     "matched_swings",
+    "opencap",
 )
 
 

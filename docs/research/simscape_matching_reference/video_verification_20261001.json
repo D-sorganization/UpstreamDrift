@@ -1,0 +1,56 @@
+{
+  "records": [
+    {
+      "file": "capture-A_ik_face-on.mp4",
+      "sha256": "bc3b01478c629fe3d9dd48c4689a57e3ae24b5feebbabc3516045d8f10a9da05",
+      "codec": "h264",
+      "fps": 30.0,
+      "decoded_frames": 55,
+      "dimensions": [800, 600],
+      "container_duration_s": 1.8333333333333333,
+      "sampled_time_span_s": 1.8,
+      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+    },
+    {
+      "file": "capture-A_ik_down-the-line.mp4",
+      "sha256": "57733b33f50f3e8a88b8849a50e1010ccbe0952f199bb432a8acfc06db43a238",
+      "codec": "h264",
+      "fps": 30.0,
+      "decoded_frames": 55,
+      "dimensions": [800, 600],
+      "container_duration_s": 1.8333333333333333,
+      "sampled_time_span_s": 1.8,
+      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+    },
+    {
+      "file": "capture-O_ik_face-on.mp4",
+      "sha256": "babcef5cac80daa0862fd47a228c0befb849877c6f6592f2818737938e56e233",
+      "codec": "h264",
+      "fps": 30.0,
+      "decoded_frames": 46,
+      "dimensions": [800, 600],
+      "container_duration_s": 1.5333333333333334,
+      "sampled_time_span_s": 1.5,
+      "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+    },
+    {
+      "file": "capture-O_ik_down-the-line.mp4",
+      "sha256": "e45140c487211e50041a9a1d02f36eb62886ebd83abdf49851e7a0f5387f487d",
+      "codec": "h264",
+      "fps": 30.0,
+      "decoded_frames": 46,
+      "dimensions": [800, 600],
+      "container_duration_s": 1.5333333333333334,
+      "sampled_time_span_s": 1.5,
+      "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+      "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+      "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+    }
+  ]
+}

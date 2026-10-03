@@ -1,0 +1,132 @@
+{
+  "capture-A": {
+    "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "metrics": {
+      "mean_rms_mm": 13.18803994571474,
+      "max_rms_mm": 40.12129837728914
+    },
+    "runtime": {
+      "matlab_release": "R2025b",
+      "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+      "matlab": {
+        "version": "25.2.0.3177638 (R2025b) Update 5",
+        "release": "R2025b"
+      },
+      "simulink": {
+        "name": "Simulink",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape": {
+        "name": "Simscape",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape_multibody": {
+        "name": "Simscape Multibody",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "python_version": "3.12.10",
+      "numpy_version": "2.4.4",
+      "ezc3d_version": "1.7.2",
+      "scope": "direct_components_recorded",
+      "description": "Direct runtime execution components recorded explicitly; transitive packages are not implied to be frozen."
+    },
+    "clips": [
+      {
+        "file": "capture-A_ik_face-on.mp4",
+        "sha256": "201089fa528e8e47699924f381bbe3465bc04e015243f45deee5f516acf96879",
+        "fully_decoded_frames": 55,
+        "fps": 30.0,
+        "width": 800,
+        "height": 600
+      },
+      {
+        "file": "capture-A_ik_down-the-line.mp4",
+        "sha256": "8278b9dc82482645b80c4e82c659c974783bd6668aea0f794a3ff39db1410ae2",
+        "fully_decoded_frames": 55,
+        "fps": 30.0,
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "native_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('fresh_export_A.m')",
+      "timestamp": "2026-10-02T07:04:47.026948+00:00"
+    },
+    "same_pose_verification": "joint arrays identical within 1e-12; same frames/geometry/capture/model",
+    "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+  },
+  "capture-O": {
+    "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+    "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+    "metrics": {
+      "mean_rms_mm": 16.767375089142128,
+      "max_rms_mm": 37.62630299901011
+    },
+    "runtime": {
+      "matlab_release": "R2025b",
+      "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+      "matlab": {
+        "version": "25.2.0.3177638 (R2025b) Update 5",
+        "release": "R2025b"
+      },
+      "simulink": {
+        "name": "Simulink",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape": {
+        "name": "Simscape",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape_multibody": {
+        "name": "Simscape Multibody",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "python_version": "3.12.10",
+      "numpy_version": "2.4.4",
+      "ezc3d_version": "1.7.2",
+      "scope": "direct_components_recorded",
+      "description": "Direct runtime execution components recorded explicitly; transitive packages are not implied to be frozen."
+    },
+    "clips": [
+      {
+        "file": "capture-O_ik_face-on.mp4",
+        "sha256": "48adbd63c8a88ba4c508123ac080f2095ae4ec85ce61b249c2be8049a8d0b3aa",
+        "fully_decoded_frames": 46,
+        "fps": 30.0,
+        "width": 800,
+        "height": 600
+      },
+      {
+        "file": "capture-O_ik_down-the-line.mp4",
+        "sha256": "3ed078cfe0d0ff7c72fff4079243f2a58d7f6ab5676a66a5a0973d72ac7142a7",
+        "fully_decoded_frames": 46,
+        "fps": 30.0,
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "native_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('fresh_export_O.m')",
+      "timestamp": "2026-10-02T07:13:40.577551+00:00"
+    },
+    "same_pose_verification": "joint arrays identical within 1e-12; same frames/geometry/capture/model",
+    "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+  }
+}

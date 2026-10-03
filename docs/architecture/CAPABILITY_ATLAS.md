@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**63 launcher tiles · 50 feature contracts.**
+**63 launcher tiles · 51 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -214,6 +214,7 @@ flowchart LR
 | Motion-capture breadth (C3D upload/playback, OpenPose source) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/freemocap_sidecar/run_freemocap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/motion_capture.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/MotionCapture.tsx) |
 | MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py) |
 | About/version info + onboarding | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/about_dialog.py) |
+| OpenCap session import action and OpenSim engine handoff | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/opensim/python/opencap_import_action.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/opencap.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/opencap/OpenCapImportModal.tsx) |
 | Swing Optimizer (trajectory optimization GUI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/optimization/swing_optimizer.py) |
 | AI Protocol (AIP) structured method dispatch | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/aip.py) |
 | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/settings_dialog.py) |

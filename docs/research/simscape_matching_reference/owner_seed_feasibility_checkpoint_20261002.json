@@ -1,0 +1,117 @@
+{
+  "qualification": "SEED_LOOP_FEASIBILITY_AND_REJECTED_FIXED_OFFSET_ADDRESS_FITS_NOT_FULL_CHAIN_OR_DYNAMIC_ACCEPTANCE",
+  "family_count": 6,
+  "families": {
+    "bilateral_elbow_proxy": {
+      "target_count": 27,
+      "free_count": 21,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 1,
+      "both_elbow_rom_pass": true
+    },
+    "lead_elbow_only": {
+      "target_count": 26,
+      "free_count": 22,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 2,
+      "both_elbow_rom_pass": false
+    },
+    "trail_elbow_only": {
+      "target_count": 26,
+      "free_count": 22,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 2,
+      "both_elbow_rom_pass": false
+    },
+    "bilateral_elbow_with_spine": {
+      "target_count": 29,
+      "free_count": 19,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 1,
+      "both_elbow_rom_pass": true
+    },
+    "bilateral_elbow_with_torso": {
+      "target_count": 28,
+      "free_count": 20,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 1,
+      "both_elbow_rom_pass": true
+    },
+    "bilateral_elbow_mild_flexion": {
+      "target_count": 27,
+      "free_count": 21,
+      "solve_status": 1,
+      "loop_closed": true,
+      "base_fixed_max_native_difference": 2.842170943040401e-14,
+      "target_max_native_difference": 2.842170943040401e-14,
+      "full_implementation_ROM_failure_rows": 0,
+      "both_elbow_rom_pass": true
+    }
+  },
+  "address_trials": {
+    "original": {
+      "mean_head_error_deg": 0.03937471519165041,
+      "max_foot_error_deg": 6.517109274909099,
+      "address_marker_RMS_mm": 6.0607866357372275,
+      "implementation_ROM_failure_rows": 2
+    },
+    "bilateral_proxy": {
+      "mean_head_error_deg": 2.239220311365663,
+      "max_foot_error_deg": 6.463353927909345,
+      "address_marker_RMS_mm": 30.744756299195835,
+      "implementation_ROM_failure_rows": 1
+    },
+    "bilateral_mild": {
+      "mean_head_error_deg": 6.509626850975613,
+      "max_foot_error_deg": 6.042894786740763,
+      "address_marker_RMS_mm": 40.682687726179836,
+      "implementation_ROM_failure_rows": 0
+    },
+    "original_selected": {
+      "mean_head_error_deg": 0.03937471519165041,
+      "max_foot_error_deg": 6.517109274909099,
+      "address_marker_RMS_mm": 6.0607866357372275
+    }
+  },
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "solver_sha256": "45ef16f9f1120f2129aca5fda283be684412330d98d6f1eca424a4e4de7cf6e8",
+  "new_candidates_promoted": false,
+  "same_original_offsets_and_head_calibration": true,
+  "native_receipts": {
+    "candidate-anatomy-review/owner-seed-families-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('probe_owner_seed_families_reviewed.m')",
+      "owned_pids": [86856],
+      "timestamp": "2026-10-02T22:13:04.256247+00:00"
+    },
+    "owner-address-seed-family-fits-reviewed.log.receipt.json": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('probe_owner_address_seed_family_fits_reviewed.m')",
+      "owned_pids": [12516],
+      "timestamp": "2026-10-02T22:18:45.641170+00:00"
+    }
+  }
+}

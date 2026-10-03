@@ -1,15 +1,39 @@
-function cap = gs3dx_capture_markers(file)
+function cap = gs3dx_capture_markers(file, opts)
 %GS3DX_CAPTURE_MARKERS  Read a C3D capture's markers, converted to Z-up (#10985, #11011).
 %
 %   CAP = GS3DX_CAPTURE_MARKERS() reads the canonical tour-average driver
 %   capture (data/C3D_TA_Driver.c3d in the nearest ancestor folder that has
 %   one); CAP = GS3DX_CAPTURE_MARKERS(FILE) reads another C3D ('' = the
-%   default).  The file is
-%   read through Python ezc3d (MATLAB pyenv) and never written; nothing is
-%   filtered, gap-filled or retimed.
+%   default).
+%   CAP = GS3DX_CAPTURE_MARKERS(FILE, observed_mask=MASK) supplies an optional
+%   logical 1 x markers x frames observation mask representing decoded source
+%   validity.
+%   The file is read through Python ezc3d (MATLAB pyenv) and never written;
+%   no smoothing, gap filling or retiming is performed. An explicit source mask only restricts sample availability.
+%
+%   Caller Responsibility & Qualification Notice:
+%     - The caller is strictly responsible for verifying that the observation
+%       mask's source hash, frame count/rate, and marker label bindings exactly
+%       match the C3D capture file.
+%     - The observation mask indicates decoded source availability/visibility and
+%       does NOT guarantee clinical or biomechanical accuracy.
+%     - Event proxy timings (impact_frame, ball_time) and club centroids are derived
+%       directly from marker positions. Masked samples introduce NaNs; this function
+%       does NOT interpolate, forward-fill, or invent contact events.
+%     - Downstream caching systems must incorporate the observation mask identity
+%       into cache keys to prevent stale or colliding cache hits.
 %
 %   CAP fields:
 %     .file .rate_hz .n_frames .force_plates_used .n_analog
+%     .source_units  units declared in C3D POINT:UNITS ('m', 'mm', or 'cm')
+%     .units         SI units of .points ('m')
+%     .missing_mask  1 x markers x frames logical mask; true where sample
+%                    is missing or invalid
+%     .observed_mask (optional) forwarded observation mask, attached ONLY if
+%                    an explicit nonempty mask was provided.
+%     .event_qualification  explicit event qualification semantics
+%                    ('PROXY_ONLY_NO_EXPLICIT_CONTACT'); computed timings
+%                    are proxies. This importer does not qualify EVENT data.
 %     .labels   marker labels (string row)
 %     .points   3 x markers x frames, m, Z-up: the capture's Y-up axes
 %               converted as (x, -z, y)
@@ -18,11 +42,12 @@ function cap = gs3dx_capture_markers(file)
 %     .club_head, .club_grip  3 x frames centroids of the two club marker
 %               clusters (head = the one farther from the wrists at
 %               address); NaN where a cluster marker is missing
-%     .impact_frame  frame (1-based) of peak club-head cluster speed; the
-%               head peaks just before it reaches the ball
-%     .ball_time    capture frame (fractional, 1-based) at which the club
-%               head, moving toward the target, returns to its address
-%               position along the target line: ball contact
+%     .impact_frame  frame (1-based) of peak club-head cluster speed proxy;
+%               the head peaks just before it reaches the ball
+%     .ball_time    capture frame (fractional, 1-based) address-line crossing
+%               proxy: frame at which the club head cluster centroid, moving
+%               toward the target, returns to its address position along the
+%               target line (proxy only, not measured contact)
 %     .ball_frame   round(.ball_time)
 %     .target_frame  3x3 [facing, lateral, up] columns at address (frame 1):
 %               lateral is the horizontal RAnkleOut -> LAnkleOut direction
@@ -32,6 +57,7 @@ function cap = gs3dx_capture_markers(file)
 
     arguments
         file (1,:) char = ''
+        opts.observed_mask = []
     end
     if isempty(file)
         file = local_default_file();
@@ -45,19 +71,52 @@ function cap = gs3dx_capture_markers(file)
     c = ez.c3d(file);
     get = @(obj, key) py.operator.getitem(obj, key);
     params = get(c, 'parameters');
-    pts = double(py.numpy.asarray(get(get(c, 'data'), 'points')));   % 4 x markers x frames
-    labels = string(cell(get(get(get(params, 'POINT'), 'LABELS'), 'value')));
-    rate = double(py.numpy.asarray(get(get(get(params, 'POINT'), 'RATE'), 'value')));
-    analogs = double(py.numpy.asarray(get(get(c, 'data'), 'analogs')));
+    data = get(c, 'data');
 
-    zup = cat(1, pts(1, :, :), -pts(3, :, :), pts(2, :, :));   % 3 x markers x frames
+    % Fail-closed extraction of POINT:UNITS metadata
+    try
+        point_params = get(params, 'POINT');
+        units_param = get(point_params, 'UNITS');
+        units_val = cell(get(units_param, 'value'));
+        assert(numel(units_val)==1, 'POINT:UNITS must contain exactly one unit');
+        source_units = strtrim(char(units_val{1}));
+        assert(~isempty(source_units), 'POINT:UNITS value string is empty');
+    catch err
+        error('gs3dx:capture', 'Missing or invalid POINT:UNITS metadata in %s: %s', file, err.message);
+    end
+
+    % Fail-closed extraction of meta_points residuals metadata
+    try
+        meta_points = get(data, 'meta_points');
+        res_py = get(meta_points, 'residuals');
+        residuals = double(py.numpy.asarray(res_py));
+    catch err
+        error('gs3dx:capture', 'Missing or invalid data.meta_points.residuals metadata in %s: %s', file, err.message);
+    end
+
+    pts = double(py.numpy.asarray(get(data, 'points')));   % 4 x markers x frames
+    labels = string(cell(get(get(point_params, 'LABELS'), 'value')));
+    rate = double(py.numpy.asarray(get(get(point_params, 'RATE'), 'value')));
+    analogs = double(py.numpy.asarray(get(data, 'analogs')));
+
+    % Convert homogeneous points to SI Z-up via pure helper with residual masking
+    % Thin forwarding of opts.observed_mask to single masking authority
+    [zup, missing_mask] = gs3dx_capture_points(pts, source_units, residuals, opts.observed_mask);
+
     cap.file = file;
+    cap.source_units = source_units;
+    cap.units = 'm';
     cap.rate_hz = rate(1);
     cap.n_frames = size(pts, 3);
     cap.force_plates_used = double(py.numpy.asarray(get(get(get(params, 'FORCE_PLATFORM'), 'USED'), 'value')));
     cap.n_analog = size(analogs, 2);
     cap.labels = labels;
     cap.points = zup;
+    cap.missing_mask = missing_mask;
+    cap.event_qualification = 'PROXY_ONLY_NO_EXPLICIT_CONTACT';
+    if ~isempty(opts.observed_mask)
+        cap.observed_mask = opts.observed_mask;
+    end
     cap.marker = @(name) reshape(zup(:, local_index(labels, name), :), 3, []);
     [cap.club_head, cap.club_grip] = local_club(zup, labels, cap.marker);
     [~, cap.impact_frame] = max(vecnorm(diff(cap.club_head, 1, 2)));
@@ -68,6 +127,7 @@ end
 function [t, f] = local_ball(head, lateral, impact)
 % First crossing, from the trail side, of the head's address position along
 % the target line, searched from 30 frames before peak speed.
+% Address-line crossing proxy: proxy only, not measured contact.
     y = lateral.' * (head - head(:, 1));
     k = find(y(1:end - 1) < 0 & y(2:end) >= 0);
     k = k(k >= impact - 30);

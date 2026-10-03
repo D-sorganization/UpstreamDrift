@@ -2,6 +2,15 @@
   "version": "1.0.0",
   "description": "Machine-readable feature-parity registry (PyQt6 = canonical model; Tauri/React web app must match). Statuses: parity | gap (requires open issue) | exempt (requires reason). Entries with pending_decision=true await the desktop-only exemption decision in issue #7460 (G12). See docs/development/feature_parity_matrix.md (generated) and epic #7462.",
   "features": {
+    "opencap.session_import": {
+      "title": "OpenCap session import action and OpenSim engine handoff",
+      "pyqt": "src/engines/physics_engines/opensim/python/opencap_import_action.py",
+      "api": "src/api/routes/opencap.py",
+      "web": "ui/src/components/opencap/OpenCapImportModal.tsx",
+      "status": "parity",
+      "tiles": [],
+      "notes": "Lists OpenCap session trials, loads the selected trial via load_opencap_session, and hands the scaled model plus kinematics to the OpenSim engine."
+    },
     "tools.necromatcher": {
       "title": "Historical Player Library And Source Review",
       "pyqt": "src/tools/necromatcher/gui.py",

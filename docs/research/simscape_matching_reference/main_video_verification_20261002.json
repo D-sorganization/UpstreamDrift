@@ -1,0 +1,162 @@
+{
+  "capture-A": {
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "metrics": {
+      "mean_rms_mm": 13.365992613115758,
+      "max_rms_mm": 41.38541701104079
+    },
+    "foot_orientation": {
+      "left": {
+        "finite_samples": 55,
+        "mean_deg": 2.386838741462541,
+        "max_deg": 12.831205659505278,
+        "prior_mean_deg": 2.3765016064302036,
+        "prior_max_deg": 12.828032373522632
+      },
+      "right": {
+        "finite_samples": 55,
+        "mean_deg": 6.693313237381582,
+        "max_deg": 19.816585935313483,
+        "prior_mean_deg": 6.710720843897411,
+        "prior_max_deg": 19.819089903735986
+      }
+    },
+    "runtime": {
+      "matlab_release": "R2025b",
+      "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+      "matlab": {
+        "version": "25.2.0.3177638 (R2025b) Update 5",
+        "release": "R2025b"
+      },
+      "simulink": {
+        "name": "Simulink",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape": {
+        "name": "Simscape",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape_multibody": {
+        "name": "Simscape Multibody",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "python_version": "3.12.10",
+      "numpy_version": "2.2.6",
+      "ezc3d_version": "1.6.3",
+      "scope": "direct_components_recorded",
+      "description": "Direct runtime execution components recorded explicitly; transitive packages are not implied to be frozen."
+    },
+    "clips": [
+      {
+        "file": "capture-A_ik_face-on.mp4",
+        "sha256": "3ed1b0b80f30592d66ef3fad4c6a5b6ac422485dc7158059d90c5ea2df562ca3",
+        "fully_decoded_frames": 55,
+        "fps": 30,
+        "width": 800,
+        "height": 600
+      },
+      {
+        "file": "capture-A_ik_down-the-line.mp4",
+        "sha256": "ba3c6c50582d323e80607c72afd3dcb0ec9370d7c2f908a31702f7583865a4d2",
+        "fully_decoded_frames": 55,
+        "fps": 30,
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "native_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('main_export_A.m')",
+      "timestamp": "2026-10-02T07:49:26.700629+00:00"
+    },
+    "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+  },
+  "capture-O": {
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+    "metrics": {
+      "mean_rms_mm": 16.642960405237172,
+      "max_rms_mm": 36.86501767597344
+    },
+    "foot_orientation": {
+      "left": {
+        "finite_samples": 45,
+        "mean_deg": 4.516763820712982,
+        "max_deg": 19.556224782402047,
+        "prior_mean_deg": 4.629274332059244,
+        "prior_max_deg": 19.550696017747374
+      },
+      "right": {
+        "finite_samples": 45,
+        "mean_deg": 9.420960910497463,
+        "max_deg": 20.298947772385834,
+        "prior_mean_deg": 9.40401243996113,
+        "prior_max_deg": 20.38098237608188
+      }
+    },
+    "runtime": {
+      "matlab_release": "R2025b",
+      "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+      "matlab": {
+        "version": "25.2.0.3177638 (R2025b) Update 5",
+        "release": "R2025b"
+      },
+      "simulink": {
+        "name": "Simulink",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape": {
+        "name": "Simscape",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "simscape_multibody": {
+        "name": "Simscape Multibody",
+        "version": "25.2",
+        "release": "(R2025b)"
+      },
+      "python_version": "3.12.10",
+      "numpy_version": "2.2.6",
+      "ezc3d_version": "1.6.3",
+      "scope": "direct_components_recorded",
+      "description": "Direct runtime execution components recorded explicitly; transitive packages are not implied to be frozen."
+    },
+    "clips": [
+      {
+        "file": "capture-O_ik_face-on.mp4",
+        "sha256": "639909ce61f03d064856e4833aaf077cf06e45e38b069bf33048aee49a7e75ea",
+        "fully_decoded_frames": 46,
+        "fps": 30,
+        "width": 800,
+        "height": 600
+      },
+      {
+        "file": "capture-O_ik_down-the-line.mp4",
+        "sha256": "a29cfd4ed8100583201fe2f6b6e40cf646ba22d0e1fb381a82a48295430e5033",
+        "fully_decoded_frames": 46,
+        "fps": 30,
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "native_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('main_export_O.m')",
+      "timestamp": "2026-10-02T08:39:18.605153+00:00"
+    },
+    "qualification": "IK_VISUALIZATION_UNQUALIFIED"
+  }
+}
