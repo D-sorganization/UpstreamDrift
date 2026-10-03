@@ -4430,6 +4430,180 @@ into the fitting objective, whole-output zero-weight parity, complete source
 clock refits and fresh native trajectory audits remain required. No artificial
 duplicate initial pose may supply the missing three-frame history.
 
+\subsection{Acceleration Prior: Fitter Contracts and Window Evidence}
+The private fitter now admits separate angular and translational acceleration
+weights and a positive reference interval. Both weights default to zero.
+Five native contract tests initially fail because these options are absent.
+The first implementation run passes four tests; the remaining test expects
+the wrong error identifier for frame zero, which is already rejected by
+the original positive-frame argument validator. The corrected expectation
+preserves that validation, and all five tests pass with natural process and
+wrapper zero at 15:30:29 UTC. The failed run remains recorded. Source review
+also corrects the failure-residual dimension from nine to three components
+per spherical group and requires a fresh accepted native pose before adding
+it to the history. Selected and calibration clocks are checked before model
+setup, including representability of centred intervals and their ratios.
+
+Every tracking or calibration call starts with empty history. The first two
+poses carry no acceleration prior. Subsequent residuals use the actual two
+previous accepted poses and source time intervals, including any unequal
+intervals. Ordinary and range-penalty fits share that history. No initial
+pose is duplicated to create artificial acceleration observations.
+
+A bounded experiment fits the same 75 tour and 59 owner frames used by the
+earlier sparse-prefix/dense-window study. Four trials per capture compare
+the original fitter, the new fitter at zero weights, a rate-only control,
+and rate plus acceleration. The acceleration angular weight is $0.0002$
+m/rad for both captures; translation weight is zero for the tour and
+$0.000625$ for the owner. The reference interval is $1/30$ s. Other data,
+geometry, priors and rate weights are fixed.
+
+The fitting process saves its outputs and reports completion but hangs
+during shutdown. Its watchdog receipt is 125 with no verified native exit.
+An independent process subsequently loads the saved outputs, confirms exact
+whole-output zero-weight parity for both captures, and rechecks all 536
+native poses. It exits naturally with process and wrapper zero at
+16:33:02 UTC. This independent success does not rewrite the original
+shutdown failure.
+
+Only triples of consecutive source frames enter the finite-window
+acceleration comparison: 35 tour triples and 23 owner triples per trial.
+Angular and translational components are reported separately; these are
+regularization proxies, not native dependent-acceleration measurements.
+For the tour, the peak angular component changes from $143,614.00$ to
+$142,283.39$ deg/s$^2$ and its RMS from $17,869.92$ to $17,820.41$ deg/s$^2$.
+For the owner, the corresponding peak changes from $295,685.77$ to
+$294,402.51$ deg/s$^2$ and RMS from $18,425.92$ to $18,336.91$ deg/s$^2$.
+These are small reductions. The owner translation-component RMS increases
+from $10.6450$ to $10.6761$ m/s$^2$.
+
+Mean derived-target window RMS changes from $27.2418$ to $27.2459$ mm for
+the tour and from $37.9893$ to $37.9902$ mm for the owner. The owner's
+boundary wrist step remains large, changing from $31.8172$ to $31.7629$
+degrees. Thus this low-weight experiment verifies the integration and a
+limited numerical effect, without resolving the boundary or demonstrating
+a better full swing. Complete-clock fitting, native interval probes,
+marker fidelity, physical actuation, contact and independent replay remain
+required. No new Desktop best video is selected from this window study.
+
+\subsection{Raw Observation Coverage and Club Orientation}
+The optical coverage audit uses the native validity rule: finite XYZ coordinates
+and a finite, nonnegative residual. The fourth point-array row is not a
+residual. Both captures contain 38 marker slots. One waist marker is missing
+in five tour frames and six owner frames; the other three waist markers remain
+observed. Head, back, knee, ankle and toe tracks are complete. The owner has
+one missing right-wrist observation. The tour right shoulder-top marker is
+missing in 526 of 654 frames, including address. Its reconstruction uses the
+mean thorax-frame offset from available shoulder observations to the shoulder
+back marker, subject to the implementation's observation-count requirement.
+This is an estimated marker location, not anatomical calibration.
+
+The address-transform pipeline fills individual raw tracks before constructing
+joint centres. It does not linearly interpolate all seven completed lower-body
+joint-centre tracks. Observed knee and ankle markers still contribute, while
+their inset directions can depend on a pelvis frame formed partly from a
+filled waist track. Coverage alone establishes neither joint-centre accuracy
+nor a reduction in physical drift.
+
+The two club clusters each contain three markers. For a nondegenerate triad,
+let $u=p_2-p_1$ and $v=p_3-p_1$. Construct
+\[
+ x=\frac{u}{\|u\|},\qquad
+ z=\frac{u\times v}{\|u\times v\|},\qquad
+ y=z\times x,\qquad R_{\mathrm{obs}}=[x\ y\ z].
+\]
+The diagnostic rejects nonfinite observations, edges shorter than
+$10^{-12}$ m and normalized cross-product magnitude below $10^{-10}$.
+These are numerical guards, not clinical acceptance thresholds. Unit and
+shape checks, complete address observations, exactly three markers per
+cluster, synthetic rigid-rotation recovery and degenerate-triad rejection
+are verified in the independently rerun Python diagnostic. Input hashes
+remain unchanged.
+
+Both cluster frames are available in 605 of 654 tour frames and 345 of 367
+owner frames. Their maximum relative orientation changes from address are
+$10.89^\circ$ and $26.74^\circ$, respectively. Maximum side-length changes
+across either cluster are 3.80 mm and 3.63 mm. Orthonormality to machine
+precision confirms the algebraic frame construction; it does not establish
+physical rigidity. Shaft flex, fixture movement, tracking error or averaging
+could contribute to the relative changes; this audit does not identify a cause.
+
+The current centroid pair directly observes club-line position and direction,
+but not rotation about that line. Other model constraints and priors can
+still constrain that rotation indirectly. A possible future observation,
+after verifying native-body assignment and a common world basis, is
+\[
+ R_{\mathrm{target}}(t)=R_{\mathrm{obs}}(t)
+ R_{\mathrm{obs}}(0)^{\mathsf T}R_{\mathrm{native}}(0).
+\]
+This assumes a constant fixture-to-body alignment. It is not an anatomical
+or club-face calibration, and does not justify forcing head and grip into
+one rigid orientation. No orientation residual has yet been added to the
+matcher. Exact session-video pairing remains unresolved.
+
+\subsection{Controller XYZ Chart Conditioning}
+The existing spherical-joint controller converts native orientation to
+intrinsic XYZ coordinates, $R=R_x(a)R_y(b)R_z(c)$. Its follower-frame angular
+velocity satisfies $\omega_F=E\dot q$ with angles expressed in radians and
+\[
+ E=\begin{bmatrix}
+ \cos b\cos c&\sin c&0\\
+ -\cos b\sin c&\cos c&0\\
+ \sin b&0&1
+ \end{bmatrix},\qquad
+ \kappa_2(E)=\frac{1+|\sin b|}{|\cos b|}.
+\]
+The denominator vanishes at the chart singularity. This is a property of
+the controller parameterization; it does not demonstrate a locked native
+spherical joint or a closed-chain constraint singularity. Power consistency
+requires $\tau_{\mathrm{XYZ}}=E^{\mathsf T}\tau_F$ for compatible torque
+and angular-rate units. Inverting this transformation near a poorly
+conditioned chart can amplify coordinate errors.
+
+An offline audit checks all four actuated spherical groups in both complete
+source-clock baseline and rate-refitted trajectories. The unactuated root
+group is excluded. Typed native axis-angle keys and units, all 48 coordinate
+identities, accepted statuses and exact source clocks are validated against
+the saved metadata. Input hashes remain unchanged. Identity and
+$b=89^\circ$ cases independently compare analytic singular values with SVD;
+the latter has condition number approximately 114.589. Exactly zero-angle
+states use the identity rotation; nonzero-angle states require unit axes.
+
+For the owner left shoulder, maximum $|b|$ increases from approximately
+$84.6^\circ$ to $87.9^\circ$ and peak condition number increases from 21.2
+to 54.2 after rate regularization. The owner's right-shoulder peak improves
+from 11.7 to 5.9. The tour's largest peak is at the left shoulder, increasing
+from 7.4 to 8.4. Hip-group peaks remain below 5.1 in these trials. No sampled
+group exceeds 100; this is a descriptive count, not an acceptance criterion.
+Thus improved pose-step smoothness can accompany worse controller-chart
+conditioning. These results qualify neither native velocities between
+samples nor torque tracking, contact or independent replay.
+
+\subsection{Whole-Model Joint Actuation Inventory}
+A read-only native inspection identifies 25 joint blocks and 48 position /
+43 velocity representation variables. Input-torque joint settings account
+for 33 velocity components: 21 upper-body and 12 leg components. The two
+neck axes instead have prescribed input motion with computed torque. Six
+root components and two midfoot components have no joint actuation torque.
+These counts do not establish independent global degrees of freedom,
+absence of external root wrenches, or delivery of all 35 intended torques.
+
+The first strict inventory run exits with code one because construction of
+the native kinematics solver changes the loaded block inventory. A separate
+diagnostic exits naturally with process and wrapper zero at 16:38:47 UTC.
+It records 3,888 blocks before and 5,197 after construction: 1,711 added and
+402 removed, all beneath the evaluation subsystem. Inspected joint
+parameters and the on-disk model hash are unchanged. The runtime structure
+is therefore explicitly not qualified as unchanged; the first failure is
+retained rather than relabelled a success. No simulation or model save is
+performed by the inventory.
+
+Spherical-joint velocity and acceleration-vector sensing uses the follower
+frame in this inspected model. Constraint and total torque sensing must be
+distinguished from actuator-only torque. The two-neck measured pilot remains
+the bounded actuator-evidence result; this inventory does not extend it to
+a moving, root-free, contact-qualified 35-axis replay.
+
 \subsection{Native Neck Actuation Inspection}
 A fresh read-only native inspection exits naturally with zero and confirms
 that both neck axes use \texttt{InputMotion} and \texttt{ComputedTorque}.

@@ -29,7 +29,412 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T15:14:39.816703+00:00"
   },
-  "acceleration_helper_scope": "Native pure-helper mathematical TDD only; integration into fitting, complete output zero-weight parity, full-clock refits and fresh physical trajectory audits remain required.",
+  "acceleration_helper_scope": "Ten native pure-helper tests and five fitter contract tests pass; independently rechecked 536 window poses establish exact zero-weight whole-output parity. Full-clock acceleration trials and fresh physical trajectory audits remain pending.",
+  "acceleration_matcher_corrected_green": {
+    "failed": 0,
+    "incomplete": 0,
+    "passed": 5,
+    "simulation_executed": false,
+    "test_count": 5
+  },
+  "acceleration_matcher_corrected_green_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T15:30:29.581895+00:00"
+  },
+  "acceleration_matcher_initial_green": {
+    "failed": 1,
+    "incomplete": 0,
+    "passed": 4,
+    "simulation_executed": false,
+    "test_count": 5
+  },
+  "acceleration_matcher_initial_green_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T15:29:00.732666+00:00"
+  },
+  "acceleration_matcher_red": {
+    "failed": 5,
+    "incomplete": 0,
+    "passed": 0,
+    "simulation_executed": false,
+    "test_count": 5
+  },
+  "acceleration_matcher_red_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failure",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T15:22:21.764902+00:00"
+  },
+  "acceleration_window_independent_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T16:33:02.305531+00:00"
+  },
+  "acceleration_window_independent_recheck": {
+    "acceleration_qualified": false,
+    "contact_qualified": false,
+    "dynamics_qualified": false,
+    "finite_window_metric_notice": "Three consecutive source-frame differences only; scalar and follower-body rotation components are regularization proxies, not independently measured native dependent accelerations or all-time bounds",
+    "fresh_pose_rechecks": 536,
+    "initial_acceleration_fitter_exit_qualified": false,
+    "model_saved": false,
+    "native_velocity_qualified": false,
+    "qualification": "INDEPENDENT_SAVED_WINDOW_POSE_RECHECK_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "baseline": {
+          "dense_three_frame_count": 35,
+          "finite_window_angular_component_peak_deg_s2": 773657.7435669882,
+          "finite_window_angular_component_rms_deg_s2": 58291.09519153695,
+          "finite_window_translation_component_peak_m_s2": 188.92262707379004,
+          "finite_window_translation_component_rms_m_s2": 45.645752213032466,
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        },
+        "rate_control": {
+          "dense_three_frame_count": 35,
+          "finite_window_angular_component_peak_deg_s2": 143614.00492533288,
+          "finite_window_angular_component_rms_deg_s2": 17869.915891897006,
+          "finite_window_translation_component_peak_m_s2": 120.4086904097061,
+          "finite_window_translation_component_rms_m_s2": 33.27710040804892,
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 6.2803698347351e-16
+        },
+        "rate_plus_acceleration": {
+          "dense_three_frame_count": 35,
+          "finite_window_angular_component_peak_deg_s2": 142283.3883339562,
+          "finite_window_angular_component_rms_deg_s2": 17820.407099836797,
+          "finite_window_translation_component_peak_m_s2": 118.99100344386252,
+          "finite_window_translation_component_rms_m_s2": 32.935265016465124,
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 7.065416064076988e-16
+        },
+        "zero": {
+          "dense_three_frame_count": 35,
+          "finite_window_angular_component_peak_deg_s2": 773657.7435669882,
+          "finite_window_angular_component_rms_deg_s2": 58291.09519153695,
+          "finite_window_translation_component_peak_m_s2": 188.92262707379004,
+          "finite_window_translation_component_rms_m_s2": 45.645752213032466,
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "dense_three_frame_count": 23,
+          "finite_window_angular_component_peak_deg_s2": 4678956.9843121525,
+          "finite_window_angular_component_rms_deg_s2": 278292.99798655213,
+          "finite_window_translation_component_peak_m_s2": 61.430331497004225,
+          "finite_window_translation_component_rms_m_s2": 13.94837788291105,
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "rate_control": {
+          "dense_three_frame_count": 23,
+          "finite_window_angular_component_peak_deg_s2": 295685.7686041162,
+          "finite_window_angular_component_rms_deg_s2": 18425.915625270576,
+          "finite_window_translation_component_peak_m_s2": 38.413033224525265,
+          "finite_window_translation_component_rms_m_s2": 10.645019779140721,
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "rate_plus_acceleration": {
+          "dense_three_frame_count": 23,
+          "finite_window_angular_component_peak_deg_s2": 294402.50991923985,
+          "finite_window_angular_component_rms_deg_s2": 18336.914579459313,
+          "finite_window_translation_component_peak_m_s2": 38.376324816719816,
+          "finite_window_translation_component_rms_m_s2": 10.676078444959922,
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 4.960524086056721e-16
+        },
+        "zero": {
+          "dense_three_frame_count": 23,
+          "finite_window_angular_component_peak_deg_s2": 4678956.9843121525,
+          "finite_window_angular_component_rms_deg_s2": 278292.99798655213,
+          "finite_window_translation_component_peak_m_s2": 61.430331497004225,
+          "finite_window_translation_component_rms_m_s2": 13.94837788291105,
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        }
+      }
+    },
+    "whole_capture_qualified": false,
+    "whole_output_zero_parity": true
+  },
+  "acceleration_window_original_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T15:50:47.539514+00:00"
+  },
+  "acceleration_window_refit": {
+    "acceleration": false,
+    "contact": false,
+    "dynamics": false,
+    "markers_anatomy": false,
+    "model_saved": false,
+    "native_velocity": false,
+    "new_candidate_promoted": false,
+    "normalized_reference_time_s": 0.03333333333333333,
+    "production_modified": false,
+    "qualification": "ACCELERATION_PRIOR_WINDOW_REFIT_AND_WHOLE_OUTPUT_ZERO_PARITY_NOT_NATIVE_ACCELERATION_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "baseline": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461,
+            16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "rate_control": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0.01,
+          "back_marker_mean_rms_mm": 15.913422245771736,
+          "boundary_step_right_shoulder_deg": 23.668408269974062,
+          "boundary_step_right_wrist_deg": 6.6287961731239875,
+          "boundary_step_root_mm": 12.455701861011018,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            8.908575710383507,
+            16.81638907011247
+          ],
+          "head_axis_mean_error_deg": 0.11392244556036009,
+          "head_orientation_mean_error_deg": 15.678537222124136,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.3077066919012332,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.512800755422006,
+          "max_interior_root_step_mm": 2.03565911408503,
+          "mean_window_target_rms_mm": 27.241758411163776,
+          "peak_window_target_rms_mm": 34.15978938755396,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "rate_plus_acceleration": {
+          "acceleration_angular_weight": 0.0002,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0.01,
+          "back_marker_mean_rms_mm": 15.917918490617883,
+          "boundary_step_right_shoulder_deg": 23.66815713869798,
+          "boundary_step_right_wrist_deg": 6.628485804924935,
+          "boundary_step_root_mm": 12.455798937884776,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            8.909729725420226,
+            16.817419126999418
+          ],
+          "head_axis_mean_error_deg": 0.11423203303251533,
+          "head_orientation_mean_error_deg": 15.678988908706852,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.3132114740493983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.512089245813911,
+          "max_interior_root_step_mm": 2.033825598074582,
+          "mean_window_target_rms_mm": 27.245948973588618,
+          "peak_window_target_rms_mm": 34.17546994987881,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "zero": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461,
+            16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953,
+            17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "rate_control": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0.02,
+          "back_marker_mean_rms_mm": 24.687248076451215,
+          "boundary_step_right_shoulder_deg": 14.041421198862693,
+          "boundary_step_right_wrist_deg": 31.817233394608078,
+          "boundary_step_root_mm": 13.616048239198705,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            13.81499905421553,
+            18.159681680520915
+          ],
+          "head_axis_mean_error_deg": 0.2005803771143465,
+          "head_orientation_mean_error_deg": 21.976900065975332,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.0625,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.1164409004979436,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 1.8618526703398288,
+          "max_interior_root_step_mm": 2.547284264438813,
+          "mean_window_target_rms_mm": 37.98933287316288,
+          "peak_window_target_rms_mm": 40.4928780634916,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "rate_plus_acceleration": {
+          "acceleration_angular_weight": 0.0002,
+          "acceleration_linear_weight": 0.000625,
+          "angular_weight": 0.02,
+          "back_marker_mean_rms_mm": 24.667282617401035,
+          "boundary_step_right_shoulder_deg": 14.035557240936557,
+          "boundary_step_right_wrist_deg": 31.762940166426347,
+          "boundary_step_root_mm": 13.637902390307072,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            13.815281283817189,
+            18.15964609200998
+          ],
+          "head_axis_mean_error_deg": 0.20053041863639212,
+          "head_orientation_mean_error_deg": 21.976350011050325,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.0625,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.104871729875147,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 1.8617127240418656,
+          "max_interior_root_step_mm": 2.550692273021997,
+          "mean_window_target_rms_mm": 37.99024420335171,
+          "peak_window_target_rms_mm": 40.49644850420747,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "zero": {
+          "acceleration_angular_weight": 0,
+          "acceleration_linear_weight": 0,
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953,
+            17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        }
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture": false,
+    "whole_output_zero_parity": true
+  },
   "all_35_input_torque_axes_qualified": false,
   "alternate_basis_accepted_subset_rates": {
     "qualification": "NATIVE_CLOSED_ARM_RATE_AND_STEP_DIAGNOSTIC_POINTWISE_ACCEPTANCE_IS_NOT_DYNAMIC_REGULARITY",
@@ -210,8 +615,15 @@
     "qualification": "CONTROLLED_ALTERNATE_INDEPENDENT_COORDINATE_BASIS_HYPOTHESIS_NO_NATIVE_OR_DYNAMICS_PROOF",
     "schema_hash": "c6a7a72ebfd7559c712e44c51504b870c3572ca33e5b6c878bebe70d928b25d7",
     "units": {
-      "position_units_summary": ["1", "deg", "m"],
-      "velocity_units_summary": ["deg/s", "m/s"]
+      "position_units_summary": [
+        "1",
+        "deg",
+        "m"
+      ],
+      "velocity_units_summary": [
+        "deg/s",
+        "m/s"
+      ]
     },
     "validation": {
       "capture_A": {
@@ -447,8 +859,15 @@
     },
     "qualification": "HISTORICAL_PROJECTED_POSES_ARE_NOT_GATED_SUPPORT_POSES_FOR_NEW_CANDIDATE",
     "units": {
-      "position_units_summary": ["1", "deg", "m"],
-      "velocity_units_summary": ["deg/s", "m/s"]
+      "position_units_summary": [
+        "1",
+        "deg",
+        "m"
+      ],
+      "velocity_units_summary": [
+        "deg/s",
+        "m/s"
+      ]
     },
     "validation": {
       "closed_q_guesses_bitwise_preserved": true,
@@ -598,6 +1017,142 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T09:10:49.061089+00:00"
   },
+  "club_orientation_diagnostic": {
+    "captures": [
+      {
+        "alias": "capture_A",
+        "both_clusters_valid_frames": 605,
+        "clusters": {
+          "grip": {
+            "address_calibration_valid": true,
+            "address_side_lengths_mm": [
+              80.41,
+              58.96,
+              121.23
+            ],
+            "finite_marker_frames_count": 633,
+            "frame_orientation_increment_deg_max": 11.41,
+            "frame_orientation_increment_deg_mean": 1.55,
+            "marker_count": 3,
+            "max_determinant_error": 6.661338147750939e-16,
+            "max_orthonormal_error": 8.422494629438676e-16,
+            "max_side_length_variation_mm": 3.56,
+            "max_side_length_variation_percent": 6.03,
+            "total_frames_count": 654,
+            "triad_condition_normalized_area_max": 0.4573,
+            "triad_condition_normalized_area_min": 0.4057,
+            "triad_selection_policy": "first_3_stable_input_label_order",
+            "valid_fraction": 0.9679,
+            "valid_frames_count": 633
+          },
+          "head": {
+            "address_calibration_valid": true,
+            "address_side_lengths_mm": [
+              92.37,
+              52.06,
+              95.78
+            ],
+            "finite_marker_frames_count": 618,
+            "frame_orientation_increment_deg_max": 8.25,
+            "frame_orientation_increment_deg_mean": 1.53,
+            "marker_count": 3,
+            "max_determinant_error": 5.551115123125783e-16,
+            "max_orthonormal_error": 7.377467038069702e-16,
+            "max_side_length_variation_mm": 3.8,
+            "max_side_length_variation_percent": 4.11,
+            "total_frames_count": 654,
+            "triad_condition_normalized_area_max": 0.5446,
+            "triad_condition_normalized_area_min": 0.5132,
+            "triad_selection_policy": "first_3_stable_input_label_order",
+            "valid_fraction": 0.945,
+            "valid_frames_count": 618
+          }
+        },
+        "frame_count": 654,
+        "relative_head_grip_orientation_change_from_address_deg": {
+          "evaluated_frames": 605,
+          "max": 10.89,
+          "mean": 3.63,
+          "median": 2.82
+        }
+      },
+      {
+        "alias": "capture_O",
+        "both_clusters_valid_frames": 345,
+        "clusters": {
+          "grip": {
+            "address_calibration_valid": true,
+            "address_side_lengths_mm": [
+              80.96,
+              59.5,
+              121.7
+            ],
+            "finite_marker_frames_count": 367,
+            "frame_orientation_increment_deg_max": 23.65,
+            "frame_orientation_increment_deg_mean": 2.94,
+            "marker_count": 3,
+            "max_determinant_error": 6.661338147750939e-16,
+            "max_orthonormal_error": 7.401662092518764e-16,
+            "max_side_length_variation_mm": 3.63,
+            "max_side_length_variation_percent": 6.11,
+            "total_frames_count": 367,
+            "triad_condition_normalized_area_max": 0.455,
+            "triad_condition_normalized_area_min": 0.4234,
+            "triad_selection_policy": "first_3_stable_input_label_order",
+            "valid_fraction": 1.0,
+            "valid_frames_count": 367
+          },
+          "head": {
+            "address_calibration_valid": true,
+            "address_side_lengths_mm": [
+              32.24,
+              86.65,
+              59.42
+            ],
+            "finite_marker_frames_count": 345,
+            "frame_orientation_increment_deg_max": 30.4,
+            "frame_orientation_increment_deg_mean": 3.3,
+            "marker_count": 3,
+            "max_determinant_error": 6.661338147750939e-16,
+            "max_orthonormal_error": 7.38874404402045e-16,
+            "max_side_length_variation_mm": 3.49,
+            "max_side_length_variation_percent": 5.88,
+            "total_frames_count": 367,
+            "triad_condition_normalized_area_max": 0.745,
+            "triad_condition_normalized_area_min": 0.6109,
+            "triad_selection_policy": "first_3_stable_input_label_order",
+            "valid_fraction": 0.9401,
+            "valid_frames_count": 345
+          }
+        },
+        "frame_count": 367,
+        "relative_head_grip_orientation_change_from_address_deg": {
+          "evaluated_frames": 345,
+          "max": 26.74,
+          "mean": 6.41,
+          "median": 6.16
+        }
+      }
+    ],
+    "qualification": "SCIENTIFIC_CLUB_ORIENTATION_DIAGNOSTIC_ONLY_NOT_PHYSICAL_QUALIFICATION",
+    "raw_inputs_integrity": {
+      "capture_A": {
+        "sha256": "fe1b4dc376378f0e4aaa93cb8a3d5b6eef97b099a10f6e2f85dff1d4f63db168",
+        "unchanged": true
+      },
+      "capture_O": {
+        "sha256": "cd50fe33e7f40fb469af47bfbddd46bbb487036b144b9b7ce404eee767a71eea",
+        "unchanged": true
+      }
+    },
+    "synthetic_validation": {
+      "collinear_rejected": true,
+      "collinear_relative_area": 0.0,
+      "rigid_rotation_passed": true,
+      "rigid_rotation_recovery_error": 0.0
+    }
+  },
+  "club_orientation_scope": "Separate triads provide possible future orientation observations. Algebraic orthogonality is not physical rigidity; changing head/grip relative orientation is not attributed to an identified cause. Fixture alignment and exact native-body assignment remain unqualified.",
   "contact_qualified": false,
   "desktop_media": {
     "forward_dynamics_qualified": false,
@@ -633,7 +1188,7 @@
         "failed_state_count": 6,
         "follower_frames_verified": true,
         "max_control_scalar_angle_deviation_deg": 2.842170943040401e-14,
-        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-06,
         "max_control_translation_deviation_m": 0,
         "max_failed_scalar_angle_deviation_deg": 0.11180137831726711,
         "max_failed_spherical_geodesic_deg": 0.17278278357579538,
@@ -783,7 +1338,7 @@
         "dependent_rate_scope": "Accepted native states only; rejected states explicitly counted. No all-time continuity or physiological acceptance.",
         "follower_frames_verified": true,
         "fresh_full_state_status_one_count": 1307,
-        "max_anchor_physical_error": 4.233890594648816e-8,
+        "max_anchor_physical_error": 4.233890594648816e-08,
         "max_full_velocity_error": 4.547473508864641e-13,
         "max_independent_position_error": 7.065416064076988e-16,
         "max_independent_velocity_error": 4.547473508864641e-13,
@@ -889,10 +1444,12 @@
           "angular_weight": 0,
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "foot_orientation_mean_error_deg": [
-            1.9803267263661521, 5.782199451269062
+            1.9803267263661521,
+            5.782199451269062
           ],
           "foot_orientation_peak_error_deg": [
-            12.831018734374203, 19.826518757177517
+            12.831018734374203,
+            19.826518757177517
           ],
           "frames_with_direct_raw_back_observations_count": 654,
           "frames_with_observed_derived_targets_count": 654,
@@ -926,10 +1483,12 @@
           "angular_weight": 0.01,
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "foot_orientation_mean_error_deg": [
-            2.163469167016995, 5.892093606716574
+            2.163469167016995,
+            5.892093606716574
           ],
           "foot_orientation_peak_error_deg": [
-            15.770866915996297, 20.43879275257763
+            15.770866915996297,
+            20.43879275257763
           ],
           "frames_with_direct_raw_back_observations_count": 654,
           "frames_with_observed_derived_targets_count": 654,
@@ -965,10 +1524,12 @@
           "angular_weight": 0,
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "foot_orientation_mean_error_deg": [
-            4.712602932933573, 8.381772832654642
+            4.712602932933573,
+            8.381772832654642
           ],
           "foot_orientation_peak_error_deg": [
-            20.736564901714974, 18.852527708891323
+            20.736564901714974,
+            18.852527708891323
           ],
           "frames_with_direct_raw_back_observations_count": 367,
           "frames_with_observed_derived_targets_count": 367,
@@ -1002,10 +1563,12 @@
           "angular_weight": 0.02,
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "foot_orientation_mean_error_deg": [
-            5.291673837174305, 8.505019679718789
+            5.291673837174305,
+            8.505019679718789
           ],
           "foot_orientation_peak_error_deg": [
-            30.65038232374536, 19.218308435808275
+            30.65038232374536,
+            19.218308435808275
           ],
           "frames_with_direct_raw_back_observations_count": 367,
           "frames_with_observed_derived_targets_count": 367,
@@ -1467,6 +2030,47 @@
     "timestamp": "2026-10-03T10:10:01.934122+00:00"
   },
   "native_acceleration_qualified": false,
+  "native_joint_inventory": {
+    "added_block_count": 1711,
+    "all35_input_torque_claimed": false,
+    "block_count_after": 5197,
+    "block_count_before": 3888,
+    "changes_confined_to_evaluation_subsystem": true,
+    "dynamics_qualified": false,
+    "geometry_hash": "not_inspected",
+    "input_torque_joint_velocity_components": 33,
+    "inspected_joint_parameters_unchanged": true,
+    "joint_blocks_count": 25,
+    "midfoot_no_joint_torque_components": 2,
+    "model_saved": false,
+    "model_sha256_after": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "model_sha256_before": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "neck_prescribed_motion_components": 2,
+    "position_representation_variables": 48,
+    "qualification": "READ_ONLY_NATIVE_ALL_JOINT_ACTUATION_INVENTORY_NOT_TORQUE_SIMULATION",
+    "removed_block_count": 402,
+    "root_no_joint_torque_components": 6,
+    "runtime_structure_qualified": false,
+    "simulation_executed": false,
+    "velocity_representation_variables": 43,
+    "workspace_hash": "not_inspected"
+  },
+  "native_joint_inventory_diagnostic_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T16:38:47.550320+00:00"
+  },
+  "native_joint_inventory_original_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": true,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T16:34:50.638185+00:00"
+  },
   "neck_measured_pilot_initial_failure_receipt": {
     "actual_process_exit_code": 1,
     "done_marker": false,
@@ -1719,7 +2323,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            7.612915155275461, 16.494500137247858
+            7.612915155275461,
+            16.494500137247858
           ],
           "head_axis_mean_error_deg": 0.0014638889045150115,
           "head_orientation_mean_error_deg": 15.87808039454606,
@@ -1745,7 +2350,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            8.908575710383507, 16.81638907011247
+            8.908575710383507,
+            16.81638907011247
           ],
           "head_axis_mean_error_deg": 0.11392244556036009,
           "head_orientation_mean_error_deg": 15.678537222124136,
@@ -1771,7 +2377,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            11.789864129922883, 17.17398044818545
+            11.789864129922883,
+            17.17398044818545
           ],
           "head_axis_mean_error_deg": 0.3987636153869647,
           "head_orientation_mean_error_deg": 15.03229165971133,
@@ -1797,7 +2404,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            7.612915155275461, 16.494500137247858
+            7.612915155275461,
+            16.494500137247858
           ],
           "head_axis_mean_error_deg": 0.0014638889045150115,
           "head_orientation_mean_error_deg": 15.87808039454606,
@@ -1825,7 +2433,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            11.937003954058953, 17.572200950515477
+            11.937003954058953,
+            17.572200950515477
           ],
           "head_axis_mean_error_deg": 0.00890232307013926,
           "head_orientation_mean_error_deg": 24.671816047418197,
@@ -1851,7 +2460,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            12.524369488661112, 17.746917928611694
+            12.524369488661112,
+            17.746917928611694
           ],
           "head_axis_mean_error_deg": 0.06541824894428518,
           "head_orientation_mean_error_deg": 23.821099744740344,
@@ -1877,7 +2487,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            13.81499905421553, 18.159681680520915
+            13.81499905421553,
+            18.159681680520915
           ],
           "head_axis_mean_error_deg": 0.2005803771143465,
           "head_orientation_mean_error_deg": 21.976900065975332,
@@ -1903,7 +2514,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            11.937003954058953, 17.572200950515477
+            11.937003954058953,
+            17.572200950515477
           ],
           "head_axis_mean_error_deg": 0.00890232307013926,
           "head_orientation_mean_error_deg": 24.671816047418197,
@@ -1986,7 +2598,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            8.41741670123309, 16.712488069202415
+            8.41741670123309,
+            16.712488069202415
           ],
           "head_axis_mean_error_deg": 0.0823017913724235,
           "head_orientation_mean_error_deg": 15.979909307896644,
@@ -2012,7 +2625,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            10.68933702236284, 17.42373072571096
+            10.68933702236284,
+            17.42373072571096
           ],
           "head_axis_mean_error_deg": 0.27670459078348947,
           "head_orientation_mean_error_deg": 16.179155215224046,
@@ -2038,7 +2652,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            7.612915155275461, 16.494500137247858
+            7.612915155275461,
+            16.494500137247858
           ],
           "head_axis_mean_error_deg": 0.0014638889045150115,
           "head_orientation_mean_error_deg": 15.87808039454606,
@@ -2064,7 +2679,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 37,
           "foot_orientation_mean_error_deg": [
-            7.612915155275461, 16.494500137247858
+            7.612915155275461,
+            16.494500137247858
           ],
           "head_axis_mean_error_deg": 0.0014638889045150115,
           "head_orientation_mean_error_deg": 15.87808039454606,
@@ -2092,7 +2708,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            12.972340979924248, 17.841697461236635
+            12.972340979924248,
+            17.841697461236635
           ],
           "head_axis_mean_error_deg": 0.10610432560391338,
           "head_orientation_mean_error_deg": 23.7808395425304,
@@ -2118,7 +2735,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            16.58678838214338, 18.62132580666958
+            16.58678838214338,
+            18.62132580666958
           ],
           "head_axis_mean_error_deg": 0.2739460237177847,
           "head_orientation_mean_error_deg": 19.611153174409313,
@@ -2144,7 +2762,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            11.937003954058953, 17.572200950515477
+            11.937003954058953,
+            17.572200950515477
           ],
           "head_axis_mean_error_deg": 0.00890232307013926,
           "head_orientation_mean_error_deg": 24.671816047418197,
@@ -2170,7 +2789,8 @@
           "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
           "dense_window_frame_count": 25,
           "foot_orientation_mean_error_deg": [
-            11.937003954058953, 17.572200950515477
+            11.937003954058953,
+            17.572200950515477
           ],
           "head_axis_mean_error_deg": 0.00890232307013926,
           "head_orientation_mean_error_deg": 24.671816047418197,
@@ -2264,7 +2884,7 @@
         "dependent_rate_scope": "Accepted native states only; rejected states explicitly counted. No all-time continuity or physiological acceptance.",
         "follower_frames_verified": true,
         "fresh_full_state_status_one_count": 731,
-        "max_anchor_physical_error": 6.713997422878524e-8,
+        "max_anchor_physical_error": 6.713997422878524e-08,
         "max_full_velocity_error": null,
         "max_independent_position_error": null,
         "max_independent_velocity_error": null,
@@ -2327,8 +2947,11 @@
     "timestamp": "2026-10-03T12:35:53.912789+00:00"
   },
   "private_source_sha256": {
+    "acceleration-runtime/gs3dx_whole_body_ik.m": "7221f41405b2c5c743d4ae82d31fcd0cffd0c764c102a8b25926251088905ac2",
     "analyze_c2_pilot_branches_reviewed.py": "683eef008f44b0cf55c5f5c1443dbcb21d11b30c7bf67d8cb60e5c170e47f11c",
+    "analyze_club_orientation_observations_private.py": "1a73e0037fc59a58e7d6682791cd92415da434ae337a021b187e893e067afdfc",
     "analyze_persisted_tangent_units.py": "8147ff5f73862c0a78d262cb6f6d803551d1d963eb8d6f55bff9c273c6211fce",
+    "analyze_xyz_control_conditioning_private.py": "f3a766612dcd68c86d61b629b3703bd48484d72288a9cef4bffbec3e158df2ed",
     "build_native_c2_payload_reviewed.py": "2594ed47b9abc5c3172b79072373f34051b5e7de5d126b124a40c18d7401fafd",
     "build_refitted_c2_payload_reviewed.py": "1f6b09577527e57e332452009a1bc6acc23f26d66e5c5341ddaeee283f4142d8",
     "c2_reference.py": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
@@ -2351,6 +2974,7 @@
     "probe_neck_measured_pilot_reviewed.m": "069e3560141ab448bb1f426547a7f20901e2588e59e26aa3d7d9f7494d76020d",
     "probe_neck_measured_pilot_time_corrected_reviewed.m": "35e73de0dc3df6b2e6503345f842ee154d0be44c04f7aed47ab7e333c3eb3aeb",
     "probe_normalized_rate_refit_reviewed.m": "dad3a0fcc568c07a85ad6084518f33ceb1106dd2c3354c61a816a9c177c20870",
+    "probe_recheck_saved_acceleration_window_refit_reviewed.m": "fd4b9caf124a344a85ebcaef76ed9bcb772f8f97cc5e923af65ad828bc22c1c1",
     "probe_recheck_saved_global_rate_refit_reviewed.m": "35cbb528ab590ba260fd3f7b7357cbf468423af61cdd5955ff313e45000e50c8",
     "probe_recheck_saved_normalized_rate_refit_reviewed.m": "f5165e32d26d174861b84bc70b97b426242ca0c2c627bf4d123f06f23f150a4f",
     "probe_refined_tangents_reviewed.m": "57814956c0f2ba823bb7b7045d20e2f149c95f12489eedd9ee661599c049155e",
@@ -2475,7 +3099,7 @@
         "failed_state_count": 3,
         "follower_frames_verified": true,
         "max_control_scalar_angle_deviation_deg": 5.684341886080802e-14,
-        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-06,
         "max_control_translation_deviation_m": 0,
         "max_failed_scalar_angle_deviation_deg": 0.008333984378253945,
         "max_failed_spherical_geodesic_deg": 0.0057617144636804745,
@@ -2500,7 +3124,7 @@
         "failed_state_count": 3,
         "follower_frames_verified": true,
         "max_control_scalar_angle_deviation_deg": 5.684341886080802e-14,
-        "max_control_spherical_geodesic_deg": 1.2074182697257333e-6,
+        "max_control_spherical_geodesic_deg": 1.2074182697257333e-06,
         "max_control_translation_deviation_m": 0,
         "max_failed_scalar_angle_deviation_deg": 0.01606710682582957,
         "max_failed_spherical_geodesic_deg": 0.014587834897701251,
@@ -2769,7 +3393,11 @@
       "output_payload_sha256": "08cbd8dbf52c8bca2099ada5d944842ba6d111f49cbddfc51a0f751a14e5c786",
       "proposal_sha256": "4c5f0cc737cd1720c791b9c01737cbb2873752d29348d319a8702c0b0e8a83e5",
       "reviewed_builder_sha256": "49f502f455a3b023dc227e081677e391480f12883c027b989e4d081d271664eb",
-      "root_rows_bound_by_native_meter_units": [0, 1, 2],
+      "root_rows_bound_by_native_meter_units": [
+        0,
+        1,
+        2
+      ],
       "unaffected_coordinates_bitwise_preserved": true
     },
     "qualification": "PREPARED_C2_PROJECTED_REFERENCE_PAYLOAD_NOT_MEASURED_DATA_OR_NATIVE_DYNAMICS",
@@ -2856,6 +3484,85 @@
     }
   },
   "qualification": "LOCAL_TANGENT_FRESH_STATE_RECHECK_AND_REJECTED_C2_PILOT_NOT_FORWARD_DYNAMICS_ACCEPTANCE",
+  "raw_observation_coverage": {
+    "capture_A": {
+      "address_missing_marker_count": 1,
+      "file_sha256": "fe1b4dc376378f0e4aaa93cb8a3d5b6eef97b099a10f6e2f85dff1d4f63db168",
+      "force_plates_used": 0,
+      "frames_with_exactly_one_waist_missing": 5,
+      "frames_with_waist_gap": 5,
+      "group_summary": {
+        "arms": {
+          "all_observed_frames": 128,
+          "any_missing_frames": 526
+        },
+        "back": {
+          "all_observed_frames": 654,
+          "any_missing_frames": 0
+        },
+        "feet": {
+          "all_observed_frames": 654,
+          "any_missing_frames": 0
+        },
+        "head": {
+          "all_observed_frames": 654,
+          "any_missing_frames": 0
+        },
+        "legs": {
+          "all_observed_frames": 654,
+          "any_missing_frames": 0
+        },
+        "waist": {
+          "all_observed_frames": 649,
+          "any_missing_frames": 5
+        }
+      },
+      "n_analog": 0,
+      "n_frames": 654,
+      "n_markers": 38,
+      "rate_hz": 360.0,
+      "raw_units": "m"
+    },
+    "capture_O": {
+      "address_missing_marker_count": 3,
+      "file_sha256": "cd50fe33e7f40fb469af47bfbddd46bbb487036b144b9b7ce404eee767a71eea",
+      "force_plates_used": 0,
+      "frames_with_exactly_one_waist_missing": 6,
+      "frames_with_waist_gap": 6,
+      "group_summary": {
+        "arms": {
+          "all_observed_frames": 366,
+          "any_missing_frames": 1
+        },
+        "back": {
+          "all_observed_frames": 367,
+          "any_missing_frames": 0
+        },
+        "feet": {
+          "all_observed_frames": 367,
+          "any_missing_frames": 0
+        },
+        "head": {
+          "all_observed_frames": 367,
+          "any_missing_frames": 0
+        },
+        "legs": {
+          "all_observed_frames": 367,
+          "any_missing_frames": 0
+        },
+        "waist": {
+          "all_observed_frames": 361,
+          "any_missing_frames": 6
+        }
+      },
+      "n_analog": 0,
+      "n_frames": 367,
+      "n_markers": 38,
+      "rate_hz": 240.0,
+      "raw_units": "m"
+    }
+  },
+  "raw_observation_coverage_scope": "Raw tracks are filled before constructing joint centres. This is coverage only, not joint-centre accuracy, anatomical calibration or proven drift reduction.",
   "saved_refit_fresh_native_recheck": {
     "acceleration_qualified": false,
     "contact_qualified": false,
@@ -2944,7 +3651,7 @@
         "accepted_state_count": 643,
         "follower_frames_verified": true,
         "fresh_full_state_status_one_count": 643,
-        "max_anchor_physical_error": 1.099089680306351e-8,
+        "max_anchor_physical_error": 1.099089680306351e-08,
         "max_full_velocity_error": null,
         "max_independent_position_error": null,
         "max_independent_velocity_error": null,
@@ -2980,7 +3687,10 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T08:20:29.579496+00:00"
   },
-  "step_sizes_seconds": [0.0001, 5e-5],
+  "step_sizes_seconds": [
+    0.0001,
+    5e-05
+  ],
   "visual_foot_native_audit": {
     "model_saved": false,
     "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
@@ -3150,5 +3860,202 @@
     "script_status": "success",
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T10:15:44.949657+00:00"
+  },
+  "xyz_controller_chart_conditioning": {
+    "actuated_spherical_joints": [
+      "left_shoulder",
+      "left_hip",
+      "right_hip",
+      "right_shoulder"
+    ],
+    "analysis_scope": "OFFLINE_KINEMATIC_XYZ_CHART_CONDITIONING_DIAGNOSTIC",
+    "analytic_validation": {
+      "identity_case_b_0": {
+        "analytic_condition2": 1.0,
+        "analytic_singular_values": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "b_deg": 0.0,
+        "cos_b": 1.0,
+        "matches_within_tol": true,
+        "svd_condition2": 1.0,
+        "svd_singular_values": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "near_90_case_b_89deg": {
+        "analytic_condition2": 114.58865012930904,
+        "analytic_singular_values": [
+          1.4141597134540325,
+          1.0,
+          0.012341184854329442
+        ],
+        "b_deg": 89.0,
+        "cos_b": 0.0174524064372836,
+        "matches_within_tol": true,
+        "svd_condition2": 114.5886501293099,
+        "svd_singular_values": [
+          1.4141597134540325,
+          1.0,
+          0.012341184854330644
+        ]
+      }
+    },
+    "coordinate_identities_validated_count": 48,
+    "diagnostic_disclaimer": "Singularity and conditioning metrics reflect the Euler X-Y-Z controller chart E matrix only. They are strictly diagnostic and do not constitute acceptance criteria, nor do they imply torque replay qualification, native physics feasibility, closed-chain loop rank, or global dynamic DOF validity.",
+    "root_joint_excluded": true,
+    "trials": {
+      "capture_A": {
+        "baseline": {
+          "left_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 38.30236689902538,
+            "max_condition2_E": 2.0641094208473705,
+            "min_abs_cos_b": 0.78475076667945
+          },
+          "left_shoulder": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 74.68231074157542,
+            "max_condition2_E": 7.436384628602569,
+            "min_abs_cos_b": 0.2641708307926603
+          },
+          "right_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 57.081416668942566,
+            "max_condition2_E": 3.3847725973098832,
+            "min_abs_cos_b": 0.5434467439454472
+          },
+          "right_shoulder": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 67.56515647053598,
+            "max_condition2_E": 5.042321731835085,
+            "min_abs_cos_b": 0.38163255401671203
+          }
+        },
+        "rate_refit": {
+          "left_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 38.57391360190248,
+            "max_condition2_E": 2.0766365964186924,
+            "min_abs_cos_b": 0.7818044397555713
+          },
+          "left_shoulder": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 76.46761136707303,
+            "max_condition2_E": 8.42854691798435,
+            "min_abs_cos_b": 0.23399499585228842
+          },
+          "right_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 57.02251740927072,
+            "max_condition2_E": 3.3783810671880485,
+            "min_abs_cos_b": 0.5443093929722352
+          },
+          "right_shoulder": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 69.61022660299106,
+            "max_condition2_E": 5.560613625396836,
+            "min_abs_cos_b": 0.3484047482824031
+          }
+        }
+      },
+      "capture_O": {
+        "baseline": {
+          "left_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 55.425052563549436,
+            "max_condition2_E": 3.2131043403472797,
+            "min_abs_cos_b": 0.5674837746356437
+          },
+          "left_shoulder": {
+            "count_condition_gt_10": 69,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 84.59947111249183,
+            "max_condition2_E": 21.202869057501964,
+            "min_abs_cos_b": 0.09411750317615195
+          },
+          "right_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 67.57490787150108,
+            "max_condition2_E": 5.044571386788301,
+            "min_abs_cos_b": 0.38147523572335446
+          },
+          "right_shoulder": {
+            "count_condition_gt_10": 3,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 80.24374105152758,
+            "max_condition2_E": 11.71704697369012,
+            "min_abs_cos_b": 0.16945716425152585
+          }
+        },
+        "rate_refit": {
+          "left_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 55.196961954402795,
+            "max_condition2_E": 3.190707435551465,
+            "min_abs_cos_b": 0.570757107414437
+          },
+          "left_shoulder": {
+            "count_condition_gt_10": 62,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 87.88719669471963,
+            "max_condition2_E": 54.230591828776575,
+            "min_abs_cos_b": 0.03686701754507566
+          },
+          "right_hip": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 67.75924220785697,
+            "max_condition2_E": 5.087463801609625,
+            "min_abs_cos_b": 0.3784993163043524
+          },
+          "right_shoulder": {
+            "count_condition_gt_10": 0,
+            "count_condition_gt_100": 0,
+            "count_condition_gt_1000": 0,
+            "max_abs_b_deg": 70.61725324071276,
+            "max_condition2_E": 5.855549259607528,
+            "min_abs_cos_b": 0.3318770880970559
+          }
+        }
+      }
+    },
+    "unchanged_input_sha256": {
+      "capture_A_baseline": "91162f5e548fbb3f51d5212c7772fa14e2e8f2818093c3271e03d35b3074c649",
+      "capture_A_rate_refit": "72f6d696cd602b1a17ec4023f5deb99a4fb047c5babe23619a432cbb6ade4fb0",
+      "capture_O_baseline": "ac1609d59ead90ca9e92c87de4ee5beb716ed711a847dd72a43fd70144a04dd6",
+      "capture_O_rate_refit": "9c85dff6b43dcb7fbd7545eee2df127caafbf84f909dc896ee0e2a7bb08b72c9",
+      "metadata": "2f94dbd2c6f49b2d2764ec9ff3c8c286a0b1bf7d5f47a4f19408701de7e61c2b"
+    }
   }
 }
