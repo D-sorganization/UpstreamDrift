@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**63 launcher tiles · 50 feature contracts.**
+**63 launcher tiles · 49 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -240,7 +240,6 @@ flowchart LR
 | Putting green simulation | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/putting_green/python/simulator.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/putting_green.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/PuttingGreen.tsx) |
 | Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | gap | [pyqt](https://github.com/D-sorganization/Tools/blob/main/src/rate_of_closure/launch_pyqt6.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/local_server.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ImpactExplorer.tsx) |
 | Terrain and topography configuration | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/terrain.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Terrain.tsx) |
-| Video Analyzer (pose tracking and force/torque overlay) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/video_analyzer/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/video_overlays.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/VideoAnalyzer.tsx) |
 | Shared Segment Force Color Controls | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/body_part_viz/force_color_controls.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/visualization/ForceColorControls.tsx) |
 
 ## Regeneration and Evidence
