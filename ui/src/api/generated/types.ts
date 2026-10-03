@@ -1409,12 +1409,18 @@ export interface ForceOverlayRequest {
 }
 
 /**
- * Response model for force/torque overlay data. See issue #1199
+ * Response model for force/torque overlay data. See issues #1199, #11307 (FTO-22).
  */
 export interface ForceOverlayResponse {
   /** Current simulation time */
   sim_time: number;
-  /** All active force vectors */
+  /** Serialized GlyphSet (glyph-set-v1) drawing payload */
+  glyphs?: Record<string, unknown> | null;
+  /** Serialized ForceTorqueFrame (force-torque-frame-v1) physics inspection payload */
+  frame?: Record<string, unknown> | null;
+  /** Explanation if force overlays are unavailable, or None if available */
+  unavailable_reason?: string | null;
+  /** Deprecated: use glyphs instead. Backward-compatible vector list. */
   vectors?: ForceVector3D[];
   /** Sum of all force magnitudes */
   total_force_magnitude: number;
@@ -1425,12 +1431,12 @@ export interface ForceOverlayResponse {
 }
 
 /**
- * A single force/torque vector for 3D overlay rendering. See issue #1199
+ * A single force/torque vector for 3D overlay rendering. .. deprecated:: Deprecated as of #11307 (FTO-22). Use the serialized GlyphSet in ``glyphs`` instead. This model will be removed in a future release.
  */
 export interface ForceVector3D {
   /** Body this force acts on */
   body_name: string;
-  /** Type: applied, gravity, contact, bias */
+  /** Type: applied, gravity, contact, bias, or WrenchKind */
   force_type: string;
   /** Application point [x, y, z] */
   origin: number[];

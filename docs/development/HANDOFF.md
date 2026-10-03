@@ -1,3 +1,31 @@
+# Force Overlay API and WebSocket Streaming — #11307 (FTO-22)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11307`
+- Branch: `feat/fto-11307-api-websocket-forces`; commit: SELF; PR: not created
+- Governing issue: #11307 (parent epic #11285, design authority ADR-0052 §2-§4 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-22] API and WebSocket: stream real provider force/torque frames; remove fabricated overlay geometry.
+- Completed:
+  - Created `src/api/services/force_overlay_service.py` (215 lines, < 400 lines budget):
+    - `current_force_frame`: queries `ForceTorqueProvider` capability without violating LoD.
+    - `style_from_request_params`: converts API request parameters to `ForceGlyphStyle`.
+    - `force_overlay_payload`: produces serialized `GlyphSet` (`glyph-set-v1`) drawing payload, `ForceTorqueFrame` (`force-torque-frame-v1`) inspection payload, and `ForceGlyphStyle` metadata with body filtering support.
+    - `glyphs_to_legacy_vectors`: translates glyphs to backward-compatible `ForceVector3D` items for legacy clients.
+  - Rewrote `src/api/routes/force_overlays.py` (185 lines, down from 543 lines):
+    - Completely deleted `_build_demo_vectors`, `_build_applied_torque_vectors`, `_build_gravity_vectors`, `_magnitude_to_color`, and `FORCE_TYPE_COLORS`.
+    - Returns real provider frames and glyphs. If no engine or non-provider engine is loaded, returns null payloads with `unavailable_reason`. Zero fabricated coordinates.
+  - Added opt-in force overlay streaming to WebSocket in `src/api/routes/simulation_ws.py`:
+    - Synchronized `time_s` matching frame wire timestamp rounding.
+    - Added `force_overlay` field to `SimulationFrame` and `SimulationConfig` in `ui/src/api/client.ts`.
+  - Regenerated TypeScript API contract via `scripts/generate_ui_api_types.py` (`ui/src/api/generated/types.ts`).
+  - Updated `src/config/feature_parity.json` for `simulation.controls_wiring` and regenerated `docs/development/feature_parity_matrix.md`.
+  - Filed follow-up deprecation issue #11362 for removing legacy `ForceVector3D`.
+- Validation:
+  - `pytest tests/unit/api/test_force_overlay_service.py tests/unit/api/test_routes_force_overlays.py tests/unit/api/test_force_overlay_stream.py`: 16 passed.
+  - `pytest tests/api/test_generated_ui_api_types.py`: 6 passed.
+  - Schema validation against `schemas/glyph-set-v1.json` and `schemas/force-torque-frame-v1.json`: passed.
+  - `rg -n "_build_demo_vectors|0\.5 \+ i \* 0\.3" src/`: 0 matches.
+- Next steps: FTO-23 (#11308) Web three.js overlay rendering the serialized `GlyphSet`.
+
 # MuJoCo Force/Torque Provider — #11294 (FTO-9)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\antigravity-11294`
