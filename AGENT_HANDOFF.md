@@ -1,8 +1,8 @@
 # Active: Necromatcher Reviewed Fitting Scope — #11414
 
-- Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Implementation SELF; last published head `55d17cfedf2e72e1a3c5a99c0f24ec1fa6f993cf`.
+- Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Published scope checkpoint `3a1a6a8e428afffc20346d7a32044b4c602d4c1b`; upload responsiveness follow-up SELF.
 - Registered raw reviews, exact selected-domain checks and native/web/export provenance are implemented. Root 294 Python/39 UI cases and static checks pass. Preserved failures and procedures are in [Camera and Scope Procedure](docs/development/necromatcher-conditional-camera-and-scope.md).
-- Next: publish this reviewed implementation, restrict the authored contact schedule explicitly, run a new controlled Tiger [0,191) fit and independently verify new overlays. No new historical fit, physical qualification or ControlTower transfer is claimed. Full goal remains active.
+- Next: restrict the authored contact schedule explicitly, run a new controlled Tiger [0,191) fit and independently verify new overlays. No new historical fit, physical qualification or ControlTower transfer is claimed. Full goal remains active.
 
 # Isolated Native Hypothesis Admission — #11376
 
@@ -250,7 +250,7 @@ agreement grants no clinical, historical or physical-time qualification.
 
 # Arm Morphology Current Continuation — #11357 / #11394
 
-- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Applied to the completed conditional camera comparison; historical fits remain unchanged. Durable scope integration under #11414 is in progress.
+- Future Tiger matching retains reviewed conservative frames 0–190 inclusive ([0, 191)); twenty selected originals reviewed, exact physical release time unmeasured. Applied to the completed conditional camera comparison; historical fits remain unchanged. Scope code under #11414 is implemented; controlled scoped fitting remains pending.
 - Documentation SELF; four unoptimized research admissions and twelve selected stills are provenance-verified, with grip degradation and no anatomy/physical qualification. See [Current Continuation](docs/development/HANDOFF.md) and [Procedure](docs/development/necromatcher-arm-morphology-admission.md); prior reports remain unchanged.
 
 ## Scoped Camera Closure Checkpoint — #11357 / #11414

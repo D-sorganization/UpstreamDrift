@@ -128,7 +128,9 @@ not establish physical time or hand contact.
 
 Use **Import Reviewed Window** in the native or web refit controls. Raw receipt
 imports are bounded to 1 MiB and share `import_fit_source_scope_review`; the
-existing immutable library stores the exact bytes. The receipt identity is
+existing immutable library stores the exact bytes. HTTP registration runs in
+the shared Starlette threadpool; native registration runs in its background
+worker, keeping frame authentication off the interface/event-loop thread. The receipt identity is
 derived from its SHA256. An identical existing receipt is freshly checked and
 reused; another asset cannot be overwritten. The returned scope uses an
 `assets/...json` reference relative to the library, so removing the external
@@ -167,7 +169,11 @@ passed 290 and failed four schedule-worker fixture cases because their fake
 library lacked `load_fit`; that fixture now exposes its existing parent record.
 Production validation was retained and the complete 294-case rerun passed.
 These are implementation checks, not new historical fit results or remote CI
-acceptance. Historical library assets remain unchanged.
+acceptance. Historical library assets remain unchanged. A focused upload
+responsiveness follow-up passed 13 root cases with the asyncio plugin explicitly
+loaded, preserving canonical error mapping and real native-bound admission.
+The first follow-up runner lacked that plugin; its two runner failures are
+retained separately from the implementation RED case.
 
 A future scoped Tiger fit uses original training frames `0,10,...,190`, creates a
 new immutable version and records `sampled_parent` initialization honestly.

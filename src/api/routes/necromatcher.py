@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 
 from src.api.routes.matched_swings import require_local_client
 from src.api.middleware.upload_limits import read_upload_file_bytes
@@ -209,7 +210,10 @@ async def import_source_scope_review(
     """Preserve bounded exact review bytes through canonical portable registration."""
     raw = await read_upload_file_bytes(file, max_bytes=MAX_SOURCE_SCOPE_REVIEW_BYTES)
     with _errors():
-        return import_fit_source_scope_review(library, fit_id, raw).to_record()
+        scope: SourceFitScope = await run_in_threadpool(
+            import_fit_source_scope_review, library, fit_id, raw
+        )
+        return scope.to_record()
 
 
 @router.get("/source-scope-reviews/{review_id}")
