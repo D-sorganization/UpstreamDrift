@@ -71,7 +71,8 @@ class ChannelSpec:
     kind: WrenchKind
     body: str
     force_cols: tuple[str, str, str] | None
-    torque_cols: tuple[str, str, str] | None
+    # A None entry is an axis the joint has no actuator about (exact zero).
+    torque_cols: tuple[str | None, str | None, str | None] | None
     point_cols: tuple[str, str, str]
     frame: Literal["world", "joint_local"]
     rotation_prefix: str | None = None
@@ -85,6 +86,26 @@ class ChannelSpec:
 
 def _cols(prefix: str, suffixes: tuple[str, ...] = _VEC) -> tuple[str, str, str]:
     a, b, c = (f"{prefix}{s}" for s in suffixes)
+    return (a, b, c)
+
+
+#: Actuated local axes per joint, from calculateJointPowerWork.m::
+#: getActuatorTorques. Torso is a scalar field with no defined axis, so it
+#: has no actuator channel here.
+_ACTUATOR_AXES: dict[str, str] = {
+    "LScap": "XY",
+    "RScap": "XY",
+    "LS": "XYZ",
+    "RS": "XYZ",
+    "LF": "Z",
+    "RF": "Z",
+    "Spine": "XY",
+}
+
+
+def _actuator_cols(joint: str) -> tuple[str | None, str | None, str | None]:
+    axes = _ACTUATOR_AXES[joint]
+    a, b, c = (f"{joint}Logs_ActuatorTorque{x}" if x in axes else None for x in _XYZ)
     return (a, b, c)
 
 
@@ -110,12 +131,18 @@ def _joint_specs(joint: str) -> tuple[ChannelSpec, ...]:
             torque_cols=_cols(f"{joint}Logs_TorqueLocal_"),
             **common,  # type: ignore[arg-type]
         ),
-        ChannelSpec(
-            label=f"joint_actuator:{joint}",
-            kind=WrenchKind.JOINT_ACTUATOR,
-            force_cols=None,
-            torque_cols=_cols(f"{joint}Logs_ActuatorTorque", _XYZ),
-            **common,  # type: ignore[arg-type]
+        *(
+            [
+                ChannelSpec(
+                    label=f"joint_actuator:{joint}",
+                    kind=WrenchKind.JOINT_ACTUATOR,
+                    force_cols=None,
+                    torque_cols=_actuator_cols(joint),
+                    **common,  # type: ignore[arg-type]
+                )
+            ]
+            if joint in _ACTUATOR_AXES
+            else []
         ),
     )
 
@@ -198,12 +225,19 @@ def _floats(cells: list[str], name: str) -> np.ndarray:
 
 
 def _vec_array(
-    columns: dict[str, list[str]], names: tuple[str, str, str]
+    columns: dict[str, list[str]], names: tuple[str | None, ...]
 ) -> np.ndarray | None:
-    """Stack three columns to (T, 3), or None when any column is absent."""
-    if not all(n in columns for n in names):
+    """Stack three columns to (T, 3), or None when a named column is absent.
+
+    A ``None`` name is an undriven axis and contributes exact zeros.
+    """
+    if not all(n is None or n in columns for n in names):
         return None
-    return np.stack([_floats(columns[n], n) for n in names], axis=1)
+    rows = len(columns["time"])
+    return np.stack(
+        [np.zeros(rows) if n is None else _floats(columns[n], n) for n in names],
+        axis=1,
+    )
 
 
 def _rotation_array(
@@ -239,7 +273,7 @@ def _to_world(rot: np.ndarray, local: np.ndarray) -> np.ndarray:
 def _half(
     columns: dict[str, list[str]],
     spec: ChannelSpec,
-    names: tuple[str, str, str] | None,
+    names: tuple[str | None, ...] | None,
     rotations: dict[str, np.ndarray | None],
 ) -> np.ndarray | None:
     if names is None:

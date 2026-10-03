@@ -214,3 +214,31 @@ def test_real_rotations_orthonormal_within_logging_precision() -> None:
         err = np.abs(np.einsum("tji,tjk->tik", r, r) - np.eye(3)).max()
         assert err < 1e-2, joint
         assert np.abs(np.linalg.det(r) - 1).max() < 1e-2, joint
+
+
+def test_actuator_axes_follow_matlab_per_joint(tmp_path: Path) -> None:
+    """LScap logs X/Y only: Z is undriven (exact 0), not 'missing'."""
+    cols = _joint_cols()
+    for joint, axes in (("LScap", "XY"), ("LF", "Z")):
+        cols |= _vec(f"{joint}Logs_GlobalPosition_", [(0.0, 0.0, 1.0)] * 2)
+        cols |= _rot(f"{joint}Logs_Rotation_Transform", [RZ90, RZ90])
+        for ax in axes:
+            cols[f"{joint}Logs_ActuatorTorque{ax}"] = [2.0, 2.0]
+    series, missing = load_simscape_force_series(_write(tmp_path, cols))
+    by = {w.label: w for w in series[0].wrenches}
+    # R=Rz90 maps local (2,2,0) to world (-2,2,0); Z axis stays exactly zero.
+    assert by["joint_actuator:LScap"].torque_nm == pytest.approx((-2.0, 2.0, 0.0))
+    assert by["joint_actuator:LF"].torque_nm == pytest.approx((0.0, 0.0, 2.0))
+    assert not any(m.startswith("joint_actuator:LScap") for m in missing)
+    # LS is driven about X/Y/Z but its columns are absent here: unavailable.
+    assert "joint_actuator:LS:torque" in missing
+    assert "joint_actuator:Torso" not in " ".join(missing)
+
+
+@needs_trial
+def test_adapter_loads_committed_trial_with_rotation_tol() -> None:
+    series, missing = SimscapeAdapter().load_force_series(TRIAL, rotation_tol=1e-2)
+    assert len(series) == 31
+    assert "joint_actuator:LScap:torque" not in missing
+    with pytest.raises(ValueError, match="not orthonormal"):
+        SimscapeAdapter().load_force_series(TRIAL)

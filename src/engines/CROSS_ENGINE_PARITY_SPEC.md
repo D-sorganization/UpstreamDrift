@@ -295,7 +295,7 @@ listed in the returned `missing` tuple (`"<label>:force"` / `"<label>:torque"`).
 | --- | --- | --- | --- | --- | --- |
 | `joint_reaction:<J>` | `JOINT_REACTION` | `<J>` | `<J>Logs_ConstraintForceLocal_*`, `..._ConstraintTorqueLocal_*` | joint-local, `R @ v` | `<J>Logs_GlobalPosition_*` |
 | `joint_total:<J>` | `EXTERNAL` | `<J>` | `<J>Logs_ForceLocal_*`, `..._TorqueLocal_*` | joint-local, `R @ v` | same |
-| `joint_actuator:<J>` | `JOINT_ACTUATOR` | `<J>` | `<J>Logs_ActuatorTorqueX/Y/Z` (torque only) | joint-local, `R @ v` | same |
+| `joint_actuator:<J>` | `JOINT_ACTUATOR` | `<J>` | `<J>Logs_ActuatorTorque{X,Y,Z}` per joint (LScap/RScap/Spine X,Y; LS/RS X,Y,Z; LF/RF Z; Torso none; undriven axes exact 0; torque only) | joint-local, `R @ v` | same |
 | `external:base_on_hip` | `EXTERNAL` | `pelvis` | `HipLogs_BaseonHipForceGlobal_*`, `..._TorqueGlobal_*` | world | `HipLogs_HipGlobalPosition_dim*` |
 | `grip:total_hand` | `GRIP` | `club` | `CalculatedSignalsLogs_TotalHandForceGlobal_*`, `..._TorqueGlobal_*` | world | `MidpointCalcsLogs_MPGlobalPosition_*` |
 | `grip:lh_mof` / `grip:rh_mof` | `GRIP` | `club` | `MomentandCoupleLogs_LHMOFonClubGlobal_*` / `RHMOF...` (torque only) | world | `LWLogs_LHGlobalPosition_*` / `RWLogs_RHGlobalPosition_*` |
