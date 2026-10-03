@@ -24,6 +24,7 @@ from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
 )
+from .shaft_residuals import AdditionalImageResiduals, ImageResidualTerm
 from .contact_schedule import ScheduledConstraintOptions
 from .contracts import (
     CameraProjection,
@@ -42,6 +43,7 @@ class _Fit:
         camera: CameraProjection,
         inputs: ImageFitInputs,
         config: ImageFitConfig,
+        additional_images: AdditionalImageResiduals | None = None,
     ) -> None:
         self.native, self.attachments, self.camera = native, attachments, camera
         self.inputs, self.config = inputs, config
@@ -77,8 +79,17 @@ class _Fit:
                 )
             probes.extend(boundaries)
         self.evaluation_times = np.unique(np.concatenate([inputs.source_times, probes]))
+        self.additional_images = additional_images
+        self.additional_sizes: dict[int, int] = {}
+        extra_times = self._additional_times()
+        self.map_evaluation_times = np.unique(
+            np.concatenate([self.evaluation_times, extra_times])
+        )
         self.source_indices = np.searchsorted(
-            self.evaluation_times, inputs.source_times
+            self.map_evaluation_times, inputs.source_times
+        )
+        self.constraint_indices = np.searchsorted(
+            self.map_evaluation_times, self.evaluation_times
         )
         self.ik = (
             native.create_ik(attachments)
@@ -86,11 +97,61 @@ class _Fit:
             else None
         )
 
+    def _additional_times(self) -> list[float]:
+        if self.additional_images is None:
+            return []
+        if not isinstance(self.additional_images, AdditionalImageResiduals):
+            raise ValueError("Typed additional image residual bundle required")
+        self.additional_images.validate(self.native)
+        times: list[float] = []
+        for term in self.additional_images.terms:
+            current = np.asarray(term.source_times, dtype=float)
+            if (
+                current.ndim != 1
+                or not len(current)
+                or not np.isfinite(current).all()
+                or not np.all(np.diff(current) > 0)
+            ):
+                raise ValueError(
+                    "Additional image times must be nonempty finite and strictly increasing"
+                )
+            if (
+                current[0] < self.inputs.source_times[0]
+                or current[-1] > self.inputs.source_times[-1]
+            ):
+                raise ValueError(
+                    "Additional image times must remain inside source interval"
+                )
+            poses = np.tile(self.inputs.seed, (len(current), 1))
+            self.additional_sizes[id(term)] = len(
+                self._additional_residual(term, poses)
+            )
+            times.extend(current.tolist())
+        return times
+
+    def _additional_residual(
+        self, term: ImageResidualTerm, poses: np.ndarray
+    ) -> np.ndarray:
+        residual = np.asarray(
+            term.residual(self.native, self.camera, poses), dtype=float
+        )
+        expected = self.additional_sizes.get(id(term))
+        if (
+            residual.ndim != 1
+            or not len(residual)
+            or not np.isfinite(residual).all()
+            or (expected is not None and len(residual) != expected)
+        ):
+            raise ValueError(
+                "Additional image residual must retain finite one-dimensional fixed rows"
+            )
+        return residual
+
     def source_evaluation(
         self, evaluation: SplineTrajectoryEvaluation
     ) -> SplineTrajectoryEvaluation:
         """Select original evidence rows without inventing observations at probes."""
-        if not np.array_equal(evaluation.times, self.evaluation_times):
+        if not np.array_equal(evaluation.times, self.map_evaluation_times):
             raise ValueError(
                 "Fit evaluation must match configured source and probe times"
             )
@@ -175,7 +236,8 @@ class _Fit:
                     [
                         row.residual
                         for row in self.constraint_linearizations(
-                            self.expand(evaluation.q), evaluation.times
+                            self.expand(evaluation.q[self.constraint_indices]),
+                            self.evaluation_times,
                         )
                     ]
                 )
@@ -185,6 +247,12 @@ class _Fit:
                 self.config.closure_weight
                 * np.array([self.native.closure_residuals(pose) for pose in q]).ravel()
             )
+        if self.additional_images is not None:
+            for term in self.additional_images.terms:
+                indices = np.searchsorted(evaluation.times, term.source_times)
+                pieces.append(
+                    self._additional_residual(term, self.expand(evaluation.q[indices]))
+                )
         return np.concatenate(pieces)
 
     def rms(self, residual: np.ndarray) -> float:
@@ -253,19 +321,57 @@ class _Fit:
         ]
         if self.ik is not None:
             rows = self.constraint_linearizations(
-                self.expand(evaluation.q), evaluation.times
+                self.expand(evaluation.q[self.constraint_indices]),
+                self.evaluation_times,
             )
             pieces.append(
                 np.vstack(
                     [
                         row.jacobian[:, self.indices] @ basis
-                        for row, basis in zip(rows, evaluation.q_basis, strict=True)
+                        for row, basis in zip(
+                            rows,
+                            evaluation.q_basis[self.constraint_indices],
+                            strict=True,
+                        )
                     ]
                 )
             )
         elif closure_rows:
             pieces.append(np.vstack(closure_rows))
+        if self.additional_images is not None:
+            pieces.extend(
+                self._additional_jacobian(evaluation, term)
+                for term in self.additional_images.terms
+            )
         return np.vstack(pieces)
+
+    def _term_pose_residual(
+        self, free: np.ndarray, poses: np.ndarray, index: int, term: ImageResidualTerm
+    ) -> np.ndarray:
+        modified = poses.copy()
+        modified[index] = self.expand(free[None, :])[0]
+        return self._additional_residual(term, modified)
+
+    def _additional_jacobian(
+        self, evaluation: SplineTrajectoryEvaluation, term: ImageResidualTerm
+    ) -> np.ndarray:
+        indices = np.searchsorted(evaluation.times, term.source_times)
+        poses = self.expand(evaluation.q[indices])
+        result = np.zeros(
+            (
+                len(self._additional_residual(term, poses)),
+                evaluation.q_basis.shape[-1],
+            )
+        )
+        for index, time_index in enumerate(indices):
+            function = partial(
+                self._term_pose_residual, poses=poses, index=index, term=term
+            )
+            result += (
+                finite_difference_jacobian(function, evaluation.q[time_index])
+                @ evaluation.q_basis[time_index]
+            )
+        return result
 
 
 def _trajectory_domain(fit: _Fit, knots: np.ndarray) -> HermiteBoundsDomain | None:
@@ -408,6 +514,18 @@ def _fit_result(
         optimizer_ran=optimizer_ran,
         initialization=prepared.initialization,
         initial_spline=prepared.initial_spline,
+        additional_image_assessments=tuple(
+            term.assess(
+                fit.native,
+                fit.camera,
+                fit.expand(
+                    trajectory.evaluate(coefficients, np.asarray(term.source_times)).q
+                ),
+            )
+            for term in fit.additional_images.terms
+        )
+        if fit.additional_images is not None
+        else (),
     )
 
 
@@ -418,12 +536,14 @@ def initialize_image_trajectory(
     inputs: ImageFitInputs,
     config: ImageFitConfig,
     initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
 ) -> ImageFitResult:
     """Author a feasible seed and measure original pixels without running an optimizer."""
     if config.initialization_policy == "strict" and initial_spline is None:
         raise ValueError("Seed authoring requires explicit initialization policy")
     prepared = _prepare_fit(
-        _Fit(native, attachments, camera, inputs, config), initial_spline
+        _Fit(native, attachments, camera, inputs, config, additional_images),
+        initial_spline,
     )
     return _fit_result(
         prepared,
@@ -443,15 +563,17 @@ def fit_image_trajectory(
     inputs: ImageFitInputs,
     config: ImageFitConfig = ImageFitConfig(),
     initial_spline: ImageSplineStart | None = None,
+    additional_images: AdditionalImageResiduals | None = None,
 ) -> ImageFitResult:
     """Fit native pixels with explicit initialization, unchanged observations and priors."""
     prepared = _prepare_fit(
-        _Fit(native, attachments, camera, inputs, config), initial_spline
+        _Fit(native, attachments, camera, inputs, config, additional_images),
+        initial_spline,
     )
     fit = prepared.fit
     problem = MapEstimatorProblem(
         prepared.trajectory,
-        fit.evaluation_times,
+        fit.map_evaluation_times,
         prepared.coefficients,
         SharedParameterBlock(()),
         fit.residual,

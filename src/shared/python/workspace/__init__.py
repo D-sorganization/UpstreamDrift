@@ -57,7 +57,11 @@ from .necromatcher_video_jobs import NativeVideoSession
 from .necromatcher_placement import author_ground_placement
 from .necromatcher_replay import ReplayOptions, replay_authored_profile
 from .necromatcher_review import CaptureReview
-from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_shaft_axis_evidence
+from .necromatcher_shaft_evidence import (
+    BoundShaftEvidence,
+    bind_shaft_axis_evidence,
+    load_shaft_image_residuals,
+)
 from .necromatcher_projection import project_fit_frame
 from .necromatcher_projection_process import NativeFitProjectionProcess
 from .necromatcher_fit_jobs import NativeRefitOptions, start_native_refit
@@ -186,6 +190,7 @@ from .necromatcher_fit_records import build_native_fit_payload
 __all__ = [
     "BoundShaftEvidence",
     "bind_shaft_axis_evidence",
+    "load_shaft_image_residuals",
     "build_native_fit_payload",
     "NativeFitBinding",
     "author_ground_placement",

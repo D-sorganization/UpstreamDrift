@@ -1,6 +1,7 @@
 """Validated image evidence and explicitly unqualified native fit records."""
 
 from __future__ import annotations
+from .shaft_residuals import ImageResidualAssessment
 from .contact_schedule import ScheduledConstraintOptions, constraint_options_from_record
 
 from dataclasses import dataclass, field
@@ -420,6 +421,7 @@ class ImageFitResult:
     optimizer_ran: bool = True
     initialization: AuthoredHermiteInitialization | None = None
     initial_spline: ImageSplineStart | None = None
+    additional_image_assessments: tuple[ImageResidualAssessment, ...] = ()
     qualification: str = field(default="monocular_research_hypothesis", init=False)
     physical_time_qualified: bool = field(default=False, init=False)
 
@@ -447,6 +449,12 @@ class ImageFitResult:
             raise ValueError(
                 "Initial spline must be a typed preserved coefficient identity"
             )
+        assessments = tuple(self.additional_image_assessments)
+        if any(not isinstance(item, ImageResidualAssessment) for item in assessments):
+            raise ValueError(
+                "Additional image diagnostics require validated typed records"
+            )
+        object.__setattr__(self, "additional_image_assessments", assessments)
         errors = self.pixel_errors.copy()
         errors.setflags(write=False)
         object.__setattr__(self, "pixel_errors", errors)

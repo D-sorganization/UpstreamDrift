@@ -56,7 +56,7 @@ Purpose & Preserve a repeatable process for additional historical players.\\
 Evidence & Original footage, exact frame identities, image landmarks, generic native models, source-stamped fits, and independent diagnostics.\\
 Status & Working software and rejected research candidates; complete player, simulation, impact, and site acceptance remain open.\\
 Tracking & Epic \#11232; Tiger \#11226; Hogan \#11229; native fitting \#11235; overlay export \#11246; report \#11247; draft PR \#11240.\\
-Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; exact restart and V9 producer \code{7a2359eadd}; phase V10 \code{9c21eda8ba}; matched wrist V11 \code{f570e5f421}; later exploration identified separately.\\
+Revision Scope & LM source \code{7d8c04946d}; TRF source \code{cee6d9d55e}; owned export controls source \code{3c73001a7c}; interior-constraint source \code{b92732e725}; hard-bounds/readiness source \code{73ace83145}; authored seed/range and V8 producer \code{2ad99b870a}; exact restart and V9 producer \code{7a2359eadd}; phase V10 \code{9c21eda8ba}; matched wrist V11 \code{f570e5f421}; later exploration identified separately; latest local handoff/shaft admission \code{605c695259}, with committed Affine consumer \code{8fdebad14d}.\\
 \bottomrule
 \end{tabular}
 \vfill
@@ -73,17 +73,18 @@ design manual. That manual's editable authority remains
 \end{titlepage}
 \hypersetup{pageanchor=true}
 
-% Compact Only the Contents Section Gaps; Preserve Font, Hierarchy, and Entries.
-{\scriptsize\linespread{0.88}\selectfont\setlength{\parskip}{0pt}
+% Readable Two-Page Contents; Explicit Midpoint Break Preserves Every Entry.
+{\small\linespread{1.0}\selectfont\setlength{\parskip}{0pt}
 \let\contentsaddvspace\addvspace
-\renewcommand{\addvspace}[1]{\contentsaddvspace{0.05em}}
+\renewcommand{\addvspace}[1]{\contentsaddvspace{0.35em}}
 \tableofcontents}
 
 \clearpage
 \reportsection{Scope, Evidence Classes, and Success Criteria}
 \note{Reading Guide}{Sections 1--4 explain evidence and the image fit.
 Sections 5--7 explain placement, closure, and constrained repair. Sections
-8--10 cover controls, repeatability, and remaining acceptance. The appendices
+8 onward cover controls, the latest local handoff and sparse shaft evidence,
+repeatability, and remaining acceptance. The appendices
 bind numerical statements to exact artifacts.}
 
 
@@ -1660,8 +1661,9 @@ therefore resolves this finite 2 mm test while retaining the model/plane and
 unobserved-contact assumptions. No all-time contact certificate follows.
 The actual V15 overlay is documented in the source-video review section; its
 visible alignment limitations remain despite the finite target passes. The
-actual Affine package below still contains Tiger V14 and Hogan V12, not this
-later V15 result.
+historical Affine package below contains Tiger V14 and Hogan V12, not this
+later V15 result. Section~\ref{sec:latest-handoff-shaft} records the separate
+completed V15/V12 cohort without changing those earlier receipts.
 
 \subsection{Immutable Research Provider and Consumer Boundary}
 \label{sec:research-handoff}
@@ -2077,6 +2079,7 @@ screenshot verify actual interface transport and publication; the subsequent
 draft resets to the parent's evaluation budget of 30. This short interface
 check supplies no motion improvement or scientific acceptance claim.
 
+\addtocontents{toc}{\protect\newpage}
 \reportsection{Authored Ground Placement and Image Invariance}
 \subsection{A New World Hypothesis, Preserving the Original}
 The v5 initial states intersected their authored ground. A diagnostic with
@@ -2929,6 +2932,257 @@ The worker verifies resource and source identities; timeout/cancellation
 terminates only its owned process. This boundary is shared infrastructure,
 not a second geometry or inference implementation.
 
+\reportsection{Latest Local Research Handoff and Sparse Shaft Evidence}
+\label{sec:latest-handoff-shaft}
+This chapter records two completed engineering boundaries: a new immutable
+Tiger V15/Hogan V12 package admitted by the committed AffineDrift consumer,
+and sparse original-image shaft evidence admitted against those exact fits.
+Neither operation changes the saved motion, runs an optimizer, or promotes
+scientific qualification. The earlier V14/V12 handoff remains an independent
+historical cohort; its receipts and figures are preserved.
+
+\subsection{Actual V15/V12 Export and Committed Consumer Admission}
+The new provider checkpoint is
+\hash{605c695259b13cb98a6d6e379e7f7fee51f27443}. Its narrow V15 protocol
+adapter preserves the V12/V14 admission behavior and rejects unknown protocols
+or incomplete verification brackets. Ten new regressions and the combined
+64-test provider/fit-selection lane passed, with scoped Ruff and pinned mypy.
+These checks support transport behavior, not new numerical estimation.
+
+Provider implementation identity, numerical producer identity, and consumer
+implementation identity are separate. Tiger's numerical producer remains
+\hash{6654881b0788c77620a0afb8a9a6763f3ee1ccb9}; Hogan's remains
+\hash{b32878a828d3b96bfc796bee368ef60cb692d117}. Exporting their summaries
+with a later provider does not relabel either fit as newly computed.
+
+\begin{longtable}{@{}p{1.25in}p{5.05in}@{}}
+\toprule Actual Asset & Immutable Identity\\\midrule\endhead
+Tiger Record & \code{tiger-normalized-coverage-variant-fit-v15}; fit SHA-256
+\hash{d16babdc84452cc61f5ca725825c34dc68a289c09f7cd5aca093c417dc2af7a0}\\
+Hogan Record & \code{hogan-probe-density-variant-fit-v12}; fit SHA-256
+\hash{e8724f903ab3cb8de53acfc9dd2d936e0bb30fe6bbe2bed63d3b716e32a480e2}\\
+Manifest & 6,852 bytes;
+\hash{d68830b14e2704466d4dd1795342dffd96f6f4d9b238b1fccd7f27117a9c10ed}\\
+Schema & 8,745 bytes;
+\hash{a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30}\\
+Export Receipt & 167,922 bytes;
+\hash{65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd}\\
+Consumer Checkpoint & Registration HEAD
+\hash{8fdebad14db0f62b719942fa5d64f14878b54fd5}; implementation
+\hash{b10ecec30ea75d0d447e0b0642378e8578da2eb0}\\
+\bottomrule
+\end{longtable}
+
+The two-file Desktop bundle \code{Affine Local Research V1 V15-V12} contains
+sanitized JSON and its pinned schema, without original media or local source
+paths. Public URL availability is not asserted: immutable logical identifiers
+are resolved by the explicit local \code{DirectoryTransport}. Pinned size,
+hash, schema equivalence, qualification, rights decision, exact rational
+source-clock interval, and record provenance are checked before admission.
+The package reports all five finite research targets passing for both selected
+records, while preserving rejected/nonconverged status, unknown physical time,
+unqualified anatomy/camera, and the absence of a continuous-motion certificate.
+Finite target passes do not authorize public distribution.
+
+The actual workflow used public inspect, exclusive draft install, idempotent
+reinstall, recall, and deterministic generic QMD generation. Inspection wrote
+no state; recalled records matched the admitted records exactly. Registry,
+source, package, schema, driver, and reviewed-config brackets remained
+unchanged. Quarto 1.8.26 rendered standalone HTML with \code{--no-execute};
+no published site tree, authoritative registry, or original media was changed.
+The consumer's focused lane passed 42 tests at 95.35\% coverage, alongside
+Black 100-column formatting, Ruff, and strict mypy. Its unchanged SDK-first
+full suite passed 6,685 tests, skipped 26, and deselected 187 by existing
+configured markers. These are software checks, not physical validation.
+
+\begin{longtable}{@{}p{1.3in}p{5in}@{}}
+\toprule Local Review Artifact & SHA-256 and Scope\\\midrule\endhead
+Admission Receipt & 21,969 bytes;
+\hash{184907af70181af6bd7e94cd5526139fdec828e57fe540c69f87c5c7a80b7d2b}\\
+Wrapper Receipt & 12,178 bytes;
+\hash{d94e28062f090f00b45e09bb550d99903926129c9b29d70b7d702ec46057aba6}\\
+Generated QMD & 4,854 bytes;
+\hash{92ca7c563f3525ccd14dcdff3d0064069f8aa0439d88e8eff601cbd6807a29b0}\\
+Rendered HTML & 26,176 bytes;
+\hash{d29c0ef91181887880175e272a0ca753ab7fe2c58851c390df540d39111cd095}\\
+Browser Addendum & 1,454 bytes;
+\hash{046cb332516253fe0592be36a20ceb148cc7496ec1e299a7dbd1041d9e0f10d6}\\
+\bottomrule
+\end{longtable}
+
+The actual browser review opened the local HTML at
+\code{http://127.0.0.1:8880/research.html}. Three natural 1,234-by-712
+screenshots covered the top, Tiger status, and finite-target views. The
+reviewer verified the latest fit identities, metrics, five finite passes, and
+rejected/unknown labels, without clipping or overlap in those views. This is
+three-view browser evidence, not a full-page or manual user-acceptance claim.
+The separate addendum leaves the original execution receipts unchanged.
+Eighteen frozen reproduction inputs and their checked copies are retained
+under \code{V15-V12 Handoff Repeatability Inputs}; its copy receipt is
+\hash{aadf6b872461bef038f307b68043ee037e5afe59ebaccf895f2c6b874a039756}.
+
+\subsection{Four Source-Bound Fragment Inspections and Explicit Abstention}
+Sparse shaft evidence addresses a visible limitation in the earlier overlays:
+the generic blue body-origin/attachment seed can disagree with the real club.
+The new evidence is an independent image observation, not a relabeling of that
+seed as the observed shaft. Each reviewed record binds the exact source video,
+capture, frame identity, rational presentation timestamp, source-sized image,
+decoded pixel hash, and PNG hash. Container PTS remains distinct from unknown
+physical swing time. No unreviewed video frame acquires a shaft observation.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{@{}p{0.75in}p{0.9in}p{2.05in}p{2.45in}@{}}
+\toprule Player / Frame & Exact PTS (s) & Image Evidence (Pixels) & Authored Interpretation\\\midrule
+Tiger / 0 & $450450/30000$ & $(500,414)$ to $(518,533)$ & Observed interior fragment; confidence 0.8, $\sigma=3$ px.\\
+Tiger / 209 & $659659/30000$ & $(511,600)$ to $(468,660)$ & Observed fragment; distal shaft leaves the image. Confidence 0.8, $\sigma=3$ px.\\
+Hogan / 0 & $3300000/30000$ & No points & Ambiguous blurred shaft/clothing/leg edges; explicit abstention.\\
+Hogan / 375 & $3675000/30000$ & $(70,137)$ to $(118,125)$ & Observed interior fragment; confidence 0.5, $\sigma=2$ px.\\
+\bottomrule
+\end{tabular}
+\caption{Sparse Authored Image Fragments With Exact Source PTS. Confidence and Pixel Scale Are Uncalibrated Reviewer Choices; Missing Points Remain Missing.}
+\end{table}
+
+All four inspection PNGs preserve original dimensions: Tiger 1,280-by-720 and
+Hogan 320-by-240. Magenta identifies an authored image fragment. Hogan frame 0
+has an ambiguous label and no fabricated line. Visibility is unknown rather
+than inferred from confidence; the weighting status is
+\code{authored_uncalibrated}. The chosen values are not calibrated likelihoods,
+measurement-error estimates, force evidence, or physical contact observations.
+Only three fragments are admitted as observed, from four reviewed frames.
+
+The two evidence JSON hashes are
+\hash{dd0f6f80a2f6d99b4721bd219f3ff6547cee64edf2f709571050e184426485f2}
+(Tiger) and
+\hash{c39bbd8a90b1912c9b6d81d2603578f23f9745d87605adb09b44c5a6b2495231}
+(Hogan). Their source videos remain bound to
+\hash{99e61d182c901548f3857d0325e23747d66b68db24610e16622de7e45d1dd673}
+and
+\hash{8424c562eb3f58c11a3791cc7a6bb83631fe23c172ca8b228a31a63accbc49eb},
+respectively. The public source-bound admission rejects changed images,
+identities, clocks, or native geometry instead of guessing a correspondence.
+
+\subsection{An Infinite Axis Is Not a Physical Shaft Segment}
+For two distinct authored image points $u_1,u_2\in\R^2$, define homogeneous
+coordinates $\widetilde u_i=(u_{ix},u_{iy},1)^\mathsf{T}$. Their image line is
+\begin{equation}
+ \ell=\widetilde u_1\times\widetilde u_2,\qquad
+ \widehat\ell=\frac{\ell}{\sqrt{\ell_x^2+\ell_y^2}}.
+\end{equation}
+Changing endpoint order changes only sign. These two pixel points select a
+visible interior fragment; they do not identify grip/head endpoints or club
+length. Extending their line is a mathematical axis hypothesis, not additional
+observed shaft pixels. Ambiguous records have no $\ell$ and contribute no
+invented observation.
+
+The public \code{resolve_authored_shaft_axis} uses the exact hashed native
+definition, not the earlier hand-drawn overlay appearance. It resolves one
+declared Clubface Vector body and the authored shaft/grip solid centers,
+validates finite proper placements, distinct centers, and coaxial local axes,
+and returns an unqualified infinite authored axis. For both players the local
+reference points in metres are
+\begin{equation}
+ a=(0,-0.4455,0.064)^\mathsf{T},\qquad
+ b=(0,-1.0235,0.064)^\mathsf{T},\qquad
+ X(s)=a+s(b-a),\quad s\in\R.
+\end{equation}
+These authored solid-center points choose direction; neither is claimed as a
+historical shaft endpoint. The bound definition hash is
+\hash{da181bae388e8e4ac1e5f905b11d5c80195bbe177bc685cbb6083a5815053ae8};
+the distinct exported XML hash is
+\hash{99e3a230fde3ecee7ce2ecd40339dff4d2ee9614df791d5288dc938f7baef3cd}.
+The resolution method \code{authored_shaft_grip_solid_axis_v1} retains
+\code{physical_geometry_qualified=false}.
+
+For prospective use with pose $q$, a native body transform $T_B(q)$, and the
+conditional camera projection $P_C$, two finite projected reference points
+would determine a model image line:
+\begin{equation}
+ v_a=P_CT_B(q)\begin{bmatrix}a\\1\end{bmatrix},\qquad
+ v_b=P_CT_B(q)\begin{bmatrix}b\\1\end{bmatrix},\qquad
+ \ell_m=v_a\times v_b.
+\end{equation}
+Projection requires valid finite camera geometry and a nondegenerate image
+line. An example line-distance quantity is
+$d_i=\widehat\ell_m^\mathsf{T}\widetilde u_i$ in pixels, with sign irrelevant
+to squared distance. This compares an infinite projected axis with observed
+fragment points, rather than matching physical endpoints. It cannot determine
+historical shaft length, roll about the axis, depth, or physical scale by
+itself. Camera, generic geometry, uncertainty, and correspondence remain
+explicit hypotheses.
+
+\note{Prospective Solver Boundary}{These equations explain possible Slice B
+use at the \code{605c695259} admission checkpoint. The completed execution
+only admitted and inspected sparse evidence; it did not add line residuals to
+the actual V15/V12 fits or run a new optimizer. Later implementation tests
+cannot retroactively establish fitted outputs at this checkpoint. A reviewed
+solver recipe, degeneracy handling, residual/Jacobian tests, independent
+numerical trials, and original-image checks remain required.}
+
+\subsection{Registry Failure, TDD Repair, and Independent Admission}
+The first temporary driver raised \code{KeyError: NecromatcherLibrary}
+before constructing the library or creating output. Its preserved v1 hash is
+\hash{cb4e5eb931c31f2ce68af78e73381f616ea430b43699420f5c94df50a68c8fcf}.
+The omitted orchestration registry key did not implicate the media, model,
+or fit. Its trace and failure receipt remain preserved, without blind retry
+or numerical recomputation.
+
+A red test reproduced the missing public API keys. A new v2 registry
+retained SDK-first imports and passed ten tests, reusing
+\code{NecromatcherLibrary}, \code{CaptureReview},
+\code{bind_shaft_axis_evidence}, and shared evidence/geometry DTOs.
+The frozen successful driver hash is
+\hash{2090e18a923a03bfe21bce53de1dc088b1f1905399a920b07c68b3319b3d703b}.
+
+The actual admission receipt
+\hash{bb36ef2233e39c829b341046d2555fcbc245769dccbaa9489933f09ddb5fadd7}
+binds both saved fits, source clocks, geometry, and image/output hashes.
+Before/after execution-source hashes equal
+\hash{472950e31205a6659272b25c7af84e97ab79ce73df648baeed4283dcc145f8c1};
+Capture/model/fit inventories and metadata also match, without library
+mutation, optimization, or acceptance promotion. Independent verification is
+\hash{2fe87e4eca50e6eef52635d87589d1ea0bc5bf8728bf8f4e109b0ef9abab7182}.
+Both reviewers directly viewed all four selected images; the root addendum is
+\hash{67f8ace21806ea5c62e0f1da5635c3e3e19baf614e9989c9fa935ee48201d7ac}.
+This establishes neither all-frame visibility nor manual user acceptance.
+
+Ten failure/success drivers, tests, logs, and source receipts are preserved
+in \code{Shaft Admission Repeatability Inputs}; their copy receipt is
+\hash{d46977208862a6357975edc42d6bfe307dc2ca9b628c8f3211825cfc0d546b1f}.
+The earlier 1,170-artifact Desktop index
+\hash{a67ab07a0d2e92815f2bc7dbca5b22db91abae526a0e6e6fad26fc9bdce443b5}
+predates these eleven appended files and this build. Regenerate the index
+after reviewed publication; the old index does not cover these additions.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\linewidth]{\reviewartifactroot/Shaft Axis Evidence Review V1/tiger-frame-0-fragment-inspection.png}\par\vspace{6pt}
+\includegraphics[width=0.98\linewidth]{\reviewartifactroot/Shaft Axis Evidence Review V1/tiger-frame-209-fragment-inspection.png}
+\caption{Tiger Source-Bound Shaft Fragment Inspections: Frames 0 and 209.
+Magenta Marks Authored Interior Image Fragments, Not Physical Endpoints or
+Fitted Native Shafts. The First Visible Shaft Descends Beside the Hands; the
+Later Walking Frame Has Cropped Lower Body and an Offscreen Distal Shaft.
+Original 1,280-by-720 Aspect and Source Underlays Are Preserved. Confidence
+Remains Uncalibrated; Admission Does Not Change the Rejected Motion.}
+\label{fig:tiger-shaft-fragments}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.64\linewidth]{\reviewartifactroot/Shaft Axis Evidence Review V1/hogan-frame-0-fragment-inspection.png}\par\vspace{10pt}
+\includegraphics[width=0.64\linewidth]{\reviewartifactroot/Shaft Axis Evidence Review V1/hogan-frame-375-fragment-inspection.png}
+\caption{Hogan Source-Bound Shaft Fragment Inspections: Frames 0 and 375.
+The Ambiguous First Frame Has No Invented Line; Blurred Clothing, Leg, and
+Shaft Edges Prevent a Defensible Fragment. Magenta in Frame 375 Marks One
+Authored Visible Interior Fragment, With Uncalibrated Confidence. Original
+320-by-240 Pixels and Aspect Are Retained; Display Enlargement Adds No
+Evidence. No Physical Shaft Length, Qualified Geometry, or Accepted Motion
+Is Claimed.}
+\label{fig:hogan-shaft-fragments}
+\end{figure}
+\clearpage
+
+
 \reportsection{Repeatable Procedure and Engineering Verification}
 \subsection{Run Checklist for an Additional Historical Player}
 \begin{enumerate}
@@ -3119,6 +3373,8 @@ continuous-motion audits, and remote checks; they do not replace them.
 Procedure filenames below are relative to \path{docs/development/}; capture
 and summary filenames are relative to its \path{historical_capture/} directory.
 Source boundaries retain repository-relative paths.
+Root turnover authorities are \path{AGENT_HANDOFF.md} and
+\path{docs/development/HANDOFF.md}.
 \begin{longtable}{@{}p{1.85in}p{4.45in}@{}}
 \toprule Authority & Relative Filename / Boundary\\\midrule\endhead
 Capture Catalog & \path{source-catalog.json}\\
@@ -3138,6 +3394,9 @@ V15 Coverage Assessment & External \path{normalized-coverage-v15-independent-ass
 V15 Overlay Journal & Desktop \path{normalized-coverage-v15-overlay-review.json}; \path{normalized-coverage-v15-independent-still-review.json} records separate direct three-still visual review.\\
 Research Provider Procedure & UpstreamDrift \path{docs/development/necromatcher-research-package.md}; public \path{src/shared/python/workspace/historical_research.py}\\
 Research Consumer Procedure & AffineDrift \path{docs/development/necromatcher-research-handoff.md}; public \path{src/affine_control/historical_research/}\\
+Latest Research Cohort & Desktop \path{affine-local-research-v15-v12-export-receipt.json}; consumer review \path{local-admission-preview-receipt.json}, \path{cohort-review-wrapper-receipt.json}, and \path{browser-review-receipt.json} in the distinct V15/V12 review directory.\\
+Sparse Shaft Admission & Desktop \path{Shaft Axis Evidence Review V1/shaft-axis-admission-receipt.json}; \path{shaft-axis-output-independent-verification.json}; \path{root-selected-fragment-visual-review.json}.\\
+Shaft Geometry Boundary & Public \path{src/shared/python/motion_matching/historical_fit/shaft_geometry.py}; workspace source-bound evidence admission. Slice B solver results remain pending at this checkpoint.\\
 Research Schema & UpstreamDrift \path{docs/api/contracts/historical-player-research-v1.schema.json}; exact Affine mirror \path{schemas/historical-player-research-v1.schema.json}\\
 Native V11 Recall Summary & \path{native-stored-overlay-v11-review-summary.json}\\
 Native Stored Overlay Review & \path{native-stored-overlay-review-summary.json}\\
@@ -3151,7 +3410,6 @@ TRF Receipt & External \path{constrained-repair-trf-probe-receipt.json} under \p
 Image Fit Boundary & \path{src/shared/python/motion_matching/historical_fit/}\\
 Native Marker/Closure & \path{src/engines/physics_engines/mujoco/python/full_body_ik.py}\\
 Shared Pose Solver & \path{src/shared/python/motion_matching/full_body_ik.py}\\
-Root Turnover & Repository \path{AGENT_HANDOFF.md}; \path{docs/development/HANDOFF.md}\\
 \bottomrule
 \end{longtable}
 

@@ -488,4 +488,168 @@ V15 selected Tiger variant export run `97b1b96fea0c4a2da403004a4985f390` at prod
 
 Actual sanitized export from published source `6654881b0788c77620a0afb8a9a6763f3ee1ccb9` binds Tiger V14 and Hogan V12, preserving their separate historical numerical producers, rejected states, unknown physical time and unauthorized distribution. Manifest SHA-256 `757a644c5408e4f5fc54904bd2918290f2c3af7d77d9a3b4045420334f1bc93d`; export receipt `5d024fa8afe4c9e88639f20de46b4f7098b44e8a70b121ec1e96dc2c70e9f7ed`. Actual Affine local inspect/draft install/idempotent recall/deterministic QMD/Quarto preview passed with unchanged inputs, source and authoritative registry; admission receipt `ccf4615f4eb3d51a51b6b3a1af98b9bfd92abda4683be20b26744ff6c67136c2`, bounded browser review `f39ffed5532bbc8700b32e50053abf4e0dafd335ad838c6b255130d3c6edadef`. Consumer evidence identifies tested working-tree fingerprint `4c712713d0aa4dde9afc34876a3b73a0074bbe04515b23215cca9f410cc6af09` on checkout base `29472661de971899bfb7cdc4a3f92b3e9eee19aa`, not committed consumer changes at that base. No original media, optimizer execution, public deployment or scientific promotion occurred.
 
-Final expanded Upstream source regression passed476 cases after the canonical Windows read-sharing repair. This publication records methods and reproducibility, not physical qualification, full goal completion, canonical manual release or public deployment. The peer-owned V15 protocol adapter is frozen in the tested working tree (64 provider/selection cases, scoped Ruff/format/pinned mypy), without actual new-cohort export; source-bound club Slice A remains in progress; the actual Affine package still contains Tiger V14/Hogan V12. Preserve all earlier numerical/export/visual receipts and publication snapshots.
+Final expanded Upstream source regression passed476 cases after the canonical Windows read-sharing repair. This publication records methods and reproducibility, not physical qualification, full goal completion, canonical manual release or public deployment. At that earlier report checkpoint the V15 provider adapter was tested, while the actual Affine cohort remained Tiger V14/Hogan V12. The separately committed latest V15/V12 handoff below supersedes that execution status while preserving all earlier artifacts; source-bound club Slice A remains a distinct qualification follow-up. Preserve all earlier numerical/export/visual receipts and publication snapshots.
+
+## Committed Latest V15/V12 Research Handoff
+
+Provider `605c695259b13cb98a6d6e379e7f7fee51f27443` exported the exclusive
+`Affine Local Research V1 V15-V12` bundle after both repository checkpoints
+were committed, pushed and remote-verified. The latest Tiger V15/Hogan V12
+manifest is 6,852 bytes, SHA-256
+`d68830b14e2704466d4dd1795342dffd96f6f4d9b238b1fccd7f27117a9c10ed`;
+normalized schema remains 8,745 bytes,
+`a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30`.
+Export receipt `65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd`
+verifies deterministic public bytes and unchanged canonical/external/source
+brackets. Numerical producers remain Tiger `6654881...` and Hogan `b32878...`,
+separate from the provider implementation. The earlier V14/V12 cohort is
+unchanged.
+
+Committed Affine consumer `8fdebad14db0f62b719942fa5d64f14878b54fd5` admitted,
+installed and recalled the exact latest cohort, rendering standalone Quarto
+HTML with code execution disabled. Source fingerprint remains `4c712713...`;
+local-admission receipt
+`184907af70181af6bd7e94cd5526139fdec828e57fe540c69f87c5c7a80b7d2b`,
+wrapper receipt
+`d94e28062f090f00b45e09bb550d99903926129c9b29d70b7d702ec46057aba6`,
+HTML `d29c0ef91181887880175e272a0ca753ab7fe2c58851c390df540d39111cd095`.
+Exact pins, sizes and separate browser scope are in
+[Provider Procedure](necromatcher-research-package.md). Root reviewed three
+natural browser views at localhost8880; both records display all-five finite
+target passes while retaining scientific rejection, unknown timing and
+unauthorized distribution. Canonical execution receipts remain immutable;
+separate browser receipt
+`046cb332516253fe0592be36a20ceb148cc7496ec1e299a7dbd1041d9e0f10d6`
+(1,454 bytes) records bounded review, with full-page/manual acceptance false.
+
+New exclusive `V15-V12 Handoff Repeatability Inputs` preserves 18 checked
+frozen wrappers/configs/tests/helpers/preflights/instructions, copy receipt
+`aadf6b872461bef038f307b68043ee037e5afe59ebaccf895f2c6b874a039756`.
+No original media, optimizer run, registry mutation, public deployment,
+continuous nonlinear qualification or full-goal acceptance occurred. Continue
+source-bound club evidence and camera/anatomy/physical-clock qualification;
+local research admission does not authorize scientific publication.
+
+## Actual Sparse Shaft Evidence Admission
+
+Committed source `605c695259b13cb98a6d6e379e7f7fee51f27443` admitted two
+Tiger fragments (frames 0 and 209), one faint Hogan fragment (frame 375)
+and an explicit abstention for blurred Hogan frame 0. Desktop
+`Shaft Axis Evidence Review V1` preserves original source-sized PNGs,
+inspection plots and exact evidence records. Tiger confidence 0.8 / sigma
+3 pixels and Hogan confidence 0.5 / sigma 2 pixels are authored and
+uncalibrated; unknown visibility remains explicit. Interior fragments
+constrain an infinite authored axis, not physical tips or shaft length.
+
+Admission receipt
+`bb36ef2233e39c829b341046d2555fcbc245769dccbaa9489933f09ddb5fadd7`
+and independent verification
+`2fe87e4eca50e6eef52635d87589d1ea0bc5bf8728bf8f4e109b0ef9abab7182`
+verify unchanged source/runtime/capture/fit/model brackets and all twelve
+output hashes. Original decoded-pixel identities remain distinct from
+original PNG-byte hashes. Native definition identity `da181bae...` remains
+distinct from compiled XML artifact `99e3...`. Root independently inspected
+all four inspection plots; separate receipt
+`67f8ace21806ea5c62e0f1da5635c3e3e19baf614e9989c9fa935ee48201d7ac`
+records their alignment and the abstention. No optimizer or saved-library
+write occurred; physical endpoint, timing and scientific acceptance remain
+false.
+
+The first TEMP admission driver failed before output creation because
+Ruff removed imports that were accessed only through `locals()`. Its v1
+bytes and traceback remain preserved. An added failing registry test
+exposed that defect; v2 uses an explicit canonical import registry and
+passed ten protocol tests before the successful actual admission. Desktop
+`Shaft Admission Repeatability Inputs` retains ten checked driver, test,
+failure and source/log copies, with copy receipt
+`d46977208862a6357975edc42d6bfe307dc2ca9b628c8f3211825cfc0d546b1f`.
+These are forensic inputs requiring the original canonical library,
+downloaded media and pinned runtime; never bypass completed-output guards.
+
+The refreshed Desktop index verifies 1,170 retained artifacts, SHA-256
+`a67ab07a0d2e92815f2bc7dbca5b22db91abae526a0e6e6fad26fc9bdce443b5`.
+The prior index and README are preserved under
+`Report/desktop-index-before-v15-v12-shaft-refresh`. This refresh precedes
+the ten-file admission repeatability copy set above; that set has its own
+receipt and awaits the next index refresh. The preserved 60-page report
+also predates actual sparse admission. Opt-in line residuals, canonical
+workspace rebind and persistence, shaft-informed fits and a newly reviewed
+report edition remain distinct subsequent work under #11318 / #11247.
+
+## Optional Shaft Residual Implementation Checkpoint
+
+The tested working-tree Slice B adds a seventh optional fitter argument,
+`additional_images: AdditionalImageResiduals | None`, while retaining the
+existing ImageFitInputs record. A typed immutable source identity declares
+capture/source/camera/clock context; it is not authentication. A small
+residual protocol allows future historical image evidence to reuse the
+canonical MAP estimator, finite pose derivatives and exact Hermite bases.
+
+For shaft fragments, two signed perpendicular pixel distances constrain
+the projected infinite authored line. Authored confidence, visibility and
+pixel sigma affect objective weighting only. Raw perpendicular RMS and
+unoriented angular errors remain separately typed immutable diagnostics;
+they do not change the body Euclidean RMS/count denominator. Abstentions
+retain two zero objective slots and no raw measurements. Degenerate
+projections, malformed or changing residual layouts, nonfinite values,
+invalid sparse times, wrong models and contradictory assessment records
+are rejected.
+
+Separate sparse evaluation times extend the MAP basis without adding
+body observations or geometry/prior rows. A native regression confirms
+unchanged body counts/RMS, poses and geometry times/residuals; independent
+coefficient finite differences also cover a generic three-row cross-frame
+term. The combined regression passed 112 cases, scoped Ruff/format and
+pinned mypy passed, and independent review verified six frozen hashes
+and separately passed 33 residual/protocol cases. Exact logs and hash
+receipt remain in TEMP `shaft-slice-b-*`; this is a tested working-tree
+checkpoint, not a new numerical producer or saved historical fit.
+
+Desktop `Shaft Review Candidates V2` preserves four further original and
+candidate image pairs. Root and independent review provisionally accept
+interior fragments in Tiger frame 150 and Hogan frames 200/550, and
+abstain for Tiger frame 60's broad blur. Separate review receipt
+`a9122a994d40ea62b69bea1eb9df89fe01b07d939e02c6834dbe2ca2fde30494`
+preserves the original draft proposal unchanged. These candidates have
+no canonical binding or training/holdout assignment and are not admitted
+observations. Canonical library rebind, saved recipes/jobs, independent
+holdout evaluation and original-video line overlays remain subsequent
+work. No historical optimizer or library mutation has run in this slice.
+
+## Canonical Shaft Admission and Expanded Report Publication
+
+The reviewed four-argument public `load_shaft_image_residuals` helper loads
+the canonical native fit once, verifies its exact capture/hash/camera,
+checks camera/attachments, reopens reviewed original PNGs and the complete
+source clock, and resolves the shaft axis from exact compiled definition
+bytes. It returns that same native binding and a validated residual bundle.
+Typed caller receipts cannot bypass canonical admission. The combined
+96-case regression, Ruff/format and pinned mypy passed; independent review
+verified four frozen hashes and passed 28 admission/binder tests. SDK-free
+imports and actual single-native-compilation reuse are covered. Worker,
+job and saved-recipe integration remains subsequent work; no historical
+shaft-informed optimizer or library mutation has run.
+
+The expanded 66-page methods report is now published on Desktop. It
+records the actual committed V15/V12 handoff and sparse shaft admission,
+line/axis mathematics prospective at the source605 execution checkpoint,
+authored uncertainty/abstention, exact receipts and the failed-v1 / tested-v2
+recovery procedure. Three installer-disabled MiKTeX passes succeeded;
+all 66 pages were independently visually reviewed. There are no overfull
+boxes or unresolved references; 17 contained table-wrapping warnings were
+reviewed at full size where relevant. Source SHA-256
+`1702e35d4a04b95d0c5de13b04db34325cfef7b8e2ad47f50ea47da45354991c`;
+PDF `f31f1fbd6c0917254b358bae3852e42de8e5d898b1f60d47b3b08c63427f3228`;
+independent review `0c7a85f91018a01d117e0d7b0e41dbec61087f6c52019b780ade7bbca4e27481`;
+separate root review `9de379e2b3a32089bff17fd1086eec9430f0f953240717bfa6093bf02e57446d`.
+
+The refreshed Desktop index verifies 1,216 retained artifacts, SHA-256
+`bd89c17e27de7b7849986f6e00d36debcd0e3c988ab8530b687a0f92ff1a6e9d`.
+Exact prior 60-page source/PDF/review/original-index/README and the later
+1,170-artifact index are preserved under
+`Report/normalized-coverage-v15-60-page-publication`. Earlier 49-page
+publication and all snapshots remain unchanged. The newer residual source
+copy and draft V2 fragment review are separately labelled checkpoints,
+without numerical outcomes. Compilation, visual review and artifact
+availability do not grant anatomical, timing, continuous-motion, impact,
+scientific, canonical manual release or publication qualification.

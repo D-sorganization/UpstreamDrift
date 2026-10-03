@@ -52,8 +52,9 @@ run must be unique, use a supported verified assessment protocol, and agree
 with full-audit fit/model/capture identities and metric values. The canonical
 saved numerical execution stamp must match the full audit and summary producer.
 Unknown protocols fail closed rather than guessing their verification meaning.
-V12 and V14 have explicit adapters because their existing summary field names
-differ; neither adapter contains player-specific logic.
+V12, V14 and V15 have explicit protocol adapters because their summary verification
+fields differ; none contains player-specific logic. V15 retains the same exact
+restart/metric/hash/qualification boundary as V14.
 
 Saved training/held-out/dense image RMS must agree with fresh evidence within
 1e-8 pixels absolute tolerance. Source/observation/training counts and unknown
@@ -135,7 +136,7 @@ it does not turn generic seed geometry into a measured shaft, public player
 model, or accepted historical reconstruction. Additional club evidence requires
 its own source-bound contract and validation before it can change qualification.
 
-## Actual Frozen Provider Export
+## Earlier Frozen V14/V12 Provider Export
 
 The published export implementation was
 `6654881b0788c77620a0afb8a9a6763f3ee1ccb9`. The actual local receipt
@@ -208,3 +209,78 @@ and 61 warnings in 600.28 seconds. The earlier 6,681-pass run is historical
 before the budget refactor. Host Python 3.13.5 remains distinct from the
 repository target 3.12. Keep the exact local receipts and preview separate from
 future consumer commits and publication review.
+
+## Actual Committed V15/V12 Handoff
+
+A separate latest-player cohort was exported from committed, pushed and
+remote-verified provider `605c695259b13cb98a6d6e379e7f7fee51f27443` into
+exclusive Desktop `Affine Local Research V1 V15-V12`. The earlier V14/V12
+bundle and all original receipts remain unchanged. The new cohort contains
+`tiger-normalized-coverage-variant-fit-v15` and
+`hogan-probe-density-variant-fit-v12`; their numerical producers remain
+`6654881b0788c77620a0afb8a9a6763f3ee1ccb9` and
+`b32878a828d3b96bfc796bee368ef60cb692d117`, respectively.
+
+| Artifact                                            |   Bytes | Plain SHA-256                                                      |
+| --------------------------------------------------- | ------: | ------------------------------------------------------------------ |
+| `historical-player-research-v1.json`                |   6,852 | `d68830b14e2704466d4dd1795342dffd96f6f4d9b238b1fccd7f27117a9c10ed` |
+| `historical-player-research-v1.schema.json`         |   8,745 | `a194bf0c8145e417262f460c9bc4ea817b73d491b8468be7dfcd17a88334cb30` |
+| `affine-local-research-v15-v12-export-receipt.json` | 167,922 | `65c4e775a501c0719e06a40aefd6b8be73a59a031298b96cf1e8a453a605debd` |
+
+V15 admission uses explicit `both_runs_verified` and
+`source_runtime_parent_artifact_evidence_brackets_verified` gates. The public
+DTO/schema and original V12/V14 admission remain unchanged. Ten added provider
+regressions and canonical selection tests passed 64 cases; scoped Ruff,
+format checking and pinned mypy passed. Actual public build/export bytes and
+schema equality were independently checked with source/runtime,
+canonical-library, original-source, external-audit, driver/helper/config
+brackets unchanged. No optimization or media redistribution occurred.
+
+The new exclusive Desktop
+`Necromatcher Affine Local Review V15-V12 2026-10-02` used committed consumer
+registration head `8fdebad14db0f62b719942fa5d64f14878b54fd5`, containing
+implementation `b10ecec30ea75d0d447e0b0642378e8578da2eb0`. Exact public source
+fingerprint was
+`4c712713d0aa4dde9afc34876a3b73a0074bbe04515b23215cca9f410cc6af09`.
+The prior working-tree review is retained as earlier evidence, not relabeled
+as a committed-consumer run.
+
+| Consumer Artifact                      |  Bytes | Plain SHA-256                                                      |
+| -------------------------------------- | -----: | ------------------------------------------------------------------ |
+| `local-admission-preview-receipt.json` | 21,969 | `184907af70181af6bd7e94cd5526139fdec828e57fe540c69f87c5c7a80b7d2b` |
+| `cohort-review-wrapper-receipt.json`   | 12,178 | `d94e28062f090f00b45e09bb550d99903926129c9b29d70b7d702ec46057aba6` |
+| `research.qmd`                         |  4,854 | `92ca7c563f3525ccd14dcdff3d0064069f8aa0439d88e8eff601cbd6807a29b0` |
+| `research.html`                        | 26,176 | `d29c0ef91181887880175e272a0ca753ab7fe2c58851c390df540d39111cd095` |
+
+No-write inspection, exclusive local draft installation, idempotent
+reinstallation, exact recalled bytes and deterministic QMD passed. Existing
+Quarto 1.8.26 rendered standalone HTML with `--no-execute`; source, package,
+helper, wrapper, reviewed config and authoritative-registry brackets were
+unchanged. Logical immutable transport URLs map local files only; they claim
+no public artifact availability. Root separately inspected three natural
+1234-by-712 browser views at localhost8880: top, Tiger status and finite
+targets, with no clipping/overlap in those reviewed views. Exact fit IDs,
+metrics, all-five finite passes, rejected acceptance and unknown timing were
+visible. Separate `browser-review-receipt.json` is 1,454 bytes, SHA-256
+`046cb332516253fe0592be36a20ceb148cc7496ec1e299a7dbd1041d9e0f10d6`.
+It binds exact HTML, provider/consumer commits and all three screenshot hashes;
+full-page review and manual acceptance remain false. Canonical execution
+receipts retain their browser-review flags false.
+
+Both records still have unknown physical timing, unqualified camera/anatomy,
+nonconverged optimization, rejected scientific acceptance and unauthorized
+source-footage distribution. Passing all five finite model-conditioned
+research targets grants neither continuous nonlinear certification nor
+historical motion acceptance. The visible generic club-seed/shaft mismatch
+remains a follow-up under #11318. No canonical registry mutation, public
+deployment or manual user acceptance is claimed.
+
+Exclusive Desktop `V15-V12 Handoff Repeatability Inputs` preserves 18 checked
+copies of frozen export/admission drivers, configs, tests, unchanged helpers,
+preflights and reproduction instructions. Its `copy-verification.json` is
+SHA-256 `aadf6b872461bef038f307b68043ee037e5afe59ebaccf895f2c6b874a039756`
+(3,640 bytes). The pending template is preserved alongside the new reviewed
+config; completed outputs cannot be rerun or overwritten. The inputs require
+the external canonical library, pinned audits, original read-only footage and
+existing runtimes; they are forensic repeatability evidence, not a portable
+media distribution.

@@ -148,7 +148,7 @@ def test_curated_imports_are_sdk_free_in_both_orders(first):
         "workspace" if first == "historical_fit" else "motion_matching.historical_fit"
     )
     first = "motion_matching.historical_fit" if first == "historical_fit" else first
-    code = f"import src.shared.python.{first}; import src.shared.python.{other}; import sys; assert not set(('mujoco','pydrake','pinocchio','opensim')) & set(sys.modules)"
+    code = f"import src.shared.python.{first}; import src.shared.python.{other}; from src.shared.python.workspace import load_shaft_image_residuals; import sys; assert callable(load_shaft_image_residuals); assert not set(('mujoco','pydrake','pinocchio','opensim')) & set(sys.modules)"
     root = Path(__file__).parents[3]
     env = {**os.environ, "PYTHONPATH": os.pathsep.join((str(root), str(root / "src")))}
     result = subprocess.run(
@@ -225,3 +225,106 @@ def test_real_public_archive_binding_preserves_original_bytes(tmp_path):
     bound = bind_shaft_axis_evidence(library, value)
     assert bound.reviewed_frame_count == 1 and bound.observed_segment_count == 0
     assert Path(asset.path).read_bytes() == before
+
+
+@pytest.fixture
+def residual_admission_inputs(binding_inputs, monkeypatch):
+    from src.shared.python.workspace.necromatcher_native import NativeFitBinding
+
+    library, value, row, asset = binding_inputs
+    module = importlib.import_module(
+        "src.shared.python.workspace.necromatcher_shaft_evidence"
+    )
+    definition = (
+        Path(__file__).parents[3]
+        / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    ).read_bytes()
+    plant = SimpleNamespace(plant_sha=hashlib.sha256(definition).hexdigest())
+    fit = {
+        "capture_id": value.capture_id,
+        "capture_hash": value.capture_sha256,
+        "frames": [value.frames[0].frame.to_dict()],
+    }
+    fit["evidence"] = {
+        "original_fit": {
+            "camera": {
+                "intrinsics": [[100, 0, 50], [0, 100, 40], [0, 0, 1]],
+                "rotation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+                "translation": [0, 0, 5],
+            },
+            "attachments": {"origin": ["PE", [0, 0, 0]]},
+        }
+    }
+    binding = NativeFitBinding(
+        "fit",
+        "sha256:" + "f" * 64,
+        "model",
+        "sha256:" + "a" * 64,
+        fit,
+        plant,
+        (),
+        definition,
+    )
+    calls = []
+
+    def load(lib, fit_id):
+        calls.append((lib, fit_id))
+        return binding
+
+    monkeypatch.setattr(module, "load_native_fit_binding", load, raising=False)
+    return library, value, row, asset, binding, calls
+
+
+def test_residual_admission_rebinds_once_and_reuses_native(residual_admission_inputs):
+    from src.shared.python.workspace import load_shaft_image_residuals
+
+    library, value, _, _, expected, calls = residual_admission_inputs
+    bound, bundle = load_shaft_image_residuals(library, "fit", value, 0.5)
+    assert bound is expected
+    assert calls == [(library, "fit")]
+    assert (
+        bundle.source_identity.source_clock_sha256
+        == bind_shaft_axis_evidence(library, value).source_clock_sha256
+    )
+    assert bundle.terms[0].axis.native_model_sha == expected.plant.plant_sha
+    assert bundle.terms[0].evidence is value
+    assert bundle.terms[0].unknown_visibility_weight == 0.5
+
+
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "fit_capture",
+        "fit_hash",
+        "camera",
+        "missing_camera",
+        "png",
+        "clock",
+        "definition",
+    ],
+)
+def test_residual_admission_rejects_actual_binding_tamper(
+    residual_admission_inputs, fault
+):
+    from src.shared.python.workspace import load_shaft_image_residuals
+
+    library, value, row, asset, binding, calls = residual_admission_inputs
+    if fault == "fit_capture":
+        binding.fit["capture_id"] = "other"
+    elif fault == "fit_hash":
+        binding.fit["capture_hash"] = "sha256:" + "f" * 64
+    elif fault == "camera":
+        binding.fit["frames"][0]["camera_id"] = "other"
+    elif fault == "missing_camera":
+        del binding.fit["frames"][0]["camera_id"]
+    elif fault == "png":
+        value = replace(
+            value, frames=(replace(value.frames[0], png_sha256="sha256:" + "f" * 64),)
+        )
+    elif fault == "clock":
+        row["frame"]["pts_ticks"] += 1
+    else:
+        binding.plant.plant_sha = "f" * 64
+    with pytest.raises(ValueError):
+        load_shaft_image_residuals(library, "fit", value, 0.5)
+    assert len(calls) == 1

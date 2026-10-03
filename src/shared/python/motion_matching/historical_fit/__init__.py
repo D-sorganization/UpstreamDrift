@@ -13,11 +13,25 @@ from .shaft_observations import (
     SourceBoundShaftFrame,
 )
 from .shaft_geometry import AuthoredShaftAxis, resolve_authored_shaft_axis
+from .shaft_residuals import (
+    AdditionalImageResiduals,
+    ImageResidualTerm,
+    ImageResidualAssessment,
+    ImageSourceIdentity,
+    ShaftAxisAssessment,
+    ShaftAxisResidualTerm,
+)
 from .solver import fit_image_trajectory, initialize_image_trajectory
 from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "AdditionalImageResiduals",
+    "ImageResidualTerm",
+    "ImageResidualAssessment",
+    "ImageSourceIdentity",
+    "ShaftAxisAssessment",
+    "ShaftAxisResidualTerm",
     "AuthoredShaftAxis",
     "resolve_authored_shaft_axis",
     "ShaftAxisEvidence",
