@@ -1,3 +1,25 @@
+# MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: ready-for-review PR for FTO-6 (#11291).
+- Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
+- Completed:
+  - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
+    - `SceneGlyphReceipt(added: int, dropped: int)`: frozen dataclass reporting geoms added and dropped.
+    - `segment_geom_count(glyphs: GlyphSet) -> int`: pure function returning exact geom capacity required for arrows and torque arc capsules/heads.
+    - `add_glyphs_to_scene(scene: mujoco.MjvScene, glyphs: GlyphSet, *, arc_width_m: float = 0.006) -> SceneGlyphReceipt`:
+      - Appends `mjGEOM_ARROW` connectors for `ArrowGlyph` using 2·shaft_radius_m.
+      - Appends `mjGEOM_CAPSULE` connectors along the polyline of `TorqueArcGlyph` plus a final `mjGEOM_ARROW` connector from `head_base_m` to `head_tip_m`.
+      - Detects and adapts both modern `mujoco.mjv_connector` and legacy `mujoco.mjv_makeConnector`.
+      - Enforces strict buffer overflow protection (`scene.ngeom < scene.maxgeom`) and records dropped geoms without exceptions or out-of-bounds writes.
+  - `tests/unit/engines/mujoco/test_force_glyphs.py`:
+    - 5 tests covering 1-arrow geom and endpoint matching within 1e-9, 32-segment arc (32 capsules + 1 arrow), overflow recording with capacity bounds, `segment_geom_count`, and offscreen pixel rendering with `mujoco.Renderer` verifying arrow color detection.
+  - Updated `SPEC.md` §12 changelog table row.
+- Validation:
+  - Ruff check and format clean.
+  - Pytest 5/5 passed.
+- Next steps: Review and merge FTO-6 (#11291); unblocks FTO-10 (MuJoCo GUI), FTO-27 (calibrated MuJoCo render on footage), and FTO-30 (gallery).
+
 # Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11288-glyphs`; commit SELF; PR: ready-for-review PR for FTO-3 (#11288).
