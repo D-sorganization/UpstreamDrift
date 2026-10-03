@@ -212,12 +212,16 @@ class DrakeForceTorqueSource:
         self._unavailable += tuple(labels)
         return []
 
+    def _read_contact_results(self, ctx: Context) -> Any:
+        """Evaluate the contact-results port (may raise ``RuntimeError``)."""
+        return self._plant.get_contact_results_output_port().Eval(ctx)
+
     def _contact_wrenches(self, ctx: Context) -> list[OverlayWrench]:
         plant = self._plant
         world = plant.world_body().index()
         entries: list[tuple[Any, Any, Any, Any]] = []  # (body, point, force, torque)
-        with narrow_catch(RuntimeError, log_message="drake contact results port"):
-            results = plant.get_contact_results_output_port().Eval(ctx)
+        try:
+            results = self._read_contact_results(ctx)
             for i in range(results.num_point_pair_contacts()):
                 info = results.point_pair_contact_info(i)
                 force = np.asarray(info.contact_force())
@@ -241,6 +245,13 @@ class DrakeForceTorqueSource:
                 centroid = surface.centroid()
                 entries.append((body_a.index(), centroid, f, t))
                 entries.append((body_b.index(), centroid, -f, -t))
+        except RuntimeError:
+            logger.warning(
+                "Drake contact results unavailable (SceneGraph query port not "
+                "connected or not evaluable); contact channel omitted"
+            )
+            self._unavailable += ("contact:results",)
+            return []
         out: list[OverlayWrench] = []
         for body, point, force, torque in entries:
             if body == world:

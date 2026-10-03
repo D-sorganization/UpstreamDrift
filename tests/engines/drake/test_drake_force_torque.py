@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pytest
 
-pytest.importorskip("pydrake")
+pytest.importorskip("pydrake.multibody.plant")  # skips if pydrake is mocked
 
 from pydrake.math import RigidTransform  # noqa: E402
 from pydrake.multibody.parsing import Parser  # noqa: E402
@@ -26,7 +26,7 @@ from src.engines.physics_engines.drake.python.drake_force_torque import (  # noq
 )
 from src.shared.python.force_overlay import WrenchKind  # noqa: E402
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.requires_drake]
 
 G = 9.81
 ROD_MASS = 2.0
@@ -232,3 +232,15 @@ def test_engine_wiring_capabilities_and_frames(tmp_path) -> None:
     loads = engine.get_segment_axial_loads()
     assert loads is not None and loads.values_n["rod"] > 0.0
     assert engine.compute_contact_forces().shape == (3,)
+
+
+def test_contact_results_failure_is_reported_unavailable() -> None:
+    class _Failing(DrakeForceTorqueSource):
+        def _read_contact_results(self, ctx):  # type: ignore[no-untyped-def]
+            raise RuntimeError("query port not connected")
+
+    plant, diagram, pctx = _pendulum()
+    source = _Failing(plant, diagram)
+    frame = source.sample(pctx)
+    assert frame.by_kind(WrenchKind.CONTACT) == ()
+    assert "contact:results" in source.unavailable_labels
