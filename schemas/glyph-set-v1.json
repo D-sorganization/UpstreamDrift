@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/D-sorganization/UpstreamDrift/schemas/glyph-set-v1.json",
+  "title": "GlyphSet",
+  "type": "object",
+  "required": ["schema_version", "time_s", "arrows", "torque_arcs", "legend"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "glyph-set-v1"
+    },
+    "time_s": {
+      "type": "number"
+    },
+    "arrows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "kind",
+          "tail_m",
+          "tip_m",
+          "head_base_m",
+          "shaft_radius_m",
+          "head_radius_m",
+          "rgba",
+          "magnitude",
+          "units",
+          "clamped"
+        ],
+        "properties": {
+          "label": { "type": "string" },
+          "kind": { "type": "string" },
+          "tail_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "tip_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "head_base_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "shaft_radius_m": { "type": "number" },
+          "head_radius_m": { "type": "number" },
+          "rgba": {
+            "type": "array",
+            "items": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "magnitude": { "type": "number" },
+          "units": { "type": "string" },
+          "clamped": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "torque_arcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "kind",
+          "center_m",
+          "axis_unit",
+          "radius_m",
+          "polyline_m",
+          "head_tip_m",
+          "head_base_m",
+          "rgba",
+          "magnitude",
+          "units",
+          "clamped"
+        ],
+        "properties": {
+          "label": { "type": "string" },
+          "kind": { "type": "string" },
+          "center_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "axis_unit": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "radius_m": { "type": "number" },
+          "polyline_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "head_tip_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "head_base_m": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "rgba": {
+            "type": "array",
+            "items": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "magnitude": { "type": "number" },
+          "units": { "type": "string" },
+          "clamped": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "legend": {
+      "type": "object",
+      "required": [
+        "force_reference_n",
+        "force_reference_length_m",
+        "torque_reference_nm",
+        "torque_reference_radius_m",
+        "kinds_present",
+        "unavailable_labels",
+        "engine",
+        "source_labels"
+      ],
+      "properties": {
+        "force_reference_n": { "type": ["number", "null"] },
+        "force_reference_length_m": { "type": ["number", "null"] },
+        "torque_reference_nm": { "type": ["number", "null"] },
+        "torque_reference_radius_m": { "type": ["number", "null"] },
+        "kinds_present": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "unavailable_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "engine": { "type": "string" },
+        "source_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
