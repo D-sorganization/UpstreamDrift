@@ -1,16 +1,16 @@
-# OpenCV Video Glyph Renderer — #11285 / #11293 (FTO-8)
+# OpenCV Video Glyph Renderer Delivery — #11285 / #11293 (FTO-8)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 for FTO-8 (#11293).
-- Governing issue: #11293 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`).
-- Objective: [FTO-8] OpenCV video glyph renderer: project force/torque glyphs through calibrated cameras onto frames with haloing, resolution-scaled shafts/heads, and bottom-left legend box.
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (`Closes #11293`, `Refs #11285`)
+- Governing issue: #11293 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-8] OpenCV video glyph renderer with calibrated camera projection, anti-aliased dark halo underlays, inset legend box, and deterministic styling (#11293).
 - Completed:
   - `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
-    - `ImageProjector` protocol with `world_frame` and `project(points_world)`.
-    - `PinholeProjector`: wraps `PinholeCamera`/`CameraCalibration` using `project_reference_to_camera(..., clip_image=False)`.
-    - `HypothesisProjector`: wraps `CameraProjection`, catches behind-camera error per point returning `valid=False` and NaN pixel coordinates.
-    - `VideoGlyphStyle`: resolution-scaled parameters (`line_px = round(2.5 * H / 1080)`, `halo_px = line_px + 2`, `head_px = 5 * line_px`, `font_scale = H / 1080`, `#101010` halo at 0.7 alpha, 30% black legend box).
-    - `VideoGlyphReceipt`: frozen and JSON-serializable execution receipt with `drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`, and 2-tuple unpacking `(frame, receipt)`.
-    - `draw_legend_box`: renders bottom-left legend box with reference values, units, kind swatches, engine/source, and optional caller qualification.
+    - `ImageProjector`: Protocol defining the camera projection contract.
+    - `PinholeProjector`: OpenCV-compatible projector supporting `K`, `dist_coeffs`, `R`, `tvec` or camera frame extrinsics with boundary clipping.
+    - `HypothesisProjector`: Adapts `CameraHypothesis` directly.
+    - `VideoGlyphStyle`: Configuration dataclass for colors, stroke widths, halo scaling, arrow head sizing, font face/scale.
+    - `VideoGlyphReceipt`: Dataclass reporting rendered frame dimensions, arrow/arc counts, legend placement, and clipping stats.
+    - `draw_legend_box`: renders semi-transparent dark background card, color swatches, reference scale texts, and unavailable notes.
     - `draw_glyphs_on_frame`: projects `ArrowGlyph` and `TorqueArcGlyph` polylines and heads, clips against image boundary with `cv2.clipLine`, applies anti-aliased dark halo layer via `cv2.addWeighted`, draws heads with `cv2.fillConvexPoly`, preserves input frame when `inplace=False`.
   - Re-exports in `src/shared/python/force_overlay/renderers/__init__.py`.
   - Synthetic scene verification PNG: `docs/development/assets/fto_8_opencv_glyph_example.png`.
@@ -18,9 +18,16 @@
 - Validation: Ruff check/format clean, strict mypy clean on new modules, file size budget passed.
 - Next steps: Land FTO-8 into main; unblocks video camera projection FTO-24 (#11309) and video overlay pipeline FTO-25 to FTO-29.
 
+# MeshCat Force and Torque Glyph Renderer Delivery — #11285 / #11290
+
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11290-meshcat-glyphs`; commit: 476ae53678; PR: #11337 (merged; `Closes #11290`, `Refs #11285`)
+- Governing issue: #11290 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Completed:
+  - MeshCat glyph renderer with MeshcatSink protocol, cylinder+cone 3D arrows, 32-segment torque arcs, transform caching, disappearing label cleanup, DrakeMeshcatSink adapter, and unit tests.
+
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (open; `Closes #11291`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-6] MuJoCo MjvScene glyph renderer: 3D arrow geoms, torque arc capsules and arrow heads, buffer overflow protection, and offscreen render support (#11291).
 - Completed:
@@ -76,7 +83,7 @@
   - 20 unit tests in `tests/unit/plot_style/test_color_utils.py` and `tests/unit/plot_style/test_colormaps.py`.
 - Next steps: Wave B child issues: FTO-5 (#11290) PySide/PyQtGL overlay renderer and FTO-24 (#11309) video camera projection.
 
-# Glyph Builder and Force Kind Palette — #11288 (FTO-3)
+# Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
 - Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341

@@ -24,11 +24,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** #11342
 - **Branch:** `feat/fto-11293-opencv-glyphs`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `schemas/glyph-set-*.json`, `src/engines/physics_engines/opensim/python/opensim_force_torque.py`, `src/engines/physics_engines/drake/python/drake_force_torque.py`, `src/engines/physics_engines/pinocchio/python/pinocchio_force_torque.py`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `schemas/glyph-set-*.json`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-03 at SELF — FTO-8 (#11293) implemented: OpenCV video glyph renderer `draw_glyphs_on_frame`, `PinholeProjector`, `HypothesisProjector`, `draw_legend_box`, `VideoGlyphReceipt`, `VideoGlyphStyle`, 13 unit tests pass, synthetic verification PNG generated; FTO-6 (#11291) implemented MjvScene glyph renderer; #11349 made `MujocoAxialLoadSource` axis discovery mujoco-3.14 safe (int enum compare); #11344 fixed OpenSim engine set_state/set_control on 4.x; FTO-4 (#11289) merged in main; FTO-3 (#11288) glyph builder, FTO-21 (#11306) parity suite, FTO-16 (#11301) muscle wrenches, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
+- **Last verified:** 2026-10-03 at SELF — FTO-8 (#11293) implemented: OpenCV video glyph renderer `draw_glyphs_on_frame`, `PinholeProjector`, `HypothesisProjector`, `draw_legend_box`, `VideoGlyphReceipt`, `VideoGlyphStyle`, 13 unit tests pass, synthetic verification PNG generated; FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); #11349 made `MujocoAxialLoadSource` axis discovery mujoco-3.14 safe; #11344 fixed OpenSim engine set_state/set_control on 4.x; FTO-4 (#11289) merged in main; FTO-3 (#11288) glyph builder, FTO-21 (#11306) parity suite, FTO-16 (#11301) muscle wrenches, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Land FTO-8 into main; unblock video projection FTO-24 and video overlays FTO-25 to FTO-29.
+- **Next step:** Land FTO-8 into main; unblock video camera projection FTO-24 and video overlays FTO-25 to FTO-29.
 
 ### DL-#11268 · Capture-O Video Companion
 
