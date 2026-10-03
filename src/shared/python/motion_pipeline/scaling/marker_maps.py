@@ -9,6 +9,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from src.shared.python.motion_pipeline.sources.opencap_markers import (
+    OPENCAP_AUGMENTED_MARKERS,
+    OPENCAP_MARKER_SET_NAME,
+)
+
 
 @dataclass
 class MarkerSet:
@@ -506,8 +511,77 @@ VICON_FULL_BODY = MarkerSet(
     ],
 )
 
+
+def _opencap_side(prefix: str, side: str, hjc: str) -> dict[str, str]:
+    """Marker-to-segment entries for one side of the LaiUhlrich2022 set."""
+    return {
+        f"{hjc}_study": "pelvis",
+        f"{prefix}_thigh1_study": f"{side}_thigh",
+        f"{prefix}_thigh2_study": f"{side}_thigh",
+        f"{prefix}_thigh3_study": f"{side}_thigh",
+        f"{prefix}_knee_study": f"{side}_knee",
+        f"{prefix}_mknee_study": f"{side}_knee",
+        f"{prefix}_sh1_study": f"{side}_shank",
+        f"{prefix}_sh2_study": f"{side}_shank",
+        f"{prefix}_sh3_study": f"{side}_shank",
+        f"{prefix}_ankle_study": f"{side}_ankle",
+        f"{prefix}_mankle_study": f"{side}_ankle",
+        f"{prefix}_toe_study": f"{side}_foot",
+        f"{prefix}_5meta_study": f"{side}_foot",
+        f"{prefix}_calc_study": f"{side}_foot",
+        f"{prefix}_shoulder_study": "torso",
+        f"{prefix}_lelbow_study": f"{side}_elbow",
+        f"{prefix}_melbow_study": f"{side}_elbow",
+        f"{prefix}_lwrist_study": f"{side}_wrist",
+        f"{prefix}_mwrist_study": f"{side}_wrist",
+    }
+
+
+def _opencap_side_pairs(prefix: str, hjc: str) -> list[tuple[str, str]]:
+    """Segment-length marker pairs for one side of the LaiUhlrich2022 set."""
+    return [
+        (f"{hjc}_study", f"{prefix}_knee_study"),
+        (f"{prefix}_knee_study", f"{prefix}_ankle_study"),
+        (f"{prefix}_calc_study", f"{prefix}_toe_study"),
+        (f"{prefix}_shoulder_study", f"{prefix}_lelbow_study"),
+        (f"{prefix}_lelbow_study", f"{prefix}_lwrist_study"),
+    ]
+
+
+_OPENCAP_MARKER_TO_SEGMENT: dict[str, str] = {
+    "r.ASIS_study": "pelvis",
+    "L.ASIS_study": "pelvis",
+    "r.PSIS_study": "pelvis",
+    "L.PSIS_study": "pelvis",
+    "C7_study": "neck",
+    **_opencap_side("r", "right", "RHJC"),
+    **_opencap_side("L", "left", "LHJC"),
+}
+assert set(_OPENCAP_MARKER_TO_SEGMENT) == set(OPENCAP_AUGMENTED_MARKERS), (
+    "every OpenCap augmented marker needs exactly one segment"
+)
+
+# OpenCap augmented markers (Stanford LaiUhlrich2022 OpenSim model, #11402).
+# Names are the model's own marker sites, kept verbatim so IK against an
+# OpenCap scaled model needs no renaming (vocabulary: sources.opencap_markers).
+OPENCAP_LAI_UHLRICH_2022 = MarkerSet(
+    name=OPENCAP_MARKER_SET_NAME,
+    markers=list(OPENCAP_AUGMENTED_MARKERS),
+    marker_to_segment=_OPENCAP_MARKER_TO_SEGMENT,
+    segment_pairs=[
+        ("r.ASIS_study", "L.ASIS_study"),
+        ("r.PSIS_study", "L.PSIS_study"),
+        ("r_shoulder_study", "L_shoulder_study"),
+        *_opencap_side_pairs("r", "RHJC"),
+        *_opencap_side_pairs("L", "LHJC"),
+    ],
+)
+
 # Registry of all marker sets
 MARKER_SETS: dict[str, MarkerSet] = {
+    "opencap": OPENCAP_LAI_UHLRICH_2022,
+    "opencap-laiuhlrich2022": OPENCAP_LAI_UHLRICH_2022,
+    "laiuhlrich2022": OPENCAP_LAI_UHLRICH_2022,
     "plug-in-gait": PLUG_IN_GAIT,
     "plugingait": PLUG_IN_GAIT,
     "pig": PLUG_IN_GAIT,

@@ -57,6 +57,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0050](0050-optimizer-backend-registry-and-bioptim.md)                  | Optimizer Backend Registry and the `bioptim` OCP Layer                            | Accepted | 2026-09-08 |
 | [0051](0051-matched-swing-abstraction.md)                               | Unified Motion-Matching Abstraction Stack                                         | Accepted | 2026-09-20 |
 | [0052](0052-force-torque-overlay-contract.md)                           | Engine-Agnostic Force and Torque Overlay Contract                                 | Proposed | 2026-10-02 |
+| [0053](0053-opencap-sidecar-licence-and-privacy-boundary.md)            | OpenCap Sidecar, Licence, and Privacy Boundary                                    | Proposed | 2026-10-03 |
 
 Note: ADR 0013 was amended on 2026-05-31 to document the CC-32
 canonical-core app-shell registry reuse of the embeddable-tool contract.

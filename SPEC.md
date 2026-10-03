@@ -1,4 +1,20 @@
+## Force and Torque Overlay Gallery, Golden Regressions, and User Guide (FTO-30, #11315)
+
+Specifies reproducible cross-engine gallery generation, golden-image visual regression thresholds, authoritative overlay user guide, and parity ledger close-out for the force/torque overlay program (FTO-1–30, #11285):
+- **Reproducible Gallery Generator (`scripts/render_force_overlay_gallery.py`)**:
+  - Headless execution across all supported engines and renderers under `MPLBACKEND=Agg`, `QT_QPA_PLATFORM=offscreen`, and `MUJOCO_GL=egl`.
+  - Generates sharp stills, clip manifests, and interactive `index.html` recording engine versions, model hashes, and `VideoGlyphReceipt` verification metrics (`drawn`, `skipped_behind_camera`, `skipped_out_of_frame`, `unavailable_labels`).
+  - Unsupported or uninstalled engines fail open with structured skip reasons rather than crashing.
+- **Golden Image Visual Regression Suite (`tests/visual/force_overlay/test_golden_force_overlays.py`)**:
+  - Headless 320x240 golden regression fixtures verifying Matplotlib 3D, OpenCV calibrated pinhole projection, and MuJoCo EGL native offscreen renders against committed golden images.
+  - Perceptual tolerance enforced strictly via `MAX_MEAN_ABS_DIFF = 2.0` on $[0, 255]$ ($2/255$ scale); threshold relaxation is prohibited.
+- **Authoritative Force Overlay Documentation & Parity Records**:
+  - User Guide in `docs/user_guide/force_overlay.md` detailing the 7-kind `FORCE_KIND_PALETTE`, axial tension/compression color scales, desktop GUI controls, web Three.js/SVG toggles, video compositing labels, and engine-specific limits.
+  - Cross-linked from `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Feature parity ledger (`src/config/feature_parity.json`) updated to record multi-engine producer wiring, and `force_overlays` tile in `launcher_manifest.json` promoted to `ready`.
+
 ## Pinocchio Native Fitting and Cross-Engine Torque Transfer (MMR-09, #11093)
+
 
 Specifies native Pinocchio fitting, cross-engine torque transfer, candidate promotion gating, and quaternion/spherical joint virtual-work duality:
 - **Candidate Promotion and Gate Isolation Contracts (`src/shared/python/motion_matching/pinocchio_g2_g3.py`)**:
@@ -7726,10 +7742,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11400 | OpenCap session import (#11401–#11403): ADR-0053 sets the sidecar, licence and privacy boundary; augmented markers keep the LaiUhlrich2022 names (`sources/opencap_markers.py`, `OpenCap-LaiUhlrich2022` marker set) with legacy aliases and collision rejection; `load_opencap_session` returns the trial, scaled model, IK kinematics (translations kept in metres via `osim_coordinates`) and subject from `sessionMetadata.yaml`; `OpenSimSTOMOTAdapter` gains `translational_coordinates`. |
+| 2026-10-03 | #11397 | [FTO-30] Force overlay gallery, golden-image visual regression tests, user guide, and parity ledger close-out: render_force_overlay_gallery, golden images in tests/visual/force_overlay, docs/user_guide/force_overlay.md, and feature parity update (#11315). |
+| 2026-10-03 | #11399 | [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host) (#11304). |
+| 2026-10-03 | #11395 | [FTO-29] Video force/torque overlay component in web UI: fix VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, add server-projected 2D SVG force glyph endpoint with DRY shared projector, halo polylines, and controls (#11314). |
 | 2026-10-03 | #11351 | Refine mirrored scapula protraction and measured-back-marker torso matching with preserved dimensions/offsets. Cover all 13 native variants, including fixed-foot FullBody alternating fits. Native R2025b 95 tests, final Human legacy/default parity and 1,313-pose independent replay have natural exit-zero receipts. Deliver 104 neutral 1080P/30-fps both-view marker/clean videos; all 5,252 frames decoded and Desktop/ZIP hashes verified. Head yaw and fixed-foot back fit remain limitations; dynamics is unqualified; source PR is ready for review and depends on #11256/#11172 acceptance. |
 | 2026-10-02 | #11256 | Default new matching to the Human ellipsoid model with keyed starts, calibrated head/foot constraints and reviewed Desktop H.264 IK videos; preserve explicit legacy consumers. Reject leg-IK half-turn false success with shared SO(3) residuals. Add configured upper learning with lifecycle and signal contracts: 19 native contract tests, two tour/owner probes preserving 837 workspace values, and 311 earlier native/legacy checks passed. Add sampled leg feedforward with 16 native seam/regression tests and traced net actuator effort. Controlled contact-guarded startup ramps pass all five fixed one-second hold gates for tour and owner; earlier rejected ramps and stiffness trials remain documented. Update the same LaTeX equations, failed receipts and handoffs; full independent replay, PDF review and protected delivery remain open. Add a native saved-posture startup-transient audit; preserve rejected intermediate outcomes and distinguish the passing supported-posture screen from independent full-swing qualification. Add selective missing-position weights with native RED/GREEN (10 new and 35 existing passing tests), exact native default-output parity and a full owner trial reducing the root transition to 17.350 mm without worsening marker fit; retain unpromoted discontinuity/ROM/visual and full-dynamics gates. Record native SO(3), implementation-ROM, marker-observability, unoffset elbow geometry and pelvis-cluster audits; preserve unchecked anatomical conventions and alternate owner seed/orientation work. Record six native loop-closing owner seed families and reject both alternative fixed-offset address fits; retain calibration/held-out and independent full-dynamics gates. |
 | 2026-10-01 | #11173 | Require LaTeX modeling references; enforce contact-face acceptance, truthful native-run receipts, and capture-specific IK export timing and provenance. |
-
 | 2026-10-03 | #11391 | [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill, Painter's algorithm depth sorting, Lambertian shading, and triangle budget enforcement (#11311). |
 | 2026-10-03 | #11393 | [FTO-27] Calibrated MuJoCo mesh render composited onto source footage: camera mapping from K, R, t via `mujoco_camera_from_pinhole`, enlarged-frame crop for off-centre principal point, lens distortion footage undistortion policy, segmentation alpha compositing with feathering, and force glyph/color shading integration (#11312). |
 | 2026-10-03 | #11377 | [FTO-23] Web Three.js force overlay: render serialized GlyphSet with pure geometry mapping, eliminate lossy client-side round-trip, live torque arcs, ForceLegend overlay, WebSocket streaming with REST polling fallback, and Playwright screenshot evidence (#11308). |
@@ -9676,7 +9695,3 @@ Establishes the independent qualification service for candidate tour baseline pa
 - **BitNet Bounded Safety and Encodability (`BitnetAdapter._build_validated_prompt`)**:
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
-
-
-
-

@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11400 · OpenCap to OpenSim Integration
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11400; children #11401–#11409 (this slice: #11401, #11402, #11403)
+- **PR:** #11410
+- **Branch:** `claude/opencap-upstreamdrift-integration-e7ev4n`
+- **Paths:** `docs/adr/0053-opencap-sidecar-licence-and-privacy-boundary.md`, `src/shared/python/motion_pipeline/sources/opencap_*.py`, `src/shared/python/motion_pipeline/sources/osim_coordinates.py`, `src/shared/python/motion_pipeline/sources/sto_mot_adapter.py`, `src/shared/python/motion_pipeline/scaling/marker_maps.py`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF (branch from `b8e9f884`) — CI `security-scans` (Semgrep `use-defused-xml`) flagged a type-only `xml.etree` import in `osim_coordinates.py`; replaced with a structural `Element` Protocol so the module never imports `xml`. 249 tests pass in `tests/unit/motion_pipeline/sources/` + marker maps + `test_opencap_boundary.py`; ruff, mypy and bandit clean; real `LaiUhlrich2022.osim` still classifies 35 coordinates with only `pelvis_tx/ty/tz` translational.
+- **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in.
+- **Next step:** Merge the #11401–#11403 PR, then start #11409 (import action in PyQt6 and React/Tauri), which depends only on #11403.
+
 ### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
 
 - **State:** in_review
@@ -45,14 +58,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** antigravity
-- **PR:** #11391
-- **Branch:** `feat/fto-26-model-footage-11311`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/motion_capture/reference/**`, `src/motion_capture/reconstruct/model/**`, `src/tools/capture_rig/**`, `src/shared/python/force_overlay/**`, `tests/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-26 (#11311, PR #11391) implemented engine-agnostic projected segment meshes with tension/compression fill: `draw_segment_meshes_on_frame` with Painter's algorithm depth sorting, back-face culling, Lambertian shading, triangle budget capping, and `ForceColorScale` fill; wired into `ComparisonLayer.draw_model_volumes` and `draw_segment_volumes`; verified across all unit tests and generated visual demo still `docs/development/fto_26_demo_still.png`; FTO-27 (#11312, PR #11393) merged to main; FTO-25 (#11310, PR #11390) merged to main; FTO-12 (#11297) Drake GUI draws real force/torque glyphs and feeds segment shading (PR #11385 landed in main); FTO-24 (#11309) merged to main (#11378); FTO-10 (#11295) routed MuJoCo GUI force/torque overlays through shared native and MeshCat glyph renderers (PR #11384); MuJoCo provider reaction labels now use joint name and parity MJCF carries a rod (PR #11381); #11346 added per-engine force-overlay parity lanes; FTO-7 (#11292) merged to main (#11348); FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); FTO-4, FTO-3, FTO-21, FTO-16, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.
+- **PR:** #11397
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for FTO-26 (#11311); proceed with FTO-29 (#11314) and FTO-30 (#11315).
+- **Next step:** Review and merge PR #11397; owner closes epic #11285.
 
 ### DL-#11268 · Capture-O Video Companion
 

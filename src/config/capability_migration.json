@@ -2001,6 +2001,18 @@
       "alias_target": null,
       "evidence": "src/tools/necromatcher/gui.py",
       "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "tools.video_analyzer": {
+      "id": "tools.video_analyzer",
+      "name": "Video Analyzer (pose tracking and force/torque overlay)",
+      "entity_kind": "feature",
+      "primary_workspace": "capture",
+      "secondary_links": ["analysis"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/video_analyzer/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     }
   },
   "fixtures": {

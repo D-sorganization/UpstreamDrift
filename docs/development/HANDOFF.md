@@ -1,3 +1,92 @@
+# Force Overlay Gallery, Golden Regressions, and User Guide — #11285 / #11315 (FTO-30)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-docs-11315`; commit SELF; PR: #11397 (`Closes #11315`, `Refs #11285`)
+- Governing issue: #11315 (parent epic #11285, design authority ADR-0052, `force_torque_overlay_epic.md`)
+- Objective: [FTO-30] Gallery generator script, golden image visual regression suite, authoritative user guide, and parity ledger close-out for the force/torque overlay program.
+- Completed:
+  - `scripts/render_force_overlay_gallery.py`:
+    - Reproducible headless gallery generator across all engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape) and renderers.
+    - Generates stills, manifest.json with model hashes, receipts, and interactive index.html.
+  - `tests/visual/force_overlay/test_golden_force_overlays.py`:
+    - Golden-image visual regression tests for Matplotlib 3D, OpenCV calibrated projection, and MuJoCo offscreen render.
+    - Strict perceptual tolerance threshold `MAX_MEAN_ABS_DIFF = 2.0` on [0, 255] (2/255 scale).
+  - `tests/scripts/test_render_force_overlay_gallery.py`:
+    - Headless gallery generation smoke tests verifying manifest schema and index output.
+  - Documentation and Ledgers:
+    - User Guide created at `docs/user_guide/force_overlay.md` detailing the 7-kind palette, axial tension/compression coloring, desktop GUI controls, web Three.js/SVG controls, and video compositing labels.
+    - Cross-links added in `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+    - Corrected status and evidence in `docs/issues/EPIC_WEB_UI_PARITY.md`, `docs/development/FEATURE_TRACKING.md`, `docs/development/segment_force_color_epic.md`.
+    - Updated `src/config/feature_parity.json` and regenerated `docs/development/feature_parity_matrix.md`.
+    - Promoted `force_overlays` tile in `src/config/launcher_manifest.json` from `experimental` to `ready`, updated capability atlas and agent context.
+- Validation:
+  - `pytest tests/visual/force_overlay/`: 3 passed.
+  - `pytest tests/scripts/test_render_force_overlay_gallery.py`: 1 passed.
+  - `pytest tests/config/feature_parity/`: 39 passed.
+  - `pytest tests/config/launcher_manifest/`: 170 passed.
+  - `pytest tests/unit/repo_hygiene/test_spec_changelog_integrity.py`: 4 passed.
+  - Pre-commit checks (architecture budget, file size budget, ruff, black, mypy): all passing.
+- Next steps: Merge PR #11397; owner closes epic #11285.
+
+---
+
+# Simscape Simulation Output: Carry Logged Force Channels and Joint Rotations Through SimscapeOutput (R2025b Host) — #11285 / #11304 (FTO-19)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11304-simscape-output-forces`; commit SELF; PR: #11399 (`Closes #11304`, `Refs #11285`)
+- Governing issue: #11304 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host).
+- Completed:
+  - Audited canonical force channels against Simscape Multibody models in MATLAB R2025b Update 5 (`GolfSwing3D_Kinetic.slx`, `GS3DX_Fit.slx`, `GS3DX_Baseline.slx`):
+    - `GolfSwing3D_Kinetic.slx` (SHA256: `daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9`): 237 of 239 canonical force channels present in `CombinedSignalBus`. Exactly 2 channels (`LFLogs_ActuatorTorqueZ` and `RFLogs_ActuatorTorqueZ`) are logged without the Z suffix in this 1-DOF joint model (`LFLogs_ActuatorTorque` and `RFLogs_ActuatorTorque`). Model `.slx` preserved untouched per invariant; missing channels gracefully handled by `missing: ('joint_actuator:LF:torque', 'joint_actuator:RF:torque')`.
+    - `GS3DX_Fit.slx` and `GS3DX_Baseline.slx`: verified presence and SHA256 hashes (`428b8ff3...` and `8935d01e...`); both depend on private C3D dataset (`data/C3D_TA_Driver.c3d`, #11165) and skip cleanly when capture files are unmounted.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/private/extract_sim_out.m`:
+    - Added `local_extract_forces(simOut, time)` and `local_force_channel_names()` to extract force/torque and 3x3 rotation transforms from `CombinedSignalBus`, `logsout`, or `simlog`.
+    - Reused `extractSignalsFromSimOut.m` (and recursive bus extractors) to flatten 3x3 rotation matrices into `_I11.._I33` and extract bus signals.
+    - Resamples/interpolates extracted channels onto the master simulation `time` grid.
+    - Postconditions verified: all `.forces` columns have $N$ rows and finite values.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_simulate_with_coefficients.m`:
+    - Added `test_output_struct_carries_optional_forces_when_logged` (verified passing in MATLAB R2025b Update 5).
+    - Fixed `TestTags` syntax from `{"RequiresSimulink"}` to `{'RequiresSimulink'}`.
+  - `tests/fixtures/simscape/synthetic_simscape_force_output.json`:
+    - Added compact 5-timestep fixture containing all 237 available canonical channels with model SHA256 and R2025b provenance metadata.
+  - `tests/engines/simscape/test_output_force_columns.py`:
+    - Added `test_trimmed_simscape_force_fixture_carries_channels` asserting all 237 channels are carried and `to_force_series()` yields 5 frames with 26 wrenches each and missing `('joint_actuator:LF:torque', 'joint_actuator:RF:torque')`.
+- Validation:
+  - pytest: 16 passed in `tests/engines/simscape/test_output_force_columns.py`.
+  - MATLAB R2025b: `test_simulate_with_coefficients/test_output_struct_carries_optional_forces_when_logged` passed (1 Passed, 0 Failed).
+  - Pre-commit: Ruff, Black, Mypy, file size budget, and error handling ratchet passed.
+- Next steps: Merge PR; proceed with FTO-28 / remaining FTO issues.
+
+---
+
+# Web Video Force/Torque Overlay Component — #11314 (FTO-29)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-29-web-video-overlay-11314`; commit SELF; PR: #11395 (`Closes #11314`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11314 (parent epic #11285, unblocks FTO-30)
+- Objective: [FTO-29] Video force/torque overlay component in web UI (SVG projection aligned with video frame).
+- Completed:
+  1. `src/shared/python/force_overlay/projection.py`:
+     - Extracted renderer-neutral 2D projection math (`project_glyphs`) from OpenCV renderer into shared module (DRY).
+     - Provides pure-Python 2D line clipping (Cohen-Sutherland) and arrowhead polygon projection.
+  2. `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
+     - Refactored to consume shared `project_glyphs`, keeping OpenCV drawing tests 100% green.
+  3. `src/api/routes/video_overlays.py`:
+     - Implemented `GET /api/overlays/video/{source_id}/frames/{n}/glyphs` with camera calibration and registration handling, returning 2D projected glyphs with sub-pixel precision.
+  4. `ui/src/components/video/VideoForceOverlay.tsx`:
+     - Renders crisp SVG force/torque overlay (`vector-effect="non-scaling-stroke"`).
+     - Renders halo `<polyline>` / `<polygon>` before stroke `<polyline>` / `<polygon>`.
+  5. `ui/src/pages/VideoAnalyzer.tsx`:
+     - Dynamically sizes SVG viewBox from `video.videoWidth` and `videoHeight` on `loadedmetadata` (eliminating hardcoded 640x480).
+     - Syncs frame index from `video.currentTime` via `requestVideoFrameCallback` (fallback to `timeupdate`) supporting arbitrary frame rates (e.g. 25 fps).
+     - Added force overlay toggles, scale controls, and mounted `VideoForceOverlay`.
+  6. Evidence & Parity:
+     - Captured Playwright screenshot `docs/development/evidence/video_force_overlay_evidence.png` and generated standalone HTML `docs/development/evidence/video_force_overlay_evidence.html`.
+     - Updated `src/config/feature_parity.json` with `tools.video_analyzer`, classified in `capability_migration.json`, and regenerated `docs/development/feature_parity_matrix.md`.
+- Validation:
+  - All Python unit tests passed (5 in `tests/unit/api/test_video_glyph_route.py`, 13 in `tests/unit/force_overlay/test_opencv_glyphs.py`, 60 in `tests/config/` and `tests/companion/`).
+  - All Vitest and UI checks passed (`npm --prefix ui run type-check`, `npm --prefix ui run lint`, `npm --prefix ui run test:run`).
+  - All feature parity tests passed (39 tests in `tests/config/feature_parity/`).
+- Next steps: Merge PR; proceed with FTO-30.
+
 # Scapula and Quiet Torso Matching Handoff - #11329
 
 - Branch: `feat/simscape-scapula-protraction-20261002`; commit SELF; PR #11351; development entry `DL-#11329`.
@@ -41,7 +130,7 @@
   - `tests/tools/capture_rig/test_reference_volumes.py` (5 passed).
   - `tests/tools/capture_rig/test_reference_force_layer.py` (3 passed).
   - All pre-commit linters, formatting, and CI budgets passed.
-- Next steps: Merge PR; proceed with FTO-29 / FTO-30.
+- Next steps: Merged in main (PR #11391).
 
 ---
 
@@ -141,11 +230,13 @@
 
 # Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: #11385 (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
 - Completed: `drake_force_overlay.py` (headless `ForceOverlayController`, `kinds_for_toggles`, `drake_color_bindings`, `illustration_base_rgba`); `VisualizationMixin._update_force_glyphs` replaces `_draw_torque_vectors` and `_draw_gravity_force_vectors`; new "Show Gravity" checkbox; `DrakeSimApp._rebuild_force_overlay` binds `segment_force_colors` to MeshCat leaf paths (`visualizer/<frame>/<geometry>/<object>`, verified against a real Drake plant) and the controller is the colour-menu target so shading is fed only while enabled; `DrakeForceTorqueSource.body_labels` public accessor; legend (with unavailable channels) goes to the status bar; force_colors.md matrix and feature_parity.json updated.
 - Decisions: the GUI has no `DrakePhysicsEngine`, so it samples `DrakeForceTorqueSource` directly (the engine frame never includes gravity); `_draw_accel_vectors` still draws induced/counterfactual lines with `SetLineSegments` (not forces, left alone per issue).
 - Validation: `pytest -o addopts="" tests/unit/engines/drake/test_drake_gui_force_overlay.py` (14 pass, incl. real-Drake smoke). The Qt window itself was not built (PyQt6 absent here); no browser screenshot or StaticHtml artifact attached.
 - Next steps: build the GUI under a PyQt6 offscreen run and attach a StaticHtml export of the golf model; FTO-30 builds on this.
+
+---
 
 # Force/Torque Series Video Alignment and Trace Import — #11285 / #11309 (FTO-24)
 
