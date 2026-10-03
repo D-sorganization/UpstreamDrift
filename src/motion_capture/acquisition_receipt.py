@@ -3,6 +3,7 @@
 from src.shared.python.motion_capture.acquisition_receipt import (
     AcquisitionEntry,
     AcquisitionError,
+    AcquisitionOptions,
     AcquisitionReceipt,
     EmptyDirectoryError,
     FFProbeError,
@@ -16,6 +17,7 @@ from src.shared.python.motion_capture.acquisition_receipt import (
 __all__ = [
     "AcquisitionEntry",
     "AcquisitionError",
+    "AcquisitionOptions",
     "AcquisitionReceipt",
     "EmptyDirectoryError",
     "FFProbeError",

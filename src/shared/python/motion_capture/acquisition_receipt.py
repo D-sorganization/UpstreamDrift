@@ -22,6 +22,7 @@ from typing import Any, Callable
 __all__ = [
     "AcquisitionEntry",
     "AcquisitionError",
+    "AcquisitionOptions",
     "AcquisitionReceipt",
     "EmptyDirectoryError",
     "FFProbeError",
@@ -247,6 +248,18 @@ class AcquisitionEntry:
             ),
             excluded_by_owner=bool(data.get("excluded_by_owner", False)),
         )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class AcquisitionOptions:
+    """Configurable options for acquisition receipt generation."""
+
+    source_url: str | None = None
+    download_method: str = "album-download-all"
+    downloaded_at: str | None = None
+    lineage_map: Mapping[str, str] | None = None
+    owner_recollections: Mapping[str, str | None] | None = None
+    excluded_by_owner: Container[str] | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -515,12 +528,7 @@ def _check_existing_hashes(
 def _build_entries(
     files: list[Path],
     existing_receipt: AcquisitionReceipt | None,
-    source_url: str | None,
-    download_method: str,
-    downloaded_at: str | None,
-    lineage_map: Mapping[str, str] | None,
-    owner_recollections: Mapping[str, str | None] | None,
-    excluded_by_owner: Container[str] | None,
+    options: AcquisitionOptions,
     ffprobe_dir: Path | None,
     probe_fn: Callable[[Path], dict[str, Any]] | None,
 ) -> list[AcquisitionEntry]:
@@ -530,7 +538,7 @@ def _build_entries(
         if existing_receipt
         else {}
     )
-    now_iso = downloaded_at or datetime.now(timezone.utc).isoformat()
+    now_iso = options.downloaded_at or datetime.now(timezone.utc).isoformat()
     entries: list[AcquisitionEntry] = []
 
     for idx, f in enumerate(files, start=1):
@@ -541,38 +549,48 @@ def _build_entries(
         creation_time = _extract_creation_time(probe_data)
 
         prior = existing_map.get(f.name)
-        item_dl_at = prior.downloaded_at if prior and not downloaded_at else now_iso
+        item_dl_at = (
+            prior.downloaded_at if prior and not options.downloaded_at else now_iso
+        )
         item_method = (
             prior.download_method
-            if prior and download_method == "album-download-all"
-            else download_method
+            if prior and options.download_method == "album-download-all"
+            else options.download_method
         )
         item_source_url = (
-            source_url
-            if source_url is not None
+            options.source_url
+            if options.source_url is not None
             else (prior.source_url if prior else None)
         )
 
-        if lineage_map and (f.name in lineage_map or cov_id in lineage_map):
-            lineage = lineage_map.get(f.name, lineage_map.get(cov_id, "original"))
+        if options.lineage_map and (
+            f.name in options.lineage_map or cov_id in options.lineage_map
+        ):
+            lineage = options.lineage_map.get(
+                f.name, options.lineage_map.get(cov_id, "original")
+            )
         elif prior:
             lineage = prior.lineage
         else:
             lineage = "original"
 
-        if owner_recollections and (
-            f.name in owner_recollections or cov_id in owner_recollections
+        if options.owner_recollections and (
+            f.name in options.owner_recollections
+            or cov_id in options.owner_recollections
         ):
-            recollection = owner_recollections.get(
-                f.name, owner_recollections.get(cov_id)
+            recollection = options.owner_recollections.get(
+                f.name, options.owner_recollections.get(cov_id)
             )
         elif prior:
             recollection = prior.owner_recollection
         else:
             recollection = None
 
-        if excluded_by_owner is not None:
-            excluded = f.name in excluded_by_owner or cov_id in excluded_by_owner
+        if options.excluded_by_owner is not None:
+            excluded = (
+                f.name in options.excluded_by_owner
+                or cov_id in options.excluded_by_owner
+            )
         elif prior:
             excluded = prior.excluded_by_owner
         else:
@@ -601,15 +619,11 @@ def build_acquisition_receipt(
     directory: Path | str,
     *,
     output_path: Path | str | None = None,
-    source_url: str | None = None,
-    download_method: str = "album-download-all",
-    downloaded_at: str | None = None,
-    lineage_map: Mapping[str, str] | None = None,
-    owner_recollections: Mapping[str, str | None] | None = None,
-    excluded_by_owner: Container[str] | None = None,
+    options: AcquisitionOptions | None = None,
     ffprobe_dir: Path | str | None = None,
     probe_fn: Callable[[Path], dict[str, Any]] | None = None,
     verify_existing: bool = True,
+    **kwargs: Any,
 ) -> AcquisitionReceipt:
     """Build or update an acquisition receipt for video assets in directory."""
     dir_path = Path(directory)
@@ -631,22 +645,26 @@ def build_acquisition_receipt(
     if existing_receipt:
         _check_existing_hashes(existing_receipt, files)
 
+    opts = options or AcquisitionOptions(
+        source_url=kwargs.get("source_url"),
+        download_method=kwargs.get("download_method", "album-download-all"),
+        downloaded_at=kwargs.get("downloaded_at"),
+        lineage_map=kwargs.get("lineage_map"),
+        owner_recollections=kwargs.get("owner_recollections"),
+        excluded_by_owner=kwargs.get("excluded_by_owner"),
+    )
+
     entries = _build_entries(
         files=files,
         existing_receipt=existing_receipt,
-        source_url=source_url,
-        download_method=download_method,
-        downloaded_at=downloaded_at,
-        lineage_map=lineage_map,
-        owner_recollections=owner_recollections,
-        excluded_by_owner=excluded_by_owner,
+        options=opts,
         ffprobe_dir=Path(ffprobe_dir) if ffprobe_dir else None,
         probe_fn=probe_fn,
     )
 
     created_at = (
         existing_receipt.created_at
-        if existing_receipt and not downloaded_at
+        if existing_receipt and not opts.downloaded_at
         else datetime.now(timezone.utc).isoformat()
     )
     receipt = AcquisitionReceipt(
