@@ -9681,3 +9681,5 @@ Establishes the independent qualification service for candidate tour baseline pa
 Accepted-main records and ledger metadata are reconciled while preserving all 133 receipt rows. Club endpoint lookup is shared between angular-speed and wrist metrics with identical fallback behavior. Focused validation: 190 passed, 15 private-workbook skips; Ruff and the full DRY gate pass. Protected CI and physical matching acceptance remain separate.
 
 The 14 new per-capture leaderboard contracts are explicitly unit tests; selected execution and the full suite-marker ratchet pass without changing baselines.
+
+Shared-tools divergence inventory is regenerated for all five new swing_comparison source paths; ten inventory checks and current-tree freshness pass.
