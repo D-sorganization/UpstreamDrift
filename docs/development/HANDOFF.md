@@ -31,6 +31,35 @@
 
 # Past Handoff — Consolidate Bolt Micro-Optimisation PRs (#11112, #11128, #11129)
 
+# Simscape Simulation Output: Carry Logged Force Channels and Joint Rotations Through SimscapeOutput (R2025b Host) — #11285 / #11304 (FTO-19)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11304-simscape-output-forces`; commit SELF; PR: #11399 (`Closes #11304`, `Refs #11285`)
+- Governing issue: #11304 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-19] Simscape simulation output: carry logged force channels and joint rotations through SimscapeOutput (R2025b host).
+- Completed:
+  - Audited canonical force channels against Simscape Multibody models in MATLAB R2025b Update 5 (`GolfSwing3D_Kinetic.slx`, `GS3DX_Fit.slx`, `GS3DX_Baseline.slx`):
+    - `GolfSwing3D_Kinetic.slx` (SHA256: `daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9`): 237 of 239 canonical force channels present in `CombinedSignalBus`. Exactly 2 channels (`LFLogs_ActuatorTorqueZ` and `RFLogs_ActuatorTorqueZ`) are logged without the Z suffix in this 1-DOF joint model (`LFLogs_ActuatorTorque` and `RFLogs_ActuatorTorque`). Model `.slx` preserved untouched per invariant; missing channels gracefully handled by `missing: ('joint_actuator:LF:torque', 'joint_actuator:RF:torque')`.
+    - `GS3DX_Fit.slx` and `GS3DX_Baseline.slx`: verified presence and SHA256 hashes (`428b8ff3...` and `8935d01e...`); both depend on private C3D dataset (`data/C3D_TA_Driver.c3d`, #11165) and skip cleanly when capture files are unmounted.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/private/extract_sim_out.m`:
+    - Added `local_extract_forces(simOut, time)` and `local_force_channel_names()` to extract force/torque and 3x3 rotation transforms from `CombinedSignalBus`, `logsout`, or `simlog`.
+    - Reused `extractSignalsFromSimOut.m` (and recursive bus extractors) to flatten 3x3 rotation matrices into `_I11.._I33` and extract bus signals.
+    - Resamples/interpolates extracted channels onto the master simulation `time` grid.
+    - Postconditions verified: all `.forces` columns have $N$ rows and finite values.
+  - `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/tests/test_simulate_with_coefficients.m`:
+    - Added `test_output_struct_carries_optional_forces_when_logged` (verified passing in MATLAB R2025b Update 5).
+    - Fixed `TestTags` syntax from `{"RequiresSimulink"}` to `{'RequiresSimulink'}`.
+  - `tests/fixtures/simscape/synthetic_simscape_force_output.json`:
+    - Added compact 5-timestep fixture containing all 237 available canonical channels with model SHA256 and R2025b provenance metadata.
+  - `tests/engines/simscape/test_output_force_columns.py`:
+    - Added `test_trimmed_simscape_force_fixture_carries_channels` asserting all 237 channels are carried and `to_force_series()` yields 5 frames with 26 wrenches each and missing `('joint_actuator:LF:torque', 'joint_actuator:RF:torque')`.
+- Validation:
+  - pytest: 16 passed in `tests/engines/simscape/test_output_force_columns.py`.
+  - MATLAB R2025b: `test_simulate_with_coefficients/test_output_struct_carries_optional_forces_when_logged` passed (1 Passed, 0 Failed).
+  - Pre-commit: Ruff, Black, Mypy, file size budget, and error handling ratchet passed.
+- Next steps: Merge PR; proceed with FTO-28 / remaining FTO issues.
+
+---
+
 # Web Video Force/Torque Overlay Component — #11314 (FTO-29)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-29-web-video-overlay-11314`; commit SELF; PR: #11395 (`Closes #11314`, `Refs #11285`); DL entry `DL-#11285`

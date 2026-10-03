@@ -6,7 +6,9 @@ All data are synthetic fixtures built here; no MATLAB is involved.
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -35,7 +37,7 @@ def synthetic_force_columns() -> dict[str, np.ndarray]:
     return cols
 
 
-def _base_kwargs() -> dict[str, np.ndarray]:
+def _base_kwargs() -> dict[str, Any]:
     return {
         "time": np.linspace(0.0, 0.02, N),
         "q": np.zeros((N, 2)),
@@ -156,3 +158,49 @@ def test_csv_loader_keeps_csv_source(tmp_path: Path) -> None:
 def test_logsout_non_mapping_forces_wrapped(bad: object) -> None:
     with pytest.raises(SimscapeSimulationError, match="forces"):
         logsout_to_simscape_output({**_base_kwargs(), "forces": bad})
+
+
+def test_trimmed_simscape_force_fixture_carries_channels() -> None:
+    fixture_path = (
+        Path(__file__).resolve().parents[2]
+        / "fixtures"
+        / "simscape"
+        / "synthetic_simscape_force_output.json"
+    )
+    assert fixture_path.exists()
+    with fixture_path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["release"] == "2025b"
+    assert (
+        data["model_sha256"]
+        == "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9"
+    )
+    assert data["channel_count"] == 237
+
+    t_rows = len(data["time"])
+    assert t_rows == 5
+
+    base = {
+        "time": np.array(data["time"], dtype=np.float64),
+        "q": np.zeros((t_rows, 2)),
+        "qd": np.zeros((t_rows, 2)),
+        "qdd": np.zeros((t_rows, 2)),
+        "tau": np.zeros((t_rows, 2)),
+        "omega": np.zeros((t_rows, 2)),
+        "r_butt": np.zeros((t_rows, 3)),
+        "r_clubhead": np.zeros((t_rows, 3)),
+        "q_club": np.tile([1.0, 0.0, 0.0, 0.0], (t_rows, 1)),
+        "v_clubhead": np.zeros((t_rows, 3)),
+        "forces": {k: np.array(v, dtype=np.float64) for k, v in data["forces"].items()},
+    }
+
+    out = logsout_to_simscape_output(base)
+    assert out.force_columns is not None
+    assert len(out.force_columns) == 237
+
+    series, missing = out.to_force_series()
+    assert len(series.frames) == t_rows
+    # 26 wrenches per frame (all joints and external wrenches except the 2 with missing actuators)
+    assert len(series.frames[0].wrenches) == 26
+    assert missing == ("joint_actuator:LF:torque", "joint_actuator:RF:torque")
