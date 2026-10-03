@@ -1,0 +1,43 @@
+{
+  "qualification": "NATIVE_R2025B_SOFTWARE_CONTRACT_ONLY",
+  "model_saved": false,
+  "red": {
+    "passed": 1,
+    "failed": 5,
+    "incomplete": 0,
+    "native_receipt": {
+      "actual_process_exit_code": 1,
+      "final_exit_code": 1,
+      "termination_reason": "natural_exit",
+      "done_marker": false,
+      "script_status": "failed",
+      "command_identity": "run('leg_contract_red.m')",
+      "owned_pids": [64984],
+      "timestamp": "2026-10-02T14:46:23.416888+00:00"
+    }
+  },
+  "green": {
+    "passed": 6,
+    "failed": 0,
+    "incomplete": 0,
+    "native_receipt": {
+      "actual_process_exit_code": 0,
+      "final_exit_code": 0,
+      "termination_reason": "natural_exit",
+      "done_marker": true,
+      "script_status": "success",
+      "command_identity": "run('leg_contract_green.m')",
+      "owned_pids": [80996],
+      "timestamp": "2026-10-02T14:48:21.692375+00:00"
+    }
+  },
+  "defect": "Skew orientation residual vanishes at 180 degrees and returned false success",
+  "repair": "Shared normalized SO3 chordal residual and 12x6 finite-difference Jacobian",
+  "translation_acceptance_m": 1e-9,
+  "orientation_acceptance_rad": 1e-9,
+  "orientation_bound": "chordal_norm < 2*sin(1e-9/2)",
+  "combined_residual_units": "metres and dimensionless chordal components",
+  "source_unchanged_apis": ["gs3dx_orientation_residual", "gs3dx_leg_fk"],
+  "selected_whole_body_videos_refitted": false,
+  "contact_support_qualified": false
+}

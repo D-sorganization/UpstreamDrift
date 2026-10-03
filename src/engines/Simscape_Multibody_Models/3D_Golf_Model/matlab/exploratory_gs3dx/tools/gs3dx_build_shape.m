@@ -80,51 +80,52 @@ function segs = local_segments(mdl)
         'upper_arm', in * local_eval(mdl, 'FitUpperArmLength'), ...
         'forearm', in * local_eval(mdl, 'FitLowerArmLength'), ...
         'hand', a.length.hand, 'head', a.length.head);
+
+    % Read actual evaluated block masses to preserve exact model behavior
+    m_actual = struct();
+    for side = ["L", "R"]
+        m_actual.("thigh_" + side) = local_eval(mdl, get_param([mdl '/Lower Body/' char(side) ' Thigh'], 'Mass'));
+        m_actual.("shank_" + side) = local_eval(mdl, get_param([mdl '/Lower Body/' char(side) ' Shank'], 'Mass'));
+        m_actual.("upper_arm_" + side) = local_eval(mdl, get_param([mdl '/' char(side) 'UpperArm'], 'Mass'));
+        arm = "Left"; if side == "R", arm = "Right"; end
+        m_actual.("forearm_" + side) = 2 * local_eval(mdl, get_param([mdl '/' char(arm) ' Forearm/' char(side) 'UpperForearm'], 'Mass'));
+        m_actual.("hand_" + side) = local_eval(mdl, get_param([mdl '/Grip/' char(side) 'Hand'], 'Mass'));
+    end
+    m_actual.head = local_eval(mdl, get_param([mdl '/Hips and Torso Inputs/Head'], 'Mass'));
+
+    inert = gs3dx_custom_segment_inertias(m_actual, L, a);
     segs = struct('solid', {}, 'mass', {}, 'com', {}, 'moments', {}, 'radii', {}, 'ellipsoid', {});
-    for side = ["L" "R"]
-        for key = ["thigh" "shank"]
+    for side = ["L", "R"]
+        for key = ["thigh", "shank"]
             solid = "Lower Body/" + side + " " + upper(extractBefore(key, 2)) + extractAfter(key, 1);
-            segs(end + 1) = local_limb(mdl, solid, a, key, L.(key), 1, true, ...
-                local_limb_radii(mdl, solid, L.(key))); %#ok<AGROW>
+            sk = key + "_" + side;
+            segs(end + 1) = struct('solid', solid, 'mass', inert.(sk).mass, ...
+                'com', inert.(sk).com, 'moments', inert.(sk).moments, ...
+                'radii', local_limb_radii(mdl, solid, L.(key)), 'ellipsoid', true); %#ok<AGROW>
         end
-        segs(end + 1) = local_limb(mdl, side + "UpperArm", a, "upper_arm", L.upper_arm, 1, false, []); %#ok<AGROW>
-        arm = "Left";
-        if side == "R", arm = "Right"; end
-        segs = [segs local_forearm(mdl, arm + " Forearm/" + side, a, L.forearm)]; %#ok<AGROW>
+        solid = side + "UpperArm";
+        sk = "upper_arm_" + side;
+        segs(end + 1) = struct('solid', solid, 'mass', inert.(sk).mass, ...
+            'com', inert.(sk).com, 'moments', inert.(sk).moments, ...
+            'radii', [], 'ellipsoid', false); %#ok<AGROW>
+        arm = "Left"; if side == "R", arm = "Right"; end
+        fk = "forearm_" + side;
+        segs(end + 1) = struct('solid', arm + " Forearm/" + side + "UpperForearm", ...
+            'mass', inert.(fk).upper.mass, 'com', inert.(fk).upper.com, ...
+            'moments', inert.(fk).upper.moments, 'radii', [], 'ellipsoid', false); %#ok<AGROW>
+        segs(end + 1) = struct('solid', arm + " Forearm/" + side + "LowerForearm", ...
+            'mass', inert.(fk).lower.mass, 'com', inert.(fk).lower.com, ...
+            'moments', inert.(fk).lower.moments, 'radii', [], 'ellipsoid', false); %#ok<AGROW>
         hand = "Grip/" + side + "Hand";
-        segs(end + 1) = local_limb(mdl, hand, a, "hand", L.hand, 1, true, [0.8 0.65 1.25] * local_radius(mdl, hand)); %#ok<AGROW>
-        segs(end).com = [0 0 0];
+        hk = "hand_" + side;
+        segs(end + 1) = struct('solid', hand, 'mass', inert.(hk).mass, ...
+            'com', inert.(hk).com, 'moments', inert.(hk).moments, ...
+            'radii', [0.8 0.65 1.25] * local_radius(mdl, hand), 'ellipsoid', true); %#ok<AGROW>
     end
     head = "Hips and Torso Inputs/Head";
-    segs(end + 1) = local_limb(mdl, head, a, "head", L.head, 1, true, [0.7 0.7 0.9] * local_radius(mdl, head));
-    segs(end).com = [0 0 0];
-end
-
-function s = local_limb(mdl, solid, a, key, len, sgn, ellipsoid, radii)
-% A solid centred on its segment, proximal joint at SGN * LEN/2 on z.
-    blk = [mdl '/' char(solid)];
-    m = local_eval(mdl, get_param(blk, 'Mass'));
-    base = char(key);
-    [~, c, I] = gs3dx_segment_inertia(m, len, a.com.(base), a.gyration.(char(key)));
-    s = struct('solid', solid, 'mass', m, 'com', [0 0 sgn * (len / 2 - c)], ...
-        'moments', [mean(I(1:2)) mean(I(1:2)) I(3)], 'radii', radii, 'ellipsoid', ellipsoid);
-end
-
-function s = local_forearm(mdl, prefix, a, len)
-% Two half solids, elbow at +len/4 of the upper half and +3len/4 of the lower.
-% Each takes half the forearm; their centres of mass are len/2 apart about
-% de Leva's, which puts both at z = len/2 - c in their own frames.
-    whole = local_limb(mdl, prefix + "UpperForearm", a, "forearm", len, 1, false, []);
-    m = 2 * whole.mass;
-    [~, c, I] = gs3dx_segment_inertia(m, len, a.com.forearm, a.gyration.forearm);
-    It = mean(I(1:2)) / 2 - (m / 2) * (len / 4) ^ 2;
-    assert(It > 0, 'gs3dx:shape', 'Forearm halves cannot carry de Leva''s transverse moment');
-    s = [whole whole];
-    s(2).solid = prefix + "LowerForearm";
-    for k = 1:2
-        s(k).com = [0 0 len / 2 - c];
-        s(k).moments = [It It I(3) / 2];
-    end
+    segs(end + 1) = struct('solid', head, 'mass', inert.head.mass, ...
+        'com', inert.head.com, 'moments', inert.head.moments, ...
+        'radii', [0.7 0.7 0.9] * local_radius(mdl, head), 'ellipsoid', true);
 end
 
 function r = local_limb_radii(mdl, solid, len)

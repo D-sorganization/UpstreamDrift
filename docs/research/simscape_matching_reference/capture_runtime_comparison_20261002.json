@@ -1,0 +1,47 @@
+{
+  "selected_runtime": {
+    "capture-A": {
+      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+      "canonical_si_xyz_validity_sha256": "fa3e042b2573c3dc93126657cb7bc8e2aeded07f0b26e1adf74e34673ef72e45",
+      "ordered_labels_sha256": "95e5ae066e89f31b806566356d7c6597453e72e8c5b1b351aa587dfd931fd37a",
+      "shape": [3, 38, 654],
+      "valid_samples": 24135,
+      "point_rate_hz": 360.0,
+      "numpy_version": "2.4.4",
+      "ezc3d_version": "1.7.2"
+    },
+    "capture-O": {
+      "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+      "canonical_si_xyz_validity_sha256": "ea2ed1c6b6a3de3e53ce08260bd0abaf76e94ded28a4c732d1d5167dd126a5d9",
+      "ordered_labels_sha256": "95e5ae066e89f31b806566356d7c6597453e72e8c5b1b351aa587dfd931fd37a",
+      "shape": [3, 38, 367],
+      "valid_samples": 12773,
+      "point_rate_hz": 240.0,
+      "numpy_version": "2.4.4",
+      "ezc3d_version": "1.7.2"
+    }
+  },
+  "current_runtime": {
+    "capture-A": {
+      "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+      "canonical_si_xyz_validity_sha256": "fa3e042b2573c3dc93126657cb7bc8e2aeded07f0b26e1adf74e34673ef72e45",
+      "ordered_labels_sha256": "95e5ae066e89f31b806566356d7c6597453e72e8c5b1b351aa587dfd931fd37a",
+      "shape": [3, 38, 654],
+      "valid_samples": 24135,
+      "point_rate_hz": 360.0,
+      "numpy_version": "2.2.6",
+      "ezc3d_version": "1.6.3"
+    },
+    "capture-O": {
+      "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+      "canonical_si_xyz_validity_sha256": "ea2ed1c6b6a3de3e53ce08260bd0abaf76e94ded28a4c732d1d5167dd126a5d9",
+      "ordered_labels_sha256": "95e5ae066e89f31b806566356d7c6597453e72e8c5b1b351aa587dfd931fd37a",
+      "shape": [3, 38, 367],
+      "valid_samples": 12773,
+      "point_rate_hz": 240.0,
+      "numpy_version": "2.2.6",
+      "ezc3d_version": "1.6.3"
+    }
+  },
+  "finding": "Identical canonical SI XYZ, validity masks, ordered label digests and capture rates; solver/runtime equivalence is not established."
+}

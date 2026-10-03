@@ -1,0 +1,62 @@
+{
+  "capture_alias": "capture-O",
+  "qualification": "GEOMETRY_DIAGNOSTIC_UNQUALIFIED",
+  "capture_sha256": "2569659eff1e0b00294fd3c213d332cb609d8e37c31853f4bce9eb860e99b160",
+  "model_sha256": "9a26ee80761f510801c7157ca311946b429a5cd71b23056b41cb8a01e5061e9a",
+  "subject_mass_kg": 104.3,
+  "equipment_mass_kg": 0.39292359999999993,
+  "clearance_m": [
+    -0.06434242704528635, -0.06439924549828623, -0.06429466807958527,
+    -0.06439630447787457, -0.06430141143955657, -0.049272241702699386,
+    -0.048619152673356585, -0.049721768542561044, -0.048628545630829516,
+    -0.04962693889972169
+  ],
+  "min_clearance_m": -0.06439924549828623,
+  "clearance_spread_m": 0.01578009282492964,
+  "pelvis_tilt_deg": 57.889391386864574,
+  "ground_normal": [0, 0, 1],
+  "contact_stiffness": 100000,
+  "contact_damping": 1000,
+  "world_frame_count": 22,
+  "simulation_run": false,
+  "simulation_initial_targets_updated": false,
+  "receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "command_identity": "run('fresh_contact_geometry_audit.m')",
+    "timestamp": "2026-10-02T06:42:14.721195+00:00"
+  },
+  "capture_metadata": {
+    "capture-A": {
+      "point_units": ["m"],
+      "frames": 654,
+      "markers": 38,
+      "residual_shape": [1, 38, 654],
+      "negative_residual_samples": 717,
+      "negative_residual_with_finite_xyz": 0,
+      "nonfinite_xyz_samples": 717,
+      "event_parameter_present": false,
+      "event_used": [],
+      "event_labels": [],
+      "event_times_shape": [0],
+      "ezc3d_version": "1.7.2"
+    },
+    "capture-O": {
+      "point_units": ["m"],
+      "frames": 367,
+      "markers": 38,
+      "residual_shape": [1, 38, 367],
+      "negative_residual_samples": 0,
+      "negative_residual_with_finite_xyz": 0,
+      "nonfinite_xyz_samples": 1173,
+      "event_parameter_present": false,
+      "event_used": [],
+      "event_labels": [],
+      "event_times_shape": [0],
+      "ezc3d_version": "1.7.2"
+    }
+  }
+}

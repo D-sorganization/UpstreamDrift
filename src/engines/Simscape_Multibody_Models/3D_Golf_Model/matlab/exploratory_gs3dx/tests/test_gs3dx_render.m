@@ -26,9 +26,11 @@ classdef test_gs3dx_render < matlab.unittest.TestCase
             testCase.addTeardown(@() close_system(testCase.mdl, 0));
 
             % Address and impact poses from a whole-body IK of the capture
+            % Explicitly pin historically Fit-based render harness call to variants.fit (never FitBalance)
             jc = gs3dx_capture_joint_centres(gs3dx_capture_markers());
             f0 = jc.impact_frame;
-            testCase.ik = gs3dx_whole_body_ik(jc, frames=[1 f0], calibration_frames=1:15:f0 - 90);
+            testCase.ik = gs3dx_whole_body_ik(jc, model=char(gs3dx_names().variants.fit), ...
+                frames=[1 f0], calibration_frames=1:15:f0 - 90);
         end
     end
 

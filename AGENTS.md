@@ -21,6 +21,37 @@ historical agent-workflow notes see
 This file is narrower: a **discovery workflow** for agents and a
 **directory of shared infrastructure** so we stop duplicating work.
 
+## Modeling Reference Documentation
+
+For future swing-matching outputs, use the refined Human ellipsoid model and
+record its actual capture-specific geometry and pose-driving mode. Legacy
+cylinder-model outputs are historical baselines, not the standard for new
+shareable matches. Changes of topology or graphics require explicit frame,
+joint-mapping, mass/inertia and native rendering checks; appearance does not
+qualify forward dynamics. Preserve measured foot/head observability limits.
+
+Every substantive modeling change must update its calculation-level reference
+in the same change: model topology and assumptions, coordinate frames, units,
+calibration and data validity, equations, parameters, numerical method,
+acceptance criteria, evidence provenance, limitations, and exact reproduction
+commands. Include failed experiments and distinguish inverse kinematics,
+feedback-assisted tracking, and independently replayed open-loop dynamics.
+An animation, a successful process exit, or an optimizer result alone does not
+establish physical acceptance.
+
+Keep the reference available in LaTeX format for users and subsequent agents.
+For the engineering design manual, edit only canonical
+`manuals/upstreamdrift` QMD and regenerate LaTeX through its governed toolchain.
+Separate research and experiment references may use editable standalone `.tex`
+sources; identify that status and link them from the relevant model README and
+handoff. Keep private captures anonymous in repository artifacts and retain
+their input hashes and detailed provenance in private execution receipts.
+
+For exploratory GS3DX matching, the separate reference is
+`docs/research/simscape_matching_reference/simscape_matching_reference.tex`.
+Record compilation and evidence checks truthfully; unresolved modeling gates
+remain open even when the documentation or video export is complete.
+
 ## Document Title Capitalization
 
 Use title case for every document title, subtitle, section heading, navigation

@@ -1,0 +1,20 @@
+{
+  "passed": 2,
+  "failed": 0,
+  "incomplete": 0,
+  "names": [
+    "test_gs3dx_human_default_policy/omitted_model_matches_explicit_human",
+    "test_gs3dx_human_default_policy/keyed_seed_uses_actual_native_units"
+  ],
+  "qualification": "NATIVE_OMITTED_MODEL_EQUALS_EXPLICIT_HUMAN_AND_ACTUAL_UNIT_KEYED_SEED_SOFTWARE_ONLY",
+  "receipt": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "owned_pids": [90296],
+    "timestamp": "2026-10-02T13:58:47.965297+00:00"
+  },
+  "default_change": "INTENTIONAL_FIT_TO_HUMAN_LEGACY_CALLERS_PIN_FIT"
+}

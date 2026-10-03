@@ -1,0 +1,52 @@
+{
+  "qualification": "LEGACY_OBJECTIVE_ROOT_AVAILABILITY_DIAGNOSTIC_AND_PRIVATE_PARAMETER_TDD_NOT_CURRENT_PREVIEW_OR_PHYSICS_ACCEPTANCE",
+  "legacy_owner_window": {
+    "production_baseline": {
+      "max_root_step_mm": 40.419494166425004,
+      "restored_derived_target_count_at_maximum": 7,
+      "frame_count": 57,
+      "transition_count": 56
+    },
+    "prototype_0_02": {
+      "max_root_step_mm": 39.2290098231202,
+      "restored_derived_target_count_at_maximum": 7,
+      "frame_count": 57,
+      "transition_count": 56
+    }
+  },
+  "derived_target_dependency": "Waist-marker gaps propagate to pelvis and hip centres and pelvis-axis-dependent knee and ankle centres; raw leg marker visibility is distinct.",
+  "refined_preview_objective_differences": [
+    "head-axis tracking",
+    "three body-local back markers",
+    "spine and scapula priors",
+    "rotational smoothing",
+    "unit residual scales for inferred lower-body targets"
+  ],
+  "current_preview_root_jump_established": false,
+  "causation_established": false,
+  "native_parameter_tdd": {
+    "red_passed": 0,
+    "red_failed": 8,
+    "red_incomplete": 0,
+    "green_passed": 8,
+    "green_failed": 0,
+    "green_incomplete": 0
+  },
+  "native_exit": {
+    "actual_process_exit_code": 0,
+    "final_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T06:18:48.287380+00:00"
+  },
+  "source_sha256": {
+    "saved_array_analysis": "3b7cd878812e8f3b11547919df24b71b895f84f2940f3a0534115254f1d054a2",
+    "private_translation_fitter": "2d0dd25e9626dd1925356efcdb3d2218751d4a5bd50cf790c7c2b7c7208cf486",
+    "parameter_tests": "3935ecc6f2c9843741d95f53628b2b967dc1968618406397e6d2063faf22cb28",
+    "native_parameter_runner": "f9da865e3be580e0945943a4287b0e6f2419bd59e65ae355b864ccfb142b93bb"
+  },
+  "model_loaded": false,
+  "simulation_executed": false,
+  "production_modified": false,
+  "candidate_promoted": false,
+  "source_only_refined_port_runtime_verified": false
+}
