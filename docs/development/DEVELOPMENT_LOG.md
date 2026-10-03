@@ -32,14 +32,14 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** antigravity
-- **PR:** #11395
-- **Branch:** `feat/fto-29-web-video-overlay-11314`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/api/routes/video_overlays.py`, `ui/src/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-29 (#11314, PR #11395) fixed VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, added shared 2D projection module (DRY FTO-8), FastAPI endpoint GET /api/overlays/video/{source_id}/frames/{n}/glyphs, React VideoForceOverlay with dark halo polylines, feature_parity.json update for video_analyzer, capability migration classification, and Playwright evidence; FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393) and FTO-25 (#11310, PR #11390) merged in main.
+- **PR:** #11397
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for #11395; proceed with FTO-30 (#11315).
+- **Next step:** Review and merge PR #11397; owner closes epic #11285.
 
 ### DL-#11268 · Capture-O Video Companion
 
