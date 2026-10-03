@@ -1,7 +1,8 @@
-"""Renderers for force and torque overlay glyphs (ADR-0052)."""
+"""Force and torque glyph renderers for various visualization backends (ADR-0052)."""
 
 from __future__ import annotations
 
+from .matplotlib_glyphs import draw_glyphs_3d, draw_legend, equalize_3d_axes
 from .meshcat_glyphs import (
     MeshcatGlyphRenderer,
     MeshcatPythonSink,
@@ -18,6 +19,7 @@ from .opencv_glyphs import (
     draw_glyphs_on_frame,
     draw_legend_box,
 )
+from .qpainter_glyphs import draw_glyphs_2d
 
 __all__ = [
     "HypothesisProjector",
@@ -29,7 +31,11 @@ __all__ = [
     "VideoGlyphReceipt",
     "VideoGlyphStyle",
     "align_y_to",
+    "draw_glyphs_2d",
+    "draw_glyphs_3d",
     "draw_glyphs_on_frame",
+    "draw_legend",
     "draw_legend_box",
+    "equalize_3d_axes",
     "legend_text",
 ]

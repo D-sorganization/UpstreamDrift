@@ -17,6 +17,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 from PyQt6.QtCore import QPointF
 from PyQt6.QtGui import QColor, QPainter, QPen
@@ -98,20 +99,32 @@ def auto_scale_factor(arrows: Sequence[ForceArrow], target_world_len: float) -> 
     return target_world_len / largest
 
 
-def _draw_arrowhead(painter: QPainter, tail: QPointF, tip: QPointF, head_px: float) -> None:
-    dx = tip.x() - tail.x()
-    dy = tip.y() - tail.y()
-    length = math.hypot(dx, dy)
-    if length < _MIN_SHAFT_PX:
-        return
-    angle = math.atan2(dy, dx)
-    for sign in (1.0, -1.0):
-        theta = angle + sign * (math.pi - _ARROWHEAD_ANGLE_RAD)
-        wing = QPointF(
-            tip.x() + head_px * math.cos(theta),
-            tip.y() + head_px * math.sin(theta),
+def arrows_to_force_torque_frame(arrows: Sequence[ForceArrow], scale: float) -> Any:
+    """Convert movement optimizer ForceArrows to a ForceTorqueFrame."""
+    from src.shared.python.force_overlay.contracts import (
+        ForceTorqueFrame,
+        OverlayWrench,
+        WrenchKind,
+    )
+
+    wrenches = []
+    for i, arrow in enumerate(arrows):
+        vx, vy = arrow.vector_m
+        if math.hypot(vx, vy) <= 0.0:
+            continue
+        ox, oy = arrow.origin_m
+        wrenches.append(
+            OverlayWrench(
+                kind=WrenchKind.EXTERNAL,
+                label=f"arrow:{i}",
+                body="canvas",
+                point_m=(ox, oy, 0.0),
+                force_n=(vx * scale, vy * scale, 0.0),
+                torque_nm=None,
+                source="vector_overlay",
+            )
         )
-        painter.drawLine(tip, wing)
+    return ForceTorqueFrame(time_s=0.0, engine="vector_overlay", wrenches=tuple(wrenches))
 
 
 def draw_force_arrows(
@@ -128,18 +141,32 @@ def draw_force_arrows(
     """
     if not math.isfinite(scale) or scale <= 0.0:
         raise ValueError("scale must be a positive, finite number")
-    for arrow in arrows:
-        origin_x, origin_y = arrow.origin_m
-        vector_x, vector_y = arrow.vector_m
-        tip_world = (origin_x + scale * vector_x, origin_y + scale * vector_y)
-        tail = projector(arrow.origin_m)
-        tip = projector(tip_world)
-        if math.hypot(tip.x() - tail.x(), tip.y() - tail.y()) < _MIN_SHAFT_PX:
-            continue  # zero / negligible force -- nothing meaningful to draw.
-        pen = QPen(arrow.style.color, arrow.style.width)
-        painter.setPen(pen)
-        painter.drawLine(tail, tip)
-        _draw_arrowhead(painter, tail, tip, arrow.style.head_px)
+    from src.shared.python.force_overlay.contracts import WrenchKind
+    from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, build_glyphs
+    from src.shared.python.force_overlay.renderers.qpainter_glyphs import (
+        draw_glyphs_2d,
+    )
+
+    frame = arrows_to_force_torque_frame(arrows, scale)
+    if not frame.wrenches:
+        return
+    palette: dict[str, str] = (
+        {WrenchKind.EXTERNAL.value: str(arrows[0].style.color.name())} if arrows else {}
+    )
+    style = ForceGlyphStyle(
+        force_scale_m_per_n=1.0,
+        min_length_m=1e-4,
+        max_length_m=1e5,
+        palette=palette,
+    )
+    glyphs = build_glyphs(frame, style=style)
+    draw_glyphs_2d(
+        painter,
+        projector,
+        glyphs,
+        px_width=float(arrows[0].style.width) if arrows else 2.0,
+        halo=False,
+    )
 
 
 def draw_torque_arcs(
