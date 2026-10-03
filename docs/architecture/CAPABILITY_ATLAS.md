@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**63 launcher tiles · 48 feature contracts.**
+**63 launcher tiles · 49 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -212,6 +212,7 @@ flowchart LR
 | Launcher tile grid from shared manifest | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/launcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Manifest tile web-reachability contract (route / native-window / unavailable) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_tool_bootstrap.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Dashboard.tsx) |
 | Motion-capture breadth (C3D upload/playback, OpenPose source) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/freemocap_sidecar/run_freemocap.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/motion_capture.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/MotionCapture.tsx) |
+| MuJoCo GUI force/torque overlays drawn through the shared glyph renderers (native viewer and MeshCat) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_rendering_mixin.py) |
 | About/version info + onboarding | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/about_dialog.py) |
 | Swing Optimizer (trajectory optimization GUI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/optimization/swing_optimizer.py) |
 | AI Protocol (AIP) structured method dispatch | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/aip.py) |
