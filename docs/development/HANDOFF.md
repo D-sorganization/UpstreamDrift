@@ -16,6 +16,51 @@
 
 ---
 
+# Current Handoff — Capture-O Video Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-2-register-sources-11270`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-2-11270`
+- Commit: `SELF`
+- Governing issue: #11270 (parent epic #11268)
+- Objective: [COV-2] Register capture-O video sources into the capture registry and public catalog, extract and validate timing evidence from container/stream metadata, define non-overlapping swing candidate intervals with view classification, and implement pure usability grading under DbC.
+- Completed:
+  - `src/shared/python/shadow_tracker/source_records.py`:
+    - `VideoTimingEvidence`: frozen dataclass capturing container fps, `r_frame_rate`, `avg_frame_rate`, VFR flag, slow motion tags, rotation, creation time, `physical_clock` (`known`, `ratio_known`, `unknown`). Enforces fail-closed invariant that missing slow-motion tags cannot claim known physical clock.
+    - `extract_video_timing_evidence`: pure parser of ffprobe metadata for stream/format tags, displaymatrix rotation, Apple/Android slow motion tags, and playback-to-capture ratio.
+    - `VariableFrameRateError` / `NonUniformPTSError`: typed exception when VFR streams are encountered by uniform-PTS consumers.
+    - `SwingWindow`: half-open interval `[start_pts_s, end_pts_s)` tracking address/top/impact/finish frames, view classification (`face_on`, `down_the_line`, `oblique`, `other`), azimuth, cuts, partial/practice flags, and feature visibility.
+    - `validate_swing_windows`: checks interval order and strictly forbids overlapping swing windows within the same clip.
+    - `SwingGradeResult` and `grade_swing_window`: pure usability grading returning grades (A, B, C, R) and mandatory non-empty reasons (raising `ValueError` if empty).
+  - `src/shared/python/workspace/necromatcher_video.py`:
+    - `source_frame_rate`: raises typed `VariableFrameRateError` when non-uniform PTS steps occur in VFR streams.
+  - `src/motion_capture/capture_registry.py`:
+    - Extended `CaptureInfo` schema with `kind` field (defaulting to `"c3d"` for backward compatibility, `"video"` for video clips).
+    - Added `register_capture(info, repo_root=...)` for registering neutral IDs into `data/capture_registry.json`.
+  - `data/capture_registry.json`:
+    - Registered neutral entry for `capture-O-video/cov-01` (`kind: "video"`, `where: "private"`).
+  - `docs/development/historical_capture/source-catalog.json`:
+    - Added neutral entry for `cov-01` (`private: true`, with no filename, URL, or title).
+  - Tests in `tests/unit/motion_capture/test_cov2_source_registration.py`: 7 comprehensive behavioral unit tests covering all required contracts.
+  - Tests in `tests/motion_capture/test_capture_registry.py`: added schema tests for `kind` and `register_capture`.
+  - Updated `SPEC.md` top specification section and §12 Change Log table.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_cov2_source_registration.py`: 7 passed.
+  - `pytest tests/motion_capture/test_capture_registry.py`: 12 passed.
+  - `pytest tests/unit/workspace/test_necromatcher_video.py`: 6 passed.
+  - `pytest tests/unit/shadow_tracker/test_source_records.py`: 71 passed.
+  - `pytest tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passed.
+  - Architecture budget: OK.
+  - File size budget: OK.
+  - Error handling ratchet: OK.
+
+---
+
+# Past Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
+
+---
+
 # Current Handoff — Remove Deprecated ForceVector3D and Force Overlay `vectors` (#11362)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `/home/user/ud-wt/a11362`
