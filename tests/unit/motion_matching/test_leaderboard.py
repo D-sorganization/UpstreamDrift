@@ -11,16 +11,23 @@ import json
 from pathlib import Path
 
 import pytest
+from src.shared.python.contracts import PreconditionError
 from src.shared.python.motion_matching.leaderboard import (
     COLUMNS,
     SCHEMA_FIELDS,
     SUPPORTED_ENGINES,
     FitResult,
+    Leaderboard,
     LeaderboardError,
+    LeaderboardRow,
     generate_report,
+    group_by_capture,
     load_results,
     render_markdown,
+    render_per_capture_markdown,
+    render_side_by_side_table,
 )
+
 
 # --- Fixtures ----------------------------------------------------------------
 
@@ -348,3 +355,261 @@ class TestGenerateReport:
             generate_report("results", tmp_path / "out.md")  # type: ignore[arg-type]
         with pytest.raises(TypeError):
             generate_report(tmp_path, "out.md")  # type: ignore[arg-type]
+
+
+# --- Per-Capture Leaderboard (Issue #11170, Epic #11161) ---------------------
+
+
+@pytest.mark.unit
+class TestPerCaptureLeaderboard:
+    def test_capture_field_defaults_to_driver(self) -> None:
+        r = FitResult(**_good_payload())
+        assert r.capture == "driver"
+        assert r.verdict is None
+        # No verdict was ever given, so none is invented (issue #11170: a
+        # PASS/FAIL must never be fabricated from an RMSE value alone).
+        assert r.display_verdict == "-"
+
+    def test_display_verdict_never_invents_a_verdict(self) -> None:
+        # A row with a "good" RMSE and no verdict still reads "-", never PASS.
+        good = FitResult(**_good_payload(grip_rmse_mm=0.01))
+        assert good.verdict is None
+        assert good.display_verdict == "-"
+
+        # An explicit verdict is echoed back verbatim.
+        explicit = FitResult(**_good_payload(verdict="FAIL"))
+        assert explicit.display_verdict == "FAIL"
+
+        # An unavailable solver reads "not run" regardless of verdict.
+        unavailable = FitResult(
+            **_good_payload(
+                solver="unavailable: no python provider",
+                grip_rmse_mm=None,
+                clubhead_rmse_mm=None,
+                body_marker_rmse_mm=None,
+                total_work_J=None,
+                wall_clock_s=None,
+            )
+        )
+        assert unavailable.display_verdict == "not run"
+
+    def test_capture_and_verdict_can_be_customized(self) -> None:
+        r = FitResult(**_good_payload(capture="owner", verdict="QUALIFIED"))
+        assert r.capture == "owner"
+        assert r.verdict == "QUALIFIED"
+        assert r.display_verdict == "QUALIFIED"
+
+    def test_empty_capture_name_raises_dbc_error(self) -> None:
+        with pytest.raises(PreconditionError, match="capture"):
+            FitResult(**_good_payload(capture=""))
+        with pytest.raises(PreconditionError, match="capture"):
+            FitResult(**_good_payload(capture="   "))
+
+    def test_group_by_capture_groups_rows(self) -> None:
+        r1 = FitResult(**_good_payload(engine="simscape", capture="driver"))
+        r2 = FitResult(**_good_payload(engine="mujoco", capture="driver"))
+        r3 = FitResult(**_good_payload(engine="simscape", capture="owner"))
+        grouped = group_by_capture([r1, r2, r3])
+        assert set(grouped.keys()) == {"driver", "owner"}
+        assert len(grouped["driver"]) == 2
+        assert len(grouped["owner"]) == 1
+        assert grouped["owner"][0].engine == "simscape"
+
+    def test_duplicate_engine_capture_raises_dbc_error(self) -> None:
+        r1 = FitResult(**_good_payload(engine="simscape", capture="driver"))
+        r2 = FitResult(
+            **_good_payload(engine="simscape", capture="driver", grip_rmse_mm=3.0)
+        )
+        with pytest.raises(PreconditionError, match="duplicate"):
+            group_by_capture([r1, r2])
+
+    def test_two_trials_same_engine_same_capture_is_not_a_duplicate(self) -> None:
+        # The leaderboard is per trial: two distinct trials fit by the same
+        # engine on the same capture are legitimate, not duplicates.
+        r1 = FitResult(
+            **_good_payload(engine="simscape", capture="driver", trial="TW_ProV1")
+        )
+        r2 = FitResult(
+            **_good_payload(engine="simscape", capture="driver", trial="GW_wiffle")
+        )
+        grouped = group_by_capture([r1, r2])
+        assert len(grouped["driver"]) == 2
+        assert {r.trial for r in grouped["driver"]} == {"TW_ProV1", "GW_wiffle"}
+
+    def test_duplicate_trial_engine_capture_raises_dbc_error(self) -> None:
+        r1 = FitResult(
+            **_good_payload(engine="simscape", capture="driver", trial="TW_ProV1")
+        )
+        r2 = FitResult(
+            **_good_payload(
+                engine="simscape",
+                capture="driver",
+                trial="TW_ProV1",
+                grip_rmse_mm=3.0,
+            )
+        )
+        with pytest.raises(PreconditionError, match="duplicate"):
+            group_by_capture([r1, r2])
+
+    def test_leaderboard_data_model_stores_and_groups_captures(self) -> None:
+        r1 = FitResult(**_good_payload(engine="simscape", capture="driver"))
+        r2 = FitResult(**_good_payload(engine="simscape", capture="owner"))
+        lb = Leaderboard([r1, r2])
+        assert lb.captures == ["driver", "owner"]
+        assert len(lb.get_capture_rows("driver")) == 1
+        assert len(lb.get_capture_rows("owner")) == 1
+        filtered = lb.filter_by_capture("owner")
+        assert filtered.captures == ["owner"]
+        assert len(filtered.rows) == 1
+
+    def test_two_captures_renders_per_capture_and_side_by_side_tables(self) -> None:
+        r_sim_driver = FitResult(
+            **_good_payload(
+                engine="simscape", capture="driver", grip_rmse_mm=1.5, verdict="PASS"
+            )
+        )
+        r_muj_driver = FitResult(
+            **_good_payload(
+                engine="mujoco", capture="driver", grip_rmse_mm=2.0, verdict="PASS"
+            )
+        )
+        r_sim_owner = FitResult(
+            **_good_payload(
+                engine="simscape",
+                capture="owner",
+                grip_rmse_mm=2.5,
+                verdict="QUALIFIED",
+            )
+        )
+        r_muj_owner = FitResult(
+            **_good_payload(
+                engine="mujoco", capture="owner", grip_rmse_mm=1.8, verdict="PASS"
+            )
+        )
+
+        rows = [r_sim_driver, r_muj_driver, r_sim_owner, r_muj_owner]
+        md = render_per_capture_markdown(rows)
+
+        # 1. One Markdown table per capture
+        assert "## Capture: driver" in md
+        assert "## Capture: owner" in md
+
+        # Headers and match metrics in per-capture tables
+        for cap in ("driver", "owner"):
+            cap_section = md.split(f"## Capture: {cap}")[1].split("##")[0]
+            assert "engine" in cap_section
+            assert "grip_rmse_mm" in cap_section
+            assert "clubhead_rmse_mm" in cap_section
+            assert "verdict" in cap_section
+            assert "simscape" in cap_section
+            assert "mujoco" in cap_section
+
+        # 2. Side-by-side table
+        assert "## Side-by-Side Comparison" in md
+        sbs_section = md.split("## Side-by-Side Comparison")[1]
+        assert "driver grip_rmse_mm" in sbs_section
+        assert "owner grip_rmse_mm" in sbs_section
+        assert "driver verdict" in sbs_section
+        assert "owner verdict" in sbs_section
+
+    def test_engine_missing_on_one_capture_shows_not_run_never_zero(self) -> None:
+        r_sim_driver = FitResult(
+            **_good_payload(engine="simscape", capture="driver", grip_rmse_mm=1.5)
+        )
+        r_muj_driver = FitResult(
+            **_good_payload(engine="mujoco", capture="driver", grip_rmse_mm=2.0)
+        )
+        r_sim_owner = FitResult(
+            **_good_payload(engine="simscape", capture="owner", grip_rmse_mm=2.5)
+        )
+        # mujoco is missing on "owner"
+        rows = [r_sim_driver, r_muj_driver, r_sim_owner]
+        md = render_per_capture_markdown(rows)
+
+        # In owner table, mujoco should show "not run"
+        owner_section = md.split("## Capture: owner")[1].split("##")[0]
+        assert "mujoco" in owner_section
+        assert "not run" in owner_section
+
+        # In side-by-side table under owner, mujoco should show "not run"
+        sbs_section = md.split("## Side-by-Side Comparison")[1]
+        mujoco_line = next(
+            line
+            for line in sbs_section.splitlines()
+            if line.startswith("| mujoco") or "| mujoco " in line
+        )
+        assert "not run" in mujoco_line
+
+        # Ensure missing values NEVER display as zero
+        cells = [c.strip() for c in mujoco_line.split("|")[1:-1]]
+        for cell in cells:
+            assert cell != "0"
+            assert cell != "0.0"
+            assert cell != "0.000"
+
+    def test_two_trials_same_engine_same_capture_both_shown_in_render(self) -> None:
+        # Regression for a dict-keyed-by-engine bug that silently dropped
+        # one of two trials fit by the same engine on the same capture.
+        r_trial_a = FitResult(
+            **_good_payload(
+                engine="simscape",
+                capture="driver",
+                trial="TW_ProV1",
+                grip_rmse_mm=1.5,
+            )
+        )
+        r_trial_b = FitResult(
+            **_good_payload(
+                engine="simscape",
+                capture="driver",
+                trial="GW_wiffle",
+                grip_rmse_mm=2.5,
+            )
+        )
+        md = render_per_capture_markdown([r_trial_a, r_trial_b])
+        driver_section = md.split("## Capture: driver")[1].split("## Capture:")[0]
+        assert "TW_ProV1" in driver_section
+        assert "GW_wiffle" in driver_section
+
+        sbs_section = md.split("## Side-by-Side Comparison")[1]
+        assert "TW_ProV1" in sbs_section
+        assert "GW_wiffle" in sbs_section
+
+    def test_engine_missing_on_one_capture_for_one_trial_shows_not_run(self) -> None:
+        # simscape ran "owner" for TW_ProV1 only; GW_wiffle/simscape/owner
+        # must show "not run" there, never be silently omitted.
+        r_a_driver = FitResult(
+            **_good_payload(engine="simscape", capture="driver", trial="TW_ProV1")
+        )
+        r_b_driver = FitResult(
+            **_good_payload(engine="simscape", capture="driver", trial="GW_wiffle")
+        )
+        r_a_owner = FitResult(
+            **_good_payload(engine="simscape", capture="owner", trial="TW_ProV1")
+        )
+        md = render_per_capture_markdown([r_a_driver, r_b_driver, r_a_owner])
+        owner_section = md.split("## Capture: owner")[1].split("##")[0]
+        assert "GW_wiffle" in owner_section
+        gw_line = next(
+            line for line in owner_section.splitlines() if "GW_wiffle" in line
+        )
+        assert "not run" in gw_line
+
+    def test_single_capture_driver_output_identical_to_legacy(self) -> None:
+        results = {
+            "TW_ProV1": [
+                FitResult(**_good_payload(engine="simscape", grip_rmse_mm=1.85)),
+                FitResult(**_good_payload(engine="mujoco", grip_rmse_mm=2.10)),
+            ]
+        }
+        # Calling render_markdown on single-capture driver rows gives exact legacy output
+        md = render_markdown(results)
+        assert "# Cross-engine leaderboard\n" in md
+        assert "## TW_ProV1" in md
+        assert (
+            "Sorted by `grip_rmse_mm` ascending within each trial; lower is better."
+            in md
+        )
+        assert "## Side-by-Side Comparison" not in md
+        assert "1.850" in md
+        assert "2.100" in md

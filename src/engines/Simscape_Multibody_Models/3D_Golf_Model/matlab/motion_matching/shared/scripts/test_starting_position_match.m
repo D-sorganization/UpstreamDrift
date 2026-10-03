@@ -44,8 +44,12 @@ function result = test_starting_position_match(varargin)
 
     % --- Resolve measured Excel file. ---------------------------------
     if isempty(char(args.xlsx_path))
-        args.xlsx_path = fullfile(mat_root, 'src', 'apps', 'golf_gui', ...
-            'Motion Capture Plotter', 'Wiffle_ProV1_club_3D_data.xlsx');
+        try
+            args.xlsx_path = resolve_capture("club-workbook-wiffle");
+        catch
+            args.xlsx_path = fullfile(mat_root, 'src', 'apps', 'golf_gui', ...
+                'Motion Capture Plotter', 'Wiffle_ProV1_club_3D_data.xlsx');
+        end
     end
     if ~isfile(args.xlsx_path)
         error('test_starting_position_match:noExcel', ...
