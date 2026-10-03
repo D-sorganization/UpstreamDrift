@@ -8,6 +8,7 @@ Preconditions / Invariants:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -19,10 +20,59 @@ from src.shared.python.motion_matching.range_of_motion import (
 
 REPO_ROOT: Path = Path(__file__).resolve().parents[5]
 DATA_DIR: Path = REPO_ROOT / "data"
+
 CAPTURES: dict[str, Path] = {
     "driver": DATA_DIR / "C3D_TA_Driver.c3d",
     "iron": DATA_DIR / "C3D_TA_Iron.c3d",
 }
+CAPTURE_NAMES: tuple[str, ...] = ("driver", "iron", "owner")
+
+
+def capture_path(name: str) -> Path:
+    """Resolve a capture name to its file path.
+
+    Preconditions: ``name`` must be one of :data:`CAPTURE_NAMES`.
+
+    ``"driver"`` and ``"iron"`` resolve to the public fixtures checked into
+    ``data/``. ``"owner"`` resolves lazily, at call time, through the private
+    capture registry (:func:`src.motion_capture.capture_registry.resolve_capture`)
+    so importing this module never touches the private dataset location and
+    never requires ``CAPTURE_DATA_DIR`` to be set.
+    """
+    if name == "owner":
+        from src.motion_capture.capture_registry import resolve_capture
+
+        return resolve_capture("capture-O")
+    if name not in CAPTURES:
+        raise ValueError(
+            f"Unknown capture name: {name!r}; expected one of {CAPTURE_NAMES}"
+        )
+    return CAPTURES[name]
+
+
+def rate_from_times(times: Sequence[float] | np.ndarray) -> float:
+    """Derive the sample rate in Hz from a capture's strictly monotonic timestamps.
+
+    Preconditions:
+    - At least 2 samples.
+    - All spacings are positive and uniform (relative tolerance 1e-6).
+
+    Raises ``ValueError`` if the preconditions are not met -- there is no
+    silent fallback to a default rate.
+    """
+    arr = np.asarray(times, dtype=float)
+    if arr.size < 2:
+        raise ValueError("rate_from_times requires at least 2 samples")
+    deltas = np.diff(arr)
+    if np.any(deltas <= 0.0):
+        raise ValueError(
+            "rate_from_times requires strictly increasing, positive sample spacing"
+        )
+    if not np.allclose(deltas, deltas[0], rtol=1e-6):
+        raise ValueError("rate_from_times requires uniform sample spacing")
+    return float(1.0 / deltas[0])
+
+
 FULL_BODY_DIR: Path = REPO_ROOT / "docs/development/full_body_models"
 SPEC: Path = FULL_BODY_DIR / "full_body_spec_v2.json"
 BUILD_RECEIPT: Path = FULL_BODY_DIR / "build_receipt_v2.json"

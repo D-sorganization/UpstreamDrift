@@ -243,6 +243,7 @@ def render_playback(
     lookat: np.ndarray,
     path: Path,
     show_com: bool = True,
+    rate_hz: float = RATE_HZ,
 ) -> None:
     """Render animated GIF of motion from spec and joint trajectory."""
     from src.engines.physics_engines.mujoco.python.visual_layer import (
@@ -257,7 +258,7 @@ def render_playback(
         path=path,
         show_com=show_com,
         playback_stride=PLAYBACK_STRIDE,
-        rate_hz=RATE_HZ,
+        rate_hz=rate_hz,
     )
 
 

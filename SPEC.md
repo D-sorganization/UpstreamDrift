@@ -9703,3 +9703,12 @@ Accepted-main records and ledger metadata are reconciled while preserving all 13
 The 14 new per-capture leaderboard contracts are explicitly unit tests; selected execution and the full suite-marker ratchet pass without changing baselines.
 
 Shared-tools divergence inventory is regenerated for all five new swing_comparison source paths; ten inventory checks and current-tree freshness pass.
+
+### Capture-O MuJoCo Ground Support Pipeline Execution - #11166 (#11174)
+
+Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-support pipeline:
+- `rate_from_times` provides unified capture rate calculation adhering to DbC without silent frequency defaults.
+- Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
+- Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
+- Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+
