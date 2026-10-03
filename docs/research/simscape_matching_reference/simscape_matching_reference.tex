@@ -3309,6 +3309,74 @@ in for verified net actuator torques. The remaining logging path must
 identify native sensor or command-tap basis, units, frame/duality and actual
 time coverage before a complete replay profile can be claimed.
 
+
+\subsection{Native Velocity and Between-Sample Reference Audit}
+\label{sec:velocity-midpoint-audit}
+The follow-up audit completed naturally at
+\texttt{2026-10-03T03:12:33Z}. Each complete original configuration was
+tested with all 48 position variables and all 43 native velocity variables.
+All 55 tour and 46 owner zero-velocity controls returned status $1$.
+This confirms a consistent stationary configuration at each sampled pose;
+it does not establish the moving trajectory.
+
+For the moving diagnostic, scalar rotational primitives were unwrapped
+and differentiated on the physical sample clock; translational primitives
+were differentiated in metres. Each spherical configuration was converted
+to continuous intrinsic XYZ angles, differentiated, and mapped through
+$\omega_F=E(\theta)\dot\theta$. The follower-frame rate map was independently
+checked against $\operatorname{vee}(R^T\dot R)$ using central finite
+differences. Maximum discrepancies were $8.52\times10^{-9}$ and
+$7.87\times10^{-9}$ rad/s for the tour and owner samples respectively.
+The native tables declare angular velocities in degrees per second and
+linear velocities in metres per second; conversion to the native angular
+units was explicit. Axis-angle coefficients were never differentiated as
+angular velocity.
+
+A separate native root-rotation control completed naturally at
+\texttt{2026-10-03T03:14:25Z}. With all internal rates zero and a nonzero
+root spherical velocity, the native joint velocity matched the angular
+velocity frame output between that joint's base and follower ports to
+$7.85\times10^{-17}$ deg/s. The frame output is follower-resolved
+\cite{MathWorksFrameVelocity}. This verifies the coordinate convention
+used by the moving diagnostic rather than inferring it from unit names.
+
+Every differentiated moving request returned status $-1$: all 55 tour and
+46 owner requests missed some complete native targets. The largest
+returned-versus-requested velocity adjustments were $1601.0231$ deg/s and
+$375.7451$ deg/s respectively. These are solver target adjustments, not
+measured player velocities or accepted corrections. This audit does not
+claim that the returned moving positions are unchanged or that the
+returned rates differentiate an accepted interpolated configuration curve.
+Returned states remain private and unpromoted.
+
+The between-sample diagnostic interpolated the complete scalar and
+continuous spherical XYZ coordinate charts at each physical interval
+midpoint, then reconstructed every spherical rotation before assembly.
+All 54 tour and 45 owner midpoint requests returned status $-1$. Maximum
+scalar angular target adjustments were $37.8975$ deg and $4.7110$ deg;
+maximum spherical rotation-matrix discrepancies were $1.1711$ and
+$0.10744$ in Frobenius norm. These results concern this explicitly defined
+complete-coordinate interpolation diagnostic. They do not assert that
+every renderer uses that interpolation or that a solver adjustment is a
+unique nearest feasible pose.
+
+The evidence supports separate acceptance gates for sample configurations,
+native tangent velocities, and the continuous curve joining samples.
+Future trajectory construction must keep $g(q(t))=0$ and
+$J_c(q(t))v(t)=0$ on the declared physical clock, retain pose and marker
+residuals before and after any constraint-aware adjustment, and verify that
+the velocity actually differentiates that curve. Independent native
+rechecks, dense between-sample checks and native initialization are
+required before torque recovery or full forward-dynamics acceptance.
+No simulation, model save, new best-match promotion or video replacement
+occurred in this audit.
+
+The first audit attempt failed before producing these results because its
+private harness mapped a translational velocity suffix to the rotational
+position suffix. The corrected mapping uses native translational position
+variables. Both the failed receipt and the naturally completed corrected
+receipt are retained; the harness failure is not a physical model result.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
@@ -3338,6 +3406,12 @@ Nominal ROM source labels are inherited from \texttt{gs3dx\_joint\_rom.m};
 they are implementation priors, not newly established clinical limits.
 Historical results are attributed to that turnover unless a fresh receipt
 identifies a new execution.
+
+\bibitem{MathWorksFrameVelocity}
+MathWorks, \emph{addFrameVariables: Create Kinematic Variables from Select
+Frame Pair in KinematicsSolver Object},
+\url{https://www.mathworks.com/help/sm/ref/simscape.multibody.kinematicssolver.addframevariables.html}.
+
 \end{thebibliography}
 \end{document}
 
