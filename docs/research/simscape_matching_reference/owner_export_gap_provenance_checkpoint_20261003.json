@@ -1,0 +1,36 @@
+{
+  "qualification": "RAW_DECODED_SOURCE_VS_SELECTED_EXPORT_GAP_PROVENANCE_NOT_PHYSICAL_MEASUREMENT_QUALIFICATION",
+  "audit_utc": "2026-10-03T00:28:52.674623+00:00",
+  "coordinate_counts": {
+    "total_coordinates_evaluated": 38535,
+    "raw_finite_export_finite": 38250,
+    "raw_missing_export_finite_interpolated": 69,
+    "raw_missing_export_missing_unfilled": 216,
+    "raw_finite_export_missing_unexpected_loss": 0
+  },
+  "raw_finite_marker_frames": 12750,
+  "interpolated_marker_frames": 23,
+  "remaining_all_missing_marker_frames": 72,
+  "sampled_IK_frames_containing_interpolated_coordinates": 3,
+  "max_raw_finite_coordinate_difference_m": 0.0,
+  "manifest_filled_coordinate_count_matches": true,
+  "long_and_edge_gaps_unfilled": true,
+  "inputs_preserved": true,
+  "meta_points_residual_and_camera_qualification": {
+    "official_reader_authority": "https://github.com/pyomeca/ezc3d",
+    "point_fourth_row_semantics": "homogeneous coordinate, NOT reconstruction residual",
+    "source_residual_negative_marker_frames": 0,
+    "target_residual_negative_marker_frames": 0,
+    "source_residual_unique_values": [0.0],
+    "target_residual_unique_values": [0.0],
+    "source_camera_true_flags": 0,
+    "target_camera_true_flags": 0,
+    "dedicated_interpolation_mask_in_export_utility": false,
+    "physical_measurement_status_from_finiteness": "not established",
+    "target_residual_values_at_interpolated_marker_frames": [0.0],
+    "target_residual_values_at_raw_finite_marker_frames": [0.0],
+    "target_camera_true_flags_at_interpolated_marker_frames": 0
+  },
+  "raw_finite_is_not_independently_qualified_physical_observation": true,
+  "solver_input_observation_mask_integration": "required_before_raw_observation_accuracy_claims"
+}

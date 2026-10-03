@@ -1,11 +1,12 @@
 function report = gs3dx_match_export(capture_id, opts)
-%GS3DX_MATCH_EXPORT  Export Simscape inverse-kinematics visualization videos and stills (#10979, #11161).
+%GS3DX_MATCH_EXPORT  Export Simscape inverse-kinematics visualization videos and stills (#10979, #11011, #11161).
 %   REPORT = GS3DX_MATCH_EXPORT(CAPTURE_ID, OPTS) exports unqualified IK
 %   visualization videos, stills, and structured provenance JSON using GS3DX_Human.
 %   Parameters: CAPTURE_ID ("capture-A", "capture-O", or explicit C3D path).
 %   OPTS: mode="ik", model="", views=["face-on","down-the-line"], output_dir (REQ),
 %         export_video=true, export_stills=true, stills=[], stride=0,
-%         overlay_markers=true, frames=[], pose_source=[], registry_repo="".
+%         overlay_markers=true, frames=[], pose_source=[], registry_repo="",
+%         observed_mask=[] (optional), observation_contract=struct([]) (optional).
 
     arguments
         capture_id (1,1) string
@@ -26,6 +27,8 @@ function report = gs3dx_match_export(capture_id, opts)
         opts.registry_repo (1,1) string = ""
         opts.checkpoint_dir (1,1) string = string(fullfile(tempdir, "gs3dx_export_cache"))
         opts.scapula_protraction_deg (1,1) double = 7.5
+        opts.observed_mask = []
+        opts.observation_contract struct = struct([])
     end
 
     % 1. Precondition validation (fail-closed before any filesystem writes)
@@ -36,15 +39,24 @@ function report = gs3dx_match_export(capture_id, opts)
     assert(isfile(c3d_path), 'gs3dx:match_export:CaptureNotFound', ...
         'Resolved capture file not found: %s', c3d_path);
 
-    % 3. Read capture markers and joint centres
-    cap = gs3dx_capture_markers(c3d_path);
+    % Actual C3D file export SHA-256 for observation identity validation
+    export_sha256 = char(cap_sha256);
+
+    % 3. Read capture markers (forwarding explicit mask via wrapper seam helper)
+    cap = local_read_capture(c3d_path, opts.observed_mask);
+
+    % Validate contract against cap metadata, rate, frames, and actual C3D export SHA fail-closed.
+    % source_sha256 is caller-attested raw GEARS source hash (CALLER_BOUND); no cap.source_sha256 is assigned.
+    obs_identity = gs3dx_observation_identity(cap, export_sha256, opts.observation_contract);
+
+    % 4. Derive joint centres (respects missingness in cap)
     jc = gs3dx_capture_joint_centres(cap);
 
-    % 4. Validate user frames or compute uniform stride frames
+    % 5. Validate user frames or compute uniform stride frames
     [frames_to_render, stride, fps] = gs3dx_video_sampling(cap.rate_hz, cap.n_frames, ...
         opts.stride, opts.frames);
 
-    % 5. Model selection (GS3DX_Human ONLY) and segment length fitting
+    % 6. Model selection (GS3DX_Human ONLY) and segment length fitting
     [mdl_name, personal_lengths] = local_setup_model(opts.model, jc);
 
     model_file = which([mdl_name '.slx']);
@@ -79,15 +91,15 @@ function report = gs3dx_match_export(capture_id, opts)
         'runtime', runtime, ...
         'scapula_protraction_deg', opts.scapula_protraction_deg);
 
-    checkpoint_file = "";
-    if strlength(opts.checkpoint_dir) > 0
-        if ~isfolder(opts.checkpoint_dir)
-            mkdir(opts.checkpoint_dir);
-        end
-        checkpoint_file = fullfile(opts.checkpoint_dir, cap_alias + "_" + mdl_name + "_ik.mat");
+    % Bind observation metadata into cache identity for masked requests via wrapper seam helper
+    identity = local_bind_cache_identity(identity, obs_identity);
+
+    checkpoint_file = local_resolve_checkpoint_file(opts.checkpoint_dir, cap_alias, mdl_name, obs_identity);
+    if strlength(checkpoint_file) > 0 && ~isfolder(opts.checkpoint_dir)
+        mkdir(opts.checkpoint_dir);
     end
 
-    % 6. Obtain and validate poses (closes model immediately after solve)
+    % 7. Obtain and validate poses (closes model immediately after solve)
     [poses, t_vec] = local_obtain_poses(mdl_name, jc, cap.rate_hz, ...
         frames_to_render, opts.pose_source, personal_lengths, checkpoint_file, identity, deps.solve);
 
@@ -100,16 +112,16 @@ function report = gs3dx_match_export(capture_id, opts)
     public_alias=regexprep(display_name,'[^A-Za-z0-9_-]','_');
     export_alias=public_alias+"_clean";
     if opts.overlay_markers,export_alias=public_alias+"_markers";end
-    % 7. Map stills from capture frames to pose column indices
+    % 8. Map stills from capture frames to pose column indices
     [stills_cols, still_names_map] = local_resolve_stills(opts.stills, ...
         poses.frames, cap, jc, opts.views, export_alias, opts.export_stills);
 
-    % 8. Format scene title for overlay: honest IK qualification labeling
+    % 9. Format scene title for overlay: honest IK qualification labeling
     coverage_str = sprintf('Frames %d-%d (%.2f-%.2fs, %.0fHz, stride %d)', ...
         poses.frames(1), poses.frames(end), t_vec(1), t_vec(end), cap.rate_hz, stride);
     scene_title = char(display_name);
 
-    % 9. Prepare marker overlays (S'*(p-origin), waist origin, subset-aligned)
+    % 10. Prepare marker overlays (S'*(p-origin), waist origin, subset-aligned)
     marker_reference=gs3dx_capture_marker_overlay(cap,poses.frames);
     markers_overlay=[];if opts.overlay_markers,markers_overlay=marker_reference;end
 
@@ -117,16 +129,16 @@ function report = gs3dx_match_export(capture_id, opts)
     if ~isfolder(opts.output_dir)
         mkdir(opts.output_dir);
     end
-    % 10. Execute rendering per view through gs3dx_render
+    % 11. Execute rendering per view through gs3dx_render
     [rendered_videos, rendered_stills, setup_info] = local_render_views(mdl_name, poses, ...
         opts.views, export_alias, opts.output_dir, opts.export_video, opts.export_stills, ...
         stills_cols, still_names_map, markers_overlay, marker_reference, t_vec, fps, scene_title, personal_lengths, opts.resolution, opts.video_quality);
 
-    % 11. Build and save structured provenance JSON
+    % 12. Build and save structured provenance JSON
     report = local_build_report(cap_alias, cap_sha256, mdl_name, poses, cap, ...
         stride, fps, t_vec, personal_lengths, rendered_videos, rendered_stills, ...
         opts.output_dir, model_sha256, deps_hashes, setup_info, jc.foot_calibration, ...
-        deps, runtime, opts);
+        deps, runtime, obs_identity, opts);
 end
 
 % -------------------------------------------------------------------------
@@ -162,6 +174,88 @@ function local_validate_options(capture_id, opts)
             'gs3dx:match_export:InvalidFrames', 'Frames must be positive integers');
         assert(issorted(opts.frames, 'strictascend'), ...
             'gs3dx:match_export:InvalidFrames', 'Frames must be strictly monotonically increasing');
+    end
+
+    % Validate observation mask and contract preconditions
+    has_mask = ~isempty(opts.observed_mask);
+    has_contract = ~isempty(opts.observation_contract);
+
+    if ~has_mask
+        if ~((islogical(opts.observed_mask) || isa(opts.observed_mask, 'double')) ...
+                && isreal(opts.observed_mask) && isequal(size(opts.observed_mask), [0, 0]))
+            error('gs3dx:match_export:BadObservedMask', ...
+                'Empty observed_mask must be double [] or logical 0 x 0 sentinel.');
+        end
+    else
+        if ~islogical(opts.observed_mask)
+            error('gs3dx:match_export:BadObservedMask', ...
+                'observed_mask must be a logical array.');
+        end
+        if ndims(opts.observed_mask) > 3 || size(opts.observed_mask, 1) ~= 1
+            error('gs3dx:match_export:BadObservedMask', ...
+                'observed_mask must be a 3D logical array with leading dimension 1 (dimensions > 3 rejected).');
+        end
+    end
+
+    if has_mask ~= has_contract
+        if has_mask
+            error('gs3dx:match_export:MaskWithoutContract', ...
+                'Explicit observed_mask requires an explicit nonempty observation_contract.');
+        else
+            error('gs3dx:match_export:ContractWithoutMask', ...
+                'Nonempty observation_contract requires an explicit nonempty observed_mask.');
+        end
+    end
+
+    if has_contract
+        if ~isstruct(opts.observation_contract) || ~isscalar(opts.observation_contract)
+            error('gs3dx:match_export:InvalidContract', ...
+                'observation_contract must be a scalar struct.');
+        end
+    else
+        if ~isstruct(opts.observation_contract) || ~isempty(opts.observation_contract)
+            error('gs3dx:match_export:InvalidContract', ...
+                'Default observation_contract must be an empty struct.');
+        end
+    end
+end
+
+% -------------------------------------------------------------------------
+% Helper: Forward mask into capture reader (seam for unit tests)
+% -------------------------------------------------------------------------
+function cap = local_read_capture(c3d_path, observed_mask, capture_reader)
+    if nargin < 3 || isempty(capture_reader)
+        capture_reader = @gs3dx_capture_markers;
+    end
+    if ~isempty(observed_mask)
+        cap = capture_reader(c3d_path, observed_mask=observed_mask);
+    else
+        cap = capture_reader(c3d_path);
+    end
+end
+
+% -------------------------------------------------------------------------
+% Helper: Bind observation metadata into solve identity struct
+% -------------------------------------------------------------------------
+function identity = local_bind_cache_identity(identity, obs_identity)
+    if isstruct(obs_identity) && isfield(obs_identity, 'source_mask_applied') && obs_identity.source_mask_applied
+        identity.observation = obs_identity;
+    end
+end
+
+% -------------------------------------------------------------------------
+% Helper: Resolve checkpoint file path based on mask state
+% -------------------------------------------------------------------------
+function checkpoint_file = local_resolve_checkpoint_file(checkpoint_dir, cap_alias, mdl_name, obs_identity)
+    checkpoint_file = "";
+    if strlength(checkpoint_dir) == 0
+        return;
+    end
+    if isstruct(obs_identity) && isfield(obs_identity, 'source_mask_applied') && obs_identity.source_mask_applied
+        checkpoint_file = fullfile(checkpoint_dir, ...
+            cap_alias + "_" + mdl_name + "_masked_" + obs_identity.mask_sha256(1:8) + "_ik.mat");
+    else
+        checkpoint_file = fullfile(checkpoint_dir, cap_alias + "_" + mdl_name + "_ik.mat");
     end
 end
 
@@ -471,7 +565,7 @@ end
 function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
     stride, fps, t_vec, personal_lengths, rendered_videos, rendered_stills, ...
     output_dir, model_sha256, deps_hashes, setup_info, foot_calibration, ...
-    deps, runtime, opts)
+    deps, runtime, obs_identity, opts)
 
     provenance = struct();
     provenance.capture_alias = char(cap_alias);
@@ -490,6 +584,7 @@ function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
     if isstruct(runtime)
         provenance.runtime = runtime;
     end
+    provenance.observation = obs_identity;
     provenance.limitations = struct( ...
         'external_stl_assets', 'External STL graphics mesh assets are not recorded in dependency inventory or hashed; code parameter hashes do not record or guarantee actual mesh geometry assets.', ...
         'transitive_dependencies', 'Direct runtime execution components (MATLAB, Simulink, Simscape, Simscape Multibody, Python, numpy, ezc3d) are recorded explicitly; unrecorded transitive packages and libraries are not implied frozen.');
@@ -606,6 +701,7 @@ function report = local_build_report(cap_alias, cap_sha256, mdl, poses, cap, ...
     report.model = mdl;
     report.provenance_file = string(prov_file);
     report.provenance = provenance;
+    report.observation = obs_identity;
     report.videos = rendered_videos;
     report.stills = rendered_stills;
     report.verdict = "IK_VISUALIZATION_UNQUALIFIED";
@@ -623,6 +719,7 @@ function dep = local_dependency_inventory()
     dep.solve = struct();
     dep.solve.export = local_resolve_file([mfilename('fullpath') '.m']);
     dep.solve.runtime_fingerprint = local_resolve_which('gs3dx_runtime_fingerprint');
+    dep.solve.observation_identity = local_resolve_which('gs3dx_observation_identity');
     dep.solve.capture_markers = local_resolve_which('gs3dx_capture_markers');
     dep.solve.capture_points = local_resolve_which('gs3dx_capture_points');
     dep.solve.resolve_capture = local_resolve_which('resolve_capture');
@@ -662,19 +759,27 @@ function dep = local_dependency_inventory()
     dep.render.joint_keys = local_resolve_which('gs3dx_joint_keys');
 end
 
-function f = local_resolve_which(name)
-    w = which(name);
-    if isempty(w) && ~endsWith(name, '.m')
-        w = which([name '.m']);
-    end
-    if isempty(w)
-        tools_dir = fileparts(mfilename('fullpath'));
-        cand = fullfile(tools_dir, [name '.m']);
-        if isfile(cand)
-            w = cand;
+function f = local_resolve_which(name, varargin)
+    candidates = [{name}, varargin];
+    f = '';
+    for k = 1:numel(candidates)
+        cand_name = candidates{k};
+        w = which(cand_name);
+        if isempty(w) && ~endsWith(cand_name, '.m')
+            w = which([cand_name '.m']);
+        end
+        if isempty(w)
+            tools_dir = fileparts(mfilename('fullpath'));
+            cand = fullfile(tools_dir, [cand_name '.m']);
+            if isfile(cand)
+                w = cand;
+            end
+        end
+        if ~isempty(w)
+            f = local_resolve_file(w);
+            return;
         end
     end
-    f = local_resolve_file(w);
 end
 
 function f = local_resolve_file(p)

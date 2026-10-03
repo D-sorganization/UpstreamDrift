@@ -104,6 +104,9 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 950 | `src/shared/python/signal_toolkit/signal_processing.py` |
 | 948 | `src/shared/python/sidekick/process_calculators/acid_gas_dewpoint_calculator.py` |
 | 947 | `src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab_optimized/visualization/SkeletonPlotter.m` |
+| 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
+| 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
+| 943 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 937 | `src/api/models/responses.py` |
@@ -154,7 +157,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 842 | `src/shared/python/gui_pkg/help_content.py` |
 | 841 | `src/shared/python/sidekick/ui/mixins/calculator_state_mixin.py` |
 | 840 | `src/tools/bunker_shot_gui/sandvolume.py` |
-| 838 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_match_export.m` |
 | 837 | `src/bunkershot3d/calibration/f1_shear_cell.py` |
 | 836 | `src/shared/python/ai/gui/assistant/panel.py` |
 | 836 | `src/shared/python/perturbation/cross_engine_runner.py` |

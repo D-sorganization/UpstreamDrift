@@ -1,0 +1,77 @@
+{
+  "qualification": "PRIVATE_FOUR_CELL_OWNER_OFFSET_CALIBRATION_AND_SAME_SOURCE_IK_TRACKING_NOT_INDEPENDENT_VALIDATION",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "solver_sha256": "45ef16f9f1120f2129aca5fda283be684412330d98d6f1eca424a4e4de7cf6e8",
+  "sample_count_per_cell": 46,
+  "calibration_sample_count": 1,
+  "calibration_rounds": 3,
+  "recalibrated_offsets_seed_specific": true,
+  "offsets_frozen_before_full_tracking": true,
+  "trials": {
+    "old_orig_offsets": {
+      "all_frames_mean_marker_RMS_m": 0.016753638977749757,
+      "all_frames_max_marker_RMS_m": 0.0369873963684329,
+      "post_address_mean_marker_RMS_m": 0.016991257918683375,
+      "post_address_mean_head_error_deg": 11.318101592895191,
+      "post_address_max_head_error_deg": 22.16892132188402,
+      "all_frames_max_foot_error_deg": 20.57273929029672,
+      "implementation_ROM_failure_rows": 13,
+      "offset_delta_frobenius_vs_orig_m": 0
+    },
+    "mild_orig_offsets": {
+      "all_frames_mean_marker_RMS_m": 0.03900810573274553,
+      "all_frames_max_marker_RMS_m": 0.25726648618239223,
+      "post_address_mean_marker_RMS_m": 0.03897089279955811,
+      "post_address_mean_head_error_deg": 12.581666867708666,
+      "post_address_max_head_error_deg": 22.2254525097087,
+      "all_frames_max_foot_error_deg": 20.62799334921239,
+      "implementation_ROM_failure_rows": 12,
+      "offset_delta_frobenius_vs_orig_m": 0,
+      "passes_marker_degradation_screen": false
+    },
+    "old_new_offsets": {
+      "all_frames_mean_marker_RMS_m": 0.01820122398121327,
+      "all_frames_max_marker_RMS_m": 0.03564460699492998,
+      "post_address_mean_marker_RMS_m": 0.018547554881636067,
+      "post_address_mean_head_error_deg": 11.057961026181763,
+      "post_address_max_head_error_deg": 21.751752854759246,
+      "all_frames_max_foot_error_deg": 19.780977319229617,
+      "implementation_ROM_failure_rows": 13,
+      "offset_delta_frobenius_vs_orig_m": 0.03813345859647842,
+      "passes_marker_degradation_screen": false
+    },
+    "mild_new_offsets": {
+      "all_frames_mean_marker_RMS_m": 0.025639698791241793,
+      "all_frames_max_marker_RMS_m": 0.03881126147800901,
+      "post_address_mean_marker_RMS_m": 0.025799352530784643,
+      "post_address_mean_head_error_deg": 13.133225141222207,
+      "post_address_max_head_error_deg": 24.82163232764419,
+      "all_frames_max_foot_error_deg": 19.43625672103976,
+      "implementation_ROM_failure_rows": 10,
+      "offset_delta_frobenius_vs_orig_m": 0.14866619716963542,
+      "passes_marker_degradation_screen": false
+    },
+    "original_selected": {
+      "all_frames_mean_marker_RMS_m": 0.016753638977749757,
+      "all_frames_max_marker_RMS_m": 0.0369873963684329,
+      "post_address_mean_marker_RMS_m": 0.016991257918683375,
+      "post_address_mean_head_error_deg": 11.318101592895191,
+      "post_address_max_head_error_deg": 22.16892132188402,
+      "all_frames_max_foot_error_deg": 20.57273929029672,
+      "implementation_ROM_failure_rows": 13,
+      "offset_delta_frobenius_vs_orig_m": 0
+    }
+  },
+  "original_control_metrics_exact": true,
+  "all_alternatives_rejected_for_promotion": true,
+  "clinical_ROM_qualification": false,
+  "model_saved": false,
+  "simulation_executed": false,
+  "native_receipt": {
+    "actual_process_exit_code": 0,
+    "termination_reason": "natural_exit",
+    "done_marker": true,
+    "script_status": "success",
+    "timestamp": "2026-10-03T00:17:56.559216+00:00"
+  }
+}

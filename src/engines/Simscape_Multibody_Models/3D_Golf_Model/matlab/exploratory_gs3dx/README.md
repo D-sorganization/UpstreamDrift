@@ -28,54 +28,54 @@ it was built stage by stage, its mathematical formulation, what it matches, its 
 
 ## Layout
 
-| Path                                  | Purpose                                                                        |
-| ------------------------------------- | ------------------------------------------------------------------------------ |
-| `gs3dx_setup.m`                       | Session setup: adds the path, redirects the cache and runs the shadowing guard |
-| `tools/gs3dx_names.m`                 | Single source of truth for original and GS3DX names                            |
-| `tools/gs3dx_clone_baseline.m`        | Builds `GS3DX_Baseline` plus `GS3DX_KD_*` from the originals                   |
-| `tools/gs3dx_save_model.m`            | The only sanctioned model writer                                               |
-| `tools/gs3dx_original_manifest.m`     | SHA-256 of the originals                                                       |
-| `tools/gs3dx_drive.m`                 | Regression drives: `impact` (default) and `persisted` (ill-conditioned)        |
-| `tools/gs3dx_build_slim.m`            | Builds `GS3DX_Slim` plus `GS3DX_KDS_*` from the baseline clones                |
-| `tools/gs3dx_build_quat.m`            | Builds `GS3DX_Quat` plus `GS3DX_KDS_Spherical` (quaternion shoulders and hip)  |
-| `tools/gs3dx_quaternion_swap.m`       | Swaps an Euler-angle joint for a quaternion joint, keeping the interface       |
-| `tools/gs3dx_joint_rig.m`             | Drives one joint subsystem in isolation (torqued equivalence rig)              |
-| `tools/gs3dx_hip_rig.m`               | Drives the hip subsystem in isolation (Bushing vs 6-DOF rig)                   |
-| `tools/gs3dx_build_lower_body.m`      | Builds `GS3DX_FullBody`: legs from `gs3dx_leg_table`, feet welded to World     |
-| `tools/gs3dx_stance_frames.m`         | Measures pelvis and shoulder frames at t = 0 (places the legs)                 |
-| `tools/gs3dx_contact_trial.m`         | Prices foot-ground contact against the weld (never saved)                      |
-| `tools/gs3dx_pinned_drive.m`          | Impact drive with the right shoulder's assembled start state pinned            |
-| `tools/gs3dx_capture_stance.m`        | Reads the tour-average C3D (ezc3d): stance, foot yaw, marker gaps, no GRF      |
-| `tools/gs3dx_leg_fk.m`                | Foot pose from pelvis pose and the six leg angles (matches Simscape)           |
-| `tools/gs3dx_leg_ik.m`                | Leg angles that put a foot on a target pose, tracked over a pelvis path        |
-| `tools/gs3dx_build_contact.m`         | Builds `GS3DX_FullBodyContact`: sole contacts, free pelvis, leg servo          |
-| `tools/gs3dx_contact_check.m`         | Simulates the contact model: Newton check, foot slip/lift, GRF                 |
-| `tools/gs3dx_anthropometry.m`         | de Leva segment masses and COM fractions for one body mass (one table)         |
-| `tools/gs3dx_build_golfer.m`          | Builds `GS3DX_Golfer`: typical (de Leva) masses, parameter-only                |
-| `tools/gs3dx_capture_markers.m`       | Reads a C3D's markers (Z-up), impact frame and address target frame            |
-| `tools/gs3dx_kinematic_grf.m`         | Total ground reaction force from the capture COM, without force plates         |
-| `tools/gs3dx_capture_joint_centres.m` | Joint-centre estimates and segment lengths from the capture markers            |
-| `tools/gs3dx_fit_lengths.m`           | Maps the capture segment lengths onto the model length variables               |
-| `tools/gs3dx_build_fit.m`             | Builds `GS3DX_Fit`: segment lengths from the capture, parameter-only           |
-| `tools/gs3dx_whole_body_ik.m`         | Least-squares whole-body IK to the capture (KinematicsSolver FK, grip loop)    |
-| `tools/gs3dx_fit_grip.m`              | Hand-on-grip geometry from the capture (functional wrist centres on the club)  |
-| `tools/gs3dx_leg_reference.m`         | Leg servo angle/rate references from the IK pelvis path and the measured feet  |
-| `tools/gs3dx_build_fit_legs.m`        | Builds `GS3DX_FitLegs`: the leg servo plays the reference (From Workspace)     |
-| `tools/gs3dx_upper_body_reference.m`  | Upper-body chart angle/rate references from the whole-body IK                  |
-| `tools/gs3dx_build_fit_track.m`       | Builds `GS3DX_FitTrack`: charts track the capture (feedforward + PD), rewired  |
-| `tools/gs3dx_track_learn.m`           | Learns the upper-body feedforward by iterative learning control (Simscape log) |
-| `tools/gs3dx_track_torque.m`          | Feedforward plus PD torque of a joint reference (called by the charts)         |
-| `tools/gs3dx_track_gains.m`           | Tracking PD gains: critically damped 6 Hz servos on estimated joint inertias   |
-| `tools/gs3dx_build_fit_balance.m`     | Builds `GS3DX_FitBalance`: centre-of-mass and foot feedback into the leg servo |
-| `tools/gs3dx_balance_command.m`       | Leg servo command with the balance shift and foot correction (MATLAB Function) |
-| `tools/gs3dx_balance_gain.m`          | Foot-fixed damped inverse leg Jacobian: leg angles per unit pelvis shift       |
-| `tools/gs3dx_balance_com_offset.m`    | Centre of mass in the pelvis frame from a run, for the balance reference       |
-| `tools/gs3dx_time_interp.m`           | Sample index and weight for linear interpolation on a time grid                |
-| `models/`                             | GS3DX `.slx` files (all generated by tools, never hand-copied)                 |
-| `baselines/`                          | Small reference trajectories for regression                                    |
-| `tests/`                              | `matlab.unittest` suites                                                       |
-| `docs/REFERENCE.md`                   | Comprehensive modeling reference, equations, conventions and gate status       |
-| `docs/`                               | Findings, block budgets and screenshots                                        |
+| Path                                  | Purpose                                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| `gs3dx_setup.m`                       | Session setup: adds the path, redirects the cache and runs the shadowing guard     |
+| `tools/gs3dx_names.m`                 | Single source of truth for original and GS3DX names                                |
+| `tools/gs3dx_clone_baseline.m`        | Builds `GS3DX_Baseline` plus `GS3DX_KD_*` from the originals                       |
+| `tools/gs3dx_save_model.m`            | The only sanctioned model writer                                                   |
+| `tools/gs3dx_original_manifest.m`     | SHA-256 of the originals                                                           |
+| `tools/gs3dx_drive.m`                 | Regression drives: `impact` (default) and `persisted` (ill-conditioned)            |
+| `tools/gs3dx_build_slim.m`            | Builds `GS3DX_Slim` plus `GS3DX_KDS_*` from the baseline clones                    |
+| `tools/gs3dx_build_quat.m`            | Builds `GS3DX_Quat` plus `GS3DX_KDS_Spherical` (quaternion shoulders and hip)      |
+| `tools/gs3dx_quaternion_swap.m`       | Swaps an Euler-angle joint for a quaternion joint, keeping the interface           |
+| `tools/gs3dx_joint_rig.m`             | Drives one joint subsystem in isolation (torqued equivalence rig)                  |
+| `tools/gs3dx_hip_rig.m`               | Drives the hip subsystem in isolation (Bushing vs 6-DOF rig)                       |
+| `tools/gs3dx_build_lower_body.m`      | Builds `GS3DX_FullBody`: legs from `gs3dx_leg_table`, feet welded to World         |
+| `tools/gs3dx_stance_frames.m`         | Measures pelvis and shoulder frames at t = 0 (places the legs)                     |
+| `tools/gs3dx_contact_trial.m`         | Prices foot-ground contact against the weld (never saved)                          |
+| `tools/gs3dx_pinned_drive.m`          | Impact drive with the right shoulder's assembled start state pinned                |
+| `tools/gs3dx_capture_stance.m`        | Reads the tour-average C3D (ezc3d): stance, foot yaw, marker gaps, no GRF          |
+| `tools/gs3dx_leg_fk.m`                | Foot pose from pelvis pose and the six leg angles (matches Simscape)               |
+| `tools/gs3dx_leg_ik.m`                | Leg angles that put a foot on a target pose, tracked over a pelvis path            |
+| `tools/gs3dx_build_contact.m`         | Builds `GS3DX_FullBodyContact`: sole contacts, free pelvis, leg servo              |
+| `tools/gs3dx_contact_check.m`         | Simulates the contact model: Newton check, foot slip/lift, GRF                     |
+| `tools/gs3dx_anthropometry.m`         | de Leva segment masses and COM fractions for one body mass (one table)             |
+| `tools/gs3dx_build_golfer.m`          | Builds `GS3DX_Golfer`: typical (de Leva) masses, parameter-only                    |
+| `tools/gs3dx_capture_markers.m`       | Reads a C3D's markers (Z-up), impact frame and address target frame                |
+| `tools/gs3dx_kinematic_grf.m`         | Total ground reaction force from the capture COM, without force plates             |
+| `tools/gs3dx_capture_joint_centres.m` | Joint-centre estimates and segment lengths from the capture markers                |
+| `tools/gs3dx_fit_lengths.m`           | Maps the capture segment lengths onto the model length variables                   |
+| `tools/gs3dx_build_fit.m`             | Builds `GS3DX_Fit`: segment lengths from the capture, parameter-only               |
+| `tools/gs3dx_whole_body_ik.m`         | Least-squares whole-body IK to the capture (KinematicsSolver FK, grip loop)        |
+| `tools/gs3dx_fit_grip.m`              | Hand-on-grip geometry from the capture (functional wrist centres on the club)      |
+| `tools/gs3dx_leg_reference.m`         | Leg servo angle/rate references from the IK pelvis path and the measured feet      |
+| `tools/gs3dx_build_fit_legs.m`        | Builds `GS3DX_FitLegs`: the leg servo plays the reference (From Workspace)         |
+| `tools/gs3dx_upper_body_reference.m`  | Upper-body chart references; Human requires explicit native joint-variable binding |
+| `tools/gs3dx_build_fit_track.m`       | Builds `GS3DX_FitTrack`: charts track the capture (feedforward + PD), rewired      |
+| `tools/gs3dx_track_learn.m`           | Learns the upper-body feedforward by iterative learning control (Simscape log)     |
+| `tools/gs3dx_track_torque.m`          | Feedforward plus PD torque of a joint reference (called by the charts)             |
+| `tools/gs3dx_track_gains.m`           | Tracking PD gains: critically damped 6 Hz servos on estimated joint inertias       |
+| `tools/gs3dx_build_fit_balance.m`     | Builds `GS3DX_FitBalance`: centre-of-mass and foot feedback into the leg servo     |
+| `tools/gs3dx_balance_command.m`       | Leg servo command with the balance shift and foot correction (MATLAB Function)     |
+| `tools/gs3dx_balance_gain.m`          | Foot-fixed damped inverse leg Jacobian: leg angles per unit pelvis shift           |
+| `tools/gs3dx_balance_com_offset.m`    | Centre of mass in the pelvis frame from a run, for the balance reference           |
+| `tools/gs3dx_time_interp.m`           | Sample index and weight for linear interpolation on a time grid                    |
+| `models/`                             | GS3DX `.slx` files (all generated by tools, never hand-copied)                     |
+| `baselines/`                          | Small reference trajectories for regression                                        |
+| `tests/`                              | `matlab.unittest` suites                                                           |
+| `docs/REFERENCE.md`                   | Comprehensive modeling reference, equations, conventions and gate status           |
+| `docs/`                               | Findings, block budgets and screenshots                                            |
 
 ## Model Lineage
 
@@ -126,3 +126,9 @@ runtests('tests')
 ```
 
 Headless: `matlab.exe -batch "cd('<this folder>'); info = gs3dx_setup(); runtests('tests')"`.
+
+For Human moving references, pass `joint_variables=ks.jointPositionVariables` to `gs3dx_upper_body_reference` from the actual capture-bound, fitted Human model. Numbered Fit joint IDs are historical only. The maintained research LaTeX reference documents filtering, units, native parity and the remaining moving-start/contact and independent dynamics gates.
+
+After native closed-chain verification, pass `filter_reference=false` to preserve supplied sample geometry during upper-body chart conversion. The historical default still filters; read `ref.filter_applied`. Componentwise filtering and between-sample chart interpolation can violate complete native targets. Derived rates require separate tangent-velocity and initialization checks. The maintained LaTeX reference and `reference_filter_closure_checkpoint_20261003.json` distinguish satisfied model constraints from missed targets and retain the rejected dependent-arm trials.
+
+The native differentiated-velocity and complete-coordinate midpoint audits miss exact targets for every tested A/O moving request, despite all original zero-velocity controls passing. Use the maintained LaTeX reference and `reference_velocity_midpoint_checkpoint_20261003.json` before building a continuous moving reference. Sample position roundtrips alone cannot qualify interpolated closure, tangent rates, initialization or full forward dynamics.
