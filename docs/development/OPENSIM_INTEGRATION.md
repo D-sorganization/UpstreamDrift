@@ -210,7 +210,7 @@ Conventions and limits:
 - Muscle lines of action (FTO-16, #11301): `OpenSimForceTorqueSource.muscle_wrenches`
   runs from `sample` unless `include_muscles=False`. Only the **end attachments**
   are drawn; wrapping surfaces and via points bend the end directions but the
-  path polyline is a follow-up. Disabled muscles are omitted; a negative or
+  path polyline is a follow-up. Disabled muscles and muscles whose path has no point geometry (`FunctionBasedPath`, `Scholz2015GeometryPath`) are omitted; a negative or
   non-finite tendon force raises `AssertionError`. `get_muscle_forces` (scalar
   fiber force) is unchanged. Rajagopal muscles stay gated by
   `POST_MVP_MUSCLES.md` and are not enabled here.

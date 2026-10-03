@@ -7,6 +7,7 @@ real ``opensim`` package and skips cleanly without it. No visualizer is used.
 from __future__ import annotations
 
 import math
+import os
 
 import numpy as np
 import pytest
@@ -194,3 +195,55 @@ def test_negative_tendon_force_violates_the_postcondition(monkeypatch) -> None:
     monkeypatch.setattr(osim.Muscle, "getTendonForce", lambda self, s: -1.0)
     with pytest.raises(AssertionError, match="tendon force"):
         source.sample(state)
+
+
+def _function_based_muscle_model():
+    """Block hung from a muscle whose path is a FunctionBasedPath (OpenSim 4.5+).
+
+    Its path is not a ``GeometryPath`` (no points), so ``getGeometryPath()``
+    throws ``std::bad_cast``.
+    """
+    model, _ = _muscle_block(with_muscle=False)
+    muscle = osim.Thelen2003Muscle("fb_muscle", MAX_ISOMETRIC_N, 0.3, 0.2, 0.0)
+    path = osim.FunctionBasedPath()
+    path.appendCoordinatePath("/jointset/slide/slide_coord_0")
+    path.setLengthFunction(osim.LinearFunction(-1.0, ORIGIN_HEIGHT_M))
+    path.setLengtheningSpeedFunction(
+        osim.MultivariatePolynomialFunction(osim.Vector(3, 0.0), 2, 1)
+    )
+    muscle.set_path(path)
+    model.addForce(muscle)
+    return model
+
+
+def test_function_based_path_muscle_is_omitted_and_sample_still_works() -> None:
+    model = _function_based_muscle_model()
+    state = model.initSystem()
+    frame = OpenSimForceTorqueSource(model).sample(state)  # must not raise
+    assert not frame.by_kind(WrenchKind.MUSCLE)
+    assert frame.by_kind(WrenchKind.JOINT_REACTION)  # other channels unaffected
+    assert OpenSimForceTorqueSource(model).muscle_wrenches(state) == ()
+
+
+def _current_rss_kib() -> int:
+    """Resident set size now (not the peak, which earlier tests may have set)."""
+    with open("/proc/self/statm") as statm:
+        pages = int(statm.read().split()[1])
+    return pages * os.sysconf("SC_PAGE_SIZE") // 1024
+
+
+@pytest.mark.skipif(
+    not os.path.exists("/proc/self/statm"), reason="needs /proc for current RSS"
+)
+def test_repeated_sampling_does_not_leak_point_force_directions() -> None:
+    """``getPointForceDirections`` hands ownership of each point to the caller."""
+    model, state, _ = _equilibrium()
+    source = OpenSimForceTorqueSource(model)
+    for _ in range(2000):  # warm up allocator pools
+        source.muscle_wrenches(state)
+    before = _current_rss_kib()
+    for _ in range(40000):
+        source.muscle_wrenches(state)
+    growth_kib = _current_rss_kib() - before
+    # Unfixed, every call leaks ~3 native objects (>5 MiB over this loop).
+    assert growth_kib < 2048

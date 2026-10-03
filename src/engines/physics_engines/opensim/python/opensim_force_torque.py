@@ -317,8 +317,9 @@ class OpenSimForceTorqueSource:
 
         Preconditions: ``state`` is realized to Dynamics or later (``sample``
         does this). Postcondition: every force is finite with a norm equal to
-        the tendon force, which is >= 0 (tendons only pull); a muscle with a
-        degenerate path (fewer than two effective points) is omitted, never
+        the tendon force, which is >= 0 (tendons only pull); a muscle whose path
+        has no point geometry (``FunctionBasedPath``, ``Scholz2015GeometryPath``)
+        or fewer than two effective points is omitted, never
         reported as zero.
 
         Raises:
@@ -334,6 +335,14 @@ class OpenSimForceTorqueSource:
         return tuple(wrenches)
 
     def _muscle_end_wrenches(self, muscle: Any, state: Any) -> list[OverlayWrench]:
+        # OpenSim 4.5+ paths may be FunctionBasedPath / Scholz2015GeometryPath,
+        # which have no points: only a plain GeometryPath is drawable.
+        path = opensim.GeometryPath.safeDownCast(muscle.getPath())
+        if path is None:
+            logger.info(
+                "Omitting muscle %s: path has no point geometry", muscle.getName()
+            )
+            return []
         tendon_n = float(muscle.getTendonForce(state))
         if not math.isfinite(tendon_n) or tendon_n < 0.0:
             raise AssertionError(
@@ -341,32 +350,41 @@ class OpenSimForceTorqueSource:
                 f">= 0 N, got {tendon_n}"
             )
         directions = opensim.ArrayPointForceDirection()
-        muscle.getGeometryPath().getPointForceDirections(state, directions)
+        path.getPointForceDirections(state, directions)
+        # The array only stores pointers; the caller owns each point.
+        points = [directions.get(k) for k in range(directions.getSize())]
+        try:
+            return self._end_wrenches(muscle, tendon_n, points, state)
+        finally:
+            for point in points:
+                point.thisown = True  # freed when the last reference is dropped
+
+    def _end_wrenches(
+        self, muscle: Any, tendon_n: float, points: list[Any], state: Any
+    ) -> list[OverlayWrench]:
         # Consecutive path points on one body exchange force internally, so
         # OpenSim reports a zero direction there; the effective ends are the
         # first and last points that transmit force to a body.
         carrying = [
             pfd
-            for pfd in (directions.get(k) for k in range(directions.getSize()))
+            for pfd in points
             if np.linalg.norm(_vec3(pfd.direction())) > _MIN_DIRECTION_NORM
         ]
         if len(carrying) < 2:
             logger.info("Omitting muscle %s: path has < 2 points", muscle.getName())
             return []
-        ends = (("origin", carrying[0]), ("insertion", carrying[-1]))
         wrenches = []
-        for end, pfd in ends:
+        for end, pfd in (("origin", carrying[0]), ("insertion", carrying[-1])):
             frame = pfd.frame()
             point = frame.findStationLocationInGround(state, pfd.point())
+            direction = np.asarray(_vec3(pfd.direction()))
             wrenches.append(
                 OverlayWrench(
                     kind=WrenchKind.MUSCLE,
                     label=f"{_label('muscle', muscle.getName())}:{end}",
                     body=_base_name(frame),
                     point_m=_tuple3(self._world(_vec3(point))),
-                    force_n=_tuple3(
-                        self._world(tendon_n * np.asarray(_vec3(pfd.direction())))
-                    ),
+                    force_n=_tuple3(self._world(tendon_n * direction)),
                     source=_MUSCLE_SOURCE,
                 )
             )
