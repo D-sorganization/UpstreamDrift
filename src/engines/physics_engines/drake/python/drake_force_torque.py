@@ -121,6 +121,11 @@ class DrakeForceTorqueSource:
         """Labels omitted by the most recent ``sample`` because unavailable."""
         return self._unavailable
 
+    @property
+    def body_labels(self) -> dict[Any, str]:
+        """Copy of the ``BodyIndex`` -> segment label map used in axial loads."""
+        return dict(self._body_names)
+
     # -- helpers -----------------------------------------------------------
     def _check_context(self, ctx: Any) -> None:
         if not isinstance(ctx, Context):
