@@ -261,6 +261,12 @@ Desktop index and prior ControlTower deliveries remain preserved.
 
 ## Solver Budget, Fixed Row-Time and ROI Checkpoint
 
+For the later completed four-video delivery, canonical 52-frame source binding,
+new telemetry and separately preregistered camera-orientation work, follow the
+[Current Full-Video and Source-Binding Checkpoint](necromatcher-full-shape-checkpoint.md).
+The pending-export statements in this section retain their earlier execution
+checkpoint meaning; they do not describe the later completed videos.
+
 This checkpoint supersedes earlier pending-diagnostic statements without
 rewriting their historical producer evidence. The balanced four-arm forearm comparison with a requested budget of 30 evaluations and twelve original shape pilots remain rejected research.
 The later comparison with a requested budget of 120 evaluations was partial: two Tiger results

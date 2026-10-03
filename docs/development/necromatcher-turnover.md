@@ -4,7 +4,7 @@
 
 Owner priority: integrate historical footage matching as **Necromatcher**, with player tiles, persistent swing/model/control versions and downstream simulation/impact/analysis handoffs. Epic #11232 supersedes the narrower capture-only delivery scope. Tiger #11226 and Hogan #11229 remain open until reconstruction and real native replay qualify.
 
-## Current Checkpoint: Budget, Row-Time and Model Surfaces
+## Current Checkpoint: Full Videos, Source Binding and Telemetry
 
 Follow the [Current Camera, Morphology and Shutter Procedure](necromatcher-camera-morphology-shutter-review.md#solver-budget-fixed-row-time-and-roi-checkpoint)
 and its exact three-page budget/four-page row-time source and review receipts.
@@ -13,17 +13,21 @@ the partial comparison with a requested budget of 120 evaluations,
 56 fixed row-time cases and twelve current ROI-parity pilots have actually run.
 Actual evaluation counts remain unavailable; fit results remain nonconverged
 and rejected. Twelve selected model-proxy surface
-poses are actual outputs; full-source shaded videos and fitted camera diagnostics
-remain separate pending work. Exact source, raw metrics, uncertainty and physical
-qualification remain distinct. The two new standalone reports are verified on
-ControlTower Desktop; row-time delivery contains thirteen hash-checked payloads
+poses are actual outputs. Four full-source shaded videos have subsequently
+completed and reached ControlTower Desktop; four focal sensitivity seeds and
+the 52-frame diagnostic shaft cohort have been independently checked. Follow
+the [Current Full-Video and Source-Binding Checkpoint](necromatcher-full-shape-checkpoint.md)
+for these later producers, exact receipts, telemetry implementation and pending
+orientation/analytic-derivative work. Exact source, raw metrics, uncertainty and physical
+qualification remain distinct. The earlier budget and row-time reports and the
+new full-shape report are verified on ControlTower Desktop; row-time delivery contains thirteen hash-checked payloads
 and 5,242,778 bytes. All earlier reports, receipts and producer identities remain
 preserved. Historical no-diagnostic/no-shape statements below apply only to their
 recorded earlier checkpoints, not this current status.
 
 ## Historical Camera, Morphology and Shutter Qualification
 
-Follow [Camera, Morphology, Shutter and Human Motion Qualification](necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original960 frames are verified; no new native diagnostic or optimizer has run. The nine-page source supplement and77-file source audit package are verified on ControlTower Desktop. Shape overlays under#11356 are under implementation/review; actual shaded exports remain pending.
+Follow [Camera, Morphology, Shutter and Human Motion Qualification](necromatcher-camera-morphology-shutter-review.md) for source diagnostics, saved camera assumptions, sourced dimension priors, authored attachment and ROM checks, immutable shutter hypotheses and controlled follow-up trials. Original 960 source frames are verified. The nine-page source supplement and 77-file source audit package remain preserved on ControlTower Desktop. The current full-video checkpoint above supersedes earlier pending-export statements; physical camera, anatomy, shutter and ROM qualification remains open.
 
 ## Shared Authorities
 

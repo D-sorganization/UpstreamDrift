@@ -1,0 +1,93 @@
+{
+  "schema": "necromatcher/standalone-research-supplement-checkpoint/1",
+  "source": "necromatcher-balanced-full-shape-checkpoint.tex",
+  "source_sha256": "e3a2d4a55e8a4050b77782fd795f96cad58f2f73f9f69bf7595fea95fada383e",
+  "pdf_sha256": "8a935064550d7eb91803f918d2f00b1d55dd22c8317b26616395242ffbbb86e6",
+  "pages": 8,
+  "all_pages_visually_reviewed": true,
+  "report_review_sha256": "933e8c9c40adfc2981799ec83eeb70f6e7697661c4357101515b80e1634418b6",
+  "root_review_sha256": "456538763c9e9382d1e7e724337b435e90d145e6662e298a2311e1d8d0a83ab3",
+  "scientific_acceptance": false,
+  "physical_calibration": false,
+  "original_media_committed": false,
+  "generated_pdf_committed": false,
+  "relative_assets_external": true,
+  "compiler": "Existing installer-disabled MiKTeX, three successful passes; built-in platform-initialization failure preserved separately.",
+  "reproduction": "Stage exact TEX beside supplied private assets directory, verify every figure hash, compile with available compiler and visually review every page after any change.",
+  "execution_producer": "e0042ba61870f88543cb1305e3f6d21903c97fb8",
+  "numerical_producer": "00b7d9846bd2fb2572b7c84f03cfc6c9699323cb",
+  "library_files_preserved": 351,
+  "tracked_execution_files_preserved": 14767,
+  "independently_decoded_frames": 1920,
+  "root_visual_stills": 12,
+  "controltower_report_transfer_completed": true,
+  "asset_pins": [
+    {
+      "path": "assets/tiger-forearm-paired-control-v17-frame-000000.png",
+      "bytes": 995057,
+      "sha256": "c82f304337e5f4d4a36a9c649a324fa1545eed68a089ef47471179914141dd4b"
+    },
+    {
+      "path": "assets/tiger-forearm-paired-control-v17-frame-000150.png",
+      "bytes": 1069857,
+      "sha256": "8aa4a5d3b827117006531c192a5fe0f0c5092ff6613c5d69ebbec268d3d4bf4e"
+    },
+    {
+      "path": "assets/tiger-forearm-paired-control-v17-frame-000209.png",
+      "bytes": 1094469,
+      "sha256": "cfdf03eabf293bfc9234ef17105acf234e1b18ebbad058dc7db30f5ef103297a"
+    },
+    {
+      "path": "assets/tiger-forearm-paired-variant-v17-frame-000000.png",
+      "bytes": 994691,
+      "sha256": "c8b72644da31d01b7513e3063d2bb863bd5d2f94e59eed23639dbb241e9301e5"
+    },
+    {
+      "path": "assets/tiger-forearm-paired-variant-v17-frame-000150.png",
+      "bytes": 1069388,
+      "sha256": "bb8d7ac55ab2a43285a68f2d017498c7f4a2de78bdf42919a4ba130c9045e9ad"
+    },
+    {
+      "path": "assets/tiger-forearm-paired-variant-v17-frame-000209.png",
+      "bytes": 1090222,
+      "sha256": "94a0f0a958474db35691f1bbb40703a892a931273510103d6ad18a5a2168c402"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-control-v14-frame-000200.png",
+      "bytes": 122816,
+      "sha256": "eec09ec6ddfff077295229b5859c41cdce2e14d81bc6db1594a2698775635c1c"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-control-v14-frame-000375.png",
+      "bytes": 120604,
+      "sha256": "e5ac8e9abd2215549e9986b4a85287da9498db3c51c382a8e951bef1723166d6"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-control-v14-frame-000550.png",
+      "bytes": 118600,
+      "sha256": "081df9ea0b6a75a96f3932ba8768d3706f0d466f69030c742b3a14336f9c08e1"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-variant-v14-frame-000200.png",
+      "bytes": 122889,
+      "sha256": "aaa3fa3fc5bbf772103372bb02ce96f9d474b6866d7ddc281e14911c8ae8dfa6"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-variant-v14-frame-000375.png",
+      "bytes": 120575,
+      "sha256": "ebeaf2457deca08ddd569d7914bebf12552cc73b21d39dcd40eaf41cb539429f"
+    },
+    {
+      "path": "assets/hogan-forearm-paired-variant-v14-frame-000550.png",
+      "bytes": 118505,
+      "sha256": "1976eb6d33b7460063e64e614734e4b284f6da8e5b9ced0866d4504fc03861f6"
+    }
+  ],
+  "controltower_destination": "C:/Users/diete/Desktop/Necromatcher Balanced Full Shape Checkpoint Report 2026-10-03 V1",
+  "controltower_payload_count": 26,
+  "controltower_payload_bytes": 23799673,
+  "controltower_manifest_sha256": "3d85126acd9d7ac93dd0cc4fecc778b94f231d4ec3779a6df1793cbb1ffea858",
+  "controltower_archive_sha256": "8ef28707879616e5156322b8d9d0832a861d1fa02f00d00e54425ec4755d0166",
+  "controltower_remote_receipt_sha256": "bf65dcb6b1a41a27f6a1b643935abc4b97bc2bc37fea19c8afada4d37a3f9587",
+  "controltower_local_receipt_sha256": "772ac9f493d5ec2f7cf8dd4edbb3d898a1b600c4129f80ed1076bab6379dc8d3"
+}
