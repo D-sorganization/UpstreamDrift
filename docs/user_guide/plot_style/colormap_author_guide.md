@@ -133,14 +133,14 @@ The semantic aliases ship the perceptually-uniform pick for each data
 family — prefer them over the underlying matplotlib name at call
 sites:
 
-| Semantic alias         | Underlying built-in   | Use-case                                                     |
-| ---------------------- | --------------------- | ------------------------------------------------------------ |
-| `VELOCITY`             | `PLASMA`              | Speed magnitudes (0 → max)                                   |
-| `FORCE`                | `INFERNO`             | Force / pressure magnitudes                                  |
-| `ACCELERATION`         | `TURBO`               | Higher-frequency derivatives                                 |
-| `HEIGHT`               | `VIRIDIS`             | Vertical position / elevation                                |
-| `GENERIC_DIVERGING`    | `COOLWARM`            | Signed deviations around zero                                |
-| `TENSION_COMPRESSION`  | `tension_compression` | Signed axial load (tension=blue, compression=red; ADR-0052)  |
+| Semantic alias        | Underlying built-in   | Use-case                                                    |
+| --------------------- | --------------------- | ----------------------------------------------------------- |
+| `VELOCITY`            | `PLASMA`              | Speed magnitudes (0 → max)                                  |
+| `FORCE`               | `INFERNO`             | Force / pressure magnitudes                                 |
+| `ACCELERATION`        | `TURBO`               | Higher-frequency derivatives                                |
+| `HEIGHT`              | `VIRIDIS`             | Vertical position / elevation                               |
+| `GENERIC_DIVERGING`   | `COOLWARM`            | Signed deviations around zero                               |
+| `TENSION_COMPRESSION` | `tension_compression` | Signed axial load (tension=blue, compression=red; ADR-0052) |
 
 Using the alias keeps call sites readable — and if a future review
 changes the underlying matplotlib pick, every existing caller updates
@@ -159,15 +159,15 @@ the canonical categorical palette is `FORCE_KIND_PALETTE`. It uses color-blind-s
 Okabe–Ito hues and reserves pure `#0000ff` and `#ff0000` strictly for axial tension
 and compression fills:
 
-| Kind | Hex Code | Visual Swatch / Notes |
-| --- | --- | --- |
-| `joint_actuator` | `#E69F00` | Orange (Okabe–Ito) |
-| `joint_reaction` | `#CC79A7` | Reddish purple (Okabe–Ito) |
-| `contact` | `#009E73` | Bluish green (Okabe–Ito) |
-| `grip` | `#56B4E9` | Sky blue (Okabe–Ito) |
-| `external` | `#000000` | Black (light) / `#FFFFFF` White (dark) |
-| `gravity` | `#999999` | Medium gray (Okabe–Ito) |
-| `muscle` | `#D55E00` | Vermilion (Okabe–Ito) |
+| Kind             | Hex Code  | Visual Swatch / Notes                  |
+| ---------------- | --------- | -------------------------------------- |
+| `joint_actuator` | `#E69F00` | Orange (Okabe–Ito)                     |
+| `joint_reaction` | `#CC79A7` | Reddish purple (Okabe–Ito)             |
+| `contact`        | `#009E73` | Bluish green (Okabe–Ito)               |
+| `grip`           | `#56B4E9` | Sky blue (Okabe–Ito)                   |
+| `external`       | `#000000` | Black (light) / `#FFFFFF` White (dark) |
+| `gravity`        | `#999999` | Medium gray (Okabe–Ito)                |
+| `muscle`         | `#D55E00` | Vermilion (Okabe–Ito)                  |
 
 ### Accessibility
 
