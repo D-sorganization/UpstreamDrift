@@ -15,8 +15,6 @@ import numpy as np
 import pytest
 from matplotlib.figure import Figure
 
-pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
-
 
 def test_force_vectors_shim_deprecation_warning() -> None:
     if "src.shared.python.plotting.renderers.force_vectors" in sys.modules:

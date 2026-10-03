@@ -1,4 +1,4 @@
-"""Renderers for force and torque overlay glyphs (ADR-0052)."""
+"""Force and torque glyph renderers for various visualization backends (ADR-0052)."""
 
 from __future__ import annotations
 
