@@ -2605,6 +2605,89 @@ report \texttt{owner\_seed\_feasibility\_checkpoint\_20261002.json}
 retains the natural-exit receipts and aggregate results; seed vectors
 and fitted coordinates remain private.
 % END OWNER SEED FEASIBILITY
+\section{Scapula Protraction and Shareable Marker Previews}
+\label{sec:scapula-preview-refinement}
+This refinement (issue \#11329) changes the inverse-kinematics matching prior;
+it does not establish forward-dynamics or contact acceptance. The anatomical
+labels and mirrored signs are inherited model conventions, not measured
+scapular anatomy. The shared role resolver identifies native left and right
+scapula \texttt{Rx.q} variables without hard-coded joint numbers. Native
+R2025b schema probes covered 13 moving-scapula variants; full-trajectory
+comparisons and previews in this refinement use \texttt{GS3DX\_Human}.
+The bulk schema process failed after 12 variants, and Human was verified in
+an independent fresh process; this is not a successful uninterrupted batch.
+
+For native angle $q_i$ in radians, registry sign $s_i\in\{+1,-1\}$ and
+registry neutral $n_i$ in degrees, the protraction coordinate is
+$p_i=s_i(180q_i/\pi-n_i)$. The bilateral posture target is $7.5^\circ$.
+Address has $5^\circ\leq p_i\leq10^\circ$; subsequent backswing frames have
+$5^\circ\leq p_i\leq25^\circ$. Setting
+\texttt{scapula\_protraction\_deg=0} restores legacy fitting and output layout.
+The top $f_t$ uses the measured pelvis-yaw minimum before the existing
+capture peak-speed proxy $f_i$, excluding gap-filled pelvis observations.
+An explicit top frame may replace this proxy. Neither proxy is an observation
+of anatomical scapular motion or ball contact.
+
+For $f_t<f<f_i$, let $a(f)=\tfrac12[1-\cos(\pi(f-f_t)/(f_i-f_t))]$.
+Finite native lower and upper bounds widen as
+$\ell(f)=(1-a)\ell_t-a\pi$ and $u(f)=(1-a)u_t+a\pi$; the posture target
+is multiplied by $1-a$. At and after $f_i$ the legacy unbounded fit and
+zero scapula posture target resume. Both the continuation fit and ROM polish
+use the same phase bounds. This permits the downswing to depart from the
+backswing prior rather than forcing the entire swing into a fixed band.
+
+Comparisons retain explicit capture, model, geometry, offset, initial-pose
+and solver identities. Positional RMS covers the 14 derived joint-centre and
+club targets; it is not the RMS of all raw optical markers. Report head and
+foot orientation, pelvis displacement and torso-hub continuity separately.
+Torso-hub displacement is a geometric proxy, not upper-body centre of mass.
+Whole-swing hard bounds, several stronger head-weight fits and gap/continuity
+trials produced unacceptable errors or branch changes and were rejected.
+Back-cluster orientation and post-top soft-bound release were private trials;
+they are not part of the delivered shared policy. Native successful exits
+alone do not qualify those trials.
+
+The preview overlay includes every raw capture channel with a valid residual
+and finite coordinates, in the fixed address-waist world frame. Missing
+samples remain absent; displayed markers are not gap-filled joint targets.
+The tour capture has 38 channels. Both captures have the same 35 named
+body, club and ball channels; three additional unnamed owner channels have
+no valid measurements. Visibility varies with missing observations and
+natural occlusion. The camera bounds include all finite marker points, and
+clean/marked modes share those bounds and the same solved poses.
+
+Videos use explicit offscreen raster export at $1920\times1080$ pixels,
+MPEG-4 quality 100 and 30 frames per second. Screen-size-limited
+\texttt{getframe} output was rejected after actual dimensions were checked.
+Marker and clean filenames, stills and provenance have distinct suffixes.
+Acceptance checks decode every frame, verify dimensions, rate and count,
+check marker bounds and inspect both views. Private captures, trajectories
+and owner videos remain outside Git.
+
+The focused R2025b test lane passed 35 tests with no failures or incomplete
+results, including mirrored/schema bounds, phase release, marker validity,
+render-option failures and marker-inclusive scene bounds. Explicit zero-prior
+native comparison preserved legacy joint values, residuals and output layout;
+default and explicit $7.5^\circ$ fits agreed on native backswing probes.
+Native full-fit and video receipts are retained privately with actual input
+and output hashes. Unavailable or watchdog-terminated runs are not successes.
+
+\paragraph{Reproduction.}
+Run MATLAB R2025b in batch mode with invisible figures. Call
+\texttt{gs3dx\_setup}, import the authorized capture, construct its joint
+centres, and retain the selected capture-specific geometry. Match with
+\texttt{gs3dx\_whole\_body\_ik(...,scapula\_protraction\_deg=7.5)};
+record any supplied offsets, initial pose, orientation weights and gap
+weights. Obtain markers using
+\texttt{gs3dx\_capture\_marker\_overlay(cap,poses.frames)}. Render both
+\texttt{face-on} and \texttt{down-the-line} with
+\texttt{resolution=[1920 1080],video\_quality=100,visible=false},
+using the same \texttt{scene\_markers} for clean and marked modes.
+Alternatively, \texttt{gs3dx\_match\_export} supports the Human export path
+with \texttt{overlay\_markers=true} and \texttt{false}. Its cache identity
+includes the scapula policy and relevant source dependencies. The detailed
+API recipe is in the exploratory \texttt{Scapula\_Matching\_Previews.md}.
+
 \begin{thebibliography}{9}
 \bibitem{ezc3d}
 pyomeca. \emph{ezc3d: Python C3D reader documentation}.

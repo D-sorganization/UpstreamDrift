@@ -1,3 +1,15 @@
+# Scapula Matching and 1080P Preview Handoff - #11329
+
+- Branch: `feat/simscape-scapula-protraction-20261002`; commit SELF; development entry `DL-#11329`.
+- Scope: inverse-kinematics scapula prior and complete measured-marker video exports. Full independent dynamics remains separate and unqualified.
+- Validation: MATLAB R2025b Update 5; 35 focused native tests passed; disabled-prior legacy parity and default/explicit-prior parity checked. Native joint-schema/address-sign checks cover 13 moving-scapula variants; Human was checked independently after a bulk-process failure. Full Human A/O comparisons retain actual capture geometry and offsets. Eight native MP4 exports passed decoded resolution/frame-rate/count checks, with camera bounds including every valid raw marker.
+- Selected profiles: A head weight 0.2; O 0.14; posture 0.04, rotation smoothing 0.025, base gap weight 0.1, ROM 0.025, feet 0.1, protraction 7.5, forward tracking. Address protraction is 10/5 degrees; backswing stays in 5..25 degrees. Owner head/mean position fit has a modest trade-off, recorded with private previews; rejected thorax, recalibration, backward and stronger-weight trials are not promoted.
+- Delivery: eight private Desktop 1080P videos, both marker modes and views, plus measurement/verification JSON and contact sheet. Raw captures, trajectories and owner videos remain outside Git. Pinned Ruff 0.15.17 format/lint passed; unpinned 0.16.8 findings are not the repository's configured check. LaTeX source updated; built-in compilation failed with `Unable to find standard directories for platform`.
+- Dependency: branch base contains 31 parent commits from draft #11256, including unmerged shared-capture work #11172. Review this refinement's own commit separately; do not merge the parent scientific program through this dependent draft.
+- Next step: Review the dependent source PR after its parent dependencies are accepted.
+
+---
+
 # Capture-O Video Companion Planning — #11268
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/elegant-tesla-f2heae`; commit SELF; PR: see the planning PR for this branch.

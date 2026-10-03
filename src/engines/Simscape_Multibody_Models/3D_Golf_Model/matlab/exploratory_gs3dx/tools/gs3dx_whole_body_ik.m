@@ -119,6 +119,18 @@ function ik = gs3dx_whole_body_ik(jc, opts)
 %                         Does not alter the 14 position target names,
 %                         .residual, or .rms.
 %
+%     scapula_protraction_deg (7.5, default) requested bilateral matching prior.
+%                         Set 0 for legacy parity. Values 5..10 bound address
+%                         protraction to 5..10 degrees and backswing to 5..25.
+%                         Raised-cosine release widens bounds to impact;
+%                         impact and follow-through retain unbounded legacy IK.
+%     scapula_backswing_end_frame (0) explicit top frame; when zero, uses the
+%                         existing pelvis-yaw event proxy on measured samples.
+%                         Uses mirrored signs from GS3DX_JOINT_ROM and stable
+%                         block roles for all compatible moving-scapula variants.
+%                         Keeps segment dimensions and marker offsets unchanged.
+%                         This is a matching assumption, not measured anatomy.
+%
 %   IK fields:
 %     .model       the model fitted
 %     .seed_source (explicit initial_pose only) kinematic seed provenance ('target_free_solve' or 'initial_pose');
@@ -162,6 +174,8 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         opts.foot_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.head_orientation_weight (1,1) double {mustBeReal, mustBeFinite, mustBeNonnegative} = 0
         opts.initial_pose = struct([])
+        opts.scapula_protraction_deg (1,1) double = 7.5
+        opts.scapula_backswing_end_frame (1,1) double {mustBeInteger,mustBeNonnegative} = 0
     end
 
     % Validate selective gap overrides before any model load or KinematicsSolver initialization
@@ -174,6 +188,10 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     assert(isscalar(opts.head_orientation_weight) && isreal(opts.head_orientation_weight) && ...
         isfinite(opts.head_orientation_weight) && opts.head_orientation_weight >= 0, ...
         'gs3dx:ik', 'head_orientation_weight must be a finite real non-negative scalar');
+    % Validate the requested prior before loading a native model.
+    assert(isreal(opts.scapula_protraction_deg) && isfinite(opts.scapula_protraction_deg) && ...
+        (opts.scapula_protraction_deg == 0 || (opts.scapula_protraction_deg >= 5 && opts.scapula_protraction_deg <= 10)), ...
+        'gs3dx:ik:scapula', 'scapula_protraction_deg must be 0 or 5..10 degrees');
     p_seed = gs3dx_ik_initial_pose(opts.initial_pose);
     if ~isempty(p_seed)
         assert(strcmp(opts.model, char(gs3dx_names().variants.human)), 'gs3dx:ik', ...
@@ -181,11 +199,22 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     end
     head_data = gs3dx_head_input_data(jc, opts.frames, ...
         opts.calibration_frames, opts.head_orientation_weight);
+    top=0;impact=0;
+    if opts.scapula_protraction_deg > 0
+        assert(isfield(jc,'impact_frame'),'gs3dx:ik:scapula','Capture phase metadata is required; use 0 for legacy IK');
+        impact=jc.impact_frame;top=opts.scapula_backswing_end_frame;
+        if top==0, top=gs3dx_backswing_top_frame(jc,true); end
+        assert(isreal(impact) && isscalar(impact) && isfinite(impact) && ...
+            impact==fix(impact) && top>1 && top<impact && impact<=size(jc.pelvis,2), ...
+            'gs3dx:ik:scapula','Require 1 < backswing top < capture impact <= capture length');
+    end
     s = local_setup(opts.model, head_data.active);
     s.verbose = opts.verbose;
     s.backward = opts.backward;
     s.foot_orientation_weight = opts.foot_orientation_weight;
     s.head_orientation_weight = opts.head_orientation_weight;
+    s.scapula = gs3dx_scapula_bounds(s.jp, s.layout, opts.scapula_protraction_deg);
+    s.scapula.top=top;s.scapula.impact=impact;
     s.reg = local_regularization(s, opts.posture_weight, opts.smooth_weight);
     s.rom = local_rom(s, opts.rom_weight, opts.rom);
     has_foot_R = isfield(jc, 'foot_R_L') && isfield(jc, 'foot_R_R');
@@ -203,6 +232,9 @@ function ik = gs3dx_whole_body_ik(jc, opts)
     assert(all(isfield(jc.gap, s.names)), 'gs3dx:ik', 'JC.gap lacks a target');
     lm = optimoptions('lsqnonlin', 'Algorithm', 'levenberg-marquardt', 'Display', 'off', ...
         'FiniteDifferenceStepSize', 1e-6, 'MaxIterations', 200);
+    if s.scapula.active
+        lm.Algorithm = 'trust-region-reflective';
+    end
 
     % Warm-start seed: if initial_pose is provided, use validated pose directly;
     % otherwise use standard target-free solve with pelvis translation shift.
@@ -284,10 +316,21 @@ function ik = gs3dx_whole_body_ik(jc, opts)
         size(ik.points, 3) == numel(ik.frames), 'gs3dx:ik', 'IK points size mismatch');
     assert(isequal(ik.names, names_ref), 'gs3dx:ik', 'IK names changed');
     ik.rms = sqrt(mean(ik.residual .^ 2, 1, 'omitnan'));
+    if s.scapula.active
+        q = cat(2, best.p);
+        ik.scapula_protraction_deg = s.scapula.sign .* ...
+            (rad2deg(q(s.scapula.indices,:)) - s.scapula.neutral_deg);
+    end
     ik.regularization = struct('posture_weight', opts.posture_weight, ...
         'smooth_weight', opts.smooth_weight, 'backward', opts.backward, 'gap_weight', opts.gap_weight, ...
         'rom_weight', opts.rom_weight, 'foot_orientation_weight', opts.foot_orientation_weight, ...
         'head_orientation_weight', opts.head_orientation_weight);
+    if s.scapula.active
+        ik.regularization.scapula_protraction_deg = opts.scapula_protraction_deg;
+        ik.regularization.scapula_backswing_end_frame=top;
+        ik.regularization.scapula_release_end_frame=impact;
+        ik.regularization.scapula_policy = 'Address 5..10 deg; backswing 5..25 deg; cosine release to impact';
+    end
     if ~isempty(opts.gap_target_weight) && isstruct(opts.gap_target_weight) && ~isempty(fieldnames(opts.gap_target_weight))
         ik.regularization.gap_target_weight = opts.gap_target_weight;
     end
@@ -360,6 +403,8 @@ function reg = local_regularization(s, posture, smooth)
     assert(nnz(trunk) == 7, 'gs3dx:ik', 'Expected 7 trunk coordinates, found %d', nnz(trunk));
     reg.posture = posture * double(trunk(:));
     reg.smooth = smooth * double(~endsWith(keys(:), [".Px", ".Py", ".Pz"]));
+    reg.target = zeros(size(reg.posture));
+    if s.scapula.active, reg.target = s.scapula.target; end
     reg.on = posture > 0 || smooth > 0;
     reg.wrap = ~endsWith(keys(:), [".Px", ".Py", ".Pz"]) & ~contains(keys(:), ".S");   % single angles
 end
@@ -383,6 +428,13 @@ function best = local_track(s, frames, p, g, off, data, weight, feet, head, lm)
     end
     for order = orders
         for i = order{1}
+            [s.scapula.frame_lower,s.scapula.frame_upper,pull] = ...
+                gs3dx_scapula_phase(s.scapula,frames(i),s.scapula.top,s.scapula.impact);
+            free.scapula=s.scapula;
+            if s.scapula.active
+                s.reg.target=s.scapula.target*pull;
+                free.reg.target=s.reg.target;
+            end
             t0 = tic;
             d = data(frames(i));
             w = weight(frames(i));
@@ -489,6 +541,7 @@ function s = local_setup(mdl, with_head)
     addOutputVariables(ks, [string(ks.frameVariables.ID); roles.closed_ids]);
     addInitialGuessVariables(ks, roles.closed_ids);
     s.ks = ks;
+    s.jp = jp;
     s.ids = ids;
     s.jkeys = gs3dx_joint_keys(mdl, jp);
     s.nt = size(T, 1);
@@ -565,9 +618,15 @@ function [p, g, cost, iters] = local_fit(s, p, g, off, d, w, fd, hd, lm)
     if s.reg.on   % the same pose, each single angle on (-pi, pi]: the branch the posture pull sees
         p(s.reg.wrap) = p(s.reg.wrap) - 2 * pi * round(p(s.reg.wrap) / (2 * pi));
     end
+    lb=[];ub=[];
+    if s.scapula.active
+        lb=s.scapula.frame_lower;ub=s.scapula.frame_upper;
+        if ~isempty(lb), p=min(max(p,lb),ub); end
+        if isempty(lb), lm.Algorithm='levenberg-marquardt'; end
+    end
     p0 = p;   % the warm start: the neighbour frame's solution
     r = @(pp) local_residual(s, pp, g, off, d, w, fd, hd, p0);
-    [p, cost, ~, ~, out] = lsqnonlin(r, p, [], [], lm);
+    [p, cost, ~, ~, out] = lsqnonlin(r, p, lb, ub, lm);
     iters = out.iterations;
     [~, ~, ~, g] = local_fk(s, p, g);
 end
@@ -582,7 +641,7 @@ function r = local_residual(s, p, g, off, d, w, fd, hd, p0)
     pts = P + reshape(pagemtimes(R(:, :, s.body), reshape(off, 3, 1, s.nt)), 3, s.nt);
     r = reshape((pts - d) .* w, [], 1);
     if s.reg.on
-        r = [r; s.reg.posture .* p; s.reg.smooth .* (p - p0)];
+        r = [r; s.reg.posture .* (p - s.reg.target); s.reg.smooth .* (p - p0)];
     end
     if s.rom.on
         r = [r; local_rom_residual(s.rom, p, gc)];

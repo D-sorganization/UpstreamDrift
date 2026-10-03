@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11329 - Scapula Protraction and Complete-Marker 1080P Previews
+
+- **State:** in_review
+- **Owner:** codex (Gemini 3.8 Flash CLI reviews)
+- **Issue:** #11329
+- **PR:** pending; depends on draft #11256 and shared-capture #11172.
+- **Branch:** `feat/simscape-scapula-protraction-20261002`
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_scapula_bounds.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-02: R2025b focused lane passed 35 tests; native legacy/default parity and 13 mirrored model schemas checked. All eight Human videos passed native 1080p/30-fps/frame-count checks. Pinned Ruff 0.15.17 format and lint passed. LaTeX source preserved; built-in compilation unavailable. No material development-log change to DL-#10950: independent dynamics remains unqualified and owned by its existing continuation.
+- **Summary:** Default 7.5-degree matching prior, 5-10-degree address band, protraction through measured backswing proxy and cosine release; raw residual-valid marker overlays and separate clean/marked 1080p exports. Trials with worse positional error, torso branch steps or head fit were rejected. Captures and owner artifacts stay outside Git.
+- **Next step:** Review the dependent source PR after its parent dependencies are accepted.
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress

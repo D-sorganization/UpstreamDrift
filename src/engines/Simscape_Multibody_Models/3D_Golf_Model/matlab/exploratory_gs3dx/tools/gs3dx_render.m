@@ -29,6 +29,8 @@ function out = gs3dx_render(mdl, q, opts)
 %     stills        (1,:) double frame indices to export as PNG stills
 %     still_files   (1,:) string filenames for the stills
 %     video         (1,:) char output video file (.mp4)
+%     resolution    [width height] pixels, default [1920 1080], even dimensions
+%     video_quality MPEG-4 quality 0..100, default 100
 %     fps           (1,1) double video playback frame rate (default 30)
 %     view          (1,:) char, string, or 1x2 double camera view
 %                   ("face-on": camera on +X, the facing axis; "down-the-line":
@@ -36,6 +38,8 @@ function out = gs3dx_render(mdl, q, opts)
 %                   "top"; or [azimuth, elevation] as for VIEW)
 %     markers       (:,:,:) double capture markers or joint centres (Nx3xF or
 %                   3xNxF, World frame, m) for overlay dots
+%     scene_markers measured markers used only for frozen camera bounds; use
+%                   the same array for marker and clean comparison videos
 %     time          (1,:) double timestamps (s) per frame for labels
 %     output_dir    (1,:) char output directory for files (default pwd)
 %     ground        (1,1) logical whether to draw a ground plane (default true)
@@ -64,8 +68,11 @@ function out = gs3dx_render(mdl, q, opts)
         opts.still_files (1,:) string = string.empty
         opts.video (1,:) char = ''
         opts.fps (1,1) double {mustBePositive} = 30
+        opts.resolution (1,2) double {mustBeInteger,mustBePositive,mustBeFinite} = [1920 1080]
+        opts.video_quality (1,1) double {mustBeInteger,mustBeNonnegative,mustBeFinite} = 100
         opts.view = "face-on"
         opts.markers double = []
+        opts.scene_markers double = []
         opts.time (1,:) double = []
         opts.output_dir (1,:) char = pwd
         opts.ground (1,1) logical = true
@@ -77,6 +84,9 @@ function out = gs3dx_render(mdl, q, opts)
 
     % Preconditions
     assert(~isempty(mdl), 'gs3dx:render', 'Model name cannot be empty');
+    assert(all(mod(opts.resolution,2)==0) && all(opts.resolution>=64), ...
+        'gs3dx:render','Video dimensions must be even and at least 64 pixels');
+    assert(opts.video_quality<=100,'gs3dx:render','Video quality must be from 0 to 100');
     if ~bdIsLoaded(mdl)
         load_system(mdl);
     end
@@ -114,7 +124,9 @@ function out = gs3dx_render(mdl, q, opts)
 
     % Format camera view
     % Freeze whole-animation bounds so the club cannot leave the camera.
-    solids(1).scene_bounds = gs3dx_scene_bounds(solids);
+    scene_markers=opts.scene_markers;
+    if isempty(scene_markers),scene_markers=opts.markers;end
+    solids(1).scene_bounds = gs3dx_scene_bounds(solids,scene_markers);
     foot = find(contains(string({solids.block}), "foot", 'IgnoreCase', true));
     floor_z = -1.02;
     for i = foot
@@ -141,7 +153,7 @@ function out = gs3dx_render(mdl, q, opts)
             video_path = fullfile(opts.output_dir, video_path);
         end
         v_written = local_render_video(solids, frames_to_solve, t_vec, az, el, ...
-            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus);
+            opts.markers, opts.ground, opts.title, opts.fps, video_path, opts.visible, focus, opts.resolution, opts.video_quality);
         if ~isempty(v_written)
             written_files(end+1) = string(v_written);
         end
@@ -171,7 +183,7 @@ function out = gs3dx_render(mdl, q, opts)
             end
 
             local_render_still(solids, f_num, t_val, az, el, ...
-                opts.markers, opts.ground, opts.title, s_path, opts.visible, focus);
+                opts.markers, opts.ground, opts.title, s_path, opts.visible, focus, opts.resolution);
             written_files(end+1) = string(s_path);
         end
     end
@@ -626,14 +638,14 @@ function local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, sc
 
     % Overlay markers if available
     if ~isempty(markers)
-        if ndims(markers) == 3 && size(markers, 1) == 3 && size(markers, 2) ~= 3
+        if size(markers, 1) == 3 && size(markers, 2) ~= 3
             markers = permute(markers, [2 1 3]);
         end
         if size(markers, 3) >= f
             m_f = markers(:, :, f);
-            valid_m = ~isnan(m_f(:, 1));
+            valid_m = all(isfinite(m_f),2);
             scatter3(ax, m_f(valid_m, 1), m_f(valid_m, 2), m_f(valid_m, 3), ...
-                28, [0.85 0.325 0.098], 'filled', 'MarkerEdgeColor', [0.2 0.2 0.2]);
+                42, [1.0 0.42 0.04], 'filled', 'MarkerEdgeColor', [0.2 0.2 0.2]);
         end
     end
 
@@ -685,17 +697,17 @@ end
 % -------------------------------------------------------------------------
 % Helper: Render single still image
 % -------------------------------------------------------------------------
-function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis, focus)
+function local_render_still(solids, f, t_val, az, el, markers, draw_ground, scene_title, outfile, is_vis, focus, resolution)
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
     end
-    fig = figure('Visible', vis_str, 'Color', 'w', 'Position', [100 100 1024 768]);
+    fig = figure('Visible', vis_str, 'Color', 'w', 'Units','pixels','Position', [100 100 resolution]);
     ax = axes('Parent', fig);
     
     local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
     
-    exportgraphics(fig, outfile, 'Resolution', 120);
+    exportgraphics(fig, outfile, 'Units','pixels','Width',resolution(1),'Height',resolution(2));
     close(fig);
 end
 
@@ -703,13 +715,13 @@ end
 % Helper: Render swing video (MP4 or GIF fallback)
 % -------------------------------------------------------------------------
 function video_file = local_render_video(solids, frames, t_vec, az, el, ...
-    markers, draw_ground, scene_title, fps, outfile, is_vis, focus)
+    markers, draw_ground, scene_title, fps, outfile, is_vis, focus, resolution, quality)
 
     vis_str = 'off';
     if is_vis
         vis_str = 'on';
     end
-    fig = figure('Visible', vis_str, 'Color', 'w', 'Position', [100 100 800 600]);
+    fig = figure('Visible', vis_str, 'Color', 'w', 'Units','pixels','Position', [100 100 resolution]);
     ax = axes('Parent', fig);
 
     video_file = outfile;
@@ -725,7 +737,7 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         try
             vw = VideoWriter(video_file, 'MPEG-4');
             vw.FrameRate = fps;
-            vw.Quality = 85;
+            vw.Quality = quality;
             open(vw);
         catch
             use_mp4 = false;
@@ -733,6 +745,8 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         end
     end
 
+    frame_png=[tempname '.png'];
+    frame_cleanup=onCleanup(@() local_delete_frame_png(frame_png));
     for i = 1:numel(frames)
         f = frames(i);
         t_val = NaN;
@@ -741,7 +755,13 @@ function video_file = local_render_video(solids, frames, t_vec, az, el, ...
         end
         local_draw_scene(ax, solids, f, t_val, az, el, markers, draw_ground, scene_title, focus);
         drawnow;
-        frame_data = getframe(fig);
+        % GETFRAME is limited by display size even for invisible figures.
+        % Render native pixels explicitly; never upscale a screen capture.
+        exportgraphics(fig,frame_png,'Units','pixels','Width',resolution(1), ...
+            'Height',resolution(2),'Padding',0);
+        frame_data=struct('cdata',imread(frame_png),'colormap',[]);
+        assert(isequal([size(frame_data.cdata,2),size(frame_data.cdata,1)],resolution), ...
+            'gs3dx:render','Rendered video dimensions differ from the requested resolution');
 
         if use_mp4
             writeVideo(vw, frame_data);
@@ -775,4 +795,8 @@ end
 
 function R = local_rz(a)
     R = [cos(a) -sin(a) 0; sin(a) cos(a) 0; 0 0 1];
+end
+
+function local_delete_frame_png(path)
+    if isfile(path),delete(path);end
 end
