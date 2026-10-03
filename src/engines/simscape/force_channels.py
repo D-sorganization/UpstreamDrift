@@ -323,6 +323,7 @@ def force_series_from_columns(
     *,
     rotation_tol: float = DEFAULT_ROTATION_TOL,
     source_name: str = "columns",
+    wrench_source: str = _SOURCE,
 ) -> tuple[ForceTorqueSeries, tuple[str, ...]]:
     """Build a world-frame ``ForceTorqueSeries`` from a column mapping.
 
@@ -332,7 +333,8 @@ def force_series_from_columns(
     sequences (numbers, or numeric strings from a CSV).
 
     Preconditions: ``columns`` has a ``time`` column with at least one row;
-    ``rotation_tol`` is positive and finite.
+    ``rotation_tol`` is positive and finite; ``wrench_source`` is a non-empty
+    provenance label stamped on every wrench (CSV: ``simscape_csv``).
 
     Postconditions: times are strictly increasing; every wrench is in the
     world frame (Z-up, SI). Each unavailable half is ``None`` and listed in
@@ -388,7 +390,7 @@ def force_series_from_columns(
                     point_m=_tuple3(point[i]),
                     force_n=None if force is None else _tuple3(force[i]),
                     torque_nm=None if torque is None else _tuple3(torque[i]),
-                    source=_SOURCE,
+                    source=wrench_source,
                 )
             )
         frames.append(

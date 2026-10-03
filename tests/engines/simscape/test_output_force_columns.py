@@ -72,7 +72,11 @@ def test_to_force_series_matches_csv_loader(tmp_path: Path) -> None:
     expected, expected_missing = load_simscape_force_series(path)
     series, missing = out.to_force_series()
     assert missing == expected_missing
-    assert series == expected
+    assert len(series) == len(expected)
+    for live, loaded in zip(series.frames, expected.frames, strict=True):
+        assert [(w.label, w.force_n, w.torque_nm) for w in live.wrenches] == [
+            (w.label, w.force_n, w.torque_nm) for w in loaded.wrenches
+        ]
     # Local force (1,2,3) rotated by Rz(90) -> (-2, 1, 3): rotation applied.
     wrench = next(
         w for w in series.frames[0].wrenches if w.label == "joint_reaction:LS"
@@ -127,3 +131,28 @@ def test_logsout_forces_optional_and_carried() -> None:
 def test_logsout_bad_forces_wrapped() -> None:
     with pytest.raises(SimscapeSimulationError, match="force_columns"):
         logsout_to_simscape_output({**_base_kwargs(), "forces": {"x": np.zeros(N + 2)}})
+
+
+def test_live_output_wrenches_labelled_distinctly_from_csv() -> None:
+    out = SimscapeOutput(**_base_kwargs(), force_columns=synthetic_force_columns())
+    series, _ = out.to_force_series()
+    sources = {w.source for f in series.frames for w in f.wrenches}
+    assert sources == {"simscape_output"}
+
+
+def test_csv_loader_keeps_csv_source(tmp_path: Path) -> None:
+    cols = synthetic_force_columns()
+    path = tmp_path / "t.csv"
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["time", *cols])
+        for r in range(N):
+            w.writerow([float(r)] + [float(cols[k][r]) for k in cols])
+    series, _ = load_simscape_force_series(path)
+    assert {w.source for f in series.frames for w in f.wrenches} == {"simscape_csv"}
+
+
+@pytest.mark.parametrize("bad", [np.zeros((0, 0)), [1.0, 2.0], "abc", 5])
+def test_logsout_non_mapping_forces_wrapped(bad: object) -> None:
+    with pytest.raises(SimscapeSimulationError, match="forces"):
+        logsout_to_simscape_output({**_base_kwargs(), "forces": bad})

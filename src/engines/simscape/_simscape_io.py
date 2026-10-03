@@ -18,6 +18,7 @@ importable without MATLAB installed.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -169,6 +170,11 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
         )
 
     raw_forces = logsout.get("forces")
+    if raw_forces is not None and not isinstance(raw_forces, Mapping):
+        raise SimscapeSimulationError(
+            "logsout 'forces' must be a mapping of channel name to samples; "
+            f"got {type(raw_forces).__name__}"
+        )
     try:
         force_columns = (
             None

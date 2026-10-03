@@ -208,7 +208,10 @@ class SimscapeOutput:
             )
         columns = {**self.force_columns, "time": self.time}
         return force_series_from_columns(
-            columns, rotation_tol=rotation_tol, source_name="SimscapeOutput"
+            columns,
+            rotation_tol=rotation_tol,
+            source_name="SimscapeOutput",
+            wrench_source="simscape_output",
         )
 
     @property
