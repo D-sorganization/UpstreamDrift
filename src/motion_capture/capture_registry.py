@@ -26,6 +26,7 @@ __all__ = [
     "UnknownCaptureError",
     "capture_info",
     "list_captures",
+    "register_capture",
     "require_capture",
     "resolve_capture",
 ]
@@ -58,11 +59,25 @@ class CaptureInfo:
     bytes: int | None
     sample_rate_hz: float | None = None
     frame_count: int | None = None
+    kind: str = "c3d"
 
     @property
     def frame_rate_hz(self) -> float | None:
         """Alias for sample_rate_hz."""
         return self.sample_rate_hz
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize CaptureInfo to manifest dictionary."""
+        return {
+            "id": self.id,
+            "kind": self.kind,
+            "where": self.where,
+            "relative_path": self.relative_path,
+            "sha256": self.sha256,
+            "bytes": self.bytes,
+            "sample_rate_hz": self.sample_rate_hz,
+            "frame_count": self.frame_count,
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CaptureInfo:
@@ -83,6 +98,7 @@ class CaptureInfo:
                 if data.get("frame_count") is not None
                 else None
             ),
+            kind=str(data.get("kind", "c3d")),
         )
 
 
@@ -253,3 +269,32 @@ def require_capture(
         raise pytest.skip.Exception(
             f"Capture {capture_id!r} unavailable: {exc}"
         ) from exc
+
+
+def register_capture(
+    info: CaptureInfo,
+    *,
+    repo_root: Path | None = None,
+) -> None:
+    """Register or update a capture entry in data/capture_registry.json."""
+    root = repo_root or _find_repo_root()
+    manifest_path = root / "data" / "capture_registry.json"
+    registry: dict[str, Any] = {}
+    if manifest_path.is_file():
+        with manifest_path.open("r", encoding="utf-8") as f:
+            raw = json.load(f)
+        if (
+            isinstance(raw, dict)
+            and "captures" in raw
+            and isinstance(raw["captures"], dict)
+        ):
+            registry = raw["captures"]
+        elif isinstance(raw, dict):
+            registry = raw
+        elif isinstance(raw, list):
+            registry = {item["id"]: item for item in raw}
+    registry[info.id] = info.to_dict()
+    manifest_path.write_text(
+        json.dumps(registry, indent=2) + "\n",
+        encoding="utf-8",
+    )
