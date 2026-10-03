@@ -305,3 +305,14 @@ class TestWithMockedPin:
         eng, _ = self._engine_with_model()
         f = eng.compute_contact_forces()
         assert np.allclose(f, [0.0, 0.0, 0.0])
+
+    @pytest.mark.unit
+    def test_compute_contact_forces_sums_contact_samples(self) -> None:
+        from src.shared.python.motion_matching.contact_law import ContactSample
+
+        eng, _ = self._engine_with_model()
+        sample = ContactSample(
+            0.0, 0.0, np.zeros(3), np.array([0.0, 0.0, 40.0]), np.array([2.0, 0, 0])
+        )
+        eng.set_contact_samples({"left_foot": sample, "right_foot": sample})
+        assert np.allclose(eng.compute_contact_forces(), [4.0, 0.0, 80.0])
