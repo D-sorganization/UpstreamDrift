@@ -354,15 +354,7 @@ def draw_segment_meshes_on_frame(
     t_start = time.perf_counter()
     opts = shading or SegmentShading()
     scale = color_scale or ForceColorScale(enabled=False)
-
-    if shape_library is None:
-        try:
-            from src.shared.python.body_part_viz.asset_library import ShapeLibrary
-
-            shape_library = ShapeLibrary.default()
-        except Exception as exc:  # noqa: BLE001
-            logger.debug("ShapeLibrary default could not be loaded: %s", exc)
-            shape_library = None
+    lib = _resolve_shape_library(shape_library)
 
     if opts.opacity <= 0.0 or len(segments) == 0:
         total_time_ms = (time.perf_counter() - t_start) * 1000.0
@@ -381,7 +373,7 @@ def draw_segment_meshes_on_frame(
 
     for pose in segments:
         triangles, culled, has_load = _extract_segment_triangles(
-            pose, projector, opts, loads, scale, shape_library
+            pose, projector, opts, loads, scale, lib
         )
         total_culled += culled
         if not has_load:
@@ -390,25 +382,12 @@ def draw_segment_meshes_on_frame(
             rendered_segments += 1
             all_triangles.extend(triangles)
 
-    # Budget cap
     if len(all_triangles) > opts.max_triangles:
         total_culled += len(all_triangles) - opts.max_triangles
         all_triangles = all_triangles[: opts.max_triangles]
 
-    # Painter's algorithm: sort triangles far to near (descending depth)
     all_triangles.sort(key=lambda item: item[0], reverse=True)
-
-    drawn = frame_bgr.copy()
-    for _, poly, color in all_triangles:
-        pts = np.rint(poly).astype(np.int32)
-        cv2.fillConvexPoly(drawn, pts, color, lineType=cv2.LINE_AA)
-
-    if opts.opacity >= 1.0:
-        result = drawn
-    else:
-        result = cv2.addWeighted(
-            drawn, opts.opacity, frame_bgr, 1.0 - opts.opacity, 0.0
-        )
+    result = _rasterize_triangles(frame_bgr, all_triangles, opts.opacity)
 
     total_time_ms = (time.perf_counter() - t_start) * 1000.0
     receipt = SegmentDrawReceipt(
@@ -420,3 +399,29 @@ def draw_segment_meshes_on_frame(
         total_triangles=len(all_triangles) + total_culled,
     )
     return result, receipt
+
+
+def _resolve_shape_library(shape_library: ShapeLibrary | None) -> ShapeLibrary | None:
+    if shape_library is not None:
+        return shape_library
+    try:
+        from src.shared.python.body_part_viz.asset_library import ShapeLibrary
+
+        return ShapeLibrary.default()
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("ShapeLibrary default could not be loaded: %s", exc)
+        return None
+
+
+def _rasterize_triangles(
+    frame_bgr: np.ndarray,
+    triangles: Sequence[tuple[float, np.ndarray, tuple[int, int, int]]],
+    opacity: float,
+) -> np.ndarray:
+    drawn = frame_bgr.copy()
+    for _, poly, color in triangles:
+        pts = np.rint(poly).astype(np.int32)
+        cv2.fillConvexPoly(drawn, pts, color, lineType=cv2.LINE_AA)
+    if opacity >= 1.0:
+        return drawn
+    return cv2.addWeighted(drawn, opacity, frame_bgr, 1.0 - opacity, 0.0)

@@ -66,60 +66,16 @@ def draw_segment_volumes(
     crossing triangles are omitted; OpenCV clips polygons at image borders.
     """
     if getattr(layer, "draw_model_volumes", False) and layer.model_volume_opacity > 0:
-        from src.shared.python.force_overlay.conversions import SegmentAxis
-        from src.shared.python.force_overlay.renderers.opencv_glyphs import (
-            PinholeProjector,
+        return _draw_model_volumes(
+            frame,
+            points,
+            valid,
+            edges,
+            camera,
+            layer,
+            loads=loads,
+            color_scale=color_scale,
         )
-        from src.shared.python.force_overlay.renderers.opencv_segments import (
-            SegmentShading,
-            draw_segment_meshes_on_frame,
-            segment_poses_from_axes,
-        )
-
-        axes: list[SegmentAxis] = []
-        for a, b in edges:
-            diff = points[b] - points[a]
-            if not (valid[a] and valid[b]) or np.vdot(diff, diff) <= 1e-18:
-                continue
-            axes.append(
-                SegmentAxis(
-                    segment=f"edge_{a}_{b}",
-                    joint_label=f"joint_{a}",
-                    proximal_m=(
-                        float(points[a, 0]),
-                        float(points[a, 1]),
-                        float(points[a, 2]),
-                    ),
-                    distal_m=(
-                        float(points[b, 0]),
-                        float(points[b, 1]),
-                        float(points[b, 2]),
-                    ),
-                )
-            )
-        if axes:
-            lengths = [
-                float(
-                    np.linalg.norm(np.asarray(ax.distal_m) - np.asarray(ax.proximal_m))
-                )
-                for ax in axes
-            ]
-            radius_m = max(
-                0.02, float(float(np.mean(lengths)) * layer.segment_radius_ratio)
-            )
-            poses = segment_poses_from_axes(axes, radius_m=radius_m)
-            projector = PinholeProjector(camera)
-            shading = SegmentShading(opacity=layer.model_volume_opacity)
-            result_frame, _ = draw_segment_meshes_on_frame(
-                frame,
-                poses,
-                projector,
-                shading=shading,
-                loads=loads,
-                color_scale=color_scale,
-            )
-            return result_frame
-        return frame
 
     if not layer.draw_ellipsoids or layer.ellipsoid_opacity <= 0:
         return frame
@@ -162,3 +118,65 @@ def draw_segment_volumes(
         ),
         dtype=np.uint8,
     )
+
+
+def _draw_model_volumes(
+    frame: np.ndarray,
+    points: np.ndarray,
+    valid: np.ndarray,
+    edges: tuple[tuple[int, int], ...],
+    camera: Camera,
+    layer: ComparisonLayer,
+    loads: Any = None,
+    color_scale: Any = None,
+) -> np.ndarray:
+    from src.shared.python.force_overlay.conversions import SegmentAxis
+    from src.shared.python.force_overlay.renderers.opencv_glyphs import (
+        PinholeProjector,
+    )
+    from src.shared.python.force_overlay.renderers.opencv_segments import (
+        SegmentShading,
+        draw_segment_meshes_on_frame,
+        segment_poses_from_axes,
+    )
+
+    axes: list[SegmentAxis] = []
+    for a, b in edges:
+        diff = points[b] - points[a]
+        if not (valid[a] and valid[b]) or np.vdot(diff, diff) <= 1e-18:
+            continue
+        axes.append(
+            SegmentAxis(
+                segment=f"edge_{a}_{b}",
+                joint_label=f"joint_{a}",
+                proximal_m=(
+                    float(points[a, 0]),
+                    float(points[a, 1]),
+                    float(points[a, 2]),
+                ),
+                distal_m=(
+                    float(points[b, 0]),
+                    float(points[b, 1]),
+                    float(points[b, 2]),
+                ),
+            )
+        )
+    if not axes:
+        return frame
+    lengths = [
+        float(np.linalg.norm(np.asarray(ax.distal_m) - np.asarray(ax.proximal_m)))
+        for ax in axes
+    ]
+    radius_m = max(0.02, float(float(np.mean(lengths)) * layer.segment_radius_ratio))
+    poses = segment_poses_from_axes(axes, radius_m=radius_m)
+    projector = PinholeProjector(camera)
+    shading = SegmentShading(opacity=layer.model_volume_opacity)
+    result_frame, _ = draw_segment_meshes_on_frame(
+        frame,
+        poses,
+        projector,
+        shading=shading,
+        loads=loads,
+        color_scale=color_scale,
+    )
+    return result_frame
