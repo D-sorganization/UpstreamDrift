@@ -23,12 +23,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** antigravity
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** not created
-- **Branch:** `feat/fto-11286-contracts`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `schemas/force-torque-frame-*.json`
+- **Branch:** `feat/fto-11309-force-alignment`
+- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `src/motion_capture/reference/force_alignment.py`, `tests/motion_capture/test_force_alignment.py`, `src/shared/python/force_overlay/**`, `schemas/force-torque-frame-*.json`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02 at SELF — FTO-1 (#11286) implemented with 98.5% test coverage; OverlayWrench (optional halves), ForceTorqueFrame (Z-up world frame), ForceTorqueSeries (interpolation + npz masks), JSON schema and 7 fixture cases verified.
+- **Last verified:** 2026-10-02 at SELF — FTO-24 (#11309) implemented: force_frame_for_video with time mapping, spatial point placement, polar force rotation, and axial torque pseudovector rotation parity under lateral mirroring; HDF5 trace force import/export; viewport origin payload wrench calculation; 9/9 focused unit tests passing.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Submit ready-for-review PR for FTO-1 (#11286); dispatch Wave B issues once Wave A merges.
+- **Next step:** Open ready-for-review PR for FTO-24 (#11309); advance to Wave C renderers and providers.
 
 ### DL-#11268 · Capture-O Video Companion
 

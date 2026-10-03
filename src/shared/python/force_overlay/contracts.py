@@ -167,6 +167,7 @@ class ForceTorqueFrame:
     units: Mapping[str, str] = MappingProxyType(
         {"force": "N", "torque": "N*m", "length": "m"}
     )
+    metadata: Mapping[str, Any] = MappingProxyType({})
 
     SCHEMA_VERSION: Final[str] = "force-torque-frame-v1"
 
@@ -216,6 +217,10 @@ class ForceTorqueFrame:
             raise TypeError("units must be a Mapping")
         object.__setattr__(self, "units", MappingProxyType(dict(self.units)))
 
+        if not isinstance(self.metadata, Mapping):
+            raise TypeError("metadata must be a Mapping")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
+
     def by_kind(self, kind: WrenchKind | str) -> tuple[OverlayWrench, ...]:
         """Return all wrenches of the given kind."""
         target_kind = kind if isinstance(kind, WrenchKind) else WrenchKind(kind)
@@ -223,7 +228,7 @@ class ForceTorqueFrame:
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize frame to dictionary matching JSON Schema 2020-12."""
-        return {
+        d: dict[str, Any] = {
             "schema_version": self.SCHEMA_VERSION,
             "time_s": self.time_s,
             "engine": self.engine,
@@ -234,6 +239,9 @@ class ForceTorqueFrame:
             if self.axial_loads is not None
             else None,
         }
+        if self.metadata:
+            d["metadata"] = dict(self.metadata)
+        return d
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> ForceTorqueFrame:
@@ -246,6 +254,7 @@ class ForceTorqueFrame:
             "units",
             "wrenches",
             "axial_loads",
+            "metadata",
         }
         unknown = set(data.keys()) - allowed_keys
         if unknown:
@@ -277,6 +286,7 @@ class ForceTorqueFrame:
             axial_loads=axial_frame,
             world_frame=data.get("world_frame", "world_Zup"),
             units=data.get("units", {"force": "N", "torque": "N*m", "length": "m"}),
+            metadata=data.get("metadata", {}),
         )
 
 

@@ -25,7 +25,7 @@
     },
     "world_frame": {
       "type": "string",
-      "const": "world_Zup"
+      "enum": ["world_Zup", "adr0041_world"]
     },
     "units": {
       "type": "object",
@@ -136,6 +136,9 @@
           "additionalProperties": false
         }
       ]
+    },
+    "metadata": {
+      "type": "object"
     }
   },
   "additionalProperties": false

@@ -1,3 +1,17 @@
+# Force and Torque Video Alignment and Trace Import — #11285 / #11309
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11309-force-alignment`; commit SELF; PR: ready-for-review PR for FTO-24 (#11309).
+- Objective: implement FTO-24 (#11309) carrying force/torque series through trace import, time maps, and spatial registration onto video frames under ADR-0052.
+- Completed:
+  - `src/motion_capture/reference/force_alignment.py`:
+    - `force_frame_for_video`: time mapping (`video_time_s` -> `scene_time` -> `ref_time` -> `frame_at`), spatial point placement (`canonical_z_up_to_adr0041_world` + `registration.place_points`), polar force vector rotation, and axial torque pseudovector rotation with parity factor (`det(M) * M @ tau`) under lateral mirroring. Returns `ForceTorqueFrame` in `"adr0041_world"` frame with `registration_scale` metadata.
+    - `write_trace_forces`: stores `ForceTorqueSeries` inside Trace HDF5 under `force_torque_series` group with `json_bytes` and `time_s`.
+    - `load_trace_forces`: reads series from `force_torque_series` group in Trace HDF5, or falls back to `Trace.wrench` iff `Trace.meta` declares a root wrench point. Never invents points.
+    - `series_to_viewport_payload_wrench`: computes total external and contact wrench about the world origin via `transform_wrench` returning `(T, 6)` array for ViewportOverlayPayload / Rerun consumers.
+  - Added unit test suite `tests/motion_capture/test_force_alignment.py` covering time alignment, Z-up to ADR-0041 mapping, 90 deg scene rotation and translation/scaling, lateral mirroring polar/axial parity with worked numeric example, max gap rejection, HDF5 round-trip, missing point rejection, declared point import, and viewport origin payload wrench.
+- Validation: All 9 unit tests pass; all 16 `tests/unit/force_overlay` tests pass; Ruff lint/format clean; file size budget and error-handling ratchet pass.
+- Next steps: Merge FTO-24 (#11309); unblocks video overlays (FTO-25, 26, 27, 28) and enables integration into video compositors.
+
 # Force and Torque Overlay Delivery — #11285 / #11286
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11286-contracts`; commit SELF; PR: ready-for-review PR for FTO-1 (#11286).

@@ -7712,6 +7712,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-02 | #11309 | [FTO-24] Align force/torque series to video frames, handle lateral mirroring parity for polar forces and axial torques, import/export HDF5 trace force groups, and compute world origin viewport payload wrenches (ADR-0052, #11309). |
 | 2026-10-02 | #11286 | [FTO-1] Implement engine-agnostic force/torque overlay contract: OverlayWrench, ForceTorqueFrame, ForceTorqueSeries, schema validation, and fixtures (ADR-0052, #11286). |
 | 2026-10-02 | #11285 | Plan the force/torque overlay epic: ADR-0052 engine-agnostic force/torque contract (proposed), assessment of every engine and the video stack, and 30 dependency-ordered child issues including tension/compression producers and source-footage overlays. |
 | 2026-10-02 | #11268 | Plan the capture-O video companion epic: procedure for markerless, Necromatcher and Simscape comparison of the owner's session video against the marker capture, with graded comparison levels and private-data rules. |
