@@ -800,3 +800,15 @@ class BasePendulumWidget(QWidget):
         painter.setPen(QPen(QColor(0, 0, 0, 40), 1))
         painter.setBrush(QBrush(grad))
         painter.drawPolygon(poly)
+
+    @staticmethod
+    def _create_force_glyph_style(kind: Any, color_name: str) -> Any:
+        """Create shared ForceGlyphStyle for 2D pendulum widgets."""
+        from src.shared.python.force_overlay.glyphs import ForceGlyphStyle
+
+        return ForceGlyphStyle(
+            force_scale_m_per_n=1.0,
+            min_length_m=1e-4,
+            max_length_m=1e5,
+            palette={kind: color_name},
+        )

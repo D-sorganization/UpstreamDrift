@@ -30,8 +30,8 @@ __all__ = [
 
 
 def _build_cone_facets(
-    base_center: Sequence[float],
-    apex: Sequence[float],
+    base_center: Sequence[float] | np.ndarray,
+    apex: Sequence[float] | np.ndarray,
     radius: float,
     num_facets: int = 12,
 ) -> list[list[np.ndarray]]:
@@ -214,7 +214,7 @@ def draw_legend(ax: Axes, legend: LegendSpec) -> Axes:
     Axes
         The inset axes containing the legend items.
     """
-    inset = ax.inset_axes([0.02, 0.02, 0.36, 0.30])
+    inset = ax.inset_axes((0.02, 0.02, 0.36, 0.30))
     inset.set_facecolor("#181818")
     inset.patch.set_alpha(0.85)
     inset.set_xticks([])
