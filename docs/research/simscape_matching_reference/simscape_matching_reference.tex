@@ -4075,7 +4075,7 @@ rate consistency and sensitivity of the selected coordinate basis must be
 tested before torque synthesis. These results neither establish a unique
 singularity nor qualify native dependent accelerations.
 
-\paragraph{Foot appearance and projection.}
+\paragraph{Foot Appearance and Projection.}
 A fresh native audit checks the actual rearfoot and forefoot ellipsoid
 centres, the sole frame and capture ankle-to-toe directions. An initial
 probe fails because it incorrectly requires exactly one World Frame block;
@@ -4149,7 +4149,7 @@ player ability or a unique mechanical cause.
 Freezing original anchors was an experimental control, not a requirement
 that future fits preserve potentially irregular poses. A controlled refit
 may change those poses, provided it reports observed-marker/derived-target
-fit tradeoffs, physical closure and full-pose continuity. The next private
+fit tradeoffs, physical closure and full-pose continuity. A controlled private
 audit replays the original sparse prefix from the address seed, then densely
 fits a window around each largest original wrist step. Baseline and zero
 full-pose-weight trials must match over their entire outputs before nonzero
@@ -4157,6 +4157,82 @@ weights are compared. Boundary transitions are reported separately from
 adjacent dense samples; all fitted poses receive independent native
 reassembly. A successful window audit would still leave whole-capture
 coverage, velocity, acceleration, contact and forward dynamics unqualified.
+
+\paragraph{Refit Tradeoffs and Independent Rechecking.}
+The four-trial comparisons finish for both captures. Baseline and zero-weight
+outputs match in their entirety. The evaluated dense windows contain 37
+tour samples at 360~Hz and 25 owner samples at 240~Hz; their preceding
+sparse prefixes contain 38 and 34 fitted poses. All trials preserve the
+original address-based spine reference and use the same refined geometry,
+capture targets and back-marker offsets.
+
+The initial refit process writes its results but hangs after its completion
+marker. Its receipt retains watchdog exit 125 with no verified actual
+process exit; it is not a natural-zero run. A separate short audit reloads
+the saved outputs, verifies whole-output zero parity and freshly assembles
+all 536 poses. That audit exits naturally with zero at
+\texttt{11:16:44Z}, with maximum physical pose residual below
+\(10^{-7}\). This validates saved window poses, not the original shutdown,
+native trajectory velocities, accelerations, contact or forward dynamics.
+
+\begin{center}
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Capture & Angular & \shortstack{Target\\RMS (mm)} &
+\shortstack{Back\\RMS (mm)} & \shortstack{Wrist\\step (deg)} &
+\shortstack{Shoulder\\step (deg)} & \shortstack{Root\\step (mm)} \\
+\midrule
+A & 0 & 26.26 & 14.91 & 4.83 & 3.88 & 2.17 \\
+A & 0.08 & 26.81 & 15.05 & 4.62 & 5.42 & 6.63 \\
+A & 0.15 & 28.79 & 15.53 & 4.54 & 7.98 & 6.08 \\
+O & 0 & 35.66 & 22.44 & 83.89 & 11.40 & 2.73 \\
+O & 0.08 & 36.83 & 22.60 & 14.46 & 4.74 & 3.60 \\
+O & 0.15 & 37.79 & 25.04 & 2.28 & 5.28 & 5.25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Target RMS is the mean of frame-wise observed derived-target RMS values;
+back RMS concerns the three directly observed back markers. The nonzero
+angular trials also use linear weight 0.5. Step columns give maxima over
+adjacent \emph{dense interior} samples: wrapped wrist scalar angles,
+shoulder SO(3) geodesic angle and root translation norm. Sparse-to-dense
+boundary transitions are stored separately and excluded from those maxima.
+These sampling-dependent steps are not native velocity estimates.
+
+The owner window demonstrates a substantial wrist-continuity benefit with
+about 2.13~mm additional derived-target RMS at the stronger setting, but
+root steps and back-marker error increase. Tour wrist changes improve only
+slightly while shoulder and root continuity worsen. The results therefore
+motivate capture-specific tradeoff evaluation rather than a universal
+default or new best-match video. Neither complete capture is promoted.
+
+\paragraph{Sampling-Time Contract.}
+The existing full-pose penalty measures displacement per selected sample;
+it has no elapsed-time normalization. A private thin adapter now evaluates
+\[
+ r_{\mathrm{normalized\ rate}}
+ = \frac{\Delta t_{\mathrm{ref}}}{\Delta t}\,r_{\mathrm{step}},
+ \qquad \Delta t,\Delta t_{\mathrm{ref}}>0.
+\]
+The ratio is dimensionless, retaining the declared step-residual units.
+Scalar angles wrap before scaling, translations use metres, and spherical
+groups reuse the physical chordal rotation metric. The rotational quantity
+is a first-order proxy, not an exact native angular-velocity vector.
+An integrated squared-rate objective would instead require a different
+time weighting; this adapter does not silently change that objective.
+
+Seven native contract tests first fail with the helper absent and actual
+process exit one. The first implementation run passes five but cannot
+exercise two spherical tests because its harness omits the shared
+orientation-helper directory; that natural-exit-one receipt is preserved.
+The corrected harness passes all seven and exits naturally with zero at
+\texttt{11:18:45Z}. Tests use independent translation, wrapped-angle and
+finite-rotation oracles, nonuniform sampling intervals, representation
+invariance, immutable inputs and invalid/unrepresentable time ratios.
+The adapter has not yet been ported into the matcher. Full-output default
+parity, address-prior handling and new fit/closure/velocity audits are
+required before any rate-normalized fitting candidate is qualified.
 
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,

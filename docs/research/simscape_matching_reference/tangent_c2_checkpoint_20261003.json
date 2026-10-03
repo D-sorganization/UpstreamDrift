@@ -1017,6 +1017,60 @@
     "timestamp": "2026-10-03T10:10:01.934122+00:00"
   },
   "native_acceleration_qualified": false,
+  "normalized_rate_helper_green": {
+    "failed": 0,
+    "incomplete": 0,
+    "matcher_ported": false,
+    "model_loaded": false,
+    "native_dynamics_qualified": false,
+    "passed": 7,
+    "phase": "GREEN_PRIVATE_NORMALIZED_RATE_HELPER",
+    "total": 7
+  },
+  "normalized_rate_helper_green_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:18:45.386015+00:00"
+  },
+  "normalized_rate_helper_initial_green": {
+    "failed": 2,
+    "incomplete": 2,
+    "matcher_ported": false,
+    "model_loaded": false,
+    "native_dynamics_qualified": false,
+    "passed": 5,
+    "phase": "GREEN_PRIVATE_NORMALIZED_RATE_HELPER",
+    "total": 7
+  },
+  "normalized_rate_helper_initial_green_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": false,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:17:59.971685+00:00"
+  },
+  "normalized_rate_helper_red": {
+    "failed": 7,
+    "incomplete": 5,
+    "model_loaded": false,
+    "native_dynamics_qualified": false,
+    "passed": 0,
+    "phase": "RED_MISSING_IMPLEMENTATION",
+    "total": 7
+  },
+  "normalized_rate_helper_red_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": false,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:13:10.818113+00:00"
+  },
+  "normalized_rate_helper_scope": "Private first-order chordal/scalar/translation proxy scaled by explicit dimensionless dt_ref/dt. Initial GREEN runner omitted shared orientation helper path; corrected runner passes seven tests. Not ported to matcher or tested as native trajectory velocity.",
   "original_anchor_pose_steps": {
     "qualification": "ORIGINAL_FITTED_ANCHOR_POSE_STEP_DIAGNOSTIC_NOT_DYNAMICS",
     "records": {
@@ -1039,6 +1093,242 @@
         "original_anchor_count": 46
       }
     }
+  },
+  "original_anchor_refit_shutdown_receipt": {
+    "actual_process_exit_code": null,
+    "done_marker": true,
+    "final_exit_code": 125,
+    "script_status": "success",
+    "termination_reason": "hung_after_done",
+    "timestamp": "2026-10-03T11:11:58.771910+00:00"
+  },
+  "original_anchor_regularized_refit": {
+    "acceleration": false,
+    "contact": false,
+    "dynamics": false,
+    "markers_anatomy": false,
+    "model_saved": false,
+    "native_velocity": false,
+    "new_candidate_promoted": false,
+    "production_modified": false,
+    "qualification": "ORIGINAL_ANCHOR_REGULARITY_REFIT_WINDOW_AUDIT_NOT_FULL_CAPTURE_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "angular_0_08_linear_0_5": {
+          "angular_weight": 0.08,
+          "back_marker_mean_rms_mm": 15.054574648880804,
+          "boundary_step_right_shoulder_deg": 20.445610128608923,
+          "boundary_step_right_wrist_deg": 4.4057892584442016,
+          "boundary_step_root_mm": 11.268249289032283,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            8.41741670123309, 16.712488069202415
+          ],
+          "head_axis_mean_error_deg": 0.0823017913724235,
+          "head_orientation_mean_error_deg": 15.979909307896644,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0.5,
+          "max_consecutive_dense_right_shoulder_so3_deg": 5.421932012630343,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.622367961561878,
+          "max_interior_root_step_mm": 6.625912843307831,
+          "mean_window_target_rms_mm": 26.809352427558093,
+          "peak_window_target_rms_mm": 32.781072856188125,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "angular_0_15_linear_0_5": {
+          "angular_weight": 0.15,
+          "back_marker_mean_rms_mm": 15.53051890769639,
+          "boundary_step_right_shoulder_deg": 18.839470472666406,
+          "boundary_step_right_wrist_deg": 4.79855467131236,
+          "boundary_step_root_mm": 8.79766728107462,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            10.68933702236284, 17.42373072571096
+          ],
+          "head_axis_mean_error_deg": 0.27670459078348947,
+          "head_orientation_mean_error_deg": 16.179155215224046,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0.5,
+          "max_consecutive_dense_right_shoulder_so3_deg": 7.981608367987915,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.540663363905026,
+          "max_interior_root_step_mm": 6.076428836590233,
+          "mean_window_target_rms_mm": 28.78668739926187,
+          "peak_window_target_rms_mm": 35.349633522209615,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "baseline": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461, 16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        },
+        "zero": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 14.906884777891635,
+          "boundary_step_right_shoulder_deg": 24.22773659224168,
+          "boundary_step_right_wrist_deg": 7.526648523755199,
+          "boundary_step_root_mm": 12.272636997646591,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 37,
+          "foot_orientation_mean_error_deg": [
+            7.612915155275461, 16.494500137247858
+          ],
+          "head_axis_mean_error_deg": 0.0014638889045150115,
+          "head_orientation_mean_error_deg": 15.87808039454606,
+          "interior_dense_step_seconds": 0.002777777777777778,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 3.8816334126713983,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 4.8277821173107895,
+          "max_interior_root_step_mm": 2.168208183906789,
+          "mean_window_target_rms_mm": 26.25575261953634,
+          "peak_window_target_rms_mm": 32.75089012432527,
+          "prefix_sparse_count": 38,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 75
+        }
+      },
+      "capture_O": {
+        "angular_0_08_linear_0_5": {
+          "angular_weight": 0.08,
+          "back_marker_mean_rms_mm": 22.59552717785699,
+          "boundary_step_right_shoulder_deg": 8.985800077005102,
+          "boundary_step_right_wrist_deg": 20.45792697063675,
+          "boundary_step_root_mm": 14.973852665064292,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            12.972340979924248, 17.841697461236635
+          ],
+          "head_axis_mean_error_deg": 0.10610432560391338,
+          "head_orientation_mean_error_deg": 23.7808395425304,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.5,
+          "max_consecutive_dense_right_shoulder_so3_deg": 4.740288791795926,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 14.464916674336992,
+          "max_interior_root_step_mm": 3.6039452829229544,
+          "mean_window_target_rms_mm": 36.82563861054421,
+          "peak_window_target_rms_mm": 39.155691391741854,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "angular_0_15_linear_0_5": {
+          "angular_weight": 0.15,
+          "back_marker_mean_rms_mm": 25.039497148311288,
+          "boundary_step_right_shoulder_deg": 11.029809355923645,
+          "boundary_step_right_wrist_deg": 2.326224842666903,
+          "boundary_step_root_mm": 14.327071908997222,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            16.58678838214338, 18.62132580666958
+          ],
+          "head_axis_mean_error_deg": 0.2739460237177847,
+          "head_orientation_mean_error_deg": 19.611153174409313,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0.5,
+          "max_consecutive_dense_right_shoulder_so3_deg": 5.284943526713956,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 2.2820899836664243,
+          "max_interior_root_step_mm": 5.250210358531034,
+          "mean_window_target_rms_mm": 37.78716861535889,
+          "peak_window_target_rms_mm": 41.95524041001417,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "baseline": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953, 17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        },
+        "zero": {
+          "angular_weight": 0,
+          "back_marker_mean_rms_mm": 22.443635988900184,
+          "boundary_step_right_shoulder_deg": 13.176390738671973,
+          "boundary_step_right_wrist_deg": 24.9405578471808,
+          "boundary_step_root_mm": 13.831636065122108,
+          "boundary_step_seconds": 0.03333333333333333,
+          "coordinate_role_notice": "37 selected IK coordinates and 48 native q variables; no global rank or actuator claim",
+          "dense_window_frame_count": 25,
+          "foot_orientation_mean_error_deg": [
+            11.937003954058953, 17.572200950515477
+          ],
+          "head_axis_mean_error_deg": 0.00890232307013926,
+          "head_orientation_mean_error_deg": 24.671816047418197,
+          "interior_dense_step_seconds": 0.004166666666666667,
+          "linear_weight": 0,
+          "max_consecutive_dense_right_shoulder_so3_deg": 11.397322058433465,
+          "max_consecutive_dense_right_wrist_wrapped_deg": 83.89175405713218,
+          "max_interior_root_step_mm": 2.7322679599790405,
+          "mean_window_target_rms_mm": 35.65958763106405,
+          "peak_window_target_rms_mm": 38.33603063934011,
+          "prefix_sparse_count": 34,
+          "role_count_selected_coords": 37,
+          "role_count_total_q": 48,
+          "total_evaluated_frames": 59
+        }
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture": false,
+    "whole_output_zero_parity": true
   },
   "original_anchor_wrist_curve_comparison": {
     "qualification": "PURE_WRIST_REFERENCE_COMPARISON_NOT_NATIVE_FIT_OR_DYNAMICS",
@@ -1606,6 +1896,64 @@
     }
   },
   "qualification": "LOCAL_TANGENT_FRESH_STATE_RECHECK_AND_REJECTED_C2_PILOT_NOT_FORWARD_DYNAMICS_ACCEPTANCE",
+  "saved_refit_fresh_native_recheck": {
+    "acceleration_qualified": false,
+    "contact_qualified": false,
+    "dynamics_qualified": false,
+    "fresh_pose_rechecks": 536,
+    "model_saved": false,
+    "native_velocity_qualified": false,
+    "original_refit_exit_qualified": false,
+    "qualification": "INDEPENDENT_SAVED_WINDOW_POSE_RECHECK_NOT_VELOCITY_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "angular_0_08_linear_0_5": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 7.065416064076988e-16
+        },
+        "angular_0_15_linear_0_5": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 6.2803698347351e-16
+        },
+        "baseline": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        },
+        "zero": {
+          "fresh_pose_rechecks": 75,
+          "max_physical_pose_error": 4.960524086056721e-16
+        }
+      },
+      "capture_O": {
+        "angular_0_08_linear_0_5": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.102800490722269e-16
+        },
+        "angular_0_15_linear_0_5": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 6.2803698347351e-16
+        },
+        "baseline": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        },
+        "zero": {
+          "fresh_pose_rechecks": 59,
+          "max_physical_pose_error": 5.495323605393213e-16
+        }
+      }
+    },
+    "whole_capture_qualified": false,
+    "whole_output_zero_parity": true
+  },
+  "saved_refit_fresh_recheck_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T11:16:44.967554+00:00"
+  },
   "source_frame_branch_failure_counts": {
     "capture_A": {
       "accepted_count": 643,
