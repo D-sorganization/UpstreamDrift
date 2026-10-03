@@ -132,6 +132,22 @@ engine-specific (scipy.optimize.minimize, Drake MathematicalProgram,
 Pinocchio + nlopt, OpenSim StaticOptimization, etc.) but the inputs and
 outputs are identical.
 
+### 2.5.0 Force Overlay Parity
+
+Every engine that implements `ForceTorqueProvider` is held to the same statics
+by `tests/integration/cross_engine/test_force_overlay_parity.py` (FTO-21, #11306),
+asserting on `get_force_torque_frame()` only, in the world Z-up frame:
+
+| Scenario             | Expected on the provider frame                                              |
+| -------------------- | --------------------------------------------------------------------------- |
+| Hanging pendulum     | joint reaction (0, 0, +m·g) at the pivot; axial load +m·g (tension)         |
+| Inverted, held       | actuator torque balances gravity about the pivot; axial load −m·g·cos(θ)    |
+| Resting body         | contact forces sum to m·g up; contact points on the ground plane            |
+
+Tolerances live once in `force_overlay_fixtures.py`; analytic rows use solver
+precision and compliant contact uses a stated 1 % bound. An engine row skips only
+when the engine is absent or its provider has not merged.
+
 ### 2.5 Visualisation
 
 Three views per [VISUALIZATION_SPEC.md](Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/VISUALIZATION_SPEC.md):

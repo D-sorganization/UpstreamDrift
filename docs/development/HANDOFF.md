@@ -1,3 +1,14 @@
+# Force Overlay Parity Suite — #11306 (FTO-21)
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/UpstreamDrift-worktrees/claude-fto-21`
+- Branch: `feat/fto-21-parity-suite`; commit: SELF; PR: see the PR for this branch (`Closes #11306`, `Refs #11285`)
+- Governing issue: #11306 (epic #11285, ADR-0052); DL entry `DL-#11285`
+- Completed: `tests/integration/cross_engine/test_force_overlay_parity.py`, `force_overlay_fixtures.py` (one parameter set, derived expectations, `assert_wrench`, tolerances set once) and `force_overlay_engine_builders.py` (OpenSim and Simscape builders); parity spec section 2.5.0. Hanging, inverted and resting scenarios pass for OpenSim 4.6 and Simscape; a sign-flip guard proves the rows bite.
+- Decisions: the resting-body scenario uses a Hunt-Crossley sphere for OpenSim (the issue's "box" needs no box-specific physics); Simscape skips contact (file-based, no free-body contact channel) and axial rows (the loader carries wrenches only). Rows are selected by wrench kind, not label, because labels are engine-specific.
+- Pending: MuJoCo (FTO-9 #11294), Drake (FTO-11 #11296), Pinocchio (FTO-13 #11298). When a provider merges, add its builders to `force_overlay_engine_builders.py`, add the engine to the `HANGING`/`INVERTED`/`RESTING` tables and remove it from `PENDING_PROVIDERS`; `test_pending_engines_are_exactly_the_unbuilt_ones` fails until both are done.
+- Validation: `python3 -m pytest tests/integration/cross_engine/test_force_overlay_parity.py -n auto --timeout=60` (9 passed, 16 skipped for the pending providers and Simscape contact) with opensim 4.6; ruff check/format, file-size and error-handling ratchet clean.
+- Next steps: land the three pending engine rows as their providers merge.
+
 # Simscape Output Force Channels — #11304 (FTO-19)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/user/ud-wt/11304`
