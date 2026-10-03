@@ -305,11 +305,11 @@ def _axial(urdf: str):
 
 def test_branching_body_has_no_axial_load_but_leaves_do() -> None:
     loads = _axial(_TREE_URDF)
-    assert loads["trunk"] is None  # two children: axis is ambiguous
+    assert loads.get("trunk") is None  # two children: axis is ambiguous
     assert loads["left"] is not None and loads["right"] is not None
 
 
 def test_coincident_intermediate_joint_gives_no_axial_load() -> None:
     loads = _axial(_COINCIDENT_URDF)
-    assert loads["a"] is None  # child joint coincides with the parent joint
+    assert loads.get("a") is None  # child joint coincides with the parent joint
     assert loads["b"] is not None

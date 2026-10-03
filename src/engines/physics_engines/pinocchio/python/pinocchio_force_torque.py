@@ -24,14 +24,12 @@ from typing import Any
 import numpy as np
 import pinocchio as pin
 
-from src.shared.python.body_part_viz import AxialLoadFrame
-from src.shared.python.body_part_viz.axial_loads import (
-    axial_force_from_proximal_reaction,
-)
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
     OverlayWrench,
+    SegmentAxis,
     WrenchKind,
+    frame_with_axial_loads,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.contact_law import ContactSample
@@ -166,26 +164,26 @@ class PinocchioForceTorqueSource:
         pin.forwardKinematics(model, data, q_arr)
 
         wrenches: list[OverlayWrench] = []
-        axial: dict[str, float | None] = {}
+        axes: list[SegmentAxis] = []
         for i in range(1, model.njoints):
             joint = model.joints[i]
             if _is_free_flyer(joint):
                 continue
             wrenches.append(self._reaction(i))
-            axial[self.body_name(i)] = self._axial_load(i, wrenches[-1])
+            axis = self._segment_axis(i)
+            if axis is not None:
+                axes.append(axis)
             actuator = self._actuator(i, joint, tau_arr)
             if actuator is not None:
                 wrenches.append(actuator)
         wrenches.extend(self._contacts(contact_samples))
 
-        loads = (
-            AxialLoadFrame(time_s=time_s, values_n=axial, source=_REACTION_SOURCE)
-            if axial
-            else None
+        frame = ForceTorqueFrame(
+            time_s=time_s, engine=_ENGINE, wrenches=tuple(wrenches)
         )
-        return ForceTorqueFrame(
-            time_s=time_s, engine=_ENGINE, wrenches=tuple(wrenches), axial_loads=loads
-        )
+        if not axes:
+            return frame
+        return frame_with_axial_loads(frame, axes, _REACTION_SOURCE)
 
     def _reaction(self, i: int) -> OverlayWrench:
         placement = self._data.oMi[i]
@@ -235,13 +233,22 @@ class PinocchioForceTorqueSource:
         lever = self.model.inertias[i].lever
         return np.asarray(self._data.oMi[i].act(lever))
 
-    def _axial_load(self, i: int, reaction: OverlayWrench) -> float | None:
+    def _segment_axis(self, i: int) -> SegmentAxis | None:
+        """Shared ``SegmentAxis`` for body ``i``, or None when unavailable.
+
+        Ambiguous (branching) or degenerate (zero-length) axes are omitted so
+        no axial load is ever guessed.
+        """
         proximal = np.asarray(self._data.oMi[i].translation)
         distal = self._segment_distal_point(i)
         if distal is None or np.linalg.norm(distal - proximal) <= _MIN_SEGMENT_LENGTH_M:
-            return None  # ambiguous or degenerate axis: unavailable, never guessed
-        assert reaction.force_n is not None  # reactions always carry both halves
-        return axial_force_from_proximal_reaction(reaction.force_n, proximal, distal)
+            return None
+        return SegmentAxis(
+            segment=self.body_name(i),
+            joint_label=_label("reaction", self.model.names[i]),
+            proximal_m=_vec3(proximal),
+            distal_m=_vec3(distal),
+        )
 
     def _contacts(
         self, samples: Mapping[str, ContactSample] | None
