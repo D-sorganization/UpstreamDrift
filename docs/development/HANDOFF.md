@@ -136,6 +136,9 @@
 - Validation: document title check, Ruff and the development-log validator on the changed files (see the PR body).
 - Blockers: album download needs a fleet machine (cloud proxy returns 403); PR #11172 (registry, export, comparison) unmerged; COV-10 waits on #11165 and an R2025b host.
 - Next steps: 1) fleet agent downloads the album and runs COV-1 #11269; 2) COV-2 #11270; 3) frontier/owner decision COV-3 #11271.
+- Additional active requirements: actual model shapes with variable transparency while retaining skeleton layers (#11356); camera, player dimensions, shutter/field/exposure effects and human ROM qualification (#11357). Distinguish previously inspected evaluation labels from unseen validation; diagnose exact model geometry/attachments/sensitivities before another optimizer run. These features remain pending.
+- ControlTower delivery: `C:/Users/diete/Desktop/Necromatcher-Matched-Review-2026-10-02-V16-V13` contains 124 size/SHA-verified files, including four videos, twelve stills, exact model/capture/source inputs and the 74-page report. Remote receipt SHA `e752477f136cd504ce06c0af775b70f07ef556991e3844f44824f370997f72e8`; existing local 1,504-artifact snapshot remains unchanged.
+- Required local hook correction #11358 explicitly declares the incoming Simscape force-channel TypeAlias; same pinned mypy now passes and 28 existing behavior tests pass. Four normal-hook formatting changes preserve Markdown text/table cells and JSON semantics. This does not restart the exhausted historical remote CI repair budget.
 
 # Active Necromatcher Workspace Delivery — #11239 (Merged)
 
