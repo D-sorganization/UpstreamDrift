@@ -88,6 +88,32 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** OpenCap session import action added in PyQt6 desktop (`OpenCapImportAction`, `OpenCapImportDialog`) and React/Tauri web UI (`OpenCapImportModal`); inspects session trials, loads chosen trial via `load_opencap_session`, and hands scaled model and kinematics to OpenSim engine target.
 - **Next step:** Merge PR for #11409 and close issue.
 
+### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
+
+- **State:** in_review
+- **Owner:** codex (Gemini 3.8 Flash CLI reviews)
+- **Issue:** #11329
+- **PR:** #11351; depends on draft #11256 and shared-capture #11172.
+- **Branch:** `feat/simscape-scapula-protraction-20261002`
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_whole_body_ik.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_spine_bounds.m`, `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/tools/gs3dx_render.m`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03: 95 native R2025b contracts/regression tests pass with no failures/skips and natural exit 0. Final independent native replay checks all 1,313 sampled poses across 26 complete trajectories; final replay/export batches exit naturally with 0. All 104 neutral 1920x1080/30-fps videos across 13 moving-scapula models are delivered on Desktop, with both views and marker/clean modes. All 5,252 frames decoded; Desktop hashes and ZIP CRC/member hashes verified. Fixed-foot FullBody public-source fits reduce mean target RMS from 532/377 to 27/34 mm while preserving original offsets/model bytes; back RMS 52/61 mm remains a limitation. Final complete Human legacy/default parity passes. Source head bbe21592b6 preserves the qualified native tree after accepted-main sync; current documentation head requires CI verification. Built-in LaTeX compilation remains unavailable (platform directories missing).
+- **Summary:** Scapula address/backswing bands, direct measured back-marker fitting, native spine excursion bands through top with soft continuation afterwards, two-coordinate-neck head-axis guide, complete measured-marker overlays, cyan back/waist highlights, neutral Model Swing labels and undistorted native 1080P pixels. Full 3D head yaw remains imperfect and is separately reported. Fixed dimensions/position offsets and private source identities are preserved. Independent dynamics remains outside this scope and unqualified.
+- **Next step:** Verify current documentation-head CI and await scientific acceptance of parent drafts #11256/#11172 before protected source integration. Desktop matching/media deliverables are complete. Do not merge unqualified parent work through dependent draft #11351; no protected-main integration is claimed.
+
+### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
+
+- **State:** in_progress
+- **Owner:** codex (Gemini 3.8 CLI delegates)
+- **Issue:** #10950 (children #10951–#10959, #10979, #10985, #10986, #11011)
+- **PR:** #11256 (draft); original #11179 remains separate.
+- **Branch:** `feat/simscape-matching-review-main-20261002` (review continuation of `feat/simscape-gs3dx-exploratory`)
+- **Paths:** `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/exploratory_gs3dx/`, `docs/research/simscape_matching_reference/`, `AGENTS.md`
+- **Started:** 2026-09-26
+- **Last verified:** 2026-10-02: sampled leg feedforward passed 16 native seam/regression checks. Saved-state audit identified early transient dominance. Controlled 0–50 ms tour passed posture but rejected peak 2.000907 BW. Separate 20–50 ms ramp runs passed all five original one-second hold gates: tour 3.176 mm / 0.836 deg at 19:54:39Z; owner 2.321 mm / 0.699 deg at 20:01:28Z. Model unchanged. Both retain feedback/prescribed neck; full independent dynamics remains unqualified. Prior b21836863 checks passed; new changes need protected checks. Built-in compiler infrastructure remains unavailable.
+- **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
+- **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_review
@@ -102,15 +128,21 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 ### DL-#11268 · Capture-O Video Companion
 
 - **State:** in_progress
-- **Owner:** claude (planning); codex (local execution with Gemini 3.8 CLI)
+- **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** #11256 (draft, Simscape/video evidence); registry dependency #11172 remains separate
-- **Branch:** `claude/elegant-tesla-f2heae` (planning only)
-- **Paths:** `docs/development/capture-o-video/**`
+- **PR:** #11413 (Closes #11269, Refs #11268)
+- **Branch:** `feat/cov-1-acquisition-11269`
 - **Started:** 2026-10-02
-- **Last verified:** 2026-10-02: six privately acquired album streams match archive hashes; all 9,539 frames decoded with increasing integer PTS. Dense indoor review records a conservative cross-dissolve exclusion; six full-resolution OpenPose samples executed with pinned source/network hashes. These are runtime/provenance observations, not independent accuracy or exact pairing. Timebase confirmed for one stream only; thirteen private trials now hash/header-verified (selected source trial 12); camera originals, club/event qualification, protocol freeze and comparison remain open. Local six-video archive/MP4 hashes were verified again on 2026-10-03 UTC; marker-region review is recorded in the maintained LaTeX reference, without exact-label or trial-pairing claims.
+- **Last verified:** 2026-10-03 at SELF — COV-1 (#11269): `build_acquisition_receipt` implemented with fail-closed validation, SHA-256 integrity checks, ffprobe metadata embedding, lineage tracking, deterministic rerun idempotency, atomic persistence, and privacy path safety; 11 unit tests passing.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
-- **Next step:** Complete per-clip event/camera/timing grading, qualify club/event correspondence in the verified thirteen-trial roster and freeze comparison protocol using shared authorities. Keep acquisition/detector receipts separate from accuracy; investigate subject association, paired projection and uncertainty at supported L0-L3 levels. No epics or child issues closed.
+- **Next step:** Advance to COV-2 (#11270) video source registration and swing window grading.
+
+- **PR:** #11417 (Closes #11273, Refs #11268)
+- **Branch:** `feat/cov-5-runner-matrix-11273`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
 ### DL-#11235 · Necromatcher Native Fit
 

@@ -33,7 +33,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-matplotlib.use("QtAgg")
+import contextlib
+
+with contextlib.suppress(Exception):
+    matplotlib.use("QtAgg")
 try:
     from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 except ImportError:

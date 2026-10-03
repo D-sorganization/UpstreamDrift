@@ -36,6 +36,45 @@
 
 ---
 
+# Current Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-1-acquisition-11269`
+- Worktree: `c:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-1-11269`
+- Commit: `SELF`
+- Governing issue: #11269 (parent epic #11268)
+- Objective: [COV-1] Implement `build_acquisition_receipt` for acquiring the capture-session video album into the capture data store with strict provenance, lineage tracking, ffprobe metadata embedding, SHA-256 verification, and fail-closed validation under DbC.
+- Completed:
+  - `src/shared/python/motion_capture/acquisition_receipt.py`:
+    - `build_acquisition_receipt(directory, ...)`: assigns deterministic neutral identifiers `cov-01`, `cov-02`, … in sorted original-filename order.
+    - `AcquisitionEntry` and `AcquisitionReceipt` dataclasses with strict DbC assertions.
+    - Fail-closed rejections: `EmptyDirectoryError` on empty directory, `NonVideoFileError` on non-video files, `FFProbeError` on probe failure, naming the offending file.
+    - Hash mismatch validation: `HashMismatchError` when file bytes change relative to an existing receipt.
+    - Idempotent determinism: re-running on unchanged files produces byte-identical receipts.
+    - Lineage tracking: distinguishes and links original clips and album copies (`lineage: original` vs `lineage: album-copy-of <cov_id>`).
+    - Absolute path elimination: strips and validates absence of absolute local paths from receipt content.
+    - Atomic writes: `write_atomic` writes via sibling temporary files before atomic rename.
+    - `verify_acquisition_receipt`: standalone integrity verifier for acquired assets.
+  - `src/shared/python/motion_capture/__init__.py`: exported public API.
+  - `src/motion_capture/acquisition_receipt.py`: namespace re-export.
+  - Unit tests in `tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passing behavioral tests.
+  - Updated `SPEC.md` top section and §12 Change Log table.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check`: OK.
+  - `ruff format --check`: OK.
+  - `python scripts/ci/run_mypy.py`: OK.
+
+---
+
+# Past Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
+
+---
+
 # OpenCap: Import Session Action in PyQt6 and React/Tauri — #11400 / #11409
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-import-11409`; commit SELF; PR: #11409 (`Closes #11409`, `Refs #11400`)
@@ -194,6 +233,21 @@
   - All Vitest and UI checks passed (`npm --prefix ui run type-check`, `npm --prefix ui run lint`, `npm --prefix ui run test:run`).
   - All feature parity tests passed (39 tests in `tests/config/feature_parity/`).
 - Next steps: Merge PR; proceed with FTO-30.
+
+# Scapula and Quiet Torso Matching Handoff - #11329
+
+- Branch: `feat/simscape-scapula-protraction-20261002`; commit SELF; PR #11351; development entry `DL-#11329`.
+- Scope: requested scapula protraction, quieter native spine/torso matching, direct back-marker residuals, complete measured-marker overlays, neutral Model Swing labels and undistorted 1080P exports. Independent dynamics remains separate and unqualified.
+- Validation: MATLAB R2025b Update 5; 95 native contracts/regression tests pass with no skips and natural exit 0. Complete 55/46-frame fits exist across all 13 registered moving-scapula models. Both complete fixed-foot FullBody public-source fits exit 0 with original offsets/model bytes preserved. Final exact entire disabled-feature Human output and default/explicit protraction parity exit 0. Native fixed-foot frame RED/GREEN probes and independent expected-transform regression pass.
+- Selected profiles: back markers 0.5, head-axis weights 0.2/0.16, posture 0.04, smoothing 0.025, base gap 0.1, ROM 0.025, feet 0.1, scapula prior 7.5, native spine bend 15 and twist 45 degrees relative to the original address seed, spine posture/smoothing 0.08 and soft hinge 0.35. Explicit lower-body gap weights 1 retain interpolated priors; displayed raw markers remain missing. Hard bands release after top. Full 3D head error around 43 degrees remains a limitation of the selected two-coordinate-neck guide.
+- Results: previous spine bending excursions 47.57/60.65 and 39.34/49.38 degrees reduce to 15.44/16.53 and 17.49/15.17. Mean/peak 14-target RMS is 16.57/32.84 and 19.81/37.78 mm; raw back-marker mean RMS is 26.73/38.23 mm. These are native kinematic results, not clinical joint measurements. Segment dimensions and original position offsets are preserved.
+- Delivery: 104 neutral Model Swing 1920x1080/30-fps MP4s across all 13 moving-scapula variants: two swings, both views, marker/clean modes. All 5,252 frames decoded and checked; Desktop hashes and ZIP CRC/member hashes verified. Neutral contact sheets, per-model fit measurements and README included. Human final eight previews are unchanged. All available measured channels are displayed; seven back/waist points are cyan, and missing channels are not synthesized. Private inputs, source identity and provenance remain outside the shareable package.
+- Source checks: pinned Ruff 0.15.17 passed format/lint. The existing LaTeX source was updated in place; built-in compilation failed with `Unable to find standard directories for platform`.
+- Dependency: branch base includes 31 parent commits from draft #11256, including shared-capture #11172. Review this refinement's own commits separately. Do not merge the unqualified parent scientific program through this dependent draft.
+- Next step: verify current documentation-head CI, then integrate only after parent scientific drafts #11256/#11172 are accepted. Desktop deliverables and final native replay/export are complete. No protected-main merge is claimed.
+
+- Variant refinement: auto selects 14 whole-body or eight upper-body targets, masks unavailable foot diagnostics and validates actual native keyed seeds. FullBody retains rigid feet and uses alternating native upper-body/pelvis blocks: mean 27/34 mm, peak 43/53 mm on eight active targets. Back RMS 52/61 mm remains a limitation. Final replay/export receipts replace the earlier numerical replay whose MATLAB shutdown was watchdog-terminated (125).
+- Current checks: 95 native tests and final Human legacy/default parity pass with native exit 0. Independent native replay checks all 1,313 poses across 26 trajectories. Final smaller replay/export batches exit naturally with 0; all 104 videos/5,252 frames are decoded and Desktop/ZIP hashes verified. Source head bbe21592b6 preserved the qualified native tree after accepted-main sync. Current documentation-head CI requires final verification; concurrent records and qualified native models/sources must be preserved.
 
 ---
 
@@ -1893,6 +1947,18 @@ original film timing or independent multiview.
 The first post-merge push was stopped because documentation changed while the
 security hook was running (no security issues were identified). Finish the
 current documentation commit and retry from a clean worktree.
+
+## Capture Comparison DRY Gate Remediation - #11162 / #11172
+
+CI identified duplicated club endpoint selection in angular-speed and wrist metrics. A shared private helper preserves explicit endpoint precedence, measured-marker aliases, array identity and missing-endpoint/shaft-axis behavior. AGY Gemini Flash supplied the bounded extraction; root reviewed the exact diff. Existing focused regression suite passes 190 tests with 15 unavailable-private-workbook skips, zero errors/failures, natural exit 0. Ruff format/check and full DRY duplication gate pass without changing baselines. Regenerate the monolith register for the revised file length. Current-head protected CI remains required.
+
+## Capture Leaderboard Suite Classification - #11162 / #11172
+
+Protected CI verified the DRY extraction, then identified 14 net-new unmarked tests in TestPerCaptureLeaderboard. Mark this pure-Python class as unit; all 14 execute and pass under unit selection with no skips/errors. Full suite-marker ratchet passes without baseline changes. Broader focused capture/comparison qualification remains 190 passed and 15 unavailable-private-workbook skips. Protected current-head CI remains required before merge.
+
+## Capture Comparison Inventory Integration - #11162 / #11172
+
+CI at bd1ee9a8e passes repository structure and 20,546 unit cases; its only unit failure identifies five new swing_comparison paths missing from the shared-tools divergence inventory. Regenerate JSON and Markdown with the authoritative generator against the pinned Tools tree. All five paths classify as UD-only; existing overlap totals remain unchanged. All ten inventory tests pass with no errors/skips, including the committed-tree freshness test, and generator --check succeeds. Protected current-head CI remains required before merging.
 
 ## Main Refresh
 

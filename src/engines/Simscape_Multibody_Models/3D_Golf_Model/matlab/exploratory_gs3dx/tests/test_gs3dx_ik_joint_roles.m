@@ -256,3 +256,77 @@ function testEmptyOrMissingPathsOrIdsRejected(t)
     % Length mismatch
     verifyError(t, @() gs3dx_ik_joint_roles(paths(1:end-1), ids), 'gs3dx:ik:ambiguous_anatomy');
 end
+
+%% 15. Default Result Exactly Equals grounded_legs=false
+function testDefaultEqualsGroundedLegsFalse(t)
+    [paths, ids] = local_build_synthetic_fit();
+    roles_default = gs3dx_ik_joint_roles(paths, ids);
+    roles_explicit_false = gs3dx_ik_joint_roles(paths, ids, grounded_legs=false);
+
+    verifyEqual(t, roles_default, roles_explicit_false);
+end
+
+%% 16. grounded_legs=true Converts Lower Body Variables to Closed Guesses
+function testGroundedLegsTrueLowerBodyClosed(t)
+    [paths, ids] = local_build_synthetic_fit("j", true);
+    roles = gs3dx_ik_joint_roles(paths, ids, grounded_legs=true);
+
+    % All six lower body role variables closed guesses
+    leg_roles = ["Left Hip Joint", "Right Hip Joint", "Left Knee", "Right Knee", "Left Ankle", "Right Ankle"];
+    for pat = leg_roles
+        m = contains(paths, pat);
+        verifyTrue(t, all(roles.closed_mask(m)));
+    end
+
+    % Total closed variables: 7 (RHS arm) + 4 (L Hip) + 4 (R Hip) + 1 (L Knee) + 1 (R Knee) + 2 (L Ankle) + 2 (R Ankle) = 21
+    % Independent count: 21 rather than 33
+    verifyEqual(t, roles.n_independent, 21);
+
+    % Trunk mask count: 7
+    verifyEqual(t, nnz(roles.is_trunk_coord), 7);
+
+    % Pelvis indices preserved: [1, 2, 3]
+    verifyEqual(t, roles.pelvis_trans_indices, [1, 2, 3]);
+end
+
+%% 17. Renumbered Fixture with Pelvis Last Retains grounded_legs Properties
+function testGroundedLegsRenumberedPelvisLast(t)
+    [paths, ids] = local_build_synthetic_fit("joint_var_", false);
+    roles = gs3dx_ik_joint_roles(paths, ids, grounded_legs=true);
+
+    % Lower body role variables closed
+    leg_roles = ["Left Hip Joint", "Right Hip Joint", "Left Knee", "Right Knee", "Left Ankle", "Right Ankle"];
+    for pat = leg_roles
+        m = contains(paths, pat);
+        verifyTrue(t, all(roles.closed_mask(m)));
+    end
+
+    % Independent count 21
+    verifyEqual(t, roles.n_independent, 21);
+
+    % Trunk mask count 7
+    verifyEqual(t, nnz(roles.is_trunk_coord), 7);
+
+    % Pelvis indices preserved within valid range of independent parameters
+    verifyEqual(t, numel(roles.pelvis_trans_indices), 3);
+    verifyFalse(t, isequal(roles.pelvis_trans_indices, [1, 2, 3]));
+    verifyTrue(t, all(roles.pelvis_trans_indices >= 1 & roles.pelvis_trans_indices <= 21));
+end
+
+%% 18. Missing or Ambiguous Grounded Leg Role Errors gs3dx:ik:missing_anatomy
+function testMissingOrAmbiguousGroundedLegRoleErrors(t)
+    % Missing grounded leg role (drop Left Knee)
+    [paths, ids] = local_build_synthetic_fit();
+    drop = contains(paths, "Left Knee");
+    paths_missing = paths(~drop);
+    ids_missing = ids(~drop);
+    verifyError(t, @() gs3dx_ik_joint_roles(paths_missing, ids_missing, grounded_legs=true), ...
+        'gs3dx:ik:missing_anatomy');
+
+    % Ambiguous grounded leg role (duplicate Right Ankle with conflicting leaf block)
+    [paths, ids] = local_build_synthetic_fit();
+    paths_ambig = [paths; "Model/Conflicting Lower Body/Right Ankle Joint/Universal Joint"];
+    ids_ambig = [ids; "j999.Rx.q"];
+    verifyError(t, @() gs3dx_ik_joint_roles(paths_ambig, ids_ambig, grounded_legs=true), ...
+        'gs3dx:ik:missing_anatomy');
+end

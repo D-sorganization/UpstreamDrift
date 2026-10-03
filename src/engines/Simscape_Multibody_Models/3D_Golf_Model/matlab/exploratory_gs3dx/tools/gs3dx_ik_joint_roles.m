@@ -1,4 +1,4 @@
-function roles = gs3dx_ik_joint_roles(paths_in, ids_in)
+function roles = gs3dx_ik_joint_roles(paths_in, ids_in, opts)
 %GS3DX_IK_JOINT_ROLES  Model-independent identification of IK joint roles (#10979, #11161).
 %
 %   ROLES = GS3DX_IK_JOINT_ROLES(JP) or GS3DX_IK_JOINT_ROLES(PATHS, IDS)
@@ -20,6 +20,10 @@ function roles = gs3dx_ik_joint_roles(paths_in, ids_in)
 %     .is_trunk_coord      logical(n_independent, 1) indicating trunk parameter coordinates
 %     .pelvis_trans_indices  1x3 double indices into parameter vector p for [Px, Py, Pz]
 %
+%   GROUNDED_LEGS=true treats all bilateral hip, knee and ankle variables as
+%   native loop-closure guesses for the rigid-foot FullBody construction stage.
+%   It leaves pelvis and trunk independent; default floating-leg layout is unchanged.
+%
 %   Errors:
 %     gs3dx:ik:missing_anatomy    A required joint group or translation primitive is missing.
 %     gs3dx:ik:ambiguous_anatomy  A joint group matches multiple conflicting blocks.
@@ -27,6 +31,7 @@ function roles = gs3dx_ik_joint_roles(paths_in, ids_in)
     arguments
         paths_in = []
         ids_in = []
+        opts.grounded_legs (1,1) logical = false
     end
 
     if istable(paths_in)
@@ -75,6 +80,16 @@ function roles = gs3dx_ik_joint_roles(paths_in, ids_in)
                 'Ambiguous multiple leaf blocks for RHS arm joint %s: %s', pat, strjoin(unique_blks, ', '));
         end
         closed_mask = closed_mask | matches(:);
+    end
+
+    if opts.grounded_legs
+        leg_roles=["Left Hip Joint","Right Hip Joint","Left Knee","Right Knee","Left Ankle","Right Ankle"];
+        for pat=leg_roles
+            match=contains(paths,pat);
+            assert(nnz(match)>0 && numel(unique(paths(match)))==1, ...
+                'gs3dx:ik:missing_anatomy','Grounded leg role %s must resolve uniquely',pat);
+            closed_mask=closed_mask|match;
+        end
     end
 
     target_ids = ids(~closed_mask);
