@@ -87,8 +87,10 @@ class MujocoAxialLoadSource:
         )
         if any(get_callback() is not None for get_callback in callbacks):
             return None
+        from src.shared.python.engine_core.mujoco_compat import copy_mjdata_state
+
         scratch = self._scratch
-        native.mj_copyData(scratch, model, data)
+        copy_mjdata_state(scratch, data)
         native.mj_forward(model, scratch)
         native.mj_rnePostConstraint(model, scratch)
         values = {}
