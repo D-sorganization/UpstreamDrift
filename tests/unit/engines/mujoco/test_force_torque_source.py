@@ -137,7 +137,7 @@ def test_sign_agreement_with_mujoco_axial_load_source() -> None:
     # FTO-2 axial_loads_from_reactions
     axis = SegmentAxis(
         segment="link1",
-        joint_label="reaction:link1",
+        joint_label="reaction:hinge1",
         proximal_m=(0.0, 0.0, 0.0),
         distal_m=(0.0, 0.0, -1.0),
     )
@@ -152,6 +152,48 @@ def test_sign_agreement_with_mujoco_axial_load_source() -> None:
     assert native_load is not None and native_load > 0
     assert converted_load is not None and converted_load > 0
     assert math.isclose(native_load, converted_load, rel_tol=1e-5)
+
+
+def test_joint_reaction_label_uses_joint_name_like_other_engines() -> None:
+    """Reactions are labelled by joint (Drake, Pinocchio, OpenSim convention).
+
+    A jointed body is labelled by its first joint (the one whose anchor is
+    reported); the wrench still acts on the body. Cross-engine consumers (the
+    FTO-21 parity suite, ``axial_loads_from_reactions``) look reactions up by
+    joint name.
+    """
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
+        MujocoForceTorqueSource,
+    )
+
+    model = mujoco.MjModel.from_xml_string(SYNTHETIC_TWO_JOINT_OBLIQUE)
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    frame = MujocoForceTorqueSource(model).sample(data)
+
+    labels = {
+        w.body: w.label for w in frame.wrenches if w.kind == WrenchKind.JOINT_REACTION
+    }
+    assert labels == {"body1": "reaction:jnt1", "body2": "reaction:jnt2"}
+
+
+def test_joint_reaction_label_falls_back_to_body_name_without_joint() -> None:
+    mujoco = pytest.importorskip("mujoco")
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
+        MujocoForceTorqueSource,
+    )
+
+    xml = (
+        '<mujoco><worldbody><body name="fixed_link" pos="0 0 1">'
+        '<geom type="sphere" size="0.1" mass="1"/></body></worldbody></mujoco>'
+    )
+    model = mujoco.MjModel.from_xml_string(xml)
+    data = mujoco.MjData(model)
+    mujoco.mj_forward(model, data)
+    frame = MujocoForceTorqueSource(model).sample(data)
+    labels = [w.label for w in frame.wrenches if w.kind == WrenchKind.JOINT_REACTION]
+    assert labels in ([], ["reaction:fixed_link"])
 
 
 def test_actuated_hinge_and_clamped_qfrc() -> None:
