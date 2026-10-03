@@ -53,10 +53,8 @@ def load_multi_kind_fixture() -> dict[str, Any]:
     }
 
 
-def generate_html_preview(fixture: dict[str, Any]) -> str:
-    """Generate HTML page embedding Three.js overlay and legend overlay."""
-    fixture_json = json.dumps(fixture)
-    css = (
+def _get_preview_css() -> str:
+    return (
         "* { box-sizing: border-box; } "
         "body { margin: 0; padding: 0; background-color: #111827; color: #f3f4f6; "
         "font-family: ui-sans-serif, system-ui, sans-serif; overflow: hidden; width: 100vw; height: 100vh; } "
@@ -79,7 +77,10 @@ def generate_html_preview(fixture: dict[str, Any]) -> str:
         ".swatch-item { display: flex; align-items: center; gap: 6px; } "
         ".swatch-dot { width: 10px; height: 10px; border-radius: 2px; }"
     )
-    js_code = """
+
+
+def _get_preview_js(fixture_json: str) -> str:
+    template = """
 import * as THREE from 'three';
 const glyphs = __FIXTURE_JSON__;
 function alignYTo(dirVec) {
@@ -135,7 +136,15 @@ if (glyphs.torque_arcs) for (const t of glyphs.torque_arcs) grp.add(buildArc(t))
 scene.add(grp);
 renderer.render(scene, camera);
 window.__SCENE_RENDERED__ = true;
-""".replace("__FIXTURE_JSON__", fixture_json)
+"""
+    return template.replace("__FIXTURE_JSON__", fixture_json)
+
+
+def generate_html_preview(fixture: dict[str, Any]) -> str:
+    """Generate HTML page embedding Three.js overlay and legend overlay."""
+    fixture_json = json.dumps(fixture)
+    css = _get_preview_css()
+    js_code = _get_preview_js(fixture_json)
 
     return f"""<!DOCTYPE html>
 <html lang="en" class="dark">
