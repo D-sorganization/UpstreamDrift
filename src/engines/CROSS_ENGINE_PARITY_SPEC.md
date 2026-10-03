@@ -320,6 +320,19 @@ is a different frame). The committed trial CSVs log R only to about 6e-3
 orthonormality, so loading them needs an explicit `rotation_tol`; the default is
 not loosened.
 
+#### Simulation-Output Path (#11304, FTO-19)
+
+`SimscapeOutput` carries an optional `force_columns` mapping (dataset column
+name to a finite `(N,)` array, rotations flattened to `_I11.._I33`). The
+default `None` is unchanged behaviour. `logsout_to_simscape_output` fills it
+from an optional `forces` key of the MATLAB struct, and
+`SimscapeOutput.to_force_series()` delegates to
+`force_channels.force_series_from_columns`, the same core the CSV loader uses,
+so there is one channel table and one rotation convention. A run without
+`force_columns` raises `ValueError` rather than returning zeros. The MATLAB
+exporter (`extract_sim_out.m` emitting `forces`) and the R2025b channel audit
+need a live host and are not part of this Python slice.
+
 ---
 
 ## 4. Cross-cutting milestones
