@@ -137,42 +137,7 @@ class SimRenderingMixin:
 
         if self.show_live_euler or self.show_live_quat or self.show_live_screw:
             rgb = self._add_live_kinematics_overlays(rgb)
-
-        if self.meshcat_adapter:
-            try:
-                self.meshcat_adapter.update(self.data)
-                if scale is not None:
-                    self.meshcat_adapter.update_force_colors(axial_frame, scale)
-                self.meshcat_adapter.draw_vectors(
-                    self.data,
-                    self.show_force_vectors,
-                    self.show_torque_vectors,
-                    self.force_scale,
-                    self.torque_scale,
-                )
-
-                if self.show_induced_vectors:
-                    self.meshcat_adapter.draw_induced_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.induced_vector_source,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
-
-                if self.show_cf_vectors:
-                    self.meshcat_adapter.draw_cf_vectors(
-                        self.data,
-                        self.latest_bio_data,
-                        self.cf_vector_type,
-                        self.torque_scale,
-                    )
-                else:
-                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
-
-            except (RuntimeError, ValueError, AttributeError) as exc:
-                logger.debug("Counterfactual vector rendering failed: %s", exc)
+        self._update_meshcat(axial_frame, scale)
 
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
             return
@@ -183,6 +148,45 @@ class SimRenderingMixin:
         pixmap = QtGui.QPixmap.fromImage(image)
 
         self.label.setPixmap(pixmap)
+
+    def _update_meshcat(self: Any, axial_frame: Any, scale: Any) -> None:
+        """Update MeshCat adapter state, force colors, and vector overlays."""
+        if not self.meshcat_adapter:
+            return
+        try:
+            self.meshcat_adapter.update(self.data)
+            if scale is not None:
+                self.meshcat_adapter.update_force_colors(axial_frame, scale)
+            self.meshcat_adapter.draw_vectors(
+                self.data,
+                self.show_force_vectors,
+                self.show_torque_vectors,
+                self.force_scale,
+                self.torque_scale,
+            )
+
+            if self.show_induced_vectors:
+                self.meshcat_adapter.draw_induced_vectors(
+                    self.data,
+                    self.latest_bio_data,
+                    self.induced_vector_source,
+                    self.torque_scale,
+                )
+            else:
+                self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
+
+            if self.show_cf_vectors:
+                self.meshcat_adapter.draw_cf_vectors(
+                    self.data,
+                    self.latest_bio_data,
+                    self.cf_vector_type,
+                    self.torque_scale,
+                )
+            else:
+                self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
+
+        except (RuntimeError, ValueError, AttributeError) as exc:
+            logger.debug("Counterfactual vector rendering failed: %s", exc)
 
     def _apply_axial_scene_colors(self: Any) -> tuple[Any, Any]:
         """Sample the optional force capability once for native and web renderers."""
