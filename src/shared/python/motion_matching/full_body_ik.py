@@ -18,6 +18,7 @@ from numpy.typing import NDArray
 from scipy.optimize import least_squares
 
 from src.shared.python.motion_matching.contact_law import GroundPlane
+from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
     ConstraintOptions,
@@ -439,6 +440,10 @@ class BaseFullBodyIK:
         raise NotImplementedError(  # tracked: #10330
             "Native constraint linearization is unsupported"
         )
+
+    def marker_linearization(self, q: Array) -> MarkerLinearization:
+        """Optional public point derivatives; unsupported adapters reject explicitly."""
+        raise NotImplementedError("Native marker linearization is unsupported")
 
     def _set(self, q: Array) -> None:
         """Set generalized coordinates on underlying physics model."""

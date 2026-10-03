@@ -85,6 +85,18 @@ class CameraProjection:
             translation_world_to_camera=self.translation,
         )
 
+    def project_jacobian(self, points: np.ndarray) -> np.ndarray:
+        """Fixed pinhole derivative (points,2,3) with respect to world metres."""
+        self._depth(points)
+        current = self.camera_points(points)
+        depth = current[:, 2]
+        derivative = np.zeros((len(current), 2, 3))
+        derivative[:, :, :2] = self.intrinsics[:2, :2] / depth[:, None, None]
+        derivative[:, :, 2] = (
+            -(current[:, :2] @ self.intrinsics[:2, :2].T) / depth[:, None] ** 2
+        )
+        return derivative @ self.rotation
+
     def residual(
         self, points: np.ndarray, observed: np.ndarray, confidence: np.ndarray
     ) -> np.ndarray:
@@ -435,6 +447,10 @@ class ImageFitResult:
     physical_time_qualified: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
+        if not isinstance(self.optimizer_ran, bool) or (
+            self.converged and not self.optimizer_ran
+        ):
+            raise ValueError("Convergence requires an executed optimizer")
         if self.telemetry is not None:
             if not isinstance(self.telemetry, SolverTelemetry):
                 raise ValueError("Telemetry must be a typed SolverTelemetry")
@@ -451,10 +467,6 @@ class ImageFitResult:
             "constraint_residuals",
         ):
             object.__setattr__(self, name, _array(getattr(self, name), name))
-        if not isinstance(self.optimizer_ran, bool) or (
-            self.converged and not self.optimizer_ran
-        ):
-            raise ValueError("Convergence requires an executed optimizer")
         if self.initialization is not None and not isinstance(
             self.initialization, AuthoredHermiteInitialization
         ):

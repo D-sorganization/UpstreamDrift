@@ -522,6 +522,14 @@ The root Bushing Joint also exposes six actuator-sensing channels under HipLogs.
 
 ## Historical Research Fit Jobs
 
+The optional `motion_matching.pipeline.MarkerLinearizationPlant` capability
+creates a `MarkerLinearizer` returning immutable `MarkerLinearization` world
+points and native-coordinate derivatives. It does not extend the required
+`MatchingPlant` protocol. Historical fitting combines this owner-provided
+derivative with `CameraProjection.project_jacobian`; unsupported providers
+retain finite differences and malformed advertised providers fail closed.
+See [Analytic Marker Derivatives](../development/necromatcher-analytic-marker-derivatives.md).
+
 The workspace facade exports `NativeRefitOptions` and `start_native_refit` for
 immutable source-bound historical refits. Reuse `motion_matching.jobs` for owned
 job execution, cancellation, manifests and recovery. `MatchingWorkOutcome`

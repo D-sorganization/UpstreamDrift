@@ -22,6 +22,11 @@ from src.shared.python.estimation import (
     solve_single_trial_map,
 )
 from src.shared.python.motion_matching.pipeline.plant import MatchingPlant
+from src.shared.python.motion_matching.marker_kinematics import (
+    MarkerLinearization,
+    MarkerLinearizationPlant,
+    MarkerLinearizer,
+)
 from src.shared.python.motion_matching.constraint_kinematics import (
     ConstraintLinearization,
 )
@@ -97,6 +102,18 @@ class _Fit:
             if config.constraint_options is not None
             else None
         )
+        self.marker_ik: MarkerLinearizer | None = None
+        if isinstance(native, MarkerLinearizationPlant):
+            provider = (
+                self.ik
+                if isinstance(self.ik, MarkerLinearizer)
+                else native.create_marker_linearizer(attachments)
+            )
+            if not isinstance(provider, MarkerLinearizer):
+                raise ValueError(
+                    "Marker linearization factory must return a public provider"
+                )
+            self.marker_ik = provider
 
     def _additional_times(self) -> list[float]:
         if self.additional_images is None:
@@ -279,7 +296,8 @@ class _Fit:
     ) -> np.ndarray:
         """Differentiate native frame poses once, then apply exact spline bases.
 
-        Native pose derivatives use the canonical central-difference helper.
+        Optional native marker derivatives avoid central pose differences.
+        Unsupported providers retain the canonical central-difference helper.
         They depend on free DOF count rather than the number of spline knots.
         Pose and speed priors use exact derivatives; no engine internals enter.
         """
@@ -294,9 +312,7 @@ class _Fit:
             source.q_basis,
             strict=True,
         ):
-            native_jacobian = finite_difference_jacobian(
-                partial(self._frame_residual, observed=observed, weights=weights), free
-            )
+            native_jacobian = self._frame_jacobian(free, observed, weights)
             chained = native_jacobian @ basis
             image_rows.append(chained[:pixel_size])
             if self.ik is None and self.config.closure_weight:
@@ -345,6 +361,53 @@ class _Fit:
                 for term in self.additional_images.terms
             )
         return np.vstack(pieces)
+
+    def _frame_jacobian(
+        self, free: np.ndarray, observed: np.ndarray, weights: np.ndarray
+    ) -> np.ndarray:
+        """Compose optional point derivatives, preserving legacy closure fallback."""
+        if self.marker_ik is not None:
+            pose = self.expand(free[None, :])[0]
+            row = self._marker_linearization(pose)
+            if row is not None:
+                projected = (
+                    self.camera.project_jacobian(row.positions)
+                    @ row.jacobian[:, :, self.indices]
+                )
+                pixels = (projected * np.sqrt(weights)[:, None, None]).reshape(
+                    -1, len(free)
+                )
+                if self.ik is None and self.config.closure_weight:
+                    closure = finite_difference_jacobian(
+                        lambda value: (
+                            self.config.closure_weight
+                            * self.native.closure_residuals(
+                                self.expand(value[None, :])[0]
+                            )
+                        ),
+                        free,
+                    )
+                    return np.vstack((pixels, closure))
+                return pixels
+        return finite_difference_jacobian(
+            partial(self._frame_residual, observed=observed, weights=weights), free
+        )
+
+    def _marker_linearization(self, pose: np.ndarray) -> MarkerLinearization | None:
+        """Unsupported capabilities fall back; malformed declared providers fail."""
+        if self.marker_ik is None:
+            return None
+        try:
+            row = self.marker_ik.marker_linearization(pose)
+        except NotImplementedError:
+            return None
+        if (
+            not isinstance(row, MarkerLinearization)
+            or row.coordinate_order != tuple(self.native.coordinate_order)
+            or row.marker_labels != tuple(self.attachments)
+        ):
+            raise ValueError("Marker linearization must retain exact fit identities")
+        return row
 
     def _term_pose_residual(
         self, free: np.ndarray, poses: np.ndarray, index: int, term: ImageResidualTerm

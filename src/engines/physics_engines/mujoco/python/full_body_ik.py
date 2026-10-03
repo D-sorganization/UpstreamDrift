@@ -27,6 +27,7 @@ from src.shared.python.motion_matching.full_body_ik import (
     _validate_axis_spec,
 )
 from src.shared.python.motion_matching.marker_calibration import Pose
+from src.shared.python.motion_matching.marker_kinematics import MarkerLinearization
 
 Array: TypeAlias = NDArray[np.float64]
 Attachment = tuple[str, tuple[float, float, float]]
@@ -217,6 +218,17 @@ class FullBodyMarkerKinematics(BaseFullBodyIK):
         """World positions (markers, 3) of every attached marker at ``q``."""
         self._set(q)
         return self._positions()
+
+    def marker_linearization(self, q: Array) -> MarkerLinearization:
+        """Reuse native point derivatives in the adapter's declared scalar order."""
+        self._set(q)
+        positions = self._positions()
+        return MarkerLinearization(
+            positions,
+            self._marker_jacobian(positions),
+            self.labels,
+            tuple(self.coordinate_order),
+        )
 
     def _positions(self) -> Array:
         out = np.empty((len(self.labels), 3))
