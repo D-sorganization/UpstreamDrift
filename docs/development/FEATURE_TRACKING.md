@@ -366,9 +366,9 @@ EDUCATIONAL                       STANDARD                           RESEARCH
 | -------------------------- | ------ | ----------------------------- |
 | Real-time 3D Rendering     | `[x]`  | 60 FPS capable                |
 | Multiple Camera Views      | `[x]`  | Side, front, top, follow, DTL |
-| Force Vector Visualization | `[x]`  | Adjustable scaling            |
-| Torque Visualization       | `[x]`  | Joint torque display          |
-| Contact Force Display      | `[x]`  | GRF visualization             |
+| Force Vector Visualization | `[x]`  | ADR-0052, #11285; adjustable scaling across backends ([docs](../user_guide/force_overlay.md)) |
+| Torque Visualization       | `[x]`  | ADR-0052, #11285; circular arc glyphs & axis helpers ([docs](../user_guide/force_overlay.md)) |
+| Contact Force Display      | `[x]`  | ADR-0052, #11285; GRF contact vectors and segment loads ([docs](../user_guide/force_overlay.md)) |
 | Trajectory Trails          | `[x]`  | Motion path display           |
 | Biomechanical Overlays     | `[x]`  | Metrics on screen             |
 

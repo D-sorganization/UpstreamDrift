@@ -39,8 +39,8 @@ load at a declared section; it is not a spatial stress field or a tissue safety 
       material adapter; retain original materials on disable and missing data.
 - [x] Concrete force-source adapters qualified with analytical tension/compression
       fixtures, including sign/frame conventions and unsupported engine behavior.
-- [ ] Regression and native renderer checks, user guide, parity registry, SPEC and
-      handoff updates; publish epic/children and merge through protected PR checks.
+- [x] Regression and native renderer checks, user guide (`docs/user_guide/force_overlay.md`), parity registry, SPEC and
+      handoff updates (#9840, FTO-30 #11315).
 
 ## Acceptance and Engineering Contracts
 
@@ -135,5 +135,5 @@ bindings; Drake's sampled reaction output must not be treated as current by defa
 | C3D / Simscape user segments        | Shared controls and explicit load-ID/segment-index bindings                                    | Supplied series must match point times; motion alone is unavailable                                                                                                |
 | Pinocchio MeshCat                   | View action and shared model/clock session                                                     | Explicit leaf bindings and caller-supplied section loads; real GUI integration tested with Pinocchio 4.1.0                                                         |
 | Drake MeshCat                       | View action and the same shared model/clock session                                            | Explicit leaf bindings and caller-supplied aligned loads; real GUI integration tested with Drake 1.56.0; sampled reactions are not automatically relabeled current |
-| OpenSim desktop                     | Current interface contains result plots, not animated segment geometry                         | Future 3D consumers can use the shared contracts; no native OpenSim section-force qualification claimed                                                            |
+| OpenSim desktop                     | Recorded 3D force & segment load playback via `render_force_playback` (FTO-17 #11302)         | `opensim_force_recording.py` records force/torque series and segment loads; rendered with stick/capsule geometry shaded in tension/compression |
 | Other/future interfaces             | Reusable Python policy/renderer capability or TypeScript material adapter                      | Host must provide stable bindings and qualified synchronous axial data; API availability does not qualify its physics                                              |

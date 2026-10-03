@@ -159,6 +159,7 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `ForceTorqueSeries` — strictly increasing time series with gap-bounded linear interpolation and pickle-free NPZ serialization.
 - `ForceTorqueProvider`, `read_force_torque_frame` — runtime-checkable Protocol and validated accessor for engine providers.
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
+- User Guide: see `docs/user_guide/force_overlay.md` for styling, palette semantics, and GUI usage.
 
 ### Anthropometrics
 

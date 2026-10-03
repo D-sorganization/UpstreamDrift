@@ -1,3 +1,37 @@
+# Force Overlay Gallery, Golden Images, User Guide and Parity Ledger Close-out — #11285 / #11315 (FTO-30)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-30-gallery-goldens-closeout-11315`; commit SELF; PR: #11392 (`Closes #11315`, `Refs #11285`)
+- Governing issue: #11315 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-30] Force overlay gallery, golden images, user guide and parity ledger close-out.
+- Completed:
+  - `scripts/render_force_overlay_gallery.py`:
+    - Cross-engine gallery rendering orchestration across MuJoCo offscreen, Matplotlib 3D, OpenCV video projection, and animated composite clips.
+    - JSON manifest generation (`force-overlay-gallery-v1`) recording timestamps, commit SHA, engine versions, and status receipts.
+    - Accessible HTML report generation with engine verification matrix, media cards, and palette legend.
+  - `tests/visual/force_overlay/`:
+    - Golden fixture images (`matplotlib_hanging.png`, `opencv_hanging.png`, `mujoco_hanging.png`).
+    - Visual regression test suite `tests/visual/force_overlay/test_golden_images.py` with strict perceptual metric (mean absolute difference <= 2.0 / 255.0).
+  - `tests/scripts/test_render_force_overlay_gallery.py`:
+    - Script unit and CLI invocation tests passing.
+  - `docs/user_guide/force_overlay.md`:
+    - Comprehensive guide covering wrench kinds, categorical color palette, tension/compression conventions, GUI/web controls, video projections, and engine limits.
+    - Cross-linked in `docs/user_guide/body_part_viz/force_colors.md` and `docs/agents/shared-infrastructure.md`.
+  - Parity & status ledgers:
+    - Updated `docs/issues/EPIC_WEB_UI_PARITY.md` to cite FTO-22 (#11307) and FTO-23 (#11308).
+    - Updated `docs/development/FEATURE_TRACKING.md` with evidence links.
+    - Updated `docs/development/segment_force_color_epic.md` delivery backlog and matrix with FTO evidence.
+    - Updated `src/config/feature_parity.json` for `visualization.force_color_controls`.
+    - Promoted `force_overlays` in `src/config/launcher_manifest.json` from `experimental` to `gui_ready` (web route `/simulation`).
+    - Re-rendered agent context and capability atlas.
+- Validation:
+  - `pytest tests/scripts/test_render_force_overlay_gallery.py` (2 passed)
+  - `pytest tests/visual/force_overlay/test_golden_images.py` (4 passed)
+  - `pytest tests/config/feature_parity/` (39 passed)
+  - `python3 -m scripts.check_design_manual_governance` passed.
+- Next steps: Merge PR; owner reviews and signs off on epic #11285.
+
+---
+
 # Force/Torque Arrow Layer in Video Compositors — #11285 / #11310 (FTO-25)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-25-video-compositors-11310`; commit SELF; PR: #11390 (`Closes #11310`, `Refs #11285`)

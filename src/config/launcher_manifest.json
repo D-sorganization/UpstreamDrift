@@ -904,14 +904,14 @@
       "category": "tool",
       "type": "api_backed",
       "path": "",
-      "web_route": "/api/force-overlays",
+      "web_route": "/simulation",
       "logo": "movement_optimizer_icon.svg",
-      "status": "experimental",
+      "status": "gui_ready",
       "capabilities": ["force_visualization", "joint_torques", "3d_overlay"],
       "order": 38,
       "web": {
-        "mode": "unavailable",
-        "reason": "REST API endpoint only; no dedicated web page yet"
+        "mode": "route",
+        "route": "/simulation"
       }
     },
     {

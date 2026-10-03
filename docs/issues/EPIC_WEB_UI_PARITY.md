@@ -26,12 +26,12 @@ The `UpstreamDrift` PyQt6 desktop app contains an advanced, highly polished feat
 
 ### 3. Add Force & Torque Vector Overlays to 3D Scene
 
-- [x] **Status:** Completed
-- [x] **Objective:** Replicate the PyQt6 physics visualization in the React `Scene3D.tsx`.
+- [x] **Status:** Completed (FTO-22 #11307, FTO-23 #11308)
+- [x] **Objective:** Replicate the desktop physics visualization in the React `Scene3D.tsx` per ADR-0052.
 - [x] **Implementation Details:**
-  - [x] Extend the WebSocket `SimulationFrame` payload to include `forces` and `torques` arrays.
-  - [x] Implement a Three.js `ForceArrows` component to render 3D arrow helpers at joint positions.
-  - [x] Add UI toggles for "Show Torques", "Show Forces", and a scale slider.
+  - [x] Extend the WebSocket `SimulationFrame` payload to carry canonical `force_torque_frame: ForceTorqueFrameDict` conforming to `force-torque-frame-v1` (FTO-22, #11307).
+  - [x] Implement Three.js `ForceOverlayLayer` and `ForceOverlayControls` to render 3D arrow helpers and torque arcs at joint/segment coordinates (FTO-23, #11308).
+  - [x] Add UI toggles for "Show Torques", "Show Forces", category filters, and linear/angular scale controls.
 
 ### 4. Implement Full Simulation Control Panel
 
