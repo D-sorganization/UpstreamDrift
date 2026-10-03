@@ -9675,3 +9675,7 @@ Establishes the independent qualification service for candidate tour baseline pa
   - Validates prompt text as strict UTF-8 before subprocess creation to guard against runtime encoding panics across platforms.
   - Enforces `_MAX_PROMPT_BYTES` (65,536 bytes) limit to prevent oversized argv allocations and process-spawn failures.
 
+
+### Capture Registry Comparison Integration - #11172
+
+Accepted-main records and ledger metadata are reconciled while preserving all 133 receipt rows. Club endpoint lookup is shared between angular-speed and wrist metrics with identical fallback behavior. Focused validation: 190 passed, 15 private-workbook skips; Ruff and the full DRY gate pass. Protected CI and physical matching acceptance remain separate.

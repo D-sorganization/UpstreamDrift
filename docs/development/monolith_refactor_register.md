@@ -49,7 +49,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1118 | `src/motion_capture/rig/__main__.py` |
 | 1115 | `src/bunkershot3d/ball/qualification.py` |
 | 1113 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/functions/dataset_generator/PostProcessingModule.m` |
-| 1107 | `src/shared/python/swing_comparison/metrics.py` |
+| 1110 | `src/shared/python/swing_comparison/metrics.py` |
 | 1106 | `src/shared/python/motion_matching/leaderboard.py` |
 | 1102 | `src/launchers/launcher_dialogs.py` |
 | 1100 | `src/shared/python/motion_matching/club_only/control_replay.py` |
