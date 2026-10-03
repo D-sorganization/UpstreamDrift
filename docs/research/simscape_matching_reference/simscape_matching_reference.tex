@@ -4054,6 +4054,56 @@ qualitative placement evidence, but not calibrated anatomical offsets or
 verified video-to-GEARS trial identity. Full capture, contact and forward
 dynamics remain unqualified.
 
+Adding the six new assembled midpoint support poses retains all 101 original
+anchors and eleven prior support poses, yielding 118 support poses overall.
+The revised native audit exits naturally with zero at \texttt{10:10:01Z}:
+A passes 1,295/1,297 samples and O passes all 721. The two remaining tour
+failures occur at midpoints; no original source sample fails. This still
+does not qualify either path for dynamics.
+
+An independent regularity analysis of the actual returned native velocities
+finds peak right-wrist \(R_y\) rates of 113,025 degrees/s for A and 169,742
+degrees/s for O. Peak independent angular-rate components are only
+2,419 and 3,457 degrees/s respectively. The dependent rates therefore require
+separate scrutiny. Across consecutive accepted samples, the owner closed-arm
+path has a maximum wrapped scalar jump of \(99.72^{\circ}\) and right-shoulder
+geodesic jump of \(115.22^{\circ}\). Corresponding tour maxima are
+\(4.24^{\circ}\) and \(4.32^{\circ}\); four tour pairs touching rejected
+samples are excluded explicitly. Finite, compatible pointwise velocities
+are not evidence of a regular moving trajectory. Global branch continuity,
+rate consistency and sensitivity of the selected coordinate basis must be
+tested before torque synthesis. These results neither establish a unique
+singularity nor qualify native dependent accelerations.
+
+\paragraph{Foot appearance and projection.}
+A fresh native audit checks the actual rearfoot and forefoot ellipsoid
+centres, the sole frame and capture ankle-to-toe directions. An initial
+probe fails because it incorrectly requires exactly one World Frame block;
+the corrected probe retains that exit-one receipt and exits naturally with
+zero at \texttt{10:15:44Z}. World Frame blocks connected to the same frame network identify the same
+global frame, as documented in \href{https://www.mathworks.com/help/sm/ref/worldframe.html}{MathWorks World Frame reference}; the correction does not rotate or mirror a shoe. Throughout
+the represented clock, the forefoot-minus-rearfoot visual direction has dot
+product above 0.9937 with the native sole's forward axis. Address horizontal
+direction errors are \(2.44/4.50^{\circ}\) for tour left/right feet and
+\(1.58/6.58^{\circ}\) for owner left/right feet.
+
+The right-foot horizontal vectors nevertheless oppose the marker vector in
+87 of 644 observed tour samples and 29 of 355 observed owner samples.
+A further native audit exits naturally with zero at \texttt{10:21:30Z}
+and examines the three-dimensional geometry of those observations. Their
+visual-to-marker 3D angles remain \(24.07\)--\(24.58^{\circ}\) for A and
+\(10.95\)--\(11.19^{\circ}\) for O, although horizontal yaw discrepancies
+approach \(180^{\circ}\). Horizontal vector lengths are only 0.16--0.40
+of full visual length for A and 0.086--0.171 for O; marker-vector fractions
+are still smaller. A raised, nearly vertical foot can therefore show
+opposing horizontal projections without a three-dimensional backwards shoe.
+The marker direction is also affected by ankle marker height and the
+documented flat-sole address calibration. These observations justify
+conditioning a direction comparison on projection magnitude and checking
+3D frames; they do not justify a blind \(180^{\circ}\) rendering correction
+or establish contact/anatomical calibration. Head/torso and skin-marker
+offset limitations remain separate from the ellipsoid styling policy.
+
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,
 rejected pilot and private source hashes. It also records the parent's

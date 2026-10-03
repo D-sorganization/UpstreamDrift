@@ -124,6 +124,43 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T08:12:24.345998+00:00"
   },
+  "closed_arm_rate_and_step_diagnostic": {
+    "qualification": "NATIVE_CLOSED_ARM_RATE_AND_STEP_DIAGNOSTIC_POINTWISE_ACCEPTANCE_IS_NOT_DYNAMIC_REGULARITY",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1295,
+        "consecutive_accepted_pair_count": 1292,
+        "excluded_pair_count": 4,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 113025.21901167004,
+        "peak_closed_guess_angular_velocity_component_deg_s": 2659.6933980033687,
+        "peak_closed_scalar_step_wrapped_deg": 4.236927332731312,
+        "peak_closed_spherical_step_geodesic_deg": 4.319022490089638,
+        "peak_independent_angular_acceleration_component_deg_s2": 146424.54497367312,
+        "peak_independent_angular_velocity_component_deg_s": 2419.2223906313498,
+        "peak_native_angular_velocity_component_deg_s": 113025.21901167004,
+        "peak_native_angular_velocity_key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "regularity_promoted": false,
+        "total_sample_count": 1297
+      },
+      "capture_O": {
+        "accepted_state_count": 721,
+        "consecutive_accepted_pair_count": 720,
+        "excluded_pair_count": 0,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 169741.649701104,
+        "peak_closed_guess_angular_velocity_component_deg_s": 5511.954134578409,
+        "peak_closed_scalar_step_wrapped_deg": 99.72037347644891,
+        "peak_closed_spherical_step_geodesic_deg": 115.22094530565386,
+        "peak_independent_angular_acceleration_component_deg_s2": 209693.70397758528,
+        "peak_independent_angular_velocity_component_deg_s": 3457.305238061857,
+        "peak_native_angular_velocity_component_deg_s": 169741.649701104,
+        "peak_native_angular_velocity_key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "regularity_promoted": false,
+        "total_sample_count": 721
+      }
+    }
+  },
   "closest_pose_seed_retry": {
     "independent_targets_modified": false,
     "model_saved": false,
@@ -386,6 +423,225 @@
         "native_neighbor_pose_solves": 32
       }
     }
+  },
+  "midpoint_refined_c2_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_MIDPOINT_REFINED_SOURCE_AND_MIDPOINT_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1295,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 1295,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 1297,
+        "position_status_one_count": 1295,
+        "velocity_status_one_count": 1295,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 721,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 721,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": 2.9103830456733704e-11,
+        "max_independent_position_error": 7.065416064076988e-16,
+        "max_independent_velocity_error": 4.547473508864641e-13,
+        "original_anchor_count": 46,
+        "pilot_state_count": 721,
+        "position_status_one_count": 721,
+        "velocity_status_one_count": 721,
+        "whole_pilot_accepted": true
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "midpoint_refined_c2_preparation": {
+    "affected_native_keys": {
+      "scalar_position_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q"
+      ],
+      "spherical_joint_stems": [
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven"
+      ],
+      "velocity_keys": [
+        "Left Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Left Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Left Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Scapula Joint/Universal Joint/Kinetically Driven Universal Joint|Ry.w",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w"
+      ]
+    },
+    "aggregate_counts": {
+      "records": {
+        "capture_A": {
+          "control_state_count": 6,
+          "failed_state_count": 3,
+          "midpoint_time_count": 648,
+          "new_diagnostic_knot_count": 3,
+          "original_anchor_count": 55,
+          "prior_support_knot_count": 61,
+          "projected_support_knot_count": 9,
+          "source_time_count": 649,
+          "total_support_knot_count": 64,
+          "total_time_count": 1297
+        },
+        "capture_O": {
+          "control_state_count": 5,
+          "failed_state_count": 3,
+          "midpoint_time_count": 360,
+          "new_diagnostic_knot_count": 3,
+          "original_anchor_count": 46,
+          "prior_support_knot_count": 51,
+          "projected_support_knot_count": 8,
+          "source_time_count": 361,
+          "total_support_knot_count": 54,
+          "total_time_count": 721
+        }
+      },
+      "total_evaluated_samples": 2018,
+      "total_midpoint_samples": 1008,
+      "total_original_anchors": 101,
+      "total_projected_support_knots": 17,
+      "total_source_samples": 1010,
+      "total_support_knots": 118
+    },
+    "deformation_aggregates": {
+      "records": {
+        "capture_A": {
+          "max_delta_vs_original_first_c2": {
+            "max_scalar_ang_deg": 13.426517593516223,
+            "max_so3_matrix_error": 0.2350300518546759
+          },
+          "max_delta_whole_2018_vs_prior": {
+            "max_scalar_ang_deg": 0.7635027142179922,
+            "max_so3_matrix_error": 0.01346660851737197
+          },
+          "raw_marker_rms_evaluated": false,
+          "root_translation_rate_acceleration_bitwise_preserved": true
+        },
+        "capture_O": {
+          "max_delta_vs_original_first_c2": {
+            "max_scalar_ang_deg": 41.5215081829667,
+            "max_so3_matrix_error": 0.5895052373287246
+          },
+          "max_delta_whole_2018_vs_prior": {
+            "max_scalar_ang_deg": 1.9592140300419771,
+            "max_so3_matrix_error": 0.02950685002220238
+          },
+          "raw_marker_rms_evaluated": false,
+          "root_translation_rate_acceleration_bitwise_preserved": true
+        }
+      }
+    },
+    "flags": {
+      "all_closed_guesses_finite": true,
+      "all_independent_targets_finite": true,
+      "all_spherical_unit_axes_valid": true,
+      "all_support_knots_preserved_within_1e_minus_10": true,
+      "continuous_path_dynamics_proof": false,
+      "input_hashes_preserved_before_after": true,
+      "measured_source": false,
+      "native_execution_proof": false,
+      "original_anchor_clock_exact_subset": true,
+      "original_anchors_preserved_within_1e_minus_10": true,
+      "original_source_time_grid_exact_subset": true,
+      "original_target_acceptance": false,
+      "output_mat_roundtrip_verified": true,
+      "prototype_promoted": false,
+      "raw_marker_rms_reevaluated": false,
+      "root_q_v_a_bitwise_preserved": true,
+      "unaffected_coordinates_bitwise_preserved": true
+    },
+    "input_hashes": {
+      "c2_reference_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+      "midpoint_audit_receipt_sha256": "82c455282c868b4ef34991a6019d4b6214b0f5c9834875ec9c1db2bb83e3d03a",
+      "midpoint_diagnostic_mat_sha256": "c931e6b3abb9ee3024712f1599c357874b05bf8e709222680fbe05ed7a7e100c",
+      "midpoint_diagnostic_receipt_sha256": "5e4643ef19c6ef016d152b8f3c4afc84657788461aafe54bc734bdb63e7ef924",
+      "midpoint_payload_mat_sha256": "a3ff4e223e60de398e61bec62c511a206234ef8d85fb3af105ab0f4ce6940b36",
+      "projected_reviewed_prep_json_sha256": "754e7080149d4f616ec61b07229145d4753ebbfee4f58b9a8337c347151a00b0"
+    },
+    "parent_review": {
+      "all_prior_support_poses_clock_flags_exact": true,
+      "all_unaffected_coordinates_bitwise_preserved": true,
+      "native_execution_proof": false,
+      "output_payload_sha256": "a525a2a7289f088252e5d694e7b440ce08bb07e1a2c10aa84dc54fcfed8d36fe",
+      "proposal_sha256": "5317ed856c8f5b13eb7e2a29574786d449654dda2245060ba77e8da6c4c80f5e",
+      "reviewed_builder_sha256": "9d286d23d80c52c31da34ad24be399111b17d4e90c71ca82ec9fd312de7b0277",
+      "scalar_error_wrap_then_absolute_corrected": true
+    },
+    "qualification": "PREPARED_C2_PROJECTED_MIDPOINT_REFINEMENT_PAYLOAD_NOT_MEASURED_SOURCE_OR_CONTINUUM_PROOF",
+    "units": {
+      "scalar_angular": "deg",
+      "scalar_angular_acceleration": "deg/s^2",
+      "scalar_angular_velocity": "deg/s",
+      "scalar_translation": "m",
+      "spherical_angular_acceleration": "deg/s^2",
+      "spherical_angular_velocity": "deg/s"
+    },
+    "validation_errors": {
+      "capture_A": {
+        "max_anc_sc": 2.842170943040401e-14,
+        "max_anc_so3": 6.661338147750939e-16,
+        "max_root_a_m_s2": 0.0,
+        "max_root_p_m": 0.0,
+        "max_root_v_m_s": 0.0,
+        "max_spherical_axis_unit_error": 2.220446049250313e-16,
+        "max_support_sc": 2.842170943040401e-14,
+        "max_support_so3": 8.604228440844963e-16
+      },
+      "capture_O": {
+        "max_anc_sc": 5.684341886080802e-14,
+        "max_anc_so3": 6.106226635438361e-16,
+        "max_root_a_m_s2": 0.0,
+        "max_root_p_m": 0.0,
+        "max_root_v_m_s": 0.0,
+        "max_spherical_axis_unit_error": 3.3306690738754696e-16,
+        "max_support_sc": 5.684341886080802e-14,
+        "max_support_so3": 1.1102230246251565e-15
+      }
+    }
+  },
+  "midpoint_refined_c2_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:10:01.934122+00:00"
   },
   "native_acceleration_qualified": false,
   "original_combined_tangent_receipt": {
@@ -997,5 +1253,175 @@
     "termination_reason": "natural_exit",
     "timestamp": "2026-10-03T08:20:29.579496+00:00"
   },
-  "step_sizes_seconds": [0.0001, 5e-5]
+  "step_sizes_seconds": [0.0001, 5e-5],
+  "visual_foot_native_audit": {
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "prototype_promoted": false,
+    "qualification": "NATIVE_STYLED_HUMAN_VISUAL_FOOT_FORWARD_AUDIT_NOT_ANATOMICAL_CONTACT_OR_DYNAMICS_PROOF",
+    "records": {
+      "capture_A": {
+        "L": {
+          "address_visual_forward_yaw_error_deg": 2.4402824511971795,
+          "mean_calibrated_sole_orientation_error_deg": 2.0498514776365093,
+          "mean_visual_forward_yaw_error_deg": 2.83359075501956,
+          "min_native_visual_to_sole_forward_dot": 0.9938298702805082,
+          "observed_backward_visual_count": 0,
+          "observed_orientation_count": 644,
+          "peak_calibrated_sole_orientation_error_deg": 12.793997565446345,
+          "peak_visual_forward_yaw_error_deg": 13.737693982096843,
+          "represented_state_count": 649
+        },
+        "R": {
+          "address_visual_forward_yaw_error_deg": 4.504758042813106,
+          "mean_calibrated_sole_orientation_error_deg": 5.747709690137414,
+          "mean_visual_forward_yaw_error_deg": 26.094564913702197,
+          "min_native_visual_to_sole_forward_dot": 0.9938298702805082,
+          "observed_backward_visual_count": 87,
+          "observed_orientation_count": 644,
+          "peak_calibrated_sole_orientation_error_deg": 19.71452327354917,
+          "peak_visual_forward_yaw_error_deg": 178.63503152827195,
+          "represented_state_count": 649
+        }
+      },
+      "capture_O": {
+        "L": {
+          "address_visual_forward_yaw_error_deg": 1.5849390253272033,
+          "mean_calibrated_sole_orientation_error_deg": 4.947071842314372,
+          "mean_visual_forward_yaw_error_deg": 5.097517474932505,
+          "min_native_visual_to_sole_forward_dot": 0.9937814413349283,
+          "observed_backward_visual_count": 0,
+          "observed_orientation_count": 355,
+          "peak_calibrated_sole_orientation_error_deg": 32.66684632766369,
+          "peak_visual_forward_yaw_error_deg": 32.620836686618475,
+          "represented_state_count": 361
+        },
+        "R": {
+          "address_visual_forward_yaw_error_deg": 6.578533065272352,
+          "mean_calibrated_sole_orientation_error_deg": 8.408026176094763,
+          "mean_visual_forward_yaw_error_deg": 24.33326361709883,
+          "min_native_visual_to_sole_forward_dot": 0.9937814413349281,
+          "observed_backward_visual_count": 29,
+          "observed_orientation_count": 355,
+          "peak_calibrated_sole_orientation_error_deg": 18.77542894644621,
+          "peak_visual_forward_yaw_error_deg": 179.16533589893476,
+          "represented_state_count": 361
+        }
+      }
+    },
+    "simulation_executed": false
+  },
+  "visual_foot_original_failed_probe_receipt": {
+    "actual_process_exit_code": 1,
+    "done_marker": false,
+    "final_exit_code": 1,
+    "script_status": "failed",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:12:50.970165+00:00"
+  },
+  "visual_foot_projection_conditioned_audit": {
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "prototype_promoted": false,
+    "qualification": "NATIVE_STYLED_HUMAN_VISUAL_FOOT_FORWARD_AUDIT_NOT_ANATOMICAL_CONTACT_OR_DYNAMICS_PROOF",
+    "records": {
+      "capture_A": {
+        "L": {
+          "address_raw_three_d_angle_deg": 11.01520715989942,
+          "address_visual_forward_yaw_error_deg": 2.4402824511971795,
+          "backward_marker_horizontal_fraction_max": [],
+          "backward_marker_horizontal_fraction_min": [],
+          "backward_raw_three_d_angle_max_deg": [],
+          "backward_raw_three_d_angle_min_deg": [],
+          "backward_visual_horizontal_fraction_max": [],
+          "backward_visual_horizontal_fraction_min": [],
+          "mean_calibrated_sole_orientation_error_deg": 2.0498514776365093,
+          "mean_visual_forward_yaw_error_deg": 2.83359075501956,
+          "min_native_visual_to_sole_forward_dot": 0.9938298702805082,
+          "observed_backward_visual_count": 0,
+          "observed_orientation_count": 644,
+          "peak_calibrated_sole_orientation_error_deg": 12.793997565446345,
+          "peak_raw_three_d_angle_deg": 16.72065631091629,
+          "peak_visual_forward_yaw_error_deg": 13.737693982096843,
+          "represented_state_count": 649
+        },
+        "R": {
+          "address_raw_three_d_angle_deg": 23.922659206344555,
+          "address_visual_forward_yaw_error_deg": 4.504758042813106,
+          "backward_marker_horizontal_fraction_max": 0.32554908618465855,
+          "backward_marker_horizontal_fraction_min": 0.10182925028978243,
+          "backward_raw_three_d_angle_max_deg": 24.583717409960602,
+          "backward_raw_three_d_angle_min_deg": 24.073259761691375,
+          "backward_visual_horizontal_fraction_max": 0.39582291253233054,
+          "backward_visual_horizontal_fraction_min": 0.16421839897150448,
+          "mean_calibrated_sole_orientation_error_deg": 5.747709690137414,
+          "mean_visual_forward_yaw_error_deg": 26.094564913702197,
+          "min_native_visual_to_sole_forward_dot": 0.9938298702805082,
+          "observed_backward_visual_count": 87,
+          "observed_orientation_count": 644,
+          "peak_calibrated_sole_orientation_error_deg": 19.71452327354917,
+          "peak_raw_three_d_angle_deg": 30.530184987548857,
+          "peak_visual_forward_yaw_error_deg": 178.63503152827195,
+          "represented_state_count": 649
+        }
+      },
+      "capture_O": {
+        "L": {
+          "address_raw_three_d_angle_deg": 7.227748539222782,
+          "address_visual_forward_yaw_error_deg": 1.5849390253272033,
+          "backward_marker_horizontal_fraction_max": [],
+          "backward_marker_horizontal_fraction_min": [],
+          "backward_raw_three_d_angle_max_deg": [],
+          "backward_raw_three_d_angle_min_deg": [],
+          "backward_visual_horizontal_fraction_max": [],
+          "backward_visual_horizontal_fraction_min": [],
+          "mean_calibrated_sole_orientation_error_deg": 4.947071842314372,
+          "mean_visual_forward_yaw_error_deg": 5.097517474932505,
+          "min_native_visual_to_sole_forward_dot": 0.9937814413349283,
+          "observed_backward_visual_count": 0,
+          "observed_orientation_count": 355,
+          "peak_calibrated_sole_orientation_error_deg": 32.66684632766369,
+          "peak_raw_three_d_angle_deg": 34.70468446256532,
+          "peak_visual_forward_yaw_error_deg": 32.620836686618475,
+          "represented_state_count": 361
+        },
+        "R": {
+          "address_raw_three_d_angle_deg": 11.053099282184657,
+          "address_visual_forward_yaw_error_deg": 6.578533065272352,
+          "backward_marker_horizontal_fraction_max": 0.10931567062859279,
+          "backward_marker_horizontal_fraction_min": 0.07517800615749073,
+          "backward_raw_three_d_angle_max_deg": 11.190690199478203,
+          "backward_raw_three_d_angle_min_deg": 10.949534973993751,
+          "backward_visual_horizontal_fraction_max": 0.17083746558796561,
+          "backward_visual_horizontal_fraction_min": 0.08556287937652439,
+          "mean_calibrated_sole_orientation_error_deg": 8.408026176094763,
+          "mean_visual_forward_yaw_error_deg": 24.33326361709883,
+          "min_native_visual_to_sole_forward_dot": 0.9937814413349281,
+          "observed_backward_visual_count": 29,
+          "observed_orientation_count": 355,
+          "peak_calibrated_sole_orientation_error_deg": 18.77542894644621,
+          "peak_raw_three_d_angle_deg": 20.760724689836767,
+          "peak_visual_forward_yaw_error_deg": 179.16533589893476,
+          "represented_state_count": 361
+        }
+      }
+    },
+    "simulation_executed": false
+  },
+  "visual_foot_projection_conditioned_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:21:30.783687+00:00"
+  },
+  "visual_foot_world_corrected_probe_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:15:44.949657+00:00"
+  }
 }
