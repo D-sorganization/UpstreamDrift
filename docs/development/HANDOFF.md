@@ -1,4 +1,39 @@
-# Current Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
+# Current Handoff — Capture-O Video Companion Acquisition Receipt (COV-1, #11269)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-1-acquisition-11269`
+- Worktree: `c:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-1-11269`
+- Commit: `SELF`
+- Governing issue: #11269 (parent epic #11268)
+- Objective: [COV-1] Implement `build_acquisition_receipt` for acquiring the capture-session video album into the capture data store with strict provenance, lineage tracking, ffprobe metadata embedding, SHA-256 verification, and fail-closed validation under DbC.
+- Completed:
+  - `src/shared/python/motion_capture/acquisition_receipt.py`:
+    - `build_acquisition_receipt(directory, ...)`: assigns deterministic neutral identifiers `cov-01`, `cov-02`, … in sorted original-filename order.
+    - `AcquisitionEntry` and `AcquisitionReceipt` dataclasses with strict DbC assertions.
+    - Fail-closed rejections: `EmptyDirectoryError` on empty directory, `NonVideoFileError` on non-video files, `FFProbeError` on probe failure, naming the offending file.
+    - Hash mismatch validation: `HashMismatchError` when file bytes change relative to an existing receipt.
+    - Idempotent determinism: re-running on unchanged files produces byte-identical receipts.
+    - Lineage tracking: distinguishes and links original clips and album copies (`lineage: original` vs `lineage: album-copy-of <cov_id>`).
+    - Absolute path elimination: strips and validates absence of absolute local paths from receipt content.
+    - Atomic writes: `write_atomic` writes via sibling temporary files before atomic rename.
+    - `verify_acquisition_receipt`: standalone integrity verifier for acquired assets.
+  - `src/shared/python/motion_capture/__init__.py`: exported public API.
+  - `src/motion_capture/acquisition_receipt.py`: namespace re-export.
+  - Unit tests in `tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passing behavioral tests.
+  - Updated `SPEC.md` top section and §12 Change Log table.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_capture_o_video_acquisition.py`: 11 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check`: OK.
+  - `ruff format --check`: OK.
+  - `python scripts/ci/run_mypy.py`: OK.
+
+---
+
+# Past Handoff — Capture Registry, Capture Export and Swing Comparison (#11161 Part 1: #11162, #11163, #11164)
 
 - Repository: D-sorganization/UpstreamDrift
 - Worktree: `UpstreamDrift-worktrees/claude-epic-11161`
