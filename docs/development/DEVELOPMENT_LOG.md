@@ -98,6 +98,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
 
+
+- **PR:** #11417 (Closes #11273, Refs #11268)
+- **Branch:** `feat/cov-5-runner-matrix-11273`
+- **Started:** 2026-10-02
+- **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
+
 ### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress
