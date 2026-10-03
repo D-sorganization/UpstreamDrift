@@ -47,6 +47,7 @@ from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_shaft_evidence import bind_fit_shaft_evidence
 from src.shared.python.motion_matching.historical_fit import ShaftAxisEvidence
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from .necromatcher_caption import CaptionOverlayOptions, validate_caption_manifest
 from .necromatcher_shape_overlay import shape_overlay_provenance
 
 _BUDGET_WALL_S = 600.0
@@ -168,6 +169,7 @@ def _parents(library: NecromatcherLibrary, request: dict[str, Any]) -> dict[str,
             raise ValueError("Video parent bytes changed")
     video_shaft_evidence(library, fit, request)
     video_shape_options(request)
+    video_caption_options(request)
     return fit
 
 
@@ -176,6 +178,39 @@ def video_shape_options(request: dict[str, Any]) -> ShapeOverlayOptions | None:
     if "shape_overlay" not in request:
         return None
     return ShapeOverlayOptions.from_record(request["shape_overlay"])
+
+
+def video_caption_options(request: dict[str, Any]) -> CaptionOverlayOptions | None:
+    """Authenticate enabled caption recipes at every persisted boundary."""
+    if "caption_overlay" not in request:
+        return None
+    return CaptionOverlayOptions.from_record(request["caption_overlay"])
+
+
+def _check_caption_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:
+    from .necromatcher_review import CaptureReview
+
+    options = video_caption_options(request)
+    if options is None:
+        if "caption_overlay" in manifest or any(
+            "caption_overlay" in frame for frame in manifest.get("frames", [])
+        ):
+            raise ValueError("Disabled caption overlay cannot include layout")
+        return
+    library = NecromatcherLibrary(request["library_root"])
+    fit = library.load_fit(request["source_fit_id"])
+    with CaptureReview(library, fit["capture_id"]) as review:
+        source = review.frame(fit["frame_indices"][0])
+        if manifest.get("image_size") != [
+            source["image_width"],
+            source["image_height"],
+        ]:
+            raise ValueError("Caption layout differs from bound source dimensions")
+    if [
+        (row["frame_index"], row["frame"]) for row in manifest.get("frames", [])
+    ] != list(zip(fit["frame_indices"], fit["frames"], strict=True)):
+        raise ValueError("Caption frames differ from bound source identities")
+    validate_caption_manifest(manifest, options)
 
 
 def _check_shape_manifest(manifest: dict[str, Any], request: dict[str, Any]) -> None:
@@ -204,6 +239,7 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
     if manifest.get("schema") != "necromatcher/source-overlay-video/1":
         raise ValueError("Unsupported overlay manifest")
     _check_shape_manifest(manifest, request)
+    _check_caption_manifest(manifest, request)
     if "shaft_overlay" in request:
         shaft = manifest.get("shaft_overlay")
         if not isinstance(shaft, dict) or any(
@@ -364,8 +400,13 @@ class NativeVideoSession:
         shaft_evidence: ShaftAxisEvidence | None = None,
         *,
         shape_overlay: ShapeOverlayOptions | None = None,
+        caption_overlay: CaptionOverlayOptions | None = None,
     ) -> dict[str, Any]:
         """Schedule a new overlay with owned paths and first/middle/last stills."""
+        if caption_overlay is not None and not isinstance(
+            caption_overlay, CaptionOverlayOptions
+        ):
+            raise TypeError("Caption overlay must be CaptionOverlayOptions or None")
         if shape_overlay is not None and not isinstance(
             shape_overlay, ShapeOverlayOptions
         ):
@@ -426,6 +467,11 @@ class NativeVideoSession:
                 if not isinstance(hash_options, dict):
                     hash_options = {"selected_frames": hash_options}
                 hash_options["shape_overlay"] = request["shape_overlay"]
+            if caption_overlay is not None:
+                request["caption_overlay"] = caption_overlay.to_record()
+                if not isinstance(hash_options, dict):
+                    hash_options = {"selected_frames": hash_options}
+                hash_options["caption_overlay"] = request["caption_overlay"]
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -643,6 +689,10 @@ class NativeVideoSession:
             shape = video_shape_options(request)
             assert shape is not None
             view["shape_overlay"] = shape.to_record()
+        if "caption_overlay" in request:
+            caption = video_caption_options(request)
+            assert caption is not None
+            view["caption_overlay"] = caption.to_record()
         return view
 
     def view(self, run_id: str) -> dict[str, Any]:

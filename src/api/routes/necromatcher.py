@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.pipeline.plant import EngineUnavailableEr
 from src.shared.python.workspace.necromatcher import default_necromatcher_library
 from src.shared.python.workspace.necromatcher_review import CaptureReview
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
+from src.shared.python.workspace.necromatcher_caption import CaptionOverlayOptions
 
 
 @asynccontextmanager
@@ -136,6 +137,7 @@ class VideoExportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
     shaft_evidence: dict[str, Any] | None = None
     shape_overlay: dict[str, Any] | None = None
+    caption_overlay: dict[str, Any] | None = None
 
 
 class IdentityRequest(BaseModel):
@@ -241,6 +243,10 @@ def submit_video_export(
                 if request.shape_overlay is not None
                 else {}
             )
+            if request.caption_overlay is not None:
+                options["caption_overlay"] = CaptionOverlayOptions.from_record(
+                    request.caption_overlay
+                )
             if evidence is None:
                 return exports.submit(fit_id, **options)
             return exports.submit(fit_id, evidence, **options)

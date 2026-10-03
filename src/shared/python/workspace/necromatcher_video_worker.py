@@ -14,7 +14,11 @@ from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
 from .necromatcher_video import export_fit_video
-from .necromatcher_video_jobs import video_shaft_evidence, video_shape_options
+from .necromatcher_video_jobs import (
+    video_caption_options,
+    video_shaft_evidence,
+    video_shape_options,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +64,9 @@ def execute(request_path: Path) -> dict[str, Any]:
     shape = video_shape_options(request)
     if shape is not None:
         additional["shape_overlay"] = shape
+    caption = video_caption_options(request)
+    if caption is not None:
+        additional["caption_overlay"] = caption
     export_fit_video(
         library,
         request["source_fit_id"],

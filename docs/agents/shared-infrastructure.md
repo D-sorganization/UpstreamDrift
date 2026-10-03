@@ -562,6 +562,16 @@ invent missing scales. project_store.validate_workspace_id exposes the existing
 identity contract for early admission before native work. UI request types are
 generated from the strict RefitRequest schema.
 
+### Historical Research Video Captions
+
+`workspace.CaptionOverlayOptions` is the SDK-free, versioned display recipe
+owned by `workspace/necromatcher_caption.py`. Pass its optional `caption_overlay`
+keyword to `workspace.export_fit_video` or `workspace.NativeVideoSession.submit`
+to reuse measured compact research captions in the existing exporter/worker.
+Omitted options preserve legacy captions; enabled manifests authenticate source
+dimensions, rational PTS, qualification and complete semantic/layout records.
+See [Compact Research Captions](../development/necromatcher-compact-captions.md).
+
 ### Historical Authored Generalized Efforts
 
 workspace.AuthoredEffortProfile and NecromatcherLibrary.load_effort_profile

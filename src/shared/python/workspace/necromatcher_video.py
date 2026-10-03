@@ -28,6 +28,13 @@ from src.shared.python.motion_matching.historical_fit import (
 )
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from .necromatcher_shape_overlay import NativeShapeOverlay
+from .necromatcher_caption import (
+    CaptionFrame,
+    CaptionOverlayOptions,
+    caption_layout,
+    caption_provenance,
+    draw_caption,
+)
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
@@ -69,6 +76,7 @@ class VideoOverlayLayers:
 
     shaft: ShaftVideoOverlay | None = None
     shapes: NativeShapeOverlay | None = None
+    captions: CaptionOverlayOptions | None = None
 
 
 def prepare_shaft_overlay(
@@ -371,6 +379,7 @@ def _render(
     anatomy: dict[str, Any],
     shaft: ShaftVideoOverlay | None = None,
     shapes: NativeShapeOverlay | None = None,
+    captions: CaptionOverlayOptions | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     import cv2
 
@@ -421,7 +430,23 @@ def _render(
         identity["pts_ticks"] * identity["timebase_numerator"],
         identity["timebase_denominator"],
     )
-    _render_caption(image, index, pts, rms, len(errors), shaft_lines)
+    compact = None
+    if captions is None:
+        _render_caption(image, index, pts, rms, len(errors), shaft_lines)
+    else:
+        compact = caption_layout(
+            (image.shape[1], image.shape[0]),
+            CaptionFrame(
+                index,
+                pts,
+                rms,
+                len(errors),
+                shaft is not None,
+                shapes.options.opacity if shapes else None,
+            ),
+            captions,
+        )
+        draw_caption(image, compact)
     record: dict[str, Any] = {
         "frame_index": index,
         "frame": identity,
@@ -431,6 +456,8 @@ def _render(
     }
     if shaft is not None:
         record["shaft_overlay"] = shaft_record
+    if compact is not None:
+        record["caption_overlay"] = compact.to_record()
     return image, record
 
 
@@ -511,6 +538,7 @@ def export_fit_video(
     selected_frames: Sequence[int] = (),
     shaft_evidence: ShaftAxisEvidence | None = None,
     shape_overlay: ShapeOverlayOptions | None = None,
+    caption_overlay: CaptionOverlayOptions | None = None,
 ) -> dict[str, Any]:
     """Publish a new MP4/PNG/manifest directory only after complete codec verification.
 
@@ -520,6 +548,10 @@ def export_fit_video(
     """
     if shape_overlay is not None and not isinstance(shape_overlay, ShapeOverlayOptions):
         raise TypeError("Shape export requires typed options")
+    if caption_overlay is not None and not isinstance(
+        caption_overlay, CaptionOverlayOptions
+    ):
+        raise TypeError("Caption export requires typed options")
     destination = Path(destination)
     if destination.exists():
         raise FileExistsError(destination)
@@ -553,7 +585,7 @@ def export_fit_video(
             set(selected_frames),
             anatomy,
             missing,
-            VideoOverlayLayers(shaft, shapes),
+            VideoOverlayLayers(shaft, shapes, caption_overlay),
         )
         # Existing library authority rechecks parent and fit hashes before publication.
         if library.load_asset(fit_id).metadata["hash"] != binding.fit_hash:
@@ -598,6 +630,22 @@ def _publish(staging: Path, destination: Path) -> None:
         raise
 
 
+def _render_layers(
+    binding: NativeFitBinding,
+    review: CaptureReview,
+    index: int,
+    anatomy: dict[str, Any],
+    overlays: VideoOverlayLayers | None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    shaft = overlays.shaft if overlays else None
+    shapes = overlays.shapes if overlays else None
+    if overlays and overlays.captions:
+        return _render(
+            binding, review, index, anatomy, shaft, shapes, overlays.captions
+        )
+    return _render(binding, review, index, anatomy, shaft, shapes)
+
+
 def _write_export(
     binding: NativeFitBinding,
     library: NecromatcherLibrary,
@@ -627,7 +675,9 @@ def _write_export(
             if not writer.isOpened():
                 raise ValueError("MP4 encoder could not open")
             for index in binding.fit["frame_indices"]:
-                image, record = _render(binding, review, index, anatomy, shaft, shapes)
+                image, record = _render_layers(
+                    binding, review, index, anatomy, overlays
+                )
                 writer.write(image)
                 records.append(record)
                 if index in selected:
@@ -686,6 +736,8 @@ def _write_export(
         manifest["club_representation"] = (
             "declared attachments and projected infinite authored axis; not physical endpoints or shaft length"
         )
+    if overlays and overlays.captions:
+        manifest["caption_overlay"] = caption_provenance(overlays.captions)
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )
