@@ -3377,6 +3377,92 @@ position suffix. The corrected mapping uses native translational position
 variables. Both the failed receipt and the naturally completed corrected
 receipt are retained; the harness failure is not a physical model result.
 
+
+\subsection{Refined Torso Preview and Observation Qualification}
+\label{sec:refined-torso-preview-review}
+The additional scapula and torso work in draft PR 11351 is incorporated
+into this review as a candidate, with its original source and media preserved.
+The eight Desktop MP4s provide clean and marker-overlay versions of both
+captures in face-on and down-the-line views. Their private provenance binds
+them to the unchanged Human ellipsoid model and the selected torso-refinement
+pose file. The parent independently checked the archive CRC, its eleven
+members, and the eight local MP4 byte hashes, and inspected the contact sheet.
+The peer's decode receipt is distinct from these parent byte checks.
+These are inverse-kinematics visualizations, not forward-dynamics evidence.
+
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+Candidate metric & Tour A & Owner O \\
+\hline
+Previous 14-target mean RMS (mm) & 13.540 & 16.754 \\
+Refined 14-target mean RMS (mm) & 16.573 & 19.814 \\
+Refined 14-target peak RMS (mm) & 32.842 & 37.778 \\
+Head long-axis mean error (degrees) & 0.005 & 0.053 \\
+Full head orientation mean error (degrees) & 42.925 & 43.301 \\
+\hline
+\end{tabular}
+\end{center}
+Reduced torso bending and trailing-hub drift therefore come with a larger
+mean marker residual. Long-axis alignment constrains two orientation degrees
+of freedom; rotation about that axis remains unresolved by this objective.
+It cannot be substituted for full head-orientation accuracy. Address and
+backswing protraction constraints are phase-specific; they do not establish
+a full-swing anatomical bound. Candidate appearance is not evidence of
+the player's ability, and these tradeoffs prevent a universal best-match claim.
+
+The marker overlays currently qualify exported-coordinate validity only.
+A finite exported coordinate can have been filled upstream. Source-observed
+availability must pass through the importer before joint-centre derivation,
+event detection and fitting, then bind to the solve cache and export report.
+The proposed explicit contract binds the actual C3D export hash, ordered
+marker labels, source clock, frame count and logical availability payload;
+the raw-source hash is a caller attestation, not independent proof of mask
+derivation or physical measurement. Old unmasked caches and videos must not
+be relabelled after such a contract is added. Private source identities and
+raw coordinates remain outside the public reference.
+
+The Google Photos local acquisition requirement is complete: the archive
+and six original MP4s are preserved on a local machine and their recorded
+hashes were rechecked. The visible cap, torso, waist, limb and shoe attachments
+inform placement review. Exact video-to-GEARS trial pairing, capture-label
+identification, occlusions and body-local anatomical offsets remain unverified.
+An attachment on clothing is not a measured joint centre. Calibrated fitting
+must isolate edited camera views and exclude cross-dissolve frames.
+
+\subsection{Independent Saved Tangent-State Recheck}
+\label{sec:dependent-arm-strict-recheck}
+An initial dependent-arm experiment saved its sampled results but terminated
+with runner exit 125 after its completion marker; it is not a naturally
+completed runtime acceptance. A separate fresh native recheck completed
+naturally with exit zero at \texttt{2026-10-03T03:37:35Z}. It verified all
+404 saved moving states from the four successful arm partitions across both
+captures, and all 392 previously qualified midpoint configurations. Angular
+and linear velocity target gates were separated at $10^{-6}$ degrees/s and
+$10^{-8}$ m/s. Rejected midpoint states remain rejected.
+
+This confirms consistency of those saved states with native assembly and
+the declared independent targets. It does not certify the velocity as the
+derivative of a continuous accepted path. Dependent angular-rate adjustments
+reach tens of thousands of degrees per second, and some midpoint pose
+adjustments are large. The candidates remain unpromoted. The canonical
+right-arm partition is taken from the shared IK joint-role authority rather
+than a duplicated header description.
+
+For a constrained path the next required gates are
+\[
+ g(q(t))=0,\qquad J_c(q(t))v(t)=0,\qquad
+ \omega_F(t)=\operatorname{vee}\bigl(R(t)^T\dot R(t)\bigr).
+\]
+Checking each configuration and tangent independently satisfies only part
+of this requirement. Dense source-clock sampling, local derivative agreement,
+branch continuity and constraint-aware accelerations must be examined before
+native moving-contact initialization. The first dense canonical-curve probe
+terminated on a private MATLAB structure-assignment error; that failed run
+provides no curve acceptance. Its corrected rerun is a diagnostic, not a
+full-swing dynamics or independent-replay result. All-actuator torque,
+contact, power and energy gates remain open.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
