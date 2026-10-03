@@ -2840,6 +2840,61 @@ report \texttt{owner\_seed\_feasibility\_checkpoint\_20261002.json}
 retains the natural-exit receipts and aggregate results; seed vectors
 and fitted coordinates remain private.
 % END OWNER SEED FEASIBILITY
+\section{Scapula, Torso and Shareable Marker Refinement}
+The October 2 refinement addresses excessive internal spine bending seen in
+the down-the-line previews. The requested address scapula prior is
+$7.5^\circ$, with bilateral $5$--$10^\circ$ address bounds and
+$5$--$25^\circ$ backswing bounds. Native left Rx has positive protraction;
+native right Rx has negative protraction. Fresh native perturbations of
+$0.1^\circ$ move the corresponding shoulder forward for these mirrored
+signs; Ry predominantly changes elevation. Stable block roles, rather than
+joint numbers, resolve coordinates across moving-scapula variants.
+
+\subsection{Body Observations and Identifiability}
+The measured BackTop, BackLeft and BackRight points now contribute directly
+to the fit. Their predicted positions are
+\begin{equation}
+ \widehat{\mathbf m}_k(t)=\mathbf p_T(t)+\mathbf R_T(t)\mathbf o_k,
+ \qquad \mathbf o_k=\mathbf R_T(0)^T
+             [\mathbf m_k(0)-\mathbf p_T(0)].
+\end{equation}
+Here the native left scapula base frame is attached to the torso, before
+scapular rotation. The three torso offsets are calibrated once at the
+original keyed address pose and remain fixed. Residual-invalid or nonfinite
+raw points are omitted individually. The four measured waist points also
+inform the existing pelvis and derived leg targets. The video overlay shows
+all measured channels, highlighting these seven back/waist points in cyan.
+Both swings share 35 named body, club and ball channels. Three additional
+unnamed channels in Model Swing 2 have no valid samples; no displayed point
+is invented or interpolated.
+
+The Human model has a two-coordinate neck. A full three-dimensional head
+orientation guide can make the torso compensate for unavailable head yaw.
+The selected guide therefore tracks the calibrated head long axis:
+\begin{equation}
+ \mathbf r_H=w_H[\mathbf R_H(t)\mathbf e_3-
+                         \mathbf R_{H,\mathrm{target}}(t)\mathbf e_3].
+\end{equation}
+The original full SO(3) error remains separately reported. A small head-axis
+error does not establish a full head-orientation match. No neck topology or
+segment dimensions were changed.
+
+\subsection{Quiet Spine Policy and Native Results}
+Native spine excursions are relative to the original address seed, not to
+zero and not to global pelvis motion. The selected band limits the two
+Spine Tilt coordinates to $\pm15^\circ$ and torso twist to $\pm45^\circ$
+through the measured pelvis-yaw backswing-top proxy. After top, hard bounds
+are removed, preserving a soft excursion hinge, posture and neighbour-pose
+penalty. Hard scapula bounds also release after top, while the scapula
+posture pull fades to the capture peak-speed proxy. This lets unbounded
+Levenberg--Marquardt tracking continue through impact. Whole-swing hard
+bounds produced large residual outliers and were rejected.
+
+The residual scales are back points $0.5$, head axis $0.2$/$0.16$ for
+Model Swing 1/2, spine posture and smoothness $0.08$ m/rad, and excursion
+hinge $0.35$ m/rad. Existing position offsets and capture-specific geometry
+are preserved. Missing lower-body targets use explicitly recorded
+interpolated priors of weight 1; these are never displayed as measurements.
 % BEGIN PELVIS PROSPECTIVE CONTRACT
 \subsection{Prospective Pelvis Orientation and Video Parameter Provenance}
 The next pelvis constraint must distinguish the raw marker-cluster rotation
@@ -3125,6 +3180,83 @@ empty Simulink signal-unit metadata is not treated as an independent unit check.
 \begin{center}
 \begin{tabular}{lrr}
 \toprule
+Quantity & Model Swing 1 & Model Swing 2 \\
+\midrule
+Previous spine bending excursions ($^\circ$) & 47.57 / 60.65 & 39.34 / 49.38 \\
+Refined spine bending excursions ($^\circ$) & 15.44 / 16.53 & 17.49 / 15.17 \\
+Refined torso twist excursion ($^\circ$) & 45.24 & 45.00 \\
+Original / refined backswing trail-hub shift (mm) & 166.77 / 80.11 & 85.80 / 69.48 \\
+14-target mean / peak RMS (mm) & 16.57 / 32.84 & 19.81 / 37.78 \\
+Raw three-back-marker mean RMS (mm) & 26.73 & 38.23 \\
+Head-axis mean error ($^\circ$) & 0.005 & 0.053 \\
+Full head-orientation mean error ($^\circ$) & 42.93 & 43.30 \\
+\bottomrule
+\end{tabular}
+\end{center}
+These are native kinematic matching results, not clinical joint angles or
+forward-dynamics qualification. The position RMS covers 14 derived centres
+and club targets, not all raw markers. Torso-hub displacement is a geometric
+proxy, not upper-body centre of mass. Soft post-top bands may be exceeded
+slightly, as the reported full-swing excursions show.
+
+\subsection{Undistorted Shareable Previews and Reproduction}
+Shareable titles and filenames use Model Swing 1/2. Source-identifying
+capture names and private paths stay outside the shareable folder. The
+deliverable has face-on and down-the-line views with and without markers,
+at native $1920\times1080$ pixels, MPEG-4 quality 100 and 30 fps. Both modes
+use identical solved poses and frozen marker-inclusive camera bounds.
+
+Screen-size-limited \texttt{getframe} output was rejected. Setting both
+export dimensions without preserving aspect ratio also stretched the
+down-the-line image. The shared pixel exporter now sets
+\texttt{PreserveAspectRatio='on'} and checks actual dimensions. Portrait
+and landscape circle probes fail with the old stretched operation and
+pass with the corrected export. The focused native R2025b lane passes
+50 tests with zero failures or incomplete results. All eight final MP4
+exports exited successfully in native MATLAB; all 404 frames were decoded
+and passed pixel/rate/count checks. Both views were visually reviewed.
+The shareable Desktop package contains only neutral titles and metadata.
+
+To reproduce, call \texttt{gs3dx\_setup}, retain the original keyed address
+seed, dimensions and 14 offsets, populate
+\texttt{jc.back\_marker\_points} from the raw marker overlay, and supply
+the fixed torso offsets. Call \texttt{gs3dx\_whole\_body\_ik} with
+\texttt{back\_marker\_weight=.5},
+\texttt{head\_orientation\_mode="axis"},
+\texttt{spine\_bend\_excursion\_deg=15},
+\texttt{torso\_twist\_excursion\_deg=45}, and the weights above.
+The detailed API recipe is in \texttt{Scapula\_Matching\_Previews.md}.
+The back and spine terms default to disabled; zero scapula prior retains
+the legacy path. Missing observations remain missing. Private native
+receipts retain input, model, source and trajectory identities; timed-out
+or watchdog-terminated executions are not counted as success.
+
+\subsection{Native Target Selection Across Moving-Scapula Models}
+The refinement scope includes all 13 registered moving-scapula variants.
+The initial whole-body entrypoint assumed feet and 14 position targets,
+which excluded the upper-body-only Baseline, Slim and Quat models.
+Automatic native target selection now uses eight pelvis, arm and club
+targets on those models, and 14 targets on a complete native leg graph.
+Partial or ambiguous lower-body graphs fail closed. Models without feet
+have no foot rotation outputs; their foot errors remain missing and a
+positive foot-orientation weight is rejected.
+
+The earlier FullBody construction stage has feet rigidly attached to
+World. Its automatic fit selects upper-body targets and solves the leg
+coordinates as native loop-closure guesses. Contact and later stages keep
+their floating-foot whole-body layouts. This adapter preserves the model
+topology; its native convergence and closure evaluation is still pending.
+
+Non-Human keyed seeds are checked against the actual native keys and
+units, including spherical unit axes and loop closure. The original
+Human 48-coordinate seed contract and full-body output layout remain
+unchanged. The 59-test target-contract lane passed, as did exact complete
+disabled-feature Human output parity. Native three-frame fitting pilots
+passed for all three upper-body-only variants. Complete quiet-torso
+trajectories are currently being evaluated with original model dimensions
+and fixed address-calibrated marker offsets. Baseline has completed both
+55/46-frame trajectories. These intermediate results do not establish
+acceptance of the remaining complete model trajectories.
 Primitive & Sample RMS (N\,m) & Peak absolute torque (N\,m)\\
 \midrule
 Rx & 5.950843 & 9.530841\\
@@ -5067,7 +5199,3 @@ Frame Pair in KinematicsSolver Object},
 
 \end{thebibliography}
 \end{document}
-
-
-
-
