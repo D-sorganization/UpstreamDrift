@@ -1,3 +1,34 @@
+# Web Video Force/Torque Overlay Component — #11314 (FTO-29)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-29-web-video-overlay-11314`; commit SELF; PR: see branch (`Closes #11314`, `Refs #11285`); DL entry `DL-#11285`
+- Governing issue: #11314 (parent epic #11285, unblocks FTO-30)
+- Objective: [FTO-29] Video force/torque overlay component in web UI (SVG projection aligned with video frame).
+- Completed:
+  1. `src/shared/python/force_overlay/projection.py`:
+     - Extracted renderer-neutral 2D projection math (`project_glyphs`) from OpenCV renderer into shared module (DRY).
+     - Provides pure-Python 2D line clipping (Cohen-Sutherland) and arrowhead polygon projection.
+  2. `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
+     - Refactored to consume shared `project_glyphs`, keeping OpenCV drawing tests 100% green.
+  3. `src/api/routes/video_overlays.py`:
+     - Implemented `GET /api/overlays/video/{source_id}/frames/{n}/glyphs` with camera calibration and registration handling, returning 2D projected glyphs with sub-pixel precision.
+  4. `ui/src/components/video/VideoForceOverlay.tsx`:
+     - Renders crisp SVG force/torque overlay (`vector-effect="non-scaling-stroke"`).
+     - Renders halo `<polyline>` / `<polygon>` before stroke `<polyline>` / `<polygon>`.
+  5. `ui/src/pages/VideoAnalyzer.tsx`:
+     - Dynamically sizes SVG viewBox from `video.videoWidth` and `videoHeight` on `loadedmetadata` (eliminating hardcoded 640x480).
+     - Syncs frame index from `video.currentTime` via `requestVideoFrameCallback` (fallback to `timeupdate`) supporting arbitrary frame rates (e.g. 25 fps).
+     - Added force overlay toggles, scale controls, and mounted `VideoForceOverlay`.
+  6. Evidence & Parity:
+     - Captured Playwright screenshot `docs/development/evidence/video_force_overlay_evidence.png` and generated standalone HTML `docs/development/evidence/video_force_overlay_evidence.html`.
+     - Updated `src/config/feature_parity.json` with `tools.video_analyzer` and regenerated `docs/development/feature_parity_matrix.md`.
+- Validation:
+  - All Python unit tests passed (5 in `tests/unit/api/test_video_glyph_route.py`, 13 in `tests/unit/force_overlay/test_opencv_glyphs.py`).
+  - All Vitest and UI checks passed (`npm --prefix ui run type-check`, `npm --prefix ui run lint`, `npm --prefix ui run test:run`).
+  - All feature parity tests passed (39 tests in `tests/config/feature_parity/`).
+- Next steps: Merge PR; proceed with FTO-30.
+
+---
+
 # Drake GUI Force Overlay and Segment Shading — #11297 (FTO-12)
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/issue-11297-gui`; commit: SELF; PR: see branch (`Closes #11297`, `Refs #11285`); DL entry `DL-#11285`
