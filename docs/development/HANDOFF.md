@@ -1,6 +1,6 @@
 # OpenCap: Opt-In Hosted Session Download — #11400 / #11407
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-hosted-download-11407`; commit SELF; PR: #11411 (`Closes #11407`, `Refs #11400`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-hosted-download-11407`; commit SELF; PR: #11415 (`Closes #11407`, `Refs #11400`)
 - Governing issue: #11407 (parent epic #11400, design authority ADR-0053)
 - Objective: [OpenCap Child 6] Opt-in hosted session download with affirmative consent, typed settings, and full layout reconstruction.
 - Completed:

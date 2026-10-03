@@ -22,13 +22,13 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #11400; child #11407 (hosted download; follows #11401–#11403 landed in #11410)
-- **PR:** #11411
+- **PR:** #11415
 - **Branch:** `feat/opencap-hosted-download-11407`
 - **Paths:** `src/shared/python/motion_pipeline/sources/opencap_download.py`, `tests/unit/motion_pipeline/sources/test_opencap_download.py`, `tests/architecture/test_opencap_boundary.py`
 - **Started:** 2026-10-03
 - **Last verified:** 2026-10-03 at SELF — Child 6 (#11407): implemented `download_opencap_session` with opt-in `OpenCapHostedSettings`, affirmative consent verification, session discovery, and full layout reconstruction matching `load_opencap_session`. 8 focused unit tests pass; zero network calls in default test lane; all 75 OpenCap unit and boundary tests pass.
 - **Summary:** OpenCap sessions load as observations plus OpenCap's scaled LaiUhlrich2022 model, IK kinematics in SI units and subject anthropometry; ADR-0053 keeps OpenCap a file/sidecar dependency with HRNet as the commercial default and hosted processing opt-in with affirmative consent.
-- **Next step:** Open PR #11411 with auto-merge for #11407; proceed with #11409.
+- **Next step:** Review and merge PR #11415 for #11407; proceed with #11409.
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
