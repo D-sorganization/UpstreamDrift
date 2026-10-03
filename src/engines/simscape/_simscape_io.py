@@ -130,6 +130,10 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
     ``time``, ``q``, ``qd``, ``qdd``, ``tau``, ``omega``,
     ``r_butt``, ``r_clubhead``, ``q_club``, ``v_clubhead``.
 
+    An optional ``forces`` key (#11304) maps dataset column names to
+    per-sample vectors and becomes ``SimscapeOutput.force_columns``;
+    old producers that omit it keep working.
+
     The MATLAB side guarantees that ``time`` starts at 0 and
     ``q_club`` rows are unit-norm; we re-validate via
     :class:`SimscapeOutput`'s ``__post_init__``.
@@ -164,7 +168,16 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
             f"logsout missing required field(s): {sorted(missing)}"
         )
 
+    raw_forces = logsout.get("forces")
     try:
+        force_columns = (
+            None
+            if raw_forces is None
+            else {
+                str(k): _as_ndarray_1d(v, name=f"forces.{k}")
+                for k, v in raw_forces.items()
+            }
+        )
         return SimscapeOutput(
             time=_as_ndarray_1d(logsout["time"], name="time"),
             q=_as_ndarray_2d(logsout["q"], name="q"),
@@ -176,6 +189,7 @@ def logsout_to_simscape_output(logsout: dict[str, Any]) -> SimscapeOutput:
             r_clubhead=_as_ndarray_2d(logsout["r_clubhead"], name="r_clubhead"),
             q_club=_as_ndarray_2d(logsout["q_club"], name="q_club"),
             v_clubhead=_as_ndarray_2d(logsout["v_clubhead"], name="v_clubhead"),
+            force_columns=force_columns,
         )
     except (TypeError, ValueError) as exc:
         raise SimscapeSimulationError(

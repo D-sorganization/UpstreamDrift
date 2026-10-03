@@ -17,11 +17,12 @@ rotation is missing is unavailable, not drawn unrotated.
 from __future__ import annotations
 
 import csv
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import logging
 import math
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 
@@ -34,11 +35,14 @@ from src.shared.python.force_overlay import (
 
 logger = logging.getLogger(__name__)
 
+_Column = Sequence[Any] | np.ndarray
+
 __all__ = [
     "DEFAULT_ROTATION_TOL",
     "SIMSCAPE_FORCE_CHANNELS",
     "SIMSCAPE_JOINTS",
     "ChannelSpec",
+    "force_series_from_columns",
     "load_simscape_force_series",
 ]
 
@@ -214,7 +218,7 @@ def _read_columns(path: Path) -> dict[str, list[str]]:
     return columns
 
 
-def _floats(cells: list[str], name: str) -> np.ndarray:
+def _floats(cells: _Column, name: str) -> np.ndarray:
     try:
         arr = np.asarray([float(c) for c in cells], dtype=np.float64)
     except ValueError as exc:
@@ -225,7 +229,7 @@ def _floats(cells: list[str], name: str) -> np.ndarray:
 
 
 def _vec_array(
-    columns: dict[str, list[str]], names: tuple[str | None, ...]
+    columns: Mapping[str, _Column], names: tuple[str | None, ...]
 ) -> np.ndarray | None:
     """Stack three columns to (T, 3), or None when a named column is absent.
 
@@ -241,7 +245,7 @@ def _vec_array(
 
 
 def _rotation_array(
-    columns: dict[str, list[str]], prefix: str, tol: float
+    columns: Mapping[str, _Column], prefix: str, tol: float
 ) -> np.ndarray | None:
     """Return (T, 3, 3) R, validated orthonormal, or None when absent."""
     names = [[f"{prefix}_I{i}{j}" for j in (1, 2, 3)] for i in (1, 2, 3)]
@@ -271,7 +275,7 @@ def _to_world(rot: np.ndarray, local: np.ndarray) -> np.ndarray:
 
 
 def _half(
-    columns: dict[str, list[str]],
+    columns: Mapping[str, _Column],
     spec: ChannelSpec,
     names: tuple[str | None, ...] | None,
     rotations: dict[str, np.ndarray | None],
@@ -298,10 +302,7 @@ def load_simscape_force_series(
     Preconditions: ``csv_path`` is a dataset CSV with a ``time`` column and
     at least one row; ``rotation_tol`` is positive and finite.
 
-    Postconditions: times are strictly increasing; every wrench is in the
-    world frame (Z-up, SI). Each unavailable half is ``None`` and listed in
-    the returned ``missing`` tuple as ``"<label>:force"`` / ``"<label>:torque"``.
-    A joint-local channel with missing rotation columns is unavailable.
+    Postconditions: see :func:`force_series_from_columns`.
 
     Raises:
         TypeError: ``csv_path`` is not a path.
@@ -311,12 +312,41 @@ def load_simscape_force_series(
     """
     if not isinstance(csv_path, str | Path):
         raise TypeError("csv_path must be str or Path")
+    path = Path(csv_path)
+    return force_series_from_columns(
+        _read_columns(path), rotation_tol=rotation_tol, source_name=path.name
+    )
+
+
+def force_series_from_columns(
+    columns: Mapping[str, _Column],
+    *,
+    rotation_tol: float = DEFAULT_ROTATION_TOL,
+    source_name: str = "columns",
+) -> tuple[ForceTorqueSeries, tuple[str, ...]]:
+    """Build a world-frame ``ForceTorqueSeries`` from a column mapping.
+
+    This is the single loader core shared by the CSV path and by
+    :meth:`SimscapeOutput.to_force_series` (#11304). Keys are the dataset
+    column names of :data:`SIMSCAPE_FORCE_CHANNELS`; values are per-sample
+    sequences (numbers, or numeric strings from a CSV).
+
+    Preconditions: ``columns`` has a ``time`` column with at least one row;
+    ``rotation_tol`` is positive and finite.
+
+    Postconditions: times are strictly increasing; every wrench is in the
+    world frame (Z-up, SI). Each unavailable half is ``None`` and listed in
+    the returned ``missing`` tuple as ``"<label>:force"`` / ``"<label>:torque"``.
+    A joint-local channel with missing rotation columns is unavailable.
+
+    Raises:
+        ValueError: bad tolerance, no ``time`` column or rows, non-finite
+            data, or a logged rotation that is not orthonormal.
+    """
     if not (math.isfinite(rotation_tol) and rotation_tol > 0.0):
         raise ValueError("rotation_tol must be positive and finite")
-    path = Path(csv_path)
-    columns = _read_columns(path)
-    if "time" not in columns or not columns["time"]:
-        raise ValueError(f"{path}: needs a 'time' column with at least one row")
+    if "time" not in columns or len(columns["time"]) == 0:
+        raise ValueError(f"{source_name}: needs a 'time' column with at least one row")
     times = _floats(columns["time"], "time")
 
     prefixes = {s.rotation_prefix for s in SIMSCAPE_FORCE_CHANNELS if s.rotation_prefix}
@@ -365,5 +395,7 @@ def load_simscape_force_series(
             ForceTorqueFrame(time_s=float(t), engine=_ENGINE, wrenches=tuple(wrenches))
         )
     if missing:
-        logger.info("Simscape force channels unavailable in %s: %s", path.name, missing)
+        logger.info(
+            "Simscape force channels unavailable in %s: %s", source_name, missing
+        )
     return ForceTorqueSeries(frames=tuple(frames), engine=_ENGINE), tuple(missing)

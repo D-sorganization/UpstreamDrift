@@ -1,0 +1,129 @@
+"""SimscapeOutput.force_columns / to_force_series (#11304, FTO-19).
+
+All data are synthetic fixtures built here; no MATLAB is involved.
+"""
+
+from __future__ import annotations
+
+import csv
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from src.engines.simscape._errors import SimscapeSimulationError
+from src.engines.simscape._output import SimscapeOutput
+from src.engines.simscape._simscape_io import logsout_to_simscape_output
+from src.engines.simscape.force_channels import load_simscape_force_series
+
+pytestmark = pytest.mark.unit
+
+N = 3
+RZ90 = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+
+
+def synthetic_force_columns() -> dict[str, np.ndarray]:
+    """Local LS joint-reaction force/torque, position and rotation (synthetic)."""
+    cols: dict[str, np.ndarray] = {}
+    for i, k in enumerate("123"):
+        cols[f"LSLogs_ConstraintForceLocal_{k}"] = np.full(N, [1.0, 2.0, 3.0][i])
+        cols[f"LSLogs_ConstraintTorqueLocal_{k}"] = np.full(N, [0.0, 1.0, 0.0][i])
+        cols[f"LSLogs_GlobalPosition_{k}"] = np.full(N, [0.1, 0.2, 1.3][i])
+    for i in range(3):
+        for j in range(3):
+            cols[f"LSLogs_Rotation_Transform_I{i + 1}{j + 1}"] = np.full(N, RZ90[i, j])
+    return cols
+
+
+def _base_kwargs() -> dict[str, np.ndarray]:
+    return {
+        "time": np.linspace(0.0, 0.02, N),
+        "q": np.zeros((N, 2)),
+        "qd": np.zeros((N, 2)),
+        "qdd": np.zeros((N, 2)),
+        "tau": np.zeros((N, 2)),
+        "omega": np.zeros((N, 2)),
+        "r_butt": np.zeros((N, 3)),
+        "r_clubhead": np.zeros((N, 3)),
+        "q_club": np.tile([1.0, 0.0, 0.0, 0.0], (N, 1)),
+        "v_clubhead": np.zeros((N, 3)),
+    }
+
+
+def test_default_is_backwards_compatible() -> None:
+    out = SimscapeOutput(**_base_kwargs())
+    assert out.force_columns is None
+    with pytest.raises(ValueError, match="no force_columns"):
+        out.to_force_series()
+
+
+def test_to_force_series_matches_csv_loader(tmp_path: Path) -> None:
+    cols = synthetic_force_columns()
+    out = SimscapeOutput(**_base_kwargs(), force_columns=cols)
+    path = tmp_path / "synthetic_trial.csv"
+    names = ["time", *cols]
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(names)
+        for r in range(N):
+            w.writerow(
+                [repr(float(out.time[r]))] + [repr(float(cols[k][r])) for k in cols]
+            )
+    expected, expected_missing = load_simscape_force_series(path)
+    series, missing = out.to_force_series()
+    assert missing == expected_missing
+    assert series == expected
+    # Local force (1,2,3) rotated by Rz(90) -> (-2, 1, 3): rotation applied.
+    wrench = next(
+        w for w in series.frames[0].wrenches if w.label == "joint_reaction:LS"
+    )
+    assert wrench.force_n == pytest.approx((-2.0, 1.0, 3.0))
+
+
+def test_missing_rotation_is_unavailable_not_zero() -> None:
+    cols = {
+        k: v
+        for k, v in synthetic_force_columns().items()
+        if "Rotation_Transform" not in k
+    }
+    series, missing = SimscapeOutput(
+        **_base_kwargs(), force_columns=cols
+    ).to_force_series()
+    assert "joint_reaction:LS:force" in missing
+    assert all(w.label != "joint_reaction:LS" for w in series.frames[0].wrenches)
+
+
+def test_non_orthonormal_rotation_rejected() -> None:
+    cols = synthetic_force_columns()
+    cols["LSLogs_Rotation_Transform_I11"] = np.full(N, 2.0)
+    out = SimscapeOutput(**_base_kwargs(), force_columns=cols)
+    with pytest.raises(ValueError, match="LS.*not orthonormal"):
+        out.to_force_series()
+
+
+@pytest.mark.parametrize(
+    ("column", "exc"),
+    [
+        (np.zeros(N + 1), ValueError),
+        (np.array([0.0, np.nan, 0.0]), ValueError),
+        ([0.0, 0.0, 0.0], TypeError),
+    ],
+)
+def test_force_columns_validated(column: object, exc: type[Exception]) -> None:
+    with pytest.raises(exc):
+        SimscapeOutput(**_base_kwargs(), force_columns={"x": column})  # type: ignore[dict-item]
+
+
+def test_logsout_forces_optional_and_carried() -> None:
+    base = _base_kwargs()
+    assert logsout_to_simscape_output(dict(base)).force_columns is None
+    out = logsout_to_simscape_output({**base, "forces": synthetic_force_columns()})
+    assert out.force_columns is not None
+    assert set(out.force_columns) == set(synthetic_force_columns())
+    series, _ = out.to_force_series()
+    assert len(series) == N
+
+
+def test_logsout_bad_forces_wrapped() -> None:
+    with pytest.raises(SimscapeSimulationError, match="force_columns"):
+        logsout_to_simscape_output({**_base_kwargs(), "forces": {"x": np.zeros(N + 2)}})

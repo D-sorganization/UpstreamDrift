@@ -16,10 +16,17 @@ unpacks it on the Python side.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from typing import Final
 
 import numpy as np
+
+from src.engines.simscape.force_channels import (
+    DEFAULT_ROTATION_TOL,
+    force_series_from_columns,
+)
+from src.shared.python.force_overlay import ForceTorqueSeries
 
 __all__ = [
     "SimscapeOutput",
@@ -60,6 +67,12 @@ class SimscapeOutput:
         q_club: Club orientation as unit quaternion ``[w, x, y, z]``,
             shape ``(N, 4)``.
         v_clubhead: Club-head linear velocity in m/s, shape ``(N, 3)``.
+        force_columns: Optional logged force/torque channels (#11304),
+            keyed by the dataset column names of
+            ``SIMSCAPE_FORCE_CHANNELS`` (3x3 rotations flattened to
+            ``_I11.._I33``), each a finite ``(N,)`` array. ``None`` (the
+            default) means the run carried none; consumers then get an
+            explicit error from :meth:`to_force_series`, never zeros.
 
     Raises:
         TypeError: If any field is not an ``np.ndarray``.
@@ -76,6 +89,7 @@ class SimscapeOutput:
     r_clubhead: np.ndarray
     q_club: np.ndarray
     v_clubhead: np.ndarray
+    force_columns: Mapping[str, np.ndarray] | None = None
 
     def __post_init__(self) -> None:
         self._check_types()
@@ -83,9 +97,12 @@ class SimscapeOutput:
         self._check_joint_arrays(n)
         self._check_three_vector_arrays(n)
         self._check_quaternion(n)
+        self._check_force_columns(n)
 
     def _check_types(self) -> None:
         for fld in fields(self):
+            if fld.name == "force_columns":
+                continue
             value = getattr(self, fld.name)
             if not isinstance(value, np.ndarray):
                 raise TypeError(
@@ -149,6 +166,50 @@ class SimscapeOutput:
                 f"SimscapeOutput.q_club rows must be unit-norm to "
                 f"{_TOL_QUAT_NORM}; max deviation {max_dev:.3e}"
             )
+
+    def _check_force_columns(self, n: int) -> None:
+        if self.force_columns is None:
+            return
+        if not isinstance(self.force_columns, Mapping):
+            raise TypeError("SimscapeOutput.force_columns must be a Mapping or None")
+        for name, arr in self.force_columns.items():
+            if not isinstance(arr, np.ndarray):
+                raise TypeError(
+                    f"SimscapeOutput.force_columns[{name!r}] must be np.ndarray, "
+                    f"got {type(arr).__name__}"
+                )
+            if arr.shape != (n,):
+                raise ValueError(
+                    f"SimscapeOutput.force_columns[{name!r}] must have shape "
+                    f"(N={n},); got {arr.shape}"
+                )
+            if not np.all(np.isfinite(arr)):
+                raise ValueError(
+                    f"SimscapeOutput.force_columns[{name!r}] must be finite"
+                )
+
+    def to_force_series(
+        self, *, rotation_tol: float = DEFAULT_ROTATION_TOL
+    ) -> tuple[ForceTorqueSeries, tuple[str, ...]]:
+        """World-frame force/torque series from the carried channels.
+
+        Delegates to the FTO-18 loader core, so there is a single channel
+        table and rotation convention. Returns ``(series, missing)`` exactly
+        like ``load_simscape_force_series``.
+
+        Raises:
+            ValueError: the run carried no ``force_columns``, or a logged
+                rotation is not orthonormal within ``rotation_tol``.
+        """
+        if self.force_columns is None:
+            raise ValueError(
+                "SimscapeOutput carries no force_columns; the exporter did "
+                "not log force channels for this run"
+            )
+        columns = {**self.force_columns, "time": self.time}
+        return force_series_from_columns(
+            columns, rotation_tol=rotation_tol, source_name="SimscapeOutput"
+        )
 
     @property
     def n_samples(self) -> int:
