@@ -271,3 +271,30 @@ engine, not into `body_part_viz`.
   - the tension/compression sign agrees across engines.
 - No engine or renderer may be marked complete in `src/config/feature_parity.json`
   without its parity row.
+
+## Addendum: Calibrated MuJoCo Mesh Render on Source Footage (FTO-27, #11312)
+
+- **Date:** 2026-10-03
+- **Context:** Rendering native MuJoCo model meshes and 3D force glyphs onto source footage requires aligning the MuJoCo offscreen camera with the calibrated pinhole camera's intrinsics ($K$), extrinsics ($R, t$), and lens distortion.
+
+### Decision 2: Principal Point and Aspect Ratio Handling
+
+MuJoCo cameras and OpenGL perspective frustums assume centered principal points and square pixels. To support calibrated cameras with off-centre principal points $(c_x, c_y) \neq (W/2, H/2)$:
+
+- **Chosen Approach:** (a) Render an enlarged frame and crop.
+- **Mechanism:**
+  - For image dimensions $(W, H)$ and principal point $(c_x, c_y)$, render an enlarged offscreen buffer of size $W_{\text{render}} = 2 \cdot \max(c_x, W - c_x)$ and $H_{\text{render}} = 2 \cdot \max(c_y, H - c_y)$.
+  - Calculate vertical field of view for the enlarged buffer: $\text{fovy} = 2 \cdot \text{atan}(H_{\text{render}} / (2 \cdot f_y))$.
+  - The crop box $(x_0, y_0, x_0 + W, y_0 + H)$ with $x_0 = \text{round}(W_{\text{render}} / 2 - c_x)$ and $y_0 = \text{round}(H_{\text{render}} / 2 - c_y)$ precisely places the optical center at $(c_x, c_y)$ in the cropped frame.
+  - Works with any MuJoCo model without modifying model XML or requiring pre-allocated camera tags.
+  - Proved in `tests/unit/engines/mujoco/test_footage_composite.py` with 3D model body points reprojecting within $\le 1.0\text{ px}$ of `PinholeCamera.project`.
+
+### Decision 3: Lens Distortion Policy
+
+Calibrated cameras exhibit radial/tangential distortion ($k_1, k_2, \dots$), while MuJoCo offscreen rendering is rectilinear.
+
+- **Chosen Policy:** Undistort the source footage frame before compositing (`cv2.undistort` with the camera's coefficients).
+- **Rationale:**
+  - Avoids non-linear resampling blur and artifacting on rendered 3D meshes and alpha edges.
+  - The arrow layer (FTO-8 `opencv_glyphs.py`) and MuJoCo scene glyphs (`add_glyphs_to_scene`) share the identical rectilinear pinhole geometry.
+  - Verified by unit tests demonstrating that 3D arrows and mesh attachment points agree within $\le 1.5\text{ px}$.
