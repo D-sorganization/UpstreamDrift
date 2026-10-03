@@ -4790,6 +4790,55 @@ The requested local download and visible marker-placement review are
 complete; exact trial pairing and anatomical offsets remain unqualified.
 No owner-media bytes, filenames, private paths or per-frame observations
 are stored in this public reference.
+\section{Club orientation observations: completed window comparison}
+\label{sec:club-window-comparison}
+The optional club observation term uses the measured, non-filled clubhead
+marker triad, transformed into the model world frame and aligned to the
+accepted address orientation. This is a fixture-alignment assumption, not
+an anatomical or club-face calibration. The existing fourteen derived
+position targets include the clubhead position but omit the club-grip
+centroid. The added rotation term therefore supplies information that the
+position objective does not directly fit.
+
+The positive weights below multiply the normalized nine-component
+rotation-matrix residual. The same raw-observation mask is used for each
+comparison. Capture A contains 75 fitted poses (74 observed club frames),
+and capture O contains 59 fitted poses (44 observed club frames).
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+Capture & Weight & Mean club error ($^\circ$) & Peak ($^\circ$) & Position RMS (mm)\\
+\hline
+A & 0 & 10.303 & 31.211 & 27.242\\
+A & 0.025 & 9.154 & 27.520 & 27.230\\
+A & 0.075 & 5.922 & 14.022 & 27.248\\
+O & 0 & 19.200 & 47.441 & 37.989\\
+O & 0.025 & 16.753 & 36.131 & 37.992\\
+O & 0.075 & 10.732 & 22.050 & 38.014\\
+\hline
+\end{tabular}
+\end{center}
+Position RMS refers to the fourteen derived targets within the dense
+window, not an independently calibrated anatomical-marker error.
+The stronger weight increases the tour wrist step across the sparse-to-dense
+boundary from $6.629^\circ$ to $15.239^\circ$, while reducing the owner
+boundary step from $31.817^\circ$ to $21.905^\circ$. These boundary intervals
+are $1/30$ s; the dense intervals are $1/360$ s and $1/240$ s respectively.
+Their unnormalized steps must not be treated as comparable velocities.
+The owner maximum dense wrist step increases from $1.862^\circ$ to
+$2.941^\circ$. These tradeoffs require full source-clock evaluation.
+
+All 536 fitted poses were saved before the original MATLAB process hung
+after its completion marker. Its receipt retains exit 125 and an unknown
+native exit code. An independent fresh MATLAB R2025b process subsequently
+verified every saved pose using all 48 native joint positions and three
+club rotation outputs, reproduced the orientation metrics and masks,
+and confirmed exact whole-output baseline/zero-weight parity for both
+captures. That separate audit exited naturally with process and wrapper
+codes zero at 2026-10-03 18:18:38 UTC. The independent success does not
+replace the original shutdown receipt. No candidate is promoted by this
+window comparison. Native velocity, contact, torque-driven motion and
+feedback-off replay remain unqualified.
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
