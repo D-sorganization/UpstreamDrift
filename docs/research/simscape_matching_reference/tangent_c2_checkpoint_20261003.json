@@ -1,5 +1,206 @@
 {
   "all_35_input_torque_axes_qualified": false,
+  "alternate_basis_accepted_subset_rates": {
+    "qualification": "NATIVE_CLOSED_ARM_RATE_AND_STEP_DIAGNOSTIC_POINTWISE_ACCEPTANCE_IS_NOT_DYNAMIC_REGULARITY",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1278,
+        "consecutive_accepted_pair_count": 1273,
+        "excluded_pair_count": 23,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 6128.160587601849,
+        "peak_closed_guess_angular_velocity_component_deg_s": 2318.574693678558,
+        "peak_closed_scalar_step_wrapped_deg": 6.715484946535099,
+        "peak_closed_spherical_step_geodesic_deg": 6.621300937651419,
+        "peak_independent_angular_acceleration_component_deg_s2": 760455.999172741,
+        "peak_independent_angular_velocity_component_deg_s": 2659.6933980033687,
+        "peak_native_angular_velocity_component_deg_s": 6128.160587601849,
+        "peak_native_angular_velocity_key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "regularity_promoted": false,
+        "total_sample_count": 1297
+      },
+      "capture_O": {
+        "accepted_state_count": 702,
+        "consecutive_accepted_pair_count": 698,
+        "excluded_pair_count": 22,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 10446.166834219994,
+        "peak_closed_guess_angular_velocity_component_deg_s": 5511.954134578409,
+        "peak_closed_scalar_step_wrapped_deg": 16.58958553389104,
+        "peak_closed_spherical_step_geodesic_deg": 13.723646026319644,
+        "peak_independent_angular_acceleration_component_deg_s2": 1019272.7861232457,
+        "peak_independent_angular_velocity_component_deg_s": 4187.3689367642655,
+        "peak_native_angular_velocity_component_deg_s": 10446.166834219994,
+        "peak_native_angular_velocity_key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "regularity_promoted": false,
+        "total_sample_count": 721
+      }
+    }
+  },
+  "alternate_basis_native_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_ALTERNATE_BASIS_SOURCE_AND_MIDPOINT_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1278,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 1278,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 1297,
+        "position_status_one_count": 1278,
+        "velocity_status_one_count": 1278,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 702,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 702,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 721,
+        "position_status_one_count": 702,
+        "velocity_status_one_count": 702,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "alternate_basis_native_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:27:44.479599+00:00"
+  },
+  "alternate_basis_preparation": {
+    "basis_keys": {
+      "free_position_keys": [
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.ax_x",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.ax_y",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.ax_z",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.q",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.q"
+      ],
+      "free_velocity_keys": [
+        "Right Elbow Joint/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_x",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_y",
+        "Right Shoulder Joint/Gimbal Joint/Kinetically Driven|S.w_z",
+        "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w"
+      ],
+      "target_position_coordinate_count": 41,
+      "target_velocity_coordinate_count": 37
+    },
+    "basis_swap": {
+      "swapped_to_free": {
+        "key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.q",
+        "new_state": "free",
+        "prior_state": "target",
+        "v_key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w"
+      },
+      "swapped_to_target": {
+        "key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.q",
+        "new_state": "target",
+        "prior_state": "free",
+        "v_key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Ry.w"
+      }
+    },
+    "counts": {
+      "free_position_coords": 7,
+      "free_velocity_coords": 6,
+      "native_position_coords": 48,
+      "native_velocity_coords": 43,
+      "records": {
+        "capture_A": {
+          "original_anchor_count": 55,
+          "projected_support_knot_count": 9,
+          "sample_count": 1297,
+          "support_knot_count": 64
+        },
+        "capture_O": {
+          "original_anchor_count": 46,
+          "projected_support_knot_count": 8,
+          "sample_count": 721,
+          "support_knot_count": 54
+        }
+      },
+      "selected_coordinate_count": 37,
+      "total_evaluated_samples": 2018,
+      "total_original_anchors": 101,
+      "total_projected_support_knots": 17,
+      "total_support_knots": 118
+    },
+    "flags": {
+      "actuator_authority_unaffected": true,
+      "contact_dynamics_proven": false,
+      "global_jacobian_conditioning_proven": false,
+      "native_acceptance_claimed": false,
+      "native_representation_coords_48": true,
+      "native_velocity_coords_43": true,
+      "physical_dof_unaffected": true,
+      "prototype_promoted": false,
+      "rate_improvement_claimed": false,
+      "selected_coordinate_count_37": true
+    },
+    "input_hashes": {
+      "c2_reference_py_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+      "closed_arm_rate_regularity_json_sha256": "5ed5971fa30db5451674db2fd77851fd8ee60d9dd19709eecf13d9af9a7df86a",
+      "midpoint_refined_payload_mat_sha256": "a525a2a7289f088252e5d694e7b440ce08bb07e1a2c10aa84dc54fcfed8d36fe"
+    },
+    "method": "Swaps RightWristRy (free to target) and RightForearmRz (target to free) maintaining 7q/6v free coordinates and bitwise-identical assembled reference.",
+    "output_mat_sha256": "93eca6972781d526bacdad0a3df993060fde3959304402f4284beb327d28fb3f",
+    "parent_review": {
+      "complete_reference_positions_and_initial_rates_bitwise_identical": true,
+      "native_execution_proof": false,
+      "original_clock_anchor_and_support_data_exact": true,
+      "output_payload_sha256": "93eca6972781d526bacdad0a3df993060fde3959304402f4284beb327d28fb3f",
+      "proposal_sha256": "a62d69ab4265e57d12d143b115aa0ddd3f50d8de1eb6e2f02c976158e271dc14",
+      "reference_guesses_not_claimed_native_assembled_states": true,
+      "reviewed_builder_sha256": "18ed95a5a16ee5c5a8400de309a335866175d941c4b4559f0e21037a11e2b52a",
+      "unchanged_target_coordinates_bitwise_preserved": true
+    },
+    "primary_test_requirements": "Requires fresh native IK q/v, 91-component position/velocity gates, 101 anchor and 118 support knot checks, and global closed-arm rate comparison; static pointwise acceptance alone insufficient.",
+    "qualification": "CONTROLLED_ALTERNATE_INDEPENDENT_COORDINATE_BASIS_HYPOTHESIS_NO_NATIVE_OR_DYNAMICS_PROOF",
+    "schema_hash": "c6a7a72ebfd7559c712e44c51504b870c3572ca33e5b6c878bebe70d928b25d7",
+    "units": {
+      "position_units_summary": ["1", "deg", "m"],
+      "velocity_units_summary": ["deg/s", "m/s"]
+    },
+    "validation": {
+      "capture_A": {
+        "complete_reference_43v_bitwise_preserved": true,
+        "complete_reference_48q_bitwise_preserved": true,
+        "forearm_target_nan_zero_verified": true,
+        "wrist_q_modulo_360_max_error": 0.0,
+        "wrist_target_finite_verified": true,
+        "wrist_v_max_error": 0.0
+      },
+      "capture_O": {
+        "complete_reference_43v_bitwise_preserved": true,
+        "complete_reference_48q_bitwise_preserved": true,
+        "forearm_target_nan_zero_verified": true,
+        "wrist_q_modulo_360_max_error": 0.0,
+        "wrist_target_finite_verified": true,
+        "wrist_v_max_error": 0.0
+      }
+    }
+  },
   "anchor_seeded_preparation": {
     "guess_policy": "Independent C2 targets unchanged; six closed-arm coordinates interpolated only as native solver guesses, not prescribed targets",
     "independent_payload_bitwise_preserved": true,
@@ -56,6 +257,178 @@
     },
     "simulation_executed": false,
     "whole_capture_qualified": false
+  },
+  "anchor_wrist_accepted_subset_rates": {
+    "qualification": "NATIVE_CLOSED_ARM_RATE_AND_STEP_DIAGNOSTIC_POINTWISE_ACCEPTANCE_IS_NOT_DYNAMIC_REGULARITY",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1284,
+        "consecutive_accepted_pair_count": 1280,
+        "excluded_pair_count": 16,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 2921.178335707416,
+        "peak_closed_guess_angular_velocity_component_deg_s": 2318.574693678558,
+        "peak_closed_scalar_step_wrapped_deg": 4.058008107722657,
+        "peak_closed_spherical_step_geodesic_deg": 2.61462765742855,
+        "peak_independent_angular_acceleration_component_deg_s2": 146424.54497367312,
+        "peak_independent_angular_velocity_component_deg_s": 2419.2223906313498,
+        "peak_native_angular_velocity_component_deg_s": 2921.178335707416,
+        "peak_native_angular_velocity_key": "Right Wrist and Hand/Universal Joint/Kinetically Driven Universal Joint|Rx.w",
+        "regularity_promoted": false,
+        "total_sample_count": 1297
+      },
+      "capture_O": {
+        "accepted_state_count": 698,
+        "consecutive_accepted_pair_count": 694,
+        "excluded_pair_count": 26,
+        "native_dependent_acceleration_evaluated": false,
+        "peak_closed_angular_velocity_component_deg_s": 10863.196249574998,
+        "peak_closed_guess_angular_velocity_component_deg_s": 5511.954134578409,
+        "peak_closed_scalar_step_wrapped_deg": 20.254592917207674,
+        "peak_closed_spherical_step_geodesic_deg": 28.54601451784598,
+        "peak_independent_angular_acceleration_component_deg_s2": 250731.71721731618,
+        "peak_independent_angular_velocity_component_deg_s": 4167.327036653941,
+        "peak_native_angular_velocity_component_deg_s": 10863.196249574998,
+        "peak_native_angular_velocity_key": "Right Forearm/Revolute Joint/Kinetically Driven Revolute|Rz.w",
+        "regularity_promoted": false,
+        "total_sample_count": 721
+      }
+    }
+  },
+  "anchor_wrist_native_audit": {
+    "between_pilot_samples_qualified": false,
+    "model_saved": false,
+    "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+    "native_dependent_acceleration_qualified": false,
+    "prototype_promoted": false,
+    "qualification": "PRIVATE_C2_ANCHOR_WRIST_REFERENCE_SOURCE_AND_MIDPOINT_NATIVE_AUDIT_NOT_CONTINUOUS_PATH_ACCELERATION_CONTACT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "accepted_state_count": 1284,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 1284,
+        "max_anchor_physical_error": 9.921048172113442e-16,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 55,
+        "pilot_state_count": 1297,
+        "position_status_one_count": 1284,
+        "velocity_status_one_count": 1284,
+        "whole_pilot_accepted": false
+      },
+      "capture_O": {
+        "accepted_state_count": 698,
+        "follower_frames_verified": true,
+        "fresh_full_state_status_one_count": 698,
+        "max_anchor_physical_error": 1.0990647210786425e-15,
+        "max_full_velocity_error": null,
+        "max_independent_position_error": null,
+        "max_independent_velocity_error": null,
+        "original_anchor_count": 46,
+        "pilot_state_count": 721,
+        "position_status_one_count": 698,
+        "velocity_status_one_count": 698,
+        "whole_pilot_accepted": false
+      }
+    },
+    "simulation_executed": false,
+    "whole_capture_qualified": false
+  },
+  "anchor_wrist_native_receipt": {
+    "actual_process_exit_code": 0,
+    "done_marker": true,
+    "final_exit_code": 0,
+    "script_status": "success",
+    "termination_reason": "natural_exit",
+    "timestamp": "2026-10-03T10:44:46.652223+00:00"
+  },
+  "anchor_wrist_preparation": {
+    "aggregate_diff": {
+      "capture_A": {
+        "anchor_count": 55,
+        "anchor_q_wrapped_max_error_deg": 2.842170943040401e-14,
+        "max_a_difference_deg_s2": 782918.5120883959,
+        "max_q_difference_deg": 13.426517593516223,
+        "max_v_difference_deg_s": 2022.6752339994484,
+        "peak_analytic_acceleration_deg_s2": 43054.23189047787,
+        "peak_analytic_velocity_deg_s": 1151.3851572281571
+      },
+      "capture_O": {
+        "anchor_count": 46,
+        "anchor_q_wrapped_max_error_deg": 0.0,
+        "max_a_difference_deg_s2": 1074396.5203710666,
+        "max_q_difference_deg": 41.5215081829667,
+        "max_v_difference_deg_s": 4604.905712944822,
+        "peak_analytic_acceleration_deg_s2": 250731.71721731618,
+        "peak_analytic_velocity_deg_s": 4167.327036653941
+      }
+    },
+    "counts": {
+      "free_position_coords": 7,
+      "free_velocity_coords": 6,
+      "native_position_coords": 48,
+      "native_velocity_coords": 43,
+      "records": {
+        "capture_A": {
+          "historical_projected_knot_count": 9,
+          "historical_support_knot_count": 64,
+          "original_anchor_count": 55,
+          "sample_count": 1297
+        },
+        "capture_O": {
+          "historical_projected_knot_count": 8,
+          "historical_support_knot_count": 54,
+          "original_anchor_count": 46,
+          "sample_count": 721
+        }
+      },
+      "total_evaluated_samples": 2018,
+      "total_historical_projected_knots": 17,
+      "total_historical_support_knots": 118,
+      "total_original_anchors": 101
+    },
+    "curve_policy": "wrist_ry_from_original_anchor_c2_remaining_targets_historical_projection",
+    "curve_policy_description": "Target WristRy replaced by C2 scalar curve from original 55/46 fitted anchors (peak acc 43054/250732 deg/s^2), departing by up to 13.43 deg (A) and 41.52 deg (O) at non-anchors while preserving all 101 original fitted anchors exactly (error <= 1e-10). Historical 17 projected support poses are preserved for reference but are NOT gated support poses for this candidate.",
+    "flags": {
+      "contact_dynamics_proven": false,
+      "curve_changed_at_non_anchors_explicit": true,
+      "global_jacobian_conditioning_proven": false,
+      "historical_projected_poses_are_not_gated_support_poses": true,
+      "native_acceptance_claimed": false,
+      "prototype_promoted": false,
+      "rank_deficiency_freedom_proven": false,
+      "singularity_freedom_proven": false
+    },
+    "input_hashes": {
+      "input_payload_mat_sha256": "93eca6972781d526bacdad0a3df993060fde3959304402f4284beb327d28fb3f",
+      "wrist_derivative_comp_json_sha256": "18a4e27499d65daa3af69051b9575892fac1bedcc1b1008cb4bbca0b356230e5"
+    },
+    "output_mat_sha256": "c42651ba9472749c08cdf389b8ff1ec73624c8547883eefc49ba74a2396146f3",
+    "parent_review": {
+      "c2_reference_sha256": "e6d6c1e26894c45d579d58ab63239969aba51326b52ebc05d24cacfacd0e2d4c",
+      "historical_support_data_renamed_and_bitwise_retained": true,
+      "native_execution_proof": false,
+      "other_targets_clock_masks_guesses_and_original_anchors_bitwise_preserved": true,
+      "output_payload_sha256": "c42651ba9472749c08cdf389b8ff1ec73624c8547883eefc49ba74a2396146f3",
+      "proposal_sha256": "4ff7eec8fadf1bd57be93df3645daf2f2f393c1b3aae62f6dc68b6316e2766e2",
+      "reviewed_builder_sha256": "95dbcae7715fef2eae450b149c0d45e2556bbedc16e2fbd19d1e4b2a46c9bb56"
+    },
+    "qualification": "HISTORICAL_PROJECTED_POSES_ARE_NOT_GATED_SUPPORT_POSES_FOR_NEW_CANDIDATE",
+    "units": {
+      "position_units_summary": ["1", "deg", "m"],
+      "velocity_units_summary": ["deg/s", "m/s"]
+    },
+    "validation": {
+      "closed_q_guesses_bitwise_preserved": true,
+      "closed_v_guesses_bitwise_preserved": true,
+      "first_closed_guess_bitwise_preserved": true,
+      "historical_support_arrays_bitwise_preserved": true,
+      "non_wrist_target_rows_bitwise_preserved": true,
+      "original_anchor_arrays_bitwise_preserved": true,
+      "wrist_analytic_derivatives_finite": true,
+      "wrist_anchor_physical_wrapped_error_le_1e_minus_10": true
+    }
   },
   "c2_anchor_midpoint_pilot": {
     "between_pilot_samples_qualified": false,
@@ -644,6 +1017,52 @@
     "timestamp": "2026-10-03T10:10:01.934122+00:00"
   },
   "native_acceleration_qualified": false,
+  "original_anchor_pose_steps": {
+    "qualification": "ORIGINAL_FITTED_ANCHOR_POSE_STEP_DIAGNOSTIC_NOT_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "anchor_interval_max_s": 0.03333333333333344,
+        "anchor_interval_min_s": 0.033333333333333215,
+        "closed_scalar_max_wrapped_step_deg": 44.262392327832515,
+        "closed_spherical_max_geodesic_step_deg": 38.139893423316146,
+        "comparison_scope": "Saved fitted anchor poses, different sampling from dense C2 branch diagnostic; no original-video rate claim.",
+        "native_original_velocity_evaluated": false,
+        "original_anchor_count": 55
+      },
+      "capture_O": {
+        "anchor_interval_max_s": 0.03333333333333344,
+        "anchor_interval_min_s": 0.033333333333333215,
+        "closed_scalar_max_wrapped_step_deg": 117.16336651618207,
+        "closed_spherical_max_geodesic_step_deg": 50.15801993348482,
+        "comparison_scope": "Saved fitted anchor poses, different sampling from dense C2 branch diagnostic; no original-video rate claim.",
+        "native_original_velocity_evaluated": false,
+        "original_anchor_count": 46
+      }
+    }
+  },
+  "original_anchor_wrist_curve_comparison": {
+    "qualification": "PURE_WRIST_REFERENCE_COMPARISON_NOT_NATIVE_FIT_OR_DYNAMICS",
+    "records": {
+      "capture_A": {
+        "native_acceptance_claimed": false,
+        "original_anchor_count": 55,
+        "original_anchor_wrist_ry_peak_acceleration_deg_s2": 43054.23189047787,
+        "original_anchor_wrist_ry_peak_velocity_deg_s": 1151.3851572281571,
+        "projected_support_wrist_ry_peak_acceleration_deg_s2": 760455.999172741,
+        "projected_support_wrist_ry_peak_velocity_deg_s": 2659.6933980033687,
+        "wrist_position_max_reference_difference_wrapped_deg": 13.426517593516223
+      },
+      "capture_O": {
+        "native_acceptance_claimed": false,
+        "original_anchor_count": 46,
+        "original_anchor_wrist_ry_peak_acceleration_deg_s2": 250731.71721731618,
+        "original_anchor_wrist_ry_peak_velocity_deg_s": 4167.327036653941,
+        "projected_support_wrist_ry_peak_acceleration_deg_s2": 1019272.7861232457,
+        "projected_support_wrist_ry_peak_velocity_deg_s": 4187.3689367642655,
+        "wrist_position_max_reference_difference_wrapped_deg": 41.5215081829667
+      }
+    }
+  },
   "original_combined_tangent_receipt": {
     "actual_process_exit_code": null,
     "done_marker": false,

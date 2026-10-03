@@ -22,7 +22,7 @@
 
 \title{\textbf{Simscape Multibody Golf Swing Modeling: Mechanics, Identifiability, and Diagnostics}}
 \author{UpstreamDrift Modeling Reference}
-\date{October 2, 2026 --- Review Continuation, PR \#11256}
+\date{October 3, 2026 --- Review Continuation, PR \#11256}
 
 \begin{document}
 
@@ -4103,6 +4103,60 @@ conditioning a direction comparison on projection magnitude and checking
 3D frames; they do not justify a blind \(180^{\circ}\) rendering correction
 or establish contact/anatomical calibration. Head/torso and skin-marker
 offset limitations remain separate from the ellipsoid styling policy.
+
+\paragraph{Coordinate Allocation and Original-Fit Regularity.}
+Two further experiments change the selected kinematic target allocation,
+prescribing right-wrist \(R_y\) while freeing right-forearm \(R_z\).
+This changes the solver chart, not the physical model or actuator authority.
+The 48 position variables, 43 velocity variables and seven/six free
+position/velocity variables remain unchanged. No global-rank claim follows.
+Both experiments finish with natural process exit zero, but their measured
+acceptance is insufficient:
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Private reference & Tour A & Owner O \\
+\midrule
+Projected-support wrist curve & 1,278/1,297 & 702/721 \\
+Original-anchor-only wrist curve & 1,284/1,297 & 698/721 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Neither reference is promoted. Accepted-subset peak angular-rate components
+are approximately 6,128/10,446 degrees/s for the first allocation and
+2,921/10,863 degrees/s for the second. These statistics omit failed samples
+and their adjacent pairs; they do not establish complete-path improvement.
+The second experiment replaces only the wrist target curve and retains the
+101 original fitted anchors. Earlier projected support poses become
+historical comparison data, rather than falsely claimed exact supports.
+
+Small independent-coordinate changes do not bound dependent-coordinate
+changes. The projected-support wrist curve departs from the original-anchor
+curve by up to \(13.43^{\circ}\) for A and \(41.52^{\circ}\) for O;
+its prescribed acceleration peaks reach about 760,456 and 1,019,273
+degrees/s\(^{2}\). Adding nearby assembled knots can therefore amplify
+derivative artifacts instead of resolving the underlying fit.
+
+The original 30~Hz fitted poses themselves have maximum closed-arm scalar
+steps of \(44.26^{\circ}\) for A and \(117.16^{\circ}\) for O, and
+right-shoulder geodesic steps of \(38.14^{\circ}\) and \(50.16^{\circ}\).
+Original native velocities have not been evaluated by that pose-step audit.
+These values use a different sampling interval from the dense experiments
+and must not be compared as identical rate measurements. They warrant
+temporal regularity in the data-fitting objective; they do not establish
+player ability or a unique mechanical cause.
+
+Freezing original anchors was an experimental control, not a requirement
+that future fits preserve potentially irregular poses. A controlled refit
+may change those poses, provided it reports observed-marker/derived-target
+fit tradeoffs, physical closure and full-pose continuity. The next private
+audit replays the original sparse prefix from the address seed, then densely
+fits a window around each largest original wrist step. Baseline and zero
+full-pose-weight trials must match over their entire outputs before nonzero
+weights are compared. Boundary transitions are reported separately from
+adjacent dense samples; all fitted poses receive independent native
+reassembly. A successful window audit would still leave whole-capture
+coverage, velocity, acceleration, contact and forward dynamics unqualified.
 
 The \href{tangent_c2_checkpoint_20261003.json}{tangent and C2 checkpoint}
 records the aggregate errors, original exit failures, fresh 48-state recheck,
