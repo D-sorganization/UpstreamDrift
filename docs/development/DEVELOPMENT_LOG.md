@@ -20,7 +20,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** in_progress
-- **Owner:** claude
+- **Owner:** antigravity
 - **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
 - **PR:** #11360
 - **Branch:** `feat/fto-11307-api-websocket-forces`
