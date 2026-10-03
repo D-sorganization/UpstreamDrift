@@ -33,10 +33,14 @@ This reference documents tour-reference and owner optical-capture matching with
 the \texttt{GS3DX\_Human} ellipsoid model under MATLAB R2025b. It defines SI
 capture transformations, joint-role mapping, closed-grip inverse kinematics,
 marker-offset calibration, full foot orientation and model/runtime provenance.
-The latest selected shareable videos have mean/max frame position RMS of
-13.540/40.368 mm for the tour and 16.754/36.987 mm for the owner. Their
-cluster-relative head-error means are 10.671 and 11.318 degrees. Earlier
-selections remain historical baselines. These are IK visualizations;
+The earlier selected full-head-tracked videos have mean/max frame position
+RMS of 13.540/40.368 mm for the tour and 16.754/36.987 mm for the owner.
+Their cluster-relative head-error means are 10.671 and 11.318 degrees.
+The newer eight-clip torso-refined Desktop candidate has corresponding
+position metrics of 16.573/32.842 and 19.814/37.778 mm, with improved
+head long-axis alignment but unresolved full head orientation. Neither
+family improves every criterion; earlier files and provenance are retained.
+Both families are IK visualizations;
 these residuals do not establish anatomical, contact or forward-dynamics
 qualification. The model lineage, intrinsic Euler and torque mappings, inertia
 assumptions, controller experiments and rejected contact-load results remain
@@ -73,8 +77,9 @@ missing-to-measured root step while preserving the stated marker-fit
 screen. It remains a candidate pending orientation, range, visual and
 physics review. Interpolated positions never become measurements. \\
 Pelvis and Arms & Address-relative pelvis targets have private native
-RED/GREEN contract evidence; configured-model parity and full-swing
-comparison remain pending. Alternate owner arm seeds fit poorly with the
+RED/GREEN contract evidence and configured-model parity. Full sampled
+pelvis trials show marker-fit improvement with adverse orientation and
+continuity tradeoffs; they remain unpromoted and do not establish dynamics. Alternate owner arm seeds fit poorly with the
 original offsets. Calibration must be branch-consistent and tested on
 held-out observations. \\
 Dynamics & Supported one-second holds and bounded feedback-learning
@@ -228,7 +233,10 @@ The architectural lineage spans thirteen programmatically constructed variants. 
 \begin{table}[!htb]
 \centering
 \footnotesize
-\caption{The Simscape Multibody GS3DX Structural Model Progression Ladder}
+\caption{The Simscape Multibody GS3DX structural progression ladder.
+Rows report historical diagnostics with their original conditions;
+standing or an impact metric does not qualify full-swing dynamics.
+Supported-hold screens and independent moving replay are separate gates.}
 \label{tab:variant_ladder}
 \begin{tabularx}{\textwidth}{p{4.2cm} >{\raggedright\arraybackslash}X c >{\raggedright\arraybackslash}X}
 \toprule
@@ -399,6 +407,23 @@ with shift $\mathbf{s} = \text{sat}_{\text{limit}}(-k_p \mathbf{e} - k_d \dot{\m
     \mathbf{foot}_{\text{leg}} = \mathbf{G}_{\text{leg}}(t) \cdot \text{sat}_{\text{limit}}\left(k_f \mathbf{e}_{\text{foot}}\right).
 \end{equation}
 Builder defaults are $k_p = 3.0$, $k_d = 0.4$, $k_f = 1.0$, and $\text{limit} = 0.10$~m.
+
+Here $\mathbf{C}_0$ is either a constant twelve-axis feedforward torque
+vector or its sampled profile (N$\cdot$m). $\mathbf{A}(t)$ and
+$\mathbf{R}(t)$ are twelve-axis leg reference angles and rates in
+degrees and degrees/s. $\mathbf{e}$ is measured minus reference
+whole-body COM position in the selected World axes (m), and its
+rate uses the corresponding COM rate references (m/s).
+$\mathbf{e}_{\rm foot}$ is measured minus reference World ankle
+position, not contact clearance. The shift gains $k_p$ and $k_f$
+are dimensionless, while $k_d$ has units seconds.
+$\mathbf{G}$ has units deg/m, so angle offsets are in degrees
+and rate offsets in degrees/s. The degree-adapted servo gains
+$\mathbf{K}_p$ and $\mathbf{K}_d$ have units N$\cdot$m/deg
+and N$\cdot$m$\cdot$s/deg. The command above is the reference
+and feedforward part of the servo; the implemented net leg torque is
+$\mathbf{u}_{\rm leg}=\mathbf{cmd}-\mathbf{K}_p\odot\mathbf{q}_{\rm leg}-\mathbf{K}_d\odot\dot{\mathbf{q}}_{\rm leg}$.
+This distinction is required when auditing sensed actuator torque and power.
 
 \section{Theoretical Caveats: Nullspaces and Under-Actuation}
 
@@ -709,7 +734,9 @@ mirror has no verified Git revision; its reported commit remains unknown.
 
 \begin{table}[!htb]
 \centering
-\caption{Measured-target position RMS in mm, over identical sampled frames.
+\caption{Historical pre-head-refinement measured-target position RMS in mm,
+over identical sampled frames. Later selected and torso-refined candidates
+are distinguished in the reader guide and Section~\ref{sec:refined-torso-preview-review}.
 Each maximum is a maximum frame RMS, not a maximum individual target error.}
 \begin{tabular}{lrrrr}
 \toprule
@@ -979,7 +1006,7 @@ compiler reports a platform-directory error. Software checks do not qualify
 PDF rendering or the open physical gates.
 
 
-\subsection{Optional Head Tracking: Contract Review in Progress}
+\subsection{Optional Head Tracking: Contract Review and Baseline Formulation}
 The refined Human ellipsoid model remains the common matching representation.
 The new optional head term shares the foot term's normalized chordal rotation
 residual rather than duplicating its mathematics. For $K$ rotations,
@@ -2314,7 +2341,7 @@ logical source-availability mask $M\in\{0,1\}^{1\times N\times T}$.
 The default retains the original three-argument behavior. For a marker
 sample, usable decoded source availability is
 \[
- v_{if}=M_{if}\land\operatorname{finite}(x_{if},y_{if},z_{if})
+ v_{if}=M_{1,i,f}\land\operatorname{finite}(x_{if},y_{if},z_{if})
        \land\operatorname{finite}(r_{if})\land(r_{if}\geq0).
 \]
 Here $r$ is the separate \texttt{meta\_points.residuals} array;
@@ -3566,6 +3593,177 @@ qualification, a calibrated marker-offset test or an independent replay.
 A changed-contract cache miss remains governed by exact identity equality;
 the actual-capture probe establishes the identical-contract reuse case.
 
+\section{Dependent-Joint Branch Diagnosis and Full-Pose Continuity Experiment}
+\label{sec:full-pose-continuity-experiment}
+A saved-curve analysis completed with a natural native process exit of zero
+at \texttt{2026-10-03T04:38:57Z}. It loaded saved numerical results without
+loading, simulating or saving the Human model. For the source-seeded dense
+curve, the largest adjacent right-shoulder rotation was $45.756^{\circ}$ for
+capture A at frames 499--500, and $101.812^{\circ}$ for capture O at frames
+285--286. These frames are separated by $1/360$ and $1/240$ seconds,
+respectively. The corresponding interpolated requested shoulder increments
+were $3.172^{\circ}$ and $2.636^{\circ}$. Capture O's original sparse fitted
+right-wrist scalar angle already changed $117.163^{\circ}$ over frames
+281--289, or $33.333$ ms. These are fitting/representation diagnostics;
+they cannot establish a difference in the players' ability.
+
+The source-seeded strategy reproduces the original sampled poses but can
+select a different closed-chain solution between samples. The previous-
+successful strategy reduces some jumps while drifting away from the source
+anchors. Neither strategy is promoted. An endpoint angular-rate norm times
+the frame interval is a diagnostic comparison, not a certified bound on the
+continuous path. Successful local derivative probes do not qualify an
+entire interval containing an untested branch change.
+
+Inspection of the reviewed solver found that its existing temporal
+regularizer penalizes only independent parameters $p$, excluding seven
+dependent closed-chain shoulder, elbow and wrist coordinates. Its next
+frame seed follows the free-chain result rather than the accepted
+ROM-polished result. Consequently, selecting forward traversal alone does
+not establish continuity of the accepted full native pose.
+
+A private opt-in prototype therefore compares the full native pose against
+the preceding accepted pose and propagates the accepted polished state.
+Scalar revolute increments use wrapped radians. Spherical increments reuse
+the existing normalized chordal orientation residual,
+\[
+ r_R=\frac{w}{\sqrt{2}}\operatorname{vec}(R-R_{\rm previous}),
+\]
+where $w$ has the units required to compare this term with positional
+residuals. The helper supports translation increments in metres, but this prototype sets their new penalty weight to zero; it tests rotational continuity while retaining the existing independent-parameter smoothing. Axis-angle inputs require
+complete groups, finite values and unit axes; no silent normalization is
+allowed. The 73 residual components for the Human representation are not
+73 physical degrees of freedom. This fixed-sample penalty is not a
+velocity, acceleration, anatomical calibration or dynamics model.
+
+An actual Gemini 3.8 CLI agent produced the helper and its tests, followed
+by parent review against the existing orientation helper. A first private
+RED harness accidentally resolved the proposed helper through its setup
+path and failed its expected-failure assertion; that run is retained as a
+harness failure, not RED evidence. After correcting path isolation, the
+native RED run had zero passes and 16 failures, with nine incomplete cases
+associated with the missing helper. GREEN passed all 16 tests with zero
+failures or incomplete tests. The corrected run exited naturally with
+code zero at \texttt{2026-10-03T04:59:34Z}, without model loading or simulation.
+
+The owner comparison uses eight observed-mask-aware frames
+241:8:297, one frozen geometry and marker-offset set, and the same frame-233
+seed. It compares the production solver, exact zero-weight prototype parity,
+and positive weights 0.02 and 0.05. The first harness attempt failed before fitting because head targets were absent; the corrected setup binds the observed head cluster to the loaded model's native address orientation and uses the existing fail-closed calibration helper. Each accepted pose requires fresh native
+position rechecking. This small diagnostic must not be substituted for
+full-capture A/O fitting, contact acceptance, all-actuator forward dynamics
+or independent replay. Production solver code and existing Desktop videos
+remain unchanged by this private experiment.
+The corrected eight-frame comparison exited naturally with code zero at
+\texttt{2026-10-03T05:13:17Z}. All 32 candidate poses passed fresh native
+full-position rechecking; the zero-weight prototype reproduced the whole
+production output exactly. The unchanged geometry and frozen offsets yielded
+95 available target observations across the eight frames. The following
+maximum increments cover the seven interior fitted-frame transitions only;
+they exclude the seed-to-first-frame boundary and are not rate bounds.
+\begin{center}
+\begin{tabular}{lrrr}
+\hline
+Trial & Mean target RMS (mm) & Max scalar step ($^{\circ}$) & Max sphere step ($^{\circ}$)\\
+\hline
+Production / zero & 30.909 & 76.425 & 47.881\\
+Weight 0.02 & 30.610 & 79.528 & 46.854\\
+Weight 0.05 & 32.186 & 85.547 & 44.989\\
+\hline
+\end{tabular}
+\end{center}
+Neither positive trial demonstrates improved continuity overall: scalar
+jumps increase, and weight 0.05 also worsens positional and head error.
+No candidate, production solver or Desktop video is replaced. A separate
+57-frame owner diagnostic at the actual 240-Hz grid compares the production solver and weight 0.02, with source masks, frozen offsets and explicit seed-boundary reporting. Its completed result is assessed separately below. No model was saved or dynamics run.
+
+\subsection{Dense Owner-Window Comparison}
+The separate 57-frame owner comparison completed with natural exit zero at
+\texttt{2026-10-03T05:24:19Z}. Both trials passed fresh native full-position
+rechecking at all 57 frames, including the interval where the earlier
+interpolation-based curves rejected four assemblies. This is a new fit to
+available targets, not preservation of the original source poses or a
+repair of that earlier interpolation. Each trial has 729 available target
+observations out of 798 possible frame-target slots; unavailable targets
+are excluded using the source mask.
+
+Mean target RMS decreases from 28.739 to 28.131 mm, peak RMS from 38.245 to
+37.184 mm, and mean full-head orientation error from $4.635^{\circ}$ to
+$4.490^{\circ}$ with weight 0.02. The reported maximum scalar increments
+are $39.133^{\circ}$ and $38.940^{\circ}$; maximum spherical increments are
+$20.047^{\circ}$ and $19.328^{\circ}$. These maxima include the seed-to-first
+fitted-frame boundary, separated by $8/240$ seconds, whereas interior
+samples are separated by $1/240$ seconds. They must not be interpreted as
+uniform-grid velocity bounds. Separate seed and interior diagnostics are
+still required before claiming continuous-path improvement. Root motion,
+marker offsets, anatomical conventions and full-swing quality retain their
+independent acceptance gates. No result is promoted or rendered as a new
+best match. The corresponding completed tour-window comparison and separate interior-step analysis are recorded below.
+\subsection{Tour Parity and Separate Seed/Interior Assessment}
+The 53-frame tour comparison completed with natural exit zero at
+\texttt{2026-10-03T05:34:09Z}. All 159 poses passed fresh native full-position
+rechecking, and the zero-weight prototype reproduced the entire production
+output exactly. Tour observations use exported-coordinate validity only,
+not an asserted raw-source availability mask. The objective uses full head
+orientation, unlike the torso-preview axis objective; these window scores
+must not be compared directly with full-capture preview scores.
+
+A separate saved-array analysis completed naturally at
+\texttt{05:35:02Z}, with no model loading or dynamics. It reused the joint-key
+metadata and orientation helper and checked its maxima against the original
+benchmark receipts. The seed boundaries remain separate from the 52/56
+uniform-grid interior transitions. The maximum interior wrist and root
+increments are:
+\begin{center}
+\begin{tabular}{llrrr}
+\hline
+Capture & Trial & Mean RMS (mm) & Wrist step ($^{\circ}$) & Root step (mm)\\
+\hline
+O & Production & 28.739 & 24.327 & 40.419\\
+O & Weight 0.02 & 28.131 & 20.356 & 39.229\\
+A & Production & 26.396 & 7.850 & 2.180\\
+A & Weight 0.02 & 26.154 & 10.231 & 2.757\\
+\hline
+\end{tabular}
+\end{center}
+Owner wrist increments improve locally, while tour wrist and root increments
+worsen despite slightly lower marker RMS. A common penalty weight therefore
+cannot be declared a general continuity fix. The owner's approximately
+40-mm root increment between adjacent 240-Hz frames remains an adverse
+motion diagnostic. Seed scalar/spherical increments are approximately
+$39/20^{\circ}$ for O and $37/23^{\circ}$ for A over $1/30$ s; they are
+not interchangeable with interior increments. These are finite pose-step
+metrics, not native velocity solutions, measured anatomical rates or
+acceleration acceptance. Whole-capture, held-out marker, contact and
+independent forward-dynamics qualification remain open.
+
+The \href{continuity_experiment_checkpoint_20261003.json}{machine-readable
+continuity checkpoint} contains sanitized aggregates, the natural-exit
+receipts, explicit failed-harness evidence, zero-parity scope and hashes of
+the private experimental sources. It also binds the supplemental local
+acquisition-review hash. Its SHA-256 is
+\nolinkurl{449db40f07b29000d81a2582c047337d22f3ae78bb79e64bf9bf004ebf372345}.
+Private experimental sources are identified for controlled reproduction;
+they are not production behavior or shipped public APIs. All earlier media
+and production solver code remain unchanged by these experiments.
+\section{Local Acquisition Catalog Follow-Through}
+\label{sec:local-acquisition-follow-through}
+All six album-export videos are hash-verified locally, totalling
+88,738,421 bytes. An additional private extraction preserves the original
+archive filenames and directory structure, with read-only file attributes,
+while retaining the neutral copies and original archive. The supplemental
+acquisition-review receipt is byte-identical under repeated verification.
+Existing stable neutral identifiers are retained. The previously recorded
+full-decode evidence covers all 9,539 frames with strictly increasing PTS.
+Local first-frame inspection confirms decoded dimensions; nominal container
+rates are not physical capture rates. \texttt{ffprobe} is unavailable on the
+reviewed PATH, and no per-file \texttt{ffprobe} JSON is claimed. COV-1
+(\#11269) therefore remains open for its remaining catalog/software
+acceptance items, camera-original provenance and owner recollection.
+The requested local download and visible marker-placement review are
+complete; exact trial pairing and anatomical offsets remain unqualified.
+No owner-media bytes, filenames, private paths or per-frame observations
+are stored in this public reference.
 \begin{thebibliography}{9}
 \bibitem{MathWorksSolve}
 MathWorks. \emph{solve: Run Kinematic Analysis for a KinematicsSolver Object}.
