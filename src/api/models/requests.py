@@ -556,7 +556,19 @@ class MeasurementRequest(BaseModel):
 #  AIP JSON-RPC (#1199, #1198, #1200, #763)
 # ──────────────────────────────────────────────────────────────
 
-VALID_FORCE_TYPES = {"applied", "gravity", "contact", "bias", "all"}
+VALID_FORCE_TYPES = {
+    "all",
+    "applied",
+    "bias",
+    "contact",
+    "external",
+    "gravity",
+    "grip",
+    "joint_actuator",
+    "joint_reaction",
+    "muscle",
+    "reaction",
+}
 
 VALID_ACTUATOR_CONTROL_TYPES = {"constant", "polynomial", "pd_gains", "trajectory"}
 

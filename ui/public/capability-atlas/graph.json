@@ -430,7 +430,7 @@
       "title": "Web SimulationControls wiring (camera presets, recording toggle, trajectory export, force overlays, actuator controls)",
       "status": "gap",
       "pyqt": "src/launchers/launcher_simulation.py",
-      "api": null,
+      "api": "src/api/routes/force_overlays.py",
       "web": "ui/src/components/simulation/SimulationControls.tsx",
       "issue": 7452,
       "reason": null,
@@ -439,7 +439,7 @@
         "force_overlays",
         "actuator_controls"
       ],
-      "notes": "",
+      "notes": "Real ForceTorqueProvider frames and GlyphSet streaming implemented over REST and WebSocket (#11307, FTO-22); web three.js glyph rendering active under #11308 (FTO-23).",
       "id": "simulation.controls_wiring"
     },
     {
@@ -2928,7 +2928,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "91d35f621fe0e5c2ee32e70a779f45cb89343025adee3df53b40e76e26c3eaa4",
-    "src/config/feature_parity.json": "faff1ffd90d66bf9197efb61eefa9165e9f20d34d657de575b19be35b238a059",
+    "src/config/feature_parity.json": "a33b66d81f992c54ccc543d42f6a40c426182730d6e5530cf736f2c2f5b7b309",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
