@@ -21,12 +21,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11285; children #11286–#11315 (FTO-1 … FTO-30)
+- **PR:** #11395
 - **Branch:** `feat/fto-29-web-video-overlay-11314`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/**`, `src/api/routes/video_overlays.py`, `ui/src/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-29 (#11314) fixed VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, added shared 2D projection module (DRY FTO-8), FastAPI endpoint GET /api/overlays/video/{source_id}/frames/{n}/glyphs, React VideoForceOverlay with dark halo polylines, feature_parity.json update for video_analyzer, and Playwright evidence; FTO-25 (#11310, PR #11390) merged in main.
+- **Last verified:** 2026-10-03 at SELF — FTO-29 (#11314, PR #11395) fixed VideoAnalyzer dynamic viewBox sizing and requestVideoFrameCallback time sync, added shared 2D projection module (DRY FTO-8), FastAPI endpoint GET /api/overlays/video/{source_id}/frames/{n}/glyphs, React VideoForceOverlay with dark halo polylines, feature_parity.json update for video_analyzer, and Playwright evidence; FTO-27 (#11312, PR #11393) and FTO-25 (#11310, PR #11390) merged in main.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR for #11314; proceed with FTO-30 (#11315).
+- **Next step:** Merge PR for #11395; proceed with FTO-30 (#11315).
 
 ### DL-#11268 · Capture-O Video Companion
 
