@@ -151,6 +151,13 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
+- **PR:** see PR for branch (Refs #11268, #11274)
+- **Branch:** `feat/cov-6-swing-pairing-11274`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at HEAD — COV-6 (#11274): Implemented `src/motion_capture/reference/swing_pairing.py` with `PairingDecisionStatus`, `PairingConfidence`, `SwingPairingResult`, `PairingMatrix`, `compute_inter_capture_envelope_median`, and `build_pairing_matrix`. DTW distance normalized by inter-capture envelope median, margin-based pairing with tau_pair and epsilon abstention, leakage guard rejecting evaluation backend observations, and EventAnchors-based TimeMapping generation. 12 unit tests passing in `tests/unit/motion_capture/test_cov6_swing_pairing.py`.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Advance to COV-7 (#11275) per-landmark and phase-stratified comparison harness.
+
 ### DL-#11235 · Necromatcher Native Fit
 
 - **State:** in_progress

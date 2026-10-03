@@ -12,6 +12,25 @@ Specifies the virtual camera estimation and 2D swing-to-swing envelope projectio
 - **Projection Adapters**:
   - Tested bidirectional adapter between `PinholeCamera` (world-from-camera convention) and `CameraProjection` (world-to-camera convention) preserving camera matrix, rotation, translation, and projection geometry.
 
+## Capture-O Video Companion: Swing Pairing, Similarity Matrix, Confidence and Abstention Contracts (COV-6, #11274)
+
+Specifies evidence-grounded video swing to capture-O marker swing pairing, DTW similarity matrices normalized by inter-capture variation, confidence estimation, and fail-closed abstention rules (#11268, #11274):
+- **Phase-Normalized Trajectory DTW & Inter-Capture Normalization (`src/motion_capture/reference/swing_pairing.py`)**:
+  - `compute_inter_capture_envelope_median`: computes median channel-averaged DTW distance across all distinct unordered pairs of capture swings in the given camera view.
+  - Inter-swing envelope serves as empirical null baseline: distance to capture swings is normalized as $d_{\text{norm}}(V, C_k) = d(V, C_k) / \text{median}(D_{\text{inter}})$.
+- **Confidence, Margin & Abstention Rule (`PairingDecisionStatus`, `PairingConfidence`)**:
+  - Evaluates margin $\Delta = d_{(2)} - d_{(1)}$ between best and second-best normalized distances.
+  - Fail-closed abstention: returns `UNPAIRED` when no capture swing is closer than envelope median ($\min_k d_{\text{norm}}(V, C_k) \ge 1.0$).
+  - Returns `AMBIGUOUS` when the top two candidates are within $\varepsilon$ ($\Delta < \varepsilon$, default 0.05) or margin fails threshold ($\Delta < \tau_{\text{pair}}$, default 0.20).
+  - Returns `PAIRED` with designated `paired_capture_swing_id` and confidence metrics when $\Delta \ge \tau_{\text{pair}}$ and $d_{(1)} < 1.0$.
+  - Strictly permutation-invariant across capture-swing order and deterministic in tie-breaking.
+- **Leakage Guard & Provenance Contracts**:
+  - `_check_leakage`: verifies video observations originate from the designated reference backend (`backend="reference"`), rejecting evaluation backends under test (`ValueError("leakage guard: ...")`).
+  - Asserts reference receipt hashes when expected hashes are provided.
+- **Time Mapping & Side Evidence (`TimeMapping`, `SideEvidence`)**:
+  - Paired swings build invertible `TimeMapping` from event anchors (`EventAnchors`) without altering physical time claims.
+  - Side evidence (owner recollection, file creation time, club-speed rank) is recorded in pairing results and serialized matrices but never overrides the geometric distance rule.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -7812,6 +7831,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-10-03 | #11272 | [COV-4] Virtual camera fitting and 2D swing envelope: fit_virtual_camera with condition number, covariance, and degeneracy handling; compute_2d_envelope for phase-normalized p5/p50/p95 bands with sample counts and missing-frame tracking; CameraProjection adapter (#11272). |
 | 2026-10-02 | #11256 | Default future matches to refined Human ellipsoids; add capture-bound exports, calibrated foot/head orientation, keyed starts, selective gap weights and source observation masks with native default-parity tests and caller-bound export/cache contracts. Support configured upper-body learning, native block-bound Human moving references with explicit geometry-preserving conversion; native moving-velocity/midpoint, dense branch, derived-target availability and source-masked full-pose continuity experiments recorded without promotion; distinguish the refined-preview objective, verify private translation parameter contracts and native address-prefix comparison with independent 344-pose rechecking, and twelve-axis leg feedforward; preserve failed exit receipts and separate 48/43/37/35 native coordinate/control counts; fresh 48-state tangent recheck passes; original source-rate C2 rejection retained, guess correction preserves anchors, and refined/alternate-chart dense candidates remain rejected; record the GS3DX canonical-manual inventory blocker without release promotion; independently recheck all 2,042 full-source-clock fitted poses after retained shutdown failure, audit tour1307/1307 and owner729/733 C2 states plus bounded measured InputTorque neck capability; retain the earlier 536 saved-window-pose review after retained shutdown failure, measure capture-specific fit/continuity tradeoffs and native RED/GREEN normalized-rate helper contracts without full-path promotion; dense target/back-marker fit and projection-conditioned visual foot direction independently measured; parent verifies 104 comparison MP4s without dynamics promotion. Maintain calculation-level LaTeX, failed-trial evidence and tour/owner Desktop H.264 IK videos. Contact-supported one-second holds pass their fixed gates; full-swing torque recovery, independent replay, PDF qualification and protected delivery remain open. |
+| 2026-10-03 | #11274 | [COV-6] Pair video swings with capture-O swings: similarity matrix, confidence and abstention contracts, DTW inter-capture normalization, leakage guard, and event time mapping (#11274). |
 | 2026-10-03 | #11270 | [COV-2] Register capture-O video sources, timing evidence, swing windows and usability grades: VideoTimingEvidence, VariableFrameRateError, SwingWindow, grade_swing_window, capture registry video kind, and catalog privacy invariants (#11270). |
 | 2026-10-03 | #11362 | [FTO] Remove the deprecated `ForceVector3D` model, `ForceOverlayResponse.vectors` and `glyphs_to_legacy_vectors` from the force overlay API; regenerate UI API types and drop the dead `vectors`/`onVectorsChange`/`forceOverlays` React plumbing (#11362, refs #11285). |
 | 2026-10-03 | #11269 | [COV-1] Acquisition receipt and provenance contracts for capture-O video companion: build_acquisition_receipt, SHA-256 verification, ffprobe metadata embedding, lineage tracking, and atomic persistence (#11269). |
