@@ -76,14 +76,25 @@ def _validate_session_id(session_id: str) -> str:
     return cleaned
 
 
+def _validate_url(url: str) -> str:
+    """Validate that the URL uses an allowed HTTP or HTTPS scheme."""
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            f"URL scheme '{parsed.scheme}' is not allowed. Only HTTP and HTTPS are permitted."
+        )
+    return url
+
+
 def _fetch_url(url: str, token: str | None = None) -> bytes:
     """Fetch binary or text content from a URL via urllib."""
+    validated_url = _validate_url(url)
     headers = {"User-Agent": "UpstreamDrift-OpenCapClient/1.0"}
     if token:
         headers["Authorization"] = f"Token {token}"
-    req = urllib.request.Request(url, headers=headers)
+    req = urllib.request.Request(validated_url, headers=headers)
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             data: bytes = resp.read()
             return data
     except urllib.error.HTTPError as err:
@@ -105,6 +116,84 @@ def _download_file_to(url: str, dest_path: Path, token: str | None = None) -> No
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     content = _fetch_url(url, token=token)
     dest_path.write_bytes(content)
+
+
+def _validate_download_request(
+    session_id: str,
+    consent_recorded: bool,
+    settings: OpenCapHostedSettings | None,
+) -> tuple[OpenCapHostedSettings, str, str]:
+    """Validate consent, settings, token, and session_id before download."""
+    if not consent_recorded:
+        raise PermissionError(
+            "Hosted OpenCap downloads require recorded user consent (ADR-0053)."
+        )
+
+    active_settings = settings or get_opencap_hosted_settings()
+    if not active_settings.enabled:
+        raise PermissionError(
+            "Hosted OpenCap downloads are disabled by default (ADR-0053). "
+            "Enable in settings or set OPENCAP_HOSTED_ENABLED=true."
+        )
+
+    token = active_settings.api_token
+    if not token or not token.strip():
+        raise ValueError(
+            "OpenCap API token is required for hosted session download. "
+            "Provide via settings or OPENCAP_API_TOKEN environment variable."
+        )
+
+    clean_id = _validate_session_id(session_id)
+    return active_settings, token, clean_id
+
+
+def _download_model_file(media_url: str, target_dir: Path) -> None:
+    """Download scaled OpenSim model file from result URL."""
+    filename = "LaiUhlrich2022_scaled.osim"
+    parsed_path = urllib.parse.urlparse(media_url).path
+    basename = Path(parsed_path).name
+    if basename.endswith(".osim"):
+        filename = basename
+    elif "-" in basename and ".osim" in basename:
+        filename = basename[basename.rfind("-") + 1 :]
+
+    model_dest = target_dir / "OpenSimData" / "Model" / filename
+    _download_file_to(media_url, model_dest)
+
+
+def _download_trial_results(
+    trial_name: str,
+    results: list[dict[str, Any]],
+    target_dir: Path,
+    trial_filter: set[str] | None,
+    state: dict[str, bool],
+) -> None:
+    """Download assets for a single trial based on result tags."""
+    for res in results:
+        tag = res.get("tag")
+        media_url = res.get("media")
+        if not tag or not media_url:
+            continue
+
+        if tag == "session_metadata" and not state.get("metadata_downloaded"):
+            _download_file_to(media_url, target_dir / "sessionMetadata.yaml")
+            state["metadata_downloaded"] = True
+        elif tag == "opensim_model" and not state.get("model_downloaded"):
+            _download_model_file(media_url, target_dir)
+            state["model_downloaded"] = True
+        elif tag == "marker_data" and (
+            trial_filter is None or trial_name in trial_filter
+        ):
+            _download_file_to(
+                media_url, target_dir / "MarkerData" / f"{trial_name}.trc"
+            )
+        elif tag == "ik_results" and (
+            trial_filter is None or trial_name in trial_filter
+        ):
+            _download_file_to(
+                media_url,
+                target_dir / "OpenSimData" / "Kinematics" / f"{trial_name}.mot",
+            )
 
 
 def download_opencap_session(
@@ -134,26 +223,9 @@ def download_opencap_session(
         FileNotFoundError: Session not found on the remote server.
         RuntimeError: Network or server error during retrieval.
     """
-    if not consent_recorded:
-        raise PermissionError(
-            "Hosted OpenCap downloads require recorded user consent (ADR-0053)."
-        )
-
-    active_settings = settings or get_opencap_hosted_settings()
-    if not active_settings.enabled:
-        raise PermissionError(
-            "Hosted OpenCap downloads are disabled by default (ADR-0053). "
-            "Enable in settings or set OPENCAP_HOSTED_ENABLED=true."
-        )
-
-    token = active_settings.api_token
-    if not token or not token.strip():
-        raise ValueError(
-            "OpenCap API token is required for hosted session download. "
-            "Provide via settings or OPENCAP_API_TOKEN environment variable."
-        )
-
-    clean_id = _validate_session_id(session_id)
+    active_settings, token, clean_id = _validate_download_request(
+        session_id, consent_recorded, settings
+    )
     base_url = active_settings.api_url.rstrip("/") + "/"
     session_url = f"{base_url}sessions/{clean_id}/"
 
@@ -166,63 +238,18 @@ def download_opencap_session(
             f"Malformed session response from OpenCap API: {exc}"
         ) from exc
 
-    raw_trials: list[dict[str, Any]] = session_json.get("trials", [])
-
     dest = Path(destination_dir)
     target_dir = dest if dest.name == clean_id else dest / clean_id
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # Track downloaded files
-    metadata_downloaded = False
-    model_downloaded = False
-
+    state: dict[str, bool] = {"metadata_downloaded": False, "model_downloaded": False}
     trial_filter = set(trials) if trials is not None else None
-
-    for trial in raw_trials:
+    for trial in session_json.get("trials", []):
         trial_name = trial.get("name")
-        if not trial_name:
-            continue
-
-        results: list[dict[str, Any]] = trial.get("results", [])
-        for res in results:
-            tag = res.get("tag")
-            media_url = res.get("media")
-            if not tag or not media_url:
-                continue
-
-            # 1. session metadata (sessionMetadata.yaml)
-            if tag == "session_metadata" and not metadata_downloaded:
-                _download_file_to(media_url, target_dir / "sessionMetadata.yaml")
-                metadata_downloaded = True
-
-            # 2. scaled OpenSim model
-            elif tag == "opensim_model" and not model_downloaded:
-                # Deduce model file name
-                filename = "LaiUhlrich2022_scaled.osim"
-                parsed_path = urllib.parse.urlparse(media_url).path
-                basename = Path(parsed_path).name
-                if basename.endswith(".osim"):
-                    filename = basename
-                elif "-" in basename and ".osim" in basename:
-                    filename = basename[basename.rfind("-") + 1 :]
-
-                model_dest = target_dir / "OpenSimData" / "Model" / filename
-                _download_file_to(media_url, model_dest)
-                model_downloaded = True
-
-            # 3. Marker data (.trc)
-            elif tag == "marker_data":
-                if trial_filter is None or trial_name in trial_filter:
-                    trc_dest = target_dir / "MarkerData" / f"{trial_name}.trc"
-                    _download_file_to(media_url, trc_dest)
-
-            # 4. Kinematics (.mot)
-            elif tag == "ik_results":
-                if trial_filter is None or trial_name in trial_filter:
-                    mot_dest = (
-                        target_dir / "OpenSimData" / "Kinematics" / f"{trial_name}.mot"
-                    )
-                    _download_file_to(media_url, mot_dest)
+        if trial_name:
+            _download_trial_results(
+                trial_name, trial.get("results", []), target_dir, trial_filter, state
+            )
 
     logger.info("Successfully downloaded OpenCap session to %s", target_dir)
     return target_dir
