@@ -21,7 +21,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **PR:** #11394
+- **PR:** #11396
 - **Branch:** `feat/fto-26-projected-segment-meshes-11311`
 - **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/motion_capture/reference/**`, `src/motion_capture/reconstruct/model/**`, `src/tools/capture_rig/**`, `src/shared/python/force_overlay/**`, `tests/**`
 - **Last verified:** 2026-10-03 at SELF — FTO-26 (#11311) implemented engine-agnostic projected segment meshes with tension/compression fill: `draw_segment_meshes_on_frame` with Painter's algorithm depth sorting, back-face culling, Lambertian shading, triangle budget capping, and `ForceColorScale` fill; wired into `ComparisonLayer.draw_model_volumes` and `draw_segment_volumes`; verified across all unit tests and generated visual demo still `docs/development/fto_26_demo_still.png`; FTO-25 (#11310) merged to main (#11390); FTO-12 (#11297) Drake GUI draws real force/torque glyphs and feeds segment shading (PR #11385 landed in main); FTO-24 (#11309) merged to main (#11378); FTO-10 (#11295) routed MuJoCo GUI force/torque overlays through shared native and MeshCat glyph renderers (PR #11384); MuJoCo provider reaction labels now use joint name and parity MJCF carries a rod (PR #11381); #11346 added per-engine force-overlay parity lanes; FTO-7 (#11292) merged to main (#11348); FTO-9 (#11294) merged to main (#11361); FTO-8 (#11293) landed in main (#11342); FTO-5 (#11290) merged in main (#11337); FTO-6 (#11291) merged to main (#11355); FTO-4, FTO-3, FTO-21, FTO-16, FTO-13, FTO-11, FTO-19, FTO-15, FTO-2, FTO-18, FTO-1 landed in main.

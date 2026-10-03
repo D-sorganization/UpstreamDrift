@@ -1,6 +1,6 @@
 # Engine-Agnostic Projected Segment Meshes With Tension/Compression Fill — #11285 / #11311 (FTO-26)
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-projected-segment-meshes-11311`; commit SELF; PR: pending (`Closes #11311`, `Refs #11285`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-26-projected-segment-meshes-11311`; commit SELF; PR: #11396 (`Closes #11311`, `Refs #11285`)
 - Governing issue: #11311 (parent epic #11285, design authority ADR-0052 and `force_torque_overlay_epic.md`)
 - Objective: [FTO-26] Engine-agnostic model-on-footage layer: projected segment meshes with tension/compression fill.
 - Completed:
