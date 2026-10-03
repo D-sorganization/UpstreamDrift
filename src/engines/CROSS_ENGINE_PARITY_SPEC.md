@@ -203,8 +203,15 @@ tolerances set once at the top of the file.
 A sign-convention guard flips each expected sign and requires the row to fail,
 so the suite cannot pass by accident. Rows skip only for an absent engine or an
 absent provider, with the reason in the skip message, and become live without
-edits when the provider lands. The test lives under `tests/integration/cross_engine/`,
-so the `cross-engine-equivalence` workflow selects it per `requires_<engine>` marker.
+edits when the provider lands.
+
+CI status: the file is marked `integration` and `requires_<engine>`, and lives
+under `tests/integration/cross_engine/`. The `cross-engine-equivalence` workflow
+does not yet run the engine rows: its forward-sim step lists three explicit paths,
+and the `adapter-core` conformance job collects the directory but its marker
+expression excludes `requires_pinocchio`, `requires_drake` and `requires_mujoco`,
+so only the unmarked checks and (where installed) OpenSim rows run there. Per-engine
+lanes are tracked in #11346.
 
 ### 2.6 Body model (humanoid + club)
 
