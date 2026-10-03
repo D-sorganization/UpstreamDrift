@@ -1,3 +1,36 @@
+# Current Handoff — Capture-O Video Companion: Swing Pairing, Similarity Matrix, Confidence and Abstention (COV-6, #11274)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-6-swing-pairing-11274`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-6-11274`
+- Commit: `SELF`
+- Governing issue: #11274 (parent epic #11268)
+- Objective: [COV-6] Pair video swings with capture-O swings via similarity matrix, confidence, and fail-closed abstention under strict DbC, LoD, and DRY.
+- Completed:
+  - `src/motion_capture/reference/swing_pairing.py`:
+    - Value objects: `PairingDecisionStatus` (enum: `paired`, `ambiguous`, `unpaired`), `PairingConfidence`, `SwingPairingResult`, `PairingMatrix`, `SwingPairingFeatures`, `SideEvidence`, `PairingOptions`.
+    - `compute_inter_capture_envelope_median`: calculates median DTW distance across distinct unordered capture swing pairs to establish the empirical null baseline.
+    - `pair_video_swing`: DTW distance in phase-normalized time normalized by inter-capture variation; margin rule pairing ($\Delta \ge \tau_{\text{pair}}$, default 0.20), abstention ($\Delta < \varepsilon$, default 0.05), and unpaired ($\min d_{\text{norm}} \ge 1.0$).
+    - Permutation-invariance and deterministic tie-breaking.
+    - Leakage guard: enforces that video observations originate strictly from the designated reference backend (`backend="reference"`), rejecting evaluation backends under test (`ValueError`), and asserting reference receipt hashes.
+    - Time mapping: builds `TimeMapping` via `EventAnchors` for paired swings when event anchors are provided.
+    - `build_pairing_matrix`: computes matrix across video swings with decision counts, envelope median, and serialized JSON export.
+  - Exported public API in `src/motion_capture/reference/__init__.py`.
+  - Comprehensive unit test suite in `tests/unit/motion_capture/test_cov6_swing_pairing.py` with 12 unit tests verifying noisy projection pairing, average swing ambiguity, unrelated motion unpairing, permutation invariance, leakage guard rejections, nonfinite feature rejections, mismatched phase bin rejections, time mapping construction, and matrix serialization.
+  - Updated `SPEC.md` with COV-6 contracts section and §12 Change Log row.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11268).
+- Validation:
+  - `pytest tests/unit/motion_capture/test_cov6_swing_pairing.py`: 12 passed.
+  - `python scripts/ci/check_architecture_budget.py`: OK.
+  - `python scripts/ci/check_file_size_budget.py`: OK.
+  - `python scripts/ci/check_error_handling_ratchet.py`: OK.
+  - `ruff check src/ tests/`: OK.
+  - `ruff format --check src/ tests/`: OK.
+  - `python scripts/ci/run_mypy.py --follow-imports=silent src/motion_capture/reference/swing_pairing.py tests/unit/motion_capture/test_cov6_swing_pairing.py`: OK (0 issues).
+- Next steps: Advance to COV-7 (#11275) per-landmark and phase-stratified comparison harness.
+
+---
+
 # Current Handoff — Remove Deprecated ForceVector3D and Force Overlay `vectors` (#11362)
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `/home/user/ud-wt/a11362`
