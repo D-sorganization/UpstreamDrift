@@ -27,6 +27,39 @@
 # MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
 
 - Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11291-mujoco-glyphs`; commit: a9515fb04e; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
+
+---
+
+# OpenCV Video Glyph Renderer Delivery — #11285 / #11293 (FTO-8)
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11293-opencv-glyphs`; commit SELF; PR: #11342 (`Closes #11293`, `Refs #11285`)
+- Governing issue: #11293 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Objective: [FTO-8] OpenCV video glyph renderer with calibrated camera projection, anti-aliased dark halo underlays, inset legend box, and deterministic styling (#11293).
+- Completed:
+  - `src/shared/python/force_overlay/renderers/opencv_glyphs.py`:
+    - `ImageProjector`: Protocol defining the camera projection contract.
+    - `PinholeProjector`: OpenCV-compatible projector supporting `K`, `dist_coeffs`, `R`, `tvec` or camera frame extrinsics with boundary clipping.
+    - `HypothesisProjector`: Adapts `CameraHypothesis` directly.
+    - `VideoGlyphStyle`: Configuration dataclass for colors, stroke widths, halo scaling, arrow head sizing, font face/scale.
+    - `VideoGlyphReceipt`: Dataclass reporting rendered frame dimensions, arrow/arc counts, legend placement, and clipping stats.
+    - `draw_legend_box`: renders semi-transparent dark background card, color swatches, reference scale texts, and unavailable notes.
+    - `draw_glyphs_on_frame`: projects `ArrowGlyph` and `TorqueArcGlyph` polylines and heads, clips against image boundary with `cv2.clipLine`, applies anti-aliased dark halo layer via `cv2.addWeighted`, draws heads with `cv2.fillConvexPoly`, preserves input frame when `inplace=False`.
+  - Re-exports in `src/shared/python/force_overlay/renderers/__init__.py`.
+  - Synthetic scene verification PNG: `docs/development/assets/fto_8_opencv_glyph_example.png`.
+  - Tests: `tests/unit/force_overlay/test_opencv_glyphs.py` (13 unit tests pass, 100% green).
+- Validation: Ruff check/format clean, strict mypy clean on new modules, file size budget passed.
+- Next steps: Land FTO-8 into main; unblocks video camera projection FTO-24 (#11309) and video overlay pipeline FTO-25 to FTO-29.
+
+# MeshCat Force and Torque Glyph Renderer Delivery — #11285 / #11290
+
+- Repository: `D-sorganization/UpstreamDrift`; branch: `feat/fto-11290-meshcat-glyphs`; commit: 476ae53678; PR: #11337 (merged; `Closes #11290`, `Refs #11285`)
+- Governing issue: #11290 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
+- Completed:
+  - MeshCat glyph renderer with MeshcatSink protocol, cylinder+cone 3D arrows, 32-segment torque arcs, transform caching, disappearing label cleanup, DrakeMeshcatSink adapter, and unit tests.
+
+# MuJoCo MjvScene Glyph Renderer Delivery — #11285 / #11291
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/fto-11291-mujoco-glyphs`; commit SELF; PR: #11355 (merged; `Closes #11291`, `Refs #11285`)
 - Governing issue: #11291 (parent epic #11285, design authority ADR-0052 §5 and `force_torque_overlay_epic.md`)
 - Completed:
   - `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_glyphs.py`:
@@ -60,6 +93,7 @@
 - Known limits: `step()` integrates through the Manager, which recomputes controls from the model controllers, so a `set_control` value does not persist across steps without a controller. Not fixed here: `reset()` calls `Manager.setSessionTime` (absent in 4.x), `compute_inverse_dynamics` uses `Vector(n_u)` (so `compute_gravity_forces`/`compute_bias_forces` return empty arrays on 4.x). The parity builders in `tests/integration/cross_engine/test_force_overlay_parity.py` (PR #11345) can switch from baked-in state/controller to `set_state`/`set_control`.
 - Validation: `python3 -m pytest tests/unit/engines/opensim` passes with the new file; the wider opensim/analytical/audit set shows the same 50 failures before and after (pre-existing in this environment).
 - Next steps: fix `reset()` and the inverse-dynamics `Vector` call in a follow-up; update the parity builders after #11345 merges.
+  > > > > > > > origin/main
 
 # Colour Utilities DRY — #11289 (FTO-4)
 
@@ -80,7 +114,7 @@
   - 20 unit tests in `tests/unit/plot_style/test_color_utils.py` and `tests/unit/plot_style/test_colormaps.py`.
 - Next steps: Wave B child issues: FTO-5 (#11290) PySide/PyQtGL overlay renderer and FTO-24 (#11309) video camera projection.
 
-# Glyph Builder and Force Kind Palette — #11288 (FTO-3)
+# Force and Torque Glyph Builder Delivery — #11285 / #11288
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree: `/home/dieterolson/Repositories/UpstreamDrift-worktrees/antigravity-11288`
 - Branch: `feat/fto-11288-glyph-builder`; commit: SELF; PR: #11341
@@ -147,6 +181,7 @@
 - Validation: `python3 -m pytest tests/engines/drake/test_drake_force_torque.py tests/unit/force_overlay` (40 passed with the capability test); ruff check/format clean on changed files.
 - Known limits: discrete-time plants read zero reactions before the first step; point contact on a box face yields one unstable point, so the point test uses a sphere.
 - Next steps: FTO-12 Drake GUI; FTO-21 parity.
+  > > > > > > > origin/main
 
 # Simscape Output Force Channels — #11304 (FTO-19)
 

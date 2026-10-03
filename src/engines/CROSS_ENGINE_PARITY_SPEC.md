@@ -194,11 +194,11 @@ model builder per engine, and every case asserts on the provider frame
 (`get_force_torque_frame()`) only, through one `assert_wrench` helper with
 tolerances set once at the top of the file.
 
-| Fixture | Expected (world, Z-up, applied to the body) | Drake | Pinocchio | OpenSim | MuJoCo | Simscape |
-| :------ | :------------------------------------------ | :---- | :-------- | :------ | :----- | :------- |
-| Static hanging pendulum | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension) | live | live | live | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
-| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live | live | live | skips until FTO-9 | not applicable (file-based) |
-| Body resting on ground | contact forces sum to `(0, 0, +m*g)`; points on the ground plane | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9 | skips (file-based) |
+| Fixture                           | Expected (world, Z-up, applied to the body)                                                        | Drake            | Pinocchio                | OpenSim              | MuJoCo                     | Simscape                                |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------- | :--------------- | :----------------------- | :------------------- | :------------------------- | :-------------------------------------- |
+| Static hanging pendulum           | reaction `(0, 0, +m*g)` at the pivot; axial load `+m*g` (tension)                                  | live             | live                     | live                 | skips until FTO-9 (#11294) | CSV via FTO-18 loader keeps world frame |
+| Inverted pendulum held at `theta` | actuator torque `+m*g*(l/2)*sin(theta)` about the axis; axial load `-m*g*cos(theta)` (compression) | live             | live                     | live                 | skips until FTO-9          | not applicable (file-based)             |
+| Body resting on ground            | contact forces sum to `(0, 0, +m*g)`; points on the ground plane                                   | hydroelastic box | skips (no contact model) | sphere on half-space | skips until FTO-9          | skips (file-based)                      |
 
 A sign-convention guard flips each expected sign and requires the row to fail,
 so the suite cannot pass by accident. Rows skip only for an absent engine or an
