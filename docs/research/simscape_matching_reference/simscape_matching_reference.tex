@@ -4528,10 +4528,17 @@ precision confirms the algebraic frame construction; it does not establish
 physical rigidity. Shaft flex, fixture movement, tracking error or averaging
 could contribute to the relative changes; this audit does not identify a cause.
 
-The current centroid pair directly observes club-line position and direction,
-but not rotation about that line. Other model constraints and priors can
-still constrain that rotation indirectly. A possible future observation,
-after verifying native-body assignment and a common world basis, is
+Source inspection of the authoritative 14-position-target list establishes
+that only \texttt{club\_head} is fitted; \texttt{club\_grip} is derived by
+the capture pipeline but omitted from this IK objective. The fitted clubhead
+position binds to the clubhead solid's reference frame, with the calibrated
+body-frame offset applied by the matcher. Thus the current objective must
+not be described as fitting both club centroids. A hypothetical fitted pair
+would directly observe club-line position and direction, but still not
+rotation about that line. Other body observations, constraints and priors
+can constrain orientation indirectly. A possible future orientation
+observation, after verifying native-body assignment and a common world
+basis, is
 \[
  R_{\mathrm{target}}(t)=R_{\mathrm{obs}}(t)
  R_{\mathrm{obs}}(0)^{\mathsf T}R_{\mathrm{native}}(0).

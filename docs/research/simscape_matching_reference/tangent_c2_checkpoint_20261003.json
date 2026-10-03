@@ -1115,6 +1115,7 @@
     }
   },
   "club_orientation_scope": "Separate triads provide possible future orientation observations. Algebraic orthogonality is not physical rigidity; changing head/grip relative orientation is not attributed to an identified cause. Fixture alignment and exact native-body assignment remain unqualified.",
+  "club_position_target_scope": "Authoritative fourteen-position-target objective includes club_head only. club_grip is derived by capture processing but omitted from the IK target list. Clubhead native /R position and body rotation support its calibrated offset; no two-centroid fit claim.",
   "contact_qualified": false,
   "desktop_media": {
     "forward_dynamics_qualified": false,
