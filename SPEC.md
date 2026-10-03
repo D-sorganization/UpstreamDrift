@@ -7725,9 +7725,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<pr> | summary |`. Add exactly one row for your own pull request and do not renumber anybody else's; the `Spec Version` field in section 1 is release-derived and is never bumped by an individual pull request. See [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520).
 
 | Date | PR | Changes |
-| --- | --- | --- |
-| 2026-10-03 | #11305 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
-| 2026-10-03 | #11292 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
+| 2026-10-03 | #11354 | [FTO-20] Simscape 3D viewer: force/torque arrows and live tension/compression shading from loaded dataset, toggle controls, and peak force verification (#11305). |
 | 2026-10-03 | #11379 | [FTO-14] Pinocchio GUI: consolidate visualization mixins onto shared force overlay view, real MeshCat 3D glyphs, live segment force shading, and eliminate duplicate _draw_arrow (#11299). |
 | 2026-10-03 | #11346 | `cross-engine-equivalence.yml` gains per-engine `force-overlay-parity` lanes (drake, pinocchio, opensim, mujoco) that run the FTO-21 parity file with the engine installed and fail via `require_junit_test_passed.py` when the evidence testcase did not pass (all-skipped guard); lanes are not required checks. |
 | 2026-10-03 | #11348 | [FTO-7] Matplotlib 3D and QPainter 2D glyph renderers; deprecation shims for force_vectors and vectors; retire duplicate arrow code (#11292). |
