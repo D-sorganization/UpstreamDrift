@@ -100,6 +100,7 @@ __all__ = [
     "ColormapId",
     "CustomColormap",
     "CustomMeshSpec",
+    "FORCE_KIND_PALETTE",
     "DataChannel",
     "DataDrivenColor",
     "FORCE_KIND_PALETTE",
