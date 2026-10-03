@@ -353,6 +353,139 @@ def _build_torque_arc_basis(a_hat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return u, v
 
 
+def _build_single_arrow(
+    w: OverlayWrench,
+    kind_str: str,
+    rgba: tuple[float, float, float, float],
+    cfg: ForceGlyphStyle,
+) -> tuple[ArrowGlyph | None, float | None, bool]:
+    """Build an ArrowGlyph for wrench force. Returns (glyph, magnitude, is_unavailable)."""
+    if w.force_n is None:
+        return None, None, True
+    f_arr = np.array(w.force_n, dtype=np.float64)
+    f_mag = float(np.linalg.norm(f_arr))
+    if f_mag < cfg.magnitude_floor_n:
+        return None, None, False
+
+    f_hat = f_arr / f_mag
+    l_des = f_mag * cfg.force_scale_m_per_n
+    l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
+    clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
+
+    pt = np.array(w.point_m, dtype=np.float64)
+    tip = pt + l_eff * f_hat
+    head_len = cfg.head_length_ratio * l_eff
+    head_base = tip - head_len * f_hat
+
+    arrow = ArrowGlyph(
+        label=w.label,
+        kind=kind_str,
+        tail_m=(float(pt[0]), float(pt[1]), float(pt[2])),
+        tip_m=(float(tip[0]), float(tip[1]), float(tip[2])),
+        head_base_m=(float(head_base[0]), float(head_base[1]), float(head_base[2])),
+        shaft_radius_m=cfg.shaft_radius_m,
+        head_radius_m=cfg.shaft_radius_m * cfg.head_radius_ratio,
+        rgba=rgba,
+        magnitude=f_mag,
+        units="N",
+        clamped=clamped,
+    )
+    return arrow, f_mag, False
+
+
+def _build_single_torque_arc(
+    w: OverlayWrench,
+    kind_str: str,
+    rgba: tuple[float, float, float, float],
+    cfg: ForceGlyphStyle,
+) -> tuple[TorqueArcGlyph | None, float | None, bool]:
+    """Build a TorqueArcGlyph for wrench torque. Returns (glyph, magnitude, is_unavailable)."""
+    if w.torque_nm is None:
+        return None, None, True
+    t_arr = np.array(w.torque_nm, dtype=np.float64)
+    t_mag = float(np.linalg.norm(t_arr))
+    if t_mag < cfg.magnitude_floor_nm:
+        return None, None, False
+
+    a_hat = t_arr / t_mag
+    l_des = t_mag * cfg.torque_scale_m_per_nm
+    l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
+    clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
+    radius_m = l_eff / 2.0
+
+    center = np.array(w.point_m, dtype=np.float64)
+    u, v = _build_torque_arc_basis(a_hat)
+    thetas = np.linspace(0.0, cfg.arc_sweep_rad, cfg.arc_segments + 1)
+    pts = [center + radius_m * (math.cos(th) * u + math.sin(th) * v) for th in thetas]
+    poly = tuple((float(p[0]), float(p[1]), float(p[2])) for p in pts)
+
+    last_th = float(thetas[-1])
+    tangent = -math.sin(last_th) * u + math.cos(last_th) * v
+    t_norm = float(np.linalg.norm(tangent))
+    if t_norm > 0:
+        tangent = tangent / t_norm
+
+    head_tip = pts[-1]
+    head_len = cfg.head_length_ratio * l_eff
+    head_base = head_tip - head_len * tangent
+
+    arc = TorqueArcGlyph(
+        label=w.label,
+        kind=kind_str,
+        center_m=(float(center[0]), float(center[1]), float(center[2])),
+        axis_unit=(float(a_hat[0]), float(a_hat[1]), float(a_hat[2])),
+        radius_m=radius_m,
+        polyline_m=poly,
+        head_tip_m=(float(head_tip[0]), float(head_tip[1]), float(head_tip[2])),
+        head_base_m=(float(head_base[0]), float(head_base[1]), float(head_base[2])),
+        rgba=rgba,
+        magnitude=t_mag,
+        units="N*m",
+        clamped=clamped,
+    )
+    return arc, t_mag, False
+
+
+def _build_legend(
+    frame: ForceTorqueFrame,
+    cfg: ForceGlyphStyle,
+    force_mags: list[float],
+    torque_mags: list[float],
+    kinds_present_set: set[str],
+    unavailable: list[str],
+    source_labels: list[str],
+) -> LegendSpec:
+    """Build the legend metadata spec for a GlyphSet."""
+    f_ref_n = _closest_nice_number(float(np.median(force_mags))) if force_mags else None
+    f_ref_l = (
+        min(max(f_ref_n * cfg.force_scale_m_per_n, cfg.min_length_m), cfg.max_length_m)
+        if f_ref_n is not None
+        else None
+    )
+    t_ref_nm = (
+        _closest_nice_number(float(np.median(torque_mags))) if torque_mags else None
+    )
+    t_ref_r = (
+        min(
+            max(t_ref_nm * cfg.torque_scale_m_per_nm, cfg.min_length_m),
+            cfg.max_length_m,
+        )
+        / 2.0
+        if t_ref_nm is not None
+        else None
+    )
+    return LegendSpec(
+        force_reference_n=f_ref_n,
+        force_reference_length_m=f_ref_l,
+        torque_reference_nm=t_ref_nm,
+        torque_reference_radius_m=t_ref_r,
+        kinds_present=tuple(sorted(kinds_present_set)),
+        unavailable_labels=tuple(sorted(set(unavailable))),
+        engine=frame.engine,
+        source_labels=tuple(sorted(set(source_labels))),
+    )
+
+
 def build_glyphs(
     frame: ForceTorqueFrame,
     style: ForceGlyphStyle | None = None,
@@ -372,142 +505,35 @@ def build_glyphs(
         if kind_str not in cfg.kinds:
             continue
 
-        hex_col = cfg.palette.get(kind_str, "#000000")
-        rgba = hex_to_rgba(hex_col)
+        rgba = hex_to_rgba(cfg.palette.get(kind_str, "#000000"))
 
-        # Force arrow
-        if w.force_n is None:
+        arrow, f_mag, f_unavail = _build_single_arrow(w, kind_str, rgba, cfg)
+        if f_unavail:
             unavailable.append(w.label)
-        else:
-            f_arr = np.array(w.force_n, dtype=np.float64)
-            f_mag = float(np.linalg.norm(f_arr))
-            if f_mag >= cfg.magnitude_floor_n:
-                f_hat = f_arr / f_mag
-                l_des = f_mag * cfg.force_scale_m_per_n
-                l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
-                clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
+        elif arrow is not None and f_mag is not None:
+            arrows.append(arrow)
+            force_mags.append(f_mag)
+            kinds_present_set.add(kind_str)
 
-                pt = np.array(w.point_m, dtype=np.float64)
-                tip = pt + l_eff * f_hat
-                head_len = cfg.head_length_ratio * l_eff
-                head_base = tip - head_len * f_hat
-
-                arrows.append(
-                    ArrowGlyph(
-                        label=w.label,
-                        kind=kind_str,
-                        tail_m=(float(pt[0]), float(pt[1]), float(pt[2])),
-                        tip_m=(float(tip[0]), float(tip[1]), float(tip[2])),
-                        head_base_m=(
-                            float(head_base[0]),
-                            float(head_base[1]),
-                            float(head_base[2]),
-                        ),
-                        shaft_radius_m=cfg.shaft_radius_m,
-                        head_radius_m=cfg.shaft_radius_m * cfg.head_radius_ratio,
-                        rgba=rgba,
-                        magnitude=f_mag,
-                        units="N",
-                        clamped=clamped,
-                    )
-                )
-                force_mags.append(f_mag)
-                kinds_present_set.add(kind_str)
-
-        # Torque arc
-        if w.torque_nm is None:
+        arc, t_mag, t_unavail = _build_single_torque_arc(w, kind_str, rgba, cfg)
+        if t_unavail:
             unavailable.append(w.label)
-        else:
-            t_arr = np.array(w.torque_nm, dtype=np.float64)
-            t_mag = float(np.linalg.norm(t_arr))
-            if t_mag >= cfg.magnitude_floor_nm:
-                a_hat = t_arr / t_mag
-                l_des = t_mag * cfg.torque_scale_m_per_nm
-                l_eff = min(max(l_des, cfg.min_length_m), cfg.max_length_m)
-                clamped = not math.isclose(l_des, l_eff, abs_tol=1e-7)
-                radius_m = l_eff / 2.0
+        elif arc is not None and t_mag is not None:
+            torque_arcs.append(arc)
+            torque_mags.append(t_mag)
+            kinds_present_set.add(kind_str)
 
-                center = np.array(w.point_m, dtype=np.float64)
-                u, v = _build_torque_arc_basis(a_hat)
-
-                thetas = np.linspace(0.0, cfg.arc_sweep_rad, cfg.arc_segments + 1)
-                pts = [
-                    center + radius_m * (math.cos(th) * u + math.sin(th) * v)
-                    for th in thetas
-                ]
-                poly = tuple((float(p[0]), float(p[1]), float(p[2])) for p in pts)
-
-                last_th = float(thetas[-1])
-                tangent = -math.sin(last_th) * u + math.cos(last_th) * v
-                t_norm = float(np.linalg.norm(tangent))
-                if t_norm > 0:
-                    tangent = tangent / t_norm
-
-                head_tip = pts[-1]
-                head_len = cfg.head_length_ratio * l_eff
-                head_base = head_tip - head_len * tangent
-
-                torque_arcs.append(
-                    TorqueArcGlyph(
-                        label=w.label,
-                        kind=kind_str,
-                        center_m=(float(center[0]), float(center[1]), float(center[2])),
-                        axis_unit=(float(a_hat[0]), float(a_hat[1]), float(a_hat[2])),
-                        radius_m=radius_m,
-                        polyline_m=poly,
-                        head_tip_m=(
-                            float(head_tip[0]),
-                            float(head_tip[1]),
-                            float(head_tip[2]),
-                        ),
-                        head_base_m=(
-                            float(head_base[0]),
-                            float(head_base[1]),
-                            float(head_base[2]),
-                        ),
-                        rgba=rgba,
-                        magnitude=t_mag,
-                        units="N*m",
-                        clamped=clamped,
-                    )
-                )
-                torque_mags.append(t_mag)
-                kinds_present_set.add(kind_str)
-
-    # Sort deterministically by label
     arrows.sort(key=lambda a: a.label)
     torque_arcs.sort(key=lambda t: t.label)
 
-    # Reference values for legend
-    f_ref_n = _closest_nice_number(float(np.median(force_mags))) if force_mags else None
-    f_ref_l = (
-        min(max(f_ref_n * cfg.force_scale_m_per_n, cfg.min_length_m), cfg.max_length_m)
-        if f_ref_n is not None
-        else None
-    )
-
-    t_ref_nm = (
-        _closest_nice_number(float(np.median(torque_mags))) if torque_mags else None
-    )
-    t_ref_r = (
-        min(
-            max(t_ref_nm * cfg.torque_scale_m_per_nm, cfg.min_length_m),
-            cfg.max_length_m,
-        )
-        / 2.0
-        if t_ref_nm is not None
-        else None
-    )
-
-    legend = LegendSpec(
-        force_reference_n=f_ref_n,
-        force_reference_length_m=f_ref_l,
-        torque_reference_nm=t_ref_nm,
-        torque_reference_radius_m=t_ref_r,
-        kinds_present=tuple(sorted(kinds_present_set)),
-        unavailable_labels=tuple(sorted(set(unavailable))),
-        engine=frame.engine,
-        source_labels=tuple(sorted(set(source_labels))),
+    legend = _build_legend(
+        frame,
+        cfg,
+        force_mags,
+        torque_mags,
+        kinds_present_set,
+        unavailable,
+        source_labels,
     )
 
     return GlyphSet(
