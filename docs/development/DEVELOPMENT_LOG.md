@@ -21,12 +21,12 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **PR:** #11391
-- **Branch:** `feat/fto-26-model-footage-11311`
-- **Paths:** `docs/adr/0052-force-torque-overlay-contract.md`, `docs/development/force_torque_overlay_epic.md`, `src/shared/python/force_overlay/renderers/opencv_segments.py`, `src/tools/capture_rig/**`, `tests/**`
-- **Last verified:** 2026-10-03 at SELF — FTO-26 (#11311) implemented engine-agnostic projected segment meshes on camera footage (`opencv_segments.py` with `SegmentPose`, `SegmentShading`, `SegmentDrawReceipt`, `segment_poses_from_axes`, `draw_segment_meshes_on_frame`). Painter's algorithm depth sorting, back-face culling, camera-space Lambert shading, and axial load coloring via `ForceColorScale`. Unified with `draw_segment_volumes` in `src/tools/capture_rig/reference_volumes.py` and wired into `MotionAppearanceControls`. 17 focused unit/tool tests pass; architecture/file budgets, error-handling ratchet, ruff, and mypy clean; FTO-25 (#11310) merged to main (#11390); FTO-12 (#11297) merged to main (#11385).
+- **PR:** in_progress (#11315)
+- **Branch:** `feat/fto-30-gallery-docs-11315`
+- **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
+- **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315): Force overlay gallery, golden images, user guide, and parity ledger close-out. Parent dependencies FTO-10, FTO-12, FTO-14, FTO-17, FTO-20, FTO-23, FTO-25, FTO-26, FTO-27 consolidated into worktree.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Merge PR #11391; unblocks FTO-27 and consumers COV-10 #11278 and #11268.
+- **Next step:** Complete gallery script, golden image visual regression tests, user guide, and parity close-out.
 
 ### DL-#11268 · Capture-O Video Companion
 
