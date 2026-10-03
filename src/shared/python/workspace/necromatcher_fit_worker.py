@@ -39,7 +39,10 @@ from .necromatcher_fit_jobs import (
 from .necromatcher_shaft_evidence import BoundShaftEvidence, load_shaft_image_residuals
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
-from .necromatcher_spline import preserved_fit_spline
+from .necromatcher_spline import preserved_fit_spline, verify_preserved_fit_samples
+from .necromatcher_fit_metrics import (
+    dense_reprojection_metrics as _dense_reprojection_metrics,
+)
 from .necromatcher_contacts import contact_schedule_binding
 from .necromatcher_fit_records import (
     build_native_fit_payload as _build_fit_payload,
@@ -145,28 +148,7 @@ def _preserved_start(
         raise ValueError(
             "Preserved spline source clock interval differs from requested evidence"
         )
-    parent_times = np.array(
-        [
-            frame["pts_ticks"]
-            * frame["timebase_numerator"]
-            / frame["timebase_denominator"]
-            for frame in source["frames"]
-        ]
-    )
-    if np.any(parent_times < start.knot_times[0]) or np.any(
-        parent_times > start.knot_times[-1]
-    ):
-        raise ValueError("Parent source clock exceeds preserved spline interval")
-    trajectory = CubicHermiteSplineTrajectory(
-        np.asarray(start.knot_times), len(start.free_coordinates)
-    )
-    free = trajectory.evaluate(np.asarray(start.spline_coefficients), parent_times).q
-    samples = np.asarray(source["q"], dtype=float)
-    expected = np.tile(samples[0], (len(samples), 1))
-    indices = [start.coordinate_order.index(name) for name in start.free_coordinates]
-    expected[:, indices] = free
-    if not np.allclose(samples, expected, rtol=1e-8, atol=1e-10):
-        raise ValueError("Parent samples disagree with the preserved canonical spline")
+    verify_preserved_fit_samples(source, start)
     return start
 
 
@@ -207,39 +189,6 @@ def _worker_inputs(
         knots,
         None if start is not None else samples,
     ), start
-
-
-def _dense_reprojection_metrics(
-    native: MatchingPlant,
-    camera: CameraProjection,
-    attachments: dict[str, Any],
-    evidence: CaptureImageEvidence,
-    q: np.ndarray,
-    fit_indices: tuple[int, ...],
-) -> dict[str, float | None]:
-    residuals = np.array(
-        [
-            camera.residual(
-                native.marker_positions(pose, attachments), observed, weights
-            )
-            for pose, observed, weights in zip(
-                q, evidence.observed_pixels, evidence.confidence, strict=True
-            )
-        ]
-    )
-    held_out = np.array([index not in fit_indices for index in evidence.frame_indices])
-    result: dict[str, float | None] = {}
-    for name, selected in (
-        ("dense_rms_pixels", np.ones(len(q), dtype=bool)),
-        ("held_out_rms_pixels", held_out),
-    ):
-        weight = float(np.sum(evidence.confidence[selected]))
-        result[name] = (
-            float(np.sqrt(np.sum(residuals[selected] ** 2) / weight))
-            if weight > 0
-            else None
-        )
-    return result
 
 
 def _load_refit_binding(

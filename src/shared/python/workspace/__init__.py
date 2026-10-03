@@ -50,7 +50,24 @@ from .historical_research import (
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
-from .necromatcher_native import NativeFitBinding, load_native_fit_binding
+from .necromatcher_native import (
+    NativeFitBinding,
+    NativeModelBinding,
+    load_native_fit_binding,
+    load_native_model_binding,
+)
+from .necromatcher_hypothesis_contracts import (
+    NativeHypothesisRequest,
+    HypothesisParents,
+    HypothesisModel,
+    HypothesisCoordinateMap,
+    HypothesisGauge,
+)
+from .necromatcher_hypothesis import (
+    BoundNativeHypothesis,
+    bind_native_hypothesis,
+    author_native_hypothesis,
+)
 from .necromatcher_constraints import repair_native_motion
 from .necromatcher_video import export_fit_video
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
@@ -197,6 +214,15 @@ __all__ = [
     "load_shaft_image_residuals",
     "build_native_fit_payload",
     "NativeFitBinding",
+    "NativeModelBinding",
+    "NativeHypothesisRequest",
+    "HypothesisParents",
+    "HypothesisModel",
+    "HypothesisCoordinateMap",
+    "HypothesisGauge",
+    "BoundNativeHypothesis",
+    "bind_native_hypothesis",
+    "author_native_hypothesis",
     "author_ground_placement",
     "repair_native_motion",
     "export_fit_video",
@@ -206,6 +232,7 @@ __all__ = [
     "ReplayOptions",
     "replay_authored_profile",
     "load_native_fit_binding",
+    "load_native_model_binding",
     "AuthoredEffortProfile",
     "EFFORT_SCHEMA",
     "NecromatcherLibrary",

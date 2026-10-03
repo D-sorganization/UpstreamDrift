@@ -64,6 +64,11 @@
       "id": "UP-D1-contact-derivatives-inventory",
       "owner": "UpstreamDrift issue #10254",
       "resolution": "Inventory the shared contact-force derivatives and full-body Pinocchio chain rule delivered in #10255 before manual coverage or physical qualification. Local directional derivative checks establish algebraic agreement with the implemented piecewise contact plant; they do not establish physiological force identification, valid contact parameters, full-swing fitting, or differentiability at activation and clipping boundaries."
+    },
+    {
+      "id": "UP-D1-necromatcher-native-hypothesis-admission-inventory",
+      "owner": "UpstreamDrift issue #11376",
+      "resolution": "Inventory workspace/necromatcher_hypothesis_contracts.py, necromatcher_hypothesis.py, necromatcher_hypothesis_worker.py and native model/capture/worker helpers: authored gauge, exact registered XML/compiled units/order, independent PNG/decoded-BGR identity domains, complete PTS clock, preserved final Hermite q/v/a mapping and explicit model/camera rebound identity. Record initializer/config, immutable lineage, negative/positive fixture subprocess and source fingerprint evidence. Fixture validation is not historical camera/anatomy/physical-time/continuous-dynamics or release qualification."
     }
   ],
   "calculations": []

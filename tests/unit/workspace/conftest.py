@@ -108,3 +108,10 @@ def native_fit_case(fit_case, tmp_path):
     }
     source.write_text(json.dumps(payload))
     return library, source, payload
+
+
+@pytest.fixture
+def hypothesis_case(native_fit_case, tmp_path):
+    from hypothesis_fixture import build_hypothesis_case
+
+    return build_hypothesis_case(native_fit_case, tmp_path)

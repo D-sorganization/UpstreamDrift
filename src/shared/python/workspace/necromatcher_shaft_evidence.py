@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from collections.abc import Mapping
 from typing import Any
 import hashlib
-import json
 import re
 
 from src.shared.python.motion_matching.historical_fit.shaft_observations import (
@@ -24,6 +23,7 @@ from src.shared.python.motion_matching.historical_fit.shaft_residuals import (
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_review import CaptureReview
+from .necromatcher_capture_identity import capture_clock_sha256
 
 
 @dataclass(frozen=True)
@@ -80,18 +80,7 @@ def bind_shaft_axis_evidence(
     with CaptureReview(library, evidence.capture_id) as review:
         if review.capture_id != evidence.capture_id:
             raise ValueError("Shaft capture review identity differs")
-        clock = []
-        for index in range(review.frame_count):
-            frame = FrameIdentity.from_dict(review.frame(index)["frame"])
-            clock.append(
-                {
-                    "frame_index": index,
-                    "frame_id": frame.frame_id,
-                    "pts_ticks": frame.pts_ticks,
-                    "timebase_numerator": frame.timebase_numerator,
-                    "timebase_denominator": frame.timebase_denominator,
-                }
-            )
+        clock_hash = capture_clock_sha256(review)
         for item in evidence.frames:
             if item.frame_index >= review.frame_count:
                 raise ValueError("Shaft frame index is outside capture")
@@ -107,12 +96,9 @@ def bind_shaft_axis_evidence(
             )
             if digest != item.png_sha256:
                 raise ValueError("Shaft original PNG hash mismatch")
-    raw = json.dumps(
-        clock, sort_keys=True, separators=(",", ":"), allow_nan=False
-    ).encode("utf-8")
     return BoundShaftEvidence(
         evidence,
-        "sha256:" + hashlib.sha256(raw).hexdigest(),
+        clock_hash,
         len(evidence.frames),
         sum(item.segment.status == "observed" for item in evidence.frames),
     )
