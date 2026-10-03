@@ -83,6 +83,8 @@ def test_opencv_golden_render() -> None:
     compare_against_golden("opencv_pendulum_320x240", img)
 
 
+@pytest.mark.requires_mujoco
+@pytest.mark.requires_gl
 def test_mujoco_golden_render() -> None:
     """MuJoCo offscreen render matches golden image within perceptual tolerance."""
     mujoco = pytest.importorskip("mujoco")
