@@ -119,6 +119,30 @@ def joint_torque_wrench(
     )
 
 
+def _validate_rotation_matrix(rotation_world_from_local: ArrayLike) -> np.ndarray:
+    """Validate that the input is an orthonormal 3x3 rotation matrix with det +1."""
+    R = np.asarray(rotation_world_from_local, dtype=np.float64)
+    if R.shape != (3, 3):
+        raise ValueError(
+            f"rotation_world_from_local must have shape (3, 3), got {R.shape}"
+        )
+    if not np.all(np.isfinite(R)):
+        raise ValueError("rotation_world_from_local must be finite")
+
+    ortho_diff = float(np.max(np.abs(R.T @ R - np.eye(3))))
+    if ortho_diff > 1e-9:
+        raise ValueError(
+            f"rotation_world_from_local must be orthonormal within 1e-9 (max dev={ortho_diff})"
+        )
+
+    det = float(np.linalg.det(R))
+    if abs(det - 1.0) > 1e-9:
+        raise ValueError(
+            f"rotation_world_from_local must have determinant +1 within 1e-9, got {det}"
+        )
+    return R
+
+
 def world_wrench_from_local(
     label: str,
     body: str,
@@ -156,91 +180,43 @@ def world_wrench_from_local(
     OverlayWrench
         World-aligned wrench.
     """
-    R = np.asarray(rotation_world_from_local, dtype=np.float64)
-    if R.shape != (3, 3):
-        raise ValueError(
-            f"rotation_world_from_local must have shape (3, 3), got {R.shape}"
-        )
-    if not np.all(np.isfinite(R)):
-        raise ValueError("rotation_world_from_local must be finite")
-
-    # Check orthonormality R.T @ R == I within 1e-9
-    ortho_diff = float(np.max(np.abs(R.T @ R - np.eye(3))))
-    if ortho_diff > 1e-9:
-        raise ValueError(
-            f"rotation_world_from_local must be orthonormal within 1e-9 (max dev={ortho_diff})"
-        )
-
-    # Check determinant == +1 within 1e-9
-    det = float(np.linalg.det(R))
-    if abs(det - 1.0) > 1e-9:
-        raise ValueError(
-            f"rotation_world_from_local must have determinant +1 within 1e-9, got {det}"
-        )
-
+    R = _validate_rotation_matrix(rotation_world_from_local)
     p_world = validate_vec3(point_world, "point_world")
 
     if force_local is None and torque_local is None:
         raise ValueError("At least one of force_local or torque_local must be provided")
 
-    if force_local is not None and torque_local is not None:
-        fl = validate_vec3(force_local, "force_local")
-        tl = validate_vec3(torque_local, "torque_local")
-        dummy = SpatialWrench(
-            application_frame="local",
-            point_m=(0.0, 0.0, 0.0),
-            force_n=fl,
-            torque_nm=tl,
-        )
-        sw = transform_wrench(
-            dummy,
-            target_frame="world",
-            new_point_m=(0.0, 0.0, 0.0),
-            rotation_matrix=R,
-        )
-        force_world: tuple[float, float, float] | None = sw.force_n
-        torque_world: tuple[float, float, float] | None = sw.torque_nm
-    elif force_local is not None:
-        fl = validate_vec3(force_local, "force_local")
-        dummy = SpatialWrench(
-            application_frame="local",
-            point_m=(0.0, 0.0, 0.0),
-            force_n=fl,
-            torque_nm=(0.0, 0.0, 0.0),
-        )
-        sw = transform_wrench(
-            dummy,
-            target_frame="world",
-            new_point_m=(0.0, 0.0, 0.0),
-            rotation_matrix=R,
-        )
-        force_world = sw.force_n
-        torque_world = None
-    else:
-        assert torque_local is not None
-        tl = validate_vec3(torque_local, "torque_local")
-        dummy = SpatialWrench(
-            application_frame="local",
-            point_m=(0.0, 0.0, 0.0),
-            force_n=(0.0, 0.0, 0.0),
-            torque_nm=tl,
-        )
-        sw = transform_wrench(
-            dummy,
-            target_frame="world",
-            new_point_m=(0.0, 0.0, 0.0),
-            rotation_matrix=R,
-        )
-        force_world = None
-        torque_world = sw.torque_nm
+    fl = (
+        validate_vec3(force_local, "force_local")
+        if force_local is not None
+        else (0.0, 0.0, 0.0)
+    )
+    tl = (
+        validate_vec3(torque_local, "torque_local")
+        if torque_local is not None
+        else (0.0, 0.0, 0.0)
+    )
+
+    dummy = SpatialWrench(
+        application_frame="local",
+        point_m=(0.0, 0.0, 0.0),
+        force_n=fl,
+        torque_nm=tl,
+    )
+    sw = transform_wrench(
+        dummy,
+        target_frame="world",
+        new_point_m=(0.0, 0.0, 0.0),
+        rotation_matrix=R,
+    )
 
     return OverlayWrench(
         kind=kind,
         label=label,
         body=body,
         point_m=p_world,
-        force_n=force_world,
-        torque_nm=torque_world,
+        force_n=sw.force_n if force_local is not None else None,
+        torque_nm=sw.torque_nm if torque_local is not None else None,
         source=source,
     )
 
