@@ -1,1 +1,98 @@
-{"qualification":"STRICT_UNIT_AND_POSE_NATIVE_RECHECK_OF_SAVED_TANGENT_STATES_NOT_CONTINUOUS_CURVE_ACCEPTANCE","model_sha256":"919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f","captures":{"capture_A":{"L_free7":{"moving_samples":55,"independently_rechecked_moving_states":55,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"max_fixed_velocity_dimensionless_error_ratio":9.0949470177292824E-7,"previous_midpoint_total":54,"previous_midpoints_qualified":54,"independently_rechecked_midpoints":54},"L_forearm_fixed6":{"moving_samples":55,"independently_rechecked_moving_states":55,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"max_fixed_velocity_dimensionless_error_ratio":9.0949470177292824E-7,"previous_midpoint_total":54,"previous_midpoints_qualified":53,"independently_rechecked_midpoints":53},"R_free7":{"moving_samples":55,"independently_rechecked_moving_states":55,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":3.637978807091713E-6,"max_fixed_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"previous_midpoint_total":54,"previous_midpoints_qualified":53,"independently_rechecked_midpoints":53},"R_forearm_fixed6":{"moving_samples":55,"independently_rechecked_moving_states":55,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":7.2759576141834259E-6,"max_fixed_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"previous_midpoint_total":54,"previous_midpoints_qualified":53,"independently_rechecked_midpoints":53}},"capture_O":{"L_free7":{"moving_samples":46,"independently_rechecked_moving_states":46,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"max_fixed_velocity_dimensionless_error_ratio":6.8212102632969618E-7,"previous_midpoint_total":45,"previous_midpoints_qualified":45,"independently_rechecked_midpoints":45},"L_forearm_fixed6":{"moving_samples":46,"independently_rechecked_moving_states":46,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"max_fixed_velocity_dimensionless_error_ratio":6.8212102632969618E-7,"previous_midpoint_total":45,"previous_midpoints_qualified":45,"independently_rechecked_midpoints":45},"R_free7":{"moving_samples":46,"independently_rechecked_moving_states":46,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":4.5474735088646412E-7,"max_fixed_velocity_dimensionless_error_ratio":6.8212102632969618E-7,"previous_midpoint_total":45,"previous_midpoints_qualified":45,"independently_rechecked_midpoints":45},"R_forearm_fixed6":{"moving_samples":46,"independently_rechecked_moving_states":46,"max_pose_dimensionless_error_ratio":5.6843418860808015E-8,"max_velocity_dimensionless_error_ratio":3.637978807091713E-6,"max_fixed_velocity_dimensionless_error_ratio":6.8212102632969618E-7,"previous_midpoint_total":45,"previous_midpoints_qualified":44,"independently_rechecked_midpoints":44}}},"original_trial_termination":"hung_after_done","original_trial_returncode":125,"angular_velocity_gate_deg_per_s":1E-6,"linear_velocity_gate_m_per_s":1E-8,"canonical_right_partition_verified_against_shared_ik_joint_roles":true,"simulation_executed":false,"model_saved":false,"candidate_promoted":false}
+{
+  "qualification": "STRICT_UNIT_AND_POSE_NATIVE_RECHECK_OF_SAVED_TANGENT_STATES_NOT_CONTINUOUS_CURVE_ACCEPTANCE",
+  "model_sha256": "919974719a4e24ee7d04ff004818c01dc3c31212383fe6a84b6e6de84abc919f",
+  "captures": {
+    "capture_A": {
+      "L_free7": {
+        "moving_samples": 55,
+        "independently_rechecked_moving_states": 55,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "max_fixed_velocity_dimensionless_error_ratio": 9.0949470177292824e-7,
+        "previous_midpoint_total": 54,
+        "previous_midpoints_qualified": 54,
+        "independently_rechecked_midpoints": 54
+      },
+      "L_forearm_fixed6": {
+        "moving_samples": 55,
+        "independently_rechecked_moving_states": 55,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "max_fixed_velocity_dimensionless_error_ratio": 9.0949470177292824e-7,
+        "previous_midpoint_total": 54,
+        "previous_midpoints_qualified": 53,
+        "independently_rechecked_midpoints": 53
+      },
+      "R_free7": {
+        "moving_samples": 55,
+        "independently_rechecked_moving_states": 55,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 3.637978807091713e-6,
+        "max_fixed_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "previous_midpoint_total": 54,
+        "previous_midpoints_qualified": 53,
+        "independently_rechecked_midpoints": 53
+      },
+      "R_forearm_fixed6": {
+        "moving_samples": 55,
+        "independently_rechecked_moving_states": 55,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 7.2759576141834259e-6,
+        "max_fixed_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "previous_midpoint_total": 54,
+        "previous_midpoints_qualified": 53,
+        "independently_rechecked_midpoints": 53
+      }
+    },
+    "capture_O": {
+      "L_free7": {
+        "moving_samples": 46,
+        "independently_rechecked_moving_states": 46,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "max_fixed_velocity_dimensionless_error_ratio": 6.8212102632969618e-7,
+        "previous_midpoint_total": 45,
+        "previous_midpoints_qualified": 45,
+        "independently_rechecked_midpoints": 45
+      },
+      "L_forearm_fixed6": {
+        "moving_samples": 46,
+        "independently_rechecked_moving_states": 46,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "max_fixed_velocity_dimensionless_error_ratio": 6.8212102632969618e-7,
+        "previous_midpoint_total": 45,
+        "previous_midpoints_qualified": 45,
+        "independently_rechecked_midpoints": 45
+      },
+      "R_free7": {
+        "moving_samples": 46,
+        "independently_rechecked_moving_states": 46,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 4.5474735088646412e-7,
+        "max_fixed_velocity_dimensionless_error_ratio": 6.8212102632969618e-7,
+        "previous_midpoint_total": 45,
+        "previous_midpoints_qualified": 45,
+        "independently_rechecked_midpoints": 45
+      },
+      "R_forearm_fixed6": {
+        "moving_samples": 46,
+        "independently_rechecked_moving_states": 46,
+        "max_pose_dimensionless_error_ratio": 5.6843418860808015e-8,
+        "max_velocity_dimensionless_error_ratio": 3.637978807091713e-6,
+        "max_fixed_velocity_dimensionless_error_ratio": 6.8212102632969618e-7,
+        "previous_midpoint_total": 45,
+        "previous_midpoints_qualified": 44,
+        "independently_rechecked_midpoints": 44
+      }
+    }
+  },
+  "original_trial_termination": "hung_after_done",
+  "original_trial_returncode": 125,
+  "angular_velocity_gate_deg_per_s": 1e-6,
+  "linear_velocity_gate_m_per_s": 1e-8,
+  "canonical_right_partition_verified_against_shared_ik_joint_roles": true,
+  "simulation_executed": false,
+  "model_saved": false,
+  "candidate_promoted": false
+}

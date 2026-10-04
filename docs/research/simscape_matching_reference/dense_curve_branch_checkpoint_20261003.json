@@ -4,18 +4,15 @@
     "previous_successful": {
       "qualification": "DENSE_NATIVE_CANONICAL_CURVE_AND_LOCAL_DERIVATIVE_PROBE_NOT_MATCH_OR_DYNAMICS_ACCEPTANCE",
       "gates": {
-        "position_error_gate_deg": 1e-06,
-        "position_error_gate_m": 1e-08,
-        "position_error_gate_so3_frobenius": 1e-07,
-        "fixed_velocity_gate_deg_per_s": 1e-06,
-        "fixed_velocity_gate_m_per_s": 1e-08,
+        "position_error_gate_deg": 1e-6,
+        "position_error_gate_m": 1e-8,
+        "position_error_gate_so3_frobenius": 1e-7,
+        "fixed_velocity_gate_deg_per_s": 1e-6,
+        "fixed_velocity_gate_m_per_s": 1e-8,
         "local_derivative_angular_abs_tol_deg_per_s": 0.1,
         "local_derivative_angular_rel_tol": 0.001,
-        "local_derivative_linear_abs_tol_m_per_s": 1e-05,
-        "local_derivative_step_sizes_s": [
-          0.0001,
-          5e-05
-        ]
+        "local_derivative_linear_abs_tol_m_per_s": 1e-5,
+        "local_derivative_step_sizes_s": [0.0001, 5e-5]
       },
       "captures": {
         "capture_A": {
@@ -57,8 +54,8 @@
           "all_local_derivative_probes_qualified": true,
           "max_local_derivative_angular_error_h1_deg_per_s": 0.04147566246558654,
           "max_local_derivative_angular_error_h2_deg_per_s": 0.010369018999426771,
-          "max_local_derivative_linear_error_h1_m_per_s": 1.8280212432941756e-06,
-          "max_local_derivative_linear_error_h2_m_per_s": 4.570047832108681e-07
+          "max_local_derivative_linear_error_h1_m_per_s": 1.8280212432941756e-6,
+          "max_local_derivative_linear_error_h2_m_per_s": 4.570047832108681e-7
         },
         "capture_O": {
           "capture_alias": "capture_O",
@@ -99,8 +96,8 @@
           "all_local_derivative_probes_qualified": true,
           "max_local_derivative_angular_error_h1_deg_per_s": 0.0869742728257279,
           "max_local_derivative_angular_error_h2_deg_per_s": 0.021743632461721063,
-          "max_local_derivative_linear_error_h1_m_per_s": 3.6705270187731287e-06,
-          "max_local_derivative_linear_error_h2_m_per_s": 9.176317459225203e-07
+          "max_local_derivative_linear_error_h1_m_per_s": 3.6705270187731287e-6,
+          "max_local_derivative_linear_error_h2_m_per_s": 9.176317459225203e-7
         }
       },
       "model_saved": false,
@@ -110,18 +107,15 @@
     "source_seeded": {
       "qualification": "DENSE_NATIVE_CANONICAL_CURVE_AND_LOCAL_DERIVATIVE_PROBE_NOT_MATCH_OR_DYNAMICS_ACCEPTANCE",
       "gates": {
-        "position_error_gate_deg": 1e-06,
-        "position_error_gate_m": 1e-08,
-        "position_error_gate_so3_frobenius": 1e-07,
-        "fixed_velocity_gate_deg_per_s": 1e-06,
-        "fixed_velocity_gate_m_per_s": 1e-08,
+        "position_error_gate_deg": 1e-6,
+        "position_error_gate_m": 1e-8,
+        "position_error_gate_so3_frobenius": 1e-7,
+        "fixed_velocity_gate_deg_per_s": 1e-6,
+        "fixed_velocity_gate_m_per_s": 1e-8,
         "local_derivative_angular_abs_tol_deg_per_s": 0.1,
         "local_derivative_angular_rel_tol": 0.001,
-        "local_derivative_linear_abs_tol_m_per_s": 1e-05,
-        "local_derivative_step_sizes_s": [
-          0.0001,
-          5e-05
-        ]
+        "local_derivative_linear_abs_tol_m_per_s": 1e-5,
+        "local_derivative_step_sizes_s": [0.0001, 5e-5]
       },
       "captures": {
         "capture_A": {
@@ -160,25 +154,20 @@
           "max_anchor_scalar_deg_error": 3.694822225952521e-13,
           "max_anchor_scalar_m_error": 7.28583859910259e-17,
           "max_anchor_so3_frobenius_distance": 7.0854499536960216e-15,
-          "max_anchor_so3_geodesic_deg": 1.7075472925031877e-06,
+          "max_anchor_so3_geodesic_deg": 1.7075472925031877e-6,
           "local_derivative_probe_count": 20,
           "local_derivative_probes_passed_count": 20,
           "local_derivative_probes_failed_count": 0,
           "all_local_derivative_probes_qualified": true,
           "max_local_derivative_angular_error_h1_deg_per_s": 0.04147566377207568,
           "max_local_derivative_angular_error_h2_deg_per_s": 0.01036902100770476,
-          "max_local_derivative_linear_error_h1_m_per_s": 1.8280212432941756e-06,
-          "max_local_derivative_linear_error_h2_m_per_s": 4.570047832108681e-07
+          "max_local_derivative_linear_error_h1_m_per_s": 1.8280212432941756e-6,
+          "max_local_derivative_linear_error_h2_m_per_s": 4.570047832108681e-7
         },
         "capture_O": {
           "capture_alias": "capture_O",
           "branch_guess_policy": "ORIGINAL_SOURCE_ANALYTIC_CLOSED_COORDINATES",
-          "rejected_source_frames": [
-            253,
-            254,
-            255,
-            256
-          ],
+          "rejected_source_frames": [253, 254, 255, 256],
           "max_adjacent_scalar_step_deg": 98.52216990442355,
           "max_adjacent_sphere_step_deg": 101.81165005891056,
           "cache_alias": "capture-O",
@@ -211,15 +200,15 @@
           "max_anchor_scalar_deg_error": 2.8421709430404007e-13,
           "max_anchor_scalar_m_error": 6.938893903907228e-17,
           "max_anchor_so3_frobenius_distance": 4.870451102211037e-15,
-          "max_anchor_so3_geodesic_deg": 1.7075472925031877e-06,
+          "max_anchor_so3_geodesic_deg": 1.7075472925031877e-6,
           "local_derivative_probe_count": 20,
           "local_derivative_probes_passed_count": 20,
           "local_derivative_probes_failed_count": 0,
           "all_local_derivative_probes_qualified": true,
           "max_local_derivative_angular_error_h1_deg_per_s": 0.08697427373999744,
           "max_local_derivative_angular_error_h2_deg_per_s": 0.021743630871924324,
-          "max_local_derivative_linear_error_h1_m_per_s": 3.6705270187731287e-06,
-          "max_local_derivative_linear_error_h2_m_per_s": 9.176317459225203e-07
+          "max_local_derivative_linear_error_h1_m_per_s": 3.6705270187731287e-6,
+          "max_local_derivative_linear_error_h2_m_per_s": 9.176317459225203e-7
         }
       },
       "model_saved": false,
