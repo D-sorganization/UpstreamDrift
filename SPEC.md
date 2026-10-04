@@ -1,3 +1,27 @@
+## Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints (DIME-06, #11427)
+
+Specifies unilateral ground support constraints, Coulomb friction cone bounding, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions for dynamics-informed mocap matching (#11421, #11427):
+- **Unilateral Ground Support (`src/shared/python/estimation/dime_contact_constraints.py`)**:
+  - `ContactMode`: enumerated contact states (`STANCE`, `FLIGHT`, `IMPACT`, `LIFTOFF`).
+  - Contact geometry (`ContactPointGeometry`) specifies local attachment point on body segment, sphere radius $r$, and candidate contact locations.
+  - Normal force non-negativity: $f_n = f \cdot n_{\text{ground}} \ge 0$. Adhesive ground tension ($f_n < 0$) is inadmissible and rejected fail-closed with `PreconditionError`.
+- **Coulomb Friction Cone Bounding (`ContactPointAdmissibleForce`)**:
+  - Tangential ground reaction $\|f_t\|_2 \le \mu f_n$ with static friction coefficient $\mu$.
+  - Slipping contact points ($\|f_t\| > \mu f_n$) are detected and flagged (`is_slipping=True`), with confidence downweighted by excess frictional tangential ratio.
+- **Unactuated Floating-Base Root Dynamic Equilibrium (`verify_unactuated_root_integrity`)**:
+  - Floating-base coordinates (DoFs 0..5) have zero actuators; direct root actuator torques or fictitious pelvis support shortcuts are strictly rejected fail-closed with `PreconditionError`.
+  - Floating-base root equations of motion:
+    \[
+    M(q)_{\text{root}, :} \ddot{q} + h(q, v)_{\text{root}} = \sum_{i} J_{c, i}(q)^T_{\text{root}, :} f_i
+    \]
+    All root inertial and gravitational loads must be balanced exclusively by admissible ground reaction forces.
+- **Bilateral Force Allocation Ambiguity (`BilateralAllocationStatus`)**:
+  - In double stance where only net ground reaction force $F_{\text{net}}$ and center of pressure are measured, distributing force between bilateral feet is underdetermined.
+  - Returns admissible interval bounds $[f_{i, \text{min}}, f_{i, \text{max}}]$ and explicitly flags `is_identified=False` to prevent unwarranted confidence claims on individual limb loading.
+- **Force Provenance & Discrete Mode Transitions**:
+  - Explicit force provenance tracking (`ForceProvenance.MEASURED` vs `ForceProvenance.INFERRED`).
+  - Contact Jacobian differentiability contract: continuous contact derivatives are declared valid (`derivatives_valid=True`) during persistent stance; discrete mode switches (impact, liftoff) declare `derivatives_valid=False`.
+
 ## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
 
 Specifies coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting (#11421, #11426):
