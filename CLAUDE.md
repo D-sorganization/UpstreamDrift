@@ -309,8 +309,8 @@ a Section 12 row is `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
   [`changes/README.md`](changes/README.md)):
   `python3 shared_scripts/changes_fragment.py new --issue N --summary "..."`.
   The post-merge collator writes the row keyed by the real PR number
-  (Repository_Management#1976). Until `.github/workflows/collate-changes.yml`
-  is on `main`, edit the table instead.
+  (Repository_Management#1976). Until the collate-changes workflow is on
+  `main`, edit the table instead.
 - Otherwise add **exactly one** row, for your own pull request, at the top of
   the table.
 - **Never** put a serial spec version in a row and **never** bump the
