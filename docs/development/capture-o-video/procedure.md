@@ -35,12 +35,12 @@ marker capture gives an error budget the historical-player projects can cite.
 
 ## Comparison Levels
 
-| Level | Requires | Claim |
-| --- | --- | --- |
-| L0 | Any graded A–C swing | Visual agreement only |
-| L1 | Fitted virtual camera | Inside or outside the 13-swing capture envelope |
-| L2 | Paired swing and time mapping | Per-frame 2D agreement with that swing |
-| L3 | L2 and a 3D source | 3D joint position and angle agreement |
+| Level | Requires                      | Claim                                           |
+| ----- | ----------------------------- | ----------------------------------------------- |
+| L0    | Any graded A–C swing          | Visual agreement only                           |
+| L1    | Fitted virtual camera         | Inside or outside the 13-swing capture envelope |
+| L2    | Paired swing and time mapping | Per-frame 2D agreement with that swing          |
+| L3    | L2 and a 3D source            | 3D joint position and angle agreement           |
 
 COV-3 ratifies or amends these; its protocol document supersedes this table.
 
@@ -102,12 +102,12 @@ explicitly and record their SHA-256 in the receipt.
 
 ## Hosts
 
-| Children | Host |
-| --- | --- |
-| COV-1 | Fleet machine able to open the owner's album; cloud sandboxes cannot |
-| COV-2, COV-4, COV-6, COV-7, COV-11 | Any fleet machine with the private store |
-| COV-5 monocular 3D, COV-8, COV-9 | GPU fleet machine preferred |
-| COV-10 | Windows host with MATLAB R2025b at its explicit path |
+| Children                           | Host                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| COV-1                              | Fleet machine able to open the owner's album; cloud sandboxes cannot |
+| COV-2, COV-4, COV-6, COV-7, COV-11 | Any fleet machine with the private store                             |
+| COV-5 monocular 3D, COV-8, COV-9   | GPU fleet machine preferred                                          |
+| COV-10                             | Windows host with MATLAB R2025b at its explicit path                 |
 
 For COV-10 launch `C:/Program Files/MATLAB/R2025b/bin/matlab.exe` explicitly
 and follow `docs/development/simscape_tour_matching/REMOTE_EXECUTION.md`. A
@@ -115,20 +115,21 @@ missing runtime or license is a blocked outcome, not a pass.
 
 ## Reuse Map
 
-| Need | Existing authority |
-| --- | --- |
-| Capture id resolution | `src/motion_capture/capture_registry.py` (#11162) |
-| Swing metrics | `src/shared/python/swing_comparison/` (#11164) |
-| Decoding, frame identity | `src/shared/python/shadow_tracker/historical_capture.py`, `source_records.py` |
-| Runner | `scripts/historical_capture.py`, extended with `--estimator` in COV-5 |
-| Detectors | `src/shared/python/pose_estimation/registry.py`, `src/tools/hmr2_sidecar/` |
-| Canonical observations | `src/shared/python/motion_pipeline/contracts.py` and `sources/` adapters |
-| Projection into a camera | `src/motion_capture/reference/registration.py` |
-| Time mapping | `src/motion_capture/reference/synchronization.py` |
-| Keypoint offsets | `src/shared/python/pose_estimation/keypoint_offsets.py` |
-| Metrics | `pose_estimation/validation_metrics.py`, `shadow_tracker/evaluation.py` |
-| Necromatcher | `src/shared/python/workspace/necromatcher*.py` public services |
+| Need                         | Existing authority                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| Capture id resolution        | `src/motion_capture/capture_registry.py` (#11162)                                                |
+| Swing metrics                | `src/shared/python/swing_comparison/` (#11164)                                                   |
+| Decoding, frame identity     | `src/shared/python/shadow_tracker/historical_capture.py`, `source_records.py`                    |
+| Runner                       | `scripts/historical_capture.py`, extended with `--estimator` in COV-5                            |
+| Detectors                    | `src/shared/python/pose_estimation/registry.py`, `src/tools/hmr2_sidecar/`                       |
+| Canonical observations       | `src/shared/python/motion_pipeline/contracts.py` and `sources/` adapters                         |
+| Projection into a camera     | `src/motion_capture/reference/registration.py`                                                   |
+| Time mapping                 | `src/motion_capture/reference/synchronization.py`                                                |
+| Keypoint offsets             | `src/shared/python/pose_estimation/keypoint_offsets.py`                                          |
+| Metrics                      | `pose_estimation/validation_metrics.py`, `shadow_tracker/evaluation.py`                          |
+| Necromatcher                 | `src/shared/python/workspace/necromatcher*.py` public services                                   |
 | Simscape replay and overlays | `motion_matching/simscape_replay_harness.py`, `src/motion_capture/simscape_c3d_video_overlay.py` |
+| Error budget & guidance      | `src/motion_capture/reference/error_budget.py` (#11279)                                          |
 
 Extend these with tests. Do not add a second parser, projector, runner, metric
 module or ledger.

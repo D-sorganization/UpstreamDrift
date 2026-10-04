@@ -1,3 +1,22 @@
+# Capture-O Video Benchmark Suite (COV-4/6/7/8/9/11) — #11268
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-benchmark-suite-11268`; PR: #11499 (`Closes #11272, #11274, #11275, #11276, #11277, #11279`, `Refs #11268`)
+- Governing issue: Epic #11268; children #11272 (COV-4), #11274 (COV-6), #11275 (COV-7), #11276 (COV-8), #11277 (COV-9), #11279 (COV-11)
+- Objective: Consolidate the entire Capture-O Video companion evaluation suite into a single unified implementation:
+  - COV-4 (`virtual_camera_fit.py`): Pinhole camera fitting and 2D variation envelope derivation.
+  - COV-6 (`swing_pairing.py`): Distance-based swing pairing with DTW, abstention margins, and event time mapping.
+  - COV-7 (`comparison_2d.py`): L1/L2 2D comparison receipts, camera uncertainty propagation, and anti-leakage offset calibration.
+  - COV-8 (`owner_project.py`): Marker-anchored subject anthropometry and Necromatcher owner project creation under privacy rules.
+  - COV-9 (`comparison_3d.py`): Monocular/refit 3D comparison vs marker IK with rigid scale fixation and depth error isolation.
+  - COV-11 (`error_budget.py`): Machine-readable error budgeting, frozen-rule guidance derivation, and privacy-preserving public summary generation.
+- Completed:
+  - Verified all 50 unit tests across all 6 test modules passing (100% green).
+  - Cleaned and unified `src/motion_capture/reference/__init__.py` exports.
+  - Pre-commit architecture, file size, error handling ratchet, and Ruff linting all clean.
+- Next steps: Merge consolidated PR, close superseded draft PRs (#11420, #11440, #11443, #11446, #11447, #11449), and close Epic #11268.
+
+---
+
 # Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers — #11421 / #11436
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11436-learned-initializers`; PR: (to be created, `Closes #11436`, `Refs #11421`)

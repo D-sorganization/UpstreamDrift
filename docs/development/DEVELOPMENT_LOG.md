@@ -130,6 +130,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** #11499 (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
+- **Branch:** `feat/cov-benchmark-suite-11268`
+- **Paths:** `src/motion_capture/reference/**`, `docs/development/capture-o-video/**`, `tests/unit/motion_capture/test_cov*`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-4/6/7/8/9/11 consolidated benchmark suite: virtual camera fitting and 2D variation envelope (`virtual_camera_fit.py`), swing pairing and similarity matrix (`swing_pairing.py`), 2D markerless backend comparison receipts (`comparison_2d.py`), marker-anchored anthropometry and Necromatcher owner project (`owner_project.py`), 3D monocular/refit comparison vs marker IK (`comparison_3d.py`), and error budget receipt with frozen guidance derivation (`error_budget.py`). All 50 unit tests across all 6 test files pass in 8.07s.
+- **Summary:** Complete implementation and verification of Capture-O Video benchmark suite spanning levels L0–L3, virtual camera projection, pairing confidence, marker-anchored subject scaling, 2D/3D residuals, and error budget reporting.
+- **Next step:** Merge consolidated PR, close superseded individual draft PRs, and close Epic #11268.
+
 - **PR:** #11416 (Closes #11270, Refs #11268)
 - **Branch:** `feat/cov-2-register-sources-11270`
 - **Started:** 2026-10-02
