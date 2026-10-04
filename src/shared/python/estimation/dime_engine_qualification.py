@@ -185,6 +185,66 @@ class EngineQualificationMatrix:
         }
 
 
+def _evaluate_capability_preconditions(
+    engine_spec: EngineCapabilitySpec,
+    capture: CaptureProvenance,
+) -> tuple[EngineQualificationStatus, str] | None:
+    """Evaluate fail-closed engine and capture capability alignment."""
+    if engine_spec.is_api_skeleton_only or not engine_spec.has_forward_dynamics:
+        return (
+            EngineQualificationStatus.BLOCKED,
+            "API skeleton only: forward dynamics is not implemented or qualified",
+        )
+    if not engine_spec.native_binary_present:
+        return (
+            EngineQualificationStatus.BLOCKED,
+            f"Missing native dependencies for engine '{engine_spec.engine_name}'",
+        )
+    if (
+        engine_spec.contact_model == ContactModelKind.CONTACT_FREE
+        and capture.claimed_contact == ContactModelKind.WHOLE_BODY_GRF
+    ):
+        return (
+            EngineQualificationStatus.REJECTED,
+            "Contact-free model cannot satisfy whole-body GRF ground reaction force contract",
+        )
+    if engine_spec.joint_convention != capture.claimed_joint_convention:
+        return (
+            EngineQualificationStatus.REJECTED,
+            f"Joint convention mismatch: engine uses {engine_spec.joint_convention.value} "
+            f"but capture claims {capture.claimed_joint_convention.value}",
+        )
+    return None
+
+
+def _evaluate_physical_tolerances(
+    trajectory_metrics: Mapping[str, float] | None,
+    thresholds: NumericAcceptanceThresholds,
+) -> tuple[tuple[str, ...], float, float, float, float]:
+    """Evaluate replay trajectory metrics against frozen physical tolerance thresholds."""
+    metrics = trajectory_metrics or {}
+    max_drift = float(metrics.get("max_drift_m", 0.0))
+    max_angular_drift = float(metrics.get("max_angular_drift_rad", 0.0))
+    mean_control = float(metrics.get("mean_control_nm", 0.0))
+    alignment = float(metrics.get("alignment", 1.0))
+
+    reasons: list[str] = []
+    if max_drift > thresholds.max_drift_m:
+        reasons.append(
+            f"Position drift {max_drift:.4f}m exceeds frozen threshold {thresholds.max_drift_m:.4f}m"
+        )
+    if max_angular_drift > thresholds.max_angular_drift_rad:
+        reasons.append(
+            f"Angular drift {max_angular_drift:.4f}rad exceeds frozen threshold {thresholds.max_angular_drift_rad:.4f}rad"
+        )
+    if alignment < thresholds.min_alignment:
+        reasons.append(
+            f"Alignment {alignment:.4f} below frozen minimum {thresholds.min_alignment:.4f}"
+        )
+
+    return tuple(reasons), max_drift, max_angular_drift, mean_control, alignment
+
+
 def evaluate_engine_qualification(
     engine_spec: EngineCapabilitySpec,
     capture: CaptureProvenance,
@@ -194,18 +254,15 @@ def evaluate_engine_qualification(
 ) -> EngineQualificationEntry:
     """Evaluate qualification of an engine against capture requirements and physics gates."""
     thresholds = thresholds or NumericAcceptanceThresholds()
-    reasons: list[str] = []
 
-    # Red gate 1: API skeleton only
-    if engine_spec.is_api_skeleton_only or not engine_spec.has_forward_dynamics:
-        reasons.append(
-            "API skeleton only: forward dynamics is not implemented or qualified"
-        )
+    precondition_failure = _evaluate_capability_preconditions(engine_spec, capture)
+    if precondition_failure is not None:
+        status, reason = precondition_failure
         return EngineQualificationEntry(
             engine_name=engine_spec.engine_name,
             capture_id=capture.capture_id,
-            status=EngineQualificationStatus.BLOCKED,
-            reasons=tuple(reasons),
+            status=status,
+            reasons=(reason,),
             max_position_drift_m=float("inf"),
             max_angular_drift_rad=float("inf"),
             mean_control_norm_nm=float("inf"),
@@ -213,107 +270,25 @@ def evaluate_engine_qualification(
             matched_forward_dynamics=False,
         )
 
-    # Red gate 2: Native binary missing
-    if not engine_spec.native_binary_present:
-        reasons.append(
-            f"Missing native dependencies for engine '{engine_spec.engine_name}'"
-        )
-        return EngineQualificationEntry(
-            engine_name=engine_spec.engine_name,
-            capture_id=capture.capture_id,
-            status=EngineQualificationStatus.BLOCKED,
-            reasons=tuple(reasons),
-            max_position_drift_m=float("inf"),
-            max_angular_drift_rad=float("inf"),
-            mean_control_norm_nm=float("inf"),
-            alignment_metric=0.0,
-            matched_forward_dynamics=False,
-        )
+    reasons, max_drift, max_angular, mean_ctrl, align = _evaluate_physical_tolerances(
+        trajectory_metrics, thresholds
+    )
+    is_qualified = len(reasons) == 0
 
-    # Red gate 3: Contact model compatibility
-    if (
-        engine_spec.contact_model == ContactModelKind.CONTACT_FREE
-        and capture.claimed_contact == ContactModelKind.WHOLE_BODY_GRF
-    ):
-        reasons.append(
-            "Contact-free model cannot satisfy whole-body GRF ground reaction force contract"
-        )
-        return EngineQualificationEntry(
-            engine_name=engine_spec.engine_name,
-            capture_id=capture.capture_id,
-            status=EngineQualificationStatus.REJECTED,
-            reasons=tuple(reasons),
-            max_position_drift_m=float("inf"),
-            max_angular_drift_rad=float("inf"),
-            mean_control_norm_nm=float("inf"),
-            alignment_metric=0.0,
-            matched_forward_dynamics=False,
-        )
-
-    # Red gate 4: Joint convention mismatch
-    if engine_spec.joint_convention != capture.claimed_joint_convention:
-        reasons.append(
-            f"Joint convention mismatch: engine uses {engine_spec.joint_convention.value} "
-            f"but capture claims {capture.claimed_joint_convention.value}"
-        )
-        return EngineQualificationEntry(
-            engine_name=engine_spec.engine_name,
-            capture_id=capture.capture_id,
-            status=EngineQualificationStatus.REJECTED,
-            reasons=tuple(reasons),
-            max_position_drift_m=float("inf"),
-            max_angular_drift_rad=float("inf"),
-            mean_control_norm_nm=float("inf"),
-            alignment_metric=0.0,
-            matched_forward_dynamics=False,
-        )
-
-    # Red gate 5: Physical acceptance tolerances from replay metrics
-    metrics = trajectory_metrics or {}
-    max_drift = float(metrics.get("max_drift_m", 0.0))
-    max_angular_drift = float(metrics.get("max_angular_drift_rad", 0.0))
-    mean_control = float(metrics.get("mean_control_nm", 0.0))
-    alignment = float(metrics.get("alignment", 1.0))
-
-    if max_drift > thresholds.max_drift_m:
-        reasons.append(
-            f"Position drift {max_drift:.4f}m exceeds frozen threshold {thresholds.max_drift_m:.4f}m"
-        )
-
-    if max_angular_drift > thresholds.max_angular_drift_rad:
-        reasons.append(
-            f"Angular drift {max_angular_drift:.4f}rad exceeds frozen threshold {thresholds.max_angular_drift_rad:.4f}rad"
-        )
-
-    if alignment < thresholds.min_alignment:
-        reasons.append(
-            f"Alignment {alignment:.4f} below frozen minimum {thresholds.min_alignment:.4f}"
-        )
-
-    if reasons:
-        return EngineQualificationEntry(
-            engine_name=engine_spec.engine_name,
-            capture_id=capture.capture_id,
-            status=EngineQualificationStatus.REJECTED,
-            reasons=tuple(reasons),
-            max_position_drift_m=max_drift,
-            max_angular_drift_rad=max_angular_drift,
-            mean_control_norm_nm=mean_control,
-            alignment_metric=alignment,
-            matched_forward_dynamics=False,
-        )
-
-    # Green outcome
     return EngineQualificationEntry(
         engine_name=engine_spec.engine_name,
         capture_id=capture.capture_id,
-        status=EngineQualificationStatus.QUALIFIED,
-        reasons=(),
+        status=(
+            EngineQualificationStatus.QUALIFIED
+            if is_qualified
+            else EngineQualificationStatus.REJECTED
+        ),
+        reasons=reasons,
         max_position_drift_m=max_drift,
-        max_angular_drift_rad=max_angular_drift,
-        mean_control_norm_nm=mean_control,
-        alignment_metric=alignment,
-        matched_forward_dynamics=True,
+        max_angular_drift_rad=max_angular,
+        mean_control_norm_nm=mean_ctrl,
+        alignment_metric=align,
+        matched_forward_dynamics=is_qualified,
     )
 
 
