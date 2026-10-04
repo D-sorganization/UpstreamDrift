@@ -138,7 +138,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
-- **PR:** (draft) (Closes #11276, Refs #11268)
+- **PR:** #11446 (draft) (Closes #11276, Refs #11268)
 - **Branch:** `feat/cov-8-necromatcher-owner-11276`
 - **Started:** 2026-10-03
 - **Last verified:** 2026-10-03 at HEAD — COV-8 (#11276): Implemented `create_owner_project` with fail-closed privacy guards refusing roots outside CAPTURE_DATA_DIR, `compute_marker_anchored_anthropometry` recovering segment lengths with spread and population priors, bilateral asymmetry and nonfinite length validation, and `import_video_swings_to_owner_project` preserving immutable-version captures. All 6 focused TDD unit tests pass.

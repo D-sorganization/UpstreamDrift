@@ -4,6 +4,7 @@
 - Branch: `feat/cov-8-necromatcher-owner-11276`
 - Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-8-11276`
 - Commit: `SELF`
+- Pull request: #11446 (draft) (Closes #11276, Refs #11268)
 - Governing issue: #11276 (parent epic #11268)
 - Objective: [COV-8] Create private owner player project for subject-O, compute marker-anchored anthropometry from joint centres with spread and population priors, enforce fail-closed privacy guards, and ingest graded video swings/captures with immutable versioning.
 - Completed:

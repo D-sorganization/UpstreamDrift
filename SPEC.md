@@ -8207,7 +8207,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
-| 2026-10-03 | #11276 | Add Necromatcher owner project initialization, marker-anchored anthropometry computation from joint centres with spread and population priors, privacy-guarded library rooting under CAPTURE_DATA_DIR, and immutable-version capture import (COV-8 #11276). |
+| 2026-10-03 | #11446 | Add Necromatcher owner project initialization, marker-anchored anthropometry computation from joint centres with spread and population priors, privacy-guarded library rooting under CAPTURE_DATA_DIR, and immutable-version capture import (COV-8 #11276). |
 | 2026-10-01 | #11147 | Wire neural matching controls to executed requests, populate qualified registry model availability, honor disabled fallbacks with named reasons, prevent preview promotion to verified, and update feature parity docs (R07 #11147). |
 | 2026-10-01 | #11107 | Complete Simscape continuous-replay qualification harness integration (MMR-07-I #11107): add test_simscape_replay_harness contract suite, integrate continuous-replay qualification receipt evaluation into test_acceptance, and verify full-marker channel evaluation. |
 | 2026-09-29 | #11126 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |
