@@ -5,7 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.contracts import ContractViolationError
+from src.shared.python.core.contracts import (
+    ContractViolationError,
+    PreconditionError,
+)
 from src.shared.python.motion_pipeline.contracts import (
     CanonicalObservationFrame,
     CanonicalObservations,

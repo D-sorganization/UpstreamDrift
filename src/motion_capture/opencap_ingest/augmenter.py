@@ -164,128 +164,38 @@ class OpenCapPipelineResult:
     num_frames: int = 0
 
 
+_OPENCAP_JOINT_SPECS: tuple[tuple[str, str | None, list[str], list[float]], ...] = (
+    ("pelvis", None, ["torso", "right_thigh", "left_thigh"], [0.0, 0.0, 0.0]),
+    ("torso", "pelvis", ["neck", "right_shoulder", "left_shoulder"], [0.0, 0.45, 0.0]),
+    ("neck", "torso", [], [0.0, 0.20, 0.0]),
+    ("right_shoulder", "torso", ["right_elbow"], [0.0, 0.0, 0.20]),
+    ("right_elbow", "right_shoulder", ["right_wrist"], [0.0, -0.28, 0.0]),
+    ("right_wrist", "right_elbow", [], [0.0, -0.24, 0.0]),
+    ("left_shoulder", "torso", ["left_elbow"], [0.0, 0.0, -0.20]),
+    ("left_elbow", "left_shoulder", ["left_wrist"], [0.0, -0.28, 0.0]),
+    ("left_wrist", "left_elbow", [], [0.0, -0.24, 0.0]),
+    ("right_thigh", "pelvis", ["right_knee"], [0.0, -0.42, 0.10]),
+    ("right_knee", "right_thigh", ["right_ankle"], [0.0, -0.40, 0.0]),
+    ("right_ankle", "right_knee", ["right_foot"], [0.0, -0.08, 0.0]),
+    ("right_foot", "right_ankle", [], [0.15, 0.0, 0.0]),
+    ("left_thigh", "pelvis", ["left_knee"], [0.0, -0.42, -0.10]),
+    ("left_knee", "left_thigh", ["left_ankle"], [0.0, -0.40, 0.0]),
+    ("left_ankle", "left_knee", ["left_foot"], [0.0, -0.08, 0.0]),
+    ("left_foot", "left_ankle", [], [0.15, 0.0, 0.0]),
+)
+
+
 def create_opencap_rig(rig_id: str = "opencap-laiuhlrich2022") -> SkeletonRig:
     """Construct a canonical SkeletonRig compatible with LaiUhlrich2022 segments."""
-    joints: dict[str, JointDef] = {
-        "pelvis": JointDef(
-            name="pelvis",
-            parent=None,
-            children=["torso", "right_thigh", "left_thigh"],
-            tpose_offset=[0.0, 0.0, 0.0],
+    joints = {
+        name: JointDef(
+            name=name,
+            parent=parent,
+            children=children,
+            tpose_offset=offset,
             axes=["X", "Y", "Z"],
-        ),
-        "torso": JointDef(
-            name="torso",
-            parent="pelvis",
-            children=["neck", "right_shoulder", "left_shoulder"],
-            tpose_offset=[0.0, 0.45, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "neck": JointDef(
-            name="neck",
-            parent="torso",
-            children=[],
-            tpose_offset=[0.0, 0.20, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_shoulder": JointDef(
-            name="right_shoulder",
-            parent="torso",
-            children=["right_elbow"],
-            tpose_offset=[0.0, 0.0, 0.20],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_elbow": JointDef(
-            name="right_elbow",
-            parent="right_shoulder",
-            children=["right_wrist"],
-            tpose_offset=[0.0, -0.28, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_wrist": JointDef(
-            name="right_wrist",
-            parent="right_elbow",
-            children=[],
-            tpose_offset=[0.0, -0.24, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_shoulder": JointDef(
-            name="left_shoulder",
-            parent="torso",
-            children=["left_elbow"],
-            tpose_offset=[0.0, 0.0, -0.20],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_elbow": JointDef(
-            name="left_elbow",
-            parent="left_shoulder",
-            children=["left_wrist"],
-            tpose_offset=[0.0, -0.28, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_wrist": JointDef(
-            name="left_wrist",
-            parent="left_elbow",
-            children=[],
-            tpose_offset=[0.0, -0.24, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_thigh": JointDef(
-            name="right_thigh",
-            parent="pelvis",
-            children=["right_knee"],
-            tpose_offset=[0.0, -0.42, 0.10],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_knee": JointDef(
-            name="right_knee",
-            parent="right_thigh",
-            children=["right_ankle"],
-            tpose_offset=[0.0, -0.40, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_ankle": JointDef(
-            name="right_ankle",
-            parent="right_knee",
-            children=["right_foot"],
-            tpose_offset=[0.0, -0.08, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "right_foot": JointDef(
-            name="right_foot",
-            parent="right_ankle",
-            children=[],
-            tpose_offset=[0.15, 0.0, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_thigh": JointDef(
-            name="left_thigh",
-            parent="pelvis",
-            children=["left_knee"],
-            tpose_offset=[0.0, -0.42, -0.10],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_knee": JointDef(
-            name="left_knee",
-            parent="left_thigh",
-            children=["left_ankle"],
-            tpose_offset=[0.0, -0.40, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_ankle": JointDef(
-            name="left_ankle",
-            parent="left_knee",
-            children=["left_foot"],
-            tpose_offset=[0.0, -0.08, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
-        "left_foot": JointDef(
-            name="left_foot",
-            parent="left_ankle",
-            children=[],
-            tpose_offset=[0.15, 0.0, 0.0],
-            axes=["X", "Y", "Z"],
-        ),
+        )
+        for name, parent, children, offset in _OPENCAP_JOINT_SPECS
     }
     return SkeletonRig(
         id=rig_id,
@@ -399,88 +309,10 @@ class OpenCapMarkerAugmenter:
     ) -> CanonicalObservations:
         """Synthesize 43 LaiUhlrich2022 markers from input keypoints."""
         n_frames = len(times)
+        base = _extract_base_keypoints(kpts, n_frames)
         markers_43: dict[str, np.ndarray] = {}
-
-        # 1. Base keypoints
-        mid_hip = kpts.get("mid_hip", np.zeros((n_frames, 3)))
-        neck = kpts.get("neck", mid_hip + np.array([0.0, 0.60, 0.0]))
-        r_hip = kpts.get("r_hip", mid_hip + np.array([0.0, 0.0, 0.10]))
-        l_hip = kpts.get("l_hip", mid_hip + np.array([0.0, 0.0, -0.10]))
-        r_knee = kpts.get("r_knee", r_hip + np.array([0.0, -0.40, 0.0]))
-        l_knee = kpts.get("l_knee", l_hip + np.array([0.0, -0.40, 0.0]))
-        r_ank = kpts.get("r_ankle", r_knee + np.array([0.0, -0.40, 0.0]))
-        l_ank = kpts.get("l_ankle", l_knee + np.array([0.0, -0.40, 0.0]))
-        r_sh = kpts.get("r_shoulder", neck + np.array([0.0, -0.05, 0.20]))
-        l_sh = kpts.get("l_shoulder", neck + np.array([0.0, -0.05, -0.20]))
-        r_elb = kpts.get("r_elbow", r_sh + np.array([0.0, -0.28, 0.0]))
-        l_elb = kpts.get("l_elbow", l_sh + np.array([0.0, -0.28, 0.0]))
-        r_wri = kpts.get("r_wrist", r_elb + np.array([0.0, -0.24, 0.0]))
-        l_wri = kpts.get("l_wrist", l_elb + np.array([0.0, -0.24, 0.0]))
-
-        # 2. Pelvis study markers
-        hip_w = np.linalg.norm(r_hip - l_hip, axis=1, keepdims=True)
-        hip_w = np.where(hip_w < 1e-3, 0.20, hip_w)
-        markers_43["r.ASIS_study"] = r_hip + np.array([0.05, 0.02, 0.0])
-        markers_43["L.ASIS_study"] = l_hip + np.array([0.05, 0.02, 0.0])
-        markers_43["r.PSIS_study"] = r_hip + np.array([-0.06, 0.04, -0.02])
-        markers_43["L.PSIS_study"] = l_hip + np.array([-0.06, 0.04, 0.02])
-        markers_43["RHJC_study"] = r_hip.copy()
-        markers_43["LHJC_study"] = l_hip.copy()
-
-        # 3. Lower extremity joint markers
-        markers_43["r_knee_study"] = r_knee + np.array([0.0, 0.0, 0.05])
-        markers_43["r_mknee_study"] = r_knee + np.array([0.0, 0.0, -0.05])
-        markers_43["r_ankle_study"] = r_ank + np.array([0.0, 0.0, 0.04])
-        markers_43["r_mankle_study"] = r_ank + np.array([0.0, 0.0, -0.04])
-        markers_43["r_calc_study"] = r_ank + np.array([-0.06, -0.04, 0.0])
-        markers_43["r_toe_study"] = r_ank + np.array([0.16, -0.06, 0.0])
-        markers_43["r_5meta_study"] = r_ank + np.array([0.14, -0.06, 0.04])
-
-        markers_43["L_knee_study"] = l_knee + np.array([0.0, 0.0, -0.05])
-        markers_43["L_mknee_study"] = l_knee + np.array([0.0, 0.0, 0.05])
-        markers_43["L_ankle_study"] = l_ank + np.array([0.0, 0.0, -0.04])
-        markers_43["L_mankle_study"] = l_ank + np.array([0.0, 0.0, 0.04])
-        markers_43["L_calc_study"] = l_ank + np.array([-0.06, -0.04, 0.0])
-        markers_43["L_toe_study"] = l_ank + np.array([0.16, -0.06, 0.0])
-        markers_43["L_5meta_study"] = l_ank + np.array([0.14, -0.06, -0.04])
-
-        # 4. Upper body markers
-        markers_43["r_shoulder_study"] = r_sh + np.array([0.0, 0.02, 0.02])
-        markers_43["L_shoulder_study"] = l_sh + np.array([0.0, 0.02, -0.02])
-        markers_43["C7_study"] = neck + np.array([-0.05, 0.02, 0.0])
-        markers_43["r_lelbow_study"] = r_elb + np.array([0.0, 0.0, 0.03])
-        markers_43["r_melbow_study"] = r_elb + np.array([0.0, 0.0, -0.03])
-        markers_43["r_lwrist_study"] = r_wri + np.array([0.0, 0.0, 0.025])
-        markers_43["r_mwrist_study"] = r_wri + np.array([0.0, 0.0, -0.025])
-        markers_43["L_lelbow_study"] = l_elb + np.array([0.0, 0.0, -0.03])
-        markers_43["L_melbow_study"] = l_elb + np.array([0.0, 0.0, 0.03])
-        markers_43["L_lwrist_study"] = l_wri + np.array([0.0, 0.0, -0.025])
-        markers_43["L_mwrist_study"] = l_wri + np.array([0.0, 0.0, 0.025])
-
-        # 5. Tracking clusters (thigh & shank)
-        for side, hip, knee, ank in [
-            ("r", r_hip, r_knee, r_ank),
-            ("L", l_hip, l_knee, l_ank),
-        ]:
-            sign = 1.0 if side == "r" else -1.0
-            markers_43[f"{side}_thigh1_study"] = (
-                hip * 0.75 + knee * 0.25 + np.array([0.03, 0.0, 0.04 * sign])
-            )
-            markers_43[f"{side}_thigh2_study"] = (
-                hip * 0.50 + knee * 0.50 + np.array([0.04, 0.0, 0.03 * sign])
-            )
-            markers_43[f"{side}_thigh3_study"] = (
-                hip * 0.25 + knee * 0.75 + np.array([0.02, 0.0, 0.04 * sign])
-            )
-            markers_43[f"{side}_sh1_study"] = (
-                knee * 0.75 + ank * 0.25 + np.array([0.02, 0.0, 0.03 * sign])
-            )
-            markers_43[f"{side}_sh2_study"] = (
-                knee * 0.50 + ank * 0.50 + np.array([0.03, 0.0, 0.02 * sign])
-            )
-            markers_43[f"{side}_sh3_study"] = (
-                knee * 0.25 + ank * 0.75 + np.array([0.02, 0.0, 0.03 * sign])
-            )
+        _compute_pelvis_and_leg_markers(base, markers_43)
+        _compute_arm_and_cluster_markers(base, markers_43)
 
         # Build CanonicalObservationFrames
         frames: list[CanonicalObservationFrame] = []
@@ -512,6 +344,123 @@ class OpenCapMarkerAugmenter:
                 "evidence_level": "model-conditioned",
                 "generator": "opencap-marker-augmenter",
             },
+        )
+
+
+def _extract_base_keypoints(
+    kpts: dict[str, np.ndarray], n_frames: int
+) -> dict[str, np.ndarray]:
+    """Extract and impute canonical base joint keypoints."""
+    mid_hip = kpts.get("mid_hip", np.zeros((n_frames, 3)))
+    neck = kpts.get("neck", mid_hip + np.array([0.0, 0.60, 0.0]))
+    r_hip = kpts.get("r_hip", mid_hip + np.array([0.0, 0.0, 0.10]))
+    l_hip = kpts.get("l_hip", mid_hip + np.array([0.0, 0.0, -0.10]))
+    r_knee = kpts.get("r_knee", r_hip + np.array([0.0, -0.40, 0.0]))
+    l_knee = kpts.get("l_knee", l_hip + np.array([0.0, -0.40, 0.0]))
+    r_ank = kpts.get("r_ankle", r_knee + np.array([0.0, -0.40, 0.0]))
+    l_ank = kpts.get("l_ankle", l_knee + np.array([0.0, -0.40, 0.0]))
+    r_sh = kpts.get("r_shoulder", neck + np.array([0.0, -0.05, 0.20]))
+    l_sh = kpts.get("l_shoulder", neck + np.array([0.0, -0.05, -0.20]))
+    r_elb = kpts.get("r_elbow", r_sh + np.array([0.0, -0.28, 0.0]))
+    l_elb = kpts.get("l_elbow", l_sh + np.array([0.0, -0.28, 0.0]))
+    r_wri = kpts.get("r_wrist", r_elb + np.array([0.0, -0.24, 0.0]))
+    l_wri = kpts.get("l_wrist", l_elb + np.array([0.0, -0.24, 0.0]))
+    return {
+        "mid_hip": mid_hip,
+        "neck": neck,
+        "r_hip": r_hip,
+        "l_hip": l_hip,
+        "r_knee": r_knee,
+        "l_knee": l_knee,
+        "r_ank": r_ank,
+        "l_ank": l_ank,
+        "r_sh": r_sh,
+        "l_sh": l_sh,
+        "r_elb": r_elb,
+        "l_elb": l_elb,
+        "r_wri": r_wri,
+        "l_wri": l_wri,
+    }
+
+
+def _compute_pelvis_and_leg_markers(
+    base: dict[str, np.ndarray], markers: dict[str, np.ndarray]
+) -> None:
+    """Compute pelvis and lower extremity anatomical markers."""
+    r_hip, l_hip = base["r_hip"], base["l_hip"]
+    r_knee, l_knee = base["r_knee"], base["l_knee"]
+    r_ank, l_ank = base["r_ank"], base["l_ank"]
+
+    markers["r.ASIS_study"] = r_hip + np.array([0.05, 0.02, 0.0])
+    markers["L.ASIS_study"] = l_hip + np.array([0.05, 0.02, 0.0])
+    markers["r.PSIS_study"] = r_hip + np.array([-0.06, 0.04, -0.02])
+    markers["L.PSIS_study"] = l_hip + np.array([-0.06, 0.04, 0.02])
+    markers["RHJC_study"] = r_hip.copy()
+    markers["LHJC_study"] = l_hip.copy()
+
+    markers["r_knee_study"] = r_knee + np.array([0.0, 0.0, 0.05])
+    markers["r_mknee_study"] = r_knee + np.array([0.0, 0.0, -0.05])
+    markers["r_ankle_study"] = r_ank + np.array([0.0, 0.0, 0.04])
+    markers["r_mankle_study"] = r_ank + np.array([0.0, 0.0, -0.04])
+    markers["r_calc_study"] = r_ank + np.array([-0.06, -0.04, 0.0])
+    markers["r_toe_study"] = r_ank + np.array([0.16, -0.06, 0.0])
+    markers["r_5meta_study"] = r_ank + np.array([0.14, -0.06, 0.04])
+
+    markers["L_knee_study"] = l_knee + np.array([0.0, 0.0, -0.05])
+    markers["L_mknee_study"] = l_knee + np.array([0.0, 0.0, 0.05])
+    markers["L_ankle_study"] = l_ank + np.array([0.0, 0.0, -0.04])
+    markers["L_mankle_study"] = l_ank + np.array([0.0, 0.0, 0.04])
+    markers["L_calc_study"] = l_ank + np.array([-0.06, -0.04, 0.0])
+    markers["L_toe_study"] = l_ank + np.array([0.16, -0.06, 0.0])
+    markers["L_5meta_study"] = l_ank + np.array([0.14, -0.06, -0.04])
+
+
+def _compute_arm_and_cluster_markers(
+    base: dict[str, np.ndarray], markers: dict[str, np.ndarray]
+) -> None:
+    """Compute upper body anatomical markers and limb tracking clusters."""
+    neck = base["neck"]
+    r_sh, l_sh = base["r_sh"], base["l_sh"]
+    r_elb, l_elb = base["r_elb"], base["l_elb"]
+    r_wri, l_wri = base["r_wri"], base["l_wri"]
+    r_hip, l_hip = base["r_hip"], base["l_hip"]
+    r_knee, l_knee = base["r_knee"], base["l_knee"]
+    r_ank, l_ank = base["r_ank"], base["l_ank"]
+
+    markers["r_shoulder_study"] = r_sh + np.array([0.0, 0.02, 0.02])
+    markers["L_shoulder_study"] = l_sh + np.array([0.0, 0.02, -0.02])
+    markers["C7_study"] = neck + np.array([-0.05, 0.02, 0.0])
+    markers["r_lelbow_study"] = r_elb + np.array([0.0, 0.0, 0.03])
+    markers["r_melbow_study"] = r_elb + np.array([0.0, 0.0, -0.03])
+    markers["r_lwrist_study"] = r_wri + np.array([0.0, 0.0, 0.025])
+    markers["r_mwrist_study"] = r_wri + np.array([0.0, 0.0, -0.025])
+    markers["L_lelbow_study"] = l_elb + np.array([0.0, 0.0, -0.03])
+    markers["L_melbow_study"] = l_elb + np.array([0.0, 0.0, 0.03])
+    markers["L_lwrist_study"] = l_wri + np.array([0.0, 0.0, -0.025])
+    markers["L_mwrist_study"] = l_wri + np.array([0.0, 0.0, 0.025])
+
+    for side, hip, knee, ank in [
+        ("r", r_hip, r_knee, r_ank),
+        ("L", l_hip, l_knee, l_ank),
+    ]:
+        sign = 1.0 if side == "r" else -1.0
+        markers[f"{side}_thigh1_study"] = (
+            hip * 0.75 + knee * 0.25 + np.array([0.03, 0.0, 0.04 * sign])
+        )
+        markers[f"{side}_thigh2_study"] = (
+            hip * 0.50 + knee * 0.50 + np.array([0.04, 0.0, 0.03 * sign])
+        )
+        markers[f"{side}_thigh3_study"] = (
+            hip * 0.25 + knee * 0.75 + np.array([0.02, 0.0, 0.04 * sign])
+        )
+        markers[f"{side}_sh1_study"] = (
+            knee * 0.75 + ank * 0.25 + np.array([0.02, 0.0, 0.03 * sign])
+        )
+        markers[f"{side}_sh2_study"] = (
+            knee * 0.50 + ank * 0.50 + np.array([0.03, 0.0, 0.02 * sign])
+        )
+        markers[f"{side}_sh3_study"] = (
+            knee * 0.25 + ank * 0.75 + np.array([0.02, 0.0, 0.03 * sign])
         )
 
 
