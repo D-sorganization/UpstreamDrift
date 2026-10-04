@@ -1,3 +1,41 @@
+# Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts — #11421 / #11423
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11423-provider-contracts`; commit SELF; PR: #11455 (`Closes #11423`, `Refs #11421`)
+- Governing issue: #11423 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-02] Establish versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold contracts with sign equivalence, fail-closed physical qualification rules, snapshot/restore rollback, Zero-Torque Counterfactual (ZTCF) proposal rollouts, and runtime factor exclusivity.
+- Completed:
+  - `src/shared/python/estimation/dime_contracts.py`:
+    - `DimeCompleteState`: versioned complete state encapsulation with generalized coordinates $q \in \mathbb{R}^{n_q}$, velocities $v \in \mathbb{R}^{n_v}$, optional accelerations $\dot{v}$, internal memory mapping, SHA-256 model hash, validated SI units, and declared coordinate frames. Enforces read-only array protections, numeric real bounds, and rejection of boolean coercion.
+    - `DimeObservationWindow`: windowed observation container enforcing strict temporal monotonicity ($\Delta t > 0$), interval containment ($t_{\text{start}} \le t_0, t_N \le t_{\text{end}}$), observation shape alignment, and typed uncertainty specifications (`"gaussian"`, `"laplace"`, `"covariance"`, `"unweighted"`).
+    - `ControlChannelSpec`: declared control channels specifying physical type (`"torque"`, `"force"`, `"excitation"`), units, selection maps, limits, and internal activation dynamics semantics.
+    - `ContactPolicy`: strictly enforces binary selection between native eliminated reactions (`"native_eliminated"`) and explicit constrained reaction variables (`"explicit_constrained"`).
+    - `PassiveLoadSpec`: inventoried passive loads evaluated where modeled; range-of-motion (ROM) priors cannot supply an unmeasured passive stiffness law.
+    - `ProviderCapability`: truthful capability report declaring manifold, control channels, contact policy, passive loads, activation dynamics, and qualification status.
+    - `check_qualification_rules`: fail-closed qualification evaluation enforcing full activation dynamics for muscle-driven models (never silent torque substitution), strict contact policies, and rejection of unmeasured passive stiffness laws.
+    - `ProviderSnapshot`: complete snapshot of provider state and solver/contact/controller memory.
+    - `DimeFullStepRequest` & `DimeFullStepResult`: input request and forward simulation output with acceleration decomposition and diagnostics.
+    - `DimeZeroInputProposal`: forward rollout under zero control ($u=0$), verifying exact acceleration superposition ($a_{\text{full}} = a_{\text{grav}} + a_{\text{drift}} + a_{\text{ctrl}}$) and Zero-Torque Counterfactual (ZTCF) drift trajectories.
+    - `DimeEstimationResult`: standardized estimation receipt with state trajectory, estimated controls, residuals, uncertainty summary, and metrics.
+    - `RuntimeExclusivityContract`: enforces mutual exclusivity between marginalized-input transitions and explicit-input likelihoods on overlapping intervals; prohibits diagnostics from contributing duplicate objective factors.
+    - `DynamicsProvider`: runtime checkable protocol for stateful dynamics providers.
+  - `src/shared/python/estimation/dime_manifold.py`:
+    - `ManifoldContract`: abstract interface defining public `retract`, `local_coordinates`, and their Jacobians.
+    - `VectorSpaceManifold`: Euclidean vector space manifold where $n_q == n_v$.
+    - `QuaternionManifold`: unit quaternion $SO(3)$ manifold ($n_q = 4, n_v = 3$) with antipodal sign equivalence ($\|v\| = 0$ for $q \equiv -q$).
+    - `SE3Manifold`: rigid body $SE(3)$ manifold ($n_q = 7, n_v = 6$) combining translation with quaternion orientation.
+  - `src/shared/python/estimation/dime_providers.py`:
+    - `DeterministicFakeProvider`: reference fake provider fulfilling identical contracts without claiming native qualification.
+    - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
+    - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new DIME contract, manifold, and provider symbols.
+  - `tests/unit/estimation/test_dime_provider_contracts.py`: 16 focused behavioral tests covering RED contract violations (incomplete state, invalid time order, dimensional mismatch, stale model hashes, unsupported contact, unknown units, snapshot rollback on exceptions, unavailable provider fail-closed, muscle activation dynamics, unmeasured ROM priors) and GREEN identical provider contracts, runtime factor exclusivity, manifold $n_q \neq n_v$ and quaternion sign equivalence, ZTCF superposition, and serialization round-trips.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_provider_contracts.py`: 16 passed.
+  - `pytest tests/unit/estimation`: 89 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_file_size_budget.py` (all tracked files <= 1200 lines, 0 on watchlist) and `check_error_handling_ratchet.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-03 under epic #11421.
+
 # Retire Deprecated Force_Vectors and Vectors Shims — #11347
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `fix/remove-vector-shims-11347`; commit SELF; PR: see branch (`Closes #11347`, `Refs #11285`, `Refs #11292`)
