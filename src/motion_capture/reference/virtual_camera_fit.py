@@ -142,7 +142,7 @@ def _check_geometric_degeneracy(world_points: np.ndarray) -> str | None:
 
 def _assemble_virtual_camera_result(
     cam: PinholeCamera,
-    rot: Sequence[float],
+    rot: Sequence[float] | np.ndarray,
     cov: np.ndarray,
     metrics: tuple[float, float],
     outcome: CameraFitOutcome,
@@ -321,7 +321,7 @@ def fit_virtual_camera(
     cam = PinholeCamera(camera_id, matrix, r_wc, t_wc, image_size_px)
     return _assemble_virtual_camera_result(
         cam,
-        rot=sol[:3],
+        rot=tuple(float(x) for x in sol[:3]),
         cov=cov,
         metrics=(rms_px, cond),
         outcome=CameraFitOutcome.FITTED,
