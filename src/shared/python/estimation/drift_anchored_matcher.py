@@ -312,20 +312,11 @@ def match_kinematics(
         :class:`DriftAnchoredMatchResult` with assembled torque, estimates,
         replay, per-sample labels and diagnostics.
     """
-    t_arr = np.asarray(t, dtype=float).reshape(-1)
-    q_obs = np.asarray(q_observed, dtype=float)
-    mask_arr = np.asarray(mask, dtype=bool).reshape(-1)
-    num = t_arr.size
-    require(q_obs.ndim == 2 and q_obs.shape[0] == num, "q_observed must be (T, n)")
-    require(mask_arr.shape == (num,), "mask must be (T,)")
-    require(num > options.window_steps, "need more samples than one window")
-    steps_dt = np.diff(t_arr)
-    dt = float(steps_dt[0])
-    require(dt > 0.0 and np.allclose(steps_dt, dt, rtol=1e-6), "t must be uniform")
-    require(check_finite(q_obs[mask_arr]), "observed rows must be finite")
-    n = q_obs.shape[1]
-    m = n if selection is None else int(np.asarray(selection).shape[1])
-    require(band.size == m, "band size must match actuation")
+    inputs = _validated_inputs(provider, t, q_observed, mask, band, options, selection)
+    t_arr, q_obs, mask_arr = inputs.t, inputs.q_obs, inputs.mask
+    num, n = q_obs.shape
+    dt = float(t_arr[1] - t_arr[0])
+    m = band.size
 
     q_state, v_state = _initial_state(q_obs, mask_arr, dt)
     tau_prev = (
@@ -350,8 +341,7 @@ def match_kinematics(
             provider,
             q_state,
             v_state,
-            WindowObservation(q=q_obs[span], mask=mask_arr[span]),
-            dt,
+            WindowObservation(q=q_obs[span], mask=mask_arr[span], dt=dt),
             band,
             tau_prev,
             win_opts,
@@ -376,10 +366,43 @@ def match_kinematics(
         q_state, v_state = q_traj[advance].copy(), v_traj[advance].copy()
         tau_prev = tau_traj[max(advance - 1, 0)].copy()
 
-    return _assemble(
-        provider, t_arr, q_obs, mask_arr, band, options, acc,
-        (fallback_q, fallback_v, fallback_tau), replay_start, records, selection,
-    )  # fmt: skip
+    fallback = (fallback_q, fallback_v, fallback_tau)
+    return _assemble(inputs, acc, fallback, replay_start, records)
+
+
+def _validated_inputs(
+    provider: DynamicsProvider,
+    t: np.ndarray,
+    q_observed: np.ndarray,
+    mask: np.ndarray,
+    band: ControlBand,
+    options: MatchOptions,
+    selection: np.ndarray | None,
+) -> _MatchInputs:
+    """Check :func:`match_kinematics` preconditions and coerce the arrays."""
+    t_arr = np.asarray(t, dtype=float).reshape(-1)
+    q_obs = np.asarray(q_observed, dtype=float)
+    mask_arr = np.asarray(mask, dtype=bool).reshape(-1)
+    num = t_arr.size
+    require(q_obs.ndim == 2 and q_obs.shape[0] == num, "q_observed must be (T, n)")
+    require(mask_arr.shape == (num,), "mask must be (T,)")
+    require(num > options.window_steps, "need more samples than one window")
+    steps_dt = np.diff(t_arr)
+    dt = float(steps_dt[0])
+    require(dt > 0.0 and np.allclose(steps_dt, dt, rtol=1e-6), "t must be uniform")
+    require(check_finite(q_obs[mask_arr]), "observed rows must be finite")
+    n = q_obs.shape[1]
+    m = n if selection is None else int(np.asarray(selection).shape[1])
+    require(band.size == m, "band size must match actuation")
+    return _MatchInputs(
+        provider=provider,
+        t=t_arr,
+        q_obs=q_obs,
+        mask=mask_arr,
+        band=band,
+        options=options,
+        selection=selection,
+    )
 
 
 def _window_length(mask: np.ndarray, start: int, options: MatchOptions) -> int:
@@ -410,19 +433,28 @@ def _record(start: int, steps: int, sol: LocalWindowSolution) -> WindowRecord:
     )
 
 
+@dataclass(frozen=True)
+class _MatchInputs:
+    """Validated inputs of one match, handed to :func:`_assemble`."""
+
+    provider: DynamicsProvider
+    t: np.ndarray
+    q_obs: np.ndarray
+    mask: np.ndarray
+    band: ControlBand
+    options: MatchOptions
+    selection: np.ndarray | None
+
+
 def _assemble(
-    provider: DynamicsProvider,
-    t: np.ndarray,
-    q_obs: np.ndarray,
-    mask: np.ndarray,
-    band: ControlBand,
-    options: MatchOptions,
+    inputs: _MatchInputs,
     acc: _Accumulator,
     fallback: tuple[np.ndarray, np.ndarray, np.ndarray],
     replay_start: tuple[np.ndarray, np.ndarray] | None,
     records: list[WindowRecord],
-    selection: np.ndarray | None,
 ) -> DriftAnchoredMatchResult:
+    provider, t, q_obs, mask = inputs.provider, inputs.t, inputs.q_obs, inputs.mask
+    band, options, selection = inputs.band, inputs.options, inputs.selection
     fb_q, fb_v, fb_tau = fallback
     dt = float(t[1] - t[0])
     covered = acc.w > 0.0

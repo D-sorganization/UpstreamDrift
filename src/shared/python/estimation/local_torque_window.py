@@ -93,10 +93,14 @@ class WindowOptions:
 
 @dataclass(frozen=True)
 class WindowObservation:
-    """Observed configurations ``q`` (S, n); rows with ``mask=False`` are missing."""
+    """Observed configurations ``q`` (S, n) sampled every ``dt`` [s].
+
+    Rows with ``mask=False`` are missing.
+    """
 
     q: np.ndarray
     mask: np.ndarray
+    dt: float
 
     def __post_init__(self) -> None:
         q = np.asarray(self.q, dtype=float)
@@ -105,6 +109,9 @@ class WindowObservation:
         require(q.shape[0] >= 2, "a window needs at least two samples", q.shape)
         require(mask.shape == (q.shape[0],), "mask must be (S,)", mask.shape)
         require(check_finite(q[mask]), "observed rows must be finite")
+        dt = float(self.dt)
+        require(np.isfinite(dt) and dt > 0.0, "dt must be positive and finite", dt)
+        object.__setattr__(self, "dt", dt)
         object.__setattr__(self, "q", q)
         object.__setattr__(self, "mask", mask)
 
@@ -215,7 +222,6 @@ class _WindowModel:
         q0: np.ndarray,
         v0: np.ndarray,
         obs: WindowObservation,
-        dt: float,
         tau_prev: np.ndarray,
         options: WindowOptions,
         selection: np.ndarray | None,
@@ -226,8 +232,18 @@ class _WindowModel:
         self.layout = _Layout(n=q0.size, m=m, basis=basis)
         self.positions = positions
         self._provider, self._q0, self._v0 = provider, q0, v0
-        self._obs, self._dt, self._opts = obs, dt, options
+        self._obs, self._dt, self._opts = obs, obs.dt, options
         self._tau_prev, self._sel = tau_prev, selection
+
+    @property
+    def observation(self) -> WindowObservation:
+        """The window's observations."""
+        return self._obs
+
+    @property
+    def options(self) -> WindowOptions:
+        """The window's solve options."""
+        return self._opts
 
     def trajectory(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         q0, v0 = self.layout.state(z, self._q0, self._v0)
@@ -335,7 +351,6 @@ def solve_local_window(
     q0: np.ndarray,
     v0: np.ndarray,
     observation: WindowObservation,
-    dt: float,
     band: ControlBand,
     tau_prev: np.ndarray,
     options: WindowOptions,
@@ -348,8 +363,8 @@ def solve_local_window(
         provider: Dynamics provider (contact-free, local coordinates).
         q0: Start-configuration estimate ``(n,)`` aligned with sample 0.
         v0: Start-velocity estimate ``(n,)``.
-        observation: Window observations ``(S, n)`` with mask.
-        dt: Sample period [s].
+        observation: Window observations ``(S, n)`` with mask and sample
+            period.
         band: Global torque box and optional rate limit.
         tau_prev: Torque acting just before the window (warm start + rate
             anchor) ``(m,)``.
@@ -367,13 +382,13 @@ def solve_local_window(
     n = q0_arr.size
     require(observation.q.shape[1] == n, "observation width must match q0", n)
     require(v0_arr.shape == (n,), "v0 must match q0", v0_arr.shape)
-    require(np.isfinite(dt) and dt > 0.0, "dt must be positive and finite", dt)
+    dt = observation.dt
     m = n if selection is None else int(np.asarray(selection).shape[1])
     require(band.size == m, f"band size {band.size} must match actuation {m}")
     require(prev.shape == (m,), "tau_prev must match actuation size", prev.shape)
 
     model = _WindowModel(
-        provider, q0_arr, v0_arr, observation, dt, prev, options, selection, m
+        provider, q0_arr, v0_arr, observation, prev, options, selection, m
     )
     layout = model.layout
     lb_c, ub_c = _knot_bounds(band, prev, model.positions, dt)
@@ -408,12 +423,12 @@ def solve_local_window(
         r, jac = model.residual_system(z, q, sens, weights)
         dof = r.size - z.size
         if dof <= 0:
-            return _failure(model, observation, q, z, "insufficient observed samples")
+            return _failure(model, q, z, "insufficient observed samples")
         step = lsq_linear(jac, -r, bounds=(lb - z, ub - z), method="bvls").x
         z = np.clip(z + step, lb, ub)
         q, _ = model.trajectory(z)
         if not check_finite(q):
-            return _failure(model, observation, q_anchor, z, "non-finite rollout")
+            return _failure(model, q_anchor, z, "non-finite rollout")
         sens = model.sensitivity(z, q)
         new_weights = _robust_weights(model.normalized_residual(q), options)
         # Finite-difference sensitivities limit attainable precision.
@@ -423,9 +438,19 @@ def solve_local_window(
             break
         weights = new_weights
 
-    return _assemble(
-        model, observation, z, q, sens, weights, q_const, (lb_c, ub_c), band, iterations
-    )
+    fit = _FitState(z=z, q=q, sens=sens, weights=weights, iterations=iterations)
+    return _assemble(model, fit, q_const, (lb_c, ub_c), band)
+
+
+@dataclass(frozen=True)
+class _FitState:
+    """Final Gauss-Newton iterate handed to :func:`_assemble`."""
+
+    z: np.ndarray
+    q: np.ndarray
+    sens: np.ndarray
+    weights: np.ndarray
+    iterations: int
 
 
 def _posterior_cov(jac: np.ndarray) -> np.ndarray:
@@ -434,18 +459,16 @@ def _posterior_cov(jac: np.ndarray) -> np.ndarray:
 
 def _assemble(
     model: _WindowModel,
-    obs: WindowObservation,
-    z: np.ndarray,
-    q: np.ndarray,
-    sens: np.ndarray,
-    weights: np.ndarray,
+    fit: _FitState,
     q_const: np.ndarray,
     knot_bounds: tuple[np.ndarray, np.ndarray],
     band: ControlBand,
-    iterations: int,
 ) -> LocalWindowSolution:
     lb_c, ub_c = knot_bounds
-    layout, opts = model.layout, model._opts
+    z, q, sens, weights = fit.z, fit.q, fit.sens, fit.weights
+    iterations = fit.iterations
+    obs = model.observation
+    layout, opts = model.layout, model.options
     n, m, steps = layout.n, layout.m, obs.num_samples - 1
     r, jac = model.residual_system(z, q, sens, weights)
     dof = max(r.size - z.size, 1)
@@ -532,11 +555,11 @@ def _assemble(
 
 def _failure(
     model: _WindowModel,
-    obs: WindowObservation,
     q: np.ndarray,
     z: np.ndarray,
     status: str,
 ) -> LocalWindowSolution:
+    obs = model.observation
     layout = model.layout
     s, n, m = obs.num_samples, layout.n, layout.m
     nan_sn = np.full((s, n), np.nan)

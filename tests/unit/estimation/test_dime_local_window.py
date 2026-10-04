@@ -47,7 +47,7 @@ def _obs(q: np.ndarray, mask: np.ndarray | None = None) -> WindowObservation:
     mask = np.ones(q.shape[0], bool) if mask is None else mask
     qq = q.copy()
     qq[~mask] = np.nan
-    return WindowObservation(q=qq, mask=mask)
+    return WindowObservation(q=qq, mask=mask, dt=DT)
 
 
 OPTS = WindowOptions(sigma_obs=1e-3, sigma_q0=1e-3, sigma_v0=0.5)
@@ -66,7 +66,7 @@ class TestRecovery:
     def test_noise_free_constant_torque_is_recovered(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         tau_true = np.array([40.0, -6.0])
         q, _ = _truth(pendulum, np.tile(tau_true, (W, 1)))
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), OPTS)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), OPTS)
         assert sol.success, sol.status
         np.testing.assert_allclose(sol.tau[0], tau_true, rtol=1e-3, atol=0.05)
         assert np.nanmax(sol.normalized_residual) < 1e-2
@@ -75,7 +75,7 @@ class TestRecovery:
         ramp = np.linspace([10.0, 0.0], [50.0, -10.0], W)
         q, _ = _truth(pendulum, ramp)
         opts = WindowOptions(sigma_obs=1e-3, sigma_q0=1e-3, sigma_v0=0.5, n_knots=2)
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, WIDE, ramp[0], opts)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, ramp[0], opts)
         assert sol.success, sol.status
         np.testing.assert_allclose(sol.tau[:W], ramp, atol=1.5)
 
@@ -86,7 +86,7 @@ class TestRecovery:
         tau_true = np.array([60.0, 8.0])
         q, _ = _truth(pendulum, np.tile(tau_true, (W, 1)))
         sol = solve_local_window(
-            pendulum, Q0, V0, _obs(q), DT, WIDE, np.array([-60.0, -8.0]), OPTS
+            pendulum, Q0, V0, _obs(q), WIDE, np.array([-60.0, -8.0]), OPTS
         )
         np.testing.assert_allclose(sol.tau[0], tau_true, rtol=0.02, atol=0.5)
         # ...the observed motion really does diverge from the ZTCF branch, and
@@ -100,7 +100,7 @@ class TestRecovery:
         mask = np.ones(W + 1, bool)
         mask[4:9] = False
         sol = solve_local_window(
-            pendulum, Q0, V0, _obs(q, mask), DT, WIDE, np.zeros(2), OPTS
+            pendulum, Q0, V0, _obs(q, mask), WIDE, np.zeros(2), OPTS
         )
         assert sol.success, sol.status
         np.testing.assert_allclose(sol.tau[0], tau_true, rtol=1e-2, atol=0.2)
@@ -116,12 +116,10 @@ class TestRobustness:
         rng = np.random.default_rng(3)
         noisy = q + rng.normal(0.0, 1e-3, q.shape)
         clean = solve_local_window(
-            pendulum, Q0, V0, _obs(noisy), DT, WIDE, np.zeros(2), OPTS
+            pendulum, Q0, V0, _obs(noisy), WIDE, np.zeros(2), OPTS
         )
         noisy[7] += np.array([0.15, -0.12])  # gross marker swap / occluder
-        sol = solve_local_window(
-            pendulum, Q0, V0, _obs(noisy), DT, WIDE, np.zeros(2), OPTS
-        )
+        sol = solve_local_window(pendulum, Q0, V0, _obs(noisy), WIDE, np.zeros(2), OPTS)
         assert sol.weights[7] == 0.0
         assert not sol.inside_band[7]
         assert np.mean(sol.weights[np.arange(W + 1) != 7] > 0.5) > 0.9
@@ -141,9 +139,7 @@ class TestRobustness:
         q, _ = _truth(pendulum, np.tile([150.0, 0.0], (W, 1)))
         tight = ControlBand(lower=np.full(2, -20.0), upper=np.full(2, 20.0))
         pinned = WindowOptions(sigma_obs=1e-3, sigma_q0=1e-3, sigma_v0=0.05)
-        sol = solve_local_window(
-            pendulum, Q0, V0, _obs(q), DT, tight, np.zeros(2), pinned
-        )
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), tight, np.zeros(2), pinned)
         assert sol.saturated[0]
         assert np.all(sol.tau <= 20.0 + 1e-9)
         # Robust weights drop the unexplainable samples, so inlier chi2 alone
@@ -158,7 +154,7 @@ class TestRobustness:
             upper=np.full(2, 200.0),
             rate_limit=np.full(2, 500.0),
         )
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, band, np.zeros(2), OPTS)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), band, np.zeros(2), OPTS)
         assert np.max(np.abs(sol.tau)) <= 500.0 * DT * W + 1e-9
         assert sol.rate_limited[0] and not sol.saturated[0]
 
@@ -166,7 +162,7 @@ class TestRobustness:
 class TestBandsAndDiagnostics:
     def test_clean_observations_lie_inside_plausible_band(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         q, _ = _truth(pendulum, np.tile([25.0, 2.0], (W, 1)))
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), OPTS)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), OPTS)
         assert np.all(sol.band_lower <= sol.band_upper)
         assert np.all(sol.inside_band)
 
@@ -174,13 +170,13 @@ class TestBandsAndDiagnostics:
         self, pendulum
     ) -> None:  # type: ignore[no-untyped-def]
         q, _ = _truth(pendulum, np.tile([25.0, 2.0], (W, 1)))
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), OPTS)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), OPTS)
         q_ztcf, _ = rollout(pendulum, sol.q[0], sol.v[0], np.zeros((W, 2)), DT)
         np.testing.assert_allclose(sol.q_ztcf, q_ztcf, atol=1e-12)
 
     def test_explained_fraction_is_high_for_consistent_data(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         q, _ = _truth(pendulum, np.tile([45.0, -3.0], (W, 1)))
-        sol = solve_local_window(pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), OPTS)
+        sol = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), OPTS)
         assert sol.explained_fraction > 0.99
 
     def test_underdetermined_window_reports_failure_not_exception(
@@ -190,7 +186,7 @@ class TestBandsAndDiagnostics:
         mask = np.zeros(W + 1, bool)
         mask[0] = True
         sol = solve_local_window(
-            pendulum, Q0, V0, _obs(q, mask), DT, WIDE, np.zeros(2), OPTS
+            pendulum, Q0, V0, _obs(q, mask), WIDE, np.zeros(2), OPTS
         )
         assert not sol.success
         assert "observ" in sol.status
@@ -199,19 +195,19 @@ class TestBandsAndDiagnostics:
 class TestContracts:
     def test_rejects_mismatched_observation_width(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         with pytest.raises(ValueError):
-            WindowObservation(q=np.zeros((5, 3)), mask=np.ones(4, bool))
+            WindowObservation(q=np.zeros((5, 3)), mask=np.ones(4, bool), dt=DT)
 
     def test_rejects_nan_in_observed_rows(self) -> None:
         q = np.zeros((4, 2))
         q[1, 0] = np.nan
         with pytest.raises(ValueError, match="finite"):
-            WindowObservation(q=q, mask=np.ones(4, bool))
+            WindowObservation(q=q, mask=np.ones(4, bool), dt=DT)
 
     def test_rejects_band_size_mismatch(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         q, _ = _truth(pendulum, np.tile([25.0, 2.0], (W, 1)))
         band = ControlBand(lower=-np.ones(3), upper=np.ones(3))
         with pytest.raises(ValueError, match="band"):
-            solve_local_window(pendulum, Q0, V0, _obs(q), DT, band, np.zeros(2), OPTS)
+            solve_local_window(pendulum, Q0, V0, _obs(q), band, np.zeros(2), OPTS)
 
     def test_options_validate(self) -> None:
         with pytest.raises(ValueError):
@@ -227,11 +223,9 @@ class TestIdentifiability:
         """Velocity offsets and constant torque are nearly collinear in short
         windows; the posterior spread must say so instead of hiding it."""
         q, _ = _truth(pendulum, np.tile([35.0, -4.0], (W, 1)))
-        loose = solve_local_window(
-            pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), OPTS
-        )
+        loose = solve_local_window(pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), OPTS)
         pinned_opts = WindowOptions(sigma_obs=1e-3, sigma_q0=1e-3, sigma_v0=0.01)
         pinned = solve_local_window(
-            pendulum, Q0, V0, _obs(q), DT, WIDE, np.zeros(2), pinned_opts
+            pendulum, Q0, V0, _obs(q), WIDE, np.zeros(2), pinned_opts
         )
         assert np.all(pinned.tau_std[0] < 0.5 * loose.tau_std[0])

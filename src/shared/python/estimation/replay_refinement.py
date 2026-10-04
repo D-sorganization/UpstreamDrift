@@ -146,6 +146,11 @@ class _Shooting:
         self._dt = float(match.t[1] - match.t[0])
 
     @property
+    def used(self) -> np.ndarray:
+        """Samples the refinement fits (matcher label ``accepted``)."""
+        return self._used
+
+    @property
     def size(self) -> int:
         return 2 * self.n + self.c_prior.size
 
@@ -279,16 +284,7 @@ def _refine(
     rms_before = model.observation_rms(q)
     if int(used.sum()) < 2:
         return _result(
-            False,
-            "too few accepted samples",
-            model,
-            z,
-            q,
-            v,
-            used,
-            rms_before,
-            rms_before,
-            0,
+            model, z, (q, v), rms_before, False, "too few accepted samples", 0
         )
 
     r = model.residual(z, q)
@@ -313,16 +309,7 @@ def _refine(
             damping *= 10.0
             if damping > 1e8:
                 return _result(
-                    True,
-                    "no further descent",
-                    model,
-                    z,
-                    q,
-                    v,
-                    used,
-                    rms_before,
-                    model.observation_rms(q),
-                    iterations,
+                    model, z, (q, v), rms_before, True, "no further descent", iterations
                 )
         improvement = (cost - float(r_try @ r_try)) / max(cost, 1e-300)
         z, q, v, r, cost = z_try, q_try, v_try, r_try, float(r_try @ r_try)
@@ -330,11 +317,8 @@ def _refine(
         if improvement < 1e-6:
             status = "converged"
             break
-    rms_after = model.observation_rms(q)
     ensure(check_finite(q) and check_finite(model.torques(z)), "replay must be finite")
-    return _result(
-        True, status, model, z, q, v, used, rms_before, rms_after, iterations
-    )
+    return _result(model, z, (q, v), rms_before, True, status, iterations)
 
 
 def _box(band: ControlBand, model: _Shooting) -> tuple[np.ndarray, np.ndarray]:
@@ -343,17 +327,15 @@ def _box(band: ControlBand, model: _Shooting) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _result(
-    success: bool,
-    status: str,
     model: _Shooting,
     z: np.ndarray,
-    q: np.ndarray,
-    v: np.ndarray,
-    used: np.ndarray,
+    trajectory: tuple[np.ndarray, np.ndarray],
     rms_before: float,
-    rms_after: float,
+    success: bool,
+    status: str,
     iterations: int,
 ) -> ReplayRefinement:
+    q, v = trajectory
     tau_steps = model.torques(z)
     return ReplayRefinement(
         success=success,
@@ -361,9 +343,9 @@ def _result(
         q=q,
         v=v,
         tau=np.vstack([tau_steps, tau_steps[-1]]),
-        used=used,
+        used=model.used.copy(),
         observation_rms_before=rms_before,
-        observation_rms_after=rms_after,
+        observation_rms_after=model.observation_rms(q),
         iterations=iterations,
         knot_stride=model.stride,
     )
