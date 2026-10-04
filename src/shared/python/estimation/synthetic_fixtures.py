@@ -155,6 +155,17 @@ class FixedBasePendulumFixture:
         return JointTrajectory(id=self.id, skeleton=self.skeleton, frames=self.frames)
 
 
+def _generate_time_grid(n_frames: int, fps: float) -> tuple[float, np.ndarray]:
+    """Validate frame parameters and compute time step with monotonic grid."""
+    if n_frames < 1:
+        raise ValueError("n_frames must be >= 1")
+    if fps <= 0.0:
+        raise ValueError("fps must be positive")
+    dt = 1.0 / fps
+    times = np.arange(n_frames, dtype=np.float64) * dt
+    return dt, times
+
+
 def make_fixed_base_pendulum_fixture(
     n_frames: int = 10,
     fps: float = 100.0,
@@ -181,14 +192,8 @@ def make_fixed_base_pendulum_fixture(
             F_z(t) = mass * gravity + mass * length * (d^2theta/dt^2 * sin(theta) + (dtheta/dt)^2 * cos(theta))
         Control input is zero (free unforced oscillation): tau(t) = 0.
     """
-    if n_frames < 1:
-        raise ValueError("n_frames must be >= 1")
-    if fps <= 0.0:
-        raise ValueError("fps must be positive")
-
+    dt, times = _generate_time_grid(n_frames, fps)
     omega_n = float(np.sqrt(gravity_m_s2 / length_m))
-    dt = 1.0 / fps
-    times = np.arange(n_frames, dtype=np.float64) * dt
 
     theta = theta_0 * np.cos(omega_n * times) + (theta_dot_0 / omega_n) * np.sin(
         omega_n * times
@@ -295,13 +300,7 @@ def make_underactuated_analytic_fixture(
         Trajectory exhibits unactuated dynamic coupling governed strictly by inertia
         matrix M and Coriolis/gravitational terms without ghost actuation.
     """
-    if n_frames < 1:
-        raise ValueError("n_frames must be >= 1")
-    if fps <= 0.0:
-        raise ValueError("fps must be positive")
-
-    dt = 1.0 / fps
-    times = np.arange(n_frames, dtype=np.float64) * dt
+    dt, times = _generate_time_grid(n_frames, fps)
 
     # Actuated joint has sinusoidal driving torque; passive joint has strictly 0 control
     tau_actuated = tau_actuated_amplitude * np.sin(2.0 * np.pi * 1.0 * times)
@@ -393,13 +392,7 @@ def make_native_stance_fixture(
         Joint angles are stationary (qdot = 0, qddot = 0), and internal joint
         torques balance gravitational moments across upright segments.
     """
-    if n_frames < 1:
-        raise ValueError("n_frames must be >= 1")
-    if fps <= 0.0:
-        raise ValueError("fps must be positive")
-
-    dt = 1.0 / fps
-    times = np.arange(n_frames, dtype=np.float64) * dt
+    dt, times = _generate_time_grid(n_frames, fps)
 
     grf_z = float(mass_kg * gravity_m_s2)
     grf_xy = (0.0, 0.0)

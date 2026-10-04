@@ -75,17 +75,15 @@ class SplitPolicy:
     phase_frames: Mapping[str, tuple[int, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        calib_set = set(self.calibration_frames)
-        hold_set = set(self.holdout_frames)
-        if not calib_set.isdisjoint(hold_set):
-            intersection = sorted(calib_set.intersection(hold_set))
+        overlap = set(self.calibration_frames) & set(self.holdout_frames)
+        if overlap:
             raise ValueError(
-                f"calibration_frames and holdout_frames must be disjoint; overlap: {intersection}"
+                f"calibration_frames and holdout_frames must be disjoint; overlap: {sorted(overlap)}"
             )
-        for f in calib_set:
+        for f in self.calibration_frames:
             if f < 0:
                 raise ValueError(f"frame index must be non-negative, got {f}")
-        for f in hold_set:
+        for f in self.holdout_frames:
             if f < 0:
                 raise ValueError(f"frame index must be non-negative, got {f}")
         object.__setattr__(
