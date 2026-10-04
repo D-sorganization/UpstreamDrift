@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 406,
-    "diverged": 274,
-    "ud-only": 1599,
-    "tools-only": 770,
+    "identical": 405,
+    "diverged": 275,
+    "ud-only": 1601,
+    "tools-only": 778,
     "spelling-only": 123
   },
   "packages": {
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 17,
+      "ud-only": 19,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -372,7 +372,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 105,
+      "tools-only": 112,
       "spelling-only": 0
     },
     "golf_simulator": {
@@ -719,8 +719,8 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 212,
-      "diverged": 66,
+      "identical": 211,
+      "diverged": 67,
       "ud-only": 36,
       "tools-only": 76,
       "spelling-only": 23
@@ -764,7 +764,7 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 0,
-      "tools-only": 427,
+      "tools-only": 428,
       "spelling-only": 0
     },
     "tests": {
@@ -7724,7 +7724,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 8916,
+      "ud_bytes": 9778,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7736,7 +7736,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 23182,
+      "ud_bytes": 23858,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7760,7 +7760,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 22302,
+      "ud_bytes": 24423,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7797,6 +7797,18 @@
       "package": "estimation",
       "subpackage": "",
       "ud_bytes": 37634,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_offline_smoothing.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 16495,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7880,7 +7892,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 10784,
+      "ud_bytes": 25241,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8350,6 +8362,30 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 8404,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/_pre_impact_contracts.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 11231,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/_pre_impact_serde.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 8922,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -9004,6 +9040,18 @@
       "spelling_only": false
     },
     {
+      "path": "golf_club/field_origin.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 3619,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "golf_club/fitting_document.py",
       "classification": "tools-only",
       "package": "golf_club",
@@ -9094,6 +9142,42 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 8594,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/modal_state.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 9928,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/pre_impact_bundle.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 12668,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/pre_impact_frames.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 7735,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -9370,6 +9454,18 @@
       "subpackage": "",
       "ud_bytes": null,
       "tools_bytes": 7564,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_club/validation.py",
+      "classification": "tools-only",
+      "package": "golf_club",
+      "subpackage": "",
+      "ud_bytes": null,
+      "tools_bytes": 528,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -25061,13 +25157,13 @@
     },
     {
       "path": "sidekick/calculators/electrical/electrical_model.py",
-      "classification": "identical",
+      "classification": "diverged",
       "package": "sidekick",
       "subpackage": "calculators",
       "ud_bytes": 18532,
-      "tools_bytes": 18532,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "tools_bytes": 19044,
+      "byte_delta": -512,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -30381,7 +30477,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 8950,
+      "tools_bytes": 9054,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30393,7 +30489,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 1182,
+      "tools_bytes": 1491,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30597,7 +30693,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 7344,
+      "tools_bytes": 7565,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30609,7 +30705,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 8201,
+      "tools_bytes": 8530,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30717,7 +30813,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 12260,
+      "tools_bytes": 16610,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30921,7 +31017,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 7469,
+      "tools_bytes": 7523,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -30934,6 +31030,18 @@
       "subpackage": "flight",
       "ud_bytes": null,
       "tools_bytes": 3320,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "swing_sim/flight/tests/test_flight_termination.py",
+      "classification": "tools-only",
+      "package": "swing_sim",
+      "subpackage": "flight",
+      "ud_bytes": null,
+      "tools_bytes": 14245,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31149,7 +31257,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 10649,
+      "tools_bytes": 15570,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -31161,7 +31269,7 @@
       "package": "swing_sim",
       "subpackage": "flight",
       "ud_bytes": null,
-      "tools_bytes": 9579,
+      "tools_bytes": 9864,
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
@@ -40106,6 +40214,19 @@
         "author": "d-sorgclaudeagent[bot]",
         "date": "2026-06-15",
         "commit": "08ec0412c4569cd2b39572d638fdf4ba1fd9f76e"
+      }
+    },
+    {
+      "path": "sidekick/calculators/electrical/electrical_model.py",
+      "ud": {
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+      },
+      "tools": {
+        "author": "Dieter Olson",
+        "date": "2026-09-29",
+        "commit": "95800a5647603bf1211a98b0899674540cc16151"
       }
     },
     {

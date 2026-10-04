@@ -1,3 +1,17 @@
+## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Forward Replay (DIME-09, #11430)
+
+Specifies full fixed-interval zero-phase bidirectional smoother, independent continuous forward replay from initial conditions without per-frame state resets or undeclared target-force assistance, contact dissipation irreversibility invariant ($dt > 0$), and structured replay verification receipts for dynamics-informed mocap matching (#11421, #11430):
+- **Continuous Forward Replay Verification (`ContinuousReplayConfig`, `ContinuousReplayReceipt`, `execute_continuous_replay`)**:
+  - Replays forward trajectory using only initial state, recorded controls, and deterministic engine step integration.
+  - Verifies invariant execution: rejects per-frame state resets (`reset_count == 1`, `is_uninterrupted=True`), validates absence of undeclared root wrenches (`has_undeclared_root_forces=False`), and checks absence of target-pose force feedback assistance (`has_hidden_target_force_feedback=False`).
+  - Strict model hash integrity: rejects mismatching model hashes with `PreconditionError`.
+  - Non-smooth contact irreversibility: enforces $dt > 0$ strictly; backward passes never execute reverse-time contact integration.
+  - Generates verifiable receipts comparing open-loop forward rollout against recorded observations and frozen benchmark tolerances.
+- **Offline Fixed-Interval Smoothing (`OfflineSmoothingProblem`, `OfflineSmoothingResult`, `run_offline_smoothing`)**:
+  - Zero-phase latency bidirectional state estimation over fixed horizons without lookahead lag.
+  - Strictly separates optimization cost from recomputed open-loop replay metric to prevent objective overfitting masking dynamical drift.
+  - Supports full JSON-compatible dictionary serialization roundtrip (`to_dict()` / `from_dict()`).
+
 ## Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits (DIME-07, #11428)
 
 Specifies square-root quadratic arrival factor representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics retention, late/irregular sample handling, and measurement accumulation guard preventing double counting across window advances (#11421, #11428):
@@ -8010,7 +8024,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
+| 2026-10-04 | #11483 | [DIME-09] Offline smoothing and independent continuous forward replay: ContinuousReplayConfig, ContinuousReplayReceipt, execute_continuous_replay, OfflineSmoothingProblem, OfflineSmoothingResult, and run_offline_smoothing (#11430, refs #11421). |
+| 2026-10-04 | #11466 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
 | 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |

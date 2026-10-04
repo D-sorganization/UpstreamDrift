@@ -1,3 +1,41 @@
+# Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Forward Replay — #11421 / #11430
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11430-offline-smoothing`; PR: pending (`Closes #11430`, `Refs #11421`)
+- Governing issue: #11430 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-09] Implement full fixed-interval zero-phase bidirectional smoother, independent continuous forward replay from initial conditions without per-frame state resets or undeclared target-force assistance, contact dissipation irreversibility invariant ($dt > 0$), and structured replay verification receipts.
+- Completed:
+  - `src/shared/python/estimation/dime_offline_smoothing.py`:
+    - `ContinuousReplayConfig`: configuration for continuous forward replay verification (initial state, controls, time step, tolerances, invariant checks).
+    - `ContinuousReplayReceipt`: verifiable structured execution receipt with validation status, root forces check, target force feedback check, reset count, open-loop observation error, and losslessly serializable `to_dict()` / `from_dict()`.
+    - `execute_continuous_replay`: executes continuous open-loop rollout from initial conditions using only recorded controls, verifying model hash match, checking absence of undeclared root wrenches and target force feedback, ensuring uninterrupted execution (`reset_count == 1`), and enforcing forward-time contact integration invariant ($dt > 0$).
+    - `OfflineSmoothingProblem`: fixed-interval smoothing problem configuration with forward/backward dynamics, observation window, and convergence criteria.
+    - `OfflineSmoothingResult`: bidirectional smoother result with zero-phase state trajectory, covariance/information matrix, and recomputed continuous replay receipt.
+    - `run_offline_smoothing`: runs zero-phase bidirectional smoothing, separating optimization cost from independent recomputed open-loop replay metric to prevent objective overfitting masking dynamical drift.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-09 symbols (`ContinuousReplayConfig`, `ContinuousReplayReceipt`, `OfflineSmoothingProblem`, `OfflineSmoothingResult`, `execute_continuous_replay`, `run_offline_smoothing`).
+  - `tests/unit/estimation/test_dime_continuous_replay.py`: 12 comprehensive behavioral unit tests:
+    - RED changed model hash rejected with `PreconditionError`.
+    - RED truncated/missing controls rejected with `PreconditionError`.
+    - RED non-finite inputs rejected with `PreconditionError`.
+    - RED undeclared root wrench flagged (`has_undeclared_root_forces=True`, unaccepted).
+    - RED hidden target force feedback assistance flagged (`has_hidden_target_force_feedback=True`, unaccepted).
+    - RED per-frame/mid-run state reset flagged (`reset_count > 1`, `is_uninterrupted=False`, unaccepted).
+    - RED backward inference calling reverse-time contact integration rejected ($dt > 0$ invariant).
+    - GREEN synthetic continuous replay reproduces within frozen tolerance manifest.
+    - GREEN zero-phase latency offline smoothing verified.
+    - GREEN optimization cost strictly separated from recomputed replay metrics.
+    - GREEN fresh engine instance reset independence confirmed.
+    - GREEN complete receipt serialization roundtrip (`to_dict` / `from_dict`).
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_continuous_replay.py`: 12 passed in 3.71s (100% GREEN).
+  - `pytest tests/unit/estimation/`: 208 passed, 1 skipped (jax).
+  - `divergence_inventory.py --check`: passed.
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_dry_duplication_gate.py`: passed.
+  - `check_error_handling_ratchet.py`: passed.
+  - `ruff format --check` and `ruff check`: passed.
+- Next steps: Push branch, create PR, and arm auto-merge.
+
 # Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits — #11421 / #11428
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11428-mhe-arrival`; PR: #11428 (`Closes #11428`, `Refs #11421`)
