@@ -13,6 +13,8 @@ import numpy as np
 
 from src.shared.python.shadow_tracker.ingestion import compute_frame_hash
 from src.shared.python.shadow_tracker.source_records import FrameIdentity, SourceAsset
+from src.shared.python.shadow_tracker import check_sha256
+from .project_store import validate_workspace_id
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_review import CaptureReview
 
@@ -48,6 +50,29 @@ class CaptureIdentity:
     frames: tuple[FrameIdentity, ...]
     png_sha256: tuple[str, ...]
 
+    def __post_init__(self) -> None:
+        """Copy containers; scalar source/frame DTOs remain frozen and detached."""
+        validate_workspace_id(self.capture_id, "capture_id")
+        for name, value in (
+            ("capture_hash", self.capture_hash),
+            ("source_clock_sha256", self.source_clock_sha256),
+            *(("png_sha256", digest) for digest in self.png_sha256),
+        ):
+            if not isinstance(value, str) or not value.startswith("sha256:"):
+                raise ValueError(f"{name} requires a prefixed SHA256")
+            check_sha256(value.removeprefix("sha256:"), name)
+        frames, pngs = tuple(self.frames), tuple(self.png_sha256)
+        if (
+            not isinstance(self.source, SourceAsset)
+            or not frames
+            or len(frames) != len(pngs)
+            or any(not isinstance(frame, FrameIdentity) for frame in frames)
+            or any(not isinstance(digest, str) for digest in pngs)
+        ):
+            raise ValueError("Capture identity requires aligned typed frame/PNG tuples")
+        object.__setattr__(self, "frames", frames)
+        object.__setattr__(self, "png_sha256", pngs)
+
     @property
     def source_sha256(self) -> str:
         return "sha256:" + self.source.content_sha256
@@ -65,6 +90,17 @@ class CaptureIdentity:
 
 def capture_identity(library: NecromatcherLibrary, capture_id: str) -> CaptureIdentity:
     """Authenticate every original PNG/decoded frame and exact nonphysical PTS."""
+    from .necromatcher_authenticated_read import _read_capture_identity
+
+    return _read_capture_identity(
+        library, capture_id, lambda: _authenticate_capture_identity(library, capture_id)
+    )
+
+
+def _authenticate_capture_identity(
+    library: NecromatcherLibrary, capture_id: str
+) -> CaptureIdentity:
+    """The unchanged full authentication algorithm, including fresh asset checks."""
     import cv2
 
     asset = library.load_asset(capture_id)

@@ -49,6 +49,7 @@ from .historical_research import (
     historical_research_schema_bytes,
 )
 from .necromatcher import NecromatcherLibrary, default_necromatcher_library
+from .necromatcher_authenticated_read import AuthenticatedRead, authenticated_read
 from .necromatcher_efforts import AuthoredEffortProfile, EFFORT_SCHEMA
 from .necromatcher_native import (
     NativeFitBinding,
@@ -250,6 +251,8 @@ __all__ = [
     "AuthoredEffortProfile",
     "EFFORT_SCHEMA",
     "NecromatcherLibrary",
+    "AuthenticatedRead",
+    "authenticated_read",
     "CaptureReview",
     "default_necromatcher_library",
     "ActionAvailability",

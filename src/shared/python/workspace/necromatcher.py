@@ -43,6 +43,7 @@ from .project_store import (
 if TYPE_CHECKING:
     from src.shared.python.simulation_backends import Trace
     from .necromatcher_source_scope import SourceFitScope
+    from .necromatcher_authenticated_read import AuthenticatedRead
 
 _ARTIFACT_KINDS = {
     "native_model": ArtifactKind.MODEL,
@@ -89,6 +90,16 @@ class NecromatcherLibrary:
     @property
     def root(self) -> Path:
         return self._store.root
+
+    def authenticated_read(self) -> AuthenticatedRead:
+        """Bound repeated capture reads to this library and one owning thread/task.
+
+        Close verifies fresh capture content and metadata before callers publish.
+        No fit, receipt or compiled model is cached, and nested contexts reject.
+        """
+        from .necromatcher_authenticated_read import authenticated_read
+
+        return authenticated_read(self)
 
     @contextmanager
     def _write_lock(self) -> Iterator[None]:

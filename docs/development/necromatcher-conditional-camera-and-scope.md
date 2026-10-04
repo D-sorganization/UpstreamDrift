@@ -189,7 +189,7 @@ restricted restart. The existing authored contact schedule ends at frame 209;
 its explicit source-clock restriction ends at frame 190, retaining the existing
 in-domain review anchors at frames 105 and 120 for the final unpinned phase.
 Do not silently drop contact records or zero post-release grip losses and report
-them as passed constraints. Scope integration and a new actual motion fit remain
+them as passed constraints. Scope integration and an optimized scoped motion result remain
 separate acceptance steps. The full Necromatcher goal remains active.
 
 ### Restricted Trial and Partial Publication
@@ -222,14 +222,27 @@ records. No active run remains. The partial closure proof is in
 the durable journal and preservation receipt are in
 `Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Scoped Fit V1`.
 
-Do not run the completed-writer assessment or final-fit rendering proposal on
-this partial result. Next, independently check both canonical stage records and
-the seed provenance, capture fresh complete baselines, and profile the public
-binding and strict initializer without optimization or writes. Compare parent
-and seed using identical 191-frame dense and 20-frame training domains. Render
-seed previews only with explicit unoptimized authored-seed captions, fresh
-source-bound pilot review and preserved shape/skeleton layers. Do not increase
-the budget or retry until measured costs identify the appropriate next change.
+Do not apply a completed-final-fit assessment or final-fit rendering proposal to
+this partial result. The V4 partial checker under
+`Repositories/Temp/tiger-two-hand-partial-close-root-release-v2` independently
+accepted the seed and failed-stage serialized records; its result SHA256 is
+`f33565880fd09a2a03287b125fe5f638e827c9b419eddf84611bbda8959bbe80`.
+No strict final start was independently computed.
+
+Setup profile V1 failed on an ambiguous ndarray adapter/receipt JSON; the failed
+artifacts and preservation proof remain intact. V2 completed five public stages:
+parent binding 0.964918 s, seed binding and shaft admission 19.146040 s, strict
+seed public initializer 0.571843 s, parent body/shaft metrics 2.148624 s and seed
+body/shaft metrics 2.134822 s. The independent serialized assessment SHA256 is
+`104a935990ec4a25a005153f0d1524037a08b0d638e0ac43e9855bb7a0aa0bdd`;
+root acceptance is under
+`Repositories/Temp/tiger-both-hands-profile-independent-v1/root-release-v1`.
+This read-only setup profile establishes no timeout cause or solver speedup.
+
+On identical 191-frame dense and 20-frame training domains, confidence-weighted
+body RMS is respectively 35.102046/31.861015 px for the seed and
+24.082673/21.776978 px for the parent. The seed is worse; retain the parent.
+Do not increase the budget, infer missing solver telemetry or retry automatically.
 
 Canonical captions now derive authored-seed status from the authenticated fit's
 operation, request policy and strict false optimizer/convergence fields. They
@@ -237,12 +250,48 @@ display **UNOPTIMIZED AUTHORED RESEARCH SEED** above the existing research and
 clock text. Publication/download reconstructs this label from fresh canonical
 fit metadata and rejects a forged or omitted seed declaration. Legacy captions
 retain their existing layout. Root passed 58 caption/video/job regression cases;
-Ruff and pinned mypy passed. This implements truthful labelling; no new export
-has yet been rendered. Root also passed 29 synthetic profile/partial-check cases.
+Ruff and pinned mypy passed. Earlier 29 synthetic profile/partial-check cases
+remain historical. Current root checks passed 33 partial V4, 14 profile V2,
+24 independent-profile and nine still-checker cases.
 
-The eight-page Methods V3 source/PDF and root page review are in the existing
-Desktop report folder. All eight pages were visually reviewed; unchanged final
-page images were byte-compared after the last wording correction. Compilation
-used existing MiKTeX with installer disabled because the built-in compiler could
-not locate platform directories. There are no overfull/underfull boxes. Exact
-Methods V2 source/PDF/review remain under `accepted-methods-v2` in that folder.
+### Accepted Seed Stills and Preservation
+
+Published producer `0143b39f571cbe67c57091fb2ae19e7d7eadae3b` rendered only
+seed frames 0, 150 and 190 in
+`Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills`.
+Each retains opacity 0.35 model-proxy shapes, skeleton and the conspicuous
+unoptimized authored research seed caption. Root viewed all three; the middle
+frame has substantial wrist/arm/neck mismatch. Unweighted display-marker RMS
+is approximately 6.45/44.14/18.27 px, distinct from weighted body metrics above.
+
+The independent serialized source/image result SHA256 is
+`dd779807794509a8d2c10912e4cc1d3b74a611015b0708efae51f50920d98217`;
+root acceptance is under
+`Repositories/Temp/tiger-authored-seed-stills-independent-v2/root-release-v1`.
+It verifies source/frame/hash/clock, geometry provenance, scope and caption
+bindings, not independently recomputed native projection or complete overlay-union
+pixel parity. Both independent profile and still checks preserve the complete
+14,826-source-file/401-library-file maps. No parent replacement, optimized result,
+new full video, ControlTower delivery or scientific qualification is claimed.
+Tiger remains restricted to [0,191); exact physical release is unmeasured and
+Hogan is unchanged.
+
+Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. Queue/worker/publication integration and historical profiling remain pending; no 300-second retry or speedup is claimed. Accepted artifacts at 0143 are unchanged.
+
+Methods V4 is the latest compiled supplement in the existing Desktop report
+folder. Root reviewed all eleven pages, including three selected seed figures.
+The accepted TeX SHA256 is
+`2f59fa11f48cc31e3c2cde3c6ba59ec59989aa074b54281704910e02c2f8527f`
+(27,501 bytes); PDF SHA256 is
+`92719ded542ca88009678e64d5e80d84b1edbc66f9b723005640b376185bbd91`
+(3,245,413 bytes). External `root-report-review-v4.json` SHA256 is
+`f0dc26f2c3cad7abe530230f0b6bbc0da09163acb118482dfda92d1b282b57a4`
+(5,488 bytes). The canonical review record may be formatter-normalized while
+retaining the exact external review semantics.
+
+The source uses three pinned external Desktop PNG paths from the accepted seed
+pilot. These preserved images are required local repeatability dependencies;
+the TeX is not a portable standalone bundle. Compilation used existing MiKTeX
+with installer disabled after the built-in compiler could not locate platform
+directories. Earlier Methods V2/V3 source/PDF/reviews remain preserved; their
+historical page reviews do not replace the eleven-page V4 review.

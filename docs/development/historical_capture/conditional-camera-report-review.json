@@ -1,66 +1,99 @@
 {
-  "schema": "necromatcher/methods-supplement-root-review/3",
-  "edition": "Methods V3: Partial Trial Recorded",
+  "schema": "necromatcher/methods-supplement-root-review/4",
+  "edition": "Methods V4: Measured Setup and Seed Previews",
   "source": {
     "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.tex",
-    "bytes": 21154,
-    "sha256": "d201c03e9982ae223d96b4a9c863d990615a489a637126faa6f2562004766bbe"
+    "sha256": "2f59fa11f48cc31e3c2cde3c6ba59ec59989aa074b54281704910e02c2f8527f",
+    "bytes": 27501
   },
   "pdf": {
     "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.pdf",
-    "bytes": 166509,
-    "sha256": "40480aab82781b6762611d906765f6140c614b3c8bbf41d8b9230c7f6c8742f8"
+    "sha256": "92719ded542ca88009678e64d5e80d84b1edbc66f9b723005640b376185bbd91",
+    "bytes": 3245413
   },
   "pages": [
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-1.png",
-      "bytes": 182707,
-      "sha256": "de2b96f1a9d79d2252a06a68d7245dcfc13fd5145ea9714b8fb2eb02c6c62d57"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-01.png",
+      "sha256": "6828b314f51f27779e8661de6bf6dc91f23762c814e64df6e51dd9368749f080",
+      "bytes": 183933
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-2.png",
-      "bytes": 197745,
-      "sha256": "95afced25f58c31f7855cb4faf6b39d98f14696b8465aa24aba13392896733a3"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-02.png",
+      "sha256": "2f98b8433aa40c98fb0422d99ee6da0b7a8e43a8d59d4e9527361baed837be8b",
+      "bytes": 197706
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-3.png",
-      "bytes": 176252,
-      "sha256": "82bdeea28057fb4e0d523427a163bc98fa21ae0c3c760ebf8aa6cdb7ceb3b02f"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-03.png",
+      "sha256": "15ffad670e205cc88b8655292e40ec089128d6de97d3c8ce98fc1ed6c4fadb91",
+      "bytes": 176226
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-4.png",
-      "bytes": 158909,
-      "sha256": "436a4f0162b9eddb67966cdbed0522f32507312160e69c7a53954efd240475a9"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-04.png",
+      "sha256": "9c2d34820e46f2ba871ee5832fb8f8d0b25dd6093a91ff3951da21c8c8573467",
+      "bytes": 158901
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-5.png",
-      "bytes": 194297,
-      "sha256": "0b1b807a8e64d7123e1d5f754bffd87812513fdb469261283a33ef7d3e621136"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-05.png",
+      "sha256": "dcbb3b866a4b45aef6a09f2bb6d117de5a5b3ba4dce1655a835195c616a0778e",
+      "bytes": 194270
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-6.png",
-      "bytes": 199201,
-      "sha256": "5e460aab3d3943facf606ce5efefef37d979ab486c217de28cd4c3f19b607fb1"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-06.png",
+      "sha256": "90314c7c0a4356ca784546d1e4af383f0f0c3274a85d9155b7169032ba23e19b",
+      "bytes": 199161
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-7.png",
-      "bytes": 172848,
-      "sha256": "1fbdf8c1660bef09282c92ef85959e8960b6df0246995a0efdd9b8d420d7ebc0"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-07.png",
+      "sha256": "2b3886975f2da8e4366e650e6993593f3c3be2e6ae98ea93783e7d2925a8c1f5",
+      "bytes": 172815
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v3-final-page-8.png",
-      "bytes": 176180,
-      "sha256": "2548f0532197f8c98e642a8f9e0fe6b0f2407c5e875157dd747b5e030359affc"
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-08.png",
+      "sha256": "1bd68a3cc73369ea309bd6bb457c6da6cb0c712e140fe3d7cbc26dcd8ac2f833",
+      "bytes": 181301
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-09.png",
+      "sha256": "0ed1feecedf6627e8441ad1690865dd365e86fe2b6c1801ec6239907f9f4cc9e",
+      "bytes": 160169
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-10.png",
+      "sha256": "12784a18105a73100679e9fcd705603ef223aa7f156f7411f950cd9e021270eb",
+      "bytes": 394460
+    },
+    {
+      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-11.png",
+      "sha256": "33f773506f4cab1c956fc0ef9ebdd13cc1685c03828217e3e67f5d30c3659ba7",
+      "bytes": 390053
     }
   ],
-  "page_count": 8,
+  "page_count": 11,
   "all_pages_visually_reviewed": true,
-  "unchanged_pages_verified": [3, 4, 5, 6, 7, 8],
-  "layout_findings": "Readable tables and full-width digests; no clipping, blank pages, overfull or underfull boxes",
-  "compiler": "Existing MiKTeX pdflatex 25.12, installer disabled",
+  "root_directly_viewed_pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "layout_findings": "Readable equations, tables and three source overlays; no clipping, blank pages or TeX box warnings",
+  "compiler": "Existing MiKTeX pdflatex, installer disabled, two final passes",
   "builtin_compiler": "Unavailable: Unable to find standard directories for platform",
-  "camera_independent_review": "Accepted historical serialized diagnostic only",
-  "partial_trial_independent_review": "Pending",
+  "polish_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-methods-v4-polish-v1\\final-polish-review-v1.json",
+    "bytes": 6036,
+    "sha256": "1fa1719e538798cd658d45c4866b373007922548d5e32fc4467c9d04b6579fde"
+  },
+  "partial_trial_independent_review": "Accepted serialized failed-trial preservation and authored-seed provenance",
+  "profile_independent_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\tiger-both-hands-profile-independent-v1\\root-release-v1\\root-acceptance.json",
+    "bytes": 1016,
+    "sha256": "5e049b4945b3e3ff188216e623475e174097557de8a80e54cf60681a6519fbe7"
+  },
+  "stills_independent_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\tiger-authored-seed-stills-independent-v2\\root-release-v1\\root-acceptance.json",
+    "bytes": 760,
+    "sha256": "5b24730a8f60c8d47484e02c3589de2fefd6bf450b1cd9b7d23f74fd2ce42ec3"
+  },
+  "native_projection_recomputed": false,
+  "complete_outside_overlay_union_verified": false,
+  "physical_clock_reconstructed": false,
   "scientific_qualified": false,
-  "ControlTower_transferred": false
+  "ControlTower_transferred": false,
+  "image_dependencies": "Three exact Desktop PNGs referenced by absolute path in the source; preserve these pinned images when reproducing this local build"
 }

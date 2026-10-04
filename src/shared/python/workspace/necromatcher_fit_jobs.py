@@ -48,6 +48,7 @@ _SOURCE_DIRECTORIES = (
     "src/shared/python/body_part_viz",
     "src/shared/python/core",
     "src/shared/python/workspace",
+    "src/shared/python/shadow_tracker",
     "src/shared/python/motion_matching",
     "src/shared/python/estimation",
     "src/shared/python/numerical_methods",
