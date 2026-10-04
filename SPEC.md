@@ -1,3 +1,27 @@
+## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
+
+Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):
+- **Unified Observation Factor Interface (`src/shared/python/estimation/dime_observation_factors.py`)**:
+  - `DimeObservationFactor`: abstract unified interface for observation factors declaring modality (`"marker_3d"`, `"markerless_2d"`), canonical units (`"m"` for markers, `"px"` for 2D detections), residual dimensions, unwhitened raw residuals, robust whitened residuals, analytical/finite-difference Jacobians on candidate states/parameters, and held-out evaluation reports.
+  - `Marker3DObservationFactor`: metric 3D marker observation factor supporting forward kinematics callbacks, local marker attachment semantics (`MarkerAttachment`), anisotropic noise covariance whitening, and robust downweighting.
+  - `Markerless2DObservationFactor`: 2D pixel observation factor combining forward kinematics with calibrated pinhole camera projection, Brown-Conrady lens distortion, and strict depth chirality checks.
+- **Calibrated Covariance Whitening & Decoupled Detector Scores**:
+  - `_build_whitening_operators`: supports isotropic variance, per-axis diagonal variances, and full $D \times D$ positive-definite covariance matrices via Cholesky factor inversion ($L^{-1}$).
+  - Strictly decouples physical noise covariance ($\text{m}^2$ or $\text{px}^2$) from detector confidence scores $[0, 1]$; non-positive variances or non-positive-definite covariance matrices fail closed with `CovarianceValidationError`.
+- **Robust Loss Kernels (`RobustLossKernel`)**:
+  - Kernels: `"linear"`, `"huber"`, `"cauchy"`, `"tukey"`, and `"pseudo_huber"`.
+  - Applied separately from noise whitening via iteratively reweighted least squares (IRLS) square-root weights $\sqrt{w(r)}$.
+  - Inliers ($r \le \delta$) receive exact unperturbed weight 1.0; gross outliers receive sub-quadratic penalties (Huber, Cauchy, Pseudo-Huber) or complete rejection (Tukey biweight cutoff $c$).
+- **Clean Partitioning & Zero-Filling Prevention**:
+  - Occlusion masks (`valid_mask`): occluded or missing markers/keypoints are strictly masked out of the fitting residual vector and never zero-filled with $[0, 0, 0]$ or $[0, 0]$, preventing artificial distortion of the optimization landscape.
+  - Held-out partition (`held_out_mask`): held-out observations are completely excluded from the fitting residual vector and Jacobian ($N_{\text{fit}} = N_{\text{valid}} - N_{\text{held\_out}}$).
+  - `HeldOutEvaluationReport`: reports out-of-sample RMSE and max error in declared canonical units without contaminating the solver objective.
+- **Camera Inversion, Chirality & Quaternion Sign Equivalence**:
+  - `DimeCameraParameters` & `invert_camera_extrinsics`: exact rigid $SE(3)$ transform inversion $(R, t) \leftrightarrow (R^T, -t R)$ with right-handed $SO(3)$ orthonormality and $\det(R) = +1$ enforcement. Reflection matrices ($\det(R) = -1$) and negative camera depth ($Z_{\text{cam}} \le 0$) fail closed with `ChiralityViolationError`.
+  - Quaternion sign equivalence: states parameterized by antipodal unit quaternions $q \equiv -q$ produce identically zero residual difference ($\Delta r = 0$) in forward kinematics and camera projections.
+- **Strict Timing Monotonicity (`ObservationTiming`)**:
+  - Validates strictly positive monotonic timestamps ($\Delta t > 0$), finite real numbers, and consistent sample rates; non-monotonic or non-finite sequences raise `TimingViolationError`.
+
 ## Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts (DIME-02, #11423)
 
 Specifies versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11421, #11423):
@@ -26,6 +50,20 @@ Specifies versioned complete-state, observation-window, provider capability, SE(
   - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
   - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
 
+## Remove Deprecated Force Vectors and Vectors Shims (FTO-7 Follow-Up, #11347)
+
+Retires obsolete deprecated plotting shims per ADR-0052, #11292, and #11347 after migration to `src.shared.python.force_overlay.renderers.matplotlib_glyphs`:
+- **Retired Modules**:
+  - `ForceVectorRenderer` in module `src.shared.python.plotting.renderers.force_vectors` (retired per ADR-0052, #11292).
+  - `VectorOverlayRenderer` in module `src.shared.python.plotting.renderers.vectors` (retired per ADR-0052, #11292).
+- **Retirement Verification Tests**:
+  - `tests/unit/force_overlay/test_renderer_shims.py`.
+  - `tests/unit/plotting/test_force_vector_renderer.py`.
+- **Plotting Suite Updates**:
+  - Cleaned up `tests/unit/test_plotting_renderers.py` to remove `VectorOverlayRenderer` references.
+- **Inventory & Schema Sync**:
+  - Regenerated `docs/shared_tools/divergence_inventory.v1.json` and `docs/shared_tools/divergence_inventory.md` reflecting the retired files.
+
 ## Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol (DIME-01, #11422)
 
 Specifies versioned benchmark manifest, native capability status, fail-closed qualification rules, and frozen acceptance thresholds (#11421, #11422):
@@ -51,6 +89,7 @@ Specifies versioned benchmark manifest, native capability status, fail-closed qu
   - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
   - `NumericAcceptanceThresholds`: frozen acceptance thresholds (max drift $\le 0.015\text{ m}$, max angular drift $\le 0.05\text{ rad}$, max control $\le 250\text{ N}\cdot\text{m}$, min alignment $\ge 0.95$, max cancellation $\le 0.10$, reproducibility atol $\le 10^{-9}$) fixed before solver comparison.
   - `ConditioningScale`: explicit scaling and nondimensionalization factors for state, angle, velocity, torque, and time.
+
 
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
@@ -7850,6 +7889,9 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11454 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
+| 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
+| 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
+| 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |
 | 2026-10-04 | #11453 | [DIME-01] Baseline and frozen benchmark protocol: DimeBenchmarkManifest, fail-closed qualification evaluation, native capability status vs method existence, deterministic fixtures, privacy protection, and frozen thresholds (#11422, refs #11421). |
 | 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
