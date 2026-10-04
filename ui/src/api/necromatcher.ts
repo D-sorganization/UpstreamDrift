@@ -45,8 +45,8 @@ export interface ImageFitRecipe {
 export interface RefitOptions {
   frame_indices: number[]; knot_count: number; coordinate_scales: number[];
   unknown_visibility_weight: number; budget_wall_s: number; config: ImageFitRecipe;
-  operation?: 'fit' | 'author_initialization';
-  initialization_source?: 'sampled_parent' | 'preserved_spline';
+  operation?: 'fit' | 'author_initialization' | 'restrict_initialization';
+  initialization_source?: 'sampled_parent' | 'preserved_spline' | 'restricted_spline';
   shaft_evidence?: Record<string, unknown>;
   source_scope?: SourceFitScope;
 }
@@ -103,6 +103,10 @@ export const fetchPlayers = () => apiFetch<{ players: HistoricalPlayer[] }>(`${r
 export const fetchSwings = (player: string) => apiFetch<{ swings: HistoricalSwing[] }>(`${root}/swings?player_id=${encodeURIComponent(player)}`);
 export const fetchAssets = (swing: string) => apiFetch<{ assets: HistoricalAsset[] }>(`${root}/swings/${encodeURIComponent(swing)}/assets`);
 export const fetchCaptureFrame = (capture: string, frame: number) => apiFetch<CaptureFrame>(`${root}/captures/${encodeURIComponent(capture)}/frames/${frame}`);
+export interface FitSummary {
+  fit_id: string; capture_id: string; frame_count: number; frame_indices: number[];
+}
+export const fetchFitSummary = (fit: string) => apiFetch<FitSummary>(`${root}/fits/${encodeURIComponent(fit)}`);
 export interface FitProjection {
   fit_id: string; capture_id: string; frame_index: number; frame: CaptureFrame['frame'];
   points: CaptureFrame['observation']['landmarks']; coordinates: 'image_pixels';

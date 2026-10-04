@@ -58,6 +58,7 @@ class NecromatcherWidget(QWidget):
         self._video_dialogs: list[VideoExportDialog] = []
         self._review: CaptureReview | None = None
         self._fit_id: str | None = None
+        self._frame_indices: tuple[int, ...] = ()
         self._pending_projection: int | None = None
         self._pending_review = False
         self._worker: BackgroundWorker | None = None
@@ -155,6 +156,7 @@ class NecromatcherWidget(QWidget):
     def _assets_changed(self) -> None:
         self._generation += 1
         self._fit_id = None
+        self._frame_indices = ()
         self._pending_projection = None
         self._pending_review = False
         self.slider.setEnabled(False)
@@ -180,27 +182,39 @@ class NecromatcherWidget(QWidget):
             self._fit_id = identity
         fit_id = self._fit_id
 
-        def target() -> CaptureReview:
-            capture_id = (
-                self.library.load_fit(fit_id)["capture_id"] if fit_id else identity
+        def target() -> tuple[CaptureReview, tuple[int, ...]]:
+            fit = self.library.load_fit(fit_id) if fit_id else None
+            review = CaptureReview(self.library, fit["capture_id"] if fit else identity)
+            indices = (
+                tuple(fit["frame_indices"]) if fit else tuple(range(review.frame_count))
             )
-            return CaptureReview(self.library, capture_id)
+            return review, indices
 
         self._run(
             target,
-            lambda review: self._capture_loaded(review, generation),
+            lambda value: self._capture_loaded(value[0], generation, value[1]),
         )
 
-    def _capture_loaded(self, review: CaptureReview, generation: int) -> None:
+    def _capture_loaded(
+        self,
+        review: CaptureReview,
+        generation: int,
+        frame_indices: tuple[int, ...] | None = None,
+    ) -> None:
         if generation != self._generation or self._closed:
             review.close()
             if not self._closed:
                 self._assets_changed()
             return
         self._review = review
+        self._frame_indices = (
+            frame_indices
+            if frame_indices is not None
+            else tuple(range(review.frame_count))
+        )
         blocked = self.slider.blockSignals(True)
         try:
-            self.slider.setRange(0, review.frame_count - 1)
+            self.slider.setRange(0, len(self._frame_indices) - 1)
             self.slider.setValue(0)
         finally:
             self.slider.blockSignals(blocked)
@@ -210,6 +224,8 @@ class NecromatcherWidget(QWidget):
     def _show_frame(self, index: int) -> None:
         if not self._review:
             return
+        if self._frame_indices:
+            index = self._frame_indices[index]
         if self._fit_id:
             self.image.clear()
             self._request_projection(index)
@@ -234,7 +250,12 @@ class NecromatcherWidget(QWidget):
         if generation != self._generation or self._closed:
             return
         index = projection["frame_index"]
-        if projection["fit_id"] == self._fit_id and index == self.slider.value():
+        selected = (
+            self._frame_indices[self.slider.value()]
+            if self._frame_indices
+            else self.slider.value()
+        )
+        if projection["fit_id"] == self._fit_id and index == selected:
             self._paint_frame(index, projection)
 
     def _paint_frame(

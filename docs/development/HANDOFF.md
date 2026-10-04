@@ -9,6 +9,8 @@
 
 # Active: Necromatcher Source-Bound Shaft Continuation — #11318
 
+- App checkpoint SELF (#11414/#11450): both hosts expose strict lossless restriction and review exact saved source indices, including sparse domains. Root 45 Python/45 React cases pass; no new historical run. [Procedure](necromatcher-app-restriction-and-frame-review.md). Current Tiger scope is [0,191), Hogan unchanged; qualified matching and remote CI remain open.
+
 - Branch: `feat/necromatcher-native-fit-11235`; historical PR #11240 merged; continuation PR #11359 published at dfdfeb3ad0bddaa05303ec4f385d2d4fc42e5ed0, normal push hooks passed. Parent #11232; Tiger #11226; Hogan #11229. Full goal remains active.
 - Canonical optional queue/worker/persistence and native/web evidence controls are implemented. D 102 combined/19 independent, renderer 20 focused/80 combined/20 independent, stable video/job/API 41, native 32 offscreen and web 30 scoped cases passed; Ruff/format/pinned mypy and TypeScript/ESLint passed. Earlier665 regression 476 remains a historical source checkpoint, not a new total.
 - Actual producer `3ab5c2ac87dd6aa97872b49596fbcad4f9a6eeb5` completed Tiger control/variant V16 and Hogan control/variant V13 matched final-start trials; all four finite historical target sets and 32 authored scalar bounds pass, 12 coordinates remain unbounded, and every optimizer remains budget-exhausted/nonconverged/rejected. Independent assessment `b1f3898d3d9e2cac5c460ceb33fd2e6c5b85371158b4eb2a823e4f027ede002e`. Raw training improves; Tiger held-out shaft agreement worsens and Hogan is essentially unchanged.

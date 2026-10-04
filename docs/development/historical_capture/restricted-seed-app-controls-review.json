@@ -1,0 +1,147 @@
+{
+  "schema": "necromatcher/restricted-seed-app-boundary-root-review/1",
+  "source_parent_commit": "3bd9aea15c1be2b21ac86d2ccd8025013ca5dc1d",
+  "source_attribution": "SELF with exact final file pins; not a new native-artifact producer",
+  "issues": [11414, 11450],
+  "freezes": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\restriction-app-boundary-freeze-v1.json",
+      "bytes": 3727,
+      "sha256": "33e61512644f6932c3672805020cc7156617d1d1093971f209d8fd15e25234ce"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\restriction-app-boundary-freeze-v2.json",
+      "bytes": 1736,
+      "sha256": "bd29b9c4da21f1f8f0162978b4a6b600eceb418bb22fd38a0d38a9d1211efe93"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-frame-domain-freeze-v1\\freeze.json",
+      "bytes": 5408,
+      "sha256": "43fd96d56bd6dcafdc1cd44935fb0348fc036cbbaf656618198ba0f637d81afb"
+    }
+  ],
+  "sources": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\api\\routes\\necromatcher.py",
+      "bytes": 19225,
+      "sha256": "c33e5d810d4fcb8a67ddc86e77f61fced2ca75cb476b7b03a3f801741746b801"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\refit_dialog.py",
+      "bytes": 21815,
+      "sha256": "d491f5fc04c7ba9498b3fb65a4bd19851281e93390cf2bcffb92a3f455966c90"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\api\\necromatcher.ts",
+      "bytes": 8479,
+      "sha256": "2d902a48edf35d4623f40e2cba3553b46fa291ae94b7eeb4ca1c05377e31c83e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\RefitControls.tsx",
+      "bytes": 11317,
+      "sha256": "9382c83cd5a10e6eb41f79be67ac7d6812fdd19c95fdb61139b934ede5d682c3"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_restriction_api.py",
+      "bytes": 4589,
+      "sha256": "375bb3286d500d5a45dbf385fa584f80a8b9abda6bd3255e2582463c214e9331"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_refit_dialog.py",
+      "bytes": 10902,
+      "sha256": "9a5231ad75f053c86870cd607aaf7a78683984202140f6caf15f8009af344689"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\api\\necromatcher.test.ts",
+      "bytes": 4208,
+      "sha256": "f4a173205839121c8eed7bb28a0358f312e9a6ab186f75e36568f5bac62fb17f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\RefitControls.test.tsx",
+      "bytes": 22019,
+      "sha256": "8a01ddb01c5a84e3949f6e417603d6bdf5a4747c46a532eddcea47da27e09542"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\gui.py",
+      "bytes": 18368,
+      "sha256": "3cf75b8101ced4f9869d03cd5b6e42cd253f823eaca7fca994f2adf488cfc0de"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\Necromatcher.tsx",
+      "bytes": 12515,
+      "sha256": "cab0a8f84df2ac91007408b53717e414b6de6a0e8386c2a2cb89afeb7447ee58"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_frame_domain.py",
+      "bytes": 2357,
+      "sha256": "76ad0f357058df5cd95ddc8f7bf7a2aee6d160526e74070234eecc969cc5bb6f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\Necromatcher.frame-domain.test.tsx",
+      "bytes": 4146,
+      "sha256": "8ed16918dbbe1ed9f08a77e46c5e61f04edd633c88f66853dd6c4a8093098901"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\Necromatcher.test.tsx",
+      "bytes": 11282,
+      "sha256": "9d11634c0608ba500200410edaca04de5d861c6a83eea8002db44052a33c8a3c"
+    }
+  ],
+  "feature_registry": {
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\config\\feature_parity.json",
+    "bytes": 26648,
+    "sha256": "c716f7d154da285a8d59c4e6cb49ef853eddaa472fc725ce8a616628d238d4a9"
+  },
+  "tests": {
+    "python": {
+      "passed": 45,
+      "log": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-controls-root-green-v1.log",
+        "bytes": 6394,
+        "sha256": "28bcf881bd9a81bf1403b6633ff19bbcbae1100e6a4ef2d4cf79708d439e6a1b"
+      }
+    },
+    "react": {
+      "passed": 45,
+      "log": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-controls-root-ui-green-v1.log",
+        "bytes": 861,
+        "sha256": "72a2b866756c9e0cde7240dc22e3c12624ae1ed0033d42cdc440c18d2752266f"
+      }
+    },
+    "feature_parity": {
+      "passed": 39,
+      "log": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-parity-root-v1.log",
+        "bytes": 5218,
+        "sha256": "0ad2b03cc63b77a4e2be237709bfe9e4a9370ccbcecbeda6423846007add0ee7"
+      }
+    }
+  },
+  "static_checks": {
+    "typescript_exit_code": 0,
+    "pinned_mypy_exit_code": 0,
+    "ruff_and_format_exit_code": 0,
+    "document_title_case_violations": 0,
+    "tsc_log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-controls-root-tsc-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "mypy_log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-app-controls-root-mypy-v1.log",
+      "bytes": 44,
+      "sha256": "281a094c39385b4d7b53e5db635f52158036861433c2a4975b9039e77a627a24"
+    }
+  },
+  "native_historical_operations": false,
+  "historical_results_changed": false,
+  "methods_v8_updated": false,
+  "scientific_qualified": false,
+  "ci": {
+    "checked_head": "3bd9aea15c1be2b21ac86d2ccd8025013ca5dc1d",
+    "registered_checks": 0,
+    "verdict": "unverified"
+  },
+  "limits": "UI/HTTP projections mocked; native Qt fixtures. Exact scope and software behavior only."
+}

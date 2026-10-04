@@ -172,6 +172,31 @@ def test_refit_resume_uses_strict_saved_domain_and_full_interval(monkeypatch):
     dialog.cleanup()
 
 
+def test_refit_lossless_seed_is_explicit_strict_and_does_not_replace_recipe(
+    monkeypatch,
+):
+    from dataclasses import replace
+
+    config, plan = _recipe_plan()
+    app, dialog = _recipe_dialog(monkeypatch, plan)
+    try:
+        index = dialog.initialization.findData("restricted_spline")
+        assert index >= 0
+        dialog.initialization.setCurrentIndex(index)
+        with pytest.raises(ValueError, match="reviewed window"):
+            dialog._options()
+        dialog._inherited_scope = {"first_frame": 2, "end_exclusive_frame": 7}
+        options = dialog._options()
+        assert options.operation == "restrict_initialization"
+        assert options.initialization_source == "restricted_spline"
+        assert options.frame_indices == (2, 4, 6)
+        assert options.knot_count == 3
+        assert options.config == replace(config, initialization_policy="strict")
+        assert dialog.frames.isEnabled()
+    finally:
+        dialog.cleanup()
+
+
 def test_refit_unavailable_resume_is_disabled_and_explains_reason(monkeypatch):
     _, plan = _recipe_plan()
     plan["preserved_spline"] = {"available": False, "reason": "No saved spline"}
@@ -249,3 +274,33 @@ def test_refit_scheduled_recipe_summary_and_scalar_edit_preserve_phases(monkeypa
     dialog.initialization.setCurrentIndex(1)
     assert dialog._options().config.constraint_options == config.constraint_options
     dialog.cleanup()
+
+
+def test_editable_modes_and_resume_roundtrip_preserve_user_domain(monkeypatch):
+    _, plan = _recipe_plan()
+    app, dialog = _recipe_dialog(monkeypatch, plan)
+    try:
+        dialog.frames.setText("0, 2, 4, 6")
+        dialog.fields["knot_count"].setText("4")
+        dialog.initialization.setCurrentIndex(2)
+        assert dialog.frames.text() == "0, 2, 4, 6"
+        assert dialog.fields["knot_count"].text() == "4"
+        dialog.initialization.setCurrentIndex(0)
+        assert dialog.frames.text() == "0, 2, 4, 6"
+        assert dialog.fields["knot_count"].text() == "4"
+        dialog.initialization.setCurrentIndex(2)
+        dialog.frames.setText("2, 4, 6")
+        dialog.fields["knot_count"].setText("3")
+        dialog.initialization.setCurrentIndex(1)
+        assert dialog.frames.text() == "0, 2, 4, 6, 8"
+        assert not dialog.frames.isEnabled()
+        dialog.initialization.setCurrentIndex(2)
+        assert dialog.frames.text() == "2, 4, 6"
+        assert dialog.fields["knot_count"].text() == "3"
+        assert dialog.frames.isEnabled()
+        dialog.initialization.setCurrentIndex(1)
+        dialog.initialization.setCurrentIndex(0)
+        assert dialog.frames.text() == "2, 4, 6"
+        assert dialog.fields["knot_count"].text() == "3"
+    finally:
+        dialog.cleanup()

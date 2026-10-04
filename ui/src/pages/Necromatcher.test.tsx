@@ -4,11 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useNavigate, useLocation } from 'react-router';
 import { NecromatcherPage } from './Necromatcher';
 
-const mocks = vi.hoisted(() => ({ players: vi.fn(), swings: vi.fn(), assets: vi.fn(), frame: vi.fn(), projection: vi.fn(), plan: vi.fn(), createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn(), videoSubmit: vi.fn(), videoView: vi.fn(), videoCancel: vi.fn() }));
+const mocks = vi.hoisted(() => ({ players: vi.fn(), swings: vi.fn(), assets: vi.fn(), frame: vi.fn(), projection: vi.fn(), summary: vi.fn(), plan: vi.fn(), createPlayer: vi.fn(), createSwing: vi.fn(), importAsset: vi.fn(), videoSubmit: vi.fn(), videoView: vi.fn(), videoCancel: vi.fn() }));
 vi.mock('@/api/necromatcher', () => ({
   fetchPlayers: mocks.players, fetchSwings: mocks.swings, fetchAssets: mocks.assets,
   fetchCaptureFrame: mocks.frame, captureFrameImageUrl: () => '/test-source.png',
   fetchFitProjection: mocks.projection,
+  fetchFitSummary: mocks.summary,
   fetchRefitPlan: mocks.plan, submitRefit: vi.fn(), fetchRefit: vi.fn(), cancelRefit: vi.fn(),
   submitVideoExport: mocks.videoSubmit, fetchVideoExport: mocks.videoView, cancelVideoExport: mocks.videoCancel, videoExportDownloadUrl: (run: string) => `/export/${run}/download`,
   swingExportUrl: (id: string) => `/api/v1/necromatcher/swings/${id}/export`,
@@ -29,6 +30,7 @@ beforeEach(() => {
   mocks.assets.mockResolvedValue({assets:[{dataset_id:'capture-v1',session_id:'hogan-practice',kind:'image_capture',metadata:{frame_count:3,qualification:'image_observations_only'}}]});
   mocks.frame.mockResolvedValue({capture_id:'capture-v1',frame_index:0,frame_count:3,image_width:320,image_height:240,frame:{pts_ticks:1100,timebase_numerator:1,timebase_denominator:10,physical_time_s:null},observation:{status:'detected',landmarks:{left_wrist:{x:0.5,y:0.4,visibility:null}}}});
   mocks.plan.mockImplementation(async (fit: string) => ({source_fit_id: fit, frame_indices: [0, 1, 2], coordinate_order: ['hip'], coordinate_units: ['rad'], recorded_options: null}));
+  mocks.summary.mockImplementation(async (fit: string) => ({fit_id: fit,capture_id:'capture-v1',frame_count:3,frame_indices:[0,1,2]}));
 });
 describe('Necromatcher historical workspace', () => {
   it('reviews the saved native fit against its bound source frame', async () => {

@@ -6,7 +6,7 @@ import { LibraryActions } from '@/components/necromatcher/LibraryActions';
 import { VideoExportControls } from '@/components/necromatcher/VideoExportControls';
 import { RefitControls } from '@/components/necromatcher/RefitControls';
 import { fetchPlayers, fetchSwings, fetchAssets, fetchCaptureFrame, captureFrameImageUrl, swingExportUrl,
-  fetchFitProjection, type FitProjection, type HistoricalPlayer, type HistoricalSwing, type HistoricalAsset, type CaptureFrame } from '@/api/necromatcher';
+  fetchFitProjection, fetchFitSummary, type FitSummary, type FitProjection, type HistoricalPlayer, type HistoricalSwing, type HistoricalAsset, type CaptureFrame } from '@/api/necromatcher';
 
 const card = 'rounded-lg border border-gray-700 bg-gray-800 p-4 text-left hover:border-blue-400 focus-visible:outline-2 focus-visible:outline-blue-400';
 const readableError = (error: unknown) => error instanceof Error ? error.message : 'The library could not be loaded. Retry after checking the backend.';
@@ -32,7 +32,7 @@ export function NecromatcherPage() {
   const swing = query.get('swing') ?? '';
   const capture = query.get('capture') ?? '';
   const fit = query.get('fit') ?? '';
-  const frameIndex = Math.max(0, Math.trunc(Number(query.get('frame')) || 0));
+  const requestedFrame = Math.max(0, Math.trunc(Number(query.get('frame')) || 0));
   const [revision, setRevision] = useState(0);
   const playerLoad = useScopedLoad('players', revision, useCallback(async () => (await fetchPlayers()).players, []), emptyPlayers);
   const players = playerLoad.data;
@@ -43,15 +43,26 @@ export function NecromatcherPage() {
     useCallback(async () => (await fetchAssets(selectedSwing)).assets, [selectedSwing]), emptyAssets);
   const selectedAssets = assetLoad.data.filter((item) => item.session_id === selectedSwing);
   const selectedCapture = selectedAssets.some((item) => item.kind === 'image_capture' && item.dataset_id === capture) ? capture : '';
-  const frameLoad = useScopedLoad<CaptureFrame | null>(selectedCapture ? `${selectedCapture}/${frameIndex}` : '', revision,
+  const selectedFit = selectedAssets.some((item) => item.kind === 'kinematic_fit' && item.dataset_id === fit && item.metadata.capture_id === selectedCapture) ? fit : '';
+  const summaryLoad = useScopedLoad<FitSummary | null>(selectedFit, revision,
+    useCallback(() => fetchFitSummary(selectedFit), [selectedFit]), null);
+  const summary = summaryLoad.data;
+  const validSummary = summary?.fit_id === selectedFit && summary.capture_id === selectedCapture
+    && Array.isArray(summary.frame_indices) && summary.frame_indices.length > 0
+    && summary.frame_count === summary.frame_indices.length
+    && summary.frame_indices.every((index, position, indices) => Number.isInteger(index) && index >= 0 && (position === 0 || index > indices[position - 1]));
+  const fitFrames = validSummary ? summary!.frame_indices : [];
+  const frameIndex = selectedFit ? (fitFrames.includes(requestedFrame) ? requestedFrame : fitFrames[0] ?? 0) : requestedFrame;
+  const readyFrame = selectedCapture && (!selectedFit || validSummary);
+  const frameLoad = useScopedLoad<CaptureFrame | null>(readyFrame ? `${selectedCapture}/${frameIndex}` : '', revision,
     useCallback(() => fetchCaptureFrame(selectedCapture, frameIndex), [selectedCapture, frameIndex]), null);
   const frame = frameLoad.data;
-  const selectedFit = selectedAssets.some((item) => item.kind === 'kinematic_fit' && item.dataset_id === fit && item.metadata.capture_id === selectedCapture) ? fit : '';
-  const projectionLoad = useScopedLoad<FitProjection | null>(selectedFit ? `${selectedFit}/${frameIndex}` : '', revision,
+  const projectionLoad = useScopedLoad<FitProjection | null>(selectedFit && validSummary ? `${selectedFit}/${frameIndex}` : '', revision,
     useCallback(() => fetchFitProjection(selectedFit, frameIndex), [selectedFit, frameIndex]), null);
   const projection = projectionLoad.data;
   const currentProjection = projection?.fit_id === selectedFit && projection.capture_id === selectedCapture && projection.frame_index === frameIndex ? projection : null;
-  const error = playerLoad.error || swingLoad.error || assetLoad.error || frameLoad.error || projectionLoad.error;
+  const error = playerLoad.error || swingLoad.error || assetLoad.error || summaryLoad.error
+    || (selectedFit && summary && !validSummary ? 'The saved fit frame domain is invalid.' : '') || frameLoad.error || projectionLoad.error;
   const loading = playerLoad.loading;
 
   function selectPlayer(id: string) {
@@ -63,6 +74,7 @@ export function NecromatcherPage() {
   const currentFrame = frame?.capture_id === capture && frame.frame_index === frameIndex ? frame : null;
   const frameCount = selectedAssets.find((asset) => asset.dataset_id === capture)?.metadata.frame_count
     ?? (frame?.capture_id === capture ? frame.frame_count : 1);
+  const reviewFrames = selectedFit ? fitFrames : Array.from({length: frameCount}, (_, index) => index);
   const sidebar = <div className="p-4 space-y-4">
     <h2 className="text-lg font-semibold text-white">Saved Swings</h2>
     {!player && <p className="text-sm text-gray-400">Select a Historical Player.</p>}
@@ -95,12 +107,12 @@ export function NecromatcherPage() {
       {selectedAssets.filter((x) => x.kind === 'image_capture').map((item) => <button key={item.dataset_id} className={card} aria-pressed={capture === item.dataset_id} onClick={() => { setQuery({player, swing, capture: item.dataset_id}); }}>
         <span className="block font-semibold">{item.dataset_id}</span><span className="text-sm text-gray-400">{item.metadata.frame_count} Source Frames · Image Observations</span>
       </button>)}
-      {selectedCapture && <SourceFrameReview capture={selectedCapture} frame={currentFrame} projection={currentProjection} failed={Boolean(frameLoad.error)} frameCount={frameCount} frameIndex={frameIndex} onChange={(index) => setQuery({player, swing, capture, ...(selectedFit ? {fit: selectedFit, ...(query.get('run') ? {run: query.get('run')!} : {}), ...(query.get('export_run') ? {export_run: query.get('export_run')!} : {})} : {}), frame: String(index)})} />}
+      {selectedCapture && <SourceFrameReview capture={selectedCapture} frame={currentFrame} projection={currentProjection} failed={Boolean(error)} frameCount={frameCount} frameIndices={reviewFrames} frameIndex={frameIndex} onChange={(index) => setQuery({player, swing, capture, ...(selectedFit ? {fit: selectedFit, ...(query.get('run') ? {run: query.get('run')!} : {}), ...(query.get('export_run') ? {export_run: query.get('export_run')!} : {})} : {}), frame: String(index)})} />}
     </div>
   </WorkspaceShell>;
 }
 
-function SourceFrameReview({capture, frame, projection, failed, frameCount, frameIndex, onChange}: {capture: string; frame: CaptureFrame | null; projection: FitProjection | null; failed: boolean; frameCount: number; frameIndex: number; onChange: (index: number) => void}) {
+function SourceFrameReview({capture, frame, projection, failed, frameCount, frameIndices, frameIndex, onChange}: {capture: string; frame: CaptureFrame | null; projection: FitProjection | null; failed: boolean; frameCount: number; frameIndices: number[]; frameIndex: number; onChange: (index: number) => void}) {
   const pts = frame ? frame.frame.pts_ticks * frame.frame.timebase_numerator / frame.frame.timebase_denominator : null;
   return <section className="space-y-3" aria-label="Source Frame Review">
     {frame ? <><div className="relative max-w-4xl"><img alt="Historical Source Frame" src={captureFrameImageUrl(capture, frameIndex)} className="w-full h-auto rounded" />
@@ -110,6 +122,6 @@ function SourceFrameReview({capture, frame, projection, failed, frameCount, fram
     <p className="text-sm text-gray-300">Source PTS: {pts?.toFixed(3)} s · Physical Time: Unknown</p>
     {projection && <p className="text-sm text-orange-300">Orange: Native Model Projection · Camera and Physical Time Remain Unqualified.</p>}
     <p className="text-sm text-gray-400">{frame.observation.status === 'missing' ? 'Detector Returned No Landmarks for This Frame.' : 'Landmarks Are Image Observations; Depth and Joint Torques Require a Fitted Model.'}</p></> : !failed && <p role="status">Loading Source Frame…</p>}
-    <label className="block text-sm">Source Frame {frameIndex + 1} of {frameCount}<input aria-label="Source Frame" className="block w-full mt-2" type="range" min="0" max={frameCount - 1} value={frameIndex} onChange={(event) => onChange(Number(event.target.value))} /></label>
+    <label className="block text-sm">Source Frame {frameIndex + 1} of {frameCount}<input aria-label="Source Frame" className="block w-full mt-2" type="range" min="0" max={Math.max(0, frameIndices.length - 1)} disabled={!frameIndices.length} value={Math.max(0, frameIndices.indexOf(frameIndex))} onChange={(event) => {const index = frameIndices[Number(event.target.value)]; if (index !== undefined) onChange(index);}} /></label>
   </section>;
 }

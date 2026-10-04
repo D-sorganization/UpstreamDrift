@@ -1,5 +1,7 @@
 # Active: Necromatcher Reviewed Fitting Scope — #11414
 
+- App checkpoint SELF: explicit lossless restriction mode and exact saved-frame review now work in both hosts; root 45 Python/45 React cases pass. Edited choices survive mode switching; excluded Tiger frames 191–209 never reach fitted projection. [App Procedure](docs/development/necromatcher-app-restriction-and-frame-review.md). Historical V22 results are unchanged; CI remains unverified.
+
 - Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Published scope checkpoint `3a1a6a8e428afffc20346d7a32044b4c602d4c1b`; upload responsiveness follow-up SELF.
 - Registered raw reviews, exact selected-domain checks and native/web/export provenance are implemented. Root 294 Python/39 UI cases and static checks pass. Preserved failures and procedures are in [Camera and Scope Procedure](docs/development/necromatcher-conditional-camera-and-scope.md).
 - Restricted trial at published `6695085027bdf4f354d867136930931591002d80`: explicit contact restriction retained existing 105/120 anchors, author stage saved `tiger-both-hands-authored-seed-v21`; strict fitting timed out at unchanged 300-second wall budget. Session 32543 closed exit 1; no final fit/candidate/completion. Original non-index bytes/index records preserved; ten allowed files added. Solver evaluations/elapsed unavailable. This is an unoptimized seed, not a successful match.

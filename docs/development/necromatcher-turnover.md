@@ -2,6 +2,8 @@
 
 ## Active Objective
 
+Current app boundary: [Restricted Seed and Frame Review](necromatcher-app-restriction-and-frame-review.md) records explicit strict seed creation, preserved editable choices and exact saved-frame review. Root 45 Python/45 React cases pass; Tiger fitted projection excludes frames 191–209. Historical V22 outputs and the earlier compiled Methods V8 retain their own producer identities and scientific limits.
+
 Owner priority: integrate historical footage matching as **Necromatcher**, with player tiles, persistent swing/model/control versions and downstream simulation/impact/analysis handoffs. Epic #11232 supersedes the narrower capture-only delivery scope. Tiger #11226 and Hogan #11229 remain open until reconstruction and real native replay qualify.
 
 ## Current Checkpoint: Full Videos, Source Binding and Telemetry

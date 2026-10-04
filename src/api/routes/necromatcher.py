@@ -105,10 +105,12 @@ class RefitRequest(BaseModel):
     config: dict[str, Any] | None = None
     shaft_evidence: dict[str, Any] | None = None
     source_scope: dict[str, Any] | None = None
-    operation: Literal["fit", "author_initialization"] = "fit"
-    initialization_source: Literal["sampled_parent", "preserved_spline"] = (
-        "sampled_parent"
+    operation: Literal["fit", "author_initialization", "restrict_initialization"] = (
+        "fit"
     )
+    initialization_source: Literal[
+        "sampled_parent", "preserved_spline", "restricted_spline"
+    ] = "sampled_parent"
 
     def options(self) -> NativeRefitOptions:
         legacy = {

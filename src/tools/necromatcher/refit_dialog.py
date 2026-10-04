@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, replace
 import json
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QStandardItemModel
@@ -282,12 +282,15 @@ class ResearchRefitDialog(ReviewedShaftDialog):
         self._sample_knot_count = self.fields["knot_count"].text()
         self._sample_frames = self.frames.text()
         self.initialization = QComboBox()
+        self._initialization_index = 0
         self.initialization.addItem("Sample Parent Poses", "sampled_parent")
         self.initialization.addItem("Resume Saved Spline", "preserved_spline")
+        self.initialization.addItem("Lossless Restricted Seed", "restricted_spline")
         model = cast(QStandardItemModel, self.initialization.model())
-        item = model.item(1)
-        if item is not None:
-            item.setEnabled(self._preserved.get("available") is True)
+        for index in (1, 2):
+            item = model.item(index)
+            if item is not None:
+                item.setEnabled(self._preserved.get("available") is True)
         self.initialization.currentIndexChanged.connect(self._initialization_changed)
         form.addRow("Initialization", self.initialization)
         self.recipe_summary = QLabel()
@@ -307,11 +310,15 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             except ValueError:
                 pass  # Submission validates malformed selected sample IDs.
             field.setText(str(self._preserved.get("knot_count", "")))
-        else:
+        elif self._initialization_index == 1:
             field.setText(self._sample_knot_count)
             self.frames.setText(self._sample_frames)
+        self._initialization_index = index
         field.setEnabled(not exact)
         self.frames.setEnabled(not exact)
+        self.start.setText(
+            "Create Lossless Restricted Seed" if index == 2 else "Start Research Refit"
+        )
         self._update_recipe_summary()
 
     def _resume_indices(self) -> tuple[int, ...]:
@@ -340,7 +347,7 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             pins = constraints.pinned_spheres if constraints else ()
         policy = (
             "strict"
-            if self.initialization.currentIndex() == 1
+            if self.initialization.currentIndex() in {1, 2}
             else config.initialization_policy
         )
         resume = (
@@ -355,13 +362,23 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             f"{config.interior_fractions}; Pins: {', '.join(pins) or 'None'}; "
             f"Initialization Policy: {policy}. {resume}. {schedule_summary}"
             "Grip, Contact, Camera and Physical Time Remain Unqualified."
+            + (
+                " Lossless restriction creates an unoptimized research seed. "
+                "Include both reviewed endpoints and the retained knot count; "
+                "contact and shaft evidence are not changed automatically."
+                if self.initialization.currentData() == "restricted_spline"
+                else ""
+            )
         )
 
     def _options(self) -> NativeRefitOptions:
         values = {name: field.text() for name, field in self.fields.items()}
         exact = self.initialization.currentIndex() == 1
-        if exact and self._preserved.get("available") is not True:
+        restricted = self.initialization.currentData() == "restricted_spline"
+        if (exact or restricted) and self._preserved.get("available") is not True:
             raise ValueError(self._preserved.get("reason", "No saved spline"))
+        if restricted and self._inherited_scope is None and self._scope_path is None:
+            raise ValueError("Lossless restriction requires a reviewed window")
         config = replace(
             self._baseline_config,
             max_iterations=int(values["max_iterations"]),
@@ -369,7 +386,9 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             smoothness_weight=float(values["smoothness_weight"]),
             closure_weight=float(values["closure_weight"]),
             initialization_policy=(
-                "strict" if exact else self._baseline_config.initialization_policy
+                "strict"
+                if exact or restricted
+                else self._baseline_config.initialization_policy
             ),
         )
         indices = (
@@ -388,8 +407,11 @@ class ResearchRefitDialog(ReviewedShaftDialog):
             config=config,
             unknown_visibility_weight=float(values["unknown_visibility_weight"]),
             budget_wall_s=float(values["budget_wall_s"]),
-            operation="fit",
-            initialization_source="preserved_spline" if exact else "sampled_parent",
+            operation="restrict_initialization" if restricted else "fit",
+            initialization_source=cast(
+                Literal["sampled_parent", "preserved_spline", "restricted_spline"],
+                self.initialization.currentData(),
+            ),
         )
 
     def _start(self) -> None:

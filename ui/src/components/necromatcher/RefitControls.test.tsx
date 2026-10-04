@@ -28,6 +28,29 @@ beforeEach(() => {
   api.fetchRefitPlan.mockResolvedValue({source_fit_id: 'old', frame_indices: [0, 2], coordinate_order: ['hip'], coordinate_units: ['rad'], recorded_options: null});
 });
 
+it('creates a lossless restricted seed only with reviewed endpoints and strict unchanged recipe', async () => {
+  api.fetchRefitPlan.mockResolvedValue(boundedPlan());
+  api.submitRefit.mockResolvedValue({run_id: 'r', source_fit_id: 'old', new_fit_id: 'seed', status: 'failed', acceptance: 'rejected', blockers: [], message: 'Finished'});
+  render(<RefitControls fit="old" onStored={vi.fn()} />);
+  const user = userEvent.setup();
+  await screen.findByLabelText('Initialization Source');
+  await user.selectOptions(screen.getByLabelText('Initialization Source'), 'restricted_spline');
+  await user.type(screen.getByLabelText('New Fit Version'), 'seed');
+  expect(screen.getByRole('button', {name: 'Create Lossless Restricted Seed'})).toBeDisabled();
+  const record = {schema: 'necromatcher/source-fit-scope/1', capture_id: 'capture', first_frame: 0, end_exclusive_frame: 3, purpose: 'both_hands_on_club', review: {reason: 'Exclude transition', uncertainty_policy: 'Unmeasured', contact_calibrated: false}};
+  const file = new File([''], 'window.json', {type: 'application/json'});
+  file.text = vi.fn().mockResolvedValue(JSON.stringify(record));
+  await user.upload(screen.getByLabelText('Import Reviewed Window'), file);
+  await screen.findByText(/Reviewed Original Frames: 0 to 3/);
+  await user.clear(screen.getByLabelText('Source Frame Indices'));
+  await user.type(screen.getByLabelText('Source Frame Indices'), '0, 1');
+  expect(screen.getByRole('button', {name: 'Create Lossless Restricted Seed'})).toBeDisabled();
+  await user.clear(screen.getByLabelText('Source Frame Indices'));
+  await user.type(screen.getByLabelText('Source Frame Indices'), '0, 1, 2');
+  await user.click(screen.getByRole('button', {name: 'Create Lossless Restricted Seed'}));
+  expect(api.submitRefit.mock.calls[0][1]).toMatchObject({operation: 'restrict_initialization', initialization_source: 'restricted_spline', source_scope: record, config: {...boundedConfig, initialization_policy: 'strict'}});
+});
+
 it('discloses inherited reviewed window without resending or widening it', async () => {
   api.fetchRefitPlan.mockResolvedValue({...boundedPlan(), source_scope: {
     first_frame: 0, end_exclusive_frame: 4, purpose: 'both_hands_on_club',

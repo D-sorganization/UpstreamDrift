@@ -5,6 +5,17 @@ const formRequest = vi.hoisted(() => vi.fn());
 vi.mock('./fetch', () => ({apiFetch: request, apiFetchForm: formRequest}));
 vi.mock('./backend', () => ({getApiBase: () => 'http://backend.test'}));
 beforeEach(() => {request.mockReset(); request.mockResolvedValue({});});
+it('transports the typed lossless restricted seed pair without inventing receipt or optimization', async () => {
+  const payload: RefitOptions & {new_fit_id: string} = {
+    new_fit_id: 'seed', frame_indices: [0, 1, 3], knot_count: 3, coordinate_scales: [1],
+    unknown_visibility_weight: 0.5, budget_wall_s: 300,
+    operation: 'restrict_initialization', initialization_source: 'restricted_spline',
+    config: {max_iterations: 30, prior_weight: 0.1, smoothness_weight: 0.01, closure_weight: 100, initialization_policy: 'strict'},
+  };
+  await submitRefit('parent', payload);
+  expect(request).toHaveBeenCalledExactlyOnceWith('/api/v1/necromatcher/fits/parent/refits', {method: 'POST', body: JSON.stringify(payload)});
+  expect(payload).not.toHaveProperty('spline_interval_restriction');
+});
 it('uploads exact review file bytes through the shared multipart transport', async () => {
   const file = new File(['{ "schema": "review" }\n'], 'review.json', {type: 'application/json'});
   await registerReviewedWindow('fit/one', file);
