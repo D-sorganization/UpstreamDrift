@@ -1,99 +1,291 @@
 {
-  "schema": "necromatcher/methods-supplement-root-review/4",
-  "edition": "Methods V4: Measured Setup and Seed Previews",
+  "schema": "necromatcher/methods-v5-report-review/1",
+  "created_at_utc": "2026-10-04T01:41:48.129737+00:00",
+  "status": "visual_review_passed",
   "source": {
-    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.tex",
-    "sha256": "2f59fa11f48cc31e3c2cde3c6ba59ec59989aa074b54281704910e02c2f8527f",
-    "bytes": 27501
+    "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/conditional-camera-two-hand-methods.tex",
+    "bytes": 36265,
+    "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
+  },
+  "frozen_source": {
+    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.tex",
+    "bytes": 36265,
+    "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
   },
   "pdf": {
-    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\conditional-camera-two-hand-methods.pdf",
-    "sha256": "92719ded542ca88009678e64d5e80d84b1edbc66f9b723005640b376185bbd91",
-    "bytes": 3245413
+    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.pdf",
+    "bytes": 3301322,
+    "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
   },
-  "pages": [
+  "page_count": 14,
+  "reviewed_page_indices": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  "visual_review_scope": {
+    "contact_sheets": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    "full_size_final_pages": [8, 9, 10, 11, 12, 13, 14],
+    "findings": "All pages inspected; tables, headings, figures, footnotes and digest lines fit. New sections have no orphaned sentence spill. Three source figures retain their original aspect."
+  },
+  "compiler": {
+    "passes": 3,
+    "exit_codes": [0, 0, 0],
+    "installer_disabled": true,
+    "final_latex_warnings": [],
+    "final_overfull_underfull": [],
+    "first_pass_rerun_resolved": true,
+    "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation was enabled."
+  },
+  "title_case": {
+    "documents_checked": 1,
+    "violations": 0
+  },
+  "local_external_graphics": [
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-01.png",
-      "sha256": "6828b314f51f27779e8661de6bf6dc91f23762c814e64df6e51dd9368749f080",
-      "bytes": 183933
+      "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000000.png",
+      "bytes": 964712,
+      "sha256": "751a0e803dd1da14427887d6f3e2e0004151c3e96710f07db5e5fbb16d68ca2d"
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-02.png",
-      "sha256": "2f98b8433aa40c98fb0422d99ee6da0b7a8e43a8d59d4e9527361baed837be8b",
-      "bytes": 197706
+      "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000150.png",
+      "bytes": 1040773,
+      "sha256": "1483528d4d24e8c233674eed6571bb55d39882d1e253e6299be2bbc588044514"
     },
     {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-03.png",
-      "sha256": "15ffad670e205cc88b8655292e40ec089128d6de97d3c8ce98fc1ed6c4fadb91",
-      "bytes": 176226
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-04.png",
-      "sha256": "9c2d34820e46f2ba871ee5832fb8f8d0b25dd6093a91ff3951da21c8c8573467",
-      "bytes": 158901
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-05.png",
-      "sha256": "dcbb3b866a4b45aef6a09f2bb6d117de5a5b3ba4dce1655a835195c616a0778e",
-      "bytes": 194270
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-06.png",
-      "sha256": "90314c7c0a4356ca784546d1e4af383f0f0c3274a85d9155b7169032ba23e19b",
-      "bytes": 199161
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-07.png",
-      "sha256": "2b3886975f2da8e4366e650e6993593f3c3be2e6ae98ea93783e7d2925a8c1f5",
-      "bytes": 172815
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-08.png",
-      "sha256": "1bd68a3cc73369ea309bd6bb457c6da6cb0c712e140fe3d7cbc26dcd8ac2f833",
-      "bytes": 181301
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-09.png",
-      "sha256": "0ed1feecedf6627e8441ad1690865dd365e86fe2b6c1801ec6239907f9f4cc9e",
-      "bytes": 160169
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-10.png",
-      "sha256": "12784a18105a73100679e9fcd705603ef223aa7f156f7411f950cd9e021270eb",
-      "bytes": 394460
-    },
-    {
-      "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Conditional Camera and Two-Hand Methods V1\\methods-v4-final-page-11.png",
-      "sha256": "33f773506f4cab1c956fc0ef9ebdd13cc1685c03828217e3e67f5d30c3659ba7",
-      "bytes": 390053
+      "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000190.png",
+      "bytes": 1057021,
+      "sha256": "ee546cf537be02f78cad629522ae1916d34d537dfabe9a52a771727c9702e00e"
     }
   ],
-  "page_count": 11,
-  "all_pages_visually_reviewed": true,
-  "root_directly_viewed_pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  "layout_findings": "Readable equations, tables and three source overlays; no clipping, blank pages or TeX box warnings",
-  "compiler": "Existing MiKTeX pdflatex, installer disabled, two final passes",
-  "builtin_compiler": "Unavailable: Unable to find standard directories for platform",
-  "polish_review": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\conditional-camera-methods-v4-polish-v1\\final-polish-review-v1.json",
-    "bytes": 6036,
-    "sha256": "1fa1719e538798cd658d45c4866b373007922548d5e32fc4467c9d04b6579fde"
+  "graphics_portability": "Three absolute Desktop PNG dependencies are required; this TeX is not independently portable without them. The exact same V4 image paths/bytes are retained.",
+  "accepted_v4_archive": {
+    "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v4/preservation-manifest.json",
+    "bytes": 5119,
+    "sha256": "1014581c53c7c1ee352aa38e586a41d87f07ae603465459ceb57636e7d81497e"
   },
-  "partial_trial_independent_review": "Accepted serialized failed-trial preservation and authored-seed provenance",
-  "profile_independent_review": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\tiger-both-hands-profile-independent-v1\\root-release-v1\\root-acceptance.json",
-    "bytes": 1016,
-    "sha256": "5e049b4945b3e3ff188216e623475e174097557de8a80e54cf60681a6519fbe7"
+  "research_authorities": [
+    {
+      "path": "C:/Users/diete/Repositories/Temp/tiger-authenticated-read-profile-preparation-v1/root-release-v1/root-acceptance.json",
+      "bytes": 42581,
+      "sha256": "b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4"
+    },
+    {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/setup-assessment.json",
+      "bytes": 47426,
+      "sha256": "e1d87d9814c4420f9cb8fd3f5253792a6c35a14e97a3b2b4f66fa2df73345f5b"
+    },
+    {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/finally-preservation.json",
+      "bytes": 4824854,
+      "sha256": "f245953430934187ba054b5feb5f54c89c1c33b78c37b801a37baf9b5872db58"
+    },
+    {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/profile-stages.json",
+      "bytes": 70338,
+      "sha256": "7e0eda61605b841a2853fbaee9bf448dc9f3c6a157d2b55a906b40fd6fc4ef3e"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/tiger-restricted-seed-lineage-public-root-v2/assessment.json",
+      "bytes": 756,
+      "sha256": "17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5"
+    }
+  ],
+  "profile_producer": "f2dfe7d450e3aa8b0c446245f2f6047858ce61bb",
+  "limitations": {
+    "native_or_optimizer_run_by_this_review": false,
+    "library_write": false,
+    "independent_projection_recompute": false,
+    "isolated_speedup_claim": false,
+    "timeout_cause_identified": false,
+    "scientific_qualification": false,
+    "physical_contact_time_calibration": false,
+    "clinical_anatomy_or_rom_qualification": false,
+    "sourceclock_restriction_integrated": false
   },
-  "stills_independent_review": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\tiger-authored-seed-stills-independent-v2\\root-release-v1\\root-acceptance.json",
-    "bytes": 760,
-    "sha256": "5b24730a8f60c8d47484e02c3589de2fefd6bf450b1cd9b7d23f74fd2ce42ec3"
+  "preserved_outputs": [
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-01.png",
+      "bytes": 560188,
+      "sha256": "07aaa68361b41f50c4cf37c73ee085d0c714e8a94218df0c16d2bb11191301c2"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-07.png",
+      "bytes": 654272,
+      "sha256": "d451cd14c4cf3c4ba72e0342f80ab191eb0c59c9e934d0454879f98ce7247b27"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-13.png",
+      "bytes": 221914,
+      "sha256": "e8491ef4ac1a92d576c36a063ca2c2455d165e2d64ad7e8842747e7e878decfa"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-01.png",
+      "bytes": 191001,
+      "sha256": "4f776c095d0665098282ccd402308c23e2c4987a8d5c4200f9c238ff83c8a304"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-02.png",
+      "bytes": 202766,
+      "sha256": "d80c9ed59c689307c3888a69b5d90a11baa944a0a8142cf4d69c7986e4bce0ab"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-03.png",
+      "bytes": 182293,
+      "sha256": "f617e4bdca5ee710a68af3e89bb3df88358444d915fce439c049a9c932b2e799"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-04.png",
+      "bytes": 166793,
+      "sha256": "b104943d9c13aa9f25cb04c38011e94c894f57e4f3bdb53db67f9486bd0bd287"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-05.png",
+      "bytes": 203290,
+      "sha256": "1587665f44c6589c7b80f250ec06241b54b1f10a3d9b6693828198f2370a217a"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-06.png",
+      "bytes": 202155,
+      "sha256": "8b59ecfeb956eaeba015a88ef137592b852f0c276ddae4bb9cc0deba74c0adfa"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-07.png",
+      "bytes": 178013,
+      "sha256": "226296cb964891ab4359df0ce9f4657a50c07c5685946dd25042bec528dd2fd8"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-08.png",
+      "bytes": 200642,
+      "sha256": "9209f4e52a1707ceacd426110cc3c6fbd8e52ed99217f36a57d87f50fcec7326"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-09.png",
+      "bytes": 170565,
+      "sha256": "a69b3f71db38b3ebacd969b09c5300e34382aa4c148fe4c2e60541ac03f3ccfa"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-10.png",
+      "bytes": 416580,
+      "sha256": "e1e4de067e71f860d72c0a2553691924bf895cd045f6f9c5301663d3d61edc46"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-11.png",
+      "bytes": 375528,
+      "sha256": "f2bdb35341264fbbbb170e97a33318df4ab6861bed3f010d38b9eb846525530d"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-12.png",
+      "bytes": 239648,
+      "sha256": "30f388b36e3876d5111ddeed59ad17ec3a8a7014ae2fd60f692c58a7231a9fcd"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-13.png",
+      "bytes": 249258,
+      "sha256": "569c4aed6feea48d2c0268241649b6855acc429c90757371c3845a3557d16408"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-14.png",
+      "bytes": 191341,
+      "sha256": "fc8fcb1a45ab4d88431d466eba3423a15d5d1ac0041e268a917dc46d71f8c005"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-1.log",
+      "bytes": 7689,
+      "sha256": "8f8c790b16b491e85d9ae60e87f4b474bd4bdb1e9c3996040357764eba194994"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-2.log",
+      "bytes": 7759,
+      "sha256": "419d08bc7d6481eefcc2fe3108677229dc0a367b6da140a3c8fc2cf0de372bf6"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-3.log",
+      "bytes": 7759,
+      "sha256": "5140e3d1ff92dc05bc13ea5e95209ed0262f53ed8c06003f8130752692651485"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/conditional-camera-two-hand-methods.log",
+      "bytes": 22506,
+      "sha256": "fa0a496d4d44a3b6097534aabed79a9494e274a2a7d4eb267da70c9d84184b8d"
+    }
+  ],
+  "external_candidate_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v5-compile-v3\\frozen-candidate-v2\\report-review-v5.json",
+    "sha256": "fe5d652c43ad56389fc55edfd905d65514d414fccb9a485fb2265100b9b75590",
+    "bytes": 9711
   },
-  "native_projection_recomputed": false,
-  "complete_outside_overlay_union_verified": false,
-  "physical_clock_reconstructed": false,
-  "scientific_qualified": false,
-  "ControlTower_transferred": false,
-  "image_dependencies": "Three exact Desktop PNGs referenced by absolute path in the source; preserve these pinned images when reproducing this local build"
+  "root_acceptance": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v5-compile-v3\\root-acceptance-v1\\root-acceptance.json",
+    "sha256": "e94e43b40d76d3b37dd207c2cd73926f02614b5e1b2d79085ab82994b8652780",
+    "bytes": 3221
+  },
+  "root_acceptance_record": {
+    "schema": "necromatcher/methods-v5-root-acceptance/1",
+    "created_at_utc": "2026-10-04T01:50:07.859027+00:00",
+    "candidate_review": {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/report-review-v5.json",
+      "bytes": 9711,
+      "sha256": "fe5d652c43ad56389fc55edfd905d65514d414fccb9a485fb2265100b9b75590"
+    },
+    "source": {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.tex",
+      "bytes": 36265,
+      "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
+    },
+    "pdf": {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.pdf",
+      "bytes": 3301322,
+      "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
+    },
+    "root_full_page_visual_review": [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+    ],
+    "visual_findings": "All 14 full-size rendered pages reviewed; figures, tables, footnotes and digest lines legible and within margins.",
+    "builtin_compiler": {
+      "success": false,
+      "diagnostic": "Unable to find standard directories for platform"
+    },
+    "existing_miktex": {
+      "passes": 3,
+      "exit_codes": [0, 0, 0],
+      "installer_disabled": true,
+      "final_latex_warnings": [],
+      "final_overfull_underfull": [],
+      "first_pass_rerun_resolved": true,
+      "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation was enabled."
+    },
+    "external_graphics": [
+      {
+        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000000.png",
+        "bytes": 964712,
+        "sha256": "751a0e803dd1da14427887d6f3e2e0004151c3e96710f07db5e5fbb16d68ca2d"
+      },
+      {
+        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000150.png",
+        "bytes": 1040773,
+        "sha256": "1483528d4d24e8c233674eed6571bb55d39882d1e253e6299be2bbc588044514"
+      },
+      {
+        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000190.png",
+        "bytes": 1057021,
+        "sha256": "ee546cf537be02f78cad629522ae1916d34d537dfabe9a52a771727c9702e00e"
+      }
+    ],
+    "preceding_v4_archive": {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v4/preservation-manifest.json",
+      "bytes": 5119,
+      "sha256": "1014581c53c7c1ee352aa38e586a41d87f07ae603465459ceb57636e7d81497e"
+    },
+    "scientific_qualification": false,
+    "native_recomputation": false,
+    "controltower_delivery": false,
+    "source_clock_restriction_integrated": false,
+    "desktop_pdf": {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/conditional-camera-two-hand-methods.pdf",
+      "bytes": 3301322,
+      "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
+    }
+  },
+  "historical_canonical_v4_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\methods-v5-canonical-doc-update-v1\\before\\docs\\development\\historical_capture\\conditional-camera-report-review.json",
+    "sha256": "097a4fcfa480e8787e9762efc5c91b6329703551c49ad12fdb33aa0f7fb3e273",
+    "bytes": 5331
+  }
 }

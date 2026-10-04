@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from src.shared.python.estimation import CubicHermiteSplineTrajectory
+from src.shared.python.estimation import CubicHermiteSplineTrajectory, SolverTelemetry
 from src.shared.python.motion_matching.historical_fit import (
     ImageSplineStart,
     ImageFitConfig,
@@ -49,6 +49,7 @@ def test_exact_start_skips_resampling_and_authored_initialization(monkeypatch):
             coefficients=problem.initial_coefficients,
             success=False,
             message="wiring only",
+            telemetry=SolverTelemetry(unavailable_reason="synthetic_test_double"),
         )
 
     monkeypatch.setattr(solver, "solve_single_trial_map", solve)

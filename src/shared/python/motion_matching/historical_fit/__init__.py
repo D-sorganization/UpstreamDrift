@@ -7,6 +7,10 @@ from .contracts import (
     ImageFitResult,
     ImageSplineStart,
 )
+from .spline_restriction import (
+    SplineIntervalRestriction,
+    restrict_image_spline_interval,
+)
 from .shaft_observations import (
     ShaftAxisEvidence,
     ShaftAxisSegment,
@@ -39,6 +43,8 @@ from .capture import CaptureImageEvidence, read_capture_evidence
 from .camera import initialize_camera_hypothesis
 
 __all__ = [
+    "SplineIntervalRestriction",
+    "restrict_image_spline_interval",
     "FragmentDerivativeOptions",
     "FragmentDerivativeCheck",
     "FragmentDerivativeAssessment",
