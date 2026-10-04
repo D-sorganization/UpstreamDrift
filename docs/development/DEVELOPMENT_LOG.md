@@ -65,6 +65,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
+- **Issue:** #11421 (children #11422–#11432; #11422–#11430 closed; #11432 active)
+- **PR:** #11432
+- **Branch:** `feat/dime-11432-reports-gui`
+- **Paths:** `src/shared/python/estimation/dime_report_integration.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_report_integration.py`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04: DIME-11 shared reports, GUI strategy selection and LaTeX methods implemented and validated across 10 behavioral tests in test_dime_report_integration.py (RED/GREEN). Implements DimeStrategySelectionService with truthful capability status reporting separating method existence from qualification; graceful explicit unavailability for experimental strategies (neural estimator); fail-closed enforcement when unqualified engine offered as validated; comprehensive Full and Custom report output contract (DimeReportArtifact) packaging kinematics, net controls, GRF provenance (typed unavailable, never fabricated zero), drift vs controlled prediction, uncertainty, contact/replay residuals, video overlays (refined ellipsoid geometry with fail-closed timestamp synchronization), and unavailable explanations; distinct pointwise vs integrated ZTCF registration; round-trip dictionary and JSON persistence preserving model and data provenance; verifiable LaTeX methods documentation generator; headless DimeStrategySelectionViewModel. All 217 estimation unit tests pass.
+- **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting, shared reports, GUI strategy selection, and LaTeX methods reference.
+- **Next step:** Open and merge PR #11432, advance to dependent comparative study and final physics qualification.
 - **Issue:** #11421 (children #11422–#11430; #11422–#11428 closed; #11430 active)
 - **PR:** #11430
 - **Branch:** `feat/dime-09-offline-smoothing-11430`
