@@ -38,6 +38,11 @@ from src.shared.python.workspace.necromatcher import default_necromatcher_librar
 from src.shared.python.workspace.necromatcher_review import CaptureReview
 from src.shared.python.body_part_viz.overlay_options import ShapeOverlayOptions
 from src.shared.python.workspace.necromatcher_caption import CaptionOverlayOptions
+from src.shared.python.workspace.necromatcher_impact_jobs import NativeImpactSession
+from src.shared.python.workspace.necromatcher_impact_contracts import (
+    ReplayImpactGeometry,
+    ReplayImpactSelection,
+)
 from src.shared.python.workspace.necromatcher_scope_import import (
     MAX_SOURCE_SCOPE_REVIEW_BYTES,
 )
@@ -51,6 +56,9 @@ async def refits_lifespan(_app: object) -> AsyncIterator[None]:
         if get_refits.cache_info().currsize:
             get_refits().close()
             get_refits.cache_clear()
+        if get_impact_runs.cache_info().currsize:
+            get_impact_runs().close()
+            get_impact_runs.cache_clear()
         if get_video_exports.cache_info().currsize:
             get_video_exports().close()
             get_video_exports.cache_clear()
@@ -88,6 +96,22 @@ def get_video_exports() -> NativeVideoSession:
 
 
 VideoExports = Annotated[NativeVideoSession, Depends(get_video_exports)]
+
+
+@lru_cache(maxsize=1)
+def get_impact_runs() -> NativeImpactSession:
+    """Reuse owned, bounded research impact jobs across local API requests."""
+    return NativeImpactSession(get_library())
+
+
+ImpactRuns = Annotated[NativeImpactSession, Depends(get_impact_runs)]
+
+
+class ImpactRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+    geometry: dict[str, Any]
+    selection: dict[str, Any]
+    budget_wall_s: float = Field(gt=0, le=600)
 
 
 class RefitRequest(BaseModel):
@@ -425,6 +449,50 @@ def replay_summary(replay_id: str, library: Library) -> dict[str, Any]:
             "backend": trace.backend,
             "metadata": dict(trace.meta),
         }
+
+
+@router.post("/replays/{replay_id}/impact-runs", status_code=202)
+def submit_impact_run(
+    replay_id: str, request: ImpactRunRequest, runs: ImpactRuns
+) -> dict[str, Any]:
+    """Submit explicit operator assumptions; no contact or clock calibration."""
+    with _errors():
+        geometry = ReplayImpactGeometry.from_record(request.geometry)
+        selection = ReplayImpactSelection.from_record(request.selection)
+        try:
+            return runs.submit(replay_id, geometry, selection, request.budget_wall_s)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/replays/{replay_id}/impact-runs/{run_id}")
+def view_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> dict[str, Any]:
+    with _errors():
+        return runs.view(replay_id, run_id)
+
+
+@router.post("/replays/{replay_id}/impact-runs/{run_id}/cancel")
+def cancel_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> dict[str, Any]:
+    with _errors():
+        try:
+            return runs.cancel(replay_id, run_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("/replays/{replay_id}/impact-runs/{run_id}/download")
+def download_impact_run(replay_id: str, run_id: str, runs: ImpactRuns) -> FileResponse:
+    """Serve only a reauthenticated complete research trajectory/receipt bundle."""
+    with _errors():
+        try:
+            path = runs.download(replay_id, run_id)
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return FileResponse(
+            path,
+            media_type="application/zip",
+            filename=f"necromatcher-impact-{run_id}.zip",
+        )
 
 
 @router.get("/replays/{replay_id}/data")

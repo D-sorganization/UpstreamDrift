@@ -26,9 +26,10 @@ it('recalls only authored replay assets and exposes verified parents and clock q
   render(<ReplayControls swing="swing" revision={0} />);
   await userEvent.click(await screen.findByRole('button', {name:'Recall replay-1'}));
   expect(await screen.findByText(/21 Samples/)).toHaveTextContent('mujoco');
-  expect(screen.getByText(/Authored Seconds/)).toHaveTextContent('Physical source time: unqualified');
+  expect(screen.getAllByText(/Authored Seconds/).some((element)=>element.textContent?.includes('Physical source time: unqualified'))).toBe(true);
   expect(screen.getByText(/Fit: fit/)).toHaveTextContent('Profile: profile');
   expect(screen.getByRole('link', {name:'Download Verified Replay HDF5'})).toHaveAttribute('href','/verified.h5');
+  expect(screen.getByRole('heading',{name:'Research Impact Preview'})).toBeInTheDocument();
   expect(screen.queryByRole('button', {name:'Recall fit'})).not.toBeInTheDocument();
 });
 it.each(['scientific_qualified','physical_source_time_qualified','independent_replay_executed'])('rejects missing qualification %s without a download', async (key) => {

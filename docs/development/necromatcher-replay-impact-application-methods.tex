@@ -1,0 +1,193 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,booktabs,array,xcolor,fancyhdr}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\definecolor{ink}{HTML}{17344A}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{UpstreamDrift / Necromatcher}}
+\fancyhead[R]{\small Replay Impact Application Methods}
+\fancyfoot[L]{\small Authored Research; Historical Qualification Pending}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\title{\textcolor{ink}{Necromatcher Replay Impact Application\\Execution, Recall and Repeatability}}
+\author{UpstreamDrift Technical Reference\\Epic \#11232; Integration Issue \#11464}
+\date{4 October 2026 / Application Supplement 1}
+\begin{document}
+\maketitle
+\begin{center}\rule{0.9\linewidth}{0.6pt}\end{center}
+\section*{Purpose and Scientific Boundary}
+This supplement documents the application journey from a registered authored
+replay to an owned native impact job, retained trajectory and portable state
+receipt. It complements the five-page extraction methods reference and the
+camera/source-scope report; their earlier evidence and producer identities remain
+unchanged. Exact software, test, toolchain and artifact hashes belong to the
+accompanying application review receipt. A source fingerprint includes working
+implementation bytes; a recorded Git commit alone does not identify dirty code.
+
+Recorded rates refer to authored simulation seconds. Geometry, effective mass
+and inertia, the selected sample and the flight transform are operator
+assumptions. Both scientific and physical-source-time qualification remain
+false. A successful job is a completed software calculation with research
+acceptance \emph{rejected}; it is not a qualified historical impact prediction.
+
+Tiger retains original frames 0--190, the reviewed half-open interval $[0,191)$.
+Frames 191 onward, including released-hand follow-through, are excluded. The
+cutoff is conservative; exact physical release and contact remain unmeasured.
+Hogan retains $[0,750)$. No application or impact success changes these domains.
+
+\section*{Ownership Chain}
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.66\linewidth}}\toprule
+Boundary & Responsibility\\\midrule
+React Controls & Verified replay recall, explicit declarations, budget, job recall.\\
+Local API & Typed admission, replay ownership, bounded job dispatch and download.\\
+Matching Job Service & Persistent state, cancellation and terminal publication.\\
+Native Worker & Recorded-state extraction, existing impact/flight calculation.\\
+Public Receipt Owner & Exact trajectory-byte binding and detached state recall.\\
+Existing Viewers & Retained sample import without re-simulation.\\\bottomrule
+\end{tabular}
+\end{center}
+No independent forward kinematics, collision solver or trajectory renderer is
+introduced by this application boundary.
+
+\newpage
+\section*{Explicit Request and Admission}
+The operator imports a finite JSON object containing exactly \code{geometry}
+and \code{selection}. Geometry declares a native body, body-local head point
+in metres, unit perpendicular face normal/up vectors, positive effective mass
+in kg and scalar inertia in kg\,m$^2$, and an assumption description. Selection
+declares an existing recorded sample, a proper orthonormal world-to-flight
+rotation, translation in metres and a selection description. The application
+requires an explicit positive execution budget no greater than 600 seconds.
+It does not manufacture a contact sample, normalize malformed axes or infer
+physical rates from video timestamps.
+
+Server admission delegates to the existing typed declaration owners and
+canonical Library authentication. The replay, torque profile, fit, native model
+and capture must retain their expected kinds, session and exact hashes. A sample
+outside the stored trace, foreign replay identity, malformed declaration or
+unauthenticated parent is refused before scheduling native work. The local-client
+restriction remains in force. Client requests contain no output directory.
+
+\section*{Recorded Kinematics and Flight Frame}
+The public native marker linearizer supplies the point Jacobian and face-triad
+derivatives at the recorded coordinates. With recorded generalized rate $v$,
+\[
+\dot p=J(q)v,\qquad
+\omega=\tfrac12\sum_{i=1}^{3}e_i\times\dot e_i.
+\]
+The extraction methods reference derives this rigid-triad identity and its
+orthonormality/tangent checks. For the authored proper rigid map $(R,t)$,
+\[
+p_f=Rp+t,\quad v_f=R\dot p,\quad \omega_f=R\omega,\quad n_f=Re_1.
+\]
+Translation affects positions only. The existing consumer preserves the full
+velocity, angular velocity and face normal declared in
+\code{flight_xfwd_yleft_zup}; it does not replace them with speed and nominal loft.
+
+\section*{Execution Identity}
+An impact-specific stamp extends the canonical refit stamp with impact/flight
+Python sources and the two canonical trajectory validators. Runtime identity
+also retains the installed flight distribution's version and executable-file
+hashes, detecting same-version binary replacement. Three stable fields are
+rechecked: source commit, source-map digest and runtime digest. Start timestamps
+are retained as provenance but are not compared for equality across calls.
+Missing flight capability fails through the existing pipeline; production
+execution does not substitute a test trajectory or repair the environment.
+
+\newpage
+\section*{Bounded Worker and Publication}
+The server creates a UUID-named run beneath the Library's \code{impact-runs}
+directory. The fixed clean-process transport dispatches the reviewed impact
+worker, imports MuJoCo before its execution-specific native APIs and bounds the
+owned process by cancellation and the declared wall budget. It accepts no
+arbitrary worker module or user-selected publication path.
+
+The worker uses public replay extraction, the existing trajectory handoff
+coordinator and actual impact/flight pipeline. Parent and stable execution
+identities are rechecked around calculation. Output is staged in an owned
+temporary directory and published only as a complete bundle to an absent
+destination. Existing or concurrently appearing output is refused. Cancellation,
+worker failure, stale parents or changed source/runtime cannot publish a verified
+completion record. The matching service retains failed/cancelled state.
+
+The job owner verifies canonical receipt contents, source assumptions and all
+artifact hashes before terminal publication. A restarted host may recall
+completed artifacts but cannot invent a live cancellation handle for an orphan
+pending/running record. Download repeats parent and artifact validation before
+and after ZIP creation; incomplete or changed artifacts are refused.
+
+\section*{Portable Bundle and Effective Settings}
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.29\linewidth}>{\raggedright\arraybackslash}p{0.62\linewidth}}\toprule
+Artifact & Retained Content\\\midrule
+\code{trajectory.json} & Canonical six-field trajectory wire and retained samples.\\
+\code{impact-receipt.json} & Versioned envelope: state, exact trajectory SHA-256 and size.\\
+\code{result.json} & Parent chain, declarations, execution stamp, calculation settings/results.\\
+\code{request.json} & Server-owned run identity, declared budget and admitted assumptions.\\\bottomrule
+\end{tabular}
+\end{center}
+The result retains effective environment and impact parameters, ball assumptions,
+launch conditions, post-impact state, trajectory metrics and full extraction
+metadata. Default method/flight settings are explicit assumptions of the pinned
+pipeline implementation; they are not historical calibrations. This action does
+not expose arbitrary environmental or impact-model configuration.
+
+The public receipt loader binds exact trajectory bytes, validates the canonical
+viewer wire and returns detached state vectors without SDK execution, impact
+calculation or resampling. Portable parent hashes remain provenance claims;
+receipt-only recall is not fresh Library authentication. Job recall adds that
+Library authentication separately. The trajectory alone carries no complete
+historical receipt, so retain and distribute the bundle together.
+
+\newpage
+\section*{Repeatable Operator Procedure}
+\begin{enumerate}
+\item Open Necromatcher, select the player/swing and recall a registered authored replay.
+Inspect its parent hashes, authored clock and unqualified status.
+\item Import exact geometry/selection declarations and enter a bounded wall budget.
+Review the native body, local point, face axes, effective inertia and sample.
+\item Choose \emph{Preview Research Impact}. Observe status, rejection blockers and
+the run ID. Cancel through the owned job when required.
+\item After verified completion, inspect the saved sample, declarations and metrics.
+They belong to the result, even if a different declaration is now loaded in the form.
+\item Download the verified four-file bundle. Retain its run ID. Recall that ID
+through \emph{Recall Research Impact Run}; reload does not require re-running.
+\item Extract \code{trajectory.json} and use the existing Ball Flight viewer's
+trajectory import. Retained samples are imported; do not treat a new simulation
+as recall. Preserve the companion receipt when interpreting or sharing it.
+\end{enumerate}
+
+\section*{Verification and Repeatability Evidence}
+Meaningful failing tests cover absent integration, missing stored-run recall,
+false display of unverified artifacts and timestamp comparison that incorrectly
+rejected otherwise identical execution stamps. Unit tests cover strict geometry,
+sample bounds, parent/source/runtime changes, output ownership, rollback,
+cancellation, foreign identity, incomplete publication and byte tampering.
+
+Native acceptance uses a temporary canonical Library and synthetic model/profile.
+It executes independent MuJoCo replay, registered HDF5 recall, the clean impact
+worker and canonical Rust flight. Native extraction, solvers, stamps and transport
+are not substituted. Checks cover portable state, viewer imports, restarted recall
+and trajectory-byte tampering. This is software evidence, not a historical capture.
+The review receipt pins closed test logs, sources and the local flight-wheel build.
+
+\section*{Remaining Historical Acceptance}
+Both historical fits still require improved reprojection and justified camera,
+anthropometry, range-of-motion, contact and physical-time evidence. Rolling
+shutter remains a conditional sensitivity model; shaft flex, blur, interlacing,
+film scanning and broadcast processing remain alternative explanations.
+The full goal also requires historical authored dynamics and integration into
+simulation golf. A successful synthetic application handoff does not complete
+those requirements or establish engineering-manual release approval.
+
+\section*{References and Public Owners}
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/11464}{Issue \#11464}
+and \href{https://github.com/D-sorganization/UpstreamDrift/pull/11359}{PR \#11359}.
+Public owners are exported by the workspace facade. The repeatable Markdown
+procedure lists their interfaces. Earlier extraction and camera/source-scope
+reports retain their original evidence boundaries.
+\end{document}

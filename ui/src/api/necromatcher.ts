@@ -126,3 +126,26 @@ export interface ReplaySummary {
 }
 export const fetchReplaySummary = (replay: string) => apiFetch<ReplaySummary>(`${root}/replays/${encodeURIComponent(replay)}`);
 export const replayDataUrl = (replay: string) => `${getApiBase()}${root}/replays/${encodeURIComponent(replay)}/data`;
+export interface ReplayImpactGeometry {
+  body: string; local_head_point_m: number[]; local_face_normal: number[]; local_face_up: number[];
+  mass_kg: number; moi_kg_m2: number; assumption_description: string;
+}
+export interface ReplayImpactSelection {
+  recorded_sample_index: number; world_to_flight_rotation: number[][];
+  world_to_flight_translation_m: number[]; selection_description: string;
+}
+export interface ReplayImpactDeclaration {geometry: ReplayImpactGeometry; selection: ReplayImpactSelection}
+export interface ReplayImpactRun {
+  run_id: string; replay_id: string; status: ResearchRun['status']; acceptance: 'partial' | 'interrupted' | 'rejected';
+  message: string; blockers: string[]; fraction: null; control_available: boolean;
+  execution_verified: boolean; download_available: boolean;
+  scientific_qualified: false; physical_source_time_qualified: false;
+  artifactsummary: {
+    files: string[]; summary: {carry_m: number; max_height_m: number; flight_time_s: number; landing_angle_deg: number};
+    geometry: ReplayImpactGeometry; selection: ReplayImpactSelection; clockpolicy: 'authored_simulation_seconds';
+  } | null;
+}
+export const submitReplayImpact = (replay: string, payload: ReplayImpactDeclaration & {budget_wall_s: number}) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs`, {method:'POST',body:JSON.stringify(payload)});
+export const fetchReplayImpact = (replay: string, run: string) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}`);
+export const cancelReplayImpact = (replay: string, run: string) => apiFetch<ReplayImpactRun>(`${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}/cancel`, {method:'POST'});
+export const replayImpactDownloadUrl = (replay: string, run: string) => `${getApiBase()}${root}/replays/${encodeURIComponent(replay)}/impact-runs/${encodeURIComponent(run)}/download`;

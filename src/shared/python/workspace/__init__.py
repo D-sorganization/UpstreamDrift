@@ -86,6 +86,8 @@ from .necromatcher_impact_receipt import (
     export_replay_impact_receipt,
     load_replay_impact_receipt,
 )
+from .necromatcher_impact_execution import impact_execution_stamp
+from .necromatcher_impact_jobs import NativeImpactSession
 from .necromatcher_review import CaptureReview
 from .necromatcher_shaft_evidence import (
     BoundShaftEvidence,
@@ -260,6 +262,8 @@ __all__ = [
     "extract_replay_impact_state",
     "export_replay_impact_receipt",
     "load_replay_impact_receipt",
+    "impact_execution_stamp",
+    "NativeImpactSession",
     "load_native_fit_binding",
     "load_native_model_binding",
     "AuthoredEffortProfile",

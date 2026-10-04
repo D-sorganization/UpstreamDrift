@@ -15,6 +15,7 @@ from src.shared.python.version_info import get_repo_root
 _WORKERS = {
     "refit": "src.shared.python.workspace.necromatcher_fit_worker",
     "hypothesis": "src.shared.python.workspace.necromatcher_hypothesis_worker",
+    "impact": "src.shared.python.workspace.necromatcher_impact_worker",
 }
 
 
@@ -23,7 +24,7 @@ def execute_native_research_worker(
     budget: float,
     cancelled: Callable[[], bool],
     *,
-    operation: Literal["refit", "hypothesis"] = "refit",
+    operation: Literal["refit", "hypothesis", "impact"] = "refit",
 ) -> dict[str, Any]:
     if operation not in _WORKERS:
         raise ValueError("Unknown native research worker operation")

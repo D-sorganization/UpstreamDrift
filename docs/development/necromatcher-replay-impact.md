@@ -59,8 +59,8 @@ receipt_path)` to publish a companion JSON receipt. Existing destinations are
    qualification flags. Recorded parent digests are portable provenance claims;
    loading a receipt does not freshly authenticate the original Library parents.
    The existing six-field trajectory wire and three-field aerodynamic provenance
-   remain unchanged. Normal app impact execution and historical qualification
-   remain acceptance work under #11464.
+   remain unchanged. The bounded application action below reauthenticates Library
+   parents separately. Historical qualification remains acceptance work under #11464.
 
 ## Technical Methods Report
 
@@ -89,10 +89,76 @@ unqualified status. Missing or inconsistent qualification, sample, identity or
 parent metadata blocks the summary and download link. Changing swings suppresses
 late responses from the previous selection. **Download Verified Replay HDF5**
 delegates to the existing backend revalidation route. This recall/import action
-does not execute impact analysis; that bounded worker action remains open.
+does not itself execute impact analysis; use the separate action below.
 
 The focused React cohort passes 87 cases, including existing frame-domain
 regressions. TypeScript and scoped ESLint pass.
+
+## Application Impact Execution and Saved-Run Recall
+
+After recalling a verified replay, use **Research Impact Preview**. Import a JSON
+object with exactly `geometry` and `selection`, containing the existing typed
+declaration records described above. Choose an existing replay sample and enter
+an explicit execution budget in `(0, 600]` seconds. No contact selection, head
+geometry, effective inertia or physical clock is supplied automatically.
+
+**Preview Research Impact** dispatches an owned clean native worker through the
+canonical matching service. The public workspace facade exports `NativeImpactSession`
+and `impact_execution_stamp`. The worker reuses public replay extraction, the
+existing trajectory coordinator, actual impact/flight pipeline and public receipt
+export. The stamp extends refit provenance with physics/consumer sources and
+installed flight-kernel file hashes. Stable source/runtime identities and canonical
+replay parents are checked around calculation. Missing runtime capability fails;
+production does not substitute a test flight.
+
+The API exposes replay-owned routes:
+
+- `POST /api/necromatcher/replays/{replay_id}/impact-runs`: explicit declarations and budget.
+- `GET /api/necromatcher/replays/{replay_id}/impact-runs/{run_id}`: persisted, verified status.
+- `POST /api/necromatcher/replays/{replay_id}/impact-runs/{run_id}/cancel`: owned cancellation.
+- `GET /api/necromatcher/replays/{replay_id}/impact-runs/{run_id}/download`: authenticated bundle.
+
+The client cannot select output paths. UUID run roots retain request and matching
+manifests; complete output is staged exclusively before publication. Succeeded
+research runs retain **rejected** scientific acceptance. Failed, cancelled,
+incomplete, foreign or modified records cannot expose a verified download.
+A restarted host can recall completed runs but cannot claim a live control handle
+for an orphan running record.
+
+Retain the displayed run ID. **Recall Research Impact Run** accepts that exact 32-hex ID
+after reload and shows the result's saved geometry, selection, authored clock and
+metrics. These declarations belong to the saved result, not a newly imported form
+draft. Download contains `trajectory.json`, `impact-receipt.json`, `result.json` and
+`request.json`. The result retains effective environment, impact/ball assumptions,
+launch/post-impact state, metrics, execution identity and extraction metadata.
+The current action uses pinned pipeline defaults; arbitrary environment or impact
+model configuration is not exposed by this form.
+
+Native PyQt tile parity is explicitly tracked in
+[Issue #11487](https://github.com/D-sorganization/UpstreamDrift/issues/11487),
+an epic #11232 child. React/Tauri uses the shared local API; the native tile's
+replay import, impact controls and saved-run recall remain that follow-up's scope.
+
+Extract `trajectory.json` and import it through the existing **Ball Flight** page
+at `/ball-flight`. This imports retained samples without re-simulation. Keep the
+receipt and result together when interpreting or sharing the curve; the six-field
+trajectory alone does not retain full historical research provenance.
+
+The [Application Methods Supplement](necromatcher-replay-impact-application-methods.tex)
+documents admission, bounded publication, schemas and repeatability. Its four-page
+PDF is compiled with the existing MiKTeX installation and installer disabled,
+following an unavailable built-in compiler. All four pages are visually reviewed;
+the final log has no layout warnings. Earlier methods editions remain unchanged.
+
+Native handoff evidence uses a temporary canonical Library, synthetic model/profile,
+independent MuJoCo replay, registered HDF5, the clean worker and actual Rust flight.
+It verifies portable state, existing viewers, restarted recall and trajectory-byte
+tamper rejection. No native/solver/flight/stamp/transport substitutions or historical
+Library mutations occur in that opt-in acceptance. This is software integration
+evidence, not a matched Tiger or Hogan swing. Tiger remains `[0,191)` and Hogan
+`[0,750)`; the full goal remains active.
+
+[Application Review](historical_capture/replay-impact-application-review.json) pins the reviewed implementation, native runtime build, test logs and Desktop bundle. The application checkpoint passes 125 focused Python cases with one Windows symlink privilege skip, one separate native handoff acceptance and 104 React cases. Configured mypy passes all six production owners.
 
 ## Verification and Limits
 

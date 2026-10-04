@@ -266,3 +266,29 @@ agreement grants no clinical, historical or physical-time qualification.
 ## Scoped Camera Closure Checkpoint — #11357 / #11414
 
 Producer 55d17 native session 74740 and independent session 92074 closed exit 0 with full 14,805-source/391-library preservation. Tiger [0,191) and Hogan [0,750) compared; keep saved cameras after mixed body/shaft outcomes. Six-page Methods V2 is compiled and all pages reviewed, with independent serialized preservation accepted and physical qualification unclaimed. See [Procedure](docs/development/necromatcher-conditional-camera-and-scope.md). SourceFitScope is implemented with registered portable receipts, exact selected-domain publication and scoped overlay provenance; root validation passed 294 Python and 39 interface cases. No new scoped motion fit has run. Full goal remains active.
+
+## Authored Replay Impact Application Checkpoint — #11464
+
+The normal React journey now previews impact from a verified authored replay,
+with exact geometry/sample/flight declarations, bounded native execution,
+cancellation, persisted run-ID recall and authenticated four-file download.
+Saved results display their own assumptions and metrics. Canonical receipt and
+trajectory owners remain unchanged; source/runtime/parent and artifact checks
+fail closed. Research acceptance remains rejected, with authored seconds and
+false physical/scientific qualification.
+
+Root final validation: 125 focused Python cases pass with one Windows symlink
+capability skip; one additional opt-in native case passes with actual MuJoCo,
+clean process transport, impact solver and Rust flight (no substitutions).
+The React cohort passes 104 cases; configured six-owner mypy, scoped lint and
+format checks pass. Earlier failures and immutable agent freezes are retained
+in the application review. Four-page LaTeX Application Supplement 1 is compiled
+without final layout warnings and all pages visually reviewed; editable source,
+PDF and the explicitly synthetic native bundle are saved on the local Desktop.
+Earlier Methods V8 and the five-page extraction report remain unchanged.
+
+See [Application Procedure](docs/development/necromatcher-replay-impact.md) and its linked review/report. Tiger stays
+within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
+Library mutation, qualified match or new ControlTower delivery is established.
+Remaining goal work includes improved historical matching, authored dynamics,
+simulation golf integration and desktop parity. The full goal remains active.
