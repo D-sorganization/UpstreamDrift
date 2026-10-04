@@ -8,6 +8,25 @@
 - Validation (architecture-budget fix on SELF: `dt` moved into `WindowObservation`; `_FitState`, `_MatchInputs` and `_validated_inputs` keep every function at <= 8 parameters and <= 100 lines; `python3 scripts/ci/check_architecture_budget.py` OK); shared-tools divergence inventory updated for the six new ud-only estimation modules (`python3 -m scripts.shared_tools.divergence_inventory --check` current; committed authorship block kept because a shallow clone cannot recompute it): `python3 -m pytest tests/unit/estimation -q --timeout=60` (new suites: test_dime_drift_prediction 27, test_dime_local_window 17, test_dime_drift_anchored_matcher 14, test_matching_quality 33, test_synthetic_swing 24, test_dime_replay_refinement 10); shared benchmark fixtures in `tests/unit/estimation/conftest.py`; `ruff check`/`ruff format --check` clean on changed paths; `python3 -m scripts.check_design_manual_governance` passes. mypy not installed in this container. Native MuJoCo/JAX lanes not available here (skipped, not evidence).
 - Risks: about 14 s per 0.4 s match plus 6–13 s per refinement in pure Python (finite differences); replay refinement does not enforce the rate limit; single shooting may need multiple shooting on longer horizons.
 - Next steps: (1) open the PR and update epic #11421 with the refined plan; (2) DIME-14 speed-up (analytic/variational sensitivities); (3) contact-mode provider integration via #10286 before any full-body use; (4) run on the owner/tour captures only after DIME-01 freezes metrics.
+# Retire Deprecated Force_Vectors and Vectors Shims — #11347
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `fix/remove-vector-shims-11347`; commit SELF; PR: see branch (`Closes #11347`, `Refs #11285`, `Refs #11292`)
+- Governing issue: #11347 (FTO-7 follow-up; design authority ADR-0052).
+- Objective: Remove deprecated `src/shared/python/plotting/renderers/force_vectors.py` and `vectors.py` shims after migration to `src.shared.python.force_overlay.renderers.matplotlib_glyphs`.
+- Completed:
+  - Removed deprecated shims:
+    - `src/shared/python/plotting/renderers/force_vectors.py` (`ForceVectorRenderer`)
+    - `src/shared/python/plotting/renderers/vectors.py` (`VectorOverlayRenderer`)
+  - Removed obsolete shim test suites:
+    - `tests/unit/force_overlay/test_renderer_shims.py`
+    - `tests/unit/plotting/test_force_vector_renderer.py`
+  - Cleaned `tests/unit/test_plotting_renderers.py` to remove `VectorOverlayRenderer` import and `TestVectorsRenderer`.
+  - Updated `docs/architecture/PROJECT_MAP.md` mapping to `force_overlay/`.
+  - Regenerated shared tools divergence inventory (`docs/shared_tools/divergence_inventory.v1.json` and `.md`).
+  - Formatted `schemas/glyph-set-examples.json` with prettier.
+  - All unit tests and divergence inventory tests passing green.
+- Next steps: Land PR, clean up worktree.
+
 # Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol — #11421 / #11422
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11422-baseline-benchmark`; commit SELF; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
