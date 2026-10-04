@@ -6,53 +6,66 @@ Within a smooth, contact-free mode the dynamics are input-affine::
                                  B = M^-1 S^T        (control influence)
 
 The zero-torque counterfactual drift ``f`` is evaluated without knowing the
-applied torques, so it anchors the prediction of the next state. Bounded
-torques (``ControlBand``) bound every admissible deviation from that anchor.
-Together they give the range of viable next states; anything outside it cannot
-be explained by reasonable inputs and is evidence of noise, occlusion or model
-error.
+applied torques, anchoring the prediction of the next state. Bounded
+torques (:class:`ControlBand`) bound every admissible deviation from that anchor.
+Together they give the range of viable next states.
 
 Scope and limits:
-
-* Pointwise drift reuses :func:`simulation_backends.ztcf_zvcf.ztcf_acceleration`
-  (DRY). Providers expose only ``mass_matrix`` and ``bias_forces``.
+* Pointwise drift reuses :func:`simulation_backends.ztcf_zvcf.ztcf_acceleration` (DRY).
 * Contact switching is not modelled here. ``contact_active=True`` is refused
-  rather than silently extrapolating free-flight drift through stance.
+  with a receipt rather than silently extrapolating free-flight drift through stance.
 * Integration uses constant acceleration over one step in local coordinates.
-  Quaternion (manifold) configurations are refused.
+  Quaternion (manifold) configurations are refused without explicit retractions.
 * Zero control mean is an *initialisation* with declared covariance, never an
   assertion that the joints are inactive.
+* Mutual exclusion of duplicate physics likelihoods is enforced via
+  :class:`RuntimeExclusivityContract`.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
+from dataclasses import dataclass, field
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
+from src.shared.python.contracts import PreconditionError
 from src.shared.python.core.contracts import check_finite, ensure, require
 from src.shared.python.simulation_backends.ztcf_zvcf import ztcf_acceleration
 
 if TYPE_CHECKING:
+    from src.shared.python.estimation.dime_contracts import (
+        DimeCompleteState,
+        EstimationIntervalFactor,
+        RuntimeExclusivityContract,
+    )
     from src.shared.python.simulation_backends.protocol import DynamicsProvider
+
+DimeTransitionMode = Literal["marginalized", "explicit"]
 
 __all__ = [
     "ControlBand",
+    "DimeTransitionMode",
+    "DimeTransitionPrediction",
+    "DimeTransitionRequest",
     "DriftLinearization",
     "UncertainPrediction",
     "drift_dominance_index",
     "integrate_step",
     "linearize_drift",
+    "predict_dime_transition",
     "predict_step",
     "reachable_acceleration_interval",
     "uncertain_control_prediction",
 ]
 
-_PSD_TOLERANCE = 1e-12
+_PSD_TOLERANCE: Final[float] = 1e-12
 
 
 def _finite_vector(name: str, value: np.ndarray) -> np.ndarray:
+    """Validate and return 1-D finite float vector."""
     arr = np.asarray(value, dtype=float).reshape(-1)
     require(arr.size > 0, f"{name} must be non-empty", value=arr.shape)
     require(check_finite(arr), f"{name} must contain only finite values", value=arr)
@@ -60,27 +73,24 @@ def _finite_vector(name: str, value: np.ndarray) -> np.ndarray:
 
 
 def _require_psd(name: str, matrix: np.ndarray, size: int) -> np.ndarray:
+    """Validate and return positive semi-definite symmetric matrix."""
     mat = np.asarray(matrix, dtype=float)
     require(mat.shape == (size, size), f"{name} must be ({size}, {size})", mat.shape)
     require(check_finite(mat), f"{name} must be finite")
     require(np.allclose(mat, mat.T, atol=1e-12), f"{name} must be symmetric")
     scale = max(1.0, float(np.max(np.abs(mat))))
+    eigvals = np.linalg.eigvalsh(mat)
     require(
-        float(np.min(np.linalg.eigvalsh(mat))) >= -_PSD_TOLERANCE * scale,
+        float(np.min(eigvals)) >= -_PSD_TOLERANCE * scale,
         f"{name} must be positive semi-definite",
-        value=np.linalg.eigvalsh(mat),
+        value=eigvals,
     )
     return mat
 
 
 @dataclass(frozen=True)
 class ControlBand:
-    """Admissible joint-torque box with an optional torque-rate limit.
-
-    ``lower``/``upper`` are the global actuator limits [N m]. ``rate_limit``
-    [N m/s] enforces torque-profile continuity: from the previous torque the
-    next step may move at most ``rate_limit * dt`` per channel.
-    """
+    """Admissible joint-torque box with an optional torque-rate limit."""
 
     lower: np.ndarray
     upper: np.ndarray
@@ -105,12 +115,7 @@ class ControlBand:
         return int(self.lower.size)
 
     def local(self, previous: np.ndarray, dt: float) -> tuple[np.ndarray, np.ndarray]:
-        """Return the tight band reachable from ``previous`` within ``dt``.
-
-        The previous torque is clipped into the global box first, so an
-        out-of-range warm start narrows toward the box instead of producing an
-        empty band. Postcondition: ``lower <= lo <= hi <= upper``.
-        """
+        """Return the tight band reachable from ``previous`` within ``dt``."""
         prev = _finite_vector("previous", previous)
         require(prev.shape == self.lower.shape, "previous must match band size")
         require(np.isfinite(dt) and dt > 0.0, "dt must be positive and finite", dt)
@@ -151,6 +156,37 @@ class UncertainPrediction:
     covariance: np.ndarray
 
 
+@dataclass(frozen=True)
+class DimeTransitionRequest:
+    """Request for DIME transition prediction across a horizon."""
+
+    state: DimeCompleteState
+    control_mean: np.ndarray
+    control_covariance: np.ndarray
+    dt: float
+    horizon: int = 1
+    mode: DimeTransitionMode = "marginalized"
+    state_covariance: np.ndarray | None = None
+    model_uncertainty: np.ndarray | None = None
+    contact_active: bool = False
+    selection: np.ndarray | None = None
+
+
+@dataclass(frozen=True)
+class DimeTransitionPrediction:
+    """Outcome of DIME transition prediction with receipts and optional factor."""
+
+    valid: bool
+    receipt: Mapping[str, Any]
+    zero_control_branch: tuple[np.ndarray, np.ndarray] | None = None
+    controlled_prediction: UncertainPrediction | None = None
+    drift_dominance: float | None = None
+    factor: EstimationIntervalFactor | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "receipt", MappingProxyType(dict(self.receipt)))
+
+
 def linearize_drift(
     provider: DynamicsProvider,
     q: np.ndarray,
@@ -159,23 +195,7 @@ def linearize_drift(
     selection: np.ndarray | None = None,
     contact_active: bool = False,
 ) -> DriftLinearization:
-    """Evaluate the ZTCF drift and control influence at ``(q, v)``.
-
-    Args:
-        provider: Dynamics provider (``mass_matrix``/``bias_forces`` only).
-        q: Configuration ``(n,)`` [rad].
-        v: Velocity ``(n,)`` [rad/s].
-        selection: Actuation map ``S^T`` of shape ``(n, m)``; identity when
-            ``None`` (fully actuated).
-        contact_active: Must be ``False``; contact modes need a constrained
-            provider (#10286) and are refused here.
-
-    Returns:
-        :class:`DriftLinearization` with drift ``(n,)`` and ``B`` ``(n, m)``.
-
-    Raises:
-        ValueError: On contact, non-finite inputs or inconsistent shapes.
-    """
+    """Evaluate the ZTCF drift and control influence at ``(q, v)``."""
     require(
         not contact_active,
         "contact mode is active: free-flight drift is invalid in stance; use a "
@@ -204,11 +224,7 @@ def linearize_drift(
 def reachable_acceleration_interval(
     lin: DriftLinearization, lower: np.ndarray, upper: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Exact per-coordinate acceleration interval over a torque box.
-
-    For ``tau`` in ``[lower, upper]`` the image ``drift + B tau`` is a
-    parallelotope; its axis-aligned hull is ``centre +/- |B| half_width``.
-    """
+    """Exact per-coordinate acceleration interval over a torque box."""
     lo = _finite_vector("lower", lower)
     hi = _finite_vector("upper", upper)
     require(bool(np.all(lo <= hi)), "lower must not exceed upper")
@@ -224,12 +240,7 @@ def predict_step(
     tau: np.ndarray,
     dt: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Constant-acceleration step ``q+ = q + dt v + dt^2 a/2``, ``v+ = v + dt a``.
-
-    Raises:
-        ValueError: If ``q`` is not in local coordinates (``len(q) != len(v)``,
-            e.g. a quaternion manifold) or ``dt`` is not positive.
-    """
+    """Constant-acceleration step ``q+ = q + dt v + dt^2 a/2``, ``v+ = v + dt a``."""
     q_arr = _finite_vector("q", q)
     v_arr = _finite_vector("v", v)
     require(
@@ -253,12 +264,7 @@ def integrate_step(
     selection: np.ndarray | None = None,
     contact_active: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """One classic RK4 step of ``a = drift + B tau`` with zero-order-hold torque.
-
-    Re-evaluates the drift at every stage, so this is the full nonlinear
-    forward dynamics, not the one-step constant-acceleration approximation of
-    :func:`predict_step`. Same local-coordinate and contact limits apply.
-    """
+    """One classic RK4 step of ``a = drift + B tau`` with zero-order-hold torque."""
     q_arr = _finite_vector("q", q)
     v_arr = _finite_vector("v", v)
     require(q_arr.shape == v_arr.shape, "q must use local coordinates (manifold)")
@@ -292,19 +298,9 @@ def uncertain_control_prediction(
     dt: float,
     *,
     state_covariance: np.ndarray | None = None,
+    model_uncertainty: np.ndarray | None = None,
 ) -> UncertainPrediction:
-    """Drift-centred prediction with an explicitly uncertain control.
-
-    Marginalises ``tau ~ N(mu, Sigma_u)`` through the step map::
-
-        x+ = A x + c + G tau,   A = [[I, dt I], [0, I]],
-        G = [[dt^2/2 B], [dt B]],
-        Cov(x+) = A P A^T + G Sigma_u G^T.
-
-    State/control cross-covariance is assumed zero and the Jacobian of the
-    drift with respect to the state is neglected over one step (first-order
-    local approximation; disclose it where reported).
-    """
+    """Drift-centred prediction with an explicitly uncertain control."""
     q_arr = _finite_vector("q", q)
     n = q_arr.size
     m = lin.control_influence.shape[1]
@@ -318,6 +314,9 @@ def uncertain_control_prediction(
         p = _require_psd("state_covariance", state_covariance, 2 * n)
         a = np.block([[np.eye(n), dt * np.eye(n)], [np.zeros((n, n)), np.eye(n)]])
         covariance = covariance + a @ p @ a.T
+    if model_uncertainty is not None:
+        q_w = _require_psd("model_uncertainty", model_uncertainty, 2 * n)
+        covariance = covariance + q_w
     covariance = 0.5 * (covariance + covariance.T)
     return UncertainPrediction(mean=np.r_[mean_q, mean_v], covariance=covariance)
 
@@ -325,13 +324,7 @@ def uncertain_control_prediction(
 def drift_dominance_index(
     lin: DriftLinearization, lower: np.ndarray, upper: np.ndarray
 ) -> float:
-    """Share of the admissible acceleration budget owed to drift, in ``[0, 1]``.
-
-    ``|drift| / (|drift| + | |B| half_width |)``. It compares drift with the
-    control *authority* in the band, not with the realised total
-    acceleration, so cancelling control (total ~ 0) cannot blow it up.
-    Returns ``1.0`` when the band has zero width, ``0.0`` when drift is zero.
-    """
+    """Share of the admissible acceleration budget owed to drift, in ``[0, 1]``."""
     lo = _finite_vector("lower", lower)
     hi = _finite_vector("upper", upper)
     require(bool(np.all(lo <= hi)), "lower must not exceed upper")
@@ -342,3 +335,141 @@ def drift_dominance_index(
     index = drift / (drift + authority)
     ensure(0.0 <= index <= 1.0, "dominance index must lie in [0, 1]", index)
     return index
+
+
+def _validate_transition_preconditions(
+    request: DimeTransitionRequest,
+    exclusivity_contract: RuntimeExclusivityContract | None,
+    factor_name: str,
+) -> tuple[DimeTransitionPrediction | None, Any | None]:
+    """Validate request preconditions and register with exclusivity contract."""
+    if request.contact_active:
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "contact_active: free-flight drift invalid in stance",
+                    "code": "CONTACT_ACTIVE_REJECTED",
+                },
+            ),
+            None,
+        )
+
+    if request.dt <= 0.0 or not np.isfinite(request.dt) or request.horizon <= 0:
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "dt must be positive and horizon must be >= 1",
+                    "code": "INVALID_HORIZON",
+                },
+            ),
+            None,
+        )
+
+    if len(request.state.q) != len(request.state.v):
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "manifold coordinates require explicit retraction",
+                    "code": "MANIFOLD_UNSUPPORTED",
+                },
+            ),
+            None,
+        )
+
+    factor = None
+    if exclusivity_contract is not None:
+        from src.shared.python.estimation.dime_contracts import (
+            EstimationIntervalFactor,
+        )
+
+        f_type = (
+            "marginalized_input_transition"
+            if request.mode == "marginalized"
+            else "explicit_input_likelihood"
+        )
+        factor = EstimationIntervalFactor(
+            name=factor_name,
+            factor_type=f_type,
+            t_start=request.state.t,
+            t_end=request.state.t + request.dt * request.horizon,
+            contributes_to_objective=True,
+        )
+        try:
+            exclusivity_contract.register_factor(factor)
+        except PreconditionError as err:
+            return (
+                DimeTransitionPrediction(
+                    valid=False,
+                    receipt={
+                        "status": "rejected",
+                        "reason": str(err),
+                        "code": "EXCLUSIVITY_VIOLATION",
+                    },
+                ),
+                None,
+            )
+
+    return None, factor
+
+
+def predict_dime_transition(
+    provider: DynamicsProvider,
+    request: DimeTransitionRequest,
+    *,
+    exclusivity_contract: RuntimeExclusivityContract | None = None,
+    factor_name: str = "dime_transition",
+) -> DimeTransitionPrediction:
+    """Execute DIME transition proposal with fail-closed receipts and factor registration."""
+    early_exit, factor = _validate_transition_preconditions(
+        request, exclusivity_contract, factor_name
+    )
+    if early_exit is not None:
+        return early_exit
+
+    # 5. Drift linearization
+    lin = linearize_drift(
+        provider,
+        request.state.q,
+        request.state.v,
+        selection=request.selection,
+        contact_active=request.contact_active,
+    )
+
+    # 6. Native zero-control branch (ZTCF anchor)
+    total_dt = request.dt * request.horizon
+    m = lin.control_influence.shape[1]
+    zero_u = np.zeros(m)
+    q0, v0 = predict_step(lin, request.state.q, request.state.v, zero_u, total_dt)
+
+    # 7. Controlled prediction with propagated uncertainty
+    pred = uncertain_control_prediction(
+        lin,
+        request.state.q,
+        request.state.v,
+        request.control_mean,
+        request.control_covariance,
+        total_dt,
+        state_covariance=request.state_covariance,
+        model_uncertainty=request.model_uncertainty,
+    )
+
+    # 8. Authority-bounded drift dominance index
+    sig = np.sqrt(np.maximum(1e-12, np.diag(request.control_covariance)))
+    box_lo = request.control_mean - 3.0 * sig
+    box_hi = request.control_mean + 3.0 * sig
+    dominance = drift_dominance_index(lin, box_lo, box_hi)
+
+    return DimeTransitionPrediction(
+        valid=True,
+        receipt={"status": "success", "code": "OK"},
+        zero_control_branch=(q0, v0),
+        controlled_prediction=pred,
+        drift_dominance=dominance,
+        factor=factor,
+    )

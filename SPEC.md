@@ -1,3 +1,191 @@
+## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
+
+Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
+- **Independent Continuous Replay Execution (`execute_continuous_replay`)**:
+  - Simulates forward dynamics strictly once from a single saved initial state $x_0 = (q_0, v_0)$ under saved control signals and declared configuration.
+  - Independently resets the dynamics provider state exactly once at initialization (`reset_count = 1`).
+  - Intermediate / per-frame state resets are strictly forbidden and rejected fail-closed with `PreconditionError`.
+  - Floating-base root coordinates (DoFs 0..5) have strictly zero artificial actuator forces (`has_undeclared_root_forces = False`). Undeclared root wrenches fail closed.
+  - Rejects hidden target-force feedback: unmodeled external assistance forces fail closed (`allow_hidden_feedback = False`).
+  - Model verification: verifies `model_hash` match between initial state, controls, and dynamics provider; model changes fail closed.
+  - Validates control channels: enforces complete channel coverage matching `provider.capability.control_channels`.
+- **Structured Replay Receipt (`ReplayReceipt`)**:
+  - Implements versioned receipt (`schema_version = "dime-continuous-replay-receipt/1.0"`).
+  - Explicitly records `reset_count`, `assistance_channels`, `declared_controller`, `declared_contact_policy`, `has_undeclared_root_forces`, `is_physically_accepted`, and `provenance` (`DimeProvenanceRecord`).
+  - Supports round-trip dictionary serialization (`to_dict` / `from_dict`).
+- **Independent Replay Metric Recomputation (`IndependentReplayMetrics`)**:
+  - Separates optimization solve cost from independently recomputed replay metrics.
+  - Evaluates maximum and RMS position drift, velocity drift, angular drift, cosine alignment metric, and vertical GRF static equilibrium error against frozen thresholds in `NumericAcceptanceThresholds` (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
+- **Offline Backward Smoothing (`smooth_backward_trajectory`)**:
+  - Propagates future observation information backward using marginalized arrival factors $R_k, r_k$ to produce a continuous smoothed trajectory without per-frame discontinuities.
+  - Reverse-time contact integration is strictly prohibited and fails closed with `PreconditionError` if attempted or if negative $\Delta t$ is supplied.
+  - Returns `SmoothedTrajectoryResult` verifying `is_continuous` and tracking `max_step_jump` and `continuity_metric`.
+- **Public API Adapters**:
+  - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
+  - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
+
+## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
+
+Specifies outer-loop observable global calibration, physical gauge anchor verification (metric scale, gravity frame, mass, measured contact force), identifiability analysis via SVD with rank-deficiency nullspace freezing, realizable physical inertia tensor validation (symmetry, positive-definiteness, triangle inequalities on principal moments), and frozen-prior revision guards for dynamics-informed mocap matching (#11421, #11429):
+- **Physical Gauge Policies (`src/shared/python/estimation/dime_global_calibration.py`)**:
+  - `PhysicalGauge`: enumerated reference anchors (`METRIC_SCALE`, `GRAVITY_FRAME`, `MASS_ANCHOR`, `MEASURED_FORCE_ANCHOR`).
+  - `PhysicalGaugePolicy`: validates required anchors for calibration candidates. Monocular camera scale ambiguity requires `METRIC_SCALE`; unmeasured contact dynamics mass/torque ambiguity requires `MASS_ANCHOR` or `MEASURED_FORCE_ANCHOR`. Missing anchors are rejected fail-closed with `PreconditionError`.
+- **Identifiability & Rank Deficiency (`RankDeficiencyPolicy`, `probe_identifiability`)**:
+  - SVD probe of stacked observation Jacobians: singular values below threshold define unobservable parameter combinations.
+  - `FAIL_CLOSED`: rank-deficient parameter blocks raise `PreconditionError`.
+  - `FREEZE_NULLSPACE`: identifies unobservable parameter combinations via right singular vectors and locks unobservable parameters at nominal values while optimizing free observable parameters.
+- **Physical Inertia Realizability (`validate_physical_inertia`)**:
+  - Rigid body inertia tensors must satisfy physical realizability: $3 \times 3$ symmetry, positive definiteness ($I > 0$), and triangle inequalities on principal moments ($I_{xx} + I_{yy} \ge I_{zz}$, $I_{yy} + I_{zz} \ge I_{xx}$, $I_{zz} + I_{xx} \ge I_{yy}$). Unphysical tensors fail closed with `PreconditionError`.
+- **Frozen Prior Protection & Revision Lineage**:
+  - When priors are declared frozen (`is_prior_frozen=True`), modifying calibrated values without an explicit revision tag (`prior_revision_tagged=True`) is strictly rejected fail-closed.
+- **Latency Accounting & Structured Receipts (`GlobalCalibrationResult`)**:
+  - Separates high-frequency inner-loop window estimator latency (`inner_loop_latency_s`) from outer-loop global calibration solver runtime (`outer_loop_time_s`), tracking cumulative latency and full cost breakdowns.
+  - Losses roundtrip losslessly through JSON-compatible dictionary serialization.
+
+## Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors (DIME-13, #11434)
+
+Specifies versioned human population priors, correlated hierarchical dimension distributions, Bayesian updating from sparse subject measurements, physical dimension bounds, coupled joint range-of-motion constraints, and inertia realizability checks (#11421, #11434):
+- **Population Priors & Hierarchical Dimensions (`src/shared/python/estimation/dime_human_priors.py`)**:
+  - `PopulationPriorVersion`: standardized prior models (e.g. `ANSUR2_V1`, `DE_LEVA_1996_V1`).
+  - `HierarchicalDimensionPrior`: multi-segment mean vector and factor-analysis covariance structure modeling correlated limb and body proportions.
+  - Supports both symmetric and asymmetric representations (`allow_asymmetry=True`), admitting natural bilateral asymmetry when measured rather than enforcing rigid equality.
+- **Sparse Bayesian Posterior Update (`update_hierarchical_dimension_posterior`)**:
+  - Combines population prior with sparse subject measurements (`SubjectDimensionMeasurement`) using numerically stable Joseph-form covariance updates.
+  - Unobserved or occluded limbs retain prior uncertainty through marginalization without artificial confidence shrinkage.
+  - Evaluates joint Mahalanobis compatibility (`evaluate_human_prior_compatibility`), admitting unusual but correlated proportions (e.g. tall stature with proportional wingspan) while identifying true physical outliers.
+- **Physical Bounds & Consistency Verification (`PhysicalDimensionBounds`)**:
+  - Validates hard physical bounds $[0.50, 2.50]\,\text{m}$ and verifies longitudinal segment sum consistency against measured total height, rejecting contradictory measurements fail-closed with `PreconditionError`.
+- **Coupled Range-of-Motion Constraints (`CoupledRangeOfMotionPrior`, `RangeOfMotionBound`)**:
+  - Enforces radian units on all angular limits ($\le 2\pi$), rejecting values passed in degrees fail-closed.
+  - Implements physiological joint couplings (e.g. scapulohumeral rhythm where arm elevation restricts axial rotation).
+- **Physical Realizability for Segment Inertia (`validate_inertia_realizability`)**:
+  - Strictly enforces positive mass, positive eigenvalues, and the classical triangle inequalities:
+    \[
+    I_{xx} + I_{yy} \ge I_{zz}, \quad I_{xx} + I_{zz} \ge I_{yy}, \quad I_{yy} + I_{zz} \ge I_{xx}
+    \]
+
+## Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits (DIME-07, #11428)
+
+Specifies square-root quadratic arrival factor representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics retention, late/irregular sample handling, and measurement accumulation guard preventing double counting across window advances (#11421, #11428):
+- **Arrival Information Representation (`ArrivalFactor`)**:
+  - Represents arrival prior density in tangent coordinates about a reference state $\bar{x}$:
+    \[
+    c_{\text{arrival}}(x) = \frac{1}{2} \| R (x - \bar{x}) - r \|_2^2
+    \]
+    where $R$ is the square-root information matrix ($R^T R = \Lambda$) and $r$ is the residual offset.
+  - Carries revealed rank, optional linearization coordinates, and linearization metadata (timestamp, window index, model hash, provenance, scheme label).
+  - Exposes `evaluate_residual`, `evaluate_cost`, `evaluate_jacobian`, and `is_rank_deficient`.
+- **Rank-Revealing Marginalization (`marginalize_arrival_factor`)**:
+  - Eliminates the oldest state $\delta x_0$ from the coupled linear system $A_0 \delta x_0 + A_1 \delta x_1 \approx b$ using full SVD decomposition $A_0 = U \Sigma V^T$.
+  - When $A_0$ is singular or rank-deficient, the unobserved nullspace directions are decoupled; the resulting arrival factor on $\delta x_1$ retains the exact rank deficiency without adding artificial diagonal jitter.
+  - Tested gauge policies:
+    - `"retain_rank_deficiency"` (default): retains revealed rank $r < n_1$ and sets below-threshold singular values to zero without diagonal inflation.
+    - `"fail_closed"`: raises `PreconditionError` if singular/unsupported directions exist in $A_0$.
+  - Exact equivalence with batch MAP on linear-Gaussian systems within frozen numerical tolerance ($10^{-5}$).
+- **Safe Window Commits & Failure Diagnostics (`WindowCommitStatus`, `FailureDiagnostics`)**:
+  - Validates window optimization results before committing state: checks solver success, finite coefficients, finite residuals, and absence of non-finite evaluations / sentinel replacements.
+  - If a solve fails, diverges, or encounters non-finite values, commit status is set to `REJECTED_NONFINITE` or `REJECTED_UNSUCCESSFUL`.
+  - Rejected solves do not replace `last_accepted_coefficients` or `last_accepted_trajectory`, preventing future warm-start poisoning.
+  - Detailed failure diagnostics (`FailureDiagnostics`) are recorded separately in bounded history (`max_history_diagnostics`).
+  - Subsequent successful windows recover deterministically using the last valid accepted state.
+- **Late & Irregular Sample Handling (`LateSamplePolicy`)**:
+  - `REJECT`: strictly enforces monotonic sample advance, raising `PreconditionError` on non-positive time differences or duplicates.
+  - `DROP_LATE`: gracefully drops out-of-order or duplicate timestamps while keeping valid advancing samples.
+  - Supports non-uniform sampling intervals ($\Delta t_i \ne \Delta t_j$) natively in spline and window solves.
+- **Accumulation Guard (`AccumulationGuard`)**:
+  - Tracks all sample indices and timestamps that have been marginalized into the arrival factor.
+  - Prevents double counting by raising `PreconditionError` if an already-marginalized measurement is reintroduced as an active observation factor.
+- **Bounded Memory & Latency Budget**:
+  - Retains strictly $O(1)$ memory across long horizons by bounding sample buffers and failure history.
+  - Records achieved per-window latency in milliseconds (`latency_ms`) alongside configured budget (`latency_budget_ms`).
+
+## Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints (DIME-06, #11427)
+
+Specifies unilateral ground support constraints, Coulomb friction cone bounding, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions for dynamics-informed mocap matching (#11421, #11427):
+- **Unilateral Ground Support (`src/shared/python/estimation/dime_contact_constraints.py`)**:
+  - `ContactMode`: enumerated contact states (`STANCE`, `FLIGHT`, `IMPACT`, `LIFTOFF`).
+  - Contact geometry (`ContactPointGeometry`) specifies local attachment point on body segment, sphere radius $r$, and candidate contact locations.
+  - Normal force non-negativity: $f_n = f \cdot n_{\text{ground}} \ge 0$. Adhesive ground tension ($f_n < 0$) is inadmissible and rejected fail-closed with `PreconditionError`.
+- **Coulomb Friction Cone Bounding (`ContactPointAdmissibleForce`)**:
+  - Tangential ground reaction $\|f_t\|_2 \le \mu f_n$ with static friction coefficient $\mu$.
+  - Slipping contact points ($\|f_t\| > \mu f_n$) are detected and flagged (`is_slipping=True`), with confidence downweighted by excess frictional tangential ratio.
+- **Unactuated Floating-Base Root Dynamic Equilibrium (`verify_unactuated_root_integrity`)**:
+  - Floating-base coordinates (DoFs 0..5) have zero actuators; direct root actuator torques or fictitious pelvis support shortcuts are strictly rejected fail-closed with `PreconditionError`.
+  - Floating-base root equations of motion:
+    \[
+    M(q)_{\text{root}, :} \ddot{q} + h(q, v)_{\text{root}} = \sum_{i} J_{c, i}(q)^T_{\text{root}, :} f_i
+    \]
+    All root inertial and gravitational loads must be balanced exclusively by admissible ground reaction forces.
+- **Bilateral Force Allocation Ambiguity (`BilateralAllocationStatus`)**:
+  - In double stance where only net ground reaction force $F_{\text{net}}$ and center of pressure are measured, distributing force between bilateral feet is underdetermined.
+  - Returns admissible interval bounds $[f_{i, \text{min}}, f_{i, \text{max}}]$ and explicitly flags `is_identified=False` to prevent unwarranted confidence claims on individual limb loading.
+- **Force Provenance & Discrete Mode Transitions**:
+  - Explicit force provenance tracking (`ForceProvenance.MEASURED` vs `ForceProvenance.INFERRED`).
+  - Contact Jacobian differentiability contract: continuous contact derivatives are declared valid (`derivatives_valid=True`) during persistent stance; discrete mode switches (impact, liftoff) declare `derivatives_valid=False`.
+
+## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
+
+Specifies coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting (#11421, #11426):
+- **Defect Transcription Modes (`DefectMode`)**:
+  - `EXACT`: integrated dynamic transition defects $x_{k+1} - f(x_k, u_k)$ are enforced as hard feasibility constraints.
+  - `SOFT`: defect residuals enter the optimization objective weighted by transition defect penalty matrices.
+- **Model Discrepancy Slack Bounds (`ModelDiscrepancyBounds`)**:
+  - Validates model discrepancy slack norm against declared maximum slack bound $\|s\| \le s_{\text{max}}$, rejecting excessive unphysical slacks with `PreconditionError`.
+  - Evaluates quadratic penalty cost $\frac{1}{2} s^T W_{\text{slack}} s$ for allowed discrepancy slacks.
+- **Coupled Window Factor (`DimeDynamicsWindowFactor`)**:
+  - Computes single-step integrated transition defect vectors $d_k = x_{k+1} - f(x_k, u_k)$ across the window horizon.
+  - Computes central finite-difference state Jacobians $J_{x_0}, J_{x_1}$ and control Jacobian $J_u$ on the discrete step map.
+  - Exports `as_interval_factor` as `explicit_input_likelihood` factor registered in `RuntimeExclusivityContract`.
+- **Underactuated Constraints & Control Variation (`DimeDynamicsWindowProblem`)**:
+  - Enforces underactuated root constraints: validates declared control channels against provider selection map, rejecting arbitrary root torque shortcuts on passive degrees of freedom with `PreconditionError`.
+  - Enforces actuator limits $[u_{\text{min}}, u_{\text{max}}]$ and penalizes control rate of change $\frac{1}{2} w_{\text{rate}} \|u_k - u_{k-1}\|^2$.
+- **Window Optimization & Structured Receipts (`solve_dime_dynamics_window`, `DimeDynamicsWindowResult`)**:
+  - Solves coupled nonlinear least-squares optimization using Trust Region Reflective (TRF) algorithm with box bounds.
+  - Structured receipt exports recovered state trajectory, control trajectory, transition defects, actuator bound residuals, control variation residuals, root constraint residuals, and full cost breakdown (`observation_cost`, `transition_cost`, `control_effort_cost`, `control_rate_cost`, `discrepancy_cost`, `total_cost`).
+  - Fail-closed handling for divergent or non-finite dynamics simulation, returning invalid result without corrupting state.
+
+## Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion (DIME-04, #11425)
+
+Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control influence linearization, exact parallelotope reachable acceleration interval bounding, Gaussian uncertain-control covariance propagation, authority-bounded drift dominance indexing, and DIME transition proposals with fail-closed receipts and runtime factor exclusivity (#11421, #11425):
+- **Input-Affine Dynamics Decomposition (`src/shared/python/estimation/drift_prediction.py`)**:
+  - In contact-free flight, smooth multi-body equations of motion are affine in generalized controls $\tau$:
+    \[
+    a(q, v, \tau) = f(q, v) + B(q) \tau, \quad f(q, v) = M(q)^{-1} (-h(q, v)), \quad B(q) = M(q)^{-1} S^T
+    \]
+  - Pointwise zero-torque counterfactual (ZTCF) drift acceleration $f(q, v)$ is evaluated via `src.shared.python.simulation_backends.ztcf_zvcf.ztcf_acceleration` without requiring applied torques, anchoring the motion proposal.
+  - Providers expose only `mass_matrix` and `bias_forces` (LOD $\le 2$). Ill-conditioned or singular mass matrices are detected via condition number tracking ($\kappa(M) = \|M\| \|M^{-1}\|$).
+- **Exact Box-Reachable Acceleration Hull (`reachable_acceleration_interval`)**:
+  - For actuator box limits $\tau \in [u_{\text{min}}, u_{\text{max}}]$, the image $f + B \tau$ forms a parallelotope.
+  - The exact axis-aligned bounding hull is computed as:
+    \[
+    a_{\text{centre}} = f + B \left(\frac{u_{\text{min}} + u_{\text{max}}}{2}\right), \quad a_{\text{half}} = |B| \left(\frac{u_{\text{max}} - u_{\text{min}}}{2}\right)
+    \]
+  - Admissible deviations from the ZTCF anchor are strictly bounded by actuator authority.
+- **Gaussian Uncertain-Control Propagation (`uncertain_control_prediction`)**:
+  - For uncertain inputs $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$ with state covariance $P = \operatorname{Cov}(x)$ and model process noise $Q_w$:
+    \[
+    x_{k+1} = A x_k + c + G \tau_k, \quad A = \begin{bmatrix} I & \Delta t I \\ 0 & I \end{bmatrix}, \quad G = \begin{bmatrix} \frac{\Delta t^2}{2} B \\ \Delta t B \end{bmatrix}
+    \]
+    \[
+    \operatorname{Cov}(x_{k+1}) = A P A^T + G \Sigma_u G^T + Q_w
+    \]
+  - Analytically equivalent to Schur-complement Gaussian elimination; propagated covariance is verified symmetric positive semi-definite ($\Sigma \succeq 0$).
+  - Declared zero-mean control is an initialization with finite covariance, never an assertion that the joints are inactive.
+- **Authority-Bounded Drift Dominance Index (`drift_dominance_index`)**:
+  - Share of admissible acceleration budget owed to drift:
+    \[
+    \eta = \frac{\|f\|_2}{\|f\|_2 + \||B| \Delta u_{\text{half}}\|_2} \in [0, 1]
+    \]
+  - Compares drift against control *authority* rather than realized net acceleration ($a_{\text{net}} = f + B \tau$), ensuring $\eta$ remains strictly bounded in $[0, 1]$ even when opposing control cancels drift ($a_{\text{net}} \approx 0$).
+- **Fail-Closed DIME Transition Protocol (`predict_dime_transition`)**:
+  - `DimeTransitionRequest`: inputs `DimeCompleteState`, control mean $\mu_u$, covariance $\Sigma_u$, step $\Delta t$, horizon $H$, mode (`"marginalized"` or `"explicit"`), optional state covariance $P$, model uncertainty $Q_w$, selection matrix $S$, and contact flag.
+  - `DimeTransitionPrediction`: outputs `valid: bool`, receipt dictionary, native zero-control branch $(q_0, v_0)$, controlled prediction `UncertainPrediction(mean, covariance)`, drift dominance $\eta$, and registered interval factor.
+  - Fail-closed receipts:
+    - Active contact (`contact_active=True`): returns `valid=False` with `{"code": "CONTACT_ACTIVE_REJECTED", "status": "disabled"}`.
+    - Invalid time step or horizon ($\Delta t \le 0$ or $H \le 0$): returns `valid=False` with `{"code": "INVALID_HORIZON", "status": "disabled"}`.
+    - Manifold coordinates ($n_q \neq n_v$, e.g. quaternions): returns `valid=False` with `{"code": "MANIFOLD_UNSUPPORTED", "status": "disabled"}`.
+    - Mutual exclusivity: registers `EstimationIntervalFactor` with `RuntimeExclusivityContract`. If an overlapping factor of opposing type exists, returns `valid=False` with `{"code": "EXCLUSIVITY_VIOLATION", "status": "rejected"}`.
+
 ## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
 
 Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):
@@ -7889,6 +8077,11 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11425 | [DIME] ZTCF-anchored kinematic matching: drift + constant-torque prediction, rate-limited torque-band local windows with viable-band gating, recursive overlay assembly with gap bridging, per-sample outlier/unexplained/gap labels, whole-trajectory replay refinement with per-coordinate discrepancy knot selection, quality report and synthetic swing benchmark (epic #11421; reference model only). |
+| 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
+| 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
+| 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
+| 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
+| 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
 | 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
 | 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |
