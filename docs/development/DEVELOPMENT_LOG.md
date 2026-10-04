@@ -65,12 +65,12 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11430, #11434, #11437 closed; #11435 active)
-- **PR:** #11435
-- **Branch:** `feat/dime-11435-profile-accelerate`
-- **Paths:** `src/shared/python/estimation/dime_solver_cache.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_solver_cache.py`
+- **Issue:** #11421 (children #11422–#11430, #11434, #11435, #11437 closed; #11436 active)
+- **PR:** #11436
+- **Branch:** `feat/dime-11436-learned-initializers`
+- **Paths:** `src/shared/python/estimation/dime_learned_initializers.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_learned_initializers.py`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-04: DIME-14 native drift and window solver profiling and caching implemented and validated across 10 behavioral tests in test_dime_solver_cache.py (RED/GREEN). Implements DimeCacheIdentity with multi-tiered isolation (model, parameters, contact policy, solver config, camera config, job id); enforces strict cross-job state isolation; implements LocalModelApproximation with explicit validity radius; guards against storing/serving smooth derivatives across impact discontinuities; enforces mandatory independent continuous replay without skipping; exports comprehensive DimeCostBreakdown with p50/p95 cold/warm metrics and failure costs. All 246 estimation tests pass.
+- **Last verified:** 2026-10-04: DIME-15 reusable matching initializers trained, qualified, and verified across 11 behavioral tests in test_dime_learned_initializers.py (RED/GREEN). Implements DimeLearnedInitializerModelCard recording architecture, model hash, training dataset hash, held-out splits, OOD thresholds, and truthful fail-closed limitations when learning curves are inconclusive; validates dataset splits against player overlap and unbuffered adjacent-window leakage (DataLeakageError); verifies model identity and DoF consistency (StaleModelIdentityError); verifies candidate finiteness, convergence, and residual tolerances (InvalidSyntheticCandidateError); verifies absolute actuator limits and rate-of-torque limits (UnrealisticTorqueError); implements calibrated OOD detection with fail-closed OutOfDistributionError; implements AdaptiveMatchingInitializer falling back deterministically to ClassicalPhysicalInitializer under OOD queries; enforces independent NativeCandidateGate verification without neural confidence shortcuts; executes systematic ablation study comparing full model, ablated drift, ablated ROM, and classical baselines; computes ComputeCostReport with truthful offline generation, training compute, and break-even amortization. All 295 estimation unit tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
 - **Next step:** Create PR, verify CI Standard, squash-merge into origin/main.
 
