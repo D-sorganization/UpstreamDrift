@@ -1,3 +1,31 @@
+# Current Handoff — Error-Budget Receipt, Guidance Derivation, and Public Summary (COV-11, #11279)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-11-error-budget-11279`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-11-11279`
+- Commit: `SELF`
+- Governing issue: #11279 (parent epic #11268)
+- Objective: [COV-11] Error-budget receipt and report: what single-view historical reconstruction can be trusted for.
+- Completed:
+  - `src/motion_capture/reference/error_budget.py`:
+    - `ErrorBudgetCell`: immutable Pydantic schema recording source, landmark, phase, view, grade, comparison level, metric, unit, swing and frame counts, p50, p95, worst, camera spread, resolvability, and source receipt SHA-256 digests.
+    - Zero-observation prohibition: `n_swings <= 0` and `n_frames <= 0` fail closed; unmeasured channels are recorded in `ErrorBudget.not_measured` (`NotMeasuredRecord`).
+    - `build_error_budget`: pure deterministic aggregation over comparison summaries, sorted canonical cell ordering, and SHA-256 `receipt_digest` computation guaranteeing byte-identical output across reruns (`to_json`).
+    - `derive_guidance`: classifies downstream quantities into `trustworthy at p95 < X`, `indicative`, or `not recoverable from single view` using frozen rules.
+    - Enforced contract rule: L1 envelope cells cannot be labelled `trustworthy` for per-frame quantities (raises `ValueError`).
+    - Enforced frozen-rule guard: threshold modifications without schema version bump fail closed (`ValueError`).
+    - `generate_public_summary`: generates owner-approved neutral Markdown summary (`capture-O`, `subject-O`) with automated privacy scanning rejecting any `cov-NN` frame indices, absolute filesystem paths, and private store filenames.
+  - `src/motion_capture/reference/__init__.py`: exported all new models, rules, reports, and pure functions.
+  - `tests/unit/motion_capture/test_cov11_error_budget.py`: 8 comprehensive unit tests covering deterministic serialization, zero-swing impossibility, L1 per-frame contract, frozen rule guard, privacy invariants, resolvability under camera spread, and finite number validations.
+  - `docs/development/capture-o-video/error-budget-summary.md`: owner-approved public neutral summary with aggregate body-height normalized figures and guidance classifications.
+  - `docs/development/capture-o-video/procedure.md`: updated reuse map with `error_budget.py`.
+- Validation:
+  - 8 unit tests in `tests/unit/motion_capture/test_cov11_error_budget.py`: 8 passed.
+  - CI ratchets verified: architecture budget, file size budget, error handling ratchet, spec duplicate checker, spec paths.
+- Next steps: Owner reviews PR, approves public summary, and closes epic #11268.
+
+---
+
 # OpenCap: Local Opencap-Core Sidecar Runner — #11400 / #11406
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-sidecar-runner-11406`; commit SELF; PR: opened from this branch (`Closes #11406`, `Refs #11400`)

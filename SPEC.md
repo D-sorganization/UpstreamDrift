@@ -1,3 +1,21 @@
+## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
+
+Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
+- **Error Budget Schema (`src/motion_capture/reference/error_budget.py`)**:
+  - `ErrorBudgetCell`: frozen data structure recording `source`, `joint_or_landmark`, `phase_bin`, `view`, `grade`, `comparison_level`, `metric`, `unit`, `n_swings`, `n_frames`, `p50`, `p95`, `worst`, `camera_uncertainty_spread`, `resolvable`, and `source_receipt_hashes`.
+  - Non-zero swing invariant: `n_swings <= 0` is strictly forbidden and raises `ValueError`. Missing data produces no cell and is recorded in `ErrorBudget.not_measured` (`NotMeasuredRecord`).
+  - `build_error_budget`: pure aggregation over COV-7/COV-9/COV-10 summaries with deterministic cell sorting and SHA-256 digest computation (`receipt_digest`), yielding byte-identical serialization across reruns (`to_json`).
+- **Frozen Guidance Derivation (`derive_guidance`, `GuidanceRule`, `GuidanceItem`, `GuidanceReport`)**:
+  - Encapsulates frozen comparison thresholds for historical player consumers (Tiger #11226, Hogan #11229, Necromatcher #11232/#11235).
+  - Classifies quantities into `trustworthy at p95 < X`, `indicative`, or `not recoverable from single view`.
+  - Level contract enforcement: an L1 cell can never be classified as `trustworthy` for a per-frame quantity; attempting to do so raises `ValueError`.
+  - Frozen-rule guard: modifying thresholds without bumping `ERROR_BUDGET_SCHEMA_VERSION` fails closed with `ValueError`.
+  - Resolvability guard: when camera uncertainty spread renders a metric unresolvable (`resolvable == False`), guidance reports `not recoverable from single view`.
+- **Public Summary Generator (`generate_public_summary`)**:
+  - Generates neutral Markdown summaries referencing only `capture-O` and `subject-O` with body-height-normalized numbers.
+  - Fail-closed privacy guards: strictly prohibits `cov-NN` frame indices, absolute filesystem paths, and private store filenames (`.mp4`, `.c3d`, `originals/`).
+  - Requires affirmative `owner_approved=True` parameter.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -7795,6 +7813,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11279 | [COV-11] Error-budget receipt, frozen-rule guidance derivation, and public neutral summary: ErrorBudgetCell, ErrorBudget, GuidanceRule, derive_guidance, generate_public_summary, and privacy invariants (#11279, refs #11268). |
 | 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |
 | 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
 | 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |

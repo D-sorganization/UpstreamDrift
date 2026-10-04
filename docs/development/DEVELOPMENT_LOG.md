@@ -114,9 +114,16 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11268 · Capture-O Video Companion
 
-- **State:** in_progress
+- **State:** in_review
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** opened from `feat/cov-11-error-budget-11279` (Closes #11279, Refs #11268)
+- **Branch:** `feat/cov-11-error-budget-11279`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-11 (#11279): Implemented versioned machine-readable error budget (`ErrorBudgetCell`, `ErrorBudget`, `build_error_budget`), frozen-rule guidance derivation (`derive_guidance`, `GuidanceRule`, `GuidanceItem`, `GuidanceReport`), and privacy-preserving public summary generator (`generate_public_summary`). Enforced non-zero swing invariant (omitted channels recorded in `not_measured`), L1-cell per-frame trustworthiness prohibition, frozen guidance thresholds tied to `error-budget/1.0.0`, and strict absence of frame indices, absolute paths, or private file names in public summary output; all 8 focused unit tests pass.
+- **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
+- **Next step:** Owner review of PR, public summary, and closing of epic #11268.
+
 - **PR:** #11416 (Closes #11270, Refs #11268)
 - **Branch:** `feat/cov-2-register-sources-11270`
 - **Started:** 2026-10-02

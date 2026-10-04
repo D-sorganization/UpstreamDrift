@@ -30,6 +30,19 @@ from .force_alignment import (
     series_to_viewport_payload_wrench,
     write_trace_forces,
 )
+from .error_budget import (
+    ERROR_BUDGET_SCHEMA_VERSION,
+    ErrorBudget,
+    ErrorBudgetCell,
+    GuidanceItem,
+    GuidanceReport,
+    GuidanceRule,
+    NotMeasuredRecord,
+    build_error_budget,
+    derive_guidance,
+    generate_public_summary,
+    get_default_guidance_rules,
+)
 
 __all__ = [
     "COMPARISON_EXPORT_SCHEMA",
@@ -61,4 +74,15 @@ __all__ = [
     "series_to_viewport_payload_wrench",
     "transform_reference_motion",
     "write_trace_forces",
+    "ERROR_BUDGET_SCHEMA_VERSION",
+    "ErrorBudget",
+    "ErrorBudgetCell",
+    "GuidanceItem",
+    "GuidanceReport",
+    "GuidanceRule",
+    "NotMeasuredRecord",
+    "build_error_budget",
+    "derive_guidance",
+    "generate_public_summary",
+    "get_default_guidance_rules",
 ]
