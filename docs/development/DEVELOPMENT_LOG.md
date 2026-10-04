@@ -129,7 +129,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
-- **PR:** to be opened (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
+- **PR:** #11499 (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
 - **Branch:** `feat/cov-benchmark-suite-11268`
 - **Paths:** `src/motion_capture/reference/**`, `docs/development/capture-o-video/**`, `tests/unit/motion_capture/test_cov*`
 - **Started:** 2026-10-04

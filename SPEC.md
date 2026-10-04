@@ -8282,6 +8282,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11499 | [COV-4/6/7/8/9/11] Capture-O Video Benchmark Suite: virtual camera fitting and 2D envelope (#11272), swing pairing and similarity matrix (#11274), 2D markerless backend comparison (#11275), marker-anchored anthropometry and owner project (#11276), 3D monocular/refit comparison vs marker IK (#11277), and error-budget receipt with frozen guidance (#11279, refs #11268). |
 | 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
 | 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
 | 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |

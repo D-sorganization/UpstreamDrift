@@ -1,6 +1,6 @@
 # Capture-O Video Benchmark Suite (COV-4/6/7/8/9/11) — #11268
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-benchmark-suite-11268`; PR: (to be created, `Closes #11272, #11274, #11275, #11276, #11277, #11279`, `Refs #11268`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-benchmark-suite-11268`; PR: #11499 (`Closes #11272, #11274, #11275, #11276, #11277, #11279`, `Refs #11268`)
 - Governing issue: Epic #11268; children #11272 (COV-4), #11274 (COV-6), #11275 (COV-7), #11276 (COV-8), #11277 (COV-9), #11279 (COV-11)
 - Objective: Consolidate the entire Capture-O Video companion evaluation suite into a single unified implementation:
   - COV-4 (`virtual_camera_fit.py`): Pinhole camera fitting and 2D variation envelope derivation.
