@@ -1,3 +1,15 @@
+# COV-10 Engine-Generic Model-Candidate Comparison (Python Part) — #11278
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/issue-11278`; PR: not created yet (`Refs #11278`, `Refs #11268`)
+- Governing issue: #11278 (COV-10); parent epic #11268. Issue stays open.
+- Objective: land the engine-generic comparison path that needs neither MATLAB nor #11165.
+- Completed:
+  - `src/motion_capture/reference/model_candidate_source.py`: `ModelCandidateProvenance` (reuses `_validate_matlab_release`), `ModelCandidateSource`, `source_from_overlay_dataset`, `project_candidate_to_camera`, `compare_candidate_2d` (reuses COV-7 L2 and receipt code).
+  - `tests/unit/motion_capture/test_cov10_model_candidate_source.py`: 13 synthetic tests plus one `requires_matlab`/`live_simulation` test that skips cleanly.
+  - Procedure section "Engine Candidates" for #11166-#11169.
+- Remaining (blocked on #11165 and an R2025b host): real GS3DX overlays and receipts per paired swing; event-timing side evidence.
+- Next steps: when #11165 stores a candidate, run the path on the R2025b host and comment aggregate results on #11278.
+
 # Merge-Queue Core Test Lanes — RM#1900
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/1900-ud-merge-group-tests`; PR: #11510 (workflow-only).
