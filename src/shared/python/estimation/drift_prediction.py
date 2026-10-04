@@ -337,48 +337,51 @@ def drift_dominance_index(
     return index
 
 
-def predict_dime_transition(
-    provider: DynamicsProvider,
+def _validate_transition_preconditions(
     request: DimeTransitionRequest,
-    *,
-    exclusivity_contract: RuntimeExclusivityContract | None = None,
-    factor_name: str = "dime_transition",
-) -> DimeTransitionPrediction:
-    """Execute DIME transition proposal with fail-closed receipts and factor registration."""
-    # 1. Stance / contact check
+    exclusivity_contract: RuntimeExclusivityContract | None,
+    factor_name: str,
+) -> tuple[DimeTransitionPrediction | None, Any | None]:
+    """Validate request preconditions and register with exclusivity contract."""
     if request.contact_active:
-        return DimeTransitionPrediction(
-            valid=False,
-            receipt={
-                "status": "disabled",
-                "reason": "contact_active: free-flight drift invalid in stance",
-                "code": "CONTACT_ACTIVE_REJECTED",
-            },
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "contact_active: free-flight drift invalid in stance",
+                    "code": "CONTACT_ACTIVE_REJECTED",
+                },
+            ),
+            None,
         )
 
-    # 2. Time step and horizon check
     if request.dt <= 0.0 or not np.isfinite(request.dt) or request.horizon <= 0:
-        return DimeTransitionPrediction(
-            valid=False,
-            receipt={
-                "status": "disabled",
-                "reason": "dt must be positive and horizon must be >= 1",
-                "code": "INVALID_HORIZON",
-            },
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "dt must be positive and horizon must be >= 1",
+                    "code": "INVALID_HORIZON",
+                },
+            ),
+            None,
         )
 
-    # 3. Manifold coordinates check
     if len(request.state.q) != len(request.state.v):
-        return DimeTransitionPrediction(
-            valid=False,
-            receipt={
-                "status": "disabled",
-                "reason": "manifold coordinates require explicit retraction",
-                "code": "MANIFOLD_UNSUPPORTED",
-            },
+        return (
+            DimeTransitionPrediction(
+                valid=False,
+                receipt={
+                    "status": "disabled",
+                    "reason": "manifold coordinates require explicit retraction",
+                    "code": "MANIFOLD_UNSUPPORTED",
+                },
+            ),
+            None,
         )
 
-    # 4. Exclusivity contract check
     factor = None
     if exclusivity_contract is not None:
         from src.shared.python.estimation.dime_contracts import (
@@ -400,14 +403,34 @@ def predict_dime_transition(
         try:
             exclusivity_contract.register_factor(factor)
         except PreconditionError as err:
-            return DimeTransitionPrediction(
-                valid=False,
-                receipt={
-                    "status": "rejected",
-                    "reason": str(err),
-                    "code": "EXCLUSIVITY_VIOLATION",
-                },
+            return (
+                DimeTransitionPrediction(
+                    valid=False,
+                    receipt={
+                        "status": "rejected",
+                        "reason": str(err),
+                        "code": "EXCLUSIVITY_VIOLATION",
+                    },
+                ),
+                None,
             )
+
+    return None, factor
+
+
+def predict_dime_transition(
+    provider: DynamicsProvider,
+    request: DimeTransitionRequest,
+    *,
+    exclusivity_contract: RuntimeExclusivityContract | None = None,
+    factor_name: str = "dime_transition",
+) -> DimeTransitionPrediction:
+    """Execute DIME transition proposal with fail-closed receipts and factor registration."""
+    early_exit, factor = _validate_transition_preconditions(
+        request, exclusivity_contract, factor_name
+    )
+    if early_exit is not None:
+        return early_exit
 
     # 5. Drift linearization
     lin = linearize_drift(
