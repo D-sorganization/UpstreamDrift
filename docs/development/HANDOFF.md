@@ -1,3 +1,36 @@
+# Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion — #11421 / #11425
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-drift-prediction-11425`; PR: #11459 (`Closes #11425`, `Refs #11421`)
+- Governing issue: #11425 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-04] Implement ZTCF-anchored one-step and multi-step dynamics prediction, control influence linearization, exact box-reachable acceleration interval bounding, Gaussian uncertain-control covariance propagation, authority-bounded drift dominance indexing, and DIME transition proposals with fail-closed receipts and runtime factor exclusivity.
+- Completed:
+  - `src/shared/python/estimation/drift_prediction.py`:
+    - `linearize_drift`: evaluates pointwise ZTCF drift acceleration $f = M(q)^{-1}(-h(q, v))$ and control influence $B = M(q)^{-1} S^T$; reuses `ztcf_acceleration` from `src.shared.python.simulation_backends.ztcf_zvcf` (DRY); tracks mass condition number $\kappa(M)$; refuses active contact with fail-closed exception/receipt.
+    - `reachable_acceleration_interval`: computes exact axis-aligned parallelotope bounding hull $[a_{\text{centre}} - a_{\text{half}}, a_{\text{centre}} + a_{\text{half}}]$ over control box $[u_{\text{min}}, u_{\text{max}}]$.
+    - `predict_step`: 1-step constant acceleration kinematic update with manifold refusal ($n_q \neq n_v$).
+    - `integrate_step`: zero-order-hold RK4 integrator reproducing reference forward dynamics under torque.
+    - `uncertain_control_prediction`: propagates Gaussian state distribution under uncertain control $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$ via $A P A^T + G \Sigma_u G^T + Q_w$; verifies PSD covariance.
+    - `drift_dominance_index`: computes authority-relative dominance ratio $\|f\| / (\|f\| + \||B| \Delta u_{\text{half}}\|)$, bounded in $[0, 1]$ even when opposing control cancels drift ($a_{\text{net}} \approx 0$).
+    - `predict_dime_transition`: executes DIME transition proposal; enforces fail-closed checks for contact (`"CONTACT_ACTIVE_REJECTED"`), invalid horizon/dt (`"INVALID_HORIZON"`), and manifold coordinates (`"MANIFOLD_UNSUPPORTED"`); enforces runtime mutual exclusivity via `RuntimeExclusivityContract` (`"EXCLUSIVITY_VIOLATION"`).
+  - `src/shared/python/estimation/__init__.py`: re-exports all new drift prediction types and functions.
+  - `tests/unit/estimation/test_dime_drift_prediction.py`: 35 comprehensive behavioral tests covering all required RED and GREEN behaviors:
+    - RED/GREEN torque-biased initialization: biased torque mean alters controlled prediction without corrupting the native ZTCF drift anchor.
+    - RED/GREEN high drift with nonzero control: dominance index $> 0.7$ under high velocity.
+    - RED/GREEN strong opposing control & near-zero total acceleration: dominance index stays in $(0, 1)$ without exploding.
+    - RED/GREEN contact switch & invalid horizon: disabled with typed receipt.
+    - RED/GREEN model uncertainty & uncertain mass: covariance propagation verified PSD.
+    - RED/GREEN analytic linear marginalization vs explicit Gaussian elimination: exact numerical agreement.
+    - RED/GREEN runtime exclusivity enforcement: duplicate overlapping physics factors refused.
+    - RED/GREEN frozen baseline verification: condition number within `NumericAcceptanceThresholds.condition_number_max`.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_drift_prediction.py`: 35 passed.
+  - `pytest tests/unit/estimation`: 166 passed, 1 skipped (jax).
+  - `python scripts/ci/check_architecture_budget.py`: passed.
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/check_no_print_calls.py`: passed.
+  - `ruff check`, `black --check`, `mypy --follow-imports=silent`: passed cleanly.
+- Next steps: Proceed to DIME-05 (#11426) under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: #11457 (`Closes #11424`, `Refs #11421`)

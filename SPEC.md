@@ -1,3 +1,45 @@
+## Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion (DIME-04, #11425)
+
+Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control influence linearization, exact parallelotope reachable acceleration interval bounding, Gaussian uncertain-control covariance propagation, authority-bounded drift dominance indexing, and DIME transition proposals with fail-closed receipts and runtime factor exclusivity (#11421, #11425):
+- **Input-Affine Dynamics Decomposition (`src/shared/python/estimation/drift_prediction.py`)**:
+  - In contact-free flight, smooth multi-body equations of motion are affine in generalized controls $\tau$:
+    \[
+    a(q, v, \tau) = f(q, v) + B(q) \tau, \quad f(q, v) = M(q)^{-1} (-h(q, v)), \quad B(q) = M(q)^{-1} S^T
+    \]
+  - Pointwise zero-torque counterfactual (ZTCF) drift acceleration $f(q, v)$ is evaluated via `src.shared.python.simulation_backends.ztcf_zvcf.ztcf_acceleration` without requiring applied torques, anchoring the motion proposal.
+  - Providers expose only `mass_matrix` and `bias_forces` (LOD $\le 2$). Ill-conditioned or singular mass matrices are detected via condition number tracking ($\kappa(M) = \|M\| \|M^{-1}\|$).
+- **Exact Box-Reachable Acceleration Hull (`reachable_acceleration_interval`)**:
+  - For actuator box limits $\tau \in [u_{\text{min}}, u_{\text{max}}]$, the image $f + B \tau$ forms a parallelotope.
+  - The exact axis-aligned bounding hull is computed as:
+    \[
+    a_{\text{centre}} = f + B \left(\frac{u_{\text{min}} + u_{\text{max}}}{2}\right), \quad a_{\text{half}} = |B| \left(\frac{u_{\text{max}} - u_{\text{min}}}{2}\right)
+    \]
+  - Admissible deviations from the ZTCF anchor are strictly bounded by actuator authority.
+- **Gaussian Uncertain-Control Propagation (`uncertain_control_prediction`)**:
+  - For uncertain inputs $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$ with state covariance $P = \operatorname{Cov}(x)$ and model process noise $Q_w$:
+    \[
+    x_{k+1} = A x_k + c + G \tau_k, \quad A = \begin{bmatrix} I & \Delta t I \\ 0 & I \end{bmatrix}, \quad G = \begin{bmatrix} \frac{\Delta t^2}{2} B \\ \Delta t B \end{bmatrix}
+    \]
+    \[
+    \operatorname{Cov}(x_{k+1}) = A P A^T + G \Sigma_u G^T + Q_w
+    \]
+  - Analytically equivalent to Schur-complement Gaussian elimination; propagated covariance is verified symmetric positive semi-definite ($\Sigma \succeq 0$).
+  - Declared zero-mean control is an initialization with finite covariance, never an assertion that the joints are inactive.
+- **Authority-Bounded Drift Dominance Index (`drift_dominance_index`)**:
+  - Share of admissible acceleration budget owed to drift:
+    \[
+    \eta = \frac{\|f\|_2}{\|f\|_2 + \||B| \Delta u_{\text{half}}\|_2} \in [0, 1]
+    \]
+  - Compares drift against control *authority* rather than realized net acceleration ($a_{\text{net}} = f + B \tau$), ensuring $\eta$ remains strictly bounded in $[0, 1]$ even when opposing control cancels drift ($a_{\text{net}} \approx 0$).
+- **Fail-Closed DIME Transition Protocol (`predict_dime_transition`)**:
+  - `DimeTransitionRequest`: inputs `DimeCompleteState`, control mean $\mu_u$, covariance $\Sigma_u$, step $\Delta t$, horizon $H$, mode (`"marginalized"` or `"explicit"`), optional state covariance $P$, model uncertainty $Q_w$, selection matrix $S$, and contact flag.
+  - `DimeTransitionPrediction`: outputs `valid: bool`, receipt dictionary, native zero-control branch $(q_0, v_0)$, controlled prediction `UncertainPrediction(mean, covariance)`, drift dominance $\eta$, and registered interval factor.
+  - Fail-closed receipts:
+    - Active contact (`contact_active=True`): returns `valid=False` with `{"code": "CONTACT_ACTIVE_REJECTED", "status": "disabled"}`.
+    - Invalid time step or horizon ($\Delta t \le 0$ or $H \le 0$): returns `valid=False` with `{"code": "INVALID_HORIZON", "status": "disabled"}`.
+    - Manifold coordinates ($n_q \neq n_v$, e.g. quaternions): returns `valid=False` with `{"code": "MANIFOLD_UNSUPPORTED", "status": "disabled"}`.
+    - Mutual exclusivity: registers `EstimationIntervalFactor` with `RuntimeExclusivityContract`. If an overlapping factor of opposing type exists, returns `valid=False` with `{"code": "EXCLUSIVITY_VIOLATION", "status": "rejected"}`.
+
 ## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
 
 Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):

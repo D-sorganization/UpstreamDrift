@@ -60,7 +60,19 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Started:** 2026-09-29
 - **Last verified:** 2026-10-03 — Part 1 merged (#11172); Part 2 (#11166, PR #11174): owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
 - **Summary:** Epic #11161: neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, engine-independent swing events and metrics, and Capture-O pipeline execution through MuJoCo. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Land PR #11174 (Part 2, #11166). Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
+
+### DL-#11421 · Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11421 (children #11422–#11425 in progress, #11422, #11423, #11424 closed; #11425 active)
+- **PR:** #11459
+- **Branch:** `feat/dime-drift-prediction-11425`
+- **Paths:** `src/shared/python/estimation/drift_prediction.py`, `src/shared/python/estimation/dime_contracts.py`, `src/shared/python/estimation/dime_observation_factors.py`, `src/shared/python/estimation/dime_manifest.py`, `tests/unit/estimation/test_dime_drift_prediction.py`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-04: DIME-04 uncertain-control ZTCF prediction implemented and validated across 35 behavioral tests in test_dime_drift_prediction.py (RED/GREEN). Refuses active contact and invalid horizon with typed receipts, enforces runtime mutual exclusivity via RuntimeExclusivityContract, evaluates exact axis-aligned box-reachable parallelotope bounds, propagates Gaussian state distribution under uncertain inputs, and tracks authority-relative drift dominance index bounded in [0, 1]. All 166 estimation tests pass.
+- **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
+- **Next step:** Land PR #11459 for DIME-04 (#11425) and advance to DIME-05 (#11426).
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
