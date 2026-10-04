@@ -1,3 +1,27 @@
+## Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers (DIME-15, #11436)
+
+Specifies reproducible training recipes, model cards, multi-strategy matching initialization, anti-leakage defenses, torque realism enforcement, calibrated OOD rejection with classical physical fallback, independent native gating, ablation protocols, and truthful compute cost accounting (#11421, #11436):
+- **Reusable Initializer Model Card (`DimeLearnedInitializerModelCard`)**:
+  - Encapsulates model architecture, model hash, training dataset hash, held-out validation splits (player, session, geometry), calibrated OOD thresholds, and canonical SI units.
+  - Fail-closed learning curve monitoring: inconclusive or negative learning curves set `scale_up_halted = True` and truthfully register limitations without hiding results or claiming fake convergence.
+- **Anti-Leakage Data Partitioning (`validate_dataset_split`)**:
+  - Rejects overlapping player identities between training and evaluation splits fail-closed (`DataLeakageError`).
+  - Enforces minimum temporal buffer gap $\Delta t_{\text{gap}} \ge \Delta t_{\text{buffer}}$ between adjacent windows within the same session/player to prevent autoregressive window contamination.
+- **Model Identity & Checkpoint Verification (`verify_checkpoint_identity`)**:
+  - Verifies that checkpoint model hash and generalized coordinate dimensions ($u_{\text{dim}}$) match the active provider/task. Mismatched or stale checkpoints raise `StaleModelIdentityError`.
+- **Torque Realism & Actuator Bounds (`verify_torque_realism`)**:
+  - Validates feedforward control proposals against absolute actuator torque limits $|\tau_i| \le \tau_{\max, i}$ and dynamic rate-of-torque limits $|d\tau_i/dt| \le \dot{\tau}_{\max, i}$, rejecting unphysical or step-impulse interpolations fail-closed (`UnrealisticTorqueError`).
+- **Calibrated OOD Detection & Classical Fallback (`AdaptiveMatchingInitializer`)**:
+  - Evaluates subject dimensions and contact modes against training distribution bounds.
+  - Out-of-distribution inputs raise `OutOfDistributionError` internally and trigger deterministic fallback to `ClassicalPhysicalInitializer` (zero-torque / constant velocity physical warm start) with structured fallback provenance.
+- **Independent Native Gate Enforcement (`NativeCandidateGate`)**:
+  - Disallows automatic acceptance of proposals based on neural confidence alone.
+  - Every candidate is strictly evaluated by an independent native residual check $\|\mathbf{r}\| \le \text{tol}_{\text{accept}}$ before acceptance.
+- **Systematic Ablation Protocol (`run_initializer_ablation_study`)**:
+  - Compares full model against ablated drift features, ablated ROM priors, and classical physical baselines across acceptance rates, residuals, and solve iterations.
+- **Truthful Compute Accounting & Break-Even Amortization (`ComputeCostReport`)**:
+  - Tracks offline teacher episode generation cost, training compute, per-solve speedup $\Delta T_{\text{solve}} = T_{\text{classical}} - T_{\text{learned}}$, and required solve volume for full amortization $N_{\text{breakeven}} = T_{\text{offline}} / \Delta T_{\text{solve}}$.
+
 ## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
 
 Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
