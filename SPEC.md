@@ -18,6 +18,28 @@ Specifies rank-revealing input-effect subspace decomposition, scale-invariant co
 - **Runtime Factor Exclusivity (`DimeInputSubspaceFactor`, `RuntimeExclusivityContract`)**:
   - Defaults to diagnostic proposal-screening factor (`contributes_to_objective=False`). When configured as an alternative reduced inference formulation (`contributes_to_objective=True`), the runtime exclusivity contract strictly rejects duplicate full-dynamics or explicit-control factors on overlapping time intervals.
 
+## Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance (DIME-10, #11431)
+
+Specifies the preregistered ablation benchmark protocol comparing the six baseline and method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera errors) under marked, markerless, and hybrid observation modes (#11421, #11431):
+- **Preregistered Baseline and Method Variants (`DimeAblationVariant`)**:
+  - `KINEMATIC_IK`: Pure kinematic inverse kinematics tracking baseline without dynamics or drift guidance.
+  - `CLASSICAL_MHE`: Moving horizon estimation with classical inverse-dynamics effort penalty without drift-centered priors.
+  - `DRIFT_PRIOR_ZTCF`: Dynamics-informed MHE with uncertain-control ZTCF prediction and drift dominance acceleration bounds.
+  - `DRIFT_CONTACT_CONSTRAINED`: Dynamics-informed estimation with explicit bilateral contact reaction and unilateral ground reaction constraints.
+  - `DRIFT_OFFLINE_SMOOTHED`: Coupled window estimation followed by bidirectional backward smoothing and single-shot continuous forward replay.
+  - `DRIFT_ACCELERATED_PROPOSAL`: Fast proposal initializer and short physical refinement with reduced solve latency.
+- **Systematic Perturbations and Observation Modes (`PerturbationKind`, `ObservationMode`)**:
+  - Perturbations: `NOISE` (anisotropic/whitened sensor noise), `OCCLUSION` (observation dropout and temporal masking), `TORQUE_BIAS` (non-zero control prior offset), `CONTACT_CHANGE` (step contact transitions and phase shifts), `MODEL_CAMERA_ERROR` (parameter scale and camera extrinsics offset).
+  - Observation modes: `MARKED` (3D markers), `MARKERLESS` (2D keypoints), `HYBRID` (joint 3D markers and 2D projections).
+- **Anti-Leakage and Fail-Closed Defenses**:
+  - Seeded data leakage fails closed: training/evaluation split overlap or explicit leakage flags raise `PreconditionError`.
+  - Test-set tuning fails closed: hyperparameter optimization directly on evaluation data raises `PreconditionError`.
+  - Winning-trial filtering fails closed: reporting only winning trials is forbidden; all trials, failures, and unqualified statuses must be retained in `AblationSummaryTable`.
+- **Accuracy-Runtime Metrics & Dominance Guard**:
+  - `compute_ablation_dominance_metric`: calculates ratio $\|\bar a_{\mathrm{drift}}\| / (\|\bar a_{\mathrm{drift}}\| + \|\bar a_{\mathrm{control}}\|)$ with `"guarded_zero"` policy returning `0.0` to eliminate zero-division risks.
+  - Empirical uncertainty coverage: evaluates fraction of ground-truth state trajectories contained within calibrated $\pm 2\sigma$ confidence intervals.
+  - Latency accounting: p50 latency, p95 latency, and global-refinement cost are recorded separately in milliseconds.
+
 ## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
 
 Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
@@ -43,7 +65,6 @@ Specifies offline backward smoothing using marginalized arrival information, fai
 - **Public API Adapters**:
   - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
   - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
-
 
 ## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
 
@@ -8098,6 +8119,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
+| 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
+| 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
 | 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
