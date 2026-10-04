@@ -1,3 +1,43 @@
+# Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay — #11421 / #11430
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11430 (`Closes #11430`, `Refs #11421`)
+- Governing issue: #11430 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-09] Offline Smoothing and Independent Continuous Replay: execute single-shot forward integration from saved initial state with saved controls and declared configuration; fail closed on per-frame resets, hidden feedback, undeclared root wrenches, model changes, and missing controls; perform offline backward smoothing using marginalized arrival information without reverse-time contact integration; record structured ReplayReceipt; recompute independent replay metrics separated from solver cost; provide public adapters to Shadow Tracker and Simscape replay harnesses.
+- Completed:
+  - `src/shared/python/estimation/dime_continuous_replay.py`:
+    - `ContinuousReplayOptions`: declared controller (`open_loop_feedforward`, `pure_torque`), contact policy, model hash, and frozen tolerances (`NumericAcceptanceThresholds`).
+    - `ReplayReceipt`: versioned receipt (`dime-continuous-replay-receipt/1.0`) tracking reset count (strictly 1 for continuous replay), assistance channels, root wrench integrity, and cryptographic provenance (`DimeProvenanceRecord`).
+    - `IndependentReplayMetrics`: independent recomputed metrics (max/RMS drift, velocity drift, angular drift, alignment, reproducibility error, GRF vertical balance) separated from optimization cost.
+    - `ContinuousReplayResult`: structured result containing trajectory states, controls, receipt, independent metrics, physical acceptance status, and provenance.
+    - `execute_continuous_replay`: executes uninterrupted forward rollout from single initial state; fails closed on per-frame resets, hidden feedback, undeclared root wrenches on floating-base root DoFs (0..5), model hash mismatches, and missing control channels.
+    - `smooth_backward_trajectory`: performs backward trajectory smoothing using arrival information and quadratic smoothness without per-frame discontinuities; strictly forbids reverse-time contact integration fail-closed.
+    - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
+    - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-09 symbols.
+  - `src/shared/python/estimation/moving_horizon.py`: refactored Law of Demeter attribute chains.
+  - `tests/unit/estimation/test_dime_continuous_replay.py`: 11 comprehensive behavioral tests (RED & GREEN) covering:
+    - RED per-frame state resets fail closed (`PreconditionError`).
+    - RED hidden target-force feedback fails closed (`PreconditionError`).
+    - RED undeclared root wrench on floating-base root DoFs fails closed (`PreconditionError`).
+    - RED replay with changed model fails closed (`PreconditionError`).
+    - RED missing controls or shape mismatch fails closed (`PreconditionError`).
+    - RED backward inference calling reverse-time contact integration fails closed (`PreconditionError`).
+    - GREEN uninterrupted synthetic replay reproduces trajectory within frozen numerical tolerances (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
+    - GREEN native floating-base/contact fixture reproduces saved motion and vertical GRF static equilibrium within frozen tolerances.
+    - GREEN backward smoothing with marginalized arrival information produces continuous smoothed trajectory without per-frame discontinuities.
+    - GREEN structured ContinuousReplayResult contains trajectory, independent replay residuals, assistance telemetry, and provenance.
+    - GREEN public adapters connect cleanly to Shadow Tracker and Simscape replay harnesses.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_continuous_replay.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 209 passed, 1 skipped (jax).
+  - `python scripts/check_spec_paths.py`: passed.
+  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
+  - `python scripts/ci/check_lod.py src/shared/python/estimation --baseline scripts/ci/lod_baseline.txt`: passed (0 new violations, clean scan).
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to dependent qualification gates under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates — #11421 / #11429
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11429-global-calibration`; PR: #11467 (`Closes #11429`, `Refs #11421`)
