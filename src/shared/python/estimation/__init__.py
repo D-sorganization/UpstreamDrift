@@ -228,6 +228,13 @@ from src.shared.python.estimation.dime_input_subspace import (
     evaluate_input_subspace_feasibility,
     predict_masked_interval,
 )
+from src.shared.python.estimation.dime_solver_cache import (
+    DimeCacheIdentity,
+    DimeCostBreakdown,
+    DimeSolverCache,
+    LocalModelApproximation,
+    accelerated_solve_dynamics_window,
+)
 
 __all__ = [
     "AccumulationGuard",
@@ -263,9 +270,11 @@ __all__ = [
     "DeterministicFakeProvider",
     "DimeBenchmarkManifest",
     "DimeBenchmarkResult",
+    "DimeCacheIdentity",
     "DimeCameraParameters",
     "DimeCompleteState",
     "DimeContactConstraintsFactor",
+    "DimeCostBreakdown",
     "DimeDynamicsWindowFactor",
     "DimeDynamicsWindowOptions",
     "DimeDynamicsWindowProblem",
@@ -277,6 +286,7 @@ __all__ = [
     "DimeObservationFactor",
     "DimeObservationWindow",
     "DimeProvenanceRecord",
+    "DimeSolverCache",
     "DimeTransitionMode",
     "DimeTransitionPrediction",
     "DimeTransitionRequest",
@@ -302,6 +312,7 @@ __all__ = [
     "LateSamplePolicy",
     "MapEstimatorOptions",
     "MapEstimatorProblem",
+    "LocalModelApproximation",
     "MapEstimatorResult",
     "ManifoldContract",
     "Marker3DObservationFactor",
@@ -369,6 +380,7 @@ __all__ = [
     "VectorSpaceManifold",
     "WindowCommitStatus",
     "ZeroDenominatorPolicy",
+    "accelerated_solve_dynamics_window",
     "anthropometric_prior_residual",
     "autodiff_jacobian",
     "calibrate_global_parameters",

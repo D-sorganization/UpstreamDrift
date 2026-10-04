@@ -1,3 +1,19 @@
+## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
+
+Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
+- **Multi-Tiered Cache Identity (`DimeCacheIdentity`)**:
+  - Partitions cache lookups across model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID.
+  - Guarantees strict cross-job native state isolation; different `job_id` queries cannot access or contaminate other jobs' cached states.
+  - Automatic and targeted invalidation: `invalidate_on_camera_change` purges camera-dependent entries; `invalidate_on_body_change` purges body/inertia-dependent entries; `invalidate_job` purges job session entries.
+- **Local Model Approximation (`LocalModelApproximation`)**:
+  - Evaluates first-order Taylor expansion local approximations $\delta x_{k+1} = A \delta x_k + B \delta u_k$ around nominal trajectories.
+  - Enforces explicit validity radius $R_{\text{valid}}$: queries with displacement $\|\delta x\| > R_{\text{valid}}$ fail closed with `PreconditionError`, preventing unverified extrapolations.
+- **Impact Phase Discontinuity Guard (`store_jacobian_with_impact_check`)**:
+  - Rejects caching or serving smooth derivative approximations across contact impact transitions where velocity or ground reaction impulses undergo jump discontinuities.
+- **Mandatory Replay Enforcement & Granular Profiling (`accelerated_solve_dynamics_window`, `DimeCostBreakdown`)**:
+  - Preserves identical provider semantics: independent continuous replay execution is strictly mandatory and cannot be skipped or short-circuited to fake speedup claims.
+  - Records comprehensive cost breakdowns: drift count/time, full step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, and cold/warm p50/p95 speeds.
+
 ## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
 
 Specifies rank-revealing input-effect subspace decomposition, scale-invariant covariance whitening, orthogonal-complement torque-independent drift feasibility tests, bounded control feasibility, changing contact rank tracking, and missing-data prediction with calibrated uncertainty bounds (#11421, #11437):

@@ -1,3 +1,36 @@
+# Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration — #11421 / #11435
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11435-profile-accelerate`; PR: (to be created, `Closes #11435`, `Refs #11421`)
+- Governing issue: #11435 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-14] Profile and accelerate native drift and window solves: implement multi-tiered cache identity with strict cross-job state isolation, local Taylor approximation with explicit validity radius, impact discontinuity invalidation, mandatory continuous replay enforcement, and granular cost breakdown profiling cold/warm p50/p95 speeds and failure costs.
+- Completed:
+  - `src/shared/python/estimation/dime_solver_cache.py`:
+    - `DimeCacheIdentity`: multi-tiered partition key covering model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID. Enforces non-empty strings and valid enums via DbC `require`.
+    - `LocalModelApproximation`: first-order Taylor expansion local model with explicit validity radius $R_{\text{valid}}$. Enforces $\|\delta x\| \le R_{\text{valid}}$ fail-closed with `PreconditionError`.
+    - `DimeSolverCache`: thread-safe multi-partition solver and provider cache using `threading.RLock`. Supports drift, step, Jacobian, and window solve caching. Provides targeted invalidations: `invalidate_on_camera_change`, `invalidate_on_body_change`, and `invalidate_job`.
+    - `store_jacobian_with_impact_check`: detects impact phase transitions and strictly rejects caching/serving smooth derivatives across impact discontinuities.
+    - `DimeCostBreakdown`: structured profiling record tracking drift count/time, full-step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, cache hits/misses, and p50/p95 speeds.
+    - `accelerated_solve_dynamics_window`: accelerated window solver enforcing mandatory independent continuous replay (strictly rejects `skip_independent_replay` fail-closed).
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-14 symbols.
+  - `tests/unit/estimation/test_dime_solver_cache.py`: 10 comprehensive behavioral unit tests:
+    - RED stale cache after camera calibration/extrinsics change.
+    - RED stale cache after body mass/inertia change.
+    - RED stale cache after contact policy transition.
+    - RED cross-job native-state contamination isolation.
+    - RED inaccurate derivative at contact impact discontinuity rejected.
+    - RED speedup claims from skipped replay rejected fail-closed.
+    - GREEN cached vs fresh evaluation machine precision equivalence.
+    - GREEN bounded approximation error within validity radius.
+    - GREEN multi-threaded concurrency and thread safety.
+    - GREEN measured cold vs warm speedup and full cost breakdown export.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_solver_cache.py`: 10 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 246 passed, 1 skipped.
+  - `ruff check`: passed.
+  - `ruff format --check`: passed.
+  - `mypy`: passed with 0 issues.
+  - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
+
 # Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction — #11421 / #11437
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11437-torque-drift`; PR: #11490 (`Closes #11437`, `Refs #11421`)
