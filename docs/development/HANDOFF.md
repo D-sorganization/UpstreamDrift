@@ -1,6 +1,33 @@
+# OpenCap: Local Opencap-Core Sidecar Runner — #11400 / #11406
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-sidecar-runner-11406`; commit SELF; PR: opened from this branch (`Closes #11406`, `Refs #11400`)
+- Governing issue: #11406 (parent epic #11400, design authority ADR-0053; follows #11401, #11403, and #11407)
+- Objective: [OpenCap Child 5] Spawns a separately installed `opencap-core` (Docker or subprocess via `managed_popen`) on local videos plus calibration, then collects the output session through `load_opencap_session`.
+- Completed:
+  - `src/motion_capture/opencap_ingest/launcher.py`:
+    - `OpenCapSidecarNotFoundError(RuntimeError)` with actionable installation guidance.
+    - `OpenCapLaunchConfig`: session directory, video directory, calibration directory, env path, docker image, detector (`hrnet` default per ADR-0053), `allow_non_commercial` guard for OpenPose, `dry_run`, timeout, extra arguments.
+    - `OpenCapLaunchResult`: status, return code, session directory, log file, error message, and collected `OpenCapSession`.
+    - `OpenCapLauncher`: Python/Conda/Venv discovery (`find_opencap_python`), Docker check (`is_docker_available`), command builders (`build_command`, `build_docker_command`), safe subprocess execution using `managed_popen` with guaranteed cleanup on context exit, fail-closed validation, and session collection via `load_opencap_session`.
+    - `run_opencap_sidecar`: clean convenience wrapper.
+  - `src/motion_capture/opencap_ingest/output_adapter.py`:
+    - `OpenCapOutputAdapter`: `load()` and `inspect()` adapting OpenCap session directories into canonical UpstreamDrift representations.
+  - `src/motion_capture/opencap_ingest/__init__.py`: exports all launcher and adapter symbols.
+  - `src/motion_capture/opencap_ingest/README.md`: architectural overview, boundary invariants, and usage guide.
+  - `src/motion_capture/__init__.py`: re-exports `opencap_ingest` symbols.
+  - `tests/unit/motion_capture/test_opencap_launcher.py`: 16 hermetic unit tests covering config defaults, ADR-0053 OpenPose licensing checks, fail-closed install hints, environment discovery, command construction, dry-run execution, `managed_popen` execution with mock process, non-zero returncode handling, and output adapter.
+  - `tests/integration/motion_capture/test_opencap_gpu_e2e.py`: tagged with `pytest.mark.requires_gpu`; checks GPU availability and skips cleanly on CPU environments.
+  - Architecture test `tests/architecture/test_opencap_boundary.py` verified clean.
+- Validation:
+  - 16 unit tests in `tests/unit/motion_capture/test_opencap_launcher.py`: 16 passed.
+  - GPU test in `tests/integration/motion_capture/test_opencap_gpu_e2e.py`: skipped cleanly.
+  - All 64 OpenCap tests passed / skipped as expected.
+  - CI ratchets verified: architecture budget, file size budget, error handling ratchet, suite marker ratchet, ruff check/format.
+- Next steps: Land PR, clean up worktree, proceed to next child issue in epic #11400.
+
 # OpenCap: Opt-In Hosted Session Download — #11400 / #11407
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-hosted-download-11407`; commit SELF; PR: #11415 (`Closes #11407`, `Refs #11400`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-hosted-download-11407`; commit `c95d9e38a0`; PR: #11415 (`Closes #11407`, `Refs #11400`)
 - Governing issue: #11407 (parent epic #11400, design authority ADR-0053; follows #11401–#11403 and #11409)
 - Objective: [OpenCap Child 6] Opt-in hosted session download with affirmative consent, typed settings, and full layout reconstruction.
 - Completed:
@@ -23,7 +50,7 @@
   - `pytest tests/unit/motion_pipeline/sources/test_opencap_download.py`: 8 passed.
   - All OpenCap unit and boundary tests pass.
   - Architecture budget, file size budget, ruff check/format, and bandit clean.
-- Next steps: Merge PR #11415; proceed with #11406.
+- Next steps: Merged via PR #11415.
 
 # Current Handoff — Kinematic-Sequence Thorax Proxy and Window Margin (#11182)
 
