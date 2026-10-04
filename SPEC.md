@@ -7796,6 +7796,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
+| 2026-10-03 | #11441 | Settings page test no longer races the asynchronously loaded theme list: it waits for the Light option before selecting it, and the shared mock now resolves the theme list late so the ordering bug reproduces every run |
 | 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |
 | 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
 | 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |
