@@ -8098,7 +8098,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-04 | #11487 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
+| 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
 | 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |

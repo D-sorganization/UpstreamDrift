@@ -1,6 +1,6 @@
 # Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance — #11421 / #11431
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-10-ablation-study-11431`; PR: #11487 (`Closes #11431`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-10-ablation-study-11431`; PR: #11488 (`Closes #11431`, `Refs #11421`)
 - Governing issue: #11431 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-10] Ablation Study and Accuracy-Runtime Acceptance: evaluate the six preregistered baseline/method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera error) under marked, markerless, and hybrid observation modes; fail closed on seeded data leakage, test-set tuning, and winning-trial filtering; guard zero denominators in dominance metrics; evaluate uncertainty coverage and record p50/p95 latency and global-refinement cost separately.
 - Completed:
