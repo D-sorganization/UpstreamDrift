@@ -64,7 +64,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
 | `force_overlay` | 0 | 0 | 0 | 15 | 0 | 0 |
-| `golf_club` | 0 | 0 | 0 | 0 | 105 | 0 |
+| `golf_club` | 0 | 0 | 0 | 0 | 112 | 0 |
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -114,13 +114,13 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `security` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `sg_optimizer` | 0 | 0 | 0 | 22 | 0 | 0 |
 | `shadow_tracker` | 0 | 0 | 0 | 21 | 0 | 0 |
-| `sidekick` | 212 | 66 | 23 | 36 | 76 | 278 |
+| `sidekick` | 211 | 67 | 23 | 36 | 76 | 278 |
 | `signal_toolkit` | 21 | 6 | 2 | 1 | 0 | 27 |
 | `simulation_backends` | 0 | 0 | 0 | 21 | 0 | 0 |
 | `simulation_store` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `spatial_algebra` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `swing_comparison` | 0 | 0 | 0 | 5 | 0 | 0 |
-| `swing_sim` | 0 | 0 | 0 | 0 | 427 | 0 |
+| `swing_sim` | 0 | 0 | 0 | 0 | 428 | 0 |
 | `tests` | 0 | 0 | 0 | 0 | 6 | 0 |
 | `theme` | 0 | 0 | 0 | 4 | 23 | 0 |
 | `tools` | 0 | 0 | 0 | 2 | 0 | 0 |
@@ -135,7 +135,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 35 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1601** | **770** | **680** |
+| **Total** | **405** | **275** | **123** | **1601** | **778** | **680** |
 
 ## Diverged Files by Package
 
@@ -416,11 +416,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `reporting/__init__.py` | +387 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-05-15 |
 | `reporting/generator.py` | -58 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-25 |
 
-### Package `sidekick` (66 Diverged Files)
+### Package `sidekick` (67 Diverged Files)
 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `sidekick/agent/action_service.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgclaudeagent[bot] 2026-06-15 |
+| `sidekick/calculators/electrical/electrical_model.py` | -512 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-29 |
 | `sidekick/calculators/electrical/glass_interface.py` | -9103 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-07 |
 | `sidekick/calculators/thermo/steam_engine.py` | -983 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-05 |
 | `sidekick/calculators/thermo/thermo_properties.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
