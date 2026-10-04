@@ -143,6 +143,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** #11502 (Closes #11271, Refs #11268)
+- **Branch:** `feat/cov-3-protocol-decision-11271`
+- **Paths:** `docs/development/capture-o-video/comparison-protocol.md`, `src/config/cov_comparison_profile.v1.json`, `src/config/cov_landmark_correspondence.json`, `tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-3 (#11271): Ratified comparison protocol levels L0–L3 and 8 governed decisions (`docs/development/capture-o-video/comparison-protocol.md`), frozen comparison profile `cov_comparison_profile.v1.json`, machine-readable landmark correspondence `cov_landmark_correspondence.json` mapping Capture-34 to derived joint centres and 4 detector backends (MediaPipe-33, COCO-17, OpenPose-25, SMPL-22) with explicit exclusions and physical rationales; all 6 schema and integrity tests passing.
+- **Summary:** Ratify comparison protocol L0-L3, frozen comparison profile, and landmark correspondence table.
+- **Next step:** Merge PR for COV-3, complete Epic #11268.
+
 - **PR:** #11499 (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
 - **Branch:** `feat/cov-benchmark-suite-11268`
 - **Paths:** `src/motion_capture/reference/**`, `docs/development/capture-o-video/**`, `tests/unit/motion_capture/test_cov*`

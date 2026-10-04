@@ -8,6 +8,24 @@
 - Validation (architecture-budget fix on SELF: `dt` moved into `WindowObservation`; `_FitState`, `_MatchInputs` and `_validated_inputs` keep every function at <= 8 parameters and <= 100 lines; `python3 scripts/ci/check_architecture_budget.py` OK); shared-tools divergence inventory updated for the six new ud-only estimation modules (`python3 -m scripts.shared_tools.divergence_inventory --check` current; committed authorship block kept because a shallow clone cannot recompute it): `python3 -m pytest tests/unit/estimation -q --timeout=60` (new suites: test_dime_drift_prediction 27, test_dime_local_window 17, test_dime_drift_anchored_matcher 14, test_matching_quality 33, test_synthetic_swing 24, test_dime_replay_refinement 10); shared benchmark fixtures in `tests/unit/estimation/conftest.py`; `ruff check`/`ruff format --check` clean on changed paths; `python3 -m scripts.check_design_manual_governance` passes. mypy not installed in this container. Native MuJoCo/JAX lanes not available here (skipped, not evidence).
 - Risks: about 14 s per 0.4 s match plus 6–13 s per refinement in pure Python (finite differences); replay refinement does not enforce the rate limit; single shooting may need multiple shooting on longer horizons.
 - Next steps: (1) open the PR and update epic #11421 with the refined plan; (2) DIME-14 speed-up (analytic/variational sensitivities); (3) contact-mode provider integration via #10286 before any full-body use; (4) run on the owner/tour captures only after DIME-01 freezes metrics.
+
+---
+
+# Capture-O Video Comparison Protocol & Correspondence (COV-3) — #11268 / #11271
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-3-protocol-decision-11271`; PR: #11502 (`Closes #11271`, `Refs #11268`)
+- Governing issue: #11271 ([COV-3] Protocol and correspondence decisions); parent epic #11268
+- Objective: Ratify comparison protocol levels L0–L3, document rationales for 8 governed decisions (landmark correspondence, offset calibration without leakage, virtual camera degrees of freedom, pairing features and abstention margin $\tau_\text{pair}=0.65$, time mapping and clock qualification, P1–P10 swing phase bins, frozen profile config, and club handling), create frozen comparison profile config `cov_comparison_profile.v1.json`, create machine-readable correspondence table `cov_landmark_correspondence.json` mapping Capture-34 markers -> derived joint centres -> 4 detector backends (MediaPipe-33, COCO-17, OpenPose-25, SMPL-22) with explicit exclusions, and provide complete test suite.
+- Completed:
+  - `docs/development/capture-o-video/comparison-protocol.md`: complete ratified comparison levels (L0–L3), null baseline principle, and comprehensive technical rationales for all 8 decisions.
+  - `src/config/cov_comparison_profile.v1.json`: versioned frozen comparison profile with levels L0–L3, pairing hyperparameters ($\tau_\text{pair}=0.65$, margin=0.05), P1–P10 phase bins, and classified reporting thresholds (trustworthy, indicative, unresolvable).
+  - `src/config/cov_landmark_correspondence.json`: versioned correspondence table mapping Capture-34 markers to derived joint centres and detector targets across MediaPipe, COCO, OpenPose, and SMPL, with explicit exclusions and physical rationales.
+  - `tests/unit/motion_capture/test_cov3_protocol_and_correspondence.py`: 6 unit and schema verification tests (100% green).
+  - All pre-commit checks clean: Ruff, mypy, file-size budget, error-handling ratchet, architecture budget.
+- Next steps: Merge PR #11502, verify issue #11271 closure, advance Epic #11268 towards completion.
+
+---
+
 # Capture-O Video Benchmark Suite (COV-4/6/7/8/9/11) — #11268
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-benchmark-suite-11268`; PR: #11499 (`Closes #11272, #11274, #11275, #11276, #11277, #11279`, `Refs #11268`)
