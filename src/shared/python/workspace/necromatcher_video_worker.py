@@ -11,9 +11,6 @@ from typing import Any
 import mujoco  # noqa: F401 -- native SDK loaded before workspace rendering helpers
 import numpy as np
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
-    MujocoForceTorqueSource,
-)
 from src.shared.python.force_overlay.contracts import ForceTorqueFrame
 from src.shared.python.motion_matching.pipeline.plants.mujoco_plant import (
     MujocoMatchingPlant,
@@ -35,6 +32,11 @@ class MujocoFitSampler:
         plant = binding.plant
         if not isinstance(plant, MujocoMatchingPlant):
             raise ValueError("Force layer requires a MuJoCo native plant")
+        # Deferred: shared -> engines is an inverted dependency at module level.
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (  # noqa: E501
+            MujocoForceTorqueSource,
+        )
+
         model = plant.adapter.model
         self._model = model
         self._data = mujoco.MjData(model)
