@@ -3854,3 +3854,13 @@ limits; the full goal remains active.
 
 See [Follow-Up Review](historical_capture/local-research-golf-admission-race-review.json). Source inventory covers 6,697 src/test
 files, with equal before/after maps; this is not a whole-repository baseline.
+
+## User-Requested Handoff and Stop Checkpoint
+
+The user requested a committed checkpoint and instructed this agent to stop
+pursuing the goal after turnover. See [Next-Agent Turnover](necromatcher-next-agent-turnover.md) for the
+exact implementation state at f0e14944, scoped work packets, public owners,
+validation commands, historical evidence boundaries and remaining acceptance.
+No proposed optimized video export or new fit was started. This documentation
+checkpoint follows the published local research integration; the full goal is
+unfinished and is to be paused after normal commit/push and handoff publication.
