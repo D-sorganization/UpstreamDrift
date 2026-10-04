@@ -26,10 +26,13 @@ from src.shared.python.estimation.map_estimator import (
     solve_single_trial_map,
 )
 from src.shared.python.estimation.moving_horizon import (
+    ArrivalInformation,
+    FailureDiagnostic,
     MovingHorizonEstimator,
     MovingHorizonOptions,
     MovingHorizonProblem,
     MovingHorizonResult,
+    marginalize_arrival_schur,
 )
 from src.shared.python.estimation.multi_trial import (
     MultiTrialDecisionLayout,
@@ -163,6 +166,7 @@ from src.shared.python.estimation.dime_dynamics_window import (
 
 __all__ = [
     "AnalyticPendulumProvider",
+    "ArrivalInformation",
     "CANONICAL_DIME_UNITS",
     "CapabilityRecord",
     "CapabilityStatus",
@@ -197,6 +201,7 @@ __all__ = [
     "DriftLinearization",
     "DynamicsProvider",
     "EstimationIntervalFactor",
+    "FailureDiagnostic",
     "FixedBasePendulumFixture",
     "ForceClassification",
     "ForwardModel",
@@ -217,6 +222,7 @@ __all__ = [
     "MovingHorizonOptions",
     "MovingHorizonProblem",
     "MovingHorizonResult",
+    "marginalize_arrival_schur",
     "MultiTrialDecisionLayout",
     "MultiTrialMapProblem",
     "MultiTrialMapResult",

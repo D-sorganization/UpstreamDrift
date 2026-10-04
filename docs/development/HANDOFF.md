@@ -1,3 +1,26 @@
+# Dynamics-Informed Mocap Matching: Arrival Information and Moving-Horizon Estimation — #11421 / #11428
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11428-arrival-mhe`; PR: #11465 (`Closes #11428`, `Refs #11421`)
+- Governing issue: #11428 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-07] Extend existing MHE with arrival information and safe window commits.
+- Completed:
+  - `src/shared/python/estimation/moving_horizon.py`:
+    - `ArrivalInformation`: frozen dataclass capturing reference coefficients, square-root information matrix $R$ ($H = R^T R$), rank, unobserved gauge nullspace basis, linearization timestamp, marginalized sample boundary, and whitened residual/cost evaluators.
+    - `marginalize_arrival_schur`: rank-revealing Schur complement marginalization using truncated SVD without artificial diagonal jitter.
+    - `FailureDiagnostic`: structured failure receipt with window index, timestamp, failure reason, residual norm, and iterations.
+    - Safe window commit semantics: solves hitting non-finite sentinels ($\ge 10^8$ / $10^{11}$) or exceeding `max_boundary_jump` fail cleanly without mutating or poisoning `last_accepted_coefficients`.
+    - `recover_and_solve_next`: deterministic recovery resetting solver state and advancing the horizon safely.
+    - Monotonic timestamp validation: strictly checks that incoming timestamps are strictly increasing, raising `PreconditionError` on non-increasing or duplicate timestamps.
+    - Mid-trajectory parameter revision detection: verifies model parameters remain consistent throughout continuous estimation, rejecting mid-trajectory alterations with `PreconditionError`.
+  - `src/shared/python/estimation/__init__.py`: exports `ArrivalInformation`, `FailureDiagnostic`, `marginalize_arrival_schur`.
+  - `tests/unit/estimation/test_moving_horizon_estimator.py`: 14 comprehensive behavioral unit tests (marked with `pytestmark = pytest.mark.unit`) covering Schur marginalization rank, safe window commit on non-finite trap, recovery, monotonic timestamps, parameter revision detection, unobserved gauge nullspace, batch comparison, and roundtrips.
+- Validation:
+  - `pytest tests/unit/estimation/test_moving_horizon_estimator.py`: 14 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 188 passed, 1 skipped.
+  - Architecture, file size, dry duplication, error handling ratchet: all passed.
+  - Divergence inventory: 100% verified.
+- Next steps: Advance to DIME-08 (#11429) under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors — #11421 / #11426
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11426-dynamics-window`; PR: #11461 (`Closes #11426`, `Refs #11421`)

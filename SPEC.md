@@ -1,3 +1,18 @@
+## Dynamics-Informed Mocap Matching: Arrival Information and Moving-Horizon Estimation (DIME-07, #11428)
+
+Specifies recursive moving-horizon estimation (MHE) with rank-revealing Schur complement marginalization, safe window commit semantics against non-finite optimization traps, failure recovery, mid-trajectory parameter revision detection, and monotonic timestamp validation (#11421, #11428):
+- **Arrival Information & Marginalization (`src/shared/python/estimation/moving_horizon.py`)**:
+  - `ArrivalInformation`: frozen dataclass capturing reference coefficients, square-root information matrix $R$ ($H = R^T R$), rank, unobserved gauge nullspace basis, linearization timestamp, marginalized sample boundary, and whitened residual/cost evaluators.
+  - `marginalize_arrival_schur`: rank-revealing Schur complement marginalization using truncated SVD without artificial diagonal jitter. Partitions joint Hessian into retained and marginalized blocks, computing $H_{\text{schur}} = H_{22} - H_{21} H_{11}^{-1} H_{12}$.
+- **Safe Window Commit Semantics (`MovingHorizonEstimator`)**:
+  - Validates solver exit status and residual sentinel activations. If optimization terminates into non-finite sentinel residuals ($\ge 10^8$) or exceeds `max_boundary_jump`, the candidate update is rejected and recorded in `failure_diagnostics`.
+  - State corruption prevention: `last_accepted_coefficients` remains uncorrupted across solve failures.
+  - Monotonic timestamp validation: strictly checks that incoming timestamps are strictly increasing, raising `PreconditionError` on non-increasing or duplicate timestamps.
+  - Parameter revision detection: verifies model parameters remain consistent throughout continuous estimation, rejecting mid-trajectory alterations with `PreconditionError`.
+- **Failure Diagnostics & Recovery (`FailureDiagnostic`, `recover_and_solve_next`)**:
+  - Structured failure reporting with window index, timestamp, failure reason, residual norm, and iterations.
+  - Deterministic recovery mechanism resetting solver state and advancing the horizon safely.
+
 ## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
 
 Specifies coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting (#11421, #11426):
@@ -7951,6 +7966,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11465 | [DIME-07] Arrival information and moving-horizon estimation: ArrivalInformation, rank-revealing Schur complement marginalization, safe window commit semantics against non-finite sentinels, failure diagnostics and recovery, monotonic timestamp validation, and parameter revision detection (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
 | 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
