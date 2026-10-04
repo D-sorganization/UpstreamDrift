@@ -140,6 +140,41 @@ def _check_geometric_degeneracy(world_points: np.ndarray) -> str | None:
     return None
 
 
+def _assemble_virtual_camera_result(
+    cam: PinholeCamera,
+    rot: Sequence[float],
+    cov: np.ndarray,
+    metrics: tuple[float, float],
+    outcome: CameraFitOutcome,
+    reason: str | None = None,
+) -> VirtualCameraResult:
+    """Build VirtualCameraResult with extracted parameters and metrics."""
+    rms_px, cond = metrics
+    t_wc = cam.translation_world_from_camera_m
+    m = cam.matrix
+    params = {
+        "r_x": float(rot[0]),
+        "r_y": float(rot[1]),
+        "r_z": float(rot[2]),
+        "t_x": float(t_wc[0]),
+        "t_y": float(t_wc[1]),
+        "t_z": float(t_wc[2]),
+        "fx_px": float(m[0, 0]),
+        "fy_px": float(m[1, 1]),
+        "cx_px": float(m[0, 2]),
+        "cy_px": float(m[1, 2]),
+    }
+    return VirtualCameraResult(
+        parameters=params,
+        covariance=cov,
+        fit_rms_px=rms_px,
+        condition_number=cond,
+        outcome=outcome,
+        degraded_reason=reason,
+        camera=cam,
+    )
+
+
 def _make_degraded_result(
     matrix: np.ndarray,
     image_size_px: tuple[int, int],
@@ -147,35 +182,20 @@ def _make_degraded_result(
     camera_id: str,
 ) -> VirtualCameraResult:
     """Construct a degraded result holding parameters at prior."""
-    r_wc = np.eye(3, dtype=float)
-    t_wc = np.array([0.0, 1.2, 3.0], dtype=float)
-    cam = PinholeCamera(
-        camera_id=camera_id,
-        matrix=matrix,
-        rotation_world_from_camera=r_wc,
-        translation_world_from_camera_m=t_wc,
-        image_size_px=image_size_px,
+    prior_cam = PinholeCamera(
+        camera_id,
+        matrix,
+        np.eye(3, dtype=float),
+        np.array([0.0, 1.2, 3.0], dtype=float),
+        image_size_px,
     )
-    params = {
-        "r_x": 0.0,
-        "r_y": 0.0,
-        "r_z": 0.0,
-        "t_x": float(t_wc[0]),
-        "t_y": float(t_wc[1]),
-        "t_z": float(t_wc[2]),
-        "fx_px": float(matrix[0, 0]),
-        "fy_px": float(matrix[1, 1]),
-        "cx_px": float(matrix[0, 2]),
-        "cy_px": float(matrix[1, 2]),
-    }
-    return VirtualCameraResult(
-        parameters=params,
-        covariance=np.zeros((6, 6), dtype=float),
-        fit_rms_px=0.0,
-        condition_number=float("inf"),
+    return _assemble_virtual_camera_result(
+        prior_cam,
+        rot=(0.0, 0.0, 0.0),
+        cov=np.zeros((6, 6), dtype=float),
+        metrics=(0.0, float("inf")),
         outcome=CameraFitOutcome.DEGRADED,
-        degraded_reason=reason,
-        camera=cam,
+        reason=reason,
     )
 
 
@@ -298,32 +318,14 @@ def fit_virtual_camera(
     )
     rms_px = float(np.sqrt(np.mean(np.sum((pred - img_pts) ** 2, axis=-1))))
 
-    cam = PinholeCamera(
-        camera_id=camera_id,
-        matrix=matrix,
-        rotation_world_from_camera=r_wc,
-        translation_world_from_camera_m=t_wc,
-        image_size_px=image_size_px,
-    )
-    params = {
-        "r_x": float(sol[0]),
-        "r_y": float(sol[1]),
-        "r_z": float(sol[2]),
-        "t_x": float(t_wc[0]),
-        "t_y": float(t_wc[1]),
-        "t_z": float(t_wc[2]),
-        "fx_px": float(matrix[0, 0]),
-        "fy_px": float(matrix[1, 1]),
-        "cx_px": float(matrix[0, 2]),
-        "cy_px": float(matrix[1, 2]),
-    }
-    return VirtualCameraResult(
-        parameters=params,
-        covariance=cov,
-        fit_rms_px=rms_px,
-        condition_number=cond,
+    cam = PinholeCamera(camera_id, matrix, r_wc, t_wc, image_size_px)
+    return _assemble_virtual_camera_result(
+        cam,
+        rot=sol[:3],
+        cov=cov,
+        metrics=(rms_px, cond),
         outcome=CameraFitOutcome.FITTED,
-        camera=cam,
+        reason=None,
     )
 
 

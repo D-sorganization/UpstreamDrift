@@ -167,6 +167,16 @@ def compute_depth_and_image_plane_errors(
     return depth_rmse_mm, image_plane_rmse_mm
 
 
+def _validate_matching_3d_trajectories(pred: np.ndarray, ref: np.ndarray) -> None:
+    """Validate that predicted and reference trajectories have matching 3D shapes."""
+    require(
+        pred.shape == ref.shape, "predicted and reference trajectories must match shape"
+    )
+    require(
+        pred.ndim == 3 and pred.shape[-1] == 3, "trajectories must have shape (T, K, 3)"
+    )
+
+
 def align_trajectories_rigid_fixed_scale(
     predicted: np.ndarray,
     reference: np.ndarray,
@@ -175,12 +185,7 @@ def align_trajectories_rigid_fixed_scale(
     """Compute rigid transform on address frames and apply with fixed scale (scale=1.0)."""
     pred = np.asarray(predicted, dtype=float)
     ref = np.asarray(reference, dtype=float)
-    require(
-        pred.shape == ref.shape, "predicted and reference trajectories must match shape"
-    )
-    require(
-        pred.ndim == 3 and pred.shape[-1] == 3, "trajectories must have shape (T, K, 3)"
-    )
+    _validate_matching_3d_trajectories(pred, ref)
 
     if address_indices and len(address_indices) > 0:
         source_anchor = pred[address_indices].reshape(-1, 3)
@@ -374,12 +379,7 @@ def compute_l3_paired_comparison(
     """Compute L3 paired comparison between video 3D fit and capture-O marker IK."""
     pred = np.asarray(predicted_trajectories, dtype=float)
     ref = np.asarray(reference_trajectories, dtype=float)
-    require(
-        pred.shape == ref.shape, "predicted and reference trajectories must match shape"
-    )
-    require(
-        pred.ndim == 3 and pred.shape[-1] == 3, "trajectories must have shape (T, K, 3)"
-    )
+    _validate_matching_3d_trajectories(pred, ref)
     require(
         len(joint_names) == pred.shape[1],
         f"joint_names ({len(joint_names)}) must match landmark dimension ({pred.shape[1]})",
