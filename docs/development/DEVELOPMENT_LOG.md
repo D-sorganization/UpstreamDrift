@@ -67,7 +67,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #11400; child #11408 (OpenCap: golf accuracy qualification against a marker reference; follows #11401–#11403, #11406, #11407, #11409, #11405)
-- **PR:** docs/opencap-golf-accuracy-deferred-11408
+- **PR:** #11451
 - **Branch:** `docs/opencap-golf-accuracy-deferred-11408`
 - **Paths:** `docs/development/planning/catalog.json`, `docs/development/planning/DV-11408.md`, `docs/development/planning/source-11408.json`
 - **Started:** 2026-10-03

@@ -1,6 +1,6 @@
 # OpenCap: Golf Accuracy Qualification Against a Marker Reference — #11400 / #11408
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `docs/opencap-golf-accuracy-deferred-11408`; commit SELF; PR: opened from this branch (`Refs #11408`, `Refs #11400`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `docs/opencap-golf-accuracy-deferred-11408`; PR: #11451 (`Refs #11408`, `Refs #11400`)
 - Governing issue: #11408 (parent epic #11400, design authority ADR-0053; follows #11401–#11403, #11406, #11407, #11409, and #11405)
 - Objective: [OpenCap Child 7] Record golf accuracy qualification against a marker reference into the deferred-validation catalog (DV-11408) per fleet rules (physical simultaneous capture unavailable; synthetic numbers prohibited as acceptance).
 - Completed:
