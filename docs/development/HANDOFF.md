@@ -1,3 +1,28 @@
+# Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors — #11421 / #11426
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11426-dynamics-window`; PR: #11461 (`Closes #11426`, `Refs #11421`)
+- Governing issue: #11426 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-05] Implement coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting.
+- Completed:
+  - `src/shared/python/estimation/dime_dynamics_window.py`:
+    - `DefectMode`: `EXACT` (hard constraint) vs `SOFT` (quadratic defect penalty) transcription.
+    - `ModelDiscrepancyBounds`: validation of process-noise / model-discrepancy slack against `max_slack_norm` and quadratic cost evaluation.
+    - `DimeDynamicsWindowFactor`: calculates single-step integrated transition defect vectors $d_k$, central finite-difference Jacobians $(J_{x_0}, J_{x_1}, J_u)$, and exports `as_interval_factor` as `explicit_input_likelihood`.
+    - `DimeDynamicsWindowProblem`: configuration, control validation enforcing underactuated root constraints (rejects arbitrary root torque shortcuts on passive DOFs), actuator bounds, and control variation regularizer cost.
+    - `DimeDynamicsWindowResult`: structured receipt exporting `states`, `controls`, `transition_defects`, `actuator_bound_residuals`, `control_variation_residuals`, `root_constraint_residuals`, and full `cost_breakdown` (`observation_cost`, `transition_cost`, `control_effort_cost`, `control_rate_cost`, `discrepancy_cost`, `total_cost`).
+    - `solve_dime_dynamics_window`: solves coupled nonlinear least-squares optimization using TRF with box bounds, recovering identifiable states and controls under observation noise with fail-closed handling for divergent dynamics.
+  - `src/shared/python/estimation/__init__.py`: exports `DefectMode`, `DimeDynamicsWindowFactor`, `DimeDynamicsWindowProblem`, `DimeDynamicsWindowResult`, `ModelDiscrepancyBounds`, `solve_dime_dynamics_window`.
+  - `tests/unit/estimation/test_dime_dynamics_window.py`: 12 comprehensive behavioral tests (RED & GREEN) verifying root constraint rejection, non-finite dynamics fail-closed handling, two-link dynamic coupling detection, control variation regularization, model discrepancy bounds, exact defect mode, runtime exclusivity, actuator bounds, cost component receipts, finite difference Jacobians, state/control recovery, and serialization roundtrips.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_dynamics_window.py`: 12 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 177 passed, 1 skipped (jax).
+  - `python scripts/ci/check_architecture_budget.py`: passed.
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/ci/check_dry_duplication_gate.py`: passed (0 unapproved duplicate growth).
+  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to DIME-06 (#11427) under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion — #11421 / #11425
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-drift-prediction-11425`; PR: #11459 (`Closes #11425`, `Refs #11421`)

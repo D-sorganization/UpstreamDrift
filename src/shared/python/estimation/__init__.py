@@ -151,6 +151,15 @@ from src.shared.python.estimation.drift_prediction import (
     reachable_acceleration_interval,
     uncertain_control_prediction,
 )
+from src.shared.python.estimation.dime_dynamics_window import (
+    DefectMode,
+    DimeDynamicsWindowFactor,
+    DimeDynamicsWindowOptions,
+    DimeDynamicsWindowProblem,
+    DimeDynamicsWindowResult,
+    ModelDiscrepancyBounds,
+    solve_dime_dynamics_window,
+)
 
 __all__ = [
     "AnalyticPendulumProvider",
@@ -165,11 +174,16 @@ __all__ = [
     "CovarianceValidationError",
     "CubicHermiteSplineTrajectory",
     "DIME_CONTRACTS_VERSION",
+    "DefectMode",
     "DeterministicFakeProvider",
     "DimeBenchmarkManifest",
     "DimeBenchmarkResult",
     "DimeCameraParameters",
     "DimeCompleteState",
+    "DimeDynamicsWindowFactor",
+    "DimeDynamicsWindowOptions",
+    "DimeDynamicsWindowProblem",
+    "DimeDynamicsWindowResult",
     "DimeEstimationResult",
     "DimeFullStepRequest",
     "DimeFullStepResult",
@@ -198,6 +212,7 @@ __all__ = [
     "Marker3DObservationFactor",
     "MarkerAttachment",
     "Markerless2DObservationFactor",
+    "ModelDiscrepancyBounds",
     "MovingHorizonEstimator",
     "MovingHorizonOptions",
     "MovingHorizonProblem",
@@ -275,6 +290,7 @@ __all__ = [
     "run_dime_baseline",
     "shared_parameter_covariance",
     "smoothness_residual",
+    "solve_dime_dynamics_window",
     "solve_multi_trial_map",
     "solve_single_trial_map",
     "stack_shared_parameter_jacobians",
