@@ -59,6 +59,7 @@ class ContinuousReplayOptions:
         default_factory=NumericAcceptanceThresholds
     )
     integrator_name: str = "rk4"
+    intermediate_resets: Sequence[tuple[int, DimeCompleteState]] | None = None
 
 
 @dataclass(frozen=True)
@@ -222,13 +223,13 @@ def _validate_replay_inputs(
     initial_state: DimeCompleteState,
     controls: np.ndarray,
     options: ContinuousReplayOptions,
-    intermediate_resets: Sequence[tuple[int, DimeCompleteState]] | None,
     assistance_forces: np.ndarray | None,
 ) -> tuple[np.ndarray, list[str]]:
     """Validate all replay preconditions and return sanitized controls and assistance list."""
     cap = provider.capability
     require(cap.status != "unavailable", "Provider is unavailable")
 
+    intermediate_resets = options.intermediate_resets
     if intermediate_resets is not None and len(intermediate_resets) > 0:
         raise PreconditionError(
             "Per-frame state resets are strictly forbidden in continuous replay; "
@@ -375,12 +376,11 @@ def execute_continuous_replay(
     reference_trajectory: Sequence[DimeCompleteState] | None = None,
     assistance_forces: np.ndarray | None = None,
     provenance: DimeProvenanceRecord | None = None,
-    intermediate_resets: Sequence[tuple[int, DimeCompleteState]] | None = None,
 ) -> ContinuousReplayResult:
     """Execute continuous forward replay from saved initial state and controls."""
     opts = options or ContinuousReplayOptions()
     ctrls, assistance_channels = _validate_replay_inputs(
-        provider, initial_state, controls, opts, intermediate_resets, assistance_forces
+        provider, initial_state, controls, opts, assistance_forces
     )
 
     traj_states = _rollout_continuous_replay(provider, initial_state, ctrls, dt)

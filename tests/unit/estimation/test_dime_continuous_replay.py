@@ -173,7 +173,7 @@ class TestRedContinuousReplayInvariants:
                 initial_state=init_state,
                 controls=controls,
                 dt=0.01,
-                intermediate_resets=bad_resets,
+                options=ContinuousReplayOptions(intermediate_resets=bad_resets),
             )
 
     def test_red_hidden_target_force_feedback_fails_closed(self) -> None:
