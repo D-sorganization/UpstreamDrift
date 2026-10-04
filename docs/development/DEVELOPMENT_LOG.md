@@ -73,6 +73,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-10-04: DIME-14 Native Drift and Window Solves Profile and Acceleration Cache implemented and validated across 14 behavioral tests in test_dime_solver_cache.py (RED/GREEN). Validates composite cache keying (DimeSolverCacheKey), local model linearization (LocalLinearizationModel) with explicit validity radius (epsilon_valid) and mandatory refresh rules, fail-closed guards for stale cache, cross-job contamination, impact linearization, and skipped replay; verified cached vs fresh exact equivalence within < 1e-12, bounded approximation error, thread-safe session concurrency, measured cold vs warm speedup, and structured receipts (DimeSolverCacheReceipt). All 229 estimation unit tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
 - **Next step:** Advance to next DIME deliverable or merge #11435.
+- **Issue:** #11421 (children #11422–#11430; #11422–#11428 closed; #11430 active)
+- **PR:** #11430
+- **Branch:** `feat/dime-09-offline-smoothing-11430`
+- **Paths:** `src/shared/python/estimation/dime_continuous_replay.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_continuous_replay.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04: DIME-09 offline smoothing and independent continuous replay implemented and validated across 11 behavioral tests in test_dime_continuous_replay.py (RED/GREEN). Implements execute_continuous_replay simulating forward dynamics once from saved initial state with saved controls and declared configuration; enforces reset_count == 1 and rejects per-frame state resets fail-closed; strictly rejects hidden target-force feedback and undeclared root wrenches on floating-base root DoFs (0..5); rejects mismatched model configuration; implements smooth_backward_trajectory with marginalized arrival information producing continuous smoothed trajectory without per-frame discontinuities while strictly forbidding reverse-time contact integration; serializes structured ReplayReceipt; computes independent replay metrics separated from solver cost; provides public adapters to Shadow Tracker RolloutRequest and Simscape ContinuousReplayTrajectory. All 209 estimation tests pass.
+- **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
+- **Next step:** Merge PR #11430, advance to dependent qualification gates.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 

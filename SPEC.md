@@ -20,6 +20,31 @@ Specifies thread-safe solver caching, local model linearization with explicit va
   - Detailed wall-clock and invocation accounting across drift evaluation, full-step rollout, Jacobian computation, linear system assembly/factorization, window solve, and independent replay.
   - Structured audit receipt exporting hit/miss counters, hit rate, eviction count, memory footprint, cold vs warm execution time, speedup ratio, and lineage provenance.
   - Accelerated window solver (`solve_accelerated_dime_window`) preserves exact provider semantics while achieving measurable warm solve acceleration.
+## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
+
+Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
+- **Independent Continuous Replay Execution (`execute_continuous_replay`)**:
+  - Simulates forward dynamics strictly once from a single saved initial state $x_0 = (q_0, v_0)$ under saved control signals and declared configuration.
+  - Independently resets the dynamics provider state exactly once at initialization (`reset_count = 1`).
+  - Intermediate / per-frame state resets are strictly forbidden and rejected fail-closed with `PreconditionError`.
+  - Floating-base root coordinates (DoFs 0..5) have strictly zero artificial actuator forces (`has_undeclared_root_forces = False`). Undeclared root wrenches fail closed.
+  - Rejects hidden target-force feedback: unmodeled external assistance forces fail closed (`allow_hidden_feedback = False`).
+  - Model verification: verifies `model_hash` match between initial state, controls, and dynamics provider; model changes fail closed.
+  - Validates control channels: enforces complete channel coverage matching `provider.capability.control_channels`.
+- **Structured Replay Receipt (`ReplayReceipt`)**:
+  - Implements versioned receipt (`schema_version = "dime-continuous-replay-receipt/1.0"`).
+  - Explicitly records `reset_count`, `assistance_channels`, `declared_controller`, `declared_contact_policy`, `has_undeclared_root_forces`, `is_physically_accepted`, and `provenance` (`DimeProvenanceRecord`).
+  - Supports round-trip dictionary serialization (`to_dict` / `from_dict`).
+- **Independent Replay Metric Recomputation (`IndependentReplayMetrics`)**:
+  - Separates optimization solve cost from independently recomputed replay metrics.
+  - Evaluates maximum and RMS position drift, velocity drift, angular drift, cosine alignment metric, and vertical GRF static equilibrium error against frozen thresholds in `NumericAcceptanceThresholds` (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
+- **Offline Backward Smoothing (`smooth_backward_trajectory`)**:
+  - Propagates future observation information backward using marginalized arrival factors $R_k, r_k$ to produce a continuous smoothed trajectory without per-frame discontinuities.
+  - Reverse-time contact integration is strictly prohibited and fails closed with `PreconditionError` if attempted or if negative $\Delta t$ is supplied.
+  - Returns `SmoothedTrajectoryResult` verifying `is_continuous` and tracking `max_step_jump` and `continuity_metric`.
+- **Public API Adapters**:
+  - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
+  - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
 
 ## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
 
@@ -8074,6 +8099,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11435 | [DIME-14] Profile and accelerate native drift and window solves: DimeSolverCacheKey, LocalLinearizationModel with validity radius epsilon_valid, DimeCostBreakdown, DimeSolverCacheReceipt, DimeSolverCache, execute_independent_replay, and solve_accelerated_dime_window (#11435, refs #11421). |
+| 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
