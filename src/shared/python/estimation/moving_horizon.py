@@ -357,6 +357,50 @@ class MovingHorizonEstimator:
         initial_coefficients = self._initial_coefficients(trajectory, times, q_samples)
         return self._map_problem(trajectory, times, initial_coefficients)
 
+    def _evaluate_boundary_jump(
+        self, map_problem: MapEstimatorProblem, max_boundary_jump: float
+    ) -> float | None:
+        """Return jump magnitude if exceeding threshold, else None."""
+        times, q_samples = self._buffer.arrays()
+        diffs = np.abs(np.diff(q_samples, axis=0))
+        max_sample_jump = float(np.max(diffs)) if diffs.size > 0 else 0.0
+        knot_jump = 0.0
+        if self._last_accepted_coefficients is not None:
+            knot_jump = float(
+                np.max(
+                    np.abs(
+                        map_problem.initial_coefficients[: self._problem.n_dof]
+                        - self._last_accepted_coefficients[: self._problem.n_dof]
+                    )
+                )
+            )
+        jump = max(max_sample_jump, knot_jump)
+        return jump if jump > max_boundary_jump else None
+
+    def _record_failure_and_create_result(
+        self,
+        map_problem: MapEstimatorProblem,
+        failed_res: MapEstimatorResult,
+        latency_ms: float,
+        warm_started: bool,
+    ) -> MovingHorizonResult:
+        """Record diagnostic and return standard failure result."""
+        is_finite = bool(np.all(np.isfinite(failed_res.residual)))
+        diag = FailureDiagnostic(
+            window_index=self._window_index,
+            timestamp_s=float(map_problem.evaluation_times[0]),
+            reason=failed_res.message,
+            raw_residual_norm=(
+                float(np.linalg.norm(failed_res.residual)) if is_finite else np.nan
+            ),
+            iterations=failed_res.n_iterations,
+        )
+        self._failure_diagnostics.append(diag)
+        result = self._to_result(map_problem, failed_res, latency_ms, warm_started)
+        if self._problem.callback is not None:
+            self._problem.callback(result)
+        return result
+
     def solve_next(
         self, max_boundary_jump: float | None = None
     ) -> MovingHorizonResult | None:
@@ -368,29 +412,9 @@ class MovingHorizonEstimator:
 
         # Check boundary continuity jump against last accepted solution or within window
         if max_boundary_jump is not None:
-            times, q_samples = self._buffer.arrays()
-            diffs = np.abs(np.diff(q_samples, axis=0))
-            max_sample_jump = float(np.max(diffs)) if diffs.size > 0 else 0.0
-            knot_jump = 0.0
-            if self._last_accepted_coefficients is not None:
-                knot_jump = float(
-                    np.max(
-                        np.abs(
-                            map_problem.initial_coefficients[: self._problem.n_dof]
-                            - self._last_accepted_coefficients[: self._problem.n_dof]
-                        )
-                    )
-                )
-            jump = max(max_sample_jump, knot_jump)
-            if jump > max_boundary_jump:
-                diag = FailureDiagnostic(
-                    window_index=self._window_index,
-                    timestamp_s=float(map_problem.evaluation_times[0]),
-                    reason=f"Window boundary jump {jump:.2f} exceeds threshold {max_boundary_jump:.2f}",
-                    raw_residual_norm=jump,
-                    iterations=0,
-                )
-                self._failure_diagnostics.append(diag)
+            jump = self._evaluate_boundary_jump(map_problem, max_boundary_jump)
+            if jump is not None:
+                msg = f"Window boundary jump {jump:.2f} exceeds threshold {max_boundary_jump:.2f}"
                 failed_res = MapEstimatorResult(
                     success=False,
                     coefficients=map_problem.initial_coefficients,
@@ -398,12 +422,14 @@ class MovingHorizonEstimator:
                     residual=np.array([jump]),
                     objective=0.5 * jump**2,
                     n_iterations=0,
-                    message=f"Window boundary jump {jump:.2f} exceeds threshold {max_boundary_jump:.2f}",
+                    message=msg,
                 )
-                result = self._to_result(map_problem, failed_res, 0.0, warm_started)
-                if self._problem.callback is not None:
-                    self._problem.callback(result)
-                return result
+                return self._record_failure_and_create_result(
+                    map_problem=map_problem,
+                    failed_res=failed_res,
+                    latency_ms=0.0,
+                    warm_started=warm_started,
+                )
 
         started = perf_counter()
         map_result = solve_single_trial_map(map_problem)
@@ -425,17 +451,7 @@ class MovingHorizonEstimator:
                     map_result.message or "Solver failed or produced non-finite output"
                 )
             )
-            diag = FailureDiagnostic(
-                window_index=self._window_index,
-                timestamp_s=float(map_problem.evaluation_times[0]),
-                reason=reason,
-                raw_residual_norm=(
-                    float(np.linalg.norm(map_result.residual)) if is_finite else np.nan
-                ),
-                iterations=map_result.n_iterations,
-            )
-            self._failure_diagnostics.append(diag)
-            failed_map_result = MapEstimatorResult(
+            failed_map_res = MapEstimatorResult(
                 success=False,
                 coefficients=map_result.coefficients,
                 parameters=map_result.parameters,
@@ -444,12 +460,12 @@ class MovingHorizonEstimator:
                 n_iterations=map_result.n_iterations,
                 message=reason,
             )
-            result = self._to_result(
-                map_problem, failed_map_result, latency_ms, warm_started
+            return self._record_failure_and_create_result(
+                map_problem=map_problem,
+                failed_res=failed_map_res,
+                latency_ms=latency_ms,
+                warm_started=warm_started,
             )
-            if self._problem.callback is not None:
-                self._problem.callback(result)
-            return result
 
         # Successful solve: safely commit state advancement
         result = self._to_result(map_problem, map_result, latency_ms, warm_started)
