@@ -510,6 +510,97 @@ def _apply_whitening(
     return np.einsum("kij,kj->ki", sub_ops, diff)
 
 
+def _setup_observation_masks(
+    n_points: int,
+    valid_mask: np.ndarray | None,
+    held_out_mask: np.ndarray | None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Validate and partition observation masks into fit and held-out subsets."""
+    if valid_mask is None:
+        v_mask: np.ndarray = np.ones(n_points, dtype=bool)
+    else:
+        v_arr = np.asarray(valid_mask, dtype=bool)
+        require(
+            v_arr.shape == (n_points,),
+            "valid_mask length must match observations",
+        )
+        v_mask = v_arr
+
+    if held_out_mask is None:
+        h_mask: np.ndarray = np.zeros(n_points, dtype=bool)
+    else:
+        h_arr = np.asarray(held_out_mask, dtype=bool)
+        require(
+            h_arr.shape == (n_points,),
+            "held_out_mask length must match observations",
+        )
+        h_mask = h_arr
+
+    fit_mask: np.ndarray = v_mask & (~h_mask)
+    active_indices: np.ndarray = np.flatnonzero(fit_mask)
+    held_out_indices: np.ndarray = np.flatnonzero(v_mask & h_mask)
+    return v_mask, h_mask, fit_mask, active_indices, held_out_indices
+
+
+def _validate_detector_scores(
+    n_points: int,
+    detector_scores: Sequence[float] | np.ndarray | None,
+) -> np.ndarray | None:
+    """Validate optional detector confidence scores in [0, 1]."""
+    if detector_scores is None:
+        return None
+    scores = np.asarray(detector_scores, dtype=np.float64)
+    require(
+        scores.shape == (n_points,),
+        "detector_scores shape must match observations",
+    )
+    require(
+        bool(np.all((scores >= 0.0) & (scores <= 1.0))),
+        "detector_scores entries must lie in [0, 1]",
+    )
+    return _make_readonly_array(scores)
+
+
+def _finite_difference_jacobian(
+    eval_fn: Callable[[np.ndarray], np.ndarray],
+    q_vec: np.ndarray,
+    step: float = 1.0e-6,
+) -> np.ndarray:
+    """Compute central finite-difference Jacobian of residual vector."""
+    n_q = q_vec.size
+    f0 = eval_fn(q_vec)
+    jac = np.empty((len(f0), n_q), dtype=np.float64)
+    for col in range(n_q):
+        delta = np.zeros(n_q, dtype=np.float64)
+        delta[col] = step
+        f_plus = eval_fn(q_vec + delta)
+        f_minus = eval_fn(q_vec - delta)
+        jac[:, col] = (f_plus - f_minus) / (2.0 * step)
+    return jac
+
+
+def _build_held_out_report(
+    diff: np.ndarray,
+    operators: np.ndarray,
+    is_diagonal: bool,
+    held_out_indices: np.ndarray,
+    canonical_unit: str,
+) -> HeldOutEvaluationReport:
+    """Build evaluation report on held-out residual differences."""
+    norms = np.linalg.norm(diff, axis=1)
+    rms = float(np.sqrt(np.mean(norms**2)))
+    max_err = float(np.max(norms))
+    whitened = _apply_whitening(diff, operators, is_diagonal, held_out_indices)
+    return HeldOutEvaluationReport(
+        num_held_out=len(held_out_indices),
+        rms_error=rms,
+        max_error=max_err,
+        canonical_unit=canonical_unit,
+        raw_residuals=diff,
+        whitened_residuals=whitened,
+    )
+
+
 # ==============================================================================
 # Unified Observation Factor Contract
 # ==============================================================================
@@ -602,29 +693,13 @@ class Marker3DObservationFactor(DimeObservationFactor):
         self._kinematics_jacobian_fn = kinematics_jacobian_fn
 
         # Masking and holdout partition
-        if valid_mask is None:
-            self._valid_mask = np.ones(self._n_points, dtype=bool)
-        else:
-            v_mask = np.asarray(valid_mask, dtype=bool)
-            require(
-                v_mask.shape == (self._n_points,),
-                "valid_mask length must match observations",
-            )
-            self._valid_mask = v_mask
-
-        if held_out_mask is None:
-            self._held_out_mask = np.zeros(self._n_points, dtype=bool)
-        else:
-            h_mask = np.asarray(held_out_mask, dtype=bool)
-            require(
-                h_mask.shape == (self._n_points,),
-                "held_out_mask length must match observations",
-            )
-            self._held_out_mask = h_mask
-
-        self._fit_mask = self._valid_mask & (~self._held_out_mask)
-        self._active_indices = np.flatnonzero(self._fit_mask)
-        self._held_out_indices = np.flatnonzero(self._valid_mask & self._held_out_mask)
+        (
+            self._valid_mask,
+            self._held_out_mask,
+            self._fit_mask,
+            self._active_indices,
+            self._held_out_indices,
+        ) = _setup_observation_masks(self._n_points, valid_mask, held_out_mask)
 
         # Covariance whitening
         self._operators, self._is_diagonal = _build_whitening_operators(
@@ -635,19 +710,9 @@ class Marker3DObservationFactor(DimeObservationFactor):
         )
 
         # Detector scores (strictly decoupled from covariance)
-        if detector_scores is not None:
-            scores = np.asarray(detector_scores, dtype=np.float64)
-            require(
-                scores.shape == (self._n_points,),
-                "detector_scores shape must match observations",
-            )
-            require(
-                bool(np.all((scores >= 0.0) & (scores <= 1.0))),
-                "detector_scores entries must lie in [0, 1]",
-            )
-            self._detector_scores: np.ndarray | None = _make_readonly_array(scores)
-        else:
-            self._detector_scores = None
+        self._detector_scores: np.ndarray | None = _validate_detector_scores(
+            self._n_points, detector_scores
+        )
 
         self._timing = timing
         self._attachments = tuple(attachments) if attachments is not None else None
@@ -738,16 +803,7 @@ class Marker3DObservationFactor(DimeObservationFactor):
             return j_rob.reshape(-1, q_vec.size)
 
         # Central finite difference
-        n_q = q_vec.size
-        f0 = self.evaluate_residuals(q_vec)
-        jac = np.empty((len(f0), n_q), dtype=np.float64)
-        for col in range(n_q):
-            delta = np.zeros(n_q, dtype=np.float64)
-            delta[col] = step
-            f_plus = self.evaluate_residuals(q_vec + delta)
-            f_minus = self.evaluate_residuals(q_vec - delta)
-            jac[:, col] = (f_plus - f_minus) / (2.0 * step)
-        return jac
+        return _finite_difference_jacobian(self.evaluate_residuals, q_vec, step=step)
 
     def evaluate_held_out(
         self, q: np.ndarray | DimeCompleteState
@@ -765,19 +821,8 @@ class Marker3DObservationFactor(DimeObservationFactor):
         q_vec = self._extract_q(q)
         pred = np.asarray(self._kinematics_fn(q_vec), dtype=np.float64)
         diff = pred[self._held_out_indices] - self._obs_m[self._held_out_indices]
-        norms = np.linalg.norm(diff, axis=1)
-        rms = float(np.sqrt(np.mean(norms**2)))
-        max_err = float(np.max(norms))
-        whitened = _apply_whitening(
-            diff, self._operators, self._is_diagonal, self._held_out_indices
-        )
-        return HeldOutEvaluationReport(
-            num_held_out=n_held,
-            rms_error=rms,
-            max_error=max_err,
-            canonical_unit="m",
-            raw_residuals=diff,
-            whitened_residuals=whitened,
+        return _build_held_out_report(
+            diff, self._operators, self._is_diagonal, self._held_out_indices, "m"
         )
 
 
@@ -821,29 +866,13 @@ class Markerless2DObservationFactor(DimeObservationFactor):
         self._camera = camera
         self._strict_chirality = strict_chirality
 
-        if valid_mask is None:
-            self._valid_mask = np.ones(self._n_points, dtype=bool)
-        else:
-            v_mask = np.asarray(valid_mask, dtype=bool)
-            require(
-                v_mask.shape == (self._n_points,),
-                "valid_mask length must match observations",
-            )
-            self._valid_mask = v_mask
-
-        if held_out_mask is None:
-            self._held_out_mask = np.zeros(self._n_points, dtype=bool)
-        else:
-            h_mask = np.asarray(held_out_mask, dtype=bool)
-            require(
-                h_mask.shape == (self._n_points,),
-                "held_out_mask length must match observations",
-            )
-            self._held_out_mask = h_mask
-
-        self._fit_mask = self._valid_mask & (~self._held_out_mask)
-        self._active_indices = np.flatnonzero(self._fit_mask)
-        self._held_out_indices = np.flatnonzero(self._valid_mask & self._held_out_mask)
+        (
+            self._valid_mask,
+            self._held_out_mask,
+            self._fit_mask,
+            self._active_indices,
+            self._held_out_indices,
+        ) = _setup_observation_masks(self._n_points, valid_mask, held_out_mask)
 
         # Covariance whitening in pixel units
         self._operators, self._is_diagonal = _build_whitening_operators(
@@ -853,19 +882,9 @@ class Markerless2DObservationFactor(DimeObservationFactor):
             robust_loss if robust_loss is not None else RobustLossKernel("huber")
         )
 
-        if detector_scores is not None:
-            scores = np.asarray(detector_scores, dtype=np.float64)
-            require(
-                scores.shape == (self._n_points,),
-                "detector_scores shape must match observations",
-            )
-            require(
-                bool(np.all((scores >= 0.0) & (scores <= 1.0))),
-                "detector_scores entries must lie in [0, 1]",
-            )
-            self._detector_scores: np.ndarray | None = _make_readonly_array(scores)
-        else:
-            self._detector_scores = None
+        self._detector_scores: np.ndarray | None = _validate_detector_scores(
+            self._n_points, detector_scores
+        )
 
         self._timing = timing
         self._keypoint_names = (
@@ -930,16 +949,7 @@ class Markerless2DObservationFactor(DimeObservationFactor):
             return np.empty((0, len(q_vec)), dtype=np.float64)
 
         # Central finite difference
-        n_q = q_vec.size
-        f0 = self.evaluate_residuals(q_vec)
-        jac = np.empty((len(f0), n_q), dtype=np.float64)
-        for col in range(n_q):
-            delta = np.zeros(n_q, dtype=np.float64)
-            delta[col] = step
-            f_plus = self.evaluate_residuals(q_vec + delta)
-            f_minus = self.evaluate_residuals(q_vec - delta)
-            jac[:, col] = (f_plus - f_minus) / (2.0 * step)
-        return jac
+        return _finite_difference_jacobian(self.evaluate_residuals, q_vec, step=step)
 
     def evaluate_held_out(
         self, q: np.ndarray | DimeCompleteState
@@ -958,19 +968,8 @@ class Markerless2DObservationFactor(DimeObservationFactor):
         pts_3d = np.asarray(self._kinematics_fn(q_vec), dtype=np.float64)
         proj_px = self._camera.project(pts_3d, check_chirality=self._strict_chirality)
         diff = proj_px[self._held_out_indices] - self._obs_px[self._held_out_indices]
-        norms = np.linalg.norm(diff, axis=1)
-        rms = float(np.sqrt(np.mean(norms**2)))
-        max_err = float(np.max(norms))
-        whitened = _apply_whitening(
-            diff, self._operators, self._is_diagonal, self._held_out_indices
-        )
-        return HeldOutEvaluationReport(
-            num_held_out=n_held,
-            rms_error=rms,
-            max_error=max_err,
-            canonical_unit="px",
-            raw_residuals=diff,
-            whitened_residuals=whitened,
+        return _build_held_out_report(
+            diff, self._operators, self._is_diagonal, self._held_out_indices, "px"
         )
 
 
