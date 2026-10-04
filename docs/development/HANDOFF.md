@@ -1,6 +1,6 @@
 # [DIME-01] Baseline and Frozen Benchmark Protocol — #11421 / #11422
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-benchmark-manifest-11422`; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-benchmark-manifest-11422`; PR: #11454 (`Closes #11422`, `Refs #11421`)
 - Governing issue: #11422 (parent epic #11421)
 - Objective: [DIME Child 1] Define versioned benchmark manifest and frozen numeric thresholds with deterministic pendulum/underactuated/stance fixtures, fail-closed validation, and truthful capability status reporting.
 - Completed:

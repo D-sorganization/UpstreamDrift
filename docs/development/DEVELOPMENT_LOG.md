@@ -22,7 +22,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **State:** in_progress
 - **Owner:** antigravity
 - **Issue:** #11422 (parent epic #11421)
-- **PR:** feat/dime-benchmark-manifest-11422
+- **PR:** #11454
 - **Branch:** `feat/dime-benchmark-manifest-11422`
 - **Paths:** `src/shared/python/estimation/benchmark_manifest.py`, `src/shared/python/estimation/benchmark_fixtures.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_benchmark_manifest.py`
 - **Started:** 2026-10-04
