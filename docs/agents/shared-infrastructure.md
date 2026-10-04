@@ -615,3 +615,28 @@ state, FK, solver or renderer is duplicated. Results are immutable raw px/rad
 checks with strict order/units and explicit unavailable/bound-limited nulls.
 Source/model/clock authentication remains in canonical workspace admission.
 See [Procedure](../development/necromatcher-shaft-fragment-diagnostics.md).
+
+### Authenticated Replay Impact and Local Research Golf
+
+Reuse public `workspace.NativeImpactSession` for bounded authored replay-impact
+jobs, verified saved-run recall and checked four-file exports. The public
+`workspace.load_replay_impact_receipt` authenticates companion state against
+exact retained trajectory bytes; portable receipt loading does not freshly
+authenticate Library parents. `workspace.load_research_impact_shot` performs
+Library admission and returns an immutable `ResearchImpactShot` with exact saved
+velocity/spin, parent/receipt hashes, assumptions and authored-clock limits.
+Declared proper aim rotations use the existing spatial transformation owner.
+
+`GolfSessionService.prepare_research_shot` explicitly admits unverified
+`MODEL_CONTACT` only to the actual connected `LocalReferenceAdapter`. Reuse its
+ordinary arm, cancel and submit lifecycle and `get_local_trajectory_record` for
+detached confirmed local samples. Ordinary qualified-contact admission and
+external delivery gates remain unchanged. This creates a new local-default
+flight, separate from the original retained impact flight and environment;
+local session results are not claimed as restart-persistent. Native avatar,
+course feedback, physical source time and historical qualification remain open.
+
+Both hosts reuse these owners; future players should supply persistent Library
+records and explicit declarations rather than another physics or lifecycle
+implementation. See [Replay Impact Procedure](../development/necromatcher-replay-impact.md)
+and [Local Research Golf Procedure](../development/necromatcher-local-research-golf.md).
