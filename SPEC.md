@@ -1,3 +1,19 @@
+## Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix (DIME-12, #11433)
+
+Specifies the cross-engine and capture qualification matrix, per-engine capability inspection, and provenance tracking across physics engines and capture datasets (#11421, #11433):
+- **Engine Capability & Provenance Contracts (`EngineCapabilitySpec`, `CaptureProvenance`)**:
+  - `EngineCapabilitySpec`: Specifies engine identity, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
+  - `CaptureProvenance`: Captures dataset origin, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
+- **Fail-Closed Qualification Invariants (`evaluate_engine_qualification`, `EngineQualificationEntry`)**:
+  - Contact-free engines cannot qualify contact-dependent capture scenarios.
+  - Synthetic test data cannot qualify product-grade matching runs.
+  - Joint convention and coordinate frame mismatches reject qualification fail-closed.
+  - Missing native platform dependencies invalidate advertised capabilities with diagnostic reasons.
+  - Breaching tolerance thresholds transitions status to `unqualified` or `degraded`.
+- **Fleet Matrix Aggregation & Report Bundle (`build_fleet_qualification_matrix`, `export_qualification_bundle`)**:
+  - Aggregates qualification verdicts across all combinations of physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark captures.
+  - Exports immutable JSON qualification bundle and human-readable Markdown summary table.
+
 ## Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods (DIME-11, #11432)
 
 Specifies shared estimation reports, GUI strategy selection with graceful explicit unavailability states, distinct pointwise vs integrated ZTCF registration, and verifiable LaTeX methods documentation (#11421, #11432):
@@ -8143,6 +8159,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
 | 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
 | 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
