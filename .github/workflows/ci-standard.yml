@@ -463,6 +463,8 @@ jobs:
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            diff_base="${{ github.event.merge_group.base_sha }}"
           else
             python3 scripts/ci/run_full_mypy_baseline.py
             exit 0
@@ -489,6 +491,8 @@ jobs:
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            diff_base="${{ github.event.merge_group.base_sha }}"
           else
             mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
             exit 0
