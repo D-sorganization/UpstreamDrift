@@ -330,6 +330,9 @@ def build_native_fit_payload(
     coordinate_expansion: SplineCoordinateExpansion | None = None,
 ) -> dict[str, Any]:
     """Build legacy research results or an explicitly verified unoptimized seed."""
+    from .necromatcher_spline_restriction import validate_restriction_seed_result
+
+    validate_restriction_seed_result(request, source, result, dense_output)
     _validate_coordinate_seed(request, source, result, coordinate_expansion)
     if coordinate_expansion is not None:
         _validate_seed_samples(source, result, dense_output, coordinate_expansion)
@@ -342,6 +345,9 @@ def build_native_fit_payload(
     if coordinate_expansion is not None:
         blockers.remove("authored_initialization_only")
         blockers.append("coordinate_expansion_only")
+    if options.get("operation") == "restrict_initialization":
+        blockers.remove("authored_initialization_only")
+        blockers.append("spline_interval_restriction_only")
     output = {
         **source,
         "frame_indices": list(dense_indices),
@@ -369,6 +375,11 @@ def build_native_fit_payload(
     }
     if coordinate_expansion is not None:
         output["provenance"]["coordinate_expansion"] = asdict(coordinate_expansion)
+    if options.get("operation") == "restrict_initialization":
+        for key in ("spline_interval_restriction", "spline_restriction_prior"):
+            output["provenance"][key] = json.loads(
+                json.dumps(request[key], allow_nan=False)
+            )
     _add_scope_record(output, request, source)
     _add_shaft_record(output, request, result)
     return output

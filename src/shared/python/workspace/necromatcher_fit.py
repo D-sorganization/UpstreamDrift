@@ -132,6 +132,9 @@ def read_kinematic_fit(
     validate_hypothesis_seed(library, payload)
     parent = _scope_parent(library, payload)
     validate_scope_payload(library, payload, parent)
+    from .necromatcher_spline_restriction import validate_spline_restriction_payload
+
+    validate_spline_restriction_payload(library, payload)
     return payload
 
 

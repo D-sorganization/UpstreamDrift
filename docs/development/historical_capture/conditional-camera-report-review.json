@@ -1,37 +1,40 @@
 {
-  "schema": "necromatcher/methods-v5-report-review/1",
-  "created_at_utc": "2026-10-04T01:41:48.129737+00:00",
+  "schema": "necromatcher/methods-v6-report-review/1",
   "status": "visual_review_passed",
+  "created_at_utc": "2026-10-04T02:33:45.876321+00:00",
   "source": {
     "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/conditional-camera-two-hand-methods.tex",
-    "bytes": 36265,
-    "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
+    "bytes": 41261,
+    "sha256": "e60983864ccf6ba5c8139ec563b19e2b4a8a4ea85e3ad8582d6963d9594d9c5c"
   },
   "frozen_source": {
-    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.tex",
-    "bytes": 36265,
-    "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
+    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/frozen-candidate/conditional-camera-two-hand-methods.tex",
+    "bytes": 41261,
+    "sha256": "e60983864ccf6ba5c8139ec563b19e2b4a8a4ea85e3ad8582d6963d9594d9c5c"
   },
   "pdf": {
-    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.pdf",
-    "bytes": 3301322,
-    "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
+    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/frozen-candidate/conditional-camera-two-hand-methods.pdf",
+    "bytes": 3307846,
+    "sha256": "e3e3e23815711a6651b11db531f472f8fd06fc7854cd9b0028956396a102539f"
   },
-  "page_count": 14,
-  "reviewed_page_indices": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  "visual_review_scope": {
-    "contact_sheets": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-    "full_size_final_pages": [8, 9, 10, 11, 12, 13, 14],
-    "findings": "All pages inspected; tables, headings, figures, footnotes and digest lines fit. New sections have no orphaned sentence spill. Three source figures retain their original aspect."
+  "page_count": 16,
+  "reviewed_page_indices": [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+  ],
+  "visual_scope": {
+    "contact_sheets": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+    "full_size_pages": [16],
+    "findings": "All16 rendered pages inspected; new pages15/16 also full-size. Tables, digest lines, qualification text and source figures fit; no orphan/blank spill. Prior14-page content retained with V6 header/current cover and appended native checkpoint."
   },
   "compiler": {
-    "passes": 3,
+    "builtin": "Failed: Unable to find standard directories for platform; diagnostic preserved",
+    "existing_miktex_passes": 3,
     "exit_codes": [0, 0, 0],
     "installer_disabled": true,
     "final_latex_warnings": [],
     "final_overfull_underfull": [],
     "first_pass_rerun_resolved": true,
-    "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation was enabled."
+    "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation enabled."
   },
   "title_case": {
     "documents_checked": 1,
@@ -54,238 +57,253 @@
       "sha256": "ee546cf537be02f78cad629522ae1916d34d537dfabe9a52a771727c9702e00e"
     }
   ],
-  "graphics_portability": "Three absolute Desktop PNG dependencies are required; this TeX is not independently portable without them. The exact same V4 image paths/bytes are retained.",
-  "accepted_v4_archive": {
-    "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v4/preservation-manifest.json",
-    "bytes": 5119,
-    "sha256": "1014581c53c7c1ee352aa38e586a41d87f07ae603465459ceb57636e7d81497e"
+  "graphics_portability": "Same three absolute Desktop PNGs; local repeatability dependencies, not portable standalone",
+  "preceding_v5_archive": {
+    "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v5/preservation-manifest.json",
+    "bytes": 12753,
+    "sha256": "4aaba17e9ec40f86b18b628a570433709f790c6323205e8fca07bcda42f485ef"
   },
-  "research_authorities": [
+  "native_checkpoint_inputs": [
     {
-      "path": "C:/Users/diete/Repositories/Temp/tiger-authenticated-read-profile-preparation-v1/root-release-v1/root-acceptance.json",
-      "bytes": 42581,
-      "sha256": "b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4"
+      "path": "C:/Users/diete/Repositories/Temp/tiger-lossless-restriction-feasibility-preparation-v2/root-release-v1/root-acceptance.json",
+      "bytes": 2124,
+      "sha256": "ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c"
     },
     {
-      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/setup-assessment.json",
-      "bytes": 47426,
-      "sha256": "e1d87d9814c4420f9cb8fd3f5253792a6c35a14e97a3b2b4f66fa2df73345f5b"
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Lossless Restriction Native Feasibility V2/native-feasibility.json",
+      "bytes": 298211,
+      "sha256": "79ea0e959d96683b42b549b628ada0b60253b875ac66d49b1f97471270947629"
     },
     {
-      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/finally-preservation.json",
-      "bytes": 4824854,
-      "sha256": "f245953430934187ba054b5feb5f54c89c1c33b78c37b801a37baf9b5872db58"
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Lossless Restriction Native Feasibility V2/finally-preservation.json",
+      "bytes": 4829354,
+      "sha256": "4c48ade0860ffe305cf0890be50b4dedb77d9507b94c25e3daf362ee70e2ab53"
     },
     {
-      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Tiger Both-Hands Setup Profile V3/profile-stages.json",
-      "bytes": 70338,
-      "sha256": "7e0eda61605b841a2853fbaee9bf448dc9f3c6a157d2b55a906b40fd6fc4ef3e"
-    },
-    {
-      "path": "C:/Users/diete/Repositories/Temp/tiger-restricted-seed-lineage-public-root-v2/assessment.json",
-      "bytes": 756,
-      "sha256": "17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5"
+      "path": "C:/Users/diete/Repositories/Temp/tiger-lossless-restriction-feasibility-preparation-v2/root-release-v1/released-config.json",
+      "bytes": 45336,
+      "sha256": "011b166fcd3029db0b7cfef56f6e1bfc25241b71848b59d9cb15230027a51ac2"
     }
   ],
-  "profile_producer": "f2dfe7d450e3aa8b0c446245f2f6047858ce61bb",
-  "limitations": {
-    "native_or_optimizer_run_by_this_review": false,
+  "serialized_checks": {
+    "body_metrics_exact_parent_equality": true,
+    "constraint_matrix_shape": [176, 12],
+    "optimizer_ran": false,
+    "converged": false,
+    "telemetry": null,
+    "scientific_qualified": false
+  },
+  "limits": {
+    "this_review_native_execution": false,
+    "independent_native_projection_recompute": false,
     "library_write": false,
-    "independent_projection_recompute": false,
-    "isolated_speedup_claim": false,
-    "timeout_cause_identified": false,
-    "scientific_qualification": false,
-    "physical_contact_time_calibration": false,
-    "clinical_anatomy_or_rom_qualification": false,
-    "sourceclock_restriction_integrated": false
+    "contact_certification": false,
+    "physical_time_qualification": false,
+    "seed_registration_or_adoption": false,
+    "strict_retry_authorized": false,
+    "new_ControlTower_delivery": false,
+    "next_backend_mode_integrated": false
   },
-  "preserved_outputs": [
+  "render_and_diagnostic_pins": [
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-01.png",
-      "bytes": 560188,
-      "sha256": "07aaa68361b41f50c4cf37c73ee085d0c714e8a94218df0c16d2bb11191301c2"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/contact-01.png",
+      "bytes": 560149,
+      "sha256": "f5bbd679e759d163b6dd9a6b52e4423b2a3b5dd8211bf091bb54cbbcf04fdecf"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-07.png",
-      "bytes": 654272,
-      "sha256": "d451cd14c4cf3c4ba72e0342f80ab191eb0c59c9e934d0454879f98ce7247b27"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/contact-07.png",
+      "bytes": 654287,
+      "sha256": "45006afab210743c5284de2163d3a85bd56f90974807135d5f14187df7e07f01"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/contact-13.png",
-      "bytes": 221914,
-      "sha256": "e8491ef4ac1a92d576c36a063ca2c2455d165e2d64ad7e8842747e7e878decfa"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/contact-13.png",
+      "bytes": 397062,
+      "sha256": "e54205178fa60d20965deb3606c98ffb52819e473b3651b7af41cd37a377a8de"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-01.png",
-      "bytes": 191001,
-      "sha256": "4f776c095d0665098282ccd402308c23e2c4987a8d5c4200f9c238ff83c8a304"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-01.png",
+      "bytes": 190932,
+      "sha256": "6a583a5da96e28bc61f8e5c9b3e9417e8210801c05de83e6d82737e6fff92388"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-02.png",
-      "bytes": 202766,
-      "sha256": "d80c9ed59c689307c3888a69b5d90a11baa944a0a8142cf4d69c7986e4bce0ab"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-02.png",
+      "bytes": 202770,
+      "sha256": "0f04939297be8423750ed9424e46778aba184f77fc13ded3a26ebb83fc82f7e0"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-03.png",
-      "bytes": 182293,
-      "sha256": "f617e4bdca5ee710a68af3e89bb3df88358444d915fce439c049a9c932b2e799"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-03.png",
+      "bytes": 182294,
+      "sha256": "c0acf903556bddffcb1140acebe3f0df53ad381596480a1c7b6d9732da5e785b"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-04.png",
-      "bytes": 166793,
-      "sha256": "b104943d9c13aa9f25cb04c38011e94c894f57e4f3bdb53db67f9486bd0bd287"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-04.png",
+      "bytes": 166798,
+      "sha256": "3403296857a29e18c6f1bf5ac057e3f19216944c2e3711382e1a2c193302802a"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-05.png",
-      "bytes": 203290,
-      "sha256": "1587665f44c6589c7b80f250ec06241b54b1f10a3d9b6693828198f2370a217a"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-05.png",
+      "bytes": 203300,
+      "sha256": "62f7dc873f40ece6042f939cc13c88955bc4b1a5be52771dc005ace71c8fc05e"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-06.png",
-      "bytes": 202155,
-      "sha256": "8b59ecfeb956eaeba015a88ef137592b852f0c276ddae4bb9cc0deba74c0adfa"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-06.png",
+      "bytes": 202156,
+      "sha256": "d490af71f7cb5187c295c53e8ccc08e56f23e9d8fdba170797ee20be49b10736"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-07.png",
-      "bytes": 178013,
-      "sha256": "226296cb964891ab4359df0ce9f4657a50c07c5685946dd25042bec528dd2fd8"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-07.png",
+      "bytes": 178021,
+      "sha256": "1ed850d82093ea0c16fad98e79044bcfaaca31ec46d3e9ea95b22aef19b2f950"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-08.png",
-      "bytes": 200642,
-      "sha256": "9209f4e52a1707ceacd426110cc3c6fbd8e52ed99217f36a57d87f50fcec7326"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-08.png",
+      "bytes": 200645,
+      "sha256": "d2eca0fd23b01b25d4f69ed6131dce86a33923417559b1b64012c4432533d6ea"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-09.png",
-      "bytes": 170565,
-      "sha256": "a69b3f71db38b3ebacd969b09c5300e34382aa4c148fe4c2e60541ac03f3ccfa"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-09.png",
+      "bytes": 170569,
+      "sha256": "0b395098800ca6f41a549441f0475a4792e9d084963ba0eaf2c802f6dd038622"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-10.png",
-      "bytes": 416580,
-      "sha256": "e1e4de067e71f860d72c0a2553691924bf895cd045f6f9c5301663d3d61edc46"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-10.png",
+      "bytes": 416586,
+      "sha256": "cc74adb26055e367d24cef22a70a2f2b59991f22715ed42cf5d76a4495cc30a6"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-11.png",
-      "bytes": 375528,
-      "sha256": "f2bdb35341264fbbbb170e97a33318df4ab6861bed3f010d38b9eb846525530d"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-11.png",
+      "bytes": 375529,
+      "sha256": "2dff1bc5c99761d6471563e2ddb69288fcf76f4c85ef90ee685e454fbf3d7e5b"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-12.png",
-      "bytes": 239648,
-      "sha256": "30f388b36e3876d5111ddeed59ad17ec3a8a7014ae2fd60f692c58a7231a9fcd"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-12.png",
+      "bytes": 239653,
+      "sha256": "9ec9e476cc49da63e3462df029bfb903cb1962280ab4f242967afb9b728ff156"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-13.png",
-      "bytes": 249258,
-      "sha256": "569c4aed6feea48d2c0268241649b6855acc429c90757371c3845a3557d16408"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-13.png",
+      "bytes": 249264,
+      "sha256": "9ef1b32b8513558bd2a3fa222cd47165e2ff446f7e0d75cfd7cc7a0be6f00a87"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/render/page-14.png",
-      "bytes": 191341,
-      "sha256": "fc8fcb1a45ab4d88431d466eba3423a15d5d1ac0041e268a917dc46d71f8c005"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-14.png",
+      "bytes": 182751,
+      "sha256": "5c558d554f5c8cc578f29d3f9baa5270a9c59b84d7da23953dffaea937f9f9fc"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-1.log",
-      "bytes": 7689,
-      "sha256": "8f8c790b16b491e85d9ae60e87f4b474bd4bdb1e9c3996040357764eba194994"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-15.png",
+      "bytes": 197450,
+      "sha256": "ad0540bcbb48f141730bcf214d64723489fd4b5e596d3d867066654a0eda4222"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-2.log",
-      "bytes": 7759,
-      "sha256": "419d08bc7d6481eefcc2fe3108677229dc0a367b6da140a3c8fc2cf0de372bf6"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/render/page-16.png",
+      "bytes": 173463,
+      "sha256": "1eaa3b4bdc4bb2bd16b53578b0a429c0776e65ef720aa9eb76d12ee79f302331"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/pass-3.log",
-      "bytes": 7759,
-      "sha256": "5140e3d1ff92dc05bc13ea5e95209ed0262f53ed8c06003f8130752692651485"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/pass-1.log",
+      "bytes": 7699,
+      "sha256": "1f474f195d00e35354652325dafb9f0a5ff69f2b4ab4896ccb29c41af73cff4e"
     },
     {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/conditional-camera-two-hand-methods.log",
-      "bytes": 22506,
-      "sha256": "fa0a496d4d44a3b6097534aabed79a9494e274a2a7d4eb267da70c9d84184b8d"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/pass-2.log",
+      "bytes": 7769,
+      "sha256": "aff74052df0108f91e45031aa9bb64bf3dc9ae3c532b0fd524348fc5fbf497e2"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/pass-3.log",
+      "bytes": 7769,
+      "sha256": "efdee869f6ceaf2701d6544eb8b2b1687f8ace4bd0dfb4ccec4461c1f97ef0ae"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/builtin-compiler-diagnostic.txt",
+      "bytes": 50,
+      "sha256": "66c9c2dac09349183b2ed322d4e523e89b8e518859f2ee6112713e60b1762bc7"
+    },
+    {
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/conditional-camera-two-hand-methods.log",
+      "bytes": 22516,
+      "sha256": "d5f8c0f17ebe5857dc49713a2c59fb2d86cab0bc91dbee9fd120910bf5970152"
     }
   ],
+  "preceding_candidate_review": {
+    "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v1/frozen-candidate/report-review-v6.json",
+    "bytes": 10461,
+    "sha256": "9f02055ff1697f93f45fdf747001f62476c55c1e41216a2b38a3e33f98b90a85"
+  },
+  "revision_comparison": {
+    "source_change": "Only requested sentence distinguishes native pixel projection metrics from overlay rendering/parity",
+    "page_pixels_identical": [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+    ],
+    "changed_page": 16,
+    "prior_full_size_page15_basis_retained": true
+  },
   "external_candidate_review": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v5-compile-v3\\frozen-candidate-v2\\report-review-v5.json",
-    "sha256": "fe5d652c43ad56389fc55edfd905d65514d414fccb9a485fb2265100b9b75590",
-    "bytes": 9711
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v6-compile-v2\\frozen-candidate\\report-review-v6.json",
+    "sha256": "08cdda7eb0e55d196d80819e51d5a51283bbb8ce61e275a162d1b69023cc2ccb",
+    "bytes": 11121
   },
   "root_acceptance": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v5-compile-v3\\root-acceptance-v1\\root-acceptance.json",
-    "sha256": "e94e43b40d76d3b37dd207c2cd73926f02614b5e1b2d79085ab82994b8652780",
-    "bytes": 3221
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-methods-v6-compile-v2\\root-acceptance-v1\\root-acceptance.json",
+    "sha256": "636b947c354654e78926a352fc04fc450f84bf650391c2961936f4426027babe",
+    "bytes": 2704
   },
   "root_acceptance_record": {
-    "schema": "necromatcher/methods-v5-root-acceptance/1",
-    "created_at_utc": "2026-10-04T01:50:07.859027+00:00",
+    "schema": "necromatcher/methods-v6-root-acceptance/1",
+    "created_at_utc": "2026-10-04T02:43:10.565139+00:00",
     "candidate_review": {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/report-review-v5.json",
-      "bytes": 9711,
-      "sha256": "fe5d652c43ad56389fc55edfd905d65514d414fccb9a485fb2265100b9b75590"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/frozen-candidate/report-review-v6.json",
+      "bytes": 11121,
+      "sha256": "08cdda7eb0e55d196d80819e51d5a51283bbb8ce61e275a162d1b69023cc2ccb"
     },
     "source": {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.tex",
-      "bytes": 36265,
-      "sha256": "28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/frozen-candidate/conditional-camera-two-hand-methods.tex",
+      "bytes": 41261,
+      "sha256": "e60983864ccf6ba5c8139ec563b19e2b4a8a4ea85e3ad8582d6963d9594d9c5c"
     },
     "pdf": {
-      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v5-compile-v3/frozen-candidate-v2/conditional-camera-two-hand-methods.pdf",
-      "bytes": 3301322,
-      "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
+      "path": "C:/Users/diete/Repositories/Temp/necromatcher-methods-v6-compile-v2/frozen-candidate/conditional-camera-two-hand-methods.pdf",
+      "bytes": 3307846,
+      "sha256": "e3e3e23815711a6651b11db531f472f8fd06fc7854cd9b0028956396a102539f"
     },
-    "root_full_page_visual_review": [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+    "root_contact_sheet_review": [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
     ],
-    "visual_findings": "All 14 full-size rendered pages reviewed; figures, tables, footnotes and digest lines legible and within margins.",
-    "builtin_compiler": {
-      "success": false,
-      "diagnostic": "Unable to find standard directories for platform"
+    "root_full_size_review": {
+      "revised_candidate": [16],
+      "preceding_candidate_identical_pixels": [15]
     },
+    "visual_findings": "All16 pages reviewed in contact sheets; revised16 full-size and preceding identical15 full-size. Earlier V5 full-page review retained as historical evidence, not claimed as current full-page review.",
+    "builtin_compilation_success": false,
     "existing_miktex": {
-      "passes": 3,
+      "builtin": "Failed: Unable to find standard directories for platform; diagnostic preserved",
+      "existing_miktex_passes": 3,
       "exit_codes": [0, 0, 0],
       "installer_disabled": true,
       "final_latex_warnings": [],
       "final_overfull_underfull": [],
       "first_pass_rerun_resolved": true,
-      "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation was enabled."
+      "console_advisory": "Existing MiKTeX reports that updates have not been checked; no installation enabled."
     },
-    "external_graphics": [
-      {
-        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000000.png",
-        "bytes": 964712,
-        "sha256": "751a0e803dd1da14427887d6f3e2e0004151c3e96710f07db5e5fbb16d68ca2d"
-      },
-      {
-        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000150.png",
-        "bytes": 1040773,
-        "sha256": "1483528d4d24e8c233674eed6571bb55d39882d1e253e6299be2bbc588044514"
-      },
-      {
-        "path": "C:/Users/diete/Desktop/Tiger Both-Hands Authored Seed Shape and Skeleton V1/selected-stills/frame-000190.png",
-        "bytes": 1057021,
-        "sha256": "ee546cf537be02f78cad629522ae1916d34d537dfabe9a52a771727c9702e00e"
-      }
-    ],
-    "preceding_v4_archive": {
-      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v4/preservation-manifest.json",
-      "bytes": 5119,
-      "sha256": "1014581c53c7c1ee352aa38e586a41d87f07ae603465459ceb57636e7d81497e"
+    "preceding_v5_archive": {
+      "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/accepted-methods-v5/preservation-manifest.json",
+      "bytes": 12753,
+      "sha256": "4aaba17e9ec40f86b18b628a570433709f790c6323205e8fca07bcda42f485ef"
     },
     "scientific_qualification": false,
     "native_recomputation": false,
+    "backend_restriction_mode_integrated": false,
     "controltower_delivery": false,
-    "source_clock_restriction_integrated": false,
     "desktop_pdf": {
       "path": "C:/Users/diete/Desktop/Necromatcher Review 2026-10-01/Conditional Camera and Two-Hand Methods V1/conditional-camera-two-hand-methods.pdf",
-      "bytes": 3301322,
-      "sha256": "032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0"
+      "bytes": 3307846,
+      "sha256": "e3e3e23815711a6651b11db531f472f8fd06fc7854cd9b0028956396a102539f"
     }
   },
-  "historical_canonical_v4_review": {
-    "path": "C:\\Users\\diete\\Repositories\\Temp\\methods-v5-canonical-doc-update-v1\\before\\docs\\development\\historical_capture\\conditional-camera-report-review.json",
-    "sha256": "097a4fcfa480e8787e9762efc5c91b6329703551c49ad12fdb33aa0f7fb3e273",
-    "bytes": 5331
+  "historical_canonical_v5_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Temp\\methods-v6-canonical-doc-update-v1\\before\\docs\\development\\historical_capture\\conditional-camera-report-review.json",
+    "sha256": "71ec844aa19874c759ce9d124c46a13a849c07adb3b0286bfb89e2671933e9e9",
+    "bytes": 13556
   }
 }

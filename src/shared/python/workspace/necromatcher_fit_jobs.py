@@ -64,6 +64,9 @@ _BLOCKERS = (
 
 if TYPE_CHECKING:
     from .necromatcher_source_scope import BoundSourceFitScope, SourceFitScope
+    from src.shared.python.motion_matching.historical_fit import (
+        SplineIntervalRestriction,
+    )
 
 
 def _digest(value: Any) -> str:
@@ -85,21 +88,28 @@ class NativeRefitOptions:
     config: ImageFitConfig = field(default_factory=ImageFitConfig)
     unknown_visibility_weight: float = 0.5
     budget_wall_s: float = 600.0
-    operation: Literal["fit", "author_initialization"] = "fit"
-    initialization_source: Literal["sampled_parent", "preserved_spline"] = (
-        "sampled_parent"
+    operation: Literal["fit", "author_initialization", "restrict_initialization"] = (
+        "fit"
     )
+    initialization_source: Literal[
+        "sampled_parent", "preserved_spline", "restricted_spline"
+    ] = "sampled_parent"
 
     def __post_init__(self) -> None:
         if not isinstance(
             self.initialization_source, str
-        ) or self.initialization_source not in ("sampled_parent", "preserved_spline"):
+        ) or self.initialization_source not in (
+            "sampled_parent",
+            "preserved_spline",
+            "restricted_spline",
+        ):
             raise ValueError("Unknown refit initialization source")
         if not isinstance(self.operation, str) or self.operation not in (
             "fit",
             "author_initialization",
+            "restrict_initialization",
         ):
-            raise ValueError("Refit operation must be fit or author_initialization")
+            raise ValueError("Unknown refit operation")
         indices = tuple(self.frame_indices)
         if (
             len(indices) < 2
@@ -121,6 +131,15 @@ class NativeRefitOptions:
             raise ValueError("Refit coordinate scales must be finite and positive")
         if not isinstance(self.config, ImageFitConfig):
             raise ValueError("Refit requires validated image-fit configuration")
+        if (self.operation == "restrict_initialization") != (
+            self.initialization_source == "restricted_spline"
+        ):
+            raise ValueError("Restriction operation requires restricted spline source")
+        if (
+            self.operation == "restrict_initialization"
+            and self.config.initialization_policy != "strict"
+        ):
+            raise ValueError("Restriction requires strict initialization policy")
         if self.initialization_source == "preserved_spline":
             if self.operation != "fit":
                 raise ValueError("Preserved spline requires fit operation")
@@ -307,6 +326,11 @@ def _verify_candidate_reads(
     library: NecromatcherLibrary, request: dict[str, Any], candidate: dict[str, Any]
 ) -> None:
     """Close fresh input authentication before candidate or fit publication."""
+    from .necromatcher_spline_restriction import (
+        validate_spline_restriction_payload,
+        validate_spline_restriction_request,
+    )
+
     with library.authenticated_read():
         if (
             library.load_asset(request["source_fit_id"]).metadata["hash"]
@@ -324,6 +348,14 @@ def _verify_candidate_reads(
             ):
                 raise ValueError("Worker shaft recipe differs from admitted request")
         _verify_scope_request(library, request, candidate)
+        restriction = validate_spline_restriction_request(library, request)
+        if restriction is not None:
+            for term in ("spline_interval_restriction", "spline_restriction_prior"):
+                if _digest(candidate["provenance"].get(term)) != _digest(request[term]):
+                    raise ValueError(
+                        "Restriction candidate differs from admitted request"
+                    )
+        validate_spline_restriction_payload(library, candidate)
 
 
 def _refit_work(
@@ -417,10 +449,15 @@ def _admit_refit_inputs(
     shaft_evidence: ShaftAxisEvidence | None,
     source_scope: SourceFitScope | None,
 ) -> tuple[
-    dict[str, Any], DatasetMetadata, BoundSourceFitScope | None, dict[str, Any] | None
+    dict[str, Any],
+    DatasetMetadata,
+    BoundSourceFitScope | None,
+    dict[str, Any] | None,
+    SplineIntervalRestriction | None,
 ]:
     """Authenticate a read group completely before scheduling or request writes."""
     from .necromatcher_fit import admit_refit_scope
+    from .necromatcher_spline_restriction import derive_spline_restriction
 
     with library.authenticated_read():
         source = library.load_fit(source_fit_id)
@@ -461,7 +498,14 @@ def _admit_refit_inputs(
             if shaft_evidence is not None
             else None
         )
-    return source, asset, bound_scope, shaft_recipe
+        restriction = (
+            derive_spline_restriction(
+                library, source_fit_id, asdict(options), source_scope
+            )
+            if options.operation == "restrict_initialization"
+            else None
+        )
+    return source, asset, bound_scope, shaft_recipe, restriction
 
 
 def start_native_refit(
@@ -479,7 +523,7 @@ def start_native_refit(
     cancellation, changed inputs/code or failed computation prevent publication.
     """
     validate_workspace_id(new_fit_id, "new_fit_id")
-    source, asset, bound_scope, shaft_recipe = _admit_refit_inputs(
+    source, asset, bound_scope, shaft_recipe, restriction = _admit_refit_inputs(
         library, source_fit_id, new_fit_id, options, shaft_evidence, source_scope
     )
     from .necromatcher_fit import scope_binding_record
@@ -508,6 +552,18 @@ def start_native_refit(
             "options": hash_options,
             "source_scope": request["source_scope"],
             "source_scope_binding": request["source_scope_binding"],
+        }
+    if restriction is not None:
+        from .necromatcher_spline_restriction import spline_restriction_prior
+
+        request["spline_interval_restriction"] = restriction.to_record()
+        request["spline_restriction_prior"] = spline_restriction_prior(
+            request["options"]
+        )
+        hash_options = {
+            "options": hash_options,
+            "spline_interval_restriction": request["spline_interval_restriction"],
+            "spline_restriction_prior": request["spline_restriction_prior"],
         }
     spec = MatchingJobSpec(
         run_root.name,

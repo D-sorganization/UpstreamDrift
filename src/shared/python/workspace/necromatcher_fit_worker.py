@@ -71,11 +71,19 @@ def _compute_operation(
             if additional_images is not None
             else fit_image_trajectory(*arguments)
         )
-    if operation != "author_initialization":
+    if operation not in ("author_initialization", "restrict_initialization"):
         raise ValueError("Unknown native fit operation")
-    if initial_spline is not None:
+    restricted = operation == "restrict_initialization"
+    if restricted and (
+        initial_spline is None or config.initialization_policy != "strict"
+    ):
+        raise ValueError("Restriction initialization requires a strict preserved start")
+    if not restricted and initial_spline is not None:
         raise ValueError("Preserved spline requires fit operation")
-    if config.initialization_policy != "authored_range_project_zero_slopes":
+    if (
+        not restricted
+        and config.initialization_policy != "authored_range_project_zero_slopes"
+    ):
         raise ValueError(
             "Author operation requires explicit authored initialization policy"
         )
@@ -85,15 +93,33 @@ def _compute_operation(
 
     result = (
         initialize_image_trajectory(
-            native, attachments, camera, inputs, config, None, additional_images
+            native,
+            attachments,
+            camera,
+            inputs,
+            config,
+            initial_spline,
+            additional_images,
         )
         if additional_images is not None
-        else initialize_image_trajectory(native, attachments, camera, inputs, config)
+        else (
+            initialize_image_trajectory(
+                native, attachments, camera, inputs, config, initial_spline
+            )
+            if restricted
+            else initialize_image_trajectory(
+                native, attachments, camera, inputs, config
+            )
+        )
     )
     if (
         result.optimizer_ran is not False
         or result.converged is not False
-        or result.initialization is None
+        or (
+            result.initialization is not None
+            if restricted
+            else result.initialization is None
+        )
     ):
         raise ValueError(
             "Author initialization returned a contradictory execution receipt"
@@ -159,12 +185,29 @@ def _worker_inputs(
     options: dict[str, Any],
     evidence: CaptureImageEvidence,
     samples: np.ndarray,
+    restricted_start: ImageSplineStart | None = None,
 ) -> tuple[ImageFitInputs, ImageSplineStart | None]:
     mode = options.get("initialization_source", "sampled_parent")
-    if mode not in ("sampled_parent", "preserved_spline"):
+    if mode not in ("sampled_parent", "preserved_spline", "restricted_spline"):
         raise ValueError("Unknown refit initialization source")
     config = ImageFitConfig.from_record(options["config"])
     start = None
+    if mode == "restricted_spline":
+        if (
+            options.get("operation") != "restrict_initialization"
+            or config.initialization_policy != "strict"
+        ):
+            raise ValueError(
+                "Restricted spline requires restriction operation and strict policy"
+            )
+        start = _checked_restricted_start(
+            binding, options, evidence.source_times, restricted_start
+        )
+    elif (
+        restricted_start is not None
+        or options.get("operation") == "restrict_initialization"
+    ):
+        raise ValueError("Restriction start requires restricted spline mode")
     if mode == "preserved_spline":
         if (
             options.get("operation", "fit") != "fit"
@@ -191,6 +234,40 @@ def _worker_inputs(
         knots,
         None if start is not None else samples,
     ), start
+
+
+def _checked_restricted_start(
+    binding: NativeFitBinding,
+    options: dict[str, Any],
+    source_times: np.ndarray,
+    start: ImageSplineStart | None,
+) -> ImageSplineStart:
+    """Match the authenticated restriction to the compiled model and evidence."""
+    if not isinstance(start, ImageSplineStart):
+        raise ValueError("Restriction initialization requires a typed restricted start")
+    if (
+        start.model_sha != binding.plant.plant_sha
+        or start.coordinate_order != tuple(binding.plant.coordinate_order)
+        or start.free_coordinates
+        != tuple(binding.fit["evidence"]["original_fit"]["free_coordinates"])
+        or len(start.knot_times) != options["knot_count"]
+        or (start.knot_times[0], start.knot_times[-1])
+        != (source_times[0], source_times[-1])
+    ):
+        raise ValueError(
+            "Restricted spline differs from compiled model, coordinates, knots or clock"
+        )
+    return start
+
+
+def _request_restriction(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> ImageSplineStart | None:
+    """Re-derive the queued receipt before any compiled binding is loaded."""
+    from .necromatcher_spline_restriction import validate_spline_restriction_request
+
+    restriction = validate_spline_restriction_request(library, request)
+    return None if restriction is None else restriction.restricted_start
 
 
 def _load_refit_binding(
@@ -230,6 +307,7 @@ def _prepare_refit_inputs(
 
     with library.authenticated_read():
         _verify_scope_request(library, request)
+        restricted_start = _request_restriction(library, request)
         binding, additional_images = _load_refit_binding(library, request)
         source = binding.fit
         options = request["options"]
@@ -251,7 +329,11 @@ def _prepare_refit_inputs(
                 indices,
                 unknown_visibility_weight=options["unknown_visibility_weight"],
             )
-            inputs, initial_spline = _worker_inputs(binding, options, evidence, samples)
+            inputs, initial_spline = (
+                _worker_inputs(binding, options, evidence, samples, restricted_start)
+                if restricted_start is not None
+                else _worker_inputs(binding, options, evidence, samples)
+            )
     return binding, additional_images, inputs, initial_spline, ranges, contact_binding
 
 
@@ -273,6 +355,7 @@ def _finish_refit(
     native = binding.plant
     camera, attachments = binding.review_inputs()
     with library.authenticated_read():
+        _request_restriction(library, request)
         if (
             library.load_asset(request["source_fit_id"]).metadata["hash"]
             != request["source_fit_hash"]

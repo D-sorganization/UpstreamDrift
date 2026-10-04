@@ -276,31 +276,32 @@ new full video, ControlTower delivery or scientific qualification is claimed.
 Tiger remains restricted to [0,191); exact physical release is unmeasured and
 Hogan is unchanged.
 
-Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Published integration f2dfe completed read-only Profile V3: five stages took 0.672506/1.464802/9.053819/1.511551/0.460402 s; only seed binding decoded 210 PNGs, once in one canonical full authentication. Source 14,835/Library 401, project/runtime/config were preserved; assessment is byte-identical to V2. Root acceptance SHA256 b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4 records this invocation; differing instrumentation/context/hardware prevents an isolated speedup or timeout-cause claim. No strict retry or new ControlTower delivery is authorized; accepted 0143 artifacts are unchanged. Pure restriction #11450 has a frozen V2 core (SHA256 b3504e6c64c7f97116a108b97a06d6ecba8732f3d38dd004751789e0bc93ce58) with 23 plus 53 agent cases. Root accepted 91 distinct cases (23 core plus 68 disjoint compatibility/bounds/initialization cases; synthetic MuJoCo-first fixtures only, nine inherited warnings and 38 unmarked cases reported only). Root acceptance SHA256 c0c2c44509650d37dc9516aa4185a54b828a49767bcca4ab8d8b2af64786b2ff records Ruff/format, pinned mypy and governance checks; manual release remains inventory-blocked. Pure q/v/a roundoff and Bernstein encoding evidence 17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5 is not native feasibility, pixel agreement, seed adoption or queue integration.
+Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Published integration f2dfe completed read-only Profile V3: five stages took 0.672506/1.464802/9.053819/1.511551/0.460402 s; only seed binding decoded 210 PNGs, once in one canonical full authentication. Source 14,835/Library 401, project/runtime/config were preserved; assessment is byte-identical to V2. Root acceptance SHA256 b8469dc86d8aa72e1be2499786a107c847dd2e11d32f20567aa1effb1947a8e4 records this invocation; differing instrumentation/context/hardware prevents an isolated speedup or timeout-cause claim. No strict retry or new ControlTower delivery is authorized; accepted 0143 artifacts are unchanged. Pure restriction #11450 has a frozen V2 core (SHA256 b3504e6c64c7f97116a108b97a06d6ecba8732f3d38dd004751789e0bc93ce58) with 23 plus 53 agent cases. Root accepted 91 distinct cases (23 core plus 68 disjoint compatibility/bounds/initialization cases; synthetic MuJoCo-first fixtures only, nine inherited warnings and 38 unmarked cases reported only). Root acceptance SHA256 c0c2c44509650d37dc9516aa4185a54b828a49767bcca4ab8d8b2af64786b2ff records Ruff/format, pinned mypy and governance checks; manual release remains inventory-blocked. Pure q/v/a roundoff and Bernstein encoding evidence 17ddcd74c27276a376174c202500baa10e389d09b97ca27c3c42e9d1e4b778b5 is not native feasibility, pixel agreement, seed adoption or queue integration. Subsequently, native session 50689 closed exit0 at published 81aa448794a0ce763cdc2dd6e503d3f9b42200e9; root serialized closure accepted ce833a420c5e208b82bc430fe4be4c4c16830aee54d9c8c357bdb1af9e775e9c. Full source 14,837/Library 401/project/runtime/config/helpers matched the fresh baseline. Restricted-parent body RMS exactly equals saved parent (dense 24.082673308003265, remaining 24.337344114034266, training 21.776977995696026 px); 381-point q/v/a roundoff and typed receipt equality hold. The full 176 x 12 dimensionless scaled constraint matrix has maximum 17.023155533359613 at ground:heel_l, source 18.501816666666667; continuous contact is uncertified and nodes differ from V21, so no V21 656 comparison applies. Retained frame 0 raw shaft RMS 66.69082241158017 px/angle 28.301292322830996deg remains mismatched. No optimizer/convergence/physical qualification, telemetry null; no adopted seed, new fit, overlay rendering/pixel-parity evaluation or ControlTower delivery. Subsequent backend software checkpoint: root accepted paired restrict_initialization/restricted_spline operations with canonical SDK-free restriction receipts, preserved prior/bounds, parent agreement within 1e-12, scope/hash admission and worker/storage/recall/delayed-publication checks. Legacy semantics and public counts (eight option fields, seven submit arguments, eight builder arguments) are unchanged. Root passed 87 distinct SDK-free cases with nine inherited warnings; pinned mypy on all five owners and Ruff/format passed. Root acceptance SHA256 dc43749d0e69c6c43051712c5d37b819fbbe950edd3cf5dfb12f426a61b80bed authenticates the software freezes. Native end-to-end verification is pending; preparation V2 is underway with no historical execution, registration or ControlTower delivery. Source publication awaits normal hooks. This later software acceptance does not alter the earlier Methods V6 native-evaluation checkpoint.
 
 The root integration acceptance receipt is
 `Repositories/Temp/authenticated-refit-integration-root-review-v2/root-acceptance.json`,
 SHA256 `13710191499ca3c558f5a554fba92e5f69aa908a8216312d711d9dc1f1b55e1d`.
 Native regressions used temporary fixtures; no historical Library operation ran.
 
-Methods V5 is the latest compiled supplement in the existing Desktop report
-folder. Root reviewed all fourteen pages, including the same three selected seed
-figures. The accepted TeX SHA256 is
-`28791e2cf8599d2d21dfdd4d463ff405f4625e079fd51b44ebbffad567df9a56`
-(36,265 bytes); PDF SHA256 is
-`032dbc53e31798cfb07c25615308ef8f9a85e8cbd172f65eda21d94bbd9a39a0`
-(3,301,322 bytes). Candidate review SHA256 is
-`fe5d652c43ad56389fc55edfd905d65514d414fccb9a485fb2265100b9b75590`.
+Methods V6 is the latest compiled supplement in the existing Desktop report
+folder. Root reviewed all sixteen pages through contact sheets, revised page 16
+full-size and the preceding pixel-identical page 15 full-size; this does not claim
+all current pages were separately viewed full-size. The accepted TeX SHA256 is
+`e60983864ccf6ba5c8139ec563b19e2b4a8a4ea85e3ad8582d6963d9594d9c5c`
+(41,261 bytes); PDF SHA256 is
+`e3e3e23815711a6651b11db531f472f8fd06fc7854cd9b0028956396a102539f`
+(3,307,846 bytes). Candidate review SHA256 is
+`08cdda7eb0e55d196d80819e51d5a51283bbb8ce61e275a162d1b69023cc2ccb`.
 Root acceptance is
-`Repositories/Temp/necromatcher-methods-v5-compile-v3/root-acceptance-v1/root-acceptance.json`,
-SHA256 `e94e43b40d76d3b37dd207c2cd73926f02614b5e1b2d79085ab82994b8652780`
-(3,221 bytes). The canonical review records both accepted reviews; formatter
-normalization does not alter their semantics.
+`Repositories/Temp/necromatcher-methods-v6-compile-v2/root-acceptance-v1/root-acceptance.json`,
+SHA256 `636b947c354654e78926a352fc04fc450f84bf650391c2961936f4426027babe`
+(2,704 bytes). The canonical review embeds both records; formatter normalization
+preserves their exact semantics. Revised pages 1--15 are pixel-identical to V6 V1.
 
-The source uses the same three pinned external Desktop PNG paths from the
-accepted seed pilot. They are required local repeatability dependencies, not a
-portable standalone bundle. Existing MiKTeX compiled three passes with installer
-disabled and no final LaTeX warnings or overfull/underfull boxes. The built-in
-compiler's platform-directory failure is preserved. Exact V4 source/PDF/review,
-eleven final page PNGs and logs were archived first in `accepted-methods-v4`;
-V2/V3 also remain preserved. Historical reviews do not replace V5 acceptance.
+The same three pinned external Desktop PNGs remain local repeatability
+dependencies, not a portable standalone bundle. Existing MiKTeX compiled three
+passes with installer disabled and no final LaTeX warnings or overflow boxes.
+The built-in platform-directory failure is preserved. Exact accepted V5 source,
+PDF, reviews, fourteen final pages and logs were archived before editing;
+V2/V3/V4 and the first V6 candidate also remain intact. The native checkpoint
+has no new overlay: the figures still depict the earlier unoptimized V21 seed.
