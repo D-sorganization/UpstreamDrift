@@ -23,6 +23,26 @@ Specifies shared estimation reports, GUI strategy selection with graceful explic
 - **Headless GUI ViewModel (`DimeStrategySelectionViewModel`)**:
   - Manages strategy selection, report scope, channel selections, and availability offscreen without unattended GUI launch.
 
+## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
+
+Specifies rank-revealing input-effect subspace decomposition, scale-invariant covariance whitening, orthogonal-complement torque-independent drift feasibility tests, bounded control feasibility, changing contact rank tracking, and missing-data prediction with calibrated uncertainty bounds (#11421, #11437):
+- **Input-Effect Subspace Decomposition (`decompose_input_subspace`, `SubspaceDecomposition`)**:
+  - Computes scale-invariant covariance whitening operator $W = \Sigma^{-1/2}$ via symmetric eigendecomposition. Scaling observation covariance $\Sigma \to \alpha \Sigma$ scales whitening by $1/\sqrt{\alpha}$ and Mahalanobis norm by $1/\alpha$.
+  - Decomposes whitened input-effect matrix $B_w = W B$ via full SVD $B_w = U \Sigma V^T$ with rank thresholding $\text{tol} = \max(s) \cdot \max(n, m) \cdot 10^{-12}$.
+  - Separates actuated subspace basis $U_{\parallel} = U[:, :r]$ from unactuated/torque-independent orthogonal complement basis $U_{\perp} = U[:, r:]$.
+- **Torque-Independent Drift Feasibility (`evaluate_input_subspace_feasibility`)**:
+  - Incorporates eliminated contact reactions $a_{\text{contact}} = M^{-1} J_c^T \lambda$ into effective drift $a_{\text{drift, eff}} = a_{\text{drift}} + a_{\text{contact}}$.
+  - Projects whitened acceleration discrepancy $r_w = W (\ddot{q}_{\text{cand}} - a_{\text{drift, eff}})$ onto the unactuated subspace $r_{\perp} = U_{\perp}^T r_w$.
+  - Since $U_{\perp}^T B_w = 0$, no admissible control torque $\tau$ can affect $r_{\perp}$. Dynamically impossible motion outside the input subspace is detected and rejected fail-closed ($\chi^2_{\perp} > \text{threshold}$).
+  - Fully actuated free systems ($r = n$) yield empty $U_{\perp}$ and zero orthogonal norm ($\chi^2_{\perp} = 0$), adding no redundant restrictions beyond control bounds.
+- **Bounded Control Feasibility Inside the Input Subspace**:
+  - Inverts within the actuated subspace to obtain optimal minimum-norm control effort $\tau^* = \arg\min_{\tau} \| B_w \tau - r_w \|$.
+  - Validates $\tau^*$ against declared `ControlBand` $[\tau_{\min}, \tau_{\max}]$, enforcing control feasibility inside the physically reachable subspace.
+- **Missing-Data Prediction (`predict_masked_interval`, `MaskedPredictionResult`)**:
+  - Across masked observation intervals, propagates state and covariance without conjuring artificial certainty: unactuated coordinates are strictly bounded by drift and model discrepancy, while actuated coordinates broaden according to control prior uncertainty.
+- **Runtime Factor Exclusivity (`DimeInputSubspaceFactor`, `RuntimeExclusivityContract`)**:
+  - Defaults to diagnostic proposal-screening factor (`contributes_to_objective=False`). When configured as an alternative reduced inference formulation (`contributes_to_objective=True`), the runtime exclusivity contract strictly rejects duplicate full-dynamics or explicit-control factors on overlapping time intervals.
+
 ## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
 
 Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
@@ -48,6 +68,7 @@ Specifies offline backward smoothing using marginalized arrival information, fai
 - **Public API Adapters**:
   - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
   - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
+
 
 ## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
 
@@ -8103,6 +8124,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | --- | --- | --- |
 | 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
 | 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
+| 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
