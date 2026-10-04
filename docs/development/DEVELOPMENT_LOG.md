@@ -151,6 +151,19 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
 - **Next step:** FTO core complete and shipped. Follow-up #11313 is tracked in DL-#11313.
 
+### DL-#11278 · COV-10 Model-Candidate Video Comparison
+
+- **State:** in_progress
+- **Owner:** claude
+- **Issue:** #11278; parent #11268; blocked (real data) on #11165
+- **PR:** not created (Refs #11278)
+- **Branch:** `claude/issue-11278`
+- **Paths:** `src/motion_capture/reference/model_candidate_source.py`, `tests/unit/motion_capture/test_cov10_model_candidate_source.py`, `docs/development/capture-o-video/procedure.md`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — engine-generic comparison source landed with 13 synthetic unit tests passing; real GS3DX overlays and receipts not run.
+- **Summary:** Python-only engine-generic path projecting any model candidate into video views and comparing it through the COV-7 L2 receipt; real Simscape evidence needs a stored `capture-O` candidate from #11165 and an R2025b host.
+- **Next step:** After #11165 stores a candidate, run `compare_candidate_2d` on an R2025b host for every paired swing and record aggregate results on #11278.
+
 ### DL-#11268 · Capture-O Video Companion
 
 - **State:** in_progress
