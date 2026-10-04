@@ -655,12 +655,81 @@ class DimeObservationFactor(ABC):
         """Evaluate raw and whitened errors specifically on held-out partition."""
 
 
+class _BaseDimeObservationFactor(DimeObservationFactor):
+    """Common state, masking, and weighting infrastructure for observation factors."""
+
+    def __init__(
+        self,
+        n_points: int,
+        covariance: float | np.ndarray,
+        point_dim: int,
+        *,
+        valid_mask: np.ndarray | None = None,
+        held_out_mask: np.ndarray | None = None,
+        robust_loss: RobustLossKernel | None = None,
+        detector_scores: Sequence[float] | np.ndarray | None = None,
+        timing: ObservationTiming | None = None,
+    ) -> None:
+        self._n_points = n_points
+        self._point_dim = point_dim
+        (
+            self._valid_mask,
+            self._held_out_mask,
+            self._fit_mask,
+            self._active_indices,
+            self._held_out_indices,
+        ) = _setup_observation_masks(n_points, valid_mask, held_out_mask)
+        self._operators, self._is_diagonal = _build_whitening_operators(
+            covariance, n_points, point_dim
+        )
+        self._robust_loss = (
+            robust_loss if robust_loss is not None else RobustLossKernel("huber")
+        )
+        self._detector_scores = _validate_detector_scores(n_points, detector_scores)
+        self._timing = timing
+
+    @property
+    def residual_dimension(self) -> int:
+        return int(len(self._active_indices) * self._point_dim)
+
+    @property
+    def num_active_observations(self) -> int:
+        return int(len(self._active_indices))
+
+    def _extract_q(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
+        if isinstance(q, DimeCompleteState):
+            return q.q
+        return np.asarray(q, dtype=np.float64)
+
+    def evaluate_residuals(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
+        if len(self._active_indices) == 0:
+            return np.empty(0, dtype=np.float64)
+        raw = self.evaluate_raw_residuals(q).reshape(-1, self._point_dim)
+        whitened = _apply_whitening(
+            raw, self._operators, self._is_diagonal, self._active_indices
+        )
+        return self._robust_loss.apply_robust_weight(whitened, self._point_dim)
+
+    def evaluate_jacobian(
+        self,
+        q: np.ndarray | DimeCompleteState,
+        *,
+        wrt: Literal["state", "calibration"] = "state",
+        method: Literal["auto", "analytical", "finite"] = "auto",
+        step: float = 1.0e-6,
+    ) -> np.ndarray:
+        q_vec = self._extract_q(q)
+        if len(self._active_indices) == 0:
+            return np.empty((0, len(q_vec)), dtype=np.float64)
+        return _finite_difference_jacobian(self.evaluate_residuals, q_vec, step=step)
+
+
 # ==============================================================================
 # Concrete 3D Marker Observation Factor
 # ==============================================================================
 
 
-class Marker3DObservationFactor(DimeObservationFactor):
+class Marker3DObservationFactor(_BaseDimeObservationFactor):
     """Robust 3D marker observation factor with metric units and covariance whitening."""
 
     def __init__(
@@ -687,34 +756,19 @@ class Marker3DObservationFactor(DimeObservationFactor):
             obs.ndim == 2 and obs.shape[1] == 3,
             f"observations_3d_m must have shape (N, 3), got {obs.shape}",
         )
-        self._n_points = obs.shape[0]
+        super().__init__(
+            obs.shape[0],
+            covariance,
+            3,
+            valid_mask=valid_mask,
+            held_out_mask=held_out_mask,
+            robust_loss=robust_loss,
+            detector_scores=detector_scores,
+            timing=timing,
+        )
         self._obs_m = _make_readonly_array(obs)
         self._kinematics_fn = kinematics_fn
         self._kinematics_jacobian_fn = kinematics_jacobian_fn
-
-        # Masking and holdout partition
-        (
-            self._valid_mask,
-            self._held_out_mask,
-            self._fit_mask,
-            self._active_indices,
-            self._held_out_indices,
-        ) = _setup_observation_masks(self._n_points, valid_mask, held_out_mask)
-
-        # Covariance whitening
-        self._operators, self._is_diagonal = _build_whitening_operators(
-            covariance, self._n_points, 3
-        )
-        self._robust_loss = (
-            robust_loss if robust_loss is not None else RobustLossKernel("huber")
-        )
-
-        # Detector scores (strictly decoupled from covariance)
-        self._detector_scores: np.ndarray | None = _validate_detector_scores(
-            self._n_points, detector_scores
-        )
-
-        self._timing = timing
         self._attachments = tuple(attachments) if attachments is not None else None
         self._marker_names = (
             tuple(str(m) for m in marker_names) if marker_names is not None else None
@@ -728,19 +782,6 @@ class Marker3DObservationFactor(DimeObservationFactor):
     def canonical_unit(self) -> str:
         return "m"
 
-    @property
-    def residual_dimension(self) -> int:
-        return int(len(self._active_indices) * 3)
-
-    @property
-    def num_active_observations(self) -> int:
-        return int(len(self._active_indices))
-
-    def _extract_q(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
-        if isinstance(q, DimeCompleteState):
-            return q.q
-        return np.asarray(q, dtype=np.float64)
-
     def evaluate_raw_residuals(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
         if len(self._active_indices) == 0:
             return np.empty(0, dtype=np.float64)
@@ -752,15 +793,6 @@ class Marker3DObservationFactor(DimeObservationFactor):
         )
         diff = pred[self._active_indices] - self._obs_m[self._active_indices]
         return diff.reshape(-1)
-
-    def evaluate_residuals(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
-        if len(self._active_indices) == 0:
-            return np.empty(0, dtype=np.float64)
-        raw = self.evaluate_raw_residuals(q).reshape(-1, 3)
-        whitened = _apply_whitening(
-            raw, self._operators, self._is_diagonal, self._active_indices
-        )
-        return self._robust_loss.apply_robust_weight(whitened, 3)
 
     def evaluate_jacobian(
         self,
@@ -802,8 +834,7 @@ class Marker3DObservationFactor(DimeObservationFactor):
             j_rob = j_white * sqrt_w[:, None, None]
             return j_rob.reshape(-1, q_vec.size)
 
-        # Central finite difference
-        return _finite_difference_jacobian(self.evaluate_residuals, q_vec, step=step)
+        return super().evaluate_jacobian(q, wrt=wrt, method=method, step=step)
 
     def evaluate_held_out(
         self, q: np.ndarray | DimeCompleteState
@@ -831,7 +862,7 @@ class Marker3DObservationFactor(DimeObservationFactor):
 # ==============================================================================
 
 
-class Markerless2DObservationFactor(DimeObservationFactor):
+class Markerless2DObservationFactor(_BaseDimeObservationFactor):
     """Robust 2D markerless observation factor with pixel units and camera projection."""
 
     def __init__(
@@ -859,34 +890,21 @@ class Markerless2DObservationFactor(DimeObservationFactor):
             obs.ndim == 2 and obs.shape[1] == 2,
             f"observations_2d_px must have shape (N, 2), got {obs.shape}",
         )
-        self._n_points = obs.shape[0]
+        super().__init__(
+            obs.shape[0],
+            covariance,
+            2,
+            valid_mask=valid_mask,
+            held_out_mask=held_out_mask,
+            robust_loss=robust_loss,
+            detector_scores=detector_scores,
+            timing=timing,
+        )
         self._obs_px = _make_readonly_array(obs)
         self._kinematics_fn = kinematics_fn
         self._kinematics_jacobian_fn = kinematics_jacobian_fn
         self._camera = camera
         self._strict_chirality = strict_chirality
-
-        (
-            self._valid_mask,
-            self._held_out_mask,
-            self._fit_mask,
-            self._active_indices,
-            self._held_out_indices,
-        ) = _setup_observation_masks(self._n_points, valid_mask, held_out_mask)
-
-        # Covariance whitening in pixel units
-        self._operators, self._is_diagonal = _build_whitening_operators(
-            covariance, self._n_points, 2
-        )
-        self._robust_loss = (
-            robust_loss if robust_loss is not None else RobustLossKernel("huber")
-        )
-
-        self._detector_scores: np.ndarray | None = _validate_detector_scores(
-            self._n_points, detector_scores
-        )
-
-        self._timing = timing
         self._keypoint_names = (
             tuple(str(k) for k in keypoint_names)
             if keypoint_names is not None
@@ -901,19 +919,6 @@ class Markerless2DObservationFactor(DimeObservationFactor):
     def canonical_unit(self) -> str:
         return "px"
 
-    @property
-    def residual_dimension(self) -> int:
-        return int(len(self._active_indices) * 2)
-
-    @property
-    def num_active_observations(self) -> int:
-        return int(len(self._active_indices))
-
-    def _extract_q(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
-        if isinstance(q, DimeCompleteState):
-            return q.q
-        return np.asarray(q, dtype=np.float64)
-
     def evaluate_raw_residuals(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
         if len(self._active_indices) == 0:
             return np.empty(0, dtype=np.float64)
@@ -926,30 +931,6 @@ class Markerless2DObservationFactor(DimeObservationFactor):
         proj_px = self._camera.project(pts_3d, check_chirality=self._strict_chirality)
         diff = proj_px[self._active_indices] - self._obs_px[self._active_indices]
         return diff.reshape(-1)
-
-    def evaluate_residuals(self, q: np.ndarray | DimeCompleteState) -> np.ndarray:
-        if len(self._active_indices) == 0:
-            return np.empty(0, dtype=np.float64)
-        raw = self.evaluate_raw_residuals(q).reshape(-1, 2)
-        whitened = _apply_whitening(
-            raw, self._operators, self._is_diagonal, self._active_indices
-        )
-        return self._robust_loss.apply_robust_weight(whitened, 2)
-
-    def evaluate_jacobian(
-        self,
-        q: np.ndarray | DimeCompleteState,
-        *,
-        wrt: Literal["state", "calibration"] = "state",
-        method: Literal["auto", "analytical", "finite"] = "auto",
-        step: float = 1.0e-6,
-    ) -> np.ndarray:
-        q_vec = self._extract_q(q)
-        if len(self._active_indices) == 0:
-            return np.empty((0, len(q_vec)), dtype=np.float64)
-
-        # Central finite difference
-        return _finite_difference_jacobian(self.evaluate_residuals, q_vec, step=step)
 
     def evaluate_held_out(
         self, q: np.ndarray | DimeCompleteState

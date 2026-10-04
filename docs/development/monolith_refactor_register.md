@@ -80,13 +80,13 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1007 | `src/launchers/launcher_ui_setup.py` |
 | 1000 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_opengl_renderer.py` |
 | 1000 | `src/engines/model_inventory.py` |
-| 992 | `src/shared/python/estimation/dime_observation_factors.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
 | 989 | `src/shared/python/estimation/dime_contracts.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
 | 981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
+| 973 | `src/shared/python/estimation/dime_observation_factors.py` |
 | 973 | `src/shared/python/motion_matching/club_only/fast_matching.py` |
 | 973 | `src/tools/bunker_shot_gui/viewport_widgets.py` |
 | 968 | `src/api/routes/simulation_ws.py` |
