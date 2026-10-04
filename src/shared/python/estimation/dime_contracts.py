@@ -899,17 +899,20 @@ class RuntimeExclusivityContract:
                     - max(factor.t_start, existing.t_start),
                 )
                 if overlap > 0.0:
-                    if (
-                        factor.factor_type == "marginalized_input_transition"
-                        and existing.factor_type == "explicit_input_likelihood"
-                    ) or (
-                        factor.factor_type == "explicit_input_likelihood"
-                        and existing.factor_type == "marginalized_input_transition"
-                    ):
+                    incompatible_pairs = {
+                        ("marginalized_input_transition", "explicit_input_likelihood"),
+                        ("explicit_input_likelihood", "marginalized_input_transition"),
+                        ("reduced_subspace_dynamics", "explicit_input_likelihood"),
+                        ("explicit_input_likelihood", "reduced_subspace_dynamics"),
+                        ("reduced_subspace_dynamics", "marginalized_input_transition"),
+                        ("marginalized_input_transition", "reduced_subspace_dynamics"),
+                        ("reduced_subspace_dynamics", "reduced_subspace_dynamics"),
+                    }
+                    if (factor.factor_type, existing.factor_type) in incompatible_pairs:
                         raise PreconditionError(
-                            f"Runtime exclusivity violation: marginalized-input transition ('{factor.name}') "
-                            f"and explicit-input likelihood ('{existing.name}') cannot co-occur on overlapping "
-                            f"interval [{max(factor.t_start, existing.t_start)}, {min(factor.t_end, existing.t_end)}]."
+                            f"Runtime exclusivity violation: factor ('{factor.name}', type='{factor.factor_type}') "
+                            f"and existing factor ('{existing.name}', type='{existing.factor_type}') cannot co-occur "
+                            f"on overlapping interval [{max(factor.t_start, existing.t_start)}, {min(factor.t_end, existing.t_end)}]."
                         )
 
         self._factors.append(factor)
