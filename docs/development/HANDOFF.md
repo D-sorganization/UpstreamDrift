@@ -79,6 +79,42 @@
   - `ruff check`, `ruff format --check`: passed cleanly.
 - Next steps: Advance to dependent qualification gates under epic #11421.
 
+# Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates — #11421 / #11429
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11429-global-calibration`; PR: #11467 (`Closes #11429`, `Refs #11421`)
+- Governing issue: #11429 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-08] Implement observable global calibration over sensor, kinematic, and dynamic parameters with physical gauge enforcement, SVD identifiability analysis, nullspace freezing, realizable physical inertia validation, and frozen-prior revision guards.
+- Completed:
+  - `src/shared/python/estimation/dime_global_calibration.py`:
+    - `PhysicalGauge`: reference anchors (`METRIC_SCALE`, `GRAVITY_FRAME`, `MASS_ANCHOR`, `MEASURED_FORCE_ANCHOR`).
+    - `PhysicalGaugePolicy`: validates required anchors for calibration candidates. Monocular camera scale ambiguity requires `METRIC_SCALE`; unmeasured contact dynamics mass/torque ambiguity requires `MASS_ANCHOR` or `MEASURED_FORCE_ANCHOR`. Missing anchors are rejected fail-closed with `PreconditionError`.
+    - `CalibrationParameter`: bounded parameter with name, subsystem kind, value, nominal value, bounds, and uncertainty sigma.
+    - `validate_physical_inertia`: enforces physical realizability on inertia tensors ($3 \times 3$ symmetry, positive definiteness, triangle inequalities on principal moments: $I_{xx} + I_{yy} \ge I_{zz}$, etc.).
+    - `GlobalCalibrationProblem`: optimization problem configuration with parameters, gauge policy, residual function, convergence tolerances, and frozen prior revision protection.
+    - `GlobalCalibrationResult`: structured receipt with parameter values, locked unobservable parameters, cost breakdown, inner loop latency, outer loop time, total time, parameter revision, and identifiability report. Full serialization and deserialization via `to_dict()` and `from_dict()`.
+    - `calibrate_global_parameters`: solves outer-loop calibration, performs SVD identifiability analysis via `probe_identifiability`, identifies unobservable nullspace directions, freezes nullspace parameters at nominal values (or fails closed per policy), optimizes free parameters with bounded nonlinear least squares, and separates inner-loop window estimator latency from outer-loop solver time.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-08 calibration symbols.
+  - `tests/unit/estimation/test_dime_global_calibration.py`: 9 comprehensive behavioral unit tests:
+    - RED monocular camera scale ambiguity rejected without metric scale anchor.
+    - RED mass/torque scaling ambiguity rejected without mass or measured force anchor.
+    - RED redundant joint angle offsets detected via SVD and flagged.
+    - RED non-physical inertia tensor violating triangle inequality or positive definiteness rejected.
+    - RED calibration changes beneath a frozen prior without explicit revision tag rejected.
+    - GREEN recovers planted marker perturbations under full multi-view anchor.
+    - GREEN flags rank-deficient parameter blocks and locks nullspace parameters at nominal values.
+    - GREEN latency accounting cleanly separates inner-loop window time from outer-loop calibration.
+    - GREEN structured result roundtrips losslessly through JSON-compatible dictionary serialization.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_global_calibration.py`: 9 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 197 passed, 1 skipped (jax).
+  - `divergence_inventory.py --check`: passed.
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_dry_duplication_gate.py`: passed.
+  - `check_error_handling_ratchet.py`: passed.
+  - `ruff format --check` and `ruff check`: passed.
+- Next steps: Confirm CI green on PR #11467 and await auto-merge.
+
 # Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors — #11421 / #11434
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11434-human-priors`; PR: #11468 (`Closes #11434`, `Refs #11421`)
