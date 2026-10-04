@@ -460,7 +460,10 @@ Binding fleet-wide from
 (program [#1505](https://github.com/D-sorganization/Repository_Management/issues/1505)):
 
 - A substantive pull request adds **exactly one** row to the SPEC.md change
-  log: `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
+  log: `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`. Prefer a
+  change fragment (`python shared_scripts/changes_fragment.py new --issue N
+--summary "..."`): the post-merge collate step writes the row keyed by the
+  real PR number, so you never edit `SPEC.md` yourself.
 - **Never put a serial spec version in a row**, and **never bump the
   `Spec Version` field**. That field is release-derived — set by
   Repository_Management's `scripts/bump_spec_version.py` when a release is cut.
@@ -563,6 +566,10 @@ workflow and report the rollout gap.
 
 Implementation state must survive context exhaustion, agent replacement, and workstation changes.
 
+### Per-PR Change Fragments (RM-5)
+
+Write a per-PR change fragment instead of editing the shared files: `python shared_scripts/changes_fragment.py new --issue N --summary "..."` (add `--dl-state in_review --next-step "..."` for live work). Do not edit `HANDOFF.md`, `DEVELOPMENT_LOG.md` or the `SPEC.md` change log directly; after merge, `collate-changes.yml` applies the fragment (SPEC row keyed by PR, `DL-#<issue>` entry updated in place) and deletes it. Put the handoff itself in the PR body's **Handoff** section. Direct edits to the shared files still pass the hooks during the transition ([Repository_Management#1894](https://github.com/D-sorganization/Repository_Management/issues/1894)).
+
 ### Canonical Handoff Location
 
 - Use the repo-local handoff path explicitly declared by that repository's `AGENTS.md` when one exists.
@@ -571,7 +578,7 @@ Implementation state must survive context exhaustion, agent replacement, and wor
 
 ### Commit-Level Requirement
 
-- Every implementation commit MUST update the canonical handoff in the same commit.
+- Every implementation commit MUST carry a change fragment (preferred) or update the canonical handoff in the same commit.
 - If the implementation does not materially change continuation state, record `No material handoff change — <reason>` in its change log; omission is not an acceptable substitute.
 - `SELF` is the only permitted commit placeholder inside the commit being described. It means the exact commit containing that handoff update and is resolved with `git rev-parse HEAD` after checkout. Do not amend or rewrite history merely to embed a self-referential SHA.
 - Before pausing, transferring control, or declaring completion, refresh the handoff and report the resolved current `HEAD` SHA in the transfer message.
@@ -603,6 +610,11 @@ The handoff answers "how do I resume the session in front of me". The
 development log answers "what is being built in this repository, and where does
 each thing stand". They are different documents and neither substitutes for the
 other.
+
+New work does not edit the log directly: it ships a change fragment
+(`python shared_scripts/changes_fragment.py new ...`, see Durable
+Implementation Handoffs), and `collate-changes.yml` updates the entry in place
+after merge. A staged valid fragment satisfies the `development-log` hook.
 
 ### Canonical Location
 
@@ -1005,8 +1017,10 @@ is delegated to cheaper CLI agents. The issue's labels say which is which.
 2. **A CLI-tier agent never claims a `tier:strong` issue.** If a CLI-tier issue
    turns out to need a design decision, open a draft PR with a `Blocked:`
    section and stop. Do not guess. A frontier agent may re-label the issue.
-3. **Delegated work comes back as a draft PR.** A frontier agent or the owner
-   reviews it before it is marked ready and merged.
+3. **Delegated work comes back as a ready PR.** Open the PR ready (not draft),
+   arm auto-merge through `scripts/automerge_guard.py`, and end the session.
+   If blocked or in need of a design decision, open as a draft PR with a
+   `Blocked:` section explaining why.
 4. **Dispatch through the tool, not by hand.** Run
    `python -m scripts.dispatch_cli_agent <OWNER/REPO> <N> --repo-dir <clone>`
    from Repository_Management; add `--cli claude` for Sonnet 5. It refuses
@@ -1014,7 +1028,7 @@ is delegated to cheaper CLI agents. The issue's labels say which is which.
    another agent, or already covered by an open PR. Then it creates the worktree,
    posts the lease, and sends the standard prompt
    (`docs/agents/prompts/cli_tier_task.md`: TDD, DbC, LoD, DRY, repo rules,
-   draft PR).
+   PR lifecycle).
 5. **Label new issues when you file them.** Put the taxonomy labels on the issue,
    or a `tier:*` label directly. To back-fill a repository, run
    `python -m scripts.apply_tier_labels <OWNER/REPO> --apply` (one repository per run).
@@ -1023,3 +1037,20 @@ The full guide is in
 [`docs/agents/AGENT_TIER_ROUTING.md`](https://github.com/D-sorganization/Repository_Management/blob/main/docs/agents/AGENT_TIER_ROUTING.md).
 
 <!-- END FLEET-MANAGED: agent-tiers -->
+
+---
+
+<!-- BEGIN FLEET-MANAGED: pr-lifecycle -->
+
+## PR Lifecycle: End the Session at PR Open; No Check-Ins
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/fleet-rules/pr-lifecycle.md.
+
+1. **Before pushing, run `python -m scripts.pre_pr` (RM-6).** Push once.
+2. **Open the PR ready (not draft) unless it is explicitly blocked; arm auto-merge with `scripts/automerge_guard.py`; then end the session.** Do not schedule check-ins, subscribe to PR activity, or enable Auto-fix.
+3. **If CI goes red, Runner Dashboard dispatches the fix (RD-1).** Do not revive the original session.
+4. **A follow-up hours later goes in a new session with a one-paragraph brief.**
+5. **Don't switch models mid-session (it throws away the prompt cache).**
+
+<!-- END FLEET-MANAGED: pr-lifecycle -->
