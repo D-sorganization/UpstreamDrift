@@ -1,6 +1,6 @@
 # Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors — #11421 / #11434
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11434-human-priors`; PR: pending (`Closes #11434`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11434-human-priors`; PR: #11468 (`Closes #11434`, `Refs #11421`)
 - Governing issue: #11434 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-13] Implement hierarchical human dimensions, versioned population priors, Bayesian posterior updates under sparse measurements, physical dimension bounds with height consistency, coupled joint range-of-motion constraints, and inertia realizability checks.
 - Completed:
@@ -37,7 +37,40 @@
   - `check_dry_duplication_gate.py`: passed (0 unapproved duplicate growth).
   - `check_lod.py`: passed (clean no-growth scan, 0 violations).
   - `ruff check` and `ruff format`: passed cleanly.
-- Next steps: Open PR for DIME-13 (#11434), arm auto-merge, and proceed to next unblocked DIME task.
+- Next steps: Confirm CI green on PR #11468 and await auto-merge.
+
+# Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits — #11421 / #11428
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11428-mhe-arrival`; PR: #11428 (`Closes #11428`, `Refs #11421`)
+- Governing issue: #11428 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-07] Extend existing MHE with square-root quadratic arrival factor representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics retention, late/irregular sample handling, and measurement accumulation guard preventing double counting across window advances.
+- Completed:
+  - `src/shared/python/estimation/moving_horizon.py`:
+    - `ArrivalFactor`: represents arrival factor in tangent coordinates about reference state $\bar{x}$ as square-root quadratic factor $\frac{1}{2} \| R(x - \bar{x}) - r \|_2^2$ with revealed rank, linearization point, and metadata.
+    - `marginalize_arrival_factor`: rank-revealing marginalization via full SVD on $A_0$; separates observed from decoupled unobserved subspace; retains rank deficiency on $\delta x_1$ without adding diagonal jitter; supports `"retain_rank_deficiency"` and `"fail_closed"` gauge policies; exactly reproduces batch MAP on linear-Gaussian fixtures.
+    - `AccumulationGuard`: tracks marginalized sample indices and timestamps, raising `PreconditionError` if an already-marginalized measurement is reintroduced to prevent double counting.
+    - `WindowCommitStatus` & `FailureDiagnostics`: categorizes window outcomes (`ACCEPTED`, `REJECTED_NONFINITE`, `REJECTED_UNSUCCESSFUL`, `REJECTED_CONSTRAINT_VIOLATION`); retains diagnostics in bounded history without overwriting last accepted coefficients or poisoning warm starts.
+    - `LateSamplePolicy`: handles late/duplicate sample timestamps under `REJECT` or `DROP_LATE` policies; natively supports irregular sampling intervals.
+    - `MovingHorizonOptions`, `MovingHorizonProblem`, `MovingHorizonResult`, `MovingHorizonEstimator`: updated with safe window commits, failure diagnostics, latency recording, and arrival factor support.
+  - `src/shared/python/estimation/__init__.py`: exports `AccumulationGuard`, `ArrivalFactor`, `FailureDiagnostics`, `LateSamplePolicy`, `WindowCommitStatus`, and `marginalize_arrival_factor`.
+  - `tests/unit/estimation/test_moving_horizon_estimator.py`: 11 comprehensive behavioral tests (RED & GREEN) covering:
+    - Arrival factor representation and linearization metadata.
+    - Rank-revealing marginalization retaining rank-deficiency without diagonal jitter.
+    - Exact agreement between small-window MHE and batch MAP on linear-Gaussian fixture within frozen tolerance ($10^{-5}$).
+    - Safe window commits rejecting non-finite/unsuccessful solves and retaining failure diagnostics without poisoning warm-start recovery.
+    - Late and irregular sample handling under `REJECT` and `DROP_LATE` policies.
+    - Accumulation guard preventing double-counted measurements across window advances.
+    - Bounded $O(1)$ memory across long horizons (60+ window advances).
+    - Existing deterministic window advancement, warm-start carryover, fixed-parameter construction, and JSON latency payload tests.
+- Validation:
+  - `pytest tests/unit/estimation/test_moving_horizon_estimator.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 53 passed, 1 skipped (jax).
+  - `python scripts/check_spec_paths.py`: passed.
+  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to DIME-08 (#11429) under epic #11421.
 
 # Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints — #11421 / #11427
 
