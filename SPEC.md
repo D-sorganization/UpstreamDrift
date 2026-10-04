@@ -1,3 +1,29 @@
+## Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers (DIME-15, #11436)
+
+Specifies reusable learned matching initializers, qualification harnesses, and comparative economics across held-out subjects, sessions, and body geometry (#11421, #11436):
+- **Leakage Prevention Across Temporal Windows (`TemporalWindow`, `validate_split_leakage`)**:
+  - Enforces disjoint temporal partitions across player identity, session identity, and window bounds.
+  - Rejects overlapping player windows, cross-session leakage, and inverted or zero durations ($t_{\text{end}} \le t_{\text{start}}$) fail-closed with `PreconditionError`.
+- **Checkpoint Identity & Stale Model Guards (`InitializerModelCard`, `validate_checkpoint_identity`)**:
+  - Validates model architecture, provider identity, state/control dimensions, coordinate conventions, and cryptographic model SHA-256 hashes against target runtime configurations.
+  - Fails closed on stale checkpoints or incompatible models.
+- **Synthetic Solver Failure Screening (`validate_synthetic_solver_outcome`)**:
+  - Screens synthetic solver candidate proposals labeled valid; rejects non-finite values, unintegrated defect residual breaches, constraint tolerance violations, and divergence fail-closed.
+- **Physical Torque Spline Interpolation & Rate Limits (`interpolate_and_validate_torques`)**:
+  - Interpolates discrete control proposals with cubic Hermite splines.
+  - Enforces physical magnitude bounds ($\|\tau\| \le \tau_{\max}$) and torque rate limits ($\|\dot{\tau}\| \le \dot{\tau}_{\max}$); rejects unrealistic torque steps fail-closed.
+- **Out-of-Distribution Body Geometry & Contact Context Detection (`detect_out_of_distribution`)**:
+  - Flags OOD body geometry dimensions ($> 3\sigma$ Mahalanobis distance) and unmodeled contact modes.
+  - Automatically falls back to classical warm starts or cold solves when proposals are out-of-distribution.
+- **Inconclusive Learning Curve Early Stopping (`monitor_learning_curve`, `EarlyStoppingStatus`)**:
+  - Monitors training and validation loss trajectories; automatically halts training upon plateaus or divergence, preventing wasted compute on unpromising initializers.
+- **Independent Native Physics Qualification Gates (`verify_candidate_with_native_gate`)**:
+  - Evaluates candidate proposals strictly against native physics dynamics providers and control bounds before admission.
+  - Does not rely on proxy network confidences or bypass verification.
+- **Break-Even Economics & Ablation Benchmarking (`compute_initializer_breakeven`, `compare_matching_initializers`, `run_initializer_ablation`)**:
+  - Computes amortization break-even queries: amortizes teacher generation and offline training compute against online per-window solve latency speedups.
+  - Evaluates ablation variants (full learned, no-drift, no-ROM priors, classical warm start) across accuracy, convergence rate, and solve runtime.
+
 ## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
 
 Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
@@ -8174,6 +8200,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11436 | [DIME-15] Train and qualify reusable matching initializers: InitializerCandidate, InitializerModelCard, BreakEvenEconomics, InitializerComparisonReport, validate_split_leakage, validate_checkpoint_identity, validate_synthetic_solver_outcome, interpolate_and_validate_torques, detect_out_of_distribution, monitor_learning_curve, verify_candidate_with_native_gate, compute_initializer_breakeven, compare_matching_initializers (#11436, refs #11421). |
 | 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
 | 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
 | 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |

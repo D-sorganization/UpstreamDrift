@@ -1,3 +1,44 @@
+# Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers — #11421 / #11436
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11436-learned-initializers`; PR: (to be created, `Closes #11436`, `Refs #11421`)
+- Governing issue: #11436 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-15] Train and qualify reusable matching initializers: implement leak-free dataset splitting across temporal windows/players/sessions, checkpoint identity and stale model validation, synthetic solver failure screening, physical torque interpolation with rate limits, out-of-distribution body geometry and contact context detection with fallback, learning curve monitoring with early stopping, independent native physics qualification gates, and break-even economic analysis amortizing teacher data generation and training compute against inference speedups.
+- Completed:
+  - `src/shared/python/estimation/dime_learned_initializers.py`:
+    - `TemporalWindow` & `validate_split_leakage`: Enforces disjoint temporal partitions across player identity, session identity, and window bounds. Fails closed with `PreconditionError` on overlapping player windows, cross-session leaks, or inverted timestamps ($t_{\text{end}} \le t_{\text{start}}$).
+    - `InitializerModelCard` & `validate_checkpoint_identity`: Validates model architecture, provider identity, state/control dimensions, coordinate conventions, and SHA-256 checkpoint hashes against target runtime configurations. Fails closed on stale checkpoints or model mismatches.
+    - `validate_synthetic_solver_outcome`: Screens synthetic solver candidate proposals labeled valid. Rejects non-finite values, unintegrated defect residual breaches, constraint tolerance violations, and divergence fail-closed.
+    - `interpolate_and_validate_torques`: Interpolates discrete control proposals with cubic Hermite splines. Enforces physical magnitude bounds ($\|\tau\| \le \tau_{\max}$) and torque rate limits ($\|\dot{\tau}\| \le \dot{\tau}_{\max}$); rejects unrealistic torque steps fail-closed.
+    - `detect_out_of_distribution` & `generate_learned_initialization`: Identifies OOD body geometry dimensions ($> 3\sigma$ Mahalanobis distance) and unmodeled contact modes. Automatically falls back to classical warm starts or cold solves when proposals are out-of-distribution.
+    - `monitor_learning_curve` & `EarlyStoppingStatus`: Monitors training and validation loss trajectories; automatically halts training upon plateaus or divergence, preventing wasted compute on unpromising initializers.
+    - `verify_candidate_with_native_gate`: Independent native physics dynamics provider evaluation and control channel boundary gate. Rejects candidate proposals exceeding control limits or diverging under forward simulation.
+    - `compute_initializer_breakeven` & `BreakEvenEconomics`: Computes break-even amortization threshold $N_{\text{break-even}} = \text{total\_offline\_cost} / (\text{baseline\_cost} - \text{accelerated\_cost})$ amortizing teacher generation and training compute against online per-window solve latency speedups.
+    - `compare_matching_initializers` & `run_initializer_ablation`: Evaluates ablation variants (full learned, no-drift, no-ROM priors, classical warm start) across convergence rate, residual accuracy, solve runtime, and physical plausibility.
+  - `src/shared/python/estimation/__init__.py`: Re-exported all public DIME-15 symbols in alphabetical order.
+  - `tests/unit/estimation/test_dime_learned_initializers.py`: 12 comprehensive behavioral unit tests:
+    - RED adjacent-window and player leakage detected fail-closed.
+    - RED stale checkpoint and model identity mismatch fails closed.
+    - RED synthetic solver failure labeled valid rejected.
+    - RED unrealistic torque interpolation and rate-of-change violations rejected.
+    - RED out-of-distribution body geometry or contact context rejected.
+    - GREEN held-out player, session, and geometry evaluation passes without leakage.
+    - GREEN calibrated OOD fallback to classical solve.
+    - GREEN candidate acceptance verified through independent native physics gate.
+    - GREEN ablation study evaluating drift features and ROM priors.
+    - GREEN break-even and training compute reporting.
+    - GREEN learning curve monitoring and early stopping on inconclusive curves.
+    - GREEN experiment bounds and comparative harness execution.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_learned_initializers.py`: 12 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 296 passed, 1 skipped.
+  - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines, file at 497 lines $\le 500$).
+  - `check_lod.py`: passed (clean no-growth scan, 0 violations).
+  - `check_file_size_budget.py`: passed (all tracked files within budget).
+  - `check_dry_duplication_gate.py`: passed (no unapproved duplicate growth).
+  - `check_error_handling_ratchet.py`: passed (counts at or below baseline).
+  - `divergence_inventory.py --check`: passed (inventory is current).
+  - `ruff check` & `ruff format --check`: passed across production and test code.
+
 # Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration — #11421 / #11435
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11435-profile-accelerate`; PR: (to be created, `Closes #11435`, `Refs #11421`)
