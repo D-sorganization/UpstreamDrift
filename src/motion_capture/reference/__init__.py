@@ -30,6 +30,22 @@ from .force_alignment import (
     series_to_viewport_payload_wrench,
     write_trace_forces,
 )
+from .comparison_3d import (
+    AnthropometryAblationResult,
+    Comparison3DLevel,
+    Comparison3DReceipt,
+    JointErrorSummary,
+    L1_3DComparisonResult,
+    L3ComparisonResult,
+    align_trajectories_rigid_fixed_scale,
+    build_3d_comparison_receipt,
+    compute_anthropometry_ablation,
+    compute_depth_and_image_plane_errors,
+    compute_l1_3d_envelope_comparison,
+    compute_l3_paired_comparison,
+    compute_mpjpe_and_pa_mpjpe,
+    validate_laterality,
+)
 
 __all__ = [
     "COMPARISON_EXPORT_SCHEMA",
@@ -61,4 +77,18 @@ __all__ = [
     "series_to_viewport_payload_wrench",
     "transform_reference_motion",
     "write_trace_forces",
+    "AnthropometryAblationResult",
+    "Comparison3DLevel",
+    "Comparison3DReceipt",
+    "JointErrorSummary",
+    "L1_3DComparisonResult",
+    "L3ComparisonResult",
+    "align_trajectories_rigid_fixed_scale",
+    "build_3d_comparison_receipt",
+    "compute_anthropometry_ablation",
+    "compute_depth_and_image_plane_errors",
+    "compute_l1_3d_envelope_comparison",
+    "compute_l3_paired_comparison",
+    "compute_mpjpe_and_pa_mpjpe",
+    "validate_laterality",
 ]
