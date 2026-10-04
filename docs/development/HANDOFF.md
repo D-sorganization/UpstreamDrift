@@ -34,6 +34,47 @@
   - `ruff format --check` and `ruff check`: passed.
 - Next steps: Confirm CI green on PR #11467 and await auto-merge.
 
+# Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors — #11421 / #11434
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11434-human-priors`; PR: #11468 (`Closes #11434`, `Refs #11421`)
+- Governing issue: #11434 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-13] Implement hierarchical human dimensions, versioned population priors, Bayesian posterior updates under sparse measurements, physical dimension bounds with height consistency, coupled joint range-of-motion constraints, and inertia realizability checks.
+- Completed:
+  - `src/shared/python/estimation/dime_human_priors.py`:
+    - `PopulationPriorVersion`: standardized prior datasets (`ANSUR2_V1`, `DE_LEVA_1996_V1`).
+    - `SubjectDimensionMeasurement`: individual subject measurements with declared standard deviation uncertainty.
+    - `PhysicalDimensionBounds`: bounds checking and longitudinal segment sum consistency against total measured height, rejecting contradictory measurements fail-closed with `PreconditionError`.
+    - `RangeOfMotionBound`: radian angle bounds, rejecting degree inputs fail-closed with `PreconditionError`.
+    - `CoupledRangeOfMotionPrior`: physiological coupling rules (notably scapulohumeral rhythm restricting arm rotation at high elevations).
+    - `InertiaRealizabilityCheck` & `validate_inertia_realizability`: verifies positive mass, positive eigenvalues, and classical triangle inequalities for principal moments of inertia ($I_{xx} + I_{yy} \ge I_{zz}$, etc.).
+    - `HierarchicalDimensionPrior`: multi-segment mean vector and factor-analysis covariance structure modeling correlated limb proportions (supports both symmetric and asymmetric limb models).
+    - `update_hierarchical_dimension_posterior`: Bayesian Gaussian posterior update using Joseph-form covariance calculation; unobserved variables retain broadened uncertainty without artificial shrinkage.
+    - `evaluate_human_prior_compatibility`: joint Mahalanobis distance evaluation, admitting unusual but correlated proportions (e.g. tall stature with proportional wingspan) while identifying physical outliers.
+    - `DimeHumanPriorReport`: structured receipt exporting modeling version, modeled dimensions, prior influence, and realizability flags.
+  - `src/shared/python/estimation/__init__.py`: re-exports all public DIME-13 human prior symbols in `__all__`.
+  - `tests/unit/estimation/test_dime_human_priors.py`: 11 behavioral tests covering all required RED and GREEN cases:
+    - RED contradictory measured height fails closed with `PreconditionError`.
+    - RED wrong degree/radian limits detected and rejected fail-closed.
+    - RED coupled shoulder restriction violation detected.
+    - RED asymmetric subject admits measured differences without forced symmetry lock.
+    - RED occluded limb uncertainty broadens rather than collapsing to misleading tight confidence.
+    - RED unrealizable inertia violating triangle inequalities is rejected.
+    - RED plausible unusual proportions (correlated tall + long wingspan) are admitted, while uncorrelated proportions are rejected.
+    - GREEN hierarchical Bayesian posterior matches analytical Kalman/Gaussian update.
+    - GREEN posterior covariance remains symmetric positive semi-definite.
+    - GREEN physically realizable inertia passes verification with positive eigenvalues.
+    - GREEN serialization roundtrip preserves prior model and measurements.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_human_priors.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 199 passed, 1 skipped (jax).
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_no_print_calls.py`: passed.
+  - `check_dry_duplication_gate.py`: passed (0 unapproved duplicate growth).
+  - `check_lod.py`: passed (clean no-growth scan, 0 violations).
+  - `ruff check` and `ruff format`: passed cleanly.
+- Next steps: Confirm CI green on PR #11468 and await auto-merge.
+
 # Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits — #11421 / #11428
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11428-mhe-arrival`; PR: #11428 (`Closes #11428`, `Refs #11421`)
