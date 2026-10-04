@@ -579,13 +579,18 @@ class Marker3DObservationFactor(DimeObservationFactor):
         covariance: float | np.ndarray = 1.0e-4,
         valid_mask: np.ndarray | None = None,
         held_out_mask: np.ndarray | None = None,
-        timing: ObservationTiming | None = None,
         robust_loss: RobustLossKernel | None = None,
-        attachments: Sequence[MarkerAttachment] | None = None,
-        marker_names: Sequence[str] | None = None,
-        detector_scores: np.ndarray | None = None,
-        kinematics_jacobian_fn: Callable[[np.ndarray], np.ndarray] | None = None,
+        **kwargs: Any,
     ) -> None:
+        timing: ObservationTiming | None = kwargs.pop("timing", None)
+        attachments: Sequence[MarkerAttachment] | None = kwargs.pop("attachments", None)
+        marker_names: Sequence[str] | None = kwargs.pop("marker_names", None)
+        detector_scores: np.ndarray | None = kwargs.pop("detector_scores", None)
+        kinematics_jacobian_fn: Callable[[np.ndarray], np.ndarray] | None = kwargs.pop(
+            "kinematics_jacobian_fn", None
+        )
+        if kwargs:
+            raise TypeError(f"Unexpected keyword arguments: {list(kwargs.keys())}")
         obs = np.asarray(observations_3d_m, dtype=np.float64)
         require(
             obs.ndim == 2 and obs.shape[1] == 3,
@@ -792,13 +797,18 @@ class Markerless2DObservationFactor(DimeObservationFactor):
         covariance: float | np.ndarray = 1.0,
         valid_mask: np.ndarray | None = None,
         held_out_mask: np.ndarray | None = None,
-        timing: ObservationTiming | None = None,
         robust_loss: RobustLossKernel | None = None,
-        keypoint_names: Sequence[str] | None = None,
-        detector_scores: np.ndarray | None = None,
-        kinematics_jacobian_fn: Callable[[np.ndarray], np.ndarray] | None = None,
-        strict_chirality: bool = True,
+        **kwargs: Any,
     ) -> None:
+        timing: ObservationTiming | None = kwargs.pop("timing", None)
+        keypoint_names: Sequence[str] | None = kwargs.pop("keypoint_names", None)
+        detector_scores: np.ndarray | None = kwargs.pop("detector_scores", None)
+        kinematics_jacobian_fn: Callable[[np.ndarray], np.ndarray] | None = kwargs.pop(
+            "kinematics_jacobian_fn", None
+        )
+        strict_chirality: bool = kwargs.pop("strict_chirality", True)
+        if kwargs:
+            raise TypeError(f"Unexpected keyword arguments: {list(kwargs.keys())}")
         obs = np.asarray(observations_2d_px, dtype=np.float64)
         require(
             obs.ndim == 2 and obs.shape[1] == 2,
