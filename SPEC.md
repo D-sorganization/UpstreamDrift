@@ -13,6 +13,30 @@ Specifies structured caching for drift evaluations, full steps, Jacobians, assem
 - **Mandatory Replay Enforcement & Granular Profiling (`accelerated_solve_dynamics_window`, `DimeCostBreakdown`)**:
   - Preserves identical provider semantics: independent continuous replay execution is strictly mandatory and cannot be skipped or short-circuited to fake speedup claims.
   - Records comprehensive cost breakdowns: drift count/time, full step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, and cold/warm p50/p95 speeds.
+## Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods (DIME-11, #11432)
+
+Specifies shared estimation reports, GUI strategy selection with graceful explicit unavailability states, distinct pointwise vs integrated ZTCF registration, and verifiable LaTeX methods documentation (#11421, #11432):
+- **Truthful Strategy Selection Service (`DimeStrategySelectionService`)**:
+  - Exposes estimation strategies (`IK`, `INVERSE_DYNAMICS`, `FORWARD_DYNAMICS`, `DIME_MHE`, `CONTINUOUS_REPLAY`, `NEURAL_ESTIMATOR`) with explicit capability status (`implemented`, `qualified`, `unavailable`).
+  - Graceful unavailability: uncertified or experimental strategies (e.g. neural estimator awaiting comparative study) return `status="unavailable"` with clear explanation reason rather than failing silently or substituting synthetic outputs.
+  - Fail-closed validation: offering or reporting an unqualified engine as validated (`require_validated=True`) raises `PreconditionError`.
+- **Output Report Contract (`DimeReportArtifact`)**:
+  - Supports `Full` and `Custom` report scopes with selectable channels and plot figures.
+  - Mandatory report sections include kinematics, selected net controls, ground reaction force provenance, drift vs controlled prediction, parameter and trajectory uncertainty, contact/replay residuals, video overlays, and unavailable-capability explanations.
+  - Preserves model digest, parameters hash, engine version, git commit, and execution seed across dictionary and JSON serialization (`to_dict` / `from_dict`, `to_json` / `from_json`).
+- **Distinct Pointwise vs Integrated ZTCF (`ZtcfRecord`)**:
+  - Pointwise ZTCF evaluates instantaneous unactuated acceleration: $a_{\mathrm{ztcf}}(t) = \mathbf{M}(\mathbf{q})^{-1} (-\mathbf{C}\mathbf{v} - \mathbf{g} + \mathbf{J}_c^T \boldsymbol{\lambda})$ in $[\mathrm{m/s^2}]$.
+  - Integrated ZTCF evaluates continuous forward-simulated zero-control drift displacement: $x_{\mathrm{ztcf}}(t) = x(t_0) + \int_{t_0}^t f_{\mathrm{ztcf}}(x(\tau))\, d\tau$ in $[\mathrm{m}]$.
+  - Both metrics are registered distinctly with separate arrays and physical semantics.
+- **Fail-Closed Invariant Enforcements**:
+  - IK run mislabeled as forward dynamics raises `PreconditionError`.
+  - Missing native GRF rendered or substituted as numeric zeros raises `PreconditionError`; missing kinetic channels must be typed `ReportForceProvenance.UNAVAILABLE` with `forces_n = None` and a recorded reason.
+  - Unqualified engine claimed as validated raises `PreconditionError`.
+  - Mismatched timestamp or frame counts between video overlays and kinematics time series raises `TimingViolationError`.
+- **LaTeX Methods Documentation Generator (`to_latex_summary`)**:
+  - Generates verifiable LaTeX documentation recording equations of motion, ZTCF definitions, canonical SI units, model/seed provenance, and explicit interpretation limitations.
+- **Headless GUI ViewModel (`DimeStrategySelectionViewModel`)**:
+  - Manages strategy selection, report scope, channel selections, and availability offscreen without unattended GUI launch.
 
 ## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
 
@@ -8134,10 +8158,11 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
+| 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
 | 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
 | 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
-| 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |

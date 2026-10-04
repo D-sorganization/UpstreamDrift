@@ -5158,6 +5158,41 @@ an isolated physical-signal chain needs none. Original failures are
 retained. A vector-compatible measurement configuration remains to be
 qualified, including its effect on the unmodified joint drive and dynamics.
 
+\section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
+\label{sec:dime_reports_methods}
+
+This section specifies the cross-engine reporting, strategy selection, and analytical output contracts formalized under DIME-11 (\#11432).
+
+\subsection{Strategy Selection and Explicit Graceful Unavailability}
+Estimator strategy selection coordinates across inverse kinematics, inverse dynamics, forward dynamics, moving horizon estimation (DIME MHE), continuous replay, and experimental learning-based estimators. Capability states are reported truthfully separating method existence from qualification:
+\begin{equation}
+\operatorname{Status}(\mathcal{S}) \in \{\mathtt{implemented}, \mathtt{qualified}, \mathtt{unavailable}\}
+\end{equation}
+Unqualified engines cannot be offered or reported as validated; any attempt to request or claim validation on an unqualified engine fails closed with a typed precondition error. Experimental strategies, including neural estimators, remain explicitly labeled as unavailable with transparent diagnostic justifications pending dedicated comparative studies.
+
+\subsection{Governing Dynamics, ZTCF Decomposition and Units}
+The constrained multibody equations of motion satisfy:
+\begin{equation}
+\mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{C}(\mathbf{q}, \mathbf{v})\mathbf{v} + \mathbf{g}(\mathbf{q}) = \mathbf{B}\mathbf{u} + \mathbf{J}_c^T \boldsymbol{\lambda}
+\end{equation}
+where $\mathbf{q} \in \mathbb{R}^{n_q}$ is generalized configuration, $\mathbf{v} \in \mathbb{R}^{n_v}$ is tangent velocity, $\mathbf{M}(\mathbf{q})$ is the mass matrix, $\mathbf{C}(\mathbf{q}, \mathbf{v})\mathbf{v}$ are Coriolis and centrifugal effects, $\mathbf{g}(\mathbf{q})$ represents gravitational generalized forces, $\mathbf{B}$ is the actuator selection map, $\mathbf{u}$ are net controls, and $\mathbf{J}_c^T \boldsymbol{\lambda}$ are admissible contact forces.
+
+Pointwise and integrated Zero-Torque Contact Free (ZTCF) drift are recorded distinctly:
+\begin{align}
+\mathbf{a}_{\mathrm{ztcf}}(t) &= \mathbf{M}(\mathbf{q})^{-1} \left( -\mathbf{C}(\mathbf{q},\mathbf{v})\mathbf{v} - \mathbf{g}(\mathbf{q}) + \mathbf{J}_c^T \boldsymbol{\lambda} \right) \quad [\mathrm{m/s^2}] \\[6pt]
+\mathbf{x}_{\mathrm{ztcf}}(t) &= \mathbf{x}(t_0) + \int_{t_0}^t \mathbf{f}_{\mathrm{ztcf}}(\mathbf{x}(\tau))\, d\tau \quad [\mathrm{m}]
+\end{align}
+All reported physical quantities adhere strictly to canonical SI units: length in metres ($\mathrm{m}$), angle in radians ($\mathrm{rad}$), time in seconds ($\mathrm{s}$), force in newtons ($\mathrm{N}$), and torque in newton-metres ($\mathrm{N\cdot m}$). Floating-base root coordinates (degrees of freedom 0 to 5) have strictly zero artificial actuator forces.
+
+\subsection{Ground Reaction Force Provenance and Typed Missingness}
+Ground reaction forces (GRF) maintain strict provenance tracking distinguishing directly measured, physically inferred, regularized, and unavailable data. In particular, missing native GRF is represented with typed unavailable missingness and is never silently rendered or substituted as numerical zeros.
+
+\subsection{Visual Overlays and Geometry Model}
+Visual overlays employ refined ellipsoid geometry (\texttt{GS3DX\_Human\_Refined\_Ellipsoid}) with rigorous timestamp and frame-index synchronization. Any timing drift or count discrepancy between video frames and estimation kinematics fails closed.
+
+\subsection{Limitations and Interpretation Boundaries}
+Kinematic agreement in inverse kinematics fitting does not demonstrate forward dynamic validity, neuromuscular plausibility, or physical ground support equilibrium. Reports must maintain clear distinctions between kinematic fits, inverse-dynamics effort attributions, and certified continuous forward simulations.
+
 \begin{thebibliography}{9}
 \bibitem{MathWorksPSUnits}
 MathWorks. \emph{Simulink-PS Converter: Unit Conversion and Checking}.
