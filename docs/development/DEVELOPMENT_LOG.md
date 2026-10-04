@@ -65,14 +65,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11428; #11422–#11426 closed; #11428 active)
-- **PR:** #11428
-- **Branch:** `feat/dime-11428-mhe-arrival`
-- **Paths:** `src/shared/python/estimation/moving_horizon.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_moving_horizon_estimator.py`
-- **Started:** 2026-10-03
-- **Last verified:** 2026-10-04: DIME-07 MHE arrival information and safe window commits implemented and validated across 11 behavioral tests in test_moving_horizon_estimator.py (RED/GREEN). Represents arrival factor in tangent coordinates as square-root quadratic factor with rank and linearization metadata; implements rank-revealing marginalization with tested gauge policy retaining rank deficiency without diagonal jitter; verifies mathematical equivalence with batch MAP on linear-Gaussian fixture within frozen tolerance (1e-5); enforces safe window commits rejecting nonfinite/unsuccessful solves without corrupting accepted state and retaining diagnostics; handles late/irregular samples and prevents double-counted measurements via AccumulationGuard; bounds memory to O(1) across long horizons. All 53 estimation tests pass.
+- **Issue:** #11421 (children #11422–#11430; #11422–#11428 closed; #11430 active)
+- **PR:** #11430
+- **Branch:** `feat/dime-09-offline-smoothing-11430`
+- **Paths:** `src/shared/python/estimation/dime_continuous_replay.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_continuous_replay.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04: DIME-09 offline smoothing and independent continuous replay implemented and validated across 11 behavioral tests in test_dime_continuous_replay.py (RED/GREEN). Implements execute_continuous_replay simulating forward dynamics once from saved initial state with saved controls and declared configuration; enforces reset_count == 1 and rejects per-frame state resets fail-closed; strictly rejects hidden target-force feedback and undeclared root wrenches on floating-base root DoFs (0..5); rejects mismatched model configuration; implements smooth_backward_trajectory with marginalized arrival information producing continuous smoothed trajectory without per-frame discontinuities while strictly forbidding reverse-time contact integration; serializes structured ReplayReceipt; computes independent replay metrics separated from solver cost; provides public adapters to Shadow Tracker RolloutRequest and Simscape ContinuousReplayTrajectory. All 209 estimation tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
-- **Next step:** Advance to DIME-08 (#11429) observable global calibration and consistent prior updates.
+- **Next step:** Merge PR #11430, advance to dependent qualification gates.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 

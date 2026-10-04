@@ -1,3 +1,120 @@
+# Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay — #11421 / #11430
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11430 (`Closes #11430`, `Refs #11421`)
+- Governing issue: #11430 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-09] Offline Smoothing and Independent Continuous Replay: execute single-shot forward integration from saved initial state with saved controls and declared configuration; fail closed on per-frame resets, hidden feedback, undeclared root wrenches, model changes, and missing controls; perform offline backward smoothing using marginalized arrival information without reverse-time contact integration; record structured ReplayReceipt; recompute independent replay metrics separated from solver cost; provide public adapters to Shadow Tracker and Simscape replay harnesses.
+- Completed:
+  - `src/shared/python/estimation/dime_continuous_replay.py`:
+    - `ContinuousReplayOptions`: declared controller (`open_loop_feedforward`, `pure_torque`), contact policy, model hash, and frozen tolerances (`NumericAcceptanceThresholds`).
+    - `ReplayReceipt`: versioned receipt (`dime-continuous-replay-receipt/1.0`) tracking reset count (strictly 1 for continuous replay), assistance channels, root wrench integrity, and cryptographic provenance (`DimeProvenanceRecord`).
+    - `IndependentReplayMetrics`: independent recomputed metrics (max/RMS drift, velocity drift, angular drift, alignment, reproducibility error, GRF vertical balance) separated from optimization cost.
+    - `ContinuousReplayResult`: structured result containing trajectory states, controls, receipt, independent metrics, physical acceptance status, and provenance.
+    - `execute_continuous_replay`: executes uninterrupted forward rollout from single initial state; fails closed on per-frame resets, hidden feedback, undeclared root wrenches on floating-base root DoFs (0..5), model hash mismatches, and missing control channels.
+    - `smooth_backward_trajectory`: performs backward trajectory smoothing using arrival information and quadratic smoothness without per-frame discontinuities; strictly forbids reverse-time contact integration fail-closed.
+    - `to_shadow_tracker_rollout_request`: maps replay parameters to Shadow Tracker's `RolloutRequest`.
+    - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-09 symbols.
+  - `src/shared/python/estimation/moving_horizon.py`: refactored Law of Demeter attribute chains.
+  - `tests/unit/estimation/test_dime_continuous_replay.py`: 11 comprehensive behavioral tests (RED & GREEN) covering:
+    - RED per-frame state resets fail closed (`PreconditionError`).
+    - RED hidden target-force feedback fails closed (`PreconditionError`).
+    - RED undeclared root wrench on floating-base root DoFs fails closed (`PreconditionError`).
+    - RED replay with changed model fails closed (`PreconditionError`).
+    - RED missing controls or shape mismatch fails closed (`PreconditionError`).
+    - RED backward inference calling reverse-time contact integration fails closed (`PreconditionError`).
+    - GREEN uninterrupted synthetic replay reproduces trajectory within frozen numerical tolerances (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
+    - GREEN native floating-base/contact fixture reproduces saved motion and vertical GRF static equilibrium within frozen tolerances.
+    - GREEN backward smoothing with marginalized arrival information produces continuous smoothed trajectory without per-frame discontinuities.
+    - GREEN structured ContinuousReplayResult contains trajectory, independent replay residuals, assistance telemetry, and provenance.
+    - GREEN public adapters connect cleanly to Shadow Tracker and Simscape replay harnesses.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_continuous_replay.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 209 passed, 1 skipped (jax).
+  - `python scripts/check_spec_paths.py`: passed.
+  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
+  - `python scripts/ci/check_lod.py src/shared/python/estimation --baseline scripts/ci/lod_baseline.txt`: passed (0 new violations, clean scan).
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to dependent qualification gates under epic #11421.
+
+# Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates — #11421 / #11429
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11429-global-calibration`; PR: #11467 (`Closes #11429`, `Refs #11421`)
+- Governing issue: #11429 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-08] Implement observable global calibration over sensor, kinematic, and dynamic parameters with physical gauge enforcement, SVD identifiability analysis, nullspace freezing, realizable physical inertia validation, and frozen-prior revision guards.
+- Completed:
+  - `src/shared/python/estimation/dime_global_calibration.py`:
+    - `PhysicalGauge`: reference anchors (`METRIC_SCALE`, `GRAVITY_FRAME`, `MASS_ANCHOR`, `MEASURED_FORCE_ANCHOR`).
+    - `PhysicalGaugePolicy`: validates required anchors for calibration candidates. Monocular camera scale ambiguity requires `METRIC_SCALE`; unmeasured contact dynamics mass/torque ambiguity requires `MASS_ANCHOR` or `MEASURED_FORCE_ANCHOR`. Missing anchors are rejected fail-closed with `PreconditionError`.
+    - `CalibrationParameter`: bounded parameter with name, subsystem kind, value, nominal value, bounds, and uncertainty sigma.
+    - `validate_physical_inertia`: enforces physical realizability on inertia tensors ($3 \times 3$ symmetry, positive definiteness, triangle inequalities on principal moments: $I_{xx} + I_{yy} \ge I_{zz}$, etc.).
+    - `GlobalCalibrationProblem`: optimization problem configuration with parameters, gauge policy, residual function, convergence tolerances, and frozen prior revision protection.
+    - `GlobalCalibrationResult`: structured receipt with parameter values, locked unobservable parameters, cost breakdown, inner loop latency, outer loop time, total time, parameter revision, and identifiability report. Full serialization and deserialization via `to_dict()` and `from_dict()`.
+    - `calibrate_global_parameters`: solves outer-loop calibration, performs SVD identifiability analysis via `probe_identifiability`, identifies unobservable nullspace directions, freezes nullspace parameters at nominal values (or fails closed per policy), optimizes free parameters with bounded nonlinear least squares, and separates inner-loop window estimator latency from outer-loop solver time.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-08 calibration symbols.
+  - `tests/unit/estimation/test_dime_global_calibration.py`: 9 comprehensive behavioral unit tests:
+    - RED monocular camera scale ambiguity rejected without metric scale anchor.
+    - RED mass/torque scaling ambiguity rejected without mass or measured force anchor.
+    - RED redundant joint angle offsets detected via SVD and flagged.
+    - RED non-physical inertia tensor violating triangle inequality or positive definiteness rejected.
+    - RED calibration changes beneath a frozen prior without explicit revision tag rejected.
+    - GREEN recovers planted marker perturbations under full multi-view anchor.
+    - GREEN flags rank-deficient parameter blocks and locks nullspace parameters at nominal values.
+    - GREEN latency accounting cleanly separates inner-loop window time from outer-loop calibration.
+    - GREEN structured result roundtrips losslessly through JSON-compatible dictionary serialization.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_global_calibration.py`: 9 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 197 passed, 1 skipped (jax).
+  - `divergence_inventory.py --check`: passed.
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_dry_duplication_gate.py`: passed.
+  - `check_error_handling_ratchet.py`: passed.
+  - `ruff format --check` and `ruff check`: passed.
+- Next steps: Confirm CI green on PR #11467 and await auto-merge.
+
+# Dynamics-Informed Mocap Matching: Hierarchical Human Dimensions and Coupled Range-of-Motion Priors — #11421 / #11434
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11434-human-priors`; PR: #11468 (`Closes #11434`, `Refs #11421`)
+- Governing issue: #11434 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-13] Implement hierarchical human dimensions, versioned population priors, Bayesian posterior updates under sparse measurements, physical dimension bounds with height consistency, coupled joint range-of-motion constraints, and inertia realizability checks.
+- Completed:
+  - `src/shared/python/estimation/dime_human_priors.py`:
+    - `PopulationPriorVersion`: standardized prior datasets (`ANSUR2_V1`, `DE_LEVA_1996_V1`).
+    - `SubjectDimensionMeasurement`: individual subject measurements with declared standard deviation uncertainty.
+    - `PhysicalDimensionBounds`: bounds checking and longitudinal segment sum consistency against total measured height, rejecting contradictory measurements fail-closed with `PreconditionError`.
+    - `RangeOfMotionBound`: radian angle bounds, rejecting degree inputs fail-closed with `PreconditionError`.
+    - `CoupledRangeOfMotionPrior`: physiological coupling rules (notably scapulohumeral rhythm restricting arm rotation at high elevations).
+    - `InertiaRealizabilityCheck` & `validate_inertia_realizability`: verifies positive mass, positive eigenvalues, and classical triangle inequalities for principal moments of inertia ($I_{xx} + I_{yy} \ge I_{zz}$, etc.).
+    - `HierarchicalDimensionPrior`: multi-segment mean vector and factor-analysis covariance structure modeling correlated limb proportions (supports both symmetric and asymmetric limb models).
+    - `update_hierarchical_dimension_posterior`: Bayesian Gaussian posterior update using Joseph-form covariance calculation; unobserved variables retain broadened uncertainty without artificial shrinkage.
+    - `evaluate_human_prior_compatibility`: joint Mahalanobis distance evaluation, admitting unusual but correlated proportions (e.g. tall stature with proportional wingspan) while identifying physical outliers.
+    - `DimeHumanPriorReport`: structured receipt exporting modeling version, modeled dimensions, prior influence, and realizability flags.
+  - `src/shared/python/estimation/__init__.py`: re-exports all public DIME-13 human prior symbols in `__all__`.
+  - `tests/unit/estimation/test_dime_human_priors.py`: 11 behavioral tests covering all required RED and GREEN cases:
+    - RED contradictory measured height fails closed with `PreconditionError`.
+    - RED wrong degree/radian limits detected and rejected fail-closed.
+    - RED coupled shoulder restriction violation detected.
+    - RED asymmetric subject admits measured differences without forced symmetry lock.
+    - RED occluded limb uncertainty broadens rather than collapsing to misleading tight confidence.
+    - RED unrealizable inertia violating triangle inequalities is rejected.
+    - RED plausible unusual proportions (correlated tall + long wingspan) are admitted, while uncorrelated proportions are rejected.
+    - GREEN hierarchical Bayesian posterior matches analytical Kalman/Gaussian update.
+    - GREEN posterior covariance remains symmetric positive semi-definite.
+    - GREEN physically realizable inertia passes verification with positive eigenvalues.
+    - GREEN serialization roundtrip preserves prior model and measurements.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_human_priors.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 199 passed, 1 skipped (jax).
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_no_print_calls.py`: passed.
+  - `check_dry_duplication_gate.py`: passed (0 unapproved duplicate growth).
+  - `check_lod.py`: passed (clean no-growth scan, 0 violations).
+  - `ruff check` and `ruff format`: passed cleanly.
+- Next steps: Confirm CI green on PR #11468 and await auto-merge.
+
 # Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits — #11421 / #11428
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11428-mhe-arrival`; PR: #11428 (`Closes #11428`, `Refs #11421`)
