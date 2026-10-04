@@ -25,6 +25,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.core.contracts import ensure, require
+from src.shared.python.estimation.drift_prediction import ControlBand
 
 _DOF = 2
 #: Duration of the default torque pulse [s]; the profile is zero outside it.
@@ -123,6 +124,20 @@ def smooth_swing_torque(
     s = t_arr / swing_time
     s_wrist = (s - wrist_delay) / (1.0 - wrist_delay)
     return np.stack([peak_shoulder * _bump(s), peak_wrist * _bump(s_wrist)], axis=1)
+
+
+def reference_control_band() -> ControlBand:
+    """Admissible torque band for the default benchmark swing.
+
+    Box +/-300 N*m (shoulder) and +/-100 N*m (wrist) comfortably contains the
+    200/40 N*m peaks; rate limits 4000/2000 N*m/s contain the profile's
+    fastest change while still enforcing continuity.
+    """
+    return ControlBand(
+        lower=np.array([-300.0, -100.0]),
+        upper=np.array([300.0, 100.0]),
+        rate_limit=np.array([4000.0, 2000.0]),
+    )
 
 
 def _default_provider() -> Any:

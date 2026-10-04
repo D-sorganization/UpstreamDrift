@@ -15,10 +15,7 @@ from src.shared.python.estimation.drift_anchored_matcher import (
     DriftAnchoredMatchResult,
     SampleLabel,
     WindowRecord,
-    match_kinematics,
 )
-from src.shared.python.estimation.drift_prediction import ControlBand
-from src.shared.python.estimation.local_torque_window import WindowOptions
 from src.shared.python.estimation.matching_quality import (
     MatchQualityReport,
     QualityThresholds,
@@ -26,12 +23,7 @@ from src.shared.python.estimation.matching_quality import (
     report_to_dict,
     summarize_match_quality,
 )
-from src.shared.python.estimation.drift_anchored_matcher import MatchOptions
-from src.shared.python.estimation.synthetic_swing import (
-    corrupt_observations,
-    simulate_swing,
-)
-from src.shared.python.simulation_backends import GolfModelParams, make_backend
+from src.shared.python.estimation.synthetic_swing import CorruptedObservation
 
 pytestmark = pytest.mark.unit
 
@@ -304,32 +296,16 @@ class TestSerialisation:
         assert SuspectInterval.__dataclass_params__.frozen
 
 
-BAND = ControlBand(
-    lower=np.array([-300.0, -100.0]),
-    upper=np.array([300.0, 100.0]),
-    rate_limit=np.array([4000.0, 2000.0]),
-)
-
-
-def test_synthetic_swing_occlusion_is_reported_as_gap() -> None:
-    noise = 0.002
-    truth = simulate_swing()
-    provider = make_backend("ode", GolfModelParams.default())
-    obs = corrupt_observations(truth, noise_std=noise, seed=11)
-    opts = MatchOptions(
-        window=WindowOptions(sigma_obs=noise, sigma_q0=noise, sigma_v0=3.0, n_knots=2),
-        window_steps=12,
-        stride=4,
-        carry_sigma_q=noise,
-        carry_sigma_v=0.2,
-    )
-    result = match_kinematics(provider, truth.t, obs.q_observed, obs.mask, BAND, opts)
+def test_synthetic_swing_occlusion_is_reported_as_gap(
+    dime_corrupted_match: tuple[CorruptedObservation, DriftAnchoredMatchResult],
+) -> None:
+    obs, result = dime_corrupted_match
     report = summarize_match_quality(result)
     occ = obs.occluded_indices
     assert occ.size > 0
     gaps = [i for i in report.suspect_intervals if i.label == "gap_filled"]
     assert any(i.start <= occ[0] and i.stop > occ[-1] for i in gaps)
-    covered = np.zeros(truth.t.size, dtype=bool)
+    covered = np.zeros(result.t.size, dtype=bool)
     for i in gaps:
         covered[i.start : i.stop] = True
     assert covered[occ].all()

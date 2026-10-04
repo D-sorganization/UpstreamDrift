@@ -11,54 +11,34 @@ import numpy as np
 import pytest
 
 from src.shared.python.estimation.drift_anchored_matcher import (
-    SampleLabel,
     MatchOptions,
+    SampleLabel,
     match_kinematics,
 )
-from src.shared.python.estimation.drift_prediction import ControlBand
 from src.shared.python.estimation.local_torque_window import WindowOptions
 from src.shared.python.estimation.synthetic_swing import (
     corrupt_observations,
-    simulate_swing,
+    reference_control_band,
 )
-from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
 pytestmark = pytest.mark.unit
 
-BAND = ControlBand(
-    lower=np.array([-300.0, -100.0]),
-    upper=np.array([300.0, 100.0]),
-    rate_limit=np.array([4000.0, 2000.0]),
-)
+BAND = reference_control_band()
 
 
-def _options(noise: float) -> MatchOptions:
-    return MatchOptions(
-        window=WindowOptions(sigma_obs=noise, sigma_q0=noise, sigma_v0=3.0, n_knots=2),
-        window_steps=12,
-        stride=4,
-        carry_sigma_q=noise,
-        carry_sigma_v=0.2,
-    )
+@pytest.fixture
+def provider(dime_provider):  # type: ignore[no-untyped-def]
+    return dime_provider
 
 
-@pytest.fixture(scope="module")
-def provider():  # type: ignore[no-untyped-def]
-    return make_backend("ode", GolfModelParams.default())
+@pytest.fixture
+def truth(dime_truth):  # type: ignore[no-untyped-def]
+    return dime_truth
 
 
-@pytest.fixture(scope="module")
-def truth():  # type: ignore[no-untyped-def]
-    return simulate_swing()
-
-
-@pytest.fixture(scope="module")
-def corrupted_match(provider, truth):  # type: ignore[no-untyped-def]
-    obs = corrupt_observations(truth, noise_std=0.002, seed=11)
-    result = match_kinematics(
-        provider, truth.t, obs.q_observed, obs.mask, BAND, _options(0.002)
-    )
-    return obs, result
+@pytest.fixture
+def corrupted_match(dime_corrupted_match):  # type: ignore[no-untyped-def]
+    return dime_corrupted_match
 
 
 def _rms(x: np.ndarray) -> float:
@@ -66,12 +46,14 @@ def _rms(x: np.ndarray) -> float:
 
 
 class TestCleanRecovery:
-    def test_low_noise_torque_profile_is_recovered(self, provider, truth) -> None:  # type: ignore[no-untyped-def]
+    def test_low_noise_torque_profile_is_recovered(
+        self, dime_options, provider, truth
+    ) -> None:  # type: ignore[no-untyped-def]
         obs = corrupt_observations(
             truth, noise_std=1e-4, outlier_fraction=0.0, occlusion=None, seed=1
         )
         res = match_kinematics(
-            provider, truth.t, obs.q_observed, obs.mask, BAND, _options(1e-4)
+            provider, truth.t, obs.q_observed, obs.mask, BAND, dime_options(1e-4)
         )
         err = res.tau[:-1] - truth.tau[:-1]
         peak = np.max(np.abs(truth.tau), axis=0)
@@ -79,7 +61,7 @@ class TestCleanRecovery:
         assert np.all(res.labels == SampleLabel.ACCEPTED)
 
     def test_replay_is_one_uninterrupted_forward_simulation(
-        self, provider, truth
+        self, dime_options, provider, truth
     ) -> None:  # type: ignore[no-untyped-def]
         from src.shared.python.estimation.local_torque_window import rollout
 
@@ -87,7 +69,7 @@ class TestCleanRecovery:
             truth, noise_std=1e-4, outlier_fraction=0.0, occlusion=None, seed=1
         )
         res = match_kinematics(
-            provider, truth.t, obs.q_observed, obs.mask, BAND, _options(1e-4)
+            provider, truth.t, obs.q_observed, obs.mask, BAND, dime_options(1e-4)
         )
         q_ref, _ = rollout(
             provider, res.q_replay[0], res.v_replay[0], res.tau[:-1], truth.dt
@@ -149,7 +131,7 @@ class TestCorruptedData:
 
 class TestUnexplainableSegments:
     def test_persistent_marker_slip_is_flagged_not_absorbed(
-        self, provider, truth
+        self, dime_options, provider, truth
     ) -> None:  # type: ignore[no-untyped-def]
         """A slowly slipping marker is not an isolated spike: it needs motion
         the bounded torques cannot produce, so the run is labelled suspect."""
@@ -159,7 +141,9 @@ class TestUnexplainableSegments:
         q = obs.q_observed.copy()
         seg = slice(120, 140)
         q[seg, 1] += 0.4 * np.sin(np.linspace(0.0, np.pi, 20)) ** 2  # 0.4 rad slip
-        res = match_kinematics(provider, truth.t, q, obs.mask, BAND, _options(0.002))
+        res = match_kinematics(
+            provider, truth.t, q, obs.mask, BAND, dime_options(0.002)
+        )
         flagged = np.isin(
             res.labels[seg], [SampleLabel.OUTLIER, SampleLabel.UNEXPLAINED]
         )
@@ -201,20 +185,22 @@ class TestContracts:
                 stride=5,
             )
 
-    def test_rejects_non_uniform_time(self, provider) -> None:  # type: ignore[no-untyped-def]
+    def test_rejects_non_uniform_time(self, dime_options, provider) -> None:  # type: ignore[no-untyped-def]
         t = np.array(
             [0.0, 0.002, 0.005, 0.006] + [0.006 + 0.002 * i for i in range(1, 30)]
         )
         q = np.zeros((t.size, 2))
         with pytest.raises(ValueError, match="uniform"):
             match_kinematics(
-                provider, t, q, np.ones(t.size, bool), BAND, _options(1e-3)
+                provider, t, q, np.ones(t.size, bool), BAND, dime_options(1e-3)
             )
 
-    def test_rejects_data_without_two_leading_observations(self, provider) -> None:  # type: ignore[no-untyped-def]
+    def test_rejects_data_without_two_leading_observations(
+        self, dime_options, provider
+    ) -> None:  # type: ignore[no-untyped-def]
         t = 0.002 * np.arange(40)
         q = np.zeros((40, 2))
         mask = np.ones(40, bool)
         mask[1] = False
         with pytest.raises(ValueError, match="initial"):
-            match_kinematics(provider, t, q, mask, BAND, _options(1e-3))
+            match_kinematics(provider, t, q, mask, BAND, dime_options(1e-3))

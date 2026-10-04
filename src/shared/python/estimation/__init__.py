@@ -71,6 +71,11 @@ from src.shared.python.estimation.multi_trial import (
     solve_multi_trial_map,
     stack_shared_parameter_jacobians,
 )
+from src.shared.python.estimation.replay_refinement import (
+    ReplayOptions,
+    ReplayRefinement,
+    refine_match_replay,
+)
 from src.shared.python.estimation.residuals import (
     ResidualFunction,
     RneaFunction,
@@ -127,6 +132,8 @@ __all__ = [
     "ParameterSpec",
     "ProjectionRecord",
     "QualityThresholds",
+    "ReplayOptions",
+    "ReplayRefinement",
     "ResidualFunction",
     "RneaFunction",
     "SampleLabel",
@@ -157,6 +164,7 @@ __all__ = [
     "project_pinhole",
     "project_world_point",
     "reachable_acceleration_interval",
+    "refine_match_replay",
     "report_to_dict",
     "reprojection_residual",
     "reprojection_residual_from_points",

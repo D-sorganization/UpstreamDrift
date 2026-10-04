@@ -128,6 +128,22 @@ software regression numbers, not population statistics.
 | Noise (sigma 2e-3 rad)                | 16.8 / 3.6        | 6e-4 vs 1.9e-3        | n/a                 | n/a           | 0.038                      |
 | Noise + 3 % spikes + 15-sample gap    | 18.8 / 3.9        | 9e-4 vs 2.4e-2        | 1.00 / 0.00         | 0.0024        | 0.069                      |
 
+**Whole-trajectory replay refinement** (`replay_refinement.refine_match_replay`,
+knot spacing selected by the per-coordinate discrepancy principle from
+candidates 32/20/12/8/4 steps) on the noise + spikes + gap case selects
+20-step (40 ms) linear knots and gives:
+
+| Stage                          | Uninterrupted replay RMS vs truth (rad) | Torque RMS (N m) |
+| ------------------------------ | --------------------------------------- | ---------------- |
+| Overlay torque, open loop      | 0.069                                   | 18.8 / 3.9       |
+| Refined, fixed 4-step knots    | 0.0008                                  | 26.0 / 5.3       |
+| Refined, pooled discrepancy    | (selects 32 steps)                      | 3.8 / 5.0        |
+| Refined, per-coordinate (used) | 0.0005                                  | 3.4 / 1.0        |
+
+Fixed fine knots fit below the noise floor and amplify torque noise; a pooled
+residual test accepts knots that under-fit the wrist release; the
+per-coordinate test rejects them (wrist mean squared residual 1.37 > 1.32).
+
 A 0.4 rad smooth marker slip over 20 samples is labelled `unexplained` rather
 than absorbed into torque. Runtime is about 14 s per match on one CPU core
 (pure Python finite differences; DIME-14 owns acceleration).
@@ -149,12 +165,15 @@ than absorbed into torque. Runtime is about 14 s per match on one CPU core
    inputs.
 4. **Open-loop replay drifts with noisy torque.** Per-window fits are
    locally consistent, but integrating 8 % torque noise for 0.4 s gives
-   0.04-0.07 rad replay error. A final whole-trajectory replay refinement
-   (single uninterrupted forward simulation, overlay as prior) is required
-   before a forward-dynamics match is claimed.
+   0.04-0.07 rad replay error. The whole-trajectory refinement (one
+   uninterrupted simulation, overlay as prior) removes it; it is the final
+   stage of the algorithm, not an optional polish.
 5. **Gaps must be bridged, not extrapolated.** Forward-only fallback through a
    15-sample occlusion walked 0.05 rad off and every later window gated out
    all data. Extending windows across the gap fixed both.
+6. **Torque resolution must be chosen from the data, per joint.** Knot
+   spacing selected by a per-coordinate discrepancy test avoids both noise
+   fitting (too fine) and hidden under-fitting of one joint (pooled test).
 
 ## Limits
 
@@ -164,6 +183,9 @@ than absorbed into torque. Runtime is about 14 s per match on one CPU core
   required.
 * The plausible band is a first-order envelope around the fit, not a certified
   reachable set; very wide bands over long windows linearise poorly.
+* The replay refinement does not enforce the torque-rate limit (the
+  overlay prior keeps it close); single shooting can become ill-conditioned
+  for long or chaotic horizons — multiple shooting is the fallback (DIME-09).
 * Carried arrival stds are fixed approximations, not marginalised arrival
   information (DIME-07).
 * No capture data, no native engine beyond the analytic ODE backend, and no
@@ -175,5 +197,7 @@ than absorbed into torque. Runtime is about 14 s per match on one CPU core
 MPLBACKEND=Agg python3 -m pytest tests/unit/estimation/test_dime_drift_prediction.py \
   tests/unit/estimation/test_dime_local_window.py \
   tests/unit/estimation/test_dime_drift_anchored_matcher.py \
+  tests/unit/estimation/test_dime_replay_refinement.py \
+  tests/unit/estimation/test_matching_quality.py \
   tests/unit/estimation/test_synthetic_swing.py -q --timeout=60
 ```

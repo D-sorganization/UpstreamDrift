@@ -7795,7 +7795,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-04 | #11425 | [DIME] ZTCF-anchored kinematic matching: drift + constant-torque prediction, rate-limited torque-band local windows with viable-band gating, recursive overlay assembly with gap bridging, per-sample outlier/unexplained/gap labels, quality report and synthetic swing benchmark (epic #11421; reference model only). |
+| 2026-10-04 | #11425 | [DIME] ZTCF-anchored kinematic matching: drift + constant-torque prediction, rate-limited torque-band local windows with viable-band gating, recursive overlay assembly with gap bridging, per-sample outlier/unexplained/gap labels, whole-trajectory replay refinement with per-coordinate discrepancy knot selection, quality report and synthetic swing benchmark (epic #11421; reference model only). |
 | 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
 | 2026-10-03 | #11441 | Settings page test no longer races the asynchronously loaded theme list: it waits for the Light option before selecting it, and the shared mock now resolves the theme list late so the ordering bug reproduces every run |

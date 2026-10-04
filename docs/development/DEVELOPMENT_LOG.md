@@ -24,11 +24,11 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Issue:** #11425 (DIME-04); also #11437 (DIME-16) and #11430 (DIME-09, replay); parent epic #11421
 - **PR:** not created
 - **Branch:** `claude/kinematic-matching-epic-7a7azh`
-- **Paths:** `src/shared/python/estimation/drift_prediction.py`, `src/shared/python/estimation/local_torque_window.py`, `src/shared/python/estimation/drift_anchored_matcher.py`, `src/shared/python/estimation/matching_quality.py`, `src/shared/python/estimation/synthetic_swing.py`, `docs/estimation/drift_anchored_matching.md`
+- **Paths:** `src/shared/python/estimation/drift_prediction.py`, `src/shared/python/estimation/local_torque_window.py`, `src/shared/python/estimation/drift_anchored_matcher.py`, `src/shared/python/estimation/matching_quality.py`, `src/shared/python/estimation/synthetic_swing.py`, `src/shared/python/estimation/replay_refinement.py`, `docs/estimation/drift_anchored_matching.md`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-04 at SELF — drift predictor, local torque-band window solver, recursive matcher with gap bridging and overlay, quality report and synthetic swing benchmark pass their unit suites on the ODE reference model; no capture, contact or native-engine qualification.
+- **Last verified:** 2026-10-04 at SELF — drift predictor, local torque-band window solver, recursive matcher with gap bridging and overlay, quality report, synthetic swing benchmark and whole-trajectory replay refinement (per-coordinate discrepancy knot selection) pass their unit suites on the ODE reference model; no capture, contact or native-engine qualification.
 - **Summary:** Uses the ZTCF drift (plus the previous torque held constant) as the next-step predictor, bounds deviations with a rate-limited admissible torque band, rules out observations outside the viable band, and assembles the torque profile as an overlay of small local solutions with per-sample labels (accepted/outlier/unexplained/gap_filled) and replay.
-- **Next step:** Add the whole-trajectory replay refinement so a single uninterrupted forward simulation matches the accepted observations.
+- **Next step:** Open the pull request for branch `claude/kinematic-matching-epic-7a7azh` and post the refined plan on epic #11421.
 
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
