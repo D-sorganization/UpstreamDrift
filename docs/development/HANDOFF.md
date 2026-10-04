@@ -1,6 +1,6 @@
 # Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers — #11421 / #11436
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11436-learned-initializers`; PR: (to be created, `Closes #11436`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11436-learned-initializers`; PR: #11500 (`Closes #11436`, `Refs #11421`)
 - Governing issue: #11436 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-15] Train and qualify reusable matching initializers: implement leak-free dataset splitting across temporal windows/players/sessions, checkpoint identity and stale model validation, synthetic solver failure screening, physical torque interpolation with rate limits, out-of-distribution body geometry and contact context detection with fallback, learning curve monitoring with early stopping, independent native physics qualification gates, and break-even economic analysis amortizing teacher data generation and training compute against inference speedups.
 - Completed:
