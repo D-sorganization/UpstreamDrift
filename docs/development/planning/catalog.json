@@ -3,6 +3,36 @@
   "repository": "D-sorganization/UpstreamDrift",
   "entries": [
     {
+      "id": "DV-11408",
+      "title": "OpenCap: Golf Accuracy Qualification Against a Marker Reference",
+      "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/11408",
+      "source_snapshot": "source-11408.json",
+      "record": "DV-11408.md",
+      "disposition": "split",
+      "kind": "physical-measurement",
+      "status": "deferred",
+      "rationale": "OpenCap kinematics accuracy on a ~0.25 s downswing with motion blur requires simultaneous physical marker-based reference capture; synthetic or unmeasured values cannot serve as empirical acceptance.",
+      "prerequisites": [
+        {
+          "name": "Simultaneous physical optical marker capture and multi-camera video of golf swings with calibrated time synchronization",
+          "evidence": null
+        },
+        {
+          "name": "Joint-angle error metric pipeline by swing phase (backswing, downswing, impact) with wrist and forearm breakout",
+          "evidence": null
+        }
+      ],
+      "acceptance": [
+        "Measured joint-angle error report by swing phase (backswing, downswing, impact) from real simultaneous capture, with wrist and forearm angles broken out.",
+        "Never report physical accuracy claims or synthetic values as empirical acceptance."
+      ],
+      "board": {
+        "decision": "pending",
+        "evidence": null
+      },
+      "activation_issue": null
+    },
+    {
       "id": "DV-10382",
       "title": "MS-108: Observable Golf Outputs, Impact Semantics and Accuracy Budgets",
       "source_issue": "https://github.com/D-sorganization/UpstreamDrift/issues/10382",
