@@ -31,7 +31,7 @@ from src.shared.python.version_info import get_repo_root, read_git_commit
 from .necromatcher_native_worker import execute_native_research_worker
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
-from .project_store import validate_workspace_id
+from .project_store import DatasetMetadata, validate_workspace_id
 from .necromatcher_shaft_evidence import BoundShaftEvidence, bind_fit_shaft_evidence
 from src.shared.python.motion_matching.historical_fit.shaft_observations import (
     ShaftAxisEvidence,
@@ -63,7 +63,7 @@ _BLOCKERS = (
 
 
 if TYPE_CHECKING:
-    from .necromatcher_source_scope import SourceFitScope
+    from .necromatcher_source_scope import BoundSourceFitScope, SourceFitScope
 
 
 def _digest(value: Any) -> str:
@@ -303,6 +303,29 @@ def _verify_scope_request(
             validate_scope_payload(library, candidate, source)
 
 
+def _verify_candidate_reads(
+    library: NecromatcherLibrary, request: dict[str, Any], candidate: dict[str, Any]
+) -> None:
+    """Close fresh input authentication before candidate or fit publication."""
+    with library.authenticated_read():
+        if (
+            library.load_asset(request["source_fit_id"]).metadata["hash"]
+            != request["source_fit_hash"]
+        ):
+            raise ValueError("Warm-start fit changed during execution")
+        recipe = request.get("shaft_images")
+        if recipe is not None:
+            _verify_shaft_request(
+                library, library.load_fit(request["source_fit_id"]), recipe
+            )
+            if (
+                candidate.get("evidence", {}).get("shaft_axis", {}).get("recipe")
+                != recipe
+            ):
+                raise ValueError("Worker shaft recipe differs from admitted request")
+        _verify_scope_request(library, request, candidate)
+
+
 def _refit_work(
     library: NecromatcherLibrary,
     options: NativeRefitOptions,
@@ -311,8 +334,7 @@ def _refit_work(
     session_id: str,
 ) -> Callable[[Callable[[JobProgress], None], Callable[[], bool]], MatchingWorkOutcome]:
     run_root = spec.run_root
-    source_fit_id, new_fit_id = request["source_fit_id"], request["new_fit_id"]
-    shaft_recipe = request.get("shaft_images")
+    new_fit_id = request["new_fit_id"]
 
     def execute(
         progress: Callable[[JobProgress], None], cancelled: Callable[[], bool]
@@ -343,30 +365,12 @@ def _refit_work(
             raise JobCancelledError("Native refit cancelled before publication")
         if fit_execution_stamp()["source_sha256"] != spec.hashes.solver_hash:
             raise ValueError("Fit implementation changed during execution")
-        if (
-            library.load_asset(source_fit_id).metadata["hash"]
-            != request["source_fit_hash"]
-        ):
-            raise ValueError("Warm-start fit changed during execution")
-        if shaft_recipe is not None:
-            _verify_shaft_request(
-                library, library.load_fit(source_fit_id), shaft_recipe
-            )
-            if (
-                response["fit"].get("evidence", {}).get("shaft_axis", {}).get("recipe")
-                != shaft_recipe
-            ):
-                raise ValueError("Worker shaft recipe differs from admitted request")
-        _verify_scope_request(library, request, response["fit"])
+        _verify_candidate_reads(library, request, response["fit"])
         candidate = run_root / "candidate.json"
         atomic_write_json(candidate, response["fit"])
 
         def publish() -> None:
-            _verify_scope_request(library, request, response["fit"])
-            if shaft_recipe is not None:
-                _verify_shaft_request(
-                    library, library.load_fit(source_fit_id), shaft_recipe
-                )
+            _verify_candidate_reads(library, request, response["fit"])
             library.add_fit(new_fit_id, session_id, candidate)
             progress(
                 JobProgress(
@@ -405,6 +409,61 @@ def _refit_work(
     return work
 
 
+def _admit_refit_inputs(
+    library: NecromatcherLibrary,
+    source_fit_id: str,
+    new_fit_id: str,
+    options: NativeRefitOptions,
+    shaft_evidence: ShaftAxisEvidence | None,
+    source_scope: SourceFitScope | None,
+) -> tuple[
+    dict[str, Any], DatasetMetadata, BoundSourceFitScope | None, dict[str, Any] | None
+]:
+    """Authenticate a read group completely before scheduling or request writes."""
+    from .necromatcher_fit import admit_refit_scope
+
+    with library.authenticated_read():
+        source = library.load_fit(source_fit_id)
+        asset = library.load_asset(source_fit_id)
+        if new_fit_id in {item.dataset_id for item in library.assets(asset.session_id)}:
+            raise ValueError("Refit requires a new immutable fit identity")
+        if len(options.coordinate_scales) != len(source["coordinate_order"]):
+            raise ValueError("Refit scales must match bound native coordinate order")
+        if any(index not in source["frame_indices"] for index in options.frame_indices):
+            raise ValueError("Warm-start samples must exist in the source fit")
+        bound_scope = admit_refit_scope(
+            library,
+            source,
+            options.frame_indices,
+            options.config,
+            shaft_evidence,
+            source_scope,
+        )
+        if (
+            bound_scope is not None
+            and options.initialization_source == "preserved_spline"
+        ):
+            from .necromatcher_spline import preserved_fit_spline
+
+            start = preserved_fit_spline(source)
+            domain = bound_scope.selected_domain(options.frame_indices)
+            if start is None or (start.knot_times[0], start.knot_times[-1]) != (
+                float(domain.first_pts),
+                float(domain.last_pts),
+            ):
+                raise ValueError(
+                    "Scoped preserved spline requires qualified exact interval restriction"
+                )
+        shaft_recipe = (
+            _queue_shaft_recipe(
+                library, source, shaft_evidence, options.unknown_visibility_weight
+            )
+            if shaft_evidence is not None
+            else None
+        )
+    return source, asset, bound_scope, shaft_recipe
+
+
 def start_native_refit(
     library: NecromatcherLibrary,
     source_fit_id: str,
@@ -420,43 +479,11 @@ def start_native_refit(
     cancellation, changed inputs/code or failed computation prevent publication.
     """
     validate_workspace_id(new_fit_id, "new_fit_id")
-    source = library.load_fit(source_fit_id)
-    asset = library.load_asset(source_fit_id)
-    if new_fit_id in {item.dataset_id for item in library.assets(asset.session_id)}:
-        raise ValueError("Refit requires a new immutable fit identity")
-    if len(options.coordinate_scales) != len(source["coordinate_order"]):
-        raise ValueError("Refit scales must match bound native coordinate order")
-    if any(index not in source["frame_indices"] for index in options.frame_indices):
-        raise ValueError("Warm-start samples must exist in the source fit")
-    from .necromatcher_fit import admit_refit_scope, scope_binding_record
-
-    bound_scope = admit_refit_scope(
-        library,
-        source,
-        options.frame_indices,
-        options.config,
-        shaft_evidence,
-        source_scope,
+    source, asset, bound_scope, shaft_recipe = _admit_refit_inputs(
+        library, source_fit_id, new_fit_id, options, shaft_evidence, source_scope
     )
-    if bound_scope is not None and options.initialization_source == "preserved_spline":
-        from .necromatcher_spline import preserved_fit_spline
+    from .necromatcher_fit import scope_binding_record
 
-        start = preserved_fit_spline(source)
-        domain = bound_scope.selected_domain(options.frame_indices)
-        if start is None or (start.knot_times[0], start.knot_times[-1]) != (
-            float(domain.first_pts),
-            float(domain.last_pts),
-        ):
-            raise ValueError(
-                "Scoped preserved spline requires qualified exact interval restriction"
-            )
-    shaft_recipe = (
-        _queue_shaft_recipe(
-            library, source, shaft_evidence, options.unknown_visibility_weight
-        )
-        if shaft_evidence is not None
-        else None
-    )
     run_root = library.root / "runs" / uuid4().hex
     queued_stamp = fit_execution_stamp()
     request = {

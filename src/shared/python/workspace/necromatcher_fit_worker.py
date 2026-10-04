@@ -215,6 +215,115 @@ def _load_refit_binding(
     return binding, bundle
 
 
+def _prepare_refit_inputs(
+    library: NecromatcherLibrary, request: dict[str, Any]
+) -> tuple[
+    NativeFitBinding,
+    AdditionalImageResiduals | None,
+    ImageFitInputs,
+    ImageSplineStart | None,
+    dict[str, Any],
+    dict[str, Any] | None,
+]:
+    """Close bounded source authentication before any fitting or initialization."""
+    from .necromatcher_fit_jobs import _verify_scope_request
+
+    with library.authenticated_read():
+        _verify_scope_request(library, request)
+        binding, additional_images = _load_refit_binding(library, request)
+        source = binding.fit
+        options = request["options"]
+        operation = options.get("operation", "fit")
+        config = ImageFitConfig.from_record(options["config"])
+        ranges = _range_provenance(binding, config, operation)
+        indices = tuple(options["frame_indices"])
+        # Reuse native XML, camera and attachment validation from the review path.
+        binding.project(indices[0])
+        camera, attachments = binding.review_inputs()
+        samples = np.asarray(source["q"])[
+            [source["frame_indices"].index(i) for i in indices]
+        ]
+        with CaptureReview(library, source["capture_id"]) as review:
+            contact_binding = contact_schedule_binding(config, source, review)
+            evidence = read_capture_evidence(
+                review,
+                tuple(attachments),
+                indices,
+                unknown_visibility_weight=options["unknown_visibility_weight"],
+            )
+            inputs, initial_spline = _worker_inputs(binding, options, evidence, samples)
+    return binding, additional_images, inputs, initial_spline, ranges, contact_binding
+
+
+def _finish_refit(
+    library: NecromatcherLibrary,
+    request: dict[str, Any],
+    binding: NativeFitBinding,
+    additional_images: AdditionalImageResiduals | None,
+    result: ImageFitResult,
+    stamp: dict[str, Any],
+    ranges: dict[str, Any],
+    contact_binding: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Freshly authenticate output dependencies, closing before result delivery."""
+    from .necromatcher_fit_jobs import _verify_scope_request
+
+    source, options = binding.fit, request["options"]
+    indices = tuple(options["frame_indices"])
+    native = binding.plant
+    camera, attachments = binding.review_inputs()
+    with library.authenticated_read():
+        if (
+            library.load_asset(request["source_fit_id"]).metadata["hash"]
+            != request["source_fit_hash"]
+        ):
+            raise ValueError("Warm-start fit differs before result delivery")
+        with CaptureReview(library, source["capture_id"]) as review:
+            dense_indices = (
+                tuple(range(indices[0], indices[-1] + 1))
+                if "source_scope" in request
+                else tuple(
+                    i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
+                )
+            )
+            dense = read_capture_evidence(
+                review,
+                tuple(attachments),
+                dense_indices,
+                unknown_visibility_weight=options["unknown_visibility_weight"],
+            )
+            q = result.evaluate_source_times(dense.source_times)
+            frames = [review.frame(i)["frame"] for i in dense_indices]
+        closure = np.array([native.closure_residuals(pose) for pose in q])
+        if additional_images is not None:
+            term = additional_images.terms[0]
+            if not isinstance(term, ShaftAxisResidualTerm):
+                raise ValueError("Native shaft worker requires a typed shaft term")
+            request = {**request, "shaft_axis": term.axis.to_record()}
+            _verify_shaft_request(
+                library,
+                library.load_fit(request["source_fit_id"]),
+                request["shaft_images"],
+            )
+        output = _build_fit_payload(
+            request,
+            source,
+            result,
+            (dense_indices, frames, q),
+            stamp,
+            float(np.max(np.linalg.norm(closure, axis=1))),
+            ranges,
+        )
+        _verify_scope_request(library, request, output)
+        output["evidence"]["original_fit"].update(
+            _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
+        )
+        output["provenance"]["coordinate_bounds_provenance"] = ranges
+        if contact_binding is not None:
+            output["provenance"]["contact_schedule_binding"] = contact_binding
+    return output
+
+
 def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
     """Compute a source-clock fit; never declare dynamics qualification."""
     stamp = fit_execution_stamp()
@@ -227,90 +336,40 @@ def compute_native_refit(request: dict[str, Any]) -> dict[str, Any]:
             "Native worker implementation or runtime differs from launch stamp"
         )
     library = NecromatcherLibrary(request["library_root"])
-    identity = request["source_fit_id"]
-    if library.load_asset(identity).metadata["hash"] != request["source_fit_hash"]:
+    if (
+        library.load_asset(request["source_fit_id"]).metadata["hash"]
+        != request["source_fit_hash"]
+    ):
         raise ValueError("Warm-start fit differs from launch identity")
-    from .necromatcher_fit_jobs import _verify_scope_request
-
-    _verify_scope_request(library, request)
-    binding, additional_images = _load_refit_binding(library, request)
-    source = binding.fit
+    binding, additional_images, inputs, initial_spline, ranges, contact_binding = (
+        _prepare_refit_inputs(library, request)
+    )
     options = request["options"]
-    operation = options.get("operation", "fit")
-    config = ImageFitConfig.from_record(options["config"])
-    ranges = _range_provenance(binding, config, operation)
-    indices = tuple(options["frame_indices"])
-    # Reuse native XML, camera and attachment validation from the review path.
-    binding.project(indices[0])
-    original = source["evidence"]["original_fit"]
-    native = binding.plant
     camera, attachments = binding.review_inputs()
-    samples = np.asarray(source["q"])[
-        [source["frame_indices"].index(i) for i in indices]
-    ]
-    with CaptureReview(library, source["capture_id"]) as review:
-        contact_binding = contact_schedule_binding(config, source, review)
-        evidence = read_capture_evidence(
-            review,
-            tuple(attachments),
-            indices,
-            unknown_visibility_weight=options["unknown_visibility_weight"],
-        )
-        inputs, initial_spline = _worker_inputs(binding, options, evidence, samples)
-        arguments = (
-            operation,
-            native,
-            attachments,
-            camera,
-            inputs,
-            config,
-            initial_spline,
-        )
-        result = (
-            _compute_operation(*arguments, additional_images)
-            if additional_images is not None
-            else _compute_operation(*arguments)
-        )
-        dense_indices = (
-            tuple(range(indices[0], indices[-1] + 1))
-            if "source_scope" in request
-            else tuple(
-                i for i in source["frame_indices"] if indices[0] <= i <= indices[-1]
-            )
-        )
-        dense = read_capture_evidence(
-            review,
-            tuple(attachments),
-            dense_indices,
-            unknown_visibility_weight=options["unknown_visibility_weight"],
-        )
-        q = result.evaluate_source_times(dense.source_times)
-        frames = [review.frame(i)["frame"] for i in dense_indices]
-    closure = np.array([native.closure_residuals(pose) for pose in q])
-    if additional_images is not None:
-        term = additional_images.terms[0]
-        if not isinstance(term, ShaftAxisResidualTerm):
-            raise ValueError("Native shaft worker requires a typed shaft term")
-        request = {**request, "shaft_axis": term.axis.to_record()}
-        _verify_shaft_request(
-            library, library.load_fit(identity), request["shaft_images"]
-        )
-    output = _build_fit_payload(
+    arguments = (
+        options.get("operation", "fit"),
+        binding.plant,
+        attachments,
+        camera,
+        inputs,
+        ImageFitConfig.from_record(options["config"]),
+        initial_spline,
+    )
+    result = (
+        _compute_operation(*arguments, additional_images)
+        if additional_images is not None
+        else _compute_operation(*arguments)
+    )
+    output = _finish_refit(
+        library,
         request,
-        source,
+        binding,
+        additional_images,
         result,
-        (dense_indices, frames, q),
         stamp,
-        float(np.max(np.linalg.norm(closure, axis=1))),
         ranges,
+        contact_binding,
     )
-    _verify_scope_request(library, request, output)
-    output["evidence"]["original_fit"].update(
-        _dense_reprojection_metrics(native, camera, attachments, dense, q, indices)
-    )
-    output["provenance"]["coordinate_bounds_provenance"] = ranges
-    if contact_binding is not None:
-        output["provenance"]["contact_schedule_binding"] = contact_binding
     if fit_execution_stamp()["source_sha256"] != expected["source_sha256"]:
         raise ValueError("Native worker implementation changed during execution")
     return output

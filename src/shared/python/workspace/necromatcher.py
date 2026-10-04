@@ -362,7 +362,8 @@ class NecromatcherLibrary:
         """Preserve source-bound research samples without certifying dynamics."""
         with self._write_lock():
             source_hash = compute_file_sha256(source)
-            payload = read_kinematic_fit(source, self, swing_id)
+            with self.authenticated_read():
+                payload = read_kinematic_fit(source, self, swing_id)
             return self._save_asset(
                 fit_id,
                 swing_id,

@@ -276,7 +276,12 @@ new full video, ControlTower delivery or scientific qualification is claimed.
 Tiger remains restricted to [0,191); exact physical release is unmeasured and
 Hogan is unchanged.
 
-Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. Queue/worker/publication integration and historical profiling remain pending; no 300-second retry or speedup is claimed. Accepted artifacts at 0143 are unchanged.
+Performance child #11445 now implements public authenticated_read: one canonical full PNG/BGR/clock validation per capture per operation, fresh complete file hashes and metadata checks on reuse/close, cross-library/thread/task and nested-context rejection, immutable DTOs and failure reset. Final root validation passed 93 cases across two lanes (86 plus seven public-owner/fingerprint cases; one Windows symlink-privilege skip and inherited import warnings). Canonical public SHA256 validation is reused, and execution fingerprints cover shadow_tracker; this API checkpoint is separate from the accepted artifacts at 0143. This integration checkpoint implements short authentication boundaries for queue admission, worker setup and fresh output checks, candidate/delayed publication and storage. Contexts close before scheduling, computation, delivery or persistence; delayed publication closes before add_fit, which uses its own fresh validation context. Root passed 188 distinct cases (185 SDK-free plus three native temporary-fixture cases; one Windows symlink-privilege skip, three native cases deselected in the SDK-free lane and nine inherited warnings). Historical performance remains unmeasured and profiling pending; no strict 300-second retry, speedup or new ControlTower delivery is authorized. Accepted artifacts at 0143 are unchanged.
+
+The root integration acceptance receipt is
+`Repositories/Temp/authenticated-refit-integration-root-review-v2/root-acceptance.json`,
+SHA256 `13710191499ca3c558f5a554fba92e5f69aa908a8216312d711d9dc1f1b55e1d`.
+Native regressions used temporary fixtures; no historical Library operation ran.
 
 Methods V4 is the latest compiled supplement in the existing Desktop report
 folder. Root reviewed all eleven pages, including three selected seed figures.

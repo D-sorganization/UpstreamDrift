@@ -1,5 +1,6 @@
 """Authored starts are separate research versions, not optimizer successes."""
 
+from contextlib import nullcontext
 from dataclasses import dataclass
 from types import SimpleNamespace
 
@@ -381,6 +382,7 @@ def _scheduled_worker_fixture(monkeypatch):
         worker,
         "NecromatcherLibrary",
         lambda root: SimpleNamespace(
+            authenticated_read=nullcontext,
             load_fit=lambda identity: binding.fit,
             load_asset=lambda identity: SimpleNamespace(
                 metadata={"hash": "parent-hash"}

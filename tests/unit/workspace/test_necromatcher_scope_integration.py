@@ -155,6 +155,8 @@ def test_schedule_outside_selected_domain_is_rejected(tmp_path, monkeypatch) -> 
 
 
 def test_worker_scope_rejects_before_native_binding(tmp_path, monkeypatch) -> None:
+    from contextlib import nullcontext
+
     from src.shared.python.workspace import necromatcher_fit_worker as worker
 
     identity, scope = scoped(tmp_path, end=2)
@@ -174,6 +176,7 @@ def test_worker_scope_rejects_before_native_binding(tmp_path, monkeypatch) -> No
         lambda: {"source_sha256": "s", "runtime_sha256": "r"},
     )
     library = SimpleNamespace(
+        authenticated_read=nullcontext,
         load_asset=lambda *_: SimpleNamespace(metadata={"hash": "h"}),
         load_fit=lambda *_: source,
         load_source_scope_review=lambda _: scope,
