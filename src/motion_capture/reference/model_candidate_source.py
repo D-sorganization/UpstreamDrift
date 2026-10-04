@@ -129,7 +129,6 @@ def compare_candidate_2d(
     input_hashes: Mapping[str, str],
     marker_projection_px: npt.ArrayLike | None = None,
     visibilities: npt.ArrayLike | None = None,
-    landmark_names: Sequence[str] | None = None,
     body_height_px: float | None = None,
 ) -> Comparison2DReceipt:
     """Compare a projected model candidate with video landmarks (L2 receipt).
@@ -147,9 +146,8 @@ def compare_candidate_2d(
         raise ValueError(
             f"video_landmarks_px shape {video.shape} must match candidate (T, K, 2)"
         )
-    names = tuple(landmark_names) if landmark_names else source.labels
     common: dict[str, Any] = {
-        "landmark_names": names,
+        "landmark_names": source.labels,
         "visibilities": visibilities,
         "body_height_px": body_height_px,
     }
