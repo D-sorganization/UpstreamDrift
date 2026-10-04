@@ -9,6 +9,8 @@
 
 # Active: Necromatcher Source-Bound Shaft Continuation — #11318
 
+- Authored replay impact SELF (#11464): public typed extraction preserves native Jv, angular rate and exact parent identities; the declared-flight consumer preserves full vectors. Root 83 app/impact Python cases pass (38 extraction/impact/viewer subset). [Procedure](necromatcher-replay-impact.md) records assumptions, authored clock and remaining receipt/app/qualification acceptance. No historical native replay or Library write.
+
 - App checkpoint SELF (#11414/#11450): both hosts expose strict lossless restriction and review exact saved source indices, including sparse domains. Root 45 Python/45 React cases pass; no new historical run. [Procedure](necromatcher-app-restriction-and-frame-review.md). Current Tiger scope is [0,191), Hogan unchanged; qualified matching and remote CI remain open.
 
 - Branch: `feat/necromatcher-native-fit-11235`; historical PR #11240 merged; continuation PR #11359 published at dfdfeb3ad0bddaa05303ec4f385d2d4fc42e5ed0, normal push hooks passed. Parent #11232; Tiger #11226; Hogan #11229. Full goal remains active.

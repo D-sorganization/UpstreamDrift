@@ -45,6 +45,8 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ### DL-#11235 · Necromatcher Native Fit
 
+- **Authored Replay Impact Checkpoint:** SELF progresses #11464 with authenticated explicit head/face/sample extraction and full-vector declared-flight handoff. Root 83 integrated app/impact cases pass; configured mypy/Ruff/format pass. [Procedure](necromatcher-replay-impact.md). Portable receipt persistence and normal app action remain open; authored seconds are not calibrated historical time and no historical replay or qualification is claimed.
+
 - **App Boundary Checkpoint:** SELF progresses #11450/#11414 with explicit strict lossless seeds and exact ordered saved-frame review in native/React hosts. Root 45 Python/45 UI cases pass; edited domains survive mode changes, excluded/sparse indices are covered, original source-only browsing remains available. [Procedure](necromatcher-app-restriction-and-frame-review.md). Historical results and Methods V8 remain unchanged; no physical qualification or CI-green claim.
 
 - **State:** in_progress

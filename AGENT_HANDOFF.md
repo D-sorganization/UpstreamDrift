@@ -1,5 +1,7 @@
 # Active: Necromatcher Reviewed Fitting Scope — #11414
 
+- Replay impact SELF (#11464): authenticated public extraction uses explicit native point/face assumptions, Jv and rigid-triad angular velocity on authored seconds. Declared flight vectors reach the actual impact solver unchanged. Root combined app/impact cohort: 83 Python cases; extraction/impact/viewer subset: 38. [Procedure](docs/development/necromatcher-replay-impact.md). Portable receipt persistence, normal app action and historical qualification remain open; no historical replay executed.
+
 - App checkpoint SELF: explicit lossless restriction mode and exact saved-frame review now work in both hosts; root 45 Python/45 React cases pass. Edited choices survive mode switching; excluded Tiger frames 191–209 never reach fitted projection. [App Procedure](docs/development/necromatcher-app-restriction-and-frame-review.md). Historical V22 results are unchanged; CI remains unverified.
 
 - Branch: `feat/necromatcher-native-fit-11235`; PR #11359 remains open. Published scope checkpoint `3a1a6a8e428afffc20346d7a32044b4c602d4c1b`; upload responsiveness follow-up SELF.

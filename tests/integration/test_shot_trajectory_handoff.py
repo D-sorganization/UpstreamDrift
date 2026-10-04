@@ -78,6 +78,111 @@ from src.shared.python.workspace.trajectory_handoff import (
 pytestmark = pytest.mark.integration
 
 
+def test_declared_flight_state_reaches_actual_impact_solver_unchanged(
+    tmp_path: Path,
+) -> None:
+    """Authored replay vectors must survive the consumer, not become speed/loft."""
+    normal = np.array([0.98, 0.08, 0.16])
+    normal /= np.linalg.norm(normal)
+    swing = SwingState(
+        clubhead_velocity=np.array([42.0, 4.0, -3.0]),
+        clubhead_angular_velocity=np.array([1.5, -2.5, 3.5]),
+        clubhead_orientation=normal,
+        engine_name="necromatcher_authored_replay",
+        metadata={
+            "frame_id": FLIGHT_FRAME_ID,
+            "replay_id": "recorded-replay",
+            "physical_source_qualified": False,
+        },
+    )
+    expected = SwingBallFlightPipeline().run(swing)
+    coordinator = ShotTrajectoryHandoffCoordinator(repo_root=tmp_path)
+    with patch.object(
+        coordinator,
+        "get_swing_state",
+        side_effect=AssertionError("A stored replay must not run a reference provider"),
+    ):
+        result, path = coordinator.simulate_and_export_trajectory(swing, "authored")
+    np.testing.assert_array_equal(
+        result.swing_state.clubhead_velocity, swing.clubhead_velocity
+    )
+    np.testing.assert_array_equal(result.swing_state.clubhead_orientation, normal)
+    np.testing.assert_array_equal(
+        result.swing_state.clubhead_angular_velocity, swing.clubhead_angular_velocity
+    )
+    np.testing.assert_allclose(
+        result.impact_state.ball_velocity, expected.impact_state.ball_velocity
+    )
+    assert result.metadata == expected.metadata
+    assert path.is_file()
+
+
+def test_declared_unsupported_swing_frame_is_rejected_before_export(
+    tmp_path: Path,
+) -> None:
+    """A declared frame cannot silently enter the legacy speed-only adapter."""
+    swing = ManualSwingStateProvider().get_swing_state(SwingStateConfig())
+    swing.metadata["frame_id"] = APP_FRAME_ID
+    coordinator = ShotTrajectoryHandoffCoordinator(repo_root=tmp_path)
+    with pytest.raises(FrameUnitMismatchError, match="frame"):
+        coordinator.simulate_and_export_trajectory(swing, "unsupported")
+    assert not (tmp_path / "unsupported.json").exists()
+
+
+def test_authored_replay_extraction_reaches_impact_and_trajectory_viewers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Synthetic screw kinematics cross extraction, real impact and wire consumers."""
+    from src.shared.python import workspace as owner
+    from tests.unit.workspace.impact_fixture import impact_case
+
+    library = impact_case(monkeypatch)
+    geometry = owner.ReplayImpactGeometry(
+        "club",
+        (0.1, 0, 0),
+        (0, -1, 0),
+        (0, 0, 1),
+        0.2,
+        0.005,
+        "Synthetic head point and face; authored effective mass and inertia",
+    )
+    selection = owner.ReplayImpactSelection(
+        1, np.eye(3), (0, 0, 0), "Authored recorded sample, not detected contact"
+    )
+    swing = owner.extract_replay_impact_state(library, "replay", geometry, selection)
+    coordinator = ShotTrajectoryHandoffCoordinator(repo_root=tmp_path)
+    with patch.object(
+        coordinator,
+        "get_swing_state",
+        side_effect=AssertionError("Stored replay must not invoke reference swing"),
+    ):
+        result, path = coordinator.simulate_and_export_trajectory(
+            swing, "replay-sample-1"
+        )
+    expected_velocity = [
+        2.0 - 3.0 * 0.1 * math.sin(math.pi / 2),
+        3.0 * 0.1 * math.cos(math.pi / 2),
+        0.0,
+    ]
+    np.testing.assert_allclose(result.swing_state.clubhead_velocity, expected_velocity)
+    np.testing.assert_array_equal(
+        result.swing_state.clubhead_velocity, swing.clubhead_velocity
+    )
+    np.testing.assert_allclose(result.swing_state.clubhead_angular_velocity, [0, 0, 3])
+    np.testing.assert_allclose(
+        result.swing_state.clubhead_orientation, [1, 0, 0], atol=1e-14
+    )
+    assert result.impact_state.ball_velocity[0] > 0
+    assert result.metadata == {"engine": swing.engine_name, **swing.metadata}
+    assert result.metadata["physical_source_time_qualified"] is False
+    assert not library.active
+    record = json.loads(path.read_text(encoding="utf-8"))
+    web = coordinator.load_into_ball_flight_web(path)
+    qt = coordinator.load_into_shot_tracer(path)
+    assert len(web.samples) == len(qt.positions) == len(record["samples"])
+    assert coordinator.load_into_impact_explorer(path)["samples"] == record["samples"]
+
+
 @pytest.fixture(autouse=True)
 def _ensure_rust_available_or_mock() -> Iterator[None]:
     from src.shared.python.physics.rust_kernel import is_rust_available

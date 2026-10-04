@@ -77,6 +77,11 @@ from .necromatcher_shape_overlay import shape_overlay_provenance
 from .necromatcher_video_jobs import NativeVideoSession
 from .necromatcher_placement import author_ground_placement
 from .necromatcher_replay import ReplayOptions, replay_authored_profile
+from .necromatcher_impact import (
+    ReplayImpactGeometry,
+    ReplayImpactSelection,
+    extract_replay_impact_state,
+)
 from .necromatcher_review import CaptureReview
 from .necromatcher_shaft_evidence import (
     BoundShaftEvidence,
@@ -246,6 +251,9 @@ __all__ = [
     "NativeVideoSession",
     "ReplayOptions",
     "replay_authored_profile",
+    "ReplayImpactGeometry",
+    "ReplayImpactSelection",
+    "extract_replay_impact_state",
     "load_native_fit_binding",
     "load_native_model_binding",
     "AuthoredEffortProfile",
