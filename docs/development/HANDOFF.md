@@ -1,3 +1,69 @@
+# Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts — #11421 / #11423
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11423-provider-contracts`; commit SELF; PR: opened from this branch (`Closes #11423`, `Refs #11421`)
+- Governing issue: #11423 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-02] Establish versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold contracts with sign equivalence, fail-closed physical qualification rules, snapshot/restore rollback, Zero-Torque Counterfactual (ZTCF) proposal rollouts, and runtime factor exclusivity.
+- Completed:
+  - `src/shared/python/estimation/dime_contracts.py`:
+    - `DimeCompleteState`: versioned complete state encapsulation with generalized coordinates $q \in \mathbb{R}^{n_q}$, velocities $v \in \mathbb{R}^{n_v}$, optional accelerations $\dot{v}$, internal memory mapping, SHA-256 model hash, validated SI units, and declared coordinate frames. Enforces read-only array protections, numeric real bounds, and rejection of boolean coercion.
+    - `DimeObservationWindow`: windowed observation container enforcing strict temporal monotonicity ($\Delta t > 0$), interval containment ($t_{\text{start}} \le t_0, t_N \le t_{\text{end}}$), observation shape alignment, and typed uncertainty specifications (`"gaussian"`, `"laplace"`, `"covariance"`, `"unweighted"`).
+    - `ControlChannelSpec`: declared control channels specifying physical type (`"torque"`, `"force"`, `"excitation"`), units, selection maps, limits, and internal activation dynamics semantics.
+    - `ContactPolicy`: strictly enforces binary selection between native eliminated reactions (`"native_eliminated"`) and explicit constrained reaction variables (`"explicit_constrained"`).
+    - `PassiveLoadSpec`: inventoried passive loads evaluated where modeled; range-of-motion (ROM) priors cannot supply an unmeasured passive stiffness law.
+    - `ProviderCapability`: truthful capability report declaring manifold, control channels, contact policy, passive loads, activation dynamics, and qualification status.
+    - `check_qualification_rules`: fail-closed qualification evaluation enforcing full activation dynamics for muscle-driven models (never silent torque substitution), strict contact policies, and rejection of unmeasured passive stiffness laws.
+    - `ProviderSnapshot`: complete snapshot of provider state and solver/contact/controller memory.
+    - `DimeFullStepRequest` & `DimeFullStepResult`: input request and forward simulation output with acceleration decomposition and diagnostics.
+    - `DimeZeroInputProposal`: forward rollout under zero control ($u=0$), verifying exact acceleration superposition ($a_{\text{full}} = a_{\text{grav}} + a_{\text{drift}} + a_{\text{ctrl}}$) and Zero-Torque Counterfactual (ZTCF) drift trajectories.
+    - `DimeEstimationResult`: standardized estimation receipt with state trajectory, estimated controls, residuals, uncertainty summary, and metrics.
+    - `RuntimeExclusivityContract`: enforces mutual exclusivity between marginalized-input transitions and explicit-input likelihoods on overlapping intervals; prohibits diagnostics from contributing duplicate objective factors.
+    - `DynamicsProvider`: runtime checkable protocol for stateful dynamics providers.
+  - `src/shared/python/estimation/dime_manifold.py`:
+    - `ManifoldContract`: abstract interface defining public `retract`, `local_coordinates`, and their Jacobians.
+    - `VectorSpaceManifold`: Euclidean vector space manifold where $n_q == n_v$.
+    - `QuaternionManifold`: unit quaternion $SO(3)$ manifold ($n_q = 4, n_v = 3$) with antipodal sign equivalence ($\|v\| = 0$ for $q \equiv -q$).
+    - `SE3Manifold`: rigid body $SE(3)$ manifold ($n_q = 7, n_v = 6$) combining translation with quaternion orientation.
+  - `src/shared/python/estimation/dime_providers.py`:
+    - `DeterministicFakeProvider`: reference fake provider fulfilling identical contracts without claiming native qualification.
+    - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
+    - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new DIME contract, manifold, and provider symbols.
+  - `tests/unit/estimation/test_dime_provider_contracts.py`: 16 focused behavioral tests covering RED contract violations (incomplete state, invalid time order, dimensional mismatch, stale model hashes, unsupported contact, unknown units, snapshot rollback on exceptions, unavailable provider fail-closed, muscle activation dynamics, unmeasured ROM priors) and GREEN identical provider contracts, runtime factor exclusivity, manifold $n_q \neq n_v$ and quaternion sign equivalence, ZTCF superposition, and serialization round-trips.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_provider_contracts.py`: 16 passed.
+  - `pytest tests/unit/estimation`: 89 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_file_size_budget.py` (all tracked files <= 1200 lines, 0 on watchlist) and `check_error_handling_ratchet.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-03 under epic #11421.
+
+# Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol — #11421 / #11422
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11422-baseline-benchmark`; commit SELF; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
+- Governing issue: #11422 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-01] Establish versioned benchmark manifest, native capability status ('implemented', 'qualified', 'unavailable') separated from method existence, fail-closed physical qualification rules, shared deterministic fixtures (fixed-base pendulum, underactuated analytic, and native stance), private capture dataset protection, and frozen numeric acceptance thresholds fixed prior to solver comparison.
+- Completed:
+  - `src/shared/python/estimation/dime_manifest.py`:
+    - `DimeBenchmarkManifest`: versioned, immutable schema specifying dataset/model/engine revisions, split policies (calibration vs holdout and phase partitions), SI unit constraints, observation types, known truth, force classifications, provenance records, privacy specifications, and frozen numeric thresholds.
+    - `evaluate_qualification()`: fail-closed validation enforcing canonical SI units, complete provenance, non-circular test kinematics (`kinematics_source != "force_derived"`), and rejection of kinematic skeleton contact outputs (`has_skeleton_contact == False`). Unqualified models that exist are marked as `implemented`, preserving honest distinction between implementation existence and physical qualification.
+    - `report_native_capabilities()`: truthfully separates method existence from physical qualification status (`"implemented"`, `"qualified"`, `"unavailable"`).
+    - `compute_alignment_metric` & `compute_cancellation_metric`: signals and force cancellation metrics with configurable `ZeroDenominatorPolicy` (`"guarded_zero"`, `"epsilon"`, `"raise"`).
+    - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
+    - `run_dime_baseline`: deterministic baseline execution on shared fixtures reproducing bit-for-bit across recorded seeds.
+    - Privacy protection: `to_dict` and `save_json` strictly redact local filesystem paths, ensuring private capture datasets remain confidential.
+  - `src/shared/python/estimation/synthetic_fixtures.py`:
+    - `make_fixed_base_pendulum_fixture`: deterministic single-DOF fixed-base pendulum with exact harmonic linear oscillator truth, pin reaction forces, zero control torques, and documented mathematical derivation.
+    - `make_underactuated_analytic_fixture`: deterministic planar two-link system with unactuated root DOF ($\tau_0 = 0$), sinusoidal actuated joint ($\tau_1(t)$), and degree of underactuation 1.
+    - `make_native_stance_fixture`: static equilibrium ground stance fixture validating vertical ground reaction force $\text{GRF}_z = m \cdot g$, zero horizontal forces, and static joint holding torques.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new DIME benchmark and fixture symbols.
+  - `tests/unit/estimation/test_dime_benchmark_manifest.py`: 13 focused behavioral tests covering RED disqualification rules (wrong units, missing provenance, force-derived test kinematics, skeleton contact output) and GREEN baseline reproducibility, privacy protection, phase metrics, zero-denominator policies, capability status reporting, and serialization round-trip.
+  - `tests/unit/estimation/test_synthetic_ground_truth.py`: added tests verifying initial state, controls, sampling, units, and exact truth derivation for the three shared deterministic fixtures.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_benchmark_manifest.py`: 13 passed.
+  - `pytest tests/unit/estimation`: 73 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_file_size_budget.py` and `check_error_handling_ratchet.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-02 under epic #11421.
+
 # OpenCap: Golf Accuracy Qualification Against a Marker Reference — #11400 / #11408
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `docs/opencap-golf-accuracy-deferred-11408`; PR: #11451 (`Refs #11408`, `Refs #11400`)

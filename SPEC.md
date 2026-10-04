@@ -1,3 +1,57 @@
+## Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts (DIME-02, #11423)
+
+Specifies versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11421, #11423):
+- **Versioned Complete State and Observation Window (`src/shared/python/estimation/dime_contracts.py`)**:
+  - `DimeCompleteState`: versioned complete state encapsulation with generalized coordinates $q \in \mathbb{R}^{n_q}$, velocities $v \in \mathbb{R}^{n_v}$, optional accelerations $\dot{v}$, internal memory mapping, SHA-256 model hash, validated SI units, and declared coordinate frames. Enforces read-only array protections, numeric real bounds, and rejection of boolean coercion.
+  - `DimeObservationWindow`: windowed observation container enforcing strict temporal monotonicity ($\Delta t > 0$), interval containment ($t_{\text{start}} \le t_0, t_N \le t_{\text{end}}$), observation shape alignment, and typed uncertainty specifications (`"gaussian"`, `"laplace"`, `"covariance"`, `"unweighted"`).
+- **Manifold Operations & Quaternion Sign Equivalence (`src/shared/python/estimation/dime_manifold.py`)**:
+  - `ManifoldContract`, `VectorSpaceManifold`, `QuaternionManifold`, `SE3Manifold`: public retraction and local-coordinate mappings supporting dimension differences ($n_q \neq n_v$, e.g. $n_q=4, n_v=3$ for unit quaternions, $n_q=7, n_v=6$ for SE(3) poses).
+  - Explicit quaternion sign equivalence: in $SO(3)$, antipodal unit quaternions $q \equiv -q$ yield identically zero tangent distance in local coordinates ($\|v\| = 0$).
+  - Declared retract Jacobians $d(\text{retract})/dv$ and local coordinate Jacobians with frame conventions.
+- **Provider Capability, Snapshot Rollback & Fail-Closed Rules (`ProviderCapability`, `check_qualification_rules`)**:
+  - Truthful capability status (`"implemented"`, `"qualified"`, `"unavailable"`) separated from method existence.
+  - Muscle-driven models: control channels declaring `"excitation"` strictly require full activation dynamics (`has_activation_dynamics == True`) and internal activation state semantics; silent substitution with generalized torques is rejected.
+  - Contact policy: strictly enforces binary selection between native eliminated reactions (`"native_eliminated"`) and explicit constrained reaction variables (`"explicit_constrained"`); simultaneous or conflicting contact models fail closed.
+  - Retained passive loads: inventoried and evaluated where modeled; range-of-motion (ROM) priors cannot supply an unmeasured passive stiffness law.
+  - Exception state restoration: provider mutations take pre-mutation snapshots; any step exception rolls back provider state to pre-call snapshot.
+  - Unavailable providers strictly raise errors and never return zero error as a false success.
+- **Intervention Contract Integration & ZTCF Zero-Input Proposals (`DimeZeroInputProposal`)**:
+  - Integrates the #10286 intervention contract (`AccelerationDecomposition` from `src/shared/python/motion_matching/counterfactual.py`) without duplication.
+  - `compute_zero_input_proposal`: generates forward rollouts under zero control ($u=0$), verifying exact acceleration superposition ($a_{\text{full}} = a_{\text{grav}} + a_{\text{drift}} + a_{\text{ctrl}}$) and Zero-Torque Counterfactual (ZTCF) drift trajectories.
+- **Runtime Factor Exclusivity (`RuntimeExclusivityContract`)**:
+  - Enforces strict mutual exclusivity on overlapping time intervals: an estimation window cannot simultaneously register a marginalized-input transition factor and an explicit-input likelihood factor.
+  - Permitted diagnostics cannot contribute duplicate factors to the estimation objective (`contributes_to_objective == False` enforced).
+- **Deterministic and Analytic Dynamics Providers (`src/shared/python/estimation/dime_providers.py`)**:
+  - `DeterministicFakeProvider`: synthetic reference provider fulfilling identical contracts without claiming native qualification.
+  - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
+  - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
+
+## Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol (DIME-01, #11422)
+
+Specifies versioned benchmark manifest, native capability status, fail-closed qualification rules, and frozen acceptance thresholds (#11421, #11422):
+- **Versioned Benchmark Manifest (`src/shared/python/estimation/dime_manifest.py`)**:
+  - `DimeBenchmarkManifest`: versioned, immutable manifest encapsulating dataset/model/engine revisions, disjoint calibration/holdout frame splits, phase-specific partition, SI unit constraints, observation type, known ground truth, force classification, provenance, privacy/licensing, and frozen numeric acceptance thresholds.
+  - Manifest serialization with privacy protection: `to_dict` and `save_json` enforce strict redaction of local filesystem paths, ensuring private capture datasets cannot be leaked.
+- **Fail-Closed Qualification Protocol (`evaluate_qualification`)**:
+  - Evaluates qualification status under fail-closed scientific integrity rules:
+    - *Wrong units*: all coordinates and quantities must be canonical SI (`"m"`, `"rad"`, `"s"`, `"kg"`, `"N"`, `"N*m"`); non-canonical units (e.g. `"mm"` or `"deg"`) fail qualification.
+    - *Missing provenance*: required provenance fields (`engine`, `engine_version`, `model_hash`, `git_commit`, `created_at`) must be complete and non-empty.
+    - *Force-derived test kinematics*: test kinematics derived from forces create circularity and cannot be marked qualified (`kinematics_source != "force_derived"` required).
+    - *Skeleton contact output*: kinematic skeletons lack unilateral ground reaction contact physics; skeleton models asserting contact forces cannot be marked qualified (`has_skeleton_contact == False` required).
+  - Unqualified models that exist are marked as `implemented`, not `qualified`, preserving truthful distinction between method existence and physical qualification.
+- **Truthful Native Capability Reporting (`report_native_capabilities`)**:
+  - Distinguishes Python method existence on engine classes from physical qualification status (`"implemented"`, `"qualified"`, `"unavailable"`), avoiding false qualification claims.
+- **Shared Deterministic Fixtures (`src/shared/python/estimation/synthetic_fixtures.py`)**:
+  - `make_fixed_base_pendulum_fixture`: deterministic single-DOF fixed-base pendulum with exact harmonic linear oscillator truth, pin reaction forces, zero control torques, and documented mathematical derivation.
+  - `make_underactuated_analytic_fixture`: deterministic planar two-link system with unactuated root DOF ($\tau_0 = 0$), sinusoidal actuated joint ($\tau_1(t)$), and degree of underactuation 1.
+  - `make_native_stance_fixture`: static equilibrium ground stance fixture validating vertical ground reaction force $\text{GRF}_z = m \cdot g$, zero horizontal forces, and static joint holding torques.
+- **Metrics, Zero-Denominator Policy, and Frozen Thresholds**:
+  - `compute_alignment_metric`: normalized cosine alignment with explicit `ZeroDenominatorPolicy` (`"guarded_zero"`, `"epsilon"`, `"raise"`).
+  - `compute_cancellation_metric`: net residual force cancellation ratio with zero-denominator guard.
+  - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
+  - `NumericAcceptanceThresholds`: frozen acceptance thresholds (max drift $\le 0.015\text{ m}$, max angular drift $\le 0.05\text{ rad}$, max control $\le 250\text{ N}\cdot\text{m}$, min alignment $\ge 0.95$, max cancellation $\le 0.10$, reproducibility atol $\le 10^{-9}$) fixed before solver comparison.
+  - `ConditioningScale`: explicit scaling and nondimensionalization factors for state, angle, velocity, torque, and time.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -7795,6 +7849,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11454 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
+| 2026-10-04 | #11453 | [DIME-01] Baseline and frozen benchmark protocol: DimeBenchmarkManifest, fail-closed qualification evaluation, native capability status vs method existence, deterministic fixtures, privacy protection, and frozen thresholds (#11422, refs #11421). |
 | 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
 | 2026-10-03 | #11441 | Settings page test no longer races the asynchronously loaded theme list: it waits for the Light option before selecting it, and the shared mock now resolves the theme list late so the ordering bug reproduces every run |
