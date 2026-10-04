@@ -119,7 +119,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** D-sorganization/Repository_Management#1900
 - **Branch:** `claude/1900-ud-merge-group-tests`
-- **PR:** see branch (workflow-only PR)
+- **PR:** #11510
 - **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_merge_group_test_lanes.py`, `tests/ci/test_ci_infrastructure.py`
 - **Started:** 2026-10-04
 - **Last verified:** 2026-10-04 at SELF — contract tests green; every `merge_group` CI Standard run since the queue rollout failed `tests` (11.8 % vs 75 % coverage floor) and `unit-test-gate` (no `origin/main`).

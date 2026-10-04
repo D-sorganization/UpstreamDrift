@@ -1,6 +1,6 @@
 # Merge-Queue Core Test Lanes — RM#1900
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `claude/1900-ud-merge-group-tests`; PR: workflow-only, opened from this branch.
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/1900-ud-merge-group-tests`; PR: #11510 (workflow-only).
 - Governing issue: D-sorganization/Repository_Management#1900 (fleet merge queue). Entry: DL-#1900.
 - Problem: every `merge_group` run of CI Standard failed. `tests` had no merge_group diff base and fell into the whole-src coverage lane (11.8 % vs `--cov-fail-under=75`); `unit-test-gate` fetched the base only for `pull_request`, so the child-copy guard asserted `origin/main is required in CI`.
 - Fix: `merge_group` branch sets `diff_base` to `merge_group.base_sha`; the unit-gate base fetch also runs for `merge_group` and falls back to the default branch.
