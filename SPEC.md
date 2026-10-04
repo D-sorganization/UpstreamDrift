@@ -7813,7 +7813,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
-| 2026-10-03 | #11277 | [COV-9] 3D comparison of monocular backends and refits vs marker IK: align_trajectories_rigid_fixed_scale, compute_mpjpe_and_pa_mpjpe, compute_depth_and_image_plane_errors, validate_laterality, L3 paired metrics, L1-3D variation envelope, anthropometry ablation, and Comparison3DReceipt (#11277). |
+| 2026-10-03 | #11447 | [COV-9] 3D comparison of monocular backends and refits vs marker IK: align_trajectories_rigid_fixed_scale, compute_mpjpe_and_pa_mpjpe, compute_depth_and_image_plane_errors, validate_laterality, L3 paired metrics, L1-3D variation envelope, anthropometry ablation, and Comparison3DReceipt (#11277). |
 | 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |
 | 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
 | 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |

@@ -3,7 +3,8 @@
 - Repository: `D-sorganization/UpstreamDrift`
 - Branch: `feat/cov-9-3d-comparison-11277`
 - Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-9-11277`
-- Commit: `SELF`
+- Commit: `3d2c8cf499`
+- PR: #11447 (`Refs #11268`, `Closes #11277`)
 - Governing issue: #11277 (parent epic #11268, follows COV-1 to COV-8)
 - Objective: Measure the 3D gap between monocular video backends (HMR2) and Necromatcher fits (marker-anchored and generic) vs capture-O marker IK at L3 (paired swings) and L1-3D (unpaired swings).
 - Completed:

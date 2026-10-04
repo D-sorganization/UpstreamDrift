@@ -138,7 +138,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
 
-- **PR:** #11277 (Refs #11268)
+- **PR:** #11447 (Refs #11268, Closes #11277)
 - **Branch:** `feat/cov-9-3d-comparison-11277`
 - **Started:** 2026-10-03
 - **Last verified:** 2026-10-03 at SELF — COV-9 (#11277): implemented 3D comparison of monocular backends and refits vs capture-O marker IK (`src/motion_capture/reference/comparison_3d.py`), fixed-scale address rigid alignment (`align_trajectories_rigid_fixed_scale`), MPJPE and PA-MPJPE computation (`compute_mpjpe_and_pa_mpjpe`), depth vs image-plane error decomposition (`compute_depth_and_image_plane_errors`), fail-closed laterality swap rejection (`validate_laterality`), clock qualification with velocity emission gating, Law of Demeter architectural boundary isolation, anthropometry ablation (`compute_anthropometry_ablation`), L1-3D variation envelope agreement (`compute_l1_3d_envelope_comparison`), and governed receipt validation (`build_3d_comparison_receipt`); 11 unit tests in `tests/unit/motion_capture/test_cov9_3d_comparison.py` passing.
