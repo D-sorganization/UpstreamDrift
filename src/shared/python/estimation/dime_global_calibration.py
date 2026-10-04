@@ -269,19 +269,20 @@ def _check_identifiability_preconditions(
 
 
 def _resolve_identifiability_locks(
-    problem: GlobalCalibrationProblem,
+    policy: RankDeficiencyPolicy,
     names: list[str],
     x0: np.ndarray,
+    residual_fn: Callable[[np.ndarray], np.ndarray],
 ) -> tuple[IdentifiabilityReport, list[str], list[int]]:
     """Probe parameter identifiability and identify locked nullspace parameters."""
     spec = ParameterSpec(names=tuple(names))
-    report = probe_identifiability(problem.residual_fn, x0, spec)
+    report = probe_identifiability(residual_fn, x0, spec)
 
     locked: list[str] = []
     free_indices: list[int] = []
 
     if report.rank < len(names):
-        if problem.rank_deficiency_policy == RankDeficiencyPolicy.FAIL_CLOSED:
+        if policy == RankDeficiencyPolicy.FAIL_CLOSED:
             raise PreconditionError(
                 f"Parameter block is rank-deficient (rank {report.rank} < {len(names)}) "
                 "with unobservable null space"
@@ -310,12 +311,13 @@ def _resolve_identifiability_locks(
 
 
 def _run_free_parameter_optimization(
-    problem: GlobalCalibrationProblem,
     nominal_vals: np.ndarray,
     x0: np.ndarray,
     lower_bounds: np.ndarray,
     upper_bounds: np.ndarray,
     free_indices: list[int],
+    residual_fn: Callable[[np.ndarray], np.ndarray],
+    tol: float,
 ) -> tuple[bool, np.ndarray, float]:
     """Execute nonlinear least squares optimization over identifiable parameter subset."""
     x_free_0 = x0[free_indices]
@@ -325,21 +327,21 @@ def _run_free_parameter_optimization(
     def joint_residual(x_free: np.ndarray) -> np.ndarray:
         x_full = np.copy(nominal_vals)
         x_full[free_indices] = x_free
-        return np.asarray(problem.residual_fn(x_full), dtype=np.float64)
+        return np.asarray(residual_fn(x_full), dtype=np.float64)
 
     opt = least_squares(
         joint_residual,
         x_free_0,
         bounds=(lb_free, ub_free),
-        ftol=problem.convergence_tolerance,
-        xtol=problem.convergence_tolerance,
-        gtol=problem.convergence_tolerance,
+        ftol=tol,
+        xtol=tol,
+        gtol=tol,
     )
 
     x_final = np.copy(nominal_vals)
     x_final[free_indices] = opt.x
 
-    data_res_final = np.asarray(problem.residual_fn(x_final), dtype=np.float64)
+    data_res_final = np.asarray(residual_fn(x_final), dtype=np.float64)
     data_cost = float(0.5 * np.sum(data_res_final**2))
     return bool(opt.success), x_final, data_cost
 
@@ -374,8 +376,11 @@ def calibrate_global_parameters(
             parameter_revision="rev-001",
         )
 
-    res0 = problem.residual_fn(x0)
-    report, locked, free_indices = _resolve_identifiability_locks(problem, names, x0)
+    residual_fn: Callable[[np.ndarray], np.ndarray] = problem.residual_fn
+    res0 = residual_fn(x0)
+    report, locked, free_indices = _resolve_identifiability_locks(
+        problem.rank_deficiency_policy, names, x0, residual_fn
+    )
 
     if not free_indices:
         t_outer = time.perf_counter() - t_start
@@ -399,7 +404,13 @@ def calibrate_global_parameters(
     upper_bounds = np.array([p.bounds[1] for p in problem.parameters], dtype=np.float64)
 
     success, x_final, data_cost = _run_free_parameter_optimization(
-        problem, nominal_vals, x0, lower_bounds, upper_bounds, free_indices
+        nominal_vals,
+        x0,
+        lower_bounds,
+        upper_bounds,
+        free_indices,
+        residual_fn,
+        problem.convergence_tolerance,
     )
 
     t_outer = time.perf_counter() - t_start
