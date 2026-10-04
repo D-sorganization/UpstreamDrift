@@ -1,6 +1,6 @@
 # Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: opened from this branch (`Closes #11424`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: #11457 (`Closes #11424`, `Refs #11421`)
 - Governing issue: #11424 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-03] Implement robust marker (3D markers) and markerless (2D keypoints) observation factors with anisotropic noise covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence.
 - Completed:
