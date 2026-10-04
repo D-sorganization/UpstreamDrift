@@ -223,22 +223,10 @@ class GlobalCalibrationResult:
         )
 
 
-def calibrate_global_parameters(
+def _check_identifiability_preconditions(
     problem: GlobalCalibrationProblem,
-) -> GlobalCalibrationResult:
-    """Execute outer-loop parameter calibration with identifiability checks.
-
-    Fail-closed checks:
-    1. Monocular scale ambiguity: monocular cameras cannot determine metric
-       body dimensions without a metric scale anchor.
-    2. Mass/torque scaling ambiguity: motion alone cannot determine body mass
-       and actuator torque independently without mass or force anchor.
-    3. Frozen prior protection: prior cannot be silently modified without tag.
-    4. Rank-deficient parameter combinations: detected via SVD and locked.
-    """
-    t_start = time.perf_counter()
-
-    # 1. Monocular scale ambiguity check
+) -> None:
+    """Validate physical gauge anchors and prior protections fail-closed."""
     has_body_geom = any(
         p.kind == CalibrationParameterKind.BODY_GEOMETRY for p in problem.parameters
     )
@@ -252,7 +240,6 @@ def calibrate_global_parameters(
             "monocular scale ambiguity requires a metric scale anchor"
         )
 
-    # 2. Mass/torque scaling check
     has_mass = any(
         p.kind == CalibrationParameterKind.BODY_INERTIA for p in problem.parameters
     )
@@ -275,56 +262,30 @@ def calibrate_global_parameters(
             "mass/torque scaling ambiguity requires mass or measured-force anchor"
         )
 
-    # 3. Frozen prior protection check
     if problem.is_prior_frozen and not problem.prior_revision_tagged:
         raise PreconditionError(
             "Cannot apply calibration changes beneath a frozen prior without explicit revision"
         )
 
-    # Prepare parameter vectors
-    names = [p.name for p in problem.parameters]
-    nominal_vals = np.array(
-        [p.nominal_value for p in problem.parameters], dtype=np.float64
-    )
-    x0 = np.array([p.value for p in problem.parameters], dtype=np.float64)
-    lower_bounds = np.array([p.bounds[0] for p in problem.parameters], dtype=np.float64)
-    upper_bounds = np.array([p.bounds[1] for p in problem.parameters], dtype=np.float64)
-    sigmas = np.array([p.sigma for p in problem.parameters], dtype=np.float64)
 
-    # If no observation residual is provided, just return initial values
-    if problem.residual_fn is None:
-        t_outer = time.perf_counter() - t_start
-        return GlobalCalibrationResult(
-            success=True,
-            parameter_values={p.name: p.value for p in problem.parameters},
-            locked_parameters=(),
-            cost_breakdown={
-                "data_cost": 0.0,
-                "prior_cost": 0.0,
-                "total_cost": 0.0,
-            },
-            inner_loop_latency_s=problem.inner_loop_latency_s,
-            outer_loop_time_s=t_outer,
-            total_time_s=problem.inner_loop_latency_s + t_outer,
-            parameter_revision="rev-001",
-        )
-
-    # 4. SVD Identifiability probe
-    res0 = problem.residual_fn(x0)
+def _resolve_identifiability_locks(
+    problem: GlobalCalibrationProblem,
+    names: list[str],
+    x0: np.ndarray,
+) -> tuple[IdentifiabilityReport, list[str], list[int]]:
+    """Probe parameter identifiability and identify locked nullspace parameters."""
     spec = ParameterSpec(names=tuple(names))
     report = probe_identifiability(problem.residual_fn, x0, spec)
 
     locked: list[str] = []
     free_indices: list[int] = []
 
-    # Check for rank deficiency
     if report.rank < len(names):
         if problem.rank_deficiency_policy == RankDeficiencyPolicy.FAIL_CLOSED:
             raise PreconditionError(
                 f"Parameter block is rank-deficient (rank {report.rank} < {len(names)}) "
                 "with unobservable null space"
             )
-        # Lock unobservable parameters: inspect right singular vectors for null directions
         null_mask = np.zeros(len(names), dtype=bool)
         if report.nullspace_directions:
             for direction in report.nullspace_directions.values():
@@ -345,26 +306,18 @@ def calibrate_global_parameters(
     else:
         free_indices = list(range(len(names)))
 
-    # If all parameters are locked, return nominal
-    if not free_indices:
-        t_outer = time.perf_counter() - t_start
-        return GlobalCalibrationResult(
-            success=True,
-            parameter_values={p.name: p.nominal_value for p in problem.parameters},
-            locked_parameters=tuple(locked),
-            cost_breakdown={
-                "data_cost": float(0.5 * np.sum(res0**2)),
-                "prior_cost": 0.0,
-                "total_cost": float(0.5 * np.sum(res0**2)),
-            },
-            inner_loop_latency_s=problem.inner_loop_latency_s,
-            outer_loop_time_s=t_outer,
-            total_time_s=problem.inner_loop_latency_s + t_outer,
-            parameter_revision="rev-001",
-            identifiability_report=report,
-        )
+    return report, locked, free_indices
 
-    # Optimize free parameters
+
+def _run_free_parameter_optimization(
+    problem: GlobalCalibrationProblem,
+    nominal_vals: np.ndarray,
+    x0: np.ndarray,
+    lower_bounds: np.ndarray,
+    upper_bounds: np.ndarray,
+    free_indices: list[int],
+) -> tuple[bool, np.ndarray, float]:
+    """Execute nonlinear least squares optimization over identifiable parameter subset."""
     x_free_0 = x0[free_indices]
     lb_free = lower_bounds[free_indices]
     ub_free = upper_bounds[free_indices]
@@ -386,22 +339,78 @@ def calibrate_global_parameters(
     x_final = np.copy(nominal_vals)
     x_final[free_indices] = opt.x
 
-    # Compute final costs
     data_res_final = np.asarray(problem.residual_fn(x_final), dtype=np.float64)
     data_cost = float(0.5 * np.sum(data_res_final**2))
-    prior_cost = 0.0
-    total_cost = data_cost + prior_cost
+    return bool(opt.success), x_final, data_cost
+
+
+def calibrate_global_parameters(
+    problem: GlobalCalibrationProblem,
+) -> GlobalCalibrationResult:
+    """Execute outer-loop parameter calibration with identifiability checks."""
+    t_start = time.perf_counter()
+    _check_identifiability_preconditions(problem)
+
+    names = [p.name for p in problem.parameters]
+    nominal_vals = np.array(
+        [p.nominal_value for p in problem.parameters], dtype=np.float64
+    )
+    x0 = np.array([p.value for p in problem.parameters], dtype=np.float64)
+
+    if problem.residual_fn is None:
+        t_outer = time.perf_counter() - t_start
+        return GlobalCalibrationResult(
+            success=True,
+            parameter_values={p.name: p.value for p in problem.parameters},
+            locked_parameters=(),
+            cost_breakdown={
+                "data_cost": 0.0,
+                "prior_cost": 0.0,
+                "total_cost": 0.0,
+            },
+            inner_loop_latency_s=problem.inner_loop_latency_s,
+            outer_loop_time_s=t_outer,
+            total_time_s=problem.inner_loop_latency_s + t_outer,
+            parameter_revision="rev-001",
+        )
+
+    res0 = problem.residual_fn(x0)
+    report, locked, free_indices = _resolve_identifiability_locks(problem, names, x0)
+
+    if not free_indices:
+        t_outer = time.perf_counter() - t_start
+        return GlobalCalibrationResult(
+            success=True,
+            parameter_values={p.name: p.nominal_value for p in problem.parameters},
+            locked_parameters=tuple(locked),
+            cost_breakdown={
+                "data_cost": float(0.5 * np.sum(res0**2)),
+                "prior_cost": 0.0,
+                "total_cost": float(0.5 * np.sum(res0**2)),
+            },
+            inner_loop_latency_s=problem.inner_loop_latency_s,
+            outer_loop_time_s=t_outer,
+            total_time_s=problem.inner_loop_latency_s + t_outer,
+            parameter_revision="rev-001",
+            identifiability_report=report,
+        )
+
+    lower_bounds = np.array([p.bounds[0] for p in problem.parameters], dtype=np.float64)
+    upper_bounds = np.array([p.bounds[1] for p in problem.parameters], dtype=np.float64)
+
+    success, x_final, data_cost = _run_free_parameter_optimization(
+        problem, nominal_vals, x0, lower_bounds, upper_bounds, free_indices
+    )
 
     t_outer = time.perf_counter() - t_start
-
     return GlobalCalibrationResult(
-        success=bool(opt.success),
+        success=success,
         parameter_values={names[i]: float(x_final[i]) for i in range(len(names))},
         locked_parameters=tuple(locked),
         cost_breakdown={
             "data_cost": data_cost,
-            "prior_cost": prior_cost,
-            "total_cost": total_cost,
+            "prior_cost": 0.0,
+            "total_cost": data_cost,
         },
         inner_loop_latency_s=problem.inner_loop_latency_s,
         outer_loop_time_s=t_outer,
