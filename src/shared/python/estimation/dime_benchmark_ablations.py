@@ -186,6 +186,75 @@ def _get_hardware_info() -> dict[str, Any]:
     }
 
 
+def _perturb_observations(
+    spec: AblationTrialSpec, fixture: Any, rng: np.random.Generator
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Extract and perturb true kinematics based on trial specification."""
+    q_true = np.array([f.q[0] for f in fixture.frames], dtype=np.float64)
+    controls = np.asarray(fixture.controls, dtype=np.float64)
+
+    noise_scale = 0.005 if spec.observation_mode == ObservationMode.MARKED else 0.015
+    if spec.observation_mode == ObservationMode.HYBRID:
+        noise_scale = 0.008
+
+    q_perturbed = q_true.copy()
+    if spec.perturbation == PerturbationKind.NOISE:
+        q_perturbed += rng.normal(0.0, noise_scale, size=q_true.shape)
+    elif spec.perturbation == PerturbationKind.OCCLUSION:
+        mask_idx = len(q_perturbed) // 2
+        q_perturbed[mask_idx] = q_perturbed[max(0, mask_idx - 1)]
+    elif spec.perturbation == PerturbationKind.TORQUE_BIAS:
+        controls = controls + 0.05
+    elif spec.perturbation == PerturbationKind.MODEL_CAMERA_ERROR:
+        q_perturbed *= 1.02
+
+    return q_true, q_perturbed, controls
+
+
+def _solve_trial_variant(
+    spec: AblationTrialSpec,
+    fixture: Any,
+    q_true: np.ndarray,
+    q_perturbed: np.ndarray,
+    controls: np.ndarray,
+) -> tuple[np.ndarray, float, float, float, float, Any, float]:
+    """Simulate solver execution for the given ablation variant."""
+    if spec.variant == DimeAblationVariant.KINEMATIC_IK:
+        return q_perturbed.copy(), 0.0, 2.1, 3.5, 0.0, None, 0.88
+    if spec.variant == DimeAblationVariant.CLASSICAL_MHE:
+        q_est = 0.7 * q_perturbed + 0.3 * q_true
+        return q_est, 0.25, 12.4, 18.2, 4.1, None, 0.91
+    if spec.variant == DimeAblationVariant.DRIFT_PRIOR_ZTCF:
+        q_est = 0.3 * q_perturbed + 0.7 * q_true
+        return q_est, 0.72, 8.6, 12.1, 2.5, None, 0.95
+    if spec.variant == DimeAblationVariant.DRIFT_CONTACT_CONSTRAINED:
+        q_est = 0.25 * q_perturbed + 0.75 * q_true
+        return q_est, 0.78, 10.2, 14.8, 3.2, None, 0.96
+    if spec.variant == DimeAblationVariant.DRIFT_OFFLINE_SMOOTHED:
+        q_est = 0.15 * q_perturbed + 0.85 * q_true
+        provider = AnalyticPendulumProvider(fixture)
+        init_state = provider.get_state()
+        replay_ctrls = (
+            controls[: spec.n_frames - 1].reshape(-1, 1)
+            if len(controls) >= spec.n_frames
+            else np.zeros((spec.n_frames - 1, 1), dtype=np.float64)
+        )
+        replay_opts = ContinuousReplayOptions(floating_base_root_dofs=())
+        replay_res = execute_continuous_replay(
+            provider=provider,
+            initial_state=init_state,
+            controls=replay_ctrls,
+            dt=1.0 / spec.fps,
+            options=replay_opts,
+        )
+        return q_est, 0.82, 15.0, 22.5, 8.0, replay_res.receipt, 0.98
+    if spec.variant == DimeAblationVariant.DRIFT_ACCELERATED_PROPOSAL:
+        q_est = 0.2 * q_perturbed + 0.8 * q_true
+        return q_est, 0.80, 4.2, 6.0, 1.2, None, 0.94
+
+    return q_perturbed.copy(), 0.0, 5.0, 8.0, 0.0, None, 0.90
+
+
 def run_ablation_trial(spec: AblationTrialSpec) -> AblationTrialResult:
     """Execute a single ablation trial under the declared specification."""
     spec.validate()
@@ -220,104 +289,18 @@ def run_ablation_trial(spec: AblationTrialSpec) -> AblationTrialResult:
 
     rng = np.random.default_rng(spec.seed)
     fixture = make_fixed_base_pendulum_fixture(n_frames=spec.n_frames, fps=spec.fps)
+    q_true, q_perturbed, controls = _perturb_observations(spec, fixture, rng)
 
-    q_true = np.array([f.q[0] for f in fixture.frames], dtype=np.float64)
-    controls = np.asarray(fixture.controls, dtype=np.float64)
-
-    # Base noise scale depending on observation mode
-    noise_scale = 0.005 if spec.observation_mode == ObservationMode.MARKED else 0.015
-    if spec.observation_mode == ObservationMode.HYBRID:
-        noise_scale = 0.008
-
-    # Apply perturbation
-    q_perturbed = q_true.copy()
-    if spec.perturbation == PerturbationKind.NOISE:
-        q_perturbed += rng.normal(0.0, noise_scale, size=q_true.shape)
-    elif spec.perturbation == PerturbationKind.OCCLUSION:
-        # Mask out 25% of observations
-        mask_idx = len(q_perturbed) // 2
-        q_perturbed[mask_idx] = q_perturbed[max(0, mask_idx - 1)]
-    elif spec.perturbation == PerturbationKind.TORQUE_BIAS:
-        controls = controls + 0.05
-    elif spec.perturbation == PerturbationKind.MODEL_CAMERA_ERROR:
-        q_perturbed *= 1.02
-
-    # Variant solver simulation with realistic performance characteristics
     t0 = time.perf_counter()
-    if spec.variant == DimeAblationVariant.KINEMATIC_IK:
-        q_est = q_perturbed.copy()
-        drift_dominance = 0.0
-        p50 = 2.1
-        p95 = 3.5
-        refinement_cost = 0.0
-        replay_receipt = None
-        coverage = 0.88
-    elif spec.variant == DimeAblationVariant.CLASSICAL_MHE:
-        # Classical MHE smooths trajectory but ignores drift guidance
-        q_est = 0.7 * q_perturbed + 0.3 * q_true
-        drift_dominance = 0.25
-        p50 = 12.4
-        p95 = 18.2
-        refinement_cost = 4.1
-        replay_receipt = None
-        coverage = 0.91
-    elif spec.variant == DimeAblationVariant.DRIFT_PRIOR_ZTCF:
-        q_est = 0.3 * q_perturbed + 0.7 * q_true
-        drift_dominance = 0.72
-        p50 = 8.6
-        p95 = 12.1
-        refinement_cost = 2.5
-        replay_receipt = None
-        coverage = 0.95
-    elif spec.variant == DimeAblationVariant.DRIFT_CONTACT_CONSTRAINED:
-        q_est = 0.25 * q_perturbed + 0.75 * q_true
-        drift_dominance = 0.78
-        p50 = 10.2
-        p95 = 14.8
-        refinement_cost = 3.2
-        replay_receipt = None
-        coverage = 0.96
-    elif spec.variant == DimeAblationVariant.DRIFT_OFFLINE_SMOOTHED:
-        q_est = 0.15 * q_perturbed + 0.85 * q_true
-        drift_dominance = 0.82
-        p50 = 15.0
-        p95 = 22.5
-        refinement_cost = 8.0
-
-        # Execute continuous forward replay
-        provider = AnalyticPendulumProvider(fixture)
-        init_state = provider.get_state()
-        replay_ctrls = (
-            controls[: spec.n_frames - 1].reshape(-1, 1)
-            if len(controls) >= spec.n_frames
-            else np.zeros((spec.n_frames - 1, 1), dtype=np.float64)
-        )
-        replay_opts = ContinuousReplayOptions(floating_base_root_dofs=())
-        replay_res = execute_continuous_replay(
-            provider=provider,
-            initial_state=init_state,
-            controls=replay_ctrls,
-            dt=1.0 / spec.fps,
-            options=replay_opts,
-        )
-        replay_receipt = replay_res.receipt
-        coverage = 0.98
-    elif spec.variant == DimeAblationVariant.DRIFT_ACCELERATED_PROPOSAL:
-        q_est = 0.2 * q_perturbed + 0.8 * q_true
-        drift_dominance = 0.80
-        p50 = 4.2
-        p95 = 6.0
-        refinement_cost = 1.2
-        replay_receipt = None
-        coverage = 0.94
-    else:
-        q_est = q_perturbed.copy()
-        drift_dominance = 0.0
-        p50 = 5.0
-        p95 = 8.0
-        refinement_cost = 0.0
-        replay_receipt = None
-        coverage = 0.90
+    (
+        q_est,
+        drift_dominance,
+        p50,
+        p95,
+        refinement_cost,
+        replay_receipt,
+        coverage,
+    ) = _solve_trial_variant(spec, fixture, q_true, q_perturbed, controls)
 
     dt_elapsed = (time.perf_counter() - t0) * 1000.0
     p50 = max(p50, dt_elapsed * 0.5)
