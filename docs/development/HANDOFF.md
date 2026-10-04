@@ -37,6 +37,40 @@
   - `check_architecture_budget.py`, `check_file_size_budget.py`, `check_dry_duplication_gate.py`, `check_error_handling_ratchet.py`: all passed.
   - `divergence_inventory.py --check`: passed.
 
+# Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance — #11421 / #11431
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-10-ablation-study-11431`; PR: #11488 (`Closes #11431`, `Refs #11421`)
+- Governing issue: #11431 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-10] Ablation Study and Accuracy-Runtime Acceptance: evaluate the six preregistered baseline/method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera error) under marked, markerless, and hybrid observation modes; fail closed on seeded data leakage, test-set tuning, and winning-trial filtering; guard zero denominators in dominance metrics; evaluate uncertainty coverage and record p50/p95 latency and global-refinement cost separately.
+- Completed:
+  - `src/shared/python/estimation/dime_benchmark_ablations.py`:
+    - `DimeAblationVariant`: six preregistered variants (`KINEMATIC_IK`, `CLASSICAL_MHE`, `DRIFT_PRIOR_ZTCF`, `DRIFT_CONTACT_CONSTRAINED`, `DRIFT_OFFLINE_SMOOTHED`, `DRIFT_ACCELERATED_PROPOSAL`).
+    - `PerturbationKind`: `NOISE`, `OCCLUSION`, `TORQUE_BIAS`, `CONTACT_CHANGE`, `MODEL_CAMERA_ERROR`.
+    - `ObservationMode`: `MARKED`, `MARKERLESS`, `HYBRID`.
+    - `AblationTrialSpec`: trial specification with anti-leakage validation (`has_data_leakage`, `test_set_tuned`).
+    - `AblationTrialResult`: structured result capturing RMSE, alignment, drift dominance, 2-sigma uncertainty coverage, p50/p95 latency, global refinement cost, hardware metrics, and optional `ReplayReceipt`.
+    - `AblationSummaryTable`: aggregated suite summary ensuring fail-closed retention of all trials and failures.
+    - `AblationBenchmarkSuite`: benchmark runner rejecting selective reporting of only winning trials.
+    - `compute_ablation_dominance_metric`: calculates ratio with `"guarded_zero"` policy returning `0.0` to eliminate zero-division risks.
+    - `run_ablation_trial` & `run_dime_ablation_suite`: execution harnesses with deterministic reproduction and full failure retention.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-10 symbols in alphabetical order.
+  - `tests/unit/estimation/test_dime_benchmark_ablations.py`: 12 focused behavioral tests (RED & GREEN):
+    - RED seeded data leakage fails closed (`PreconditionError`).
+    - RED test-set tuning fails closed (`PreconditionError`).
+    - RED zero denominator in dominance metric guarded safely or raises under strict policy.
+    - RED reporting only winning trials fails closed (`PreconditionError`).
+    - GREEN deterministic reproduction across runs with identical seed.
+    - GREEN all trials, failures, and unqualified statuses retained in summary tables.
+    - GREEN uncertainty coverage computed (>= 0.85 for 2-sigma confidence).
+    - GREEN p50/p95 latency and global-refinement cost recorded separately.
+    - GREEN all 6 variants evaluated across perturbations and modalities.
+    - GREEN headless import purity verified without GUI dependencies.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_benchmark_ablations.py`: 12 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 239 passed, 1 skipped (jax).
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to dependent qualification gates under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay — #11421 / #11430
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11484 (`Closes #11430`, `Refs #11421`)
