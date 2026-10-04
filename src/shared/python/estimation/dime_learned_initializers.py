@@ -310,6 +310,22 @@ def _compute_window_gap(ep1: TeacherEpisode, ep2: TeacherEpisode) -> float:
     return -1.0  # Overlapping
 
 
+def _build_initial_complete_state(
+    t_start: float,
+    q: np.ndarray,
+    v: np.ndarray,
+    model_hash: str,
+) -> DimeCompleteState:
+    """Construct initial DimeCompleteState with standard canonical units."""
+    return DimeCompleteState(
+        t=float(t_start),
+        q=q,
+        v=v,
+        model_hash=model_hash,
+        units={"angle": "rad", "time": "s"},
+    )
+
+
 def validate_dataset_split(
     train_episodes: Sequence[TeacherEpisode],
     eval_episodes: Sequence[TeacherEpisode],
@@ -431,12 +447,8 @@ class ClassicalPhysicalInitializer:
         """Generate classical zero-torque / constant-velocity initial state."""
         q_init = np.zeros(self.u_dim, dtype=np.float64)
         v_init = np.zeros(self.u_dim, dtype=np.float64)
-        state = DimeCompleteState(
-            t=float(window.t_start),
-            q=q_init,
-            v=v_init,
-            model_hash=self.model_hash,
-            units={"angle": "rad", "time": "s"},
+        state = _build_initial_complete_state(
+            window.t_start, q_init, v_init, self.model_hash
         )
         return DimeInitializerCandidate(
             state=state,
@@ -532,12 +544,8 @@ class LearnedProposalInitializer:
 
         q_init = np.array([0.1, -0.2], dtype=np.float64)
         v_init = np.array([0.05, 0.0], dtype=np.float64)
-        state = DimeCompleteState(
-            t=float(window.t_start),
-            q=q_init,
-            v=v_init,
-            model_hash=self.model_hash,
-            units={"angle": "rad", "time": "s"},
+        state = _build_initial_complete_state(
+            window.t_start, q_init, v_init, self.model_hash
         )
         return DimeInitializerCandidate(
             state=state,
