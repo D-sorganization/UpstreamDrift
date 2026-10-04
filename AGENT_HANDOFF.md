@@ -1,3 +1,14 @@
+# DIME: ZTCF-Anchored Kinematic Matching — #11421 / #11425
+
+- Repository: `D-sorganization/UpstreamDrift`; working directory `/home/user/upstreamdrift`; branch `claude/kinematic-matching-epic-7a7azh`; commit SELF; PR: not created
+- Governing issues: DIME-04 #11425, DIME-16 #11437, DIME-09 #11430 (partial); parent epic #11421. Dev-log entry DL-#11425.
+- Objective: owner's ZTCF prediction strategy — ZTCF (+ previous torque held constant) predicts the next state, a rate-limited torque band bounds viable deviations, observations outside the band are ruled out, and the torque profile is the overlay of small local solutions; then a forward-dynamics replay.
+- Completed: `estimation/drift_prediction.py`, `local_torque_window.py`, `drift_anchored_matcher.py`, `matching_quality.py` (Sonnet agent), `synthetic_swing.py` (Sonnet agent); facade exports in `estimation/__init__.py`; method note `docs/estimation/drift_anchored_matching.md`; registry blocker `UP-D1-dime-drift-anchored-matching-inventory`.
+- Key decisions: contact and manifold coordinates refused (not extrapolated); saturation = global actuator box only, rate-limit activity reported separately; unweighted `raw_rms_residual` reported because robust inlier chi2 hides unreachable motion; sparse windows extend across gaps; carried arrival stds are fixed approximations pending DIME-07.
+- Validation: `python3 -m pytest tests/unit/estimation -q --timeout=60` (new suites: test_dime_drift_prediction 27, test_dime_local_window 17, test_dime_drift_anchored_matcher 14, test_matching_quality 33, test_synthetic_swing 24); `ruff check`/`ruff format --check` clean on changed paths; `python3 -m scripts.check_design_manual_governance` passes. mypy not installed in this container. Native MuJoCo/JAX lanes not available here (skipped, not evidence).
+- Risks: open-loop replay drifts 0.04–0.07 rad on noisy data (needs whole-trajectory refinement); about 14 s per 0.4 s match in pure Python.
+- Next steps: (1) whole-trajectory replay refinement; (2) open the PR and update epic #11421 with the refined plan; (3) DIME-14 speed-up (analytic sensitivities); (4) contact-mode provider integration via #10286 before any full-body use.
+
 # Active: OpenCap to OpenSim Integration — #11400
 
 - Branch `feat/opencap-import-11409` at SELF; PR #11409. Slice covers #11409 (OpenCap: Import Session Action in PyQt6 and React/Tauri).
