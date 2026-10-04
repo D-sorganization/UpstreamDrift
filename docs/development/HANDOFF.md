@@ -1,3 +1,43 @@
+# Dynamics-Informed Mocap Matching: Profile and Accelerate Native Drift and Window Solves — #11421 / #11435
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11435-solver-cache`; PR: #11435 (`Closes #11435`, `Refs #11421`)
+- Governing issue: #11435 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-14] Profile and accelerate native drift and window solves with exact and approximate local models, explicit validity radius ($\epsilon_{\text{valid}}$), mandatory refresh rules, detailed cost breakdown across solver phases, thread/session isolation, and fail-closed guards against stale caching, cross-job contamination, impact derivative misuse, and skipped replay.
+- Completed:
+  - `src/shared/python/estimation/dime_solver_cache.py`:
+    - `DimeSolverCacheKey`: immutable composite key covering model digest, parameters hash, state signature, contact policy/mode, solver configuration, session ID, camera calibration digest, and body segment digest. Generates SHA-256 composite digest.
+    - `LocalLinearizationModel`: first-order Taylor expansion of drift acceleration ($a \approx a_0 + J_q \Delta q + J_v \Delta v$) with explicit validity radius ($\epsilon_{\text{valid}}$) and mandatory refresh rules. Contact mode changes or impact transitions (`derivatives_valid=False`) immediately invalidate local linearization fail-closed (`ImpactLinearizationError`).
+    - `DimeCostBreakdown`: fine-grained timing and invocation breakdown across drift evaluation, full-step rollout, Jacobian computation, linear system assembly/factorization, window solve, and independent replay.
+    - `DimeSolverCacheReceipt`: structured performance and audit receipt exporting hit/miss counters, hit rate, eviction count, memory footprint, cold vs warm execution time, speedup ratio, cost profiles, and provenance.
+    - `DimeSolverCache`: thread-safe LRU cache enforcing strict session isolation (`CrossJobContaminationError`) and stale cache rejection across camera, body, or contact modifications (`StaleCacheError`).
+    - `execute_independent_replay`: fail-closed independent forward rollout verifying recovered state-control trajectories without permitting skipped replay or artificial shortcuts (`SkippedReplayError`).
+    - `solve_accelerated_dime_window`: accelerated window solver delivering identical provider semantics with verified warm solve acceleration.
+  - `src/shared/python/estimation/__init__.py`: re-exports all public DIME-14 solver cache symbols in `__all__`.
+  - `tests/unit/estimation/test_dime_solver_cache.py`: 14 comprehensive behavioral unit tests:
+    - Key generation, composition, and sensitivity to model, parameters, camera, body, contact, and session.
+    - RED stale cache rejected on camera, body, or contact modification (`StaleCacheError`).
+    - RED cross-job native state contamination fails closed with `CrossJobContaminationError`.
+    - RED inaccurate derivative at impact / discrete contact switch fails closed with `ImpactLinearizationError`.
+    - RED speedup claims from skipped replay fail closed with `SkippedReplayError`.
+    - GREEN exact cached vs fresh evaluation equivalence within numerical tolerance $< 10^{-12}$.
+    - GREEN bounded approximation error inside validity radius ($\epsilon_{\text{valid}}$).
+    - GREEN validity radius exceeded triggers mandatory refresh.
+    - GREEN thread concurrency and session isolation across concurrent workers.
+    - GREEN measured cold vs warm speedup with detailed cost breakdown.
+    - GREEN structured receipt export and JSON roundtrip.
+  - `SPEC.md`: added DIME-14 specification section and recorded pull request in Section 12 Change Log table.
+  - `docs/development/DEVELOPMENT_LOG.md`: updated DL-#11421 entry.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_solver_cache.py`: 14 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 229 passed, 1 skipped (jax).
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_error_handling_ratchet.py`: passed.
+  - `check_lod.py`: clean no-growth scan, 0 violations.
+  - `check_spec_paths.py`: passed.
+  - `check_spec_changelog_duplicates.py`: passed.
+  - `ruff format --check` and `ruff check`: passed.
+
 # Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates — #11421 / #11429
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11429-global-calibration`; PR: #11467 (`Closes #11429`, `Refs #11421`)

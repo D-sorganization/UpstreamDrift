@@ -1,3 +1,26 @@
+## Dynamics-Informed Mocap Matching: Profile and Accelerate Native Drift and Window Solves (DIME-14, #11435)
+
+Specifies thread-safe solver caching, local model linearization with explicit validity radius ($\epsilon_{\text{valid}}$), mandatory refresh and invalidation rules, fine-grained profiling cost breakdown, fail-closed cross-job state isolation, and audit receipt generation for dynamics-informed mocap matching (#11421, #11435):
+- **Solver Cache Key & Identity (`DimeSolverCacheKey`, `src/shared/python/estimation/dime_solver_cache.py`)**:
+  - Immutable composite key combining model topology digest, physical parameter hash, state vector signature ($q, v$, controls), contact mode/policy, solver configuration, isolated session ID, camera calibration digest, and body segment digest.
+  - Generates authoritative SHA-256 composite digest (`to_composite_key`) ensuring identical provider semantics.
+- **Local Linearization & Validity Radius (`LocalLinearizationModel`)**:
+  - Evaluates first-order Taylor expansion of drift acceleration about a nominal center:
+    \[
+    a(q, v) \approx a(q_0, v_0) + J_q (q - q_0) + J_v (v - v_0)
+    \]
+  - Explicit validity radius $\epsilon_{\text{valid}} > 0$ bounding Euclidean state displacement in tangent space: $\|[q - q_0; v - v_0]\|_2 \le \epsilon_{\text{valid}}$.
+  - Mandatory refresh rules: state excursions beyond $\epsilon_{\text{valid}}$ trigger a mandatory refresh/recomputation.
+  - Contact mode invalidation: discrete contact transitions (impact, liftoff, or mode changes) declare derivatives invalid (`derivatives_valid=False`) and reject smooth linearization fail-closed with `ImpactLinearizationError`.
+- **Fail-Closed Session Isolation & Integrity Guards**:
+  - `CrossJobContaminationError`: cross-job native-state access or contamination between distinct sessions is strictly prohibited and fails closed.
+  - `StaleCacheError`: modifying camera calibration, body segment parameters, or contact configuration renders existing cache entries stale and raises `StaleCacheError` upon mismatched retrieval.
+  - `SkippedReplayError`: independent replay (`execute_independent_replay`) verifies forward dynamic integration from initial conditions and cannot be bypassed, skipped, or artificially cached without full recomputation.
+- **Cost Profiling & Structured Receipt (`DimeCostBreakdown`, `DimeSolverCacheReceipt`)**:
+  - Detailed wall-clock and invocation accounting across drift evaluation, full-step rollout, Jacobian computation, linear system assembly/factorization, window solve, and independent replay.
+  - Structured audit receipt exporting hit/miss counters, hit rate, eviction count, memory footprint, cold vs warm execution time, speedup ratio, and lineage provenance.
+  - Accelerated window solver (`solve_accelerated_dime_window`) preserves exact provider semantics while achieving measurable warm solve acceleration.
+
 ## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
 
 Specifies outer-loop observable global calibration, physical gauge anchor verification (metric scale, gravity frame, mass, measured contact force), identifiability analysis via SVD with rank-deficiency nullspace freezing, realizable physical inertia tensor validation (symmetry, positive-definiteness, triangle inequalities on principal moments), and frozen-prior revision guards for dynamics-informed mocap matching (#11421, #11429):
@@ -8050,6 +8073,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11435 | [DIME-14] Profile and accelerate native drift and window solves: DimeSolverCacheKey, LocalLinearizationModel with validity radius epsilon_valid, DimeCostBreakdown, DimeSolverCacheReceipt, DimeSolverCache, execute_independent_replay, and solve_accelerated_dime_window (#11435, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |

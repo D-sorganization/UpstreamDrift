@@ -65,14 +65,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11428; #11422–#11426 closed; #11428 active)
-- **PR:** #11428
-- **Branch:** `feat/dime-11428-mhe-arrival`
-- **Paths:** `src/shared/python/estimation/moving_horizon.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_moving_horizon_estimator.py`
+- **Issue:** #11421 (children #11422–#11428, #11429, #11434, #11435; #11435 active)
+- **PR:** #11435
+- **Branch:** `feat/dime-11435-solver-cache`
+- **Paths:** `src/shared/python/estimation/dime_solver_cache.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_solver_cache.py`, `SPEC.md`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-04: DIME-07 MHE arrival information and safe window commits implemented and validated across 11 behavioral tests in test_moving_horizon_estimator.py (RED/GREEN). Represents arrival factor in tangent coordinates as square-root quadratic factor with rank and linearization metadata; implements rank-revealing marginalization with tested gauge policy retaining rank deficiency without diagonal jitter; verifies mathematical equivalence with batch MAP on linear-Gaussian fixture within frozen tolerance (1e-5); enforces safe window commits rejecting nonfinite/unsuccessful solves without corrupting accepted state and retaining diagnostics; handles late/irregular samples and prevents double-counted measurements via AccumulationGuard; bounds memory to O(1) across long horizons. All 53 estimation tests pass.
+- **Last verified:** 2026-10-04: DIME-14 Native Drift and Window Solves Profile and Acceleration Cache implemented and validated across 14 behavioral tests in test_dime_solver_cache.py (RED/GREEN). Validates composite cache keying (DimeSolverCacheKey), local model linearization (LocalLinearizationModel) with explicit validity radius (epsilon_valid) and mandatory refresh rules, fail-closed guards for stale cache, cross-job contamination, impact linearization, and skipped replay; verified cached vs fresh exact equivalence within < 1e-12, bounded approximation error, thread-safe session concurrency, measured cold vs warm speedup, and structured receipts (DimeSolverCacheReceipt). All 229 estimation unit tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
-- **Next step:** Advance to DIME-08 (#11429) observable global calibration and consistent prior updates.
+- **Next step:** Advance to next DIME deliverable or merge #11435.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
