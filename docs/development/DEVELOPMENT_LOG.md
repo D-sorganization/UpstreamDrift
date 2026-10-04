@@ -65,14 +65,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11425 in progress, #11422, #11423, #11424 closed; #11425 active)
-- **PR:** #11459
-- **Branch:** `feat/dime-drift-prediction-11425`
-- **Paths:** `src/shared/python/estimation/drift_prediction.py`, `src/shared/python/estimation/dime_contracts.py`, `src/shared/python/estimation/dime_observation_factors.py`, `src/shared/python/estimation/dime_manifest.py`, `tests/unit/estimation/test_dime_drift_prediction.py`
+- **Issue:** #11421 (children #11422–#11428; #11422–#11426 closed; #11428 active)
+- **PR:** #11428
+- **Branch:** `feat/dime-11428-mhe-arrival`
+- **Paths:** `src/shared/python/estimation/moving_horizon.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_moving_horizon_estimator.py`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-04: DIME-04 uncertain-control ZTCF prediction implemented and validated across 35 behavioral tests in test_dime_drift_prediction.py (RED/GREEN). Refuses active contact and invalid horizon with typed receipts, enforces runtime mutual exclusivity via RuntimeExclusivityContract, evaluates exact axis-aligned box-reachable parallelotope bounds, propagates Gaussian state distribution under uncertain inputs, and tracks authority-relative drift dominance index bounded in [0, 1]. All 166 estimation tests pass.
+- **Last verified:** 2026-10-04: DIME-07 MHE arrival information and safe window commits implemented and validated across 11 behavioral tests in test_moving_horizon_estimator.py (RED/GREEN). Represents arrival factor in tangent coordinates as square-root quadratic factor with rank and linearization metadata; implements rank-revealing marginalization with tested gauge policy retaining rank deficiency without diagonal jitter; verifies mathematical equivalence with batch MAP on linear-Gaussian fixture within frozen tolerance (1e-5); enforces safe window commits rejecting nonfinite/unsuccessful solves without corrupting accepted state and retaining diagnostics; handles late/irregular samples and prevents double-counted measurements via AccumulationGuard; bounds memory to O(1) across long horizons. All 53 estimation tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
-- **Next step:** Land PR #11459 for DIME-04 (#11425) and advance to DIME-05 (#11426).
+- **Next step:** Advance to DIME-08 (#11429) observable global calibration and consistent prior updates.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 

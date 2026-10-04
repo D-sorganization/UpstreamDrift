@@ -26,10 +26,16 @@ from src.shared.python.estimation.map_estimator import (
     solve_single_trial_map,
 )
 from src.shared.python.estimation.moving_horizon import (
+    AccumulationGuard,
+    ArrivalFactor,
+    FailureDiagnostics,
+    LateSamplePolicy,
     MovingHorizonEstimator,
     MovingHorizonOptions,
     MovingHorizonProblem,
     MovingHorizonResult,
+    WindowCommitStatus,
+    marginalize_arrival_factor,
 )
 from src.shared.python.estimation.multi_trial import (
     MultiTrialDecisionLayout,
@@ -183,7 +189,9 @@ from src.shared.python.estimation.dime_global_calibration import (
 )
 
 __all__ = [
+    "AccumulationGuard",
     "AnalyticPendulumProvider",
+    "ArrivalFactor",
     "BilateralAllocationStatus",
     "CalibrationParameter",
     "CalibrationParameterKind",
@@ -226,6 +234,7 @@ __all__ = [
     "DriftLinearization",
     "DynamicsProvider",
     "EstimationIntervalFactor",
+    "FailureDiagnostics",
     "FixedBasePendulumFixture",
     "ForceClassification",
     "ForceProvenance",
@@ -237,6 +246,7 @@ __all__ = [
     "IdentifiabilityGateOptions",
     "IdentifiabilityGateReport",
     "IdentifiabilityReport",
+    "LateSamplePolicy",
     "MapEstimatorOptions",
     "MapEstimatorProblem",
     "MapEstimatorResult",
@@ -292,6 +302,7 @@ __all__ = [
     "UncertainPrediction",
     "UnidentifiableParametersError",
     "VectorSpaceManifold",
+    "WindowCommitStatus",
     "ZeroDenominatorPolicy",
     "anthropometric_prior_residual",
     "autodiff_jacobian",
@@ -314,6 +325,7 @@ __all__ = [
     "make_planar_two_link_skeleton",
     "make_two_link_trajectory",
     "make_underactuated_analytic_fixture",
+    "marginalize_arrival_factor",
     "predict_dime_transition",
     "predict_step",
     "probe_identifiability",

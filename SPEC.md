@@ -16,6 +16,41 @@ Specifies outer-loop observable global calibration, physical gauge anchor verifi
   - Separates high-frequency inner-loop window estimator latency (`inner_loop_latency_s`) from outer-loop global calibration solver runtime (`outer_loop_time_s`), tracking cumulative latency and full cost breakdowns.
   - Losses roundtrip losslessly through JSON-compatible dictionary serialization.
 
+## Dynamics-Informed Mocap Matching: Extend Existing MHE With Arrival Information and Safe Window Commits (DIME-07, #11428)
+
+Specifies square-root quadratic arrival factor representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics retention, late/irregular sample handling, and measurement accumulation guard preventing double counting across window advances (#11421, #11428):
+- **Arrival Information Representation (`ArrivalFactor`)**:
+  - Represents arrival prior density in tangent coordinates about a reference state $\bar{x}$:
+    \[
+    c_{\text{arrival}}(x) = \frac{1}{2} \| R (x - \bar{x}) - r \|_2^2
+    \]
+    where $R$ is the square-root information matrix ($R^T R = \Lambda$) and $r$ is the residual offset.
+  - Carries revealed rank, optional linearization coordinates, and linearization metadata (timestamp, window index, model hash, provenance, scheme label).
+  - Exposes `evaluate_residual`, `evaluate_cost`, `evaluate_jacobian`, and `is_rank_deficient`.
+- **Rank-Revealing Marginalization (`marginalize_arrival_factor`)**:
+  - Eliminates the oldest state $\delta x_0$ from the coupled linear system $A_0 \delta x_0 + A_1 \delta x_1 \approx b$ using full SVD decomposition $A_0 = U \Sigma V^T$.
+  - When $A_0$ is singular or rank-deficient, the unobserved nullspace directions are decoupled; the resulting arrival factor on $\delta x_1$ retains the exact rank deficiency without adding artificial diagonal jitter.
+  - Tested gauge policies:
+    - `"retain_rank_deficiency"` (default): retains revealed rank $r < n_1$ and sets below-threshold singular values to zero without diagonal inflation.
+    - `"fail_closed"`: raises `PreconditionError` if singular/unsupported directions exist in $A_0$.
+  - Exact equivalence with batch MAP on linear-Gaussian systems within frozen numerical tolerance ($10^{-5}$).
+- **Safe Window Commits & Failure Diagnostics (`WindowCommitStatus`, `FailureDiagnostics`)**:
+  - Validates window optimization results before committing state: checks solver success, finite coefficients, finite residuals, and absence of non-finite evaluations / sentinel replacements.
+  - If a solve fails, diverges, or encounters non-finite values, commit status is set to `REJECTED_NONFINITE` or `REJECTED_UNSUCCESSFUL`.
+  - Rejected solves do not replace `last_accepted_coefficients` or `last_accepted_trajectory`, preventing future warm-start poisoning.
+  - Detailed failure diagnostics (`FailureDiagnostics`) are recorded separately in bounded history (`max_history_diagnostics`).
+  - Subsequent successful windows recover deterministically using the last valid accepted state.
+- **Late & Irregular Sample Handling (`LateSamplePolicy`)**:
+  - `REJECT`: strictly enforces monotonic sample advance, raising `PreconditionError` on non-positive time differences or duplicates.
+  - `DROP_LATE`: gracefully drops out-of-order or duplicate timestamps while keeping valid advancing samples.
+  - Supports non-uniform sampling intervals ($\Delta t_i \ne \Delta t_j$) natively in spline and window solves.
+- **Accumulation Guard (`AccumulationGuard`)**:
+  - Tracks all sample indices and timestamps that have been marginalized into the arrival factor.
+  - Prevents double counting by raising `PreconditionError` if an already-marginalized measurement is reintroduced as an active observation factor.
+- **Bounded Memory & Latency Budget**:
+  - Retains strictly $O(1)$ memory across long horizons by bounding sample buffers and failure history.
+  - Records achieved per-window latency in milliseconds (`latency_ms`) alongside configured budget (`latency_budget_ms`).
+
 ## Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints (DIME-06, #11427)
 
 Specifies unilateral ground support constraints, Coulomb friction cone bounding, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions for dynamics-informed mocap matching (#11421, #11427):
@@ -7994,6 +8029,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
+| 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
 | 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
