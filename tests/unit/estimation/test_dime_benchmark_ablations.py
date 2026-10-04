@@ -285,7 +285,7 @@ print("HEADLESS_IMPORT_OK")
 
     repo_root = Path(__file__).resolve().parents[3]
     env = os.environ.copy()
-    env["PYTHONPATH"] = f"{repo_root}:{repo_root / 'src'}"
+    env["PYTHONPATH"] = os.pathsep.join([str(repo_root), str(repo_root / "src")])
     result = subprocess.run(
         [sys.executable, "-c", script],
         cwd=repo_root,
