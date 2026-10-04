@@ -8,6 +8,33 @@
 - Validation: `python3 -m pytest tests/unit/estimation -q --timeout=60` (new suites: test_dime_drift_prediction 27, test_dime_local_window 17, test_dime_drift_anchored_matcher 14, test_matching_quality 33, test_synthetic_swing 24, test_dime_replay_refinement 10); shared benchmark fixtures in `tests/unit/estimation/conftest.py`; `ruff check`/`ruff format --check` clean on changed paths; `python3 -m scripts.check_design_manual_governance` passes. mypy not installed in this container. Native MuJoCo/JAX lanes not available here (skipped, not evidence).
 - Risks: about 14 s per 0.4 s match plus 6–13 s per refinement in pure Python (finite differences); replay refinement does not enforce the rate limit; single shooting may need multiple shooting on longer horizons.
 - Next steps: (1) open the PR and update epic #11421 with the refined plan; (2) DIME-14 speed-up (analytic/variational sensitivities); (3) contact-mode provider integration via #10286 before any full-body use; (4) run on the owner/tour captures only after DIME-01 freezes metrics.
+# Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol — #11421 / #11422
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11422-baseline-benchmark`; commit SELF; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
+- Governing issue: #11422 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-01] Establish versioned benchmark manifest, native capability status ('implemented', 'qualified', 'unavailable') separated from method existence, fail-closed physical qualification rules, shared deterministic fixtures (fixed-base pendulum, underactuated analytic, and native stance), private capture dataset protection, and frozen numeric acceptance thresholds fixed prior to solver comparison.
+- Completed:
+  - `src/shared/python/estimation/dime_manifest.py`:
+    - `DimeBenchmarkManifest`: versioned, immutable schema specifying dataset/model/engine revisions, split policies (calibration vs holdout and phase partitions), SI unit constraints, observation types, known truth, force classifications, provenance records, privacy specifications, and frozen numeric thresholds.
+    - `evaluate_qualification()`: fail-closed validation enforcing canonical SI units, complete provenance, non-circular test kinematics (`kinematics_source != "force_derived"`), and rejection of kinematic skeleton contact outputs (`has_skeleton_contact == False`). Unqualified models that exist are marked as `implemented`, preserving honest distinction between implementation existence and physical qualification.
+    - `report_native_capabilities()`: truthfully separates method existence from physical qualification status (`"implemented"`, `"qualified"`, `"unavailable"`).
+    - `compute_alignment_metric` & `compute_cancellation_metric`: signals and force cancellation metrics with configurable `ZeroDenominatorPolicy` (`"guarded_zero"`, `"epsilon"`, `"raise"`).
+    - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
+    - `run_dime_baseline`: deterministic baseline execution on shared fixtures reproducing bit-for-bit across recorded seeds.
+    - Privacy protection: `to_dict` and `save_json` strictly redact local filesystem paths, ensuring private capture datasets remain confidential.
+  - `src/shared/python/estimation/synthetic_fixtures.py`:
+    - `make_fixed_base_pendulum_fixture`: deterministic single-DOF fixed-base pendulum with exact harmonic linear oscillator truth, pin reaction forces, zero control torques, and documented mathematical derivation.
+    - `make_underactuated_analytic_fixture`: deterministic planar two-link system with unactuated root DOF ($\tau_0 = 0$), sinusoidal actuated joint ($\tau_1(t)$), and degree of underactuation 1.
+    - `make_native_stance_fixture`: static equilibrium ground stance fixture validating vertical ground reaction force $\text{GRF}_z = m \cdot g$, zero horizontal forces, and static joint holding torques.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new DIME benchmark and fixture symbols.
+  - `tests/unit/estimation/test_dime_benchmark_manifest.py`: 13 focused behavioral tests covering RED disqualification rules (wrong units, missing provenance, force-derived test kinematics, skeleton contact output) and GREEN baseline reproducibility, privacy protection, phase metrics, zero-denominator policies, capability status reporting, and serialization round-trip.
+  - `tests/unit/estimation/test_synthetic_ground_truth.py`: added tests verifying initial state, controls, sampling, units, and exact truth derivation for the three shared deterministic fixtures.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_benchmark_manifest.py`: 13 passed.
+  - `pytest tests/unit/estimation`: 73 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_file_size_budget.py` and `check_error_handling_ratchet.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-02 under epic #11421.
 
 # OpenCap: Golf Accuracy Qualification Against a Marker Reference — #11400 / #11408
 
