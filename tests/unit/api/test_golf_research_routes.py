@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event, Lock
 from types import SimpleNamespace
 
 import pytest
@@ -21,6 +23,46 @@ from src.shared.python.golf_simulator import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def test_reused_id_during_authentication_is_refused(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    connect(client)
+    entered, release, lock = Event(), Event(), Lock()
+    calls = 0
+
+    def authenticate(*args: object) -> SimpleNamespace:
+        nonlocal calls
+        with lock:
+            calls += 1
+            first = calls == 1
+        if first:
+            entered.set()
+            assert release.wait(10)
+        return admitted(args[-1])
+
+    monkeypatch.setattr(golf_research, "load_research_impact_shot", authenticate)
+    path = "/tools/golf-simulator/shot/prepare-research-impact"
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        delayed = pool.submit(client.post, path, json=payload())
+        try:
+            assert entered.wait(10)
+            first_completed = client.post(path, json=payload())
+            assert first_completed.status_code == 200
+            prepared_id = first_completed.json()["prepared_shot_id"]
+            assert (
+                client.post(
+                    "/tools/golf-simulator/shot/cancel",
+                    json={"prepared_shot_id": prepared_id},
+                ).status_code
+                == 200
+            )
+        finally:
+            release.set()
+        response = delayed.result(timeout=10)
+    assert response.status_code == 409
+    assert golf_simulator.get_current_session_service().current_state.value == "idle"
 
 
 @pytest.fixture

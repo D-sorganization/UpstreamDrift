@@ -64,17 +64,21 @@ def _local_session(session_id: str | None = None) -> GolfSessionService:
     return service
 
 
+def _require_unused_shot(service: GolfSessionService, shot_id: str) -> None:
+    if (
+        shot_id in _contexts.get(service, {})
+        or service.delivery_status(shot_id) is not None
+    ):
+        raise HTTPException(409, "Research shot identity has already been used")
+
+
 @router.post("/shot/prepare-research-impact")
 async def prepare_research_impact(
     request: ResearchPrepareRequest, library: Library
 ) -> dict[str, Any]:
     """Authenticate saved evidence off-loop; explicitly prepare without arming."""
     service = _local_session(request.session_id)
-    if (
-        request.shot_id in _contexts.get(service, {})
-        or service.delivery_status(request.shot_id) is not None
-    ):
-        raise HTTPException(409, "Research shot identity has already been used")
+    _require_unused_shot(service, request.shot_id)
     try:
         aim = AimContext(
             tuple(tuple(row) for row in request.aim_context.source_to_target_rotation),  # type: ignore[arg-type]
@@ -97,6 +101,7 @@ async def prepare_research_impact(
         )
         if get_current_session_service() is not service:
             raise HTTPException(409, "Session changed during research admission")
+        _require_unused_shot(service, request.shot_id)
         context = admitted.to_record()
         if (
             context.get("replay_id") != request.replay_id

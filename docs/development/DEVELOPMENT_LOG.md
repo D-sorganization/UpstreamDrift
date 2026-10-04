@@ -3839,3 +3839,18 @@ and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json)
 Historical fits, scientific qualification, simulation golf and final overall
 desktop parity acceptance remain open. No new ControlTower delivery or remote
 CI-green claim is made. The full goal remains active.
+
+## Local Research Admission Race Follow-Up — #11493
+
+A concurrent request regression reproduced reused shot-ID admission after another
+request prepared and cancelled during authentication. The API now applies the
+same identity guard before and immediately after authentication. All 10 API
+cases pass; a fresh additional actual MuJoCo/clean-worker/Rust API and Qt
+acceptance passes in 24.56 s, with seven exact retained samples and no
+re-simulation on recall. Configured mypy passes for the changed API owner.
+The earlier 209-case cohort and 106 React cases remain separate checkpoint
+evidence. The follow-up preserves unverified qualification and all historical
+limits; the full goal remains active.
+
+See [Follow-Up Review](historical_capture/local-research-golf-admission-race-review.json). Source inventory covers 6,697 src/test
+files, with equal before/after maps; this is not a whole-repository baseline.
