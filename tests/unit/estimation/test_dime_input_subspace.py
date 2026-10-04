@@ -23,7 +23,9 @@ from src.shared.python.estimation.dime_contracts import (
 from src.shared.python.estimation.dime_input_subspace import (
     DimeInputSubspaceFactor,
     DimeSubspaceReport,
+    MaskedIntervalControlPrior,
     MaskedPredictionResult,
+    SubspaceContactInteraction,
     SubspaceDecomposition,
     SubspaceFeasibilityEvaluation,
     decompose_input_subspace,
@@ -198,7 +200,7 @@ class TestRedCases:
             drift_accel=drift_acc,
             input_matrix=B,
             covariance=cov,
-            contact_forces=None,
+            contact=None,
             threshold_chi2=9.0,
         )
         assert not res_flight.is_drift_feasible
@@ -215,9 +217,11 @@ class TestRedCases:
             drift_accel=drift_acc,
             input_matrix=B,
             covariance=cov,
-            contact_jacobian=J_c,
-            contact_forces=contact_force,
-            mass_matrix=mass_mat,
+            contact=SubspaceContactInteraction(
+                jacobian=J_c,
+                forces=contact_force,
+                mass_matrix=mass_mat,
+            ),
             threshold_chi2=9.0,
         )
         # In stance with contact reaction eliminated, vertical acceleration 0 is physically feasible!
@@ -390,8 +394,7 @@ class TestGreenCases:
             initial_state=initial_state,
             input_matrix=B,
             drift_accel=drift_acc,
-            control_prior_mean=u_mean,
-            control_prior_cov=u_cov,
+            control_prior=MaskedIntervalControlPrior(mean=u_mean, covariance=u_cov),
             observation_mask=mask,
             dt=dt,
             horizon=horizon,

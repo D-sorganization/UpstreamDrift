@@ -51,7 +51,9 @@ __all__ = [
     "DIME_INPUT_SUBSPACE_VERSION",
     "DimeInputSubspaceFactor",
     "DimeSubspaceReport",
+    "MaskedIntervalControlPrior",
     "MaskedPredictionResult",
+    "SubspaceContactInteraction",
     "SubspaceDecomposition",
     "SubspaceFactorMode",
     "SubspaceFeasibilityEvaluation",
@@ -212,6 +214,62 @@ def _solve_subspace_torque(
     return tau_opt
 
 
+@dataclass(frozen=True)
+class SubspaceContactInteraction:
+    """Contact Jacobian, forces, and mass matrix for contact reaction acceleration."""
+
+    jacobian: np.ndarray
+    forces: np.ndarray
+    mass_matrix: np.ndarray
+
+
+def _compute_contact_acceleration(
+    contact: SubspaceContactInteraction | tuple[np.ndarray, np.ndarray, np.ndarray],
+    n: int,
+) -> tuple[np.ndarray, int]:
+    """Compute contact reaction acceleration and contact rank."""
+    if isinstance(contact, tuple):
+        contact_obj = SubspaceContactInteraction(
+            jacobian=contact[0], forces=contact[1], mass_matrix=contact[2]
+        )
+    else:
+        contact_obj = contact
+
+    forces = _finite_vector("contact.forces", contact_obj.forces)
+    j_c = _finite_matrix("contact.jacobian", contact_obj.jacobian)
+    m_mat = _finite_matrix("contact.mass_matrix", contact_obj.mass_matrix)
+    require(
+        j_c.shape[0] == forces.size,
+        "contact_jacobian rows must match contact_forces",
+    )
+    require(j_c.shape[1] == n, "contact_jacobian cols must match coordinate size")
+    require(m_mat.shape == (n, n), "mass_matrix must be square with size n")
+
+    contact_load = j_c.T @ forces
+    a_contact = np.linalg.solve(m_mat, contact_load)
+    contact_rank = int(np.linalg.matrix_rank(j_c))
+    return a_contact, contact_rank
+
+
+def _evaluate_control_feasibility(
+    decomp: SubspaceDecomposition,
+    whitened_residual: np.ndarray,
+    control_band: ControlBand | None,
+) -> tuple[np.ndarray | None, bool]:
+    """Evaluate optimal torque and box bound feasibility inside actuated subspace."""
+    if decomp.rank == 0:
+        return None, True
+    optimal_tau = _solve_subspace_torque(decomp, whitened_residual)
+    if control_band is None:
+        return optimal_tau, True
+    lo, hi = control_band.lower, control_band.upper
+    tol_bound = 1e-5
+    within_box = np.all(optimal_tau >= lo - tol_bound) and np.all(
+        optimal_tau <= hi + tol_bound
+    )
+    return optimal_tau, bool(within_box)
+
+
 def evaluate_input_subspace_feasibility(
     candidate_accel: np.ndarray,
     drift_accel: np.ndarray,
@@ -219,9 +277,9 @@ def evaluate_input_subspace_feasibility(
     covariance: np.ndarray,
     *,
     control_band: ControlBand | None = None,
-    contact_jacobian: np.ndarray | None = None,
-    contact_forces: np.ndarray | None = None,
-    mass_matrix: np.ndarray | None = None,
+    contact: SubspaceContactInteraction
+    | tuple[np.ndarray, np.ndarray, np.ndarray]
+    | None = None,
     tolerance: float | None = None,
     threshold_chi2: float = 9.0,
 ) -> SubspaceFeasibilityEvaluation:
@@ -235,39 +293,20 @@ def evaluate_input_subspace_feasibility(
         (a_drift.size, n),
     )
 
-    # Incorporate eliminated contact reactions
     a_contact = np.zeros(n, dtype=np.float64)
     contact_rank = 0
-    if contact_forces is not None:
-        forces = _finite_vector("contact_forces", contact_forces)
-        if contact_jacobian is None or mass_matrix is None:
-            raise PreconditionError(
-                "contact_jacobian and mass_matrix required when contact_forces provided"
-            )
-        j_c = _finite_matrix("contact_jacobian", contact_jacobian)
-        m_mat = _finite_matrix("mass_matrix", mass_matrix)
-        require(
-            j_c.shape[0] == forces.size,
-            "contact_jacobian rows must match contact_forces",
-        )
-        require(j_c.shape[1] == n, "contact_jacobian cols must match coordinate size")
-        require(m_mat.shape == (n, n), "mass_matrix must be square with size n")
-
-        contact_load = j_c.T @ forces
-        a_contact = np.linalg.solve(m_mat, contact_load)
-        contact_rank = int(np.linalg.matrix_rank(j_c))
+    if contact is not None:
+        a_contact, contact_rank = _compute_contact_acceleration(contact, n)
 
     effective_drift = a_drift + a_contact
     raw_res = a_cand - effective_drift
 
     decomp = decompose_input_subspace(input_matrix, covariance, tolerance=tolerance)
-    w_mat = decomp.whitening_transform
-    r_w = w_mat @ raw_res
+    r_w = decomp.whitening_transform @ raw_res
 
     # Orthogonal projection: unactuated / torque-independent subspace
     u_perp = decomp.orthogonal_basis
     if u_perp.shape[1] == 0:
-        # Fully actuated system: projection onto orthogonal complement adds no information
         r_perp = np.zeros(0, dtype=np.float64)
         chi2_perp = 0.0
         drift_feasible = True
@@ -276,19 +315,9 @@ def evaluate_input_subspace_feasibility(
         chi2_perp = float(np.sum(r_perp**2))
         drift_feasible = chi2_perp <= threshold_chi2
 
-    # Inside actuated subspace: bounded control feasibility
-    optimal_tau = None
-    control_feasible = True
-    if decomp.rank > 0:
-        optimal_tau = _solve_subspace_torque(decomp, r_w)
-        if control_band is not None:
-            lo, hi = control_band.lower, control_band.upper
-            tol_bound = 1e-5
-            within_box = np.all(optimal_tau >= lo - tol_bound) and np.all(
-                optimal_tau <= hi + tol_bound
-            )
-            control_feasible = bool(within_box)
-
+    optimal_tau, control_feasible = _evaluate_control_feasibility(
+        decomp, r_w, control_band
+    )
     overall_feasible = bool(drift_feasible and control_feasible)
 
     diag: dict[str, Any] = {
@@ -318,6 +347,14 @@ def evaluate_input_subspace_feasibility(
 
 
 @dataclass(frozen=True)
+class MaskedIntervalControlPrior:
+    """Mean and covariance for uncertain control during masked interval prediction."""
+
+    mean: np.ndarray
+    covariance: np.ndarray
+
+
+@dataclass(frozen=True)
 class MaskedPredictionResult:
     """Calibrated trajectory prediction across masked/missing observation intervals."""
 
@@ -336,8 +373,7 @@ def predict_masked_interval(
     initial_state: DimeCompleteState,
     input_matrix: np.ndarray,
     drift_accel: np.ndarray,
-    control_prior_mean: np.ndarray,
-    control_prior_cov: np.ndarray,
+    control_prior: MaskedIntervalControlPrior | tuple[np.ndarray, np.ndarray],
     observation_mask: np.ndarray,
     dt: float,
     horizon: int,
@@ -367,16 +403,21 @@ def predict_masked_interval(
     )
     m = b_mat.shape[1]
 
-    u_mean = _finite_vector("control_prior_mean", control_prior_mean)
-    u_cov = _finite_matrix("control_prior_cov", control_prior_cov)
+    if isinstance(control_prior, tuple):
+        prior_mean, prior_cov = control_prior
+    else:
+        prior_mean, prior_cov = control_prior.mean, control_prior.covariance
+
+    u_mean = _finite_vector("control_prior.mean", prior_mean)
+    u_cov = _finite_matrix("control_prior.covariance", prior_cov)
     require(
         u_mean.size == m,
-        "control_prior_mean size must match input columns",
+        "control_prior.mean size must match input columns",
         (u_mean.size, m),
     )
     require(
         u_cov.shape == (m, m),
-        "control_prior_cov shape must be (m, m)",
+        "control_prior.covariance shape must be (m, m)",
         (u_cov.shape, m),
     )
 
