@@ -1086,6 +1086,22 @@
       "expires_on": "2026-10-23"
     },
     {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "_validate_entry",
+      "rule": "function-lines",
+      "owner": "claude",
+      "reason": "Exact fleet bundle from Repository_Management ee986664db5024e7b1136816f219a56aa1054377 (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "expires_on": "2027-01-31"
+    },
+    {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "validate_devlog_content",
+      "rule": "function-lines",
+      "owner": "claude",
+      "reason": "Exact fleet bundle from Repository_Management ee986664db5024e7b1136816f219a56aa1054377 (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "expires_on": "2027-01-31"
+    },
+    {
       "path": "src/shared/python/shadow_tracker/service.py",
       "symbol": "DefaultShadowTrackerService.import_video",
       "rule": "function-lines",
