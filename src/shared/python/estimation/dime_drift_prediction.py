@@ -314,17 +314,15 @@ class DimeDriftPredictor:
     def __init__(self, provider: DynamicsProvider) -> None:
         self._provider = provider
 
-    def predict(
+    def _check_contract_preconditions(
         self,
-        state_dist: StateDistribution,
-        control_dist: ControlDistribution,
         uncertainty: ModelContactUncertainty,
         horizon_s: float,
+        state: DimeCompleteState,
+        mode: PredictionMode,
         dt: float,
-        mode: PredictionMode = PredictionMode.MARGINALIZED_CONTROL,
-    ) -> DimeDriftPredictionResult:
-        """Propagate state and uncertainty over horizon under explicit or marginalized control."""
-        # 1. Fail-closed contract checks
+    ) -> DimeDriftPredictionResult | None:
+        """Evaluate fail-closed contract checks before prediction."""
         if not uncertainty.contact_phase_stable:
             return DimeDriftPredictionResult(
                 validity_status=PredictionValidityStatus.INVALID_CONTACT,
@@ -353,7 +351,6 @@ class DimeDriftPredictor:
                 linearization_control_jacobian_G=None,
             )
 
-        state = state_dist.mean
         if state.model_hash != self._provider.model_hash:
             return DimeDriftPredictionResult(
                 validity_status=PredictionValidityStatus.STALE_MODEL_HASH,
@@ -367,13 +364,78 @@ class DimeDriftPredictor:
                 linearization_drift_jacobian_F=None,
                 linearization_control_jacobian_G=None,
             )
+        return None
 
-        # 2. Compute zero-control branch (ZTCF)
+    def _propagate_covariance(
+        self,
+        F: np.ndarray,
+        G: np.ndarray,
+        state_dist: StateDistribution,
+        control_dist: ControlDistribution,
+        uncertainty: ModelContactUncertainty,
+        a_total: np.ndarray,
+        horizon_s: float,
+        n_v: int,
+    ) -> np.ndarray:
+        """Propagate state/control covariance and inflate with mass uncertainty."""
+        dim_x = n_v * 2
+        Q_proc = uncertainty.process_noise_covariance
+        if Q_proc.shape != (dim_x, dim_x):
+            Q_proc = np.eye(dim_x) * 1e-5
+
+        sigma_prop = (
+            F @ state_dist.covariance @ F.T + G @ control_dist.covariance @ G.T + Q_proc
+        )
+
+        if uncertainty.mass_uncertainty_std > 0.0:
+            sigma_m = uncertainty.mass_uncertainty_std
+            mass_var = np.zeros((dim_x, dim_x), dtype=np.float64)
+            for k in range(n_v):
+                mass_var[n_v + k, n_v + k] = (
+                    float(a_total[k]) * sigma_m * horizon_s
+                ) ** 2 + 1e-6 * sigma_m
+            sigma_prop = sigma_prop + mass_var
+
+        return _ensure_symmetric_psd(sigma_prop)
+
+    def _rollout_controlled_mean(
+        self, state: DimeCompleteState, u: np.ndarray, n_steps: int, dt: float
+    ) -> DimeCompleteState:
+        """Rollout nominal mean forward through discrete steps."""
+        curr_state = state
+        for _ in range(n_steps):
+            step_res = self._provider.step(
+                DimeFullStepRequest(
+                    state=curr_state,
+                    controls=u,
+                    dt=dt,
+                    model_hash=self._provider.model_hash,
+                )
+            )
+            curr_state = step_res.next_state
+        return curr_state
+
+    def predict(
+        self,
+        state_dist: StateDistribution,
+        control_dist: ControlDistribution,
+        uncertainty: ModelContactUncertainty,
+        horizon_s: float,
+        dt: float,
+        mode: PredictionMode = PredictionMode.MARGINALIZED_CONTROL,
+    ) -> DimeDriftPredictionResult:
+        """Propagate state and uncertainty over horizon under explicit or marginalized control."""
+        state = state_dist.mean
+        precondition_fail = self._check_contract_preconditions(
+            uncertainty, horizon_s, state, mode, dt
+        )
+        if precondition_fail is not None:
+            return precondition_fail
+
         ztcf_proposal = rollout_zero_input_proposal(
             self._provider, state, duration=horizon_s, dt=dt
         )
 
-        # 3. Compute acceleration decomposition at initial state
         decomp = self._provider.compute_acceleration_decomposition(
             state, control_dist.mean
         )
@@ -386,54 +448,24 @@ class DimeDriftPredictor:
         drift_gain = norm_passive / (norm_total + 1e-12)
         cancellation = compute_cancellation_metric(a_passive, a_ctrl)
 
-        # 4. Discrete rollout of controlled mean
         n_steps = max(1, int(round(horizon_s / dt)))
-        curr_state = state
-        curr_u = control_dist.mean
-        for _ in range(n_steps):
-            step_res = self._provider.step(
-                DimeFullStepRequest(
-                    state=curr_state,
-                    controls=curr_u,
-                    dt=dt,
-                    model_hash=self._provider.model_hash,
-                )
-            )
-            curr_state = step_res.next_state
+        pred_mean = self._rollout_controlled_mean(state, control_dist.mean, n_steps, dt)
 
-        pred_mean = curr_state
-
-        # 5. Linearization and covariance propagation over the horizon
         F, G = compute_linearization_jacobians(
             self._provider, state, control_dist.mean, dt=horizon_s
         )
 
-        # Propagate covariance: Sigma_{k+1} = F Sigma_x F^T + G Sigma_u G^T + Q
-        dim_x = len(state.v) * 2
-        Q_proc = uncertainty.process_noise_covariance
-        if Q_proc.shape != (dim_x, dim_x):
-            Q_proc = np.eye(dim_x) * 1e-5
-
-        sigma_prop = (
-            F @ state_dist.covariance @ F.T + G @ control_dist.covariance @ G.T + Q_proc
+        pred_cov = self._propagate_covariance(
+            F,
+            G,
+            state_dist,
+            control_dist,
+            uncertainty,
+            a_total,
+            horizon_s,
+            len(state.v),
         )
 
-        # Mass uncertainty inflation
-        if uncertainty.mass_uncertainty_std > 0.0:
-            sigma_m = uncertainty.mass_uncertainty_std
-            # Acceleration sensitivity wrt mass: d(a)/dm ≈ - a / m for inertial acceleration
-            # Add variance proportional to mass uncertainty on the velocity coordinates
-            n_v = len(state.v)
-            mass_var = np.zeros((dim_x, dim_x), dtype=np.float64)
-            for k in range(n_v):
-                mass_var[n_v + k, n_v + k] = (
-                    float(a_total[k]) * sigma_m * horizon_s
-                ) ** 2 + 1e-6 * sigma_m
-            sigma_prop = sigma_prop + mass_var
-
-        pred_cov = _ensure_symmetric_psd(sigma_prop)
-
-        # 6. Linearization error bound
         error_bound = evaluate_linearization_error(
             self._provider,
             state,
@@ -494,24 +526,26 @@ class DimeDriftTransitionCriterion(EstimationIntervalFactor):
         """Evaluate normalized residual vector between candidate transition and dynamics proposal."""
         require(self.provider is not None, "provider must be set")
         require(self.control_dist is not None, "control_dist must be set")
+        provider = self.provider
+        control_dist = self.control_dist
+        assert provider is not None
+        assert control_dist is not None
 
         dt = self.dt if self.dt > 0.0 else (x_kp1.t - x_k.t)
         require(dt > 0.0, "Time interval dt must be positive")
 
         # Step under zero control (ZTCF branch)
-        zero_u = np.zeros(len(self.control_dist.mean), dtype=np.float64)
-        ztcf_step = self.provider.step(
+        zero_u = np.zeros(len(control_dist.mean), dtype=np.float64)
+        ztcf_step = provider.step(
             DimeFullStepRequest(
-                state=x_k, controls=zero_u, dt=dt, model_hash=self.provider.model_hash
+                state=x_k, controls=zero_u, dt=dt, model_hash=provider.model_hash
             )
         )
         x_ztcf = np.concatenate([ztcf_step.next_state.q, ztcf_step.next_state.v])
         x_actual = np.concatenate([x_kp1.q, x_kp1.v])
 
         # Control sensitivity G
-        _, G = compute_linearization_jacobians(
-            self.provider, x_k, self.control_dist.mean, dt=dt
-        )
+        _, G = compute_linearization_jacobians(provider, x_k, control_dist.mean, dt=dt)
 
         dim_x = len(x_actual)
         Q = (
@@ -522,12 +556,12 @@ class DimeDriftTransitionCriterion(EstimationIntervalFactor):
         if Q.shape != (dim_x, dim_x):
             Q = np.eye(dim_x) * 1e-4
 
-        Sigma_trans = G @ self.control_dist.covariance @ G.T + Q
+        Sigma_trans = G @ control_dist.covariance @ G.T + Q
         Sigma_trans_sym = 0.5 * (Sigma_trans + Sigma_trans.T)
 
         # Mahalanobis whitening via Cholesky factor L: L * L^T = Sigma_trans
         # residual r = L^-1 ( (x_actual - x_ztcf) - G * mu_u )
-        diff = (x_actual - x_ztcf) - G @ self.control_dist.mean
+        diff = (x_actual - x_ztcf) - G @ control_dist.mean
         try:
             L = np.linalg.cholesky(Sigma_trans_sym)
             whitened_residual = np.linalg.solve(L, diff)
