@@ -59,7 +59,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `docker_config.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `engine_core` | 0 | 0 | 0 | 24 | 0 | 0 |
 | `engine_loaders.py` | 0 | 0 | 0 | 1 | 0 | 0 |
-| `estimation` | 0 | 0 | 0 | 19 | 0 | 0 |
+| `estimation` | 0 | 0 | 0 | 20 | 0 | 0 |
 | `exceptions.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `feature_registry` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `file_watcher` | 0 | 0 | 0 | 0 | 2 | 0 |
@@ -135,7 +135,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 35 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1601** | **770** | **680** |
+| **Total** | **406** | **274** | **123** | **1602** | **770** | **680** |
 
 ## Diverged Files by Package
 
