@@ -1,3 +1,32 @@
+## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
+
+Specifies decision vector layout, integration defects, bounded model discrepancy, actuator limit penalties, underactuated root constraints, control variation regularizers, contact hooks, and exact vs. soft defect selection for coupled state-control window estimation (#11421, #11426):
+- **Decision Vector Layout (`DimeWindowDecisionLayout`)**:
+  - Structured packing and unpacking of states $x_k = (q_k, v_k) \in \mathcal{M} \times \mathbb{R}^{n_v}$, controls $u_k \in \mathbb{R}^{n_u}$, and optional discrepancy slacks $w_k \in \mathbb{R}^{n_v}$ across time nodes $k = 0, \dots, K-1$ and intervals $k = 0, \dots, K-2$.
+  - Preserves manifold retraction semantics for generalized coordinates ($n_q \ge n_v$).
+- **Integrated Transition Defects (`_evaluate_transition_defects`)**:
+  - Full forward integration defect combining tangent position defects $d_q(k) = \text{local\_coordinates}(\hat{q}_{k+1}, q_{k+1}) \in \mathbb{R}^{n_v}$ and velocity defects $d_v(k) = v_{k+1} - \hat{v}_{k+1} \in \mathbb{R}^{n_v}$.
+  - Supports explicit defect selection: soft defects (`defect_mode="soft"`) with quadratic penalty weight $W_{\text{defect}}$ or exact defect preservation (`defect_mode="exact"`).
+  - Transition defects are separately exported in raw canonical physical units without silent zeroing.
+- **Underactuated Root Constraints & Shortcut Rejection**:
+  - Evaluates root wrench constraints on unactuated DOFs ($n_{\text{unactuated}} = \max(0, n_v - n_u)$).
+  - Explicitly rejects arbitrary root wrench shortcuts; attempting unphysical actuation on passive root coordinates raises `PreconditionError`.
+- **Control Regularization & Actuator Bounds**:
+  - Control variation regularizer: penalizes control rate of change $\frac{\Delta u}{\Delta t}$ between successive intervals, enforcing control smoothness and penalizing discontinuous step changes.
+  - Control magnitude regularizer: standard L2 control energy cost.
+  - Actuator limit penalties: enforces declared channel limits $[u_{\min}, u_{\max}]$ from `ControlChannelSpec`, evaluating linear excess penalties with weight $W_{\text{bounds}}$.
+- **Bounded Model Discrepancy (`slack_bound`)**:
+  - Optional unmodeled acceleration slack $w_k \in \mathbb{R}^{n_v}$ entering predicted velocity and position updates.
+  - Penalized with quadratic slack weight $W_{\text{slack}}$.
+  - Tracks and exports `is_slack_bounded`, `max_slack`, and `slack_violations` when slack norms exceed the configured threshold $\bar{w}$.
+- **Contact Hooks & Stance Completeness Protection (`DimeContactHook`)**:
+  - Exposes contact hooks with native no-contact semantics.
+  - Fail-closed: asserting active contact without a qualified contact provider raises `PreconditionError`.
+  - Claiming stance completeness without physical contact capability raises `PreconditionError`.
+- **Solver & Failure Preservation (`DimeDynamicsWindowFactor.solve`)**:
+  - Solves coupled state-control window optimization using trust-region least squares.
+  - Truthfully preserves dynamics failures: simulated engine failures or non-finite results return `success=False` with descriptive diagnostic messages, and are never converted into finite best-fit successes.
+
 ## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
 
 Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):
@@ -7888,6 +7917,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11426 | [DIME-05] Coupled state-control full-dynamics window factors: DimeDynamicsWindowFactor, DimeWindowDecisionLayout, integrated transition defects, bounded model discrepancy, actuator limit penalties, underactuated root constraints, control variation regularizers, and contact hooks (#11426, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
 | 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
 | 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |

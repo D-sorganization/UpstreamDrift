@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11426 — Coupled State-Control Full-Dynamics Window Factors (DIME-05)
+
+- **State:** in_progress
+- **Owner:** antigravity (local)
+- **Issue:** #11426 (parent epic #11421)
+- **PR:** #11458
+- **Branch:** `feat/dime-11426-window-factors`
+- **Paths:** `src/shared/python/estimation/dime_window_factors.py`, `tests/unit/estimation/test_dime_dynamics_window.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — 12 focused behavioral tests in test_dime_dynamics_window.py pass; all 144 unit tests in tests/unit/estimation pass; architecture budget, file size budget, error handling ratchet, and spec path gates pass cleanly.
+- **Summary:** [DIME-05] Decision vector layout (DimeWindowDecisionLayout), integrated transition defects, bounded model discrepancy, actuator limit penalties, underactuated root constraints, control variation regularizers, and fail-closed contact hooks for coupled state-control window factor estimation.
+- **Next step:** Merge PR #11458 and proceed to DIME-06.
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress

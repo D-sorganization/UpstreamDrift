@@ -1,3 +1,26 @@
+# Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors — #11421 / #11426
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11426-window-factors`; commit SELF; PR: #11458 (`Closes #11426`, `Refs #11421`)
+- Governing issue: #11426 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-05] Implement coupled state-control full-dynamics window factors: decision vector layout, integration defects, bounded model discrepancy, actuator limit penalties, underactuated root constraints, control variation regularizers, and contact hooks.
+- Completed:
+  - `src/shared/python/estimation/dime_window_factors.py`:
+    - `DimeWindowDecisionLayout`: structured packing and unpacking between flat 1D parameter vectors and states, controls, and discrepancy slacks across time nodes and intervals.
+    - `DimeWindowFactorConfig`: configuration specifying step size `dt`, defect mode (`"exact"` vs `"soft"`), defect weight, control variation weight, control magnitude weight, actuator bound penalty weight, slack bound, and underactuated root weight.
+    - `DimeContactHook`: exposes contact hooks with native no-contact semantics, enforcing fail-closed assertions if active contact is asserted without a qualified contact provider or if stance completeness is claimed.
+    - `DimeWindowResidualComponents`: comprehensive exported breakdown of all cost components and constraint residuals (transition defects, control variation, control magnitude, actuator bounds, underactuated root constraints, model discrepancy slacks, observation residuals, slack violations, max slack, and total cost).
+    - `DimeDynamicsWindowResult`: estimation result capturing success status, message, trajectory states, controls, slacks, components, and conversion to `DimeEstimationResult`.
+    - `DimeDynamicsWindowFactor`: factor evaluating full forward-integrated transition defects via provider step, control variation regularizers, actuator limits, underactuated root constraints, model discrepancy, and least-squares window optimization.
+  - `src/shared/python/estimation/__init__.py`: re-exported all new DIME-05 window factor symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `.md`: updated to reflect new file in `src/shared/python/estimation/`.
+  - `tests/unit/estimation/test_dime_dynamics_window.py`: 12 focused behavioral tests covering RED contract violations and physical invariants (actuated pendulum under observation noise recovery within frozen tolerances, two-link dynamic coupling and acceleration defects, arbitrary root wrench shortcut rejection, discontinuous controls variation penalties, excessive model-discrepancy slack violation reporting, contact hooks fail-closed behavior, and failed dynamics preservation) and GREEN verification (exact vs soft defect selection and export, derivative verification against finite differences, noiseless pendulum recovery, clean contact exposure with native no-contact semantics, and actuator limits enforcement).
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_dynamics_window.py`: 12 passed.
+  - `pytest tests/unit/estimation`: 144 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_architecture_budget.py`, `check_file_size_budget.py`, `check_error_handling_ratchet.py`, and `check_spec_paths.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-06 under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: #11457 (`Closes #11424`, `Refs #11421`)
