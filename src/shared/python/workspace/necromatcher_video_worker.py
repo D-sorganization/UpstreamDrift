@@ -15,6 +15,9 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque
     MujocoForceTorqueSource,
 )
 from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.motion_matching.pipeline.plants.mujoco_plant import (
+    MujocoMatchingPlant,
+)
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
@@ -29,6 +32,8 @@ class MujocoFitSampler:
     """Sample MuJoCo wrenches for one fitted state (q, v, a) of a bound native model."""
 
     def __init__(self, binding: NativeFitBinding) -> None:
+        if not isinstance(binding.plant, MujocoMatchingPlant):
+            raise ValueError("Force layer requires a MuJoCo native plant")
         model = binding.plant.adapter.model
         self._model = model
         self._data = mujoco.MjData(model)
