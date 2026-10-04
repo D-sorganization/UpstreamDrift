@@ -1080,9 +1080,11 @@ jobs:
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Fetch PR base for ownership guards
-        if: github.event_name == 'pull_request'
+        # merge_group has no base_ref; the queue always targets the default
+        # branch, and the child-copy guard needs origin/<default> (RM#1900).
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         shell: bash
-        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref || github.event.repository.default_branch }}"
       # Also satisfies the ownership guards below, which read the pinned
       # Tools sources out of vendor/ud-tools.
       - name: Fetch pinned Tools packages
@@ -2055,6 +2057,11 @@ jobs:
             )
             coverage_args=(--no-cov)
             coverage_report_args=()
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            # Scope the queue's merge commit like the PR it carries. Without
+            # this branch the run fell through to the whole-src coverage lane,
+            # which this dependency-light lane can never reach (RM#1900).
+            diff_base="${{ github.event.merge_group.base_sha }}"
           elif [ "${{ github.event_name }}" = "push" ] \
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
