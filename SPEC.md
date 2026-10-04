@@ -1,3 +1,24 @@
+## Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion (DIME-04, #11425)
+
+Specifies Zero-Torque Counterfactual (ZTCF) drift prediction under control uncertainty, state and control Gaussian distributions, mass uncertainty propagation, central finite-difference state/control Jacobians, Taylor linearization error bounds, force cancellation metrics, and marginalized-input transition estimation criteria (#11421, #11425):
+- **State and Control Distributions (`StateDistribution`, `ControlDistribution`)**:
+  - `StateDistribution`: encapsulates nominal `DimeCompleteState` and symmetric positive semi-definite state covariance $\Sigma_x \in \mathbb{R}^{2n_v \times 2n_v}$ across positions and velocities.
+  - `ControlDistribution`: encapsulates mean control $u \in \mathbb{R}^{n_u}$, symmetric positive semi-definite control covariance $\Sigma_u \in \mathbb{R}^{n_u \times n_u}$, declared physical types and SI units.
+- **Model and Contact Uncertainty (`ModelContactUncertainty`)**:
+  - Encapsulates process noise covariance $Q \in \mathbb{R}^{2n_v \times 2n_v}$, mass uncertainty variance $\sigma_m^2$, contact phase stability flag, and maximum qualified horizon $T_{\text{max}}$.
+- **ZTCF Drift Predictor (`DimeDriftPredictor`)**:
+  - Computes zero-input proposal rollout ($u=0$) verifying drift dynamics $x_{\text{ZTCF}}$.
+  - Evaluates central finite-difference Jacobians $F = \frac{\partial f}{\partial x}$ and $G = \frac{\partial f}{\partial u}$ on the discrete transition map.
+  - Propagates uncertainty: $\Sigma_{k+1} = F \Sigma_x F^T + G \Sigma_u G^T + Q + \Sigma_{\text{mass}}$, guaranteed symmetric and positive semi-definite.
+  - Evaluates Taylor linearization error against nonlinear sampled steps, bounded by $\mathcal{O}(\|\text{pert}_x\|^2)$ relative to the nominal step map.
+  - Decomposes acceleration into passive/drift and control components, computing drift gain $G_{\text{drift}}$ and force cancellation ratio.
+  - Fail-closed validation: detects and flags `INVALID_CONTACT`, `INVALID_HORIZON`, `STALE_MODEL_HASH`, and `SINGULAR_COVARIANCE`.
+- **Marginalized-Input Transition Criterion (`DimeDriftTransitionCriterion`)**:
+  - Implements `EstimationIntervalFactor` under factor type `"marginalized_input_transition"`.
+  - Evaluates whitened residual $r = L^{-1} ((x_{k+1} - x_{\text{ZTCF}}) - G \mu_u)$ where $L L^T = G \Sigma_u G^T + Q$.
+  - Proves numerical and mathematical equivalence ($\le 10^{-7}$ relative error) to the explicit-control joint optimization $\min_u [ \frac{1}{2} \|x_{k+1} - f(x_k, u)\|_Q^2 + \frac{1}{2} \|u - \mu_u\|_{\Sigma_u}^2 ]$.
+  - Enforces `RuntimeExclusivityContract` preventing duplicate explicit-input factors on overlapping estimation intervals.
+
 ## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
 
 Specifies unified observation factors for marked (3D markers) and markerless (2D keypoint detections) observations, calibrated confidence and anisotropic noise covariance whitening, robust loss kernels, held-out partitioning, camera transform inversion, chirality validation, and quaternion sign equivalence (#11421, #11424):
@@ -7888,6 +7909,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11459 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: StateDistribution, ControlDistribution, ModelContactUncertainty, DimeDriftPredictor, central finite-difference Jacobians, Taylor linearization error bound, and DimeDriftTransitionCriterion (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
 | 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
 | 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |

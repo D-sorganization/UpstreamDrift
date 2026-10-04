@@ -1,3 +1,37 @@
+# Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion — #11421 / #11425
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11425-ztcf-prediction`; commit SELF; PR: #11459 (`Closes #11425`, `Refs #11421`)
+- Governing issue: #11425 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-04] Implement Zero-Torque Counterfactual (ZTCF) drift prediction under control uncertainty, state/control Gaussian distributions, central finite-difference Jacobians, Taylor linearization error bounds, force cancellation metrics, and marginalized-input transition estimation criteria.
+- Completed:
+  - `src/shared/python/estimation/dime_drift_prediction.py`:
+    - `PredictionValidityStatus`: enum declaring `VALID`, `INVALID_CONTACT`, `INVALID_HORIZON`, `STALE_MODEL_HASH`, `SINGULAR_COVARIANCE`, `UNAVAILABLE_PROVIDER`.
+    - `PredictionMode`: enum declaring `EXPLICIT_CONTROL` and `MARGINALIZED_CONTROL`.
+    - `StateDistribution`: encapsulates nominal `DimeCompleteState` and symmetric positive semi-definite state covariance $\Sigma_x \in \mathbb{R}^{2n_v \times 2n_v}$.
+    - `ControlDistribution`: encapsulates mean control $u \in \mathbb{R}^{n_u}$, symmetric positive semi-definite control covariance $\Sigma_u \in \mathbb{R}^{n_u \times n_u}$, declared physical types and SI units.
+    - `ModelContactUncertainty`: encapsulates process noise covariance $Q$, mass uncertainty variance $\sigma_m^2$, contact phase stability flag, and maximum qualified horizon $T_{\text{max}}$.
+    - `DimeDriftPredictor`:
+      - Evaluates ZTCF proposal rollout under zero control ($u=0$).
+      - Computes central finite-difference state and control Jacobians $F = \frac{\partial f}{\partial x}$ and $G = \frac{\partial f}{\partial u}$.
+      - Propagates uncertainty: $\Sigma_{k+1} = F \Sigma_x F^T + G \Sigma_u G^T + Q + \Sigma_{\text{mass}}$, guaranteed PSD.
+      - Evaluates Taylor linearization error against nonlinear sampled steps, bounded by $\mathcal{O}(\|\text{pert}_x\|^2)$ relative to the nominal step map.
+      - Decomposes acceleration into passive/drift and control components, computing drift gain $G_{\text{drift}}$ and force cancellation ratio.
+      - Fail-closed checks for contact stability, maximum qualified horizon, model hash alignment, and covariance conditioning.
+    - `DimeDriftTransitionCriterion`:
+      - Implements `EstimationIntervalFactor` under factor type `"marginalized_input_transition"`.
+      - Evaluates whitened residual $r = L^{-1} ((x_{k+1} - x_{\text{ZTCF}}) - G \mu_u)$ where $L L^T = G \Sigma_u G^T + Q$.
+      - Proves numerical and mathematical equivalence ($\le 10^{-7}$ relative error) to the explicit-control joint optimization $\min_u [ \frac{1}{2} \|x_{k+1} - f(x_k, u)\|_Q^2 + \frac{1}{2} \|u - \mu_u\|_{\Sigma_u}^2 ]$.
+      - Enforces `RuntimeExclusivityContract` preventing duplicate physics factors.
+  - `src/shared/python/estimation/__init__.py`: re-exports all DIME-04 prediction and criterion symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `.md`: updated to include `dime_drift_prediction.py`.
+  - `tests/unit/estimation/test_dime_drift_prediction.py`: 12 focused behavioral tests covering RED contract violations (torque-biased initialization, mismatched control dimensions, non-monotonic / negative horizon, singular covariance, unstable contact phase, stale model hash, provider rollback on exception, Taylor error bound, cancellation ratio on opposing torque, mathematical equivalence of marginalized vs explicit control, runtime factor exclusivity) and GREEN numerical accuracy and PSD covariance guarantees.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_drift_prediction.py`: 12 passed.
+  - `pytest tests/unit/estimation`: 143 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_dry_duplication_gate.py`, `check_file_size_budget.py`, `check_architecture_budget.py`, `check_error_handling_ratchet.py`, and `divergence_inventory.py --check` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-05 under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: #11457 (`Closes #11424`, `Refs #11421`)
