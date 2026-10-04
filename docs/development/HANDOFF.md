@@ -1,3 +1,32 @@
+# Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: opened from this branch (`Closes #11424`, `Refs #11421`)
+- Governing issue: #11424 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-03] Implement robust marker (3D markers) and markerless (2D keypoints) observation factors with anisotropic noise covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence.
+- Completed:
+  - `src/shared/python/estimation/dime_observation_factors.py`:
+    - `DimeObservationFactor`: abstract unified interface for observation factors declaring modality (`"marker_3d"`, `"markerless_2d"`), canonical units (`"m"` for markers, `"px"` for 2D detections), residual dimensions, unwhitened raw residuals, robust whitened residuals, analytical/finite-difference Jacobians on candidate states/parameters, and held-out evaluation reports.
+    - `Marker3DObservationFactor`: metric 3D marker observation factor supporting forward kinematics callbacks, local marker attachment semantics (`MarkerAttachment`), anisotropic noise covariance whitening, and robust downweighting.
+    - `Markerless2DObservationFactor`: 2D pixel observation factor combining forward kinematics with calibrated pinhole camera projection, Brown-Conrady lens distortion, and strict depth chirality checks.
+    - `RobustLossKernel`: robust kernels (`"linear"`, `"huber"`, `"cauchy"`, `"tukey"`, `"pseudo_huber"`) applied via iteratively reweighted least squares (IRLS) square-root weights $\sqrt{w(r)}$; inliers receive weight 1.0, gross outliers receive sub-quadratic penalties or complete rejection (Tukey biweight cutoff $c$).
+    - `_build_whitening_operators`: supports isotropic variance, per-axis diagonal variances, and full $D \times D$ positive-definite covariance matrices via Cholesky factor inversion ($L^{-1}$).
+    - Strictly decouples physical noise covariance ($\text{m}^2$ or $\text{px}^2$) from detector confidence scores $[0, 1]$; non-positive variances or non-positive-definite covariance matrices fail closed with `CovarianceValidationError`.
+    - Occlusion masks (`valid_mask`): occluded or missing markers/keypoints are strictly masked out of the fitting residual vector and never zero-filled with $[0, 0, 0]$ or $[0, 0]$, preventing artificial distortion of the optimization landscape.
+    - Held-out partition (`held_out_mask`): held-out observations are completely excluded from the fitting residual vector and Jacobian ($N_{\text{fit}} = N_{\text{valid}} - N_{\text{held\_out}}$).
+    - `HeldOutEvaluationReport`: reports out-of-sample RMSE and max error in declared canonical units without contaminating the solver objective.
+    - `DimeCameraParameters` & `invert_camera_extrinsics`: exact rigid $SE(3)$ transform inversion $(R, t) \leftrightarrow (R^T, -t R)$ with right-handed $SO(3)$ orthonormality and $\det(R) = +1$ enforcement. Reflection matrices ($\det(R) = -1$) and negative camera depth ($Z_{\text{cam}} \le 0$) fail closed with `ChiralityViolationError`.
+    - Quaternion sign equivalence: states parameterized by antipodal unit quaternions $q \equiv -q$ produce identically zero residual difference ($\Delta r = 0$) in forward kinematics and camera projections.
+    - `ObservationTiming`: validates strictly positive monotonic timestamps ($\Delta t > 0$), finite real numbers, and consistent sample rates; non-monotonic or non-finite sequences raise `TimingViolationError`.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new observation factor symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `.md`: updated to reflect new file in `src/shared/python/estimation/`.
+  - `tests/unit/estimation/test_dime_observation_factors.py`: 10 focused behavioral tests covering RED contract violations (irregular timestamps, camera transform inversion, occluded marker without zero-filling, anisotropic noise whitening, outlier downweighting via robust loss, mirrored coordinates/chirality validation, quaternion sign equivalence) and GREEN numerical derivatives (analytical vs finite difference), noiseless projection recovery, and masked residual dimensions.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_observation_factors.py`: 10 passed.
+  - `pytest tests/unit/estimation`: 99 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_dry_duplication_gate.py`, `check_file_size_budget.py` (all tracked files <= 1200 lines, 0 on watchlist), `check_error_handling_ratchet.py`, and `divergence_inventory.py --check` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-04 under epic #11421.
+
 # Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts — #11421 / #11423
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11423-provider-contracts`; commit SELF; PR: #11455 (`Closes #11423`, `Refs #11421`)
