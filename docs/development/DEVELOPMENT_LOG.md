@@ -124,8 +124,6 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-3 comparison protocol specification and level definitions (#11271).
 
-
-
 - **PR:** #11413 (Closes #11269, Refs #11268)
 - **Branch:** `feat/cov-1-acquisition-11269`
 - **Started:** 2026-10-02
@@ -139,6 +137,13 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Last verified:** 2026-10-03 at HEAD — COV-5 (#11273): Added `--estimator` and `--estimator-option` to `scripts/historical_capture.py` backed by `src.shared.python.pose_estimation.registry.create_estimator`, explicit model-weights hash and package version recording in receipt detector identity, fail-closed availability and overwrite guards, and canonical 3D ingestion in `HMR2Adapter.to_canonical_observations` preserving metres and tagging missing focal/camera fields with typed unqualified flag. 6 focused unit tests passing.
 - **Summary:** Bring the owner's capture-session video album into the markerless, Necromatcher and engine-matching pipelines, compare against the `capture-O` marker capture at graded levels L0–L3, and publish a single-view reconstruction error budget. [Procedure](capture-o-video/procedure.md).
 - **Next step:** Advance to COV-6 validation harness and error budget report (#11274).
+
+- **PR:** (draft) (Closes #11276, Refs #11268)
+- **Branch:** `feat/cov-8-necromatcher-owner-11276`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at HEAD — COV-8 (#11276): Implemented `create_owner_project` with fail-closed privacy guards refusing roots outside CAPTURE_DATA_DIR, `compute_marker_anchored_anthropometry` recovering segment lengths with spread and population priors, bilateral asymmetry and nonfinite length validation, and `import_video_swings_to_owner_project` preserving immutable-version captures. All 6 focused TDD unit tests pass.
+- **Summary:** Necromatcher owner player project for subject-O: private library initialization, marker-anchored anthropometry from joint centres, and immutable capture/swing ingestion.
+- **Next step:** Advance to COV-9 fit evaluation against marker IK (#11277).
 
 ### DL-#11235 · Necromatcher Native Fit
 

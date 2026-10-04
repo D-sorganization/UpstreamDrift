@@ -1,3 +1,21 @@
+## Marker-Anchored Anthropometry and Necromatcher Owner Project Contracts (COV-8, #11276)
+
+Specifies the Necromatcher owner player project, marker-anchored anthropometry fitting, fail-closed privacy guards, and immutable capture/swing ingestion (#11268, #11276):
+- **Fail-Closed Privacy Guard (`create_owner_project`)**:
+  - Requires `CAPTURE_DATA_DIR` environment variable or parameter when `private=True`.
+  - Refuses library paths outside `CAPTURE_DATA_DIR` with `ValueError`, ensuring owner data never lands in default public library roots or Git trees.
+  - Automatically initializes or loads `NecromatcherLibrary` and registers the owner player (`subject-O`).
+- **Marker-Anchored Anthropometry Fitting (`compute_marker_anchored_anthropometry`, `MarkerAnchoredAnthropometry`, `SegmentLengthEstimate`)**:
+  - Computes segment lengths from marker joint centres (median across swings with spread and uncertainty).
+  - Explicit provenance tagging: marks marker-measured segments as `'observed (marker-derived)'` and unobserved segments as `'population-prior'` from de Leva male tables scaled to height. Missing or unrecognised provenance tags strictly raise `ValueError`.
+  - Enforces strictly positive and finite segment lengths, raising `ValueError` naming the offending segment on invalid values.
+  - Enforces bilateral length symmetry bounds between paired limbs (`thigh_r`/`thigh_l`, `upper_arm_r`/`upper_arm_l`, `shank_r`/`shank_l`, `forearm_r`/`forearm_l`, `hand_r`/`hand_l`, `foot_r`/`foot_l`), raising `ValueError` naming the segment when asymmetry exceeds the declared bound.
+  - Records owner-reported height and mass with explicit `owner_reported` provenance.
+- **Immutable-Version Capture and Swing Ingestion (`import_video_swings_to_owner_project`)**:
+  - Ingests graded video swings (grades A–C) under registered player `subject-O`, skipping rejected swings (`grade="R"`).
+  - Archives observations from historical-capture run directories via `build_capture_archive`.
+  - Re-importing existing capture archives maintains immutable versioning without duplicating assets or overwriting files on disk.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -8189,6 +8207,7 @@ eady while anything is outstanding, and is locked). scripts/generate_industrial
 <!-- prettier-ignore-start -->
 
 | Date       | PR         | Changes    |
+| 2026-10-03 | #11276 | Add Necromatcher owner project initialization, marker-anchored anthropometry computation from joint centres with spread and population priors, privacy-guarded library rooting under CAPTURE_DATA_DIR, and immutable-version capture import (COV-8 #11276). |
 | 2026-10-01 | #11147 | Wire neural matching controls to executed requests, populate qualified registry model availability, honor disabled fallbacks with named reasons, prevent preview promotion to verified, and update feature parity docs (R07 #11147). |
 | 2026-10-01 | #11107 | Complete Simscape continuous-replay qualification harness integration (MMR-07-I #11107): add test_simscape_replay_harness contract suite, integrate continuous-replay qualification receipt evaluation into test_acceptance, and verify full-marker channel evaluation. |
 | 2026-09-29 | #11126 | Implement Simscape continuous-replay qualification harness (MMR-07): fail-closed validation, receipt adapter, per-marker and phase channels, R2025b enforcement, run-102 terminal rejection preservation, canonical-metric acceptance (0.60 s early window, club-cluster labels, measured pelvis yaw with unmeasured-quantity disclosure), elapsed-horizon span validation, native-evidence derivation with recomputed replay digest, and powershell candidate runner integration. |

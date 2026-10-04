@@ -1,4 +1,36 @@
-# Current Handoff — Kinematic-Sequence Thorax Proxy and Window Margin (#11182)
+# Current Handoff — Necromatcher Owner Project and Marker-Anchored Anthropometry (COV-8, #11276)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-8-necromatcher-owner-11276`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-8-11276`
+- Commit: `SELF`
+- Governing issue: #11276 (parent epic #11268)
+- Objective: [COV-8] Create private owner player project for subject-O, compute marker-anchored anthropometry from joint centres with spread and population priors, enforce fail-closed privacy guards, and ingest graded video swings/captures with immutable versioning.
+- Completed:
+  - `src/motion_capture/reference/owner_project.py`:
+    - `SegmentLengthEstimate`: frozen dataclass holding segment, length, spread, sample count, provenance, uncertainty. Validates positive finite length, non-negative spread, and strictly required provenance (`observed (marker-derived)` or `population-prior`).
+    - `MarkerAnchoredAnthropometry`: frozen dataclass holding subject_id, height_m, mass_kg, sources, segment mapping, and bilateral asymmetry bound. Validates positive dimensions, segment instances/provenance, and enforces bilateral symmetry bounds across paired limbs.
+    - `OwnerPlayerProject`: dataclass binding `NecromatcherLibrary`, player_id, and library root.
+    - `create_owner_project`: fail-closed factory enforcing that private owner projects reside strictly inside `CAPTURE_DATA_DIR`, rejecting outside roots with `ValueError`.
+    - `compute_marker_anchored_anthropometry`: pure function calculating median segment lengths and spread from observation samples across swings, filling missing segments with height-scaled de Leva population priors, and validating bilateral asymmetry bounds.
+    - `import_video_swings_to_owner_project`: pure function importing A–C video swings and captures into Necromatcher library, skipping rejected swings and preserving immutable asset versions without duplication or overwrite.
+  - `src/motion_capture/reference/__init__.py`: exported new owner project classes and functions.
+  - `tests/unit/motion_capture/test_cov8_owner_project.py`: 6 comprehensive TDD unit tests with synthetic data verifying length recovery, spread, nonfinite/negative length errors, asymmetry errors, privacy guards, provenance validation, and immutable re-import behavior.
+  - Updated `SPEC.md`: added top specification section and Section 12 Change Log table entry for #11276.
+  - Updated `docs/development/DEVELOPMENT_LOG.md`: added DL-#11268 child entry for COV-8.
+- Validation:
+  - `pytest tests/unit/motion_capture/test_cov8_owner_project.py`: 6 passed.
+  - `pytest tests/unit/motion_capture/`: 89 passed, 1 skipped.
+  - Architecture budget (`scripts/ci/check_architecture_budget.py`): OK.
+  - Error handling ratchet (`scripts/ci/check_error_handling_ratchet.py`): OK.
+  - File size budget (`scripts/ci/check_file_size_budget.py`): OK.
+  - Ruff lint & format (`ruff check`, `ruff format --check`): OK.
+- Next steps:
+  - Advance to COV-9 fit evaluation against marker IK (#11277).
+
+---
+
+# Past Handoff — Kinematic-Sequence Thorax Proxy and Window Margin (#11182)
 
 - Repository: `D-sorganization/UpstreamDrift`
 - Branch: `fix/issue-11182-kinematic-sequence`
