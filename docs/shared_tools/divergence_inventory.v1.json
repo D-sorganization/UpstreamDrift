@@ -11,10 +11,10 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 406,
-    "diverged": 274,
-    "ud-only": 1609,
-    "tools-only": 770,
+    "identical": 401,
+    "diverged": 272,
+    "ud-only": 1608,
+    "tools-only": 777,
     "spelling-only": 123
   },
   "packages": {
@@ -271,10 +271,10 @@
       "spelling-only": 0
     },
     "data_processing": {
-      "identical": 3,
-      "diverged": 1,
-      "ud-only": 1,
-      "tools-only": 0,
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 0,
+      "tools-only": 4,
       "spelling-only": 0
     },
     "data_processor": {
@@ -285,10 +285,10 @@
       "spelling-only": 0
     },
     "data_processor_io": {
-      "identical": 2,
-      "diverged": 1,
+      "identical": 0,
+      "diverged": 0,
       "ud-only": 0,
-      "tools-only": 0,
+      "tools-only": 3,
       "spelling-only": 0
     },
     "dataset_tools": {
@@ -7193,61 +7193,49 @@
     },
     {
       "path": "data_processing/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "",
-      "ud_bytes": 747,
+      "ud_bytes": null,
       "tools_bytes": 747,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processing/processor.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "",
-      "ud_bytes": 22196,
+      "ud_bytes": null,
       "tools_bytes": 22175,
-      "byte_delta": 21,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processing/tests/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "tests",
-      "ud_bytes": 35,
+      "ud_bytes": null,
       "tools_bytes": 35,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
-      "path": "data_processing/tests/test_data_processing_drift.py",
-      "classification": "ud-only",
+      "path": "data_processing/tests/test_processor.py",
+      "classification": "tools-only",
       "package": "data_processing",
       "subpackage": "tests",
-      "ud_bytes": 2056,
-      "tools_bytes": null,
+      "ud_bytes": null,
+      "tools_bytes": 25239,
       "byte_delta": null,
       "byte_identical": false,
-      "ud_has_child_copy_header": true,
-      "spelling_only": false
-    },
-    {
-      "path": "data_processing/tests/test_processor.py",
-      "classification": "identical",
-      "package": "data_processing",
-      "subpackage": "tests",
-      "ud_bytes": 25239,
-      "tools_bytes": 25239,
-      "byte_delta": 0,
-      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -7277,36 +7265,36 @@
     },
     {
       "path": "data_processor_io/__init__.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 901,
+      "ud_bytes": null,
       "tools_bytes": 901,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processor_io/bulk_facade.py",
-      "classification": "identical",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 4955,
+      "ud_bytes": null,
       "tools_bytes": 4955,
-      "byte_delta": 0,
-      "byte_identical": true,
+      "byte_delta": null,
+      "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
       "path": "data_processor_io/rust_engine.py",
-      "classification": "diverged",
+      "classification": "tools-only",
       "package": "data_processor_io",
       "subpackage": "",
-      "ud_bytes": 17769,
+      "ud_bytes": null,
       "tools_bytes": 17849,
-      "byte_delta": -80,
+      "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
       "spelling_only": false
@@ -39000,32 +38988,6 @@
         "author": "Dieter Olson",
         "date": "2026-08-01",
         "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "data_processing/processor.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-08-20",
-        "commit": "91ffb3a2ab8abc1e368f665d88f5bcbb76ee6728"
-      }
-    },
-    {
-      "path": "data_processor_io/rust_engine.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-07",
-        "commit": "d4859319746069816a071564992e18bc0520afc8"
       },
       "tools": {
         "author": "Dieter Olson",

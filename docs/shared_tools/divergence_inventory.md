@@ -50,9 +50,9 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `cors.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `dashboard` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `data_io` | 0 | 0 | 0 | 30 | 0 | 0 |
-| `data_processing` | 3 | 1 | 0 | 1 | 0 | 4 |
+| `data_processing` | 0 | 0 | 0 | 0 | 4 | 0 |
 | `data_processor` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `data_processor_io` | 2 | 1 | 0 | 0 | 0 | 3 |
+| `data_processor_io` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `dataset_tools` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `deprecation.py` | 0 | 0 | 0 | 0 | 1 | 0 |
 | `diagnostics` | 0 | 0 | 0 | 4 | 0 | 0 |
@@ -135,7 +135,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 35 | 0 | 0 |
-| **Total** | **406** | **274** | **123** | **1609** | **770** | **680** |
+| **Total** | **401** | **272** | **123** | **1608** | **777** | **673** |
 
 ## Diverged Files by Package
 
@@ -278,18 +278,6 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
 |---|---:|:---:|---|---|
 | `contracts.py` | -709 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-
-### Package `data_processing` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `data_processing/processor.py` | +21 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
-
-### Package `data_processor_io` (1 Diverged Files)
-
-| Path | Δ bytes (UD−Tools) | Spelling-only | UD last touch | Tools last touch |
-|---|---:|:---:|---|---|
-| `data_processor_io/rust_engine.py` | -80 |  | Dieter Olson 2026-08-07 | Dieter Olson 2026-08-20 |
 
 ### Package `gui_launcher` (4 Diverged Files)
 
