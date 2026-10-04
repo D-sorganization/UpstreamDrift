@@ -32,15 +32,16 @@ class MujocoFitSampler:
     """Sample MuJoCo wrenches for one fitted state (q, v, a) of a bound native model."""
 
     def __init__(self, binding: NativeFitBinding) -> None:
-        if not isinstance(binding.plant, MujocoMatchingPlant):
+        plant = binding.plant
+        if not isinstance(plant, MujocoMatchingPlant):
             raise ValueError("Force layer requires a MuJoCo native plant")
-        model = binding.plant.adapter.model
+        model = plant.adapter.model
         self._model = model
         self._data = mujoco.MjData(model)
         self._source = MujocoForceTorqueSource(model)
         joints = [
             mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
-            for name in binding.plant.coordinate_order
+            for name in plant.coordinate_order
         ]
         if min(joints) < 0:
             raise ValueError("Native model lacks a declared coordinate joint")
