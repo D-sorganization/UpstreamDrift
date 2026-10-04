@@ -136,7 +136,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 35 | 0 | 0 |
-| **Total** | **405** | **275** | **123** | **1605** | **779** | **680** |
+| **Total** | **406** | **274** | **123** | **1606** | **770** | **680** |
 
 ## Diverged Files by Package
 
