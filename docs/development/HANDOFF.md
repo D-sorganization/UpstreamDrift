@@ -1,3 +1,22 @@
+# Retire Deprecated Force_Vectors and Vectors Shims — #11347
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `fix/remove-vector-shims-11347`; commit SELF; PR: see branch (`Closes #11347`, `Refs #11285`, `Refs #11292`)
+- Governing issue: #11347 (FTO-7 follow-up; design authority ADR-0052).
+- Objective: Remove deprecated `src/shared/python/plotting/renderers/force_vectors.py` and `vectors.py` shims after migration to `src.shared.python.force_overlay.renderers.matplotlib_glyphs`.
+- Completed:
+  - Removed deprecated shims:
+    - `src/shared/python/plotting/renderers/force_vectors.py` (`ForceVectorRenderer`)
+    - `src/shared/python/plotting/renderers/vectors.py` (`VectorOverlayRenderer`)
+  - Removed obsolete shim test suites:
+    - `tests/unit/force_overlay/test_renderer_shims.py`
+    - `tests/unit/plotting/test_force_vector_renderer.py`
+  - Cleaned `tests/unit/test_plotting_renderers.py` to remove `VectorOverlayRenderer` import and `TestVectorsRenderer`.
+  - Updated `docs/architecture/PROJECT_MAP.md` mapping to `force_overlay/`.
+  - Regenerated shared tools divergence inventory (`docs/shared_tools/divergence_inventory.v1.json` and `.md`).
+  - Formatted `schemas/glyph-set-examples.json` with prettier.
+  - All unit tests and divergence inventory tests passing green.
+- Next steps: Land PR, clean up worktree.
+
 # OpenCap: Marker Augmenter on Our Own Triangulated Keypoints — #11400 / #11405
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-marker-augmenter-11405`; commit SELF; PR: opened from this branch (`Closes #11405`, `Refs #11400`)

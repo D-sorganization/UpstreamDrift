@@ -13,7 +13,6 @@ from src.shared.python.plotting.renderers.kinematics import KinematicsRenderer
 from src.shared.python.plotting.renderers.kinetics import KineticsRenderer
 from src.shared.python.plotting.renderers.signal import SignalRenderer
 from src.shared.python.plotting.renderers.stability import StabilityRenderer
-from src.shared.python.plotting.renderers.vectors import VectorOverlayRenderer
 from src.shared.python.plotting.transforms import DataManager
 
 
@@ -75,12 +74,6 @@ class TestKineticsRenderer:
 class TestStabilityRenderer:
     def test_plotting_renderers_construction(self) -> None:
         renderer = StabilityRenderer(_make_dm())
-        assert renderer is not None
-
-
-class TestVectorsRenderer:
-    def test_plotting_renderers_construction(self) -> None:
-        renderer = VectorOverlayRenderer(_make_dm())
         assert renderer is not None
 
 
