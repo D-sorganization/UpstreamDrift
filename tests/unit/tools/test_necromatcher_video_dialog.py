@@ -194,3 +194,37 @@ def test_response_from_another_fit_or_run_is_rejected(tmp_path, monkeypatch):
         app.processEvents()
     finally:
         dialog.cleanup()
+
+
+def test_force_layer_is_off_by_default_and_forwarded_when_checked(monkeypatch):
+    monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
+    pytest.importorskip("PyQt6.QtWidgets")
+    from PyQt6.QtWidgets import QApplication
+    from src.tools.necromatcher.video_dialog import VideoExportDialog
+
+    app = QApplication.instance() or QApplication([])
+    calls = []
+
+    class Session:
+        def submit(self, fit, **kwargs):
+            calls.append(kwargs)
+            raise ValueError("stop after recording the request")
+
+    dialog = VideoExportDialog("fit", Session(), library_root=Path("library"))
+    try:
+        assert not dialog.force_layer.isChecked()
+        assert dialog.force_layer_settings() is None
+        dialog.force_layer.setChecked(True)
+        dialog.segment_shading.setChecked(True)
+        assert dialog.force_layer_settings() == {
+            "enabled": True,
+            "kinds": ["joint_reaction"],
+            "scale": 1.0,
+            "segment_shading": True,
+        }
+        dialog.start.click()
+        dialog._worker.wait(2)
+        dialog._poll()
+        assert calls == [{"force_layer": dialog.force_layer_settings()}]
+    finally:
+        dialog.cleanup()

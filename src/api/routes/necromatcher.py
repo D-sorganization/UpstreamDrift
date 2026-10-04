@@ -16,6 +16,7 @@ from starlette.background import BackgroundTask
 
 from src.api.routes.matched_swings import require_local_client
 from src.shared.python.core.contracts.exceptions import StateError
+from src.shared.python.force_overlay.contracts import WrenchKind
 from src.shared.python.workspace import (
     DatasetMetadata,
     NecromatcherLibrary,
@@ -107,6 +108,23 @@ class RefitRequest(BaseModel):
         )
 
 
+class ForceLayerRequest(BaseModel):
+    """Opt-in force/torque layer for a video export; off unless ``enabled``."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    enabled: bool = False
+    kinds: list[WrenchKind] = Field(
+        default_factory=lambda: [WrenchKind.JOINT_REACTION], min_length=1
+    )
+    scale: float = Field(default=1.0, gt=0, le=100)
+    segment_shading: bool = False
+
+
+class VideoExportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    force_layer: ForceLayerRequest = Field(default_factory=ForceLayerRequest)
+
+
 class IdentityRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str = Field(min_length=1, max_length=128)
@@ -184,11 +202,16 @@ def cancel_refit(run_id: str, refits: Refits) -> dict[str, Any]:
 
 
 @router.post("/fits/{fit_id}/video-exports", status_code=202)
-def submit_video_export(fit_id: str, exports: VideoExports) -> dict[str, Any]:
+def submit_video_export(
+    fit_id: str, exports: VideoExports, request: VideoExportRequest | None = None
+) -> dict[str, Any]:
     """Queue a source-bound video review without accepting a host output path."""
+    layer = request.force_layer if request else None
     with _errors():
         try:
-            return exports.submit(fit_id)
+            if layer is None or not layer.enabled:
+                return exports.submit(fit_id)
+            return exports.submit(fit_id, force_layer=layer.model_dump(mode="json"))
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 
