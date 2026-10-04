@@ -8118,6 +8118,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
 | 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
 | 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
 | 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |

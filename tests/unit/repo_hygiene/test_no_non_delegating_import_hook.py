@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Iterator
+import functools
 from pathlib import Path
 
 import pytest
@@ -50,8 +51,14 @@ _PREEXISTING_NON_DELEGATING_HOOKS: frozenset[tuple[str, str]] = frozenset()
 def _iter_test_sources() -> Iterator[tuple[Path, ast.Module]]:
     for path in sorted(_TESTS_ROOT.rglob("*.py")):
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except (SyntaxError, UnicodeDecodeError):  # pragma: no cover - defensive
+            content = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if "__import__" not in content:
+            continue
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
             continue
         yield path, tree
 
@@ -120,6 +127,7 @@ def _delegates_to_real_import(
     return False
 
 
+@functools.cache
 def _find_non_delegating_hooks() -> list[tuple[str, str, int]]:
     offenders: list[tuple[str, str, int]] = []
     for path, tree in _iter_test_sources():
