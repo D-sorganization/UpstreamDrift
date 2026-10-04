@@ -272,6 +272,13 @@ from src.shared.python.estimation.dime_engine_qualification import (
     evaluate_engine_qualification,
     export_qualification_bundle,
 )
+from src.shared.python.estimation.dime_solver_cache import (
+    DimeCacheIdentity,
+    DimeCostBreakdown,
+    DimeSolverCache,
+    LocalModelApproximation,
+    accelerated_solve_dynamics_window,
+)
 
 __all__ = [
     "AblationBenchmarkSuite",
@@ -316,9 +323,11 @@ __all__ = [
     "DimeAblationVariant",
     "DimeBenchmarkManifest",
     "DimeBenchmarkResult",
+    "DimeCacheIdentity",
     "DimeCameraParameters",
     "DimeCompleteState",
     "DimeContactConstraintsFactor",
+    "DimeCostBreakdown",
     "DimeDynamicsWindowFactor",
     "DimeDynamicsWindowOptions",
     "DimeDynamicsWindowProblem",
@@ -330,6 +339,7 @@ __all__ = [
     "DimeObservationFactor",
     "DimeObservationWindow",
     "DimeProvenanceRecord",
+    "DimeSolverCache",
     "DimeReportArtifact",
     "DimeReportOptions",
     "DimeStrategySelectionService",
@@ -368,6 +378,7 @@ __all__ = [
     "LateSamplePolicy",
     "MapEstimatorOptions",
     "MapEstimatorProblem",
+    "LocalModelApproximation",
     "MapEstimatorResult",
     "ManifoldContract",
     "Marker3DObservationFactor",
@@ -446,6 +457,7 @@ __all__ = [
     "WindowCommitStatus",
     "ZeroDenominatorPolicy",
     "ZtcfRecord",
+    "accelerated_solve_dynamics_window",
     "anthropometric_prior_residual",
     "autodiff_jacobian",
     "build_fleet_qualification_matrix",
@@ -505,4 +517,10 @@ __all__ = [
     "validate_inertia_realizability",
     "validate_physical_inertia",
     "validate_range_of_motion_units",
+    "EngineQualificationRecord",
+    "EngineQualificationTier",
+    "EngineReadinessMatrix",
+    "ExecutionBackendKind",
+    "generate_readiness_matrix",
+    "render_markdown_matrix",
 ]

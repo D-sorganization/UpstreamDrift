@@ -1,74 +1,35 @@
-# Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix — #11421 / #11433
+# Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration — #11421 / #11435
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11433-qualification-matrix`; PR: #11496 (`Closes #11433`, `Refs #11421`)
-- Governing issue: #11433 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
-- Objective: [DIME-12] Per-Engine and Capture Qualification Matrix: evaluate capability alignment and evidence contracts per physics engine (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark capture; enforce fail-closed qualification rules (contact-free cannot qualify contact scenarios, synthetic test data cannot qualify product matching, joint/coordinate frame mismatches rejected fail-closed, missing native SDKs invalidate capabilities, tolerance threshold breaches trigger unqualified/degraded status); aggregate fleet qualification matrix and export structured JSON bundles and Markdown summary tables.
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11435-profile-accelerate`; PR: (to be created, `Closes #11435`, `Refs #11421`)
+- Governing issue: #11435 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-14] Profile and accelerate native drift and window solves: implement multi-tiered cache identity with strict cross-job state isolation, local Taylor approximation with explicit validity radius, impact discontinuity invalidation, mandatory continuous replay enforcement, and granular cost breakdown profiling cold/warm p50/p95 speeds and failure costs.
 - Completed:
-  - `src/shared/python/estimation/dime_engine_qualification.py`:
-    - `EngineCapabilitySpec`: declares engine name, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
-    - `CaptureProvenance`: records capture name, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
-    - `EngineQualificationEntry`: holds structured qualification entry with status (`qualified`, `degraded`, `unqualified`, `unavailable`), evidenced tolerances, and diagnostic failure reasons.
-    - `EngineQualificationMatrix`: cross-engine by capture matrix container providing query methods and markdown serialization.
-    - `evaluate_engine_qualification`: evaluates qualification rules fail-closed.
-    - `build_fleet_qualification_matrix`: aggregates qualification across standard physics engines and benchmark captures.
-    - `export_qualification_bundle`: exports immutable JSON bundles and markdown summaries.
-  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-12 symbols.
-  - `tests/unit/estimation/test_dime_engine_qualification.py`: 8 comprehensive behavioral unit tests:
-    - RED API skeleton rejection: unimplemented/unsupported engines reject qualification fail-closed.
-    - RED contact-free vs GRF rejection: contact-free engines cannot qualify contact-dependent captures.
-    - RED joint convention mismatch failure: mismatched coordinate conventions fail closed.
-    - RED missing native dependencies: missing platform SDKs invalidate advertised capabilities with diagnostic reasons.
-    - RED tolerance threshold breach: exceeding maximum permitted tracking error triggers unqualified status.
-    - GREEN evidenced engine qualification: valid capability and evidence yields qualified status.
-    - GREEN fleet matrix aggregation: complete multi-engine by multi-capture evaluation succeeds.
-    - GREEN report bundle export: JSON bundle and markdown tables export losslessly.
+  - `src/shared/python/estimation/dime_solver_cache.py`:
+    - `DimeCacheIdentity`: multi-tiered partition key covering model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID. Enforces non-empty strings and valid enums via DbC `require`.
+    - `LocalModelApproximation`: first-order Taylor expansion local model with explicit validity radius $R_{\text{valid}}$. Enforces $\|\delta x\| \le R_{\text{valid}}$ fail-closed with `PreconditionError`.
+    - `DimeSolverCache`: thread-safe multi-partition solver and provider cache using `threading.RLock`. Supports drift, step, Jacobian, and window solve caching. Provides targeted invalidations: `invalidate_on_camera_change`, `invalidate_on_body_change`, and `invalidate_job`.
+    - `store_jacobian_with_impact_check`: detects impact phase transitions and strictly rejects caching/serving smooth derivatives across impact discontinuities.
+    - `DimeCostBreakdown`: structured profiling record tracking drift count/time, full-step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, cache hits/misses, and p50/p95 speeds.
+    - `accelerated_solve_dynamics_window`: accelerated window solver enforcing mandatory independent continuous replay (strictly rejects `skip_independent_replay` fail-closed).
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-14 symbols.
+  - `tests/unit/estimation/test_dime_solver_cache.py`: 10 comprehensive behavioral unit tests:
+    - RED stale cache after camera calibration/extrinsics change.
+    - RED stale cache after body mass/inertia change.
+    - RED stale cache after contact policy transition.
+    - RED cross-job native-state contamination isolation.
+    - RED inaccurate derivative at contact impact discontinuity rejected.
+    - RED speedup claims from skipped replay rejected fail-closed.
+    - GREEN cached vs fresh evaluation machine precision equivalence.
+    - GREEN bounded approximation error within validity radius.
+    - GREEN multi-threaded concurrency and thread safety.
+    - GREEN measured cold vs warm speedup and full cost breakdown export.
 - Validation:
-  - `pytest tests/unit/estimation/test_dime_engine_qualification.py`: 8 passed (100% GREEN).
-  - `pytest tests/unit/estimation`: 261 passed, 1 skipped.
-  - `ruff check`, `ruff format --check`: passed cleanly.
-  - `check_file_size_budget.py`, `check_error_handling_ratchet.py`: passed.
-  - `divergence_inventory.py --check`: passed.
-
-# Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods — #11421 / #11432
-
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11432-reports-gui`; PR: #11432 (`Closes #11432`, `Refs #11421`)
-- Governing issue: #11432 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
-- Objective: [DIME-11] Shared Reports, GUI Strategy Selection and LaTeX Methods: provide unified strategy selection across qualified engines with explicit graceful unavailability states; establish Full and Custom report output contracts packaging kinematics, selected net controls, GRF provenance (typed unavailable, never fabricated zero), drift vs controlled prediction, uncertainty, contact/replay residuals, video overlays (refined ellipsoid geometry with fail-closed timestamp synchronization), and unavailable-capability explanations; record pointwise vs integrated ZTCF distinctly; enforce strict fail-closed invariants; provide verifiable LaTeX methods documentation; support headless offscreen GUI ViewModel.
-- Completed:
-  - `src/shared/python/estimation/dime_report_integration.py`:
-    - `EstimatorStrategy`, `RunClassification`, `ReportScope`, `ReportForceProvenance`: domain enums categorizing estimation workflows, execution modes, scopes, and force origins.
-    - `KinematicsPayload`: immutable kinematics series with joint names, dimension checks, and monotonicity verification.
-    - `ZtcfRecord`: distinct registration of pointwise acceleration drift ($a_{\mathrm{ztcf}}(t)$) and integrated trajectory drift displacement ($x_{\mathrm{ztcf}}(t)$) with explicit SI units.
-    - `GroundReactionForceReport`: typed force provenance rejecting silent numeric zero-substitution fail-closed.
-    - `VideoOverlaySpec`: video overlay alignment contract specifying refined ellipsoid geometry (`GS3DX_Human_Refined_Ellipsoid`), camera, and fail-closed timestamp checks.
-    - `DriftAndPredictionPayload`, `UncertaintySummary`, `ReplayResidualsSummary`, `DimeReportOptions`: comprehensive physical summary payloads.
-    - `DimeReportArtifact`: durable report package with dictionary and JSON round-trip serialization preserving model/data provenance and method identity; `to_latex_summary()` generating verifiable LaTeX documentation.
-    - `DimeStrategySelectionService`: coordinates strategy selection and qualification enforcement; experimental strategies (neural estimator) gracefully return `status="unavailable"` with explanatory reason.
-    - `DimeStrategySelectionViewModel`: headless offscreen ViewModel managing strategy, scope, channel, and plot options without GUI launch.
-  - `src/shared/python/estimation/__init__.py`: re-exported all 18 DIME-11 domain types and functions.
-  - `docs/research/simscape_matching_reference/simscape_matching_reference.tex`: added section `\section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}` documenting governing equations, ZTCF definitions, SI units, and limitations.
-  - `tests/unit/estimation/test_dime_report_integration.py`: 10 comprehensive behavioral tests (RED & GREEN) covering:
-    - RED IK run mislabeled as forward dynamics fails closed (`PreconditionError`).
-    - RED missing native GRF rendered as zero fails closed (`PreconditionError` / typed missingness).
-    - RED unqualified engine offered as validated fails closed (`PreconditionError`).
-    - RED mismatched timestamp/frame overlays fails closed (`TimingViolationError`).
-    - GREEN strategy selection service exposes explicit graceful unavailability states.
-    - GREEN full and custom report output contracts contain all mandatory physical sections.
-    - GREEN pointwise vs integrated ZTCF distinctly recorded with distinct units and values.
-    - GREEN report round-trip dict/JSON preserves provenance and method identity.
-    - GREEN offscreen GUI ViewModel manages selections without window launch.
-    - GREEN LaTeX methods summary outputs valid LaTeX equations, assumptions, units, and limitations.
-- Validation:
-  - `pytest tests/unit/estimation/test_dime_report_integration.py`: 10 passed (100% GREEN).
-  - `pytest tests/unit/estimation`: 217 passed, 1 skipped (jax).
-  - `python scripts/check_spec_paths.py`: passed.
-  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
-  - `python scripts/ci/check_file_size_budget.py`: passed.
-  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
-  - `python scripts/ci/check_spec_changelog_duplicates.py`: passed.
-  - `python scripts/ci/check_lod.py src/shared/python/estimation --baseline scripts/ci/lod_baseline.txt`: passed (0 new violations, clean scan).
-  - `ruff check`, `ruff format --check`: passed cleanly.
-- Next steps: Open and merge PR #11432; advance to dependent comparative study and final physics qualification.
+  - `pytest tests/unit/estimation/test_dime_solver_cache.py`: 10 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 246 passed, 1 skipped.
+  - `ruff check`: passed.
+  - `ruff format --check`: passed.
+  - `mypy`: passed with 0 issues.
+  - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
 
 # Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction — #11421 / #11437
 

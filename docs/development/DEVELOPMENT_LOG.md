@@ -65,22 +65,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11432; #11422–#11430 closed; #11432 active)
-- **PR:** #11432
-- **Branch:** `feat/dime-11432-reports-gui`
-- **Paths:** `src/shared/python/estimation/dime_report_integration.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_report_integration.py`, `docs/research/simscape_matching_reference/simscape_matching_reference.tex`
+- **Issue:** #11421 (children #11422–#11430, #11434, #11437 closed; #11435 active)
+- **PR:** #11435
+- **Branch:** `feat/dime-11435-profile-accelerate`
+- **Paths:** `src/shared/python/estimation/dime_solver_cache.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_solver_cache.py`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-04: DIME-11 shared reports, GUI strategy selection and LaTeX methods implemented and validated across 10 behavioral tests in test_dime_report_integration.py (RED/GREEN). Implements DimeStrategySelectionService with truthful capability status reporting separating method existence from qualification; graceful explicit unavailability for experimental strategies (neural estimator); fail-closed enforcement when unqualified engine offered as validated; comprehensive Full and Custom report output contract (DimeReportArtifact) packaging kinematics, net controls, GRF provenance (typed unavailable, never fabricated zero), drift vs controlled prediction, uncertainty, contact/replay residuals, video overlays (refined ellipsoid geometry with fail-closed timestamp synchronization), and unavailable explanations; distinct pointwise vs integrated ZTCF registration; round-trip dictionary and JSON persistence preserving model and data provenance; verifiable LaTeX methods documentation generator; headless DimeStrategySelectionViewModel. All 217 estimation unit tests pass.
-- **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting, shared reports, GUI strategy selection, and LaTeX methods reference.
-- **Next step:** Open and merge PR #11432, advance to dependent comparative study and final physics qualification.
-- **Issue:** #11421 (children #11422–#11430; #11422–#11428 closed; #11430 active)
-- **PR:** #11430
-- **Branch:** `feat/dime-09-offline-smoothing-11430`
-- **Paths:** `src/shared/python/estimation/dime_continuous_replay.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_continuous_replay.py`
-- **Started:** 2026-10-04
-- **Last verified:** 2026-10-04: DIME-09 offline smoothing and independent continuous replay implemented and validated across 11 behavioral tests in test_dime_continuous_replay.py (RED/GREEN). Implements execute_continuous_replay simulating forward dynamics once from saved initial state with saved controls and declared configuration; enforces reset_count == 1 and rejects per-frame state resets fail-closed; strictly rejects hidden target-force feedback and undeclared root wrenches on floating-base root DoFs (0..5); rejects mismatched model configuration; implements smooth_backward_trajectory with marginalized arrival information producing continuous smoothed trajectory without per-frame discontinuities while strictly forbidding reverse-time contact integration; serializes structured ReplayReceipt; computes independent replay metrics separated from solver cost; provides public adapters to Shadow Tracker RolloutRequest and Simscape ContinuousReplayTrajectory. All 209 estimation tests pass.
+- **Last verified:** 2026-10-04: DIME-14 native drift and window solver profiling and caching implemented and validated across 10 behavioral tests in test_dime_solver_cache.py (RED/GREEN). Implements DimeCacheIdentity with multi-tiered isolation (model, parameters, contact policy, solver config, camera config, job id); enforces strict cross-job state isolation; implements LocalModelApproximation with explicit validity radius; guards against storing/serving smooth derivatives across impact discontinuities; enforces mandatory independent continuous replay without skipping; exports comprehensive DimeCostBreakdown with p50/p95 cold/warm metrics and failure costs. All 246 estimation tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
-- **Next step:** Merge PR #11430, advance to dependent qualification gates.
+- **Next step:** Create PR, verify CI Standard, squash-merge into origin/main.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
