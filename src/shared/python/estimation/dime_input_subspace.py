@@ -306,12 +306,13 @@ def evaluate_input_subspace_feasibility(
 
     # Orthogonal projection: unactuated / torque-independent subspace
     u_perp = decomp.orthogonal_basis
+    r_perp: np.ndarray
     if u_perp.shape[1] == 0:
         r_perp = np.zeros(0, dtype=np.float64)
         chi2_perp = 0.0
         drift_feasible = True
     else:
-        r_perp = u_perp.T @ r_w
+        r_perp = np.asarray(u_perp.T @ r_w, dtype=np.float64).reshape(-1)
         chi2_perp = float(np.sum(r_perp**2))
         drift_feasible = chi2_perp <= threshold_chi2
 
