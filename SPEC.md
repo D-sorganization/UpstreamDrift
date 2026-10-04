@@ -1,3 +1,21 @@
+## Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates (DIME-08, #11429)
+
+Specifies outer-loop observable global calibration, physical gauge anchor verification (metric scale, gravity frame, mass, measured contact force), identifiability analysis via SVD with rank-deficiency nullspace freezing, realizable physical inertia tensor validation (symmetry, positive-definiteness, triangle inequalities on principal moments), and frozen-prior revision guards for dynamics-informed mocap matching (#11421, #11429):
+- **Physical Gauge Policies (`src/shared/python/estimation/dime_global_calibration.py`)**:
+  - `PhysicalGauge`: enumerated reference anchors (`METRIC_SCALE`, `GRAVITY_FRAME`, `MASS_ANCHOR`, `MEASURED_FORCE_ANCHOR`).
+  - `PhysicalGaugePolicy`: validates required anchors for calibration candidates. Monocular camera scale ambiguity requires `METRIC_SCALE`; unmeasured contact dynamics mass/torque ambiguity requires `MASS_ANCHOR` or `MEASURED_FORCE_ANCHOR`. Missing anchors are rejected fail-closed with `PreconditionError`.
+- **Identifiability & Rank Deficiency (`RankDeficiencyPolicy`, `probe_identifiability`)**:
+  - SVD probe of stacked observation Jacobians: singular values below threshold define unobservable parameter combinations.
+  - `FAIL_CLOSED`: rank-deficient parameter blocks raise `PreconditionError`.
+  - `FREEZE_NULLSPACE`: identifies unobservable parameter combinations via right singular vectors and locks unobservable parameters at nominal values while optimizing free observable parameters.
+- **Physical Inertia Realizability (`validate_physical_inertia`)**:
+  - Rigid body inertia tensors must satisfy physical realizability: $3 \times 3$ symmetry, positive definiteness ($I > 0$), and triangle inequalities on principal moments ($I_{xx} + I_{yy} \ge I_{zz}$, $I_{yy} + I_{zz} \ge I_{xx}$, $I_{zz} + I_{xx} \ge I_{yy}$). Unphysical tensors fail closed with `PreconditionError`.
+- **Frozen Prior Protection & Revision Lineage**:
+  - When priors are declared frozen (`is_prior_frozen=True`), modifying calibrated values without an explicit revision tag (`prior_revision_tagged=True`) is strictly rejected fail-closed.
+- **Latency Accounting & Structured Receipts (`GlobalCalibrationResult`)**:
+  - Separates high-frequency inner-loop window estimator latency (`inner_loop_latency_s`) from outer-loop global calibration solver runtime (`outer_loop_time_s`), tracking cumulative latency and full cost breakdowns.
+  - Losses roundtrip losslessly through JSON-compatible dictionary serialization.
+
 ## Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints (DIME-06, #11427)
 
 Specifies unilateral ground support constraints, Coulomb friction cone bounding, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions for dynamics-informed mocap matching (#11421, #11427):
@@ -7975,6 +7993,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
 | 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
