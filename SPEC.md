@@ -1,3 +1,17 @@
+## Remove Deprecated Force Vectors and Vectors Shims (FTO-7 Follow-Up, #11347)
+
+Retires obsolete deprecated plotting shims per ADR-0052, #11292, and #11347 after migration to `src.shared.python.force_overlay.renderers.matplotlib_glyphs`:
+- **Retired Modules**:
+  - `ForceVectorRenderer` in module `src.shared.python.plotting.renderers.force_vectors` (retired per ADR-0052, #11292).
+  - `VectorOverlayRenderer` in module `src.shared.python.plotting.renderers.vectors` (retired per ADR-0052, #11292).
+- **Retirement Verification Tests**:
+  - `tests/unit/force_overlay/test_renderer_shims.py`.
+  - `tests/unit/plotting/test_force_vector_renderer.py`.
+- **Plotting Suite Updates**:
+  - Cleaned up `tests/unit/test_plotting_renderers.py` to remove `VectorOverlayRenderer` references.
+- **Inventory & Schema Sync**:
+  - Regenerated `docs/shared_tools/divergence_inventory.v1.json` and `docs/shared_tools/divergence_inventory.md` reflecting the retired files.
+
 ## Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol (DIME-01, #11422)
 
 Specifies versioned benchmark manifest, native capability status, fail-closed qualification rules, and frozen acceptance thresholds (#11421, #11422):
@@ -23,6 +37,7 @@ Specifies versioned benchmark manifest, native capability status, fail-closed qu
   - `compute_phase_drift_and_control`: phase-stratified kinematic drift and control magnitudes across split phases.
   - `NumericAcceptanceThresholds`: frozen acceptance thresholds (max drift $\le 0.015\text{ m}$, max angular drift $\le 0.05\text{ rad}$, max control $\le 250\text{ N}\cdot\text{m}$, min alignment $\ge 0.95$, max cancellation $\le 0.10$, reproducibility atol $\le 10^{-9}$) fixed before solver comparison.
   - `ConditioningScale`: explicit scaling and nondimensionalization factors for state, angle, velocity, torque, and time.
+
 
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
@@ -7821,6 +7836,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |
 | 2026-10-04 | #11453 | [DIME-01] Baseline and frozen benchmark protocol: DimeBenchmarkManifest, fail-closed qualification evaluation, native capability status vs method existence, deterministic fixtures, privacy protection, and frozen thresholds (#11422, refs #11421). |
 | 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
