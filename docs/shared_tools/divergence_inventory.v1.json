@@ -13,7 +13,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1593,
+    "ud-only": 1597,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 11,
+      "ud-only": 15,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7724,7 +7724,19 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 4948,
+      "ud_bytes": 7162,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_contracts.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 36795,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7737,6 +7749,42 @@
       "package": "estimation",
       "subpackage": "",
       "ud_bytes": 23497,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_manifold.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 7868,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_observation_factors.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 38375,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_providers.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 15610,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,

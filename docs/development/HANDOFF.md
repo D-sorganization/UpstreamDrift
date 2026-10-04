@@ -1,3 +1,70 @@
+# Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors — #11421 / #11424
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11424-observation-factors`; commit SELF; PR: #11457 (`Closes #11424`, `Refs #11421`)
+- Governing issue: #11424 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-03] Implement robust marker (3D markers) and markerless (2D keypoints) observation factors with anisotropic noise covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence.
+- Completed:
+  - `src/shared/python/estimation/dime_observation_factors.py`:
+    - `DimeObservationFactor`: abstract unified interface for observation factors declaring modality (`"marker_3d"`, `"markerless_2d"`), canonical units (`"m"` for markers, `"px"` for 2D detections), residual dimensions, unwhitened raw residuals, robust whitened residuals, analytical/finite-difference Jacobians on candidate states/parameters, and held-out evaluation reports.
+    - `Marker3DObservationFactor`: metric 3D marker observation factor supporting forward kinematics callbacks, local marker attachment semantics (`MarkerAttachment`), anisotropic noise covariance whitening, and robust downweighting.
+    - `Markerless2DObservationFactor`: 2D pixel observation factor combining forward kinematics with calibrated pinhole camera projection, Brown-Conrady lens distortion, and strict depth chirality checks.
+    - `RobustLossKernel`: robust kernels (`"linear"`, `"huber"`, `"cauchy"`, `"tukey"`, `"pseudo_huber"`) applied via iteratively reweighted least squares (IRLS) square-root weights $\sqrt{w(r)}$; inliers receive weight 1.0, gross outliers receive sub-quadratic penalties or complete rejection (Tukey biweight cutoff $c$).
+    - `_build_whitening_operators`: supports isotropic variance, per-axis diagonal variances, and full $D \times D$ positive-definite covariance matrices via Cholesky factor inversion ($L^{-1}$).
+    - Strictly decouples physical noise covariance ($\text{m}^2$ or $\text{px}^2$) from detector confidence scores $[0, 1]$; non-positive variances or non-positive-definite covariance matrices fail closed with `CovarianceValidationError`.
+    - Occlusion masks (`valid_mask`): occluded or missing markers/keypoints are strictly masked out of the fitting residual vector and never zero-filled with $[0, 0, 0]$ or $[0, 0]$, preventing artificial distortion of the optimization landscape.
+    - Held-out partition (`held_out_mask`): held-out observations are completely excluded from the fitting residual vector and Jacobian ($N_{\text{fit}} = N_{\text{valid}} - N_{\text{held\_out}}$).
+    - `HeldOutEvaluationReport`: reports out-of-sample RMSE and max error in declared canonical units without contaminating the solver objective.
+    - `DimeCameraParameters` & `invert_camera_extrinsics`: exact rigid $SE(3)$ transform inversion $(R, t) \leftrightarrow (R^T, -t R)$ with right-handed $SO(3)$ orthonormality and $\det(R) = +1$ enforcement. Reflection matrices ($\det(R) = -1$) and negative camera depth ($Z_{\text{cam}} \le 0$) fail closed with `ChiralityViolationError`.
+    - Quaternion sign equivalence: states parameterized by antipodal unit quaternions $q \equiv -q$ produce identically zero residual difference ($\Delta r = 0$) in forward kinematics and camera projections.
+    - `ObservationTiming`: validates strictly positive monotonic timestamps ($\Delta t > 0$), finite real numbers, and consistent sample rates; non-monotonic or non-finite sequences raise `TimingViolationError`.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new observation factor symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `.md`: updated to reflect new file in `src/shared/python/estimation/`.
+  - `tests/unit/estimation/test_dime_observation_factors.py`: 10 focused behavioral tests covering RED contract violations (irregular timestamps, camera transform inversion, occluded marker without zero-filling, anisotropic noise whitening, outlier downweighting via robust loss, mirrored coordinates/chirality validation, quaternion sign equivalence) and GREEN numerical derivatives (analytical vs finite difference), noiseless projection recovery, and masked residual dimensions.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_observation_factors.py`: 10 passed.
+  - `pytest tests/unit/estimation`: 99 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_dry_duplication_gate.py`, `check_file_size_budget.py` (all tracked files <= 1200 lines, 0 on watchlist), `check_error_handling_ratchet.py`, and `divergence_inventory.py --check` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-04 under epic #11421.
+
+# Dynamics-Informed Mocap Matching: State, Observation and Dynamics Provider Contracts — #11421 / #11423
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11423-provider-contracts`; commit SELF; PR: #11455 (`Closes #11423`, `Refs #11421`)
+- Governing issue: #11423 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-02] Establish versioned complete-state, observation-window, provider capability, SE(3)/quaternion manifold contracts with sign equivalence, fail-closed physical qualification rules, snapshot/restore rollback, Zero-Torque Counterfactual (ZTCF) proposal rollouts, and runtime factor exclusivity.
+- Completed:
+  - `src/shared/python/estimation/dime_contracts.py`:
+    - `DimeCompleteState`: versioned complete state encapsulation with generalized coordinates $q \in \mathbb{R}^{n_q}$, velocities $v \in \mathbb{R}^{n_v}$, optional accelerations $\dot{v}$, internal memory mapping, SHA-256 model hash, validated SI units, and declared coordinate frames. Enforces read-only array protections, numeric real bounds, and rejection of boolean coercion.
+    - `DimeObservationWindow`: windowed observation container enforcing strict temporal monotonicity ($\Delta t > 0$), interval containment ($t_{\text{start}} \le t_0, t_N \le t_{\text{end}}$), observation shape alignment, and typed uncertainty specifications (`"gaussian"`, `"laplace"`, `"covariance"`, `"unweighted"`).
+    - `ControlChannelSpec`: declared control channels specifying physical type (`"torque"`, `"force"`, `"excitation"`), units, selection maps, limits, and internal activation dynamics semantics.
+    - `ContactPolicy`: strictly enforces binary selection between native eliminated reactions (`"native_eliminated"`) and explicit constrained reaction variables (`"explicit_constrained"`).
+    - `PassiveLoadSpec`: inventoried passive loads evaluated where modeled; range-of-motion (ROM) priors cannot supply an unmeasured passive stiffness law.
+    - `ProviderCapability`: truthful capability report declaring manifold, control channels, contact policy, passive loads, activation dynamics, and qualification status.
+    - `check_qualification_rules`: fail-closed qualification evaluation enforcing full activation dynamics for muscle-driven models (never silent torque substitution), strict contact policies, and rejection of unmeasured passive stiffness laws.
+    - `ProviderSnapshot`: complete snapshot of provider state and solver/contact/controller memory.
+    - `DimeFullStepRequest` & `DimeFullStepResult`: input request and forward simulation output with acceleration decomposition and diagnostics.
+    - `DimeZeroInputProposal`: forward rollout under zero control ($u=0$), verifying exact acceleration superposition ($a_{\text{full}} = a_{\text{grav}} + a_{\text{drift}} + a_{\text{ctrl}}$) and Zero-Torque Counterfactual (ZTCF) drift trajectories.
+    - `DimeEstimationResult`: standardized estimation receipt with state trajectory, estimated controls, residuals, uncertainty summary, and metrics.
+    - `RuntimeExclusivityContract`: enforces mutual exclusivity between marginalized-input transitions and explicit-input likelihoods on overlapping intervals; prohibits diagnostics from contributing duplicate objective factors.
+    - `DynamicsProvider`: runtime checkable protocol for stateful dynamics providers.
+  - `src/shared/python/estimation/dime_manifold.py`:
+    - `ManifoldContract`: abstract interface defining public `retract`, `local_coordinates`, and their Jacobians.
+    - `VectorSpaceManifold`: Euclidean vector space manifold where $n_q == n_v$.
+    - `QuaternionManifold`: unit quaternion $SO(3)$ manifold ($n_q = 4, n_v = 3$) with antipodal sign equivalence ($\|v\| = 0$ for $q \equiv -q$).
+    - `SE3Manifold`: rigid body $SE(3)$ manifold ($n_q = 7, n_v = 6$) combining translation with quaternion orientation.
+  - `src/shared/python/estimation/dime_providers.py`:
+    - `DeterministicFakeProvider`: reference fake provider fulfilling identical contracts without claiming native qualification.
+    - `AnalyticPendulumProvider`: harmonic oscillator dynamics provider integrating with `make_fixed_base_pendulum_fixture`.
+    - `UnderactuatedAnalyticProvider`: underactuated two-link fixture provider with passive root DOF ($\tau_0 = 0$) integrating with `make_underactuated_analytic_fixture`.
+  - `src/shared/python/estimation/__init__.py`: re-exports all new DIME contract, manifold, and provider symbols.
+  - `tests/unit/estimation/test_dime_provider_contracts.py`: 16 focused behavioral tests covering RED contract violations (incomplete state, invalid time order, dimensional mismatch, stale model hashes, unsupported contact, unknown units, snapshot rollback on exceptions, unavailable provider fail-closed, muscle activation dynamics, unmeasured ROM priors) and GREEN identical provider contracts, runtime factor exclusivity, manifold $n_q \neq n_v$ and quaternion sign equivalence, ZTCF superposition, and serialization round-trips.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_provider_contracts.py`: 16 passed.
+  - `pytest tests/unit/estimation`: 89 passed, 1 skipped (jax).
+  - All CI ratchets verified: `check_file_size_budget.py` (all tracked files <= 1200 lines, 0 on watchlist) and `check_error_handling_ratchet.py` pass.
+  - Code hygiene verified: `ruff check` and `ruff format --check` pass cleanly.
+- Next steps: Proceed to DIME-03 under epic #11421.
+
 # Retire Deprecated Force_Vectors and Vectors Shims — #11347
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `fix/remove-vector-shims-11347`; commit SELF; PR: see branch (`Closes #11347`, `Refs #11285`, `Refs #11292`)
