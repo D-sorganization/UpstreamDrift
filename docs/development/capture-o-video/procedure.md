@@ -134,6 +134,34 @@ missing runtime or license is a blocked outcome, not a pass.
 Extend these with tests. Do not add a second parser, projector, runner, metric
 module or ledger.
 
+## Engine Candidates (COV-10, #11278)
+
+Any engine plugs into the video comparison through one path,
+`src/motion_capture/reference/model_candidate_source.py`. It has no engine
+branches, and the engine name is recorded in provenance only.
+
+1. Produce world-frame landmark trajectories `(T, K, 3)` in metres from the
+   engine's forward simulation or replay output, never from the input markers.
+   For Simscape use `simscape_replay_harness.py` and
+   `simscape_c3d_video_overlay.load_overlay_dataset`; other engines build the
+   array from their own public adapter.
+2. Wrap it in `ModelCandidateSource` with `ModelCandidateProvenance` (engine,
+   candidate id, model SHA-256, qualification as reported by the matching
+   issue; Simscape also needs `matlab_release`, which must be R2025b).
+   `source_from_overlay_dataset` does this for an overlay dataset.
+3. Call `compare_candidate_2d` with the COV-4 camera, the time-aligned video
+   landmarks, the COV-6 pairing result and, optionally, the projected markers.
+   The receipt reports model-vs-video residuals, marker-vs-video residuals and
+   their difference. An `unqualified` candidate still compares, and the receipt
+   carries `model_qualification: unqualified` with no validity claim.
+4. Plugging in #11166 (MuJoCo), #11167 (Drake), #11168 (Pinocchio) and #11169
+   (OpenSim) needs only steps 1-2. A parameterized synthetic-engine test
+   proves the shared path.
+
+The real-data step for Simscape GS3DX (private overlays and receipts per paired
+swing on an R2025b host) stays blocked until #11165 stores a `capture-O`
+candidate. It is never a pass without one.
+
 ## Per-Child Workflow
 
 1. Check and post the issue lease, then create an isolated worktree from
