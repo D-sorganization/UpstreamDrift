@@ -114,7 +114,8 @@ class DimeDynamicsWindowFactor:
         step_res = self.provider.step(step_req)
         pred = step_res.next_state
 
-        nv = self.provider.capability.n_v
+        capability = self.provider.capability
+        nv = capability.n_v
         # Tangent coordinate difference
         diff_q = np.asarray(state_k1.q[:nv], dtype=np.float64) - np.asarray(
             pred.q[:nv], dtype=np.float64
@@ -139,9 +140,10 @@ class DimeDynamicsWindowFactor:
         control: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute Jacobians J_x0, J_x1, J_u of the defect via central finite differences."""
-        nv = self.provider.capability.n_v
+        capability = self.provider.capability
+        nv = capability.n_v
         dim_x = 2 * nv
-        nu = len(self.provider.capability.control_channels)
+        nu = len(capability.control_channels)
 
         # J_x1 is identity
         J_x1 = np.eye(dim_x, dtype=np.float64)
@@ -306,8 +308,9 @@ class DimeDynamicsWindowProblem:
             f"controls row count {raw_u.shape[0]} must match horizon_steps {self.horizon_steps}",
         )
 
-        nu_declared = len(self.provider.capability.control_channels)
-        nv = self.provider.capability.n_v
+        capability = self.provider.capability
+        nu_declared = len(capability.control_channels)
+        nv = capability.n_v
 
         # Check for underactuated root constraint shortcuts
         if self.enforce_root_constraints:
@@ -315,7 +318,7 @@ class DimeDynamicsWindowProblem:
                 # User passed controls for all DOFs including passive root
                 # Check if passive DOFs have non-zero torque
                 passive_dofs = set(range(nv))
-                for ch in self.provider.capability.control_channels:
+                for ch in capability.control_channels:
                     passive_dofs.difference_update(ch.selection_map)
                 for dof in passive_dofs:
                     if dof < raw_u.shape[1] and np.any(np.abs(raw_u[:, dof]) > 1e-9):
@@ -383,6 +386,7 @@ def _check_state_divergence(
     """Fail closed if initial conditions are divergent or unphysical."""
     q0 = np.asarray(problem.initial_state.q, dtype=np.float64)
     v0 = np.asarray(problem.initial_state.v, dtype=np.float64)
+    capability = problem.provider.capability
     if (
         not np.all(np.isfinite(q0))
         or not np.all(np.isfinite(v0))
@@ -395,18 +399,16 @@ def _check_state_divergence(
             controls=np.zeros(
                 (
                     problem.horizon_steps,
-                    len(problem.provider.capability.control_channels),
+                    len(capability.control_channels),
                 )
             ),
-            transition_defects=np.zeros(
-                (problem.horizon_steps, 2 * problem.provider.capability.n_v)
-            ),
+            transition_defects=np.zeros((problem.horizon_steps, 2 * capability.n_v)),
             actuator_bound_residuals=np.zeros(1),
             control_variation_residuals=np.zeros(1),
             root_constraint_residuals=np.zeros(1),
             cost_breakdown={"total_cost": float("inf")},
             status="failed_dynamics_divergence",
-            qualification_status=problem.provider.capability.status,
+            qualification_status=capability.status,
             n_iterations=0,
         )
     return None
@@ -418,7 +420,8 @@ def _rollout_nominal_trajectory(
     """Perform zero-control initial rollout to verify dynamics provider stability."""
     curr_state = problem.initial_state
     states = [curr_state]
-    nu = len(problem.provider.capability.control_channels)
+    capability = problem.provider.capability
+    nu = len(capability.control_channels)
     zeros = np.zeros(nu, dtype=np.float64)
     try:
         for _ in range(problem.horizon_steps):
@@ -527,8 +530,9 @@ def _assemble_window_result(
     """Roll out optimal trajectory and bundle result dataclass."""
     n_steps = problem.horizon_steps
     dt = problem.dt_s
-    nu = len(problem.provider.capability.control_channels)
-    nv = problem.provider.capability.n_v
+    capability = problem.provider.capability
+    nu = len(capability.control_channels)
+    nv = capability.n_v
     curr_state = problem.initial_state
     final_states = [curr_state]
     transition_defects = []
@@ -562,7 +566,7 @@ def _assemble_window_result(
         root_constraint_residuals=np.zeros(n_steps, dtype=np.float64),
         cost_breakdown=cost_breakdown,
         status="converged" if opt_res.success else "max_iterations_reached",
-        qualification_status=problem.provider.capability.status,
+        qualification_status=capability.status,
         n_iterations=int(opt_res.nfev),
     )
 
@@ -576,9 +580,10 @@ def solve_dime_dynamics_window(
         return divergence_res
 
     nominal_ok, _ = _rollout_nominal_trajectory(problem)
+    capability = problem.provider.capability
     if not nominal_ok:
-        nu = len(problem.provider.capability.control_channels)
-        nv = problem.provider.capability.n_v
+        nu = len(capability.control_channels)
+        nv = capability.n_v
         return DimeDynamicsWindowResult(
             success=False,
             states=(problem.initial_state,),
@@ -589,13 +594,13 @@ def solve_dime_dynamics_window(
             root_constraint_residuals=np.zeros(1),
             cost_breakdown={"total_cost": float("inf")},
             status="failed_dynamics_divergence",
-            qualification_status=problem.provider.capability.status,
+            qualification_status=capability.status,
             n_iterations=0,
         )
 
     residuals_fn = _build_residuals_evaluator(problem)
     n_steps = problem.horizon_steps
-    nu = len(problem.provider.capability.control_channels)
+    nu = len(capability.control_channels)
     u_init = np.zeros(n_steps * nu, dtype=np.float64)
 
     bounds: tuple[Any, Any] = (-np.inf, np.inf)
@@ -618,7 +623,7 @@ def solve_dime_dynamics_window(
         )
         u_opt = opt_res.x.reshape((n_steps, nu))
     except Exception as exc:
-        nv = problem.provider.capability.n_v
+        nv = capability.n_v
         return DimeDynamicsWindowResult(
             success=False,
             states=(problem.initial_state,),
@@ -629,7 +634,7 @@ def solve_dime_dynamics_window(
             root_constraint_residuals=np.zeros(1),
             cost_breakdown={"total_cost": float("inf")},
             status=f"solver_exception_{exc}",
-            qualification_status=problem.provider.capability.status,
+            qualification_status=capability.status,
             n_iterations=0,
         )
 
