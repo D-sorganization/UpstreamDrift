@@ -350,6 +350,7 @@ __all__ = [
     "QuaternionManifold",
     "RangeOfMotionBound",
     "RankDeficiencyPolicy",
+    "ReplayReceipt",
     "ResidualFunction",
     "RneaFunction",
     "ReplayReceipt",
