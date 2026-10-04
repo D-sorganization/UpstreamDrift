@@ -1,6 +1,45 @@
+# Dynamics-Informed Mocap Matching: Ground Reaction Balance and Contact Constraints — #11421 / #11427
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11427-contact-constraints`; PR: #11463 (`Closes #11427`, `Refs #11421`)
+- Governing issue: #11427 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-06] Implement ground reaction balance and contact constraints, unilateral support ($f_n \ge 0$), Coulomb friction cone bounds, unactuated floating-base root dynamic equilibrium, bilateral contact force allocation ambiguity tracking, and discrete contact mode transitions.
+- Completed:
+  - `src/shared/python/estimation/dime_contact_constraints.py`:
+    - `ContactMode`: enumerated contact phases (`STANCE`, `FLIGHT`, `IMPACT`, `LIFTOFF`).
+    - `ForceProvenance`: provenance tracking (`MEASURED` vs `INFERRED`).
+    - `ContactPointGeometry`: specifies contact point ID, body name, local position, sphere radius, and normal.
+    - `MeasuredGroundReaction`: validates measured net force/torque, center of pressure, and provenance.
+    - `ContactPointAdmissibleForce`: projects candidate force onto unilateral normal support ($f_n \ge 0$, adhesive tension rejected fail-closed with `PreconditionError`) and Coulomb friction cone ($|f_t| \le \mu f_n$); flags slipping and downweights confidence.
+    - `BilateralAllocationStatus`: detects bilateral stance ambiguity under net force measurements without individual footplates; returns admissible intervals $[f_{\text{min}}, f_{\text{max}}]$ and explicitly flags `is_identified=False`.
+    - `ContactConstraintResult`: structured receipt holding admissible contact forces, bilateral allocation status, root equilibrium residuals, and differentiability validity flag.
+    - `DimeContactConstraintsFactor`: verifies unactuated root integrity (floating-base DoFs 0..5 receive strictly zero actuator torques, no fictitious pelvis support shortcuts); evaluates root dynamic equilibrium $M(q)_{\text{root}, :} \ddot{q} + h(q, v)_{\text{root}} = \sum J_{c, i}^T f_i$; evaluates unilateral support, Coulomb friction cone, and contact Jacobians; declares derivatives invalid across discrete mode switches (impact, liftoff).
+  - `src/shared/python/estimation/__init__.py`: re-exports all public DIME-06 contact constraint symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `.md`: updated divergence inventory.
+  - `tests/unit/estimation/test_dime_contact_constraints.py`: 11 behavioral tests covering all required RED and GREEN behaviors:
+    - RED negative normal force (adhesive ground tension) rejected fail-closed.
+    - RED excessive friction violates Coulomb cone, flags slipping and downweights confidence.
+    - RED incorrect foot frame coordinate transforms fail closed.
+    - RED fictitious pelvis support shortcut (actuator torque on unactuated root DoF) rejected fail-closed with `PreconditionError`.
+    - RED stance-to-flight / flight-to-stance transitions declare contact derivatives invalid.
+    - RED bilateral ambiguity under net force without individual plates returns `is_identified=False` with bounded intervals.
+    - RED loss of support during stance fails dynamic equilibrium.
+    - GREEN static weight support matches gravitational load equilibrium.
+    - GREEN measured vs inferred force provenance distinction preserved.
+    - GREEN continuous contact derivatives during persistent stance match finite differences.
+    - GREEN bilateral allocation with independent footplates is identified.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_contact_constraints.py`: 11 passed (100% GREEN).
+  - `check_architecture_budget.py`: passed.
+  - `check_file_size_budget.py`: passed.
+  - `check_error_handling_ratchet.py`: passed.
+  - `check_dry_duplication_gate.py`: passed.
+  - `divergence_inventory.py --check`: passed.
+  - `ruff check` and `ruff format --check`: passed.
+- Next steps: Drive PR #11463 to merge, and proceed to DIME-07 (#11428).
+
 # Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors — #11421 / #11426
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11426-dynamics-window`; PR: #11461 (`Closes #11426`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11426-dynamics-window`; PR: #11462 (`Closes #11426`, `Refs #11421`)
 - Governing issue: #11426 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-05] Implement coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting.
 - Completed:
