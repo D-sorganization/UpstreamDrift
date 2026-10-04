@@ -1,3 +1,24 @@
+## Dynamics-Informed Mocap Matching: Coupled State-Control Full-Dynamics Window Factors (DIME-05, #11426)
+
+Specifies coupled state-control window estimation, exact vs soft integrated defect transcription, bounded model discrepancy slack, actuator limits, underactuated root constraints, control variation regularization, and comprehensive cost and residual reporting (#11421, #11426):
+- **Defect Transcription Modes (`DefectMode`)**:
+  - `EXACT`: integrated dynamic transition defects $x_{k+1} - f(x_k, u_k)$ are enforced as hard feasibility constraints.
+  - `SOFT`: defect residuals enter the optimization objective weighted by transition defect penalty matrices.
+- **Model Discrepancy Slack Bounds (`ModelDiscrepancyBounds`)**:
+  - Validates model discrepancy slack norm against declared maximum slack bound $\|s\| \le s_{\text{max}}$, rejecting excessive unphysical slacks with `PreconditionError`.
+  - Evaluates quadratic penalty cost $\frac{1}{2} s^T W_{\text{slack}} s$ for allowed discrepancy slacks.
+- **Coupled Window Factor (`DimeDynamicsWindowFactor`)**:
+  - Computes single-step integrated transition defect vectors $d_k = x_{k+1} - f(x_k, u_k)$ across the window horizon.
+  - Computes central finite-difference state Jacobians $J_{x_0}, J_{x_1}$ and control Jacobian $J_u$ on the discrete step map.
+  - Exports `as_interval_factor` as `explicit_input_likelihood` factor registered in `RuntimeExclusivityContract`.
+- **Underactuated Constraints & Control Variation (`DimeDynamicsWindowProblem`)**:
+  - Enforces underactuated root constraints: validates declared control channels against provider selection map, rejecting arbitrary root torque shortcuts on passive degrees of freedom with `PreconditionError`.
+  - Enforces actuator limits $[u_{\text{min}}, u_{\text{max}}]$ and penalizes control rate of change $\frac{1}{2} w_{\text{rate}} \|u_k - u_{k-1}\|^2$.
+- **Window Optimization & Structured Receipts (`solve_dime_dynamics_window`, `DimeDynamicsWindowResult`)**:
+  - Solves coupled nonlinear least-squares optimization using Trust Region Reflective (TRF) algorithm with box bounds.
+  - Structured receipt exports recovered state trajectory, control trajectory, transition defects, actuator bound residuals, control variation residuals, root constraint residuals, and full cost breakdown (`observation_cost`, `transition_cost`, `control_effort_cost`, `control_rate_cost`, `discrepancy_cost`, `total_cost`).
+  - Fail-closed handling for divergent or non-finite dynamics simulation, returning invalid result without corrupting state.
+
 ## Dynamics-Informed Mocap Matching: Uncertain-Control ZTCF Prediction and Estimation Criterion (DIME-04, #11425)
 
 Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control influence linearization, exact parallelotope reachable acceleration interval bounding, Gaussian uncertain-control covariance propagation, authority-bounded drift dominance indexing, and DIME transition proposals with fail-closed receipts and runtime factor exclusivity (#11421, #11425):
@@ -7930,6 +7951,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |
+| 2026-10-04 | #11460 | [DIME-04] Uncertain-control ZTCF prediction and estimation criterion: input-affine dynamics decomposition, parallelotope reachable acceleration interval, Gaussian uncertain-control covariance propagation, drift dominance index, and predict_dime_transition (#11425, refs #11421). |
 | 2026-10-04 | #11457 | [DIME-03] Robust marker and markerless observation factors: Marker3DObservationFactor, Markerless2DObservationFactor, calibrated confidence and anisotropic covariance whitening, robust loss kernels (Huber, Tukey, Cauchy, Pseudo-Huber), held-out partitioning, camera inversion and chirality validation, and quaternion sign equivalence (#11424, refs #11421). |
 | 2026-10-04 | #11455 | [DIME-02] State, observation and dynamics provider contracts: DimeCompleteState, DimeObservationWindow, SE(3)/quaternion manifold operations with sign equivalence, fail-closed qualification rules, snapshot rollback, ZTCF proposals, and runtime factor exclusivity (#11423, refs #11421). |
 | 2026-10-03 | #11452 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |

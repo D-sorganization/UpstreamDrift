@@ -13,7 +13,7 @@
   "totals": {
     "identical": 406,
     "diverged": 274,
-    "ud-only": 1598,
+    "ud-only": 1599,
     "tools-only": 770,
     "spelling-only": 123
   },
@@ -336,7 +336,7 @@
     "estimation": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 16,
+      "ud-only": 17,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7724,7 +7724,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 7916,
+      "ud_bytes": 8328,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -7737,6 +7737,18 @@
       "package": "estimation",
       "subpackage": "",
       "ud_bytes": 36795,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "estimation/dime_dynamics_window.py",
+      "classification": "ud-only",
+      "package": "estimation",
+      "subpackage": "",
+      "ud_bytes": 22302,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
