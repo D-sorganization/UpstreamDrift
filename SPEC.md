@@ -1,3 +1,26 @@
+## Dynamics-Informed Mocap Matching: State, Observation, and Dynamics Provider Contracts (DIME-02, #11423)
+
+Specifies versioned complete-state, observation-window, provider capability, proposal/step, and estimation-result interfaces for dynamics-informed mocap matching (#11421, #11423):
+- **Versioned Complete-State and Observation-Window Contracts (`src/shared/python/estimation/dime_contracts.py`)**:
+  - `DimeState`: immutable container encapsulating timestamp, generalized positions $q$, generalized velocities $v$, optional generalized accelerations $\dot{v}$, optional muscle activations $a$, model hash, coordinate frame (`"world"`), and explicit units (`"rad"`, `"m"`, `"rad/s"`, `"m/s"`, `"rad/s^2"`, `"m/s^2"`).
+  - Validation rules fail closed on missing/non-canonical units, non-finite values, and model hash mismatch.
+  - `ObservationItem` and `ObservationWindow`: structured observation items (marker positions, marker velocities, segment orientations) and time-ordered windows with monotonicity verification, span calculation, and segment filtering.
+- **Manifold Operations with Antipodal Sign Equivalence (`DimeManifold`, `VectorManifold`, `QuaternionManifold`)**:
+  - Manifold contract exposing public `retract(x, delta)` and `local_coordinates(x0, x1)` operations.
+  - Supports configurations where $n_q \ne n_v$ (e.g. 4D unit quaternion for 3D rotational velocity).
+  - `QuaternionManifold`: enforces $S^3 / SO(3)$ antipodal sign equivalence ($q \equiv -q$); checks $\langle q_0, q_1 \rangle < 0$, negating $q_1$ before logarithm retraction to guarantee shortest geodesic displacement and seamless equivalence.
+- **Typed Control Channels and Activation Dynamics (`DimeControlChannel`, `ControlAllocation`, `ControlPhysicalType`)**:
+  - Control channels declare physical type (`JOINT_TORQUE`, `MUSCLE_EXCITATION`, `EXTERNAL_WRENCH`, `SYNTHETIC_GENERALIZED_FORCE`), canonical units (`"N*m"`, `"dimensionless"`, `"N"`), underactuation selection maps, and lower/upper bounds.
+  - Muscle excitation channels mandate explicit forward activation dynamics ($\dot{a} = (u - a) / \tau$); silent torque substitution without activation dynamics fails closed with `UnitMismatchError`.
+- **Mutually Exclusive Contact Interfaces (`ContactPolicy`, `ContactInterfaceMode`)**:
+  - Contact policies declare contact mode: `NATIVE_ELIMINATED` (reactions eliminated by solver/integrator without explicit multipliers) or `EXPLICIT_CONSTRAINED` (explicit normal/friction constraint reaction variables $\lambda$).
+  - Simultaneous declaration of native eliminated and explicit constrained modes raises typed `ConflictingContactInterfaceError`.
+- **Runtime Factor Exclusivity (`IntervalFactorRegistry`, `IntervalFactorType`)**:
+  - Prevents factor double-counting: runtime exclusivity between `MARGINALIZED_TRANSITION` and `EXPLICIT_INPUT_LIKELIHOOD` on overlapping time intervals, raising `ExclusiveFactorConflictError`.
+  - Diagnostics factors cannot contribute duplicate factors to estimation graphs.
+- **Test Dynamics Providers (`DeterministicFakeProvider`, `AnalyticPendulumProvider`)**:
+  - Concrete reference providers implementing proposal (`step_zero_input`) and full-step (`step_full`) transitions without claiming native qualification (`qualification="implemented"`).
+
 ## Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol (DIME-01, #11422)
 
 Specifies versioned benchmark manifest, native capability status, fail-closed qualification rules, and frozen acceptance thresholds (#11421, #11422):

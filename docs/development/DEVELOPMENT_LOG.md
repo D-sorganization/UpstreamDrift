@@ -60,7 +60,19 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Started:** 2026-09-29
 - **Last verified:** 2026-10-03 — Part 1 merged (#11172); Part 2 (#11166, PR #11174): owner capture runs through the MuJoCo pipeline (IK 0.083 m); owner dynamics 0.567 m is a strict xfail; 95 pipeline unit tests pass.
 - **Summary:** Epic #11161: neutral-id capture registry with SHA-256 verification and private-data resolution, pure capture-export functions, engine-independent swing events and metrics, and Capture-O pipeline execution through MuJoCo. Engines (#11165-#11169) and the cross-engine comparison (#11170) follow.
-- **Next step:** Land PR #11174 (Part 2, #11166). Bring the owner dynamics marker RMS under 0.15 m so the #11166 xfail can be removed.
+
+### DL-#11421 · Dynamics-Informed Mocap Matching (DIME)
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11421; children #11422–#11430
+- **PR:** #11456 (Closes #11423, Refs #11421)
+- **Branch:** `feat/dime-provider-contracts-11423`
+- **Paths:** `src/shared/python/estimation/dime_manifest.py`, `src/shared/python/estimation/dime_contracts.py`, `src/shared/python/estimation/synthetic_fixtures.py`, `tests/unit/estimation/**`
+- **Started:** 2026-10-03
+- **Last verified:** 2026-10-03 at SELF — Child 2 (#11423, PR #11456): versioned complete-state (`DimeState`), observation-window (`ObservationWindow`), provider capability, full-step proposal/step (`step_full`, `step_zero_input`), and estimation-result contracts implemented; manifold contract exposing public retract and local coordinates with antipodal sign equivalence ($q \equiv -q$ on $S^3 / SO(3)$); typed control channels with muscle activation dynamics; mutually exclusive contact interfaces (`ContactPolicy`); runtime factor exclusivity (`IntervalFactorRegistry`); 17 unit tests passing. Child 1 (#11422, PR #11453) merged to main.
+- **Summary:** Dynamics-Informed Mocap Matching (DIME) establishes benchmark manifests, provider contracts, robust observation factors, solver interfaces, baseline estimators, cross-engine evaluations, and frozen threshold validation for physical motion capture estimation.
+- **Next step:** Advance to Child 3 (#11424): robust marker and markerless observation factors.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 

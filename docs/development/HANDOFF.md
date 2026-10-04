@@ -1,3 +1,26 @@
+# Dynamics-Informed Mocap Matching: State, Observation, and Dynamics Provider Contracts — #11421 / #11423
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-provider-contracts-11423`; commit SELF; PR: opened from this branch (`Closes #11423`, `Refs #11421`)
+- Governing issue: #11423 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-02] Define versioned complete-state (`DimeState`), observation-window (`ObservationWindow`), provider capability, full-step proposal/step (`step_full`, `step_zero_input`), and estimation-result interfaces; public `retract` and `local_coordinates` supporting $n_q \ne n_v$ and quaternion antipodal sign equivalence ($q \equiv -q$ on $S^3 / SO(3)$); typed control channels with muscle activation dynamics; mutually exclusive contact interfaces (`ContactPolicy`); runtime factor exclusivity (`IntervalFactorRegistry`); and concrete test providers (`DeterministicFakeProvider`, `AnalyticPendulumProvider`).
+- Completed:
+  - `src/shared/python/estimation/dime_contracts.py`:
+    - `DimeState`: immutable state with timestamp, generalized positions $q$, generalized velocities $v$, optional accelerations $\dot{v}$, optional muscle activations $a$, model hash, coordinate frame (`"world"`), and canonical SI units. Fails closed on missing/non-canonical units, non-finite values, and model hash mismatches.
+    - `DimeManifold`, `VectorManifold`, `QuaternionManifold`: public `retract` and `local_coordinates` operations supporting $n_q \ne n_v$ and $S^3 / SO(3)$ antipodal sign equivalence ($q \equiv -q$) with negative inner-product reflection before logarithm retraction.
+    - `DimeControlChannel`, `ControlAllocation`, `ControlPhysicalType`: typed channels (`JOINT_TORQUE`, `MUSCLE_EXCITATION`, `EXTERNAL_WRENCH`, `SYNTHETIC_GENERALIZED_FORCE`), canonical units (`"N*m"`, `"dimensionless"`, `"N"`), underactuation selection maps, and mandatory activation dynamics ($\dot{a} = (u - a) / \tau$) rejecting silent torque substitution with `UnitMismatchError`.
+    - `ContactPolicy`, `ContactInterfaceMode`: mutually exclusive contact modes (`NATIVE_ELIMINATED` vs `EXPLICIT_CONSTRAINED`), raising typed `ConflictingContactInterfaceError` on concurrent declaration.
+    - `ObservationItem`, `ObservationWindow`: structured observation items (marker positions, marker velocities, segment orientations) and time-ordered windows with monotonicity verification, span calculation, and segment filtering.
+    - `IntervalFactorRegistry`, `IntervalFactorRegistration`, `IntervalFactorType`: runtime exclusivity between `MARGINALIZED_TRANSITION` and `EXPLICIT_INPUT_LIKELIHOOD` on overlapping time intervals, preventing factor double-counting and raising `ExclusiveFactorConflictError`.
+    - `DeterministicFakeProvider`, `AnalyticPendulumProvider`: concrete reference providers implementing proposal (`step_zero_input`) and full-step (`step_full`) transitions without claiming native qualification (`qualification="implemented"`).
+  - `src/shared/python/estimation/__init__.py`: exported all DIME contract symbols.
+  - `tests/unit/estimation/test_dime_provider_contracts.py`: 17 behavioral unit tests covering state validation, unit mismatch rejection, manifold retraction/coordinates, quaternion antipodal sign equivalence, typed control channels, activation dynamics, contact exclusivity, observation window monotonicity/span, runtime factor exclusivity, and provider step contracts.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_provider_contracts.py`: 17 passed in 14.5s.
+  - `pytest tests/unit/estimation`: 119 passed, 1 skipped (jax).
+  - Code hygiene: `ruff check`, `black --check`, `mypy` all pass cleanly with 0 errors.
+  - Architecture and budgets: `check_no_print_calls.py`, `check_architecture_budget.py`, `check_file_size_budget.py`, and LoD scan all pass cleanly.
+- Next steps: Proceed to DIME-03 (#11424, robust marker and markerless observation factors) under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Baseline and Frozen Benchmark Protocol — #11421 / #11422
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11422-baseline-benchmark`; commit SELF; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
