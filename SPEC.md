@@ -1,3 +1,111 @@
+## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
+
+Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
+- **Error Budget Schema (`src/motion_capture/reference/error_budget.py`)**:
+  - `ErrorBudgetCell`: frozen data structure recording `source`, `joint_or_landmark`, `phase_bin`, `view`, `grade`, `comparison_level`, `metric`, `unit`, `n_swings`, `n_frames`, `p50`, `p95`, `worst`, `camera_uncertainty_spread`, `resolvable`, and `source_receipt_hashes`.
+  - Non-zero swing invariant: `n_swings <= 0` is strictly forbidden and raises `ValueError`. Missing data produces no cell and is recorded in `ErrorBudget.not_measured` (`NotMeasuredRecord`).
+  - `build_error_budget`: pure aggregation over COV-7/COV-9/COV-10 summaries with deterministic cell sorting and SHA-256 digest computation (`receipt_digest`), yielding byte-identical serialization across reruns (`to_json`).
+- **Frozen Guidance Derivation (`derive_guidance`, `GuidanceRule`, `GuidanceItem`, `GuidanceReport`)**:
+  - Encapsulates frozen comparison thresholds for historical player consumers (Tiger #11226, Hogan #11229, Necromatcher #11232/#11235).
+  - Classifies quantities into `trustworthy at p95 < X`, `indicative`, or `not recoverable from single view`.
+  - Level contract enforcement: an L1 cell can never be classified as `trustworthy` for a per-frame quantity; attempting to do so raises `ValueError`.
+  - Frozen-rule guard: modifying thresholds without bumping `ERROR_BUDGET_SCHEMA_VERSION` fails closed with `ValueError`.
+  - Resolvability guard: when camera uncertainty spread renders a metric unresolvable (`resolvable == False`), guidance reports `not recoverable from single view`.
+- **Public Summary Generator (`generate_public_summary`)**:
+  - Generates neutral Markdown summaries referencing only `capture-O` and `subject-O` with body-height-normalized numbers.
+  - Fail-closed privacy guards: strictly prohibits `cov-NN` frame indices, absolute filesystem paths, and private store filenames (`.mp4`, `.c3d`, `originals/`).
+  - Requires affirmative `owner_approved=True` parameter.
+
+## 3D Comparison: Monocular Backends and Necromatcher Fits vs Capture-O Marker IK (COV-9, #11277)
+
+Specifies 3D comparison of monocular video 3D backends (HMR2) and Necromatcher native forward kinematics fits (marker-anchored and generic) against capture-O reference marker IK under Design by Contract (DbC), Law of Demeter (LoD), and fail-closed integrity (#11268, #11277):
+- **3D Error Metric Separation & Procrustes Alignment (`src/motion_capture/reference/comparison_3d.py`)**:
+  - `align_trajectories_rigid_fixed_scale`: computes rigid transform ($R, t$) on address-phase frames using Kabsch alignment, preserving scale fixed ($s = 1.0$) from reference anthropometry.
+  - `compute_mpjpe_and_pa_mpjpe`: evaluates fixed-scale MPJPE alongside Procrustes-aligned PA-MPJPE (per-frame optimal similarity $s, R, t$) in millimeters. Uniform scale errors remain visible in MPJPE while neutralized in PA-MPJPE.
+  - `compute_depth_and_image_plane_errors`: decomposes 3D residual vectors into the camera optical depth axis component ($e_d = \Delta \mathbf{p} \cdot \hat{\mathbf{d}}$) and orthogonal image-plane component ($\Delta \mathbf{p}_{\perp} = \Delta \mathbf{p} - e_d \hat{\mathbf{d}}$), isolating single-view monocular depth ambiguity.
+- **Fail-Closed Laterality & Clock Qualification**:
+  - `validate_laterality`: validates coronal vector alignment between bilateral joint pairs (shoulders, hips); swapped left and right joints fail closed with `ValueError` rather than averaging.
+  - Clock qualification: when `physical_clock == "unknown"`, comparisons operate strictly in phase-normalized units and omit all velocity metrics (`velocity_metrics is None`). Velocity metrics are emitted only when `physical_clock == "known"` and frame rate is authenticated.
+- **Architecture Law of Demeter & Solver Isolation**:
+  - Comparison harness interfaces exclusively with native forward kinematics landmark positions $(T, K, 3)$; direct imports or dependencies on Necromatcher solver internals, optimizer routines, or raw generalized coordinates ($q$-vectors) are forbidden.
+- **Anthropometry Ablation & L1-3D Envelope Evaluation**:
+  - `compute_anthropometry_ablation`: computes anchored-minus-generic delta ($\Delta = \text{MPJPE}_{\text{anchored}} - \text{MPJPE}_{\text{generic}}$) and fraction of error attributable to body-size estimation.
+  - `compute_l1_3d_envelope_comparison`: measures trajectory agreement fraction inside the 13-swing 3D variation envelope ($[p_5, p_{95}]$ bounds) per joint and per swing phase.
+- **Governed 3D Comparison Receipt (`Comparison3DReceipt`, `build_3d_comparison_receipt`)**:
+  - Encapsulates neutral swing identifiers, backend name, comparison level (`L3` or `L1_3D`), and verified 64-character hexadecimal SHA-256 digests (`reference_hash`, `predicted_hash`, `pairing_hash`); corrupted or stale hashes fail closed.
+
+## Marker-Anchored Anthropometry and Necromatcher Owner Project Contracts (COV-8, #11276)
+
+Specifies the Necromatcher owner player project, marker-anchored anthropometry fitting, fail-closed privacy guards, and immutable capture/swing ingestion (#11268, #11276):
+- **Fail-Closed Privacy Guard (`create_owner_project`)**:
+  - Requires `CAPTURE_DATA_DIR` environment variable or parameter when `private=True`.
+  - Refuses library paths outside `CAPTURE_DATA_DIR` with `ValueError`, ensuring owner data never lands in default public library roots or Git trees.
+  - Automatically initializes or loads `NecromatcherLibrary` and registers the owner player (`subject-O`).
+- **Marker-Anchored Anthropometry Fitting (`compute_marker_anchored_anthropometry`, `MarkerAnchoredAnthropometry`, `SegmentLengthEstimate`)**:
+  - Computes segment lengths from marker joint centres (median across swings with spread and uncertainty).
+  - Explicit provenance tagging: marks marker-measured segments as `'observed (marker-derived)'` and unobserved segments as `'population-prior'` from de Leva male tables scaled to height. Missing or unrecognised provenance tags strictly raise `ValueError`.
+  - Enforces strictly positive and finite segment lengths, raising `ValueError` naming the offending segment on invalid values.
+  - Enforces bilateral length symmetry bounds between paired limbs (`thigh_r`/`thigh_l`, `upper_arm_r`/`upper_arm_l`, `shank_r`/`shank_l`, `forearm_r`/`forearm_l`, `hand_r`/`hand_l`, `foot_r`/`foot_l`), raising `ValueError` naming the segment when asymmetry exceeds the declared bound.
+  - Records owner-reported height and mass with explicit `owner_reported` provenance.
+- **Immutable-Version Capture and Swing Ingestion (`import_video_swings_to_owner_project`)**:
+  - Ingests graded video swings (grades A–C) under registered player `subject-O`, skipping rejected swings (`grade="R"`).
+  - Archives observations from historical-capture run directories via `build_capture_archive`.
+  - Re-importing existing capture archives maintains immutable versioning without duplicating assets or overwriting files on disk.
+
+## 2D Comparison of Markerless Backends vs Projected Capture-O Landmarks (COV-7, #11275)
+
+Specifies 2D comparison between markerless backends and projected capture-O reference landmarks at the highest level each swing supports (COV-7, #11275, parent epic #11268):
+- **Comparison Level Separation (`ComparisonLevel`)**:
+  - `L1` (Envelope comparison, applicable to all graded A–C swings): evaluates fraction of frames inside the 13-swing variation envelope ($p_5 \le \text{observed} \le p_{95}$), signed distance to envelope median ($p_{50}$) in pixels and body-height-normalized units, and DTW distance relative to inter-swing spread.
+  - `L2` (Paired comparison): strictly requires paired swing status (`PairingDecisionStatus.PAIRED`) with confidence margin $\Delta \ge \tau_{\text{pair}}$ and non-null `paired_capture_swing_id`. An unpaired or ambiguous swing raises `ValueError`.
+- **Per-Landmark Residuals & Missingness Tracking (`L2ComparisonResult`)**:
+  - Reports pixel residuals and body-height-normalized residuals as $p_{50}$, $p_{95}$, and worst (maximum) per landmark and aggregated.
+  - Dual RMSE variants: visibility-weighted RMSE ($\sqrt{\sum v_i r_i^2 / \sum v_i}$) and unweighted RMSE.
+  - Missing and occluded landmarks ($v_i = 0$ or non-finite) are excluded from visibility weighting and counted in the structured `missingness_report`, never filled with zeros.
+- **Leakage Guard for Keypoint Offset Calibration**:
+  - Calibration frames used for offset estimation are strictly excluded from the evaluation set.
+  - If a caller supplies an evaluated set containing calibration frames, the leakage guard raises `ValueError`.
+- **Camera Uncertainty Propagation (`propagate_camera_uncertainty`, `MetricSpread`)**:
+  - Propagates virtual camera parameter covariance by sampling camera extrinsics perturbations and reprojecting reference landmarks to establish empirical metric spread ($p_{95} - p_5$).
+  - Larger camera covariance yields wider metric spread.
+  - When comparing backend differences, any difference smaller than the camera metric spread is reported as `is_resolvable = False` and status `"not resolvable"`.
+- **Receipt Input Hash Integrity (`build_2d_comparison_receipt`, `Comparison2DReceipt`)**:
+  - Enforces bitwise input hash verification across observations, camera, pairing, and profile SHA-256 digests.
+  - A stale or mismatched hash raises immediate refusal (`ValueError`).
+
+## Capture-O Video Companion: Swing Pairing, Similarity Matrix, Confidence and Abstention Contracts (COV-6, #11274)
+
+Specifies evidence-grounded video swing to capture-O marker swing pairing, DTW similarity matrices normalized by inter-capture variation, confidence estimation, and fail-closed abstention rules (#11268, #11274):
+- **Phase-Normalized Trajectory DTW & Inter-Capture Normalization (`src/motion_capture/reference/swing_pairing.py`)**:
+  - `compute_inter_capture_envelope_median`: computes median channel-averaged DTW distance across all distinct unordered pairs of capture swings in the given camera view.
+  - Inter-swing envelope serves as empirical null baseline: distance to capture swings is normalized as $d_{\text{norm}}(V, C_k) = d(V, C_k) / \text{median}(D_{\text{inter}})$.
+- **Confidence, Margin & Abstention Rule (`PairingDecisionStatus`, `PairingConfidence`)**:
+  - Evaluates margin $\Delta = d_{(2)} - d_{(1)}$ between best and second-best normalized distances.
+  - Fail-closed abstention: returns `UNPAIRED` when no capture swing is closer than envelope median ($\min_k d_{\text{norm}}(V, C_k) \ge 1.0$).
+  - Returns `AMBIGUOUS` when the top two candidates are within $\varepsilon$ ($\Delta < \varepsilon$, default 0.05) or margin fails threshold ($\Delta < \tau_{\text{pair}}$, default 0.20).
+  - Returns `PAIRED` with designated `paired_capture_swing_id` and confidence metrics when $\Delta \ge \tau_{\text{pair}}$ and $d_{(1)} < 1.0$.
+  - Strictly permutation-invariant across capture-swing order and deterministic in tie-breaking.
+- **Leakage Guard & Provenance Contracts**:
+  - `_check_leakage`: verifies video observations originate from the designated reference backend (`backend="reference"`), rejecting evaluation backends under test (`ValueError("leakage guard: ...")`).
+  - Asserts reference receipt hashes when expected hashes are provided.
+- **Time Mapping & Side Evidence (`TimeMapping`, `SideEvidence`)**:
+  - Paired swings build invertible `TimeMapping` from event anchors (`EventAnchors`) without altering physical time claims.
+  - Side evidence (owner recollection, file creation time, club-speed rank) is recorded in pairing results and serialized matrices but never overrides the geometric distance rule.
+
+## Virtual Camera Fitting and 2D Swing Variation Envelope (COV-4, #11272)
+
+Specifies the virtual camera estimation and 2D swing-to-swing envelope projection for comparing owner video swings against the 13 capture-O reference swings (COV-4, #11272, parent #11268):
+- **Virtual Camera Fitting (`src/motion_capture/reference/virtual_camera_fit.py`)**:
+  - `fit_virtual_camera` estimates camera extrinsics mapping ADR-0041 world coordinates (Y-up, X toward target, Z golfer's right) into 2D video pixel views using non-linear least squares reprojection minimization.
+  - Returns `VirtualCameraResult` recording estimated camera parameters, parameter covariance matrix, fit reprojection RMS in pixels, Jacobian condition number, `CameraFitOutcome` (`fitted` or `degraded`), and optional `degraded_reason`.
+  - Degeneracy handling: correspondences with coplanar or collinear geometry (rank < 3) or ill-conditioned normal equations ($\kappa(J) > \text{max\_condition\_number}$) yield `CameraFitOutcome.degraded` with declared reason and hold camera parameters at priors, refusing to report false sharp fits.
+  - Coordinate axis and chirality validation: enforces ADR-0041 convention where Y is the vertical height axis (rejecting unconverted Y-up C3D inputs missing `y_up_to_z_up`) and detects mirrored projections via chirality sign tests.
+- **2D Swing Variation Envelope (`compute_2d_envelope`, `SwingEnvelope2D`)**:
+  - Projects all 13 capture-O swings into the virtual camera view and computes phase-normalized per-landmark percentile bands ($p_5 \le p_{50} \le p_{95}$) in pixel and body-height-normalized units.
+  - Enforces monotonicity ($p_5 \le p_{50} \le p_{95}$), asserts 13-swing input completeness, and explicitly tracks valid sample counts per landmark and phase bin when marker occlusions/NaNs are present.
+- **Projection Adapters**:
+  - Tested bidirectional adapter between `PinholeCamera` (world-from-camera convention) and `CameraProjection` (world-to-camera convention) preserving camera matrix, rotation, translation, and projection geometry.
+
 ## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
 
 Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
