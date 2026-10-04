@@ -436,17 +436,19 @@ class MovingHorizonEstimator:
 
     def append_samples(self, times: Sequence[float], q_samples: np.ndarray) -> None:
         """Append strictly increasing samples and retain only the active window."""
+        opts = self._problem.options
         self._buffer.append(times, q_samples, self._problem.n_dof)
-        self._buffer.trim_to(self._problem.options.window_size)
+        self._buffer.trim_to(opts.window_size)
 
     def ready(self) -> bool:
         """Return true when enough new samples exist for the next solve."""
-        if self._buffer.size < self._problem.options.window_size:
+        opts = self._problem.options
+        if self._buffer.size < opts.window_size:
             return False
         retained_stop = self._buffer.first_sample_index + self._buffer.size
         if self._last_solved_stop == 0:
             return True
-        return retained_stop - self._last_solved_stop >= self._problem.options.step_size
+        return retained_stop - self._last_solved_stop >= opts.step_size
 
     def build_current_problem(self) -> MapEstimatorProblem:
         """Build the fixed-parameter MAP problem for the retained window."""
@@ -587,6 +589,8 @@ class MovingHorizonEstimator:
             ) -> np.ndarray:
                 return problem_jacobian(evaluation, fixed, layout)
 
+        opts = self._problem.options
+        solver_opts = opts.solver_options
         return MapEstimatorProblem(
             trajectory=trajectory,
             evaluation_times=times,
@@ -594,7 +598,7 @@ class MovingHorizonEstimator:
             shared_parameters=SharedParameterBlock.from_specs([]),
             residual=residual,
             jacobian=jacobian_wrapper,
-            options=self._problem.options.solver_options,
+            options=solver_opts,
         )
 
     def _to_result(
@@ -606,6 +610,8 @@ class MovingHorizonEstimator:
         commit_status: WindowCommitStatus = WindowCommitStatus.ACCEPTED,
         failure_diag: FailureDiagnostics | None = None,
     ) -> MovingHorizonResult:
+        opts = self._problem.options
+        latency_budget = opts.latency_budget_ms
         sample_start = self._buffer.first_sample_index
         sample_stop = sample_start + self._buffer.size
         return MovingHorizonResult(
@@ -622,7 +628,7 @@ class MovingHorizonEstimator:
             objective=map_result.objective,
             n_iterations=map_result.n_iterations,
             latency_ms=latency_ms,
-            latency_budget_ms=self._problem.options.latency_budget_ms,
+            latency_budget_ms=latency_budget,
             warm_started=warm_started,
             message=map_result.message,
             commit_status=commit_status,
