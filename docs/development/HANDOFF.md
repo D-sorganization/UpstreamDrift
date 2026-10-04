@@ -1,3 +1,38 @@
+# Current Handoff — [COV-9] 3D Comparison: Monocular Backends and Refits vs Marker IK (#11277)
+
+- Repository: `D-sorganization/UpstreamDrift`
+- Branch: `feat/cov-9-3d-comparison-11277`
+- Worktree: `C:\Users\diete\Repositories\UpstreamDrift-worktrees\cov-9-11277`
+- Commit: `3d2c8cf499`
+- PR: #11447 (`Refs #11268`, `Closes #11277`)
+- Governing issue: #11277 (parent epic #11268, follows COV-1 to COV-8)
+- Objective: Measure the 3D gap between monocular video backends (HMR2) and Necromatcher fits (marker-anchored and generic) vs capture-O marker IK at L3 (paired swings) and L1-3D (unpaired swings).
+- Completed:
+  - `src/motion_capture/reference/comparison_3d.py`:
+    - `Comparison3DLevel` (`L3`, `L1_3D`), `JointErrorSummary`, `AnthropometryAblationResult`, `L3ComparisonResult`, `L1_3DComparisonResult`, and `Comparison3DReceipt`.
+    - `align_trajectories_rigid_fixed_scale`: Kabsch rigid alignment on address frame with fixed scale ($s=1.0$).
+    - `compute_mpjpe_and_pa_mpjpe`: computes MPJPE alongside Procrustes-aligned PA-MPJPE (per-frame optimal similarity).
+    - `compute_depth_and_image_plane_errors`: isolates depth component ($e_d = \Delta \mathbf{p} \cdot \hat{\mathbf{d}}$) from transverse image-plane component ($\Delta \mathbf{p}_{\perp}$).
+    - `validate_laterality`: fail-closed detection and rejection of swapped left/right bilateral joints via coronal alignment.
+    - Clock qualification: when `physical_clock == "unknown"`, comparisons operate in phase-normalized time and emit no velocity metrics (`velocity_metrics is None`).
+    - Law of Demeter boundary: interface strictly with native forward kinematics landmark positions $(T, K, 3)$ without importing Necromatcher solver internals or raw generalized coordinates.
+    - `compute_anthropometry_ablation`: calculates anchored-minus-generic delta and body-size error fraction.
+    - `compute_l1_3d_envelope_comparison`: measures 3D agreement fraction inside the 13-swing variation envelope.
+    - `build_3d_comparison_receipt`: immutable governed receipt with 64-char SHA-256 digest validation.
+  - `src/motion_capture/reference/__init__.py`: re-exported all public COV-9 symbols in `__all__`.
+  - `tests/unit/motion_capture/test_cov9_3d_comparison.py`: 11 unit tests covering all 6 mandatory software contracts plus L1-3D receipt, address subset alignment, and fail-closed DbC validation.
+  - `SPEC.md`: added top contract section for COV-9 and recorded Section 12 Change Log row for #11277.
+  - `docs/development/DEVELOPMENT_LOG.md`: recorded DL-#11268 progress entry.
+- Validation:
+  - 11 unit tests in `tests/unit/motion_capture/test_cov9_3d_comparison.py`: all 11 passed.
+  - `check_architecture_budget.py`: OK (all functions <= 100 lines, parameters <= 8).
+  - `check_file_size_budget.py`: OK (all files within line-count budget).
+  - `check_error_handling_ratchet.py`: OK (no ratchet regressions).
+  - `ruff check`: OK (no lint violations).
+  - `ruff format --check`: OK (clean formatting).
+  - `run_mypy.py`: OK (no type issues).
+- Next steps: Open draft PR referencing `Refs #11268`, await review, advance to COV-10 (#11278).
+
 # OpenCap: Local Opencap-Core Sidecar Runner — #11400 / #11406
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-sidecar-runner-11406`; commit SELF; PR: opened from this branch (`Closes #11406`, `Refs #11400`)

@@ -1,3 +1,21 @@
+## 3D Comparison: Monocular Backends and Necromatcher Fits vs Capture-O Marker IK (COV-9, #11277)
+
+Specifies 3D comparison of monocular video 3D backends (HMR2) and Necromatcher native forward kinematics fits (marker-anchored and generic) against capture-O reference marker IK under Design by Contract (DbC), Law of Demeter (LoD), and fail-closed integrity (#11268, #11277):
+- **3D Error Metric Separation & Procrustes Alignment (`src/motion_capture/reference/comparison_3d.py`)**:
+  - `align_trajectories_rigid_fixed_scale`: computes rigid transform ($R, t$) on address-phase frames using Kabsch alignment, preserving scale fixed ($s = 1.0$) from reference anthropometry.
+  - `compute_mpjpe_and_pa_mpjpe`: evaluates fixed-scale MPJPE alongside Procrustes-aligned PA-MPJPE (per-frame optimal similarity $s, R, t$) in millimeters. Uniform scale errors remain visible in MPJPE while neutralized in PA-MPJPE.
+  - `compute_depth_and_image_plane_errors`: decomposes 3D residual vectors into the camera optical depth axis component ($e_d = \Delta \mathbf{p} \cdot \hat{\mathbf{d}}$) and orthogonal image-plane component ($\Delta \mathbf{p}_{\perp} = \Delta \mathbf{p} - e_d \hat{\mathbf{d}}$), isolating single-view monocular depth ambiguity.
+- **Fail-Closed Laterality & Clock Qualification**:
+  - `validate_laterality`: validates coronal vector alignment between bilateral joint pairs (shoulders, hips); swapped left and right joints fail closed with `ValueError` rather than averaging.
+  - Clock qualification: when `physical_clock == "unknown"`, comparisons operate strictly in phase-normalized units and omit all velocity metrics (`velocity_metrics is None`). Velocity metrics are emitted only when `physical_clock == "known"` and frame rate is authenticated.
+- **Architecture Law of Demeter & Solver Isolation**:
+  - Comparison harness interfaces exclusively with native forward kinematics landmark positions $(T, K, 3)$; direct imports or dependencies on Necromatcher solver internals, optimizer routines, or raw generalized coordinates ($q$-vectors) are forbidden.
+- **Anthropometry Ablation & L1-3D Envelope Evaluation**:
+  - `compute_anthropometry_ablation`: computes anchored-minus-generic delta ($\Delta = \text{MPJPE}_{\text{anchored}} - \text{MPJPE}_{\text{generic}}$) and fraction of error attributable to body-size estimation.
+  - `compute_l1_3d_envelope_comparison`: measures trajectory agreement fraction inside the 13-swing 3D variation envelope ($[p_5, p_{95}]$ bounds) per joint and per swing phase.
+- **Governed 3D Comparison Receipt (`Comparison3DReceipt`, `build_3d_comparison_receipt`)**:
+  - Encapsulates neutral swing identifiers, backend name, comparison level (`L3` or `L1_3D`), and verified 64-character hexadecimal SHA-256 digests (`reference_hash`, `predicted_hash`, `pairing_hash`); corrupted or stale hashes fail closed.
+
 ## Capture-O Video Companion: Source Registration, Timing Evidence, Swing Windows, and Grades (COV-2, #11270)
 
 Specifies registration of capture-O video sources, timing evidence validation, swing interval extraction, and usability grading (#11268, #11270):
@@ -7795,6 +7813,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-03 | #11447 | [COV-9] 3D comparison of monocular backends and refits vs marker IK: align_trajectories_rigid_fixed_scale, compute_mpjpe_and_pa_mpjpe, compute_depth_and_image_plane_errors, validate_laterality, L3 paired metrics, L1-3D variation envelope, anthropometry ablation, and Comparison3DReceipt (#11277). |
 | 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |
 | 2026-10-03 | #11415 | [OpenCap] Opt-in hosted session download client with affirmative consent verification, typed OpenCapHostedSettings, and full session layout reconstruction matching load_opencap_session (#11407). |
 | 2026-10-03 | #11182 | swing_comparison kinematic sequence: thorax yaw from BackLeft/BackRight (shoulder-line fallback, proxy recorded in `thorax_proxy`) and post-impact search margin in seconds instead of frames (#11182). |
