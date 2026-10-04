@@ -125,6 +125,19 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
 
+### DL-#11313 · Necromatcher Video Export Force/Torque Layer
+
+- **State:** in_review
+- **Owner:** claude (Sonnet 5 CLI delegate)
+- **Issue:** #11313; parent #11285
+- **PR:** draft from `claude/issue-11313` (number on the PR; `Fixes #11313`)
+- **Branch:** `claude/issue-11313`
+- **Paths:** `src/shared/python/workspace/necromatcher_video_forces.py`, `src/shared/python/workspace/necromatcher_video.py`, `src/shared/python/workspace/necromatcher_video_worker.py`, `src/shared/python/workspace/necromatcher_video_jobs.py`, `src/api/routes/necromatcher.py`, `src/tools/necromatcher/video_dialog.py`, `ui/src/components/necromatcher/VideoExportControls.tsx`, `tests/unit/workspace/test_necromatcher_video_forces.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — opt-in force/torque and segment-shading layer on the fitted-model video export; focused Necromatcher, API, dialog and UI tests green.
+- **Summary:** Off-by-default `force_layer {enabled, kinds, scale, segment_shading}` drawn through the shared FTO-8 renderer with the fit's camera; analytic v/a from the preserved spline (kinematic-only fits report the layer unavailable); legend states research-fit, not measured forces; manifest and per-frame receipts are deterministic.
+- **Next step:** Frontier review of the draft PR, then rebase against paused draft #11359 (also edits `necromatcher_video.py`) before merge.
+
 ### DL-#1900 · Merge-Queue Scoping for Core Test Lanes
 
 - **State:** in_review
@@ -148,7 +161,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
 - **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** FTO core complete and shipped. Remaining follow-up #11313 is deferred until #11246 completes.
+- **Next step:** FTO core complete and shipped. Follow-up #11313 is tracked in DL-#11313.
 
 ### DL-#11278 · COV-10 Model-Candidate Video Comparison
 

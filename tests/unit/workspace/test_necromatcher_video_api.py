@@ -17,8 +17,12 @@ class VideoSession:
         self.ready = False
         self.busy = False
         self.cancelled = False
+        self.force_layer: dict[str, Any] | None = None
 
-    def submit(self, fit_id: str) -> dict[str, Any]:
+    def submit(
+        self, fit_id: str, force_layer: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        self.force_layer = force_layer
         if self.busy:
             raise RuntimeError("A video export is already running")
         if fit_id != "fit":
@@ -112,3 +116,41 @@ def test_video_routes_remain_local_only(video_api):
         assert (
             remote.post("/api/necromatcher/fits/fit/video-exports").status_code == 403
         )
+
+
+def test_default_request_has_no_force_layer(video_api):
+    client, session = video_api
+    assert client.post("/api/necromatcher/fits/fit/video-exports").status_code == 202
+    assert session.force_layer is None
+
+
+def test_opt_in_force_layer_is_validated_and_forwarded(video_api):
+    client, session = video_api
+    url = "/api/necromatcher/fits/fit/video-exports"
+    body = {
+        "force_layer": {
+            "enabled": True,
+            "kinds": ["joint_reaction", "contact"],
+            "scale": 2.0,
+            "segment_shading": True,
+        }
+    }
+    assert client.post(url, json=body).status_code == 202
+    assert session.force_layer == body["force_layer"]
+
+
+@pytest.mark.parametrize(
+    "layer",
+    [
+        {"enabled": True, "kinds": ["nonsense"]},
+        {"enabled": True, "scale": 0},
+        {"enabled": True, "extra": 1},
+    ],
+)
+def test_invalid_force_layer_is_rejected(video_api, layer):
+    client, session = video_api
+    response = client.post(
+        "/api/necromatcher/fits/fit/video-exports", json={"force_layer": layer}
+    )
+    assert response.status_code == 422
+    assert session.force_layer is None
