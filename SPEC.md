@@ -1,3 +1,233 @@
+## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
+
+Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
+- **Error Budget Schema (`src/motion_capture/reference/error_budget.py`)**:
+  - `ErrorBudgetCell`: frozen data structure recording `source`, `joint_or_landmark`, `phase_bin`, `view`, `grade`, `comparison_level`, `metric`, `unit`, `n_swings`, `n_frames`, `p50`, `p95`, `worst`, `camera_uncertainty_spread`, `resolvable`, and `source_receipt_hashes`.
+  - Non-zero swing invariant: `n_swings <= 0` is strictly forbidden and raises `ValueError`. Missing data produces no cell and is recorded in `ErrorBudget.not_measured` (`NotMeasuredRecord`).
+  - `build_error_budget`: pure aggregation over COV-7/COV-9/COV-10 summaries with deterministic cell sorting and SHA-256 digest computation (`receipt_digest`), yielding byte-identical serialization across reruns (`to_json`).
+- **Frozen Guidance Derivation (`derive_guidance`, `GuidanceRule`, `GuidanceItem`, `GuidanceReport`)**:
+  - Encapsulates frozen comparison thresholds for historical player consumers (Tiger #11226, Hogan #11229, Necromatcher #11232/#11235).
+  - Classifies quantities into `trustworthy at p95 < X`, `indicative`, or `not recoverable from single view`.
+  - Level contract enforcement: an L1 cell can never be classified as `trustworthy` for a per-frame quantity; attempting to do so raises `ValueError`.
+  - Frozen-rule guard: modifying thresholds without bumping `ERROR_BUDGET_SCHEMA_VERSION` fails closed with `ValueError`.
+  - Resolvability guard: when camera uncertainty spread renders a metric unresolvable (`resolvable == False`), guidance reports `not recoverable from single view`.
+- **Public Summary Generator (`generate_public_summary`)**:
+  - Generates neutral Markdown summaries referencing only `capture-O` and `subject-O` with body-height-normalized numbers.
+  - Fail-closed privacy guards: strictly prohibits `cov-NN` frame indices, absolute filesystem paths, and private store filenames (`.mp4`, `.c3d`, `originals/`).
+  - Requires affirmative `owner_approved=True` parameter.
+
+## 3D Comparison: Monocular Backends and Necromatcher Fits vs Capture-O Marker IK (COV-9, #11277)
+
+Specifies 3D comparison of monocular video 3D backends (HMR2) and Necromatcher native forward kinematics fits (marker-anchored and generic) against capture-O reference marker IK under Design by Contract (DbC), Law of Demeter (LoD), and fail-closed integrity (#11268, #11277):
+- **3D Error Metric Separation & Procrustes Alignment (`src/motion_capture/reference/comparison_3d.py`)**:
+  - `align_trajectories_rigid_fixed_scale`: computes rigid transform ($R, t$) on address-phase frames using Kabsch alignment, preserving scale fixed ($s = 1.0$) from reference anthropometry.
+  - `compute_mpjpe_and_pa_mpjpe`: evaluates fixed-scale MPJPE alongside Procrustes-aligned PA-MPJPE (per-frame optimal similarity $s, R, t$) in millimeters. Uniform scale errors remain visible in MPJPE while neutralized in PA-MPJPE.
+  - `compute_depth_and_image_plane_errors`: decomposes 3D residual vectors into the camera optical depth axis component ($e_d = \Delta \mathbf{p} \cdot \hat{\mathbf{d}}$) and orthogonal image-plane component ($\Delta \mathbf{p}_{\perp} = \Delta \mathbf{p} - e_d \hat{\mathbf{d}}$), isolating single-view monocular depth ambiguity.
+- **Fail-Closed Laterality & Clock Qualification**:
+  - `validate_laterality`: validates coronal vector alignment between bilateral joint pairs (shoulders, hips); swapped left and right joints fail closed with `ValueError` rather than averaging.
+  - Clock qualification: when `physical_clock == "unknown"`, comparisons operate strictly in phase-normalized units and omit all velocity metrics (`velocity_metrics is None`). Velocity metrics are emitted only when `physical_clock == "known"` and frame rate is authenticated.
+- **Architecture Law of Demeter & Solver Isolation**:
+  - Comparison harness interfaces exclusively with native forward kinematics landmark positions $(T, K, 3)$; direct imports or dependencies on Necromatcher solver internals, optimizer routines, or raw generalized coordinates ($q$-vectors) are forbidden.
+- **Anthropometry Ablation & L1-3D Envelope Evaluation**:
+  - `compute_anthropometry_ablation`: computes anchored-minus-generic delta ($\Delta = \text{MPJPE}_{\text{anchored}} - \text{MPJPE}_{\text{generic}}$) and fraction of error attributable to body-size estimation.
+  - `compute_l1_3d_envelope_comparison`: measures trajectory agreement fraction inside the 13-swing 3D variation envelope ($[p_5, p_{95}]$ bounds) per joint and per swing phase.
+- **Governed 3D Comparison Receipt (`Comparison3DReceipt`, `build_3d_comparison_receipt`)**:
+  - Encapsulates neutral swing identifiers, backend name, comparison level (`L3` or `L1_3D`), and verified 64-character hexadecimal SHA-256 digests (`reference_hash`, `predicted_hash`, `pairing_hash`); corrupted or stale hashes fail closed.
+
+## Marker-Anchored Anthropometry and Necromatcher Owner Project Contracts (COV-8, #11276)
+
+Specifies the Necromatcher owner player project, marker-anchored anthropometry fitting, fail-closed privacy guards, and immutable capture/swing ingestion (#11268, #11276):
+- **Fail-Closed Privacy Guard (`create_owner_project`)**:
+  - Requires `CAPTURE_DATA_DIR` environment variable or parameter when `private=True`.
+  - Refuses library paths outside `CAPTURE_DATA_DIR` with `ValueError`, ensuring owner data never lands in default public library roots or Git trees.
+  - Automatically initializes or loads `NecromatcherLibrary` and registers the owner player (`subject-O`).
+- **Marker-Anchored Anthropometry Fitting (`compute_marker_anchored_anthropometry`, `MarkerAnchoredAnthropometry`, `SegmentLengthEstimate`)**:
+  - Computes segment lengths from marker joint centres (median across swings with spread and uncertainty).
+  - Explicit provenance tagging: marks marker-measured segments as `'observed (marker-derived)'` and unobserved segments as `'population-prior'` from de Leva male tables scaled to height. Missing or unrecognised provenance tags strictly raise `ValueError`.
+  - Enforces strictly positive and finite segment lengths, raising `ValueError` naming the offending segment on invalid values.
+  - Enforces bilateral length symmetry bounds between paired limbs (`thigh_r`/`thigh_l`, `upper_arm_r`/`upper_arm_l`, `shank_r`/`shank_l`, `forearm_r`/`forearm_l`, `hand_r`/`hand_l`, `foot_r`/`foot_l`), raising `ValueError` naming the segment when asymmetry exceeds the declared bound.
+  - Records owner-reported height and mass with explicit `owner_reported` provenance.
+- **Immutable-Version Capture and Swing Ingestion (`import_video_swings_to_owner_project`)**:
+  - Ingests graded video swings (grades A–C) under registered player `subject-O`, skipping rejected swings (`grade="R"`).
+  - Archives observations from historical-capture run directories via `build_capture_archive`.
+  - Re-importing existing capture archives maintains immutable versioning without duplicating assets or overwriting files on disk.
+
+## 2D Comparison of Markerless Backends vs Projected Capture-O Landmarks (COV-7, #11275)
+
+Specifies 2D comparison between markerless backends and projected capture-O reference landmarks at the highest level each swing supports (COV-7, #11275, parent epic #11268):
+- **Comparison Level Separation (`ComparisonLevel`)**:
+  - `L1` (Envelope comparison, applicable to all graded A–C swings): evaluates fraction of frames inside the 13-swing variation envelope ($p_5 \le \text{observed} \le p_{95}$), signed distance to envelope median ($p_{50}$) in pixels and body-height-normalized units, and DTW distance relative to inter-swing spread.
+  - `L2` (Paired comparison): strictly requires paired swing status (`PairingDecisionStatus.PAIRED`) with confidence margin $\Delta \ge \tau_{\text{pair}}$ and non-null `paired_capture_swing_id`. An unpaired or ambiguous swing raises `ValueError`.
+- **Per-Landmark Residuals & Missingness Tracking (`L2ComparisonResult`)**:
+  - Reports pixel residuals and body-height-normalized residuals as $p_{50}$, $p_{95}$, and worst (maximum) per landmark and aggregated.
+  - Dual RMSE variants: visibility-weighted RMSE ($\sqrt{\sum v_i r_i^2 / \sum v_i}$) and unweighted RMSE.
+  - Missing and occluded landmarks ($v_i = 0$ or non-finite) are excluded from visibility weighting and counted in the structured `missingness_report`, never filled with zeros.
+- **Leakage Guard for Keypoint Offset Calibration**:
+  - Calibration frames used for offset estimation are strictly excluded from the evaluation set.
+  - If a caller supplies an evaluated set containing calibration frames, the leakage guard raises `ValueError`.
+- **Camera Uncertainty Propagation (`propagate_camera_uncertainty`, `MetricSpread`)**:
+  - Propagates virtual camera parameter covariance by sampling camera extrinsics perturbations and reprojecting reference landmarks to establish empirical metric spread ($p_{95} - p_5$).
+  - Larger camera covariance yields wider metric spread.
+  - When comparing backend differences, any difference smaller than the camera metric spread is reported as `is_resolvable = False` and status `"not resolvable"`.
+- **Receipt Input Hash Integrity (`build_2d_comparison_receipt`, `Comparison2DReceipt`)**:
+  - Enforces bitwise input hash verification across observations, camera, pairing, and profile SHA-256 digests.
+  - A stale or mismatched hash raises immediate refusal (`ValueError`).
+
+## Capture-O Video Companion: Swing Pairing, Similarity Matrix, Confidence and Abstention Contracts (COV-6, #11274)
+
+Specifies evidence-grounded video swing to capture-O marker swing pairing, DTW similarity matrices normalized by inter-capture variation, confidence estimation, and fail-closed abstention rules (#11268, #11274):
+- **Phase-Normalized Trajectory DTW & Inter-Capture Normalization (`src/motion_capture/reference/swing_pairing.py`)**:
+  - `compute_inter_capture_envelope_median`: computes median channel-averaged DTW distance across all distinct unordered pairs of capture swings in the given camera view.
+  - Inter-swing envelope serves as empirical null baseline: distance to capture swings is normalized as $d_{\text{norm}}(V, C_k) = d(V, C_k) / \text{median}(D_{\text{inter}})$.
+- **Confidence, Margin & Abstention Rule (`PairingDecisionStatus`, `PairingConfidence`)**:
+  - Evaluates margin $\Delta = d_{(2)} - d_{(1)}$ between best and second-best normalized distances.
+  - Fail-closed abstention: returns `UNPAIRED` when no capture swing is closer than envelope median ($\min_k d_{\text{norm}}(V, C_k) \ge 1.0$).
+  - Returns `AMBIGUOUS` when the top two candidates are within $\varepsilon$ ($\Delta < \varepsilon$, default 0.05) or margin fails threshold ($\Delta < \tau_{\text{pair}}$, default 0.20).
+  - Returns `PAIRED` with designated `paired_capture_swing_id` and confidence metrics when $\Delta \ge \tau_{\text{pair}}$ and $d_{(1)} < 1.0$.
+  - Strictly permutation-invariant across capture-swing order and deterministic in tie-breaking.
+- **Leakage Guard & Provenance Contracts**:
+  - `_check_leakage`: verifies video observations originate from the designated reference backend (`backend="reference"`), rejecting evaluation backends under test (`ValueError("leakage guard: ...")`).
+  - Asserts reference receipt hashes when expected hashes are provided.
+- **Time Mapping & Side Evidence (`TimeMapping`, `SideEvidence`)**:
+  - Paired swings build invertible `TimeMapping` from event anchors (`EventAnchors`) without altering physical time claims.
+  - Side evidence (owner recollection, file creation time, club-speed rank) is recorded in pairing results and serialized matrices but never overrides the geometric distance rule.
+
+## Virtual Camera Fitting and 2D Swing Variation Envelope (COV-4, #11272)
+
+Specifies the virtual camera estimation and 2D swing-to-swing envelope projection for comparing owner video swings against the 13 capture-O reference swings (COV-4, #11272, parent #11268):
+- **Virtual Camera Fitting (`src/motion_capture/reference/virtual_camera_fit.py`)**:
+  - `fit_virtual_camera` estimates camera extrinsics mapping ADR-0041 world coordinates (Y-up, X toward target, Z golfer's right) into 2D video pixel views using non-linear least squares reprojection minimization.
+  - Returns `VirtualCameraResult` recording estimated camera parameters, parameter covariance matrix, fit reprojection RMS in pixels, Jacobian condition number, `CameraFitOutcome` (`fitted` or `degraded`), and optional `degraded_reason`.
+  - Degeneracy handling: correspondences with coplanar or collinear geometry (rank < 3) or ill-conditioned normal equations ($\kappa(J) > \text{max\_condition\_number}$) yield `CameraFitOutcome.degraded` with declared reason and hold camera parameters at priors, refusing to report false sharp fits.
+  - Coordinate axis and chirality validation: enforces ADR-0041 convention where Y is the vertical height axis (rejecting unconverted Y-up C3D inputs missing `y_up_to_z_up`) and detects mirrored projections via chirality sign tests.
+- **2D Swing Variation Envelope (`compute_2d_envelope`, `SwingEnvelope2D`)**:
+  - Projects all 13 capture-O swings into the virtual camera view and computes phase-normalized per-landmark percentile bands ($p_5 \le p_{50} \le p_{95}$) in pixel and body-height-normalized units.
+  - Enforces monotonicity ($p_5 \le p_{50} \le p_{95}$), asserts 13-swing input completeness, and explicitly tracks valid sample counts per landmark and phase bin when marker occlusions/NaNs are present.
+- **Projection Adapters**:
+  - Tested bidirectional adapter between `PinholeCamera` (world-from-camera convention) and `CameraProjection` (world-to-camera convention) preserving camera matrix, rotation, translation, and projection geometry.
+
+## Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers (DIME-15, #11436)
+
+Specifies reproducible training recipes, model cards, multi-strategy matching initialization, anti-leakage defenses, torque realism enforcement, calibrated OOD rejection with classical physical fallback, independent native gating, ablation protocols, and truthful compute cost accounting (#11421, #11436):
+- **Reusable Initializer Model Card (`DimeLearnedInitializerModelCard`)**:
+  - Encapsulates model architecture, model hash, training dataset hash, held-out validation splits (player, session, geometry), calibrated OOD thresholds, and canonical SI units.
+  - Fail-closed learning curve monitoring: inconclusive or negative learning curves set `scale_up_halted = True` and truthfully register limitations without hiding results or claiming fake convergence.
+- **Anti-Leakage Data Partitioning (`validate_dataset_split`)**:
+  - Rejects overlapping player identities between training and evaluation splits fail-closed (`DataLeakageError`).
+  - Enforces minimum temporal buffer gap $\Delta t_{\text{gap}} \ge \Delta t_{\text{buffer}}$ between adjacent windows within the same session/player to prevent autoregressive window contamination.
+- **Model Identity & Checkpoint Verification (`verify_checkpoint_identity`)**:
+  - Verifies that checkpoint model hash and generalized coordinate dimensions ($u_{\text{dim}}$) match the active provider/task. Mismatched or stale checkpoints raise `StaleModelIdentityError`.
+- **Torque Realism & Actuator Bounds (`verify_torque_realism`)**:
+  - Validates feedforward control proposals against absolute actuator torque limits $|\tau_i| \le \tau_{\max, i}$ and dynamic rate-of-torque limits $|d\tau_i/dt| \le \dot{\tau}_{\max, i}$, rejecting unphysical or step-impulse interpolations fail-closed (`UnrealisticTorqueError`).
+- **Calibrated OOD Detection & Classical Fallback (`AdaptiveMatchingInitializer`)**:
+  - Evaluates subject dimensions and contact modes against training distribution bounds.
+  - Out-of-distribution inputs raise `OutOfDistributionError` internally and trigger deterministic fallback to `ClassicalPhysicalInitializer` (zero-torque / constant velocity physical warm start) with structured fallback provenance.
+- **Independent Native Gate Enforcement (`NativeCandidateGate`)**:
+  - Disallows automatic acceptance of proposals based on neural confidence alone.
+  - Every candidate is strictly evaluated by an independent native residual check $\|\mathbf{r}\| \le \text{tol}_{\text{accept}}$ before acceptance.
+- **Systematic Ablation Protocol (`run_initializer_ablation_study`)**:
+  - Compares full model against ablated drift features, ablated ROM priors, and classical physical baselines across acceptance rates, residuals, and solve iterations.
+- **Truthful Compute Accounting & Break-Even Amortization (`ComputeCostReport`)**:
+  - Tracks offline teacher episode generation cost, training compute, per-solve speedup $\Delta T_{\text{solve}} = T_{\text{classical}} - T_{\text{learned}}$, and required solve volume for full amortization $N_{\text{breakeven}} = T_{\text{offline}} / \Delta T_{\text{solve}}$.
+
+## Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration (DIME-14, #11435)
+
+Specifies structured caching for drift evaluations, full steps, Jacobians, assembly/factorization, and window solves, with multi-tiered identity validation, explicit validity radiuses, impact discontinuity invalidation, and mandatory independent replay profiling (#11421, #11435):
+- **Multi-Tiered Cache Identity (`DimeCacheIdentity`)**:
+  - Partitions cache lookups across model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID.
+  - Guarantees strict cross-job native state isolation; different `job_id` queries cannot access or contaminate other jobs' cached states.
+  - Automatic and targeted invalidation: `invalidate_on_camera_change` purges camera-dependent entries; `invalidate_on_body_change` purges body/inertia-dependent entries; `invalidate_job` purges job session entries.
+- **Local Model Approximation (`LocalModelApproximation`)**:
+  - Evaluates first-order Taylor expansion local approximations $\delta x_{k+1} = A \delta x_k + B \delta u_k$ around nominal trajectories.
+  - Enforces explicit validity radius $R_{\text{valid}}$: queries with displacement $\|\delta x\| > R_{\text{valid}}$ fail closed with `PreconditionError`, preventing unverified extrapolations.
+- **Impact Phase Discontinuity Guard (`store_jacobian_with_impact_check`)**:
+  - Rejects caching or serving smooth derivative approximations across contact impact transitions where velocity or ground reaction impulses undergo jump discontinuities.
+- **Mandatory Replay Enforcement & Granular Profiling (`accelerated_solve_dynamics_window`, `DimeCostBreakdown`)**:
+  - Preserves identical provider semantics: independent continuous replay execution is strictly mandatory and cannot be skipped or short-circuited to fake speedup claims.
+  - Records comprehensive cost breakdowns: drift count/time, full step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, and cold/warm p50/p95 speeds.
+## Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix (DIME-12, #11433)
+
+Specifies the cross-engine and capture qualification matrix, per-engine capability inspection, and provenance tracking across physics engines and capture datasets (#11421, #11433):
+- **Engine Capability & Provenance Contracts (`EngineCapabilitySpec`, `CaptureProvenance`)**:
+  - `EngineCapabilitySpec`: Specifies engine identity, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
+  - `CaptureProvenance`: Captures dataset origin, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
+- **Fail-Closed Qualification Invariants (`evaluate_engine_qualification`, `EngineQualificationEntry`)**:
+  - Contact-free engines cannot qualify contact-dependent capture scenarios.
+  - Synthetic test data cannot qualify product-grade matching runs.
+  - Joint convention and coordinate frame mismatches reject qualification fail-closed.
+  - Missing native platform dependencies invalidate advertised capabilities with diagnostic reasons.
+  - Breaching tolerance thresholds transitions status to `unqualified` or `degraded`.
+- **Fleet Matrix Aggregation & Report Bundle (`build_fleet_qualification_matrix`, `export_qualification_bundle`)**:
+  - Aggregates qualification verdicts across all combinations of physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark captures.
+  - Exports immutable JSON qualification bundle and human-readable Markdown summary table.
+
+## Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods (DIME-11, #11432)
+
+Specifies shared estimation reports, GUI strategy selection with graceful explicit unavailability states, distinct pointwise vs integrated ZTCF registration, and verifiable LaTeX methods documentation (#11421, #11432):
+- **Truthful Strategy Selection Service (`DimeStrategySelectionService`)**:
+  - Exposes estimation strategies (`IK`, `INVERSE_DYNAMICS`, `FORWARD_DYNAMICS`, `DIME_MHE`, `CONTINUOUS_REPLAY`, `NEURAL_ESTIMATOR`) with explicit capability status (`implemented`, `qualified`, `unavailable`).
+  - Graceful unavailability: uncertified or experimental strategies (e.g. neural estimator awaiting comparative study) return `status="unavailable"` with clear explanation reason rather than failing silently or substituting synthetic outputs.
+  - Fail-closed validation: offering or reporting an unqualified engine as validated (`require_validated=True`) raises `PreconditionError`.
+- **Output Report Contract (`DimeReportArtifact`)**:
+  - Supports `Full` and `Custom` report scopes with selectable channels and plot figures.
+  - Mandatory report sections include kinematics, selected net controls, ground reaction force provenance, drift vs controlled prediction, parameter and trajectory uncertainty, contact/replay residuals, video overlays, and unavailable-capability explanations.
+  - Preserves model digest, parameters hash, engine version, git commit, and execution seed across dictionary and JSON serialization (`to_dict` / `from_dict`, `to_json` / `from_json`).
+- **Distinct Pointwise vs Integrated ZTCF (`ZtcfRecord`)**:
+  - Pointwise ZTCF evaluates instantaneous unactuated acceleration: $a_{\mathrm{ztcf}}(t) = \mathbf{M}(\mathbf{q})^{-1} (-\mathbf{C}\mathbf{v} - \mathbf{g} + \mathbf{J}_c^T \boldsymbol{\lambda})$ in $[\mathrm{m/s^2}]$.
+  - Integrated ZTCF evaluates continuous forward-simulated zero-control drift displacement: $x_{\mathrm{ztcf}}(t) = x(t_0) + \int_{t_0}^t f_{\mathrm{ztcf}}(x(\tau))\, d\tau$ in $[\mathrm{m}]$.
+  - Both metrics are registered distinctly with separate arrays and physical semantics.
+- **Fail-Closed Invariant Enforcements**:
+  - IK run mislabeled as forward dynamics raises `PreconditionError`.
+  - Missing native GRF rendered or substituted as numeric zeros raises `PreconditionError`; missing kinetic channels must be typed `ReportForceProvenance.UNAVAILABLE` with `forces_n = None` and a recorded reason.
+  - Unqualified engine claimed as validated raises `PreconditionError`.
+  - Mismatched timestamp or frame counts between video overlays and kinematics time series raises `TimingViolationError`.
+- **LaTeX Methods Documentation Generator (`to_latex_summary`)**:
+  - Generates verifiable LaTeX documentation recording equations of motion, ZTCF definitions, canonical SI units, model/seed provenance, and explicit interpretation limitations.
+- **Headless GUI ViewModel (`DimeStrategySelectionViewModel`)**:
+  - Manages strategy selection, report scope, channel selections, and availability offscreen without unattended GUI launch.
+
+## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
+
+Specifies rank-revealing input-effect subspace decomposition, scale-invariant covariance whitening, orthogonal-complement torque-independent drift feasibility tests, bounded control feasibility, changing contact rank tracking, and missing-data prediction with calibrated uncertainty bounds (#11421, #11437):
+- **Input-Effect Subspace Decomposition (`decompose_input_subspace`, `SubspaceDecomposition`)**:
+  - Computes scale-invariant covariance whitening operator $W = \Sigma^{-1/2}$ via symmetric eigendecomposition. Scaling observation covariance $\Sigma \to \alpha \Sigma$ scales whitening by $1/\sqrt{\alpha}$ and Mahalanobis norm by $1/\alpha$.
+  - Decomposes whitened input-effect matrix $B_w = W B$ via full SVD $B_w = U \Sigma V^T$ with rank thresholding $\text{tol} = \max(s) \cdot \max(n, m) \cdot 10^{-12}$.
+  - Separates actuated subspace basis $U_{\parallel} = U[:, :r]$ from unactuated/torque-independent orthogonal complement basis $U_{\perp} = U[:, r:]$.
+- **Torque-Independent Drift Feasibility (`evaluate_input_subspace_feasibility`)**:
+  - Incorporates eliminated contact reactions $a_{\text{contact}} = M^{-1} J_c^T \lambda$ into effective drift $a_{\text{drift, eff}} = a_{\text{drift}} + a_{\text{contact}}$.
+  - Projects whitened acceleration discrepancy $r_w = W (\ddot{q}_{\text{cand}} - a_{\text{drift, eff}})$ onto the unactuated subspace $r_{\perp} = U_{\perp}^T r_w$.
+  - Since $U_{\perp}^T B_w = 0$, no admissible control torque $\tau$ can affect $r_{\perp}$. Dynamically impossible motion outside the input subspace is detected and rejected fail-closed ($\chi^2_{\perp} > \text{threshold}$).
+  - Fully actuated free systems ($r = n$) yield empty $U_{\perp}$ and zero orthogonal norm ($\chi^2_{\perp} = 0$), adding no redundant restrictions beyond control bounds.
+- **Bounded Control Feasibility Inside the Input Subspace**:
+  - Inverts within the actuated subspace to obtain optimal minimum-norm control effort $\tau^* = \arg\min_{\tau} \| B_w \tau - r_w \|$.
+  - Validates $\tau^*$ against declared `ControlBand` $[\tau_{\min}, \tau_{\max}]$, enforcing control feasibility inside the physically reachable subspace.
+- **Missing-Data Prediction (`predict_masked_interval`, `MaskedPredictionResult`)**:
+  - Across masked observation intervals, propagates state and covariance without conjuring artificial certainty: unactuated coordinates are strictly bounded by drift and model discrepancy, while actuated coordinates broaden according to control prior uncertainty.
+- **Runtime Factor Exclusivity (`DimeInputSubspaceFactor`, `RuntimeExclusivityContract`)**:
+  - Defaults to diagnostic proposal-screening factor (`contributes_to_objective=False`). When configured as an alternative reduced inference formulation (`contributes_to_objective=True`), the runtime exclusivity contract strictly rejects duplicate full-dynamics or explicit-control factors on overlapping time intervals.
+
+## Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance (DIME-10, #11431)
+
+Specifies the preregistered ablation benchmark protocol comparing the six baseline and method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera errors) under marked, markerless, and hybrid observation modes (#11421, #11431):
+- **Preregistered Baseline and Method Variants (`DimeAblationVariant`)**:
+  - `KINEMATIC_IK`: Pure kinematic inverse kinematics tracking baseline without dynamics or drift guidance.
+  - `CLASSICAL_MHE`: Moving horizon estimation with classical inverse-dynamics effort penalty without drift-centered priors.
+  - `DRIFT_PRIOR_ZTCF`: Dynamics-informed MHE with uncertain-control ZTCF prediction and drift dominance acceleration bounds.
+  - `DRIFT_CONTACT_CONSTRAINED`: Dynamics-informed estimation with explicit bilateral contact reaction and unilateral ground reaction constraints.
+  - `DRIFT_OFFLINE_SMOOTHED`: Coupled window estimation followed by bidirectional backward smoothing and single-shot continuous forward replay.
+  - `DRIFT_ACCELERATED_PROPOSAL`: Fast proposal initializer and short physical refinement with reduced solve latency.
+- **Systematic Perturbations and Observation Modes (`PerturbationKind`, `ObservationMode`)**:
+  - Perturbations: `NOISE` (anisotropic/whitened sensor noise), `OCCLUSION` (observation dropout and temporal masking), `TORQUE_BIAS` (non-zero control prior offset), `CONTACT_CHANGE` (step contact transitions and phase shifts), `MODEL_CAMERA_ERROR` (parameter scale and camera extrinsics offset).
+  - Observation modes: `MARKED` (3D markers), `MARKERLESS` (2D keypoints), `HYBRID` (joint 3D markers and 2D projections).
+- **Anti-Leakage and Fail-Closed Defenses**:
+  - Seeded data leakage fails closed: training/evaluation split overlap or explicit leakage flags raise `PreconditionError`.
+  - Test-set tuning fails closed: hyperparameter optimization directly on evaluation data raises `PreconditionError`.
+  - Winning-trial filtering fails closed: reporting only winning trials is forbidden; all trials, failures, and unqualified statuses must be retained in `AblationSummaryTable`.
+- **Accuracy-Runtime Metrics & Dominance Guard**:
+  - `compute_ablation_dominance_metric`: calculates ratio $\|\bar a_{\mathrm{drift}}\| / (\|\bar a_{\mathrm{drift}}\| + \|\bar a_{\mathrm{control}}\|)$ with `"guarded_zero"` policy returning `0.0` to eliminate zero-division risks.
+  - Empirical uncertainty coverage: evaluates fraction of ground-truth state trajectories contained within calibrated $\pm 2\sigma$ confidence intervals.
+  - Latency accounting: p50 latency, p95 latency, and global-refinement cost are recorded separately in milliseconds.
+
 ## Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay (DIME-09, #11430)
 
 Specifies offline backward smoothing using marginalized arrival information, fail-closed prohibition of reverse-time contact integration, single-shot continuous forward replay from saved initial state, structured replay receipts with reset and assistance tracking, and independent replay metric recomputation separated from optimization cost (#11421, #11430):
@@ -8077,7 +8307,13 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-04 | #11425 | [DIME] ZTCF-anchored kinematic matching: drift + constant-torque prediction, rate-limited torque-band local windows with viable-band gating, recursive overlay assembly with gap bridging, per-sample outlier/unexplained/gap labels, whole-trajectory replay refinement with per-coordinate discrepancy knot selection, quality report and synthetic swing benchmark (epic #11421; reference model only). |
-| 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
+| 2026-10-04 | #11499 | [COV-4/6/7/8/9/11] Capture-O Video Benchmark Suite: virtual camera fitting and 2D envelope (#11272), swing pairing and similarity matrix (#11274), 2D markerless backend comparison (#11275), marker-anchored anthropometry and owner project (#11276), 3D monocular/refit comparison vs marker IK (#11277), and error-budget receipt with frozen guidance (#11279, refs #11268). |
+| 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
+| 2026-10-04 | #11432 | [DIME-11] Shared reports, GUI strategy selection and LaTeX methods: EstimatorStrategy, RunClassification, ReportScope, ReportForceProvenance, KinematicsPayload, ZtcfRecord, GroundReactionForceReport, VideoOverlaySpec, DimeReportOptions, DimeReportArtifact, DimeStrategySelectionService, DimeStrategySelectionViewModel (#11432, refs #11421). |
+| 2026-10-04 | #11430 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
+| 2026-10-04 | #11495 | [CI] Optimize import hook hygiene test with fast-filter and functools.cache, prune 125 stale baseline errors, and support merge_group event in MyPy steps (#11492, refs #1890). |
+| 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
+| 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
 | 2026-10-04 | #11467 | [DIME-08] Observable global calibration and consistent prior updates: PhysicalGauge, PhysicalGaugePolicy, CalibrationParameter, validate_physical_inertia, GlobalCalibrationProblem, GlobalCalibrationResult, and calibrate_global_parameters (#11429, refs #11421). |
 | 2026-10-04 | #11428 | [DIME-07] Extend existing MHE with arrival information and safe window commits: ArrivalFactor square-root representation, rank-revealing marginalization with tested gauge policy, safe window commit validation and failure diagnostics, late/irregular sample handling, and accumulation guard (#11428, refs #11421). |
 | 2026-10-04 | #11461 | [DIME-05] Coupled state-control full-dynamics window factors: DefectMode, ModelDiscrepancyBounds, DimeDynamicsWindowFactor, DimeDynamicsWindowProblem, DimeDynamicsWindowResult, solve_dime_dynamics_window (#11426, refs #11421). |

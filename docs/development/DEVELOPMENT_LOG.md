@@ -78,14 +78,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11421 (children #11422–#11430; #11422–#11428 closed; #11430 active)
-- **PR:** #11430
-- **Branch:** `feat/dime-09-offline-smoothing-11430`
-- **Paths:** `src/shared/python/estimation/dime_continuous_replay.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_continuous_replay.py`
+- **Issue:** #11421 (children #11422–#11430, #11434, #11435, #11437 closed; #11436 active)
+- **PR:** #11436
+- **Branch:** `feat/dime-11436-learned-initializers`
+- **Paths:** `src/shared/python/estimation/dime_learned_initializers.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_learned_initializers.py`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-04: DIME-09 offline smoothing and independent continuous replay implemented and validated across 11 behavioral tests in test_dime_continuous_replay.py (RED/GREEN). Implements execute_continuous_replay simulating forward dynamics once from saved initial state with saved controls and declared configuration; enforces reset_count == 1 and rejects per-frame state resets fail-closed; strictly rejects hidden target-force feedback and undeclared root wrenches on floating-base root DoFs (0..5); rejects mismatched model configuration; implements smooth_backward_trajectory with marginalized arrival information producing continuous smoothed trajectory without per-frame discontinuities while strictly forbidding reverse-time contact integration; serializes structured ReplayReceipt; computes independent replay metrics separated from solver cost; provides public adapters to Shadow Tracker RolloutRequest and Simscape ContinuousReplayTrajectory. All 209 estimation tests pass.
+- **Last verified:** 2026-10-04: DIME-15 reusable matching initializers trained, qualified, and verified across 11 behavioral tests in test_dime_learned_initializers.py (RED/GREEN). Implements DimeLearnedInitializerModelCard recording architecture, model hash, training dataset hash, held-out splits, OOD thresholds, and truthful fail-closed limitations when learning curves are inconclusive; validates dataset splits against player overlap and unbuffered adjacent-window leakage (DataLeakageError); verifies model identity and DoF consistency (StaleModelIdentityError); verifies candidate finiteness, convergence, and residual tolerances (InvalidSyntheticCandidateError); verifies absolute actuator limits and rate-of-torque limits (UnrealisticTorqueError); implements calibrated OOD detection with fail-closed OutOfDistributionError; implements AdaptiveMatchingInitializer falling back deterministically to ClassicalPhysicalInitializer under OOD queries; enforces independent NativeCandidateGate verification without neural confidence shortcuts; executes systematic ablation study comparing full model, ablated drift, ablated ROM, and classical baselines; computes ComputeCostReport with truthful offline generation, training compute, and break-even amortization. All 295 estimation unit tests pass.
 - **Summary:** Epic #11421: ZTCF drift prediction, kinematics-informed mocap matching, calibrated uncertainty weighting, uninterrupted forward simulation replay without frame-to-frame resetting.
-- **Next step:** Merge PR #11430, advance to dependent qualification gates.
+- **Next step:** Create PR, verify CI Standard, squash-merge into origin/main.
 
 ### DL-#11400 · OpenCap to OpenSim Integration
 
@@ -128,20 +128,29 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
-- **State:** in_review
+- **State:** completed
 - **Owner:** antigravity
+- **Issue:** #11285; children #11286–#11315
 - **PR:** #11397
 - **Branch:** `feat/fto-30-gallery-docs-11315`
 - **Paths:** `scripts/render_force_overlay_gallery.py`, `tests/visual/force_overlay/**`, `docs/user_guide/force_overlay.md`, `src/config/feature_parity.json`
 - **Last verified:** 2026-10-03 at SELF — FTO-30 (#11315, PR #11397): Gallery generator, golden image visual regression tests (Matplotlib, OpenCV, MuJoCo), user guide (`docs/user_guide/force_overlay.md`), cross-links, and feature parity records completed; FTO-19 (#11304, PR #11399), FTO-26 (#11311, PR #11391), FTO-27 (#11312, PR #11393), and FTO-29 (#11314, PR #11395) merged to main. All parent dependencies consolidated.
 - **Summary:** One engine-agnostic force/torque contract, glyph builder and renderer adapters; real providers for MuJoCo, Drake, Pinocchio, OpenSim and Simscape; tension/compression producers for every engine; arrows, shaded model and legend over source footage. [Plan](force_torque_overlay_epic.md).
-- **Next step:** Review and merge PR #11397; owner closes epic #11285.
+- **Next step:** FTO core complete and shipped. Remaining follow-up #11313 is deferred until #11246 completes.
 
 ### DL-#11268 · Capture-O Video Companion
 
 - **State:** in_progress
 - **Owner:** local
 - **Issue:** #11268; children #11269–#11279; parent program #11161
+- **PR:** #11499 (Closes #11272, #11274, #11275, #11276, #11277, #11279, Refs #11268)
+- **Branch:** `feat/cov-benchmark-suite-11268`
+- **Paths:** `src/motion_capture/reference/**`, `docs/development/capture-o-video/**`, `tests/unit/motion_capture/test_cov*`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — COV-4/6/7/8/9/11 consolidated benchmark suite: virtual camera fitting and 2D variation envelope (`virtual_camera_fit.py`), swing pairing and similarity matrix (`swing_pairing.py`), 2D markerless backend comparison receipts (`comparison_2d.py`), marker-anchored anthropometry and Necromatcher owner project (`owner_project.py`), 3D monocular/refit comparison vs marker IK (`comparison_3d.py`), and error budget receipt with frozen guidance derivation (`error_budget.py`). All 50 unit tests across all 6 test files pass in 8.07s.
+- **Summary:** Complete implementation and verification of Capture-O Video benchmark suite spanning levels L0–L3, virtual camera projection, pairing confidence, marker-anchored subject scaling, 2D/3D residuals, and error budget reporting.
+- **Next step:** Merge consolidated PR, close superseded individual draft PRs, and close Epic #11268.
+
 - **PR:** #11416 (Closes #11270, Refs #11268)
 - **Branch:** `feat/cov-2-register-sources-11270`
 - **Started:** 2026-10-02

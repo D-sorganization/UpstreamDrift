@@ -8,9 +8,182 @@
 - Validation (architecture-budget fix on SELF: `dt` moved into `WindowObservation`; `_FitState`, `_MatchInputs` and `_validated_inputs` keep every function at <= 8 parameters and <= 100 lines; `python3 scripts/ci/check_architecture_budget.py` OK); shared-tools divergence inventory updated for the six new ud-only estimation modules (`python3 -m scripts.shared_tools.divergence_inventory --check` current; committed authorship block kept because a shallow clone cannot recompute it): `python3 -m pytest tests/unit/estimation -q --timeout=60` (new suites: test_dime_drift_prediction 27, test_dime_local_window 17, test_dime_drift_anchored_matcher 14, test_matching_quality 33, test_synthetic_swing 24, test_dime_replay_refinement 10); shared benchmark fixtures in `tests/unit/estimation/conftest.py`; `ruff check`/`ruff format --check` clean on changed paths; `python3 -m scripts.check_design_manual_governance` passes. mypy not installed in this container. Native MuJoCo/JAX lanes not available here (skipped, not evidence).
 - Risks: about 14 s per 0.4 s match plus 6–13 s per refinement in pure Python (finite differences); replay refinement does not enforce the rate limit; single shooting may need multiple shooting on longer horizons.
 - Next steps: (1) open the PR and update epic #11421 with the refined plan; (2) DIME-14 speed-up (analytic/variational sensitivities); (3) contact-mode provider integration via #10286 before any full-body use; (4) run on the owner/tour captures only after DIME-01 freezes metrics.
+# Capture-O Video Benchmark Suite (COV-4/6/7/8/9/11) — #11268
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-benchmark-suite-11268`; PR: #11499 (`Closes #11272, #11274, #11275, #11276, #11277, #11279`, `Refs #11268`)
+- Governing issue: Epic #11268; children #11272 (COV-4), #11274 (COV-6), #11275 (COV-7), #11276 (COV-8), #11277 (COV-9), #11279 (COV-11)
+- Objective: Consolidate the entire Capture-O Video companion evaluation suite into a single unified implementation:
+  - COV-4 (`virtual_camera_fit.py`): Pinhole camera fitting and 2D variation envelope derivation.
+  - COV-6 (`swing_pairing.py`): Distance-based swing pairing with DTW, abstention margins, and event time mapping.
+  - COV-7 (`comparison_2d.py`): L1/L2 2D comparison receipts, camera uncertainty propagation, and anti-leakage offset calibration.
+  - COV-8 (`owner_project.py`): Marker-anchored subject anthropometry and Necromatcher owner project creation under privacy rules.
+  - COV-9 (`comparison_3d.py`): Monocular/refit 3D comparison vs marker IK with rigid scale fixation and depth error isolation.
+  - COV-11 (`error_budget.py`): Machine-readable error budgeting, frozen-rule guidance derivation, and privacy-preserving public summary generation.
+- Completed:
+  - Verified all 50 unit tests across all 6 test modules passing (100% green).
+  - Cleaned and unified `src/motion_capture/reference/__init__.py` exports.
+  - Pre-commit architecture, file size, error handling ratchet, and Ruff linting all clean.
+- Next steps: Merge consolidated PR, close superseded draft PRs (#11420, #11440, #11443, #11446, #11447, #11449), and close Epic #11268.
+
+---
+
+# Dynamics-Informed Mocap Matching: Train and Qualify Reusable Matching Initializers — #11421 / #11436
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11436-learned-initializers`; PR: (to be created, `Closes #11436`, `Refs #11421`)
+- Governing issue: #11436 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-15] Train and qualify reusable matching initializers: establish reproducible training recipe and model card, multi-strategy candidate proposals (retrieval, compact learned proposals, classical warm starts), fail-closed anti-leakage guards (adjacent-window and player leakage), model/checkpoint identity verification, torque realism checks, calibrated OOD rejection falling back to classical physical solve, independent native gating without neural confidence bypass, systematic ablation protocols (drift features and ROM priors), and truthful compute cost accounting and break-even amortization.
+- Completed:
+  - `src/shared/python/estimation/dime_learned_initializers.py`:
+    - `DimeLearnedInitializerModelCard`: reproducible model card tracking architecture, model hash, dataset hash, held-out splits, OOD thresholds, units, limitations, and learning curve convergence status. Halts scale-up fail-closed if learning curve is inconclusive.
+    - `TemporalWindowContext` & `TeacherEpisode`: structured definitions for temporal windows and verified teacher episodes.
+    - `DimeInitializerCandidate`: candidate output bundling complete state, feedforward controls, contact context, confidence, and calibrated OOD score.
+    - `validate_dataset_split`: rejects overlapping player IDs across train/eval splits and unbuffered adjacent temporal windows ($\Delta t_{\text{gap}} < \Delta t_{\text{buffer}}$) fail-closed (`DataLeakageError`).
+    - `verify_checkpoint_identity`: validates model hash and DoF consistency, rejecting stale or mismatched checkpoints (`StaleModelIdentityError`).
+    - `verify_synthetic_candidate`: verifies state and control finiteness and enforces residual tolerance bounds, catching failed or diverged candidates labeled valid (`InvalidSyntheticCandidateError`).
+    - `verify_torque_realism`: validates feedforward controls against absolute actuator limits and rate-of-torque limits ($|d\tau/dt| \le \dot{\tau}_{\max}$), rejecting unphysical torque steps (`UnrealisticTorqueError`).
+    - `LearnedProposalInitializer`: compact learned proposal model with calibrated OOD detection (`OutOfDistributionError`).
+    - `ClassicalPhysicalInitializer`: classical physics-based warm start generator.
+    - `RetrievalInitializer`: nearest-neighbor teacher episode retrieval.
+    - `AdaptiveMatchingInitializer`: orchestrates learned proposals and gracefully falls back to classical physical solve upon OOD queries.
+    - `NativeCandidateGate`: independent physical residual evaluation gate that strictly prevents neural confidence from bypassing physical checks.
+    - `run_initializer_ablation_study`: systematic ablation protocol comparing full model, ablated drift features, ablated ROM priors, and classical baselines.
+    - `ComputeCostReport`: compute cost breakdown calculating total offline cost (teacher generation + training) and break-even solve volume.
+    - `train_reusable_matching_initializer`: training driver with fail-closed learning curve evaluation.
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-15 symbols.
+  - `docs/shared_tools/divergence_inventory.v1.json` and `docs/shared_tools/divergence_inventory.md`: registered `dime_learned_initializers.py` and updated estimation package totals.
+  - `SPEC.md` and `docs/development/DEVELOPMENT_LOG.md`: updated specifications and active state logs.
+  - `tests/unit/estimation/test_dime_learned_initializers.py`: 11 comprehensive behavioral unit tests:
+    - RED adjacent-window and player leakage rejected fail-closed (`DataLeakageError`).
+    - RED stale checkpoint and model identity mismatch rejected fail-closed (`StaleModelIdentityError`).
+    - RED synthetic failure labeled valid rejected fail-closed (`InvalidSyntheticCandidateError`).
+    - RED unrealistic torque interpolation and rate limits rejected fail-closed (`UnrealisticTorqueError`).
+    - RED out-of-distribution body dimensions and contact context rejected (`OutOfDistributionError`).
+    - GREEN held-out player, session, and geometry evaluation passes.
+    - GREEN calibrated OOD rejection safely falls back to classical physical solve.
+    - GREEN independent native gate strictly gates candidate acceptance regardless of neural confidence.
+    - GREEN systematic ablation of drift features and ROM priors.
+    - GREEN truthful compute accounting and break-even amortization reporting.
+    - GREEN inconclusive learning curve halts scale-up without hiding results.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_learned_initializers.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 295 passed, 1 skipped.
+  - `ruff check`: passed.
+  - `ruff format --check`: passed.
+  - `mypy`: passed with 0 issues in source files.
+  - `check_module_size_budget`: passed.
+  - `check_no_print_calls`: passed.
+  - `check_root_clutter`: passed.
+  - `check_spec_paths`: passed.
+
+# Dynamics-Informed Mocap Matching: Native Drift and Window Solver Profiling & Acceleration — #11421 / #11435
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11435-profile-accelerate`; PR: (to be created, `Closes #11435`, `Refs #11421`)
+- Governing issue: #11435 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-14] Profile and accelerate native drift and window solves: implement multi-tiered cache identity with strict cross-job state isolation, local Taylor approximation with explicit validity radius, impact discontinuity invalidation, mandatory continuous replay enforcement, and granular cost breakdown profiling cold/warm p50/p95 speeds and failure costs.
+- Completed:
+  - `src/shared/python/estimation/dime_solver_cache.py`:
+    - `DimeCacheIdentity`: multi-tiered partition key covering model hash, parameter hash, contact policy, solver configuration, camera configuration, and job ID. Enforces non-empty strings and valid enums via DbC `require`.
+    - `LocalModelApproximation`: first-order Taylor expansion local model with explicit validity radius $R_{\text{valid}}$. Enforces $\|\delta x\| \le R_{\text{valid}}$ fail-closed with `PreconditionError`.
+    - `DimeSolverCache`: thread-safe multi-partition solver and provider cache using `threading.RLock`. Supports drift, step, Jacobian, and window solve caching. Provides targeted invalidations: `invalidate_on_camera_change`, `invalidate_on_body_change`, and `invalidate_job`.
+    - `store_jacobian_with_impact_check`: detects impact phase transitions and strictly rejects caching/serving smooth derivatives across impact discontinuities.
+    - `DimeCostBreakdown`: structured profiling record tracking drift count/time, full-step count/time, Jacobian count/time, assembly/factorization time, window solve time, independent replay time, failure costs, cache hits/misses, and p50/p95 speeds.
+    - `accelerated_solve_dynamics_window`: accelerated window solver enforcing mandatory independent continuous replay (strictly rejects `skip_independent_replay` fail-closed).
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-14 symbols.
+  - `tests/unit/estimation/test_dime_solver_cache.py`: 10 comprehensive behavioral unit tests:
+    - RED stale cache after camera calibration/extrinsics change.
+    - RED stale cache after body mass/inertia change.
+    - RED stale cache after contact policy transition.
+    - RED cross-job native-state contamination isolation.
+    - RED inaccurate derivative at contact impact discontinuity rejected.
+    - RED speedup claims from skipped replay rejected fail-closed.
+    - GREEN cached vs fresh evaluation machine precision equivalence.
+    - GREEN bounded approximation error within validity radius.
+    - GREEN multi-threaded concurrency and thread safety.
+    - GREEN measured cold vs warm speedup and full cost breakdown export.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_solver_cache.py`: 10 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 246 passed, 1 skipped.
+  - `ruff check`: passed.
+  - `ruff format --check`: passed.
+  - `mypy`: passed with 0 issues.
+  - `check_architecture_budget.py`: passed (all changed functions $\le 8$ parameters, $\le 100$ lines).
+
+# Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction — #11421 / #11437
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11437-torque-drift`; PR: #11490 (`Closes #11437`, `Refs #11421`)
+- Governing issue: #11437 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-16] Implement torque-independent drift feasibility tests outside the input-effect subspace using covariance whitening and rank-revealing SVD, bounded control feasibility inside the subspace, changing contact rank tracking, missing-data prediction with calibrated uncertainty bounds, and runtime factor exclusivity.
+- Completed:
+  - `src/shared/python/estimation/dime_input_subspace.py`:
+    - `SubspaceDecomposition`: encapsulates input influence matrix, scale-invariant whitening operator, actuated subspace basis $U_{\parallel}$, unactuated/torque-independent orthogonal complement basis $U_{\perp}$, singular values, rank, condition number, and actuator status.
+    - `decompose_input_subspace`: symmetric eigendecomposition whitening $W = \Sigma^{-1/2}$ and full SVD rank-revealing factorization $B_w = U \Sigma V^T$.
+    - `SubspaceFeasibilityEvaluation`: structured outcome of torque-independent drift feasibility and bounded control feasibility.
+    - `evaluate_input_subspace_feasibility`: evaluates orthogonal residual $r_{\perp} = U_{\perp}^T W (\ddot{q}_{\text{cand}} - a_{\text{drift, eff}})$, detects unphysical motion outside the input subspace fail-closed ($\chi^2_{\perp} > \text{threshold}$), solves minimum-norm control effort $\tau^*$ inside the subspace, checks box bounds via `ControlBand`, and incorporates eliminated contact reactions $a_{\text{contact}} = M^{-1} J_c^T \lambda$.
+    - `MaskedPredictionResult` & `predict_masked_interval`: propagates state and uncertainty across missing observation intervals without conjuring artificial certainty; unactuated coordinates strictly follow deterministic drift while actuated coordinates broaden according to control priors.
+    - `DimeInputSubspaceFactor`: diagnostic proposal-screening factor by default (`contributes_to_objective=False`) or alternative reduced inference formulation (`contributes_to_objective=True`).
+    - `DimeSubspaceReport`: structured JSON-serializable audit receipt.
+  - `src/shared/python/estimation/dime_contracts.py`:
+    - Extended `RuntimeExclusivityContract` to recognize `reduced_subspace_dynamics` and enforce mutual exclusion against overlapping duplicate full-dynamics or explicit-control factors.
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-16 symbols.
+  - `tests/unit/estimation/test_dime_input_subspace.py`: 11 comprehensive behavioral unit tests:
+    - RED fully actuated free system: projection onto orthogonal complement adds no information ($\chi^2_{\perp} = 0$).
+    - RED underactuated cart-pole: torque cannot explain arbitrary base acceleration; detected and rejected fail-closed.
+    - RED changing contact rank: smoothly transitions between flight ($J_c = 0$, rank 0) and stance ($J_c \ne 0$, rank 1) incorporating eliminated contact loads without unphysical force leaks.
+    - RED correlated uncertainty: non-diagonal whitening decorrelates sensor error and preserves Mahalanobis distance.
+    - RED singular/near-singular input maps: drops near-zero singular directions into unactuated subspace without explosive torques.
+    - GREEN analytic subspace cases: match exact closed-form orthogonal projections.
+    - GREEN scale-invariant whitening: scaling covariance by $\alpha$ scales Mahalanobis norm by $1/\alpha$.
+    - GREEN masked-observation prediction: unactuated coordinates retain calibrated drift bounds while actuated coordinates broaden with control prior uncertainty.
+    - GREEN exclusivity contract: permits diagnostic screening and rejects competing objective factors on overlapping intervals.
+    - GREEN structured receipt: serializes and deserializes losslessly.
+    - GREEN finite-difference cross-check: verifies subspace residual Jacobian against numerical finite differences.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_input_subspace.py`: 11 passed (100% GREEN).
+  - `pytest tests/unit/estimation/`: 227 passed, 1 skipped.
+  - `ruff check`: passed.
+  - `ruff format --check`: passed.
+  - `mypy`: passed with 0 errors across checked files.
+  - `check_lod.py`: passed (clean no-growth scan, 0 violations).
+  - `check_architecture_budget.py`, `check_file_size_budget.py`, `check_dry_duplication_gate.py`, `check_error_handling_ratchet.py`: all passed.
+  - `divergence_inventory.py --check`: passed.
+
+# Dynamics-Informed Mocap Matching: Ablation Study and Accuracy-Runtime Acceptance — #11421 / #11431
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-10-ablation-study-11431`; PR: #11488 (`Closes #11431`, `Refs #11421`)
+- Governing issue: #11431 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-10] Ablation Study and Accuracy-Runtime Acceptance: evaluate the six preregistered baseline/method variants across systematic perturbations (noise, occlusion, torque initialization bias, contact transitions, model/camera error) under marked, markerless, and hybrid observation modes; fail closed on seeded data leakage, test-set tuning, and winning-trial filtering; guard zero denominators in dominance metrics; evaluate uncertainty coverage and record p50/p95 latency and global-refinement cost separately.
+- Completed:
+  - `src/shared/python/estimation/dime_benchmark_ablations.py`:
+    - `DimeAblationVariant`: six preregistered variants (`KINEMATIC_IK`, `CLASSICAL_MHE`, `DRIFT_PRIOR_ZTCF`, `DRIFT_CONTACT_CONSTRAINED`, `DRIFT_OFFLINE_SMOOTHED`, `DRIFT_ACCELERATED_PROPOSAL`).
+    - `PerturbationKind`: `NOISE`, `OCCLUSION`, `TORQUE_BIAS`, `CONTACT_CHANGE`, `MODEL_CAMERA_ERROR`.
+    - `ObservationMode`: `MARKED`, `MARKERLESS`, `HYBRID`.
+    - `AblationTrialSpec`: trial specification with anti-leakage validation (`has_data_leakage`, `test_set_tuned`).
+    - `AblationTrialResult`: structured result capturing RMSE, alignment, drift dominance, 2-sigma uncertainty coverage, p50/p95 latency, global refinement cost, hardware metrics, and optional `ReplayReceipt`.
+    - `AblationSummaryTable`: aggregated suite summary ensuring fail-closed retention of all trials and failures.
+    - `AblationBenchmarkSuite`: benchmark runner rejecting selective reporting of only winning trials.
+    - `compute_ablation_dominance_metric`: calculates ratio with `"guarded_zero"` policy returning `0.0` to eliminate zero-division risks.
+    - `run_ablation_trial` & `run_dime_ablation_suite`: execution harnesses with deterministic reproduction and full failure retention.
+  - `src/shared/python/estimation/__init__.py`: exports all public DIME-10 symbols in alphabetical order.
+  - `tests/unit/estimation/test_dime_benchmark_ablations.py`: 12 focused behavioral tests (RED & GREEN):
+    - RED seeded data leakage fails closed (`PreconditionError`).
+    - RED test-set tuning fails closed (`PreconditionError`).
+    - RED zero denominator in dominance metric guarded safely or raises under strict policy.
+    - RED reporting only winning trials fails closed (`PreconditionError`).
+    - GREEN deterministic reproduction across runs with identical seed.
+    - GREEN all trials, failures, and unqualified statuses retained in summary tables.
+    - GREEN uncertainty coverage computed (>= 0.85 for 2-sigma confidence).
+    - GREEN p50/p95 latency and global-refinement cost recorded separately.
+    - GREEN all 6 variants evaluated across perturbations and modalities.
+    - GREEN headless import purity verified without GUI dependencies.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_benchmark_ablations.py`: 12 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 239 passed, 1 skipped (jax).
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Advance to dependent qualification gates under epic #11421.
+
 # Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay — #11421 / #11430
 
-- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11430 (`Closes #11430`, `Refs #11421`)
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11484 (`Closes #11430`, `Refs #11421`)
 - Governing issue: #11430 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
 - Objective: [DIME-09] Offline Smoothing and Independent Continuous Replay: execute single-shot forward integration from saved initial state with saved controls and declared configuration; fail closed on per-frame resets, hidden feedback, undeclared root wrenches, model changes, and missing controls; perform offline backward smoothing using marginalized arrival information without reverse-time contact integration; record structured ReplayReceipt; recompute independent replay metrics separated from solver cost; provide public adapters to Shadow Tracker and Simscape replay harnesses.
 - Completed:
@@ -25,28 +198,7 @@
     - `to_simscape_continuous_trajectory`: maps continuous replay results to Simscape's `ContinuousReplayTrajectory`.
   - `src/shared/python/estimation/__init__.py`: exports all public DIME-09 symbols.
   - `src/shared/python/estimation/moving_horizon.py`: refactored Law of Demeter attribute chains.
-  - `tests/unit/estimation/test_dime_continuous_replay.py`: 11 comprehensive behavioral tests (RED & GREEN) covering:
-    - RED per-frame state resets fail closed (`PreconditionError`).
-    - RED hidden target-force feedback fails closed (`PreconditionError`).
-    - RED undeclared root wrench on floating-base root DoFs fails closed (`PreconditionError`).
-    - RED replay with changed model fails closed (`PreconditionError`).
-    - RED missing controls or shape mismatch fails closed (`PreconditionError`).
-    - RED backward inference calling reverse-time contact integration fails closed (`PreconditionError`).
-    - GREEN uninterrupted synthetic replay reproduces trajectory within frozen numerical tolerances (`reproducibility_atol = 1e-9`, `max_drift_m = 0.015`).
-    - GREEN native floating-base/contact fixture reproduces saved motion and vertical GRF static equilibrium within frozen tolerances.
-    - GREEN backward smoothing with marginalized arrival information produces continuous smoothed trajectory without per-frame discontinuities.
-    - GREEN structured ContinuousReplayResult contains trajectory, independent replay residuals, assistance telemetry, and provenance.
-    - GREEN public adapters connect cleanly to Shadow Tracker and Simscape replay harnesses.
-- Validation:
-  - `pytest tests/unit/estimation/test_dime_continuous_replay.py`: 11 passed (100% GREEN).
-  - `pytest tests/unit/estimation`: 209 passed, 1 skipped (jax).
-  - `python scripts/check_spec_paths.py`: passed.
-  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
-  - `python scripts/ci/check_file_size_budget.py`: passed.
-  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
-  - `python scripts/ci/check_lod.py src/shared/python/estimation --baseline scripts/ci/lod_baseline.txt`: passed (0 new violations, clean scan).
-  - `ruff check`, `ruff format --check`: passed cleanly.
-- Next steps: Advance to dependent qualification gates under epic #11421.
+  - `tests/unit/estimation/test_dime_continuous_replay.py`: 11 comprehensive behavioral tests (RED & GREEN).
 
 # Dynamics-Informed Mocap Matching: Observable Global Calibration and Consistent Prior Updates — #11421 / #11429
 

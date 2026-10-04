@@ -23,6 +23,8 @@ on:
   # dispatcher job plus one diff, not the full suite.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # Merge queue (Repository_Management#1890): required checks must report on the queue's merge commit.
+  merge_group:
   workflow_dispatch:
   schedule:
     # Weekly run every Monday at 06:00 UTC  -  catches test drift and
@@ -461,6 +463,8 @@ jobs:
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            diff_base="${{ github.event.merge_group.base_sha }}"
           else
             python3 scripts/ci/run_full_mypy_baseline.py
             exit 0
@@ -487,6 +491,8 @@ jobs:
             && [ -n "${{ github.event.before }}" ] \
             && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
             diff_base="${{ github.event.before }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            diff_base="${{ github.event.merge_group.base_sha }}"
           else
             mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
             exit 0
@@ -1270,7 +1276,7 @@ jobs:
       - name: Run docs governance checks
         uses: ./.github/actions/docs-governance-checks
         with:
-          changed-from: ${{ github.event.pull_request.base.sha || github.event.before }}
+          changed-from: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
 
   # Governed companion workflows execute on every code PR and protected-main
   # push. The job emits exact-commit evidence but does not publish or qualify it.
