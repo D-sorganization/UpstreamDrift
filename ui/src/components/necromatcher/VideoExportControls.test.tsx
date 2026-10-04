@@ -48,3 +48,13 @@ it('does not advertise orphan cancellation or unverified download', async () => 
   api.fetchVideoExport.mockResolvedValue(run({control_available:false,download_available:true})); render(<VideoExportControls fit="fit-1" initialRunId="export-1" />);
   await screen.findByRole('status'); expect(screen.queryByRole('button',{name:'Cancel Overlay Export'})).not.toBeInTheDocument(); expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
+it('submits the opt-in force layer only after it is enabled', async () => {
+  api.submitVideoExport.mockResolvedValue(run()); api.fetchVideoExport.mockResolvedValue(run());
+  render(<VideoExportControls fit="fit-1" />); const user = userEvent.setup();
+  expect(screen.queryByText(/not measured forces/)).not.toBeInTheDocument();
+  await user.click(screen.getByRole('checkbox',{name:/Draw force and torque glyphs/}));
+  await user.click(screen.getByRole('checkbox',{name:/contact/})); await user.click(screen.getByRole('checkbox',{name:/Shade body segments/}));
+  expect(screen.getByText(/not measured forces/)).toBeInTheDocument();
+  await user.click(screen.getByRole('button',{name:'Export Research Overlay'}));
+  expect(api.submitVideoExport).toHaveBeenCalledExactlyOnceWith('fit-1',{enabled:true,kinds:['joint_reaction','contact'],scale:1,segment_shading:true});
+});

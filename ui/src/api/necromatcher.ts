@@ -1,6 +1,6 @@
 import { apiFetch } from './fetch';
 import { getApiBase } from './backend';
-import type { AssetRequest, IdentityRequest, ModelRequest, SwingRequest, RefitRequest } from './generated/types';
+import type { AssetRequest, ForceLayerRequest, IdentityRequest, ModelRequest, SwingRequest, RefitRequest, VideoExportRequest } from './generated/types';
 
 const root = '/api/v1/necromatcher';
 export type RefitOptions = Required<Omit<RefitRequest, 'new_fit_id'>>;
@@ -22,7 +22,8 @@ export interface VideoExportRun extends ResearchRun {
   qualification: 'monocular_research_hypothesis'; download_available: boolean;
   execution_started: boolean; execution_verified: boolean;
 }
-export const submitVideoExport = (fit: string) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, {method: 'POST'});
+export type ForceLayer = Required<ForceLayerRequest>;
+export const submitVideoExport = (fit: string, forceLayer?: ForceLayer) => apiFetch<VideoExportRun>(`${root}/fits/${encodeURIComponent(fit)}/video-exports`, forceLayer?.enabled ? {method: 'POST', body: JSON.stringify({force_layer: forceLayer} satisfies VideoExportRequest)} : {method: 'POST'});
 export const fetchVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}`);
 export const cancelVideoExport = (run: string) => apiFetch<VideoExportRun>(`${root}/video-exports/${encodeURIComponent(run)}/cancel`, {method: 'POST'});
 export const videoExportDownloadUrl = (run: string) => `${getApiBase()}${root}/video-exports/${encodeURIComponent(run)}/download`;

@@ -319,3 +319,57 @@ def test_json_polling_preserves_missing_and_malformed_errors(tmp_path):
     path.write_text("[]", encoding="utf-8")
     with pytest.raises(ValueError, match="JSON object"):
         jobs._read(path)
+
+
+def test_force_layer_is_validated_recorded_and_forwarded_to_the_worker(
+    fit_case, monkeypatch
+):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+    from src.shared.python.workspace import necromatcher_video_worker as worker
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    monkeypatch.setattr(jobs, "_execute_worker", _fake_export)
+    session = jobs.NativeVideoSession(library)
+    layer = {
+        "enabled": True,
+        "kinds": ["contact"],
+        "scale": 2.0,
+        "segment_shading": False,
+    }
+    try:
+        with pytest.raises(ValueError, match="kinds"):
+            session.submit("source", force_layer={**layer, "kinds": ["bogus"]})
+        run = session.submit("source", force_layer=layer)["run_id"]
+        _wait(session, run)
+        path = library.root / "video-runs" / run / "request.json"
+        assert json.loads(path.read_text())["force_layer"] == layer
+        calls = []
+        monkeypatch.setattr(
+            worker, "export_fit_video", lambda *args, **kwargs: calls.append(kwargs)
+        )
+        worker.execute(path)
+        assert calls[0]["force_layer"].kinds == ("contact",)
+        assert calls[0]["force_sampler_factory"] is worker.mujoco_force_sampler
+    finally:
+        session.close()
+
+
+def test_default_submission_has_no_force_layer_in_its_request(fit_case, monkeypatch):
+    from src.shared.python.workspace import necromatcher_video_jobs as jobs
+
+    library, source, _ = fit_case
+    library.add_fit("source", "practice", source)
+    seen = []
+
+    def recording_export(request_path, budget, cancelled):
+        seen.append(json.loads(request_path.read_text()))
+        return _fake_export(request_path, budget, cancelled)
+
+    monkeypatch.setattr(jobs, "_execute_worker", recording_export)
+    session = jobs.NativeVideoSession(library)
+    try:
+        _wait(session, session.submit("source")["run_id"])
+        assert len(seen) == 1 and "force_layer" not in seen[0]
+    finally:
+        session.close()
