@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11422 — [DIME-01] Baseline and Frozen Benchmark Protocol
+
+- **State:** in_progress
+- **Owner:** antigravity
+- **Issue:** #11422 (parent epic #11421)
+- **PR:** feat/dime-benchmark-manifest-11422
+- **Branch:** `feat/dime-benchmark-manifest-11422`
+- **Paths:** `src/shared/python/estimation/benchmark_manifest.py`, `src/shared/python/estimation/benchmark_fixtures.py`, `src/shared/python/estimation/__init__.py`, `tests/unit/estimation/test_dime_benchmark_manifest.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — DIME-01: defined versioned benchmark manifest (BenchmarkManifest, BenchmarkManifestInput, ObservationType, ForceMeasurementType, NativeCapabilityStatus, NumericAcceptanceThreshold, PhaseMetrics) through existing ProvenanceInfo. Defined deterministic benchmark fixtures (fixed-base pendulum, underactuated analytic, native stance) with exact truth derivation, energy conservation, contact constraints, and strict SI units. Implemented fail-closed validation rejecting wrong units, missing provenance, force-derived kinematics qualification, and skeleton contact qualification. Zero-denominator safe phase metrics (drift, control, alignment, cancellation ratio). 13 focused unit tests pass; all 102 estimation tests pass; ruff, black, mypy, architecture budget clean.
+- **Summary:** Defined versioned benchmark manifest and frozen numeric thresholds with deterministic pendulum/underactuated/stance fixtures, fail-closed validation, and truthful capability status reporting.
+- **Next step:** Open PR, pass CI Standard, auto-merge, and close #11422.
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress

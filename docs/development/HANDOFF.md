@@ -1,3 +1,38 @@
+# [DIME-01] Baseline and Frozen Benchmark Protocol — #11421 / #11422
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-benchmark-manifest-11422`; PR: opened from this branch (`Closes #11422`, `Refs #11421`)
+- Governing issue: #11422 (parent epic #11421)
+- Objective: [DIME Child 1] Define versioned benchmark manifest and frozen numeric thresholds with deterministic pendulum/underactuated/stance fixtures, fail-closed validation, and truthful capability status reporting.
+- Completed:
+  - `src/shared/python/estimation/benchmark_manifest.py`:
+    - `ObservationType` (`MARKER_3D`, `KEYPOINT_2D`, `INERTIAL_IMU`, `JOINT_ENCODER`, `HYBRID`)
+    - `ForceMeasurementType` (`MEASURED`, `INFERRED`, `UNCONSTRAINED`, `ZERO_TORQUE_PREDICTION`)
+    - `NativeCapabilityStatus` (`IMPLEMENTED`, `QUALIFIED`, `UNAVAILABLE`, `DEGRADED`)
+    - `BenchmarkSplitPolicy` (`ALL_FRAMES`, `CALIBRATION_HOLDOUT_SPLIT`, `SWING_PHASE_SPLIT`, `LEAVE_ONE_OUT`)
+    - `BenchmarkManifestInput`: dataset_id, model_revision, engine_type, split_policy, seed, parameters.
+    - `NumericAcceptanceThreshold`: frozen metric comparisons with units and phase scoping.
+    - `PhaseMetrics`: drift magnitude, control magnitude, trajectory alignment, and cancellation ratio.
+    - `BenchmarkManifest`: versioned, immutable schema with JSON serialization/deserialization.
+    - `validate_benchmark_manifest`: fails closed on non-SI units, missing provenance, force-derived kinematics qualification, skeleton contact qualification, or privacy leaks.
+    - `compute_phase_metrics`: safe metric evaluation with zero-denominator policy.
+    - `create_baseline_manifest`: frozen baseline manifest with truthful capability status.
+    - `run_baseline_from_manifest`: truthful baseline execution without rewrite or improvement claims.
+  - `src/shared/python/estimation/benchmark_fixtures.py`:
+    - `BenchmarkTrajectory` and `BenchmarkFixture`: structured contracts with energy and contact laws.
+    - `make_deterministic_pendulum_fixture`: conservative single pendulum with RK4 integration and energy conservation (delta E < 1e-5).
+    - `make_underactuated_analytic_fixture`: 2-DOF underactuated system with passive unactuated joint (tau_2 = 0).
+    - `make_native_stance_fixture`: ground contact model with F_z >= 0 and friction cone ||F_t|| <= mu \* F_z.
+  - `src/shared/python/estimation/__init__.py`: re-exported all new symbols in `__all__`.
+  - `tests/unit/estimation/test_dime_benchmark_manifest.py`: 13 focused TDD unit tests covering all RED and GREEN requirements.
+- Validation:
+  - Unit tests: 13 passed in `test_dime_benchmark_manifest.py`.
+  - Full estimation suite: 102 passed, 1 skipped.
+  - Formatting & linting: `ruff check`, `ruff format`, `black` all 100% clean.
+  - Type checking: `mypy` clean (no issues in source files).
+  - Architecture budget: changed files within budgets.
+  - Design manual governance: clean.
+- Next steps: Open PR, pass CI Standard, auto-merge, and close #11422.
+
 # OpenCap: Golf Accuracy Qualification Against a Marker Reference — #11400 / #11408
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `docs/opencap-golf-accuracy-deferred-11408`; PR: #11451 (`Refs #11408`, `Refs #11400`)
