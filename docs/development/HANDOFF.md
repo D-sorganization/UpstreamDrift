@@ -1,3 +1,14 @@
+# Merge-Queue Core Test Lanes — RM#1900
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/1900-ud-merge-group-tests`; PR: workflow-only, opened from this branch.
+- Governing issue: D-sorganization/Repository_Management#1900 (fleet merge queue). Entry: DL-#1900.
+- Problem: every `merge_group` run of CI Standard failed. `tests` had no merge_group diff base and fell into the whole-src coverage lane (11.8 % vs `--cov-fail-under=75`); `unit-test-gate` fetched the base only for `pull_request`, so the child-copy guard asserted `origin/main is required in CI`.
+- Fix: `merge_group` branch sets `diff_base` to `merge_group.base_sha`; the unit-gate base fetch also runs for `merge_group` and falls back to the default branch.
+- Validation: `python -m pytest -q -o addopts="" tests/ci/test_merge_group_test_lanes.py tests/ci/test_ci_infrastructure.py -k "merge_group or unit_gate_fetches"` passes. The 16 other `test_ci_infrastructure.py` failures are local import failures that also fail on `origin/main`.
+- Next: merge through the queue; confirm the next queued PR (e.g. #11507) passes.
+
+---
+
 # Capture-O Video Comparison Protocol & Correspondence (COV-3) — #11268 / #11271
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/cov-3-protocol-decision-11271`; PR: #11502 (`Closes #11271`, `Refs #11268`)

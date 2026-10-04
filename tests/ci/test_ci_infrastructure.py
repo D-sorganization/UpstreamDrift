@@ -1085,10 +1085,13 @@ class TestCIEnvironmentCompatibility:
         fetch_step = steps[fetch_index]
 
         assert fetch_index < unit_index
-        assert fetch_step["if"] == "github.event_name == 'pull_request'"
+        # merge_group runs need origin/<default> too (RM#1900).
+        assert fetch_step["if"] == (
+            "github.event_name == 'pull_request' || github.event_name == 'merge_group'"
+        )
         assert (
-            'git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"'
-            in fetch_step["run"]
+            'git fetch --no-tags --depth=1 origin "${{ github.base_ref || '
+            'github.event.repository.default_branch }}"' in fetch_step["run"]
         )
 
     def test_unit_gate_sparse_checks_out_pinned_tools_for_ownership_guard(self) -> None:

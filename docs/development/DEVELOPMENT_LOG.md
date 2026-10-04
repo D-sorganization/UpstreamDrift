@@ -113,6 +113,19 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** Agent-editable GS3DX clones, LaTeX reference and documentation policy, truthful serialized execution, Human ellipsoid geometry adapter, joint-role mapping and calibrated full foot orientation. A is the tour reference; O is the owner capture. Marker residuals, offsets, orientation and provenance remain independently visible; videos are IK, not qualified forward dynamics.
 - **Next step:** Verify selected head-tracked cache timing, named IDs and units, then integrate moving references with explicit accepted-stance corrections and existing prospective gate authorities. Continue all-actuator/neck control recovery, full-swing tracking and independent replay. Six public-source served videos are privately acquired with rechecked hashes, while original camera provenance remains unresolved. Decode/grade them and freeze pairing/camera/timing/held-out protocols before comparison; selected named mapping passed all 101 frames without loading a model.
 
+### DL-#1900 · Merge-Queue Scoping for Core Test Lanes
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** D-sorganization/Repository_Management#1900
+- **Branch:** `claude/1900-ud-merge-group-tests`
+- **PR:** see branch (workflow-only PR)
+- **Paths:** `.github/workflows/ci-standard.yml`, `tests/ci/test_merge_group_test_lanes.py`, `tests/ci/test_ci_infrastructure.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF — contract tests green; every `merge_group` CI Standard run since the queue rollout failed `tests` (11.8 % vs 75 % coverage floor) and `unit-test-gate` (no `origin/main`).
+- **Summary:** `merge_group` runs diff the core lane against `merge_group.base_sha` and fetch the default branch for the Tools child-copy guard, matching pull-request behaviour.
+- **Next step:** Merge through the queue and confirm the next queued UpstreamDrift PR passes `tests` and `unit-test-gate`.
+
 ### DL-#11285 · Force and Torque Overlays for Every Engine
 
 - **State:** completed
