@@ -41,6 +41,7 @@ class CaptionFrame:
     shaft: bool = False
     shape_opacity: float | None = None
     authored_seed: bool = False
+    restricted_seed: bool = False
 
     def __post_init__(self) -> None:
         if (
@@ -54,6 +55,8 @@ class CaptionFrame:
             not isinstance(self.pts, Fraction)
             or type(self.shaft) is not bool
             or type(self.authored_seed) is not bool
+            or type(self.restricted_seed) is not bool
+            or (self.authored_seed and self.restricted_seed)
         ):
             raise ValueError("Caption requires exact rational PTS and shaft flag")
         for value in (self.rms, self.shape_opacity):
@@ -149,6 +152,50 @@ def authored_seed_status(fit: Mapping[str, Any]) -> bool:
     return True
 
 
+def restricted_seed_status(fit: Mapping[str, Any]) -> bool:
+    """Classify freshly Library-authenticated metadata, not arbitrary receipt bytes.
+
+    The restriction payload owner alone rederives hashes, parent and scope.
+    Missing legacy provenance is unchanged; contradictory mode metadata rejects.
+    """
+    if not isinstance(fit, Mapping):
+        raise ValueError("Caption requires a canonical fit record")
+    provenance = fit.get("provenance", {})
+    evidence = fit.get("evidence", {})
+    if not isinstance(provenance, Mapping) or not isinstance(evidence, Mapping):
+        raise ValueError("Caption requires canonical fit provenance and evidence")
+    request = provenance.get("request_options", {})
+    original = evidence.get("original_fit", {})
+    if not isinstance(request, Mapping) or not isinstance(original, Mapping):
+        raise ValueError("Caption requires canonical request and original fit")
+    declared = (
+        provenance.get("operation") == "restrict_initialization"
+        or request.get("operation") == "restrict_initialization"
+        or request.get("initialization_source") == "restricted_spline"
+        or original.get("initialization_source") == "restricted_spline"
+        or "spline_interval_restriction" in provenance
+        or "spline_restriction_prior" in provenance
+    )
+    if not declared:
+        return False
+    config = request.get("config", {})
+    if (
+        provenance.get("operation") != "restrict_initialization"
+        or request.get("operation") != "restrict_initialization"
+        or request.get("initialization_source") != "restricted_spline"
+        or not isinstance(config, Mapping)
+        or config.get("initialization_policy") != "strict"
+        or not isinstance(provenance.get("spline_interval_restriction"), Mapping)
+        or not isinstance(provenance.get("spline_restriction_prior"), Mapping)
+        or original.get("optimizer_ran") is not False
+        or original.get("converged") is not False
+        or "initialization" not in original
+        or original["initialization"] is not None
+    ):
+        raise ValueError("Restricted seed caption contradicts canonical fit metadata")
+    return True
+
+
 def _texts(frame: CaptionFrame) -> tuple[str, ...]:
     clock = f"{frame.pts.numerator}/{frame.pts.denominator}s"
     metric = f"RMS {frame.rms:.2f}px" if frame.rms is not None else "RMS unavailable"
@@ -159,6 +206,8 @@ def _texts(frame: CaptionFrame) -> tuple[str, ...]:
     ]
     if frame.authored_seed:
         lines.insert(0, "UNOPTIMIZED AUTHORED RESEARCH SEED")
+    elif frame.restricted_seed:
+        lines.insert(0, "UNOPTIMIZED RESTRICTED RESEARCH SEED")
     extra = "M:Fragment C:Axis" if frame.shaft else ""
     if frame.shape_opacity is not None and frame.shape_opacity > 0:
         extra += (
@@ -241,6 +290,12 @@ def validate_caption_manifest(
             raise ValueError("Seed caption requires authenticated canonical fit")
     elif seed:
         raise ValueError("Authored seed manifest is missing its visible status")
+    restricted = restricted_seed_status(fit) if fit is not None else False
+    if "restricted_initialization_seed" in manifest:
+        if manifest["restricted_initialization_seed"] is not True or not restricted:
+            raise ValueError("Restricted seed requires authenticated canonical fit")
+    elif restricted:
+        raise ValueError("Restricted seed manifest is missing its visible status")
     shape = manifest.get("shape_overlay", {}).get("options", {})
     for row in manifest["frames"]:
         identity = row["frame"]
@@ -256,6 +311,7 @@ def validate_caption_manifest(
             "shaft_overlay" in manifest,
             shape.get("opacity"),
             seed,
+            restricted,
         )
         expected = caption_layout(
             tuple(manifest["image_size"]), frame, options

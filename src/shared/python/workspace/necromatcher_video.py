@@ -32,6 +32,7 @@ from .necromatcher_caption import (
     CaptionFrame,
     CaptionOverlayOptions,
     authored_seed_status,
+    restricted_seed_status,
     caption_layout,
     caption_provenance,
     draw_caption,
@@ -452,6 +453,7 @@ def _render(
                 shaft is not None,
                 shapes.options.opacity if shapes else None,
                 authored_seed_status(binding.fit),
+                restricted_seed_status(binding.fit),
             ),
             captions,
         )
@@ -869,6 +871,8 @@ def _export_manifest(
         manifest["caption_overlay"] = caption_provenance(overlays.captions)
         if authored_seed_status(binding.fit):
             manifest["authored_initialization_seed"] = True
+        if restricted_seed_status(binding.fit):
+            manifest["restricted_initialization_seed"] = True
     return manifest
 
 

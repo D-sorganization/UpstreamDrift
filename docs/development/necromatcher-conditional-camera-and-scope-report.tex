@@ -3,14 +3,14 @@
 \usepackage{amsmath,amssymb,booktabs,longtable,xcolor,hyperref,fancyhdr,graphicx}
 \definecolor{ink}{HTML}{16324F}
 \hypersetup{colorlinks=true,linkcolor=ink,urlcolor=ink}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V6}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\small Conditional Camera and Two-Hand Methods}\fancyhead[R]{\small Methods V7}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
 \newcommand{\digest}[1]{\texttt{\small\detokenize{#1}}}
 \begin{document}
 \begin{center}
 {\LARGE\color{ink}\bfseries Conditional Camera Initialization\\and Two-Hand Scope Methods}\par
 \vspace{8pt}{\large A Source-Bound Tiger Woods and Ben Hogan Supplement}\par
-\vspace{8pt}3 October 2026\quad\textbullet\quad Methods V6: Lossless Restriction and Native Evaluation
+\vspace{8pt}3 October 2026\quad\textbullet\quad Methods V7: Lossless Restriction Backend Validation
 \end{center}
 \section*{Status and Purpose}
 This supplement describes one closed, read-only conditional-camera diagnostic and the exclusion of Tiger's uncertain late hand-release phase. It accompanies exact serialized data; it is not a calibration report or an accepted historical reconstruction. Root observed producer session 74740 and independent checker session 92074 close with exit code zero. Root accepted the independent serialized-output and complete-byte preservation review. This acceptance does not independently recompute native projections or reconstruct the capture clock.
@@ -449,4 +449,113 @@ mode implementation is still underway; this receipt is not evidence of its
 integration or acceptance. Tiger retains $[0,191)$ and Hogan is unchanged.
 Preserve Methods V5 and its fourteen-page review as the preceding accepted
 edition. The Tiger/Hogan Necromatcher goal remains active.
+
+\newpage
+\section*{Reusable Lossless Restriction Workflow}
+This subsequent software checkpoint integrates an explicit, reusable backend
+path for restricting a preserved Hermite curve to an authenticated source
+window. The preceding sections retain their status at the time they were
+written; their earlier historical V21 figures and results are unchanged.
+The completed test below concerns a synthetic fixture, not a new historical
+Tiger seed or an optimized match.
+
+The public pure operation \texttt{restrict\_image\_spline\_interval(start, lower,
+upper)} retains interior knots and their position/velocity coefficients. Cut
+endpoints are evaluated and packed through the canonical public trajectory
+provider. Its immutable \texttt{SplineIntervalRestriction} receipt records
+both exact six-field spline identities: model hash, coordinate order, free
+order, knot times, coefficients and coefficient digest. This algebraic receipt
+alone is not capture authentication or a physical-time certificate. $q$ and $v$
+are continuous; acceleration at an existing-knot upper cut follows the retained
+left segment, not a claim of $C^2$ continuity.
+
+\begin{center}\begin{tabular}{p{0.21\linewidth}p{0.71\linewidth}}\toprule
+Public Boundary & Required Admission and Postcondition\\\midrule
+Source and Scope & Canonical parent bytes, registered review receipt, complete capture clock
+and exact source identities; selected first/last span the reviewed half-open window.\\
+Queue & Explicit \texttt{restrict\_initialization}/\texttt{restricted\_spline};
+strict policy, exact retained knot count, receipt and selected-first parent prior
+enter the immutable request and its hash.\\
+Clean Worker & SDK-first model/order/free/units binding, canonical rederivation before
+compilation, exact restricted start passed to the public initializer; no optimizer
+or authored projection.\\
+Publication and Recall & Fresh bounded authentication before writes, exact request/candidate
+comparison, canonical stored parent hash and receipt rederivation; scope, source
+poses and recipe persist without widening.\\\bottomrule
+\end{tabular}\end{center}
+
+Public Bernstein-domain encoding checks both free coefficients and constant
+locked reference values against declared bounds. The ordinary
+\texttt{preserved\_spline} short-interval rejection remains unchanged. This is a
+separate explicit mode, not a silent resampling fallback. Its prior policy is
+\texttt{selected\_\allowbreak first\_\allowbreak parent\_\allowbreak pose}; later starting windows use the saved parent
+pose at their first selected frame, rather than assuming frame zero.
+
+Read contexts close before scheduling, native initialization or storage writes;
+fresh groups cover worker preparation, output authentication and publication.
+The stored result retains the blocker
+\texttt{spline\_\allowbreak interval\_\allowbreak restriction\_\allowbreak only}. No optimizer counts, convergence,
+range projection or scientific qualification are invented. Caption-consumer
+software is a separate pending checkpoint here; this section does not claim a
+new historical restriction caption, seed registration or rendered overlay.
+
+\newpage
+\begingroup\small
+\section*{Synthetic Native End-to-End Evidence}
+Root observed actual fixture process 4534 close with exit code zero, followed by
+SDK-free independent process 97412 closing with exit code zero. The released
+producer is
+\begin{center}\digest{5197f8639818321b7cf8f86d4748a25ce79aa278}\end{center}
+The public queue, clean worker, storage and reopened recall were exercised in
+an exclusive temporary fixture Library. The real historical Library was never
+passed to fixture matching. Complete 14,844-source-file and 401-historical-file
+maps, project and stable runtime identities remained unchanged.
+
+Seven authored synthetic source frames have rational PTS $i/10$, $i=0,\ldots,6$.
+The registered scope is $[1,6)$; training uses $(1,2,3,5)$ and dense output uses
+$1,\ldots,5$. The parent knots are $(0,.17,.31,.52,.6)$; the child retains the
+nonuniform knots $(.1,.17,.31,.5)$. One of 44 native coordinates is free;
+all 43 locked coordinates retain their references. Nonzero retained and endpoint
+velocities are preserved. These are authored synthetic presentation records,
+not measured physical seconds, anatomy or a historical contact assessment.
+
+\begin{center}\begin{tabular}{lr}\toprule
+Independent Serialized or Pure Check & Value\\\midrule
+Training Body RMS (px) & 4.79766778352853\\
+Dense Body RMS (px) & 4.795600130676517\\
+Maximum Pure $q$ Difference & $3.47\times10^{-18}$\\
+Maximum Pure $v$ Difference & $2.78\times10^{-17}$\\
+Maximum Pure $a$ Difference & $1.78\times10^{-15}$\\
+Computational Status / Acceptance & Succeeded / Rejected\\
+Optimizer / Convergence & False / False\\
+Solver \texttt{nfev}/\texttt{njev} & Null / Null\\\bottomrule
+\end{tabular}\end{center}
+
+The actual native fixture freshly checked confidence-weighted Euclidean body
+RMS through public projection providers; its denominator is the sum of point
+weights, not twice that sum. The independent review verifies saved/result
+metric parity and pure Hermite $q/v/a$ at five source times and four midpoints;
+it does not independently rerun native projection. These cuts lie inside parent
+segments. The selected-first prior at frame 1 is persisted correctly, but its
+free-coordinate soft cost is not independently observable from an unoptimized
+exact-start output. Recorded worker duration is scoped telemetry, not complete
+process wall time or evidence of optimizer iterations.
+
+Two queue counterexamples (wrong knot count and selected domain) created no
+files. Three distinct stored specimens (changed prior, receipt or model hash)
+were rejected. No accepted fixture asset was overwritten. The exact owned run is
+\begin{center}\digest{f32866fdca3949fd9cfb766eb682027b}\end{center}
+Root closure and independent serialized review digests, respectively, are
+\begin{center}
+\digest{a26073a9c7bef6c8d5f2dd12b249c8e5f848be49c9fb0ba63d0a5c98f011d9bc}\par\smallskip
+\digest{6ebc2b607b35b4d0611594bd1df7443358117510711fde1601f084f78f5c8f4d}
+\end{center}
+The exact results, finally maps, source/config/helper pins and independent
+checker are preserved under the released synthetic-proof and independent-review
+folders. This backend acceptance does not certify physical timing, continuous
+constraints, clinical ROM, dynamics or improved historical image agreement.
+Tiger matching still excludes frames 191 onward; no new historical fit, camera,
+role adoption or ControlTower delivery is claimed.
+\endgroup
+
 \end{document}

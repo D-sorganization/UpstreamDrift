@@ -62,3 +62,31 @@ source PTS, particularly Hogan 200/375/550 at 320 by 240. Record remaining text
 occlusion and readability without claiming improved motion quality, historical
 calibration or physical-time qualification. No actual historical export has been
 performed for this caption checkpoint.
+
+## Restricted Seed Provenance
+
+The lossless restriction operation in #11450 uses the same compact caption
+composer for stills and video. A freshly Library-authenticated fit with
+`restrict_initialization` and `restricted_spline` provenance receives the leading
+line `UNOPTIMIZED RESTRICTED RESEARCH SEED`. Its enabled manifest declares
+`restricted_initialization_seed: true`; publication reconstructs that status
+from the canonical fit and rejects missing, forged or conflicting declarations.
+The text classifier checks mode and unoptimized status. The Library restriction
+owner remains responsible for parent hashes, receipt derivation, selected scope,
+source clock, bounds and curve identity; a mapping alone is not authentication.
+
+`CaptionFrame` appends the optional strict-boolean `restricted_seed` field after
+the existing seven fields. Authored and restricted flags are mutually exclusive.
+No user option claims either status. Ordinary and authored captions retain their
+existing text and layout; omitted caption options retain legacy output. All
+source dimensions, shape opacity, skeleton layers and measured strip limits
+continue to apply. The label does not imply improved fitting, optimized motion,
+calibrated contact, individual anatomy or physical-time qualification.
+
+Before a historical export, recall and authenticate the admitted restricted
+seed, record its parent and canonical receipt hashes, use the approved source
+interval and export to a new destination. Preserve source/Library/runtime
+before-and-finally evidence. For Tiger, reviewed support is frames 0 through 190
+inclusive; transition and released-hand frames remain outside the fit. Inspect
+original and overlay at identical rational PTS and retain the unoptimized label
+until a separately qualified result supports a different status.
