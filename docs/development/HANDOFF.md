@@ -17,6 +17,22 @@
   - All unit tests and divergence inventory tests passing green.
 - Next steps: Land PR, clean up worktree.
 
+# OpenCap: Golf Accuracy Qualification Against a Marker Reference — #11400 / #11408
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `docs/opencap-golf-accuracy-deferred-11408`; PR: #11451 (`Refs #11408`, `Refs #11400`)
+- Governing issue: #11408 (parent epic #11400, design authority ADR-0053; follows #11401–#11403, #11406, #11407, #11409, and #11405)
+- Objective: [OpenCap Child 7] Record golf accuracy qualification against a marker reference into the deferred-validation catalog (DV-11408) per fleet rules (physical simultaneous capture unavailable; synthetic numbers prohibited as acceptance).
+- Completed:
+  - Recorded DV-11408 in `docs/development/planning/catalog.json`.
+  - Created `docs/development/planning/DV-11408.md` defining rationale, prerequisites, required hardware (optical mocap + multi-cam synchronized 60+ fps video of identical swings), and scientific verification gate.
+  - Created `docs/development/planning/source-11408.json` preserving original issue state and acceptance criteria.
+  - Updated `docs/development/DEVELOPMENT_LOG.md` (DL-#11400).
+- Validation:
+  - `python -m shared_scripts.deferred_validation --repo-root .` passes.
+  - `pytest tests/unit/repo_hygiene/test_deferred_catalog_hook.py` passes (5/5).
+  - Document title case check passes.
+- Next steps: Land PR, publish DV-11408 on main, close issue #11408 via gh CLI, and close epic #11400.
+
 # OpenCap: Marker Augmenter on Our Own Triangulated Keypoints — #11400 / #11405
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-marker-augmenter-11405`; commit SELF; PR: opened from this branch (`Closes #11405`, `Refs #11400`)

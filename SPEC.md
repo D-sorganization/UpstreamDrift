@@ -7810,6 +7810,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 | Date | PR | Changes |
 | --- | --- | --- |
 | 2026-10-03 | #11347 | [FTO-7 follow-up] Remove deprecated force_vectors and vectors shims, drop obsolete shim tests, update test_plotting_renderers, and update divergence inventory (#11347). |
+| 2026-10-03 | #11451 | [OpenCap] Record golf accuracy qualification against a simultaneous physical marker reference in deferred-validation catalog DV-11408 (refs #11408). |
 | 2026-10-03 | #11448 | [OpenCap] Marker augmenter on triangulated keypoints with OpenCapMarkerAugmenter, model-conditioned evidence labeling per ADR-0041, OpenSimScaleBackend and OpenSimIKBackend fallback integration (#11405). |
 | 2026-10-03 | #11441 | Settings page test no longer races the asynchronously loaded theme list: it waits for the Light option before selecting it, and the shared mock now resolves the theme list late so the ordering bug reproduces every run |
 | 2026-10-03 | #11444 | [OpenCap] Local opencap-core sidecar runner with OpenCapLauncher, process safety via managed_popen, Docker and venv discovery, ADR-0053 licensing guards, and OpenCapOutputAdapter (#11406). |

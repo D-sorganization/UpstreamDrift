@@ -1,0 +1,22 @@
+{
+  "number": 11408,
+  "html_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11408",
+  "title": "OpenCap: Golf Accuracy Qualification Against a Marker Reference",
+  "body": "Child 7 of #11400. Depends on #11403 and child 3.\n\nOpenCap was validated on gait, squats and jumps, not on a roughly 0.25 s downswing at 60 fps with motion blur. Compare OpenCap kinematics against a simultaneous marker-based capture of the same swings. Report joint-angle error by phase (backswing, downswing, impact), with the wrists and forearms broken out.\n\n## Acceptance\n\n- A measured error report from a real simultaneous capture.\n- **This needs physical capture.** If none is available, record it in the deferred-validation catalog per the fleet rule; never use synthetic numbers as acceptance.",
+  "updated_at": "2026-10-03T16:28:57Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQqJAi88AAAAClZPy8w",
+      "name": "ingestion",
+      "description": "Markerless / mocap ingestion to canonical observations",
+      "color": "0052CC"
+    },
+    {
+      "id": "LA_kwDOQqJAi88AAAAC4Yg5pA",
+      "name": "tier:strong",
+      "description": "Reserved for frontier agents (Claude Opus 5.5 / Codex high). CLI-tier agents must not claim.",
+      "color": "5319E7"
+    }
+  ],
+  "state": "open"
+}

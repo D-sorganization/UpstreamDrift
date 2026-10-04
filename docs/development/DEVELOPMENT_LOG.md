@@ -66,14 +66,14 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 
 - **State:** in_progress
 - **Owner:** antigravity
-- **Issue:** #11400; child #11405 (OpenCap: marker augmenter on our own triangulated keypoints; follows #11401–#11403, #11406, #11407, #11409)
-- **PR:** opened from `feat/opencap-marker-augmenter-11405`
-- **Branch:** `feat/opencap-marker-augmenter-11405`
-- **Paths:** `src/motion_capture/opencap_ingest/augmenter.py`, `src/motion_capture/opencap_ingest/**`, `src/shared/python/motion_pipeline/ik/opensim_backend.py`, `src/shared/python/motion_pipeline/scaling/opensim_scale.py`, `tests/unit/motion_capture/test_opencap_augmenter.py`, `tests/integration/motion_capture/test_opencap_pipeline_e2e.py`
+- **Issue:** #11400; child #11408 (OpenCap: golf accuracy qualification against a marker reference; follows #11401–#11403, #11406, #11407, #11409, #11405)
+- **PR:** #11451
+- **Branch:** `docs/opencap-golf-accuracy-deferred-11408`
+- **Paths:** `docs/development/planning/catalog.json`, `docs/development/planning/DV-11408.md`, `docs/development/planning/source-11408.json`
 - **Started:** 2026-10-03
-- **Last verified:** 2026-10-03 at SELF — Child 4 (#11405): implemented `OpenCapMarkerAugmenter`, `OpenCapAugmenterConfig`, `OpenCapPipelineResult`, `create_opencap_rig`, and `run_opencap_pipeline_from_keypoints` in `src/motion_capture/opencap_ingest`. Runs marker augmentation as sidecar per ADR-0053 or deterministic geometric fallback, synthesizing all 43 LaiUhlrich2022 anatomical markers from 3D triangulated keypoints. Labels output as `model-conditioned` per ADR-0041. Feeds markers into `OpenSimScaleBackend` and `OpenSimIKBackend` with hermetic test fallbacks. 9 unit tests and 3 e2e integration tests pass; all 120 related motion capture and boundary tests green; ruff check/format and black clean; architecture and file size budgets pass.
-- **Summary:** OpenCap marker augmenter maps 3-D triangulated keypoints to 43 LaiUhlrich2022 anatomical markers, scaling OpenSim model and solving IK end-to-end; TensorFlow is never imported; evidence labelled model-conditioned.
-- **Next step:** Review and merge PR for #11405; proceed to next child issue in epic #11400.
+- **Last verified:** 2026-10-03 at SELF — Child 7 (#11408): recorded OpenCap golf accuracy qualification against a marker reference in deferred-validation catalog (DV-11408) per fleet rules (physical simultaneous capture unavailable; synthetic numbers prohibited as acceptance). catalog.json, DV-11408.md, and source-11408.json verified via shared_scripts.deferred_validation and test_deferred_catalog_hook.
+- **Summary:** OpenCap to OpenSim integration complete across sidecar launcher, session import, marker augmentation, UI, and hosted download; golf accuracy qualification against physical marker reference recorded in deferred-validation catalog (DV-11408).
+- **Next step:** Merge PR, publish DV-11408 on main, close issue #11408, and close epic #11400.
 
 ### DL-#11329 - Scapula and Quiet Torso Matching With Neutral 1080P Previews
 
