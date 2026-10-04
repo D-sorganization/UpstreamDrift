@@ -1,0 +1,149 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,booktabs,array,xcolor,fancyhdr}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\definecolor{ink}{HTML}{17344A}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{UpstreamDrift / Necromatcher}}
+\fancyhead[R]{\small Native Desktop Impact Methods}
+\fancyfoot[L]{\small Authored Research; Historical Qualification Pending}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\title{\textcolor{ink}{Necromatcher Native Desktop Impact\\Replay Admission, Job Ownership and Viewer Handoff}}
+\author{UpstreamDrift Technical Reference\\Epic \#11232; Desktop Integration Issue \#11487}
+\date{4 October 2026 / Native Desktop Supplement 1}
+\begin{document}
+\maketitle
+\begin{center}\rule{0.9\linewidth}{0.6pt}\end{center}
+\section*{Purpose and Evidence Boundary}
+This supplement describes the native Necromatcher tile's path from a registered
+authored replay to a retained impact result and the existing Shot Tracer viewer.
+The earlier extraction and application reports retain their original producer
+identities and evidence. The accompanying desktop review must bind current
+implementation and test bytes, closed validation logs and rendered report pages.
+Software execution, scientific acceptance and visible rendering are separate
+claims; none follows merely from the presence of controls.
+
+Tiger retains original frames 0--190, the conservative reviewed domain
+$[0,191)$. Released-hand follow-through and the uncertain transition beyond the
+cutoff remain excluded. Hogan retains $[0,750)$. Physical release/contact time,
+camera, anatomy and dynamics remain unqualified. Rolling-shutter sensitivity
+cannot uniquely distinguish sensor readout from shaft flex, blur, interlacing,
+film scanning or broadcast processing in these historical sources.
+
+\section*{Canonical Replay Admission}
+The operator selects a historical swing and imports its authored HDF5 trace
+through the public Library's \code{add_replay} method. This owner authenticates the
+profile, fit, native model and capture chain, same-session identities, immutable
+hashes, native coordinate order and channel units. Recall through
+\code{load_replay} repeats admission; a filename or asset-list label alone is
+insufficient evidence. The desktop displays the admitted identities, sample
+domain and authored-clock limits rather than inferring player measurements.
+
+All rates are derivatives with respect to authored simulation seconds. Explicit
+body-local head/face geometry, effective mass and inertia, a recorded sample and
+proper world-to-flight transform remain operator assumptions. Scientific and
+physical source time qualification remain false.
+A completed calculation retains rejected research acceptance.
+
+\newpage
+\section*{Responsiveness and Ownership}
+The desktop is an adapter over the public \code{NativeImpactSession}. It does
+not introduce another extraction, impact or flight implementation. Admission,
+hashing, submission, polling, cancellation, saved-result recall and download
+belong in background operations; Qt callbacks update widgets on their owner
+thread. Native physics executes only through the existing fixed clean worker,
+with the SDK import order, explicit wall budget and stable source/runtime
+identity checks documented in the application supplement.
+
+The user must declare a finite positive budget no greater than 600 seconds.
+Controls are disabled during incompatible operations, and late or foreign
+responses cannot replace the current replay/run. Closing a dialog must retire
+its outstanding callbacks and owned controls. A restarted session may recall a
+verified completed result; an orphan pending/running record has no invented
+cancel handle or verified download.
+
+\section*{Saved Results and Exclusive Export}
+Saved geometry, selection, metrics and clock policy belong to the authenticated
+result. They are displayed independently of the editable declaration used for a
+future run. Malformed records, accepted scientific status, foreign replay/run
+identities and incomplete artifact sets are refused before enabling export or
+viewer handoff. The four retained files are:
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.29\linewidth}>{\raggedright\arraybackslash}p{0.62\linewidth}}\toprule
+File & Responsibility\\\midrule
+\code{trajectory.json} & Canonical trajectory wire and retained sample values.\\
+\code{impact-receipt.json} & Full detached state and exact trajectory byte binding.\\
+\code{result.json} & Saved assumptions, metrics, effective settings and provenance.\\
+\code{request.json} & Admitted replay/run identity, declarations and budget.\\\bottomrule
+\end{tabular}
+\end{center}
+Download repeats parent and artifact authentication. External export uses an
+exclusive destination outside the immutable Library, checks copied bytes and
+refuses overwrite. Failure must preserve an existing destination and remove only
+owned incomplete output. Keep all four files together when sharing results;
+the trajectory wire alone does not carry the complete historical research context.
+
+\section*{Existing Viewer Handoff}
+The desktop obtains a verified bundle, checks the companion receipt and reads
+the canonical trajectory through \code{ShotTrajectoryHandoffCoordinator}.
+The resulting imported curve is inserted through a public Shot Tracer method on
+the Qt thread. Viewer insertion retains provenance labels and detached sample
+positions; it performs no file read, impact solve, flight integration, reference
+swing substitution or source-time differentiation. Invalid curves must be
+refused before altering the viewer's retained state.
+
+\newpage
+\section*{Repeatable Operator Procedure}
+Select the player and swing, import or select a registered authored replay, and
+review its parent identities and authored-clock boundary. Open the replay impact
+controls and provide the exact existing geometry/selection records plus an
+explicit budget. Use a recorded sample; do not interpret the selection as an
+automatically detected collision. Retain the run ID when the owned job starts.
+
+Observe the job state and use cancellation only when this host owns a live
+handle. After verified completion, inspect the saved result's assumptions and
+metrics. Save the checked ZIP to a new external path. Open the retained trajectory
+in Shot Tracer through the integrated handoff, retaining the companion receipt
+and explicit research context. After restarting the desktop, select the same
+registered replay and recall the saved run ID; do not submit another job merely
+to display a stored result.
+
+\section*{Validation and Reproduction}
+Root validation passes 146 focused Qt, viewer and parity cases, with no skips,
+and configured type checks on all three production owners. Meaningful earlier
+failures cover missing actions, stale run identity and foreign bundles.
+
+One additional opt-in acceptance passes with actual MuJoCo replay, retained HDF5,
+the clean impact worker, real impact and Rust flight in a temporary synthetic
+Library. It verifies export, restarted recall, exact detached state and public
+viewer positions without substituting physics, stamps or transport. The test
+call takes 20.68 seconds on this host; this is not an efficiency benchmark.
+Its whole-test cap is 120 seconds, phase waits are 90 seconds and the declared
+native worker budget remains 60 seconds. An earlier whole-test timeout is
+preserved without attributing a physical or solver cause.
+
+All three final screenshots are readable and visually reviewed. The offscreen
+font database was empty; test setup loads the existing Windows Segoe UI only
+under that condition, without installation or production changes. File chooser
+automation is separate from physics. Retained curve checks and readable controls
+do not establish OpenGL pixel accuracy or historical model quality. Exact frozen
+source, closed-process logs and report pages are bound in the desktop review.
+
+\section*{Remaining Historical Work}
+Desktop integration does not improve the historical fit by itself. Camera,
+anthropometry, human range of motion, two-hand contact, source time, continuous
+dynamics and impact assumptions still require evidence. Simulation-golf
+integration and qualified Tiger/Hogan model acceptance remain active requirements.
+The engineering manual's separate inventory and approval gates also remain in
+force. This supplement is a technical workflow reference, not release approval.
+
+\section*{References and Public Owners}
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/11487}{Desktop Issue \#11487}
+and \href{https://github.com/D-sorganization/UpstreamDrift/pull/11359}{PR \#11359}.
+See the authored replay impact procedure and earlier application supplement for
+the unchanged native extraction mathematics, worker envelope and portable wire.
+\end{document}

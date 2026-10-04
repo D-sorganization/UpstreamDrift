@@ -292,3 +292,27 @@ within original frames 0–190 ([0,191)); Hogan stays [0,750). No historical
 Library mutation, qualified match or new ControlTower delivery is established.
 Remaining goal work includes improved historical matching, authored dynamics,
 simulation golf integration and desktop parity. The full goal remains active.
+
+## Native Desktop Replay Impact Checkpoint — #11487
+
+The native Necromatcher tile now imports registered authored replays, runs the
+shared bounded replay-impact session off the GUI thread, cancels owned jobs,
+recalls retained run IDs after restart and exports an authenticated four-file
+ZIP exclusively. Saved assumptions remain separate from editable declarations.
+The public Shot Tracer handoff retains exact detached positions and provenance.
+
+Root validation passes 146 focused Qt/viewer/parity cases without skips and
+configured mypy on three production owners. One additional opt-in actual
+MuJoCo/HDF5/clean-worker/impact/Rust native Qt case passes with Python exit 0.
+The three final synthetic screenshots are readable and visually reviewed;
+retained positions are verified, while OpenGL pixel accuracy is unverified.
+Test-only font bootstrap uses existing Windows Segoe UI when the offscreen
+font database is empty. The 120-second whole-test cap does not change the
+60-second native budget; earlier timeout evidence is preserved.
+
+The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
+intact synthetic bundle are saved on the local Desktop. See [Procedure](docs/development/necromatcher-replay-impact.md)
+and [Frozen Review](docs/development/historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
+Historical fits, scientific qualification, simulation golf and final overall
+desktop parity acceptance remain open. No new ControlTower delivery or remote
+CI-green claim is made. The full goal remains active.

@@ -38,6 +38,7 @@ from src.shared.python.workspace import (
 from .image_review import landmark_overlay
 from .refit_dialog import ResearchRefitDialog
 from .video_dialog import VideoExportDialog
+from .replay_impact_dialog import ReplayImpactDialog
 
 
 class NecromatcherWidget(QWidget):
@@ -56,6 +57,7 @@ class NecromatcherWidget(QWidget):
         self._refit_dialogs: list[ResearchRefitDialog] = []
         self._video_session: Any = None
         self._video_dialogs: list[VideoExportDialog] = []
+        self._impact_dialogs: list[ReplayImpactDialog] = []
         self._review: CaptureReview | None = None
         self._fit_id: str | None = None
         self._frame_indices: tuple[int, ...] = ()
@@ -88,6 +90,7 @@ class NecromatcherWidget(QWidget):
             ("Export Swing", self._export),
             ("Refit Selected Version", self._refit),
             ("Export Fitted Overlay", self._video_export),
+            ("Preview Replay Impact", self._replay_impact),
         ):
             button = QPushButton(name)
             button.clicked.connect(callback)
@@ -393,6 +396,7 @@ class NecromatcherWidget(QWidget):
                 "Native Model",
                 "Torque Profile",
                 "Kinematic Research Fit",
+                "Authored Replay HDF5",
             ],
             0,
             False,
@@ -417,6 +421,8 @@ class NecromatcherWidget(QWidget):
             target = partial(self.library.add_profile, identity, swing, Path(source))
         elif kind == "Kinematic Research Fit":
             target = partial(self.library.add_fit, identity, swing, Path(source))
+        elif kind == "Authored Replay HDF5":
+            target = partial(self.library.add_replay, identity, swing, Path(source))
         else:
             engine, accepted = QInputDialog.getItem(
                 self,
@@ -475,6 +481,36 @@ class NecromatcherWidget(QWidget):
         self._video_dialogs.append(dialog)
         dialog.show()
 
+    def _replay_impact(self) -> None:
+        identity, swing = self._id(self.asset_list), self._id(self.swing_list)
+        asset = (
+            next(
+                (
+                    item
+                    for item in self.library.assets(swing)
+                    if item.dataset_id == identity
+                ),
+                None,
+            )
+            if swing
+            else None
+        )
+        if asset is None or asset.kind != "authored_replay":
+            self.status.setText(
+                "Select a registered authored replay; kinematic fits are not replays."
+            )
+            return
+        from src.shared.python.workspace import NativeImpactSession
+
+        dialog = ReplayImpactDialog(
+            asset.dataset_id,
+            NativeImpactSession(self.library),
+            self,
+            library_root=self.library.root,
+        )
+        self._impact_dialogs.append(dialog)
+        dialog.show()
+
     def cleanup(self) -> None:
         """Drain owned I/O before releasing archive and worker handles."""
         self._closed = True
@@ -496,3 +532,5 @@ class NecromatcherWidget(QWidget):
             self._video_session.close()
         for video_dialog in self._video_dialogs:
             video_dialog.cleanup()
+        for impact_dialog in self._impact_dialogs:
+            impact_dialog.cleanup()

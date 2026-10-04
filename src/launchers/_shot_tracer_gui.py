@@ -62,6 +62,7 @@ from src.shared.python.physics.flight_models import (  # noqa: E402
     UnifiedLaunchConditions,
     compare_models,
 )
+from src.shared.python.physics.flight_trajectory_export import FLIGHT_FRAME_ID  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -468,13 +469,52 @@ class MultiModelShotTracerWidget(QWidget):
         """
         try:
             curve = import_trajectory_record(path)
+            self.display_imported_trajectory(curve)
         except (TrajectoryImportError, Exception) as e:
             logger.exception("Trajectory import refused")
             QMessageBox.warning(self, "Import Refused", str(e))
             return
 
-        self.imported_trajectories[curve.label] = curve
-        self.imported_list.addItem(curve.label)
+    def display_imported_trajectory(self, curve: ImportedTrajectoryCurve) -> None:
+        """Display detached validated samples without reading or simulating a record."""
+        if not isinstance(curve, ImportedTrajectoryCurve):
+            raise TypeError("Display requires an ImportedTrajectoryCurve")
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in (
+                curve.label,
+                curve.source_id,
+                curve.model_family,
+                curve.model_name,
+            )
+        ):
+            raise ValueError("Imported trajectory provenance must be nonempty")
+        positions = curve.positions
+        if (
+            curve.frame_id != FLIGHT_FRAME_ID
+            or not isinstance(positions, np.ndarray)
+            or positions.ndim != 2
+            or positions.shape[1] != 3
+            or positions.shape[0] == 0
+            or positions.dtype.kind not in "iuf"
+            or not np.isfinite(positions).all()
+        ):
+            raise ValueError(
+                "Imported trajectory requires finite real Nx3 flight samples"
+            )
+        detached = positions.copy()
+        detached.setflags(write=False)
+        stored = ImportedTrajectoryCurve(
+            curve.label,
+            detached,
+            curve.source_id,
+            curve.model_family,
+            curve.model_name,
+            curve.frame_id,
+        )
+        if curve.label not in self.imported_trajectories:
+            self.imported_list.addItem(curve.label)
+        self.imported_trajectories[curve.label] = stored
         self._update_visualization()
 
     def _update_visualization(self) -> None:

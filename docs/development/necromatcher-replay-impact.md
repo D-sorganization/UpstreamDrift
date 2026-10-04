@@ -134,10 +134,11 @@ launch/post-impact state, metrics, execution identity and extraction metadata.
 The current action uses pinned pipeline defaults; arbitrary environment or impact
 model configuration is not exposed by this form.
 
-Native PyQt tile parity is explicitly tracked in
+Native PyQt tile integration is tracked in
 [Issue #11487](https://github.com/D-sorganization/UpstreamDrift/issues/11487),
-an epic #11232 child. React/Tauri uses the shared local API; the native tile's
-replay import, impact controls and saved-run recall remain that follow-up's scope.
+an epic #11232 child. React/Tauri uses the shared local API; the native tile
+adapts the same public Library and owned impact session without HTTP or a second
+physics implementation. Desktop acceptance is recorded separately below.
 
 Extract `trajectory.json` and import it through the existing **Ball Flight** page
 at `/ball-flight`. This imports retained samples without re-simulation. Keep the
@@ -159,6 +160,44 @@ evidence, not a matched Tiger or Hogan swing. Tiger remains `[0,191)` and Hogan
 `[0,750)`; the full goal remains active.
 
 [Application Review](historical_capture/replay-impact-application-review.json) pins the reviewed implementation, native runtime build, test logs and Desktop bundle. The application checkpoint passes 125 focused Python cases with one Windows symlink privilege skip, one separate native handoff acceptance and 104 React cases. Configured mypy passes all six production owners.
+
+## Native Desktop Replay Impact
+
+Select a player and swing in the Necromatcher tile. **Import Version** now offers
+**Authored Replay HDF5** with an explicit permanent version ID. The canonical
+Library admits the saved trace and its existing same-session profile, fit, model
+and capture parents; importing a kinematic fit does not create a replay.
+
+Select the registered replay and choose **Preview Replay Impact**. The dialog
+loads the authenticated trace off the Qt thread and displays parent IDs/hashes,
+sample count, step and authored-clock qualification. **Import Impact Declaration
+JSON** accepts the same exact public geometry/selection records as React.
+Enter an explicit **Impact Budget (s)** and choose **Preview Research Impact**.
+Submission, status reads, cancellation, hashes and native job execution stay off
+the GUI thread. The dialog owns its dedicated session and drains pending work
+asynchronously when it closes.
+
+Retain **Current Impact Run ID**. After restart, select the same replay, enter
+**Saved Impact Run ID** and choose **Recall Research Impact Run**. Saved summaries
+display the result's own assumptions, sample, clock and metrics. A failed or
+foreign recall revokes the previous run's export/viewer actions. An orphan
+pending/running record offers no invented cancellation or download; another saved
+run can still be recalled. The current editable declaration is not a saved result.
+
+**Save Checked Impact ZIP** reauthenticates the bundle and copies it exclusively
+to a new path outside the immutable Library. It preserves existing destinations.
+**Open in Shot Tracer** obtains a verified bundle, checks its exact four members,
+replay/run identity and companion receipt, then imports the trajectory through
+the existing public coordinator in a background operation. A Qt callback inserts
+the detached retained positions through `display_imported_trajectory` on the
+public Shot Tracer widget. The viewer performs no recalculation; timestamps and
+velocity channels remain in the authenticated trajectory wire. Its host shows
+the replay/sample and unqualified authored research context.
+
+The [Native Desktop Methods Supplement](necromatcher-native-desktop-impact-methods.tex)
+documents admission, ownership, export and the viewer handoff. Earlier reports
+and their evidence remain unchanged. Historical matching, physical qualification,
+simulation-golf integration and final overall parity acceptance remain open.
 
 ## Verification and Limits
 
@@ -186,3 +225,27 @@ Both `physical_source_time_qualified` and `scientific_qualified` remain false.
 These SI rates refer to authored simulation seconds, not calibrated Tiger/Hogan
 motion time. Valid mathematical extraction does not qualify historical club
 geometry, effective inertia, contact selection, impact predictions or golf play.
+
+## Native Desktop Replay Impact Checkpoint — #11487
+
+The native Necromatcher tile now imports registered authored replays, runs the
+shared bounded replay-impact session off the GUI thread, cancels owned jobs,
+recalls retained run IDs after restart and exports an authenticated four-file
+ZIP exclusively. Saved assumptions remain separate from editable declarations.
+The public Shot Tracer handoff retains exact detached positions and provenance.
+
+Root validation passes 146 focused Qt/viewer/parity cases without skips and
+configured mypy on three production owners. One additional opt-in actual
+MuJoCo/HDF5/clean-worker/impact/Rust native Qt case passes with Python exit 0.
+The three final synthetic screenshots are readable and visually reviewed;
+retained positions are verified, while OpenGL pixel accuracy is unverified.
+Test-only font bootstrap uses existing Windows Segoe UI when the offscreen
+font database is empty. The 120-second whole-test cap does not change the
+60-second native budget; earlier timeout evidence is preserved.
+
+The three-page Native Desktop Supplement 1 and editable LaTeX, screenshots and
+intact synthetic bundle are saved on the local Desktop. See [Procedure](necromatcher-native-desktop-impact-methods.tex)
+and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json). Tiger remains [0,191), Hogan [0,750).
+Historical fits, scientific qualification, simulation golf and final overall
+desktop parity acceptance remain open. No new ControlTower delivery or remote
+CI-green claim is made. The full goal remains active.
