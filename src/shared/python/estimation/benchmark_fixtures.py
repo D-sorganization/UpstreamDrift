@@ -80,6 +80,49 @@ class BenchmarkFixture:
         return kinetic + potential
 
 
+_STANDARD_BENCHMARK_UNITS: dict[str, str] = {
+    "position": "m",
+    "angle": "rad",
+    "torque": "N*m",
+    "force": "N",
+    "time": "s",
+}
+
+
+def _assemble_fixture(
+    name: str,
+    t_arr: np.ndarray,
+    q_arr: np.ndarray,
+    qdot_arr: np.ndarray,
+    qddot_arr: np.ndarray,
+    controls: np.ndarray,
+    actuated_mask: tuple[bool, ...],
+    contact_forces: np.ndarray,
+    friction_coefficient: float = 0.6,
+    parameters: dict[str, Any] | None = None,
+) -> BenchmarkFixture:
+    from src.shared.python.estimation.benchmark_manifest import ForceMeasurementType
+
+    trajectory = BenchmarkTrajectory(
+        t=t_arr,
+        q=q_arr,
+        qdot=qdot_arr,
+        qddot=qddot_arr,
+    )
+    return BenchmarkFixture(
+        name=name,
+        trajectory=trajectory,
+        controls=controls,
+        num_dofs=len(actuated_mask),
+        actuated_mask=actuated_mask,
+        units=_STANDARD_BENCHMARK_UNITS,
+        forces_type=ForceMeasurementType.MEASURED,
+        contact_forces=contact_forces,
+        friction_coefficient=friction_coefficient,
+        parameters=parameters or {},
+    )
+
+
 def _rk4_step(
     f: Any,
     t: float,
@@ -104,8 +147,6 @@ def make_deterministic_pendulum_fixture(
     Parameters: mass m=1.0 kg, length l=1.0 m, gravity g=9.81 m/s^2.
     Integrates via RK4 with substepping to ensure energy conservation.
     """
-    from src.shared.python.estimation.benchmark_manifest import ForceMeasurementType
-
     require(n_frames >= 2, "n_frames must be >= 2")
     require(dt > 0.0, "dt must be positive")
 
@@ -144,31 +185,15 @@ def make_deterministic_pendulum_fixture(
             for _ in range(substeps):
                 y = _rk4_step(ode, 0.0, y, sub_dt)
 
-    controls = np.zeros((n_frames, 1), dtype=np.float64)
-    contact_forces = np.zeros((n_frames, 3), dtype=np.float64)
-
-    trajectory = BenchmarkTrajectory(
-        t=t_arr,
-        q=q_arr,
-        qdot=qdot_arr,
-        qddot=qddot_arr,
-    )
-
-    return BenchmarkFixture(
+    return _assemble_fixture(
         name="deterministic-fixed-base-pendulum",
-        trajectory=trajectory,
-        controls=controls,
-        num_dofs=1,
+        t_arr=t_arr,
+        q_arr=q_arr,
+        qdot_arr=qdot_arr,
+        qddot_arr=qddot_arr,
+        controls=np.zeros((n_frames, 1), dtype=np.float64),
         actuated_mask=(True,),
-        units={
-            "position": "m",
-            "angle": "rad",
-            "torque": "N*m",
-            "force": "N",
-            "time": "s",
-        },
-        forces_type=ForceMeasurementType.MEASURED,
-        contact_forces=contact_forces,
+        contact_forces=np.zeros((n_frames, 3), dtype=np.float64),
         friction_coefficient=0.6,
         parameters={
             "mass_kg": m,
@@ -215,30 +240,15 @@ def make_underactuated_analytic_fixture(
     controls[:, 0] = 0.5 * np.cos(omega1 * t_arr)  # Actuated joint 1
     controls[:, 1] = 0.0  # Passive joint 2
 
-    contact_forces = np.zeros((n_frames, 3), dtype=np.float64)
-
-    trajectory = BenchmarkTrajectory(
-        t=t_arr,
-        q=q_arr,
-        qdot=qdot_arr,
-        qddot=qddot_arr,
-    )
-
-    return BenchmarkFixture(
+    return _assemble_fixture(
         name="underactuated-analytic-fixture",
-        trajectory=trajectory,
+        t_arr=t_arr,
+        q_arr=q_arr,
+        qdot_arr=qdot_arr,
+        qddot_arr=qddot_arr,
         controls=controls,
-        num_dofs=2,
         actuated_mask=(True, False),  # Joint 2 is passive!
-        units={
-            "position": "m",
-            "angle": "rad",
-            "torque": "N*m",
-            "force": "N",
-            "time": "s",
-        },
-        forces_type=ForceMeasurementType.MEASURED,
-        contact_forces=contact_forces,
+        contact_forces=np.zeros((n_frames, 3), dtype=np.float64),
         friction_coefficient=0.6,
         parameters={"seed": seed},
     )
@@ -250,8 +260,6 @@ def make_native_stance_fixture(
     seed: int = 42,
 ) -> BenchmarkFixture:
     """Build a native stance fixture with ground contact forces and friction cone."""
-    from src.shared.python.estimation.benchmark_manifest import ForceMeasurementType
-
     require(n_frames >= 2, "n_frames must be >= 2")
     require(dt > 0.0, "dt must be positive")
 
@@ -270,29 +278,14 @@ def make_native_stance_fixture(
     contact_forces[:, 0] = 0.2 * body_weight_n * np.sin(2.0 * np.pi * t_arr)
     contact_forces[:, 1] = 0.1 * body_weight_n * np.cos(2.0 * np.pi * t_arr)
 
-    controls = np.zeros((n_frames, 3), dtype=np.float64)
-
-    trajectory = BenchmarkTrajectory(
-        t=t_arr,
-        q=q_arr,
-        qdot=qdot_arr,
-        qddot=qddot_arr,
-    )
-
-    return BenchmarkFixture(
+    return _assemble_fixture(
         name="native-stance-fixture",
-        trajectory=trajectory,
-        controls=controls,
-        num_dofs=3,
+        t_arr=t_arr,
+        q_arr=q_arr,
+        qdot_arr=qdot_arr,
+        qddot_arr=qddot_arr,
+        controls=np.zeros((n_frames, 3), dtype=np.float64),
         actuated_mask=(True, True, True),
-        units={
-            "position": "m",
-            "angle": "rad",
-            "torque": "N*m",
-            "force": "N",
-            "time": "s",
-        },
-        forces_type=ForceMeasurementType.MEASURED,
         contact_forces=contact_forces,
         friction_coefficient=mu,
         parameters={"body_weight_n": body_weight_n, "seed": seed},
