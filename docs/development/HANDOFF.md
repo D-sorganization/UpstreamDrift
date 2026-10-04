@@ -1,3 +1,34 @@
+# Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix — #11421 / #11433
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11433-qualification-matrix`; PR: #11496 (`Closes #11433`, `Refs #11421`)
+- Governing issue: #11433 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-12] Per-Engine and Capture Qualification Matrix: evaluate capability alignment and evidence contracts per physics engine (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark capture; enforce fail-closed qualification rules (contact-free cannot qualify contact scenarios, synthetic test data cannot qualify product matching, joint/coordinate frame mismatches rejected fail-closed, missing native SDKs invalidate capabilities, tolerance threshold breaches trigger unqualified/degraded status); aggregate fleet qualification matrix and export structured JSON bundles and Markdown summary tables.
+- Completed:
+  - `src/shared/python/estimation/dime_engine_qualification.py`:
+    - `EngineCapabilitySpec`: declares engine name, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
+    - `CaptureProvenance`: records capture name, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
+    - `EngineQualificationEntry`: holds structured qualification entry with status (`qualified`, `degraded`, `unqualified`, `unavailable`), evidenced tolerances, and diagnostic failure reasons.
+    - `EngineQualificationMatrix`: cross-engine by capture matrix container providing query methods and markdown serialization.
+    - `evaluate_engine_qualification`: evaluates qualification rules fail-closed.
+    - `build_fleet_qualification_matrix`: aggregates qualification across standard physics engines and benchmark captures.
+    - `export_qualification_bundle`: exports immutable JSON bundles and markdown summaries.
+  - `src/shared/python/estimation/__init__.py`: re-exported all public DIME-12 symbols.
+  - `tests/unit/estimation/test_dime_engine_qualification.py`: 8 comprehensive behavioral unit tests:
+    - RED API skeleton rejection: unimplemented/unsupported engines reject qualification fail-closed.
+    - RED contact-free vs GRF rejection: contact-free engines cannot qualify contact-dependent captures.
+    - RED joint convention mismatch failure: mismatched coordinate conventions fail closed.
+    - RED missing native dependencies: missing platform SDKs invalidate advertised capabilities with diagnostic reasons.
+    - RED tolerance threshold breach: exceeding maximum permitted tracking error triggers unqualified status.
+    - GREEN evidenced engine qualification: valid capability and evidence yields qualified status.
+    - GREEN fleet matrix aggregation: complete multi-engine by multi-capture evaluation succeeds.
+    - GREEN report bundle export: JSON bundle and markdown tables export losslessly.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_engine_qualification.py`: 8 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 261 passed, 1 skipped.
+  - `ruff check`, `ruff format --check`: passed cleanly.
+  - `check_file_size_budget.py`, `check_error_handling_ratchet.py`: passed.
+  - `divergence_inventory.py --check`: passed.
+
 # Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction — #11421 / #11437
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11437-torque-drift`; PR: #11490 (`Closes #11437`, `Refs #11421`)

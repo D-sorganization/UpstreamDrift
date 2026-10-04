@@ -1,3 +1,19 @@
+## Dynamics-Informed Mocap Matching: Per-Engine and Capture Qualification Matrix (DIME-12, #11433)
+
+Specifies the cross-engine and capture qualification matrix, per-engine capability inspection, and provenance tracking across physics engines and capture datasets (#11421, #11433):
+- **Engine Capability & Provenance Contracts (`EngineCapabilitySpec`, `CaptureProvenance`)**:
+  - `EngineCapabilitySpec`: Specifies engine identity, native SDK presence, coordinate conventions, supported contact representations, actuation support (generalized torque vs muscle activation), and independent forward replay integration.
+  - `CaptureProvenance`: Captures dataset origin, observation mode (marked, markerless, hybrid), ground truth modality, calibration protocol, privacy clearance, and native sample clocks.
+- **Fail-Closed Qualification Invariants (`evaluate_engine_qualification`, `EngineQualificationEntry`)**:
+  - Contact-free engines cannot qualify contact-dependent capture scenarios.
+  - Synthetic test data cannot qualify product-grade matching runs.
+  - Joint convention and coordinate frame mismatches reject qualification fail-closed.
+  - Missing native platform dependencies invalidate advertised capabilities with diagnostic reasons.
+  - Breaching tolerance thresholds transitions status to `unqualified` or `degraded`.
+- **Fleet Matrix Aggregation & Report Bundle (`build_fleet_qualification_matrix`, `export_qualification_bundle`)**:
+  - Aggregates qualification verdicts across all combinations of physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark captures.
+  - Exports immutable JSON qualification bundle and human-readable Markdown summary table.
+
 ## Dynamics-Informed Mocap Matching: Torque-Independent Drift Feasibility and Missing-Data Prediction (DIME-16, #11437)
 
 Specifies rank-revealing input-effect subspace decomposition, scale-invariant covariance whitening, orthogonal-complement torque-independent drift feasibility tests, bounded control feasibility, changing contact rank tracking, and missing-data prediction with calibrated uncertainty bounds (#11421, #11437):
@@ -8118,6 +8134,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11496 | [DIME-12] Per-engine and capture qualification matrix: EngineCapabilitySpec, CaptureProvenance, EngineQualificationEntry, EngineQualificationMatrix, evaluate_engine_qualification, build_fleet_qualification_matrix, and export_qualification_bundle (#11433, refs #11421). |
 | 2026-10-04 | #11490 | [DIME-16] Torque-independent drift feasibility and missing-data prediction: SubspaceDecomposition, SubspaceContactInteraction, MaskedIntervalControlPrior, MaskedPredictionResult, DimeInputSubspaceFactor, decompose_input_subspace, evaluate_input_subspace_feasibility, and predict_masked_interval (#11437, refs #11421). |
 | 2026-10-04 | #11488 | [DIME-10] Ablation study and accuracy-runtime acceptance: DimeAblationVariant, PerturbationKind, ObservationMode, AblationTrialSpec, AblationTrialResult, AblationSummaryTable, AblationBenchmarkSuite, compute_ablation_dominance_metric, run_ablation_trial, and run_dime_ablation_suite (#11431, refs #11421). |
 | 2026-10-04 | #11484 | [DIME-09] Offline smoothing and independent continuous replay: ContinuousReplayOptions, ReplayReceipt, IndependentReplayMetrics, ContinuousReplayResult, execute_continuous_replay, smooth_backward_trajectory with forbidden reverse-time contact, and Shadow Tracker / Simscape adapters (#11430, refs #11421). |
