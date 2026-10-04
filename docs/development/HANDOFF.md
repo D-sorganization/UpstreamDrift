@@ -1,3 +1,44 @@
+# Dynamics-Informed Mocap Matching: Shared Reports, GUI Strategy Selection and LaTeX Methods — #11421 / #11432
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-11432-reports-gui`; PR: #11432 (`Closes #11432`, `Refs #11421`)
+- Governing issue: #11432 (parent epic #11421 '[EPIC] Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay')
+- Objective: [DIME-11] Shared Reports, GUI Strategy Selection and LaTeX Methods: provide unified strategy selection across qualified engines with explicit graceful unavailability states; establish Full and Custom report output contracts packaging kinematics, selected net controls, GRF provenance (typed unavailable, never fabricated zero), drift vs controlled prediction, uncertainty, contact/replay residuals, video overlays (refined ellipsoid geometry with fail-closed timestamp synchronization), and unavailable-capability explanations; record pointwise vs integrated ZTCF distinctly; enforce strict fail-closed invariants; provide verifiable LaTeX methods documentation; support headless offscreen GUI ViewModel.
+- Completed:
+  - `src/shared/python/estimation/dime_report_integration.py`:
+    - `EstimatorStrategy`, `RunClassification`, `ReportScope`, `ReportForceProvenance`: domain enums categorizing estimation workflows, execution modes, scopes, and force origins.
+    - `KinematicsPayload`: immutable kinematics series with joint names, dimension checks, and monotonicity verification.
+    - `ZtcfRecord`: distinct registration of pointwise acceleration drift ($a_{\mathrm{ztcf}}(t)$) and integrated trajectory drift displacement ($x_{\mathrm{ztcf}}(t)$) with explicit SI units.
+    - `GroundReactionForceReport`: typed force provenance rejecting silent numeric zero-substitution fail-closed.
+    - `VideoOverlaySpec`: video overlay alignment contract specifying refined ellipsoid geometry (`GS3DX_Human_Refined_Ellipsoid`), camera, and fail-closed timestamp checks.
+    - `DriftAndPredictionPayload`, `UncertaintySummary`, `ReplayResidualsSummary`, `DimeReportOptions`: comprehensive physical summary payloads.
+    - `DimeReportArtifact`: durable report package with dictionary and JSON round-trip serialization preserving model/data provenance and method identity; `to_latex_summary()` generating verifiable LaTeX documentation.
+    - `DimeStrategySelectionService`: coordinates strategy selection and qualification enforcement; experimental strategies (neural estimator) gracefully return `status="unavailable"` with explanatory reason.
+    - `DimeStrategySelectionViewModel`: headless offscreen ViewModel managing strategy, scope, channel, and plot options without GUI launch.
+  - `src/shared/python/estimation/__init__.py`: re-exported all 18 DIME-11 domain types and functions.
+  - `docs/research/simscape_matching_reference/simscape_matching_reference.tex`: added section `\section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}` documenting governing equations, ZTCF definitions, SI units, and limitations.
+  - `tests/unit/estimation/test_dime_report_integration.py`: 10 comprehensive behavioral tests (RED & GREEN) covering:
+    - RED IK run mislabeled as forward dynamics fails closed (`PreconditionError`).
+    - RED missing native GRF rendered as zero fails closed (`PreconditionError` / typed missingness).
+    - RED unqualified engine offered as validated fails closed (`PreconditionError`).
+    - RED mismatched timestamp/frame overlays fails closed (`TimingViolationError`).
+    - GREEN strategy selection service exposes explicit graceful unavailability states.
+    - GREEN full and custom report output contracts contain all mandatory physical sections.
+    - GREEN pointwise vs integrated ZTCF distinctly recorded with distinct units and values.
+    - GREEN report round-trip dict/JSON preserves provenance and method identity.
+    - GREEN offscreen GUI ViewModel manages selections without window launch.
+    - GREEN LaTeX methods summary outputs valid LaTeX equations, assumptions, units, and limitations.
+- Validation:
+  - `pytest tests/unit/estimation/test_dime_report_integration.py`: 10 passed (100% GREEN).
+  - `pytest tests/unit/estimation`: 217 passed, 1 skipped (jax).
+  - `python scripts/check_spec_paths.py`: passed.
+  - `python scripts/ci/check_architecture_budget.py`: passed (all functions <= 100 lines and parameters <= 8).
+  - `python scripts/ci/check_file_size_budget.py`: passed.
+  - `python scripts/ci/check_error_handling_ratchet.py`: passed.
+  - `python scripts/ci/check_spec_changelog_duplicates.py`: passed.
+  - `python scripts/ci/check_lod.py src/shared/python/estimation --baseline scripts/ci/lod_baseline.txt`: passed (0 new violations, clean scan).
+  - `ruff check`, `ruff format --check`: passed cleanly.
+- Next steps: Open and merge PR #11432; advance to dependent comparative study and final physics qualification.
+
 # Dynamics-Informed Mocap Matching: Offline Smoothing and Independent Continuous Replay — #11421 / #11430
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `feat/dime-09-offline-smoothing-11430`; PR: #11430 (`Closes #11430`, `Refs #11421`)
