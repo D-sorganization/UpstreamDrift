@@ -91,8 +91,8 @@ export const cancelRefit = (run: string) => apiFetch<RefitRun>(`${root}/refits/$
 export interface HistoricalPlayer { subject_id: string; display_name: string; metadata: Record<string, unknown> }
 export interface HistoricalSwing { session_id: string; subject_id: string; name: string; metadata: Record<string, unknown> }
 export interface HistoricalAsset {
-  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit';
-  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; capture_id?: string; hash?: string };
+  dataset_id: string; session_id: string; kind: 'image_capture' | 'native_model' | 'torque_profile' | 'kinematic_fit' | 'authored_replay';
+  metadata: { qualification: string; frame_count?: number; engine?: string; dofs?: string[]; model_id?: string; capture_id?: string; fit_id?: string; profile_id?: string; hash?: string };
 }
 export interface CaptureFrame {
   capture_id: string; frame_index: number; frame_count: number; image_width: number; image_height: number;
@@ -117,6 +117,12 @@ export const captureFrameImageUrl = (capture: string, frame: number) => `${getAp
 export const swingExportUrl = (swing: string) => `${getApiBase()}${root}/swings/${encodeURIComponent(swing)}/export`;
 export const createPlayer = (id: string, name: string) => apiFetch<HistoricalPlayer>(`${root}/players`, { method: 'POST', body: JSON.stringify({ id, name } satisfies IdentityRequest) });
 export const createSwing = (id: string, player_id: string, name: string) => apiFetch<HistoricalSwing>(`${root}/swings`, { method: 'POST', body: JSON.stringify({ id, player_id, name } satisfies SwingRequest) });
-export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles' | 'fits', payload: AssetRequest & Partial<Pick<ModelRequest, 'engine' | 'dofs'>>) {
+export function importAsset(swing: string, kind: 'captures' | 'models' | 'profiles' | 'fits' | 'replays', payload: AssetRequest & Partial<Pick<ModelRequest, 'engine' | 'dofs'>>) {
   return apiFetch<HistoricalAsset>(`${root}/swings/${encodeURIComponent(swing)}/${kind}`, { method: 'POST', body: JSON.stringify(payload), timeoutMs: 300_000 });
 }
+export interface ReplaySummary {
+  replay_id: string; sample_count: number; dt_s: number; backend: string;
+  metadata: Record<string, unknown>;
+}
+export const fetchReplaySummary = (replay: string) => apiFetch<ReplaySummary>(`${root}/replays/${encodeURIComponent(replay)}`);
+export const replayDataUrl = (replay: string) => `${getApiBase()}${root}/replays/${encodeURIComponent(replay)}/data`;

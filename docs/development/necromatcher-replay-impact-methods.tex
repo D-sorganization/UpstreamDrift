@@ -1,0 +1,230 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs,xcolor,fancyhdr}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\definecolor{ink}{HTML}{17344A}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\textcolor{ink}{UpstreamDrift / Necromatcher}}
+\fancyhead[R]{\small Authored Replay Methods}
+\fancyfoot[L]{\small Research Implementation; Historical Qualification Pending}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{7pt}
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\title{\textcolor{ink}{Necromatcher Authored Replay\\and Impact Handoff Methods}}
+\author{UpstreamDrift Technical Reference\\Epic \#11232; Integration Issue \#11464}
+\date{4 October 2026 / Edition 1}
+\begin{document}
+\maketitle
+\begin{center}\rule{0.9\linewidth}{0.6pt}\end{center}
+\section*{Purpose and Evidence Boundary}
+Necromatcher stores historical image observations, native model hypotheses,
+kinematic fits, torque profiles and independently executed authored replays.
+This reference describes the implemented public path from a stored replay to
+the existing impact and flight pipeline. It supplements the separate camera
+and source-scope report. It does not replace that report's retained evidence,
+the engineering design manual, or a scientific qualification review.
+
+The source checkpoint for extraction and full-vector consumer behavior in
+\href{https://github.com/D-sorganization/UpstreamDrift/pull/11359}{PR \#11359} is:
+\begin{center}\small
+\code{b059f04e91e5fefd056d8c8514fc2b502815cd89}
+\end{center}
+At that checkpoint the complete extraction metadata remains in the returned
+pipeline result; the trajectory wire alone does not persist the replay receipt.
+Portable receipt storage and a normal application action remain open acceptance
+criteria. This edition documents implemented mathematics, not proposed behavior.
+
+\section*{Scientific Status}
+Both \code{scientific_qualified} and
+\code{physical_source_time_qualified} are false. Recorded generalized rates use
+authored simulation seconds. Container presentation timestamps identify original
+images; they do not establish physical swing duration. No finite differences of
+historical video timestamps are used to produce clubhead velocity.
+
+Tiger's reviewed matching domain is the half-open interval $[0,191)$: original
+frames 0 through 190. Later released-hand follow-through is excluded. This is a
+conservative reviewed interval, not a measured release instant or proof of hand
+contact in every retained frame. Hogan's retained domain remains $[0,750)$.
+Current historical fits remain research previews; none of the mathematics below
+certifies camera calibration, anthropometry, shaft flex, rolling shutter,
+clinical range of motion, or historical impact speed.
+
+\newpage
+\section*{Inputs and Ownership}
+The public workspace facade provides \code{ReplayImpactGeometry},
+\code{ReplayImpactSelection} and \code{extract_replay_impact_state}.
+Extraction reads through the canonical Library's authenticated-read context.
+It compiles no engine merely by importing the module; native evaluation requires
+the established SDK-first execution context.
+
+\begin{center}\small
+\begin{tabular}{p{0.28\linewidth}p{0.64\linewidth}}\toprule
+Declaration & Required Meaning\\\midrule
+Replay Identity & Immutable registered authored replay and exact parent hashes.\\
+Body and Head Point & Explicit native body and body-local point in metres.\\
+Face Axes & Unit, perpendicular body-local normal and up vectors.\\
+Effective Mass and MOI & Positive authored impact mass in kg and scalar inertia in kg\,m$^2$.\\
+Recorded Sample & Nonnegative integer selecting an existing replay sample.\\
+Flight Transform & Proper orthonormal rotation and translation in metres.\\
+Assumption Descriptions & Nonempty operator declarations for geometry and selection.\\\bottomrule
+\end{tabular}
+\end{center}
+
+The selected sample is an authored analysis choice, not automatic contact
+detection. The head point is not inferred to be a named frame, the solid centre
+of mass, or a measured physical clubhead. Effective impact inertia is not inferred
+from silhouette fitting. The typed inputs detach their tuples and reject Boolean,
+textual and nonfinite numeric coercions.
+
+\section*{Authenticated Parent Chain}
+The replay must have the authored-replay schema and explicitly record independent
+execution. Its profile, fit, model and capture must have the expected asset kind,
+the same session and the exact stored digest. Compiled native coordinate order,
+scalar units, engine identity and fit/model/capture bindings must agree with the
+recorded trace. A required derivative capability is checked before coordinate
+evaluation. Missing capability fails explicitly.
+
+Extraction rechecks the parent chain before returning; the enclosing authenticated
+read also guards source changes. This protects the provenance of an extraction.
+It does not independently validate the physical realism of those parents.
+
+\newpage
+\section*{Point Velocity From Native Derivatives}
+Let $q$ denote the recorded generalized coordinates and $v$ their recorded rates.
+For a native body-local point $a_0$, the public marker linearizer provides world
+position $p_0(q)$ and coordinate Jacobian $J_0(q)$. The point velocity is
+\[
+  \dot p_0=J_0(q)v.
+\]
+Mixed translational and rotational coordinates retain compiled metre/radian
+order and corresponding rate units. The implementation does not assume that
+all coordinates are angular or replace the native Jacobian with an independent
+forward-kinematics implementation.
+
+\section*{Rigid Face Triad and Angular Velocity}
+Write the declared body-local normal and up vectors as $n$ and $u$; require
+$n^Tn=u^Tu=1$ and $n^Tu=0$. Define $b_1=n$, $b_2=u$ and $b_3=n\times u$.
+Three mathematical probes are attached at
+\[
+  a_i=a_0+L b_i,\qquad L=1\,\mathrm{m},\qquad i=1,2,3.
+\]
+The probe length establishes units for the derivative construction. It is not
+a physical one-metre clubhead. Native marker positions and their Jacobians give
+\[
+ e_i=\frac{p_i-p_0}{L},\qquad
+ \dot e_i=\frac{(J_i-J_0)v}{L}.
+\]
+For a proper rigid triad, $\dot e_i=\omega\times e_i$. Since the triad is
+orthonormal, summing $e_i\times(\omega\times e_i)$ gives $2\omega$, hence
+\[
+  \boxed{\displaystyle\omega=\frac12\sum_{i=1}^3 e_i\times\dot e_i.}
+\]
+This obtains all three angular-velocity components from native coordinate
+derivatives. Zero angular velocity is not substituted when derivatives are absent.
+
+\section*{Rigid Consistency Checks}
+The native public body pose must have a proper rotation. Marker identities,
+coordinate order and world positions must agree with that pose and the authored
+attachments. Define $E$ with rows $e_i^T$ and $\dot E$ with rows $\dot e_i^T$.
+The numerical checks require
+\[
+ EE^T=I,\qquad \dot E E^T+E\dot E^T=0.
+\]
+The first condition checks orthonormality; the second checks its instantaneous
+preservation. These are numerical rigidity checks, not clinical constraints.
+
+\newpage
+\section*{Flight Frame and Consumer Preservation}
+The trajectory frame is explicitly \code{flight_xfwd_yleft_zup}: forward,
+left and up. With authored world-to-flight rotation $R_f$ and translation $t_f$,
+\[
+ p_f=R_fp_0+t_f,\quad v_f=R_f\dot p_0,\quad
+ \omega_f=R_f\omega,\quad n_f=R_fe_1.
+\]
+Translation affects position only. The stored loft descriptor is
+$\operatorname{atan2}(n_{f,z},\sqrt{n_{f,x}^2+n_{f,y}^2})$ in degrees;
+the impact solver receives the full face normal.
+
+The existing trajectory handoff preserves a state that declares the supported
+flight frame, including off-axis velocity, angular velocity, face normal and
+metadata. An incompatible declared frame is rejected before output. The separate
+legacy conversion for undeclared providers retains its existing behavior and
+must not be used to collapse an extracted replay into speed and nominal loft.
+
+\section*{Retained Metadata and Interchange}
+Extraction records the exact replay, profile, fit, model and capture identities
+and hashes; recorded sample index and authored time; initial source-frame
+identity; geometry and selection declarations; flight head-point position;
+basis probe length; and the explicit clock and qualification flags.
+Finite JSON serialization is checked before returning the state.
+
+The flight interchange remains \code{swing_sim.ball_flight_trajectory/1} with
+exactly six top-level keys. Its aerodynamic provenance has exactly the model
+family, model name and parameter digest. Retained integrator samples must survive
+viewer interchange without resampling or re-simulation. Additional historical
+provenance requires a separate, versioned companion artifact; adding keys to
+the existing flight wire would violate its interchange contract.
+
+\section*{Repeatable Operator Procedure}
+\begin{enumerate}
+\item Recall the exact authored replay and inspect its parent and clock metadata.
+\item Establish the selected engine's SDK-first native execution context.
+\item Declare the head geometry, effective inertia, sample and proper flight transform.
+\item Extract through the public workspace function. Resolve any admission failure.
+\item Pass the extracted state to the existing trajectory coordinator and retain
+the returned pipeline result together with the trajectory.
+\item Inspect retained samples through the existing viewers. Record the assumptions
+and qualification limits whenever sharing the result.
+\end{enumerate}
+
+\newpage
+\section*{Verification Evidence}
+The checkpoint includes an independent synthetic screw-motion fixture that
+checks native $Jv$, all angular components, flight rotation and full-vector
+consumer preservation. Synthetic kinematics exercise the mathematics; they
+are not historical swing measurements. Negative cases cover stale parents,
+changed bindings, coordinate order and units, malformed metadata, absent
+derivatives, nonrigid probes and mid-read parent changes.
+
+Meaningful failing tests reproduced the old consumer's loss of off-axis
+velocity and its acceptance of incompatible declared frames. After repair,
+the isolated extraction/consumer/viewer group passed 38 cases. It exercised the
+actual impact solver; its flight integration fixture substitutes the optional
+Rust integration when the wheel is unavailable. It does not substitute the
+impact solver. Cold public imports passed with engine and GUI SDK imports blocked.
+
+The broader checkpoint passed 83 Python cases, 45 React cases and 39 feature
+parity checks. These establish covered software behavior only. No new historical
+native replay or Library mutation occurred during that checkpoint. Local checks
+do not establish remote CI success or scientific release approval.
+
+\section*{Remaining Acceptance Work}
+A complete application journey still needs a normal replay-to-impact action,
+portable receipt persistence and verified recall through the analysis interfaces.
+Historical validation additionally requires justified geometry, time calibration,
+camera/anatomy uncertainty, human range-of-motion assessment, contact selection
+and improved reprojection quality. Mathematical extraction, polished reporting
+and passing synthetic tests do not remove those requirements.
+
+Rolling shutter remains a separate conditional sensitivity hypothesis. A bent
+shaft image may also reflect shaft flex, exposure blur, interlacing, film scanning
+or broadcast processing. This replay-to-impact path neither estimates a readout
+time nor converts shaft curvature into measured angular velocity. Preserve the
+original pixels and authored hypothesis whenever comparing alternatives.
+
+\section*{Source References}
+\begin{itemize}
+\item \href{https://github.com/D-sorganization/UpstreamDrift/issues/11232}{Necromatcher Epic \#11232} and
+\href{https://github.com/D-sorganization/UpstreamDrift/issues/11464}{Replay Impact Integration \#11464}.
+\item Workspace extraction: \code{necromatcher_impact.py}.
+\item Typed declarations: \code{necromatcher_impact_contracts.py}.
+\item Existing consumer: \code{trajectory_handoff.py}.
+\item Solver pipeline: \code{swing_ball_flight_pipeline.py}.
+\item Wire owner: \code{flight_trajectory_export.py}.
+\item Extraction evidence: \code{test_necromatcher_impact.py}.
+\item Declaration evidence: \code{test_necromatcher_impact_contracts.py}.
+\item Consumer evidence: \code{test_shot_trajectory_handoff.py}.
+\end{itemize}
+\end{document}

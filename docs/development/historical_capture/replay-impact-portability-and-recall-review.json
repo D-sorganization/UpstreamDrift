@@ -1,0 +1,128 @@
+{
+  "schema": "necromatcher/impact-portability-review/1",
+  "base_checkpoint": "b059f04e91e5fefd056d8c8514fc2b502815cd89",
+  "issues": [11232, 11464],
+  "agent_freezes": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\impact-receipt-freeze-v1\\freeze.json",
+      "bytes": 5287,
+      "sha256": "1aafd5761d348115a05576b1e45fc0ef604022b7d5c02b9fe4b07d70b9811b3e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-ui-freeze-v1.json",
+      "bytes": 3680,
+      "sha256": "17fedd74eb67099ee731352c070c87b40843b78021c4c54bf93538f4f7e9df7a"
+    }
+  ],
+  "source_and_test_pins": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\necromatcher_impact_receipt.py",
+      "bytes": 10379,
+      "sha256": "e606f9d7f914cb1683b394f8f8048971ff39faab280b7bf9952ecbd245792450"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_impact_receipt.py",
+      "bytes": 12249,
+      "sha256": "62ae9a87312c54bdb21866cfc85c894eccbebe1d17a07c9c8053537697094782"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\api\\necromatcher.ts",
+      "bytes": 8941,
+      "sha256": "1bdfac8ce7c89eb517f4e8241301abcd72132c57be53b0ad52992ccb4da53511"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\api\\necromatcherReplay.test.ts",
+      "bytes": 1077,
+      "sha256": "9aeea3ecb4c35bb09451e37871efa1c25955c43a3987acc8738765963a793fd5"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayControls.tsx",
+      "bytes": 4549,
+      "sha256": "6537f4783c62068521bf17efc80ec924b8e73b76a304cf1ed51868f5f5226494"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayControls.test.tsx",
+      "bytes": 3906,
+      "sha256": "3780dab51713338156dba11ebde19a615b368c67e56b0567672e7f2ac867d8b4"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\LibraryActions.tsx",
+      "bytes": 4325,
+      "sha256": "8aae851ed48d58ea19ffa098035db568e102fb0e33b8620f1f6067bb811fd0d5"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\LibraryActions.test.tsx",
+      "bytes": 6108,
+      "sha256": "32462e86accfeb7b854a0544e0fd02f831d8e1681dc2463e83c87e3836719e93"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\Necromatcher.tsx",
+      "bytes": 12569,
+      "sha256": "f6e4e2242048ec58d2b61de393872ef20609ad77f8faf05049c7f3b874e00bf8"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\Necromatcher.test.tsx",
+      "bytes": 11994,
+      "sha256": "0bbaebb43a935b5b083236d6a99712a8307df2779874c1edc26a8638233d9f34"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\__init__.py",
+      "bytes": 11955,
+      "sha256": "da9b75303ad96b75696a8917e5581e5c8c24d67eacd18fd094666eb695fb6f6e"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\integration\\test_shot_trajectory_handoff.py",
+      "bytes": 20184,
+      "sha256": "7d7812bb2dd7611dfcffedd72e480b43203d1d2a6bcfaa03cd2e951b9e03cbcc"
+    }
+  ],
+  "root_python": {
+    "passed": 69,
+    "log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-impact-receipt-root-cohort-v1.log",
+      "bytes": 2775,
+      "sha256": "05442fc49a6751b76e11bf3d2af1efd16964ba2bff97a959af05ce169629453c"
+    }
+  },
+  "root_configured_mypy": {
+    "passed": true,
+    "sources": 2,
+    "log": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-impact-receipt-root-mypy-v1.log",
+      "bytes": 44,
+      "sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2"
+    }
+  },
+  "react": {
+    "passed": 87,
+    "type_check": "passed",
+    "scoped_lint": "passed",
+    "freeze": {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-replay-ui-freeze-v1.json",
+      "bytes": 3680,
+      "sha256": "17fedd74eb67099ee731352c070c87b40843b78021c4c54bf93538f4f7e9df7a"
+    }
+  },
+  "root_integration_red": {
+    "session": 93506,
+    "terminal_exit_code": 1,
+    "chunk": "53a866",
+    "failure": "Public facade lacks export_replay_impact_receipt"
+  },
+  "root_integrated_roundtrip": "Synthetic native extraction -> actual impact solver -> canonical trajectory -> existing viewers -> companion receipt -> detached recall -> exact-byte tamper refusal",
+  "flight_fixture": "Optional Rust flight integration substituted when unavailable; actual impact solver retained",
+  "trajectory_wire_modified": false,
+  "receipt_reauthenticates_library": false,
+  "app_replay_import_recall_download": true,
+  "app_impact_execution": false,
+  "historical_native_execution": false,
+  "historical_library_mutation": false,
+  "scientific_qualified": false,
+  "physical_source_time_qualified": false,
+  "controltower_delivery": false,
+  "methods_report_review": {
+    "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\historical_capture\\replay-impact-methods-review-edition1.json",
+    "bytes": 3772,
+    "sha256": "286d4c17bc21cff8cc1fe67906f5d3332a2c5ee3ed29915d270fe78a1251ba1a"
+  }
+}

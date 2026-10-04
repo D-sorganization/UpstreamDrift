@@ -181,6 +181,29 @@ def test_authored_replay_extraction_reaches_impact_and_trajectory_viewers(
     qt = coordinator.load_into_shot_tracer(path)
     assert len(web.samples) == len(qt.positions) == len(record["samples"])
     assert coordinator.load_into_impact_explorer(path)["samples"] == record["samples"]
+    receipt_path = tmp_path / "replay-impact-receipt.json"
+    owner.export_replay_impact_receipt(result.swing_state, path, receipt_path)
+    recalled = owner.load_replay_impact_receipt(receipt_path, path)
+    for key in (
+        "clubhead_velocity",
+        "clubhead_angular_velocity",
+        "clubhead_orientation",
+    ):
+        np.testing.assert_array_equal(getattr(recalled, key), getattr(swing, key))
+    assert recalled.metadata == swing.metadata
+    assert recalled.metadata["replay_clock_policy"] == "authored_simulation_seconds"
+    assert recalled.metadata["scientific_qualified"] is False
+    assert set(record) == {
+        "format",
+        "source_id",
+        "frame_id",
+        "channels",
+        "provenance",
+        "samples",
+    }
+    path.write_bytes(path.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="[Hh]ash|[Dd]igest|[Tt]rajectory"):
+        owner.load_replay_impact_receipt(receipt_path, path)
 
 
 @pytest.fixture(autouse=True)

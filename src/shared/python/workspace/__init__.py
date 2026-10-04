@@ -82,6 +82,10 @@ from .necromatcher_impact import (
     ReplayImpactSelection,
     extract_replay_impact_state,
 )
+from .necromatcher_impact_receipt import (
+    export_replay_impact_receipt,
+    load_replay_impact_receipt,
+)
 from .necromatcher_review import CaptureReview
 from .necromatcher_shaft_evidence import (
     BoundShaftEvidence,
@@ -254,6 +258,8 @@ __all__ = [
     "ReplayImpactGeometry",
     "ReplayImpactSelection",
     "extract_replay_impact_state",
+    "export_replay_impact_receipt",
+    "load_replay_impact_receipt",
     "load_native_fit_binding",
     "load_native_model_binding",
     "AuthoredEffortProfile",

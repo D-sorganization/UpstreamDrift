@@ -88,7 +88,7 @@ export function NecromatcherPage() {
     {selectedFit && <VideoExportControls fit={selectedFit} initialRunId={query.get('export_run') ?? undefined} onRun={(run) => setQuery((old) => {const next = new URLSearchParams(old); next.set('export_run', run); return next;})} />}
     {selectedFit && <RefitControls fit={selectedFit} initialRunId={query.get('run') ?? undefined} onRun={(run) => setQuery((old) => {const next = new URLSearchParams(old); next.set('run', run); return next;})} onStored={() => setRevision((value) => value + 1)} />}
     {selectedAssets.filter((x) => x.kind !== 'image_capture').map((item) => <div key={item.dataset_id} className={card}>
-      <h3 className="font-medium">{item.dataset_id}</h3><p className="text-sm text-gray-400">{item.kind === 'native_model' ? 'Candidate Model' : item.kind === 'kinematic_fit' ? 'Kinematic Research Fit' : 'Authored Controls'}</p>
+      <h3 className="font-medium">{item.dataset_id}</h3><p className="text-sm text-gray-400">{item.kind === 'native_model' ? 'Candidate Model' : item.kind === 'kinematic_fit' ? 'Kinematic Research Fit' : item.kind === 'authored_replay' ? 'Authored Replay' : 'Authored Controls'}</p>
       <p className="text-sm text-gray-400">{item.metadata.qualification}</p>
       {item.metadata.engine && <p>{item.metadata.engine}</p>}{item.metadata.model_id && <p>Model: {item.metadata.model_id}</p>}
       {item.kind === 'kinematic_fit' && item.metadata.capture_id && <button className="text-blue-300 hover:underline" onClick={() => setQuery({player, swing, capture: item.metadata.capture_id!, fit: item.dataset_id})}>Review Fit {item.dataset_id}</button>}

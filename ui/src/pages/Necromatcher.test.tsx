@@ -33,6 +33,14 @@ beforeEach(() => {
   mocks.summary.mockImplementation(async (fit: string) => ({fit_id: fit,capture_id:'capture-v1',frame_count:3,frame_indices:[0,1,2]}));
 });
 describe('Necromatcher historical workspace', () => {
+  it('renders a registered authored replay explicitly instead of controls or a kinematic fit', async () => {
+    mocks.assets.mockResolvedValue({assets:[{dataset_id:'replay-v1',session_id:'hogan-practice',kind:'authored_replay',metadata:{qualification:'unqualified_authored_replay',model_id:'model'}}]});
+    show('/tools/necromatcher?player=ben-hogan&swing=hogan-practice');
+    expect(await screen.findByText('Authored Replay')).toBeInTheDocument();
+    expect(screen.getByText('unqualified_authored_replay')).toBeInTheDocument();
+    expect(screen.queryByText('Authored Controls')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:'Review Fit replay-v1'})).not.toBeInTheDocument();
+  });
   it('reviews the saved native fit against its bound source frame', async () => {
     mocks.assets.mockResolvedValue({assets:[
       {dataset_id:'capture-v1',session_id:'hogan-practice',kind:'image_capture',metadata:{frame_count:3}},

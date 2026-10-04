@@ -2,7 +2,7 @@
 
 ## Active Objective
 
-The [Authored Replay Impact Procedure](necromatcher-replay-impact.md) now provides a tested public extraction-to-impact path without reference-swing substitution. Root 83 app/impact Python cases pass. Explicit geometry, selected sample, native mixed units and authored seconds remain research assumptions; persistent portable impact receipts and an app action remain open under #11464.
+The [Authored Replay Impact Procedure](necromatcher-replay-impact.md) provides public extraction-to-impact and portable full-state receipt export/recall without reference-swing substitution. The earlier root 83 app/impact Python cohort remains historical evidence; the extended six-case integration now verifies the actual impact solver, unchanged viewer samples, receipt recall and exact-byte tamper rejection. Explicit geometry, selected sample, native mixed units and authored seconds remain research assumptions. Normal app impact execution remains open under #11464. The five-page supplemental methods report is compiled and visually reviewed on the local Desktop; the earlier Methods V8 is preserved.
 
 Current app boundary: [Restricted Seed and Frame Review](necromatcher-app-restriction-and-frame-review.md) records explicit strict seed creation, preserved editable choices and exact saved-frame review. Root 45 Python/45 React cases pass; Tiger fitted projection excludes frames 191–209. Historical V22 outputs and the earlier compiled Methods V8 retain their own producer identities and scientific limits.
 

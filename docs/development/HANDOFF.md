@@ -1,5 +1,7 @@
 # Isolated Native Hypothesis Admission — #11376
 
+- Replay impact continuation (#11464): portable versioned receipt export/recall uses exact trajectory hash/size and detached full state/metadata. Existing trajectory/viewer wire is unchanged; hashes are retained provenance, not fresh Library authentication. Root 69 Python cases and 87 React cases pass, including actual impact/viewer/receipt integration and verified app replay import/recall/download. Configured types, lint and formatting pass. [Procedure](necromatcher-replay-impact.md). The five-page supplemental LaTeX report is compiled, all pages reviewed and saved locally on Desktop; ControlTower delivery and historical qualification are not claimed. Normal app impact execution remains open.
+
 - Branch: `feat/necromatcher-hypothesis-admission-11376`, isolated from the frozen real-player workspace.
 - Public typed request, authenticated source/model/clock binding and explicit saved-final Hermite rebinding produce an unoptimized research seed through the existing clean-worker/initializer/store path.
 - Registered model/XML hashes, compiled scalar units/order, body-local markers and complete PNG/decoded-BGR/PTS identities fail closed. Recall reauthenticates lineage; source/runtime fingerprints include all new helpers.
