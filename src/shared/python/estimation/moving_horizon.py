@@ -461,9 +461,10 @@ class MovingHorizonEstimator:
         if not self.ready():
             return None
         map_problem = self.build_current_problem()
+        opts = self._problem.options
         warm_started = (
             self._last_accepted_coefficients is not None
-            if self._problem.options.enable_safe_commits
+            if opts.enable_safe_commits
             else self._previous_coefficients is not None
         )
         started = perf_counter()
@@ -481,7 +482,7 @@ class MovingHorizonEstimator:
             self._last_failure_diagnostics = failure_diag
             if failure_diag is not None:
                 self._record_failure(failure_diag)
-            if not self._problem.options.enable_safe_commits:
+            if not opts.enable_safe_commits:
                 self._previous_coefficients = map_result.coefficients
                 self._previous_trajectory = map_problem.trajectory
 
@@ -535,9 +536,8 @@ class MovingHorizonEstimator:
 
     def _record_failure(self, diag: FailureDiagnostics) -> None:
         self._failure_history.append(diag)
-        overflow = (
-            len(self._failure_history) - self._problem.options.max_history_diagnostics
-        )
+        opts = self._problem.options
+        overflow = len(self._failure_history) - opts.max_history_diagnostics
         if overflow > 0:
             del self._failure_history[:overflow]
 
@@ -547,14 +547,15 @@ class MovingHorizonEstimator:
         times: np.ndarray,
         q_samples: np.ndarray,
     ) -> np.ndarray:
+        opts = self._problem.options
         source_coeffs = (
             self._last_accepted_coefficients
-            if self._problem.options.enable_safe_commits
+            if opts.enable_safe_commits
             else self._previous_coefficients
         )
         source_traj = (
             self._last_accepted_trajectory
-            if self._problem.options.enable_safe_commits
+            if opts.enable_safe_commits
             else self._previous_trajectory
         )
         if source_traj is None or source_coeffs is None:
