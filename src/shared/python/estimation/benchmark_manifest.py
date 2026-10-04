@@ -191,16 +191,18 @@ class BenchmarkManifest:
         if self.provenance is not None:
             prov_dict = asdict(self.provenance)
 
+        inp = self.input
+        policy = inp.split_policy
         return {
             "schema_version": self.schema_version,
             "manifest_id": self.manifest_id,
             "input": {
-                "dataset_id": self.input.dataset_id,
-                "model_revision": self.input.model_revision,
-                "engine_type": self.input.engine_type,
-                "split_policy": self.input.split_policy.value,
-                "seed": self.input.seed,
-                "parameters": self.input.parameters,
+                "dataset_id": inp.dataset_id,
+                "model_revision": inp.model_revision,
+                "engine_type": inp.engine_type,
+                "split_policy": policy.value,
+                "seed": inp.seed,
+                "parameters": inp.parameters,
             },
             "provenance": prov_dict,
             "units_and_frames": dict(self.units_and_frames),
