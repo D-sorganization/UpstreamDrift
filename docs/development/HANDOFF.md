@@ -1,3 +1,38 @@
+# OpenCap: Marker Augmenter on Our Own Triangulated Keypoints — #11400 / #11405
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `feat/opencap-marker-augmenter-11405`; commit SELF; PR: opened from this branch (`Closes #11405`, `Refs #11400`)
+- Governing issue: #11405 (parent epic #11400, design authority ADR-0053; follows #11401–#11403, #11406, #11407, and #11409)
+- Objective: [OpenCap Child 4] Runs OpenCap's marker augmenter as a sidecar per ADR-0053 on 3-D keypoints triangulated by our self-calibrating pipeline, mapping them to the 43 LaiUhlrich2022 anatomical markers. Feeds the result to OpenSimScaleBackend and OpenSimIKBackend.
+- Completed:
+  - `src/motion_capture/opencap_ingest/augmenter.py`:
+    - `OpenCapAugmenterConfig`: validates `height_m > 0` and `mass_kg > 0`.
+    - `create_opencap_rig()`: builds canonical `SkeletonRig` matching LaiUhlrich2022 segments.
+    - `OpenCapMarkerAugmenter`:
+      - Normalizes input keypoints from `CanonicalObservations`, `MarkerTrajectory`, `dict[str, np.ndarray]`, or tuple `(array, names)`.
+      - Fails closed with `OpenCapSidecarNotFoundError` when sidecar is absent and `synthetic_fallback=False`.
+      - Synthesizes all 43 `OPENCAP_AUGMENTED_MARKERS` deterministically with `synthetic_fallback=True` or `dry_run=True`.
+      - Labels output as `model-conditioned` in metadata and source provenance per ADR-0041.
+    - `run_opencap_pipeline_from_keypoints()`: runs keypoints -> augmenter -> `OpenSimScaleBackend` -> `OpenSimIKBackend` -> `OpenCapPipelineResult`.
+  - `src/motion_capture/opencap_ingest/launcher.py`:
+    - Converted `find_opencap_python` and `is_docker_available` to `@classmethod` for direct invocation.
+  - `src/shared/python/motion_pipeline/scaling/opensim_scale.py`:
+    - Added `allow_fallback: bool = False` to `OpenSimScaleBackend.__init__` and `scale()`. Gracefully falls back to marker-distance scaling when OpenSim is uninstalled.
+  - `src/shared/python/motion_pipeline/ik/opensim_backend.py`:
+    - Added `OpenSimIKBackend` class (with alias `OpenSimIKSolver`).
+    - Added `_adapt_markers_for_rig` mapping OpenCap 43 markers to rig joint centers.
+    - Added `_solve_geometric_fallback` providing geometric IK fallback when OpenSim is uninstalled.
+  - `src/motion_capture/opencap_ingest/__init__.py` & `src/motion_capture/__init__.py`: re-exported all augmenter symbols.
+  - `tests/unit/motion_capture/test_opencap_augmenter.py`: 9 unit tests covering config validation, canonical rig creation, fail-closed sidecar check, synthetic fallback, all 43 markers presence, CanonicalObservations input, OpenSim scaling with fallback, OpenSim IK with fallback, and end-to-end pipeline.
+  - `tests/integration/motion_capture/test_opencap_pipeline_e2e.py`: 3 end-to-end integration tests validating synthetic capture -> augmented markers -> scaled model + IK, model-conditioned evidence labeling per ADR-0041, and ensuring TensorFlow is never a core dependency per ADR-0053.
+- Validation:
+  - Unit tests: 9 passed in `test_opencap_augmenter.py`.
+  - Integration tests: 3 passed in `test_opencap_pipeline_e2e.py`.
+  - All 120 related motion capture and boundary tests green.
+  - Linting & formatting: `ruff check`, `ruff format`, `black` all 100% clean.
+  - Type checking: `mypy` clean on modified sources.
+  - Budgets: architecture budget and file size budget clean.
+- Next steps: Land PR, clean up worktree, proceed to next child issue in epic #11400.
+
 # Settings Page Test Theme-List Race — #11441
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `fix/settings-test-theme-option-race`; commit SELF; PR: see branch (`Refs #11441`)

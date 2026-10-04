@@ -124,7 +124,8 @@ class OpenCapLauncher:
     def __init__(self, log_level: int = logging.INFO) -> None:
         self.log_level = log_level
 
-    def find_opencap_python(self, env_path: Path | None = None) -> str | None:
+    @classmethod
+    def find_opencap_python(cls, env_path: Path | None = None) -> str | None:
         """Find Python interpreter in the opencap-core environment."""
         if env_path is not None:
             resolved_env = Path(env_path).expanduser().resolve()
@@ -142,10 +143,10 @@ class OpenCapLauncher:
 
         home = Path.home()
         candidates = [
-            home / "miniconda3" / "envs" / self.DEFAULT_OPENCAP_ENV_NAME,
-            home / "anaconda3" / "envs" / self.DEFAULT_OPENCAP_ENV_NAME,
-            home / ".venvs" / self.DEFAULT_OPENCAP_ENV_NAME,
-            home / self.DEFAULT_OPENCAP_ENV_NAME,
+            home / "miniconda3" / "envs" / cls.DEFAULT_OPENCAP_ENV_NAME,
+            home / "anaconda3" / "envs" / cls.DEFAULT_OPENCAP_ENV_NAME,
+            home / ".venvs" / cls.DEFAULT_OPENCAP_ENV_NAME,
+            home / cls.DEFAULT_OPENCAP_ENV_NAME,
             Path("/opt/opencap-core"),
         ]
         for base in candidates:
@@ -154,7 +155,8 @@ class OpenCapLauncher:
                     return str(py)
         return None
 
-    def is_docker_available(self) -> bool:
+    @classmethod
+    def is_docker_available(cls) -> bool:
         """Check if Docker CLI is installed and available on PATH."""
         return shutil.which("docker") is not None
 
