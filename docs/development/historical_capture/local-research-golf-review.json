@@ -1,0 +1,1485 @@
+{
+  "schema": "necromatcher/local-research-golf-review/1",
+  "issue": 11493,
+  "desktop_folder": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1",
+  "copy_receipt": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\copy-receipt.json",
+    "bytes": 29258,
+    "sha256": "7ef96baef4fc80075f10caf516f673404383876526ad70587676a1a9392e4536"
+  },
+  "readme": {
+    "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\README.txt",
+    "bytes": 1260,
+    "sha256": "82dbb95c3925f56f41bca4bfa718b3228f569fed92d73b035e15e931ef901b92"
+  },
+  "artifacts": [
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-local-research-golf-methods.tex",
+        "bytes": 8312,
+        "sha256": "488a574723833d3e77af3fd866b179701d2f85939604ff69c1e80feec067e5b4"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\necromatcher-local-research-golf-methods.tex",
+        "bytes": 8312,
+        "sha256": "488a574723833d3e77af3fd866b179701d2f85939604ff69c1e80feec067e5b4"
+      },
+      "relative_path": "report/necromatcher-local-research-golf-methods.tex"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\necromatcher-local-research-golf-methods.pdf",
+        "bytes": 211692,
+        "sha256": "d201ac45e621d9198b75fdec48c5f2bd46a9e8f267616aa3130c8831bf651d7e"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\necromatcher-local-research-golf-methods.pdf",
+        "bytes": 211692,
+        "sha256": "d201ac45e621d9198b75fdec48c5f2bd46a9e8f267616aa3130c8831bf651d7e"
+      },
+      "relative_path": "report/necromatcher-local-research-golf-methods.pdf"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\page-1.png",
+        "bytes": 130879,
+        "sha256": "5d7c909d2cb6ad6c527fd6b0c119d95decdae0236659ab608b10498caf159ebe"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\page-1.png",
+        "bytes": 130879,
+        "sha256": "5d7c909d2cb6ad6c527fd6b0c119d95decdae0236659ab608b10498caf159ebe"
+      },
+      "relative_path": "report/page-1.png"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\page-2.png",
+        "bytes": 132678,
+        "sha256": "3795af9fccdc21fa9bb8e2fddd68e3863e93bd5e95a95323603b49a23f86fec6"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\page-2.png",
+        "bytes": 132678,
+        "sha256": "3795af9fccdc21fa9bb8e2fddd68e3863e93bd5e95a95323603b49a23f86fec6"
+      },
+      "relative_path": "report/page-2.png"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\page-3.png",
+        "bytes": 177836,
+        "sha256": "d8af59e759ded677058497b05200bb3bfd0ee2b947b2237dcf179d946d7da27c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\page-3.png",
+        "bytes": 177836,
+        "sha256": "d8af59e759ded677058497b05200bb3bfd0ee2b947b2237dcf179d946d7da27c"
+      },
+      "relative_path": "report/page-3.png"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\compile-v2.stdout.log",
+        "bytes": 6786,
+        "sha256": "11b53d5860f8460604b7b2889404b63b041d774267dc853504e5f94d0440d89c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\compile-v2.stdout.log",
+        "bytes": 6786,
+        "sha256": "11b53d5860f8460604b7b2889404b63b041d774267dc853504e5f94d0440d89c"
+      },
+      "relative_path": "report/compile-v2.stdout.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-methods-v1\\necromatcher-local-research-golf-methods.log",
+        "bytes": 22444,
+        "sha256": "1c2412249539d95c09de4bc85d375fa9b05c761f1cc90ceb212d115633ff903c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\report\\necromatcher-local-research-golf-methods.log",
+        "bytes": 22444,
+        "sha256": "1c2412249539d95c09de4bc85d375fa9b05c761f1cc90ceb212d115633ff903c"
+      },
+      "relative_path": "report/necromatcher-local-research-golf-methods.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\api.json",
+        "bytes": 9551,
+        "sha256": "8ff4ba7594518276b4164985cc01e37704abec809fc9e893aae15a97e70c746c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\api.json",
+        "bytes": 9551,
+        "sha256": "8ff4ba7594518276b4164985cc01e37704abec809fc9e893aae15a97e70c746c"
+      },
+      "relative_path": "native/api.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      },
+      "relative_path": "native/font-environment.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "284eb428d7f575837eb3c0cc89b1e52569c8d9fb24ed4287744359cccd8b8e54"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\impact\\impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "284eb428d7f575837eb3c0cc89b1e52569c8d9fb24ed4287744359cccd8b8e54"
+      },
+      "relative_path": "native/impact/impact-receipt.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\request.json",
+        "bytes": 100906,
+        "sha256": "738a2f68c1baea58711ec91c06ec6086bb55d0ad469f950f7b5c9ba975e444f3"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\impact\\request.json",
+        "bytes": 100906,
+        "sha256": "738a2f68c1baea58711ec91c06ec6086bb55d0ad469f950f7b5c9ba975e444f3"
+      },
+      "relative_path": "native/impact/request.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\result.json",
+        "bytes": 107713,
+        "sha256": "8566815e184aa707e9e4ee6c02f201c6ba0b8b72ac7f14d7dd26349dab79210d"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\impact\\result.json",
+        "bytes": 107713,
+        "sha256": "8566815e184aa707e9e4ee6c02f201c6ba0b8b72ac7f14d7dd26349dab79210d"
+      },
+      "relative_path": "native/impact/result.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\impact\\trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      },
+      "relative_path": "native/impact/trajectory.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\qt.json",
+        "bytes": 4778,
+        "sha256": "bd28d8fb5e8f6408c5f6a661e2598b878f8bbee47352f9a9c0ec3c084b45d512"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\qt.json",
+        "bytes": 4778,
+        "sha256": "bd28d8fb5e8f6408c5f6a661e2598b878f8bbee47352f9a9c0ec3c084b45d512"
+      },
+      "relative_path": "native/qt.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\research-recalled.png",
+        "bytes": 65453,
+        "sha256": "4e589c89264e64195490f11f45f431fd5d599397c73997b6a1749440c1113d1f"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\research-recalled.png",
+        "bytes": 65453,
+        "sha256": "4e589c89264e64195490f11f45f431fd5d599397c73997b6a1749440c1113d1f"
+      },
+      "relative_path": "native/research-recalled.png"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\research-submitted.png",
+        "bytes": 68355,
+        "sha256": "5710e1af4dfe9ec01daf08a25df046a93878c7e52627a2f65d5f8f8cd62dd35e"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\research-submitted.png",
+        "bytes": 68355,
+        "sha256": "5710e1af4dfe9ec01daf08a25df046a93878c7e52627a2f65d5f8f8cd62dd35e"
+      },
+      "relative_path": "native/research-submitted.png"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\terminal.json",
+        "bytes": 2007,
+        "sha256": "d674cef49be25cdc4307eeaee67ad917cc13a8b87dccd2b8cbb191bf4caf83dd"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\terminal.json",
+        "bytes": 2007,
+        "sha256": "d674cef49be25cdc4307eeaee67ad917cc13a8b87dccd2b8cbb191bf4caf83dd"
+      },
+      "relative_path": "native/terminal.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\timeline.json",
+        "bytes": 430,
+        "sha256": "4260c70f196dde51c3d5a36003e1bd44635e52596dfea3d983a52fdd1fb9acb0"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\timeline.json",
+        "bytes": 430,
+        "sha256": "4260c70f196dde51c3d5a36003e1bd44635e52596dfea3d983a52fdd1fb9acb0"
+      },
+      "relative_path": "native/timeline.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1.log",
+        "bytes": 4366,
+        "sha256": "944136491daf7fed8b6d6c2cf6d7cb37f0e3c2a8317dac3de2cd5d94b6bbd9b1"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\necromatcher-local-research-golf-native-v1.log",
+        "bytes": 4366,
+        "sha256": "944136491daf7fed8b6d6c2cf6d7cb37f0e3c2a8317dac3de2cd5d94b6bbd9b1"
+      },
+      "relative_path": "native/necromatcher-local-research-golf-native-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\necromatcher-local-research-golf-native-v1-exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      },
+      "relative_path": "native/necromatcher-local-research-golf-native-v1-exit.txt"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-source-before.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\necromatcher-local-research-golf-native-v1-source-before.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      },
+      "relative_path": "native/necromatcher-local-research-golf-native-v1-source-before.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-source-after.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\native\\necromatcher-local-research-golf-native-v1-source-after.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      },
+      "relative_path": "native/necromatcher-local-research-golf-native-v1-source-after.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-bridge-freeze-v1\\freeze.json",
+        "bytes": 5114,
+        "sha256": "c93601caa34dc5e21cbce947eefdb2833b3144c68b2418e506448fbcf3ff99e1"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\0-necromatcher-golf-bridge-freeze-v1-freeze.json",
+        "bytes": 5114,
+        "sha256": "c93601caa34dc5e21cbce947eefdb2833b3144c68b2418e506448fbcf3ff99e1"
+      },
+      "relative_path": "proofs/0-necromatcher-golf-bridge-freeze-v1-freeze.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-session-freeze-v1\\freeze.json",
+        "bytes": 4524,
+        "sha256": "14f0bc17f82f55ee403ca901a11317c511b5ed0730aedd2984c54e637a2e9dbf"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\1-local-research-session-freeze-v1-freeze.json",
+        "bytes": 4524,
+        "sha256": "14f0bc17f82f55ee403ca901a11317c511b5ed0730aedd2984c54e637a2e9dbf"
+      },
+      "relative_path": "proofs/1-local-research-session-freeze-v1-freeze.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\native-research-golf-ui-freeze-v2\\freeze.json",
+        "bytes": 4154,
+        "sha256": "e5302fba272e7dc85f473e256d0fda68ec83f47e91987296af93cf49be7326f6"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\2-native-research-golf-ui-freeze-v2-freeze.json",
+        "bytes": 4154,
+        "sha256": "e5302fba272e7dc85f473e256d0fda68ec83f47e91987296af93cf49be7326f6"
+      },
+      "relative_path": "proofs/2-native-research-golf-ui-freeze-v2-freeze.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-freeze-v1.json",
+        "bytes": 4219,
+        "sha256": "def055d104f01d67411d455098806c6d934d5e32b9f688b0d00c037fe45e2cf7"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\3-Temp-golf-research-ui-freeze-v1.json",
+        "bytes": 4219,
+        "sha256": "def055d104f01d67411d455098806c6d934d5e32b9f688b0d00c037fe45e2cf7"
+      },
+      "relative_path": "proofs/3-Temp-golf-research-ui-freeze-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\freeze.json",
+        "bytes": 7205,
+        "sha256": "ccee3fd9761cab74294e325f311c5cba094c0ee15541ea1081d49f857ab2eeb3"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\4-necromatcher-local-research-golf-native-freeze-v1-freeze.json",
+        "bytes": 7205,
+        "sha256": "ccee3fd9761cab74294e325f311c5cba094c0ee15541ea1081d49f857ab2eeb3"
+      },
+      "relative_path": "proofs/4-necromatcher-local-research-golf-native-freeze-v1-freeze.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-golf-doc-freeze-v2\\freeze.json",
+        "bytes": 2258,
+        "sha256": "4da043df163ddf313afb53e1caf67efbc696004094e66759bcd610f815c1b0c0"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\5-local-research-golf-doc-freeze-v2-freeze.json",
+        "bytes": 2258,
+        "sha256": "4da043df163ddf313afb53e1caf67efbc696004094e66759bcd610f815c1b0c0"
+      },
+      "relative_path": "proofs/5-local-research-golf-doc-freeze-v2-freeze.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-cohort-v2.log",
+        "bytes": 5215,
+        "sha256": "01bc16ca6879a6a466105b9c482263cb3cabfeb657c15bf4b1a85dc094705d5b"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-cohort-v2.log",
+        "bytes": 5215,
+        "sha256": "01bc16ca6879a6a466105b9c482263cb3cabfeb657c15bf4b1a85dc094705d5b"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-cohort-v2.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-cohort-v2.xml",
+        "bytes": 31021,
+        "sha256": "635aae4c20186c2228c59a8b053b7c6fc92ed2b177f27697dffdea48dfc0461e"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-cohort-v2.xml",
+        "bytes": 31021,
+        "sha256": "635aae4c20186c2228c59a8b053b7c6fc92ed2b177f27697dffdea48dfc0461e"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-cohort-v2.xml"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-mypy-v2.log",
+        "bytes": 44,
+        "sha256": "e2702f9afc4c0f80ff1e8624f77af7a7d2689ca184512114aae5967a76229ba8"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-mypy-v2.log",
+        "bytes": 44,
+        "sha256": "e2702f9afc4c0f80ff1e8624f77af7a7d2689ca184512114aae5967a76229ba8"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-mypy-v2.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-ruff-v1.log",
+        "bytes": 47,
+        "sha256": "565f03bea0b03a0d70f564c9656aa166c2acd7ff0d1c08b57d868a07b29aed52"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-ruff-v1.log",
+        "bytes": 47,
+        "sha256": "565f03bea0b03a0d70f564c9656aa166c2acd7ff0d1c08b57d868a07b29aed52"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-ruff-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-atlas-v1.log",
+        "bytes": 1835,
+        "sha256": "8835798f9ca36cdab96c01fe54914d7ffa442f60f5c1d45c1d7823969d7ab7cd"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-atlas-v1.log",
+        "bytes": 1835,
+        "sha256": "8835798f9ca36cdab96c01fe54914d7ffa442f60f5c1d45c1d7823969d7ab7cd"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-atlas-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-session-freeze-v1\\reconstructed-prior-session.py",
+        "bytes": 17624,
+        "sha256": "c1c5381f3e561975cf858cc1e3d29d43cbadf19a4435b4eb90ae3665bec20163"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\reconstructed-prior-session.py",
+        "bytes": 17624,
+        "sha256": "c1c5381f3e561975cf858cc1e3d29d43cbadf19a4435b4eb90ae3665bec20163"
+      },
+      "relative_path": "proofs/reconstructed-prior-session.py"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf_native_handoff.py",
+        "bytes": 10476,
+        "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\test_necromatcher_golf_native_handoff.py",
+        "bytes": 10476,
+        "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+      },
+      "relative_path": "proofs/test_necromatcher_golf_native_handoff.py"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-cohort-v2.log",
+        "bytes": 5215,
+        "sha256": "01bc16ca6879a6a466105b9c482263cb3cabfeb657c15bf4b1a85dc094705d5b"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-cohort-v2.log",
+        "bytes": 5215,
+        "sha256": "01bc16ca6879a6a466105b9c482263cb3cabfeb657c15bf4b1a85dc094705d5b"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-cohort-v2.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-cohort-v2.xml",
+        "bytes": 31021,
+        "sha256": "635aae4c20186c2228c59a8b053b7c6fc92ed2b177f27697dffdea48dfc0461e"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-cohort-v2.xml",
+        "bytes": 31021,
+        "sha256": "635aae4c20186c2228c59a8b053b7c6fc92ed2b177f27697dffdea48dfc0461e"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-cohort-v2.xml"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-mypy-v2.log",
+        "bytes": 44,
+        "sha256": "e2702f9afc4c0f80ff1e8624f77af7a7d2689ca184512114aae5967a76229ba8"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-mypy-v2.log",
+        "bytes": 44,
+        "sha256": "e2702f9afc4c0f80ff1e8624f77af7a7d2689ca184512114aae5967a76229ba8"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-mypy-v2.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-ruff-v1.log",
+        "bytes": 47,
+        "sha256": "565f03bea0b03a0d70f564c9656aa166c2acd7ff0d1c08b57d868a07b29aed52"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-ruff-v1.log",
+        "bytes": 47,
+        "sha256": "565f03bea0b03a0d70f564c9656aa166c2acd7ff0d1c08b57d868a07b29aed52"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-ruff-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-root-budget-v1.json",
+        "bytes": 2484,
+        "sha256": "85ee82878939f30e3ee7255fd1bb50a75fa53e796fec8fc8a7a0bbc575f4a51d"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-root-budget-v1.json",
+        "bytes": 2484,
+        "sha256": "85ee82878939f30e3ee7255fd1bb50a75fa53e796fec8fc8a7a0bbc575f4a51d"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-root-budget-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-atlas-v1.log",
+        "bytes": 1835,
+        "sha256": "8835798f9ca36cdab96c01fe54914d7ffa442f60f5c1d45c1d7823969d7ab7cd"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-atlas-v1.log",
+        "bytes": 1835,
+        "sha256": "8835798f9ca36cdab96c01fe54914d7ffa442f60f5c1d45c1d7823969d7ab7cd"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-atlas-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-manual-gate-v1.log",
+        "bytes": 114,
+        "sha256": "9d4846edc6e38fef6284751fb977a83a6f3db19ae57447d1e885ab495605746c"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-manual-gate-v1.log",
+        "bytes": 114,
+        "sha256": "9d4846edc6e38fef6284751fb977a83a6f3db19ae57447d1e885ab495605746c"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-manual-gate-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-inbox-precommit-v1.json",
+        "bytes": 2863,
+        "sha256": "c0096bbafd0974df6e8ef688fddae503e02d77db6e8cdb6de531f5920ba7685f"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-inbox-precommit-v1.json",
+        "bytes": 2863,
+        "sha256": "c0096bbafd0974df6e8ef688fddae503e02d77db6e8cdb6de531f5920ba7685f"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-inbox-precommit-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-api-red-v1.log",
+        "bytes": 3813,
+        "sha256": "0894ac7ea520ecc35260353e21bf4008e0142e2910ef8e1d93be298d6cafc0a0"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-api-red-v1.log",
+        "bytes": 3813,
+        "sha256": "0894ac7ea520ecc35260353e21bf4008e0142e2910ef8e1d93be298d6cafc0a0"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-api-red-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-api-identity-red-v1.log",
+        "bytes": 6722,
+        "sha256": "a43f94914b9bf446a789319a5c78f5b6e53c8fce70f5e139e439f2e8dec509a4"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-api-identity-red-v1.log",
+        "bytes": 6722,
+        "sha256": "a43f94914b9bf446a789319a5c78f5b6e53c8fce70f5e139e439f2e8dec509a4"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-api-identity-red-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-research-golf-journal-red-v1.log",
+        "bytes": 10240,
+        "sha256": "d36ff517a340f836a770273f4d3071d075b2aa5d0ba7d001f5f15cd911f6beab"
+      },
+      "copy": {
+        "path": "C:\\Users\\diete\\Desktop\\Necromatcher Review 2026-10-01\\Local Research Golf Supplement 1\\proofs\\necromatcher-research-golf-journal-red-v1.log",
+        "bytes": 10240,
+        "sha256": "d36ff517a340f836a770273f4d3071d075b2aa5d0ba7d001f5f15cd911f6beab"
+      },
+      "relative_path": "proofs/necromatcher-research-golf-journal-red-v1.log"
+    }
+  ],
+  "agent_freezes": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-bridge-freeze-v1\\freeze.json",
+      "bytes": 5114,
+      "sha256": "c93601caa34dc5e21cbce947eefdb2833b3144c68b2418e506448fbcf3ff99e1"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-session-freeze-v1\\freeze.json",
+      "bytes": 4524,
+      "sha256": "14f0bc17f82f55ee403ca901a11317c511b5ed0730aedd2984c54e637a2e9dbf"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\native-research-golf-ui-freeze-v2\\freeze.json",
+      "bytes": 4154,
+      "sha256": "e5302fba272e7dc85f473e256d0fda68ec83f47e91987296af93cf49be7326f6"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-freeze-v1.json",
+      "bytes": 4219,
+      "sha256": "def055d104f01d67411d455098806c6d934d5e32b9f688b0d00c037fe45e2cf7"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\freeze.json",
+      "bytes": 7205,
+      "sha256": "ccee3fd9761cab74294e325f311c5cba094c0ee15541ea1081d49f857ab2eeb3"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-golf-doc-freeze-v2\\freeze.json",
+      "bytes": 2258,
+      "sha256": "4da043df163ddf313afb53e1caf67efbc696004094e66759bcd610f815c1b0c0"
+    }
+  ],
+  "freeze_pin_checks": [
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\necromatcher_golf.py",
+        "bytes": 18898,
+        "sha256": "49f6122c3753fc5ec4a89946aff293514f6c3a5716e15b157fbf8af179878d4d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf.py",
+        "bytes": 12744,
+        "sha256": "90b9be41dfdfaf1980c74893f7ead4f05ab987758d6d3621e17af3d5166ca69d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-bridge-freeze-v1\\necromatcher_golf.py",
+        "bytes": 18898,
+        "sha256": "49f6122c3753fc5ec4a89946aff293514f6c3a5716e15b157fbf8af179878d4d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-bridge-freeze-v1\\test_necromatcher_golf.py",
+        "bytes": 12744,
+        "sha256": "90b9be41dfdfaf1980c74893f7ead4f05ab987758d6d3621e17af3d5166ca69d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-aim-red-v1.log",
+        "bytes": 4438,
+        "sha256": "02a78ceff21bb93deed176510eac4bd8a867bbab2540a4e6f8de5efa3e333a49"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-context-final-v1.log",
+        "bytes": 5232,
+        "sha256": "774e2ec4ab0d48b68a29746b2c813bec78674dfe25d9ae2d7d66e403a7f4fe20"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-contract-red-v1.log",
+        "bytes": 12630,
+        "sha256": "196d4c203cfa305357093d1bea64383eed2dec4db258adbb5380e16cefe6fd7d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-final-v1.log",
+        "bytes": 5373,
+        "sha256": "94bcee6044d82b698220718d07bc8edc7f109607a1b1cc6768f556fa45a7b579"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-final-v2.log",
+        "bytes": 5271,
+        "sha256": "1cc41e8cb7eb98425a48a7f89fcb7c40140636131c12295fef9f8e3447acd03e"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-v1.log",
+        "bytes": 9901,
+        "sha256": "a4a372afc48edfef97037ad799111218a050915e06f7b13d3d467ffaefdabbea"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-v2.log",
+        "bytes": 21403,
+        "sha256": "cc8b9f073de5c554a603a15c0088208fb1bbc48afe41d830fda9d04fe9c59083"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-v3.log",
+        "bytes": 7707,
+        "sha256": "625ce1ba98ea654684b6a7e8d9729b7d9545ab89c745e0162d496f26be5f7de6"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-green-v4.log",
+        "bytes": 5357,
+        "sha256": "d0bd915a9906f8a8d2d3449cb076b284ead5dbcda6fb5ad5f84165c6dd8045b5"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-mypy-final-v1.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-mypy-final-v2.log",
+        "bytes": 306,
+        "sha256": "147f77143e7843b37a615f50e28c733532c7206386676d5ff245af930df90587"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-mypy-final-v3.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-mypy-final-v4.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-mypy-v1.log",
+        "bytes": 43,
+        "sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-red-v1.log",
+        "bytes": 3919,
+        "sha256": "506deff754f25b7ac0a53a2f62fedb3a098fbab45c355ba0845dc1f9220e87d7"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-ruff-final-v1.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-ruff-final-v2.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-ruff-final-v3.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-golf-bridge-freeze-v1\\validation.json",
+        "bytes": 1752,
+        "sha256": "5cee7ffac8111c15aabc790535476abe035256f58a8a72b33015136d1ac0376b"
+      }
+    },
+    {
+      "historical_pin": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\golf_simulator\\session.py",
+        "bytes": 17624,
+        "sha256": "c1c5381f3e561975cf858cc1e3d29d43cbadf19a4435b4eb90ae3665bec20163"
+      },
+      "current_pin": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\golf_simulator\\session.py",
+        "bytes": 17702,
+        "sha256": "dbb822c1857bc999553968ccf761b6e3afc0a1f3387a1a06ae8855c9b31b99d9"
+      },
+      "reconstructed_prior": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\local-research-session-freeze-v1\\reconstructed-prior-session.py",
+        "bytes": 17624,
+        "sha256": "c1c5381f3e561975cf858cc1e3d29d43cbadf19a4435b4eb90ae3665bec20163"
+      },
+      "supersession": "Only delivery_status catches KeyError and returns None; prior is reconstructed post hoc, not an original pre-edit saved source"
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\golf_simulator\\adapters\\local.py",
+        "bytes": 7124,
+        "sha256": "8deeb9b6eed5218e7dfaf6fbef8ff381b0e74d4ca6925b23f3cf6459a45d0715"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\golf_simulator\\test_research_session.py",
+        "bytes": 10447,
+        "sha256": "5b06d35425a8ad5ddd20c681888c8ef07fbe881b01e9d07355b9543778b410ed"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-red-v1.log",
+        "bytes": 19331,
+        "sha256": "87997e982b5908b326ea6508c2cef186f34c507d2a8ebf879911cb02749b40bd"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-responsive-red-v1.log",
+        "bytes": 4420,
+        "sha256": "6f7687cb9c1f928589fdcd798708e0305967c16c83739300d64f938cf5fa5294"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-enum-red-v1.log",
+        "bytes": 5654,
+        "sha256": "5aac7d1ed0e44c662daf8082652990cee7ef1bc1a32ee52adbd84ae81c2960af"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-green-v1.log",
+        "bytes": 2774,
+        "sha256": "26da26e3ad0f9cb94127ffe84ebeb2f07d3e13b970a3561f91c8e199e30b7f46"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-green-v2.log",
+        "bytes": 2775,
+        "sha256": "2b65d446ce71457e3cdf78c97c1f64d10b94a2bea3d0eeb2ab64541baa8b1733"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-final-green-v1.log",
+        "bytes": 2774,
+        "sha256": "2f5670f4dfefbedebcaaa30b289e122c7818bcfea1397d15de421c3cb80d58e3"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-final-ruff-v1.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-final-format-v1.log",
+        "bytes": 27,
+        "sha256": "81e0708af79a682467b0ecbd3453a0a33cfcbbe2812201b4d4f405f78ded2976"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-final-mypy-v1.log",
+        "bytes": 44,
+        "sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-session-governance-v1.log",
+        "bytes": 114,
+        "sha256": "9d4846edc6e38fef6284751fb977a83a6f3db19ae57447d1e885ab495605746c"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\golf_simulator\\research_dialog.py",
+        "bytes": 10709,
+        "sha256": "5bd72e950526a1475c6e58556275d6bccce24dd463e88b4082d03ba92009dee3"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\replay_impact_dialog.py",
+        "bytes": 24256,
+        "sha256": "b69a9a7b49b3cd552f484fb0decb47b85002181d6a7a8333dd78f30d72c8c280"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\golf_simulator\\test_research_dialog.py",
+        "bytes": 11196,
+        "sha256": "a69353d6362968740912627632b04651a80be51b8947898a3d816a8c56c74779"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_replay_impact_handoff.py",
+        "bytes": 3882,
+        "sha256": "9545b2604ab8799247eff4c21547edf81e46fc90222c1ce9398aac70b9f3cabd"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-close-red-v1.log",
+        "bytes": 6199,
+        "sha256": "d944b260dfb06480e1bacb10d54e5cc8b99fedaa781abdf8186652f172cca165"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-final-green-v4.log",
+        "bytes": 2775,
+        "sha256": "563aa89f661d817561bf9f993a90e1229dab9451ca4bc44c3d0e45e47ba0be07"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-final-green-v5.log",
+        "bytes": 2775,
+        "sha256": "af98c7fbb91bbfa285fd070f2e8b299c3b94a47b2e2e850bdc1882d237659836"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-final-ruff-v3.log",
+        "bytes": 20,
+        "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-final-format-v3.log",
+        "bytes": 44,
+        "sha256": "b203c69c7638b47e44a4ac280f899f03ed4c1d1c5acca8f4841a1c545bf46b30"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\research-dialog-final-mypy-v3.log",
+        "bytes": 44,
+        "sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\GolfSimulator.tsx",
+        "sha256": "dbb58d27e3649a892f7b1ff9bbdb9f385e1adef01c39aae69416ce11e05eb1be",
+        "bytes": 17099
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\GolfSimulatorResearch.test.tsx",
+        "sha256": "b21c77345a14eac4061b7c0747152b2f2e125284d58211bbf4a6c547cfb8c090",
+        "bytes": 10274
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayImpactControls.tsx",
+        "sha256": "f1cd3eac209ce6d603ceb6483cbf2bfac49cca98e1ec3bc5057e452613124eac",
+        "bytes": 11972
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayImpactControls.test.tsx",
+        "sha256": "534306aeb3070a04b98f26dd19603aa349b238770c8b11d4865497fdd277afa9",
+        "bytes": 8835
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ResearchGolfSimulator.tsx",
+        "sha256": "e4ca64e7cee70d7720e29fe4604e4c32c0afd79148158a94133c14ddd94d4557",
+        "bytes": 3695
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\researchGolfContracts.ts",
+        "sha256": "68cd889c65f32f3996c9bcdb5576b20fd394bafb8439ce5ac8811f7ddb7323d8",
+        "bytes": 4523
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\researchGolfContracts.test.ts",
+        "sha256": "07a0ccbf88aeadfa5568761e6d068e50c6148784aafc9413d416b8f8ea006cae",
+        "bytes": 2547
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\useResearchGolf.ts",
+        "sha256": "593aaf19751cdbe27ea1be3061f6886cb1919d491d04e5af903504c0e6faef45",
+        "bytes": 5125
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\useResearchTurnover.ts",
+        "sha256": "cc0f0969f98f59dc0e3d3dde6a0045ad214f085555f7cf0cb44500b53b9c5b20",
+        "bytes": 1633
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-red-v1.log",
+        "sha256": "7a756ba63657bb55f94f44a274415d552a8e8569c2332d87036b10d8bb6697d5",
+        "bytes": 14455
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-query-red-v1.log",
+        "sha256": "817023f75d3b7deb2879644dbe249520ff78aedf4982f36d96ca088b2a0fa7b6",
+        "bytes": 894
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-cohort-final-v2.log",
+        "sha256": "7fb51590d8275c9c003e94c505e425590e347b8cd86ac1b2eb76496eb9f86568",
+        "bytes": 549
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-types-final-v1.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-lint-final-v1.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\golf-research-ui-budgets-v1.log",
+        "sha256": "4056aa35a7c67c7df6134f5edc2bc2ae9642192f2d91272e17f44f32b6bf36bd",
+        "bytes": 665
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf_native_handoff.py",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\00-test_necromatcher_golf_native_handoff.py",
+        "bytes": 10476,
+        "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\api.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\01-api.json",
+        "bytes": 9551,
+        "sha256": "8ff4ba7594518276b4164985cc01e37704abec809fc9e893aae15a97e70c746c"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\font-environment.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\02-font-environment.json",
+        "bytes": 378,
+        "sha256": "b6dd6ca955477f149a7e93b9384620551854d9f37231b17499b4739e8d251e47"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\impact-receipt.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\03-impact-receipt.json",
+        "bytes": 3210,
+        "sha256": "284eb428d7f575837eb3c0cc89b1e52569c8d9fb24ed4287744359cccd8b8e54"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\request.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\04-request.json",
+        "bytes": 100906,
+        "sha256": "738a2f68c1baea58711ec91c06ec6086bb55d0ad469f950f7b5c9ba975e444f3"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\result.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\05-result.json",
+        "bytes": 107713,
+        "sha256": "8566815e184aa707e9e4ee6c02f201c6ba0b8b72ac7f14d7dd26349dab79210d"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\impact\\trajectory.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\06-trajectory.json",
+        "bytes": 1493,
+        "sha256": "dfc28416d085e947aff6c341dda2ad832b50ac359fbfde6fa2f241f329dccef1"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\qt.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\07-qt.json",
+        "bytes": 4778,
+        "sha256": "bd28d8fb5e8f6408c5f6a661e2598b878f8bbee47352f9a9c0ec3c084b45d512"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\research-recalled.png",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\08-research-recalled.png",
+        "bytes": 65453,
+        "sha256": "4e589c89264e64195490f11f45f431fd5d599397c73997b6a1749440c1113d1f"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\research-submitted.png",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\09-research-submitted.png",
+        "bytes": 68355,
+        "sha256": "5710e1af4dfe9ec01daf08a25df046a93878c7e52627a2f65d5f8f8cd62dd35e"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\terminal.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\10-terminal.json",
+        "bytes": 2007,
+        "sha256": "d674cef49be25cdc4307eeaee67ad917cc13a8b87dccd2b8cbb191bf4caf83dd"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1\\timeline.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\11-timeline.json",
+        "bytes": 430,
+        "sha256": "4260c70f196dde51c3d5a36003e1bd44635e52596dfea3d983a52fdd1fb9acb0"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1.log",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\12-necromatcher-local-research-golf-native-v1.log",
+        "bytes": 4366,
+        "sha256": "944136491daf7fed8b6d6c2cf6d7cb37f0e3c2a8317dac3de2cd5d94b6bbd9b1"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-exit.txt",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\13-necromatcher-local-research-golf-native-v1-exit.txt",
+        "bytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-source-before.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\14-necromatcher-local-research-golf-native-v1-source-before.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-v1-source-after.json",
+        "copy": "C:\\Users\\diete\\Repositories\\Temp\\necromatcher-local-research-golf-native-freeze-v1\\15-necromatcher-local-research-golf-native-v1-source-after.json",
+        "bytes": 999305,
+        "sha256": "eda6fad7f858cf9e3dde71b61e0c8cea0c64519e2eb0fb980443b4b36876a180"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\AGENT_HANDOFF.md",
+        "bytes": 50383,
+        "sha256": "9dffe94b0dbdc3c545edbb0da116b0b116a8eb68c1aba9e6e4231b8c2201465f"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\HANDOFF.md",
+        "bytes": 137002,
+        "sha256": "68ac1b102d34cb5d31ca3b3da3ad114592e68fc05d95a02a6be981b98add1b2f"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\DEVELOPMENT_LOG.md",
+        "bytes": 400246,
+        "sha256": "6001a80617a3a5c72bdcc6e98f8f59391c1747a8395b18fa4f0d88df302f6252"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-turnover.md",
+        "bytes": 109530,
+        "sha256": "7845d17f6131b27292db5f6deff196dc5f5dc6c065cf84248d24f638007d0a24"
+      }
+    },
+    {
+      "verified": {
+        "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\SPEC.md",
+        "bytes": 1458228,
+        "sha256": "84ec346ff199dc55615a4b6c9a68070c1204c3870b34451fd9cf383f644d52d6"
+      }
+    }
+  ],
+  "native": {
+    "process_session": 94422,
+    "python_exit_code": 0,
+    "cases_passed": 1,
+    "pytest_elapsed_s": 23.07,
+    "call_elapsed_s": 18.26,
+    "source_files_checked": 6697,
+    "source_maps_equal": true,
+    "inventory_scope": "src files and owned native acceptance test, not complete repository",
+    "api_samples": 7,
+    "qt_samples": 7,
+    "api_delivery": "confirmed_accepted",
+    "public_copied_receipt_validated": true,
+    "proper_aim_rotation": "Identity proper rotation in native acceptance; nonidentity proper rotation covered by frozen bridge synthetic unit test"
+  },
+  "report": {
+    "pages": 3,
+    "root_visual_review": "Root reported all three pages visually reviewed; this receipt attributes that review to root",
+    "screenshots": "Submitted and recalled Qt screenshots independently viewed readable by fitting_audit; root independently reviewed both readable"
+  },
+  "scope": {
+    "tiger": [0, 191],
+    "hogan": [0, 750],
+    "interval_convention": "half-open",
+    "contact_boundary": "Conservative reviewed exclusion; exact physical release time unmeasured"
+  },
+  "qualification": {
+    "scientific": false,
+    "physical_source_time": false,
+    "historical_fit_improvement": false,
+    "controltower_transfer": false,
+    "opengl_pixel_accuracy": false,
+    "avatar": false,
+    "course_feedback": false
+  },
+  "pending": {
+    "root_final_cohort": false,
+    "root_final_mypy": false,
+    "publication": true,
+    "ci_acceptance": true
+  },
+  "current_checkpoint_pins": [
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\AGENT_HANDOFF.md",
+      "bytes": 50383,
+      "sha256": "9dffe94b0dbdc3c545edbb0da116b0b116a8eb68c1aba9e6e4231b8c2201465f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\SPEC.md",
+      "bytes": 1458228,
+      "sha256": "84ec346ff199dc55615a4b6c9a68070c1204c3870b34451fd9cf383f644d52d6"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\DEVELOPMENT_LOG.md",
+      "bytes": 400246,
+      "sha256": "6001a80617a3a5c72bdcc6e98f8f59391c1747a8395b18fa4f0d88df302f6252"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\HANDOFF.md",
+      "bytes": 137002,
+      "sha256": "68ac1b102d34cb5d31ca3b3da3ad114592e68fc05d95a02a6be981b98add1b2f"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-local-research-golf-methods.tex",
+      "bytes": 8312,
+      "sha256": "488a574723833d3e77af3fd866b179701d2f85939604ff69c1e80feec067e5b4"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-local-research-golf.md",
+      "bytes": 6121,
+      "sha256": "11456359dc3884fa5224e3f654ae446e26f6a22c2e603f5483cd517e36892d5a"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\docs\\development\\necromatcher-turnover.md",
+      "bytes": 109530,
+      "sha256": "7845d17f6131b27292db5f6deff196dc5f5dc6c065cf84248d24f638007d0a24"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\api\\routes\\golf_research.py",
+      "bytes": 5626,
+      "sha256": "459eeaf08cf47bf72e7f4cc3454e46fd792e078acc1944de284b8aa47a197821"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\config\\feature_parity.json",
+      "bytes": 27393,
+      "sha256": "514fce72d8a651a734549c9bdf81cbe3a0e559395fa50bf4b08edfa7c53026e9"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\golf_simulator\\adapters\\local.py",
+      "bytes": 7124,
+      "sha256": "8deeb9b6eed5218e7dfaf6fbef8ff381b0e74d4ca6925b23f3cf6459a45d0715"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\golf_simulator\\session.py",
+      "bytes": 17702,
+      "sha256": "dbb822c1857bc999553968ccf761b6e3afc0a1f3387a1a06ae8855c9b31b99d9"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\__init__.py",
+      "bytes": 12272,
+      "sha256": "cdd225901bb38c2e6249244e545442845f2b82601a994fcb538089a249f6ccbe"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\shared\\python\\workspace\\necromatcher_golf.py",
+      "bytes": 18898,
+      "sha256": "49f6122c3753fc5ec4a89946aff293514f6c3a5716e15b157fbf8af179878d4d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\golf_simulator\\research_dialog.py",
+      "bytes": 10709,
+      "sha256": "5bd72e950526a1475c6e58556275d6bccce24dd463e88b4082d03ba92009dee3"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\README.md",
+      "bytes": 2099,
+      "sha256": "3d9ecd84583c6a5ef20a06d685a86daf8873a125a5cdcfcc90e04be4d48bc303"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\src\\tools\\necromatcher\\replay_impact_dialog.py",
+      "bytes": 24256,
+      "sha256": "b69a9a7b49b3cd552f484fb0decb47b85002181d6a7a8333dd78f30d72c8c280"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\api\\test_golf_research_routes.py",
+      "bytes": 7374,
+      "sha256": "a94d6386f05fd5eaa213fe033d5fa10d1104c2714207616abe39de4029d0c46d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\golf_simulator\\test_research_session.py",
+      "bytes": 10447,
+      "sha256": "5b06d35425a8ad5ddd20c681888c8ef07fbe881b01e9d07355b9543778b410ed"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\golf_simulator\\test_research_dialog.py",
+      "bytes": 11196,
+      "sha256": "a69353d6362968740912627632b04651a80be51b8947898a3d816a8c56c74779"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\tools\\test_necromatcher_replay_impact_handoff.py",
+      "bytes": 3882,
+      "sha256": "9545b2604ab8799247eff4c21547edf81e46fc90222c1ce9398aac70b9f3cabd"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf.py",
+      "bytes": 12744,
+      "sha256": "90b9be41dfdfaf1980c74893f7ead4f05ab987758d6d3621e17af3d5166ca69d"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\tests\\unit\\workspace\\test_necromatcher_golf_native_handoff.py",
+      "bytes": 10476,
+      "sha256": "26478d75fb6b21a25b5f59b7e5d20f4626355c842e507daf29b3c81c405d684b"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\public\\capability-atlas\\graph.json",
+      "bytes": 115082,
+      "sha256": "a13fad26e456bf20e82f0ce22af28b07af73bb90719ce9bbca791b8644b34a71"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\public\\capability-atlas\\index.html",
+      "bytes": 126801,
+      "sha256": "2dbb662c0d49777dc967fe89f25073219ecbf655657b19d26b2a18b5ee8fc3de"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayImpactControls.test.tsx",
+      "bytes": 8835,
+      "sha256": "534306aeb3070a04b98f26dd19603aa349b238770c8b11d4865497fdd277afa9"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ReplayImpactControls.tsx",
+      "bytes": 11972,
+      "sha256": "f1cd3eac209ce6d603ceb6483cbf2bfac49cca98e1ec3bc5057e452613124eac"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\ResearchGolfSimulator.tsx",
+      "bytes": 3695,
+      "sha256": "e4ca64e7cee70d7720e29fe4604e4c32c0afd79148158a94133c14ddd94d4557"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\researchGolfContracts.test.ts",
+      "bytes": 2547,
+      "sha256": "07a0ccbf88aeadfa5568761e6d068e50c6148784aafc9413d416b8f8ea006cae"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\researchGolfContracts.ts",
+      "bytes": 4523,
+      "sha256": "68cd889c65f32f3996c9bcdb5576b20fd394bafb8439ce5ac8811f7ddb7323d8"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\useResearchGolf.ts",
+      "bytes": 5125,
+      "sha256": "593aaf19751cdbe27ea1be3061f6886cb1919d491d04e5af903504c0e6faef45"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\components\\necromatcher\\useResearchTurnover.ts",
+      "bytes": 1633,
+      "sha256": "cc0f0969f98f59dc0e3d3dde6a0045ad214f085555f7cf0cb44500b53b9c5b20"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\GolfSimulator.tsx",
+      "bytes": 17099,
+      "sha256": "dbb58d27e3649a892f7b1ff9bbdb9f385e1adef01c39aae69416ce11e05eb1be"
+    },
+    {
+      "path": "C:\\Users\\diete\\Repositories\\Worktrees\\UpstreamDrift-necromatcher-native-fit\\ui\\src\\pages\\GolfSimulatorResearch.test.tsx",
+      "bytes": 10274,
+      "sha256": "b21c77345a14eac4061b7c0747152b2f2e125284d58211bbf4a6c547cfb8c090"
+    }
+  ],
+  "base_checkpoint": "458bf21b6d356876bfd52ef6e1086f85996c66d3",
+  "root_validation": {
+    "python_cohort": {
+      "cases_passed": 209,
+      "warnings": 12,
+      "skips": 0,
+      "elapsed_s": 58.64,
+      "process_session": 68663,
+      "exit_code": 0
+    },
+    "additional_actual_native": 1,
+    "react_cases": 106,
+    "mypy_production_owners": 7,
+    "pinned_ruff_python_files": 13,
+    "python_budget_files": 13,
+    "atlas_cases": 11,
+    "manual_release": "blocked-inventory-required",
+    "coordination_inbox": "Incomplete evidence, exit 2; fail-open policy, no no-conflict claim"
+  },
+  "local_research_boundary": {
+    "source_kind": "MODEL_CONTACT",
+    "qualification_axes": "UNVERIFIED",
+    "clock": "authored seconds, physically uncalibrated",
+    "launch": "full saved post-impact velocity and angular velocity; proper declared rotation",
+    "simulation": "New local-default flight, distinct from original saved flight/environment",
+    "recall": "Current local session only; original replay and impact persist in canonical Library"
+  }
+}

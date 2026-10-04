@@ -816,3 +816,9 @@ and [Frozen Review](historical_capture/native-desktop-replay-impact-review.json)
 Historical fits, scientific qualification, simulation golf and final overall
 desktop parity acceptance remain open. No new ControlTower delivery or remote
 CI-green claim is made. The full goal remains active.
+
+## Local Research Golf Checkpoint — #11493
+
+API, native and React now provide explicit Connect → Prepare Research → Arm → Submit → Recall through the actual local session. The authenticated bridge retains exact saved impact vectors and a declared proper Aim rotation; MODEL_CONTACT and contact/numerical/scientific qualification remain unverified. React passed 106 cases; one actual temporary-Library MuJoCo/clean-worker/Rust API and native case passed in 23.07 s with seven exact retained samples; configured mypy passed on seven owners. The final root cohort passed 209 cases with 12 warnings and no skips in 58.64 s; the actual native case is one additional pass. All 13 modified Python owners pass pinned Ruff check/format. The capability atlas was refreshed without claiming overall gap closure. Core V1 is superseded only by the root delivery_status unknown-ID KeyError→None contract fix. The three-page local report and procedure document the new local flight, saved assumptions and explicit lifecycle. No fit improvement, avatar/course capability, GL accuracy, ControlTower delivery or new remote CI claim is established. Tiger remains [0,191), Hogan [0,750); the full goal remains ACTIVE.
+
+See [Procedure](necromatcher-local-research-golf.md) and [Three-Page Report Source](necromatcher-local-research-golf-methods.tex). Native acceptance: `Temp/necromatcher-local-research-golf-native-freeze-v1/freeze.json`; source inventory covers 6,697 src/test files, not a whole-repository baseline.

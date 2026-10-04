@@ -103,6 +103,7 @@ function ImpactForm({replay,sampleCount}: {replay: string; sampleCount: number})
     {job.run && !submitted && <p className="text-xs">Stored assumptions and selected sample are retained in the verified receipt bundle; the current declaration is not the saved request.</p>}
     {active && job.controlAvailable && <button type="button" onClick={()=>void job.cancel()}>Cancel Research Impact</button>}
     {job.run?.status==='succeeded' && job.run.execution_verified && job.run.download_available && <a href={replayImpactDownloadUrl(replay,job.run.run_id)}>Download Research Trajectory and Receipt Bundle</a>}
+    {job.run?.status==='succeeded' && job.run.execution_verified && job.run.download_available && <a href={`/tools/golf-simulator?replay=${encodeURIComponent(replay)}&impactRun=${encodeURIComponent(job.run.run_id)}`}>Open Local Research Simulation</a>}
     {job.run?.status==='succeeded' && job.run.execution_verified && job.run.download_available && <p className="text-xs">Extract trajectory.json from the ZIP and use Import Trajectory in the <a href="/ball-flight">Ball Flight Viewer</a>. Retain impact-receipt.json for authored clock, assumptions and qualification context.</p>}
     {(error || job.error) && <p role="alert">{error || job.error}</p>}
   </section>;

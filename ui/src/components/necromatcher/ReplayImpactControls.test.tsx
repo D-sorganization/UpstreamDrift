@@ -85,6 +85,7 @@ it('recalls a saved verified run by exact ID without resubmission or invented as
   expect(screen.getByText(/Carry: 150 m/)).toHaveTextContent('Flight Time: 4 s');
   expect(screen.getByText(/Run Selected Replay Sample: 3/)).toHaveTextContent('authored_simulation_seconds');
   expect(screen.getByRole('link',{name:'Ball Flight Viewer'})).toHaveAttribute('href','/ball-flight');
+  expect(screen.getByRole('link',{name:'Open Local Research Simulation'})).toHaveAttribute('href',`/tools/golf-simulator?replay=replay&impactRun=${'a'.repeat(32)}`);
 });
 it.each(['clock','numeric type','missing declaration','unverified artifact'])('blocks incomplete saved %s metadata',async(kind)=>{
   const value=run();

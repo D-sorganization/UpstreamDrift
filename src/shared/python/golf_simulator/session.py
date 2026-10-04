@@ -7,6 +7,7 @@ All boundary invariants are verified regardless of python -O settings.
 from __future__ import annotations
 
 import datetime
+import copy
 import logging
 import uuid
 from typing import TYPE_CHECKING, Any
@@ -15,6 +16,8 @@ from src.shared.python.golf_simulator.contracts import (
     CapabilityState,
     ConnectionStatus,
     ContactStatus,
+    NumericalStatus,
+    ScientificStatus,
     PreparedShot,
     SessionState,
     ShotEnvelope,
@@ -22,6 +25,10 @@ from src.shared.python.golf_simulator.contracts import (
     SourceKind,
     SubmissionReceipt,
     SubmissionState,
+)
+from src.shared.python.golf_simulator.adapters.local import (
+    LocalReferenceAdapter,
+    TrajectoryRecord,
 )
 from src.shared.python.golf_simulator.journal import DeliveryStatus
 
@@ -58,6 +65,7 @@ class GolfSessionService:
         self._prepared_shot: PreparedShot | None = None
         self._receipts: dict[str, SubmissionReceipt] = {}
         self._destination_id: str = ""
+        self._research_prepared = False
 
     @property
     def current_state(self) -> SessionState:
@@ -101,6 +109,7 @@ class GolfSessionService:
         if self._state == SessionState.PREPARED:
             logger.info("Destination change invalidating prepared shot")
             self._prepared_shot = None
+            self._research_prepared = False
             self._state = SessionState.IDLE
 
         self._adapter = adapter
@@ -121,6 +130,43 @@ class GolfSessionService:
         - Destination must declare SUPPORTED for shot_input.
         - MODEL_CONTACT shots must possess QUALIFIED contact qualification.
         """
+        return self._prepare(shot, context_revision, research=False)
+
+    def prepare_research_shot(
+        self, shot: ShotEnvelope, context_revision: int = 1
+    ) -> PreparedShot:
+        """Explicitly prepare unverified model evidence for the actual local simulator."""
+        return self._prepare(shot, context_revision, research=True)
+
+    def _validate_research_shot(self, shot: ShotEnvelope) -> None:
+        if (
+            type(self._adapter) is not LocalReferenceAdapter
+            or self._destination_id != "local_in_memory"
+            or self._adapter.capabilities().local_trajectory_return.state
+            != CapabilityState.SUPPORTED
+        ):
+            raise ValueError(
+                "Research shots require the connected actual local destination"
+            )
+        qualification = shot.qualification
+        if (
+            shot.source_kind is not SourceKind.MODEL_CONTACT
+            or qualification.contact is not ContactStatus.UNVERIFIED
+            or qualification.numerical is not NumericalStatus.UNVERIFIED
+            or qualification.scientific is not ScientificStatus.UNVERIFIED
+            or not qualification.evidence_refs
+            or any(
+                not isinstance(ref, str) or not ref.strip()
+                for ref in qualification.evidence_refs
+            )
+        ):
+            raise ValueError(
+                "Research model shots require unverified qualification and evidence"
+            )
+
+    def _prepare(
+        self, shot: ShotEnvelope, context_revision: int, *, research: bool
+    ) -> PreparedShot:
         if self._state == SessionState.UNCERTAIN:
             raise RuntimeError(
                 "Session is in UNCERTAIN state; resolve prior delivery before preparing shots"
@@ -142,7 +188,9 @@ class GolfSessionService:
             )
 
         # Audit qualification requirements for model-driven shots
-        if shot.source_kind == SourceKind.MODEL_CONTACT:
+        if research:
+            self._validate_research_shot(shot)
+        elif shot.source_kind == SourceKind.MODEL_CONTACT:
             qualification = shot.qualification
             contact_status = qualification.contact
             if contact_status != ContactStatus.QUALIFIED:
@@ -161,6 +209,7 @@ class GolfSessionService:
             is_armed=False,
         )
         self._prepared_shot = prepared
+        self._research_prepared = research
         self._state = SessionState.PREPARED
         return prepared
 
@@ -223,6 +272,7 @@ class GolfSessionService:
             raise ValueError("prepared_shot_id does not match active prepared shot")
 
         self._prepared_shot = None
+        self._research_prepared = False
         self._state = SessionState.IDLE
 
     async def submit_at_impact(
@@ -244,6 +294,15 @@ class GolfSessionService:
             raise ValueError("Invalid arm token")
 
         shot = self._prepared_shot.shot
+        if self._research_prepared:
+            self._validate_research_shot(shot)
+            if (
+                self._adapter.capabilities().shot_input.state
+                != CapabilityState.SUPPORTED
+            ):
+                raise ValueError(
+                    "Local research destination no longer supports shot input"
+                )
         self._state = SessionState.SUBMITTING
 
         # 1. Pre-send intent logging
@@ -279,6 +338,7 @@ class GolfSessionService:
 
         self._receipts[shot.shot_id] = receipt
         self._prepared_shot = None
+        self._research_prepared = False
 
         # 4. State transition
         if receipt.state == SubmissionState.UNKNOWN_AMBIGUOUS:
@@ -288,12 +348,31 @@ class GolfSessionService:
 
         return receipt
 
+    def get_local_trajectory_record(self, shot_id: str) -> TrajectoryRecord:
+        """Recall detached samples only after confirmed delivery to the actual local owner."""
+        receipt = self._receipts.get(shot_id)
+        if (
+            type(self._adapter) is not LocalReferenceAdapter
+            or self._destination_id != "local_in_memory"
+            or receipt is None
+            or receipt.destination_id != "local_reference"
+            or receipt.state != SubmissionState.CONFIRMED_ACCEPTED
+        ):
+            raise ValueError("No confirmed local trajectory for this session shot")
+        record = self._adapter.get_trajectory_record(shot_id)
+        if record is None or record.shot_id != shot_id:
+            raise ValueError("Local trajectory identity differs from confirmed shot")
+        return copy.deepcopy(record)
+
     def delivery_status(self, shot_id: str) -> SubmissionReceipt | None:
         """Query submission receipt for a delivered shot."""
         if shot_id in self._receipts:
             return self._receipts[shot_id]
         if self._journal is not None:
-            entry = self._journal.get_entry(shot_id)
+            try:
+                entry = self._journal.get_entry(shot_id)
+            except KeyError:
+                return None
             if entry is not None:
                 if entry.status == DeliveryStatus.ACKNOWLEDGED:
                     sub_state = SubmissionState.CONFIRMED_ACCEPTED

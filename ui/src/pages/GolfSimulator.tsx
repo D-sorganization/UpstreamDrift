@@ -13,6 +13,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { apiFetch } from "@/api/fetch";
 import { WorkspaceShell } from "@/components/layout/WorkspaceShell";
+import { ResearchGolfSimulator } from "@/components/necromatcher/ResearchGolfSimulator";
+import { useInRouterContext, useLocation } from "react-router";
 
 export type DeliveryStatus =
   | "DISCONNECTED"
@@ -51,6 +53,22 @@ function getErrorMessage(err: unknown, fallback: string): string {
 }
 
 export function GolfSimulatorPage() {
+  const routed = useInRouterContext();
+  return routed ? <RoutedGolfSimulator /> : <SelectedGolfSimulator search={window.location.search} />;
+}
+
+function RoutedGolfSimulator() {
+  const location = useLocation();
+  return <SelectedGolfSimulator search={location.search} />;
+}
+
+function SelectedGolfSimulator({search}: {search: string}) {
+  const params = new URLSearchParams(search);
+  if (params.has('replay') || params.has('impactRun')) return <ResearchGolfSimulator search={search} />;
+  return <ManualGolfSimulatorPage />;
+}
+
+function ManualGolfSimulatorPage() {
   const [destinations, setDestinations] = useState<DestinationItem[]>([]);
   const [selectedDest, setSelectedDest] = useState<string>("local");
   const [sessionState, setSessionState] = useState<DeliveryStatus>("DISCONNECTED");

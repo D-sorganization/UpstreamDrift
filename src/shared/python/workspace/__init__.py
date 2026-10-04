@@ -118,6 +118,7 @@ from .project_store import (
     SessionProjectStore,
     SubjectMetadata,
 )
+from .necromatcher_golf import ResearchImpactShot, load_research_impact_shot
 from .results_browser import ResultArtifact, ResultFilter, ResultsBrowser
 from .estimation_workspace import (
     EstimationJobResult,
@@ -423,5 +424,7 @@ __all__ = [
     "refit_plan",
     "resolve_matching_route",
     "start_native_refit",
+    "ResearchImpactShot",
+    "load_research_impact_shot",
     "validate_run_compatibility",
 ]

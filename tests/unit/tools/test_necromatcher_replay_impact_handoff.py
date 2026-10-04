@@ -15,6 +15,47 @@ from src.tools.necromatcher import replay_impact_dialog as owner
 pytestmark = pytest.mark.unit
 
 
+def test_local_research_action_uses_public_authenticated_loader(monkeypatch):
+    dispatched = []
+    loaded = []
+    monkeypatch.setattr(
+        owner,
+        "load_research_impact_shot",
+        lambda *args: loaded.append(args) or "admitted",
+    )
+    dialog = SimpleNamespace(
+        open_golf=SimpleNamespace(isEnabled=lambda: True),
+        run={"run_id": "a" * 32},
+        replay_id="replay",
+        session=SimpleNamespace(library="canonical library"),
+        _work=lambda operation, target: dispatched.append((operation, target)),
+    )
+    owner.ReplayImpactDialog._open_golf(dialog)
+    assert dispatched[0][0] == "golf"
+    assert dispatched[0][1]() == "admitted"
+    library, replay, run, metadata = loaded[0]
+    assert (library, replay, run) == ("canonical library", "replay", "a" * 32)
+    assert metadata.source_kind.value == "model_contact"
+    assert (
+        metadata.aim_context.provenance
+        == "operator_declared_identity_for_local_research"
+    )
+    assert metadata.aim_context.source_to_target_rotation == (
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0),
+    )
+    assert metadata.shot_id != metadata.session_id
+    assert metadata.created_at_utc
+
+
+def test_local_research_action_disabled_does_not_load():
+    dialog = SimpleNamespace(
+        open_golf=SimpleNamespace(isEnabled=lambda: False), run=None
+    )
+    owner.ReplayImpactDialog._open_golf(dialog)
+
+
 def test_foreign_run_zip_rejected_before_receipt_or_viewer(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

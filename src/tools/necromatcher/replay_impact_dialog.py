@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import datetime
+import uuid
 import math
 import re
 from collections.abc import Callable
@@ -22,12 +24,14 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
+from src.shared.python.golf_simulator import AimContext, ShotMetadata, SourceKind
 from src.shared.python.workspace import (
     ReplayImpactGeometry,
     ReplayImpactSelection,
     ShotTrajectoryHandoffCoordinator,
     compute_file_sha256,
     load_replay_impact_receipt,
+    load_research_impact_shot,
 )
 from .video_dialog import copy_export
 
@@ -243,6 +247,7 @@ class ReplayImpactDialog(QDialog):
         self._operation = ""
         self.tracer_widget: Any = None
         self._tracer_windows: list[QDialog] = []
+        self._golf_windows: list[Any] = []
         self.setWindowTitle("Authored Replay Research Impact")
         self._build()
         self._timer = QTimer(self)
@@ -280,6 +285,9 @@ class ReplayImpactDialog(QDialog):
             QPushButton("Save Checked Impact ZIP"),
         )
         self.open_tracer = QPushButton("Open in Shot Tracer")
+        self.open_golf = QPushButton(
+            "Open Local Research Simulation (Declare Identity Frame)"
+        )
         for widget in (
             self.declaration_path,
             self.import_declaration,
@@ -294,6 +302,7 @@ class ReplayImpactDialog(QDialog):
             (self.cancel, self._cancel),
             (self.save, self._save),
             (self.open_tracer, self._open_tracer),
+            (self.open_golf, self._open_golf),
         ):
             button.clicked.connect(callback)
             layout.addWidget(button)
@@ -349,6 +358,7 @@ class ReplayImpactDialog(QDialog):
             )
         )
         self.open_tracer.setEnabled(self.save.isEnabled())
+        self.open_golf.setEnabled(self.save.isEnabled())
 
     def _work(self, operation: str, target: Callable[[], Any]) -> None:
         if self._closed or self._worker:
@@ -466,6 +476,8 @@ class ReplayImpactDialog(QDialog):
             self.status.setText(f"Checked Research Impact ZIP Saved: {result}")
         elif self._operation == "tracer":
             self._show_tracer(*result)
+        elif self._operation == "golf":
+            self._show_golf(result)
         else:
             self.run = checked_impact_view(result, self.replay_id, self.sample_count)
             self._render()
@@ -553,11 +565,47 @@ class ReplayImpactDialog(QDialog):
         self._tracer_windows.append(host)
         host.show()
 
+    def _open_golf(self) -> None:
+        if not self.open_golf.isEnabled() or self.run is None:
+            return
+        run_id = self.run["run_id"]
+        metadata = ShotMetadata(
+            shot_id="research-shot-" + uuid.uuid4().hex,
+            session_id="research-session-" + uuid.uuid4().hex,
+            aim_context=AimContext(
+                ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)),
+                provenance="operator_declared_identity_for_local_research",
+            ),
+            created_at_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            source_kind=SourceKind.MODEL_CONTACT,
+        )
+        self._work(
+            "golf",
+            lambda: load_research_impact_shot(
+                self.session.library, self.replay_id, run_id, metadata
+            ),
+        )
+
+    def _show_golf(self, admitted: Any) -> None:
+        from src.tools.golf_simulator.research_dialog import ResearchGolfDialog
+
+        if (
+            self.run is None
+            or admitted.replay_id != self.replay_id
+            or admitted.run_id != self.run["run_id"]
+        ):
+            raise ValueError("Research admission belongs to another replay/run")
+        dialog = ResearchGolfDialog(self, admitted)
+        self._golf_windows.append(dialog)
+        dialog.show()
+
     def cleanup(self) -> None:
         """Cancel/drain the dedicated session off Qt; late results remain hidden."""
         if self._closed:
             return
         self._closed = True
+        for dialog in self._golf_windows:
+            dialog.cleanup()
         self._timer.stop()
         self._controls()
         worker = self._worker
