@@ -1,0 +1,333 @@
+{
+  "$schema": "cov-landmark-correspondence/1.0.0",
+  "version": "1.0.0",
+  "governing_issue": 11271,
+  "parent_epic": 11268,
+  "description": "Capture-34 optical marker set to derived joint centres and detector keypoint correspondence table",
+  "capture_marker_set": {
+    "name": "capture-34",
+    "authority": "src/engines/physics_engines/opensim/python/tour_matching/marker_map.py",
+    "anatomical_markers_count": 28,
+    "club_markers_count": 6,
+    "total_markers_count": 34
+  },
+  "detector_layouts": {
+    "mediapipe_33": {
+      "name": "mediapipe_pose_33",
+      "authority": "src/shared/python/pose_estimation/mediapipe_estimator.py",
+      "keypoint_count": 33
+    },
+    "coco_17": {
+      "name": "coco17",
+      "authority": "src/shared/python/pose_estimation/rtmpose_onnx_estimator.py",
+      "keypoint_count": 17
+    },
+    "openpose_25": {
+      "name": "openpose_body25",
+      "authority": "src/shared/python/pose_estimation/openpose_dnn_estimator.py",
+      "keypoint_count": 25
+    },
+    "smpl_22": {
+      "name": "SMPL-22",
+      "authority": "src/shared/python/motion_pipeline/sources/hmr2_adapter.py",
+      "keypoint_count": 22
+    }
+  },
+  "derived_joint_centres": [
+    {
+      "joint_name": "pelvis",
+      "source_markers": ["WaistLeft", "WaistRight", "WaistLBack", "WaistRBack"],
+      "derivation": "Midpoint of front waist markers and back waist markers",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": null,
+        "coco_17": null,
+        "openpose_25": "mid_hip",
+        "smpl_22": "pelvis"
+      },
+      "notes": "Direct pelvis root in OpenPose BODY_25 and SMPL-22; MediaPipe and COCO represent pelvis as midpoint of left/right hips"
+    },
+    {
+      "joint_name": "left_hip",
+      "source_markers": ["WaistLeft", "WaistLBack", "WaistRight", "WaistRBack"],
+      "derivation": "Pelvis origin offset by anatomical hip half-width and hip drop in pelvis frame",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_hip",
+        "coco_17": "left_hip",
+        "openpose_25": "left_hip",
+        "smpl_22": "left_hip"
+      },
+      "notes": "Acetabulofemoral joint centre inferred from pelvic landmark frame"
+    },
+    {
+      "joint_name": "right_hip",
+      "source_markers": ["WaistLeft", "WaistLBack", "WaistRight", "WaistRBack"],
+      "derivation": "Pelvis origin offset by anatomical hip half-width and hip drop in pelvis frame",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_hip",
+        "coco_17": "right_hip",
+        "openpose_25": "right_hip",
+        "smpl_22": "right_hip"
+      },
+      "notes": "Acetabulofemoral joint centre inferred from pelvic landmark frame"
+    },
+    {
+      "joint_name": "left_knee",
+      "source_markers": ["LKneeOut"],
+      "derivation": "LKneeOut lateral epicondyle marker shifted inset toward body midline",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_knee",
+        "coco_17": "left_knee",
+        "openpose_25": "left_knee",
+        "smpl_22": "left_knee"
+      },
+      "notes": "Tibiofemoral joint centre"
+    },
+    {
+      "joint_name": "right_knee",
+      "source_markers": ["RKneeOut"],
+      "derivation": "RKneeOut lateral epicondyle marker shifted inset toward body midline",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_knee",
+        "coco_17": "right_knee",
+        "openpose_25": "right_knee",
+        "smpl_22": "right_knee"
+      },
+      "notes": "Tibiofemoral joint centre"
+    },
+    {
+      "joint_name": "left_ankle",
+      "source_markers": ["LAnkleOut"],
+      "derivation": "LAnkleOut lateral malleolus marker shifted inset toward body midline",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_ankle",
+        "coco_17": "left_ankle",
+        "openpose_25": "left_ankle",
+        "smpl_22": "left_ankle"
+      },
+      "notes": "Talocrural joint centre"
+    },
+    {
+      "joint_name": "right_ankle",
+      "source_markers": ["RAnkleOut"],
+      "derivation": "RAnkleOut lateral malleolus marker shifted inset toward body midline",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_ankle",
+        "coco_17": "right_ankle",
+        "openpose_25": "right_ankle",
+        "smpl_22": "right_ankle"
+      },
+      "notes": "Talocrural joint centre"
+    },
+    {
+      "joint_name": "left_shoulder",
+      "source_markers": ["LShoulderTop", "LShoulderBack", "BackTop"],
+      "derivation": "LShoulderTop acromion marker shifted downward by shoulder drop in thorax frame",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_shoulder",
+        "coco_17": "left_shoulder",
+        "openpose_25": "left_shoulder",
+        "smpl_22": "left_shoulder"
+      },
+      "notes": "Glenohumeral joint centre"
+    },
+    {
+      "joint_name": "right_shoulder",
+      "source_markers": ["RShoulderTop", "RShoulderBack", "BackTop"],
+      "derivation": "RShoulderTop acromion marker shifted downward by shoulder drop (reconstructed via RShoulderBack when top is occluded)",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_shoulder",
+        "coco_17": "right_shoulder",
+        "openpose_25": "right_shoulder",
+        "smpl_22": "right_shoulder"
+      },
+      "notes": "Glenohumeral joint centre"
+    },
+    {
+      "joint_name": "left_elbow",
+      "source_markers": ["LElbowOut", "LUArmHigh"],
+      "derivation": "LElbowOut lateral epicondyle marker proxy",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_elbow",
+        "coco_17": "left_elbow",
+        "openpose_25": "left_elbow",
+        "smpl_22": "left_elbow"
+      },
+      "notes": "Humeroulnar joint centre"
+    },
+    {
+      "joint_name": "right_elbow",
+      "source_markers": ["RElbowOut", "RUArmHigh"],
+      "derivation": "RElbowOut lateral epicondyle marker proxy",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_elbow",
+        "coco_17": "right_elbow",
+        "openpose_25": "right_elbow",
+        "smpl_22": "right_elbow"
+      },
+      "notes": "Humeroulnar joint centre"
+    },
+    {
+      "joint_name": "left_wrist",
+      "source_markers": ["LWristTop"],
+      "derivation": "LWristTop distal radius/ulna surface marker proxy",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "left_wrist",
+        "coco_17": "left_wrist",
+        "openpose_25": "left_wrist",
+        "smpl_22": "left_wrist"
+      },
+      "notes": "Radiocarpal joint centre"
+    },
+    {
+      "joint_name": "right_wrist",
+      "source_markers": ["RWristTop"],
+      "derivation": "RWristTop distal radius/ulna surface marker proxy",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": "right_wrist",
+        "coco_17": "right_wrist",
+        "openpose_25": "right_wrist",
+        "smpl_22": "right_wrist"
+      },
+      "notes": "Radiocarpal joint centre"
+    },
+    {
+      "joint_name": "neck",
+      "source_markers": ["BackTop"],
+      "derivation": "BackTop C7 spinous process marker translated anterior-superior toward cervical joint centre",
+      "correspondence_type": "joint_centre",
+      "detector_targets": {
+        "mediapipe_33": null,
+        "coco_17": null,
+        "openpose_25": "neck",
+        "smpl_22": "neck"
+      },
+      "notes": "Cervicothoracic junction; MediaPipe and COCO-17 lack an explicit neck joint"
+    },
+    {
+      "joint_name": "head",
+      "source_markers": ["HeadTop", "HeadFront", "HeadSide"],
+      "derivation": "Head cluster centroid or HeadTop cranial marker",
+      "correspondence_type": "proxy_centroid",
+      "detector_targets": {
+        "mediapipe_33": null,
+        "coco_17": null,
+        "openpose_25": null,
+        "smpl_22": "head"
+      },
+      "notes": "Cranial centroid; 2D detectors detect facial landmarks (nose, eyes) rather than head centre"
+    },
+    {
+      "joint_name": "left_foot",
+      "source_markers": ["LToeIn", "LToeOut"],
+      "derivation": "Midpoint of medial and lateral metatarsal head markers",
+      "correspondence_type": "surface_marker",
+      "detector_targets": {
+        "mediapipe_33": "left_foot_index",
+        "coco_17": null,
+        "openpose_25": "left_big_toe",
+        "smpl_22": "left_foot"
+      },
+      "notes": "Forefoot position; COCO-17 terminates at ankle"
+    },
+    {
+      "joint_name": "right_foot",
+      "source_markers": ["RToeIn", "RToeOut"],
+      "derivation": "Midpoint of medial and lateral metatarsal head markers",
+      "correspondence_type": "surface_marker",
+      "detector_targets": {
+        "mediapipe_33": "right_foot_index",
+        "coco_17": null,
+        "openpose_25": "right_big_toe",
+        "smpl_22": "right_foot"
+      },
+      "notes": "Forefoot position; COCO-17 terminates at ankle"
+    }
+  ],
+  "excluded_mappings": [
+    {
+      "marker_or_keypoint": "HeadFront",
+      "matched_candidate": "nose",
+      "status": "excluded",
+      "rationale": "HeadFront sits on the forehead/cap surface while nose keypoint sits on the facial nasal tip; 3D offset (~100 mm) causes artificial residual error"
+    },
+    {
+      "marker_or_keypoint": "HeadSide",
+      "matched_candidate": "ear",
+      "status": "excluded",
+      "rationale": "Temporal helmet marker is not co-located with external auditory meatus"
+    },
+    {
+      "marker_or_keypoint": "LUArmHigh",
+      "matched_candidate": null,
+      "status": "excluded",
+      "rationale": "Humeral tracking marker to resolve axial arm twist; no anatomical keypoint in 2D detectors"
+    },
+    {
+      "marker_or_keypoint": "RUArmHigh",
+      "matched_candidate": null,
+      "status": "excluded",
+      "rationale": "Humeral tracking marker to resolve axial arm twist; no anatomical keypoint in 2D detectors"
+    },
+    {
+      "marker_or_keypoint": "BackLeft",
+      "matched_candidate": null,
+      "status": "excluded",
+      "rationale": "Scapular tracking marker; standard 2D detectors do not predict posterior dorsal surface landmarks"
+    },
+    {
+      "marker_or_keypoint": "BackRight",
+      "matched_candidate": null,
+      "status": "excluded",
+      "rationale": "Scapular tracking marker; standard 2D detectors do not predict posterior dorsal surface landmarks"
+    },
+    {
+      "marker_or_keypoint": "Marker_2:2:1",
+      "matched_candidate": "club_shaft",
+      "status": "excluded",
+      "rationale": "Club shaft cluster marker; human pose estimation backends do not detect equipment"
+    },
+    {
+      "marker_or_keypoint": "Marker_2:2:2",
+      "matched_candidate": "club_shaft",
+      "status": "excluded",
+      "rationale": "Club shaft cluster marker; human pose estimation backends do not detect equipment"
+    },
+    {
+      "marker_or_keypoint": "Marker_2:2:3",
+      "matched_candidate": "club_shaft",
+      "status": "excluded",
+      "rationale": "Club shaft cluster marker; human pose estimation backends do not detect equipment"
+    },
+    {
+      "marker_or_keypoint": "Marker_3:3:1",
+      "matched_candidate": "club_head",
+      "status": "excluded",
+      "rationale": "Club head cluster marker; excluded from 2D per-frame metrics due to severe impact motion blur and absence in human detectors"
+    },
+    {
+      "marker_or_keypoint": "Marker_3:3:2",
+      "matched_candidate": "club_head",
+      "status": "excluded",
+      "rationale": "Club head cluster marker; excluded from 2D per-frame metrics due to severe impact motion blur and absence in human detectors"
+    },
+    {
+      "marker_or_keypoint": "Marker_3:3:3",
+      "matched_candidate": "club_head",
+      "status": "excluded",
+      "rationale": "Club head cluster marker; excluded from 2D per-frame metrics due to severe impact motion blur and absence in human detectors"
+    }
+  ]
+}
