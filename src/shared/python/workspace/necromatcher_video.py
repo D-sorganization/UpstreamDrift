@@ -22,6 +22,11 @@ from src.shared.python.shadow_tracker.source_records import VariableFrameRateErr
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_native import NativeFitBinding, load_native_fit_binding
 from .necromatcher_review import CaptureReview
+from .necromatcher_video_forces import (
+    ForceLayer,
+    ForceLayerRenderer,
+    ForceSamplerFactory,
+)
 
 _OBSERVED = (90, 230, 90)
 _NATIVE = (255, 170, 30)
@@ -176,7 +181,7 @@ def _rigid_segments(binding: NativeFitBinding) -> list[dict[str, str]]:
 
 def _draw_rigid_skeleton(
     binding: NativeFitBinding, pose: np.ndarray, image: np.ndarray
-) -> None:
+) -> dict[str, np.ndarray]:
     edges = _rigid_segments(binding)
     names = sorted({name for edge in edges for name in edge.values()})
     poses = binding.plant.frame_poses({name: (name, (0, 0, 0)) for name in names}, pose)
@@ -192,6 +197,7 @@ def _draw_rigid_skeleton(
         a, b = points[edge["a"]], points[edge["b"]]
         if np.linalg.norm(a - b) > 1e-9:
             _line(image, a, b, _NATIVE, 2)
+    return {name: np.asarray(poses[name][1], dtype=float) for name in names}
 
 
 def _observations(row: dict[str, Any]) -> dict[str, np.ndarray]:
@@ -213,6 +219,7 @@ def _render(
     review: CaptureReview,
     index: int,
     anatomy: dict[str, Any],
+    force: ForceLayerRenderer | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     import cv2
 
@@ -238,7 +245,8 @@ def _render(
         if anatomy
         else {}
     )
-    _draw_rigid_skeleton(binding, pose, image)
+    origins = _draw_rigid_skeleton(binding, pose, image)
+    layer_record = force.draw(image, position, pose, origins) if force else {}
     for segment in default_body_segments(tuple(anatomical)):
         _line(image, anatomical[segment.a], anatomical[segment.b], _NATIVE, 2)
     observed = _observations(row)
@@ -259,6 +267,9 @@ def _render(
         if rms is not None
         else "Matched RMS unavailable (no common observed markers)"
     )
+    unavailable = (
+        [f"Force layer unavailable: {force.reason}"] if force and force.reason else []
+    )
     _caption(
         image,
         [
@@ -266,6 +277,7 @@ def _render(
             "Camera/anatomy unqualified | Physical time unknown",
             metric,
             "Green: observations | Blue: native rig/seeds | Yellow: residuals",
+            *unavailable,
         ],
     )
     return image, {
@@ -274,6 +286,7 @@ def _render(
         "original_png_sha256": hashlib.sha256(original_png).hexdigest(),
         "matched_marker_count": len(errors),
         "matched_rms_pixels": rms,
+        **layer_record,
     }
 
 
@@ -309,13 +322,22 @@ def export_fit_video(
     destination: Path,
     *,
     selected_frames: Sequence[int] = (),
+    force_layer: ForceLayer | None = None,
+    force_sampler_factory: ForceSamplerFactory | None = None,
 ) -> dict[str, Any]:
     """Publish a new MP4/PNG/manifest directory only after complete codec verification.
 
     Preconditions: hash-bound native fit, contiguous uniform source PTS and selected
     PNG indices inside that fit. Postcondition: source bytes remain untouched and
     output hashes, frame identities and unqualified scientific status are recorded.
+    An enabled ``force_layer`` additionally requires ``force_sampler_factory``.
     """
+    if (
+        force_layer is not None
+        and force_layer.enabled
+        and force_sampler_factory is None
+    ):
+        raise ValueError("An enabled force layer requires a force sampler factory")
     destination = Path(destination)
     if destination.exists():
         raise FileExistsError(destination)
@@ -332,7 +354,20 @@ def export_fit_video(
         staging = Path(temporary) / "export"
         staging.mkdir()
         manifest = _write_export(
-            binding, library, staging, rate, set(selected_frames), anatomy, missing
+            binding,
+            library,
+            staging,
+            rate,
+            set(selected_frames),
+            anatomy,
+            missing,
+            ForceLayerRenderer(
+                binding, force_layer, force_sampler_factory, _rigid_segments(binding)
+            )
+            if force_layer is not None
+            and force_layer.enabled
+            and force_sampler_factory is not None
+            else None,
         )
         # Existing library authority rechecks parent and fit hashes before publication.
         if library.load_asset(fit_id).metadata["hash"] != binding.fit_hash:
@@ -379,6 +414,7 @@ def _write_export(
     selected: set[int],
     anatomy: dict[str, Any],
     missing: list[str],
+    force: ForceLayerRenderer | None = None,
 ) -> dict[str, Any]:
     import cv2
 
@@ -396,7 +432,7 @@ def _write_export(
             if not writer.isOpened():
                 raise ValueError("MP4 encoder could not open")
             for index in binding.fit["frame_indices"]:
-                image, record = _render(binding, review, index, anatomy)
+                image, record = _render(binding, review, index, anatomy, force)
                 writer.write(image)
                 records.append(record)
                 if index in selected:
@@ -445,6 +481,8 @@ def _write_export(
             "bytes": (staging / "overlay.mp4").stat().st_size,
         },
     }
+    if force is not None:
+        manifest["force_layer"] = force.manifest()
     (staging / "manifest.json").write_text(
         json.dumps(manifest, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )

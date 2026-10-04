@@ -9,7 +9,14 @@ import shutil
 from typing import Any
 
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QDialog, QFileDialog, QLabel, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QFileDialog,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from src.shared.python.ui.adapters import BackgroundWorker, get_worker_adapter
 from src.shared.python.workspace import compute_file_sha256
@@ -63,6 +70,12 @@ class VideoExportDialog(QDialog):
         )
         self.boundary.setWordWrap(True)
         layout.addWidget(self.boundary)
+        self.force_layer = QCheckBox(
+            "Draw force and torque glyphs (research fit; not measured forces)"
+        )
+        self.segment_shading = QCheckBox("Shade body segments")
+        layout.addWidget(self.force_layer)
+        layout.addWidget(self.segment_shading)
         self.start = QPushButton("Render Original-Footage Overlay")
         self.cancel = QPushButton("Cancel Export")
         self.save = QPushButton("Save Checked ZIP")
@@ -81,6 +94,17 @@ class VideoExportDialog(QDialog):
         self._timer = QTimer(self)
         self._timer.setInterval(100)
         self._timer.timeout.connect(self._poll)
+
+    def force_layer_settings(self) -> dict[str, Any] | None:
+        """Opt-in layer settings, or None so the default export is unchanged."""
+        if not self.force_layer.isChecked():
+            return None
+        return {
+            "enabled": True,
+            "kinds": ["joint_reaction"],
+            "scale": 1.0,
+            "segment_shading": self.segment_shading.isChecked(),
+        }
 
     def _work(self, operation: str, target: Callable[[], Any]) -> None:
         def guarded() -> Any:
@@ -103,7 +127,15 @@ class VideoExportDialog(QDialog):
         self._cancel_requested = False
         self.cancel.setEnabled(True)
         self.status.setText("Submitting Research Overlay…")
-        self._work("submit", lambda: self.session.submit(self.source_fit_id))
+        layer = self.force_layer_settings()
+        self._work(
+            "submit",
+            lambda: (
+                self.session.submit(self.source_fit_id, force_layer=layer)
+                if layer
+                else self.session.submit(self.source_fit_id)
+            ),
+        )
 
     def _poll(self) -> None:
         if self._closed:
