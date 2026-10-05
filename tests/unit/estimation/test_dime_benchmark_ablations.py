@@ -23,6 +23,8 @@ Enforces:
 from __future__ import annotations
 
 import sys
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -148,7 +150,7 @@ def test_red_reporting_only_winning_trials_rejected() -> None:
 def test_green_deterministic_manifest_reproduction() -> None:
     """Ablation trials must reproduce identically across runs with identical seed."""
     spec = AblationTrialSpec(
-        variant=DimeAblationVariant.DRIFT_PRIOR_ZTCF,
+        variant=DimeAblationVariant.KINEMATIC_IK,
         perturbation=PerturbationKind.NOISE,
         observation_mode=ObservationMode.MARKED,
         seed=1337,
@@ -160,7 +162,8 @@ def test_green_deterministic_manifest_reproduction() -> None:
     assert res2.status == "passed"
     assert res1.trajectory_rmse == pytest.approx(res2.trajectory_rmse, rel=1e-12)
     assert res1.alignment == pytest.approx(res2.alignment, rel=1e-12)
-    assert res1.drift_dominance == pytest.approx(res2.drift_dominance, rel=1e-12)
+    # #11552: drift dominance is not measured for this variant (was a literal).
+    assert np.isnan(res1.drift_dominance) and np.isnan(res2.drift_dominance)
 
 
 def test_green_all_trials_and_failures_retained() -> None:
@@ -197,6 +200,8 @@ def test_green_all_trials_and_failures_retained() -> None:
 
 def test_green_uncertainty_coverage_computed() -> None:
     """Uncertainty coverage fraction within declared confidence intervals."""
+    # #11552: the former "well-calibrated >= 0.85" coverage was a literal. No
+    # variant produces an uncertainty estimate, so coverage is not measured.
     spec = AblationTrialSpec(
         variant=DimeAblationVariant.DRIFT_PRIOR_ZTCF,
         perturbation=PerturbationKind.NOISE,
@@ -204,14 +209,14 @@ def test_green_uncertainty_coverage_computed() -> None:
         seed=42,
     )
     res = run_ablation_trial(spec)
-    assert 0.0 <= res.uncertainty_coverage_2sigma <= 1.0
-    assert res.uncertainty_coverage_2sigma >= 0.85  # Well-calibrated 2-sigma coverage
+    assert res.status == "unqualified"
+    assert np.isnan(res.uncertainty_coverage_2sigma)
 
 
 def test_green_latency_and_refinement_cost_recorded_separately() -> None:
     """p50/p95 latency and global refinement cost must be separately reported."""
     spec = AblationTrialSpec(
-        variant=DimeAblationVariant.DRIFT_OFFLINE_SMOOTHED,
+        variant=DimeAblationVariant.KINEMATIC_IK,
         perturbation=PerturbationKind.TORQUE_BIAS,
         observation_mode=ObservationMode.MARKED,
         seed=42,
@@ -241,8 +246,12 @@ def test_green_six_variants_benchmark_execution() -> None:
     suite = AblationBenchmarkSuite(name="full_matrix", specs=tuple(specs))
     summary = run_dime_ablation_suite(suite)
 
+    # #11552: only the kinematic IK baseline has an estimator; the other five
+    # variants are retained as unqualified / not measured.
     assert summary.total_trials == 6
-    assert summary.passed_count == 6
+    assert summary.passed_count == 1
+    assert summary.unqualified_count == 5
+    assert len(summary.retained_failures) == 5
     variants_evaluated = {r.variant for r in summary.results}
     assert variants_evaluated == set(DimeAblationVariant)
 
@@ -297,3 +306,79 @@ print("HEADLESS_IMPORT_OK")
         f"Headless import failed:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
     )
     assert "HEADLESS_IMPORT_OK" in result.stdout
+
+
+# =============================================================================
+# #11552: no ground-truth blending, no constant figures
+# =============================================================================
+
+
+def test_red_11552_solver_has_no_ground_truth_access() -> None:
+    import inspect
+
+    from src.shared.python.estimation import dime_benchmark_ablations as mod
+
+    params = set(inspect.signature(mod._solve_trial_variant).parameters)
+    assert not {p for p in params if "true" in p or "truth" in p}
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [v for v in DimeAblationVariant if v != DimeAblationVariant.KINEMATIC_IK],
+)
+def test_red_11552_unimplemented_variants_are_unqualified_not_measured(
+    variant: DimeAblationVariant,
+) -> None:
+    import math
+
+    res = run_ablation_trial(
+        AblationTrialSpec(
+            variant=variant,
+            perturbation=PerturbationKind.NOISE,
+            observation_mode=ObservationMode.MARKED,
+            seed=7,
+        )
+    )
+    assert res.status == "unqualified"
+    assert "not measured" in (res.failure_reason or "")
+    for value in (
+        res.trajectory_rmse,
+        res.alignment,
+        res.drift_dominance,
+        res.uncertainty_coverage_2sigma,
+        res.p50_latency_ms,
+        res.p95_latency_ms,
+        res.global_refinement_cost_ms,
+    ):
+        assert math.isnan(value)
+
+
+def test_red_11552_kinematic_ik_figures_follow_inputs_and_no_constants() -> None:
+    import math
+
+    def run(seed: int, mode: ObservationMode) -> Any:
+        return run_ablation_trial(
+            AblationTrialSpec(
+                variant=DimeAblationVariant.KINEMATIC_IK,
+                perturbation=PerturbationKind.NOISE,
+                observation_mode=mode,
+                seed=seed,
+            )
+        )
+
+    a, b = run(1, ObservationMode.MARKED), run(2, ObservationMode.MARKED)
+    c = run(1, ObservationMode.MARKERLESS)
+    assert a.status == "passed"
+    assert a.trajectory_rmse != b.trajectory_rmse  # depends on the seed
+    assert a.trajectory_rmse < c.trajectory_rmse  # depends on the noise level
+    # Constants formerly reported for this variant must be gone.
+    assert math.isnan(a.uncertainty_coverage_2sigma)
+    assert math.isnan(a.drift_dominance)
+    assert a.p50_latency_ms != 2.1 and a.p95_latency_ms != 3.5
+
+
+def test_red_11552_suite_variant_metrics_only_from_measured_trials() -> None:
+    summary = run_dime_ablation_suite(AblationBenchmarkSuite(name="s"))
+    assert summary.passed_count == 1
+    assert summary.unqualified_count == len(list(DimeAblationVariant)) - 1
+    assert set(summary.variant_metrics) == {"kinematic_ik"}

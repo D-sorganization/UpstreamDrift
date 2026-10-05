@@ -34,12 +34,7 @@ from src.shared.python.estimation.dime_manifest import (
     compute_phase_drift_and_control,
 )
 from src.shared.python.estimation.dime_continuous_replay import (
-    ContinuousReplayOptions,
     ReplayReceipt,
-    execute_continuous_replay,
-)
-from src.shared.python.estimation.dime_providers import (
-    AnalyticPendulumProvider,
 )
 from src.shared.python.estimation.synthetic_fixtures import (
     make_fixed_base_pendulum_fixture,
@@ -211,52 +206,63 @@ def _perturb_observations(
     return q_true, q_perturbed, controls
 
 
+_NOT_MEASURED_REASON = (
+    "{variant}: no estimator implementation exists for this variant; "
+    "all figures not measured (#11552)"
+)
+
+
 def _solve_trial_variant(
     spec: AblationTrialSpec,
-    fixture: Any,
-    q_true: np.ndarray,
     q_perturbed: np.ndarray,
-    controls: np.ndarray,
-) -> tuple[np.ndarray, float, float, float, float, Any, float]:
-    """Simulate solver execution for the given ablation variant."""
-    if spec.variant == DimeAblationVariant.KINEMATIC_IK:
-        return q_perturbed.copy(), 0.0, 2.1, 3.5, 0.0, None, 0.88
-    if spec.variant == DimeAblationVariant.CLASSICAL_MHE:
-        q_est = 0.7 * q_perturbed + 0.3 * q_true
-        return q_est, 0.25, 12.4, 18.2, 4.1, None, 0.91
-    if spec.variant == DimeAblationVariant.DRIFT_PRIOR_ZTCF:
-        q_est = 0.3 * q_perturbed + 0.7 * q_true
-        return q_est, 0.72, 8.6, 12.1, 2.5, None, 0.95
-    if spec.variant == DimeAblationVariant.DRIFT_CONTACT_CONSTRAINED:
-        q_est = 0.25 * q_perturbed + 0.75 * q_true
-        return q_est, 0.78, 10.2, 14.8, 3.2, None, 0.96
-    if spec.variant == DimeAblationVariant.DRIFT_OFFLINE_SMOOTHED:
-        q_est = 0.15 * q_perturbed + 0.85 * q_true
-        provider = AnalyticPendulumProvider(fixture)
-        init_state = provider.get_state()
-        replay_ctrls = (
-            controls[: spec.n_frames - 1].reshape(-1, 1)
-            if len(controls) >= spec.n_frames
-            else np.zeros((spec.n_frames - 1, 1), dtype=np.float64)
-        )
-        replay_opts = ContinuousReplayOptions(floating_base_root_dofs=())
-        replay_res = execute_continuous_replay(
-            provider=provider,
-            initial_state=init_state,
-            controls=replay_ctrls,
-            dt=1.0 / spec.fps,
-            options=replay_opts,
-        )
-        return q_est, 0.82, 15.0, 22.5, 8.0, replay_res.receipt, 0.98
-    if spec.variant == DimeAblationVariant.DRIFT_ACCELERATED_PROPOSAL:
-        q_est = 0.2 * q_perturbed + 0.8 * q_true
-        return q_est, 0.80, 4.2, 6.0, 1.2, None, 0.94
+) -> np.ndarray | None:
+    """Estimate the trajectory from the perturbed observations ONLY.
 
-    return q_perturbed.copy(), 0.0, 5.0, 8.0, 0.0, None, 0.90
+    Preconditions: ``q_perturbed`` is the observed (not ground-truth) trajectory.
+    Returns the estimate, or ``None`` when the variant has no estimator, in which
+    case the trial is reported unqualified / not measured. Ground truth is never an
+    input, so it cannot be blended into the estimate.
+    """
+    if spec.variant == DimeAblationVariant.KINEMATIC_IK:
+        # Kinematic IK baseline: the observation itself is the estimate.
+        return q_perturbed.copy()
+    return None
+
+
+def _not_measured_result(
+    spec: AblationTrialSpec,
+    status: str,
+    reason: str,
+    hardware: Mapping[str, Any],
+    method_cfg: Mapping[str, Any],
+) -> AblationTrialResult:
+    nan = float("nan")
+    return AblationTrialResult(
+        variant=spec.variant,
+        perturbation=spec.perturbation,
+        observation_mode=spec.observation_mode,
+        seed=spec.seed,
+        status=status,
+        failure_reason=reason,
+        trajectory_rmse=nan,
+        alignment=nan,
+        drift_dominance=nan,
+        uncertainty_coverage_2sigma=nan,
+        p50_latency_ms=nan,
+        p95_latency_ms=nan,
+        global_refinement_cost_ms=nan,
+        hardware_info=hardware,
+        method_config=method_cfg,
+        replay_receipt=None,
+    )
 
 
 def run_ablation_trial(spec: AblationTrialSpec) -> AblationTrialResult:
-    """Execute a single ablation trial under the declared specification."""
+    """Execute a single ablation trial under the declared specification.
+
+    Only figures actually computed from this run are reported; everything else is
+    NaN and the trial is ``unqualified`` (not measured).
+    """
     spec.validate()
 
     hardware = _get_hardware_info()
@@ -268,46 +274,35 @@ def run_ablation_trial(spec: AblationTrialSpec) -> AblationTrialResult:
     }
 
     if spec.force_unfeasible:
-        return AblationTrialResult(
-            variant=spec.variant,
-            perturbation=spec.perturbation,
-            observation_mode=spec.observation_mode,
-            seed=spec.seed,
-            status="failed",
-            failure_reason="Deliberately unfeasible perturbation in contact transition",
-            trajectory_rmse=float("nan"),
-            alignment=0.0,
-            drift_dominance=0.0,
-            uncertainty_coverage_2sigma=0.0,
-            p50_latency_ms=1.0,
-            p95_latency_ms=1.5,
-            global_refinement_cost_ms=0.0,
-            hardware_info=hardware,
-            method_config=method_cfg,
-            replay_receipt=None,
+        return _not_measured_result(
+            spec,
+            "failed",
+            "Deliberately unfeasible perturbation in contact transition",
+            hardware,
+            method_cfg,
         )
 
     rng = np.random.default_rng(spec.seed)
     fixture = make_fixed_base_pendulum_fixture(n_frames=spec.n_frames, fps=spec.fps)
-    q_true, q_perturbed, controls = _perturb_observations(spec, fixture, rng)
+    q_true, q_perturbed, _controls = _perturb_observations(spec, fixture, rng)
 
     t0 = time.perf_counter()
-    (
-        q_est,
-        drift_dominance,
-        p50,
-        p95,
-        refinement_cost,
-        replay_receipt,
-        coverage,
-    ) = _solve_trial_variant(spec, fixture, q_true, q_perturbed, controls)
-
+    q_est = _solve_trial_variant(spec, q_perturbed)
     dt_elapsed = (time.perf_counter() - t0) * 1000.0
-    p50 = max(p50, dt_elapsed * 0.5)
-    p95 = max(p95, dt_elapsed)
 
+    if q_est is None:
+        return _not_measured_result(
+            spec,
+            "unqualified",
+            _NOT_MEASURED_REASON.format(variant=spec.variant.value),
+            hardware,
+            method_cfg,
+        )
+
+    # Ground truth is used only here, to score the estimate.
     rmse = float(np.sqrt(np.mean((q_est - q_true) ** 2)))
     alignment = compute_alignment_metric(q_est, q_true, policy="guarded_zero")
+    nan = float("nan")
 
     return AblationTrialResult(
         variant=spec.variant,
@@ -318,14 +313,14 @@ def run_ablation_trial(spec: AblationTrialSpec) -> AblationTrialResult:
         failure_reason=None,
         trajectory_rmse=rmse,
         alignment=alignment,
-        drift_dominance=drift_dominance,
-        uncertainty_coverage_2sigma=coverage,
-        p50_latency_ms=float(p50),
-        p95_latency_ms=float(p95),
-        global_refinement_cost_ms=float(refinement_cost),
+        drift_dominance=nan,  # no drift model in this variant: not measured
+        uncertainty_coverage_2sigma=nan,  # no uncertainty estimate: not measured
+        p50_latency_ms=float(dt_elapsed),  # single measured sample
+        p95_latency_ms=float(dt_elapsed),
+        global_refinement_cost_ms=0.0,  # variant has no refinement stage
         hardware_info=hardware,
         method_config=method_cfg,
-        replay_receipt=replay_receipt,
+        replay_receipt=None,
     )
 
 
@@ -366,6 +361,8 @@ def run_dime_ablation_suite(suite: AblationBenchmarkSuite) -> AblationSummaryTab
     # Aggregate variant metrics
     variant_metrics: dict[str, dict[str, float]] = {}
     for res in results:
+        if res.status != "passed":
+            continue  # unqualified/failed trials carry no measured figures
         v_key = res.variant.value
         if v_key not in variant_metrics:
             variant_metrics[v_key] = {
