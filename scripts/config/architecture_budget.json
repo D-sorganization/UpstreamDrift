@@ -3,6 +3,24 @@
   "max_parameters": 8,
   "exceptions": [
     {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "_validate_entry",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 1976,
+      "reason": "Issue #1976: Vendored from Repository_Management#1938 canonical development-log validator (121 lines > 100 budget).",
+      "expires_on": "2026-12-31"
+    },
+    {
+      "path": "shared_scripts/development_log_validator.py",
+      "symbol": "validate_devlog_content",
+      "rule": "function-lines",
+      "owner": "@dieterolson @D-sorganization/core-maintainers",
+      "issue": 1976,
+      "reason": "Issue #1976: Vendored from Repository_Management#1938 canonical development-log validator (120 lines > 100 budget).",
+      "expires_on": "2026-12-31"
+    },
+    {
       "path": "src/tools/capture_rig/overlay_render.py",
       "symbol": "render_frame",
       "rule": "parameters",
