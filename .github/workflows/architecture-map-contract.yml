@@ -57,4 +57,4 @@ jobs:
         run: python scripts/architecture_map_contract.py --path docs/architecture/C4.md
 
       - name: Run Focused Contract Tests
-        run: pytest --noconftest -c /dev/null -o pythonpath=. tests/scripts/test_architecture_map_contract.py -v
+        run: python -m pytest --noconftest -c /dev/null --rootdir=. tests/scripts/test_architecture_map_contract.py -v
