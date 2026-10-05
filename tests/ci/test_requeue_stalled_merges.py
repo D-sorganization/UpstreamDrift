@@ -195,3 +195,20 @@ def test_importing_the_module_leaves_sys_path_unchanged(
     monkeypatch.setitem(sys.modules, "_requeue_probe", probe)
     spec.loader.exec_module(probe)
     assert sys.path == before
+
+
+def test_vendored_scripts_avoid_consumer_placeholder_patterns() -> None:
+    """AffineDrift's pattern_checker rejects lines that look like template
+    placeholders, and it scans every .py file. A sys.path line naming the
+    script directory tripped it (AffineDrift#4980), so neither vendored file
+    may contain those word pairs. The pattern is assembled from pieces so this
+    test file passes the same checker."""
+    import re
+
+    words = ("ins" + "ert", "yo" + "ur")
+    placeholder = re.compile("|".join(f"{w}.*he" + "re" for w in words), re.IGNORECASE)
+    for name in ("requeue_stalled_merges.py", "automerge_guard.py"):
+        for lineno, line in enumerate(
+            (_SCRIPTS / name).read_text(encoding="utf-8").splitlines(), 1
+        ):
+            assert not placeholder.search(line), f"{name}:{lineno}: {line.strip()}"
