@@ -3250,6 +3250,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11525 · CLAUDE.md Is Prettier-Clean: Restored the Mangled Where-to-Edit Code Spans and Spaced the @AGENTS.md Import
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11525
+- **Branch:** merged via #11526
+- **PR:** #11526
+- **Paths:** see #11526
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`45110b2b`; collated from changes/11525-claude-md-is-prettier-clean-restored-the.md)
+- **Summary:** CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import
+- **Next step:** Shipped in PR #11526.
+
 ### DL-#1989 · Keep Fork PRs Off the Self-Hosted Fleet: Fork Guard on PR-Triggered Jobs, Hosted Route for the Quality-Gate Lane, and a Static Checker (RM#1989)
 
 - **State:** shipped
