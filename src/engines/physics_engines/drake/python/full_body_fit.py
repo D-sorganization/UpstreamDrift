@@ -16,9 +16,10 @@ import argparse
 import hashlib
 import json
 import logging
+import math
 import time
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -26,6 +27,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.acceptance import (
+    AcceptanceGates,
+    GateResult,
+    GateStatus,
     Horizon,
     evaluate,
 )
@@ -45,6 +49,7 @@ from src.shared.python.motion_matching.polynomial_torque import (
 )
 from src.shared.python.motion_matching.replay_metrics import (
     compute_replay_five_metrics,
+    is_club_marker_label,
 )
 from src.shared.python.simulation_backends.exceptions import (
     BackendNotAvailableError,
@@ -142,7 +147,7 @@ def compute_parity_vs_reference(
     joint_space_rms = float(np.sqrt(np.mean(q_diff**2)))
 
     m_diff = markers_fit[:n_frames] - markers_ref[:n_frames]
-    marker_rms = float(np.sqrt(np.mean(m_diff**2)))
+    marker_rms = float(np.sqrt(np.nanmean(m_diff**2)))
 
     n_ctrl = min(tau_fit.shape[0], tau_ref.shape[0])
     tau_diff = tau_fit[:n_ctrl] - tau_ref[:n_ctrl]
@@ -345,6 +350,24 @@ def _optimize_controls(time_s: Array, tau_ws: Array, control_mode: str) -> Array
     return tau_ws.copy()
 
 
+def _build_drake_model(spec_dict: Mapping[str, Any]) -> Any:
+    """Construct the full-body Drake plant for ``spec_dict``.
+
+    Raises:
+        BackendNotAvailableError: If pydrake or FullBodyDrakeModel is unavailable.
+    """
+    try:
+        from src.engines.physics_engines.drake.python.full_body_model import (
+            FullBodyDrakeModel,
+        )
+
+        return FullBodyDrakeModel(spec_dict)
+    except ImportError as exc:
+        raise BackendNotAvailableError(
+            f"Drake plant initialization failed: {exc}"
+        ) from exc
+
+
 def _simulate_drake(
     spec_dict: Mapping[str, Any],
     q_ws: Array,
@@ -357,27 +380,53 @@ def _simulate_drake(
     Raises:
         BackendNotAvailableError: If pydrake or FullBodyDrakeModel is unavailable.
     """
-    try:
-        from src.engines.physics_engines.drake.python.full_body_model import (
-            FullBodyDrakeModel,
-        )
-
-        model = FullBodyDrakeModel(spec_dict)
-    except ImportError as exc:
-        raise BackendNotAvailableError(
-            f"Drake plant initialization failed: {exc}"
-        ) from exc
-
+    model = _build_drake_model(spec_dict)
     return _simulate_drake_forward(model, q_ws[0], v_ws[0], time_s, tau_optimized)
 
 
-def _extract_markers_and_metrics(
+def _spec_marker_attachments(
+    spec_dict: Mapping[str, Any],
+) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    """Return ``{label: (body, offset)}`` for every spec marker with an offset."""
+    out: dict[str, tuple[str, tuple[float, float, float]]] = {}
+    for label, att in spec_dict.get("marker_attachments", {}).items():
+        if att.get("offset_m") is not None:
+            ox, oy, oz = (float(x) for x in att["offset_m"])
+            out[str(label)] = (str(att["body"]), (ox, oy, oz))
+    return out
+
+
+def _rollout_marker_positions(
+    model: Any,
+    q_traj: Array,
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, tuple[float, float, float]]],
+) -> tuple[Array, NDArray[np.bool_]]:
+    """Forward-kinematics every rollout frame through the Drake plant (#11567).
+
+    Labels without an attachment are NaN and marked invalid, so they can never
+    be scored as a match.
+    """
+    known = [label for label in labels if label in attachments]
+    if not known:
+        raise ValueError("No marker label has a Drake attachment; cannot score")
+    cols = [list(labels).index(label) for label in known]
+    ordered = {label: attachments[label] for label in known}
+    markers = np.full((q_traj.shape[0], len(labels), 3), np.nan, dtype=np.float64)
+    for k, q in enumerate(q_traj):
+        markers[k, cols] = model.marker_positions(q, ordered)
+    valid = np.zeros((q_traj.shape[0], len(labels)), dtype=bool)
+    valid[:, cols] = True
+    return markers, valid
+
+
+def _resolve_targets(
     ws_candidate: MatchedSwingCandidate,
     target_markers: Array | None,
     marker_labels: Sequence[str] | None,
     time_s: Array,
-) -> tuple[Array, Array, NDArray[np.bool_], tuple[str, ...], Any, dict[str, float]]:
-    """Extract marker arrays and compute replay 5 metrics."""
+) -> tuple[Array, NDArray[np.bool_], tuple[str, ...]]:
+    """Return (target markers, target validity, labels) for scoring."""
     tgt = (
         ws_candidate.target_markers_m
         if ws_candidate.target_markers_m is not None
@@ -387,11 +436,6 @@ def _extract_markers_and_metrics(
         raise ValueError(
             "Target markers are unavailable (neither in candidate nor provided as argument)"
         )
-    if ws_candidate.model_markers_m is None:
-        raise ValueError(
-            "Candidate model markers unavailable; refusing to score target markers against themselves"
-        )
-    fit = ws_candidate.model_markers_m
     val = (
         ws_candidate.marker_validity
         if ws_candidate.marker_validity is not None
@@ -403,6 +447,40 @@ def _extract_markers_and_metrics(
         lbls = ws_candidate.metadata.marker_names
     else:
         lbls = tuple(f"marker_{i}" for i in range(tgt.shape[1]))
+    return tgt, val, lbls
+
+
+def _club_cluster_scored(val: NDArray[np.bool_], labels: Sequence[str]) -> bool:
+    """True when at least one club-cluster marker is valid on the terminal frame."""
+    cols = [i for i, lbl in enumerate(labels) if is_club_marker_label(lbl)]
+    return bool(cols) and bool(np.any(val[-1, cols]))
+
+
+def _extract_markers_and_metrics(
+    ws_candidate: MatchedSwingCandidate,
+    target_markers: Array | None,
+    marker_labels: Sequence[str] | None,
+    time_s: Array,
+    *,
+    predicted_markers_m: Array | None = None,
+    predicted_validity: NDArray[np.bool_] | None = None,
+) -> tuple[Array, Array, NDArray[np.bool_], tuple[str, ...], Any, dict[str, float]]:
+    """Score the Drake rollout markers against the targets (replay-5 metrics).
+
+    ``predicted_markers_m`` must be forward kinematics of the Drake rollout;
+    the warm start's own model markers are never scored (#11567).
+    """
+    tgt, val, lbls = _resolve_targets(
+        ws_candidate, target_markers, marker_labels, time_s
+    )
+    if predicted_markers_m is None:
+        raise ValueError(
+            "Drake rollout markers unavailable; refusing to score warm-start or "
+            "target markers against themselves"
+        )
+    fit = predicted_markers_m
+    if predicted_validity is not None:
+        val = np.logical_and(val, predicted_validity)
 
     five = compute_replay_five_metrics(
         time_s=time_s,
@@ -411,6 +489,9 @@ def _extract_markers_and_metrics(
         valid=val,
         marker_labels=lbls,
     )
+    if not _club_cluster_scored(val, lbls):
+        # No valid club marker was scored: report NaN, never a perfect 0.0.
+        five = replace(five, club_cluster_rms_m=float("nan"))
     shared = {
         "whole_marker_rmse_m": five.whole_rms_m,
         "early_marker_rmse_m": five.early_rms_m,
@@ -441,7 +522,63 @@ def _evaluate_acceptance(
         },
         "max_closure_residual_m": physical_audit["closure_translation_error_max_m"],
     }
-    return evaluate(acceptance_input, horizon=Horizon.G1)
+    verdict = evaluate(acceptance_input, horizon=Horizon.G1)
+    club = shared_dict.get("club_marker_rmse_m")
+    if club is not None and math.isnan(club):
+        # ``evaluate`` skips NaN metrics, so an unscored club cluster must be
+        # failed explicitly here (fail closed).
+        gates = AcceptanceGates()
+        failed = GateResult(
+            name="club_marker_rmse_m",
+            status=GateStatus.FAILED,
+            threshold=gates.g1_club_rmse_m,
+            measured=None,
+            reason="club cluster has no valid scored marker (NaN)",
+        )
+        return replace(
+            verdict,
+            is_physically_accepted=False,
+            status="REJECTED",
+            gates=(*verdict.gates, failed),
+        )
+    return verdict
+
+
+def _score_rollout(
+    model: Any,
+    q_fit: Array,
+    ws_cand: MatchedSwingCandidate,
+    spec_dict: Mapping[str, Any],
+    target_markers: Array | None,
+    marker_labels: Sequence[str] | None,
+) -> tuple[Array, Array, NDArray[np.bool_], tuple[str, ...], Any, dict[str, float]]:
+    """Score forward kinematics of the Drake rollout against the targets (#11567)."""
+    time_s = ws_cand.time_s
+    _, _, labels = _resolve_targets(ws_cand, target_markers, marker_labels, time_s)
+    rollout_m, rollout_valid = _rollout_marker_positions(
+        model, q_fit, labels, _spec_marker_attachments(spec_dict)
+    )
+    return _extract_markers_and_metrics(
+        ws_cand,
+        target_markers,
+        marker_labels,
+        time_s,
+        predicted_markers_m=rollout_m,
+        predicted_validity=rollout_valid,
+    )
+
+
+def _unmeasured_physical_audit(tau_fit: Array) -> dict[str, Any]:
+    """Contact and closure audit fields are unmeasured (None) so G1 fails closed."""
+    return {
+        "max_normal_force_n": None,
+        "max_normal_force_body_weights": None,
+        "max_penetration_m": None,
+        "closure_translation_error_max_m": None,
+        "closure_rotation_error_max_rad": None,
+        "weight_fraction": None,
+        "peak_effort_n_m": float(np.max(np.abs(tau_fit))),
+    }
 
 
 def fit_full_body_drake(
@@ -468,21 +605,15 @@ def fit_full_body_drake(
     )
 
     tau_opt = _optimize_controls(time_s, tau_ws, opts.control_mode)
-    q_fit, v_fit, tau_fit = _simulate_drake(spec_dict, q_ws, v_ws, time_s, tau_opt)
-
-    tgt_m, fit_m, val_m, lbls, five_m, shared = _extract_markers_and_metrics(
-        ws_cand, target_markers, marker_labels, time_s
+    model = _build_drake_model(spec_dict)
+    q_fit, v_fit, tau_fit = _simulate_drake_forward(
+        model, q_ws[0], v_ws[0], time_s, tau_opt
     )
 
-    physical_audit = {
-        "max_normal_force_n": None,
-        "max_normal_force_body_weights": None,
-        "max_penetration_m": None,
-        "closure_translation_error_max_m": None,
-        "closure_rotation_error_max_rad": None,
-        "weight_fraction": None,
-        "peak_effort_n_m": float(np.max(np.abs(tau_fit))),
-    }
+    tgt_m, fit_m, val_m, lbls, five_m, shared = _score_rollout(
+        model, q_fit, ws_cand, spec_dict, target_markers, marker_labels
+    )
+    physical_audit = _unmeasured_physical_audit(tau_fit)
 
     eval_result = _evaluate_acceptance(shared, five_m, physical_audit)
     parity_dict = compute_parity_vs_reference(
