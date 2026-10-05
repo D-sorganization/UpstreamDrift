@@ -44,6 +44,10 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 2
     outputs:
@@ -61,6 +65,10 @@ jobs:
   # run the identical gate list. Edit the composite action, not this file, to
   # change what docs governance checks.
   doc-governance:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: doc-governance
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}

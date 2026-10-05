@@ -45,7 +45,11 @@ jobs:
     timeout-minutes: 30
     name: phantom-guard
     runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
-    if: github.event.pull_request.base.ref == 'main'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event.pull_request.base.ref == 'main')
     steps:
       - name: Configure Git to use HTTP/1.1
         run: |
@@ -54,13 +58,17 @@ jobs:
           git config --global http.lowSpeedLimit 0
           git config --global http.lowSpeedTime 999999
 
+      # Never check out PR head code on pull_request_target: that event runs in
+      # the base-repo security context (RM#1989). Label events are API-only.
       - name: Check out PR head with bounded history
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 50
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Fetch base branch
+        if: github.event_name == 'pull_request'
         run: |
           git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1 || true
           git fetch origin "${{ github.event.pull_request.base.sha }}" || true
@@ -117,7 +125,7 @@ jobs:
           fi
 
       - name: Run phantom guard checks
-        if: steps.override.outputs.override != 'true'
+        if: github.event_name == 'pull_request' && steps.override.outputs.override != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

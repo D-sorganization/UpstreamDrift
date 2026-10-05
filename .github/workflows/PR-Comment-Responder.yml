@@ -23,6 +23,10 @@ concurrency:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     # Dispatcher placement only. This repo is public, so a hosted runner is
     # free and unmetered; pinning the dispatcher meant every run waited for a
     # self-hosted slot just to decide where to run. The runner it SELECTS is
@@ -44,9 +48,11 @@ jobs:
     timeout-minutes: 30
     needs: pick-runner
     # Only run on PR comments (not issue comments)
-    if: |
-      (github.event_name == 'pull_request_review_comment') ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null)
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      ((github.event_name == 'pull_request_review_comment') || (github.event_name == 'issue_comment' && github.event.issue.pull_request != null))
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Filter Bot Comments

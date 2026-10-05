@@ -30,6 +30,10 @@ permissions:
 jobs:
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 2
     outputs:
@@ -46,7 +50,11 @@ jobs:
     name: Verify SPEC.md freshness
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Skip if spec-exempt label is applied
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'spec-exempt') }}
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (!contains(github.event.pull_request.labels.*.name, 'spec-exempt'))
     timeout-minutes: 5
 
     steps:
