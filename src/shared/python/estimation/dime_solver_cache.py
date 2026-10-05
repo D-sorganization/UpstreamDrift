@@ -74,15 +74,21 @@ class DimeCacheIdentity:
 
 @dataclass(frozen=True)
 class DimeCostBreakdown:
-    """Granular cost profiling breakdown for native drift and window solves."""
+    """Cost profiling report for native drift and window solves.
 
-    drift_calls_count: int = 0
-    drift_time_s: float = 0.0
-    full_step_calls_count: int = 0
-    full_step_time_s: float = 0.0
-    jacobian_calls_count: int = 0
-    jacobian_time_s: float = 0.0
-    assembly_factorization_time_s: float = 0.0
+    Every numeric field is either a value measured during the solve or ``None``
+    meaning *not measured* (#11547). Nothing is derived as a fixed fraction of
+    wall time. ``solver_cost_terms`` carries the objective components computed
+    by the window solver itself, and they sum to its ``total_cost``.
+    """
+
+    drift_calls_count: int | None = None
+    drift_time_s: float | None = None
+    full_step_calls_count: int | None = None
+    full_step_time_s: float | None = None
+    jacobian_calls_count: int | None = None
+    jacobian_time_s: float | None = None
+    assembly_factorization_time_s: float | None = None
     window_solve_time_s: float = 0.0
     independent_replay_time_s: float = 0.0
     total_time_s: float = 0.0
@@ -90,29 +96,48 @@ class DimeCostBreakdown:
     cache_misses: int = 0
     replay_executed: bool = True
     failure_costs: float = 0.0
-    p50_speed_s: float = 0.0
-    p95_speed_s: float = 0.0
+    p50_speed_s: float | None = None
+    p95_speed_s: float | None = None
+    solver_cost_terms: Mapping[str, float] | None = None
+
+    def not_measured_fields(self) -> tuple[str, ...]:
+        """Names of numeric fields that were not measured (value is None)."""
+        return tuple(
+            name
+            for name in _COST_BREAKDOWN_NUMERIC_FIELDS
+            if getattr(self, name) is None
+        )
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize cost breakdown into structured dictionary."""
-        return {
-            "drift_calls_count": self.drift_calls_count,
-            "drift_time_s": self.drift_time_s,
-            "full_step_calls_count": self.full_step_calls_count,
-            "full_step_time_s": self.full_step_time_s,
-            "jacobian_calls_count": self.jacobian_calls_count,
-            "jacobian_time_s": self.jacobian_time_s,
-            "assembly_factorization_time_s": self.assembly_factorization_time_s,
-            "window_solve_time_s": self.window_solve_time_s,
-            "independent_replay_time_s": self.independent_replay_time_s,
-            "total_time_s": self.total_time_s,
-            "cache_hits": self.cache_hits,
-            "cache_misses": self.cache_misses,
-            "replay_executed": self.replay_executed,
-            "failure_costs": self.failure_costs,
-            "p50_speed_s": self.p50_speed_s,
-            "p95_speed_s": self.p95_speed_s,
+        """Serialize cost breakdown; unmeasured fields stay None and are listed."""
+        out: dict[str, Any] = {
+            name: getattr(self, name) for name in _COST_BREAKDOWN_NUMERIC_FIELDS
         }
+        out["replay_executed"] = self.replay_executed
+        out["solver_cost_terms"] = (
+            dict(self.solver_cost_terms) if self.solver_cost_terms is not None else None
+        )
+        out["not_measured"] = list(self.not_measured_fields())
+        return out
+
+
+_COST_BREAKDOWN_NUMERIC_FIELDS: tuple[str, ...] = (
+    "drift_calls_count",
+    "drift_time_s",
+    "full_step_calls_count",
+    "full_step_time_s",
+    "jacobian_calls_count",
+    "jacobian_time_s",
+    "assembly_factorization_time_s",
+    "window_solve_time_s",
+    "independent_replay_time_s",
+    "total_time_s",
+    "cache_hits",
+    "cache_misses",
+    "failure_costs",
+    "p50_speed_s",
+    "p95_speed_s",
+)
 
 
 @dataclass(frozen=True)
@@ -159,6 +184,111 @@ class LocalModelApproximation:
             units=self.nominal_state.units,
             model_hash=self.nominal_state.model_hash,
         )
+
+
+def _array_content_hash(arr: Any, name: str) -> str:
+    """Deterministic content hash of a finite array covering dtype, shape, bytes.
+
+    Preconditions: ``arr`` converts to a finite float64 array.
+    """
+    a = np.ascontiguousarray(np.asarray(arr, dtype=np.float64))
+    require(bool(np.all(np.isfinite(a))), f"{name} must be finite")
+    h = hashlib.sha256()
+    h.update(f"{a.dtype.str}|{a.shape}|".encode())
+    h.update(a.tobytes())
+    return h.hexdigest()
+
+
+def _canonical_value(value: Any, name: str) -> str:
+    """Canonical, order-independent text form of a state-field value.
+
+    Arrays hash by content, mappings by sorted key, sequences element-wise,
+    and everything else by ``repr``; ``None`` is explicit.
+
+    Preconditions: array-like leaves are finite.
+    """
+    if value is None:
+        return "None"
+    if isinstance(value, Mapping):
+        items = sorted(value.items(), key=lambda kv: str(kv[0]))
+        return (
+            "{"
+            + ",".join(f"{k!r}:{_canonical_value(v, f'{name}.{k}')}" for k, v in items)
+            + "}"
+        )
+    if isinstance(value, np.ndarray):
+        return f"arr:{_array_content_hash(value, name)}"
+    if isinstance(value, (list, tuple)):
+        return "[" + ",".join(_canonical_value(v, name) for v in value) + "]"
+    return f"{type(value).__name__}:{value!r}"
+
+
+def _complete_state_hash(state: DimeCompleteState) -> str:
+    """Content hash of every ``DimeCompleteState`` field (#11547).
+
+    Covers t, q, v, v_dot, internal_state, model_hash, units and frame so two
+    states differing in any field never share a cache key.
+
+    Preconditions: ``state`` is a validated (finite) complete state.
+    Postcondition: equal states, regardless of mapping insertion order, hash equal.
+    """
+    parts = [
+        f"t={float(state.t)!r}",
+        f"q={_canonical_value(state.q, 'q')}",
+        f"v={_canonical_value(state.v, 'v')}",
+        f"v_dot={_canonical_value(state.v_dot, 'v_dot')}",
+        f"internal_state={_canonical_value(state.internal_state, 'internal_state')}",
+        f"model_hash={state.model_hash!r}",
+        f"units={_canonical_value(state.units, 'units')}",
+        f"frame={state.frame!r}",
+    ]
+    return hashlib.sha256("|".join(parts).encode()).hexdigest()
+
+
+def _window_problem_qualifier(problem: DimeDynamicsWindowProblem) -> str:
+    """Key qualifier covering every input that changes a window solution.
+
+    Covers the complete initial state, horizon, dt, target observations, weights, defect
+    mode, constraints, bounds, and solver options (#11547).
+
+    Preconditions: states, targets, weights, and bounds are finite.
+    """
+    state_hash = _complete_state_hash(problem.initial_state)
+    if problem.target_positions is None:
+        targets_hash = "none"
+    else:
+        targets_hash = hashlib.sha256(
+            "|".join(
+                _array_content_hash(t, "target_positions")
+                for t in problem.target_positions
+            ).encode()
+        ).hexdigest()
+    weights = np.array(
+        [
+            problem.observation_weight,
+            problem.control_rate_weight,
+            problem.transition_weight,
+        ],
+        dtype=np.float64,
+    )
+    weights_hash = _array_content_hash(weights, "weights")
+    bounds = problem.actuator_bounds
+    bounds_hash = "none" if bounds is None else _array_content_hash(bounds, "bounds")
+    disc = problem.discrepancy_bounds
+    disc_repr = (
+        "none"
+        if disc is None
+        else _array_content_hash(
+            [disc.max_slack_norm, disc.slack_weight], "discrepancy"
+        )
+    )
+    return (
+        f"win:{state_hash[:16]}:{problem.horizon_steps}:{problem.dt_s!r}"
+        f":tg{targets_hash[:16]}:w{weights_hash[:16]}:b{bounds_hash[:16]}"
+        f":d{disc_repr[:16]}:{problem.defect_mode.value}"
+        f":root{int(bool(problem.enforce_root_constraints))}"
+        f":it{problem.max_iterations}"
+    )
 
 
 class DimeSolverCache:
@@ -290,10 +420,7 @@ class DimeSolverCache:
         elapsed_s: float = 0.0,
     ) -> None:
         """Store converged window solve result and track latency."""
-        fp = self._state_fingerprint(problem.initial_state)
-        key = identity.to_composite_key(
-            f"win:{fp}:{problem.horizon_steps}:{problem.dt_s:.6f}"
-        )
+        key = identity.to_composite_key(_window_problem_qualifier(problem))
         with self._lock:
             self._window_store[key] = result
             self._timing_store.setdefault(key, []).append(elapsed_s)
@@ -305,10 +432,7 @@ class DimeSolverCache:
         problem: DimeDynamicsWindowProblem,
     ) -> DimeDynamicsWindowResult | None:
         """Retrieve cached window solve result or None on miss."""
-        fp = self._state_fingerprint(problem.initial_state)
-        key = identity.to_composite_key(
-            f"win:{fp}:{problem.horizon_steps}:{problem.dt_s:.6f}"
-        )
+        key = identity.to_composite_key(_window_problem_qualifier(problem))
         with self._lock:
             return self._window_store.get(key)
 
@@ -397,16 +521,14 @@ def accelerated_solve_dynamics_window(
     t_replay = time.perf_counter() - t_replay_start
 
     total_time = t_solve + t_replay
-    failure_cost = 0.0 if res.success else 1000.0
+    # Seconds actually spent on a solve that did not converge (measured).
+    failure_cost = 0.0 if res.success else t_solve
+
+    solver_terms = {
+        k: float(v) for k, v in res.cost_breakdown.items() if np.isfinite(v)
+    } or None
 
     breakdown = DimeCostBreakdown(
-        drift_calls_count=problem.horizon_steps if misses > 0 else 0,
-        drift_time_s=0.5 * t_solve if misses > 0 else 0.0,
-        full_step_calls_count=problem.horizon_steps * res.n_iterations,
-        full_step_time_s=0.5 * t_solve,
-        jacobian_calls_count=res.n_iterations,
-        jacobian_time_s=0.2 * t_solve,
-        assembly_factorization_time_s=0.1 * t_solve,
         window_solve_time_s=t_solve,
         independent_replay_time_s=t_replay,
         total_time_s=total_time,
@@ -414,8 +536,7 @@ def accelerated_solve_dynamics_window(
         cache_misses=misses,
         replay_executed=True,
         failure_costs=failure_cost,
-        p50_speed_s=total_time,
-        p95_speed_s=total_time * 1.05,
+        solver_cost_terms=solver_terms,
     )
 
     return res, breakdown

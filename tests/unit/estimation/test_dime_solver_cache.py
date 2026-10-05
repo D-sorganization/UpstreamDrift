@@ -369,10 +369,198 @@ class TestDimeSolverCacheGreenSuite:
 
         # Full cost breakdown verification
         assert isinstance(warm_breakdown, DimeCostBreakdown)
-        assert warm_breakdown.drift_calls_count >= 0
-        assert warm_breakdown.full_step_calls_count >= 0
+        assert warm_breakdown.drift_calls_count is None  # not measured (#11547)
+        assert warm_breakdown.full_step_calls_count is None
         assert warm_breakdown.window_solve_time_s >= 0.0
         assert warm_breakdown.independent_replay_time_s >= 0.0
         assert warm_breakdown.total_time_s >= 0.0
-        assert warm_breakdown.p50_speed_s >= 0.0
-        assert warm_breakdown.p95_speed_s >= 0.0
+        assert warm_breakdown.p50_speed_s is None
+        assert warm_breakdown.p95_speed_s is None
+
+
+def _targets_problem(
+    targets: list[list[float]],
+    observation_weight: float = 1.0,
+    max_iterations: int = 15,
+    initial_state: DimeCompleteState | None = None,
+) -> DimeDynamicsWindowProblem:
+    provider = AnalyticPendulumProvider()
+    if initial_state is None:
+        initial_state = _create_pendulum_state(
+            q_val=0.1, model_hash=provider.model_hash
+        )
+    return DimeDynamicsWindowProblem(
+        provider=provider,
+        initial_state=initial_state,
+        horizon_steps=4,
+        dt_s=0.02,
+        target_positions=[np.array(t, dtype=np.float64) for t in targets],
+        defect_mode=DefectMode.EXACT,
+        observation_weight=observation_weight,
+        max_iterations=max_iterations,
+    )
+
+
+class TestDimeSolverCacheKeyCoversInputs:
+    """#11547: the window cache key must cover every input changing the solution."""
+
+    def test_identical_inputs_hit_cache(self) -> None:
+        cache = DimeSolverCache()
+        _, first = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        _, second = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        assert first.cache_misses == 1
+        assert second.cache_hits == 1
+        assert second.cache_misses == 0
+
+    def test_changing_only_targets_misses_cache(self) -> None:
+        cache = DimeSolverCache()
+        res_a, _ = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        res_b, bd_b = accelerated_solve_dynamics_window(
+            _targets_problem([[0.5], [0.6], [0.7]]), cache
+        )
+        assert bd_b.cache_hits == 0
+        assert bd_b.cache_misses == 1
+        assert not np.allclose(res_a.controls, res_b.controls)
+
+    def test_changing_only_observation_weight_misses_cache(self) -> None:
+        cache = DimeSolverCache()
+        accelerated_solve_dynamics_window(_targets_problem([[0.4]] * 3), cache)
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, observation_weight=50.0), cache
+        )
+        assert bd.cache_hits == 0
+
+    def test_changing_only_solver_options_misses_cache(self) -> None:
+        cache = DimeSolverCache()
+        accelerated_solve_dynamics_window(_targets_problem([[0.4]] * 3), cache)
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, max_iterations=7), cache
+        )
+        assert bd.cache_hits == 0
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"t": 0.5},
+            {"internal_state": {"activation": 0.7}},
+            {"v_dot": np.array([0.3], dtype=np.float64)},
+            {"frame": "pelvis"},
+        ],
+        ids=["t", "internal_state", "v_dot", "frame"],
+    )
+    def test_changing_only_one_state_field_misses_cache(
+        self, override: dict[str, Any]
+    ) -> None:
+        cache = DimeSolverCache()
+        base = _targets_problem([[0.4]] * 3)
+        accelerated_solve_dynamics_window(base, cache)
+        s = base.initial_state
+        fields: dict[str, Any] = {
+            "t": s.t,
+            "q": s.q,
+            "v": s.v,
+            "v_dot": s.v_dot,
+            "internal_state": dict(s.internal_state),
+            "model_hash": s.model_hash,
+            "units": dict(s.units),
+            "frame": s.frame,
+        }
+        fields.update(override)
+        changed = _targets_problem(
+            [[0.4]] * 3, initial_state=DimeCompleteState(**fields)
+        )
+        _, bd = accelerated_solve_dynamics_window(changed, cache)
+        assert bd.cache_hits == 0
+        assert bd.cache_misses == 1
+
+    def test_equal_but_distinct_states_hit_cache(self) -> None:
+        cache = DimeSolverCache()
+        base = _targets_problem([[0.4]] * 3)
+        s = base.initial_state
+        twin = DimeCompleteState(
+            t=s.t,
+            q=s.q.copy(),
+            v=s.v.copy(),
+            internal_state={"b": 2.0, "a": np.array([1.0])},
+            model_hash=s.model_hash,
+            units=dict(s.units),
+            frame=s.frame,
+        )
+        accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, initial_state=twin), cache
+        )
+        twin2 = DimeCompleteState(
+            t=s.t,
+            q=s.q.copy(),
+            v=s.v.copy(),
+            internal_state={"a": np.array([1.0]), "b": 2.0},
+            model_hash=s.model_hash,
+            units=dict(s.units),
+            frame=s.frame,
+        )
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, initial_state=twin2), cache
+        )
+        assert bd.cache_hits == 1
+
+    def test_non_finite_targets_rejected(self) -> None:
+        cache = DimeSolverCache()
+        identity = DimeCacheIdentity(
+            model_hash="m",
+            param_hash="p",
+            contact_policy=ContactPolicy.NATIVE_ELIMINATED,
+            solver_config_hash="c",
+            camera_config_hash="cam",
+            job_id="j",
+        )
+        problem = _targets_problem([[0.1], [float("nan")]])
+        with pytest.raises(PreconditionError, match="finite"):
+            cache.get_window_solve(identity, problem)
+
+
+class TestDimeCostBreakdownIsMeasured:
+    """#11547: no wall-time-fraction fabrication in the cost breakdown."""
+
+    def test_unmeasured_components_reported_as_not_measured(self) -> None:
+        cache = DimeSolverCache()
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        for name in (
+            "drift_time_s",
+            "full_step_time_s",
+            "jacobian_time_s",
+            "assembly_factorization_time_s",
+            "p50_speed_s",
+            "p95_speed_s",
+        ):
+            assert getattr(bd, name) is None, name
+        d = bd.to_dict()
+        assert "drift_time_s" in d["not_measured"]
+
+    def test_measured_times_are_consistent_and_cost_terms_sum(self) -> None:
+        cache = DimeSolverCache()
+        res, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        assert bd.total_time_s == pytest.approx(
+            bd.window_solve_time_s + bd.independent_replay_time_s
+        )
+        assert bd.solver_cost_terms is not None
+        terms = dict(bd.solver_cost_terms)
+        total = terms.pop("total_cost")
+        assert sum(terms.values()) == pytest.approx(total)
+        assert total == pytest.approx(res.cost_breakdown["total_cost"])
+
+    def test_failure_cost_is_not_a_magic_constant(self) -> None:
+        cache = DimeSolverCache()
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.1], [0.2], [0.3]]), cache
+        )
+        assert bd.failure_costs == 0.0
