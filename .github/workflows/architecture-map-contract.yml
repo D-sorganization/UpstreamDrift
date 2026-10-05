@@ -33,6 +33,10 @@ env:
 
 jobs:
   validate-map:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: Validate Architecture Map Contract
     runs-on: ${{ vars.RUNNER_TARGET == 'local' && 'd-sorg-fleet' || 'ubuntu-latest' }}
     timeout-minutes: 5
@@ -53,4 +57,4 @@ jobs:
         run: python scripts/architecture_map_contract.py --path docs/architecture/C4.md
 
       - name: Run Focused Contract Tests
-        run: pytest --noconftest -c /dev/null -o pythonpath=. tests/scripts/test_architecture_map_contract.py -v
+        run: python -m pytest --noconftest -c /dev/null --rootdir=. tests/scripts/test_architecture_map_contract.py -v

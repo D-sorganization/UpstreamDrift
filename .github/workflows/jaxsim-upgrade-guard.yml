@@ -34,6 +34,10 @@ permissions:
 
 jobs:
   jaxsim-upgrade-guard:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 30
 
