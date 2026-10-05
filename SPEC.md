@@ -8319,6 +8319,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11558 | DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment |
+| 2026-10-05 | #11562 | drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default |
+| 2026-10-05 | #11557 | Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1 |
+| 2026-10-05 | #11561 | DIME solver cache key now covers targets, weights and solver options; cost breakdown reports measured values or not-measured (None) instead of wall-time fractions |
 | 2026-10-05 | #11560 | DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences |
 | 2026-10-04 | #11516 | Versioned BunkerShot3D workbench route `POST /tools/bunker-workbench/v1/evaluate` over the headless `WorkbenchModel`: strict DbC input validation (units, PyQt panel ranges, explicit right-handed convention), bounded nominal solve, tier/verdict/stamp/source stamps plus canonical SHA-256 digest, and predictive or degenerate playability objectives refused (#9239); closes the `api: null` parity gap. |
 | 2026-10-05 | #11526 | CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import |
