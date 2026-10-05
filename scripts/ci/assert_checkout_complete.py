@@ -19,10 +19,12 @@ Postconditions:
     by sparse-checkout (skip-worktree) exists in the working tree, and sparse
     checkout is not enabled with an empty pattern set that pruned files.
     Exit 1: the checkout is incomplete (reason and runner name printed).
-    Exit 2: ``--root`` is not a git working tree or git could not be run.
+    Exit 2: ``--root`` is not a git working tree or git could not be run
+    (including ``git ls-files`` failing, e.g. a corrupt index).
 
-Intentional sparse checkouts are respected: index entries carrying the
-skip-worktree bit are excluded from verification. Gitlinks (submodules) are
+Intentional sparse checkouts are respected: when sparse checkout is enabled,
+index entries carrying the skip-worktree bit are excluded from verification.
+With sparse checkout disabled the bit is stale and gets no such exemption. Gitlinks (submodules) are
 skipped because CI checkouts do not populate them.
 
 Runbook: no runner-corruption runbook exists in this repository; see
@@ -93,14 +95,26 @@ def _tracked_entries(root: Path) -> list[tuple[str, bool]]:
 def find_missing(root: Path) -> list[str]:
     """Return tracked paths absent from the working tree.
 
-    Paths excluded by sparse-checkout (skip-worktree) are not reported.
+    Paths carrying the skip-worktree bit are treated as intentional exclusions
+    only when sparse checkout is enabled; with sparse checkout disabled the bit
+    is stale (e.g. left on a reused runner) and the path must exist.
+
+    Raises:
+        RuntimeError: if git cannot list the index (e.g. a corrupt index).
     """
     assert root.is_dir(), f"root must be a directory: {root}"
+    honor_skip = sparse_state(root).enabled
     return [
         path
         for path, skipped in _tracked_entries(root)
-        if not skipped and not os.path.lexists(root / path)
+        if not (skipped and honor_skip) and not os.path.lexists(root / path)
     ]
+
+
+def _stale_skip_worktree(root: Path, missing: list[str]) -> list[str]:
+    """Return ``missing`` paths that carry a stale skip-worktree bit."""
+    flagged = {path for path, skipped in _tracked_entries(root) if skipped}
+    return [path for path in missing if path in flagged]
 
 
 def _skipped_count(root: Path) -> int:
@@ -139,10 +153,19 @@ def main(argv: list[str] | None = None) -> int:
     else:
         _emit("sparse-checkout: disabled")
 
-    missing = find_missing(root)
-    pruned_by_empty_set = (
-        state.enabled and not state.patterns and _skipped_count(root) > 0
-    )
+    try:
+        missing = find_missing(root)
+        pruned_by_empty_set = (
+            state.enabled and not state.patterns and _skipped_count(root) > 0
+        )
+        stale = [] if state.enabled else _stale_skip_worktree(root, missing)
+    except RuntimeError as exc:
+        _emit(
+            f"::error::cannot inspect the checkout on runner {runner}: "
+            f"git ls-files failed ({exc}). The index may be corrupt; drain or "
+            "clean this runner's _work directory (see issue #9507)."
+        )
+        return 2
     if not missing and not pruned_by_empty_set:
         _emit(f"checkout complete on runner {runner}")
         return 0
@@ -156,6 +179,11 @@ def main(argv: list[str] | None = None) -> int:
         _emit(
             "sparse-checkout is enabled with an empty pattern set, which "
             "prunes the working tree."
+        )
+    if stale:
+        _emit(
+            f"{len(stale)} missing file(s) carry a stale skip-worktree bit "
+            "while sparse-checkout is disabled."
         )
     if missing:
         _emit(f"{len(missing)} tracked file(s) missing:")

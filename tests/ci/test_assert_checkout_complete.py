@@ -135,6 +135,32 @@ def test_invalid_max_report_rejected(repo):
         main(["--root", str(repo), "--max-report", "0"])
 
 
+def test_stale_skip_worktree_with_sparse_disabled_fails(repo, monkeypatch, capsys):
+    """A leftover skip-worktree bit is not an exclusion when sparse is off."""
+    monkeypatch.setenv("RUNNER_NAME", "runner-3")
+    _git(repo, "update-index", "--skip-worktree", "ui/package-lock.json")
+    (repo / "ui" / "package-lock.json").unlink()
+    assert find_missing(repo) == ["ui/package-lock.json"]
+    assert main(["--root", str(repo)]) == 1
+    text = capsys.readouterr()
+    combined = text.out + text.err
+    assert "ui/package-lock.json" in combined
+    assert "skip-worktree" in combined
+    assert "runner-3" in combined
+
+
+def test_ls_files_failure_is_a_runner_named_diagnostic(repo, monkeypatch, capsys):
+    """A corrupt index yields an ::error:: line and exit 2, not a traceback."""
+    monkeypatch.setenv("RUNNER_NAME", "runner-5")
+    (repo / ".git" / "index").write_bytes(b"garbage-not-an-index" * 8)
+    assert main(["--root", str(repo)]) == 2
+    text = capsys.readouterr()
+    combined = text.out + text.err
+    assert "::error::" in combined
+    assert "runner-5" in combined
+    assert "Traceback" not in combined
+
+
 def test_fetch_pinned_tools_action_runs_the_assertion_first():
     """The shared composite action asserts checkout completeness first."""
     yaml = pytest.importorskip("yaml")
