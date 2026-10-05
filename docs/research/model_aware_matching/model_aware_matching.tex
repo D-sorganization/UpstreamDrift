@@ -69,9 +69,10 @@ ground reactions), and places the zero-torque and zero-velocity counterfactuals
 (ZTCF/ZVCF) in the same algebra as exact row and column projections of the
 regressor.  A NumPy reference implementation on an analytic planar chain
 recovers geometry to $0.1\,\mathrm{mm}$, observable inertial parameters to
-1--3\,\%, torques to 20\,\% RMS, and passes an open-loop forward-replay gate
-(0.03\,rad RMS over 0.75\,s) in 37 outer iterations and about six seconds for
-two trials.  No human capture has been qualified with the method yet; the
+within 4\,\% (prior 5\,\%), torques to 20\,\% RMS, and passes an open-loop
+forward-replay gate (0.03\,rad RMS over 0.75\,s) in 37 outer iterations and
+about five seconds for two trials, every number read from a committed,
+regenerable evidence receipt.  No human capture has been qualified with the method yet; the
 qualification gates and the engine integration path are specified so that
 claim can be earned, not asserted.
 \end{abstract}
@@ -445,23 +446,23 @@ Fixture: pinned planar 3-link chain (pelvis--arm--club analogue), first joint
 unactuated, true lengths $(0.9,0.6,0.4)\,\mathrm{m}$, two trials of 150 nodes
 at 200\,Hz driven by smooth torques of RMS $0.54\,\mathrm{N\,m}$, six markers
 with $0.5\,\mathrm{mm}$ noise, initial geometry $+5\,\%$, inertial prior
-perturbed by $\pm10$--$15\,\%$ (projected onto the cone), anthropometric
+perturbed by $\pm10\,\%$ (projected onto the cone), anthropometric
 $\sigma=15\,\%$, total mass and club inertia anchored, $\sigma_\tau=0.2\,\mathrm{N\,m}$,
-$w_u=0.3$, $w_{\Delta u}=10$.  Measured on NumPy~2.5/SciPy~1.18, single core:
+$w_u=0.3$, $w_{\Delta u}=10$.  Measured values (receipt \texttt{reference\_results.json}):
 \begin{center}
 \begin{tabular}{@{}l r@{}}
 \toprule
-Initialisation (sequential IK, 2 trials) & 1.0\,s \\
-Joint fit (4 stages, 8+9+9+11 iterations, all converged) & 3.1\,s \\
-Replay + TVLQR (2 trials) & 1.8\,s \\
+Initialisation (sequential IK, 2 trials) & 0.7\,s \\
+Joint fit (4 stages, 8+9+9+11 iterations, all converged) & 2.3\,s \\
+Replay + TVLQR (2 trials) & 1.4\,s \\
 \midrule
-Geometry error (identifiable lengths) & $<0.1\,\mathrm{mm}$ \\
-Kinematic RMS error & $0.5\,\mathrm{mrad}$ \\
-Torque RMS error / torque RMS & $0.106/0.542 = 20\,\%$ \\
-Inertial parameters (observable, vs.\ truth) & 1--3\,\% (prior: 4--10\,\%) \\
+Geometry error (identifiable lengths) & $0.024\,\mathrm{mm}$ \\
+Kinematic RMS error & $0.70$, $0.74\,\mathrm{mrad}$ \\
+Torque RMS error / torque RMS & $0.106/0.542 = 19.5\,\%$ \\
+Inertial parameters, max relative error over observable non-zero entries & 3.6\,\% (prior: 4.6\,\%) \\
 Structural observability rank & 9 of 12 ($m_0$ unobservable, as predicted) \\
-Open-loop replay, configuration RMS over 0.75\,s & $0.030\,\mathrm{rad}$, no divergence \\
-Closed-loop replay / feedback effort RMS & $0.0005\,\mathrm{rad}$ / $0.02$--$0.03\,\mathrm{N\,m}$ \\
+Open-loop replay, configuration RMS over 0.75\,s & $0.0304$, $0.0307\,\mathrm{rad}$; no divergence \\
+Closed-loop replay / feedback effort RMS & $0.00052$, $0.00053\,\mathrm{rad}$ / $0.021$, $0.030\,\mathrm{N\,m}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -472,11 +473,20 @@ and no input smoothness the torques were dominated by acceleration noise
 anchor the scale gauge was resolved by the degenerate solution.  Each is now a
 test or a gate.
 
-\paragraph{Reproduction.}
+\paragraph{Reproduction and evidence receipt.}
+Every number in the table is read from the committed receipt
+\texttt{docs/research/model\_aware\_matching/reference\_results.json}, which is
+regenerated deterministically (fixed seeds) by
 \begin{verbatim}
 export PYTHONPATH=$PWD:$PWD/src:$PWD/src/shared/python
+python3 -m src.shared.python.estimation.mosaic.reference_evidence
 python3 -m pytest tests/unit/estimation/mosaic -q
 \end{verbatim}
+and verified by \texttt{test\_reference\_evidence.py}, which re-runs the fixture
+and fails if any quoted quantity drifts from the receipt beyond its stated
+tolerance (timings are recorded but never compared; they depend on the host).
+Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session
+container.
 
 \section{Engine Integration Path}
 \label{sec:engines}

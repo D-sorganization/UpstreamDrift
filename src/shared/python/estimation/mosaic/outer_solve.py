@@ -100,6 +100,10 @@ class TrialData:
             self.marker_sigma > 0.0, "marker_sigma must be positive", self.marker_sigma
         )
         require(self.basis.n_samples == n_times, "basis sample count must match times")
+        require(
+            bool(np.allclose(self.basis.times, self.times, rtol=0.0, atol=1e-12)),
+            "basis grid must equal the trial times",
+        )
         if self.phase_index is not None:
             require(self.phase_index.shape == (n_times,), "phase_index per time")
 

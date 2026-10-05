@@ -46,7 +46,8 @@ class BSplineBasis:
     ) -> BSplineBasis:
         """Build a clamped uniform-knot basis spanning ``[times[0], times[-1]]``.
 
-        Preconditions: strictly increasing times, ``degree >= 1`` and
+        Preconditions: strictly increasing times, ``degree >= 2`` (the
+        acceleration matrix needs a second derivative) and
         ``n_coefficients > degree`` (otherwise the spline cannot interpolate).
         """
         samples = np.asarray(times, dtype=np.float64)
@@ -54,7 +55,7 @@ class BSplineBasis:
         require(
             bool(np.all(np.diff(samples) > 0.0)), "times must be strictly increasing"
         )
-        require(degree >= 1, "degree must be >= 1", degree)
+        require(degree >= 2, "degree must be >= 2 (acceleration needs it)", degree)
         require(
             n_coefficients > degree,
             "n_coefficients must exceed the degree",

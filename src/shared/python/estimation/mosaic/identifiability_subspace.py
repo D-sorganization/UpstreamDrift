@@ -92,10 +92,14 @@ def structural_observability(
     relative_tolerance: float = 1e-10,
     parameter_names: tuple[str, ...] | None = None,
 ) -> ObservabilityReport:
-    """Observability from unactuated rows only (no inputs, no priors)."""
+    """Observability from unactuated rows only (no inputs, no priors).
+
+    A fully actuated model has no such rows: the report then has rank zero
+    (kinematics alone carry no torque-free information about ``pi``).
+    """
     require(regressors.ndim == 3, "regressors must be (N, n_v, n_pi)", regressors.shape)
-    require(len(unactuated_rows) > 0, "at least one unactuated row is required")
-    stacked = regressors[:, unactuated_rows, :].reshape(-1, regressors.shape[2])
+    rows = np.asarray(unactuated_rows, dtype=np.int64)
+    stacked = regressors[:, rows, :].reshape(-1, regressors.shape[2])
     return _report_from_information(
         stacked.T @ stacked, relative_tolerance, parameter_names
     )

@@ -1,0 +1,55 @@
+{
+  "all_stages_converged": true,
+  "fixture": {
+    "data_seed": 8,
+    "geometry_scale": 1.05,
+    "marker_noise_m": 0.0005,
+    "n_nodes": 150,
+    "n_trials": 2,
+    "prior_relative_spread": 0.1,
+    "prior_seed": 2,
+    "sample_rate_hz": 200.0
+  },
+  "geometry_error_identifiable_m": 2.3748409428203665e-05,
+  "inertia_max_relative_error_observable": 0.03638699630458403,
+  "inertia_max_relative_error_prior": 0.04571210536235881,
+  "kinematic_rms_rad": [
+    0.0006968582784585059,
+    0.0007385478899680415
+  ],
+  "n_parameters": 12,
+  "outer_iterations_per_stage": [
+    8,
+    9,
+    9,
+    11
+  ],
+  "replay": [
+    {
+      "closed_loop_rms_rad": 0.0005198555596840188,
+      "divergence_time_s": null,
+      "feedback_effort_rms": 0.02144031452454268,
+      "open_loop_accepted": true,
+      "open_loop_rms_rad": 0.030361271450439528
+    },
+    {
+      "closed_loop_rms_rad": 0.0005303526043076004,
+      "divergence_time_s": null,
+      "feedback_effort_rms": 0.03021828509031123,
+      "open_loop_accepted": true,
+      "open_loop_rms_rad": 0.030670097151543868
+    }
+  ],
+  "structural_rank": 9,
+  "timings_s_not_compared": {
+    "initialisation": 0.9808534869998766,
+    "joint_fit": 2.3823950730002252,
+    "observability": 0.004733879000013985,
+    "replay": 1.4242817880003713
+  },
+  "torque_rms_error": 0.10576598465399824,
+  "torque_rms_scale": 0.5417725031211008,
+  "unobservable_parameters": [
+    "m_0"
+  ]
+}

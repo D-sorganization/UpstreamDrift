@@ -190,7 +190,7 @@ def fit_subject(
 
     started = time.perf_counter()
     model = factory(fit.geometry)
-    unactuated = np.flatnonzero(~np.any(model.input_matrix > 0.0, axis=1))
+    unactuated = np.flatnonzero(~np.any(np.abs(model.input_matrix) > 0.0, axis=1))
     observability = structural_observability(
         _regressors(model, trials, fit), unactuated
     )
