@@ -131,6 +131,76 @@ all trials/views and compare the approximate covariance of identifiable
 directions. Adding independent views of the same shared theta must reduce the
 reported variance on those directions in synthetic validation data.
 
+### 6.1 Shared-parameter posterior covariance (#11548)
+
+`solve_multi_trial_map` (`src/shared/python/estimation/multi_trial.py`)
+reports the Laplace (Gauss-Newton) covariance of the free shared parameters
+**marginalised over the per-trial trajectory coefficients**. Partition the
+decision vector as $x = (t, s)$, where $t$ stacks every trial's spline
+coefficients (nuisance) and $s$ the free shared parameters, and let $J$ be the
+Jacobian of the stacked whitened residual (data rows of every trial, then one
+prior row per free parameter with both `prior` and `prior_scale`). With
+regularisation $\lambda \ge 0$ (`covariance_regularization`, default
+$10^{-12}$):
+
+$$
+F = J^\top J + \lambda I =
+\begin{bmatrix} F_{tt} & F_{ts} \\ F_{st} & F_{ss} \end{bmatrix},
+\qquad
+\Sigma_{ss} = \left[F^{-1}\right]_{ss}
+= \left(F_{ss} - F_{st}\, F_{tt}^{-1}\, F_{ts}\right)^{-1}.
+$$
+
+The conditional covariance $F_{ss}^{-1}$ (trajectories held fixed) satisfies
+$F_{ss}^{-1} \preceq \Sigma_{ss}$ and understates uncertainty whenever $t$ and
+$s$ are correlated; it is **not** reported. Before #11548 the code returned the
+conditional block.
+
+Assumptions and conventions:
+
+- Residuals are already whitened (unit noise variance); the Laplace
+  approximation is evaluated at the returned solution $\hat{x}$.
+- Prior rows: residual $(s_i - \mu_i)/\sigma_i$, Jacobian $1/\sigma_i$ in
+  column $s_i$. A **locked** parameter is not a decision variable, so its prior
+  row would be a constant residual with a zero Jacobian row: it shifts the
+  objective by a constant and leaves the gradient, $F$, the MAP estimate and
+  $\Sigma_{ss}$ unchanged. Locked priors are therefore excluded from both the
+  residual and the Jacobian (the same row layout as the single-trial
+  estimator), and the reported `objective` no longer includes their constant.
+
+Numerical method: $F$ is formed explicitly; its numerical rank is the count of
+singular values above $\sigma_{\max}(F)\, n\, \varepsilon$ ($n$ = number of
+decision columns, $\varepsilon$ = float64 machine epsilon; the
+`numpy.linalg.matrix_rank` default). When the rank is $n$, $F^{-1}$ is
+computed and its $ss$ block read.
+
+Limitations:
+
+- **Rank deficiency fails closed.** If $\operatorname{rank}(F) < n$, the Schur
+  complement is singular and the marginal variance of a confounded direction
+  is unbounded. The Moore-Penrose block is not that marginal (for
+  $J = [1\;\, 1]$ with $\lambda = 0$ it gives $0.25$, where the Schur
+  complement is $1 - 1 = 0$). The result then carries
+  `covariance_status == "rank_deficient"` and a `NaN`-filled
+  `posterior_covariance`, matching `fit_uncertainty`.
+- A positive $\lambda$ that clears the tolerance makes $F$ invertible; the
+  reported $\Sigma_{ss}$ is then the exact marginal of the *regularised*
+  problem (an isotropic Gaussian prior of precision $\lambda$ on every
+  decision column). With the default $\lambda = 10^{-12}$ a confounded
+  direction yields a variance of order $10^{12}$, which is large rather than
+  falsely tight.
+- The Gauss-Newton $F$ omits second-order residual terms; it is accurate for
+  small residuals or near-linear models only.
+
+Acceptance evidence (dense $F^{-1}$ block equals the Schur inverse and exceeds
+the conditional variance; locked priors share one row layout; singular $F$
+reports `rank_deficient` instead of $0.25$):
+
+```bash
+MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen python -m pytest -q -o addopts="" \
+  -p no:cacheprovider tests/unit/estimation/test_multi_trial_map.py
+```
+
 ## 7. Double-pendulum AffineDrift coupling
 
 The analysis-layer helper

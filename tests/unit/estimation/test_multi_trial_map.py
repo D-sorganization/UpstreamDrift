@@ -26,6 +26,7 @@ from src.shared.python.estimation import (
 )
 from src.shared.python.estimation.multi_trial import (
     _build_layout,
+    _marginal_shared_block,
     _objective_jacobian,
     _objective_residual,
     _pack_decision,
@@ -465,3 +466,75 @@ def test_posterior_covariance_is_schur_marginal_not_conditional() -> None:
     np.testing.assert_allclose(result.posterior_covariance, dense_marginal, rtol=1e-8)
     # Correlated example: marginalising cannot shrink, and here strictly grows.
     assert result.posterior_variance("club_length_m") > 1.5 * conditional[0, 0]
+
+
+@pytest.mark.unit
+def test_marginal_block_of_singular_fisher_is_unavailable_not_pinv() -> None:
+    """A confounded trajectory/shared column pair has no marginal (#11548).
+
+    Jacobian row ``[1, 1]`` (one trajectory column, one shared column) gives
+    ``F = [[1, 1], [1, 1]]`` with ``lambda = 0``. The Schur complement
+    ``F_ss - F_st F_tt^-1 F_ts = 1 - 1 = 0``, so the marginal variance is
+    undefined (infinite). The Moore-Penrose block ``pinv(F)[1, 1] = 0.25``
+    must never be reported in its place.
+    """
+    covariance, status = _marginal_shared_block(
+        np.array([[1.0, 1.0]]), trajectory_size=1, regularization=0.0
+    )
+
+    assert status == "rank_deficient"
+    assert covariance.shape == (1, 1)
+    assert np.all(np.isnan(covariance))
+
+
+@pytest.mark.unit
+def test_marginal_block_of_full_rank_fisher_matches_schur_inverse() -> None:
+    """A full-rank Fisher matrix reports the inverse Schur complement.
+
+    ``J = [[1, 1], [0, 1]]`` gives ``F = [[1, 1], [1, 2]]``; the Schur
+    complement of ``F_tt = 1`` is ``2 - 1 = 1``, so the exact marginal is
+    ``1.0`` (the conditional ``1 / F_ss`` would be ``0.5``). Exact 2x2
+    arithmetic, so ``rtol = 1e-12`` is far above rounding.
+    """
+    covariance, status = _marginal_shared_block(
+        np.array([[1.0, 1.0], [0.0, 1.0]]), trajectory_size=1, regularization=0.0
+    )
+
+    assert status == "estimated"
+    np.testing.assert_allclose(covariance, [[1.0]], rtol=1e-12)
+
+
+@pytest.mark.unit
+def test_solver_reports_unavailable_covariance_for_confounded_problem() -> None:
+    """``q * club_length`` alone is scale-confounded; the result fails closed.
+
+    Without the trajectory anchor rows, scaling the spline coefficients by
+    ``c`` and ``club_length_m`` by ``1 / c`` leaves every residual unchanged,
+    so the regularisation-free Fisher matrix is singular at every point.
+    """
+    base = _observation(0, 1.0)
+    times = base.evaluation_times
+    observed = np.linspace(1.0, 2.0, times.size)
+
+    def residual(_observation, evaluation, parameters):
+        return parameters["club_length_m"] * evaluation.q[:, 0] - observed
+
+    def jacobian(observation, evaluation, parameters, layout):
+        jac = np.zeros((times.size, layout.size), dtype=float)
+        jac[:, layout.trajectory_slice(observation.key)] = (
+            parameters["club_length_m"] * evaluation.q_basis[:, 0, :]
+        )
+        jac[:, layout.parameter_column("club_length_m")] = evaluation.q[:, 0]
+        return jac
+
+    observation = replace(base, residual=residual, jacobian=jacobian)
+    problem = replace(
+        _single_problem(),
+        observations=(observation,),
+        covariance_regularization=0.0,
+    )
+
+    result = solve_multi_trial_map(problem)
+
+    assert result.covariance_status == "rank_deficient"
+    assert np.isnan(result.posterior_variance("club_length_m"))

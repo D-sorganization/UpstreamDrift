@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -45,6 +45,7 @@ MultiTrialJacobianFn = Callable[
     ],
     np.ndarray,
 ]
+CovarianceStatus = Literal["estimated", "rank_deficient"]
 
 
 @dataclass(frozen=True)
@@ -137,9 +138,14 @@ class MultiTrialMapResult:
     n_non_finite_evaluations: int = 0
     identifiability: IdentifiabilityGateReport | None = None
     locked_by_gate: tuple[str, ...] = field(default_factory=tuple)
+    covariance_status: CovarianceStatus = "estimated"
 
     def posterior_variance(self, name: str) -> float:
-        """Return the approximate posterior variance for an unlocked parameter."""
+        """Return the approximate posterior variance for an unlocked parameter.
+
+        ``NaN`` when ``covariance_status == "rank_deficient"``: the marginal is
+        undefined and is reported as unavailable rather than approximated.
+        """
         try:
             index = self.posterior_parameter_names.index(name)
         except ValueError as exc:
@@ -186,7 +192,9 @@ def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
     free_values = result.x[layout.trajectory_size :]
     full_values = problem.shared_parameters.expand_free_vector(free_values)
     parameters = problem.shared_parameters.to_mapping(full_values)
-    covariance = _posterior_covariance(problem, layout, result.x, residual.size)
+    covariance, covariance_status = _posterior_covariance(
+        problem, layout, result.x, residual.size
+    )
     _warn_if_sentinel_fired(counter, _all_jacobians_available(problem))
     return MultiTrialMapResult(
         success=bool(result.success),
@@ -202,6 +210,7 @@ def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
         n_non_finite_evaluations=counter.evaluations,
         identifiability=gate_report,
         locked_by_gate=tuple(locked),
+        covariance_status=covariance_status,
     )
 
 
@@ -491,26 +500,19 @@ def _posterior_covariance(
     layout: MultiTrialDecisionLayout,
     decision: np.ndarray,
     n_residual_rows: int,
-) -> np.ndarray:
+) -> tuple[np.ndarray, CovarianceStatus]:
     """Marginal Laplace covariance of the free shared parameters.
 
-    The Gauss-Newton Fisher matrix ``F = J^T J + lambda I`` spans every
-    decision column: the per-trial trajectory coefficients ``t`` and the free
-    shared parameters ``s``. The trajectory coefficients are nuisance
-    parameters, so the reported covariance is the **marginal** over ``s``,
-    the ``s`` block of ``F^-1``, which equals the inverse Schur complement
-    ``(F_ss - F_st F_tt^-1 F_ts)^-1``. Inverting ``F_ss`` alone would be the
-    covariance *conditional* on the trajectories and understates uncertainty
-    whenever they are correlated with ``s`` (#11548). This is the same
-    construction :mod:`.fit_uncertainty` uses: invert the full Fisher matrix
-    with :func:`shared_parameter_covariance`, then read the requested block.
+    Builds the objective Jacobian at ``decision`` and delegates to
+    :func:`_marginal_shared_block`, which documents the calculation and its
+    rank-deficiency behaviour.
 
     Preconditions: ``decision`` is finite with width ``layout.size``. Invariant:
-    the Jacobian has exactly ``n_residual_rows`` rows (one shared row layout). Postcondition: a square matrix of
-    side ``free_size``.
+    the Jacobian has exactly ``n_residual_rows`` rows (one shared row layout).
+    Postcondition: a square matrix of side ``free_size`` and its status.
     """
     if problem.shared_parameters.free_size == 0:
-        return np.zeros((0, 0), dtype=float)
+        return np.zeros((0, 0), dtype=float), "estimated"
     require(decision.shape == (layout.size,), "decision width must match layout")
     require(bool(np.all(np.isfinite(decision))), "decision must be finite")
     if _all_jacobians_available(problem):
@@ -522,14 +524,62 @@ def _posterior_covariance(
         )
     require(jacobian.shape[1] == layout.size, "jacobian width must match layout")
     assert jacobian.shape[0] == n_residual_rows, "residual/Jacobian row mismatch"
-    full = shared_parameter_covariance(
+    return _marginal_shared_block(
         jacobian,
+        trajectory_size=layout.trajectory_size,
         regularization=problem.covariance_regularization,
     )
-    shared = slice(layout.trajectory_size, layout.size)
+
+
+def _marginal_shared_block(
+    jacobian: np.ndarray,
+    trajectory_size: int,
+    regularization: float,
+) -> tuple[np.ndarray, CovarianceStatus]:
+    """Shared-parameter block of the inverse regularised Fisher matrix.
+
+    The Gauss-Newton Fisher matrix ``F = J^T J + lambda I`` spans every
+    decision column: the per-trial trajectory coefficients ``t`` (the first
+    ``trajectory_size`` columns) and the free shared parameters ``s``. The
+    trajectory coefficients are nuisance parameters, so the reported
+    covariance is the **marginal** over ``s``, the ``s`` block of ``F^-1``,
+    which equals the inverse Schur complement
+    ``(F_ss - F_st F_tt^-1 F_ts)^-1``. Inverting ``F_ss`` alone would be the
+    covariance *conditional* on the trajectories and understates uncertainty
+    whenever they are correlated with ``s`` (#11548).
+
+    Rank deficiency fails closed. ``F`` is treated as singular when its
+    numerical rank, counting singular values above
+    ``sigma_max(F) * n * eps`` (``n`` = number of columns; the
+    :func:`numpy.linalg.matrix_rank` default), is below ``n``. A singular
+    ``F`` has no inverse, the Schur complement is singular, and the marginal
+    variance of at least one confounded direction is unbounded; the
+    Moore-Penrose block is *not* that marginal (for ``J = [1, 1]`` it gives
+    ``0.25`` where the marginal is infinite). The block is then returned
+    filled with ``NaN`` and status ``"rank_deficient"``, the same convention
+    :mod:`.fit_uncertainty` uses. A positive ``lambda`` large enough to clear
+    the tolerance makes ``F`` invertible; the result is then the exact
+    marginal of the *regularised* (prior-augmented) problem.
+
+    Preconditions: ``jacobian`` is finite 2-D with more than
+    ``trajectory_size`` columns; ``regularization >= 0``. Postcondition: a
+    square matrix of side ``n - trajectory_size`` and its status.
+    """
+    matrix = np.asarray(jacobian, dtype=float)
+    require(matrix.ndim == 2, "jacobian must be 2D")
+    require(0 <= trajectory_size < matrix.shape[1], "trajectory_size out of range")
+    require(bool(np.all(np.isfinite(matrix))), "jacobian must be finite")
+    require(regularization >= 0.0, "regularization must be non-negative")
+    n_columns = matrix.shape[1]
+    shared = slice(trajectory_size, n_columns)
+    side = n_columns - trajectory_size
+    fisher = matrix.T @ matrix + regularization * np.eye(n_columns)
+    if np.linalg.matrix_rank(fisher, hermitian=True) < n_columns:
+        return np.full((side, side), np.nan, dtype=float), "rank_deficient"
+    full = shared_parameter_covariance(matrix, regularization=regularization)
     marginal = full[shared, shared].copy()
-    assert marginal.shape == (layout.size - layout.trajectory_size,) * 2
-    return marginal
+    assert marginal.shape == (side, side)
+    return marginal, "estimated"
 
 
 def _finite_difference_jacobian(
