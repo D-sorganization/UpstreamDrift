@@ -52,7 +52,7 @@ credible anthropometric prior.
 around the fit (the only linearisation), delivered together as the
 reference-plus-gains schedule a whole-body controller consumes.
 
-## Measured Reference Results (planar 3-link fixture, NumPy, single core)
+## Measured Reference Results (Planar 3-Link Fixture, NumPy, Single Core)
 
 Two trials × 150 nodes at 200 Hz, 0.5 mm marker noise, +5 % geometry error,
 ±10–15 % inertial prior, total mass and club inertia anchored:
@@ -64,7 +64,7 @@ total. Negative results (massless collapse with an under-resolved basis;
 acceleration-noise torques without input smoothness; scale collapse without an
 anchor) are retained as tests and gates.
 
-## Qualification Gates (frozen before human experiments)
+## Qualification Gates (Frozen Before Human Experiments)
 
 1. Kinematic whiteness at γ = 0 (basis resolution) before dynamics weighting.
 2. Declared dynamics discrepancy σ_τ ≥ basis acceleration error × mass scale.

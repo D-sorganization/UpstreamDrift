@@ -161,6 +161,23 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 
+### MOSAIC Model-Aware Matching Estimator
+
+`src/shared/python/estimation/mosaic/` — model-aware multi-trial
+forward-dynamics matching. Design reference:
+`docs/research/model_aware_matching/model_aware_matching.tex`; epic plan in
+`docs/plans/EPIC_MOSAIC_MODEL_AWARE_MATCHING.md`.
+
+- `inertial`, `planar_chain` — vectorized planar inertial regressor fixture.
+- `kinematic_basis` — B-spline kinematic basis.
+- `inner_solve` — variable-projection inner solve; `outer_solve` — LM outer
+  solve with continuation.
+- `identifiability_subspace`, `ik_init` — inertial observability and IK start.
+- `local_policy` — TVLQR local policy and replay gate.
+- `torque_template`, `subject_fit` — torque template and subject pipeline.
+- Scope: planar fixture only; no engine regressor provider or human capture
+  qualification yet.
+
 ### Anthropometrics
 
 `src/shared/python/anthropometrics/`
