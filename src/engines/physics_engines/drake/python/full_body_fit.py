@@ -511,6 +511,43 @@ def _evaluate_acceptance(
     return evaluate(acceptance_input, horizon=Horizon.G1)
 
 
+def _score_rollout(
+    model: Any,
+    q_fit: Array,
+    ws_cand: MatchedSwingCandidate,
+    spec_dict: Mapping[str, Any],
+    target_markers: Array | None,
+    marker_labels: Sequence[str] | None,
+) -> tuple[Array, Array, NDArray[np.bool_], tuple[str, ...], Any, dict[str, float]]:
+    """Score forward kinematics of the Drake rollout against the targets (#11567)."""
+    time_s = ws_cand.time_s
+    _, _, labels = _resolve_targets(ws_cand, target_markers, marker_labels, time_s)
+    rollout_m, rollout_valid = _rollout_marker_positions(
+        model, q_fit, labels, _spec_marker_attachments(spec_dict)
+    )
+    return _extract_markers_and_metrics(
+        ws_cand,
+        target_markers,
+        marker_labels,
+        time_s,
+        predicted_markers_m=rollout_m,
+        predicted_validity=rollout_valid,
+    )
+
+
+def _unmeasured_physical_audit(tau_fit: Array) -> dict[str, Any]:
+    """Contact and closure audit fields are unmeasured (None) so G1 fails closed."""
+    return {
+        "max_normal_force_n": None,
+        "max_normal_force_body_weights": None,
+        "max_penetration_m": None,
+        "closure_translation_error_max_m": None,
+        "closure_rotation_error_max_rad": None,
+        "weight_fraction": None,
+        "peak_effort_n_m": float(np.max(np.abs(tau_fit))),
+    }
+
+
 def fit_full_body_drake(
     spec: Mapping[str, Any] | bytes | str | Path,
     warm_start_path: Path | str | None = None,
@@ -540,28 +577,10 @@ def fit_full_body_drake(
         model, q_ws[0], v_ws[0], time_s, tau_opt
     )
 
-    _, _, labels = _resolve_targets(ws_cand, target_markers, marker_labels, time_s)
-    rollout_m, rollout_valid = _rollout_marker_positions(
-        model, q_fit, labels, _spec_marker_attachments(spec_dict)
+    tgt_m, fit_m, val_m, lbls, five_m, shared = _score_rollout(
+        model, q_fit, ws_cand, spec_dict, target_markers, marker_labels
     )
-    tgt_m, fit_m, val_m, lbls, five_m, shared = _extract_markers_and_metrics(
-        ws_cand,
-        target_markers,
-        marker_labels,
-        time_s,
-        predicted_markers_m=rollout_m,
-        predicted_validity=rollout_valid,
-    )
-
-    physical_audit = {
-        "max_normal_force_n": None,
-        "max_normal_force_body_weights": None,
-        "max_penetration_m": None,
-        "closure_translation_error_max_m": None,
-        "closure_rotation_error_max_rad": None,
-        "weight_fraction": None,
-        "peak_effort_n_m": float(np.max(np.abs(tau_fit))),
-    }
+    physical_audit = _unmeasured_physical_audit(tau_fit)
 
     eval_result = _evaluate_acceptance(shared, five_m, physical_audit)
     parity_dict = compute_parity_vs_reference(
