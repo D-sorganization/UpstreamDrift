@@ -3276,6 +3276,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11573 · Report NaN for Unmeasured Replay Metrics and Fail Closed in Acceptance Evaluation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11573
+- **Branch:** merged via #11575
+- **PR:** #11575
+- **Paths:** see #11575
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`34cf0eb8`; collated from changes/11573-unmeasured-replay-metrics-nan.md)
+- **Summary:** Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation
+- **Next step:** Shipped in PR #11575.
+
 ### DL-#11567 · Drake Full-Body Fit Scores Forward Kinematics of the Drake Rollout Instead of the Warm-Start Candidate's Markers
 
 - **State:** shipped
