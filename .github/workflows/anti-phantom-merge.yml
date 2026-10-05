@@ -37,7 +37,9 @@ permissions:
   issues: read
 
 concurrency:
-  group: anti-phantom-${{ github.event.pull_request.number }}
+  # Separate groups per event type so label churn (pull_request_target) cannot
+  # cancel the authoritative pull_request run.
+  group: anti-phantom-${{ github.event.pull_request.number }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -58,20 +60,16 @@ jobs:
           git config --global http.lowSpeedLimit 0
           git config --global http.lowSpeedTime 999999
 
-      # Never check out PR head code on pull_request_target: that event runs in
-      # the base-repo security context (RM#1989). Label events are API-only.
-      - name: Check out PR head with bounded history
-        if: github.event_name == 'pull_request'
+      # SECURITY INVARIANT (RM#1989): this job also runs on pull_request_target
+      # with base-repo credentials, so it checks out TRUSTED BASE code only (it
+      # runs scripts/ci/check_phantom_guard_paths.py from here) and reads the
+      # PR's files and commits from the REST API. Never check out or fetch the
+      # PR head in this workflow.
+      - name: Check out trusted base code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 50
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Fetch base branch
-        if: github.event_name == 'pull_request'
-        run: |
-          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1 || true
-          git fetch origin "${{ github.event.pull_request.base.sha }}" || true
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Check admin override label
         id: override
@@ -125,15 +123,13 @@ jobs:
           fi
 
       - name: Run phantom guard checks
-        if: github.event_name == 'pull_request' && steps.override.outputs.override != 'true'
+        if: steps.override.outputs.override != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
           REPO: ${{ github.repository }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
 
@@ -162,45 +158,24 @@ jobs:
             exit 1
           }
 
-          # Gather diff against base merge-base
-          MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo "$BASE_SHA")
-          CHANGED_FILES=$(git diff --name-only "$MERGE_BASE...$HEAD_SHA" || true)
-          NUM_CHANGED=$(echo "$CHANGED_FILES" | sed '/^$/d' | wc -l)
-          echo "merge_base=$MERGE_BASE"
+          # Changed files come from the REST API, never from a PR-head
+          # checkout. Retry a few times when the API reports 0 files: the
+          # workflow can fire before the push has propagated (#2898, #2907).
+          RETRIES=0
+          while :; do
+            CHANGED_FILES=$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename' || true)
+            NUM_CHANGED=$(printf '%s\n' "$CHANGED_FILES" | sed '/^$/d' | wc -l)
+            if [ "$NUM_CHANGED" -gt 0 ] || [ "$RETRIES" -ge 3 ]; then
+              break
+            fi
+            echo "::notice::0 changed files reported; waiting 10s and retrying (attempt $((RETRIES+1))/3)"
+            sleep 10
+            RETRIES=$((RETRIES + 1))
+          done
+          export PR_CHANGED_FILES="$CHANGED_FILES"
           echo "num_changed=$NUM_CHANGED"
           echo "changed files:"
           echo "$CHANGED_FILES"
-
-          # If git diff reports 0 changed files, cross-check via the GitHub API
-          # and retry up to 3 times. This handles a race condition where the
-          # workflow fires before the PR's push has fully propagated to the
-          # GitHub API / git database (see false-positives on #2898, #2907).
-          RETRIES=0
-          while [ "$NUM_CHANGED" -eq 0 ] && [ $RETRIES -lt 3 ]; do
-            echo "::notice::0 changed files reported; waiting 10s and retrying (attempt $((RETRIES+1))/3)"
-            sleep 10
-            # Re-fetch base + head in case refs propagated since the initial fetch.
-            git fetch origin "${{ github.event.pull_request.base.ref }}" || true
-            git fetch origin "$BASE_SHA" || true
-            git fetch origin "$HEAD_SHA" || true
-            # Cross-check via the API as well.
-            API_STATS=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json additions,deletions,changedFiles --jq '[.changedFiles, .additions, .deletions] | @tsv' 2>/dev/null || echo '0	0	0')
-            read -r API_FILES API_ADDS API_DELS <<< "$API_STATS"
-            echo "api_changed_files=$API_FILES api_additions=$API_ADDS api_deletions=$API_DELS"
-            MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || echo "$BASE_SHA")
-            CHANGED_FILES=$(git diff --name-only "$MERGE_BASE...$HEAD_SHA" || true)
-            NUM_CHANGED=$(echo "$CHANGED_FILES" | sed '/^$/d' | wc -l)
-            # If the API sees changes but local git still doesn't, trust the API
-            # count AND file list to avoid a false-positive rule-1/rule-3 failure
-            # on a racey push or a merge-base git can't resolve (e.g. #9404).
-            if [ "$NUM_CHANGED" -eq 0 ] && [ "$API_FILES" -gt 0 ]; then
-              echo "::notice::API reports $API_FILES changed files; deferring to API count and file list to avoid race-induced false positive"
-              NUM_CHANGED="$API_FILES"
-              CHANGED_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json files --jq '.files[].path' 2>/dev/null || echo "")
-            fi
-            RETRIES=$((RETRIES + 1))
-          done
-          echo "post-retry num_changed=$NUM_CHANGED"
 
           # -------- Rule 1 — empty diff --------
           if [ "$NUM_CHANGED" -eq 0 ]; then
@@ -223,15 +198,16 @@ jobs:
           # -------- Rule 3 — closes-issue path mismatch --------
           # Extracted to scripts/ci/check_phantom_guard_paths.py (UD #9091;
           # governed change: Repository_Management#1505 / #1507). The script
-          # consults the GitHub API changed-file list when the shallow base
-          # fetch defeats git merge-base, instead of false-positiving on the
-          # resulting empty local `git diff`. Diagnostics go to stderr; the
-          # PR-comment report goes to stdout and is forwarded to fail().
+          # takes the API changed-file list via PR_CHANGED_FILES (no BASE_SHA /
+          # HEAD_SHA, so it never runs git against PR code). Diagnostics go to
+          # stderr; the PR-comment report goes to stdout and is forwarded to
+          # fail().
           RULE3_OUTPUT=$(python3 scripts/ci/check_phantom_guard_paths.py) || \
             fail "3 (closes-issue path mismatch)" "$RULE3_OUTPUT"
 
           # -------- Rule 4 — bot-only commits --------
-          COMMITS=$(git log --format='%H|%an|%s' "$MERGE_BASE..$HEAD_SHA" || true)
+          # The API lists oldest first; `tac` restores newest-first order.
+          COMMITS=$(gh api "repos/$REPO/pulls/$PR_NUMBER/commits" --paginate --jq '.[] | [.sha, (.commit.author.name), (.commit.message | split("\n")[0])] | join("|")' | tac || true)
           if [ -n "$COMMITS" ]; then
             LAST_LINE=$(printf '%s\n' "$COMMITS" | sed -n '1p')
             LAST_AUTHOR=$(echo "$LAST_LINE" | cut -d'|' -f2)
