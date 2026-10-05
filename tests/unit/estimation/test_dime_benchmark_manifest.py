@@ -210,12 +210,11 @@ def test_green_analytic_pendulum_and_estimator_baseline_reproduce_with_recorded_
     result_1 = run_dime_baseline(manifest, seed=42)
     result_2 = run_dime_baseline(manifest, seed=42)
 
-    assert result_1.reproduced_identically
-    np.testing.assert_allclose(
-        result_1.trajectory_q,
-        result_2.trajectory_q,
-        atol=manifest.thresholds.reproducibility_atol,
-    )
+    # No estimator ran, so nothing was reproduced (#11552).
+    assert result_1.reproduced_identically is False
+    # #11552: the former trajectory was ground truth copied as the "estimate";
+    # with no estimator it is not measured (None), not reproduced.
+    assert result_1.trajectory_q is None and result_2.trajectory_q is None
     np.testing.assert_allclose(
         result_1.control_torques,
         result_2.control_torques,
@@ -377,3 +376,22 @@ def test_green_shared_fixtures_contract() -> None:
     assert stance.is_stance is True
     assert np.isclose(stance.ground_reaction_force_z, stance.mass_kg * 9.81, atol=1e-4)
     assert len(stance.frames) == 10
+
+
+@pytest.mark.unit
+def test_red_11552_baseline_without_estimator_is_not_measured() -> None:
+    """The baseline must not report truth-as-estimate figures as measurements."""
+    manifest = _make_valid_manifest()
+    result = run_dime_baseline(manifest, seed=42)
+
+    assert result.measured is False
+    assert result.trajectory_q is None
+    assert result.alignment is None
+    assert result.cancellation is None
+    assert result.phase_metrics == {}
+    assert result.status == "unavailable"
+    assert result.thresholds_passed is False
+    assert any("not measured" in f for f in result.threshold_failures)
+    assert any("no baseline estimator" in r for r in result.qualification_reasons)
+    # Qualification of the manifest itself is unchanged and still evaluable.
+    assert manifest.evaluate_qualification()[0] == "qualified"

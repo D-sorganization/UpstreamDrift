@@ -542,7 +542,11 @@ class DimeBenchmarkManifest:
 
 @dataclass(frozen=True)
 class DimeBenchmarkResult:
-    """Execution result of running the DIME baseline against a frozen manifest."""
+    """Execution result of running the DIME baseline against a frozen manifest.
+
+    ``None`` figures mean *not measured*; they are never replaced by constants or by
+    ground truth (#11552).
+    """
 
     manifest_version: str
     dataset_id: str
@@ -551,13 +555,22 @@ class DimeBenchmarkResult:
     qualification_reasons: tuple[str, ...]
     reproduced_identically: bool
     seed: int
-    trajectory_q: np.ndarray
+    trajectory_q: np.ndarray | None
     control_torques: np.ndarray
     phase_metrics: dict[str, PhaseMetrics]
-    alignment: float
-    cancellation: float
+    alignment: float | None
+    cancellation: float | None
     thresholds_passed: bool
     threshold_failures: tuple[str, ...]
+
+    @property
+    def measured(self) -> bool:
+        """True only when an estimator produced the reported figures."""
+        return (
+            self.trajectory_q is not None
+            and self.alignment is not None
+            and self.cancellation is not None
+        )
 
 
 def run_dime_baseline(
@@ -565,10 +578,17 @@ def run_dime_baseline(
     *,
     seed: int = 42,
 ) -> DimeBenchmarkResult:
-    """Execute the baseline model/estimator reproducibly under the frozen manifest."""
-    status, reasons = manifest.evaluate_qualification()
+    """Run the baseline under the frozen manifest, failing closed without an estimator.
 
-    # Load appropriate deterministic fixture
+    No baseline estimator is wired to this protocol, and the fixture carries no
+    observations separate from ground truth. Using truth as the estimate would make
+    every metric trivially perfect, so the result is reported as ``unavailable`` with
+    all estimate-derived figures not measured. Fixture controls are inputs, not
+    results, and are returned unchanged.
+    """
+    _status, reasons = manifest.evaluate_qualification()
+
+    # Load appropriate deterministic fixture (controls only; truth is not an estimate)
     if manifest.model_id == "fixed_base_pendulum":
         fixture: Any = make_fixed_base_pendulum_fixture(n_frames=8, fps=100.0)
     elif manifest.model_id == "underactuated":
@@ -578,54 +598,28 @@ def run_dime_baseline(
     else:
         fixture = make_fixed_base_pendulum_fixture(n_frames=8, fps=100.0)
 
-    # Deterministic trajectory recovery
-    _rng = np.random.default_rng(seed)
-    q_true = np.array([f.q[0] for f in fixture.frames], dtype=np.float64)
-    q_est = q_true.copy()
     controls = np.asarray(fixture.controls, dtype=np.float64)
-
-    phase_metrics = compute_phase_drift_and_control(
-        q_est, q_true, controls, manifest.split_policy.phase_frames
-    )
-    alignment = compute_alignment_metric(
-        q_est, q_true, policy=manifest.zero_denominator_policy
-    )
-    cancellation = compute_cancellation_metric(
-        fixture.reaction_forces if hasattr(fixture, "reaction_forces") else controls,
-        -fixture.reaction_forces if hasattr(fixture, "reaction_forces") else -controls,
-        policy=manifest.zero_denominator_policy,
-    )
-
-    threshold_failures: list[str] = []
-    max_drift = max((pm.max_drift for pm in phase_metrics.values()), default=0.0)
-    if max_drift > manifest.thresholds.max_drift_m:
-        threshold_failures.append(
-            f"max_drift {max_drift:.4f} > {manifest.thresholds.max_drift_m}"
-        )
-    if alignment < manifest.thresholds.min_alignment:
-        threshold_failures.append(
-            f"alignment {alignment:.4f} < {manifest.thresholds.min_alignment}"
-        )
-    if cancellation > manifest.thresholds.max_cancellation_ratio:
-        threshold_failures.append(
-            f"cancellation {cancellation:.4f} > {manifest.thresholds.max_cancellation_ratio}"
-        )
 
     return DimeBenchmarkResult(
         manifest_version=manifest.manifest_version,
         dataset_id=manifest.dataset_id,
         model_id=manifest.model_id,
-        status=status,
-        qualification_reasons=tuple(reasons),
-        reproduced_identically=True,
+        status="unavailable",
+        qualification_reasons=(
+            *reasons,
+            "no baseline estimator is implemented for this protocol",
+        ),
+        reproduced_identically=False,  # no estimator ran: nothing reproduced
         seed=seed,
-        trajectory_q=q_est,
+        trajectory_q=None,
         control_torques=controls,
-        phase_metrics=phase_metrics,
-        alignment=alignment,
-        cancellation=cancellation,
-        thresholds_passed=len(threshold_failures) == 0,
-        threshold_failures=tuple(threshold_failures),
+        phase_metrics={},
+        alignment=None,
+        cancellation=None,
+        thresholds_passed=False,
+        threshold_failures=(
+            "baseline figures not measured: no estimator output to compare",
+        ),
     )
 
 

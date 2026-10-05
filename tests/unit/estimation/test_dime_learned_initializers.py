@@ -47,6 +47,7 @@ from src.shared.python.estimation.dime_learned_initializers import (
     StaleModelIdentityError,
     TeacherEpisode,
     TemporalWindowContext,
+    TrainingTimings,
     UnrealisticTorqueError,
     run_initializer_ablation_study,
     train_reusable_matching_initializer,
@@ -372,7 +373,8 @@ def test_green_calibrated_ood_rejection_falls_back_to_classical_solve() -> None:
         classical_initializer=classical_init,
     )
 
-    # 1. In-distribution query returns learned proposal
+    # 1. In-distribution query: no trained model exists (#11552), so the learned
+    # proposal is unavailable and the flagged classical solve is used instead.
     id_window = _make_dummy_observation_window()
     id_priors = {"height_m": 1.78, "mass_kg": 72.0}
     cand_id = adaptive_init.initialize(
@@ -380,9 +382,9 @@ def test_green_calibrated_ood_rejection_falls_back_to_classical_solve() -> None:
         subject_priors=id_priors,
         contact_context={"mode": "ground_foot"},
     )
-    assert cand_id.source_method == "learned_proposal"
+    assert cand_id.source_method == "classical_physical"
     assert cand_id.is_ood is False
-    assert cand_id.confidence > 0.5
+    assert "not measured" in cand_id.metadata["fallback_reason"]
 
     # 2. OOD query (extreme height = 2.45m) gracefully falls back to classical solve
     ood_priors = {"height_m": 2.45, "mass_kg": 130.0}
@@ -460,11 +462,11 @@ def test_green_ablate_drift_features_and_rom_priors() -> None:
     assert "ablate_rom" in ablation_results
     assert "classical_baseline" in ablation_results
 
-    # Full model with drift features and ROM priors outperforms ablated variants
-    report_full = ablation_results["full_model"]
-    report_no_drift = ablation_results["ablate_drift"]
-    assert report_full.acceptance_rate >= report_no_drift.acceptance_rate
-    assert report_full.mean_residual <= report_no_drift.mean_residual
+    # #11552: the former literal figures (full model beating ablations) were
+    # fabricated; with no evaluation harness every variant is flagged not measured.
+    assert all(not r.is_measured for r in ablation_results.values())
+    assert ablation_results["ablate_drift"].config.include_drift_features is False
+    assert ablation_results["ablate_rom"].config.include_rom_priors is False
 
 
 def test_green_report_teacher_training_cost_and_break_even() -> None:
@@ -503,3 +505,171 @@ def test_green_inconclusive_learning_curve_halts_scale_up() -> None:
     assert card.learning_curve_status == "inconclusive"
     assert card.scale_up_halted is True
     assert "Inconclusive learning curve" in card.limitations[0]
+
+
+# ==============================================================================
+# #11552: no fabricated results, no ground-truth leakage
+# ==============================================================================
+
+
+def test_red_11552_untrained_learned_proposal_is_not_a_constant_result() -> None:
+    """An in-distribution query must not return the old literal q/v/controls."""
+    from src.shared.python.estimation import dime_learned_initializers as mod
+
+    proposal_init = LearnedProposalInitializer(model_hash=_MODEL_HASH, u_dim=2)
+    with pytest.raises(mod.LearnedProposalUnavailableError, match="not measured"):
+        proposal_init.propose(
+            window=_make_dummy_observation_window(),
+            subject_priors={"height_m": 1.78},
+            contact_context={"mode": "ground_foot"},
+        )
+
+
+def test_red_11552_adaptive_fallback_is_flagged_and_truth_independent() -> None:
+    """Adaptive output must not depend on teacher/ground-truth states."""
+    adaptive = AdaptiveMatchingInitializer(
+        learned_initializer=LearnedProposalInitializer(model_hash=_MODEL_HASH, u_dim=2),
+        classical_initializer=ClassicalPhysicalInitializer(
+            model_hash=_MODEL_HASH, u_dim=2
+        ),
+    )
+    window = _make_dummy_observation_window()
+    cand = adaptive.initialize(window, {"height_m": 1.78}, {"mode": "ground_foot"})
+    assert cand.source_method == "classical_physical"
+    assert cand.metadata["fallback_reason"].startswith("learned proposal not measured")
+    assert not np.allclose(cand.state.q, [0.1, -0.2])
+
+    # Perturbing any teacher/ground-truth episode data cannot change the output:
+    # no initialiser input carries it.
+    _make_teacher_episode(controls=np.full((6, 2), 99.0))
+    again = adaptive.initialize(window, {"height_m": 1.78}, {"mode": "ground_foot"})
+    np.testing.assert_array_equal(again.state.q, cand.state.q)
+    np.testing.assert_array_equal(again.controls, cand.controls)
+
+
+def test_red_11552_initializer_signatures_accept_no_ground_truth() -> None:
+    import inspect
+
+    for fn in (
+        LearnedProposalInitializer.propose,
+        ClassicalPhysicalInitializer.initialize,
+        AdaptiveMatchingInitializer.initialize,
+    ):
+        names = set(inspect.signature(fn).parameters)
+        assert not {n for n in names if "truth" in n or n.startswith("true_")}
+
+
+def test_red_11552_ablation_study_reports_not_measured() -> None:
+    """Ablation figures are never the old literals; they are flagged not measured."""
+    episodes = tuple(
+        _make_teacher_episode(
+            episode_id=f"ep_{i}",
+            player_id=f"p_{i}",
+            t_start=i * 2.0,
+            t_end=i * 2.0 + 0.5,
+        )
+        for i in range(3)
+    )
+    reports = run_initializer_ablation_study(episodes=episodes, model_hash=_MODEL_HASH)
+    for report in reports.values():
+        assert report.is_measured is False
+        assert report.acceptance_rate is None
+        assert report.mean_residual is None
+        assert report.mean_solve_iterations is None
+        assert report.mean_solve_time_ms is None
+        assert report.receipt["status"] == "not_measured"
+
+
+def test_red_11552_native_gate_rejects_missing_residual() -> None:
+    """A candidate with no measured native residual must not be accepted."""
+    gate = NativeCandidateGate(model_hash=_MODEL_HASH)
+    cand = DimeInitializerCandidate(
+        state=_make_dummy_state(),
+        controls=np.array([1.0, 1.0]),
+        contact_state={},
+        confidence=0.9,
+        ood_score=0.1,
+        is_ood=False,
+        source_method="learned_proposal",
+    )
+    verdict = gate.evaluate(cand)
+    assert verdict.accepted is False
+    assert "not measured" in verdict.diagnostics["rejection_reason"]
+
+
+def test_red_11552_training_result_does_not_fabricate_costs_or_curve() -> None:
+    result = train_reusable_matching_initializer(
+        model_id="dp",
+        model_hash=_MODEL_HASH,
+        u_dim=2,
+        episodes=(_make_teacher_episode(),),
+    )
+    assert result.loss_history == ()
+    assert result.model_card.learning_curve_status == "not_measured"
+    assert result.model_card.scale_up_halted is True
+    assert result.model_card.training_cost_s is None
+    assert result.model_card.held_out_players == ()
+    assert result.compute_report is None
+
+    measured = train_reusable_matching_initializer(
+        model_id="dp",
+        model_hash=_MODEL_HASH,
+        u_dim=2,
+        episodes=(_make_teacher_episode(),),
+        simulated_loss_history=[1.0, 0.5],
+        timings=TrainingTimings(
+            training_time_s=12.0,
+            per_solve_classical_time_s=0.4,
+            per_solve_learned_time_s=0.1,
+        ),
+    )
+    assert measured.model_card.training_cost_s == 12.0
+    assert measured.compute_report is not None
+    assert measured.compute_report.training_time_s == 12.0
+    other = train_reusable_matching_initializer(
+        model_id="dp",
+        model_hash=_MODEL_HASH,
+        u_dim=2,
+        episodes=(_make_teacher_episode(episode_id="other"),),
+        simulated_loss_history=[1.0, 0.5],
+    )
+    assert (
+        other.model_card.training_dataset_hash
+        != measured.model_card.training_dataset_hash
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "field_name",
+    ["training_time_s", "per_solve_classical_time_s", "per_solve_learned_time_s"],
+)
+@pytest.mark.parametrize("bad", [-1.0, float("nan"), float("inf")])
+def test_training_timings_reject_non_finite_or_negative(
+    field_name: str, bad: float
+) -> None:
+    """A supplied timing must be a real measurement (#11552)."""
+
+    with pytest.raises(PreconditionError):
+        TrainingTimings(**{field_name: bad})
+
+
+def _dataset_hash(*episodes: TeacherEpisode) -> str:
+    return train_reusable_matching_initializer(
+        model_id="dp",
+        model_hash=_MODEL_HASH,
+        u_dim=2,
+        episodes=episodes,
+    ).model_card.training_dataset_hash
+
+
+def test_red_11552_dataset_hash_covers_episode_contents_and_order() -> None:
+    a = _make_teacher_episode(episode_id="a")
+    b = _make_teacher_episode(episode_id="b")
+    base = _dataset_hash(a, b)
+    assert base == _dataset_hash(
+        _make_teacher_episode(episode_id="a"), _make_teacher_episode(episode_id="b")
+    )
+    changed = _make_teacher_episode(episode_id="a", controls=np.full((6, 2), 7.0))
+    assert _dataset_hash(changed, b) != base
+    assert _dataset_hash(b, a) != base

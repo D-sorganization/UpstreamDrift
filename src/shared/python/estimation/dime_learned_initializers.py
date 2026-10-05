@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+import hashlib
 import math
 from types import MappingProxyType
 from typing import Any, Final
@@ -46,6 +47,7 @@ __all__ = [
     "DimeLearnedInitializerModelCard",
     "InvalidSyntheticCandidateError",
     "LearnedProposalInitializer",
+    "LearnedProposalUnavailableError",
     "NativeCandidateGate",
     "NativeGateVerdict",
     "OutOfDistributionError",
@@ -54,6 +56,7 @@ __all__ = [
     "TeacherEpisode",
     "TemporalWindowContext",
     "TrainingResult",
+    "TrainingTimings",
     "UnrealisticTorqueError",
     "run_initializer_ablation_study",
     "train_reusable_matching_initializer",
@@ -78,6 +81,10 @@ class InvalidSyntheticCandidateError(PreconditionError):
 
 class UnrealisticTorqueError(PreconditionError):
     """Raised when proposed controls exceed torque limits or maximum rate of torque change."""
+
+
+class LearnedProposalUnavailableError(PreconditionError):
+    """Raised when no trained proposal model exists: output is not measured (#11552)."""
 
 
 class OutOfDistributionError(PreconditionError):
@@ -180,7 +187,7 @@ class DimeLearnedInitializerModelCard:
     held_out_geometries: tuple[str, ...]
     ood_threshold: float
     units: Mapping[str, str]
-    training_cost_s: float
+    training_cost_s: float | None  # None: not measured
     teacher_data_cost_s: float
     learning_curve_status: str
     scale_up_halted: bool
@@ -256,22 +263,39 @@ class AblationEvaluationReport:
     """Report summarizing an ablation configuration's performance."""
 
     config: AblationConfiguration
-    acceptance_rate: float
-    mean_residual: float
-    mean_solve_iterations: int
-    mean_solve_time_ms: float
+    acceptance_rate: float | None = None
+    mean_residual: float | None = None
+    mean_solve_iterations: int | None = None
+    mean_solve_time_ms: float | None = None
     receipt: Mapping[str, Any] = field(default_factory=dict)
 
+    @property
+    def is_measured(self) -> bool:
+        """True only when every figure came from an actual run (None = not measured)."""
+        return None not in (
+            self.acceptance_rate,
+            self.mean_residual,
+            self.mean_solve_iterations,
+            self.mean_solve_time_ms,
+        )
+
     def __post_init__(self) -> None:
-        require(0.0 <= self.acceptance_rate <= 1.0, "acceptance_rate must be in [0, 1]")
-        require(self.mean_residual >= 0.0, "mean_residual must be non-negative")
-        require(
-            self.mean_solve_iterations >= 0,
-            "mean_solve_iterations must be non-negative",
-        )
-        require(
-            self.mean_solve_time_ms >= 0.0, "mean_solve_time_ms must be non-negative"
-        )
+        if self.acceptance_rate is not None:
+            require(
+                0.0 <= self.acceptance_rate <= 1.0, "acceptance_rate must be in [0, 1]"
+            )
+        if self.mean_residual is not None:
+            require(self.mean_residual >= 0.0, "mean_residual must be non-negative")
+        if self.mean_solve_iterations is not None:
+            require(
+                self.mean_solve_iterations >= 0,
+                "mean_solve_iterations must be non-negative",
+            )
+        if self.mean_solve_time_ms is not None:
+            require(
+                self.mean_solve_time_ms >= 0.0,
+                "mean_solve_time_ms must be non-negative",
+            )
         object.__setattr__(self, "receipt", MappingProxyType(dict(self.receipt)))
 
 
@@ -295,7 +319,7 @@ class TrainingResult:
     """Output bundle of initializer training."""
 
     model_card: DimeLearnedInitializerModelCard
-    compute_report: ComputeCostReport
+    compute_report: ComputeCostReport | None  # None: timings not measured
     loss_history: tuple[float, ...]
 
 
@@ -520,7 +544,14 @@ class LearnedProposalInitializer:
         subject_priors: Mapping[str, Any],
         contact_context: Mapping[str, Any],
     ) -> DimeInitializerCandidate:
-        """Predict proposal candidate or raise OutOfDistributionError."""
+        """Predict a proposal candidate.
+
+        Preconditions: OOD checks on subject height and contact mode.
+        Raises:
+            OutOfDistributionError: query is outside the supported distribution.
+            LearnedProposalUnavailableError: no trained model exists; nothing is
+                fabricated and no ground truth is consulted (fail closed).
+        """
         height = float(subject_priors.get("height_m", 1.75))
         if height < self.height_bounds[0] or height > self.height_bounds[1]:
             raise OutOfDistributionError(
@@ -542,19 +573,9 @@ class LearnedProposalInitializer:
                 f"Calibrated OOD score {ood_score:.2f} exceeds threshold {self.ood_threshold:.2f}."
             )
 
-        q_init = np.array([0.1, -0.2], dtype=np.float64)
-        v_init = np.array([0.05, 0.0], dtype=np.float64)
-        state = _build_initial_complete_state(
-            window.t_start, q_init, v_init, self.model_hash
-        )
-        return DimeInitializerCandidate(
-            state=state,
-            controls=np.ones(self.u_dim, dtype=np.float64) * 2.0,
-            contact_state=contact_context,
-            confidence=0.92,
-            ood_score=float(ood_score),
-            is_ood=False,
-            source_method="learned_proposal",
+        raise LearnedProposalUnavailableError(
+            "Learned proposal not measured: no trained proposal model is "
+            "available, so no state, control or confidence is reported (#11552)."
         )
 
 
@@ -579,6 +600,21 @@ class AdaptiveMatchingInitializer:
         try:
             return self.learned_initializer.propose(
                 window, subject_priors, contact_context
+            )
+        except LearnedProposalUnavailableError as err:
+            logger.info("Learned proposal unavailable, classical fallback: %s", err)
+            fallback_cand = self.classical_initializer.initialize(
+                window, subject_priors, contact_context
+            )
+            return DimeInitializerCandidate(
+                state=fallback_cand.state,
+                controls=fallback_cand.controls,
+                contact_state=fallback_cand.contact_state,
+                confidence=fallback_cand.confidence,
+                ood_score=fallback_cand.ood_score,
+                is_ood=False,
+                source_method="classical_physical",
+                metadata={"fallback_reason": f"learned proposal not measured: {err}"},
             )
         except OutOfDistributionError as err:
             logger.info("OOD detected, falling back to classical solve: %s", err)
@@ -610,7 +646,17 @@ class NativeCandidateGate:
 
     def evaluate(self, candidate: DimeInitializerCandidate) -> NativeGateVerdict:
         """Evaluate candidate through independent native dynamic consistency check."""
-        res_norm = float(candidate.metadata.get("native_residual", 0.01))
+        raw_residual = candidate.metadata.get("native_residual")
+        if raw_residual is None:
+            return NativeGateVerdict(
+                accepted=False,
+                residual_norm=math.inf,
+                diagnostics={
+                    "rejection_reason": "Native residual not measured; "
+                    "candidate rejected fail-closed."
+                },
+            )
+        res_norm = float(raw_residual)
         accepted = bool(res_norm <= self.residual_threshold)
         diagnostics = {}
         if not accepted:
@@ -624,6 +670,90 @@ class NativeCandidateGate:
         )
 
 
+@dataclass(frozen=True)
+class TrainingTimings:
+    """Caller-measured training and per-solve timings, in seconds (#11552).
+
+    ``None`` means not measured; nothing is ever substituted for a missing value.
+    Preconditions: every supplied value is finite and non-negative.
+    """
+
+    training_time_s: float | None = None
+    per_solve_classical_time_s: float | None = None
+    per_solve_learned_time_s: float | None = None
+
+    def __post_init__(self) -> None:
+        for name in (
+            "training_time_s",
+            "per_solve_classical_time_s",
+            "per_solve_learned_time_s",
+        ):
+            value = getattr(self, name)
+            require(
+                value is None or (math.isfinite(value) and value >= 0.0),
+                f"{name} must be finite and non-negative when supplied",
+            )
+
+
+def _update_digest(digest: Any, value: Any) -> None:
+    """Feed a deterministic, type-tagged serialization of ``value`` to ``digest``."""
+    if isinstance(value, np.ndarray):
+        arr = np.ascontiguousarray(value)
+        digest.update(f"nd:{arr.dtype.str}:{arr.shape}:".encode())
+        digest.update(arr.tobytes())
+    elif isinstance(value, Mapping):
+        digest.update(f"map:{len(value)}:".encode())
+        for key in sorted(value, key=str):
+            _update_digest(digest, str(key))
+            _update_digest(digest, value[key])
+    elif isinstance(value, (list, tuple)):
+        digest.update(f"seq:{len(value)}:".encode())
+        for item in value:
+            _update_digest(digest, item)
+    elif isinstance(value, DimeCompleteState):
+        for name in (
+            "t",
+            "q",
+            "v",
+            "v_dot",
+            "internal_state",
+            "model_hash",
+            "units",
+            "frame",
+        ):
+            _update_digest(digest, getattr(value, name))
+    else:
+        digest.update(f"{type(value).__name__}:{value!r};".encode())
+
+
+def _hash_episodes(episodes: Sequence[TeacherEpisode]) -> str:
+    """SHA-256 over the full content of each episode, in the given order.
+
+    Postcondition: changing any episode field (states, controls, contacts, model
+    hash, timing, ids) or the episode order changes the digest.
+    """
+    digest = hashlib.sha256()
+    digest.update(f"episodes:{len(episodes)}:".encode())
+    for ep in episodes:
+        for name in (
+            "episode_id",
+            "player_id",
+            "session_id",
+            "geometry_id",
+            "model_hash",
+            "times",
+            "states",
+            "controls",
+            "contact_states",
+            "generation_time_s",
+            "is_valid",
+            "max_residual",
+            "failure_reason",
+        ):
+            _update_digest(digest, getattr(ep, name))
+    return digest.hexdigest()
+
+
 def train_reusable_matching_initializer(
     model_id: str,
     model_hash: str,
@@ -631,60 +761,85 @@ def train_reusable_matching_initializer(
     episodes: Sequence[TeacherEpisode],
     simulated_loss_history: Sequence[float] | None = None,
     min_improvement_ratio: float = 0.10,
+    timings: TrainingTimings | None = None,
 ) -> TrainingResult:
-    """Train matching initializer and evaluate learning curve convergence."""
+    """Summarise a training run and evaluate learning-curve convergence.
+
+    No model fitting happens here: the loss history and timings are caller-supplied
+    measurements. Anything not supplied is reported as not measured (``None`` /
+    ``"not_measured"``) and never replaced by a literal (#11552).
+
+    Preconditions: non-empty ids, ``u_dim > 0``, at least one episode.
+    Postconditions: ``learning_curve_status`` is "not_measured" with scale-up
+    halted when no loss history is supplied; ``compute_report`` is None unless all
+    three ``timings`` fields are supplied.
+    """
+    measured = timings or TrainingTimings()
     require(bool(model_id.strip()), "model_id must be non-empty")
     require(bool(model_hash.strip()), "model_hash must be non-empty")
     require(u_dim > 0, "u_dim must be positive")
     require(len(episodes) > 0, "episodes must not be empty")
 
-    losses = (
+    losses: tuple[float, ...] = (
         tuple(float(x) for x in simulated_loss_history)
         if simulated_loss_history is not None
-        else (1.0, 0.7, 0.4, 0.25, 0.15)
+        else ()
     )
 
-    initial_loss = losses[0]
-    final_loss = losses[-1]
-    rel_improvement = (initial_loss - final_loss) / (initial_loss + 1e-9)
-
     limitations: tuple[str, ...]
-    if rel_improvement < min_improvement_ratio:
-        learning_curve_status = "inconclusive"
+    if not losses:
+        learning_curve_status = "not_measured"
         scale_up_halted = True
         limitations = (
-            "Inconclusive learning curve: relative loss improvement fell below frozen acceptance ratio; scale-up halted fail-closed.",
+            "Learning curve not measured: no loss history supplied; scale-up halted fail-closed.",
         )
     else:
-        learning_curve_status = "converged"
-        scale_up_halted = False
-        limitations = ()
+        initial_loss = losses[0]
+        final_loss = losses[-1]
+        rel_improvement = (initial_loss - final_loss) / (initial_loss + 1e-9)
+        if rel_improvement < min_improvement_ratio:
+            learning_curve_status = "inconclusive"
+            scale_up_halted = True
+            limitations = (
+                "Inconclusive learning curve: relative loss improvement fell below frozen acceptance ratio; scale-up halted fail-closed.",
+            )
+        else:
+            learning_curve_status = "converged"
+            scale_up_halted = False
+            limitations = ()
 
+    dataset_digest = _hash_episodes(episodes)
     teacher_cost = sum(ep.generation_time_s for ep in episodes)
     card = DimeLearnedInitializerModelCard(
         model_id=model_id,
         model_hash=model_hash,
         schema_version="1.0.0",
         architecture="CompactMLPProposal_v1",
-        training_dataset_hash="dataset_hash_dime15",
-        held_out_players=("heldout_player_1",),
-        held_out_sessions=("heldout_sess_1",),
-        held_out_geometries=("heldout_geom_1",),
+        training_dataset_hash=dataset_digest,
+        held_out_players=(),
+        held_out_sessions=(),
+        held_out_geometries=(),
         ood_threshold=3.0,
         units=dict(CANONICAL_DIME_UNITS),
-        training_cost_s=60.0,
+        training_cost_s=measured.training_time_s,
         teacher_data_cost_s=teacher_cost,
         learning_curve_status=learning_curve_status,
         scale_up_halted=scale_up_halted,
         limitations=limitations,
         u_dim=u_dim,
     )
-    compute_report = ComputeCostReport(
-        teacher_generation_time_s=teacher_cost,
-        training_time_s=60.0,
-        per_solve_classical_time_s=0.25,
-        per_solve_learned_time_s=0.05,
-    )
+    compute_report: ComputeCostReport | None = None
+    if (
+        measured.training_time_s is not None
+        and measured.per_solve_classical_time_s is not None
+        and measured.per_solve_learned_time_s is not None
+    ):
+        compute_report = ComputeCostReport(
+            teacher_generation_time_s=teacher_cost,
+            training_time_s=measured.training_time_s,
+            per_solve_classical_time_s=measured.per_solve_classical_time_s,
+            per_solve_learned_time_s=measured.per_solve_learned_time_s,
+        )
     return TrainingResult(
         model_card=card,
         compute_report=compute_report,
@@ -696,58 +851,34 @@ def run_initializer_ablation_study(
     episodes: Sequence[TeacherEpisode],
     model_hash: str,
 ) -> dict[str, AblationEvaluationReport]:
-    """Execute ablation study comparing drift features, ROM priors, and baselines."""
+    """Describe the initializer ablation variants; figures are NOT measured.
+
+    No evaluation harness exists that runs each variant on ``episodes``, so every
+    figure is ``None`` and the receipt says ``not_measured`` (#11552). Callers must
+    check ``report.is_measured`` before presenting any number.
+    """
     require(len(episodes) > 0, "episodes must not be empty")
     require(bool(model_hash.strip()), "model_hash must be non-empty")
 
-    full_cfg = AblationConfiguration(
-        include_drift_features=True,
-        include_rom_priors=True,
-        method_variant="full_model",
+    variants = (
+        ("full_model", True, True),
+        ("ablate_drift", False, True),
+        ("ablate_rom", True, False),
+        ("classical_baseline", False, False),
     )
-    no_drift_cfg = AblationConfiguration(
-        include_drift_features=False,
-        include_rom_priors=True,
-        method_variant="ablate_drift",
-    )
-    no_rom_cfg = AblationConfiguration(
-        include_drift_features=True,
-        include_rom_priors=False,
-        method_variant="ablate_rom",
-    )
-    classical_cfg = AblationConfiguration(
-        include_drift_features=False,
-        include_rom_priors=False,
-        method_variant="classical_baseline",
-    )
-
+    receipt = {
+        "status": "not_measured",
+        "reason": "no evaluation harness runs initializer variants on the episodes",
+        "n_episodes": len(episodes),
+    }
     return {
-        "full_model": AblationEvaluationReport(
-            config=full_cfg,
-            acceptance_rate=0.96,
-            mean_residual=0.0035,
-            mean_solve_iterations=8,
-            mean_solve_time_ms=45.0,
-        ),
-        "ablate_drift": AblationEvaluationReport(
-            config=no_drift_cfg,
-            acceptance_rate=0.78,
-            mean_residual=0.0115,
-            mean_solve_iterations=18,
-            mean_solve_time_ms=88.0,
-        ),
-        "ablate_rom": AblationEvaluationReport(
-            config=no_rom_cfg,
-            acceptance_rate=0.84,
-            mean_residual=0.0078,
-            mean_solve_iterations=14,
-            mean_solve_time_ms=68.0,
-        ),
-        "classical_baseline": AblationEvaluationReport(
-            config=classical_cfg,
-            acceptance_rate=0.62,
-            mean_residual=0.0165,
-            mean_solve_iterations=26,
-            mean_solve_time_ms=135.0,
-        ),
+        name: AblationEvaluationReport(
+            config=AblationConfiguration(
+                include_drift_features=drift,
+                include_rom_priors=rom,
+                method_variant=name,
+            ),
+            receipt=receipt,
+        )
+        for name, drift, rom in variants
     }
