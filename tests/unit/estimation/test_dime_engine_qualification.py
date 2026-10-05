@@ -15,6 +15,7 @@ Verifies:
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 import pytest
 
@@ -419,3 +420,37 @@ class TestDimeEngineQualificationFailClosedOnMissingMetrics:
             thresholds=default_thresholds,
         )
         assert entry.status != EngineQualificationStatus.QUALIFIED
+
+    def test_unqualified_counted_and_totals_reconcile(
+        self,
+        valid_engine_spec: EngineCapabilitySpec,
+        valid_capture: CaptureProvenance,
+        default_thresholds: NumericAcceptanceThresholds,
+        tmp_path: Path,
+    ) -> None:
+        passing = {
+            "max_drift_m": 0.005,
+            "max_angular_drift_rad": 0.01,
+            "alignment": 0.99,
+        }
+        owner = replace(valid_capture, capture_id="owner_swing_02")
+        matrix = build_fleet_qualification_matrix(
+            engine_specs=[valid_engine_spec],
+            captures=[valid_capture, owner],
+            solve_receipts={("mujoco", "tour_swing_01"): passing},  # owner absent
+            thresholds=default_thresholds,
+        )
+        assert matrix.total_unqualified == 1
+        data = matrix.to_dict()
+        per_status = (
+            data["total_qualified"]
+            + data["total_unqualified"]
+            + data["total_blocked"]
+            + data["total_rejected"]
+            + data["total_unsupported"]
+        )
+        assert per_status == data["total_evaluated"] == 2
+
+        export_qualification_bundle(matrix, tmp_path)
+        summary = json.loads((tmp_path / "manifest.json").read_text("utf-8"))["summary"]
+        assert summary["total_unqualified"] == 1

@@ -164,6 +164,12 @@ class EngineQualificationMatrix:
         )
 
     @property
+    def total_unqualified(self) -> int:
+        return sum(
+            1 for e in self.entries if e.status == EngineQualificationStatus.UNQUALIFIED
+        )
+
+    @property
     def total_blocked(self) -> int:
         return sum(
             1 for e in self.entries if e.status == EngineQualificationStatus.BLOCKED
@@ -187,6 +193,7 @@ class EngineQualificationMatrix:
             "evaluated_at": self.evaluated_at,
             "total_evaluated": self.total_evaluated,
             "total_qualified": self.total_qualified,
+            "total_unqualified": self.total_unqualified,
             "total_blocked": self.total_blocked,
             "total_rejected": self.total_rejected,
             "total_unsupported": self.total_unsupported,
@@ -384,6 +391,7 @@ def export_qualification_bundle(
             "summary": {
                 "total_evaluated": matrix.total_evaluated,
                 "total_qualified": matrix.total_qualified,
+                "total_unqualified": matrix.total_unqualified,
                 "total_blocked": matrix.total_blocked,
                 "total_rejected": matrix.total_rejected,
             },
