@@ -305,7 +305,14 @@ When implementing an issue:
 Since [Repository_Management#1520](https://github.com/D-sorganization/Repository_Management/issues/1520)
 a Section 12 row is `| YYYY-MM-DD | #<your PR or issue> | one-line summary |`.
 
-- Add **exactly one** row, for your own pull request, at the top of the table.
+- Prefer a change fragment over editing the table (see
+  [`changes/README.md`](changes/README.md)):
+  `python3 shared_scripts/changes_fragment.py new --issue N --summary "..."`.
+  The post-merge collator writes the row keyed by the real PR number
+  (Repository_Management#1976). Until the collate-changes workflow is on
+  `main`, edit the table instead.
+- Otherwise add **exactly one** row, for your own pull request, at the top of
+  the table.
 - **Never** put a serial spec version in a row and **never** bump the
   `Spec Version` field. (`Current Version` is the release field and is guarded
   separately by `scripts/ci/check_version_consistency.py` — do not confuse the
