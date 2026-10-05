@@ -16,9 +16,10 @@ import argparse
 import hashlib
 import json
 import logging
+import math
 import time
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -26,6 +27,9 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.motion_matching.acceptance import (
+    AcceptanceGates,
+    GateResult,
+    GateStatus,
     Horizon,
     evaluate,
 )
@@ -45,6 +49,7 @@ from src.shared.python.motion_matching.polynomial_torque import (
 )
 from src.shared.python.motion_matching.replay_metrics import (
     compute_replay_five_metrics,
+    is_club_marker_label,
 )
 from src.shared.python.simulation_backends.exceptions import (
     BackendNotAvailableError,
@@ -445,6 +450,12 @@ def _resolve_targets(
     return tgt, val, lbls
 
 
+def _club_cluster_scored(val: NDArray[np.bool_], labels: Sequence[str]) -> bool:
+    """True when at least one club-cluster marker is valid on the terminal frame."""
+    cols = [i for i, lbl in enumerate(labels) if is_club_marker_label(lbl)]
+    return bool(cols) and bool(np.any(val[-1, cols]))
+
+
 def _extract_markers_and_metrics(
     ws_candidate: MatchedSwingCandidate,
     target_markers: Array | None,
@@ -478,6 +489,9 @@ def _extract_markers_and_metrics(
         valid=val,
         marker_labels=lbls,
     )
+    if not _club_cluster_scored(val, lbls):
+        # No valid club marker was scored: report NaN, never a perfect 0.0.
+        five = replace(five, club_cluster_rms_m=float("nan"))
     shared = {
         "whole_marker_rmse_m": five.whole_rms_m,
         "early_marker_rmse_m": five.early_rms_m,
@@ -508,7 +522,26 @@ def _evaluate_acceptance(
         },
         "max_closure_residual_m": physical_audit["closure_translation_error_max_m"],
     }
-    return evaluate(acceptance_input, horizon=Horizon.G1)
+    verdict = evaluate(acceptance_input, horizon=Horizon.G1)
+    club = shared_dict.get("club_marker_rmse_m")
+    if club is not None and math.isnan(club):
+        # ``evaluate`` skips NaN metrics, so an unscored club cluster must be
+        # failed explicitly here (fail closed).
+        gates = AcceptanceGates()
+        failed = GateResult(
+            name="club_marker_rmse_m",
+            status=GateStatus.FAILED,
+            threshold=gates.g1_club_rmse_m,
+            measured=None,
+            reason="club cluster has no valid scored marker (NaN)",
+        )
+        return replace(
+            verdict,
+            is_physically_accepted=False,
+            status="REJECTED",
+            gates=(*verdict.gates, failed),
+        )
+    return verdict
 
 
 def _score_rollout(

@@ -403,3 +403,52 @@ def test_drake_fit_scores_drake_rollout_not_warm_start(
     assert shared["whole_marker_rmse_m"] == pytest.approx(honest.whole_rms_m)
     assert shared["whole_marker_rmse_m"] > 0.1
     assert result.receipt["acceptance"]["status"] == "REJECTED"
+
+
+def test_all_invalid_club_cluster_fails_closed() -> None:
+    """An all-invalid club cluster must report NaN and never pass acceptance."""
+    import math
+
+    from src.engines.physics_engines.drake.python import full_body_fit as fbf
+
+    n_frames = 12
+    time_s = np.linspace(0.0, 0.85, n_frames)
+    labels = ("m0", "m1", "club_head")
+    target = np.zeros((n_frames, 3, 3))
+    valid = np.ones((n_frames, 3), dtype=bool)
+    valid[:, 2] = False  # club cluster has no valid rollout marker
+    cand = MatchedSwingCandidate(
+        metadata=CandidateMetadata(
+            profile=CandidateProfile.DYNAMIC,
+            engine="warm_start",
+            source_c3d_sha256="ab" * 32,
+            coordinate_names=("q0",),
+            actuator_names=("a0",),
+            marker_names=labels,
+        ),
+        time_s=time_s,
+        q=np.zeros((n_frames, 1)),
+        v=np.zeros((n_frames, 1)),
+        tau=np.zeros((n_frames, 1)),
+        markers=CandidateMarkers(target_markers_m=target, marker_validity=valid),
+    )
+    _, _, _, _, five, shared = fbf._extract_markers_and_metrics(
+        cand, None, labels, time_s, predicted_markers_m=target.copy()
+    )
+    assert math.isnan(shared["club_marker_rmse_m"])
+    assert math.isnan(five.club_cluster_rms_m)
+    verdict = fbf._evaluate_acceptance(
+        shared,
+        five,
+        {
+            "max_normal_force_n": 0.0,
+            "max_penetration_m": 0.0,
+            "weight_fraction": 1.0,
+            "closure_translation_error_max_m": 0.0,
+        },
+    )
+    assert verdict.status == "REJECTED"
+    assert any(
+        g.name == "club_marker_rmse_m" and g.status.name == "FAILED"
+        for g in verdict.gates
+    )

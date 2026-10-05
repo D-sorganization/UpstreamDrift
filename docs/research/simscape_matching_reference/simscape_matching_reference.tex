@@ -535,6 +535,14 @@ Under epic \#11161, biomechanics are evaluated across Simscape, MuJoCo, Drake, P
     \item \textbf{ZMP Support Margin:} This experiment indicated that for \texttt{capture-O}, the reference ZMP fell outside the physical support hull in 86\% of frames (vs. 47\% for \texttt{capture-A}). This is an attributed multi-engine observation; \texttt{capture-O} is not yet Simscape qualified.
 \end{itemize}
 
+\subsection{Drake Full-Body Fit Scoring (\#11567)}
+\begin{itemize}
+    \item \textbf{Scored Quantity:} The Drake fit is scored on the predicted marker positions $\hat{\mathbf{p}}_{k,j}=\mathrm{FK}(\mathbf{q}^{\mathrm{Drake}}_k)$ obtained by forward kinematics of the Drake forward rollout $\mathbf{q}^{\mathrm{Drake}}_k$, never on the warm-start model markers. A warm start scored against its own targets reports a zero error by construction and is not evidence of a fit. A missing rollout marker array raises an error rather than falling back to the warm start.
+    \item \textbf{Validity Mask:} Labels without a Drake marker attachment are NaN and invalid; the scoring mask is the logical AND of the target validity and the rollout validity. The whole, early and terminal marker RMS use only valid markers, $\mathrm{RMS}=\sqrt{\operatorname{mean}_{(k,j)\in\mathcal{V}}\lVert\hat{\mathbf{p}}_{k,j}-\mathbf{p}^{\star}_{k,j}\rVert^2}$; the parity marker RMS against the reference candidate uses \texttt{nanmean} so invalid (NaN) markers are excluded and never counted as zero error.
+    \item \textbf{Fail-Closed Club Cluster:} The club-cluster RMS uses the club markers valid on the terminal frame. If no club marker is valid (no club attachment or all predicted validity false) the metric is reported as NaN, not $0.0$ m. NaN is not a pass: the acceptance step records an explicit failed \texttt{club\_marker\_rmse\_m} gate and the verdict is \texttt{REJECTED}.
+    \item \textbf{Evidence Boundary:} Contact and closure audit fields remain unmeasured, so the G1 verdict stays fail-closed. Evidence: \texttt{tests/unit/motion\_matching/test\_drake\_full\_body\_fit.py} (rollout-versus-warm-start scoring and the all-invalid club cluster case).
+\end{itemize}
+
 \section{Visualization, Offscreen Rendering, and Asset Provenance}
 
 \subsection{Headless Offscreen Graphics Architecture}
