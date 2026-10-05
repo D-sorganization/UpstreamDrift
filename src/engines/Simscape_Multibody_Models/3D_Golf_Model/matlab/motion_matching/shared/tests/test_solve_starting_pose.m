@@ -190,6 +190,39 @@ classdef test_solve_starting_pose < matlab.unittest.TestCase
                             name, a.(name), b.(name)));
             end
         end
+
+        function test_prepare_fast_sim_input_honours_fast_restart_flag(testCase)
+            testCase.assumeSimulinkAvailable();
+
+            in_on = prepare_fast_sim_input([], struct('model_name', 'GolfSwing3D_Kinetic', 'fast_restart', true));
+            param_names_on = {in_on.ModelParameters.Name};
+            idx_on = find(strcmp(param_names_on, 'FastRestart'), 1, 'last');
+            testCase.verifyFalse(isempty(idx_on), "FastRestart model parameter must be present");
+            testCase.verifyEqual(in_on.ModelParameters(idx_on).Value, 'on');
+
+            in_off = prepare_fast_sim_input([], struct('model_name', 'GolfSwing3D_Kinetic', 'fast_restart', false));
+            param_names_off = {in_off.ModelParameters.Name};
+            idx_off = find(strcmp(param_names_off, 'FastRestart'), 1, 'last');
+            testCase.verifyFalse(isempty(idx_off), "FastRestart model parameter must be present");
+            testCase.verifyEqual(in_off.ModelParameters(idx_off).Value, 'off');
+        end
+
+        function test_joint_position_targets_affect_simulated_grip_position(testCase)
+            testCase.assumeSimulinkAvailable();
+
+            target_base = local_synthesize_target_at_pose( ...
+                testCase.base_input, testCase.default_vars, ...
+                zeros(numel(testCase.default_vars), 1));
+
+            pert = zeros(numel(testCase.default_vars), 1);
+            pert(1) = 0.15; % Perturb TranslationStartPositionX by 15 cm
+            target_pert = local_synthesize_target_at_pose( ...
+                testCase.base_input, testCase.default_vars, pert);
+
+            diff_mm = 1000 * norm(target_base.grip(1, :) - target_pert.grip(1, :));
+            testCase.verifyGreaterThan(diff_mm, 10.0, ...
+                "Simulated grip positions must differ significantly when joint position target is perturbed");
+        end
     end
 
     %% ---------------- Helpers ---------------------------------------------
@@ -262,7 +295,11 @@ function grip = local_simulate_grip_at_pose(base_input_mat, vars, x)
     for k = 1:numel(f); overrides.(f{k}) = base.(f{k}); end
     for k = 1:numel(vars)
         if isfield(overrides, vars{k})
-            overrides.(vars{k}) = overrides.(vars{k}) + x(k);
+            cur = overrides.(vars{k});
+            if isa(cur, 'Simulink.Parameter')
+                cur = cur.Value;
+            end
+            overrides.(vars{k}) = cur + x(k);
         else
             overrides.(vars{k}) = x(k);
         end
@@ -271,6 +308,7 @@ function grip = local_simulate_grip_at_pose(base_input_mat, vars, x)
         'model_name',      'GolfSwing3D_Kinetic', ...
         'stop_time',       0.005, ...
         'simscape_log',    'all', ...
+        'fast_restart',    false, ...
         'input_overrides', overrides));
     simOut = sim(in);
     d = double(simOut.CombinedSignalBus.MidpointCalcsLogs.MPGlobalPosition.Data);
@@ -286,7 +324,11 @@ function R = local_simulate_grip_R_at_pose(base_input_mat, vars, x)
     for k = 1:numel(f); overrides.(f{k}) = base.(f{k}); end
     for k = 1:numel(vars)
         if isfield(overrides, vars{k})
-            overrides.(vars{k}) = overrides.(vars{k}) + x(k);
+            cur = overrides.(vars{k});
+            if isa(cur, 'Simulink.Parameter')
+                cur = cur.Value;
+            end
+            overrides.(vars{k}) = cur + x(k);
         else
             overrides.(vars{k}) = x(k);
         end
@@ -295,6 +337,7 @@ function R = local_simulate_grip_R_at_pose(base_input_mat, vars, x)
         'model_name',      'GolfSwing3D_Kinetic', ...
         'stop_time',       0.005, ...
         'simscape_log',    'all', ...
+        'fast_restart',    false, ...
         'input_overrides', overrides));
     simOut = sim(in);
     R = nan(3,3);
