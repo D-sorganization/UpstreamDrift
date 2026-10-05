@@ -131,7 +131,7 @@ all trials/views and compare the approximate covariance of identifiable
 directions. Adding independent views of the same shared theta must reduce the
 reported variance on those directions in synthetic validation data.
 
-### 6.1 Shared-parameter posterior covariance (#11548)
+### 6.1 Shared-Parameter Posterior Covariance (#11548)
 
 `solve_multi_trial_map` (`src/shared/python/estimation/multi_trial.py`)
 reports the Laplace (Gauss-Newton) covariance of the free shared parameters
