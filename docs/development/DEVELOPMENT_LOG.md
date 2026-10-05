@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11513 · Point Contributors at Change Fragments in Post_Spec_Reminder
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11513
+- **Branch:** fix/11513-post-spec-reminder-fragments
+- **PR:** #11519
+- **Paths:** see #11519
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`739df607`; collated from changes/11513-point-contributors-at-change-fragments-i.md)
+- **Summary:** Point contributors at change fragments in post_spec_reminder
+- **Next step:** Merge the PR.
+
 ### DL-#11190 · Disable FastRestart for Solve_Starting_Pose and Resolve Model Path in Run_Leaderboard
 
 - **State:** in_review
