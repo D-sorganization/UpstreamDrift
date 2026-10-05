@@ -61,7 +61,10 @@ Source files were modified in this PR but `SPEC.md` was not updated.
 **Per the [Specification-Driven Development Policy]({policy_url}):**
 - Any PR that adds, removes, or changes functionality must update SPEC.md
 - Update the relevant sections (features, architecture, tests, dependencies, etc.)
-- Add ONE change-log row keyed by this PR: `| YYYY-MM-DD | #<pr> | summary |`
+- Preferred: record the change as a fragment, which never conflicts:
+  `python shared_scripts/changes_fragment.py new --issue <N> --summary "<Title Case summary>"`
+- Fallback until the collator is live: add ONE SPEC.md change-log row keyed by
+  this PR: `| YYYY-MM-DD | #<pr> | summary |`
 - Do NOT bump the `Spec Version` field and do NOT put a serial
   version in the row: see Repository_Management#1520
 

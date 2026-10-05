@@ -195,6 +195,14 @@ class TestReminderScriptInputValidation:
 class TestReminderBodyContent:
     """The body carries the actionable guidance from the policy."""
 
+    def test_body_recommends_fragment_before_manual_row_fallback(self) -> None:
+        body = post_spec_reminder.build_reminder_body(
+            post_spec_reminder.FALLBACK_POLICY_URL
+        )
+        fragment = body.index("shared_scripts/changes_fragment.py new")
+        assert fragment < body.index("| YYYY-MM-DD | #<pr> | summary |")
+        assert "--issue" in body and "--summary" in body
+
     def test_body_names_policy_link_and_change_log_row_format(self) -> None:
         body = post_spec_reminder.build_reminder_body(
             post_spec_reminder.FALLBACK_POLICY_URL

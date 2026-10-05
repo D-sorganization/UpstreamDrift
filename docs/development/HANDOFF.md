@@ -1,3 +1,12 @@
+# SPEC Reminder Recommends Change Fragments — #11513
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `chore/11513-spec-reminder-fragments`; PR: see the PR body (`Closes #11513`). Parent RM#1889 / RM#1976.
+- Objective: `scripts/post_spec_reminder.py` recommends `python shared_scripts/changes_fragment.py new --issue <N> --summary "..."` first and keeps the manual SPEC.md row as the fallback until the collator (UD #11512) is live.
+- Completed: reminder text updated; `tests/ci/test_spec_check_workflow.py` asserts the fragment command precedes the manual-row fallback; one SPEC.md change-log row (#11513).
+- Validation: `ruff check`, `ruff format`, `python -m pytest tests/ci/test_spec_check_workflow.py -q`, `python3 scripts/ci/check_spec_changelog_duplicates.py`, `python3 scripts/ci/check_file_size_budget.py` all pass.
+- Constraints: `shared_scripts/changes_fragment.py` is not on main yet (UD #11511); the reminder names it ahead of landing.
+- Next steps: after #11512 lands, drop the manual-row fallback wording in a follow-up.
+
 # Necromatcher Video Export Force/Torque Layer (FTO-28) — #11313
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-worktrees/claude-11313`; branch `claude/issue-11313`; PR: draft opened from this branch (`Fixes #11313`, `Refs #11285`)
