@@ -17,6 +17,7 @@ from src.shared.python.estimation.dime_contracts import (
 )
 from src.shared.python.estimation.dime_manifest import NumericAcceptanceThresholds
 from src.shared.python.estimation.drift_prediction import (
+    FIXED_BASE,
     ControlBand,
     DimeTransitionRequest,
     drift_dominance_index,
@@ -24,6 +25,7 @@ from src.shared.python.estimation.drift_prediction import (
     linearize_drift,
     predict_dime_transition,
     predict_step,
+    PropagatedStateCovariance,
     reachable_acceleration_interval,
     transition_jacobian,
     uncertain_control_prediction,
@@ -100,7 +102,7 @@ class TestLinearizeDrift:
     def test_drift_matches_existing_ztcf_operator(
         self, linear: _LinearProvider
     ) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         expected = np.linalg.solve(linear.M, -(linear.K @ Q + linear.D @ V))
         np.testing.assert_allclose(lin.drift_acceleration, expected, atol=1e-12)
 
@@ -108,14 +110,14 @@ class TestLinearizeDrift:
         self, linear: _LinearProvider
     ) -> None:
         sel = np.array([[1.0], [0.0]])  # only the first joint is actuated
-        lin = linearize_drift(linear, Q, V, selection=sel, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, selection=sel, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         np.testing.assert_allclose(
             lin.control_influence, np.linalg.solve(linear.M, sel), atol=1e-12
         )
 
     def test_total_acceleration_is_drift_plus_control(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         tau = np.array([25.0, -4.0])
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         np.testing.assert_allclose(
             lin.acceleration(tau), pendulum.forward_dynamics(Q, V, tau), atol=1e-9
         )
@@ -124,9 +126,7 @@ class TestLinearizeDrift:
         self, linear: _LinearProvider
     ) -> None:
         with pytest.raises(ValueError, match="selection"):
-            linearize_drift(
-                linear, Q, V, selection=np.eye(3), floating_base_root_dofs=()
-            )  # type: ignore[arg-type]
+            linearize_drift(linear, Q, V, selection=np.eye(3), root_policy=FIXED_BASE)  # type: ignore[arg-type]
 
     def test_refuses_active_contact_with_receipt(self, linear: _LinearProvider) -> None:
         with pytest.raises(ValueError, match="contact"):
@@ -135,7 +135,7 @@ class TestLinearizeDrift:
 
 class TestReachableAcceleration:
     def test_interval_is_exact_for_box_controls(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         lo_u, hi_u = np.array([-2.0, -1.0]), np.array([3.0, 1.0])
         lo_a, hi_a = reachable_acceleration_interval(lin, lo_u, hi_u)
         corners = [
@@ -148,7 +148,7 @@ class TestReachableAcceleration:
         self, pendulum
     ) -> None:  # type: ignore[no-untyped-def]
         tau = np.array([10.0, 2.0])
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         lo_a, hi_a = reachable_acceleration_interval(lin, tau, tau)
         np.testing.assert_allclose(lo_a, hi_a, atol=1e-12)
         np.testing.assert_allclose(lo_a, lin.acceleration(tau), atol=1e-12)
@@ -156,7 +156,7 @@ class TestReachableAcceleration:
     def test_drift_is_inside_band_only_when_zero_torque_is_admissible(
         self, pendulum
     ) -> None:  # type: ignore[no-untyped-def]
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         a0 = lin.drift_acceleration
         lo_a, hi_a = reachable_acceleration_interval(lin, -np.ones(2), np.ones(2))
         assert np.all(lo_a <= a0) and np.all(a0 <= hi_a)
@@ -168,7 +168,7 @@ class TestReachableAcceleration:
 
 class TestPredictStep:
     def test_constant_acceleration_kinematics(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         tau = np.array([1.0, -0.5])
         dt = 0.002
         q1, v1 = predict_step(lin, Q, V, tau, dt)
@@ -177,12 +177,12 @@ class TestPredictStep:
         np.testing.assert_allclose(v1, V + dt * a)
 
     def test_rejects_quaternion_configuration(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         with pytest.raises(ValueError, match="manifold"):
             predict_step(lin, np.r_[Q, 1.0], V, np.zeros(2), 0.01)
 
     def test_rejects_non_positive_dt(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         with pytest.raises(ValueError, match="dt"):
             predict_step(lin, Q, V, np.zeros(2), 0.0)
 
@@ -192,7 +192,7 @@ class TestUncertainControlPrediction:
         self, linear: _LinearProvider
     ) -> None:
         """Linear map of a Gaussian control: Cov = G Sigma_u G^T exactly."""
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         dt = 0.01
         mu = np.array([0.5, -0.2])
         sigma_u = np.array([[4.0, 1.0], [1.0, 2.0]])
@@ -204,7 +204,7 @@ class TestUncertainControlPrediction:
         np.testing.assert_allclose(pred.mean, np.r_[q1, v1])
 
     def test_monte_carlo_agrees_with_closed_form(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         dt = 0.01
         mu = np.zeros(2)
         sigma_u = np.diag([9.0, 1.0])
@@ -219,7 +219,7 @@ class TestUncertainControlPrediction:
     def test_state_covariance_is_propagated_and_result_is_psd(
         self, linear: _LinearProvider
     ) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         state_cov = np.diag([1e-4, 1e-4, 1e-2, 1e-2])
         f = transition_jacobian(
             linear,  # type: ignore[arg-type]
@@ -227,7 +227,7 @@ class TestUncertainControlPrediction:
             V,
             np.zeros(2),
             0.01,
-            floating_base_root_dofs=(),
+            root_policy=FIXED_BASE,
         )
         pred = uncertain_control_prediction(
             lin,
@@ -236,8 +236,7 @@ class TestUncertainControlPrediction:
             np.zeros(2),
             np.eye(2),
             0.01,
-            state_covariance=state_cov,
-            state_transition=f,
+            state_prior=PropagatedStateCovariance(state_cov, f),
         )
         assert np.all(np.linalg.eigvalsh(pred.covariance) >= -1e-15)
         b = lin.control_influence
@@ -248,7 +247,7 @@ class TestUncertainControlPrediction:
         assert pred.covariance[0, 0] > state_cov[0, 0]
 
     def test_rejects_non_psd_control_covariance(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         with pytest.raises(ValueError, match="positive semi-definite"):
             uncertain_control_prediction(
                 lin, Q, V, np.zeros(2), np.diag([1.0, -1.0]), 0.01
@@ -258,7 +257,7 @@ class TestUncertainControlPrediction:
         self, linear: _LinearProvider
     ) -> None:
         """Zero mean with broad covariance must keep the band wide (not passive)."""
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         narrow = uncertain_control_prediction(
             lin, Q, V, np.zeros(2), 1e-6 * np.eye(2), 0.01
         )
@@ -268,7 +267,7 @@ class TestUncertainControlPrediction:
         assert np.trace(broad.covariance) > 1e6 * np.trace(narrow.covariance)
 
     def test_model_uncertainty_is_incorporated(self, linear: _LinearProvider) -> None:
-        lin = linearize_drift(linear, Q, V, floating_base_root_dofs=())  # type: ignore[arg-type]
+        lin = linearize_drift(linear, Q, V, root_policy=FIXED_BASE)  # type: ignore[arg-type]
         model_q = np.diag([1e-6, 1e-6, 1e-5, 1e-5])
         pred = uncertain_control_prediction(
             lin, Q, V, np.zeros(2), np.eye(2), 0.01, model_uncertainty=model_q
@@ -278,7 +277,7 @@ class TestUncertainControlPrediction:
 
 class TestDriftDominance:
     def test_index_is_one_when_controls_have_no_authority(self, pendulum) -> None:  # type: ignore[no-untyped-def]
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         assert drift_dominance_index(lin, np.zeros(2), np.zeros(2)) == pytest.approx(
             1.0
         )
@@ -286,10 +285,10 @@ class TestDriftDominance:
     def test_index_grows_with_velocity(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         band = (np.full(2, -20.0), np.full(2, 20.0))
         slow = drift_dominance_index(
-            linearize_drift(pendulum, Q, 0.1 * V, floating_base_root_dofs=()), *band
+            linearize_drift(pendulum, Q, 0.1 * V, root_policy=FIXED_BASE), *band
         )
         fast = drift_dominance_index(
-            linearize_drift(pendulum, Q, 5.0 * V, floating_base_root_dofs=()), *band
+            linearize_drift(pendulum, Q, 5.0 * V, root_policy=FIXED_BASE), *band
         )
         assert 0.0 <= slow < fast <= 1.0
 
@@ -301,7 +300,7 @@ class TestDriftDominance:
         The index compares drift with control authority, not realised total acceleration,
         so cancelling control stays bounded and informative in (0, 1).
         """
-        lin = linearize_drift(pendulum, Q, 5.0 * V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, 5.0 * V, root_policy=FIXED_BASE)
         cancelling = np.linalg.lstsq(
             lin.control_influence, -lin.drift_acceleration, rcond=None
         )[0]
@@ -318,18 +317,14 @@ class TestIntegrateStep:
         dt = 0.002
         pendulum.reset(SimState(q=Q.copy(), v=V.copy(), time=0.0))
         trace = pendulum.rollout(tau[None, :], horizon=1, dt=dt)
-        q1, v1 = integrate_step(pendulum, Q, V, tau, dt, floating_base_root_dofs=())
+        q1, v1 = integrate_step(pendulum, Q, V, tau, dt, root_policy=FIXED_BASE)
         np.testing.assert_allclose(q1, trace.q[1], atol=1e-10)
         np.testing.assert_allclose(v1, trace.v[1], atol=1e-10)
 
     def test_zero_torque_step_follows_ztcf_drift(self, linear: _LinearProvider) -> None:
         dt = 1e-4
-        q1, v1 = integrate_step(
-            linear, Q, V, np.zeros(2), dt, floating_base_root_dofs=()
-        )  # type: ignore[arg-type]
-        a0 = linearize_drift(
-            linear, Q, V, floating_base_root_dofs=()
-        ).drift_acceleration  # type: ignore[arg-type]
+        q1, v1 = integrate_step(linear, Q, V, np.zeros(2), dt, root_policy=FIXED_BASE)  # type: ignore[arg-type]
+        a0 = linearize_drift(linear, Q, V, root_policy=FIXED_BASE).drift_acceleration  # type: ignore[arg-type]
         np.testing.assert_allclose((v1 - V) / dt, a0, rtol=1e-3)
 
     def test_refuses_contact(self, linear: _LinearProvider) -> None:
@@ -354,14 +349,14 @@ class TestDimeTransitionPrediction:
         state = DimeCompleteState(t=0.0, q=Q, v=V, model_hash="linear_model")
         req_zero = DimeTransitionRequest(
             state=state,
-            floating_base_root_dofs=(),
+            root_policy=FIXED_BASE,
             control_mean=np.zeros(2),
             control_covariance=np.eye(2),
             dt=0.01,
         )
         req_biased = DimeTransitionRequest(
             state=state,
-            floating_base_root_dofs=(),
+            root_policy=FIXED_BASE,
             control_mean=np.array([200.0, -150.0]),
             control_covariance=np.eye(2),
             dt=0.01,
@@ -391,7 +386,7 @@ class TestDimeTransitionPrediction:
         state = DimeCompleteState(t=0.0, q=Q, v=10.0 * V, model_hash="pendulum")
         req = DimeTransitionRequest(
             state=state,
-            floating_base_root_dofs=(),
+            root_policy=FIXED_BASE,
             control_mean=np.array([10.0, -5.0]),
             control_covariance=4.0 * np.eye(2),
             dt=0.005,
@@ -403,14 +398,14 @@ class TestDimeTransitionPrediction:
 
     def test_strong_opposing_control_near_zero_total_accel(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         """RED/GREEN: strong opposing control yielding near-zero total accel stays bounded."""
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         cancelling = np.linalg.lstsq(
             lin.control_influence, -lin.drift_acceleration, rcond=None
         )[0]
         state = DimeCompleteState(t=0.0, q=Q, v=V, model_hash="pendulum")
         req = DimeTransitionRequest(
             state=state,
-            floating_base_root_dofs=(),
+            root_policy=FIXED_BASE,
             control_mean=cancelling,
             control_covariance=np.eye(2),
             dt=0.005,
@@ -485,6 +480,6 @@ class TestDimeTransitionPrediction:
     def test_drift_gain_against_frozen_baseline_thresholds(self, pendulum) -> None:  # type: ignore[no-untyped-def]
         """GREEN: drift gain against frozen thresholds without tuning test data."""
         thresholds = NumericAcceptanceThresholds()
-        lin = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         assert lin.mass_condition_number < thresholds.condition_number_max
         assert np.linalg.norm(lin.drift_acceleration) > 0.0

@@ -18,7 +18,10 @@ import pytest
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.estimation.dime_contracts import DimeCompleteState
 from src.shared.python.estimation.drift_prediction import (
+    FIXED_BASE,
     DimeTransitionRequest,
+    PropagatedStateCovariance,
+    RootActuationPolicy,
     linearize_drift,
     predict_dime_transition,
     predict_step,
@@ -27,7 +30,6 @@ from src.shared.python.simulation_backends import GolfModelParams, make_backend
 
 pytestmark = pytest.mark.unit
 
-FIXED_BASE: tuple[int, ...] = ()
 Q = np.array([0.4, -0.2])
 V = np.array([3.0, -6.0])
 
@@ -99,7 +101,7 @@ class TestCovariancePropagatesThroughTransitionJacobian:
             horizon=horizon,
             state_covariance=p0,
             model_uncertainty=q_w,
-            floating_base_root_dofs=FIXED_BASE,
+            root_policy=FIXED_BASE,
         )
         result = predict_dime_transition(provider, request)  # type: ignore[arg-type]
 
@@ -127,7 +129,7 @@ class TestCovariancePropagatesThroughTransitionJacobian:
             control_covariance=np.zeros((2, 2)),
             dt=dt,
             state_covariance=p0,
-            floating_base_root_dofs=FIXED_BASE,
+            root_policy=FIXED_BASE,
         )
         result = predict_dime_transition(provider, request)  # type: ignore[arg-type]
         a_mat, _ = _analytic_step_matrices(provider, dt)
@@ -152,18 +154,18 @@ class TestHorizonStepsEveryDt:
             control_covariance=np.eye(2),
             dt=dt,
             horizon=horizon,
-            floating_base_root_dofs=FIXED_BASE,
+            root_policy=FIXED_BASE,
         )
         result = predict_dime_transition(pendulum, request)
 
         def rollout(tau: np.ndarray) -> np.ndarray:
             q, v = Q.copy(), V.copy()
             for _ in range(horizon):
-                lin = linearize_drift(pendulum, q, v, floating_base_root_dofs=())
+                lin = linearize_drift(pendulum, q, v, root_policy=FIXED_BASE)
                 q, v = predict_step(lin, q, v, tau, dt)
             return np.r_[q, v]
 
-        lin0 = linearize_drift(pendulum, Q, V, floating_base_root_dofs=())
+        lin0 = linearize_drift(pendulum, Q, V, root_policy=FIXED_BASE)
         one_big_step = np.r_[predict_step(lin0, Q, V, np.zeros(2), horizon * dt)]
 
         assert result.valid and result.zero_control_branch is not None
@@ -201,7 +203,7 @@ class TestRootIsNeverActuatedByDefault:
             q,
             v,
             selection=np.eye(8),
-            allow_root_actuation=True,
+            root_policy=RootActuationPolicy(allow_root_actuation=True),
         )
         np.testing.assert_allclose(
             provider.M @ lin.control_influence, np.eye(8), atol=1e-12
@@ -209,5 +211,19 @@ class TestRootIsNeverActuatedByDefault:
 
     def test_undeclared_base_on_small_model_fails_closed(self) -> None:
         """A model too small for the default root must declare its base explicitly."""
-        with pytest.raises(PreconditionError, match="floating_base_root_dofs"):
+        with pytest.raises(PreconditionError, match="FIXED_BASE"):
             linearize_drift(_LinearProvider(), Q, V)  # type: ignore[arg-type]
+
+
+class TestPropagatedStateCovarianceContract:
+    """A prior covariance cannot be supplied without a matching, finite F."""
+
+    def test_mismatched_shapes_are_rejected(self) -> None:
+        with pytest.raises(PreconditionError, match="equal size"):
+            PropagatedStateCovariance(np.eye(4), np.eye(2))
+
+    def test_non_finite_transition_is_rejected(self) -> None:
+        f = np.eye(4)
+        f[0, 0] = np.nan
+        with pytest.raises(PreconditionError, match="finite"):
+            PropagatedStateCovariance(np.eye(4), f)

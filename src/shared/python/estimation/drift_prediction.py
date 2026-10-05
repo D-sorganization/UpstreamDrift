@@ -58,6 +58,9 @@ DimeTransitionMode = Literal["marginalized", "explicit"]
 
 __all__ = [
     "DEFAULT_FLOATING_BASE_ROOT_DOFS",
+    "FIXED_BASE",
+    "PropagatedStateCovariance",
+    "RootActuationPolicy",
     "ControlBand",
     "DimeTransitionMode",
     "DimeTransitionPrediction",
@@ -80,6 +83,46 @@ _PSD_TOLERANCE: Final[float] = 1e-12
 #: matches ``ContinuousReplayOptions.floating_base_root_dofs``. Fixed-base
 #: models declare ``()``.
 DEFAULT_FLOATING_BASE_ROOT_DOFS: Final[tuple[int, ...]] = (0, 1, 2, 3, 4, 5)
+
+
+@dataclass(frozen=True)
+class RootActuationPolicy:
+    """Declares the unactuated floating-base root DOFs (#11549).
+
+    The default assumes a 6-DOF floating base, matching
+    ``ContinuousReplayOptions.floating_base_root_dofs``; fixed-base models use
+    :data:`FIXED_BASE`. Driving a root DOF requires ``allow_root_actuation``.
+    """
+
+    floating_base_root_dofs: tuple[int, ...] = DEFAULT_FLOATING_BASE_ROOT_DOFS
+    allow_root_actuation: bool = False
+
+
+#: Policy for fixed-base models: no root DOFs.
+FIXED_BASE: Final[RootActuationPolicy] = RootActuationPolicy(floating_base_root_dofs=())
+
+
+@dataclass(frozen=True)
+class PropagatedStateCovariance:
+    """A prior state covariance ``P`` paired with the step Jacobian ``F`` (#11549).
+
+    Pairing them makes "propagate ``P`` through the dynamics" structural: a
+    covariance cannot be supplied without the ``F = df/dx`` that maps it.
+    Preconditions: both are finite square matrices of the same size.
+    """
+
+    covariance: np.ndarray
+    transition: np.ndarray
+
+    def __post_init__(self) -> None:
+        p = np.asarray(self.covariance, dtype=float)
+        f = np.asarray(self.transition, dtype=float)
+        require(
+            p.ndim == 2 and p.shape[0] == p.shape[1] and f.shape == p.shape,
+            "covariance and transition must be square matrices of equal size",
+            value=(p.shape, f.shape),
+        )
+        require(check_finite(f), "transition (F = df/dx) must be finite")
 
 
 def _finite_vector(name: str, value: np.ndarray) -> np.ndarray:
@@ -188,8 +231,7 @@ class DimeTransitionRequest:
     model_uncertainty: np.ndarray | None = None
     contact_active: bool = False
     selection: np.ndarray | None = None
-    floating_base_root_dofs: tuple[int, ...] = DEFAULT_FLOATING_BASE_ROOT_DOFS
-    allow_root_actuation: bool = False
+    root_policy: RootActuationPolicy = field(default_factory=RootActuationPolicy)
 
 
 @dataclass(frozen=True)
@@ -210,23 +252,23 @@ class DimeTransitionPrediction:
 def _resolve_selection(
     n: int,
     selection: np.ndarray | None,
-    floating_base_root_dofs: tuple[int, ...],
-    allow_root_actuation: bool,
+    policy: RootActuationPolicy,
 ) -> np.ndarray:
     """Return the ``(n, m)`` selection matrix ``S`` mapping torque to forces.
 
     Preconditions: every root DOF index is a distinct integer in ``[0, n)``;
     an explicit ``selection`` is ``(n, m)`` with ``m >= 1`` and, unless
-    ``allow_root_actuation``, has all-zero rows on the root DOFs.
+    ``policy.allow_root_actuation``, has all-zero rows on the root DOFs.
     Postcondition: the default (``selection is None``) is ``I_n`` with the root
     rows and columns zeroed, or ``I_n`` when root actuation is declared.
     """
-    roots = tuple(floating_base_root_dofs)
+    roots = tuple(policy.floating_base_root_dofs)
+    allow_root_actuation = policy.allow_root_actuation
     require(
         all(isinstance(d, (int, np.integer)) and 0 <= int(d) < n for d in roots)
         and len(set(roots)) == len(roots),
         f"floating_base_root_dofs must be distinct indices in [0, {n}); "
-        "declare floating_base_root_dofs=() for a fixed-base model",
+        "use root_policy=FIXED_BASE for a fixed-base model",
         value=roots,
     )
     root_idx = np.asarray(roots, dtype=int)
@@ -244,7 +286,7 @@ def _resolve_selection(
     require(
         allow_root_actuation or not bool(np.any(sel[root_idx, :] != 0.0)),
         "selection actuates floating-base root DOFs; the root is unactuated "
-        "unless the caller declares allow_root_actuation=True",
+        "unless root_policy declares allow_root_actuation=True",
         value=roots,
     )
     return sel
@@ -257,14 +299,13 @@ def linearize_drift(
     *,
     selection: np.ndarray | None = None,
     contact_active: bool = False,
-    floating_base_root_dofs: tuple[int, ...] = DEFAULT_FLOATING_BASE_ROOT_DOFS,
-    allow_root_actuation: bool = False,
+    root_policy: RootActuationPolicy = RootActuationPolicy(),
 ) -> DriftLinearization:
     """Evaluate the ZTCF drift and control influence at ``(q, v)``.
 
-    The default selection actuates every DOF except ``floating_base_root_dofs``
-    (pass ``()`` for a fixed-base model). Actuating a root DOF requires
-    ``allow_root_actuation=True``; see :func:`_resolve_selection`.
+    The default selection actuates every DOF except the root DOFs declared by
+    ``root_policy`` (use :data:`FIXED_BASE` for a fixed-base model). Actuating a
+    root DOF requires ``allow_root_actuation``; see :func:`_resolve_selection`.
     """
     require(
         not contact_active,
@@ -274,9 +315,7 @@ def linearize_drift(
     q_arr = _finite_vector("q", q)
     v_arr = _finite_vector("v", v)
     drift = ztcf_acceleration(provider, q_arr, v_arr)
-    sel = _resolve_selection(
-        drift.size, selection, floating_base_root_dofs, allow_root_actuation
-    )
+    sel = _resolve_selection(drift.size, selection, root_policy)
     mass = np.asarray(provider.mass_matrix(q_arr), dtype=float)
     influence = np.linalg.solve(mass, sel)
     ensure(check_finite(influence), "control influence must be finite")
@@ -329,8 +368,7 @@ def integrate_step(
     *,
     selection: np.ndarray | None = None,
     contact_active: bool = False,
-    floating_base_root_dofs: tuple[int, ...] = DEFAULT_FLOATING_BASE_ROOT_DOFS,
-    allow_root_actuation: bool = False,
+    root_policy: RootActuationPolicy = RootActuationPolicy(),
 ) -> tuple[np.ndarray, np.ndarray]:
     """One classic RK4 step of ``a = drift + B tau`` with zero-order-hold torque."""
     q_arr = _finite_vector("q", q)
@@ -345,8 +383,7 @@ def integrate_step(
             vs,
             selection=selection,
             contact_active=contact_active,
-            floating_base_root_dofs=floating_base_root_dofs,
-            allow_root_actuation=allow_root_actuation,
+            root_policy=root_policy,
         )
         return lin.acceleration(tau)
 
@@ -372,8 +409,7 @@ def transition_jacobian(
     *,
     selection: np.ndarray | None = None,
     contact_active: bool = False,
-    floating_base_root_dofs: tuple[int, ...] = DEFAULT_FLOATING_BASE_ROOT_DOFS,
-    allow_root_actuation: bool = False,
+    root_policy: RootActuationPolicy = RootActuationPolicy(),
 ) -> np.ndarray:
     """Return ``F = df/dx`` of the one-step transition at ``x = (q, v)``.
 
@@ -399,8 +435,7 @@ def transition_jacobian(
             x[n:],
             selection=selection,
             contact_active=contact_active,
-            floating_base_root_dofs=floating_base_root_dofs,
-            allow_root_actuation=allow_root_actuation,
+            root_policy=root_policy,
         )
         return np.concatenate(predict_step(lin, x[:n], x[n:], tau, dt))
 
@@ -417,15 +452,14 @@ def uncertain_control_prediction(
     control_covariance: np.ndarray,
     dt: float,
     *,
-    state_covariance: np.ndarray | None = None,
+    state_prior: PropagatedStateCovariance | None = None,
     model_uncertainty: np.ndarray | None = None,
-    state_transition: np.ndarray | None = None,
 ) -> UncertainPrediction:
     """Drift-centred prediction with an explicitly uncertain control.
 
     ``P+ = F P F^T + G Sigma_u G^T + Q_w`` with ``G = [dt^2/2 B; dt B]``.
-    Precondition: a ``state_covariance`` needs the one-step transition
-    Jacobian ``state_transition = F`` (:func:`transition_jacobian`); mapping it
+    A prior state covariance always arrives with its one-step Jacobian ``F``
+    (:class:`PropagatedStateCovariance`, :func:`transition_jacobian`); mapping it
     by the kinematic chain alone would drop the dynamics sensitivity (#11549).
     """
     q_arr = _finite_vector("q", q)
@@ -437,18 +471,9 @@ def uncertain_control_prediction(
         [0.5 * dt * dt * lin.control_influence, dt * lin.control_influence]
     )
     covariance = gain @ sigma_u @ gain.T
-    if state_covariance is not None:
-        p = _require_psd("state_covariance", state_covariance, 2 * n)
-        require(
-            state_transition is not None,
-            "state_covariance requires state_transition (F = df/dx)",
-        )
-        f = np.asarray(state_transition, dtype=float)
-        require(
-            f.shape == (2 * n, 2 * n) and check_finite(f),
-            f"state_transition must be a finite ({2 * n}, {2 * n}) matrix",
-            value=f.shape,
-        )
+    if state_prior is not None:
+        p = _require_psd("state_prior.covariance", state_prior.covariance, 2 * n)
+        f = np.asarray(state_prior.transition, dtype=float)
         covariance = covariance + f @ p @ f.T
     if model_uncertainty is not None:
         q_w = _require_psd("model_uncertainty", model_uncertainty, 2 * n)
@@ -575,8 +600,7 @@ def predict_dime_transition(
             v,
             selection=request.selection,
             contact_active=request.contact_active,
-            floating_base_root_dofs=request.floating_base_root_dofs,
-            allow_root_actuation=request.allow_root_actuation,
+            root_policy=request.root_policy,
         )
 
     # 5. Drift linearization at the initial state
@@ -610,8 +634,7 @@ def predict_dime_transition(
             dt,
             selection=request.selection,
             contact_active=request.contact_active,
-            floating_base_root_dofs=request.floating_base_root_dofs,
-            allow_root_actuation=request.allow_root_actuation,
+            root_policy=request.root_policy,
         )
         pred = uncertain_control_prediction(
             lin if step == 0 else linearize(q_c, v_c),
@@ -620,9 +643,8 @@ def predict_dime_transition(
             request.control_mean,
             request.control_covariance,
             dt,
-            state_covariance=pred.covariance,
+            state_prior=PropagatedStateCovariance(pred.covariance, f_k),
             model_uncertainty=request.model_uncertainty,
-            state_transition=f_k,
         )
 
     # 8. Authority-bounded drift dominance index
