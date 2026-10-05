@@ -16,8 +16,9 @@ Provides:
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 import hashlib
 from typing import Any
 import numpy as np
@@ -39,6 +40,7 @@ from src.shared.python.estimation.moving_horizon import ArrivalFactor
 from src.shared.python.motion_matching.simscape_replay_harness import (
     ContinuousReplayTrajectory,
 )
+from src.shared.python.motion_matching.provenance import git_commit_full
 from src.shared.python.shadow_tracker.contracts import RolloutRequest
 
 DIME_REPLAY_SCHEMA_VERSION = "dime-continuous-replay-receipt/1.0"
@@ -125,15 +127,19 @@ class ReplayReceipt:
 
 @dataclass(frozen=True)
 class IndependentReplayMetrics:
-    """Independently recomputed replay metrics separated from optimization cost."""
+    """Independently recomputed replay metrics separated from optimization cost.
+
+    ``reproducibility_error`` and ``alignment_metric`` are ``None`` when no
+    reference trajectory was supplied: they were not measured (issue #11551).
+    """
 
     max_position_drift_m: float
     rms_position_drift_m: float
     max_velocity_drift: float
     max_angular_drift_rad: float
-    alignment_metric: float
+    alignment_metric: float | None
     cancellation_ratio: float
-    reproducibility_error: float
+    reproducibility_error: float | None
     grf_vertical_equilibrium_rms: float | None = None
     satisfies_frozen_tolerances: bool = True
 
@@ -153,14 +159,16 @@ class IndependentReplayMetrics:
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> IndependentReplayMetrics:
         grf = data.get("grf_vertical_equilibrium_rms")
+        align = data.get("alignment_metric")
+        repro = data.get("reproducibility_error")
         return cls(
             max_position_drift_m=float(data["max_position_drift_m"]),
             rms_position_drift_m=float(data["rms_position_drift_m"]),
             max_velocity_drift=float(data["max_velocity_drift"]),
             max_angular_drift_rad=float(data["max_angular_drift_rad"]),
-            alignment_metric=float(data["alignment_metric"]),
+            alignment_metric=float(align) if align is not None else None,
             cancellation_ratio=float(data["cancellation_ratio"]),
-            reproducibility_error=float(data["reproducibility_error"]),
+            reproducibility_error=float(repro) if repro is not None else None,
             grf_vertical_equilibrium_rms=float(grf) if grf is not None else None,
             satisfies_frozen_tolerances=bool(data["satisfies_frozen_tolerances"]),
         )
@@ -176,6 +184,7 @@ class ContinuousReplayResult:
     metrics: IndependentReplayMetrics
     is_physically_accepted: bool
     provenance: DimeProvenanceRecord
+    unqualified_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         rec_dict = self.receipt.to_dict()
@@ -188,6 +197,7 @@ class ContinuousReplayResult:
             "metrics": met_dict,
             "is_physically_accepted": self.is_physically_accepted,
             "provenance": prov_dict,
+            "unqualified_reasons": list(self.unqualified_reasons),
         }
 
     @classmethod
@@ -204,6 +214,9 @@ class ContinuousReplayResult:
             metrics=met,
             is_physically_accepted=bool(data["is_physically_accepted"]),
             provenance=prov,
+            unqualified_reasons=tuple(
+                str(x) for x in data.get("unqualified_reasons", ())
+            ),
         )
 
 
@@ -342,13 +355,15 @@ def _compute_replay_metrics(
         drift_init = [float(np.linalg.norm(s.q - init_q)) for s in traj_states]
         max_pos_drift = float(np.max(drift_init))
         rms_pos_drift = float(np.sqrt(np.mean(np.array(drift_init) ** 2)))
-        reproducibility_err = 0.0
-        align = 1.0
+        # No reference: reproducibility and alignment were NOT measured.
+        reproducibility_err = None
+        align = None
 
     v_norms = [float(np.linalg.norm(s.v)) for s in traj_states]
     max_v = float(np.max(v_norms)) if v_norms else 0.0
 
-    satisfies_tol = bool(
+    # Fail closed: without a reference there is nothing to qualify against.
+    satisfies_tol = reproducibility_err is not None and bool(
         max_pos_drift <= tol.max_drift_m
         or reproducibility_err <= tol.reproducibility_atol
     )
@@ -376,17 +391,34 @@ def execute_continuous_replay(
     reference_trajectory: Sequence[DimeCompleteState] | None = None,
     assistance_forces: np.ndarray | None = None,
     provenance: DimeProvenanceRecord | None = None,
+    git_commit_source: Callable[[], str] = git_commit_full,
+    clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> ContinuousReplayResult:
-    """Execute continuous forward replay from saved initial state and controls."""
+    """Execute continuous forward replay from saved initial state and controls.
+
+    Postconditions (issue #11551): without ``reference_trajectory`` the result is
+    not physically accepted, ``unqualified_reasons`` says why and reproducibility
+    is reported as not measured (``None``). When ``provenance`` is not supplied
+    the git commit comes from ``git_commit_source`` (``"unknown"`` when git is
+    unavailable) and the timestamp from ``clock``; both are injectable so tests
+    stay hermetic. ``reset_count`` counts the initial-state placement plus any
+    declared intermediate resets (the latter are rejected during validation).
+    """
     opts = options or ContinuousReplayOptions()
     ctrls, assistance_channels = _validate_replay_inputs(
         provider, initial_state, controls, opts, assistance_forces
     )
 
+    require(callable(git_commit_source) and callable(clock), "sources must be callable")
     traj_states = _rollout_continuous_replay(provider, initial_state, ctrls, dt)
     metrics, satisfies_tol = _compute_replay_metrics(
         traj_states, reference_trajectory, opts
     )
+    unqualified_reasons: tuple[str, ...] = ()
+    if reference_trajectory is None:
+        unqualified_reasons = (
+            "No reference trajectory supplied: reproducibility not measured",
+        )
 
     cap = provider.capability
     p_hash = provider.model_hash
@@ -395,8 +427,8 @@ def execute_continuous_replay(
         engine_version=cap.version,
         model_hash=p_hash,
         param_hash="default-param-hash",
-        git_commit="dime-09-replay-commit",
-        created_at="2026-10-04T00:00:00Z",
+        git_commit=git_commit_source(),
+        created_at=clock().astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         notes="Independent continuous replay execution",
     )
 
@@ -410,7 +442,7 @@ def execute_continuous_replay(
         integrator_name=opts.integrator_name,
         coverage_start_s=float(traj_states[0].t),
         coverage_end_s=float(traj_states[-1].t),
-        reset_count=1,
+        reset_count=1 + len(opts.intermediate_resets or ()),
         assistance_channels=tuple(assistance_channels),
         declared_controller=opts.declared_controller,
         declared_contact_policy=str(opts.declared_contact_policy),
@@ -426,6 +458,7 @@ def execute_continuous_replay(
         metrics=metrics,
         is_physically_accepted=satisfies_tol,
         provenance=prov,
+        unqualified_reasons=unqualified_reasons,
     )
 
 

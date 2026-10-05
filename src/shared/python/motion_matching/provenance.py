@@ -10,6 +10,8 @@ Public API:
         and then each distribution name, returning ``"unknown"`` otherwise.
     git_commit_short() -> str
         Best-effort short SHA of ``HEAD``; ``"unknown"`` outside a repo.
+    git_commit_full() -> str
+        Best-effort full SHA of ``HEAD``; ``"unknown"`` outside a repo.
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ from typing import Any
 
 __all__ = [
     "engine_package_version",
+    "git_commit_full",
     "git_commit_short",
 ]
 
@@ -68,15 +71,11 @@ def engine_package_version(
     return "unknown"
 
 
-def git_commit_short() -> str:
-    """Return the short SHA of ``HEAD``, or ``"unknown"`` if unavailable.
-
-    Best-effort: returns ``"unknown"`` when git is absent, the working tree is
-    not a repository, or the call times out. Never raises (issue #6939).
-    """
+def _git_rev_parse_head(*flags: str) -> str:
+    """Run ``git rev-parse [flags] HEAD``; ``"unknown"`` on any failure."""
     try:
         out = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"],
+            ["git", "rev-parse", *flags, "HEAD"],
             stderr=subprocess.DEVNULL,
             timeout=_GIT_TIMEOUT_S,
         )
@@ -87,3 +86,21 @@ def git_commit_short() -> str:
     ):
         return "unknown"
     return out.decode("ascii", errors="replace").strip() or "unknown"
+
+
+def git_commit_short() -> str:
+    """Return the short SHA of ``HEAD``, or ``"unknown"`` if unavailable.
+
+    Best-effort: returns ``"unknown"`` when git is absent, the working tree is
+    not a repository, or the call times out. Never raises (issue #6939).
+    """
+    return _git_rev_parse_head("--short")
+
+
+def git_commit_full() -> str:
+    """Return the full SHA of ``HEAD``, or ``"unknown"`` if unavailable.
+
+    ``"unknown"`` is an explicit marker, never a fabricated SHA (issue #11551).
+    Never raises.
+    """
+    return _git_rev_parse_head()
