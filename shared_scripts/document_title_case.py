@@ -18,8 +18,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
-from defusedxml import ElementTree
-
 MINOR_WORDS = {
     "a",
     "an",
@@ -203,16 +201,16 @@ def findings_for_text(path: Path, text: str) -> list[Finding]:
     if path.suffix.lower() == ".py":
         return _python_chart_findings(path, text)
     if path.suffix.lower() == ".tex":
-        findings = []
+        tex_findings: list[Finding] = []
         for line_number, line in enumerate(text.splitlines(), start=1):
             content = line.split("%", 1)[0]
-            for match in LATEX_TITLE.finditer(content):
+            for latex in LATEX_TITLE.finditer(content):
                 finding = _finding(
-                    path, line_number, match.group("kind"), match.group("value")
+                    path, line_number, latex.group("kind"), latex.group("value")
                 )
                 if finding:
-                    findings.append(finding)
-        return findings
+                    tex_findings.append(finding)
+        return tex_findings
 
     findings: list[Finding] = []
     in_frontmatter = False
@@ -254,6 +252,11 @@ def findings_for_text(path: Path, text: str) -> list[Finding]:
 
 def findings_for_docx(path: Path) -> list[Finding]:
     """Find DOCX paragraphs using title, subtitle, heading, or caption styles."""
+    # Imported here, not at module level: title casing itself is standard
+    # library only, so copies without defusedxml still title-case headings
+    # (Repository_Management#1976). Word parsing still requires it.
+    from defusedxml import ElementTree
+
     try:
         with ZipFile(path) as archive:
             root = ElementTree.fromstring(archive.read("word/document.xml"))

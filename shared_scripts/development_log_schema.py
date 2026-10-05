@@ -80,6 +80,13 @@ WIP_LIMIT_HEADER = re.compile(
 ENTRY_HEADING = re.compile(
     r"^###\s+(DL-(?:#\d+|\d{4}))\s+[·–—]\s+(.+?)\s*$", re.MULTILINE
 )
+# Lookup only, never validation: the change-fragment collator also finds a
+# legacy ``DL-#N - Title`` entry (UpstreamDrift's log has them), so it updates
+# that entry in place instead of inserting a duplicate, and rewrites its
+# heading with the middle dot (Repository_Management#1976).
+ENTRY_LOOKUP_HEADING = re.compile(
+    r"^###\s+(DL-(?:#\d+|\d{4}))\s+[·–—-]\s+(.+?)\s*$", re.MULTILINE
+)
 LEGACY_ENTRY_ID = re.compile(r"^DL-\d{4}$")
 ISSUE_KEYED_ENTRY_ID = re.compile(r"^DL-#(\d+)$")
 FIELD_LINE = re.compile(r"^-\s+\*\*(?P<key>[A-Za-z ]+?):\*\*\s*(?P<value>.*?)\s*$")

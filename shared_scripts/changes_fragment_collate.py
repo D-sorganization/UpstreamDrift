@@ -76,15 +76,27 @@ def apply_spec_row(text: str, *, pr: int, summary: str, today: date) -> str:
 
 
 def _entry_span(lines: list[str], entry_id: str) -> tuple[int, int] | None:
-    """Line range ``[start, end)`` of ``entry_id``'s block, or ``None``."""
+    """Line range ``[start, end)`` of ``entry_id``'s block, or ``None``.
+
+    Also finds a legacy ``DL-#N - Title`` heading, so it is never duplicated.
+    """
     for start, raw in enumerate(lines):
-        heading = development_log.ENTRY_HEADING.match(raw.rstrip("\r\n"))
+        heading = development_log.ENTRY_LOOKUP_HEADING.match(raw.rstrip("\r\n"))
         if heading and heading.group(1) == entry_id:
             end = start + 1
             while end < len(lines) and not lines[end].startswith("#"):
                 end += 1
             return start, end
     return None
+
+
+def _canonical_heading(raw: str) -> str:
+    """``raw`` unchanged when valid, else its legacy hyphen as a middle dot."""
+    if development_log.ENTRY_HEADING.match(raw.rstrip("\r\n")):
+        return raw
+    heading = development_log.ENTRY_LOOKUP_HEADING.match(raw.rstrip("\r\n"))
+    assert heading is not None, "caller passes a heading found by _entry_span"
+    return f"### {heading.group(1)} · {heading.group(2)}\n"
 
 
 def _section_insert_index(lines: list[str], heading_prefix: str) -> int | None:
@@ -197,6 +209,7 @@ def apply_devlog_entry(
         return "".join(_insert_block(lines, block, terminal=state in terminal))
 
     start, end = span
+    lines[start] = _canonical_heading(lines[start])
     current = development_log.parse_entries("".join(lines[start:end]))[0]
     old_state = current.state
     new_state = fragment.dl_state or old_state

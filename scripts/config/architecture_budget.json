@@ -1090,7 +1090,7 @@
       "symbol": "_validate_entry",
       "rule": "function-lines",
       "owner": "claude",
-      "reason": "Exact fleet bundle from Repository_Management ee986664db5024e7b1136816f219a56aa1054377 (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "reason": "Exact fleet bundle from Repository_Management b13150898be81bca3bbfe66d79614dbe0c7c12cc (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
       "expires_on": "2027-01-31"
     },
     {
@@ -1098,7 +1098,7 @@
       "symbol": "validate_devlog_content",
       "rule": "function-lines",
       "owner": "claude",
-      "reason": "Exact fleet bundle from Repository_Management ee986664db5024e7b1136816f219a56aa1054377 (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
+      "reason": "Exact fleet bundle from Repository_Management b13150898be81bca3bbfe66d79614dbe0c7c12cc (change fragments, Repository_Management#1976); the digest pin in docs/development/change-fragment-bundle.json prevents local edits. Refactor at the central source and re-vendor before expiry.",
       "expires_on": "2027-01-31"
     },
     {

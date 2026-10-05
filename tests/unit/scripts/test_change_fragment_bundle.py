@@ -138,3 +138,29 @@ def test_validate_rejects_a_malformed_fragment(scratch_repo: Path) -> None:
     result = _cli(scratch_repo, "validate")
     assert result.returncode == 1
     assert "summary is required" in result.stderr
+
+
+def test_collate_updates_a_legacy_hyphen_entry_in_place(scratch_repo: Path) -> None:
+    """``DL-#11329 - ...`` (hyphen heading) is updated, never duplicated."""
+    devlog_path = scratch_repo / "docs/development/DEVELOPMENT_LOG.md"
+    assert "### DL-#11329 - " in devlog_path.read_text(encoding="utf-8")
+    fragment = scratch_repo / "changes" / "11329-touch.md"
+    fragment.parent.mkdir()
+    fragment.write_text(
+        '---\nissue: 11329\nsummary: "Touch the scapula entry"\n---\n',
+        encoding="utf-8",
+    )
+    collated = _cli(
+        scratch_repo,
+        "collate",
+        "--pr",
+        "4343",
+        "--sha",
+        "abcdef1",
+        "--date",
+        "2026-10-04",
+    )
+    assert collated.returncode == 0, collated.stderr
+    devlog = devlog_path.read_text(encoding="utf-8")
+    assert devlog.count("### DL-#11329 ") == 1
+    assert "### DL-#11329 · Scapula and Quiet Torso Matching" in devlog

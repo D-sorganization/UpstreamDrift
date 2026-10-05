@@ -65,6 +65,7 @@ BRANCH_STATES = _schema.BRANCH_STATES
 CANONICAL_RELATIVE_PATH = _schema.CANONICAL_RELATIVE_PATH
 DevLogFinding = _schema.DevLogFinding
 ENTRY_HEADING = _schema.ENTRY_HEADING
+ENTRY_LOOKUP_HEADING = _schema.ENTRY_LOOKUP_HEADING
 Entry = _schema.Entry
 FIELD_LINE = _schema.FIELD_LINE
 ISO_DATE = _schema.ISO_DATE
@@ -104,6 +105,7 @@ __all__ = [
     "CANONICAL_RELATIVE_PATH",
     "DevLogFinding",
     "ENTRY_HEADING",
+    "ENTRY_LOOKUP_HEADING",
     "Entry",
     "FIELD_LINE",
     "ISO_DATE",
