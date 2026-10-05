@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -24,6 +25,11 @@ from src.shared.python.estimation import (
     stack_shared_parameter_jacobians,
 )
 from src.shared.python.estimation.multi_trial import (
+    _build_layout,
+    _marginal_shared_block,
+    _objective_jacobian,
+    _objective_residual,
+    _pack_decision,
     _validate_observation,
     _validate_problem,
 )
@@ -355,3 +361,180 @@ class TestStackSharedParameterJacobians:
         block = np.array([[1.0, np.nan]])
         with pytest.raises(ValueError, match="must be finite"):
             stack_shared_parameter_jacobians([block])
+
+
+# --------------------------------------------------------------------------
+# Row layout and marginal covariance (issue #11548)
+# --------------------------------------------------------------------------
+
+
+def _locked_prior_problem() -> MultiTrialMapProblem:
+    """Two trials; a locked parameter that carries a prior plus a free one."""
+    base = _problem_with_trials(
+        trial_scales=(1.0, 1.35), parameter_initial=1.0, locked_mass=False
+    )
+    shared = SharedParameterBlock.from_specs(
+        [
+            SharedParameterSpec(
+                "locked_mass_kg", 70.0, prior=72.0, prior_scale=2.0, locked=True
+            ),
+            SharedParameterSpec(
+                "club_length_m",
+                1.0,
+                kind="length",
+                lower=0.8,
+                upper=1.5,
+                prior=1.1,
+                prior_scale=0.5,
+            ),
+        ]
+    )
+    return replace(base, shared_parameters=shared)
+
+
+def _central_difference_jacobian(fn, x: np.ndarray, step: float) -> np.ndarray:
+    columns = []
+    for column in range(x.size):
+        delta = np.zeros_like(x)
+        delta[column] = step
+        columns.append((fn(x + delta) - fn(x - delta)) / (2.0 * step))
+    return np.column_stack(columns)
+
+
+@pytest.mark.unit
+def test_locked_prior_residual_and_jacobian_share_row_layout(
+    contracts_enforced,
+) -> None:
+    """A locked parameter's prior is excluded from BOTH residual and Jacobian.
+
+    The fixture residuals are at most bilinear in the decision vector
+    (``club_length * q`` with ``q`` linear in the spline coefficients), so the
+    central-difference truncation error is exactly zero and the only error is
+    rounding, ``~eps * |r| / h ~ 1e-9`` for ``h = 1e-6``; ``atol = 1e-7``
+    leaves two decades of margin while catching any wrong or missing row.
+    """
+    problem = _locked_prior_problem()
+    layout = _build_layout(problem)
+    decision = _pack_decision(problem) + 0.03
+
+    residual = _objective_residual(problem, layout, decision)
+    jacobian = _objective_jacobian(problem, layout, decision)
+
+    assert jacobian.shape == (residual.size, layout.size)
+    # 2 trials x 8 data rows + one prior row for the single FREE parameter.
+    assert residual.size == 2 * 8 + 1
+    numeric = _central_difference_jacobian(
+        lambda x: _objective_residual(problem, layout, x), decision, step=1e-6
+    )
+    np.testing.assert_allclose(jacobian, numeric, rtol=0.0, atol=1e-7)
+
+
+@pytest.mark.unit
+def test_posterior_covariance_is_schur_marginal_not_conditional() -> None:
+    """Shared-parameter covariance marginalises the trajectory coefficients.
+
+    The independent reference inverts the full regularised Fisher matrix
+    densely and reads the shared block, and separately evaluates the Schur
+    complement ``(F_ss - F_st F_tt^-1 F_ts)^-1``. Both are exact linear algebra
+    on a 17x17 well-conditioned matrix, so ``rtol = 1e-8`` is far above the
+    ``cond(F) * eps`` rounding floor.
+    """
+    problem = _problem_with_trials(
+        trial_scales=(1.0, 1.35), parameter_initial=1.0, locked_mass=False
+    )
+    result = solve_multi_trial_map(problem)
+    assert result.success
+    layout = _build_layout(problem)
+    decision = np.concatenate(
+        [result.coefficients_by_trial[o.key] for o in problem.observations]
+        + [np.array([result.parameters["club_length_m"]])]
+    )
+    jacobian = _objective_jacobian(problem, layout, decision)
+    regularization = problem.covariance_regularization
+    fisher = jacobian.T @ jacobian + regularization * np.eye(layout.size)
+    shared = slice(layout.trajectory_size, layout.size)
+    traj = slice(0, layout.trajectory_size)
+
+    dense_marginal = np.linalg.inv(fisher)[shared, shared]
+    schur = fisher[shared, shared] - fisher[shared, traj] @ np.linalg.solve(
+        fisher[traj, traj], fisher[traj, shared]
+    )
+    schur_marginal = np.linalg.inv(schur)
+    conditional = np.linalg.inv(fisher[shared, shared])
+
+    np.testing.assert_allclose(dense_marginal, schur_marginal, rtol=1e-8)
+    np.testing.assert_allclose(result.posterior_covariance, dense_marginal, rtol=1e-8)
+    # Correlated example: marginalising cannot shrink, and here strictly grows.
+    assert result.posterior_variance("club_length_m") > 1.5 * conditional[0, 0]
+
+
+@pytest.mark.unit
+def test_marginal_block_of_singular_fisher_is_unavailable_not_pinv() -> None:
+    """A confounded trajectory/shared column pair has no marginal (#11548).
+
+    Jacobian row ``[1, 1]`` (one trajectory column, one shared column) gives
+    ``F = [[1, 1], [1, 1]]`` with ``lambda = 0``. The Schur complement
+    ``F_ss - F_st F_tt^-1 F_ts = 1 - 1 = 0``, so the marginal variance is
+    undefined (infinite). The Moore-Penrose block ``pinv(F)[1, 1] = 0.25``
+    must never be reported in its place.
+    """
+    covariance, status = _marginal_shared_block(
+        np.array([[1.0, 1.0]]), trajectory_size=1, regularization=0.0
+    )
+
+    assert status == "rank_deficient"
+    assert covariance.shape == (1, 1)
+    assert np.all(np.isnan(covariance))
+
+
+@pytest.mark.unit
+def test_marginal_block_of_full_rank_fisher_matches_schur_inverse() -> None:
+    """A full-rank Fisher matrix reports the inverse Schur complement.
+
+    ``J = [[1, 1], [0, 1]]`` gives ``F = [[1, 1], [1, 2]]``; the Schur
+    complement of ``F_tt = 1`` is ``2 - 1 = 1``, so the exact marginal is
+    ``1.0`` (the conditional ``1 / F_ss`` would be ``0.5``). Exact 2x2
+    arithmetic, so ``rtol = 1e-12`` is far above rounding.
+    """
+    covariance, status = _marginal_shared_block(
+        np.array([[1.0, 1.0], [0.0, 1.0]]), trajectory_size=1, regularization=0.0
+    )
+
+    assert status == "estimated"
+    np.testing.assert_allclose(covariance, [[1.0]], rtol=1e-12)
+
+
+@pytest.mark.unit
+def test_solver_reports_unavailable_covariance_for_confounded_problem() -> None:
+    """``q * club_length`` alone is scale-confounded; the result fails closed.
+
+    Without the trajectory anchor rows, scaling the spline coefficients by
+    ``c`` and ``club_length_m`` by ``1 / c`` leaves every residual unchanged,
+    so the regularisation-free Fisher matrix is singular at every point.
+    """
+    base = _observation(0, 1.0)
+    times = base.evaluation_times
+    observed = np.linspace(1.0, 2.0, times.size)
+
+    def residual(_observation, evaluation, parameters):
+        return parameters["club_length_m"] * evaluation.q[:, 0] - observed
+
+    def jacobian(observation, evaluation, parameters, layout):
+        jac = np.zeros((times.size, layout.size), dtype=float)
+        jac[:, layout.trajectory_slice(observation.key)] = (
+            parameters["club_length_m"] * evaluation.q_basis[:, 0, :]
+        )
+        jac[:, layout.parameter_column("club_length_m")] = evaluation.q[:, 0]
+        return jac
+
+    observation = replace(base, residual=residual, jacobian=jacobian)
+    problem = replace(
+        _single_problem(),
+        observations=(observation,),
+        covariance_regularization=0.0,
+    )
+
+    result = solve_multi_trial_map(problem)
+
+    assert result.covariance_status == "rank_deficient"
+    assert np.isnan(result.posterior_variance("club_length_m"))
