@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11560 | DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences |
 | 2026-10-04 | #11516 | Versioned BunkerShot3D workbench route `POST /tools/bunker-workbench/v1/evaluate` over the headless `WorkbenchModel`: strict DbC input validation (units, PyQt panel ranges, explicit right-handed convention), bounded nominal solve, tier/verdict/stamp/source stamps plus canonical SHA-256 digest, and predictive or degenerate playability objectives refused (#9239); closes the `api: null` parity gap. |
 | 2026-10-05 | #11526 | CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import |
 | 2026-10-05 | #11522 | fail fast with an explicit incomplete-checkout error naming the runner, and log sparse-checkout state, after checkout in fetch-pinned-tools |
