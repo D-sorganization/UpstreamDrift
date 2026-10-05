@@ -21,6 +21,13 @@
       "reason": "Tornado HTTP request parsing vulnerability; upstream package bump to 6.5.9 tracked.",
       "tracked_in": "#11103",
       "expires_on": "2026-10-31"
+    },
+    {
+      "vuln": "CVE-2026-104851",
+      "package": "fsspec",
+      "reason": "fsspec ReferenceFileSystem SSTI; package upgrade to 2026.6.0 tracked.",
+      "tracked_in": "#11587",
+      "expires_on": "2026-10-31"
     }
   ]
 }
