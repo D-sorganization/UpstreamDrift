@@ -19,7 +19,7 @@ concurrency:
 jobs:
   check-kill-switch:
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -36,7 +36,7 @@ jobs:
   pick-runner:
     needs: check-kill-switch
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'issue_comment' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
