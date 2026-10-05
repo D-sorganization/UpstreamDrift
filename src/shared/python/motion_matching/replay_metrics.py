@@ -224,14 +224,14 @@ def compute_replay_five_metrics(
     if np.any(early_mask):
         early_rms_m = float(np.sqrt(np.mean(sq_err[early_mask])))
     else:
-        early_rms_m = 0.0
+        early_rms_m = float("nan")
 
     # 3. Terminal RMS (last frame)
     term_val = val[-1]
     if np.any(term_val):
         terminal_rms_m = float(np.sqrt(np.mean(sq_err[-1, term_val])))
     else:
-        terminal_rms_m = 0.0
+        terminal_rms_m = float("nan")
 
     # 4. Club cluster RMS (last frame, clubhead and shaft markers)
     club_indices = [
@@ -243,22 +243,25 @@ def compute_replay_five_metrics(
             term_club_idx = np.array(club_indices)[club_term_mask]
             club_cluster_rms_m = float(np.sqrt(np.mean(sq_err[-1, term_club_idx])))
         else:
-            club_cluster_rms_m = 0.0
+            club_cluster_rms_m = float("nan")
     else:
-        club_cluster_rms_m = 0.0
+        club_cluster_rms_m = float("nan")
 
     # 5. Pelvis yaw error pct
     if "WaistLeft" in marker_labels and "WaistRight" in marker_labels:
         wl_i = marker_labels.index("WaistLeft")
         wr_i = marker_labels.index("WaistRight")
-        vp = pred[-1, wr_i, :2] - pred[-1, wl_i, :2]
-        vt = target[-1, wr_i, :2] - target[-1, wl_i, :2]
-        yaw_t = float(np.degrees(np.arctan2(vt[1], vt[0])))
-        yaw_p = float(np.degrees(np.arctan2(vp[1], vp[0])))
-        diff_deg = float((yaw_p - yaw_t + 180.0) % 360.0 - 180.0)
-        pelvis_yaw_error_pct = float(abs(diff_deg) / max(abs(yaw_t), 1.0) * 100.0)
+        if term_val[wl_i] and term_val[wr_i]:
+            vp = pred[-1, wr_i, :2] - pred[-1, wl_i, :2]
+            vt = target[-1, wr_i, :2] - target[-1, wl_i, :2]
+            yaw_t = float(np.degrees(np.arctan2(vt[1], vt[0])))
+            yaw_p = float(np.degrees(np.arctan2(vp[1], vp[0])))
+            diff_deg = float((yaw_p - yaw_t + 180.0) % 360.0 - 180.0)
+            pelvis_yaw_error_pct = float(abs(diff_deg) / max(abs(yaw_t), 1.0) * 100.0)
+        else:
+            pelvis_yaw_error_pct = float("nan")
     else:
-        pelvis_yaw_error_pct = 0.0
+        pelvis_yaw_error_pct = float("nan")
 
     return ReplayFiveMetrics(
         whole_rms_m=whole_rms_m,
