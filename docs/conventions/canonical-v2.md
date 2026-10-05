@@ -184,7 +184,7 @@ Limitations:
   `covariance_status == "rank_deficient"` and a `NaN`-filled
   `posterior_covariance`, matching `fit_uncertainty`.
 - A positive $\lambda$ that clears the tolerance makes $F$ invertible; the
-  reported $\Sigma_{ss}$ is then the exact marginal of the *regularised*
+  reported $\Sigma_{ss}$ is then the exact marginal of the _regularised_
   problem (an isotropic Gaussian prior of precision $\lambda$ on every
   decision column). With the default $\lambda = 10^{-12}$ a confounded
   direction yields a variance of order $10^{12}$, which is large rather than
