@@ -23,6 +23,87 @@ from src.launchers.settings_dialog import (  # noqa: E402
 )
 
 
+class _ModalRecorder:
+    """Outermost ``QMessageBox`` sentinels: any call here is a *real* modal."""
+
+    def __init__(self) -> None:
+        self.real_calls: list[str] = []
+        self.workers: list = []
+
+
+@pytest.fixture
+def modal_recorder(qapp):
+    """Fail the test if a dependency-check signal reaches an unpatched modal.
+
+    Set up *before* ``dep_check_modal_guard`` so it is torn down *after* it: its
+    sentinels stand where the real ``QMessageBox`` would be, and its teardown
+    drains any worker still running (so a late signal is delivered here, not
+    lost) before asserting that nothing reached them.
+    """
+    recorder = _ModalRecorder()
+
+    def _sentinel(name: str):
+        def _record(*args, **kwargs):
+            recorder.real_calls.append(name)
+
+        return _record
+
+    with (
+        patch("PyQt6.QtWidgets.QMessageBox.information", _sentinel("information")),
+        patch("PyQt6.QtWidgets.QMessageBox.warning", _sentinel("warning")),
+        patch("PyQt6.QtWidgets.QMessageBox.critical", _sentinel("critical")),
+    ):
+        yield recorder
+        for worker in recorder.workers:
+            worker.wait(5000)
+        qapp.processEvents()
+    assert not recorder.real_calls, (
+        f"dependency-check signal opened a real modal QMessageBox "
+        f"({recorder.real_calls}) after the test's patches ended; this blocks "
+        "forever offscreen (UpstreamDrift#11577)"
+    )
+
+
+@pytest.fixture(autouse=True)
+def dep_check_modal_guard(modal_recorder, qapp):
+    """Never let a dependency-check worker outlive its test (UpstreamDrift#11577).
+
+    Per-test ``@patch("...QMessageBox.information")`` decorators only live for the
+    test function. A worker whose ``succeeded``/``failed`` signal lands during
+    pytest-qt teardown would then open a real modal ``QMessageBox`` and block the
+    xdist worker forever. This fixture records every ``RuntimeDependencyCheckWorker``
+    started, keeps ``QMessageBox`` information/warning/critical patched
+    (non-blocking), and on teardown waits for each worker and delivers its queued
+    signals *before* the patches are removed. A worker that will not finish fails
+    the test loudly instead of passing silently.
+    """
+    from src.launchers import settings_dialog
+
+    started: list = []
+
+    class _RecordingWorker(settings_dialog.RuntimeDependencyCheckWorker):
+        def __init__(self, *args, **kwargs) -> None:
+            super().__init__(*args, **kwargs)
+            started.append(self)
+
+    with (
+        patch.object(settings_dialog, "RuntimeDependencyCheckWorker", _RecordingWorker),
+        patch("PyQt6.QtWidgets.QMessageBox.information"),
+        patch("PyQt6.QtWidgets.QMessageBox.warning"),
+        patch("PyQt6.QtWidgets.QMessageBox.critical"),
+    ):
+        yield
+        modal_recorder.workers.extend(started)
+        stuck = [w for w in started if not w.wait(5000)]
+        qapp.processEvents()
+    if stuck:
+        pytest.fail(
+            f"{len(stuck)} dependency-check worker(s) still running 5s after the "
+            "test ended; a late signal would open a real modal QMessageBox "
+            "(UpstreamDrift#11577)"
+        )
+
+
 def test_validate_tab_index() -> None:
     """Validate all legal tab indexes; ensure out-of-range raises ValueError."""
     assert validate_tab_index(0) == 0  # TAB_LAYOUT
@@ -575,6 +656,43 @@ def test_check_docker_deps_returns_while_worker_runs(
     release_probe.set()
     qtbot.waitUntil(dialog.btn_check_docker_deps.isEnabled, timeout=3000)
     assert mock_info.called
+
+
+@pytest.mark.unit
+def test_late_worker_signal_never_reaches_real_modal(
+    parent_launcher, qapp, modal_recorder
+) -> None:
+    """A worker that outlives the test body must not open a real modal (#11577).
+
+    The report function blocks until a timer releases it *after* the test
+    function has returned, i.e. after any per-test ``@patch`` is gone.
+    """
+    from src.launchers.settings_runtime import RuntimeDependencyReport
+
+    release_probe = threading.Event()
+
+    def blocked_report() -> RuntimeDependencyReport:
+        release_probe.wait(timeout=10)
+        return RuntimeDependencyReport(
+            dialog_title="Late",
+            table_title="Late",
+            environment_name="Late",
+            check_results=[],
+        )
+
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    with patch(
+        "src.launchers.settings_dialog._check_windows_dependencies_report",
+        side_effect=blocked_report,
+    ):
+        dialog._check_windows_deps()
+    modal_recorder.workers.extend(dialog._dep_check_workers.values())
+    assert modal_recorder.workers, "worker was not started"
+
+    # Released only once the test body has ended (fixture teardown).
+    timer = threading.Timer(0.3, release_probe.set)
+    timer.daemon = True
+    timer.start()
 
 
 @patch("PyQt6.QtWidgets.QDialog.exec")
