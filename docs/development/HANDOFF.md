@@ -1,3 +1,18 @@
+# BunkerShot3D Versioned Workbench API Route — #9545
+
+- Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-worktrees/claude-9545`; branch `claude/issue-9545-api`; PR: draft (`Refs #9545`). Entry: DL-#9545.
+- Governing issue: #9545 (epic #9541). Sub-task scope: close the `api: null` gap for `tools.bunkershot3d_workbench`.
+- Completed:
+  - `src/api/routes/bunker_workbench.py`: `POST /tools/bunker-workbench/v1/evaluate` (auto-registered at root, `/api`, `/api/v1`). Lazy model import; sync handler (threadpool). Request: `extra="forbid"`, no inf/nan, ranges mirror `widgets.py` spin boxes, required handedness (left -> 422 `handedness_unsupported`). `WorkbenchInputError` -> 422 `invalid_workbench_input`. Predictive objective -> 422 `objective_not_predictive` (disposition `unavailable-uncalibrated`); exploratory objective reported with `degenerate` flag and `ranking_permitted: false`. Refused shots carry no numbers (ADR-0032). `evaluation_record`/`record_digest` are public pure functions.
+  - `report.py` now owns `validity_stamp` and `TIER_MODEL_NAMES` (re-exported by `render.py`).
+  - `feature_parity.json` `api`/`issue` set; matrix and `ui/src/api/generated/types.ts` regenerated.
+  - `tests/bunkershot3d/test_bunker_workbench_api.py`: 24 contract tests.
+- Validation: `python -m pytest tests/bunkershot3d -m "contract or unit" -q` (2955 passed; one xdist worker crash in unrelated `test_f1_continuum_8733`); `check_lod.py src --baseline scripts/ci/lod_baseline.txt` clean; `generate_ui_api_types.py --check` OK. Pre-existing local failures unchanged: route-uniqueness (4), route-prefixes data_explorer, pyvista `n_faces` VTK test.
+- Out of scope: async jobs/cancellation (#8880/#9472), web UI (#9692-#9695), predictive claims, solver-settings override.
+- Next steps: review the draft PR; list the route under U15 in `src/config/bunkershot3d_qualification.json`; consider hoisting the panel ranges into `design.py` and the serialiser into the tools package for #9692.
+
+---
+
 # COV-10 Engine-Generic Model-Candidate Comparison (Python Part) — #11278
 
 - Repository: `D-sorganization/UpstreamDrift`; branch `claude/issue-11278`; PR: not created yet (`Refs #11278`, `Refs #11268`)

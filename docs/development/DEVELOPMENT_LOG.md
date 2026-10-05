@@ -1480,6 +1480,18 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Summary:** `BallFlightSimulator._post_process_rust` called the scalar `_calculate_forces_single` path once per trajectory point instead of the existing vectorized `_calculate_forces_batch` path; now builds the `(3, N)` batch once and calls force calculation a single time per trajectory.
 - **Next step:** Land the vectorization PR (#10648) if not already merged.
 
+### DL-#9545 · Versioned BunkerShot3D Workbench API Route
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9545 (epic #9541)
+- **Branch:** claude/issue-9545-api
+- **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 at SELF (RED: collection ImportError; GREEN: 24 contract tests pass; `tests/bunkershot3d -m "contract or unit"` 2955 passed, one unrelated xdist worker crash; LoD, file-size, error-handling, suite-marker and suppression gates clean)
+- **Summary:** `POST /tools/bunker-workbench/v1/evaluate` is a thin client of the headless `WorkbenchModel` (no Qt, no matplotlib): strict request models mirroring the PyQt panel ranges, explicit right-handed convention (left refused, not mirrored), bounded nominal solve with `include_playability=False`, tier/verdict/stamp/source stamps and a canonical SHA-256 digest equal to the model path; predictive playability objectives refused and exploratory ones reported but never ranked (#9239). `validity_stamp` and `TIER_MODEL_NAMES` moved from render.py to report.py (re-exported) so the API avoids matplotlib.
+- **Next step:** Review the draft PR and list the route in the U15 entry of `src/config/bunkershot3d_qualification.json`.
+
 ### DL-#9544 · Bunker Contact Regimes and Coupled Club Rotation Across Fidelity Tiers
 
 - **State:** in_review

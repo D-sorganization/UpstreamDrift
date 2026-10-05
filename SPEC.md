@@ -8306,6 +8306,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #9545 | Versioned BunkerShot3D workbench route `POST /tools/bunker-workbench/v1/evaluate` over the headless `WorkbenchModel`: strict DbC input validation (units, PyQt panel ranges, explicit right-handed convention), bounded nominal solve, tier/verdict/stamp/source stamps plus canonical SHA-256 digest, and predictive or degenerate playability objectives refused (#9239); closes the `api: null` parity gap. |
 | 2026-10-04 | #11510 | Merge-queue runs scope the core `tests` lane to `merge_group.base_sha` and fetch `origin/<default>` for the unit-gate child-copy guard, so queued PRs no longer fail the whole-src coverage floor or the guard (RM#1900). |
 | 2026-10-04 | #11508 | [COV-10] Engine-generic model-candidate comparison source (`model_candidate_source.py`): provenance-carrying landmark sources for any engine, shared COV-7 L2 path, qualification-aware receipts (Python-only part; real GS3DX evidence blocked on #11165, refs #11278). |
 | 2026-10-04 | #11502 | [COV-3] Capture-O comparison protocol ratification, landmark correspondence table, and frozen profile config: comparison levels L0-L3, 8 governed decisions and rationales, cov_comparison_profile.v1.json, and cov_landmark_correspondence.json mapping Capture-34 to derived joint centres and 4 detector backends (#11271, refs #11268). |
