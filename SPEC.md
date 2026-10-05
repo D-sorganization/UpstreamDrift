@@ -157,6 +157,7 @@ Specifies the cross-engine and capture qualification matrix, per-engine capabili
   - Joint convention and coordinate frame mismatches reject qualification fail-closed.
   - Missing native platform dependencies invalidate advertised capabilities with diagnostic reasons.
   - Breaching tolerance thresholds transitions status to `unqualified` or `degraded`.
+  - Missing solve receipts or missing/non-finite gated metrics (`max_drift_m`, `max_angular_drift_rad`, `alignment`) fail closed to `unqualified`; matrix and manifest totals report `total_unqualified` alongside qualified/blocked/rejected/unsupported so they reconcile with `total_evaluated`.
 - **Fleet Matrix Aggregation & Report Bundle (`build_fleet_qualification_matrix`, `export_qualification_bundle`)**:
   - Aggregates qualification verdicts across all combinations of physics engines (MuJoCo, Drake, Pinocchio, OpenSim, Simscape, MyoSuite, Pendulum) and benchmark captures.
   - Exports immutable JSON qualification bundle and human-readable Markdown summary table.

@@ -18,6 +18,8 @@ Enforces:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import numpy as np
 import pytest
 
@@ -53,6 +55,7 @@ from src.shared.python.estimation.dime_continuous_replay import (
     ContinuousReplayResult,
     IndependentReplayMetrics,
     ReplayReceipt,
+    ReplayProvenanceSources,
     SmoothedTrajectoryResult,
     execute_continuous_replay,
     smooth_backward_trajectory,
@@ -365,10 +368,15 @@ class TestGreenContinuousReplayAndSmoothing:
         )
         assert repro_err <= 1e-9
 
-    def test_green_native_stance_fixture_reproduces_saved_motion_and_forces(
+    def test_native_stance_fixture_with_gravity_fake_provider_not_accepted(
         self,
     ) -> None:
-        """Native stance fixture reproduces saved motion and vertical GRF within frozen tolerances."""
+        """The fake provider falls under gravity, so it must not be accepted (#11551).
+
+        This test previously asserted acceptance only because a missing
+        reference reported reproducibility 0.0. Against the saved static
+        fixture the fake provider drifts beyond the frozen tolerance.
+        """
         fixture = make_native_stance_fixture(n_frames=8, fps=100.0)
         q0, v0 = fixture.initial_state
         dt = 1.0 / fixture.sampling_rate_hz
@@ -417,6 +425,17 @@ class TestGreenContinuousReplayAndSmoothing:
             expected_model_hash="native-stance-model-v1",
             floating_base_root_dofs=(0,),
         )
+        # Qualification requires a saved-motion reference (issue #11551).
+        reference = [
+            DimeCompleteState(
+                t=frame.timestamp,
+                q=np.array(frame.q, dtype=np.float64),
+                v=np.array(frame.qdot, dtype=np.float64),
+                model_hash=provider.model_hash,
+                units=dict(CANONICAL_DIME_UNITS),
+            )
+            for frame in fixture.frames
+        ]
 
         result = execute_continuous_replay(
             provider=provider,
@@ -424,9 +443,10 @@ class TestGreenContinuousReplayAndSmoothing:
             controls=holding_controls,
             dt=dt,
             options=options,
+            reference_trajectory=reference,
         )
-
-        assert result.is_physically_accepted
+        assert not result.is_physically_accepted
+        assert result.metrics.max_position_drift_m > 0.015
         assert result.receipt.reset_count == 1
         assert len(result.trajectory) == 8
 
@@ -573,3 +593,59 @@ class TestGreenContinuousReplayAndSmoothing:
         assert simscape_traj.v.shape == (6, 1)
         assert simscape_traj.coordinate_names == ("pendulum_theta",)
         assert simscape_traj.marker_labels == ("marker_tip",)
+
+
+class TestFailClosedOnMissingEvidence:
+    """Issue #11551: absent reference or provenance sources never imply acceptance."""
+
+    @staticmethod
+    def _run(**kwargs: object) -> ContinuousReplayResult:
+        fixture = make_fixed_base_pendulum_fixture(n_frames=5, fps=100.0)
+        provider = AnalyticPendulumProvider(fixture)
+        return execute_continuous_replay(
+            provider=provider,
+            initial_state=provider.get_state(),
+            controls=np.zeros((4, 1), dtype=np.float64),
+            dt=0.01,
+            **kwargs,  # type: ignore[arg-type]
+        )
+
+    def test_red_no_reference_is_not_accepted(self) -> None:
+        result = self._run()
+        assert result.is_physically_accepted is False
+        assert result.receipt.is_physically_accepted is False
+        assert result.metrics.satisfies_frozen_tolerances is False
+        assert any("reference" in r.lower() for r in result.unqualified_reasons)
+
+    def test_red_no_reference_reproducibility_is_not_measured(self) -> None:
+        result = self._run()
+        assert result.metrics.reproducibility_error is None
+        assert result.metrics.alignment_metric is None
+        restored = ContinuousReplayResult.from_dict(result.to_dict())
+        assert restored.metrics.reproducibility_error is None
+        assert restored.unqualified_reasons == result.unqualified_reasons
+
+    def test_red_provenance_uses_injected_sources(self) -> None:
+        fixed = datetime(2031, 2, 3, 4, 5, 6, tzinfo=UTC)
+        sources = ReplayProvenanceSources(
+            git_commit=lambda: "a" * 40, clock=lambda: fixed
+        )
+        result = self._run(options=ContinuousReplayOptions(provenance_sources=sources))
+        prov = result.provenance
+        assert prov.git_commit == "a" * 40
+        assert prov.created_at == "2031-02-03T04:05:06Z"
+        assert result.receipt.provenance == prov
+
+    def test_red_provenance_is_not_the_old_hardcoded_literals(self) -> None:
+        prov = self._run().provenance
+        assert prov.git_commit != "dime-09-replay-commit"
+        assert prov.created_at != "2026-10-04T00:00:00Z"
+
+    def test_red_unknown_git_is_explicit_marker_not_fake_sha(self) -> None:
+        sources = ReplayProvenanceSources(git_commit=lambda: "unknown")
+        result = self._run(options=ContinuousReplayOptions(provenance_sources=sources))
+        assert result.provenance.git_commit == "unknown"
+
+    def test_red_reset_count_is_derived_from_replay(self) -> None:
+        result = self._run()
+        assert result.receipt.reset_count == 1

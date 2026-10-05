@@ -20,10 +20,11 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 import json
+import math
 from pathlib import Path
 from typing import Any, Final, Literal
 
-from src.shared.python.contracts import PreconditionError
+from src.shared.python.contracts import PreconditionError, require
 from src.shared.python.estimation.dime_manifest import (
     CANONICAL_DIME_UNITS,
     NumericAcceptanceThresholds,
@@ -31,11 +32,19 @@ from src.shared.python.estimation.dime_manifest import (
 
 DIME_QUALIFICATION_SCHEMA_VERSION: Final[str] = "dime-engine-qualification-v1"
 
+# Metrics compared against frozen thresholds; all must be present and finite.
+_GATED_METRIC_KEYS: Final[tuple[str, ...]] = (
+    "max_drift_m",
+    "max_angular_drift_rad",
+    "alignment",
+)
+
 
 class EngineQualificationStatus(str, Enum):
     """Engine qualification state for forward dynamics matching."""
 
     QUALIFIED = "qualified"
+    UNQUALIFIED = "unqualified"  # required evidence missing or not measured
     PROVISIONAL = "provisional"
     UNSUPPORTED = "unsupported"
     BLOCKED = "blocked"
@@ -155,6 +164,12 @@ class EngineQualificationMatrix:
         )
 
     @property
+    def total_unqualified(self) -> int:
+        return sum(
+            1 for e in self.entries if e.status == EngineQualificationStatus.UNQUALIFIED
+        )
+
+    @property
     def total_blocked(self) -> int:
         return sum(
             1 for e in self.entries if e.status == EngineQualificationStatus.BLOCKED
@@ -178,6 +193,7 @@ class EngineQualificationMatrix:
             "evaluated_at": self.evaluated_at,
             "total_evaluated": self.total_evaluated,
             "total_qualified": self.total_qualified,
+            "total_unqualified": self.total_unqualified,
             "total_blocked": self.total_blocked,
             "total_rejected": self.total_rejected,
             "total_unsupported": self.total_unsupported,
@@ -217,18 +233,34 @@ def _evaluate_capability_preconditions(
     return None
 
 
+def _missing_metric_reasons(
+    trajectory_metrics: Mapping[str, float] | None,
+) -> tuple[str, ...]:
+    """Name every gated metric that is absent or non-finite (not measured)."""
+    metrics = trajectory_metrics or {}
+    return tuple(
+        f"Missing trajectory metric '{key}': not measured"
+        for key in _GATED_METRIC_KEYS
+        if metrics.get(key) is None or not math.isfinite(float(metrics[key]))
+    )
+
+
 def _evaluate_physical_tolerances(
     trajectory_metrics: Mapping[str, float] | None,
     thresholds: NumericAcceptanceThresholds,
 ) -> tuple[tuple[str, ...], float, float, float, float]:
     """Evaluate replay trajectory metrics against frozen physical tolerance thresholds."""
     metrics = trajectory_metrics or {}
-    max_drift = float(metrics.get("max_drift_m", 0.0))
-    max_angular_drift = float(metrics.get("max_angular_drift_rad", 0.0))
-    mean_control = float(metrics.get("mean_control_nm", 0.0))
-    alignment = float(metrics.get("alignment", 1.0))
-
+    require(
+        not _missing_metric_reasons(trajectory_metrics),
+        "gated trajectory metrics must be present and finite",
+    )
     reasons: list[str] = []
+    max_drift = float(metrics["max_drift_m"])
+    max_angular_drift = float(metrics["max_angular_drift_rad"])
+    mean_control = float(metrics.get("mean_control_nm", 0.0))
+    alignment = float(metrics["alignment"])
+
     if max_drift > thresholds.max_drift_m:
         reasons.append(
             f"Position drift {max_drift:.4f}m exceeds frozen threshold {thresholds.max_drift_m:.4f}m"
@@ -270,19 +302,35 @@ def evaluate_engine_qualification(
             matched_forward_dynamics=False,
         )
 
+    missing = _missing_metric_reasons(trajectory_metrics)
+    if missing:
+        # Fail closed: unavailable evidence is never evidence of qualification.
+        return EngineQualificationEntry(
+            engine_name=engine_spec.engine_name,
+            capture_id=capture.capture_id,
+            status=EngineQualificationStatus.UNQUALIFIED,
+            reasons=missing,
+            max_position_drift_m=float("inf"),
+            max_angular_drift_rad=float("inf"),
+            mean_control_norm_nm=float("inf"),
+            alignment_metric=0.0,
+            matched_forward_dynamics=False,
+        )
+
     reasons, max_drift, max_angular, mean_ctrl, align = _evaluate_physical_tolerances(
         trajectory_metrics, thresholds
     )
     is_qualified = len(reasons) == 0
+    status = (
+        EngineQualificationStatus.QUALIFIED
+        if is_qualified
+        else EngineQualificationStatus.REJECTED
+    )
 
     return EngineQualificationEntry(
         engine_name=engine_spec.engine_name,
         capture_id=capture.capture_id,
-        status=(
-            EngineQualificationStatus.QUALIFIED
-            if is_qualified
-            else EngineQualificationStatus.REJECTED
-        ),
+        status=status,
         reasons=reasons,
         max_position_drift_m=max_drift,
         max_angular_drift_rad=max_angular,
@@ -343,6 +391,7 @@ def export_qualification_bundle(
             "summary": {
                 "total_evaluated": matrix.total_evaluated,
                 "total_qualified": matrix.total_qualified,
+                "total_unqualified": matrix.total_unqualified,
                 "total_blocked": matrix.total_blocked,
                 "total_rejected": matrix.total_rejected,
             },

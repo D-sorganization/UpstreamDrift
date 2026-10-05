@@ -15,6 +15,7 @@ Verifies:
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 import pytest
 
@@ -213,6 +214,7 @@ class TestDimeEngineQualificationRedCases:
     ) -> None:
         failing_metrics = {
             "max_drift_m": 0.050,  # Exceeds 0.015m threshold
+            "max_angular_drift_rad": 0.01,
             "alignment": 0.90,  # Fails 0.95 threshold
             "max_control_nm": 300.0,
         }
@@ -289,11 +291,13 @@ class TestDimeEngineQualificationGreenCases:
         solve_receipts = {
             ("mujoco", "tour_swing_01"): {
                 "max_drift_m": 0.007,
+                "max_angular_drift_rad": 0.01,
                 "alignment": 0.98,
                 "mean_control_nm": 30.0,
             },
             ("mujoco", "owner_swing_02"): {
                 "max_drift_m": 0.010,
+                "max_angular_drift_rad": 0.01,
                 "alignment": 0.97,
                 "mean_control_nm": 40.0,
             },
@@ -322,6 +326,7 @@ class TestDimeEngineQualificationGreenCases:
     ) -> None:
         passing_metrics = {
             "max_drift_m": 0.005,
+            "max_angular_drift_rad": 0.01,
             "alignment": 0.99,
             "mean_control_nm": 20.0,
         }
@@ -350,3 +355,102 @@ class TestDimeEngineQualificationGreenCases:
         manifest_data = json.loads(manifest_file.read_text(encoding="utf-8"))
         assert "qualification_matrix.json" in manifest_data["artifacts"]
         assert manifest_data["schema_version"] == "dime-engine-qualification-v1"
+
+
+class TestDimeEngineQualificationFailClosedOnMissingMetrics:
+    """Issue #11551: missing trajectory evidence must never qualify an engine."""
+
+    @pytest.mark.parametrize("metrics", [None, {}])
+    def test_absent_metrics_not_qualified(
+        self,
+        valid_engine_spec: EngineCapabilitySpec,
+        valid_capture: CaptureProvenance,
+        default_thresholds: NumericAcceptanceThresholds,
+        metrics: dict[str, float] | None,
+    ) -> None:
+        entry = evaluate_engine_qualification(
+            valid_engine_spec,
+            valid_capture,
+            trajectory_metrics=metrics,
+            thresholds=default_thresholds,
+        )
+        assert entry.status == EngineQualificationStatus.UNQUALIFIED
+        assert entry.matched_forward_dynamics is False
+        assert any("missing" in r.lower() for r in entry.reasons)
+
+    @pytest.mark.parametrize(
+        "missing", ["max_drift_m", "max_angular_drift_rad", "alignment"]
+    )
+    def test_any_single_missing_gated_metric_not_qualified(
+        self,
+        valid_engine_spec: EngineCapabilitySpec,
+        valid_capture: CaptureProvenance,
+        default_thresholds: NumericAcceptanceThresholds,
+        missing: str,
+    ) -> None:
+        metrics = {
+            "max_drift_m": 0.008,
+            "max_angular_drift_rad": 0.02,
+            "alignment": 0.99,
+        }
+        del metrics[missing]
+        entry = evaluate_engine_qualification(
+            valid_engine_spec,
+            valid_capture,
+            trajectory_metrics=metrics,
+            thresholds=default_thresholds,
+        )
+        assert entry.status == EngineQualificationStatus.UNQUALIFIED
+        assert any(missing in r for r in entry.reasons)
+
+    def test_non_finite_metric_not_qualified(
+        self,
+        valid_engine_spec: EngineCapabilitySpec,
+        valid_capture: CaptureProvenance,
+        default_thresholds: NumericAcceptanceThresholds,
+    ) -> None:
+        entry = evaluate_engine_qualification(
+            valid_engine_spec,
+            valid_capture,
+            trajectory_metrics={
+                "max_drift_m": float("nan"),
+                "max_angular_drift_rad": 0.02,
+                "alignment": 0.99,
+            },
+            thresholds=default_thresholds,
+        )
+        assert entry.status != EngineQualificationStatus.QUALIFIED
+
+    def test_unqualified_counted_and_totals_reconcile(
+        self,
+        valid_engine_spec: EngineCapabilitySpec,
+        valid_capture: CaptureProvenance,
+        default_thresholds: NumericAcceptanceThresholds,
+        tmp_path: Path,
+    ) -> None:
+        passing = {
+            "max_drift_m": 0.005,
+            "max_angular_drift_rad": 0.01,
+            "alignment": 0.99,
+        }
+        owner = replace(valid_capture, capture_id="owner_swing_02")
+        matrix = build_fleet_qualification_matrix(
+            engine_specs=[valid_engine_spec],
+            captures=[valid_capture, owner],
+            solve_receipts={("mujoco", "tour_swing_01"): passing},  # owner absent
+            thresholds=default_thresholds,
+        )
+        assert matrix.total_unqualified == 1
+        data = matrix.to_dict()
+        per_status = (
+            data["total_qualified"]
+            + data["total_unqualified"]
+            + data["total_blocked"]
+            + data["total_rejected"]
+            + data["total_unsupported"]
+        )
+        assert per_status == data["total_evaluated"] == 2
+
+        export_qualification_bundle(matrix, tmp_path)
+        summary = json.loads((tmp_path / "manifest.json").read_text("utf-8"))["summary"]
+        assert summary["total_unqualified"] == 1
