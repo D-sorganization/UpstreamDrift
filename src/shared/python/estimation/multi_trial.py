@@ -186,7 +186,7 @@ def solve_multi_trial_map(problem: MultiTrialMapProblem) -> MultiTrialMapResult:
     free_values = result.x[layout.trajectory_size :]
     full_values = problem.shared_parameters.expand_free_vector(free_values)
     parameters = problem.shared_parameters.to_mapping(full_values)
-    covariance = _posterior_covariance(problem, layout, result.x)
+    covariance = _posterior_covariance(problem, layout, result.x, residual.size)
     _warn_if_sentinel_fired(counter, _all_jacobians_available(problem))
     return MultiTrialMapResult(
         success=bool(result.success),
@@ -376,7 +376,7 @@ def _objective_residual(
             residual, policy=problem.options.non_finite_policy, counter=counter
         )
         residuals.append(residual)
-    residuals.append(problem.shared_parameters.prior_residuals(parameter_values))
+    residuals.append(_prior_row_layout(problem.shared_parameters).residual(free_values))
     return np.concatenate(residuals)
 
 
@@ -404,26 +404,75 @@ def _objective_jacobian(
         if jacobian.ndim != 2 or jacobian.shape[1] != layout.size:
             raise ValueError(f"jacobian callable must return (*, {layout.size})")
         rows.append(jacobian)
-    prior = _free_prior_jacobian(problem.shared_parameters, layout)
-    if prior.shape[0]:
-        rows.append(prior)
+    rows.append(_prior_row_layout(problem.shared_parameters).jacobian(layout))
     return np.vstack(rows)
 
 
-def _free_prior_jacobian(
-    parameter_block: SharedParameterBlock,
-    layout: MultiTrialDecisionLayout,
-) -> np.ndarray:
-    rows = []
-    for spec in parameter_block.free_specs:
-        if spec.prior is None or spec.prior_scale is None:
-            continue
-        row = np.zeros(layout.size, dtype=float)
-        row[layout.parameter_column(spec.name)] = 1.0 / spec.prior_scale
-        rows.append(row)
-    if not rows:
-        return np.zeros((0, layout.size), dtype=float)
-    return np.vstack(rows)
+@dataclass(frozen=True)
+class _PriorRowLayout:
+    """Row layout of the Gaussian prior block, shared by residual and Jacobian.
+
+    One row per **free** parameter that carries both ``prior`` and
+    ``prior_scale``, in free-parameter order. A locked parameter is not a
+    decision variable: its prior residual would be a constant row with a zero
+    Jacobian row, which shifts the objective by a constant, leaves its gradient
+    and Gauss-Newton Fisher matrix unchanged, and therefore cannot affect the
+    MAP estimate or the posterior. Such rows are excluded from **both** the
+    residual and the Jacobian, matching
+    :meth:`SharedParameterBlock.free_prior_residuals` used by the single-trial
+    estimator (#11548). Building both blocks from this one object is what
+    keeps their row counts and order identical.
+    """
+
+    free_indices: np.ndarray
+    priors: np.ndarray
+    scales: np.ndarray
+
+    @property
+    def n_rows(self) -> int:
+        """Number of prior rows."""
+        return int(self.free_indices.size)
+
+    def residual(self, free_values: np.ndarray) -> np.ndarray:
+        """Prior residuals ``(theta_free[i] - prior_i) / scale_i``.
+
+        Precondition: ``free_values`` is a finite 1-D vector covering every
+        indexed free parameter. Postcondition: shape ``(n_rows,)``.
+        """
+        values = np.asarray(free_values, dtype=float)
+        require(values.ndim == 1, "free_values must be 1D")
+        require(
+            self.n_rows == 0 or int(self.free_indices.max()) < values.size,
+            "free_values does not cover the prior rows",
+        )
+        rows = (values[self.free_indices] - self.priors) / self.scales
+        assert rows.shape == (self.n_rows,)
+        return rows
+
+    def jacobian(self, layout: MultiTrialDecisionLayout) -> np.ndarray:
+        """Jacobian of :meth:`residual` over the full decision vector.
+
+        Postcondition: shape ``(n_rows, layout.size)`` with ``1 / scale_i`` in
+        the decision column of each prior's free parameter.
+        """
+        rows = np.zeros((self.n_rows, layout.size), dtype=float)
+        columns = layout.trajectory_size + self.free_indices
+        rows[np.arange(self.n_rows), columns] = 1.0 / self.scales
+        return rows
+
+
+def _prior_row_layout(parameter_block: SharedParameterBlock) -> _PriorRowLayout:
+    """Return the single prior row layout used by residual and Jacobian."""
+    indexed = [
+        (index, float(spec.prior), float(spec.prior_scale))
+        for index, spec in enumerate(parameter_block.free_specs)
+        if spec.prior is not None and spec.prior_scale is not None
+    ]
+    return _PriorRowLayout(
+        free_indices=np.array([item[0] for item in indexed], dtype=int),
+        priors=np.array([item[1] for item in indexed], dtype=float),
+        scales=np.array([item[2] for item in indexed], dtype=float),
+    )
 
 
 def _unpack_coefficients(
@@ -441,9 +490,29 @@ def _posterior_covariance(
     problem: MultiTrialMapProblem,
     layout: MultiTrialDecisionLayout,
     decision: np.ndarray,
+    n_residual_rows: int,
 ) -> np.ndarray:
+    """Marginal Laplace covariance of the free shared parameters.
+
+    The Gauss-Newton Fisher matrix ``F = J^T J + lambda I`` spans every
+    decision column: the per-trial trajectory coefficients ``t`` and the free
+    shared parameters ``s``. The trajectory coefficients are nuisance
+    parameters, so the reported covariance is the **marginal** over ``s``,
+    the ``s`` block of ``F^-1``, which equals the inverse Schur complement
+    ``(F_ss - F_st F_tt^-1 F_ts)^-1``. Inverting ``F_ss`` alone would be the
+    covariance *conditional* on the trajectories and understates uncertainty
+    whenever they are correlated with ``s`` (#11548). This is the same
+    construction :mod:`.fit_uncertainty` uses: invert the full Fisher matrix
+    with :func:`shared_parameter_covariance`, then read the requested block.
+
+    Preconditions: ``decision`` is finite with width ``layout.size``. Invariant:
+    the Jacobian has exactly ``n_residual_rows`` rows (one shared row layout). Postcondition: a square matrix of
+    side ``free_size``.
+    """
     if problem.shared_parameters.free_size == 0:
         return np.zeros((0, 0), dtype=float)
+    require(decision.shape == (layout.size,), "decision width must match layout")
+    require(bool(np.all(np.isfinite(decision))), "decision must be finite")
     if _all_jacobians_available(problem):
         jacobian = _objective_jacobian(problem, layout, decision)
     else:
@@ -451,11 +520,16 @@ def _posterior_covariance(
             lambda x: _objective_residual(problem, layout, x),
             decision,
         )
-    shared_jacobian = jacobian[:, layout.trajectory_size :]
-    return shared_parameter_covariance(
-        shared_jacobian,
+    require(jacobian.shape[1] == layout.size, "jacobian width must match layout")
+    assert jacobian.shape[0] == n_residual_rows, "residual/Jacobian row mismatch"
+    full = shared_parameter_covariance(
+        jacobian,
         regularization=problem.covariance_regularization,
     )
+    shared = slice(layout.trajectory_size, layout.size)
+    marginal = full[shared, shared].copy()
+    assert marginal.shape == (layout.size - layout.trajectory_size,) * 2
+    return marginal
 
 
 def _finite_difference_jacobian(
