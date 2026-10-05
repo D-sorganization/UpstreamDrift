@@ -8306,6 +8306,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11511 | Vendor the RM-5 change-fragment tooling (`shared_scripts/changes_fragment.py` and siblings, byte-identical with Repository_Management, digests pinned in `docs/development/change-fragment-bundle.json`), add `changes/` and `scripts/ci/check_spec_freshness.py`, which accepts a valid fragment in place of a SPEC.md edit (Repository_Management#1976). |
 | 2026-10-04 | #11510 | Merge-queue runs scope the core `tests` lane to `merge_group.base_sha` and fetch `origin/<default>` for the unit-gate child-copy guard, so queued PRs no longer fail the whole-src coverage floor or the guard (RM#1900). |
 | 2026-10-04 | #11507 | Switch the `smoke-test-wheel` sparse checkout to cone mode on `tests/fixtures` and add a guard test that no workflow sets `sparse-checkout-cone-mode: false` (#9507). |
 | 2026-10-04 | #11506 | Retired the tools-canonical `data_processing` and `data_processor_io` UD copies (#11503): both roots now resolve to the pinned Tools tree via `REDIRECTED_ROOTS`, their `shadow_modules.yaml` ledger lines and the drift-test waiver in `tools_child_copy_missing_counterparts.txt` are removed. |

@@ -1,0 +1,13 @@
+{
+  "source_repository": "D-sorganization/Repository_Management",
+  "source_commit": "b13150898be81bca3bbfe66d79614dbe0c7c12cc",
+  "files": {
+    "shared_scripts/changes_fragment.py": "338ac47aca60949f34b83dffbf1295a42616d57a04aa51bdc6ad6bbd70077cbe",
+    "shared_scripts/changes_fragment_schema.py": "2c923c0140cd50767f5ee49f27a9451a022463265555ed6e1f0320b27bc11b78",
+    "shared_scripts/changes_fragment_collate.py": "82138320b982a68dded80364c2951b6e4787d5c7a0b16ec1c12c2775a0c4d299",
+    "shared_scripts/development_log.py": "23f561d3d4dcc12e646675db771324c37692a746d24c3391b46983b8e0b99710",
+    "shared_scripts/development_log_schema.py": "4ad2c79060a9e15b092d9e361aea1f6f54f53cb222210438bb2568405328d64f",
+    "shared_scripts/development_log_validator.py": "aee931c8ae1f584c3c36df49c013a4381acbcbd372621feb84fed2c5a07b5f5b",
+    "shared_scripts/document_title_case.py": "609cc9c61e0c3c9e76d853d489752b547757bdb5954dbe023a48d0b3c05e9a15"
+  }
+}

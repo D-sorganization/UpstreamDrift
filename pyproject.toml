@@ -511,8 +511,10 @@ max-complexity = 10
 "scripts/**" = ["T201"]
 # Fleet-shared portable CLIs (Repository_Management#1520), copied verbatim so
 # they stay byte-identical across repositories; their reports go to stdout by
-# design, exactly like scripts/**.
-"shared_scripts/**" = ["T201"]
+# design, exactly like scripts/**. The rest are upstream style choices in the
+# change-fragment bundle (Repository_Management#1976) that a local --fix would
+# fork from the byte-identical copy.
+"shared_scripts/**" = ["T201", "BLE001", "FURB167", "FURB188", "SIM114"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
 # Benchmark CLIs report their tables on stdout, like scripts/** above.
