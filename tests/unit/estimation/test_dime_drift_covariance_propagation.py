@@ -227,3 +227,22 @@ class TestPropagatedStateCovarianceContract:
         f[0, 0] = np.nan
         with pytest.raises(PreconditionError, match="finite"):
             PropagatedStateCovariance(np.eye(4), f)
+
+
+def test_new_public_helpers_are_exported_from_the_estimation_facade() -> None:
+    """The canonical façade re-exports every public #11549 helper (PR #11562)."""
+    import src.shared.python.estimation as facade
+    from src.shared.python.estimation import drift_prediction
+
+    new_names = (
+        "DEFAULT_FLOATING_BASE_ROOT_DOFS",
+        "FIXED_BASE",
+        "PropagatedStateCovariance",
+        "RootActuationPolicy",
+        "transition_jacobian",
+    )
+    for name in new_names:
+        assert name in facade.__all__, name
+        assert getattr(facade, name) is getattr(drift_prediction, name)
+    missing = set(drift_prediction.__all__) - set(facade.__all__)
+    assert not missing, sorted(missing)

@@ -391,15 +391,18 @@ Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control inf
     a_{\text{centre}} = f + B \left(\frac{u_{\text{min}} + u_{\text{max}}}{2}\right), \quad a_{\text{half}} = |B| \left(\frac{u_{\text{max}} - u_{\text{min}}}{2}\right)
     \]
   - Admissible deviations from the ZTCF anchor are strictly bounded by actuator authority.
-- **Gaussian Uncertain-Control Propagation (`uncertain_control_prediction`)**:
-  - For uncertain inputs $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$ with state covariance $P = \operatorname{Cov}(x)$ and model process noise $Q_w$:
+- **Gaussian Uncertain-Control Propagation (`uncertain_control_prediction`, `transition_jacobian`, `PropagatedStateCovariance`, #11549)**:
+  - State $x = (q, v) \in \mathbb{R}^{2n}$ in local coordinates. One step of the constant-acceleration map with zero-order-hold torque, re-linearised at $x_k$:
     \[
-    x_{k+1} = A x_k + c + G \tau_k, \quad A = \begin{bmatrix} I & \Delta t I \\ 0 & I \end{bmatrix}, \quad G = \begin{bmatrix} \frac{\Delta t^2}{2} B \\ \Delta t B \end{bmatrix}
+    x_{k+1} = \Phi(x_k, \tau_k) = \begin{bmatrix} q_k + \Delta t\, v_k + \tfrac{\Delta t^2}{2} a_k \\ v_k + \Delta t\, a_k \end{bmatrix}, \quad a_k = f(q_k, v_k) + B(q_k) \tau_k
     \]
+  - For uncertain inputs $\tau \sim \mathcal{N}(\mu_u, \Sigma_u)$, prior state covariance $P_k = \operatorname{Cov}(x_k)$ and model process noise $Q_w$, the covariance propagates through the Jacobian of the full one-step map, not a kinematic chain:
     \[
-    \operatorname{Cov}(x_{k+1}) = A P A^T + G \Sigma_u G^T + Q_w
+    P_{k+1} = F_k P_k F_k^T + G_k \Sigma_u G_k^T + Q_w, \quad F_k = \left.\frac{\partial \Phi}{\partial x}\right|_{(x_k, \mu_u)}, \quad G_k = \begin{bmatrix} \frac{\Delta t^2}{2} B(q_k) \\ \Delta t\, B(q_k) \end{bmatrix}
     \]
-  - Analytically equivalent to Schur-complement Gaussian elimination; propagated covariance is verified symmetric positive semi-definite ($\Sigma \succeq 0$).
+  - $F_k$ carries the dynamics sensitivity $\partial a / \partial q$ and $\partial a / \partial v$. The superseded kinematic matrix $A = \begin{bmatrix} I & \Delta t I \\ 0 & I \end{bmatrix}$ equals $F_k$ only when $f$ is independent of $x$; it is not used.
+  - Numerical method: dynamics providers expose no analytic state derivatives, so `transition_jacobian` computes $F_k$ by central finite differences of $\Phi$ (re-evaluating $f$ and $B$ at each perturbed state), $F_{:,j} = \frac{\Phi(x + h_j e_j) - \Phi(x - h_j e_j)}{2 h_j}$ with $h_j = 10^{-6} \max(1, |x_j|)$, reusing `identifiability.finite_difference_jacobian` ($2 \cdot 2n$ provider evaluations per step, $O(h^2)$ truncation error).
+  - Contract: a prior covariance is accepted only as `PropagatedStateCovariance(covariance=P_k, transition=F_k)`, so $P_k$ cannot be supplied without the $F_k$ that maps it; both must be finite, square and of equal size, and $P_k$, $\Sigma_u$, $Q_w$ must be symmetric positive semi-definite. The output is symmetrised, $P_{k+1} \leftarrow \tfrac{1}{2}(P_{k+1} + P_{k+1}^T)$.
   - Declared zero-mean control is an initialization with finite covariance, never an assertion that the joints are inactive.
 - **Authority-Bounded Drift Dominance Index (`drift_dominance_index`)**:
   - Share of admissible acceleration budget owed to drift:
@@ -408,13 +411,22 @@ Specifies ZTCF-anchored one-step and multi-step dynamics prediction, control inf
     \]
   - Compares drift against control *authority* rather than realized net acceleration ($a_{\text{net}} = f + B \tau$), ensuring $\eta$ remains strictly bounded in $[0, 1]$ even when opposing control cancels drift ($a_{\text{net}} \approx 0$).
 - **Fail-Closed DIME Transition Protocol (`predict_dime_transition`)**:
-  - `DimeTransitionRequest`: inputs `DimeCompleteState`, control mean $\mu_u$, covariance $\Sigma_u$, step $\Delta t$, horizon $H$, mode (`"marginalized"` or `"explicit"`), optional state covariance $P$, model uncertainty $Q_w$, selection matrix $S$, and contact flag.
+  - `DimeTransitionRequest`: inputs `DimeCompleteState`, control mean $\mu_u$, covariance $\Sigma_u$, step $\Delta t$, horizon $H$, mode (`"marginalized"` or `"explicit"`), optional state covariance $P_0$ (zero when omitted), model uncertainty $Q_w$, selection matrix $S$, root policy (`root_policy: RootActuationPolicy`), and contact flag.
+  - Horizon integration: a horizon $H$ is $H$ steps of $\Delta t$, never one step of $H \Delta t$. Both the native zero-control branch ($\tau = 0$, the ZTCF anchor) and the controlled prediction re-linearise $f$, $B$ (and $F_k$, $G_k$) at the current state of every step $k = 0, \dots, H-1$, and $Q_w$ is added once per step. The reported factor spans $[t, t + H \Delta t]$; the drift dominance index $\eta$ is evaluated at the initial state over the box $\mu_u \pm 3 \sqrt{\operatorname{diag} \Sigma_u}$.
+  - Root actuation: the floating-base root is unactuated by default so the zero-torque reading of the root stays torque-free. With `selection=None` the selection is $S = I_n$ with the rows and columns of the declared root DOFs zeroed. `RootActuationPolicy()` declares `DEFAULT_FLOATING_BASE_ROOT_DOFS = (0, 1, 2, 3, 4, 5)` (matching `ContinuousReplayOptions.floating_base_root_dofs`); fixed-base models pass `root_policy=FIXED_BASE` (no root DOFs). Root DOF indices must be distinct and lie in $[0, n)$, so a model with $n < 6$ and no declared base fails closed with `PreconditionError`. An explicit $S$ with a non-zero root row is rejected with `PreconditionError` unless the caller declares `RootActuationPolicy(allow_root_actuation=True)`. The same policy applies to `linearize_drift`, `integrate_step` and `transition_jacobian`.
   - `DimeTransitionPrediction`: outputs `valid: bool`, receipt dictionary, native zero-control branch $(q_0, v_0)$, controlled prediction `UncertainPrediction(mean, covariance)`, drift dominance $\eta$, and registered interval factor.
   - Fail-closed receipts:
     - Active contact (`contact_active=True`): returns `valid=False` with `{"code": "CONTACT_ACTIVE_REJECTED", "status": "disabled"}`.
     - Invalid time step or horizon ($\Delta t \le 0$ or $H \le 0$): returns `valid=False` with `{"code": "INVALID_HORIZON", "status": "disabled"}`.
     - Manifold coordinates ($n_q \neq n_v$, e.g. quaternions): returns `valid=False` with `{"code": "MANIFOLD_UNSUPPORTED", "status": "disabled"}`.
     - Mutual exclusivity: registers `EstimationIntervalFactor` with `RuntimeExclusivityContract`. If an overlapping factor of opposing type exists, returns `valid=False` with `{"code": "EXCLUSIVITY_VIOLATION", "status": "rejected"}`.
+- **Limitations**:
+  - Linearised Gaussian propagation: $P_{k+1}$ is exact only for a step map that is affine in $x$ and $\tau$; for nonlinear dynamics it is a first-order (EKF-style) approximation about the controlled mean, and the finite-difference $F_k$ adds $O(h^2)$ error.
+  - Constant acceleration over each step in local coordinates; quaternion or other manifold configurations ($n_q \neq n_v$) are refused, as is active contact.
+  - The default root policy assumes a 6-DOF floating base at indices $0..5$; models with a different base layout must declare it.
+  - Acceptance evidence is synthetic: an analytic linear system ($P$ matched to the closed-form recursion to `rtol=1e-7`), an $H$-step versus one-step-of-$H\Delta t$ rollout on the 2-DOF `make_backend("ode", GolfModelParams.default())` model (zero-control branch and controlled mean match an $H$-step reference to `atol=1e-12`), and root-selection contracts. No physical capture validates the covariance.
+- **Reproduction**:
+  - `python -m pytest -q -o addopts="" -p no:cacheprovider tests/unit/estimation/test_dime_drift_covariance_propagation.py tests/unit/estimation/test_dime_drift_prediction.py`
 
 ## Dynamics-Informed Mocap Matching: Robust Marker and Markerless Observation Factors (DIME-03, #11424)
 
