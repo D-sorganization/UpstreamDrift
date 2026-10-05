@@ -1,0 +1,180 @@
+name: Collate Change Fragments
+
+# RM-5 (Repository_Management#1894, rolled out here by #1976): every pull
+# request adds its own changes/<issue>-<slug>.md instead of editing SPEC.md and
+# docs/development/DEVELOPMENT_LOG.md, so queued PRs never conflict over those
+# files. After a merge to main this workflow folds every fragment present on
+# main into the shared files with `shared_scripts/changes_fragment.py collate`:
+# one SPEC.md change-log row keyed by the PR that added the fragment, the
+# DL-#<issue> entry updated in place, and the fragment deleted.
+#
+# Ported from Repository_Management's collate-changes.yml. It never pushes to
+# main: it proposes the result on the reused branch bot/collate-changes and
+# arms auto-merge through Repository_Management's scripts/automerge_guard.py
+# (checked out read-only, as Jules-Redundant-PR-Closer.yml does), which
+# honours reviewer holds.
+#
+# Push-only on purpose: in the merge queue (merge_group) the PR number is not
+# final and nothing must be written, so the workflow does not run there.
+# Every run collates *all* fragments on main, so a cancelled or failed run is
+# caught up by the next one, and cancel-in-progress is safe.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "changes/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: collate-changes
+  cancel-in-progress: true
+
+jobs:
+  collate:
+    name: Collate merged change fragments
+    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
+    timeout-minutes: 10
+    steps:
+      - name: Generate fleet app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.JULES_APP_ID }}
+          private-key: ${{ secrets.JULES_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # Full history: each fragment's PR is read from the commit that
+          # added it, which may be older than the push that triggered us.
+          fetch-depth: 0
+
+      - name: Checkout Repository_Management (automerge guard)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: D-sorganization/Repository_Management
+          ref: main
+          path: .rm-tools
+          token: ${{ steps.app-token.outputs.token }}
+          sparse-checkout: scripts/automerge_guard.py
+          sparse-checkout-cone-mode: false
+
+      - name: Isolate Python tool cache (prevent shared-cache races)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ -f /.dockerenv ]; then
+            mkdir -p "$RUNNER_TEMP/hostedtoolcache"
+            echo "RUNNER_TOOL_CACHE=$RUNNER_TEMP/hostedtoolcache" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      # document_title_case.py needs defusedxml; without it the collated
+      # DL-#<issue> heading is not title-cased and docs-governance's
+      # check_document_title_case.py rejects the collation PR.
+      - name: Install collator dependency
+        run: python3 -m pip install --disable-pip-version-check defusedxml==0.7.1
+
+      - name: Collate fragments
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO_SLUG: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f shared_scripts/changes_fragment.py ]; then
+            echo "OUTCOME=changes_fragment.py not on main yet; nothing to do" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          shopt -s nullglob
+          COLLATED=0
+          for FRAGMENT in changes/*.md; do
+            case "$(basename "$FRAGMENT")" in [Rr][Ee][Aa][Dd][Mm][Ee].md) continue ;; esac
+            SHA=$(git log -1 --diff-filter=A --format=%H -- "$FRAGMENT")
+            # The merged PR that introduced the commit; fall back to the
+            # "(#123)" suffix GitHub puts on squash-merge subjects.
+            PR=$(gh api "repos/$REPO_SLUG/commits/$SHA/pulls" \
+              --jq '[.[] | select(.merged_at != null)][0].number // empty' || true)
+            if [ -z "$PR" ]; then
+              PR=$(git log -1 --format=%s "$SHA" | grep -oE '\(#[0-9]+\)$' | tr -dc '0-9' || true)
+            fi
+            if [ -z "$PR" ]; then
+              echo "::warning::No merged PR found for $FRAGMENT (added in $SHA); left in place."
+              continue
+            fi
+            python3 shared_scripts/changes_fragment.py collate \
+              --pr "$PR" --sha "$SHA" "$FRAGMENT"
+            COLLATED=$((COLLATED + 1))
+          done
+          echo "COLLATED=$COLLATED" >> "$GITHUB_ENV"
+
+      - name: Propose collation as a pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: bot/collate-changes
+          REPO_SLUG: ${{ github.repository }}
+          GUARD: .rm-tools/scripts/automerge_guard.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain -- SPEC.md docs changes)" ]; then
+            echo "OUTCOME=${OUTCOME:-no fragments to collate}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          OWNER="${REPO_SLUG%%/*}"
+          PR_NUM=$(gh api "repos/$REPO_SLUG/pulls?state=open&head=$OWNER:$BRANCH" --jq '.[0].number // empty')
+          # A reviewer's hold must survive: a push newer than their disarm
+          # would make the guard treat the hold as superseded and re-arm.
+          if [ -n "$PR_NUM" ] && ! python3 "$GUARD" "$REPO_SLUG" "$PR_NUM"; then
+            echo "::warning::Collation PR #$PR_NUM is held by a reviewer; leaving it untouched."
+            echo "OUTCOME=collation PR #$PR_NUM held; not updated" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          # Only the collated files: never the Repository_Management checkout.
+          git add -A -- SPEC.md docs changes
+          git commit -m "chore(changes): collate ${COLLATED} change fragment(s)"
+          # The branch carries only this generated commit, rebuilt from main
+          # each run from every fragment on main, so overwriting it never
+          # discards work.
+          git push --force origin "$BRANCH"
+          if [ -z "$PR_NUM" ]; then
+            # Every collation deletes the fragments it folded in, and
+            # automerge_guard holds unacknowledged deletions, so the body
+            # must carry the acknowledgement line or the PR never merges.
+            PR_BODY="$(printf 'Generated by collate-changes.yml (RM-5, Repository_Management#1976): folds merged changes/ fragments into the SPEC.md change log and the development log, then deletes them. Generated content only.\n\nThe deleted files are the collated change fragments.\nDeletions-Acknowledged: true\n')"
+            PR_NUM=$(gh api "repos/$REPO_SLUG/pulls" -X POST \
+              -f title="chore(changes): collate merged change fragments" \
+              -f head="$BRANCH" -f base=main \
+              -f body="$PR_BODY" \
+              --jq '.number')
+          fi
+          if python3 "$GUARD" "$REPO_SLUG" "$PR_NUM" --arm --strategy squash; then
+            echo "OUTCOME=collation PR #$PR_NUM, auto-merge armed" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Auto-merge withheld on PR #$PR_NUM"
+            echo "OUTCOME=collation PR #$PR_NUM, auto-merge withheld" >> "$GITHUB_ENV"
+          fi
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Collate Change Fragments"
+            echo ""
+            echo "- **Fragments collated:** ${COLLATED:-0}"
+            echo "- **Outcome:** ${OUTCOME:-not reached}"
+          } >> "$GITHUB_STEP_SUMMARY"

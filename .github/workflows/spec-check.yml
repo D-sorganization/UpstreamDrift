@@ -68,46 +68,16 @@ jobs:
           if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
             git fetch --no-tags --depth=1 origin "$BASE_SHA"
           fi
-          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
 
           echo "Changed files:"
-          echo "$CHANGED_FILES"
+          git diff --name-only "$BASE_SHA" HEAD
 
-          # Define source patterns that require spec updates
-          # Customize these per repo as needed
-          SOURCE_CHANGED=false
-          SPEC_CHANGED=false
-
-          while IFS= read -r file || [ -n "$file" ]; do
-            # Check if SPEC.md was modified
-            if [[ "$file" == "SPEC.md" ]]; then
-              SPEC_CHANGED=true
-            fi
-
-            # Check if source files were modified
-            # Add or remove patterns as appropriate for your repo
-            # Note: .github/workflows/ is excluded  -  CI-only changes rarely
-            # affect documented behavior. Use spec-exempt if needed.
-            if [[ "$file" == src/* ]] || \
-               [[ "$file" == tests/* ]] || \
-               [[ "$file" == config/* ]] || \
-               [[ "$file" == pyproject.toml ]] || \
-               [[ "$file" == Cargo.toml ]] || \
-               [[ "$file" == CMakeLists.txt ]] || \
-               [[ "$file" == package.json ]] || \
-               [[ "$file" == requirements.txt ]]; then
-              SOURCE_CHANGED=true
-            fi
-          done <<< "$CHANGED_FILES"
-
-          echo "source_changed=$SOURCE_CHANGED" >> "$GITHUB_OUTPUT"
-          echo "spec_changed=$SPEC_CHANGED" >> "$GITHUB_OUTPUT"
-
-          if [[ "$SOURCE_CHANGED" == "true" ]] && [[ "$SPEC_CHANGED" == "false" ]]; then
-            echo "needs_update=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "needs_update=false" >> "$GITHUB_OUTPUT"
-          fi
+          # Source patterns that require a spec update live in
+          # scripts/ci/check_spec_freshness.py. A PR that carries only valid
+          # change fragments (changes/<issue>-<slug>.md, RM-5 /
+          # Repository_Management#1976) passes without editing SPEC.md:
+          # collate-changes.yml writes the PR-keyed row after merge.
+          python3 scripts/ci/check_spec_freshness.py --base "$BASE_SHA" | tee -a "$GITHUB_OUTPUT"
 
       - name: Post warning comment
         if: steps.check.outputs.needs_update == 'true'
@@ -133,7 +103,7 @@ jobs:
         run: |
 
           echo "::error::Source files changed but SPEC.md was not updated."
-          echo "Update SPEC.md or add the 'spec-exempt' label to bypass."
+          echo "Update SPEC.md, add a change fragment (changes/README.md), or add the 'spec-exempt' label to bypass."
           exit 1
 
       - name: Spec check passed
@@ -144,6 +114,8 @@ jobs:
           echo "- Spec check passed."
           if [[ "${{ steps.check.outputs.spec_changed }}" == "true" ]]; then
             echo "   SPEC.md was updated alongside source changes. Good."
+          elif [[ "${{ steps.check.outputs.fragment_valid }}" == "true" ]]; then
+            echo "   A valid change fragment stands in for the SPEC.md edit."
           elif [[ "${{ steps.check.outputs.source_changed }}" == "false" ]]; then
             echo "   No source files changed  -  spec update not required."
           fi
