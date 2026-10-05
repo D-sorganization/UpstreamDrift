@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11532 · MOSAIC Model-Aware Multi-Trial Matching Kernels, Methods Reference and DIME (#11421) Audit
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11532
+- **Branch:** feat/mosaic-model-aware-matching
+- **PR:** #11555
+- **Paths:** see #11555
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`90df1e03`; collated from changes/11532-mosaic-model-aware-multi-trial-matching.md)
+- **Summary:** MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit
+- **Next step:** Merge PR; start MOSAIC-01/02/13 (benchmark freeze, Pinocchio regressor provider, DIME defect remediation).
+
 ### DL-#11513 · Point Contributors at Change Fragments in Post_Spec_Reminder
 
 - **State:** in_review
@@ -3262,6 +3275,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11556
+- **Branch:** merged via #11556
+- **PR:** #11556
+- **Paths:** see #11556
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`b081650e`; collated from changes/11556-ci-security-re-vendor-fork-pr-runner-gua.md)
+- **Summary:** ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis.
+- **Next step:** Shipped in PR #11556.
 
 ### DL-#11552 · Fix(Estimation): DIME Initialisers, Ablations and Manifest Report Not-Measured Instead of Constants or Ground-Truth-Derived Figures
 

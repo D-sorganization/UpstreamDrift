@@ -8319,6 +8319,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11556 | ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis. |
+| 2026-10-05 | #11555 | MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit |
 | 2026-10-05 | #11559 | fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures |
 | 2026-10-05 | #11558 | DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment |
 | 2026-10-05 | #11562 | drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default |
