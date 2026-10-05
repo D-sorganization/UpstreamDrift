@@ -39,6 +39,7 @@ from src.shared.python.version_info import get_repo_root
 from .artifact_handoff import compute_file_sha256
 from .necromatcher import NecromatcherLibrary
 from .necromatcher_fit_jobs import fit_execution_stamp
+from .necromatcher_video_forces import ForceLayer
 
 _BUDGET_WALL_S = 600.0
 _BLOCKERS = (
@@ -161,6 +162,10 @@ def _outputs(root: Path, request: dict[str, Any]) -> tuple[dict[str, Any], list[
             expected is False and manifest.get(name) is not False
         ):
             raise ValueError("Overlay manifest identity or qualification mismatch")
+    if (request.get("force_layer") or {}).get("enabled") and (
+        manifest.get("force_layer", {}).get("settings") != request["force_layer"]
+    ):
+        raise ValueError("Overlay force-layer settings differ from the request")
     requested = {f"frame-{index:06d}.png" for index in request["selected_frames"]}
     if {record["path"] for record in manifest["pngs"]} != requested:
         raise ValueError("Overlay selected stills differ from the request")
@@ -208,8 +213,15 @@ class NativeVideoSession:
             raise KeyError(run_id)
         return root
 
-    def submit(self, fit_id: str) -> dict[str, Any]:
-        """Schedule a new overlay with owned paths and first/middle/last stills."""
+    def submit(
+        self, fit_id: str, force_layer: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Schedule a new overlay with owned paths and first/middle/last stills.
+
+        ``force_layer`` is an opt-in settings record; it is validated here and
+        omitted from the request (and its job digest) when absent.
+        """
+        layer = ForceLayer(**force_layer).to_dict() if force_layer else None
         with self._lock:
             if self._closed:
                 raise RuntimeError("Video session is closed")
@@ -241,6 +253,8 @@ class NativeVideoSession:
                 "execution_stamp": stamp,
                 "execution_started": False,
             }
+            if layer is not None:
+                request["force_layer"] = layer
             spec = MatchingJobSpec(
                 root.name,
                 "mujoco",
@@ -250,7 +264,11 @@ class NativeVideoSession:
                     fit["capture_hash"],
                     fit["model_hash"],
                     stamp["runtime_sha256"],
-                    _digest(request["selected_frames"]),
+                    _digest(
+                        request["selected_frames"]
+                        if layer is None
+                        else [request["selected_frames"], layer]
+                    ),
                     stamp["source_sha256"],
                 ),
                 budget_wall_s=_BUDGET_WALL_S,

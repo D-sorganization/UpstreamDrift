@@ -61,6 +61,8 @@ REDIRECTED_ROOTS: dict[str, Path | None] = {
     "codemap": None,
     "compatibility": None,
     "cors": None,
+    "data_processing": None,
+    "data_processor_io": None,
     "deprecation": None,
     "file_watcher": None,
     "logging_pkg": None,

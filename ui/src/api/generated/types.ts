@@ -1524,6 +1524,16 @@ export interface FlightModelListResponse {
 export type FlightModelType = "waterloo_penner" | "macdonald_hanzely" | "nathan" | "ballantyne" | "jcole" | "rospie_dl" | "charry_l3";
 
 /**
+ * Opt-in force/torque layer for a video export; off unless ``enabled``.
+ */
+export interface ForceLayerRequest {
+  enabled: boolean;
+  kinds?: WrenchKind[];
+  scale: number;
+  segment_shading: boolean;
+}
+
+/**
  * Request model for enabling/configuring force/torque overlays. Preconditions: - force_types must each be a known force type - scale_factor must be positive See issue #1199
  */
 export interface ForceOverlayRequest {
@@ -3371,6 +3381,10 @@ export interface VideoAnalysisResponse {
   pose_data: Record<string, unknown>[];
 }
 
+export interface VideoExportRequest {
+  force_layer?: ForceLayerRequest;
+}
+
 /**
  * How a tile is reachable from the web app (issue #7461). Mirrors ``src.config.launcher_manifest_loader.WebLaunchContract``.
  */
@@ -3391,3 +3405,8 @@ export interface WebSettings {
   notifications?: NotificationSettings;
   simulation_defaults?: SimulationDefaultsSettings;
 }
+
+/**
+ * Categorical origin of an overlay wrench.
+ */
+export type WrenchKind = "joint_actuator" | "joint_reaction" | "contact" | "grip" | "external" | "gravity" | "muscle";
