@@ -9,9 +9,9 @@ Contract
 --------
 
 * **Inputs are validated at the boundary.** Every field names its unit, the
-  ranges are the desktop panel's (``widgets.py``), unknown fields are refused
-  so a value in the wrong unit cannot be silently ignored, and the handedness
-  must be stated. Constructibility is still judged by the domain objects;
+  ranges are the desktop panel's (both read ``INPUT_RANGES``), unknown
+  fields are refused so a value in the wrong unit cannot be silently
+  ignored, and the handedness must be stated. Constructibility is still judged by the domain objects;
   their :class:`~src.tools.bunker_shot_gui.design.WorkbenchInputError` is a
   422, not a 500.
 * **The solve is bounded.** One nominal F0 shot at the default study
@@ -40,6 +40,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.tools.bunker_shot_gui.input_ranges import INPUT_RANGES
 
 if TYPE_CHECKING:
     from src.tools.bunker_shot_gui.design import SwingSetup
@@ -105,6 +106,18 @@ router = APIRouter(prefix="/tools/bunker-workbench", tags=["bunker-workbench"])
 # ------------------------------------------------------------------ request
 
 
+def _bounded(key: str, *, required: bool = False) -> Any:
+    """A pydantic field bounded by the shared ``INPUT_RANGES[key]``.
+
+    Optional fields default to ``None`` (keep the preset or domain default);
+    ``required`` fields have no default.
+    """
+    low, high = INPUT_RANGES[key]
+    if required:
+        return Field(ge=low, le=high)
+    return Field(default=None, ge=low, le=high)
+
+
 class _Strict(BaseModel):
     """Refuses unknown fields and non-finite numbers."""
 
@@ -116,32 +129,34 @@ class BunkerDesignV1(_Strict):
 
     name: str = Field(min_length=1, max_length=64)
     grind_preset: str | None = Field(default=None, min_length=1, max_length=64)
-    loft_deg: float | None = Field(default=None, ge=40.0, le=66.0)
-    marketed_bounce_deg: float | None = Field(default=None, ge=0.0, le=20.0)
-    sole_width_mm: float | None = Field(default=None, ge=8.0, le=26.0)
-    entry_height_mm: float | None = Field(default=None, ge=1.5, le=7.5)
-    leading_edge_radius_mm: float | None = Field(default=None, ge=2.0, le=12.0)
-    camber_area_mm2: float | None = Field(default=None, ge=20.0, le=70.0)
-    heel_relief_fraction: float | None = Field(default=None, ge=0.0, le=0.6)
-    toe_relief_fraction: float | None = Field(default=None, ge=0.0, le=0.6)
+    loft_deg: float | None = _bounded("loft_deg")
+    marketed_bounce_deg: float | None = _bounded("marketed_bounce_deg")
+    sole_width_mm: float | None = _bounded("sole_width_mm")
+    entry_height_mm: float | None = _bounded("entry_height_mm")
+    leading_edge_radius_mm: float | None = _bounded("leading_edge_radius_mm")
+    camber_area_mm2: float | None = _bounded("camber_area_mm2")
+    heel_relief_fraction: float | None = _bounded("heel_relief_fraction")
+    toe_relief_fraction: float | None = _bounded("toe_relief_fraction")
 
 
 class BunkerSandV1(_Strict):
     """The playing condition; ``None`` keeps the preset's firmness."""
 
     preset: str | None = Field(default=None, min_length=1, max_length=32)
-    firmness_kg_per_cm2: float | None = Field(default=None, ge=1.2, le=3.2)
+    firmness_kg_per_cm2: float | None = _bounded("firmness_kg_per_cm2")
 
 
 class BunkerSwingV1(_Strict):
     """The delivery; ``None`` keeps the workbench's splash-shot default."""
 
-    clubhead_speed_mps: float | None = Field(default=None, ge=10.0, le=40.0)
-    attack_angle_deg: float | None = Field(default=None, ge=-20.0, le=-0.5)
-    face_open_deg: float | None = Field(default=None, ge=0.0, le=40.0)
-    shaft_lean_deg: float | None = Field(default=None, ge=-10.0, le=25.0)
-    entry_distance_behind_ball_m: float | None = Field(default=None, ge=0.010, le=0.200)
-    ball_depth_m: float | None = Field(default=None, ge=-0.010, le=0.020)
+    clubhead_speed_mps: float | None = _bounded("clubhead_speed_mps")
+    attack_angle_deg: float | None = _bounded("attack_angle_deg")
+    face_open_deg: float | None = _bounded("face_open_deg")
+    shaft_lean_deg: float | None = _bounded("shaft_lean_deg")
+    entry_distance_behind_ball_m: float | None = _bounded(
+        "entry_distance_behind_ball_m"
+    )
+    ball_depth_m: float | None = _bounded("ball_depth_m")
     dynamic_terms_active: bool | None = None
 
 
@@ -149,8 +164,8 @@ class BunkerObjectiveV1(_Strict):
     """A carry-target playability objective and the use it is asked for."""
 
     use: Literal["exploratory", "predictive"]
-    target_carry_m: float = Field(ge=2.0, le=40.0)
-    tolerance_fraction: float = Field(ge=0.02, le=0.5)
+    target_carry_m: float = _bounded("target_carry_m", required=True)
+    tolerance_fraction: float = _bounded("carry_tolerance_fraction", required=True)
 
 
 class BunkerWorkbenchRequestV1(_Strict):

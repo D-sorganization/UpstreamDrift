@@ -5,11 +5,12 @@
 - Completed:
   - `src/api/routes/bunker_workbench.py`: `POST /tools/bunker-workbench/v1/evaluate` (auto-registered at root, `/api`, `/api/v1`). Lazy model import; sync handler (threadpool). Request: `extra="forbid"`, no inf/nan, ranges mirror `widgets.py` spin boxes, required handedness (left -> 422 `handedness_unsupported`). `WorkbenchInputError` -> 422 `invalid_workbench_input`. Predictive objective -> 422 `objective_not_predictive` (disposition `unavailable-uncalibrated`); exploratory objective reported with `degenerate` flag and `ranking_permitted: false`. Refused shots carry no numbers (ADR-0032). `evaluation_record`/`record_digest` are public pure functions.
   - `report.py` now owns `validity_stamp` and `TIER_MODEL_NAMES` (re-exported by `render.py`).
+  - Input ranges have one source of truth, `src/tools/bunker_shot_gui/input_ranges.py` (`INPUT_RANGES`, read-only, stdlib-only so API boot stays fast), re-exported by `design.py`; the PyQt panels (`widgets.py`) and the API request models both read it. `tests/bunkershot3d/test_bunker_workbench_ranges.py` pins both consumers to it.
   - `feature_parity.json` `api`/`issue` set; matrix and `ui/src/api/generated/types.ts` regenerated.
   - `tests/bunkershot3d/test_bunker_workbench_api.py`: 24 contract tests.
 - Validation: `python -m pytest tests/bunkershot3d -m "contract or unit" -q` (2955 passed; one xdist worker crash in unrelated `test_f1_continuum_8733`); `check_lod.py src --baseline scripts/ci/lod_baseline.txt` clean; `generate_ui_api_types.py --check` OK. Pre-existing local failures unchanged: route-uniqueness (4), route-prefixes data_explorer, pyvista `n_faces` VTK test.
 - Out of scope: async jobs/cancellation (#8880/#9472), web UI (#9692-#9695), predictive claims, solver-settings override.
-- Next steps: review the draft PR; list the route under U15 in `src/config/bunkershot3d_qualification.json`; consider hoisting the panel ranges into `design.py` and the serialiser into the tools package for #9692.
+- Next steps: review the draft PR; list the route under U15 in `src/config/bunkershot3d_qualification.json`; consider hoisting the serialiser into the tools package for #9692.
 
 ---
 
