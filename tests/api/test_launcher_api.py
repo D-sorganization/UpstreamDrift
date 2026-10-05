@@ -394,7 +394,7 @@ class TestEngineCapabilitiesAPI:
         )
 
     def test_mujoco_capabilities(self, client: TestClient) -> None:
-        """MuJoCo should have FULL support for all capabilities."""
+        """MuJoCo should match declared capabilities."""
         response = client.get("/api/launcher/engines/mujoco/capabilities")
         assert response.status_code == 200, (
             "Assertion failed: response.status_code == 200"
@@ -410,15 +410,15 @@ class TestEngineCapabilitiesAPI:
         assert data["video_export"] == "full", (
             "Assertion failed: data[video_export] == full"
         )
-        assert data["dataset_export"] == "full", (
-            "Assertion failed: data[dataset_export] == full"
+        assert data["dataset_export"] == "partial", (
+            "Assertion failed: data[dataset_export] == partial"
         )
         assert data["force_visualization"] == "full", (
             "Assertion failed: data[force_visualization] == full"
         )
 
     def test_drake_capabilities(self, client: TestClient) -> None:
-        """Drake should have PARTIAL contact forces."""
+        """Drake should match declared capabilities."""
         response = client.get("/api/launcher/engines/drake/capabilities")
         assert response.status_code == 200, (
             "Assertion failed: response.status_code == 200"
@@ -427,8 +427,8 @@ class TestEngineCapabilitiesAPI:
         assert data["engine_name"] == "Drake", (
             "Assertion failed: data[engine_name] == Drake"
         )
-        assert data["contact_forces"] == "partial", (
-            "Assertion failed: data[contact_forces] == partial"
+        assert data["contact_forces"] == "full", (
+            "Assertion failed: data[contact_forces] == full"
         )
         assert data["mass_matrix"] == "full", (
             "Assertion failed: data[mass_matrix] == full"
