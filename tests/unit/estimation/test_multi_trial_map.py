@@ -400,6 +400,7 @@ def _central_difference_jacobian(fn, x: np.ndarray, step: float) -> np.ndarray:
     return np.column_stack(columns)
 
 
+@pytest.mark.unit
 def test_locked_prior_residual_and_jacobian_share_row_layout(
     contracts_enforced,
 ) -> None:
@@ -427,6 +428,7 @@ def test_locked_prior_residual_and_jacobian_share_row_layout(
     np.testing.assert_allclose(jacobian, numeric, rtol=0.0, atol=1e-7)
 
 
+@pytest.mark.unit
 def test_posterior_covariance_is_schur_marginal_not_conditional() -> None:
     """Shared-parameter covariance marginalises the trajectory coefficients.
 
