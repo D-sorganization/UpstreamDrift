@@ -8306,6 +8306,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-04 | #11511 | Vendor the RM-5 change-fragment tooling (`shared_scripts/changes_fragment.py` and siblings, byte-identical with Repository_Management, digests pinned in `docs/development/change-fragment-bundle.json`), add `changes/` and `scripts/ci/check_spec_freshness.py`, which accepts a valid fragment in place of a SPEC.md edit (Repository_Management#1976). |
 | 2026-10-04 | #11510 | Merge-queue runs scope the core `tests` lane to `merge_group.base_sha` and fetch `origin/<default>` for the unit-gate child-copy guard, so queued PRs no longer fail the whole-src coverage floor or the guard (RM#1900). |
 | 2026-10-04 | #11506 | Retired the tools-canonical `data_processing` and `data_processor_io` UD copies (#11503): both roots now resolve to the pinned Tools tree via `REDIRECTED_ROOTS`, their `shadow_modules.yaml` ledger lines and the drift-test waiver in `tools_child_copy_missing_counterparts.txt` are removed. |
 | 2026-10-04 | #11509 | [FTO-28] Opt-in force/torque and segment-shading layer for the Necromatcher fitted-model video export: `ForceLayer` settings (off by default), spline-derivative `v`/`a` from the preserved fit, MuJoCo provider injected only in the SDK worker, FTO-8 glyph rendering through the fit's camera with the research-fit qualification legend, manifest and per-frame receipts, `force_layer` request field, desktop and web toggles (#11313). |
