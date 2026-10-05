@@ -43,7 +43,7 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Summary:** Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard
 - **Next step:** Merge the PR.
 
-### DL-#9507 - Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
+### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
 
 - **State:** in_review
 - **Owner:** claude
@@ -51,9 +51,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Branch:** `claude/issue-9507`
 - **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
 - **Started:** 2026-10-04
-- **Last verified:** 2026-10-04 - workflow contract tests pass (12); no workflow sets `sparse-checkout-cone-mode: false`.
+- **Last verified:** 2026-10-05 (`43d63ce9`; collated from changes/9507-fail-fast-with-an-explicit-incomplete-ch.md)
 - **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
 - **Next step:** Merge the PR and confirm no runner reports tracked files missing after a Sidekick packaging run.
+- **PR:** #11522
 
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
@@ -3248,6 +3249,19 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#1989 · Keep Fork PRs Off the Self-Hosted Fleet: Fork Guard on PR-Triggered Jobs, Hosted Route for the Quality-Gate Lane, and a Static Checker (RM#1989)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1989
+- **Branch:** merged via #11523
+- **PR:** #11523
+- **Paths:** see #11523
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`c20fb0b7`; collated from changes/1989-fork-pr-self-hosted-guard.md)
+- **Summary:** Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989)
+- **Next step:** Shipped in PR #11523.
 
 ### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
 
