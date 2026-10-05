@@ -28,7 +28,9 @@ vendored to the other fleet repositories. This checker enforces two rules over
    ``workflow_call`` is privileged here too: a callee inherits its caller's
    event, and a ``workflow_run`` caller passes the job guard. A reusable-
    workflow call under these events must not pass a head ref in ``with:``.
-   Bracket property access (``head['sha']``) is read as dotted access.
+   Bracket property access (``head['sha']``) is read as dotted access, and
+   naming the head *repository* counts: checkout without a ref takes the
+   fork's default branch.
 
 A job counts as self-hosted unless every ``runs-on`` value is a literal
 GitHub-hosted label. Expressions, matrix references, runner groups and
@@ -95,6 +97,15 @@ HEAD_REF_PATTERNS = (
     re.compile(r"github\.event\.pull_request\.head\.(sha|ref)"),
     re.compile(r"github\.head_ref"),
     re.compile(r"github\.event\.workflow_run\.head_(sha|branch)"),
+    # The fork repository itself: checkout without a ref takes its default branch.
+    re.compile(
+        r"github\.event\.pull_request\.head\.repo\."
+        r"(full_name|clone_url|ssh_url|git_url|html_url)"
+    ),
+    re.compile(
+        r"github\.event\.workflow_run\.head_repository\."
+        r"(full_name|clone_url|ssh_url|git_url|html_url)"
+    ),
     re.compile(r"refs/pull/"),
     re.compile(r"pull/(\$\{\{[^}]*\}\}|[^\s/]+)/(head|merge)"),
     re.compile(r"gh\s+pr\s+checkout"),
