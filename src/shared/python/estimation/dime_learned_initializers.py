@@ -695,6 +695,65 @@ class TrainingTimings:
             )
 
 
+def _update_digest(digest: Any, value: Any) -> None:
+    """Feed a deterministic, type-tagged serialization of ``value`` to ``digest``."""
+    if isinstance(value, np.ndarray):
+        arr = np.ascontiguousarray(value)
+        digest.update(f"nd:{arr.dtype.str}:{arr.shape}:".encode())
+        digest.update(arr.tobytes())
+    elif isinstance(value, Mapping):
+        digest.update(f"map:{len(value)}:".encode())
+        for key in sorted(value, key=str):
+            _update_digest(digest, str(key))
+            _update_digest(digest, value[key])
+    elif isinstance(value, (list, tuple)):
+        digest.update(f"seq:{len(value)}:".encode())
+        for item in value:
+            _update_digest(digest, item)
+    elif isinstance(value, DimeCompleteState):
+        for name in (
+            "t",
+            "q",
+            "v",
+            "v_dot",
+            "internal_state",
+            "model_hash",
+            "units",
+            "frame",
+        ):
+            _update_digest(digest, getattr(value, name))
+    else:
+        digest.update(f"{type(value).__name__}:{value!r};".encode())
+
+
+def _hash_episodes(episodes: Sequence[TeacherEpisode]) -> str:
+    """SHA-256 over the full content of each episode, in the given order.
+
+    Postcondition: changing any episode field (states, controls, contacts, model
+    hash, timing, ids) or the episode order changes the digest.
+    """
+    digest = hashlib.sha256()
+    digest.update(f"episodes:{len(episodes)}:".encode())
+    for ep in episodes:
+        for name in (
+            "episode_id",
+            "player_id",
+            "session_id",
+            "geometry_id",
+            "model_hash",
+            "times",
+            "states",
+            "controls",
+            "contact_states",
+            "generation_time_s",
+            "is_valid",
+            "max_residual",
+            "failure_reason",
+        ):
+            _update_digest(digest, getattr(ep, name))
+    return digest.hexdigest()
+
+
 def train_reusable_matching_initializer(
     model_id: str,
     model_hash: str,
@@ -749,9 +808,7 @@ def train_reusable_matching_initializer(
             scale_up_halted = False
             limitations = ()
 
-    dataset_digest = hashlib.sha256(
-        "\n".join(sorted(ep.episode_id for ep in episodes)).encode("utf-8")
-    ).hexdigest()
+    dataset_digest = _hash_episodes(episodes)
     teacher_cost = sum(ep.generation_time_s for ep in episodes)
     card = DimeLearnedInitializerModelCard(
         model_id=model_id,

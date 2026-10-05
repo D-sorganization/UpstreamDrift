@@ -609,7 +609,7 @@ def run_dime_baseline(
             *reasons,
             "no baseline estimator is implemented for this protocol",
         ),
-        reproduced_identically=True,
+        reproduced_identically=False,  # no estimator ran: nothing reproduced
         seed=seed,
         trajectory_q=None,
         control_torques=controls,

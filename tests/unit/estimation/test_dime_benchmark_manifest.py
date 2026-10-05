@@ -210,7 +210,8 @@ def test_green_analytic_pendulum_and_estimator_baseline_reproduce_with_recorded_
     result_1 = run_dime_baseline(manifest, seed=42)
     result_2 = run_dime_baseline(manifest, seed=42)
 
-    assert result_1.reproduced_identically
+    # No estimator ran, so nothing was reproduced (#11552).
+    assert result_1.reproduced_identically is False
     # #11552: the former trajectory was ground truth copied as the "estimate";
     # with no estimator it is not measured (None), not reproduced.
     assert result_1.trajectory_q is None and result_2.trajectory_q is None

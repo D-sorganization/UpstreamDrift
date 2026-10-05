@@ -652,3 +652,24 @@ def test_training_timings_reject_non_finite_or_negative(
 
     with pytest.raises(PreconditionError):
         TrainingTimings(**{field_name: bad})
+
+
+def _dataset_hash(*episodes: TeacherEpisode) -> str:
+    return train_reusable_matching_initializer(
+        model_id="dp",
+        model_hash=_MODEL_HASH,
+        u_dim=2,
+        episodes=episodes,
+    ).model_card.training_dataset_hash
+
+
+def test_red_11552_dataset_hash_covers_episode_contents_and_order() -> None:
+    a = _make_teacher_episode(episode_id="a")
+    b = _make_teacher_episode(episode_id="b")
+    base = _dataset_hash(a, b)
+    assert base == _dataset_hash(
+        _make_teacher_episode(episode_id="a"), _make_teacher_episode(episode_id="b")
+    )
+    changed = _make_teacher_episode(episode_id="a", controls=np.full((6, 2), 7.0))
+    assert _dataset_hash(changed, b) != base
+    assert _dataset_hash(b, a) != base
