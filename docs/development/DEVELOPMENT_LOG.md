@@ -17,6 +17,18 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#9507 - Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9507
+- **Branch:** `claude/issue-9507`
+- **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-04 - workflow contract tests pass (12); no workflow sets `sparse-checkout-cone-mode: false`.
+- **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
+- **Next step:** Merge the PR and confirm no runner reports tracked files missing after a Sidekick packaging run.
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress

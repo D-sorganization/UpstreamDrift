@@ -62,8 +62,9 @@ jobs:
           ref: main
           path: .rm-tools
           token: ${{ steps.app-token.outputs.token }}
-          sparse-checkout: scripts/automerge_guard.py
-          sparse-checkout-cone-mode: false
+          # Cone mode (#9507): non-cone leaves core.sparseCheckout set in
+          # reused runner workspaces. Only scripts/automerge_guard.py is used.
+          sparse-checkout: scripts
 
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'

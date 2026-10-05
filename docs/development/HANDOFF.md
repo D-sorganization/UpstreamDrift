@@ -1,3 +1,12 @@
+# Cone-Mode Sparse Checkout for Sidekick Wheel Smoke Job - #9507
+
+- Repository: `D-sorganization/UpstreamDrift`; branch `claude/issue-9507`; PR: see branch (`Fixes #9507`)
+- Governing issue: #9507 (self-hosted runners start jobs on an incomplete workspace)
+- Objective: stop non-cone sparse checkout from leaving `core.sparseCheckout=true` in `.git/config` of reused runner workspaces.
+- Completed: `smoke-test-wheel` now uses `sparse-checkout: tests/fixtures` (cone mode default); `test_standalone_sidekick_workflows.py` asserts it and a new test forbids `sparse-checkout-cone-mode: false` in any workflow. Verification: `python -m pytest tests/unit/packaging/test_standalone_sidekick_workflows.py` 12 passed; `tests/ci` 167 passed, 16 failed identically on main (vendor/ud-tools submodule not initialised locally).
+- Also: `collate-changes.yml` (landed via #11512) switched from non-cone `scripts/automerge_guard.py` to cone-mode `scripts`, which the new guard test caught in the merge queue.
+- Next steps: merge via the queue; DL-#9507.
+
 # Necromatcher Video Export Force/Torque Layer (FTO-28) — #11313
 
 - Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-worktrees/claude-11313`; branch `claude/issue-11313`; PR: draft opened from this branch (`Fixes #11313`, `Refs #11285`)
