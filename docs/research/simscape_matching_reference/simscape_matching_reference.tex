@@ -3257,6 +3257,9 @@ trajectories are currently being evaluated with original model dimensions
 and fixed address-calibrated marker offsets. Baseline has completed both
 55/46-frame trajectories. These intermediate results do not establish
 acceptance of the remaining complete model trajectories.
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
 Primitive & Sample RMS (N\,m) & Peak absolute torque (N\,m)\\
 \midrule
 Rx & 5.950843 & 9.530841\\
@@ -5161,28 +5164,30 @@ qualified, including its effect on the unmodified joint drive and dynamics.
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
 
-This section specifies the cross-engine reporting, strategy selection, and analytical output contracts formalized under DIME-11 (\#11432).
+This section specifies the cross-engine reporting, strategy selection, and analytical output contracts formalized under DIME-11 (\#11432) of epic \#11421. The estimator mathematics itself is now maintained in the separate research record \texttt{docs/research/model\_aware\_matching/model\_aware\_matching.tex} (MOSAIC), which also records the 2026-10-05 audit of the DIME implementation: the merged children delivered contracts and reporting, while the coupled estimator, learned initialisers and benchmark numbers remained placeholders. No DIME result qualifies any capture in this document.
 
 \subsection{Strategy Selection and Explicit Graceful Unavailability}
 Estimator strategy selection coordinates across inverse kinematics, inverse dynamics, forward dynamics, moving horizon estimation (DIME MHE), continuous replay, and experimental learning-based estimators. Capability states are reported truthfully separating method existence from qualification:
 \begin{equation}
 \operatorname{Status}(\mathcal{S}) \in \{\mathtt{implemented}, \mathtt{qualified}, \mathtt{unavailable}\}
 \end{equation}
-Unqualified engines cannot be offered or reported as validated; any attempt to request or claim validation on an unqualified engine fails closed with a typed precondition error. Experimental strategies, including neural estimators, remain explicitly labeled as unavailable with transparent diagnostic justifications pending dedicated comparative studies.
+Unqualified engines cannot be offered or reported as validated; any attempt to request or claim validation on an unqualified engine fails closed with a typed precondition error. Experimental strategies, including neural estimators, remain explicitly labeled as unavailable with transparent diagnostic justifications pending dedicated comparative studies. As of the audit no provider in the repository reports \texttt{qualified}.
 
-\subsection{Governing Dynamics, ZTCF Decomposition and Units}
+\subsection{Governing Dynamics, Counterfactual Decomposition and Units}
 The constrained multibody equations of motion satisfy:
 \begin{equation}
 \mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{C}(\mathbf{q}, \mathbf{v})\mathbf{v} + \mathbf{g}(\mathbf{q}) = \mathbf{B}\mathbf{u} + \mathbf{J}_c^T \boldsymbol{\lambda}
 \end{equation}
-where $\mathbf{q} \in \mathbb{R}^{n_q}$ is generalized configuration, $\mathbf{v} \in \mathbb{R}^{n_v}$ is tangent velocity, $\mathbf{M}(\mathbf{q})$ is the mass matrix, $\mathbf{C}(\mathbf{q}, \mathbf{v})\mathbf{v}$ are Coriolis and centrifugal effects, $\mathbf{g}(\mathbf{q})$ represents gravitational generalized forces, $\mathbf{B}$ is the actuator selection map, $\mathbf{u}$ are net controls, and $\mathbf{J}_c^T \boldsymbol{\lambda}$ are admissible contact forces.
+where $\mathbf{q}$ is the generalized configuration (a manifold when spherical joints or a floating base are present), $\mathbf{v} \in \mathbb{R}^{n_v}$ is the tangent velocity, $\mathbf{M}(\mathbf{q})$ is the mass matrix, $\mathbf{C}(\mathbf{q}, \mathbf{v})\mathbf{v}$ are Coriolis and centrifugal effects, $\mathbf{g}(\mathbf{q})$ are gravitational generalized forces, $\mathbf{B}$ is the actuator selection map, $\mathbf{u}$ are net controls, and $\mathbf{J}_c^T \boldsymbol{\lambda}$ are the contact reactions. The left-hand side is linear in the stacked inertial parameters, $\mathbf{M}\dot{\mathbf{v}} + \mathbf{C}\mathbf{v} + \mathbf{g} = \mathbf{Y}(\mathbf{q},\mathbf{v},\dot{\mathbf{v}})\,\boldsymbol{\pi}$, which the MOSAIC record exploits.
 
-Pointwise and integrated Zero-Torque Contact Free (ZTCF) drift are recorded distinctly:
+The pointwise counterfactual accelerations are defined with the reactions recomputed from the same constraint equations under the counterfactual input:
 \begin{align}
-\mathbf{a}_{\mathrm{ztcf}}(t) &= \mathbf{M}(\mathbf{q})^{-1} \left( -\mathbf{C}(\mathbf{q},\mathbf{v})\mathbf{v} - \mathbf{g}(\mathbf{q}) + \mathbf{J}_c^T \boldsymbol{\lambda} \right) \quad [\mathrm{m/s^2}] \\[6pt]
-\mathbf{x}_{\mathrm{ztcf}}(t) &= \mathbf{x}(t_0) + \int_{t_0}^t \mathbf{f}_{\mathrm{ztcf}}(\mathbf{x}(\tau))\, d\tau \quad [\mathrm{m}]
+\mathbf{a}_{\mathrm{ZTCF}}(t) &= \mathbf{M}(\mathbf{q})^{-1} \left( -\mathbf{C}(\mathbf{q},\mathbf{v})\mathbf{v} - \mathbf{g}(\mathbf{q}) + \mathbf{J}_c^T \boldsymbol{\lambda}_0 \right), \qquad \boldsymbol{\lambda}_0 = \boldsymbol{\lambda}\big|_{\mathbf{u}=0}, \\[4pt]
+\mathbf{a}_{\mathrm{ZVCF}}(t) &= \mathbf{M}(\mathbf{q})^{-1} \left( - \mathbf{g}(\mathbf{q}) + \mathbf{J}_c^T \boldsymbol{\lambda}_{00} \right), \qquad \boldsymbol{\lambda}_{00} = \boldsymbol{\lambda}\big|_{\mathbf{u}=0,\,\mathbf{v}=0},
 \end{align}
-All reported physical quantities adhere strictly to canonical SI units: length in metres ($\mathrm{m}$), angle in radians ($\mathrm{rad}$), time in seconds ($\mathrm{s}$), force in newtons ($\mathrm{N}$), and torque in newton-metres ($\mathrm{N\cdot m}$). Floating-base root coordinates (degrees of freedom 0 to 5) have strictly zero artificial actuator forces.
+so that the measured acceleration decomposes exactly as $\dot{\mathbf{v}} = \mathbf{a}_{\mathrm{ZTCF}} + \mathbf{M}^{-1}\mathbf{B}\mathbf{u} + \mathbf{M}^{-1}\mathbf{J}_c^T(\boldsymbol{\lambda}-\boldsymbol{\lambda}_0)$. In free flight $\boldsymbol{\lambda}_0 = \boldsymbol{\lambda}_{00} = 0$. The ZTCF is the drift evaluated pointwise along the measured state; the \emph{ZTCF trajectory} is the distinct integral curve $\dot{\mathbf{x}} = \mathbf{f}(\mathbf{x})$ started from $\mathbf{x}(t_0)$ and following its own flow, and the two must not be conflated. ZVCF means zero velocity \emph{and} zero input at each instant; the control-preserved zero-velocity acceleration is a different quantity and is never abbreviated ZVCF. A declared feedback servo is part of $\mathbf{u}$ and is removed by the ZTCF; declared passive joint impedance is part of the drift.
+
+Generalized accelerations are mixed-unit vectors ($\mathrm{rad/s^2}$ on revolute coordinates, $\mathrm{m/s^2}$ on translational coordinates) and are reported per coordinate; no norm is taken across mixed units. All reported physical quantities adhere strictly to canonical SI units: length in metres ($\mathrm{m}$), angle in radians ($\mathrm{rad}$), time in seconds ($\mathrm{s}$), force in newtons ($\mathrm{N}$), and torque in newton-metres ($\mathrm{N\cdot m}$). Floating-base root coordinates (degrees of freedom 0 to 5) have strictly zero artificial actuator forces; their rows of the equations of motion carry the input-free information about the inertial parameters.
 
 \subsection{Ground Reaction Force Provenance and Typed Missingness}
 Ground reaction forces (GRF) maintain strict provenance tracking distinguishing directly measured, physically inferred, regularized, and unavailable data. In particular, missing native GRF is represented with typed unavailable missingness and is never silently rendered or substituted as numerical zeros.
