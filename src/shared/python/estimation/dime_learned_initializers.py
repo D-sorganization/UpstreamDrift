@@ -56,6 +56,7 @@ __all__ = [
     "TeacherEpisode",
     "TemporalWindowContext",
     "TrainingResult",
+    "TrainingTimings",
     "UnrealisticTorqueError",
     "run_initializer_ablation_study",
     "train_reusable_matching_initializer",
@@ -669,6 +670,31 @@ class NativeCandidateGate:
         )
 
 
+@dataclass(frozen=True)
+class TrainingTimings:
+    """Caller-measured training and per-solve timings, in seconds (#11552).
+
+    ``None`` means not measured; nothing is ever substituted for a missing value.
+    Preconditions: every supplied value is finite and non-negative.
+    """
+
+    training_time_s: float | None = None
+    per_solve_classical_time_s: float | None = None
+    per_solve_learned_time_s: float | None = None
+
+    def __post_init__(self) -> None:
+        for name in (
+            "training_time_s",
+            "per_solve_classical_time_s",
+            "per_solve_learned_time_s",
+        ):
+            value = getattr(self, name)
+            require(
+                value is None or (math.isfinite(value) and value >= 0.0),
+                f"{name} must be finite and non-negative when supplied",
+            )
+
+
 def train_reusable_matching_initializer(
     model_id: str,
     model_hash: str,
@@ -676,9 +702,7 @@ def train_reusable_matching_initializer(
     episodes: Sequence[TeacherEpisode],
     simulated_loss_history: Sequence[float] | None = None,
     min_improvement_ratio: float = 0.10,
-    training_time_s: float | None = None,
-    per_solve_classical_time_s: float | None = None,
-    per_solve_learned_time_s: float | None = None,
+    timings: TrainingTimings | None = None,
 ) -> TrainingResult:
     """Summarise a training run and evaluate learning-curve convergence.
 
@@ -689,8 +713,9 @@ def train_reusable_matching_initializer(
     Preconditions: non-empty ids, ``u_dim > 0``, at least one episode.
     Postconditions: ``learning_curve_status`` is "not_measured" with scale-up
     halted when no loss history is supplied; ``compute_report`` is None unless all
-    three timings are supplied.
+    three ``timings`` fields are supplied.
     """
+    measured = timings or TrainingTimings()
     require(bool(model_id.strip()), "model_id must be non-empty")
     require(bool(model_hash.strip()), "model_hash must be non-empty")
     require(u_dim > 0, "u_dim must be positive")
@@ -739,7 +764,7 @@ def train_reusable_matching_initializer(
         held_out_geometries=(),
         ood_threshold=3.0,
         units=dict(CANONICAL_DIME_UNITS),
-        training_cost_s=training_time_s,
+        training_cost_s=measured.training_time_s,
         teacher_data_cost_s=teacher_cost,
         learning_curve_status=learning_curve_status,
         scale_up_halted=scale_up_halted,
@@ -748,15 +773,15 @@ def train_reusable_matching_initializer(
     )
     compute_report: ComputeCostReport | None = None
     if (
-        training_time_s is not None
-        and per_solve_classical_time_s is not None
-        and per_solve_learned_time_s is not None
+        measured.training_time_s is not None
+        and measured.per_solve_classical_time_s is not None
+        and measured.per_solve_learned_time_s is not None
     ):
         compute_report = ComputeCostReport(
             teacher_generation_time_s=teacher_cost,
-            training_time_s=training_time_s,
-            per_solve_classical_time_s=per_solve_classical_time_s,
-            per_solve_learned_time_s=per_solve_learned_time_s,
+            training_time_s=measured.training_time_s,
+            per_solve_classical_time_s=measured.per_solve_classical_time_s,
+            per_solve_learned_time_s=measured.per_solve_learned_time_s,
         )
     return TrainingResult(
         model_card=card,

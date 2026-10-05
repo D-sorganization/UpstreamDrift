@@ -47,6 +47,7 @@ from src.shared.python.estimation.dime_learned_initializers import (
     StaleModelIdentityError,
     TeacherEpisode,
     TemporalWindowContext,
+    TrainingTimings,
     UnrealisticTorqueError,
     run_initializer_ablation_study,
     train_reusable_matching_initializer,
@@ -616,9 +617,11 @@ def test_red_11552_training_result_does_not_fabricate_costs_or_curve() -> None:
         u_dim=2,
         episodes=(_make_teacher_episode(),),
         simulated_loss_history=[1.0, 0.5],
-        training_time_s=12.0,
-        per_solve_classical_time_s=0.4,
-        per_solve_learned_time_s=0.1,
+        timings=TrainingTimings(
+            training_time_s=12.0,
+            per_solve_classical_time_s=0.4,
+            per_solve_learned_time_s=0.1,
+        ),
     )
     assert measured.model_card.training_cost_s == 12.0
     assert measured.compute_report is not None
@@ -634,3 +637,18 @@ def test_red_11552_training_result_does_not_fabricate_costs_or_curve() -> None:
         other.model_card.training_dataset_hash
         != measured.model_card.training_dataset_hash
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "field_name",
+    ["training_time_s", "per_solve_classical_time_s", "per_solve_learned_time_s"],
+)
+@pytest.mark.parametrize("bad", [-1.0, float("nan"), float("inf")])
+def test_training_timings_reject_non_finite_or_negative(
+    field_name: str, bad: float
+) -> None:
+    """A supplied timing must be a real measurement (#11552)."""
+
+    with pytest.raises(PreconditionError):
+        TrainingTimings(**{field_name: bad})
