@@ -126,7 +126,7 @@ def test_polynomial_control_fitting() -> None:
 def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
     """Part B: Drake fit refuses fabricated evidence and removes synthetic fallbacks.
 
-    1. Missing model markers in candidate raises ValueError (refuses scoring targets against themselves).
+    1. Missing Drake rollout markers raises ValueError (never scores the warm start or targets against themselves, #11567).
     2. Missing target markers (neither candidate nor argument) raises ValueError.
     3. Missing or placeholder capture hash in warm start raises ValueError.
     4. Drake simulation failure raises classified error (never falls back to warm-start kinematics).
@@ -148,7 +148,7 @@ def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
     time_s = np.linspace(0.0, 0.85, n_frames)
     target_markers = np.ones((n_frames, 44, 3), dtype=np.float64)
 
-    # 1. Missing model markers raises ValueError
+    # 1. Missing Drake rollout markers raises ValueError
     cand_no_model_markers = MatchedSwingCandidate(
         metadata=CandidateMetadata(
             profile=CandidateProfile.DYNAMIC,
@@ -168,7 +168,7 @@ def test_drake_fit_refuses_fabricated_evidence(tmp_path: Path) -> None:
     )
     with pytest.raises(
         ValueError,
-        match="model markers unavailable; refusing to score target markers against themselves",
+        match="Drake rollout markers unavailable; refusing to score warm-start",
     ):
         _extract_markers_and_metrics(
             cand_no_model_markers,
@@ -295,3 +295,111 @@ def test_drake_matching_plant_fit_hook() -> None:
     )
     assert result.candidate is not None
     assert result.receipt["schema"] == RECEIPT_SCHEMA
+
+
+class _DriftingDrakeModel:
+    """Fake FullBodyDrakeModel whose rollout drifts away from the warm start.
+
+    Marker k sits at ``offset_k + (q[0], 0, 0)``, so any change in q[0] moves
+    every marker. ``step`` adds 0.1 rad to q[0] per frame.
+    """
+
+    def __init__(self, spec: Any) -> None:
+        self.names = tuple(spec["coordinate_order"])
+
+    def step(self, q: Any, v: Any, tau: Any, dt: float) -> tuple[Any, Any]:
+        q_next = np.array(q, dtype=float)
+        q_next[0] += 0.1
+        return q_next, np.array(v, dtype=float)
+
+    def marker_positions(self, q: Any, attachments: Any) -> Any:
+        return np.asarray(
+            [
+                np.asarray(off, dtype=float) + [q[0], 0.0, 0.0]
+                for _, off in attachments.values()
+            ]
+        )
+
+
+def test_drake_fit_scores_drake_rollout_not_warm_start(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """#11567: metrics must come from FK of the Drake rollout q_fit.
+
+    The warm start's own model markers equal the targets (RMSE 0 by
+    construction). The Drake rollout drifts, so honest scoring must report the
+    rollout's marker error, never the warm start's zero.
+    """
+    import sys
+    import types
+
+    from src.engines.physics_engines.drake.python import full_body_fit as fbf
+    from src.shared.python.motion_matching.replay_metrics import (
+        compute_replay_five_metrics,
+    )
+
+    n_frames, nq = 12, 8
+    time_s = np.linspace(0.0, 0.85, n_frames)
+    labels = ("m0", "m1", "m2")
+    offsets = {"m0": [0.0, 0.0, 1.0], "m1": [0.0, 0.2, 1.0], "m2": [0.0, -0.2, 0.5]}
+    spec = {
+        "coordinate_order": [f"q{i}" for i in range(nq)],
+        "marker_attachments": {
+            k: {"body": "b", "offset_m": v} for k, v in offsets.items()
+        },
+    }
+    target = np.broadcast_to(
+        np.asarray([offsets[k] for k in labels]), (n_frames, 3, 3)
+    ).copy()
+    warm_start = MatchedSwingCandidate(
+        metadata=CandidateMetadata(
+            profile=CandidateProfile.DYNAMIC,
+            engine="warm_start",
+            source_c3d_sha256="ab" * 32,
+            coordinate_names=tuple(spec["coordinate_order"]),
+            actuator_names=tuple(spec["coordinate_order"][6:]),
+            marker_names=labels,
+        ),
+        time_s=time_s,
+        q=np.zeros((n_frames, nq)),
+        v=np.zeros((n_frames, nq)),
+        tau=np.zeros((n_frames, nq - 6)),
+        markers=CandidateMarkers(
+            target_markers_m=target,
+            model_markers_m=target.copy(),  # warm start scores 0 against itself
+            marker_validity=np.ones((n_frames, 3), dtype=bool),
+        ),
+    )
+    monkeypatch.setattr(
+        fbf, "_load_warm_start", lambda path, spec_dict: (warm_start, "ab" * 32, "ws")
+    )
+    fake_module = types.ModuleType("fake_full_body_model")
+    fake_module.FullBodyDrakeModel = _DriftingDrakeModel  # type: ignore[attr-defined]
+    monkeypatch.setitem(
+        sys.modules,
+        "src.engines.physics_engines.drake.python.full_body_model",
+        fake_module,
+    )
+
+    result = fit_full_body_drake(
+        spec,
+        warm_start_path="unused.npz",
+        options=DrakeFitOptions(control_mode="knots"),
+    )
+
+    q_roll = np.zeros((n_frames, nq))
+    q_roll[:, 0] = 0.1 * np.arange(n_frames)
+    rollout_markers = target + q_roll[:, 0][:, None, None] * np.array([1.0, 0.0, 0.0])
+    honest = compute_replay_five_metrics(
+        time_s=time_s,
+        pred_markers_m=rollout_markers,
+        target_markers_m=target,
+        valid=np.ones((n_frames, 3), dtype=bool),
+        marker_labels=labels,
+    )
+    assert np.allclose(result.candidate.q[:, 0], q_roll[:, 0])
+    assert np.allclose(result.candidate.markers.model_markers_m, rollout_markers)
+    shared = result.receipt["shared_metrics"]
+    assert shared["whole_marker_rmse_m"] == pytest.approx(honest.whole_rms_m)
+    assert shared["whole_marker_rmse_m"] > 0.1
+    assert result.receipt["acceptance"]["status"] == "REJECTED"
