@@ -374,9 +374,24 @@ def _workflow_run_job(condition: str | None, body: str) -> str:
     return f"on: workflow_run\njobs:\n  t:\n{guard}{body}"
 
 
-def test_head_ref_passed_to_script_as_data_is_allowed(tmp_path: Path) -> None:
-    # reroute-runner-loss in util-self-hosted-runner-recovery.yml (RM#1995).
-    assert _violations(tmp_path, _workflow_run_job(None, RECOVERY_STEPS)) == []
+def test_head_ref_passed_to_script_is_rejected_without_same_repo(
+    tmp_path: Path,
+) -> None:
+    """Fail-closed: a helper handed the head can fetch and run it (RM#1996).
+
+    reroute-runner-loss is only safe because its job carries the same-repo
+    condition (see the exemption tests below), not because of its command.
+    """
+    violations = _violations(tmp_path, _workflow_run_job(None, RECOVERY_STEPS))
+    assert len(violations) == 1
+
+
+def test_delegated_fetch_helper_is_rejected(tmp_path: Path) -> None:
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        "      - run: python fetch.py ${{ github.event.workflow_run.head_sha }}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
 
 
 @pytest.mark.parametrize(
@@ -453,14 +468,14 @@ def test_head_ref_in_step_env_with_git_fetch_is_still_rejected(
     assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
 
 
-def test_head_ref_to_non_checkout_action_input_is_data(tmp_path: Path) -> None:
+def test_head_ref_to_non_checkout_action_input_is_rejected(tmp_path: Path) -> None:
     body = (
         "    runs-on: d-sorg-fleet\n    steps:\n"
         "      - uses: actions/checkout@v4\n"
         "      - uses: ./.github/actions/notify\n        with:\n"
         "          branch: ${{ github.event.workflow_run.head_branch }}\n"
     )
-    assert _violations(tmp_path, _workflow_run_job(None, body)) == []
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
 
 
 def test_same_repo_conditioned_ignores_non_strings() -> None:
@@ -479,6 +494,14 @@ def test_same_repo_conditioned_ignores_non_strings() -> None:
         "gh repo clone ${{ github.event.workflow_run.head_repository.full_name }}",
         "curl -L https://x/${{ github.event.workflow_run.head_sha }}.tar.gz",
         "wget https://x/${{ github.event.workflow_run.head_sha }}.zip",
+        "CURL -L https://x/${{ github.event.workflow_run.head_sha }}.tar.gz",
+        "Invoke-WebRequest -Uri https://x/${{ github.event.workflow_run.head_sha }}"
+        " -OutFile a.zip",
+        "iwr https://x/${{ github.event.workflow_run.head_sha }}.zip -OutFile a.zip",
+        "Invoke-RestMethod https://x/${{ github.event.workflow_run.head_sha }}",
+        "irm https://x/${{ github.event.workflow_run.head_sha }} | iex",
+        "Start-BitsTransfer -Source"
+        " https://x/${{ github.event.workflow_run.head_sha }}",
     ],
 )
 def test_any_git_or_fetch_command_reading_head_is_rejected(
@@ -488,3 +511,33 @@ def test_any_git_or_fetch_command_reading_head_is_rejected(
     violations = _violations(tmp_path, _workflow_run_job(None, body))
     assert len(violations) == 1
     assert "checks out PR head" in violations[0]
+
+
+@pytest.mark.parametrize("uses", ["Actions/Checkout@v4", "ACTIONS/CHECKOUT@v4"])
+def test_checkout_action_name_is_matched_case_insensitively(
+    tmp_path: Path, uses: str
+) -> None:
+    """Owner/repo in ``uses:`` is case-insensitive on GitHub, so is the guard."""
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        f"      - uses: {uses}\n        with:\n"
+        "          ref: ${{ github.event.workflow_run.head_branch }}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
+
+
+@pytest.mark.parametrize("key", ["REF", "Ref", "Repository", "REPOSITORY"])
+def test_checkout_input_names_are_matched_case_insensitively(
+    tmp_path: Path, key: str
+) -> None:
+    """The runner upper-cases input keys (INPUT_REF), so ``REF:`` still checks out."""
+    value = (
+        "${{ github.event.workflow_run.head_branch }}"
+        if key.lower() == "ref"
+        else "${{ github.event.workflow_run.head_repository.full_name }}"
+    )
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        f"      - uses: actions/checkout@v4\n        with:\n          {key}: {value}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1

@@ -40,13 +40,6 @@ SAME_REPO_CONDITIONS = (
     "github.event.workflow_run.head_repository.full_name == github.repository",
 )
 
-#: Text that reads as a shell command able to fetch or check out code: any git
-#: invocation (``git -C d ...``, ``git clone``, ``git pull``), ``gh pr checkout``,
-#: ``gh repo clone``, and ``curl``/``wget`` downloads.
-HEAD_SINK_COMMAND = re.compile(
-    r"\bgit\b|\bgh\s+(?:pr\s+checkout|repo\s+clone)\b|\b(?:curl|wget)\b"
-)
-
 #: ``ctx['key']`` / ``ctx["key"]`` property access in a GitHub expression.
 _BRACKET_PROPERTY = re.compile(r"\[\s*['\"]([A-Za-z_][\w-]*)['\"]\s*\]")
 
@@ -197,42 +190,31 @@ def _checkout_action_reads_head(
     """
     if not isinstance(inputs, dict):
         return False
-    text = dotted("\n".join(_strings([inputs.get("ref"), inputs.get("repository")])))
+    # The runner upper-cases input keys (INPUT_REF), so ``REF:`` is ``ref:``.
+    named = {str(key).lower(): value for key, value in inputs.items()}
+    text = dotted("\n".join(_strings([named.get("ref"), named.get("repository")])))
     return any(pattern.search(text) for pattern in patterns)
-
-
-def _run_step_checks_out_head(
-    run: str, step_text: str, patterns: Sequence[re.Pattern[str]]
-) -> bool:
-    """True when a ``run:`` step reads the head AND invokes a fetching command.
-
-    Precondition: ``step_text`` is the step's dotted text (``run`` and ``env``).
-    Postcondition: the head and the command are correlated per step, never per
-    line, so ``REF=...`` on one line and ``git checkout "$REF"`` on another
-    still count. A head ref handed to a script that runs no git/gh/curl/wget in
-    that step is data.
-    """
-    if HEAD_SINK_COMMAND.search(run) is None:
-        return False
-    return any(pattern.search(step_text) for pattern in patterns)
 
 
 def _step_checks_out_head(
     step: dict[str, Any], patterns: Sequence[re.Pattern[str]]
 ) -> bool:
-    """Return whether one step checks out the PR head.
+    """Return whether one step reads the PR head (fail-closed).
 
-    Postcondition: only ``actions/checkout`` inputs and ``run:`` steps matching
-    :data:`HEAD_SINK_COMMAND` count; a head ref handed to any other step is data.
+    Postcondition: an ``actions/checkout`` step counts only when its ``ref`` or
+    ``repository`` input names the head (``token``/``path`` are not code). Any
+    other step that reads the head anywhere (``run``, ``env``, action inputs)
+    counts: a helper script or action handed the head can fetch and execute it,
+    so no command is trusted as data-only. A job-level same-repo condition is
+    the sanctioned exemption.
     """
-    uses, run = step.get("uses"), step.get("run")
-    if isinstance(uses, str) and uses.startswith("actions/checkout"):
+    uses = step.get("uses")
+    # Owner/repo in ``uses:`` are case-insensitive on GitHub.
+    if isinstance(uses, str) and uses.lower().startswith("actions/checkout"):
         return _checkout_action_reads_head(step.get("with"), patterns)
-    if isinstance(run, str):
-        fields = {k: v for k, v in step.items() if k != "if"}
-        text = dotted("\n".join(_strings(fields)))
-        return _run_step_checks_out_head(dotted(run), text, patterns)
-    return False
+    fields = {k: v for k, v in step.items() if k != "if"}
+    text = dotted("\n".join(_strings(fields)))
+    return any(pattern.search(text) for pattern in patterns)
 
 
 def head_checkout_steps(job: dict[str, Any], aliases: set[str]) -> list[str]:

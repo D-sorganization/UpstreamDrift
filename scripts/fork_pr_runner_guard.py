@@ -57,7 +57,6 @@ import yaml
 
 try:
     from scripts.fork_pr_guard_analysis import (
-        HEAD_SINK_COMMAND,
         PULL_REQUEST_ONLY,
         SAME_REPO_CONDITIONS,
         dotted,
@@ -71,7 +70,6 @@ try:
     )
 except ImportError:  # executed as a file: scripts/ is on sys.path
     from fork_pr_guard_analysis import (
-        HEAD_SINK_COMMAND,
         PULL_REQUEST_ONLY,
         SAME_REPO_CONDITIONS,
         dotted,
@@ -85,7 +83,6 @@ except ImportError:  # executed as a file: scripts/ is on sys.path
     )
 
 __all__ = [
-    "HEAD_SINK_COMMAND",
     "PULL_REQUEST_ONLY",
     "SAME_REPO_CONDITIONS",
     "dotted",
