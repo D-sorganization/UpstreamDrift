@@ -131,15 +131,28 @@ def _strings(value: Any) -> Iterable[str]:
             yield from _strings(item)
 
 
-def head_ref_aliases(*scopes: Any) -> set[str]:
-    """Return env names, across ``scopes``, whose value reads the PR head."""
-    names: set[str] = set()
+def head_ref_aliases(*scopes: Any, known: Iterable[str] = ()) -> set[str]:
+    """Return env names, across ``scopes``, whose value reads the PR head.
+
+    Resolution is transitive (fail-closed): a name whose value references a
+    head literal, a ``known`` alias, or any alias found so far (``HEAD`` ->
+    ``REF: ${{ env.HEAD }}`` -> ...) is an alias too, iterated to a fixpoint.
+    Postcondition: the result contains every name in ``known``.
+    """
+    names: set[str] = {str(n) for n in known}
+    entries: list[tuple[str, str]] = []
     for scope in scopes:
         env = scope.get("env") if isinstance(scope, dict) else None
         for name, value in env.items() if isinstance(env, dict) else ():
-            text = dotted("\n".join(_strings(value)))
-            if any(p.search(text) for p in HEAD_REF_PATTERNS):
-                names.add(str(name))
+            entries.append((str(name), dotted("\n".join(_strings(value)))))
+    changed = True
+    while changed:
+        changed = False
+        patterns = [*HEAD_REF_PATTERNS, *(_alias_reference(n) for n in names)]
+        for name, text in entries:
+            if name not in names and any(p.search(text) for p in patterns):
+                names.add(name)
+                changed = True
     return names
 
 
@@ -196,9 +209,19 @@ def _checkout_action_reads_head(
     return any(pattern.search(text) for pattern in patterns)
 
 
-def _step_checks_out_head(
-    step: dict[str, Any], patterns: Sequence[re.Pattern[str]]
-) -> bool:
+def _is_checkout_action(uses: Any) -> bool:
+    """True only for ``actions/checkout`` itself (any ref, any letter case).
+
+    Owner/repo in ``uses:`` are case-insensitive on GitHub. A prefix match would
+    also exempt look-alikes such as ``actions/checkout-wrapper``, which get no
+    per-input allowlist.
+    """
+    if not isinstance(uses, str):
+        return False
+    return uses.split("@", 1)[0].strip().lower() == "actions/checkout"
+
+
+def _step_checks_out_head(step: dict[str, Any], aliases: set[str]) -> bool:
     """Return whether one step reads the PR head (fail-closed).
 
     Postcondition: an ``actions/checkout`` step counts only when its ``ref`` or
@@ -208,9 +231,11 @@ def _step_checks_out_head(
     so no command is trusted as data-only. A job-level same-repo condition is
     the sanctioned exemption.
     """
-    uses = step.get("uses")
-    # Owner/repo in ``uses:`` are case-insensitive on GitHub.
-    if isinstance(uses, str) and uses.lower().startswith("actions/checkout"):
+    # Step-level env aliases (``env: REF: <head>`` or ``REF: ${{ env.HEAD }}``)
+    # read the head as surely as workflow- or job-level ones do.
+    step_aliases = head_ref_aliases(step, known=aliases)
+    patterns = [*HEAD_REF_PATTERNS, *(_alias_reference(a) for a in step_aliases)]
+    if _is_checkout_action(step.get("uses")):
         return _checkout_action_reads_head(step.get("with"), patterns)
     fields = {k: v for k, v in step.items() if k != "if"}
     text = dotted("\n".join(_strings(fields)))
@@ -223,7 +248,6 @@ def head_checkout_steps(job: dict[str, Any], aliases: set[str]) -> list[str]:
     ``aliases`` are workflow- or job-level env names that hold a head ref; a
     step that references one reads the head as surely as a literal does.
     """
-    patterns = [*HEAD_REF_PATTERNS, *(_alias_reference(a) for a in aliases)]
     found: list[str] = []
     steps = job.get("steps")
     for index, step in enumerate(steps if isinstance(steps, list) else []):
@@ -231,7 +255,7 @@ def head_checkout_steps(job: dict[str, Any], aliases: set[str]) -> list[str]:
             continue
         if requires_conjunct(step.get("if"), PULL_REQUEST_ONLY):
             continue
-        if _step_checks_out_head(step, patterns):
+        if _step_checks_out_head(step, aliases):
             found.append(str(step.get("name") or step.get("uses") or f"#{index}"))
     return found
 

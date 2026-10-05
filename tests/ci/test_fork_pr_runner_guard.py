@@ -541,3 +541,90 @@ def test_checkout_input_names_are_matched_case_insensitively(
         f"      - uses: actions/checkout@v4\n        with:\n          {key}: {value}\n"
     )
     assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
+
+
+def test_checkout_ref_through_step_env_alias_is_rejected(tmp_path: Path) -> None:
+    """Codex P1 on AD #4962: a step-level env alias must not hide the head ref."""
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "        env:\n"
+        "          REF: ${{ github.event.workflow_run.head_branch }}\n"
+        "        with:\n"
+        "          ref: ${{ env.REF }}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
+
+
+def test_checkout_step_env_alias_unused_by_ref_is_not_a_checkout(
+    tmp_path: Path,
+) -> None:
+    """The step alias counts only when ``ref``/``repository`` actually uses it."""
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "        env:\n"
+        "          REF: ${{ github.event.workflow_run.head_branch }}\n"
+        "        with:\n"
+        "          path: src\n"
+    )
+    assert _violations(tmp_path, _workflow_run_job(None, body)) == []
+
+
+@pytest.mark.parametrize(
+    "action", ["actions/checkout-wrapper@v1", "actions/checkoutx@v1"]
+)
+def test_lookalike_checkout_action_gets_no_checkout_allowlist(
+    tmp_path: Path, action: str
+) -> None:
+    """Codex P2 on AD #4962: only ``actions/checkout`` itself is exempted per input."""
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        f"      - uses: {action}\n        with:\n"
+        "          branch: ${{ github.event.workflow_run.head_branch }}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
+
+
+_CHAINED_CHECKOUT = (
+    "      - uses: actions/checkout@v4\n        with:\n          ref: ${{ env.REF }}\n"
+)
+
+
+def test_step_alias_chained_from_workflow_alias_is_rejected(tmp_path: Path) -> None:
+    """Codex P1 on #2003: HEAD (workflow) -> REF (step) -> checkout ref."""
+    text = (
+        "on: workflow_run\n"
+        "env:\n  HEAD: ${{ github.event.workflow_run.head_branch }}\n"
+        "jobs:\n  t:\n    runs-on: d-sorg-fleet\n    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "        env:\n          REF: ${{ env.HEAD }}\n"
+        "        with:\n          ref: ${{ env.REF }}\n"
+    )
+    assert len(_violations(tmp_path, text)) == 1
+
+
+def test_job_alias_chained_from_workflow_alias_is_rejected(tmp_path: Path) -> None:
+    """HEAD (workflow) -> REF (job) -> checkout ref is a head checkout too."""
+    text = (
+        "on: workflow_run\n"
+        "env:\n  HEAD: ${{ github.event.workflow_run.head_branch }}\n"
+        "jobs:\n  t:\n    runs-on: d-sorg-fleet\n"
+        "    env:\n      REF: ${{ env.HEAD }}\n"
+        "    steps:\n" + _CHAINED_CHECKOUT
+    )
+    assert len(_violations(tmp_path, text)) == 1
+
+
+def test_multi_hop_step_alias_chain_is_rejected(tmp_path: Path) -> None:
+    """A -> B -> REF within one step still resolves to the head."""
+    body = (
+        "    runs-on: d-sorg-fleet\n    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "        env:\n"
+        "          REF: ${{ env.B }}\n"
+        "          B: ${{ env.A }}\n"
+        "          A: ${{ github.event.workflow_run.head_branch }}\n"
+        "        with:\n          ref: ${{ env.REF }}\n"
+    )
+    assert len(_violations(tmp_path, _workflow_run_job(None, body))) == 1
