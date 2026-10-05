@@ -1091,3 +1091,33 @@ def test_stalled_pr_enqueue_failure_is_reported_not_retried() -> None:
     assert result.armed is False
     assert len(_graphql_calls(fake)) == 1
     assert fake.direct_calls == []
+
+
+# --------------------------------------------------------------------------
+# evaluate_hold structure (#2018 rollout): consumers enforce a 100-line
+# function budget on this vendored file, and a malformed payload must stay
+# inside the fail-closed path rather than crash.
+# --------------------------------------------------------------------------
+
+
+def test_malformed_head_field_yields_a_verdict_not_a_crash() -> None:
+    fake = FakeGh()
+    fake.pull["head"] = "not-an-object"
+    verdict = automerge_guard.evaluate_hold("o/r", 7, runner=fake)
+    assert verdict.held is False
+    assert verdict.head_sha == "" and verdict.head_ref == ""
+    assert verdict.head_in_base_repo is False
+
+
+def test_no_guard_function_exceeds_the_consumer_function_budget() -> None:
+    import ast
+
+    tree = ast.parse(_MODULE_PATH.read_text(encoding="utf-8"))
+    too_long = [
+        f"{node.name}: {node.end_lineno - node.lineno + 1}"
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and node.end_lineno is not None
+        and node.end_lineno - node.lineno + 1 > 100
+    ]
+    assert too_long == []

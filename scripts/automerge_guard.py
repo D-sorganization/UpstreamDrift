@@ -38,6 +38,7 @@ import shutil
 import subprocess
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
@@ -286,6 +287,101 @@ def _head_arrival(runner: CommandRunner, repo: str, pr: int, sha: str) -> str:
     return max([arrived, *pushes])
 
 
+def _obj(value: object) -> dict[str, Any]:
+    """``value`` if it is a JSON object, else ``{}``: a malformed payload field
+    reads as absent rather than raising past the fail-closed handler."""
+    return value if isinstance(value, dict) else {}
+
+
+def _pull_from(raw: dict[str, Any], pr: int) -> _PullRequest:
+    """Project the REST pull-request payload onto the fields the hold reads."""
+    labels = raw.get("labels") or []
+    return _PullRequest(
+        number=pr,
+        draft=bool(raw.get("draft")),
+        labels=[str(_obj(item).get("name", "")) for item in labels],
+        body=str(raw.get("body") or ""),
+        head_sha=str(_obj(raw.get("head")).get("sha") or ""),
+    )
+
+
+def _disarm_reasons(run: CommandRunner, repo: str, pr: int, sha: str) -> list[str]:
+    """Signal 3: a non-bot account disarmed auto-merge since the head arrived.
+
+    Bot actors are excluded so the Merge-Hold-Guard workflow's own revocations
+    never read as a human decision. Raises ``RuntimeError`` if unreadable.
+    """
+    disarms = _gh_lines(
+        run,
+        [
+            "api",
+            f"repos/{repo}/issues/{pr}/timeline?per_page=100",
+            "--paginate",
+            "--jq",
+            '.[] | select(.event == "auto_merge_disabled") '
+            '| select((.actor.type // "User") != "Bot") | .created_at',
+        ],
+    )
+    if not disarms:
+        return []
+    last_disarm = max(disarms)
+    arrived = _head_arrival(run, repo, pr, sha)
+    if not arrived:
+        return [
+            f"a reviewer disabled auto-merge at {last_disarm} and the "
+            "server-side arrival time of the head commit is unknown"
+        ]
+    if last_disarm > arrived:
+        return [
+            f"a reviewer disabled auto-merge at {last_disarm}, after the "
+            f"head commit arrived ({arrived}) — no push has superseded it"
+        ]
+    return []
+
+
+def _deletion_reasons(
+    run: CommandRunner, repo: str, pr: int, pull: _PullRequest
+) -> list[str]:
+    """Signal 4: the diff deletes tracked files with no acknowledgement."""
+    removed = _gh_lines(
+        run,
+        [
+            "api",
+            f"repos/{repo}/pulls/{pr}/files?per_page=100",
+            "--paginate",
+            "--jq",
+            '.[] | select(.status == "removed") | .filename',
+        ],
+    )
+    lowered = {label.lower() for label in pull.labels}
+    if not removed or _deletions_acknowledged(lowered, pull.body):
+        return []
+    sample = ", ".join(removed[:5])
+    more = f" (+{len(removed) - 5} more)" if len(removed) > 5 else ""
+    return [
+        f"diff deletes {len(removed)} tracked file(s) with no "
+        f"acknowledgement: {sample}{more}"
+    ]
+
+
+def _verdict_from(
+    raw: dict[str, Any], pull: _PullRequest, reasons: list[str]
+) -> HoldVerdict:
+    """Build the verdict, carrying the PR facts later merge steps pin to."""
+    head, base = _obj(raw.get("head")), _obj(raw.get("base"))
+    head_repo = str(_obj(head.get("repo")).get("full_name") or "").lower()
+    base_repo = str(_obj(base.get("repo")).get("full_name") or "").lower()
+    return HoldVerdict(
+        bool(reasons),
+        tuple(reasons),
+        head_sha=pull.head_sha,
+        base_ref=str(base.get("ref") or ""),
+        node_id=str(raw.get("node_id") or ""),
+        head_ref=str(head.get("ref") or ""),
+        head_in_base_repo=bool(head_repo) and head_repo == base_repo,
+    )
+
+
 def evaluate_hold(
     repo: str, pr: int, *, runner: CommandRunner | None = None
 ) -> HoldVerdict:
@@ -303,96 +399,21 @@ def evaluate_hold(
     Fails closed: any error computing the verdict returns ``held=True``.
     """
     run = runner or _default_runner
-    reasons: list[str] = []
-
     try:
-        raw = _gh_json(
-            run,
-            ["api", f"repos/{repo}/pulls/{pr}"],
-        )
+        raw = _gh_json(run, ["api", f"repos/{repo}/pulls/{pr}"])
         if not isinstance(raw, dict):
             return HoldVerdict(True, (), error=f"unreadable PR {repo}#{pr}")
-
-        pull = _PullRequest(
-            number=pr,
-            draft=bool(raw.get("draft")),
-            labels=[str(item.get("name", "")) for item in raw.get("labels") or []],
-            body=str(raw.get("body") or ""),
-            head_sha=str((raw.get("head") or {}).get("sha") or ""),
-        )
+        pull = _pull_from(raw, pr)
         lowered = {label.lower() for label in pull.labels}
-
-        # --- signal 1: explicit hold labels --------------------------------
-        for label in sorted(lowered & HOLD_LABELS):
-            reasons.append(f"`{label}` label")
-
-        # --- signal 2: draft ------------------------------------------------
+        reasons = [f"`{label}` label" for label in sorted(lowered & HOLD_LABELS)]
         if pull.draft:
             reasons.append("PR is a draft (mark ready first)")
-
-        # --- signal 3: a reviewer disarmed it since the last push -----------
-        # Bot actors are excluded so the Merge-Hold-Guard workflow's own
-        # revocations never read as a human decision.
-        disarms = _gh_lines(
-            run,
-            [
-                "api",
-                f"repos/{repo}/issues/{pr}/timeline?per_page=100",
-                "--paginate",
-                "--jq",
-                '.[] | select(.event == "auto_merge_disabled") '
-                '| select((.actor.type // "User") != "Bot") | .created_at',
-            ],
-        )
-        arrived = _head_arrival(run, repo, pr, pull.head_sha) if disarms else ""
-        if disarms:
-            last_disarm = max(disarms)
-            if not arrived:
-                reasons.append(
-                    f"a reviewer disabled auto-merge at {last_disarm} and the "
-                    "server-side arrival time of the head commit is unknown"
-                )
-            elif last_disarm > arrived:
-                reasons.append(
-                    f"a reviewer disabled auto-merge at {last_disarm}, after the "
-                    f"head commit arrived ({arrived}) — no push has superseded it"
-                )
-
-        # --- signal 4: unacknowledged deletion of tracked files -------------
-        removed = _gh_lines(
-            run,
-            [
-                "api",
-                f"repos/{repo}/pulls/{pr}/files?per_page=100",
-                "--paginate",
-                "--jq",
-                '.[] | select(.status == "removed") | .filename',
-            ],
-        )
-        if removed and not _deletions_acknowledged(lowered, pull.body):
-            sample = ", ".join(removed[:5])
-            more = f" (+{len(removed) - 5} more)" if len(removed) > 5 else ""
-            reasons.append(
-                f"diff deletes {len(removed)} tracked file(s) with no "
-                f"acknowledgement: {sample}{more}"
-            )
+        reasons += _disarm_reasons(run, repo, pr, pull.head_sha)
+        reasons += _deletion_reasons(run, repo, pr, pull)
     except (RuntimeError, json.JSONDecodeError, OSError) as exc:
         # Fail closed. An unknown state is not a licence to arm.
         return HoldVerdict(True, (), error=str(exc))
-
-    head = raw.get("head") or {}
-    head_repo = str((head.get("repo") or {}).get("full_name") or "").lower()
-    base_repo = str(((raw.get("base") or {}).get("repo") or {}).get("full_name") or "")
-    base_repo = base_repo.lower()
-    return HoldVerdict(
-        bool(reasons),
-        tuple(reasons),
-        head_sha=pull.head_sha,
-        base_ref=str((raw.get("base") or {}).get("ref") or ""),
-        node_id=str(raw.get("node_id") or ""),
-        head_ref=str(head.get("ref") or ""),
-        head_in_base_repo=bool(head_repo) and head_repo == base_repo,
-    )
+    return _verdict_from(raw, pull, reasons)
 
 
 def _deletions_acknowledged(lowered_labels: set[str], body: str) -> bool:
