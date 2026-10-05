@@ -199,18 +199,61 @@ def _array_content_hash(arr: Any, name: str) -> str:
     return h.hexdigest()
 
 
+def _canonical_value(value: Any, name: str) -> str:
+    """Canonical, order-independent text form of a state-field value.
+
+    Arrays hash by content, mappings by sorted key, sequences element-wise,
+    and everything else by ``repr``; ``None`` is explicit.
+
+    Preconditions: array-like leaves are finite.
+    """
+    if value is None:
+        return "None"
+    if isinstance(value, Mapping):
+        items = sorted(value.items(), key=lambda kv: str(kv[0]))
+        return (
+            "{"
+            + ",".join(f"{k!r}:{_canonical_value(v, f'{name}.{k}')}" for k, v in items)
+            + "}"
+        )
+    if isinstance(value, np.ndarray):
+        return f"arr:{_array_content_hash(value, name)}"
+    if isinstance(value, (list, tuple)):
+        return "[" + ",".join(_canonical_value(v, name) for v in value) + "]"
+    return f"{type(value).__name__}:{value!r}"
+
+
+def _complete_state_hash(state: DimeCompleteState) -> str:
+    """Content hash of every ``DimeCompleteState`` field (#11547).
+
+    Covers t, q, v, v_dot, internal_state, model_hash, units and frame so two
+    states differing in any field never share a cache key.
+
+    Preconditions: ``state`` is a validated (finite) complete state.
+    Postcondition: equal states, regardless of mapping insertion order, hash equal.
+    """
+    parts = [
+        f"t={float(state.t)!r}",
+        f"q={_canonical_value(state.q, 'q')}",
+        f"v={_canonical_value(state.v, 'v')}",
+        f"v_dot={_canonical_value(state.v_dot, 'v_dot')}",
+        f"internal_state={_canonical_value(state.internal_state, 'internal_state')}",
+        f"model_hash={state.model_hash!r}",
+        f"units={_canonical_value(state.units, 'units')}",
+        f"frame={state.frame!r}",
+    ]
+    return hashlib.sha256("|".join(parts).encode()).hexdigest()
+
+
 def _window_problem_qualifier(problem: DimeDynamicsWindowProblem) -> str:
     """Key qualifier covering every input that changes a window solution.
 
-    Covers initial state, horizon, dt, target observations, weights, defect
+    Covers the complete initial state, horizon, dt, target observations, weights, defect
     mode, constraints, bounds, and solver options (#11547).
 
     Preconditions: states, targets, weights, and bounds are finite.
     """
-    state = problem.initial_state
-    state_hash = _array_content_hash(
-        np.concatenate([state.q, state.v]), "initial_state"
-    )
+    state_hash = _complete_state_hash(problem.initial_state)
     if problem.target_positions is None:
         targets_hash = "none"
     else:

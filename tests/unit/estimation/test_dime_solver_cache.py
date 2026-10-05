@@ -382,11 +382,16 @@ def _targets_problem(
     targets: list[list[float]],
     observation_weight: float = 1.0,
     max_iterations: int = 15,
+    initial_state: DimeCompleteState | None = None,
 ) -> DimeDynamicsWindowProblem:
     provider = AnalyticPendulumProvider()
+    if initial_state is None:
+        initial_state = _create_pendulum_state(
+            q_val=0.1, model_hash=provider.model_hash
+        )
     return DimeDynamicsWindowProblem(
         provider=provider,
-        initial_state=_create_pendulum_state(q_val=0.1, model_hash=provider.model_hash),
+        initial_state=initial_state,
         horizon_steps=4,
         dt_s=0.02,
         target_positions=[np.array(t, dtype=np.float64) for t in targets],
@@ -438,6 +443,71 @@ class TestDimeSolverCacheKeyCoversInputs:
             _targets_problem([[0.4]] * 3, max_iterations=7), cache
         )
         assert bd.cache_hits == 0
+
+    @pytest.mark.parametrize(
+        "override",
+        [
+            {"t": 0.5},
+            {"internal_state": {"activation": 0.7}},
+            {"v_dot": np.array([0.3], dtype=np.float64)},
+            {"frame": "pelvis"},
+        ],
+        ids=["t", "internal_state", "v_dot", "frame"],
+    )
+    def test_changing_only_one_state_field_misses_cache(
+        self, override: dict[str, Any]
+    ) -> None:
+        cache = DimeSolverCache()
+        base = _targets_problem([[0.4]] * 3)
+        accelerated_solve_dynamics_window(base, cache)
+        s = base.initial_state
+        fields: dict[str, Any] = {
+            "t": s.t,
+            "q": s.q,
+            "v": s.v,
+            "v_dot": s.v_dot,
+            "internal_state": dict(s.internal_state),
+            "model_hash": s.model_hash,
+            "units": dict(s.units),
+            "frame": s.frame,
+        }
+        fields.update(override)
+        changed = _targets_problem(
+            [[0.4]] * 3, initial_state=DimeCompleteState(**fields)
+        )
+        _, bd = accelerated_solve_dynamics_window(changed, cache)
+        assert bd.cache_hits == 0
+        assert bd.cache_misses == 1
+
+    def test_equal_but_distinct_states_hit_cache(self) -> None:
+        cache = DimeSolverCache()
+        base = _targets_problem([[0.4]] * 3)
+        s = base.initial_state
+        twin = DimeCompleteState(
+            t=s.t,
+            q=s.q.copy(),
+            v=s.v.copy(),
+            internal_state={"b": 2.0, "a": np.array([1.0])},
+            model_hash=s.model_hash,
+            units=dict(s.units),
+            frame=s.frame,
+        )
+        accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, initial_state=twin), cache
+        )
+        twin2 = DimeCompleteState(
+            t=s.t,
+            q=s.q.copy(),
+            v=s.v.copy(),
+            internal_state={"a": np.array([1.0]), "b": 2.0},
+            model_hash=s.model_hash,
+            units=dict(s.units),
+            frame=s.frame,
+        )
+        _, bd = accelerated_solve_dynamics_window(
+            _targets_problem([[0.4]] * 3, initial_state=twin2), cache
+        )
+        assert bd.cache_hits == 1
 
     def test_non_finite_targets_rejected(self) -> None:
         cache = DimeSolverCache()
