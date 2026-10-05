@@ -725,6 +725,53 @@ class ConditionPanel(QWidget):
         sand_form.addRow("Penetrometer firmness:", self._firmness)
         layout.addWidget(sand_box)
 
+        layout.addWidget(self._build_swing_box(defaults))
+
+        study_box = QGroupBox("Study")
+        study_form = QFormLayout(study_box)
+        self._target_carry = _spin(
+            " m", *INPUT_RANGES["target_carry_m"], 0.5, 1, study.target_carry_m
+        )
+        study_form.addRow("Target carry:", self._target_carry)
+        self._tolerance = _spin(
+            "",
+            *INPUT_RANGES["carry_tolerance_fraction"],
+            0.01,
+            2,
+            study.carry_tolerance_fraction,
+        )
+        study_form.addRow("Carry tolerance:", self._tolerance)
+        self._grid = QSpinBox()
+        self._grid.setRange(2, 9)
+        self._grid.setValue(study.playability_points)
+        study_form.addRow("Playability grid (n x n):", self._grid)
+        self._stations = QSpinBox()
+        self._stations.setRange(5, 25)
+        self._stations.setValue(study.n_stations)
+        study_form.addRow("Mesh stations:", self._stations)
+        self._profile_points = QSpinBox()
+        self._profile_points.setRange(12, 48)
+        self._profile_points.setValue(study.n_profile_points)
+        study_form.addRow("Sole samples:", self._profile_points)
+        layout.addWidget(study_box)
+
+        for widget in (
+            self._firmness,
+            self._speed,
+            self._attack,
+            self._face_open,
+            self._shaft_lean,
+            self._entry,
+            self._ball_depth,
+            self._target_carry,
+            self._tolerance,
+        ):
+            widget.valueChanged.connect(self.changed)
+        self._condition.currentTextChanged.connect(self.changed)
+        self._dynamic.toggled.connect(self.changed)
+
+    def _build_swing_box(self, defaults: SwingSetup) -> QGroupBox:
+        """Build the swing-condition group seeded from ``defaults``."""
         swing_box = QGroupBox("Swing")
         swing_form = QFormLayout(swing_box)
         self._speed = _spin(
@@ -774,50 +821,7 @@ class ConditionPanel(QWidget):
             "solver deserves at bunker-shot speeds."
         )
         swing_form.addRow(self._dynamic)
-        layout.addWidget(swing_box)
-
-        study_box = QGroupBox("Study")
-        study_form = QFormLayout(study_box)
-        self._target_carry = _spin(
-            " m", *INPUT_RANGES["target_carry_m"], 0.5, 1, study.target_carry_m
-        )
-        study_form.addRow("Target carry:", self._target_carry)
-        self._tolerance = _spin(
-            "",
-            *INPUT_RANGES["carry_tolerance_fraction"],
-            0.01,
-            2,
-            study.carry_tolerance_fraction,
-        )
-        study_form.addRow("Carry tolerance:", self._tolerance)
-        self._grid = QSpinBox()
-        self._grid.setRange(2, 9)
-        self._grid.setValue(study.playability_points)
-        study_form.addRow("Playability grid (n x n):", self._grid)
-        self._stations = QSpinBox()
-        self._stations.setRange(5, 25)
-        self._stations.setValue(study.n_stations)
-        study_form.addRow("Mesh stations:", self._stations)
-        self._profile_points = QSpinBox()
-        self._profile_points.setRange(12, 48)
-        self._profile_points.setValue(study.n_profile_points)
-        study_form.addRow("Sole samples:", self._profile_points)
-        layout.addWidget(study_box)
-
-        for widget in (
-            self._firmness,
-            self._speed,
-            self._attack,
-            self._face_open,
-            self._shaft_lean,
-            self._entry,
-            self._ball_depth,
-            self._target_carry,
-            self._tolerance,
-        ):
-            widget.valueChanged.connect(self.changed)
-        self._condition.currentTextChanged.connect(self.changed)
-        self._dynamic.toggled.connect(self.changed)
+        return swing_box
 
     def sand_condition(self) -> SandCondition:
         """Read the sand controls.

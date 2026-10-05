@@ -524,15 +524,15 @@
       "title": "BunkerShot3D designer workbench (W2 sole parameters, W3 sand condition, F0 dynamic-RFT shot, W7 metrics, playability window, bounce utilisation, animated sole load field, 3-D shot animation through the ADR-0027 viewport, linked scalar traces with a validity band, F1 sand-field cross-sections, A/B comparison, validity verdict)",
       "status": "gap",
       "pyqt": "src/tools/bunker_shot_gui/gui.py",
-      "api": null,
+      "api": "src/api/routes/bunker_workbench.py",
       "web": null,
-      "issue": 8607,
+      "issue": 9545,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "bunkershot3d"
       ],
-      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; no API route or web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match.",
+      "notes": "Moved out of engines.load_and_simulate by #8618: the tile is a club-design workbench, not an engine load/simulate surface, and the two launcher tiles (bunkershot3d -> a notebook script, bunker_shot -> the GUI) were reconciled into this one entry point. The computation lives in src/tools/bunker_shot_gui/model.py, which imports no GUI toolkit and is the layer a React port would consume; the v1 API route (#9545) serves a bounded nominal solve from it, and no web page exists yet. The visualization suite (epic #8699) keeps that split: shot3d.py and traces.py compute, render3d.py and render_traces.py draw headlessly through matplotlib, and viewport_widgets.py only wires them to a canvas. A React port would consume shot3d.viewport_payload, which is the backend-neutral ADR-0027 ViewportOverlayPayload and carries the envelope status and fidelity tier in its metadata so any renderer can stamp its own frames. The F1 sand cut (#8710, #8711) keeps the same split and adds one constraint a port must honour: the field carries its fidelity tier and validity status as data covered by a SHA-256 over the provenance and the arrays together, so any client that renders a field must read the standing out of the file rather than out of its filename, and must refuse a field whose digest does not match.",
       "id": "tools.bunkershot3d_workbench"
     },
     {
@@ -2957,7 +2957,7 @@
   "inputs": {
     "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
     "src/config/launcher_manifest.json": "2674d23f4694d9aa4aa90428c7212f78470e59452784ba09de266a04699e061a",
-    "src/config/feature_parity.json": "04ea5ab6cabe5a0624684e84399199ebcf05eb198ecfad04b54ed3dd2d11821e",
+    "src/config/feature_parity.json": "7bf7fcc3a71e8593769fde7f0f9c7b04e81605cdd66e74bf2c70ed6c2c935b24",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
