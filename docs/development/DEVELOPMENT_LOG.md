@@ -3276,6 +3276,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11567 · Drake Full-Body Fit Scores Forward Kinematics of the Drake Rollout Instead of the Warm-Start Candidate's Markers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11567
+- **Branch:** merged via #11568
+- **PR:** #11568
+- **Paths:** see #11568
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`80dde80a`; collated from changes/11567-drake-full-body-fit-scores-forward-kinem.md)
+- **Summary:** Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers
+- **Next step:** Shipped in PR #11568.
+
 ### DL-#11556 · Ci(Security): Re-Vendor fork_pr_runner_guard.py and New fork_pr_guard_analysis.py From Repository_Management (RM#1996): Same-Repo if: Exemption and Sink-Based Head-Checkout Analysis.
 
 - **State:** shipped
