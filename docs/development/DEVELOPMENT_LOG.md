@@ -3263,6 +3263,58 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11551 · DIME Replay and Engine Qualification Fail Closed on Missing Reference/Metrics; Replay Provenance Read From the Environment
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11551
+- **Branch:** merged via #11558
+- **PR:** #11558
+- **Paths:** see #11558
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`8dfd58bc`; collated from changes/11551-dime-replay-and-engine-qualification-fai.md)
+- **Summary:** DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment
+- **Next step:** Shipped in PR #11558.
+
+### DL-#11549 · Drift Prediction Propagates Covariance Through F = Df/Dx per Step, Steps the Full Horizon as H Steps of Dt, and Never Actuates the Floating-Base Root by Default
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11549
+- **Branch:** fix/11549-drift-covariance-propagation
+- **PR:** #11562
+- **Paths:** src/shared/python/estimation/drift_prediction.py
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`dc22a363`; collated from changes/11549-drift-prediction-propagates-covariance-t.md)
+- **Summary:** drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default
+- **Next step:** Shipped in PR #11562.
+
+### DL-#11548 · Multi-Trial MAP: Residual and Jacobian Prior Rows Share One Layout (Locked Priors Excluded From Both); Posterior Covariance Is the Schur Marginal Over the Shared Parameters, Reported as Unavailable (`covariance_status="rank_deficient"`, NaN) When the Fisher Matrix Is Singular; Calculation Documented in Docs/Conventions/canonical-v2.md §6.1
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11548
+- **Branch:** merged via #11557
+- **PR:** #11557
+- **Paths:** see #11557
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`efa445dd`; collated from changes/11548-multi-trial-map-residual-and-jacobian-pr.md)
+- **Summary:** Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1
+- **Next step:** Shipped in PR #11557.
+
+### DL-#11547 · DIME Solver Cache Key Now Covers Targets, Weights and Solver Options; Cost Breakdown Reports Measured Values or Not-Measured (None) Instead of Wall-Time Fractions
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11547
+- **Branch:** merged via #11561
+- **PR:** #11561
+- **Paths:** see #11561
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`d7b122a1`; collated from changes/11547-dime-solver-cache-key-now-covers-targets.md)
+- **Summary:** DIME solver cache key now covers targets, weights and solver options; cost breakdown reports measured values or not-measured (None) instead of wall-time fractions
+- **Next step:** Shipped in PR #11561.
+
 ### DL-#11550 · DIME Manifold Retract and Local-Coordinate Jacobians Are Now the Exact Derivatives of the Right Quaternion Chart at Any Pose and Velocity (J_R^-1, dExp/Dv), Verified Against Central Finite Differences
 
 - **State:** shipped
