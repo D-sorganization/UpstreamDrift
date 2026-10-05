@@ -39,6 +39,9 @@ function summary = run_leaderboard(varargin)
 %     - Every entry in Options is one of {"fmincon","surrogate","inverse",
 %       "hybrid"}; an unknown value triggers run_leaderboard:unknownOption.
 %     - Trials is a non-empty string array.
+%     - If DryRun is false, GolfSwing3D_Kinetic must be resolvable onto the
+%       MATLAB path (exist('GolfSwing3D_Kinetic') == 4); triggers
+%       run_leaderboard:modelNotFound if missing.
 %
 %   Postconditions:
 %     - SUMMARY.leaderboard_md points at an existing .md file.
@@ -72,6 +75,10 @@ function summary = run_leaderboard(varargin)
               "Precondition: at least one trial must be supplied.");
     end
     local_validate_options(options);
+
+    if ~args.DryRun
+        local_ensure_model_on_path();
+    end
 
     results_dir = local_resolve_results_dir(args.ResultsDir);
     if ~isfolder(results_dir); mkdir(results_dir); end
@@ -544,4 +551,27 @@ function local_write_meta(meta_path, git_commit)
     fprintf(fid, '  "git_head": "%s",\n', sha);
     fprintf(fid, '  "regenerated_at": "%s"\n', iso);
     fprintf(fid, '}\n');
+end
+
+
+%% =====================================================================
+function local_ensure_model_on_path()
+%LOCAL_ENSURE_MODEL_ON_PATH  Dynamically resolve GolfSwing3D_Kinetic onto
+%   the MATLAB path without invoking savepath.
+    if exist('GolfSwing3D_Kinetic') ~= 4
+        here = fileparts(mfilename("fullpath"));
+        % shared/scripts -> shared -> motion_matching -> matlab
+        matlab_dir = fileparts(fileparts(fileparts(here)));
+        model_dir = fullfile(matlab_dir, "src", "model");
+        if isfolder(model_dir)
+            addpath(model_dir);
+        end
+        functions_dir = fullfile(matlab_dir, "src", "functions");
+        if isfolder(functions_dir)
+            addpath(genpath(functions_dir));
+        end
+    end
+    assert(exist('GolfSwing3D_Kinetic') == 4, ...
+        "run_leaderboard:modelNotFound", ...
+        "Precondition: GolfSwing3D_Kinetic model must be on the MATLAB path.");
 end
