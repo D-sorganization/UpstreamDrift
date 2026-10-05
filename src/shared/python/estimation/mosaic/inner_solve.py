@@ -228,10 +228,11 @@ def _assemble(problem: InnerProblem) -> tuple[sp.csr_matrix, FloatArray, int]:
     n_u_cols, n_t_cols = problem.n_nodes * n_u, problem.n_phases * n_u
     pi_dyn, u_dyn, dyn_rhs = _dynamics_blocks(problem)
     n_dyn = u_dyn.shape[0]
-    blocks: list[list[sp.spmatrix | None]] = [[pi_dyn, u_dyn, None]]
+    blocks: list[list[sp.csr_matrix | None]] = [[pi_dyn, u_dyn, None]]
     rhs: list[FloatArray] = [dyn_rhs]
     if problem.parameters_are_free:
-        blocks.append([sp.diags(problem.parameter_prior_weight), None, None])
+        prior_block = sp.csr_matrix(np.diag(problem.parameter_prior_weight))
+        blocks.append([prior_block, None, None])
         rhs.append(problem.parameter_prior_weight * problem.parameter_prior_mean)
     for u_block, t_block in _input_prior_blocks(problem):
         blocks.append([None, u_block, t_block])
@@ -248,15 +249,15 @@ def _assemble(problem: InnerProblem) -> tuple[sp.csr_matrix, FloatArray, int]:
 
 
 def _fill_row(
-    row: list[sp.spmatrix | None], widths: tuple[int, int, int]
+    row: list[sp.csr_matrix | None], widths: tuple[int, int, int]
 ) -> sp.csr_matrix:
     height = next(block.shape[0] for block in row if block is not None)
-    filled = [
+    filled: list[sp.csr_matrix] = [
         block if block is not None else sp.csr_matrix((height, width))
         for block, width in zip(row, widths, strict=True)
         if width > 0 or block is not None
     ]
-    return sp.hstack(filled, format="csr")
+    return sp.csr_matrix(sp.hstack(filled, format="csr"))
 
 
 def solve_inner(problem: InnerProblem) -> InnerSolution:
