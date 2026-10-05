@@ -3276,6 +3276,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11571 · Reconcile Engine Capability Matrix With Get_Capabilities and Add Consistency Test
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11571
+- **Branch:** merged via #11576
+- **PR:** #11576
+- **Paths:** see #11576
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`1c11f2d9`; collated from changes/11571-engine-capability-registry-consistency.md)
+- **Summary:** Reconcile engine capability matrix with get_capabilities and add consistency test
+- **Next step:** Shipped in PR #11576.
+
 ### DL-#11573 · Report NaN for Unmeasured Replay Metrics and Fail Closed in Acceptance Evaluation
 
 - **State:** shipped
