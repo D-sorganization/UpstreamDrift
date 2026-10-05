@@ -1,5 +1,7 @@
 # CLAUDE.md — UpstreamDrift
+
 @AGENTS.md
+
 <!-- Claude Code reads CLAUDE.md; the line above imports AGENTS.md, the single source of agent guidance. Edit AGENTS.md (or its fleet-rules sources), not this file. -->
 
 `CLAUDE.md` is the authoritative contributor and agent policy file.
@@ -378,6 +380,6 @@ For the canonical hook contract, see [`Repository_Management/docs/FLEET_HOOK_STA
 
 ## Where to edit
 
-- **Tools (chat/sidekick/shared)**: Edit in the upstream Tools repository. Do NOT edit in \
-endor/ud-tools\ or shadow it in \src/shared/python/\.
-- **UpstreamDrift core**: Edit in \src/\.
+- **Tools (chat/sidekick/shared)**: Edit in the upstream Tools repository. Do NOT edit in
+  `vendor/ud-tools/` or shadow it in `src/shared/python/`.
+- **UpstreamDrift core**: Edit in `src/`.
