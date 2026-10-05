@@ -3282,10 +3282,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #11571
 - **Branch:** merged via #11576
-- **PR:** #11576
+- **PR:** #11576, #11580
 - **Paths:** see #11576
 - **Started:** 2026-10-05
-- **Last verified:** 2026-10-05 (`1c11f2d9`; collated from changes/11571-engine-capability-registry-consistency.md)
+- **Last verified:** 2026-10-05 (`a40295cc`; collated from changes/11571-launcher-capability-tests.md)
 - **Summary:** Reconcile engine capability matrix with get_capabilities and add consistency test
 - **Next step:** Shipped in PR #11576.
 
