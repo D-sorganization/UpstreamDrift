@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11568 | Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers |
 | 2026-10-05 | #11556 | ci(security): re-vendor fork_pr_runner_guard.py and new fork_pr_guard_analysis.py from Repository_Management (RM#1996): same-repo if: exemption and sink-based head-checkout analysis. |
 | 2026-10-05 | #11555 | MOSAIC model-aware multi-trial matching kernels, methods reference and DIME (#11421) audit |
 | 2026-10-05 | #11559 | fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures |
