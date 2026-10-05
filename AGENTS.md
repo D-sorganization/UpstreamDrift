@@ -49,6 +49,9 @@ their input hashes and detailed provenance in private execution receipts.
 
 For exploratory GS3DX matching, the separate reference is
 `docs/research/simscape_matching_reference/simscape_matching_reference.tex`.
+The separate research record for the MOSAIC estimator (model-aware multi-trial
+forward-dynamics matching) and the canonical ZTCF/ZVCF nomenclature is
+`docs/research/model_aware_matching/model_aware_matching.tex`.
 Record compilation and evidence checks truthfully; unresolved modeling gates
 remain open even when the documentation or video export is complete.
 

@@ -1,0 +1,604 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\geometry{margin=25mm}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bB}{\mathbf{B}}
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bP}{\mathbf{P}}
+\newcommand{\bS}{\mathbf{S}}
+\newcommand{\bW}{\mathbf{W}}
+\newcommand{\bpi}{\boldsymbol{\pi}}
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\newcommand{\bxi}{\boldsymbol{\xi}}
+\newcommand{\blambda}{\boldsymbol{\lambda}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{MOSAIC: Model-Aware Simultaneous Anthropometry, Inertia and Control\\
+Estimation From Repeated Motion Captures\\[4pt]
+\large Methods Reference for Forward-Dynamics Matching in UpstreamDrift}
+\author{UpstreamDrift Estimation Working Reference}
+\date{Revision 2026-10-05 \quad (separate research and experiment record; see \S\ref{sec:governance})}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Matching a forward-dynamics model to measured kinematics requires three things
+to be determined at once: the subject's segment geometry and inertial
+parameters, the joint inputs that drove each trial, and a kinematic trajectory
+consistent with both the observations and the equations of motion.  This
+reference specifies MOSAIC, an estimator that exploits two exact structural
+facts of rigid-body dynamics---the control-affine form
+$\dot\bx=f(\bx)+G(\bx)\bu$ and the linearity of inverse dynamics in the
+inertial parameters, $\bY(\bq,\bv,\ba)\bpi=\bB\bu+\bJ_c^{\!\top}\blambda$---to
+turn the joint problem into a variable-projection Gauss--Newton method over a
+physically consistent inertial manifold.  Inputs, cross-trial torque templates
+and contact wrenches are eliminated exactly by a sparse linear inner solve;
+kinematics, geometry and inertia are updated by a damped reduced Gauss--Newton
+step whose dynamics Jacobians are exact in the inertial direction.  The method
+clarifies what kinematics can and cannot identify (base-parameter
+combinations, a global mass gauge, the massless-body degeneracy of
+minimum-effort fitting), states where the missing information comes from in
+golf (the club as a known-inertia force sensor, the unactuated base rows,
+ground reactions), and places the zero-torque and zero-velocity counterfactuals
+(ZTCF/ZVCF) in the same algebra as exact row and column projections of the
+regressor.  A NumPy reference implementation on an analytic planar chain
+recovers geometry to $0.1\,\mathrm{mm}$, observable inertial parameters to
+within 4\,\% (prior 5\,\%), torques to 20\,\% RMS, and passes an open-loop
+forward-replay gate (0.03\,rad RMS over 0.75\,s) in 37 outer iterations and
+about five seconds for two trials, every number read from a committed,
+regenerable evidence receipt.  No human capture has been qualified with the method yet; the
+qualification gates and the engine integration path are specified so that
+claim can be earned, not asserted.
+\end{abstract}
+
+\tableofcontents
+
+\section{Status, Scope and Governance}
+\label{sec:governance}
+
+This document is an editable standalone research and experiment record in the
+sense of \texttt{AGENTS.md} (``Modeling Reference Documentation''); it is not
+the engineering design manual, whose only editable source is
+\texttt{manuals/upstreamdrift}.  It is the calculation-level reference for the
+MOSAIC estimator implemented in
+\texttt{src/shared/python/estimation/mosaic/} and for the review of the
+Dynamics-Informed Motion Estimation epic (DIME, \#11421) recorded in
+\S\ref{sec:dime_review}.  It complements, and is cross-linked from, the GS3DX
+record \texttt{docs/research/simscape\_matching\_reference/}.
+
+\paragraph{Qualification Status (Truthful).}
+\begin{itemize}[nosep]
+  \item Verified: all equations of \S\ref{sec:structure}--\S\ref{sec:algorithm}
+    against closed-form double-pendulum dynamics and synthetic ground truth
+    (36 behavioural tests, \texttt{tests/unit/estimation/mosaic/}).
+  \item Measured: the planar results of \S\ref{sec:results} on the analytic
+    fixture (capture-A/capture-O style noise levels, no engine).
+  \item Not yet done: any fit of a human capture (capture-A, capture-O), any
+    3-D floating-base model, any contact-wrench estimation, any engine-backed
+    regressor.  These are the child issues of the follow-up epic
+    (\S\ref{sec:roadmap}).  Nothing here qualifies the GS3DX IK videos.
+\end{itemize}
+
+\section{Problem Statement and Notation}
+\label{sec:problem}
+
+A subject performs $K$ trials (swings).  Trial $k$ is observed at times
+$t^k_1<\dots<t^k_{T_k}$ through markers or 2-D keypoints $\by^k_t$ with
+covariance $\mathbf{R}^k_t$, optionally with ground-reaction wrenches.  A
+rigid multibody model with configuration $\bq\in\mathcal{Q}$ (a Lie group when
+a floating base or spherical joints are present), velocity $\bv\in\R^{n_v}$ and
+acceleration $\ba$ obeys
+\begin{equation}
+  \bM(\bq;\bpi,s)\,\ba + \bh(\bq,\bv;\bpi,s) = \bB\bu + \bJ_c(\bq;s)^{\!\top}\blambda ,
+  \label{eq:eom}
+\end{equation}
+with $\bh=\mathbf{C}\bv+\mathbf{g}$, actuation map $\bB\in\R^{n_v\times n_u}$
+($n_u<n_v$: the floating base and any passive joints are unactuated), contact
+Jacobian $\bJ_c$ and wrenches $\blambda$.  Unknowns:
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+Symbol & Shared/per-trial & Meaning \\
+\midrule
+$s\in\R^{n_s}$ & shared & geometry: segment lengths, marker attachment offsets, joint-axis offsets \\
+$\bpi\in\R^{10 n_b}$ & shared & inertial parameters $(m_i,\bh_i=m_i\mathbf{c}_i,\mathbf{I}_i)$ about each body-frame origin \\
+$\btheta$ & shared & unconstrained coordinates of $\bpi$ on the consistency manifold (\S\ref{sec:consistency}) \\
+$\mathbf{C}^k\in\R^{C\times n_v}$ & per trial & spline coefficients of the kinematic trajectory $\bq^k(t)=\bP(t)\mathbf{C}^k$ \\
+$\bu^k_t$ & per trial & net joint inputs (torques; activations via a declared actuator model) \\
+$\bar\bu(\phi)$ & shared & phase-indexed torque template coupling trials \\
+$\blambda^k_t$ & per trial & contact wrenches (friction-cone constrained) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+$\bxi=(\mathbf{C}^1,\dots,\mathbf{C}^K,s,\btheta)$ are the \emph{outer}
+variables, $w=(\bu,\bar\bu,\blambda)$ the \emph{inner} variables.  Units are SI
+throughout; residuals are whitened before any norm is taken so that radians
+and metres are never mixed (cf.\ ch.~21 of the AffineDrift companion).
+
+\section{Structure Exploited}
+\label{sec:structure}
+
+\subsection{Control-Affine Form and the Inertial Regressor}
+Equation~\eqref{eq:eom} is control-affine: $\dot\bx=f(\bx)+G(\bx)\bu$ with
+$f=(\bv,-\bM^{-1}\bh+\bM^{-1}\bJ_c^{\!\top}\blambda)$ and
+$G=(0,\bM^{-1}\bB)$.  Independently, the left-hand side of \eqref{eq:eom} is
+\emph{linear} in $\bpi$ (Atkeson--An--Hollerbach; Gautier--Khalil):
+\begin{equation}
+  \bM(\bq)\ba+\bh(\bq,\bv) \;=\; \bY(\bq,\bv,\ba;s)\,\bpi ,
+  \qquad \bY\in\R^{n_v\times 10 n_b}.
+  \label{eq:regressor}
+\end{equation}
+Both facts hold for every rigid multibody engine (Pinocchio exposes $\bY$ as
+\texttt{computeJointTorqueRegressor}; MuJoCo/MJX and Drake give it by
+differentiating inverse dynamics with respect to the body inertias).  MOSAIC
+consumes only $\bY$, $\bB$, $\bJ_c$ and marker forward kinematics, so it is
+engine-agnostic by construction.
+
+\subsection{ZTCF and ZVCF as Exact Projections of the Regressor}
+\label{sec:ztcf}
+Because $\bY$ is affine in $\ba$ and $\bh=\bY(\bq,\bv,0)\bpi$, the drift and
+its parts are algebraic objects of the same regressor:
+\begin{align}
+  \ba_{\mathrm{ZTCF}}(t) &= -\bM(\bq)^{-1}\,\bY(\bq,\bv,0)\,\bpi
+    \;+\;\bM^{-1}\bJ_c^{\!\top}\blambda_0 , \label{eq:ztcf}\\
+  \ba_{\mathrm{ZVCF}}(t) &= -\bM(\bq)^{-1}\,\bY(\bq,0,0)\,\bpi
+    \;+\;\bM^{-1}\bJ_c^{\!\top}\blambda_{00}, \label{eq:zvcf}\\
+  \ba_{\mathrm{ZTCF}}-\ba_{\mathrm{ZVCF}} &= -\bM^{-1}\,[\bY(\bq,\bv,0)-\bY(\bq,0,0)]\,\bpi
+    \quad\text{(velocity-dependent drift)} .
+\end{align}
+Here $\blambda_0$ ($\blambda_{00}$) are the contact reactions recomputed under
+zero input (zero input and zero velocity) from the same constraint equations;
+in free flight they vanish.  The measured acceleration decomposes exactly as
+$\ba_{\mathrm{meas}}=\ba_{\mathrm{ZTCF}}+\bM^{-1}\bB\bu+\bM^{-1}\bJ_c^{\!\top}(\blambda-\blambda_0)$,
+which is the AffineDrift pointwise decomposition $\dot\bx-f(\bx)=G(\bx)\bu$
+with contact made explicit.
+
+\paragraph{Canonical nomenclature (fixing the inconsistencies found in the
+repository, \S\ref{sec:dime_review}).}
+\begin{itemize}[nosep]
+  \item \textbf{ZTCF}: $\bu=0$, full state kept, constraints kept, reactions
+    recomputed.  \emph{Pointwise} unless the word ``trajectory'' is attached;
+    the integrated object $\bx(t_0)+\int f(\bx_{\mathrm{ZTCF}}(\tau))d\tau$ is a
+    different curve (it follows its own flow, not the measured state) and must
+    be called the ZTCF \emph{trajectory}.
+  \item \textbf{ZVCF}: $\bv=0$ \emph{and} $\bu=0$ at each instant
+    (configuration-only drift: gravity plus constraint reactions).  The variant
+    that keeps the control is \emph{zero-velocity, control-preserved
+    acceleration} and is never abbreviated ZVCF.
+  \item Passive impedance declared in the model (joint damping, ligament
+    stiffness) is part of $f$; a feedback servo is part of $\bu$ and is removed
+    by the ZTCF.
+\end{itemize}
+
+\subsection{Where the Information Lives: Unactuated Rows}
+\label{sec:unactuated}
+Let $\bS_\perp$ select the unactuated coordinates ($\bS_\perp\bB=0$).  Then
+\eqref{eq:eom} gives, with \emph{no unknown input},
+\begin{equation}
+  \bS_\perp\,\bY(\bq,\bv,\ba)\,\bpi \;=\; \bS_\perp\bJ_c^{\!\top}\blambda .
+  \label{eq:unactuated}
+\end{equation}
+These six-per-node (floating base) or one-per-node (passive pivot) equations
+are the entire torque-free information kinematics carries about $\bpi$
+(Ayusawa--Venture--Nakamura).  Equivalently, in ZTCF language,
+$\bS_\perp\bM(\ba_{\mathrm{meas}}-\ba_{\mathrm{ZTCF}})=\bS_\perp\bJ_c^{\!\top}(\blambda-\blambda_0)$:
+the ``torque-independent feasibility criterion'' of DIME-16 is the unactuated
+projection of the regressor equation, not an additional likelihood.
+The actuated rows determine $\bu$ once $\bpi$ is known; they carry information
+about $\bpi$ only through priors on $\bu$.
+
+\subsection{The Club as a Known-Inertia Force Sensor}
+In golf the distal body is a manufactured object whose inertial parameters are
+measurable to better than 1\,\% off-line.  With $\bpi_{\mathrm{club}}$ known
+and its kinematics observed, the club's Newton--Euler equations return the
+hand wrench exactly, and the unactuated rows \eqref{eq:unactuated} become
+\emph{inhomogeneous} in the unknown human parameters,
+$\bS_\perp\bY_{\mathrm{human}}\bpi_{\mathrm{human}}=-\bS_\perp\bY_{\mathrm{club}}\bpi_{\mathrm{club}}+\dots$,
+which removes the global scale gauge without a force plate.  This is the
+golf-specific anchor used in \S\ref{sec:results}; for a humanoid the analogue
+is a known payload or the measured ground wrench.
+
+\section{Identifiability}
+\label{sec:identifiability}
+
+\begin{proposition}[Scale gauge]
+If no external wrench is measured and no anchor is imposed, the map
+$(\bpi,\bu,\blambda)\mapsto(\alpha\bpi,\alpha\bu,\alpha\blambda)$ leaves every
+residual of \eqref{eq:eom} invariant for all $\alpha>0$.  Kinematics alone
+cannot identify absolute mass.
+\end{proposition}
+
+\begin{proposition}[Base parameters]
+Only the row space of the stacked matrix
+$[\bS_\perp\bY(\bq_t,\bv_t,\ba_t)]_t$ is observable from the unactuated rows.
+A distal link's mass lumps into the proximal link's first moment and inertia
+($h_{0x}+m_1 l_0$, $I_{0}+m_1 l_0^2$ in the planar chain); the orthogonal
+complement is determined by the prior only.  The reference implementation
+reports this subspace (\texttt{structural\_observability}) and the Fisher
+information after eliminating inputs (\texttt{data\_information}).
+\end{proposition}
+
+\begin{proposition}[Massless-body degeneracy of minimum-effort fitting]
+\label{prop:massless}
+With free $\bpi$ constrained only by positivity, a free kinematic trajectory
+and any prior that penalises input magnitude, the configuration
+``all mass at the unactuated pivot, every other body massless, $\bu\equiv0$''
+attains zero dynamics residual and zero effort for \emph{every} trajectory.
+Without an anchor or a credible anthropometric prior the estimator converges to
+it.
+\end{proposition}
+\begin{proof}[Sketch]
+A body whose mass sits at the origin of the unactuated joint contributes
+$\bS_\perp\bY\bpi=0$ for all motions (zero lever arm, zero first moment, zero
+inertia); massless bodies contribute nothing; with $\bu=0$ the actuated rows
+vanish identically.  Both the dynamics and the effort terms are then at their
+global minimum.
+\end{proof}
+This degeneracy was reproduced numerically during development (\S\ref{sec:results}):
+with a weak absolute prior the fit returned $m_0=2.3\,\mathrm{kg}$ (the total)
+and zeros elsewhere.  Two remedies are structural, not cosmetic: the
+physically consistent manifold (\S\ref{sec:consistency}), which keeps every
+iterate realisable, and anchors supplying inhomogeneous information (known
+club, total mass, ground wrench).  A third is honest reporting: every fit
+publishes which directions of $\bpi$ came from the data.
+
+\begin{remark}[Effort priors bias inertia downward]
+Any penalty on $\norm{\bu}$ or $\norm{\Delta\bu}$ is informative about
+$\bpi$ because $\bu=\bB^{+}(\bY\bpi-\bJ_c^{\!\top}\blambda)$ on the actuated
+rows.  The bias is small when the unactuated rows and anchors dominate the
+information (the planar result shows $\le3\,\%$) but it must be reported, and
+model-free kinematic regularisation (a jerk prior on $\bq$) is preferable to
+strong effort priors when acceleration noise is the problem.
+\end{remark}
+
+\section{Physically Consistent Inertia}
+\label{sec:consistency}
+Physical consistency is the convex cone of parameters whose $4\times4$
+pseudo-inertia
+$\mathcal{J}(\bpi)=\begin{bmatrix}\tfrac12\operatorname{tr}(\mathbf{I})\mathbf{1}-\mathbf{I} & \bh\\ \bh^{\!\top} & m\end{bmatrix}\succeq0$
+(Wensing--Kim--Slotine).  Two representations are used:
+(i) the linear 10-vector with Euclidean projection onto the cone in the
+pseudo-inertia Frobenius metric (eigenvalue clipping; idempotent; identity on
+consistent bodies), used to sanitise priors and report violations; and
+(ii) the unconstrained log-Cholesky coordinates $\btheta$ with
+$\mathcal{J}=\mathbf{L}\mathbf{L}^{\!\top}$, $\operatorname{diag}\mathbf{L}=e^{\theta}$
+(Rucker--Wensing), used as outer variables so every iterate is realisable.
+For planar bodies $(m,h_x,h_y,I_o)$ the cone is the rotated second-order cone
+$mI_o\ge|\bh|^2$, with coordinates $(\log m,\bh,\log I_c)$,
+$I_c=I_o-|\bh|^2/m$, and a closed-form projection.  Because
+$\partial\bpi/\partial\btheta$ is available analytically, the dynamics
+Jacobian in the inertial direction is exact: $\bW\bY\,\partial\bpi/\partial\btheta$.
+
+\section{Estimation Problem}
+\label{sec:estimation}
+With trajectory basis $\bq^k_t=\bP^k_t\mathbf{C}^k$, $\bv^k_t=\mathbf{V}^k_t\mathbf{C}^k$,
+$\ba^k_t=\bA^k_t\mathbf{C}^k$ (clamped quintic B-splines; position, velocity
+and acceleration are all linear in $\mathbf{C}^k$), the reduced objective is
+\begin{equation}
+\begin{aligned}
+F(\bxi)=\;&\sum_{k,t}\rho\!\left(\norm{\mathbf{R}^{-1/2}_{kt}\big[\mathbf{m}(\bq^k_t;s)-\by^k_t\big]}^2\right)
+ + \min_{w}\Bigg[\sum_{k,t}\norm{\bW_\tau\big[\bY(\bq^k_t,\bv^k_t,\ba^k_t;s)\,\bpi(\btheta)-\bB\bu^k_t-\bJ_c^{\!\top}\blambda^k_t\big]}^2 \\
+ &\quad + w_u^2\sum\norm{\bu^k_t}^2 + w_{\Delta u}^2\sum\norm{\Delta^2\bu^k_t}^2
+   + w_T^2\sum\norm{\bu^k_t-\bar\bu_{\phi(k,t)}}^2 + w_\lambda^2\sum\norm{\blambda^k_t}^2\Bigg]\\
+ &+ \norm{\bW_s(s-s_0)}^2 + \norm{\bW_\pi(\bpi(\btheta)-\bpi_0)}^2
+   + \sum_j w_j^2\big(\mathbf{a}_j^{\!\top}\bpi(\btheta)-b_j\big)^2 ,
+\end{aligned}
+\label{eq:objective}
+\end{equation}
+where $\rho$ is a robust kernel (Huber/Cauchy by IRLS), $\bW_\tau=\operatorname{diag}(\gamma/\sigma_\tau)$
+carries the continuation factor $\gamma\in[0,1]$ and the declared dynamics
+discrepancy $\sigma_\tau$ (which must include the basis discretisation error,
+\S\ref{sec:gates}), $\mathbf{a}_j^{\!\top}\bpi=b_j$ are linear anchors (total
+mass, known club), and $\bar\bu$ is the shared phase-indexed template.
+Everything inside $\min_w$ is linear in $w$ for fixed $\bxi$: the inner problem
+is a sparse linear least-squares problem (a convex QP/SOCP when input bounds and
+friction cones are active).  This is the \emph{inverse-dynamics collocation}
+formulation (Remy--Thelen; Falisse \emph{et al.}): no forward integration
+occurs inside the optimisation, so there is no exponential sensitivity, every
+node is independent (embarrassingly parallel), and the measured states are
+feasible initial iterates.
+
+\section{Algorithm}
+\label{sec:algorithm}
+
+\subsection{Variable Projection: The ``Locally Learned Inputs''}
+For fixed $\bxi$ the inner minimiser $w^\star(\bxi)$ is the solution of sparse
+normal equations $(\bA^{\!\top}\bA)w=\bA^{\!\top}b$ (block-arrow structure:
+per-node $\bu$ blocks, a banded $\Delta^2$ coupling, a small template block).
+The inputs are therefore \emph{determined linearly from the kinematics}: this
+is the exact answer to ``is the locally learned set of inputs a
+linearisation?''---the inputs are a linear function of the inner problem
+data, not an approximation; the only linearisation in MOSAIC is the
+Gauss--Newton model of the outer step.  Eliminating $w$ exactly gives the
+Golub--Pereyra/Kaufman reduced Gauss--Newton system
+\begin{equation}
+  \mathbf{H}_{\mathrm{red}}=\bJ_\xi^{\!\top}\big(\mathbf{I}-\bA(\bA^{\!\top}\bA)^{-1}\bA^{\!\top}\big)\bJ_\xi,
+  \qquad
+  \mathbf{g}_{\mathrm{red}}=\bJ_\xi^{\!\top}r^\star ,
+  \label{eq:reduced}
+\end{equation}
+which is the Schur complement of the full Gauss--Newton matrix onto the outer
+variables (bundle-adjustment structure).  The implementation verifies
+\eqref{eq:reduced} against the explicit projector.
+
+\subsection{Outer Step}
+Levenberg--Marquardt on $F$ with Marquardt scaling and Nielsen damping updates
+(gain ratio $\varrho$; $\mu\leftarrow\mu\max\{\tfrac13,1-(2\varrho-1)^3\}$ on
+success, geometric growth on failure).  Jacobians:
+observation rows analytically through $\partial\mathbf{m}/\partial\bq\cdot\bP$
+and $\partial\mathbf{m}/\partial s$; dynamics rows exactly in $\btheta$
+($\bW\bY\,\partial\bpi/\partial\btheta$) and by \emph{vectorised} central
+differences in $(\bq,\bv,\ba,s)$---each perturbation applied to all nodes of
+all trials at once, so one iteration costs $2(3n_v+n_s)$ batched regressor
+evaluations plus one sparse factorisation.  Analytic derivatives (Singh--
+Russell--Wensing; GRiD) replace the differences without changing the
+algorithm.
+
+\subsection{Continuation}
+A schedule $\gamma\in\{0,\,10^{-2},\,10^{-1},\,1\}$ moves the problem from a
+pure kinematic fit (the current IK practice, now a special case) to the fully
+weighted dynamics-consistent fit.  Each stage is solved to tolerance before the
+next; the measured receipts (\S\ref{sec:results}) show 8--14 iterations per
+stage.  The homotopy is what makes convergence from an IK seed reliable: the
+$\gamma=0$ basin is convex-like, and the dynamics terms are switched on only
+once the kinematic residual is at its noise floor.
+
+\subsection{Convergence Properties}
+For zero-residual problems (synthetic truth, consistent model) Gauss--Newton
+converges quadratically; with noise the rate is linear with factor governed by
+residual-weighted curvature over the smallest reduced-Hessian eigenvalue.
+Weakly identifiable inertial directions make that eigenvalue small; the
+Levenberg--Marquardt damping with the Yamashita--Fukushima rule
+$\mu\propto\norm{r}$ retains local quadratic convergence under a local error
+bound even when the Jacobian is rank-deficient, which is the generic case
+here.  Global convergence to a stationary point follows from the trust-region
+acceptance test (Mor\'e).  Variable projection removes the inner variables'
+nonlinearity from the outer iteration and is known to reduce the number of
+local minima and iterations in separable problems (Golub--Pereyra 2003).
+
+\subsection{Local Policy and Replay Acceptance}
+After the fit, the discrete step of the (any-engine) model is linearised along
+$(\bx^\star,\bu^\star)$ by vectorised central differences, and a backward
+Riccati pass gives time-varying gains $\bK_t$.  The pair $(\bu^\star_t,\bK_t)$,
+$\bu=\bu^\star_t-\bK_t(\bx-\bx^\star_t)$, is the locally optimal linear policy
+around the fit---the object a whole-body controller consumes.  Acceptance is
+two-sided: the \emph{open-loop} replay from one initial state is the physical
+gate (a dynamically consistent fit must replay), and the closed-loop replay
+reports the feedback effort needed to hold the motion, which quantifies the
+fit's sensitivity.  For repeated trials the iterative-learning view
+$\bu_{k+1}=\bu_k+\mathbf{L}e_k$ converges iff $\rho(\mathbf{I}-\mathbf{G}\mathbf{L})<1$;
+with $\mathbf{L}$ the Riccati gain this is a cross-trial diagnostic, not the
+estimator.
+
+\subsection{Cross-Trial Torque Template}
+Each trial's inputs are binned by normalised phase; the trial-balanced mean
+$\bar\bu(\phi)$ enters the inner solve as a coupling prior ($w_T$) and is
+reported with its principal modes (SVD of trial deviations) as the player's
+motor signature.  On a planted rank-one structure the first mode explains
+$>99.9\,\%$ of the variance (test).
+
+\subsection{Complexity and Vectorisation}
+Per outer iteration: $O(N)$ batched regressor evaluations ($N=\sum_k T_k$
+nodes), one sparse LU of the inner normal matrix ($n_w=N n_u+Pn_u+n_\lambda$,
+banded), one dense reduced system of size $n_\xi=\sum_k C_k n_v+n_s+10n_b$.
+Trials enter only through the shared blocks, so the per-trial parts are
+independent and batch over trials; the time axis is parallel because no
+integration occurs.  The reference implementation is pure NumPy; the same
+kernels accept MJX/JAX batched regressors unchanged.
+
+\section{Qualification Gates}
+\label{sec:gates}
+A fit is reported with the following measured items; a missing item is
+``unqualified'', never ``passed''.
+\begin{enumerate}[nosep]
+  \item \textbf{Kinematic whiteness.} At $\gamma=0$ the whitened marker
+    residual RMS must be within a declared factor of 1 and uncorrelated in
+    time.  Under-resolved bases fail this gate; dynamics weighting must not be
+    switched on before it passes (Proposition~\ref{prop:massless} is reached
+    otherwise, because a basis that cannot represent the acceleration makes the
+    massless body the cheapest consistent explanation).
+  \item \textbf{Declared discrepancy.} $\sigma_\tau$ must be at least the basis
+    acceleration error times the mass scale; for the planar fixture a
+    80-coefficient quintic basis over 200 nodes gives 1\,\% acceleration error.
+  \item \textbf{Physical consistency.} Every reported $\bpi$ is on the cone by
+    construction; violations of the sanitised prior are logged.
+  \item \textbf{Observability.} Rank and per-parameter observable fraction of
+    the unactuated-row regressor; posterior information after eliminating
+    inputs; directions supplied by the prior are named.
+  \item \textbf{Open-loop replay.} Configuration RMS and divergence time from
+    one initial state with the fitted inputs; the accepted tolerance is
+    declared beforehand.
+  \item \textbf{Closed-loop effort.} TVLQR feedback RMS relative to the
+    nominal inputs.
+  \item \textbf{Cross-trial consistency.} Template explained variance and the
+    spread of shared parameters across leave-one-trial-out refits.
+\end{enumerate}
+
+\section{Reference Results on the Planar Fixture}
+\label{sec:results}
+Fixture: pinned planar 3-link chain (pelvis--arm--club analogue), first joint
+unactuated, true lengths $(0.9,0.6,0.4)\,\mathrm{m}$, two trials of 150 nodes
+at 200\,Hz driven by smooth torques of RMS $0.54\,\mathrm{N\,m}$, six markers
+with $0.5\,\mathrm{mm}$ noise, initial geometry $+5\,\%$, inertial prior
+perturbed by $\pm10\,\%$ (projected onto the cone), anthropometric
+$\sigma=15\,\%$, total mass and club inertia anchored, $\sigma_\tau=0.2\,\mathrm{N\,m}$,
+$w_u=0.3$, $w_{\Delta u}=10$.  Measured values (receipt \texttt{reference\_results.json}):
+\begin{center}
+\begin{tabular}{@{}l r@{}}
+\toprule
+Initialisation (sequential IK, 2 trials) & 0.7\,s \\
+Joint fit (4 stages, 8+9+9+11 iterations, all converged) & 2.3\,s \\
+Replay + TVLQR (2 trials) & 1.4\,s \\
+\midrule
+Geometry error (identifiable lengths) & $0.024\,\mathrm{mm}$ \\
+Kinematic RMS error & $0.70$, $0.74\,\mathrm{mrad}$ \\
+Torque RMS error / torque RMS & $0.106/0.542 = 19.5\,\%$ \\
+Inertial parameters, max relative error over observable non-zero entries & 3.6\,\% (prior: 4.6\,\%) \\
+Structural observability rank & 9 of 12 ($m_0$ unobservable, as predicted) \\
+Open-loop replay, configuration RMS over 0.75\,s & $0.0304$, $0.0307\,\mathrm{rad}$; no divergence \\
+Closed-loop replay / feedback effort RMS & $0.00052$, $0.00053\,\mathrm{rad}$ / $0.021$, $0.030\,\mathrm{N\,m}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Negative results retained: (a) with a 16- or 32-coefficient basis the fit
+converged to the massless body (gate~1 failure); (b) with $\sigma_\tau=0.05\,\mathrm{N\,m}$
+and no input smoothness the torques were dominated by acceleration noise
+(RMS error $>1\,\mathrm{N\,m}$); (c) with a weak absolute prior and no club
+anchor the scale gauge was resolved by the degenerate solution.  Each is now a
+test or a gate.
+
+\paragraph{Reproduction and Evidence Receipt.}
+Every number in the table is read from the committed receipt
+\texttt{docs/research/model\_aware\_matching/reference\_results.json}, which is
+regenerated deterministically (fixed seeds) by
+\begin{verbatim}
+export PYTHONPATH=$PWD:$PWD/src:$PWD/src/shared/python
+python3 -m src.shared.python.estimation.mosaic.reference_evidence
+python3 -m pytest tests/unit/estimation/mosaic -q
+\end{verbatim}
+and verified by \texttt{test\_reference\_evidence.py}, which re-runs the fixture
+and fails if any quoted quantity drifts from the receipt beyond its stated
+tolerance (timings are recorded but never compared; they depend on the host).
+Timings above were measured on NumPy~2.5/SciPy~1.18, one core of the session
+container.
+
+\section{Engine Integration Path}
+\label{sec:engines}
+\begin{itemize}[nosep]
+  \item \textbf{Regressor provider.} Implement \texttt{RegressorModel} for
+    Pinocchio (\texttt{computeJointTorqueRegressor}, batched over nodes in
+    C++), MuJoCo (\texttt{mj\_inverse} differentiated w.r.t.\ body inertias,
+    or MJX autodiff with \texttt{vmap}), Drake (AutoDiffXd).  Marker forward
+    kinematics and Jacobians come from the same engine.
+  \item \textbf{Floating base and manifold.} Replace the Euclidean spline by a
+    spline in local coordinates with retraction (Sol\`a); the inner solve is
+    unchanged because it never differentiates $\bq$.
+  \item \textbf{Contact.} Add $\blambda$ to $w$ with friction-cone/unilateral
+    constraints (the inner problem becomes a small SOCP; use an active-set or
+    proximal solver; the reduced system is unchanged on the free set).  Treat
+    measured GRF as observations of $\blambda$, never as decision variables.
+  \item \textbf{Observations.} Markerless 2-D keypoints enter through camera
+    projection with robust kernels; marker attachment offsets are geometry
+    variables so dimension refinement propagates to the markers.
+  \item \textbf{Actuation layer.} Net torques first; an optional declared
+    joint-level activation model maps torques to bounded activations with
+    first-order dynamics (reported as a model choice, not a measurement).
+\end{itemize}
+
+\section{Generalisation to Humanoids and Manipulation}
+The kernels are model-agnostic: a humanoid's floating-base rows supply
+\eqref{eq:unactuated}, a known payload or the measured ground wrench supplies
+the anchor, and the output $(s,\bpi,\bu^\star,\bK)$ is a reference-plus-gains
+schedule that whole-body controllers consume directly.  For manipulation the
+object plays the club's role (unknown inertia identified from the wrench
+transmitted through a known-inertia tool, or vice versa).  Identified
+parameters become the nominal model; residual learning or light randomisation
+covers what remains, rather than replacing identification.
+
+\section{Review of the DIME Epic and Repository Defects}
+\label{sec:dime_review}
+The audit of \#11421 (child issues \#11422--\#11437, all merged 2026-10-02..04)
+found that the estimator contracts and bookkeeping landed but the estimator
+largely did not.  Recorded for correction, with file references at audit
+commit \texttt{21a2ed06}:
+\begin{itemize}[nosep]
+  \item No engine backs any DIME provider; the \texttt{DynamicsProvider}
+    protocol lacks derivatives, parameter setters and batching
+    (\texttt{dime\_contracts.py:930-956}).
+  \item The ``coupled state-control window'' is control-only single shooting
+    with hard-coded zero defects and costs (\texttt{dime\_dynamics\_window.py:517-566,604}).
+  \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
+  \item Learned initialisers, ablations, baseline and replay audit return
+    constants (\texttt{dime\_learned\_initializers.py:517-753},
+    \texttt{dime\_benchmark\_ablations.py:214-255}, \texttt{dime\_manifest.py:563-629},
+    \texttt{dime\_continuous\_replay.py:351-417}); solver-cache timings are fabricated
+    and its key omits the targets (\texttt{dime\_solver\_cache.py:293-313,408-418}).
+  \item \texttt{multi\_trial.py:379} vs \texttt{:413-426}: locked parameters with a
+    prior give a residual/Jacobian row mismatch; its covariance is conditional,
+    not marginal.
+  \item \texttt{drift\_prediction.py}: covariance propagation omits
+    $\partial f/\partial\bx$; a horizon collapses to one step; the default
+    selection matrix actuates the root.
+  \item \texttt{dime\_manifold.py}: \texttt{local\_coordinates\_jacobian} is the
+    identity; the retraction Jacobian is valid only at zero velocity.
+  \item ZVCF is defined two incompatible ways (\texttt{ztcf\_zvcf.py:339}
+    vs \texttt{counterfactual.py:62,98}); \texttt{\_dynamics\_interface.py:227} has a
+    sign error; the GS3DX reference's ZTCF equation carried an undefined
+    $\blambda$ under a ``contact free'' heading and integrated the drift along
+    the measured state (corrected in that document alongside this one).
+  \item No inertial regressor existed anywhere in the estimation package.
+\end{itemize}
+
+\section{Roadmap}
+\label{sec:roadmap}
+The follow-up epic (MOSAIC) sequences: engine regressor providers and a
+conformance test against this reference; floating-base manifold spline;
+contact wrenches with cones and GRF observations; 2-D keypoint observations and
+attachment-offset geometry; capture-A/capture-O fits with the gates of
+\S\ref{sec:gates}; multi-swing acquisition (the repository holds one trial per
+capture); analytic derivatives and MJX batching; activation layer; and
+remediation of the defects above.  Promotion criteria are frozen before the
+experiments: open-loop replay tolerance, torque RMS against synthetic truth,
+and time-to-accepted-match against the IK+smoothing baseline, all measured.
+
+\section{Non-Claims}
+This document does not claim real-time performance, a global optimum, muscle
+force identification, or validity of any human fit.  Synthetic truth is truth
+of the simulator.  Numbers quoted are measured on the stated fixture and
+hardware and are reproducible by the stated command.
+
+\begin{thebibliography}{99}
+\bibitem{AtkesonAnHollerbach1986} C.~G.~Atkeson, C.~H.~An, J.~M.~Hollerbach. Estimation of inertial parameters of manipulator loads and links. \emph{IJRR} 5(3), 1986.
+\bibitem{GautierKhalil1990} M.~Gautier, W.~Khalil. Direct calculation of minimum set of inertial parameters of serial robots. \emph{IEEE T-RA} 6(3), 1990.
+\bibitem{Ayusawa2014} K.~Ayusawa, G.~Venture, Y.~Nakamura. Identifiability and identification of inertial parameters using the underactuated base-link dynamics for legged multibody systems. \emph{IJRR} 33(3), 2014.
+\bibitem{Wensing2018} P.~M.~Wensing, S.~Kim, J.-J.~E.~Slotine. Linear matrix inequalities for physically consistent inertial parameter identification. \emph{RA-L} 3(1), 2018. arXiv:1701.04395.
+\bibitem{Rucker2022} C.~Rucker, P.~M.~Wensing. Smooth parameterization of rigid-body inertia. \emph{RA-L} 7(2), 2022.
+\bibitem{Lee2020} T.~Lee, P.~M.~Wensing, F.~C.~Park. Geometric robot dynamic identification: a convex programming approach. \emph{IEEE T-RO} 36(2), 2020.
+\bibitem{Traversaro2016} S.~Traversaro, S.~Brossette, A.~Escande, F.~Nori. Identification of fully physical consistent inertial parameters using optimization on manifolds. \emph{IROS} 2016. arXiv:1610.08703.
+\bibitem{Wensing2024} P.~M.~Wensing, G.~Niemeyer, J.-J.~E.~Slotine. A geometric characterization of observability in inertial parameter identification. \emph{IJRR}, 2024. arXiv:1711.03896.
+\bibitem{GolubPereyra2003} G.~Golub, V.~Pereyra. Separable nonlinear least squares: the variable projection method and its applications. \emph{Inverse Problems} 19, 2003.
+\bibitem{Kaufman1975} L.~Kaufman. A variable projection method for solving separable nonlinear least squares problems. \emph{BIT} 15, 1975.
+\bibitem{YamashitaFukushima2001} N.~Yamashita, M.~Fukushima. On the rate of convergence of the Levenberg--Marquardt method. \emph{Computing Suppl.} 15, 2001.
+\bibitem{More1978} J.~J.~Mor\'e. The Levenberg--Marquardt algorithm: implementation and theory. \emph{Numerical Analysis}, LNM 630, 1978.
+\bibitem{Nielsen1999} H.~B.~Nielsen. Damping parameter in Marquardt's method. IMM-REP-1999-05, DTU, 1999.
+\bibitem{RemyThelen2009} C.~D.~Remy, D.~G.~Thelen. Optimal estimation of dynamically consistent kinematics and kinetics for forward dynamic simulation of gait. \emph{J.~Biomech.\ Eng.} 131(3), 2009.
+\bibitem{Falisse2019} A.~Falisse \emph{et al.} Rapid predictive simulations with complex musculoskeletal models suggest that diverse healthy and pathological human gaits can emerge from similar control strategies. \emph{J.~R.~Soc.\ Interface} 16, 2019.
+\bibitem{Werling2023} K.~Werling \emph{et al.} AddBiomechanics: automating model scaling, inverse kinematics, and inverse dynamics from human motion data through sequential optimization. \emph{PLOS ONE}, 2023.
+\bibitem{Dembia2020} C.~L.~Dembia \emph{et al.} OpenSim Moco: musculoskeletal optimal control. \emph{PLOS Comput.\ Biol.}, 2020.
+\bibitem{Giftthaler2018} M.~Giftthaler \emph{et al.} A family of iterative Gauss--Newton shooting methods for nonlinear optimal control. \emph{IROS} 2018. arXiv:1711.11006.
+\bibitem{Jallet2025} W.~Jallet \emph{et al.} PROXDDP: proximal constrained trajectory optimization. \emph{IEEE T-RO}, 2025.
+\bibitem{Singh2022} S.~Singh, R.~P.~Russell, P.~M.~Wensing. Efficient analytical derivatives of rigid-body dynamics using spatial vector algebra. \emph{RA-L} 7(2), 2022.
+\bibitem{Sarkka2023} S.~S\"arkk\"a, \'A.~F.~Garc\'ia-Fern\'andez. Temporal parallelization of dynamic programming and linear quadratic control. \emph{IEEE TAC}, 2023.
+\bibitem{Sola2018} J.~Sol\`a, J.~Deray, D.~Atchuthan. A micro Lie theory for state estimation in robotics. arXiv:1812.01537, 2018.
+\bibitem{Bristow2006} D.~A.~Bristow, M.~Tharayil, A.~G.~Alleyne. A survey of iterative learning control. \emph{IEEE Control Systems Magazine} 26(3), 2006.
+\bibitem{deLeva1996} P.~de~Leva. Adjustments to Zatsiorsky--Seluyanov's segment inertia parameters. \emph{J.~Biomech.} 29(9), 1996.
+\bibitem{AffineDriftZTCF} AffineDrift. The zero-torque counterfactual. \url{https://www.affinedrift.com/articles/zero-torque-counterfactual.html}.
+\bibitem{DIME} UpstreamDrift. Epic \#11421, Dynamics-Informed Mocap Matching With ZTCF Prediction and Continuous Forward Replay, and children \#11422--\#11437.
+\end{thebibliography}
+\end{document}
