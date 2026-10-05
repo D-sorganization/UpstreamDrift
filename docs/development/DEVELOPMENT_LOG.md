@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11190 · Disable FastRestart for Solve_Starting_Pose and Resolve Model Path in Run_Leaderboard
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11190
+- **Branch:** fix/11190-motion-matching-fast-restart
+- **PR:** #11518
+- **Paths:** see #11518
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`d816c998`; collated from changes/11190-disable-fastrestart-for-solve-starting-p.md)
+- **Summary:** Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard
+- **Next step:** Merge the PR.
+
 ### DL-#9507 - Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
 
 - **State:** in_review
