@@ -179,3 +179,19 @@ def test_a_real_enqueue_failure_is_still_a_failure(
     )
     ok, _ = requeue._guard_enqueue("o/r", 7)
     assert ok is False
+
+
+def test_importing_the_module_leaves_sys_path_unchanged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A lasting ``scripts/`` entry on sys.path shadows same-named top-level
+    packages for every later import in the process: UpstreamDrift's
+    ``scripts/motion_capture`` hid ``src/motion_capture`` (UD#11577)."""
+    monkeypatch.setattr(sys, "path", [p for p in sys.path if p != str(_SCRIPTS)])
+    before = list(sys.path)
+    spec = importlib.util.spec_from_file_location("_requeue_probe", _SPEC.origin)
+    assert spec and spec.loader
+    probe = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, "_requeue_probe", probe)
+    spec.loader.exec_module(probe)
+    assert sys.path == before

@@ -23,8 +23,15 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import automerge_guard  # noqa: E402
+# Expose this directory only while importing the guard. A lasting sys.path
+# entry would shadow any same-named top-level package for the rest of the
+# process (UpstreamDrift's scripts/motion_capture hid src/motion_capture).
+_HERE = str(Path(__file__).resolve().parent)
+sys.path.insert(0, _HERE)
+try:
+    import automerge_guard  # noqa: E402
+finally:
+    sys.path.remove(_HERE)
 
 logger = logging.getLogger("requeue_stalled_merges")
 
