@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11580 | Align launcher API capability tests with reconciled capability matrix |
 | 2026-10-05 | #11576 | Reconcile engine capability matrix with get_capabilities and add consistency test |
 | 2026-10-05 | #11575 | Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation |
 | 2026-10-05 | #11568 | Drake full-body fit scores forward kinematics of the Drake rollout instead of the warm-start candidate's markers |
