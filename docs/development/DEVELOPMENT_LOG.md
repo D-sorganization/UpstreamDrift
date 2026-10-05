@@ -3263,6 +3263,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11552 · Fix(Estimation): DIME Initialisers, Ablations and Manifest Report Not-Measured Instead of Constants or Ground-Truth-Derived Figures
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11552
+- **Branch:** merged via #11559
+- **PR:** #11559
+- **Paths:** see #11559
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`3637c80e`; collated from changes/11552-fix-estimation-dime-initialisers-ablatio.md)
+- **Summary:** fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures
+- **Next step:** Shipped in PR #11559.
+
 ### DL-#11551 · DIME Replay and Engine Qualification Fail Closed on Missing Reference/Metrics; Replay Provenance Read From the Environment
 
 - **State:** shipped

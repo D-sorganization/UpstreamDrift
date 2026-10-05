@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11559 | fix(estimation): DIME initialisers, ablations and manifest report not-measured instead of constants or ground-truth-derived figures |
 | 2026-10-05 | #11558 | DIME replay and engine qualification fail closed on missing reference/metrics; replay provenance read from the environment |
 | 2026-10-05 | #11562 | drift prediction propagates covariance through F = df/dx per step, steps the full horizon as H steps of dt, and never actuates the floating-base root by default |
 | 2026-10-05 | #11557 | Multi-trial MAP: residual and Jacobian prior rows share one layout (locked priors excluded from both); posterior covariance is the Schur marginal over the shared parameters, reported as unavailable (`covariance_status="rank_deficient"`, NaN) when the Fisher matrix is singular; calculation documented in docs/conventions/canonical-v2.md §6.1 |
