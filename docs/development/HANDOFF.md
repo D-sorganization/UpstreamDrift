@@ -1,6 +1,6 @@
 # BunkerShot3D Versioned Workbench API Route — #9545
 
-- Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-worktrees/claude-9545`; branch `claude/issue-9545-api`; PR: draft (`Refs #9545`). Entry: DL-#9545.
+- Repository: `D-sorganization/UpstreamDrift`; worktree `UpstreamDrift-worktrees/claude-9545`; branch `claude/issue-9545-api`; PR: #11516 (draft, `Refs #9545`). Entry: DL-#9545.
 - Governing issue: #9545 (epic #9541). Sub-task scope: close the `api: null` gap for `tools.bunkershot3d_workbench`.
 - Completed:
   - `src/api/routes/bunker_workbench.py`: `POST /tools/bunker-workbench/v1/evaluate` (auto-registered at root, `/api`, `/api/v1`). Lazy model import; sync handler (threadpool). Request: `extra="forbid"`, no inf/nan, ranges mirror `widgets.py` spin boxes, required handedness (left -> 422 `handedness_unsupported`). `WorkbenchInputError` -> 422 `invalid_workbench_input`. Predictive objective -> 422 `objective_not_predictive` (disposition `unavailable-uncalibrated`); exploratory objective reported with `degenerate` flag and `ranking_permitted: false`. Refused shots carry no numbers (ADR-0032). `evaluation_record`/`record_digest` are public pure functions.

@@ -1486,6 +1486,7 @@ Aligned refined-objective review (2026-10-03 UTC): actual sparse refined preview
 - **Owner:** claude
 - **Issue:** #9545 (epic #9541)
 - **Branch:** claude/issue-9545-api
+- **PR:** #11516 (draft)
 - **Paths:** src/api/routes/bunker_workbench.py; src/tools/bunker_shot_gui/report.py; src/tools/bunker_shot_gui/render.py; src/config/feature_parity.json; tests/bunkershot3d/test_bunker_workbench_api.py
 - **Started:** 2026-10-04
 - **Last verified:** 2026-10-04 at SELF (RED: collection ImportError; GREEN: 24 contract tests pass; `tests/bunkershot3d -m "contract or unit"` 2955 passed, one unrelated xdist worker crash; LoD, file-size, error-handling, suite-marker and suppression gates clean)
