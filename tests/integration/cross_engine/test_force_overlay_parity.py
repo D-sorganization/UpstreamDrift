@@ -69,7 +69,6 @@ ENGINE_PARAMS = [
     pytest.param(name, marks=getattr(pytest.mark, f"requires_{name}"))
     for name in ENGINES
 ]
-_PROVIDER_ISSUE = {"mujoco": "FTO-9 (#11294)"}
 _NO_CONTACT_REASON = {
     "pinocchio": (
         "Pinocchio has no contact model: contacts are caller-supplied "
@@ -196,7 +195,7 @@ def _probe(name: str) -> tuple[type | None, str]:
         return None, f"{name} is not installed ({exc})"
     if not hasattr(cls, "get_force_torque_frame"):
         return None, (
-            f"{name} force/torque provider {_PROVIDER_ISSUE.get(name, '')} is not "
+            f"{name} force/torque provider is not "
             f"on this branch: {class_name} has no get_force_torque_frame"
         )
     return cls, ""
