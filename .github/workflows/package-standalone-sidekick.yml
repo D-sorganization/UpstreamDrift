@@ -28,6 +28,10 @@ permissions:
 
 jobs:
   build-wheel:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: Build sdist + wheel
     runs-on: d-sorg-fleet-docker
     # A cold pinned-Tools checkout plus frontend and Python builds can consume
@@ -145,6 +149,10 @@ jobs:
           if-no-files-found: error
 
   smoke-test-wheel:
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     name: Smoke-test wheel (Python ${{ matrix.python }})
     needs: build-wheel
     runs-on: d-sorg-fleet-docker
@@ -162,8 +170,7 @@ jobs:
         with:
           submodules: false
           persist-credentials: false
-          sparse-checkout: tests/fixtures/wgs.json
-          sparse-checkout-cone-mode: false
+          sparse-checkout: tests/fixtures
       - name: Isolate Python tool cache (prevent shared-cache races)
         if: runner.os != 'Windows'
         shell: bash

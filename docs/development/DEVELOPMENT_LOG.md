@@ -17,6 +17,45 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11513 · Point Contributors at Change Fragments in Post_Spec_Reminder
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11513
+- **Branch:** fix/11513-post-spec-reminder-fragments
+- **PR:** #11519
+- **Paths:** see #11519
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`739df607`; collated from changes/11513-point-contributors-at-change-fragments-i.md)
+- **Summary:** Point contributors at change fragments in post_spec_reminder
+- **Next step:** Merge the PR.
+
+### DL-#11190 · Disable FastRestart for Solve_Starting_Pose and Resolve Model Path in Run_Leaderboard
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11190
+- **Branch:** fix/11190-motion-matching-fast-restart
+- **PR:** #11518
+- **Paths:** see #11518
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`d816c998`; collated from changes/11190-disable-fastrestart-for-solve-starting-p.md)
+- **Summary:** Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard
+- **Next step:** Merge the PR.
+
+### DL-#9507 · Cone-Mode Sparse Checkout in Sidekick Wheel Smoke Job
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #9507
+- **Branch:** `claude/issue-9507`
+- **Paths:** `.github/workflows/package-standalone-sidekick.yml`, `tests/unit/packaging/test_standalone_sidekick_workflows.py`
+- **Started:** 2026-10-04
+- **Last verified:** 2026-10-05 (`43d63ce9`; collated from changes/9507-fail-fast-with-an-explicit-incomplete-ch.md)
+- **Summary:** `smoke-test-wheel` used non-cone sparse checkout, which leaves `core.sparseCheckout=true` in `.git/config` and poisons later jobs on reused self-hosted runners. Switched to cone mode on `tests/fixtures` and added a guard test over all workflows.
+- **Next step:** Merge the PR and confirm no runner reports tracked files missing after a Sidekick packaging run.
+- **PR:** #11522
+
 ### DL-#10950 - Exploratory GS3DX Simscape Model: Quaternion Joints and Full-Body Under the 1,000-Block Budget
 
 - **State:** in_progress
@@ -3223,6 +3262,32 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#11525 · CLAUDE.md Is Prettier-Clean: Restored the Mangled Where-to-Edit Code Spans and Spaced the @AGENTS.md Import
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11525
+- **Branch:** merged via #11526
+- **PR:** #11526
+- **Paths:** see #11526
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`45110b2b`; collated from changes/11525-claude-md-is-prettier-clean-restored-the.md)
+- **Summary:** CLAUDE.md is prettier-clean: restored the mangled Where-to-edit code spans and spaced the @AGENTS.md import
+- **Next step:** Shipped in PR #11526.
+
+### DL-#1989 · Keep Fork PRs Off the Self-Hosted Fleet: Fork Guard on PR-Triggered Jobs, Hosted Route for the Quality-Gate Lane, and a Static Checker (RM#1989)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1989
+- **Branch:** merged via #11523
+- **PR:** #11523
+- **Paths:** see #11523
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`c20fb0b7`; collated from changes/1989-fork-pr-self-hosted-guard.md)
+- **Summary:** Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989)
+- **Next step:** Shipped in PR #11523.
 
 ### DL-#10750 · Keep Test-Generated JSON Out of Committed Working Tree
 

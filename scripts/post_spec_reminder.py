@@ -56,18 +56,25 @@ def build_reminder_body(policy_url: str) -> str:
     """
     return f"""## -- {COMMENT_MARKER}
 
-Source files were modified in this PR but `SPEC.md` was not updated.
+Source files were modified in this PR but `SPEC.md` was not updated and no valid change fragment was found.
 
 **Per the [Specification-Driven Development Policy]({policy_url}):**
-- Any PR that adds, removes, or changes functionality must update SPEC.md
-- Update the relevant sections (features, architecture, tests, dependencies, etc.)
-- Add ONE change-log row keyed by this PR: `| YYYY-MM-DD | #<pr> | summary |`
-- Do NOT bump the `Spec Version` field and do NOT put a serial
-  version in the row: see Repository_Management#1520
+- Any PR that adds, removes, or changes functionality must document its changes.
+- **Recommended (avoids merge conflicts):** create a change fragment:
+  ```bash
+  python shared_scripts/changes_fragment.py new --issue N --summary "One-line summary"
+  ```
+  `collate-changes` will fold the fragment into `SPEC.md` automatically upon merge.
+- **Fallback:** update `SPEC.md` directly:
+  - Update the relevant sections (features, architecture, tests, dependencies, etc.)
+  - Add ONE change-log row keyed by this PR: `| YYYY-MM-DD | #<pr> | summary |`
+  - Do NOT bump the `Spec Version` field and do NOT put a serial
+    version in the row: see Repository_Management#1520
 
 **To resolve:**
-1. Update `SPEC.md` to reflect your changes, OR
-2. Add the `spec-exempt` label if this PR genuinely doesn't affect the spec (e.g., pure refactor with no behavior change)
+1. Add a change fragment (`changes/<issue>-<slug>.md`), OR
+2. Update `SPEC.md` directly to reflect your changes, OR
+3. Add the `spec-exempt` label if this PR genuinely doesn't affect the spec (e.g., pure refactor with no behavior change)
 
 *This check is enforced by the spec-check CI workflow.*"""
 

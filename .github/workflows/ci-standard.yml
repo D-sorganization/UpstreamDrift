@@ -46,7 +46,11 @@ jobs:
   local-only-workflows:
     name: Reject hosted runner routing
     needs: changed-paths
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -65,7 +69,11 @@ jobs:
   pinned-actions:
     name: Enforce action SHA pinning
     needs: changed-paths
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -91,7 +99,11 @@ jobs:
   workflow-inventory:
     name: Enforce workflow inventory
     needs: changed-paths
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -117,7 +129,11 @@ jobs:
   urdf-layering:
     name: Enforce URDF subsystem layering (ADR 0007)
     needs: changed-paths
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
@@ -149,9 +165,10 @@ jobs:
   #
   # Reverting: set the repo variable CI_RUNNER_MODE=local.
   pick-runner:
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 3
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -164,9 +181,15 @@ jobs:
           CI_RUNNER_MODE: ${{ vars.CI_RUNNER_MODE }}
           REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
           RUNNER_LABEL: d-sorg-fleet-docker
+          FORK_PR: ${{ github.event.pull_request &&
+            github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           mode="${CI_RUNNER_MODE:-auto}"
-          if [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
+          if [ "$FORK_PR" = "true" ]; then
+            # Fork PRs never run on the self-hosted fleet (RM#1989).
+            mode="hosted"
+            runner="ubuntu-latest"
+          elif [ "$REPOSITORY_PRIVATE" != "true" ] && [ "$mode" != "local" ]; then
             mode="hosted"
             runner="ubuntu-latest"
           else
@@ -194,9 +217,10 @@ jobs:
   # runs (and reports `quality-gate`) on every PR.
   changed-paths:
     name: changed-paths
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 10
     outputs:
       code: ${{ steps.detect.outputs.code }}
@@ -312,7 +336,10 @@ jobs:
     name: code-quality
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     steps:
       - name: Clean corrupt git objects
@@ -623,7 +650,10 @@ jobs:
     name: security-scans
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     steps:
       - name: Clean corrupt git objects
@@ -877,7 +907,10 @@ jobs:
     name: repo-structure-gates
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -1059,7 +1092,10 @@ jobs:
     name: unit-test-gate
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     # 25 min of pytest plus a cached-registry release build of one crate.
     timeout-minutes: 35
     env:
@@ -1212,7 +1248,10 @@ jobs:
     name: publication-quality
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.publication == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
       - name: Clean corrupt git objects
@@ -1268,7 +1307,10 @@ jobs:
     name: docs-governance-gates
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.docs == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -1286,7 +1328,10 @@ jobs:
     name: companion-workflows
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -1340,7 +1385,10 @@ jobs:
     name: seam-drift-gate
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -1367,7 +1415,10 @@ jobs:
   always-on-unit-lane:
     name: always-on-unit-lane
     needs: [pick-runner, changed-paths]
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 10
     steps:
       - name: Clean corrupt git objects
@@ -1451,7 +1502,10 @@ jobs:
   # PR merged anyway. They are now `lod-quality-gate` and `docs-quality-gate`.
   agent-context:
     name: agent-context
-    runs-on: ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet' }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet' }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -1507,9 +1561,10 @@ jobs:
     # the fleet, so no Actions minutes are ever billed.
     #
     # Reverting: set the repo variable CI_RUNNER_MODE=local.
-    runs-on:
-      ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
-      'd-sorg-fleet-docker' }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' || 'd-sorg-fleet-docker' }}
     timeout-minutes: 5
     steps:
       - name: Require Current Agent Context
@@ -1650,7 +1705,11 @@ jobs:
 
   core-only-install:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1724,7 +1783,11 @@ jobs:
   dependency-consistency:
     name: dependency-consistency
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
@@ -1793,7 +1856,10 @@ jobs:
   tests:
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     # Budget measured from CI run 33779933815 (job 100731026646, `tests (3.11)`,
     # commit ee247039, 2026-09-03): the serial core lane needed 2m36s to collect
     # and had executed 24% of its 40,488 selected tests after 30m45s (5.27
@@ -2428,7 +2494,11 @@ jobs:
 
   parity-smoke:
     needs: pick-runner
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
@@ -2488,7 +2558,11 @@ jobs:
 
   alembic-postgres-round-trip:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 45
     services:
@@ -2599,7 +2673,10 @@ jobs:
   shared-tools-consumer-contracts:
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -2726,7 +2803,10 @@ jobs:
     name: impact-explorer-web-build
     needs: [pick-runner, changed-paths]
     if: needs.changed-paths.outputs.code == 'true'
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
       - name: Clean corrupt git objects
@@ -2800,7 +2880,11 @@ jobs:
 
   frontend-tests:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     defaults:
@@ -2877,7 +2961,12 @@ jobs:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
-    if: false # DISABLED - Requires MATLAB license not available in CI
+    # DISABLED - Requires MATLAB license not available in CI
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (false)
     continue-on-error: true
     steps:
       - name: Clean corrupt git objects
@@ -2909,7 +2998,12 @@ jobs:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
-    if: false # DISABLED - No Arduino components in this project
+    # DISABLED - No Arduino components in this project
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (false)
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -2961,7 +3055,11 @@ jobs:
   # =============================================================================
   rust-quality-gate:
     needs: [pick-runner, changed-paths]
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     strategy:
       fail-fast: false
       matrix:
@@ -3244,7 +3342,11 @@ jobs:
   rust-quickstart:
     name: Rust Quickstart
     needs: changed-paths
-    if: needs.changed-paths.outputs.code == 'true'
+    # Fork PRs never run on the self-hosted fleet (RM#1989).
+    if: >-
+      (!github.event.pull_request ||
+      github.event.pull_request.head.repo.full_name == github.repository) &&
+      (needs.changed-paths.outputs.code == 'true')
     # No `needs: pick-runner` on this job, so it routes directly rather than
     # gaining a dependency edge just to learn where to run.
     runs-on:
@@ -3376,7 +3478,10 @@ jobs:
     # In the required `quality-gate` aggregate's `needs`, so a fleet pin here
     # blocked every merge a second time. Pure `cargo`/`maturin` work with no
     # fleet-local state, so it follows the dispatcher like its siblings.
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: >-
+      ${{ github.event.pull_request &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
