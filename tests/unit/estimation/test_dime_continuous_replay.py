@@ -55,6 +55,7 @@ from src.shared.python.estimation.dime_continuous_replay import (
     ContinuousReplayResult,
     IndependentReplayMetrics,
     ReplayReceipt,
+    ReplayProvenanceSources,
     SmoothedTrajectoryResult,
     execute_continuous_replay,
     smooth_backward_trajectory,
@@ -626,7 +627,10 @@ class TestFailClosedOnMissingEvidence:
 
     def test_red_provenance_uses_injected_sources(self) -> None:
         fixed = datetime(2031, 2, 3, 4, 5, 6, tzinfo=UTC)
-        result = self._run(git_commit_source=lambda: "a" * 40, clock=lambda: fixed)
+        sources = ReplayProvenanceSources(
+            git_commit=lambda: "a" * 40, clock=lambda: fixed
+        )
+        result = self._run(options=ContinuousReplayOptions(provenance_sources=sources))
         prov = result.provenance
         assert prov.git_commit == "a" * 40
         assert prov.created_at == "2031-02-03T04:05:06Z"
@@ -638,7 +642,8 @@ class TestFailClosedOnMissingEvidence:
         assert prov.created_at != "2026-10-04T00:00:00Z"
 
     def test_red_unknown_git_is_explicit_marker_not_fake_sha(self) -> None:
-        result = self._run(git_commit_source=lambda: "unknown")
+        sources = ReplayProvenanceSources(git_commit=lambda: "unknown")
+        result = self._run(options=ContinuousReplayOptions(provenance_sources=sources))
         assert result.provenance.git_commit == "unknown"
 
     def test_red_reset_count_is_derived_from_replay(self) -> None:

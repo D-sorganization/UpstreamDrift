@@ -46,6 +46,29 @@ from src.shared.python.shadow_tracker.contracts import RolloutRequest
 DIME_REPLAY_SCHEMA_VERSION = "dime-continuous-replay-receipt/1.0"
 
 
+def _utc_now() -> datetime:
+    """Current wall-clock time in UTC."""
+    return datetime.now(UTC)
+
+
+@dataclass(frozen=True)
+class ReplayProvenanceSources:
+    """Where replay provenance comes from when no record is supplied (#11551).
+
+    ``git_commit`` returns the full commit SHA or ``"unknown"``; ``clock``
+    returns an aware datetime. Both are injectable so tests stay hermetic.
+    """
+
+    git_commit: Callable[[], str] = git_commit_full
+    clock: Callable[[], datetime] = _utc_now
+
+    def __post_init__(self) -> None:
+        require(
+            callable(self.git_commit) and callable(self.clock),
+            "provenance sources must be callable",
+        )
+
+
 @dataclass(frozen=True)
 class ContinuousReplayOptions:
     """Declared configuration for continuous forward replay."""
@@ -62,6 +85,9 @@ class ContinuousReplayOptions:
     )
     integrator_name: str = "rk4"
     intermediate_resets: Sequence[tuple[int, DimeCompleteState]] | None = None
+    provenance_sources: ReplayProvenanceSources = field(
+        default_factory=ReplayProvenanceSources
+    )
 
 
 @dataclass(frozen=True)
@@ -391,17 +417,15 @@ def execute_continuous_replay(
     reference_trajectory: Sequence[DimeCompleteState] | None = None,
     assistance_forces: np.ndarray | None = None,
     provenance: DimeProvenanceRecord | None = None,
-    git_commit_source: Callable[[], str] = git_commit_full,
-    clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> ContinuousReplayResult:
     """Execute continuous forward replay from saved initial state and controls.
 
     Postconditions (issue #11551): without ``reference_trajectory`` the result is
     not physically accepted, ``unqualified_reasons`` says why and reproducibility
     is reported as not measured (``None``). When ``provenance`` is not supplied
-    the git commit comes from ``git_commit_source`` (``"unknown"`` when git is
-    unavailable) and the timestamp from ``clock``; both are injectable so tests
-    stay hermetic. ``reset_count`` counts the initial-state placement plus any
+    the git commit and timestamp come from ``options.provenance_sources`` (default
+    :class:`ReplayProvenanceSources`: real git, ``"unknown"`` when git is
+    unavailable, and the UTC wall clock); it is injectable so tests stay hermetic. ``reset_count`` counts the initial-state placement plus any
     declared intermediate resets (the latter are rejected during validation).
     """
     opts = options or ContinuousReplayOptions()
@@ -409,7 +433,7 @@ def execute_continuous_replay(
         provider, initial_state, controls, opts, assistance_forces
     )
 
-    require(callable(git_commit_source) and callable(clock), "sources must be callable")
+    src = opts.provenance_sources
     traj_states = _rollout_continuous_replay(provider, initial_state, ctrls, dt)
     metrics, satisfies_tol = _compute_replay_metrics(
         traj_states, reference_trajectory, opts
@@ -427,8 +451,8 @@ def execute_continuous_replay(
         engine_version=cap.version,
         model_hash=p_hash,
         param_hash="default-param-hash",
-        git_commit=git_commit_source(),
-        created_at=clock().astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        git_commit=src.git_commit(),
+        created_at=src.clock().astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         notes="Independent continuous replay execution",
     )
 
