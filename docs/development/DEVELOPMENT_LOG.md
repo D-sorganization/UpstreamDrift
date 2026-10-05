@@ -3263,6 +3263,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11550 · DIME Manifold Retract and Local-Coordinate Jacobians Are Now the Exact Derivatives of the Right Quaternion Chart at Any Pose and Velocity (J_R^-1, dExp/Dv), Verified Against Central Finite Differences
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11550
+- **Branch:** merged via #11560
+- **PR:** #11560
+- **Paths:** see #11560
+- **Started:** 2026-10-05
+- **Last verified:** 2026-10-05 (`a9f33f14`; collated from changes/11550-dime-manifold-retract-and-local-coordina.md)
+- **Summary:** DIME manifold retract and local-coordinate Jacobians are now the exact derivatives of the right quaternion chart at any pose and velocity (J_r^-1, dExp/dv), verified against central finite differences
+- **Next step:** Shipped in PR #11560.
+
 ### DL-#11525 · CLAUDE.md Is Prettier-Clean: Restored the Mangled Where-to-Edit Code Spans and Spaced the @AGENTS.md Import
 
 - **State:** shipped
