@@ -46,6 +46,13 @@ repos:
         pass_filenames: false
         always_run: true
 
+      - id: changes-fragment
+        name: "validate change fragments"
+        entry: python shared_scripts/changes_fragment.py validate
+        language: python
+        pass_filenames: false
+        always_run: true
+
       - id: formatter-guidance-consistency
         name: "formatter guidance consistency (ruff)"
         entry: python scripts/check_formatter_guidance.py
