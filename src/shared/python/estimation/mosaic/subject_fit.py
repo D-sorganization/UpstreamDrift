@@ -140,23 +140,39 @@ def _replay_trial(
     return report, gains
 
 
+@dataclass(frozen=True)
+class SubjectFitProblem:
+    """Everything needed to fit one subject: model factory, trials, seeds, priors."""
+
+    factory: ModelFactory
+    trials: tuple[TrialData, ...]
+    first_frame_q: tuple[FloatArray, ...]
+    initial_geometry: FloatArray
+    initial_parameters: FloatArray
+    parameterization: InertialParameterization
+    priors: OuterPriors
+    options: OuterOptions
+
+    def __post_init__(self) -> None:
+        require(len(self.trials) >= 1, "at least one trial")
+        require(
+            len(self.trials) == len(self.first_frame_q),
+            "one seed configuration per trial",
+        )
+
+
 def fit_subject(
-    factory: ModelFactory,
-    trials: Sequence[TrialData],
-    first_frame_q: Sequence[FloatArray],
-    initial_geometry: FloatArray,
-    initial_parameters: FloatArray,
-    parameterization: InertialParameterization,
-    priors: OuterPriors,
-    options: OuterOptions,
+    problem: SubjectFitProblem,
     replay_config: ReplayConfig | None = None,
     n_phase_bins: int = 0,
 ) -> SubjectFitReport:
     """Run the full subject pipeline; see the module docstring for the stages."""
-    require(len(trials) == len(first_frame_q), "one seed configuration per trial")
+    factory, trials = problem.factory, problem.trials
     timings: dict[str, float] = {}
     started = time.perf_counter()
-    coefficients0 = _initialize(factory, trials, first_frame_q, initial_geometry)
+    coefficients0 = _initialize(
+        factory, trials, problem.first_frame_q, problem.initial_geometry
+    )
     timings["initialisation"] = time.perf_counter() - started
 
     started = time.perf_counter()
@@ -164,11 +180,11 @@ def fit_subject(
         factory,
         trials,
         coefficients0,
-        initial_geometry,
-        initial_parameters,
-        parameterization,
-        priors,
-        options,
+        problem.initial_geometry,
+        problem.initial_parameters,
+        problem.parameterization,
+        problem.priors,
+        problem.options,
     )
     timings["joint_fit"] = time.perf_counter() - started
 

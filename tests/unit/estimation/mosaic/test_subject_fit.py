@@ -10,7 +10,11 @@ from src.shared.python.estimation.mosaic.inertial import (
     project_planar_consistent,
 )
 from src.shared.python.estimation.mosaic.outer_solve import OuterOptions
-from src.shared.python.estimation.mosaic.subject_fit import ReplayConfig, fit_subject
+from src.shared.python.estimation.mosaic.subject_fit import (
+    ReplayConfig,
+    SubjectFitProblem,
+    fit_subject,
+)
 from tests.unit.estimation.mosaic.test_outer_solve import (
     TRUE_LENGTHS,
     TRUE_PI,
@@ -46,18 +50,17 @@ def test_subject_pipeline_passes_open_loop_replay_gate() -> None:
         position_tolerance=0.15,
         initial_perturbation=np.zeros(6),
     )
-    report = fit_subject(
-        _factory,
-        trials,
-        [t[0][0] + 0.1 for t in truth],
-        TRUE_LENGTHS * 1.05,
-        pi_prior,
-        PlanarParameterization(),
-        _priors(pi_prior, True),
-        OuterOptions(),
-        config,
-        n_phase_bins=15,
+    problem = SubjectFitProblem(
+        factory=_factory,
+        trials=tuple(trials),
+        first_frame_q=tuple(t[0][0] + 0.1 for t in truth),
+        initial_geometry=TRUE_LENGTHS * 1.05,
+        initial_parameters=pi_prior,
+        parameterization=PlanarParameterization(),
+        priors=_priors(pi_prior, True),
+        options=OuterOptions(),
     )
+    report = fit_subject(problem, config, n_phase_bins=15)
     assert report.open_loop_accepted, [r.open_loop_rms for r in report.replays]
     assert all(r.closed_loop_rms <= r.open_loop_rms + 1e-12 for r in report.replays)
     assert report.observability.rank >= 4

@@ -182,7 +182,10 @@ def _dynamics_blocks(
             sp.csr_matrix(u_block),
             np.zeros(weighted.shape[0]),
         )
-    return None, sp.csr_matrix(u_block), -(weighted @ problem.fixed_parameters)
+    fixed = problem.fixed_parameters
+    require(fixed is not None, "fixed parameters expected")
+    assert fixed is not None  # narrowed for the type checker after the contract
+    return None, sp.csr_matrix(u_block), -(weighted @ fixed)
 
 
 def _input_prior_blocks(

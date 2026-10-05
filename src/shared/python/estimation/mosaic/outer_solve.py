@@ -334,6 +334,13 @@ def _outer_prior_rows(
     return residual, d_pi
 
 
+def _stack_phases(phases: list[IntArray | None]) -> IntArray | None:
+    present = [phase for phase in phases if phase is not None]
+    if len(present) != len(phases):
+        return None
+    return np.concatenate(present)
+
+
 def _evaluate(xi: FloatArray, ctx: _Context, factor: float) -> _Evaluation:
     coefficients, geometry, theta = ctx.unpack(xi)
     parameters = ctx.parameterization.from_unconstrained(theta)
@@ -358,7 +365,7 @@ def _evaluate(xi: FloatArray, ctx: _Context, factor: float) -> _Evaluation:
         trial_index=np.repeat(
             np.arange(len(ctx.trials)), [t.n_times for t in ctx.trials]
         ),
-        phase_index=None if any(p is None for p in phases) else np.concatenate(phases),
+        phase_index=_stack_phases(phases),
         dynamics_weight=factor / ctx.priors.dynamics_sigma,
         parameter_prior_mean=ctx.priors.parameter_prior_mean,
         parameter_prior_weight=ctx.priors.parameter_prior_weight,
@@ -507,8 +514,7 @@ def _iterate(
                     _DAMPING_FLOOR,
                 )
                 growth = 2.0
-        stalled = accepted is None
-        if stalled:
+        if accepted is None:
             converged = predicted <= options.relative_cost_tolerance * max(ev.cost, 1.0)
             break
         previous, ev = ev.cost, accepted
@@ -600,9 +606,9 @@ def fit_trials(
         all(r.cost_after <= r.cost_before + 1e-12 for r in receipts),
         "stage costs non-increasing",
     )
-    coefficients, geometry, theta = ctx.unpack(xi)
+    final_coefficients, geometry, theta = ctx.unpack(xi)
     return OuterFit(
-        tuple(coefficients),
+        tuple(final_coefficients),
         geometry,
         parameterization.from_unconstrained(theta),
         ev.inner,
