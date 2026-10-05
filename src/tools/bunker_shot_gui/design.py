@@ -48,9 +48,12 @@ from bunkershot3d.sand import (
     usga_reference_sand,
 )
 
+from .input_ranges import INPUT_RANGES
+
 __all__ = [
     "DEFAULT_GRIND_PRESET",
     "FIRMNESS_RANGE_KG_PER_CM2",
+    "INPUT_RANGES",
     "SandCondition",
     "SolverSetup",
     "SwingSetup",

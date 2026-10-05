@@ -35,6 +35,7 @@ from bunkershot3d.solvers import EnvelopeStatus
 from src.shared.python.ui.qt import MplCanvas
 
 from .design import (
+    INPUT_RANGES,
     SandCondition,
     SolverSetup,
     SwingSetup,
@@ -629,14 +630,16 @@ class DesignPanel(QGroupBox):
         self._preset.setCurrentText(preset)
         form.addRow("Grind preset:", self._preset)
 
-        self._loft = _spin(" deg", 40.0, 66.0, 0.5, 2)
-        self._bounce = _spin(" deg", 0.0, 20.0, 0.5, 2)
-        self._sole_width = _spin(" mm", 8.0, 26.0, 0.5, 2)
-        self._entry_height = _spin(" mm", 1.5, 7.5, 0.1, 2)
-        self._leading_radius = _spin(" mm", 2.0, 12.0, 0.25, 2)
-        self._camber_area = _spin(" mm^2", 20.0, 70.0, 1.0, 1)
-        self._heel_relief = _spin("", 0.0, 0.6, 0.01, 3)
-        self._toe_relief = _spin("", 0.0, 0.6, 0.01, 3)
+        self._loft = _spin(" deg", *INPUT_RANGES["loft_deg"], 0.5, 2)
+        self._bounce = _spin(" deg", *INPUT_RANGES["marketed_bounce_deg"], 0.5, 2)
+        self._sole_width = _spin(" mm", *INPUT_RANGES["sole_width_mm"], 0.5, 2)
+        self._entry_height = _spin(" mm", *INPUT_RANGES["entry_height_mm"], 0.1, 2)
+        self._leading_radius = _spin(
+            " mm", *INPUT_RANGES["leading_edge_radius_mm"], 0.25, 2
+        )
+        self._camber_area = _spin(" mm^2", *INPUT_RANGES["camber_area_mm2"], 1.0, 1)
+        self._heel_relief = _spin("", *INPUT_RANGES["heel_relief_fraction"], 0.01, 3)
+        self._toe_relief = _spin("", *INPUT_RANGES["toe_relief_fraction"], 0.01, 3)
         for label, widget in (
             ("Loft:", self._loft),
             ("Bounce (marketed):", self._bounce),
@@ -716,46 +719,27 @@ class ConditionPanel(QWidget):
         self._condition = QComboBox()
         self._condition.addItems(playing_condition_names())
         sand_form.addRow("Playing condition:", self._condition)
-        self._firmness = _spin(" kg/cm^2", 1.2, 3.2, 0.1, 2, 2.4)
+        self._firmness = _spin(
+            " kg/cm^2", *INPUT_RANGES["firmness_kg_per_cm2"], 0.1, 2, 2.4
+        )
         sand_form.addRow("Penetrometer firmness:", self._firmness)
         layout.addWidget(sand_box)
 
-        swing_box = QGroupBox("Swing")
-        swing_form = QFormLayout(swing_box)
-        self._speed = _spin(" m/s", 10.0, 40.0, 0.5, 1, defaults.clubhead_speed_mps)
-        self._attack = _spin(" deg", -20.0, -0.5, 0.5, 1, defaults.attack_angle_deg)
-        self._face_open = _spin(" deg", 0.0, 40.0, 1.0, 1, defaults.face_open_deg)
-        self._shaft_lean = _spin(" deg", -10.0, 25.0, 0.5, 1, defaults.shaft_lean_deg)
-        self._entry = _spin(
-            " mm", 10.0, 200.0, 5.0, 1, defaults.entry_distance_behind_ball_m * 1e3
-        )
-        self._ball_depth = _spin(
-            " mm", -10.0, 20.0, 1.0, 1, defaults.ball_depth_m * 1e3
-        )
-        for label, widget in (
-            ("Clubhead speed:", self._speed),
-            ("Attack angle:", self._attack),
-            ("Face open:", self._face_open),
-            ("Shaft lean:", self._shaft_lean),
-            ("Entry behind ball:", self._entry),
-            ("Ball depth in sand:", self._ball_depth),
-        ):
-            swing_form.addRow(label, widget)
-        self._dynamic = QCheckBox("DRFT inertial term active")
-        self._dynamic.setChecked(True)
-        self._dynamic.setToolTip(
-            "Unchecking this gives quasi-static RFT. Above Fr ~ 1 the envelope "
-            "refuses to report a force at all, which is what a quasi-static "
-            "solver deserves at bunker-shot speeds."
-        )
-        swing_form.addRow(self._dynamic)
-        layout.addWidget(swing_box)
+        layout.addWidget(self._build_swing_box(defaults))
 
         study_box = QGroupBox("Study")
         study_form = QFormLayout(study_box)
-        self._target_carry = _spin(" m", 2.0, 40.0, 0.5, 1, study.target_carry_m)
+        self._target_carry = _spin(
+            " m", *INPUT_RANGES["target_carry_m"], 0.5, 1, study.target_carry_m
+        )
         study_form.addRow("Target carry:", self._target_carry)
-        self._tolerance = _spin("", 0.02, 0.5, 0.01, 2, study.carry_tolerance_fraction)
+        self._tolerance = _spin(
+            "",
+            *INPUT_RANGES["carry_tolerance_fraction"],
+            0.01,
+            2,
+            study.carry_tolerance_fraction,
+        )
         study_form.addRow("Carry tolerance:", self._tolerance)
         self._grid = QSpinBox()
         self._grid.setRange(2, 9)
@@ -785,6 +769,59 @@ class ConditionPanel(QWidget):
             widget.valueChanged.connect(self.changed)
         self._condition.currentTextChanged.connect(self.changed)
         self._dynamic.toggled.connect(self.changed)
+
+    def _build_swing_box(self, defaults: SwingSetup) -> QGroupBox:
+        """Build the swing-condition group seeded from ``defaults``."""
+        swing_box = QGroupBox("Swing")
+        swing_form = QFormLayout(swing_box)
+        self._speed = _spin(
+            " m/s",
+            *INPUT_RANGES["clubhead_speed_mps"],
+            0.5,
+            1,
+            defaults.clubhead_speed_mps,
+        )
+        self._attack = _spin(
+            " deg", *INPUT_RANGES["attack_angle_deg"], 0.5, 1, defaults.attack_angle_deg
+        )
+        self._face_open = _spin(
+            " deg", *INPUT_RANGES["face_open_deg"], 1.0, 1, defaults.face_open_deg
+        )
+        self._shaft_lean = _spin(
+            " deg", *INPUT_RANGES["shaft_lean_deg"], 0.5, 1, defaults.shaft_lean_deg
+        )
+        self._entry = _spin(
+            " mm",
+            *_in_mm(INPUT_RANGES["entry_distance_behind_ball_m"]),
+            5.0,
+            1,
+            defaults.entry_distance_behind_ball_m * 1e3,
+        )
+        self._ball_depth = _spin(
+            " mm",
+            *_in_mm(INPUT_RANGES["ball_depth_m"]),
+            1.0,
+            1,
+            defaults.ball_depth_m * 1e3,
+        )
+        for label, widget in (
+            ("Clubhead speed:", self._speed),
+            ("Attack angle:", self._attack),
+            ("Face open:", self._face_open),
+            ("Shaft lean:", self._shaft_lean),
+            ("Entry behind ball:", self._entry),
+            ("Ball depth in sand:", self._ball_depth),
+        ):
+            swing_form.addRow(label, widget)
+        self._dynamic = QCheckBox("DRFT inertial term active")
+        self._dynamic.setChecked(True)
+        self._dynamic.setToolTip(
+            "Unchecking this gives quasi-static RFT. Above Fr ~ 1 the envelope "
+            "refuses to report a force at all, which is what a quasi-static "
+            "solver deserves at bunker-shot speeds."
+        )
+        swing_form.addRow(self._dynamic)
+        return swing_box
 
     def sand_condition(self) -> SandCondition:
         """Read the sand controls.
@@ -832,6 +869,12 @@ class ConditionPanel(QWidget):
             carry_tolerance_fraction=self._tolerance.value(),
             playability_points=self._grid.value(),
         )
+
+
+def _in_mm(bounds_m: tuple[float, float]) -> tuple[float, float]:
+    """Convert a shared metre range to the millimetres the panel displays."""
+    low_m, high_m = bounds_m
+    return low_m * 1e3, high_m * 1e3
 
 
 def _spin(

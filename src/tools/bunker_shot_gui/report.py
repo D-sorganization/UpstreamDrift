@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from bunkershot3d.solvers import EnvelopeStatus, ValidityVerdict
+from bunkershot3d.solvers import EnvelopeStatus, FidelityTier, ValidityVerdict
 from bunkershot3d.vandv.band import CONSISTENCY_BAND_NAMING_REASON
 
 from .field import ContactPatch, LoadComponent, SoleLoadField
@@ -34,6 +34,7 @@ __all__ = [
     "SHADE_RAMP",
     "STATUS_COLOUR",
     "STATUS_HEADLINE",
+    "TIER_MODEL_NAMES",
     "comparison_report",
     "evaluation_report",
     "playability_text",
@@ -43,6 +44,7 @@ __all__ = [
     "sole_map_text",
     "status_colour",
     "status_headline",
+    "validity_stamp",
     "verdict_report",
 ]
 
@@ -79,6 +81,24 @@ STATUS_COLOUR: dict[EnvelopeStatus, str] = {
 }
 """Banner colour per status. Refusal is the only red in the tool."""
 
+TIER_MODEL_NAMES: dict[FidelityTier, str] = {
+    FidelityTier.F0: "dynamic 3D-RFT",
+    FidelityTier.F1: "plane-strain MPM continuum",
+    FidelityTier.F2: "MPM reference",
+    FidelityTier.F3: "DEM grains",
+}
+"""What each ADR-0032 tier actually solves, for the in-frame stamp.
+
+A tier letter is only meaningful to somebody who has read ADR-0032; the
+model name is what a wedge designer looking at a screenshot can check
+against what they were told they were being shown. F0's constitutive
+shortcut and F1's continuum are different claims and must not share a
+label.
+
+Defined here rather than in :mod:`.render` so that a front end without
+matplotlib -- the v1 API route of issue #9545 -- stamps the same words;
+:mod:`.render` re-exports it unchanged."""
+
 _RULE = "=" * 66
 _THIN = "-" * 66
 
@@ -105,6 +125,37 @@ def status_colour(status: EnvelopeStatus) -> str:
         A ``#rrggbb`` colour string.
     """
     return STATUS_COLOUR[EnvelopeStatus(status)]
+
+
+def validity_stamp(status: EnvelopeStatus, tier: FidelityTier) -> str:
+    """Return the validity line drawn inside a panel.
+
+    The one place this sentence is composed. Every view in this package --
+    the sole field, the 3-D scene, the trace panel -- stamps the same words,
+    so a designer comparing two of them is not reading two vocabularies.
+    The v1 API route (issue #9545) returns the same sentence, which is why it
+    lives in this matplotlib-free module; :mod:`.render` re-exports it.
+
+    The model is named from the tier rather than fixed. Writing
+    "dynamic 3D-RFT" under every tier was right while F0 was the only one;
+    with ADR-0033's F1 continuum drawing through the same stamp it would put
+    F0's constitutive shortcut on a picture of a material-point solve, which
+    is the exact kind of mislabelling an in-frame stamp exists to prevent.
+
+    Args:
+        status: How much of the frame may be believed.
+        tier: Which rung of the ADR-0032 ladder produced it.
+
+    Returns:
+        A short stamp: the status, the tier, the model behind it, and the
+        reminder that none of it is a measurement. Short enough to sit
+        inside an axes without covering the data it qualifies.
+    """
+    return (
+        f"{status.value.replace('_', ' ').upper()} - "
+        f"{tier.value.upper()} {TIER_MODEL_NAMES[tier]}\n"
+        "not calibrated for bunker sand"
+    )
 
 
 def verdict_report(

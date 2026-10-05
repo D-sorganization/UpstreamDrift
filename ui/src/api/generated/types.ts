@@ -551,6 +551,139 @@ export interface Body_upload_c3d_tools_motion_capture_upload_c3d_post {
   file: string;
 }
 
+export interface BunkerCarryV1 {
+  carry_m: number;
+  verdict_status: string;
+  band_m: number[] | null;
+  band_reasons: string[];
+}
+
+export interface BunkerDeliveredV1 {
+  effective_loft_deg: number;
+  effective_marketed_bounce_deg: number;
+  presentation_bounce_deg: number;
+  aim_offset_deg: number;
+}
+
+/**
+ * A candidate sole; ``None`` keeps the grind preset's value.
+ */
+export interface BunkerDesignV1 {
+  name: string;
+  grind_preset?: string | null;
+  loft_deg?: number | null;
+  marketed_bounce_deg?: number | null;
+  sole_width_mm?: number | null;
+  entry_height_mm?: number | null;
+  leading_edge_radius_mm?: number | null;
+  camber_area_mm2?: number | null;
+  heel_relief_fraction?: number | null;
+  toe_relief_fraction?: number | null;
+}
+
+export interface BunkerObjectiveReportV1 {
+  use: string;
+  target_carry_m: number;
+  tolerance_fraction: number;
+  disposition: string;
+  nominal_carry_m: number | null;
+  degenerate: boolean;
+  ranking_permitted: boolean;
+  reason: string;
+}
+
+/**
+ * A carry-target playability objective and the use it is asked for.
+ */
+export interface BunkerObjectiveV1 {
+  use: "exploratory" | "predictive";
+  target_carry_m: number;
+  tolerance_fraction: number;
+}
+
+/**
+ * The playing condition; ``None`` keeps the preset's firmness.
+ */
+export interface BunkerSandV1 {
+  preset?: string | null;
+  firmness_kg_per_cm2?: number | null;
+}
+
+export interface BunkerShotMetricsV1 {
+  peak_force_n: number | null;
+  impulse_n_s: number | null;
+  entry_speed_mps: number | null;
+  exit_speed_mps: number | null;
+  max_depth_m: number | null;
+  contact_duration_s: number | null;
+  peak_inertial_fraction: number | null;
+}
+
+export interface BunkerSourceStampV1 {
+  basis: string;
+  source: string;
+}
+
+export interface BunkerSourcesV1 {
+  model: string;
+  sand: Record<string, BunkerSourceStampV1>;
+  carry_band: string | null;
+}
+
+/**
+ * The delivery; ``None`` keeps the workbench's splash-shot default.
+ */
+export interface BunkerSwingV1 {
+  clubhead_speed_mps?: number | null;
+  attack_angle_deg?: number | null;
+  face_open_deg?: number | null;
+  shaft_lean_deg?: number | null;
+  entry_distance_behind_ball_m?: number | null;
+  ball_depth_m?: number | null;
+  dynamic_terms_active?: boolean | null;
+}
+
+export interface BunkerVerdictV1 {
+  status: string;
+  headline: string;
+  caveats: string[];
+  reasons: string[];
+  reason_count: number;
+}
+
+/**
+ * The record returned for one evaluation; ``digest`` covers the rest.
+ */
+export interface BunkerWorkbenchEvaluationV1 {
+  schema_version: string;
+  conventions: Record<string, unknown>;
+  inputs: Record<string, unknown>;
+  tier: string;
+  tier_model: string;
+  verdict: BunkerVerdictV1;
+  stamp: string;
+  refused: boolean;
+  shot: BunkerShotMetricsV1;
+  delivered: BunkerDeliveredV1;
+  carry: BunkerCarryV1 | null;
+  unavailable: string[];
+  sources: BunkerSourcesV1;
+  objective: BunkerObjectiveReportV1 | null;
+  predictive: boolean;
+  digest: string;
+}
+
+/**
+ * One bounded nominal evaluation.
+ */
+export interface BunkerWorkbenchRequestV1 {
+  handedness: "right" | "left";
+  design: BunkerDesignV1;
+  sand?: BunkerSandV1;
+  swing?: BunkerSwingV1;
+  objective?: BunkerObjectiveV1 | null;
+}
+
 /**
  * Metadata extracted from an uploaded C3D file. Marker positions are converted to meters server-side by the motion pipeline's ``C3DAdapter`` so the web visualizer never has to guess mm-vs-m scaling.
  */
