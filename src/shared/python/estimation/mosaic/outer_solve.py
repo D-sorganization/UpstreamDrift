@@ -198,7 +198,7 @@ class _Context:
     priors: OuterPriors
     options: OuterOptions
     parameterization: InertialParameterization
-    shapes: tuple[tuple[int, int], ...]
+    shapes: tuple[tuple[int, ...], ...]
     n_geometry: int
     n_theta: int
 
@@ -218,8 +218,8 @@ class _Context:
 
     def unpack(self, xi: FloatArray) -> tuple[list[FloatArray], FloatArray, FloatArray]:
         offsets = self.offsets
-        coefficients = [
-            xi[offsets[k] : offsets[k + 1]].reshape(shape)
+        coefficients: list[FloatArray] = [
+            np.asarray(xi[offsets[k] : offsets[k + 1]].reshape(shape), dtype=np.float64)
             for k, shape in enumerate(self.shapes)
         ]
         return coefficients, xi[self.geometry_columns], xi[self.theta_columns]

@@ -41,6 +41,12 @@ def _cross2(x: FloatArray, y: FloatArray) -> FloatArray:
     return x[..., 0] * y[..., 1] - x[..., 1] * y[..., 0]
 
 
+def _solve_batched(matrices: FloatArray, vectors: FloatArray) -> FloatArray:
+    """Solve ``matrices[n] x = vectors[n]`` for every batch entry; returns float64."""
+    solution = np.linalg.solve(matrices, vectors[..., None])[..., 0]
+    return np.asarray(solution, dtype=np.float64)
+
+
 def _require_same_batch(*arrays: FloatArray) -> int:
     lengths = {array.shape[0] for array in arrays}
     require(len(lengths) == 1, "all inputs must share the batch length", lengths)
@@ -214,10 +220,8 @@ class PlanarChain:
     ) -> DriftDecomposition:
         """Pointwise ZTCF/ZVCF accelerations: ``-M^{-1} h`` and ``-M^{-1} g``."""
         mass = self.mass_matrix(q, pi)
-        ztcf = -np.linalg.solve(mass, self.bias(q, v, pi)[..., None])[..., 0]
-        zvcf = -np.linalg.solve(mass, self.bias(q, np.zeros_like(q), pi)[..., None])[
-            ..., 0
-        ]
+        ztcf = -_solve_batched(mass, self.bias(q, v, pi))
+        zvcf = -_solve_batched(mass, self.bias(q, np.zeros_like(q), pi))
         return DriftDecomposition(ztcf=ztcf, zvcf=zvcf, velocity_part=ztcf - zvcf)
 
     def forward_dynamics(
@@ -228,7 +232,7 @@ class PlanarChain:
             u.shape == (q.shape[0], self.n_inputs), "u must be (N, n_inputs)", u.shape
         )
         rhs = u @ self.input_matrix.T - self.bias(q, v, pi)
-        return np.linalg.solve(self.mass_matrix(q, pi), rhs[..., None])[..., 0]
+        return _solve_batched(self.mass_matrix(q, pi), rhs)
 
     def step(
         self, x: FloatArray, u: FloatArray, pi: FloatArray, dt: float

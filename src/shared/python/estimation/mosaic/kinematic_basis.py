@@ -84,7 +84,8 @@ class BSplineBasis:
         )
         require(ridge >= 0.0, "ridge must be non-negative", ridge)
         normal = self.position.T @ self.position + ridge * np.eye(self.n_coefficients)
-        return np.linalg.solve(normal, self.position.T @ samples)
+        solution = np.linalg.solve(normal, self.position.T @ samples)
+        return np.asarray(solution, dtype=np.float64)
 
     def evaluate(
         self, coefficients: FloatArray

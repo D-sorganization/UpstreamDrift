@@ -101,7 +101,7 @@ def initialize_trajectory(
             model, observed[frame : frame + 1], markers, seed, iterations, damping
         )
         trajectory[frame] = seed[0]
-    unwrapped = np.unwrap(trajectory, axis=0)
+    unwrapped = np.asarray(np.unwrap(trajectory, axis=0), dtype=np.float64)
     return initialize_joint_angles(
         model, observed, markers, unwrapped, iterations, damping
     )
