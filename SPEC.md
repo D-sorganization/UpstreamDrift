@@ -8306,6 +8306,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-05 | #11522 | fail fast with an explicit incomplete-checkout error naming the runner, and log sparse-checkout state, after checkout in fetch-pinned-tools |
+| 2026-10-05 | #11523 | Keep fork PRs off the self-hosted fleet: fork guard on PR-triggered jobs, hosted route for the quality-gate lane, and a static checker (RM#1989) |
 | 2026-10-05 | #11519 | Point contributors at change fragments in post_spec_reminder |
 | 2026-10-05 | #11518 | Disable FastRestart for solve_starting_pose and resolve model path in run_leaderboard |
 | 2026-10-04 | #11511 | Vendor the RM-5 change-fragment tooling (`shared_scripts/changes_fragment.py` and siblings, byte-identical with Repository_Management, digests pinned in `docs/development/change-fragment-bundle.json`), add `changes/` and `scripts/ci/check_spec_freshness.py`, which accepts a valid fragment in place of a SPEC.md edit (Repository_Management#1976). |
