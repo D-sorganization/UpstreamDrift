@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-06 | #11590 | chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry |
 | 2026-10-06 | #11602 | ci: deleted-test guard honours a reviewed allowlist (scripts/config/reviewed_test_deletions.json: path + issue + reason, fails closed when malformed) so an approved test retirement can pass the merge queue; unapproved deletions still fail. |
 | 2026-10-06 | #11592 | Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it |
 | 2026-10-06 | #11597 | ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py. |

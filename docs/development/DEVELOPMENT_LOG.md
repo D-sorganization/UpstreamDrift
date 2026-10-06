@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11589 · Retire Stale Shared-Code Header Test
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11589
+- **Branch:** chore/retire-unflagged-header-test-11589
+- **PR:** #11590
+- **Paths:** see #11590
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`a4031aa0`; collated from changes/11589-chore-tests-retire-stale-test-no-unflagg.md)
+- **Summary:** chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry
+- **Next step:** Merge the PR; child-copy enforcement remains in test_tools_child_copy_contract.py.
+
 ### DL-#11532 · MOSAIC Model-Aware Multi-Trial Matching Kernels, Methods Reference and DIME (#11421) Audit
 
 - **State:** in_review
