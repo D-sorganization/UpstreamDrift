@@ -21,5 +21,6 @@
     }
   },
   "receipt_warm_start_source": "candidate:/home/dieterolson/fits/w030r/candidate.npz",
-  "note": "Provenance recovery only. Receipts and verdicts are unchanged; inputs only, not acceptance evidence."
+  "note": "Provenance recovery only. Receipts and verdicts are unchanged; inputs only, not acceptance evidence.",
+  "receipt_warm_start_source_in_repo": "evidence/matched/driver_g1_crocoddyl_w030r/candidate.npz"
 }
