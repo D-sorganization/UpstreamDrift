@@ -1,4 +1,10 @@
 {
   "_comment": "Reviewed test deletions (#11601). scripts/ci/check_deleted_test_files.py exempts a deleted tests/**/*.py file only when it is listed here with a governing issue ('#N' or an issue/PR URL) and a non-empty reason. Add the entry in the same PR that deletes the test so the approval is reviewed with the deletion. A malformed file fails the guard closed.",
-  "reviewed_deletions": []
+  "reviewed_deletions": [
+    {
+      "path": "tests/unit/repo_hygiene/test_no_unflagged_shared_code.py",
+      "issue": "#11589",
+      "reason": "Stale header test retired by #11590 with its unit-gate quarantine entry; child-copy enforcement remains in test_tools_child_copy_contract.py."
+    }
+  ]
 }
