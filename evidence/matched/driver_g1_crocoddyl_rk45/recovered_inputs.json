@@ -1,0 +1,25 @@
+{
+  "schema": "recovered-fit-inputs/v1",
+  "issue": 11596,
+  "source": "ControlTower WSL (ControlTower-Runner) ~/fits/driver_g1/",
+  "recovered": "2026-10-06",
+  "identity_check": {
+    "candidate_sha256": "652379c3a9ef4a90e540117078bbe4828b699e42352697268a52fccad78a8d59",
+    "matches_source_run_candidate": true,
+    "matches_receipt_candidate_sha256": true
+  },
+  "files": {
+    "warm_start.npz": {
+      "sha256": "44331c9eff0ccc46c759b9084dd9d7d1d472bb8cb758ebc82baa0e29fbb9f606",
+      "role": "inverse-kinematics warm start (q, q_smooth, q_track, v, us, ik_rms_m; 307 frames x 44 coordinates)",
+      "whole_marker_rms_m": 0.12896188581320783,
+      "receipt_warm_start_ik_marker_rms_m": 0.12896188581320783
+    },
+    "stage_0.60s.npz": {
+      "sha256": "eebfa0e7b69e62aac3a10f4d6cf9b18c02c81900f89da51b12e45475d66082ec",
+      "role": "FDDP continuation stage over 0-0.60 s (q, v, u; 217 nodes); seeds later continuation runs"
+    }
+  },
+  "receipt_warm_start_source": "candidate:/home/dieterolson/fits/w030r/candidate.npz",
+  "note": "Provenance recovery only. Receipts and verdicts are unchanged; inputs only, not acceptance evidence."
+}
