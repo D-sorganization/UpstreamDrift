@@ -3282,10 +3282,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #2018
 - **Branch:** merged via #11577
-- **PR:** #11577
+- **PR:** #11577, #11586
 - **Paths:** see #11577
 - **Started:** 2026-10-06
-- **Last verified:** 2026-10-06 (`95255d8f`; collated from changes/2018-vendor-automerge-guard-and-requeue-stall.md)
+- **Last verified:** 2026-10-06 (`1943a1b7`; collated from changes/2018-resync-requeue.md)
 - **Summary:** Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018)
 - **Next step:** Shipped in PR #11577.
 
