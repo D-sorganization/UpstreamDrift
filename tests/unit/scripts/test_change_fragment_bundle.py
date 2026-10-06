@@ -87,12 +87,21 @@ def _cli(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+# An issue number no real entry can carry. scratch_repo copies the live
+# development log, so reusing a real issue (the vendoring issue #1976 did)
+# makes collate update that entry instead of creating the one asserted below
+# once the collate bot records it (Tools#5450).
+_ROUND_TRIP_ISSUE = "987654"
+
+
 def test_new_validate_collate_round_trip(scratch_repo: Path) -> None:
+    devlog_path = scratch_repo / "docs/development/DEVELOPMENT_LOG.md"
+    assert f"DL-#{_ROUND_TRIP_ISSUE} " not in devlog_path.read_text(encoding="utf-8")
     created = _cli(
         scratch_repo,
         "new",
         "--issue",
-        "1976",
+        _ROUND_TRIP_ISSUE,
         "--summary",
         "vendor the change fragment tooling",
         "--dl-state",
@@ -100,10 +109,14 @@ def test_new_validate_collate_round_trip(scratch_repo: Path) -> None:
         "--next-step",
         "Merge the pull request.",
         "--branch",
-        "chore/1976-change-fragments-tooling",
+        f"chore/{_ROUND_TRIP_ISSUE}-change-fragments-tooling",
     )
     assert created.returncode == 0, created.stderr
-    fragment = scratch_repo / "changes" / "1976-vendor-the-change-fragment-tooling.md"
+    fragment = (
+        scratch_repo
+        / "changes"
+        / f"{_ROUND_TRIP_ISSUE}-vendor-the-change-fragment-tooling.md"
+    )
     assert fragment.is_file()
 
     validated = _cli(scratch_repo, "validate")
@@ -123,11 +136,10 @@ def test_new_validate_collate_round_trip(scratch_repo: Path) -> None:
     assert not fragment.exists()
     spec = (scratch_repo / "SPEC.md").read_text(encoding="utf-8")
     assert "| 2026-10-04 | #4242 | vendor the change fragment tooling |" in spec
-    devlog = (scratch_repo / "docs/development/DEVELOPMENT_LOG.md").read_text(
-        encoding="utf-8"
-    )
+    devlog = devlog_path.read_text(encoding="utf-8")
     # Title-cased so the collated heading passes the document-title gate.
-    assert "### DL-#1976 · Vendor the Change Fragment Tooling" in devlog
+    expected = f"### DL-#{_ROUND_TRIP_ISSUE} · Vendor the Change Fragment Tooling"
+    assert expected in devlog
     assert "- **PR:** #4242" in devlog
 
 
