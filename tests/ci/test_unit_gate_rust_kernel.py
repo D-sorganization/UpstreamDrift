@@ -55,3 +55,43 @@ def test_unit_gate_kernel_step_installs_into_venv_and_probes_fail_closed() -> No
 def test_unit_gate_uses_workspace_cargo_home() -> None:
     env = _unit_gate_job().get("env", {})
     assert env.get("CARGO_HOME") == "${{ github.workspace }}/.cargo-home"
+
+
+RUST_TOOLCHAIN_ACTION = "dtolnay/rust-toolchain@"
+ISOLATED_RUSTUP_HOME = "${{ github.workspace }}/.rustup-home"
+
+
+def _rust_toolchain_jobs() -> list[tuple[str, str, dict[str, Any]]]:
+    yaml = pytest.importorskip("yaml")
+    found: list[tuple[str, str, dict[str, Any]]] = []
+    for path in sorted((REPO_ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        for job_id, job in (workflow.get("jobs") or {}).items():
+            steps = job.get("steps") or []
+            if any(
+                str(s.get("uses", "")).startswith(RUST_TOOLCHAIN_ACTION) for s in steps
+            ):
+                found.append((path.name, job_id, job))
+    return found
+
+
+@pytest.mark.unit
+def test_every_rust_toolchain_job_uses_an_isolated_rustup_home() -> None:
+    """A shared ~/.rustup lets the image's preinstalled toolchain break installs.
+
+    rustup upgrading the runner image's partially recorded ``stable`` in place
+    aborts with ``detected conflict: 'bin/cargo'`` before any test runs
+    (#11595). A per-job RUSTUP_HOME in the workspace starts empty because
+    actions/checkout cleans untracked files; job-level env cannot use the
+    runner context.
+    """
+    jobs = _rust_toolchain_jobs()
+    assert jobs, "expected at least one job that installs Rust"
+    offenders = [
+        f"{workflow}:{job_id}"
+        for workflow, job_id, job in jobs
+        if (job.get("env") or {}).get("RUSTUP_HOME") != ISOLATED_RUSTUP_HOME
+    ]
+    assert not offenders, (
+        f"jobs without RUSTUP_HOME={ISOLATED_RUSTUP_HOME}: {offenders}"
+    )

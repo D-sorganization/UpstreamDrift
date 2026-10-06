@@ -1099,6 +1099,10 @@ jobs:
     # 25 min of pytest plus a cached-registry release build of one crate.
     timeout-minutes: 35
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
     steps:
@@ -3070,6 +3074,10 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 25
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
     defaults:
@@ -3353,6 +3361,11 @@ jobs:
       ${{ !github.event.repository.private && vars.CI_RUNNER_MODE != 'local' && 'ubuntu-latest' ||
       'd-sorg-fleet-docker' }}
     timeout-minutes: 15
+    env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -3484,6 +3497,10 @@ jobs:
       'ubuntu-latest' || needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: true
       CI_RUST_WHEELS_EXPECTED: "1"
