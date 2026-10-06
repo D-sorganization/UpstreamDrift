@@ -3276,6 +3276,32 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#1976 · Make the Change-Fragment Round-Trip Test Hermetic so Collating a Real DL-#1976 Entry Cannot Break It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1976
+- **Branch:** merged via #11592
+- **PR:** #11592
+- **Paths:** see #11592
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`d2086034`; collated from changes/1976-make-the-change-fragment-round-trip-test.md)
+- **Summary:** Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it
+- **Next step:** Shipped in PR #11592.
+
+### DL-#11595 · Ci: Give Every Dtolnay/Rust-Toolchain Job a Per-Job RUSTUP_HOME (${{ Github.Workspace }}/.rustup-home) so Rustup Never Upgrades the Runner Image's Partially Installed ~/.rustup Toolchain in Place; Contract Test in Tests/Ci/test_unit_gate_rust_kernel.py.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11595
+- **Branch:** merged via #11597
+- **PR:** #11597
+- **Paths:** see #11597
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`39fbd017`; collated from changes/11595-ci-give-every-dtolnay-rust-toolchain-job.md)
+- **Summary:** ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py.
+- **Next step:** Shipped in PR #11597.
+
 ### DL-#2018 · Vendor Automerge_Guard and Requeue_Stalled_Merges (Stalled-Merge Requeue Tooling) From Repository_Management With Canonical Tests (Refs Repository_Management#2018)
 
 - **State:** shipped

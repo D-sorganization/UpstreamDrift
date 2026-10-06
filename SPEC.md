@@ -8319,6 +8319,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-06 | #11592 | Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it |
+| 2026-10-06 | #11597 | ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py. |
 | 2026-10-06 | #11586 | Re-sync vendored automerge_guard and requeue_stalled_merges (and tests) to Repository_Management canonical (Refs Repository_Management#2018) |
 | 2026-10-06 | #11577 | Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018) |
 | 2026-10-06 | #11594 | Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver. |
