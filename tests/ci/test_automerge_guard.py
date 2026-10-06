@@ -1121,3 +1121,19 @@ def test_no_guard_function_exceeds_the_consumer_function_budget() -> None:
         and node.end_lineno - node.lineno + 1 > 100
     ]
     assert too_long == []
+
+
+def test_guard_has_no_builtin_print_calls() -> None:
+    """Consumers (Gasification_Model) ban builtin print() in scripts/; CLI
+    output goes through one helper so the vendored file passes as-is."""
+    import ast
+
+    tree = ast.parse(_MODULE_PATH.read_text(encoding="utf-8"))
+    calls = [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "print"
+    ]
+    assert calls == []

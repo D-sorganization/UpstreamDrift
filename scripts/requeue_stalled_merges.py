@@ -26,12 +26,12 @@ from pathlib import Path
 # Expose this directory only while importing the guard. A lasting sys.path
 # entry would shadow any same-named top-level package for the rest of the
 # process (UpstreamDrift's scripts/motion_capture hid src/motion_capture).
-_HERE = str(Path(__file__).resolve().parent)
-sys.path.insert(0, _HERE)
+_SCRIPT_DIR = str(Path(__file__).resolve().parent)
+sys.path.insert(0, _SCRIPT_DIR)
 try:
     import automerge_guard  # noqa: E402
 finally:
-    sys.path.remove(_HERE)
+    sys.path.remove(_SCRIPT_DIR)
 
 logger = logging.getLogger("requeue_stalled_merges")
 

@@ -3276,6 +3276,71 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#1976 · Make the Change-Fragment Round-Trip Test Hermetic so Collating a Real DL-#1976 Entry Cannot Break It
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1976
+- **Branch:** merged via #11592
+- **PR:** #11592
+- **Paths:** see #11592
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`d2086034`; collated from changes/1976-make-the-change-fragment-round-trip-test.md)
+- **Summary:** Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it
+- **Next step:** Shipped in PR #11592.
+
+### DL-#11595 · Ci: Give Every Dtolnay/Rust-Toolchain Job a Per-Job RUSTUP_HOME (${{ Github.Workspace }}/.rustup-home) so Rustup Never Upgrades the Runner Image's Partially Installed ~/.rustup Toolchain in Place; Contract Test in Tests/Ci/test_unit_gate_rust_kernel.py.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11595
+- **Branch:** merged via #11597
+- **PR:** #11597
+- **Paths:** see #11597
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`39fbd017`; collated from changes/11595-ci-give-every-dtolnay-rust-toolchain-job.md)
+- **Summary:** ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py.
+- **Next step:** Shipped in PR #11597.
+
+### DL-#2018 · Vendor Automerge_Guard and Requeue_Stalled_Merges (Stalled-Merge Requeue Tooling) From Repository_Management With Canonical Tests (Refs Repository_Management#2018)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #2018
+- **Branch:** merged via #11577
+- **PR:** #11577, #11586
+- **Paths:** see #11577
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`1943a1b7`; collated from changes/2018-resync-requeue.md)
+- **Summary:** Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018)
+- **Next step:** Shipped in PR #11577.
+
+### DL-#11593 · Clear the Security Findings Main Carries: Werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and Fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in Both Python Lockfiles, and Source-Map-Js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68Fv-2Mgg-Jv7q) in Ui/Package-Lock.Json; Lockfile-Only Upgrades, No New Waiver.
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11593
+- **Branch:** merged via #11594
+- **PR:** #11594
+- **Paths:** see #11594
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`2d183206`; collated from changes/11593-bump-werkzeug-3-1-8-to-3-1-9-in-both-loc.md)
+- **Summary:** Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver.
+- **Next step:** Shipped in PR #11594.
+
+### DL-#11577 · Fix(Tests): Wait for Settings-Dialog Dependency-Check Workers Before Teardown
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11577
+- **Branch:** merged via #11581
+- **PR:** #11581
+- **Paths:** see #11581
+- **Started:** 2026-10-06
+- **Last verified:** 2026-10-06 (`843e3e82`; collated from changes/11577-fix-tests-wait-for-settings-dialog-depen.md)
+- **Summary:** fix(tests): wait for settings-dialog dependency-check workers before teardown
+- **Next step:** Shipped in PR #11581.
+
 ### DL-#11571 · Reconcile Engine Capability Matrix With Get_Capabilities and Add Consistency Test
 
 - **State:** shipped
