@@ -36,6 +36,7 @@ import logging
 import os
 import shutil
 import subprocess
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -735,6 +736,11 @@ def enqueue_stalled_pr(
     return _enqueue_clean_pr(repo, pr, strategy, verdict, run)
 
 
+def _emit(message: str) -> None:
+    """Write one CLI result line to stdout (the interface callers read)."""
+    sys.stdout.write(f"{message}\n")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI: ``automerge_guard.py <owner/repo> <pr> [--arm] [--strategy squash]``.
 
@@ -773,21 +779,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             delete_branch=args.delete_branch,
         )
         if result.armed:
-            print(f"armed {args.repo}#{args.pr}")
+            _emit(f"armed {args.repo}#{args.pr}")
             return 0
         if result.merged:
-            print(
+            _emit(
                 f"merged {args.repo}#{args.pr} ({args.strategy}; PR was already clean)"
             )
             return 0
         if result.auto_merge_may_be_on:
-            print(f"DANGER NOT armed {args.repo}#{args.pr}: {result.reason()}")
+            _emit(f"DANGER NOT armed {args.repo}#{args.pr}: {result.reason()}")
             return EXIT_ARM_MAY_BE_ON
-        print(f"NOT armed {args.repo}#{args.pr}: {result.reason()}")
+        _emit(f"NOT armed {args.repo}#{args.pr}: {result.reason()}")
         return 1
 
     verdict = evaluate_hold(args.repo, args.pr)
-    print(f"{args.repo}#{args.pr}: {verdict.describe()}")
+    _emit(f"{args.repo}#{args.pr}: {verdict.describe()}")
     return 1 if verdict.held else 0
 
 
