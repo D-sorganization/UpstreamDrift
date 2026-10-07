@@ -3,10 +3,28 @@
 Maintains a bounded sample window, solves that window with fixed parameters or
 dynamic models, updates arrival factors via rank-revealing marginalization, and
 enforces safe window commits so failed or non-finite solves never poison future states.
+
+Arrival cost (#11545). The window decision vector holds cubic-Hermite knot
+positions and velocities; the arrival state is the first knot's
+``x_0 = (q_0, v_0)``, of size ``2 * n_dof``. Each window minimises
+
+    0.5 * || R (x_0 - x_ref) - r ||^2 + 0.5 * sum_k || rho_k(c) ||^2,
+
+where ``rho_k`` collects the user residual rows of window sample ``k`` and of
+transitions between consecutive samples. When the window slides from first
+sample ``A`` to ``F``, the rows that will not be evaluated again (the arrival
+rows, the rows of samples ``A..F-1`` and the transitions ``A..F``) are
+linearised at the last accepted solution and the knots ``A..F-1`` are
+eliminated by a Schur complement (:func:`marginalize_arrival_factor`), leaving a
+factor on knot ``F``. The update is committed only when the window solve is
+accepted. For a linear-Gaussian model this is exact: every window equals the
+batch MAP (Kalman/RTS) estimate over all samples seen so far. Earlier versions
+stored the factor but never applied or propagated it.
 """
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
@@ -16,7 +34,22 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.contracts import PreconditionError, require
+from src.shared.python.contracts import require
+from src.shared.python.estimation.arrival_factor import (
+    AccumulationGuard as AccumulationGuard,
+)
+from src.shared.python.estimation.arrival_factor import (
+    ArrivalFactor as ArrivalFactor,
+)
+from src.shared.python.estimation.arrival_factor import (
+    ArrivalUpdate,
+    arrival_rows,
+    forward_difference,
+    marginalize_window_prefix,
+)
+from src.shared.python.estimation.arrival_factor import (
+    marginalize_arrival_factor as marginalize_arrival_factor,
+)
 from src.shared.python.estimation.map_estimator import (
     CubicHermiteSplineTrajectory,
     MapDecisionLayout,
@@ -37,12 +70,7 @@ FixedJacobianFn = Callable[
 ]
 ResultCallback = Callable[["MovingHorizonResult"], None]
 
-
-def _make_readonly(arr: np.ndarray) -> np.ndarray:
-    """Return a read-only float64 numpy array copy."""
-    out = np.array(arr, dtype=np.float64, copy=True)
-    out.flags.writeable = False
-    return out
+logger = logging.getLogger(__name__)
 
 
 class LateSamplePolicy(str, Enum):
@@ -72,173 +100,6 @@ class FailureDiagnostics:
     n_iterations: int = 0
     non_finite_indices: tuple[int, ...] = ()
     constraint_residuals: Mapping[str, float] = field(default_factory=dict)
-
-
-@dataclass(frozen=True)
-class ArrivalFactor:
-    """Square-root quadratic arrival factor in tangent coordinates about a reference.
-
-    Cost: 0.5 * || R * (x - x_ref) - r ||^2
-    """
-
-    reference_state: np.ndarray
-    sqrt_information: np.ndarray
-    residual_offset: np.ndarray
-    rank: int
-    linearization_point: np.ndarray | None = None
-    metadata: Mapping[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        ref = np.asarray(self.reference_state, dtype=np.float64)
-        sqrt_info = np.asarray(self.sqrt_information, dtype=np.float64)
-        offset = np.asarray(self.residual_offset, dtype=np.float64)
-        require(ref.ndim == 1, "reference_state must be a 1D vector")
-        require(sqrt_info.ndim == 2, "sqrt_information must be a 2D matrix")
-        require(offset.ndim == 1, "residual_offset must be a 1D vector")
-        require(
-            sqrt_info.shape[0] == offset.size,
-            "sqrt_information rows must match residual_offset size",
-        )
-        require(
-            sqrt_info.shape[1] == ref.size,
-            "sqrt_information columns must match reference_state size",
-        )
-        require(0 <= self.rank <= sqrt_info.shape[1], "rank out of valid bounds")
-        object.__setattr__(self, "reference_state", _make_readonly(ref))
-        object.__setattr__(self, "sqrt_information", _make_readonly(sqrt_info))
-        object.__setattr__(self, "residual_offset", _make_readonly(offset))
-        if self.linearization_point is not None:
-            lin = np.asarray(self.linearization_point, dtype=np.float64)
-            require(lin.shape == ref.shape, "linearization_point shape mismatch")
-            object.__setattr__(self, "linearization_point", _make_readonly(lin))
-        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
-
-    @property
-    def is_rank_deficient(self) -> bool:
-        """Whether the information matrix has revealed rank deficiency."""
-        return self.rank < self.sqrt_information.shape[1]
-
-    def evaluate_residual(self, state: np.ndarray) -> np.ndarray:
-        """Compute arrival residual R * (state - ref) - r."""
-        x = np.asarray(state, dtype=np.float64)
-        require(x.shape == self.reference_state.shape, "state shape mismatch")
-        delta_x = x - self.reference_state
-        return self.sqrt_information @ delta_x - self.residual_offset
-
-    def evaluate_cost(self, state: np.ndarray) -> float:
-        """Compute quadratic cost 0.5 * || R * (state - ref) - r ||^2."""
-        res = self.evaluate_residual(state)
-        return 0.5 * float(np.sum(res**2))
-
-    def evaluate_jacobian(self, state: np.ndarray) -> np.ndarray:
-        """Evaluate Jacobian with respect to tangent perturbation."""
-        x = np.asarray(state, dtype=np.float64)
-        require(x.shape == self.reference_state.shape, "state shape mismatch")
-        return np.array(self.sqrt_information, copy=True)
-
-
-def marginalize_arrival_factor(
-    A0: np.ndarray,
-    A1: np.ndarray,
-    b: np.ndarray,
-    reference_state_k1: np.ndarray,
-    gauge_policy: str = "retain_rank_deficiency",
-    metadata: Mapping[str, Any] | None = None,
-    rank_tol: float = 1e-10,
-) -> ArrivalFactor:
-    """Perform rank-revealing marginalization of A0 delta x0 + A1 delta x1 ~ b.
-
-    Eliminates delta x0 and forms an updated square-root arrival factor on delta x1.
-    If A0 is singular/unsupported, rank deficiency is retained without diagonal jitter.
-    """
-    mat_a0 = np.asarray(A0, dtype=np.float64)
-    mat_a1 = np.asarray(A1, dtype=np.float64)
-    vec_b = np.asarray(b, dtype=np.float64)
-    require(mat_a0.ndim == 2 and mat_a1.ndim == 2, "A0 and A1 must be 2D matrices")
-    require(mat_a0.shape[0] == mat_a1.shape[0] == vec_b.size, "row dimension mismatch")
-    n0 = mat_a0.shape[1]
-    n1 = mat_a1.shape[1]
-
-    # Full SVD on A0: A0 = U @ diag(S) @ Vt
-    U, S, _ = np.linalg.svd(mat_a0, full_matrices=True)
-    tol = max(rank_tol, S[0] * max(mat_a0.shape) * 1e-12) if S.size > 0 else rank_tol
-    rank_a0 = int(np.sum(tol < S))
-
-    if rank_a0 < n0 and gauge_policy == "fail_closed":
-        raise PreconditionError(
-            f"Singular/rank-deficient marginalization (rank {rank_a0} < {n0}) under fail_closed gauge policy."
-        )
-
-    # Rotate system by U^T:
-    # First rank_a0 rows depend on x0 in observed subspace.
-    # Remaining M - rank_a0 rows are completely decoupled from x0!
-    U2 = U[:, rank_a0:]
-    R_rem = U2.T @ mat_a1
-    b_rem = U2.T @ vec_b
-
-    # SVD on R_rem to reveal rank and obtain canonical square-root form without jitter
-    if R_rem.shape[0] > 0 and R_rem.shape[1] > 0:
-        U_rem, S_rem, Vt_rem = np.linalg.svd(R_rem, full_matrices=False)
-        tol_rem = (
-            max(rank_tol, S_rem[0] * max(R_rem.shape) * 1e-12)
-            if S_rem.size > 0
-            else rank_tol
-        )
-        rank_1 = int(np.sum(S_rem > tol_rem))
-        # Zero out below-threshold singular values strictly without jitter
-        S_clean = np.where(S_rem > tol_rem, S_rem, 0.0)
-        # Pad or form square (n1, n1) matrix
-        k_modes = len(S_clean)
-        R_sq = np.zeros((n1, n1), dtype=np.float64)
-        R_sq[:k_modes, :] = np.diag(S_clean) @ Vt_rem
-        r_sq = np.zeros(n1, dtype=np.float64)
-        r_sq[:k_modes] = U_rem.T @ b_rem
-    else:
-        R_sq = np.zeros((n1, n1), dtype=np.float64)
-        r_sq = np.zeros(n1, dtype=np.float64)
-        rank_1 = 0
-
-    meta = dict(metadata or {})
-    meta["gauge_policy"] = gauge_policy
-    meta["eliminated_dim"] = n0
-    meta["eliminated_rank"] = rank_a0
-
-    return ArrivalFactor(
-        reference_state=np.asarray(reference_state_k1, dtype=np.float64),
-        sqrt_information=R_sq,
-        residual_offset=r_sq,
-        rank=rank_1,
-        linearization_point=np.asarray(reference_state_k1, dtype=np.float64),
-        metadata=meta,
-    )
-
-
-class AccumulationGuard:
-    """Guard against double-counted measurements across receding window advances."""
-
-    def __init__(self) -> None:
-        self._marginalized_indices: set[int] = set()
-        self._marginalized_timestamps: set[float] = set()
-
-    def record_marginalized(self, sample_index: int, timestamp: float) -> None:
-        """Record a sample that has been marginalized into the arrival factor."""
-        require(
-            isinstance(sample_index, int) and sample_index >= 0, "invalid sample_index"
-        )
-        require(np.isfinite(timestamp), "invalid timestamp")
-        self._marginalized_indices.add(sample_index)
-        self._marginalized_timestamps.add(float(timestamp))
-
-    def is_marginalized(self, sample_index: int) -> bool:
-        """Check if sample_index has been marginalized into arrival factor."""
-        return sample_index in self._marginalized_indices
-
-    def validate_sample(self, sample_index: int, timestamp: float) -> None:
-        """Ensure sample has not been previously marginalized into the arrival factor."""
-        if sample_index in self._marginalized_indices:
-            raise PreconditionError(
-                f"Sample index {sample_index} at t={timestamp} is already marginalized into the arrival factor; double-counting prevented."
-            )
 
 
 @dataclass(frozen=True)
@@ -280,6 +141,19 @@ class MovingHorizonProblem:
         for name, value in self.fixed_parameters.items():
             require(str(name).strip() != "", "parameter names must be non-empty")
             require(np.isfinite(float(value)), f"{name} must be finite")
+        if self.arrival_factor is not None:
+            arrival = self.arrival_factor
+            require(
+                arrival.reference_state.size == 2 * self.n_dof,
+                "arrival_factor state must be the first knot (q, v): size "
+                f"2 * n_dof = {2 * self.n_dof}, got {arrival.reference_state.size}",
+            )
+            require(
+                bool(np.all(np.isfinite(arrival.sqrt_information)))
+                and bool(np.all(np.isfinite(arrival.reference_state)))
+                and bool(np.all(np.isfinite(arrival.residual_offset))),
+                "arrival_factor must be finite",
+            )
 
 
 @dataclass(frozen=True)
@@ -399,6 +273,10 @@ class MovingHorizonEstimator:
         self._last_failure_diagnostics: FailureDiagnostics | None = None
         self._failure_history: list[FailureDiagnostics] = []
         self._arrival_factor: ArrivalFactor | None = problem.arrival_factor
+        # Sample index whose first-knot state the arrival factor constrains.
+        self._arrival_sample_index = 0
+        self._pending_arrival = ArrivalUpdate(problem.arrival_factor, 0)
+        self._last_accepted_first_index = 0
         self._accumulation_guard = AccumulationGuard()
 
     @property
@@ -426,6 +304,11 @@ class MovingHorizonEstimator:
         return self._arrival_factor
 
     @property
+    def arrival_sample_index(self) -> int:
+        """Sample index whose knot state the current arrival factor constrains."""
+        return self._arrival_sample_index
+
+    @property
     def accumulation_guard(self) -> AccumulationGuard:
         """Accumulation guard protecting against double-counted measurements."""
         return self._accumulation_guard
@@ -451,8 +334,14 @@ class MovingHorizonEstimator:
         return retained_stop - self._last_solved_stop >= opts.step_size
 
     def build_current_problem(self) -> MapEstimatorProblem:
-        """Build the fixed-parameter MAP problem for the retained window."""
+        """Build the fixed-parameter MAP problem for the retained window.
+
+        Computes the arrival factor for the window's first sample (tentative;
+        committed state changes only when :meth:`solve_next` accepts the
+        window), so the returned problem includes the arrival rows.
+        """
         require(self.ready(), "not enough new samples for a moving-horizon solve")
+        self._pending_arrival = self._propagate_arrival()
         times, q_samples = self._buffer.arrays()
         trajectory = CubicHermiteSplineTrajectory(times, self._problem.n_dof)
         initial_coefficients = self._initial_coefficients(trajectory, times, q_samples)
@@ -474,8 +363,20 @@ class MovingHorizonEstimator:
         latency_ms = (perf_counter() - started) * 1000.0
 
         commit_status, failure_diag = self._evaluate_commit(map_result)
+        pending = self._pending_arrival
+        if pending.failure and commit_status == WindowCommitStatus.ACCEPTED:
+            commit_status = WindowCommitStatus.REJECTED_NONFINITE
+            failure_diag = FailureDiagnostics(
+                window_index=self._window_index,
+                reason=f"non_finite arrival propagation: {pending.failure}",
+                status=commit_status,
+                solver_message=map_result.message,
+                n_iterations=map_result.n_iterations,
+            )
 
         if commit_status == WindowCommitStatus.ACCEPTED:
+            self._commit_arrival(pending)
+            self._last_accepted_first_index = self._buffer.first_sample_index
             self._last_accepted_coefficients = map_result.coefficients
             self._last_accepted_trajectory = map_problem.trajectory
             self._previous_coefficients = map_result.coefficients
@@ -572,11 +473,15 @@ class MovingHorizonEstimator:
         initial_coefficients: np.ndarray,
     ) -> MapEstimatorProblem:
         fixed = dict(self._problem.fixed_parameters)
+        arrival = self._pending_arrival.factor
 
         def residual(
             evaluation: SplineTrajectoryEvaluation, _parameters: Mapping[str, float]
         ) -> np.ndarray:
-            return self._problem.residual(evaluation, fixed)
+            data = np.asarray(self._problem.residual(evaluation, fixed), dtype=float)
+            if arrival is None:
+                return data
+            return np.concatenate([data, arrival_rows(arrival, evaluation, 0)[0]])
 
         jacobian_wrapper = None
         problem_jacobian = self._problem.jacobian
@@ -587,7 +492,16 @@ class MovingHorizonEstimator:
                 _parameters: Mapping[str, float],
                 layout: MapDecisionLayout,
             ) -> np.ndarray:
-                return problem_jacobian(evaluation, fixed, layout)
+                data = np.asarray(
+                    problem_jacobian(evaluation, fixed, layout), dtype=float
+                )
+                if arrival is None:
+                    return data
+                arrival_jac = np.zeros((arrival.residual_offset.size, layout.size))
+                arrival_jac[:, : layout.trajectory_size] = arrival_rows(
+                    arrival, evaluation, 0
+                )[1]
+                return np.vstack([data, arrival_jac])
 
         opts = self._problem.options
         solver_opts = opts.solver_options
@@ -633,5 +547,85 @@ class MovingHorizonEstimator:
             message=map_result.message,
             commit_status=commit_status,
             failure_diagnostics=failure_diag,
-            arrival_factor=self._arrival_factor,
+            arrival_factor=self._pending_arrival.factor,
         )
+
+    def _propagate_arrival(self) -> ArrivalUpdate:
+        """Return the arrival factor for the current window without committing.
+
+        Moves the committed factor from sample ``A`` to the window's first
+        sample ``F`` using the last accepted window (first sample ``S``) as
+        the linearisation point; requires ``S <= A < F < S + N``. Otherwise the
+        dropped samples were never solved, the information cannot be carried
+        and the factor is discarded on commit with a warning (never silently).
+        """
+        first = self._buffer.first_sample_index
+        anchor = self._arrival_sample_index
+        if anchor >= first:
+            return ArrivalUpdate(self._arrival_factor, anchor)
+        traj = self._last_accepted_trajectory
+        coeffs = self._last_accepted_coefficients
+        source = self._last_accepted_first_index
+        if traj is None or coeffs is None:
+            return ArrivalUpdate(
+                None, first, discard_reason="no accepted window to linearise"
+            )
+        if not (source <= anchor and first - source < traj.n_knots):
+            return ArrivalUpdate(None, first, discard_reason="samples never solved")
+        factor = marginalize_window_prefix(
+            traj,
+            coeffs,
+            self._arrival_factor,
+            (anchor - source, first - source),
+            self._dropped_residual_fn(traj),
+        )
+        if factor is None:
+            return ArrivalUpdate(
+                None, anchor, failure="residual or Jacobian non-finite"
+            )
+        times = traj.knot_times[anchor - source : first - source]
+        dropped = tuple(
+            (anchor + offset, float(time)) for offset, time in enumerate(times)
+        )
+        return ArrivalUpdate(factor, first, dropped)
+
+    def _commit_arrival(self, update: ArrivalUpdate) -> None:
+        """Make an accepted window's arrival update the committed state."""
+        if update.discard_reason and self._arrival_factor is not None:
+            logger.warning(
+                "MHE arrival factor discarded moving from sample %d to %d: %s",
+                self._arrival_sample_index,
+                update.anchor,
+                update.discard_reason,
+            )
+        for index, time in update.marginalized:
+            self._accumulation_guard.validate_sample(index, time)
+            self._accumulation_guard.record_marginalized(index, time)
+        self._arrival_factor = update.factor
+        self._arrival_sample_index = update.anchor
+
+    def _dropped_residual_fn(
+        self, traj: CubicHermiteSplineTrajectory
+    ) -> Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+        """Return ``(coeffs, times) -> (residual, jacobian)`` on ``traj``."""
+        fixed = dict(self._problem.fixed_parameters)
+        user_jacobian = self._problem.jacobian
+        layout = MapDecisionLayout(traj.coefficient_size, ())
+
+        def residual_at(coeffs: np.ndarray, times: np.ndarray) -> np.ndarray:
+            evaluation = traj.evaluate(coeffs, times)
+            return np.asarray(self._problem.residual(evaluation, fixed), dtype=float)
+
+        def rows(
+            coeffs: np.ndarray, times: np.ndarray
+        ) -> tuple[np.ndarray, np.ndarray]:
+            value = residual_at(coeffs, times)
+            if user_jacobian is not None:
+                evaluation = traj.evaluate(coeffs, times)
+                jac = np.asarray(user_jacobian(evaluation, fixed, layout), dtype=float)
+                return value, jac[:, : traj.coefficient_size]
+            return value, forward_difference(
+                lambda c: residual_at(c, times), coeffs, value
+            )
+
+        return rows
