@@ -453,8 +453,9 @@ def expected_residual_size(problem: DimeDynamicsWindowProblem) -> int:
     independent of the control values.
     """
     n_steps = problem.horizon_steps
-    nu = len(problem.provider.capability.control_channels)
-    n_q = problem.provider.capability.n_q
+    capability = problem.provider.capability
+    nu = len(capability.control_channels)
+    n_q = capability.n_q
     size = n_steps * nu  # control effort
     if problem.target_positions is not None:
         size += sum(
