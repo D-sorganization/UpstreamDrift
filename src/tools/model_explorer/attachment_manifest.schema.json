@@ -44,6 +44,12 @@
             "type": "number",
             "exclusiveMinimum": 0
           },
+          "port_type": {
+            "enum": ["grip", "hip", "shoulder", "ankle", "neck", "mount"]
+          },
+          "polarity": {
+            "enum": ["socket", "plug"]
+          },
           "tags": {
             "type": "array",
             "items": {

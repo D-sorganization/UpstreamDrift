@@ -1258,6 +1258,30 @@
       "evidence": "src/tools/motion_matching/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "native_viewer_export": {
+      "id": "native_viewer_export",
+      "name": "Tools Package: native_viewer_export",
+      "entity_kind": "cli_tool",
+      "primary_workspace": "simulation",
+      "secondary_links": ["analysis"],
+      "provider_authority": "core",
+      "lifecycle": "intentionally_headless",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/__init__.py",
+      "acceptance_owner": "tests/config/test_registry_exclusions.py"
+    },
+    "tools.native_viewer_export": {
+      "id": "tools.native_viewer_export",
+      "name": "Native per-engine viewer video export (CLI)",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",
@@ -1881,6 +1905,18 @@
       "alias_target": null,
       "evidence": "src/tools/model_explorer/launch_model_explorer.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "tools.model_explorer.frankenstein_assembly": {
+      "id": "tools.model_explorer.frankenstein_assembly",
+      "name": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "acceptance_owner": "tests/unit/tools/model_explorer/test_assembly_panel_gui.py"
     },
     "tools.motion_matching": {
       "id": "tools.motion_matching",

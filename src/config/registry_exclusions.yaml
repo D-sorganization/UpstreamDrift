@@ -63,3 +63,9 @@ exclusions:
       generating URDF and MJCF physics engine models from canonical specification;
       build-time orchestrator with no GUI launcher tile.
     issue: "#9965"
+  - package: native_viewer_export
+    reason: >-
+      Headless batch CLI (python -m src.tools.native_viewer_export) that
+      records each engine's own viewer (Drake/Pinocchio MeshCat via headless
+      Chromium, OpenSim simbody under xvfb, MyoSuite EGL) to mp4 files; it
+      has no interactive window to host in the launcher (epic #11673).
