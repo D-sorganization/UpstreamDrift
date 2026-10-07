@@ -49,6 +49,11 @@ Do not reintroduce MJCF `fullinertia` (MuJoCo's eigen-solve is inaccurate;
 the exporter emits `diaginertia` + `quat`). Open: P-8 Simscape (#11613) on the
 MATLAB R2025b host.
 
+## Active: OpenSim Musculoskeletal Swing (#11617, Epic #11605)
+
+- Branch `feat/opensim-musculoskeletal-swing`: `musculoskeletal_*.py` in `src/engines/physics_engines/opensim/python/`, runner `scripts/run_musculoskeletal_swing.py`, receipt under `docs/development/full_body_models/evidence/musculoskeletal/`.
+- Static Optimization only, leg muscles only, estimated GRF; valid for the backswing (0-1.08 s). Moco did not converge. Next: trunk/arm muscles (Hamner graft or MyoSuite), fix IK after 1.15 s.
+
 ## Simscape Matching Review (2026-10-02)
 
 GS3DX manual inventory follow-through (2026-10-03 UTC): canonical calculation-registry blocker `UP-D1-gs3dx-whole-body-matching-inventory` records the matching, frames/units, observation/calibration, C2/rate, actuation/contact/replay and media-provenance calculations still needing governed QMD coverage. The separate editable research LaTeX is linked evidence, not an approved canonical manual. The registry remains empty and release-blocked; no publication exemption or generated-artifact edit is introduced.
