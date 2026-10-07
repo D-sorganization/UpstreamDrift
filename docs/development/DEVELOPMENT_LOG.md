@@ -3302,6 +3302,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11584 · Settings_Dialog: Ignore Late Dependency-Check Results After Close; Worker Emits Failed for Any Exception
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11584
+- **Branch:** merged via #11618
+- **PR:** #11618
+- **Paths:** see #11618
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`1696354a`; collated from changes/11584-settings-dialog-ignore-late-dependency-c.md)
+- **Summary:** settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception
+- **Next step:** Shipped in PR #11618.
+
 ### DL-#11601 · Ci: Deleted-Test Guard Honours a Reviewed Allowlist (Scripts/Config/Reviewed_Test_Deletions.Json: Path + Issue + Reason, Fails Closed When Malformed) so an Approved Test Retirement Can Pass the Merge Queue; Unapproved Deletions Still Fail.
 
 - **State:** shipped
