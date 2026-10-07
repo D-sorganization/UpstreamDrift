@@ -21,6 +21,7 @@ from src.shared.python.motion_matching.same_input import (
 )
 
 pytestmark = [
+    pytest.mark.unit,
     pytest.mark.integration,
     pytest.mark.requires_mujoco,
     pytest.mark.requires_drake,
