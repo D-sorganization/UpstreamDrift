@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1628,
+    "ud-only": 1633,
     "tools-only": 777,
     "spelling-only": 123
   },
@@ -470,6 +470,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 2,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "model_appearance": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 5,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -7772,7 +7779,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 24423,
+      "ud_bytes": 26633,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -11661,6 +11668,66 @@
       "package": "math_utils",
       "subpackage": "",
       "ud_bytes": 4896,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/__init__.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 1088,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/appearance_v1.schema.json",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 2777,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/geometry.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 6290,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/library.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 8060,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/schema.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 8729,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
