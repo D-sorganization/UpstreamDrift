@@ -36,7 +36,8 @@
 ## Active: Native Per-Engine Viewer Export (Epic #11673)
 
 - Landed (PR 1, NV-1..3): `src/shared/python/golf_view_presets/` (face-on, down-the-line, overhead, oblique; MuJoCo, Drake MeshCat, MeshCat (Rx(-90 deg)) and simbody adapters), the `mjv_initGeom` slot fix in `force_glyphs.py` (#11675, subprocess segfault regression test), and `force_overlay/bundle_provider.py` + `mujoco/python/overlay_source.py` (bundle efforts to joint-torque arcs, shared contact law to per-foot GRF at the CoP, weight at the CoM).
-- Next (PR 2): `src/tools/native_viewer_export/` (Drake and Pinocchio MeshCat via Playwright, OpenSim simbody under xvfb only, MyoSuite via EGL), the 2x2 Pillow compositor, MeshCat overlays. NV-7 Gepetto and NV-8 Simscape stay open.
+- Landed (PR 2, NV-4..6): `src/tools/native_viewer_export/` (CLI `python -m src.tools.native_viewer_export`; Drake and Pinocchio MeshCat via Playwright, OpenSim simbody under xvfb only with 2D projected glyphs, MyoSuite via EGL), the 2x2 Pillow compositor, and a fix to `DrakeMeshcatSink` cone arguments (`MeshcatCone(height, a, b)`). Pitfalls: MeshCat camera = translate `/Cameras/default` is NOT the look-at; set `viewer.controls.target` via `MeshcatPage.look_at`; use the full Playwright Chromium (much faster than the headless shell); run the Drake URDF export in a child (`shared.python` aliases need `src` first on `PYTHONPATH`).
+- Open: NV-7 Gepetto (#11680) and NV-8 Simscape stay open.
 - Camera convention: Z-up, golfer faces -X, target line -Y; MuJoCo azimuth is the heading of the view direction.
 
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)

@@ -11,6 +11,15 @@
       "tiles": [],
       "notes": "Lists OpenCap session trials, loads the selected trial via load_opencap_session, and hands the scaled model plus kinematics to the OpenSim engine."
     },
+    "tools.native_viewer_export": {
+      "title": "Native per-engine viewer video export (CLI)",
+      "pyqt": "src/tools/native_viewer_export/cli.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "tiles": []
+    },
     "tools.necromatcher": {
       "title": "Historical Player Library And Source Review",
       "pyqt": "src/tools/necromatcher/gui.py",
