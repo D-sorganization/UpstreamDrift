@@ -56,6 +56,9 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     shooting_fit,
     zmp_filter,
 )
+from src.shared.python.motion_matching.pipeline.centroidal_filter import (
+    centroidal_filter,
+)
 from src.shared.python.motion_matching.pipeline.finish_feasibility import (
     finish_feasibility_report,
 )
@@ -163,6 +166,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--zmp-filter",
         action="store_true",
         help="dynamics-filter reference to keep ZMP inside support polygon",
+    )
+    parser.add_argument(
+        "--centroidal-filter",
+        action="store_true",
+        help="centroidal feasibility filter v2: full ZMP, vertical force and "
+        "friction cone over the finish (runs after --zmp-filter)",
     )
     parser.add_argument(
         "--static-seeds",
@@ -693,6 +702,25 @@ def _apply_trajectory_optimiser(
         receipt["trajectory_optimiser"] = opt_summary
 
 
+def _feasibility_filters(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    zmp: dict[str, Any],
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
+    """Run the optional cart-table and centroidal feasibility filters in order."""
+    lane, kin, sim, log = context
+    zmp_report: dict[str, Any] | None = None
+    centroidal_report: dict[str, Any] | None = None
+    if args.zmp_filter:
+        q_track, zmp, zmp_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
+    if getattr(args, "centroidal_filter", False):
+        q_track, zmp, centroidal_report = centroidal_filter(
+            lane, kin, sim, q_track, zmp, log
+        )
+    return q_track, zmp, zmp_report, centroidal_report
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -712,9 +740,9 @@ def _simulate_and_receipt(
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
-    zmp_filter_report: dict[str, Any] | None = None
-    if args.zmp_filter:
-        q_track, zmp, zmp_filter_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
+    q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
+        args, (lane, kin, sim, log), q_track, zmp
+    )
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
@@ -751,6 +779,7 @@ def _simulate_and_receipt(
             q_ref=q_ref,
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
+            centroidal_filter_report=centroidal_report,
             shooting_report=shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,

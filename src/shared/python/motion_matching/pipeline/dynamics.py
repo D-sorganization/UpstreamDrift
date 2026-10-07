@@ -522,6 +522,7 @@ class DynamicsReportInputs:
     zmp: dict[str, Any]
     labels: tuple[str, ...] | Sequence[str]
     zmp_filter_report: dict[str, Any] | None = None
+    centroidal_filter_report: dict[str, Any] | None = None
     shooting_report: dict[str, Any] | None = None
     sim_errors: np.ndarray | None = None
     tracking_backend: str = "kkt"
@@ -691,6 +692,7 @@ def build_dynamics_report(
         },
         "contact_parameters": adapter.contact_parameters.as_document(),
         "zmp_filter": inputs.zmp_filter_report,
+        "centroidal_filter": inputs.centroidal_filter_report,
         "shooting_fit": inputs.shooting_report,
         "reference_zmp": _build_reference_zmp_report(inputs.zmp, lane.times),
         "finish_feasibility": inputs.finish_feasibility,
