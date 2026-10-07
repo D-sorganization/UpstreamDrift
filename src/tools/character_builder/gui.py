@@ -19,6 +19,9 @@ logger = get_logger(__name__)
 
 __all__ = ["CharacterBuilderWidget"]
 
+# noqa: gui-thread/ok - compiling a spec takes about 50 ms and exports write one
+# file, so the handlers run inline rather than through AsyncActionBar.
+
 _LABELS = {
     "stature_m": "Stature (m)",
     "mass_kg": "Mass (kg)",
@@ -92,7 +95,7 @@ class CharacterBuilderWidget(QtWidgets.QWidget):
             self.model.apply_preset(preset_id)
         self._syncing = True
         try:
-            values = self.model.parameters.to_dict()
+            values = self.model.parameters_dict()
             for name, spin in self.spins.items():
                 spin.setValue(values[name])
             self.club_combo.setCurrentText(values["club"])

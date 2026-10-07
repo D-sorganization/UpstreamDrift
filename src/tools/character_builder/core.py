@@ -39,6 +39,10 @@ class CharacterBuilderModel:
         """Current parameters (immutable value object)."""
         return self._params
 
+    def parameters_dict(self) -> dict[str, Any]:
+        """Current parameters as a plain mapping (delegates for callers)."""
+        return self._params.to_dict()
+
     @property
     def preset(self) -> CharacterPreset | None:
         """The preset last applied, or ``None`` once a value is edited."""
