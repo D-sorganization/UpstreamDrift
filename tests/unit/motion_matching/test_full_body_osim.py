@@ -225,3 +225,41 @@ def test_cli_export_full_body_osim(tmp_path: Path) -> None:
     assert receipt["representation"] == "native-full-body-osim-v1"
     assert receipt["coordinate_count"] == 44
     assert len(receipt["coordinate_order"]) == 44
+
+
+def test_xyz_orientation_is_body_fixed_not_extrinsic() -> None:
+    """OpenSim orientation is body-fixed X-Y-Z, ``R = Rx(a) Ry(b) Rz(c)`` (#11611)."""
+    import numpy as np
+    from scipy.spatial.transform import Rotation
+
+    from src.engines.physics_engines.opensim.python.full_body_osim import (
+        _rotation_matrix_to_xyz_euler,
+    )
+
+    angles = (0.3, -0.5, 0.8)
+    expected = (
+        Rotation.from_rotvec([angles[0], 0, 0]).as_matrix()
+        @ Rotation.from_rotvec([0, angles[1], 0]).as_matrix()
+        @ Rotation.from_rotvec([0, 0, angles[2]]).as_matrix()
+    )
+    np.testing.assert_allclose(
+        _rotation_matrix_to_xyz_euler(expected), angles, rtol=0, atol=1e-12
+    )
+
+
+def test_validation_accepts_any_consistent_coordinate_inventory(
+    driver_spec: dict,
+) -> None:
+    """The hip-calibrated full-body spec has 41 coordinates, not 44 (#11611)."""
+    from src.engines.physics_engines.opensim.python.full_body_osim import (
+        _validate_spec,
+    )
+
+    spec = json.loads(json.dumps(driver_spec))
+    spec["joints"] = [j for j in spec["joints"] if j["child"] != "toes_l"]
+    kept = {p["coordinate"] for j in spec["joints"] for p in j["primitives"]}
+    spec["coordinate_order"] = [c for c in spec["coordinate_order"] if c in kept]
+    _validate_spec(spec)
+    spec["coordinate_order"] = spec["coordinate_order"][:-1]
+    with pytest.raises(ValueError, match="joint primitive"):
+        _validate_spec(spec)
