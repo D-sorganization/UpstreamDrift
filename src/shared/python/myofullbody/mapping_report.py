@@ -76,8 +76,8 @@ def key_frames(mapper: MyoMapper, q: Array, dt_s: float) -> KeyFrames:
     top = int(np.argmax(np.abs(torso[: int(0.6 * n)] - torso[0])))
     body = [
         i
-        for i in range(mapper.spec.model.nbody)
-        if (mapper.spec.model.body(i).name or "").endswith(CLUB_BODY)
+        for i in range(mapper.spec_nbody)
+        if mapper.spec_body_name(i).endswith(CLUB_BODY)
     ][0]
     stride = max(1, n // 400)
     idx = np.arange(0, n, stride)

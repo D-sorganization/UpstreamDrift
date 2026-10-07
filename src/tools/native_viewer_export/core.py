@@ -91,8 +91,14 @@ class SwingInput:
     club: str
     rollout_engine: str
 
+    @property
+    def reference_shape(self) -> tuple[int, ...]:
+        """Shape the rollout ``q`` must match (the bundle reference)."""
+        reference = self.bundle.reference_q
+        return tuple(reference.shape)
+
     def __post_init__(self) -> None:
-        expected = self.bundle.reference_q.shape
+        expected = self.reference_shape
         if self.q.shape != expected:
             raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
         if not np.isfinite(self.q).all():

@@ -22,12 +22,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from src.engines.physics_engines.opensim.python import musculoskeletal_static_opt as so
 from src.shared.python.contracts import require
+
+if TYPE_CHECKING:
+    from src.engines.physics_engines.opensim.python import (
+        musculoskeletal_static_opt as so,
+    )
 
 Array = np.ndarray
 
@@ -231,7 +235,11 @@ def solve_frame(
             break
     reserve = offset - gain @ a
     cost = float(a @ a + w * (reserve @ reserve))
-    return so.FrameSolution(a, reserve, cost, converged)
+    from src.engines.physics_engines.opensim.python import (
+        musculoskeletal_static_opt as so_runtime,
+    )
+
+    return so_runtime.FrameSolution(a, reserve, cost, converged)
 
 
 def group_reserve_metrics(

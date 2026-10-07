@@ -281,7 +281,9 @@ def run_swing(config: SwingConfig) -> SwingResult:
         order = tuple(bundle.coordinate_order)
         neck_names = neck.actuator_names(order, cols)
         bases = [neck.augment(b, order, cols) for b in bases]
-    tau = bundle.efforts[np.ix_(ks, cols)]
+    tau = bundle.efforts[
+        np.ix_(np.asarray(ks, dtype=np.intp), np.asarray(cols, dtype=np.intp))
+    ]
     act, neck_act, res, ok = solve_with_neck(
         bases, tau, config.reserve_weight, n_muscles
     )

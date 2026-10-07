@@ -29,6 +29,22 @@ def spec() -> dict:
     return compile_full_body_spec(PARAMS)
 
 
+def _require_real_module(name: str) -> None:
+    """Skip unless ``name`` is a genuinely installed package, not a test mock."""
+    import importlib
+    import sys
+
+    try:
+        module = importlib.import_module(name)
+    except ImportError:
+        pytest.skip(f"{name} is not installed")
+    root = sys.modules.get(name.split(".")[0])
+    if not (hasattr(module, "__file__") and hasattr(root, "__path__")) or type(
+        module
+    ).__module__.startswith("unittest.mock"):
+        pytest.skip(f"{name} is mocked by another test, not a real install")
+
+
 class TestParameterContract:
     def test_defaults_are_valid(self) -> None:
         p = SpecCharacterParameters()
@@ -140,7 +156,7 @@ class TestEngineExporters:
         assert model.nq >= 41
 
     def test_pinocchio_builds(self, spec: dict) -> None:
-        pytest.importorskip("pinocchio")
+        _require_real_module("pinocchio")
         from src.engines.physics_engines.pinocchio.python.native_model import (
             build_full_body_pinocchio_model,
         )
@@ -148,7 +164,7 @@ class TestEngineExporters:
         assert build_full_body_pinocchio_model(spec) is not None
 
     def test_drake_builds(self, spec: dict) -> None:
-        pytest.importorskip("pydrake.all")
+        _require_real_module("pydrake.all")
         from src.engines.physics_engines.drake.python.full_body_model import (
             FullBodyDrakeModel,
         )

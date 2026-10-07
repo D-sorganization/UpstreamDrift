@@ -154,10 +154,12 @@ def frame_from_axes(y_dir: Array, x_dir: Array) -> Array:
     """
     y = np.asarray(y_dir, dtype=float)
     x = np.asarray(x_dir, dtype=float)
-    require(np.linalg.norm(y) > 1e-9 and np.linalg.norm(x) > 1e-9, "zero-length axis")
+    require(
+        bool(np.linalg.norm(y) > 1e-9 and np.linalg.norm(x) > 1e-9), "zero-length axis"
+    )
     y = y / np.linalg.norm(y)
     x = x - float(x @ y) * y
-    require(np.linalg.norm(x) > 1e-6, "axes are parallel")
+    require(bool(np.linalg.norm(x) > 1e-6), "axes are parallel")
     x = x / np.linalg.norm(x)
     return np.column_stack([x, y, np.cross(x, y)])
 

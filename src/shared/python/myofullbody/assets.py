@@ -211,7 +211,10 @@ def extract_verified(data: bytes, manifest: AssetManifest, destination: Path) ->
 def download_archive(url: str = ARCHIVE_URL) -> bytes:
     """Download ``url`` (HTTPS only) with a timeout."""
     require(url.startswith("https://"), "archive url must be https")
-    with urllib.request.urlopen(url, timeout=DOWNLOAD_TIMEOUT_S) as response:  # noqa: S310
+    # https is enforced above, so file:// schemes cannot reach urlopen.
+    with urllib.request.urlopen(  # noqa: S310  # nosec B310  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+        url, timeout=DOWNLOAD_TIMEOUT_S
+    ) as response:
         return bytes(response.read())
 
 

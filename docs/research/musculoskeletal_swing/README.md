@@ -73,7 +73,7 @@ Receipts: `docs/development/full_body_models/evidence/musculoskeletal/receipt_v2
 
 ## MyoFullBody Full-Body Muscle Study (Epic #11642)
 
-Editable research source: [myofullbody_swing.tex](myofullbody_swing.tex) (compile
+Editable research source: [myofullbody_swing.tex](../myofullbody_swing/myofullbody_swing.tex) (compile
 with `tectonic`; the PDF is not committed). It covers the model and licences, the
 spec-to-MyoFullBody orientation mapping, ROM clamps, the static optimisation, the
 inverse-dynamics consistency check, reserves, failed experiments and the

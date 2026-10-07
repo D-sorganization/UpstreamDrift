@@ -6,7 +6,20 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytest.importorskip("pydrake")
+
+def _real_pydrake() -> bool:
+    """True only for a genuine pydrake install, not a ``sys.modules`` mock."""
+    import importlib
+
+    try:
+        module = importlib.import_module("pydrake")
+    except ImportError:
+        return False
+    return hasattr(module, "__path__") and type(module).__module__ != "unittest.mock"
+
+
+if not _real_pydrake():
+    pytest.skip("pydrake is not installed (or is mocked)", allow_module_level=True)
 
 
 class _RecordingMeshcat:

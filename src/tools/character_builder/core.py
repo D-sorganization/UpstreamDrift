@@ -62,7 +62,8 @@ class CharacterBuilderModel:
         """Change one parameter, validating the full set before committing."""
         if name not in self._params.to_dict():
             raise ValueError(f"unknown character parameter: {name!r}")
-        self._params = replace(self._params, **{name: value})
+        overrides: dict[str, Any] = {name: value}
+        self._params = replace(self._params, **overrides)
         self._preset = None
 
     def compile(self) -> spec_export.CompiledCharacter:

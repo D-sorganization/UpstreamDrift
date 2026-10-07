@@ -169,7 +169,7 @@ class MyoMapper:
         spec_frames = anatomy.segment_frames(
             self.spec.model,
             anatomy.spec_frame_defs(),
-            np.zeros(self.spec.model.nq),
+            np.zeros(self.spec_nq),
             self._spec_qpos(reference_q),
         )
         myo_frames = anatomy.segment_frames(
@@ -190,9 +190,40 @@ class MyoMapper:
         self._root_rel = self._pelvis_in_root()
         self._limits = self._build_limits()
 
+    # -- delegation (Law of Demeter) ------------------------------------------
+    @property
+    def spec_nq(self) -> int:
+        """Number of generalized positions of the spec model."""
+        model = self.spec.model
+        return int(model.nq)
+
+    def spec_coordinate_index(self, name: str) -> int:
+        """Index of spec coordinate ``name`` in the spec coordinate order."""
+        order = self.spec.coordinate_order
+        return order.index(name)
+
+    @property
+    def spec_nbody(self) -> int:
+        """Number of bodies in the spec model."""
+        model = self.spec.model
+        return int(model.nbody)
+
+    def spec_body_name(self, index: int) -> str:
+        """Name of spec body ``index`` (empty string when unnamed)."""
+        model = self.spec.model
+        return model.body(index).name or ""
+
+    def expand_coupled(self, q: Array) -> Array:
+        """Expand independent coordinates to the full coupled ``qpos``."""
+        return self.coupling.expand(q)
+
+    def coupled_jacobian(self, full: Array) -> Array:
+        """Jacobian of the coupling map at the full ``qpos``."""
+        return self.coupling.jacobian(full)
+
     # -- setup ---------------------------------------------------------------
     def _spec_qpos(self, q: Array) -> Array:
-        qpos = np.zeros(self.spec.model.nq)
+        qpos = np.zeros(self.spec_nq)
         qpos[self.spec.qpos_adr] = q
         return qpos
 
@@ -324,7 +355,7 @@ class MyoMapper:
         rot_rel, pos_rel = self._root_rel
         root_rot = self.target("pelvis") @ rot_rel.T
         spec_pos = np.array(
-            [q_spec[self.spec.coordinate_order.index(n)] for n in SPEC_ROOT_TRANSLATION]
+            [q_spec[self.spec_coordinate_index(n)] for n in SPEC_ROOT_TRANSLATION]
         )
         pelvis_at = self.world @ spec_pos
         q[:3] = pelvis_at - root_rot @ pos_rel + np.array([0.0, 0.0, ground_offset])

@@ -178,7 +178,7 @@ every file by sha256 (`scripts/fetch_myofullbody.py`).
   `qualification`; `swing_pipeline.run_swing` builds the receipt.
 - `render` — blue-to-red activation colours, frame selection, four camera views
   (`scripts/render_myofullbody_swing.py`).
-- Reference: `docs/research/musculoskeletal_swing/myofullbody_swing.tex`.
+- Reference: `docs/research/myofullbody_swing/myofullbody_swing.tex`.
 
 ### MOSAIC Model-Aware Matching Estimator
 

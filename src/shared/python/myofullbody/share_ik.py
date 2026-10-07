@@ -134,7 +134,7 @@ class _Problem:
         self.root_rot0 = self.target["pelvis"] @ rot_rel.T
         spec_pos = np.array(
             [
-                q_spec[mapper.spec.coordinate_order.index(n)]
+                q_spec[mapper.spec_coordinate_index(n)]
                 for n in mapping.SPEC_ROOT_TRANSLATION
             ]
         )
@@ -167,7 +167,7 @@ class _Problem:
     def _errors(self, x: Array) -> tuple[Array, dict[str, Array]]:
         if self._cache is not None and np.array_equal(self._cache[0], x):
             return self._cache[1], self._cache[2]
-        full = self.mapper.coupling.expand(self.qpos(x))
+        full = self.mapper.expand_coupled(self.qpos(x))
         data, model = self.mapper.data, self.mapper.model
         data.qpos[:] = full
         self.mujoco.mj_kinematics(model, data)
@@ -193,7 +193,7 @@ class _Problem:
     def jacobian(self, x: Array) -> Array:
         full, rot = self._errors(x)
         data, model = self.mapper.data, self.mapper.model
-        jac_q = self.mapper.coupling.jacobian(full)
+        jac_q = self.mapper.coupled_jacobian(full)
         d_qfull = jac_q[np.ix_(self.h_qadr, self.adr)]  # (n_hinge, nj)
         root = left_jacobian(x[self.nj :])
         rows = [np.hstack([np.zeros((3, self.nj)), np.eye(3)]) * self.weight["pelvis"]]
