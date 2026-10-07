@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "character-preset-v1",
+  "title": "Character Preset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "description",
+    "category",
+    "parameters",
+    "provenance",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "character-preset-v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "enum": [
+        "tour",
+        "age",
+        "matched_capture"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stature_m",
+        "mass_kg"
+      ],
+      "properties": {
+        "stature_m": {
+          "type": "number",
+          "minimum": 1.2,
+          "maximum": 2.3
+        },
+        "mass_kg": {
+          "type": "number",
+          "minimum": 30,
+          "maximum": 200
+        },
+        "trunk_scale": {
+          "type": "number",
+          "minimum": 0.7,
+          "maximum": 1.4
+        },
+        "arm_scale": {
+          "type": "number",
+          "minimum": 0.7,
+          "maximum": 1.4
+        },
+        "shoulder_scale": {
+          "type": "number",
+          "minimum": 0.7,
+          "maximum": 1.4
+        },
+        "grip_roll_deg": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "club": {
+          "enum": [
+            "driver",
+            "iron7"
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limitations": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

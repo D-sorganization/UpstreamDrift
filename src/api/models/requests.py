@@ -731,3 +731,23 @@ class CharacterBuilderRequest(BaseModel):
         if normalized not in {"athletic", "average", "heavy", "slim"}:
             raise ValueError("build_type must be athletic, average, heavy, or slim")
         return normalized
+
+
+class CharacterSpecRequest(BaseModel):
+    """Request for the spec-native character builder (CMB-3, #11654).
+
+    ``preset`` selects a shipped character preset as the base; any other
+    field overrides that base (or the defaults when no preset is given).
+    Bounds mirror ``spec_params.PARAMETER_RANGES``; the service re-validates.
+    """
+
+    preset: str | None = Field(None, description="Character preset id")
+    stature_m: float | None = Field(None, ge=1.2, le=2.3)
+    mass_kg: float | None = Field(None, ge=30.0, le=200.0)
+    trunk_scale: float | None = Field(None, ge=0.7, le=1.4)
+    arm_scale: float | None = Field(None, ge=0.7, le=1.4)
+    shoulder_scale: float | None = Field(None, ge=0.7, le=1.4)
+    grip_roll_deg: float | None = Field(None, ge=-180.0, le=180.0)
+    club: str | None = Field(None, description="driver or iron7")
+
+    model_config = {"extra": "forbid"}

@@ -314,14 +314,13 @@
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
     "tools.character_builder": {
-      "title": "Character Builder (humanoid URDF generation)",
-      "pyqt": "src/shared/python/model_generation/cli/main.py",
+      "title": "Character Builder (spec-native character, presets, engine export)",
+      "pyqt": "src/tools/character_builder/gui.py",
       "api": "src/api/routes/character_builder.py",
       "web": "ui/src/pages/CharacterBuilder.tsx",
-      "status": "gap",
-      "issue": 7448,
+      "status": "parity",
       "tiles": ["character_builder"],
-      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page still drives only /character-builder/generate; wiring presets and spec export into the page is tracked under epic #11651."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",

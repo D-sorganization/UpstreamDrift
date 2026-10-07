@@ -411,6 +411,18 @@ models:
       logo: "assets/data_explorer_modern.png"
       status: "beta"
 
+  - id: "character_builder"
+    help: "docs/help/character_builder.md"
+    name: "Character Builder"
+    description: "Build a golfer from stature, mass and proportions and export a full-body spec, URDF, MJCF or OpenSim model; presets included"
+    type: "special_app"
+    path: "src/tools/character_builder/__main__.py"
+    launcher:
+      category: "tool"
+      logo: "urdf_icon.svg"
+      status: "beta"
+      default_launch: "tab"
+
   - id: "capture_rig"
     help: "docs/help/capture_rig.md"
     name: "Capture Rig"

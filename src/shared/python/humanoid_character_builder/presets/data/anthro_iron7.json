@@ -1,0 +1,18 @@
+{
+  "schema_version": "character-preset-v1",
+  "id": "anthro_iron7",
+  "name": "Anthropometric Iron Subject",
+  "description": "Subject parameters of the committed anthropometric 7-iron spec.",
+  "category": "matched_capture",
+  "parameters": {
+    "stature_m": 1.71,
+    "mass_kg": 78.0,
+    "trunk_scale": 1.15,
+    "arm_scale": 1.1,
+    "shoulder_scale": 1.0,
+    "grip_roll_deg": 0.0,
+    "club": "iron7"
+  },
+  "provenance": "docs/development/full_body_models/build_receipt_anthro_iron7.json subject block.",
+  "limitations": "Subject anonymised; proportion scales were set by the capture match and are unqualified. Compiles on the De Leva 1996 male table and the Rajagopal lower limbs; only stature, mass and the proportion scales change."
+}

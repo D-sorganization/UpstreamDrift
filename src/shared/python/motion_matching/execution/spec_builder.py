@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Sequence
+from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -429,26 +430,40 @@ def _write_outputs(
     return spec_path, receipt_path
 
 
-def build_anthropometric_spec(
+@dataclass(frozen=True)
+class AnthropometricDocument:
+    """A composed candidate document plus the values its receipt records."""
+
+    document: dict[str, Any]
+    subject: dict[str, Any]
+    hip_half_m: float
+    hub_height_m: float
+    notes: list[str]
+
+
+def compose_anthropometric_document(
     *,
     native_path: Path,
     osim_path: Path,
     native_candidate_path: Path,
     stature_m: float,
     mass_kg: float,
-    output_dir: Path,
     club: str = "driver",
     **kwargs: Any,
-) -> tuple[Path, Path]:
-    """Build candidate spec and receipt, writing both to output_dir."""
+) -> AnthropometricDocument:
+    """Compose the candidate full-body document in memory (no files written).
+
+    Single source for the spec content: ``build_anthropometric_spec`` writes
+    it with a receipt and the character builder (CMB-1, #11652) compiles
+    subject parameters through it. Postcondition: the document passed
+    ``validate_full_body_spec`` inside ``derive_full_body_spec``.
+    """
     trunk_scale = float(kwargs.get("trunk_scale", 1.0))
     arm_scale = float(kwargs.get("arm_scale", 1.0))
     shoulder_scale = float(kwargs.get("shoulder_scale", 1.0))
     grip_roll_deg = float(kwargs.get("grip_roll_deg", 0.0))
     lead_grip_rotation = kwargs.get("lead_grip_rotation")
     trail_grip_rotation = kwargs.get("trail_grip_rotation")
-    name = kwargs.get("name")
-    spec_name = name or f"full_body_spec_anthro_{club}"
 
     native = json.loads(native_path.read_text(encoding="utf-8"))
     upper = build_upper_body(
@@ -507,16 +522,47 @@ def build_anthropometric_spec(
             for side in ("r", "l")
         }
     )
-
-    return _write_outputs(
+    return AnthropometricDocument(
         document=document,
+        subject=upper["subject"],
+        hip_half_m=hip_half,
+        hub_height_m=hub_h,
+        notes=notes,
+    )
+
+
+def build_anthropometric_spec(
+    *,
+    native_path: Path,
+    osim_path: Path,
+    native_candidate_path: Path,
+    stature_m: float,
+    mass_kg: float,
+    output_dir: Path,
+    club: str = "driver",
+    **kwargs: Any,
+) -> tuple[Path, Path]:
+    """Build candidate spec and receipt, writing both to output_dir."""
+    name = kwargs.get("name")
+    spec_name = name or f"full_body_spec_anthro_{club}"
+    built = compose_anthropometric_document(
+        native_path=native_path,
+        osim_path=osim_path,
+        native_candidate_path=native_candidate_path,
+        stature_m=stature_m,
+        mass_kg=mass_kg,
+        club=club,
+        **kwargs,
+    )
+    return _write_outputs(
+        document=built.document,
         output_dir=output_dir,
         spec_name=spec_name,
-        subject=upper["subject"],
+        subject=built.subject,
         input_paths=(native_path, osim_path, native_candidate_path),
-        hip_half=hip_half,
-        hub_h=hub_h,
-        notes=notes,
+        hip_half=built.hip_half_m,
+        hub_h=built.hub_height_m,
+        notes=built.notes,
     )
 
 
