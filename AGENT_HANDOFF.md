@@ -1,6 +1,6 @@
 # Active: Contact Wrench Tracking QP - #11670
 
-- Branch `feat/contact-wrench-qp-11670` (stacked on #11704). Opt-in `--tracking wrench-qp` (Drake Clarabel). Reference: `docs/development/full_body_models/CONTACT_WRENCH_QP.md`.
+- Branch `feat/contact-wrench-qp-11670` (stacked on the #11703 branch, after #11704 merged into it). Opt-in `--tracking wrench-qp` (Drake Clarabel). Reference: `docs/development/full_body_models/CONTACT_WRENCH_QP.md`.
 - Negative result: baseline reproduced within 1 mm only with the plant cone; yaw error unchanged (driver 34.5, iron 19.4 degrees) because the torque depends only on joint acceleration. Issue stays open.
 
 # Active: Foot Contact Geometry and Torsional Friction - #11671
