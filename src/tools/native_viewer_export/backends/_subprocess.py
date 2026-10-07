@@ -6,6 +6,7 @@ from collections.abc import Iterator, Sequence
 import json
 import os
 from pathlib import Path
+from typing import Any
 import subprocess
 import sys
 import tempfile
@@ -121,7 +122,7 @@ _URDF_SNIPPET = (
 )
 
 
-def export_urdf(spec_bytes: bytes) -> tuple[str, dict[str, object]]:
+def export_urdf(spec_bytes: bytes) -> tuple[str, dict[str, Any]]:
     """Full-body URDF text and sidecar, built in a child with the repo import paths.
 
     The legacy ``shared.python`` aliases only resolve when ``src`` leads

@@ -67,9 +67,9 @@ class PinocchioMeshcatBackend:
             name: str, body: str, rot: Any, pos: Any, shape: Any, rgba: list[float]
         ) -> None:
             joint, body_pose = adapter._bodies[body]  # noqa: SLF001 - adapter exposes no public accessor
-            obj = pin.GeometryObject(name, joint, body_pose * pin.SE3(rot, pos), shape)
+            obj = pin.GeometryObject(name, joint, body_pose * pin.SE3(rot, pos), shape)  # type: ignore[attr-defined]
             obj.meshColor = np.array(rgba)
-            geometry.addGeometryObject(obj)
+            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
 
         n = 0
         for cap in skeleton.capsules:
@@ -98,14 +98,14 @@ class PinocchioMeshcatBackend:
                 _SHAPE_RGBA,
             )
             n += 1
-        floor = pin.GeometryObject(
+        floor = pin.GeometryObject(  # type: ignore[attr-defined]
             "floor",
             0,
             pin.SE3(np.eye(3), np.array([1.0, 0.0, skeleton.ground.height_m - 0.005])),
             coal.Box(6.0, 6.0, 0.01),
         )
         floor.meshColor = np.array(_FLOOR_RGBA)
-        geometry.addGeometryObject(floor)
+        geometry.addGeometryObject(floor)  # type: ignore[attr-defined]
         viz = MeshcatVisualizer(adapter.model, geometry, geometry)
         viz.initViewer(viewer=meshcat.Visualizer(), open=False, loadModel=False)
         viz.loadViewerModel(rootNodeName="golfer")

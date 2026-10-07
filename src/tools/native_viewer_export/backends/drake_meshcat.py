@@ -78,7 +78,7 @@ class DrakeMeshcatBackend:
             rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
             plant.RegisterVisualGeometry(
                 plant.GetBodyByName(links[cap.body], inst),
-                RigidTransform(RotationMatrix(rot), centre),
+                RigidTransform(RotationMatrix(rot), centre),  # type: ignore[arg-type]
                 Capsule(cap.radius_m, length),
                 f"cap{n}",
                 np.array(_CAPSULE_RGBA),
@@ -92,7 +92,7 @@ class DrakeMeshcatBackend:
             )
             plant.RegisterVisualGeometry(
                 plant.GetBodyByName(links[shp.body], inst),
-                RigidTransform(np.asarray(shp.center_m)),
+                RigidTransform(np.asarray(shp.center_m)),  # type: ignore[arg-type]
                 shape,
                 f"shp{n}",
                 np.array(_SHAPE_RGBA),
@@ -100,7 +100,7 @@ class DrakeMeshcatBackend:
             n += 1
         plant.RegisterVisualGeometry(
             plant.world_body(),
-            RigidTransform([1.0, 0.0, skeleton.ground.height_m - 0.005]),
+            RigidTransform(np.array([1.0, 0.0, skeleton.ground.height_m - 0.005])),  # type: ignore[arg-type]
             Box(6.0, 6.0, 0.01),
             "floor",
             np.array(_FLOOR_RGBA),

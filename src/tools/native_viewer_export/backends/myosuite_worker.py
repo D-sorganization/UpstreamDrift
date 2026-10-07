@@ -46,19 +46,25 @@ def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) 
     root = ET.fromstring(spec_xml)  # noqa: S314 - generated locally
     scene_path = arena_scene_path()
     scene = ET.parse(scene_path).getroot()  # noqa: S314
+    scene_asset = scene.find("asset")
+    scene_visual = scene.find("visual")
+    scene_world = scene.find("worldbody")
+    if scene_asset is None or scene_visual is None or scene_world is None:
+        raise ValueError(f"{scene_path} lacks asset, visual or worldbody sections")
     asset = root.find("asset")
     if asset is None:
         asset = ET.SubElement(root, "asset")
-    for elem in scene.find("asset") or []:
+    for elem in scene_asset:
         if elem.get("file"):
             elem.set(
-                "file", str((scene_path.parent / Path(elem.get("file")).name).resolve())
+                "file",
+                str((scene_path.parent / Path(str(elem.get("file"))).name).resolve()),
             )
         asset.append(elem)
     visual = root.find("visual")
     if visual is None:
         visual = ET.SubElement(root, "visual")
-    for elem in scene.find("visual") or []:
+    for elem in scene_visual:
         if elem.tag in ("headlight", "map", "scale"):
             old = visual.find(elem.tag)
             if old is not None:
@@ -70,16 +76,18 @@ def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) 
     glob.set("offwidth", str(max(width, 640)))
     glob.set("offheight", str(max(height, 480)))
     world = root.find("worldbody")
+    if world is None:
+        raise ValueError("specification MJCF has no worldbody")
     for geom in list(world.findall("geom")):
         if geom.get("name") == "visual_floor":
             world.remove(geom)
     names = {e.get("name") for e in root.iter() if e.get("name")}
     ground = None
-    for elem in scene.find("worldbody"):
+    for elem in scene_world:
         if elem.tag != "geom" or elem.get("group") == "2":
             continue
         if elem.get("name") in names:
-            elem.set("name", "myo_" + elem.get("name"))
+            elem.set("name", "myo_" + str(elem.get("name")))
         world.append(elem)
         if elem.get("name") in ("ground", "myo_ground"):
             ground = elem

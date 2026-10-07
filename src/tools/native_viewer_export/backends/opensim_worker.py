@@ -73,8 +73,8 @@ def grab_window() -> np.ndarray:
         head[19],
     )
     offset = header_size + n_colors * 12
-    pix = np.frombuffer(raw[offset : offset + bytes_per_line * height], np.uint8)
-    pix = pix.reshape(height, bytes_per_line)[:, : width * 4].reshape(height, width, 4)
+    flat = np.frombuffer(raw[offset : offset + bytes_per_line * height], np.uint8)
+    pix = flat.reshape(height, bytes_per_line)[:, : width * 4].reshape(height, width, 4)
     return np.ascontiguousarray(pix[:, :, [2, 1, 0]])
 
 
