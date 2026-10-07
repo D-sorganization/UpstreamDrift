@@ -121,7 +121,8 @@ class NativeMujocoFullBodyModel:
         Subclasses override this to supply a model held by another runtime
         (for example MyoSuite); the MJCF is the same specification export.
         """
-        model = self._mj.MjModel.from_xml_string(xml)
+        model_cls = self._mj.MjModel
+        model = model_cls.from_xml_string(xml)
         return model, self._mj.MjData(model)
 
     @property

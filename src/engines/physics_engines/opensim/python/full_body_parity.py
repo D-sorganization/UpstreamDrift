@@ -89,7 +89,8 @@ class OpenSimFullBodyParityAdapter:
         self.coordinate_order: tuple[str, ...] = tuple(spec["coordinate_order"])
         self.nv = len(self.coordinate_order)
         self._osim: Any = import_module("opensim")
-        self._osim.Logger.setLevelString("Warn")
+        logger = self._osim.Logger
+        logger.setLevelString("Warn")
         self._build_model(spec_bytes)
         self._probe_state_layout()
         self._init_closure(spec["closure"])
