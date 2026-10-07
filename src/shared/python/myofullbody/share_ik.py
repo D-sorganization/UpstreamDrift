@@ -83,7 +83,7 @@ def left_jacobian_inv(rotvec: Array) -> Array:
 def default_tolerances_deg() -> dict[str, float]:
     """Per-segment tolerance (deg): tight for distal 3-DOF chains, loose proximally."""
     tol = {s: mapping_report.tolerance_for(s) for s in anatomy.SEGMENTS}
-    tol.update({s: PROXIMAL_TOLERANCE_DEG for s in PROXIMAL_SEGMENTS})
+    tol.update(dict.fromkeys(PROXIMAL_SEGMENTS, PROXIMAL_TOLERANCE_DEG))
     return tol
 
 

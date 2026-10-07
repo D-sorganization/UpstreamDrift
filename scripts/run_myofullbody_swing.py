@@ -32,6 +32,9 @@ def main() -> int:
     parser.add_argument("--stride", type=int, default=5)
     parser.add_argument("--reserve-weight", type=float, default=100.0)
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument("--rom-policy", choices=("share", "extend"), default="share")
+    parser.add_argument("--no-neck-actuator", action="store_true")
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     config = SwingConfig(
@@ -40,6 +43,9 @@ def main() -> int:
         args.reserve_weight,
         args.cache_root,
         invocation=shlex.join(["python3", *sys.argv]),
+        rom_policy=args.rom_policy,
+        neck_actuator=not args.no_neck_actuator,
+        workers=args.workers,
     )
     result = run_swing(config)
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
