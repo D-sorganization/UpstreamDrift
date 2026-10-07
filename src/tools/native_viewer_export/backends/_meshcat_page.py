@@ -56,12 +56,13 @@ def playwright_unavailable_reason() -> str | None:
     """Why headless Chromium capture cannot run here, or ``None``."""
     if find_spec("playwright") is None:
         return "playwright is not installed (pip install playwright; playwright install chromium)"
+    from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import sync_playwright
 
     try:
         with sync_playwright() as p:
             exe = preferred_chromium() or p.chromium.executable_path
-    except Exception as exc:  # noqa: BLE001 - any driver failure means unavailable
+    except (PlaywrightError, OSError, RuntimeError) as exc:
         return f"playwright driver failed to start: {exc}"
     if not Path(exe).exists():
         return f"chromium is not installed at {exe} (playwright install chromium)"
