@@ -585,10 +585,15 @@ commit \texttt{21a2ed06}:
     construction as \texttt{fit\_uncertainty.least\_squares\_parameter\_uncertainty}
     (which multiplies by $\hat\sigma^2=2\,\mathrm{cost}/(m-n)$).  If
     $\mathbf{F}$ is numerically rank-deficient (rank below its column count at
-    the \texttt{numpy.linalg.matrix\_rank} default tolerance) the marginal is
-    unbounded in a confounded direction; the block is reported as
-    \texttt{NaN} with status \texttt{rank\_deficient} rather than as the
-    Moore--Penrose block.
+    the \texttt{numpy.linalg.matrix\_rank} default tolerance) the block is
+    reported as \texttt{NaN} with status \texttt{rank\_deficient} rather than
+    as the Moore--Penrose block.  This is a conservative fail-closed
+    \emph{policy}, not a mathematical necessity: $\Sigma_{ss}$ is unbounded
+    only when a null direction of $\mathbf{F}$ has a nonzero $s$ component.
+    Rank loss confined to trajectory columns leaves $s$ identified (for
+    $\mathbf{F}=\operatorname{diag}(0,1)$ with $t$ first, the marginal
+    variance of $s$ is $1$), but is still reported as unavailable.  A
+    projected-rank test would remove that conservatism and is not implemented.
     Acceptance benchmark: two trials, each a two-knot one-DoF Hermite spline
     observed at its knots, residual
     $[q(0),q(1),v(0),v(1),\,s+q(0)+q(1)-z]$ per trial, prior $s/\sigma$, and
