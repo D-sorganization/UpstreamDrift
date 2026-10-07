@@ -12,6 +12,7 @@ from src.shared.python.motion_matching.same_input import (
     ROOT_COORDINATES,
     SCHEMA,
     InputBundle,
+    StepPolicy,
     growth_rate,
     integrate,
     open_loop,
@@ -50,7 +51,9 @@ def _bundle(steps: int = 20, dt_s: float = 0.01) -> InputBundle:
     q0[-1] = 1.0
     efforts = np.zeros((steps, 7))
     efforts[:, -1] = 0.5
-    rollout = open_loop(_Oscillator(), q0, v0, efforts, dt_s=dt_s, project=False)
+    rollout = open_loop(
+        _Oscillator(), q0, v0, efforts, dt_s=dt_s, policy=StepPolicy(project=False)
+    )
     return InputBundle(
         spec_bytes=SPEC,
         coordinate_order=ORDER,
@@ -90,7 +93,7 @@ def test_integrate_holds_effort_and_zeroes_root() -> None:
         source,
         steps=3,
         dt_s=0.1,
-        project=False,
+        policy=StepPolicy(project=False),
     )
     assert calls == [0, 1, 2]
     assert np.all(rollout.efforts[:, :6] == 0.0)
@@ -101,9 +104,16 @@ def test_integrate_holds_effort_and_zeroes_root() -> None:
 def test_substeps_match_a_finer_step() -> None:
     plant, q0, v0 = _Oscillator(), np.ones(7), np.zeros(7)
     efforts = np.zeros((10, 7))
-    coarse = open_loop(plant, q0, v0, efforts, dt_s=0.1, substeps=4, project=False)
+    coarse = open_loop(
+        plant, q0, v0, efforts, dt_s=0.1, policy=StepPolicy(substeps=4, project=False)
+    )
     fine = open_loop(
-        plant, q0, v0, np.zeros((40, 7)), dt_s=0.025, substeps=1, project=False
+        plant,
+        q0,
+        v0,
+        np.zeros((40, 7)),
+        dt_s=0.025,
+        policy=StepPolicy(substeps=1, project=False),
     )
     np.testing.assert_allclose(coarse.q[-1], fine.q[-1], atol=1e-15)
 
@@ -173,7 +183,7 @@ def test_score_replay_of_the_reference_is_exact() -> None:
         bundle.v0,
         bundle.efforts,
         dt_s=bundle.dt_s,
-        project=False,
+        policy=StepPolicy(project=False),
     )
     score = score_replay(_Oscillator(), bundle, rollout, frame_stride=5)
     assert score.coordinate_error.max() == 0.0
@@ -195,9 +205,27 @@ def test_stop_on_failure_returns_the_states_reached() -> None:
     efforts[:, -1] = 100.0
     plant, q0 = _Blowup(), np.zeros(7)
     with pytest.raises(FloatingPointError):
-        open_loop(plant, q0, np.zeros(7), efforts, dt_s=0.1, project=False)
+        open_loop(
+            plant, q0, np.zeros(7), efforts, dt_s=0.1, policy=StepPolicy(project=False)
+        )
     rollout = open_loop(
-        plant, q0, np.zeros(7), efforts, dt_s=0.1, project=False, stop_on_failure=True
+        plant,
+        q0,
+        np.zeros(7),
+        efforts,
+        dt_s=0.1,
+        policy=StepPolicy(project=False, stop_on_failure=True),
     )
     assert rollout.failure is not None and "FloatingPointError" in rollout.failure
     assert rollout.q.shape[0] == rollout.efforts.shape[0] + 1 < 11
+
+
+@pytest.mark.parametrize("substeps", [0, -1])
+def test_step_policy_rejects_nonpositive_substeps(substeps: int) -> None:
+    with pytest.raises(ValueError, match="substeps"):
+        StepPolicy(substeps=substeps)
+
+
+def test_step_policy_rejects_non_integer_substeps() -> None:
+    with pytest.raises(TypeError, match="substeps"):
+        StepPolicy(substeps=2.0)  # type: ignore[arg-type]

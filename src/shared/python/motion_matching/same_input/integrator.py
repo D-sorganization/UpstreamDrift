@@ -40,6 +40,29 @@ ROOT_COORDINATES: tuple[str, ...] = (
 )
 
 
+@dataclass(frozen=True)
+class StepPolicy:
+    """How each fixed step is integrated.
+
+    ``substeps`` RK4 substeps per step, closure projection after each step when
+    ``project``, and with ``stop_on_failure`` a diverging run (nonfinite or
+    singular dynamics, failed projection) ends early instead of raising.
+    """
+
+    substeps: int = DEFAULT_SUBSTEPS
+    project: bool = True
+    stop_on_failure: bool = False
+
+    def __post_init__(self) -> None:
+        if isinstance(self.substeps, bool) or not isinstance(self.substeps, int):
+            raise TypeError("substeps must be an int")
+        if self.substeps < 1:
+            raise ValueError("substeps must be positive")
+
+
+DEFAULT_POLICY = StepPolicy()
+
+
 class DynamicsPlant(ClosurePlant, Protocol):
     """Plant with constrained accelerations and spec coordinate order."""
 
@@ -54,7 +77,7 @@ class Rollout:
 
     ``pose_drift`` is the closure pose residual each step left before its
     projection; it measures what the projection removed.  ``failure`` is set
-    when ``stop_on_failure`` ended the run early (states then stop there).
+    when ``StepPolicy.stop_on_failure`` ended the run early (states then stop there).
     """
 
     time_s: Array
@@ -99,20 +122,18 @@ def integrate(
     *,
     steps: int,
     dt_s: float,
-    substeps: int = DEFAULT_SUBSTEPS,
-    project: bool = True,
-    stop_on_failure: bool = False,
+    policy: StepPolicy = DEFAULT_POLICY,
 ) -> Rollout:
     """Integrate ``steps`` steps, asking ``source(k, t, q, v)`` for each effort.
 
     The effort is requested once per step at the step's start state and held
-    over the step's ``substeps`` RK4 substeps.  Root entries are forced to zero.
-    With ``stop_on_failure`` a diverging run (nonfinite or singular dynamics,
-    failed projection) returns the states reached so far instead of raising.
+    over the step's ``policy.substeps`` RK4 substeps.  Root entries are forced
+    to zero.  With ``policy.stop_on_failure`` a diverging run returns the
+    states reached so far instead of raising.
     """
-    if steps < 1 or substeps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
-        raise ValueError("steps, substeps and dt_s must be positive")
-    inner_dt = dt_s / substeps
+    if steps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
+        raise ValueError("steps and dt_s must be positive")
+    inner_dt = dt_s / policy.substeps
     root = root_indices(plant.coordinate_order)
     q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
     qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
@@ -121,9 +142,9 @@ def integrate(
         tau = np.asarray(source(k, k * dt_s, q, v), dtype=float).copy()
         tau[root] = 0.0
         try:
-            q, v, step_drift = _step(plant, q, v, tau, inner_dt, substeps, project)
+            q, v, step_drift = _step(plant, q, v, tau, inner_dt, policy)
         except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
-            if not stop_on_failure:
+            if not policy.stop_on_failure:
                 raise
             failure = f"step {k} (t = {k * dt_s:.3f} s): {type(exc).__name__}: {exc}"
             break
@@ -147,12 +168,11 @@ def _step(
     v: Array,
     tau: Array,
     inner_dt: float,
-    substeps: int,
-    project: bool,
+    policy: StepPolicy,
 ) -> tuple[Array, Array, float]:
-    for _ in range(substeps):
+    for _ in range(policy.substeps):
         q, v = zoh_rk4_step(plant, q, v, tau, inner_dt)
-    if not project:
+    if not policy.project:
         return q, v, float(np.abs(plant.closure_pose_residual(q)).max())
     state = project_to_closure(plant, q, v)
     return state.q, state.v, state.pose_residual_before
@@ -165,9 +185,7 @@ def open_loop(
     efforts: Array,
     *,
     dt_s: float,
-    substeps: int = DEFAULT_SUBSTEPS,
-    project: bool = True,
-    stop_on_failure: bool = False,
+    policy: StepPolicy = DEFAULT_POLICY,
 ) -> Rollout:
     """Replay a fixed effort sequence (steps, nv); root columns must be zero."""
     table = np.asarray(efforts, dtype=float)
@@ -182,7 +200,5 @@ def open_loop(
         lambda k, _t, _q, _v: table[k],
         steps=table.shape[0],
         dt_s=dt_s,
-        substeps=substeps,
-        project=project,
-        stop_on_failure=stop_on_failure,
+        policy=policy,
     )

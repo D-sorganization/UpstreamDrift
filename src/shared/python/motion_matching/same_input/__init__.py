@@ -17,6 +17,7 @@ from src.shared.python.motion_matching.same_input.closure import (
 from src.shared.python.motion_matching.same_input.integrator import (
     ROOT_COORDINATES,
     Rollout,
+    StepPolicy,
     integrate,
     open_loop,
     zoh_rk4_step,
@@ -48,6 +49,7 @@ __all__ = [
     "InputBundle",
     "ReplayScore",
     "Rollout",
+    "StepPolicy",
     "VectorPlant",
     "closed_loop",
     "generate_reference_bundle",

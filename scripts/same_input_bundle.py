@@ -30,6 +30,7 @@ import numpy as np
 from src.shared.python.motion_matching.same_input import (
     ALL_ENGINES,
     InputBundle,
+    StepPolicy,
     VectorPlant,
     closed_loop,
     generate_reference_bundle,
@@ -89,7 +90,7 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
         bundle.v0,
         bundle.efforts,
         dt_s=bundle.dt_s,
-        stop_on_failure=True,
+        policy=StepPolicy(stop_on_failure=True),
     )
     elapsed = time.perf_counter() - started
     score = score_replay(plant, bundle, rollout)
