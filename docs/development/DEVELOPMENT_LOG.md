@@ -2720,6 +2720,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#1893 · Archive HANDOFF.md and DEVELOPMENT_LOG.md Verbatim (RM#1893)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1893
+- **Branch:** merged via #11620
+- **PR:** #11620
+- **Paths:** see #11620
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`7a4e3436`; collated from changes/1893-archive-handoff-devlog.md)
+- **Summary:** Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893)
+- **Next step:** Shipped in PR #11620.
+
 ### DL-#11584 · Settings_Dialog: Ignore Late Dependency-Check Results After Close; Worker Emits Failed for Any Exception
 
 - **State:** shipped
