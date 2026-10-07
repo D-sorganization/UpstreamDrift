@@ -173,6 +173,7 @@ def test_iter_documents_only_doc_extensions(
     assert names == ["a.md", "b.qmd"]
 
 
+@pytest.mark.unit
 def test_main_exempts_handoff_and_devlog_archives(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -186,6 +187,7 @@ def test_main_exempts_handoff_and_devlog_archives(
     assert mod.main() == 0
 
 
+@pytest.mark.unit
 def test_main_still_fails_for_oversize_outside_archives(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
