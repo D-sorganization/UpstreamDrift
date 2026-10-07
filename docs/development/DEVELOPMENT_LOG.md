@@ -2720,6 +2720,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11617 · OpenSim Musculoskeletal Swing: GRF Estimate, StaticOptimization Pipeline, Receipt
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11617
+- **Branch:** merged via #11621
+- **PR:** #11621
+- **Paths:** see #11621
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`d1f0d8bf`; collated from changes/11617-opensim-musculoskeletal-swing-grf-estima.md)
+- **Summary:** OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt
+- **Next step:** Shipped in PR #11621.
+
 ### DL-#11612 · P-7: Spec Full-Body Model Loaded Through the MyoSuite Runtime Reproduces MuJoCo Bit-Exactly Under the Same Inputs (L0/L1/L2 Parity Receipt)
 
 - **State:** shipped
