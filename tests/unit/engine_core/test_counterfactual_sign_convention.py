@@ -36,8 +36,15 @@ _CONTRACT_DOCS = (
 )
 
 # ``M(q)^-1`` (Unicode or ASCII) applied to a bias that starts with a positive
-# ``C(q,v)`` term: the wrong-sign form ``M^-1 (C v + g ...)``.
-_POSITIVE_BIAS = re.compile(r"M\(q\)\s*(?:⁻¹|\^-1)\s*[·*]\s*\(\s*C\(q,\s*v\)")
+# ``C(q,v)`` or ``g(q)`` term: the wrong-sign forms ``M^-1 (C v + g ...)`` and
+# ``M^-1 (g + ...)``.
+_POSITIVE_BIAS = re.compile(
+    r"M\(q\)\s*(?:⁻¹|\^-1)\s*[·*]\s*\(\s*(?:C\(q,\s*v\)|g\(q\))"
+)
+
+# Phrases that describe ZVCF as keeping the control or as a pure velocity split;
+# ZVCF zeroes velocity *and* control (methods reference, eq. ``eq:zvcf``).
+_CONTROL_PRESERVING_ZVCF = ("control (τ) preserved", "Δa_velocity = a_full - a_ZVCF")
 
 
 def _single_link() -> tuple[PlanarChain, np.ndarray, float]:
@@ -86,3 +93,13 @@ def test_contract_documents_negative_bias(relative_path: str) -> None:
     ]
 
     assert offending == [], f"{relative_path} documents the wrong drift sign"
+
+
+@pytest.mark.parametrize("relative_path", _CONTRACT_DOCS)
+def test_contract_documents_zvcf_with_control_zeroed(relative_path: str) -> None:
+    """No contract text may say ZVCF keeps the applied control."""
+    text = (_REPO_ROOT / relative_path).read_text(encoding="utf-8")
+
+    offending = [phrase for phrase in _CONTROL_PRESERVING_ZVCF if phrase in text]
+
+    assert offending == [], f"{relative_path} describes ZVCF as control-preserving"

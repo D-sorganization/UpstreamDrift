@@ -179,9 +179,10 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
     FeatureDescriptor(
         name="compute_zvcf",
         display_name="Zero-Velocity Counterfactual (ZVCF)",
-        description="Compute acceleration with zero velocities, preserving configuration. "
-        "Isolates gravity/configuration effects from Coriolis/centrifugal. "
-        "Δa_velocity = a_full - a_ZVCF.",
+        description="Compute acceleration with zero velocities and zero applied "
+        "control, preserving configuration. Isolates gravity/configuration "
+        "effects from Coriolis/centrifugal and control. "
+        "Velocity-dependent drift = a_ZTCF - a_ZVCF.",
         category=FeatureCategory.COUNTERFACTUAL,
         requires_args=True,
         arg_specs=[

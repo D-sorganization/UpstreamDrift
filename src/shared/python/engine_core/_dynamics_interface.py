@@ -304,9 +304,10 @@ class DynamicsInterface(Protocol):
             ValueError: If array dimensions don't match model
 
         Note:
-            Only velocity is zeroed; configuration (q) and control (τ) preserved.
-            Centrifugal barrier analysis uses ZVCF to find configurations where
-            q̈(q,0,τ) prevents motion even with applied torque.
+            Velocity and applied control are zeroed; configuration (q) is kept.
+            The control-preserved variant q̈(q, 0, τ), used for centrifugal
+            barrier analysis, is a distinct diagnostic
+            (zero_velocity_control_preserved_acceleration) and never a ZVCF.
 
         See Also:
             - compute_ztcf: Zero-torque counterfactual
