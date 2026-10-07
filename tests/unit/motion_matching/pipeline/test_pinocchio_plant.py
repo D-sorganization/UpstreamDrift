@@ -188,30 +188,36 @@ def test_pinocchio_plant_accelerations_and_derivatives() -> None:
 
 
 def test_pinocchio_plant_matches_mujoco_accelerations() -> None:
-    """Shared contact law + weld: Pinocchio qdd within 1e-6 of MuJoCo at 3 states."""
+    """Shared contact law + weld: Pinocchio qdd within 1e-6 of MuJoCo at 3 states.
+
+    Random states violate the dual-grip weld, where each engine linearises the
+    closure differently, so they are first projected onto the closure manifold
+    and MuJoCo uses the exact (unregularised) KKT solve (#11606).
+    """
     _require_real_pinocchio()
     pytest.importorskip("mujoco")
-    spec = _load_spec()
-    pin_plant = get_plant("pinocchio", spec)
-    mj_plant = get_plant("mujoco", spec)
-    shared = [c for c in pin_plant.coordinate_order if c in mj_plant.coordinate_order]
-    assert len(shared) >= 30
+    from src.shared.python.motion_matching.same_input import (
+        VectorPlant,
+        project_to_closure,
+    )
+
+    spec_bytes = _SPEC.read_bytes()
+    pin_plant = VectorPlant("pinocchio", spec_bytes)
+    mj_plant = VectorPlant("mujoco", spec_bytes, kkt_regularization=0.0)
     rng = np.random.default_rng(10333)
+    tau = np.zeros(pin_plant.nv)
     for _ in range(3):
-        q = {c: float(rng.normal(scale=0.02)) for c in shared}
-        v = {c: float(rng.normal(scale=0.01)) for c in shared}
-        tau = dict.fromkeys(shared, 0.0)
-        # Pad missing coords with zeros for each plant.
-        q_pin = {c: q.get(c, 0.0) for c in pin_plant.coordinate_order}
-        v_pin = {c: v.get(c, 0.0) for c in pin_plant.coordinate_order}
-        tau_pin = dict.fromkeys(pin_plant.coordinate_order, 0.0)
-        q_mj = {c: q.get(c, 0.0) for c in mj_plant.coordinate_order}
-        v_mj = {c: v.get(c, 0.0) for c in mj_plant.coordinate_order}
-        tau_mj = dict.fromkeys(mj_plant.coordinate_order, 0.0)
-        a_pin = pin_plant.accelerations(q_pin, v_pin, tau_pin)
-        a_mj = mj_plant.accelerations(q_mj, v_mj, tau_mj)
-        for name in shared:
-            assert a_pin[name] == pytest.approx(a_mj[name], abs=1e-6), name
+        state = project_to_closure(
+            pin_plant,
+            rng.normal(scale=0.02, size=pin_plant.nv),
+            rng.normal(scale=0.01, size=pin_plant.nv),
+        )
+        np.testing.assert_allclose(
+            pin_plant.acceleration(state.q, state.v, tau),
+            mj_plant.acceleration(state.q, state.v, tau),
+            rtol=0,
+            atol=1e-6,
+        )
 
 
 def test_pinocchio_matching_plant_alias_module() -> None:
