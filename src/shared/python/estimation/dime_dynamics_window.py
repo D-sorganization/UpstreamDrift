@@ -32,6 +32,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeFullStepResult,
     DimeDynamicsProvider,
     EstimationIntervalFactor,
+    ProviderCapability,
 )
 
 
@@ -321,6 +322,11 @@ class DimeDynamicsWindowProblem:
         self.discrepancy_bounds = discrepancy_bounds
         self.max_iterations = max_iterations
 
+    @property
+    def capability(self) -> ProviderCapability:
+        """Provider capability (delegating accessor, keeps call chains short)."""
+        return self.provider.capability
+
     def validate_controls(self, controls: np.ndarray) -> None:
         """Validate control array shape, underactuated root constraints, and actuator bounds."""
         raw_u = np.asarray(controls, dtype=np.float64)
@@ -404,7 +410,7 @@ class DimeDynamicsWindowResult:
 
 def _window_dims(problem: DimeDynamicsWindowProblem) -> tuple[int, int, int]:
     """Return ``(n_steps, n_u, n_x)`` with ``n_x = 2 n_v`` the knot-state size."""
-    capability = problem.provider.capability
+    capability = problem.capability
     return problem.horizon_steps, len(capability.control_channels), 2 * capability.n_v
 
 
@@ -423,7 +429,7 @@ def _failed_result(
         root_constraint_residuals=np.zeros(1),
         cost_breakdown={"total_cost": float("inf")},
         status=status,
-        qualification_status=problem.provider.capability.status,
+        qualification_status=problem.capability.status,
         n_iterations=0,
     )
 
@@ -517,7 +523,7 @@ def _knot_states(
 ) -> list[DimeCompleteState]:
     """Return ``[x_0, x_1, ..., x_N]`` as complete states (``x_0`` is fixed)."""
     init = problem.initial_state
-    nv = problem.provider.capability.n_v
+    nv = problem.capability.n_v
     states = [init]
     for k, x in enumerate(knot_states, start=1):
         states.append(
@@ -607,7 +613,7 @@ def _observation_targets(
     """``(k, y_k)`` pairs for knots ``k <= N``, truncated to ``n_q`` entries."""
     if problem.target_positions is None:
         return []
-    n_q = problem.provider.capability.n_q
+    n_q = problem.capability.n_q
     return [
         (k, targ[:n_q])
         for k, targ in enumerate(problem.target_positions)
@@ -636,7 +642,7 @@ def _observation_residuals(
     problem: DimeDynamicsWindowProblem, knot_states: np.ndarray
 ) -> list[np.ndarray]:
     """Unweighted position residuals ``q_k - y_k`` for every target."""
-    n_q = problem.provider.capability.n_q
+    n_q = problem.capability.n_q
     q_all = np.vstack([problem.initial_state.q[None, :n_q], knot_states[:, :n_q]])
     return [q_all[k, : len(targ)] - targ for k, targ in _observation_targets(problem)]
 
@@ -765,7 +771,7 @@ def _assemble_window_result(
         root_constraint_residuals=np.zeros(n_steps, dtype=np.float64),
         cost_breakdown=cost_breakdown,
         status=status,
-        qualification_status=problem.provider.capability.status,
+        qualification_status=problem.capability.status,
         n_iterations=int(opt_res.nfev),
     )
 
