@@ -2720,6 +2720,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11574 · Ci: Compile Docs/Research LaTeX References With Pinned Tectonic and Check Changed Title Case
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11574
+- **Branch:** merged via #11641
+- **PR:** #11641
+- **Paths:** see #11641
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`18a4a5bd`; collated from changes/11574-ci-compile-docs-research-latex-reference.md)
+- **Summary:** ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case
+- **Next step:** Shipped in PR #11641.
+
 ### DL-#11554 · Fixed-Size Window Residual: Typed DimeResidualEvaluationError Replaces the Np.Full(100, 1E8) Fake Residual; Bound Residuals Fixed-Length; DbC Postcondition on Residual Length. Single Shooting / Real Defects Deferred to MOSAIC-13 (#11545).
 
 - **State:** shipped
