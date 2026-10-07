@@ -714,7 +714,8 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
 
         **Physics**: With τ=0, acceleration is purely passive:
-            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+            q̈_ZTCF = M(q)⁻¹ · (J^T·λ₀ - C(q,v)·v - g(q))
+            (λ₀: constraint reactions recomputed under τ = 0)
 
         Args:
             q: Joint positions (n_q,) [rad or m]

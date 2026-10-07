@@ -129,7 +129,7 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         display_name="Drift Acceleration (Passive Dynamics)",
         description="Compute passive/drift acceleration with zero control inputs. "
         "Answers: 'What happens if all motors turn off?' "
-        "q̈_drift = M(q)⁻¹ · (C(q,v)v + g(q))",
+        "q̈_drift = M(q)⁻¹ · (-C(q,v)v - g(q))",
         category=FeatureCategory.ANALYSIS,
         return_type="np.ndarray (n_v,)",
         section="Section F: Drift-Control Decomposition",
