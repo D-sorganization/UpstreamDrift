@@ -47,8 +47,7 @@ class NativeMujocoFullBodyModel:
         # canonical pipeline unchanged; same-input parity runs set it to 0 so
         # the solve is exact like Drake's and Pinocchio's (#11606).
         self.kkt_regularization: float = 1e-6
-        self.model = mj.MjModel.from_xml_string(self.xml)
-        self.data = mj.MjData(self.model)
+        self.model, self.data = self._build_model(self.xml)
 
         self.coordinate_order: list[str] = list(self.metadata["coordinate_order"])
         self.upper_body_coordinates = int(spec["upper_body_counts"]["coordinates"])
@@ -115,6 +114,15 @@ class NativeMujocoFullBodyModel:
             }
 
         self._errors: tuple[np.ndarray, np.ndarray] | None = None
+
+    def _build_model(self, xml: str) -> tuple[Any, Any]:
+        """Compile ``xml`` into the ``(model, data)`` pair the adapter drives.
+
+        Subclasses override this to supply a model held by another runtime
+        (for example MyoSuite); the MJCF is the same specification export.
+        """
+        model = self._mj.MjModel.from_xml_string(xml)
+        return model, self._mj.MjData(model)
 
     @property
     def coordinate_units(self) -> tuple[str, ...]:
