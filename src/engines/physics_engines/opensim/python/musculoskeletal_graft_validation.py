@@ -118,10 +118,10 @@ def muscle_length_agreement(
             )
         base_scaled.realizePosition(base_state)
         for muscle in model.getMuscles():
-            side = graft.side_of(muscle.getName())
+            owner = str(graft.side_of(muscle.getName()))
             reference = base_scaled.getMuscles().get(muscle.getName())
             diff = 1000.0 * (muscle.getLength(state) - reference.getLength(base_state))
-            errors[str(side)].append((muscle.getName(), float(diff)))
+            errors[owner].append((muscle.getName(), float(diff)))
     out: dict[str, Any] = {"frames": list(frames)}
     for side, rows in errors.items():
         values = np.array([v for _, v in rows])

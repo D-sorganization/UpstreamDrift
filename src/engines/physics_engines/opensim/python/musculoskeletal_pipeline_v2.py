@@ -306,13 +306,13 @@ def run_v2(config: V2Config) -> dict[str, Any]:
         "muscle_force_peak_n": float(result["force"].max()),
     }
     receipt["upper_body_torque_standins"] = upper_body_summary(bundle)
-    np.savez_compressed(
-        config.out_dir / "static_opt.npz",
-        times=times,
-        muscle_names=np.array(basis.muscle_names),
-        coordinates=np.array(basis.coords),
+    arrays: dict[str, Any] = {
+        "times": times,
+        "muscle_names": np.array(basis.muscle_names),
+        "coordinates": np.array(basis.coords),
         **result,
-    )
+    }
+    np.savez_compressed(config.out_dir / "static_opt.npz", **arrays)
     digest = hashlib.sha256(
         json.dumps(receipt, sort_keys=True, default=str).encode()
     ).hexdigest()

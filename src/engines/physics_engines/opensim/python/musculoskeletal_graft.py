@@ -24,11 +24,12 @@ Everything here that does not need OpenSim is pure numpy and unit tested.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 import json
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike
 from scipy.spatial.transform import Rotation
 
 from src.shared.python.contracts import require
@@ -88,10 +89,10 @@ def pelvis_frame_from_spec(
 
 
 def map_pelvis_point(
-    point: Sequence[float],
+    point: ArrayLike,
     rotation: Array,
-    base_hip_centre: Sequence[float],
-    spec_hip_centre: Sequence[float],
+    base_hip_centre: ArrayLike,
+    spec_hip_centre: ArrayLike,
 ) -> Array:
     """Map a point of the (scaled) Rajagopal pelvis frame into the spec ``Hip`` body.
 
@@ -104,7 +105,7 @@ def map_pelvis_point(
     )
 
 
-def map_wrap_orientation(xyz_body_rotation: Sequence[float], rotation: Array) -> Array:
+def map_wrap_orientation(xyz_body_rotation: ArrayLike, rotation: Array) -> Array:
     """Compose a fixed rotation with an OpenSim ``xyz_body_rotation`` triple.
 
     OpenSim wrap objects store body-fixed X-Y-Z Euler angles; the result is the
@@ -116,8 +117,8 @@ def map_wrap_orientation(xyz_body_rotation: Sequence[float], rotation: Array) ->
 
 
 def leg_scale_factors(
-    spec_mass_centres: Mapping[str, Sequence[float]],
-    base_mass_centres: Mapping[str, Sequence[float]],
+    spec_mass_centres: Mapping[str, ArrayLike],
+    base_mass_centres: Mapping[str, ArrayLike],
     *,
     talus_scale: float,
 ) -> dict[str, float]:
