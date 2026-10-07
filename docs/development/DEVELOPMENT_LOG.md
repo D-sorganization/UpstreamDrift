@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11553 · Fix ZTCF/Drift Sign in Engine Contract Docs and Unify ZVCF on Simulation_Backends.Ztcf_Zvcf (Counterfactual Delegates)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11553
+- **Branch:** fix/11553-zvcf-sign-and-definition
+- **PR:** #11638
+- **Paths:** see #11638
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`7300b4c4`; collated from changes/11553-fix-ztcf-drift-sign-in-engine-contract-d.md)
+- **Summary:** Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates)
+- **Next step:** Reconcile the duplicate DynamicsProvider protocols (dime_contracts vs simulation_backends.protocol) in a follow-up API-change PR
+
 ### DL-#11614 · Same-Input Parity LaTeX Research Reference (P-1 Pointwise Result)
 
 - **State:** in_progress
