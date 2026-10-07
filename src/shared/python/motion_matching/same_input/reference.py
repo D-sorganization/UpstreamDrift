@@ -49,7 +49,7 @@ def _tracking_setup(
     if times.ndim != 1 or track.shape[0] != times.size or np.any(np.diff(times) <= 0):
         raise ValueError("q_track rows must match strictly increasing times")
     span = float(times[-1]) if duration_s is None else float(duration_s)
-    if not 0.0 < span <= float(times[-1]) + 1e-12:
+    if not 0.0 < span <= float(times[-1]) + DT_S / 2:
         raise ValueError("duration_s must lie within the reference span")
     sim = fs.FullBodySimulator(NativeMujocoFullBodyModel(spec_bytes))
     q0 = fs.preload_feet(sim, track[0])

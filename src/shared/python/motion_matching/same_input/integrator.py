@@ -53,7 +53,8 @@ class Rollout:
     """States ``q``/``v`` (steps + 1, nv), held efforts (steps, nv) and drift.
 
     ``pose_drift`` is the closure pose residual each step left before its
-    projection; it measures what the projection removed.
+    projection; it measures what the projection removed.  ``failure`` is set
+    when ``stop_on_failure`` ended the run early (states then stop there).
     """
 
     time_s: Array
@@ -61,6 +62,7 @@ class Rollout:
     v: Array
     efforts: Array
     pose_drift: Array
+    failure: str | None = None
 
 
 def root_indices(coordinate_order: Sequence[str]) -> Array:
@@ -99,11 +101,14 @@ def integrate(
     dt_s: float,
     substeps: int = DEFAULT_SUBSTEPS,
     project: bool = True,
+    stop_on_failure: bool = False,
 ) -> Rollout:
     """Integrate ``steps`` steps, asking ``source(k, t, q, v)`` for each effort.
 
     The effort is requested once per step at the step's start state and held
     over the step's ``substeps`` RK4 substeps.  Root entries are forced to zero.
+    With ``stop_on_failure`` a diverging run (nonfinite or singular dynamics,
+    failed projection) returns the states reached so far instead of raising.
     """
     if steps < 1 or substeps < 1 or not (np.isfinite(dt_s) and dt_s > 0.0):
         raise ValueError("steps, substeps and dt_s must be positive")
@@ -111,27 +116,46 @@ def integrate(
     root = root_indices(plant.coordinate_order)
     q, v = np.asarray(q0, dtype=float).copy(), np.asarray(v0, dtype=float).copy()
     qs, vs, efforts, drift = [q.copy()], [v.copy()], [], []
+    failure = None
     for k in range(steps):
         tau = np.asarray(source(k, k * dt_s, q, v), dtype=float).copy()
         tau[root] = 0.0
-        for _ in range(substeps):
-            q, v = zoh_rk4_step(plant, q, v, tau, inner_dt)
-        if project:
-            state = project_to_closure(plant, q, v)
-            drift.append(state.pose_residual_before)
-            q, v = state.q, state.v
-        else:
-            drift.append(float(np.abs(plant.closure_pose_residual(q)).max()))
+        try:
+            q, v, step_drift = _step(plant, q, v, tau, inner_dt, substeps, project)
+        except (ArithmeticError, np.linalg.LinAlgError, ValueError) as exc:
+            if not stop_on_failure:
+                raise
+            failure = f"step {k} (t = {k * dt_s:.3f} s): {type(exc).__name__}: {exc}"
+            break
+        drift.append(step_drift)
         qs.append(q.copy())
         vs.append(v.copy())
         efforts.append(tau)
     return Rollout(
-        time_s=np.arange(steps + 1) * dt_s,
+        time_s=np.arange(len(qs)) * dt_s,
         q=np.array(qs),
         v=np.array(vs),
-        efforts=np.array(efforts),
+        efforts=np.array(efforts).reshape(len(efforts), -1),
         pose_drift=np.array(drift),
+        failure=failure,
     )
+
+
+def _step(
+    plant: DynamicsPlant,
+    q: Array,
+    v: Array,
+    tau: Array,
+    inner_dt: float,
+    substeps: int,
+    project: bool,
+) -> tuple[Array, Array, float]:
+    for _ in range(substeps):
+        q, v = zoh_rk4_step(plant, q, v, tau, inner_dt)
+    if not project:
+        return q, v, float(np.abs(plant.closure_pose_residual(q)).max())
+    state = project_to_closure(plant, q, v)
+    return state.q, state.v, state.pose_residual_before
 
 
 def open_loop(
@@ -143,6 +167,7 @@ def open_loop(
     dt_s: float,
     substeps: int = DEFAULT_SUBSTEPS,
     project: bool = True,
+    stop_on_failure: bool = False,
 ) -> Rollout:
     """Replay a fixed effort sequence (steps, nv); root columns must be zero."""
     table = np.asarray(efforts, dtype=float)
@@ -159,4 +184,5 @@ def open_loop(
         dt_s=dt_s,
         substeps=substeps,
         project=project,
+        stop_on_failure=stop_on_failure,
     )

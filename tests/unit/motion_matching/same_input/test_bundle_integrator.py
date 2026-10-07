@@ -179,3 +179,22 @@ def test_score_replay_of_the_reference_is_exact() -> None:
     assert score.coordinate_error.max() == 0.0
     assert score.frame_error_m.max() == 0.0
     assert score.horizon_s == pytest.approx(bundle.steps * bundle.dt_s)
+
+
+def test_stop_on_failure_returns_the_states_reached() -> None:
+    class _Blowup(_Oscillator):
+        def acceleration(self, q, v, tau):
+            if q[-1] > 1.5:
+                raise FloatingPointError("nonfinite")
+            return np.full_like(q, 0.0) + tau
+
+    efforts = np.zeros((10, 7))
+    efforts[:, -1] = 100.0
+    plant, q0 = _Blowup(), np.zeros(7)
+    with pytest.raises(FloatingPointError):
+        open_loop(plant, q0, np.zeros(7), efforts, dt_s=0.1, project=False)
+    rollout = open_loop(
+        plant, q0, np.zeros(7), efforts, dt_s=0.1, project=False, stop_on_failure=True
+    )
+    assert rollout.failure is not None and "FloatingPointError" in rollout.failure
+    assert rollout.q.shape[0] == rollout.efforts.shape[0] + 1 < 11

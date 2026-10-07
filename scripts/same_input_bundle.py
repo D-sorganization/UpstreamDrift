@@ -39,6 +39,7 @@ from src.shared.python.motion_matching.same_input import (
 )
 
 LOG = logging.getLogger("same_input_bundle")
+_STATES: dict[str, np.ndarray] = {}  # last rollout, written beside the receipt
 
 
 def _sha256(path: Path) -> str:
@@ -82,14 +83,23 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
     segment_steps = max(1, int(round(segment_ms * 1e-3 / bundle.dt_s)))
     plant = VectorPlant(engine, bundle.spec_bytes)
     started = time.perf_counter()
-    rollout = open_loop(plant, bundle.q0, bundle.v0, bundle.efforts, dt_s=bundle.dt_s)
+    rollout = open_loop(
+        plant,
+        bundle.q0,
+        bundle.v0,
+        bundle.efforts,
+        dt_s=bundle.dt_s,
+        stop_on_failure=True,
+    )
     elapsed = time.perf_counter() - started
     score = score_replay(plant, bundle, rollout)
     segments = segmented_replay(plant, bundle, segment_steps=segment_steps)
     checkpoints = {
         f"{t:.2f}": float(score.coordinate_error[int(round(t / bundle.dt_s))])
         for t in np.arange(0.05, bundle.steps * bundle.dt_s + 1e-9, 0.05)
+        if int(round(t / bundle.dt_s)) < score.coordinate_error.size
     }
+    _STATES["q"], _STATES["time_s"] = rollout.q, rollout.time_s
     return {
         "schema": "same-input-replay/v1",
         "bundle_sha256": _sha256(bundle_path),
@@ -123,6 +133,7 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     elapsed = time.perf_counter() - started
     plant = VectorPlant(engine, bundle.spec_bytes)
     score = score_replay(plant, bundle, rollout)
+    _STATES["q"], _STATES["time_s"] = rollout.q, rollout.time_s
     return {
         "schema": "same-input-closed-loop/v1",
         "bundle_sha256": _sha256(bundle_path),
@@ -166,6 +177,7 @@ def main() -> None:
         receipt = replay(args.bundle, args.engine, args.segment_ms)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    np.savez_compressed(args.out.with_suffix(".npz"), **_STATES)
     LOG.info("%s: %s", args.engine, json.dumps(receipt["full_horizon"]))
     if "worst_segment" in receipt:
         LOG.info("worst %g ms segment: %s", args.segment_ms, receipt["worst_segment"])

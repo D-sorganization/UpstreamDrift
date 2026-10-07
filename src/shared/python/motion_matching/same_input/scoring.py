@@ -50,9 +50,11 @@ class ReplayScore:
     frame_error_m: Array
     growth_rate_per_s: float
     horizon_s: float
+    failure: str | None = None
 
-    def summary(self) -> dict[str, float]:
+    def summary(self) -> dict[str, float | str | None]:
         return {
+            "failure": self.failure,
             "duration_s": float(self.time_s[-1]),
             "max_coordinate_error_rad": float(self.coordinate_error.max()),
             "max_frame_error_m": float(self.frame_error_m.max()),
@@ -80,11 +82,14 @@ def growth_rate(time_s: Array, error: Array, low: float, high: float) -> float:
 def score_replay(
     plant: FramePlant, bundle: InputBundle, rollout: Rollout, *, frame_stride: int = 10
 ) -> ReplayScore:
-    """Compare ``rollout`` with the bundle reference states."""
-    if rollout.q.shape != bundle.reference_q.shape or frame_stride < 1:
-        raise ValueError("rollout must span the bundle; frame_stride >= 1")
-    coordinate_error = np.abs(rollout.q - bundle.reference_q).max(axis=1)
-    rows = np.unique(np.r_[np.arange(0, bundle.steps + 1, frame_stride), bundle.steps])
+    """Compare ``rollout`` with the bundle reference over the steps it reached."""
+    reached = rollout.q.shape[0]
+    if reached > bundle.steps + 1 or rollout.q.shape[1] != bundle.q0.size:
+        raise ValueError("rollout must not exceed the bundle")
+    if frame_stride < 1:
+        raise ValueError("frame_stride must be positive")
+    coordinate_error = np.abs(rollout.q - bundle.reference_q[:reached]).max(axis=1)
+    rows = np.unique(np.r_[np.arange(0, reached, frame_stride), reached - 1])
     frame_error = np.array(
         [
             np.linalg.norm(
@@ -108,6 +113,7 @@ def score_replay(
         frame_error_m=frame_error,
         growth_rate_per_s=growth_rate(rollout.time_s, coordinate_error, 1e-12, 1e-3),
         horizon_s=horizon,
+        failure=rollout.failure,
     )
 
 
