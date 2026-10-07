@@ -25,7 +25,7 @@
 \title{Same-Input Cross-Engine Dynamics Parity\\[4pt]
 \large Calculation Reference for Epic \#11605 (Child P-9, Issue \#11614)}
 \author{UpstreamDrift Research Reference}
-\date{Revision 2026-10-06 \quad (pointwise level L1 only)}
+\date{Revision 2026-10-06 \quad (levels L1, L2 and L3 reported)}
 
 \begin{document}
 \maketitle
@@ -36,8 +36,9 @@ torques, must produce the same motion in every physics engine.  This reference
 records the model definition, the constrained-dynamics formulation, the
 closure projection that makes engine comparisons convention free, the
 acceptance levels, and the measured pointwise (L1) result for MuJoCo, Drake and
-Pinocchio.  Trajectory (L2) and closed-loop (L3) levels are planned and not yet
-reported.
+Pinocchio.  The full-swing results (L2 open-loop and L3 closed-loop) for a driver
+and a 7-iron swing in MuJoCo, Drake, Pinocchio, OpenSim and MyoSuite are
+reported in Sections~\ref{sec:bundle} and~\ref{sec:fullswing}.
 \end{abstract}
 
 \noindent\textbf{Document status.}  This is an editable standalone research
@@ -52,8 +53,7 @@ OpenSim, MyoSuite and Simscape.  Agreement establishes that the spec-built
 models are dynamically identical and that residual differences come from
 documented numerical policy.  It says nothing about whether the model matches a
 human golfer.  Inverse kinematics, feedback-assisted tracking and independently
-replayed open-loop dynamics are kept distinct; only the first level, pointwise
-dynamics, is reported here.
+replayed open-loop dynamics are kept distinct; all three are reported and labelled below.
 
 \section{Shared Model Definition}
 One full-body specification JSON builds every engine adapter.  The model has
@@ -176,7 +176,7 @@ rad/s$^2$ against Pinocchio; ``Proj.'' is after closure projection and
   \url{scripts/same_input_pointwise_parity.py}.
 \end{itemize}
 
-\section{Acceptance Levels and Input Bundle}
+\section{Acceptance Levels}
 \begin{description}[nosep]
 \item[L0, model identity.] Masses, inertias, frames, $\bM(\bq)$ and bias agree to
   $\le10^{-9}$ relative at reference states.  \emph{Passed.}
@@ -184,17 +184,139 @@ rad/s$^2$ against Pinocchio; ``Proj.'' is after closure projection and
   states agree to the gate above.  \emph{Passed for MuJoCo, Drake, Pinocchio.}
 \item[L2, open-loop same-input trajectory.] Whole-swing joint RMS against the
   MuJoCo reference $\le10^{-6}$~rad, or the divergence-growth exponent and
-  agreement horizon recorded; marker RMSE $\le1$~mm.  \emph{Planned, in progress
-  (\#11607--\#11610).}
+  agreement horizon recorded; marker RMSE $\le1$~mm.  \emph{Passed in the segmented
+  form; for a single full-horizon run the growth rate and agreement horizon are
+  recorded (Section~\ref{sec:fullswing}).}
 \item[L3, closed-loop same controller.] The identical tracking controller
-  reproduces the MuJoCo match metrics to $\le1$~mm per engine.  \emph{Planned,
-  in progress (\#11607--\#11610).}
+  reproduces the MuJoCo match metrics to $\le1$~mm per engine.  \emph{Passed for Drake,
+  Pinocchio, OpenSim and MyoSuite (Section~\ref{sec:fullswing}).}
 \end{description}
-The planned input bundle \texttt{same-input-bundle/v1} holds the spec hash,
-closure-consistent $\bq_0,\bv_0$, per-step torques $\bt_k$ held zero-order over
-$[t_k,t_{k+1})$, a fixed-step RK4 integrator at $1$~ms with closure projection
-after each step, contact parameters, and marker attachments.  It is
-\emph{planned, in progress} (\#11607--\#11610); no bundle result exists yet.
+The input bundle \texttt{same-input-bundle/v1} is described in
+Section~\ref{sec:bundle}.
+
+
+\section{Same-Input Bundle and Integration Policy}\label{sec:bundle}
+Schema \texttt{same-input-bundle/v1} is exported from a pipeline run
+directory by the MuJoCo reference and replayed by every other engine.  It holds
+the spec hash, closure-consistent $\bq_0,\bv_0$, the per-step joint efforts
+$\bt_k$, contact parameters and marker attachments.  The policy is identical in
+every engine:
+\begin{itemize}[nosep]
+\item classical RK4 with efforts held zero-order over each step;
+\item $1$~ms step with $8$ substeps (effective $0.125$~ms);
+\item exact weld KKT solve (Eq.~\eqref{eq:kkt}, no regularisation);
+\item closest-point closure projection after each step, tolerance
+  $10^{-13}$;
+\item root (floating-base) efforts set to zero.
+\end{itemize}
+The substeps are necessary.  Contact introduces stiff modes near
+$-9.9\times10^{3}$~s$^{-1}$; a single $1$~ms RK4 step has amplification
+$|R|\approx274$ for such a mode, whereas $8$ substeps bring $h\lambda$ inside
+the RK4 stability region.  Two bundles were generated on 2026-10-06 on host
+\texttt{brick}, from the pipeline specs
+\texttt{full\_body\_spec\_anthro\_driver.json} and
+\texttt{full\_body\_spec\_anthro\_iron7.json}.  The zero-order-hold reference
+tracks the capture about $4\times$ more loosely than the canonical pipeline
+(joint RMS $0.017$ versus $0.004$~rad), so the bundle is a dynamics-parity
+input and not a capture-matching result.
+
+\section{Full-Swing Results (Levels L2 and L3)}\label{sec:fullswing}
+Error is the worst absolute generalized-coordinate difference against the
+MuJoCo reference over the lane; the marker-frame error (metres) is reported in
+the receipts.  Bounds are $10^{-6}$~rad and $1$~mm.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+Club & Lane & Drake & Pinocchio & OpenSim & MyoSuite\\
+\midrule
+Driver & L3 closed loop, $1.81$~s & $6.7\mathrm{e}{-10}$ & $7.0\mathrm{e}{-10}$ & $5.0\mathrm{e}{-12}$ & $0$\\
+7-iron & L3 closed loop, $1.83$~s & $6.4\mathrm{e}{-10}$ & $6.5\mathrm{e}{-10}$ & $4.8\mathrm{e}{-12}$ & $0$\\
+Driver & L2 open loop, 50~ms restarts & $8.0\mathrm{e}{-11}$ & $7.9\mathrm{e}{-11}$ & $8.8\mathrm{e}{-14}$ & $0$\\
+7-iron & L2 open loop, 50~ms restarts & $1.1\mathrm{e}{-9}$ & $1.1\mathrm{e}{-9}$ & $7.4\mathrm{e}{-12}$ & $0$\\
+\bottomrule
+\end{tabular}
+\caption{Worst coordinate error in rad.  ``$0$'' is bit-identical.  All entries
+are more than three orders of magnitude inside the $10^{-6}$~rad bound.}
+\end{table}
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llrrl}
+\toprule
+Club & Engine & Horizon (s) & Growth (s$^{-1}$) & Run ends\\
+\midrule
+Driver & Drake & $0.60$ & $38.8$ & singular matrix, $1.79$~s\\
+Driver & OpenSim & $0.61$ & $40.4$ & invalid dimensions, $1.65$~s\\
+7-iron & Pinocchio & $0.52$ & $40.3$ & nonfinite acceleration, $1.25$~s\\
+\bottomrule
+\end{tabular}
+\caption{Single full-horizon open-loop runs (selected rows; the receipts cover
+every engine).  The horizon is the last time the error is within
+$10^{-6}$~rad.  MyoSuite stays at exactly $0$ over the full swing.}
+\end{table}
+
+\paragraph{Interpretation.}  The open-loop swing is physically unstable, with
+measured perturbation growth $39$--$41$~s$^{-1}$.  A round-off difference of
+$10^{-15}$ therefore reaches $10^{-6}$ after $\ln(10^{9})/40\approx0.52$~s for
+any pair of engines.  The L2 acceptance for a single full-horizon run is hence
+the documented growth rate and agreement horizon (Drake and Pinocchio stay
+within $10^{-6}$~rad to $0.51$--$0.60$~s, OpenSim to about $0.5$~s), after which
+the runs diverge and eventually become nonfinite or singular; the replay stops
+gracefully (\texttt{stop\_on\_failure}).  This is a property of the motion, not
+a disagreement between engines.  The segmented lane (restart from the MuJoCo
+state every $50$~ms) and the closed-loop lane (identical controller) cover the
+whole swing and agree to round-off.
+
+\paragraph{MyoSuite.}  MyoSuite wraps the MuJoCo core, so identical operations
+give identical results.  It was run with MyoSuite 2.12.2 on MuJoCo 3.6.0 while
+the reference was generated with MuJoCo 3.8, and was still bit-identical on
+every lane, including the full-horizon open-loop run (observed).
+
+\paragraph{Failed First Full-Swing Comparison.}  Before the fix below, MuJoCo
+versus Drake/Pinocchio wrist accelerations differed by about
+$2\times10^{-2}$~rad/s$^2$, the closed-loop iron error was $3.3\times10^{-5}$~rad
+and the $50$~ms segments reached $6\times10^{-5}$~rad and $1.3$~mm.  The cause
+was MuJoCo's own eigen-decomposition of an MJCF \texttt{fullinertia} attribute,
+accurate only to about $1.1\times10^{-6}$ relative on the iron club inertia.
+The native MJCF exporter (\texttt{native\_mjcf.py}, \texttt{\_principal\_inertia})
+now emits \texttt{diaginertia} and \texttt{quat} from numpy \texttt{eigh}, with a
+determinant correction that keeps the frame right-handed.  Pointwise agreement
+then became $\le5.5\times10^{-9}$ and the results above followed.
+
+\paragraph{Evidence Provenance.}  Receipts are the 16 JSON files below
+(fields \texttt{bundle\_sha256}, \texttt{engine}, \texttt{full\_horizon},
+\texttt{segments}, \texttt{worst\_segment}), generated 2026-10-06 on host
+\texttt{brick}; they live outside the repository under
+\texttt{Videos/Parity Audit/receipts/}.
+\begin{itemize}[nosep]
+\item Driver bundle \texttt{driver.npz}, sha256\\
+  \texttt{\footnotesize d7aeb9a886c6e2cf414e99af9d0e33cf62d6060271b1a9d23c36678cacfeb678}.
+\item Iron bundle \texttt{iron.npz}, sha256\\
+  \texttt{\footnotesize 9ef8e23bb4eb4df13e7f3f96030cd9a7301760f429d70b369e9cb3c2e751e576}.
+\end{itemize}
+Receipt sha256 (file name, \texttt{.json} omitted):
+\begin{center}\scriptsize
+\begin{tabular}{ll}
+\texttt{driver\_closed\_drake} & \texttt{fa3a5ee9f4261173383e5bff6d9be3ef34de2081e04e9142993d41026e3b87dc}\\
+\texttt{driver\_closed\_myosuite} & \texttt{446968ae3c3f4c21365ffad976a34fc597cfd8f759f0ad99dee199af7830162f}\\
+\texttt{driver\_closed\_opensim} & \texttt{5c9f65c9c15fbda9683e7c3db415d1d936af7f2073a65e451768f7ad6b60a145}\\
+\texttt{driver\_closed\_pinocchio} & \texttt{66669d000dd02a407b738daf66fea4c310f4aefeff31043c5ec54ec0779a7a13}\\
+\texttt{driver\_open\_drake} & \texttt{bbaea2510ca1b5873aa4c33c0e5d533dbca8c7b8a08578da30e4967fbe914425}\\
+\texttt{driver\_open\_myosuite} & \texttt{ef361555813bc29fc7fe42240ac713980473ed2de7bdd6c0ddb601dbca36e19c}\\
+\texttt{driver\_open\_opensim} & \texttt{862870af733d8abaef725e4dbbe1fc7e74ae83fc97f5950ed3fbe0841ed097fd}\\
+\texttt{driver\_open\_pinocchio} & \texttt{ce2f9391ce4e766d43e211b00ba13c13a6be9278752a19e9069b9aaf3a55c570}\\
+\texttt{iron\_closed\_drake} & \texttt{4554de9eea97c5eaf1c4049d2de6b2ecba53c8a3fd5f0a11aa9e07e4f882fe21}\\
+\texttt{iron\_closed\_myosuite} & \texttt{5ee1ff5e972eb3421bdbdad5683a9c0c6a0e41963b50388fd0868c290144098c}\\
+\texttt{iron\_closed\_opensim} & \texttt{a9f8ceafa1927dd37445f562e9c11e96b99c101cbee3fa32010466589a814c7c}\\
+\texttt{iron\_closed\_pinocchio} & \texttt{fda45ea1a7a9c98d3a6d6c1b3a7e8343a94470ed8b8c6b94d44b59649a05b0e4}\\
+\texttt{iron\_open\_drake} & \texttt{6d555d543244063be5474ebbf9b2c4754fc3520a0695add82bd6a983d1da3afd}\\
+\texttt{iron\_open\_myosuite} & \texttt{82f9a4e49b4c13e42630bdbe6031b7e7c8eb7d3ed170f9e94be8d78f06833697}\\
+\texttt{iron\_open\_opensim} & \texttt{b7e7bcd8df9a79909c1d85b898f950a9d374e4f554ec1508d40c2fb4011f180e}\\
+\texttt{iron\_open\_pinocchio} & \texttt{fbdcb6cc86ca3391fdec98724c828148e785aef150ef1a733756d70c215f4c59}\\
+\end{tabular}
+\end{center}
 
 \section{Engine Status}
 \begin{table}[h]
@@ -203,12 +325,12 @@ after each step, contact parameters, and marker attachments.  It is
 \toprule
 Engine & Levels & Status\\
 \midrule
-MuJoCo & L0, L1 & passed (PR \#11615)\\
-Drake & L0, L1 & passed (PR \#11615)\\
-Pinocchio & L0, L1 & passed (PR \#11615); reference side of the comparison\\
-OpenSim & --- & planned (\#11611)\\
-MyoSuite & --- & planned (\#11612)\\
-Simscape & --- & deferred to the MATLAB R2025b host (\#11613)\\
+MuJoCo & L0--L3 & passed (PR \#11615); reference of the L2/L3 comparison\\
+Drake & L0--L3 & passed (PR \#11615; full-swing results below)\\
+Pinocchio & L0--L3 & passed (PR \#11615; full-swing results below)\\
+OpenSim & L2, L3 & passed (Simbody adapter; closed loop $5\times10^{-12}$~rad)\\
+MyoSuite & L2, L3 & passed, bit-identical to MuJoCo (same core)\\
+Simscape & --- & pending on the MATLAB R2025b host (P-8, \#11613)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -219,14 +341,34 @@ From the repository root:
 MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
 python3 -m pytest tests/unit/motion_matching/same_input -m ""
 \end{verbatim}
-The first command rewrites the receipt; the second runs the behavioural tests.
+The first command rewrites the pointwise receipt; the second runs the
+behavioural tests.  The full-swing results are reproduced with
+\begin{verbatim}
+PYTHONPATH=.:src python -m scripts.same_input_bundle export \
+    --run-dir RUN --out bundle.npz
+PYTHONPATH=.:src python -m scripts.same_input_bundle replay \
+    --bundle bundle.npz --engine {mujoco,drake,pinocchio,opensim,myosuite} \
+    --out r.json [--segment-ms 50]
+PYTHONPATH=.:src python -m scripts.same_input_bundle closed-loop \
+    --run-dir RUN --bundle bundle.npz --engine E --out r.json
+\end{verbatim}
+where the pipeline runs used
+\texttt{--spec} \url{docs/development/full_body_models/full_body_spec_anthro_driver.json} (and the \texttt{iron7} counterpart).
 This document compiles with \texttt{tectonic same\_input\_parity.tex}.
 
 \section{Limitations}
 \begin{itemize}[nosep]
-\item No trajectory (L2) or closed-loop (L3) result exists yet; pointwise
-  agreement does not imply trajectory agreement.
-\item Only one dynamics record is used, with one scaled spec.
+\item Simscape (P-8, \#11613) is pending on the MATLAB R2025b host.
+\item Two bundles (one driver, one 7-iron swing) were compared, each from one
+  anthropometric spec.
+\item Single full-horizon open loop cannot meet $10^{-6}$~rad beyond about
+  $0.5$~s for any engine pair because of the swing instability; only the
+  growth rate and horizon are asserted.
+\item The OpenSim adapter works around two exporter defects: an invalid XML
+  element name (\texttt{<HuntCrossleyForce::ContactParametersSet>}, emitted
+  escaped) and a marker set referencing a nonexistent \texttt{Hub} body.
+\item The zero-order-hold reference tracks the capture more loosely than the
+  canonical pipeline; it is not a capture-matching result.
 \item Contact spikes are ill conditioned ($\operatorname{cond}(\bM)\approx6\times10^{8}$),
   so the relative tolerance is bounded by round-off, not by physics.
 \item The grip closure is projected, so the compared states are not the raw
