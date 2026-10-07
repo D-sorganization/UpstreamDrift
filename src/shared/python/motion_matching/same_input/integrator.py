@@ -153,7 +153,7 @@ def integrate(
         vs.append(v.copy())
         efforts.append(tau)
     return Rollout(
-        time_s=np.arange(len(qs)) * dt_s,
+        time_s=np.arange(len(qs), dtype=np.float64) * dt_s,
         q=np.array(qs),
         v=np.array(vs),
         efforts=np.array(efforts).reshape(len(efforts), -1),

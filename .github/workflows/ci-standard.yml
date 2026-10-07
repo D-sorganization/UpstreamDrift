@@ -3366,6 +3366,7 @@ jobs:
       # ~/.rustup can hold a partially installed toolchain that rustup cannot
       # upgrade in place (#11595).
       RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
     steps:
       - name: Clean corrupt git objects
         shell: bash
@@ -3439,8 +3440,8 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
           key: rust-quickstart-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
           restore-keys: |
             rust-quickstart-${{ runner.os }}-
