@@ -20,9 +20,15 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.contracts import postcondition, precondition
+from src.shared.python.core.contracts import require
+from src.shared.python.simulation_backends.ztcf_zvcf import (
+    drift_and_control_split,
+    zvcf_acceleration,
+)
 
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.candidate_session import CandidateSession
+    from src.shared.python.simulation_backends.protocol import DynamicsProvider
 
 logger = logging.getLogger(__name__)
 
@@ -54,12 +60,19 @@ class CounterfactualStrategy(str, Enum):
 class AccelerationDecomposition:
     """Instantaneous decomposition of generalized accelerations.
 
+    ZVCF has one definition in the repository: velocity *and* control set to
+    zero, ``-M(q)^-1 h(q, 0)``, implemented by
+    :func:`simulation_backends.ztcf_zvcf.zvcf_acceleration` (issue #11553).
+    :meth:`from_dynamics` builds the components from that module.
+
     Invariants:
-    - a_grav: generalized acceleration induced purely by gravity.
-    - a_drift: velocity-product drift (Coriolis, centrifugal, passive damping).
+    - a_grav: configuration-only acceleration at zero velocity and zero control
+      (gravity plus configuration-dependent passive loads); this *is* the ZVCF.
+    - a_drift: velocity-dependent drift (Coriolis, centrifugal, passive damping).
     - a_ctrl: generalized acceleration induced by active control torques.
     - ztcf = a_grav + a_drift (Zero-Torque Counterfactual).
-    - zvcf = a_grav + a_ctrl (Zero-Velocity Counterfactual).
+    - zvcf = a_grav (Zero-Velocity Counterfactual: v = 0 and u = 0).
+    - zero_velocity_control_preserved = a_grav + a_ctrl (not a ZVCF).
     """
 
     a_grav: NDArray[np.float64]
@@ -85,6 +98,42 @@ class AccelerationDecomposition:
         _make_readonly(self.a_drift)
         _make_readonly(self.a_ctrl)
 
+    @classmethod
+    def from_dynamics(
+        cls,
+        provider: DynamicsProvider,
+        q: NDArray[np.float64],
+        v: NDArray[np.float64],
+        tau: NDArray[np.float64],
+    ) -> AccelerationDecomposition:
+        """Decompose the acceleration at ``(q, v)`` under ``tau`` canonically.
+
+        Delegates to :mod:`simulation_backends.ztcf_zvcf` so the ZTCF and ZVCF
+        reported here are the same numbers as that module's for the same state.
+
+        Args:
+            provider: Backend exposing ``mass_matrix`` and ``bias_forces``.
+            q: Joint positions ``(n,)``.
+            v: Joint velocities ``(n,)``.
+            tau: Applied generalized control ``(n,)``.
+
+        Returns:
+            Decomposition whose ``zvcf`` equals ``zvcf_acceleration(provider, q)``
+            and whose ``ztcf`` equals ``ztcf_acceleration(provider, q, v)``.
+
+        Raises:
+            ValueError: If the state or control vectors are empty, non-finite or
+                of inconsistent length.
+        """
+        ztcf, a_ctrl = drift_and_control_split(provider, q, v, tau)
+        a_grav = zvcf_acceleration(provider, q)
+        require(
+            a_grav.shape == ztcf.shape,
+            "zvcf and ztcf accelerations must share a shape",
+            value=(a_grav.shape, ztcf.shape),
+        )
+        return cls(a_grav=a_grav, a_drift=ztcf - a_grav, a_ctrl=a_ctrl)
+
     @property
     def ztcf(self) -> NDArray[np.float64]:
         """Zero-Torque Counterfactual acceleration (a_grav + a_drift)."""
@@ -94,7 +143,17 @@ class AccelerationDecomposition:
 
     @property
     def zvcf(self) -> NDArray[np.float64]:
-        """Zero-Velocity Counterfactual acceleration (a_grav + a_ctrl)."""
+        """Zero-Velocity Counterfactual acceleration (v = 0 and u = 0): a_grav."""
+        res = self.a_grav.copy()
+        res.flags.writeable = False
+        return res
+
+    @property
+    def zero_velocity_control_preserved(self) -> NDArray[np.float64]:
+        """Zero-velocity acceleration that keeps the control (a_grav + a_ctrl).
+
+        Matches ``zero_velocity_control_preserved_acceleration``; never a ZVCF.
+        """
         res = self.a_grav + self.a_ctrl
         res.flags.writeable = False
         return res
