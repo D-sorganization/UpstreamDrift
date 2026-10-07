@@ -600,6 +600,85 @@ def _validate_transition_preconditions(
     return None, factor
 
 
+def _linearize_request(
+    provider: EquationsOfMotionProvider,
+    request: DimeTransitionRequest,
+    q: np.ndarray,
+    v: np.ndarray,
+) -> DriftLinearization:
+    """Linearise the drift at ``(q, v)`` with the request's selection and policy."""
+    return linearize_drift(
+        provider,
+        q,
+        v,
+        selection=request.selection,
+        contact_active=request.contact_active,
+        root_policy=request.root_policy,
+    )
+
+
+def _propagate_horizon(
+    provider: EquationsOfMotionProvider,
+    request: DimeTransitionRequest,
+    lin: DriftLinearization,
+) -> tuple[tuple[np.ndarray, np.ndarray], tuple[UncertainPrediction, ...]]:
+    """Step ``H`` steps of ``dt``, re-linearised every step (#11549, #11545).
+
+    Returns the zero-control (ZTCF anchor) end state and the ``H`` controlled
+    predictions, whose covariance follows ``P_{k+1} = F_k P_k F_k^T +
+    G_k Sigma_u G_k^T + Q_w`` with ``F_k = df/dx`` at ``x_k``.
+    ``lin`` is the linearisation at the initial state (reused for step 0).
+    Postcondition: exactly ``H`` predictions, each with a finite symmetric PSD
+    covariance.
+    """
+    n = lin.drift_acceleration.size
+    dt = request.dt
+    zero_u = np.zeros(lin.control_influence.shape[1])
+    q0 = np.asarray(request.state.q, dtype=float)
+    v0 = np.asarray(request.state.v, dtype=float)
+    pred = UncertainPrediction(
+        mean=np.r_[q0, v0],
+        covariance=(
+            np.zeros((2 * n, 2 * n))
+            if request.state_covariance is None
+            else np.asarray(request.state_covariance, dtype=float)
+        ),
+    )
+    trajectory: list[UncertainPrediction] = []
+    for step in range(request.horizon):
+        lin_zero = lin if step == 0 else _linearize_request(provider, request, q0, v0)
+        q0, v0 = predict_step(lin_zero, q0, v0, zero_u, dt)
+        q_c, v_c = pred.mean[:n], pred.mean[n:]
+        f_k = transition_jacobian(
+            provider,
+            q_c,
+            v_c,
+            request.control_mean,
+            dt,
+            selection=request.selection,
+            contact_active=request.contact_active,
+            root_policy=request.root_policy,
+        )
+        pred = uncertain_control_prediction(
+            lin if step == 0 else _linearize_request(provider, request, q_c, v_c),
+            q_c,
+            v_c,
+            request.control_mean,
+            request.control_covariance,
+            dt,
+            state_prior=PropagatedStateCovariance(pred.covariance, f_k),
+            model_uncertainty=request.model_uncertainty,
+        )
+        trajectory.append(pred)
+    ensure(
+        len(trajectory) == request.horizon
+        and all(_is_symmetric_psd(p.covariance) for p in trajectory),
+        "every horizon step must yield a symmetric PSD covariance",
+        value=request.horizon,
+    )
+    return (q0, v0), tuple(trajectory)
+
+
 def predict_dime_transition(
     provider: EquationsOfMotionProvider,
     request: DimeTransitionRequest,
@@ -626,67 +705,11 @@ def predict_dime_transition(
     if early_exit is not None:
         return early_exit
 
-    def linearize(q: np.ndarray, v: np.ndarray) -> DriftLinearization:
-        return linearize_drift(
-            provider,
-            q,
-            v,
-            selection=request.selection,
-            contact_active=request.contact_active,
-            root_policy=request.root_policy,
-        )
-
     # 5. Drift linearization at the initial state
-    lin = linearize(request.state.q, request.state.v)
-    n = lin.drift_acceleration.size
-    dt = request.dt
-    zero_u = np.zeros(lin.control_influence.shape[1])
-
-    # 6./7. Step the full horizon: H steps of dt, re-linearised every step, for
-    # the native zero-control branch (ZTCF anchor) and the controlled
-    # prediction, whose covariance follows P_{k+1} = F P_k F^T + G S G^T + Q_w.
-    q0 = np.asarray(request.state.q, dtype=float)
-    v0 = np.asarray(request.state.v, dtype=float)
-    pred = UncertainPrediction(
-        mean=np.r_[q0, v0],
-        covariance=(
-            np.zeros((2 * n, 2 * n))
-            if request.state_covariance is None
-            else np.asarray(request.state_covariance, dtype=float)
-        ),
-    )
-    trajectory: list[UncertainPrediction] = []
-    for step in range(request.horizon):
-        lin_zero = lin if step == 0 else linearize(q0, v0)
-        q0, v0 = predict_step(lin_zero, q0, v0, zero_u, dt)
-        q_c, v_c = pred.mean[:n], pred.mean[n:]
-        f_k = transition_jacobian(
-            provider,
-            q_c,
-            v_c,
-            request.control_mean,
-            dt,
-            selection=request.selection,
-            contact_active=request.contact_active,
-            root_policy=request.root_policy,
-        )
-        pred = uncertain_control_prediction(
-            lin if step == 0 else linearize(q_c, v_c),
-            q_c,
-            v_c,
-            request.control_mean,
-            request.control_covariance,
-            dt,
-            state_prior=PropagatedStateCovariance(pred.covariance, f_k),
-            model_uncertainty=request.model_uncertainty,
-        )
-        trajectory.append(pred)
-    ensure(
-        len(trajectory) == request.horizon
-        and all(_is_symmetric_psd(p.covariance) for p in trajectory),
-        "every horizon step must yield a symmetric PSD covariance",
-        value=request.horizon,
-    )
+    lin = _linearize_request(provider, request, request.state.q, request.state.v)
+    # 6./7. Step the full horizon (zero-control branch and controlled prediction)
+    zero_branch, trajectory = _propagate_horizon(provider, request, lin)
+    pred = trajectory[-1]
 
     # 8. Authority-bounded drift dominance index
     sig = np.sqrt(np.maximum(1e-12, np.diag(request.control_covariance)))
@@ -697,7 +720,7 @@ def predict_dime_transition(
     return DimeTransitionPrediction(
         valid=True,
         receipt={"status": "success", "code": "OK"},
-        zero_control_branch=(q0, v0),
+        zero_control_branch=zero_branch,
         controlled_prediction=pred,
         drift_dominance=dominance,
         factor=factor,
