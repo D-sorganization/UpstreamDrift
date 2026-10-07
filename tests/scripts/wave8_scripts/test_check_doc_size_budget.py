@@ -171,3 +171,25 @@ def test_iter_documents_only_doc_extensions(
     docs = mod._iter_documents()
     names = sorted(p.name for p in docs)
     assert names == ["a.md", "b.qmd"]
+
+
+def test_main_exempts_handoff_and_devlog_archives(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Verbatim archives (RM#1893) are historical and exempt from the budget."""
+    root = _setup_root(tmp_path, monkeypatch)
+    dev = root / "docs" / "development"
+    (dev / "archive").mkdir(parents=True)
+    big = "x" * (mod.MAX_BYTES + 1)
+    (dev / "archive" / "HANDOFF_ARCHIVE_2026.md").write_text(big)
+    (dev / "DEVELOPMENT_LOG_ARCHIVE_2026.md").write_text(big)
+    assert mod.main() == 0
+
+
+def test_main_still_fails_for_oversize_outside_archives(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _setup_root(tmp_path, monkeypatch)
+    (root / "docs" / "archive").mkdir(parents=True)
+    (root / "docs" / "archive" / "big.md").write_text("x" * (mod.MAX_BYTES + 1))
+    assert mod.main() == 1
