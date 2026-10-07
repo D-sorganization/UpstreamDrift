@@ -28,7 +28,7 @@ from src.shared.python.estimation.dime_contracts import (
     ContactPolicy,
     DimeCompleteState,
     DimeFullStepRequest,
-    DynamicsProvider,
+    DimeDynamicsProvider,
 )
 from src.shared.python.estimation.dime_manifest import (
     CANONICAL_DIME_UNITS,
@@ -258,7 +258,7 @@ class SmoothedTrajectoryResult:
 
 
 def _validate_replay_inputs(
-    provider: DynamicsProvider,
+    provider: DimeDynamicsProvider,
     initial_state: DimeCompleteState,
     controls: np.ndarray,
     options: ContinuousReplayOptions,
@@ -326,7 +326,7 @@ def _validate_replay_inputs(
 
 
 def _rollout_continuous_replay(
-    provider: DynamicsProvider,
+    provider: DimeDynamicsProvider,
     initial_state: DimeCompleteState,
     controls: np.ndarray,
     dt: float,
@@ -409,7 +409,7 @@ def _compute_replay_metrics(
 
 
 def execute_continuous_replay(
-    provider: DynamicsProvider,
+    provider: DimeDynamicsProvider,
     initial_state: DimeCompleteState,
     controls: np.ndarray,
     dt: float,

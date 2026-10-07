@@ -13,6 +13,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import json
+import warnings
 import enum
 from types import MappingProxyType
 from typing import Any, Final, Literal, Protocol, runtime_checkable
@@ -928,7 +929,7 @@ class RuntimeExclusivityContract:
 
 
 @runtime_checkable
-class DynamicsProvider(Protocol):
+class DimeDynamicsProvider(Protocol):
     """Protocol for stateful dynamics providers supporting DIME contracts."""
 
     @property
@@ -971,12 +972,13 @@ __all__ = [
     "DIME_CONTRACTS_VERSION",
     "DeterministicFakeProvider",
     "DimeCompleteState",
+    "DimeDynamicsProvider",
     "DimeEstimationResult",
     "DimeFullStepRequest",
     "DimeFullStepResult",
     "DimeObservationWindow",
     "DimeZeroInputProposal",
-    "DynamicsProvider",
+    "DynamicsProvider",  # noqa: F822 - deprecated alias via module __getattr__
     "EstimationIntervalFactor",
     "ManifoldContract",
     "PassiveLoadSpec",
@@ -990,3 +992,16 @@ __all__ = [
     "VectorSpaceManifold",
     "check_qualification_rules",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
+    if name == "DynamicsProvider":
+        warnings.warn(
+            "DynamicsProvider is deprecated and will be removed in a future "
+            "release; use DimeDynamicsProvider instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return DimeDynamicsProvider
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

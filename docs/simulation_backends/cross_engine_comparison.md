@@ -62,7 +62,7 @@ write_report(report, "reports/ode_vs_mujoco.md")
 
 Use `compare_traces()` when engines have already written HDF5 traces and the
 report should compare the data without rerunning simulations. Counterfactual
-panels require live objects satisfying `DynamicsProvider`, so trace-only reports
+panels require live objects satisfying `EquationsOfMotionProvider`, so trace-only reports
 omit ZTCF/ZVCF metrics.
 
 ## Panels
@@ -83,7 +83,7 @@ invented values.
 ### Counterfactuals
 
 ZTCF and ZVCF panels are pointwise diagnostics computed only for backends that
-implement `DynamicsProvider`. They reuse the canonical
+implement `EquationsOfMotionProvider`. They reuse the canonical
 `ztcf_acceleration()` / `zvcf_acceleration()` primitives and do not perform
 forward-integrated counterfactual rollouts.
 

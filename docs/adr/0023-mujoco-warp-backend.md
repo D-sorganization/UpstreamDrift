@@ -49,7 +49,7 @@ schema so the analysis layer never depends on a concrete engine.
 Capabilities are declared statically via the frozen `BackendCapabilities`
 dataclass so callers branch _without_ `hasattr` probing or importing optional
 GPU modules. Interface segregation (LOD) is enforced by splitting the optional
-services into their own Protocols: `DynamicsProvider` (`mass_matrix`,
+services into their own Protocols: `EquationsOfMotionProvider` (`mass_matrix`,
 `bias_forces`) and `BatchedBackend` (`rollout_batch`).
 
 | Backend | `name`     | Device | `supports_batched` | `is_differentiable` | `provides_dynamics` | Role                                                            |

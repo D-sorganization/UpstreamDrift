@@ -10,7 +10,7 @@ Design notes
   :class:`typing.Protocol`; the ODE and MuJoCo backends are interchangeable
   implementations. See ADR-0023.
 * **Interface segregation (LOD).** Not every backend can supply every service.
-  ``DynamicsProvider`` (mass matrix / bias forces) is implemented only by the
+  ``EquationsOfMotionProvider`` (mass matrix / bias forces) is implemented only by the
   CPU backends that expose MuJoCo/analytical primitives; ``BatchedBackend`` is
   implemented only by the GPU backend. Callers ``isinstance``-check the *exact*
   capability they need rather than assuming a god-object.
@@ -21,6 +21,7 @@ Design notes
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -419,7 +420,7 @@ class SimulationBackend(Protocol):
 
 
 @runtime_checkable
-class DynamicsProvider(Protocol):
+class EquationsOfMotionProvider(Protocol):
     """Optional contract for backends exposing analytical dynamics primitives.
 
     Implemented by the ODE reference backend and the MuJoCo CPU backend, whose
@@ -458,3 +459,16 @@ class BatchedBackend(Protocol):
             num_envs: Number of parallel environments (``> 0``).
         """
         ...
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
+    if name == "DynamicsProvider":
+        warnings.warn(
+            "DynamicsProvider is deprecated and will be removed in a future "
+            "release; use EquationsOfMotionProvider instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return EquationsOfMotionProvider
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

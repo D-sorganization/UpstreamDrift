@@ -23,7 +23,7 @@ for the golf double-pendulum behind one Protocol. See
 [ADR 0023](../adr/0023-mujoco-warp-backend.md) and the package README.
 
 - `protocol.SimulationBackend` — runtime-checkable Protocol every backend
-  satisfies. `DynamicsProvider` (mass matrix / bias forces) and
+  satisfies. `EquationsOfMotionProvider` (mass matrix / bias forces) and
   `BatchedBackend` (parallel `rollout_batch`) are **segregated** optional
   Protocols — `isinstance`-check the exact capability you need.
 - `protocol.{SimState, Trace, BatchTrace, BackendCapabilities}` — the shared

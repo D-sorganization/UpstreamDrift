@@ -19,6 +19,8 @@ lazily by the factory only when requested.
 
 from __future__ import annotations
 
+import warnings
+
 from .capabilities import (
     has_mujoco,
     has_mjx,
@@ -57,7 +59,7 @@ from .protocol import (
     BackendCapabilities,
     BatchedBackend,
     BatchTrace,
-    DynamicsProvider,
+    EquationsOfMotionProvider,
     SimState,
     SimulationBackend,
     Trace,
@@ -108,6 +110,7 @@ __all__ = [
     "DivergenceRegistryEntry",
     "DynamicsProvider",
     "EngineRun",
+    "EquationsOfMotionProvider",
     "GolfModelParams",
     "LowerSegmentParams",
     "PROVENANCE_FLAT_PREFIX",
@@ -151,3 +154,16 @@ __all__ = [
     "wrench_trace_from_force_torque",
     "ZtcfZvcfResult",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
+    if name == "DynamicsProvider":
+        warnings.warn(
+            "DynamicsProvider is deprecated and will be removed in a future "
+            "release; use EquationsOfMotionProvider instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return EquationsOfMotionProvider
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

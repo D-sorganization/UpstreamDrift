@@ -14,7 +14,7 @@ in [`docs/simulation_backends/README.md`](../../../../docs/simulation_backends/R
 
 | Module              | Responsibility                                                                                                                                                         |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `protocol.py`       | **Frozen interface.** `SimulationBackend`, `DynamicsProvider`, `BatchedBackend` Protocols; `SimState`, `Trace`, `BatchTrace`, `BackendCapabilities`, `SCHEMA_VERSION`. |
+| `protocol.py`       | **Frozen interface.** `SimulationBackend`, `EquationsOfMotionProvider`, `BatchedBackend` Protocols; `SimState`, `Trace`, `BatchTrace`, `BackendCapabilities`, `SCHEMA_VERSION`. |
 | `model_params.py`   | `GolfModelParams` — the single source of truth. `to_double_pendulum_parameters()`, `projected_gravity`, `default()`.                                                   |
 | `mjcf.py`           | `params_to_mjcf()` — renders `GolfModelParams` to MuJoCo MJCF XML (the second renderer of the one model).                                                              |
 | `factory.py`        | `make_backend(name, params, **kwargs)` and `available_backends()`. Imports backends **lazily**.                                                                        |
@@ -27,7 +27,7 @@ in [`docs/simulation_backends/README.md`](../../../../docs/simulation_backends/R
 | `mjwarp_backend.py` | `mjwarp` — GPU MuJoCo Warp backend for batched rollouts (optional `[warp]` extra).                                                                                     |
 | `mjx_backend.py`    | `mjx` — MJX/JAX backend for batched differentiable rollouts (optional `[mjx]` extra).                                                                                  |
 | `trace.py`          | HDF5 (de)serialisation of `Trace` / `BatchTrace`.                                                                                                                      |
-| `ztcf_zvcf.py`      | Pointwise ZTCF/ZVCF and affine drift/control analysis over `DynamicsProvider`, including canonical-v2 trajectory input and HDF5 analysis persistence.                  |
+| `ztcf_zvcf.py`      | Pointwise ZTCF/ZVCF and affine drift/control analysis over `EquationsOfMotionProvider`, including canonical-v2 trajectory input and HDF5 analysis persistence.                  |
 
 ## Choosing a backend
 
@@ -62,7 +62,7 @@ backend = make_backend("ode", params)  # CPU reference; no GPU deps
 
 # rollout(controls, horizon, dt) -> Trace with horizon + 1 samples (t[0] == 0).
 trace = backend.rollout(controls=None, horizon=200, dt=0.005)  # passive swing
-trace.num_steps        # 201
+trace.num_steps  # 201
 trace.final_state().v  # final joint velocities
 ```
 
@@ -117,5 +117,5 @@ python -m src.shared.python.simulation_backends.compare_cli \
 ```
 
 Reports include kinematics, kinetics, ZTCF/ZVCF when the selected backend
-implements `DynamicsProvider`, optional wrench comparison, divergence registry
+implements `EquationsOfMotionProvider`, optional wrench comparison, divergence registry
 links, and provenance for every panel.

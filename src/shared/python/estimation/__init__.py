@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -112,7 +114,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeFullStepResult,
     DimeObservationWindow,
     DimeZeroInputProposal,
-    DynamicsProvider,
+    DimeDynamicsProvider,
     EstimationIntervalFactor,
     ManifoldContract,
     PassiveLoadSpec,
@@ -370,6 +372,7 @@ __all__ = [
     "DimeCompleteState",
     "DimeContactConstraintsFactor",
     "DimeCostBreakdown",
+    "DimeDynamicsProvider",
     "DimeDynamicsWindowFactor",
     "DimeDynamicsWindowOptions",
     "DimeDynamicsWindowProblem",
@@ -392,9 +395,9 @@ __all__ = [
     "DimeTransitionPrediction",
     "DimeTransitionRequest",
     "DimeZeroInputProposal",
+    "DynamicsProvider",
     "DriftAndPredictionPayload",
     "DriftLinearization",
-    "DynamicsProvider",
     "EngineCapabilitySpec",
     "EngineQualificationEntry",
     "EngineQualificationMatrix",
@@ -590,3 +593,16 @@ __all__ = [
     "generate_readiness_matrix",
     "render_markdown_matrix",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
+    if name == "DynamicsProvider":
+        warnings.warn(
+            "DynamicsProvider is deprecated and will be removed in a future "
+            "release; use DimeDynamicsProvider instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return DimeDynamicsProvider
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
