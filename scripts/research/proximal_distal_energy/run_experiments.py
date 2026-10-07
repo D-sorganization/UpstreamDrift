@@ -46,10 +46,7 @@ from scripts.research.proximal_distal_energy.torque_programs import (
     restrain_then_drive_program,
 )
 from src.shared.python.simulation_backends import GolfModelParams, make_backend
-from src.shared.python.simulation_backends.protocol import (
-    EquationsOfMotionProvider,
-    SimState,
-)
+from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
 from src.shared.python.simulation_backends.ztcf_zvcf import drift_and_control_split
 
 logger = logging.getLogger(__name__)
@@ -118,7 +115,7 @@ def counterfactual_split(
     the club's absolute angular acceleration split is the row sum.
     """
     provider = make_backend("ode", params)
-    if not isinstance(provider, EquationsOfMotionProvider):
+    if not isinstance(provider, DynamicsProvider):
         raise TypeError("the ODE backend must expose analytical dynamics primitives")
     drift = np.empty_like(v)
     control = np.empty_like(v)

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import importlib
+import json
 from pathlib import Path
 
 import pytest
@@ -38,6 +39,16 @@ OLD_NAME = "DynamicsProvider"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 # First-party code that must not import the deprecated name.
 SCANNED_ROOTS = ("src", "scripts", "tests")
+# Pinned by hash in the open research-release manifest, so migrating it means
+# re-cutting that release (a release decision, not part of this rename). It keeps
+# working through the deprecated alias; migrate it when the release is re-cut,
+# before the alias is removed.
+FROZEN_RELEASE_CONSUMERS = frozenset(
+    {"scripts/research/proximal_distal_energy/run_experiments.py"}
+)
+RELEASE_MANIFEST = (
+    REPO_ROOT / "docs/research/proximal_distal_energy_transfer/release_manifest.json"
+)
 
 # (module path, new class) pairs whose old name must warn and alias the new class.
 DEPRECATED_ALIASES = [
@@ -129,4 +140,17 @@ def test_no_first_party_module_imports_deprecated_names() -> None:
         for p in (REPO_ROOT / root).rglob("*.py")
         if (lines := _uses_old_name(p))
     }
+    for frozen in FROZEN_RELEASE_CONSUMERS:
+        offenders.pop(frozen, None)
     assert not offenders, f"deprecated {OLD_NAME} still used: {offenders}"
+
+
+@pytest.mark.unit
+def test_frozen_release_consumers_are_still_pinned_and_still_need_it() -> None:
+    """The exemption must not outlive its reason."""
+    manifest = json.loads(RELEASE_MANIFEST.read_text(encoding="utf-8"))
+    for frozen in FROZEN_RELEASE_CONSUMERS:
+        assert frozen in manifest["artifacts"], f"{frozen} is no longer release-pinned"
+        assert _uses_old_name(REPO_ROOT / frozen), (
+            f"{frozen} migrated; drop the exemption"
+        )
