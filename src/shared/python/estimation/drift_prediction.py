@@ -16,7 +16,9 @@ Scope and limits:
   with a receipt rather than silently extrapolating free-flight drift through stance.
 * Integration uses constant acceleration over one step in local coordinates.
   A horizon ``H`` is ``H`` such steps of ``dt``, re-linearised at every step,
-  never one step of ``H * dt`` (#11549). Quaternion (manifold) configurations
+  never one step of ``H * dt`` (#11549). Every step's prediction is returned
+  (``controlled_trajectory``, #11545). A horizon that is not an integer
+  ``>= 1`` is refused with a receipt. Quaternion (manifold) configurations
   are refused without explicit retractions.
 * State covariance propagates through the one-step transition Jacobian
   ``F = df/dx``: ``P_{k+1} = F P_k F^T + G Sigma_u G^T + Q_w`` (#11549).
@@ -149,6 +151,14 @@ def _require_psd(name: str, matrix: np.ndarray, size: int) -> np.ndarray:
     return mat
 
 
+def _is_symmetric_psd(matrix: np.ndarray) -> bool:
+    """Return whether ``matrix`` is finite, symmetric and PSD within tolerance."""
+    if not (check_finite(matrix) and np.array_equal(matrix, matrix.T)):
+        return False
+    scale = max(1.0, float(np.max(np.abs(matrix))))
+    return float(np.min(np.linalg.eigvalsh(matrix))) >= -_PSD_TOLERANCE * scale
+
+
 @dataclass(frozen=True)
 class ControlBand:
     """Admissible joint-torque box with an optional torque-rate limit."""
@@ -236,7 +246,12 @@ class DimeTransitionRequest:
 
 @dataclass(frozen=True)
 class DimeTransitionPrediction:
-    """Outcome of DIME transition prediction with receipts and optional factor."""
+    """Outcome of DIME transition prediction with receipts and optional factor.
+
+    ``controlled_trajectory`` holds the ``H`` per-step predictions
+    ``x_1 .. x_H``; ``controlled_prediction`` is its last element. Both are
+    empty or ``None`` when the request is refused.
+    """
 
     valid: bool
     receipt: Mapping[str, Any]
@@ -244,6 +259,7 @@ class DimeTransitionPrediction:
     controlled_prediction: UncertainPrediction | None = None
     drift_dominance: float | None = None
     factor: EstimationIntervalFactor | None = None
+    controlled_trajectory: tuple[UncertainPrediction, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "receipt", MappingProxyType(dict(self.receipt)))
@@ -517,13 +533,18 @@ def _validate_transition_preconditions(
             None,
         )
 
-    if request.dt <= 0.0 or not np.isfinite(request.dt) or request.horizon <= 0:
+    horizon_ok = (
+        isinstance(request.horizon, (int, np.integer))
+        and not isinstance(request.horizon, bool)
+        and request.horizon >= 1
+    )
+    if request.dt <= 0.0 or not np.isfinite(request.dt) or not horizon_ok:
         return (
             DimeTransitionPrediction(
                 valid=False,
                 receipt={
                     "status": "disabled",
-                    "reason": "dt must be positive and horizon must be >= 1",
+                    "reason": "dt must be positive and horizon an integer >= 1",
                     "code": "INVALID_HORIZON",
                 },
             ),
@@ -579,39 +600,40 @@ def _validate_transition_preconditions(
     return None, factor
 
 
-def predict_dime_transition(
+def _linearize_request(
     provider: EquationsOfMotionProvider,
     request: DimeTransitionRequest,
-    *,
-    exclusivity_contract: RuntimeExclusivityContract | None = None,
-    factor_name: str = "dime_transition",
-) -> DimeTransitionPrediction:
-    """Execute DIME transition proposal with fail-closed receipts and factor registration."""
-    early_exit, factor = _validate_transition_preconditions(
-        request, exclusivity_contract, factor_name
+    q: np.ndarray,
+    v: np.ndarray,
+) -> DriftLinearization:
+    """Linearise the drift at ``(q, v)`` with the request's selection and policy."""
+    return linearize_drift(
+        provider,
+        q,
+        v,
+        selection=request.selection,
+        contact_active=request.contact_active,
+        root_policy=request.root_policy,
     )
-    if early_exit is not None:
-        return early_exit
 
-    def linearize(q: np.ndarray, v: np.ndarray) -> DriftLinearization:
-        return linearize_drift(
-            provider,
-            q,
-            v,
-            selection=request.selection,
-            contact_active=request.contact_active,
-            root_policy=request.root_policy,
-        )
 
-    # 5. Drift linearization at the initial state
-    lin = linearize(request.state.q, request.state.v)
+def _propagate_horizon(
+    provider: EquationsOfMotionProvider,
+    request: DimeTransitionRequest,
+    lin: DriftLinearization,
+) -> tuple[tuple[np.ndarray, np.ndarray], tuple[UncertainPrediction, ...]]:
+    """Step ``H`` steps of ``dt``, re-linearised every step (#11549, #11545).
+
+    Returns the zero-control (ZTCF anchor) end state and the ``H`` controlled
+    predictions, whose covariance follows ``P_{k+1} = F_k P_k F_k^T +
+    G_k Sigma_u G_k^T + Q_w`` with ``F_k = df/dx`` at ``x_k``.
+    ``lin`` is the linearisation at the initial state (reused for step 0).
+    Postcondition: exactly ``H`` predictions, each with a finite symmetric PSD
+    covariance.
+    """
     n = lin.drift_acceleration.size
     dt = request.dt
     zero_u = np.zeros(lin.control_influence.shape[1])
-
-    # 6./7. Step the full horizon: H steps of dt, re-linearised every step, for
-    # the native zero-control branch (ZTCF anchor) and the controlled
-    # prediction, whose covariance follows P_{k+1} = F P_k F^T + G S G^T + Q_w.
     q0 = np.asarray(request.state.q, dtype=float)
     v0 = np.asarray(request.state.v, dtype=float)
     pred = UncertainPrediction(
@@ -622,8 +644,9 @@ def predict_dime_transition(
             else np.asarray(request.state_covariance, dtype=float)
         ),
     )
+    trajectory: list[UncertainPrediction] = []
     for step in range(request.horizon):
-        lin_zero = lin if step == 0 else linearize(q0, v0)
+        lin_zero = lin if step == 0 else _linearize_request(provider, request, q0, v0)
         q0, v0 = predict_step(lin_zero, q0, v0, zero_u, dt)
         q_c, v_c = pred.mean[:n], pred.mean[n:]
         f_k = transition_jacobian(
@@ -637,7 +660,7 @@ def predict_dime_transition(
             root_policy=request.root_policy,
         )
         pred = uncertain_control_prediction(
-            lin if step == 0 else linearize(q_c, v_c),
+            lin if step == 0 else _linearize_request(provider, request, q_c, v_c),
             q_c,
             v_c,
             request.control_mean,
@@ -646,6 +669,47 @@ def predict_dime_transition(
             state_prior=PropagatedStateCovariance(pred.covariance, f_k),
             model_uncertainty=request.model_uncertainty,
         )
+        trajectory.append(pred)
+    ensure(
+        len(trajectory) == request.horizon
+        and all(_is_symmetric_psd(p.covariance) for p in trajectory),
+        "every horizon step must yield a symmetric PSD covariance",
+        value=request.horizon,
+    )
+    return (q0, v0), tuple(trajectory)
+
+
+def predict_dime_transition(
+    provider: EquationsOfMotionProvider,
+    request: DimeTransitionRequest,
+    *,
+    exclusivity_contract: RuntimeExclusivityContract | None = None,
+    factor_name: str = "dime_transition",
+) -> DimeTransitionPrediction:
+    """Execute DIME transition proposal with fail-closed receipts and factor registration.
+
+    Steps ``H = request.horizon`` steps of ``dt``, re-linearised at every step:
+    ``x_{k+1} = f(x_k, mu)`` and ``P_{k+1} = F_k P_k F_k^T + G_k Sigma_u G_k^T +
+    Q_w`` with ``F_k = df/dx`` at ``x_k`` (:func:`transition_jacobian`).
+
+    Preconditions (refused with a receipt, never extrapolated): no active
+    contact, finite ``dt > 0``, integer ``horizon >= 1``, local coordinates.
+    Covariances must be symmetric PSD (``core.contracts.require``).
+    Postconditions on a valid result: ``controlled_trajectory`` has exactly
+    ``H`` entries, each with a finite symmetric PSD ``(2n, 2n)`` covariance, and
+    ``controlled_prediction`` is its last entry.
+    """
+    early_exit, factor = _validate_transition_preconditions(
+        request, exclusivity_contract, factor_name
+    )
+    if early_exit is not None:
+        return early_exit
+
+    # 5. Drift linearization at the initial state
+    lin = _linearize_request(provider, request, request.state.q, request.state.v)
+    # 6./7. Step the full horizon (zero-control branch and controlled prediction)
+    zero_branch, trajectory = _propagate_horizon(provider, request, lin)
+    pred = trajectory[-1]
 
     # 8. Authority-bounded drift dominance index
     sig = np.sqrt(np.maximum(1e-12, np.diag(request.control_covariance)))
@@ -656,8 +720,9 @@ def predict_dime_transition(
     return DimeTransitionPrediction(
         valid=True,
         receipt={"status": "success", "code": "OK"},
-        zero_control_branch=(q0, v0),
+        zero_control_branch=zero_branch,
         controlled_prediction=pred,
         drift_dominance=dominance,
         factor=factor,
+        controlled_trajectory=tuple(trajectory),
     )

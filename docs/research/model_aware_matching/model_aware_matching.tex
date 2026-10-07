@@ -531,22 +531,114 @@ commit \texttt{21a2ed06}:
   \item No engine backs any DIME provider; the \texttt{DynamicsProvider}
     protocol lacks derivatives, parameter setters and batching
     (\texttt{dime\_contracts.py:930-956}).
-  \item The ``coupled state-control window'' is control-only single shooting
+  \item The ``coupled state-control window'' was control-only single shooting
     with hard-coded zero defects and costs (\texttt{dime\_dynamics\_window.py:517-566,604}).
-    Partially corrected by \#11554: the least-squares residual now has the fixed
-    length $n_u N_{\mathrm{steps}}$ (control effort) $+\ \sum_k \min(\dim\bx^{\mathrm{obs}}_k, n_q)$
-    (observations) $+\ (N_{\mathrm{steps}}-1)\,n_u$ (control rate, when weighted)
-    $+\ n_u N_{\mathrm{steps}}$ (actuator bounds, when set; one non-negative entry per
-    control, zero inside the bounds), independent of the control values and
-    enforced by a postcondition (\texttt{expected\_residual\_size}).  A failed
-    provider step no longer returns the placeholder residual $10^{8}\mathbf{1}_{100}$
-    (whose length differed from the normal path); it raises
-    \texttt{DimeResidualEvaluationError}, and the solver reports
-    \texttt{failed\_dynamics\_step} with \texttt{success=False}.  The zero
-    defects and costs, and the single-shooting structure, remain open
-    (\#11545).  Reproduce with
-    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window.py -k FixedSize}.
+    \emph{Resolved (\#11554).}  The window is now transcribed by multiple
+    shooting: the decision vector is
+    $\mathbf{z}=(\bu_0,\dots,\bu_{N-1},\bx_1,\dots,\bx_N)$ with knot states
+    $\bx_k=(\bq_k,\bv_k)$ and $\bx_0$ fixed, and each interval contributes the
+    transition defect $\mathbf{d}_k=\bx_{k+1}-\Phi(\bx_k,\bu_k,\Delta t)$, where $\Phi$ is
+    the provider's own step (no separate integrator).  The objective is
+    $\tfrac12\lVert\mathbf{r}(\mathbf{z})\rVert^2$ with residual blocks, in order:
+    $\sqrt{w_{\mathrm{obs}}}\,(\bq_k-\by_k)$ for each target $k\le N$;
+    $\sqrt{w_{\mathrm{d}}}\,\mathbf{d}_k$ for $k=0,\dots,N-1$; $\sqrt{w_{\mathrm{rate}}\Delta t}\,(\bu_{k+1}-\bu_k)/\Delta t$
+    (when $w_{\mathrm{rate}}>0$); $10^{-4}\bu_k$ (effort); and $100$ times the
+    actuator-bound violation (when bounds are set).  Its length,
+    $\sum_k\min(\dim\by_k,n_q)+2n_vN+(N-1)n_u+n_uN+n_uN$ (the rate and bound
+    terms only when active), is fixed and enforced by a postcondition
+    (\texttt{expected\_residual\_size}); a failed provider step raises
+    \texttt{DimeResidualEvaluationError} and the solver reports
+    \texttt{failed\_dynamics\_step}.  $w_{\mathrm{d}}$ is \texttt{transition\_weight},
+    except in \texttt{SOFT} mode with \texttt{ModelDiscrepancyBounds}, where the
+    defects are model-discrepancy slack weighted by \texttt{slack\_weight}, costed
+    as \texttt{discrepancy\_cost}, and a per-step $\lVert\mathbf{d}_k\rVert$ above
+    \texttt{max\_slack\_norm} fails closed (\texttt{failed\_discrepancy\_bound}).
+    \texttt{SOFT} returns the optimised knots.  \texttt{EXACT} enforces
+    $\mathbf{d}_k=\mathbf{0}$: after the multiple-shooting solve (used as a warm
+    start) it re-optimises the controls with the knots eliminated,
+    $\bx_{k+1}=\Phi(\bx_k,\bu_k,\Delta t)$, so the returned controls minimise the
+    hard-constrained objective that is reported.  Provider memory
+    (\texttt{internal\_state}, $\dot{\bv}$) is not a decision variable: knot $k+1$
+    takes it from the prediction $\Phi(\bx_k,\bu_k,\Delta t)$, so it is carried
+    exactly along the shooting chain.  In both modes the reported defects and every cost
+    term are evaluated on the returned trajectory, and the reported total equals
+    $\tfrac12\lVert\mathbf{r}\rVert^2$ there.  Limitations: knot states are restricted to
+    vector-space providers ($n_q=n_v$; a manifold retraction is required
+    otherwise); Jacobians are dense finite differences; the scheme is still
+    forward shooting, not the inverse-dynamics variable projection of
+    \S\ref{sec:roadmap} (\#11545).  Verified on a linear oscillator, where
+    $\Phi$ is exactly $\bx_{k+1}=\mathbf{A}\bx_k+\mathbf{B}\bu_k$: defects vanish on the
+    rollout to $10^{-14}$, a knot perturbation $\boldsymbol{\delta}$ gives
+    $\mathbf{d}_{j-1}=\boldsymbol{\delta}$ and $\mathbf{d}_j=-\mathbf{A}\boldsymbol{\delta}$,
+    an inconsistent initial guess ($\max|\mathbf{d}|>10^{-2}$) converges to
+    $\max|\mathbf{d}|<10^{-6}$, and controls and states match the closed-form linear
+    least-squares optimum to $10^{-6}$ for two observation weights; \texttt{EXACT}
+    controls match the closed-form optimum with the knots eliminated, not the
+    penalty optimum (which differs by more than $10^{-2}$); and on a provider whose
+    dynamics depend on \texttt{internal\_state}, defects vanish on its rollout.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window\_multiple\_shooting.py
+    tests/unit/estimation/test\_dime\_dynamics\_window.py}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
+    The estimator stored an \texttt{ArrivalFactor} and returned it in its
+    results but never added it to the window cost, and never propagated it
+    when the window slid, so every window was solved from its own samples
+    alone and all earlier information was discarded.
+    \emph{Resolved (\#11545):} for a window of $N$ samples at knots
+    $t_F,\dots,t_{F+N-1}$ with cubic-Hermite coefficients
+    $\mathbf{c}=(\bq_F,\dots,\bv_{F+N-1})$, the arrival state is the first knot
+    $\bx_F=(\bq_F,\bv_F)\in\R^{2n}$ and each window minimises
+    \begin{equation}
+      \tfrac12\norm{\mathbf{R}_F(\bx_F-\bar\bx_F)-\mathbf{r}_F}^2
+      +\tfrac12\sum_{k=F}^{F+N-1}\norm{\boldsymbol{\rho}_k(\mathbf{c})}^2 ,
+      \label{eq:mhe_window}
+    \end{equation}
+    with $\boldsymbol{\rho}_k$ the whitened residual rows of sample $k$ and of
+    the transition from sample $k$ to $k{+}1$.  A Gaussian
+    prior $\mathcal{N}(\bar\bx_0,\bP_0)$ enters as
+    $\mathbf{R}_0^{\top}\mathbf{R}_0=\bP_0^{-1}$, $\mathbf{r}_0=0$
+    (\texttt{ArrivalFactor.from\_gaussian\_prior}, which requires a finite,
+    symmetric, positive-definite information matrix).  When the window
+    advances from $F$ to $F'$, the rows that are never evaluated again (the
+    arrival rows, plus the rows over samples $F..F'$ minus those of sample $F'$
+    alone, which the next window re-evaluates) are linearised at the last
+    accepted solution.  Their information
+    $\mathbf{H}=\bJ_{F..F'}^{\top}\bJ_{F..F'}-\bJ_{F'}^{\top}\bJ_{F'}$ and gradient
+    are written in square-root form
+    $\bA^{\top}\bA=\mathbf{H}$, $\boldsymbol{\rho}\approx\boldsymbol{\rho}^\star
+    +\bA_0\,\delta\bx_{\mathrm{drop}}+\bA_1\,\delta\bx_{F'}$, and the dropped
+    knots are eliminated by the Schur complement: with
+    $\bA_0=[\mathbf{U}_1\;\mathbf{U}_2]\,\mathrm{diag}(\bS,0)\,\mathbf{V}^{\top}$,
+    $\mathbf{R}_{F'}$ and $\mathbf{r}_{F'}$ are the rank-revealed square root of
+    $\mathbf{U}_2^{\top}\bA_1$ and $-\mathbf{U}_2^{\top}\boldsymbol{\rho}^\star$
+    (\texttt{marginalize\_arrival\_factor}; rank deficiency is retained, no
+    jitter).  Assumptions: samples sit on knots; residual rows are per-sample or
+    couple consecutive samples only (enforced: $\mathbf{H}$ must be positive
+    semidefinite and touch no knot outside $F..F'$, otherwise information would
+    be dropped or double counted and the estimator raises); the window overlaps
+    the last accepted window ($F'<S+N$).  The propagated factor is tentative and
+    is committed only when the window solve is accepted; a non-finite
+    linearisation rejects the window and leaves the committed factor intact.
+    If samples were never solved, the factor is discarded with a logged warning
+    rather than silently.  For a
+    linear-Gaussian model the elimination is exact, so every window equals
+    the batch MAP (Kalman filter at the last knot, fixed-lag RTS smoother
+    inside the window) over all samples seen so far.  Acceptance: on a
+    one-DOF fixture with position, velocity and white-noise-acceleration
+    rows ($\sigma_y=0.05$, $\sigma_v=0.2$, $\sigma_a=2$, $\Delta t=0.1$,
+    $N=4$, prior information $\mathrm{diag}(10^4,10^2)$ about $(0.5,-3)$),
+    all seven sliding windows match the analytic batch least-squares solution
+    to $10^{-7}$; before the fix the mismatch was $4.9$ in a single window
+    and $4.7$ across sliding windows, and $0.024$ with no prior (dropped
+    samples discarded).  With discrete transitions
+    $q_{k+1}-q_k-\Delta t\,v_k$ and $v_{k+1}-v_k$ between samples, a first version
+    that marginalised only the dropped samples' own rows lost the transition into
+    the new first knot (mismatch $1.76$); and a transient non-finite window
+    discarded the prior permanently.  Both are now covered by tests.  A first fixture without the velocity rows was not
+    discriminating: with two rows per knot the dropped rows are exactly
+    satisfiable and carry no information forward.  Nonlinear residuals are
+    linearised once at the accepted solution (first-order arrival cost), which
+    is not exact.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_moving\_horizon\_arrival\_cost.py}.
   \item Learned initialisers, ablations, baseline and replay audit return
     constants (\texttt{dime\_learned\_initializers.py:517-753},
     \texttt{dime\_benchmark\_ablations.py:214-255}, \texttt{dime\_manifest.py:563-629},
@@ -630,8 +722,69 @@ commit \texttt{21a2ed06}:
   \item \texttt{drift\_prediction.py}: covariance propagation omits
     $\partial f/\partial\bx$; a horizon collapses to one step; the default
     selection matrix actuates the root.
+    \emph{Resolved (\#11549, PR \#11562; per-step output and horizon contract
+    \#11545):} see \S\ref{sec:drift_prediction}.
   \item \texttt{dime\_manifold.py}: \texttt{local\_coordinates\_jacobian} is the
     identity; the retraction Jacobian is valid only at zero velocity.
+    \emph{Resolved (\#11560, \#11550):} the chart is the right (body-frame)
+    retraction on Hamilton unit quaternions $q=[w,x,y,z]$,
+    $\mathcal{R}(q,\bv)=q\otimes\operatorname{Exp}(\bv)$ with
+    $\operatorname{Exp}(\bv)=[\cos\tfrac{\theta}{2},\ s(\theta)\,\bv]$,
+    $\theta=\lVert\bv\rVert$, $s(\theta)=\sin(\theta/2)/\theta$, and local
+    coordinates $\mathcal{L}(q_0,q_1)=\operatorname{Log}(q_0^{-1}\otimes q_1)$
+    on the principal branch $\lVert\mathcal{L}\rVert\le\pi$, with the sign of
+    $q_1$ chosen so that $q_0\cdot q_1\ge 0$.  The exact Jacobians at any
+    configuration and tangent are
+    \begin{align}
+      \frac{\partial\mathcal{R}}{\partial\bv}
+        &= \mathbf{L}(q)\begin{bmatrix}-\tfrac12 s(\theta)\,\bv^{\top}\\[2pt]
+           s(\theta)\,\mathbf{I}_3+c(\theta)\,\bv\bv^{\top}\end{bmatrix},
+        \qquad c(\theta)=\frac{\tfrac12\cos\tfrac{\theta}{2}-s(\theta)}{\theta^{2}},
+        \label{eq:dime_retract_jac}\\
+      \frac{\partial}{\partial\boldsymbol{\delta}}
+        \mathcal{L}\bigl(q_0,\mathcal{R}(q_1,\boldsymbol{\delta})\bigr)\Big|_{\boldsymbol{\delta}=0}
+        &= \bJ_r^{-1}(\boldsymbol{\phi})
+         = \mathbf{I}_3+\tfrac12[\boldsymbol{\phi}]_\times
+           +\Bigl(\frac{1}{t^{2}}-\frac{\cot(t/2)}{2t}\Bigr)[\boldsymbol{\phi}]_\times^{2},
+        \label{eq:dime_log_jac}
+    \end{align}
+    where $\mathbf{L}(q)$ is the left quaternion-product matrix
+    ($q\otimes p=\mathbf{L}(q)\,p$), $\boldsymbol{\phi}=\mathcal{L}(q_0,q_1)$ and
+    $t=\lVert\boldsymbol{\phi}\rVert$.  \eqref{eq:dime_retract_jac} reduces to the
+    former $\tfrac12\mathbf{L}(q)_{:,1:3}$ only at $\bv=0$, and
+    \eqref{eq:dime_log_jac} to the former identity only when $q_0$ and $q_1$
+    represent the same rotation.  Below $\theta,t<10^{-4}$ the coefficients
+    use their Taylor series, $s\approx\tfrac12-\tfrac{\theta^2}{48}$,
+    $c\approx-\tfrac1{24}+\tfrac{\theta^2}{960}$ and
+    $\tfrac1{12}+\tfrac{t^2}{720}$ (truncation $<10^{-16}$), avoiding
+    cancellation.  \eqref{eq:dime_log_jac} is the derivative only for
+    $t<\pi$.  At $t=\pi$ (the cut locus) the sign selection makes
+    $\mathcal{L}$ discontinuous along $\boldsymbol{\phi}$: for $q_0=[1,0,0,0]$,
+    $q_1=[0,1,0,0]$ and $h=10^{-6}$ the one-sided quotients along the axis
+    are $1$ and $-6.3\times10^{6}$, so no Jacobian exists there.  The code
+    accepts $t\le\pi+10^{-9}$ and returns the finite one-sided limit
+    ($\cot(\pi/2)=0$); that value is unqualified as a derivative, and callers
+    must keep iterates off the cut locus.  Preconditions
+    (\texttt{contracts.require}): $q$ a finite unit 4-vector, $\bv$ a finite
+    3-vector, $t\le\pi$ (principal branch).  \texttt{SE3Manifold}
+    is the product chart $\R^3\times SO(3)$ (translation first), so both
+    Jacobians are block diagonal, $\mathrm{diag}(\mathbf{I}_3,\cdot)$.
+    \emph{Acceptance:} central differences with step $h=10^{-6}$ (truncation
+    $O(h^2)\approx10^{-12}$, round-off $O(\epsilon/h)\approx10^{-10}$) match
+    both Jacobians within $10^{-7}$ absolute at seeded random poses and
+    rotation angles $10^{-5},10^{-3},0.4,1.3,2.5,\pi-10^{-3}$ (none on the
+    cut locus, which is excluded above), and
+    $\mathcal{L}(q,\mathcal{R}(q,\bv))=\bv$ within $10^{-9}$.  Measured
+    (seed 11550, five poses per angle): the closed forms agree with the
+    differences to $\le5\times10^{-10}$; the former zero-velocity retraction
+    Jacobian was off by $1.7\times10^{-4}$ at $10^{-3}$\,rad rising to $0.53$
+    near $\pi$, and the former identity by $4.5\times10^{-4}$ rising to $1.54$,
+    so the tolerance separates the forms by over three decades.  Reverting
+    either form alone fails 7 of the 21 tests, and both together 13.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_manifold\_jacobians.py}.
+    Unqualified: the chart is the product $\R^3\times SO(3)$, not the
+    $SE(3)$ exponential; MOSAIC's floating-base manifold spline must state its
+    own chart and Jacobians.
   \item ZVCF is defined two incompatible ways (\texttt{ztcf\_zvcf.py:339}
     vs \texttt{counterfactual.py:62,98}); \texttt{\_dynamics\_interface.py:227} has a
     sign error; the GS3DX reference's ZTCF equation carried an undefined
@@ -656,6 +809,102 @@ commit \texttt{21a2ed06}:
     The duplicate \texttt{DynamicsProvider} protocols were renamed \texttt{DimeDynamicsProvider} and \texttt{EquationsOfMotionProvider} (\#11553).
   \item No inertial regressor existed anywhere in the estimation package.
 \end{itemize}
+
+\subsection{Corrected Drift Prediction and Selection-Matrix Convention}
+\label{sec:drift_prediction}
+\paragraph{Model and Assumptions.}  \texttt{drift\_prediction.py} predicts the
+next state $\bx=(\bq,\bv)\in\R^{2n}$ of a smooth, contact-free mode from the
+input-affine split of \eqref{eq:ztcf} with $\blambda_0=0$:
+$\ba=f_a(\bq,\bv)+\bM^{-1}\bS\,\bu$, $f_a=-\bM^{-1}\bh$.  Here $\bS\in\R^{n\times m}$
+is the selection matrix that maps the $m$ joint torques to generalized
+forces (the $\bB$ of \eqref{eq:eom}).  Configurations are in local
+coordinates ($\dim\bq=\dim\bv$); manifold (quaternion) states and active
+contact are refused with a receipt rather than extrapolated.  Units are SI
+(rad, m, s, N\,m).
+
+\paragraph{One Step.}  Over a step $\Delta t$ the acceleration is held constant
+(zero-order hold on $\bu$):
+\begin{equation}
+  \bx_{k+1}=f(\bx_k,\bu)=
+  \begin{bmatrix}\bq_k+\Delta t\,\bv_k+\tfrac12\Delta t^2\ba_k\\
+                 \bv_k+\Delta t\,\ba_k\end{bmatrix},\qquad
+  \mathbf{G}_k=\begin{bmatrix}\tfrac12\Delta t^2\\ \Delta t\end{bmatrix}\otimes\bM(\bq_k)^{-1}\bS .
+  \label{eq:drift_step}
+\end{equation}
+
+\paragraph{Covariance Through the Dynamics.}  With $\bu\sim\mathcal N(\boldsymbol\mu_u,\boldsymbol\Sigma_u)$,
+prior $\bP_0$ and additive model noise $\mathbf Q_w$,
+\begin{equation}
+  \bP_{k+1}=\mathbf F_k\bP_k\mathbf F_k^{\!\top}+\mathbf G_k\boldsymbol\Sigma_u\mathbf G_k^{\!\top}+\mathbf Q_w,
+  \qquad \mathbf F_k=\left.\frac{\partial f}{\partial\bx}\right|_{\bx_k,\boldsymbol\mu_u}.
+  \label{eq:drift_cov}
+\end{equation}
+$\mathbf F_k$ contains the dynamics sensitivities
+$\partial\ba/\partial\bq$, $\partial\ba/\partial\bv$ and not only the kinematic
+chain $\left[\begin{smallmatrix}\mathbf I&\Delta t\mathbf I\\0&\mathbf I\end{smallmatrix}\right]$.
+Providers expose no analytic state derivatives, so $\mathbf F_k$ is a central
+finite difference of \eqref{eq:drift_step}, with the drift re-linearised at each
+perturbed state (\texttt{transition\_jacobian}).  A prior covariance is accepted
+only with its $\mathbf F$ (\texttt{PropagatedStateCovariance}).
+
+\paragraph{Horizon.}  A horizon $H$ is $H$ applications of \eqref{eq:drift_step}
+and \eqref{eq:drift_cov} with step $\Delta t$, re-linearised at every
+$\bx_k$.  It is never one step of $H\Delta t$.  Every step is returned
+(\texttt{controlled\_trajectory}$=(\bx_1,\bP_1),\dots,(\bx_H,\bP_H)$), and the
+final step is \texttt{controlled\_prediction}.  The zero-control branch (the
+ZTCF trajectory anchor) uses the same recursion with $\bu=0$.  A horizon that
+is not an integer $\ge 1$, or a step $\Delta t$ that is not finite and positive,
+is refused with receipt \texttt{INVALID\_HORIZON}.
+
+\paragraph{Selection-Matrix Convention.}  The floating-base root is
+unactuated.  Without a caller-supplied $\bS$,
+\begin{equation}
+  \bS=\mathrm{diag}\bigl(\mathbf 0_{r},\ \mathbf I_{n-r}\bigr)\quad
+  (\text{rows and columns of the } r \text{ root DOFs zero}),
+  \label{eq:selection_default}
+\end{equation}
+with root indices $(0,\dots,5)$ by default.  This matches
+\texttt{ContinuousReplayOptions.floating\_base\_root\_dofs}.  A fixed-base model
+declares $r=0$ (\texttt{FIXED\_BASE}).  A supplied $\bS$ with any non-zero root row
+fails a \texttt{require} precondition unless root actuation is declared
+explicitly.  This keeps the ZTCF reading of the root torque-free, consistent
+with \eqref{eq:unactuated}.
+
+\paragraph{Contracts.}  Preconditions (\texttt{core.contracts.require}):
+$\boldsymbol\Sigma_u$, $\bP_0$ and $\mathbf Q_w$ have the right shape and are
+finite, symmetric and positive semidefinite, and $\mathbf F$ is finite and square.
+Postconditions (\texttt{ensure}): $\mathbf F_k\in\R^{2n\times2n}$ is finite,
+there are exactly $H$ trajectory entries, and every $\bP_k$ is finite,
+symmetric and positive semidefinite.
+
+\paragraph{Acceptance Criteria and Evidence.}  For the linear system
+$\bM\ba+\bK\bq+\mathbf D\bv=\bu$ ($\bM$ constant), \eqref{eq:drift_step} is exactly
+$\bx_{k+1}=\bA\bx_k+\mathbf G\bu$.  The returned means must match the analytic
+recursion to $10^{-12}$ absolute, and the covariances must match
+$\bA\bP\bA^{\!\top}+\mathbf G\boldsymbol\Sigma_u\mathbf G^{\!\top}+\mathbf Q_w$ to
+$10^{-7}$ relative, at every one of $H=5$ steps.  The five means must be
+pairwise distinct (separation $>10^{-3}$).  At $\Delta t=0.1$, the correct
+$\bP_1$ differs from the kinematic-only map by $3.7\,\%$ in Frobenius norm, and
+the test requires a separation above $1\,\%$.  On the nonlinear ODE pendulum,
+$H=10$ steps of $\Delta t$ match an $H$-step reference and differ from one step
+of $H\Delta t$ by more than $10^{-3}$.  For an 8-DOF floating base,
+$\bM\cdot(\bM^{-1}\bS)=\mathrm{diag}(\mathbf 0_6,1,1)$.
+
+\paragraph{Failed Implementations (Pre-\#11562, base \texttt{cef37ae9}).}
+The earlier code mapped $\bP$ by the kinematic chain.  At $\Delta t=0.1$ this
+gave $P_{01}=0$, whereas the analytic $P_{01}$ is $1.85\times10^{-5}$.  It took
+one step of $H\Delta t$: at $H=4$ the mean was off by up to
+$0.36\,\mathrm{rad\,s^{-1}}$.  Its default $\bS=\mathbf I_n$ actuated the root.
+Running these tests against that module fails all three behaviours (RED); they
+pass on the corrected module (GREEN).  \texttt{drift\_dominance\_index} is still
+evaluated only at the initial state of the horizon.  It is a diagnostic and is
+not part of this correction.
+
+\paragraph{Reproduction.}
+\texttt{QT\_QPA\_PLATFORM=offscreen MPLBACKEND=Agg python3 -m pytest
+tests/unit/estimation/test\_dime\_drift\_prediction\_horizon.py
+tests/unit/estimation/test\_dime\_drift\_covariance\_propagation.py
+tests/unit/estimation/test\_dime\_drift\_prediction.py}.
 
 \section{Roadmap}
 \label{sec:roadmap}
