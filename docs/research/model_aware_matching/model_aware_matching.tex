@@ -555,6 +555,60 @@ commit \texttt{21a2ed06}:
   \item \texttt{multi\_trial.py:379} vs \texttt{:413-426}: locked parameters with a
     prior give a residual/Jacobian row mismatch; its covariance is conditional,
     not marginal.
+    \emph{Resolved (\#11557, closing \#11548; closed-form benchmark \#11545):}
+    the residual added prior rows over the full parameter block while the
+    Jacobian added them over the free parameters only, so a locked parameter
+    with a prior gave one more residual row than Jacobian row.  Both blocks are
+    now built from one row layout that keeps a prior row
+    $(s_j-\mu_j)/\sigma_j$ only for a \emph{free} shared parameter $s_j$.  A
+    locked parameter is not a decision variable: its prior row is a constant
+    with a zero Jacobian row, which shifts the objective by a constant and
+    leaves the gradient, the Gauss--Newton matrix, the MAP estimate and the
+    posterior unchanged, so it is excluded from both blocks (as in the
+    single-trial estimator).  The reported objective therefore omits locked
+    priors.  For the covariance, partition the decision vector into the
+    stacked trial trajectory coefficients $t$ (nuisance) and the free shared
+    parameters $s$, and let $\mathbf{F}=\bJ^{\!\top}\bJ+\lambda\mathbf{I}$ be
+    the regularised Gauss--Newton matrix of the whole objective (data and
+    prior rows; $\lambda$ is \texttt{covariance\_regularization}, default
+    $10^{-12}$).  The reported unit-noise Laplace covariance is the marginal
+    \begin{equation}
+      \boldsymbol{\Sigma}_{ss}=\big[\mathbf{F}^{-1}\big]_{ss}
+      =\big(\mathbf{F}_{ss}-\mathbf{F}_{st}\mathbf{F}_{tt}^{-1}\mathbf{F}_{ts}\big)^{-1}
+      \;\succeq\;\mathbf{F}_{ss}^{-1},
+      \label{eq:multitrial_marginal}
+    \end{equation}
+    whereas the code had returned the conditional $\mathbf{F}_{ss}^{-1}$, which
+    understates the uncertainty whenever trajectories and shared parameters
+    are correlated.  The implementation inverts the full $\mathbf{F}$ with
+    \texttt{shared\_parameter\_covariance} and reads the $ss$ block, the same
+    construction as \texttt{fit\_uncertainty.least\_squares\_parameter\_uncertainty}
+    (which multiplies by $\hat\sigma^2=2\,\mathrm{cost}/(m-n)$).  If
+    $\mathbf{F}$ is numerically rank-deficient (rank below its column count at
+    the \texttt{numpy.linalg.matrix\_rank} default tolerance) the block is
+    reported as \texttt{NaN} with status \texttt{rank\_deficient} rather than
+    as the Moore--Penrose block.  This is a conservative fail-closed
+    \emph{policy}, not a mathematical necessity: $\Sigma_{ss}$ is unbounded
+    only when a null direction of $\mathbf{F}$ has a nonzero $s$ component.
+    Rank loss confined to trajectory columns leaves $s$ identified (for
+    $\mathbf{F}=\operatorname{diag}(0,1)$ with $t$ first, the marginal
+    variance of $s$ is $1$), but is still reported as unavailable.  A
+    projected-rank test would remove that conservatism and is not implemented.
+    Acceptance benchmark: two trials, each a two-knot one-DoF Hermite spline
+    observed at its knots, residual
+    $[q(0),q(1),v(0),v(1),\,s+q(0)+q(1)-z]$ per trial, prior $s/\sigma$, and
+    $\lambda=0$.  Per trial $\mathbf{F}_{tt}=\mathbf{I}+bb^{\!\top}$ and
+    $\mathbf{F}_{ts}=b$ with $\beta=\norm{b}^2=2$, so by Sherman--Morrison
+    \eqref{eq:multitrial_marginal} gives
+    $\Sigma_{ss}=\big(n/(1+\beta)+\sigma^{-2}\big)^{-1}=0.6$ for $n=2$,
+    $\sigma=1$, against the conditional $(n+\sigma^{-2})^{-1}=1/3$; profiling
+    $t$ out gives $s^\star=\Sigma_{ss}\,n z/(1+\beta)=0.4$ for $z=1$.  The
+    solver matches both at relative tolerance $10^{-9}$ with and without a
+    locked parameter carrying a prior, and agrees with
+    \texttt{fit\_uncertainty} after removing $\hat\sigma^2$.  Before the fix the
+    same problem reported $1/3$ and, with the locked prior, failed with a
+    $(12,9)$ versus $(11,9)$ Jacobian shape error.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_multi\_trial\_map.py}.
   \item \texttt{drift\_prediction.py}: covariance propagation omits
     $\partial f/\partial\bx$; a horizon collapses to one step; the default
     selection matrix actuates the root.
