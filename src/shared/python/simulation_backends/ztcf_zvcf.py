@@ -21,9 +21,12 @@ as ZVCF because it answers a different intervention question.
 For the planar double pendulum the bias force is ``C(q, v) v + g(q) + d(v)``.
 At ``v = 0`` the Coriolis term (quadratic in velocity) and the viscous damping
 term (linear in velocity) both vanish, so ``bias(q, 0) == g(q)``. The ZVCF
-expression therefore reduces to ``solve(M, tau - g(q))``, matching the
-analytical ground truth in
-:meth:`PendulumPhysicsEngine.compute_zvcf`.
+expression therefore reduces to ``solve(M, -g(q))``, matching the analytical
+ground truth in :meth:`PendulumPhysicsEngine.compute_zvcf`.
+
+This module holds the repository's single ZVCF definition (issue #11553): the
+row/column projection ``-M(q)^-1 Y(q, 0, 0) pi`` of the inertial regressor in
+the methods reference. ``motion_matching.counterfactual`` delegates to it.
 
 # AGENT-NOTE: These are POINTWISE / INSTANTANEOUS decompositions evaluated at
 # each measured state along a trajectory -- they are NOT forward-integrated
