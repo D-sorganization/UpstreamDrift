@@ -70,3 +70,14 @@ python3 scripts/run_musculoskeletal_spec_swing.py --bundle driver.npz \
 ```
 
 Receipts: `docs/development/full_body_models/evidence/musculoskeletal/receipt_v2_*.json`.
+
+## Build Locally
+
+CI typesets this reference with a pinned Tectonic (`.github/workflows/latex-references.yml`)
+whenever a `docs/research/**/*.tex` file changes. To reproduce it:
+
+```bash
+tectonic -X compile --outdir build docs/research/musculoskeletal_swing/musculoskeletal_swing.tex
+# or, with a TeX Live install:
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build docs/research/musculoskeletal_swing/musculoskeletal_swing.tex
+```
