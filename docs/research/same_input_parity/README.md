@@ -22,3 +22,14 @@ MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
 ```
 
 The generated PDF is not committed.
+
+## Build Locally
+
+CI typesets this reference with a pinned Tectonic (`.github/workflows/latex-references.yml`)
+whenever a `docs/research/**/*.tex` file changes. To reproduce it:
+
+```bash
+tectonic -X compile --outdir build docs/research/same_input_parity/same_input_parity.tex
+# or, with a TeX Live install:
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build docs/research/same_input_parity/same_input_parity.tex
+```

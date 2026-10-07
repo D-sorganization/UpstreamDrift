@@ -24,7 +24,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeCompleteState,
     DimeFullStepRequest,
     DimeFullStepResult,
-    DynamicsProvider,
+    DimeDynamicsProvider,
     EstimationIntervalFactor,
 )
 
@@ -76,7 +76,7 @@ class DimeDynamicsWindowFactor:
 
     def __init__(
         self,
-        provider: DynamicsProvider,
+        provider: DimeDynamicsProvider,
         initial_state: DimeCompleteState,
         horizon_steps: int,
         dt_s: float,
@@ -248,7 +248,7 @@ class DimeDynamicsWindowProblem:
 
     def __init__(
         self,
-        provider: DynamicsProvider,
+        provider: DimeDynamicsProvider,
         initial_state: DimeCompleteState,
         horizon_steps: int,
         dt_s: float,

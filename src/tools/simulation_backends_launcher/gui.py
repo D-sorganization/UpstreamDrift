@@ -39,7 +39,10 @@ from src.shared.python.simulation_backends import (
     make_backend,
     validation,
 )
-from src.shared.python.simulation_backends.protocol import DynamicsProvider, SimState
+from src.shared.python.simulation_backends.protocol import (
+    EquationsOfMotionProvider,
+    SimState,
+)
 from src.shared.python.simulation_backends.trace_io import write_trace
 from src.tools.async_action import AsyncActionBar, WorkerContext
 from src.tools.window_theme import apply_theme_best_effort
@@ -523,10 +526,12 @@ class MainWidget(QtWidgets.QWidget):
         if ctx is not None:
             ctx.raise_if_cancelled()
             ctx.report(0.3, "cross-validating mass matrix")
-        # ode/mujoco backends both implement DynamicsProvider at runtime;
+        # ode/mujoco backends both implement EquationsOfMotionProvider at runtime;
         # narrow the static SimulationBackend type for the mass-matrix check.
         mass_report = validation.cross_validate_mass_matrix(
-            cast(DynamicsProvider, ode), cast(DynamicsProvider, mj), q_samples
+            cast(EquationsOfMotionProvider, ode),
+            cast(EquationsOfMotionProvider, mj),
+            q_samples,
         )
         if ctx is not None:
             ctx.raise_if_cancelled()

@@ -81,3 +81,14 @@ reproduction commands. Receipts:
 `docs/development/full_body_models/evidence/myofullbody/receipt_{driver,iron}.json`.
 Result status for both swings: `NOT_QUALIFIED` (the reserves exceed 10 percent of
 the effort RMS in the trunk, legs and arms). Renders: `~/Videos/Parity Audit/musculoskeletal_fullbody/`.
+
+## Build Locally
+
+CI typesets this reference with a pinned Tectonic (`.github/workflows/latex-references.yml`)
+whenever a `docs/research/**/*.tex` file changes. To reproduce it:
+
+```bash
+tectonic -X compile --outdir build docs/research/musculoskeletal_swing/musculoskeletal_swing.tex
+# or, with a TeX Live install:
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build docs/research/musculoskeletal_swing/musculoskeletal_swing.tex
+```

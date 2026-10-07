@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11553 · Fix ZTCF/Drift Sign in Engine Contract Docs and Unify ZVCF on Simulation_Backends.Ztcf_Zvcf (Counterfactual Delegates)
+
+- **State:** in_review
+- **Owner:** claude
+- **Issue:** #11553
+- **Branch:** fix/11553-zvcf-sign-and-definition
+- **PR:** #11638
+- **Paths:** see #11638
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`7300b4c4`; collated from changes/11553-fix-ztcf-drift-sign-in-engine-contract-d.md)
+- **Summary:** Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates)
+- **Next step:** Reconcile the duplicate DynamicsProvider protocols (dime_contracts vs simulation_backends.protocol) in a follow-up API-change PR
+
 ### DL-#11614 · Same-Input Parity LaTeX Research Reference (P-1 Pointwise Result)
 
 - **State:** in_progress
@@ -2719,6 +2732,45 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#11574 · Ci: Compile Docs/Research LaTeX References With Pinned Tectonic and Check Changed Title Case
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11574
+- **Branch:** merged via #11641
+- **PR:** #11641
+- **Paths:** see #11641
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`18a4a5bd`; collated from changes/11574-ci-compile-docs-research-latex-reference.md)
+- **Summary:** ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case
+- **Next step:** Shipped in PR #11641.
+
+### DL-#11554 · Fixed-Size Window Residual: Typed DimeResidualEvaluationError Replaces the Np.Full(100, 1E8) Fake Residual; Bound Residuals Fixed-Length; DbC Postcondition on Residual Length. Single Shooting / Real Defects Deferred to MOSAIC-13 (#11545).
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11554
+- **Branch:** fix/11554-fixed-size-residual
+- **PR:** #11637
+- **Paths:** src/shared/python/estimation/dime_dynamics_window.py
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`feb58aa1`; collated from changes/11554-fixed-size-window-residual-typed-dimeres.md)
+- **Summary:** Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545).
+- **Next step:** Shipped in PR #11637.
+
+### DL-#11635 · Bump Tornado to 6.5.10 and Remove the Three Stale Tornado Pip-Audit Waivers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11635
+- **Branch:** merged via #11636
+- **PR:** #11636
+- **Paths:** see #11636
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`019a42d3`; collated from changes/11635-bump-tornado-to-6-5-10-and-remove-the-th.md)
+- **Summary:** Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers
+- **Next step:** Shipped in PR #11636.
 
 ### DL-#11617 · OpenSim Musculoskeletal Swing: GRF Estimate, StaticOptimization Pipeline, Receipt
 

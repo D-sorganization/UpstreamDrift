@@ -1,7 +1,7 @@
 """Unit tests for ZTCF / ZVCF counterfactual primitives (epic task M7).
 
 These verify that the pointwise zero-torque / zero-velocity acceleration
-decompositions, computed purely from ``DynamicsProvider`` primitives, match the
+decompositions, computed purely from ``EquationsOfMotionProvider`` primitives, match the
 analytical ground truth (:class:`PendulumPhysicsEngine`) and -- when MuJoCo is
 installed -- the MuJoCo CPU backend, establishing cross-backend agreement.
 """
@@ -47,7 +47,7 @@ ATOL_MUJOCO = 1e-7
 
 
 class _AnalyticalProvider:
-    """Minimal :class:`DynamicsProvider` built directly on the analytical EOM.
+    """Minimal :class:`EquationsOfMotionProvider` built directly on the analytical EOM.
 
     Independent of any concrete backend, this lets the ZTCF/ZVCF math be
     validated even when the ``ode`` backend module is not yet present, and uses

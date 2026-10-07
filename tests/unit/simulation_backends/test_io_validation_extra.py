@@ -79,7 +79,7 @@ _NQ = 2
 # Lightweight Protocol-satisfying fakes (no optional dependency).
 # --------------------------------------------------------------------------- #
 class _GoodProvider:
-    """A minimal, well-shaped :class:`DynamicsProvider`."""
+    """A minimal, well-shaped :class:`EquationsOfMotionProvider`."""
 
     def __init__(self, skew: float = 0.0) -> None:
         self.skew = float(skew)
