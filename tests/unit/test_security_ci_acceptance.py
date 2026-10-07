@@ -27,6 +27,23 @@ def test_pip_audit_waivers_use_issue_schema() -> None:
         assert waiver["tracked_in"].startswith("#")
 
 
+def test_pip_audit_waiver_packages_are_still_locked() -> None:
+    """A waiver for a package no lockfile pins is stale and must be removed."""
+    manifest = json.loads(_read("scripts/config/pip_audit_waivers.json"))
+    locked = {
+        match.group(1).lower().replace("_", "-")
+        for lock in ("requirements.lock", "requirements-dev.lock")
+        for match in re.finditer(r"^([A-Za-z0-9_.-]+)==", _read(lock), re.MULTILINE)
+    }
+
+    stale = sorted(
+        w["package"]
+        for w in manifest["waivers"]
+        if w["package"].lower().replace("_", "-") not in locked
+    )
+    assert not stale, f"waivers for packages absent from the locks: {stale}"
+
+
 def test_standard_ci_runs_blocking_semgrep_and_trivy() -> None:
     workflow = _read(".github/workflows/ci-standard.yml")
     trivy_test = _read("tests/security/test_no_secrets_in_tree.py")
