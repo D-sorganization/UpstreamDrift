@@ -17,6 +17,19 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11614 · Same-Input Parity LaTeX Research Reference (P-1 Pointwise Result)
+
+- **State:** in_progress
+- **Owner:** unassigned
+- **Issue:** #11614
+- **Branch:** docs/sip-9-parity-reference-11614
+- **PR:** #11616
+- **Paths:** see #11616
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`838a670f`; collated from changes/11614-same-input-parity-latex-research-referen.md)
+- **Summary:** Same-input parity LaTeX research reference (P-1 pointwise result)
+- **Next step:** Extend with P-2..P-5 trajectory and closed-loop results
+
 ### DL-#11589 · Retire Stale Shared-Code Header Test
 
 - **State:** in_review
