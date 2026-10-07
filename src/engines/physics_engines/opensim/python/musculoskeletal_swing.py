@@ -486,17 +486,18 @@ def build_musculoskeletal_model(
     model.setName("golf_musculoskeletal")
     model.finalizeConnections()
     model.initSystem()
-    info = {
+    n_muscles = int(model.getMuscles().getSize())
+    info: dict[str, Any] = {
         "base_model": str(base_path),
         "golf_model": str(golf_path),
         "body_scale_factors": scales,
         "actuator_kinds": kinds,
         "actuator_optimal_force": optimal,
-        "n_muscles": int(model.getMuscles().getSize()),
+        "n_muscles": n_muscles,
         "n_coordinates": int(model.getCoordinateSet().getSize()),
         "total_mass_kg": float(sum(b.getMass() for b in model.getBodySet())),
     }
-    ensure(info["n_muscles"] > 0, "musculoskeletal model has no muscles")
+    ensure(n_muscles > 0, "musculoskeletal model has no muscles")
     return model, info
 
 

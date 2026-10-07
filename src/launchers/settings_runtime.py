@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import subprocess
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -19,6 +20,10 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 _WINDOWS_DEPENDENCIES: dict[str, tuple[str, str, bool]] = {
     "numpy": ("NumPy", ">=1.26.4", False),
@@ -90,6 +95,9 @@ class RuntimeDependencyCheckFailure(RuntimeError):
         self.html = html
 
 
+_DETACHED_WORKERS: set[QThread] = set()
+
+
 class RuntimeDependencyCheckWorker(QThread):
     """Run Docker or WSL dependency checks without blocking the GUI thread."""
 
@@ -115,6 +123,31 @@ class RuntimeDependencyCheckWorker(QThread):
                 "Dependency Check",
                 f"<h3>Runtime Dependency Check Failed</h3><p>{exc}</p>",
             )
+        except Exception as exc:
+            # Thread boundary: an unhandled exception would end the thread
+            # without a signal and leave the button disabled (#11584).
+            logger.exception("Runtime dependency check crashed")
+            self.failed.emit(
+                "critical",
+                "Dependency Check",
+                "<h3>Runtime Dependency Check Failed</h3>"
+                f"<p>Unexpected error ({type(exc).__name__}): {exc}</p>",
+            )
+
+    def detach(self) -> None:
+        """Drop this worker's UI connections so a late result is ignored.
+
+        The thread keeps running to completion, owned by a module-level set
+        instead of the (possibly closing) dialog, so Qt never destroys a
+        running ``QThread`` (#11584).
+        """
+        for signal in (self.succeeded, self.failed):
+            with contextlib.suppress(TypeError):  # already disconnected
+                signal.disconnect()
+        if self.isRunning():
+            _DETACHED_WORKERS.add(self)
+            self.finished.connect(lambda: _DETACHED_WORKERS.discard(self))
+            self.setParent(None)
 
 
 def _numeric_version(version: str) -> list[int]:
