@@ -538,3 +538,164 @@ def test_solver_reports_unavailable_covariance_for_confounded_problem() -> None:
 
     assert result.covariance_status == "rank_deficient"
     assert np.isnan(result.posterior_variance("club_length_m"))
+
+
+# --------------------------------------------------------------------------
+# Closed-form linear benchmark (MOSAIC-13, issue #11545)
+# --------------------------------------------------------------------------
+#
+# Two trials, each a two-knot, one-DoF Hermite spline evaluated at its knots,
+# so the decision vector is exactly linear in the residual. Per trial ``i``
+# with coefficients ``c_i`` (4 entries) and one shared scalar ``s``:
+#
+#     r_i = [ q(0), q(1), v(0), v(1),  s + q(0) + q(1) - z ]
+#
+# plus a prior row ``s / sigma``. The coupling row has trajectory gradient
+# ``b`` with ``beta = |b|^2 = 2`` (the q-basis rows at the knots are unit
+# vectors). Per trial ``F_tt = I + b b^T`` and ``F_ts = b``; by
+# Sherman-Morrison ``b^T (I + b b^T)^-1 b = beta / (1 + beta)``, so
+#
+#     marginal    = (n / (1 + beta) + 1 / sigma^2)^-1 = (2/3 + 1)^-1 = 0.6
+#     conditional = (n + 1 / sigma^2)^-1                = 1/3
+#
+# Profiling ``c_i`` out of the objective gives ``n (z - s)^2 / (1 + beta) +
+# s^2 / sigma^2``, whose minimiser is ``s* = 0.6 * (2/3) * z = 0.4`` for
+# ``z = 1``. Everything is exact linear algebra on a 9x9 matrix with
+# condition number ~10, so ``rtol = 1e-9`` sits far above rounding.
+
+_LINEAR_TRIALS = 2
+_LINEAR_SIGMA = 1.0
+_LINEAR_Z = 1.0
+_LINEAR_MARGINAL = 0.6
+_LINEAR_CONDITIONAL = 1.0 / 3.0
+_LINEAR_MAP_S = 0.4
+
+
+def _linear_observation(index: int) -> MultiTrialObservation:
+    times = np.array([0.0, 1.0])
+    trajectory = CubicHermiteSplineTrajectory(times, n_dof=1)
+
+    def residual(_observation, evaluation, parameters) -> np.ndarray:
+        q = evaluation.q[:, 0]
+        v = evaluation.v[:, 0]
+        coupling = parameters["s"] + q.sum() - _LINEAR_Z
+        return np.concatenate([q, v, [coupling]])
+
+    def jacobian(observation, evaluation, _parameters, layout) -> np.ndarray:
+        columns = layout.trajectory_slice(observation.key)
+        jac = np.zeros((5, layout.size), dtype=float)
+        jac[0:2, columns] = evaluation.q_basis[:, 0, :]
+        jac[2:4, columns] = evaluation.v_basis[:, 0, :]
+        jac[4, columns] = evaluation.q_basis[:, 0, :].sum(axis=0)
+        jac[4, layout.parameter_column("s")] = 1.0
+        return jac
+
+    return MultiTrialObservation(
+        trial_id=f"linear-{index}",
+        trajectory=trajectory,
+        evaluation_times=times,
+        initial_coefficients=np.zeros(trajectory.coefficient_size),
+        residual=residual,
+        jacobian=jacobian,
+    )
+
+
+def _linear_problem(*, locked_prior: bool) -> MultiTrialMapProblem:
+    specs = [SharedParameterSpec("s", 0.0, prior=0.0, prior_scale=_LINEAR_SIGMA)]
+    if locked_prior:
+        specs.insert(
+            0, SharedParameterSpec("m", 70.0, prior=72.0, prior_scale=2.0, locked=True)
+        )
+    return MultiTrialMapProblem(
+        observations=tuple(_linear_observation(i) for i in range(_LINEAR_TRIALS)),
+        shared_parameters=SharedParameterBlock.from_specs(specs),
+        options=MapEstimatorOptions(max_iterations=200),
+        covariance_regularization=0.0,
+    )
+
+
+@pytest.mark.unit
+def test_linear_benchmark_coupling_has_beta_two() -> None:
+    """Guard the closed form's premise: the knot q-basis gives ``|b|^2 = 2``."""
+    observation = _linear_observation(0)
+    evaluation = observation.trajectory.evaluate(
+        observation.initial_coefficients, observation.evaluation_times
+    )
+    coupling = evaluation.q_basis[:, 0, :].sum(axis=0)
+    assert float(coupling @ coupling) == pytest.approx(2.0, abs=1e-12)
+
+
+@pytest.mark.unit
+def test_linear_benchmark_covariance_is_closed_form_marginal() -> None:
+    """Reported variance equals the analytic Schur marginal, not the conditional."""
+    result = solve_multi_trial_map(_linear_problem(locked_prior=False))
+
+    assert result.success
+    variance = result.posterior_variance("s")
+    np.testing.assert_allclose(variance, _LINEAR_MARGINAL, rtol=1e-9)
+    # The two candidates differ by 80 %, so this cannot pass by accident.
+    assert abs(variance - _LINEAR_CONDITIONAL) > 0.25
+    assert result.covariance_status == "estimated"
+
+
+@pytest.mark.unit
+def test_linear_benchmark_locked_prior_keeps_rows_and_estimate(
+    contracts_enforced,
+) -> None:
+    """A locked parameter with a prior changes neither rows nor the MAP answer.
+
+    The locked prior row would be the constant ``(70 - 72) / 2``; it carries
+    no decision variable, so the solve must report the same ``s*`` and the
+    same marginal as the problem without it, with one prior row (for ``s``).
+    """
+    result = solve_multi_trial_map(_linear_problem(locked_prior=True))
+
+    assert result.success
+    assert result.residual.size == _LINEAR_TRIALS * 5 + 1
+    assert result.parameters["m"] == 70.0
+    np.testing.assert_allclose(result.parameters["s"], _LINEAR_MAP_S, rtol=1e-9)
+    np.testing.assert_allclose(
+        result.posterior_variance("s"), _LINEAR_MARGINAL, rtol=1e-9
+    )
+
+
+@pytest.mark.unit
+def test_marginal_covariance_consistent_with_fit_uncertainty() -> None:
+    """Both estimators read the same block of the full inverse Fisher matrix.
+
+    :func:`least_squares_parameter_uncertainty` scales the unit-noise
+    covariance by ``sigma^2 = 2 cost / (m - n)``; ``solve_multi_trial_map``
+    reports the unit-noise MAP covariance. With ``lambda = 0`` the two must
+    agree after removing that scale.
+    """
+    from scipy.optimize import OptimizeResult
+
+    from src.shared.python.estimation.fit_uncertainty import (
+        least_squares_parameter_uncertainty,
+    )
+
+    problem = _linear_problem(locked_prior=False)
+    result = solve_multi_trial_map(problem)
+    layout = _build_layout(problem)
+    decision = np.concatenate(
+        [result.coefficients_by_trial[o.key] for o in problem.observations]
+        + [np.array([result.parameters["s"]])]
+    )
+    optimum = OptimizeResult(
+        x=decision,
+        jac=_objective_jacobian(problem, layout, decision),
+        cost=result.objective,
+        active_mask=np.zeros(layout.size, dtype=int),
+    )
+
+    uncertainty = least_squares_parameter_uncertainty(
+        optimum, parameter_indices=[layout.parameter_column("s")]
+    )
+
+    assert uncertainty.status == "estimated"
+    assert uncertainty.covariance is not None
+    np.testing.assert_allclose(
+        uncertainty.covariance / uncertainty.residual_variance,
+        result.posterior_covariance,
+        rtol=1e-9,
+    )
