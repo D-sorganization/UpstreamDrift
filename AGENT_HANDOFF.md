@@ -451,3 +451,10 @@ The selected club fits were tested at all anchors and midpoints using independen
 The private production integration candidate passed 17 native pre-model contract cases (parent RED, candidate GREEN, 51 recorded checks) at 20:20:58 UTC. Numerical whole-output parity and positive-fit validation remain separate pending gates. Original failed runner receipts are preserved. A custom vector measurement block built successfully, but the eight-axis instrumented simulation hit the Home license's 1,000-nonvirtual-block limit. No all-35 measured torque or moving feedback-off replay claim follows from these tests. Original physical model files were not saved.
 
 See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
+
+# Active: Frankenstein Typed Ports And Drag-And-Drop — #11659, #11660
+
+- Branch `feat/frankenstein-ports-dnd-cmb-11659` (epic #11651, CMB-8 and CMB-9).
+- Pure layer: `model_generation/editor/attachment_ports.py` (port types, polarity, compatibility rules), `model_explorer/part_catalog.py` + `_part_builders.py` (library API), `assembly_session.py` (attach, detach, undo/redo, URDF round-trip via embedded `ud_assembly` record). Manifest schema gained optional `port_type`/`polarity`.
+- GUI: `frankenstein_editor/assembly_panel.py` and `assembly_canvas.py`, hosted as the "Drag-And-Drop Assembly" tab of `FrankensteinEditor`; drops reach the 3D preview via `assembly_urdf_changed`. Fixed `URDFEditorWindow.__init__` (a `_show_status` def had swallowed its body).
+- Open: web drag-and-drop is CMB-10 (#11661), tracked as a gap in `feature_parity.json`. Parts are bundled synthetic limbs plus the driver URDF; no sidecar-backed human/robot URDF library yet.

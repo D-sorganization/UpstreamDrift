@@ -1882,6 +1882,18 @@
       "evidence": "src/tools/model_explorer/launch_model_explorer.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "tools.model_explorer.frankenstein_assembly": {
+      "id": "tools.model_explorer.frankenstein_assembly",
+      "name": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "acceptance_owner": "tests/unit/tools/model_explorer/test_assembly_panel_gui.py"
+    },
     "tools.motion_matching": {
       "id": "tools.motion_matching",
       "name": "Motion Matching tool (full-body forward-dynamics matching of the tour captures)",

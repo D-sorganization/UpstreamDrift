@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 23 parity · 15 gap · 13 exempt (12 pending decision in #7460).
+**Summary:** 23 parity · 16 gap · 13 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -54,6 +54,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.matched_swing_browser`<br>Matched Swing Results Browser | 🔴 gap | `src/tools/matched_swing_browser/gui.py` | — | — | #10353 |
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
+| `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | — | — | #11661 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | 🔴 gap | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | #11234 |
 | `tools.pose_editing`<br>Pose Studio interactive pose editing | ⚪ exempt | `src/tools/pose_studio/__main__.py` | — | — | Interactive 3D pose editing and shared scene-bound native reference points/planes (#9942); desktop-only candidate pending #7460. — **pending decision (#7460)** |
