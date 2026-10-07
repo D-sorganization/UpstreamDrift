@@ -126,8 +126,8 @@ def solve_contact_forces(
     gens = friction_generators(mu)
     forces = np.zeros((n, 3))
     spin = np.zeros(n)
-    idx = np.flatnonzero(active)
-    if idx.size == 0:
+    idx = [int(i) for i in np.flatnonzero(active)]
+    if not idx:
         return forces, spin, float(np.linalg.norm(required))
     blocks = [(jacobians[i].T @ gens.T) for i in idx]
     spin_owner: list[int] = []
@@ -141,13 +141,13 @@ def solve_contact_forces(
     # edges (mid-foot centre of pressure, equal loading) instead of min-norm,
     # which would concentrate the load on a few edge points.
     prior = np.zeros(cols.shape[1])
-    prior[: 4 * idx.size] = max(float(required[4]), 0.0) / (4.0 * idx.size)
+    prior[: 4 * len(idx)] = max(float(required[4]), 0.0) / (4.0 * len(idx))
     a = np.vstack([cols, np.sqrt(ridge) * np.eye(cols.shape[1])])
     b = np.concatenate([required, np.sqrt(ridge) * prior])
     lam, _ = nnls(a, b, maxiter=4000)
     for slot, i in enumerate(idx):
         forces[i] = gens.T @ lam[4 * slot : 4 * slot + 4]
-    base = 4 * idx.size
+    base = 4 * len(idx)
     for slot, owner in enumerate(spin_owner):
         spin[owner] = lam[base + 2 * slot] - lam[base + 2 * slot + 1]
     residual = float(np.linalg.norm(cols @ lam - required))
@@ -180,6 +180,38 @@ def _force_free_copy(model: Any) -> Any:
         free.updForceSet().get(i).set_appliesForce(False)
     free.initSystem()
     return free
+
+
+def _root_jacobian(
+    root_coords: list[Any], state: Any, positions: Any, n_points: int
+) -> np.ndarray:
+    """Central-difference Jacobian ``(P, 3, 6)`` of sole points w.r.t. root coordinates."""
+    jac = np.zeros((n_points, 3, 6))
+    for j, rc in enumerate(root_coords):
+        v0 = rc.getValue(state)
+        rc.setValue(state, v0 + _FD_STEP, False)
+        plus = positions(state)
+        rc.setValue(state, v0 - _FD_STEP, False)
+        minus = positions(state)
+        rc.setValue(state, v0, False)
+        jac[:, :, j] = (plus - minus) / (2 * _FD_STEP)
+    return jac
+
+
+def _spin_generalised(model: Any, root_coords: list[Any], state: Any) -> np.ndarray:
+    """Generalised force of a unit ground-vertical moment: ``J_omega^T e_y``."""
+    rot0 = _pelvis_rotation(model, state)
+    spin_gen = np.zeros(6)
+    for j in range(3):
+        v0 = root_coords[j].getValue(state)
+        root_coords[j].setValue(state, v0 + _FD_STEP, False)
+        rp = _pelvis_rotation(model, state)
+        root_coords[j].setValue(state, v0 - _FD_STEP, False)
+        rm = _pelvis_rotation(model, state)
+        root_coords[j].setValue(state, v0, False)
+        skew = ((rp - rm) / (2 * _FD_STEP)) @ rot0.T
+        spin_gen[j] = (skew[0, 2] - skew[2, 0]) / 2.0  # omega_y
+    return spin_gen
 
 
 def estimate_ground_reactions(
@@ -254,27 +286,8 @@ def estimate_ground_reactions(
         required[k] = tau[root_idx]
         base = point_positions(state)
         world[k] = base
-        jac = np.zeros((len(pts), 3, 6))
-        for j, rc in enumerate(root_coords):
-            v0 = rc.getValue(state)
-            rc.setValue(state, v0 + _FD_STEP, False)
-            plus = point_positions(state)
-            rc.setValue(state, v0 - _FD_STEP, False)
-            minus = point_positions(state)
-            rc.setValue(state, v0, False)
-            jac[:, :, j] = (plus - minus) / (2 * _FD_STEP)
-        # Generalised force of a unit ground-vertical moment: J_omega^T e_y.
-        rot0 = _pelvis_rotation(free, state)
-        spin_gen = np.zeros(6)
-        for j in range(3):
-            v0 = root_coords[j].getValue(state)
-            root_coords[j].setValue(state, v0 + _FD_STEP, False)
-            rp = _pelvis_rotation(free, state)
-            root_coords[j].setValue(state, v0 - _FD_STEP, False)
-            rm = _pelvis_rotation(free, state)
-            root_coords[j].setValue(state, v0, False)
-            skew = ((rp - rm) / (2 * _FD_STEP)) @ rot0.T
-            spin_gen[j] = (skew[0, 2] - skew[2, 0]) / 2.0  # omega_y
+        jac = _root_jacobian(root_coords, state, point_positions, len(pts))
+        spin_gen = _spin_generalised(free, root_coords, state)
         # sign: tau_root(F) = J^T F supplies the ground wrench.
         world_k = base
         active = world_k[:, 1] <= world_k[:, 1].min() + height_tol_m

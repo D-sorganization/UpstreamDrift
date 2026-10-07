@@ -33,7 +33,7 @@
 
 # Historical Player Capture Handoff
 
-## Active: OpenSim Musculoskeletal Swing (#11617, epic #11605)
+## Active: OpenSim Musculoskeletal Swing (#11617, Epic #11605)
 
 - Branch `feat/opensim-musculoskeletal-swing`: `musculoskeletal_*.py` in `src/engines/physics_engines/opensim/python/`, runner `scripts/run_musculoskeletal_swing.py`, receipt under `docs/development/full_body_models/evidence/musculoskeletal/`.
 - Static Optimization only, leg muscles only, estimated GRF; valid for the backswing (0-1.08 s). Moco did not converge. Next: trunk/arm muscles (Hamner graft or MyoSuite), fix IK after 1.15 s.

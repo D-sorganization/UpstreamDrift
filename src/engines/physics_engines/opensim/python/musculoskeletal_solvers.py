@@ -106,18 +106,24 @@ def run_static_optimization(
     return act
 
 
+@dataclass(frozen=True)
+class MocoInverseConfig:
+    """Time window, mesh, effort weights and Ipopt limits of a Moco inverse problem."""
+
+    window: SolveWindow
+    mesh_interval: float
+    muscle_weight: float = 1.0
+    reserve_weight: float = 1.0
+    upper_weight: float = 1.0
+    max_iterations: int = 400
+    convergence_tolerance: float = 1e-2
+
+
 def build_moco_inverse(
     model_path: str | Path,
     kinematics_file: str | Path,
     loads_xml: str | Path,
-    window: SolveWindow,
-    *,
-    mesh_interval: float,
-    muscle_weight: float = 1.0,
-    reserve_weight: float = 1.0,
-    upper_weight: float = 1.0,
-    max_iterations: int = 400,
-    convergence_tolerance: float = 1e-2,
+    config: MocoInverseConfig,
 ) -> Any:
     """Configure (but do not solve) a ``MocoInverse`` problem.
 
@@ -127,6 +133,8 @@ def build_moco_inverse(
     joints no muscle crosses and are lightly penalised.
     """
     osim = _opensim()
+    window = config.window
+    mesh_interval = config.mesh_interval
     for p in (model_path, kinematics_file, loads_xml):
         require(Path(p).is_file(), f"missing input file {p}")
     require(mesh_interval > 0, "mesh_interval must be positive")
@@ -150,16 +158,16 @@ def build_moco_inverse(
     inverse.set_mesh_interval(mesh_interval)
     inverse.set_kinematics_allow_extra_columns(True)
     inverse.set_minimize_sum_squared_activations(False)
-    inverse.set_convergence_tolerance(convergence_tolerance)
-    inverse.set_constraint_tolerance(convergence_tolerance)
-    inverse.set_max_iterations(int(max_iterations))
+    inverse.set_convergence_tolerance(config.convergence_tolerance)
+    inverse.set_constraint_tolerance(config.convergence_tolerance)
+    inverse.set_max_iterations(int(config.max_iterations))
     study = inverse.initialize()
     problem = study.updProblem()
     # Replace the default effort goal with kind-specific weights.
     goal = osim.MocoControlGoal.safeDownCast(problem.updGoal("excitation_effort"))
-    goal.setWeight(muscle_weight)
-    goal.setWeightForControlPattern(".*reserve_.*", reserve_weight)
-    goal.setWeightForControlPattern(".*upper_.*", upper_weight)
+    goal.setWeight(config.muscle_weight)
+    goal.setWeightForControlPattern(".*reserve_.*", config.reserve_weight)
+    goal.setWeightForControlPattern(".*upper_.*", config.upper_weight)
     return inverse, study
 
 
@@ -181,9 +189,7 @@ def solve_moco_pilot(
         model_path,
         kinematics_file,
         loads_xml,
-        window,
-        mesh_interval=mesh_interval,
-        max_iterations=max_iterations,
+        MocoInverseConfig(window, mesh_interval, max_iterations=max_iterations),
     )
     solution = study.solve()
     record: dict[str, Any] = {
