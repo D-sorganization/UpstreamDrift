@@ -98,8 +98,15 @@ def expected_title(value: str) -> str:
         word = item.group()
         lowered = word.lower()
         separator = value[previous_end : item.start()]
-        boundary = index in {0, len(words) - 1} or bool(
-            re.search(r"(?:[:!?—–]|-{2,}|[([{])\s*$", separator)
+        # A literal at the start or end of a title is that title's edge, so the
+        # word next to it is not.
+        boundary = (
+            (index == 0 and not any(end <= item.start() for _, end in spans))
+            or (
+                index == len(words) - 1
+                and not any(start >= item.end() for start, _ in spans)
+            )
+            or bool(re.search(r"(?:[:!?—–]|-{2,}|[([{])\s*$", separator))
         )
         hyphens = "-‐‑"
         compound = (item.start() > 0 and value[item.start() - 1] in hyphens) != (

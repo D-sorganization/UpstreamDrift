@@ -107,3 +107,14 @@ def test_angle_bracket_spans_are_protected_literals() -> None:
 def test_ud_specific_extensions_stay_protected() -> None:
     for name in ("setup.exe", "tool.app", "build.appimage"):
         assert expected_title(f"Run {name} Locally") == f"Run {name} Locally"
+
+
+def test_minor_words_next_to_edge_literals_stay_lowercase() -> None:
+    for title in (
+        "latex-references.yml and Related Files",
+        "Settings for refs.yml",
+        "`code` and Related Files",
+    ):
+        assert expected_title(title) == title
+    # A literal in the middle does not change which word is the title edge.
+    assert expected_title("and the ci.yml for") == "And the ci.yml For"
