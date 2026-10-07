@@ -243,7 +243,9 @@ def static_optimisation(
         "activation": activation,
         "reserve": reserve,
         "force": force,
-        "tau": bundle.efforts[np.ix_(ks, cols)],
+        "tau": bundle.efforts[
+            np.ix_(np.asarray(ks, dtype=np.intp), np.asarray(cols, dtype=np.intp))
+        ],
     }
 
 
