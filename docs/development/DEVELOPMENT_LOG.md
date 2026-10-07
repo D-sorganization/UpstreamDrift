@@ -17,16 +17,29 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 
 ## Active
 
+### DL-#11596 · Commit Recovered Crocoddyl G1 Warm-Start IK and 0.60 s FDDP Stage Inputs Beside the Rk45, Rtol6 and B100 Receipts, Plus the W030r Chain-Root Candidate, With Sha256 Provenance
+
+- **State:** in_review
+- **Owner:** unassigned
+- **Issue:** #11596
+- **Branch:** chore/crocoddyl-warm-start-evidence-11596
+- **PR:** #11598
+- **Paths:** see #11598
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`d4a763d8`; collated from changes/11596-commit-recovered-crocoddyl-g1-warm-start.md)
+- **Summary:** Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance
+- **Next step:** Merge PR #11598 once CI is green; then re-run the Crocoddyl G1 FDDP stage from the committed warm-start inputs.
+
 ### DL-#11553 · Fix ZTCF/Drift Sign in Engine Contract Docs and Unify ZVCF on Simulation_Backends.Ztcf_Zvcf (Counterfactual Delegates)
 
 - **State:** in_review
 - **Owner:** claude
 - **Issue:** #11553
 - **Branch:** fix/11553-zvcf-sign-and-definition
-- **PR:** #11638
+- **PR:** #11638, #11687
 - **Paths:** see #11638
 - **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`7300b4c4`; collated from changes/11553-fix-ztcf-drift-sign-in-engine-contract-d.md)
+- **Last verified:** 2026-10-07 (`71cc60b2`; collated from changes/11553-rename-the-two-unrelated-dynamicsprovide.md)
 - **Summary:** Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates)
 - **Next step:** Reconcile the duplicate DynamicsProvider protocols (dime_contracts vs simulation_backends.protocol) in a follow-up API-change PR
 
@@ -2732,6 +2745,32 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#11691 · Protect `.yml` and Related Filenames in the Title-Case Checker
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11691
+- **Branch:** merged via #11692
+- **PR:** #11692
+- **Paths:** see #11692
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`de0e48a1`; collated from changes/11691-protect-yml-and-related-filenames-in-the.md)
+- **Summary:** Protect `.yml` and Related Filenames in the Title-Case Checker
+- **Next step:** Shipped in PR #11692.
+
+### DL-#11641 · Register latex-references.yml in the Workflow Inventory so the Inventory Gate Passes on Main
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11641
+- **Branch:** merged via #11666
+- **PR:** #11666
+- **Paths:** see #11666
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`ee47b1ee`; collated from changes/11641-register-latex-references-yml-in-the-wor.md)
+- **Summary:** Register latex-references.yml in the workflow inventory so the inventory gate passes on main
+- **Next step:** Shipped in PR #11666.
 
 ### DL-#11574 · Ci: Compile Docs/Research LaTeX References With Pinned Tectonic and Check Changed Title Case
 
