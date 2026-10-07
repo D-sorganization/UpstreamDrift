@@ -422,7 +422,8 @@ def finish_feasibility_report(
     q_ik: np.ndarray | None = None,
 ) -> ReportDict:
     """Finish-feasibility block of the dynamics receipt (reference and simulation)."""
-    mu = float(sim.adapter.contact_parameters.dynamic_friction)
+    contacts = sim.adapter.contact_parameters
+    mu = float(contacts.dynamic_friction)
     ref = reference_history(sim, times_track, q_track, zmp, ground, q_ik=q_ik)
     plant = simulation_history(sim, record, times_track, q_track, ground)
     return {
