@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1632,
+    "ud-only": 1633,
     "tools-only": 777,
     "spelling-only": 123
   },
@@ -483,7 +483,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 270,
+      "ud-only": 271,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -15040,11 +15040,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/pipeline/centroidal_filter.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 24949,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/pipeline/cli.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 28341,
+      "ud_bytes": 29492,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15080,7 +15092,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 26086,
+      "ud_bytes": 26207,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15248,7 +15260,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 18200,
+      "ud_bytes": 18430,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
