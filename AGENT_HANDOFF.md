@@ -452,7 +452,7 @@ The private production integration candidate passed 17 native pre-model contract
 
 See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
 
-# Active: Frankenstein Typed Ports And Drag-And-Drop — #11659, #11660
+# Active: Frankenstein Typed Ports and Drag-and-Drop — #11659, #11660
 
 - Branch `feat/frankenstein-ports-dnd-cmb-11659` (epic #11651, CMB-8 and CMB-9).
 - Pure layer: `model_generation/editor/attachment_ports.py` (port types, polarity, compatibility rules), `model_explorer/part_catalog.py` + `_part_builders.py` (library API), `assembly_session.py` (attach, detach, undo/redo, URDF round-trip via embedded `ud_assembly` record). Manifest schema gained optional `port_type`/`polarity`.
