@@ -1,0 +1,237 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{xurl}
+\usepackage{enumitem}
+\geometry{margin=25mm}
+\hypersetup{colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bD}{\mathbf{D}}
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bt}{\boldsymbol{\tau}}
+\newcommand{\bl}{\boldsymbol{\lambda}}
+\newcommand{\row}{\operatorname{row}}
+
+\title{Same-Input Cross-Engine Dynamics Parity\\[4pt]
+\large Calculation Reference for Epic \#11605 (Child P-9, Issue \#11614)}
+\author{UpstreamDrift Research Reference}
+\date{Revision 2026-10-06 \quad (pointwise level L1 only)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The same full-body model, driven by the same initial state and the same joint
+torques, must produce the same motion in every physics engine.  This reference
+records the model definition, the constrained-dynamics formulation, the
+closure projection that makes engine comparisons convention free, the
+acceptance levels, and the measured pointwise (L1) result for MuJoCo, Drake and
+Pinocchio.  Trajectory (L2) and closed-loop (L3) levels are planned and not yet
+reported.
+\end{abstract}
+
+\noindent\textbf{Document status.}  This is an editable standalone research
+source, separate from the engineering design manual.  The sole editable design
+manual source remains \texttt{manuals/upstreamdrift} (QMD).  It is a software
+and model-consistency check, not scientific validation against capture data.
+
+\section{Purpose and Scope}
+The same inputs (model specification, initial state $\bq_0,\bv_0$, and per-step
+torques) must yield the same motion in MuJoCo, Drake and Pinocchio, and later in
+OpenSim, MyoSuite and Simscape.  Agreement establishes that the spec-built
+models are dynamically identical and that residual differences come from
+documented numerical policy.  It says nothing about whether the model matches a
+human golfer.  Inverse kinematics, feedback-assisted tracking and independently
+replayed open-loop dynamics are kept distinct; only the first level, pointwise
+dynamics, is reported here.
+
+\section{Shared Model Definition}
+One full-body specification JSON builds every engine adapter.  The model has
+$44$ generalized coordinates in spec order.  The root is a floating base
+parameterised by \texttt{TranslationInputX/Y/Z} and \texttt{HipInputX/Y/Z},
+which are unactuated.  The two hands are welded to the club by a dual-grip
+closure: a 6D weld constraint between the body \texttt{RHandStandoff} and the
+\texttt{Clubface Vector} frame, with the left grip closing the second loop.
+Ground contact uses one shared Hunt--Crossley law with common parameters in all
+engines.  Units are SI throughout: metres, radians, seconds, newton-metres.
+
+Baseline probe at the recorded states (issue \#11605): total mass is identical
+($79.358$~kg), $\max|\bM_{\mathrm{MuJoCo}}-\bM_{\mathrm{Pinocchio}}|\le
+9\times10^{-13}$ for the $44\times44$ mass matrix, and the bias
+$\bh=\mathbf{C}(\bq,\bv)\bv+\mathbf{g}(\bq)$ agrees to $\le 8\times10^{-10}$
+N\,m.  The models therefore pass L0 and differ only in numerical policy.
+
+\section{Constrained Dynamics}
+With rate map $\bD(\bq)$ ($\bD\bv$ is the weld rate residual), the
+accelerations $\ba$ and constraint forces $\bl$ solve the KKT system
+\begin{equation}
+\begin{bmatrix}\bM & \bD^{\top}\\ \bD & 0\end{bmatrix}
+\begin{bmatrix}\ba\\ \bl\end{bmatrix}
+=\begin{bmatrix}\bt-\bh\\ -\dot{\bD}\bv\end{bmatrix}.
+\label{eq:kkt}
+\end{equation}
+Drake and Pinocchio solve Eq.~\eqref{eq:kkt} exactly.  MuJoCo adds a Tikhonov
+term of $10^{-6}$ to the constraint block by default
+(\texttt{kkt\_regularization}); with large grip forces and small wrist inertias
+this alone moves accelerations visibly, so parity runs set it to $0$.
+
+\section{Why Raw States Are Formulation Dependent}
+The recorded states violate the grip weld by $1.4$ to $190~\mu$m.  Each engine
+expresses the weld residual in a different frame (world or local, body-a or
+body-b point) and so linearises a violated weld differently: the row spaces of
+$\bD$ differ by about $3\times10^{-5}$ off the manifold, and raw-state
+accelerations differ by up to $42$~rad/s$^2$.
+
+\paragraph{Failed first comparison.}  Comparing engines at the raw recorded
+states with MuJoCo's default regularisation gave MuJoCo versus Pinocchio
+differences up to $0.62$~rad/s$^2$ at early frames, while Drake versus Pinocchio
+agreed to $5\times10^{-8}$.  Switching off the regularisation alone was
+insufficient; the closure violation had to be removed from the comparison.
+
+\section{Convention-Free Closure Projection}
+Two objects do not depend on the residual convention: the zero set of the pose
+residual (the closure manifold) and the row space of $\bD$, since every
+convention is $T(\bq)\bJ(\bq)$ for an invertible $T$.  The position correction
+is the closest point on the manifold, $\bq^{*}$, defined by
+\begin{equation}
+\bq^{*}-\bq_0\in\row\bigl(\bD(\bq^{*})\bigr),\qquad r(\bq^{*})=0 .
+\end{equation}
+It is solved as a fixed point.  With $B_k$ the row-normalised $\bD(\bq_k)^{\top}$
+as columns, an inner Newton iteration finds $\alpha$ such that
+$r(\bq_0+B_k\alpha)=0$, using a central-difference residual Jacobian with step
+$10^{-7}$; the outer update sets $\bq_{k+1}=\bq_0+B_k\alpha$ and recomputes
+$\bD$.  The rate map $\bD$ is extracted exactly from the linear rate residual
+using unit velocities.  The velocity correction removes the row-space
+component at $\bq^{*}$,
+\begin{equation}
+\bv^{*}=\bv-\bD^{+}\bD\bv .
+\end{equation}
+The Newton search stops at $\max|r|\le10^{-13}$ (cap 25 iterations, otherwise
+\texttt{ArithmeticError}).
+
+\paragraph{Failed first version.}  Projecting along $\bD(\bq_0)$ only, evaluated
+at the violated state, left a residual engine spread of $6\times10^{-8}$ in the
+projected state.  The closest-point version evaluates $\bD$ on the manifold,
+where every engine agrees, and reduces the spread to $3\times10^{-14}$.
+
+\section{Pointwise Parity Result (Level L1)}
+Every 20th frame of the 606-frame dynamics record ($31$ frames) is projected
+onto the closure manifold and the constrained accelerations of MuJoCo (exact
+KKT), Drake and Pinocchio are compared under the recorded efforts.  The gate is
+\begin{equation}
+|\Delta a|\le 10^{-6}+10^{-8}\max|a| .
+\end{equation}
+Results (all $31$ frames pass):
+\begin{itemize}[nosep]
+\item worst state spread across engines $\le 3.0\times10^{-14}$;
+\item worst projected acceleration difference $1.4\times10^{-4}$~rad/s$^2$ at
+  frame 420, where $\max|a|\approx1.3\times10^{5}$ (contact spike); relative
+  $1.1\times10^{-9}$;
+\item $\operatorname{cond}(\bM)\approx6.1\times10^{8}$ at frame 420
+  ($4.6\times10^{7}$ at frame 400), so $\epsilon\operatorname{cond}(\bM)\approx
+  1.4\times10^{-7}$ bounds round-off, and the relative tolerance sits $14\times$
+  inside that bound;
+\item worst off-manifold difference $41.8$~rad/s$^2$ (MuJoCo, frame 420), which
+  is the disagreement the projection removes.
+\end{itemize}
+
+\begin{table}[h]
+\centering\small
+\resizebox{\textwidth}{!}{\begin{tabular}{rrrrrrr}
+\toprule
+Frame & Pose residual before (m) & $\max|a|$ & Proj. MuJoCo & Proj. Drake & Off-man. MuJoCo & Off-man. Drake\\
+\midrule
+0   & $1.4\mathrm{e}{-6}$ & $7.1\mathrm{e}{2}$ & $3.5\mathrm{e}{-10}$ & $4.6\mathrm{e}{-9}$ & $3.9\mathrm{e}{-3}$ & $5.3\mathrm{e}{-8}$\\
+200 & $7.3\mathrm{e}{-5}$ & $1.6\mathrm{e}{2}$ & $5.3\mathrm{e}{-9}$ & $7.4\mathrm{e}{-9}$ & $2.0$ & $2.9\mathrm{e}{-7}$\\
+400 & $1.1\mathrm{e}{-4}$ & $1.4\mathrm{e}{3}$ & $1.4\mathrm{e}{-8}$ & $4.2\mathrm{e}{-9}$ & $1.8$ & $2.7\mathrm{e}{-6}$\\
+420 & $1.2\mathrm{e}{-4}$ & $1.3\mathrm{e}{5}$ & $1.1\mathrm{e}{-4}$ & $1.4\mathrm{e}{-4}$ & $41.8$ & $2.8\mathrm{e}{-4}$\\
+600 & $1.8\mathrm{e}{-4}$ & $8.3\mathrm{e}{1}$ & $1.2\mathrm{e}{-9}$ & $7.9\mathrm{e}{-10}$ & $6.2\mathrm{e}{-2}$ & $7.0\mathrm{e}{-7}$\\
+\bottomrule
+\end{tabular}}
+\caption{Selected frames of the pointwise receipt.  Differences are absolute
+rad/s$^2$ against Pinocchio; ``Proj.'' is after closure projection and
+``Off-man.'' is at the raw recorded state.}
+\end{table}
+
+\paragraph{Evidence provenance.}
+\begin{itemize}[nosep]
+\item Receipt: \url{docs/development/full_body_models/evidence/same_input/pointwise_parity_receipt.json}
+  (schema \url{same-input-pointwise-parity/v1}, PR \#11615).
+\item Spec: \url{docs/development/full_body_models/evidence/ground_support/full_body_spec_hipcal_scaled.json},
+  sha256 \\\texttt{36702e052dcc2731b76d07cafcb92c9534b1274d2d374a0f6214af6eb52206c4}.
+\item Record: \url{docs/development/full_body_models/evidence/ground_support/dynamics_record.npz},
+  sha256 \\\texttt{cb3625aa48f3e7d8b8c21aa02437352259c2b4c2aa3b2acadea8a34a8d750883}.
+\item Code: \url{src/shared/python/motion_matching/same_input/}
+  (\texttt{plant.py}, \texttt{closure.py}) and
+  \url{scripts/same_input_pointwise_parity.py}.
+\end{itemize}
+
+\section{Acceptance Levels and Input Bundle}
+\begin{description}[nosep]
+\item[L0, model identity.] Masses, inertias, frames, $\bM(\bq)$ and bias agree to
+  $\le10^{-9}$ relative at reference states.  \emph{Passed.}
+\item[L1, pointwise dynamics.] Constrained accelerations at closure-consistent
+  states agree to the gate above.  \emph{Passed for MuJoCo, Drake, Pinocchio.}
+\item[L2, open-loop same-input trajectory.] Whole-swing joint RMS against the
+  MuJoCo reference $\le10^{-6}$~rad, or the divergence-growth exponent and
+  agreement horizon recorded; marker RMSE $\le1$~mm.  \emph{Planned, in progress
+  (\#11607--\#11610).}
+\item[L3, closed-loop same controller.] The identical tracking controller
+  reproduces the MuJoCo match metrics to $\le1$~mm per engine.  \emph{Planned,
+  in progress (\#11607--\#11610).}
+\end{description}
+The planned input bundle \texttt{same-input-bundle/v1} holds the spec hash,
+closure-consistent $\bq_0,\bv_0$, per-step torques $\bt_k$ held zero-order over
+$[t_k,t_{k+1})$, a fixed-step RK4 integrator at $1$~ms with closure projection
+after each step, contact parameters, and marker attachments.  It is
+\emph{planned, in progress} (\#11607--\#11610); no bundle result exists yet.
+
+\section{Engine Status}
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lll}
+\toprule
+Engine & Levels & Status\\
+\midrule
+MuJoCo & L0, L1 & passed (PR \#11615)\\
+Drake & L0, L1 & passed (PR \#11615)\\
+Pinocchio & L0, L1 & passed (PR \#11615); reference side of the comparison\\
+OpenSim & --- & planned (\#11611)\\
+MyoSuite & --- & planned (\#11612)\\
+Simscape & --- & deferred to the MATLAB R2025b host (\#11613)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Reproduction}
+From the repository root:
+\begin{verbatim}
+MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_pointwise_parity
+python3 -m pytest tests/unit/motion_matching/same_input -m ""
+\end{verbatim}
+The first command rewrites the receipt; the second runs the behavioural tests.
+This document compiles with \texttt{tectonic same\_input\_parity.tex}.
+
+\section{Limitations}
+\begin{itemize}[nosep]
+\item No trajectory (L2) or closed-loop (L3) result exists yet; pointwise
+  agreement does not imply trajectory agreement.
+\item Only one dynamics record is used, with one scaled spec.
+\item Contact spikes are ill conditioned ($\operatorname{cond}(\bM)\approx6\times10^{8}$),
+  so the relative tolerance is bounded by round-off, not by physics.
+\item The grip closure is projected, so the compared states are not the raw
+  recorded states.
+\item This is a software consistency result, not scientific qualification;
+  that remains with the design-manual governance pathway.
+\end{itemize}
+\end{document}
