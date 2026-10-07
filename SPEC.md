@@ -8319,6 +8319,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-07 | #11624 | Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021) |
+| 2026-10-07 | #11625 | Document full-swing five-engine same-input parity results (L2/L3) in the research reference |
 | 2026-10-07 | #11620 | Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893) |
 | 2026-10-07 | #11618 | settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception |
 | 2026-10-07 | #11616 | Same-input parity LaTeX research reference (P-1 pointwise result) |
