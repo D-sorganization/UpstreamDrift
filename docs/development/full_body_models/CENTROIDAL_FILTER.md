@@ -1,4 +1,4 @@
-# Centroidal Feasibility Filter v2
+# Centroidal Feasibility Filter Version 2
 
 Issue #11669, epic #11667. Source: `src/shared/python/motion_matching/pipeline/centroidal_filter.py`. Opt-in pipeline stage `--centroidal-filter` (runs after `--zmp-filter`).
 
