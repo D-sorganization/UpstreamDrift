@@ -122,3 +122,19 @@ def test_neck_without_muscles_is_a_declared_scope_limit_not_a_pass() -> None:
     result = redundancy.qualification(metrics, True, True)
     assert result["status"] == "QUALIFIED_SOFTWARE_ONLY"
     assert result["uncovered_groups_scope_limitation"] == ["neck"]
+
+
+def test_neck_with_a_torque_actuator_is_held_to_the_same_limit() -> None:
+    metrics = {
+        "legs": {"reserve_over_effort_rms": 0.01},
+        "neck": {"reserve_over_effort_rms": 0.5},
+    }
+    result = redundancy.qualification(metrics, True, True, uncovered=())
+    assert result["status"] == "NOT_QUALIFIED"
+    assert "neck" in result["reasons"][0]
+    assert result["uncovered_groups_scope_limitation"] == []
+    metrics["neck"]["reserve_over_effort_rms"] = 0.05
+    assert (
+        redundancy.qualification(metrics, True, True, uncovered=())["status"]
+        == "QUALIFIED_SOFTWARE_ONLY"
+    )

@@ -20,6 +20,7 @@ every spec coordinate; their size is the measure of what the muscles cannot do.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -86,11 +87,17 @@ class FrameBasis:
 class MuscleBasis:
     """MyoFullBody muscle capacity and spec-space moment arms from MuJoCo."""
 
-    def __init__(self, mapper: Any, columns: list[int]) -> None:
+    def __init__(
+        self,
+        mapper: Any,
+        columns: list[int],
+        velocity_map: Callable[[Array, Any], Array] | None = None,
+    ) -> None:
         import mujoco
 
         require(len(columns) > 0, "columns must be non-empty")
         self.mapper = mapper
+        self._velocity_map = velocity_map or mapper.velocity_map
         self.model = mapper.model
         self.data = mapper.data
         self.columns = list(columns)
@@ -112,7 +119,7 @@ class MuscleBasis:
         """Place MyoFullBody at the mapped pose with rates ``Phi v``; returns ``Phi``."""
         import mujoco
 
-        phi = self.mapper.velocity_map(q_spec, pose)
+        phi = self._velocity_map(q_spec, pose)
         self.data.qpos[:] = pose.qpos
         self.data.qvel[:] = phi @ v_spec
         mujoco.mj_fwdPosition(self.model, self.data)
@@ -260,18 +267,21 @@ def qualification(
     solver_ok: bool,
     id_ok: bool,
     limit: float = RESERVE_RMS_FRACTION_LIMIT,
+    uncovered: tuple[str, ...] = UNCOVERED_GROUPS,
 ) -> dict[str, Any]:
     """Fail-closed status: ``NOT_QUALIFIED`` unless every covered group is within limit.
 
-    Groups in :data:`UNCOVERED_GROUPS` have no MyoFullBody muscles, so their
-    entire effort is reserve by construction; they are reported but declared
-    as an explicit scope limitation rather than silently passed.
+    Groups in ``uncovered`` (default :data:`UNCOVERED_GROUPS`) have no actuator at
+    all, so their entire effort is reserve by construction; they are reported but
+    declared as an explicit scope limitation rather than silently passed.  With a
+    torque-actuated neck (:mod:`neck`) the caller passes ``uncovered=()`` and the
+    neck is held to the same limit as every other group.
 
     Raises:
         ValueError: if ``limit`` is not positive.
     """
     require(limit > 0.0, "limit must be positive")
-    covered = {k: v for k, v in metrics.items() if k not in UNCOVERED_GROUPS}
+    covered = {k: v for k, v in metrics.items() if k not in uncovered}
     failing = sorted(
         k for k, v in covered.items() if v["reserve_over_effort_rms"] > limit
     )
@@ -286,7 +296,5 @@ def qualification(
         "status": "NOT_QUALIFIED" if reasons else "QUALIFIED_SOFTWARE_ONLY",
         "reasons": reasons,
         "reserve_rms_over_effort_rms_limit": limit,
-        "uncovered_groups_scope_limitation": [
-            g for g in UNCOVERED_GROUPS if g in metrics
-        ],
+        "uncovered_groups_scope_limitation": [g for g in uncovered if g in metrics],
     }
