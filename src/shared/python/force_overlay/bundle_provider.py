@@ -79,7 +79,7 @@ def _label_part(text: str) -> str:
     return _LABEL_SAFE.sub("_", text).strip("_") or "x"
 
 
-def _tuple3(vec: Sequence[float]) -> Vec3:
+def _tuple3(vec: Sequence[float] | Array) -> Vec3:
     return (float(vec[0]), float(vec[1]), float(vec[2]))
 
 

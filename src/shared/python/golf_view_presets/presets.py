@@ -28,7 +28,7 @@ Array = NDArray[np.float64]
 _WORLD_UP = np.array([0.0, 0.0, 1.0])
 
 
-def check_point3(value: Sequence[float], name: str) -> Array:
+def check_point3(value: Sequence[float] | Array, name: str) -> Array:
     """Return ``value`` as a finite float 3-vector or raise ``ValueError``."""
     arr = np.asarray(value, dtype=float)
     if arr.shape != (3,) or not np.isfinite(arr).all():
@@ -77,7 +77,9 @@ class ViewPreset:
         """Unit world vector pointing up in the image."""
         return np.cross(self.image_right(), self.view_direction())
 
-    def camera_position(self, lookat_m: Sequence[float], distance_m: float) -> Array:
+    def camera_position(
+        self, lookat_m: Sequence[float] | Array, distance_m: float
+    ) -> Array:
         """World position of a camera ``distance_m`` before ``lookat_m``."""
         look = check_point3(lookat_m, "lookat_m")
         if not (math.isfinite(distance_m) and distance_m > 0.0):

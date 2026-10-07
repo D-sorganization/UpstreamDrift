@@ -21,12 +21,14 @@ Array = NDArray[np.float64]
 _RX_MINUS_90 = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]])
 
 
-def _tuple3(vec: Sequence[float]) -> Vec3:
+def _tuple3(vec: Sequence[float] | Array) -> Vec3:
     return (float(vec[0]), float(vec[1]), float(vec[2]))
 
 
 def _resolve(
-    preset: str | ViewPreset, lookat_m: Sequence[float], distance_m: float | None
+    preset: str | ViewPreset,
+    lookat_m: Sequence[float] | Array,
+    distance_m: float | None,
 ) -> tuple[ViewPreset, Array, float]:
     p = get_view_preset(preset) if isinstance(preset, str) else preset
     look = check_point3(lookat_m, "lookat_m")
@@ -47,7 +49,7 @@ class MujocoFreeCamera:
 
 def mujoco_camera_params(
     preset: str | ViewPreset,
-    lookat_m: Sequence[float],
+    lookat_m: Sequence[float] | Array,
     distance_m: float | None = None,
 ) -> MujocoFreeCamera:
     """MuJoCo free-camera azimuth/elevation/distance/lookat for ``preset``."""
@@ -70,7 +72,7 @@ class MujocoFixedCamera:
 
 def mujoco_fixed_camera(
     preset: str | ViewPreset,
-    lookat_m: Sequence[float],
+    lookat_m: Sequence[float] | Array,
     distance_m: float | None = None,
 ) -> MujocoFixedCamera:
     """Fixed MJCF camera (image-right then image-up axes) for ``preset``."""
@@ -84,7 +86,7 @@ def mujoco_fixed_camera(
 
 def drake_meshcat_camera_pose(
     preset: str | ViewPreset,
-    lookat_m: Sequence[float],
+    lookat_m: Sequence[float] | Array,
     distance_m: float | None = None,
 ) -> tuple[Vec3, Vec3]:
     """``(position, target)`` in the Z-up world for ``Meshcat.SetCameraPose``.
@@ -114,7 +116,7 @@ class MeshcatCamera:
 
 def meshcat_camera(
     preset: str | ViewPreset,
-    lookat_m: Sequence[float],
+    lookat_m: Sequence[float] | Array,
     distance_m: float | None = None,
 ) -> MeshcatCamera:
     """MeshCat camera for ``preset`` including the Rx(-90 deg) scene transform."""
@@ -131,7 +133,7 @@ def meshcat_camera(
 
 def simbody_camera_transform(
     preset: str | ViewPreset,
-    lookat_m: Sequence[float],
+    lookat_m: Sequence[float] | Array,
     distance_m: float | None = None,
 ) -> tuple[tuple[Vec3, Vec3, Vec3], Vec3]:
     """Rotation rows and position of the simbody visualizer camera.
