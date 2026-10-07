@@ -5,10 +5,15 @@
     MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle replay \\
         --bundle bundle.npz --engine drake --out receipt.json [--segment-ms 50]
 
+    MUJOCO_GL=egl PYTHONPATH=.:src python3 -m scripts.same_input_bundle closed-loop \\
+        --run-dir RUN --bundle bundle.npz --engine drake --out receipt.json
+
 ``export`` reads a pipeline run directory (``full_body_spec_hipcal_scaled.json``
 and the ``q_track``/``track_time_s`` arrays of ``dynamics_record.npz``) and
 writes the MuJoCo reference bundle.  ``replay`` integrates the bundle efforts
 open loop in one engine and writes the full-horizon and segmented scores.
+``closed-loop`` tracks the run's reference in one engine with the identical
+controller function and scores it against the bundle's MuJoCo reference.
 """
 
 from __future__ import annotations
@@ -26,6 +31,7 @@ from src.shared.python.motion_matching.same_input import (
     PARITY_ENGINES,
     InputBundle,
     VectorPlant,
+    closed_loop,
     generate_reference_bundle,
     open_loop,
     score_replay,
@@ -39,14 +45,18 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
-    """Build the MuJoCo reference bundle of a pipeline run directory."""
-    spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
+def _track(run_dir: Path) -> tuple[Path, np.ndarray, np.ndarray]:
     record_path = run_dir / "dynamics_record.npz"
     with np.load(record_path) as record:
         if "q_track" not in record:
             raise ValueError(f"{record_path} predates q_track; rerun the pipeline")
-        times, q_track = record["track_time_s"], record["q_track"]
+        return record_path, record["track_time_s"], record["q_track"]
+
+
+def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
+    """Build the MuJoCo reference bundle of a pipeline run directory."""
+    spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
+    record_path, times, q_track = _track(run_dir)
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
     bundle = generate_reference_bundle(
         spec_path.read_bytes(),
@@ -98,6 +108,35 @@ def replay(bundle_path: Path, engine: str, segment_ms: float) -> dict:
     }
 
 
+def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
+    """Score a closed-loop run in ``engine`` against the bundle reference."""
+    bundle = InputBundle.load(bundle_path)
+    _, times, q_track = _track(run_dir)
+    started = time.perf_counter()
+    rollout = closed_loop(
+        engine,
+        bundle.spec_bytes,
+        times,
+        q_track,
+        duration_s=bundle.steps * bundle.dt_s,
+    )
+    elapsed = time.perf_counter() - started
+    plant = VectorPlant(engine, bundle.spec_bytes)
+    score = score_replay(plant, bundle, rollout)
+    return {
+        "schema": "same-input-closed-loop/v1",
+        "bundle_sha256": _sha256(bundle_path),
+        "bundle": bundle.manifest(),
+        "engine": engine,
+        "elapsed_s": elapsed,
+        "full_horizon": score.summary(),
+        "max_effort_difference_nm": float(
+            np.abs(rollout.efforts - bundle.efforts).max()
+        ),
+        "max_pose_drift_m": float(rollout.pose_drift.max()),
+    }
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
@@ -111,16 +150,25 @@ def main() -> None:
     rep.add_argument("--engine", choices=PARITY_ENGINES, required=True)
     rep.add_argument("--out", type=Path, required=True)
     rep.add_argument("--segment-ms", type=float, default=50.0)
+    clo = sub.add_parser("closed-loop")
+    clo.add_argument("--run-dir", type=Path, required=True)
+    clo.add_argument("--bundle", type=Path, required=True)
+    clo.add_argument("--engine", choices=PARITY_ENGINES, required=True)
+    clo.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "export":
         manifest = export(args.run_dir, args.out, args.duration)
         LOG.info("wrote %s: %d steps", args.out, manifest["steps"])
         return
-    receipt = replay(args.bundle, args.engine, args.segment_ms)
+    if args.command == "closed-loop":
+        receipt = closed_loop_receipt(args.run_dir, args.bundle, args.engine)
+    else:
+        receipt = replay(args.bundle, args.engine, args.segment_ms)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     LOG.info("%s: %s", args.engine, json.dumps(receipt["full_horizon"]))
-    LOG.info("worst %g ms segment: %s", args.segment_ms, receipt["worst_segment"])
+    if "worst_segment" in receipt:
+        LOG.info("worst %g ms segment: %s", args.segment_ms, receipt["worst_segment"])
 
 
 if __name__ == "__main__":

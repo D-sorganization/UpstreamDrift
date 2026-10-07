@@ -16,6 +16,7 @@ import pytest
 from src.shared.python.motion_matching.same_input import (
     InputBundle,
     VectorPlant,
+    closed_loop,
     generate_reference_bundle,
     open_loop,
 )
@@ -72,3 +73,14 @@ def test_engine_replays_the_mujoco_motion(bundle, engine) -> None:
     )
     np.testing.assert_allclose(rollout.q, bundle.reference_q, rtol=0, atol=1e-10)
     np.testing.assert_allclose(rollout.v, bundle.reference_v, rtol=0, atol=1e-8)
+
+
+@pytest.mark.parametrize("engine", ["drake", "pinocchio"])
+def test_closed_loop_with_the_shared_controller_matches(bundle, engine) -> None:
+    spec = (EVIDENCE / "full_body_spec_hipcal_scaled.json").read_bytes()
+    with np.load(EVIDENCE / "dynamics_record.npz") as record:
+        rollout = closed_loop(
+            engine, spec, record["time_s"], record["q"], duration_s=0.03
+        )
+    np.testing.assert_allclose(rollout.q, bundle.reference_q, rtol=0, atol=1e-10)
+    np.testing.assert_allclose(rollout.efforts, bundle.efforts, rtol=0, atol=1e-6)

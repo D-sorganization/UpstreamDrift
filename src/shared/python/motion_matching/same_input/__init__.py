@@ -27,6 +27,7 @@ from src.shared.python.motion_matching.same_input.plant import (
     VectorPlant,
 )
 from src.shared.python.motion_matching.same_input.reference import (
+    closed_loop,
     generate_reference_bundle,
 )
 from src.shared.python.motion_matching.same_input.scoring import (
@@ -46,6 +47,7 @@ __all__ = [
     "ReplayScore",
     "Rollout",
     "VectorPlant",
+    "closed_loop",
     "generate_reference_bundle",
     "growth_rate",
     "integrate",
