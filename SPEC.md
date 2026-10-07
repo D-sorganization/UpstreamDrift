@@ -8319,6 +8319,7 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-07 | #11636 | Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers |
 | 2026-10-07 | #11627 | Phase 2: spec-driven musculoskeletal model, exact contact, per-frame static optimisation |
 | 2026-10-07 | #11621 | OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt |
 | 2026-10-07 | #11628 | Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track; OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation; P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt) |

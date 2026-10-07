@@ -2720,6 +2720,19 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11635 · Bump Tornado to 6.5.10 and Remove the Three Stale Tornado Pip-Audit Waivers
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11635
+- **Branch:** merged via #11636
+- **PR:** #11636
+- **Paths:** see #11636
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`019a42d3`; collated from changes/11635-bump-tornado-to-6-5-10-and-remove-the-th.md)
+- **Summary:** Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers
+- **Next step:** Shipped in PR #11636.
+
 ### DL-#11617 · OpenSim Musculoskeletal Swing: GRF Estimate, StaticOptimization Pipeline, Receipt
 
 - **State:** shipped
