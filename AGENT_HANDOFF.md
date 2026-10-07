@@ -33,6 +33,12 @@
 
 # Historical Player Capture Handoff
 
+## Active: Character Builder Spec Compile, Presets and Tile (Epic #11651; CMB-1 #11652, CMB-2 #11653, CMB-3 #11654)
+
+- `humanoid_character_builder.spec_params` compiles `SpecCharacterParameters` through `spec_builder.compose_anthropometric_document` (the one De Leva path); `spec_export` is the shared build, preview and export code for the PyQt6 tool `src/tools/character_builder` and `src/api/routes/character_builder.py`.
+- Presets: `presets/data/*.json` validated by `presets/character_preset.schema.json`; non-capture values are nominal and the De Leva male table is always used.
+- Open: the web page still calls only `/character-builder/generate`; appearance is CMB-4/5 and the Frankenstein editor CMB-8/9 (other lanes).
+
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 
 Same spec, same initial state, same joint torques: every engine must reproduce

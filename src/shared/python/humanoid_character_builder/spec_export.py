@@ -1,9 +1,9 @@
-"""Character builder service: parameters -> spec -> engine exports (CMB-3, #11654).
+"""Character builder: parameters -> spec -> engine exports (CMB-3, #11654).
 
-Pure functions behind ``src/api/routes/character_builder.py`` so the routes
-stay thin and the logic is testable without HTTP. All compilation goes
-through ``humanoid_character_builder.spec_params`` (CMB-1) and presets
-through the shared presets loader (CMB-2).
+One implementation shared by the web API
+(``src/api/routes/character_builder.py``) and the desktop tool
+(``src/tools/character_builder``). Compilation goes through
+``spec_params`` (CMB-1) and presets through the presets loader (CMB-2).
 """
 
 from __future__ import annotations
@@ -109,7 +109,9 @@ def export_character(character: CompiledCharacter, fmt: str) -> tuple[str, str, 
     Engine exporters import lazily so listing presets never needs them.
     """
     if fmt not in EXPORT_FORMATS:
-        raise ValueError(f"Unsupported export format {fmt!r}; use {sorted(EXPORT_FORMATS)}")
+        raise ValueError(
+            f"Unsupported export format {fmt!r}; use {sorted(EXPORT_FORMATS)}"
+        )
     media_type, ext = EXPORT_FORMATS[fmt]
     text = serialize_spec(character.document)
     if fmt == "urdf":

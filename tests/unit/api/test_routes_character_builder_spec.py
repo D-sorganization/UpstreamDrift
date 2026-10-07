@@ -116,7 +116,7 @@ def test_export_is_byte_identical_across_calls(client: TestClient) -> None:
 def test_missing_reference_assets_is_503(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from src.api.services import character_builder_service as service
+    from src.shared.python.humanoid_character_builder import spec_export as service
 
     def boom(*_a: object, **_k: object) -> None:
         raise FileNotFoundError("native_geometry_spec_9967.json")

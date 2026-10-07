@@ -28,7 +28,7 @@ EXPECTED = {
 
 
 def test_library_ships_expected_presets() -> None:
-    assert EXPECTED <= set(loader.list_character_presets())
+    assert set(loader.list_character_presets()) >= EXPECTED
 
 
 def test_listing_is_sorted_and_stable() -> None:

@@ -123,9 +123,7 @@ def compile_full_body_spec(
     built = compose_anthropometric_document(
         native_path=assets.get_native_geometry_spec(native_path),
         osim_path=assets.get_opensim_model(osim_path),
-        native_candidate_path=assets.get_candidate_geometry_spec(
-            native_candidate_path
-        ),
+        native_candidate_path=assets.get_candidate_geometry_spec(native_candidate_path),
         stature_m=params.stature_m,
         mass_kg=params.mass_kg,
         club=params.club,

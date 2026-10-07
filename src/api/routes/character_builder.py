@@ -14,7 +14,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Response
 
 from src.api.middleware.error_handler import handle_api_errors
-from src.api.services import character_builder_service as service
+from src.shared.python.humanoid_character_builder import spec_export as service
 
 from ..dependencies import get_logger
 from ..models.requests import CharacterBuilderRequest, CharacterSpecRequest
