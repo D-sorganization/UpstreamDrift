@@ -565,7 +565,9 @@ commit \texttt{21a2ed06}:
     \texttt{None}), and \texttt{store\_window\_solve} no longer records a
     default $0$\,s solve time (an unmeasured solve leaves no timing; the
     accelerated path records the \texttt{time.perf\_counter} duration of the
-    real solve).  Computing those replay metrics remains open.  Reproduce with
+    real solve).  Because those metrics are frozen acceptance gates, a replay
+    with any of them unmeasured is no longer physically accepted and lists them
+    in \texttt{unqualified\_reasons}.  Computing those replay metrics remains open.  Reproduce with
     \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_continuous\_replay.py
     tests/unit/estimation/test\_dime\_solver\_cache.py}.
   \item \texttt{multi\_trial.py:379} vs \texttt{:413-426}: locked parameters with a

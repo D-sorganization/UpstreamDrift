@@ -344,7 +344,9 @@ class TestGreenContinuousReplayAndSmoothing:
 
         assert isinstance(result, ContinuousReplayResult)
         assert len(result.trajectory) == n_frames
-        assert result.is_physically_accepted
+        # Angular drift, cancellation and GRF equilibrium are not computed, so the
+        # replay cannot be physically accepted (#11545); drift itself is in tolerance.
+        assert not result.is_physically_accepted
         assert result.receipt.reset_count == 1
         assert len(result.receipt.assistance_channels) == 0
         assert not result.receipt.has_undeclared_root_forces
@@ -352,7 +354,7 @@ class TestGreenContinuousReplayAndSmoothing:
         metrics = result.metrics
         assert isinstance(metrics, IndependentReplayMetrics)
         assert metrics.max_position_drift_m <= 0.015
-        assert metrics.satisfies_frozen_tolerances
+        assert not metrics.satisfies_frozen_tolerances
 
         # Exact reproducibility on fresh run from same initial state and controls
         result_repro = execute_continuous_replay(
@@ -693,3 +695,14 @@ class TestUnmeasuredReplayMetricsAreNotZero:
         restored = ContinuousReplayResult.from_dict(result.to_dict())
         for name in self._NEVER_COMPUTED:
             assert getattr(restored.metrics, name) is None, name
+
+    def test_red_unmeasured_gated_metrics_block_acceptance(self) -> None:
+        """A passing drift check cannot accept a replay whose gated metrics are None."""
+        result = self._run(reference=True)
+        assert result.metrics.max_position_drift_m <= 0.015
+        assert result.is_physically_accepted is False
+        assert result.receipt.is_physically_accepted is False
+        assert result.metrics.satisfies_frozen_tolerances is False
+        reasons = " ".join(result.unqualified_reasons)
+        for name in self._NEVER_COMPUTED:
+            assert name in reasons

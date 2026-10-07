@@ -4,4 +4,4 @@ summary: "Fail closed on the last DIME stub constants: replay angular drift, can
 branch: "fix/11545-stubs-fail-closed"
 ---
 
-Refs #11545. Replay metrics never computed are None; store_window_solve elapsed_s defaults to None. Computing those replay metrics is open. Tests: tests/unit/estimation/test_dime_continuous_replay.py, test_dime_solver_cache.py.
+Refs #11545. Replay metrics never computed are None; store_window_solve elapsed_s defaults to None. Replay acceptance now fails closed while those metrics are unmeasured. Computing them is open. Tests: tests/unit/estimation/test_dime_continuous_replay.py, test_dime_solver_cache.py.
