@@ -21,12 +21,12 @@ Design notes
 
 from __future__ import annotations
 
-import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from src.shared.python.engine_core.capabilities import (
     Capability,
     CapabilityLevel,
@@ -461,14 +461,6 @@ class BatchedBackend(Protocol):
         ...
 
 
-def __getattr__(name: str) -> object:
-    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
-    if name == "DynamicsProvider":
-        warnings.warn(
-            "DynamicsProvider is deprecated and will be removed in a future "
-            "release; use EquationsOfMotionProvider instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return EquationsOfMotionProvider
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": EquationsOfMotionProvider}
+)

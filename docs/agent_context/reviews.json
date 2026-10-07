@@ -39,16 +39,16 @@
       "rationale": "Feature parity registers the v1 bunker workbench API route (#9545); entry stays status gap, contract unchanged"
     },
     "model-backends": {
-      "fingerprint": "71ca6edf17e3a20ce9a6b7c19cee0595e99fa6f24574d7a2278b85addedbd945",
+      "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
       "inputs": {
         "docs/agent_context/contracts/model-backends.md": "7ed94bab041136985db1940772b6789b36396618da3af651705dd759aac39957",
         "src/shared/python/simulation_backends/factory.py": "49f90d5525a84b3bdbd0989264e25b77c7ccc235c6d91a5bf7dbcd1f18c31711",
         "src/shared/python/simulation_backends/mjcf.py": "985f5abcedea3354d4bf2f8c530748dc861754e024e4b43a59ecd984175dddff",
         "src/shared/python/simulation_backends/model_params.py": "78aeb9c060f4b455b34b5dff5fcfe49847e7a2a3e545ec71060528a55e16be10",
-        "src/shared/python/simulation_backends/protocol.py": "68134385df2a2be9a3854674168851fbe10c68945d1e82f2f0a1f7a6652c9ca0",
+        "src/shared/python/simulation_backends/protocol.py": "e49546a321daea5f2bde74f2440e09cf41c8a3ff11de6b0fdd831d282e4b5176",
         "tests/unit/simulation_backends/test_foundation.py": "cab3b398da6f172ea3d33203d1514ef29c1928179131a697943f44de8e775b48"
       },
-      "rationale": "Reviewed #11553 rename of the optional equations-of-motion capability protocol DynamicsProvider to EquationsOfMotionProvider in protocol.py and the model-backends contract (old name kept as a DeprecationWarning alias for one release). Method signatures (mass_matrix, bias_forces), runtime_checkable behaviour and all consumers are unchanged. Verified by the tests/unit/simulation_backends suite including test_foundation.py, with the ODE and MuJoCo CPU backends satisfying the protocol (exit 0, mujoco 3.x installed), and tests/unit/repo_hygiene/test_provider_protocol_names.py. GPU/mjwarp readiness is not inferred and no scientific approval is implied."
+      "rationale": "Reviewed #11553 rename of the optional equations-of-motion capability protocol DynamicsProvider to EquationsOfMotionProvider in protocol.py and the model-backends contract. The old name now resolves through the shared core.deprecation.deprecated_alias_getattr helper (DeprecationWarning, returns the new class) for one release. Method signatures (mass_matrix, bias_forces), runtime_checkable behaviour and all consumers are unchanged. Verified by the tests/unit/simulation_backends suite including test_foundation.py, with the ODE and MuJoCo CPU backends satisfying the protocol (exit 0, mujoco installed), and tests/unit/repo_hygiene/test_provider_protocol_names.py. GPU/mjwarp readiness is not inferred and no scientific approval is implied."
     },
     "pipeline-api": {
       "fingerprint": "bb81e316001c42322cf9628984c7044a5431ad7d27f3b9b0b901ad0a4c023546",

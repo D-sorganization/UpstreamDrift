@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import warnings
 
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -595,14 +595,6 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> object:
-    """Resolve the deprecated ``DynamicsProvider`` alias (#11553)."""
-    if name == "DynamicsProvider":
-        warnings.warn(
-            "DynamicsProvider is deprecated and will be removed in a future "
-            "release; use DimeDynamicsProvider instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return DimeDynamicsProvider
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": DimeDynamicsProvider}
+)

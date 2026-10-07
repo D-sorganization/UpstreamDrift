@@ -35,7 +35,9 @@ from src.shared.python.simulation_backends.protocol import (
 )
 
 OLD_NAME = "DynamicsProvider"
-SRC_ROOT = Path(__file__).resolve().parents[3] / "src"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+# First-party code that must not import the deprecated name.
+SCANNED_ROOTS = ("src", "scripts", "tests")
 
 # (module path, new class) pairs whose old name must warn and alias the new class.
 DEPRECATED_ALIASES = [
@@ -120,10 +122,11 @@ def _uses_old_name(path: Path) -> list[int]:
 
 
 @pytest.mark.unit
-def test_no_src_module_imports_deprecated_names() -> None:
+def test_no_first_party_module_imports_deprecated_names() -> None:
     offenders = {
-        str(p.relative_to(SRC_ROOT.parent)): lines
-        for p in SRC_ROOT.rglob("*.py")
+        str(p.relative_to(REPO_ROOT)): lines
+        for root in SCANNED_ROOTS
+        for p in (REPO_ROOT / root).rglob("*.py")
         if (lines := _uses_old_name(p))
     }
-    assert not offenders, f"deprecated {OLD_NAME} still used in src/: {offenders}"
+    assert not offenders, f"deprecated {OLD_NAME} still used: {offenders}"
