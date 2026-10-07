@@ -13,9 +13,9 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1628,
+    "ud-only": 1637,
     "tools-only": 777,
-    "spelling-only": 123
+    "spelling-only": 121
   },
   "packages": {
     "README.md": {
@@ -413,9 +413,9 @@
     "humanoid_character_builder": {
       "identical": 14,
       "diverged": 26,
-      "ud-only": 27,
+      "ud-only": 36,
       "tools-only": 0,
-      "spelling-only": 11
+      "spelling-only": 9
     },
     "import_aliases.py": {
       "identical": 0,
@@ -7772,7 +7772,7 @@
       "classification": "ud-only",
       "package": "estimation",
       "subpackage": "",
-      "ud_bytes": 24423,
+      "ud_bytes": 26633,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -10916,24 +10916,132 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 404,
+      "ud_bytes": 626,
       "tools_bytes": 400,
-      "byte_delta": 4,
+      "byte_delta": 226,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/character_preset.schema.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 1869,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/anthro_driver.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 753,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/anthro_iron7.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 748,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/junior.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 491,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/senior.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 484,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/tour_average_female.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 613,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/tour_average_male.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 601,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 9064,
+      "ud_bytes": 11927,
       "tools_bytes": 9060,
-      "byte_delta": 4,
+      "byte_delta": 2867,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/spec_export.py",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "",
+      "ud_bytes": 5435,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/spec_params.py",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "",
+      "ud_bytes": 6225,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/tests/__init__.py",
@@ -13916,7 +14024,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 20792,
+      "ud_bytes": 22162,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -39563,9 +39671,9 @@
     {
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-07",
+        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39576,9 +39684,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-07",
+        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
