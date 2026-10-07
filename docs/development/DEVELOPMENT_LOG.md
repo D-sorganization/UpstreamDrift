@@ -2726,10 +2726,10 @@ open. Preserve explicit ground configuration in independent replay.
 - **Owner:** unassigned
 - **Issue:** #11617
 - **Branch:** merged via #11621
-- **PR:** #11621
+- **PR:** #11621, #11627
 - **Paths:** see #11621
 - **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`d1f0d8bf`; collated from changes/11617-opensim-musculoskeletal-swing-grf-estima.md)
+- **Last verified:** 2026-10-07 (`976b9ce4`; collated from changes/11617-phase-2-spec-driven-musculoskeletal-mode.md)
 - **Summary:** OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt
 - **Next step:** Shipped in PR #11621.
 
