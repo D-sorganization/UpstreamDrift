@@ -116,6 +116,7 @@ Computed-torque tracking simulation, zero-moment point diagnostics, contact para
 | `peak_joint_torque_n_m`           | N m      | Maximum absolute joint actuator torque exerted in simulation     | dynamics |
 | `lowest_sphere_height_min_m`      | m        | Minimum elevation of lowest foot contact sphere in simulation    | dynamics |
 | `lowest_sphere_height_max_m`      | m        | Maximum elevation of lowest foot contact sphere in simulation    | dynamics |
+| `finish_feasibility`              | compound | Finish-window feasibility metrics of reference and simulation    | dynamics |
 | `zmp_filter`                      | compound | Optional cart-table zero-moment-point filter report              | dynamics |
 | `shooting_fit`                    | compound | Optional contact-aware shooting fit report                       | dynamics |
 | `mjx`                             | compound | Optional MJX differentiable trajectory optimization report       | dynamics |

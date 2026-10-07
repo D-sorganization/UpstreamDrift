@@ -1,3 +1,9 @@
+# Active: Finish Feasibility Balance - #11667
+
+- Balance-1 (#11668), branch `feat/finish-feasibility-metrics-11668`: `pipeline/finish_feasibility.py` adds ZMP-inside fraction, friction-cone utilisation, foot slide and yaw pivot, pelvis yaw error and vertical force range to `dynamics.finish_feasibility` (reference and simulation). `finish_feasibility_cli` annotates saved runs.
+- Baseline: `evidence/ground_support/finish_feasibility_baseline.json` (driver reference ZMP inside 0.29 over 1.0-1.5 s, iron 0.55). The committed canonical receipts were not edited: their trajectories are not committed and a rerun does not reproduce their spec hash.
+- Next: Balance-2 (#11669) centroidal feasibility filter v2; a linearised joint-space QP prototype has not yet reduced the outside fraction.
+
 # Active: MOSAIC Model-Aware Matching — #11532
 
 - Branch `feat/mosaic-model-aware-matching`; audits closed epic #11421 (change fragment `changes/11532-mosaic-model-aware-multi-trial-matching.md`). Design: `docs/plans/EPIC_MOSAIC_MODEL_AWARE_MATCHING.md`.
