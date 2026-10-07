@@ -533,6 +533,19 @@ commit \texttt{21a2ed06}:
     (\texttt{dime\_contracts.py:930-956}).
   \item The ``coupled state-control window'' is control-only single shooting
     with hard-coded zero defects and costs (\texttt{dime\_dynamics\_window.py:517-566,604}).
+    Partially corrected by \#11554: the least-squares residual now has the fixed
+    length $n_u N_{\mathrm{steps}}$ (control effort) $+\ \sum_k \min(\dim\bx^{\mathrm{obs}}_k, n_q)$
+    (observations) $+\ (N_{\mathrm{steps}}-1)\,n_u$ (control rate, when weighted)
+    $+\ n_u N_{\mathrm{steps}}$ (actuator bounds, when set; one non-negative entry per
+    control, zero inside the bounds), independent of the control values and
+    enforced by a postcondition (\texttt{expected\_residual\_size}).  A failed
+    provider step no longer returns the placeholder residual $10^{8}\mathbf{1}_{100}$
+    (whose length differed from the normal path); it raises
+    \texttt{DimeResidualEvaluationError}, and the solver reports
+    \texttt{failed\_dynamics\_step} with \texttt{success=False}.  The zero
+    defects and costs, and the single-shooting structure, remain open
+    (\#11545).  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window.py -k FixedSize}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
   \item Learned initialisers, ablations, baseline and replay audit return
     constants (\texttt{dime\_learned\_initializers.py:517-753},

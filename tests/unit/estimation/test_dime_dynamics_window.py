@@ -485,3 +485,68 @@ class TestDimeDynamicsWindowGreenSuite:
         assert payload["success"] is True
         assert len(payload["states"]) == 3
         assert "cost_breakdown" in payload
+
+
+class _FailsOnNonzeroControls(AnalyticPendulumProvider):
+    """Pendulum whose step raises for any non-zero control (nominal rollout passes)."""
+
+    def step(self, request: DimeFullStepRequest):  # type: ignore[override]
+        if np.any(request.controls != 0.0):
+            raise RuntimeError("synthetic provider failure")
+        return super().step(request)
+
+
+def _fixed_size_problem(provider: AnalyticPendulumProvider):
+    state = DimeCompleteState(
+        t=0.0,
+        q=np.array([0.1], dtype=np.float64),
+        v=np.array([0.0], dtype=np.float64),
+        units={"length": "m", "angle": "rad", "time": "s"},
+        model_hash=provider.model_hash,
+    )
+    targets = [np.array([0.1], dtype=np.float64) for _ in range(5)]
+    return DimeDynamicsWindowProblem(
+        provider=provider,
+        initial_state=state,
+        horizon_steps=4,
+        dt_s=0.01,
+        target_positions=targets,
+        control_rate_weight=1.0,
+        actuator_bounds=(-1.0, 1.0),
+        max_iterations=5,
+    )
+
+
+class TestFixedSizeResidual:
+    """Residual length is fixed on every path; failures are typed, not faked (#11554)."""
+
+    def test_residual_length_invariant_across_controls(self) -> None:
+        from src.shared.python.estimation.dime_dynamics_window import (
+            _build_residuals_evaluator,
+            expected_residual_size,
+        )
+
+        problem = _fixed_size_problem(AnalyticPendulumProvider())
+        fn = _build_residuals_evaluator(problem)
+        n = expected_residual_size(problem)
+        inside = fn(np.full(4, 0.1))
+        outside = fn(np.full(4, 5.0))  # violates actuator bounds
+        assert inside.shape == outside.shape == (n,)
+
+    def test_failure_raises_typed_error_not_fake_residual(self) -> None:
+        from src.shared.python.estimation.dime_dynamics_window import (
+            DimeResidualEvaluationError,
+            _build_residuals_evaluator,
+        )
+
+        problem = _fixed_size_problem(_FailsOnNonzeroControls())
+        fn = _build_residuals_evaluator(problem)
+        with pytest.raises(DimeResidualEvaluationError):
+            fn(np.full(4, 0.1))
+
+    def test_solver_reports_step_failure_explicitly(self) -> None:
+        problem = _fixed_size_problem(_FailsOnNonzeroControls())
+        result = solve_dime_dynamics_window(problem)
+        assert not result.success
+        assert result.status == "failed_dynamics_step"
+        assert result.controls.shape == (4, 1)
