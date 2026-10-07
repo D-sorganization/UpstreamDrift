@@ -552,6 +552,22 @@ commit \texttt{21a2ed06}:
     \texttt{dime\_benchmark\_ablations.py:214-255}, \texttt{dime\_manifest.py:563-629},
     \texttt{dime\_continuous\_replay.py:351-417}); solver-cache timings are fabricated
     and its key omits the targets (\texttt{dime\_solver\_cache.py:293-313,408-418}).
+    \emph{Re-scoped to fail closed (\#11545):} these modules are \emph{not}
+    given estimators here.  Learned proposals, ablation variants other than the
+    kinematic-IK baseline, and the manifest baseline report
+    \texttt{unqualified}/\texttt{unavailable} with NaN or \texttt{None} figures
+    (\#11552); the replay reports reproducibility and alignment as not measured
+    without a reference (\#11551); the cache key covers the targets and the
+    cost breakdown reports unmeasured components as \texttt{None} (\#11547).
+    This change closes the last literal constants: the replay no longer
+    reports \texttt{max\_angular\_drift\_rad}, \texttt{cancellation\_ratio} or
+    \texttt{grf\_vertical\_equilibrium\_rms} as $0$ (never computed, now
+    \texttt{None}), and \texttt{store\_window\_solve} no longer records a
+    default $0$\,s solve time (an unmeasured solve leaves no timing; the
+    accelerated path records the \texttt{time.perf\_counter} duration of the
+    real solve).  Computing those replay metrics remains open.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_continuous\_replay.py
+    tests/unit/estimation/test\_dime\_solver\_cache.py}.
   \item \texttt{multi\_trial.py:379} vs \texttt{:413-426}: locked parameters with a
     prior give a residual/Jacobian row mismatch; its covariance is conditional,
     not marginal.

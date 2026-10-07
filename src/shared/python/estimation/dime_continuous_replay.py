@@ -157,14 +157,17 @@ class IndependentReplayMetrics:
 
     ``reproducibility_error`` and ``alignment_metric`` are ``None`` when no
     reference trajectory was supplied: they were not measured (issue #11551).
+    ``max_angular_drift_rad``, ``cancellation_ratio`` and
+    ``grf_vertical_equilibrium_rms`` are ``None`` because the replay does not
+    compute them yet: a literal ``0.0`` would read as a perfect result (#11545).
     """
 
     max_position_drift_m: float
     rms_position_drift_m: float
     max_velocity_drift: float
-    max_angular_drift_rad: float
+    max_angular_drift_rad: float | None
     alignment_metric: float | None
-    cancellation_ratio: float
+    cancellation_ratio: float | None
     reproducibility_error: float | None
     grf_vertical_equilibrium_rms: float | None = None
     satisfies_frozen_tolerances: bool = True
@@ -185,15 +188,17 @@ class IndependentReplayMetrics:
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> IndependentReplayMetrics:
         grf = data.get("grf_vertical_equilibrium_rms")
+        ang = data.get("max_angular_drift_rad")
+        canc = data.get("cancellation_ratio")
         align = data.get("alignment_metric")
         repro = data.get("reproducibility_error")
         return cls(
             max_position_drift_m=float(data["max_position_drift_m"]),
             rms_position_drift_m=float(data["rms_position_drift_m"]),
             max_velocity_drift=float(data["max_velocity_drift"]),
-            max_angular_drift_rad=float(data["max_angular_drift_rad"]),
+            max_angular_drift_rad=float(ang) if ang is not None else None,
             alignment_metric=float(align) if align is not None else None,
-            cancellation_ratio=float(data["cancellation_ratio"]),
+            cancellation_ratio=float(canc) if canc is not None else None,
             reproducibility_error=float(repro) if repro is not None else None,
             grf_vertical_equilibrium_rms=float(grf) if grf is not None else None,
             satisfies_frozen_tolerances=bool(data["satisfies_frozen_tolerances"]),
@@ -398,11 +403,11 @@ def _compute_replay_metrics(
         max_position_drift_m=max_pos_drift,
         rms_position_drift_m=rms_pos_drift,
         max_velocity_drift=max_v,
-        max_angular_drift_rad=0.0,
+        max_angular_drift_rad=None,  # not computed: not measured
         alignment_metric=align,
-        cancellation_ratio=0.0,
+        cancellation_ratio=None,  # not computed: not measured
         reproducibility_error=reproducibility_err,
-        grf_vertical_equilibrium_rms=0.0,
+        grf_vertical_equilibrium_rms=None,  # not computed: not measured
         satisfies_frozen_tolerances=satisfies_tol,
     )
     return metrics, satisfies_tol

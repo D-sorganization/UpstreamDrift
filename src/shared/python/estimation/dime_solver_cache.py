@@ -417,13 +417,24 @@ class DimeSolverCache:
         identity: DimeCacheIdentity,
         problem: DimeDynamicsWindowProblem,
         result: DimeDynamicsWindowResult,
-        elapsed_s: float = 0.0,
+        elapsed_s: float | None = None,
     ) -> None:
-        """Store converged window solve result and track latency."""
+        """Store converged window solve result and track measured latency.
+
+        Preconditions: ``elapsed_s`` is ``None`` (not measured) or a finite,
+        non-negative duration in seconds taken around the real solve.
+        Postcondition: a duration is recorded only when supplied; an unmeasured
+        solve leaves no timing rather than a fabricated ``0.0`` (#11545).
+        """
+        require(
+            elapsed_s is None or (np.isfinite(elapsed_s) and elapsed_s >= 0.0),
+            "elapsed_s must be None (not measured) or finite and non-negative",
+        )
         key = identity.to_composite_key(_window_problem_qualifier(problem))
         with self._lock:
             self._window_store[key] = result
-            self._timing_store.setdefault(key, []).append(elapsed_s)
+            if elapsed_s is not None:
+                self._timing_store.setdefault(key, []).append(float(elapsed_s))
             self._register_indices(identity, key)
 
     def get_window_solve(
@@ -435,6 +446,16 @@ class DimeSolverCache:
         key = identity.to_composite_key(_window_problem_qualifier(problem))
         with self._lock:
             return self._window_store.get(key)
+
+    def get_window_solve_timings(
+        self,
+        identity: DimeCacheIdentity,
+        problem: DimeDynamicsWindowProblem,
+    ) -> tuple[float, ...]:
+        """Measured solve durations (s) recorded for this entry; empty = not measured."""
+        key = identity.to_composite_key(_window_problem_qualifier(problem))
+        with self._lock:
+            return tuple(self._timing_store.get(key, ()))
 
     def invalidate_on_camera_change(self, camera_config_hash: str) -> None:
         """Invalidate all cache entries associated with a modified camera setup."""

@@ -649,3 +649,47 @@ class TestFailClosedOnMissingEvidence:
     def test_red_reset_count_is_derived_from_replay(self) -> None:
         result = self._run()
         assert result.receipt.reset_count == 1
+
+
+class TestUnmeasuredReplayMetricsAreNotZero:
+    """#11545: metrics the replay never computes are None, never a literal 0.0."""
+
+    _NEVER_COMPUTED = (
+        "max_angular_drift_rad",
+        "cancellation_ratio",
+        "grf_vertical_equilibrium_rms",
+    )
+
+    @staticmethod
+    def _run(reference: bool, q0: float = 0.1) -> ContinuousReplayResult:
+        fixture = make_fixed_base_pendulum_fixture(n_frames=5, fps=100.0)
+        provider = AnalyticPendulumProvider(fixture)
+        init = provider.get_state()
+        ref = None
+        if reference:
+            first = execute_continuous_replay(
+                provider=provider,
+                initial_state=init,
+                controls=np.zeros((4, 1), dtype=np.float64),
+                dt=0.01,
+            )
+            ref = list(first.trajectory)
+        return execute_continuous_replay(
+            provider=provider,
+            initial_state=init,
+            controls=np.zeros((4, 1), dtype=np.float64),
+            dt=0.01,
+            reference_trajectory=ref,
+        )
+
+    @pytest.mark.parametrize("reference", [False, True])
+    def test_red_never_computed_metrics_are_not_measured(self, reference: bool) -> None:
+        metrics = self._run(reference).metrics
+        for name in self._NEVER_COMPUTED:
+            assert getattr(metrics, name) is None, name
+
+    def test_red_not_measured_round_trips_through_dict(self) -> None:
+        result = self._run(reference=True)
+        restored = ContinuousReplayResult.from_dict(result.to_dict())
+        for name in self._NEVER_COMPUTED:
+            assert getattr(restored.metrics, name) is None, name
