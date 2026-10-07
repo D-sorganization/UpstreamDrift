@@ -1,3 +1,9 @@
+# Active: Foot Contact Geometry and Torsional Friction - #11671
+
+- Branch `feat/foot-contact-geometry-11671` (stacked on #11703). Opt-in `--torsional-patch-m` (spin friction, patch 0.05 m calibrated on the driver, validated on the 7-iron) and `--foot-half-width-m` (lateral spheres, pinned in the IK). Reference: `docs/development/full_body_models/FOOT_CONTACT_TORSION.md`.
+- Result: driver marker RMS 83.3 to 67.3 mm, slide 502 to 210 mm, yaw error 34.5 to 9.0 degrees; 7-iron 57.9 to 54.3 mm, 340 to 93 mm, 19.4 to 14.5 degrees. Pre-impact fit unchanged. Foot width alone is worse; stays an experiment.
+- Not met: pelvis yaw error below 8 degrees on both clubs. Issue stays open.
+
 # Active: Finish Feasibility Balance - #11667
 
 - Balance-1 (#11668), branch `feat/finish-feasibility-metrics-11668`: `pipeline/finish_feasibility.py` adds ZMP-inside fraction, friction-cone utilisation, foot slide and yaw pivot, pelvis yaw error and vertical force range to `dynamics.finish_feasibility` (reference and simulation). `finish_feasibility_cli` annotates saved runs.
