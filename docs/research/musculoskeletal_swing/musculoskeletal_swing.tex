@@ -1,0 +1,92 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=25mm}
+
+\title{OpenSim Musculoskeletal Golf Swing: Static Optimization Reference}
+\author{UpstreamDrift (issue \#11617, epic \#11605)}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Editable standalone research source (not the engineering design manual). Result status: \texttt{STATIC\_OPTIMIZATION\_ONLY\_NOT\_QUALIFIED}. Phase 1 (Sections 1--8) used inverse-kinematics inputs and an estimated ground reaction and is retained as a historical baseline. Phase 2 (Sections 9--14) replaces both inputs with the forward-dynamics-consistent matched swing and is the current result. Compiled with \texttt{tectonic}; the PDF is not committed.
+
+\section{Model and Assumptions}
+The base model is RajagopalLaiUhlrich2023 (80 Millard2012 lower-limb muscles, 39 coordinates after unlocking the wrist and subtalar joints; the metatarsophalangeal joints stay locked at zero). Body segments are scaled by per-body factors equal to the ratio of joint-frame offset norms between the golf humanoid and the base model; masses are copied from the golf humanoid and a $0.32$~kg club is welded to the hands. Skeleton agreement with the golf model is at most about $4.1$~cm. The base model has \emph{no} arm, shoulder or trunk muscles; the 17 generic torque actuators are replaced by \texttt{upper\_*} stand-ins (optimal force $100$) and \texttt{reserve\_*} actuators (optimal force $1$ for joints, $100$ for the pelvis residual).
+
+\section{Frames, Units and Coordinate Mapping}
+SI units; degrees converted to radians; ground frame $y$ up. Prescribed kinematics are the 39 \texttt{/jointset/.../value} columns of the os7\_moco\_g1 inverse-kinematics states (654 frames at 360~Hz), mapped to the musculoskeletal model by coordinate name (39 of 39, one to one). \texttt{knee\_angle\_*\_beta} follows the patellofemoral coupler constraint and \texttt{mtp\_*} is zero. Kinematics are low-passed with a zero-phase second-order Butterworth filter at 15~Hz.
+
+\section{Ground Reaction Estimation}
+No force plate data exist. With contact removed, inverse dynamics gives the generalised force on the six pelvis coordinates, $\boldsymbol\tau_{root}$, that the ground must supply. Per frame, eight sole points (heel and ball, medial and lateral, per foot) with friction pyramids ($\mu=1$) generate forces $\mathbf{f}=\mathbf{G}\boldsymbol\lambda$, $\boldsymbol\lambda\ge0$, plus a free vertical spin moment per foot. Solve
+\[
+\min_{\boldsymbol\lambda\ge0}\ \lVert \mathbf{J}_{root}^{T}\mathbf{G}\boldsymbol\lambda-\boldsymbol\tau_{root}\rVert^2+\rho\lVert\boldsymbol\lambda-\boldsymbol\lambda_0\rVert^2,
+\]
+with $\rho=0.05$ and $\boldsymbol\lambda_0$ spreading force equally over active edges; points within $0.12$~m of the floor are active. The split between feet is statically indeterminate, so leg-muscle forces inherit that uncertainty. Output is an OpenSim \texttt{ExternalLoads} file of eight \texttt{ExternalForce} objects.
+
+\section{Muscle Redundancy Solvers}
+\textbf{StaticOptimization} (\texttt{AnalyzeTool}, step interval 2 = 180~Hz, muscle physiology on) minimises $\sum_i a_i^2$ subject to $\sum_i f_i(a_i,\ell_i,\dot\ell_i)\,r_{ij} + \tau^{res}_j + \tau^{up}_j = \tau_j$ for each coordinate $j$. \textbf{MocoInverse} (Hermite--Simpson, DeGroote--Fregly muscles, rigid tendon, MTP joints welded) is configured but a 10-interval, 25-iteration pilot over 0.6--0.7~s took about 8~min and did not converge, so no Moco result is claimed.
+
+\section{Acceptance Criteria and Results}
+Acceptance for a muscle-force claim would require: low unexplained ground wrench, reserves small relative to muscle moments, and independent validation. None is met. Backswing (0--1.08~s): wrench residual about 58 (RMS), 44\% of muscles reach full activation, left-hip reserves 9--18~N\,m RMS. After 1.08~s the IK degrades (lumbar rotation to $-119^\circ$, joint limits hit, club head about 2.9~m high at top of backswing) and the wrench residual reaches thousands of newtons; reserves and activations there are artefacts. See \path{docs/development/full_body_models/evidence/musculoskeletal/receipt.json}.
+
+\section{Failed Experiments}
+Optimal force 1 for upper-body and pelvis actuators made Ipopt fail from $t\approx0.48$~s (scaling); fixed by optimal force 100. Sign error in the root wrench (required $=+\tau$) and zero-width foot lines (large moment residual) were fixed. Contact tolerances of 0.03--0.06~m wrongly marked feet airborne. \texttt{AnalyzeTool} built in Python failed until serialised and reloaded.
+
+\section{Limitations}
+No arm, shoulder or trunk muscles; torque stand-ins instead. Estimated, not measured, ground reactions. Rigid IK with limit violations after 1.15~s. Not an independently replayed open-loop dynamic result; this is inverse-dynamics-based redundancy resolution only.
+
+\section{Reproduction}
+\begin{verbatim}
+MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src \
+python3 scripts/run_musculoskeletal_swing.py --out-dir /tmp/msk_run
+\end{verbatim}
+Requires the \texttt{opensim-models} submodule (or \texttt{UPSTREAMDRIFT\_MSK\_BASE\_MODEL}). Runtime about 11~min on 4 cores.
+
+\section{Phase 2: Spec-Driven Model and Inputs}
+Phase 2 targets the two root causes of Section 5: the degraded inverse-kinematics tail and the indeterminate ground reaction. The inputs are the same-input bundles (driver and iron): 44 coordinates sampled at $\Delta t=1$~ms for the full swing, reference $\mathbf{q}$, $\mathbf{v}$ and the joint-conjugate efforts $\boldsymbol\tau_{ref}$ that the MuJoCo plant used, together with the \texttt{full-body-v1} specification. The reference was produced by forward dynamics with a deterministic contact law, so the ground reaction is a function of $(\mathbf{q},\mathbf{v})$ and is not estimated.
+
+\textbf{Skeleton.} The exported spec skeleton (exact to MuJoCo) is used with the grip-loop weld, contact forces, markers and force set removed. Segment masses and inertias come from the spec. The 80 Rajagopal muscles are grafted on: the pelvis frame is recovered as $\mathbf{A}=\mathbf{P}_R\,R_z(-\theta_{tw})$ from the two hip joint frames; a base point $\mathbf{p}$ maps to the spec as $\mathbf{p}_{spec}=\mathbf{A}(\mathbf{p}-\mathbf{c}_{base})+\mathbf{c}_{spec}$ with a per-side hip centre; leg segments are scaled by mass-centre ratios; the 44 wrap cylinders are copied with orientation composed through $\mathbf{A}$; the patella, patellofemoral joint and coupler constraints are re-added; tendons are rigid. Muscle lengths agree with the scaled generic model to a few millimetres RMS (right leg about 2.7~mm, left about 5~mm, worst cases the vasti, which reflect the spec knee simplification).
+
+\textbf{Frame conventions.} The spec left knee runs opposite to Rajagopal's; the left hip Euler axes are mirrored; the spec world is $z$ up (ground normal $=-\mathbf{g}/\lVert\mathbf{g}\rVert$). A frame-by-frame comparison with the MuJoCo export of the same spec places every body origin within $0.0$~mm except three fixed convention offsets: the club body (OpenSim origin at the head, MuJoCo at the grip end; $1.13$~m driver, $0.91$~m iron), the grip standoff ($12.7$~mm) and the tibia frame ($9.3$~mm). All three are pose independent.
+
+\section{Phase 2: Exact Contact and Inverse Dynamics}
+Contact spheres (heel, forefoot and toe per foot, six in total) are evaluated with the shared law (\texttt{contact\_law.sphere\_ground\_contact}, Hunt--Crossley normal force with Coulomb friction) at the OpenSim sphere stations. Open-chain inverse dynamics is $\boldsymbol\tau=\mathbf{M}\mathbf{a}+\mathbf{C}-\mathbf{G}_g-\sum_s\mathbf{J}_s^{T}\mathbf{f}_s$, evaluated at the midpoint state of each step with the step-mean acceleration $\mathbf{a}_k=(\mathbf{v}_{k+1}-\mathbf{v}_k)/\Delta t$, which pairs with the held effort $\boldsymbol\tau_k$. The grip loop is not modelled, so arm and scapula coordinates carry the weld reaction and are excluded from the comparison.
+
+\textbf{Result.} Over about 180 sampled steps (every 10th step), the leg, pelvis and trunk coordinates reproduce the bundle efforts with a median absolute error of $0.01$~N\,m, a 95th percentile of about $1.1$ (driver) and $0.9$~N\,m (iron) and RMS $3.0$ and $2.2$~N\,m. Before the peak of club-head speed the RMS is $0.8$ and $0.3$~N\,m, and the peak is $21.6$ and $6.0$. After it the peak is $80.7$ and $71.2$~N\,m. The largest errors occur at the stiff foot-contact transients (pelvis translation and hip coordinates, with total contact load of $2$--$4$~kN): a trapezoidal or endpoint evaluation of the contact gives no consistent improvement, so they are attributed to the one-millisecond discretisation of a stiff contact, not to a mismatch of the model. The residual is a verified bound, not a tolerance adjustment.
+
+\textbf{Ground reaction.} The total vertical force peaks at $3.01$ (driver) and $3.00$ (iron) body weights with a mean of $0.97$ body weights, i.e.\ it supports the body, and the force split between the feet is determined. It is written as an \texttt{ExternalLoads} file.
+
+\section{Phase 2: Per-Frame Static Optimization}
+The AnalyzeTool route is not used: it differences accelerations itself and cannot represent the grip reaction. A per-frame optimisation is solved instead on the $5$~ms-strided midpoint states. With rigid tendons, force is affine in activation, $F_m(a)=F^{pas}_m+aF^{act}_m$, with $F^{pas}$ and $F^{act}$ read from the model at activations 0 and 1, and moment arms $R_{mc}=-\partial\ell_m/\partial q_c$. For the 14 leg coordinates
+\[
+\min_{\mathbf{a}\in[0,1]^{80}}\ \lVert\mathbf{a}\rVert^2+\lVert\mathbf{r}\rVert^2,\qquad
+\mathbf{r}=\boldsymbol\tau_{ref}-\mathbf{R}^{T}\!\left(\mathbf{F}^{pas}+\mathbf{a}\odot\mathbf{F}^{act}\right),
+\]
+solved by bounded least squares. Arms and trunk keep the reference torques as stand-ins because no muscles exist for them.
+
+\textbf{Results.} Reserve torque RMS over all leg coordinates is $34.3$ (driver) and $35.6$~N\,m (iron), with peaks of $452$ and $417$~N\,m. Before the club-head speed peak the RMS is $22.9$ and $14.3$; after it $53.2$ and $63.2$~N\,m. The median reserve is $0.3$ and $0.2$~N\,m: most frames are muscle-feasible and the large reserves are concentrated in a few high-demand intervals (hip flexion, adduction and rotation). About $18$\% of muscle--frame pairs are saturated and the mean activation is $0.24$. Phase 1 reported leg reserve peaks up to $2134$~N\,m, and a pelvis residual of up to $22\,316$ (RMS up to $1457$): phase 2 has no pelvis residual at all because the root is driven by the exact contact force. The left hip rotation coordinate is a spec axis along which the muscle set can only produce torque of one sign in most poses (isolated capacity range of about $[-290,-10]$~N\,m against a required $+47$ to $+31$~N\,m in places); this contributes to its reserve and is an unresolved modelling observation, not a conclusion about the athlete.
+
+\section{Phase 2: Muscle Models for the Arms and Trunk}
+No arm, shoulder or trunk muscles are present in any model shipped in the repository's official \texttt{opensim-models} submodule (commit \texttt{d9b05d4}): \texttt{Arm26} is planar (6 muscles, no trunk), \texttt{Hamner} has 93 lower-limb muscle paths with torque-driven upper body, and the remaining models are leg or wrist only. Candidate sources are the Saul et al.\ (2015) upper-extremity model (MoBL-ARMS, SimTK project \texttt{upexdyn}), the Christophy et al.\ (2012) lumbar model and the Hamner et al.\ (2010) full-body model. None was downloaded in this change: it needs an explicit download approval, and the licence and checksum have to be recorded from the official page at download time. The graft plan reuses the existing machinery of this document: (i) obtain the model from its official SimTK or \texttt{opensim-org} location; (ii) map shoulder, elbow and wrist coordinates by name to the spec \texttt{LScap/LS/LE/LF/LW} and \texttt{R*} coordinates; (iii) recover frame transforms from the scapula and clavicle joint frames as done for the pelvis in this section; (iv) validate every muscle length against the source model (target $<5$~mm RMS) before any solve; (v) solve the arm coordinates against the bundle efforts only after the grip-weld reaction is separated, because the reference arm efforts include it and so are not pure muscle demand. Until then the arm and trunk coordinates remain torque stand-ins.
+
+\section{Phase 2: Acceptance, Failed Experiments and Limitations}
+\textbf{Not qualified.} Inverse dynamics matches the reference efforts to a stiff-contact discretisation bound and the ground reaction is determined, so the phase-1 input defects are removed. The muscle result is nevertheless not accepted: reserves are non-zero at the high-demand instants, left hip capacity is anomalous, tendons are rigid, the muscle set covers only the legs, arms and trunk are stand-ins, and nothing was replayed in an independent open-loop forward simulation. \texttt{STATIC\_OPTIMIZATION\_ONLY\_NOT\_QUALIFIED} stands.
+
+\textbf{Failed or corrected experiments.} The exporter used an intrinsic Euler composition where the spec requires the extrinsic one (fixed on the parity branch and imported here); a first inverse-dynamics check without contact forces failed by thousands of newtons and led to the exact contact evaluation; endpoint and trapezoidal contact evaluation were tried against the midpoint rule and gave no improvement; the first muscle-length comparison for the left leg disagreed by 100~mm until the knee and hip sign map was found.
+
+\section{Phase 2: Reproduction}
+\begin{verbatim}
+MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src \
+python3 scripts/run_musculoskeletal_spec_swing.py --bundle driver.npz \
+  --out-dir /tmp/msk2_driver --receipt receipt_v2_driver.json \
+  --v1-receipt docs/development/full_body_models/evidence/musculoskeletal/\
+receipt.json
+\end{verbatim}
+The receipts record the bundle and base-model hashes. Runtime is about 25~s per bundle.
+\end{document}

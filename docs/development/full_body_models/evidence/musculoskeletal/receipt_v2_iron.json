@@ -1,0 +1,316 @@
+{
+  "base_model": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-msk2/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim",
+  "base_model_sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec",
+  "body_origin_mismatch": {
+    "at": "",
+    "bodies": 24,
+    "max_mm": 0.0
+  },
+  "bundle_sha256": "9ef8e23bb4eb4df13e7f3f96030cd9a7301760f429d70b369e9cb3c2e751e576",
+  "capture": "iron",
+  "comparison_with_v1": {
+    "v1_leg_reserve_peak": 2133.87509796,
+    "v1_leg_reserve_rms_max_coordinate": 257.0711905578023,
+    "v1_pelvis_residual_peak": 22316.289194,
+    "v1_pelvis_residual_rms_max": 1457.2589960709156,
+    "v2_leg_reserve_peak": 416.8648293197108,
+    "v2_leg_reserve_rms_all": 35.6476128490516,
+    "v2_pelvis_residual": "none: root driven by exact contact (ID check above)"
+  },
+  "dt_s": 0.001,
+  "ground_reaction": {
+    "contact_free_fraction": 0.08743169398907104,
+    "frames": 366,
+    "mean_vertical_bw": 0.9711113240751402,
+    "min_vertical_n": 0.0,
+    "peak_vertical_bw": 2.9991690288228305,
+    "peak_vertical_n": 2337.4585397569335,
+    "total_mass_kg": 79.4734923989728
+  },
+  "impact_step": 1315,
+  "impact_time_s": 1.315,
+  "inverse_dynamics": {
+    "frames": 183,
+    "loop": {
+      "median_abs": 2.778839203832696,
+      "p95_abs": 27.16637104825335,
+      "peak": 91.71633205409718,
+      "rms": 12.414579419849401
+    },
+    "loop_coordinates": [
+      "LEInput",
+      "LFInput",
+      "LScapInputX",
+      "LScapInputY",
+      "LSInputX",
+      "LSInputY",
+      "LSInputZ",
+      "LWInputX",
+      "LWInputY",
+      "REInput",
+      "RFInput",
+      "RScapInputX",
+      "RScapInputY",
+      "RSInputX",
+      "RSInputY",
+      "RSInputZ",
+      "RWInputX",
+      "RWInputY"
+    ],
+    "non_loop": {
+      "median_abs": 0.008477833453757189,
+      "p95_abs": 0.8579748656066002,
+      "peak": 71.17844397075453,
+      "rms": 2.1694956042758267
+    },
+    "non_loop_post_impact": {
+      "median_abs": 0.001539440079097787,
+      "p95_abs": 3.380476919496161,
+      "peak": 71.17844397075453,
+      "rms": 4.078328700633056
+    },
+    "non_loop_pre_impact": {
+      "median_abs": 0.011249093499738905,
+      "p95_abs": 0.299036617768412,
+      "peak": 6.024363339351453,
+      "rms": 0.31451177743433806
+    },
+    "worst_non_loop": {
+      "HipInputY": 47.892889180824355,
+      "HipInputZ": 43.69584204398262,
+      "TranslationInputX": 71.17844397075453,
+      "TranslationInputY": 36.6056570116009,
+      "hip_flexion_l": 64.22431119905464
+    }
+  },
+  "model": {
+    "n_coordinates": 46,
+    "n_muscles": 80,
+    "n_wrap_objects": 44
+  },
+  "parity_body_origin_mismatch": {
+    "club_body_note": "OpenSim 'Clubhead' origin is the head; MuJoCo's club body origin is the grip end (a fixed 1.1 m convention offset)",
+    "frames": 37,
+    "max_mm_excluding_club_body": 12.7,
+    "per_body_max_mm": {
+      "Clubhead": 910.264,
+      "Grip": 12.7,
+      "Head": 0.0,
+      "Hip": 0.0,
+      "LE": 0.0,
+      "LF": 0.0,
+      "LS": 0.0,
+      "LScap": 0.0,
+      "RE": 0.0,
+      "RF": 0.0,
+      "RS": 0.0,
+      "RScap": 0.0,
+      "Spine": 0.0,
+      "Torso": 0.0,
+      "calcn_l": 0.0,
+      "calcn_r": 0.0,
+      "femur_l": 0.0,
+      "femur_r": 0.0,
+      "talus_l": 0.0,
+      "talus_r": 0.0,
+      "tibia_l": 9.254,
+      "tibia_r": 9.289,
+      "toes_l": 0.0,
+      "toes_r": 0.0
+    }
+  },
+  "receipt_digest": "2a343c2355b2a9205b3c193ebafd2e9e683cbfcfa2c4e0a1689bf2c411a1c742",
+  "schema": "musculoskeletal-spec-receipt/v2",
+  "static_optimisation": {
+    "activation_mean": 0.2435243067292188,
+    "activation_peak": 1.0,
+    "frames": 366,
+    "muscle_force_peak_n": 5042.431708967351,
+    "reserve_all": {
+      "median_abs": 0.23512360958717093,
+      "p95_abs": 67.75686692637821,
+      "peak": 416.8648293197108,
+      "rms": 35.6476128490516
+    },
+    "reserve_post_impact": {
+      "median_abs": 0.22118416590427392,
+      "p95_abs": 148.60192268495038,
+      "peak": 416.8648293197108,
+      "rms": 63.20593364615921
+    },
+    "reserve_pre_impact": {
+      "median_abs": 0.24218011783029247,
+      "p95_abs": 27.58966696241584,
+      "peak": 110.01520749092337,
+      "rms": 14.277447386563528
+    },
+    "reserve_weight": 1.0,
+    "saturated_fraction": 0.1733948087431694,
+    "torque_rms": 62.55062803415839
+  },
+  "steps": 1827,
+  "upper_body_torque_standins": {
+    "LEInput": {
+      "median_abs": 2.0612310530862956,
+      "p95_abs": 19.089664238966154,
+      "peak": 33.7469373124279,
+      "rms": 8.1223038357703
+    },
+    "LFInput": {
+      "median_abs": 0.8576799902168046,
+      "p95_abs": 9.31022071878726,
+      "peak": 14.454145755987769,
+      "rms": 4.049325784771415
+    },
+    "LSInputX": {
+      "median_abs": 5.419395076883014,
+      "p95_abs": 24.85983108593975,
+      "peak": 57.0273047781652,
+      "rms": 12.068653630971523
+    },
+    "LSInputY": {
+      "median_abs": 3.9872885315918913,
+      "p95_abs": 29.046394843089786,
+      "peak": 60.5850877419688,
+      "rms": 13.87859861368893
+    },
+    "LSInputZ": {
+      "median_abs": 1.1290810970369354,
+      "p95_abs": 12.367787921382837,
+      "peak": 21.949904122846736,
+      "rms": 5.295486467312223
+    },
+    "LScapInputX": {
+      "median_abs": 2.875357259487039,
+      "p95_abs": 35.54068445581642,
+      "peak": 73.43152027736446,
+      "rms": 14.303397160617392
+    },
+    "LScapInputY": {
+      "median_abs": 4.5102852867320795,
+      "p95_abs": 57.20810000235719,
+      "peak": 86.68604068184861,
+      "rms": 20.205086968079982
+    },
+    "LWInputX": {
+      "median_abs": 2.047106211321207,
+      "p95_abs": 15.364517942431485,
+      "peak": 21.365493965090295,
+      "rms": 6.0405062084576615
+    },
+    "LWInputY": {
+      "median_abs": 1.2213496743121437,
+      "p95_abs": 6.40801049023047,
+      "peak": 30.431205729862555,
+      "rms": 4.13942479979561
+    },
+    "NeckInputX": {
+      "median_abs": 2.889856397398804,
+      "p95_abs": 11.028658069111755,
+      "peak": 17.06577209614734,
+      "rms": 4.819611399410694
+    },
+    "NeckInputY": {
+      "median_abs": 3.275031660167252,
+      "p95_abs": 8.501901991912385,
+      "peak": 16.10616999982362,
+      "rms": 4.087345839367112
+    },
+    "NeckInputZ": {
+      "median_abs": 0.09465024179869172,
+      "p95_abs": 1.6008599502821175,
+      "peak": 2.349264004709468,
+      "rms": 0.6312685726550917
+    },
+    "REInput": {
+      "median_abs": 4.731188936986381,
+      "p95_abs": 29.79627107824401,
+      "peak": 41.83200112020431,
+      "rms": 11.258297238371068
+    },
+    "RFInput": {
+      "median_abs": 2.0237594976472337,
+      "p95_abs": 14.169659370050725,
+      "peak": 21.55698154920172,
+      "rms": 5.9942518267891245
+    },
+    "RSInputX": {
+      "median_abs": 4.042248512872234,
+      "p95_abs": 22.974338471440213,
+      "peak": 28.31411622486316,
+      "rms": 9.955561255192691
+    },
+    "RSInputY": {
+      "median_abs": 1.8801896936210305,
+      "p95_abs": 43.68702714259456,
+      "peak": 89.56324921246058,
+      "rms": 17.178648385180587
+    },
+    "RSInputZ": {
+      "median_abs": 1.3033142405264588,
+      "p95_abs": 18.197018118160013,
+      "peak": 23.574438535864783,
+      "rms": 7.785806741537771
+    },
+    "RScapInputX": {
+      "median_abs": 6.919636738435283,
+      "p95_abs": 26.41509820442093,
+      "peak": 89.26116624532783,
+      "rms": 15.308463423651723
+    },
+    "RScapInputY": {
+      "median_abs": 10.454224875104416,
+      "p95_abs": 52.780167568840255,
+      "peak": 67.43061950485574,
+      "rms": 22.019402642231213
+    },
+    "RWInputX": {
+      "median_abs": 0.5513227150200772,
+      "p95_abs": 12.15220769876707,
+      "peak": 34.04799599092398,
+      "rms": 5.603646675986621
+    },
+    "RWInputY": {
+      "median_abs": 1.7967529503269428,
+      "p95_abs": 12.485520027822634,
+      "peak": 24.165445072579463,
+      "rms": 5.4213835139794195
+    },
+    "SpineInputX": {
+      "median_abs": 24.214880915133005,
+      "p95_abs": 88.38081036496496,
+      "peak": 262.0770213461652,
+      "rms": 48.72171895364332
+    },
+    "SpineInputY": {
+      "median_abs": 70.3122652500434,
+      "p95_abs": 156.05707759887264,
+      "peak": 243.30677601073472,
+      "rms": 81.37177613962628
+    },
+    "TorsoInput": {
+      "median_abs": 12.69425932097245,
+      "p95_abs": 114.7846105707877,
+      "peak": 133.71548313478237,
+      "rms": 44.53494011983632
+    },
+    "TranslationInputX": {
+      "median_abs": 0.0,
+      "p95_abs": 0.0,
+      "peak": 0.0,
+      "rms": 0.0
+    },
+    "TranslationInputY": {
+      "median_abs": 0.0,
+      "p95_abs": 0.0,
+      "peak": 0.0,
+      "rms": 0.0
+    },
+    "TranslationInputZ": {
+      "median_abs": 0.0,
+      "p95_abs": 0.0,
+      "peak": 0.0,
+      "rms": 0.0
+    }
+  }
+}

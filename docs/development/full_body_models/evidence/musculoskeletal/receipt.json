@@ -1,0 +1,801 @@
+{
+  "coordinate_mapping": {
+    "mapped": 39,
+    "method": "1:1 by coordinate name from OpenSim IK states",
+    "notes": [
+      "knee_angle_*_beta follow the patellofemoral coupler constraint",
+      "mtp_angle_* are identically zero in the source and locked",
+      "kinematics low-passed at 15.0 Hz (zero-phase 2nd-order Butterworth)"
+    ],
+    "of": 39,
+    "unmapped_model_coordinates": [],
+    "unmapped_source_columns": []
+  },
+  "epic": "#11605",
+  "ground_reaction_estimate": {
+    "contact_height_tolerance_m": 0.12,
+    "estimator": "force-free ID root wrench + friction-limited NNLS, 8 sole points",
+    "floor_height_m": 0.06250132442082512,
+    "friction_coefficient": 1.0,
+    "horizontal_force_bw_peak": 3.5468248368648854,
+    "required_wrench_rms": 1914.8633798447945,
+    "unexplained_wrench_max": 6371.4058775408885,
+    "unexplained_wrench_rms": 1448.284869666475,
+    "unexplained_wrench_rms_by_phase": {
+      "after_split": 2859.491753371303,
+      "before_split": 58.49058060156841
+    },
+    "vertical_force_bw_mean": 1.1367784423223732,
+    "vertical_force_bw_peak": 3.237392245696315
+  },
+  "inputs": {
+    "base_model": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-msk/shared/models/opensim/opensim-models/Models/Rajagopal/RajagopalLaiUhlrich2023.osim",
+    "base_model_sha256": "8f30d0b64750b87eb7f705907862590535212b4afd7e919faa3fd7d1683d22ec",
+    "golf_model": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-msk/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/golf_humanoid_scaled_tour_markers.osim",
+    "golf_model_sha256": "7dd1da1764bd8569d9e5de14eae6a249f8845e9fddf0f343796bef2ae8137381",
+    "musculoskeletal_model_sha256": "18243842218141832cab9466f0a8ae7cfbf1627adf076126bc9f0c71df4c0f54",
+    "states_file": "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-msk/docs/development/opensim_tour_matching/evidence/os7_moco_g1/inputs/ik_states_full.sto",
+    "states_file_sha256": "325796072973aad8b007c5f975253eaf62057b91924cada85e2dae381cd1c2cc"
+  },
+  "issue": "#11617",
+  "limitations": [
+    "The base model has 80 lower-limb muscles only: there are no trunk, shoulder, arm or forearm muscles. Lumbar, shoulder, elbow, forearm and wrist demand is carried by upper_* joint-torque actuators, not muscles.",
+    "No ground-reaction forces were measured. They are estimated from the kinematics (force-free inverse dynamics + friction-limited NNLS on eight sole points); the split between feet is statically indeterminate, so leg-muscle forces depend on that assumption.",
+    "Kinematics are marker-based IK of a tour-average swing with no foot markers; large trunk/arm angles and fast transitions make joint accelerations (hence demands) unreliable, especially after the downswing begins.",
+    "Muscle strength is the generic Rajagopal-Lai-Uhlrich set scaled with the segments; it is not calibrated to this golfer.",
+    "StaticOptimization has no activation dynamics and no tendon history; it is a per-frame redundancy resolution, not a forward-dynamics replay."
+  ],
+  "moco_inverse": {
+    "note": "see limitations in the README; direct collocation with 80 muscles took more than a minute per iteration on 4 cores even for a 10-interval pilot, so a full-swing solve was infeasible here",
+    "status": "NOT_RUN_TO_CONVERGENCE"
+  },
+  "model": {
+    "body_scale_factors": {
+      "calcn_l": 0.9456409471657812,
+      "calcn_r": 0.9071416660051361,
+      "femur_l": 0.9868506229058648,
+      "femur_r": 0.9832146785323012,
+      "ground": 1.0,
+      "hand_l": 1.0,
+      "hand_r": 1.0,
+      "humerus_l": 1.243623149966618,
+      "humerus_r": 1.4567005270975437,
+      "patella_l": 1.0,
+      "patella_r": 1.0,
+      "pelvis": 1.0606483790373178,
+      "radius_l": 1.154714956454738,
+      "radius_r": 1.1641304524935194,
+      "talus_l": 0.9428933096976863,
+      "talus_r": 0.9485501689126455,
+      "tibia_l": 1.051566835483121,
+      "tibia_r": 1.0592826917177491,
+      "toes_l": 1.0,
+      "toes_r": 1.0,
+      "torso": 1.1362361110264596,
+      "ulna_l": 1.0,
+      "ulna_r": 1.0
+    },
+    "muscle_type": "Millard2012EquilibriumMuscle",
+    "n_coordinates": 39,
+    "n_muscles": 80,
+    "reserve_actuators": "reserve_* CoordinateActuator (leg optimal force 1, pelvis residual 100; reported in N or N m)",
+    "total_mass_kg": 79.69870000000002,
+    "unlocked_coordinates": [
+      "subtalar_angle_r",
+      "subtalar_angle_l",
+      "wrist_flex_r",
+      "wrist_dev_r",
+      "wrist_flex_l",
+      "wrist_dev_l"
+    ],
+    "upper_body_actuators": "upper_* CoordinateActuator (optimal force 100; torques reported in N m)"
+  },
+  "results": {
+    "muscles_saturated_fraction": 0.975,
+    "per_group": {
+      "dorsiflexors": {
+        "mean_activation": 0.3912941188422392,
+        "n_muscles": 6,
+        "peak_activation": 1.0
+      },
+      "evertors": {
+        "mean_activation": 0.18900168604007633,
+        "n_muscles": 4,
+        "peak_activation": 1.0
+      },
+      "hamstrings": {
+        "mean_activation": 0.1895645210019084,
+        "n_muscles": 8,
+        "peak_activation": 1.0
+      },
+      "hip abductors": {
+        "mean_activation": 0.24539264484460194,
+        "n_muscles": 14,
+        "peak_activation": 1.0
+      },
+      "hip adductors": {
+        "mean_activation": 0.20173088316248636,
+        "n_muscles": 14,
+        "peak_activation": 1.0
+      },
+      "hip extensors": {
+        "mean_activation": 0.19147952765267176,
+        "n_muscles": 6,
+        "peak_activation": 1.0
+      },
+      "hip flexors": {
+        "mean_activation": 0.37704767796437655,
+        "n_muscles": 6,
+        "peak_activation": 1.0
+      },
+      "hip rotators": {
+        "mean_activation": 0.3236151575,
+        "n_muscles": 2,
+        "peak_activation": 1.0
+      },
+      "plantarflexors": {
+        "mean_activation": 0.12859861360368957,
+        "n_muscles": 12,
+        "peak_activation": 1.0
+      },
+      "quadriceps": {
+        "mean_activation": 0.1832163116841603,
+        "n_muscles": 8,
+        "peak_activation": 1.0
+      }
+    },
+    "phase_split_s": 1.08,
+    "phases": {
+      "after_split": {
+        "muscles_saturated_fraction": 0.975,
+        "per_group": {
+          "dorsiflexors": {
+            "mean_activation": 0.6499413343034826,
+            "n_muscles": 6,
+            "peak_activation": 1.0
+          },
+          "evertors": {
+            "mean_activation": 0.3789464890671642,
+            "n_muscles": 4,
+            "peak_activation": 1.0
+          },
+          "hamstrings": {
+            "mean_activation": 0.44344794847014923,
+            "n_muscles": 8,
+            "peak_activation": 1.0
+          },
+          "hip abductors": {
+            "mean_activation": 0.4423838217910448,
+            "n_muscles": 14,
+            "peak_activation": 1.0
+          },
+          "hip adductors": {
+            "mean_activation": 0.46947178462686573,
+            "n_muscles": 14,
+            "peak_activation": 1.0
+          },
+          "hip extensors": {
+            "mean_activation": 0.49819988601990045,
+            "n_muscles": 6,
+            "peak_activation": 1.0
+          },
+          "hip flexors": {
+            "mean_activation": 0.538810733880597,
+            "n_muscles": 6,
+            "peak_activation": 1.0
+          },
+          "hip rotators": {
+            "mean_activation": 0.4422000173880597,
+            "n_muscles": 2,
+            "peak_activation": 1.0
+          },
+          "plantarflexors": {
+            "mean_activation": 0.3522811386318408,
+            "n_muscles": 12,
+            "peak_activation": 1.0
+          },
+          "quadriceps": {
+            "mean_activation": 0.32506852059701496,
+            "n_muscles": 8,
+            "peak_activation": 1.0
+          }
+        },
+        "reserve_rms_max": 2881.532280823276,
+        "reserve_torques": {
+          "reserve_ankle_angle_l": {
+            "peak": 192.94335553,
+            "rms": 35.20149024611946
+          },
+          "reserve_ankle_angle_r": {
+            "peak": 246.47166628,
+            "rms": 75.43318679798163
+          },
+          "reserve_hip_adduction_l": {
+            "peak": 486.38659218,
+            "rms": 148.5858878171954
+          },
+          "reserve_hip_adduction_r": {
+            "peak": 825.53197361,
+            "rms": 184.28669700866774
+          },
+          "reserve_hip_flexion_l": {
+            "peak": 2133.87509796,
+            "rms": 486.5348391450143
+          },
+          "reserve_hip_flexion_r": {
+            "peak": 1273.13534196,
+            "rms": 252.6915030690259
+          },
+          "reserve_hip_rotation_l": {
+            "peak": 1266.40259076,
+            "rms": 475.1154599392826
+          },
+          "reserve_hip_rotation_r": {
+            "peak": 1541.91050229,
+            "rms": 508.3450625858719
+          },
+          "reserve_knee_angle_l": {
+            "peak": 589.0146906,
+            "rms": 128.6348602981656
+          },
+          "reserve_knee_angle_r": {
+            "peak": 514.00940004,
+            "rms": 119.42048691151778
+          },
+          "reserve_pelvis_list": {
+            "peak": 11100.375217,
+            "rms": 1723.9192524401396
+          },
+          "reserve_pelvis_rotation": {
+            "peak": 8709.052372,
+            "rms": 1370.9176431584538
+          },
+          "reserve_pelvis_tilt": {
+            "peak": 15788.649889999999,
+            "rms": 2239.7592412988797
+          },
+          "reserve_pelvis_tx": {
+            "peak": 8617.287498,
+            "rms": 1705.4522518595172
+          },
+          "reserve_pelvis_ty": {
+            "peak": 22316.289194,
+            "rms": 2881.532280823276
+          },
+          "reserve_pelvis_tz": {
+            "peak": 13897.903278999998,
+            "rms": 2111.1047030165146
+          },
+          "reserve_subtalar_angle_l": {
+            "peak": 668.51346307,
+            "rms": 179.4575256093515
+          },
+          "reserve_subtalar_angle_r": {
+            "peak": 1092.34309019,
+            "rms": 343.8366941972823
+          }
+        },
+        "t_range_s": [
+          1.08333333,
+          1.45
+        ],
+        "upper_body_torques": {
+          "upper_arm_add_l": {
+            "peak": 20501.955783,
+            "rms": 2513.22058847819
+          },
+          "upper_arm_add_r": {
+            "peak": 20626.897333,
+            "rms": 2601.8591118722197
+          },
+          "upper_arm_flex_l": {
+            "peak": 6373.319198,
+            "rms": 792.5418941517847
+          },
+          "upper_arm_flex_r": {
+            "peak": 7797.592790999999,
+            "rms": 1002.5954173329039
+          },
+          "upper_arm_rot_l": {
+            "peak": 13425.424774000001,
+            "rms": 1641.3566593990136
+          },
+          "upper_arm_rot_r": {
+            "peak": 1990.9254099999998,
+            "rms": 282.5657665981777
+          },
+          "upper_elbow_flex_l": {
+            "peak": 24393.189076,
+            "rms": 2986.2509580085452
+          },
+          "upper_elbow_flex_r": {
+            "peak": 2129.327832,
+            "rms": 393.1546025585116
+          },
+          "upper_lumbar_bending": {
+            "peak": 7504.30463,
+            "rms": 1175.5478352108462
+          },
+          "upper_lumbar_extension": {
+            "peak": 9609.216893,
+            "rms": 1519.5243840145818
+          },
+          "upper_lumbar_rotation": {
+            "peak": 5047.831815,
+            "rms": 979.1520945428705
+          },
+          "upper_pro_sup_l": {
+            "peak": 3794.600016,
+            "rms": 463.7547711747286
+          },
+          "upper_pro_sup_r": {
+            "peak": 2672.1934929999998,
+            "rms": 335.7533662552146
+          },
+          "upper_wrist_dev_l": {
+            "peak": 5581.3486410000005,
+            "rms": 682.074111101611
+          },
+          "upper_wrist_dev_r": {
+            "peak": 1593.308504,
+            "rms": 255.20669409074594
+          },
+          "upper_wrist_flex_l": {
+            "peak": 8658.626820000001,
+            "rms": 1058.7340161308503
+          },
+          "upper_wrist_flex_r": {
+            "peak": 8304.203243,
+            "rms": 1025.1765299741683
+          }
+        }
+      },
+      "before_split": {
+        "muscles_saturated_fraction": 0.4375,
+        "per_group": {
+          "dorsiflexors": {
+            "mean_activation": 0.30242558840170936,
+            "n_muscles": 6,
+            "peak_activation": 0.99999999
+          },
+          "evertors": {
+            "mean_activation": 0.12373859987179486,
+            "n_muscles": 4,
+            "peak_activation": 0.91378451
+          },
+          "hamstrings": {
+            "mean_activation": 0.10233277925641024,
+            "n_muscles": 8,
+            "peak_activation": 0.99999985
+          },
+          "hip abductors": {
+            "mean_activation": 0.1777084968681319,
+            "n_muscles": 14,
+            "peak_activation": 1.0
+          },
+          "hip adductors": {
+            "mean_activation": 0.10973785547985347,
+            "n_muscles": 14,
+            "peak_activation": 1.0
+          },
+          "hip extensors": {
+            "mean_activation": 0.08609355836752138,
+            "n_muscles": 6,
+            "peak_activation": 0.86847529
+          },
+          "hip flexors": {
+            "mean_activation": 0.32146755105982905,
+            "n_muscles": 6,
+            "peak_activation": 1.0
+          },
+          "hip rotators": {
+            "mean_activation": 0.28287061589743595,
+            "n_muscles": 2,
+            "peak_activation": 0.99999998
+          },
+          "plantarflexors": {
+            "mean_activation": 0.05174359218376068,
+            "n_muscles": 12,
+            "peak_activation": 0.99998053
+          },
+          "quadriceps": {
+            "mean_activation": 0.13447734759615382,
+            "n_muscles": 8,
+            "peak_activation": 1.0
+          }
+        },
+        "reserve_rms_max": 41.208241864608006,
+        "reserve_torques": {
+          "reserve_ankle_angle_l": {
+            "peak": 0.12103503,
+            "rms": 0.023451303402577405
+          },
+          "reserve_ankle_angle_r": {
+            "peak": 5.3559006,
+            "rms": 0.3838086421276953
+          },
+          "reserve_hip_adduction_l": {
+            "peak": 73.31578072,
+            "rms": 11.88229427584376
+          },
+          "reserve_hip_adduction_r": {
+            "peak": 8.11278936,
+            "rms": 0.6124407008958506
+          },
+          "reserve_hip_flexion_l": {
+            "peak": 111.81084117,
+            "rms": 17.57223074154313
+          },
+          "reserve_hip_flexion_r": {
+            "peak": 4.84843232,
+            "rms": 0.3725966468821558
+          },
+          "reserve_hip_rotation_l": {
+            "peak": 46.62610045,
+            "rms": 8.718688036638193
+          },
+          "reserve_hip_rotation_r": {
+            "peak": 17.58766873,
+            "rms": 1.8135387775727128
+          },
+          "reserve_knee_angle_l": {
+            "peak": 0.03103752,
+            "rms": 0.010983163023930766
+          },
+          "reserve_knee_angle_r": {
+            "peak": 0.01544539,
+            "rms": 0.004807563612261839
+          },
+          "reserve_pelvis_list": {
+            "peak": 90.754744,
+            "rms": 28.500199858650586
+          },
+          "reserve_pelvis_rotation": {
+            "peak": 50.539031,
+            "rms": 15.908540925827834
+          },
+          "reserve_pelvis_tilt": {
+            "peak": 98.777867,
+            "rms": 41.208241864608006
+          },
+          "reserve_pelvis_tx": {
+            "peak": 100.18142,
+            "rms": 36.240980502583845
+          },
+          "reserve_pelvis_ty": {
+            "peak": 62.291242000000004,
+            "rms": 18.65965940508743
+          },
+          "reserve_pelvis_tz": {
+            "peak": 92.541427,
+            "rms": 34.41522416996315
+          },
+          "reserve_subtalar_angle_l": {
+            "peak": 0.05597132,
+            "rms": 0.02051308661512418
+          },
+          "reserve_subtalar_angle_r": {
+            "peak": 1.48050685,
+            "rms": 0.10724212623850546
+          }
+        },
+        "t_range_s": [
+          0.0,
+          1.07777778
+        ],
+        "upper_body_torques": {
+          "upper_arm_add_l": {
+            "peak": 70.451761,
+            "rms": 7.652190055802504
+          },
+          "upper_arm_add_r": {
+            "peak": 108.483984,
+            "rms": 26.19198018006849
+          },
+          "upper_arm_flex_l": {
+            "peak": 54.840416000000005,
+            "rms": 9.677074631599819
+          },
+          "upper_arm_flex_r": {
+            "peak": 39.19684,
+            "rms": 14.917451635894645
+          },
+          "upper_arm_rot_l": {
+            "peak": 43.890384,
+            "rms": 5.500486569377834
+          },
+          "upper_arm_rot_r": {
+            "peak": 14.905809,
+            "rms": 6.9771493150784645
+          },
+          "upper_elbow_flex_l": {
+            "peak": 55.654095999999996,
+            "rms": 5.780943418854681
+          },
+          "upper_elbow_flex_r": {
+            "peak": 25.700736000000003,
+            "rms": 11.175724838820553
+          },
+          "upper_lumbar_bending": {
+            "peak": 142.984477,
+            "rms": 84.72163011799833
+          },
+          "upper_lumbar_extension": {
+            "peak": 104.98754100000001,
+            "rms": 51.777445206345
+          },
+          "upper_lumbar_rotation": {
+            "peak": 73.259447,
+            "rms": 38.75028157404211
+          },
+          "upper_pro_sup_l": {
+            "peak": 3.4573720000000003,
+            "rms": 0.29145831569954456
+          },
+          "upper_pro_sup_r": {
+            "peak": 10.56937,
+            "rms": 4.743617437035845
+          },
+          "upper_wrist_dev_l": {
+            "peak": 4.259729,
+            "rms": 0.5687238190982666
+          },
+          "upper_wrist_dev_r": {
+            "peak": 48.349322,
+            "rms": 9.11789163606024
+          },
+          "upper_wrist_flex_l": {
+            "peak": 11.056934,
+            "rms": 1.0566996387147034
+          },
+          "upper_wrist_flex_r": {
+            "peak": 78.752643,
+            "rms": 8.927205157701541
+          }
+        }
+      }
+    },
+    "reserve_rms_max": 1457.2589960709156,
+    "reserve_torques": {
+      "reserve_ankle_angle_l": {
+        "peak": 192.94335553,
+        "rms": 17.80115106757243
+      },
+      "reserve_ankle_angle_r": {
+        "peak": 246.47166628,
+        "rms": 38.14745522876531
+      },
+      "reserve_hip_adduction_l": {
+        "peak": 486.38659218,
+        "rms": 75.83484880351656
+      },
+      "reserve_hip_adduction_r": {
+        "peak": 825.53197361,
+        "rms": 93.1939504684667
+      },
+      "reserve_hip_flexion_l": {
+        "peak": 2133.87509796,
+        "rms": 246.50375693686857
+      },
+      "reserve_hip_flexion_r": {
+        "peak": 1273.13534196,
+        "rms": 127.78467374220018
+      },
+      "reserve_hip_rotation_l": {
+        "peak": 1266.40259076,
+        "rms": 240.38016919866794
+      },
+      "reserve_hip_rotation_r": {
+        "peak": 1541.91050229,
+        "rms": 257.0711905578023
+      },
+      "reserve_knee_angle_l": {
+        "peak": 589.0146906,
+        "rms": 65.0497211929072
+      },
+      "reserve_knee_angle_r": {
+        "peak": 514.00940004,
+        "rms": 60.390078523177024
+      },
+      "reserve_pelvis_list": {
+        "peak": 11100.375217,
+        "rms": 872.1201888378821
+      },
+      "reserve_pelvis_rotation": {
+        "peak": 8709.052372,
+        "rms": 693.3989969656432
+      },
+      "reserve_pelvis_tilt": {
+        "peak": 15788.649889999999,
+        "rms": 1133.1878815058615
+      },
+      "reserve_pelvis_tx": {
+        "peak": 8617.287498,
+        "rms": 863.0014404209661
+      },
+      "reserve_pelvis_ty": {
+        "peak": 22316.289194,
+        "rms": 1457.2589960709156
+      },
+      "reserve_pelvis_tz": {
+        "peak": 13897.903278999998,
+        "rms": 1067.983197734028
+      },
+      "reserve_subtalar_angle_l": {
+        "peak": 668.51346307,
+        "rms": 90.75037729209082
+      },
+      "reserve_subtalar_angle_r": {
+        "peak": 1092.34309019,
+        "rms": 173.87575942175482
+      }
+    },
+    "top_muscles_by_peak": {
+      "addbrev_r": {
+        "mean": 0.2781553727099237,
+        "peak": 1.0
+      },
+      "addlong_r": {
+        "mean": 0.35265344209923666,
+        "peak": 1.0
+      },
+      "addmagDist_r": {
+        "mean": 0.20827424778625953,
+        "peak": 1.0
+      },
+      "addmagIsch_r": {
+        "mean": 0.2856189205343511,
+        "peak": 1.0
+      },
+      "addmagMid_r": {
+        "mean": 0.20282043194656488,
+        "peak": 1.0
+      },
+      "addmagProx_r": {
+        "mean": 0.20268279583969467,
+        "peak": 1.0
+      },
+      "bflh_r": {
+        "mean": 0.2280356357633588,
+        "peak": 1.0
+      },
+      "bfsh_r": {
+        "mean": 0.13806367549618323,
+        "peak": 1.0
+      },
+      "edl_r": {
+        "mean": 0.29332152828244273,
+        "peak": 1.0
+      },
+      "ehl_r": {
+        "mean": 0.30981915534351145,
+        "peak": 1.0
+      },
+      "fdl_r": {
+        "mean": 0.1390310193129771,
+        "peak": 1.0
+      },
+      "fhl_r": {
+        "mean": 0.1394142809923664,
+        "peak": 1.0
+      },
+      "gaslat_r": {
+        "mean": 0.12294641858778627,
+        "peak": 1.0
+      },
+      "gasmed_r": {
+        "mean": 0.08970842083969464,
+        "peak": 1.0
+      },
+      "glmax1_r": {
+        "mean": 0.26778558416030535,
+        "peak": 1.0
+      },
+      "glmax2_r": {
+        "mean": 0.29931995213740453,
+        "peak": 1.0
+      },
+      "glmax3_r": {
+        "mean": 0.23933760603053433,
+        "peak": 1.0
+      },
+      "glmed1_r": {
+        "mean": 0.3849855043129771,
+        "peak": 1.0
+      },
+      "glmed2_r": {
+        "mean": 0.1918845608015267,
+        "peak": 1.0
+      },
+      "glmed3_r": {
+        "mean": 0.1628175682442748,
+        "peak": 1.0
+      }
+    },
+    "upper_body_torques": {
+      "upper_arm_add_l": {
+        "peak": 20501.955783,
+        "rms": 1270.9346595056238
+      },
+      "upper_arm_add_r": {
+        "peak": 20626.897333,
+        "rms": 1315.9353913671707
+      },
+      "upper_arm_flex_l": {
+        "peak": 6373.319198,
+        "rms": 400.86965930508296
+      },
+      "upper_arm_flex_r": {
+        "peak": 7797.592790999999,
+        "rms": 507.168575902207
+      },
+      "upper_arm_rot_l": {
+        "peak": 13425.424774000001,
+        "rms": 830.0357818517704
+      },
+      "upper_arm_rot_r": {
+        "peak": 1990.9254099999998,
+        "rms": 143.0181933899237
+      },
+      "upper_elbow_flex_l": {
+        "peak": 24393.189076,
+        "rms": 1510.1337933076238
+      },
+      "upper_elbow_flex_r": {
+        "peak": 2129.327832,
+        "rms": 199.04908637741687
+      },
+      "upper_lumbar_bending": {
+        "peak": 7504.30463,
+        "rms": 598.942496542571
+      },
+      "upper_lumbar_extension": {
+        "peak": 9609.216893,
+        "rms": 769.7097647206529
+      },
+      "upper_lumbar_rotation": {
+        "peak": 5047.831815,
+        "rms": 496.27740244837867
+      },
+      "upper_pro_sup_l": {
+        "peak": 3794.600016,
+        "rms": 234.51757569026105
+      },
+      "upper_pro_sup_r": {
+        "peak": 2672.1934929999998,
+        "rms": 169.83736618403321
+      },
+      "upper_wrist_dev_l": {
+        "peak": 5581.3486410000005,
+        "rms": 344.9203044662576
+      },
+      "upper_wrist_dev_r": {
+        "peak": 1593.308504,
+        "rms": 129.29568617345183
+      },
+      "upper_wrist_flex_l": {
+        "peak": 8658.626820000001,
+        "rms": 535.394927264748
+      },
+      "upper_wrist_flex_r": {
+        "peak": 8304.203243,
+        "rms": 518.4815763850401
+      }
+    }
+  },
+  "schema": "msk-swing/opensim-static-optimization-v1",
+  "solver": {
+    "activation_exponent": 2,
+    "converged": true,
+    "convergence_note": "AnalyzeTool completed; per-frame optimiser failures, if any, are visible as reserve use and saturated muscles below",
+    "name": "opensim.StaticOptimization (AnalyzeTool)",
+    "step_interval": 2,
+    "use_muscle_physiology": true,
+    "wall_clock_s": 661.3126986026764
+  },
+  "status": "STATIC_OPTIMIZATION_ONLY_NOT_QUALIFIED",
+  "window_s": [
+    0.0,
+    1.45
+  ]
+}

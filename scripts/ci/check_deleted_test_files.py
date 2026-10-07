@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import logging
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +24,14 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# Reviewed test deletions (#11601): each entry is a deliberate, reviewed
+# retirement of a test file. Relative to --repo-root so the allowlist read is
+# the one at the commit under test.
+DEFAULT_REVIEWED_DELETIONS = Path("scripts/config/reviewed_test_deletions.json")
+_ISSUE_REF = re.compile(
+    r"^(#[1-9][0-9]*|https://github\.com/[\w.-]+/[\w.-]+/(issues|pull)/[1-9][0-9]*)$"
+)
 
 
 def _load_contract_helpers() -> tuple[Any, Any]:
@@ -51,6 +61,61 @@ precondition, postcondition = _load_contract_helpers()
 
 class MergeBaseResolutionError(RuntimeError):
     """Raised when git cannot resolve the merge-base between base and head refs."""
+
+
+class ReviewedDeletionsError(ValueError):
+    """Raised when the reviewed-deletions allowlist is malformed (fails closed)."""
+
+
+def _validated_entry_path(entry: object, index: int) -> str:
+    """Return the entry's test path, or raise if any field breaks the contract."""
+    if not isinstance(entry, dict):
+        raise ReviewedDeletionsError(f"entry {index} must be an object")
+    path, issue, reason = entry.get("path"), entry.get("issue"), entry.get("reason")
+    if not (
+        isinstance(path, str) and path.startswith("tests/") and path.endswith(".py")
+    ):
+        raise ReviewedDeletionsError(
+            f"entry {index}: 'path' must be a tests/**/*.py path, got {path!r}"
+        )
+    if not (isinstance(issue, str) and _ISSUE_REF.match(issue)):
+        raise ReviewedDeletionsError(
+            f"entry {index}: 'issue' must be '#N' or a GitHub issue/PR URL"
+        )
+    if not (isinstance(reason, str) and reason.strip()):
+        raise ReviewedDeletionsError(f"entry {index}: 'reason' must be non-empty")
+    return path
+
+
+def load_reviewed_deletions(path: Path) -> set[str]:
+    """Load the set of test paths whose deletion has been reviewed.
+
+    Precondition: ``path`` is a filesystem path; an absent file means no
+    reviewed deletions. Postcondition: every returned path is a unique
+    ``tests/**/*.py`` path backed by an issue reference and a reason.
+
+    Raises:
+        ReviewedDeletionsError: If the file exists but is malformed, so a bad
+            allowlist can never silently exempt a deletion.
+    """
+    if not path.is_file():
+        return set()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ReviewedDeletionsError(f"{path} is not valid JSON: {exc}") from exc
+    entries = data.get("reviewed_deletions") if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        raise ReviewedDeletionsError(
+            f"{path} must be an object with a 'reviewed_deletions' list"
+        )
+    approved: set[str] = set()
+    for index, entry in enumerate(entries):
+        entry_path = _validated_entry_path(entry, index)
+        if entry_path in approved:
+            raise ReviewedDeletionsError(f"entry {index}: duplicate path {entry_path}")
+        approved.add(entry_path)
+    return approved
 
 
 @precondition(
@@ -213,6 +278,15 @@ def main(argv: list[str] | None = None) -> int:
         default=REPO_ROOT,
         help="Repository root directory (default: current repository root)",
     )
+    parser.add_argument(
+        "--reviewed-deletions",
+        type=Path,
+        default=None,
+        help=(
+            "Allowlist of reviewed test deletions "
+            f"(default: <repo-root>/{DEFAULT_REVIEWED_DELETIONS})"
+        ),
+    )
 
     args = parser.parse_args(argv)
 
@@ -224,9 +298,20 @@ def main(argv: list[str] | None = None) -> int:
             repo_root=args.repo_root,
             fallback_to_base=args.fallback_to_base,
         )
-    except MergeBaseResolutionError as err:
+        allowlist = args.reviewed_deletions or (
+            args.repo_root / DEFAULT_REVIEWED_DELETIONS
+        )
+        approved = load_reviewed_deletions(allowlist)
+    except (MergeBaseResolutionError, ReviewedDeletionsError) as err:
         sys.stderr.write(f"::error::{err}\n")
         return 1
+
+    for file_path in deleted:
+        if file_path in approved:
+            sys.stderr.write(
+                f"::notice::Reviewed test deletion (see {allowlist}): {file_path}\n"
+            )
+    deleted = [file_path for file_path in deleted if file_path not in approved]
 
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

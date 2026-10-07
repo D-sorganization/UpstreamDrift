@@ -533,6 +533,19 @@ commit \texttt{21a2ed06}:
     (\texttt{dime\_contracts.py:930-956}).
   \item The ``coupled state-control window'' is control-only single shooting
     with hard-coded zero defects and costs (\texttt{dime\_dynamics\_window.py:517-566,604}).
+    Partially corrected by \#11554: the least-squares residual now has the fixed
+    length $n_u N_{\mathrm{steps}}$ (control effort) $+\ \sum_k \min(\dim\bx^{\mathrm{obs}}_k, n_q)$
+    (observations) $+\ (N_{\mathrm{steps}}-1)\,n_u$ (control rate, when weighted)
+    $+\ n_u N_{\mathrm{steps}}$ (actuator bounds, when set; one non-negative entry per
+    control, zero inside the bounds), independent of the control values and
+    enforced by a postcondition (\texttt{expected\_residual\_size}).  A failed
+    provider step no longer returns the placeholder residual $10^{8}\mathbf{1}_{100}$
+    (whose length differed from the normal path); it raises
+    \texttt{DimeResidualEvaluationError}, and the solver reports
+    \texttt{failed\_dynamics\_step} with \texttt{success=False}.  The zero
+    defects and costs, and the single-shooting structure, remain open
+    (\#11545).  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window.py -k FixedSize}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
   \item Learned initialisers, ablations, baseline and replay audit return
     constants (\texttt{dime\_learned\_initializers.py:517-753},
@@ -552,6 +565,23 @@ commit \texttt{21a2ed06}:
     sign error; the GS3DX reference's ZTCF equation carried an undefined
     $\blambda$ under a ``contact free'' heading and integrated the drift along
     the measured state (corrected in that document alongside this one).
+    \emph{Resolved (\#11553):} the engine contract documented the drift and
+    ZTCF as $\bM^{-1}(\mathbf{C}\bv+\mathbf{g}+\bJ_c^{\!\top}\blambda)$; the bias enters with a
+    minus sign, $\bM^{-1}(\bJ_c^{\!\top}\blambda_0-\bh)$, as in
+    \eqref{eq:ztcf}.  Engine implementations already computed $-\bM^{-1}\bh$;
+    the contract text and its three copies are corrected.
+    \texttt{AccelerationDecomposition.zvcf} returned
+    $\ba_{\mathrm{grav}}+\bM^{-1}\bB\bu$, the zero-velocity, control-preserved
+    acceleration; it now returns \eqref{eq:zvcf} by delegating to
+    \texttt{simulation\_backends.ztcf\_zvcf.zvcf\_acceleration}, the single
+    implementation, and the old quantity keeps its own name
+    (\texttt{zero\_velocity\_control\_preserved}).  On the planar double
+    pendulum the two definitions differed by up to
+    $73.9\,\mathrm{rad\,s^{-2}}$ at one state; both entry points now agree to
+    $10^{-10}$ relative.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/motion\_matching/test\_zvcf\_single\_definition.py
+    tests/unit/engine\_core/test\_counterfactual\_sign\_convention.py}.
+    The duplicate \texttt{DynamicsProvider} protocols remain open.
   \item No inertial regressor existed anywhere in the estimation package.
 \end{itemize}
 

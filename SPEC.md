@@ -8319,6 +8319,27 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-07 | #11638 | Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates) |
+| 2026-10-07 | #11641 | ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case |
+| 2026-10-07 | #11637 | Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545). |
+| 2026-10-07 | #11636 | Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers |
+| 2026-10-07 | #11627 | Phase 2: spec-driven musculoskeletal model, exact contact, per-frame static optimisation |
+| 2026-10-07 | #11621 | OpenSim musculoskeletal swing: GRF estimate, StaticOptimization pipeline, receipt |
+| 2026-10-07 | #11628 | Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track; OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation; P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt) |
+| 2026-10-07 | #11615 | Same-input parity P-1: VectorPlant + convention-free closure projection; MuJoCo exact-KKT option; pointwise MuJoCo/Drake/Pinocchio acceleration parity gate and receipt (worst 1.1e-9 relative over 31 frames) |
+| 2026-10-07 | #11624 | Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021) |
+| 2026-10-07 | #11625 | Document full-swing five-engine same-input parity results (L2/L3) in the research reference |
+| 2026-10-07 | #11620 | Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893) |
+| 2026-10-07 | #11618 | settings_dialog: ignore late dependency-check results after close; worker emits failed for any exception |
+| 2026-10-07 | #11616 | Same-input parity LaTeX research reference (P-1 pointwise result) |
+| 2026-10-06 | #11590 | chore(tests): retire stale test_no_unflagged_shared_code header test and its unit-gate quarantine entry |
+| 2026-10-06 | #11602 | ci: deleted-test guard honours a reviewed allowlist (scripts/config/reviewed_test_deletions.json: path + issue + reason, fails closed when malformed) so an approved test retirement can pass the merge queue; unapproved deletions still fail. |
+| 2026-10-06 | #11592 | Make the change-fragment round-trip test hermetic so collating a real DL-#1976 entry cannot break it |
+| 2026-10-06 | #11597 | ci: give every dtolnay/rust-toolchain job a per-job RUSTUP_HOME (${{ github.workspace }}/.rustup-home) so rustup never upgrades the runner image's partially installed ~/.rustup toolchain in place; contract test in tests/ci/test_unit_gate_rust_kernel.py. |
+| 2026-10-06 | #11586 | Re-sync vendored automerge_guard and requeue_stalled_merges (and tests) to Repository_Management canonical (Refs Repository_Management#2018) |
+| 2026-10-06 | #11577 | Vendor automerge_guard and requeue_stalled_merges (stalled-merge requeue tooling) from Repository_Management with canonical tests (Refs Repository_Management#2018) |
+| 2026-10-06 | #11594 | Clear the security findings main carries: werkzeug 3.1.8 to 3.1.9 (CVE-2026-102598) and fsspec 2026.1.0 to 2026.6.0 (CVE-2026-104851) in both Python lockfiles, and source-map-js 1.2.1 to 1.2.2 (CVE-2026-93749 / GHSA-68fv-2mgg-jv7q) in ui/package-lock.json; lockfile-only upgrades, no new waiver. |
+| 2026-10-06 | #11581 | fix(tests): wait for settings-dialog dependency-check workers before teardown |
 | 2026-10-05 | #11580 | Align launcher API capability tests with reconciled capability matrix |
 | 2026-10-05 | #11576 | Reconcile engine capability matrix with get_capabilities and add consistency test |
 | 2026-10-05 | #11575 | Report NaN for unmeasured replay metrics and fail closed in acceptance evaluation |

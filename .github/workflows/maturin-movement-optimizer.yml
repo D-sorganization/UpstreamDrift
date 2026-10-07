@@ -46,6 +46,10 @@ jobs:
     runs-on: d-sorg-fleet-docker
     timeout-minutes: 25
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     defaults:

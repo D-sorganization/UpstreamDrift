@@ -76,6 +76,10 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 25
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       CARGO_HOME: ${{ github.workspace }}/.cargo-tauri-check
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -183,6 +187,10 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     env:
+      # Per-job rustup state (checkout wipes the workspace): the runner image's
+      # ~/.rustup can hold a partially installed toolchain that rustup cannot
+      # upgrade in place (#11595).
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
       WINDOWS_TAURI_RELEASE_ENABLED: ${{ vars.TAURI_WINDOWS_RELEASE_ENABLED == 'true' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

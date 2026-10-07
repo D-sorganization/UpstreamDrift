@@ -772,3 +772,71 @@ def test_layout_lock_button_toggle_caption_and_tooltip(parent_launcher, qapp) ->
     dialog._btn_layout_lock.setChecked(True)
     assert dialog._btn_layout_lock.text() == "Layout: Unlocked"
     assert dialog._btn_edit_tiles.isEnabled() is True
+
+
+@pytest.mark.unit
+def test_closing_dialog_mid_check_opens_no_modal(
+    parent_launcher, qapp, modal_recorder
+) -> None:
+    """A result that lands after the dialog closed must be ignored (#11584)."""
+    from src.launchers.settings_runtime import RuntimeDependencyReport
+
+    release_probe = threading.Event()
+
+    def blocked_report() -> RuntimeDependencyReport:
+        release_probe.wait(timeout=10)
+        return RuntimeDependencyReport(
+            dialog_title="Late",
+            table_title="Late",
+            environment_name="Late",
+            check_results=[],
+        )
+
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    with (
+        patch("PyQt6.QtWidgets.QMessageBox.information") as mock_info,
+        patch("PyQt6.QtWidgets.QMessageBox.warning") as mock_warning,
+        patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_critical,
+        patch(
+            "src.launchers.settings_dialog._check_windows_dependencies_report",
+            side_effect=blocked_report,
+        ),
+    ):
+        dialog.widget._check_windows_deps()
+        workers = list(dialog.widget._dep_check_workers.values())
+        assert workers, "worker was not started"
+        modal_recorder.workers.extend(workers)
+
+        dialog.close()
+        release_probe.set()
+        for worker in workers:
+            assert worker.wait(5000)
+        qapp.processEvents()
+
+    assert not mock_info.called
+    assert not mock_warning.called
+    assert not mock_critical.called
+
+
+@pytest.mark.unit
+def test_unexpected_worker_exception_restores_button(
+    parent_launcher, qapp, qtbot
+) -> None:
+    """Any exception in ``check_fn`` must emit ``failed`` and re-enable the button."""
+    dialog = SettingsWidget(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    with (
+        patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_critical,
+        patch(
+            "src.launchers.settings_dialog._check_windows_dependencies_report",
+            side_effect=RuntimeError("probe exploded"),
+        ),
+    ):
+        dialog._check_windows_deps()
+        qtbot.waitUntil(lambda: mock_critical.called, timeout=3000)
+
+    button = dialog.btn_check_windows_deps
+    qtbot.waitUntil(button.isEnabled, timeout=3000)
+    assert button.text() == "Check Deps"
+    html = mock_critical.call_args.args[2]
+    assert "probe exploded" in html
+    assert "RuntimeError" in html

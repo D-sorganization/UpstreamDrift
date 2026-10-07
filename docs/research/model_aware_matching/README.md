@@ -22,3 +22,16 @@ reference results, the engine integration path, and the audit of the DIME epic
 
 Compile with `pdflatex model_aware_matching.tex` (two passes). The generated
 PDF is not committed.
+
+See also the sibling [Same-Input Cross-Engine Dynamics Parity Reference](../same_input_parity/same_input_parity.tex).
+
+## Build Locally
+
+CI typesets this reference with a pinned Tectonic (`.github/workflows/latex-references.yml`)
+whenever a `docs/research/**/*.tex` file changes. To reproduce it:
+
+```bash
+tectonic -X compile --outdir build docs/research/model_aware_matching/model_aware_matching.tex
+# or, with a TeX Live install:
+latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build docs/research/model_aware_matching/model_aware_matching.tex
+```
