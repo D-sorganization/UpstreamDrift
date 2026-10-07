@@ -9,6 +9,7 @@ the adapters' public APIs, so the dynamics are each engine's own (#11606).
 
 from __future__ import annotations
 
+import importlib
 import json
 from collections.abc import Mapping
 from typing import Any
@@ -20,8 +21,20 @@ Array = NDArray[np.float64]
 
 PARITY_ENGINES: tuple[str, ...] = ("mujoco", "drake", "pinocchio")
 
+# Further engines supply ``build_parity_adapter(spec_bytes)`` in their own
+# package.  The adapter must offer ``coordinate_order``, ``accelerations``,
+# ``closure_residuals`` and ``frame_poses`` with the Drake/Pinocchio
+# signatures (name-keyed dictionaries in, spec frame names out).
+OPTIONAL_ENGINES: dict[str, str] = {
+    "opensim": "src.engines.physics_engines.opensim.python.full_body_parity",
+    "myosuite": "src.engines.physics_engines.myosuite.python.full_body_parity",
+}
+
 
 def _build_adapter(engine: str, spec_bytes: bytes, kkt_regularization: float) -> Any:
+    if engine in OPTIONAL_ENGINES:
+        module = importlib.import_module(OPTIONAL_ENGINES[engine])
+        return module.build_parity_adapter(spec_bytes)
     spec = json.loads(spec_bytes)
     if engine == "mujoco":
         from src.engines.physics_engines.mujoco.python.full_body_model import (
@@ -48,7 +61,7 @@ class VectorPlant:
     """One engine's full-body dynamics in spec coordinate order.
 
     Args:
-        engine: One of :data:`PARITY_ENGINES`.
+        engine: One of :data:`PARITY_ENGINES` or :data:`OPTIONAL_ENGINES`.
         spec_bytes: Full-body spec document (the same bytes for every engine).
         kkt_regularization: MuJoCo weld-KKT Tikhonov term; 0 gives the exact
             solve used by Drake and Pinocchio.  Ignored by the other engines.
@@ -59,8 +72,9 @@ class VectorPlant:
     def __init__(
         self, engine: str, spec_bytes: bytes, *, kkt_regularization: float = 0.0
     ) -> None:
-        if engine not in PARITY_ENGINES:
-            raise ValueError(f"engine must be one of {PARITY_ENGINES}, got {engine!r}")
+        if engine not in PARITY_ENGINES and engine not in OPTIONAL_ENGINES:
+            known = (*PARITY_ENGINES, *OPTIONAL_ENGINES)
+            raise ValueError(f"engine must be one of {known}, got {engine!r}")
         if not isinstance(spec_bytes, bytes | bytearray):
             raise TypeError("spec_bytes must be the raw spec document bytes")
         if not np.isfinite(kkt_regularization) or kkt_regularization < 0.0:
