@@ -46,6 +46,7 @@ class DrakeMeshcatSink:
         clean_path = path.strip("/")
         drake_rgba = Rgba(rgba[0], rgba[1], rgba[2], rgba[3])
 
+        shape: Any
         if radius_top_m <= 1e-6:
             try:
                 from pydrake.geometry import (
@@ -73,7 +74,7 @@ class DrakeMeshcatSink:
         clean_path = path.strip("/")
         r = RotationMatrix(matrix4x4[:3, :3])
         p = matrix4x4[:3, 3]
-        x_val = RigidTransform(r, p)
+        x_val = RigidTransform(r, p)  # type: ignore[arg-type]
         self._meshcat.SetTransform(clean_path, x_val)
 
     def delete(self, path: str) -> None:
