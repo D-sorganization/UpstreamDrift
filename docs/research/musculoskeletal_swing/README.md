@@ -70,3 +70,14 @@ python3 scripts/run_musculoskeletal_spec_swing.py --bundle driver.npz \
 ```
 
 Receipts: `docs/development/full_body_models/evidence/musculoskeletal/receipt_v2_*.json`.
+
+## MyoFullBody Full-Body Muscle Study (Epic #11642)
+
+Editable research source: [myofullbody_swing.tex](myofullbody_swing.tex) (compile
+with `tectonic`; the PDF is not committed). It covers the model and licences, the
+spec-to-MyoFullBody orientation mapping, ROM clamps, the static optimisation, the
+inverse-dynamics consistency check, reserves, failed experiments and the
+reproduction commands. Receipts:
+`docs/development/full_body_models/evidence/myofullbody/receipt_{driver,iron}.json`.
+Result status for both swings: `NOT_QUALIFIED` (the reserves exceed 10 percent of
+the effort RMS in the trunk, legs and arms). Renders: `~/Videos/Parity Audit/musculoskeletal_fullbody/`.
