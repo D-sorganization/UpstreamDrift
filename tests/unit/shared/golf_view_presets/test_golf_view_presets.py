@@ -111,9 +111,7 @@ def test_mujoco_fixed_camera_axes(name: str) -> None:
     view = -np.cross(right, up)
     np.testing.assert_allclose(view, p.view_direction(), atol=1e-9)
     assert up[2] > 0.0
-    np.testing.assert_allclose(
-        np.asarray(cam.position) + 3.0 * view, LOOKAT, atol=1e-9
-    )
+    np.testing.assert_allclose(np.asarray(cam.position) + 3.0 * view, LOOKAT, atol=1e-9)
 
 
 @pytest.mark.parametrize("name", VIEW_ORDER)
