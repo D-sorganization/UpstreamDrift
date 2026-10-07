@@ -92,7 +92,7 @@ body-b point) and so linearises a violated weld differently: the row spaces of
 $\bD$ differ by about $3\times10^{-5}$ off the manifold, and raw-state
 accelerations differ by up to $42$~rad/s$^2$.
 
-\paragraph{Failed first comparison.}  Comparing engines at the raw recorded
+\paragraph{Failed First Comparison.}  Comparing engines at the raw recorded
 states with MuJoCo's default regularisation gave MuJoCo versus Pinocchio
 differences up to $0.62$~rad/s$^2$ at early frames, while Drake versus Pinocchio
 agreed to $5\times10^{-8}$.  Switching off the regularisation alone was
@@ -119,7 +119,7 @@ component at $\bq^{*}$,
 The Newton search stops at $\max|r|\le10^{-13}$ (cap 25 iterations, otherwise
 \texttt{ArithmeticError}).
 
-\paragraph{Failed first version.}  Projecting along $\bD(\bq_0)$ only, evaluated
+\paragraph{Failed First Version.}  Projecting along $\bD(\bq_0)$ only, evaluated
 at the violated state, left a residual engine spread of $6\times10^{-8}$ in the
 projected state.  The closest-point version evaluates $\bD$ on the manifold,
 where every engine agrees, and reduces the spread to $3\times10^{-14}$.
@@ -163,7 +163,7 @@ rad/s$^2$ against Pinocchio; ``Proj.'' is after closure projection and
 ``Off-man.'' is at the raw recorded state.}
 \end{table}
 
-\paragraph{Evidence provenance.}
+\paragraph{Evidence Provenance.}
 \begin{itemize}[nosep]
 \item Receipt: \url{docs/development/full_body_models/evidence/same_input/pointwise_parity_receipt.json}
   (schema \url{same-input-pointwise-parity/v1}, PR \#11615).
