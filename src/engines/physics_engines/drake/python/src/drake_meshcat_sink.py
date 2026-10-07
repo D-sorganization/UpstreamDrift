@@ -52,7 +52,7 @@ class DrakeMeshcatSink:
                     MeshcatCone,  # type: ignore[import-not-found]
                 )
 
-                shape = MeshcatCone(radius_bottom_m, length_m)
+                shape = MeshcatCone(length_m, radius_bottom_m, radius_bottom_m)
             except ImportError:
                 # Fallback: Cylinder approximation for Drake versions lacking MeshcatCone
                 shape = Cylinder(radius_bottom_m, length_m)
