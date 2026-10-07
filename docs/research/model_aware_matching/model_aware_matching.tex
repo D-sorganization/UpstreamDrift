@@ -630,6 +630,8 @@ commit \texttt{21a2ed06}:
   \item \texttt{drift\_prediction.py}: covariance propagation omits
     $\partial f/\partial\bx$; a horizon collapses to one step; the default
     selection matrix actuates the root.
+    \emph{Resolved (\#11549, PR \#11562; per-step output and horizon contract
+    \#11545):} see \S\ref{sec:drift_prediction}.
   \item \texttt{dime\_manifold.py}: \texttt{local\_coordinates\_jacobian} is the
     identity; the retraction Jacobian is valid only at zero velocity.
     \emph{Resolved (\#11560, \#11550):} the chart is the right (body-frame)
@@ -715,6 +717,102 @@ commit \texttt{21a2ed06}:
     The duplicate \texttt{DynamicsProvider} protocols were renamed \texttt{DimeDynamicsProvider} and \texttt{EquationsOfMotionProvider} (\#11553).
   \item No inertial regressor existed anywhere in the estimation package.
 \end{itemize}
+
+\subsection{Corrected Drift Prediction and Selection-Matrix Convention}
+\label{sec:drift_prediction}
+\paragraph{Model and Assumptions.}  \texttt{drift\_prediction.py} predicts the
+next state $\bx=(\bq,\bv)\in\R^{2n}$ of a smooth, contact-free mode from the
+input-affine split of \eqref{eq:ztcf} with $\blambda_0=0$:
+$\ba=f_a(\bq,\bv)+\bM^{-1}\bS\,\bu$, $f_a=-\bM^{-1}\bh$.  Here $\bS\in\R^{n\times m}$
+is the selection matrix that maps the $m$ joint torques to generalized
+forces (the $\bB$ of \eqref{eq:eom}).  Configurations are in local
+coordinates ($\dim\bq=\dim\bv$); manifold (quaternion) states and active
+contact are refused with a receipt rather than extrapolated.  Units are SI
+(rad, m, s, N\,m).
+
+\paragraph{One Step.}  Over a step $\Delta t$ the acceleration is held constant
+(zero-order hold on $\bu$):
+\begin{equation}
+  \bx_{k+1}=f(\bx_k,\bu)=
+  \begin{bmatrix}\bq_k+\Delta t\,\bv_k+\tfrac12\Delta t^2\ba_k\\
+                 \bv_k+\Delta t\,\ba_k\end{bmatrix},\qquad
+  \mathbf{G}_k=\begin{bmatrix}\tfrac12\Delta t^2\\ \Delta t\end{bmatrix}\otimes\bM(\bq_k)^{-1}\bS .
+  \label{eq:drift_step}
+\end{equation}
+
+\paragraph{Covariance Through the Dynamics.}  With $\bu\sim\mathcal N(\boldsymbol\mu_u,\boldsymbol\Sigma_u)$,
+prior $\bP_0$ and additive model noise $\mathbf Q_w$,
+\begin{equation}
+  \bP_{k+1}=\mathbf F_k\bP_k\mathbf F_k^{\!\top}+\mathbf G_k\boldsymbol\Sigma_u\mathbf G_k^{\!\top}+\mathbf Q_w,
+  \qquad \mathbf F_k=\left.\frac{\partial f}{\partial\bx}\right|_{\bx_k,\boldsymbol\mu_u}.
+  \label{eq:drift_cov}
+\end{equation}
+$\mathbf F_k$ contains the dynamics sensitivities
+$\partial\ba/\partial\bq$, $\partial\ba/\partial\bv$ and not only the kinematic
+chain $\left[\begin{smallmatrix}\mathbf I&\Delta t\mathbf I\\0&\mathbf I\end{smallmatrix}\right]$.
+Providers expose no analytic state derivatives, so $\mathbf F_k$ is a central
+finite difference of \eqref{eq:drift_step}, with the drift re-linearised at each
+perturbed state (\texttt{transition\_jacobian}).  A prior covariance is accepted
+only with its $\mathbf F$ (\texttt{PropagatedStateCovariance}).
+
+\paragraph{Horizon.}  A horizon $H$ is $H$ applications of \eqref{eq:drift_step}
+and \eqref{eq:drift_cov} with step $\Delta t$, re-linearised at every
+$\bx_k$.  It is never one step of $H\Delta t$.  Every step is returned
+(\texttt{controlled\_trajectory}$=(\bx_1,\bP_1),\dots,(\bx_H,\bP_H)$), and the
+final step is \texttt{controlled\_prediction}.  The zero-control branch (the
+ZTCF trajectory anchor) uses the same recursion with $\bu=0$.  A horizon that
+is not an integer $\ge 1$, or a step $\Delta t$ that is not finite and positive,
+is refused with receipt \texttt{INVALID\_HORIZON}.
+
+\paragraph{Selection-Matrix Convention.}  The floating-base root is
+unactuated.  Without a caller-supplied $\bS$,
+\begin{equation}
+  \bS=\mathrm{diag}\bigl(\mathbf 0_{r},\ \mathbf I_{n-r}\bigr)\quad
+  (\text{rows and columns of the } r \text{ root DOFs zero}),
+  \label{eq:selection_default}
+\end{equation}
+with root indices $(0,\dots,5)$ by default.  This matches
+\texttt{ContinuousReplayOptions.floating\_base\_root\_dofs}.  A fixed-base model
+declares $r=0$ (\texttt{FIXED\_BASE}).  A supplied $\bS$ with any non-zero root row
+fails a \texttt{require} precondition unless root actuation is declared
+explicitly.  This keeps the ZTCF reading of the root torque-free, consistent
+with \eqref{eq:unactuated}.
+
+\paragraph{Contracts.}  Preconditions (\texttt{core.contracts.require}):
+$\boldsymbol\Sigma_u$, $\bP_0$ and $\mathbf Q_w$ have the right shape and are
+finite, symmetric and positive semidefinite, and $\mathbf F$ is finite and square.
+Postconditions (\texttt{ensure}): $\mathbf F_k\in\R^{2n\times2n}$ is finite,
+there are exactly $H$ trajectory entries, and every $\bP_k$ is finite,
+symmetric and positive semidefinite.
+
+\paragraph{Acceptance Criteria and Evidence.}  For the linear system
+$\bM\ba+\bK\bq+\mathbf D\bv=\bu$ ($\bM$ constant), \eqref{eq:drift_step} is exactly
+$\bx_{k+1}=\bA\bx_k+\mathbf G\bu$.  The returned means must match the analytic
+recursion to $10^{-12}$ absolute, and the covariances must match
+$\bA\bP\bA^{\!\top}+\mathbf G\boldsymbol\Sigma_u\mathbf G^{\!\top}+\mathbf Q_w$ to
+$10^{-7}$ relative, at every one of $H=5$ steps.  The five means must be
+pairwise distinct (separation $>10^{-3}$).  At $\Delta t=0.1$, the correct
+$\bP_1$ differs from the kinematic-only map by $3.7\,\%$ in Frobenius norm, and
+the test requires a separation above $1\,\%$.  On the nonlinear ODE pendulum,
+$H=10$ steps of $\Delta t$ match an $H$-step reference and differ from one step
+of $H\Delta t$ by more than $10^{-3}$.  For an 8-DOF floating base,
+$\bM\cdot(\bM^{-1}\bS)=\mathrm{diag}(\mathbf 0_6,1,1)$.
+
+\paragraph{Failed Implementations (Pre-\#11562, base \texttt{cef37ae9}).}
+The earlier code mapped $\bP$ by the kinematic chain.  At $\Delta t=0.1$ this
+gave $P_{01}=0$, whereas the analytic $P_{01}$ is $1.85\times10^{-5}$.  It took
+one step of $H\Delta t$: at $H=4$ the mean was off by up to
+$0.36\,\mathrm{rad\,s^{-1}}$.  Its default $\bS=\mathbf I_n$ actuated the root.
+Running these tests against that module fails all three behaviours (RED); they
+pass on the corrected module (GREEN).  \texttt{drift\_dominance\_index} is still
+evaluated only at the initial state of the horizon.  It is a diagnostic and is
+not part of this correction.
+
+\paragraph{Reproduction.}
+\texttt{QT\_QPA\_PLATFORM=offscreen MPLBACKEND=Agg python3 -m pytest
+tests/unit/estimation/test\_dime\_drift\_prediction\_horizon.py
+tests/unit/estimation/test\_dime\_drift\_covariance\_propagation.py
+tests/unit/estimation/test\_dime\_drift\_prediction.py}.
 
 \section{Roadmap}
 \label{sec:roadmap}
