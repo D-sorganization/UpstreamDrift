@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-30T07:12:00Z",
+  "generated_at": "2026-10-07T03:00:19Z",
   "rows": [
     {
       "acceptance": null,
@@ -2620,6 +2620,29 @@
         "mot": null,
         "npz": null
       },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/same_input/pointwise_parity_receipt.json",
+      "sha256": "43e6ac610a6fe1a34e126a03350455ef5b57227e2840f4b5eeb3e0ba20b588e3"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": null
+      },
       "candidate_sha": "1183f05bd9ea7b5adad7c92a995c8aa340b5dac3a388f4f69c6df89ef8ea3484",
       "capture": "driver",
       "engine": "mujoco",
@@ -4768,7 +4791,7 @@
             "unit": "m"
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "max_closure_residual_m",
             "reason": "",
             "status": "passed",
@@ -4832,7 +4855,7 @@
             "unit": ""
           },
           {
-            "measured": 2.478701664524015e-5,
+            "measured": 2.478701664524015e-05,
             "name": "required_max_closure_residual_m",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -4840,7 +4863,7 @@
             "unit": ""
           },
           {
-            "measured": 1.8289190783135055e-5,
+            "measured": 1.8289190783135055e-05,
             "name": "required_max_closure_residual_rad",
             "reason": "Required finite G1 measurement",
             "status": "passed",
@@ -5404,5 +5427,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 133
+  "total_receipts": 134
 }
