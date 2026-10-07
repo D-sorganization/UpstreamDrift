@@ -43,6 +43,10 @@ class NativeMujocoFullBodyModel:
         spec = json.loads(model_bytes)
         self.xml, self.metadata = export_full_body_mjcf(model_bytes)
         self.model_sha256 = self.metadata["model_sha256"]
+        # Tikhonov term added to the weld KKT solve.  The default keeps the
+        # canonical pipeline unchanged; same-input parity runs set it to 0 so
+        # the solve is exact like Drake's and Pinocchio's (#11606).
+        self.kkt_regularization: float = 1e-6
         self.model = mj.MjModel.from_xml_string(self.xml)
         self.data = mj.MjData(self.model)
 
@@ -218,7 +222,9 @@ class NativeMujocoFullBodyModel:
 
         jac, drift = _evaluate_weld_closure(mj, model, data, self._closure)
         total_effort = effort + tau_contact - bias
-        acceleration = _solve_kkt_dynamics(mass, total_effort, jac, drift)
+        acceleration = _solve_kkt_dynamics(
+            mass, total_effort, jac, drift, regularization=self.kkt_regularization
+        )
 
         if not np.isfinite(acceleration).all():
             raise FloatingPointError("Nonfinite full-body MuJoCo acceleration")
