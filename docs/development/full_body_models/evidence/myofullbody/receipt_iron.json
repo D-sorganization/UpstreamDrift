@@ -1,0 +1,1223 @@
+{
+  "attribution": {
+    "capacity_audit": {
+      "LEInput": {
+        "capacity_at_peak_demand_nm": 23.867474073531103,
+        "frames_demand_exceeds_capacity": 0.0653950953678474,
+        "median_capacity_over_demand": 6.822087602825984,
+        "peak_demand_nm": 33.67466109481926
+      },
+      "LFInput": {
+        "capacity_at_peak_demand_nm": 12.431904085885053,
+        "frames_demand_exceeds_capacity": 0.03814713896457766,
+        "median_capacity_over_demand": 9.690494390747096,
+        "peak_demand_nm": 14.447155086923106
+      },
+      "LSInputX": {
+        "capacity_at_peak_demand_nm": 47.83736965373389,
+        "frames_demand_exceeds_capacity": 0.010899182561307902,
+        "median_capacity_over_demand": 13.985861077773214,
+        "peak_demand_nm": 56.978665668965824
+      },
+      "LSInputY": {
+        "capacity_at_peak_demand_nm": 79.1122307734073,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 22.49604228458124,
+        "peak_demand_nm": 60.56738356560592
+      },
+      "LSInputZ": {
+        "capacity_at_peak_demand_nm": 84.22408454060279,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 43.7623685176682,
+        "peak_demand_nm": 21.949904122846736
+      },
+      "LScapInputX": {
+        "capacity_at_peak_demand_nm": 73.36314967349452,
+        "frames_demand_exceeds_capacity": 0.01634877384196185,
+        "median_capacity_over_demand": 29.725282586295606,
+        "peak_demand_nm": 73.19239198043091
+      },
+      "LScapInputY": {
+        "capacity_at_peak_demand_nm": 77.41228646143563,
+        "frames_demand_exceeds_capacity": 0.021798365122615803,
+        "median_capacity_over_demand": 13.607702459542622,
+        "peak_demand_nm": 86.59326180281667
+      },
+      "LWInputX": {
+        "capacity_at_peak_demand_nm": 17.649354493745065,
+        "frames_demand_exceeds_capacity": 0.16076294277929154,
+        "median_capacity_over_demand": 3.6930702357391185,
+        "peak_demand_nm": 21.356400390083415
+      },
+      "LWInputY": {
+        "capacity_at_peak_demand_nm": 44.878769198395744,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 10.562447148627045,
+        "peak_demand_nm": 30.09991165019317
+      },
+      "NeckInputX": {
+        "capacity_at_peak_demand_nm": 30.0,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 10.381138670766955,
+        "peak_demand_nm": 17.020847137750913
+      },
+      "NeckInputY": {
+        "capacity_at_peak_demand_nm": 36.0,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 11.067986386584028,
+        "peak_demand_nm": 15.937250383603912
+      },
+      "NeckInputZ": {
+        "capacity_at_peak_demand_nm": 15.0,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 161.03235823752024,
+        "peak_demand_nm": 2.335407917054722
+      },
+      "REInput": {
+        "capacity_at_peak_demand_nm": 24.051607962253623,
+        "frames_demand_exceeds_capacity": 0.2098092643051771,
+        "median_capacity_over_demand": 4.127185183980878,
+        "peak_demand_nm": 41.78632362078273
+      },
+      "RFInput": {
+        "capacity_at_peak_demand_nm": 13.143056898984184,
+        "frames_demand_exceeds_capacity": 0.1307901907356948,
+        "median_capacity_over_demand": 6.601711990165404,
+        "peak_demand_nm": 21.55698154920172
+      },
+      "RSInputX": {
+        "capacity_at_peak_demand_nm": 306.27829407781644,
+        "frames_demand_exceeds_capacity": 0.01634877384196185,
+        "median_capacity_over_demand": 13.99197461232449,
+        "peak_demand_nm": 28.31411622486316
+      },
+      "RSInputY": {
+        "capacity_at_peak_demand_nm": 51.27889273850261,
+        "frames_demand_exceeds_capacity": 0.02452316076294278,
+        "median_capacity_over_demand": 35.60663097312735,
+        "peak_demand_nm": 89.47660163303532
+      },
+      "RSInputZ": {
+        "capacity_at_peak_demand_nm": 61.40594813728147,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 57.698377468085646,
+        "peak_demand_nm": 23.574438535864783
+      },
+      "RScapInputX": {
+        "capacity_at_peak_demand_nm": 71.36827384239578,
+        "frames_demand_exceeds_capacity": 0.013623978201634877,
+        "median_capacity_over_demand": 6.908522287412549,
+        "peak_demand_nm": 89.26116624532783
+      },
+      "RScapInputY": {
+        "capacity_at_peak_demand_nm": 77.88036613986705,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 6.5249456130765155,
+        "peak_demand_nm": 67.30659316023977
+      },
+      "RWInputX": {
+        "capacity_at_peak_demand_nm": 32.674694239730805,
+        "frames_demand_exceeds_capacity": 0.08991825613079019,
+        "median_capacity_over_demand": 23.875852425415985,
+        "peak_demand_nm": 33.68221280465957
+      },
+      "RWInputY": {
+        "capacity_at_peak_demand_nm": 15.782285581826459,
+        "frames_demand_exceeds_capacity": 0.11444141689373297,
+        "median_capacity_over_demand": 8.030391857679108,
+        "peak_demand_nm": 24.062761214499726
+      },
+      "SpineInputX": {
+        "capacity_at_peak_demand_nm": 230.8545722543114,
+        "frames_demand_exceeds_capacity": 0.027247956403269755,
+        "median_capacity_over_demand": 5.888882539578968,
+        "peak_demand_nm": 262.0770213461652
+      },
+      "SpineInputY": {
+        "capacity_at_peak_demand_nm": 120.83045067888153,
+        "frames_demand_exceeds_capacity": 0.07629427792915532,
+        "median_capacity_over_demand": 1.9840998927749462,
+        "peak_demand_nm": 243.30677601073472
+      },
+      "TorsoInput": {
+        "capacity_at_peak_demand_nm": 140.2704452890395,
+        "frames_demand_exceeds_capacity": 0.027247956403269755,
+        "median_capacity_over_demand": 7.907239623108694,
+        "peak_demand_nm": 133.02552463393926
+      },
+      "ankle_angle_l": {
+        "capacity_at_peak_demand_nm": 311.45079018488866,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 19.33002936216952,
+        "peak_demand_nm": 105.19564078755482
+      },
+      "ankle_angle_r": {
+        "capacity_at_peak_demand_nm": 403.5351808719813,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 12.150563271852336,
+        "peak_demand_nm": 60.205610402742415
+      },
+      "hip_adduction_l": {
+        "capacity_at_peak_demand_nm": 511.07526205131495,
+        "frames_demand_exceeds_capacity": 0.02997275204359673,
+        "median_capacity_over_demand": 8.580545721834081,
+        "peak_demand_nm": 677.8790838165178
+      },
+      "hip_adduction_r": {
+        "capacity_at_peak_demand_nm": 316.16922861451997,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 9.999886552629677,
+        "peak_demand_nm": 224.96135097327814
+      },
+      "hip_flexion_l": {
+        "capacity_at_peak_demand_nm": 138.58834192399215,
+        "frames_demand_exceeds_capacity": 0.07084468664850137,
+        "median_capacity_over_demand": 7.811111789767075,
+        "peak_demand_nm": 321.5118200660246
+      },
+      "hip_flexion_r": {
+        "capacity_at_peak_demand_nm": 172.0213461740411,
+        "frames_demand_exceeds_capacity": 0.02997275204359673,
+        "median_capacity_over_demand": 4.248728313849057,
+        "peak_demand_nm": 507.71914140964117
+      },
+      "hip_rotation_l": {
+        "capacity_at_peak_demand_nm": 76.6769769515041,
+        "frames_demand_exceeds_capacity": 0.04087193460490463,
+        "median_capacity_over_demand": 42.987904295517076,
+        "peak_demand_nm": 146.96608366863646
+      },
+      "hip_rotation_r": {
+        "capacity_at_peak_demand_nm": 67.64321225101544,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 14.281907016330717,
+        "peak_demand_nm": 59.62196541202806
+      },
+      "knee_angle_l": {
+        "capacity_at_peak_demand_nm": 335.06088848496324,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 20.673250037892846,
+        "peak_demand_nm": 313.8672826839133
+      },
+      "knee_angle_r": {
+        "capacity_at_peak_demand_nm": 293.03581834405685,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 5.439473299830988,
+        "peak_demand_nm": 285.99456377897815
+      },
+      "mtp_angle_l": {
+        "capacity_at_peak_demand_nm": 5.7077161405317405,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 407.28866554202625,
+        "peak_demand_nm": 0.210519147174705
+      },
+      "mtp_angle_r": {
+        "capacity_at_peak_demand_nm": 4.399322427035325,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 169.21398782330994,
+        "peak_demand_nm": 0.4442050082271268
+      },
+      "subtalar_angle_l": {
+        "capacity_at_peak_demand_nm": 215.33698504406777,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 16.78593310343258,
+        "peak_demand_nm": 120.12233215984041
+      },
+      "subtalar_angle_r": {
+        "capacity_at_peak_demand_nm": 202.3905477550539,
+        "frames_demand_exceeds_capacity": 0.0,
+        "median_capacity_over_demand": 21.860107750418496,
+        "peak_demand_nm": 51.31811220449156
+      }
+    },
+    "definition": "waterfall: baseline, then passive force removed, then x3 and unlimited active capacity (what is left is muscle geometry); kinematic floor: effort at spec coordinates that no MyoFullBody generalised force can produce; capacity audit: peak effort versus the best single-coordinate active capacity.  Diagnostics only; none enters qualification.",
+    "kinematic_floor_reserve_over_effort_rms": {
+      "arms": 0.5364211090164391,
+      "legs": 0.10898081788869647,
+      "neck": 1.0,
+      "trunk": 0.06941240680738194
+    },
+    "waterfall_reserve_over_effort_rms": {
+      "arms": {
+        "baseline": 0.6503,
+        "capacity_unlimited": 0.5839,
+        "capacity_x3_passive_off": 0.588,
+        "passive_off": 0.6218
+      },
+      "legs": {
+        "baseline": 0.3251,
+        "capacity_unlimited": 0.1433,
+        "capacity_x3_passive_off": 0.1477,
+        "passive_off": 0.3237
+      },
+      "neck": {
+        "baseline": 0.0,
+        "capacity_unlimited": 0.0,
+        "capacity_x3_passive_off": 0.0,
+        "passive_off": 0.0
+      },
+      "trunk": {
+        "baseline": 0.5586,
+        "capacity_unlimited": 0.1425,
+        "capacity_x3_passive_off": 0.1447,
+        "passive_off": 0.3864
+      }
+    }
+  },
+  "bundle": {
+    "dt_s": 0.001,
+    "path_name": "iron.npz",
+    "sha256": "9ef8e23bb4eb4df13e7f3f96030cd9a7301760f429d70b369e9cb3c2e751e576",
+    "spec_sha256": "0c1f5ca2f4f61f3fa63a7a88963aff1774f24ce89c18997922c7649387f297ce",
+    "steps": 1827
+  },
+  "frames": 367,
+  "hybrid_statement": "Spec inverse dynamics provides the joint efforts; MyoFullBody provides only muscle moment arms and force capacity at the mapped pose.",
+  "id_consistency": {
+    "definition": "tau_muscle (MuJoCo qfrc_actuator at the solved activations, mapped by Phi^T) + reserve must equal the spec effort, and the spec plant driven by that rebuilt effort must give the same acceleration as the plant driven by the original effort.  plant_acceleration_rms_error_plain_efforts is the pre-existing plant-versus-bundle residual (midpoint state versus step mean) and is reported only as a baseline",
+    "frames": 367,
+    "passed": true,
+    "plant_acceleration_rms_difference_muscle_reserve_vs_plain": 2.4625784403873605e-10,
+    "plant_acceleration_rms_error_plain_efforts": 51.591293159112986,
+    "reference_acceleration_rms": 56.48005567361892,
+    "relative_rms_error_muscle_reserve": 4.360085008800014e-12,
+    "relative_rms_limit": 0.01,
+    "torque_closure_limit_nm": 1e-06,
+    "torque_closure_max_nm": 1.1368683772161603e-13
+  },
+  "invocation": "python3 scripts/run_myofullbody_swing.py --bundle /tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/sip_runs/bundles/iron.npz --receipt /tmp/mfb/v2/iron.json --solution /tmp/mfb/v2/iron.npz --stride 5 --workers 2",
+  "key_frames": {
+    "address": 0,
+    "finish": 1826,
+    "impact": 1260,
+    "top": 1095
+  },
+  "mapping": {
+    "errors_deg_all_frames": {
+      "femur_l": {
+        "max": 16.64467841214282,
+        "mean": 6.5542825502818145,
+        "p95": 16.283503701950686
+      },
+      "femur_r": {
+        "max": 4.907177613348667,
+        "mean": 2.667465905885347,
+        "p95": 4.8915382431284
+      },
+      "foot_l": {
+        "max": 13.759750513689989,
+        "mean": 5.235070082716093,
+        "p95": 12.6291770501834
+      },
+      "foot_r": {
+        "max": 2.4879588101902126,
+        "mean": 0.41582404351001045,
+        "p95": 0.8024060167298055
+      },
+      "forearm_l": {
+        "max": 16.222781008269727,
+        "mean": 11.944401791701482,
+        "p95": 15.33177570514769
+      },
+      "forearm_r": {
+        "max": 20.4775652559294,
+        "mean": 14.803293528077281,
+        "p95": 19.083459243162636
+      },
+      "hand_l": {
+        "max": 35.07363655684899,
+        "mean": 11.062433898646631,
+        "p95": 33.776383612287965
+      },
+      "hand_r": {
+        "max": 17.44297278650216,
+        "mean": 11.523817832667001,
+        "p95": 16.571895907962663
+      },
+      "humerus_l": {
+        "max": 0.2807125235969817,
+        "mean": 0.10202061034202815,
+        "p95": 0.26344876207015006
+      },
+      "humerus_r": {
+        "max": 0.12799851432506995,
+        "mean": 0.06152238976552634,
+        "p95": 0.10319103697555691
+      },
+      "pelvis": {
+        "max": 22.58755373517198,
+        "mean": 12.353456934630588,
+        "p95": 21.87674394223153
+      },
+      "thorax": {
+        "max": 28.73026492008976,
+        "mean": 5.300496012242171,
+        "p95": 25.84946695242925
+      },
+      "tibia_l": {
+        "max": 25.34076878175557,
+        "mean": 9.185578937987788,
+        "p95": 25.075902651198504
+      },
+      "tibia_r": {
+        "max": 4.70124917426973,
+        "mean": 2.2571903136092066,
+        "p95": 4.687781645849919
+      },
+      "toes_l": {
+        "max": 13.396421633734425,
+        "mean": 4.340360309427409,
+        "p95": 12.118527023225269
+      },
+      "toes_r": {
+        "max": 2.335778666864321,
+        "mean": 0.3654394886062295,
+        "p95": 0.7271576541786045
+      }
+    },
+    "errors_deg_at_key_frames_clamp": {
+      "address": {
+        "femur_l": 6.279,
+        "femur_r": 0.0,
+        "foot_l": 13.481,
+        "foot_r": 0.475,
+        "forearm_l": 14.786,
+        "forearm_r": 16.832,
+        "hand_l": 33.24,
+        "hand_r": 11.935,
+        "humerus_l": 0.0,
+        "humerus_r": 0.0,
+        "pelvis": 0.0,
+        "thorax": 0.0,
+        "tibia_l": 15.109,
+        "tibia_r": 3.701,
+        "toes_l": 10.34,
+        "toes_r": 0.41
+      },
+      "finish": {
+        "femur_l": 1.624,
+        "femur_r": 0.0,
+        "foot_l": 6.049,
+        "foot_r": 3.065,
+        "forearm_l": 7.904,
+        "forearm_r": 20.648,
+        "hand_l": 1.325,
+        "hand_r": 2.005,
+        "humerus_l": 0.0,
+        "humerus_r": 26.617,
+        "pelvis": 0.0,
+        "thorax": 19.729,
+        "tibia_l": 8.366,
+        "tibia_r": 3.304,
+        "toes_l": 5.495,
+        "toes_r": 2.817
+      },
+      "impact": {
+        "femur_l": 0.0,
+        "femur_r": 0.0,
+        "foot_l": 9.369,
+        "foot_r": 2.144,
+        "forearm_l": 10.584,
+        "forearm_r": 8.692,
+        "hand_l": 1.59,
+        "hand_r": 5.452,
+        "humerus_l": 1.964,
+        "humerus_r": 0.0,
+        "pelvis": 0.0,
+        "thorax": 0.0,
+        "tibia_l": 12.58,
+        "tibia_r": 2.881,
+        "toes_l": 7.19,
+        "toes_r": 1.531
+      },
+      "top": {
+        "femur_l": 24.156,
+        "femur_r": 0.0,
+        "foot_l": 28.268,
+        "foot_r": 1.957,
+        "forearm_l": 21.846,
+        "forearm_r": 15.159,
+        "hand_l": 5.662,
+        "hand_r": 13.968,
+        "humerus_l": 13.961,
+        "humerus_r": 0.0,
+        "pelvis": 0.0,
+        "thorax": 0.0,
+        "tibia_l": 36.463,
+        "tibia_r": 9.255,
+        "toes_l": 24.748,
+        "toes_r": 1.928
+      }
+    },
+    "errors_deg_at_key_frames_primary": {
+      "address": {
+        "femur_l": 3.759,
+        "femur_r": 1.866,
+        "foot_l": 4.192,
+        "foot_r": 0.107,
+        "forearm_l": 14.627,
+        "forearm_r": 16.794,
+        "hand_l": 33.053,
+        "hand_r": 11.937,
+        "humerus_l": 0.194,
+        "humerus_r": 0.052,
+        "pelvis": 9.12,
+        "thorax": 0.0,
+        "tibia_l": 6.095,
+        "tibia_r": 1.839,
+        "toes_l": 3.486,
+        "toes_r": 0.087
+      },
+      "finish": {
+        "femur_l": 4.25,
+        "femur_r": 2.341,
+        "foot_l": 1.15,
+        "foot_r": 0.788,
+        "forearm_l": 7.873,
+        "forearm_r": 9.485,
+        "hand_l": 1.33,
+        "hand_r": 6.78,
+        "humerus_l": 0.033,
+        "humerus_r": 0.115,
+        "pelvis": 21.746,
+        "thorax": 15.079,
+        "tibia_l": 2.922,
+        "tibia_r": 1.044,
+        "toes_l": 1.074,
+        "toes_r": 0.726
+      },
+      "impact": {
+        "femur_l": 7.918,
+        "femur_r": 1.801,
+        "foot_l": 2.422,
+        "foot_r": 0.6,
+        "forearm_l": 8.774,
+        "forearm_r": 8.677,
+        "hand_l": 1.697,
+        "hand_r": 5.466,
+        "humerus_l": 0.03,
+        "humerus_r": 0.016,
+        "pelvis": 0.0,
+        "thorax": 1.99,
+        "tibia_l": 5.061,
+        "tibia_r": 1.173,
+        "toes_l": 2.026,
+        "toes_r": 0.441
+      },
+      "top": {
+        "femur_l": 16.292,
+        "femur_r": 4.751,
+        "foot_l": 13.179,
+        "foot_r": 0.467,
+        "forearm_l": 9.347,
+        "forearm_r": 15.145,
+        "hand_l": 1.846,
+        "hand_r": 13.964,
+        "humerus_l": 0.272,
+        "humerus_r": 0.035,
+        "pelvis": 21.149,
+        "thorax": 28.14,
+        "tibia_l": 24.956,
+        "tibia_r": 4.548,
+        "toes_l": 12.778,
+        "toes_r": 0.458
+      }
+    },
+    "hinge_agreement": {
+      "LEInput->elbow_flexion_l": {
+        "max_abs_deg": 12.679575318425826,
+        "mean_offset_deg": -2.7839606727162947,
+        "rms_deg": 6.044750810851003,
+        "sign": -1.0
+      },
+      "REInput->elbow_flexion_r": {
+        "max_abs_deg": 16.17826825687628,
+        "mean_offset_deg": -10.618392082164384,
+        "rms_deg": 12.343432361532816,
+        "sign": -1.0
+      },
+      "ankle_angle_l->ankle_angle_l": {
+        "max_abs_deg": 5.422452637783223,
+        "mean_offset_deg": -0.958091389721348,
+        "rms_deg": 1.6396808183098268,
+        "sign": 1.0
+      },
+      "ankle_angle_r->ankle_angle_r": {
+        "max_abs_deg": 3.470488598471606,
+        "mean_offset_deg": 0.5696815927036031,
+        "rms_deg": 1.951156539721474,
+        "sign": 1.0
+      },
+      "knee_angle_l->knee_angle_l": {
+        "max_abs_deg": 13.287077553025759,
+        "mean_offset_deg": -2.4992776930374307,
+        "rms_deg": 5.5757758814968925,
+        "sign": -1.0
+      },
+      "knee_angle_r->knee_angle_r": {
+        "max_abs_deg": 18.787999282469187,
+        "mean_offset_deg": 3.4990847157467275,
+        "rms_deg": 10.483910540938282,
+        "sign": -1.0
+      }
+    },
+    "muscle_lengths": {
+      "all_finite": true,
+      "all_positive": true,
+      "frames": 367,
+      "min_length_m": 0.012471567322667706,
+      "muscles_ever_outside_range": 103,
+      "muscles_outside_over_10pct_of_frames": 36,
+      "range_definition": "normalised = (length - lengthrange[0]) / span; lengthrange is MuJoCo's length over the model's own joint limits, so 'outside' marks paths evaluated beyond MyoFullBody's validated range of motion",
+      "worst": {
+        "APL_l": 0.6839237057220708,
+        "FDP5": 0.8038147138964578,
+        "FDP5_l": 1.0,
+        "FDS4": 1.0,
+        "FDS4_l": 1.0,
+        "IO1_r": 0.6730245231607629,
+        "IO2_l": 0.5613079019073569,
+        "IO2_r": 0.7220708446866485,
+        "IO3_l": 0.6457765667574932,
+        "IO3_r": 0.7929155313351499,
+        "LAT1": 1.0,
+        "LAT1_l": 1.0,
+        "LAT3": 0.784741144414169,
+        "LU_RB4": 1.0,
+        "LU_RB4_l": 1.0,
+        "RI2": 1.0,
+        "RI2_l": 1.0,
+        "RI5": 1.0,
+        "RI5_l": 1.0,
+        "UI_UB4": 1.0,
+        "UI_UB4_l": 1.0,
+        "glmax3_l": 0.6321525885558583,
+        "glmax3_r": 1.0,
+        "vasmed_l": 1.0,
+        "vasmed_r": 1.0
+      }
+    },
+    "rom_clamps": "not applicable: share IK keeps every joint inside its range",
+    "rom_policy_used_for_poses": "share",
+    "tolerance_deg": {
+      "structurally_1_or_2_dof_segments": 15.0,
+      "three_dof_segments": 1.0,
+      "three_dof_set": [
+        "pelvis",
+        "thorax",
+        "humerus_l",
+        "humerus_r",
+        "femur_l",
+        "femur_r"
+      ]
+    }
+  },
+  "muscle_findings": {
+    "muscles_saturated_over_90pct_of_window": 2,
+    "top_by_mean_activation": [
+      {
+        "mean_activation": 0.9923451233086465,
+        "muscle": "IL_R11_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -160.0
+      },
+      {
+        "mean_activation": 0.9907790087201458,
+        "muscle": "IL_L2_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -150.0
+      },
+      {
+        "mean_activation": 0.9875991408473757,
+        "muscle": "IL_R12_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -150.0
+      },
+      {
+        "mean_activation": 0.9812645470079121,
+        "muscle": "psoas_l",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -140.0
+      },
+      {
+        "mean_activation": 0.9509159293166839,
+        "muscle": "IL_L3_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -160.0
+      },
+      {
+        "mean_activation": 0.9423479480664976,
+        "muscle": "IL_L1_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -150.0
+      },
+      {
+        "mean_activation": 0.9250617075355451,
+        "muscle": "IL_R10_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -105.0
+      },
+      {
+        "mean_activation": 0.9040013461920932,
+        "muscle": "iliacus_l",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -75.0
+      },
+      {
+        "mean_activation": 0.9039203260732946,
+        "muscle": "IL_L4_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -160.0
+      },
+      {
+        "mean_activation": 0.855540032506968,
+        "muscle": "LTpT_R11_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -40.0
+      },
+      {
+        "mean_activation": 0.8481911069190328,
+        "muscle": "sart_l",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -70.0
+      },
+      {
+        "mean_activation": 0.8301793253955323,
+        "muscle": "LTpL_L2_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      },
+      {
+        "mean_activation": 0.8144511920726265,
+        "muscle": "LTpT_T11_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      },
+      {
+        "mean_activation": 0.8109395688440815,
+        "muscle": "LTpL_L1_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -30.0
+      },
+      {
+        "mean_activation": 0.8057641505620521,
+        "muscle": "LTpT_R10_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      },
+      {
+        "mean_activation": 0.7602592085141947,
+        "muscle": "LTpL_L3_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      },
+      {
+        "mean_activation": 0.7545181046030656,
+        "muscle": "MF_m2t.3_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      },
+      {
+        "mean_activation": 0.7460549096132969,
+        "muscle": "addlong_l",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -65.0
+      },
+      {
+        "mean_activation": 0.7437826367593534,
+        "muscle": "ehl_l",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -155.0
+      },
+      {
+        "mean_activation": 0.7250332733904823,
+        "muscle": "LTpL_L4_r",
+        "peak_activation": 1.0,
+        "peak_time_to_impact_ms": -35.0
+      }
+    ],
+    "window_frames": 34,
+    "window_steps": [
+      1095,
+      1260
+    ]
+  },
+  "myofullbody": {
+    "commit": "93b0ca8f4ec90c9899ee7f05fee561e9911da91b",
+    "files": 173,
+    "inventory": {
+      "actuators": 416,
+      "bodies": 104,
+      "joints": 123,
+      "mass_kg": 84.26498825710956,
+      "mujoco_version": "3.8.0",
+      "muscles": 416,
+      "nq": 129,
+      "nv": 128,
+      "tendons": 424
+    },
+    "license": {
+      "arm_muscles": "Derived from MoBL-ARMS (Saul et al. 2015); upstream terms are BSD-3 non-commercial with citation required.",
+      "owner_ruling": "2026-10-07: the application is non-commercial (free website and free software), so the MoBL-derived arm terms are acceptable.",
+      "repository_license": "Apache-2.0 (myo_sim/LICENSE)",
+      "restriction": "Commercial use requires re-clearing the arm muscle geometry."
+    },
+    "manifest_files_sha256": "dc71cbaf42d98268ef03d373c7ee518bc79519ddef3448e982fad152e8769453",
+    "muscle_count_ok": true,
+    "repository": "MyoHub/myo_sim",
+    "schema": "myofullbody-asset-receipt/v1"
+  },
+  "neck_actuator": {
+    "actuators": [
+      "neck_torque_NeckInputX_pos",
+      "neck_torque_NeckInputX_neg",
+      "neck_torque_NeckInputY_pos",
+      "neck_torque_NeckInputY_neg",
+      "neck_torque_NeckInputZ_pos",
+      "neck_torque_NeckInputZ_neg"
+    ],
+    "capacity_nm": {
+      "NeckInputX": 30.0,
+      "NeckInputY": 36.0,
+      "NeckInputZ": 15.0
+    },
+    "enabled": true,
+    "frames_saturated_over_99pct": 0.0,
+    "is_muscle": false,
+    "peak_activation": 0.5673552673109492,
+    "source": "Maximum isometric neck moments of young men: Vasavada, Li and Delp (2001) Spine 26(17):1904-1909; Vasavada, Danaraj and Siegmund (2008) J Biomech 41:114-121.  Flexion 30, extension 52, lateral bending 36, axial rotation 15 N m (means, rounded).",
+    "statement": "MyoFullBody has no neck joints or muscles; these bounded torque actuators stand in for the neck.  They are not muscles and no neck motion is represented in MyoFullBody."
+  },
+  "per_coordinate_reserve": {
+    "LEInput": {
+      "effort_rms_nm": 8.102205689604935,
+      "peak_nm": 25.127495387607688,
+      "rms_nm": 4.306694050444132
+    },
+    "LFInput": {
+      "effort_rms_nm": 4.041211125223747,
+      "peak_nm": 12.290118542308376,
+      "rms_nm": 2.4243611521050408
+    },
+    "LSInputX": {
+      "effort_rms_nm": 12.036580748919762,
+      "peak_nm": 40.71237245204671,
+      "rms_nm": 12.333376836023621
+    },
+    "LSInputY": {
+      "effort_rms_nm": 13.84872375256054,
+      "peak_nm": 30.26895068614509,
+      "rms_nm": 3.872854353045931
+    },
+    "LSInputZ": {
+      "effort_rms_nm": 5.284400267081637,
+      "peak_nm": 33.98116341178643,
+      "rms_nm": 5.988464178483614
+    },
+    "LScapInputX": {
+      "effort_rms_nm": 14.272702203484684,
+      "peak_nm": 43.778814939806026,
+      "rms_nm": 7.261733142709655
+    },
+    "LScapInputY": {
+      "effort_rms_nm": 20.14674692009808,
+      "peak_nm": 59.76107366398125,
+      "rms_nm": 12.422709282874296
+    },
+    "LWInputX": {
+      "effort_rms_nm": 6.027343479330731,
+      "peak_nm": 18.637935243615917,
+      "rms_nm": 4.162556690794415
+    },
+    "LWInputY": {
+      "effort_rms_nm": 4.130319829573613,
+      "peak_nm": 9.088690613878695,
+      "rms_nm": 1.7790558973875825
+    },
+    "NeckInputX": {
+      "effort_rms_nm": 4.8117527463515675,
+      "peak_nm": 0.00018911842243696242,
+      "rms_nm": 5.346332536695862e-05
+    },
+    "NeckInputY": {
+      "effort_rms_nm": 4.082394309964603,
+      "peak_nm": 0.0001229716621278243,
+      "rms_nm": 3.149971304204381e-05
+    },
+    "NeckInputZ": {
+      "effort_rms_nm": 0.6299333819131645,
+      "peak_nm": 0.00010379129447812829,
+      "rms_nm": 2.799579493857467e-05
+    },
+    "REInput": {
+      "effort_rms_nm": 11.22910648345668,
+      "peak_nm": 33.433017516573834,
+      "rms_nm": 5.710712116509859
+    },
+    "RFInput": {
+      "effort_rms_nm": 5.981389956402809,
+      "peak_nm": 15.836496869454532,
+      "rms_nm": 3.515216733414513
+    },
+    "RSInputX": {
+      "effort_rms_nm": 9.923326395215142,
+      "peak_nm": 38.733047702670476,
+      "rms_nm": 12.748684547267937
+    },
+    "RSInputY": {
+      "effort_rms_nm": 17.134366587108282,
+      "peak_nm": 44.11697818524122,
+      "rms_nm": 6.672563075771107
+    },
+    "RSInputZ": {
+      "effort_rms_nm": 7.768432017311515,
+      "peak_nm": 34.586864309475374,
+      "rms_nm": 6.806374423072065
+    },
+    "RScapInputX": {
+      "effort_rms_nm": 15.275922451583615,
+      "peak_nm": 34.64759140103188,
+      "rms_nm": 7.711931158694302
+    },
+    "RScapInputY": {
+      "effort_rms_nm": 21.968060306725125,
+      "peak_nm": 48.98595708975072,
+      "rms_nm": 13.562297380443066
+    },
+    "RWInputX": {
+      "effort_rms_nm": 5.5895074691928786,
+      "peak_nm": 28.68861178783596,
+      "rms_nm": 6.8966249664337225
+    },
+    "RWInputY": {
+      "effort_rms_nm": 5.405667027158787,
+      "peak_nm": 18.740360930591066,
+      "rms_nm": 3.6308957799969965
+    },
+    "SpineInputX": {
+      "effort_rms_nm": 48.63415830013904,
+      "peak_nm": 156.2424783683554,
+      "rms_nm": 24.234954791411035
+    },
+    "SpineInputY": {
+      "effort_rms_nm": 81.19052215856917,
+      "peak_nm": 183.34193656961946,
+      "rms_nm": 41.457937880532455
+    },
+    "TorsoInput": {
+      "effort_rms_nm": 44.42846918876746,
+      "peak_nm": 129.79658116046633,
+      "rms_nm": 33.23835866032892
+    },
+    "ankle_angle_l": {
+      "effort_rms_nm": 26.99639183212828,
+      "peak_nm": 17.23510526330614,
+      "rms_nm": 3.055782025941874
+    },
+    "ankle_angle_r": {
+      "effort_rms_nm": 38.71560671058083,
+      "peak_nm": 11.223298450570589,
+      "rms_nm": 2.4953360831512277
+    },
+    "hip_adduction_l": {
+      "effort_rms_nm": 121.09464339502675,
+      "peak_nm": 186.8698608239348,
+      "rms_nm": 31.80311800640644
+    },
+    "hip_adduction_r": {
+      "effort_rms_nm": 52.69286734715075,
+      "peak_nm": 63.17895443421531,
+      "rms_nm": 9.359185066346447
+    },
+    "hip_flexion_l": {
+      "effort_rms_nm": 78.57837939267345,
+      "peak_nm": 240.59898513572347,
+      "rms_nm": 47.891401423280904
+    },
+    "hip_flexion_r": {
+      "effort_rms_nm": 129.81942465879624,
+      "peak_nm": 332.98197227970803,
+      "rms_nm": 36.69342483790265
+    },
+    "hip_rotation_l": {
+      "effort_rms_nm": 28.673850053498054,
+      "peak_nm": 101.9536860157736,
+      "rms_nm": 18.580132387149725
+    },
+    "hip_rotation_r": {
+      "effort_rms_nm": 10.449425425985773,
+      "peak_nm": 40.85546145931745,
+      "rms_nm": 11.919473386362814
+    },
+    "knee_angle_l": {
+      "effort_rms_nm": 54.862578837938564,
+      "peak_nm": 38.79947722018896,
+      "rms_nm": 7.8432334046976875
+    },
+    "knee_angle_r": {
+      "effort_rms_nm": 85.42213308628716,
+      "peak_nm": 18.800233654367474,
+      "rms_nm": 7.099637818733228
+    },
+    "mtp_angle_l": {
+      "effort_rms_nm": 0.04226027171273448,
+      "peak_nm": 10.179025124182324,
+      "rms_nm": 2.4187861798783654
+    },
+    "mtp_angle_r": {
+      "effort_rms_nm": 0.07263038079872582,
+      "peak_nm": 5.616062433486036,
+      "rms_nm": 2.417959930511956
+    },
+    "subtalar_angle_l": {
+      "effort_rms_nm": 24.645942881995367,
+      "peak_nm": 107.38242981883492,
+      "rms_nm": 16.58141650272541
+    },
+    "subtalar_angle_r": {
+      "effort_rms_nm": 9.345423306257405,
+      "peak_nm": 56.87517270240771,
+      "rms_nm": 11.545542055293812
+    }
+  },
+  "phase_breakdown": {
+    "arms": {
+      "backswing": {
+        "effort_share": 0.05497057043923397,
+        "frames": 219,
+        "ratio": 1.2548905373671755,
+        "reserve_share": 0.20467509499438022
+      },
+      "downswing": {
+        "effort_share": 0.19487703602053774,
+        "frames": 31,
+        "ratio": 0.5901795636090973,
+        "reserve_share": 0.16049151156841185
+      },
+      "follow_through": {
+        "effort_share": 0.6847572918141861,
+        "frames": 112,
+        "ratio": 0.594010748120227,
+        "reserve_share": 0.5712791055327906
+      },
+      "impact_window": {
+        "effort_share": 0.06539510172604206,
+        "frames": 5,
+        "ratio": 0.6411184641358354,
+        "reserve_share": 0.06355428790441735
+      }
+    },
+    "legs": {
+      "backswing": {
+        "effort_share": 0.2616303944073706,
+        "frames": 219,
+        "ratio": 0.15345512329486716,
+        "reserve_share": 0.05829278277044843
+      },
+      "downswing": {
+        "effort_share": 0.08652969327489407,
+        "frames": 31,
+        "ratio": 0.22868034422066885,
+        "reserve_share": 0.04281408293459154
+      },
+      "follow_through": {
+        "effort_share": 0.6075341549901401,
+        "frames": 112,
+        "ratio": 0.3952000548303536,
+        "reserve_share": 0.8977770476217266
+      },
+      "impact_window": {
+        "effort_share": 0.04430575732759516,
+        "frames": 5,
+        "ratio": 0.0515984879740508,
+        "reserve_share": 0.0011160866732334177
+      }
+    },
+    "neck": {
+      "backswing": {
+        "effort_share": 0.28099974752811063,
+        "frames": 219,
+        "ratio": 9.463252278998285e-06,
+        "reserve_share": 0.2183716715942952
+      },
+      "downswing": {
+        "effort_share": 0.0658518435575235,
+        "frames": 31,
+        "ratio": 1.090902496061439e-05,
+        "reserve_share": 0.06800633046403902
+      },
+      "follow_through": {
+        "effort_share": 0.6299969514039044,
+        "frames": 112,
+        "ratio": 1.1287088797638283e-05,
+        "reserve_share": 0.6964851548917136
+      },
+      "impact_window": {
+        "effort_share": 0.023151457510461614,
+        "frames": 5,
+        "ratio": 9.235735238742797e-06,
+        "reserve_share": 0.017136843049951986
+      }
+    },
+    "trunk": {
+      "backswing": {
+        "effort_share": 0.331591853685069,
+        "frames": 219,
+        "ratio": 0.4173551271700877,
+        "reserve_share": 0.18510210876465572
+      },
+      "downswing": {
+        "effort_share": 0.0982999271434737,
+        "frames": 31,
+        "ratio": 0.340787793599378,
+        "reserve_share": 0.03658619670487048
+      },
+      "follow_through": {
+        "effort_share": 0.5088130314116978,
+        "frames": 112,
+        "ratio": 0.6531350860488145,
+        "reserve_share": 0.6956011032905081
+      },
+      "impact_window": {
+        "effort_share": 0.06129518775975966,
+        "frames": 5,
+        "ratio": 0.6488874415586607,
+        "reserve_share": 0.0827105912399657
+      }
+    }
+  },
+  "qualification": {
+    "reasons": [
+      "reserve RMS above 10% of effort RMS: arms",
+      "reserve RMS above 10% of effort RMS: legs",
+      "reserve RMS above 10% of effort RMS: trunk"
+    ],
+    "reserve_rms_over_effort_rms_limit": 0.1,
+    "status": "NOT_QUALIFIED",
+    "uncovered_groups_scope_limitation": []
+  },
+  "receipt_digest": "cba9049fec9694b1d7d27ae3961eddb3430f1f51ca2d1dc682394a629e7a4a01",
+  "reserves_by_group": {
+    "arms": {
+      "coordinates": 18,
+      "effort_peak_nm": 89.47660163303532,
+      "effort_rms_nm": 11.785699707479765,
+      "reserve_over_effort_rms": 0.6503370041134822,
+      "reserve_peak_nm": 59.76107366398125,
+      "reserve_rms_nm": 7.664676639143533
+    },
+    "legs": {
+      "coordinates": 14,
+      "effort_peak_nm": 677.8790838165178,
+      "effort_rms_nm": 62.466441890642194,
+      "reserve_over_effort_rms": 0.32510084356465113,
+      "reserve_peak_nm": 332.98197227970803,
+      "reserve_rms_nm": 20.30789295313004
+    },
+    "neck": {
+      "coordinates": 3,
+      "effort_peak_nm": 17.020847137750913,
+      "effort_rms_nm": 3.661316878742846,
+      "reserve_over_effort_rms": 1.0734831541947842e-05,
+      "reserve_peak_nm": 0.00018911842243696242,
+      "reserve_rms_nm": 3.9303619914994723e-05
+    },
+    "trunk": {
+      "coordinates": 3,
+      "effort_peak_nm": 262.0770213461652,
+      "effort_rms_nm": 60.362988429448926,
+      "reserve_over_effort_rms": 0.5586013696121674,
+      "reserve_peak_nm": 183.34193656961946,
+      "reserve_rms_nm": 33.71884801057359
+    }
+  },
+  "schema": "myofullbody-swing-receipt-v1",
+  "sensitivity": [
+    {
+      "converged": true,
+      "force_scale": 1.0,
+      "name": "weight_1",
+      "passive_scale": 1.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6501,
+        "legs": 0.3251,
+        "neck": 0.0011,
+        "trunk": 0.5591
+      },
+      "reserve_weight": 1.0
+    },
+    {
+      "converged": true,
+      "force_scale": 1.0,
+      "name": "weight_10",
+      "passive_scale": 1.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6503,
+        "legs": 0.3251,
+        "neck": 0.0001,
+        "trunk": 0.5586
+      },
+      "reserve_weight": 10.0
+    },
+    {
+      "converged": true,
+      "force_scale": 1.0,
+      "name": "weight_1000",
+      "passive_scale": 1.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6503,
+        "legs": 0.3251,
+        "neck": 0.0,
+        "trunk": 0.5586
+      },
+      "reserve_weight": 1000.0
+    },
+    {
+      "converged": true,
+      "force_scale": 0.95,
+      "name": "force_x0.95",
+      "passive_scale": 1.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6525,
+        "legs": 0.3355,
+        "neck": 0.0,
+        "trunk": 0.5609
+      },
+      "reserve_weight": 100.0
+    },
+    {
+      "converged": true,
+      "force_scale": 1.5,
+      "name": "force_x1.5",
+      "passive_scale": 1.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6504,
+        "legs": 0.251,
+        "neck": 0.0,
+        "trunk": 0.5855
+      },
+      "reserve_weight": 100.0
+    },
+    {
+      "converged": false,
+      "force_scale": 1.0,
+      "name": "passive_off",
+      "passive_scale": 0.0,
+      "reserve_over_effort_rms": {
+        "arms": 0.6218,
+        "legs": 0.3237,
+        "neck": 0.0,
+        "trunk": 0.3864
+      },
+      "reserve_weight": 100.0
+    }
+  ],
+  "solver": {
+    "all_frames_converged": true,
+    "cross_checked_against": "scipy BVLS (musculoskeletal_static_opt.solve_frame)",
+    "method": "projected Newton on min sum(a^2) + w sum(reserve^2), 0<=a<=1",
+    "reserve_weight": 100.0
+  },
+  "spec_mass_kg": 78.0,
+  "stride": 5
+}

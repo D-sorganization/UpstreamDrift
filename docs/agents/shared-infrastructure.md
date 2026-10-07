@@ -161,6 +161,25 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 
+### MyoFullBody Muscle-Driven Swing
+
+`src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
+MyoSuite MyoFullBody model (416 muscles, Apache-2.0, MoBL-derived arms are
+non-commercial) and resolves muscle redundancy. Assets are never committed:
+`assets.fetch` downloads a pinned `myo_sim` commit into a cache and verifies
+every file by sha256 (`scripts/fetch_myofullbody.py`).
+
+- `assets` — pinned fetch, manifest, tamper rejection, licence record, model receipt.
+- `couplings.JointCoupling` — exact `mjEQ_JOINT` polynomial substitution.
+- `anatomy`, `ik`, `mapping.MyoMapper` — landmark segment frames and orientation
+  IK (`map_pose`) plus the rate map `velocity_map` (`Phi`).
+- `mapping_report` — key frames, ROM exceedance, hinge cross-check, muscle lengths.
+- `redundancy` — `MuscleBasis`, fast `solve_frame`, group reserves, fail-closed
+  `qualification`; `swing_pipeline.run_swing` builds the receipt.
+- `render` — blue-to-red activation colours, frame selection, four camera views
+  (`scripts/render_myofullbody_swing.py`).
+- Reference: `docs/research/musculoskeletal_swing/myofullbody_swing.tex`.
+
 ### MOSAIC Model-Aware Matching Estimator
 
 `src/shared/python/estimation/mosaic/` — model-aware multi-trial

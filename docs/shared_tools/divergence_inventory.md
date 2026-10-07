@@ -85,6 +85,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `motion_matching` | 0 | 0 | 0 | 268 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
+| `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `native_lanes` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `neural_motion` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `notes` | 0 | 0 | 0 | 0 | 6 | 0 |
@@ -137,7 +138,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1648** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1662** | **777** | **673** |
 
 ## Diverged Files by Package
 
