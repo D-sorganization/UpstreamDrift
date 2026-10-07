@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.model_appearance import ellipsoid_mesh, lofted_segment
+from src.shared.python.model_appearance.geometry import LoftOptions
 
 pytestmark = pytest.mark.unit
 Z = np.array([0.0, 0.0, 0.4])
@@ -25,8 +26,10 @@ def test_spindle_is_closed_with_positive_volume() -> None:
 
 
 def test_garment_band_is_thicker_than_the_skin_it_covers() -> None:
-    skin = lofted_segment(np.zeros(3), Z, 0.05, coverage=(0.0, 0.6))
-    cloth = lofted_segment(np.zeros(3), Z, 0.05, coverage=(0.0, 0.6), thickness=1.1)
+    skin = lofted_segment(np.zeros(3), Z, 0.05, LoftOptions(coverage=(0.0, 0.6)))
+    cloth = lofted_segment(
+        np.zeros(3), Z, 0.05, LoftOptions(coverage=(0.0, 0.6), thickness=1.1)
+    )
     assert cloth.volume() > skin.volume() > 0
 
 
@@ -43,7 +46,7 @@ def test_ellipsoid_volume_matches_the_analytic_value() -> None:
     [
         lambda: lofted_segment(np.zeros(3), np.zeros(3), 0.05),
         lambda: lofted_segment(np.zeros(3), Z, -0.1),
-        lambda: lofted_segment(np.zeros(3), Z, 0.05, coverage=(0.6, 0.2)),
+        lambda: lofted_segment(np.zeros(3), Z, 0.05, LoftOptions(coverage=(0.6, 0.2))),
         lambda: lofted_segment(np.zeros(3), np.array([np.nan, 0, 1]), 0.05),
         lambda: ellipsoid_mesh(np.zeros(3), np.array([1, 1, 0.0]), Z),
         lambda: ellipsoid_mesh(np.zeros(3), np.ones(3), np.zeros(3)),

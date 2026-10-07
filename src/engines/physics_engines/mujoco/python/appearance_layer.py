@@ -41,9 +41,12 @@ class _Assets:
     """Collects deduplicated texture/material/mesh assets for one document."""
 
     def __init__(self, root: ET.Element, doc: AppearanceDocument) -> None:
-        self.asset = root.find("asset")
-        if self.asset is None:
-            self.asset = ET.SubElement(root, "asset")
+        asset = root.find("asset")
+        if asset is None:
+            asset = ET.SubElement(root, "asset")
+        if asset is None:  # pragma: no cover - SubElement always returns an element
+            raise ValueError("MJCF root has no asset element")
+        self.asset: ET.Element = asset
         self.materials = library.library_materials(doc)
         self._made: set[str] = set()
         self.n_meshes = 0
@@ -63,13 +66,15 @@ class _Assets:
         if tex is not None and tex.kind != "flat":
             tex_name = f"tex_{name}{'_plane' if plane else ''}"
             ET.SubElement(
-                self.asset, "texture", **_texture_attrs(tex_name, material, plane)
+                self.asset,
+                "texture",
+                attrib=dict(_texture_attrs(tex_name, material, plane)),
             )
             attrs["texture"] = tex_name
             if plane:
                 attrs["texrepeat"] = f"{tex.repeat:g} {tex.repeat:g}"
                 attrs["texuniform"] = "true"
-        ET.SubElement(self.asset, "material", name=mat_name, **attrs)
+        ET.SubElement(self.asset, "material", attrib={"name": mat_name, **attrs})
         self._made.add(key)
         return mat_name
 
@@ -171,7 +176,9 @@ def _body_meshes(
         out.append(
             (
                 f"skin{i}",
-                geometry.lofted_segment(start, end, radius, aspect=aspect),
+                geometry.lofted_segment(
+                    start, end, radius, geometry.LoftOptions(aspect=aspect)
+                ),
                 base,
             )
         )
@@ -184,9 +191,11 @@ def _body_meshes(
                         start,
                         end,
                         radius,
-                        aspect=aspect,
-                        coverage=band,
-                        thickness=library.GARMENT_THICKNESS,
+                        geometry.LoftOptions(
+                            aspect=aspect,
+                            coverage=band,
+                            thickness=library.GARMENT_THICKNESS,
+                        ),
                     ),
                     garment,
                 )

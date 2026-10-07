@@ -68,17 +68,23 @@ def _ring_faces(n_rings: int, sides: int) -> list[tuple[int, int, int]]:
     return faces
 
 
+@dataclass(frozen=True)
+class LoftOptions:
+    """Shape options for :func:`lofted_segment`."""
+
+    aspect: float = 1.0
+    coverage: tuple[float, float] = (0.0, 1.0)
+    thickness: float = 1.0
+    rings: int = 14
+    sides: int = 20
+    width_hint: Array | None = None
+
+
 def lofted_segment(
     start: Array,
     end: Array,
     radius: float,
-    *,
-    aspect: float = 1.0,
-    coverage: tuple[float, float] = (0.0, 1.0),
-    thickness: float = 1.0,
-    rings: int = 14,
-    sides: int = 20,
-    width_hint: Array | None = None,
+    options: LoftOptions | None = None,
 ) -> Mesh:
     """Smooth lofted body between ``start`` and ``end``.
 
@@ -88,6 +94,9 @@ def lofted_segment(
     shorts and shoes. ``aspect`` is depth/width of the cross-section.
     Preconditions: finite points, positive length and radius.
     """
+    opts = options or LoftOptions()
+    aspect, coverage, thickness = opts.aspect, opts.coverage, opts.thickness
+    rings, sides, width_hint = opts.rings, opts.sides, opts.width_hint
     p0, p1 = _check_finite("start", start, 3), _check_finite("end", end, 3)
     if not math.isfinite(radius) or radius <= 0 or thickness <= 0 or aspect <= 0:
         raise ValueError("radius, thickness and aspect must be positive")
