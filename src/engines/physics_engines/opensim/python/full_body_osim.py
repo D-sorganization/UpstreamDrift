@@ -44,9 +44,14 @@ def _validate_spec(spec: Mapping[str, Any]) -> None:
     for required_key in ("bodies", "joints", "coordinate_order", "contact", "closure"):
         if required_key not in spec:
             raise ValueError(f"Missing required key in specification: {required_key!r}")
-    if len(spec["coordinate_order"]) != 44:
+    primitives = [p["coordinate"] for j in spec["joints"] for p in j["primitives"]]
+    if sorted(primitives) != sorted(spec["coordinate_order"]) or len(
+        set(primitives)
+    ) != len(primitives):
         raise ValueError(
-            f"Expected 44 coordinates, found {len(spec['coordinate_order'])}"
+            "coordinate_order must list each joint primitive coordinate exactly "
+            f"once; found {len(spec['coordinate_order'])} coordinates and "
+            f"{len(primitives)} joint primitives"
         )
 
 
@@ -65,7 +70,13 @@ def _validate_rigid_transform(matrix_like: Any) -> np.ndarray:
 
 
 def _rotation_matrix_to_xyz_euler(r_mat: np.ndarray) -> tuple[float, float, float]:
-    """Convert a 3x3 rotation matrix to body-fixed XYZ Euler angles in radians."""
+    """Convert a 3x3 rotation matrix to body-fixed (intrinsic) XYZ Euler angles.
+
+    OpenSim ``orientation`` properties are Simbody body-fixed X-Y-Z sequences,
+    ``R = Rx(a) Ry(b) Rz(c)``, which is scipy's intrinsic ``"XYZ"``; the
+    lowercase extrinsic ``"xyz"`` gives ``Rz Ry Rx`` and silently mis-orients
+    any frame whose rotation is not a single-axis one (#11611).
+    """
     import warnings
 
     with warnings.catch_warnings():
@@ -73,7 +84,7 @@ def _rotation_matrix_to_xyz_euler(r_mat: np.ndarray) -> tuple[float, float, floa
             "ignore", message="Gimbal lock detected.*", category=UserWarning
         )
         r = Rotation.from_matrix(r_mat)
-        angles = r.as_euler("xyz")
+        angles = r.as_euler("XYZ")
     return float(angles[0]), float(angles[1]), float(angles[2])
 
 
