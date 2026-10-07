@@ -5,12 +5,12 @@ through the package's public surface. They confirm that:
 
 * the registry advertises exactly the four planned backends,
 * the ODE backend constructs and structurally satisfies both the
-  :class:`SimulationBackend` and :class:`DynamicsProvider` Protocols,
+  :class:`SimulationBackend` and :class:`EquationsOfMotionProvider` Protocols,
 * name lookup is case-insensitive and forwards keyword arguments,
 * unknown / empty names raise :class:`UnknownBackendError`,
 * the GPU backend fails loudly with :class:`BackendNotAvailableError` when the
   optional Warp stack is absent, and
-* the MuJoCo backend is a :class:`DynamicsProvider` when ``mujoco`` is present.
+* the MuJoCo backend is a :class:`EquationsOfMotionProvider` when ``mujoco`` is present.
 
 No source module is imported other than the package itself, so the lazy-import
 contract (importing the package pulls in no GPU/MuJoCo deps) is respected.
@@ -24,7 +24,7 @@ import pytest
 
 from src.shared.python.simulation_backends import (
     BackendNotAvailableError,
-    DynamicsProvider,
+    EquationsOfMotionProvider,
     GolfModelParams,
     SimulationBackend,
     UnknownBackendError,
@@ -60,10 +60,10 @@ def test_available_backends_is_exact_sorted_quad() -> None:
 
 
 def test_make_ode_satisfies_both_protocols() -> None:
-    """The ODE backend is a runtime-checkable SimulationBackend + DynamicsProvider."""
+    """The ODE backend is a runtime-checkable SimulationBackend + EquationsOfMotionProvider."""
     backend = make_backend("ode", _params())
     assert isinstance(backend, SimulationBackend)
-    assert isinstance(backend, DynamicsProvider)
+    assert isinstance(backend, EquationsOfMotionProvider)
 
 
 def test_make_backend_name_is_case_insensitive() -> None:
@@ -115,4 +115,4 @@ def test_make_mjx_without_mjx_raises_not_available() -> None:
 def test_make_mujoco_is_dynamics_provider() -> None:
     """When mujoco is present, the CPU backend exposes dynamics primitives."""
     backend = make_backend("mujoco", _params())
-    assert isinstance(backend, DynamicsProvider)
+    assert isinstance(backend, EquationsOfMotionProvider)

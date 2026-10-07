@@ -36,7 +36,7 @@ TAU = np.array([4.0, -1.5])
 
 
 class _PlanarOracleProvider:
-    """``DynamicsProvider`` view of the planar double pendulum at fixed ``pi``."""
+    """``EquationsOfMotionProvider`` view of the planar double pendulum at fixed ``pi``."""
 
     def __init__(self) -> None:
         m1, m2, lc1, lc2, i1c, i2c = 1.3, 0.7, 0.45, 0.25, 0.08, 0.02

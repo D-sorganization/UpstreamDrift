@@ -36,7 +36,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeFullStepResult,
     DimeObservationWindow,
     DimeZeroInputProposal,
-    DynamicsProvider,
+    DimeDynamicsProvider,
     EstimationIntervalFactor,
     PassiveLoadSpec,
     ProviderCapability,
@@ -355,9 +355,9 @@ class TestGreenProviderContracts:
             n_q=1, n_v=1, model_hash=analytic_provider.model_hash
         )
 
-        # Both satisfy DynamicsProvider interface
-        assert isinstance(analytic_provider, DynamicsProvider)
-        assert isinstance(fake_provider, DynamicsProvider)
+        # Both satisfy DimeDynamicsProvider interface
+        assert isinstance(analytic_provider, DimeDynamicsProvider)
+        assert isinstance(fake_provider, DimeDynamicsProvider)
 
         # Neither claims native qualification by default
         assert not analytic_provider.capability.is_qualified

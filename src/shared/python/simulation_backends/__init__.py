@@ -19,6 +19,8 @@ lazily by the factory only when requested.
 
 from __future__ import annotations
 
+
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from .capabilities import (
     has_mujoco,
     has_mjx,
@@ -57,7 +59,7 @@ from .protocol import (
     BackendCapabilities,
     BatchedBackend,
     BatchTrace,
-    DynamicsProvider,
+    EquationsOfMotionProvider,
     SimState,
     SimulationBackend,
     Trace,
@@ -108,6 +110,7 @@ __all__ = [
     "DivergenceRegistryEntry",
     "DynamicsProvider",
     "EngineRun",
+    "EquationsOfMotionProvider",
     "GolfModelParams",
     "LowerSegmentParams",
     "PROVENANCE_FLAT_PREFIX",
@@ -151,3 +154,8 @@ __all__ = [
     "wrench_trace_from_force_torque",
     "ZtcfZvcfResult",
 ]
+
+
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": EquationsOfMotionProvider}
+)

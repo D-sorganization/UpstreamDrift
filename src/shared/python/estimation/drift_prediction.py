@@ -52,7 +52,7 @@ if TYPE_CHECKING:
         EstimationIntervalFactor,
         RuntimeExclusivityContract,
     )
-    from src.shared.python.simulation_backends.protocol import DynamicsProvider
+    from src.shared.python.simulation_backends.protocol import EquationsOfMotionProvider
 
 DimeTransitionMode = Literal["marginalized", "explicit"]
 
@@ -293,7 +293,7 @@ def _resolve_selection(
 
 
 def linearize_drift(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     q: np.ndarray,
     v: np.ndarray,
     *,
@@ -360,7 +360,7 @@ def predict_step(
 
 
 def integrate_step(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     q: np.ndarray,
     v: np.ndarray,
     tau: np.ndarray,
@@ -401,7 +401,7 @@ def integrate_step(
 
 
 def transition_jacobian(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     q: np.ndarray,
     v: np.ndarray,
     tau: np.ndarray,
@@ -580,7 +580,7 @@ def _validate_transition_preconditions(
 
 
 def predict_dime_transition(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     request: DimeTransitionRequest,
     *,
     exclusivity_contract: RuntimeExclusivityContract | None = None,

@@ -1,6 +1,6 @@
 """DIME Dynamics Providers (#11421, #11423).
 
-Provides concrete dynamics providers implementing the DIME DynamicsProvider protocol:
+Provides concrete dynamics providers implementing the DIME DimeDynamicsProvider protocol:
 - DeterministicFakeProvider: synthetic test provider satisfying contracts without native qualification.
 - AnalyticPendulumProvider: single-DOF analytic harmonic pendulum provider using synthetic fixtures.
 - UnderactuatedAnalyticProvider: underactuated two-link fixture provider with passive root DOF.
@@ -34,7 +34,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeFullStepRequest,
     DimeFullStepResult,
     DimeZeroInputProposal,
-    DynamicsProvider,
+    DimeDynamicsProvider,
     ProviderCapability,
     ProviderSnapshot,
     SE3Manifold,
@@ -44,7 +44,7 @@ from src.shared.python.estimation.dime_contracts import (
 
 
 def rollout_zero_input_proposal(
-    provider: DynamicsProvider, state: DimeCompleteState, duration: float, dt: float
+    provider: DimeDynamicsProvider, state: DimeCompleteState, duration: float, dt: float
 ) -> DimeZeroInputProposal:
     """Propagate forward dynamics under zero applied control to evaluate passive drift and ZTCF."""
     if hasattr(provider, "_validate_incoming_state"):

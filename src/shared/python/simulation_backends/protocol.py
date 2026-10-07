@@ -10,7 +10,7 @@ Design notes
   :class:`typing.Protocol`; the ODE and MuJoCo backends are interchangeable
   implementations. See ADR-0023.
 * **Interface segregation (LOD).** Not every backend can supply every service.
-  ``DynamicsProvider`` (mass matrix / bias forces) is implemented only by the
+  ``EquationsOfMotionProvider`` (mass matrix / bias forces) is implemented only by the
   CPU backends that expose MuJoCo/analytical primitives; ``BatchedBackend`` is
   implemented only by the GPU backend. Callers ``isinstance``-check the *exact*
   capability they need rather than assuming a god-object.
@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from src.shared.python.engine_core.capabilities import (
     Capability,
     CapabilityLevel,
@@ -419,7 +420,7 @@ class SimulationBackend(Protocol):
 
 
 @runtime_checkable
-class DynamicsProvider(Protocol):
+class EquationsOfMotionProvider(Protocol):
     """Optional contract for backends exposing analytical dynamics primitives.
 
     Implemented by the ODE reference backend and the MuJoCo CPU backend, whose
@@ -458,3 +459,8 @@ class BatchedBackend(Protocol):
             num_envs: Number of parallel environments (``> 0``).
         """
         ...
+
+
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": EquationsOfMotionProvider}
+)

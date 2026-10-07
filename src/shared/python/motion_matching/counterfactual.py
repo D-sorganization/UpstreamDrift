@@ -28,7 +28,7 @@ from src.shared.python.simulation_backends.ztcf_zvcf import (
 
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.candidate_session import CandidateSession
-    from src.shared.python.simulation_backends.protocol import DynamicsProvider
+    from src.shared.python.simulation_backends.protocol import EquationsOfMotionProvider
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ class AccelerationDecomposition:
     @classmethod
     def from_dynamics(
         cls,
-        provider: DynamicsProvider,
+        provider: EquationsOfMotionProvider,
         q: NDArray[np.float64],
         v: NDArray[np.float64],
         tau: NDArray[np.float64],

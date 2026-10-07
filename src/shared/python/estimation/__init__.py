@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from src.shared.python.estimation.identifiability import (
     IdentifiabilityGateOptions,
     IdentifiabilityGateReport,
@@ -112,7 +114,7 @@ from src.shared.python.estimation.dime_contracts import (
     DimeFullStepResult,
     DimeObservationWindow,
     DimeZeroInputProposal,
-    DynamicsProvider,
+    DimeDynamicsProvider,
     EstimationIntervalFactor,
     ManifoldContract,
     PassiveLoadSpec,
@@ -370,6 +372,7 @@ __all__ = [
     "DimeCompleteState",
     "DimeContactConstraintsFactor",
     "DimeCostBreakdown",
+    "DimeDynamicsProvider",
     "DimeDynamicsWindowFactor",
     "DimeDynamicsWindowOptions",
     "DimeDynamicsWindowProblem",
@@ -392,9 +395,9 @@ __all__ = [
     "DimeTransitionPrediction",
     "DimeTransitionRequest",
     "DimeZeroInputProposal",
+    "DynamicsProvider",
     "DriftAndPredictionPayload",
     "DriftLinearization",
-    "DynamicsProvider",
     "EngineCapabilitySpec",
     "EngineQualificationEntry",
     "EngineQualificationMatrix",
@@ -590,3 +593,8 @@ __all__ = [
     "generate_readiness_matrix",
     "render_markdown_matrix",
 ]
+
+
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": DimeDynamicsProvider}
+)
