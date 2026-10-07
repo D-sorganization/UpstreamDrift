@@ -1,0 +1,15 @@
+{
+  "schema_version": "character-preset-v1",
+  "id": "senior",
+  "name": "Senior",
+  "description": "Nominal senior golfer, 7-iron.",
+  "category": "age",
+  "parameters": {
+    "stature_m": 1.73,
+    "mass_kg": 82.0,
+    "trunk_scale": 0.97,
+    "club": "iron7"
+  },
+  "provenance": "Nominal senior values chosen for the builder.",
+  "limitations": "Nominal values, not measured data; review before scientific use. Age-related range-of-motion and strength limits are not modelled."
+}
