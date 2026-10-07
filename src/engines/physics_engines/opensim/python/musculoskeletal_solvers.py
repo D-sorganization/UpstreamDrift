@@ -18,6 +18,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 import logging
 from pathlib import Path
+import time
 from typing import Any
 
 import numpy as np
@@ -113,8 +114,8 @@ def build_moco_inverse(
     *,
     mesh_interval: float,
     muscle_weight: float = 1.0,
-    reserve_weight: float = 10.0,
-    upper_weight: float = 0.01,
+    reserve_weight: float = 1.0,
+    upper_weight: float = 1.0,
     max_iterations: int = 400,
     convergence_tolerance: float = 1e-2,
 ) -> Any:
@@ -160,6 +161,45 @@ def build_moco_inverse(
     goal.setWeightForControlPattern(".*reserve_.*", reserve_weight)
     goal.setWeightForControlPattern(".*upper_.*", upper_weight)
     return inverse, study
+
+
+def solve_moco_pilot(
+    model_path: str | Path,
+    kinematics_file: str | Path,
+    loads_xml: str | Path,
+    window: SolveWindow,
+    *,
+    mesh_interval: float,
+    max_iterations: int,
+) -> dict[str, Any]:
+    """Run a short ``MocoInverse`` pilot and return an honest status record.
+
+    A sealed (unconverged) trajectory is reported as such, never as a result.
+    """
+    start = time.time()
+    _, study = build_moco_inverse(
+        model_path,
+        kinematics_file,
+        loads_xml,
+        window,
+        mesh_interval=mesh_interval,
+        max_iterations=max_iterations,
+    )
+    solution = study.solve()
+    record: dict[str, Any] = {
+        "solver": "opensim.MocoInverse/Ipopt (Hermite-Simpson, DGF2016, rigid tendon)",
+        "window_s": [window.t_start, window.t_end],
+        "mesh_interval_s": mesh_interval,
+        "max_iterations": max_iterations,
+        "wall_clock_s": time.time() - start,
+        "converged": bool(solution.success()),
+        "status": str(solution.getStatus()),
+    }
+    if not record["converged"]:
+        solution.unseal()
+    record["objective"] = float(solution.getObjective())
+    record["iterations"] = int(solution.getNumIterations())
+    return record
 
 
 def activation_table_to_arrays(

@@ -47,6 +47,14 @@ def main() -> int:
     parser.add_argument("--t-end", type=float, default=1.45)
     parser.add_argument("--cutoff-hz", type=float, default=15.0)
     parser.add_argument("--so-step", type=int, default=2)
+    parser.add_argument(
+        "--moco-pilot",
+        type=float,
+        nargs=3,
+        metavar=("T0", "T1", "MESH_S"),
+        help="also run a short MocoInverse pilot on [T0, T1] with this mesh interval",
+    )
+    parser.add_argument("--moco-iterations", type=int, default=25)
     parser.add_argument("--phase-split", type=float, default=1.08)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -60,7 +68,12 @@ def main() -> int:
         phase_split_s=args.phase_split,
         base_model=args.base_model,
     )
-    receipt = run_pipeline(cfg, args.receipt)
+    receipt = run_pipeline(
+        cfg,
+        args.receipt,
+        moco_pilot=args.moco_pilot,
+        moco_iterations=args.moco_iterations,
+    )
     logger.info("receipt: %s", args.receipt)
     logger.info("%s", json.dumps(receipt["results"]["per_group"], indent=2))
     return 0

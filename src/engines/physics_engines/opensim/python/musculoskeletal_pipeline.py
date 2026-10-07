@@ -293,11 +293,31 @@ def build_receipt(
     }
 
 
-def run_pipeline(cfg: PipelineConfig, receipt_path: str | Path) -> dict[str, Any]:
-    """Run all steps and write the receipt; return it."""
+def run_pipeline(
+    cfg: PipelineConfig,
+    receipt_path: str | Path,
+    *,
+    moco_pilot: tuple[float, float, float] | None = None,
+    moco_iterations: int = 25,
+) -> dict[str, Any]:
+    """Run all steps and write the receipt; return it.
+
+    ``moco_pilot=(t0, t1, mesh_s)`` additionally runs a short MocoInverse pilot
+    whose (usually unconverged) status is recorded verbatim in the receipt.
+    """
     prep = prepare_inputs(cfg)
     summary = solve_and_summarise(cfg, prep)
     receipt = build_receipt(cfg, prep, summary)
+    if moco_pilot is not None:
+        t0, t1, mesh = moco_pilot
+        receipt["moco_inverse"] = solvers.solve_moco_pilot(
+            prep["model_path"],
+            prep["coords_path"],
+            prep["loads_xml"],
+            solvers.SolveWindow(t0, t1),
+            mesh_interval=mesh,
+            max_iterations=moco_iterations,
+        )
     path = Path(receipt_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
