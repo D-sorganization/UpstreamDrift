@@ -33,6 +33,7 @@ from src.shared.python.estimation.dime_solver_cache import (
 from src.shared.python.estimation.dime_dynamics_window import (
     DefectMode,
     DimeDynamicsWindowProblem,
+    solve_dime_dynamics_window,
 )
 
 
@@ -564,3 +565,67 @@ class TestDimeCostBreakdownIsMeasured:
             _targets_problem([[0.1], [0.2], [0.3]]), cache
         )
         assert bd.failure_costs == 0.0
+
+
+class TestStoredTimingsAreMeasured:
+    """#11545: a solve duration is recorded only when it was actually measured."""
+
+    @staticmethod
+    def _identity() -> DimeCacheIdentity:
+        return DimeCacheIdentity(
+            model_hash="m",
+            param_hash="p",
+            contact_policy=ContactPolicy.NATIVE_ELIMINATED,
+            solver_config_hash="c",
+            camera_config_hash="cam",
+            job_id="j",
+        )
+
+    def test_unmeasured_store_records_no_timing(self) -> None:
+        cache = DimeSolverCache()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        result = solve_dime_dynamics_window(problem)
+        cache.store_window_solve(self._identity(), problem, result)
+        assert cache.get_window_solve_timings(self._identity(), problem) == ()
+
+    def test_measured_store_records_the_supplied_duration(self) -> None:
+        cache = DimeSolverCache()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        result = solve_dime_dynamics_window(problem)
+        cache.store_window_solve(self._identity(), problem, result, elapsed_s=0.25)
+        assert cache.get_window_solve_timings(self._identity(), problem) == (0.25,)
+
+    def test_negative_or_non_finite_duration_rejected(self) -> None:
+        cache = DimeSolverCache()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        result = solve_dime_dynamics_window(problem)
+        for bad in (-1.0, float("nan"), float("inf")):
+            with pytest.raises(PreconditionError):
+                cache.store_window_solve(
+                    self._identity(), problem, result, elapsed_s=bad
+                )
+
+    def test_accelerated_solve_stores_the_measured_duration(self) -> None:
+        cache = DimeSolverCache()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        _, bd = accelerated_solve_dynamics_window(problem, cache)
+        timings = [t for ts in cache._timing_store.values() for t in ts]
+        assert timings == [bd.window_solve_time_s]
+
+    @pytest.mark.parametrize(
+        "invalidate",
+        [
+            lambda c, i: c.invalidate_job(i.job_id),
+            lambda c, i: c.invalidate_on_camera_change(i.camera_config_hash),
+            lambda c, i: c.invalidate_on_body_change(i.param_hash),
+        ],
+    )
+    def test_invalidation_purges_stored_timings(self, invalidate: Any) -> None:
+        cache = DimeSolverCache()
+        identity = self._identity()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        result = solve_dime_dynamics_window(problem)
+        cache.store_window_solve(identity, problem, result, elapsed_s=0.25)
+        invalidate(cache, identity)
+        assert cache.get_window_solve(identity, problem) is None
+        assert cache.get_window_solve_timings(identity, problem) == ()

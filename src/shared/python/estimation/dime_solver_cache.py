@@ -417,13 +417,24 @@ class DimeSolverCache:
         identity: DimeCacheIdentity,
         problem: DimeDynamicsWindowProblem,
         result: DimeDynamicsWindowResult,
-        elapsed_s: float = 0.0,
+        elapsed_s: float | None = None,
     ) -> None:
-        """Store converged window solve result and track latency."""
+        """Store converged window solve result and track measured latency.
+
+        Preconditions: ``elapsed_s`` is ``None`` (not measured) or a finite,
+        non-negative duration in seconds taken around the real solve.
+        Postcondition: a duration is recorded only when supplied; an unmeasured
+        solve leaves no timing rather than a fabricated ``0.0`` (#11545).
+        """
+        require(
+            elapsed_s is None or (np.isfinite(elapsed_s) and elapsed_s >= 0.0),
+            "elapsed_s must be None (not measured) or finite and non-negative",
+        )
         key = identity.to_composite_key(_window_problem_qualifier(problem))
         with self._lock:
             self._window_store[key] = result
-            self._timing_store.setdefault(key, []).append(elapsed_s)
+            if elapsed_s is not None:
+                self._timing_store.setdefault(key, []).append(float(elapsed_s))
             self._register_indices(identity, key)
 
     def get_window_solve(
@@ -436,35 +447,42 @@ class DimeSolverCache:
         with self._lock:
             return self._window_store.get(key)
 
+    def get_window_solve_timings(
+        self,
+        identity: DimeCacheIdentity,
+        problem: DimeDynamicsWindowProblem,
+    ) -> tuple[float, ...]:
+        """Measured solve durations (s) recorded for this entry; empty = not measured."""
+        key = identity.to_composite_key(_window_problem_qualifier(problem))
+        with self._lock:
+            return tuple(self._timing_store.get(key, ()))
+
+    def _purge_keys(self, keys: set[str]) -> None:
+        """Drop every stored value, including measured timings, for ``keys``."""
+        for k in keys:
+            self._drift_store.pop(k, None)
+            self._step_store.pop(k, None)
+            self._jacobian_store.pop(k, None)
+            self._window_store.pop(k, None)
+            self._timing_store.pop(k, None)
+
     def invalidate_on_camera_change(self, camera_config_hash: str) -> None:
         """Invalidate all cache entries associated with a modified camera setup."""
         with self._lock:
             keys_to_purge = self._camera_index.pop(camera_config_hash, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
     def invalidate_on_body_change(self, param_hash: str) -> None:
         """Invalidate all cache entries associated with modified body parameters."""
         with self._lock:
             keys_to_purge = self._body_index.pop(param_hash, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
     def invalidate_job(self, job_id: str) -> None:
         """Invalidate all cache entries associated with a finished or isolated job."""
         with self._lock:
             keys_to_purge = self._job_index.pop(job_id, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
 
 def accelerated_solve_dynamics_window(

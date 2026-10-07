@@ -17,7 +17,7 @@ Provides:
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 import hashlib
 from typing import Any
@@ -157,14 +157,17 @@ class IndependentReplayMetrics:
 
     ``reproducibility_error`` and ``alignment_metric`` are ``None`` when no
     reference trajectory was supplied: they were not measured (issue #11551).
+    ``max_angular_drift_rad``, ``cancellation_ratio`` and
+    ``grf_vertical_equilibrium_rms`` are ``None`` because the replay does not
+    compute them yet: a literal ``0.0`` would read as a perfect result (#11545).
     """
 
     max_position_drift_m: float
     rms_position_drift_m: float
     max_velocity_drift: float
-    max_angular_drift_rad: float
+    max_angular_drift_rad: float | None
     alignment_metric: float | None
-    cancellation_ratio: float
+    cancellation_ratio: float | None
     reproducibility_error: float | None
     grf_vertical_equilibrium_rms: float | None = None
     satisfies_frozen_tolerances: bool = True
@@ -185,15 +188,17 @@ class IndependentReplayMetrics:
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> IndependentReplayMetrics:
         grf = data.get("grf_vertical_equilibrium_rms")
+        ang = data.get("max_angular_drift_rad")
+        canc = data.get("cancellation_ratio")
         align = data.get("alignment_metric")
         repro = data.get("reproducibility_error")
         return cls(
             max_position_drift_m=float(data["max_position_drift_m"]),
             rms_position_drift_m=float(data["rms_position_drift_m"]),
             max_velocity_drift=float(data["max_velocity_drift"]),
-            max_angular_drift_rad=float(data["max_angular_drift_rad"]),
+            max_angular_drift_rad=float(ang) if ang is not None else None,
             alignment_metric=float(align) if align is not None else None,
-            cancellation_ratio=float(data["cancellation_ratio"]),
+            cancellation_ratio=float(canc) if canc is not None else None,
             reproducibility_error=float(repro) if repro is not None else None,
             grf_vertical_equilibrium_rms=float(grf) if grf is not None else None,
             satisfies_frozen_tolerances=bool(data["satisfies_frozen_tolerances"]),
@@ -352,6 +357,18 @@ def _rollout_continuous_replay(
     return states
 
 
+_GATE_METRIC_NAMES: tuple[str, ...] = (
+    "max_angular_drift_rad",
+    "cancellation_ratio",
+    "grf_vertical_equilibrium_rms",
+)
+
+
+def _unmeasured_gate_metrics(metrics: IndependentReplayMetrics) -> tuple[str, ...]:
+    """Names of acceptance metrics that were not measured (value is None)."""
+    return tuple(n for n in _GATE_METRIC_NAMES if getattr(metrics, n) is None)
+
+
 def _compute_replay_metrics(
     traj_states: list[DimeCompleteState],
     reference_trajectory: Sequence[DimeCompleteState] | None,
@@ -388,24 +405,28 @@ def _compute_replay_metrics(
     v_norms = [float(np.linalg.norm(s.v)) for s in traj_states]
     max_v = float(np.max(v_norms)) if v_norms else 0.0
 
-    # Fail closed: without a reference there is nothing to qualify against.
-    satisfies_tol = reproducibility_err is not None and bool(
-        max_pos_drift <= tol.max_drift_m
-        or reproducibility_err <= tol.reproducibility_atol
-    )
-
     metrics = IndependentReplayMetrics(
         max_position_drift_m=max_pos_drift,
         rms_position_drift_m=rms_pos_drift,
         max_velocity_drift=max_v,
-        max_angular_drift_rad=0.0,
+        max_angular_drift_rad=None,  # not computed: not measured
         alignment_metric=align,
-        cancellation_ratio=0.0,
+        cancellation_ratio=None,  # not computed: not measured
         reproducibility_error=reproducibility_err,
-        grf_vertical_equilibrium_rms=0.0,
-        satisfies_frozen_tolerances=satisfies_tol,
+        grf_vertical_equilibrium_rms=None,  # not computed: not measured
+        satisfies_frozen_tolerances=False,
     )
-    return metrics, satisfies_tol
+    # Fail closed: without a reference there is nothing to qualify against, and a
+    # frozen acceptance metric that was not measured cannot pass (#11545).
+    satisfies_tol = (
+        reproducibility_err is not None
+        and not _unmeasured_gate_metrics(metrics)
+        and bool(
+            max_pos_drift <= tol.max_drift_m
+            or reproducibility_err <= tol.reproducibility_atol
+        )
+    )
+    return replace(metrics, satisfies_frozen_tolerances=satisfies_tol), satisfies_tol
 
 
 def execute_continuous_replay(
@@ -442,6 +463,11 @@ def execute_continuous_replay(
     if reference_trajectory is None:
         unqualified_reasons = (
             "No reference trajectory supplied: reproducibility not measured",
+        )
+    unmeasured = _unmeasured_gate_metrics(metrics)
+    if unmeasured:
+        unqualified_reasons += (
+            "Acceptance metrics not measured: " + ", ".join(unmeasured),
         )
 
     cap = provider.capability
