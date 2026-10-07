@@ -20,6 +20,7 @@ from typing import Any, Final, Literal, Protocol, runtime_checkable
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.core.deprecation import deprecated_alias_getattr
 from src.shared.python.contracts import (
     ContractViolationError,
     PreconditionError,
@@ -928,7 +929,7 @@ class RuntimeExclusivityContract:
 
 
 @runtime_checkable
-class DynamicsProvider(Protocol):
+class DimeDynamicsProvider(Protocol):
     """Protocol for stateful dynamics providers supporting DIME contracts."""
 
     @property
@@ -971,12 +972,13 @@ __all__ = [
     "DIME_CONTRACTS_VERSION",
     "DeterministicFakeProvider",
     "DimeCompleteState",
+    "DimeDynamicsProvider",
     "DimeEstimationResult",
     "DimeFullStepRequest",
     "DimeFullStepResult",
     "DimeObservationWindow",
     "DimeZeroInputProposal",
-    "DynamicsProvider",
+    "DynamicsProvider",  # noqa: F822 - deprecated alias via module __getattr__
     "EstimationIntervalFactor",
     "ManifoldContract",
     "PassiveLoadSpec",
@@ -990,3 +992,8 @@ __all__ = [
     "VectorSpaceManifold",
     "check_qualification_rules",
 ]
+
+
+__getattr__ = deprecated_alias_getattr(
+    __name__, {"DynamicsProvider": DimeDynamicsProvider}
+)

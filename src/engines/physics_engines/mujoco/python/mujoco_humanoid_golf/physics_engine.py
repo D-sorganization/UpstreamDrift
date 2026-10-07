@@ -714,7 +714,8 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
 
         **Physics**: With τ=0, acceleration is purely passive:
-            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+            q̈_ZTCF = M(q)⁻¹ · (J^T·λ₀ - C(q,v)·v - g(q))
+            (λ₀: constraint reactions recomputed under τ = 0)
 
         Args:
             q: Joint positions (n_q,) [rad or m]
@@ -766,13 +767,14 @@ class MuJoCoPhysicsEngine(BasePhysicsEngine):
         instantaneously?"
 
         **Physics**: With v=0, acceleration has no velocity-dependent terms:
-            q̈_ZVCF = M(q)⁻¹ · (g(q) + J^T·λ)
+            q̈_ZVCF = M(q)⁻¹ · (J^T·λ₀₀ - g(q))
+            (λ₀₀: constraint reactions recomputed under v = 0, τ = 0)
 
         Args:
             q: Joint positions (n_q,) [rad or m]
 
         Returns:
-            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+            q̈_ZVCF: Acceleration with v=0 and u=0 (n_v,) [rad/s² or m/s²]
         """
         if q is None:
             raise ValueError("q must be provided")

@@ -198,17 +198,17 @@ if has_mjx():
 ```python
 import numpy as np
 
-from src.shared.python.simulation_backends import DynamicsProvider, make_backend
+from src.shared.python.simulation_backends import EquationsOfMotionProvider, make_backend
 
 ode = make_backend("ode", GolfModelParams.default())
 q = np.array([0.3, -0.2])
-if isinstance(ode, DynamicsProvider):  # ode/mujoco satisfy this; mjwarp does not
+if isinstance(ode, EquationsOfMotionProvider):  # ode/mujoco satisfy this; mjwarp does not
     mass = ode.mass_matrix(q)          # (2, 2)
     bias = ode.bias_forces(q, np.zeros(2))  # (2,)
 ```
 
 Asking `mjwarp` for `mass_matrix` raises `BackendCapabilityError` — its
-`provides_dynamics` flag is `False`. Branch on the `DynamicsProvider` Protocol
+`provides_dynamics` flag is `False`. Branch on the `EquationsOfMotionProvider` Protocol
 (or `backend.capabilities.provides_dynamics`) rather than assuming every backend
 offers every service.
 

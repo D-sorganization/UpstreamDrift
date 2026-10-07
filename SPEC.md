@@ -8319,6 +8319,8 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-07 | #11638 | Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates) |
+| 2026-10-07 | #11641 | ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case |
 | 2026-10-07 | #11637 | Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545). |
 | 2026-10-07 | #11636 | Bump tornado to 6.5.10 and remove the three stale tornado pip-audit waivers |
 | 2026-10-07 | #11627 | Phase 2: spec-driven musculoskeletal model, exact contact, per-frame static optimisation |

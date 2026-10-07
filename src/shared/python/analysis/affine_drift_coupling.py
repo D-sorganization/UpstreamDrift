@@ -21,7 +21,7 @@ from src.shared.python.simulation_backends.ztcf_zvcf import ztcf_acceleration
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from src.shared.python.simulation_backends.protocol import DynamicsProvider
+    from src.shared.python.simulation_backends.protocol import EquationsOfMotionProvider
 
 __all__ = [
     "AffineDriftCouplingResult",
@@ -161,7 +161,7 @@ def extract_double_pendulum_kinematics(
 
 
 def couple_trace_to_affine_drift(
-    provider: DynamicsProvider,
+    provider: EquationsOfMotionProvider,
     trace: Trace,
     *,
     q_indices: Sequence[int] | None = None,
@@ -314,7 +314,7 @@ def _extract_control(trace: Trace, control_indices: Sequence[int] | None) -> np.
     return tau.copy()
 
 
-def _inverse_mass(provider: DynamicsProvider, q: np.ndarray) -> np.ndarray:
+def _inverse_mass(provider: EquationsOfMotionProvider, q: np.ndarray) -> np.ndarray:
     """Return ``M(q)^-1`` with shape and finiteness checks."""
     mass = np.asarray(provider.mass_matrix(q), dtype=float)
     require(

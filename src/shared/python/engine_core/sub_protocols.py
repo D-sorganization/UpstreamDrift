@@ -361,7 +361,7 @@ class DynamicsComputable(Protocol):
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive (drift) acceleration with zero control inputs.
 
-        Section F Requirement: q_ddot_drift = M(q)^-1 * (C(q,v)v + g(q))
+        Section F Requirement: q_ddot_drift = M(q)^-1 * (-C(q,v)v - g(q))
 
         Returns:
             q_ddot_drift: Drift acceleration vector (n_v,).
