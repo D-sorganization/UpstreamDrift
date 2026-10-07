@@ -203,13 +203,9 @@ class AssemblyCanvas(QGraphicsView):
             item.setBrush(QBrush(_OCCUPIED if name in taken else _FREE))
 
     def _children(self) -> dict[str, list[str]]:
-        children: dict[str, list[str]] = {n: [] for n in self.session.model.links}
-        for joint in self.session.model.joints.values():
-            parent, child = joint.find("parent"), joint.find("child")
-            if parent is not None and child is not None:
-                children.setdefault(parent.get("link", ""), []).append(
-                    child.get("link", "")
-                )
+        children: dict[str, list[str]] = {n: [] for n in self.session.link_names()}
+        for parent, child in self.session.link_edges():
+            children.setdefault(parent, []).append(child)
         return children
 
     def _layout(self) -> dict[str, tuple[float, float]]:

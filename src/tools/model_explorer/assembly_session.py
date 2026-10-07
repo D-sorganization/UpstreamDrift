@@ -28,6 +28,7 @@ from src.tools.model_explorer.composition_ux import (
 )
 from src.tools.model_explorer.composition_validator import (
     CompositionFinding,
+    CompositionValidationResult,
 )
 from src.tools.model_explorer.frankenstein_editor.model import URDFModel
 from src.tools.model_explorer.part_catalog import (
@@ -105,6 +106,18 @@ class AssemblySession:
         if listener is None:
             raise ValueError("listener must be provided")
         self._listeners.append(listener)
+
+    def link_names(self) -> tuple[str, ...]:
+        """Names of every link in the assembled model."""
+        return tuple(self.model.links)
+
+    def link_edges(self) -> tuple[tuple[str, str], ...]:
+        """(parent, child) link pairs for every joint."""
+        return self.model.joint_edges()
+
+    def validate(self) -> CompositionValidationResult:
+        """Run composition validation on the current model."""
+        return self.model.validate_composition()
 
     def instance(self, instance_id: str) -> PlacedPart:
         """Return a placed part by instance id."""
@@ -329,9 +342,6 @@ class AssemblySession:
             listener()
 
     def _sync_metadata(self) -> None:
-        self.model.other_elements = [
-            e for e in self.model.other_elements if e.tag != ASSEMBLY_TAG
-        ]
         record = {
             "schema": ASSEMBLY_SCHEMA,
             "counter": self._counter,
@@ -339,7 +349,7 @@ class AssemblySession:
         }
         element = ET.Element(ASSEMBLY_TAG)
         element.text = json.dumps(record, sort_keys=True)
-        self.model.other_elements.append(element)
+        self.model.replace_extension(element)
 
 
 def _payload(part: PartSpec, prefix: str) -> CompositionDragPayload:

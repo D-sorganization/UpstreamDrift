@@ -96,6 +96,22 @@ class URDFModel:
             is_modified=self.is_modified,
         )
 
+    def joint_edges(self) -> tuple[tuple[str, str], ...]:
+        """(parent, child) link pairs for every joint that names both."""
+        edges = []
+        for joint in self.joints.values():
+            parent, child = joint.find("parent"), joint.find("child")
+            if parent is not None and child is not None:
+                edges.append((parent.get("link", ""), child.get("link", "")))
+        return tuple(edges)
+
+    def replace_extension(self, element: ET.Element) -> None:
+        """Replace any top-level extra element sharing ``element``'s tag."""
+        if element is None:
+            raise ValueError("element must be provided")
+        kept = [e for e in self.other_elements if e.tag != element.tag]
+        self.other_elements = [*kept, element]
+
     def validate_composition(self) -> CompositionValidationResult:
         """Validate this composed model before export."""
         return CompositionValidator().validate_model(self)

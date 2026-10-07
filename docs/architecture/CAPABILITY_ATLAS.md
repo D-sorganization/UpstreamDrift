@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**63 launcher tiles · 51 feature contracts.**
+**63 launcher tiles · 52 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -235,6 +235,7 @@ flowchart LR
 | Matched Swing Results Browser | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/matched_swing_browser/gui.py) |
 | MATLAB/Simscape model suite | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/matlab_suite_dialog.py) |
 | Model Explorer (browse/select/build URDF-MJCF) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/launch_model_explorer.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ModelExplorer.tsx) |
+| Frankenstein drag-and-drop assembly with typed attachment ports | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/frankenstein_editor/assembly_panel.py) |
 | Motion Matching tour-average and club-only Excel matching | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
 | Historical Player Library And Source Review | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/necromatcher/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/necromatcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Necromatcher.tsx) |
 | Pose Studio interactive pose editing | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/pose_studio/__main__.py) |

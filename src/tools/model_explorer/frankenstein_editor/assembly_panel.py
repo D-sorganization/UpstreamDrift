@@ -203,7 +203,7 @@ class AssemblyPanel(QWidget):
 
     def _refresh_validation(self) -> None:
         self.validation_list.clear()
-        findings = self.session.model.validate_composition().findings
+        findings = self.session.validate().findings
         if not findings:
             self.validation_list.addItem("Valid: no findings")
         for finding in findings:
