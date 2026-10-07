@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T06:09:52Z",
+  "generated_at": "2026-10-07T06:57:19Z",
   "rows": [
     {
       "acceptance": null,
@@ -2526,7 +2526,7 @@
       "artefacts": {
         "gif": null,
         "mot": null,
-        "npz": null
+        "npz": "docs/development/full_body_models/evidence/musculoskeletal/static_opt_v2_driver.npz"
       },
       "candidate_sha": null,
       "capture": null,
@@ -2543,6 +2543,52 @@
       "reason": "Unrecognized directory path structure",
       "receipt_path": "docs/development/full_body_models/evidence/musculoskeletal/receipt.json",
       "sha256": "b30898092d575aa5d09e51b1c2d47716259bc963065d4b8b7a06f45d5ef27ca0"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/musculoskeletal/static_opt_v2_driver.npz"
+      },
+      "candidate_sha": "d7aeb9a886c6e2cf414e99af9d0e33cf62d6060271b1a9d23c36678cacfeb678",
+      "capture": "driver",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/musculoskeletal/receipt_v2_driver.json",
+      "sha256": "563f5ef54726a20145171e57694cf46199884bd867deac572203ee3188c7e3fd"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/musculoskeletal/static_opt_v2_driver.npz"
+      },
+      "candidate_sha": "9ef8e23bb4eb4df13e7f3f96030cd9a7301760f429d70b369e9cb3c2e751e576",
+      "capture": "iron",
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/musculoskeletal/receipt_v2_iron.json",
+      "sha256": "a5237ece62ebd11a8a19bf39bd2370b8c564ebdd0f8c5ce60f699af99fef4c9d"
     },
     {
       "acceptance": null,
@@ -5496,5 +5542,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 137
+  "total_receipts": 139
 }

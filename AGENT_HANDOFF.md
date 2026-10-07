@@ -52,7 +52,8 @@ MATLAB R2025b host.
 ## Active: OpenSim Musculoskeletal Swing (#11617, Epic #11605)
 
 - Branch `feat/opensim-musculoskeletal-swing`: `musculoskeletal_*.py` in `src/engines/physics_engines/opensim/python/`, runner `scripts/run_musculoskeletal_swing.py`, receipt under `docs/development/full_body_models/evidence/musculoskeletal/`.
-- Static Optimization only, leg muscles only, estimated GRF; valid for the backswing (0-1.08 s). Moco did not converge. Next: trunk/arm muscles (Hamner graft or MyoSuite), fix IK after 1.15 s.
+- Static Optimization only, leg muscles only, estimated GRF; valid for the backswing (0-1.08 s). Moco did not converge. Superseded inputs, see phase 2.
+- Phase 2 (branch `feat/opensim-msk-spec-driven`, stacked on phase 1): same-input bundles drive a spec-skeleton model with 80 grafted leg muscles, exact contact, per-frame bounded-LSQ static optimisation (`musculoskeletal_pipeline_v2.py`, `scripts/run_musculoskeletal_spec_swing.py`, receipts `receipt_v2_*.json`, notes `docs/research/musculoskeletal_swing/README.md`). ID matches bundle efforts (median 0.01 N m); leg reserve RMS about 35 N m; arms/trunk are torque stand-ins; not qualified. Next: arm/trunk muscle graft from an officially downloaded model (needs approval), left hip rotation capacity, independent open-loop replay.
 
 ## Simscape Matching Review (2026-10-02)
 
