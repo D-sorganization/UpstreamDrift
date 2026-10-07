@@ -8319,6 +8319,10 @@ Rows are keyed by pull request, not by a serial spec version: `| YYYY-MM-DD | #<
 
 | Date | PR | Changes |
 | --- | --- | --- |
+| 2026-10-07 | #11692 | Protect `.yml` and Related Filenames in the Title-Case Checker |
+| 2026-10-07 | #11666 | Register latex-references.yml in the workflow inventory so the inventory gate passes on main |
+| 2026-10-07 | #11598 | Commit recovered Crocoddyl G1 warm-start IK and 0.60 s FDDP stage inputs beside the rk45, rtol6 and b100 receipts, plus the w030r chain-root candidate, with sha256 provenance |
+| 2026-10-07 | #11687 | Rename the two unrelated DynamicsProvider protocols to DimeDynamicsProvider and EquationsOfMotionProvider; old name kept as a deprecated alias for one release |
 | 2026-10-07 | #11638 | Fix ZTCF/drift sign in engine contract docs and unify ZVCF on simulation_backends.ztcf_zvcf (counterfactual delegates) |
 | 2026-10-07 | #11641 | ci: compile docs/research LaTeX references with pinned Tectonic and check changed title case |
 | 2026-10-07 | #11637 | Fixed-size window residual: typed DimeResidualEvaluationError replaces the np.full(100, 1e8) fake residual; bound residuals fixed-length; DbC postcondition on residual length. Single shooting / real defects deferred to MOSAIC-13 (#11545). |
