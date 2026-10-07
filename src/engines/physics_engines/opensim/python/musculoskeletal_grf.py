@@ -34,7 +34,7 @@ from src.shared.python.contracts import ensure, require
 
 DEFAULT_FRICTION = 1.0
 DEFAULT_SOLE_OFFSET_M = 0.025
-DEFAULT_RIDGE = 1e-2
+DEFAULT_RIDGE = 5e-2
 DEFAULT_CONTACT_HEIGHT_TOL_M = 0.12
 _FD_STEP = 1e-5
 
@@ -105,7 +105,8 @@ def solve_contact_forces(
             an active point may also apply a free vertical (spin) moment.
         spin_generalised: ``(6,)`` root generalised force of a unit vertical moment.
         mu: friction coefficient (pyramid half-width per unit normal force).
-        ridge: Tikhonov weight on the unknowns (min-norm tie-break).
+        ridge: Tikhonov weight pulling the pyramid weights towards an equal
+            share of the required vertical force (tie-break prior).
 
     Returns:
         ``(forces (n, 3), spin (n,), residual_norm)``.  The spin moment of a foot
@@ -136,8 +137,13 @@ def solve_contact_forces(
             spin_owner.append(owner)
             blocks.append(np.column_stack([spin_generalised, -spin_generalised]))
     cols = np.concatenate(blocks, axis=1)
+    # Prior: share the required vertical force equally over the active pyramid
+    # edges (mid-foot centre of pressure, equal loading) instead of min-norm,
+    # which would concentrate the load on a few edge points.
+    prior = np.zeros(cols.shape[1])
+    prior[: 4 * idx.size] = max(float(required[4]), 0.0) / (4.0 * idx.size)
     a = np.vstack([cols, np.sqrt(ridge) * np.eye(cols.shape[1])])
-    b = np.concatenate([required, np.zeros(cols.shape[1])])
+    b = np.concatenate([required, np.sqrt(ridge) * prior])
     lam, _ = nnls(a, b, maxiter=4000)
     for slot, i in enumerate(idx):
         forces[i] = gens.T @ lam[4 * slot : 4 * slot + 4]

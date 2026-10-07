@@ -14,6 +14,7 @@ and upper-body stand-in torques so that a muscle-incapable motion is visible.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 import logging
 from pathlib import Path
@@ -173,7 +174,7 @@ def summarize_solution(
     activations: dict[str, np.ndarray],
     *,
     muscle_names: list[str],
-    reserve_rms_scale: float = 1.0,
+    optimal_forces: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
     """Summarise muscle activity and reserve/stand-in torque magnitudes.
 
@@ -182,8 +183,8 @@ def summarize_solution(
         activations: ``{name: (N,)}``; muscle columns are activations in [0, 1],
             ``reserve_*``/``upper_*`` columns are torques (N, N m).
         muscle_names: names of true muscles in ``activations``.
-        reserve_rms_scale: multiplier converting a reserve control to torque
-            (the actuator optimal force).
+        optimal_forces: ``{actuator: optimal force}`` converting controls to
+            N or N m (default 1.0 for every actuator).
 
     Returns:
         dict with per-muscle peak/mean, per-group peak/mean, reserve and upper-body
@@ -206,13 +207,14 @@ def summarize_solution(
         }
         for g, ms in sorted(groups.items())
     }
+    scale = optimal_forces or {}
     reserves = {
-        k: np.asarray(v, dtype=float) * reserve_rms_scale
+        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
         for k, v in activations.items()
         if k.startswith("reserve_")
     }
     upper = {
-        k: np.asarray(v, dtype=float) * reserve_rms_scale
+        k: np.asarray(v, dtype=float) * scale.get(k, 1.0)
         for k, v in activations.items()
         if k.startswith("upper_")
     }

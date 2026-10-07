@@ -175,10 +175,20 @@ def solve_and_summarise(cfg: PipelineConfig, prep: dict[str, Any]) -> dict[str, 
     t, acts = solvers.activation_table_to_arrays(act_path)
     muscle_names = [m.getName() for m in prep["model"].getMuscles()]
     muscle_names = [m for m in muscle_names if m in acts]
-    summary = solvers.summarize_solution(t, acts, muscle_names=muscle_names)
+    summary = solvers.summarize_solution(
+        t,
+        acts,
+        muscle_names=muscle_names,
+        optimal_forces=prep["info"]["actuator_optimal_force"],
+    )
 
     def summarize_phase(tt: np.ndarray, aa: dict[str, np.ndarray]) -> dict[str, Any]:
-        sub = solvers.summarize_solution(tt, aa, muscle_names=muscle_names)
+        sub = solvers.summarize_solution(
+            tt,
+            aa,
+            muscle_names=muscle_names,
+            optimal_forces=prep["info"]["actuator_optimal_force"],
+        )
         return {
             "t_range_s": [float(tt[0]), float(tt[-1])],
             "per_group": sub["per_group"],
@@ -231,8 +241,11 @@ def build_receipt(
             "total_mass_kg": info["total_mass_kg"],
             "body_scale_factors": info["body_scale_factors"],
             "unlocked_coordinates": list(swing.UNLOCKED_COORDINATES),
-            "upper_body_actuators": "upper_* CoordinateActuator (optimal force 1)",
-            "reserve_actuators": "reserve_* CoordinateActuator (optimal force 1)",
+            "upper_body_actuators": "upper_* CoordinateActuator (optimal force "
+            f"{swing.UPPER_OPTIMAL_FORCE:g}; torques reported in N m)",
+            "reserve_actuators": "reserve_* CoordinateActuator (leg optimal force "
+            f"{swing.RESERVE_OPTIMAL_FORCE:g}, pelvis residual "
+            f"{swing.ROOT_OPTIMAL_FORCE:g}; reported in N or N m)",
         },
         "coordinate_mapping": {
             "method": "1:1 by coordinate name from OpenSim IK states",

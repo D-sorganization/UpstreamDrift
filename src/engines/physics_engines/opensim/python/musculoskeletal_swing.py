@@ -85,6 +85,14 @@ UNLOCKED_COORDINATES: tuple[str, ...] = (
 # Dependent coordinates solved by constraint; they are never reserve-actuated.
 DEPENDENT_COORDINATES: tuple[str, ...] = ("knee_angle_r_beta", "knee_angle_l_beta")
 
+# Optimal force of the non-muscle actuators.  Muscle-free joints (upper body, pelvis
+# root residuals) get a physical scale so their controls are O(1) and the
+# optimiser is well conditioned; leg reserves keep a small value so they are
+# expensive and only used when the muscles cannot supply the moment.
+UPPER_OPTIMAL_FORCE = 100.0
+ROOT_OPTIMAL_FORCE = 100.0
+RESERVE_OPTIMAL_FORCE = 1.0
+
 # Welded club copied from the golf humanoid (hand_r_to_club joint, Club body).
 CLUB_MASS_KG = 0.32
 CLUB_COM_M = (0.0, -0.786, 0.0)
@@ -401,8 +409,10 @@ def _add_club(model: Any) -> None:
     model.addJoint(weld)
 
 
-def _replace_actuators(model: Any, reserve_optimal_force: float) -> dict[str, str]:
-    """Replace torque actuators; return ``{actuator_name: kind}``.
+def _replace_actuators(
+    model: Any, reserve_optimal_force: float
+) -> tuple[dict[str, str], dict[str, float]]:
+    """Replace torque actuators; return ``(kinds, optimal_forces)`` by name.
 
     ``upper_<coord>`` actuators stand in for absent upper-body muscles and
     ``reserve_<coord>`` actuators cover every other non-dependent coordinate.
@@ -413,7 +423,9 @@ def _replace_actuators(model: Any, reserve_optimal_force: float) -> dict[str, st
         if fset.get(i).getConcreteClassName() == "CoordinateActuator":
             fset.remove(i)
     kinds: dict[str, str] = {}
+    optimal: dict[str, float] = {}
     upper = set(UPPER_BODY_COORDINATES)
+    root = set(ROOT_COORDINATES)
     for coord in model.getCoordinateSet():
         name = coord.getName()
         if name in DEPENDENT_COORDINATES:
@@ -423,19 +435,27 @@ def _replace_actuators(model: Any, reserve_optimal_force: float) -> dict[str, st
         kind = "upper" if name in upper else "reserve"
         act = osim.CoordinateActuator(name)
         act.setName(f"{kind}_{name}")
-        act.setOptimalForce(float(reserve_optimal_force))
+        scale = (
+            UPPER_OPTIMAL_FORCE
+            if kind == "upper"
+            else ROOT_OPTIMAL_FORCE
+            if name in root
+            else float(reserve_optimal_force)
+        )
+        act.setOptimalForce(scale)
+        optimal[act.getName()] = scale
         act.setMinControl(-np.inf)
         act.setMaxControl(np.inf)
         model.addForce(act)
         kinds[act.getName()] = kind
-    return kinds
+    return kinds, optimal
 
 
 def build_musculoskeletal_model(
     golf_model_path: str | Path,
     base_model_path: str | Path | None = None,
     *,
-    reserve_optimal_force: float = 1.0,
+    reserve_optimal_force: float = RESERVE_OPTIMAL_FORCE,
 ) -> tuple[Any, dict[str, Any]]:
     """Fit the Rajagopal-Lai-Uhlrich muscle model to the golf humanoid.
 
@@ -462,7 +482,7 @@ def build_musculoskeletal_model(
     for coord_name in UNLOCKED_COORDINATES:
         model.updCoordinateSet().get(coord_name).set_locked(False)
     _add_club(model)
-    kinds = _replace_actuators(model, reserve_optimal_force)
+    kinds, optimal = _replace_actuators(model, reserve_optimal_force)
     model.setName("golf_musculoskeletal")
     model.finalizeConnections()
     model.initSystem()
@@ -471,6 +491,7 @@ def build_musculoskeletal_model(
         "golf_model": str(golf_path),
         "body_scale_factors": scales,
         "actuator_kinds": kinds,
+        "actuator_optimal_force": optimal,
         "n_muscles": int(model.getMuscles().getSize()),
         "n_coordinates": int(model.getCoordinateSet().getSize()),
         "total_mass_kg": float(sum(b.getMass() for b in model.getBodySet())),
