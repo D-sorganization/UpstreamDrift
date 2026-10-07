@@ -106,6 +106,16 @@ def _append_connector(
         return False
 
     geom = scene.geoms[scene.ngeom]
+    # Slots past ngeom hold stale memory; mjr_render dereferences matid/dataid, so
+    # an uninitialised slot segfaults the renderer (#11675). Reset it first.
+    mujoco.mjv_initGeom(
+        geom,
+        geom_type,
+        np.array([0.01, 0.0, 0.0]),
+        np.zeros(3),
+        np.eye(3).ravel(),
+        np.asarray(rgba, dtype=np.float32),
+    )
     _call_connector(geom, geom_type, width, from_pt, to_pt)
     geom.rgba[:] = rgba
     scene.ngeom += 1

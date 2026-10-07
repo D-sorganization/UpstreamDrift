@@ -710,6 +710,20 @@
       "id": "tools.motion_matching"
     },
     {
+      "feature_id": "tools.native_viewer_export",
+      "title": "Native per-engine viewer video export (CLI)",
+      "status": "exempt",
+      "pyqt": "src/tools/native_viewer_export/cli.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "",
+      "id": "tools.native_viewer_export"
+    },
+    {
       "feature_id": "tools.necromatcher",
       "title": "Historical Player Library And Source Review",
       "status": "gap",
@@ -2986,7 +3000,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "4427d5e83724ce1f408d6275c24c07a6f5caff114b55a0f21314ef83fe794deb",
+    "src/config/feature_parity.json": "29d7144015e1c30266c939807f94d013a9ffab8c81c28b72724e6258c9ed9afe",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
