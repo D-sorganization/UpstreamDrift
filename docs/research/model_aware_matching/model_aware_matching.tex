@@ -591,15 +591,23 @@ commit \texttt{21a2ed06}:
     use their Taylor series, $s\approx\tfrac12-\tfrac{\theta^2}{48}$,
     $c\approx-\tfrac1{24}+\tfrac{\theta^2}{960}$ and
     $\tfrac1{12}+\tfrac{t^2}{720}$ (truncation $<10^{-16}$), avoiding
-    cancellation; the $\bJ_r^{-1}$ coefficient is finite at $t=\pi$, where
-    $\cot(\pi/2)=0$.  Preconditions (\texttt{contracts.require}): $q$ a finite
-    unit 4-vector, $\bv$ a finite 3-vector, $t\le\pi$.  \texttt{SE3Manifold}
+    cancellation.  \eqref{eq:dime_log_jac} is the derivative only for
+    $t<\pi$.  At $t=\pi$ (the cut locus) the sign selection makes
+    $\mathcal{L}$ discontinuous along $\boldsymbol{\phi}$: for $q_0=[1,0,0,0]$,
+    $q_1=[0,1,0,0]$ and $h=10^{-6}$ the one-sided quotients along the axis
+    are $1$ and $-6.3\times10^{6}$, so no Jacobian exists there.  The code
+    accepts $t\le\pi+10^{-9}$ and returns the finite one-sided limit
+    ($\cot(\pi/2)=0$); that value is unqualified as a derivative, and callers
+    must keep iterates off the cut locus.  Preconditions
+    (\texttt{contracts.require}): $q$ a finite unit 4-vector, $\bv$ a finite
+    3-vector, $t\le\pi$ (principal branch).  \texttt{SE3Manifold}
     is the product chart $\R^3\times SO(3)$ (translation first), so both
     Jacobians are block diagonal, $\mathrm{diag}(\mathbf{I}_3,\cdot)$.
     \emph{Acceptance:} central differences with step $h=10^{-6}$ (truncation
     $O(h^2)\approx10^{-12}$, round-off $O(\epsilon/h)\approx10^{-10}$) match
     both Jacobians within $10^{-7}$ absolute at seeded random poses and
-    rotation angles $10^{-5},10^{-3},0.4,1.3,2.5,\pi-10^{-3}$, and
+    rotation angles $10^{-5},10^{-3},0.4,1.3,2.5,\pi-10^{-3}$ (none on the
+    cut locus, which is excluded above), and
     $\mathcal{L}(q,\mathcal{R}(q,\bv))=\bv$ within $10^{-9}$.  Measured
     (seed 11550, five poses per angle): the closed forms agree with the
     differences to $\le5\times10^{-10}$; the former zero-velocity retraction
