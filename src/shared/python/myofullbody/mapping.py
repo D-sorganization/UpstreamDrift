@@ -26,7 +26,7 @@ from scipy.spatial.transform import Rotation
 from src.shared.python.contracts import require
 from src.shared.python.myofullbody import anatomy
 from src.shared.python.myofullbody.couplings import JointCoupling
-from src.shared.python.myofullbody.ik import OrientationFit, solve_orientations
+from src.shared.python.myofullbody.ik import OrientationFit, Starts, solve_orientations
 
 Array = np.ndarray
 
@@ -274,8 +274,7 @@ class MyoMapper:
         errors = {"pelvis": 0.0}
         for segments, joints in SEGMENT_GROUPS:
             adr = tuple(self._joint_adr[j] for j in joints)
-            lo, hi = self.bounds(joints) if bounded else (None, None)
-            box = None if lo is None else (lo, hi)
+            box = self.bounds(joints) if bounded else None
             targets = [(self.myo_body[n], self.target(n)) for n in segments]
             seeds = self._seeds(joints, adr) if multistart else ()
             prefer = self._mid_range(joints) if multistart else None
@@ -285,13 +284,13 @@ class MyoMapper:
                 # equivalent but distant branch of the same orientation.
                 clamped = solve_orientations(
                     self.model, self.data, self.coupling, q, targets, adr,
-                    self.bounds(joints, "clamp"), seeds=seeds, prefer=prefer,
+                    self.bounds(joints, "clamp"), Starts(seeds, prefer),
                 )  # fmt: skip
                 q[list(adr)] = clamped.values
                 seeds, prefer = (), None
             fit = solve_orientations(
                 self.model, self.data, self.coupling, q, targets, adr, box,
-                seeds=seeds, prefer=prefer,
+                Starts(seeds, prefer),
             )  # fmt: skip
             q[list(adr)] = fit.values
             fits[segments[0]] = fit

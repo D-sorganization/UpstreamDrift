@@ -10,7 +10,9 @@ from src.shared.python.myofullbody.couplings import JointCoupling
 from src.shared.python.myofullbody.ik import (
     body_rotation,
     rotation_error,
+    Starts,
     solve_orientation,
+    solve_orientations,
 )
 
 mujoco = pytest.importorskip("mujoco")
@@ -34,16 +36,15 @@ def test_recovers_a_three_joint_orientation(rig) -> None:
     model, data, coupling = rig
     truth = np.array([0.4, -0.6, 0.9, 0.0])
     target = body_rotation(model, data, coupling, truth, 1)
-    fit = solve_orientation(
+    fit = solve_orientations(
         model,
         data,
         coupling,
         np.zeros(4),
-        1,
+        [(1, target)],
         (0, 1, 2),
-        target,
         None,
-        seeds=(np.array([0.3, 0.3, 0.3]),),
+        Starts(seeds=(np.array([0.3, 0.3, 0.3]),)),
     )
     assert fit.error_rad < 1e-8
     np.testing.assert_allclose(

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -59,6 +59,13 @@ def body_rotation(
     return np.asarray(data.xmat[body]).reshape(3, 3).copy()
 
 
+class Starts(NamedTuple):
+    """Extra initial guesses and the branch preference of :func:`solve_orientations`."""
+
+    seeds: tuple[Array, ...] = ()
+    prefer: Array | None = None
+
+
 def solve_orientations(
     model: Any,
     data: Any,
@@ -67,8 +74,7 @@ def solve_orientations(
     targets: Sequence[tuple[int, Array]],
     qpos_adr: tuple[int, ...],
     bounds: tuple[Array, Array] | None,
-    seeds: tuple[Array, ...] = (),
-    prefer: Array | None = None,
+    starts: Starts = Starts(),
 ) -> OrientationFit:
     """Fit ``qpos_adr`` of ``q`` so that every ``(body, R)`` target is matched.
 
@@ -78,8 +84,8 @@ def solve_orientations(
         q: full coordinate vector; the entries at ``qpos_adr`` are the initial guess
             and every other entry is held fixed.
         bounds: ``(lower, upper)`` per joint, or ``None`` for unbounded.
-        seeds: extra initial guesses tried when the first one is not accurate.
-        prefer: when given, every start is run and, among the fits that reach the
+        starts: ``seeds`` are extra initial guesses tried when the first one is not
+            accurate.  When ``prefer`` is given, every start is run and, among the fits that reach the
             best cost (Euler-angle branches of one orientation), the one closest
             to ``prefer`` is returned.
 
@@ -114,6 +120,7 @@ def solve_orientations(
         )
 
     best: tuple[float, Array, Array] | None = None
+    seeds, prefer = starts.seeds, starts.prefer
     for start in (q[idx], *seeds):
         x0 = np.clip(np.asarray(start, float), lo, hi)
         result = least_squares(
@@ -150,9 +157,8 @@ def solve_orientation(
     qpos_adr: tuple[int, ...],
     target: Array,
     bounds: tuple[Array, Array] | None,
-    seeds: tuple[Array, ...] = (),
 ) -> OrientationFit:
-    """Single-body form of :func:`solve_orientations`."""
+    """Single-body form of :func:`solve_orientations` (no extra starts)."""
     return solve_orientations(
-        model, data, coupling, q, [(body, target)], qpos_adr, bounds, seeds
+        model, data, coupling, q, [(body, target)], qpos_adr, bounds
     )

@@ -124,13 +124,13 @@ def tolerance_for(segment: str) -> float:
 
 def rom_exceedance(
     mapper: MyoMapper, poses: list[MappedPose]
-) -> dict[str, dict[str, float]]:
+) -> dict[str, dict[str, Any]]:
     """Per solved joint: fraction of frames beyond the limit and the peak overshoot (deg).
 
     ``poses`` must come from the extended-ROM mapping.  Only joints that exceed
     their limit at least once are returned.
     """
-    out: dict[str, dict[str, float]] = {}
+    out: dict[str, dict[str, Any]] = {}
     model = mapper.model
     for joints in SEGMENT_JOINTS.values():
         for name in joints:

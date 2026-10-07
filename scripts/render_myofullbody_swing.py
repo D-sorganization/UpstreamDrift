@@ -30,11 +30,19 @@ logger = logging.getLogger(__name__)
 FPS = 50.0
 SLOWDOWN = 0.25
 TENDON_WIDTH_SCALE = 1.2
+PIPELINE = """export MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src
+python3 scripts/run_myofullbody_swing.py --bundle driver.npz --stride 5 \\
+  --receipt driver.json --solution driver.npz.solution.npz
+python3 scripts/render_myofullbody_swing.py --solution driver.npz.solution.npz \\
+  --receipt driver.json --label driver --out-dir OUT
+python3 scripts/render_myofullbody_swing.py --out-dir OUT --readme"""
 GROUP_COLOURS = {"legs": "tab:green", "trunk": "tab:orange", "arms": "tab:blue"}
 
 
-def _heading(model: Any, data: Any, qpos: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Facing direction and target line (golfer's left, right-handed) at address."""
+def _heading(
+    model: Any, data: Any, qpos: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Facing direction, target line (golfer's left, right-handed) and pelvis."""
     import mujoco
 
     data.qpos[:] = qpos
@@ -44,12 +52,14 @@ def _heading(model: Any, data: Any, qpos: np.ndarray) -> tuple[np.ndarray, np.nd
     forward = rot @ np.array([0.0, -1.0, 0.0])  # MyoFullBody faces -y at zero pose
     forward[2] = 0.0
     forward /= np.linalg.norm(forward)
-    return forward, np.cross([0.0, 0.0, 1.0], forward)
+    pelvis = np.asarray(data.xpos[body]).copy()
+    return forward, np.cross([0.0, 0.0, 1.0], forward), pelvis
 
 
 def _write_video(path: Path, frames: list[np.ndarray]) -> None:
     import imageio
 
+    writer: Any
     with imageio.get_writer(
         path, fps=FPS, codec="libx264", quality=8, macro_block_size=None
     ) as writer:
@@ -70,8 +80,8 @@ def render_swing(solution: dict[str, np.ndarray], out_dir: Path, label: str) -> 
     render.style_bones(model)
     model.tendon_width[:] *= TENDON_WIDTH_SCALE
     qpos, act = solution["qpos"], solution["activation"]
-    forward, target = _heading(model, data, qpos[0])
-    centre = qpos[0][:3] + np.array([0.0, 0.0, 0.1])
+    forward, target, pelvis = _heading(model, data, qpos[0])
+    centre = pelvis + np.array([0.0, 0.0, 0.1])
     cameras = render.view_cameras(forward, target, centre, distance=2.6)
     shown = render.select_frames(solution["time_s"], FPS, SLOWDOWN)
     renderer = mujoco.Renderer(model, 480, 640)
@@ -186,7 +196,23 @@ def write_readme(out_dir: Path, invocation: str) -> None:
                 f"peak {m['reserve_peak_nm']:.1f} N m"
             )
         lines += [f"- Receipt digest: `{r['receipt_digest']}`", ""]
-    lines += ["## Invocation", "", "```", invocation, "```", ""]
+    lines += [
+        "## Invocation",
+        "",
+        "Per swing (run from the repository root; needs `scripts/fetch_myofullbody.py`",
+        "to have filled the cache and a same-input bundle `driver.npz` or `iron.npz`):",
+        "",
+        "```",
+        PIPELINE,
+        "```",
+        "",
+        "README written by:",
+        "",
+        "```",
+        invocation,
+        "```",
+        "",
+    ]
     (out_dir / "README.md").write_text("\n".join(lines))
 
 

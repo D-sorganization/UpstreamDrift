@@ -46,7 +46,7 @@ class SwingResult:
     """Receipt and arrays of one run."""
 
     receipt: dict[str, Any]
-    arrays: dict[str, Array] = field(repr=False)
+    arrays: dict[str, Any] = field(repr=False)
 
 
 def frame_steps(steps: int, stride: int, keys: mapping_report.KeyFrames) -> Array:
@@ -197,9 +197,8 @@ def run_swing(config: SwingConfig) -> SwingResult:
 
     bundle = InputBundle.load(config.bundle)
     tree = assets.cached_tree(root=config.cache_root)
-    require(
-        tree is not None, "MyoFullBody cache missing: run scripts/fetch_myofullbody.py"
-    )
+    if tree is None:
+        raise ValueError("MyoFullBody cache missing: run scripts/fetch_myofullbody.py")
     model, data = assets.load_myofullbody(tree)
     mapper = mapping.MyoMapper(
         bundle.spec_bytes, model, bundle.reference_q[0], rom_policy="extend"
