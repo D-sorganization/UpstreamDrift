@@ -27,14 +27,17 @@ CLUB_BODY = "Clubface Vector"
 THREE_DOF = ("pelvis", "thorax", "humerus_l", "humerus_r", "femur_l", "femur_r")
 TOLERANCE_DEG_THREE_DOF = 1.0
 TOLERANCE_DEG_STRUCTURAL = 15.0
-# (spec coordinate, Myo joint): flexion hinges whose physical axis both models define.
+# (spec coordinate, Myo joint, sign): flexion hinges whose physical axis both models
+# define.  Spec knee flexion is negative and elbow flexion runs opposite to the
+# MyoFullBody sign; ankle dorsiflexion agrees.  The signs are fixed by convention,
+# not fitted, so a wrong mapping cannot hide behind a sign flip.
 HINGE_PAIRS = (
-    ("knee_angle_l", "knee_angle_l"),
-    ("knee_angle_r", "knee_angle_r"),
-    ("ankle_angle_l", "ankle_angle_l"),
-    ("ankle_angle_r", "ankle_angle_r"),
-    ("LEInput", "elbow_flexion_l"),
-    ("REInput", "elbow_flexion_r"),
+    ("knee_angle_l", "knee_angle_l", -1.0),
+    ("knee_angle_r", "knee_angle_r", -1.0),
+    ("ankle_angle_l", "ankle_angle_l", 1.0),
+    ("ankle_angle_r", "ankle_angle_r", 1.0),
+    ("LEInput", "elbow_flexion_l", -1.0),
+    ("REInput", "elbow_flexion_r", -1.0),
 )
 LENGTH_OUT_TOL = 0.02
 
@@ -153,17 +156,16 @@ def hinge_agreement(
 ) -> dict[str, dict[str, float]]:
     """Independent check: solved MyoFullBody hinge angle versus the spec coordinate.
 
-    The sign is taken from the correlation (the two models define the positive
-    direction differently); after that the RMS difference in degrees measures
-    whether the orientation mapping reproduces the same physical flexion.
+    The RMS of ``myo - sign * spec`` in degrees (with the conventional signs of
+    :data:`HINGE_PAIRS`) measures whether the orientation mapping reproduces the
+    same physical flexion; the mean offset is the structural carrying angle.
     """
     order = mapper.spec.coordinate_order
     out: dict[str, dict[str, float]] = {}
-    for spec_name, myo_name in HINGE_PAIRS:
+    for spec_name, myo_name, sign in HINGE_PAIRS:
         spec = q[np.asarray(indices, dtype=int), order.index(spec_name)]
         adr = int(mapper.model.joint(myo_name).qposadr[0])
         myo = np.array([p.qpos[adr] for p in poses])
-        sign = 1.0 if float(np.corrcoef(spec, myo)[0, 1]) >= 0.0 else -1.0
         diff = np.degrees(myo - sign * spec)
         out[f"{spec_name}->{myo_name}"] = {
             "sign": sign,

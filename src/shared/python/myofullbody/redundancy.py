@@ -162,7 +162,7 @@ def solve_frame(
     tau: Array,
     *,
     reserve_weight: float = 100.0,
-    max_iter: int = 200,
+    max_iter: int = 1000,
     tol: float = 1e-6,
 ) -> so.FrameSolution:
     """Same problem as ``musculoskeletal_static_opt.solve_frame``, solved fast.

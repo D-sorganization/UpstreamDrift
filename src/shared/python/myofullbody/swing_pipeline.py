@@ -307,6 +307,12 @@ def _receipt(
         },
         "id_consistency": id_check,
         "reserves_by_group": metrics,
+        "solver": {
+            "method": "projected Newton on min sum(a^2) + w sum(reserve^2), 0<=a<=1",
+            "reserve_weight": config.reserve_weight,
+            "all_frames_converged": bool(ok),
+            "cross_checked_against": "scipy BVLS (musculoskeletal_static_opt.solve_frame)",
+        },
         "qualification": redundancy.qualification(metrics, ok, id_check["passed"]),
         "hybrid_statement": (
             "Spec inverse dynamics provides the joint efforts; MyoFullBody provides "
