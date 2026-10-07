@@ -23,6 +23,7 @@ from src.tools.native_viewer_export.core import (
 )
 
 pytestmark = [
+    pytest.mark.unit,
     pytest.mark.slow,
     pytest.mark.integration,
     pytest.mark.timeout(900),

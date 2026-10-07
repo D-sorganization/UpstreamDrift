@@ -15,7 +15,7 @@ from pathlib import Path
 import sys
 import tempfile
 from typing import Any
-import xml.etree.ElementTree as ET  # noqa: S405 - trusted, locally generated MJCF
+from defusedxml import ElementTree as ET
 
 import numpy as np
 
@@ -41,11 +41,18 @@ def arena_scene_path() -> Path:
     return Path(myosuite.__file__).parent.joinpath(*SCENE_FILE)
 
 
+def _append_child(parent: Any, tag: str) -> Any:
+    """Create and append an empty child element (``SubElement`` without stdlib xml)."""
+    child = parent.makeelement(tag, {})
+    parent.append(child)
+    return child
+
+
 def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) -> str:
     """Specification MJCF with the MyoSuite arena floor, headlight and map."""
-    root = ET.fromstring(spec_xml)  # noqa: S314 - generated locally
+    root = ET.fromstring(spec_xml)
     scene_path = arena_scene_path()
-    scene = ET.parse(scene_path).getroot()  # noqa: S314
+    scene = ET.parse(scene_path).getroot()
     scene_asset = scene.find("asset")
     scene_visual = scene.find("visual")
     scene_world = scene.find("worldbody")
@@ -53,7 +60,7 @@ def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) 
         raise ValueError(f"{scene_path} lacks asset, visual or worldbody sections")
     asset = root.find("asset")
     if asset is None:
-        asset = ET.SubElement(root, "asset")
+        asset = _append_child(root, "asset")
     for elem in scene_asset:
         if elem.get("file"):
             elem.set(
@@ -63,7 +70,7 @@ def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) 
         asset.append(elem)
     visual = root.find("visual")
     if visual is None:
-        visual = ET.SubElement(root, "visual")
+        visual = _append_child(root, "visual")
     for elem in scene_visual:
         if elem.tag in ("headlight", "map", "scale"):
             old = visual.find(elem.tag)
@@ -72,7 +79,7 @@ def merge_arena(spec_xml: str, ground_height_m: float, width: int, height: int) 
             visual.append(elem)
     glob = visual.find("global")
     if glob is None:
-        glob = ET.SubElement(visual, "global")
+        glob = _append_child(visual, "global")
     glob.set("offwidth", str(max(width, 640)))
     glob.set("offheight", str(max(height, 480)))
     world = root.find("worldbody")
