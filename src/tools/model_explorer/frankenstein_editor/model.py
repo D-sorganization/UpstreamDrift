@@ -83,6 +83,19 @@ class URDFModel:
             other_elements=[],
         )
 
+    def clone(self) -> URDFModel:
+        """Return an independent deep copy (no XML element is shared)."""
+        return URDFModel(
+            file_path=self.file_path,
+            robot_name=self.robot_name,
+            links={n: copy.deepcopy(e) for n, e in self.links.items()},
+            joints={n: copy.deepcopy(e) for n, e in self.joints.items()},
+            materials={n: copy.deepcopy(e) for n, e in self.materials.items()},
+            other_elements=[copy.deepcopy(e) for e in self.other_elements],
+            attachment_points=tuple(copy.deepcopy(p) for p in self.attachment_points),
+            is_modified=self.is_modified,
+        )
+
     def validate_composition(self) -> CompositionValidationResult:
         """Validate this composed model before export."""
         return CompositionValidator().validate_model(self)
