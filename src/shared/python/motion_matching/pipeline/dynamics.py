@@ -49,7 +49,15 @@ from src.shared.python.motion_matching.tour_capture_contract import MARKER_SEGME
 if TYPE_CHECKING:
     from src.shared.python.motion_matching.pipeline.lane import Lane
 
-TRACKING_BACKENDS = frozenset({"kkt", "mj-inverse"})
+# Cone margins of the opt-in wrench-QP backend (#11670): a friction coefficient
+# below the plant's 0.8, a 10 mm CoP margin and a stiff root and slack.
+WRENCH_QP_SETTINGS = {
+    "friction": 0.6,
+    "cop_margin_m": 0.01,
+    "root_weight": 1000.0,
+    "slack_weight": 1e6,
+}
+TRACKING_BACKENDS = frozenset({"kkt", "mj-inverse", "wrench-qp"})
 
 
 @precondition(lambda name: isinstance(name, str), "tracking_backend must be a string")
@@ -90,6 +98,23 @@ def build_tracking_controller(
             omega_rad_s=OMEGA_RAD_S,
             zeta=1.0,
             balance=BALANCE,
+        )
+    if tracking_backend == "wrench-qp":
+        from src.shared.python.motion_matching.contact_wrench_qp import (
+            WrenchQPConfig,
+            contact_wrench_controller,
+        )
+
+        wrench_config = WrenchQPConfig(**WRENCH_QP_SETTINGS)
+
+        return contact_wrench_controller(
+            sim,
+            times,
+            q_track,
+            omega_rad_s=OMEGA_RAD_S,
+            zeta=1.0,
+            balance=BALANCE,
+            config=wrench_config,
         )
     return fs.tracking_controller(
         sim, times, q_track, omega_rad_s=OMEGA_RAD_S, zeta=1.0, balance=BALANCE

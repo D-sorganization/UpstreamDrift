@@ -229,9 +229,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--tracking",
-        choices=["kkt", "mj-inverse"],
+        choices=["kkt", "mj-inverse", "wrench-qp"],
         default="kkt",
-        help="computed-torque tracking backend (kkt or mj-inverse)",
+        help="computed-torque tracking backend (kkt, mj-inverse, or the opt-in "
+        "contact-wrench QP wrench-qp, #11670)",
     )
     parser.add_argument(
         "--trajectory-optimiser",
