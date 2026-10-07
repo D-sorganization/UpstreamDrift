@@ -178,12 +178,7 @@ def main(job_path: str) -> None:
     viz.setGroundHeight(ground_h)
     viz.setCameraFieldOfView(FOV_Y_RAD)
     coords = model.getCoordinateSet()
-    glyph_sets = None
-    if job.glyphs_path:
-        glyph_sets = [
-            GlyphSet.from_dict(d)
-            for d in json.loads(Path(job.glyphs_path).read_text(encoding="utf-8"))
-        ]
+    glyph_sets = job.load_glyph_sets()
     time.sleep(3.0)
     for pos, k in enumerate(job.indices):
         for name, value in zip(bundle.coordinate_order, q[k], strict=True):

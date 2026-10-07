@@ -92,11 +92,9 @@ class SwingInput:
     rollout_engine: str
 
     def __post_init__(self) -> None:
-        if self.q.shape != self.bundle.reference_q.shape:
-            raise ValueError(
-                f"rollout q has shape {self.q.shape}, "
-                f"expected {self.bundle.reference_q.shape}"
-            )
+        expected = self.bundle.reference_q.shape
+        if self.q.shape != expected:
+            raise ValueError(f"rollout q has shape {self.q.shape}, expected {expected}")
         if not np.isfinite(self.q).all():
             raise ValueError("rollout q must be finite")
 

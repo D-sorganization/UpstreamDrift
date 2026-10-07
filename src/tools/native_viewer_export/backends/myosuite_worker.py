@@ -140,12 +140,7 @@ def main(job_path: str) -> None:
     env.mj_renderer.render_offscreen(width=job.width, height=job.height, camera_id=-1)
     renderer = env.mj_renderer._renderer  # noqa: SLF001 - the env's mujoco.Renderer
     option = env.mj_renderer._scene_option  # noqa: SLF001
-    glyph_sets = None
-    if job.glyphs_path:
-        glyph_sets = [
-            GlyphSet.from_dict(d)
-            for d in json.loads(Path(job.glyphs_path).read_text(encoding="utf-8"))
-        ]
+    glyph_sets = job.load_glyph_sets()
     cams = {v: make_camera(mujoco, v, job) for v in job.views}
     for pos, k in enumerate(job.indices):
         data.qpos[adr] = q[k]

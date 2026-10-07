@@ -75,7 +75,9 @@ class ViewPreset:
 
     def image_up(self) -> Array:
         """Unit world vector pointing up in the image."""
-        return np.cross(self.image_right(), self.view_direction())
+        return np.asarray(
+            np.cross(self.image_right(), self.view_direction()), dtype=np.float64
+        )
 
     def camera_position(
         self, lookat_m: Sequence[float] | Array, distance_m: float

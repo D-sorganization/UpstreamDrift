@@ -85,9 +85,9 @@ class MeshcatPage:
         from playwright.sync_api import sync_playwright
 
         self._pw = sync_playwright().start()
-        exe = preferred_chromium()
-        self._browser = self._pw.chromium.launch(
-            executable_path=exe, args=list(CHROMIUM_ARGS)
+        chromium = self._pw.chromium
+        self._browser = chromium.launch(
+            executable_path=preferred_chromium(), args=list(CHROMIUM_ARGS)
         )
         self._page = self._browser.new_page(
             viewport={"width": self._w, "height": self._h}
