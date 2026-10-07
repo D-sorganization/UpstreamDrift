@@ -313,6 +313,16 @@
       "tiles": ["model_explorer"],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
+    "tools.model_explorer.frankenstein_assembly": {
+      "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 11661,
+      "tiles": [],
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661)."
+    },
     "tools.character_builder": {
       "title": "Character Builder (spec-native character, presets, engine export)",
       "pyqt": "src/tools/character_builder/gui.py",

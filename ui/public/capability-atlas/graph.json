@@ -680,6 +680,20 @@
       "id": "tools.model_explorer"
     },
     {
+      "feature_id": "tools.model_explorer.frankenstein_assembly",
+      "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "api": null,
+      "web": null,
+      "issue": 11661,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661).",
+      "id": "tools.model_explorer.frankenstein_assembly"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -2972,7 +2986,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "048a94dd31eacb911a9f5ddfb99a93b36df5067aa6fe317b54b1588a827c16c9",
+    "src/config/feature_parity.json": "4427d5e83724ce1f408d6275c24c07a6f5caff114b55a0f21314ef83fe794deb",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

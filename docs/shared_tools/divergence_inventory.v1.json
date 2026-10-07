@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1643,
+    "ud-only": 1644,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "model_generation": {
       "identical": 27,
       "diverged": 52,
-      "ud-only": 19,
+      "ud-only": 20,
       "tools-only": 1,
       "spelling-only": 14
     },
@@ -12380,6 +12380,18 @@
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": true,
+      "spelling_only": false
+    },
+    {
+      "path": "model_generation/editor/attachment_ports.py",
+      "classification": "ud-only",
+      "package": "model_generation",
+      "subpackage": "editor",
+      "ud_bytes": 4751,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
@@ -39750,9 +39762,9 @@
     {
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-07",
+        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -39763,9 +39775,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "author": "fleet-orchestrator",
+        "date": "2026-10-07",
+        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
