@@ -78,3 +78,21 @@ def test_circular_mean_handles_the_wrap() -> None:
     assert render.circular_mean_deg(170.0, -170.0) == pytest.approx(
         180.0, abs=1e-9
     ) or (abs(render.circular_mean_deg(170.0, -170.0)) == pytest.approx(180.0))
+
+
+def test_club_segment_starts_at_the_grip_and_follows_the_lead_forearm() -> None:
+    elbow = np.array([0.0, 0.0, 1.0])
+    lead = np.array([0.0, 0.0, 0.5])  # forearm points straight down
+    trail = np.array([0.0, 0.1, 0.5])
+    grip, head = render.club_segment(elbow, lead, trail, 1.1)
+    np.testing.assert_allclose(grip, [0.0, 0.05, 0.5])
+    np.testing.assert_allclose(head, [0.0, 0.05, -0.6])
+    assert np.linalg.norm(head - grip) == pytest.approx(1.1)
+
+
+def test_club_segment_contract() -> None:
+    v = np.zeros(3)
+    with pytest.raises(ValueError):
+        render.club_segment(v, v, v, 1.0)  # degenerate forearm
+    with pytest.raises(ValueError):
+        render.club_segment(v, np.ones(3), v, 0.0)

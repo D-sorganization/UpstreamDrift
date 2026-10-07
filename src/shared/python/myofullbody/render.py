@@ -154,8 +154,12 @@ def render_view(
     activation: Array,
     camera: dict[str, Any],
     renderer: Any,
+    club_length_m: float | None = None,
 ) -> Array:
-    """One RGB frame of the pose with muscles coloured by ``activation``."""
+    """One RGB frame of the pose with muscles coloured by ``activation``.
+
+    ``club_length_m`` adds the illustrative club of :func:`club_segment`.
+    """
     import mujoco
 
     require(activation.shape == (model.nu,), "activation must be (nu,)")
@@ -171,4 +175,47 @@ def render_view(
     cam.azimuth = camera["azimuth"]
     cam.elevation = camera["elevation"]
     renderer.update_scene(data, camera=cam)
+    if club_length_m is not None:
+        add_club(renderer, data, model, club_length_m)
     return np.asarray(renderer.render()).copy()
+
+
+def club_segment(
+    elbow: Array, lead_wrist: Array, trail_wrist: Array, length_m: float
+) -> tuple[Array, Array]:
+    """Illustrative club: grip at the wrists' midpoint, shaft along the lead forearm.
+
+    MyoFullBody has no club.  This is a drawing aid, not the spec club: the
+    shaft is simply the lead forearm line extended to ``length_m``.
+
+    Raises:
+        ValueError: if ``length_m`` is not positive or the forearm has no length.
+    """
+    require(length_m > 0.0, "length_m must be positive")
+    axis = np.asarray(lead_wrist, float) - np.asarray(elbow, float)
+    norm = float(np.linalg.norm(axis))
+    require(norm > 1e-9, "the forearm has no length")
+    grip = 0.5 * (np.asarray(lead_wrist, float) + np.asarray(trail_wrist, float))
+    return grip, grip + length_m * axis / norm
+
+
+def add_club(renderer: Any, data: Any, model: Any, length_m: float) -> None:
+    """Draw the illustrative club (see :func:`club_segment`) into the scene."""
+    import mujoco
+
+    pos = lambda name: np.asarray(data.xpos[model.body(name).id])  # noqa: E731
+    grip, head = club_segment(pos("ulna_l"), pos("lunate_l"), pos("lunate_r"), length_m)
+    scene = renderer.scene
+    if scene.ngeom >= scene.maxgeom:
+        return
+    geom = scene.geoms[scene.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_CAPSULE,
+        np.zeros(3),
+        np.zeros(3),
+        np.zeros(9),
+        np.array([0.25, 0.25, 0.28, 1.0], dtype=np.float32),
+    )
+    mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.012, grip, head)
+    scene.ngeom += 1

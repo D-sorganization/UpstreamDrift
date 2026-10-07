@@ -67,7 +67,9 @@ def _write_video(path: Path, frames: list[np.ndarray]) -> None:
             writer.append_data(frame)
 
 
-def render_swing(solution: dict[str, np.ndarray], out_dir: Path, label: str) -> None:
+def render_swing(
+    solution: dict[str, np.ndarray], out_dir: Path, label: str, club_m: float | None
+) -> None:
     """Four single-view videos and the 2x2 composite of one swing."""
     import mujoco
 
@@ -90,7 +92,7 @@ def render_swing(solution: dict[str, np.ndarray], out_dir: Path, label: str) -> 
         for view in render.VIEW_NAMES:
             views[view].append(
                 render.render_view(
-                    model, data, qpos[k], act[k], cameras[view], renderer
+                    model, data, qpos[k], act[k], cameras[view], renderer, club_m
                 )
             )
     for view, frames in views.items():
@@ -224,6 +226,12 @@ def main() -> int:
     parser.add_argument("--label", default="swing")
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--readme", action="store_true")
+    parser.add_argument(
+        "--club-length-m",
+        type=float,
+        default=None,
+        help="draw an illustrative club of this length (driver 1.17, iron 0.95)",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -238,7 +246,7 @@ def main() -> int:
     shutil.copyfile(args.receipt, args.out_dir / f"{args.label}_receipt.json")
     plot_activation(solution, args.out_dir / f"{args.label}_activation.png", args.label)
     plot_reserve(solution, args.out_dir / f"{args.label}_reserve.png", args.label)
-    render_swing(solution, args.out_dir, args.label)
+    render_swing(solution, args.out_dir, args.label, args.club_length_m)
     return 0
 
 
