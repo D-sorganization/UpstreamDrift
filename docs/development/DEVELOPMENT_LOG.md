@@ -2720,6 +2720,45 @@ open. Preserve explicit ground configuration in independent replay.
 
 ## Shipped (Last 90 Days)
 
+### DL-#11612 · P-7: Spec Full-Body Model Loaded Through the MyoSuite Runtime Reproduces MuJoCo Bit-Exactly Under the Same Inputs (L0/L1/L2 Parity Receipt)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11612
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11612-p-7-spec-full-body-model-loaded-through.md)
+- **Summary:** P-7: spec full-body model loaded through the MyoSuite runtime reproduces MuJoCo bit-exactly under the same inputs (L0/L1/L2 parity receipt)
+- **Next step:** Shipped in PR #11628.
+
+### DL-#11611 · OpenSim Same-Input Parity Adapter (Exact Weld KKT, Shared Contact Law); Fix OSIM Exporter XYZ Euler Convention and 41-Coordinate Validation
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11611
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11611-opensim-same-input-parity-adapter-exact.md)
+- **Summary:** OpenSim same-input parity adapter (exact weld KKT, shared contact law); fix OSIM exporter XYZ Euler convention and 41-coordinate validation
+- **Next step:** Shipped in PR #11628.
+
+### DL-#11607 · Same-Input Parity P-2: Same-Input-Bundle/V1, Shared ZOH RK4 Integrator (8 Substeps for Stiff Contact Modes), Per-Step Closure Projection, MuJoCo Reference Generation, Replay Scoring; Pipeline Persists Q_Track
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11607
+- **Branch:** merged via #11628
+- **PR:** #11628
+- **Paths:** see #11628
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`cf9fb216`; collated from changes/11607-same-input-parity-p-2-same-input-bundle.md)
+- **Summary:** Same-input parity P-2: same-input-bundle/v1, shared ZOH RK4 integrator (8 substeps for stiff contact modes), per-step closure projection, MuJoCo reference generation, replay scoring; pipeline persists q_track
+- **Next step:** Shipped in PR #11628.
+
 ### DL-#11606 · Same-Input Parity P-1: VectorPlant + Convention-Free Closure Projection; MuJoCo Exact-KKT Option; Pointwise MuJoCo/Drake/Pinocchio Acceleration Parity Gate and Receipt (Worst 1.1E-9 Relative Over 31 Frames)
 
 - **State:** shipped
