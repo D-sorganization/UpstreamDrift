@@ -33,6 +33,22 @@
 
 # Historical Player Capture Handoff
 
+## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
+
+Same spec, same initial state, same joint torques: every engine must reproduce
+the MuJoCo motion. Shared code is `src/shared/python/motion_matching/same_input/`
+(`VectorPlant`, closure projection, `StepPolicy` RK4 ZOH integrator with 8
+substeps, `InputBundle` `same-input-bundle/v1`, scoring). CLI:
+`python -m scripts.same_input_bundle {export,replay,closed-loop} --engine
+{mujoco,drake,pinocchio,opensim,myosuite}`. Full-swing results (driver and
+7-iron): closed loop at most 7e-10 rad for Drake/Pinocchio, 5e-12 rad for OpenSim, and
+bit-identical for MyoSuite. The 50 ms segmented open loop is at most 1.1e-9 rad. The full-horizon open
+loop is limited by the swing's physical instability (about 40 1/s), so it stays
+within bound to about 0.5 s. Reference: `docs/research/same_input_parity/`.
+Do not reintroduce MJCF `fullinertia` (MuJoCo's eigen-solve is inaccurate;
+the exporter emits `diaginertia` + `quat`). Open: P-8 Simscape (#11613) on the
+MATLAB R2025b host.
+
 ## Active: OpenSim Musculoskeletal Swing (#11617, Epic #11605)
 
 - Branch `feat/opensim-musculoskeletal-swing`: `musculoskeletal_*.py` in `src/engines/physics_engines/opensim/python/`, runner `scripts/run_musculoskeletal_swing.py`, receipt under `docs/development/full_body_models/evidence/musculoskeletal/`.

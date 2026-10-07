@@ -1,0 +1,524 @@
+{
+  "schema": "same-input-pointwise-parity/v1",
+  "issue": 11606,
+  "spec": {
+    "path": "docs/development/full_body_models/evidence/ground_support/full_body_spec_hipcal_scaled.json",
+    "sha256": "36702e052dcc2731b76d07cafcb92c9534b1274d2d374a0f6214af6eb52206c4"
+  },
+  "record": {
+    "path": "docs/development/full_body_models/evidence/ground_support/dynamics_record.npz",
+    "sha256": "cb3625aa48f3e7d8b8c21aa02437352259c2b4c2aa3b2acadea8a34a8d750883"
+  },
+  "engines": [
+    "mujoco",
+    "drake",
+    "pinocchio"
+  ],
+  "mujoco_kkt_regularization": 0.0,
+  "acceleration_atol": 1e-06,
+  "acceleration_rtol": 1e-08,
+  "frames_checked": 31,
+  "worst_projected_acceleration_difference": 0.00013945464161224663,
+  "worst_projected_relative_difference": 1.0647055885290007e-09,
+  "worst_state_spread": 2.9753977059954195e-14,
+  "worst_off_manifold_difference": 41.806905986595666,
+  "passed": true,
+  "frames": [
+    {
+      "frame": 0,
+      "pose_residual_before": 1.389091859618771e-06,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 2.1510571102112408e-16,
+      "max_abs_acceleration": 706.5981432073593,
+      "projected": {
+        "mujoco": 3.5004177334485576e-10,
+        "drake": 4.575099410430994e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.0038696002251473183,
+        "drake": 5.3286943746400084e-08
+      },
+      "passed": true
+    },
+    {
+      "frame": 20,
+      "pose_residual_before": 6.910510030474295e-06,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 5.551115123125783e-17,
+      "max_abs_acceleration": 335.596019679818,
+      "projected": {
+        "mujoco": 3.0717046684003435e-09,
+        "drake": 2.6036559575004503e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.0335249194050784,
+        "drake": 5.395426691534588e-08
+      },
+      "passed": true
+    },
+    {
+      "frame": 40,
+      "pose_residual_before": 1.3839457560842365e-05,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 2.7755575615628914e-16,
+      "max_abs_acceleration": 429.34385108076646,
+      "projected": {
+        "mujoco": 6.210143510543276e-09,
+        "drake": 3.5232687878306024e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.0752587179091142,
+        "drake": 5.293319382815298e-08
+      },
+      "passed": true
+    },
+    {
+      "frame": 60,
+      "pose_residual_before": 2.1088985099476417e-05,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 5.828670879282072e-16,
+      "max_abs_acceleration": 257.77321592350347,
+      "projected": {
+        "mujoco": 7.416019798256457e-09,
+        "drake": 3.3866456305986503e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.12900778719209072,
+        "drake": 4.634006067760765e-08
+      },
+      "passed": true
+    },
+    {
+      "frame": 80,
+      "pose_residual_before": 2.8565630533230376e-05,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 5.551115123125783e-16,
+      "max_abs_acceleration": 104.58341589510626,
+      "projected": {
+        "mujoco": 5.60547164241143e-09,
+        "drake": 3.837627104985586e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.11129229172815513,
+        "drake": 6.757609538610154e-08
+      },
+      "passed": true
+    },
+    {
+      "frame": 100,
+      "pose_residual_before": 3.60844429800223e-05,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 1.4432899320127035e-15,
+      "max_abs_acceleration": 105.37813635137856,
+      "projected": {
+        "mujoco": 1.1933551036236167e-08,
+        "drake": 5.434500849332835e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.04004944453285475,
+        "drake": 1.0388056814747415e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 120,
+      "pose_residual_before": 4.286168188741844e-05,
+      "state_spread_q": 1.7763568394002505e-15,
+      "state_spread_v": 1.3322676295501878e-15,
+      "max_abs_acceleration": 222.11741171608432,
+      "projected": {
+        "mujoco": 7.706375981797464e-09,
+        "drake": 7.795762257956085e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.19247184411059237,
+        "drake": 1.4463581798906944e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 140,
+      "pose_residual_before": 4.7495973657930125e-05,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 1.887379141862766e-15,
+      "max_abs_acceleration": 97.97159442580706,
+      "projected": {
+        "mujoco": 7.360156928370998e-09,
+        "drake": 5.543725478673878e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.5488787488414762,
+        "drake": 1.7832915411020167e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 160,
+      "pose_residual_before": 5.365347966156813e-05,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 3.6637359812630166e-15,
+      "max_abs_acceleration": 106.64927379991322,
+      "projected": {
+        "mujoco": 1.207411060022423e-09,
+        "drake": 5.525478741219558e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.8293248588122761,
+        "drake": 2.2397273680141438e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 180,
+      "pose_residual_before": 5.8937821195984675e-05,
+      "state_spread_q": 7.771561172376096e-16,
+      "state_spread_v": 1.887379141862766e-15,
+      "max_abs_acceleration": 142.5078519904471,
+      "projected": {
+        "mujoco": 1.1776137398555875e-08,
+        "drake": 1.0053213372884784e-08
+      },
+      "off_manifold": {
+        "mujoco": 1.9225596628599324,
+        "drake": 2.609004319253927e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 200,
+      "pose_residual_before": 7.29468359388659e-05,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 2.886579864025407e-15,
+      "max_abs_acceleration": 156.77985054536683,
+      "projected": {
+        "mujoco": 5.30155830347212e-09,
+        "drake": 7.3821269097607e-09
+      },
+      "off_manifold": {
+        "mujoco": 1.9863145679158056,
+        "drake": 2.919705686110774e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 220,
+      "pose_residual_before": 8.25158184781271e-05,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 5.10702591327572e-15,
+      "max_abs_acceleration": 354.373132591131,
+      "projected": {
+        "mujoco": 8.271925366898358e-09,
+        "drake": 2.9105535759299528e-09
+      },
+      "off_manifold": {
+        "mujoco": 2.4000897308444564,
+        "drake": 3.310059248917696e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 240,
+      "pose_residual_before": 8.08391450217397e-05,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 3.524958103184872e-15,
+      "max_abs_acceleration": 65.89219297062395,
+      "projected": {
+        "mujoco": 3.681769555896608e-09,
+        "drake": 2.088242467834789e-09
+      },
+      "off_manifold": {
+        "mujoco": 2.1100471292514626,
+        "drake": 3.219331077275456e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 260,
+      "pose_residual_before": 7.031505170729325e-05,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 3.552713678800501e-15,
+      "max_abs_acceleration": 180.85824205419772,
+      "projected": {
+        "mujoco": 5.743565623106406e-09,
+        "drake": 2.6289086463293643e-09
+      },
+      "off_manifold": {
+        "mujoco": 1.2619320122488604,
+        "drake": 3.621039290635508e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 280,
+      "pose_residual_before": 9.326451320882148e-05,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 2.6645352591003757e-15,
+      "max_abs_acceleration": 76.7907515264099,
+      "projected": {
+        "mujoco": 3.427345518502989e-09,
+        "drake": 2.8615829705813667e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.5158221945639476,
+        "drake": 3.779934658609818e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 300,
+      "pose_residual_before": 0.00010218268621900498,
+      "state_spread_q": 4.996003610813204e-16,
+      "state_spread_v": 3.552713678800501e-15,
+      "max_abs_acceleration": 176.4984794270624,
+      "projected": {
+        "mujoco": 2.4077309035419603e-09,
+        "drake": 2.378722996354554e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.2809526624352543,
+        "drake": 2.517258730350136e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 320,
+      "pose_residual_before": 9.309106510080244e-05,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 3.552713678800501e-15,
+      "max_abs_acceleration": 270.7016106121317,
+      "projected": {
+        "mujoco": 3.5488199046085356e-09,
+        "drake": 5.151065352038131e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.40475781278834866,
+        "drake": 1.4368031315825647e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 340,
+      "pose_residual_before": 0.00010369856325730426,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 3.1086244689504383e-15,
+      "max_abs_acceleration": 306.8368998883702,
+      "projected": {
+        "mujoco": 9.718291948956903e-09,
+        "drake": 4.2545593714748975e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.9179863049198786,
+        "drake": 8.947399408043566e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 360,
+      "pose_residual_before": 0.0001209689797551406,
+      "state_spread_q": 7.771561172376096e-16,
+      "state_spread_v": 5.329070518200751e-15,
+      "max_abs_acceleration": 786.5485932212243,
+      "projected": {
+        "mujoco": 4.068795078637777e-09,
+        "drake": 4.851870016864268e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.45792880652379253,
+        "drake": 2.3264465198735707e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 380,
+      "pose_residual_before": 0.00012732878410645526,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 3.774758283725532e-15,
+      "max_abs_acceleration": 634.3070598036237,
+      "projected": {
+        "mujoco": 8.19621703840312e-09,
+        "drake": 1.527780568721937e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.833387906873849,
+        "drake": 8.631726586827426e-07
+      },
+      "passed": true
+    },
+    {
+      "frame": 400,
+      "pose_residual_before": 0.000113752907368612,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 7.105427357601002e-15,
+      "max_abs_acceleration": 1375.8712818441372,
+      "projected": {
+        "mujoco": 1.4190078445608378e-08,
+        "drake": 4.168327905063052e-09
+      },
+      "off_manifold": {
+        "mujoco": 1.7726749561500128,
+        "drake": 2.6836000586172304e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 420,
+      "pose_residual_before": 0.00011529254979784979,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 2.1316282072803006e-14,
+      "max_abs_acceleration": 130979.53379292152,
+      "projected": {
+        "mujoco": 0.00011056405492126942,
+        "drake": 0.00013945464161224663
+      },
+      "off_manifold": {
+        "mujoco": 41.806905986595666,
+        "drake": 0.000282324937870726
+      },
+      "passed": true
+    },
+    {
+      "frame": 440,
+      "pose_residual_before": 0.000132636595707923,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 2.842170943040401e-14,
+      "max_abs_acceleration": 2438.749586297144,
+      "projected": {
+        "mujoco": 2.689466782612726e-08,
+        "drake": 5.228230293141678e-09
+      },
+      "off_manifold": {
+        "mujoco": 13.763401580058371,
+        "drake": 3.976254902227083e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 460,
+      "pose_residual_before": 0.00015093103058845992,
+      "state_spread_q": 3.3306690738754696e-15,
+      "state_spread_v": 2.9753977059954195e-14,
+      "max_abs_acceleration": 4504.6164477029215,
+      "projected": {
+        "mujoco": 5.6834323913790286e-09,
+        "drake": 6.1977516452316195e-09
+      },
+      "off_manifold": {
+        "mujoco": 4.804094269237112,
+        "drake": 2.2251545175322462e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 480,
+      "pose_residual_before": 0.0001396932241233035,
+      "state_spread_q": 9.43689570931383e-16,
+      "state_spread_v": 8.881784197001252e-15,
+      "max_abs_acceleration": 4731.4486851613965,
+      "projected": {
+        "mujoco": 1.0202279554505367e-07,
+        "drake": 3.676973392430227e-08
+      },
+      "off_manifold": {
+        "mujoco": 6.648049698795376,
+        "drake": 6.484566938524949e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 500,
+      "pose_residual_before": 0.00014744192351293575,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 1.2878587085651816e-14,
+      "max_abs_acceleration": 158.6584133578753,
+      "projected": {
+        "mujoco": 3.4938523185701342e-09,
+        "drake": 4.950280185767042e-10
+      },
+      "off_manifold": {
+        "mujoco": 10.831649793436355,
+        "drake": 4.092372478226025e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 520,
+      "pose_residual_before": 0.0001854351928171823,
+      "state_spread_q": 8.881784197001252e-16,
+      "state_spread_v": 1.2434497875801753e-14,
+      "max_abs_acceleration": 12022.850548757347,
+      "projected": {
+        "mujoco": 3.4443985441612313e-09,
+        "drake": 4.17182732803667e-09
+      },
+      "off_manifold": {
+        "mujoco": 18.776513211248584,
+        "drake": 1.2696361750386131e-05
+      },
+      "passed": true
+    },
+    {
+      "frame": 540,
+      "pose_residual_before": 0.00015850639812299818,
+      "state_spread_q": 4.440892098500626e-16,
+      "state_spread_v": 1.4210854715202004e-14,
+      "max_abs_acceleration": 207.3838903547366,
+      "projected": {
+        "mujoco": 3.4853684383051586e-09,
+        "drake": 1.1921770237677265e-09
+      },
+      "off_manifold": {
+        "mujoco": 5.1553668603703215,
+        "drake": 6.430605566265513e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 560,
+      "pose_residual_before": 0.0001747223004470402,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 7.105427357601002e-15,
+      "max_abs_acceleration": 121.55202198625503,
+      "projected": {
+        "mujoco": 3.987902563729051e-09,
+        "drake": 8.370477644348284e-10
+      },
+      "off_manifold": {
+        "mujoco": 1.0388890617433266,
+        "drake": 3.1462547127603102e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 580,
+      "pose_residual_before": 0.0001585667350583937,
+      "state_spread_q": 6.661338147750939e-16,
+      "state_spread_v": 3.9968028886505635e-15,
+      "max_abs_acceleration": 1576.6930732792046,
+      "projected": {
+        "mujoco": 2.606171278785041e-09,
+        "drake": 1.1068737038044674e-09
+      },
+      "off_manifold": {
+        "mujoco": 0.6699088036853773,
+        "drake": 1.4406986466042326e-06
+      },
+      "passed": true
+    },
+    {
+      "frame": 600,
+      "pose_residual_before": 0.00018400938056120164,
+      "state_spread_q": 1.1102230246251565e-15,
+      "state_spread_v": 3.1086244689504383e-15,
+      "max_abs_acceleration": 82.78532266158234,
+      "projected": {
+        "mujoco": 1.1537935051819659e-09,
+        "drake": 7.945359925543016e-10
+      },
+      "off_manifold": {
+        "mujoco": 0.06240335102766181,
+        "drake": 6.957857192624317e-07
+      },
+      "passed": true
+    }
+  ]
+}
