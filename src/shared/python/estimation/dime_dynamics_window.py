@@ -18,7 +18,7 @@ from typing import Any, Callable, Mapping, Sequence
 import numpy as np
 from scipy.optimize import least_squares
 
-from src.shared.python.contracts import PreconditionError, require
+from src.shared.python.contracts import PreconditionError, ensure, require
 from src.shared.python.estimation.dime_contracts import (
     ContactPolicy,
     DimeCompleteState,
@@ -438,6 +438,37 @@ def _rollout_nominal_trajectory(
         return False, [problem.initial_state]
 
 
+class DimeResidualEvaluationError(RuntimeError):
+    """Raised when the dynamics provider fails while evaluating window residuals.
+
+    The residual vector has a fixed size on every path, so a failed step cannot be
+    represented by a placeholder residual; callers must handle this error.
+    """
+
+
+def expected_residual_size(problem: DimeDynamicsWindowProblem) -> int:
+    """Return the fixed length of the window residual vector.
+
+    Postcondition: every successful residual evaluation has exactly this length,
+    independent of the control values.
+    """
+    n_steps = problem.horizon_steps
+    nu = len(problem.provider.capability.control_channels)
+    n_q = problem.provider.capability.n_q
+    size = n_steps * nu  # control effort
+    if problem.target_positions is not None:
+        size += sum(
+            min(len(targ), n_q)
+            for k, targ in enumerate(problem.target_positions)
+            if k <= n_steps
+        )
+    if problem.control_rate_weight > 0.0 and n_steps > 1:
+        size += (n_steps - 1) * nu
+    if problem.actuator_bounds is not None:
+        size += n_steps * nu  # one bound-violation entry per control
+    return size
+
+
 def _build_residuals_evaluator(
     problem: DimeDynamicsWindowProblem,
 ) -> Callable[[np.ndarray], np.ndarray]:
@@ -447,6 +478,7 @@ def _build_residuals_evaluator(
     n_steps = problem.horizon_steps
     dt = problem.dt_s
     nu = len(provider.capability.control_channels)
+    expected_size = expected_residual_size(problem)
 
     def residuals_fn(u_vec: np.ndarray) -> np.ndarray:
         res_list: list[float] = []
@@ -463,8 +495,10 @@ def _build_residuals_evaluator(
                 )
                 st = provider.step(s_req).next_state
                 traj.append(st)
-            except Exception:
-                return np.full(100, 1e8)
+            except Exception as exc:
+                raise DimeResidualEvaluationError(
+                    f"dynamics step {k} failed during residual evaluation: {exc}"
+                ) from exc
 
         if problem.target_positions is not None:
             w_obs = np.sqrt(problem.observation_weight)
@@ -484,12 +518,18 @@ def _build_residuals_evaluator(
         if problem.actuator_bounds is not None:
             low, high = problem.actuator_bounds
             for u_val in u_vec:
-                if u_val < low:
-                    res_list.append(100.0 * (low - u_val))
-                elif u_val > high:
-                    res_list.append(100.0 * (u_val - high))
+                # Always one entry per control so the residual length is fixed.
+                res_list.append(
+                    100.0 * (max(0.0, low - u_val) + max(0.0, u_val - high))
+                )
 
-        return np.asarray(res_list, dtype=np.float64)
+        residual = np.asarray(res_list, dtype=np.float64)
+        ensure(
+            residual.shape == (expected_size,),
+            "residual length must equal expected_residual_size",
+            residual.shape,
+        )
+        return residual
 
     return residuals_fn
 
@@ -622,6 +662,21 @@ def solve_dime_dynamics_window(
             xtol=1e-7,
         )
         u_opt = opt_res.x.reshape((n_steps, nu))
+    except DimeResidualEvaluationError:
+        nv = capability.n_v
+        return DimeDynamicsWindowResult(
+            success=False,
+            states=(problem.initial_state,),
+            controls=np.zeros((n_steps, nu)),
+            transition_defects=np.zeros((n_steps, 2 * nv)),
+            actuator_bound_residuals=np.zeros(1),
+            control_variation_residuals=np.zeros(1),
+            root_constraint_residuals=np.zeros(1),
+            cost_breakdown={"total_cost": float("inf")},
+            status="failed_dynamics_step",
+            qualification_status=capability.status,
+            n_iterations=0,
+        )
     except Exception as exc:
         nv = capability.n_v
         return DimeDynamicsWindowResult(
