@@ -260,6 +260,19 @@ forward-dynamics matching. Design reference:
   **Not** the same as the _starting-pose matcher_ (which solves a
   rigid-body transform across an entire skeleton, not per-joint).
 
+### Model Appearance (Engine-Agnostic Visuals)
+
+`src/shared/python/model_appearance/` — purely visual, never read by physics.
+
+- `schema` — `appearance-v1` document (`document_from_dict`, `load_appearance`,
+  `appearance_path_for`), JSON Schema `appearance_v1.schema.json`, and
+  `physics_spec_sha256` (spec hash that ignores visual-only keys).
+- `library` — named PBR materials, skin tones, clothing presets, club finishes,
+  `classify_body` (body name to anatomical part).
+- `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
+  via `attach_visual_layer(..., appearance=doc)`.
+
 ### Theme / Typography
 
 `src/shared/python/theme/`

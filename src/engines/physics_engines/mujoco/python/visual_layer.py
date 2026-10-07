@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
     derive_visual_skeleton,
@@ -59,8 +60,13 @@ def attach_visual_layer(
     elements: Mapping[str, ET.Element],
     offsets: Mapping[str, np.ndarray],
     spec: Mapping[str, Any],
+    appearance: AppearanceDocument | None = None,
 ) -> dict[str, Any]:
     """Attach the shared skeleton to an MJCF document; returns a summary.
+
+    With an ``appearance`` document the bare capsules are replaced by smooth
+    textured mesh segments, garments, shoes and a club head, plus a skybox,
+    textured ground and shadowed lights; still visual only.
 
     ``elements`` and ``offsets`` are the exporter's per-body MJCF elements and
     spec-body-to-MJCF-body transforms. Every added geom is class ``visual``:
@@ -76,7 +82,18 @@ def attach_visual_layer(
     ET.SubElement(
         visual_default, "geom", contype="0", conaffinity="0", group="1", mass="0"
     )
-    for index, capsule in enumerate(skeleton.capsules):
+    appearance_meta: dict[str, Any] = {}
+    if appearance is not None:
+        from src.engines.physics_engines.mujoco.python.appearance_layer import (
+            attach_appearance,
+        )
+
+        appearance_meta = attach_appearance(
+            root, elements, offsets, skeleton, appearance
+        )
+    for index, capsule in enumerate(
+        () if appearance is not None else skeleton.capsules
+    ):
         offset = offsets[capsule.body]
         start = _to_mjcf_frame(offset, np.asarray(capsule.start_m))
         end = _to_mjcf_frame(offset, np.asarray(capsule.end_m))
@@ -90,7 +107,7 @@ def attach_visual_layer(
             rgba=_CAPSULE_RGBA,
             attrib={"class": _VISUAL_CLASS},
         )
-    for index, shape in enumerate(skeleton.shapes):
+    for index, shape in enumerate(() if appearance is not None else skeleton.shapes):
         ET.SubElement(
             elements[shape.body],
             "geom",
@@ -127,8 +144,12 @@ def attach_visual_layer(
         size="3 3 0.05",
         pos=_numbers(normal * skeleton.ground.height_m),
         quat=_plane_quat(normal),
-        rgba=_FLOOR_RGBA,
         attrib={"class": _VISUAL_CLASS},
+        **(
+            {"material": appearance_meta["ground_material"]}
+            if appearance is not None
+            else {"rgba": _FLOOR_RGBA}
+        ),
     )
     up = normal * 3.0
     ET.SubElement(
@@ -138,6 +159,7 @@ def attach_visual_layer(
         pos=_numbers(up + np.array([1.5, -1.5, 0.0])),
         dir=_numbers(-(up + np.array([1.5, -1.5, 0.0]))),
         diffuse="0.8 0.8 0.8",
+        castshadow="true" if appearance is not None else "false",
     )
     ET.SubElement(
         world,
@@ -155,12 +177,26 @@ def attach_visual_layer(
         mode="targetbody",
         target=next(e.get("name", "") for k, e in elements.items() if k != "world"),
     )
+    lights = 2
+    if appearance is not None:
+        rim = up + np.array([0.0, 2.5, 0.0])
+        ET.SubElement(
+            world,
+            "light",
+            name="visual_rim",
+            pos=_numbers(rim),
+            dir=_numbers(-rim),
+            diffuse="0.45 0.47 0.55",
+            castshadow="false",
+        )
+        lights = 3
     return {
+        **appearance_meta,
         "capsules": len(skeleton.capsules),
         "spheres": len(skeleton.spheres),
         "floor": True,
         "ground_calibrated": skeleton.ground.calibrated,
-        "lights": 2,
+        "lights": lights,
     }
 
 

@@ -33,6 +33,12 @@
 
 # Historical Player Capture Handoff
 
+## Active: Model Appearance Schema and MuJoCo Layer (#11655, #11656, Epic #11651)
+
+- `src/shared/python/model_appearance/` holds the engine-agnostic `appearance-v1` schema, material library, clothing and skin presets, and smooth mesh generation. The document lives beside the spec (`*.appearance.json`) and `physics_spec_sha256` ignores visual-only keys.
+- `attach_visual_layer(..., appearance=doc)` and `export_full_body_mjcf(..., appearance=doc)` add materials, textures, skybox, shadowed lights, smooth skin and garment meshes, shoes and a club head as group-1 massless geoms; the physics identity test is bit-exact.
+- Renders: `scripts/render_model_appearance.py`. Open: no head mesh, file textures unsupported in MuJoCo, Drake/Pinocchio/OpenSim consumers of the schema, and builder presets (CMB-1 to CMB-3).
+
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 
 Same spec, same initial state, same joint torques: every engine must reproduce

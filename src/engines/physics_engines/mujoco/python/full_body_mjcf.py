@@ -22,6 +22,7 @@ from src.engines.physics_engines.mujoco.python.native_mjcf import (
     _attach_joint_element,
     _numbers,
 )
+from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.full_body_spec import order_full_body_joints
 
 
@@ -116,13 +117,18 @@ def _attach_full_body_sites(
 
 
 def export_full_body_mjcf(
-    model_bytes: bytes, *, visual: bool = False
+    model_bytes: bytes,
+    *,
+    visual: bool = False,
+    appearance: AppearanceDocument | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
     ``visual=True`` additionally attaches the shared visual skeleton (capsules,
     COM/frame spheres, floor, lights, camera) as massless non-colliding geoms;
-    the physics content is identical to the plain export.
+    the physics content is identical to the plain export. An ``appearance``
+    document (implies ``visual``) restyles that layer with materials,
+    textures and smooth meshes; it is never read by the physics path.
     """
     spec = json.loads(model_bytes)
     if spec.get("schema_version") != "full-body-v1":
@@ -151,12 +157,12 @@ def export_full_body_mjcf(
     elements, offsets = _build_full_body_kinematics(root, spec)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
     visual_meta = None
-    if visual:
+    if visual or appearance is not None:
         from src.engines.physics_engines.mujoco.python.visual_layer import (
             attach_visual_layer,
         )
 
-        visual_meta = attach_visual_layer(root, elements, offsets, spec)
+        visual_meta = attach_visual_layer(root, elements, offsets, spec, appearance)
 
     xml = ET.tostring(root, encoding="unicode")
     extra = {} if visual_meta is None else {"visual_layer": visual_meta}
