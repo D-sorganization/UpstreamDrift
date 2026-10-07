@@ -32,9 +32,9 @@ SLOWDOWN = 0.25
 TENDON_WIDTH_SCALE = 1.2
 PIPELINE = """export MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src
 python3 scripts/run_myofullbody_swing.py --bundle driver.npz --stride 5 \\
-  --receipt driver.json --solution driver.npz.solution.npz
+  --workers 2 --receipt driver.json --solution driver.npz.solution.npz
 python3 scripts/render_myofullbody_swing.py --solution driver.npz.solution.npz \\
-  --receipt driver.json --label driver --out-dir OUT
+  --receipt driver.json --label driver --out-dir OUT --club-length-m 1.17
 python3 scripts/render_myofullbody_swing.py --out-dir OUT --readme"""
 GROUP_COLOURS = {"legs": "tab:green", "trunk": "tab:orange", "arms": "tab:blue"}
 
@@ -163,6 +163,26 @@ def plot_reserve(solution: dict[str, np.ndarray], path: Path, label: str) -> Non
     plt.close(fig)
 
 
+def _attribution_lines(r: dict[str, Any]) -> list[str]:
+    """README lines for the reserve attribution of one receipt."""
+    a = r.get("attribution")
+    if not a:
+        return []
+    out = [f"- ROM policy: {r['mapping']['rom_policy_used_for_poses']}"]
+    for group, rows in a["waterfall_reserve_over_effort_rms"].items():
+        out.append(
+            f"- Attribution {group}: "
+            + ", ".join(f"{k} {v:.0%}" for k, v in rows.items())
+            + f"; kinematic floor {a['kinematic_floor_reserve_over_effort_rms'][group]:.0%}"
+        )
+    for group, phases in r.get("phase_breakdown", {}).items():
+        out.append(
+            f"- Phase reserve/effort {group}: "
+            + ", ".join(f"{k} {v['ratio']:.0%}" for k, v in phases.items())
+        )
+    return out
+
+
 def write_readme(out_dir: Path, invocation: str) -> None:
     """README of ``out_dir`` built from the receipt copies found there."""
     lines = [
@@ -180,6 +200,10 @@ def write_readme(out_dir: Path, invocation: str) -> None:
         "  efforts with reserve actuators.  Where the reserve is large the muscles",
         "  cannot supply the effort and the colours understate the real demand.",
         "- Colours show activation (0 to 1), not force.",
+        "- The club is an illustrative capsule along the lead forearm, not the spec",
+        "  club; MyoFullBody has no club.",
+        "- The neck is a bounded torque actuator (not a muscle); MyoFullBody has no",
+        "  neck, so no neck motion or neck muscle activation is shown.",
         "",
     ]
     for path in sorted(out_dir.glob("*_receipt.json")):
@@ -197,6 +221,7 @@ def write_readme(out_dir: Path, invocation: str) -> None:
                 f"({m['reserve_over_effort_rms']:.0%} of effort RMS), "
                 f"peak {m['reserve_peak_nm']:.1f} N m"
             )
+        lines += _attribution_lines(r)
         lines += [f"- Receipt digest: `{r['receipt_digest']}`", ""]
     lines += [
         "## Invocation",
