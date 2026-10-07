@@ -407,3 +407,160 @@ class TestPreconditions:
         problem = _problem(horizon=3)
         with pytest.raises(PreconditionError, match="initial_knot_states"):
             solve_dime_dynamics_window(problem, initial_knot_states=np.zeros((2, 2)))
+
+
+def _eliminated_optimum(
+    horizon: int, targets: list[np.ndarray], w_obs: float
+) -> np.ndarray:
+    """Exact optimum over controls with the knots eliminated (hard defects).
+
+    ``x_k = A^k x_0 + sum_j A^{k-1-j} B u_j``, so every residual is affine in u.
+    """
+    rows: list[np.ndarray] = []
+    rhs: list[float] = []
+    for k, y in enumerate(targets):
+        if k == 0:
+            continue
+        row = np.zeros(horizon)
+        for j in range(k):
+            row[j] = (np.linalg.matrix_power(A_MAT, k - 1 - j) @ B_MAT)[0, 0]
+        free = (np.linalg.matrix_power(A_MAT, k) @ X0)[0]
+        rows.append(np.sqrt(w_obs) * row)
+        rhs.append(np.sqrt(w_obs) * (float(y[0]) - free))
+    for j in range(horizon):
+        row = np.zeros(horizon)
+        row[j] = CONTROL_EFFORT_RESIDUAL_SCALE
+        rows.append(row)
+        rhs.append(0.0)
+    u, *_ = np.linalg.lstsq(np.asarray(rows), np.asarray(rhs), rcond=None)
+    return u.reshape(horizon, 1)
+
+
+class TestExactModeIsHardConstrained:
+    """EXACT optimises the controls of the hard-constrained problem (Codex P1)."""
+
+    def test_exact_matches_eliminated_optimum_not_penalty_optimum(self) -> None:
+        horizon = 4
+        targets = [
+            X0[:1],
+            np.array([0.4]),
+            np.array([-0.3]),
+            np.array([0.5]),
+            np.array([0.0]),
+        ]
+        # A weak defect weight makes the penalty optimum clearly infeasible.
+        problem = _problem(
+            horizon=horizon,
+            targets=targets,
+            defect_mode=DefectMode.EXACT,
+            control_rate_weight=0.0,
+            transition_weight=1.0,
+        )
+        exp_u = _eliminated_optimum(horizon, targets, w_obs=1.0)
+        penalty_u, _ = _analytic_optimum(horizon, targets, w_obs=1.0, w_def=1.0)
+        assert np.max(np.abs(penalty_u - exp_u)) > 1e-2  # the test discriminates
+
+        result = solve_dime_dynamics_window(problem)
+        assert result.success
+        np.testing.assert_allclose(result.controls, exp_u, rtol=1e-4, atol=1e-6)
+        np.testing.assert_allclose(result.transition_defects, 0.0, atol=1e-12)
+        # The reported total is the hard-constrained objective at the optimum.
+        knots = np.array([np.concatenate([s.q, s.v]) for s in result.states[1:]])
+        residual = _build_residuals_evaluator(problem)(
+            pack_window_decision(result.controls, knots)
+        )
+        assert result.cost_breakdown["total_cost"] == pytest.approx(
+            0.5 * float(residual @ residual)
+        )
+
+
+class MemoryOscillatorProvider(LinearOscillatorProvider):
+    """Linear oscillator driven through a memory state ``m_{k+1} = m_k + u_k``.
+
+    The acceleration is ``-k q + c m_{k+1}``, so the dynamics depend on
+    ``internal_state['m']``, which the shooting knots must carry.
+    """
+
+    def step(self, request):  # type: ignore[no-untyped-def,override]
+        m_next = float(request.state.internal_state.get("m", 0.0)) + float(
+            request.controls[0]
+        )
+        q, v, dt = float(request.state.q[0]), float(request.state.v[0]), request.dt
+        a = -STIFFNESS * q + GAIN * m_next
+        v_next = v + a * dt
+        nxt = DimeCompleteState(
+            t=request.state.t + dt,
+            q=np.array([q + v_next * dt]),
+            v=np.array([v_next]),
+            v_dot=np.array([a]),
+            internal_state={"m": m_next},
+            model_hash=self.model_hash,
+            units=dict(request.state.units),
+        )
+        decomp = AccelerationDecomposition(
+            a_grav=np.array([-STIFFNESS * q]),
+            a_drift=np.zeros(1),
+            a_ctrl=np.array([GAIN * m_next]),
+        )
+        return self._finalize_step(nxt, decomp)
+
+
+class TestProviderMemoryCarried:
+    """Knot states keep the provider's internal state (Codex P2)."""
+
+    def _memory_problem(self, **kwargs: object) -> DimeDynamicsWindowProblem:
+        provider = MemoryOscillatorProvider()
+        state = DimeCompleteState(
+            t=0.0,
+            q=X0[:1],
+            v=X0[1:],
+            internal_state={"m": 0.1},
+            units=UNITS,
+            model_hash=provider.model_hash,
+        )
+        return DimeDynamicsWindowProblem(
+            provider=provider,
+            initial_state=state,
+            horizon_steps=4,
+            dt_s=DT,
+            **kwargs,  # type: ignore[arg-type]
+        )
+
+    def _provider_rollout(self, problem: DimeDynamicsWindowProblem, controls):  # type: ignore[no-untyped-def]
+        from src.shared.python.estimation.dime_contracts import DimeFullStepRequest
+
+        states = [problem.initial_state]
+        for u in controls:
+            req = DimeFullStepRequest(
+                state=states[-1],
+                controls=u,
+                dt=DT,
+                model_hash=problem.provider.model_hash,
+            )
+            states.append(problem.provider.step(req).next_state)
+        return states
+
+    def test_defects_vanish_on_memory_rollout(self) -> None:
+        problem = self._memory_problem()
+        controls = np.array([[0.3], [-0.2], [0.1], [0.4]])
+        states = self._provider_rollout(problem, controls)
+        knots = np.array([np.concatenate([s.q, s.v]) for s in states[1:]])
+        defects = compute_window_transition_defects(problem, knots, controls)
+        np.testing.assert_allclose(defects, 0.0, atol=1e-14)
+
+    def test_soft_result_states_carry_memory(self) -> None:
+        true_u = np.array([[0.3], [-0.2], [0.1], [0.4]])
+        problem0 = self._memory_problem()
+        truth = self._provider_rollout(problem0, true_u)
+        targets = [s.q.copy() for s in truth]
+        problem = self._memory_problem(
+            target_positions=targets,
+            defect_mode=DefectMode.SOFT,
+            control_rate_weight=0.0,
+        )
+        result = solve_dime_dynamics_window(problem)
+        assert result.success
+        assert np.max(np.abs(result.transition_defects)) < 1e-6
+        memory = [s.internal_state["m"] for s in result.states[1:]]
+        expected = 0.1 + np.cumsum(result.controls[:, 0])
+        np.testing.assert_allclose(memory, expected, atol=1e-12)

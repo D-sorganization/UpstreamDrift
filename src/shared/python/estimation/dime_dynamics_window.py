@@ -108,26 +108,27 @@ class DimeDynamicsWindowFactor:
         self.discrepancy_bounds = discrepancy_bounds
         self.process_noise_cov = process_noise_cov
 
-    def compute_single_step_defect(
-        self,
-        state_k: DimeCompleteState,
-        state_k1: DimeCompleteState,
-        control: np.ndarray,
-        slack: np.ndarray | None = None,
-    ) -> np.ndarray:
-        """Evaluate integrated transition defect d = local_diff(state_k1, f(state_k, u)) - slack."""
+    def predict_next_state(
+        self, state_k: DimeCompleteState, control: np.ndarray
+    ) -> DimeCompleteState:
+        """Return ``Phi(state_k, u, dt)``, the provider's one-step prediction."""
         step_req = DimeFullStepRequest(
             state=state_k,
             controls=np.asarray(control, dtype=np.float64),
             dt=self.dt_s,
             model_hash=self.provider.model_hash,
         )
-        step_res = self.provider.step(step_req)
-        pred = step_res.next_state
+        return self.provider.step(step_req).next_state
 
+    def defect_from_prediction(
+        self,
+        state_k1: DimeCompleteState,
+        pred: DimeCompleteState,
+        slack: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Tangent difference ``local_diff(state_k1, pred) - slack``."""
         capability = self.provider.capability
         nv = capability.n_v
-        # Tangent coordinate difference
         diff_q = np.asarray(state_k1.q[:nv], dtype=np.float64) - np.asarray(
             pred.q[:nv], dtype=np.float64
         )
@@ -143,6 +144,17 @@ class DimeDynamicsWindowFactor:
             defect = defect - raw_slack
 
         return defect
+
+    def compute_single_step_defect(
+        self,
+        state_k: DimeCompleteState,
+        state_k1: DimeCompleteState,
+        control: np.ndarray,
+        slack: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Evaluate integrated transition defect d = local_diff(state_k1, f(state_k, u)) - slack."""
+        pred = self.predict_next_state(state_k, control)
+        return self.defect_from_prediction(state_k1, pred, slack)
 
     def compute_defect_jacobians(
         self,
@@ -518,30 +530,66 @@ def unpack_window_decision(
     return raw[:split].reshape(n_steps, nu), raw[split:].reshape(n_steps, nx)
 
 
-def _knot_states(
-    problem: DimeDynamicsWindowProblem, knot_states: np.ndarray
-) -> list[DimeCompleteState]:
-    """Return ``[x_0, x_1, ..., x_N]`` as complete states (``x_0`` is fixed)."""
-    init = problem.initial_state
-    nv = problem.capability.n_v
-    states = [init]
-    for k, x in enumerate(knot_states, start=1):
-        states.append(
-            DimeCompleteState(
-                t=float(init.t + k * problem.dt_s),
-                q=x[:nv],
-                v=x[nv:],
-                model_hash=init.model_hash,
-                units=dict(init.units),
-                frame=init.frame,
-            )
-        )
-    return states
-
-
 def _states_to_knots(states: Sequence[DimeCompleteState]) -> np.ndarray:
     """Knot array ``(N, n_x)`` from ``[x_0, ..., x_N]`` (``x_0`` dropped)."""
     return np.array([np.concatenate([s.q, s.v]) for s in states[1:]], dtype=np.float64)
+
+
+def _evaluate_shooting(
+    problem: DimeDynamicsWindowProblem,
+    knot_states: np.ndarray,
+    controls: np.ndarray,
+) -> tuple[list[DimeCompleteState], np.ndarray]:
+    """Shooting states ``[x_0, ..., x_N]`` and defects ``d_0..d_{N-1}``.
+
+    Knot ``k+1`` takes ``(q, v)`` from the decision vector and its provider
+    memory (``internal_state``, ``v_dot``) from the prediction
+    ``Phi(x_k, u_k, dt)``: memory is not optimised, but it is carried exactly
+    along the shooting chain instead of being reset at every knot.
+
+    Raises:
+        DimeResidualEvaluationError: if a provider step fails.
+    """
+    n_steps, nu, nx = _window_dims(problem)
+    x_arr = np.asarray(knot_states, dtype=np.float64)
+    u_arr = np.asarray(controls, dtype=np.float64)
+    require(x_arr.shape == (n_steps, nx), "knot_states must be (N, 2 n_v)", x_arr.shape)
+    require(u_arr.shape == (n_steps, nu), "controls must be (N, n_u)", u_arr.shape)
+    require(bool(np.all(np.isfinite(x_arr))), "knot_states must be finite")
+    require(bool(np.all(np.isfinite(u_arr))), "controls must be finite")
+
+    init = problem.initial_state
+    nv = nx // 2
+    factor = DimeDynamicsWindowFactor(
+        provider=problem.provider,
+        initial_state=init,
+        horizon_steps=n_steps,
+        dt_s=problem.dt_s,
+        defect_mode=problem.defect_mode,
+    )
+    states = [init]
+    defects = np.empty((n_steps, nx), dtype=np.float64)
+    for k in range(n_steps):
+        try:
+            pred = factor.predict_next_state(states[k], u_arr[k])
+        except Exception as exc:
+            raise DimeResidualEvaluationError(
+                f"dynamics step {k} failed during residual evaluation: {exc}"
+            ) from exc
+        knot = DimeCompleteState(
+            t=float(init.t + (k + 1) * problem.dt_s),
+            q=x_arr[k, :nv],
+            v=x_arr[k, nv:],
+            v_dot=pred.v_dot,
+            internal_state=dict(pred.internal_state),
+            model_hash=init.model_hash,
+            units=dict(init.units),
+            frame=init.frame,
+        )
+        defects[k] = factor.defect_from_prediction(knot, pred)
+        states.append(knot)
+    ensure(bool(np.all(np.isfinite(defects))), "transition defects must be finite")
+    return states, defects
 
 
 def compute_window_transition_defects(
@@ -560,34 +608,7 @@ def compute_window_transition_defects(
     Raises:
         DimeResidualEvaluationError: if a provider step fails.
     """
-    n_steps, nu, nx = _window_dims(problem)
-    x_arr = np.asarray(knot_states, dtype=np.float64)
-    u_arr = np.asarray(controls, dtype=np.float64)
-    require(x_arr.shape == (n_steps, nx), "knot_states must be (N, 2 n_v)", x_arr.shape)
-    require(u_arr.shape == (n_steps, nu), "controls must be (N, n_u)", u_arr.shape)
-    require(bool(np.all(np.isfinite(x_arr))), "knot_states must be finite")
-    require(bool(np.all(np.isfinite(u_arr))), "controls must be finite")
-
-    factor = DimeDynamicsWindowFactor(
-        provider=problem.provider,
-        initial_state=problem.initial_state,
-        horizon_steps=n_steps,
-        dt_s=problem.dt_s,
-        defect_mode=problem.defect_mode,
-    )
-    states = _knot_states(problem, x_arr)
-    defects = np.empty((n_steps, nx), dtype=np.float64)
-    for k in range(n_steps):
-        try:
-            defects[k] = factor.compute_single_step_defect(
-                states[k], states[k + 1], u_arr[k]
-            )
-        except Exception as exc:
-            raise DimeResidualEvaluationError(
-                f"dynamics step {k} failed during residual evaluation: {exc}"
-            ) from exc
-    ensure(bool(np.all(np.isfinite(defects))), "transition defects must be finite")
-    return defects
+    return _evaluate_shooting(problem, knot_states, controls)[1]
 
 
 def _discrepancy_slack_bounds(
@@ -723,25 +744,20 @@ def _compute_window_cost_breakdown(
 
 def _assemble_window_result(
     problem: DimeDynamicsWindowProblem,
-    opt_res: Any,
+    z_opt: np.ndarray,
+    converged: bool,
+    n_evaluations: int,
 ) -> DimeDynamicsWindowResult:
     """Bundle the optimum into a receipt with defects and costs evaluated on it.
 
     SOFT returns the optimised knot states, whose defects are the residual model
-    mismatch.  EXACT returns the forward rollout of the optimised controls (a
-    feasibility projection), so its defects are zero by construction and are
-    still evaluated rather than assumed.
+    mismatch.  EXACT passes knots equal to the forward rollout of its
+    hard-constrained controls, so its defects are zero; they are still
+    evaluated rather than assumed.
     """
     n_steps, nu, _ = _window_dims(problem)
-    u_opt, x_opt = unpack_window_decision(problem, opt_res.x)
-    if problem.defect_mode == DefectMode.EXACT:
-        ok, states = _rollout_nominal_trajectory(problem, u_opt)
-        if not ok:
-            return _failed_result(problem, "failed_dynamics_step")
-        x_opt = _states_to_knots(states)
-    else:
-        states = _knot_states(problem, x_opt)
-    defects = compute_window_transition_defects(problem, x_opt, u_opt)
+    u_opt, x_opt = unpack_window_decision(problem, z_opt)
+    states, defects = _evaluate_shooting(problem, x_opt, u_opt)
     cost_breakdown = _compute_window_cost_breakdown(problem, x_opt, u_opt, defects)
     ctrl_var_res = (
         np.diff(u_opt, axis=0) / problem.dt_s if n_steps > 1 else np.zeros((1, nu))
@@ -753,7 +769,7 @@ def _assemble_window_result(
     else:
         bound_res = np.zeros_like(u_opt)
 
-    success = bool(opt_res.success)
+    success = converged
     status = "converged" if success else "max_iterations_reached"
     slack_bounds = _discrepancy_slack_bounds(problem)
     if slack_bounds is not None:
@@ -772,7 +788,67 @@ def _assemble_window_result(
         cost_breakdown=cost_breakdown,
         status=status,
         qualification_status=problem.capability.status,
-        n_iterations=int(opt_res.nfev),
+        n_iterations=n_evaluations,
+    )
+
+
+def _rollout_knots(
+    problem: DimeDynamicsWindowProblem, controls: np.ndarray
+) -> np.ndarray:
+    """Knots ``x_1..x_N`` of the forward rollout; raises on a failed step."""
+    ok, states = _rollout_nominal_trajectory(problem, controls)
+    if not ok:
+        raise DimeResidualEvaluationError("forward rollout failed in the exact stage")
+    return _states_to_knots(states)
+
+
+def _exact_controls_residual(
+    problem: DimeDynamicsWindowProblem,
+    residuals_fn: Callable[[np.ndarray], np.ndarray],
+) -> Callable[[np.ndarray], np.ndarray]:
+    """Residual over controls only, with the knots eliminated by rollout.
+
+    This is the hard-constrained (``d_k = 0``) problem: the defect block of the
+    same residual vector is identically zero, so its length is unchanged.
+    """
+    n_steps, nu, _ = _window_dims(problem)
+
+    def fn(u_vec: np.ndarray) -> np.ndarray:
+        u_arr = np.asarray(u_vec, dtype=np.float64).reshape(n_steps, nu)
+        return residuals_fn(pack_window_decision(u_arr, _rollout_knots(problem, u_arr)))
+
+    return fn
+
+
+def _decision_bounds(
+    problem: DimeDynamicsWindowProblem, n_vars: int
+) -> tuple[Any, Any]:
+    """Actuator bounds on the leading control block, states unbounded."""
+    if problem.actuator_bounds is None:
+        return (-np.inf, np.inf)
+    n_u_vars = problem.horizon_steps * _window_dims(problem)[1]
+    low, high = problem.actuator_bounds
+    lower = np.full(n_vars, -np.inf)
+    upper = np.full(n_vars, np.inf)
+    lower[:n_u_vars] = low
+    upper[:n_u_vars] = high
+    return (lower, upper)
+
+
+def _least_squares(
+    problem: DimeDynamicsWindowProblem,
+    fn: Callable[[np.ndarray], np.ndarray],
+    x0: np.ndarray,
+) -> Any:
+    """One trust-region least-squares solve with the window's bounds and budget."""
+    return least_squares(
+        fn,
+        x0,
+        bounds=_decision_bounds(problem, x0.size),
+        method="trf",
+        max_nfev=problem.max_iterations * (x0.size + 1),
+        ftol=1e-7,
+        xtol=1e-7,
     )
 
 
@@ -816,6 +892,10 @@ def solve_dime_dynamics_window(
 
     Decision variables are the controls and the knot states ``x_1..x_N``; the
     objective is ``0.5 |r(z)|^2`` with ``r`` from ``_build_residuals_evaluator``.
+    SOFT keeps the defects as weighted residuals.  EXACT enforces ``d_k = 0``:
+    after the multiple-shooting solve it re-optimises the controls with the
+    knots eliminated (``x_{k+1} = Phi(x_k, u_k)``), so the returned controls
+    minimise the hard-constrained objective that is reported.
 
     Args:
         problem: Window problem.
@@ -841,32 +921,22 @@ def solve_dime_dynamics_window(
         return _failed_result(problem, "failed_dynamics_divergence")
 
     residuals_fn = _build_residuals_evaluator(problem)
-    n_steps, nu, nx = _window_dims(problem)
-    n_u_vars = n_steps * nu
-    n_vars = z_init.size
-
-    bounds: tuple[Any, Any] = (-np.inf, np.inf)
-    if problem.actuator_bounds is not None:
-        low, high = problem.actuator_bounds
-        lower = np.full(n_vars, -np.inf)
-        upper = np.full(n_vars, np.inf)
-        lower[:n_u_vars] = low
-        upper[:n_u_vars] = high
-        bounds = (lower, upper)
-
     try:
-        opt_res = least_squares(
-            residuals_fn,
-            z_init,
-            bounds=bounds,
-            method="trf",
-            max_nfev=problem.max_iterations * (n_vars + 1),
-            ftol=1e-7,
-            xtol=1e-7,
-        )
+        opt_res = _least_squares(problem, residuals_fn, z_init)
+        z_opt, n_evaluations = opt_res.x, int(opt_res.nfev)
+        if problem.defect_mode == DefectMode.EXACT:
+            # Hard defects: re-optimise the controls with the knots eliminated,
+            # warm-started from the multiple-shooting solution.
+            u_ms, _ = unpack_window_decision(problem, opt_res.x)
+            opt_res = _least_squares(
+                problem, _exact_controls_residual(problem, residuals_fn), u_ms.ravel()
+            )
+            u_exact = opt_res.x.reshape(u_ms.shape)
+            z_opt = pack_window_decision(u_exact, _rollout_knots(problem, u_exact))
+            n_evaluations += int(opt_res.nfev)
     except DimeResidualEvaluationError:
         return _failed_result(problem, "failed_dynamics_step")
     except Exception as exc:
         return _failed_result(problem, f"solver_exception_{exc}")
 
-    return _assemble_window_result(problem, opt_res)
+    return _assemble_window_result(problem, z_opt, bool(opt_res.success), n_evaluations)

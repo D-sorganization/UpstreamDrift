@@ -553,9 +553,14 @@ commit \texttt{21a2ed06}:
     defects are model-discrepancy slack weighted by \texttt{slack\_weight}, costed
     as \texttt{discrepancy\_cost}, and a per-step $\lVert\mathbf{d}_k\rVert$ above
     \texttt{max\_slack\_norm} fails closed (\texttt{failed\_discrepancy\_bound}).
-    \texttt{SOFT} returns the optimised knots; \texttt{EXACT} returns the forward
-    rollout of the optimised controls (a feasibility projection), so its defects
-    are zero by construction.  In both modes the reported defects and every cost
+    \texttt{SOFT} returns the optimised knots.  \texttt{EXACT} enforces
+    $\mathbf{d}_k=\mathbf{0}$: after the multiple-shooting solve (used as a warm
+    start) it re-optimises the controls with the knots eliminated,
+    $\bx_{k+1}=\Phi(\bx_k,\bu_k,\Delta t)$, so the returned controls minimise the
+    hard-constrained objective that is reported.  Provider memory
+    (\texttt{internal\_state}, $\dot{\bv}$) is not a decision variable: knot $k+1$
+    takes it from the prediction $\Phi(\bx_k,\bu_k,\Delta t)$, so it is carried
+    exactly along the shooting chain.  In both modes the reported defects and every cost
     term are evaluated on the returned trajectory, and the reported total equals
     $\tfrac12\lVert\mathbf{r}\rVert^2$ there.  Limitations: knot states are restricted to
     vector-space providers ($n_q=n_v$; a manifold retraction is required
@@ -567,7 +572,10 @@ commit \texttt{21a2ed06}:
     $\mathbf{d}_{j-1}=\boldsymbol{\delta}$ and $\mathbf{d}_j=-\mathbf{A}\boldsymbol{\delta}$,
     an inconsistent initial guess ($\max|\mathbf{d}|>10^{-2}$) converges to
     $\max|\mathbf{d}|<10^{-6}$, and controls and states match the closed-form linear
-    least-squares optimum to $10^{-6}$ for two observation weights.  Reproduce with
+    least-squares optimum to $10^{-6}$ for two observation weights; \texttt{EXACT}
+    controls match the closed-form optimum with the knots eliminated, not the
+    penalty optimum (which differs by more than $10^{-2}$); and on a provider whose
+    dynamics depend on \texttt{internal\_state}, defects vanish on its rollout.  Reproduce with
     \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window\_multiple\_shooting.py
     tests/unit/estimation/test\_dime\_dynamics\_window.py}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
