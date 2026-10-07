@@ -82,3 +82,28 @@ def test_staged_path_selection_does_not_scan_untouched_documents(
 
     assert changed_paths(tmp_path, staged=True) == [staged_pdf]
     assert "--cached" in observed["command"]
+
+
+def test_yaml_and_other_filenames_are_protected_literals() -> None:
+    title = "Register latex-references.yml in the Workflow Inventory"
+    assert expected_title(title) == title
+    for name in ("ci.yaml", "index.html", "theme.css", "refs.bib"):
+        assert expected_title(f"Update {name} Settings") == f"Update {name} Settings"
+
+
+def test_dotfiles_and_dot_paths_are_protected_literals() -> None:
+    for title in (
+        "Track .gitattributes for Line Endings",
+        "Audit .github/workflows for Drift",
+    ):
+        assert expected_title(title) == title
+
+
+def test_angle_bracket_spans_are_protected_literals() -> None:
+    title = "Replace <issue-number> in the Template"
+    assert expected_title(title) == title
+
+
+def test_ud_specific_extensions_stay_protected() -> None:
+    for name in ("setup.exe", "tool.app", "build.appimage"):
+        assert expected_title(f"Run {name} Locally") == f"Run {name} Locally"

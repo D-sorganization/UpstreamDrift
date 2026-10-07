@@ -44,8 +44,11 @@ TERMS = {"cm", "kg", "km", "m", "mm", "ms", "nm", "rad", "s"}
 PARTICLES = {"da", "de", "der", "di", "la", "le", "van", "von"}
 WORD = re.compile(r"[^\W\d_][^\W_]*(?:['’][^\W_]+)?", re.UNICODE)
 PROTECTED = re.compile(
-    r"`[^`]+`|\$[^$]+\$|https?://\S+|@[\w:.-]+|\\[A-Za-z]+|\b[A-Z]\([^)]*\)|"
-    r"\b[\w.-]+\.(?i:md|qmd|tex|docx|pdf|py|exe|app|appimage)\b"
+    r"`[^`]+`|\$[^$]+\$|<[^>]+>|https?://\S+|@[\w:.-]+|\\[A-Za-z]+|"
+    r"\b[A-Z]\([^)]*\)|"
+    r"\b[\w.-]+\.(?i:md|qmd|tex|docx|pdf|py|html|css|yml|yaml|bib|exe|app|appimage)\b|"
+    # Dotfile names and paths (``.gitattributes``, ``.git/hooks``) are literals.
+    r"(?<![\w.])\.\w[\w./*-]*"
 )
 HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 YAML_TITLE = re.compile(
