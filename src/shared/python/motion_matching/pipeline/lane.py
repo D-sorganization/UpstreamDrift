@@ -125,6 +125,118 @@ def add_toe_spheres(document: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+FOOT_WIDTH_STEMS = ("heel", "forefoot")
+TORSION_TRANSITION_RAD_S = 0.5
+
+
+def add_foot_width_spheres(
+    document: dict[str, Any],
+    half_width_m: float,
+    torsional_patch_m: float | None = None,
+) -> dict[str, Any]:
+    """Return a copy of ``document`` whose feet are wide, not a centre line (#11671).
+
+    The heel and forefoot spheres get a lateral pair at ``+/- half_width_m``
+    along the calcaneus z axis (named ``<stem>_zp_<side>`` and
+    ``<stem>_zn_<side>``, so a foot side is still the name suffix). With three
+    spheres on one line a foot has no lateral or torsional support; the pair
+    turns the line into a sole. ``torsional_patch_m`` additionally records a
+    spin-friction patch radius that engines apply as a moment about the ground
+    normal at every loaded sphere.
+
+    Preconditions: ``half_width_m`` finite and positive; ``torsional_patch_m``
+    ``None`` or finite and nonnegative. Postconditions: the input is unchanged;
+    applying the function twice with the same width equals applying it once.
+    """
+    if not np.isfinite(half_width_m) or half_width_m <= 0:
+        raise ValueError("half_width_m must be finite and positive")
+    if torsional_patch_m is not None and (
+        not np.isfinite(torsional_patch_m) or torsional_patch_m < 0
+    ):
+        raise ValueError("torsional_patch_m must be None or finite and nonnegative")
+    if "contact" not in document:
+        raise ValueError("document must contain a 'contact' block")
+    contact = dict(document["contact"])
+    spheres = list(contact["spheres"])
+    names = {sphere["name"] for sphere in spheres}
+    for sphere in list(spheres):
+        stem, _, side = sphere["name"].rpartition("_")
+        if stem not in FOOT_WIDTH_STEMS or side not in ("r", "l"):
+            continue
+        for tag, sign in (("zp", 1.0), ("zn", -1.0)):
+            name = f"{stem}_{tag}_{side}"
+            if name in names:
+                continue
+            position = list(sphere["position_m"])
+            position[2] = position[2] + sign * float(half_width_m)
+            spheres.append({**sphere, "name": name, "position_m": position})
+    contact["spheres"] = spheres
+    note = f"foot width +/-{half_width_m * 1e3:.0f} mm on heel and forefoot"
+    out = dict(document)
+    out["contact"] = contact
+    prov = str(document.get("provenance", ""))
+    out["provenance"] = prov if note in prov else f"{prov} | {note}"
+    if torsional_patch_m is not None:
+        out = add_torsional_friction(out, torsional_patch_m)
+    return out
+
+
+def add_torsional_friction(
+    document: dict[str, Any], patch_radius_m: float
+) -> dict[str, Any]:
+    """Return a copy of ``document`` whose contact spheres resist spinning (#11671).
+
+    Records ``contact.torsion`` so the MuJoCo adapter applies a spin-friction
+    moment ``-mu f_n r tanh(w_n / w0)`` about the ground normal at every loaded
+    sphere. It changes no geometry, so a fitted pre-impact trajectory stays valid.
+
+    Preconditions: ``patch_radius_m`` finite and nonnegative.
+    """
+    if not np.isfinite(patch_radius_m) or patch_radius_m < 0:
+        raise ValueError("torsional_patch_m must be None or finite and nonnegative")
+    if "contact" not in document:
+        raise ValueError("document must contain a 'contact' block")
+    out = dict(document)
+    out["contact"] = {
+        **document["contact"],
+        "torsion": {
+            "patch_radius_m": float(patch_radius_m),
+            "transition_rad_s": TORSION_TRANSITION_RAD_S,
+        },
+    }
+    note = f"torsional patch {patch_radius_m * 1e3:.0f} mm"
+    prov = str(document.get("provenance", ""))
+    out["provenance"] = prov if note in prov else f"{prov} | {note}"
+    return out
+
+
+def expand_stance_for_width(
+    stance: Sequence[Sequence[str]], sphere_names: Sequence[str]
+) -> list[tuple[str, ...]]:
+    """Pin the lateral foot-width spheres wherever their centre-line sphere is pinned.
+
+    Without this the IK keeps the heel and forefoot on the ground but may tilt
+    the sole, so a lateral sphere hangs in the air or digs in and the plant
+    rolls the foot (#11671). Postcondition: every output frame contains its
+    input frame, plus the existing ``<stem>_zp_<side>`` / ``<stem>_zn_<side>``
+    siblings of each pinned heel or forefoot sphere.
+    """
+    available = set(sphere_names)
+    out: list[tuple[str, ...]] = []
+    for frame in stance:
+        pinned = list(frame)
+        for name in frame:
+            stem, _, side = name.rpartition("_")
+            if stem not in FOOT_WIDTH_STEMS:
+                continue
+            for tag in ("zp", "zn"):
+                sibling = f"{stem}_{tag}_{side}"
+                if sibling in available and sibling not in pinned:
+                    pinned.append(sibling)
+        out.append(tuple(pinned))
+    return out
+
+
 def fitted_grip(document: dict[str, Any]) -> bool:
     """True when the document's hands carry a fitted (nonzero) rotation."""
     rotation = document.get("subject", {}).get("grip_rotation_deg") or {}

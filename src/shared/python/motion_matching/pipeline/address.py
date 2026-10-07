@@ -57,6 +57,8 @@ from src.shared.python.motion_matching.pipeline.constants import (
     UP_AXIS,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
+    add_foot_width_spheres,
+    add_torsional_friction,
     add_toe_spheres,
     wrist_bounds,
 )
@@ -426,6 +428,8 @@ class HipCalibrationOptions:
     skip_hip_calibration: bool = False
     anthropometric: tuple[float, float] | None = None
     recalibrate_upper: bool = False
+    foot_half_width_m: float | None = None
+    torsional_patch_m: float | None = None
 
 
 def _calibrate_ground_height(
@@ -497,6 +501,12 @@ def prepare_hip_spec(
                 base_spec, hip_cal, alignment_old, zero_twist_deg=zero_twist
             )
         )
+    if opts.foot_half_width_m is not None:
+        hip_spec = add_foot_width_spheres(
+            hip_spec, opts.foot_half_width_m, opts.torsional_patch_m
+        )
+    elif opts.torsional_patch_m is not None:
+        hip_spec = add_torsional_friction(hip_spec, opts.torsional_patch_m)
     hip_spec = _calibrate_ground_height(hip_spec, lane.ground.height_m)
     unqualified = "unqualified" in str(base_spec.get("upper_body_qualification", ""))
     if opts.anthropometric:
