@@ -64,7 +64,7 @@ def test_model_registry_explicit_local_only_ignores_hybrid_environment(
     )
 
     assert registry.discovery_mode == "local-only"
-    assert len(registry.get_all_models()) == 63
+    assert len(registry.get_all_models()) == 64
 
 
 def test_catalog_reconciles_current_registries_without_schema_count_constants(
@@ -77,13 +77,13 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
 
     assert catalog["summary"] == {
         "raw_launcher_records": 55,
-        "local_model_records": 63,
+        "local_model_records": 64,
         "program_records": 77,
-        "feature_records": 52,
-        "feature_surface_paths": 104,
+        "feature_records": 53,
+        "feature_surface_paths": 105,
         "workflow_records": 15,
         "executable_workflow_records": 14,
-        "single_source_program_records": 36,
+        "single_source_program_records": 35,
         "documentation_records": 20,
         "current_documentation_records": 4,
         "engine_capability_records": 17,
@@ -95,7 +95,7 @@ def test_catalog_reconciles_current_registries_without_schema_count_constants(
         "pending_screenshot_records": 71,
     }
     assert len({record["id"] for record in catalog["programs"]}) == 77
-    assert len({record["id"] for record in catalog["features"]}) == 52
+    assert len({record["id"] for record in catalog["features"]}) == 53
 
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
     for current_count in (55, 63, 77, 51, 95):

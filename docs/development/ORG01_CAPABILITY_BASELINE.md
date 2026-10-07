@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 167
+- **Total Cataloged Entries**: 169
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -32,7 +32,7 @@ packages, saved layouts, and golden test fixtures.
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
-| `simulation` | 85 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
+| `simulation` | 87 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
 | `training` | 17 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
 
 ## Representative Golden Preservation Fixtures
@@ -149,6 +149,7 @@ packages, saved layouts, and golden test fixtures.
 | `mujoco_models_shared` | MuJoCo Models | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `MuJoCo_Models` | `tests/config/test_launcher_registry_parity.py` |
 | `mujoco_unified` | MuJoCo | `model` | `simulation` | — | `mujoco` | 🟢 active_feature | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `myosim_suite` | MyoSuite | `model` | `simulation` | — | `opensim` | 🟢 active_feature | `src/engines/physics_engines/myosuite/python/gui.py` | `tests/config/test_launcher_registry_parity.py` |
+| `native_viewer_export` | Tools Package: native_viewer_export | `cli_tool` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/native_viewer_export/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `necromatcher` | Necromatcher Historical Player Workspace | `tile` | `capture` | `analysis`, `simulation` | `core` | 🟢 active_feature | `src/tools/necromatcher/gui.py` | `tests/unit/tools/test_necromatcher_gui.py` |
 | `offline_validation` | Tools Package: offline_validation | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/offline_validation/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `onboarding.about_version` | About/version info + onboarding | `feature` | `simulation` | — | `core` | 🔵 planned | `src/launchers/about_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
@@ -218,6 +219,7 @@ packages, saved layouts, and golden test fixtures.
 | `tools.model_explorer` | Model Explorer (browse/select/build URDF-MJCF) | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/launch_model_explorer.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.model_explorer.frankenstein_assembly` | Frankenstein drag-and-drop assembly with typed attachment ports | `feature` | `analysis` | — | `core` | 🔵 planned | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `tests/unit/tools/model_explorer/test_assembly_panel_gui.py` |
 | `tools.motion_matching` | Motion Matching tool (full-body forward-dynamics matching of the tour captures) | `feature` | `capture` | — | `core` | 🔵 planned | `src/tools/motion_matching/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `tools.native_viewer_export` | Native per-engine viewer video export (CLI) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.necromatcher` | Necromatcher Historical Player Workspace | `feature` | `capture` | `analysis`, `simulation` | `core` | 🟢 active_feature | `src/tools/necromatcher/gui.py` | `tests/unit/tools/test_necromatcher_gui.py` |
 | `tools.pose_editing` | Pose Studio interactive pose editing | `feature` | `capture` | — | `core` | ⚪ exempt | `src/tools/pose_studio/__main__.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.putting_green` | Putting green simulation | `feature` | `putting` | — | `core` | 🟢 active_feature | `src/engines/physics_engines/putting_green/python/simulator.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
