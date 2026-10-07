@@ -524,25 +524,29 @@ class TestFixedSizeResidual:
         from src.shared.python.estimation.dime_dynamics_window import (
             _build_residuals_evaluator,
             expected_residual_size,
+            pack_window_decision,
         )
 
         problem = _fixed_size_problem(AnalyticPendulumProvider())
         fn = _build_residuals_evaluator(problem)
         n = expected_residual_size(problem)
-        inside = fn(np.full(4, 0.1))
-        outside = fn(np.full(4, 5.0))  # violates actuator bounds
+        knots = np.zeros((4, 2))  # decision vector also carries the knot states
+        inside = fn(pack_window_decision(np.full((4, 1), 0.1), knots))
+        # 5.0 violates the actuator bounds.
+        outside = fn(pack_window_decision(np.full((4, 1), 5.0), knots))
         assert inside.shape == outside.shape == (n,)
 
     def test_failure_raises_typed_error_not_fake_residual(self) -> None:
         from src.shared.python.estimation.dime_dynamics_window import (
             DimeResidualEvaluationError,
             _build_residuals_evaluator,
+            pack_window_decision,
         )
 
         problem = _fixed_size_problem(_FailsOnNonzeroControls())
         fn = _build_residuals_evaluator(problem)
         with pytest.raises(DimeResidualEvaluationError):
-            fn(np.full(4, 0.1))
+            fn(pack_window_decision(np.full((4, 1), 0.1), np.zeros((4, 2))))
 
     def test_solver_reports_step_failure_explicitly(self) -> None:
         problem = _fixed_size_problem(_FailsOnNonzeroControls())

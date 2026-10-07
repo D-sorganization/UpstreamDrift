@@ -531,21 +531,45 @@ commit \texttt{21a2ed06}:
   \item No engine backs any DIME provider; the \texttt{DynamicsProvider}
     protocol lacks derivatives, parameter setters and batching
     (\texttt{dime\_contracts.py:930-956}).
-  \item The ``coupled state-control window'' is control-only single shooting
+  \item The ``coupled state-control window'' was control-only single shooting
     with hard-coded zero defects and costs (\texttt{dime\_dynamics\_window.py:517-566,604}).
-    Partially corrected by \#11554: the least-squares residual now has the fixed
-    length $n_u N_{\mathrm{steps}}$ (control effort) $+\ \sum_k \min(\dim\bx^{\mathrm{obs}}_k, n_q)$
-    (observations) $+\ (N_{\mathrm{steps}}-1)\,n_u$ (control rate, when weighted)
-    $+\ n_u N_{\mathrm{steps}}$ (actuator bounds, when set; one non-negative entry per
-    control, zero inside the bounds), independent of the control values and
-    enforced by a postcondition (\texttt{expected\_residual\_size}).  A failed
-    provider step no longer returns the placeholder residual $10^{8}\mathbf{1}_{100}$
-    (whose length differed from the normal path); it raises
-    \texttt{DimeResidualEvaluationError}, and the solver reports
-    \texttt{failed\_dynamics\_step} with \texttt{success=False}.  The zero
-    defects and costs, and the single-shooting structure, remain open
-    (\#11545).  Reproduce with
-    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window.py -k FixedSize}.
+    \emph{Resolved (\#11554).}  The window is now transcribed by multiple
+    shooting: the decision vector is
+    $\mathbf{z}=(\bu_0,\dots,\bu_{N-1},\bx_1,\dots,\bx_N)$ with knot states
+    $\bx_k=(\bq_k,\bv_k)$ and $\bx_0$ fixed, and each interval contributes the
+    transition defect $\mathbf{d}_k=\bx_{k+1}-\Phi(\bx_k,\bu_k,\Delta t)$, where $\Phi$ is
+    the provider's own step (no separate integrator).  The objective is
+    $\tfrac12\lVert\mathbf{r}(\mathbf{z})\rVert^2$ with residual blocks, in order:
+    $\sqrt{w_{\mathrm{obs}}}\,(\bq_k-\by_k)$ for each target $k\le N$;
+    $\sqrt{w_{\mathrm{d}}}\,\mathbf{d}_k$ for $k=0,\dots,N-1$; $\sqrt{w_{\mathrm{rate}}\Delta t}\,(\bu_{k+1}-\bu_k)/\Delta t$
+    (when $w_{\mathrm{rate}}>0$); $10^{-4}\bu_k$ (effort); and $100$ times the
+    actuator-bound violation (when bounds are set).  Its length,
+    $\sum_k\min(\dim\by_k,n_q)+2n_vN+(N-1)n_u+n_uN+n_uN$ (the rate and bound
+    terms only when active), is fixed and enforced by a postcondition
+    (\texttt{expected\_residual\_size}); a failed provider step raises
+    \texttt{DimeResidualEvaluationError} and the solver reports
+    \texttt{failed\_dynamics\_step}.  $w_{\mathrm{d}}$ is \texttt{transition\_weight},
+    except in \texttt{SOFT} mode with \texttt{ModelDiscrepancyBounds}, where the
+    defects are model-discrepancy slack weighted by \texttt{slack\_weight}, costed
+    as \texttt{discrepancy\_cost}, and a per-step $\lVert\mathbf{d}_k\rVert$ above
+    \texttt{max\_slack\_norm} fails closed (\texttt{failed\_discrepancy\_bound}).
+    \texttt{SOFT} returns the optimised knots; \texttt{EXACT} returns the forward
+    rollout of the optimised controls (a feasibility projection), so its defects
+    are zero by construction.  In both modes the reported defects and every cost
+    term are evaluated on the returned trajectory, and the reported total equals
+    $\tfrac12\lVert\mathbf{r}\rVert^2$ there.  Limitations: knot states are restricted to
+    vector-space providers ($n_q=n_v$; a manifold retraction is required
+    otherwise); Jacobians are dense finite differences; the scheme is still
+    forward shooting, not the inverse-dynamics variable projection of
+    \S\ref{sec:roadmap} (\#11545).  Verified on a linear oscillator, where
+    $\Phi$ is exactly $\bx_{k+1}=\mathbf{A}\bx_k+\mathbf{B}\bu_k$: defects vanish on the
+    rollout to $10^{-14}$, a knot perturbation $\boldsymbol{\delta}$ gives
+    $\mathbf{d}_{j-1}=\boldsymbol{\delta}$ and $\mathbf{d}_j=-\mathbf{A}\boldsymbol{\delta}$,
+    an inconsistent initial guess ($\max|\mathbf{d}|>10^{-2}$) converges to
+    $\max|\mathbf{d}|<10^{-6}$, and controls and states match the closed-form linear
+    least-squares optimum to $10^{-6}$ for two observation weights.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window\_multiple\_shooting.py
+    tests/unit/estimation/test\_dime\_dynamics\_window.py}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
   \item Learned initialisers, ablations, baseline and replay audit return
     constants (\texttt{dime\_learned\_initializers.py:517-753},
