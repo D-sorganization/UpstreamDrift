@@ -29,6 +29,7 @@ OPTIONAL_ENGINES: dict[str, str] = {
     "opensim": "src.engines.physics_engines.opensim.python.full_body_parity",
     "myosuite": "src.engines.physics_engines.myosuite.python.full_body_parity",
 }
+ALL_ENGINES: tuple[str, ...] = (*PARITY_ENGINES, *OPTIONAL_ENGINES)
 
 
 def _build_adapter(engine: str, spec_bytes: bytes, kkt_regularization: float) -> Any:
@@ -72,9 +73,8 @@ class VectorPlant:
     def __init__(
         self, engine: str, spec_bytes: bytes, *, kkt_regularization: float = 0.0
     ) -> None:
-        if engine not in PARITY_ENGINES and engine not in OPTIONAL_ENGINES:
-            known = (*PARITY_ENGINES, *OPTIONAL_ENGINES)
-            raise ValueError(f"engine must be one of {known}, got {engine!r}")
+        if engine not in ALL_ENGINES:
+            raise ValueError(f"engine must be one of {ALL_ENGINES}, got {engine!r}")
         if not isinstance(spec_bytes, bytes | bytearray):
             raise TypeError("spec_bytes must be the raw spec document bytes")
         if not np.isfinite(kkt_regularization) or kkt_regularization < 0.0:

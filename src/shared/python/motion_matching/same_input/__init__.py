@@ -22,6 +22,7 @@ from src.shared.python.motion_matching.same_input.integrator import (
     zoh_rk4_step,
 )
 from src.shared.python.motion_matching.same_input.plant import (
+    ALL_ENGINES,
     OPTIONAL_ENGINES,
     PARITY_ENGINES,
     VectorPlant,
@@ -38,6 +39,7 @@ from src.shared.python.motion_matching.same_input.scoring import (
 )
 
 __all__ = [
+    "ALL_ENGINES",
     "OPTIONAL_ENGINES",
     "PARITY_ENGINES",
     "ROOT_COORDINATES",

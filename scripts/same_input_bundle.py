@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 
 from src.shared.python.motion_matching.same_input import (
-    PARITY_ENGINES,
+    ALL_ENGINES,
     InputBundle,
     VectorPlant,
     closed_loop,
@@ -148,8 +148,8 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
     }
 
 
-def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+def build_parser() -> argparse.ArgumentParser:
+    """Return the ``export`` / ``replay`` / ``closed-loop`` argument parser."""
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     exp = sub.add_parser("export")
@@ -158,15 +158,20 @@ def main() -> None:
     exp.add_argument("--duration", type=float, default=None)
     rep = sub.add_parser("replay")
     rep.add_argument("--bundle", type=Path, required=True)
-    rep.add_argument("--engine", choices=PARITY_ENGINES, required=True)
+    rep.add_argument("--engine", choices=ALL_ENGINES, required=True)
     rep.add_argument("--out", type=Path, required=True)
     rep.add_argument("--segment-ms", type=float, default=50.0)
     clo = sub.add_parser("closed-loop")
     clo.add_argument("--run-dir", type=Path, required=True)
     clo.add_argument("--bundle", type=Path, required=True)
-    clo.add_argument("--engine", choices=PARITY_ENGINES, required=True)
+    clo.add_argument("--engine", choices=ALL_ENGINES, required=True)
     clo.add_argument("--out", type=Path, required=True)
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    args = build_parser().parse_args()
     if args.command == "export":
         manifest = export(args.run_dir, args.out, args.duration)
         LOG.info("wrote %s: %d steps", args.out, manifest["steps"])
