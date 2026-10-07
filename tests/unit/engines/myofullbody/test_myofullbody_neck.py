@@ -80,3 +80,22 @@ def test_split_separates_muscle_and_neck_activation() -> None:
     assert list(muscles) == [0, 1, 2] and list(torque) == [3, 4, 5, 6]
     with pytest.raises(ValueError):
         neck.split(act, 9)
+
+
+def test_torque_returns_the_signed_neck_generalised_force() -> None:
+    order = ("NeckInputX", "Other")
+    base = redundancy.FrameBasis(
+        np.array([1.0]), np.array([0.0]), np.array([[0.5, 0.0]]), np.eye(2)
+    )
+    aug = neck.augment(base, order, [0, 1])
+    act = np.array([0.2, 0.5, 0.1])  # muscle, neck pos, neck neg
+    tau = neck.torque(aug, act, 1)
+    expected = (0.5 - 0.1) * neck.CAPACITY_NM["NeckInputX"]
+    assert tau.tolist() == [expected, 0.0]
+
+
+def test_torque_of_an_unaugmented_basis_is_zero() -> None:
+    base = redundancy.FrameBasis(
+        np.array([1.0]), np.array([0.0]), np.array([[0.5]]), np.eye(1)
+    )
+    assert neck.torque(base, np.array([0.3]), 1).tolist() == [0.0]

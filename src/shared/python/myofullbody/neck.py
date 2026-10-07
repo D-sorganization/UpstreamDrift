@@ -86,3 +86,10 @@ def split(activation: np.ndarray, n_muscles: int) -> tuple[np.ndarray, np.ndarra
     """
     require(0 <= n_muscles <= activation.shape[-1], "n_muscles outside the vector")
     return activation[..., :n_muscles], activation[..., n_muscles:]
+
+
+def torque(basis: FrameBasis, activation: np.ndarray, n_muscles: int) -> np.ndarray:
+    """Spec generalised force of the neck torque actuators alone (zero if none)."""
+    _, act = split(activation, n_muscles)
+    rows = basis.moment[n_muscles:]
+    return rows.T @ (act * basis.active[n_muscles:])
