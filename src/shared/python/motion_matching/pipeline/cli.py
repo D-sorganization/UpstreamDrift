@@ -596,11 +596,14 @@ def _persist_dynamics_artifacts(
     q_ref: np.ndarray,
     sim_q: np.ndarray,
     lane: Lane,
+    q_track: np.ndarray,
 ) -> None:
     """Write dynamics NPZ and render IK / tracking playback GIFs.
 
     The playback looks at the capture's first-frame marker centroid and runs
-    at the capture's own rate.
+    at the capture's own rate.  The NPZ also keeps the tracked reference
+    (``q_track`` on ``track_time_s``) so same-input bundles can be rebuilt
+    from a run directory (#11607).
     """
     lookat = np.nanmean(lane.points[0], axis=0)
     rate_hz = lane.rate_hz
@@ -616,6 +619,8 @@ def _persist_dynamics_artifacts(
         inside=record.inside_support_polygon,
         lowest_sphere_height_m=record.lowest_sphere_height_m,
         sim_errors_m=sim_errors,
+        q_track=q_track,
+        track_time_s=lane.times,
     )
     names = tuple(kin.coordinate_order)
     render_playback(
@@ -746,6 +751,7 @@ def _simulate_and_receipt(
         q_ref,
         sim_q,
         lane,
+        q_track,
     )
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
