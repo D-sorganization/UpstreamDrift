@@ -30,7 +30,10 @@ from src.shared.python.estimation import (
     MovingHorizonOptions,
     MovingHorizonProblem,
 )
-from src.shared.python.estimation.map_estimator import CubicHermiteSplineTrajectory
+from src.shared.python.estimation.map_estimator import (
+    CubicHermiteSplineTrajectory,
+    MapDecisionLayout,
+)
 from src.shared.python.estimation.moving_horizon import ArrivalFactor
 
 pytestmark = pytest.mark.unit
@@ -65,11 +68,9 @@ def _prior() -> ArrivalFactor:
     )
 
 
-def _problem(
-    obs_lookup: dict[float, np.ndarray],
-    window_size: int,
-    arrival: ArrivalFactor | None,
-) -> MovingHorizonProblem:
+def _per_sample_model(obs_lookup: dict[float, np.ndarray]):
+    """Per-sample position, velocity and acceleration rows (linear)."""
+
     def residual(evaluation, _parameters):
         obs = np.array([obs_lookup[round(float(t), 9)] for t in evaluation.times])
         return np.concatenate(
@@ -90,6 +91,52 @@ def _problem(
         jac[:, : layout.trajectory_size] = np.vstack(rows)
         return jac
 
+    return residual, jacobian
+
+
+def _transition_model(obs_lookup: dict[float, np.ndarray]):
+    """Position observations plus discrete transitions between consecutive samples.
+
+    ``q_{k+1} - q_k - dt v_k`` and ``v_{k+1} - v_k`` couple each pair of
+    samples, as in a classic discrete-time MHE process model.
+    """
+    sigma_q, sigma_w = 0.02, 0.3
+
+    def residual(evaluation, _parameters):
+        obs = np.array([obs_lookup[round(float(t), 9)] for t in evaluation.times])
+        q, v = evaluation.q[:, 0], evaluation.v[:, 0]
+        dt = np.diff(evaluation.times)
+        return np.concatenate(
+            [
+                (q - obs[:, 0]) / SIGMA_Y,
+                (q[1:] - q[:-1] - dt * v[:-1]) / sigma_q,
+                (v[1:] - v[:-1]) / sigma_w,
+            ]
+        )
+
+    def jacobian(evaluation, _parameters, layout):
+        qb, vb = evaluation.q_basis[:, 0, :], evaluation.v_basis[:, 0, :]
+        dt = np.diff(evaluation.times)[:, None]
+        rows = [
+            qb / SIGMA_Y,
+            (qb[1:] - qb[:-1] - dt * vb[:-1]) / sigma_q,
+            (vb[1:] - vb[:-1]) / sigma_w,
+        ]
+        stacked = np.vstack(rows)
+        jac = np.zeros((stacked.shape[0], layout.size))
+        jac[:, : layout.trajectory_size] = stacked
+        return jac
+
+    return residual, jacobian
+
+
+def _problem(
+    obs_lookup: dict[float, np.ndarray],
+    window_size: int,
+    arrival: ArrivalFactor | None,
+    model=None,
+) -> MovingHorizonProblem:
+    residual, jacobian = model or _per_sample_model(obs_lookup)
     return MovingHorizonProblem(
         n_dof=1,
         fixed_parameters={},
@@ -106,17 +153,19 @@ def _problem(
 
 
 def _batch_solution(
-    times: np.ndarray, obs: np.ndarray, *, with_prior: bool = True
+    times: np.ndarray, obs: np.ndarray, *, with_prior: bool = True, model=None
 ) -> np.ndarray:
-    """Analytic linear least-squares MAP over every sample (the batch truth)."""
+    """Analytic linear least-squares MAP over every sample (the batch truth).
+
+    The model rows are linear in the coefficients, so evaluating them at zero
+    gives ``J c + r0``; the batch MAP solves ``J c = -r0`` with the prior.
+    """
+    residual, jacobian = model or _per_sample_model(_lookup(times, obs))
     spline = CubicHermiteSplineTrajectory(times, 1)
     basis = spline.evaluate(np.zeros(spline.coefficient_size), times)
-    blocks = [
-        basis.q_basis[:, 0, :] / SIGMA_Y,
-        basis.v_basis[:, 0, :] / SIGMA_V,
-        basis.a_basis[:, 0, :] / SIGMA_A,
-    ]
-    targets = [obs[:, 0] / SIGMA_Y, obs[:, 1] / SIGMA_V, np.zeros(times.size)]
+    layout = MapDecisionLayout(spline.coefficient_size, ())
+    blocks = [jacobian(basis, {}, layout)]
+    targets = [-residual(basis, {})]
     if with_prior:
         sqrt_info = np.linalg.cholesky(PRIOR_INFORMATION).T
         first_state = np.vstack([basis.q_basis[0], basis.v_basis[0]])
@@ -251,3 +300,66 @@ def test_arrival_is_reset_when_window_skips_past_unsolved_samples(caplog) -> Non
     assert result.arrival_factor is None
     assert estimator.arrival_factor is None
     assert "arrival factor discarded" in caplog.text
+
+
+def test_transition_factors_between_samples_are_marginalised() -> None:
+    """Rows coupling a dropped sample to the retained one must not be lost."""
+    n_samples, window = 9, 4
+    times, obs = _samples(n_samples)
+    model = _transition_model(_lookup(times, obs))
+    estimator = MovingHorizonEstimator(
+        _problem(_lookup(times, obs), window, _prior(), model=model)
+    )
+    estimator.append_samples(times[:window], obs[:window, :1])
+
+    for stop in range(window, n_samples + 1):
+        if stop > window:
+            estimator.append_samples(times[stop - 1 : stop], obs[stop - 1 : stop, :1])
+        result = estimator.solve_next()
+        assert result is not None and result.success
+        batch = _knot_states(
+            _batch_solution(times[:stop], obs[:stop], model=model), stop
+        )
+        np.testing.assert_allclose(
+            _knot_states(result.coefficients, window),
+            batch[stop - window : stop],
+            atol=ATOL,
+        )
+
+
+def test_transient_failure_keeps_arrival_until_a_window_is_accepted() -> None:
+    """A rejected window must not discard or advance the arrival factor."""
+    n_samples, window = 7, 4
+    times, obs = _samples(n_samples)
+    residual, jacobian = _per_sample_model(_lookup(times, obs))
+    fail = {"on": False}
+
+    def flaky_residual(evaluation, parameters):
+        if fail["on"]:
+            return np.full(3 * evaluation.times.size, np.nan)
+        return residual(evaluation, parameters)
+
+    estimator = MovingHorizonEstimator(
+        _problem(
+            _lookup(times, obs), window, _prior(), model=(flaky_residual, jacobian)
+        )
+    )
+    estimator.append_samples(times[:window], obs[:window, :1])
+    assert estimator.solve_next().success
+
+    fail["on"] = True
+    estimator.append_samples(times[4:5], obs[4:5, :1])
+    rejected = estimator.solve_next()
+    assert rejected is not None and not rejected.success
+    assert estimator.arrival_sample_index == 0
+    assert not estimator.accumulation_guard.is_marginalized(0)
+
+    fail["on"] = False
+    for stop in (6, 7):
+        estimator.append_samples(times[stop - 1 : stop], obs[stop - 1 : stop, :1])
+        result = estimator.solve_next()
+        assert result is not None and result.success
+    batch = _knot_states(_batch_solution(times, obs), n_samples)
+    np.testing.assert_allclose(
+        _knot_states(result.coefficients, window), batch[-window:], atol=ATOL
+    )

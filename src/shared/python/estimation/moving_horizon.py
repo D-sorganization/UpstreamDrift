@@ -10,14 +10,16 @@ positions and velocities; the arrival state is the first knot's
 
     0.5 * || R (x_0 - x_ref) - r ||^2 + 0.5 * sum_k || rho_k(c) ||^2,
 
-where ``rho_k`` is the user residual at window sample ``k``. When the window
-slides from first sample ``A`` to ``F``, the arrival rows and the residual rows
-of samples ``A..F-1`` are linearised at the last accepted solution and the
-knots ``A..F-1`` are eliminated by a Schur complement
-(:func:`marginalize_arrival_factor`), leaving a factor on knot ``F``. For a
-linear-Gaussian model this is exact: every window equals the batch MAP
-(Kalman/RTS) estimate over all samples seen so far. Earlier versions stored the
-factor but never applied or propagated it.
+where ``rho_k`` collects the user residual rows of window sample ``k`` and of
+transitions between consecutive samples. When the window slides from first
+sample ``A`` to ``F``, the rows that will not be evaluated again (the arrival
+rows, the rows of samples ``A..F-1`` and the transitions ``A..F``) are
+linearised at the last accepted solution and the knots ``A..F-1`` are
+eliminated by a Schur complement (:func:`marginalize_arrival_factor`), leaving a
+factor on knot ``F``. The update is committed only when the window solve is
+accepted. For a linear-Gaussian model this is exact: every window equals the
+batch MAP (Kalman/RTS) estimate over all samples seen so far. Earlier versions
+stored the factor but never applied or propagated it.
 """
 
 from __future__ import annotations
@@ -90,6 +92,22 @@ class FailureDiagnostics:
     n_iterations: int = 0
     non_finite_indices: tuple[int, ...] = ()
     constraint_residuals: Mapping[str, float] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class _ArrivalUpdate:
+    """Tentative arrival factor for a window, committed only on acceptance.
+
+    ``failure`` is non-empty when the propagation linearisation was
+    non-finite; the window is then rejected and committed state is unchanged.
+    ``discard_reason`` is non-empty when information is lost on commit.
+    """
+
+    factor: ArrivalFactor | None
+    anchor: int
+    marginalized: tuple[tuple[int, float], ...] = ()
+    failure: str = ""
+    discard_reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -476,6 +494,7 @@ class MovingHorizonEstimator:
         self._arrival_factor: ArrivalFactor | None = problem.arrival_factor
         # Sample index whose first-knot state the arrival factor constrains.
         self._arrival_sample_index = 0
+        self._pending_arrival = _ArrivalUpdate(problem.arrival_factor, 0)
         self._last_accepted_first_index = 0
         self._accumulation_guard = AccumulationGuard()
 
@@ -536,11 +555,12 @@ class MovingHorizonEstimator:
     def build_current_problem(self) -> MapEstimatorProblem:
         """Build the fixed-parameter MAP problem for the retained window.
 
-        First advances the arrival factor to the window's first sample
-        (idempotent), so the returned problem includes the arrival rows.
+        Computes the arrival factor for the window's first sample (tentative;
+        committed state changes only when :meth:`solve_next` accepts the
+        window), so the returned problem includes the arrival rows.
         """
         require(self.ready(), "not enough new samples for a moving-horizon solve")
-        self._advance_arrival()
+        self._pending_arrival = self._propagate_arrival()
         times, q_samples = self._buffer.arrays()
         trajectory = CubicHermiteSplineTrajectory(times, self._problem.n_dof)
         initial_coefficients = self._initial_coefficients(trajectory, times, q_samples)
@@ -562,8 +582,19 @@ class MovingHorizonEstimator:
         latency_ms = (perf_counter() - started) * 1000.0
 
         commit_status, failure_diag = self._evaluate_commit(map_result)
+        pending = self._pending_arrival
+        if pending.failure and commit_status == WindowCommitStatus.ACCEPTED:
+            commit_status = WindowCommitStatus.REJECTED_NONFINITE
+            failure_diag = FailureDiagnostics(
+                window_index=self._window_index,
+                reason=f"non_finite arrival propagation: {pending.failure}",
+                status=commit_status,
+                solver_message=map_result.message,
+                n_iterations=map_result.n_iterations,
+            )
 
         if commit_status == WindowCommitStatus.ACCEPTED:
+            self._commit_arrival(pending)
             self._last_accepted_first_index = self._buffer.first_sample_index
             self._last_accepted_coefficients = map_result.coefficients
             self._last_accepted_trajectory = map_problem.trajectory
@@ -661,7 +692,7 @@ class MovingHorizonEstimator:
         initial_coefficients: np.ndarray,
     ) -> MapEstimatorProblem:
         fixed = dict(self._problem.fixed_parameters)
-        arrival = self._arrival_factor
+        arrival = self._pending_arrival.factor
 
         def residual(
             evaluation: SplineTrajectoryEvaluation, _parameters: Mapping[str, float]
@@ -735,32 +766,31 @@ class MovingHorizonEstimator:
             message=map_result.message,
             commit_status=commit_status,
             failure_diagnostics=failure_diag,
-            arrival_factor=self._arrival_factor,
+            arrival_factor=self._pending_arrival.factor,
         )
 
-    def _advance_arrival(self) -> None:
-        """Marginalise samples that left the window into the arrival factor.
+    def _propagate_arrival(self) -> _ArrivalUpdate:
+        """Return the arrival factor for the current window without committing.
 
-        Idempotent. Moves the factor from sample ``A`` to the window's first
-        sample ``F`` using the last accepted window (first sample ``S``) as the
-        linearisation point; requires ``S <= A < F < S + N``. Otherwise the
+        Moves the committed factor from sample ``A`` to the window's first
+        sample ``F`` using the last accepted window (first sample ``S``) as
+        the linearisation point; requires ``S <= A < F < S + N``. Otherwise the
         dropped samples were never solved, the information cannot be carried
-        and the factor is discarded with a warning (never silently).
+        and the factor is discarded on commit with a warning (never silently).
         """
         first = self._buffer.first_sample_index
         anchor = self._arrival_sample_index
         if anchor >= first:
-            return
-        self._arrival_sample_index = first
+            return _ArrivalUpdate(self._arrival_factor, anchor)
         traj = self._last_accepted_trajectory
         coeffs = self._last_accepted_coefficients
         source = self._last_accepted_first_index
         if traj is None or coeffs is None:
-            self._discard_arrival(anchor, first, "no accepted window to linearise")
-            return
+            return _ArrivalUpdate(
+                None, first, discard_reason="no accepted window to linearise"
+            )
         if not (source <= anchor and first - source < traj.n_knots):
-            self._discard_arrival(anchor, first, "samples were never solved")
-            return
+            return _ArrivalUpdate(None, first, discard_reason="samples never solved")
         factor = _marginalize_window_prefix(
             traj,
             coeffs,
@@ -769,23 +799,29 @@ class MovingHorizonEstimator:
             self._dropped_residual_fn(traj),
         )
         if factor is None:
-            self._discard_arrival(anchor, first, "non-finite linearisation")
-            return
-        dropped_times = traj.knot_times[anchor - source : first - source]
-        for offset, time in enumerate(dropped_times):
-            self._accumulation_guard.validate_sample(anchor + offset, float(time))
-            self._accumulation_guard.record_marginalized(anchor + offset, float(time))
-        self._arrival_factor = factor
+            return _ArrivalUpdate(
+                None, anchor, failure="residual or Jacobian non-finite"
+            )
+        times = traj.knot_times[anchor - source : first - source]
+        dropped = tuple(
+            (anchor + offset, float(time)) for offset, time in enumerate(times)
+        )
+        return _ArrivalUpdate(factor, first, dropped)
 
-    def _discard_arrival(self, anchor: int, first: int, reason: str) -> None:
-        if self._arrival_factor is not None:
+    def _commit_arrival(self, update: _ArrivalUpdate) -> None:
+        """Make an accepted window's arrival update the committed state."""
+        if update.discard_reason and self._arrival_factor is not None:
             logger.warning(
                 "MHE arrival factor discarded moving from sample %d to %d: %s",
-                anchor,
-                first,
-                reason,
+                self._arrival_sample_index,
+                update.anchor,
+                update.discard_reason,
             )
-        self._arrival_factor = None
+        for index, time in update.marginalized:
+            self._accumulation_guard.validate_sample(index, time)
+            self._accumulation_guard.record_marginalized(index, time)
+        self._arrival_factor = update.factor
+        self._arrival_sample_index = update.anchor
 
     def _dropped_residual_fn(
         self, traj: CubicHermiteSplineTrajectory
@@ -853,42 +889,63 @@ def _marginalize_window_prefix(
 ) -> ArrivalFactor | None:
     """Eliminate knots ``[a, f)`` of a solved window onto knot ``f``.
 
-    Stacks the arrival rows (on knot ``a``) and the residual rows of the
-    samples at knots ``a..f-1``, linearised at ``coeffs``, and returns the
-    Schur-complement factor on knot ``f``'s state, or ``None`` when the
+    The rows that leave the problem are those evaluated on samples ``a..f``
+    (including transitions into ``f``) minus those of sample ``f`` alone,
+    which the next window evaluates again, plus the arrival rows on knot
+    ``a``. Linearised at ``coeffs`` they give the information
+    ``H = J_a^T J_a - J_f^T J_f`` and gradient ``g``; a square root
+    ``A^T A = H``, ``A^T b = -g`` is marginalised by
+    :func:`marginalize_arrival_factor`. Returns ``None`` when the
     linearisation is non-finite.
 
-    Precondition: those rows depend only on knots ``a..f`` (per-sample
-    residuals on a knot-aligned spline); coupling to any other knot would
-    double count it, so it is rejected.
+    Preconditions: residual rows are per-sample or couple consecutive
+    samples only, so ``H`` is positive semidefinite and touches no knot
+    outside ``a..f``; anything else would drop or double count information
+    and is rejected.
     """
     start, stop = knot_span
     n_knots, n_dof = traj.n_knots, traj.n_dof
-    times = traj.knot_times[start:stop]
-    value, jac = rows_fn(coeffs, times)
+    value, jac = rows_fn(coeffs, traj.knot_times[start : stop + 1])
+    boundary_value, boundary_jac = rows_fn(coeffs, traj.knot_times[stop : stop + 1])
     if arrival is not None:
         evaluation = traj.evaluate(coeffs, traj.knot_times[start : start + 1])
         arrival_value, arrival_jac = _arrival_rows(arrival, evaluation, 0)
         value = np.concatenate([value, arrival_value])
         jac = np.vstack([jac, arrival_jac])
-    if not (np.all(np.isfinite(value)) and np.all(np.isfinite(jac))):
+    arrays = (value, jac, boundary_value, boundary_jac)
+    if not all(bool(np.all(np.isfinite(arr))) for arr in arrays):
         return None
+    info = jac.T @ jac - boundary_jac.T @ boundary_jac
+    info = 0.5 * (info + info.T)
+    grad = jac.T @ value - boundary_jac.T @ boundary_value
     eliminated = np.concatenate(
         [_knot_state_columns(n_knots, n_dof, k) for k in range(start, stop)]
     )
     kept = _knot_state_columns(n_knots, n_dof, stop)
-    other = np.setdiff1d(np.arange(traj.coefficient_size), np.union1d(eliminated, kept))
-    scale = max(1.0, float(np.max(np.abs(jac)))) if jac.size else 1.0
+    cols = np.concatenate([eliminated, kept])
+    other = np.setdiff1d(np.arange(traj.coefficient_size), cols)
+    scale = max(1.0, float(np.max(np.abs(info))))
     require(
-        other.size == 0 or float(np.max(np.abs(jac[:, other]))) <= 1e-12 * scale,
-        "marginalised residual rows must depend only on the dropped knots and the "
-        "new first knot (per-sample residuals); otherwise information is "
-        "double counted",
+        other.size == 0 or float(np.max(np.abs(info[other]))) <= 1e-9 * scale,
+        "marginalised residual rows must touch only the dropped knots and the "
+        "new first knot (per-sample or consecutive-sample residuals); otherwise "
+        "information is dropped or double counted",
     )
+    eigvals, eigvecs = np.linalg.eigh(info[np.ix_(cols, cols)])
+    require(
+        float(eigvals.min()) >= -1e-9 * scale,
+        "boundary-sample rows must be a subset of the span rows (information "
+        "of the marginalised rows is not positive semidefinite)",
+    )
+    keep = eigvals > 1e-12 * scale * cols.size
+    root = np.sqrt(eigvals[keep])
+    sqrt_rows = root[:, None] * eigvecs[:, keep].T
+    target = -(eigvecs[:, keep].T @ grad[cols]) / root
+    n_elim = eliminated.size
     return marginalize_arrival_factor(
-        A0=jac[:, eliminated],
-        A1=jac[:, kept],
-        b=-value,
+        A0=sqrt_rows[:, :n_elim],
+        A1=sqrt_rows[:, n_elim:],
+        b=target,
         reference_state_k1=coeffs[kept],
         metadata={"eliminated_knots": stop - start},
     )
