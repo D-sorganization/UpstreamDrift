@@ -179,6 +179,9 @@ def test_score_replay_of_the_reference_is_exact() -> None:
     assert score.coordinate_error.max() == 0.0
     assert score.frame_error_m.max() == 0.0
     assert score.horizon_s == pytest.approx(bundle.steps * bundle.dt_s)
+    summary = score.summary()
+    assert summary["growth_rate_per_s"] is None  # no growth band: strict JSON null
+    json.dumps(summary, allow_nan=False)
 
 
 def test_stop_on_failure_returns_the_states_reached() -> None:

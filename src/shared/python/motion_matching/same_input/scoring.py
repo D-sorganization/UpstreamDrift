@@ -53,12 +53,14 @@ class ReplayScore:
     failure: str | None = None
 
     def summary(self) -> dict[str, float | str | None]:
+        """Strict-JSON scalars; an undefined growth rate becomes ``None``."""
+        growth = self.growth_rate_per_s
         return {
             "failure": self.failure,
             "duration_s": float(self.time_s[-1]),
             "max_coordinate_error_rad": float(self.coordinate_error.max()),
             "max_frame_error_m": float(self.frame_error_m.max()),
-            "growth_rate_per_s": self.growth_rate_per_s,
+            "growth_rate_per_s": growth if np.isfinite(growth) else None,
             "horizon_s": self.horizon_s,
         }
 
