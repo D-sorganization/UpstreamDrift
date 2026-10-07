@@ -587,23 +587,18 @@ def _solve_trajectory_ik(
     return q_ik, q_ref, fits, ref_fits, errors, ref_errors, None
 
 
-def _persist_dynamics_artifacts(
+def _save_dynamics_record(
     out_dir: Path,
     record: Any,
     sim_errors: np.ndarray,
-    cal_res: _CalibrateAndScaleResult,
-    kin: Any,
-    q_ref: np.ndarray,
-    sim_q: np.ndarray,
     lane: Lane,
+    q_track: np.ndarray,
 ) -> None:
-    """Write dynamics NPZ and render IK / tracking playback GIFs.
+    """Write ``dynamics_record.npz``.
 
-    The playback looks at the capture's first-frame marker centroid and runs
-    at the capture's own rate.
+    The NPZ also keeps the tracked reference (``q_track`` on ``track_time_s``)
+    so same-input bundles can be rebuilt from a run directory (#11607).
     """
-    lookat = np.nanmean(lane.points[0], axis=0)
-    rate_hz = lane.rate_hz
     np.savez(
         out_dir / "dynamics_record.npz",
         time_s=record.time_s,
@@ -616,24 +611,35 @@ def _persist_dynamics_artifacts(
         inside=record.inside_support_polygon,
         lowest_sphere_height_m=record.lowest_sphere_height_m,
         sim_errors_m=sim_errors,
+        q_track=q_track,
+        track_time_s=lane.times,
     )
+
+
+def _render_playbacks(
+    out_dir: Path,
+    cal_res: _CalibrateAndScaleResult,
+    kin: Any,
+    lane: Lane,
+    q_ref: np.ndarray,
+    sim_q: np.ndarray,
+) -> None:
+    """Render IK and tracking playback GIFs.
+
+    The playback looks at the capture's first-frame marker centroid and runs
+    at the capture's own rate.
+    """
+    lookat = np.nanmean(lane.points[0], axis=0)
     names = tuple(kin.coordinate_order)
-    render_playback(
-        cal_res.spec_bytes,
-        names,
-        q_ref,
-        lookat,
-        out_dir / "ik_playback.gif",
-        rate_hz=rate_hz,
-    )
-    render_playback(
-        cal_res.spec_bytes,
-        names,
-        sim_q,
-        lookat,
-        out_dir / "tracking_playback.gif",
-        rate_hz=rate_hz,
-    )
+    for q, name in ((q_ref, "ik_playback.gif"), (sim_q, "tracking_playback.gif")):
+        render_playback(
+            cal_res.spec_bytes,
+            names,
+            q,
+            lookat,
+            out_dir / name,
+            rate_hz=lane.rate_hz,
+        )
 
 
 def _write_receipt(out_dir: Path, receipt: dict[str, Any]) -> None:
@@ -737,16 +743,8 @@ def _simulate_and_receipt(
             tracking_backend=tracking,
         )
     )
-    _persist_dynamics_artifacts(
-        out_dir,
-        record,
-        sim_errors,
-        cal_res,
-        kin,
-        q_ref,
-        sim_q,
-        lane,
-    )
+    _save_dynamics_record(out_dir, record, sim_errors, lane, q_track)
+    _render_playbacks(out_dir, cal_res, kin, lane, q_ref, sim_q)
     receipt = build_ground_support_receipt(
         GroundSupportReceiptInputs(
             backend=args.backend,

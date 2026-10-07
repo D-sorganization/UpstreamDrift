@@ -23,10 +23,10 @@ from any live state and `abandoned` from `parked`. `shipped` never returns to
 - **Owner:** unassigned
 - **Issue:** #11614
 - **Branch:** docs/sip-9-parity-reference-11614
-- **PR:** #11616
+- **PR:** #11616, #11625
 - **Paths:** see #11616
 - **Started:** 2026-10-07
-- **Last verified:** 2026-10-07 (`838a670f`; collated from changes/11614-same-input-parity-latex-research-referen.md)
+- **Last verified:** 2026-10-07 (`cf3e475f`; collated from changes/11614-document-full-swing-five-engine-same-inp.md)
 - **Summary:** Same-input parity LaTeX research reference (P-1 pointwise result)
 - **Next step:** Extend with P-2..P-5 trajectory and closed-loop results
 
@@ -2719,6 +2719,45 @@ open. Preserve explicit ground configuration in independent replay.
 - **Evidence:** tests/config/launcher_manifest/test_launch_monitor_tiles_share_one_engine.py; tests/unit/launch_monitor/test_canonical_layer_parity.py.
 
 ## Shipped (Last 90 Days)
+
+### DL-#11606 · Same-Input Parity P-1: VectorPlant + Convention-Free Closure Projection; MuJoCo Exact-KKT Option; Pointwise MuJoCo/Drake/Pinocchio Acceleration Parity Gate and Receipt (Worst 1.1E-9 Relative Over 31 Frames)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11606
+- **Branch:** merged via #11615
+- **PR:** #11615
+- **Paths:** see #11615
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`f2def974`; collated from changes/11606-same-input-parity-p-1-vectorplant-conven.md)
+- **Summary:** Same-input parity P-1: VectorPlant + convention-free closure projection; MuJoCo exact-KKT option; pointwise MuJoCo/Drake/Pinocchio acceleration parity gate and receipt (worst 1.1e-9 relative over 31 frames)
+- **Next step:** Shipped in PR #11615.
+
+### DL-#11623 · Per-Workspace CARGO_HOME for Rust-Quickstart and Realtime-Soak; Contract Test Pins RUSTUP_HOME and CARGO_HOME for Every Rust Job (RM#2021)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #11623
+- **Branch:** merged via #11624
+- **PR:** #11624
+- **Paths:** see #11624
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`17b3b95c`; collated from changes/11623-per-workspace-cargo-home-for-rust-quicks.md)
+- **Summary:** Per-workspace CARGO_HOME for rust-quickstart and realtime-soak; contract test pins RUSTUP_HOME and CARGO_HOME for every Rust job (RM#2021)
+- **Next step:** Shipped in PR #11624.
+
+### DL-#1893 · Archive HANDOFF.md and DEVELOPMENT_LOG.md Verbatim (RM#1893)
+
+- **State:** shipped
+- **Owner:** unassigned
+- **Issue:** #1893
+- **Branch:** merged via #11620
+- **PR:** #11620
+- **Paths:** see #11620
+- **Started:** 2026-10-07
+- **Last verified:** 2026-10-07 (`7a4e3436`; collated from changes/1893-archive-handoff-devlog.md)
+- **Summary:** Archive HANDOFF.md And DEVELOPMENT_LOG.md Verbatim (RM#1893)
+- **Next step:** Shipped in PR #11620.
 
 ### DL-#11584 · Settings_Dialog: Ignore Late Dependency-Check Results After Close; Worker Emits Failed for Any Exception
 

@@ -150,11 +150,8 @@ def test_receipt_absent_for_none_and_present_for_stubbed_optimiser(
         "build_dynamics_report",
         lambda *a, **k: ({}, np.zeros((2, 1))),
     )
-    monkeypatch.setattr(
-        cli,
-        "_persist_dynamics_artifacts",
-        lambda *a, **k: None,
-    )
+    for name in ("_save_dynamics_record", "_render_playbacks"):
+        monkeypatch.setattr(cli, name, lambda *a, **k: None)
     monkeypatch.setattr(
         cli,
         "build_ground_support_receipt",
@@ -331,11 +328,8 @@ def test_trajectory_optimiser_shared_simulator_rescoring(
         "build_dynamics_report",
         lambda *a, **k: ({}, np.zeros((2, 1))),
     )
-    monkeypatch.setattr(
-        cli,
-        "_persist_dynamics_artifacts",
-        lambda *a, **k: None,
-    )
+    for name in ("_save_dynamics_record", "_render_playbacks"):
+        monkeypatch.setattr(cli, name, lambda *a, **k: None)
     monkeypatch.setattr(
         cli,
         "build_ground_support_receipt",
