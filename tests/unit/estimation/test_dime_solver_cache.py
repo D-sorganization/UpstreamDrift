@@ -611,3 +611,21 @@ class TestStoredTimingsAreMeasured:
         _, bd = accelerated_solve_dynamics_window(problem, cache)
         timings = [t for ts in cache._timing_store.values() for t in ts]
         assert timings == [bd.window_solve_time_s]
+
+    @pytest.mark.parametrize(
+        "invalidate",
+        [
+            lambda c, i: c.invalidate_job(i.job_id),
+            lambda c, i: c.invalidate_on_camera_change(i.camera_config_hash),
+            lambda c, i: c.invalidate_on_body_change(i.param_hash),
+        ],
+    )
+    def test_invalidation_purges_stored_timings(self, invalidate: Any) -> None:
+        cache = DimeSolverCache()
+        identity = self._identity()
+        problem = _targets_problem([[0.1], [0.2], [0.3]])
+        result = solve_dime_dynamics_window(problem)
+        cache.store_window_solve(identity, problem, result, elapsed_s=0.25)
+        invalidate(cache, identity)
+        assert cache.get_window_solve(identity, problem) is None
+        assert cache.get_window_solve_timings(identity, problem) == ()

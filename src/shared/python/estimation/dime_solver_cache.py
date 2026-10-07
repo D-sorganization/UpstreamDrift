@@ -457,35 +457,32 @@ class DimeSolverCache:
         with self._lock:
             return tuple(self._timing_store.get(key, ()))
 
+    def _purge_keys(self, keys: set[str]) -> None:
+        """Drop every stored value, including measured timings, for ``keys``."""
+        for k in keys:
+            self._drift_store.pop(k, None)
+            self._step_store.pop(k, None)
+            self._jacobian_store.pop(k, None)
+            self._window_store.pop(k, None)
+            self._timing_store.pop(k, None)
+
     def invalidate_on_camera_change(self, camera_config_hash: str) -> None:
         """Invalidate all cache entries associated with a modified camera setup."""
         with self._lock:
             keys_to_purge = self._camera_index.pop(camera_config_hash, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
     def invalidate_on_body_change(self, param_hash: str) -> None:
         """Invalidate all cache entries associated with modified body parameters."""
         with self._lock:
             keys_to_purge = self._body_index.pop(param_hash, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
     def invalidate_job(self, job_id: str) -> None:
         """Invalidate all cache entries associated with a finished or isolated job."""
         with self._lock:
             keys_to_purge = self._job_index.pop(job_id, set())
-            for k in keys_to_purge:
-                self._drift_store.pop(k, None)
-                self._step_store.pop(k, None)
-                self._jacobian_store.pop(k, None)
-                self._window_store.pop(k, None)
+            self._purge_keys(keys_to_purge)
 
 
 def accelerated_solve_dynamics_window(
