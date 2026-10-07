@@ -567,3 +567,13 @@ named order. Projection and native refitting reuse this resource; efforts checks
 exact model/fit hashes, ordered units and authored timing before native command
 mapping. Scientific acceptance remains independent. See the
 [Native Resource Procedure](../development/necromatcher-native-resources.md).
+
+### Golf View Presets and Bundle Overlay Provider
+
+`golf_view_presets` holds the four golf camera presets (face-on, down-the-line,
+overhead, oblique) in the Z-up spec frame (golfer faces -X, target line -Y) with
+adapters for MuJoCo, Drake MeshCat, meshcat-python (Rx(-90 deg) scene transform)
+and the simbody visualizer. `force_overlay.bundle_provider` builds
+ForceTorqueFrame series from same-input bundles (efforts to joint-torque arcs,
+the shared contact law to per-foot GRF at the CoP, weight at the CoM); the
+MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.

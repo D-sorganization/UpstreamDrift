@@ -33,6 +33,12 @@
 
 # Historical Player Capture Handoff
 
+## Active: Native Per-Engine Viewer Export (Epic #11673)
+
+- Landed (PR 1, NV-1..3): `src/shared/python/golf_view_presets/` (face-on, down-the-line, overhead, oblique; MuJoCo, Drake MeshCat, MeshCat (Rx(-90 deg)) and simbody adapters), the `mjv_initGeom` slot fix in `force_glyphs.py` (#11675, subprocess segfault regression test), and `force_overlay/bundle_provider.py` + `mujoco/python/overlay_source.py` (bundle efforts to joint-torque arcs, shared contact law to per-foot GRF at the CoP, weight at the CoM).
+- Next (PR 2): `src/tools/native_viewer_export/` (Drake and Pinocchio MeshCat via Playwright, OpenSim simbody under xvfb only, MyoSuite via EGL), the 2x2 Pillow compositor, MeshCat overlays. NV-7 Gepetto and NV-8 Simscape stay open.
+- Camera convention: Z-up, golfer faces -X, target line -Y; MuJoCo azimuth is the heading of the view direction.
+
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 
 Same spec, same initial state, same joint torques: every engine must reproduce
