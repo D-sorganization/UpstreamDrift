@@ -1,0 +1,29 @@
+{
+  "schema": "recovered-fit-inputs/v1",
+  "issue": 11596,
+  "source": "ControlTower WSL (ControlTower-Runner) ~/fits/w030r/",
+  "recovered": "2026-10-06",
+  "identity_check": {
+    "candidate_sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
+    "matches_source_run_candidate": true,
+    "matches_receipt_candidate_sha256": true
+  },
+  "files": {
+    "candidate.npz": {
+      "sha256": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
+      "role": "Crocoddyl FDDP candidate over 0-0.30 s (109 nodes); warm-start source of driver_g1_crocoddyl_rk45"
+    },
+    "warm_start.npz": {
+      "sha256": "54cf5d569defae172b1827231eaaeca54ef0192b91f8cf19beda4baf4d5cae63",
+      "role": "inverse-kinematics warm start (109 frames x 44 coordinates)",
+      "whole_marker_rms_m": 0.032053889845691075,
+      "receipt_warm_start_ik_marker_rms_m": 0.032053889845691075
+    },
+    "receipt.json": {
+      "sha256_as_recovered": "8d0b9a6f1e6b8320b7313b93ade7689f6257b992b008fe305a76be26345a2742",
+      "edit": "capture_sha256 set to the canonical C3D_TA_Driver.c3d hash, the same single edit present in the committed rk45, rtol6 and b100 receipts; no other field changed"
+    }
+  },
+  "receipt_warm_start_source": null,
+  "note": "Chain root (seeded from IK only). Provenance recovery only; not registered in the acceptance ledger and not acceptance evidence."
+}

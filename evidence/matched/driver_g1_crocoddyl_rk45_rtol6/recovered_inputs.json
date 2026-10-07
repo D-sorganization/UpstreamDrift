@@ -1,0 +1,25 @@
+{
+  "schema": "recovered-fit-inputs/v1",
+  "issue": 11596,
+  "source": "ControlTower WSL (ControlTower-Runner) ~/fits/driver_g1_rtol6/",
+  "recovered": "2026-10-06",
+  "identity_check": {
+    "candidate_sha256": "a7372b787824d902a616d2a77cf5dfaed2b68accf2cc112593bc8419a80e8509",
+    "matches_source_run_candidate": true,
+    "matches_receipt_candidate_sha256": true
+  },
+  "files": {
+    "warm_start.npz": {
+      "sha256": "b61f0ae589b7cb62972fb7117d02d252eb36d60598e1bef9cc6a4dea272608b3",
+      "role": "inverse-kinematics warm start (q, q_smooth, q_track, v, us, ik_rms_m; 307 frames x 44 coordinates)",
+      "whole_marker_rms_m": 0.02908669278648613,
+      "receipt_warm_start_ik_marker_rms_m": 0.02908669278648613
+    },
+    "stage_0.60s.npz": {
+      "sha256": "ea3259ee08d2252c57a34ca081a3361ce57a24ba0e5f340042bd5cddb4e53e10",
+      "role": "FDDP continuation stage over 0-0.60 s (q, v, u; 217 nodes); seeds later continuation runs"
+    }
+  },
+  "receipt_warm_start_source": "candidate:evidence/matched/driver_g1_crocoddyl_rk45/stage_0.60s.npz",
+  "note": "Provenance recovery only. Receipts and verdicts are unchanged; inputs only, not acceptance evidence."
+}

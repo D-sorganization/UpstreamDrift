@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T06:57:19Z",
+  "generated_at": "2026-10-07T15:24:37Z",
   "rows": [
     {
       "acceptance": null,
@@ -5148,6 +5148,29 @@
       "sha256": "7c6f7d23766642fa15fa012542ff39d1cf4e3406a80abd9da985ee673c49a7ae"
     },
     {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "evidence/matched/driver_g1_crocoddyl_w030r/candidate.npz"
+      },
+      "candidate_sha": "90b80cf50f8b86bf72bc8a5a85610227820a355bb32d7b7df26ab19af5568599",
+      "capture": "driver",
+      "engine": "pinocchio",
+      "horizon_s": null,
+      "lane": "matched",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": null,
+      "receipt_path": "evidence/matched/driver_g1_crocoddyl_w030r/receipt.json",
+      "sha256": "456a86d0199f592971d52056e7bb1caba3742d0aa6518e055a28a56d701a7b61"
+    },
+    {
       "acceptance": {
         "gates": [
           {
@@ -5542,5 +5565,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 139
+  "total_receipts": 140
 }
