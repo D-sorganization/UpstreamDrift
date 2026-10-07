@@ -3,10 +3,26 @@
 Maintains a bounded sample window, solves that window with fixed parameters or
 dynamic models, updates arrival factors via rank-revealing marginalization, and
 enforces safe window commits so failed or non-finite solves never poison future states.
+
+Arrival cost (#11545). The window decision vector holds cubic-Hermite knot
+positions and velocities; the arrival state is the first knot's
+``x_0 = (q_0, v_0)``, of size ``2 * n_dof``. Each window minimises
+
+    0.5 * || R (x_0 - x_ref) - r ||^2 + 0.5 * sum_k || rho_k(c) ||^2,
+
+where ``rho_k`` is the user residual at window sample ``k``. When the window
+slides from first sample ``A`` to ``F``, the arrival rows and the residual rows
+of samples ``A..F-1`` are linearised at the last accepted solution and the
+knots ``A..F-1`` are eliminated by a Schur complement
+(:func:`marginalize_arrival_factor`), leaving a factor on knot ``F``. For a
+linear-Gaussian model this is exact: every window equals the batch MAP
+(Kalman/RTS) estimate over all samples seen so far. Earlier versions stored the
+factor but never applied or propagated it.
 """
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
@@ -36,6 +52,8 @@ FixedJacobianFn = Callable[
     np.ndarray,
 ]
 ResultCallback = Callable[["MovingHorizonResult"], None]
+
+logger = logging.getLogger(__name__)
 
 
 def _make_readonly(arr: np.ndarray) -> np.ndarray:
@@ -112,6 +130,50 @@ class ArrivalFactor:
             require(lin.shape == ref.shape, "linearization_point shape mismatch")
             object.__setattr__(self, "linearization_point", _make_readonly(lin))
         object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
+
+    @classmethod
+    def from_gaussian_prior(
+        cls,
+        mean: np.ndarray,
+        information: np.ndarray,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> ArrivalFactor:
+        """Build the factor of a Gaussian prior ``N(mean, information^-1)``.
+
+        Preconditions: ``mean`` is a finite 1D vector of size ``n`` and
+        ``information`` is a finite, symmetric, positive-definite ``(n, n)``
+        matrix (checked by Cholesky factorisation).
+
+        Postcondition: ``R^T R == information`` with ``R`` upper triangular,
+        ``residual_offset == 0`` and ``rank == n``, so
+        ``evaluate_cost(x) == 0.5 (x - mean)^T information (x - mean)``.
+        """
+        mu = np.asarray(mean, dtype=np.float64)
+        info = np.asarray(information, dtype=np.float64)
+        require(mu.ndim == 1 and mu.size > 0, "mean must be a non-empty 1D vector")
+        require(bool(np.all(np.isfinite(mu))), "mean must be finite")
+        require(
+            info.shape == (mu.size, mu.size),
+            f"information must have shape {(mu.size, mu.size)}",
+        )
+        require(bool(np.all(np.isfinite(info))), "information must be finite")
+        require(
+            bool(np.allclose(info, info.T, rtol=1e-12, atol=1e-12)),
+            "information must be symmetric",
+        )
+        try:
+            lower = np.linalg.cholesky(info)
+        except np.linalg.LinAlgError:
+            lower = None
+        require(lower is not None, "information must be positive definite")
+        assert lower is not None  # narrowed by the precondition above
+        return cls(
+            reference_state=mu,
+            sqrt_information=lower.T,
+            residual_offset=np.zeros(mu.size),
+            rank=mu.size,
+            metadata=dict(metadata or {}),
+        )
 
     @property
     def is_rank_deficient(self) -> bool:
@@ -280,6 +342,19 @@ class MovingHorizonProblem:
         for name, value in self.fixed_parameters.items():
             require(str(name).strip() != "", "parameter names must be non-empty")
             require(np.isfinite(float(value)), f"{name} must be finite")
+        if self.arrival_factor is not None:
+            arrival = self.arrival_factor
+            require(
+                arrival.reference_state.size == 2 * self.n_dof,
+                "arrival_factor state must be the first knot (q, v): size "
+                f"2 * n_dof = {2 * self.n_dof}, got {arrival.reference_state.size}",
+            )
+            require(
+                bool(np.all(np.isfinite(arrival.sqrt_information)))
+                and bool(np.all(np.isfinite(arrival.reference_state)))
+                and bool(np.all(np.isfinite(arrival.residual_offset))),
+                "arrival_factor must be finite",
+            )
 
 
 @dataclass(frozen=True)
@@ -399,6 +474,9 @@ class MovingHorizonEstimator:
         self._last_failure_diagnostics: FailureDiagnostics | None = None
         self._failure_history: list[FailureDiagnostics] = []
         self._arrival_factor: ArrivalFactor | None = problem.arrival_factor
+        # Sample index whose first-knot state the arrival factor constrains.
+        self._arrival_sample_index = 0
+        self._last_accepted_first_index = 0
         self._accumulation_guard = AccumulationGuard()
 
     @property
@@ -426,6 +504,11 @@ class MovingHorizonEstimator:
         return self._arrival_factor
 
     @property
+    def arrival_sample_index(self) -> int:
+        """Sample index whose knot state the current arrival factor constrains."""
+        return self._arrival_sample_index
+
+    @property
     def accumulation_guard(self) -> AccumulationGuard:
         """Accumulation guard protecting against double-counted measurements."""
         return self._accumulation_guard
@@ -451,8 +534,13 @@ class MovingHorizonEstimator:
         return retained_stop - self._last_solved_stop >= opts.step_size
 
     def build_current_problem(self) -> MapEstimatorProblem:
-        """Build the fixed-parameter MAP problem for the retained window."""
+        """Build the fixed-parameter MAP problem for the retained window.
+
+        First advances the arrival factor to the window's first sample
+        (idempotent), so the returned problem includes the arrival rows.
+        """
         require(self.ready(), "not enough new samples for a moving-horizon solve")
+        self._advance_arrival()
         times, q_samples = self._buffer.arrays()
         trajectory = CubicHermiteSplineTrajectory(times, self._problem.n_dof)
         initial_coefficients = self._initial_coefficients(trajectory, times, q_samples)
@@ -476,6 +564,7 @@ class MovingHorizonEstimator:
         commit_status, failure_diag = self._evaluate_commit(map_result)
 
         if commit_status == WindowCommitStatus.ACCEPTED:
+            self._last_accepted_first_index = self._buffer.first_sample_index
             self._last_accepted_coefficients = map_result.coefficients
             self._last_accepted_trajectory = map_problem.trajectory
             self._previous_coefficients = map_result.coefficients
@@ -572,11 +661,15 @@ class MovingHorizonEstimator:
         initial_coefficients: np.ndarray,
     ) -> MapEstimatorProblem:
         fixed = dict(self._problem.fixed_parameters)
+        arrival = self._arrival_factor
 
         def residual(
             evaluation: SplineTrajectoryEvaluation, _parameters: Mapping[str, float]
         ) -> np.ndarray:
-            return self._problem.residual(evaluation, fixed)
+            data = np.asarray(self._problem.residual(evaluation, fixed), dtype=float)
+            if arrival is None:
+                return data
+            return np.concatenate([data, _arrival_rows(arrival, evaluation, 0)[0]])
 
         jacobian_wrapper = None
         problem_jacobian = self._problem.jacobian
@@ -587,7 +680,16 @@ class MovingHorizonEstimator:
                 _parameters: Mapping[str, float],
                 layout: MapDecisionLayout,
             ) -> np.ndarray:
-                return problem_jacobian(evaluation, fixed, layout)
+                data = np.asarray(
+                    problem_jacobian(evaluation, fixed, layout), dtype=float
+                )
+                if arrival is None:
+                    return data
+                arrival_jac = np.zeros((arrival.residual_offset.size, layout.size))
+                arrival_jac[:, : layout.trajectory_size] = _arrival_rows(
+                    arrival, evaluation, 0
+                )[1]
+                return np.vstack([data, arrival_jac])
 
         opts = self._problem.options
         solver_opts = opts.solver_options
@@ -635,3 +737,158 @@ class MovingHorizonEstimator:
             failure_diagnostics=failure_diag,
             arrival_factor=self._arrival_factor,
         )
+
+    def _advance_arrival(self) -> None:
+        """Marginalise samples that left the window into the arrival factor.
+
+        Idempotent. Moves the factor from sample ``A`` to the window's first
+        sample ``F`` using the last accepted window (first sample ``S``) as the
+        linearisation point; requires ``S <= A < F < S + N``. Otherwise the
+        dropped samples were never solved, the information cannot be carried
+        and the factor is discarded with a warning (never silently).
+        """
+        first = self._buffer.first_sample_index
+        anchor = self._arrival_sample_index
+        if anchor >= first:
+            return
+        self._arrival_sample_index = first
+        traj = self._last_accepted_trajectory
+        coeffs = self._last_accepted_coefficients
+        source = self._last_accepted_first_index
+        if traj is None or coeffs is None:
+            self._discard_arrival(anchor, first, "no accepted window to linearise")
+            return
+        if not (source <= anchor and first - source < traj.n_knots):
+            self._discard_arrival(anchor, first, "samples were never solved")
+            return
+        factor = _marginalize_window_prefix(
+            traj,
+            coeffs,
+            self._arrival_factor,
+            (anchor - source, first - source),
+            self._dropped_residual_fn(traj),
+        )
+        if factor is None:
+            self._discard_arrival(anchor, first, "non-finite linearisation")
+            return
+        dropped_times = traj.knot_times[anchor - source : first - source]
+        for offset, time in enumerate(dropped_times):
+            self._accumulation_guard.validate_sample(anchor + offset, float(time))
+            self._accumulation_guard.record_marginalized(anchor + offset, float(time))
+        self._arrival_factor = factor
+
+    def _discard_arrival(self, anchor: int, first: int, reason: str) -> None:
+        if self._arrival_factor is not None:
+            logger.warning(
+                "MHE arrival factor discarded moving from sample %d to %d: %s",
+                anchor,
+                first,
+                reason,
+            )
+        self._arrival_factor = None
+
+    def _dropped_residual_fn(
+        self, traj: CubicHermiteSplineTrajectory
+    ) -> Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]:
+        """Return ``(coeffs, times) -> (residual, jacobian)`` on ``traj``."""
+        fixed = dict(self._problem.fixed_parameters)
+        user_jacobian = self._problem.jacobian
+        layout = MapDecisionLayout(traj.coefficient_size, ())
+
+        def residual_at(coeffs: np.ndarray, times: np.ndarray) -> np.ndarray:
+            evaluation = traj.evaluate(coeffs, times)
+            return np.asarray(self._problem.residual(evaluation, fixed), dtype=float)
+
+        def rows(
+            coeffs: np.ndarray, times: np.ndarray
+        ) -> tuple[np.ndarray, np.ndarray]:
+            value = residual_at(coeffs, times)
+            if user_jacobian is not None:
+                evaluation = traj.evaluate(coeffs, times)
+                jac = np.asarray(user_jacobian(evaluation, fixed, layout), dtype=float)
+                return value, jac[:, : traj.coefficient_size]
+            return value, _forward_difference(
+                lambda c: residual_at(c, times), coeffs, value
+            )
+
+        return rows
+
+
+def _knot_state_columns(n_knots: int, n_dof: int, knot: int) -> np.ndarray:
+    """Decision columns of knot ``knot``'s state ``(q, v)`` in spline order."""
+    q_cols = knot * n_dof + np.arange(n_dof)
+    return np.concatenate([q_cols, n_knots * n_dof + q_cols])
+
+
+def _arrival_rows(
+    arrival: ArrivalFactor, evaluation: SplineTrajectoryEvaluation, sample: int
+) -> tuple[np.ndarray, np.ndarray]:
+    """Arrival residual and coefficient Jacobian at evaluation sample ``sample``.
+
+    The sample must coincide with a knot so ``(q, v)`` there is the knot state.
+    """
+    state = np.concatenate([evaluation.q[sample], evaluation.v[sample]])
+    basis = np.vstack([evaluation.q_basis[sample], evaluation.v_basis[sample]])
+    return arrival.evaluate_residual(state), arrival.sqrt_information @ basis
+
+
+def _forward_difference(
+    fn: Callable[[np.ndarray], np.ndarray], x: np.ndarray, f0: np.ndarray
+) -> np.ndarray:
+    jac = np.zeros((f0.size, x.size))
+    for col in range(x.size):
+        step = np.sqrt(np.finfo(float).eps) * max(1.0, abs(float(x[col])))
+        probe = np.array(x, dtype=float, copy=True)
+        probe[col] += step
+        jac[:, col] = (fn(probe) - f0) / step
+    return jac
+
+
+def _marginalize_window_prefix(
+    traj: CubicHermiteSplineTrajectory,
+    coeffs: np.ndarray,
+    arrival: ArrivalFactor | None,
+    knot_span: tuple[int, int],
+    rows_fn: Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]],
+) -> ArrivalFactor | None:
+    """Eliminate knots ``[a, f)`` of a solved window onto knot ``f``.
+
+    Stacks the arrival rows (on knot ``a``) and the residual rows of the
+    samples at knots ``a..f-1``, linearised at ``coeffs``, and returns the
+    Schur-complement factor on knot ``f``'s state, or ``None`` when the
+    linearisation is non-finite.
+
+    Precondition: those rows depend only on knots ``a..f`` (per-sample
+    residuals on a knot-aligned spline); coupling to any other knot would
+    double count it, so it is rejected.
+    """
+    start, stop = knot_span
+    n_knots, n_dof = traj.n_knots, traj.n_dof
+    times = traj.knot_times[start:stop]
+    value, jac = rows_fn(coeffs, times)
+    if arrival is not None:
+        evaluation = traj.evaluate(coeffs, traj.knot_times[start : start + 1])
+        arrival_value, arrival_jac = _arrival_rows(arrival, evaluation, 0)
+        value = np.concatenate([value, arrival_value])
+        jac = np.vstack([jac, arrival_jac])
+    if not (np.all(np.isfinite(value)) and np.all(np.isfinite(jac))):
+        return None
+    eliminated = np.concatenate(
+        [_knot_state_columns(n_knots, n_dof, k) for k in range(start, stop)]
+    )
+    kept = _knot_state_columns(n_knots, n_dof, stop)
+    other = np.setdiff1d(np.arange(traj.coefficient_size), np.union1d(eliminated, kept))
+    scale = max(1.0, float(np.max(np.abs(jac)))) if jac.size else 1.0
+    require(
+        other.size == 0 or float(np.max(np.abs(jac[:, other]))) <= 1e-12 * scale,
+        "marginalised residual rows must depend only on the dropped knots and the "
+        "new first knot (per-sample residuals); otherwise information is "
+        "double counted",
+    )
+    return marginalize_arrival_factor(
+        A0=jac[:, eliminated],
+        A1=jac[:, kept],
+        b=-value,
+        reference_state_k1=coeffs[kept],
+        metadata={"eliminated_knots": stop - start},
+    )

@@ -547,6 +547,54 @@ commit \texttt{21a2ed06}:
     (\#11545).  Reproduce with
     \texttt{python3 -m pytest tests/unit/estimation/test\_dime\_dynamics\_window.py -k FixedSize}.
   \item MHE never applies its arrival factor (\texttt{moving\_horizon.py:140-213,401,636}).
+    The estimator stored an \texttt{ArrivalFactor} and returned it in its
+    results but never added it to the window cost, and never propagated it
+    when the window slid, so every window was solved from its own samples
+    alone and all earlier information was discarded.
+    \emph{Resolved (\#11545):} for a window of $N$ samples at knots
+    $t_F,\dots,t_{F+N-1}$ with cubic-Hermite coefficients
+    $\mathbf{c}=(\bq_F,\dots,\bv_{F+N-1})$, the arrival state is the first knot
+    $\bx_F=(\bq_F,\bv_F)\in\R^{2n}$ and each window minimises
+    \begin{equation}
+      \tfrac12\norm{\mathbf{R}_F(\bx_F-\bar\bx_F)-\mathbf{r}_F}^2
+      +\tfrac12\sum_{k=F}^{F+N-1}\norm{\boldsymbol{\rho}_k(\mathbf{c})}^2 ,
+      \label{eq:mhe_window}
+    \end{equation}
+    with $\boldsymbol{\rho}_k$ the whitened per-sample residual.  A Gaussian
+    prior $\mathcal{N}(\bar\bx_0,\bP_0)$ enters as
+    $\mathbf{R}_0^{\top}\mathbf{R}_0=\bP_0^{-1}$, $\mathbf{r}_0=0$
+    (\texttt{ArrivalFactor.from\_gaussian\_prior}, which requires a finite,
+    symmetric, positive-definite information matrix).  When the window
+    advances from $F$ to $F'$, the arrival rows and the rows
+    $\boldsymbol{\rho}_F,\dots,\boldsymbol{\rho}_{F'-1}$ are linearised at
+    the last accepted solution, $\boldsymbol{\rho}\approx\boldsymbol{\rho}^\star
+    +\bA_0\,\delta\bx_{\mathrm{drop}}+\bA_1\,\delta\bx_{F'}$, and the dropped
+    knots are eliminated by the Schur complement: with
+    $\bA_0=[\mathbf{U}_1\;\mathbf{U}_2]\,\mathrm{diag}(\bS,0)\,\mathbf{V}^{\top}$,
+    $\mathbf{R}_{F'}$ and $\mathbf{r}_{F'}$ are the rank-revealed square root of
+    $\mathbf{U}_2^{\top}\bA_1$ and $-\mathbf{U}_2^{\top}\boldsymbol{\rho}^\star$
+    (\texttt{marginalize\_arrival\_factor}; rank deficiency is retained, no
+    jitter).  Assumptions: samples sit on knots; each $\boldsymbol{\rho}_k$
+    depends only on sample $k$'s evaluation, so on a knot-aligned spline it
+    touches knots $k$ and $k{+}1$ only (enforced: a dropped row coupled to any
+    other knot raises, since it would be double counted); the window overlaps
+    the last accepted window ($F'<S+N$).  If samples were never solved, the
+    factor is discarded with a logged warning rather than silently.  For a
+    linear-Gaussian model the elimination is exact, so every window equals
+    the batch MAP (Kalman filter at the last knot, fixed-lag RTS smoother
+    inside the window) over all samples seen so far.  Acceptance: on a
+    one-DOF fixture with position, velocity and white-noise-acceleration
+    rows ($\sigma_y=0.05$, $\sigma_v=0.2$, $\sigma_a=2$, $\Delta t=0.1$,
+    $N=4$, prior information $\mathrm{diag}(10^4,10^2)$ about $(0.5,-3)$),
+    all seven sliding windows match the analytic batch least-squares solution
+    to $10^{-7}$; before the fix the mismatch was $4.9$ in a single window
+    and $4.7$ across sliding windows, and $0.024$ with no prior (dropped
+    samples discarded).  A first fixture without the velocity rows was not
+    discriminating: with two rows per knot the dropped rows are exactly
+    satisfiable and carry no information forward.  Nonlinear residuals are
+    linearised once at the accepted solution (first-order arrival cost), which
+    is not exact.  Reproduce with
+    \texttt{python3 -m pytest tests/unit/estimation/test\_moving\_horizon\_arrival\_cost.py}.
   \item Learned initialisers, ablations, baseline and replay audit return
     constants (\texttt{dime\_learned\_initializers.py:517-753},
     \texttt{dime\_benchmark\_ablations.py:214-255}, \texttt{dime\_manifest.py:563-629},
