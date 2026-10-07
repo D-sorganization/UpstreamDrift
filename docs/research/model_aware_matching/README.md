@@ -22,3 +22,5 @@ reference results, the engine integration path, and the audit of the DIME epic
 
 Compile with `pdflatex model_aware_matching.tex` (two passes). The generated
 PDF is not committed.
+
+See also the sibling [Same-Input Cross-Engine Dynamics Parity Reference](../same_input_parity/same_input_parity.tex).
