@@ -84,7 +84,7 @@ def key_frames(mapper: MyoMapper, q: Array, dt_s: float) -> KeyFrames:
         pos[j] = mapper.spec.position(body)
     speed = np.linalg.norm(np.gradient(pos, idx * dt_s, axis=0), axis=1)
     impact = int(idx[int(np.argmax(speed))])
-    return KeyFrames(0, top, impact, n - 1)
+    return KeyFrames(0, top, impact, n - 2)  # last step midpoint
 
 
 def map_sequence(

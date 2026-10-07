@@ -276,16 +276,23 @@ class MyoMapper:
             adr = tuple(self._joint_adr[j] for j in joints)
             lo, hi = self.bounds(joints) if bounded else (None, None)
             box = None if lo is None else (lo, hi)
+            targets = [(self.myo_body[n], self.target(n)) for n in segments]
+            seeds = self._seeds(joints, adr) if multistart else ()
+            prefer = self._mid_range(joints) if multistart else None
+            if multistart and bounded:
+                # Start inside the natural range and prefer the Euler branch closest
+                # to mid-range, so that an extended fit does not land on an
+                # equivalent but distant branch of the same orientation.
+                clamped = solve_orientations(
+                    self.model, self.data, self.coupling, q, targets, adr,
+                    self.bounds(joints, "clamp"), seeds=seeds, prefer=prefer,
+                )  # fmt: skip
+                q[list(adr)] = clamped.values
+                seeds, prefer = (), None
             fit = solve_orientations(
-                self.model,
-                self.data,
-                self.coupling,
-                q,
-                [(self.myo_body[n], self.target(n)) for n in segments],
-                adr,
-                box,
-                seeds=self._seeds(joints, adr) if multistart else (),
-            )
+                self.model, self.data, self.coupling, q, targets, adr, box,
+                seeds=seeds, prefer=prefer,
+            )  # fmt: skip
             q[list(adr)] = fit.values
             fits[segments[0]] = fit
             for n, err in zip(segments, fit.errors_rad, strict=True):
@@ -301,13 +308,17 @@ class MyoMapper:
         )
         return MappedPose(full, errors, bound, fits)
 
+    def _mid_range(self, joints: tuple[str, ...]) -> Array:
+        lo, hi = self.bounds(joints, "clamp")
+        return np.where(np.isfinite(lo + hi), 0.5 * (lo + hi), 0.0)
+
     def _seeds(
         self, joints: tuple[str, ...], adr: tuple[int, ...]
     ) -> tuple[Array, ...]:
         """Alternative starting points: the neutral posture and the mid-range."""
         lo, hi = self.bounds(joints, "clamp")
-        mid = np.where(np.isfinite(lo + hi), 0.5 * (lo + hi), 0.0)
-        return (np.zeros(len(adr)), mid, np.clip(np.zeros(len(adr)), lo, hi))
+        zero = np.zeros(len(adr))
+        return (zero, self._mid_range(joints), np.clip(zero, lo, hi))
 
     def _set_root(self, q: Array, q_spec: Array, ground_offset: float) -> None:
         """Free joint from the pelvis frame target and the spec root translation."""

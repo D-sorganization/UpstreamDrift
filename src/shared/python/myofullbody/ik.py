@@ -68,6 +68,7 @@ def solve_orientations(
     qpos_adr: tuple[int, ...],
     bounds: tuple[Array, Array] | None,
     seeds: tuple[Array, ...] = (),
+    prefer: Array | None = None,
 ) -> OrientationFit:
     """Fit ``qpos_adr`` of ``q`` so that every ``(body, R)`` target is matched.
 
@@ -78,6 +79,9 @@ def solve_orientations(
             and every other entry is held fixed.
         bounds: ``(lower, upper)`` per joint, or ``None`` for unbounded.
         seeds: extra initial guesses tried when the first one is not accurate.
+        prefer: when given, every start is run and, among the fits that reach the
+            best cost (Euler-angle branches of one orientation), the one closest
+            to ``prefer`` is returned.
 
     Returns:
         The best fit.  Postcondition: ``q`` is not modified.
@@ -116,9 +120,17 @@ def solve_orientations(
             residual, x0, bounds=(lo, hi), xtol=1e-13, ftol=1e-13, gtol=1e-13
         )
         cost = float(np.linalg.norm(result.fun))
-        if best is None or cost < best[0]:
+        if best is None:
+            better = True
+        elif prefer is not None and cost < 1e-8 and best[0] < 1e-8:
+            better = bool(
+                np.linalg.norm(result.x - prefer) < np.linalg.norm(best[1] - prefer)
+            )
+        else:
+            better = cost < best[0]
+        if better:
             best = (cost, result.x, result.fun)
-        if cost < 1e-8:
+        if cost < 1e-8 and prefer is None:
             break
     assert best is not None
     values = best[1]
