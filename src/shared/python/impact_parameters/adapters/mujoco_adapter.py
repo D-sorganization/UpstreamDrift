@@ -8,6 +8,8 @@ wrap a MuJoCo model, so :func:`clubhead_series_from_myosuite` delegates here.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from ..clubhead_series import ClubheadSeries
@@ -20,7 +22,7 @@ from .club_face import (
 
 
 def clubhead_series_from_mujoco(
-    model: object,
+    model: Any,
     times_s: object,
     qpos: object,
     qvel: object,
@@ -64,7 +66,7 @@ def clubhead_series_from_mujoco(
 
 
 def clubhead_series_from_myosuite(
-    sim: object,
+    sim: Any,
     times_s: object,
     qpos: object,
     qvel: object,

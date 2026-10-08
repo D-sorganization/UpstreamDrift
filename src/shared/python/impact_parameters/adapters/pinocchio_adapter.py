@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from ..clubhead_series import ClubheadSeries
@@ -14,7 +16,7 @@ from .club_face import (
 
 
 def clubhead_series_from_pinocchio(
-    model: object,
+    model: Any,
     times_s: object,
     q: object,
     v: object,

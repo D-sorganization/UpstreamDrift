@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from typing import Any
+
 import numpy as np
 
 from ..clubhead_series import ClubheadSeries
@@ -16,7 +18,7 @@ from .club_face import NATIVE_CLUB_FACE, ClubFaceSpec, rigid_body_series
 
 
 def clubhead_series_from_opensim(
-    model: object,
+    model: Any,
     times_s: object,
     coordinate_values: Mapping[str, object],
     coordinate_speeds: Mapping[str, object],
