@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from collections.abc import Mapping
 from typing import Any
 
@@ -88,7 +88,7 @@ class DrakeAdapter(EngineAdapter):
 
     def structure(self) -> dict[str, Any]:
         p = self.plant
-        root = ET.fromstring(self._xml)  # noqa: S314 - own generated SDF
+        root = ET.fromstring(self._xml)
         contacts = [
             c.get("name", "")
             for c in root.iter("collision")

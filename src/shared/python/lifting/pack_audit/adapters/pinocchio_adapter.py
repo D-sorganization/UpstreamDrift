@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import importlib
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from collections.abc import Mapping
 from typing import Any
 
@@ -28,7 +28,7 @@ class PinocchioAdapter(EngineAdapter):
     def __init__(self, pack: Any, lift: str, anthro: Any) -> None:
         super().__init__(pack, lift, anthro)
         self._xml = build_model_text(pack, lift, anthro)
-        self._root = ET.fromstring(self._xml)  # noqa: S314 - own generated URDF
+        self._root = ET.fromstring(self._xml)
         self.model = pin.buildModelFromXML(self._xml, pin.JointModelFreeFlyer())
         self.data = self.model.createData()
 
