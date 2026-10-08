@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1663,
+    "ud-only": 1664,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -133,7 +133,7 @@
     "biomechanics": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 29,
+      "ud-only": 30,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -3798,6 +3798,18 @@
       "package": "biomechanics",
       "subpackage": "",
       "ud_bytes": 4180,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "biomechanics/ground_reaction.py",
+      "classification": "ud-only",
+      "package": "biomechanics",
+      "subpackage": "",
+      "ud_bytes": 19054,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -8345,7 +8357,7 @@
       "classification": "ud-only",
       "package": "force_overlay",
       "subpackage": "",
-      "ud_bytes": 9255,
+      "ud_bytes": 9189,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -40004,9 +40016,9 @@
     {
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
+        "author": "Dieter Olson",
         "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40017,9 +40029,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "fleet-orchestrator",
+        "author": "Dieter Olson",
         "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
