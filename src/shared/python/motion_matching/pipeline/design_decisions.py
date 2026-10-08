@@ -26,6 +26,7 @@ EXPECTED_DECISION_TITLES = [
     "Reference Zero-Moment-Point Diagnostic",
     "Rejected: Grip-Roll Scan, Closure Fit From the Address, Cart-Table Filter, Fixed-Point and Iterative-Learning Shooting Fits",
     "MJX Differentiable Optimisation (Windowed)",
+    "Address Foot Progression (OSV-4, #11730)",
 ]
 
 

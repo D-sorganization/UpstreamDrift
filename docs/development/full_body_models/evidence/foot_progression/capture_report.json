@@ -1,0 +1,79 @@
+{
+  "driver": {
+    "available": true,
+    "capture": "driver",
+    "feet": {
+      "left": {
+        "angle_deg": 16.368121989889968,
+        "forefoot_angle_deg": 18.61178686546821,
+        "is_default": false,
+        "raw_angle_deg": 2.044214068767256,
+        "reason": "measured over the address window",
+        "reliable": true,
+        "role": "lead",
+        "side": "left",
+        "spread_deg": 0.0343060121983072,
+        "window_frames": 90
+      },
+      "right": {
+        "angle_deg": 4.032115544619926,
+        "forefoot_angle_deg": -0.9763711867968883,
+        "is_default": false,
+        "raw_angle_deg": -12.45682523002517,
+        "reason": "measured over the address window",
+        "reliable": true,
+        "role": "trail",
+        "side": "right",
+        "spread_deg": 0.13285304987617197,
+        "window_frames": 90
+      }
+    },
+    "source_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+    "stance_line_target_angle_deg": {
+      "left": 13.46,
+      "right": 6.94
+    },
+    "target_axis": "native -Y (verified: lead foot at -Y, toes toward -X)"
+  },
+  "iron": {
+    "available": true,
+    "capture": "iron",
+    "feet": {
+      "left": {
+        "angle_deg": 14.998533032325602,
+        "forefoot_angle_deg": 17.807168321309533,
+        "is_default": false,
+        "raw_angle_deg": 0.9742434915628998,
+        "reason": "measured over the address window",
+        "reliable": true,
+        "role": "lead",
+        "side": "left",
+        "spread_deg": 0.014760038493339067,
+        "window_frames": 93
+      },
+      "right": {
+        "angle_deg": -0.37171697863684805,
+        "forefoot_angle_deg": -4.304226516190024,
+        "is_default": false,
+        "raw_angle_deg": -16.763875354871036,
+        "reason": "measured over the address window",
+        "reliable": true,
+        "role": "trail",
+        "side": "right",
+        "spread_deg": 0.13646013288826525,
+        "window_frames": 93
+      }
+    },
+    "source_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
+    "stance_line_target_angle_deg": {
+      "left": 12.04,
+      "right": 2.58
+    },
+    "target_axis": "native -Y (verified: lead foot at -Y, toes toward -X)"
+  },
+  "owner": {
+    "available": false,
+    "capture": "owner",
+    "reason": "Capture 'capture-O' is private and CAPTURE_DATA_DIR environment variable is not set."
+  }
+}
