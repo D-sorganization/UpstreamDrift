@@ -478,6 +478,18 @@
       "evidence": "src/tools/impact_parameters_panel/gui.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "grip_wrench_plots": {
+      "id": "grip_wrench_plots",
+      "name": "Grip Wrench Plots",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/grip_wrench_plots/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "force_overlays": {
       "id": "force_overlays",
       "name": "Force Overlays",
@@ -1527,12 +1539,12 @@
       "name": "Per-hand grip wrench on the club emitted as GRIP overlay frames",
       "entity_kind": "feature",
       "primary_workspace": "analysis",
-      "secondary_links": [],
+      "secondary_links": ["simulation"],
       "provider_authority": "core",
-      "lifecycle": "planned",
+      "lifecycle": "active_feature",
       "alias_target": null,
-      "evidence": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
-      "acceptance_owner": "tests/unit/biomechanics/test_grip_extraction.py"
+      "evidence": "src/tools/grip_wrench_plots/gui.py",
+      "acceptance_owner": "tests/unit/grip_overlay/test_grip_glyphs.py"
     },
     "analysis.static_plots": {
       "id": "analysis.static_plots",

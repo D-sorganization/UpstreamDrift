@@ -13,6 +13,7 @@ import { useAnalysisTools, EXPORT_FORMATS } from '@/api/useAnalysisTools';
 import type { ExportFormat } from '@/api/useAnalysisTools';
 import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
+import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -186,6 +187,9 @@ export function AnalysisToolsPage() {
 
             {/* Impact parameters relative to the target line (GCV-17, #11723) */}
             <ImpactParametersPanel />
+
+            {/* Club grip force and torque plots (GCV-10, #11716) */}
+            <GripWrenchCharts />
 
             {/* Export Section */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">
