@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1666,
+    "ud-only": 1667,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 271,
+      "ud-only": 272,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -13829,7 +13829,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 10389,
+      "ud_bytes": 12041,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -13842,6 +13842,18 @@
       "package": "motion_matching",
       "subpackage": "",
       "ud_bytes": 22423,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/contact_wrench_qp.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 22981,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15281,7 +15293,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 25059,
+      "ud_bytes": 25487,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15305,7 +15317,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 29492,
+      "ud_bytes": 30589,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15341,7 +15353,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 26207,
+      "ud_bytes": 26981,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15377,7 +15389,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 15931,
+      "ud_bytes": 20718,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -40041,8 +40053,8 @@
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-07",
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40054,8 +40066,8 @@
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
         "author": "Dieter Olson",
-        "date": "2026-08-01",
-        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
+        "date": "2026-10-07",
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",

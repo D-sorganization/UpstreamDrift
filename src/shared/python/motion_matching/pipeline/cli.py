@@ -65,6 +65,7 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
+    expand_stance_for_width,
     fitted_grip,
     wrist_bounds,
 )
@@ -174,6 +175,20 @@ def build_parser() -> argparse.ArgumentParser:
         "friction cone over the finish (runs after --zmp-filter)",
     )
     parser.add_argument(
+        "--foot-half-width-m",
+        type=float,
+        default=None,
+        help="add lateral heel/forefoot contact spheres at +/- this distance so "
+        "the foot is a sole, not a centre line (#11671)",
+    )
+    parser.add_argument(
+        "--torsional-patch-m",
+        type=float,
+        default=None,
+        help="torsional (spin) friction patch radius applied at every loaded "
+        "contact sphere (#11671)",
+    )
+    parser.add_argument(
         "--static-seeds",
         action="store_true",
         help="place every marker from a neutral-spine static trial",
@@ -214,9 +229,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--tracking",
-        choices=["kkt", "mj-inverse"],
+        choices=["kkt", "mj-inverse", "wrench-qp"],
         default="kkt",
-        help="computed-torque tracking backend (kkt or mj-inverse)",
+        help="computed-torque tracking backend (kkt, mj-inverse, or the opt-in "
+        "contact-wrench QP wrench-qp, #11670)",
     )
     parser.add_argument(
         "--trajectory-optimiser",
@@ -333,6 +349,14 @@ def _validate_scaled_spec(
         validate_full_body_spec(scaled_spec, upper_base)
 
 
+def _pin_width_spheres(args: Any, lane: Lane, hip_spec: dict[str, Any]) -> None:
+    """Pin lateral foot spheres in the IK stance when a foot width is set."""
+    if getattr(args, "foot_half_width_m", None) is not None:
+        lane.stance = expand_stance_for_width(
+            lane.stance, [s["name"] for s in hip_spec["contact"]["spheres"]]
+        )
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -365,12 +389,15 @@ def _calibrate_and_scale(
             skip_hip_calibration=args.skip_hip_calibration,
             anthropometric=tuple(args.anthropometric) if args.anthropometric else None,
             recalibrate_upper=args.recalibrate_upper,
+            foot_half_width_m=getattr(args, "foot_half_width_m", None),
+            torsional_patch_m=getattr(args, "torsional_patch_m", None),
         ),
     )
     hipcal_path.write_text(
         json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     hip_bytes = hipcal_path.read_bytes()
+    _pin_width_spheres(args, lane, hip_spec)
     lane.plant = get_plant(ctx.engine, hip_spec)
 
     stage2 = solve_address_stage(
@@ -389,11 +416,8 @@ def _calibrate_and_scale(
             log=log,
         )
     )
-    address = stage2.address
-    address_report = stage2.address_report
-    fixed = stage2.fixed
-    seeds_all = stage2.seeds_all
-    hip_spec = stage2.hip_spec
+    address, address_report = stage2.address, stage2.address_report
+    fixed, seeds_all, hip_spec = stage2.fixed, stage2.seeds_all, stage2.hip_spec
 
     offsets, calibration = lane.calibrate_legs(hip_bytes, fixed, seeds_all, address.q)
     scaled_spec, femur_scale, tibia_scale, scale_table = search_segment_scales(
