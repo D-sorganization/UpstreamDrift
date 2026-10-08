@@ -121,6 +121,7 @@ def export_full_body_mjcf(
     *,
     visual: bool = False,
     appearance: AppearanceDocument | None = None,
+    with_head: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Export the full-body specification to MJCF with 41 scalar joints and contact sites.
 
@@ -129,6 +130,8 @@ def export_full_body_mjcf(
     the physics content is identical to the plain export. An ``appearance``
     document (implies ``visual``) restyles that layer with materials,
     textures and smooth meshes; it is never read by the physics path.
+    ``with_head`` adds only the visible head and neck to the legacy capsule
+    layer (an appearance document already includes them).
     """
     spec = json.loads(model_bytes)
     if spec.get("schema_version") != "full-body-v1":
@@ -157,12 +160,14 @@ def export_full_body_mjcf(
     elements, offsets = _build_full_body_kinematics(root, spec)
     frame_sites, contact_sites = _attach_full_body_sites(root, elements, offsets, spec)
     visual_meta = None
-    if visual or appearance is not None:
+    if visual or with_head or appearance is not None:
         from src.engines.physics_engines.mujoco.python.visual_layer import (
             attach_visual_layer,
         )
 
-        visual_meta = attach_visual_layer(root, elements, offsets, spec, appearance)
+        visual_meta = attach_visual_layer(
+            root, elements, offsets, spec, appearance, with_head=with_head
+        )
 
     xml = ET.tostring(root, encoding="unicode")
     extra = {} if visual_meta is None else {"visual_layer": visual_meta}

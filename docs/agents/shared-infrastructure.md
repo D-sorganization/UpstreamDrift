@@ -290,8 +290,24 @@ forward-dynamics matching. Design reference:
 - `library` — named PBR materials, skin tones, clothing presets, club finishes,
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- `head` — parametric visible head (skull, eyes, brows, nose, mouth, ears, neck,
+  optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
+  `Head` body on the neck at the cervicale; head length from de Leva), and
+  `head_override_rotation`. Licence: procedural geometry, CC0-1.0, no third-party mesh.
+- Document fields `head` (`enabled`, `headwear` none/hair/cap, `scale`,
+  `forward_axis`/`up_axis`, `orientation_override`) and `body_model`
+  (`ellipsoid`; `meshes` is rejected until CMB-6 #11657 lands).
+- Gaze channel: `head.orientation_override` (`frame` parent/world, `yaw_rad`,
+  `pitch_rad`, `roll_rad`, `channel` name) detaches the visual head onto a massless
+  mocap body; `head_visual.drive_visual_head(model, data, yaw, pitch, roll, frame)`
+  places it per frame. Axes: x forward, y left, z up; yaw left-positive, pitch
+  up-positive, roll toward the right shoulder. OSV-3 #11729 drives it for engines
+  without a neck.
 - MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
-  via `attach_visual_layer(..., appearance=doc)`.
+  via `attach_visual_layer(..., appearance=doc)`; the head is `head_visual.py`
+  (`with_head=True` adds only the head to the legacy capsule layer, used by MyoSuite).
+  Drake, Pinocchio and OpenSim native viewers use
+  `src/tools/native_viewer_export/backends/_head.py` (OBJ per part).
 
 ### Theme / Typography
 

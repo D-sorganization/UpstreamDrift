@@ -397,6 +397,20 @@
       "id": "platform.aip_protocol"
     },
     {
+      "feature_id": "render.body_appearance",
+      "title": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "status": "exempt",
+      "pyqt": "src/shared/python/model_appearance/head.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706).",
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes.",
+      "id": "render.body_appearance"
+    },
+    {
       "feature_id": "settings.desktop_only_tabs",
       "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
       "status": "exempt",
@@ -3000,7 +3014,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "29d7144015e1c30266c939807f94d013a9ffab8c81c28b72724e6258c9ed9afe",
+    "src/config/feature_parity.json": "75fc1b2d9e56f137be8dc493482a8627dd4901dabb04b531818521caded960b6",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

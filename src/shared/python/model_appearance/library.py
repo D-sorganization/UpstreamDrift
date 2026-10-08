@@ -51,6 +51,25 @@ MATERIALS: dict[str, Material] = {
     "trousers_charcoal": Material(
         (0.30, 0.32, 0.35, 1.0), 0.9, texture=Texture("noise", noise=0.05)
     ),
+    "hair_brown": Material(
+        (0.20, 0.13, 0.08, 1.0), 0.8, texture=Texture("noise", noise=0.05)
+    ),
+    "hair_black": Material(
+        (0.05, 0.045, 0.045, 1.0), 0.75, texture=Texture("noise", noise=0.04)
+    ),
+    "hair_blond": Material(
+        (0.70, 0.55, 0.30, 1.0), 0.8, texture=Texture("noise", noise=0.05)
+    ),
+    "cap_white": Material(
+        (0.94, 0.94, 0.93, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "cap_navy": Material(
+        (0.12, 0.20, 0.45, 1.0), 0.85, texture=Texture("noise", noise=0.04)
+    ),
+    "eye_white": Material((0.96, 0.96, 0.94, 1.0), 0.2),
+    "iris_dark": Material((0.10, 0.07, 0.05, 1.0), 0.15),
+    "brow_dark": Material((0.14, 0.09, 0.06, 1.0), 0.9),
+    "lip_pink": Material((0.62, 0.30, 0.30, 1.0), 0.5),
     "shoe_white": Material((0.92, 0.92, 0.90, 1.0), 0.4),
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
@@ -83,6 +102,7 @@ MATERIALS: dict[str, Material] = {
 }
 
 SKIN_TONES = ("skin_light", "skin_medium", "skin_tan", "skin_dark")
+HEADWEAR_DEFAULT_MATERIAL = {"hair": "hair_brown", "cap": "cap_navy"}
 CLUB_FINISHES = ("satin_steel", "chrome", "graphite", "black_pvd")
 
 # Anatomical part -> material, per clothing preset; absent parts show skin.
@@ -161,6 +181,10 @@ GARMENT_COVERAGE: dict[str, tuple[float, float]] = {
     "thigh": (0.0, 0.6),
     "shin": (0.0, 1.0),
 }
+# Segment smoothness: loft resolution, and ball blends where limbs meet the trunk.
+LOFT_RINGS, LOFT_SIDES = 22, 36
+BLEND_PARTS = ("upper_arm", "thigh")
+BLEND_RADIUS_SCALE = 1.1
 GARMENT_PARTS = ("torso", "pelvis", "upper_arm", "thigh", "shin")
 
 
@@ -183,6 +207,13 @@ def library_materials(doc: AppearanceDocument | None = None) -> dict[str, Materi
     return merged
 
 
+def headwear_material_name(doc: AppearanceDocument) -> str | None:
+    """Material of the hair or cap, or ``None`` when the head is bare."""
+    if doc.head.headwear == "none":
+        return None
+    return doc.head.headwear_material or HEADWEAR_DEFAULT_MATERIAL[doc.head.headwear]
+
+
 def check_references(doc: AppearanceDocument) -> None:
     """Every referenced material and preset name must exist."""
     materials = library_materials(doc)
@@ -192,6 +223,7 @@ def check_references(doc: AppearanceDocument) -> None:
         ("skin_tone", doc.skin_tone),
         ("club_finish", doc.club_finish),
         ("ground_material", doc.environment.ground_material),
+        ("head headwear_material", headwear_material_name(doc) or "skin_light"),
         *(
             (f"segments[{i}]", r.material)
             for i, r in enumerate(doc.segments)

@@ -160,6 +160,8 @@ def _body_meshes(
     if rule is not None and rule.mesh == "none":
         return []
     part = library.classify_body(body)
+    if part == "head" and doc.head.enabled:
+        return []  # drawn by head_visual: skull, face, ears and neck
     base = library.material_name_for(doc, body)
     garment = library.garment_name_for(doc, body)
     scale = 1.0 if rule is None else rule.radius_scale
@@ -177,11 +179,27 @@ def _body_meshes(
             (
                 f"skin{i}",
                 geometry.lofted_segment(
-                    start, end, radius, geometry.LoftOptions(aspect=aspect)
+                    start,
+                    end,
+                    radius,
+                    geometry.LoftOptions(
+                        aspect=aspect,
+                        rings=library.LOFT_RINGS,
+                        sides=library.LOFT_SIDES,
+                    ),
                 ),
                 base,
             )
         )
+        if part in library.BLEND_PARTS:  # ball joint hides the segment seam
+            ball = geometry.ellipsoid_mesh(
+                start,
+                np.full(3, radius * library.BLEND_RADIUS_SCALE),
+                end - start,
+                rings=14,
+                sides=24,
+            )
+            out.append((f"blend{i}", ball, garment or base))
         if garment is not None:
             band = library.GARMENT_COVERAGE.get(part, (0.0, 1.0))
             out.append(
@@ -195,6 +213,8 @@ def _body_meshes(
                             aspect=aspect,
                             coverage=band,
                             thickness=library.GARMENT_THICKNESS,
+                            rings=library.LOFT_RINGS,
+                            sides=library.LOFT_SIDES,
                         ),
                     ),
                     garment,
@@ -271,6 +291,11 @@ def attach_appearance(
     ``ground_material``) merged into the exporter metadata. The caller adds
     the ground, lights and camera that use the returned material.
     """
+    if doc.body_model != "ellipsoid":
+        raise ValueError(
+            f"body_model {doc.body_model!r} needs a rigid-bind mesh set that is "
+            "not available yet (CMB-6 #11657); use 'ellipsoid'"
+        )
     assets = _Assets(root, doc)
     ground_material = _add_environment(root, assets, doc)
     by_body: dict[str, list[Capsule]] = {}
