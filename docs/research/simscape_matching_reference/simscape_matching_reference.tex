@@ -57,8 +57,8 @@ and physical acceptance are recorded separately. Gates \#11156, \#11160 and
 \newpage
 
 \section{Current Reader Guide and Qualification Status}
-Capture A is the tour-average reference; capture O is the owner optical
-GEARS capture. Differences in the rendered motion are evaluated as
+Capture A is the tour-average reference; capture O is the owner native
+capture. Differences in the rendered motion are evaluated as
 matching, calibration or observability questions, not player-skill
 judgments. New shareable matches use the refined Human ellipsoid model.
 Its Simscape dynamics capability does not establish the mode used by an
@@ -1649,7 +1649,7 @@ $d_s=\max_{i\in s}c_i-m_s$. The selected addresses gave:
 Capture & $m_L$ (mm) & $m_R$ (mm) & $d_L$ (mm) & $d_R$ (mm) & $|m_L-m_R|$ (mm) \\
 \midrule
 Tour Average & $-13.973$ & $15.108$ & $0.637$ & $1.462$ & $29.081$ \\
-Owner GEARS & $-64.540$ & $-49.443$ & $0.100$ & $1.102$ & $15.097$ \\
+Owner Capture O & $-64.540$ & $-49.443$ & $0.100$ & $1.102$ & $15.097$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1742,7 +1742,7 @@ at \texttt{2026-10-02T15:08:49Z} for the tour and
 Capture & \shortstack{Mass\\(kg)} & \shortstack{Left Force\\at 20 ms (N)} & \shortstack{Right Force\\at 20 ms (N)} & \shortstack{Maximum Pelvis\\Shift (mm)} \\
 \midrule
 Tour Average & 80.393 & 443.969 & 407.322 & 1.513 \\
-Owner GEARS & 104.693 & 502.848 & 407.399 & 1.482 \\
+Owner Capture O & 104.693 & 502.848 & 407.399 & 1.482 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2328,7 +2328,7 @@ the staged streams by SHA-256 and byte count. The archive contains
 media inventory are retained in the acquisition evidence. This verifies
 the bytes delivered by the observed source-export operation. It does
 not establish untouched raw-camera provenance, physical capture rate
-or exact GEARS swing pairing.
+or exact capture-system swing pairing.
 
 Sparse visual review distinguishes one indoor marker-equipped clip,
 edited across two views, from five driving-range recordings. The
@@ -3624,7 +3624,7 @@ raw coordinates remain outside the public reference.
 The Google Photos local acquisition requirement is complete: the archive
 and six original MP4s are preserved on a local machine and their recorded
 hashes were rechecked. The visible cap, torso, waist, limb and shoe attachments
-inform placement review. Exact video-to-GEARS trial pairing, capture-label
+inform placement review. Exact video-to-capture trial pairing, capture-label
 identification, occlusions and body-local anatomical offsets remain unverified.
 An attachment on clothing is not a measured joint centre. Calibrated fitting
 must isolate edited camera views and exclude cross-dissolve frames.
@@ -3721,7 +3721,7 @@ Numeric masks, malformed hashes, mismatched metadata and improperly shaped
 empty sentinels fail closed. Single-frame masks retain their conceptual
 $1\times M\times1$ shape despite MATLAB's trailing-singleton convention.
 
-The raw GEARS source hash is an explicit caller attestation. It is distinct
+The raw native-capture source hash is an explicit caller attestation. It is distinct
 from the actual C3D file hash; hashing the exporter M-file would not bind the
 capture and is not used for this contract. Neither hash establishes physical
 marker accuracy. Without a mask the report declares
@@ -4198,7 +4198,7 @@ per-frame RMS distance. These dense results have different sampling from
 the sparse selected-preview scores and should not be presented as a direct
 ranking of models or golfers. Marker-placement video supplies useful
 qualitative placement evidence, but not calibrated anatomical offsets or
-verified video-to-GEARS trial identity. Full capture, contact and forward
+verified video-to-capture trial identity. Full capture, contact and forward
 dynamics remain unqualified.
 
 Adding the six new assembled midpoint support poses retains all 101 original

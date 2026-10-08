@@ -134,7 +134,7 @@ def test_run_export_skips_unavailable_and_renders_rest(tmp_path: Path) -> None:
     )
     results = run_export(
         job,
-        ExportSettings(width=32, height=32, stride=50),
+        ExportSettings(width=32, height=32, fps=20, speeds=(1.0,)),
         backends.__getitem__,
         overlay,
         _Writer,
@@ -145,8 +145,8 @@ def test_run_export_skips_unavailable_and_renders_rest(tmp_path: Path) -> None:
     assert swing.rollout_engine == "pinocchio" and float(swing.q[0, 0]) == 1.0
     assert settings.lookat_m == (0.5, 0.0, 0.9)
     assert seen == ["pinocchio"]
-    assert (tmp_path / "out" / "driver_pinocchio_face_on.mp4").exists()
-    assert (tmp_path / "out" / "driver_pinocchio_2x2.mp4").exists()
+    assert (tmp_path / "out" / "driver_pinocchio_face_on_1x.mp4").exists()
+    assert (tmp_path / "out" / "driver_pinocchio_2x2_1x.mp4").exists()
 
 
 def test_overlay_unavailable_still_renders(tmp_path: Path) -> None:
@@ -160,7 +160,7 @@ def test_overlay_unavailable_still_renders(tmp_path: Path) -> None:
     backend = _Backend("drake")
     results = run_export(
         ExportJob(bpath, tmp_path / "o", "d", "Driver", ("drake",)),
-        ExportSettings(width=32, height=32, stride=50),
+        ExportSettings(width=32, height=32, fps=20, speeds=(1.0,)),
         lambda e: backend,
         overlay,
         _Writer,
