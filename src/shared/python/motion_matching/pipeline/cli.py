@@ -59,6 +59,10 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
 from src.shared.python.motion_matching.pipeline.finish_feasibility import (
     finish_feasibility_report,
 )
+from src.shared.python.motion_matching.pipeline.gaze_residual import (
+    club_face_offset_m,
+    head_gaze_receipt,
+)
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
@@ -96,6 +100,16 @@ def _positive_int(value: str) -> int:
     return val
 
 
+def _nonnegative_float(value: str) -> float:
+    try:
+        val = float(value)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(f"Invalid number: {value!r}") from e
+    if not np.isfinite(val) or val < 0:
+        raise argparse.ArgumentTypeError(f"--gaze-weight must be >= 0, got {val}")
+    return val
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser for the ground support pipeline runner."""
     parser = argparse.ArgumentParser(
@@ -124,6 +138,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--recalibrate-upper",
         action="store_true",
         help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
+    )
+    parser.add_argument(
+        "--gaze-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "soft head-gaze residual weight (eyes on the ball until impact + "
+            "0.03 s, then a 0.35 s release to the target line); 0 keeps the "
+            "marker-faithful head (default)"
+        ),
     )
     parser.add_argument(
         "--capture",
@@ -785,6 +809,7 @@ def _simulate_and_receipt(
         )
     )
     receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(
@@ -814,6 +839,9 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
+
+    lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
+    lane.gaze_face_offset_m = club_face_offset_m(base_spec)
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
 
