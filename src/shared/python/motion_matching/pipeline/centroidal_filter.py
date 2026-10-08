@@ -472,8 +472,8 @@ def constraint_system(
         coupled = np.flatnonzero(accel[r])
         for pos, acc, bound, kind in rows:
             row = len(limits)
-            entries = {r: pos.copy()}
-            for other in coupled:
+            entries: dict[int, np.ndarray] = {r: pos.copy()}
+            for other in (int(c) for c in coupled):
                 entries[other] = entries.get(other, 0.0) + accel[r, other] * acc
             for frame, vec in entries.items():
                 ii.append(np.full(nv, row))
@@ -498,7 +498,7 @@ def _finite_row(row: tuple[np.ndarray, np.ndarray, float, str]) -> bool:
 
 def second_difference(times: np.ndarray) -> np.ndarray:
     """Dense (N, N) operator of the second time derivative (np.gradient twice)."""
-    first = np.gradient(np.eye(len(times)), times, axis=0)
+    first = np.asarray(np.gradient(np.eye(len(times)), times, axis=0))
     return first @ first
 
 
@@ -517,7 +517,7 @@ def centroidal_step(
     accel = second_difference(times)
     local = accel[np.ix_(window, window)]
     com, force, moment = frames.wrench_series(times, q)
-    lins = [frames.linearise(q[k], k) for k in window]
+    lins = [frames.linearise(q[k], int(k)) for k in window]
     frame_rows: list[list[tuple[np.ndarray, np.ndarray, float, str]]] = []
     for r, k in enumerate(window):
         if times[k] < config.t_con_s:
