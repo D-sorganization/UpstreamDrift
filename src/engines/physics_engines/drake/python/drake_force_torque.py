@@ -16,6 +16,10 @@ Reads Drake's own output ports and emits an engine-agnostic
 * ``CONTACT`` from ``plant.get_contact_results_output_port()``: point pairs
   (force on body B at ``contact_point()``, negative on A) and hydroelastic
   surfaces (``F_Ac_W()`` on body A at the surface centroid, negative on B).
+* ground reaction (GCV-2, #11708): the contacts of foot bodies against bodies
+  welded to the world, as ``contact:grf_*`` / ``free_moment_*`` /
+  ``moment_com_*`` wrenches from the shared ground-reaction core, with the
+  centre of mass from ``plant.CalcCenterOfMassPositionInWorld``.
 * ``GRAVITY`` (opt-in): ``m*g`` at each body's centre of mass.
 
 Note: for discrete-time plants Drake's reaction-force port reads zero until the
@@ -39,6 +43,9 @@ from pydrake.multibody.plant import MultibodyPlant
 from pydrake.multibody.tree import BodyIndex, RevoluteJoint
 from pydrake.systems.framework import Context
 
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
+)
 from src.shared.python.body_part_viz.axial_loads import AxialLoadFrame
 from src.shared.python.core.process_safety import narrow_catch
 from src.shared.python.force_overlay import (
@@ -208,18 +215,23 @@ class DrakeForceTorqueSource:
         """Evaluate the contact-results port (may raise ``RuntimeError``)."""
         return self._plant.get_contact_results_output_port().Eval(ctx)
 
-    def _contact_wrenches(self, ctx: Context) -> list[OverlayWrench]:
+    def _contact_entries(self, ctx: Context) -> list[tuple[Any, Any, Any, Any, Any]]:
+        """``(body, point, force, torque, partner)`` per contact side, or ``[]``.
+
+        ``partner`` is the other body of the pair.  An unreadable contact port
+        is reported in ``unavailable_labels``.
+        """
         plant = self._plant
-        world = plant.world_body().index()
-        entries: list[tuple[Any, Any, Any, Any]] = []  # (body, point, force, torque)
+        entries: list[tuple[Any, Any, Any, Any, Any]] = []
         try:
             results = self._read_contact_results(ctx)
             for i in range(results.num_point_pair_contacts()):
                 info = results.point_pair_contact_info(i)
                 force = np.asarray(info.contact_force())
                 point = info.contact_point()
-                entries.append((info.bodyB_index(), point, force, None))
-                entries.append((info.bodyA_index(), point, -force, None))
+                a, b = info.bodyA_index(), info.bodyB_index()
+                entries.append((b, point, force, None, a))
+                entries.append((a, point, -force, None, b))
             n_hydro = results.num_hydroelastic_contacts()
             inspector = (
                 self._scene_graph.model_inspector() if self._scene_graph else None
@@ -239,8 +251,9 @@ class DrakeForceTorqueSource:
                     sf = info.F_Ac_W()
                     f, t = np.asarray(sf.translational()), np.asarray(sf.rotational())
                     centroid = surface.centroid()
-                    entries.append((body_a.index(), centroid, f, t))
-                    entries.append((body_b.index(), centroid, -f, -t))
+                    a, b = body_a.index(), body_b.index()
+                    entries.append((a, centroid, f, t, b))
+                    entries.append((b, centroid, -f, -t, a))
         except RuntimeError:
             logger.warning(
                 "Drake contact results unavailable (SceneGraph query port not "
@@ -248,8 +261,16 @@ class DrakeForceTorqueSource:
             )
             self._unavailable += ("contact:results",)
             return []
+        return entries
+
+    def _contact_wrenches(
+        self, ctx: Context, entries: list[tuple[Any, Any, Any, Any, Any]] | None = None
+    ) -> list[OverlayWrench]:
+        world = self._plant.world_body().index()
+        if entries is None:
+            entries = self._contact_entries(ctx)
         out: list[OverlayWrench] = []
-        for body, point, force, torque in entries:
+        for body, point, force, torque, _partner in entries:
             if body == world:
                 continue
             out.append(
@@ -264,6 +285,25 @@ class DrakeForceTorqueSource:
                 )
             )
         return out
+
+    def _ground_reaction_wrenches(
+        self, ctx: Context, entries: list[tuple[Any, Any, Any, Any, Any]]
+    ) -> list[OverlayWrench]:
+        """Per-foot and net GRF breakdown of contacts against anchored bodies (GCV-2).
+
+        Ground is any body welded to the world (the world body itself or a
+        static ground model); foot-on-club contacts are not ground reaction.
+        """
+        plant = self._plant
+        anchored = {b.index() for b in plant.GetBodiesWeldedTo(plant.world_body())}
+        ground = [e for e in entries if e[4] in anchored and e[0] not in anchored]
+        wrenches = self._contact_wrenches(ctx, ground)
+        com = plant.CalcCenterOfMassPositionInWorld(ctx)
+        return list(
+            ground_reaction_overlay(
+                wrenches, com, source="drake:contact_results_port"
+            )
+        )
 
     def _gravity_wrenches(self, ctx: Context) -> list[OverlayWrench]:
         plant = self._plant
@@ -337,7 +377,9 @@ class DrakeForceTorqueSource:
         reactions = self._reaction_wrenches(plant_context)
         wrenches = list(reactions)
         wrenches += self._actuator_wrenches(plant_context)
-        wrenches += self._contact_wrenches(plant_context)
+        entries = self._contact_entries(plant_context)
+        wrenches += self._contact_wrenches(plant_context, entries)
+        wrenches += self._ground_reaction_wrenches(plant_context, entries)
         if include_gravity:
             wrenches += self._gravity_wrenches(plant_context)
         return ForceTorqueFrame(
