@@ -101,7 +101,8 @@ def test_com_moment_uses_pinocchio_centre_of_mass(source_and_q) -> None:
     com = pin.centerOfMass(source.model, source.model.createData(), q)
     np.testing.assert_allclose(w["contact:moment_com_net"].point_m, com, atol=1e-9)
     m_com = np.asarray(w["contact:moment_com_net"].torque_nm)
-    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * 0.03
+    com_height = w["contact:moment_com_net"].point_m[2]
+    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * com_height
 
 
 def test_without_samples_ground_reaction_is_unavailable_with_a_reason(

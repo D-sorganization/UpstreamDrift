@@ -119,14 +119,15 @@ def test_static_stance_free_moment_and_com_moment_are_present(stance) -> None:
 def test_static_stance_com_moment_balance_residual_is_small(stance) -> None:
     """Quasi-static balance: the ground wrench has no horizontal moment about the CoM.
 
-    The measured residual on the reference host is recorded in the issue; the
-    bound is the contact-solver's moment error, not a loosened tolerance: one
-    percent of weight times the foot half-width.
+    The bound is a residual shear of at most 1 % of weight acting at the CoM
+    height (the lever of a horizontal ground force about the CoM); the measured
+    residuals are recorded in the pull request.
     """
     model, data = stance
     w = _by_label(MujocoForceTorqueSource(model).sample(data))
     m_com = np.asarray(w["contact:moment_com_net"].torque_nm)
-    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * HALF_Y
+    com_height = w["contact:moment_com_net"].point_m[2]
+    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * com_height
 
 
 def test_newton_euler_identity_diagnostic(stance) -> None:

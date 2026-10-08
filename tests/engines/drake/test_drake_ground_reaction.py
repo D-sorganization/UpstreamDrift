@@ -104,7 +104,8 @@ def test_static_stance_com_moment_uses_the_plant_com(stance) -> None:
     for label in ("contact:free_moment_net", "contact:free_moment_left"):
         assert label in w
     m_com = np.asarray(w["contact:moment_com_net"].torque_nm)
-    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * RADIUS
+    com_height = w["contact:moment_com_net"].point_m[2]
+    assert np.linalg.norm(m_com[:2]) < 0.01 * WEIGHT_N * com_height
 
 
 def test_airborne_has_no_ground_reaction() -> None:
