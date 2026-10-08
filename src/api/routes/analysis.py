@@ -28,7 +28,12 @@ from ..models.requests import (
     CandidateCounterfactualRequest,
     CounterfactualRequest,
 )
-from ..models.responses import AnalysisResponse, ImpactParametersResponse
+from ..models.responses import (
+    AnalysisResponse,
+    GroundReactionResponse,
+    ImpactParametersResponse,
+)
+from ..services.ground_reaction_service import compute_ground_reaction_plot
 from ..services.impact_parameters_service import compute_impact_card
 from ..utils.datetime_compat import UTC
 
@@ -298,3 +303,30 @@ async def get_impact_parameters(
     return ImpactParametersResponse(
         run_id=run.run_id, engine=run.engine_type, **payload
     )
+
+
+# ──────────────────────────────────────────────────────────────
+#  Ground-reaction plots (GCV-5, #11711)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get("/analysis/ground-reaction", response_model=GroundReactionResponse)
+async def get_ground_reaction(
+    run_id: str | None = Query(None, description="Run id; defaults to the active run"),
+    impact_time_s: float | None = Query(None, description="Impact event marker (s)"),
+    service: SimulationService = Depends(get_simulation_service),
+) -> GroundReactionResponse:
+    """Per-foot and net ground reaction on the body (world frame) over time.
+
+    Force (N and body weights), centre of pressure, free moment, moment about
+    the centre of mass and vertical load share.  Unavailable samples are
+    ``null``, never zero.  404 for an unknown run, 400 for malformed data.
+    """
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No such simulation run")
+    try:
+        payload = compute_ground_reaction_plot(run, impact_time_s=impact_time_s)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return GroundReactionResponse(run_id=run.run_id, engine=run.engine_type, **payload)
