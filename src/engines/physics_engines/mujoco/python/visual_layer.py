@@ -65,6 +65,8 @@ def attach_visual_layer(
     offsets: Mapping[str, np.ndarray],
     spec: Mapping[str, Any],
     appearance: AppearanceDocument | None = None,
+    *,
+    with_head: bool = False,
 ) -> dict[str, Any]:
     """Attach the shared skeleton to an MJCF document; returns a summary.
 
@@ -95,9 +97,24 @@ def attach_visual_layer(
         appearance_meta = attach_appearance(
             root, elements, offsets, skeleton, appearance, assembly_from_spec(spec)
         )
+    head_doc = appearance or (AppearanceDocument() if with_head else None)
+    if head_doc is not None:  # visible head and neck, visual only (GCV-12)
+        from src.engines.physics_engines.mujoco.python.head_visual import (
+            attach_head_visual,
+        )
+
+        appearance_meta["head"] = attach_head_visual(
+            root, elements, offsets, spec, head_doc
+        )
+    head_meta = appearance_meta.get("head") or {}
+    if appearance is not None and head_meta.get("enabled"):
+        appearance_meta["meshes"] += len(head_meta["parts"])
+    head_body = head_meta["body"] if head_meta.get("source") == "head_body" else None
     for index, capsule in enumerate(
         () if appearance is not None else skeleton.capsules
     ):
+        if capsule.body == head_body:
+            continue  # the head mesh replaces the head capsule
         offset = offsets[capsule.body]
         start = _to_mjcf_frame(offset, np.asarray(capsule.start_m))
         end = _to_mjcf_frame(offset, np.asarray(capsule.end_m))

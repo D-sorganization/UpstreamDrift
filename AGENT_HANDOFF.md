@@ -19,6 +19,13 @@
 - Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
 - Impact: `club_face.impact_frame` (shared `detect_impact_index`, closest-approach fallback, raises if not at the ball). True impact face is +30 deg (driver, t=1.327) and +18 deg (iron, t=1.337) open, while the capture head triad is about +2 deg: the IK/matched trajectory under-rotates the club through release (grows from 4 deg at the top), so a constant roll cannot fix it; needs an IK refit with head-triad weight (test `test_face_is_square_at_impact` is a strict xfail). `tour_matching` club models are unrolled.
 
+# Active: Visible Head and Neck (GCV-12) - #11718
+
+- Branch `claude/gcv-12-visible-head`; epic #11706. The anthropometric specs already carry a `Head` body on a three-axis neck at the cervicale; only the native Simscape spec (v1/v2) has none, so the head rides the `Head` body (follows the fitted neck) and falls back to the torso for v1/v2 in MuJoCo only.
+- Code: `model_appearance/head.py` (procedural head, face, ears, neck, hair or cap), `mujoco/python/head_visual.py`, native viewer `backends/_head.py`; schema fields `head` and `body_model`. Visual only: no mass, inertia or DOF change (identity tests). Gaze channel `head.orientation_override` plus `drive_visual_head` for OSV-3 #11729.
+- Blend balls are capped at 1.1x the adjoining limb radius (test); `*hubto*` bodies are a small `shoulder` part, not torso-sized pads.
+- Not done: `body_model: meshes` (rejected until CMB-6 #11657), web `GolferModel.tsx` head. Owner renders in `~/Videos/Parity Audit/forces_and_impact/visuals/head/`.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.

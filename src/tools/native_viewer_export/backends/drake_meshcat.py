@@ -22,6 +22,7 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 from src.shared.python.golf_view_presets import drake_meshcat_camera_pose
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._club import club_parts, write_obj
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -78,7 +79,21 @@ class DrakeMeshcatBackend:
             plant.world_frame(), plant.GetBodyByName(links["world"], inst).body_frame()
         )
         n = 0
+        # The shared visual head replaces the head capsule (visual only).
+        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
+        heads = head_mesh_files(json.loads(spec_bytes), Path(self._head_dir))
+        head_body = heads[0].body if heads else None
+        for head in heads:
+            plant.RegisterVisualGeometry(
+                plant.GetBodyByName(links[head.body], inst),
+                RigidTransform(),  # type: ignore[arg-type]
+                Mesh(str(head.path)),
+                f"head_{head.name}",
+                np.array(head.rgba),
+            )
         for cap in skeleton.capsules:
+            if cap.body == head_body:
+                continue
             rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
             plant.RegisterVisualGeometry(
                 plant.GetBodyByName(links[cap.body], inst),

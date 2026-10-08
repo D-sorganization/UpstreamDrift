@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
+import json
+import tempfile
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -19,6 +22,7 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 from src.shared.python.golf_view_presets import meshcat_camera
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
 from src.tools.native_viewer_export.backends._club import club_parts
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -59,7 +63,6 @@ class PinocchioMeshcatBackend:
         return playwright_unavailable_reason()
 
     def _build(self, swing: SwingInput) -> tuple[Any, Any, Any]:
-        import json
 
         import coal
         import meshcat
@@ -84,7 +87,22 @@ class PinocchioMeshcatBackend:
             geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
 
         n = 0
+        # The shared visual head replaces the head capsule (visual only).
+        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
+        heads = head_mesh_files(spec, Path(self._head_dir))
+        head_body = heads[0].body if heads else None
+        for head in heads:
+            joint, body_pose = adapter._bodies[head.body]  # noqa: SLF001
+            shape = coal.MeshLoader().load(str(head.path))
+            obj = pin.GeometryObject(  # type: ignore[attr-defined]
+                f"head_{head.name}", joint, body_pose, shape, str(head.path)
+            )
+            obj.meshColor = np.array(head.rgba)
+            obj.overrideMaterial = True
+            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
         for cap in skeleton.capsules:
+            if cap.body == head_body:
+                continue
             rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
             add(
                 f"cap{n}",

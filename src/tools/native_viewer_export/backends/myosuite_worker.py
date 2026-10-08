@@ -128,7 +128,7 @@ def main(job_path: str) -> None:
     bundle = InputBundle.load(Path(job.bundle_path))
     q = np.load(job.q_path)
     skeleton = derive_visual_skeleton(json.loads(bundle.spec_bytes))
-    xml, _ = export_full_body_mjcf(bundle.spec_bytes, visual=True)
+    xml, _ = export_full_body_mjcf(bundle.spec_bytes, visual=True, with_head=True)
     scene_xml = merge_arena(xml, skeleton.ground.height_m, job.width, job.height)
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "scene.xml"

@@ -57,8 +57,8 @@ def write_obj(mesh: Mesh, directory: str, stem: str) -> str:
     """Write ``mesh`` as a Wavefront OBJ under ``directory``; return its path."""
     from pathlib import Path
 
+    from src.tools.native_viewer_export.backends._head import write_obj as write_file
+
     path = Path(directory) / f"{stem}.obj"
-    lines = [f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in mesh.vertices]
-    lines += [f"f {a + 1} {b + 1} {c + 1}" for a, b, c in mesh.faces]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    write_file(path, mesh.vertices, mesh.faces)
     return str(path)

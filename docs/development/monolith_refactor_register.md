@@ -115,6 +115,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
+| 928 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 926 | `src/tools/bunker_shot_gui/gui.py` |
 | 924 | `src/research/differentiable/engine.py` |
