@@ -78,7 +78,7 @@ def eye_point(
 
 
 def gaze_direction(
-    head_r: Sequence | Array, axis: Sequence[float] = GAZE_AXIS_HEAD
+    head_r: Sequence | Array, axis: Sequence[float] | Array = GAZE_AXIS_HEAD
 ) -> Array:
     """World gaze direction ``head_R @ axis`` (unit)."""
     a = _unit(np.asarray(axis, dtype=float), "gaze axis")
@@ -89,7 +89,7 @@ def gaze_error(
     head_r: Sequence | Array,
     eye: Sequence | Array,
     ball: Sequence | Array,
-    axis: Sequence[float] = GAZE_AXIS_HEAD,
+    axis: Sequence[float] | Array = GAZE_AXIS_HEAD,
 ) -> Array:
     """Angle (rad) between the gaze direction and the line of sight to the ball.
 
@@ -207,7 +207,7 @@ def head_stability_metrics(
     last: int,
     *,
     eye_offset: Sequence[float] = EYE_OFFSET_HEAD_M,
-    axis: Sequence[float] = GAZE_AXIS_HEAD,
+    axis: Sequence[float] | Array = GAZE_AXIS_HEAD,
 ) -> GazeMetrics:
     """Metrics over frames ``first..last`` inclusive (address to impact)."""
     r = _rotations(head_r)
@@ -252,7 +252,7 @@ def neck_ik(
     parent_r: Sequence | Array,
     direction: Sequence[float] | Array,
     *,
-    axis: Sequence[float] = GAZE_AXIS_HEAD,
+    axis: Sequence[float] | Array = GAZE_AXIS_HEAD,
     ranges_deg: dict[str, tuple[float, float]] | None = None,
     q0: Sequence[float] | None = None,
     pose_prior: float = 1e-3,

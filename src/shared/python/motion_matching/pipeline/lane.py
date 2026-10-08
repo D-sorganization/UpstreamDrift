@@ -342,7 +342,17 @@ class Lane:
         if self.gaze_axis_targets_cache is None:
             from src.shared.python.motion_matching.pipeline import gaze_residual as gr
 
+            from src.shared.python.motion_matching.pipeline.constants import (
+                REFERENCE_CUTOFF_HZ,
+            )
+            from src.shared.python.motion_matching.pipeline.reference import (
+                smooth_reference,
+            )
+
             q0, _ = self._solve(kin, q_start, None, pits)
+            # Plan from the smoothed pass so impact detection is not driven by
+            # marker jitter in the speed signal.
+            q0 = smooth_reference(q0, self.rate_hz, REFERENCE_CUTOFF_HZ)
             self.gaze_plan = gr.plan_gaze(
                 kin,
                 q0,

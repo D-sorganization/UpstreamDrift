@@ -1,7 +1,7 @@
 """Side-by-side 0.5x head-gaze clips (OSV-3, #11729), MuJoCo, headless.
 
 Left: gaze weight 0 (marker-faithful). Right: gaze on. Each panel draws a red
-head-forward glyph from the eye point along the gaze axis, so head orientation
+head-forward glyph from the eye point along the gaze axis (green: line of sight to the ball), so head orientation
 is visible without a face mesh, and the ball at address (white). Inputs are two
 pipeline run directories (``ik_trajectory.npz`` + ``full_body_spec_hipcal_scaled.json``).
 
@@ -75,7 +75,7 @@ def _panel_frames(run: Path, label: str, azimuth: float, stride: int):  # noqa: 
     kin = plant.create_ik(dict(list(att.items())[:5]), ik_backend="lm")
     head_r, head_t = gr.frame_poses(kin, q, gr.HEAD_FRAME)
     eyes = gaze.eye_point(head_r, head_t)
-    forward = gaze.gaze_direction(head_r)
+    forward = gaze.gaze_direction(head_r, block["plan"]["gaze_axis_head"])
     ball = np.asarray(block["plan"]["ball_at_address_m"])
     impact = int(block["plan"]["impact_index"])
 
@@ -86,8 +86,8 @@ def _panel_frames(run: Path, label: str, azimuth: float, stride: int):  # noqa: 
     addresses = [model.joint(n).qposadr[0] for n in names]
     renderer = mujoco.Renderer(model, HEIGHT, WIDTH)
     cam = mujoco.MjvCamera()
-    cam.lookat[:] = 0.5 * (eyes[0] + ball) - np.array([0.0, 0.0, 0.25])
-    cam.distance, cam.azimuth, cam.elevation = 2.6, azimuth, -10.0
+    cam.lookat[:] = 0.5 * (eyes[0] + ball) - np.array([0.0, 0.0, 0.1])
+    cam.distance, cam.azimuth, cam.elevation = 3.4, azimuth, -10.0
     out = []
     for k in range(0, q.shape[0], stride):
         data.qpos[addresses] = q[k]
@@ -96,6 +96,7 @@ def _panel_frames(run: Path, label: str, azimuth: float, stride: int):  # noqa: 
         add_scene_marker(renderer.scene, ball, 0.021335, (1, 1, 1, 1))
         tip = eyes[k] + GLYPH_LENGTH_M * forward[k]
         _connector(renderer.scene, eyes[k], tip, 0.008, (0.95, 0.1, 0.1, 1))
+        _connector(renderer.scene, eyes[k], ball, 0.003, (0.2, 0.9, 0.3, 1))
         add_scene_marker(renderer.scene, eyes[k], 0.014, (1.0, 0.8, 0.1, 1))
         img = np.ascontiguousarray(renderer.render())
         phase = "ball" if k <= impact + 3 else "release"

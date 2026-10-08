@@ -75,7 +75,7 @@ def test_axis_targets_follow_schedule_and_weight() -> None:
     targets = gr.gaze_axis_targets(plan, kin, q, TIMES, 7.0)
     assert len(targets) == N
     axis, direction, weight = targets[0][gr.HEAD_FRAME]
-    assert weight == 7.0 and tuple(axis) == gaze.GAZE_AXIS_HEAD
+    assert weight == 7.0 and np.asarray(axis) == pytest.approx(plan.gaze_axis_head)
     eye = gaze.eye_point(np.eye(3), kin.head_t)
     sight = (plan.ball_m - eye) / np.linalg.norm(plan.ball_m - eye)
     assert direction == pytest.approx(sight)
@@ -104,7 +104,11 @@ def test_report_records_weight_metrics_and_note() -> None:
     on = gr.gaze_report(plan, kin, q, TIMES, 5.0, COORDS)
     assert off["gaze_weight"] == 0.0 and not off["regularised"]
     assert on["regularised"] and "not measured" in on["note"]
-    assert off["address_to_impact"]["theta_gaze_rms_deg"] > 0.0
+    # gaze axis is calibrated at address, so a static head has zero error
+    assert off["address_to_impact"]["theta_gaze_rms_deg"] == pytest.approx(
+        0.0, abs=1e-9
+    )
+    assert off["address_to_impact_nominal_axis"]["theta_gaze_rms_deg"] > 0.0
     assert set(off["neck_range_deg"]) == set(COORDS)
     assert off["plan"]["t_release_s"] == 0.35
 
@@ -116,3 +120,63 @@ def test_lane_default_leaves_axis_targets_unchanged() -> None:
     lane.gaze_weight = 0.0
     lane.anthropometric = False
     assert lane.axis_targets(None, np.zeros(3)) is None  # type: ignore[arg-type]
+
+
+def test_cli_gaze_weight_defaults_to_marker_faithful_and_validates() -> None:
+    from src.shared.python.motion_matching.pipeline.cli import build_parser
+
+    parser = build_parser()
+    assert parser.parse_args([]).gaze_weight == 0.0
+    assert parser.parse_args(["--gaze-weight", "10"]).gaze_weight == 10.0
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--gaze-weight", "-1"])
+
+
+def test_lane_plans_gaze_once_from_marker_faithful_pass() -> None:
+    from src.shared.python.motion_matching.pipeline.lane import Lane
+
+    kin, q = StubKin(), _q()
+    lane = Lane.__new__(Lane)
+    lane.gaze_weight = 4.0
+    lane.anthropometric = False
+    lane.times = TIMES
+    lane.gaze_face_offset_m = 0.0
+    lane.gaze_axis_targets_cache = None
+    lane.gaze_plan = None
+
+    class Ground:
+        height_m = 0.0
+
+    lane.ground = Ground()  # type: ignore[assignment]
+    calls: list[int] = []
+
+    def fake_solve(_kin, _q0, _frames, _axis):  # noqa: ANN001
+        calls.append(1)
+        return q, []
+
+    lane._solve = fake_solve  # type: ignore[method-assign]
+    # smoothing needs the capture rate; the stub trajectory is 100 Hz
+    lane.__class__ = type("L", (Lane,), {"rate_hz": 100.0})
+    first = lane.axis_targets(kin, q[0])
+    second = lane.axis_targets(kin, q[0])
+    assert len(calls) == 1 and first == second
+    assert first[0][gr.HEAD_FRAME][2] == 4.0
+    assert lane.gaze_plan.impact_index > 0
+
+
+def test_receipt_reports_unavailable_when_the_model_has_no_head_frame() -> None:
+    class NoHead(StubKin):
+        def body_poses(self, q, frames):  # noqa: ANN001
+            raise ValueError("Unknown body Head")
+
+    class FakeLane:
+        gaze_plan = None
+        gaze_weight = 0.0
+        gaze_face_offset_m = 0.0
+        times = TIMES
+
+        class ground:  # noqa: N801
+            height_m = 0.0
+
+    block = gr.head_gaze_receipt(FakeLane(), NoHead(), _q())
+    assert block["available"] is False and "Unknown body" in block["reason"]

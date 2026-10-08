@@ -29,6 +29,8 @@ HEAD_FRAME = "Head"
 CLUB_FRAME = "Clubhead"
 TORSO_FRAME = "Torso"
 GRIP_FRAME = "Grip"
+# Neck IK is a per-frame bounded solve; the receipt summary samples every Nth.
+NECK_IK_STRIDE = 6
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,7 @@ class GazePlan:
     t_rel_s: float
     face_normal: Array
     face_centre_m: Array
+    gaze_axis_head: Array
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -55,7 +58,8 @@ class GazePlan:
             "t_hold_s": self.t_hold_s,
             "t_release_s": self.t_rel_s,
             "eye_offset_head_m": list(gaze.EYE_OFFSET_HEAD_M),
-            "gaze_axis_head": list(gaze.GAZE_AXIS_HEAD),
+            "gaze_axis_head": [float(v) for v in self.gaze_axis_head],
+            "gaze_axis_rule": "head-frame direction of the address line of sight to the ball",
         }
 
 
@@ -114,6 +118,10 @@ def plan_gaze(
     normal = club_r[0] @ local_normal
     centre = club_t[0] + normal * face_offset_m
     ball = ball_position_at_address(centre, normal, ground_height_m=ground_height_m)
+    head_r, head_t = frame_poses(kin, q[:1], HEAD_FRAME)
+    sight = ball - gaze.eye_point(head_r[0], head_t[0])
+    axis = head_r[0].T @ sight
+    axis = axis / np.linalg.norm(axis)
     horizontal = np.array([normal[0], normal[1], 0.0])
     if np.linalg.norm(horizontal) < 1e-6:
         raise ValueError("address face normal has no horizontal component")
@@ -126,6 +134,7 @@ def plan_gaze(
         t_rel_s=t_rel_s,
         face_normal=normal,
         face_centre_m=centre,
+        gaze_axis_head=axis,
     )
 
 
@@ -159,7 +168,8 @@ def gaze_axis_targets(
         raise ValueError("gaze weight must be finite and nonnegative")
     directions, *_ = schedule_directions(plan, kin, q, times)
     return [
-        {HEAD_FRAME: (gaze.GAZE_AXIS_HEAD, tuple(d), float(weight))} for d in directions
+        {HEAD_FRAME: (tuple(plan.gaze_axis_head), tuple(d), float(weight))}
+        for d in directions
     ]
 
 
@@ -187,13 +197,17 @@ def gaze_report(
     """Receipt block: weight, definitions, address-to-impact metrics, neck IK."""
     directions, _eyes, head_r, head_t = schedule_directions(plan, kin, q, times)
     metrics = gaze.head_stability_metrics(
+        head_r, head_t, plan.ball_m, 0, plan.impact_index, axis=plan.gaze_axis_head
+    )
+    nominal = gaze.head_stability_metrics(
         head_r, head_t, plan.ball_m, 0, plan.impact_index
     )
     torso_r, _ = frame_poses(kin, q, TORSO_FRAME)
     clamped = 0
     worst = 0.0
-    for k in range(len(directions)):
-        res = gaze.neck_ik(torso_r[k], directions[k])
+    sampled = range(0, len(directions), NECK_IK_STRIDE)
+    for k in sampled:
+        res = gaze.neck_ik(torso_r[k], directions[k], axis=plan.gaze_axis_head)
         clamped += int(res.clamped.any())
         worst = max(worst, res.residual_deg)
     neck_cols = [coordinate_order.index(n) for n in gaze.NECK_COORDINATES]
@@ -208,8 +222,14 @@ def gaze_report(
         ),
         "plan": plan.as_dict(),
         "address_to_impact": metrics.as_dict(),
+        "address_to_impact_nominal_axis": {
+            "theta_gaze_max_deg": nominal.theta_gaze_max_deg,
+            "theta_gaze_rms_deg": nominal.theta_gaze_rms_deg,
+            "note": "head +x axis as the gaze axis (not calibrated at address)",
+        },
         "neck_ik_schedule": {
-            "frames": int(len(directions)),
+            "frames": len(sampled),
+            "stride": NECK_IK_STRIDE,
             "frames_with_clamping": clamped,
             "max_residual_deg": float(worst),
         },
@@ -221,16 +241,27 @@ def gaze_report(
 
 
 def head_gaze_receipt(lane: Any, kin: Any, q: Array) -> dict[str, Any]:
-    """Receipt block for a finished lane (plans from ``q`` when no gaze pass ran)."""
-    plan = lane.gaze_plan
-    if plan is None:
-        plan = plan_gaze(
-            kin,
-            q,
-            lane.times,
-            ground_height_m=lane.ground.height_m,
-            face_offset_m=lane.gaze_face_offset_m,
+    """Receipt block for a finished lane (plans from ``q`` when no gaze pass ran).
+
+    Unavailable is never zero: a model without the head, clubhead or grip frame
+    (native Simscape geometry) returns ``{"available": False, "reason": ...}``.
+    """
+    try:
+        plan = lane.gaze_plan
+        if plan is None:
+            plan = plan_gaze(
+                kin,
+                q,
+                lane.times,
+                ground_height_m=lane.ground.height_m,
+                face_offset_m=lane.gaze_face_offset_m,
+            )
+        return gaze_report(
+            plan, kin, q, lane.times, lane.gaze_weight, tuple(kin.coordinate_order)
         )
-    return gaze_report(
-        plan, kin, q, lane.times, lane.gaze_weight, tuple(kin.coordinate_order)
-    )
+    except ValueError as exc:
+        return {
+            "available": False,
+            "gaze_weight": float(lane.gaze_weight),
+            "reason": str(exc),
+        }
