@@ -7,6 +7,7 @@ from typing import Any
 from src.shared.python.launcher_embed import (
     EmbedCapabilities,
     register_embeddable_tool,
+    release_widget,
 )
 from src.tools.canonical_core.registry import (
     CanonicalCoreTool,
@@ -54,11 +55,7 @@ class CanonicalCoreToolEmbedAdapter:
     def cleanup(self) -> None:
         """Release the current widget reference; safe to call repeatedly."""
         widget, self._widget = self._widget, None
-        if widget is None:
-            return
-        delete_later = getattr(widget, "deleteLater", None)
-        if callable(delete_later):
-            delete_later()
+        release_widget(widget)
 
     def is_dirty(self) -> bool:
         """Canonical-core launch shells do not hold unsaved local state."""

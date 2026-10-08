@@ -14,7 +14,12 @@ from typing import Any
 import numpy as np
 
 from ..clubhead_series import ClubheadSeries
-from .club_face import NATIVE_CLUB_FACE, ClubFaceSpec, rigid_body_series
+from .club_face import (
+    NATIVE_CLUB_FACE,
+    ClubFaceSpec,
+    empty_pose_twist,
+    rigid_body_series,
+)
 
 
 def clubhead_series_from_opensim(
@@ -42,12 +47,7 @@ def clubhead_series_from_opensim(
     coords = model.getCoordinateSet()
     state = model.initSystem()
     n = t.shape[0]
-    pos, rot, lin, ang = (
-        np.zeros((n, 3)),
-        np.zeros((n, 3, 3)),
-        np.zeros((n, 3)),
-        np.zeros((n, 3)),
-    )
+    pos, rot, lin, ang = empty_pose_twist(n)
     for i in range(n):
         for key in series:
             coord = coords.get(key)

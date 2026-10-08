@@ -88,6 +88,19 @@ def _check_samples(times: np.ndarray, **arrays: np.ndarray) -> int:
     return n
 
 
+def empty_pose_twist(
+    n: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Zeroed per-sample buffers (position, rotation, linear, angular velocity).
+
+    Each engine adapter fills these from its own FK before calling
+    :func:`rigid_body_series`. Raises ``ValueError`` for a negative ``n``.
+    """
+    if n < 0:
+        raise ValueError(f"sample count must be non-negative, got {n}")
+    return np.zeros((n, 3)), np.zeros((n, 3, 3)), np.zeros((n, 3)), np.zeros((n, 3))
+
+
 def rigid_body_series(
     times_s: object,
     origins_m: object,

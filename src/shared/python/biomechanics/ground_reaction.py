@@ -50,7 +50,10 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from src.shared.python.force_overlay.contracts import OverlayWrench, WrenchKind
-from src.shared.python.motion_matching.force_torque import ContactReaction
+from src.shared.python.motion_matching.force_torque import (
+    ContactReaction,
+    validate_vec3,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     import pandas as pd
@@ -94,12 +97,11 @@ def _finite_scalar(value: float, name: str) -> float:
 
 
 def _vec3(value: ArrayLike, name: str) -> Array:
+    """A finite world 3-vector; the finiteness check is the shared one."""
     arr = np.asarray(value, dtype=float)
     if arr.shape != (3,):
         raise ValueError(f"{name} must have shape (3,), got {arr.shape}")
-    if not np.all(np.isfinite(arr)):
-        raise ValueError(f"{name} must be finite")
-    return arr
+    return np.array(validate_vec3(arr.tolist(), name))
 
 
 def _rows(value: ArrayLike, name: str) -> Array:

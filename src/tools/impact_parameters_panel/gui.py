@@ -144,6 +144,8 @@ class ImpactParametersWidget(QWidget):
         self.units_combo.currentTextChanged.connect(self.refresh)
         self.target_spin.valueChanged.connect(self.refresh)
         self.left_handed.toggled.connect(self.refresh)
+        # noqa: gui-thread/ok - the only button emits a signal with an already
+        # computed delivery dict; there is no compute to move off the GUI thread.
         self.explorer_button.clicked.connect(self._emit_explorer)
 
     # ----------------------------------------------------------------- data --

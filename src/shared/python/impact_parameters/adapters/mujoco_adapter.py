@@ -14,6 +14,7 @@ import numpy as np
 
 from ..clubhead_series import ClubheadSeries
 from .club_face import (
+    empty_pose_twist,
     NATIVE_CLUB_FACE,
     ClubFaceSpec,
     check_trajectory,
@@ -46,12 +47,7 @@ def clubhead_series_from_mujoco(
         )
     data = mujoco.MjData(model)
     n = t.shape[0]
-    pos, rot, lin, ang = (
-        np.zeros((n, 3)),
-        np.zeros((n, 3, 3)),
-        np.zeros((n, 3)),
-        np.zeros((n, 3)),
-    )
+    pos, rot, lin, ang = empty_pose_twist(n)
     jacp, jacr = np.zeros((3, model.nv)), np.zeros((3, model.nv))
     for i in range(n):
         data.qpos[:] = q[i]

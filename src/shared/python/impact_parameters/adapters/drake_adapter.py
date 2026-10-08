@@ -8,6 +8,7 @@ import numpy as np
 
 from ..clubhead_series import ClubheadSeries
 from .club_face import (
+    empty_pose_twist,
     NATIVE_CLUB_FACE,
     ClubFaceSpec,
     check_trajectory,
@@ -35,12 +36,7 @@ def clubhead_series_from_drake(
     body = plant.GetBodyByName(body_name)
     context = plant.CreateDefaultContext()
     n = t.shape[0]
-    pos, rot, lin, ang = (
-        np.zeros((n, 3)),
-        np.zeros((n, 3, 3)),
-        np.zeros((n, 3)),
-        np.zeros((n, 3)),
-    )
+    pos, rot, lin, ang = empty_pose_twist(n)
     for i in range(n):
         plant.SetPositions(context, qa[i])
         plant.SetVelocities(context, va[i])
