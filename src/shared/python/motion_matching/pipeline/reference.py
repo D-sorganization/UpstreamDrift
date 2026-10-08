@@ -232,6 +232,7 @@ def consistency_resolve(
         plant_stance=True,
         prior_trajectory=q_smooth,
         bounds=lane.bounds,
+        axis_targets_per_frame=lane.face_targets,
     )
     return q_ref, ref_fits
 

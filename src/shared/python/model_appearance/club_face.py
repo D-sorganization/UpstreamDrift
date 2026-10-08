@@ -102,3 +102,71 @@ def impact_frame(
         f"{whole} is not within {height_tol_m} m of the address height after the "
         f"top of the backswing (frame {top}), and the head never returns to the ball"
     )
+
+
+def ball_passage(
+    time: Sequence[float] | np.ndarray,
+    clubhead: np.ndarray,
+    *,
+    height_tol_m: float = IMPACT_HEIGHT_TOL_M,
+    ball_radius_m: float = IMPACT_BALL_RADIUS_M,
+) -> tuple[float, int, float]:
+    """Sub-sample impact: where the face centre passes the ball (OSV-10).
+
+    At 45 m/s the head moves 5-12 cm per sample (1 kHz to 360 Hz) while the
+    face turns 5-7 degrees, so a frame index is too coarse to compare face
+    angles at impact. The face-centre path is taken piecewise linear; among
+    the segments after the top of the backswing, the one passing closest to
+    the address position (the ball) is impact, and the closest point on it
+    gives the fraction ``s`` in ``[0, 1]``.
+
+    Returns ``(t_impact, k, s)`` with ``t_impact = t[k] + s (t[k+1] - t[k])``.
+    Raises ``ValueError`` for bad shapes or tolerances, or when no segment
+    after the top comes within ``ball_radius_m`` of the ball with its closest
+    point within ``height_tol_m`` of the address height.
+    """
+    t = np.asarray(time, dtype=float)
+    head = np.asarray(clubhead, dtype=float)
+    if head.ndim != 2 or head.shape[1] != 3 or t.shape != (len(head),):
+        raise ValueError("time must be (n,) and clubhead (n, 3)")
+    if not (np.isfinite(t).all() and np.isfinite(head).all()):
+        raise ValueError("time and clubhead must be finite")
+    if height_tol_m <= 0.0 or ball_radius_m <= 0.0:
+        raise ValueError("tolerances must be positive")
+    top = top_of_backswing_index(t, head)
+    ball = head[0]
+    start, step = head[top:-1], np.diff(head[top:], axis=0)
+    length2 = np.einsum("ij,ij->i", step, step)
+    s = np.clip(
+        np.einsum("ij,ij->i", ball - start, step) / np.maximum(length2, 1e-18),
+        0.0,
+        1.0,
+    )
+    closest = start + s[:, None] * step
+    gap = np.linalg.norm(closest - ball, axis=1)
+    gap[np.abs(closest[:, 2] - ball[2]) > height_tol_m] = np.inf
+    j = int(np.argmin(gap))
+    if not gap[j] <= ball_radius_m:
+        raise ValueError(
+            f"no valid impact: the face centre never passes within {ball_radius_m} m "
+            f"of the ball after the top of the backswing (frame {top})"
+        )
+    k = top + j
+    return float(t[k] + s[j] * (t[k + 1] - t[k])), k, float(s[j])
+
+
+def face_angle_at(normals: np.ndarray, k: int, s: float) -> float:
+    """Open-positive face angle between samples ``k`` and ``k + 1``.
+
+    The world face normals ``(n, 3)`` are blended linearly at fraction ``s``
+    and renormalised (exact for the small inter-sample rotations). Raises
+    ``ValueError`` for an out-of-range index or fraction or a non-finite
+    normal.
+    """
+    n = np.asarray(normals, dtype=float)
+    if n.ndim != 2 or n.shape[1] != 3:
+        raise ValueError("normals must be (n, 3)")
+    if not 0 <= k < len(n) - 1 or not 0.0 <= s <= 1.0:
+        raise ValueError("k must index a segment and s lie in [0, 1]")
+    blend = (1.0 - s) * n[k] + s * n[k + 1]
+    return horizontal_face_angle_deg(blend)

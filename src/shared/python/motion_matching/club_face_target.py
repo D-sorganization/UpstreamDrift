@@ -271,3 +271,36 @@ def face_separation_deg(model_axis: Array, capture_axis: Array) -> Array:
         np.linalg.norm(m, axis=1) * np.linalg.norm(c, axis=1)
     )
     return np.degrees(np.arccos(np.clip(cos, -1.0, 1.0)))
+
+
+def model_face_normals(
+    kin: Any, q: Array, spec: Mapping[str, Any], frame: str = FACE_FRAME
+) -> Array:
+    """World rendered face normal per row of ``q`` from the IK provider's FK.
+
+    ``kin`` must expose ``body_poses(q, [frame])`` (MuJoCo and Drake marker
+    kinematics do). Raises ``ValueError`` for a non-2-D ``q``.
+    """
+    rows = np.asarray(q, dtype=float)
+    if rows.ndim != 2:
+        raise ValueError("q must be (frames, coordinates)")
+    axis = face_axis_in_frame(spec, frame)
+    return np.array([kin.body_poses(row, [frame])[frame][0] @ axis for row in rows])
+
+
+def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:
+    """Separation statistics (degrees) over the frames the capture observes.
+
+    Unobserved frames are reported as a count, never as a zero error.
+    """
+    sep = face_separation_deg(model_normals, capture_normals)
+    seen = np.isfinite(sep)
+    if not seen.any():
+        return {"frames_observed": 0, "reason": "head triad never observed"}
+    return {
+        "frames_observed": int(seen.sum()),
+        "frames_unobserved": int((~seen).sum()),
+        "rms_deg": float(np.sqrt(np.mean(sep[seen] ** 2))),
+        "p95_deg": float(np.percentile(sep[seen], 95)),
+        "max_deg": float(sep[seen].max()),
+    }

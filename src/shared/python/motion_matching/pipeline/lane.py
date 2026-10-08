@@ -11,6 +11,7 @@ import numpy as np
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.motion_matching import posture_metrics as post
+from src.shared.python.motion_matching.club_face_target import merge_axis_targets
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 from src.shared.python.motion_matching.pipeline.plant import (
@@ -247,6 +248,29 @@ class Lane:
         self.anthropometric = False
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
+        #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
+        self.face_targets: list[dict[str, Any] | None] | None = None
+        self.face_weight = 0.0
+
+    def set_face_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        weight: float,
+    ) -> None:
+        """Enable the face-orientation residual (OSV-10, #11759) for the
+        trajectory and consistency solves, from the calibrated head-triad
+        ``attachments`` and the document's rendered face. Raises
+        ``ValueError``/``TypeError`` for a negative or non-numeric weight."""
+        from src.shared.python.motion_matching.club_face_target import (
+            face_axis_targets,
+        )
+
+        targets = face_axis_targets(
+            self.points, self.valid, self.labels, attachments, spec, weight=weight
+        )
+        self.face_weight = float(weight)
+        self.face_targets = targets if any(targets) else None
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""
@@ -352,8 +376,9 @@ class Lane:
             bounds=self.bounds,
             marker_weights=self.marker_weights,
             prior_weights=self.prior_weights,
-            axis_targets_per_frame=(
-                self.pit_targets_per_frame(0.01) if self.anthropometric else None
+            axis_targets_per_frame=merge_axis_targets(
+                self.pit_targets_per_frame(0.01) if self.anthropometric else None,
+                self.face_targets,
             ),
             restarts=TRAJECTORY_RESTARTS,
             restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,

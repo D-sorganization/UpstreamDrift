@@ -383,3 +383,44 @@ def test_impact_frame_rejects_bad_shapes_and_tolerances() -> None:
         cf.impact_frame(t[:-1], head)
     with pytest.raises(ValueError, match="tolerances"):
         cf.impact_frame(t, head, height_tol_m=0.0)
+
+
+def test_ball_passage_finds_the_sub_sample_crossing() -> None:
+    t = np.linspace(0.0, 2.0, 41)  # coarse: 5 cm per sample near the ball
+    head = np.zeros((len(t), 3))
+    phase = np.pi * t / 2.0
+    head[:, 1] = -np.sin(2.0 * phase) * 0.8  # back, through the ball, through
+    head[:, 2] = 0.1 + 0.9 * np.sin(phase) ** 2 * (t < 1.0)
+    t_imp, k, s = cf.ball_passage(t, head)
+    assert t[k] <= t_imp <= t[k + 1] and 0.0 <= s <= 1.0
+    point = head[k] + s * (head[k + 1] - head[k])
+    assert np.linalg.norm(point - head[0]) < 1e-9
+    assert t_imp == pytest.approx(1.0)
+
+
+def test_ball_passage_contracts() -> None:
+    t, head = _swing()
+    with pytest.raises(ValueError, match="clubhead"):
+        cf.ball_passage(t[:-1], head)
+    with pytest.raises(ValueError, match="tolerances"):
+        cf.ball_passage(t, head, ball_radius_m=-1.0)
+    bad = head.copy()
+    bad[3, 0] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        cf.ball_passage(t, bad)
+    head[1:, 2] += 0.5
+    with pytest.raises(ValueError, match="no valid impact"):
+        cf.ball_passage(t, head)
+
+
+def test_face_angle_at_blends_neighbouring_normals() -> None:
+    a, b = math.radians(10.0), math.radians(-10.0)
+    normals = np.array(
+        [[-math.sin(a), -math.cos(a), 0.0], [-math.sin(b), -math.cos(b), 0]]
+    )
+    assert cf.face_angle_at(normals, 0, 0.5) == pytest.approx(0.0, abs=1e-9)
+    assert cf.face_angle_at(normals, 0, 0.0) == pytest.approx(10.0)
+    with pytest.raises(ValueError, match="segment"):
+        cf.face_angle_at(normals, 1, 0.5)
+    with pytest.raises(ValueError, match="segment"):
+        cf.face_angle_at(normals, 0, 1.5)
