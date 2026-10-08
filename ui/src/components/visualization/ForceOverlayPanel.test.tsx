@@ -213,7 +213,7 @@ describe("ForceOverlayPanel scale and group controls (GCV-4, #11710)", () => {
       });
       await flush();
     }
-    const url = String(fetchMock.mock.calls.at(-1)?.[0]);
+    const url = String(fetchMock.mock.calls[fetchMock.mock.calls.length - 1]?.[0]);
     expect(url).toContain("scale_mode=body_weight");
     expect(url).toContain("reference_force_n=");
     expect(url).toContain("groups=");
