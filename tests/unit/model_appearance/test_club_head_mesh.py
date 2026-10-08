@@ -71,8 +71,8 @@ def test_club_frame_axes_follow_the_spec_lie_and_loft() -> None:
         abs_tol=1e-9,
     )
     assert math.isclose(float(head.shaft_direction[1]), math.cos(tau), abs_tol=1e-9)
-    # Address: the club-frame face normal points to -x (toward the target).
-    assert f_club[0] < -0.8
+    # The club-frame face normal points along +x (down the target line).
+    assert f_club[0] > 0.8
     assert abs(np.linalg.det(rot) - 1.0) < 1e-9
     assert np.allclose(rot @ rot.T, np.eye(3), atol=1e-12)
 

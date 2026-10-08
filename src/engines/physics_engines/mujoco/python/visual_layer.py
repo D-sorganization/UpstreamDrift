@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
@@ -89,7 +90,7 @@ def attach_visual_layer(
         )
 
         appearance_meta = attach_appearance(
-            root, elements, offsets, skeleton, appearance
+            root, elements, offsets, skeleton, appearance, assembly_from_spec(spec)
         )
     for index, capsule in enumerate(
         () if appearance is not None else skeleton.capsules

@@ -13,8 +13,10 @@ Frames. The *head frame* is the Tools frame: x toward the target (face normal
 at zero loft), y up, z toward the toe (right-handed golfer, toe away). The
 *club frame* is the spec's club-body frame (``motion_matching.club_models``):
 origin at the sole point on the shaft axis, shaft toward the grip along -y,
-the shaft axis offset ``axis_offset_m`` along +z. At address the face normal
-is club ``-x`` (the golfer faces +x, the target lies to the golfer's left).
+the shaft axis offset ``axis_offset_m`` along +z. The face normal is club
+``+x`` at zero loft: in the matched address poses the head-up axis is vertical
+and ``+x`` points down the target line (checked against the driver and 7-iron
+reference bundles, where the residual roll about the shaft is under 6 degrees).
 
 Tools heads carry no hosel, so a short tapered hosel tube on the lie-angle
 shaft axis is added here. The mesh is visual only: head mass, inertia and the
@@ -83,6 +85,7 @@ class ClubHeadMesh:
     mesh: Mesh  # body + hosel, two closed shells
     sole_point: Array  # head frame, where the shaft axis meets the sole plane
     shaft_direction: Array  # head frame, unit vector sole -> grip
+    hosel_top_m: float  # distance from the sole point to the hosel top on the axis
 
 
 def library_name_for(name: str) -> str:
@@ -238,13 +241,18 @@ def _sole_point(vertices: Array) -> Array:
     return np.array([face_x, float(vertices[:, 1].min()), z0])
 
 
-def _hosel(sole: Array, direction: Array, vertices: Array, club_type: str) -> Mesh:
+def _hosel_top(sole: Array, direction: Array, vertices: Array, club_type: str) -> float:
     crown = float(vertices[:, 1].max()) - sole[1]
     above = HOSEL_ABOVE_CROWN_M.get(club_type, HOSEL_ABOVE_CROWN_DEFAULT_M)
-    t_top = (crown + above) / float(direction[1])
-    start = sole + 0.35 * t_top * direction
+    return (crown + above) / float(direction[1])
+
+
+def _hosel(sole: Array, direction: Array, t_top: float) -> Mesh:
     return tapered_tube(
-        start, sole + t_top * direction, HOSEL_RADIUS_M, 0.9 * HOSEL_RADIUS_M
+        sole + 0.35 * t_top * direction,
+        sole + t_top * direction,
+        HOSEL_RADIUS_M,
+        0.9 * HOSEL_RADIUS_M,
     )
 
 
@@ -273,9 +281,18 @@ def load_club_head(name: str) -> ClubHeadMesh:
     loft, lie = _spec_angles(library_name)
     sole = _sole_point(head.vertices)
     direction = shaft_direction_head(lie)
-    hosel = _hosel(sole, direction, head.vertices, _club_type(library_name))
+    t_top = _hosel_top(sole, direction, head.vertices, _club_type(library_name))
+    hosel = _hosel(sole, direction, t_top)
     return ClubHeadMesh(
-        library_name, source, loft, lie, head, _concat(head, hosel), sole, direction
+        library_name,
+        source,
+        loft,
+        lie,
+        head,
+        _concat(head, hosel),
+        sole,
+        direction,
+        t_top,
     )
 
 
@@ -313,13 +330,13 @@ def measured_face_normal(mesh: Mesh) -> Array:
 def head_to_club_rotation(head: ClubHeadMesh) -> Array:
     """Rotation taking head-frame vectors to the club-body frame.
 
-    Maps (x_h, shaft direction, x_h x shaft) to (-x, -y, +z): the face looks
-    along club ``-x`` and the shaft runs toward the grip along ``-y``.
+    Maps (x_h, shaft direction, x_h x shaft) to (+x, -y, -z): the face looks
+    along club ``+x`` and the shaft runs toward the grip along ``-y``.
     """
     x_h = np.array([1.0, 0.0, 0.0])
     s_h = head.shaft_direction
     basis_h = np.column_stack([x_h, s_h, np.cross(x_h, s_h)])
-    basis_c = np.diag([-1.0, -1.0, 1.0])
+    basis_c = np.diag([1.0, -1.0, -1.0])
     return np.asarray(basis_c @ basis_h.T, float)
 
 

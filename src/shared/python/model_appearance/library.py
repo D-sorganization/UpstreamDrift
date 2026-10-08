@@ -55,7 +55,7 @@ MATERIALS: dict[str, Material] = {
     "shoe_black": Material((0.06, 0.06, 0.07, 1.0), 0.35),
     "glove_white": Material((0.95, 0.95, 0.94, 1.0), 0.7),
     "grip_rubber": Material((0.08, 0.08, 0.09, 1.0), 0.95),
-    "satin_steel": Material((0.72, 0.74, 0.78, 1.0), 0.45, 1.0),
+    "satin_steel": Material((0.46, 0.48, 0.52, 1.0), 0.5, 1.0),
     "chrome": Material((0.86, 0.88, 0.92, 1.0), 0.08, 1.0),
     "graphite": Material((0.10, 0.11, 0.13, 1.0), 0.35, 0.6),
     "black_pvd": Material((0.05, 0.05, 0.06, 1.0), 0.25, 0.9),
