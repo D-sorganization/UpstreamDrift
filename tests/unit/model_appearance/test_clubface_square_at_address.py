@@ -385,8 +385,9 @@ CAPTURE_NAMES = {"driver": "driver", "iron7": "iron"}
 
 
 @functools.cache
-def _capture_events(club: str) -> cf.FaceEvents:
-    """Face events of the capture head triad (calibrated offsets of the fit)."""
+def _capture_face(club: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(time, face normal, gap-filled face centre) of the capture head triad,
+    placed with the calibrated offsets of the fit."""
     from src.shared.python.motion_matching import club_face_target as cft
     from src.shared.python.motion_matching.ground_support import (
         capture_to_native_world,
@@ -411,7 +412,12 @@ def _capture_events(club: str) -> cf.FaceEvents:
     )
     t = np.asarray(capture.time_s, dtype=float)
     t = t - t[0]
-    return cf.face_events(t, normals, cft.fill_unobserved(t, centres))
+    return t, normals, cft.fill_unobserved(t, centres)
+
+
+def _capture_events(club: str) -> cf.FaceEvents:
+    """Face events of the capture head triad (calibrated offsets of the fit)."""
+    return cf.face_events(*_capture_face(club))
 
 
 def _wrapped_deg(a: float, b: float) -> float:
@@ -441,6 +447,32 @@ def test_face_tracks_the_capture_at_address_top_and_impact(
             getattr(truth, event),
         )
     assert abs(model.impact_time_s - truth.impact_time_s) <= 0.010
+
+
+# ------------------------------------- clubhead speed timing (GCV-20, #11767)
+PEAK_TIMING_TOL_S = 0.005
+IMPACT_SPEED_TOL = 0.03
+
+
+@pytest.mark.parametrize("capture", sorted(CAPTURES))
+def test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact(
+    capture: str,
+) -> None:
+    """Fixture face centre (MuJoCo FK) against the capture triad face centre.
+
+    Each on its own clock, relative to its own ball passage: the model's peak
+    speed within 5 ms of the capture's, its pre-contact speed at impact within
+    3 % of the capture's.
+    """
+    club = CAPTURES[capture]
+    time, _, head = _face_series("mujoco", club)
+    model = cf.clubhead_speed_timing(time, head)
+    t_cap, _, c_cap = _capture_face(club)
+    truth = cf.clubhead_speed_timing(t_cap, c_cap)
+    lead = model.peak_minus_impact_s - truth.peak_minus_impact_s
+    assert abs(lead) <= PEAK_TIMING_TOL_S, (model, truth)
+    ratio = model.impact_speed_mps / truth.impact_speed_mps
+    assert abs(ratio - 1.0) <= IMPACT_SPEED_TOL, (model, truth)
 
 
 def _swing(n: int = 400) -> tuple[np.ndarray, np.ndarray]:
