@@ -56,6 +56,9 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     shooting_fit,
     zmp_filter,
 )
+from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+    finish_feasibility_report,
+)
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
@@ -728,6 +731,15 @@ def _simulate_and_receipt(
             ),
         )
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
+    finish = finish_feasibility_report(
+        sim,
+        times_track=lane.times,
+        q_track=q_track,
+        record=record,
+        zmp=zmp,
+        ground=lane.ground,
+        q_ik=q_ref,
+    )
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -741,6 +753,7 @@ def _simulate_and_receipt(
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
             tracking_backend=tracking,
+            finish_feasibility=finish,
         )
     )
     _save_dynamics_record(out_dir, record, sim_errors, lane, q_track)

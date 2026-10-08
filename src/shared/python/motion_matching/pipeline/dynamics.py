@@ -525,6 +525,7 @@ class DynamicsReportInputs:
     shooting_report: dict[str, Any] | None = None
     sim_errors: np.ndarray | None = None
     tracking_backend: str = "kkt"
+    finish_feasibility: dict[str, Any] | None = None
 
 
 def _build_reference_zmp_report(
@@ -692,6 +693,7 @@ def build_dynamics_report(
         "zmp_filter": inputs.zmp_filter_report,
         "shooting_fit": inputs.shooting_report,
         "reference_zmp": _build_reference_zmp_report(inputs.zmp, lane.times),
+        "finish_feasibility": inputs.finish_feasibility,
         "marker_rms_m": float(np.sqrt(np.mean(sim_errors[lane.valid] ** 2))),
         "segment_rms_m": segment_rms(inputs.labels, sim_errors, lane.valid),
         "joint_tracking_rms_rad": float(
