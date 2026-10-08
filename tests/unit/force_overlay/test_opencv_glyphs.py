@@ -298,8 +298,8 @@ def test_4k_vs_720p_line_thickness() -> None:
     line_4k = style.resolve_line_px(2160)
     line_720p = style.resolve_line_px(720)
     assert line_4k > line_720p
-    assert line_4k == 5
-    assert line_720p == 2
+    assert line_4k == 8
+    assert line_720p == 3
 
 
 @pytest.mark.unit
@@ -461,3 +461,18 @@ def test_torque_arc_drawing(
     assert receipt.drawn == 1
     assert receipt.skipped_behind_camera == 0
     assert receipt.skipped_out_of_frame == 0
+
+
+@pytest.mark.unit
+def test_clamped_chevron_trails_the_head_along_the_shaft() -> None:
+    """The second chevron has the same shape, shifted back toward the shaft."""
+    from src.shared.python.force_overlay.renderers.opencv_glyphs import (
+        clamped_chevron_poly,
+    )
+
+    head = ((100.0, 50.0), (80.0, 40.0), (80.0, 60.0))
+    chevron = clamped_chevron_poly(head)
+    assert chevron.shape == (3, 2)
+    assert chevron[0][1] == pytest.approx(50.0)
+    assert chevron[0][0] < head[0][0]
+    np.testing.assert_allclose(chevron[1] - chevron[2], np.array(head[1]) - head[2])

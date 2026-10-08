@@ -298,3 +298,39 @@ Calibrated cameras exhibit radial/tangential distortion ($k_1, k_2, \dots$), whi
   - Avoids non-linear resampling blur and artifacting on rendered 3D meshes and alpha edges.
   - The arrow layer (FTO-8 `opencv_glyphs.py`) and MuJoCo scene glyphs (`add_glyphs_to_scene`) share the identical rectilinear pinhole geometry.
   - Verified by unit tests demonstrating that 3D arrows and mesh attachment points agree within $\le 1.5\text{ px}$.
+
+## Addendum: Arrow Scale Modes, Clamping and Group Toggles (GCV-4, #11710)
+
+The fixed 1 mm per N scale clamped at 0.6 m drew every ground reaction force
+above about 600 N at the same length, so peak loads looked small and identical.
+
+- **Scale modes.** `ForceGlyphStyle.scale_mode` is `fixed` (default,
+  `force_scale_m_per_n`), `body_weight` or `peak`. The last two map
+  `reference_force_n` to `reference_length_m` (default 0.5 m): the caller passes
+  body weight $m g$ for `body_weight` and the series peak for `peak`. Both
+  require `reference_force_n`; an unknown mode raises `ValueError`.
+  The effective scale is $L_\mathrm{ref} / F_\mathrm{ref}$ metres per newton.
+  `kind_scale` multiplies that scale for one `WrenchKind`.
+- **Clamping is surfaced.** `ArrowGlyph.clamped` is true iff the raw length
+  exceeds `max_length_m`. Raising a tiny arrow to `min_length_m` is a floor, not
+  a clamp. `LegendSpec` gains `scale_mode` and `clamped_labels` (optional keys, so
+  older payloads still load). Renderers draw a clamped arrow with a distinct tip:
+  a double chevron in OpenCV and Three.js, a white marker arrow past the tip in
+  the MuJoCo scene; the legend reports the count.
+- **Group toggles.** `ForceGlyphStyle.groups` selects overlay groups by label
+  prefix only, so providers never import this module: `per_foot`
+  (`contact:grf_<foot>`), `net` (`contact:grf_net`), `free_moment`
+  (`contact:free_moment_*`), `moment_about_com` (`contact:moment_com_*`),
+  `contact_points` (any other `contact:` label), and the grip groups
+  `grip_per_hand` (`grip:hand_*`), `grip_net` (`grip:net_midpoint`),
+  `grip_couple` (`grip:couple_midpoint`) and `grip_mof` (`grip:mof_*`).
+  Ungrouped labels are never filtered. `contact_points` and `moment_about_com`
+  are off by default; raw contacts are still shown when the frame carries no
+  aggregated GRF label, so engines that predate the aggregated labels keep their
+  arrows.
+- **Surfaces.** The PyQt Visualization tab, the web `ForceOverlayPanel`, the
+  `/simulation/forces` API and the WebSocket style object expose the same
+  controls. Native export defaults to `body_weight` with the model mass, so one
+  body weight is 0.5 m and a 3 m ceiling avoids silent clamping in a swing.
+- The default shaft radius is now 12 mm, and the OpenCV shaft is 4 px at 1080p.
+

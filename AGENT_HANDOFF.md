@@ -1,3 +1,9 @@
+# Active: GCV-4 Force Arrow Scale Modes - #11710
+
+- Branch `claude/gcv-4-arrow-scaling`, epic #11706. `ForceGlyphStyle` gains `scale_mode` (fixed, body_weight, peak), `reference_force_n`, `reference_length_m` (0.5 m per body weight), `kind_scale` and `groups` (label-prefix toggles); `ArrowGlyph.clamped` now means raw length above `max_length_m` and renderers draw a distinct tip.
+- Surfaces: PyQt Visualization tab, web `ForceOverlayPanel`, `/simulation/forces` and WebSocket style keys, native export (body weight from model mass, 3 m ceiling). Stills in `~/Videos/Parity Audit/forces_and_impact/grf/`.
+- Open: group labels `contact:grf_*`, `free_moment_*`, `moment_com_*` (GCV-1 #11733) and `grip:*` (PR #11732) are matched by prefix and not yet emitted on main; the PyQt peak mode has no live series peak (manual field).
+
 # Active: Finish Feasibility Balance - #11667
 
 - Balance-1 (#11668), branch `feat/finish-feasibility-metrics-11668`: `pipeline/finish_feasibility.py` adds ZMP-inside fraction, friction-cone utilisation, foot slide and yaw pivot, pelvis yaw error and vertical force range to `dynamics.finish_feasibility` (reference and simulation). `finish_feasibility_cli` annotates saved runs.

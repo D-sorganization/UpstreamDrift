@@ -41,6 +41,12 @@ _FORCE_TYPE_MAP: dict[str, set[WrenchKind]] = {
 }
 
 
+#: Style keys a mapping payload may pass straight through (GCV-4, #11710).
+_SCALE_STYLE_KEYS = frozenset(
+    {"scale_mode", "reference_force_n", "reference_length_m", "kind_scale", "groups"}
+)
+
+
 def current_force_frame(engine: Any) -> ForceTorqueFrame | None:
     """Read instantaneous force/torque frame from a qualified engine provider.
 
@@ -69,6 +75,12 @@ def style_from_request_params(
     force_types: Sequence[str] | None = None,
     scale_factor: float = 0.01,
     show_labels: bool = False,
+    *,
+    scale_mode: str = "fixed",
+    reference_force_n: float | None = None,
+    reference_length_m: float = 0.5,
+    kind_scale: Mapping[str, float] | None = None,
+    groups: Sequence[str] | None = None,
 ) -> ForceGlyphStyle:
     """Build a ForceGlyphStyle from API query/request parameters.
 
@@ -76,9 +88,19 @@ def style_from_request_params(
         force_types: Selected force types (e.g. ['applied', 'contact', 'all']).
         scale_factor: Linear scaling factor from API request.
         show_labels: Whether to attach text labels.
+        scale_mode: ``fixed`` (``scale_factor``), ``body_weight`` or ``peak``.
+        reference_force_n: Body weight (N) or series peak (N); required for
+            ``body_weight`` and ``peak``.
+        reference_length_m: Arrow length for one reference force.
+        kind_scale: Per-WrenchKind length multipliers keyed by kind value.
+        groups: Enabled overlay groups; ``None`` keeps the style default.
 
     Returns:
         Configured ForceGlyphStyle.
+
+    Raises:
+        ValueError: Unknown mode/group/kind, or a non-fixed mode without a
+            reference force.
     """
     kinds: set[WrenchKind] = set()
     if force_types:
@@ -103,11 +125,20 @@ def style_from_request_params(
     force_scale = 0.001 * ratio
     torque_scale = 0.005 * ratio
 
+    extra: dict[str, Any] = {}
+    if groups is not None:
+        extra["groups"] = frozenset(groups)
+    if kind_scale:
+        extra["kind_scale"] = {WrenchKind(k): float(v) for k, v in kind_scale.items()}
     return ForceGlyphStyle(
         force_scale_m_per_n=force_scale,
         torque_scale_m_per_nm=torque_scale,
         kinds=frozenset(kinds),
         show_labels=show_labels,
+        scale_mode=scale_mode,  # type: ignore[arg-type]
+        reference_force_n=reference_force_n,
+        reference_length_m=reference_length_m,
+        **extra,
     )
 
 
@@ -137,11 +168,18 @@ def force_overlay_payload(
         kinds_set: frozenset[WrenchKind] | None = None
         if kinds_raw is not None:
             kinds_set = frozenset(WrenchKind(k) for k in kinds_raw)
-        style_obj = ForceGlyphStyle(
-            force_scale_m_per_n=float(style.get("force_scale_m_per_n", 0.001)),
-            torque_scale_m_per_nm=float(style.get("torque_scale_m_per_nm", 0.005)),
-            show_labels=bool(style.get("show_labels", False)),
-            kinds=kinds_set if kinds_set is not None else frozenset(WrenchKind),
+        style_obj = ForceGlyphStyle.from_dict(
+            {
+                **{k: v for k, v in style.items() if k in _SCALE_STYLE_KEYS},
+                "force_scale_m_per_n": float(style.get("force_scale_m_per_n", 0.001)),
+                "torque_scale_m_per_nm": float(
+                    style.get("torque_scale_m_per_nm", 0.005)
+                ),
+                "show_labels": bool(style.get("show_labels", False)),
+                "kinds": sorted(k.value for k in kinds_set)
+                if kinds_set is not None
+                else sorted(k.value for k in WrenchKind),
+            }
         )
     else:
         style_obj = ForceGlyphStyle()

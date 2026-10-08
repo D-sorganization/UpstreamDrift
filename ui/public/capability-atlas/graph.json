@@ -169,7 +169,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308.",
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308. GCV-4 (#11710) changed the shared glyph defaults (12 mm shaft, group toggles, clamped flag only above the maximum length) that this overlay consumes.",
       "id": "drake.gui_force_overlay"
     },
     {
@@ -333,7 +333,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308).",
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip.",
       "id": "mujoco.force_overlays"
     },
     {
@@ -3000,7 +3000,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "29d7144015e1c30266c939807f94d013a9ffab8c81c28b72724e6258c9ed9afe",
+    "src/config/feature_parity.json": "89536c663553cbc1787a935c560e01d4fcdc95722dd92ac38aa9dc9feacd4cde",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

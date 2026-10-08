@@ -9,7 +9,7 @@ No demo or fabricated vectors.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from fastapi import APIRouter, Depends
 
@@ -80,6 +80,11 @@ def _build_overlay_response(
         force_types=config.force_types,
         scale_factor=config.scale_factor,
         show_labels=config.show_labels,
+        scale_mode=config.scale_mode,
+        reference_force_n=config.reference_force_n,
+        reference_length_m=config.reference_length_m,
+        kind_scale=config.kind_scale,
+        groups=config.groups,
     )
     payload = force_overlay_payload(frame, style, body_filter=config.body_filter)
 
@@ -107,6 +112,7 @@ def _build_overlay_response(
             "scale_factor": config.scale_factor,
             "body_filter": config.body_filter,
             "show_labels": config.show_labels,
+            "scale_mode": config.scale_mode,
         },
     )
 
@@ -117,7 +123,7 @@ def _build_overlay_response(
     response_model=ForceOverlayResponse,
 )
 @precondition(
-    lambda force_types="applied", color_by_magnitude=True, body_filter=None, show_labels=False, scale_factor=0.01, engine_manager=None, logger=None: (
+    lambda force_types="applied", color_by_magnitude=True, body_filter=None, show_labels=False, scale_factor=0.01, engine_manager=None, logger=None, **_: (
         scale_factor > 0 and len(force_types.strip()) > 0
     ),
     "Scale factor must be positive and force_types must be non-empty",
@@ -129,6 +135,10 @@ async def get_force_overlays(
     body_filter: str | None = None,
     show_labels: bool = False,
     scale_factor: float = 0.01,
+    scale_mode: Literal["fixed", "body_weight", "peak"] = "fixed",
+    reference_force_n: float | None = None,
+    reference_length_m: float = 0.5,
+    groups: str | None = None,
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> ForceOverlayResponse:
@@ -143,6 +153,11 @@ async def get_force_overlays(
         body_filter=body_filter.split(",") if body_filter else None,
         show_labels=show_labels,
         scale_factor=scale_factor,
+        scale_mode=scale_mode,
+        reference_force_n=reference_force_n,
+        reference_length_m=reference_length_m,
+        kind_scale=None,
+        groups=groups.split(",") if groups else None,
     )
     return _build_overlay_response(engine_manager, config)
 

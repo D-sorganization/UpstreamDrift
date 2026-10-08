@@ -226,3 +226,44 @@ def test_short_backend_is_an_error(tmp_path: Path) -> None:
             tmp_path,
             writer_factory=lambda p, fps: _Writer(p, fps, {}),
         )
+
+
+def test_default_glyph_style_body_weight_mode_scales_one_bw_to_half_metre() -> None:
+    from src.shared.python.force_overlay import (
+        ForceTorqueFrame,
+        OverlayWrench,
+        WrenchKind,
+        build_glyphs,
+    )
+    from src.tools.native_viewer_export.core import default_glyph_style
+
+    mass = 75.0
+    style = default_glyph_style(body_mass_kg=mass)
+    assert style.scale_mode == "body_weight"
+    assert style.reference_force_n == pytest.approx(mass * 9.80665)
+    frame = ForceTorqueFrame(
+        time_s=0.0,
+        engine="x",
+        wrenches=tuple(
+            OverlayWrench(
+                WrenchKind.CONTACT,
+                f"contact:grf_{name}",
+                "foot",
+                (0.0, 0.0, 0.0),
+                force_n=(0.0, 0.0, bw * mass * 9.80665),
+                source="x",
+            )
+            for name, bw in (("one", 1.0), ("peak", 2.5))
+        ),
+    )
+    arrows = {a.label: a for a in build_glyphs(frame, style).arrows}
+    assert arrows["contact:grf_one"].tip_m[2] == pytest.approx(0.5)
+    assert arrows["contact:grf_peak"].tip_m[2] == pytest.approx(1.25)
+    assert not any(a.clamped for a in arrows.values())
+
+
+def test_default_glyph_style_rejects_nonpositive_mass() -> None:
+    from src.tools.native_viewer_export.core import default_glyph_style
+
+    with pytest.raises(ValueError):
+        default_glyph_style(body_mass_kg=0.0)

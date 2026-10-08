@@ -624,6 +624,13 @@ async def _send_simulation_frame(
                         force_types=style_cfg.get("force_types"),
                         scale_factor=float(style_cfg.get("scale_factor", 0.01)),
                         show_labels=bool(style_cfg.get("show_labels", False)),
+                        scale_mode=str(style_cfg.get("scale_mode", "fixed")),
+                        reference_force_n=style_cfg.get("reference_force_n"),
+                        reference_length_m=float(
+                            style_cfg.get("reference_length_m", 0.5)
+                        ),
+                        kind_scale=style_cfg.get("kind_scale"),
+                        groups=style_cfg.get("groups"),
                     )
                 else:
                     style = style_from_request_params()
