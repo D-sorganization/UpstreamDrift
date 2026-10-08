@@ -72,6 +72,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 14 | 26 | 9 | 36 | 0 | 40 |
+| `impact_parameters` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -138,7 +139,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1665** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1670** | **777** | **673** |
 
 ## Diverged Files by Package
 
@@ -316,8 +317,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-08-20 |
-| `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/presets/loader.py` | +2867 |  | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/loader.py` | +2867 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/tests/test_api.py` | -423 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |
