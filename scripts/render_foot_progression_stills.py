@@ -105,12 +105,21 @@ def render(
         lines.append(
             f"{role} ({key}): model {probe['model'][key]:+.1f}  capture {target:+.1f}"
         )
+    model.vis.global_.offheight = max(SIZE)
+    model.vis.global_.offwidth = max(SIZE)
     renderer = mujoco.Renderer(model, *SIZE)
     paths: list[Path] = []
     out_dir.mkdir(parents=True, exist_ok=True)
     for view in VIEWS:
+        overhead = view == "overhead"
+        # overhead: fade everything above the shins so the feet are visible
+        faded = model.geom_rgba.copy()
+        if overhead:
+            high = data.geom_xpos[:, 2] > 0.3
+            model.geom_rgba[high, 3] = 0.08
+        view_lookat = np.array([lookat[0], lookat[1], 0.05]) if overhead else lookat
         cam_params = mujoco_camera_params(
-            get_view_preset(view), lookat, 2.2 if view == "face_on" else 2.6
+            get_view_preset(view), view_lookat, 1.5 if overhead else 2.2
         )
         cam = mujoco.MjvCamera()
         cam.lookat[:] = cam_params.lookat
@@ -128,6 +137,7 @@ def render(
                 renderer.scene, base, base + LINE_LENGTH_M * forward, FORWARD_RGBA
             )
         image = _annotate(renderer.render().copy(), lines)
+        model.geom_rgba[:] = faded
         path = out_dir / f"{label}_{view}.png"
         imageio.imwrite(path, image)
         paths.append(path)

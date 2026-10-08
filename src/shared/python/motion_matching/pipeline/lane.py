@@ -248,11 +248,11 @@ class Lane:
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
 
-    def leg_seeds(self) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""
         if self.feet is None:
             return dict(LEG_SEEDS)
-        return square_forefoot_seeds(LEG_SEEDS)
+        return dict(square_forefoot_seeds(LEG_SEEDS))
 
     @property
     def rate_hz(self) -> float:
