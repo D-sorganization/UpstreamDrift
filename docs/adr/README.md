@@ -65,5 +65,5 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 ## Recent Amendments
 
 - **2026-10-03:** ADR-0052 updated with decisions on calibrated camera compositing and distortion handling (#11312).
-
+- **2026-10-07:** ADR-0052 gains an addendum on arrow scale modes, clamping and group toggles (GCV-4, #11710).
 - **2026-10-07:** ADR-0052 gains the Grip Label Table: labels, application points and force/torque halves for `GRIP` wrenches from `grip_wrench.to_overlay_wrenches` (GCV-7, #11713).

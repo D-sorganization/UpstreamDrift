@@ -47,7 +47,7 @@
       "status": "gap",
       "issue": 11308,
       "tiles": [],
-      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308."
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308. GCV-4 (#11710) changed the shared glyph defaults (12 mm shaft, group toggles, clamped flag only above the maximum length) that this overlay consumes."
     },
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
@@ -177,7 +177,7 @@
       "status": "gap",
       "issue": 11308,
       "tiles": [],
-      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308)."
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip."
     },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",

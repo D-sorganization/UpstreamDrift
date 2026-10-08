@@ -1565,6 +1565,16 @@ export interface ForceOverlayRequest {
   body_filter?: string[] | null;
   /** Show magnitude labels */
   show_labels: boolean;
+  /** Arrow scaling: fixed, body_weight or peak */
+  scale_mode: "fixed" | "body_weight" | "peak";
+  /** Body weight (N) for body_weight; series peak (N) for peak */
+  reference_force_n?: number | null;
+  /** Arrow length (m) for one reference force */
+  reference_length_m: number;
+  /** Per-WrenchKind length multipliers */
+  kind_scale?: Record<string, number> | null;
+  /** Enabled overlay groups (None = defaults) */
+  groups?: string[] | null;
 }
 
 /**

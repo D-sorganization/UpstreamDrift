@@ -96,6 +96,9 @@ In `Model Explorer`, `Capture Rig`, `Simscape 3D Viewer`, and `Tour Matching Vie
 - **Torque Arcs Toggle:** Enable "Show Torques" to render moment arcs around joint rotation axes.
 - **Model Volumes (Shaded):** Enable shaded capsule or mesh volumes with tension/compression fill.
 - **Scale Controls:** Adjust `force_scale_m_per_n` and `torque_scale_m_per_nm` sliders to scale visual glyph lengths for clear inspection.
+- **Scale Mode:** Choose how force arrows are sized. `Fixed (Slider)` uses the slider scale. `Body Weight` draws one body weight (body mass times 9.80665) as the reference length, 0.5 m by default, so a 3 BW ground reaction is 1.5 m long whatever the golfer's mass. `Series Peak` draws the given peak force as the reference length. Native export defaults to `Body Weight` using the model mass.
+- **Clamped Arrows:** An arrow longer than the maximum length is shortened and drawn with a second head (double tip, or a white marker in the MuJoCo viewport). The legend reports how many arrows are clamped.
+- **Group Toggles:** Per-Foot GRF, Net GRF, Free Moment, Moment About CoM, Contact Points, Grip Per Hand, Grip Net, Grip Couple and Grip MOF. Contact Points (raw per-sphere contacts) and Moment About CoM are off by default.
 
 ### 2. Web Interface (React & Three.Js)
 
@@ -103,6 +106,7 @@ In `Scene3D.tsx` and `SimulationControls.tsx`:
 
 - Open the **Visualization** tab in the left control sidebar.
 - Toggle **Show Forces** and **Show Torques**.
+- Use the same **Scale Mode**, body mass or peak force, length per reference and **Groups** controls as the desktop Visualization tab.
 - Live `GlyphSet` objects stream over WebSocket `/ws/overlays/force-torque/{model_id}` with Three.js rendering via `GlyphLayer.tsx`.
 
 ### 3. Web Video Analyzer (SVG)
