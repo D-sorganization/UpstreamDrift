@@ -610,3 +610,7 @@ and the simbody visualizer. `force_overlay.bundle_provider` builds
 ForceTorqueFrame series from same-input bundles (efforts to joint-torque arcs,
 the shared contact law to per-foot GRF at the CoP, weight at the CoM); the
 MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
+
+### Lift Pack Parity Audit
+
+`src/shared/python/lifting/pack_audit/` loads the OpenSim, MuJoCo, Drake and Pinocchio lift model packs behind one `EngineAdapter` (canonical frame, FK, CoM, closure), and reduces the receipt to tables and gap rules (`analysis.py`, `gaps.py`, `report.py`). Reuse it for same-input lift parity (LIFT-2 onward) instead of writing another per-engine loader. Entry point: `scripts/lifting/run_pack_parity_baseline.py`; record: `docs/development/lifting/PACK_PARITY_BASELINE.md`.

@@ -1,3 +1,9 @@
+# Active: Lift Pack Parity Baseline - LIFT-1 #11741, Epic #11740
+
+- Branch `claude/lift-1-pack-parity-baseline`. Audit package `src/shared/python/lifting/pack_audit/` (per-engine adapters, canonical frame, gap rules); run `python3 scripts/lifting/run_pack_parity_baseline.py`, results in `docs/development/lifting/PACK_PARITY_BASELINE.md` and `pack_parity_baseline.json`.
+- Finding: same-q FK, feet and total mass agree across the four packs (OpenSim 0.0115 m worst); grips, start poses, limits, phases, bench mass and contacts do not. Nine new pack issues filed (MuJoCo_Models#427-#428, OpenSim_Models#414-#416, Drake_Models#390-#391, Pinocchio_Models#449-#451).
+- Next: LIFT-2 shared exercise spec; stills in `~/Videos/Parity Audit/lifts/baseline/`.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
