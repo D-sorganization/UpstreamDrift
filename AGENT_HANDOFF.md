@@ -1,3 +1,8 @@
+# Active: Ground-Reaction Core, GCV-1 #11707 (Epic #11706)
+
+- Branch `claude/gcv-1-ground-reaction`. New `src/shared/python/biomechanics/ground_reaction.py`: per-foot and net GRF, CoP on `z = z_g` (10 N `COP_MIN_FZ_N`), free moment, moments about the CoM, series and overlay/`ContactReaction` converters. Labels are in ADR-0052.
+- `force_overlay/bundle_provider.py` consumes it. Other CoP helpers (`physics/ground_reaction_forces.py` and others) are untouched until GCV-6 (#11712); engine wiring is GCV-2 (#11708).
+
 # Active: MyoFullBody Muscle-Driven Swing, Epic #11642
 
 - Branch `feat/myofullbody-muscle-swing-11642`; children #11643 to #11647 (MFB-6 #11648 is blocked and not started). Code: `src/shared/python/myofullbody/`; scripts `fetch_myofullbody.py`, `run_myofullbody_swing.py`, `render_myofullbody_swing.py`; reference `docs/research/myofullbody_swing/myofullbody_swing.tex`.

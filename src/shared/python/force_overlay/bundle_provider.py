@@ -6,8 +6,8 @@ touching any engine SDK:
 * bundle efforts -> one joint-torque wrench per joint anchor (coordinates that
   share an anchor, e.g. the three hip rotations, merge into one vector);
 * the shared contact law (``evaluate_contact_samples`` of any full-body model)
-  -> one ground reaction force per foot body, applied at the normal-load
-  weighted centre of pressure;
+  -> one ground reaction force per foot body, applied at the wrench-derived
+  centre of pressure of the shared ground-reaction core (GCV-1, #11707);
 * the centre of mass -> the system weight, as a gravity wrench at the CoM.
 
 Engine adapters only have to supply the two small protocols below.
@@ -24,6 +24,10 @@ from typing import Any, NamedTuple, Protocol, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.biomechanics.ground_reaction import (
+    foot_reaction,
+    grf_overlay_wrench,
+)
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
     OverlayWrench,
@@ -166,7 +170,7 @@ class BundleOverlayProvider:
     def _contact_wrenches(
         self, coords: Mapping[str, float], rates: Mapping[str, float]
     ) -> list[OverlayWrench]:
-        per_body: dict[str, list[tuple[Array, Array, float]]] = {}
+        per_body: dict[str, list[tuple[Array, Array]]] = {}
         samples = self._contact.evaluate_contact_samples(coords, rates)
         for name, sample in samples.items():
             force = np.asarray(sample.normal_force_n) + np.asarray(
@@ -175,25 +179,20 @@ class BundleOverlayProvider:
             if float(np.linalg.norm(force)) <= 1e-9:
                 continue
             body = self._sphere_body.get(name, name.rsplit("_", 1)[-1])
-            load = float(np.linalg.norm(sample.normal_force_n)) or 1e-9
-            per_body.setdefault(body, []).append(
-                (np.asarray(sample.contact_point_m, float), force, load)
-            )
+            point = np.asarray(sample.contact_point_m, float)
+            per_body.setdefault(body, []).append((point, force))
         out = []
         for body, items in sorted(per_body.items()):
-            total = np.sum([f for _, f, _ in items], axis=0)
-            weights = np.array([w for _, _, w in items])
-            cop = np.sum([w * p for (p, _, w) in items], axis=0) / weights.sum()
-            out.append(
-                OverlayWrench(
-                    WrenchKind.CONTACT,
-                    f"contact:grf_{_label_part(body)}",
-                    body,
-                    _tuple3(cop),
-                    force_n=_tuple3(total),
-                    source=f"{self._engine}:shared_contact_law",
-                )
+            points = np.array([p for p, _ in items])
+            forces = np.array([f for _, f in items])
+            reaction = foot_reaction(body, forces, points)
+            wrench = grf_overlay_wrench(
+                reaction,
+                source=f"{self._engine}:shared_contact_law",
+                label_part=_label_part(body),
             )
+            if wrench is not None:
+                out.append(wrench)
         return out
 
     def _torque_wrenches(

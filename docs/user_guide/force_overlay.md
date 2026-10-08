@@ -86,6 +86,26 @@ When compositing physical overlays onto calibrated camera footage:
 
 ---
 
+## Ground Reaction Breakdown
+
+The shared core `src/shared/python/biomechanics/ground_reaction.py` (GCV-1, #11707) turns contact wrenches into the complete ground-reaction breakdown. Every engine and surface should display these quantities instead of recomputing them.
+
+| Quantity                        | Label                                   | Notes                                              |
+| :------------------------------ | :-------------------------------------- | :------------------------------------------------- |
+| Foot and net GRF                | `contact:grf_<foot>`, `contact:grf_net` | Force by the ground on the foot, drawn at the CoP  |
+| Centre of pressure (CoP)        | Arrow anchor                            | On the ground plane `z = z_g`; needs `F_z >= 10 N` |
+| Free moment                     | `contact:free_moment_<foot>`, `..._net` | Vertical torque about the CoP                      |
+| Moment about the whole-body CoM | `contact:moment_com_<foot>`, `..._net`  | `M_O - c x F`; the net equals the sum of the feet  |
+
+Behavior to know when reading the overlays:
+
+- Below 10 N vertical force the CoP and free moment are unavailable (not zero); the force arrow remains, anchored at the contact centroid.
+- A foot with no active contact shows nothing and reports zero force.
+- The net free moment is computed from the net wrench about the net CoP. It is generally not the sum of the two foot free moments, because the foot CoPs differ and shear forces at those offset points contribute a vertical moment. The two agree when the CoPs coincide.
+- Time series use `GroundReactionSeries` (NaN marks unavailable values, `to_dataframe()` for export).
+
+---
+
 ## Known Limits per Engine
 
 - **MuJoCo:** Native offscreen rendering supports true 3D geoms (`add_glyphs_to_scene`) and footage compositing with segmentation masks. GPU rasterization requires EGL or an active display server.

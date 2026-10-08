@@ -199,6 +199,27 @@ the engine adapter packages (`src/engines/...`), never in
 `src/shared/python/force_overlay/`. New MuJoCo-specific code goes beside the
 engine, not into `body_part_viz`.
 
+### Contact Label Table (GCV-1, #11707)
+
+Ground-reaction overlays come from one pure-numpy core,
+`src/shared/python/biomechanics/ground_reaction.py`
+(`to_overlay_wrenches`). All are `WrenchKind.CONTACT`, world frame, force
+exerted **by the ground on the foot**. `<foot>` is the sanitised foot label.
+
+| Label                        | Halves | Application point | Meaning                                                  |
+| :--------------------------- | :----- | :---------------- | :------------------------------------------------------- |
+| `contact:grf_<foot>`         | force  | foot CoP          | Resultant foot GRF (contact centroid when CoP is absent) |
+| `contact:grf_net`            | force  | net CoP           | Both-feet resultant GRF (`body="system"`)                |
+| `contact:free_moment_<foot>` | torque | foot CoP          | Vertical free moment `T_z` of the foot about its CoP     |
+| `contact:free_moment_net`    | torque | net CoP           | Free moment of the net wrench about the net CoP          |
+| `contact:moment_com_<foot>`  | torque | whole-body CoM    | `M_O,f - c x F_f`, the foot wrench moment about the CoM  |
+| `contact:moment_com_net`     | torque | whole-body CoM    | Sum of the foot CoM moments (exactly)                    |
+
+The CoP exists only when `F_z >= 10 N` (`COP_MIN_FZ_N`); below that the free
+moment labels are omitted (unavailable, never zero) and the GRF arrow is
+anchored at the loaded-contact centroid. The net free moment is computed from
+the net wrench and is not the sum of the foot free moments.
+
 ### Semantics That Renderers and Reviewers Rely On
 
 - **World frame:** Z-up, SI units, and the point is the physical application
