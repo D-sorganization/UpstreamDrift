@@ -6,8 +6,9 @@ touching any engine SDK:
 * bundle efforts -> one joint-torque wrench per joint anchor (coordinates that
   share an anchor, e.g. the three hip rotations, merge into one vector);
 * the shared contact law (``evaluate_contact_samples`` of any full-body model)
-  -> one ground reaction force per foot body, applied at the wrench-derived
-  centre of pressure of the shared ground-reaction core (GCV-1, #11707);
+  -> the ground-reaction breakdown of the shared core (GCV-1, #11707; GCV-2,
+  #11708): per-foot and net force at the wrench-derived centre of pressure,
+  free moment and moment about the centre of mass;
 * the centre of mass -> the system weight, as a gravity wrench at the CoM.
 
 Engine adapters only have to supply the two small protocols below.
@@ -24,9 +25,8 @@ from typing import Any, NamedTuple, Protocol, runtime_checkable
 import numpy as np
 from numpy.typing import NDArray
 
-from src.shared.python.biomechanics.ground_reaction import (
-    foot_reaction,
-    grf_overlay_wrench,
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
 )
 from src.shared.python.force_overlay.contracts import (
     ForceTorqueFrame,
@@ -170,8 +170,14 @@ class BundleOverlayProvider:
     def _contact_wrenches(
         self, coords: Mapping[str, float], rates: Mapping[str, float]
     ) -> list[OverlayWrench]:
-        per_body: dict[str, list[tuple[Array, Array]]] = {}
+        """Per-foot and net GRF breakdown of the shared contact law (GCV-2, GCV-6).
+
+        Loaded contact spheres become ground-contact wrenches on their body;
+        the shared ground-reaction core groups them by foot and reports the
+        per-foot and net force, CoP, free moment and moment about the CoM.
+        """
         samples = self._contact.evaluate_contact_samples(coords, rates)
+        ground: list[OverlayWrench] = []
         for name, sample in samples.items():
             force = np.asarray(sample.normal_force_n) + np.asarray(
                 sample.friction_force_n
@@ -179,21 +185,23 @@ class BundleOverlayProvider:
             if float(np.linalg.norm(force)) <= 1e-9:
                 continue
             body = self._sphere_body.get(name, name.rsplit("_", 1)[-1])
-            point = np.asarray(sample.contact_point_m, float)
-            per_body.setdefault(body, []).append((point, force))
-        out = []
-        for body, items in sorted(per_body.items()):
-            points = np.array([p for p, _ in items])
-            forces = np.array([f for _, f in items])
-            reaction = foot_reaction(body, forces, points)
-            wrench = grf_overlay_wrench(
-                reaction,
-                source=f"{self._engine}:shared_contact_law",
-                label_part=_label_part(body),
+            ground.append(
+                OverlayWrench(
+                    WrenchKind.CONTACT,
+                    f"contact:{_label_part(name)}",
+                    body,
+                    _tuple3(np.asarray(sample.contact_point_m, float)),
+                    force_n=_tuple3(force),
+                    source=f"{self._engine}:shared_contact_law",
+                )
             )
-            if wrench is not None:
-                out.append(wrench)
-        return out
+        return list(
+            ground_reaction_overlay(
+                ground,
+                self._kin.center_of_mass_m(coords),
+                source=f"{self._engine}:shared_contact_law",
+            )
+        )
 
     def _torque_wrenches(
         self, coords: Mapping[str, float], effort: Mapping[str, float]
