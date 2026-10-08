@@ -1,3 +1,10 @@
+# Active: Time-Based Video Export, GCV-14 #11720
+
+- Branch `claude/gcv-14-frame-schedule`; epic #11706. `src/shared/python/video_timing/frame_schedule.py` holds `FrameSchedule` (fps, speed, window; lerp plus quaternion slerp), `select_frames` (shim left in `myofullbody/render.py`) and `stride_for_speed`.
+- Native export (`src/tools/native_viewer_export/`): 60 fps, `--speeds 1,0.5` with `_1x`/`_0p5x` suffixes, `--impact-window` (`_impact_0p1x`), `--preset hq|preview` (1280x720 CRF 18 vs 640x544 CRF 23), HUD speed and ms from impact; `stride` is a deprecated alias. `motion_matching.export_video` takes `speed=`.
+- Not converted (higher risk, no interpolating API): `force_overlay/playback.py` (matplotlib FFMpegWriter), capture-rig playback, MuJoCo `visual_layer` (no `render_gif` exists in the tree).
+- Impact defaults to the last sample unless the bundle provenance has `impact_time_s` or `--impact-time` is given.
+
 # Active: MyoFullBody Muscle-Driven Swing, Epic #11642
 
 - Branch `feat/myofullbody-muscle-swing-11642`; children #11643 to #11647 (MFB-6 #11648 is blocked and not started). Code: `src/shared/python/myofullbody/`; scripts `fetch_myofullbody.py`, `run_myofullbody_swing.py`, `render_myofullbody_swing.py`; reference `docs/research/myofullbody_swing/myofullbody_swing.tex`.

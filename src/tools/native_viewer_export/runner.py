@@ -19,7 +19,6 @@ from src.tools.native_viewer_export.core import (
     SwingInput,
     WriterFactory,
     export_swing,
-    imageio_writer,
     load_receipt_rollout,
 )
 from src.tools.native_viewer_export.overlay import build_overlay_feed
@@ -57,7 +56,7 @@ def run_export(
     settings: ExportSettings,
     backend_factory: Callable[[str], NativeBackend] = make_backend,
     overlay_factory: OverlayFactory = build_overlay_feed,
-    writer_factory: WriterFactory = imageio_writer,
+    writer_factory: WriterFactory | None = None,
 ) -> list[ExportResult]:
     """Render every requested engine; unavailable backends are skipped, not fatal."""
     for engine in job.engines:
