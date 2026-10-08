@@ -94,7 +94,7 @@ def _ground(vec: np.ndarray, up: np.ndarray, what: str) -> np.ndarray:
     up_u = _unit(np.asarray(up, dtype=float), "up")
     v = np.asarray(vec, dtype=float)
     flat = v - (v @ up_u) * up_u
-    if np.linalg.norm(flat) < 1e-9 * max(1.0, np.linalg.norm(v)):
+    if np.linalg.norm(flat) < 1e-9 * max(1.0, float(np.linalg.norm(v))):
         raise ValueError(f"{what} is vertical: no ground-plane direction")
     return _unit(flat, what)
 
@@ -334,21 +334,25 @@ def _measure_foot(
         heel = frames_pts[f"{prefix}AnkleOut"][f]
         t_in = frames_pts[f"{prefix}ToeIn"][f]
         t_out = frames_pts[f"{prefix}ToeOut"][f]
-        kw = {
-            "target_axis": target,
-            "up": up,
-            "foot_role": role,
-            "handedness": handedness,
-        }
+
+        def _angle(axis: np.ndarray) -> float:
+            return progression_angle_deg(
+                axis,
+                target_axis=target,
+                up=up,
+                foot_role=role,
+                handedness=handedness,
+            )
+
         raw = marker_long_axis(heel, t_in, t_out, up=up)
         cor = marker_long_axis(
             heel, t_in, t_out, up=up, out_dir=out, ankle_lateral_offset_m=lateral_m
         )
         fore = _forefoot_axis(t_in, t_out, up, fwd)
         angles[k] = [
-            progression_angle_deg(raw, **kw),
-            progression_angle_deg(cor, **kw),
-            progression_angle_deg(fore, **kw),
+            _angle(raw),
+            _angle(cor),
+            _angle(fore),
         ]
     med = np.median(angles, axis=0)
     spread = float(np.subtract(*np.percentile(angles[:, 1], [75, 25])))
