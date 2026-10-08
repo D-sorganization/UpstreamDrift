@@ -99,7 +99,7 @@ def _describe(name: str) -> tuple[str, str]:
 
 
 def _load_share(series: GroundReactionSeries, feet: tuple[str, ...]):
-    fz = {k: series.force_n[k][:, 2] for k in feet}
+    fz = {k: np.asarray(series.force_n[k], dtype=np.float64)[:, 2] for k in feet}
     total = np.sum([fz[k] for k in feet], axis=0) if feet else np.zeros(0)
     supported = total >= COP_MIN_FZ_N
     safe = np.where(supported, total, 1.0)
@@ -159,7 +159,7 @@ def build_ground_reaction_plot_series(
             )
     in_contact = bool(np.any(series.in_contact[NET_LABEL]))
     return GroundReactionPlotSeries(
-        time_s=tuple(float(t) for t in series.times_s),
+        time_s=tuple(np.asarray(series.times_s, dtype=np.float64).tolist()),
         feet=feet,
         traces=traces,
         load_share=_load_share(series, feet),
