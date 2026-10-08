@@ -50,10 +50,14 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noq
 )
 from src.shared.python.grip_contact import (  # noqa: E402
     ClubDynamics,
+    ClubKinematics,
     GripInterface,
+    couple_consistency,
     decompose_hand_forces,
     load_coordinate_swing,
     modal_damping,
+    peak_squeeze_n,
+    required_hand_moment_nm,
 )
 from src.shared.python.model_appearance import club_face as cf  # noqa: E402
 
@@ -204,6 +208,48 @@ def impact_metrics(run: BushingRun) -> dict[str, Any]:
     }
 
 
+def internal_force_checks(run: BushingRun, spec: dict) -> dict[str, Any]:
+    """Squeeze and couple-consistency checks (#11739 owner decision).
+
+    The realised check uses the club's own engine accelerations (a
+    Newton-Euler closure); the rigid-input entry uses the club welded to the
+    prescribed lead hand and shows the bushing's dynamic amplification.
+    """
+    forces = (run.force_on_club_n["L"], run.force_on_club_n["R"])
+    points = (run.grip_point_m["L"], run.grip_point_m["R"])
+    torques = (run.torque_on_club_nm["L"], run.torque_on_club_nm["R"])
+    mid = 0.5 * (points[0] + points[1])
+    dyn = ClubDynamics.from_spec(spec)
+    g = np.asarray(spec["gravity_m_s2"], dtype=float)
+    realised = ClubKinematics(
+        run.club_rotation,
+        run.club_omega_rad_s,
+        run.club_alpha_rad_s2,
+        run.club_com_m,
+        run.club_com_acceleration_m_s2,
+    )
+    m_real = required_hand_moment_nm(realised, dyn, g, mid)
+    m_rigid = required_hand_moment_nm(run.rigid_club, dyn, g, mid)
+    res = couple_consistency(forces, points, torques, m_real)
+    k = int(np.argmax(res.actual_transverse_n))
+    t = run.time_s
+    spacing = np.linalg.norm(points[1] - points[0], axis=1)
+    return {
+        "squeeze_bound_n": 50.0,
+        "couple_relative_error_bound": 0.05,
+        "noise_floor_nm": res.noise_floor_nm,
+        "peak_squeeze_n": peak_squeeze_n(*forces, *points),
+        "peak_internal_transverse_n": float(res.actual_transverse_n[k]),
+        "peak_internal_time_s": float(t[k]),
+        "couple_over_d_prediction_at_peak_n": float(res.predicted_transverse_n[k]),
+        "max_relative_error": res.max_relative_error(),
+        "checked_fraction": float(res.checked.mean()),
+        "hand_spacing_m": {"min": float(spacing.min()), "max": float(spacing.max())},
+        "realised_hand_moment_peak_nm": _peak(np.linalg.norm(m_real, axis=1), t),
+        "rigid_input_hand_moment_peak_nm": _peak(np.linalg.norm(m_rigid, axis=1), t),
+    }
+
+
 def simulate(club: str, accuracy: float, method: str) -> tuple[BushingRun, dict]:
     """Run the full window; returns the run and integrator metadata."""
     import opensim as osim
@@ -230,6 +276,14 @@ def simulate(club: str, accuracy: float, method: str) -> tuple[BushingRun, dict]
         osim.Manager.__init__ = original
     meta = {"method": method, "accuracy": accuracy, "wall_time_s": elapsed}
     return run, {"integrator": meta, "swing": swing, "spec_bytes": spec_bytes}
+
+
+def _previous_convergence(club: str) -> dict[str, Any]:
+    """Keep the convergence block of an earlier receipt (rerun without it)."""
+    path = HERE / f"receipt_full_swing_{club}.json"
+    if not path.exists():
+        return {}
+    return dict(json.loads(path.read_text()).get("convergence", {}))
 
 
 def _bounds(run: BushingRun) -> dict[str, float]:
@@ -274,14 +328,16 @@ def main() -> int:
         "bounds": {
             "deflection_mm": 3.0,
             "rotation_deg": 2.0,
-            "internal_force_n": 500.0,
+            "squeeze_n": 50.0,
+            "couple_relative_error": 0.05,
         },
         "full_window": summarize(run),
         "full_window_bounds": _bounds(run),
         "window_0_to_1p30_s_bounds": _bounds(window(run, OLD_XFAIL_WINDOW_S)),
         "impact": impact,
+        "internal_force_checks": internal_force_checks(run, spec),
         "literature_sanity_check": LITERATURE,
-        "convergence": {},
+        "convergence": _previous_convergence(args.club),
     }
     if args.convergence:
         for method, acc in (("RungeKuttaMerson", 1e-5), ("CPodes", 1e-4)):

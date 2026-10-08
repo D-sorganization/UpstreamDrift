@@ -23,9 +23,14 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noq
     prepare_motion,
 )
 from src.shared.python.grip_contact import (  # noqa: E402
+    ClubDynamics,
+    ClubKinematics,
     GripInterface,
+    couple_consistency,
     decompose_hand_forces,
     load_coordinate_swing,
+    peak_squeeze_n,
+    required_hand_moment_nm,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -147,13 +152,22 @@ def test_analysis_uses_bushing_split_method(static_run) -> None:
         hand_power_w(run, "X")
 
 
-# Internal (antagonistic) hand force bound.  Reasoning: the two hands carry the
-# club couple as an equal and opposite force pair, F_int = M / d with d = 0.076 m,
-# so 500 N is a 38 N m couple, well above what a 0.31 kg club needs in the
-# backswing and transition and consistent with the review statement (#11765)
-# that real per-hand grip forces near impact are a few hundred newtons.
-MAX_INTERNAL_FORCE_N = 500.0
 FIRST_IK_SWITCH_S = 0.95
+
+# Physics checks replacing the flat 500 N internal-force bound (owner decision
+# on PR #11774): a flat bound cannot tell a couple-carrying force pair from the
+# fighting-hands artefact.  See grip_contact.couple_check and
+# DESIGN_DECISIONS.md section 17.
+MAX_SQUEEZE_N = 50.0
+MAX_COUPLE_RELATIVE_ERROR = 0.05
+
+
+def _hand_pairs(run):
+    return (
+        (run.force_on_club_n["L"], run.force_on_club_n["R"]),
+        (run.grip_point_m["L"], run.grip_point_m["R"]),
+        (run.torque_on_club_nm["L"], run.torque_on_club_nm["R"]),
+    )
 
 
 def _driven_run(spec_bytes, motion, t_end, valid_window):
@@ -185,7 +199,7 @@ def test_driven_swing_before_ik_switch_within_limits(spec_bytes, motion) -> None
     trans, rot, dec = _worst(run)
     assert trans <= MAX_DEFLECTION_M
     assert rot <= MAX_ROTATION_RAD
-    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
+    _assert_internal_force_is_physical(run, json.loads(spec_bytes))
     peak = max(np.linalg.norm(run.force_on_club_n[s], axis=1).max() for s in "LR")
     assert peak > 20.0  # the swing genuinely loads the grip
 
@@ -239,21 +253,34 @@ def test_full_swing_deflection_within_limits(full_swing_run) -> None:
     assert rot <= MAX_ROTATION_RAD
 
 
+def _assert_internal_force_is_physical(run, spec) -> None:
+    """Squeeze bound plus couple consistency (Newton-Euler of the club)."""
+    forces, points, torques = _hand_pairs(run)
+    assert peak_squeeze_n(*forces, *points) <= MAX_SQUEEZE_N
+    kinematics = ClubKinematics(
+        run.club_rotation,
+        run.club_omega_rad_s,
+        run.club_alpha_rad_s2,
+        run.club_com_m,
+        run.club_com_acceleration_m_s2,
+    )
+    required = required_hand_moment_nm(
+        kinematics,
+        ClubDynamics.from_spec(spec),
+        np.asarray(spec["gravity_m_s2"]),
+        0.5 * (points[0] + points[1]),
+    )
+    res = couple_consistency(forces, points, torques, required)
+    assert res.checked.mean() > 0.5  # the check covers the loaded swing
+    assert res.checked[int(np.argmax(res.actual_transverse_n))]
+    assert res.max_relative_error() <= MAX_COUPLE_RELATIVE_ERROR
+
+
 @pytest.mark.slow
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "#11739: with the closure-consistent fitted swings the full 0-1.8 s "
-        "window meets the deflection bounds (0.56/0.59 mm, 0.84 deg) but the "
-        "internal hand force peaks at impact at 510 N (driver) and 524 N "
-        "(iron7), above the 500 N bound; converged (RK-Merson 1e-3/1e-5, "
-        "CPodes). The bound is not loosened; see DESIGN_DECISIONS.md section 16."
-    ),
-)
-def test_full_swing_internal_force_within_limit(full_swing_run) -> None:
-    _, run = full_swing_run
-    _, _, dec = _worst(run)
-    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
+def test_full_swing_internal_force_is_physical(full_swing_run) -> None:
+    club, run = full_swing_run
+    spec = json.loads((MODELS / f"full_body_spec_anthro_{club}.json").read_bytes())
+    _assert_internal_force_is_physical(run, spec)
 
 
 def test_candidate_is_inconsistent_with_the_two_hand_closure(

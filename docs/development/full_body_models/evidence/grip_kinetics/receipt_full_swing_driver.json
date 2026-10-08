@@ -42,7 +42,7 @@
   "integrator": {
     "method": "RungeKuttaMerson",
     "accuracy": 0.001,
-    "wall_time_s": 377.3618028810015
+    "wall_time_s": 130.07414771500044
   },
   "modal_frequencies_hz": [
     23.654435511165286,
@@ -63,7 +63,8 @@
   "bounds": {
     "deflection_mm": 3.0,
     "rotation_deg": 2.0,
-    "internal_force_n": 500.0
+    "squeeze_n": 50.0,
+    "couple_relative_error": 0.05
   },
   "full_window": {
     "samples": 908,
@@ -152,6 +153,29 @@
       "equivalent_couple_at_midpoint_nm": 99.5620265084763,
       "couple_peak_time_s": 1.314,
       "internal_peak_time_s": 1.322
+    }
+  },
+  "internal_force_checks": {
+    "squeeze_bound_n": 50.0,
+    "couple_relative_error_bound": 0.05,
+    "noise_floor_nm": 2.0,
+    "peak_squeeze_n": 3.2728714300846633,
+    "peak_internal_transverse_n": 509.7989892235387,
+    "peak_internal_time_s": 1.322,
+    "couple_over_d_prediction_at_peak_n": 509.7989892235378,
+    "max_relative_error": 5.924833506279895e-14,
+    "checked_fraction": 0.8138766519823789,
+    "hand_spacing_m": {
+      "min": 0.0803218525682765,
+      "max": 0.08032185256827722
+    },
+    "realised_hand_moment_peak_nm": {
+      "peak_m_s": 99.56202650847594,
+      "time_s": 1.314
+    },
+    "rigid_input_hand_moment_peak_nm": {
+      "peak_m_s": 89.13676949189671,
+      "time_s": 1.312
     }
   },
   "literature_sanity_check": [

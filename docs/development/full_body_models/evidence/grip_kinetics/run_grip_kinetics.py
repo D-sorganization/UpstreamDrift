@@ -49,6 +49,7 @@ from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (  # noq
 )
 from src.shared.python.grip_contact import (  # noqa: E402
     ClubDynamics,
+    ClubKinematics,
     GripInterface,
     decompose_hand_forces,
     first_discontinuity_time,
@@ -161,6 +162,8 @@ def window(run: BushingRun, t_max: float) -> BushingRun:
     def cut(value: object) -> object:
         if isinstance(value, dict):
             return {k: cut(v) for k, v in value.items()}
+        if isinstance(value, ClubKinematics):
+            return value.subset(keep)
         return value[keep]  # type: ignore[index]
 
     return replace(run, **{f.name: cut(getattr(run, f.name)) for f in fields(run)})

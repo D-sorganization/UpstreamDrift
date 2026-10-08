@@ -1,7 +1,7 @@
 # Active: Impact-Phase Bushing Grip, OSV-7 #11739
 
 - Branch `claude/osv-7-impact-grip`. The OpenSim bushing grip is driven over 0 to 1.8 s by the OSV-10 fits (`tests/fixtures/club_face/swing_q_*.npz`), mapped by name with `grip_contact.load_coordinate_swing`. Loop closure is below 0.001 mm and hand speeds are within 12 % of the measured wrist markers.
-- Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. The internal force at impact is 510 N (driver) and 524 N (iron), above the unchanged 500 N bound. It is a 99.9 % transverse force pair at 76 mm spacing, so the test stays a strict xfail. Owner decision needed. See DESIGN_DECISIONS.md section 17 and `evidence/grip_kinetics/run_full_swing_grip_kinetics.py`.
+- Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. Owner decision on PR #11774: the flat 500 N internal-force bound is replaced by `grip_contact.couple_check` (squeeze at most 50 N; transverse pair equals the couple/d Newton-Euler prediction within 5 %, 2 N m noise floor). Both pass for driver and iron (squeeze 3.3 / 3.9 N), so the full-window test is no longer an xfail. The club-welded-to-hand demand is 89 / 87 N m against the realised 100 / 99 N m (bushing amplification). Grip-frame spacing is 80.3 mm, not 76. See DESIGN_DECISIONS.md section 17.
 - Next: MuJoCo (soft weld) and Drake (`LinearBushingRollPitchYaw`) bushing parity on the same fixtures. The plan is on #11739.
 
 # Active: Shared Ground Reaction Core — GCV-1, Epic #11706

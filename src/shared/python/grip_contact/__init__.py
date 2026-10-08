@@ -6,6 +6,14 @@ from src.shared.python.grip_contact.damping import (
     design_damping,
     modal_damping,
 )
+from src.shared.python.grip_contact.couple_check import (
+    DEFAULT_COUPLE_NOISE_FLOOR_NM,
+    ClubKinematics,
+    CoupleConsistency,
+    couple_consistency,
+    peak_squeeze_n,
+    required_hand_moment_nm,
+)
 from src.shared.python.grip_contact.force_decomposition import (
     ForceDecomposition,
     decompose_hand_forces,
@@ -31,6 +39,12 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 )
 
 __all__ = [
+    "DEFAULT_COUPLE_NOISE_FLOOR_NM",
+    "ClubKinematics",
+    "CoupleConsistency",
+    "couple_consistency",
+    "peak_squeeze_n",
+    "required_hand_moment_nm",
     "DEFAULT_DAMPING_RATIO",
     "FIXTURE_DT_S",
     "BushingParameters",

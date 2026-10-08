@@ -488,7 +488,7 @@ Stiffness sensitivity on the valid window: $\times 0.1$ gives 84 / 98 N, 0.84 / 
 Acceptance bounds (never loosened):
 
 - Deflection at most 3 mm and 2 degrees (owner-reviewable): met in the valid window; the full-window test is a strict xfail.
-- Internal force at most 500 N: a 38 N m couple at 76 mm, well above the 12 N m seen in the valid window and consistent with the review statement that per-hand grip forces near impact are a few hundred newtons. Met in the valid window; the full-window test is a strict xfail.
+- Internal force at most 500 N (superseded by the squeeze and couple-consistency checks of section 17): a 38 N m couple at 76 mm, well above the 12 N m seen in the valid window and consistent with the review statement that per-hand grip forces near impact are a few hundred newtons. Met in the valid window; the full-window test is a strict xfail.
 
 ### What Was Tried and Rejected
 
@@ -504,6 +504,7 @@ Acceptance bounds (never loosened):
 - The right hand arm chain of the input is ignored (open loop); the split is a property of this approximation.
 - Stiffness defaults and the deflection and internal-force bounds are owner-reviewable engineering values; the three citations were confirmed to exist but support no number.
 - Explicit stiff integration of the full 1.8 s takes about 35 minutes at accuracy 1e-3.
+- The bushing amplification of the couple (12 to 13 % at default stiffness) is a modelling result, not a validated one; whether `K_r` should change is an owner decision and nothing is tuned here.
 - Software correctness only. Scientific qualification stays in the design-manual governance pathway.
 - Out of scope for phase 1: the contact model, MuJoCo, Drake and Pinocchio parity, and the `golf_humanoid.osim` builder.
 
@@ -548,16 +549,33 @@ The integrator is OpenSim `Manager` Runge-Kutta-Merson (explicit, error-controll
 Acceptance against the unchanged bounds:
 
 - Deflection (3 mm, 2 deg): met over the full window for both clubs. `test_full_swing_deflection_within_limits` passes.
-- Internal force (500 N): exceeded at impact by 2.0 % (driver) and 4.8 % (iron). `test_full_swing_internal_force_within_limit` stays a strict xfail. The bound is not loosened. Over 0 to 1.30 s, the window of the former candidate xfail, all bounds are met. That window ends before impact, so it is not presented as a full-window pass.
+- Internal force: the flat 500 N bound is replaced by the two physics checks below (owner decision on PR #11774). Both pass over the full 0 to 1.8 s window for both clubs, so `test_full_swing_internal_force_is_physical` is a plain test, no longer a strict xfail. The 3 mm and 2 deg bounds are unchanged.
+
+| Internal-force check, 0 to 1.8 s | Driver | 7-iron |
+| --- | --- | --- |
+| Peak squeeze (bound 50 N) | 3.3 N | 3.9 N |
+| Peak transverse internal force | 509.8 N at 1.322 s | 524.1 N at 1.332 s |
+| Couple/d prediction at that sample | 509.8 N | 524.1 N |
+| Max relative error, checked samples (bound 5 %) | 6e-14 | 2e-13 |
+| Samples above the 2 N m noise floor | 81 % | 79 % |
+| Hand-moment peak, realised club motion | 99.6 N m at 1.314 s | 98.6 N m at 1.324 s |
+| Hand-moment peak, club welded to the prescribed hand | 89.1 N m at 1.312 s | 87.0 N m at 1.322 s |
 
 ### Sanity Check Against Published Magnitudes
 
 - Nesbit (2005), J Sports Sci Med 4(4):499-519, Table 3 (85 golfers): the golfer-club linear force at impact averages 397.5 N (range 300 to 490 N). The model's net force at impact, 332 and 360 N, and its peaks, 439 and 457 N, lie inside that range.
-- Grober (2020), arXiv:2006.11778, section VIII, quotes MacKenzie's instrumented-grip data for one golfer in the last frame before impact: F = 456 N, moment of force 55.8 N m, couple -59.1 N m. Grober notes that a 50 N m couple at a 1/6 m hand spacing needs about 300 N per hand. The model's 71 N m equivalent couple at impact (peak 99.6 N m) is the same order but larger. Because the bushing spacing is 76 mm, not 167 mm, carrying it as a force pair needs a larger internal force. That spacing is the reason the internal force crosses 500 N.
+- Grober (2020), arXiv:2006.11778, section VIII, quotes MacKenzie's instrumented-grip data for one golfer in the last frame before impact: F = 456 N, moment of force 55.8 N m, couple -59.1 N m. Grober notes that a 50 N m couple at a 1/6 m hand spacing needs about 300 N per hand. The model's 71 N m equivalent couple at impact (peak 99.6 N m) is the same order but larger. Because the grip-frame spacing is 80.3 mm, not 167 mm, carrying it as a force pair needs a larger internal force. The larger model couple is an open comparison item on #11739, not a test: one instrumented golfer is not a bound, and the model's couple includes the bushing amplification described below.
 
-### Why the Internal-Force Bound Is Not Met
+### Why the Flat Internal-Force Bound Was Replaced
 
-Of the internal force at impact, 99.9 % is transverse: a force pair carrying the club couple, with a squeeze of only 2 to 4 N. It is fixed by the club's angular acceleration, the 76 mm hand spacing of the grip frames and the ratio of `K_r` to `K_t`, and it converges with the integrator. The 500 N bound was set (section 16) from the backswing and transition with a 38 N m couple in mind. At impact, the published couple of about 60 N m already implies roughly 790 N at 76 mm if the free torques carried nothing. Exceeding the bound is therefore a property of the interface geometry and stiffness defaults, not of numerical error or the input. Whether the bound, the hand spacing or `K_r` should change is an owner decision. None of them is tuned here.
+Of the internal force at impact, 99.9 % is transverse: a force pair carrying the club couple, with a squeeze of only 2 to 4 N. The flat 500 N bound was mis-specified. It was set (section 16) from the backswing and transition with a 38 N m couple in mind, and it could not tell a real, couple-carrying force pair from the "fighting hands" artefact of inconsistent kinematics: both raise `|F_int|`. At impact the published couple of about 60 N m alone implies roughly 750 N at 80.3 mm if the free torques carried nothing. (Sections 16 and the earlier PR text quoted a 76 mm spacing; the measured grip-frame spacing is 80.32 mm and constant to 1e-15 m.)
+
+The replacement lives in the shared `grip_contact.couple_check` module and uses only `decompose_hand_forces`:
+
+1. **Squeeze.** The axial internal force along the inter-hand line `u` (positive in compression) stays within 50 N over 0 to 1.8 s. The club needs no squeeze, so a large one means the hands are pulled against each other.
+2. **Couple consistency.** With `P` the hand midpoint, `d = |p_R - p_L|` and the hand-acting-on-the-club convention, Newton-Euler of the club gives the moment the hands must apply about `P`: `M_hands,P = I w' + w x (I w) + (c - P) x m (a_c - g)`. The net hand force has no moment about the midpoint, so the contact-force moment is carried by the internal pair alone: `M_contact = M_hands,P - tau_L - tau_R = -d u x F_int`. The predicted transverse pair is `|M_contact,perp| / d` (the component normal to `u`), and it must equal the measured `|F_int,perp|` within 5 %. Samples with `|M_contact,perp|` below 2 N m (2 % of the swing peak, about the address and backswing level) are skipped, because the relative error of a vanishing couple is meaningless; 79 to 81 % of the samples are checked, including the peak.
+
+Scope of the couple check. It uses the engine's realised accelerations (`realizeAcceleration`; finite differences of 2 ms samples alias the 400 to 950 Hz bushing modes and gave errors up to 96 %). Evaluated that way it is a Newton-Euler closure, so it agrees to round-off: it proves that the extracted per-hand wrenches, frames, signs and the spec inertia account for the club's motion and that the transverse pair is couple-carrying, not an unexplained load. It does not prove that the club follows the input swing. For that, the same function evaluated on the club welded to the prescribed lead hand gives the moment the input swing demands: 89.1 N m (driver) and 87.0 N m (iron) against the realised 99.6 and 98.6 N m. The bushing amplifies the couple dynamically by 12 to 13 %; with stiffness x10 the driver peak falls to 90.7 N m (internal 530 N, squeeze 1.4 N). The internal force itself barely changes with stiffness, because it is set by the couple and `d`.
 
 ### Evidence Receipt
 
