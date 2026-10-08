@@ -237,7 +237,11 @@ def _net_reaction(
 ) -> FootReaction:
     force = np.zeros(3) + sum((r.force_n for r in feet), np.zeros(3))
     moment = sum((r.moment_about_origin_nm for r in feet), np.zeros(3))
-    active = [r.contact_centroid_m for r in feet if r.in_contact]
+    active = [
+        r.contact_centroid_m
+        for r in feet
+        if r.in_contact and r.contact_centroid_m is not None
+    ]
     centroid = np.mean(active, axis=0) if active else None
     return _resultant(
         NET_LABEL, force, moment, centroid, bool(active), ground_height_m, cop_min_fz_n
@@ -331,7 +335,7 @@ def grf_overlay_wrench(
         WrenchKind.CONTACT,
         f"contact:grf_{label_part or _foot_part(reaction)}",
         body or default_body,
-        _tuple(anchor),
+        _tuple(anchor if anchor is not None else np.zeros(3)),
         force_n=_tuple(reaction.force_n),
         source=source,
     )
