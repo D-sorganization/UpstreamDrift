@@ -162,6 +162,14 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 - `biomechanics/grip_wrench.py` — shared hand-on-club grip wrench (`analyze_grip`, `GripAnalysis`, `GripSeries`): per-hand wrench, net force at the grip midpoint, equivalent couple split into contact-force moment and free torque, per-hand MOF, club-local components and `split_method`. Transport reuses `force_overlay.conversions.move_wrench_point`; do not write another (GCV-7, #11713).
 
+### Ground-Reaction Analysis Core
+
+`src/shared/python/biomechanics/ground_reaction.py` — the single implementation of per-foot and net GRF, CoP (with ground height `z_g` and the named `COP_MIN_FZ_N` = 10 N threshold), free moment, and moments about the whole-body CoM (GCV-1, #11707, epic #11706).
+
+- `foot_reaction(label, forces, points, torques=None, *, ground_height_m, cop_min_fz_n)` and `analyze_ground_reaction(contacts_by_foot, com_m)` return `FootReaction` / `GroundReactionBreakdown`; unavailable CoP quantities are `None`, never zero.
+- `to_overlay_wrenches` emits the `contact:grf_*`, `contact:free_moment_*`, `contact:moment_com_*` labels (ADR-0052); `to_contact_reaction` populates `motion_matching.force_torque.ContactReaction`; `GroundReactionSeries` stacks frames for plots and export.
+- `force_overlay/bundle_provider.py` already consumes it. Do not add another CoP helper; GCV-6 (#11712) consolidates the legacy ones.
+
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
