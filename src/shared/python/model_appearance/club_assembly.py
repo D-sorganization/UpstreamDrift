@@ -20,6 +20,8 @@ from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
     club_face_normal,
     club_frame_mesh,
+    face_centre,
+    head_points_to_club,
     load_club_head,
 )
 from src.shared.python.model_appearance.club_shaft_mesh import tapered_tube
@@ -140,6 +142,22 @@ def clubface_vector(club: ClubAssembly) -> np.ndarray:
     rendered head's face points in every engine.
     """
     return club_face_normal(load_club_head(club.head_alias), club.face_roll_deg)
+
+
+def clubface_centre(club: ClubAssembly) -> np.ndarray:
+    """Face-centre point (where the ball is struck) in the club-body frame.
+
+    Same placement and roll as the rendered head, so it is the point every
+    engine's head mesh shows at the middle of the face.
+    """
+    head = load_club_head(club.head_alias)
+    centre = face_centre(head.head_mesh)[None, :]
+    return head_points_to_club(
+        head,
+        centre,
+        axis_offset_m=club.axis_offset_m,
+        face_roll_deg=club.face_roll_deg,
+    )[0]
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

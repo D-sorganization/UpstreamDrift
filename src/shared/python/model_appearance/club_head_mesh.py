@@ -398,12 +398,36 @@ def club_frame_mesh(
     ``face_roll_deg`` turns the head about the shaft axis line (club ``y``
     through ``z = axis_offset_m``); the hosel is on that line and stays put.
     """
+    verts = head_points_to_club(
+        head,
+        head.mesh.vertices,
+        axis_offset_m=axis_offset_m,
+        face_roll_deg=face_roll_deg,
+    )
+    return Mesh(verts, head.mesh.faces)
+
+
+def head_points_to_club(
+    head: ClubHeadMesh,
+    points: Array,
+    *,
+    axis_offset_m: float = DEFAULT_AXIS_OFFSET_M,
+    face_roll_deg: float = 0.0,
+) -> Array:
+    """Map head-frame points ``(n, 3)`` to the club-body frame (metres).
+
+    The same rigid placement as :func:`club_frame_mesh`: sole point on the
+    shaft axis line, then ``face_roll_deg`` about that line.
+    """
     if not math.isfinite(axis_offset_m):
         raise ValueError("axis_offset_m must be finite")
+    pts = np.asarray(points, dtype=float)
+    if pts.ndim != 2 or pts.shape[1] != 3:
+        raise ValueError("points must be (n, 3)")
     rot = head_to_club_rotation(head)
     shift = np.array([0.0, 0.0, axis_offset_m]) - rot @ head.sole_point
-    verts = head.mesh.vertices @ rot.T + shift
+    out = pts @ rot.T + shift
     if face_roll_deg != 0.0:
         axis = np.array([0.0, 0.0, axis_offset_m])
-        verts = (verts - axis) @ face_roll_rotation(face_roll_deg).T + axis
-    return Mesh(verts, head.mesh.faces)
+        out = (out - axis) @ face_roll_rotation(face_roll_deg).T + axis
+    return np.asarray(out, dtype=float)
