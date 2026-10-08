@@ -320,3 +320,11 @@ def foot_progression_series(
         for side, deg in model_feet_deg(kin, q, targets).items():
             series[side].append(round(float(deg), 3))
     return series
+
+
+def record_foot_progression(
+    address_report: dict[str, Any], kin: Any, q: np.ndarray, targets: FootTargets | None
+) -> None:
+    """Add the model-vs-capture foot report to ``address_report`` when enabled."""
+    if targets is not None:
+        address_report["foot_progression"] = foot_progression_report(kin, q, targets)

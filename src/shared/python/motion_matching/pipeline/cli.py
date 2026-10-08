@@ -30,9 +30,9 @@ from src.shared.python.motion_matching.pipeline.address import (
 )
 from src.shared.python.motion_matching.pipeline.address_feet import (
     build_foot_targets,
-    foot_progression_report,
     foot_progression_series,
     model_feet_deg,
+    record_foot_progression,
     seed_document_feet,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
@@ -432,10 +432,7 @@ def _calibrate_and_scale(
     address_report["calibrated"] = calibrated_address_summary(
         sim, kin, address2, lane, labels, adapter
     )
-    if lane.feet is not None:
-        address_report["foot_progression"] = foot_progression_report(
-            kin, address2.q, lane.feet
-        )
+    record_foot_progression(address_report, kin, address2.q, lane.feet)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,

@@ -46,9 +46,7 @@ def _add_line(scene: Any, start: np.ndarray, end: np.ndarray, rgba: tuple) -> No
         np.zeros(9),
         np.asarray(rgba, dtype=np.float32),
     )
-    mujoco.mjv_connector(
-        geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.006, start, end
-    )
+    mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.006, start, end)
     scene.ngeom += 1
 
 
