@@ -118,7 +118,9 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
     kin = FullBodyMarkerKinematics(adapter, {k: attachments[k] for k in labels})
     model = adapter.model
     rate_hz = rate_from_times(times)
-    q_track = smooth_reference(q_ref, rate_hz, TRACKING_CUTOFF_HZ)
+    # The run's impact split (GCV-20, #11767); absent in older receipts.
+    split = receipt["ik"].get("impact_split", {}).get("frame")
+    q_track = smooth_reference(q_ref, rate_hz, TRACKING_CUTOFF_HZ, impact_index=split)
 
     xml = stiffen_weld(adapter.xml)
     root = DET.fromstring(xml)

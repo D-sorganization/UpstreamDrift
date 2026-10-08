@@ -221,3 +221,67 @@ def face_events(
         peak_speed_time_s=float(t[peak]),
         peak_speed_gap_to_ball_m=float(np.linalg.norm(head[peak] - head[0])),
     )
+
+
+@dataclass(frozen=True)
+class SpeedTiming:
+    """Clubhead speed around impact on the swing's own clock (GCV-20, #11767).
+
+    Speeds are face-centre chord speeds of whole sample segments, timed at the
+    segment midpoints. ``impact_speed_mps`` is the last segment that ends at
+    or before the ball passage, so it holds no post-contact motion (the
+    GCV-15 "last pre-contact sample" convention).
+    """
+
+    impact_time_s: float
+    peak_time_s: float
+    peak_speed_mps: float
+    impact_speed_mps: float
+
+    @property
+    def peak_minus_impact_s(self) -> float:
+        """Peak time relative to impact; negative when the peak comes first."""
+        return self.peak_time_s - self.impact_time_s
+
+    def to_record(self) -> dict[str, float]:
+        """JSON-ready record including ``peak_minus_impact_s``."""
+        return {
+            "impact_time_s": self.impact_time_s,
+            "peak_time_s": self.peak_time_s,
+            "peak_minus_impact_s": self.peak_minus_impact_s,
+            "peak_speed_mps": self.peak_speed_mps,
+            "impact_speed_mps": self.impact_speed_mps,
+        }
+
+
+def clubhead_speed_timing(
+    time: Sequence[float] | np.ndarray, centres: np.ndarray
+) -> SpeedTiming:
+    """Peak and pre-contact impact clubhead speed of a swing (GCV-20).
+
+    ``centres`` is the finite ``(n, 3)`` world face-centre path at strictly
+    increasing ``time``. Impact is :func:`ball_passage`; the peak is the
+    fastest segment after the top of the backswing. Raises ``ValueError`` for
+    bad shapes, non-finite input, non-increasing time or no impact.
+    """
+    t = np.asarray(time, dtype=float)
+    head = np.asarray(centres, dtype=float)
+    if head.ndim != 2 or head.shape[1] != 3 or t.shape != (len(head),):
+        raise ValueError("time must be (n,) and clubhead (n, 3)")
+    if not (np.isfinite(t).all() and np.isfinite(head).all()):
+        raise ValueError("time and clubhead must be finite")
+    if np.any(np.diff(t) <= 0.0):
+        raise ValueError("time must strictly increase")
+    t_impact, _, _ = ball_passage(t, head)
+    top = top_of_backswing_index(t, head)
+    speed = np.linalg.norm(np.diff(head, axis=0), axis=1) / np.diff(t)
+    mid = 0.5 * (t[1:] + t[:-1])
+    peak = top + int(np.argmax(speed[top:]))
+    # Segments ending at the passage (to rounding) are wholly pre-contact.
+    pre = np.flatnonzero(t[1:] <= t_impact + 1e-6 * float(np.min(np.diff(t))))
+    return SpeedTiming(
+        impact_time_s=float(t_impact),
+        peak_time_s=float(mid[peak]),
+        peak_speed_mps=float(speed[peak]),
+        impact_speed_mps=float(speed[pre[-1]]),
+    )

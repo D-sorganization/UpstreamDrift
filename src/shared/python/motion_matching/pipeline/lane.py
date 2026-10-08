@@ -368,6 +368,10 @@ class Lane:
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
         self.face_targets: list[dict[str, Any] | None] | None = None
         self.face_weight = 0.0
+        #: Last pre-contact capture frame (GCV-20); the reference low-pass is
+        #: split there. None filters across impact (no club triad observed).
+        self.impact_index: int | None = None
+        self.impact_split_reason = "not computed"
 
     def set_face_targets(
         self,
@@ -388,6 +392,37 @@ class Lane:
         )
         self.face_weight = float(weight)
         self.face_targets = targets if any(targets) else None
+
+    def set_impact_split(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+    ) -> None:
+        """Locate impact in the capture so smoothing does not cross it (GCV-20,
+        #11767). Impact is the capture face centre's ball passage; when the
+        club triad cannot be observed the split is unavailable and the reason
+        is kept for the receipt (never a guessed frame)."""
+        from src.shared.python.motion_matching.club_face_target import (
+            capture_impact_index,
+        )
+
+        try:
+            self.impact_index = capture_impact_index(
+                self.times, self.points, self.valid, self.labels, attachments, spec
+            )
+        except ValueError as exc:
+            self.impact_index = None
+            self.impact_split_reason = f"unavailable: {exc}"
+        else:
+            self.impact_split_reason = "capture face-centre ball passage"
+
+    def impact_split_report(self) -> dict[str, Any]:
+        """Receipt block describing where the reference low-pass is split."""
+        report: dict[str, Any] = {"source": self.impact_split_reason}
+        if self.impact_index is not None:
+            report["frame"] = self.impact_index
+            report["time_s"] = float(self.times[self.impact_index] - self.times[0])
+        return report
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
         """Leg marker seeds; forefoot markers squared when foot progression is on."""

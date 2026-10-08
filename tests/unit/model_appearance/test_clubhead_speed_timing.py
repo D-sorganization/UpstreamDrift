@@ -72,9 +72,7 @@ def test_impact_speed_uses_only_pre_contact_samples() -> None:
 def test_speed_timing_detects_an_early_peak() -> None:
     """A head that brakes 25 ms before the ball reports an early peak."""
     t = np.arange(0.0, 1.6, 1.0 / 1000.0)
-    timing = cf.clubhead_speed_timing(
-        t, _swing(t, collision=False, brake_at_s=1.375)
-    )
+    timing = cf.clubhead_speed_timing(t, _swing(t, collision=False, brake_at_s=1.375))
     assert timing.peak_minus_impact_s < -0.020
 
 

@@ -14,7 +14,8 @@ For each capture this script
    1 kHz reference sample, float32), the address pose in
    ``address_poses.json`` and a per-club provenance record in
    ``provenance.json``: commands, input and output hashes, marker RMS, the
-   model-versus-capture face fit, and the impact and peak-speed frames.
+   model-versus-capture face fit, the impact and peak-speed frames and the
+   clubhead speed timing (GCV-20).
 
 Before overwriting, the previous fixture is measured the same way so the
 provenance keeps the before/after face angles. Nothing here is hand edited.
@@ -105,11 +106,13 @@ def _git_head() -> str:
 
 
 def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
-    """Face events (address, top, impact) of ``q`` and of the capture triad.
+    """Face events and clubhead speed timing of ``q`` and of the capture triad.
 
     The model uses MuJoCo FK of the run's scaled document; the capture face
     comes from the run's calibrated head triad. Impact is the sub-sample
     passage of the face centre through the ball, each swing on its own clock.
+    Returns ``{"faces": {...}, "speed_timing": {...}}``, each keyed by
+    ``model`` and ``capture`` (speed timing: GCV-20, #11767).
     """
     from dataclasses import asdict
 
@@ -122,9 +125,17 @@ def measure_swing(run_dir: Path, q: np.ndarray, dt_s: float) -> dict[str, Any]:
     )
     t_cap = lane.times - lane.times[0]
     model_n, model_c = _model_face(kin, spec, q, list(kin.coordinate_order))
-    model = cf.face_events(np.arange(len(q)) * dt_s, model_n, model_c)
-    capture = cf.face_events(t_cap, cap_n, cft.fill_unobserved(t_cap, cap_c))
-    return {"model": asdict(model), "capture": asdict(capture)}
+    t_model = np.arange(len(q)) * dt_s
+    cap_c = cft.fill_unobserved(t_cap, cap_c)
+    model = cf.face_events(t_model, model_n, model_c)
+    capture = cf.face_events(t_cap, cap_n, cap_c)
+    return {
+        "faces": {"model": asdict(model), "capture": asdict(capture)},
+        "speed_timing": {
+            "model": cf.clubhead_speed_timing(t_model, model_c).to_record(),
+            "capture": cf.clubhead_speed_timing(t_cap, cap_c).to_record(),
+        },
+    }
 
 
 def _run_kinematics(run_dir: Path) -> tuple[Any, Any, dict[str, Any], dict]:
@@ -173,7 +184,7 @@ def write_fixtures(
         old_q = np.load(npz_path)["q"].astype(float)
         before = {
             "fixture_sha256": _sha256(npz_path),
-            "faces": measure_swing(run_dir, old_q, FIXTURE_DT_S),
+            **measure_swing(run_dir, old_q, FIXTURE_DT_S),
         }
     with np.load(bundle_path, allow_pickle=False) as bundle:
         reference = np.asarray(bundle["reference_q"], dtype=float)
@@ -197,7 +208,8 @@ def write_fixtures(
         "face_orientation": receipt["ik"].get("face_orientation"),
         "capture_triad_offsets_m": _triad_offsets(receipt),
         "before": before,
-        "after": {"faces": measure_swing(run_dir, q_fixture, FIXTURE_DT_S)},
+        "after": measure_swing(run_dir, q_fixture, FIXTURE_DT_S),
+        "impact_split": receipt["ik"].get("impact_split"),
     }
 
 

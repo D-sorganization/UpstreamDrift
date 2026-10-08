@@ -625,7 +625,9 @@ def _solve_pink_ik(
         )
         for r in pink_result.frame_residuals
     ]
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_reference(
+        q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ, impact_index=lane.impact_index
+    )
     audit_result = pink_service.audit_trajectory(q_smooth, solve_req, ik_opts)
     all_converged = bool(pink_result.passed)
     rate_limits_respected = bool(
@@ -717,7 +719,9 @@ def _solve_trajectory_ik(
         return _solve_pink_ik(ctx, lane, kin, scaled_spec, labels, initial_q)
     q_ik, fits = full_capture_ik(lane, kin, initial_q)
     errors = marker_errors(kin, q_ik, lane.points)
-    q_smooth = smooth_reference(q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ)
+    q_smooth = smooth_reference(
+        q_ik, lane.rate_hz, REFERENCE_CUTOFF_HZ, impact_index=lane.impact_index
+    )
     q_ref, ref_fits = consistency_resolve(
         lane, kin, q_smooth, prior_weight=CONSISTENCY_PRIOR, iterations=30
     )
@@ -864,7 +868,9 @@ def _simulate_and_receipt(
     out_dir = ctx.out_dir
     log = ctx.log
     tracking = getattr(args, "tracking", "kkt")
-    q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
+    q_track = smooth_reference(
+        q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ, impact_index=lane.impact_index
+    )
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
@@ -981,6 +987,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
     lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
+    lane.set_impact_split(cal_res.attachments, cal_res.scaled_spec)
 
     (
         q_ik,
@@ -1028,6 +1035,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         )
     )
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
+    ik_report["impact_split"] = lane.impact_split_report()
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,

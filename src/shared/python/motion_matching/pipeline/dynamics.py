@@ -75,6 +75,11 @@ def validate_tracking_backend(name: str) -> str:
     return key
 
 
+def _impact_split(lane: Any) -> int | None:
+    """Lane's last pre-contact frame (GCV-20); None when it has not been set."""
+    return getattr(lane, "impact_index", None)
+
+
 def build_tracking_controller(
     sim: fs.FullBodySimulator,
     times: np.ndarray,
@@ -390,7 +395,9 @@ def shooting_fit(
             locked_per_frame=locked,
             axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
-        q_track = smooth_reference(q_fit, rate_hz, TRACKING_CUTOFF_HZ)
+        q_track = smooth_reference(
+            q_fit, rate_hz, TRACKING_CUTOFF_HZ, impact_index=_impact_split(lane)
+        )
     zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
     report = {
         "locked": list(SHOOTING_LOCKED),
@@ -459,7 +466,9 @@ def zmp_filter(
             com_targets_per_frame=goals,
             axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
-        q_track = smooth_reference(q_new, rate_hz, TRACKING_CUTOFF_HZ)
+        q_track = smooth_reference(
+            q_new, rate_hz, TRACKING_CUTOFF_HZ, impact_index=_impact_split(lane)
+        )
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
         errors = marker_errors(kin, q_track, lane.points)
         passes.append(

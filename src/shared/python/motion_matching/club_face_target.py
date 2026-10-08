@@ -325,3 +325,30 @@ def fill_unobserved(
     if seen.sum() < 2:
         raise ValueError("need at least two observed face centres to interpolate")
     return np.column_stack([np.interp(t, t[seen], c[seen, j]) for j in range(3)])
+
+
+def capture_impact_index(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> int:
+    """Last pre-contact capture frame (GCV-20, #11767).
+
+    The capture face centre (head triad through the calibrated
+    ``attachments``, gaps interpolated) passes the ball at the sub-sample
+    :func:`model_appearance.club_face.ball_passage`; the frame returned is the
+    start ``k`` of that segment, so ``times[k] <= t_impact <= times[k + 1]``.
+    Raises ``ValueError`` when ``times`` does not match the frames, the triad
+    cannot be observed, or the face centre never returns to the ball.
+    """
+    from src.shared.python.model_appearance.club_face import ball_passage
+
+    _, centres = observe_capture_face(points, valid, labels, attachments, spec)
+    t = np.asarray(times, dtype=float)
+    if t.shape != (len(centres),):
+        raise ValueError("times must hold one entry per capture frame")
+    _, k, _ = ball_passage(t, fill_unobserved(t, centres))
+    return int(k)
