@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from src.engines.simscape._errors import (
+    SimscapeChannelUnavailableError,
     SimscapeModelNotFoundError,
     SimscapeNotInstalledError,
     SimscapeSimulationError,
@@ -368,13 +369,22 @@ def test_compute_jacobian_returns_none(slx_pair: Path) -> None:
     a.close()
 
 
-def test_compute_contact_forces_zero(slx_pair: Path) -> None:
+def test_compute_contact_forces_unavailable_not_zero(slx_pair: Path) -> None:
+    """#11709: the model has no foot-ground contact; never report zero GRF."""
     a = SimscapeAdapter()
     a.load_from_path(str(slx_pair))
-    f = a.compute_contact_forces()
-    assert f.shape == (3,)
-    assert np.all(f == 0.0)
+    with pytest.raises(SimscapeChannelUnavailableError, match="foot-ground") as exc:
+        a.compute_contact_forces()
+    # RuntimeError is the platform's "optional channel unavailable" signal
+    # (api/routes/physics.py, dataset_generator/sim_recording.py).
+    assert isinstance(exc.value, RuntimeError)
+    assert exc.value.channel == "contact_forces"
     a.close()
+
+
+def test_compute_contact_forces_requires_loaded_model() -> None:
+    with pytest.raises(SimscapeStateError):
+        SimscapeAdapter().compute_contact_forces()
 
 
 def test_set_shaft_returns_false() -> None:
