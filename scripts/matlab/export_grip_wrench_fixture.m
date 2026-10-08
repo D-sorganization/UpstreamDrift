@@ -16,6 +16,8 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
 %   against the logged MomentandCoupleLogs.EquivalentMidpointCoupleGlobal.
 %
 %   OPTS fields: stop_time (default 0.30 s), n_rows (default 31).
+%   Coefficients are the model workspace's own polynomial values, run through
+%   simulate_with_coefficients (the single sanctioned forward call).
 %
 %   Preconditions:
 %     - MATLAB R2025b only (asserted).
@@ -40,26 +42,31 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     matlab_root = fullfile(repo, 'src', 'engines', 'Simscape_Multibody_Models', ...
         '3D_Golf_Model', 'matlab');
     model_dir = fullfile(matlab_root, 'src', 'model');
-    addpath(model_dir);
-    addpath(fullfile(matlab_root, 'src', 'functions', 'dataset_generator'));
+    addpath(genpath(fullfile(matlab_root, 'src')));
+    addpath(fullfile(matlab_root, 'motion_matching', 'shared'));
     if ~isfolder(out_dir); mkdir(out_dir); end
 
     cache = fullfile(tempdir, 'ud_grip_fixture_cache');
     Simulink.fileGenControl('set', 'CacheFolder', cache, ...
         'CodeGenFolder', cache, 'createDir', true);
 
+    % The single sanctioned forward call (simulate_with_coefficients), fed
+    % the model workspace's own polynomial coefficients (its designed swing).
     model = 'GolfSwing3D_Kinetic';
     load_system(model);
-    in = Simulink.SimulationInput(model);
-    in = in.setModelParameter('StopTime', num2str(opts.stop_time));
-    in = in.setModelParameter('FastRestart', 'off');
-    in = in.setModelParameter('SaveOutput', 'on');
-    in = in.setModelParameter('ReturnWorkspaceOutputs', 'on');
+    sim_opts = default_sim_options();
+    sim_opts.simulation_time = opts.stop_time;
+    sim_opts.fast_restart = false;
+    sim_opts.retain_raw_output = true;
+    sim_opts.stop_on_error = true;
+    sim_opts.verbosity = 'Silent';
+    theta = local_model_theta(model);
     tic;
-    sim_out = sim(in);
+    sim_out = simulate_with_coefficients(theta, sim_opts);
     elapsed_s = toc;
+    assert(sim_out.solver_status == "success", 'SimFailed: %s', sim_out.solver_status);
 
-    csb = sim_out.CombinedSignalBus;
+    csb = sim_out.raw_output.CombinedSignalBus;
     table_all = [];
     evalc('table_all = extractFromCombinedSignalBus(csb);');
     assert(~isempty(table_all), 'ExtractFailed: CombinedSignalBus was empty');
@@ -85,6 +92,11 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     fixture = table_all(idx, names);
     csv_path = fullfile(out_dir, 'simscape_grip_wrench_fixture.csv');
     writetable(fixture, csv_path);
+    % LF line endings so the receipt hash survives git text=auto normalization.
+    text = strrep(fileread(csv_path), sprintf('\r\n'), newline);
+    fid = fopen(csv_path, 'w');
+    fwrite(fid, text, 'char');
+    fclose(fid);
 
     % Two-contact reduction residual over every logged sample (not just
     % the decimated rows), in the same units as the logged couple.
@@ -104,6 +116,8 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     receipt.matlab_version = version;
     receipt.model = model;
     receipt.model_sha256 = local_sha256(fullfile(model_dir, [model '.slx']));
+    receipt.coefficient_source = 'model_workspace';
+    receipt.theta_sha256 = local_sha256_bytes(typecast(theta(:), 'uint8'));
     receipt.stop_time_s = opts.stop_time;
     receipt.sim_wall_clock_s = elapsed_s;
     receipt.samples_logged = n_all;
@@ -124,11 +138,33 @@ function receipt = export_grip_wrench_fixture(repo, out_dir, opts)
     close_system(model, 0);
 end
 
+function theta = local_model_theta(model)
+%LOCAL_MODEL_THETA  [A..G] per joint from the model workspace, canonical order.
+    info = getPolynomialParameterInfo();
+    joints = string(info.joint_names);
+    ws = get_param(model, 'ModelWorkspace');
+    letters = 'ABCDEFG';
+    theta = zeros(numel(joints) * 7, 1);
+    for j = 1:numel(joints)
+        for c = 1:7
+            name = char(joints(j) + letters(c));
+            assert(hasVariable(ws, name), 'MissingCoefficient: %s', name);
+            value = getVariable(ws, name);
+            if isa(value, 'Simulink.Parameter'); value = value.Value; end
+            theta((j - 1) * 7 + c) = double(value);
+        end
+    end
+end
+
 function hex = local_sha256(path)
     fid = fopen(path, 'r');
     assert(fid > 0, 'CannotOpen: %s', path);
     bytes = fread(fid, inf, '*uint8');
     fclose(fid);
+    hex = local_sha256_bytes(bytes);
+end
+
+function hex = local_sha256_bytes(bytes)
     md = java.security.MessageDigest.getInstance('SHA-256');
     digest = typecast(md.digest(bytes), 'uint8');
     hex = lower(reshape(dec2hex(digest, 2).', 1, []));
