@@ -72,6 +72,7 @@ def write_club_assets(
         "grip_length_m": club.grip_length_m,
         "shaft_radius_m": club.shaft_radius_m,
         "axis_offset_m": club.axis_offset_m,
+        "face_roll_deg": club.face_roll_deg,
     }
     spec_hash = hashlib.sha256(
         json.dumps(params, sort_keys=True).encode("utf-8")

@@ -18,6 +18,7 @@ import numpy as np
 
 from src.shared.python.model_appearance.club_head_mesh import (
     DEFAULT_AXIS_OFFSET_M,
+    club_face_normal,
     club_frame_mesh,
     load_club_head,
 )
@@ -31,6 +32,14 @@ SHAFT_BUTT_RADIUS_FRACTION = 0.95
 GRIP_TIP_RADIUS_M = 0.0105
 GRIP_BUTT_RADIUS_M = 0.0118
 DRIVER_MIN_LENGTH_M = 1.05  # longer than this and the head is a driver
+#: Roll of the head about the shaft, in the club-body frame, that squares the
+#: face to the target at the captured address pose of each tour-average
+#: capture (A: driver, B: 7-iron). The matched hand-club chain fixes the club
+#: roll only through fitted wrist constants (``GRIP_ROTATION_DEG``), so the
+#: club body ``+x`` axis is open 31 / 45 degrees there; this single constant
+#: re-seats the head and the ``Clubface Vector`` for every engine. Solved from
+#: forward kinematics (OSV-8, #11755); see test_clubface_square_at_address.
+ADDRESS_SQUARE_FACE_ROLL_DEG = {"driver": -37.92, "iron7": -48.99}
 PART_MATERIALS = {"shaft": None, "grip": "grip_rubber", "head": None}  # None: finish
 
 
@@ -43,8 +52,11 @@ class ClubAssembly:
     grip_length_m: float
     shaft_radius_m: float
     axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
+    face_roll_deg: float = 0.0  # head roll about the shaft axis (club frame)
 
     def __post_init__(self) -> None:
+        if not math.isfinite(self.face_roll_deg):
+            raise ValueError("face_roll_deg must be finite")
         for name in ("length_m", "grip_length_m", "shaft_radius_m"):
             value = getattr(self, name)
             if not math.isfinite(value) or value <= 0.0:
@@ -86,7 +98,8 @@ def assembly_from_spec(spec: Mapping[str, Any]) -> ClubAssembly | None:
         if "Clubhead" in solids
         else DEFAULT_AXIS_OFFSET_M
     )
-    return ClubAssembly(alias, length, grip, 0.0065, offset)
+    roll = club.get("face_roll_deg", ADDRESS_SQUARE_FACE_ROLL_DEG.get(alias, 0.0))
+    return ClubAssembly(alias, length, grip, 0.0065, offset, float(roll))
 
 
 def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
@@ -114,8 +127,19 @@ def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
     return {
         "shaft": shaft,
         "grip": grip,
-        "head": club_frame_mesh(head, axis_offset_m=z),
+        "head": club_frame_mesh(
+            head, axis_offset_m=z, face_roll_deg=club.face_roll_deg
+        ),
     }
+
+
+def clubface_vector(club: ClubAssembly) -> np.ndarray:
+    """The spec ``Clubface Vector``: unit face normal (with loft) in the club frame.
+
+    Rolled by the assembly's ``face_roll_deg``, so it is the direction the
+    rendered head's face points in every engine.
+    """
+    return club_face_normal(load_club_head(club.head_alias), club.face_roll_deg)
 
 
 def club_body_name(spec: Mapping[str, Any]) -> str | None:

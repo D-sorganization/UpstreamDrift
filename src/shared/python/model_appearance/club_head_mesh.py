@@ -340,12 +340,45 @@ def head_to_club_rotation(head: ClubHeadMesh) -> Array:
     return np.asarray(basis_c @ basis_h.T, float)
 
 
+def face_roll_rotation(face_roll_deg: float) -> Array:
+    """Rotation about the club-frame shaft axis (``y``) by ``face_roll_deg``.
+
+    Positive angles follow the right-hand rule about club ``+y``. Raises
+    ``ValueError`` for a non-finite angle.
+    """
+    if not math.isfinite(face_roll_deg):
+        raise ValueError("face_roll_deg must be finite")
+    c, s = math.cos(math.radians(face_roll_deg)), math.sin(math.radians(face_roll_deg))
+    return np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
+
+
+def club_face_normal(head: ClubHeadMesh, face_roll_deg: float = 0.0) -> Array:
+    """Unit face normal (loft included) in the club-body frame, rolled."""
+    loft = math.radians(head.loft_deg)
+    normal_h = np.array([math.cos(loft), math.sin(loft), 0.0])
+    return np.asarray(
+        face_roll_rotation(face_roll_deg) @ head_to_club_rotation(head) @ normal_h,
+        float,
+    )
+
+
 def club_frame_mesh(
-    head: ClubHeadMesh, *, axis_offset_m: float = DEFAULT_AXIS_OFFSET_M
+    head: ClubHeadMesh,
+    *,
+    axis_offset_m: float = DEFAULT_AXIS_OFFSET_M,
+    face_roll_deg: float = 0.0,
 ) -> Mesh:
-    """Head plus hosel in the club-body frame (metres, outward winding)."""
+    """Head plus hosel in the club-body frame (metres, outward winding).
+
+    ``face_roll_deg`` turns the head about the shaft axis line (club ``y``
+    through ``z = axis_offset_m``); the hosel is on that line and stays put.
+    """
     if not math.isfinite(axis_offset_m):
         raise ValueError("axis_offset_m must be finite")
     rot = head_to_club_rotation(head)
     shift = np.array([0.0, 0.0, axis_offset_m]) - rot @ head.sole_point
-    return Mesh(head.mesh.vertices @ rot.T + shift, head.mesh.faces)
+    verts = head.mesh.vertices @ rot.T + shift
+    if face_roll_deg != 0.0:
+        axis = np.array([0.0, 0.0, axis_offset_m])
+        verts = (verts - axis) @ face_roll_rotation(face_roll_deg).T + axis
+    return Mesh(verts, head.mesh.faces)

@@ -3,6 +3,7 @@
     "driver": {
       "assembly": {
         "axis_offset_m": 0.064,
+        "face_roll_deg": -37.92,
         "grip_length_m": 0.265,
         "head_alias": "driver",
         "length_m": 1.156,
@@ -17,14 +18,15 @@
       "head_source": "tools_parametric",
       "sha256": {
         "grip": "3d3497e3c6920fc697f39789b44e494322466415e13a9e505d1bb7ca0803e4dc",
-        "head": "6f65f5a5132eb03a6be66e0581a0587da47ff500fd37e8a7474744ac59a9bfe6",
+        "head": "f171d4d8d47a516bdf4485d4e926bf9c4f2c180893b65a50aa58f37d872e37b4",
         "shaft": "54ff22636c0e443c544107c22b42f852381690feeac59dc694268d678fcbeeea"
       },
-      "spec_sha256": "79bc2adec11943d3191e55eda61da7bf0a59816283070eb2eb473a090ff93046"
+      "spec_sha256": "9f15a045b588770c8e3eb6e8ce37f480f10a9e755fc6daf0a8b6d50edfcdea01"
     },
     "iron7": {
       "assembly": {
         "axis_offset_m": 0.064,
+        "face_roll_deg": -48.99,
         "grip_length_m": 0.265,
         "head_alias": "iron7",
         "length_m": 0.94,
@@ -39,10 +41,10 @@
       "head_source": "tools_parametric",
       "sha256": {
         "grip": "b2793b4abb56d89491dcb367f810993eb1b049ce3d9a36bdadd6635599a3ef6d",
-        "head": "dc59dba88031e8d0fb9c6a2b00075dc58d0ca1a74b948e9df909a985a1e1a15c",
+        "head": "55caa4004a6b1089f860a968053fb4b5f3ee281fac42356638d41246686dd9d0",
         "shaft": "9bbe857b20acc00dd3ab138c3c732aa9516fefaadaa0bb0e04b7da21b485d5ff"
       },
-      "spec_sha256": "ebae11ad575245a5da00aabf6b64fa0e729c854cb79e51c043d7b0852fc8cb35"
+      "spec_sha256": "9a14c1ecd38e71add368371d5f7085c9104130c239073f207722f0938bbd594f"
     }
   },
   "frame": "club body: origin at sole point on shaft axis, shaft -y",

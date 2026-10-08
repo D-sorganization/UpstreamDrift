@@ -1,3 +1,9 @@
+# Active: Clubface Roll At Address, OSV-8 #11755
+
+- On PR #11752. The matched hand-club chain leaves the club roll to fitted wrist constants, so club `+x` was open 30.7 deg (driver) and 44.8 deg (7-iron) at address in every engine. One shared constant, `ADDRESS_SQUARE_FACE_ROLL_DEG` in `model_appearance/club_assembly.py`, now rolls the head about the shaft (and defines `clubface_vector`); `club.face_roll_deg` in a spec overrides it.
+- Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
+- Open: the roll is calibrated at address only. At the downswing minimum-height frame the face is still 107 deg (driver) and 53 deg (iron) open, so the grip roll in the hand chain needs refitting (not done here). `tour_matching/club_geometry.py` models are unrolled.
+
 # Active: MyoFullBody Muscle-Driven Swing, Epic #11642
 
 - Branch `feat/myofullbody-muscle-swing-11642`; children #11643 to #11647 (MFB-6 #11648 is blocked and not started). Code: `src/shared/python/myofullbody/`; scripts `fetch_myofullbody.py`, `run_myofullbody_swing.py`, `render_myofullbody_swing.py`; reference `docs/research/myofullbody_swing/myofullbody_swing.tex`.
