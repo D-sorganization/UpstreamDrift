@@ -500,9 +500,74 @@ Acceptance bounds (never loosened):
 
 ### Limitations
 
-- The kinetics are valid only for the 0 to 0.94 s window (backswing and transition). The downswing, impact and finish are not covered because the committed OpenSim IK candidate is not a qualified motion. The needed work is a closure-consistent, marker-qualified IK (marker RMS near 30 to 50 mm) in the OpenSim coordinate convention, then a re-run of the receipt; until then no impact-phase hand-force number should be presented.
+- (Superseded by section 17, which drives the full window from the closure-consistent fits.) With the IK candidate, the kinetics are valid only for the 0 to 0.94 s window (backswing and transition). The downswing, impact and finish are not covered because the committed OpenSim IK candidate is not a qualified motion. The needed work is a closure-consistent, marker-qualified IK (marker RMS near 30 to 50 mm) in the OpenSim coordinate convention, then a re-run of the receipt; until then no impact-phase hand-force number should be presented.
 - The right hand arm chain of the input is ignored (open loop); the split is a property of this approximation.
 - Stiffness defaults and the deflection and internal-force bounds are owner-reviewable engineering values; the three citations were confirmed to exist but support no number.
 - Explicit stiff integration of the full 1.8 s takes about 35 minutes at accuracy 1e-3.
 - Software correctness only. Scientific qualification stays in the design-manual governance pathway.
 - Out of scope for phase 1: the contact model, MuJoCo, Drake and Pinocchio parity, and the `golf_humanoid.osim` builder.
+
+## 17. Impact-Phase Bushing Grip From the Closure-Consistent Fits (OSV-7)
+
+### What
+
+The section 16 bushing simulation is re-driven over the full 0 to 1.8 s window from the OSV-10 fitted swings (`tests/fixtures/club_face/swing_q_{driver,iron7}.npz`: the 1 kHz same-input reference of the shared ground-support fit, every second sample, IK marker RMS 33.6 mm for the driver and 31.6 mm for the iron, replayed identically in every engine). The columns are mapped by coordinate name onto the committed `full_body_spec_anthro_<club>.json` with `grip_contact.load_coordinate_swing` and `map_coordinates`. The mapping is the identity for these documents, but it is checked: a missing, duplicated or unused coordinate raises `ValueError`. The prescribed coordinates are used as committed, with no filter and no repair. `condition_trajectory` finds no frame to repair and no 2 pi flip, and the 25 Hz filter of the candidate pipeline changes the peak forces by less than 4 % while opening the loop slightly. The model, stiffness, damping (zeta = 0.70) and bounds are unchanged.
+
+### Input Kinematics (Reported First)
+
+| | Driver (capture A) | 7-iron (capture B) |
+| --- | --- | --- |
+| Hand-loop closure, max over swing | 5.0e-5 mm, 8e-6 deg | 1.7e-4 mm, 2e-5 deg |
+| Model left grip-point speed, peak | 9.63 m/s at 1.244 s | 9.16 m/s at 1.262 s |
+| Model right closure-frame speed, peak | 8.47 m/s at 1.238 s | 8.75 m/s at 1.296 s |
+| Measured left / right wrist-marker speed, peak | 9.73 / 9.58 m/s | 9.30 / 9.01 m/s |
+
+The loop is closed to float32 precision, and the hand speeds match the measured wrist markers within 1 to 12 %. The OpenSim IK candidate gave 134 mm and 95 m/s. The input is credible for kinetics.
+
+### Integrator
+
+The integrator is OpenSim `Manager` Runge-Kutta-Merson (explicit, error-controlled) at accuracy 1e-3, sampled at the 2 ms fixture times, taking 1.5 to 7 minutes per swing. Convergence of the peaks against RK-Merson at 1e-5 and implicit CPodes at 1e-4: driver internal force 509.8 / 509.8 / 511.2 N, iron 524.1 / 524.1 / 526.3 N; deflections agree within 0.5 %.
+
+### Results (Hand Acting on the Club)
+
+| Quantity | Driver | 7-iron |
+| --- | --- | --- |
+| Impact time (shared `club_face.impact_frame`) | 1.326 s | 1.336 s |
+| Lead (L) / trail (R) force at impact | 506 / 530 N | 517 / 552 N |
+| Lead share at impact | 48.9 % | 48.4 % |
+| Net force at impact (peak) | 332 N (439 N at 1.296 s) | 360 N (457 N) |
+| Internal force at impact (full-window peak) | 491 N (510 N at 1.322 s) | 503 N (524 N at 1.332 s) |
+| Squeeze part of the internal force at impact | 2.2 N | 3.9 N |
+| Force-pair couple / equivalent couple at midpoint, at impact | 39.4 / 71.2 N m | 40.4 / 71.7 N m |
+| Peak equivalent couple at midpoint | 99.6 N m at 1.314 s | 98.6 N m at 1.324 s |
+| Free torque per hand at impact | 18.6 N m | 17.0 N m |
+| Peak per-hand force L / R | 515 / 564 N | 533 / 584 N |
+| Max deflection | 0.56 mm, 0.84 deg | 0.58 mm, 0.84 deg |
+| Window 0 to 1.30 s: peak internal force | 364 N | 293 N |
+
+Acceptance against the unchanged bounds:
+
+- Deflection (3 mm, 2 deg): met over the full window for both clubs. `test_full_swing_deflection_within_limits` passes.
+- Internal force (500 N): exceeded at impact by 2.0 % (driver) and 4.8 % (iron). `test_full_swing_internal_force_within_limit` stays a strict xfail. The bound is not loosened. Over 0 to 1.30 s, the window of the former candidate xfail, all bounds are met. That window ends before impact, so it is not presented as a full-window pass.
+
+### Sanity Check Against Published Magnitudes
+
+- Nesbit (2005), J Sports Sci Med 4(4):499-519, Table 3 (85 golfers): the golfer-club linear force at impact averages 397.5 N (range 300 to 490 N). The model's net force at impact, 332 and 360 N, and its peaks, 439 and 457 N, lie inside that range.
+- Grober (2020), arXiv:2006.11778, section VIII, quotes MacKenzie's instrumented-grip data for one golfer in the last frame before impact: F = 456 N, moment of force 55.8 N m, couple -59.1 N m. Grober notes that a 50 N m couple at a 1/6 m hand spacing needs about 300 N per hand. The model's 71 N m equivalent couple at impact (peak 99.6 N m) is the same order but larger. Because the bushing spacing is 76 mm, not 167 mm, carrying it as a force pair needs a larger internal force. That spacing is the reason the internal force crosses 500 N.
+
+### Why the Internal-Force Bound Is Not Met
+
+Of the internal force at impact, 99.9 % is transverse: a force pair carrying the club couple, with a squeeze of only 2 to 4 N. It is fixed by the club's angular acceleration, the 76 mm hand spacing of the grip frames and the ratio of `K_r` to `K_t`, and it converges with the integrator. The 500 N bound was set (section 16) from the backswing and transition with a 38 N m couple in mind. At impact, the published couple of about 60 N m already implies roughly 790 N at 76 mm if the free torques carried nothing. Exceeding the bound is therefore a property of the interface geometry and stiffness defaults, not of numerical error or the input. Whether the bound, the hand spacing or `K_r` should change is an owner decision. None of them is tuned here.
+
+### Evidence Receipt
+
+- [`evidence/grip_kinetics/receipt_full_swing_driver.json`](evidence/grip_kinetics/receipt_full_swing_driver.json) and [`receipt_full_swing_iron7.json`](evidence/grip_kinetics/receipt_full_swing_iron7.json), with [`driver_bushing_series_full_swing.npz`](evidence/grip_kinetics/driver_bushing_series_full_swing.npz) and [`iron7_bushing_series_full_swing.npz`](evidence/grip_kinetics/iron7_bushing_series_full_swing.npz).
+- Reproduce: `CAPTURE_DATA_DIR=... MPLBACKEND=Agg PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/grip_kinetics/run_full_swing_grip_kinetics.py --club driver --convergence` (and `--club iron7`).
+- Plots and 0.5x hands close-ups (outside the repository): `~/Videos/Parity Audit/golfer_realism/grip_kinetics/full_swing/`.
+
+### Limitations
+
+- Both bushings' hand frames sit on the left hand body (section 16). With a closed loop this is kinematically the same as prescribing the right arm. Because `K_r` is equal per hand, the free-torque split is 50/50 by construction, so the lead/trail split of the free torque is not a measurement.
+- The couple and internal force oscillate at about 15 Hz between 1.25 and 1.40 s. This content is in the fitted wrist kinematics (it survives the 25 Hz filter) and has not been validated against measured club angular acceleration.
+- The fitted swing has no ball. The impact metrics are those of the club passing through the ball position, not of the collision.
+- Software correctness only. Scientific qualification stays in the design-manual governance pathway. MuJoCo, Drake and Pinocchio bushing parity and the contact model remain open (#11739).

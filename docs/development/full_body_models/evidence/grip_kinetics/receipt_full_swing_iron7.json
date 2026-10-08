@@ -1,0 +1,197 @@
+{
+  "issue": "#11739",
+  "epic": "#11726",
+  "club": "iron7",
+  "capture": "B",
+  "spec_sha256": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
+  "input_kinematics": {
+    "fixture": "tests/fixtures/club_face/swing_q_iron7.npz",
+    "fixture_sha256": "2b6d382f298612c14a9ca45f5ef9543d79db553fb89121db3214aacf430843af",
+    "ik_marker_rms_m": 0.0316487650783191,
+    "reference_marker_rms_m": 0.03080485093885836,
+    "closure_distance_mm": {
+      "max": 0.0001735443581655747,
+      "median": 6.81120830035951e-05
+    },
+    "closure_angle_deg": {
+      "max": 2.1808641969171743e-05
+    },
+    "model_left_grip_point_speed": {
+      "peak_m_s": 9.163420673638383,
+      "time_s": 1.262
+    },
+    "model_right_closure_frame_speed": {
+      "peak_m_s": 8.75384908623817,
+      "time_s": 1.296
+    },
+    "measured_wrist_marker_speed": {
+      "left": {
+        "peak_m_s": 9.30057421512929,
+        "time_s": 1.2646239554317549,
+        "p95_m_s": 6.682135324025362
+      },
+      "right": {
+        "peak_m_s": 9.010648228916002,
+        "time_s": 1.3649025069637883,
+        "p95_m_s": 7.585059148348667
+      }
+    },
+    "note": "model speeds are of the grip points, measured of the wrist-top markers; the grip points lie further from the swing centre"
+  },
+  "prescription": "fixture coordinates as committed, SimmSpline, no filter",
+  "integrator": {
+    "method": "RungeKuttaMerson",
+    "accuracy": 0.001,
+    "wall_time_s": 422.96516444100416
+  },
+  "modal_frequencies_hz": [
+    24.92573411926416,
+    26.035159111055407,
+    344.04341112866666,
+    756.8447189906502,
+    890.8779927751604,
+    1039.3336581834365
+  ],
+  "modal_damping_ratios": [
+    0.7000000000000001,
+    0.7000000000000007,
+    0.7,
+    0.6999999999999998,
+    0.7000000000000002,
+    0.7
+  ],
+  "bounds": {
+    "deflection_mm": 3.0,
+    "rotation_deg": 2.0,
+    "internal_force_n": 500.0
+  },
+  "full_window": {
+    "samples": 914,
+    "peak_time_s": 1.33,
+    "peak_force_n": {
+      "L": 532.9576612811162,
+      "R": 584.4736217975021
+    },
+    "peak_net_force_n": 456.8226024275185,
+    "max_translation_deflection_mm": {
+      "L": 0.5338021765359946,
+      "R": 0.5846601743565066
+    },
+    "max_rotation_deflection_deg": {
+      "L": 0.8387643883291983,
+      "R": 0.8387643883291983
+    },
+    "left_force_share": {
+      "bushing_at_peak": 0.4765255773362813,
+      "bushing_median_loaded": 0.4792019867763001,
+      "min_norm_at_peak": 0.4879196966134169,
+      "min_norm_median_loaded": 0.4891280483787983
+    },
+    "left_force_difference_vs_min_norm_n": {
+      "max": 755.9419072545634,
+      "rms_loaded": 312.4083419072053
+    },
+    "peak_hand_power_w": {
+      "L": 2218.7880335452437,
+      "R": 3244.867060295446
+    },
+    "internal_force": {
+      "peak_internal_n": 524.0907026791301,
+      "peak_net_n": 456.8226024275185,
+      "peak_axial_squeeze_n": 3.8587363583761203,
+      "peak_transverse_n": 524.0783616616598,
+      "peak_couple_nm": 42.094944899611896
+    }
+  },
+  "full_window_bounds": {
+    "peak_force_L_n": 532.9576612811162,
+    "peak_force_R_n": 584.4736217975021,
+    "peak_net_n": 456.8226024275185,
+    "peak_internal_n": 524.0907026791301,
+    "max_deflection_mm": 0.5846601743565066,
+    "max_rotation_deg": 0.8387643883291983
+  },
+  "window_0_to_1p30_s_bounds": {
+    "peak_force_L_n": 303.92606336662516,
+    "peak_force_R_n": 355.62546889096143,
+    "peak_net_n": 432.14779729600315,
+    "peak_internal_n": 293.02906958948114,
+    "max_deflection_mm": 0.3543745845970125,
+    "max_rotation_deg": 0.4954401390009171
+  },
+  "impact": {
+    "impact_time_s": 1.336,
+    "detector": "model_appearance.club_face.impact_frame on the club body origin",
+    "at_impact": {
+      "force_n": {
+        "L_lead": 517.0724281506522,
+        "R_trail": 551.6265746842743
+      },
+      "lead_share": 0.48383354600221357,
+      "net_n": 359.5875496765066,
+      "internal_n": 503.4899060112027,
+      "internal_axial_squeeze_n": 3.8587363583761203,
+      "internal_transverse_n": 503.47511915573966,
+      "force_pair_couple_nm": 40.440054292622904,
+      "equivalent_couple_at_midpoint_nm": 71.65150986987432,
+      "free_torque_nm": {
+        "L": 16.980596497618215,
+        "R": 16.98059649761822
+      }
+    },
+    "peak_within_10_ms": {
+      "force_n": {
+        "L": 532.9576612811162,
+        "R": 584.4736217975021
+      },
+      "net_n": 401.10098336519525,
+      "internal_n": 524.0907026791301,
+      "equivalent_couple_at_midpoint_nm": 94.25659220132574
+    },
+    "peak_full_window": {
+      "equivalent_couple_at_midpoint_nm": 98.56396381538931,
+      "couple_peak_time_s": 1.324,
+      "internal_peak_time_s": 1.332
+    }
+  },
+  "literature_sanity_check": [
+    {
+      "source": "Nesbit S M (2005) A three dimensional kinematic and kinetic study of the golf swing. J Sports Sci Med 4(4):499-519, Table 3",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3899667/",
+      "quantity": "golfer-club linear (net) force at impact, 84 male + 1 female",
+      "value": "mean 397.5 N, median 400 N, SD 87.7 N, range 300-490 N",
+      "compare_to": "net force at impact"
+    },
+    {
+      "source": "Grober R D (2020) Forces and torques near to impact in the golf swing. arXiv:2006.11778, section VIII, quoting MacKenzie's instrumented-grip data (one golfer, 116.5 mph, last frame before impact)",
+      "url": "https://arxiv.org/abs/2006.11778",
+      "quantity": "net force, moment of force and couple on the club",
+      "value": "F0 = 456 N, M0 = 55.8 N m, K0 = -59.1 N m; a 50 N m couple needs about 300 N per hand at 1/6 m spacing",
+      "compare_to": "net force and equivalent couple at impact"
+    }
+  ],
+  "convergence": {
+    "RungeKuttaMerson_1e-05": {
+      "method": "RungeKuttaMerson",
+      "accuracy": 1e-05,
+      "wall_time_s": 1217.489094324992,
+      "peak_force_L_n": 533.0809132893766,
+      "peak_force_R_n": 584.3608387292801,
+      "peak_net_n": 456.7470104485919,
+      "peak_internal_n": 524.1036631810554,
+      "max_deflection_mm": 0.5845723502388736,
+      "max_rotation_deg": 0.8387500890169366
+    },
+    "CPodes_0.0001": {
+      "method": "CPodes",
+      "accuracy": 0.0001,
+      "wall_time_s": 430.20884575200034,
+      "peak_force_L_n": 537.2196233920541,
+      "peak_force_R_n": 582.6559612337014,
+      "peak_net_n": 457.4198270449026,
+      "peak_internal_n": 526.3081273842669,
+      "max_deflection_mm": 0.5826656835477368,
+      "max_rotation_deg": 0.8413711748653134
+    }
+  }
+}

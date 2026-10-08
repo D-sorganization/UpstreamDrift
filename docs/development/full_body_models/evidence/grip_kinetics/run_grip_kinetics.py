@@ -256,7 +256,11 @@ def static_hold(spec_path: Path) -> dict:
 
 
 def plot_series(
-    run: BushingRun, path: Path, discontinuity_s: float | None = None
+    run: BushingRun,
+    path: Path,
+    discontinuity_s: float | None = None,
+    title: str = "Driver Swing, Bushing Grip: Wrenches Exerted by Each Hand on the Club",
+    events: dict[str, float] | None = None,
 ) -> None:
     """Per-hand force and couple (free torque + moment of force) versus time."""
     analyses = analyze_run(run)
@@ -313,6 +317,17 @@ def plot_series(
             color="darkorange",
             fontsize=8,
         )
+    for name, when in (events or {}).items():
+        for ax in axes:
+            ax.axvline(when, color="purple", lw=1.0, ls="--")
+        axes[0].text(
+            when,
+            0.9,
+            f" {name}",
+            transform=axes[0].get_xaxis_transform(),
+            color="purple",
+            fontsize=8,
+        )
     for ax, label in zip(
         axes,
         (
@@ -328,15 +343,18 @@ def plot_series(
         ax.grid(alpha=0.3)
         ax.legend(loc="upper left", fontsize=8)
     axes[-1].set_xlabel("Time (s)")
-    fig.suptitle(
-        "Driver Swing, Bushing Grip: Wrenches Exerted by Each Hand on the Club"
-    )
+    fig.suptitle(title)
     fig.tight_layout()
     fig.savefig(path, dpi=130)
     plt.close(fig)
 
 
-def render_clip(run: BushingRun, path: Path, length_m: float = 1.156) -> int:
+def render_clip(
+    run: BushingRun,
+    path: Path,
+    length_m: float | None = 1.156,
+    title: str = "Bushing Grip, Driver (0.5x)",
+) -> int:
     """0.5x hands close-up with per-hand force arrows (GCV-4/GCV-10 glyphs)."""
     analyses = analyze_run(run)
     step = max(1, int(round(run.time_s.size / (run.time_s[-1] * 60.0))))  # ~60 sim-fps
@@ -355,8 +373,16 @@ def render_clip(run: BushingRun, path: Path, length_m: float = 1.156) -> int:
             ax.clear()
             mid = 0.5 * (run.grip_point_m["L"][i] + run.grip_point_m["R"][i])
             r = run.club_rotation[i]
-            butt = run.club_position_m[i] + r @ np.array([0.0, -length_m, 0.064])
             head = run.club_position_m[i]
+            if length_m is None:  # butt just beyond the hand farther from the head
+                far = max(
+                    (run.grip_point_m[s][i] for s in "LR"),
+                    key=lambda p: float(np.linalg.norm(p - head)),
+                )
+                axis = (far - head) / np.linalg.norm(far - head)
+                butt = far + 0.04 * axis
+            else:
+                butt = head + r @ np.array([0.0, -length_m, 0.064])
             ax.plot(*zip(butt, head, strict=True), color="#444", lw=3)
             for side, colour in (("L", "#1f77b4"), ("R", "#d62728")):
                 ax.scatter(*run.grip_point_m[side][i], color=colour, s=60)
@@ -389,7 +415,8 @@ def render_clip(run: BushingRun, path: Path, length_m: float = 1.156) -> int:
             ax.set_box_aspect((1, 1, 1))
             ax.view_init(elev=15, azim=-70)
             ax.set_title(
-                f"Bushing Grip, Driver (0.5x): t = {run.time_s[i]:.3f} s\nL blue, R red; arrows = hand force on club",
+                f"{title}: t = {run.time_s[i]:.3f} s\n"
+                "L blue, R red; arrows = hand force on club",
                 fontsize=9,
             )
             fig.savefig(Path(tmp) / f"f{n:05d}.png", dpi=100)
