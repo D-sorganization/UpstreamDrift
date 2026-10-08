@@ -21,12 +21,18 @@ import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.secur
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.contracts import precondition
+from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_SCHEMA_VERSIONS = {"full-body-v1"}
 DEFAULT_CLOSURE_TYPE = "weld"
+CLUB_BODY = (
+    "Clubhead"  # OpenSim name of the spec's club body (head, shaft, grip solids)
+)
+DEFAULT_CLUB_GEOMETRY_REF = ""  # bare names; loaders register models/geometry/club
 
 
 def _format_numbers(values: Sequence[float] | np.ndarray) -> str:
@@ -192,8 +198,18 @@ def clean_osim_joint_name(jname: str, child_name: str) -> str:
     return f"joint_{clean_osim_body_name(child_name)}"
 
 
-def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]:
-    """Construct BodySet from specification and return body name mappings."""
+def _build_bodyset(
+    model: ET.Element,
+    spec: Mapping[str, Any],
+    club_geometry_ref: str | None = None,
+    club_finish: str = club_visuals.DEFAULT_FINISH,
+) -> dict[str, str]:
+    """Construct BodySet from specification and return body name mappings.
+
+    With ``club_geometry_ref`` the club body gets shaft, grip and head
+    ``<Mesh>`` geometry from the shared club assembly (visual only).
+    """
+    club = assembly_from_spec(spec) if club_geometry_ref is not None else None
     bodyset = ET.SubElement(model, "BodySet", attrib={"name": "bodyset"})
     objects = ET.SubElement(bodyset, "objects")
     body_map: dict[str, str] = {}
@@ -213,6 +229,10 @@ def _build_bodyset(model: ET.Element, spec: Mapping[str, Any]) -> dict[str, str]
         ET.SubElement(fg, "socket_frame").text = ".."
         ET.SubElement(fg, "scale_factors").text = "0.2 0.2 0.2"
         ET.SubElement(body_elem, "attached_geometry")
+        if club is not None and club_geometry_ref is not None and bname == CLUB_BODY:
+            club_visuals.attach_club_meshes(
+                body_elem, club.head_alias, club_geometry_ref, club_finish
+            )
 
         wrap = ET.SubElement(
             body_elem, "WrapObjectSet", attrib={"name": "wrapobjectset"}
@@ -529,6 +549,21 @@ def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
         ET.SubElement(marker_elem, "fixed").text = "false"
 
 
+def _club_geometry_meta(
+    spec: Mapping[str, Any], club_geometry_ref: str | None
+) -> dict[str, Any] | None:
+    club = assembly_from_spec(spec) if club_geometry_ref is not None else None
+    if club is None:
+        return None
+    return {
+        "directory": club_geometry_ref,
+        "head_alias": club.head_alias,
+        "files": [
+            club_visuals.asset_filename(club.head_alias, p) for p in club_visuals.PARTS
+        ],
+    }
+
+
 @precondition(
     lambda spec, **kwargs: bool(spec), "spec mapping or bytes must not be empty"
 )
@@ -538,6 +573,8 @@ def export_full_body_osim(
     model_name: str = "full_body_anthro_driver",
     closure_type: str = DEFAULT_CLOSURE_TYPE,
     actuate_root: bool = False,
+    club_geometry_ref: str | None = DEFAULT_CLUB_GEOMETRY_REF,
+    club_finish: str = club_visuals.DEFAULT_FINISH,
 ) -> tuple[str, dict[str, Any]]:
     """Export anthropometric full-body specification to OpenSim 4.0 XML string.
 
@@ -551,6 +588,12 @@ def export_full_body_osim(
         Grip loop-closure formulation ("weld" or "point_pair").
     actuate_root : bool
         Whether to generate CoordinateActuators for root 6-DOF coordinates.
+    club_geometry_ref : str | None
+        Directory, as the saved model references it (relative to the model
+        file, or absolute), holding the club STLs written by
+        ``club_visuals.write_club_assets``; ``None`` leaves the club bare.
+    club_finish : str
+        Appearance-library material for the shaft and head.
 
     Returns
     -------
@@ -579,7 +622,7 @@ def export_full_body_osim(
     ET.SubElement(model, "length_units").text = "m"
     ET.SubElement(model, "force_units").text = "N"
 
-    _build_bodyset(model, spec)
+    _build_bodyset(model, spec, club_geometry_ref, club_finish)
     coords = _build_jointset(model, spec)
 
     # ControllerSet (empty container for OpenSim compliance)
@@ -607,9 +650,19 @@ def export_full_body_osim(
         "contact_sphere_count": len(spec["contact"]["spheres"]),
         "closure_type": closure_type,
         "actuate_root": actuate_root,
+        "club_geometry": _club_geometry_meta(spec, club_geometry_ref),
     }
 
     return xml_text, metadata
+
+
+def _write_club_assets(spec: Mapping[str, Any], directory: Path) -> None:
+    """Write the club STLs the exported model references (default: committed dir)."""
+    club = assembly_from_spec(spec)
+    if club is None:
+        return
+    club_visuals.write_club_assets(club, directory)
+    logger.info("Wrote club meshes to %s", directory)
 
 
 def main() -> int:
@@ -635,6 +688,23 @@ def main() -> int:
         help="Closure constraint formulation",
     )
     parser.add_argument(
+        "--club-geometry-ref",
+        type=str,
+        default=DEFAULT_CLUB_GEOMETRY_REF,
+        help="Directory prefix written into mesh_file ('' = bare file names)",
+    )
+    parser.add_argument(
+        "--no-club-geometry",
+        action="store_true",
+        help="Leave the club without visual meshes",
+    )
+    parser.add_argument(
+        "--club-geometry-dir",
+        type=Path,
+        default=club_visuals.GEOMETRY_DIR,
+        help="Where the club STLs are written",
+    )
+    parser.add_argument(
         "--actuate-root",
         action="store_true",
         help="Generate CoordinateActuators for root floating-base coordinates",
@@ -654,11 +724,14 @@ def main() -> int:
         model_name=name,
         closure_type=args.closure_type,
         actuate_root=args.actuate_root,
+        club_geometry_ref=None if args.no_club_geometry else args.club_geometry_ref,
     )
 
     out_path = args.out.resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(xml_str, encoding="utf-8")
+    if not args.no_club_geometry:
+        _write_club_assets(json.loads(spec_bytes), args.club_geometry_dir.resolve())
     logger.info("Wrote OpenSim model to %s", out_path)
 
     if args.receipt:
