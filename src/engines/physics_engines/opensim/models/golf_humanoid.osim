@@ -1394,6 +1394,17 @@
 					<mass>0.48204408524363901</mass>
 					<mass_center>0 -0.068095000000000003 0</mass_center>
 					<inertia>0.00093985399999999995 0.00057634600000000004 0.0014118900000000001 0 0 0</inertia>
+					<components>
+						<PhysicalOffsetFrame name="hand_r_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.2 0.2 0.2</scale_factors>
+							</FrameGeometry>
+							<socket_parent>..</socket_parent>
+							<translation>0.022001223256120778 -0.084989054522732727 7.4606668201138149e-06</translation>
+							<orientation>-1.3097220934355633 -0.89573564690346064 -1.456125880059737</orientation>
+						</PhysicalOffsetFrame>
+					</components>
 				</Body>
 				<Body name="humerus_l">
 					<FrameGeometry name="frame_geometry">
@@ -1724,20 +1735,80 @@
 					<mass>0.48204408524363901</mass>
 					<mass_center>0 -0.068095000000000003 0</mass_center>
 					<inertia>0.00093985399999999995 0.00057634600000000004 0.0014118900000000001 0 0 0</inertia>
+					<components>
+						<PhysicalOffsetFrame name="hand_l_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.2 0.2 0.2</scale_factors>
+							</FrameGeometry>
+							<socket_parent>..</socket_parent>
+							<translation>0.021998693945641256 -0.08494265867646339 1.6828050293238306e-06</translation>
+							<orientation>1.2344866959091527 0.21394068732832716 -1.6020139805914415</orientation>
+						</PhysicalOffsetFrame>
+					</components>
 				</Body>
 				<Body name="Club">
-					<FrameGeometry name="frame_geometry">
-						<socket_frame>..</socket_frame>
-						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-					</FrameGeometry>
-					<attached_geometry />
-					<WrapObjectSet name="wrapobjectset">
-						<objects />
-						<groups />
-					</WrapObjectSet>
-					<mass>0.32</mass>
-					<mass_center>0.0 -0.786 0.0</mass_center>
-					<inertia>0.1158 0.0001 0.1158 0.0 0.0 0.0</inertia>
+					<mass>0.313</mass>
+					<mass_center>0 -0.25601437699680507 0.064000000000000001</mass_center>
+					<inertia>0.049675339289470169 0.000406229375 0.049759489289470174 0 0 0</inertia>
+					<components>
+						<PhysicalOffsetFrame name="club_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.2 0.2 0.2</scale_factors>
+							</FrameGeometry>
+							<socket_parent>..</socket_parent>
+							<translation>0 -1.1239999999999999 0.064000000000000001</translation>
+							<orientation>-3.1415926535897927 -1.3962634015954636 -1.5707963267948961</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="club_trail_grip_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.2 0.2 0.2</scale_factors>
+							</FrameGeometry>
+							<socket_parent>..</socket_parent>
+							<translation>0 -1.0477999999999998 0.064000000000000001</translation>
+							<orientation>-3.1415926535897927 -1.3962634015954636 -1.5707963267948961</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="club_head_offset">
+							<FrameGeometry name="frame_geometry">
+								<socket_frame>..</socket_frame>
+								<scale_factors>0.2 0.2 0.2</scale_factors>
+							</FrameGeometry>
+							<socket_parent>..</socket_parent>
+							<translation>0.034322076298442673 0.0010481600690734 0.01958150364412968</translation>
+							<orientation>-0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</components>
+					<attached_geometry>
+						<Mesh name="club_shaft_geom">
+							<socket_frame>..</socket_frame>
+							<scale_factors>1 1 1</scale_factors>
+							<Appearance>
+								<opacity>1</opacity>
+								<color>0.46 0.48 0.52</color>
+							</Appearance>
+							<mesh_file>club_driver_shaft.stl</mesh_file>
+						</Mesh>
+						<Mesh name="club_grip_geom">
+							<socket_frame>..</socket_frame>
+							<scale_factors>1 1 1</scale_factors>
+							<Appearance>
+								<opacity>1</opacity>
+								<color>0.08 0.08 0.09</color>
+							</Appearance>
+							<mesh_file>club_driver_grip.stl</mesh_file>
+						</Mesh>
+						<Mesh name="club_head_geom">
+							<socket_frame>..</socket_frame>
+							<scale_factors>1 1 1</scale_factors>
+							<Appearance>
+								<opacity>1</opacity>
+								<color>0.46 0.48 0.52</color>
+							</Appearance>
+							<mesh_file>club_driver_head.stl</mesh_file>
+						</Mesh>
+					</attached_geometry>
 				</Body>
 			</objects>
 			<groups />
@@ -1749,7 +1820,7 @@
 					<socket_child_frame>pelvis_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="pelvis_tilt">
-							<default_value>0</default_value>
+							<default_value>-0.69718562979825205</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>false</clamped>
@@ -1758,7 +1829,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="pelvis_list">
-							<default_value>0</default_value>
+							<default_value>-0.035447449601968273</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>false</clamped>
@@ -1767,7 +1838,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="pelvis_rotation">
-							<default_value>0</default_value>
+							<default_value>-0.059627194219186087</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>false</clamped>
@@ -1776,7 +1847,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="pelvis_tx">
-							<default_value>0</default_value>
+							<default_value>-1.0804152348765637</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-5 5</range>
 							<clamped>false</clamped>
@@ -1785,7 +1856,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="pelvis_ty">
-							<default_value>0.93000000000000005</default_value>
+							<default_value>0.8499436518788871</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1 2</range>
 							<clamped>false</clamped>
@@ -1794,7 +1865,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="pelvis_tz">
-							<default_value>0</default_value>
+							<default_value>0.06294291866724995</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-3 3</range>
 							<clamped>false</clamped>
@@ -1873,7 +1944,7 @@
 					<socket_child_frame>femur_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="hip_flexion_r">
-							<default_value>0</default_value>
+							<default_value>0.25776158582401981</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 2.0943950999999998</range>
 							<clamped>true</clamped>
@@ -1882,7 +1953,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="hip_adduction_r">
-							<default_value>0</default_value>
+							<default_value>-0.49744387147068797</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.87266463000000005 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -1891,7 +1962,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="hip_rotation_r">
-							<default_value>0</default_value>
+							<default_value>-0.033957992407836882</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.69813170000000002 0.69813170000000002</range>
 							<clamped>true</clamped>
@@ -1985,7 +2056,7 @@
 					<socket_child_frame>tibia_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="knee_angle_r">
-							<default_value>0</default_value>
+							<default_value>1.0665905208977583e-28</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.0943999999999998</range>
 							<clamped>true</clamped>
@@ -2181,7 +2252,7 @@
 					<socket_child_frame>talus_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="ankle_angle_r">
-							<default_value>0</default_value>
+							<default_value>1.1352716250690217e-19</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.69813170000000002 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -2216,7 +2287,7 @@
 					<socket_child_frame>calcn_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="subtalar_angle_r">
-							<default_value>0</default_value>
+							<default_value>-4.2019998383864562e-20</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.34906585000000001 0.34906585000000001</range>
 							<clamped>true</clamped>
@@ -2251,7 +2322,7 @@
 					<socket_child_frame>toes_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="mtp_angle_r">
-							<default_value>0</default_value>
+							<default_value>-2.0969043016441839e-20</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -2286,7 +2357,7 @@
 					<socket_child_frame>femur_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="hip_flexion_l">
-							<default_value>0</default_value>
+							<default_value>0.4873305645954833</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 2.0943950999999998</range>
 							<clamped>true</clamped>
@@ -2295,7 +2366,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="hip_adduction_l">
-							<default_value>0</default_value>
+							<default_value>0.23747665799088563</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.87266463000000005 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -2304,7 +2375,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="hip_rotation_l">
-							<default_value>0</default_value>
+							<default_value>0.35731309187686355</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.69813170000000002 0.69813170000000002</range>
 							<clamped>true</clamped>
@@ -2398,7 +2469,7 @@
 					<socket_child_frame>tibia_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="knee_angle_l">
-							<default_value>0</default_value>
+							<default_value>0.5444548913202184</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.0943999999999998</range>
 							<clamped>true</clamped>
@@ -2594,7 +2665,7 @@
 					<socket_child_frame>talus_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="ankle_angle_l">
-							<default_value>0</default_value>
+							<default_value>1.0467957080261217e-19</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.69813170000000002 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -2629,7 +2700,7 @@
 					<socket_child_frame>calcn_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="subtalar_angle_l">
-							<default_value>0</default_value>
+							<default_value>5.9632760440149896e-20</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.34906585000000001 0.34906585000000001</range>
 							<clamped>true</clamped>
@@ -2664,7 +2735,7 @@
 					<socket_child_frame>toes_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="mtp_angle_l">
-							<default_value>0</default_value>
+							<default_value>-2.4902536631709689e-20</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.52359878000000004 0.52359878000000004</range>
 							<clamped>true</clamped>
@@ -2699,7 +2770,7 @@
 					<socket_child_frame>torso_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="lumbar_extension">
-							<default_value>0</default_value>
+							<default_value>-0.031365925466666646</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -2708,7 +2779,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="lumbar_bending">
-							<default_value>0</default_value>
+							<default_value>0.048584373457781861</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -2717,7 +2788,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="lumbar_rotation">
-							<default_value>0</default_value>
+							<default_value>0.38639782709210124</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-2.094395102393195 2.094395102393195</range>
 							<clamped>true</clamped>
@@ -2811,7 +2882,7 @@
 					<socket_child_frame>humerus_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="arm_flex_r">
-							<default_value>0</default_value>
+							<default_value>0.60927887045696949</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-2.094395102393195 3.141592653589793</range>
 							<clamped>true</clamped>
@@ -2820,7 +2891,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="arm_add_r">
-							<default_value>0</default_value>
+							<default_value>0.16833002164910157</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-2.0943950999999998 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -2829,7 +2900,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="arm_rot_r">
-							<default_value>0</default_value>
+							<default_value>0.25780953796223288</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -2923,7 +2994,7 @@
 					<socket_child_frame>ulna_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="elbow_flex_r">
-							<default_value>0</default_value>
+							<default_value>0.14965380369595424</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.6179999999999999</range>
 							<clamped>true</clamped>
@@ -2958,7 +3029,7 @@
 					<socket_child_frame>radius_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="pro_sup_r">
-							<default_value>0</default_value>
+							<default_value>0.28008349124073856</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -2993,7 +3064,7 @@
 					<socket_child_frame>hand_r_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="wrist_flex_r">
-							<default_value>0</default_value>
+							<default_value>0.46345399357998635</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.22173048 1.22173048</range>
 							<clamped>true</clamped>
@@ -3002,7 +3073,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="wrist_dev_r">
-							<default_value>0</default_value>
+							<default_value>0.53474801658735271</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.7853981633974483 0.7853981633974483</range>
 							<clamped>true</clamped>
@@ -3037,7 +3108,7 @@
 					<socket_child_frame>humerus_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="arm_flex_l">
-							<default_value>0</default_value>
+							<default_value>0.37655403680691207</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-2.094395102393195 3.141592653589793</range>
 							<clamped>true</clamped>
@@ -3046,7 +3117,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="arm_add_l">
-							<default_value>0</default_value>
+							<default_value>0.36737947154524558</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-2.0943950999999998 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -3055,7 +3126,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="arm_rot_l">
-							<default_value>0</default_value>
+							<default_value>-0.21098259154283927</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.5707963300000001 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -3149,7 +3220,7 @@
 					<socket_child_frame>ulna_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="elbow_flex_l">
-							<default_value>0</default_value>
+							<default_value>0.5928059756178784</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 2.6179999999999999</range>
 							<clamped>true</clamped>
@@ -3184,7 +3255,7 @@
 					<socket_child_frame>radius_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="pro_sup_l">
-							<default_value>0</default_value>
+							<default_value>1.4405706555000399</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>0 1.5707963300000001</range>
 							<clamped>true</clamped>
@@ -3219,7 +3290,7 @@
 					<socket_child_frame>hand_l_offset</socket_child_frame>
 					<coordinates>
 						<Coordinate name="wrist_flex_l">
-							<default_value>0</default_value>
+							<default_value>0.33375476802299059</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-1.22173048 1.22173048</range>
 							<clamped>true</clamped>
@@ -3228,7 +3299,7 @@
 							<prescribed>false</prescribed>
 						</Coordinate>
 						<Coordinate name="wrist_dev_l">
-							<default_value>0</default_value>
+							<default_value>0.78539816339744817</default_value>
 							<default_speed_value>0</default_speed_value>
 							<range>-0.7853981633974483 0.7853981633974483</range>
 							<clamped>true</clamped>
@@ -3258,38 +3329,9 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</UniversalJoint>
-				<WeldJoint name="hand_r_to_club">
-					<socket_parent_frame>hand_r_grip_offset</socket_parent_frame>
-					<socket_child_frame>club_grip_offset</socket_child_frame>
-					<frames>
-						<PhysicalOffsetFrame name="hand_r_grip_offset">
-							<FrameGeometry name="frame_geometry">
-								<socket_frame>..</socket_frame>
-								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-							</FrameGeometry>
-							<socket_parent>/bodyset/hand_r</socket_parent>
-							<translation>0.0 -0.06 0.0</translation>
-							<orientation>0.0 0.0 0.0</orientation>
-						</PhysicalOffsetFrame>
-						<PhysicalOffsetFrame name="club_grip_offset">
-							<FrameGeometry name="frame_geometry">
-								<socket_frame>..</socket_frame>
-								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-							</FrameGeometry>
-							<socket_parent>/bodyset/Club</socket_parent>
-							<translation>0.0 0.0 0.0</translation>
-							<orientation>0.0 0.0 0.0</orientation>
-						</PhysicalOffsetFrame>
-						<PhysicalOffsetFrame name="club_head_offset">
-							<FrameGeometry name="frame_geometry">
-								<socket_frame>..</socket_frame>
-								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
-							</FrameGeometry>
-							<socket_parent>/bodyset/Club</socket_parent>
-							<translation>0.0 -1.042 0.0</translation>
-							<orientation>0.0 0.0 0.0</orientation>
-						</PhysicalOffsetFrame>
-					</frames>
+				<WeldJoint name="hand_l_to_club">
+					<socket_parent_frame>/bodyset/hand_l/hand_l_grip_offset</socket_parent_frame>
+					<socket_child_frame>/bodyset/Club/club_grip_offset</socket_child_frame>
 				</WeldJoint>
 			</objects>
 		</JointSet>
@@ -3321,6 +3363,11 @@
 					<dependent_coordinate_name>knee_angle_l_beta</dependent_coordinate_name>
 					<scale_factor>1</scale_factor>
 				</CoordinateCouplerConstraint>
+				<WeldConstraint name="hand_r_to_club">
+					<isEnforced>true</isEnforced>
+					<socket_frame1>/bodyset/hand_r/hand_r_grip_offset</socket_frame1>
+					<socket_frame2>/bodyset/Club/club_trail_grip_offset</socket_frame2>
+				</WeldConstraint>
 			</objects>
 			<groups />
 		</ConstraintSet>
