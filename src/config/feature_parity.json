@@ -537,6 +537,14 @@
       "status": "parity",
       "tiles": [],
       "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305)."
+    },
+    "render.club_head_and_ball": {
+      "title": "Realistic Club Head And Ball Rendering",
+      "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
+      "status": "gap",
+      "issue": 11717,
+      "tiles": [],
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head."
     }
   }
 }

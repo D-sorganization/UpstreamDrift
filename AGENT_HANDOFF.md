@@ -6,6 +6,12 @@
 
 - Branch `claude/gcv-4-arrow-scaling` (PR #11738): body-weight and peak arrow scale modes; overlay route takes a `ForceOverlayQuery` dependency. Next: GCV-5 (#11711) plots, API and web.
 
+# Active: Clubface Roll at Address, OSV-8 #11755
+
+- On PR #11752. The matched hand-club chain leaves the club roll to fitted wrist constants, so club `+x` was open 30.7 deg (driver) and 44.8 deg (7-iron) at address in every engine. One shared constant, `ADDRESS_SQUARE_FACE_ROLL_DEG` in `model_appearance/club_assembly.py`, now rolls the head about the shaft (and defines `clubface_vector`); `club.face_roll_deg` in a spec overrides it.
+- Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
+- Impact: `club_face.impact_frame` (shared `detect_impact_index`, closest-approach fallback, raises if not at the ball). True impact face is +30 deg (driver, t=1.327) and +18 deg (iron, t=1.337) open, while the capture head triad is about +2 deg: the IK/matched trajectory under-rotates the club through release (grows from 4 deg at the top), so a constant roll cannot fix it; needs an IK refit with head-triad weight (test `test_face_is_square_at_impact` is a strict xfail). `tour_matching` club models are unrolled.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
@@ -80,6 +86,13 @@ Per-hand `WrenchKind.GRIP` frames, wrench exerted by the hand ON THE CLUB (ADR-0
 - Full-body MuJoCo, MyoSuite spec and Drake: `solve_with_multipliers` (qacc bitwise unchanged) and `grip_analysis`; the closing (right) hand is the multiplier, the holding (left) hand is club Newton-Euler, see `biomechanics/grip_extraction.py`.
 - Pinocchio: `PinocchioForceTorqueSource.grip_from_allocation` gives the net with `split_method="allocation"`, no per-hand values. OpenSim: `grip_analysis()` is unavailable with a reason.
 - Open: web/video overlays are GCV-10 (#11716, `analysis.grip_wrench` is a gap). The pinned myo_sim assets are absent on some hosts, so the golfer-scene test skips there.
+
+## Active: Realistic Club Meshes in Every Engine Visual Layer (#11717, #11727)
+
+- One adapter, `src/shared/python/model_appearance/club_head_mesh.py`, builds the head from the Tools parametric builder, with committed STLs in `assets/club_heads/` as fallback. `club_assembly.py` adds the shaft and grip. Never edit `vendor/ud-tools` for this.
+- Wired: MuJoCo (appearance and plain visual layers), OpenSim (`club_visuals.py`, `full_body_osim.py`, `tour_matching/club_geometry.py`), Drake and Pinocchio MeshCat exports, MyoSuite via the plain visual layer, and the native OpenSim viewer.
+- Open: the web `ClubHead` component (#11717) and the ball visual (#11719) are tracked by gap entry `render.club_head_and_ball`. The head centre of mass is not moved to the mesh centre.
+- Saved OpenSim models use bare mesh names; loaders call `club_visuals.register_geometry_path()`.
 
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 

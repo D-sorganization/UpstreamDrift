@@ -190,6 +190,7 @@ packages, saved layouts, and golden test fixtures.
 | `putting_green_gui` | Putting Green | `tile` | `putting` | — | `core` | 🟡 deprecated_alias | `src/tools/putting_green_gui/gui.py` | `tests/config/test_capability_migration_coverage.py` |
 | `rate_of_closure` | Rate of Closure Impact Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
+| `render.club_head_and_ball` | Realistic Club Head And Ball Rendering | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/club_head_mesh.py` | `tests/unit/model_appearance/test_club_head_mesh.py` |
 | `robotics_module` | Robotics Module | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/robotics/__init__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `settings.desktop_only_tabs` | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `settings.preferences` | Settings/preferences surface + persistence | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

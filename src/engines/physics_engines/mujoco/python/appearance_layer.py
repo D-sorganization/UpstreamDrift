@@ -1,7 +1,7 @@
 """MuJoCo translation of an engine-agnostic appearance document.
 
 Emits ``<asset>`` textures/materials/meshes, smooth visual-only mesh geoms
-(skin, garments, shoes, club head), a skybox, a textured ground, shadowed
+(skin, garments, shoes, club shaft, grip and mesh head), a skybox, a textured ground, shadowed
 studio lights and a 960x720 offscreen buffer. Every geom is class ``visual``
 (group 1, no contacts, zero mass), so inertias and dynamics are untouched.
 """
@@ -15,10 +15,16 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.model_appearance import geometry, library
+from src.shared.python.model_appearance.club_assembly import (
+    PART_MATERIALS,
+    ClubAssembly,
+    assembly_meshes,
+)
 from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     Material,
     Texture,
+    document_from_dict,
 )
 from src.shared.python.motion_matching.visual_skeleton import (
     Capsule,
@@ -152,8 +158,21 @@ def _mesh_to_mjcf(offset: np.ndarray, mesh: geometry.Mesh) -> geometry.Mesh:
     return geometry.Mesh(_world_points(offset, mesh.vertices), mesh.faces)
 
 
+def _club_meshes(
+    club: ClubAssembly, finish: str
+) -> list[tuple[str, geometry.Mesh, str]]:
+    """Shaft, grip and mesh head (GCV-11) in the club-body frame."""
+    return [
+        (label, mesh, PART_MATERIALS[label] or finish)
+        for label, mesh in assembly_meshes(club).items()
+    ]
+
+
 def _body_meshes(
-    doc: AppearanceDocument, body: str, capsules: list[Capsule]
+    doc: AppearanceDocument,
+    body: str,
+    capsules: list[Capsule],
+    club: ClubAssembly | None = None,
 ) -> list[tuple[str, geometry.Mesh, str]]:
     """(label, mesh in spec body frame, material name) for one body."""
     rule = library.rule_for_body(doc, body)
@@ -161,6 +180,8 @@ def _body_meshes(
         return []
     part = library.classify_body(body)
     base = library.material_name_for(doc, body)
+    if part == "club" and club is not None:
+        return _club_meshes(club, base)
     garment = library.garment_name_for(doc, body)
     scale = 1.0 if rule is None else rule.radius_scale
     out: list[tuple[str, geometry.Mesh, str]] = []
@@ -200,20 +221,6 @@ def _body_meshes(
                     garment,
                 )
             )
-    if part == "club" and capsules:
-        far = max(capsules, key=lambda c: c.length_m())
-        head_axis = np.asarray(far.end_m) - np.asarray(far.start_m)
-        out.append(
-            (
-                "head",
-                geometry.ellipsoid_mesh(
-                    np.asarray(far.end_m),
-                    np.array([0.06, 0.045, 0.032]),
-                    head_axis,
-                ),
-                base,
-            )
-        )
     return out
 
 
@@ -264,6 +271,7 @@ def attach_appearance(
     offsets: Mapping[str, np.ndarray],
     skeleton: VisualSkeleton,
     doc: AppearanceDocument,
+    club: ClubAssembly | None = None,
 ) -> dict[str, Any]:
     """Add materials, textures, smooth meshes and scene dressing.
 
@@ -278,14 +286,14 @@ def attach_appearance(
         by_body.setdefault(cap.body, []).append(cap)
     garments = 0
     for index, (body, caps) in enumerate(by_body.items()):
-        for label, mesh, material in _body_meshes(doc, body, caps):
-            mesh_name = f"vmesh_{index}_{label}"
-            assets.mesh(mesh_name, _mesh_to_mjcf(offsets[body], mesh))
-            _add_geom(
+        for label, mesh, material in _body_meshes(doc, body, caps, club):
+            _add_mesh_visual(
+                assets,
                 elements[body],
-                f"visual_{mesh_name}",
-                mesh_name,
-                assets.material(material),
+                f"vmesh_{index}_{label}",
+                offsets[body],
+                mesh,
+                material,
             )
             garments += label.startswith("garment")
     return {
@@ -294,5 +302,42 @@ def attach_appearance(
         "garments": garments,
         "materials": assets.n_materials,
         "ground_material": ground_material,
+        "club_head": None if club is None else club.head_alias,
         "offscreen": list(OFFSCREEN_SIZE),
     }
+
+
+def _add_mesh_visual(
+    assets: _Assets,
+    parent: ET.Element,
+    mesh_name: str,
+    offset: np.ndarray,
+    mesh: Any,
+    material: Any,
+) -> None:
+    """Register ``mesh`` as an asset and attach a visual geom to ``parent``."""
+    assets.mesh(mesh_name, _mesh_to_mjcf(offset, mesh))
+    _add_geom(parent, f"visual_{mesh_name}", mesh_name, assets.material(material))
+
+
+def attach_club_meshes(
+    root: ET.Element,
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    body: str,
+    club: ClubAssembly,
+    finish: str = "satin_steel",
+) -> int:
+    """Add only the shaft, grip and mesh head of ``club`` (plain visual layer).
+
+    For the plain ``visual=True`` export, which keeps its capsule skeleton but
+    should still show the real head (GCV-11). Visual only, massless,
+    non-colliding. Returns the number of meshes added.
+    """
+    doc = document_from_dict({"schema_version": "appearance-v1"})
+    assets = _Assets(root, doc)
+    for label, mesh, material in _club_meshes(club, finish):
+        _add_mesh_visual(
+            assets, elements[body], f"vmesh_club_{label}", offsets[body], mesh, material
+        )
+    return assets.n_meshes

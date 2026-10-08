@@ -18,6 +18,7 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import meshcat_camera
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -33,6 +34,17 @@ from src.tools.native_viewer_export.core import (
 _CAPSULE_RGBA = [0.75, 0.78, 0.85, 1.0]
 _SHAPE_RGBA = [0.7, 0.72, 0.8, 1.0]
 _FLOOR_RGBA = [0.35, 0.45, 0.3, 1.0]
+
+
+def _bvh_mesh(coal: Any, mesh: Any) -> Any:
+    """A coal triangle mesh for a closed ``Mesh`` (club-body frame)."""
+    bvh = coal.BVHModelOBBRSS()
+    bvh.beginModel(0, 0)
+    for face in mesh.faces:
+        a, b, c = (np.asarray(mesh.vertices[i], dtype=float) for i in face)
+        bvh.addTriangle(a, b, c)
+    bvh.endModel()
+    return bvh
 
 
 class PinocchioMeshcatBackend:
@@ -83,7 +95,21 @@ class PinocchioMeshcatBackend:
                 _CAPSULE_RGBA,
             )
             n += 1
+        club = club_parts(spec)
+        if club is not None:
+            club_body, parts = club
+            for part in parts:
+                add(
+                    part.name,
+                    club_body,
+                    np.eye(3),
+                    np.zeros(3),
+                    _bvh_mesh(coal, part.mesh),
+                    list(part.rgba),
+                )
         for shp in skeleton.shapes:
+            if club is not None and shp.body == club[0]:
+                continue  # the mesh head replaces the ellipsoid hint
             shape = (
                 coal.Ellipsoid(*shp.half_size_m)
                 if shp.kind == "ellipsoid"
