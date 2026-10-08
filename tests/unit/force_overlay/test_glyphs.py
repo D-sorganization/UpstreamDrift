@@ -53,7 +53,7 @@ def test_force_glyph_style_defaults_and_validation() -> None:
     assert style.torque_scale_m_per_nm == pytest.approx(1.0 / 200.0)
     assert style.min_length_m == pytest.approx(0.02)
     assert style.max_length_m == pytest.approx(0.6)
-    assert style.shaft_radius_m == pytest.approx(0.006)
+    assert style.shaft_radius_m == pytest.approx(0.012)
     assert style.head_length_ratio == pytest.approx(0.22)
     assert style.head_radius_ratio == pytest.approx(2.4)
     assert style.torque_style == "arc"
@@ -149,7 +149,7 @@ def test_build_glyphs_clamping() -> None:
     assert large_arrow.tip_m[2] == pytest.approx(0.6)
 
     small_arrow = arrows_by_label["contact:small"]
-    assert small_arrow.clamped
+    assert not small_arrow.clamped  # raised to the floor, not clamped (GCV-4)
     assert small_arrow.tip_m[0] == pytest.approx(0.02)
 
 

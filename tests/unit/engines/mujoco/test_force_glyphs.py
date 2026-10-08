@@ -255,3 +255,23 @@ def test_offscreen_pixel_test_renders_arrow_colour() -> None:
     arrow_pixels = renderer.render().copy()
     red_count = count_red_pixels(arrow_pixels)
     assert red_count > 0, f"Expected red arrow pixels, found {red_count}"
+
+
+@pytest.mark.unit
+def test_clamped_arrow_adds_white_marker_past_the_tip() -> None:
+    """A clamped arrow gets one extra white arrow geom continuing past its tip."""
+    import dataclasses
+
+    model = mujoco.MjModel.from_xml_string("<mujoco><worldbody/></mujoco>")
+    scene = mujoco.MjvScene(model, maxgeom=10)
+    arrow = dataclasses.replace(
+        _make_dummy_arrow(tail_m=(0.0, 0.0, 0.0), tip_m=(0.0, 0.0, 1.0)),
+        clamped=True,
+    )
+    glyph_set = _make_glyph_set(arrows=(arrow,))
+    assert segment_geom_count(glyph_set) == 2
+    receipt = add_glyphs_to_scene(scene, glyph_set)
+    assert receipt.added == 2 and scene.ngeom == 2
+    marker = scene.geoms[1]
+    np.testing.assert_allclose(marker.rgba, [1.0, 1.0, 1.0, 1.0], atol=1e-6)
+    np.testing.assert_allclose(marker.pos, [0.0, 0.0, 1.0], atol=1e-9)

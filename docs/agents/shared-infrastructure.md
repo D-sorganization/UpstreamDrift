@@ -162,6 +162,14 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 - `biomechanics/grip_wrench.py` — shared hand-on-club grip wrench (`analyze_grip`, `GripAnalysis`, `GripSeries`): per-hand wrench, net force at the grip midpoint, equivalent couple split into contact-force moment and free torque, per-hand MOF, club-local components and `split_method`. Transport reuses `force_overlay.conversions.move_wrench_point`; do not write another (GCV-7, #11713).
 
+### Ground-Reaction Analysis Core
+
+`src/shared/python/biomechanics/ground_reaction.py` — the single implementation of per-foot and net GRF, CoP (with ground height `z_g` and the named `COP_MIN_FZ_N` = 10 N threshold), free moment, and moments about the whole-body CoM (GCV-1, #11707, epic #11706).
+
+- `foot_reaction(label, forces, points, torques=None, *, ground_height_m, cop_min_fz_n)` and `analyze_ground_reaction(contacts_by_foot, com_m)` return `FootReaction` / `GroundReactionBreakdown`; unavailable CoP quantities are `None`, never zero.
+- `to_overlay_wrenches` emits the `contact:grf_*`, `contact:free_moment_*`, `contact:moment_com_*` labels (ADR-0052); `to_contact_reaction` populates `motion_matching.force_torque.ContactReaction`; `GroundReactionSeries` stacks frames for plots and export.
+- `force_overlay/bundle_provider.py` already consumes it. Do not add another CoP helper; GCV-6 (#11712) consolidates the legacy ones.
+
 ### MyoFullBody Muscle-Driven Swing
 
 `src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
@@ -290,8 +298,24 @@ forward-dynamics matching. Design reference:
 - `library` — named PBR materials, skin tones, clothing presets, club finishes,
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- `head` — parametric visible head (skull, eyes, brows, nose, mouth, ears, neck,
+  optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
+  `Head` body on the neck at the cervicale; head length from de Leva), and
+  `head_override_rotation`. Licence: procedural geometry, CC0-1.0, no third-party mesh.
+- Document fields `head` (`enabled`, `headwear` none/hair/cap, `scale`,
+  `forward_axis`/`up_axis`, `orientation_override`) and `body_model`
+  (`ellipsoid`; `meshes` is rejected until CMB-6 #11657 lands).
+- Gaze channel: `head.orientation_override` (`frame` parent/world, `yaw_rad`,
+  `pitch_rad`, `roll_rad`, `channel` name) detaches the visual head onto a massless
+  mocap body; `head_visual.drive_visual_head(model, data, yaw, pitch, roll, frame)`
+  places it per frame. Axes: x forward, y left, z up; yaw left-positive, pitch
+  up-positive, roll toward the right shoulder. OSV-3 #11729 drives it for engines
+  without a neck.
 - MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
-  via `attach_visual_layer(..., appearance=doc)`.
+  via `attach_visual_layer(..., appearance=doc)`; the head is `head_visual.py`
+  (`with_head=True` adds only the head to the legacy capsule layer, used by MyoSuite).
+  Drake, Pinocchio and OpenSim native viewers use
+  `src/tools/native_viewer_export/backends/_head.py` (OBJ per part).
 
 ### Theme / Typography
 

@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 31 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 32 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -68,11 +68,12 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `golf_simulator` | 0 | 0 | 0 | 19 | 0 | 0 |
 | `golf_view_presets` | 0 | 0 | 0 | 3 | 0 | 0 |
 | `golf_viz` | 0 | 0 | 0 | 3 | 0 | 0 |
+| `grip_contact` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `ground_model` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 14 | 26 | 9 | 36 | 0 | 40 |
-| `impact_parameters` | 0 | 0 | 0 | 5 | 0 | 0 |
+| `impact_parameters` | 0 | 0 | 0 | 14 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -82,9 +83,9 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `lifting` | 0 | 0 | 0 | 20 | 0 | 0 |
 | `logging_pkg` | 0 | 0 | 0 | 0 | 3 | 0 |
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
-| `model_appearance` | 0 | 0 | 0 | 5 | 0 | 0 |
+| `model_appearance` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 272 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 277 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
@@ -141,7 +142,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1696** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1725** | **777** | **673** |
 
 ## Diverged Files by Package
 

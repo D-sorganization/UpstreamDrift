@@ -11,6 +11,16 @@
       "tiles": [],
       "notes": "Lists OpenCap session trials, loads the selected trial via load_opencap_session, and hands the scaled model plus kinematics to the OpenSim engine."
     },
+    "render.body_appearance": {
+      "title": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "pyqt": "src/shared/python/model_appearance/head.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706).",
+      "tiles": [],
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes."
+    },
     "tools.native_viewer_export": {
       "title": "Native per-engine viewer video export (CLI)",
       "pyqt": "src/tools/native_viewer_export/cli.py",
@@ -47,7 +57,7 @@
       "status": "gap",
       "issue": 11308,
       "tiles": [],
-      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308."
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308. GCV-4 (#11710) changed the shared glyph defaults (12 mm shaft, group toggles, clamped flag only above the maximum length) that this overlay consumes."
     },
     "launcher.tile_grid": {
       "title": "Launcher tile grid from shared manifest",
@@ -152,6 +162,15 @@
       "tiles": ["matched_swing_browser"],
       "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff."
     },
+    "analysis.impact_parameters": {
+      "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
+      "pyqt": "src/tools/impact_parameters_panel/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/ImpactParametersPanel.tsx",
+      "status": "parity",
+      "tiles": ["impact_parameters"],
+      "notes": "GCV-17 (#11723): shared card model (impact_parameters.panel_model) feeds the PyQt6 dock, GET /api/analysis/impact-parameters and the web panel; unavailable quantities are null with a reason in all three. Engine adapters are GCV-16 (#11722). Video HUD stamping is GCV-14 follow-up; matched-swing ledger entries show unavailable until candidates carry a club series."
+    },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
       "pyqt": "src/tools/canonical_core/estimation.py",
@@ -177,7 +196,7 @@
       "status": "gap",
       "issue": 11308,
       "tiles": [],
-      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308)."
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip."
     },
     "analysis.grip_wrench": {
       "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
@@ -537,6 +556,14 @@
       "status": "parity",
       "tiles": [],
       "notes": "Reusable settings controls share positive-tension N conventions and conformance fixtures. Simscape 3D viewer wires live tension/compression shading and 3D force/torque glyphs from dataset CSVs (ADR-0052, #11305)."
+    },
+    "render.club_head_and_ball": {
+      "title": "Realistic Club Head And Ball Rendering",
+      "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
+      "status": "gap",
+      "issue": 11717,
+      "tiles": [],
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head."
     }
   }
 }

@@ -1,0 +1,206 @@
+{
+  "issue": "#11739",
+  "epic": "#11726",
+  "meta": {
+    "spec_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
+    "candidate_sha256": "f81216e8eb6a847081215eb5323b1b4e72a129a31d992ac7175f31628a1bf1d4",
+    "stiffness_scale": 1.0,
+    "bushing": {
+      "translational_stiffness_n_m": [
+        1000000.0,
+        1000000.0,
+        1000000.0
+      ],
+      "rotational_stiffness_nm_rad": [
+        1600.0,
+        1600.0,
+        1600.0
+      ],
+      "translational_damping_ns_m": [
+        553.922351177747,
+        208.6904334504008,
+        212.24179522534004
+      ],
+      "rotational_damping_nms_rad": [
+        0.8147162048608255,
+        28.640452538420213,
+        27.26897590902813
+      ],
+      "source": "engineering default (see module docstring); modal damping ratio 0.7; stiffness x1"
+    },
+    "modal_frequencies_hz": [
+      23.654435511165286,
+      24.727835433696832,
+      402.31197589212576,
+      459.5029876961583,
+      930.5449613055972,
+      946.3898579852973
+    ],
+    "modal_damping_ratios": [
+      0.7000000000000002,
+      0.7000000000000013,
+      0.7,
+      0.7000000000000003,
+      0.7000000000000002,
+      0.7
+    ],
+    "accuracy": 0.001,
+    "t_end_s": 1.81388889,
+    "conditioning": {
+      "repaired_frames": 7,
+      "repaired_times_s": [
+        1.23333333,
+        1.43055556,
+        1.43333333,
+        1.43611111,
+        1.54444444,
+        1.56666667,
+        1.56944444
+      ],
+      "unwrapped_coordinates": [
+        "LFInput",
+        "RFInput",
+        "RSInputX",
+        "RSInputZ",
+        "RWInputX",
+        "hip_flexion_r",
+        "hip_adduction_r",
+        "hip_rotation_r",
+        "ankle_angle_r",
+        "ankle_angle_l"
+      ],
+      "first_ik_discontinuity_s": 0.95,
+      "lowpass": "zero-phase 4th-order Butterworth, 25 Hz"
+    },
+    "input_quality": {
+      "closure_distance_mm": {
+        "address": 134.43572285185869,
+        "max_raw": 180.4392985036242
+      },
+      "closure_angle_deg": {
+        "address": 50.567396219777265,
+        "max_raw": 179.96626671254427
+      },
+      "left_hand_speed_raw": {
+        "peak_m_s": 98.62891263215829,
+        "p95_m_s": 13.865237585269693
+      },
+      "right_hand_speed_raw": {
+        "peak_m_s": 101.06391208112652,
+        "p95_m_s": 15.236481577140703
+      },
+      "left_hand_speed_prepared": {
+        "peak_m_s": 39.634479438749395,
+        "p95_m_s": 16.540796056931033
+      },
+      "right_hand_speed_prepared": {
+        "peak_m_s": 49.04129374226783,
+        "p95_m_s": 26.466456555985157
+      },
+      "measured_wrist_marker_speed": {
+        "left": {
+          "peak_m_s": 9.726481071242999,
+          "p95_m_s": 7.141079276573126
+        },
+        "right": {
+          "peak_m_s": 9.575464089344031,
+          "p95_m_s": 8.082757205200359
+        }
+      },
+      "ik_marker_rms_m": 0.262,
+      "ik_marker_rms_source": "anthro_driver_opensim/receipt.json (ik.marker_rms_m)"
+    }
+  },
+  "summary_full_window": {
+    "samples": 654,
+    "peak_time_s": 1.81388889,
+    "peak_force_n": {
+      "L": 21058.22912711565,
+      "R": 27980.906857569476
+    },
+    "peak_net_force_n": 22501.217716038605,
+    "max_translation_deflection_mm": {
+      "L": 19.918355472145336,
+      "R": 26.75307926073136
+    },
+    "max_rotation_deflection_deg": {
+      "L": 37.16371640884716,
+      "R": 37.16371640884716
+    },
+    "left_force_share": {
+      "bushing_at_peak": 0.4294168056650124,
+      "bushing_median_loaded": 0.44619989439309254,
+      "min_norm_at_peak": 0.48999038189222777,
+      "min_norm_median_loaded": 0.4825017242417939
+    },
+    "left_force_difference_vs_min_norm_n": {
+      "max": 78188.19140310689,
+      "rms_loaded": 35602.66566477892
+    },
+    "peak_hand_power_w": {
+      "L": 741562.559395723,
+      "R": 1109049.453253443
+    },
+    "internal_force": {
+      "peak_internal_n": 23760.58951191909,
+      "peak_net_n": 22501.217716038605,
+      "peak_axial_squeeze_n": 5861.051105343514,
+      "peak_transverse_n": 23026.369533525492,
+      "peak_couple_nm": 1849.5206588545013
+    }
+  },
+  "summary_before_first_ik_switch": {
+    "samples": 343,
+    "peak_time_s": 0.95,
+    "peak_force_n": {
+      "L": 1703.878926734834,
+      "R": 2058.5651625551727
+    },
+    "peak_net_force_n": 418.86542320823634,
+    "max_translation_deflection_mm": {
+      "L": 1.6940263119019099,
+      "R": 2.0534469813291034
+    },
+    "max_rotation_deflection_deg": {
+      "L": 3.287051684809555,
+      "R": 3.287051684809555
+    },
+    "left_force_share": {
+      "bushing_at_peak": 0.45286491607543466,
+      "bushing_median_loaded": 0.44107073126672297,
+      "min_norm_at_peak": 0.4814461873216763,
+      "min_norm_median_loaded": 0.48123322413620895
+    },
+    "left_force_difference_vs_min_norm_n": {
+      "max": 3836.0328160420486,
+      "rms_loaded": 3402.2119940681855
+    },
+    "peak_hand_power_w": {
+      "L": 14693.964627012594,
+      "R": 10054.995633903647
+    },
+    "internal_force": {
+      "peak_internal_n": 1877.9203662665184,
+      "peak_net_n": 418.86542320823634,
+      "peak_axial_squeeze_n": 28.02986303392737,
+      "peak_transverse_n": 1877.7111675699416,
+      "peak_couple_nm": 150.82123956736018
+    }
+  },
+  "static_hold": {
+    "club_weight_n": 3.0694814499999996,
+    "sum_hand_force_up_n": 3.069514878831134,
+    "relative_error": 1.0890709612964119e-05,
+    "left_force_n": [
+      2.507958661755362,
+      4.301935951458784,
+      -9.360358962712535
+    ],
+    "right_force_n": [
+      -2.507894354709358,
+      -4.302007120648232,
+      12.42987384154367
+    ]
+  },
+  "sensitivity": {}
+}

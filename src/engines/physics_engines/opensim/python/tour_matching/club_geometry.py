@@ -3,8 +3,8 @@
 Provides parameterized visual geometry attachments and coordinate frames for
 the OpenSim Club body according to shared ``ClubSpec`` parameters:
 1. Inspects whether a model has visual geometry on the Club body.
-2. Generates parameterized OpenSim visual mesh elements (shaft and clubhead)
-   scaled from ``ClubSpec`` parameters without altering physical inertia or mass.
+2. Attaches the generated shaft, grip and head STL meshes (``club_visuals``,
+   shared with the full-body models) without altering physical inertia or mass.
 3. Computes canonical grip (butt, mid-grip, two-handed grip offsets) and
    clubhead frames in the OpenSim club body coordinate system.
 4. Attaches visual geometry and grip frames into an OpenSim XML ElementTree.
@@ -22,22 +22,16 @@ import xml.etree.ElementTree as ET  # nosec B405 # nosemgrep: python.lang.securi
 from defusedxml import ElementTree as SafeET
 
 
+from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.contracts import ensure, require
+from src.shared.python.model_appearance.club_assembly import ClubAssembly
 from src.shared.python.motion_matching.club_models import (
     DRIVER,
     IRON_7,
     ClubSpec,
 )
 
-# OpenSim default club shaft and head visual mesh identifiers
-DEFAULT_SHAFT_MESH_FILE: str = "golf_club_shaft.vtp"
-DEFAULT_HEAD_MESH_FILE: str = "golf_club_head.vtp"
-
-# Default visual appearance parameters
-DEFAULT_SHAFT_COLOR: str = "0.7 0.7 0.7"
-DEFAULT_SHAFT_OPACITY: str = "1.0"
-DEFAULT_HEAD_COLOR: str = "0.2 0.2 0.2"
-DEFAULT_HEAD_OPACITY: str = "1.0"
+VISUAL_FRAME_NAME: str = "club_visual_frame"
 
 # OpenSim hand grip anatomical offsets on the club shaft (metres from butt origin)
 # Hand R (trail hand) is distally placed ~0.06 m down the shaft
@@ -108,51 +102,57 @@ def get_club_frame_offsets(spec: ClubSpec) -> dict[str, tuple[float, float, floa
     return offsets
 
 
-def _create_mesh_element(
-    name: str,
-    mesh_file: str,
-    scale_factors: tuple[float, float, float],
-    color: str = "1 1 1",
-    opacity: str = "1",
-) -> ET.Element:
-    """Create an OpenSim <Mesh> XML element."""
-    mesh = ET.Element("Mesh", attrib={"name": name})
-    ET.SubElement(mesh, "socket_frame").text = ".."
+def club_assembly_for(spec: ClubSpec) -> ClubAssembly:
+    """The shared visual assembly for a ``motion_matching`` club spec."""
+    return ClubAssembly(
+        head_alias=spec.name,
+        length_m=spec.length_m,
+        grip_length_m=spec.grip_length_m,
+        shaft_radius_m=spec.shaft_radius_m,
+    )
+
+
+def _visual_frame(club: ClubAssembly) -> ET.Element:
+    """Offset frame mapping the shared club frame onto the Club body frame.
+
+    The shared meshes sit in the head-origin frame (shaft toward the grip along
+    -y, shaft axis at z = ``axis_offset_m``); this body has its origin at the
+    butt with the head at -length_m along y. The map is a half turn about x
+    plus the translation (0, -length, axis_offset).
+    """
+    frame = ET.Element("PhysicalOffsetFrame", attrib={"name": VISUAL_FRAME_NAME})
+    ET.SubElement(frame, "socket_parent").text = ".."
     ET.SubElement(
-        mesh, "scale_factors"
-    ).text = f"{scale_factors[0]:.6g} {scale_factors[1]:.6g} {scale_factors[2]:.6g}"
-    app = ET.SubElement(mesh, "Appearance")
-    ET.SubElement(app, "opacity").text = opacity
-    ET.SubElement(app, "color").text = color
-    ET.SubElement(mesh, "mesh_file").text = mesh_file
-    return mesh
+        frame, "translation"
+    ).text = f"0 {-club.length_m:.17g} {club.axis_offset_m:.17g}"
+    ET.SubElement(frame, "orientation").text = f"{math.pi:.17g} 0 0"
+    return frame
 
 
 def attach_visual_club(
     tree: ET.ElementTree,
     spec: ClubSpec | None = None,
     *,
-    shaft_mesh_file: str = DEFAULT_SHAFT_MESH_FILE,
-    head_mesh_file: str = DEFAULT_HEAD_MESH_FILE,
+    mesh_dir_ref: str = "",
+    geometry_dir: Path | str = club_visuals.GEOMETRY_DIR,
 ) -> ET.ElementTree:
-    """Attach parameterized visual geometry to the Club body in an OpenSim ElementTree.
+    """Attach the shared shaft, grip and head meshes to the Club body.
 
-    Modifies the attached_geometry of the <Body name="Club"> element by adding
-    shaft and clubhead visual meshes parameterized from ``spec``. Preserves existing
-    mass, center of mass, and inertia properties.
+    Replaces the old ``.vtp`` placeholders (never committed) with the generated
+    STLs of ``club_visuals``. Mass, mass centre and inertia are untouched.
 
     Preconditions:
     - tree must contain a Body with name="Club".
+    - the club's STLs exist in ``geometry_dir`` (committed for the driver and
+      7-iron; write others with ``club_visuals.write_club_assets``).
 
     Postconditions:
-    - Club attached_geometry has at least 2 visual geometry components.
-    - Physical mass and inertia are unmodified.
+    - Club attached_geometry holds shaft, grip and head meshes.
     """
     club_spec = spec if spec is not None else DRIVER
     require(
         isinstance(club_spec, ClubSpec), "club_spec must be an instance of ClubSpec"
     )
-
     root = tree.getroot()
     require(root is not None, "ElementTree must have a valid root")
     assert root is not None
@@ -160,48 +160,34 @@ def attach_visual_club(
     club_body = root.find(".//BodySet/objects/Body[@name='Club']")
     if club_body is None:
         raise ValueError("Model has no Club body")
+    club = club_assembly_for(club_spec)
+    missing = [
+        str(p)
+        for p in club_visuals.asset_paths(club.head_alias, Path(geometry_dir)).values()
+        if not p.is_file()
+    ]
+    if missing:
+        raise FileNotFoundError(f"Club visual assets missing: {', '.join(missing)}")
+
+    components = club_body.find("components")
+    if components is None:
+        components = ET.SubElement(club_body, "components")
+    for old in components.findall(f"PhysicalOffsetFrame[@name='{VISUAL_FRAME_NAME}']"):
+        components.remove(old)
+    components.append(_visual_frame(club))
 
     att_geom = club_body.find("attached_geometry")
     if att_geom is None:
         att_geom = ET.SubElement(club_body, "attached_geometry")
-
-    # Clear existing attached_geometry on Club
     for child in list(att_geom):
         att_geom.remove(child)
-
-    # Scale factors:
-    # Shaft mesh: nominal length 1.0m, nominal radius 0.0065m
-    shaft_scale_x = club_spec.shaft_radius_m / 0.0065
-    shaft_scale_y = club_spec.length_m / 1.0
-    shaft_scale_z = club_spec.shaft_radius_m / 0.0065
-    shaft_scales = (shaft_scale_x, shaft_scale_y, shaft_scale_z)
-
-    # Head mesh: nominal dimensions scaled from head_half_size_m
-    hx, hy, hz = club_spec.head_half_size_m
-    head_scales = (hx * 2.0, hy * 2.0, hz * 2.0)
-
-    # Attach shaft mesh
-    shaft_mesh = _create_mesh_element(
-        name="club_shaft_geom",
-        mesh_file=shaft_mesh_file,
-        scale_factors=shaft_scales,
-        color=DEFAULT_SHAFT_COLOR,
-        opacity=DEFAULT_SHAFT_OPACITY,
+    att_geom.extend(
+        club_visuals.club_mesh_elements(
+            club.head_alias, mesh_dir_ref, socket_frame=f"../{VISUAL_FRAME_NAME}"
+        )
     )
-    att_geom.append(shaft_mesh)
-
-    # Attach clubhead mesh
-    head_mesh = _create_mesh_element(
-        name="club_head_geom",
-        mesh_file=head_mesh_file,
-        scale_factors=head_scales,
-        color=DEFAULT_HEAD_COLOR,
-        opacity=DEFAULT_HEAD_OPACITY,
-    )
-    att_geom.append(head_mesh)
-
     ensure(
-        len(list(att_geom)) >= 2,
-        "Club body must have at least 2 attached visual geometries",
+        len(list(att_geom)) >= 3,
+        "Club body must have shaft, grip and head visual geometries",
     )
     return tree

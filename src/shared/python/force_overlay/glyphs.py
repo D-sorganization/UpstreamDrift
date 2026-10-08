@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 import numpy as np
 
@@ -23,9 +23,73 @@ __all__ = [
     "GlyphSet",
     "LegendSpec",
     "TorqueArcGlyph",
+    "ALL_GROUPS",
+    "GROUP_LABELS",
+    "DEFAULT_GROUPS",
+    "SCALE_MODES",
     "build_glyphs",
+    "label_group",
     "scale_for_view",
 ]
+
+ScaleMode = Literal["fixed", "body_weight", "peak"]
+SCALE_MODES: tuple[str, ...] = ("fixed", "body_weight", "peak")
+
+#: Overlay groups selected by label prefix (GCV-1 ``contact:`` / GCV-2 ``grip:``).
+ALL_GROUPS: frozenset[str] = frozenset(
+    {
+        "per_foot",
+        "net",
+        "free_moment",
+        "moment_about_com",
+        "contact_points",
+        "grip_per_hand",
+        "grip_net",
+        "grip_couple",
+        "grip_mof",
+    }
+)
+#: Raw per-sphere contacts and moment-about-CoM arcs are opt-in.
+DEFAULT_GROUPS: frozenset[str] = ALL_GROUPS - {"contact_points", "moment_about_com"}
+
+#: Display labels shared by the PyQt Visualization tab and the web panel.
+GROUP_LABELS: dict[str, str] = {
+    "per_foot": "Per-Foot GRF",
+    "net": "Net GRF",
+    "free_moment": "Free Moment",
+    "moment_about_com": "Moment About CoM",
+    "contact_points": "Contact Points",
+    "grip_per_hand": "Grip Per Hand",
+    "grip_net": "Grip Net",
+    "grip_couple": "Grip Couple",
+    "grip_mof": "Grip MOF",
+}
+
+# Order matters: the first matching prefix wins (``grf_net`` before ``grf_``).
+_GROUP_PREFIXES: tuple[tuple[str, str], ...] = (
+    ("contact:grf_net", "net"),
+    ("contact:grf_", "per_foot"),
+    ("contact:free_moment", "free_moment"),
+    ("contact:moment_com", "moment_about_com"),
+    ("grip:hand_", "grip_per_hand"),
+    ("grip:net_midpoint", "grip_net"),
+    ("grip:couple_midpoint", "grip_couple"),
+    ("grip:mof_", "grip_mof"),
+    ("contact:", "contact_points"),
+)
+
+
+def label_group(label: str) -> str | None:
+    """Return the overlay group of a wrench label, or ``None`` if ungrouped.
+
+    Matching is by label prefix only, so providers need not import this module.
+    Ungrouped labels (joint torques, gravity, ...) are never filtered by groups.
+    """
+    for prefix, group in _GROUP_PREFIXES:
+        if label.startswith(prefix):
+            return group
+    return None
+
 
 SCHEMA_VERSION = "glyph-set-v1"
 
@@ -68,7 +132,7 @@ class ForceGlyphStyle:
     torque_scale_m_per_nm: float = 1.0 / 200.0
     min_length_m: float = 0.02
     max_length_m: float = 0.6
-    shaft_radius_m: float = 0.006
+    shaft_radius_m: float = 0.012
     head_length_ratio: float = 0.22
     head_radius_ratio: float = 2.4
     torque_style: str = "arc"
@@ -81,6 +145,63 @@ class ForceGlyphStyle:
     palette: Mapping[str, str] = field(
         default_factory=lambda: MappingProxyType(dict(FORCE_KIND_PALETTE))
     )
+    scale_mode: ScaleMode = "fixed"
+    reference_force_n: float | None = None
+    reference_length_m: float = 0.5
+    kind_scale: Mapping[WrenchKind, float] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
+    groups: frozenset[str] = DEFAULT_GROUPS
+
+    def force_scale_for(self, kind: WrenchKind) -> float:
+        """Effective arrow length in metres per newton for ``kind``.
+
+        ``fixed`` uses ``force_scale_m_per_n``; ``body_weight`` and ``peak`` map
+        ``reference_force_n`` to ``reference_length_m``. ``kind_scale`` then
+        multiplies the result for that kind. Postcondition: finite and positive.
+        """
+        if self.scale_mode == "fixed":
+            base = self.force_scale_m_per_n
+        else:
+            assert self.reference_force_n is not None  # validated in __post_init__
+            base = self.reference_length_m / self.reference_force_n
+        return base * self.kind_scale.get(kind, 1.0)
+
+    def _validate_scaling(self) -> None:
+        if self.scale_mode not in SCALE_MODES:
+            raise ValueError(
+                f"scale_mode must be one of {SCALE_MODES}, got {self.scale_mode!r}"
+            )
+        ref = self.reference_force_n
+        if ref is not None:
+            if not isinstance(ref, (int, float)) or isinstance(ref, bool):
+                raise TypeError("reference_force_n must be numeric or None")
+            if not math.isfinite(ref) or ref <= 0.0:
+                raise ValueError(
+                    f"reference_force_n must be finite and positive, got {ref}"
+                )
+        if self.scale_mode != "fixed" and ref is None:
+            raise ValueError(
+                f"scale_mode {self.scale_mode!r} requires reference_force_n "
+                "(body weight in N for body_weight; series peak in N for peak)"
+            )
+        for kind, factor in self.kind_scale.items():
+            if not isinstance(kind, WrenchKind):
+                raise TypeError("kind_scale keys must be WrenchKind")
+            if (
+                not isinstance(factor, (int, float))
+                or isinstance(factor, bool)
+                or not math.isfinite(factor)
+                or factor <= 0.0
+            ):
+                raise ValueError(
+                    f"kind_scale[{kind.value}] must be finite and positive, got {factor!r}"
+                )
+        unknown = set(self.groups) - ALL_GROUPS
+        if unknown:
+            raise ValueError(
+                f"Unknown groups {sorted(unknown)}; valid: {sorted(ALL_GROUPS)}"
+            )
 
     def __post_init__(self) -> None:
         for name in (
@@ -94,12 +215,15 @@ class ForceGlyphStyle:
             "arc_sweep_rad",
             "magnitude_floor_n",
             "magnitude_floor_nm",
+            "reference_length_m",
         ):
             val = getattr(self, name)
             if not isinstance(val, (int, float)) or isinstance(val, bool):
                 raise TypeError(f"{name} must be numeric")
             if not math.isfinite(val) or val <= 0.0:
                 raise ValueError(f"{name} must be finite and positive, got {val}")
+
+        self._validate_scaling()
 
         if self.min_length_m >= self.max_length_m:
             raise ValueError(
@@ -136,6 +260,14 @@ class ForceGlyphStyle:
             "magnitude_floor_nm": self.magnitude_floor_nm,
             "show_labels": self.show_labels,
             "palette": dict(self.palette),
+            "scale_mode": self.scale_mode,
+            "reference_force_n": self.reference_force_n,
+            "reference_length_m": self.reference_length_m,
+            "kind_scale": {
+                k.value: v
+                for k, v in sorted(self.kind_scale.items(), key=lambda kv: kv[0].value)
+            },
+            "groups": sorted(self.groups),
         }
 
     @classmethod
@@ -157,6 +289,11 @@ class ForceGlyphStyle:
             "magnitude_floor_nm",
             "show_labels",
             "palette",
+            "scale_mode",
+            "reference_force_n",
+            "reference_length_m",
+            "kind_scale",
+            "groups",
         }
         unknown = set(data.keys()) - valid_keys
         if unknown:
@@ -176,11 +313,17 @@ class ForceGlyphStyle:
         )
 
         kwargs: dict[str, Any] = {}
-        for key in valid_keys - {"kinds", "palette"}:
+        for key in valid_keys - {"kinds", "palette", "kind_scale", "groups"}:
             if key in data:
                 kwargs[key] = data[key]
         kwargs["kinds"] = kinds
         kwargs["palette"] = palette
+        if "kind_scale" in data:
+            kwargs["kind_scale"] = MappingProxyType(
+                {WrenchKind(k): v for k, v in dict(data["kind_scale"]).items()}
+            )
+        if "groups" in data:
+            kwargs["groups"] = frozenset(data["groups"])
         return cls(**kwargs)
 
 
@@ -312,6 +455,8 @@ class LegendSpec:
     unavailable_labels: tuple[str, ...] = ()
     engine: str = ""
     source_labels: tuple[str, ...] = ()
+    scale_mode: str = "fixed"
+    clamped_labels: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Convert legend spec to JSON dictionary."""
@@ -326,6 +471,8 @@ class LegendSpec:
             "unavailable_labels": list(self.unavailable_labels),
             "engine": self.engine,
             "source_labels": list(self.source_labels),
+            "scale_mode": self.scale_mode,
+            "clamped_labels": list(self.clamped_labels),
         }
 
     @classmethod
@@ -356,6 +503,8 @@ class LegendSpec:
             unavailable_labels=tuple(str(lbl) for lbl in d["unavailable_labels"]),
             engine=str(d["engine"]),
             source_labels=tuple(str(src) for src in d["source_labels"]),
+            scale_mode=str(d.get("scale_mode", "fixed")),
+            clamped_labels=tuple(str(c) for c in d.get("clamped_labels", ())),
         )
 
 
@@ -439,8 +588,8 @@ def _build_force_arrow(
     mag = math.sqrt(fx * fx + fy * fy + fz * fz)
     f_hat = (fx / mag, fy / mag, fz / mag)
 
-    raw_len = mag * style.force_scale_m_per_n
-    clamped = (raw_len < style.min_length_m) or (raw_len > style.max_length_m)
+    raw_len = mag * style.force_scale_for(wrench.kind)
+    clamped = raw_len > style.max_length_m
     length = max(style.min_length_m, min(raw_len, style.max_length_m))
 
     px, py, pz = wrench.point_m
@@ -483,7 +632,7 @@ def _build_torque_arc(
     a_hat = (tx / mag, ty / mag, tz / mag)
 
     raw_len = mag * style.torque_scale_m_per_nm
-    clamped = (raw_len < style.min_length_m) or (raw_len > style.max_length_m)
+    clamped = raw_len > style.max_length_m
     eff_len = max(style.min_length_m, min(raw_len, style.max_length_m))
     radius = eff_len / 2.0
 
@@ -534,9 +683,26 @@ def _build_torque_arc(
     )
 
 
+def _group_visible(label: str, groups: frozenset[str], has_aggregate: bool) -> bool:
+    """Whether ``label`` passes the group toggles.
+
+    Raw per-sphere contacts are shown regardless of the toggle when the frame has
+    no aggregated GRF labels, so engines that predate GCV-1 keep their arrows.
+    """
+    group = label_group(label)
+    if group is None:
+        return True
+    if group == "contact_points" and not has_aggregate:
+        return True
+    return group in groups
+
+
 def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
     """Pure, deterministic builder turning a ForceTorqueFrame into renderer-neutral glyphs."""
     sorted_wrenches = sorted(frame.wrenches, key=lambda w: w.label)
+    has_aggregate = any(
+        label_group(w.label) in ("per_foot", "net") for w in sorted_wrenches
+    )
     arrows: list[ArrowGlyph] = []
     torque_arcs: list[TorqueArcGlyph] = []
     unavailable: list[str] = []
@@ -545,6 +711,8 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
 
     for w in sorted_wrenches:
         if w.kind not in style.kinds:
+            continue
+        if not _group_visible(w.label, style.groups, has_aggregate):
             continue
         source_labels_set.add(w.source)
         color = style.palette.get(
@@ -575,8 +743,12 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
     force_ref_len: float | None = None
     if arrows:
         median_f = float(np.median([a.magnitude for a in arrows]))
-        force_ref_n = _nice_number(median_f)
-        force_ref_len = force_ref_n * style.force_scale_m_per_n
+        if style.scale_mode == "fixed":
+            force_ref_n = _nice_number(median_f)
+            force_ref_len = force_ref_n * style.force_scale_m_per_n
+        else:
+            force_ref_n = style.reference_force_n
+            force_ref_len = style.reference_length_m
 
     torque_ref_nm: float | None = None
     torque_ref_rad: float | None = None
@@ -594,6 +766,13 @@ def build_glyphs(frame: ForceTorqueFrame, style: ForceGlyphStyle) -> GlyphSet:
         unavailable_labels=tuple(sorted(unavailable)),
         engine=frame.engine,
         source_labels=tuple(sorted(source_labels_set)),
+        scale_mode=style.scale_mode,
+        clamped_labels=tuple(
+            sorted(
+                {a.label for a in arrows if a.clamped}
+                | {t.label for t in torque_arcs if t.clamped}
+            )
+        ),
     )
 
     return GlyphSet(
@@ -673,6 +852,8 @@ def scale_for_view(glyphs: GlyphSet, scale_factor: float) -> GlyphSet:
         unavailable_labels=old_leg.unavailable_labels,
         engine=old_leg.engine,
         source_labels=old_leg.source_labels,
+        scale_mode=old_leg.scale_mode,
+        clamped_labels=old_leg.clamped_labels,
     )
 
     return GlyphSet(

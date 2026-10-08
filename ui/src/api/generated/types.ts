@@ -1565,6 +1565,16 @@ export interface ForceOverlayRequest {
   body_filter?: string[] | null;
   /** Show magnitude labels */
   show_labels: boolean;
+  /** Arrow scaling: fixed, body_weight or peak */
+  scale_mode: "fixed" | "body_weight" | "peak";
+  /** Body weight (N) for body_weight; series peak (N) for peak */
+  reference_force_n?: number | null;
+  /** Arrow length (m) for one reference force */
+  reference_length_m: number;
+  /** Per-WrenchKind length multipliers */
+  kind_scale?: Record<string, number> | null;
+  /** Enabled overlay groups (None = defaults) */
+  groups?: string[] | null;
 }
 
 /**
@@ -1700,6 +1710,37 @@ export interface HTTPValidationError {
 export interface IdentityRequest {
   id: string;
   name: string;
+}
+
+/**
+ * One launch-monitor row; ``value`` is null when unavailable (GCV-17).
+ */
+export interface ImpactParameterRow {
+  key: string;
+  label: string;
+  unit: string;
+  value?: number | null;
+  /** Why the value is unavailable */
+  reason?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Target-relative impact parameters card for a run (GCV-17, #11723).
+ */
+export interface ImpactParametersResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no card can be computed */
+  available: boolean;
+  /** Why the card is unavailable */
+  reason?: string | null;
+  units: string;
+  impact_time_s?: number | null;
+  impact_time_source?: string | null;
+  frame?: Record<string, unknown>;
+  rows?: ImpactParameterRow[];
+  d_plane?: Record<string, number | null>;
 }
 
 /**

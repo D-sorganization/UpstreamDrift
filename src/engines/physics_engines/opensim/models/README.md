@@ -1,4 +1,4 @@
-# OpenSim golf-humanoid model
+# OpenSim Golf-Humanoid Model
 
 This directory holds the **generated** OpenSim humanoid `.osim` model that
 the OpenSim engine integrates into the cross-engine motion-matching
@@ -26,7 +26,7 @@ pipeline. The model is the joint-torque-actuated MVP body from
   avoids a brittle muscle-removal pass and keeps the build deterministic
   without requiring the OpenSim Python bindings at build time.
 
-## Licence audit
+## Licence Audit
 
 The upstream `opensim-org/opensim-models` repository is published by the
 OpenSim Development Team. The repository itself does not ship a
@@ -60,7 +60,7 @@ and tracked.
 The licence-review note for this PR is recorded above; the project owner
 sign-off is captured in the merging PR's review.
 
-## Modifications applied to the base model
+## Modifications Applied to the Base Model
 
 The generator `scripts/build_humanoid_osim.py` reads
 `Rajagopal2015_opensense.osim` and emits `golf_humanoid.osim` with the
@@ -96,7 +96,7 @@ here. The post-MVP muscle path is tracked by issue **#4134** and by
 deliberately structured so that re-grafting the muscle force-set is a
 single ForceSet additive operation, with no rip-and-replace.
 
-## Coordinate-name alignment with the Simscape body chain
+## Coordinate-Name Alignment With the Simscape Body Chain
 
 The cross-engine parity spec ([CROSS_ENGINE_PARITY_SPEC.md](../../CROSS_ENGINE_PARITY_SPEC.md)
 §2.6) requires the OpenSim coordinate names to round-trip with the
@@ -127,7 +127,7 @@ chain (cross-engine spec §2.6) is the role of `coordinate_map.py`; this
 artifact deliberately preserves the upstream Rajagopal naming so the
 mapping helper can be implemented without touching the OSIM model.
 
-## Regeneration command
+## Regeneration Command
 
 ```bash
 python3 scripts/build_humanoid_osim.py
@@ -169,3 +169,28 @@ python -m src.engines.physics_engines.opensim.python.full_body_osim \
   --out src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim \
   --receipt src/engines/physics_engines/opensim/models/generated/export_receipt.json
 ```
+
+### Club Visuals (OSV-1 #11727, GCV-11 #11717)
+
+Every generated full-body model carries three `<Mesh>` visual geometries on
+the `Clubhead` body: shaft, grip rubber and a parametric clubhead. They come
+from the shared adapter `src/shared/python/model_appearance/club_head_mesh.py`
+(Tools parametric builder, with committed STLs under `assets/club_heads/` as
+fallback) and are written to `geometry/club/` with a `provenance.json` that
+records the spec hash, assembly parameters and a sha256 per file.
+
+- Visual only: the meshes add no mass, inertia or contact. The `Clubhead`
+  body mass properties are identical to a bare export (checked by
+  `tests/unit/motion_matching/test_full_body_osim_club.py`).
+- The saved models reference the files by bare name. OpenSim 4.6 does not
+  resolve relative paths containing `..`, so loaders call
+  `club_visuals.register_geometry_path()` first. In the OpenSim GUI, add
+  `models/geometry/club` to File > Preferences > Geometry Search Path, or
+  re-export with `--club-geometry-ref <absolute directory>`.
+- `tour_matching/club_geometry.py::attach_visual_club` applies the same three
+  meshes to `golf_humanoid.osim` through a `club_visual_frame` offset frame.
+- Limitation: the visual head follows the specification solid placement; the
+  head centre of mass in the dynamics model is not moved to the mesh centre.
+- Regenerate with the exporter command above; `--no-club-geometry` produces a
+  bare club.
+

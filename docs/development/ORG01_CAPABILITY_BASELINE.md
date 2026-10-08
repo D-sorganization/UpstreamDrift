@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 171
+- **Total Cataloged Entries**: 175
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -28,7 +28,7 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace | Primary Capability Count | Description |
 | :--- | :---: | :--- |
-| `analysis` | 26 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
+| `analysis` | 30 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
@@ -72,6 +72,7 @@ packages, saved layouts, and golden test fixtures.
 | `analysis.counterfactuals` | ZTCF/ZVCF + induced-acceleration counterfactuals | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/biomechanics/ztcf.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis.cross_engine_robustness` | Cross-engine robustness dashboard (perturbation/CV) | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/launchers/cross_engine_dashboard.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis.grip_wrench` | Per-hand grip wrench on the club emitted as GRIP overlay frames | `feature` | `analysis` | — | `core` | 🔵 planned | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` | `tests/unit/biomechanics/test_grip_extraction.py` |
+| `analysis.impact_parameters` | Impact parameters panel (target-relative launch-monitor card) | `feature` | `analysis` | `simulation` | `core` | 🟢 active_feature | `src/tools/impact_parameters_panel/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis.static_plots` | Static analysis plots (20+ plot types) | `feature` | `analysis` | — | `core` | 🟢 active_feature | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis_tools_api` | Analysis Tools | `service` | `analysis` | — | `tools` | 🟢 active_feature | `src/api/routes/analysis_tools.py` | `tests/config/test_launcher_registry_parity.py` |
 | `ball_flight_simulator` | Ball Flight Simulator | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/ball_flight_gui/gui.py` | `tests/config/test_launcher_registry_parity.py` |
@@ -118,6 +119,7 @@ packages, saved layouts, and golden test fixtures.
 | `golf_simulation_suite` | Golf Simulation Suite | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulator` | Golf Simulator Console | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulator/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `hmr2_sidecar` | Tools Package: hmr2_sidecar | `library` | `simulation` | `analysis` | `core` | 🟣 intentionally_headless | `src/tools/hmr2_sidecar/__init__.py` | `tests/config/test_registry_exclusions.py` |
+| `impact_parameters` | Impact Parameters | `tile` | `analysis` | `simulation` | `core` | 🟢 active_feature | `src/tools/impact_parameters_panel/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `injury_analysis` | Injury Risk Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/shared/python/injury/injury_risk.py` | `tests/config/test_launcher_registry_parity.py` |
 | `launch_monitor_analytics` | Launch Monitor Analytics | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/launch_monitor_analytics/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `launch_monitor_model` | Tools Package: launch_monitor_model | `library` | `analysis` | `simulation` | `core` | 🟣 intentionally_headless | `src/tools/launch_monitor_model/__init__.py` | `tests/config/test_registry_exclusions.py` |
@@ -190,6 +192,8 @@ packages, saved layouts, and golden test fixtures.
 | `putting_green_gui` | Putting Green | `tile` | `putting` | — | `core` | 🟡 deprecated_alias | `src/tools/putting_green_gui/gui.py` | `tests/config/test_capability_migration_coverage.py` |
 | `rate_of_closure` | Rate of Closure Impact Explorer | `tile` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `realtime_ws` | Realtime WebSocket | `service` | `simulation` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
+| `render.body_appearance` | Golfer body appearance with a visible head, face and neck in every engine render | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/head.py` | `tests/unit/model_appearance/test_head_model.py` |
+| `render.club_head_and_ball` | Realistic Club Head And Ball Rendering | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/model_appearance/club_head_mesh.py` | `tests/unit/model_appearance/test_club_head_mesh.py` |
 | `robotics_module` | Robotics Module | `library` | `simulation` | — | `core` | 🟢 active_feature | `src/robotics/__init__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `settings.desktop_only_tabs` | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `settings.preferences` | Settings/preferences surface + persistence | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |

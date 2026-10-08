@@ -466,6 +466,18 @@
       "evidence": "src/config/models.yaml",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "impact_parameters": {
+      "id": "impact_parameters",
+      "name": "Impact Parameters",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "force_overlays": {
       "id": "force_overlays",
       "name": "Force Overlays",
@@ -1486,6 +1498,30 @@
       "evidence": "src/launchers/cross_engine_dashboard.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "render.body_appearance": {
+      "id": "render.body_appearance",
+      "name": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/model_appearance/head.py",
+      "acceptance_owner": "tests/unit/model_appearance/test_head_model.py"
+    },
+    "render.club_head_and_ball": {
+      "id": "render.club_head_and_ball",
+      "name": "Realistic Club Head And Ball Rendering",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/model_appearance/club_head_mesh.py",
+      "acceptance_owner": "tests/unit/model_appearance/test_club_head_mesh.py"
+    },
     "analysis.grip_wrench": {
       "id": "analysis.grip_wrench",
       "name": "Per-hand grip wrench on the club emitted as GRIP overlay frames",
@@ -1989,6 +2025,18 @@
       "alias_target": null,
       "evidence": "src/tools/necromatcher/gui.py",
       "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "analysis.impact_parameters": {
+      "id": "analysis.impact_parameters",
+      "name": "Impact parameters panel (target-relative launch-monitor card)",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_green": {
       "id": "tools.putting_green",

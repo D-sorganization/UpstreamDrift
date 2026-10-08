@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
+import json
+import tempfile
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -18,6 +21,8 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import meshcat_camera
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -35,6 +40,17 @@ _SHAPE_RGBA = [0.7, 0.72, 0.8, 1.0]
 _FLOOR_RGBA = [0.35, 0.45, 0.3, 1.0]
 
 
+def _bvh_mesh(coal: Any, mesh: Any) -> Any:
+    """A coal triangle mesh for a closed ``Mesh`` (club-body frame)."""
+    bvh = coal.BVHModelOBBRSS()
+    bvh.beginModel(0, 0)
+    for face in mesh.faces:
+        a, b, c = (np.asarray(mesh.vertices[i], dtype=float) for i in face)
+        bvh.addTriangle(a, b, c)
+    bvh.endModel()
+    return bvh
+
+
 class PinocchioMeshcatBackend:
     """Pinocchio ``MeshcatVisualizer`` captured with headless Chromium."""
 
@@ -47,7 +63,6 @@ class PinocchioMeshcatBackend:
         return playwright_unavailable_reason()
 
     def _build(self, swing: SwingInput) -> tuple[Any, Any, Any]:
-        import json
 
         import coal
         import meshcat
@@ -72,7 +87,22 @@ class PinocchioMeshcatBackend:
             geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
 
         n = 0
+        # The shared visual head replaces the head capsule (visual only).
+        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
+        heads = head_mesh_files(spec, Path(self._head_dir))
+        head_body = heads[0].body if heads else None
+        for head in heads:
+            joint, body_pose = adapter._bodies[head.body]  # noqa: SLF001
+            shape = coal.MeshLoader().load(str(head.path))
+            obj = pin.GeometryObject(  # type: ignore[attr-defined]
+                f"head_{head.name}", joint, body_pose, shape, str(head.path)
+            )
+            obj.meshColor = np.array(head.rgba)
+            obj.overrideMaterial = True
+            geometry.addGeometryObject(obj)  # type: ignore[attr-defined]
         for cap in skeleton.capsules:
+            if cap.body == head_body:
+                continue
             rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
             add(
                 f"cap{n}",
@@ -83,7 +113,21 @@ class PinocchioMeshcatBackend:
                 _CAPSULE_RGBA,
             )
             n += 1
+        club = club_parts(spec)
+        if club is not None:
+            club_body, parts = club
+            for part in parts:
+                add(
+                    part.name,
+                    club_body,
+                    np.eye(3),
+                    np.zeros(3),
+                    _bvh_mesh(coal, part.mesh),
+                    list(part.rgba),
+                )
         for shp in skeleton.shapes:
+            if club is not None and shp.body == club[0]:
+                continue  # the mesh head replaces the ellipsoid hint
             shape = (
                 coal.Ellipsoid(*shp.half_size_m)
                 if shp.kind == "ellipsoid"

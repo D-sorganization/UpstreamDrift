@@ -327,6 +327,10 @@ def legend_text(glyphs: GlyphSet) -> str:
         parts.append(
             f"Ref Torque: {leg.torque_reference_nm:.0f} N*m (r={leg.torque_reference_radius_m:.2f} m)"
         )
+    if leg.scale_mode != "fixed":
+        parts.append(f"Scale: {leg.scale_mode}")
+    if leg.clamped_labels:
+        parts.append(f"Clamped: {len(leg.clamped_labels)} (double tip)")
     if leg.engine:
         parts.append(f"Engine: {leg.engine}")
     if leg.kinds_present:
