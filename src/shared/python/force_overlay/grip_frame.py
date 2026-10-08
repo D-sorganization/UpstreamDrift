@@ -21,9 +21,9 @@ from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
     to_overlay_wrenches,
 )
-from src.shared.python.force_overlay.contracts import ForceTorqueFrame
+from src.shared.python.force_overlay.contracts import ForceTorqueFrame, OverlayWrench
 
-__all__ = ["GRIP_LABELS", "grip_frame"]
+__all__ = ["GRIP_LABELS", "grip_frame", "grip_wrenches_and_metadata"]
 
 #: Every label a complete grip analysis can emit.
 GRIP_LABELS: tuple[str, ...] = (
@@ -34,6 +34,33 @@ GRIP_LABELS: tuple[str, ...] = (
     "grip:mof_left",
     "grip:mof_right",
 )
+
+
+def grip_wrenches_and_metadata(
+    analysis: GripAnalysis, *, source: str
+) -> tuple[tuple[OverlayWrench, ...], dict[str, Any]]:
+    """Overlay wrenches and frame metadata of one grip analysis.
+
+    Metadata: ``grip_split_method``, ``grip_unavailable_labels``, optionally
+    ``grip_unavailable_reason`` and ``grip_midpoint_m`` (the camera focus of the
+    hands close-up view).
+
+    Raises:
+        TypeError: if ``analysis`` is not a ``GripAnalysis``.
+    """
+    if not isinstance(analysis, GripAnalysis):
+        raise TypeError(f"analysis must be a GripAnalysis, got {type(analysis)}")
+    wrenches = tuple(to_overlay_wrenches(analysis, source=source))
+    present = {w.label for w in wrenches}
+    metadata: dict[str, Any] = {
+        "grip_split_method": analysis.split_method,
+        "grip_unavailable_labels": [x for x in GRIP_LABELS if x not in present],
+    }
+    if analysis.unavailable_reason:
+        metadata["grip_unavailable_reason"] = analysis.unavailable_reason
+    if analysis.midpoint_m is not None:
+        metadata["grip_midpoint_m"] = list(analysis.midpoint_m)
+    return wrenches, metadata
 
 
 def grip_frame(
@@ -50,21 +77,12 @@ def grip_frame(
         TypeError: if ``analysis`` is not a ``GripAnalysis``.
         ValueError: for a non-finite ``time_s`` or an empty ``engine``/``source``.
     """
-    if not isinstance(analysis, GripAnalysis):
-        raise TypeError(f"analysis must be a GripAnalysis, got {type(analysis)}")
     if not math.isfinite(time_s):
         raise ValueError("time_s must be finite")
     if not engine or not source:
         raise ValueError("engine and source must be non-empty")
-    wrenches = tuple(to_overlay_wrenches(analysis, source=source))
-    present = {w.label for w in wrenches}
-    metadata: dict[str, Any] = {
-        **(extra_metadata or {}),
-        "grip_split_method": analysis.split_method,
-        "grip_unavailable_labels": [x for x in GRIP_LABELS if x not in present],
-    }
-    if analysis.unavailable_reason:
-        metadata["grip_unavailable_reason"] = analysis.unavailable_reason
+    wrenches, metadata = grip_wrenches_and_metadata(analysis, source=source)
+    metadata = {**(extra_metadata or {}), **metadata}
     return ForceTorqueFrame(
         time_s=float(time_s), engine=engine, wrenches=wrenches, metadata=metadata
     )

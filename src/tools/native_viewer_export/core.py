@@ -21,7 +21,11 @@ from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
-from src.shared.python.golf_view_presets import VIEW_ORDER, get_view_preset
+from src.shared.python.golf_view_presets import (
+    VIEW_ORDER,
+    get_view_preset,
+    tracked_lookats,
+)
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.video_timing.frame_schedule import (
     DEFAULT_FPS,
@@ -85,6 +89,7 @@ class ExportSettings:
     impact_speed: float = IMPACT_CLIP_SPEED
     overlays: bool = True
     multiview: bool = True
+    grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
 
@@ -312,11 +317,25 @@ def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
 
 @dataclass
 class OverlayFeed:
-    """Glyph sets by state index, built lazily from an overlay provider."""
+    """Glyph sets by state index, built lazily from an overlay provider.
+
+    Frames are cached per index: a frame may need an engine solve (the grip
+    wrench), and both the glyphs and the tracked camera read it.
+    """
 
     frame_at: Callable[[int], Any]
     style: ForceGlyphStyle = field(default_factory=default_glyph_style)
     build: Callable[[Any, ForceGlyphStyle], GlyphSet] | None = None
+    #: grip analyses at given indices (set when the grip overlay is enabled)
+    grip_analyses: Callable[[Sequence[int]], list[Any]] | None = None
+    _frames: dict[int, Any] = field(
+        default_factory=dict, init=False, repr=False, compare=False
+    )
+
+    def _frame(self, index: int) -> Any:
+        if index not in self._frames:
+            self._frames[index] = self.frame_at(index)
+        return self._frames[index]
 
     def glyphs_at(self, index: int) -> GlyphSet:
         build = self.build
@@ -324,11 +343,42 @@ class OverlayFeed:
             from src.shared.python.force_overlay.glyphs import build_glyphs
 
             build = build_glyphs
-        return build(self.frame_at(index), self.style)
+        return build(self._frame(index), self.style)
+
+    def focus_at(self, index: int) -> tuple[float, float, float] | None:
+        """Grip midpoint of state ``index`` (camera focus), or ``None`` if unknown."""
+        metadata = getattr(self._frame(index), "metadata", None) or {}
+        point = metadata.get("grip_midpoint_m")
+        if point is None:
+            return None
+        return (float(point[0]), float(point[1]), float(point[2]))
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
         return "" if glyphs is None else legend_text(glyphs)
+
+
+def view_lookats(
+    settings: ExportSettings, indices: Sequence[int], overlay: OverlayFeed | None
+) -> dict[str, list[tuple[float, float, float]]]:
+    """Look-at point per view and frame (``indices`` order).
+
+    A tracking view (``hands_closeup``) follows the overlay's grip midpoint; a
+    fixed view, or a tracking view without an overlay, keeps
+    ``settings.lookat_m``.
+    """
+    focus: list[tuple[float, float, float] | None] | None = None
+    out: dict[str, list[tuple[float, float, float]]] = {}
+    for name in settings.views:
+        preset = get_view_preset(name)
+        if preset.tracks is not None and overlay is not None and focus is None:
+            focus = [overlay.focus_at(k) for k in indices]
+        out[name] = tracked_lookats(
+            preset,
+            settings.lookat_m,
+            focus if focus is not None else [None] * len(indices),
+        )
+    return out
 
 
 @runtime_checkable
@@ -389,6 +439,7 @@ class ExportResult:
     skipped_reason: str | None = None
     glyph_counts: tuple[int, ...] = ()
     frames_by_suffix: dict[str, int] = field(default_factory=dict)
+    grip_json: Path | None = None  # grip plot payload (GCV-10), when enabled
 
     @property
     def skipped(self) -> bool:

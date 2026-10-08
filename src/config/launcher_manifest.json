@@ -1206,6 +1206,26 @@
         "mode": "route",
         "route": "/tools/analysis"
       }
+    },
+    {
+      "id": "grip_wrench_plots",
+      "name": "Grip Wrench Plots",
+      "description": "Hand force on the club per hand, net force and equivalent couple at the grip midpoint over time, with the left/right split method",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/grip_wrench_plots/__main__.py",
+      "logo": "grip_wrench_plots.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "grip_wrench",
+        "club_forces",
+        "force_plots"
+      ],
+      "order": 53,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
     }
   ]
 }

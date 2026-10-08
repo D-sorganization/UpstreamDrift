@@ -50,6 +50,9 @@ class ViewPreset:
     azimuth_deg: float
     elevation_deg: float
     default_distance_m: float
+    #: Moving target the camera follows (``"grip_midpoint"``), or ``None`` for a
+    #: fixed look-at point (GCV-10, #11716).
+    tracks: str | None = None
 
     def __post_init__(self) -> None:
         if not self.name or not self.label:
@@ -105,6 +108,15 @@ VIEW_PRESETS = MappingProxyType(
         "oblique": ViewPreset(
             "oblique", "Oblique (rear, target side)", 135.0, -14.0, 3.2
         ),
+        # Not part of VIEW_ORDER (the 2x2 grid stays four views): request it by name.
+        "hands_closeup": ViewPreset(
+            "hands_closeup",
+            "Hands close-up (follows the grip midpoint)",
+            -35.0,
+            -18.0,
+            1.1,
+            tracks="grip_midpoint",
+        ),
     }
 )
 
@@ -115,5 +127,32 @@ def get_view_preset(name: str) -> ViewPreset:
         return VIEW_PRESETS[name]
     except KeyError:
         raise ValueError(
-            f"unknown view preset {name!r}; expected one of {list(VIEW_ORDER)}"
+            f"unknown view preset {name!r}; expected one of {list(VIEW_PRESETS)}"
         ) from None
+
+
+def tracked_lookats(
+    preset: ViewPreset,
+    static_lookat_m: Sequence[float] | Array,
+    focus_m: Sequence[Sequence[float] | None],
+) -> list[tuple[float, float, float]]:
+    """Look-at point per frame for ``preset``.
+
+    A tracking preset follows ``focus_m`` (for ``hands_closeup``, the grip
+    midpoint per frame); a sample that is ``None`` or not finite holds the last
+    known point, and before any is known the static look-at is used, never the
+    origin.  A fixed preset returns ``static_lookat_m`` for every frame.
+
+    Raises:
+        ValueError: if ``static_lookat_m`` is not a finite 3-vector.
+    """
+    static = tuple(float(v) for v in check_point3(static_lookat_m, "static_lookat_m"))
+    out: list[tuple[float, float, float]] = []
+    held = static
+    for point in focus_m:
+        if preset.tracks is not None and point is not None:
+            arr = np.asarray(point, dtype=float)
+            if arr.shape == (3,) and np.isfinite(arr).all():
+                held = (float(arr[0]), float(arr[1]), float(arr[2]))
+        out.append(held if preset.tracks is not None else static)
+    return out

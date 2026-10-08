@@ -16,7 +16,7 @@ const KIND_INFO: Record<WrenchKind, { label: string; color: string }> = {
   joint_actuator: { label: 'Actuator Torque', color: '#E69F00' },
   joint_reaction: { label: 'Joint Reaction', color: '#56B4E9' },
   contact: { label: 'Contact Force', color: '#009E73' },
-  grip: { label: 'Grip Force', color: '#F0E442' },
+  grip: { label: 'Grip Force (Net)', color: '#56B4E9' },
   external: { label: 'External Force', color: '#0072B2' },
   gravity: { label: 'Gravity', color: '#D55E00' },
   muscle: { label: 'Muscle Force', color: '#CC79A7' },
@@ -93,6 +93,23 @@ export function ForceLegend({ glyphs, className = '' }: ForceLegendProps) {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Grip split (GCV-10): per-hand shades and the method behind the split */}
+      {legend.grip_split_method && (
+        <div className="pt-1 border-t border-white/5 text-[11px] space-y-1" data-testid="grip-legend">
+          <div>
+            <span className="text-gray-400">Grip split: </span>
+            <span className="font-mono text-sky-300" data-testid="grip-legend-split">
+              {legend.grip_split_method}
+            </span>
+          </div>
+          <div className="flex gap-3 text-gray-300">
+            <span><span style={{ color: '#9AD0F2' }}>&#9632;</span> Left hand</span>
+            <span><span style={{ color: '#1B6C99' }}>&#9632;</span> Right hand</span>
+            <span><span style={{ color: '#56B4E9' }}>&#9632;</span> Net / couple</span>
           </div>
         </div>
       )}

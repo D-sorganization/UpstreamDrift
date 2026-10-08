@@ -73,7 +73,12 @@ def test_couple_arc_axis_equals_couple_direction():
 def test_hand_arrows_have_distinct_colours_from_net():
     glyphs, _ = _glyphs()
     rgba = {a.label: a.rgba for a in glyphs.arrows}
-    assert len({rgba["grip:hand_left"], rgba["grip:hand_right"], rgba["grip:net_midpoint"]}) == 3
+    assert (
+        len(
+            {rgba["grip:hand_left"], rgba["grip:hand_right"], rgba["grip:net_midpoint"]}
+        )
+        == 3
+    )
     # GRIP #56B4E9 stays the net colour
     assert rgba["grip:net_midpoint"][:3] == pytest.approx(
         (0x56 / 255, 0xB4 / 255, 0xE9 / 255)
@@ -84,7 +89,7 @@ def test_hand_arrows_have_distinct_colours_from_net():
 
 
 def test_group_toggles_hide_each_glyph_class():
-    base = dict(magnitude_floor_n=1.0, magnitude_floor_nm=0.1)
+    base = {"magnitude_floor_n": 1.0, "magnitude_floor_nm": 0.1}
     only_net = ForceGlyphStyle(groups=frozenset({"grip_net"}), **base)
     glyphs, _ = _glyphs(style=only_net)
     assert [a.label for a in glyphs.arrows] == ["grip:net_midpoint"]
@@ -131,7 +136,9 @@ def test_unavailable_split_is_listed_not_drawn_as_zero():
     glyphs, frame = _glyphs(net_only)
     labels = {a.label for a in glyphs.arrows}
     assert labels == {"grip:net_midpoint"}
-    assert {"grip:hand_left", "grip:hand_right"} <= set(glyphs.legend.unavailable_labels)
+    assert {"grip:hand_left", "grip:hand_right"} <= set(
+        glyphs.legend.unavailable_labels
+    )
     assert glyphs.legend.grip_split_method == "allocation"
     from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
 
@@ -159,4 +166,6 @@ def test_grip_frame_rejects_bad_inputs():
         grip_frame(math.nan, _analysis(), engine="x", source="t")
     with pytest.raises(ValueError):
         grip_frame(0.0, _analysis(), engine="", source="t")
-    assert WrenchKind.GRIP in {w.kind for w in grip_frame(0.0, _analysis(), engine="x", source="t").wrenches}
+    assert WrenchKind.GRIP in {
+        w.kind for w in grip_frame(0.0, _analysis(), engine="x", source="t").wrenches
+    }

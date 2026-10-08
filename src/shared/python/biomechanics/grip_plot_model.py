@@ -37,6 +37,7 @@ __all__ = [
     "GripPlotSeries",
     "build_grip_plot_series",
     "plot_series_to_json",
+    "series_from_payload",
 ]
 
 TRACE_LABELS: dict[str, str] = {
@@ -107,7 +108,9 @@ class GripPlotSeries:
             "events": dict(self.events),
             "units": dict(TRACE_UNITS),
             "labels": dict(TRACE_LABELS),
-            "traces": {k: {a: list(v) for a, v in t.items()} for k, t in self.traces.items()},
+            "traces": {
+                k: {a: list(v) for a, v in t.items()} for k, t in self.traces.items()
+            },
         }
 
 
@@ -165,3 +168,33 @@ def build_grip_plot_series(
 def plot_series_to_json(series: GripPlotSeries) -> str:
     """Strict JSON text (``allow_nan=False``) of ``series``."""
     return json.dumps(series.to_dict(), allow_nan=False)
+
+
+def series_from_payload(payload: Mapping[str, Any]) -> GripPlotSeries:
+    """Rebuild a :class:`GripPlotSeries` from its ``to_dict`` / API form.
+
+    Raises:
+        ValueError: if the payload lacks ``time_s`` and ``traces`` or any trace
+            of :data:`TRACE_LABELS` is missing a component.
+    """
+    if "time_s" not in payload or "traces" not in payload:
+        raise ValueError("grip payload needs 'time_s' and 'traces'")
+    n = len(payload["time_s"])
+    traces: dict[str, dict[str, list[float | None]]] = {}
+    for name, trace in payload["traces"].items():
+        if name not in TRACE_LABELS:
+            continue
+        missing = [a for a in ("x", "y", "z", "magnitude") if a not in trace]
+        if missing or any(len(trace[a]) != n for a in trace):
+            raise ValueError(f"trace {name!r} is malformed (missing {missing})")
+        traces[name] = {a: list(v) for a, v in trace.items()}
+    return GripPlotSeries(
+        time_s=tuple(float(t) for t in payload["time_s"]),
+        traces=traces,
+        split_method=str(payload.get("split_method", "unavailable")),
+        split_method_by_sample=tuple(payload.get("split_method_by_sample", ())),
+        unavailable_reasons=tuple(payload.get("unavailable_reasons", ())),
+        available=bool(payload.get("available", True)),
+        reason=str(payload.get("reason") or ""),
+        events={str(k): float(v) for k, v in dict(payload.get("events") or {}).items()},
+    )

@@ -73,7 +73,9 @@ def _unavailable(reason: str) -> dict[str, Any]:
     }
 
 
-def compute_grip_plot(run: Any, *, impact_time_s: float | None = None) -> dict[str, Any]:
+def compute_grip_plot(
+    run: Any, *, impact_time_s: float | None = None
+) -> dict[str, Any]:
     """Plot payload for ``run`` (see ``GripPlotSeries.to_dict``).
 
     Raises:

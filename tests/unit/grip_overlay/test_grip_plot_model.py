@@ -91,9 +91,7 @@ def test_unavailable_samples_are_none_never_zero():
         split_method="allocation",
         reason="allocation yields one net 6-D wrench",
     )
-    p = build_grip_plot_series(
-        [0.0, 0.1], [_pair((1, 0, 0), (1, 0, 0)), net_only]
-    )
+    p = build_grip_plot_series([0.0, 0.1], [_pair((1, 0, 0), (1, 0, 0)), net_only])
     assert p.traces["left_force_n"]["x"][1] is None
     assert p.traces["left_force_n"]["magnitude"][1] is None
     assert p.traces["net_force_n"]["x"][1] == 5.0
@@ -110,9 +108,7 @@ def _reject(token):  # pragma: no cover - fails the test if hit
 
 
 def test_fully_unavailable_series_reports_reason():
-    p = build_grip_plot_series(
-        [0.0, 0.1], [unavailable_analysis("no grip welds")] * 2
-    )
+    p = build_grip_plot_series([0.0, 0.1], [unavailable_analysis("no grip welds")] * 2)
     assert p.available is False
     assert "no grip welds" in p.reason
     assert p.split_method == "unavailable"
@@ -122,8 +118,10 @@ def test_fully_unavailable_series_reports_reason():
 def test_mixed_split_methods_are_named():
     p = build_grip_plot_series(
         [0.0, 0.1],
-        [_pair((1, 0, 0), (1, 0, 0), method="efc_force"),
-         _pair((1, 0, 0), (1, 0, 0), method="bushing")],
+        [
+            _pair((1, 0, 0), (1, 0, 0), method="efc_force"),
+            _pair((1, 0, 0), (1, 0, 0), method="bushing"),
+        ],
     )
     assert p.split_method == "mixed"
 
@@ -134,4 +132,6 @@ def test_preconditions():
     with pytest.raises(ValueError):
         build_grip_plot_series([], [])
     with pytest.raises(ValueError):
-        build_grip_plot_series([0.0], [_pair((1, 0, 0), (1, 0, 0))], events={"x": math.nan})
+        build_grip_plot_series(
+            [0.0], [_pair((1, 0, 0), (1, 0, 0))], events={"x": math.nan}
+        )

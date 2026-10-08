@@ -7,6 +7,10 @@ from dataclasses import dataclass, replace
 import logging
 from pathlib import Path
 
+from src.shared.python.biomechanics.grip_plot_model import (
+    build_grip_plot_series,
+    plot_series_to_json,
+)
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.tools.native_viewer_export.backends.registry import make_backend
 from src.tools.native_viewer_export.core import (
@@ -24,6 +28,32 @@ from src.tools.native_viewer_export.core import (
 from src.tools.native_viewer_export.overlay import build_overlay_feed
 
 logger = logging.getLogger(__name__)
+GRIP_PLOT_STRIDE = 4  # one grip sample per 4 bundle steps in the plot payload
+
+
+def write_grip_json(
+    swing: SwingInput,
+    engine: str,
+    feed: OverlayFeed,
+    out_dir: Path,
+    *,
+    impact_time_s: float | None = None,
+) -> Path:
+    """Write ``<swing>_<engine>_grip_wrench.json`` (the ``/analysis/grip-wrench`` shape)."""
+    if feed.grip_analyses is None:
+        raise ValueError("overlay feed has no grip analyses")
+    steps = swing.bundle.steps
+    indices = list(range(0, steps + 1, GRIP_PLOT_STRIDE))
+    analyses = feed.grip_analyses(indices)
+    times = [k * swing.bundle.dt_s for k in indices]
+    events = {"impact": impact_time_s} if impact_time_s is not None else None
+    series = build_grip_plot_series(times, analyses, events=events)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{swing.swing}_{engine}_grip_wrench.json"
+    path.write_text(plot_series_to_json(series), encoding="utf-8")
+    return path
+
+
 OverlayFactory = Callable[
     [SwingInput, str], tuple[OverlayFeed, tuple[float, float, float]]
 ]
@@ -81,9 +111,19 @@ def run_export(
                 per_settings = replace(settings, lookat_m=lookat)
             except BackendUnavailable as exc:
                 logger.warning("rendering %s without overlays: %s", engine, exc)
-        results.append(
-            export_swing(
-                backend, swing, per_settings, job.out_dir, feed, writer_factory
-            )
+        result = export_swing(
+            backend, swing, per_settings, job.out_dir, feed, writer_factory
         )
+        if feed is not None and feed.grip_analyses is not None:
+            result = replace(
+                result,
+                grip_json=write_grip_json(
+                    swing,
+                    engine,
+                    feed,
+                    job.out_dir,
+                    impact_time_s=settings.impact_time_s,
+                ),
+            )
+        results.append(result)
     return results

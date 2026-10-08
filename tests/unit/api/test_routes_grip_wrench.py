@@ -133,9 +133,7 @@ def test_all_unavailable_analyses():
 
 def test_engine_provider_is_used():
     times = [0.0, 0.01]
-    engine = SimpleNamespace(
-        get_grip_analyses=lambda: (times, [_pair(1), _pair(2)])
-    )
+    engine = SimpleNamespace(get_grip_analyses=lambda: (times, [_pair(1), _pair(2)]))
     c = _client({"r1": _run({}, engine)})
     body = c.get("/analysis/grip-wrench", params={"run_id": "r1"}).json()
     assert body["available"] is True and len(body["time_s"]) == 2

@@ -68,4 +68,49 @@ describe('ForceLegend', () => {
     expect(screen.getByText(/Gravity/i)).toBeInTheDocument();
     expect(screen.queryByText(/N\*m/i)).not.toBeInTheDocument();
   });
+
+  it('names the grip split method and the per-hand shades (GCV-10)', () => {
+    const glyphs: GlyphSetV1 = {
+      schema_version: 'glyph-set-v1',
+      time_s: 0.5,
+      arrows: [],
+      torque_arcs: [],
+      legend: {
+        force_reference_n: null,
+        force_reference_length_m: null,
+        torque_reference_nm: null,
+        torque_reference_radius_m: null,
+        kinds_present: ['grip'],
+        unavailable_labels: ['grip:hand_left', 'grip:hand_right'],
+        engine: 'pinocchio',
+        source_labels: [],
+        grip_split_method: 'allocation',
+      },
+    };
+    render(<ForceLegend glyphs={glyphs} />);
+    expect(screen.getByTestId('grip-legend-split')).toHaveTextContent('allocation');
+    expect(screen.getByText(/grip:hand_left, grip:hand_right/)).toBeInTheDocument();
+    expect(screen.getByText(/Left hand/)).toBeInTheDocument();
+  });
+
+  it('omits the grip block without grip data', () => {
+    const glyphs = {
+      schema_version: 'glyph-set-v1',
+      time_s: 0,
+      arrows: [],
+      torque_arcs: [],
+      legend: {
+        force_reference_n: null,
+        force_reference_length_m: null,
+        torque_reference_nm: null,
+        torque_reference_radius_m: null,
+        kinds_present: [],
+        unavailable_labels: [],
+        engine: 'mujoco',
+        source_labels: [],
+      },
+    } as GlyphSetV1;
+    render(<ForceLegend glyphs={glyphs} />);
+    expect(screen.queryByTestId('grip-legend')).toBeNull();
+  });
 });
