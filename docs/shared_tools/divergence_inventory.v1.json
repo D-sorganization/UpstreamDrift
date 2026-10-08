@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1663,
+    "ud-only": 1665,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -869,6 +869,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 1,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "video_timing": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 2,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -14201,7 +14208,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "",
-      "ud_bytes": 17394,
+      "ud_bytes": 17920,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -19229,7 +19236,7 @@
       "classification": "ud-only",
       "package": "myofullbody",
       "subpackage": "",
-      "ud_bytes": 7991,
+      "ud_bytes": 6903,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -37765,6 +37772,30 @@
       "spelling_only": false
     },
     {
+      "path": "video_timing/__init__.py",
+      "classification": "ud-only",
+      "package": "video_timing",
+      "subpackage": "",
+      "ud_bytes": 487,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "video_timing/frame_schedule.py",
+      "classification": "ud-only",
+      "package": "video_timing",
+      "subpackage": "",
+      "ud_bytes": 8137,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "visualization/__init__.py",
       "classification": "ud-only",
       "package": "visualization",
@@ -40004,9 +40035,9 @@
     {
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
+        "author": "Dieter Olson",
         "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40017,9 +40048,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "fleet-orchestrator",
+        "author": "Dieter Olson",
         "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "commit": "5b607519924a610ff6588749084c928e7051701e"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
