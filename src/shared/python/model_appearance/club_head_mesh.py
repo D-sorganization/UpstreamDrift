@@ -101,6 +101,7 @@ def library_name_for(name: str) -> str:
     if not key:
         raise ValueError("club name must be non-empty")
     match = _IRON_RE.match(key)
+    num: int | None
     if match is not None:
         kind, num = "iron", int(match.group("num"))
     else:
@@ -305,34 +306,8 @@ def _resolve(name: str) -> str:
         raise
 
 
-def measured_face_normal(mesh: Mesh) -> Array:
-    """Area-weighted mean normal of the face patch around its centre.
-
-    Works on a head-frame mesh; the patch is the triangles within 15 mm of the
-    face centre whose normals point toward the target.
-    """
-    tri = mesh.vertices[mesh.faces]
-    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
-    area = 0.5 * np.linalg.norm(cross, axis=1)
-    normal = cross / np.maximum(2.0 * area[:, None], 1e-18)
-    centroid = tri.mean(axis=1)
-    x_mid = 0.5 * (mesh.vertices[:, 0].min() + mesh.vertices[:, 0].max())
-    forward = (normal[:, 0] > 0.3) & (centroid[:, 0] > x_mid)
-    mid_y = 0.5 * (mesh.vertices[:, 1].min() + mesh.vertices[:, 1].max())
-    near = np.hypot(centroid[:, 1] - mid_y, centroid[:, 2]) < 0.015
-    pick = forward & near
-    if not pick.any():
-        raise ValueError("mesh has no face patch toward +x")
-    mean = (normal[pick] * area[pick, None]).sum(axis=0)
-    return np.asarray(mean / np.linalg.norm(mean), float)
-
-
-def face_centre(mesh: Mesh) -> Array:
-    """Centroid of the face patch (the point that meets the ball), head frame.
-
-    Same patch as :func:`measured_face_normal`; works on any rigidly moved
-    copy only through the head frame, so call it on head-frame meshes.
-    """
+def _face_patch(mesh: Mesh) -> tuple[Array, Array, np.ndarray[Any, Any], Array]:
+    """Return (normal, area, pick, centroid) of the face-patch triangles of a head mesh."""
     tri = mesh.vertices[mesh.faces]
     cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
     area = 0.5 * np.linalg.norm(cross, axis=1)
@@ -347,6 +322,27 @@ def face_centre(mesh: Mesh) -> Array:
     )
     if not pick.any():
         raise ValueError("mesh has no face patch toward +x")
+    return normal, area, pick, centroid
+
+
+def measured_face_normal(mesh: Mesh) -> Array:
+    """Area-weighted mean normal of the face patch around its centre.
+
+    Works on a head-frame mesh; the patch is the triangles within 15 mm of the
+    face centre whose normals point toward the target.
+    """
+    normal, area, pick, _ = _face_patch(mesh)
+    mean = (normal[pick] * area[pick, None]).sum(axis=0)
+    return np.asarray(mean / np.linalg.norm(mean), float)
+
+
+def face_centre(mesh: Mesh) -> Array:
+    """Centroid of the face patch (the point that meets the ball), head frame.
+
+    Same patch as :func:`measured_face_normal`; works on any rigidly moved
+    copy only through the head frame, so call it on head-frame meshes.
+    """
+    _, area, pick, centroid = _face_patch(mesh)
     return np.asarray(
         (centroid[pick] * area[pick, None]).sum(0) / area[pick].sum(), float
     )

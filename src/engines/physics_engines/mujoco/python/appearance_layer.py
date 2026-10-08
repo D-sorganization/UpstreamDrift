@@ -287,13 +287,13 @@ def attach_appearance(
     garments = 0
     for index, (body, caps) in enumerate(by_body.items()):
         for label, mesh, material in _body_meshes(doc, body, caps, club):
-            mesh_name = f"vmesh_{index}_{label}"
-            assets.mesh(mesh_name, _mesh_to_mjcf(offsets[body], mesh))
-            _add_geom(
+            _add_mesh_visual(
+                assets,
                 elements[body],
-                f"visual_{mesh_name}",
-                mesh_name,
-                assets.material(material),
+                f"vmesh_{index}_{label}",
+                offsets[body],
+                mesh,
+                material,
             )
             garments += label.startswith("garment")
     return {
@@ -305,6 +305,19 @@ def attach_appearance(
         "club_head": None if club is None else club.head_alias,
         "offscreen": list(OFFSCREEN_SIZE),
     }
+
+
+def _add_mesh_visual(
+    assets: _Assets,
+    parent: ET.Element,
+    mesh_name: str,
+    offset: np.ndarray,
+    mesh: Any,
+    material: Any,
+) -> None:
+    """Register ``mesh`` as an asset and attach a visual geom to ``parent``."""
+    assets.mesh(mesh_name, _mesh_to_mjcf(offset, mesh))
+    _add_geom(parent, f"visual_{mesh_name}", mesh_name, assets.material(material))
 
 
 def attach_club_meshes(
@@ -324,12 +337,7 @@ def attach_club_meshes(
     doc = document_from_dict({"schema_version": "appearance-v1"})
     assets = _Assets(root, doc)
     for label, mesh, material in _club_meshes(club, finish):
-        mesh_name = f"vmesh_club_{label}"
-        assets.mesh(mesh_name, _mesh_to_mjcf(offsets[body], mesh))
-        _add_geom(
-            elements[body],
-            f"visual_{mesh_name}",
-            mesh_name,
-            assets.material(material),
+        _add_mesh_visual(
+            assets, elements[body], f"vmesh_club_{label}", offsets[body], mesh, material
         )
     return assets.n_meshes

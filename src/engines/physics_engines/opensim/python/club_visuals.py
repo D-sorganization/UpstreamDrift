@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
+from typing import Any
 from pathlib import Path
 import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # construction only
 
@@ -78,7 +79,7 @@ def write_club_assets(
         json.dumps(params, sort_keys=True).encode("utf-8")
     ).hexdigest()
     manifest_path = out / PROVENANCE_NAME
-    manifest = (
+    manifest: dict[str, Any] = (
         json.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest_path.is_file()
         else {"schema": SCHEMA, "clubs": {}}
