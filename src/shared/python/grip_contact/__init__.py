@@ -16,6 +16,12 @@ from src.shared.python.grip_contact.parameters import (
     ContactMaterial,
     default_bushing,
 )
+from src.shared.python.grip_contact.swing_input import (
+    FIXTURE_DT_S,
+    CoordinateSwing,
+    load_coordinate_swing,
+    map_coordinates,
+)
 from src.shared.python.grip_contact.trajectory_conditioning import (
     ConditioningReport,
     condition_trajectory,
@@ -26,10 +32,12 @@ from src.shared.python.grip_contact.trajectory_conditioning import (
 
 __all__ = [
     "DEFAULT_DAMPING_RATIO",
+    "FIXTURE_DT_S",
     "BushingParameters",
     "ClubDynamics",
     "ConditioningReport",
     "ContactMaterial",
+    "CoordinateSwing",
     "ForceDecomposition",
     "GripFrame",
     "GripInterface",
@@ -39,6 +47,8 @@ __all__ = [
     "design_damping",
     "detect_ik_outliers",
     "first_discontinuity_time",
+    "load_coordinate_swing",
+    "map_coordinates",
     "modal_damping",
     "unwrap_angular",
 ]
