@@ -61,6 +61,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1066 | `src/tools/bunker_shot_gui/crosstier.py` |
 | 1065 | `src/shared/python/pendulum_simulator/gui/toolstrip_widget.py` |
 | 1063 | `src/bunkershot3d/metrics/divot.py` |
+| 1063 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 1053 | `src/tools/tour_matching_viewer/core.py` |
 | 1046 | `src/shared/python/motion_matching/pinocchio_g2_g3.py` |
 | 1042 | `src/shared/python/physics/flight_models.py` |
@@ -83,7 +84,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
-| 984 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 974 | `src/launchers/embedded_host.py` |
@@ -101,7 +101,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 960 | `src/shared/python/signal_toolkit/widget_ui.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
-| 954 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 953 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |
 | 950 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |
@@ -114,16 +113,15 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 942 | `src/bunkershot3d/solvers/shot.py` |
 | 942 | `src/shared/python/estimation/dime_dynamics_window.py` |
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
+| 937 | `src/api/models/responses.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
-| 928 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 926 | `src/tools/bunker_shot_gui/gui.py` |
 | 924 | `src/research/differentiable/engine.py` |
 | 922 | `src/shared/python/shadow_tracker/service.py` |
 | 920 | `src/engines/physics_engines/opensim/python/muscle_analysis.py` |
 | 919 | `src/bunkershot3d/vandv/ledger.py` |
-| 911 | `src/api/models/responses.py` |
 | 907 | `src/tools/bunker_shot_gui/widgets.py` |
 | 907 | `src/unreal_integration/mesh_loader.py` |
 | 903 | `src/shared/python/motion_matching/club_only/body_candidates.py` |
@@ -136,6 +134,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 888 | `src/engines/pendulum_models/python/double_pendulum_model/ui/double_pendulum_gui.py` |
 | 887 | `src/shared/python/sidekick/process_calculators/syngas_compression_calculator.py` |
 | 887 | `src/tools/bunker_shot_gui/bridge.py` |
+| 886 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 885 | `src/shared/python/estimation/dime_report_integration.py` |
 | 884 | `src/shared/python/estimation/dime_learned_initializers.py` |
 | 881 | `src/engines/physics_engines/pinocchio/python/native_model.py` |
@@ -190,7 +189,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/evaluate_matching_workflow.py` |
 | 806 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py` |
 | 806 | `src/launchers/_launcher_navigation_ui.py` |
-| 805 | `src/engines/physics_engines/opensim/python/full_body_osim.py` |
 | 803 | `src/shared/python/ui/qt/widgets/signal_toolkit_processing_mixin.py` |
 | 802 | `src/shared/python/plotting/renderers/kinetics.py` |
 | 801 | `src/engines/physics_engines/pinocchio/python/motion_matching/fit_swing.py` |

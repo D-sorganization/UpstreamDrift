@@ -74,7 +74,7 @@
 # Active: Address Foot Progression — #11730 (OSV-4, Epic #11726)
 
 - `motion_matching/foot_progression.py` defines and measures per-foot toe-out; `pipeline/address_feet.py` seeds and refits it; `--foot-progression {off,capture,default}` is opt-in (default `off`, so existing receipts stay valid).
-- Findings: the spec's left `hip_rotation` axis is not mirrored (OpenSim's is), and the stock toe marker seeds carry a 12.5 degree yaw bias; see `docs/development/full_body_models/DESIGN_DECISIONS.md` section 16.
+- Findings: the spec's left `hip_rotation` axis is not mirrored (OpenSim's is), and the stock toe marker seeds carry a 12.5 degree yaw bias; see `docs/development/full_body_models/DESIGN_DECISIONS.md` section 15.
 - Tour captures measure 15 to 16 degrees lead and 0 to 4 degrees trail, not 20. Owner capture O is private and was not on the implementing host: run `python3 -m scripts.foot_progression_report` with `CAPTURE_DATA_DIR` set.
 - Driver result: legacy 41.7/-2.8 vs option 37.0/4.05 (lead/trail, capture 16.4/4.0); lead is pinned by the hip_rotation_l limit. Next: let the address solve trade hip adduction against stance width; regenerate qualified receipts with the option only on request; Drake, Pinocchio and MyoSuite stills need their own renderers.
 

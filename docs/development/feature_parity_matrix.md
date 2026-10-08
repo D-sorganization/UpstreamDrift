@@ -7,7 +7,7 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 24 parity · 16 gap · 15 exempt (12 pending decision in #7460).
+**Summary:** 25 parity · 17 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
@@ -15,6 +15,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | 🔴 gap | `src/shared/python/biomechanics/ztcf.py` | — | — | #7450 |
 | `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | ✅ parity | `src/launchers/cross_engine_dashboard.py` | `src/api/routes/cross_engine.py` | `ui/src/pages/CrossEngineDashboard.tsx` | — |
 | `analysis.grip_wrench`<br>Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames | 🔴 gap | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` | — | — | #11716 |
+| `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
@@ -38,6 +39,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `opencap.session_import`<br>OpenCap session import action and OpenSim engine handoff | ✅ parity | `src/engines/physics_engines/opensim/python/opencap_import_action.py` | `src/api/routes/opencap.py` | `ui/src/components/opencap/OpenCapImportModal.tsx` | — |
 | `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Desktop optimization GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
+| `render.body_appearance`<br>Golfer body appearance with a visible head, face and neck in every engine render | ⚪ exempt | `src/shared/python/model_appearance/head.py` | — | — | Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706). |
 | `render.club_head_and_ball`<br>Realistic Club Head And Ball Rendering | 🔴 gap | `src/shared/python/model_appearance/club_head_mesh.py` | — | — | #11717 |
 | `settings.desktop_only_tabs`<br>Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | ⚪ exempt | `src/launchers/settings_dialog.py` | — | — | Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460. — **pending decision (#7460)** |
 | `settings.preferences`<br>Settings/preferences surface + persistence | ✅ parity | `src/launchers/settings_dialog.py` | `src/api/routes/settings.py` | `ui/src/pages/Settings.tsx` | — |
@@ -93,6 +95,7 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `force_overlays` | `simulation.controls_wiring` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `golf_simulator` | `tools.golf_simulator` |
+| `impact_parameters` | `analysis.impact_parameters` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
 | `matched_swing_browser` | `tools.matched_swing_browser` |
