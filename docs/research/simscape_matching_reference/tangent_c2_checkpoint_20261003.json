@@ -2716,6 +2716,7 @@
         "width": 1920
       }
     ],
+    "filename_redaction": "Four owner clip file values were renamed to Owner_CaptureO_IK_Match_* after this receipt was generated, to remove a capture-system name under the private data policy. The media, ZIP archive and manifest were not regenerated: each clip sha256, archive_sha256 and manifest_sha256 still binds the original private media and its original member names. Locate those clips by sha256, not by the recorded file value, until the media is re-exported under neutral names and this receipt is regenerated.",
     "manifest_sha256": "5aa7f595fdc3544644526d1d341b70483075d8f9f0e992e9371f5c592f434f1d",
     "opencv_version": "4.13.0",
     "qualification": "IK_PREVIEW_DECODE_AND_SAVED_POSE_PARITY_NOT_DYNAMICS",
