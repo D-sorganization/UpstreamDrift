@@ -433,41 +433,76 @@ An engine-agnostic grip interface (`src/shared/python/grip_contact/`) and an Ope
 Model:
 
 - Club: a free body (six coordinates, `ClubFree*`) with unchanged mass and inertia. The left hand solids move to a new `LGrip` hand body and the right hand solid to the right standoff body; every solid keeps its mass and inertia, so total mass is conserved.
-- One `BushingForce` per hand between a hand-body frame and a club frame. Both frames come from the spec's existing grip closure and club geometry, with no invented offsets. Grip-frame x is the shaft axis; y and z are across the grip.
-- Wrench: $\mathbf{F} = -K_t\,\boldsymbol{\delta} - C_t\,\dot{\boldsymbol{\delta}}$ and $\mathbf{M} = -K_r\,\boldsymbol{\theta} - C_r\,\dot{\boldsymbol{\theta}}$ per axis, in the hand frame. The record is converted to force and couple ON THE CLUB at the grip point, $\boldsymbol{\tau} = \mathbf{M} - (\mathbf{p}-\mathbf{o})\times\mathbf{F}$, because OpenSim reports the moment about the club body origin.
-- Defaults (`default_bushing()`): $K_t = 10^6$ N/m, $K_r = 1600$ N m/rad per axis, damping ratio $\zeta = 0.3$. These are engineering defaults with cited scale brackets (fingertip pulp and Komi grip-force sources in the module docstring), never fitted. The citations are from the literature record and were not re-verified against full texts.
-- Wrench split: `analyze_grip(split_method="bushing")` in `biomechanics/grip_wrench.py`. The weld split is indeterminate, so `allocate_min_norm` (zero free torque, minimum norm, equal axial split) is the labelled weld proxy.
+- One `BushingForce` per hand between a hand-body frame and a club frame. Both frames come from the spec's existing grip closure and club geometry, with no invented offsets. Grip-frame x is the shaft axis; y and z are across the grip. The right hand frame is tied to the left hand body at the weld-model location (one hand defines the club, see Input Kinematics).
+- Wrench: $\mathbf{F} = -K_t\,\boldsymbol{\delta} - C_t\,\dot{\boldsymbol{\delta}}$ and $\mathbf{M} = -K_r\,\boldsymbol{\theta} - C_r\,\dot{\boldsymbol{\theta}}$ per axis in the hand frame, converted to force and couple ON THE CLUB at the grip point, $\boldsymbol{\tau} = \mathbf{M} - (\mathbf{p}-\mathbf{o})\times\mathbf{F}$.
+- Stiffness defaults (`default_bushing()`): $K_t = 10^6$ N/m, $K_r = 1600$ N m/rad per axis. Unfitted engineering defaults for a stiff surrogate of the weld. Only the existence, authors and venue of the three cited papers (Serina et al. 1997, Wu et al. 2004, Komi et al. 2008) were confirmed by search; no number is sourced from them, and an earlier 0.5 to 3 N/mm pulp figure and a FingerTPS reference were withdrawn.
+- Damping is designed, not tuned (`grip_contact/damping.py`). See Damping Design.
+- Internal force (`decompose_hand_forces`): net $F_L + F_R$; internal $(F_L - F_R)/2$, split along the inter-hand line into a squeeze part and a transverse part. A transverse internal force is a force pair carrying a couple $M = F_t d$ with $d = 0.076$ m.
+- Wrench split: `analyze_grip(split_method="bushing")` in `biomechanics/grip_wrench.py`; `allocate_min_norm` is the labelled weld proxy because the weld split is indeterminate.
 
 ### Why
 
-A rigid weld cannot report per-hand forces. A finite stiffness makes the split determinate and measurable while keeping the club dynamics essentially those of the weld.
+A rigid weld cannot report per-hand forces. A finite stiffness makes the split determinate while keeping the club dynamics essentially those of the weld.
+
+### Review Findings (PR #11765) and What Changed
+
+The first run reported 3 to 6.6 kN per hand against 0.5 to 1.8 kN net, ringing at 30 to 40 Hz, and 3 to 6 mm deflection. The diagnosis:
+
+1. **Internal force is a couple, not a squeeze.** Of the 6.0 kN internal peak, 6.0 kN was transverse (a force pair carrying up to 484 N m) and only 0.46 kN was axial squeeze. It is the club couple divided by the 76 mm hand spacing.
+2. **Input kinematics, not the bushing, caused the load.** The OpenSim IK candidate (`anthro_driver_opensim/candidate.npz`) has a marker RMS of 262 mm (the MuJoCo canonical IK is 34 to 52 mm). Its model wrist markers reach 95 m/s while the measured wrist markers peak at 9.7 m/s (p95 7.1 to 8.1). It contains 15 frames with steps of 1 to 3 rad in one 2.8 ms frame (median step 0.001 rad), at 0.947, 1.231, 1.258, 1.436, 1.544 s and others; several are persistent IK solution-branch switches, and ten coordinates also carry 2 pi branch flips. The two-hand loop is open by 134 mm and 51 degrees at address and 180 mm and up to 180 degrees later, so the right arm chain cannot be prescribed. The 25 Hz zero-phase filter then spreads each step backwards in time as a precursor load.
+3. **Damping was a per-axis guess.** The lowest modes are club pendulum modes at 23.7 and 24.7 Hz (stiffness $2k_r + k_t d^2/2$ of the force pair, mass 0.8 m from the hands). The old coefficients left them at modal $\zeta = 0.21$ (nominal 0.3), which is the ringing seen.
+
+Fixes (all in the shared pipeline, none by tuning the bushing):
+
+- `grip_contact.trajectory_conditioning`: `unwrap_angular` (lossless), `detect_ik_outliers` plus `condition_trajectory` (PCHIP over frames where at least two angles leave a running median by more than 0.35 rad; 7 frames repaired), and `first_discontinuity_time` (0.95 s). Persistent branch switches cannot be interpolated, so the motion is cut before the first one, before filtering. The full 1.8 s is retained as a separate receipt and is reported as failing.
+- Closure consistency: one hand defines the club. The right bushing frame is fixed on the left hand body at the weld location, so the two bushings cannot be stretched against each other by inconsistent hand kinematics; the right arm chain of the IK is not used. `input_kinematics_report` records the residual, hand speeds and measured wrist speeds in the receipt.
+- Damping Design: see below.
+
+### Damping Design
+
+Small motion of the rigid club about its centre of mass, state $(u, \theta)$. Bushing $i$ at $r_i$ with frame $R_i$ sees $A_i x$, $A_i = [[I, -[r_i]_\times],[0, I]]$, so $K = \sum_i A_i^T \mathrm{diag}(R_i K_b R_i^T) A_i$ and $C$ likewise with the coefficients. Mass and inertia come from the spec club solids (0.313 kg, centre of mass 0.256 m from the head, hands excluded). For the undamped modes $\phi_j$ the modal ratio $\zeta_j = \phi_j^T C \phi_j / (2 \omega_j \phi_j^T M \phi_j)$ is linear in the six per-axis coefficients, so setting all six to the requested $\zeta$ is a 6 by 6 non-negative linear solve (`design_damping`). The requested value is $\zeta = 0.7$ (about 5 % overshoot, fastest settling without sustained ringing); nothing else is chosen. Result: $c_t = (554, 209, 212)$ N s/m, $c_r = (0.81, 28.6, 27.3)$ N m s/rad, all six modes at $\zeta = 0.700$ (frequencies 23.7, 24.7, 402, 460, 931, 946 Hz). `test_free_vibration_decays_at_the_stated_ratio` integrates the linear model and recovers the logarithmic-decrement ratio within 3 %.
 
 ### Evidence Receipt
 
-- [`evidence/grip_kinetics/receipt.json`](evidence/grip_kinetics/receipt.json) and [`evidence/grip_kinetics/driver_bushing_series.npz`](evidence/grip_kinetics/driver_bushing_series.npz)
-- Reproduce: `PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/grip_kinetics/run_grip_kinetics.py --accuracy 1e-3 --t-end 1.3 --sensitivity 0.1 10`
-- Clip and plot (outside the repository): `~/Videos/Parity Audit/golfer_realism/grip_kinetics/`
-- Tests: `tests/unit/grip_contact/`, `tests/unit/motion_matching/test_full_body_osim_grip_models.py`, `tests/unit/motion_matching/test_grip_bushing_opensim.py`
+- [`evidence/grip_kinetics/receipt.json`](evidence/grip_kinetics/receipt.json), [`driver_bushing_series.npz`](evidence/grip_kinetics/driver_bushing_series.npz): valid window (0 to 0.94 s).
+- [`receipt_full_window_conditioned.json`](evidence/grip_kinetics/receipt_full_window_conditioned.json), [`driver_bushing_series_full_window.npz`](evidence/grip_kinetics/driver_bushing_series_full_window.npz): full 1.8 s with the conditioned input.
+- [`receipt_before_fix.json`](evidence/grip_kinetics/receipt_before_fix.json): first run, kept for the before and after comparison.
+- Reproduce: `PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/grip_kinetics/run_grip_kinetics.py --accuracy 1e-3 --sensitivity 0.1 10`
+- Clips and plots (outside the repository): `~/Videos/Parity Audit/golfer_realism/grip_kinetics/` (the `_full_window` files show the failing window).
 
-Results (driver candidate, 25 Hz zero-phase prefilter, window 0 to 1.3 s):
+Before and after (default stiffness):
 
-- Static hold: the sum of hand forces is 3.0693 N against a club weight of 3.0695 N, a relative error of $4.4\times10^{-5}$ (limit 1%). Moment balance about the grip point holds.
-- $F = K\delta$ per axis holds to numerical precision (`probe_deflection`).
-- Driven swing, default stiffness: to 0.9 s the maximum deflection is 0.25 mm and 0.34 deg. Over the full window to 1.3 s it is 5.5 mm / 6.7 mm (left / right) and 8.9 deg, so the owner limits of 3 mm and 2 deg are NOT met (peak 5.5 / 6.6 kN per hand).
-- Sensitivity of the window to 1.3 s: stiffness $\times 0.1$ gives 14 / 18 mm and 30 deg; $\times 10$ gives 0.45 / 0.49 mm and 0.66 deg.
-- Left share of the hand force: 45.2% at the peak and 45.8% median (loaded samples) with the bushing, against 47.7% / 48.0% for the minimum-norm weld proxy. The difference is up to 7.7 kN at peak (rms 4.4 kN), dominated by the opposing, squeeze-like force pair.
-- The integrator accuracy was checked: 1e-3 and 1e-4 agree to better than 0.1% on a 0.3 s window.
+| Quantity | First run (to 1.3 s) | Valid window (0 to 0.94 s) | Full 1.8 s, conditioned |
+| --- | --- | --- | --- |
+| Peak per-hand force L / R (N) | 5466 / 6626 | 142 / 162 | 21058 / 27981 |
+| Peak net force (N) | 1830 | 28 | 22501 |
+| Peak internal force (N) | 6038 | 151 | 23761 |
+| Squeeze part / couple (N, N m) | 460 / 484 | 1.3 / 12.1 | 5861 / 1850 |
+| Max deflection L / R (mm) | 5.5 / 6.7 | 0.14 / 0.16 | 19.9 / 26.8 |
+| Max rotation (deg) | 8.9 | 0.22 | 37 |
+| Modal damping ratio (lowest modes) | 0.21 | 0.70 | 0.70 |
+| Static hold error | 4.4e-5 | 1.1e-5 | n/a |
+
+Stiffness sensitivity on the valid window: $\times 0.1$ gives 84 / 98 N, 0.84 / 0.98 mm and 1.3 degrees; $\times 10$ gives 159 / 180 N, 0.016 / 0.018 mm and 0.02 degrees. Left share of the hand force: 46.4 % at peak and 46.1 % median with the bushing, against 48.4 % and 48.1 % for the minimum-norm weld proxy.
+
+Acceptance bounds (never loosened):
+
+- Deflection at most 3 mm and 2 degrees (owner-reviewable): met in the valid window; the full-window test is a strict xfail.
+- Internal force at most 500 N: a 38 N m couple at 76 mm, well above the 12 N m seen in the valid window and consistent with the review statement that per-hand grip forces near impact are a few hundred newtons. Met in the valid window; the full-window test is a strict xfail.
 
 ### What Was Tried and Rejected
 
 - Hunt-Crossley sphere-sphere and sphere-cylinder contact: no force produced; open meshes fail. Deferred to phase 2.
-- Closing the weld loop with `assemble`: the IK candidate leaves the loop open by 134 mm and 50 deg at address, so assembly produced an 84 kN preload. The right bushing frame is therefore tied to the left hand body, which is where the weld model places it.
-- Translational-lever damping for the rotational modes: the pitch mode kept $\zeta \approx 0.01$ and the static hold did not settle. Rotational damping is now set per axis, $c_r = 2\zeta\sqrt{k_r I_\mathrm{ref}}$.
+- Closing the weld loop with `assemble`: the IK leaves the loop open, so assembly produced an 84 kN preload.
+- Per-axis damping $2\zeta\sqrt{km}$ with the club mass: leaves the pendulum modes underdamped (see Review Findings).
+- Spike repair plus filtering of the whole 1.8 s: the filter spreads the persistent branch switches, and peak forces rose to 21 to 28 kN. Replaced by cutting before the first switch.
+- Applying the Drake or MuJoCo dynamics and IK records to the OpenSim model: their coordinate conventions differ (z-up, 41 or 44 differently ordered columns) and the closure residual was 1.2 m, so no cross-engine record could be substituted.
 
 ### Limitations
 
-- The default parameters are unfitted engineering defaults; the unmet deflection criterion is a finding about the candidate motion and the defaults, not a tuned result. The candidate has a one-frame hand-velocity spike near 0.95 s (10.9 m/s against 1.3 m/s either side) and hand speeds above 17 m/s at 1.3 s, so the late window is a stress test of the motion, not a calibrated swing.
-- The right hand is tied to the left hand body (open IK loop), so the per-hand split is a property of this approximation.
-- The window ends at 1.3 s: explicit stiff integration of the full 1.8 s trajectory exceeded the 50 minute time box. This is a follow-up.
+- The kinetics are valid only for the 0 to 0.94 s window (backswing and transition). The downswing, impact and finish are not covered because the committed OpenSim IK candidate is not a qualified motion. The needed work is a closure-consistent, marker-qualified IK (marker RMS near 30 to 50 mm) in the OpenSim coordinate convention, then a re-run of the receipt; until then no impact-phase hand-force number should be presented.
+- The right hand arm chain of the input is ignored (open loop); the split is a property of this approximation.
+- Stiffness defaults and the deflection and internal-force bounds are owner-reviewable engineering values; the three citations were confirmed to exist but support no number.
+- Explicit stiff integration of the full 1.8 s takes about 35 minutes at accuracy 1e-3.
 - Software correctness only. Scientific qualification stays in the design-manual governance pathway.
 - Out of scope for phase 1: the contact model, MuJoCo, Drake and Pinocchio parity, and the `golf_humanoid.osim` builder.

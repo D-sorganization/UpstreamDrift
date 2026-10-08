@@ -5,9 +5,12 @@ Issue #11739 (OSV-7) phase 1, epic #11726.  Reproduce from the repository root::
     MPLBACKEND=Agg PYTHONPATH=.:src python \
         docs/development/full_body_models/evidence/grip_kinetics/run_grip_kinetics.py
 
-The 44 body coordinates of the matched OpenSim driver candidate are low-pass
-filtered (25 Hz) and prescribed; the club is a free body held by the two grip
-bushings.  Existing output files are overwritten by name; nothing is deleted.
+The 44 body coordinates of the matched OpenSim driver candidate are conditioned
+(2 pi unwrap, IK-failure frames interpolated, cut before the first IK
+solution-branch switch, 25 Hz zero-phase low-pass) and
+prescribed; the club is a free body held by the two grip bushings with modally
+designed damping (zeta = 0.7).  The full 0-1.8 s window is kept as a separate receipt
+(receipt_full_window_conditioned.json) because it is dominated by IK failures.  Existing output files are overwritten by name; nothing is deleted.
 """
 
 from __future__ import annotations
@@ -18,6 +21,7 @@ import json
 import subprocess
 import sys
 import tempfile
+from dataclasses import fields, replace
 from pathlib import Path
 
 import matplotlib
@@ -31,7 +35,8 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noq
     BushingRun,
     analyze_run,
     hand_power_w,
-    lowpass_trajectory,
+    input_kinematics_report,
+    prepare_motion,
 )
 from src.shared.python.biomechanics.grip_wrench import (  # noqa: E402
     allocate_min_norm,
@@ -42,7 +47,13 @@ from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, build_glyphs
 from src.shared.python.force_overlay.renderers.matplotlib_glyphs import (  # noqa: E402
     draw_glyphs_3d,
 )
-from src.shared.python.grip_contact import GripInterface  # noqa: E402
+from src.shared.python.grip_contact import (  # noqa: E402
+    ClubDynamics,
+    GripInterface,
+    decompose_hand_forces,
+    first_discontinuity_time,
+    modal_damping,
+)
 
 ROOT = Path(__file__).resolve().parents[5]
 MODELS = ROOT / "docs/development/full_body_models"
@@ -55,23 +66,50 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _speed_stats(v: np.ndarray) -> dict:
+    return {"peak_m_s": float(v.max()), "p95_m_s": float(np.percentile(v, 95))}
+
+
+VALID_MARGIN_S = 0.01
+
+
 def run_swing(
-    scale: float, accuracy: float, t_end: float | None = None
+    scale: float,
+    accuracy: float,
+    t_end: float | None = None,
+    valid_window: bool = False,
 ) -> tuple[BushingRun, dict]:
-    """Integrate the filtered driver motion with stiffness scaled by ``scale``."""
+    """Integrate the conditioned driver motion with stiffness scaled by ``scale``."""
     spec_path = MODELS / "full_body_spec_anthro_driver.json"
     cand = MODELS / "evidence/ground_support/anthro_driver_opensim/candidate.npz"
     data = np.load(cand, allow_pickle=True)
-    names = json.loads(str(data["manifest_json"]))["coordinate_names"]
-    t, q = (
-        np.asarray(data["time_s"]),
-        lowpass_trajectory(np.asarray(data["time_s"]), np.asarray(data["q"]), 25.0),
-    )
+    manifest = json.loads(str(data["manifest_json"]))
+    names, t, q_raw = manifest["coordinate_names"], data["time_s"], data["q"]
+    t_valid = first_discontinuity_time(t, q_raw, names)
+    if valid_window and t_valid is not None:
+        # Cut BEFORE filtering: a zero-phase filter would otherwise spread the
+        # solution-branch step backwards in time as kN-scale precursor loads.
+        keep = t < t_valid - VALID_MARGIN_S
+        t_in, q_in = t[keep], q_raw[keep]
+    else:
+        t_in, q_in = t, q_raw
+    q, report = prepare_motion(t_in, q_in, names)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     gi = GripInterface.from_spec(spec)
     gi = GripInterface(gi.left, gi.right, gi.bushing.scaled(scale), gi.contact_material)
-    sim = BushingGripSimulator(spec_path.read_bytes(), names, t, q, interface=gi)
+    sim = BushingGripSimulator(spec_path.read_bytes(), names, t_in, q, interface=gi)
     run = sim.run(t_end, accuracy=accuracy)
+    freqs, zetas = modal_damping(gi, ClubDynamics.from_spec(spec))
+    raw_rep = input_kinematics_report(spec_path.read_bytes(), names, t, q_raw, gi)
+    prep_rep = input_kinematics_report(spec_path.read_bytes(), names, t_in, q, gi)
+    marker = {}
+    for hand, label in (("LWristTop", "left"), ("RWristTop", "right")):
+        pts = np.asarray(data["target_markers_m"])[
+            :, manifest["marker_names"].index(hand)
+        ]
+        marker[label] = _speed_stats(
+            np.linalg.norm(np.gradient(pts, axis=0) / np.gradient(t)[:, None], axis=1)
+        )
     meta = {
         "spec_sha256": _sha(spec_path),
         "candidate_sha256": _sha(cand),
@@ -83,11 +121,49 @@ def run_swing(
             "rotational_damping_nms_rad": gi.bushing.rotational_damping_nms_rad,
             "source": gi.bushing.source,
         },
+        "modal_frequencies_hz": freqs.tolist(),
+        "modal_damping_ratios": zetas.tolist(),
         "accuracy": accuracy,
         "t_end_s": float(run.time_s[-1]),
-        "prefilter": "zero-phase 4th-order Butterworth, 25 Hz",
+        "valid_window_only": bool(valid_window and t_valid is not None),
+        "conditioning": {
+            "repaired_frames": report.repaired_frames,
+            "repaired_times_s": report.frame_times_s,
+            "unwrapped_coordinates": report.unwrapped_coordinates,
+            "first_ik_discontinuity_s": t_valid,
+            "lowpass": "zero-phase 4th-order Butterworth, 25 Hz",
+        },
+        "input_quality": {
+            "closure_distance_mm": {
+                "address": float(raw_rep["closure_distance_m"][0] * 1e3),
+                "max_raw": float(raw_rep["closure_distance_m"].max() * 1e3),
+            },
+            "closure_angle_deg": {
+                "address": float(raw_rep["closure_angle_deg"][0]),
+                "max_raw": float(raw_rep["closure_angle_deg"].max()),
+            },
+            "left_hand_speed_raw": _speed_stats(raw_rep["left_hand_speed_m_s"]),
+            "right_hand_speed_raw": _speed_stats(raw_rep["right_hand_speed_m_s"]),
+            "left_hand_speed_prepared": _speed_stats(prep_rep["left_hand_speed_m_s"]),
+            "right_hand_speed_prepared": _speed_stats(prep_rep["right_hand_speed_m_s"]),
+            "measured_wrist_marker_speed": marker,
+            "ik_marker_rms_m": 0.262,
+            "ik_marker_rms_source": "anthro_driver_opensim/receipt.json (ik.marker_rms_m)",
+        },
     }
     return run, meta
+
+
+def window(run: BushingRun, t_max: float) -> BushingRun:
+    """Return ``run`` restricted to samples with ``time <= t_max``."""
+    keep = run.time_s <= t_max
+
+    def cut(value: object) -> object:
+        if isinstance(value, dict):
+            return {k: cut(v) for k, v in value.items()}
+        return value[keep]  # type: ignore[index]
+
+    return replace(run, **{f.name: cut(getattr(run, f.name)) for f in fields(run)})
 
 
 def summarize(run: BushingRun) -> dict:
@@ -140,6 +216,16 @@ def summarize(run: BushingRun) -> dict:
             s: float(np.abs(hand_power_w(run, s)).max()) for s in "LR"
         },
     }
+    dec = decompose_hand_forces(fl, fr, run.grip_point_m["L"], run.grip_point_m["R"])
+    out["internal_force"] = {
+        "peak_internal_n": dec.peak_internal_n(),
+        "peak_net_n": dec.peak_net_n(),
+        "peak_axial_squeeze_n": float(np.abs(dec.internal_axial_n).max()),
+        "peak_transverse_n": float(
+            np.linalg.norm(dec.internal_transverse_n, axis=1).max()
+        ),
+        "peak_couple_nm": float(np.max(dec.couple_moment_nm)),
+    }
     return out
 
 
@@ -169,11 +255,19 @@ def static_hold(spec_path: Path) -> dict:
     }
 
 
-def plot_series(run: BushingRun, path: Path) -> None:
+def plot_series(
+    run: BushingRun, path: Path, discontinuity_s: float | None = None
+) -> None:
     """Per-hand force and couple (free torque + moment of force) versus time."""
     analyses = analyze_run(run)
     t = run.time_s
-    fig, axes = plt.subplots(4, 1, figsize=(9, 11), sharex=True)
+    fig, axes = plt.subplots(5, 1, figsize=(9, 13), sharex=True)
+    dec = decompose_hand_forces(
+        run.force_on_club_n["L"],
+        run.force_on_club_n["R"],
+        run.grip_point_m["L"],
+        run.grip_point_m["R"],
+    )
     for side, colour in (("L", "#1f77b4"), ("R", "#d62728")):
         axes[0].plot(
             t,
@@ -187,32 +281,45 @@ def plot_series(run: BushingRun, path: Path) -> None:
             colour,
             label=f"{side} hand free torque on club",
         )
-        axes[3].plot(
+        axes[4].plot(
             t,
             np.linalg.norm(run.deflection_m[side], axis=1) * 1e3,
             colour,
             label=f"{side} translation",
         )
-        axes[3].plot(
+        axes[4].plot(
             t,
             np.degrees(run.rotation_deflection_rad[side]),
             colour,
             ls="--",
             label=f"{side} rotation (deg)",
         )
+    axes[2].plot(t, np.linalg.norm(dec.net_n, axis=1), "g", label="net force")
+    axes[2].plot(t, np.linalg.norm(dec.internal_n, axis=1), "m", label="internal force")
+    axes[2].plot(t, np.abs(dec.internal_axial_n), "m--", lw=0.9, label="squeeze part")
+    axes[2].axhline(500.0, color="grey", lw=0.8, ls=":")
     couple = np.array([np.linalg.norm(a.couple_at_midpoint_nm) for a in analyses])
-    axes[2].plot(t, couple, "k", label="equivalent couple at midpoint")
-    axes[2].plot(
-        t, [np.linalg.norm(a.net_force_n) for a in analyses], "g", label="net force (N)"
-    )
-    axes[3].axhline(3.0, color="grey", lw=0.8)
-    axes[3].axhline(2.0, color="grey", lw=0.8, ls=":")
+    axes[3].plot(t, couple, "k", label="equivalent couple at midpoint")
+    axes[4].axhline(3.0, color="grey", lw=0.8)
+    axes[4].axhline(2.0, color="grey", lw=0.8, ls=":")
+    if discontinuity_s is not None:
+        for ax in axes:
+            ax.axvline(discontinuity_s, color="orange", lw=1.2)
+        axes[0].text(
+            discontinuity_s,
+            0.9,
+            " IK solution switch",
+            transform=axes[0].get_xaxis_transform(),
+            color="darkorange",
+            fontsize=8,
+        )
     for ax, label in zip(
         axes,
         (
             "Force (N)",
             "Torque (N*m)",
-            "Net force (N) / couple (N*m)",
+            "Net / internal force (N)",
+            "Couple (N*m)",
             "Deflection (mm, deg)",
         ),
         strict=True,
@@ -318,17 +425,20 @@ def main() -> int:
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
-    run, meta = run_swing(1.0, args.accuracy, args.t_end)
+    run, meta = run_swing(1.0, args.accuracy, args.t_end, valid_window=True)
+    t_valid = meta["conditioning"]["first_ik_discontinuity_s"]
+    full_path = HERE / "receipt_full_window_conditioned.json"
     receipt = {
         "issue": "#11739",
         "epic": "#11726",
         "meta": meta,
-        "summary": summarize(run),
+        "summary_valid_window": summarize(run),
+        "full_window_receipt": full_path.name if full_path.exists() else None,
         "static_hold": static_hold(MODELS / "full_body_spec_anthro_driver.json"),
         "sensitivity": {},
     }
     for scale in args.sensitivity:
-        r2, _ = run_swing(scale, args.accuracy, args.t_end)
+        r2, _ = run_swing(scale, args.accuracy, args.t_end, valid_window=True)
         receipt["sensitivity"][f"{scale:g}"] = summarize(r2)
     series = {"time_s": run.time_s}
     for s in "LR":
@@ -345,7 +455,7 @@ def main() -> int:
         render_clip(
             run, args.out / "driver_opensim_bushing_grip_hands_closeup_0p5x.mp4"
         )
-    sys.stdout.write(json.dumps(receipt["summary"], indent=2) + "\n")
+    sys.stdout.write(json.dumps(receipt["summary_valid_window"], indent=2) + "\n")
     sys.stdout.write(json.dumps(receipt["static_hold"], indent=2) + "\n")
     return 0
 

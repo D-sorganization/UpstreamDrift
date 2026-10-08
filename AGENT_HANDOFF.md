@@ -1,9 +1,9 @@
 # Active: Compliant Bushing Grip Model - #11739
 
 - Branch `claude/osv-7-bushing-grip` (phase 1, Refs #11739 #11726): `src/shared/python/grip_contact/` interface, OpenSim `grip_model="bushing"` (`weld` default unchanged, `contact` raises), `split_method="bushing"`.
-- Open: the driven-swing deflection limits (3 mm, 2 deg) are not met at default stiffness (5.5 mm, 8.9 deg to 1.3 s); the slow test is a strict xfail. See `DESIGN_DECISIONS.md` section 16.
+- Valid window 0 to 0.94 s with designed damping (zeta 0.7): per-hand peak 142/162 N, internal 151 N (bound 500), 0.16 mm and 0.22 deg. Beyond 0.95 s the committed OpenSim IK candidate is unusable (marker RMS 262 mm, branch switches); the full-window test is a strict xfail.
 - Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
-
+- Next: qualified closure-consistent OpenSim IK input, then re-run the receipt; phase 2 contact model, other engine parity, `golf_humanoid.osim` builder.
 
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 

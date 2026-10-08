@@ -17,128 +17,211 @@
         1600.0
       ],
       "translational_damping_ns_m": [
-        335.67841753678476,
-        335.67841753678476,
-        335.67841753678476
+        553.922351177747,
+        208.6904334504008,
+        212.24179522534004
       ],
       "rotational_damping_nms_rad": [
-        0.4293250516799596,
-        8.056282020882835,
-        8.056282020882835
+        0.8147162048608255,
+        28.640452538420213,
+        27.26897590902813
       ],
-      "source": "engineering default (see module docstring); stiffness x1"
+      "source": "engineering default (see module docstring); modal damping ratio 0.7; stiffness x1"
     },
+    "modal_frequencies_hz": [
+      23.654435511165286,
+      24.727835433696832,
+      402.31197589212576,
+      459.5029876961583,
+      930.5449613055972,
+      946.3898579852973
+    ],
+    "modal_damping_ratios": [
+      0.7000000000000002,
+      0.7000000000000013,
+      0.7,
+      0.7000000000000003,
+      0.7000000000000002,
+      0.7
+    ],
     "accuracy": 0.001,
-    "t_end_s": 1.3,
-    "prefilter": "zero-phase 4th-order Butterworth, 25 Hz"
-  },
-  "summary": {
-    "samples": 469,
-    "peak_time_s": 1.29166667,
-    "peak_force_n": {
-      "L": 5465.726884311405,
-      "R": 6626.370635177333
+    "t_end_s": 0.93888889,
+    "valid_window_only": true,
+    "conditioning": {
+      "repaired_frames": 0,
+      "repaired_times_s": [],
+      "unwrapped_coordinates": [],
+      "first_ik_discontinuity_s": 0.95,
+      "lowpass": "zero-phase 4th-order Butterworth, 25 Hz"
     },
-    "peak_net_force_n": 1829.70875377547,
-    "max_translation_deflection_mm": {
-      "L": 5.4922303783065605,
-      "R": 6.6739676393905
-    },
-    "max_rotation_deflection_deg": {
-      "L": 8.940063639003956,
-      "R": 8.940063639003956
-    },
-    "left_force_share": {
-      "bushing_at_peak": 0.45200817108052066,
-      "bushing_median_loaded": 0.45782129428239504,
-      "min_norm_at_peak": 0.4766561927114192,
-      "min_norm_median_loaded": 0.48004780624709553
-    },
-    "left_force_difference_vs_min_norm_n": {
-      "max": 7720.608548420856,
-      "rms_loaded": 4389.107695006332
-    },
-    "peak_hand_power_w": {
-      "L": 94960.60682100685,
-      "R": 48774.470964043896
+    "input_quality": {
+      "closure_distance_mm": {
+        "address": 134.43572285185869,
+        "max_raw": 180.4392985036242
+      },
+      "closure_angle_deg": {
+        "address": 50.567396219777265,
+        "max_raw": 179.96626671254427
+      },
+      "left_hand_speed_raw": {
+        "peak_m_s": 98.62891263215829,
+        "p95_m_s": 13.865237585269693
+      },
+      "right_hand_speed_raw": {
+        "peak_m_s": 101.06391208112652,
+        "p95_m_s": 15.236481577140703
+      },
+      "left_hand_speed_prepared": {
+        "peak_m_s": 2.5462487533888156,
+        "p95_m_s": 1.9851190745757137
+      },
+      "right_hand_speed_prepared": {
+        "peak_m_s": 2.6546843388764008,
+        "p95_m_s": 1.6610561778316835
+      },
+      "measured_wrist_marker_speed": {
+        "left": {
+          "peak_m_s": 9.726481071242999,
+          "p95_m_s": 7.141079276573126
+        },
+        "right": {
+          "peak_m_s": 9.575464089344031,
+          "p95_m_s": 8.082757205200359
+        }
+      },
+      "ik_marker_rms_m": 0.262,
+      "ik_marker_rms_source": "anthro_driver_opensim/receipt.json (ik.marker_rms_m)"
     }
   },
+  "summary_valid_window": {
+    "samples": 339,
+    "peak_time_s": 0.63888889,
+    "peak_force_n": {
+      "L": 142.1595152948413,
+      "R": 161.91363092867522
+    },
+    "peak_net_force_n": 28.235609119532487,
+    "max_translation_deflection_mm": {
+      "L": 0.14236617319134806,
+      "R": 0.1615573056400526
+    },
+    "max_rotation_deflection_deg": {
+      "L": 0.2159062830159231,
+      "R": 0.2159062830159231
+    },
+    "left_force_share": {
+      "bushing_at_peak": 0.4642956258590142,
+      "bushing_median_loaded": 0.4613176348578225,
+      "min_norm_at_peak": 0.48402079076598525,
+      "min_norm_median_loaded": 0.48056723961765596
+    },
+    "left_force_difference_vs_min_norm_n": {
+      "max": 251.1015684304786,
+      "rms_loaded": 89.52884296902373
+    },
+    "peak_hand_power_w": {
+      "L": 310.0595983020963,
+      "R": 230.36570272499563
+    },
+    "internal_force": {
+      "peak_internal_n": 150.96446008944164,
+      "peak_net_n": 28.235609119532487,
+      "peak_axial_squeeze_n": 1.2706872858677194,
+      "peak_transverse_n": 150.964444825738,
+      "peak_couple_nm": 12.125743880344695
+    }
+  },
+  "full_window_receipt": "receipt_full_window_conditioned.json",
   "static_hold": {
     "club_weight_n": 3.0694814499999996,
-    "sum_hand_force_up_n": 3.069344939381752,
-    "relative_error": 4.4473511396395106e-05,
+    "sum_hand_force_up_n": 3.069514878831134,
+    "relative_error": 1.0890709612964119e-05,
     "left_force_n": [
-      2.507877880493787,
-      4.301965772301925,
-      -9.360305421811479
+      2.507958661755362,
+      4.301935951458784,
+      -9.360358962712535
     ],
     "right_force_n": [
-      -2.508209371083577,
-      -4.301636492688729,
-      12.42965036119323
+      -2.507894354709358,
+      -4.302007120648232,
+      12.42987384154367
     ]
   },
   "sensitivity": {
     "0.1": {
-      "samples": 469,
-      "peak_time_s": 1.29444444,
+      "samples": 339,
+      "peak_time_s": 0.65,
       "peak_force_n": {
-        "L": 1440.904308843349,
-        "R": 1814.1569662231118
+        "L": 83.76833412539092,
+        "R": 97.57085045239687
       },
-      "peak_net_force_n": 1074.192102669911,
+      "peak_net_force_n": 21.8212677591833,
       "max_translation_deflection_mm": {
-        "L": 14.362797645285452,
-        "R": 18.110007459062516
+        "L": 0.838114558647109,
+        "R": 0.9759556799371943
       },
       "max_rotation_deflection_deg": {
-        "L": 30.27423376099006,
-        "R": 30.27423376099006
+        "L": 1.2912159114811794,
+        "R": 1.2912159114811794
       },
       "left_force_share": {
-        "bushing_at_peak": 0.440910046796095,
-        "bushing_median_loaded": 0.445522904228699,
-        "min_norm_at_peak": 0.48117376364977493,
-        "min_norm_median_loaded": 0.479083368674813
+        "bushing_at_peak": 0.46112674110079127,
+        "bushing_median_loaded": 0.4572413159951294,
+        "min_norm_at_peak": 0.48229127575401315,
+        "min_norm_median_loaded": 0.47913263891379954
       },
       "left_force_difference_vs_min_norm_n": {
-        "max": 2431.212169173293,
-        "rms_loaded": 1415.8054992920174
+        "max": 211.06253555845544,
+        "rms_loaded": 79.26936419446297
       },
       "peak_hand_power_w": {
-        "L": 13009.3231109856,
-        "R": 17233.64103049058
+        "L": 189.41067002353157,
+        "R": 127.20415446795369
+      },
+      "internal_force": {
+        "peak_internal_n": 90.27615602032623,
+        "peak_net_n": 21.8212677591833,
+        "peak_axial_squeeze_n": 1.5641224240649017,
+        "peak_transverse_n": 90.27155491405162,
+        "peak_couple_nm": 7.250778524915565
       }
     },
     "10": {
-      "samples": 469,
-      "peak_time_s": 1.3,
+      "samples": 339,
+      "peak_time_s": 0.63333333,
       "peak_force_n": {
-        "L": 4450.038259335367,
-        "R": 4928.36174569417
+        "L": 159.35261190578996,
+        "R": 180.49484212384345
       },
-      "peak_net_force_n": 1237.2200342195497,
+      "peak_net_force_n": 38.270278348221716,
       "max_translation_deflection_mm": {
-        "L": 0.44593888713472724,
-        "R": 0.4872718408906644
+        "L": 0.01588556290523841,
+        "R": 0.018088013024814876
       },
       "max_rotation_deflection_deg": {
-        "L": 0.6624663568304111,
-        "R": 0.6624663568304111
+        "L": 0.0242875615437276,
+        "R": 0.0242875615437276
       },
       "left_force_share": {
-        "bushing_at_peak": 0.47449866255959,
-        "bushing_median_loaded": 0.46261656726445677,
-        "min_norm_at_peak": 0.4873261380080428,
-        "min_norm_median_loaded": 0.4819178576006559
+        "bushing_at_peak": 0.4688945290491863,
+        "bushing_median_loaded": 0.46115410535307044,
+        "min_norm_at_peak": 0.48471748054005176,
+        "min_norm_median_loaded": 0.4809103072452916
       },
       "left_force_difference_vs_min_norm_n": {
-        "max": 4980.568063218703,
-        "rms_loaded": 2893.0581377766234
+        "max": 210.71152216980545,
+        "rms_loaded": 75.7057090513464
       },
       "peak_hand_power_w": {
-        "L": 44404.62864473573,
-        "R": 38564.72143160769
+        "L": 318.9107856247925,
+        "R": 218.18655269060892
+      },
+      "internal_force": {
+        "peak_internal_n": 169.777248324168,
+        "peak_net_n": 38.270278348221716,
+        "peak_axial_squeeze_n": 0.46528875425921257,
+        "peak_transverse_n": 169.7772483152546,
+        "peak_couple_nm": 13.636823108625611
       }
     }
   }
