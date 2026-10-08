@@ -97,3 +97,47 @@ def test_cli_exposes_the_face_weight_with_the_shared_default() -> None:
     assert build_parser().parse_args([]).face_weight == cft.FACE_ORIENTATION_WEIGHT
     args = build_parser().parse_args(["--face-weight", "0"])
     assert args.face_weight == 0.0
+
+
+def test_shooting_refit_keeps_the_face_targets(monkeypatch: pytest.MonkeyPatch) -> None:
+    import logging
+    from types import SimpleNamespace
+
+    from src.shared.python.motion_matching import full_body_forward_dynamics
+    from src.shared.python.motion_matching.pipeline import dynamics
+    from src.shared.python.motion_matching.pipeline.constants import SHOOTING_LOCKED
+
+    frames, n_q = 600, 8
+    q = np.zeros((frames, n_q))
+    lane = SimpleNamespace(
+        points=np.zeros((frames, 2, 3)),
+        valid=np.ones((frames, 2), dtype=bool),
+        times=np.arange(frames) / 360.0,
+        rate_hz=360.0,
+        ground=None,
+        labels=("WaistLeft", "Other"),
+        stance=[()] * frames,
+        bounds={},
+        face_targets=[None] * frames,
+    )
+    kin = MagicMock()
+    kin.coordinate_order = (*SHOOTING_LOCKED, *(f"q{i}" for i in range(n_q)))[:n_q]
+    kin.solve_trajectory.return_value = (q, [])
+    record = SimpleNamespace(time_s=lane.times, weight_fraction=np.full(frames, 0.9))
+    monkeypatch.setattr(dynamics, "replay", lambda *a, **k: (record, q))
+    monkeypatch.setattr(
+        dynamics, "marker_errors", lambda *a: np.full((frames, 2), 0.01)
+    )
+    zmp = {"outside_m": np.zeros(frames), "unloaded": np.zeros(frames, dtype=bool)}
+    monkeypatch.setattr(full_body_forward_dynamics, "reference_zmp", lambda *a: zmp)
+    dynamics.shooting_fit(
+        lane,
+        kin,
+        object(),
+        q,
+        q,
+        logging.getLogger("test"),
+        dynamics.ShootingFitConfig(iterations=1, gain=0.5, tracking_backend="kkt"),
+    )
+    kwargs = kin.solve_trajectory.call_args.kwargs
+    assert kwargs["axis_targets_per_frame"] is lane.face_targets
