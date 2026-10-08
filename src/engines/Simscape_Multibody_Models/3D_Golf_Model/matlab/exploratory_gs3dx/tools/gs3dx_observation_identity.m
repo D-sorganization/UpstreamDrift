@@ -21,9 +21,9 @@ function obs = gs3dx_observation_identity(cap, export_sha256, contract)
 %   Contract Semantics & Attestation Boundaries:
 %     - export_sha256 is the actual SHA-256 of the exported C3D capture file
 %       as resolved by local_resolve_capture (cap_sha256).
-%     - contract.source_sha256 is the caller-attested raw GEARS source hash.
+%     - contract.source_sha256 is the caller-attested raw native-capture source hash.
 %       It is bound as CALLER_BOUND; this function and the export wrapper do
-%       not read, access, or verify the raw GEARS source file on disk.
+%       not read, access, or verify the raw native-capture source file on disk.
 %     - The observation contract attests decoded upstream availability only.
 %       Source hash shape equality does NOT prove actual upstream mask
 %       derivation or independent physical measurement accuracy. No false
@@ -190,7 +190,7 @@ function obs = gs3dx_observation_identity(cap, export_sha256, contract)
             char(contract.export_sha256), char(export_sha256));
     end
 
-    % Notice: source_sha256 is caller-attested raw GEARS source hash.
+    % Notice: source_sha256 is caller-attested raw native-capture source hash.
     % It is bound as CALLER_BOUND; no cap.source_sha256 is expected or assigned, and no
     % raw source file read or comparison is performed.
 
@@ -235,7 +235,7 @@ function obs = gs3dx_observation_identity(cap, export_sha256, contract)
     obs.units = units;
     obs.source_units = source_units;
     obs.qualification_notice = ...
-        "SOURCE_AVAILABILITY_MASK_CALLER_BOUND: Observation contract attests decoded upstream availability and caller-attested raw GEARS source hash only. No actual raw source read or physical measurement verified.";
+        "SOURCE_AVAILABILITY_MASK_CALLER_BOUND: Observation contract attests decoded upstream availability and caller-attested raw native-capture source hash only. No actual raw source read or physical measurement verified.";
 end
 
 % -------------------------------------------------------------------------

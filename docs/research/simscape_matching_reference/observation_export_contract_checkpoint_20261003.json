@@ -80,7 +80,7 @@
       ],
       "units": "m",
       "source_units": "m",
-      "qualification_notice": "SOURCE_AVAILABILITY_MASK_CALLER_BOUND: Observation contract attests decoded upstream availability and caller-attested raw GEARS source hash only. No actual raw source read or physical measurement verified."
+      "qualification_notice": "SOURCE_AVAILABILITY_MASK_CALLER_BOUND: Observation contract attests decoded upstream availability and caller-attested raw native-capture source hash only. No actual raw source read or physical measurement verified."
     },
     "model_saved": false,
     "simulation_executed": false,
