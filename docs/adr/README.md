@@ -65,6 +65,7 @@ canonical-core app-shell registry reuse of the embeddable-tool contract.
 ## Recent Amendments
 
 - **2026-10-03:** ADR-0052 updated with decisions on calibrated camera compositing and distortion handling (#11312).
+- **2026-10-07:** ADR-0052 gains the Contact Label Table: labels and conventions for ground-reaction wrenches (GCV-1, #11707).
 - **2026-09-26:** ADR-0041 gains Amendment 1: consumer-side fitters (unknowns include the
   subject model) live in UpstreamDrift; Tools keeps record authority and reference geometry (#9619, #9630).
 - **2026-09-26:** ADR-0044 records the interim fail-closed sand-motion capability register
