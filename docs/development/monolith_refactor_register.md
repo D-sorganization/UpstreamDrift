@@ -27,8 +27,8 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 1185 | `src/engines/Simscape_Multibody_Models/shared/+golfviz/GolfSwingVisualizer.m` |
 | 1184 | `src/bunkershot3d/ball/splash.py` |
 | 1173 | `src/launchers/upstream_drift_launcher.py` |
-| 1171 | `src/config/launcher_manifest_loader.py` |
 | 1171 | `src/shared/python/movement_optimizer/gui/motion_tabs.py` |
+| 1170 | `src/config/launcher_manifest_loader.py` |
 | 1169 | `src/shared/python/swing_comparison/metrics.py` |
 | 1168 | `src/api/routes/data_explorer.py` |
 | 1168 | `src/shared/python/shadow_tracker/ingestion.py` |
@@ -84,6 +84,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
 | 981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
+| 981 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 974 | `src/launchers/embedded_host.py` |
 | 973 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py` |
 | 973 | `src/shared/python/estimation/dime_observation_factors.py` |
@@ -138,7 +139,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 879 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/visualization/SkeletonPlotter.m` |
 | 878 | `src/launchers/launcher_layout_manager.py` |
 | 877 | `src/bunkershot3d/io/schema.py` |
-| 875 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 875 | `src/shared/python/sidekick/process_calculators/pressure_drop_calculator/pressure_drop_interface.py` |
 | 874 | `src/shared/python/tour_baselines/qualification.py` |
 | 872 | `src/shared/python/pendulum_simulator/gui/base_pendulum_widget.py` |
