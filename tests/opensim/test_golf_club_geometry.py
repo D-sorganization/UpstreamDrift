@@ -152,3 +152,50 @@ def test_attach_visual_club_fails_closed_on_missing_club_body() -> None:
 
     with pytest.raises(ValueError, match="Model has no Club body"):
         attach_visual_club(tree, DRIVER)
+
+
+def test_attach_visual_club_uses_committed_stl_assets_and_a_frame_offset() -> None:
+    """OSV-1: shaft, grip and head STLs on an offset frame; no missing .vtp files."""
+    from src.engines.physics_engines.opensim.python import club_visuals
+
+    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    attach_visual_club(tree, IRON_7)
+    club_body = tree.find(".//BodySet/objects/Body[@name='Club']")
+    assert club_body is not None
+    meshes = club_body.findall("attached_geometry/Mesh")
+    assert [m.get("name") for m in meshes] == [
+        "club_shaft_geom",
+        "club_grip_geom",
+        "club_head_geom",
+    ]
+    for mesh in meshes:
+        name = mesh.findtext("mesh_file") or ""
+        assert name.endswith(".stl")
+        assert (club_visuals.GEOMETRY_DIR / name).is_file()
+        assert mesh.findtext("socket_frame") == "../club_visual_frame"
+    frame = club_body.find("components/PhysicalOffsetFrame")
+    assert frame is not None
+    translation = [float(v) for v in (frame.findtext("translation") or "").split()]
+    assert translation[1] == pytest.approx(-IRON_7.length_m)
+
+
+def test_attach_visual_club_fails_closed_without_assets(tmp_path: Path) -> None:
+    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    with pytest.raises(FileNotFoundError, match="assets missing"):
+        attach_visual_club(tree, DRIVER, geometry_dir=tmp_path)
+
+
+def test_visual_club_model_loads_in_opensim_with_unchanged_mass(tmp_path: Path) -> None:
+    osim = pytest.importorskip("opensim")
+    from src.engines.physics_engines.opensim.python import club_visuals
+
+    club_visuals.register_geometry_path()
+    plain = osim.Model(str(GOLF_HUMANOID_PATH))
+    tree = SafeET.parse(str(GOLF_HUMANOID_PATH))
+    attach_visual_club(tree, DRIVER)
+    out = tmp_path / "with_club.osim"
+    out.write_bytes(ET.tostring(tree.getroot(), encoding="utf-8"))
+    model = osim.Model(str(out))
+    assert model.getTotalMass(model.initSystem()) == plain.getTotalMass(
+        plain.initSystem()
+    )

@@ -16,6 +16,14 @@ from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching import (
     full_body_forward_dynamics as fs,
 )
+from src.shared.python.motion_matching.club_face_target import (
+    FACE_FRAME,
+    FACE_ORIENTATION_WEIGHT,
+    HEAD_TRIAD_LABELS,
+    face_fit_summary,
+    model_face_normals,
+    observe_capture_face,
+)
 from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
@@ -63,13 +71,20 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     shooting_fit,
     zmp_filter,
 )
+from src.shared.python.motion_matching.pipeline.centroidal_filter import (
+    centroidal_filter,
+)
 from src.shared.python.motion_matching.pipeline.finish_feasibility import (
     finish_feasibility_report,
+)
+from src.shared.python.motion_matching.pipeline.gaze_residual import (
+    head_gaze_receipt,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
     document_seed,
+    expand_stance_for_width,
     fitted_grip,
     wrist_bounds,
 )
@@ -108,6 +123,16 @@ def _positive_int(value: str) -> int:
     return val
 
 
+def _nonnegative_float(value: str) -> float:
+    try:
+        val = float(value)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(f"Invalid number: {value!r}") from e
+    if not np.isfinite(val) or val < 0:
+        raise argparse.ArgumentTypeError(f"--gaze-weight must be >= 0, got {val}")
+    return val
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser for the ground support pipeline runner."""
     parser = argparse.ArgumentParser(
@@ -136,6 +161,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--recalibrate-upper",
         action="store_true",
         help="calibrate the 25 upper-body offsets too (qualified offsets as prior)",
+    )
+    parser.add_argument(
+        "--gaze-weight",
+        type=_nonnegative_float,
+        default=0.0,
+        help=(
+            "soft head-gaze residual weight (eyes on the ball until impact + "
+            "0.03 s, then a 0.35 s release to the target line); 0 keeps the "
+            "marker-faithful head (default)"
+        ),
     )
     parser.add_argument(
         "--capture",
@@ -175,6 +210,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--zmp-filter",
         action="store_true",
         help="dynamics-filter reference to keep ZMP inside support polygon",
+    )
+    parser.add_argument(
+        "--centroidal-filter",
+        action="store_true",
+        help="centroidal feasibility filter v2: full ZMP, vertical force and "
+        "friction cone over the finish (runs after --zmp-filter)",
+    )
+    parser.add_argument(
+        "--foot-half-width-m",
+        type=float,
+        default=None,
+        help="add lateral heel/forefoot contact spheres at +/- this distance so "
+        "the foot is a sole, not a centre line (#11671)",
+    )
+    parser.add_argument(
+        "--torsional-patch-m",
+        type=float,
+        default=None,
+        help="torsional (spin) friction patch radius applied at every loaded "
+        "contact sphere (#11671)",
     )
     parser.add_argument(
         "--static-seeds",
@@ -217,9 +272,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--tracking",
-        choices=["kkt", "mj-inverse"],
+        choices=["kkt", "mj-inverse", "wrench-qp"],
         default="kkt",
-        help="computed-torque tracking backend (kkt or mj-inverse)",
+        help="computed-torque tracking backend (kkt, mj-inverse, or the opt-in "
+        "contact-wrench QP wrench-qp, #11670)",
     )
     parser.add_argument(
         "--trajectory-optimiser",
@@ -273,7 +329,53 @@ def build_parser() -> argparse.ArgumentParser:
             "seeds and records model vs capture angles in the receipt."
         ),
     )
+    parser.add_argument(
+        "--face-weight",
+        type=float,
+        default=FACE_ORIENTATION_WEIGHT,
+        help=(
+            "weight of the club-face orientation residual (OSV-10, #11759): the "
+            "IK pulls the rendered face normal onto the one the capture head "
+            "triad implies; 0 restores the marker-only fit"
+        ),
+    )
     return parser
+
+
+def _attach_face_report(
+    ik_report: dict[str, Any],
+    lane: Lane,
+    cal_res: Any,
+    q_pair: tuple[np.ndarray, np.ndarray],
+    weight: float,
+) -> None:
+    """Add the face residual's receipt block when the residual was active."""
+    if lane.face_targets is not None:
+        ik_report["face_orientation"] = _face_orientation_report(
+            lane, cal_res, *q_pair, weight
+        )
+
+
+def _face_orientation_report(
+    lane: Lane, cal_res: Any, q_ik: np.ndarray, q_ref: np.ndarray, weight: float
+) -> dict[str, Any]:
+    """Receipt block of the face residual: weight and model-vs-capture fit."""
+    report: dict[str, Any] = {
+        "weight": weight,
+        "frame": FACE_FRAME,
+        "triad": list(HEAD_TRIAD_LABELS),
+        "targeted_frames": sum(t is not None for t in lane.face_targets or ()),
+    }
+    if not hasattr(cal_res.kin, "body_poses"):
+        report["reason"] = "IK provider has no body_poses; fit not measured"
+        return report
+    capture, _ = observe_capture_face(
+        lane.points, lane.valid, lane.labels, cal_res.attachments, cal_res.scaled_spec
+    )
+    for name, q in (("ik", q_ik), ("reference", q_ref)):
+        model = model_face_normals(cal_res.kin, q, cal_res.scaled_spec)
+        report[name] = face_fit_summary(model, capture)
+    return report
 
 
 @dataclass(frozen=True)
@@ -348,6 +450,14 @@ def _validate_scaled_spec(
         validate_full_body_spec(scaled_spec, upper_base)
 
 
+def _pin_width_spheres(args: Any, lane: Lane, hip_spec: dict[str, Any]) -> None:
+    """Pin lateral foot spheres in the IK stance when a foot width is set."""
+    if getattr(args, "foot_half_width_m", None) is not None:
+        lane.stance = expand_stance_for_width(
+            lane.stance, [s["name"] for s in hip_spec["contact"]["spheres"]]
+        )
+
+
 def _calibrate_and_scale(
     ctx: PipelineContext,
     lane: Lane,
@@ -380,12 +490,15 @@ def _calibrate_and_scale(
             skip_hip_calibration=args.skip_hip_calibration,
             anthropometric=tuple(args.anthropometric) if args.anthropometric else None,
             recalibrate_upper=args.recalibrate_upper,
+            foot_half_width_m=getattr(args, "foot_half_width_m", None),
+            torsional_patch_m=getattr(args, "torsional_patch_m", None),
         ),
     )
     hipcal_path.write_text(
         json.dumps(hip_spec, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     hip_bytes = hipcal_path.read_bytes()
+    _pin_width_spheres(args, lane, hip_spec)
     lane.plant = get_plant(ctx.engine, hip_spec)
 
     stage2 = solve_address_stage(
@@ -404,11 +517,8 @@ def _calibrate_and_scale(
             log=log,
         )
     )
-    address = stage2.address
-    address_report = stage2.address_report
-    fixed = stage2.fixed
-    seeds_all = stage2.seeds_all
-    hip_spec = stage2.hip_spec
+    address, address_report = stage2.address, stage2.address_report
+    fixed, seeds_all, hip_spec = stage2.fixed, stage2.seeds_all, stage2.hip_spec
 
     offsets, calibration = lane.calibrate_legs(hip_bytes, fixed, seeds_all, address.q)
     scaled_spec, femur_scale, tibia_scale, scale_table = search_segment_scales(
@@ -718,6 +828,25 @@ def _apply_trajectory_optimiser(
         receipt["trajectory_optimiser"] = opt_summary
 
 
+def _feasibility_filters(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    zmp: dict[str, Any],
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
+    """Run the optional cart-table and centroidal feasibility filters in order."""
+    lane, kin, sim, log = context
+    zmp_report: dict[str, Any] | None = None
+    centroidal_report: dict[str, Any] | None = None
+    if args.zmp_filter:
+        q_track, zmp, zmp_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
+    if getattr(args, "centroidal_filter", False):
+        q_track, zmp, centroidal_report = centroidal_filter(
+            lane, kin, sim, q_track, zmp, log
+        )
+    return q_track, zmp, zmp_report, centroidal_report
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -737,9 +866,9 @@ def _simulate_and_receipt(
     tracking = getattr(args, "tracking", "kkt")
     q_track = smooth_reference(q_ref, lane.rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
-    zmp_filter_report: dict[str, Any] | None = None
-    if args.zmp_filter:
-        q_track, zmp, zmp_filter_report = zmp_filter(lane, kin, sim, q_track, zmp, log)
+    q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
+        args, (lane, kin, sim, log), q_track, zmp
+    )
     shooting_report: dict[str, Any] | None = None
     if args.shooting_fit > 0:
         q_track, zmp, shooting_report = shooting_fit(
@@ -776,6 +905,7 @@ def _simulate_and_receipt(
             q_ref=q_ref,
             zmp=zmp,
             zmp_filter_report=zmp_filter_report,
+            centroidal_filter_report=centroidal_report,
             shooting_report=shooting_report,
             tracking_backend=tracking,
             finish_feasibility=finish,
@@ -810,6 +940,7 @@ def _simulate_and_receipt(
         )
     )
     receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
     _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
     _write_receipt(out_dir, receipt)
     log_pipeline_summary(
@@ -846,7 +977,10 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         lane.bounds |= wrist_bounds()
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
 
+    lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
+
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
 
     (
         q_ik,
@@ -893,6 +1027,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
+    _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,

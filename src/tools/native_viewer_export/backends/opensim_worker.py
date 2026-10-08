@@ -19,10 +19,13 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.force_overlay.glyphs import GlyphSet
 from src.shared.python.golf_view_presets import simbody_camera_transform
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import (
     fit_to_size,
     y_axis_rotation,
@@ -103,6 +106,7 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
         export_full_body_osim,
     )
 
+    club_visuals.register_geometry_path()
     skeleton = derive_visual_skeleton(json.loads(spec_bytes))
     xml, _ = export_full_body_osim(spec_bytes)
     with tempfile.TemporaryDirectory() as tmp:
@@ -120,7 +124,25 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     model.finalizeFromProperties()
     bodies = model.getBodySet()
     n = 0
+    # The shared visual head replaces the head capsule (visual only).
+    head_dir = tempfile.mkdtemp(prefix="ud_head_")
+    heads = head_mesh_files(json.loads(spec_bytes), Path(head_dir))
+    head_body = heads[0].body if heads else None
+    for head in heads:
+        body = bodies.get(clean_osim_body_name(head.body))
+        _attach(
+            osim,
+            body,
+            np.eye(3),
+            (0.0, 0.0, 0.0),
+            osim.Mesh(str(head.path)),
+            head.rgba[:3],
+            n,
+        )
+        n += 1
     for cap in skeleton.capsules:
+        if cap.body == head_body:
+            continue
         body = bodies.get(clean_osim_body_name(cap.body))
         a, b = np.array(cap.start_m), np.array(cap.end_m)
         rot = y_axis_rotation(b - a)
@@ -137,7 +159,10 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
             n += 1
             _attach(osim, body, np.eye(3), end, osim.Sphere(cap.radius_m), _GREY, n)
         n += 1
+    club = club_parts(json.loads(spec_bytes))
     for shp in skeleton.shapes:
+        if club is not None and shp.body == club[0]:
+            continue  # the exported model carries the club meshes instead
         body = bodies.get(clean_osim_body_name(shp.body))
         half = [float(v) for v in shp.half_size_m]
         geom = (

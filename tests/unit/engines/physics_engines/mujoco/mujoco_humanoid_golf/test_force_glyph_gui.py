@@ -216,3 +216,79 @@ def test_no_flat_xaxis_slices_remain() -> None:
         check=False,
     )
     assert out.stdout == ""
+
+
+def test_style_options_body_weight_and_groups() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_glyph_overlay import (
+        style_options_from_controls,
+    )
+
+    options = style_options_from_controls(
+        scale_mode="body_weight",
+        body_mass_kg=80.0,
+        peak_force_n=2000.0,
+        reference_length_m=0.5,
+        groups=["per_foot", "net"],
+    )
+    assert options["scale_mode"] == "body_weight"
+    assert options["reference_force_n"] == pytest.approx(80.0 * 9.80665)
+    assert options["groups"] == frozenset({"per_foot", "net"})
+    peak = style_options_from_controls(
+        scale_mode="peak",
+        body_mass_kg=80.0,
+        peak_force_n=2000.0,
+        reference_length_m=0.7,
+        groups=["net"],
+    )
+    assert peak["reference_force_n"] == 2000.0
+    fixed = style_options_from_controls(
+        scale_mode="fixed",
+        body_mass_kg=80.0,
+        peak_force_n=2000.0,
+        reference_length_m=0.5,
+        groups=["net"],
+    )
+    assert "reference_force_n" not in fixed
+    with pytest.raises(ValueError):
+        style_options_from_controls(
+            scale_mode="body_weight",
+            body_mass_kg=0.0,
+            peak_force_n=1.0,
+            reference_length_m=0.5,
+            groups=[],
+        )
+
+
+def test_overlay_glyphs_follow_body_weight_options() -> None:
+    options = {
+        "scale_mode": "body_weight",
+        "reference_force_n": 100.0,
+        "reference_length_m": 0.5,
+    }
+    glyphs = build_overlay_glyphs(
+        _frame(),
+        show_force=True,
+        show_torque=False,
+        force_scale=1e-3,
+        torque_scale=1e-3,
+        style_options=options,
+    )
+    assert glyphs is not None
+    tip = glyphs.arrows[0].tip_m
+    assert tip[2] == pytest.approx(0.5)  # 100 N == 1 reference force == 0.5 m
+    with pytest.raises(ValueError):
+        overlay_style(1e-3, 1e-3, {"scale_mode": "body_weight"})
+    with pytest.raises(ValueError):
+        overlay_style(1e-3, 1e-3, {"bogus": 1})
+
+
+def test_widget_style_options_reach_the_renderer() -> None:
+    widget = _Widget(force=True, torque=False)
+    widget.force_style_options = {
+        "scale_mode": "peak",
+        "reference_force_n": 50.0,
+        "reference_length_m": 0.2,
+    }
+    glyphs = widget._render_force_glyphs(_scene())
+    assert glyphs is not None
+    assert glyphs.arrows[0].tip_m[2] == pytest.approx(0.4)  # 100 N / 50 N * 0.2 m

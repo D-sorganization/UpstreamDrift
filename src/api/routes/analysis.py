@@ -28,7 +28,8 @@ from ..models.requests import (
     CandidateCounterfactualRequest,
     CounterfactualRequest,
 )
-from ..models.responses import AnalysisResponse
+from ..models.responses import AnalysisResponse, ImpactParametersResponse
+from ..services.impact_parameters_service import compute_impact_card
 from ..utils.datetime_compat import UTC
 
 if TYPE_CHECKING:
@@ -255,3 +256,45 @@ async def run_candidate_counterfactual(
         return result
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+# ──────────────────────────────────────────────────────────────
+#  Impact Parameters (GCV-17, #11723)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get("/analysis/impact-parameters", response_model=ImpactParametersResponse)
+async def get_impact_parameters(
+    run_id: str | None = Query(None, description="Run id; defaults to the active run"),
+    target_dir: str | None = Query(
+        None, description="Target direction 'x,y[,z]' (horizontal); default -Y"
+    ),
+    handedness: str = Query("right", pattern="^(right|left)$"),
+    units: str = Query("mph", pattern="^(mph|m/s)$"),
+    impact_index: int | None = Query(None, ge=0),
+    service: SimulationService = Depends(get_simulation_service),
+) -> ImpactParametersResponse:
+    """Launch-monitor-style impact parameters relative to a target line.
+
+    Unavailable quantities are returned as ``null`` with a reason, never zero.
+    Responds 404 for an unknown run and 400 for malformed inputs.
+    """
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No such simulation run")
+    try:
+        card = compute_impact_card(
+            run,
+            target_dir=target_dir,
+            handedness=handedness,
+            units=units,
+            impact_index=impact_index,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    payload = card.to_dict()
+    time_s = payload["impact_time_s"]
+    payload["impact_time_s"] = time_s if time_s == time_s else None
+    return ImpactParametersResponse(
+        run_id=run.run_id, engine=run.engine_type, **payload
+    )

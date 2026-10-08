@@ -102,6 +102,16 @@ export function buildArrowMeshGroup(glyph: ArrowGlyph): THREE.Group {
   headMesh.quaternion.copy(headQuat);
   group.add(headMesh);
 
+  // Clamped arrows (raw length above the style maximum) get a trailing second
+  // head so a shortened arrow never reads as a smaller force (GCV-4, #11710).
+  if (glyph.clamped) {
+    const chevron = new THREE.Mesh(headGeo, material);
+    chevron.name = 'arrow-clamped-head';
+    chevron.position.copy(headMid).addScaledVector(headDir, -0.6 * headLen);
+    chevron.quaternion.copy(headQuat);
+    group.add(chevron);
+  }
+
   return group;
 }
 

@@ -182,3 +182,30 @@ def ellipsoid_mesh(
         faces.append((n, j2, j))
         faces.append((n + 1, last + j, last + j2))
     return _orient(np.asarray(verts, dtype=float), np.asarray(faces, dtype=np.int64))
+
+
+def closed_grid_mesh(grid: Array, top: Array, bottom: Array) -> Mesh:
+    """Closed mesh from ``(rings, sides, 3)`` vertex rings between two poles.
+
+    ``top`` is fanned to the first ring and ``bottom`` to the last, so a
+    deformed sphere (skull) or a dome fanned to an interior point (hair, cap)
+    is built the same way. Preconditions: finite grid with at least two rings
+    and six sides. Postcondition: positive enclosed volume (winding repaired).
+    """
+    g = np.asarray(grid, dtype=float)
+    if g.ndim != 3 or g.shape[2] != 3 or g.shape[0] < 2 or g.shape[1] < 6:
+        raise ValueError("grid must be (rings >= 2, sides >= 6, 3)")
+    if not np.isfinite(g).all():
+        raise ValueError("grid must be finite")
+    t = _check_finite("top", top, 3)
+    b = _check_finite("bottom", bottom, 3)
+    rings, sides = g.shape[:2]
+    faces = _ring_faces(rings, sides)
+    n = rings * sides
+    verts = np.vstack([g.reshape(-1, 3), t, b])
+    last = (rings - 1) * sides
+    for j in range(sides):
+        j2 = (j + 1) % sides
+        faces.append((n, j2, j))
+        faces.append((n + 1, last + j, last + j2))
+    return _orient(verts, np.asarray(faces, dtype=np.int64))

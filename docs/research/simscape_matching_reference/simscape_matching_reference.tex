@@ -5169,6 +5169,133 @@ an isolated physical-signal chain needs none. Original failures are
 retained. A vector-compatible measurement configuration remains to be
 qualified, including its effect on the unmodified joint drive and dynamics.
 
+\section{Club-Face Orientation Residual in the Shared Python IK (OSV-10)}
+This section records a change to the shared Python ground-support matching
+pipeline (\texttt{src/shared/python/motion\_matching/pipeline}), not to the
+Simscape model. It is kept here beside the club-orientation records above
+because it uses the same capture head triad. Issue \#11759, epic \#11726.
+
+\subsection{Problem and Observability}
+The hand-to-club chain leaves club roll to the fitted wrist coordinates. The
+marker-only fit placed the three clubhead markers well, but it did not
+constrain rotation about the shaft. The rendered face was therefore 29.5 deg
+(driver) and 17.9 deg (7-iron) open at impact, while the capture head triad
+was 8.8 and 8.4 deg open at its own impact. The triad
+(\texttt{Marker\_2:2:1..3}) is attached to the spec frame \texttt{Clubhead}.
+Its calibrated offsets $p_j$ define a capture rotation $R_{c,i}$ per frame by
+a Kabsch fit of $p_j$ onto the observed positions. Frames with a missing or
+degenerate triad (driver 36 of 654, iron 17 of 657) are unobserved and get no
+target. They are never filled.
+
+\subsection{Cost Term}
+Let $a$ be the rendered face normal expressed in the \texttt{Clubhead} frame:
+$a=R_F^{\top}\,c$, where $c$ is \texttt{clubface\_vector} of the club
+assembly (including the address-square roll constant) and $R_F$ is the
+frame's placement on the club body. Then for each observed frame $i$ the
+Levenberg--Marquardt IK adds three residual components
+\[
+ r_{\mathrm{face},i}=\sqrt{w_f}\,\bigl(R_i(q)\,a-R_{c,i}\,a\bigr),
+\]
+where $R_i(q)$ is the model rotation of \texttt{Clubhead}. The cost is
+$w_f\lVert R_i a-R_{c,i}a\rVert^2$, the squared chord between the model and
+capture normals. Marker residuals are unit-weight in metres, so a 5 deg face
+error (chord 0.087) costs as much as an 8.7 cm error on each of the three
+head markers when $w_f=3$. The term uses the existing per-frame
+\texttt{axis\_targets} mechanism of \texttt{BaseFullBodyIK} (the same mechanism
+used for the elbow-pit targets), so every IK provider honours it without
+engine-specific code. The residual applies in the full-capture IK, in the
+consistency re-solve, and in the optional ZMP-filter and shooting re-solves.
+\texttt{--face-weight 0} restores the marker-only fit.
+
+\subsection{Impact and Top Definitions}
+At about 2400 deg/s of face closure near impact, one 360 Hz capture sample
+spans about 7 deg. A frame index is therefore too coarse. Impact is the
+sub-sample ball passage (\texttt{club\_face.ball\_passage}). After the top of
+the backswing, the face-centre path is taken as piecewise linear. Impact is
+its closest approach to the address face centre, within 0.15 m and within
+0.10 m of the address height. The face angle there blends the two
+neighbouring normals (\texttt{face\_angle\_at}). The top is the slowest
+face-centre sample between first motion and peak speed. Each swing is
+measured on its own clock. The 1 kHz rollout lags the reference by a few
+milliseconds, about 6 deg of face rotation at a fixed time. Comparing at a
+common time would mistake that lag for a face error.
+
+\subsection{Weight Sweep and Selection}
+The sweep re-solves the full-capture IK and the consistency stage on the
+original calibrated runs, with the weight as the only change.
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+$w_f$ & IK RMS (mm) & Ref.\ RMS (mm) & Face RMS (deg) & Driver closure max (mm) \\
+\midrule
+0 & 32.80 / 31.67 & 31.86 / 30.75 & 8.6 / 7.9 & 4.4 \\
+0.3 (driver) & 32.54 & 31.88 & 3.0 & 3.0 \\
+1 (driver) & 33.71 & 32.80 & 1.7 & 4.4 \\
+3 & 33.63 / 31.65 & 32.56 / 30.81 & 0.8 / 0.6 & 4.5 \\
+10 & 33.65 / 31.52 & 32.83 / 30.80 & 0.3 / 0.2 & 8.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Pairs are driver / 7-iron. Face RMS is the model-to-capture normal
+separation on the reference stage. The weight is set to $w_f=3$
+(\texttt{FACE\_ORIENTATION\_WEIGHT}): it brings the face to within 1 deg RMS
+and costs 2.5 \% of driver marker RMS, against an allowance of 10 \%.
+$w_f=10$ is rejected because it doubles the driver loop-closure error.
+
+\subsection{Regenerated Fixtures and Result}
+\texttt{scripts/regenerate\_club\_face\_fixtures.py} reruns the pipeline,
+exports the MuJoCo same-input bundle and rewrites
+\texttt{tests/fixtures/club\_face}. It writes the 2 ms swing samples, the
+address pose and \texttt{provenance.json}, which holds the commands, hashes,
+calibrated triad offsets, marker RMS and before/after face events. Nothing in
+it is hand edited.
+\begin{center}
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Club & Event & Before (deg) & After (deg) & Capture (deg) \\
+\midrule
+Driver & Address & 0.0 & 0.2 & 0.2 \\
+Driver & Top & 102.1 & 98.8 & 97.7 \\
+Driver & Impact & 29.5 & 11.3 & 8.8 \\
+7-iron & Address & 0.0 & $-0.4$ & $-0.3$ \\
+7-iron & Top & 108.0 & 110.3 & 109.7 \\
+7-iron & Impact & 17.9 & 7.6 & 8.4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Angles are open-positive. Model angles are from the 1 kHz computed-torque
+reference at 2 ms. The largest remaining gap is 2.5 deg (driver impact),
+against a 5 deg acceptance limit. Marker RMS for the IK, the reference and the
+tracked dynamics is 33.63, 32.56 and 65.0 mm for the driver (before 32.80,
+31.86 and 82.5) and 31.65, 30.80 and 53.0 mm for the 7-iron (before 31.66,
+30.75 and 55.5).
+
+The peak clubhead-speed sample is not impact. In the model it falls 24 ms
+(driver) and 25 ms (7-iron) before the ball passage, about 1.1 and 0.9 m from
+the ball. In the capture it falls 3.6 and 2.5 ms before, 0.18 and 0.11 m from
+the ball. The model's clubhead therefore peaks earlier than the captured one.
+That timing difference is outside this change.
+
+\subsection{Verification and Limitations}
+\texttt{test\_face\_tracks\_the\_capture\_at\_address\_top\_and\_impact}
+places the head mesh by each engine's own forward kinematics (OpenSim,
+MuJoCo, Drake, Pinocchio, MyoSuite). It requires agreement within 5 deg with
+the capture-triad face at address, top and impact, with impact times within
+10 ms. The four engines that ran agree with each other to 0.01 deg. MyoSuite
+was not installed on the implementing host, so that case was skipped there.
+The result is kinematic only. It does not establish the grip wrench, wrist
+torques or an independent forward replay. Rejected approaches were: a
+constant roll, which cannot follow a face error that grows from 4 deg at the
+top to 30 deg at impact; the peak-speed frame as impact; and a residual on
+the club body itself, whose name is not an IK frame in the providers.
+
+Reproduction (repository root, \texttt{MUJOCO\_GL=egl PYTHONPATH=.:src}):
+\begin{verbatim}
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture driver
+python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture iron
+python3 -m pytest tests/unit/model_appearance/test_clubface_square_at_address.py
+\end{verbatim}
+
 \section{Dynamics-Informed Motion Estimation (DIME): Shared Reports, GUI Strategy Selection and Methods}
 \label{sec:dime_reports_methods}
 

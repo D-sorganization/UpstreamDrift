@@ -40,4 +40,5 @@ def build_overlay_feed(
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
-    return OverlayFeed(provider.frame_at, default_glyph_style()), lookat
+    style = default_glyph_style(body_mass_kg=float(source.total_mass_kg))
+    return OverlayFeed(provider.frame_at, style), lookat

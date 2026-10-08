@@ -1186,6 +1186,26 @@
         "mode": "route",
         "route": "/tools/matched-swings"
       }
+    },
+    {
+      "id": "impact_parameters",
+      "name": "Impact Parameters",
+      "description": "Launch-monitor-style clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft and spin loft relative to a target line",
+      "category": "tool",
+      "type": "special_app",
+      "path": "src/tools/impact_parameters_panel/__main__.py",
+      "logo": "impact_parameters.svg",
+      "status": "gui_ready",
+      "capabilities": [
+        "impact_parameters",
+        "launch_monitor",
+        "target_line"
+      ],
+      "order": 52,
+      "web": {
+        "mode": "route",
+        "route": "/tools/analysis"
+      }
     }
   ]
 }

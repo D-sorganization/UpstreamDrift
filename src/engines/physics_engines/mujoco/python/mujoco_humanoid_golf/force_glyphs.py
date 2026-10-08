@@ -67,6 +67,10 @@ def _call_connector(
         raise RuntimeError("MuJoCo installation lacks connector support.")
 
 
+#: Length of the white marker arrow drawn past the tip of a clamped arrow (GCV-4).
+CLAMPED_TIP_LENGTH_M = 0.1
+
+
 @dataclass(frozen=True)
 class SceneGlyphReceipt:
     """Receipt summarizing geoms added to and dropped from an MjvScene."""
@@ -82,7 +86,7 @@ def segment_geom_count(glyphs: GlyphSet) -> int:
     Each arrow requires 1 geom. Each torque arc requires (len(polyline) - 1)
     capsule connectors plus 1 arrow head connector.
     """
-    count = len(glyphs.arrows)
+    count = len(glyphs.arrows) + sum(1 for a in glyphs.arrows if a.clamped)
     for arc in glyphs.torque_arcs:
         n_pts = len(arc.polyline_m)
         segments = max(0, n_pts - 1)
@@ -168,6 +172,17 @@ def add_glyphs_to_scene(
             added += 1
         else:
             dropped += 1
+        if arrow.clamped:
+            # Distinct clamped tip: a short white arrow continuing past the tip.
+            direction = to_pt - from_pt
+            norm = float(np.linalg.norm(direction))
+            if norm > 0.0:
+                extra = to_pt + direction / norm * CLAMPED_TIP_LENGTH_M
+                marker = (1.0, 1.0, 1.0, float(arrow.rgba[3]))
+                if _append_connector(scene, arrow_type, width, to_pt, extra, marker):
+                    added += 1
+                else:
+                    dropped += 1
 
     # 2. Torque Arcs: (N-1) mjGEOM_CAPSULE along polyline + 1 mjGEOM_ARROW head
     for arc in glyphs.torque_arcs:

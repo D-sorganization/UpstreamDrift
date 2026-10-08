@@ -382,6 +382,7 @@ class SimRenderingMixin:
             force_scale=self.force_scale,
             torque_scale=self.torque_scale,
             body_name=body_name,
+            style_options=getattr(self, "force_style_options", None),
         )
         self._set_force_legend("" if glyphs is None else legend_text(glyphs))
         return glyphs
