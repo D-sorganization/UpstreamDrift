@@ -31,7 +31,6 @@ import argparse
 import json
 import logging
 import tempfile
-import xml.etree.ElementTree as ET  # noqa: S405  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml  # parse of committed models
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -280,7 +279,7 @@ class _Residual:
         return np.concatenate(parts)
 
 
-def free_coordinates(model_xml: ET.Element) -> list[str]:
+def free_coordinates(model_xml: mc.Element) -> list[str]:
     return [n for n in mc.unlocked_coordinates(model_xml) if not n.endswith("_beta")]
 
 

@@ -59,6 +59,8 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 SPEC_DIR = REPO_ROOT / "docs" / "development" / "full_body_models"
 CALIBRATION_SCHEMA = "msk-club-grip-calibration-v1"
 
+#: XML element type of the model trees (built here; parsed with defusedxml).
+Element = ET.Element
 CLUB_BODY = "Club"
 GRIP_MODELS = ("weld", "bushing")
 DEFAULT_GRIP_MODEL = "weld"
