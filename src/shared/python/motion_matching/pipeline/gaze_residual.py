@@ -28,9 +28,7 @@ Array = NDArray[np.float64]
 HEAD_FRAME = "Head"
 CLUB_FRAME = "Clubhead"
 TORSO_FRAME = "Torso"
-# Clubhead frame: +x is the face normal (club_models.ClubSpec.head_half_size_m
-# lists x first as the face-normal extent), face centre at +x by that half size.
-FACE_NORMAL_LOCAL: tuple[float, float, float] = (1.0, 0.0, 0.0)
+GRIP_FRAME = "Grip"
 
 
 @dataclass(frozen=True)
@@ -71,6 +69,27 @@ def frame_poses(kin: Any, q: Array, frame: str) -> tuple[Array, Array]:
     return np.asarray(rots), np.asarray(trans)
 
 
+def face_normal_local(
+    club_r: Array, club_t: Array, grip_t: Array, times: Array, k: int
+) -> Array:
+    """Face normal in the clubhead frame from the impact path (square face).
+
+    The Simscape clubhead frame carries its roll about the shaft arbitrarily,
+    so the normal is the impact-frame clubhead velocity with its shaft
+    component removed, expressed in the clubhead frame. Limitation: it assumes
+    the face is square to the path at impact (recorded in the reference).
+    """
+    if not 0 < k < len(times) - 1:
+        raise ValueError("impact frame must have neighbours for a velocity")
+    shaft = club_r.T @ (grip_t - club_t[k])
+    shaft = shaft / np.linalg.norm(shaft)
+    vel = club_r.T @ ((club_t[k + 1] - club_t[k - 1]) / (times[k + 1] - times[k - 1]))
+    perp = vel - (vel @ shaft) * shaft
+    if np.linalg.norm(perp) < 1e-9:
+        raise ValueError("clubhead has no path component normal to the shaft")
+    return perp / np.linalg.norm(perp)
+
+
 def plan_gaze(
     kin: Any,
     q: Array,
@@ -89,13 +108,15 @@ def plan_gaze(
     """
     t = np.asarray(times, dtype=float)
     club_r, club_t = frame_poses(kin, q, CLUB_FRAME)
-    normal = club_r[0] @ np.asarray(FACE_NORMAL_LOCAL)
+    k = gaze.impact_index(t, club_t)
+    _, grip_t = frame_poses(kin, q, GRIP_FRAME)
+    local_normal = face_normal_local(club_r[k], club_t, grip_t[k], t, k)
+    normal = club_r[0] @ local_normal
     centre = club_t[0] + normal * face_offset_m
     ball = ball_position_at_address(centre, normal, ground_height_m=ground_height_m)
     horizontal = np.array([normal[0], normal[1], 0.0])
     if np.linalg.norm(horizontal) < 1e-6:
         raise ValueError("address face normal has no horizontal component")
-    k = gaze.impact_index(t, club_t)
     return GazePlan(
         ball_m=ball,
         impact_index=k,
@@ -137,7 +158,9 @@ def gaze_axis_targets(
     if not np.isfinite(weight) or weight < 0:
         raise ValueError("gaze weight must be finite and nonnegative")
     directions, *_ = schedule_directions(plan, kin, q, times)
-    return [{HEAD_FRAME: (gaze.GAZE_AXIS_HEAD, tuple(d), float(weight))} for d in directions]
+    return [
+        {HEAD_FRAME: (gaze.GAZE_AXIS_HEAD, tuple(d), float(weight))} for d in directions
+    ]
 
 
 def merge_axis_targets(
@@ -195,14 +218,6 @@ def gaze_report(
             for i, name in enumerate(gaze.NECK_COORDINATES)
         },
     }
-
-
-def club_face_offset_m(document: Mapping[str, Any]) -> float:
-    """Face-normal half extent of the document's club head (face centre offset)."""
-    from src.shared.python.motion_matching.club_models import CLUBS
-
-    name = str(document.get("club", {}).get("name", ""))
-    return float(CLUBS[name].head_half_size_m[0]) if name in CLUBS else 0.0
 
 
 def head_gaze_receipt(lane: Any, kin: Any, q: Array) -> dict[str, Any]:

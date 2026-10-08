@@ -62,7 +62,7 @@ def test_min_jerk_boundary_conditions() -> None:
     assert gaze.min_jerk(s) == pytest.approx([0.0, 1.0])
     h = 1e-4
     for edge in (0.0, 1.0):
-        ds = (gaze.min_jerk(np.array([edge + h])) - gaze.min_jerk(np.array([edge])))
+        ds = gaze.min_jerk(np.array([edge + h])) - gaze.min_jerk(np.array([edge]))
         assert abs(float(ds[0])) < 1e-6 or edge == 1.0
     # clamped outside [0, 1]
     assert gaze.min_jerk(np.array([-1.0, 2.0])) == pytest.approx([0.0, 1.0])
@@ -70,9 +70,7 @@ def test_min_jerk_boundary_conditions() -> None:
 
 def _schedule(t: np.ndarray, **kw: float) -> np.ndarray:
     eye = np.array([0.0, 0.0, 1.3])
-    return gaze.gaze_target_direction(
-        t, eye, BALL, [1.0, 0.0, 0.0], t_impact=1.0, **kw
-    )
+    return gaze.gaze_target_direction(t, eye, BALL, [1.0, 0.0, 0.0], t_impact=1.0, **kw)
 
 
 def test_schedule_holds_ball_until_impact_plus_hold() -> None:
@@ -151,7 +149,10 @@ def test_head_stability_metrics_stationary_head_has_zero_range() -> None:
 def test_head_stability_metrics_reports_translation_and_rotation() -> None:
     n = 11
     rot = np.stack(
-        [Rotation.from_euler("z", a, degrees=True).as_matrix() for a in np.linspace(0, 20, n)]
+        [
+            Rotation.from_euler("z", a, degrees=True).as_matrix()
+            for a in np.linspace(0, 20, n)
+        ]
     )
     pos = np.zeros((n, 3))
     pos[:, 0] = np.linspace(0, 0.05, n)

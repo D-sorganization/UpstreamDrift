@@ -18,7 +18,11 @@ COORDS = ("NeckInputX", "NeckInputY", "NeckInputZ")
 def _club_xz(k: int) -> tuple[float, float]:
     """Address, backswing to the top (k=25), accelerating downswing to impact
     (k=40, peak speed), decelerating follow-through."""
-    top, bottom, finish = np.array([-0.8, 1.0]), np.array([0.0, 0.02]), np.array([0.8, 1.0])
+    top, bottom, finish = (
+        np.array([-0.8, 1.0]),
+        np.array([0.0, 0.02]),
+        np.array([0.8, 1.0]),
+    )
     if k <= 25:
         p = bottom + (top - bottom) * (k / 25)
     elif k <= 40:
@@ -44,6 +48,9 @@ class StubKin:
             if f == gr.CLUB_FRAME:
                 x, z = _club_xz(k)
                 out[f] = (np.eye(3), np.array([x, 0.0, z]))
+            elif f == gr.GRIP_FRAME:
+                x, z = _club_xz(k)
+                out[f] = (np.eye(3), np.array([x, 0.0, z + 1.1]))
             else:
                 out[f] = (np.eye(3), self.head_t.copy())
         return out

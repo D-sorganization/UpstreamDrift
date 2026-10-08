@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_radius_is_regulation_ball() -> None:
-    assert BALL_RADIUS_M == pytest.approx(0.021335)
+    assert pytest.approx(0.021335) == BALL_RADIUS_M
 
 
 def test_ball_rests_on_ground_and_touches_face_plane() -> None:

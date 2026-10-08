@@ -60,7 +60,6 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
     finish_feasibility_report,
 )
 from src.shared.python.motion_matching.pipeline.gaze_residual import (
-    club_face_offset_m,
     head_gaze_receipt,
 )
 from src.shared.python.motion_matching.pipeline.lane import (
@@ -841,7 +840,6 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
 
     lane.gaze_weight = float(getattr(args, "gaze_weight", 0.0))
-    lane.gaze_face_offset_m = club_face_offset_m(base_spec)
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
 
