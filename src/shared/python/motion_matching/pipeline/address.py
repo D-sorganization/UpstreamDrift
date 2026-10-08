@@ -171,6 +171,8 @@ def best_address(
     for seed in ADDRESS_SEEDS_DEG:
         start = base.copy()
         for joint, value in seed.items():
+            if joint == "hip_rotation" and lane.feet is not None:
+                continue  # the shared foot-progression seed sets the foot yaw
             for side in ("r", "l"):
                 coord = f"{joint}_{side}"
                 if coord in kin.coordinate_order:

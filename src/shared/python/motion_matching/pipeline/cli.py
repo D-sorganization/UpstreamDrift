@@ -33,6 +33,7 @@ from src.shared.python.motion_matching.pipeline.address_feet import (
     foot_progression_report,
     foot_progression_series,
     model_feet_deg,
+    seed_document_feet,
 )
 from src.shared.python.motion_matching.pipeline.constants import (
     BUILD_RECEIPT,
@@ -68,6 +69,7 @@ from src.shared.python.motion_matching.pipeline.finish_feasibility import (
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
+    document_seed,
     fitted_grip,
     wrist_bounds,
 )
@@ -836,6 +838,11 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     lane = Lane(labels, ctx.c3d_path, plant=plant)
     configure_lane(lane, base_spec)
     lane.feet = build_foot_targets(lane, getattr(args, "foot_progression", "off"))
+    if lane.feet is not None:
+        seed_kin = plant.create_ik(lane.leg_seeds())
+        base_spec = seed_document_feet(
+            base_spec, seed_kin, lane.feet, document_seed(base_spec, seed_kin)
+        )
     if args.bound_wrists and args.free_wrists:
         raise ValueError("--bound-wrists and --free-wrists exclude each other")
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):

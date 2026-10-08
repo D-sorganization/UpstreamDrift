@@ -35,15 +35,21 @@ __all__ = [
     "NATIVE_TARGET_AXIS",
     "NATIVE_UP_AXIS",
     "build_foot_targets",
+    "MODEL_TARGET_AXIS",
     "foot_progression_report",
     "foot_progression_series",
     "model_feet_deg",
     "refine_foot_progression",
+    "seed_document_feet",
+    "seed_hip_rotation_deg",
 ]
 
 #: Capture/native world (Z up): the target is toward -Y (the lead foot's side).
 NATIVE_TARGET_AXIS = np.array([0.0, -1.0, 0.0])
 NATIVE_UP_AXIS = np.array([0.0, 0.0, 1.0])
+#: The spec's own world at pelvis yaw 0: the golfer faces +X and the lead (left)
+#: foot is at +Y, so the target is toward +Y. Used for the shared address seed.
+MODEL_TARGET_AXIS = np.array([0.0, 1.0, 0.0])
 #: Prior weight on ``hip_rotation_*`` while the foot-progression refit runs.
 FOOT_PRIOR_WEIGHT: float = 1.0e3
 #: Convergence tolerance of the refit; the issue asks for 2 degrees.
@@ -124,7 +130,12 @@ def build_foot_targets(
     )
 
 
-def model_feet_deg(kin: Any, q: np.ndarray, targets: FootTargets) -> dict[str, float]:
+def model_feet_deg(
+    kin: Any,
+    q: np.ndarray,
+    targets: FootTargets,
+    target_axis: np.ndarray = NATIVE_TARGET_AXIS,
+) -> dict[str, float]:
     """Model toe-out per foot at ``q`` from the calcn -> toes axis."""
     names = [f"{b}_{sfx}" for sfx in ("r", "l") for b in ("calcn", "toes")]
     poses = kin.body_poses(q, names)
@@ -135,7 +146,7 @@ def model_feet_deg(kin: Any, q: np.ndarray, targets: FootTargets) -> dict[str, f
         )
         out[side] = progression_angle_deg(
             axis,
-            target_axis=NATIVE_TARGET_AXIS,
+            target_axis=target_axis,
             up=NATIVE_UP_AXIS,
             foot_role=foot_role(side, targets.handedness),
             handedness=targets.handedness,
@@ -144,14 +155,22 @@ def model_feet_deg(kin: Any, q: np.ndarray, targets: FootTargets) -> dict[str, f
 
 
 def _sensitivity(
-    kin: Any, q: np.ndarray, targets: FootTargets, side: str, index: int
+    kin: Any,
+    q: np.ndarray,
+    targets: FootTargets,
+    side: str,
+    index: int,
+    target_axis: np.ndarray = NATIVE_TARGET_AXIS,
 ) -> float:
     """d(toe-out)/d(hip_rotation) in deg/deg by central difference (sign-safe)."""
     step = np.radians(1.0)
     hi, lo = q.copy(), q.copy()
     hi[index] += step
     lo[index] -= step
-    d = model_feet_deg(kin, hi, targets)[side] - model_feet_deg(kin, lo, targets)[side]
+    d = (
+        model_feet_deg(kin, hi, targets, target_axis)[side]
+        - model_feet_deg(kin, lo, targets, target_axis)[side]
+    )
     return float(d / np.degrees(2.0 * step))
 
 
@@ -191,6 +210,66 @@ def refine_foot_progression(
             q_start[index[side]] += np.radians(err / gain)
         current = resolve(q_start, prior)
     return current
+
+
+def seed_hip_rotation_deg(
+    kin: Any,
+    q_base: np.ndarray,
+    targets: FootTargets,
+    target_axis: np.ndarray = MODEL_TARGET_AXIS,
+) -> dict[str, float]:
+    """``hip_rotation_*`` (deg) that give each foot its target toe-out at ``q_base``.
+
+    Sign-safe: solved against forward kinematics, so it is right whether the
+    spec's left-leg rotation axis is mirrored or not (it is not: see the design
+    decisions). ``q_base`` is the shared address seed at pelvis yaw 0 in the
+    spec world. Postcondition: both feet within ``FOOT_TOLERANCE_DEG``.
+    """
+    q = np.asarray(q_base, dtype=float).copy()
+    names = list(kin.coordinate_order)
+    index = {}
+    for side, sfx in _SIDE_SUFFIX.items():
+        name = f"hip_rotation_{sfx}"
+        if name not in names:
+            raise ValueError(f"model has no {name} coordinate")
+        index[side] = names.index(name)
+    for _ in range(MAX_REFINE_PASSES):
+        angles = model_feet_deg(kin, q, targets, target_axis)
+        errors = {s: targets.target_deg[s] - angles[s] for s in angles}
+        if max(abs(e) for e in errors.values()) <= 0.05:
+            break
+        for side, err in errors.items():
+            gain = _sensitivity(kin, q, targets, side, index[side], target_axis)
+            if abs(gain) < 0.1:
+                raise ValueError(f"hip_rotation barely turns the {side} foot")
+            q[index[side]] += np.radians(err / gain)
+    final = model_feet_deg(kin, q, targets, target_axis)
+    if any(abs(targets.target_deg[s] - final[s]) > FOOT_TOLERANCE_DEG for s in final):
+        raise ValueError(f"hip_rotation seed did not converge: {final}")
+    return {
+        f"hip_rotation_{sfx}": float(np.degrees(q[index[side]]))
+        for side, sfx in _SIDE_SUFFIX.items()
+    }
+
+
+def seed_document_feet(
+    document: Mapping[str, Any],
+    kin: Any,
+    targets: FootTargets,
+    q_base: np.ndarray,
+    target_axis: np.ndarray = MODEL_TARGET_AXIS,
+) -> dict[str, Any]:
+    """Copy of ``document`` whose ``address_seed_deg`` carries the foot seed.
+
+    Every engine that starts from the document's address seed (MuJoCo, Drake,
+    Pinocchio, MyoSuite) then starts from the same feet. The document keeps its
+    schema (no extra keys); the target provenance (measured or flagged default)
+    is recorded in the receipt's ``foot_progression`` block.
+    """
+    seeds = seed_hip_rotation_deg(kin, q_base, targets, target_axis)
+    out = dict(document)
+    out["address_seed_deg"] = {**(document.get("address_seed_deg") or {}), **seeds}
+    return out
 
 
 def foot_progression_report(

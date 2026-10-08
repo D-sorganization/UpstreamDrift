@@ -203,3 +203,76 @@ def test_lane_leg_seeds_only_square_the_forefoot_when_enabled() -> None:
     squared = lane.leg_seeds()
     assert squared["RToeIn"][1][0] == squared["RToeOut"][1][0]
     assert squared["RAnkleOut"] == LEG_SEEDS["RAnkleOut"]
+
+
+@pytest.mark.parametrize("sign_l", [-1.0, 1.0])
+def test_seed_hip_rotation_is_sign_safe_for_mirrored_and_unmirrored_left_axes(
+    sign_l: float,
+) -> None:
+    kin = _FakeKin(sign_l=sign_l)
+    targets = _targets(18.0, 4.0)
+    seeds = address_feet.seed_hip_rotation_deg(
+        kin, np.zeros(3), targets, target_axis=np.array([0.0, -1.0, 0.0])
+    )
+    assert seeds["hip_rotation_r"] == pytest.approx(4.0, abs=0.5)
+    assert seeds["hip_rotation_l"] == pytest.approx(sign_l * 18.0, abs=0.5)
+
+
+def test_seed_document_feet_merges_without_mutating_or_adding_keys() -> None:
+    kin = _FakeKin()
+    document = {"address_seed_deg": {"LSInputY": 45.0}}
+    out = address_feet.seed_document_feet(
+        document,
+        kin,
+        _targets(18.0, 4.0),
+        np.zeros(3),
+        target_axis=np.array([0.0, -1.0, 0.0]),
+    )
+    assert document == {"address_seed_deg": {"LSInputY": 45.0}}
+    assert out["address_seed_deg"]["LSInputY"] == 45.0
+    assert out["address_seed_deg"]["hip_rotation_r"] == pytest.approx(4.0, abs=0.5)
+    assert set(out) == set(document)  # the document schema is unchanged
+
+
+def _spec_kin():
+    pytest.importorskip("mujoco")
+    import json
+
+    from src.shared.python.motion_matching.pipeline.constants import REPO_ROOT
+    from src.shared.python.motion_matching.pipeline.plant import get_plant
+
+    path = (
+        REPO_ROOT
+        / "docs/development/full_body_models/full_body_spec_anthro_driver.json"
+    )
+    document = json.loads(path.read_text(encoding="utf-8"))
+    plant = get_plant("mujoco", document)
+    return document, plant.create_ik(dict(LEG_SEEDS))
+
+
+def test_spec_left_hip_rotation_axis_is_not_mirrored_unlike_opensim() -> None:
+    """Finding: +hip_rotation_r turns the right foot in, +hip_rotation_l turns the
+    left foot OUT (OpenSim turns both in). Equal-sign seeds therefore splay feet."""
+    document, kin = _spec_kin()
+    targets = _targets(0.0, 0.0)
+    names = list(kin.coordinate_order)
+    for side, expected_sign in (("right", -1.0), ("left", 1.0)):
+        q = np.zeros(len(names))
+        q[names.index(f"hip_rotation_{side[0]}")] = np.radians(10.0)
+        angle = model_feet_deg(kin, q, targets, address_feet.MODEL_TARGET_AXIS)[side]
+        assert np.sign(angle) == expected_sign
+        assert abs(angle) == pytest.approx(10.0, abs=1.0)
+
+
+def test_shared_seed_puts_both_model_feet_on_target_within_two_degrees() -> None:
+    from src.shared.python.motion_matching.pipeline.lane import document_seed
+
+    document, kin = _spec_kin()
+    targets = _targets(16.4, 4.0)
+    seeded = address_feet.seed_document_feet(
+        document, kin, targets, document_seed(document, kin)
+    )
+    q = document_seed(seeded, kin)
+    angles = model_feet_deg(kin, q, targets, address_feet.MODEL_TARGET_AXIS)
+    assert angles["left"] == pytest.approx(16.4, abs=2.0)
+    assert angles["right"] == pytest.approx(4.0, abs=2.0)
