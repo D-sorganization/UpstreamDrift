@@ -32,6 +32,47 @@ Categorical wrench colors stay distinct from axial tension and compression color
 
 ---
 
+## Grip Wrench: Per-Hand Loading, Midpoint Net Force and Couple
+
+The grip overlays come from one shared definition,
+`src/shared/python/biomechanics/grip_wrench.py` (GCV-7, #11713). Every wrench
+is what the **hand exerts on the club**, in the world frame, in SI units.
+
+With hand grip points `r_L`, `r_R`, forces `F_L`, `F_R` and free torques
+`tau_L`, `tau_R`, and the grip midpoint `r_M = (r_L + r_R) / 2`:
+
+```
+R   = F_L + F_R                                  drawn at r_M  (grip:net_midpoint)
+M_M = (r_L - r_M) x F_L + (r_R - r_M) x F_R      contact-force moment
+      + tau_L + tau_R                            applied free torque
+                                                 total: grip:couple_midpoint
+```
+
+```
+   F_L  (grip:hand_left)            F_R  (grip:hand_right)
+    \                                /
+     o r_L ---------- o r_M ---------- o r_R
+                      |
+        MOF_L = (r_L - r_M) x F_L    (grip:mof_left)
+        MOF_R = (r_R - r_M) x F_R    (grip:mof_right)
+
+ couple M_M  =  [MOF_L + MOF_R]  +  [tau_L + tau_R]
+                 contact-force      applied free
+                 moment             torque
+```
+
+- The decomposition is exposed as `contact_force_moment_nm` and
+  `applied_free_torque_nm`; their sum is the equivalent couple. Only a pure
+  couple (`R = 0`) has the same moment about every reference point; otherwise
+  move the wrench with `GripAnalysis.net_wrench_at(point)`.
+- The club-local components are `R^T M_M` (`couple_local_nm`); `about_axis`
+  gives the component about any axis, such as the swing-plane normal.
+- `split_method` (`constraint_multiplier`, `efc_force`, `allocation`, `logged`
+  or `unavailable`) records how the left/right split was obtained. Show it
+  next to the per-hand arrows: the split is solver-regularised.
+- A missing hand, or a missing free torque, yields `None` plus
+  `unavailable_reason`, never zero; `GripSeries` uses NaN and `to_dataframe()`.
+
 ## Tension and Compression Shading
 
 Segment axial loads derived from proximal joint reactions color segments according to the shared policy in `src/shared/python/body_part_viz/`:
