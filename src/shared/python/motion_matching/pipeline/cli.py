@@ -294,6 +294,20 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _attach_face_report(
+    ik_report: dict[str, Any],
+    lane: Lane,
+    cal_res: Any,
+    q_pair: tuple[np.ndarray, np.ndarray],
+    weight: float,
+) -> None:
+    """Add the face residual's receipt block when the residual was active."""
+    if lane.face_targets is not None:
+        ik_report["face_orientation"] = _face_orientation_report(
+            lane, cal_res, *q_pair, weight
+        )
+
+
 def _face_orientation_report(
     lane: Lane, cal_res: Any, q_ik: np.ndarray, q_ref: np.ndarray, weight: float
 ) -> dict[str, Any]:
@@ -934,10 +948,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
-    if lane.face_targets is not None:
-        ik_report["face_orientation"] = _face_orientation_report(
-            lane, cal_res, q_ik, q_ref, args.face_weight
-        )
+    _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,

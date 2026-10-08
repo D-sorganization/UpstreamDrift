@@ -228,7 +228,7 @@ def _write_address_pose(club: str, manifest: dict[str, Any], q0: np.ndarray) -> 
 
 def _update_provenance(club: str, record: dict[str, Any]) -> None:
     path = FIXTURES / "provenance.json"
-    doc = (
+    doc: dict[str, Any] = (
         json.loads(path.read_text(encoding="utf-8"))
         if path.is_file()
         else {"schema": "club-face-fixture-provenance/v1", "clubs": {}}
