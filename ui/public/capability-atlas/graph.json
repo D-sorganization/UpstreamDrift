@@ -51,6 +51,20 @@
       "id": "analysis.cross_engine_robustness"
     },
     {
+      "feature_id": "analysis.grip_wrench",
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
+      "status": "gap",
+      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
+      "api": null,
+      "web": null,
+      "issue": 11716,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. The club force and torque overlays and plots in PyQt, web and video are GCV-10 (#11716); the web surface lands there.",
+      "id": "analysis.grip_wrench"
+    },
+    {
       "feature_id": "analysis.static_plots",
       "title": "Static analysis plots (20+ plot types)",
       "status": "parity",
@@ -3014,7 +3028,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "96d7dac5317a7e0fc8e808b5d0357879aa540ea5a17147cf208dd42c463ccfbd",
+    "src/config/feature_parity.json": "6bab9e5d8a8fa2017bc70b38af2140e30d1e0875d01d7eb01dfe56e6801a9383",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

@@ -5,6 +5,7 @@ Emits world-frame OverlayWrenches for:
 - JOINT_REACTION: parent-on-child internal reactions from cfrc_int
 - CONTACT: active contact pair forces from mj_contactForce
 - EXTERNAL: applied external wrenches from xfrc_applied
+- GRIP: per-hand wrench on the club from the grip weld efc_force (GCV-8, #11714)
 - GRAVITY: optional gravitational body forces mass * g
 Synchronizes with MujocoAxialLoadSource for rod tension/compression.
 All calculations operate on an internal scratch MjData, preserving live simulation state.
@@ -17,6 +18,11 @@ from typing import Any
 import mujoco
 import numpy as np
 
+from src.engines.physics_engines.mujoco.python.grip_efc import (
+    DEFAULT_GRIP_WELDS,
+    grip_analysis_from_efc,
+)
+from src.shared.python.biomechanics.grip_wrench import to_overlay_wrenches
 from src.shared.python.body_part_viz.mujoco_axial_loads import MujocoAxialLoadSource
 from src.shared.python.engine_core.mujoco_compat import copy_mjdata_state
 from src.shared.python.force_overlay.contracts import (
@@ -265,6 +271,22 @@ class MujocoForceTorqueSource:
                     )
         return externals
 
+    def _extract_grip(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
+        """Per-hand ``GRIP`` wrenches ON THE CLUB from the grip weld ``efc_force``.
+
+        Models without the conventional ``grip_weld_l`` / ``grip_weld_r``
+        equalities (the MyoSuite golfer scene has them) yield nothing.
+        """
+        model = self._model
+        present = {
+            side: mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_EQUALITY, name) >= 0
+            for side, name in DEFAULT_GRIP_WELDS.items()
+        }
+        if not all(present.values()):
+            return []
+        analysis = grip_analysis_from_efc(model, scratch)
+        return to_overlay_wrenches(analysis, source=_ENGINE + ":efc_force")
+
     def _extract_gravity(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
         model = self._model
         grav = model.opt.gravity
@@ -312,6 +334,7 @@ class MujocoForceTorqueSource:
         wrenches.extend(self._extract_reactions(scratch))
         wrenches.extend(self._extract_contacts(scratch))
         wrenches.extend(self._extract_externals(scratch))
+        wrenches.extend(self._extract_grip(scratch))
         if include_gravity:
             wrenches.extend(self._extract_gravity(scratch))
 

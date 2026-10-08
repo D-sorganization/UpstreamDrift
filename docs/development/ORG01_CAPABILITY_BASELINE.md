@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 170
+- **Total Cataloged Entries**: 171
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -28,7 +28,7 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace | Primary Capability Count | Description |
 | :--- | :---: | :--- |
-| `analysis` | 25 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
+| `analysis` | 26 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
@@ -71,6 +71,7 @@ packages, saved layouts, and golden test fixtures.
 | `analysis.analysis_tools_api` | Analysis Tools REST endpoints (swing metrics, biomechanics) | `feature` | `analysis` | — | `core` | 🔵 planned | `src/api/routes/analysis_tools.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis.counterfactuals` | ZTCF/ZVCF + induced-acceleration counterfactuals | `feature` | `analysis` | — | `core` | 🔵 planned | `src/shared/python/biomechanics/ztcf.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis.cross_engine_robustness` | Cross-engine robustness dashboard (perturbation/CV) | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/launchers/cross_engine_dashboard.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `analysis.grip_wrench` | Per-hand grip wrench on the club emitted as GRIP overlay frames | `feature` | `analysis` | — | `core` | 🔵 planned | `src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py` | `tests/unit/biomechanics/test_grip_extraction.py` |
 | `analysis.static_plots` | Static analysis plots (20+ plot types) | `feature` | `analysis` | — | `core` | 🟢 active_feature | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `analysis_tools_api` | Analysis Tools | `service` | `analysis` | — | `tools` | 🟢 active_feature | `src/api/routes/analysis_tools.py` | `tests/config/test_launcher_registry_parity.py` |
 | `ball_flight_simulator` | Ball Flight Simulator | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/ball_flight_gui/gui.py` | `tests/config/test_launcher_registry_parity.py` |

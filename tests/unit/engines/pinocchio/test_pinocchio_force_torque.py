@@ -313,3 +313,32 @@ def test_coincident_intermediate_joint_gives_no_axial_load() -> None:
     loads = _axial(_COINCIDENT_URDF)
     assert loads.get("a") is None  # child joint coincides with the parent joint
     assert loads["b"] is not None
+
+
+# --- GCV-8 (#11714): net grip from the allocation lambda_grip -------------------
+
+
+def test_grip_from_allocation_emits_net_only_with_allocation_split() -> None:
+    lam = np.array([0.0, 0.0, -14.7, 0.0, 0.0, 0.0])  # load on the human
+    grip = PinocchioForceTorqueSource.grip_from_allocation(
+        lam, point_m=np.array([0.0, 0.0, 1.0])
+    )
+    assert grip.split_method == "allocation"
+    assert grip.left is None and grip.right is None
+    assert grip.net_force_n == pytest.approx((0.0, 0.0, 14.7))  # on the club
+    src = _source()
+    frame = src.sample(np.zeros(1), np.zeros(1), np.zeros(1), np.zeros(1), grip=grip)
+    labels = {w.label for w in frame.wrenches if w.kind is WrenchKind.GRIP}
+    assert labels == {"grip:net_midpoint", "grip:couple_midpoint"}
+
+
+def test_grip_from_allocation_rejects_bad_shape() -> None:
+    with pytest.raises(ValueError, match="6-vector"):
+        PinocchioForceTorqueSource.grip_from_allocation(
+            np.zeros(3), point_m=np.zeros(3)
+        )
+
+
+def test_sample_without_grip_has_no_grip_wrenches() -> None:
+    frame = _source().sample(np.zeros(1), np.zeros(1), np.zeros(1), np.zeros(1))
+    assert not [w for w in frame.wrenches if w.kind is WrenchKind.GRIP]
