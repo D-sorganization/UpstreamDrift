@@ -257,3 +257,14 @@ def test_face_centre_is_the_rendered_head_face_centre() -> None:
     assert np.linalg.norm(head - club_point, axis=1).min() < 0.005
     normal = ca.clubface_vector(assembly)
     assert (club_point - head.mean(axis=0)) @ normal > 0.0
+
+
+def test_fill_unobserved_interpolates_gaps_in_time() -> None:
+    t = np.array([0.0, 1.0, 2.0, 4.0])
+    c = np.array([[0.0, 0, 0], [np.nan] * 3, [2.0, 2, 2], [4.0, 4, 4]])
+    np.testing.assert_allclose(cft.fill_unobserved(t, c)[1], [1.0, 1.0, 1.0])
+    assert np.isnan(c[1]).all()  # the input is not modified
+    with pytest.raises(ValueError, match="two observed"):
+        cft.fill_unobserved(t, np.full((4, 3), np.nan))
+    with pytest.raises(ValueError, match="time"):
+        cft.fill_unobserved(t[:-1], c)

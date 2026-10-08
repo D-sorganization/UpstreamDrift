@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -170,3 +171,53 @@ def face_angle_at(normals: np.ndarray, k: int, s: float) -> float:
         raise ValueError("k must index a segment and s lie in [0, 1]")
     blend = (1.0 - s) * n[k] + s * n[k + 1]
     return horizontal_face_angle_deg(blend)
+
+
+@dataclass(frozen=True)
+class FaceEvents:
+    """Face angles of one swing at address, the top and impact (OSV-10).
+
+    Angles are open-positive degrees; times are on the swing's own clock.
+    ``peak_speed_*`` locate the peak clubhead-speed sample, which the
+    pre-OSV-10 tests took as impact, relative to the ball.
+    """
+
+    address_deg: float
+    top_time_s: float
+    top_deg: float
+    impact_time_s: float
+    impact_deg: float
+    peak_speed_time_s: float
+    peak_speed_gap_to_ball_m: float
+
+
+def face_events(
+    time: Sequence[float] | np.ndarray, normals: np.ndarray, centres: np.ndarray
+) -> FaceEvents:
+    """Address, top-of-backswing and sub-sample impact face angles of a swing.
+
+    ``normals`` and ``centres`` are the world face normals and face-centre
+    positions ``(n, 3)`` at ``time``; ``centres`` must be finite (fill capture
+    gaps first). Impact is :func:`ball_passage`; the top is
+    :func:`top_of_backswing_index`. Raises ``ValueError`` for mismatched
+    shapes or when an event cannot be located.
+    """
+    from src.shared.python.motion_matching.loaders._align import detect_impact_index
+
+    t = np.asarray(time, dtype=float)
+    n = np.asarray(normals, dtype=float)
+    head = np.asarray(centres, dtype=float)
+    if n.shape != head.shape:
+        raise ValueError("normals and centres must both be (n, 3)")
+    t_impact, k, s = ball_passage(t, head)
+    top = top_of_backswing_index(t, head)
+    peak = int(detect_impact_index(t, head))
+    return FaceEvents(
+        address_deg=horizontal_face_angle_deg(n[0]),
+        top_time_s=float(t[top]),
+        top_deg=horizontal_face_angle_deg(n[top]),
+        impact_time_s=t_impact,
+        impact_deg=face_angle_at(n, k, s),
+        peak_speed_time_s=float(t[peak]),
+        peak_speed_gap_to_ball_m=float(np.linalg.norm(head[peak] - head[0])),
+    )

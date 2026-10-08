@@ -424,3 +424,34 @@ def test_face_angle_at_blends_neighbouring_normals() -> None:
         cf.face_angle_at(normals, 1, 0.5)
     with pytest.raises(ValueError, match="segment"):
         cf.face_angle_at(normals, 0, 1.5)
+
+
+def _circle_swing(t: np.ndarray) -> np.ndarray:
+    """Head on a 1 m circle: slow backswing to the top at t = 1, back to the
+    ball at t = 1.4 at full speed, then through."""
+    theta = np.where(
+        t < 1.0,
+        np.pi / 2.0 * (1.0 - np.cos(np.pi * t)),
+        np.pi * np.cos(np.pi / 2.0 * (t - 1.0) / 0.4),
+    )
+    head = np.zeros((len(t), 3))
+    head[:, 1] = np.sin(theta)
+    head[:, 2] = 0.1 + (1.0 - np.cos(theta))
+    return head
+
+
+def test_face_events_report_address_top_impact_and_peak_speed() -> None:
+    t = np.linspace(0.0, 1.6, 801)
+    head = _circle_swing(t)
+    turn = np.radians(15.0) * t  # face opens 15 degrees per second
+    normals = np.column_stack([-np.sin(turn), -np.cos(turn), np.zeros_like(t)])
+    events = cf.face_events(t, normals, head)
+    assert events.address_deg == pytest.approx(0.0)
+    assert events.top_time_s == pytest.approx(1.0, abs=0.01)
+    assert events.top_deg == pytest.approx(15.0 * events.top_time_s)
+    assert events.impact_time_s == pytest.approx(1.4, abs=1e-3)
+    assert events.impact_deg == pytest.approx(21.0, abs=0.02)
+    assert events.peak_speed_time_s == pytest.approx(1.4, abs=0.01)
+    assert events.peak_speed_gap_to_ball_m < 0.01
+    with pytest.raises(ValueError, match="normals"):
+        cf.face_events(t, normals[:-1], head)

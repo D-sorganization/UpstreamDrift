@@ -43,10 +43,13 @@ FACE_FRAME = "Clubhead"
 #: Clubhead marker triad (the three head markers of the tour capture contract).
 HEAD_TRIAD_LABELS: tuple[str, ...] = MARKER_SEGMENTS["club"][:3]
 #: Weight of the face-orientation residual relative to unit-weight marker
-#: residuals in metres. A 5 degree face error (chord 0.087) then costs about
-#: as much as a 3 cm error on each of the three head markers. Chosen from the
-#: weight sweep recorded in the matching reference (OSV-10, #11759).
-FACE_ORIENTATION_WEIGHT = 1.0
+#: residuals in metres (cost ``w |R a - n|^2``). A 5 degree face error (chord
+#: 0.087) then costs as much as an 8.7 cm error on each of the three head
+#: markers. Sweep on the reference stage (driver / 7-iron, OSV-10, #11759):
+#: w = 0, 0.3, 1, 3, 10 gave face-separation RMS 8.6/7.9, 3.0, 1.7, 0.8/0.6,
+#: 0.3/0.2 deg and full-capture IK marker RMS 32.8/31.7, 32.5, 33.7, 33.6/31.6,
+#: 33.6/31.5 mm; w = 10 doubled the driver closure error (8.5 mm), so 3.
+FACE_ORIENTATION_WEIGHT = 3.0
 #: Minimum spread (m) of the triad offsets; a degenerate triad has no roll.
 MIN_TRIAD_SPREAD_M = 0.01
 
@@ -304,3 +307,21 @@ def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, 
         "p95_deg": float(np.percentile(sep[seen], 95)),
         "max_deg": float(sep[seen].max()),
     }
+
+
+def fill_unobserved(
+    time: Sequence[float] | np.ndarray, centres: np.ndarray
+) -> np.ndarray:
+    """Copy of ``centres`` with unobserved (NaN) rows interpolated in time.
+
+    Capture head-triad gaps would otherwise break the impact search. Raises
+    ``ValueError`` for mismatched shapes or fewer than two observed rows.
+    """
+    t = np.asarray(time, dtype=float)
+    c = np.asarray(centres, dtype=float)
+    if c.ndim != 2 or c.shape[1] != 3 or t.shape != (len(c),):
+        raise ValueError("time must be (n,) and centres (n, 3)")
+    seen = np.isfinite(c).all(axis=1)
+    if seen.sum() < 2:
+        raise ValueError("need at least two observed face centres to interpolate")
+    return np.column_stack([np.interp(t, t[seen], c[seen, j]) for j in range(3)])
