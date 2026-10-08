@@ -51,6 +51,10 @@
 - Impact time: `adapters/impact_time.py::select_impact_index` is the single integration point for the OSV-8/OSV-10 closest-approach rule (not on main yet). `ClubFaceSpec` default centre is the club body origin until GCV-11 face geometry lands.
 - Next: GCV-17 impact panel consumes these adapters.
 
+# Active: Centroidal Feasibility Filter V2 — #11669
+
+- Branch `feat/centroidal-filter-v2-11669` (PR #11703); epic #11667. Next: Balance-3 contact-consistent inverse dynamics.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.

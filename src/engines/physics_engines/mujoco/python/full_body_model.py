@@ -40,6 +40,7 @@ from src.shared.python.motion_matching.contact_law import (
     ContactSample,
     GroundPlane,
     sphere_ground_contact,
+    torsional_friction_moment,
 )
 
 
@@ -109,6 +110,11 @@ class NativeMujocoFullBodyModel:
             ground_cfg["height_m"] if ground_cfg["height_m"] is not None else 0.0
         )
         self.ground_plane = GroundPlane(normal=ground_normal, height_m=ground_height)
+
+        # Optional spin-friction patch (#11671); absent means point contacts.
+        torsion = contact_cfg.get("torsion") or {}
+        self._torsion_patch_m = float(torsion.get("patch_radius_m", 0.0))
+        self._torsion_rate_rad_s = float(torsion.get("transition_rad_s", 0.5))
 
         self._spheres: dict[str, dict[str, Any]] = {}
         for sphere in contact_cfg["spheres"]:
@@ -222,8 +228,20 @@ class NativeMujocoFullBodyModel:
             data.xfrc_applied[body_id] += np.concatenate([f_contact, torque])
 
             jac_pos = np.zeros((3, model.nv))
-            mj.mj_jacSite(model, data, jac_pos, None, site_id)
+            jac_rot = np.zeros((3, model.nv)) if self._torsion_patch_m > 0 else None
+            mj.mj_jacSite(model, data, jac_pos, jac_rot, site_id)
             tau_contact += jac_pos.T @ f_contact
+            if jac_rot is not None:
+                moment = torsional_friction_moment(
+                    sample.normal_force_n,
+                    jac_rot @ data.qvel,
+                    self.ground_plane,
+                    patch_radius_m=self._torsion_patch_m,
+                    friction=self.contact_parameters.dynamic_friction,
+                    transition_rad_s=self._torsion_rate_rad_s,
+                )
+                data.xfrc_applied[body_id, 3:] += moment
+                tau_contact += jac_rot.T @ moment
         return data.qfrc_bias.copy(), tau_contact, samples
 
     def _constrained_solve(
