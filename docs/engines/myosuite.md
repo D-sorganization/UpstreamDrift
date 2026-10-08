@@ -39,8 +39,11 @@ Scenes live under `shared/models/myosuite/golf/body/` so nested
 ## Coordinate Map Honesty
 
 The anthro map is diagnostic. Mapped document coordinates resolve to named
-MyoSuite joints. Omitted sources (root freejoint translations and one
-scapular DOF) are listed in `omitted_source`. A partial map does **not**
+MyoSuite joints. Omitted sources (root freejoint translations, one
+scapular DOF and neck lateral bending `NeckInputX`, which has no myo_sim head
+DOF) are listed in `omitted_source`. `NeckInputY` (head pitch) drives
+`neck_flexion` with sign -1 by forward kinematics; see section 16 of
+`docs/development/full_body_models/DESIGN_DECISIONS.md` (#11729). A partial map does **not**
 prove dynamics equivalence or satisfy 15 mm marker parity.
 
 ## Inventory Status

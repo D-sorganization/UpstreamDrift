@@ -406,10 +406,10 @@ Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (p
 
 **Measured Capture Values (Degrees of Toe-Out at Address)**
 
-| Capture | Lead (left) | Trail (right) |
-| --- | --- | --- |
-| Tour driver | 16.4 | 4.0 |
-| Tour 7-iron | 15.0 | -0.4 |
+| Capture     | Lead (left) | Trail (right) |
+| ----------- | ----------- | ------------- |
+| Tour driver | 16.4        | 4.0           |
+| Tour 7-iron | 15.0        | -0.4          |
 
 The tour players are not at 20 degrees per foot (the trail foot is close to square), so 20 degrees is only the fallback for unreliable markers. The owner's capture O value is not measured here: its C3D is private and was not present on the implementing host; run `python3 -m scripts.foot_progression_report` with `CAPTURE_DATA_DIR` set. Until then it takes the flagged 20 degree default.
 
@@ -423,3 +423,51 @@ Foot yaw through the swing is not constrained; it follows the matched solution a
 
 - [`evidence/foot_progression/capture_report.json`](evidence/foot_progression/capture_report.json)
 - Tests: `tests/unit/motion_matching/test_foot_progression.py`, `tests/unit/motion_matching/pipeline/test_address_feet.py`, `tests/opensim/test_golf_address.py`.
+
+---
+
+## 16. MyoSuite Neck Retarget: NeckInputY to `neck_flexion` (OSV-3, #11729)
+
+### What
+
+The anthro document neck joint is `Rx(NeckInputX) Ry(NeckInputY) Rz(NeckInputZ)` in the COMRod frame (`full_body_spec_anthro_driver.json`, joint `GolfSwing3D_Kinetic/Neck Joint`), and the head forward axis (towards `HeadFront`, offset `[0.1, 0, 0.16]` m on `Head`) is +x. So `NeckInputX` is lateral bending, `NeckInputY` is flexion/extension (head pitch) and `NeckInputZ` is axial rotation. The pinned myo_sim head chain (`head/assets/myohead_simple_chain.xml` at `33f3ded9`) has only `neck_rotation` (hinge about `[0.2, 1, 0]`) and `neck_flexion` (hinge about head z), and no lateral bending.
+
+`src/engines/physics_engines/myosuite/python/coordinate_map_anthro.json` now maps:
+
+| Source       | Target                                  | Sign |
+| ------------ | --------------------------------------- | ---- |
+| `NeckInputY` | `neck_flexion`                          | -1   |
+| `NeckInputZ` | `neck_rotation`                         | +1   |
+| `NeckInputX` | none (in `omitted_source`, with a note) | n/a  |
+
+**Sign derivation (forward kinematics, MuJoCo).** Head forward-axis pitch `p = asin(f . up)` (positive = above the horizontal), central difference at `+/-0.2` rad from the neutral pose, all other coordinates zero:
+
+- Native plant (`get_plant("mujoco", spec)`, `f` = `Head[0.1, 0, 0.16]` minus `Head[0, 0, 0.16]`, up = +z): `dp/dNeckInputY = -11.459 deg` per 0.2 rad (head pitches down). `NeckInputX` and `NeckInputZ` give 0. Analytically `Ry(b) x = (cos b, 0, -sin b)`, so the pitch change is `-b`.
+- MyoSuite (`myobody_simpleupper.xml` at the pin, `f` = head body +x, up = -gravity): `dp/dneck_flexion = +11.459 deg` per 0.2 rad (head pitches up); `neck_rotation` gives 0.002 deg. The head +x axis is anterior: its cosine with the right foot calcn-to-toes direction is 0.99992.
+
+Opposite pitch sensitivities of equal magnitude give `neck_flexion = -NeckInputY`. The magnitudes agree to 2e-7 deg, so the mapping is one-to-one on pitch at the neutral pose. Away from neutral the two chains differ: the hinge axes and joint centres are not co-located, and MyoSuite applies rotation before flexion.
+
+### Why
+
+The previous map sent `NeckInputX` (lateral bending) to `neck_flexion`, so a sideways head tilt was replayed as a nod. It also carried a secondary `NeckInputY -> neck_rotation` entry with weight 0.5. `retarget_frame` assigns rather than accumulates, so that entry overwrote the `NeckInputZ` contribution, and `neck_rotation` was effectively `0.5 * NeckInputY` (unit test `test_neck_input_z_alone_drives_neck_rotation` was red on the old map). Removing it makes `NeckInputZ` the only `neck_rotation` driver.
+
+### Limitations
+
+- MyoSuite cannot represent neck lateral bending. `NeckInputX` is dropped, not absorbed into another coordinate.
+- Other secondary (weighted) entries in the map have the same overwrite problem (for example `RScapInputY` 0.5 over `RSInputY` on `arm_flex_r`). That is outside this decision and tracked as a follow-up.
+- Earlier MyoSuite replay receipts (`evidence/matched/driver_g1_myosuite/receipt.json`, 11 mapped coordinates, historical map) are historical and were not regenerated. They neither record nor depend on a hash of the map file.
+- The map remains diagnostic (`qualification.diagnostic_only`). This is a kinematic sign/axis correction, not dynamics or gaze qualification for #11729.
+
+### Reproduction
+
+```bash
+git clone https://github.com/MyoHub/myo_sim.git /path/to/myo_sim
+git -C /path/to/myo_sim checkout 33f3ded946f55adbdcf963c99999587aadaf975f
+MUJOCO_GL=egl python3 -m scripts.myosuite_neck_flexion_sign --myo-sim /path/to/myo_sim
+python3 -m pytest tests/unit/engines/myosuite/test_retarget.py -q
+```
+
+### Evidence Receipt
+
+- [`evidence/myosuite_neck/neck_flexion_sign.json`](evidence/myosuite_neck/neck_flexion_sign.json)
+- Tests: `tests/unit/engines/myosuite/test_retarget.py` (`test_neck_input_y_drives_neck_flexion_with_fk_sign`, `test_neck_input_x_is_unmapped_and_documented`, `test_neck_input_z_alone_drives_neck_rotation`, `test_fixture_map_partitions_source_coordinates`).

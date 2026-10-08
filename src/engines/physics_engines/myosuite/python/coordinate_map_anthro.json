@@ -95,7 +95,7 @@
     { "source": "SpineInputX", "target": "lumbar_extension", "sign": 1.0 },
     { "source": "SpineInputY", "target": "lumbar_bending", "sign": 1.0 },
     { "source": "TorsoInput", "target": "lumbar_rotation", "sign": 1.0 },
-    { "source": "NeckInputX", "target": "neck_flexion", "sign": 1.0 },
+    { "source": "NeckInputY", "target": "neck_flexion", "sign": -1.0 },
     { "source": "NeckInputZ", "target": "neck_rotation", "sign": 1.0 },
     { "source": "RSInputY", "target": "arm_flex_r", "sign": 1.0 },
     { "source": "RSInputX", "target": "arm_add_r", "sign": 1.0 },
@@ -130,7 +130,6 @@
     { "source": "HipInputX", "target": "lumbar_extension", "sign": 0.25 },
     { "source": "HipInputY", "target": "lumbar_bending", "sign": 0.25 },
     { "source": "HipInputZ", "target": "lumbar_rotation", "sign": 0.25 },
-    { "source": "NeckInputY", "target": "neck_rotation", "sign": 0.5 },
     { "source": "RScapInputX", "target": "arm_add_r", "sign": 0.5 }
   ],
   "chain_order": [
@@ -207,13 +206,15 @@
     "TranslationInputX",
     "TranslationInputY",
     "TranslationInputZ",
-    "LScapInputX"
+    "LScapInputX",
+    "NeckInputX"
   ],
   "omitted_source_notes": {
     "TranslationInputX": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
     "TranslationInputY": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
     "TranslationInputZ": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
-    "LScapInputX": "No independent scapular DOF on myobody_simpleupper; absorbed partially via arm_add_l for the contralateral scapula only."
+    "LScapInputX": "No independent scapular DOF on myobody_simpleupper; absorbed partially via arm_add_l for the contralateral scapula only.",
+    "NeckInputX": "Neck lateral bending (Rx about the head forward axis); the pinned myo_sim head chain has only neck_rotation and neck_flexion, so there is no matching DOF (#11729)."
   },
   "omitted_target": [],
   "marker_sites": {
