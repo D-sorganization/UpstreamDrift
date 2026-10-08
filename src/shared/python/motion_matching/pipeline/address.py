@@ -46,7 +46,6 @@ from src.shared.python.motion_matching.pipeline.constants import (
     ELBOW_PIT_WEIGHT,
     ELBOW_PIT_WEIGHTS_NEUTRAL,
     FORWARD_AXIS,
-    LEG_SEEDS,
     NEUTRAL_BOUNDS_DEG,
     NEUTRAL_LOCKS,
     PRIOR,
@@ -150,6 +149,23 @@ def best_address(
         }
         axis_targets = lane.pit_targets_for(list(range(STATIC_FRAMES)), pit_weight)
 
+    def solve(q0: np.ndarray, extra_prior: Mapping[str, float] | None) -> Any:
+        return kin.solve_pose(
+            lane.points[0],
+            lane.valid[0],
+            q0,
+            ground=lane.ground,
+            prior_weight=PRIOR,
+            iterations=100,
+            flat_feet=lane.stance[0],
+            bounds=bounds,
+            locked=locked,
+            marker_weights=lane.marker_weights,
+            prior_weights={**lane.prior_weights, **(extra_prior or {})},
+            axis_targets=axis_targets,
+            balance_weight=balance,
+        )
+
     best = None
     rng = np.random.default_rng(0)
     for seed in ADDRESS_SEEDS_DEG:
@@ -174,23 +190,16 @@ def best_address(
             for _ in range(ADDRESS_RESTARTS)
         ]
         for q0 in starts:
-            fit = kin.solve_pose(
-                lane.points[0],
-                lane.valid[0],
-                q0,
-                ground=lane.ground,
-                prior_weight=PRIOR,
-                iterations=100,
-                flat_feet=lane.stance[0],
-                bounds=bounds,
-                locked=locked,
-                marker_weights=lane.marker_weights,
-                prior_weights=lane.prior_weights,
-                axis_targets=axis_targets,
-                balance_weight=balance,
-            )
+            fit = solve(q0, None)
             if best is None or fit.marker_rms_m < best.marker_rms_m:
                 best = fit
+    feet = getattr(lane, "feet", None)
+    if feet is not None and best is not None:
+        from src.shared.python.motion_matching.pipeline.address_feet import (
+            refine_foot_progression,
+        )
+
+        best = refine_foot_progression(kin, best, feet, solve)
     if best is None:
         raise RuntimeError("No viable address fit found across multi-start seeds")
     return best
@@ -515,10 +524,10 @@ def prepare_hip_spec(
         qualification_note = "qualified upper body with functional hips"
 
     if opts.recalibrate_upper:
-        seeds_all = {**upper, **LEG_SEEDS}
+        seeds_all = {**upper, **lane.leg_seeds()}
         fixed = {}
     else:
-        seeds_all = dict(LEG_SEEDS)
+        seeds_all = lane.leg_seeds()
         fixed = dict(upper)
 
     hip_report = {
@@ -633,7 +642,7 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
     labels = inputs.labels
     log = inputs.log
 
-    adapter, kin = lane.kinematics(hip_bytes, {**inputs.upper, **LEG_SEEDS})
+    adapter, kin = lane.kinematics(hip_bytes, {**inputs.upper, **lane.leg_seeds()})
     q_seed = document_seed(dict(base_spec), kin)
     address = lane.best_address(kin, q_seed)
     address_report: dict[str, Any] = {
@@ -694,6 +703,15 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
                 closure_report["translation_change_m"] * 1e3,
                 address.marker_rms_m * 1e3,
             )
+
+    if lane.feet is not None:
+        from src.shared.python.motion_matching.pipeline.address_feet import (
+            foot_progression_report,
+        )
+
+        address_report["foot_progression"] = foot_progression_report(
+            kin, address.q, lane.feet
+        )
 
     return AddressStageResult(
         address=address,
