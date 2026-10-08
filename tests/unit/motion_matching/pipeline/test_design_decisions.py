@@ -19,7 +19,7 @@ def test_design_decisions_file_exists() -> None:
 
 
 def test_design_decisions_parser_and_order() -> None:
-    """Verify all 15 decisions exist in order, each with what, why, receipt, rejected."""
+    """Verify all 17 decisions exist in order, each with what, why, receipt, rejected."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
         parse_design_decisions,
         validate_design_decisions,
@@ -27,7 +27,7 @@ def test_design_decisions_parser_and_order() -> None:
 
     content = DOC_PATH.read_text(encoding="utf-8")
     decisions = parse_design_decisions(content)
-    assert len(decisions) == 15, f"Expected 15 decisions, got {len(decisions)}"
+    assert len(decisions) == 17, f"Expected 17 decisions, got {len(decisions)}"
 
     # Validate decision contents and verify all referenced receipt links exist on disk
     validate_design_decisions(decisions, repo_root=REPO_ROOT)
@@ -56,6 +56,7 @@ def test_design_decisions_rejects_bad_input() -> None:
 def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
     """Verify that a broken link target raises FileNotFoundError."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
+        EXPECTED_DECISION_TITLES,
         DesignDecision,
         validate_design_decisions,
     )
@@ -74,25 +75,7 @@ def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
             review_sections="[REVIEW](evidence/anthropometry/REVIEW.md#1)",
             raw_markdown="",
         )
-        for i, title in enumerate(
-            [
-                "Anthropometric Geometry From de Leva",
-                "Arms Forward at Zero Pose",
-                "Scapula Rz",
-                "One Static-Trial Round",
-                "Marker-Driven Elbow Pits",
-                "Anatomical Wrist Axes and Neutral-Grip Turn",
-                "Fitted Hand-to-Club Rotation (`GRIP_ROTATION_DEG`)",
-                "Human Ranges in the Matching Only, Wrists Bounded by Default",
-                "Clubs From `club_models`",
-                "Compliant 50 kN/m Sole",
-                "12 Hz Tracked Reference",
-                "Reference Zero-Moment-Point Diagnostic",
-                "Rejected: Grip-Roll Scan, Closure Fit From the Address, Cart-Table Filter, Fixed-Point and Iterative-Learning Shooting Fits",
-                "MJX Differentiable Optimisation (Windowed)",
-                "Address Foot Progression (OSV-4, #11730)",
-            ]
-        )
+        for i, title in enumerate(EXPECTED_DECISION_TITLES)
     ]
 
     with pytest.raises(FileNotFoundError, match="does not exist on disk"):

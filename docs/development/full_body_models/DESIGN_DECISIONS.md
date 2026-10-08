@@ -451,6 +451,11 @@ Opposite pitch sensitivities of equal magnitude give `neck_flexion = -NeckInputY
 
 The previous map sent `NeckInputX` (lateral bending) to `neck_flexion`, so a sideways head tilt was replayed as a nod. It also carried a secondary `NeckInputY -> neck_rotation` entry with weight 0.5. `retarget_frame` assigns rather than accumulates, so that entry overwrote the `NeckInputZ` contribution, and `neck_rotation` was effectively `0.5 * NeckInputY` (unit test `test_neck_input_z_alone_drives_neck_rotation` was red on the old map). Removing it makes `NeckInputZ` the only `neck_rotation` driver.
 
+### What Was Tried and Rejected
+
+- **Keeping `NeckInputX -> neck_flexion`** (the previous map). `NeckInputX` is lateral bending, so this replayed a sideways head tilt as a nod.
+- **Keeping the 0.5-weighted `NeckInputY -> neck_rotation` entry.** It overwrote `NeckInputZ`, the only axial-rotation input.
+
 ### Limitations
 
 - MyoSuite cannot represent neck lateral bending. `NeckInputX` is dropped, not absorbed into another coordinate.
@@ -494,10 +499,12 @@ python3 -m pytest tests/unit/engines/myosuite/test_retarget.py -q
 
 `retarget_frame` assigns `out[target] = sign * q[source]` for each entry in order. Every secondary entry came after its primary, so on the shipped map it overwrote the primary. `SpineInputX`, `SpineInputY`, `TorsoInput`, `RSInputX`, `RSInputY` and `LSInputY` had no effect, and their targets were replayed as 0.25 x pelvis angle or 0.5 x scapula angle. Section 16 removed the same defect for `NeckInputY -> neck_rotation`.
 
-We considered two fixes:
+Each mapped target is now driven only by its axis-matched primary. Inputs that MyoSuite cannot represent are listed as omitted rather than silently blended in, and the loader check stops the same overwrite from coming back.
 
-1. **Accumulate weighted contributions** (`out[target] += weight * q[source]`). This would preserve the intent of the old entries. But none of the weights (0.25, 0.5) was derived from kinematics, and the Hip and Scap axes do not correspond to the targets they were added to (see the table). Accumulation would also make `project_to_source` under-determined.
-2. **Drop the secondary entries and fail closed on many-to-one maps** (chosen). Each mapped target is driven by its axis-matched primary. Inputs that MyoSuite cannot represent are listed as omitted, not silently blended, and the same overwrite cannot come back without a loader error.
+### What Was Tried and Rejected
+
+- **Accumulating weighted contributions** (`out[target] += weight * q[source]`). This would keep the intent of the old entries. But none of the weights (0.25, 0.5) was derived from kinematics, and the Hip and Scap axes do not correspond to the targets they were added to (see the table). Accumulation would also make `project_to_source` under-determined.
+- **Reordering the entries so the primary is written last.** This hides the overwrite without removing it, and it silently discards the secondary input.
 
 ### Limitations
 

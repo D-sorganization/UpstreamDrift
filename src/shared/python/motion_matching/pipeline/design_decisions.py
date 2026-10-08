@@ -27,6 +27,8 @@ EXPECTED_DECISION_TITLES = [
     "Rejected: Grip-Roll Scan, Closure Fit From the Address, Cart-Table Filter, Fixed-Point and Iterative-Learning Shooting Fits",
     "MJX Differentiable Optimisation (Windowed)",
     "Address Foot Progression (OSV-4, #11730)",
+    "MyoSuite Neck Retarget: NeckInputY to `neck_flexion` (OSV-3, #11729)",
+    "MyoSuite Retarget Map Is One-to-One: Weighted Secondary Entries Dropped (#11729)",
 ]
 
 
