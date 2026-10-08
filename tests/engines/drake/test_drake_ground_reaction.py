@@ -34,9 +34,7 @@ SETTLE_S = 1.0
 WEIGHT_RTOL = 0.02
 WEIGHT_N = (PELVIS_KG + 2 * FOOT_KG) * G
 
-_INERTIA = (
-    '<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0"/>'
-)
+_INERTIA = '<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0"/>'
 STANCE_URDF = f"""<robot name="stance">
 <link name="pelvis"><inertial><mass value="{PELVIS_KG}"/>{_INERTIA}</inertial></link>
 <link name="calcn_l"><inertial><mass value="{FOOT_KG}"/>{_INERTIA}</inertial>
@@ -78,7 +76,9 @@ def stance():
 
 def _labelled(stance):
     plant, diagram, pctx = stance
-    return {w.label: w for w in DrakeForceTorqueSource(plant, diagram).sample(pctx).wrenches}
+    return {
+        w.label: w for w in DrakeForceTorqueSource(plant, diagram).sample(pctx).wrenches
+    }
 
 
 def test_static_stance_net_grf_equals_body_weight(stance) -> None:

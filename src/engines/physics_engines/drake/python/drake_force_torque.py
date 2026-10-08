@@ -300,9 +300,7 @@ class DrakeForceTorqueSource:
         wrenches = self._contact_wrenches(ctx, ground)
         com = plant.CalcCenterOfMassPositionInWorld(ctx)
         return list(
-            ground_reaction_overlay(
-                wrenches, com, source="drake:contact_results_port"
-            )
+            ground_reaction_overlay(wrenches, com, source="drake:contact_results_port")
         )
 
     def _gravity_wrenches(self, ctx: Context) -> list[OverlayWrench]:

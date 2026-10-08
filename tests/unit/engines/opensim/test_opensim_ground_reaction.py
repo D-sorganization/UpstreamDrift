@@ -94,10 +94,12 @@ def _stance_model_path(directory: Path) -> Path:
     text = path.read_text()
     text = re.sub(
         r'(<ForceSet name="forceset">\s*<objects)\s*/>',
-        lambda m: m.group(1)
-        + ">"
-        + "".join(_HC.format(side=f"{a}_{b}") for a in "lr" for b in "ht")
-        + "</objects>",
+        lambda m: (
+            m.group(1)
+            + ">"
+            + "".join(_HC.format(side=f"{a}_{b}") for a in "lr" for b in "ht")
+            + "</objects>"
+        ),
         text,
     )
     path.write_text(text)
@@ -149,7 +151,9 @@ def test_com_moment_uses_the_model_centre_of_mass(stance) -> None:
     w = _labelled(stance)
     com = np.asarray(model.calcMassCenterPosition(state).to_numpy())
     com_world = np.array([com[0], -com[2], com[1]])
-    np.testing.assert_allclose(w["contact:moment_com_net"].point_m, com_world, atol=1e-6)
+    np.testing.assert_allclose(
+        w["contact:moment_com_net"].point_m, com_world, atol=1e-6
+    )
     for label in ("contact:free_moment_net", "contact:free_moment_left"):
         assert label in w
     m_com = np.asarray(w["contact:moment_com_net"].torque_nm)

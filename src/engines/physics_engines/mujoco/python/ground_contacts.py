@@ -26,8 +26,7 @@ def _vec3(seq) -> tuple[float, float, float]:
 
 def _body_name(model: mujoco.MjModel, body_id: int) -> str:
     return (
-        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id)
-        or f"body_{body_id}"
+        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id) or f"body_{body_id}"
     )
 
 

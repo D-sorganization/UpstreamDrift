@@ -194,9 +194,7 @@ class MujocoForceTorqueSource:
 
     def _extract_ground_reaction(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
         """Per-foot and net GRF, CoP, free moment and moment about the CoM (GCV-2)."""
-        return list(
-            ground_reaction_wrenches(self._model, scratch, engine=self.ENGINE)
-        )
+        return list(ground_reaction_wrenches(self._model, scratch, engine=self.ENGINE))
 
     def _extract_externals(self, scratch: mujoco.MjData) -> list[OverlayWrench]:
         model = self._model

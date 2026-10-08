@@ -28,15 +28,15 @@ from typing import Any
 import numpy as np
 import pinocchio as pin
 
-from src.shared.python.biomechanics.ground_reaction_wrenches import (
-    ground_reaction_overlay,
-)
 from src.shared.python.biomechanics.grip_extraction import (
     allocation_grip_analysis,
 )
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
     to_overlay_wrenches,
+)
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
 )
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,

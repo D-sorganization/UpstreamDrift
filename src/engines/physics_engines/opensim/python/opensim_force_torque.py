@@ -446,9 +446,7 @@ class OpenSimForceTorqueSource:
         contact.  The centre of mass comes from ``Model.calcMassCenterPosition``.
         """
         com = self._world(_vec3(self._model.calcMassCenterPosition(state)))
-        return list(
-            ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE)
-        )
+        return list(ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE))
 
     def _contacts(self, state: Any) -> list[OverlayWrench]:
         wrenches = []

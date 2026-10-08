@@ -1534,6 +1534,18 @@
       "evidence": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
       "acceptance_owner": "tests/unit/biomechanics/test_grip_extraction.py"
     },
+    "analysis.ground_reaction": {
+      "id": "analysis.ground_reaction",
+      "name": "Per-foot and net ground-reaction breakdown emitted from engine contacts",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/biomechanics/ground_reaction_wrenches.py",
+      "acceptance_owner": "tests/integration/cross_engine/test_ground_reaction_parity.py"
+    },
     "analysis.static_plots": {
       "id": "analysis.static_plots",
       "name": "Static analysis plots (20+ plot types)",

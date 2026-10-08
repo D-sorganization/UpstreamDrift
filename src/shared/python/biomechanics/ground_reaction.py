@@ -209,7 +209,9 @@ def _cop(force: Array, moment: Array, zg: float, thr: float) -> Array | None:
     fz = float(force[2])
     if fz < thr:
         return None
-    return np.array([(zg * force[0] - moment[1]) / fz, (moment[0] + zg * force[1]) / fz, zg])
+    return np.array(
+        [(zg * force[0] - moment[1]) / fz, (moment[0] + zg * force[1]) / fz, zg]
+    )
 
 
 def _resultant(

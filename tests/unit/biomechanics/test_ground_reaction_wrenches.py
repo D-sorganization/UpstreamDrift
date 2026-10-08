@@ -79,8 +79,12 @@ def test_missing_foot_is_an_empty_set_not_absent() -> None:
 
 def test_non_contact_kinds_are_ignored() -> None:
     w = OverlayWrench(
-        WrenchKind.EXTERNAL, "external:calcn_l", "calcn_l", (0, 0, 0),
-        force_n=(0, 0, 50.0), source="t",
+        WrenchKind.EXTERNAL,
+        "external:calcn_l",
+        "calcn_l",
+        (0, 0, 0),
+        force_n=(0, 0, 50.0),
+        source="t",
     )
     assert foot_contact_sets([w])["left"].forces_n.shape == (0, 3)
 

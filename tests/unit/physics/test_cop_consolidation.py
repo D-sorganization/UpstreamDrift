@@ -59,7 +59,9 @@ def test_legacy_ground_cop_honours_ground_height() -> None:
 
 def test_legacy_ground_cop_unloaded_is_none_not_zero() -> None:
     with pytest.warns(DeprecationWarning):
-        assert compute_cop_from_grf(np.array([0, 0, 5.0]), np.array([100, 100, 0])) is None
+        assert (
+            compute_cop_from_grf(np.array([0, 0, 5.0]), np.array([100, 100, 0])) is None
+        )
 
 
 @pytest.mark.parametrize(("force", "moment"), FORCE_MOMENT_FIXTURES)
