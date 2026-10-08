@@ -1,3 +1,10 @@
+# Active: Compliant Bushing Grip Model - #11739
+
+- Branch `claude/osv-7-bushing-grip` (phase 1, Refs #11739 #11726): `src/shared/python/grip_contact/` interface, OpenSim `grip_model="bushing"` (`weld` default unchanged, `contact` raises), `split_method="bushing"`.
+- Open: the driven-swing deflection limits (3 mm, 2 deg) are not met at default stiffness (5.5 mm, 8.9 deg to 1.3 s); the slow test is a strict xfail. See `DESIGN_DECISIONS.md` section 16.
+- Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
+
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
@@ -17,7 +24,7 @@
 # Active: Address Foot Progression — #11730 (OSV-4, Epic #11726)
 
 - `motion_matching/foot_progression.py` defines and measures per-foot toe-out; `pipeline/address_feet.py` seeds and refits it; `--foot-progression {off,capture,default}` is opt-in (default `off`, so existing receipts stay valid).
-- Findings: the spec's left `hip_rotation` axis is not mirrored (OpenSim's is), and the stock toe marker seeds carry a 12.5 degree yaw bias; see `docs/development/full_body_models/DESIGN_DECISIONS.md` section 15.
+- Findings: the spec's left `hip_rotation` axis is not mirrored (OpenSim's is), and the stock toe marker seeds carry a 12.5 degree yaw bias; see `docs/development/full_body_models/DESIGN_DECISIONS.md` section 16.
 - Tour captures measure 15 to 16 degrees lead and 0 to 4 degrees trail, not 20. Owner capture O is private and was not on the implementing host: run `python3 -m scripts.foot_progression_report` with `CAPTURE_DATA_DIR` set.
 - Driver result: legacy 41.7/-2.8 vs option 37.0/4.05 (lead/trail, capture 16.4/4.0); lead is pinned by the hip_rotation_l limit. Next: let the address solve trade hip adduction against stance width; regenerate qualified receipts with the option only on request; Drake, Pinocchio and MyoSuite stills need their own renderers.
 

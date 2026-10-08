@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T04:38:03Z",
+  "generated_at": "2026-10-08T05:35:20Z",
   "rows": [
     {
       "acceptance": null,
@@ -368,6 +368,29 @@
       "reason": null,
       "receipt_path": "docs/development/full_body_models/evidence/fb6_parity/receipt_pinocchio.json",
       "sha256": "7c66cafe00f0d3d0f2294a1aa272e8a75e6505b90c49bb4c3d5d58269f9aeb1f"
+    },
+    {
+      "acceptance": null,
+      "artefacts": {
+        "gif": null,
+        "mot": null,
+        "npz": "docs/development/full_body_models/evidence/grip_kinetics/driver_bushing_series.npz"
+      },
+      "candidate_sha": null,
+      "capture": null,
+      "engine": "unknown",
+      "horizon_s": null,
+      "lane": "unclassified",
+      "metrics": {
+        "club_marker_rmse_m": null,
+        "early_marker_rmse_m": null,
+        "pelvis_yaw_rmse_rad": null,
+        "terminal_marker_rmse_m": null,
+        "whole_marker_rmse_m": null
+      },
+      "reason": "Unrecognized directory path structure",
+      "receipt_path": "docs/development/full_body_models/evidence/grip_kinetics/receipt.json",
+      "sha256": "1fdb758db8d68462a28990d3e6f56c315a8cb1c341a31ec58a07876f922a563d"
     },
     {
       "acceptance": null,
@@ -5611,5 +5634,5 @@
     }
   ],
   "schema_version": "1.0.0",
-  "total_receipts": 142
+  "total_receipts": 143
 }
