@@ -40,6 +40,8 @@ from typing import Any
 import numpy as np
 import opensim
 
+from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
+from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.body_part_viz.axial_loads import (
     axial_force_from_proximal_reaction,
@@ -166,6 +168,18 @@ class OpenSimForceTorqueSource:
     def model(self) -> Any:
         """The wrapped ``opensim.Model``."""
         return self._model
+
+    #: Why grip wrenches cannot be reported (GCV-8, #11714).
+    GRIP_UNAVAILABLE_REASON = (
+        "OpenSim grip model is a placeholder (#11161, #10286): no constraint "
+        "multipliers or per-hand wrenches are computed"
+    )
+
+    def grip_analysis(self, state: Any = None) -> GripAnalysis:
+        """Explicitly unavailable grip analysis: ``None`` values, never zero."""
+        return unavailable_analysis(
+            self.GRIP_UNAVAILABLE_REASON, metadata={"engine": _ENGINE}
+        )
 
     def sample(self, state: Any) -> ForceTorqueFrame:
         """Return the overlay frame for ``state``.

@@ -170,6 +170,16 @@
       "tiles": [],
       "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308)."
     },
+    "analysis.grip_wrench": {
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
+      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 11716,
+      "tiles": [],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. The club force and torque overlays and plots in PyQt, web and video are GCV-10 (#11716); the web surface lands there."
+    },
     "analysis.counterfactuals": {
       "title": "ZTCF/ZVCF + induced-acceleration counterfactuals",
       "pyqt": "src/shared/python/biomechanics/ztcf.py",

@@ -24,6 +24,13 @@ from typing import Any
 import numpy as np
 import pinocchio as pin
 
+from src.shared.python.biomechanics.grip_extraction import (
+    allocation_grip_analysis,
+)
+from src.shared.python.biomechanics.grip_wrench import (
+    GripAnalysis,
+    to_overlay_wrenches,
+)
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
     OverlayWrench,
@@ -42,6 +49,7 @@ _ENGINE = "pinocchio"
 _REACTION_SOURCE = "pinocchio:rnea:data.f"
 _ACTUATOR_SOURCE = "pinocchio:tau_applied"
 _CONTACT_SOURCE = "pinocchio:contact_sample"
+_GRIP_SOURCE = "pinocchio:allocation:lambda_grip"
 _AXIS_BY_SUFFIX = {
     "X": (1.0, 0.0, 0.0),
     "Y": (0.0, 1.0, 0.0),
@@ -133,6 +141,7 @@ class PinocchioForceTorqueSource:
         contact_samples: Mapping[str, ContactSample] | None = None,
         *,
         time_s: float = 0.0,
+        grip: GripAnalysis | None = None,
     ) -> ForceTorqueFrame:
         """Return the overlay frame for the given state.
 
@@ -145,6 +154,8 @@ class PinocchioForceTorqueSource:
                 ``ContactSample``, passed through. Entries whose name is not
                 a frame of the model are omitted, never relabelled.
             time_s: Frame timestamp [s].
+            grip: optional grip analysis (see :meth:`grip_from_allocation`);
+                its ``GRIP`` wrenches are appended.
 
         Raises:
             ValueError: On wrongly sized or non-finite inputs.
@@ -177,6 +188,8 @@ class PinocchioForceTorqueSource:
             if actuator is not None:
                 wrenches.append(actuator)
         wrenches.extend(self._contacts(contact_samples))
+        if grip is not None:
+            wrenches.extend(to_overlay_wrenches(grip, source=_GRIP_SOURCE))
 
         frame = ForceTorqueFrame(
             time_s=time_s, engine=_ENGINE, wrenches=tuple(wrenches)
@@ -184,6 +197,31 @@ class PinocchioForceTorqueSource:
         if not axes:
             return frame
         return frame_with_axial_loads(frame, axes, _REACTION_SOURCE)
+
+    @staticmethod
+    def grip_from_allocation(
+        lambda_grip: np.ndarray,
+        *,
+        point_m: np.ndarray,
+        ordering: str = "force_torque",
+        load_on: str = "human",
+        rotation_world_from_frame: np.ndarray | None = None,
+    ) -> GripAnalysis:
+        """Net grip analysis from the allocation ``lambda_grip`` (GCV-8, #11714).
+
+        Only the net wrench at ``point_m`` is available
+        (``split_method="allocation"``); per-hand values are ``None`` because
+        the allocator solves one 6-D wrench.  Pass the result to
+        :meth:`sample` as ``grip`` to emit the ``GRIP`` frames.
+        """
+        return allocation_grip_analysis(
+            lambda_grip,
+            point_m=point_m,
+            ordering=ordering,
+            load_on=load_on,
+            rotation_world_from_frame=rotation_world_from_frame,
+            metadata={"engine": _ENGINE},
+        )
 
     def _reaction(self, i: int) -> OverlayWrench:
         placement = self._data.oMi[i]

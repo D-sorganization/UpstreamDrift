@@ -369,3 +369,49 @@ def test_frame_roundtrip_to_dict() -> None:
     reconstructed = ForceTorqueFrame.from_dict(frame_dict)
     assert reconstructed.time_s == frame.time_s
     assert len(reconstructed.wrenches) == len(frame.wrenches)
+
+
+# --- GCV-8 (#11714): GRIP wrenches from the grip weld efc_force ---------------
+
+_GRIP_HELD_CLUB = """
+<mujoco><option gravity="0 0 -9.81"/>
+<worldbody>
+ <body name="hand_r" mocap="true" pos="0.1 0 1"><site name="hr" size="0.01"/></body>
+ <body name="hand_l" mocap="true" pos="-0.1 0 1"><site name="hl" size="0.01"/></body>
+ <body name="club" pos="0 0 1"><freejoint/>
+  <geom type="box" size="0.2 0.02 0.02" mass="0.5"/>
+  <site name="cr" pos="0.1 0 0" size="0.01"/><site name="cl" pos="-0.1 0 0" size="0.01"/>
+ </body>
+</worldbody>
+<equality>
+ <weld name="grip_weld_r" site1="hr" site2="cr"/>
+ <weld name="grip_weld_l" site1="hl" site2="cl"/>
+</equality>
+</mujoco>"""
+
+
+def test_sample_emits_grip_wrenches_that_balance_the_club_weight() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
+        MujocoForceTorqueSource,
+    )
+
+    model = mujoco.MjModel.from_xml_string(_GRIP_HELD_CLUB)
+    data = mujoco.MjData(model)
+    for _ in range(3000):
+        mujoco.mj_step(model, data)
+    frame = MujocoForceTorqueSource(model).sample(data)
+    grip = {w.label: w for w in frame.wrenches if w.kind is WrenchKind.GRIP}
+    assert {"grip:hand_left", "grip:hand_right", "grip:net_midpoint"} <= set(grip)
+    net = np.array(grip["grip:net_midpoint"].force_n)
+    np.testing.assert_allclose(net, [0.0, 0.0, 0.5 * 9.81], atol=1e-3)
+
+
+def test_sample_without_grip_welds_emits_no_grip_wrenches() -> None:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.force_torque_source import (
+        MujocoForceTorqueSource,
+    )
+
+    model = mujoco.MjModel.from_xml_string(SYNTHETIC_HANGING_PENDULUM)
+    data = mujoco.MjData(model)
+    frame = MujocoForceTorqueSource(model).sample(data)
+    assert not [w for w in frame.wrenches if w.kind is WrenchKind.GRIP]
