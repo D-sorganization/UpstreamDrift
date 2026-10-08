@@ -24,8 +24,16 @@ GLYPH_LENGTH_M = 0.6
 def _load(run: Path):  # noqa: ANN202
     spec_bytes = (run / "full_body_spec_hipcal_scaled.json").read_bytes()
     q = np.load(run / "ik_trajectory.npz")
-    receipt = json.loads((run / "receipt.json").read_text(encoding="utf-8"))
-    return spec_bytes, q["q_ref"], q["time_s"], receipt["head_gaze"]
+    # A full pipeline run writes receipt.json; a sweep run (scripts.sweep_gaze_weight)
+    # stops after the inverse kinematics and writes sweep_row.json instead.
+    receipt_path = run / "receipt.json"
+    if receipt_path.exists():
+        block = json.loads(receipt_path.read_text(encoding="utf-8"))["head_gaze"]
+    else:
+        block = json.loads((run / "sweep_row.json").read_text(encoding="utf-8"))[
+            "head_gaze"
+        ]
+    return spec_bytes, q["q_ref"], q["time_s"], block
 
 
 def _connector(scene, p0, p1, radius, rgba) -> None:  # noqa: ANN001
