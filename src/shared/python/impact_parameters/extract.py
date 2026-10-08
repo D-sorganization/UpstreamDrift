@@ -29,6 +29,20 @@ TOOLS_AGREEMENT_TOL_DEG = 0.01
 
 
 @dataclass(frozen=True)
+class BallObservation:
+    """Optional impact-model ball inputs for ``extract_impact_parameters``.
+
+    ``contact_m`` is the ball contact point; ``speed_mps`` and ``model_status``
+    are the impact-model ball speed and its calibration status (both needed for
+    the smash factor).
+    """
+
+    contact_m: object | None = None
+    speed_mps: float | None = None
+    model_status: str | None = None
+
+
+@dataclass(frozen=True)
 class ImpactParameters:
     """Impact parameters at the last pre-contact state.
 
@@ -196,7 +210,7 @@ def _max_deviation(p: dict[str, Any], tools: ToolsDeliveryEstimate) -> float:
     return max(diffs) if diffs else 0.0
 
 
-def extract_impact_parameters(  # noqa: PLR0913 - keyword-only options
+def extract_impact_parameters(
     series: ClubheadSeries,
     frame: TargetFrame,
     *,
@@ -205,9 +219,7 @@ def extract_impact_parameters(  # noqa: PLR0913 - keyword-only options
     min_speed_mps: float = 1.0,
     use_tools: bool = True,
     tools_gateway: ToolsDeliveryGateway | None = None,
-    ball_contact_m: object | None = None,
-    ball_speed_mps: float | None = None,
-    impact_model_status: str | None = None,
+    ball: BallObservation | None = None,
 ) -> ImpactParameters:
     """Compute impact parameters relative to ``frame``.
 
@@ -222,6 +234,7 @@ def extract_impact_parameters(  # noqa: PLR0913 - keyword-only options
         raise TypeError("series must be ClubheadSeries and frame a TargetFrame")
     if not min_speed_mps > 0:
         raise ValueError("min_speed_mps must be positive")
+    ball = ball if ball is not None else BallObservation()
     idx, source = _resolve_impact_index(series, impact_index, contact_index)
     v = series.velocity_mps[idx]
     speed = float(np.linalg.norm(v))
@@ -260,8 +273,8 @@ def extract_impact_parameters(  # noqa: PLR0913 - keyword-only options
         tools, why = _tools_estimate(tools_gateway, v, n, frame)
         if why:
             unavailable["tools_estimates"] = why
-    _fill_geometry(values, unavailable, series, frame, idx, ball_contact_m)
-    _fill_smash(values, unavailable, speed, ball_speed_mps, impact_model_status)
+    _fill_geometry(values, unavailable, series, frame, idx, ball.contact_m)
+    _fill_smash(values, unavailable, speed, ball.speed_mps, ball.model_status)
     deviation = None if tools is None else _max_deviation(values, tools)
     return ImpactParameters(
         frame=frame.to_record(),

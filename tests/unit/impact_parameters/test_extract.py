@@ -13,6 +13,7 @@ from src.shared.python.impact_parameters import (
     TargetFrame,
     ToolsDeliveryGateway,
     ToolsDeliveryUnavailableError,
+    BallObservation,
     extract_impact_parameters,
     load_tools_delivery_gateway,
 )
@@ -256,9 +257,7 @@ def test_toe_high_smash_and_collinear_plane():
         frame,
         impact_index=IDX,
         use_tools=False,
-        ball_contact_m=contact,
-        ball_speed_mps=66.0,
-        impact_model_status="uncalibrated",
+        ball=BallObservation(contact, 66.0, "uncalibrated"),
     )
     assert r.toe_mm == pytest.approx(10.0)
     assert r.high_mm == pytest.approx(4.0)
@@ -286,7 +285,7 @@ def test_toe_high_smash_and_collinear_plane():
             frame,
             impact_index=IDX,
             use_tools=False,
-            ball_contact_m=[0, 0],
+            ball=BallObservation([0, 0]),
         )
 
 
@@ -431,12 +430,20 @@ def test_plane_needs_three_samples_and_toe_cases():
     assert "fewer than 3" in r.unavailable["swing_plane_angle_deg"]
     no_toe = ClubheadSeries(**_kw(s, toe_axis=None))
     r = extract_impact_parameters(
-        no_toe, frame, impact_index=IDX, use_tools=False, ball_contact_m=[0, 0, 0]
+        no_toe,
+        frame,
+        impact_index=IDX,
+        use_tools=False,
+        ball=BallObservation([0, 0, 0]),
     )
     assert "unobservable" in r.unavailable["toe_mm"]
     parallel = ClubheadSeries(**_kw(s, toe_axis=s.face_normal))
     r = extract_impact_parameters(
-        parallel, frame, impact_index=IDX, use_tools=False, ball_contact_m=[0, 0, 0]
+        parallel,
+        frame,
+        impact_index=IDX,
+        use_tools=False,
+        ball=BallObservation([0, 0, 0]),
     )
     assert "parallel" in r.unavailable["high_mm"]
 
@@ -451,8 +458,7 @@ def test_option_validation():
             frame,
             impact_index=IDX,
             use_tools=False,
-            ball_speed_mps=-1.0,
-            impact_model_status="x",
+            ball=BallObservation(speed_mps=-1.0, model_status="x"),
         )
 
 

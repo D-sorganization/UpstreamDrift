@@ -40,7 +40,7 @@ recorded in every result.
 from __future__ import annotations
 
 from .clubhead_series import ClubheadSeries
-from .extract import ImpactParameters, extract_impact_parameters
+from .extract import BallObservation, ImpactParameters, extract_impact_parameters
 from .target_frame import TargetFrame
 from .tools_gateway import (
     ToolsDeliveryEstimate,
@@ -56,6 +56,7 @@ __all__ = [
     "ToolsDeliveryEstimate",
     "ToolsDeliveryGateway",
     "ToolsDeliveryUnavailableError",
+    "BallObservation",
     "extract_impact_parameters",
     "load_tools_delivery_gateway",
 ]
