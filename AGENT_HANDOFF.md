@@ -1,4 +1,4 @@
-# Active: Centroidal Feasibility Filter v2 — #11669
+# Active: Centroidal Feasibility Filter V2 — #11669
 
 - Branch `feat/centroidal-filter-v2-11669` (PR #11703); epic #11667. Next: Balance-3 contact-consistent inverse dynamics.
 
