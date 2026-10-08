@@ -160,6 +160,7 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - `ForceTorqueProvider`, `read_force_torque_frame` — runtime-checkable Protocol and validated accessor for engine providers.
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
+- `biomechanics/grip_wrench.py` — shared hand-on-club grip wrench (`analyze_grip`, `GripAnalysis`, `GripSeries`): per-hand wrench, net force at the grip midpoint, equivalent couple split into contact-force moment and free torque, per-hand MOF, club-local components and `split_method`. Transport reuses `force_overlay.conversions.move_wrench_point`; do not write another (GCV-7, #11713).
 
 ### Ground-Reaction Analysis Core
 

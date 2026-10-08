@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 30 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 31 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -138,7 +138,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1666** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1667** | **777** | **673** |
 
 ## Diverged Files by Package
 
