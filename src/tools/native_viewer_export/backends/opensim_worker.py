@@ -175,9 +175,11 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
-def set_camera(osim: Any, viz: Any, view: str, job: WorkerJob) -> None:
-    """Point the simbody camera for a golf view preset."""
-    rows, pos = simbody_camera_transform(view, job.lookat_m, job.distance_m)
+def set_camera(
+    osim: Any, viz: Any, view: str, job: WorkerJob, lookat_m: list[float]
+) -> None:
+    """Point the simbody camera for a golf view preset at ``lookat_m``."""
+    rows, pos = simbody_camera_transform(view, lookat_m, job.distance_m)
     mat = osim.Mat33()
     for i in range(3):
         for j in range(3):
@@ -210,14 +212,15 @@ def main(job_path: str) -> None:
             coords.get(name).setValue(state, float(value), False)
         model.realizePosition(state)
         for view in job.views:
-            set_camera(osim, viz, view, job)
+            look = job.lookat_for(view, pos)
+            set_camera(osim, viz, view, job, look)
             viz.drawFrameNow(state)
             time.sleep(SETTLE_S)
             window = grab_window()
             if glyph_sets is not None:
                 cam = pinhole_for_view(
                     view,
-                    job.lookat_m,
+                    look,
                     job.distance_m,
                     FOV_Y_RAD,
                     (window.shape[1], window.shape[0]),

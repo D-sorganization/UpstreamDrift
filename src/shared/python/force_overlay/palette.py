@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 __all__ = [
     "FORCE_KIND_PALETTE",
     "get_kind_rgba",
+    "label_variant_hex",
     "hex_to_rgba",
 ]
 
@@ -79,3 +80,33 @@ def get_kind_rgba(
     key = kind.value if hasattr(kind, "value") else str(kind)
     hex_color = FORCE_KIND_PALETTE.get(key, "#000000")
     return hex_to_rgba(hex_color, alpha=alpha)
+
+
+#: Lighten (+) or darken (-) the GRIP colour per label so left and right hands
+#: and the moments of force stay distinguishable from the net (#11716).
+_LABEL_SHADE: Final[tuple[tuple[str, float], ...]] = (
+    ("grip:hand_left", 0.45),
+    ("grip:hand_right", -0.35),
+    ("grip:mof_left", 0.7),
+    ("grip:mof_right", -0.6),
+)
+
+
+def label_variant_hex(label: str, base_hex: str) -> str:
+    """Shade ``base_hex`` for per-hand grip labels; other labels are unchanged.
+
+    A positive shade mixes toward white, a negative one toward black.
+    """
+    for prefix, shade in _LABEL_SHADE:
+        if label.startswith(prefix):
+            digits = base_hex.strip().lstrip("#")
+            if len(digits) != 6:
+                return base_hex
+            target = 255 if shade > 0 else 0
+            mix = abs(shade)
+            chans = [
+                round(int(digits[i : i + 2], 16) * (1 - mix) + target * mix)
+                for i in (0, 2, 4)
+            ]
+            return "#" + "".join(f"{c:02X}" for c in chans)
+    return base_hex

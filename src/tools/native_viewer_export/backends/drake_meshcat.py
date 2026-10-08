@@ -34,6 +34,7 @@ from src.tools.native_viewer_export.core import (
     Image8,
     OverlayFeed,
     SwingInput,
+    view_lookats,
 )
 
 _CAPSULE_RGBA = (0.75, 0.78, 0.85, 1.0)
@@ -204,16 +205,17 @@ class DrakeMeshcatBackend:
             else None
         )
         with MeshcatPage(meshcat.web_url(), settings.width, settings.height) as page:
-            for k in indices:
+            looks = view_lookats(settings, indices, overlay)
+            for pos, k in enumerate(indices):
                 set_state(k)
                 if glyphs is not None and overlay is not None:
                     glyphs.update(overlay.glyphs_at(k))
                 tiles: dict[str, Image8] = {}
                 for view in settings.views:
-                    pos, target = drake_meshcat_camera_pose(
-                        view, settings.lookat_m, settings.distance_m
+                    eye, target = drake_meshcat_camera_pose(
+                        view, looks[view][pos], settings.distance_m
                     )
-                    meshcat.SetCameraPose(list(pos), list(target))
+                    meshcat.SetCameraPose(list(eye), list(target))
                     page.settle()
                     tiles[view] = page.screenshot()
                 yield tiles
