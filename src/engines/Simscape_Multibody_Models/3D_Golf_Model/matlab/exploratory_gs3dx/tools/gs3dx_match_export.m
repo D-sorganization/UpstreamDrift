@@ -46,7 +46,7 @@ function report = gs3dx_match_export(capture_id, opts)
     cap = local_read_capture(c3d_path, opts.observed_mask);
 
     % Validate contract against cap metadata, rate, frames, and actual C3D export SHA fail-closed.
-    % source_sha256 is caller-attested raw GEARS source hash (CALLER_BOUND); no cap.source_sha256 is assigned.
+    % source_sha256 is caller-attested raw native-capture source hash (CALLER_BOUND); no cap.source_sha256 is assigned.
     obs_identity = gs3dx_observation_identity(cap, export_sha256, opts.observation_contract);
 
     % 4. Derive joint centres (respects missingness in cap)

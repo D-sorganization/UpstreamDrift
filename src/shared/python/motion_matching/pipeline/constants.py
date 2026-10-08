@@ -8,7 +8,7 @@ Preconditions / Invariants:
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -108,6 +108,30 @@ LEG_SEEDS: dict[str, tuple[str, tuple[float, float, float]]] = {
     "LToeOut": ("calcn_l", (0.17, 0.03, -0.06)),
 }
 LEG_LABELS: tuple[str, ...] = tuple(LEG_SEEDS)
+
+
+def square_forefoot_seeds(
+    seeds: Mapping[str, tuple[str, tuple[float, float, float]]],
+) -> dict[str, tuple[str, tuple[float, float, float]]]:
+    """Copy of ``seeds`` whose ToeIn/ToeOut markers share one forward (x) offset.
+
+    The stock seeds stagger ToeIn 0.02 m ahead of ToeOut over a 0.09 m span, an
+    unmeasured 12.5 degree yaw bias: the C3D ToeIn-ToeOut line is perpendicular
+    to the foot axis within a few degrees (OSV-4, #11730), so a marker fit
+    against the stock seeds turns the model foot by that bias. Each side's x is
+    set to the mean of the two seeds, keeping the toe-midpoint where it was.
+    """
+    out = dict(seeds)
+    for side in ("R", "L"):
+        inner, outer = f"{side}ToeIn", f"{side}ToeOut"
+        if inner not in seeds or outer not in seeds:
+            raise ValueError(f"seeds must contain {inner} and {outer}")
+        mean_x = 0.5 * (seeds[inner][1][0] + seeds[outer][1][0])
+        for label in (inner, outer):
+            body, (_, y, z) = seeds[label]
+            out[label] = (body, (mean_x, y, z))
+    return out
+
 
 BOUND_WIDENING: float = 1.0
 
