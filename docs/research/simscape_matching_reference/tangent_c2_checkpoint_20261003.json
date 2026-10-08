@@ -2535,7 +2535,7 @@
     "decoded_frames": 404,
     "local_and_desk_hash_verified": true,
     "videos": 8,
-    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-GEARS trial pairing or anatomical calibration."
+    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-capture trial pairing or anatomical calibration."
   },
   "global_club_preview_media": {
     "clips": [
@@ -2630,7 +2630,7 @@
       {
         "codec": "h264",
         "decoded_frames": 46,
-        "file": "Owner_GEARS_IK_Match_down-the-line_clean_1080p.mp4",
+        "file": "Owner_CaptureO_IK_Match_down-the-line_clean_1080p.mp4",
         "fps": 30.0,
         "height": 1080,
         "native_pose_parity": {
@@ -2652,7 +2652,7 @@
       {
         "codec": "h264",
         "decoded_frames": 46,
-        "file": "Owner_GEARS_IK_Match_down-the-line_markers_1080p.mp4",
+        "file": "Owner_CaptureO_IK_Match_down-the-line_markers_1080p.mp4",
         "fps": 30.0,
         "height": 1080,
         "native_pose_parity": {
@@ -2674,7 +2674,7 @@
       {
         "codec": "h264",
         "decoded_frames": 46,
-        "file": "Owner_GEARS_IK_Match_face-on_clean_1080p.mp4",
+        "file": "Owner_CaptureO_IK_Match_face-on_clean_1080p.mp4",
         "fps": 30.0,
         "height": 1080,
         "native_pose_parity": {
@@ -2696,7 +2696,7 @@
       {
         "codec": "h264",
         "decoded_frames": 46,
-        "file": "Owner_GEARS_IK_Match_face-on_markers_1080p.mp4",
+        "file": "Owner_CaptureO_IK_Match_face-on_markers_1080p.mp4",
         "fps": 30.0,
         "height": 1080,
         "native_pose_parity": {
@@ -2722,7 +2722,7 @@
     "total_decoded_frames": 404,
     "visual_findings": "Consistent Human ellipsoid bodies, no observed body/club cropping in inspected frames; cyan back/waist overlays visible. Residual marker offsets remain. No claim of identical camera framing across captures.",
     "visual_review_completed": true,
-    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-GEARS trial pairing or anatomical calibration."
+    "visual_review_scope": "Four sampled frames per clip reviewed for ellipsoid style, visible motion, overlays and framing; two clean clips additionally inspected at six samples. Not video-to-capture trial pairing or anatomical calibration."
   },
   "global_club_preview_media_export_status": "VERIFIED_PREVIEWS_DELIVERED_LOCAL_AND_DESK_DESKTOP_NOT_DYNAMICS",
   "global_club_preview_media_verified": true,
