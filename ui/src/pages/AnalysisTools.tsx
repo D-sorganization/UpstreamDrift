@@ -12,6 +12,7 @@ import { useState, useCallback } from 'react';
 import { useAnalysisTools, EXPORT_FORMATS } from '@/api/useAnalysisTools';
 import type { ExportFormat } from '@/api/useAnalysisTools';
 import { CounterfactualPanel } from '@/components/analysis/CounterfactualPanel';
+import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import { PlotsSection } from '@/components/analysis/PlotsSection';
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell';
 export type {
@@ -182,6 +183,9 @@ export function AnalysisToolsPage() {
 
             {/* Counterfactual Analysis (issue #7450) */}
             <CounterfactualPanel />
+
+            {/* Impact parameters relative to the target line (GCV-17, #11723) */}
+            <ImpactParametersPanel />
 
             {/* Export Section */}
             <div className="bg-gray-800 rounded-lg border border-gray-700 p-4">

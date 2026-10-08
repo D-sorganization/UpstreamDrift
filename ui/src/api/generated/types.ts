@@ -1713,6 +1713,37 @@ export interface IdentityRequest {
 }
 
 /**
+ * One launch-monitor row; ``value`` is null when unavailable (GCV-17).
+ */
+export interface ImpactParameterRow {
+  key: string;
+  label: string;
+  unit: string;
+  value?: number | null;
+  /** Why the value is unavailable */
+  reason?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Target-relative impact parameters card for a run (GCV-17, #11723).
+ */
+export interface ImpactParametersResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no card can be computed */
+  available: boolean;
+  /** Why the card is unavailable */
+  reason?: string | null;
+  units: string;
+  impact_time_s?: number | null;
+  impact_time_source?: string | null;
+  frame?: Record<string, unknown>;
+  rows?: ImpactParameterRow[];
+  d_plane?: Record<string, number | null>;
+}
+
+/**
  * One ``swing_sim.ball_flight_trajectory/1`` record to import for overlay. ``record`` is accepted as an opaque JSON object rather than a typed model on purpose: the wire's own shape is validated by the vendored Tools reader (fail-closed), not re-declared here. Passing it through unmodified means every field the reader checks — unknown fields, missing fields, malformed provenance, non-monotone samples — is enforced exactly as the wire defines it, from either flight-model family (issue #9352, ADR-0047).
  */
 export interface ImportBallFlightTrajectoryRequest {

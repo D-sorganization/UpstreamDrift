@@ -25,6 +25,7 @@ import {
   verdictBadgeClass,
   type MatchedSwingRun,
 } from '@/api/matchedSwings';
+import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
 import type { MocapJoint } from '@/components/visualization/MocapSkeleton3D';
 
 const MocapSkeleton3D = lazy(
@@ -261,6 +262,9 @@ export function MatchedSwingsPage() {
           {selectedRun.reason}
         </p>
       )}
+
+      {/* Impact parameters relative to the target line (GCV-17, #11723) */}
+      <ImpactParametersPanel runId={selectedRun.id} />
     </div>
   ) : (
     <div className="p-4 text-sm text-gray-400">Select a run to inspect metrics.</div>

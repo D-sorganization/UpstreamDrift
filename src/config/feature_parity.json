@@ -162,6 +162,15 @@
       "tiles": ["matched_swing_browser"],
       "notes": "PyQt6 tool for browsing matched-swing execution ledger, receipts, metrics, physical gate verdicts, animations, and viewer handoff."
     },
+    "analysis.impact_parameters": {
+      "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
+      "pyqt": "src/tools/impact_parameters_panel/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/ImpactParametersPanel.tsx",
+      "status": "parity",
+      "tiles": ["impact_parameters"],
+      "notes": "GCV-17 (#11723): shared card model (impact_parameters.panel_model) feeds the PyQt6 dock, GET /api/analysis/impact-parameters and the web panel; unavailable quantities are null with a reason in all three. Engine adapters are GCV-16 (#11722). Video HUD stamping is GCV-14 follow-up; matched-swing ledger entries show unavailable until candidates carry a club series."
+    },
     "canonical_core.workspaces": {
       "title": "Canonical-core estimation/comparison workspaces",
       "pyqt": "src/tools/canonical_core/estimation.py",

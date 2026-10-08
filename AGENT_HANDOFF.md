@@ -39,6 +39,12 @@
 - Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
 - Next: qualified closure-consistent OpenSim IK input, then re-run the receipt; phase 2 contact model, other engine parity, `golf_humanoid.osim` builder.
 
+# Active: Impact Parameters Panel - GCV-17 (#11723)
+
+- Branch `claude/gcv-17-impact-panel`, stacked on GCV-16 (PR #11769, adapters); epic #11706. Shared card model `impact_parameters/panel_model.py` feeds `GET /api/analysis/impact-parameters`, the PyQt6 dock `src/tools/impact_parameters_panel/` (tile `impact_parameters`) and web `ImpactParametersPanel.tsx`. Parity entry `analysis.impact_parameters`.
+- Run series come from `run.simulation_data["clubhead_series"]`, an engine `get_clubhead_series()`, or a MuJoCo run with a `clubhead` body; otherwise the card is unavailable with a reason. Matched-swing ledger ids are not simulation run ids, so that view shows unavailable until candidates carry a club series.
+- Next: wire engine runs to record `clubhead_series`; video HUD stamp (GCV-14); Impact Explorer prefill is owned by Tools (#9546).
+
 # Active: ClubheadSeries Engine Adapters - GCV-16 (#11722)
 
 - Branch `claude/gcv-16-clubhead-adapters`; epic #11706. Package `src/shared/python/impact_parameters/adapters/`: one `ClubFaceSpec` (face centre and axes in the club body frame) and one `rigid_body_series` kernel; MuJoCo/MyoSuite, Drake, Pinocchio, OpenSim and Simscape adapters only supply their own FK.
