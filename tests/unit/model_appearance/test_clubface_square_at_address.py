@@ -298,3 +298,88 @@ def test_spec_club_block_overrides_the_default_roll() -> None:
     spec["club"]["face_roll_deg"] = float("nan")
     with pytest.raises(ValueError, match="face_roll_deg"):
         ca.assembly_from_spec(spec)
+
+
+# ------------------------------------------------------------ impact frame
+SWING_DT_S = 0.002  # fixtures hold every second sample of the 1 kHz reference
+
+
+def _face_centre_series(club: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(time, face-centre world xyz, face horizontal angle) over the swing (MuJoCo FK)."""
+    mujoco, model = _mujoco_model(club)
+    from src.shared.python.model_appearance.club_head_mesh import face_centre
+
+    q = np.load(ROOT / f"tests/fixtures/club_face/swing_q_{club}.npz")["q"]
+    order = POSES[club]["coordinate_order"]
+    adr = [model.joint(n).qposadr[0] for n in order]
+    data = mujoco.MjData(model)
+    mesh_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_MESH, "vmesh_club_head")
+    geom = int(np.flatnonzero(model.geom_dataid == mesh_id)[0])
+    vadr, vnum = model.mesh_vertadr[mesh_id], model.mesh_vertnum[mesh_id]
+    vertices = np.array(model.mesh_vert[vadr : vadr + vnum], dtype=float)
+    assembly = ca.assembly_from_spec(json.loads(_spec_bytes(club)))
+    head = load_club_head(assembly.head_alias)
+    src = head.mesh.vertices
+    rot = _procrustes(head.mesh, vertices)
+    trans = vertices.mean(axis=0) - rot @ src.mean(axis=0)
+    centre_g = rot @ face_centre(head.head_mesh) + trans
+    normal_g = rot @ measured_face_normal(head.head_mesh)
+    centres, angles = [], []
+    for row in q.astype(float):
+        data.qpos[adr] = row
+        mujoco.mj_forward(model, data)
+        r = np.array(data.geom_xmat[geom]).reshape(3, 3)
+        centres.append(np.array(data.geom_xpos[geom]) + r @ centre_g)
+        angles.append(cf.horizontal_face_angle_deg(r @ normal_g))
+    return np.arange(len(q)) * SWING_DT_S, np.array(centres), np.array(angles)
+
+
+@pytest.mark.parametrize("capture", sorted(CAPTURES))
+def test_impact_frame_puts_the_clubhead_at_the_ball(capture: str) -> None:
+    time, head, _ = _face_centre_series(CAPTURES[capture])
+    k = cf.impact_frame(time, head)
+    assert k > cf.top_of_backswing_index(time, head)
+    assert abs(head[k, 2] - head[0, 2]) <= 0.10
+    assert np.linalg.norm(head[k] - head[0]) <= cf.IMPACT_BALL_RADIUS_M
+    assert 1.2 < time[k] < 1.45  # downswing of the 1.8 s captures, not the finish
+
+
+@pytest.mark.parametrize("capture", sorted(CAPTURES))
+@pytest.mark.xfail(
+    strict=True,
+    reason="#11755 open: the matched trajectory leaves the face 18-30 degrees "
+    "open at impact while the capture head triad is square; needs an IK refit "
+    "with head-triad weight, not a constant roll",
+)
+def test_face_is_square_at_impact(capture: str) -> None:
+    time, head, angle = _face_centre_series(CAPTURES[capture])
+    assert abs(angle[cf.impact_frame(time, head)]) <= 10.0
+
+
+def _swing(n: int = 400) -> tuple[np.ndarray, np.ndarray]:
+    t = np.linspace(0.0, 2.0, n)
+    head = np.zeros((n, 3))
+    head[:, 2] = 0.1 + 1.0 * np.sin(np.pi * t / 2.0) ** 2  # up and back to the ball
+    head[:, 1] = 1.0 * np.sin(np.pi * t / 2.0) ** 2
+    return t, head
+
+
+def test_impact_frame_accepts_a_swing_that_returns_to_the_ball() -> None:
+    t, head = _swing()
+    k = cf.impact_frame(t, head)
+    assert abs(head[k, 2] - head[0, 2]) <= 0.10
+
+
+def test_impact_frame_raises_when_the_head_never_returns_to_the_ball() -> None:
+    t, head = _swing()
+    head[1:, 2] += 0.5  # leaves the ball and never comes back down
+    with pytest.raises(ValueError, match="no valid impact frame"):
+        cf.impact_frame(t, head)
+
+
+def test_impact_frame_rejects_bad_shapes_and_tolerances() -> None:
+    t, head = _swing()
+    with pytest.raises(ValueError, match="clubhead"):
+        cf.impact_frame(t[:-1], head)
+    with pytest.raises(ValueError, match="tolerances"):
+        cf.impact_frame(t, head, height_tol_m=0.0)

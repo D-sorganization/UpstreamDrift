@@ -2,7 +2,7 @@
 
 - On PR #11752. The matched hand-club chain leaves the club roll to fitted wrist constants, so club `+x` was open 30.7 deg (driver) and 44.8 deg (7-iron) at address in every engine. One shared constant, `ADDRESS_SQUARE_FACE_ROLL_DEG` in `model_appearance/club_assembly.py`, now rolls the head about the shaft (and defines `clubface_vector`); `club.face_roll_deg` in a spec overrides it.
 - Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
-- Open: the roll is calibrated at address only. At the downswing minimum-height frame the face is still 107 deg (driver) and 53 deg (iron) open, so the grip roll in the hand chain needs refitting (not done here). `tour_matching/club_geometry.py` models are unrolled.
+- Impact: `club_face.impact_frame` (shared `detect_impact_index`, closest-approach fallback, raises if not at the ball). True impact face is +30 deg (driver, t=1.327) and +18 deg (iron, t=1.337) open, while the capture head triad is about +2 deg: the IK/matched trajectory under-rotates the club through release (grows from 4 deg at the top), so a constant roll cannot fix it; needs an IK refit with head-triad weight (test `test_face_is_square_at_impact` is a strict xfail). `tour_matching` club models are unrolled.
 
 # Active: Shared Grip Wrench Core — #11713
 

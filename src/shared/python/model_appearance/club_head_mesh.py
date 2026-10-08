@@ -327,6 +327,31 @@ def measured_face_normal(mesh: Mesh) -> Array:
     return np.asarray(mean / np.linalg.norm(mean), float)
 
 
+def face_centre(mesh: Mesh) -> Array:
+    """Centroid of the face patch (the point that meets the ball), head frame.
+
+    Same patch as :func:`measured_face_normal`; works on any rigidly moved
+    copy only through the head frame, so call it on head-frame meshes.
+    """
+    tri = mesh.vertices[mesh.faces]
+    cross = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    area = 0.5 * np.linalg.norm(cross, axis=1)
+    normal = cross / np.maximum(2.0 * area[:, None], 1e-18)
+    centroid = tri.mean(axis=1)
+    x_mid = 0.5 * (mesh.vertices[:, 0].min() + mesh.vertices[:, 0].max())
+    mid_y = 0.5 * (mesh.vertices[:, 1].min() + mesh.vertices[:, 1].max())
+    pick = (
+        (normal[:, 0] > 0.3)
+        & (centroid[:, 0] > x_mid)
+        & (np.hypot(centroid[:, 1] - mid_y, centroid[:, 2]) < 0.015)
+    )
+    if not pick.any():
+        raise ValueError("mesh has no face patch toward +x")
+    return np.asarray(
+        (centroid[pick] * area[pick, None]).sum(0) / area[pick].sum(), float
+    )
+
+
 def head_to_club_rotation(head: ClubHeadMesh) -> Array:
     """Rotation taking head-frame vectors to the club-body frame.
 
