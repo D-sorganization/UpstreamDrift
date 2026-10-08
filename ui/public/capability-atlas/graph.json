@@ -51,6 +51,22 @@
       "id": "analysis.cross_engine_robustness"
     },
     {
+      "feature_id": "analysis.impact_parameters",
+      "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
+      "status": "parity",
+      "pyqt": "src/tools/impact_parameters_panel/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/ImpactParametersPanel.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "impact_parameters"
+      ],
+      "notes": "GCV-17 (#11723): shared card model (impact_parameters.panel_model) feeds the PyQt6 dock, GET /api/analysis/impact-parameters and the web panel; unavailable quantities are null with a reason in all three. Engine adapters are GCV-16 (#11722). Video HUD stamping is GCV-14 follow-up; matched-swing ledger entries show unavailable until candidates carry a club series.",
+      "id": "analysis.impact_parameters"
+    },
+    {
       "feature_id": "analysis.static_plots",
       "title": "Static analysis plots (20+ plot types)",
       "status": "parity",
@@ -1425,6 +1441,20 @@
         "ledger",
         "video_export",
         "report_export"
+      ]
+    },
+    {
+      "id": "impact_parameters",
+      "title": "Impact Parameters",
+      "description": "Launch-monitor-style clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft and spin loft relative to a target line",
+      "path": "src/tools/impact_parameters_panel/__main__.py",
+      "launch_target": "src/tools/impact_parameters_panel/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "impact_parameters",
+        "launch_monitor",
+        "target_line"
       ]
     },
     {
@@ -3012,9 +3042,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
-    "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "96d7dac5317a7e0fc8e808b5d0357879aa540ea5a17147cf208dd42c463ccfbd",
+    "src/config/models.yaml": "948ce17feb5638b2f0d75ee4911d7b67b93c89646311a306a320efd676ae85d5",
+    "src/config/launcher_manifest.json": "b30567afc0dc4662be92e0b308a9ba0b0e70c53047a99068df25d4977f15409b",
+    "src/config/feature_parity.json": "027cd0be686f9b9cad185b6a83b9291dcdfc7e47f2a1ec9ff6e6908b7f81580e",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

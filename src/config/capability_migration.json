@@ -466,6 +466,18 @@
       "evidence": "src/config/models.yaml",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "impact_parameters": {
+      "id": "impact_parameters",
+      "name": "Impact Parameters",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "force_overlays": {
       "id": "force_overlays",
       "name": "Force Overlays",
@@ -1977,6 +1989,18 @@
       "alias_target": null,
       "evidence": "src/tools/necromatcher/gui.py",
       "acceptance_owner": "tests/unit/tools/test_necromatcher_gui.py"
+    },
+    "analysis.impact_parameters": {
+      "id": "analysis.impact_parameters",
+      "name": "Impact parameters panel (target-relative launch-monitor card)",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": ["simulation"],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/impact_parameters_panel/gui.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
     "tools.putting_green": {
       "id": "tools.putting_green",

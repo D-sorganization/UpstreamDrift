@@ -622,6 +622,22 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "impact_parameters"
+    help: "docs/help/impact_parameters.md"
+    name: "Impact Parameters"
+    description: "Launch-monitor-style clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft and spin loft relative to a target line"
+    type: "special_app"
+    path: "src/tools/impact_parameters_panel/__main__.py"
+    capabilities:
+      - "impact_parameters"
+      - "launch_monitor"
+      - "target_line"
+    launcher:
+      category: "tool"
+      logo: "assets/impact_parameters.png"
+      status: "ready"
+      default_launch: "dock"
+
   - id: "data_explorer"
     help: "docs/help/data_explorer.md"
     name: "Data Explorer (Import & Visualize)"

@@ -909,3 +909,29 @@ class EngineLoadResponse(BaseModel):
         default_factory=list, description="Engine capability tags"
     )
     message: str | None = Field(None, description="Human-readable status message")
+
+
+class ImpactParameterRow(BaseModel):
+    """One launch-monitor row; ``value`` is null when unavailable (GCV-17)."""
+
+    key: str
+    label: str
+    unit: str
+    value: float | None = None
+    reason: str | None = Field(None, description="Why the value is unavailable")
+    note: str | None = None
+
+
+class ImpactParametersResponse(BaseModel):
+    """Target-relative impact parameters card for a run (GCV-17, #11723)."""
+
+    run_id: str | None = None
+    engine: str | None = None
+    available: bool = Field(..., description="False when no card can be computed")
+    reason: str | None = Field(None, description="Why the card is unavailable")
+    units: str = "mph"
+    impact_time_s: float | None = None
+    impact_time_source: str | None = None
+    frame: dict[str, Any] = Field(default_factory=dict)
+    rows: list[ImpactParameterRow] = Field(default_factory=list)
+    d_plane: dict[str, float | None] = Field(default_factory=dict)
