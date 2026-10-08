@@ -1,0 +1,14 @@
+{
+  "schema_version": "character-preset-v1",
+  "id": "tour_average_male",
+  "name": "Tour Average Male",
+  "description": "Nominal professional male golfer, driver.",
+  "category": "tour",
+  "parameters": {
+    "stature_m": 1.8,
+    "mass_kg": 84.0,
+    "club": "driver"
+  },
+  "provenance": "Nominal professional-tour averages chosen for the builder; not derived from a specific capture.",
+  "limitations": "Nominal values, not measured data; review before scientific use. Compiles on the De Leva 1996 male table and the Rajagopal lower limbs; only stature, mass and the proportion scales change."
+}

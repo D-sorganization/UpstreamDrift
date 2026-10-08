@@ -36,7 +36,6 @@ pytestmark = pytest.mark.unit
 WEB_CATALOG_ONLY_TILES: dict[str, str] = {
     "chat_assistant": "web chat page (/chat); desktop equivalent is the sidekick dock",
     "dataset_generator": "web page (/tools/dataset); native path is the MATLAB chooser",
-    "character_builder": "web page (/tools/character-builder); native side is a CLI",
     "analysis_tools_api": "web page (/tools/analysis) over REST endpoints",
     "motion_pipeline": "REST pipeline service; no desktop tile",
     "perturbation_analysis": "API-backed catalog entry; no launchable surface",

@@ -7,7 +7,10 @@ custom presets from YAML files.
 
 from __future__ import annotations
 
+import json
 import logging
+import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +20,18 @@ from src.shared.python.humanoid_character_builder.core.body_parameters import (
     GenderModel,
 )
 
+from src.shared.python.humanoid_character_builder.spec_params import (
+    SpecCharacterParameters,
+)
+
 logger = logging.getLogger(__name__)
+
+# Spec-native character presets (CMB-2, #11653): JSON files validated against
+# ``character_preset.schema.json`` and compiled through ``spec_params``.
+_PRESET_PACKAGE_DIR = Path(__file__).resolve().parent
+CHARACTER_PRESET_DIR = _PRESET_PACKAGE_DIR / "data"
+CHARACTER_PRESET_SCHEMA_PATH = _PRESET_PACKAGE_DIR / "character_preset.schema.json"
+_PRESET_ID = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 # Built-in preset definitions
@@ -326,3 +340,68 @@ def save_preset_to_file(
 
     file_path.write_text(content)
     logger.info(f"Preset saved to {file_path}")
+
+
+@dataclass(frozen=True)
+class CharacterPreset:
+    """A validated preset: metadata plus compile-ready parameters."""
+
+    id: str
+    name: str
+    description: str
+    category: str
+    parameters: SpecCharacterParameters
+    provenance: str
+    limitations: str
+    document: dict[str, Any]
+
+
+def validate_character_preset(document: Any) -> None:
+    """Raise ``ValueError`` unless ``document`` satisfies the preset schema."""
+    import jsonschema
+
+    schema = json.loads(CHARACTER_PRESET_SCHEMA_PATH.read_text(encoding="utf-8"))
+    try:
+        jsonschema.validate(document, schema)
+    except jsonschema.ValidationError as exc:
+        where = ".".join(str(p) for p in exc.absolute_path) or "<root>"
+        raise ValueError(f"Invalid character preset at {where}: {exc.message}") from exc
+
+
+def list_character_presets() -> list[str]:
+    """Return the sorted ids of the shipped character presets."""
+    return sorted(p.stem for p in CHARACTER_PRESET_DIR.glob("*.json"))
+
+
+def load_character_preset(preset_id: str, **overrides: float | str) -> CharacterPreset:
+    """Load, validate and return a character preset.
+
+    ``overrides`` replace individual compile parameters (for example
+    ``mass_kg=82.0``); unknown names raise ``ValueError``. Raises
+    ``ValueError`` for an unknown id or a file failing the schema.
+    """
+    key = preset_id.strip().lower() if isinstance(preset_id, str) else ""
+    if not _PRESET_ID.match(key) or key not in list_character_presets():
+        raise ValueError(
+            f"Unknown character preset: {preset_id!r}. "
+            f"Available: {', '.join(list_character_presets())}"
+        )
+    document = json.loads(
+        (CHARACTER_PRESET_DIR / f"{key}.json").read_text(encoding="utf-8")
+    )
+    validate_character_preset(document)
+    if document["id"] != key:
+        raise ValueError(f"Preset file {key}.json declares id {document['id']!r}")
+    parameters = SpecCharacterParameters.from_dict(
+        {**document["parameters"], **overrides}
+    )
+    return CharacterPreset(
+        id=key,
+        name=document["name"],
+        description=document["description"],
+        category=document["category"],
+        parameters=parameters,
+        provenance=document["provenance"],
+        limitations=document["limitations"],
+        document=document,
+    )

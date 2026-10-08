@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSplitter,
+    QTabWidget,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -32,6 +33,7 @@ from src.tools.model_explorer.composition_ux import (
     ExportChoice,
 )
 
+from .assembly_panel import AssemblyPanel
 from .model import URDFModel
 from .panel import ModelPanel
 
@@ -42,6 +44,7 @@ class FrankensteinEditor(QWidget):
     """Side-by-side URDF editor for combining components from multiple files."""
 
     model_updated = pyqtSignal(str, object)  # panel_id, model
+    assembly_urdf_changed = pyqtSignal(str)  # URDF xml from the assembly tab
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the Frankenstein editor."""
@@ -53,7 +56,15 @@ class FrankensteinEditor(QWidget):
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-        layout = QVBoxLayout(self)
+        outer = QVBoxLayout(self)
+        self.mode_tabs = QTabWidget()
+        outer.addWidget(self.mode_tabs)
+        copy_page = QWidget()
+        self.mode_tabs.addTab(copy_page, "Copy And Merge")
+        self.assembly_panel = AssemblyPanel()
+        self.mode_tabs.addTab(self.assembly_panel, "Drag-And-Drop Assembly")
+        self.assembly_panel.assembly_changed.connect(self.assembly_urdf_changed)
+        layout = QVBoxLayout(copy_page)
 
         # Instructions
         instructions = QLabel(

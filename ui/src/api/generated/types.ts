@@ -848,6 +848,22 @@ export interface CharacterBuilderRequest {
   build_type: string;
 }
 
+/**
+ * Request for the spec-native character builder (CMB-3, #11654). ``preset`` selects a shipped character preset as the base; any other field overrides that base (or the defaults when no preset is given). Bounds mirror ``spec_params.PARAMETER_RANGES``; the service re-validates.
+ */
+export interface CharacterSpecRequest {
+  /** Character preset id */
+  preset?: string | null;
+  stature_m?: number | null;
+  mass_kg?: number | null;
+  trunk_scale?: number | null;
+  arm_scale?: number | null;
+  shoulder_scale?: number | null;
+  grip_roll_deg?: number | null;
+  /** driver or iron7 */
+  club?: string | null;
+}
+
 export interface ClaimsV2 {
   vendor_comparison: "descriptive" | "matched_agreement";
   device_emulation: boolean;

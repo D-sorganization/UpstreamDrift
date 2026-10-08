@@ -161,6 +161,25 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 
+### MyoFullBody Muscle-Driven Swing
+
+`src/shared/python/myofullbody/` — maps the 44-coordinate spec swing onto the
+MyoSuite MyoFullBody model (416 muscles, Apache-2.0, MoBL-derived arms are
+non-commercial) and resolves muscle redundancy. Assets are never committed:
+`assets.fetch` downloads a pinned `myo_sim` commit into a cache and verifies
+every file by sha256 (`scripts/fetch_myofullbody.py`).
+
+- `assets` — pinned fetch, manifest, tamper rejection, licence record, model receipt.
+- `couplings.JointCoupling` — exact `mjEQ_JOINT` polynomial substitution.
+- `anatomy`, `ik`, `mapping.MyoMapper` — landmark segment frames and orientation
+  IK (`map_pose`) plus the rate map `velocity_map` (`Phi`).
+- `mapping_report` — key frames, ROM exceedance, hinge cross-check, muscle lengths.
+- `redundancy` — `MuscleBasis`, fast `solve_frame`, group reserves, fail-closed
+  `qualification`; `swing_pipeline.run_swing` builds the receipt.
+- `render` — blue-to-red activation colours, frame selection, four camera views
+  (`scripts/render_myofullbody_swing.py`).
+- Reference: `docs/research/myofullbody_swing/myofullbody_swing.tex`.
+
 ### MOSAIC Model-Aware Matching Estimator
 
 `src/shared/python/estimation/mosaic/` — model-aware multi-trial
@@ -259,6 +278,19 @@ forward-dynamics matching. Design reference:
 - Used by per-engine GUIs (MuJoCo, Drake) for live joint editing.
   **Not** the same as the _starting-pose matcher_ (which solves a
   rigid-body transform across an entire skeleton, not per-joint).
+
+### Model Appearance (Engine-Agnostic Visuals)
+
+`src/shared/python/model_appearance/` — purely visual, never read by physics.
+
+- `schema` — `appearance-v1` document (`document_from_dict`, `load_appearance`,
+  `appearance_path_for`), JSON Schema `appearance_v1.schema.json`, and
+  `physics_spec_sha256` (spec hash that ignores visual-only keys).
+- `library` — named PBR materials, skin tones, clothing presets, club finishes,
+  `classify_body` (body name to anatomical part).
+- `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
+  via `attach_visual_layer(..., appearance=doc)`.
 
 ### Theme / Typography
 
@@ -567,3 +599,13 @@ named order. Projection and native refitting reuse this resource; efforts checks
 exact model/fit hashes, ordered units and authored timing before native command
 mapping. Scientific acceptance remains independent. See the
 [Native Resource Procedure](../development/necromatcher-native-resources.md).
+
+### Golf View Presets and Bundle Overlay Provider
+
+`golf_view_presets` holds the four golf camera presets (face-on, down-the-line,
+overhead, oblique) in the Z-up spec frame (golfer faces -X, target line -Y) with
+adapters for MuJoCo, Drake MeshCat, meshcat-python (Rx(-90 deg) scene transform)
+and the simbody visualizer. `force_overlay.bundle_provider` builds
+ForceTorqueFrame series from same-input bundles (efforts to joint-torque arcs,
+the shared contact law to per-foot GRF at the CoP, weight at the CoM); the
+MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
