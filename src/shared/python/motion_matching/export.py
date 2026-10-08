@@ -24,6 +24,7 @@ from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.motion_matching.candidate import MatchedSwingCandidate
 from src.shared.python.motion_matching.candidate_io import load_candidate
+from src.shared.python.video_timing.frame_schedule import stride_for_speed
 from src.shared.python.motion_matching.provenance import (
     engine_package_version,
     git_commit_short,
@@ -149,6 +150,7 @@ def export_video(
     fps: int = 30,
     stride: int = 5,
     view: str = "marker_overlay",
+    speed: float | None = None,
 ) -> Path:
     """Export 3D marker overlay trajectory animation as GIF or MP4.
 
@@ -159,19 +161,30 @@ def export_video(
         fps: Frames per second for output video.
         stride: Frame subsampling stride for rendering.
         view: Visual rendering preset ("marker_overlay").
+        speed: Playback speed relative to real time (0.5 is half speed). When
+            given, ``stride`` is derived from ``fps`` and the swing ``dt`` so
+            playback is time-based (GCV-14); ``stride`` is then ignored.
 
     Returns:
         Resolved output Path.
     """
     out_p = Path(path).resolve()
     cand = _validate_candidate_for_video(candidate)
-    stride_safe = max(1, stride)
+    dt_s = cand.time_s[1] - cand.time_s[0] if len(cand.time_s) > 1 else 0.05
+    stride_safe = (
+        stride_for_speed(float(dt_s), fps, speed)
+        if speed is not None
+        else max(1, stride)
+    )
     frames = _render_video_frames(cand, engine, stride_safe)
 
     ext = out_p.suffix.lower()
     if ext == ".gif":
-        dt_s = cand.time_s[1] - cand.time_s[0] if len(cand.time_s) > 1 else 0.05
-        duration_ms = float(1000.0 * stride_safe * dt_s)
+        duration_ms = (
+            float(1000.0 / fps)
+            if speed is not None
+            else float(1000.0 * stride_safe * dt_s)
+        )
         return _write_gif(frames, out_p, fps, duration_ms=duration_ms)
     if ext == ".mp4":
         return _write_mp4(frames, out_p, fps)
