@@ -84,11 +84,25 @@ def test_consistency_resolve_keeps_the_face_targets() -> None:
     lane = MagicMock()
     lane.frames = 2
     lane.face_targets = [None, {"Clubhead": ((1, 0, 0), (0, 1, 0), 1.0)}]
+    lane.gaze_axis_targets_cache = None
     kin = MagicMock()
     kin.solve_trajectory.return_value = (np.zeros((2, 4)), [])
     consistency_resolve(lane, kin, np.zeros((2, 4)))
     kwargs = kin.solve_trajectory.call_args.kwargs
-    assert kwargs["axis_targets_per_frame"] is lane.face_targets
+    assert kwargs["axis_targets_per_frame"] == lane.face_targets
+
+
+def test_consistency_resolve_unions_the_gaze_and_face_targets() -> None:
+    head = {"Head": ((0, 0, 1), (0, 0, 1), 1.0)}
+    lane = MagicMock()
+    lane.frames = 2
+    lane.face_targets = [None, {"Clubhead": ((1, 0, 0), (0, 1, 0), 1.0)}]
+    lane.gaze_axis_targets_cache = [head, head]
+    kin = MagicMock()
+    kin.solve_trajectory.return_value = (np.zeros((2, 4)), [])
+    consistency_resolve(lane, kin, np.zeros((2, 4)))
+    kwargs = kin.solve_trajectory.call_args.kwargs
+    assert kwargs["axis_targets_per_frame"] == [head, {**head, **lane.face_targets[1]}]
 
 
 def test_cli_exposes_the_face_weight_with_the_shared_default() -> None:

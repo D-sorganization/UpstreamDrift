@@ -101,6 +101,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 960 | `src/shared/python/signal_toolkit/widget_ui.py` |
 | 957 | `src/bunkershot3d/solvers/mpm/solver.py` |
 | 955 | `src/shared/python/pendulum_simulator/gui/simulation_panel.py` |
+| 954 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 953 | `src/shared/python/motion_matching/full_body_ik.py` |
 | 952 | `src/shared/python/pendulum_simulator/gui/panel_builders.py` |
 | 950 | `src/engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py` |

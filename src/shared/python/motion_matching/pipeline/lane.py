@@ -246,6 +246,11 @@ class Lane:
         }
         self.prior_weights: dict[str, float] = {}
         self.anthropometric = False
+        # Soft head-gaze residual (OSV-3, #11729); 0 keeps markers faithful.
+        self.gaze_weight = 0.0
+        self.gaze_face_offset_m = 0.0
+        self.gaze_axis_targets_cache: list[Any] | None = None
+        self.gaze_plan: Any = None
         #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
         self.feet: Any = None
         #: Per-frame club-face orientation targets (OSV-10); None: marker-only.
@@ -358,11 +363,59 @@ class Lane:
         """One pit target set per capture frame (None where unobservable)."""
         return [self.pit_targets_for([f], weight) or None for f in range(self.frames)]
 
+    def axis_targets(self, kin: BaseFullBodyIK, q_start: np.ndarray) -> list | None:
+        """Per-frame axis targets: elbow pits plus the optional gaze residual.
+
+        With ``gaze_weight > 0`` the gaze schedule is planned once from a
+        marker-faithful pass (head markers keep their weights) and cached so
+        the consistency re-solve uses the same targets.
+        """
+        pits = self.pit_targets_per_frame(0.01) if self.anthropometric else None
+        if self.gaze_weight <= 0:
+            return pits
+        if self.gaze_axis_targets_cache is None:
+            from src.shared.python.motion_matching.pipeline import gaze_residual as gr
+
+            from src.shared.python.motion_matching.pipeline.constants import (
+                REFERENCE_CUTOFF_HZ,
+            )
+            from src.shared.python.motion_matching.pipeline.reference import (
+                smooth_reference,
+            )
+
+            q0, _ = self._solve(kin, q_start, None, pits)
+            # Plan from the smoothed pass so impact detection is not driven by
+            # marker jitter in the speed signal.
+            q0 = smooth_reference(q0, self.rate_hz, REFERENCE_CUTOFF_HZ)
+            self.gaze_plan = gr.plan_gaze(
+                kin,
+                q0,
+                self.times,
+                ground_height_m=self.ground.height_m,
+                face_offset_m=self.gaze_face_offset_m,
+            )
+            self.gaze_axis_targets_cache = gr.gaze_axis_targets(
+                self.gaze_plan, kin, q0, self.times, self.gaze_weight
+            )
+        return merge_axis_targets(pits, self.gaze_axis_targets_cache)
+
     def trajectory(
         self,
         kin: BaseFullBodyIK,
         q_start: np.ndarray,
         frames: Sequence[int] | None = None,
+    ) -> tuple[np.ndarray, list[Any]]:
+        if frames is not None:
+            pits = self.pit_targets_per_frame(0.01) if self.anthropometric else None
+            return self._solve(kin, q_start, frames, pits)
+        return self._solve(kin, q_start, frames, self.axis_targets(kin, q_start))
+
+    def _solve(
+        self,
+        kin: BaseFullBodyIK,
+        q_start: np.ndarray,
+        frames: Sequence[int] | None,
+        axis_targets: list | None,
     ) -> tuple[np.ndarray, list[Any]]:
         return kin.solve_trajectory(
             self.points,
@@ -376,10 +429,7 @@ class Lane:
             bounds=self.bounds,
             marker_weights=self.marker_weights,
             prior_weights=self.prior_weights,
-            axis_targets_per_frame=merge_axis_targets(
-                self.pit_targets_per_frame(0.01) if self.anthropometric else None,
-                self.face_targets,
-            ),
+            axis_targets_per_frame=merge_axis_targets(axis_targets, self.face_targets),
             restarts=TRAJECTORY_RESTARTS,
             restart_threshold_m=TRAJECTORY_RESTART_THRESHOLD_M,
             restart_margin_m=TRAJECTORY_RESTART_MARGIN_M,
