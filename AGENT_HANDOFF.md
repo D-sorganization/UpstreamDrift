@@ -39,6 +39,12 @@
 - Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
 - Next: qualified closure-consistent OpenSim IK input, then re-run the receipt; phase 2 contact model, other engine parity, `golf_humanoid.osim` builder.
 
+# Active: ClubheadSeries Engine Adapters - GCV-16 (#11722)
+
+- Branch `claude/gcv-16-clubhead-adapters`; epic #11706. Package `src/shared/python/impact_parameters/adapters/`: one `ClubFaceSpec` (face centre and axes in the club body frame) and one `rigid_body_series` kernel; MuJoCo/MyoSuite, Drake, Pinocchio, OpenSim and Simscape adapters only supply their own FK.
+- Impact time: `adapters/impact_time.py::select_impact_index` is the single integration point for the OSV-8/OSV-10 closest-approach rule (not on main yet). `ClubFaceSpec` default centre is the club body origin until GCV-11 face geometry lands.
+- Next: GCV-17 impact panel consumes these adapters.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
