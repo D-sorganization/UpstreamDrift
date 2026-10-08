@@ -18,6 +18,11 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.grip_contact.club_dynamics import ClubDynamics
+from src.shared.python.grip_contact.damping import (
+    DEFAULT_DAMPING_RATIO,
+    design_damping,
+)
 from src.shared.python.grip_contact.parameters import (
     BushingParameters,
     ContactMaterial,
@@ -98,6 +103,7 @@ class GripInterface:
         *,
         bushing: BushingParameters | None = None,
         contact_material: ContactMaterial | None = None,
+        damping_ratio: float = DEFAULT_DAMPING_RATIO,
     ) -> GripInterface:
         """Build from a ``full-body-v1`` spec (closure plus club-parented joint).
 
@@ -116,10 +122,20 @@ class GripInterface:
             )
         p_left = np.asarray(joints[0]["child_to_follower"], dtype=float)[:3, 3]
         rot = tuple(tuple(float(x) for x in row) for row in t_right[:3, :3])
+        left = GripFrame("L", _v3(p_left), rot)  # type: ignore[arg-type]
+        right = GripFrame("R", _v3(t_right[:3, 3]), rot)  # type: ignore[arg-type]
+        if bushing is None:
+            bushing = design_damping(
+                default_bushing(),
+                left,
+                right,
+                ClubDynamics.from_spec(spec),
+                damping_ratio,
+            )
         return cls(
-            left=GripFrame("L", _v3(p_left), rot),  # type: ignore[arg-type]
-            right=GripFrame("R", _v3(t_right[:3, 3]), rot),  # type: ignore[arg-type]
-            bushing=bushing or default_bushing(),
+            left=left,
+            right=right,
+            bushing=bushing,
             contact_material=contact_material or ContactMaterial(),
         )
 

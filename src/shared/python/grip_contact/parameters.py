@@ -13,31 +13,40 @@ Provenance of the default numbers (read before changing them):
   relations below and are never tuned to a target; the deflection criterion is
   checked afterwards and the sensitivity is recorded in the modelling
   reference.
-* Soft-tissue scale (lower bracket for sensitivity runs): fingertip pulp
-  compresses at roughly 0.5 to 3 N/mm (Serina, Mote and Rempel, "Force
-  response of the fingertip pulp to repeated compression", J. Biomech. 30(10),
-  1997; Wu, Dong, Rakheja, Schopper and Smutz, "A structural fingertip model
-  for simulating of the biomechanics of tactile sensation", Med. Eng. Phys.
-  26(2), 2004).  A wrapped hand adds several such patches in parallel, so
-  10 to 100 N/mm per hand is the soft-tissue range; the default is the stiff
-  end of the bracket and beyond because squeeze preload stiffens the contact.
+* Soft-tissue scale (context only, the numbers are NOT taken from these
+  papers).  Serina, Mote and Rempel, "Force response of the fingertip pulp
+  to repeated compression: effects of loading rate, loading angle, and
+  anthropometry", J. Biomech. 30(10), 1035-1040, 1997, report a viscoelastic,
+  rate-dependent, nonlinear pulp that is compliant below about 1 N and
+  stiffens rapidly above it.  Wu, Dong, Rakheja, Schopper and Smutz, "A
+  structural fingertip model for simulating of the biomechanics of tactile
+  sensation", Med. Eng. Phys. 26(2), 165-175, 2004, give a hyperelastic and
+  viscoelastic finite-element finger model.  Both existence and subject
+  matter were confirmed by search (2026-10); the per-patch stiffness
+  figure of 0.5 to 3 N/mm quoted in the first version of this note could
+  not be confirmed and is withdrawn.  The stiffness default is therefore a
+  stiff surrogate chosen so the bushing replaces the weld, not a measured
+  tissue stiffness; the sensitivity runs (x0.1, x10) bracket it.
 * Rotational stiffness follows a lever relation ``k_r = k_t * r_eff**2`` with
   ``r_eff = 0.04 m`` (half of a ~80 mm palm width).
-* Damping uses a damping ratio ``zeta = 0.3`` (engineering default for
-  tissue-dominated contact): translational ``c = 2 zeta sqrt(k m)`` on the club
-  mass, rotational ``c = 2 zeta sqrt(k_r I_ref)`` per axis with
-  ``I_ref = m L**2`` (``L = 0.6 m``, club centre of mass to the grip) for the
-  pitch and yaw axes and the driver-head inertia about the shaft for the
-  twist axis.  A fixed damping on the translational lever alone
-  leaves the pitch mode with ``zeta ~ 0.01`` (measured), which does not settle.
-* Hand-grip force magnitudes for plausibility: Komi, Roberts and Rothberg,
-  "Evaluation of thin, flexible sensors for time-resolved grip force
-  measurement", Proc. IMechE Part C 222, 2008, and the FingerTPS golf study
-  at scitepress.org/Papers/2018/69623.
+* Damping is *designed*, not tuned: ``design_damping`` (module ``damping``)
+  sets the damping coefficients so that every one of the six club modes has
+  the modal damping ratio ``zeta = 0.7`` (the value with about 5 % overshoot
+  and the fastest settling without sustained ringing).  The derivation and
+  the reason a per-axis ``2 zeta sqrt(k m)`` is wrong (the lowest modes are
+  pendulum modes of the club carried by a force pair of the two hands, which
+  that formula leaves at zeta ~ 0.01) are in ``damping.py``.  The default
+  ``default_bushing`` therefore carries *zero* damping; use
+  ``GripInterface.from_spec`` to obtain the designed values.
+* Hand-grip force context: Komi, Roberts and Rothberg, "Evaluation of thin,
+  flexible sensors for time-resolved grip force measurement", Proc. IMechE
+  Part C, J. Mech. Eng. Sci. 222, 1687-1700, 2008 (confirmed to exist; it
+  includes a golf-shot grip measurement).  A second FingerTPS golf reference
+  given in the first version could not be identified and is removed.
 
-The citations above are given from the literature record and were not
-re-verified against the full texts in this change; treat the numeric
-defaults as owner-reviewable.
+Only the existence, authors and venue of the three papers above were
+confirmed; no numeric value in this module is sourced from them.  Treat all
+numeric defaults as owner-reviewable engineering defaults.
 """
 
 from __future__ import annotations
@@ -48,15 +57,6 @@ from dataclasses import dataclass
 Vec3 = tuple[float, float, float]
 
 R_EFF_M = 0.04
-ZETA = 0.3
-_REFERENCE_CLUB_MASS_KG = 0.313
-# Reference rotational inertia per grip axis (x = about the shaft, y/z = pitch
-# and yaw about the hands): driver head inertia about the shaft; m * L**2.
-_REFERENCE_CLUB_INERTIA_KG_M2 = (
-    3.2e-4,
-    _REFERENCE_CLUB_MASS_KG * 0.6**2,
-    _REFERENCE_CLUB_MASS_KG * 0.6**2,
-)
 
 
 def _check_vec3(name: str, value: object, *, positive: bool) -> Vec3:
@@ -118,17 +118,16 @@ class BushingParameters:
 
 
 def default_bushing() -> BushingParameters:
-    """Stiff-surrogate engineering defaults (never tuned to a target)."""
+    """Stiff-surrogate engineering stiffness defaults, zero damping.
+
+    Damping depends on the club and hand geometry and is designed by
+    :func:`src.shared.python.grip_contact.damping.design_damping`
+    (``GripInterface.from_spec`` does this).
+    """
     k_t = 1.0e6
-    c_t = 2.0 * ZETA * math.sqrt(k_t * _REFERENCE_CLUB_MASS_KG)
     k_r = k_t * R_EFF_M**2
-    c_r = tuple(2.0 * ZETA * math.sqrt(k_r * i) for i in _REFERENCE_CLUB_INERTIA_KG_M2)
-    return BushingParameters(
-        (k_t, k_t, k_t),
-        (k_r, k_r, k_r),
-        (c_t, c_t, c_t),
-        c_r,  # type: ignore[arg-type]
-    )
+    zero = (0.0, 0.0, 0.0)
+    return BushingParameters((k_t, k_t, k_t), (k_r, k_r, k_r), zero, zero)
 
 
 @dataclass(frozen=True)
