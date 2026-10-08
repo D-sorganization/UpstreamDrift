@@ -25,7 +25,10 @@ from src.tools.native_viewer_export.core import (
     export_swing,
     load_receipt_rollout,
 )
-from src.tools.native_viewer_export.overlay import build_overlay_feed
+from src.tools.native_viewer_export.overlay import (
+    build_overlay_feed,
+    detect_impact_time_s,
+)
 
 logger = logging.getLogger(__name__)
 GRIP_PLOT_STRIDE = 4  # one grip sample per 4 bundle steps in the plot payload
@@ -87,6 +90,7 @@ def run_export(
     backend_factory: Callable[[str], NativeBackend] = make_backend,
     overlay_factory: OverlayFactory = build_overlay_feed,
     writer_factory: WriterFactory | None = None,
+    impact_detector: Callable[[SwingInput], float] = detect_impact_time_s,
 ) -> list[ExportResult]:
     """Render every requested engine; unavailable backends are skipped, not fatal."""
     for engine in job.engines:
@@ -105,10 +109,15 @@ def run_export(
             continue
         swing = _swing_for(job, bundle, engine)
         feed, per_settings = None, settings
+        if settings.impact_time_s is None and not swing.has_impact_provenance:
+            try:
+                per_settings = replace(settings, impact_time_s=impact_detector(swing))
+            except (BackendUnavailable, ValueError, KeyError, RuntimeError) as exc:
+                logger.warning("impact time not detected for %s: %s", engine, exc)
         if settings.overlays:
             try:
                 feed, lookat = overlay_factory(swing, engine)
-                per_settings = replace(settings, lookat_m=lookat)
+                per_settings = replace(per_settings, lookat_m=lookat)
             except BackendUnavailable as exc:
                 logger.warning("rendering %s without overlays: %s", engine, exc)
         result = export_swing(
@@ -122,7 +131,7 @@ def run_export(
                     engine,
                     feed,
                     job.out_dir,
-                    impact_time_s=settings.impact_time_s,
+                    impact_time_s=per_settings.impact_time_s,
                 ),
             )
         results.append(result)

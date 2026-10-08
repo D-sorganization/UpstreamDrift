@@ -65,6 +65,17 @@ def build_parser() -> argparse.ArgumentParser:
         "at 0.1x speed (suffix _impact_0p1x)",
     )
     p.add_argument(
+        "--impact-speed",
+        type=float,
+        default=None,
+        help="playback speed of the --impact-window clip (default 0.1)",
+    )
+    p.add_argument(
+        "--no-hud",
+        action="store_true",
+        help="clean frames: no view label, HUD or legend text",
+    )
+    p.add_argument(
         "--impact-time",
         type=float,
         default=None,
@@ -128,6 +139,10 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         overlays=not args.no_overlay,
         multiview=not args.no_grid,
         grip=args.grip,
+        hud=not args.no_hud,
+        **(
+            {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
+        ),
     )
 
 

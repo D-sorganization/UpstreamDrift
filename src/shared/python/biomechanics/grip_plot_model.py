@@ -149,7 +149,7 @@ def build_grip_plot_series(
     ev = {str(k): float(v) for k, v in (events or {}).items()}
     if not all(math.isfinite(v) for v in ev.values()):
         raise ValueError("event times must be finite")
-    series = GripSeries.from_analyses(times, analyses)
+    series = GripSeries.from_analyses(times.tolist(), analyses)
     traces = {name: _trace(getattr(series, attr)) for name, attr in _ATTR.items()}
     any_net = any(v is not None for v in traces["net_force_n"]["x"])
     reasons = [a.unavailable_reason for a in analyses if a.unavailable_reason]

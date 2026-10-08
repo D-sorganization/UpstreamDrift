@@ -1,3 +1,10 @@
+# Active: Club Force and Torque Overlays - GCV-10 #11716
+
+- Branch `claude/gcv-10-grip-overlays`; epic #11706. Per-hand, net-at-midpoint and couple glyphs (groups `grip_per_hand`, `grip_net`, `grip_couple`, `grip_mof`) carry the `split_method` label; unavailable quantities are listed as unavailable, never zero (`force_overlay/grip_frame.py`, frame metadata `grip_unavailable_labels`).
+- Plots: `biomechanics/grip_plot_model.py` (series), `GET /analysis/grip-wrench`, web `GripWrenchCharts.tsx`, PyQt tile `grip_wrench_plots` (`src/tools/grip_wrench_plots/`). `analysis.grip_wrench` parity gap closed.
+- Native export: `--grip` adds the overlay (Drake uses its own KKT multiplier; other viewers show the MuJoCo plant at that engine's pose) and writes `<swing>_<engine>_grip_wrench.json`; `--views hands_closeup --no-grid` tracks the grip midpoint per frame (`view_lookats`, `WorkerJob.lookats`).
+- Open: `hands_closeup` azimuth is judged by eye only; Pinocchio gives a net allocation only and OpenSim is unavailable.
+
 # Active: Shared Ground Reaction Core — GCV-1, Epic #11706
 
 - Branch `claude/gcv-1-ground-reaction` (PR #11733): per-foot and net GRF, CoP, free moment and moment about the CoM in `src/shared/python/biomechanics/ground_reaction.py`. Next: GCV-2 (#11708) engine wiring.

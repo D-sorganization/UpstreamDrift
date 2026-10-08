@@ -114,7 +114,7 @@ VIEW_PRESETS = MappingProxyType(
             "Hands close-up (follows the grip midpoint)",
             -35.0,
             -18.0,
-            1.1,
+            0.7,
             tracks="grip_midpoint",
         ),
     }
@@ -146,7 +146,8 @@ def tracked_lookats(
     Raises:
         ValueError: if ``static_lookat_m`` is not a finite 3-vector.
     """
-    static = tuple(float(v) for v in check_point3(static_lookat_m, "static_lookat_m"))
+    checked = check_point3(static_lookat_m, "static_lookat_m")
+    static = (float(checked[0]), float(checked[1]), float(checked[2]))
     out: list[tuple[float, float, float]] = []
     held = static
     for point in focus_m:

@@ -38,13 +38,8 @@ class _Grip:
 
 def _provider(grip):
     return BundleOverlayProvider(
-        _bundle(),
-        _Contact(),
-        _Kinematics(),
-        engine="fake",
-        grip=grip,
-        grip_source="fake:kkt",
-    )
+        _bundle(), _Contact(), _Kinematics(), engine="fake"
+    ).with_grip(grip, "fake:kkt")
 
 
 def test_frames_carry_grip_wrenches_and_metadata():

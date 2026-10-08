@@ -126,8 +126,6 @@ class BundleOverlayProvider:
         v: Array | None = None,
         torque_floor_nm: float = 0.0,
         include_weight: bool = True,
-        grip: GripSource | None = None,
-        grip_source: str | None = None,
     ) -> None:
         if not isinstance(bundle, InputBundle):
             raise TypeError(
@@ -135,11 +133,9 @@ class BundleOverlayProvider:
             )
         if not engine:
             raise ValueError("engine must be a non-empty string")
-        if grip is not None and not isinstance(grip, GripSource):
-            raise TypeError("grip must provide grip_analysis(coords, rates, efforts)")
-        self._grip = grip
+        self._grip: GripSource | None = None
         self._grip_cache: dict[int, GripAnalysis] = {}
-        self._grip_source = grip_source or f"{engine}:grip"
+        self._grip_source = f"{engine}:grip"
         if not (math.isfinite(torque_floor_nm) and torque_floor_nm >= 0.0):
             raise ValueError("torque_floor_nm must be finite and non-negative")
         expected = bundle.reference_q.shape
@@ -160,6 +156,23 @@ class BundleOverlayProvider:
         self._sphere_body = {
             s["name"]: s["body"] for s in spec.get("contact", {}).get("spheres", ())
         }
+
+    def with_grip(
+        self, grip: GripSource, source: str | None = None
+    ) -> BundleOverlayProvider:
+        """Add the hands' wrench on the club (GCV-10); returns ``self``.
+
+        ``source`` labels where the extraction came from (frame metadata
+        ``grip_source``).  Raises ``TypeError`` if ``grip`` has no
+        ``grip_analysis``.
+        """
+        if not isinstance(grip, GripSource):
+            raise TypeError("grip must provide grip_analysis(coords, rates, efforts)")
+        self._grip = grip
+        self._grip_cache.clear()
+        if source:
+            self._grip_source = source
+        return self
 
     def __len__(self) -> int:
         return int(self._q.shape[0])

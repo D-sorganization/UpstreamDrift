@@ -11,6 +11,8 @@ import json
 import logging
 from typing import Any
 
+import numpy as np
+
 from src.shared.python.force_overlay.bundle_provider import BundleOverlayProvider
 from src.tools.native_viewer_export.core import (
     BackendUnavailable,
@@ -71,9 +73,9 @@ def build_overlay_feed(
         source,
         engine=engine,
         q=swing.q,
-        grip=grip_source,
-        grip_source=grip_name,
     )
+    if grip_source is not None:
+        provider.with_grip(grip_source, grip_name)
     names = swing.bundle.coordinate_order
     com = source.center_of_mass_m(dict(zip(names, map(float, swing.q[0]), strict=True)))
     lookat = (float(com[0]), float(com[1]), LOOKAT_HEIGHT_M)
@@ -84,3 +86,36 @@ def build_overlay_feed(
         grip_analyses=provider.grip_analyses if grip else None,
     )
     return feed, lookat
+
+
+def detect_impact_time_s(swing: SwingInput) -> float:
+    """Impact time of ``swing`` from the shared checked rule (one detector).
+
+    The head trajectory is the ``Clubhead`` frame of the specification export
+    placed by MuJoCo forward kinematics at every state of ``swing.q``; the
+    frame is chosen by ``model_appearance.club_face.impact_frame`` (closest
+    approach to the address position, with its height and ball-radius checks).
+
+    Raises ``BackendUnavailable`` without MuJoCo and ``ValueError`` when no
+    frame is a valid impact.
+    """
+    try:
+        from src.engines.physics_engines.mujoco.python.overlay_source import (
+            MujocoOverlaySource,
+        )
+    except ImportError as exc:
+        raise BackendUnavailable(f"mujoco is not available: {exc}") from exc
+    from src.shared.python.model_appearance.club_face import impact_frame
+
+    source = MujocoOverlaySource(swing.bundle.spec_bytes)
+    names = swing.bundle.coordinate_order
+    head = np.array(
+        [
+            source.frame_poses(dict(zip(names, map(float, row), strict=True)))[
+                "Clubhead"
+            ][:3, 3]
+            for row in swing.q
+        ]
+    )
+    times = np.asarray(swing.source_times_s, dtype=float)
+    return float(times[impact_frame(times, head)])

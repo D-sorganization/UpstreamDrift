@@ -89,6 +89,7 @@ class ExportSettings:
     impact_speed: float = IMPACT_CLIP_SPEED
     overlays: bool = True
     multiview: bool = True
+    hud: bool = True  # False: clean frames, no view label or HUD text
     grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
@@ -104,8 +105,8 @@ class ExportSettings:
         return cls(**{**base, **overrides})
 
     def _validate_clips(self) -> None:
-        if not self.speeds:
-            raise ValueError("speeds must not be empty")
+        if not self.speeds and self.impact_window_s is None:
+            raise ValueError("speeds must not be empty (or set impact_window_s)")
         for speed in (*self.speeds, self.impact_speed):
             if not (math.isfinite(speed) and 0.0 < speed <= MAX_SPEED):
                 raise ValueError(f"speeds must lie in (0, {MAX_SPEED:g}], got {speed}")
@@ -210,6 +211,11 @@ class SwingInput:
     def _provenance_value(self, key: str) -> Any:
         provenance = self.bundle.provenance
         return provenance.get(key)
+
+    @property
+    def has_impact_provenance(self) -> bool:
+        """Whether the bundle records an impact time."""
+        return self._provenance_value("impact_time_s") is not None
 
     @property
     def impact_time_s(self) -> float:
@@ -553,13 +559,17 @@ def _export_clip(
             )
             labelled = {
                 v: draw_label(tiles[v], get_view_preset(v).label, (8, 6))
+                if settings.hud
+                else tiles[v]
                 for v in settings.views
             }
-            outputs = {v: draw_hud(labelled[v], hud) for v in settings.views}
+            outputs = {
+                v: draw_hud(labelled[v], hud) if settings.hud else labelled[v]
+                for v in settings.views
+            }
             if settings.multiview:
-                outputs[GRID_VIEW] = draw_hud(
-                    compose_grid([labelled[v] for v in settings.views]), hud
-                )
+                grid = compose_grid([labelled[v] for v in settings.views])
+                outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             for name, frame in outputs.items():
                 key = f"{name}{plan.suffix}"
                 if key not in writers:
