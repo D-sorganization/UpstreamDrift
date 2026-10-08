@@ -397,6 +397,20 @@
       "id": "platform.aip_protocol"
     },
     {
+      "feature_id": "render.club_head_and_ball",
+      "title": "Realistic Club Head And Ball Rendering",
+      "status": "gap",
+      "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
+      "api": null,
+      "web": null,
+      "issue": 11717,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head.",
+      "id": "render.club_head_and_ball"
+    },
+    {
       "feature_id": "settings.desktop_only_tabs",
       "title": "Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance)",
       "status": "exempt",
@@ -3000,7 +3014,7 @@
   "inputs": {
     "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
     "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "29d7144015e1c30266c939807f94d013a9ffab8c81c28b72724e6258c9ed9afe",
+    "src/config/feature_parity.json": "f1ed6b29014a371f824af5a4813743d8645695e890d727ae9dac9681992a8b6a",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
