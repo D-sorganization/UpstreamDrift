@@ -139,6 +139,7 @@ def _toy_problem(nominal_fx: float) -> cw.WrenchQPProblem:
 
 
 def test_solver_reproduces_the_nominal_point_when_the_cone_is_satisfied() -> None:
+    pytest.importorskip("pydrake.solvers")
     problem = _toy_problem(nominal_fx=100.0)  # 100 < 0.57 * 700
     solution = cw.solve_wrench_qp(problem, cw.WrenchQPConfig())
     assert solution.success
@@ -148,6 +149,7 @@ def test_solver_reproduces_the_nominal_point_when_the_cone_is_satisfied() -> Non
 
 
 def test_solver_bends_joint_accelerations_when_the_friction_cone_is_violated() -> None:
+    pytest.importorskip("pydrake.solvers")
     problem = _toy_problem(nominal_fx=500.0)  # 500 > 0.566 * 700 = 396
     solution = cw.solve_wrench_qp(problem, cw.WrenchQPConfig(slack_weight=1e8))
     assert solution.success
@@ -168,6 +170,7 @@ def test_solver_bends_joint_accelerations_when_the_friction_cone_is_violated() -
 
 
 def test_solver_forces_a_lifted_foot_wrench_to_zero() -> None:
+    pytest.importorskip("pydrake.solvers")
     base = _toy_problem(nominal_fx=0.0)
     problem = cw.WrenchQPProblem(
         **{**base.__dict__, "touching": [False], "wrenches_nominal": np.zeros((1, 6))}
