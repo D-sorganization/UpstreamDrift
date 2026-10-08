@@ -12,6 +12,9 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.contracts import require
+from src.shared.python.video_timing.frame_schedule import (  # noqa: F401 - shim
+    select_frames as select_frames,
+)
 
 Array = np.ndarray
 
@@ -38,32 +41,6 @@ def activation_rgba(activation: Array, alpha: float = 1.0) -> Array:
     t = np.clip(a, 0.0, 1.0)[..., None]
     rgb = (1.0 - t) * COLD_RGB + t * HOT_RGB
     return np.concatenate([rgb, np.full(rgb.shape[:-1] + (1,), alpha)], axis=-1)
-
-
-def select_frames(times_s: Array, fps: float = 50.0, slowdown: float = 0.25) -> Array:
-    """Source-frame index shown by each video frame at ``slowdown`` x real time.
-
-    Video frame ``j`` lasts ``1 / fps`` seconds of video, which is
-    ``slowdown / fps`` seconds of the swing, so it shows the sample nearest to
-    ``times[0] + j * slowdown / fps``.
-
-    Returns:
-        Integer indices, non-decreasing, covering the whole swing.
-
-    Raises:
-        ValueError: if ``times_s`` is not a strictly increasing 1-D array of at
-            least two samples, or ``fps``/``slowdown`` are not positive.
-    """
-    t = np.asarray(times_s, dtype=float)
-    require(t.ndim == 1 and t.size >= 2, "times_s must be 1-D with >= 2 samples")
-    require(bool((np.diff(t) > 0.0).all()), "times_s must be strictly increasing")
-    require(fps > 0.0 and slowdown > 0.0, "fps and slowdown must be positive")
-    n = int(np.floor((t[-1] - t[0]) * fps / slowdown)) + 1
-    wanted = t[0] + np.arange(n) * slowdown / fps
-    right = np.clip(np.searchsorted(t, wanted), 1, t.size - 1)
-    left = right - 1
-    nearer_left = (wanted - t[left]) <= (t[right] - wanted)
-    return np.where(nearer_left, left, right).astype(int)
 
 
 def circular_mean_deg(a: float, b: float) -> float:
