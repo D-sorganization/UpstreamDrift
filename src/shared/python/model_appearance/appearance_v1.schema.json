@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://upstreamdrift.local/schemas/appearance-v1.schema.json",
+  "title": "Model Appearance Document",
+  "description": "Engine-agnostic, purely visual description stored beside a body/joint spec. Never part of the physics spec hash.",
+  "type": "object",
+  "required": ["schema_version"],
+  "additionalProperties": false,
+  "$defs": {
+    "color": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "minItems": 3,
+      "maxItems": 4
+    },
+    "unit": {"type": "number", "minimum": 0, "maximum": 1},
+    "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "texture": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["flat", "checker", "gradient", "noise", "file"]},
+        "color_a": {"$ref": "#/$defs/color"},
+        "color_b": {"$ref": "#/$defs/color"},
+        "noise": {"$ref": "#/$defs/unit"},
+        "repeat": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000},
+        "path": {"type": "string", "minLength": 1}
+      }
+    },
+    "material": {
+      "type": "object",
+      "required": ["base_color"],
+      "additionalProperties": false,
+      "properties": {
+        "base_color": {"$ref": "#/$defs/color"},
+        "roughness": {"$ref": "#/$defs/unit"},
+        "metallic": {"$ref": "#/$defs/unit"},
+        "texture": {"$ref": "#/$defs/texture"}
+      }
+    },
+    "segment_rule": {
+      "type": "object",
+      "required": ["match"],
+      "additionalProperties": false,
+      "properties": {
+        "match": {"type": "string", "minLength": 1},
+        "material": {"$ref": "#/$defs/name"},
+        "mesh": {"enum": ["smooth", "capsule", "none"]},
+        "radius_scale": {"type": "number", "exclusiveMinimum": 0, "maximum": 3}
+      }
+    }
+  },
+  "properties": {
+    "schema_version": {"const": "appearance-v1"},
+    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "name": {"type": "string", "minLength": 1},
+    "skin_tone": {"$ref": "#/$defs/name"},
+    "clothing": {"$ref": "#/$defs/name"},
+    "club_finish": {"$ref": "#/$defs/name"},
+    "materials": {
+      "type": "object",
+      "propertyNames": {"$ref": "#/$defs/name"},
+      "additionalProperties": {"$ref": "#/$defs/material"}
+    },
+    "segments": {"type": "array", "items": {"$ref": "#/$defs/segment_rule"}},
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ground_material": {"$ref": "#/$defs/name"},
+        "sky_top": {"$ref": "#/$defs/color"},
+        "sky_bottom": {"$ref": "#/$defs/color"},
+        "lighting": {"enum": ["studio", "daylight", "flat"]}
+      }
+    }
+  }
+}

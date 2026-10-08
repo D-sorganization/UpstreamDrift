@@ -553,18 +553,18 @@
     },
     {
       "feature_id": "tools.character_builder",
-      "title": "Character Builder (humanoid URDF generation)",
-      "status": "gap",
-      "pyqt": "src/shared/python/model_generation/cli/main.py",
+      "title": "Character Builder (spec-native character, presets, engine export)",
+      "status": "parity",
+      "pyqt": "src/tools/character_builder/gui.py",
       "api": "src/api/routes/character_builder.py",
       "web": "ui/src/pages/CharacterBuilder.tsx",
-      "issue": 7448,
+      "issue": null,
       "reason": null,
       "pending_decision": false,
       "tiles": [
         "character_builder"
       ],
-      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4).",
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page still drives only /character-builder/generate; wiring presets and spec export into the page is tracked under epic #11651.",
       "id": "tools.character_builder"
     },
     {
@@ -680,6 +680,20 @@
       "id": "tools.model_explorer"
     },
     {
+      "feature_id": "tools.model_explorer.frankenstein_assembly",
+      "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "status": "gap",
+      "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "api": null,
+      "web": null,
+      "issue": 11661,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661).",
+      "id": "tools.model_explorer.frankenstein_assembly"
+    },
+    {
       "feature_id": "tools.motion_matching",
       "title": "Motion Matching tour-average and club-only Excel matching",
       "status": "parity",
@@ -694,6 +708,20 @@
       ],
       "notes": "PyQt6 tool for anthropometric document generation, stage-aware ground-support tour matching, downswing experiments, MJX export/validation (MS-82 #10355), Club-Only Excel matching UI (CO-09 #10613), and neural-assisted matching controls wired to verified-inference orchestrator with qualified registry availability, honest research explanation, and classical fallback (R07 #11147). Web parity is an intentional platform gap as native physics and neural inference run in desktop PyQt6.",
       "id": "tools.motion_matching"
+    },
+    {
+      "feature_id": "tools.native_viewer_export",
+      "title": "Native per-engine viewer video export (CLI)",
+      "status": "exempt",
+      "pyqt": "src/tools/native_viewer_export/cli.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "",
+      "id": "tools.native_viewer_export"
     },
     {
       "feature_id": "tools.necromatcher",
@@ -1206,6 +1234,21 @@
         "pose_editing",
         "retargeting",
         "joint_manipulation"
+      ]
+    },
+    {
+      "id": "character_builder",
+      "title": "Character Builder",
+      "description": "Build a golfer from stature, mass and proportions and export a full-body spec, URDF, MJCF or OpenSim model; presets included",
+      "path": "src/tools/character_builder/__main__.py",
+      "launch_target": "src/tools/character_builder/__main__.py",
+      "category": "tool",
+      "status": "beta",
+      "capabilities": [
+        "urdf_generation",
+        "anthropometry",
+        "mesh_generation",
+        "collision_geometry"
       ]
     },
     {
@@ -2955,9 +2998,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "faf2e6a33deab344fe0a5e671c6b9f8a7e63365b76d980ea68b328ae390005dc",
-    "src/config/launcher_manifest.json": "2674d23f4694d9aa4aa90428c7212f78470e59452784ba09de266a04699e061a",
-    "src/config/feature_parity.json": "7bf7fcc3a71e8593769fde7f0f9c7b04e81605cdd66e74bf2c70ed6c2c935b24",
+    "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
+    "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
+    "src/config/feature_parity.json": "29d7144015e1c30266c939807f94d013a9ffab8c81c28b72724e6258c9ed9afe",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

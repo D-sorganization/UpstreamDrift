@@ -1,0 +1,360 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\geometry{margin=25mm}
+\emergencystretch=3em
+
+\title{MyoFullBody Muscle-Driven Golf Swing: Mapping and Static Optimization Reference}
+\author{UpstreamDrift (epic \#11642, issues \#11643--\#11647)}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Editable standalone research source (not the engineering design manual). Result status for both swings: \texttt{NOT\_QUALIFIED}. The whole-body mapping and the solver are verified; the muscle model cannot supply the spec joint efforts in the trunk, legs or arms. Compiled with \texttt{tectonic}; the PDF is not committed. This is inverse-dynamics-based redundancy resolution: it is not feedback-assisted tracking and it is not an independently replayed open-loop forward dynamics result.
+
+\section{Scope and Hybrid Formulation}
+The same-input bundles (driver and 7-iron; 44 coordinates, $\Delta t=1$~ms, reference $\mathbf{q},\mathbf{v}$ and joint-conjugate efforts $\boldsymbol\tau$) define a swing whose dynamics are owned by the spec skeleton. \emph{Spec inverse dynamics provides the efforts; MyoFullBody provides only the muscle moment arms and the force capacity.} MyoFullBody masses and inertias are never used. The question answered is whether MyoFullBody's 416 muscles can produce the spec efforts, and which muscles would do so with minimum activation.
+
+\section{Model, Provenance and Licences}
+\textbf{Model.} MyoSuite \texttt{myo\_sim} MyoFullBody, commit \path{93b0ca8f4ec90c9899ee7f05fee561e9911da91b}, composed with \texttt{myo\_sim.load("myofullbody")}: 104 bodies, 123 joints, nq~129, nv~128, 416 muscle actuators, 424 tendons, mass 84.26~kg (spec mass 78~kg), MuJoCo 3.8.0. The world is $z$ up and the model faces $-y$ at its zero pose.
+
+\textbf{Assets are not committed.} \texttt{scripts/fetch\_myofullbody.py} fetches the pinned archive into \path{~/.cache/upstreamdrift/myofullbody} (override: \path{UPSTREAMDRIFT_MYOFULLBODY_CACHE}). The committed manifest lists a sha256 for each of 173 files (manifest-files digest \path{dc71cbaf42d98268ef03d373c7ee518bc79519ddef3448e982fad152e8769453}); a tampered or extra file rejects the whole fetch, tested with a fake archive. Tests that need the model skip when the cache is absent.
+
+\textbf{Licences.} The repository is Apache-2.0. The arm muscles descend from MoBL-ARMS (Saul et al. 2015), whose upstream terms are BSD-3 \emph{non-commercial} with citation required. The owner ruled on 2026-10-07 that the application is non-commercial (free website and free software), so these terms are acceptable; commercial use requires re-clearing the arm muscle geometry. The trunk muscles come from the constrained lumbar spine model and the legs from the Rajagopal model.
+
+\section{Coordinate Mapping}
+\textbf{Why not renaming.} Names are not equivalent: the spec zero pose is arms level forward with thumbs up, the left hip carries a calibrated $45^\circ$ twist, spec knee flexion is negative, and the spec shoulder is a three-axis chain with separate scapula coordinates. The mapping therefore matches \emph{segment orientations}, not coordinates.
+
+\textbf{Segment frames.} Sixteen anatomical frames (pelvis, thorax, and per side humerus, forearm, hand, femur, tibia, foot, toes) are built identically in both models at the zero pose: $y$ along the long axis, $x$ along the distal hinge axis signed to point right, $z=x\times y$. Pelvis and thorax $x$ come from the hip and shoulder lines; hand and toes take the parent frame at zero. Leg hinge-axis signs are read at the address pose because the spec leg zero pose is ambiguous. The world alignment $G$ is taken from the thorax frames (the hip lines carry a $1.4^\circ$ yaw). The target orientation of a MyoFullBody segment is $G\,R_{spec}K_{spec}K_{myo}^{T}$.
+
+\textbf{Inverse kinematics.} Proximal to distal, in groups (thorax; humerus; forearm and hand jointly; femur; tibia; foot; toes), bounded nonlinear least squares on the rotation error with the group's independent joints as unknowns. The pelvis sets the free joint; the thorax sets the three lumbar coordinates; each humerus sets elevation plane, elevation and axial rotation.
+
+\textbf{Dependent joints.} MyoFullBody ties the knee translations and patella, the clavicle and scapula chain (functions of shoulder elevation, $\texttt{shoulder1\_r2}=-\texttt{elv\_angle}$) and the lumbar intervertebral joints to a few drivers by joint equality polynomials. They are substituted exactly, $q_1=q_{1,0}+p(q_2-q_{2,0})$, so equality residuals vanish (tested). \textbf{Scapula coupling.} The spec has two free scapula coordinates per side; MyoFullBody's scapula is slaved to shoulder elevation. The spec scapula and glenohumeral motion are therefore merged: the humerus world orientation fixes the three shoulder coordinates and the scapula follows the polynomial. The scapula efforts are carried by the shoulder muscles through the rate map below, and the scapular rhythm cannot deviate from MyoFullBody's.
+
+\textbf{Elevation branch.} A negative elevation duplicates a positive one with the plane of elevation turned by $\pi$, and the polynomials are fitted for non-negative elevation, so the elevation lower bound is never extended. Near arms-level elevation the Euler parametrisation is nearly degenerate (elevation plane and axial rotation trade off), so individual shoulder angles are not unique even though the segment orientation is.
+
+\textbf{Rate map.} The first-order map $\Phi=\partial q_{myo}/\partial q_{spec}$ is built hierarchically from the body angular Jacobians (pseudo-inverse per group, dependent joints by the coupling Jacobian) and verified against central finite differences. A spec generalized force maps by $\tau_{spec}=\Phi^T\,q_{frc,myo}$, which conserves power. A muscle with MuJoCo moment arms $M$ (tension negative) therefore has spec moment arms $R=-M\Phi$.
+
+\textbf{ROM policy.} Poses use the \texttt{extend} policy: every limit widened by $\pi$ except the elevation lower bound, so segments reach their target and the demand beyond MyoFullBody's limits is reported. A second \texttt{clamp} mapping, which honours the limits, is solved at the four key frames to show what limits cost.
+
+\noindent\emph{Note on provenance.} The orientation-error, range-of-motion, muscle-length, sensitivity and muscle-finding tables below are the \#11688 results of the extend policy; the reserve tables and the attribution section are the MFB-7 results of share IK with the torque neck. The extend path remains reproducible with \texttt{--rom-policy extend}.
+
+\section{Orientation Errors}
+Tolerance: $\le 1^\circ$ for the six three-degree-of-freedom chains (pelvis, thorax, humeri, femora) and $\le 15^\circ$ for the structurally one- or two-degree-of-freedom chains (forearm and tibia, wrist, foot and toes), whose segment orientation MyoFullBody cannot represent (the MoBL elbow has a carrying angle the spec's orthogonal elbow lacks; the knee and ankle lack the spec's out-of-plane freedom). Errors are the angle of the rotation error in degrees. Key frames: driver steps {'address': 0, 'finish': 1813, 'impact': 1248, 'top': 1061}; iron steps {'address': 0, 'finish': 1826, 'impact': 1260, 'top': 1095} (midpoint states, stride 5 ms plus key frames, 366 and 367 frames).
+
+\begin{table}[h]\centering\small
+\caption{Driver Orientation Error (Degrees), Extended ROM Policy}
+\begin{tabular}{lrrrr}\toprule Segment & Address & Top & Impact & Finish \\\midrule
+pelvis & 0.0 & 0.0 & 0.0 & 0.0 \\
+thorax & 0.0 & 0.0 & 0.0 & 0.0 \\
+humerus\_l & 0.0 & 0.0 & 0.0 & 0.0 \\
+humerus\_r & 0.0 & 0.0 & 0.0 & 0.0 \\
+forearm\_l & 13.2 & 9.5 & 9.2 & 8.0 \\
+forearm\_r & 11.3 & 7.5 & 9.2 & 7.4 \\
+hand\_l & 0.2 & 2.1 & 2.2 & 1.7 \\
+hand\_r & 0.9 & 3.6 & 2.2 & 1.4 \\
+femur\_l & 0.0 & 0.0 & 0.0 & 0.0 \\
+femur\_r & 0.0 & 0.0 & 0.0 & 0.0 \\
+tibia\_l & 9.2 & 12.5 & 11.9 & 6.6 \\
+tibia\_r & 3.3 & 11.9 & 7.2 & 8.4 \\
+foot\_l & 7.5 & 9.2 & 9.2 & 5.2 \\
+foot\_r & 0.4 & 1.9 & 1.3 & 1.8 \\
+toes\_l & 6.0 & 5.2 & 7.6 & 4.9 \\
+toes\_r & 0.3 & 1.8 & 0.8 & 1.7 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron Orientation Error (Degrees), Extended ROM Policy}
+\begin{tabular}{lrrrr}\toprule Segment & Address & Top & Impact & Finish \\\midrule
+pelvis & 0.0 & 0.0 & 0.0 & 0.0 \\
+thorax & 0.0 & 0.0 & 0.0 & 0.0 \\
+humerus\_l & 0.0 & 0.0 & 0.0 & 0.0 \\
+humerus\_r & 0.0 & 0.0 & 0.0 & 0.0 \\
+forearm\_l & 13.1 & 9.1 & 8.8 & 7.9 \\
+forearm\_r & 12.3 & 6.9 & 8.5 & 7.8 \\
+hand\_l & 0.3 & 1.7 & 1.7 & 1.3 \\
+hand\_r & 1.7 & 3.4 & 2.1 & 1.6 \\
+femur\_l & 0.0 & 0.0 & 0.0 & 0.0 \\
+femur\_r & 0.0 & 0.0 & 0.0 & 0.0 \\
+tibia\_l & 9.1 & 13.0 & 12.6 & 7.0 \\
+tibia\_r & 3.7 & 9.3 & 7.5 & 8.8 \\
+foot\_l & 7.3 & 9.2 & 9.4 & 4.5 \\
+foot\_r & 0.5 & 1.4 & 1.3 & 2.2 \\
+toes\_l & 5.9 & 5.0 & 7.2 & 4.1 \\
+toes\_r & 0.4 & 1.4 & 1.0 & 2.0 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Driver Orientation Error (Degrees), Clamped ROM Policy}
+\begin{tabular}{lrrrr}\toprule Segment & Address & Top & Impact & Finish \\\midrule
+pelvis & 0.0 & 0.0 & 0.0 & 0.0 \\
+thorax & 0.0 & 0.2 & 0.0 & 21.7 \\
+humerus\_l & 0.0 & 0.0 & 0.0 & 0.0 \\
+humerus\_r & 0.0 & 0.0 & 0.0 & 29.1 \\
+forearm\_l & 18.6 & 9.7 & 9.4 & 8.0 \\
+forearm\_r & 12.8 & 16.5 & 10.2 & 21.1 \\
+hand\_l & 14.2 & 3.1 & 3.1 & 1.7 \\
+hand\_r & 9.3 & 19.9 & 14.3 & 6.5 \\
+femur\_l & 2.1 & 27.4 & 0.0 & 0.0 \\
+femur\_r & 0.0 & 3.7 & 0.0 & 0.0 \\
+tibia\_l & 11.2 & 39.4 & 11.9 & 6.6 \\
+tibia\_r & 3.3 & 12.2 & 2.8 & 3.2 \\
+foot\_l & 9.6 & 30.3 & 9.2 & 5.2 \\
+foot\_r & 0.4 & 6.2 & 2.0 & 2.6 \\
+toes\_l & 7.5 & 26.8 & 7.6 & 4.9 \\
+toes\_r & 0.3 & 6.1 & 2.1 & 2.5 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron Orientation Error (Degrees), Clamped ROM Policy}
+\begin{tabular}{lrrrr}\toprule Segment & Address & Top & Impact & Finish \\\midrule
+pelvis & 0.0 & 0.0 & 0.0 & 0.0 \\
+thorax & 0.0 & 0.0 & 0.0 & 19.7 \\
+humerus\_l & 0.0 & 14.0 & 2.0 & 0.0 \\
+humerus\_r & 0.0 & 0.0 & 0.0 & 26.6 \\
+forearm\_l & 14.8 & 21.8 & 10.6 & 7.9 \\
+forearm\_r & 16.8 & 15.2 & 8.7 & 20.6 \\
+hand\_l & 33.2 & 5.7 & 1.6 & 1.3 \\
+hand\_r & 11.9 & 14.0 & 5.5 & 2.0 \\
+femur\_l & 6.3 & 24.2 & 0.0 & 1.6 \\
+femur\_r & 0.0 & 0.0 & 0.0 & 0.0 \\
+tibia\_l & 15.1 & 36.5 & 12.6 & 8.4 \\
+tibia\_r & 3.7 & 9.3 & 2.9 & 3.3 \\
+foot\_l & 13.5 & 28.3 & 9.4 & 6.0 \\
+foot\_r & 0.5 & 2.0 & 2.1 & 3.1 \\
+toes\_l & 10.3 & 24.7 & 7.2 & 5.5 \\
+toes\_r & 0.4 & 1.9 & 1.5 & 2.8 \\
+\bottomrule\end{tabular}\end{table}
+
+\noindent The three-degree-of-freedom chains are exact to numerical precision under the extended policy (the shoulder is verified numerically by segment-orientation IK, not by coordinate renaming). The structural chains stay within the stated 15$^\circ$ tolerance. Clamping the limits instead breaks the proximal chains at the top and finish (femur $\approx$ 24--27$^\circ$ at top, humerus and thorax 20--29$^\circ$ at finish), which is why the extended policy is the physical mapping.
+
+\begin{table}[h]\centering\small
+\caption{Hinge Cross-Check: Solved MyoFullBody Flexion Minus Signed Spec Coordinate (Degrees)}
+\begin{tabular}{lrrr}\toprule Pair (driver) & RMS & Max & Mean Offset \\\midrule
+LEInput to elbow\_flexion\_l & 2.2 & 3.8 & -1.6 \\
+REInput to elbow\_flexion\_r & 2.6 & 4.1 & -2.4 \\
+ankle\_angle\_l to ankle\_angle\_l & 1.0 & 2.5 & -0.7 \\
+ankle\_angle\_r to ankle\_angle\_r & 7.4 & 11.0 & 0.5 \\
+knee\_angle\_l to knee\_angle\_l & 4.0 & 4.2 & -4.0 \\
+knee\_angle\_r to knee\_angle\_r & 7.4 & 11.2 & 0.6 \\
+\bottomrule\end{tabular}\end{table}
+\noindent Signs are fixed by convention (knee and elbow opposite, ankle equal), not fitted. The iron swing agrees within the same bounds (RMS at most 6.9$^\circ$). The knee offset $-4^\circ$ and elbow offset about $-2^\circ$ are structural.
+
+\section{Range-of-Motion Clamps}
+For each joint beyond MyoFullBody's limits in the extended mapping, the table lists the limit range, the demanded range, the percentage of frames beyond the limit and the peak overshoot.
+
+\begin{table}[h]\centering\small
+\caption{Driver ROM Demand Beyond MyoFullBody Limits (Degrees)}
+\begin{tabular}{lrrrr}\toprule Joint & Limits & Demand & \% Frames & Peak Over \\\midrule
+hip\_rotation\_l & [-40, 40] & [-86, -20] & 66 & 45.6 \\
+deviation\_l & [-10, 25] & [-45, 32] & 68 & 35.5 \\
+deviation\_r & [-10, 25] & [-40, 15] & 82 & 30.4 \\
+axial\_rotation & [-45, 45] & [-45, 68] & 19 & 22.7 \\
+flexion\_r & [-45, 45] & [-67, 57] & 36 & 21.8 \\
+elv\_angle\_r & [-95, 130] & [76, 145] & 15 & 14.7 \\
+subtalar\_angle\_l & [-20, 20] & [-16, 34] & 11 & 13.9 \\
+subtalar\_angle\_r & [-20, 20] & [-27, 22] & 20 & 6.8 \\
+mtp\_angle\_r & [-30, 30] & [-27, 36] & 2 & 5.7 \\
+pro\_sup\_r & [-90, 90] & [-34, 95] & 7 & 5.2 \\
+hip\_adduction\_l & [-50, 30] & [-55, 4] & 14 & 5.0 \\
+elv\_angle\_l & [-95, 130] & [64, 134] & 2 & 4.3 \\
+hip\_rotation\_r & [-40, 40] & [-22, 44] & 13 & 4.2 \\
+flexion\_l & [-45, 45] & [-14, 49] & 17 & 3.8 \\
+elbow\_flexion\_r & [0, 130] & [-3, 111] & 8 & 3.4 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron ROM Demand Beyond MyoFullBody Limits (Degrees)}
+\begin{tabular}{lrrrr}\toprule Joint & Limits & Demand & \% Frames & Peak Over \\\midrule
+hip\_rotation\_l & [-40, 40] & [-82, -21] & 90 & 42.1 \\
+deviation\_l & [-10, 25] & [-43, 26] & 58 & 32.5 \\
+deviation\_r & [-10, 25] & [-42, 7] & 81 & 31.7 \\
+axial\_rotation & [-45, 45] & [-39, 63] & 14 & 17.6 \\
+elv\_angle\_r & [-95, 130] & [51, 147] & 9 & 16.6 \\
+elv\_angle\_l & [-95, 130] & [61, 144] & 26 & 14.1 \\
+flexion\_r & [-45, 45] & [-59, 48] & 26 & 13.7 \\
+mtp\_angle\_l & [-30, 30] & [-4, 39] & 10 & 9.2 \\
+elbow\_flexion\_l & [0, 130] & [-8, 102] & 23 & 8.2 \\
+elbow\_flexion\_r & [0, 130] & [-6, 120] & 7 & 6.5 \\
+subtalar\_angle\_r & [-20, 20] & [-26, 21] & 38 & 6.2 \\
+hip\_adduction\_l & [-50, 30] & [-56, 12] & 10 & 5.7 \\
+subtalar\_angle\_l & [-20, 20] & [-19, 25] & 7 & 4.7 \\
+mtp\_angle\_r & [-30, 30] & [-20, 31] & 3 & 0.6 \\
+\bottomrule\end{tabular}\end{table}
+\noindent Wrist deviation, left hip rotation and axial rotation of the lumbar spine are the dominant violations; MyoFullBody's wrist deviation and lumbar twist limits are tighter than the golf swing. Muscle paths beyond these limits are extrapolations.
+
+\section{Muscle Length Validity}
+At every mapped frame all tendon lengths are finite and positive (minimum 14.3~mm driver, 16.5~mm iron). Normalised length is $(\ell-\ell_{min})/(\ell_{max}-\ell_{min})$ with MuJoCo's \texttt{lengthrange}, which is computed over the model's own joint limits; ``outside'' (more than 2\% beyond) therefore marks paths evaluated beyond the validated range. Driver: 75 muscles are ever outside, 45 for more than 10\% of frames. Worst driver cases (fraction of frames outside): \texttt{FDP5\_l} (100\%), \texttt{FDS4} (100\%), \texttt{FDS4\_l} (100\%), \texttt{LAT1} (100\%), \texttt{LAT1\_l} (100\%), \texttt{LU\_RB4} (100\%), \texttt{LU\_RB4\_l} (100\%), \texttt{RI2} (100\%), \texttt{RI2\_l} (100\%), \texttt{RI5} (100\%). Iron: 67 ever, 42 for more than 10\% of frames. These are concentrated in the latissimus, internal oblique, finger flexors and extensors, and vastus medialis, and flag paths that need per-muscle review; they are not corrected here.
+
+\section{Static Optimization}
+Per frame, at midpoint states $(q_k,v_k)$ with effort $\tau_k$: unknowns are the activations $a\in[0,1]^{416}$ and reserve actuators $\rho\in\mathbb{R}^{38}$, one per non-root spec coordinate.
+\begin{equation}
+\min_{a,\rho}\ \sum_m a_m^2+w\sum_c\rho_c^2\quad\text{s.t.}\quad \tau_c=\sum_m R_{mc}\,(F^{p}_m+a_m F^{a}_m)+\rho_c,\ \ 0\le a\le 1 .
+\end{equation}
+The passive force $F^p_m=-f_m(a{=}0)$ and active capacity $F^a_m=-(f_m(1)-f_m(0))$ come from MuJoCo's muscle model at the pose and rates $\dot q_{myo}=\Phi v$, so the force-length-velocity relationship is included, and the force is linear in activation (checked to $10^{-13}$~N). $R=-M\Phi$ as above. Reserve weight $w=100$. The six root coordinates carry no effort and no muscle (contact supplies them). MyoFullBody has no neck; since MFB-7 (\#11689) the three neck coordinates are served by a documented bounded torque actuator (a signed pair of unit-moment-arm actuators with the literature maximum isometric moment, 30/36/15~N\,m for flexion, lateral bending, axial rotation; Vasavada et al. 2001, 2008, to be verified against the papers before publication). It is not a muscle, and the neck is held to the same 10\% limit. Fingers are held (rigid grip).
+
+\textbf{Solver.} The bounded least squares of \texttt{musculoskeletal\_static\_opt.solve\_frame} (BVLS) takes about a minute per frame at 416 muscles, so a projected Newton method with a Woodbury solve on the free set is used (about 0.05~s). It agrees with BVLS to a relative cost of $10^{-5}$ (tested on random problems and on a real frame). A toy two-muscle one-joint problem is checked against its analytic optimum $a=w\tau c/(1+w\|c\|^2)$, $c_m=r_mF_m$. All frames converged in both swings.
+
+\section{Inverse-Dynamics Consistency}
+Two independent checks per frame. (i) \emph{Torque closure:} MuJoCo's \texttt{qfrc\_actuator} at the solved activations, mapped by $\Phi^T$, plus the reserve must equal the spec effort; tolerance $10^{-6}$~N\,m; observed maximum 1.7e-13 (driver) and 2.3e-13 (iron) N\,m. (ii) \emph{Plant consistency:} the spec plant (\texttt{VectorPlant}, MuJoCo) driven by the rebuilt effort must give the same acceleration as when driven by the original effort; tolerance 1\% of the reference acceleration RMS; observed relative RMS 2.3e-12 (driver) and 4.0e-12 (iron). Both pass. The baseline plant-versus-bundle acceleration residual at the sampled midpoint states is 19.7 (driver, reference RMS 87.4) and 51.6 (iron, reference RMS 56.5) rad/s$^2$; it belongs to the bundle and the midpoint pairing, not to the muscle decomposition, and is reported only for transparency.
+
+\section{Reserves and Qualification}
+Fail-closed rule: \texttt{NOT\_QUALIFIED} if any muscle-covered group (legs, trunk, arms) has reserve RMS above 10\% of its effort RMS, if the solver does not converge, or if the ID check fails. Both swings fail: arms, legs and trunk exceed the limit. The limit is not loosened.
+
+\begin{table}[h]\centering\small
+\caption{Driver Reserve by Group (Share IK, Neck Actuator, $w=100$)}
+\begin{tabular}{lrrrrr}\toprule Group & Effort RMS & Effort Peak & Reserve RMS & Reserve Peak & Reserve/Effort (\%) \\\midrule
+arms & 11.5 & 107 & 7.5 & 64 & 65 \\
+legs & 60.3 & 761 & 19.2 & 266 & 32 \\
+neck & 4.5 & 22 & 0.0 & 0 & 0 \\
+trunk & 64.4 & 397 & 33.8 & 316 & 53 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron Reserve by Group (Share IK, Neck Actuator, $w=100$)}
+\begin{tabular}{lrrrrr}\toprule Group & Effort RMS & Effort Peak & Reserve RMS & Reserve Peak & Reserve/Effort (\%) \\\midrule
+arms & 11.8 & 89 & 7.7 & 60 & 65 \\
+legs & 62.5 & 678 & 20.3 & 333 & 33 \\
+neck & 3.7 & 17 & 0.0 & 0 & 0 \\
+trunk & 60.4 & 262 & 33.7 & 183 & 56 \\
+\bottomrule\end{tabular}\end{table}
+
+\noindent Units are N\,m. The reserve at the instants of peak demand is large: the spec trunk lateral-bending effort at impact (driver peak 397~N\,m in the trunk group) exceeds what the MyoFullBody lumbar muscles can supply, and the right hip flexion and left hip adduction efforts also exceed the modelled capacity near impact. The neck is within its torque actuator capacity (peak activation 0.73 driver, 0.57 iron) and its reserve is zero; this is a modelling statement about a bounded torque actuator, not muscle evidence.
+
+\begin{table}[h]\centering\small
+\caption{Driver Sensitivity: Reserve Over Effort RMS (\%)}
+\begin{tabular}{rrrrrr}\toprule $w$ & Force Scale & Passive Scale & Legs & Trunk & Arms \\\midrule
+1 & 1 & 1 & 30 & 76 & 53 \\
+10 & 1 & 1 & 30 & 76 & 53 \\
+1000 & 1 & 1 & 30 & 76 & 53 \\
+100 & 0.95 & 1 & 31 & 74 & 54 \\
+100 & 1.5 & 1 & 21 & 100 & 52 \\
+100 & 1 & 0 & 30 & 39 & 54 \\
+\bottomrule\end{tabular}\end{table}
+\noindent The reserve weight is irrelevant once large; scaling all forces by $(78/84.3)^{2/3}=0.95$ changes little; a $1.5\times$ stronger model reduces the leg reserve to about 21\% but not below the limit and makes the trunk worse (its passive force grows with scale); removing passive force reduces the trunk reserve to about 39\%, which shows that much of the trunk reserve is passive muscle force at poses beyond MyoFullBody's lumbar limits (axial rotation to 68$^\circ$ against a $\pm45^\circ$ limit). Iron is within a few percentage points of these values in every row.
+
+\section{Reserve Attribution and Reduction (MFB-7, \#11689)}
+Goal: reserve below 10\% of effort RMS per group on both clubs. Result: not met; arms, legs and trunk remain \texttt{NOT\_QUALIFIED}. What changed and why is measured below.
+
+\textbf{Changes.} (1) \emph{Share IK} (\texttt{share\_ik}): whole-body bounded weighted least squares over the 31 independent joints plus a pelvis rotation, weights $1/\mathrm{tol}$ with a 15$^\circ$ proximal tolerance, analytic SO(3) Jacobian, every joint kept inside its range, and a velocity map $\Phi$ from the same weighted problem. (2) \emph{Torque neck} as above. (3) Attribution diagnostics (\texttt{attribution}). Not done: force-capacity scaling beyond the sensitivity rows (no evidence to justify a stronger model), and lumbar-rotation redistribution beyond what share IK does.
+
+\textbf{Attribution.} Waterfall of reserve/effort (\%): baseline; passive force removed; active capacity $\times3$ with passive off; unlimited capacity. The kinematic floor is the part of the effort no MyoFullBody generalised force can produce at all.
+
+\begin{table}[h]\centering\small
+\caption{Driver Attribution: Reserve Over Effort RMS (\%)}
+\begin{tabular}{lrrrrr}\toprule Group & Baseline & Passive Off & $\times3$ Capacity & Unlimited & Kinematic Floor \\\midrule
+arms & 65 & 64 & 62 & 62 & 58 \\
+legs & 32 & 31 & 17 & 15 & 12 \\
+trunk & 53 & 41 & 14 & 13 & 8 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron Attribution: Reserve Over Effort RMS (\%)}
+\begin{tabular}{lrrrrr}\toprule Group & Baseline & Passive Off & $\times3$ Capacity & Unlimited & Kinematic Floor \\\midrule
+arms & 65 & 62 & 59 & 58 & 54 \\
+legs & 33 & 32 & 15 & 14 & 11 \\
+trunk & 56 & 39 & 14 & 14 & 7 \\
+\bottomrule\end{tabular}\end{table}
+
+\noindent \emph{Arms} (about 65\%): the floor (58\% driver, 54\% iron) is structural. The spec shoulder girdle has two scapula coordinates per side with no independent MyoFullBody counterpart (the shoulder-complex joints are coupled), so that effort cannot be produced by any muscle; more strength changes nothing. \emph{Legs} (about 32\%): the floor is about 11\%, and unlimited capacity gives about 15\%, so legs are capacity-limited in the model and also close to a geometric floor above 10\%. \emph{Trunk} (about 53--56\%): the floor is 7--8\% and unlimited capacity gives 13--14\%, so the trunk gap is mostly capacity; passive off gives 39--41\%, so about 13--17 points are passive muscle force. A $\times3$ stronger model would still sit at 14\%.
+
+\begin{table}[h]\centering\small
+\caption{Driver Reserve Over Effort RMS by Phase (\%)}
+\begin{tabular}{lrrrr}\toprule Group & Backswing & Downswing & Impact Window & Follow-through \\\midrule
+arms & 85 & 61 & 68 & 64 \\
+legs & 15 & 23 & 29 & 42 \\
+trunk & 45 & 54 & 73 & 49 \\
+\bottomrule\end{tabular}\end{table}
+\noindent The gated metric is the full-window RMS; the phase table is diagnostic. No phase passes for arms, trunk is highest in the impact window, and the legs are below 25\% only in the backswing and downswing. Iron is similar (receipt).
+
+\textbf{Mixed result of share IK.} Compared with the extend policy of \#11688 (trunk 76\%, legs 30\%, arms 53\%), share IK lowers the trunk to 53\% and leaves legs at 32\%, but raises the arms to 65\%, because forcing every joint inside its range and sharing proximal error moves error into the arm chain whose floor is already structural. It also removes the range violations of the extend policy. Both policies are available (\texttt{--rom-policy}).
+
+\textbf{Follow-ups.} Release or add the sterno-clavicular and scapular joints so the arms have an independent shoulder-girdle (expected to be the largest single gain); a stronger trunk requires a justified strength model, not scaling; an impact-window treatment of the force spike; independent forward-dynamics replay.
+
+\section{Muscle Findings}
+Between the top of the backswing and impact (the transition and downswing), the muscles with the highest mean activation are below. ``Peak time'' is relative to impact. Because reserves are large, activations saturate at 1 and these lists describe where the model \emph{runs out of capacity}, not a validated recruitment pattern.
+
+\begin{table}[h]\centering\small
+\caption{Driver: Most Active Muscles, Top to Impact}
+\begin{tabular}{lrrr}\toprule Muscle & Mean & Peak & Peak Time (ms) \\\midrule
+addmagProx\_l & 1.00 & 1.00 & -187 \\
+ECU\_l & 1.00 & 1.00 & -187 \\
+sart\_l & 1.00 & 1.00 & -187 \\
+psoas\_l & 1.00 & 1.00 & -187 \\
+FPL\_l & 1.00 & 1.00 & -187 \\
+IL\_L1\_r & 1.00 & 1.00 & -187 \\
+IL\_L2\_r & 1.00 & 1.00 & -187 \\
+EDC4\_l & 0.98 & 1.00 & -158 \\
+LTpL\_L1\_r & 0.97 & 1.00 & -187 \\
+IL\_L3\_r & 0.96 & 1.00 & -187 \\
+TRIlat & 0.96 & 1.00 & -138 \\
+LTpL\_L2\_r & 0.96 & 1.00 & -187 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[h]\centering\small
+\caption{Iron: Most Active Muscles, Top to Impact}
+\begin{tabular}{lrrr}\toprule Muscle & Mean & Peak & Peak Time (ms) \\\midrule
+IL\_L1\_r & 1.00 & 1.00 & -165 \\
+IL\_L2\_r & 1.00 & 1.00 & -165 \\
+IL\_L3\_r & 1.00 & 1.00 & -165 \\
+addmagProx\_l & 1.00 & 1.00 & -165 \\
+EDM\_l & 1.00 & 1.00 & -165 \\
+EDC5\_l & 1.00 & 1.00 & -165 \\
+sart\_l & 1.00 & 1.00 & -165 \\
+EDC4\_l & 1.00 & 1.00 & -165 \\
+psoas\_l & 1.00 & 1.00 & -165 \\
+IL\_R12\_r & 1.00 & 1.00 & -165 \\
+addbrev\_l & 0.99 & 1.00 & -160 \\
+IL\_L4\_r & 0.98 & 1.00 & -165 \\
+\bottomrule\end{tabular}\end{table}
+\noindent In both swings the same structures saturate about 165--190~ms before impact: the right lumbar erector spinae and longissimus (\texttt{IL\_L1}--\texttt{L4\_r}, \texttt{LTpL}, \texttt{LTpT}) for trunk extension and rotation, the left psoas, sartorius and adductor magnus (hip flexion and adduction), the left forearm extensors (\texttt{ECU\_l}, \texttt{EDC}), and, later, the triceps and supinator on the right arm. These match the physiological demand (trunk rotation and left-hip drive at the transition), but the saturation is the sign that capacity is exceeded.
+
+\section{Failed Experiments}
+\begin{itemize}
+\item \textbf{Coordinate renaming and zero-pose equivalence} gave arm and leg errors of tens of degrees; replaced by landmark segment frames.
+\item \textbf{Leg hinge axes signed at the zero pose} flipped the left foot by $26^\circ$ and the ankle by $-75^\circ$ because the spec leg zero pose is twisted; fixed by signing at the address pose and by using the ankle axis, not the metatarsal axis, for the foot frame.
+\item \textbf{World alignment from the hips} carried a $1.4^\circ$ yaw; taken from the thorax instead.
+\item \textbf{Unbounded shoulder elevation} chose negative elevation (up to $-110^\circ$) and extrapolated the scapula polynomial; the lower bound is now never extended.
+\item \textbf{BVLS per frame} took 66~s; \texttt{lsq\_linear} with the trust-region method did not converge in 11~s. Replaced by projected Newton.
+\item \textbf{ID check on stale state:} the first torque-closure check read MuJoCo's state of the last frame and reported 328~N\,m; it now resets each frame's state.
+\item \textbf{Correlation-derived hinge signs} flipped for nearly constant joints (right ankle, knees); signs are now fixed by convention.
+\item \textbf{Share IK for the arms:} lowering the trunk reserve raised the arm reserve (53\% to 65\%); not a net qualification gain.
+\item \textbf{Strength scaling:} $\times1.5$ lowers legs to 25\% but does not reach 10\% and has no evidence basis; $\times3$ with passive off leaves trunk 14\%.
+\item \textbf{Clamped mapping} breaks the proximal chains by 20--40$^\circ$ at the top and finish and is only used to quantify the limit.
+\end{itemize}
+
+\section{Limitations}
+Not qualified. Mapping is an orientation match, so MyoFullBody joint angles are not unique near the degenerate shoulder; wrist and finger motion beyond the wrist are not mapped (grip is rigid); the neck is a torque actuator, not muscles, and its motion is not represented; the shoulder girdle has no independent counterpart (arms floor above 50\%); muscles are rigid-tendon MuJoCo tendons whose force-length curves are generic; the MoBL arm and the lumbar trunk are scaled by neither anthropometry nor strength (the spec is 78~kg, MyoFullBody 84.3~kg); passive force beyond the ROM is extrapolated; the spec thoracic motion is a single torso coordinate; activations are not independently replayed in forward dynamics. An animation, a successful run or an optimizer result is not physical acceptance, and none is claimed.
+
+\section{Reproduction}
+\begin{verbatim}
+python3 scripts/fetch_myofullbody.py --receipt /tmp/myofullbody_assets.json
+export MUJOCO_GL=egl MPLBACKEND=Agg QT_QPA_PLATFORM=offscreen PYTHONPATH=.:src
+python3 scripts/run_myofullbody_swing.py --bundle driver.npz --stride 5 \
+  --workers 2 --receipt receipt_driver.json --solution driver_solution.npz
+python3 scripts/run_myofullbody_swing.py --bundle iron.npz --stride 5 \
+  --receipt receipt_iron.json --solution iron_solution.npz
+python3 scripts/render_myofullbody_swing.py --solution driver_solution.npz \
+  --receipt receipt_driver.json --label driver --out-dir OUT --club-length-m 1.17
+python3 -m pytest tests/unit/engines/myofullbody
+\end{verbatim}
+The bundles are the same-input bundles of \texttt{docs/research/same\_input\_parity}. Runtime is about 40~min per swing with two workers (attribution adds the capacity variants).
+
+\section{Receipt Hashes}
+\begin{tabular}{ll}
+Driver receipt sha256 & {\scriptsize\path{132a2306f07603fb2c690c5eafa50f1655742c4e2a9883132a742bfa907e5fb1}} \\
+Iron receipt sha256 & {\scriptsize\path{958cc67292557a48ceb32455e3d43827815969b75c18ba4b9a5d317b2d350e49}} \\
+Driver receipt digest & {\scriptsize\path{47c96603f723f247c9884b4d249afc47bc40ff44a61197d3994d0528692f7a93}} \\
+Iron receipt digest & {\scriptsize\path{cba9049fec9694b1d7d27ae3961eddb3430f1f51ca2d1dc682394a629e7a4a01}} \\
+Driver bundle sha256 & {\scriptsize\path{d7aeb9a886c6e2cf414e99af9d0e33cf62d6060271b1a9d23c36678cacfeb678}} \\
+Iron bundle sha256 & {\scriptsize\path{9ef8e23bb4eb4df13e7f3f96030cd9a7301760f429d70b369e9cb3c2e751e576}} \\
+\end{tabular}
+
+\noindent Receipts: \path{docs/development/full_body_models/evidence/myofullbody/}. Videos and plots: \texttt{\textasciitilde/Videos/Parity Audit/musculoskeletal\_fullbody/v2/}; the \#11688 set is one level up. The drawn club is illustrative.
+
+\end{document}

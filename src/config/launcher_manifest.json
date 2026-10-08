@@ -705,7 +705,7 @@
       "description": "Build and customize humanoid URDF models with anthropometric scaling",
       "category": "tool",
       "type": "special_app",
-      "path": "src/shared/python/model_generation/cli/main.py",
+      "path": "src/tools/character_builder/__main__.py",
       "logo": "urdf_icon.svg",
       "status": "gui_ready",
       "capabilities": [

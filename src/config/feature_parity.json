@@ -11,6 +11,15 @@
       "tiles": [],
       "notes": "Lists OpenCap session trials, loads the selected trial via load_opencap_session, and hands the scaled model plus kinematics to the OpenSim engine."
     },
+    "tools.native_viewer_export": {
+      "title": "Native per-engine viewer video export (CLI)",
+      "pyqt": "src/tools/native_viewer_export/cli.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
+      "tiles": []
+    },
     "tools.necromatcher": {
       "title": "Historical Player Library And Source Review",
       "pyqt": "src/tools/necromatcher/gui.py",
@@ -313,15 +322,24 @@
       "tiles": ["model_explorer"],
       "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
     },
+    "tools.model_explorer.frankenstein_assembly": {
+      "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
+      "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
+      "api": null,
+      "web": null,
+      "status": "gap",
+      "issue": 11661,
+      "tiles": [],
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661)."
+    },
     "tools.character_builder": {
-      "title": "Character Builder (humanoid URDF generation)",
-      "pyqt": "src/shared/python/model_generation/cli/main.py",
+      "title": "Character Builder (spec-native character, presets, engine export)",
+      "pyqt": "src/tools/character_builder/gui.py",
       "api": "src/api/routes/character_builder.py",
       "web": "ui/src/pages/CharacterBuilder.tsx",
-      "status": "gap",
-      "issue": 7448,
+      "status": "parity",
       "tiles": ["character_builder"],
-      "notes": "Web page exists but the backing API endpoints are stubs/partial (F4)."
+      "notes": "Desktop and API share humanoid_character_builder.spec_export (build, preview, export spec/URDF/MJCF/OSIM, presets). The web page still drives only /character-builder/generate; wiring presets and spec export into the page is tracked under epic #11651."
     },
     "tools.data_explorer": {
       "title": "Data Explorer (import/filter/visualize datasets)",

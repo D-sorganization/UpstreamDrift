@@ -15,11 +15,12 @@ engine. It also converts between model formats, validates and compares URDF
 files, composes models from parts, computes inertia tensors, and manages a
 local model library.
 
-The tile lives in the `web_catalog` half of the registry: `surfaces: ["web"]`
-with the reason "web page (/tools/character-builder); the native side is a
-CLI", `web.mode: route`, `web.route: /tools/character-builder`,
-`launcher.status: gui_ready`. The native entry point is
-`src/shared/python/model_generation/cli/main.py` (`model-gen`). Declared
+The tile opens a native PyQt6 builder (`src/tools/character_builder`) that
+compiles a golfer to the `full-body-v1` specification used by every physics
+engine and exports it as spec JSON, URDF, MJCF or OpenSim XML; the same
+operations are served by `/api/character-builder/*`. The original URDF
+command-line workflow (`model-gen`,
+`src/shared/python/model_generation/cli/main.py`) remains available. Declared
 capabilities: `urdf_generation`, `anthropometry`, `mesh_generation`,
 `collision_geometry`.
 
@@ -62,6 +63,22 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 (1.28 m, 26.0 kg, CDC growth charts 50th percentile) and `senior_70yo`
 (1.70 m, 72.0 kg, NHANES average).
 
+### Spec-Native Builder (Desktop Tool and API)
+
+| Input | Unit / type | Notes |
+| --- | --- | --- |
+| Preset | `tour_average_male`, `tour_average_female`, `junior`, `senior`, `anthro_driver`, `anthro_iron7` or Custom | JSON files in `humanoid_character_builder/presets/data`, validated by `character_preset.schema.json`. Editing any value switches to Custom. |
+| `stature_m` | m, 1.20 to 2.30 | Scales De Leva segment lengths. |
+| `mass_kg` | kg, 30 to 200 | Distributed by De Leva mass fractions. |
+| `trunk_scale`, `arm_scale`, `shoulder_scale` | dimensionless, 0.7 to 1.4 | Trunk length, arm lengths, biacromial breadth. |
+| `grip_roll_deg` | deg, -180 to 180 | Hand roll about the shaft. |
+| `club` | `driver` or `iron7` | Copied into the spec with its mass properties. |
+
+Outputs: the specification (sorted-key JSON, byte-identical for equal inputs,
+SHA-256 shown in the summary), a URDF, an MJCF and an OpenSim model. API:
+`GET /character-builder/presets`, `POST /character-builder/build`, `/preview`
+and `/export/{spec|urdf|mjcf|osim}`.
+
 ## Outputs
 
 | Output | Description | Unit |
@@ -78,6 +95,15 @@ including `average` (1.75 m, 75.0 kg), `athletic` (1.80 m, 80.0 kg),
 | URDF `<inertial>` blocks | one per segment, via `write_urdf_inertial` | mass in kg, inertia in kg m^2 |
 
 ## Method
+
+The spec-native path compiles through `compose_anthropometric_document`
+(`motion_matching/execution/spec_builder.py`): the De Leva 1996 male table
+sets segment masses, centres of mass and inertias, the native upper body is
+rebuilt for the subject and the Rajagopal lower limbs are attached at the
+subject hip width. The desktop tool and the API share
+`humanoid_character_builder/spec_export.py`.
+
+The URDF command-line path works as follows.
 
 `cmd_generate` constructs a `ParametricBuilder` with the requested robot name,
 applies `set_height` and `set_mass` when given, parses `--proportions` as JSON
@@ -105,9 +131,12 @@ converters, library) and `src/shared/python/humanoid_character_builder`
 
 ## Limitations
 
-- There is no native GUI. The registry states plainly that the native side is a
-  CLI and that the interactive surface is the web route
-  `/tools/character-builder`. `launcher.status` is `gui_ready`, not `ready`.
+- The spec-native output is unqualified geometry: validated for structure and
+  loadability in MuJoCo, Drake, Pinocchio and OpenSim, not against measured
+  subjects. The De Leva male table and Rajagopal legs are always used, so the
+  female, junior and senior presets only change stature, mass and proportion
+  scales, and their values are nominal. The web page still drives only
+  `/character-builder/generate`.
 - Presets are parameter tables, not validated subjects. The percentile and
   survey attributions in `character_presets.md` describe where the height and
   mass came from; they do not make a generated model a validated

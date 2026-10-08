@@ -13,9 +13,9 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1632,
+    "ud-only": 1665,
     "tools-only": 777,
-    "spelling-only": 123
+    "spelling-only": 121
   },
   "packages": {
     "README.md": {
@@ -364,7 +364,7 @@
     "force_overlay": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 15,
+      "ud-only": 16,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -379,6 +379,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 19,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "golf_view_presets": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 3,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -413,9 +420,9 @@
     "humanoid_character_builder": {
       "identical": 14,
       "diverged": 26,
-      "ud-only": 27,
+      "ud-only": 36,
       "tools-only": 0,
-      "spelling-only": 11
+      "spelling-only": 9
     },
     "import_aliases.py": {
       "identical": 0,
@@ -473,10 +480,17 @@
       "tools-only": 0,
       "spelling-only": 0
     },
+    "model_appearance": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 5,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
     "model_generation": {
       "identical": 27,
       "diverged": 52,
-      "ud-only": 19,
+      "ud-only": 20,
       "tools-only": 1,
       "spelling-only": 14
     },
@@ -498,6 +512,13 @@
       "identical": 0,
       "diverged": 0,
       "ud-only": 169,
+      "tools-only": 0,
+      "spelling-only": 0
+    },
+    "myofullbody": {
+      "identical": 0,
+      "diverged": 0,
+      "ud-only": 14,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -8320,6 +8341,18 @@
       "spelling_only": false
     },
     {
+      "path": "force_overlay/bundle_provider.py",
+      "classification": "ud-only",
+      "package": "force_overlay",
+      "subpackage": "",
+      "ud_bytes": 9255,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "force_overlay/contracts.py",
       "classification": "ud-only",
       "package": "force_overlay",
@@ -9976,6 +10009,42 @@
       "spelling_only": false
     },
     {
+      "path": "golf_view_presets/__init__.py",
+      "classification": "ud-only",
+      "package": "golf_view_presets",
+      "subpackage": "",
+      "ud_bytes": 782,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_view_presets/adapters.py",
+      "classification": "ud-only",
+      "package": "golf_view_presets",
+      "subpackage": "",
+      "ud_bytes": 4833,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "golf_view_presets/presets.py",
+      "classification": "ud-only",
+      "package": "golf_view_presets",
+      "subpackage": "",
+      "ud_bytes": 4509,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "golf_viz/__init__.py",
       "classification": "ud-only",
       "package": "golf_viz",
@@ -10940,24 +11009,132 @@
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 404,
+      "ud_bytes": 626,
       "tools_bytes": 400,
-      "byte_delta": 4,
+      "byte_delta": 226,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/character_preset.schema.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 1869,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/anthro_driver.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 753,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/anthro_iron7.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 748,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/junior.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 491,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/senior.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 484,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/tour_average_female.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 613,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/presets/data/tour_average_male.json",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "presets",
+      "ud_bytes": 601,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "classification": "diverged",
       "package": "humanoid_character_builder",
       "subpackage": "presets",
-      "ud_bytes": 9064,
+      "ud_bytes": 11927,
       "tools_bytes": 9060,
-      "byte_delta": 4,
+      "byte_delta": 2867,
       "byte_identical": false,
       "ud_has_child_copy_header": false,
-      "spelling_only": true
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/spec_export.py",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "",
+      "ud_bytes": 5435,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "humanoid_character_builder/spec_params.py",
+      "classification": "ud-only",
+      "package": "humanoid_character_builder",
+      "subpackage": "",
+      "ud_bytes": 6225,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
     },
     {
       "path": "humanoid_character_builder/tests/__init__.py",
@@ -11692,6 +11869,66 @@
       "spelling_only": false
     },
     {
+      "path": "model_appearance/__init__.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 1088,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/appearance_v1.schema.json",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 2777,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/geometry.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 6599,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/library.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 8060,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "model_appearance/schema.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 8729,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "model_generation/__init__.py",
       "classification": "diverged",
       "package": "model_generation",
@@ -12217,6 +12454,18 @@
       "byte_delta": null,
       "byte_identical": false,
       "ud_has_child_copy_header": true,
+      "spelling_only": false
+    },
+    {
+      "path": "model_generation/editor/attachment_ports.py",
+      "classification": "ud-only",
+      "package": "model_generation",
+      "subpackage": "editor",
+      "ud_bytes": 4751,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
       "spelling_only": false
     },
     {
@@ -13940,7 +14189,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "execution",
-      "ud_bytes": 20792,
+      "ud_bytes": 22162,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15092,7 +15341,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 18198,
+      "ud_bytes": 18222,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -18861,6 +19110,174 @@
       "package": "movement_optimizer",
       "subpackage": "",
       "ud_bytes": 4305,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/__init__.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 0,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/anatomy.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 9870,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/assets.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 12372,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/attribution.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 10775,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/couplings.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 5888,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/ik.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 5521,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/mapping.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 17655,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/mapping_report.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 8404,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/myofullbody_manifest.json",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 20269,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/neck.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 4033,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/redundancy.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 11739,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/render.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 7991,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/share_ik.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 12095,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "myofullbody/swing_pipeline.py",
+      "classification": "ud-only",
+      "package": "myofullbody",
+      "subpackage": "",
+      "ud_bytes": 16600,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
