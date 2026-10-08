@@ -18,9 +18,14 @@ from src.engines.physics_engines.opensim.python.grip_bushing_sim import (  # noq
     BushingGripSimulator,
     analyze_run,
     hand_power_w,
+    input_kinematics_report,
     lowpass_trajectory,
+    prepare_motion,
 )
-from src.shared.python.grip_contact import GripInterface  # noqa: E402
+from src.shared.python.grip_contact import (  # noqa: E402
+    GripInterface,
+    decompose_hand_forces,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -141,27 +146,45 @@ def test_analysis_uses_bushing_split_method(static_run) -> None:
         hand_power_w(run, "X")
 
 
-def _driven_run(spec_bytes, motion, t_end):
+# Internal (antagonistic) hand force bound.  Reasoning: the two hands carry the
+# club couple as an equal and opposite force pair, F_int = M / d with d = 0.076 m,
+# so 500 N is a 38 N m couple, well above what a 0.31 kg club needs in the
+# backswing and transition and consistent with the review statement (#11765)
+# that real per-hand grip forces near impact are a few hundred newtons.
+MAX_INTERNAL_FORCE_N = 500.0
+FIRST_IK_SWITCH_S = 0.95
+
+
+def _driven_run(spec_bytes, motion, t_end, valid_window):
     names, t, q = motion
-    sim = BushingGripSimulator(spec_bytes, names, t, lowpass_trajectory(t, q, 25.0))
+    if valid_window:  # cut before filtering, see run_grip_kinetics.run_swing
+        keep = t < FIRST_IK_SWITCH_S - 0.01
+        t, q = t[keep], q[keep]
+    q_prepared, _ = prepare_motion(t, q, names)
+    sim = BushingGripSimulator(spec_bytes, names, t, q_prepared)
     return sim.run(t_end, accuracy=1e-3)
 
 
 def _worst(run):
     trans = max(np.linalg.norm(run.deflection_m[s], axis=1).max() for s in "LR")
     rot = max(run.rotation_deflection_rad[s].max() for s in "LR")
-    return trans, rot
+    dec = decompose_hand_forces(
+        run.force_on_club_n["L"],
+        run.force_on_club_n["R"],
+        run.grip_point_m["L"],
+        run.grip_point_m["R"],
+    )
+    return trans, rot, dec
 
 
 @pytest.mark.slow
-def test_driven_swing_backswing_and_transition_within_owner_limits(
-    spec_bytes, motion
-) -> None:
-    """Up to 0.9 s, before the candidate-motion glitch, the limits hold."""
-    run = _driven_run(spec_bytes, motion, 0.9)
-    trans, rot = _worst(run)
+def test_driven_swing_before_ik_switch_within_limits(spec_bytes, motion) -> None:
+    """Valid window: deflection and internal force within the stated bounds."""
+    run = _driven_run(spec_bytes, motion, None, valid_window=True)
+    trans, rot, dec = _worst(run)
     assert trans <= MAX_DEFLECTION_M
     assert rot <= MAX_ROTATION_RAD
+    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
     peak = max(np.linalg.norm(run.force_on_club_n[s], axis=1).max() for s in "LR")
     assert peak > 20.0  # the swing genuinely loads the grip
 
@@ -170,16 +193,33 @@ def test_driven_swing_backswing_and_transition_within_owner_limits(
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "#11739 phase 1 acceptance NOT met at the default engineering "
-        "stiffness: the candidate driver motion has a hand-velocity glitch near "
-        "0.95 s and a violent late downswing; measured 5.5 mm / 8.9 deg to "
-        "1.3 s (see DESIGN_DECISIONS.md section 16). Limits are not loosened."
+        "#11739: the OpenSim IK candidate (marker RMS 262 mm) switches IK "
+        "solution at 0.95 s and again later; across it the conditioned motion "
+        "gives kN-scale hand forces and mm-scale deflection. The bounds are not "
+        "loosened; a qualified IK input is required (DESIGN_DECISIONS.md "
+        "section 16)."
     ),
 )
-def test_driven_swing_deflection_within_owner_limits_to_downswing(
-    spec_bytes, motion
-) -> None:
-    run = _driven_run(spec_bytes, motion, 1.3)
-    trans, rot = _worst(run)
+def test_driven_swing_through_ik_switch_within_limits(spec_bytes, motion) -> None:
+    run = _driven_run(spec_bytes, motion, 1.3, valid_window=False)
+    trans, rot, dec = _worst(run)
     assert trans <= MAX_DEFLECTION_M
     assert rot <= MAX_ROTATION_RAD
+    assert dec.peak_internal_n() <= MAX_INTERNAL_FORCE_N
+
+
+def test_candidate_is_inconsistent_with_the_two_hand_closure(
+    spec_bytes, motion
+) -> None:
+    """Documents the input quality: the IK candidate leaves the loop open."""
+    names, t, q = motion
+    rep = input_kinematics_report(spec_bytes, names, t[:40], q[:40])
+    assert 0.10 < rep["closure_distance_m"][0] < 0.17  # 134 mm at address
+    assert 40.0 < rep["closure_angle_deg"][0] < 60.0  # 51 deg at address
+
+
+def test_prepare_motion_repairs_the_candidate_glitches(motion) -> None:
+    names, t, q = motion
+    q_clean, report = prepare_motion(t, q, names)
+    assert report.repaired_frames >= 5
+    assert np.isfinite(q_clean).all()

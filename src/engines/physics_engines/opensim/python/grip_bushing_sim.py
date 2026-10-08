@@ -35,7 +35,11 @@ from src.shared.python.biomechanics.grip_wrench import (
     HandWrench,
     analyze_grip,
 )
-from src.shared.python.grip_contact import GripInterface
+from src.shared.python.grip_contact import (
+    ConditioningReport,
+    GripInterface,
+    condition_trajectory,
+)
 
 CLUB_BODY = "Clubhead"
 TRACKED_BODIES = ("LF", "RF", "LGrip", "Grip")
@@ -101,6 +105,22 @@ def lowpass_trajectory(
     return np.asarray(sosfiltfilt(sos, q, axis=0))
 
 
+def prepare_motion(
+    time_s: np.ndarray,
+    q: np.ndarray,
+    names: Sequence[str],
+    cutoff_hz: float = 25.0,
+) -> tuple[np.ndarray, ConditioningReport]:
+    """Condition a matched-IK trajectory for kinetics.
+
+    Order: remove 2 pi branch flips, interpolate over IK-failure frames
+    (:func:`condition_trajectory`), then zero-phase low-pass.  Returns the
+    prepared coordinates and the conditioning report.
+    """
+    cleaned, report = condition_trajectory(time_s, q, names)
+    return lowpass_trajectory(np.asarray(time_s, float), cleaned, cutoff_hz), report
+
+
 def _osim() -> Any:
     return import_module("opensim")
 
@@ -126,6 +146,59 @@ def weld_club_pose(
     return _transform_to_rt(
         model.getBodySet().get(CLUB_BODY).getTransformInGround(state)
     )
+
+
+def _speed(points: list[np.ndarray], dt: np.ndarray) -> np.ndarray:
+    return np.linalg.norm(np.gradient(np.array(points), axis=0) / dt[:, None], axis=1)
+
+
+def input_kinematics_report(
+    spec_bytes: bytes,
+    names: Sequence[str],
+    time_s: np.ndarray,
+    q: np.ndarray,
+    interface: GripInterface | None = None,
+) -> dict[str, Any]:
+    """Consistency of a coordinate trajectory with the two-hand grip closure.
+
+    In the rigid-weld model the club follows the left hand; the right hand is
+    its own arm chain whose closure frame should coincide with the right grip
+    frame on the club.  The residual (distance and angle between the two
+    closure frames) is how far the input motion is from a physical two-hand
+    grip.  Hand speeds are the speeds of the left grip point on the club and
+    of the right closure frame on the right-hand body.
+    """
+    osim = _osim()
+    spec = json.loads(spec_bytes)
+    gi = interface or GripInterface.from_spec(spec)
+    model = _load(export_full_body_osim(spec_bytes)[0])
+    state = model.initSystem()
+    weld = osim.WeldConstraint.safeDownCast(model.getConstraintSet().get(0))
+    frame_a, frame_b = weld.getConnectee("frame1"), weld.getConnectee("frame2")
+    club = model.getBodySet().get(CLUB_BODY)
+    p_left = np.asarray(gi.left.position_m)
+    dist, ang, left, right = [], [], [], []
+    for row in np.asarray(q, float):
+        for name, value in zip(names, row, strict=True):
+            model.getCoordinateSet().get(name).setValue(state, float(value), False)
+        model.realizePosition(state)
+        ra, pa = _transform_to_rt(frame_a.getTransformInGround(state))
+        rb, pb = _transform_to_rt(frame_b.getTransformInGround(state))
+        dist.append(np.linalg.norm(pa - pb))
+        ang.append(
+            np.degrees(np.linalg.norm(Rotation.from_matrix(ra.T @ rb).as_rotvec()))
+        )
+        rc, pc = _transform_to_rt(club.getTransformInGround(state))
+        left.append(rc @ p_left + pc)
+        right.append(pa)
+    dt = np.gradient(np.asarray(time_s, float))
+    v_l, v_r = _speed(left, dt), _speed(right, dt)
+    return {
+        "closure_distance_m": np.array(dist),
+        "closure_angle_deg": np.array(ang),
+        "left_hand_speed_m_s": v_l,
+        "right_hand_speed_m_s": v_r,
+    }
 
 
 def _load(xml: str) -> Any:
