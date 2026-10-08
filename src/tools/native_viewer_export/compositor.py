@@ -115,14 +115,31 @@ class HudInfo:
     engine: str
     club: str
     legend: str
+    speed: float | None = None
+    ms_from_impact: float | None = None
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.time_s):
             raise ValueError("time_s must be finite")
+        if self.speed is not None and not (
+            math.isfinite(self.speed) and self.speed > 0
+        ):
+            raise ValueError("speed must be positive and finite")
+        if self.ms_from_impact is not None and not math.isfinite(self.ms_from_impact):
+            raise ValueError("ms_from_impact must be finite")
 
     def lines(self) -> list[str]:
-        """Text lines, the legend only when present."""
-        out = [f"{self.engine} | {self.club} | t = {self.time_s:.3f} s"]
+        """Text lines, the legend only when present.
+
+        The first line carries the swing time, and when known the playback
+        speed (``0.5x``) and the real time from impact (``-12.0 ms``).
+        """
+        head = f"{self.engine} | {self.club} | t = {self.time_s:.3f} s"
+        if self.speed is not None:
+            head += f" | {self.speed:g}x"
+        if self.ms_from_impact is not None:
+            head += f" | {self.ms_from_impact:+.1f} ms from impact"
+        out = [head]
         if self.legend:
             out.append(self.legend)
         return out

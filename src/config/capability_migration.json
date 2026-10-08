@@ -1282,6 +1282,18 @@
       "evidence": "src/tools/native_viewer_export/cli.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "export.video_speed_variants": {
+      "id": "export.video_speed_variants",
+      "name": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",
@@ -1473,6 +1485,18 @@
       "alias_target": null,
       "evidence": "src/launchers/cross_engine_dashboard.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "render.body_appearance": {
+      "id": "render.body_appearance",
+      "name": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "planned",
+      "alias_target": null,
+      "evidence": "src/shared/python/model_appearance/head.py",
+      "acceptance_owner": "tests/unit/model_appearance/test_head_model.py"
     },
     "analysis.static_plots": {
       "id": "analysis.static_plots",

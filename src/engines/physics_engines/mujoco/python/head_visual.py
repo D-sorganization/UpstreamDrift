@@ -165,7 +165,9 @@ def attach_head_visual(
     else:
         target = _mocap_body(elements, body, pose)
         ET.SubElement(
-            elements[body], "site", name=HEAD_ANCHOR_SITE, size=".002", **_pose(pose)
+            elements[body],
+            "site",
+            {"name": HEAD_ANCHOR_SITE, "size": ".002", **_pose(pose)},
         )
     for part in parts:
         mesh_name = f"vmesh_head_{part.name}"
