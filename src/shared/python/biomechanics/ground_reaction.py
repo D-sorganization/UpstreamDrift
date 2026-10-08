@@ -320,7 +320,7 @@ def grf_overlay_wrench(
     """``contact:grf_<foot>`` force at the CoP (contact centroid below threshold).
 
     ``label_part`` overrides the sanitised label suffix.  Returns ``None`` when
-    the foot is not in contact.  Torque is left
+    the foot is not in contact or has no anchor point.  Torque is left
     unavailable (``None``); the free moment is a separate wrench.
     """
     if not isinstance(reaction, FootReaction):
@@ -330,12 +330,14 @@ def grf_overlay_wrench(
     anchor = (
         reaction.cop_m if reaction.cop_m is not None else reaction.contact_centroid_m
     )
+    if anchor is None:
+        return None
     default_body = "system" if reaction.label == NET_LABEL else reaction.label
     return OverlayWrench(
         WrenchKind.CONTACT,
         f"contact:grf_{label_part or _foot_part(reaction)}",
         body or default_body,
-        _tuple(anchor if anchor is not None else np.zeros(3)),
+        _tuple(anchor),
         force_n=_tuple(reaction.force_n),
         source=source,
     )
