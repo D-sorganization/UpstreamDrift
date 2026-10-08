@@ -471,3 +471,50 @@ python3 -m pytest tests/unit/engines/myosuite/test_retarget.py -q
 
 - [`evidence/myosuite_neck/neck_flexion_sign.json`](evidence/myosuite_neck/neck_flexion_sign.json)
 - Tests: `tests/unit/engines/myosuite/test_retarget.py` (`test_neck_input_y_drives_neck_flexion_with_fk_sign`, `test_neck_input_x_is_unmapped_and_documented`, `test_neck_input_z_alone_drives_neck_rotation`, `test_fixture_map_partitions_source_coordinates`).
+
+---
+
+## 17. MyoSuite Retarget Map Is One-to-One: Weighted Secondary Entries Dropped (#11729)
+
+### What
+
+`load_retarget_map` (`src/engines/physics_engines/myosuite/python/retarget.py`) now rejects any map in which two sources share a target, a source appears twice, or a sign is zero, and raises `ValueError`. The six weighted secondary entries in `coordinate_map_anthro.json` were removed, and their sources were added to `omitted_source` with notes:
+
+| Source                                | Former entry       | Why it has no MyoSuite target                                                                                                                                                                            |
+| ------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HipInputX`, `HipInputY`, `HipInputZ` | 0.25 x `lumbar_*`  | They give the `LowerTorso` orientation relative to `world` (the pelvis root), not a lumbar angle. Adding them to the lumbar joints moves the trunk relative to the pelvis that the capture did not move. |
+| `RScapInputY`, `LScapInputY`          | 0.5 x `arm_flex_*` | The scapula joint is `Rx(ScapInputX) Rz(ScapInputY)`, so `ScapInputY` is a rotation about z (protraction/retraction). `arm_flex` follows `SInputY`, a y-axis rotation, so the axes do not match.         |
+| `RScapInputX`                         | 0.5 x `arm_add_r`  | `myobody_simpleupper` has no scapular DOF. The left side never had this entry, so the absorption was asymmetric.                                                                                         |
+
+`LScapInputX` was already omitted. Its note used to say it was "absorbed via `arm_add_l`", but no such entry existed, so the note was corrected.
+
+`retarget_frame`, `project_to_source` and `interpolate_unmapped` keep their one-to-one assignment semantics. `project_to_source` is now an exact inverse on mapped sources, because the loader guarantees a one-to-one map with non-zero signs.
+
+### Why
+
+`retarget_frame` assigns `out[target] = sign * q[source]` for each entry in order. Every secondary entry came after its primary, so on the shipped map it overwrote the primary. `SpineInputX`, `SpineInputY`, `TorsoInput`, `RSInputX`, `RSInputY` and `LSInputY` had no effect, and their targets were replayed as 0.25 x pelvis angle or 0.5 x scapula angle. Section 16 removed the same defect for `NeckInputY -> neck_rotation`.
+
+We considered two fixes:
+
+1. **Accumulate weighted contributions** (`out[target] += weight * q[source]`). This would preserve the intent of the old entries. But none of the weights (0.25, 0.5) was derived from kinematics, and the Hip and Scap axes do not correspond to the targets they were added to (see the table). Accumulation would also make `project_to_source` under-determined.
+2. **Drop the secondary entries and fail closed on many-to-one maps** (chosen). Each mapped target is driven by its axis-matched primary. Inputs that MyoSuite cannot represent are listed as omitted, not silently blended, and the same overwrite cannot come back without a loader error.
+
+### Limitations
+
+- MyoSuite replay still has no shoulder-girdle motion, and the pelvis root orientation is not driven. `_qpos_from_retarget` reads `pelvis_r*`, which is not in the target list, so the free-joint quaternion stays at identity. Absorbing scapula motion into the shoulder needs a forward-kinematics fit of the scapula and shoulder chain against the glenohumeral joint. It should not be added back as a fixed weight.
+- Earlier MyoSuite replay receipts were produced with the overwriting map and are historical. They were not regenerated.
+- The map remains diagnostic (`qualification.diagnostic_only`).
+
+### Neck Torque Capacities
+
+`src/shared/python/myofullbody/neck.py` `CAPACITY_NM` labelled `NeckInputX` as flexion/extension (30 N m) and `NeckInputY` as lateral bending (36 N m). Section 16 established that the anthro neck joint is `Rx(X) Ry(Y) Rz(Z)` with the head forward axis on +x, so X is lateral bending and Y is flexion. The capacities were swapped to `NeckInputX` 36 N m (lateral bending) and `NeckInputY` 30 N m (flexion, the smaller of flexion and extension). `NeckInputZ` stays at 15 N m. The MyoFullBody receipts under `evidence/myofullbody/` record the old `capacity_nm` and are historical until they are regenerated.
+
+### Reproduction
+
+```bash
+python3 -m pytest tests/unit/engines/myosuite/test_retarget.py tests/unit/engines/myofullbody/test_myofullbody_neck.py -q
+```
+
+### Evidence Receipt
+
+- Tests: `tests/unit/engines/myosuite/test_retarget.py` (`test_primary_source_alone_drives_its_target`, `test_fixture_map_targets_are_one_to_one`, `test_secondary_sources_are_omitted_and_documented`, `test_fixture_map_round_trips_mapped_sources`, `test_loader_rejects_two_sources_on_one_target`, `test_loader_rejects_duplicate_source`, `test_loader_rejects_zero_sign`); `tests/unit/engines/myofullbody/test_myofullbody_neck.py` (`test_capacities_follow_anthro_neck_axes`). All of them failed before the fix.

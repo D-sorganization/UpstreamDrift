@@ -124,13 +124,7 @@
     { "source": "knee_angle_l", "target": "knee_angle_l", "sign": 1.0 },
     { "source": "ankle_angle_l", "target": "ankle_angle_l", "sign": 1.0 },
     { "source": "subtalar_angle_l", "target": "subtalar_angle_l", "sign": 1.0 },
-    { "source": "mtp_angle_l", "target": "mtp_angle_l", "sign": 1.0 },
-    { "source": "RScapInputY", "target": "arm_flex_r", "sign": 0.5 },
-    { "source": "LScapInputY", "target": "arm_flex_l", "sign": 0.5 },
-    { "source": "HipInputX", "target": "lumbar_extension", "sign": 0.25 },
-    { "source": "HipInputY", "target": "lumbar_bending", "sign": 0.25 },
-    { "source": "HipInputZ", "target": "lumbar_rotation", "sign": 0.25 },
-    { "source": "RScapInputX", "target": "arm_add_r", "sign": 0.5 }
+    { "source": "mtp_angle_l", "target": "mtp_angle_l", "sign": 1.0 }
   ],
   "chain_order": [
     "lumbar_extension",
@@ -206,14 +200,26 @@
     "TranslationInputX",
     "TranslationInputY",
     "TranslationInputZ",
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
     "LScapInputX",
+    "LScapInputY",
+    "RScapInputX",
+    "RScapInputY",
     "NeckInputX"
   ],
   "omitted_source_notes": {
     "TranslationInputX": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
     "TranslationInputY": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
     "TranslationInputZ": "Root freejoint pose is not a named MyoSuite hinge; handled as qpos[0:3] outside this joint map.",
-    "LScapInputX": "No independent scapular DOF on myobody_simpleupper; absorbed partially via arm_add_l for the contralateral scapula only.",
+    "HipInputX": "Pelvis orientation relative to world (LowerTorso Rx/Ry/Rz), not a lumbar angle. The former 0.25-weighted lumbar entry was dropped (#11729); the MyoSuite free-joint orientation is not yet driven by the replay.",
+    "HipInputY": "Pelvis orientation relative to world (LowerTorso Rx/Ry/Rz), not a lumbar angle. The former 0.25-weighted lumbar entry was dropped (#11729); the MyoSuite free-joint orientation is not yet driven by the replay.",
+    "HipInputZ": "Pelvis orientation relative to world (LowerTorso Rx/Ry/Rz), not a lumbar angle. The former 0.25-weighted lumbar entry was dropped (#11729); the MyoSuite free-joint orientation is not yet driven by the replay.",
+    "LScapInputX": "Scapula Rx on the left side; myobody_simpleupper has no scapular DOF and no axis-matched shoulder coordinate, so it is not absorbed (#11729).",
+    "LScapInputY": "Scapula Rz (ScapInputY) on the left side; myobody_simpleupper has no scapular DOF and no axis-matched shoulder coordinate, so it is not absorbed (the former 0.5-weighted shoulder entry was dropped, #11729).",
+    "RScapInputX": "Scapula Rx on the right side; myobody_simpleupper has no scapular DOF and no axis-matched shoulder coordinate, so it is not absorbed (the former 0.5-weighted shoulder entry was dropped, #11729).",
+    "RScapInputY": "Scapula Rz (ScapInputY) on the right side; myobody_simpleupper has no scapular DOF and no axis-matched shoulder coordinate, so it is not absorbed (the former 0.5-weighted shoulder entry was dropped, #11729).",
     "NeckInputX": "Neck lateral bending (Rx about the head forward axis); the pinned myo_sim head chain has only neck_rotation and neck_flexion, so there is no matching DOF (#11729)."
   },
   "omitted_target": [],

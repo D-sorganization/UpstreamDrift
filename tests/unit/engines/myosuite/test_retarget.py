@@ -169,3 +169,99 @@ def test_fixture_map_partitions_source_coordinates() -> None:
     assert not mapped & omitted
     assert mapped | omitted == set(rmap.source_names)
     assert set(doc["omitted_source_notes"]) == omitted
+
+
+# Sources whose weighted secondary entries were dropped (many-to-one map, below).
+SECONDARY_SOURCES = (
+    "HipInputX",
+    "HipInputY",
+    "HipInputZ",
+    "LScapInputY",
+    "RScapInputX",
+    "RScapInputY",
+)
+
+
+@pytest.mark.parametrize(
+    ("source", "target"),
+    [
+        ("SpineInputX", "lumbar_extension"),
+        ("SpineInputY", "lumbar_bending"),
+        ("TorsoInput", "lumbar_rotation"),
+        ("RSInputY", "arm_flex_r"),
+        ("RSInputX", "arm_add_r"),
+        ("LSInputY", "arm_flex_l"),
+    ],
+)
+def test_primary_source_alone_drives_its_target(source: str, target: str) -> None:
+    """A primary source is not overwritten by a later entry on the same target."""
+    _, rmap = _fixture_map()
+    out = _retarget_single(rmap, source, 0.3)
+    assert out[rmap.target_names.index(target)] == pytest.approx(0.3)
+
+
+def test_fixture_map_targets_are_one_to_one() -> None:
+    """No two source coordinates share a MyoSuite target."""
+    doc, _ = _fixture_map()
+    targets = [entry["target"] for entry in doc["mappings"]]
+    assert len(targets) == len(set(targets))
+
+
+@pytest.mark.parametrize("source", SECONDARY_SOURCES)
+def test_secondary_sources_are_omitted_and_documented(source: str) -> None:
+    """Pelvis-world and scapula inputs have no axis-matched MyoSuite target."""
+    doc, rmap = _fixture_map()
+    assert source not in rmap.source_to_target
+    assert source in doc["omitted_source"]
+    assert doc["omitted_source_notes"][source]
+    out = _retarget_single(rmap, source, 0.3)
+    np.testing.assert_allclose(out, rmap.neutral_target, rtol=0, atol=0)
+
+
+def test_fixture_map_round_trips_mapped_sources() -> None:
+    """``project_to_source`` inverts ``retarget_frame`` on every mapped source."""
+    _, rmap = _fixture_map()
+    rng = np.random.default_rng(11729)
+    q = np.zeros(rmap.n_source)
+    for name in rmap.source_to_target:
+        q[rmap.source_names.index(name)] = rng.uniform(-0.5, 0.5)
+    round_trip = rmap.project_to_source(retarget_frame(q, rmap))
+    np.testing.assert_allclose(round_trip, q, rtol=0, atol=1e-12)
+
+
+def _two_entry_doc(mappings: list[dict[str, object]]) -> dict[str, object]:
+    return {
+        "source_coordinates": ["a", "b"],
+        "target_coordinates": ["x", "y"],
+        "mappings": mappings,
+    }
+
+
+def test_loader_rejects_two_sources_on_one_target() -> None:
+    """A many-to-one map would silently overwrite; the loader fails closed."""
+    doc = _two_entry_doc(
+        [
+            {"source": "a", "target": "x", "sign": 1.0},
+            {"source": "b", "target": "x", "sign": 0.5},
+        ]
+    )
+    with pytest.raises(ValueError, match="both map to target 'x'"):
+        load_retarget_map(doc)
+
+
+def test_loader_rejects_duplicate_source() -> None:
+    doc = _two_entry_doc(
+        [
+            {"source": "a", "target": "x", "sign": 1.0},
+            {"source": "a", "target": "y", "sign": 1.0},
+        ]
+    )
+    with pytest.raises(ValueError, match="mapped more than once"):
+        load_retarget_map(doc)
+
+
+def test_loader_rejects_zero_sign() -> None:
+    """A zero multiplier is not invertible by ``project_to_source``."""
+    doc = _two_entry_doc([{"source": "a", "target": "x", "sign": 0.0}])
+    with pytest.raises(ValueError, match="non-zero"):
+        load_retarget_map(doc)
