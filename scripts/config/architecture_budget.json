@@ -1127,15 +1127,6 @@
       "issue": 11098,
       "reason": "Issue #11098: GUI model import_video forwards the imported-video parameter surface to the service (9 > 8 budget). Decompose at an #11127 follow-up.",
       "expires_on": "2026-12-31"
-    },
-    {
-      "path": "src/api/routes/force_overlays.py",
-      "symbol": "get_force_overlays",
-      "rule": "parameters",
-      "owner": "@dieterolson @D-sorganization/core-maintainers",
-      "issue": 11710,
-      "reason": "Issue #11710: the GET /simulation/forces query surface carries the arrow scale mode, reference force and length and group toggles beside the existing query and dependency parameters (11 > 8 budget). Fold into a shared query model at a follow-up.",
-      "expires_on": "2026-12-31"
     }
   ]
 }

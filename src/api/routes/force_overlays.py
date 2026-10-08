@@ -9,6 +9,7 @@ No demo or fabricated vectors.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 from fastapi import APIRouter, Depends
@@ -117,49 +118,61 @@ def _build_overlay_response(
     )
 
 
-# fmt: off
+@dataclass
+class ForceOverlayQuery:
+    """Query parameters of ``GET /simulation/forces`` (a FastAPI class dependency).
+
+    Grouping the query surface keeps the route within the parameter budget and
+    gives one place that converts the query into a ``ForceOverlayRequest``.
+    """
+
+    force_types: str = "applied"
+    color_by_magnitude: bool = True
+    body_filter: str | None = None
+    show_labels: bool = False
+    scale_factor: float = 0.01
+    scale_mode: Literal["fixed", "body_weight", "peak"] = "fixed"
+    reference_force_n: float | None = None
+    reference_length_m: float = 0.5
+    groups: str | None = None
+
+    def to_request(self) -> ForceOverlayRequest:
+        """Build the overlay request.
+
+        Raises:
+            ValueError: if ``force_types`` is blank or ``scale_factor`` <= 0.
+        """
+        if not self.force_types.strip():
+            raise ValueError("force_types must be non-empty")
+        if self.scale_factor <= 0:
+            raise ValueError("Scale factor must be positive")
+        return ForceOverlayRequest(
+            enabled=True,
+            force_types=self.force_types.split(","),
+            color_by_magnitude=self.color_by_magnitude,
+            body_filter=self.body_filter.split(",") if self.body_filter else None,
+            show_labels=self.show_labels,
+            scale_factor=self.scale_factor,
+            scale_mode=self.scale_mode,
+            reference_force_n=self.reference_force_n,
+            reference_length_m=self.reference_length_m,
+            kind_scale=None,
+            groups=self.groups.split(",") if self.groups else None,
+        )
+
+
 @router.get(
     "/simulation/forces",
     response_model=ForceOverlayResponse,
 )
-@precondition(
-    lambda force_types="applied", color_by_magnitude=True, body_filter=None, show_labels=False, scale_factor=0.01, engine_manager=None, logger=None, **_: (
-        scale_factor > 0 and len(force_types.strip()) > 0
-    ),
-    "Scale factor must be positive and force_types must be non-empty",
-)
 @handle_api_errors
 async def get_force_overlays(
-    force_types: str = "applied",
-    color_by_magnitude: bool = True,
-    body_filter: str | None = None,
-    show_labels: bool = False,
-    scale_factor: float = 0.01,
-    scale_mode: Literal["fixed", "body_weight", "peak"] = "fixed",
-    reference_force_n: float | None = None,
-    reference_length_m: float = 0.5,
-    groups: str | None = None,
+    query: ForceOverlayQuery = Depends(),
     engine_manager: Any = Depends(get_engine_manager),
     logger: Any = Depends(get_logger),
 ) -> ForceOverlayResponse:
-# fmt: on
     """Get current force/torque vectors for 3D overlay rendering."""
-    if not (force_types is not None):
-        raise ValueError("force_types must be provided")
-    config = ForceOverlayRequest(
-        enabled=True,
-        force_types=force_types.split(","),
-        color_by_magnitude=color_by_magnitude,
-        body_filter=body_filter.split(",") if body_filter else None,
-        show_labels=show_labels,
-        scale_factor=scale_factor,
-        scale_mode=scale_mode,
-        reference_force_n=reference_force_n,
-        reference_length_m=reference_length_m,
-        kind_scale=None,
-        groups=groups.split(",") if groups else None,
-    )
-    return _build_overlay_response(engine_manager, config)
+    return _build_overlay_response(engine_manager, query.to_request())
 
 
 @router.post(
