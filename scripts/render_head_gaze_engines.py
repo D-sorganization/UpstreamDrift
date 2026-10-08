@@ -141,7 +141,21 @@ def export_run(run: Path, out: Path, label: str, engines: Sequence[str]) -> None
     from src.tools.native_viewer_export.runner import ExportJob, run_export
 
     bundle = build_bundle(run, out / "_bundles" / f"{label}.npz")
-    settings = replace(ExportSettings(), speeds=(0.5,), multiview=False)
+    plan = json.loads((run / "sweep_row.json").read_text())["head_gaze"]["plan"]
+    with np.load(run / "ik_trajectory.npz") as ik:
+        impact_s = float(plan["impact_time_s"] - ik["time_s"][0])
+    settings = replace(
+        ExportSettings(),
+        width=1920,
+        height=1080,
+        fps=60,
+        speeds=(1.0, 0.5),
+        impact_time_s=impact_s,
+        impact_window_s=0.4,
+        impact_speed=0.25,
+        views=("face_on", "down_the_line"),
+        multiview=False,
+    )
     job = ExportJob(bundle, out / label, label, label, tuple(engines))
     for result in run_export(job, settings, overlay_factory=overlay_factory_for(run)):
         LOG.info("%s: %s", result.engine, result.skipped_reason or result.paths)
@@ -153,7 +167,7 @@ def pair_clips(off_dir: Path, on_dir: Path, out: Path, capture: str) -> list[Pat
     import imageio.v2 as imageio
 
     written = []
-    for clip_off in sorted(off_dir.glob("*_0p5x.mp4")):
+    for clip_off in sorted(off_dir.glob("*.mp4")):
         clip_on = on_dir / clip_off.name.replace("gaze0", "gazeon")
         if not clip_on.exists():
             LOG.warning("no matching gaze-on clip for %s", clip_off.name)
