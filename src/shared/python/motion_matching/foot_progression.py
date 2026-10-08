@@ -313,11 +313,11 @@ def _measure_foot(
     ok: np.ndarray,
     window: np.ndarray,
     *,
-    target: np.ndarray,
-    up: np.ndarray,
+    axes: tuple[np.ndarray, np.ndarray],
     handedness: str,
     lateral_m: float,
 ) -> FootProgression:
+    target, up = axes
     prefix = "L" if side == "left" else "R"
     n_valid = int(ok.sum())
     if n_valid < MIN_VALID_FRACTION * len(window) or n_valid < MIN_WINDOW_FRAMES:
@@ -428,8 +428,7 @@ def capture_foot_progression(
             windowed,
             ok_foot[side],
             window,
-            target=target,
-            up=up_u,
+            axes=(target, up_u),
             handedness=handedness,
             lateral_m=ankle_lateral_offset_m,
         )

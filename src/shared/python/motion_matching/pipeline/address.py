@@ -631,6 +631,9 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
     if inputs.fit_closure and not inputs.static_seeds:
         raise ValueError("--fit-closure needs --static-seeds")
 
+    from src.shared.python.motion_matching.pipeline.address_feet import (
+        record_foot_progression,
+    )
     from src.shared.python.motion_matching.pipeline.dynamics import segment_rms
     from src.shared.python.motion_matching.pipeline.lane import document_seed
     from src.shared.python.motion_matching.pipeline.reference import marker_errors
@@ -706,14 +709,7 @@ def solve_address_stage(inputs: AddressStageInputs) -> AddressStageResult:
                 address.marker_rms_m * 1e3,
             )
 
-    if lane.feet is not None:
-        from src.shared.python.motion_matching.pipeline.address_feet import (
-            foot_progression_report,
-        )
-
-        address_report["foot_progression"] = foot_progression_report(
-            kin, address.q, lane.feet
-        )
+    record_foot_progression(address_report, kin, address.q, lane.feet)
 
     return AddressStageResult(
         address=address,
