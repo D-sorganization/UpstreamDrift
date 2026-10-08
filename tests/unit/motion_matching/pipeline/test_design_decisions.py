@@ -91,6 +91,7 @@ def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
                 "Rejected: Grip-Roll Scan, Closure Fit From the Address, Cart-Table Filter, Fixed-Point and Iterative-Learning Shooting Fits",
                 "MJX Differentiable Optimisation (Windowed)",
                 "Address Foot Progression (OSV-4, #11730)",
+                "Compliant Bushing Grip Model (OSV-7 Phase 1)",
             ]
         )
     ]
