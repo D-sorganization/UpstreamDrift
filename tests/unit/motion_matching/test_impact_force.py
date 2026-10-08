@@ -199,3 +199,41 @@ def test_reference_rates_do_not_differentiate_across_impact() -> None:
     )
     with pytest.raises(ValueError, match="two samples"):
         imf.reference_rates(t, q, t[-2])
+
+
+def test_passage_trigger_fires_when_the_face_reaches_the_ball() -> None:
+    """Contact starts at the simulated face centre's closest approach to the
+    ball point, not at the capture's impact time (the replay lags it)."""
+    ball = np.array([L, 0.0, 0.0])  # tip at theta = 0
+    armed = plan(t_start=0.40).with_passage(ball)
+    assert not armed.is_scheduled and armed.trigger == "passage"
+    th0, rate = -0.4, 40.0  # tip reaches the ball at t = 0.41 + 0.01
+    q, v = np.array([0.0, th0]), np.array([0.0, rate])
+    t, dt = 0.41, 1e-3
+    calls = []
+
+    def drift(t_a, h, qq, vv, external):  # noqa: ANN001, ANN202
+        calls.append((t_a, h, external is not None))
+        return qq + h * vv, vv, None
+
+    impact = armed
+    for _ in range(20):
+        q, v, impact, _ = imf.step_through_impact(
+            impact, t, dt, q, v, drift, poses=poses, accel=accel
+        )
+        t += dt
+    assert impact.is_scheduled and impact.is_latched
+    assert impact.t_start_s == pytest.approx(0.41 + 0.4 / rate, abs=2e-4)
+    forced = [c for c in calls if c[2]]
+    assert sum(h for _, h, _ in forced) == pytest.approx(impact.duration_s)
+    record = imf.ImpactForce.from_record(impact.to_record())
+    assert record.is_scheduled and record.trigger == "passage"
+
+
+def test_passage_trigger_needs_the_head_near_the_ball() -> None:
+    far = plan(t_start=0.40).with_passage(np.array([5.0, 0.0, 0.0]))
+    q, v = np.array([0.0, 0.0]), np.array([0.0, 40.0])
+    out = far.schedule(0.41, 1e-3, q, v, poses)
+    assert not out.is_scheduled
+    early = plan(t_start=0.40).with_passage(np.array([L, 0.0, 0.0]))
+    assert not early.schedule(0.30, 1e-3, q, v, poses).is_scheduled  # not armed

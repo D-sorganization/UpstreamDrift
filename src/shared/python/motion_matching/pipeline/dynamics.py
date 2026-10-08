@@ -200,9 +200,9 @@ def replay(
     q0 = fs.preload_feet(sim, q_track[0])
     v0 = sim.consistent_velocity(q0, np.gradient(q_track, lane.times, axis=0)[0])
     impact = getattr(lane, "ball_impact", None)
-    split = None
-    if impact is not None and tracking_backend == "kkt":
-        split = float(impact.t_start_s)
+    if impact is not None:
+        impact = impact.at_address(q0, sim.frame_poses)
+    split = getattr(lane, "impact_time_s", None) if tracking_backend == "kkt" else None
     controller = build_tracking_controller(
         sim,
         lane.times,

@@ -373,6 +373,7 @@ class Lane:
         self.impact_index: int | None = None
         self.impact_split_reason = "not computed"
         self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
+        self.impact_time_s: float | None = None
 
     def set_face_targets(
         self,
@@ -414,21 +415,28 @@ class Lane:
         club triad cannot be observed the split is unavailable and the reason
         is kept for the receipt (never a guessed frame)."""
         from src.shared.python.motion_matching.club_face_target import capture_impact
-        from src.shared.python.motion_matching.impact_force import ImpactForce
+        from src.shared.python.motion_matching.impact_force import (
+            PASSAGE_ARM_LEAD_S,
+            ImpactForce,
+        )
 
         try:
             hit = capture_impact(
                 self.times, self.points, self.valid, self.labels, attachments, spec
             )
+            # Armed before the capture impact; the replay's own face passage
+            # starts the contact (``ImpactForce.at_address``).
             self.ball_impact = ImpactForce.for_spec(
                 spec,
-                t_start_s=hit.time_s,
+                t_start_s=max(hit.time_s - PASSAGE_ARM_LEAD_S, float(self.times[0])),
                 swing_span_s=(float(self.times[0]), float(self.times[-1])),
                 ball_centre_m=hit.ball_centre_m,
             )
+            self.impact_time_s = hit.time_s
         except ValueError as exc:
             self.impact_index = None
             self.ball_impact = None
+            self.impact_time_s = None
             self.impact_split_reason = f"unavailable: {exc}"
         else:
             self.impact_index = hit.index
@@ -440,8 +448,8 @@ class Lane:
         if self.impact_index is not None:
             report["frame"] = self.impact_index
             report["time_s"] = float(self.times[self.impact_index] - self.times[0])
-        if self.ball_impact is not None:
-            report["impact_time_s"] = float(self.ball_impact.t_start_s)
+        if self.impact_time_s is not None:
+            report["impact_time_s"] = float(self.impact_time_s)
         return report
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:

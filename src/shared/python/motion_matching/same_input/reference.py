@@ -72,18 +72,23 @@ def closed_loop(
     *,
     duration_s: float | None = None,
     impact: ImpactForce | None = None,
+    split_time_s: float | None = None,
 ) -> Rollout:
     """Track ``q_track`` in ``engine`` with the shared controller held per step.
 
     ``impact`` is the ball force plan on the bundle clock (time zero at
-    ``track_time_s[0]``); it is latched from this engine's own state.
+    ``track_time_s[0]``); an unscheduled passage plan is re-addressed to this
+    run's start pose and latched from this engine's own state.
+    ``split_time_s`` (same clock) splits the controller's reference rates at
+    the reference's impact.
     """
-    split = None if impact is None else float(impact.t_start_s)
     controller, q0, v0, steps = _tracking_setup(
-        spec_bytes, track_time_s, q_track, duration_s, split
+        spec_bytes, track_time_s, q_track, duration_s, split_time_s
     )
     plant = VectorPlant(engine, spec_bytes)
     start = project_to_closure(plant, q0, v0)
+    if impact is not None and impact.trigger == "passage" and not impact.scheduled:
+        impact = impact.at_address(start.q, plant.kinematic_frames)
     return integrate(
         plant,
         start.q,
@@ -103,6 +108,7 @@ def generate_reference_bundle(
     duration_s: float | None = None,
     provenance: dict[str, Any] | None = None,
     impact: ImpactForce | None = None,
+    split_time_s: float | None = None,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -115,6 +121,8 @@ def generate_reference_bundle(
         impact: Ball force plan on the bundle clock; the force latched in
             MuJoCo is recorded as ``provenance["ball_impact"]`` so every
             engine's replay applies it identically (GCV-20).
+        split_time_s: Reference impact time on the bundle clock, splitting
+            the controller's reference rates (recorded in the provenance).
     """
     rollout = closed_loop(
         "mujoco",
@@ -123,6 +131,7 @@ def generate_reference_bundle(
         q_track,
         duration_s=duration_s,
         impact=impact,
+        split_time_s=split_time_s,
     )
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
@@ -138,6 +147,7 @@ def generate_reference_bundle(
             "controller": "pipeline computed-torque (kkt), held per step",
             "max_pose_drift_m": float(rollout.pose_drift.max()),
             "ball_impact": rollout.ball_impact,
+            "impact_split_time_s": split_time_s,
             **(provenance or {}),
         },
     )

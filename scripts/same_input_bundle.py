@@ -56,13 +56,18 @@ def _track(run_dir: Path) -> tuple[Path, np.ndarray, np.ndarray]:
         return record_path, record["track_time_s"], record["q_track"]
 
 
-def _impact_plan(receipt: dict, times: np.ndarray) -> ImpactForce | None:
-    """The run's ball impact (GCV-20) on the bundle clock, to re-latch."""
+def _impact_plan(
+    receipt: dict, times: np.ndarray
+) -> tuple[ImpactForce | None, float | None]:
+    """The run's ball impact plan and reference impact time (GCV-20), on the
+    bundle clock; the plan is re-armed so the bundle run finds its own contact."""
     record = receipt.get("dynamics", {}).get("ball_impact")
-    if record is None:
-        return None
-    plan = ImpactForce.from_record(record).unlatched()
-    return plan.shifted(-float(times[0]))
+    split = receipt.get("ik", {}).get("impact_split", {}).get("impact_time_s")
+    offset = -float(times[0])
+    plan = None
+    if record is not None:
+        plan = ImpactForce.from_record(record).rearmed().shifted(offset)
+    return plan, None if split is None else float(split) + offset
 
 
 def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
@@ -70,12 +75,14 @@ def export(run_dir: Path, out: Path, duration_s: float | None) -> dict:
     spec_path = run_dir / "full_body_spec_hipcal_scaled.json"
     record_path, times, q_track = _track(run_dir)
     receipt = json.loads((run_dir / "receipt.json").read_text(encoding="utf-8"))
+    impact, split = _impact_plan(receipt, times)
     bundle = generate_reference_bundle(
         spec_path.read_bytes(),
         times,
         q_track,
         duration_s=duration_s,
-        impact=_impact_plan(receipt, times),
+        impact=impact,
+        split_time_s=split,
         provenance={
             "run_dir": run_dir.name,
             "capture": receipt.get("capture"),
@@ -143,7 +150,8 @@ def closed_loop_receipt(run_dir: Path, bundle_path: Path, engine: str) -> dict:
         times,
         q_track,
         duration_s=bundle.steps * bundle.dt_s,
-        impact=None if impact is None else impact.unlatched(),
+        impact=None if impact is None else impact.rearmed(),
+        split_time_s=bundle.provenance.get("impact_split_time_s"),
     )
     elapsed = time.perf_counter() - started
     plant = VectorPlant(engine, bundle.spec_bytes)

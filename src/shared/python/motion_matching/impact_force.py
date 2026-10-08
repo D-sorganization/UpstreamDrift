@@ -19,6 +19,16 @@ applied to the clubhead as a short constant world force at the face centre:
    engine apply the identical force (``from_record``, ``shifted`` for a
    segment clock).
 
+Contact timing. A replay lags its reference by a few milliseconds (about
+14 cm of head travel at impact), so contact at the *capture's* impact time
+would strike the head well short of the ball. With ``trigger == "passage"``
+the plan is armed at ``t_start_s`` and the contact starts when the simulated
+face centre reaches its closest approach to ``passage_point_m`` (the address
+face centre: the ball's contact point, the same definition as
+:func:`model_appearance.club_face.ball_passage`) within
+``PASSAGE_GATE_M``. ``t_start_s`` then becomes that event time, sub-step
+accurate from the face-centre velocity at the step start.
+
 The point Jacobian is a central finite difference of the frame pose in the
 generalized coordinates; it equals the velocity Jacobian because the
 full-body coordinates have ``nq == nv`` (Euler-angle root).
@@ -56,6 +66,11 @@ StepFn = Callable[[float, float, Array, Array, ExternalFn | None], tuple[Any, ..
 
 _FD_STEP = 1e-6
 _EDGE_TOL_S = 1e-12
+#: Arm the passage trigger this long before the capture's impact time.
+PASSAGE_ARM_LEAD_S = 0.020
+#: The face centre must pass within this distance of the ball point (the
+#: ``ball_passage`` tolerance, ``IMPACT_BALL_RADIUS_M``).
+PASSAGE_GATE_M = 0.15
 
 
 def _finite3(value: Any, name: str, *, nonzero: bool = False) -> Array:
@@ -82,6 +97,9 @@ class ImpactForce:
     ball_centre_m: Array | None = None
     force_world: Array | None = None
     collision: BallCollision | None = field(default=None, compare=False)
+    trigger: str = "time"
+    passage_point_m: Array | None = None
+    scheduled: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.frame, str) or not self.frame:
@@ -106,6 +124,16 @@ class ImpactForce:
             object.__setattr__(
                 self, "force_world", _finite3(self.force_world, "force_world")
             )
+        if self.trigger not in ("time", "passage"):
+            raise ValueError(f"trigger must be 'time' or 'passage', not {self.trigger}")
+        if self.passage_point_m is not None:
+            object.__setattr__(
+                self,
+                "passage_point_m",
+                _finite3(self.passage_point_m, "passage_point_m"),
+            )
+        if self.trigger == "passage" and self.passage_point_m is None:
+            raise ValueError("a passage trigger needs passage_point_m")
 
     @classmethod
     def for_spec(
@@ -133,16 +161,75 @@ class ImpactForce:
         return self.force_world is not None
 
     @property
+    def is_scheduled(self) -> bool:
+        """Contact start known (fixed time, or the passage event has fired)."""
+        return self.trigger == "time" or self.scheduled
+
+    def with_passage(self, point_m: Any) -> ImpactForce:
+        """Copy armed at ``t_start_s`` to fire at the passage of ``point_m``."""
+        return replace(
+            self, trigger="passage", passage_point_m=point_m, scheduled=False
+        )
+
+    def at_address(self, q0: Array, poses: PoseFn) -> ImpactForce:
+        """Passage plan whose ball is at this run's address face (``q0``).
+
+        The passage point is the address face centre and the ball centre the
+        shared :func:`model_appearance.ball.ball_position_at_address`, centred
+        at the face-centre height (the ``capture_impact`` convention).
+        """
+        from src.shared.python.model_appearance.ball import (
+            BALL_RADIUS_M,
+            ball_position_at_address,
+        )
+
+        point, normal = self._point_and_normal(np.asarray(q0, dtype=float), poses)
+        ball = ball_position_at_address(
+            point, normal, ground_height_m=float(point[2]) - BALL_RADIUS_M
+        )
+        return replace(self.with_passage(point), ball_centre_m=ball)
+
+    def rearmed(self, lead_s: float = PASSAGE_ARM_LEAD_S) -> ImpactForce:
+        """Unlatched copy for a new closed-loop run in another plant.
+
+        A passage plan is re-armed ``lead_s`` before its recorded contact so
+        the new run finds its own contact; a fixed-time plan keeps its time.
+        """
+        start = float(self.t_start_s)
+        if self.trigger == "passage":
+            start = max(start - lead_s, float(self.swing_span_s[0]))
+        return replace(
+            self, force_world=None, collision=None, scheduled=False, t_start_s=start
+        )
+
+    def schedule(
+        self, t: float, dt: float, q: Array, v: Array, poses: PoseFn
+    ) -> ImpactForce:
+        """Fire the passage trigger if the contact starts within ``[t, t + dt)``."""
+        if self.is_scheduled or t + dt < float(self.t_start_s):
+            return self
+        q = np.asarray(q, dtype=float)
+        v = np.asarray(v, dtype=float)
+        point, _ = self._point_and_normal(q, poses)
+        ahead = self._point_and_normal(q + _FD_STEP * v, poses)[0]
+        behind = self._point_and_normal(q - _FD_STEP * v, poses)[0]
+        velocity = (ahead - behind) / (2.0 * _FD_STEP)
+        offset = point - self.passage_point_m  # type: ignore[operator]
+        speed2 = float(velocity @ velocity)
+        if float(np.linalg.norm(offset)) > PASSAGE_GATE_M or speed2 <= 0.0:
+            return self
+        lead = -float(offset @ velocity) / speed2
+        if lead >= dt:
+            return self
+        return replace(self, t_start_s=t + max(lead, 0.0), scheduled=True)
+
+    @property
     def t_end_s(self) -> float:
         return float(self.t_start_s) + float(self.duration_s)
 
     def with_force(self, force_world: Any) -> ImpactForce:
         """Copy with an explicit world force (replays of a recorded impact)."""
         return replace(self, force_world=_finite3(force_world, "force_world"))
-
-    def unlatched(self) -> ImpactForce:
-        """Copy that re-latches from the next plant it runs in."""
-        return replace(self, force_world=None, collision=None)
 
     def shifted(self, offset_s: float) -> ImpactForce:
         """Copy on a clock shifted by ``offset_s`` (segment replays)."""
@@ -247,6 +334,9 @@ class ImpactForce:
             "cor": float(self.cor),
             "ball_centre_m": vec(self.ball_centre_m),
             "force_world_n": vec(self.force_world),
+            "trigger": self.trigger,
+            "passage_point_m": vec(self.passage_point_m),
+            "scheduled": bool(self.scheduled),
             "collision": None if self.collision is None else self.collision.to_record(),
         }
 
@@ -270,6 +360,13 @@ class ImpactForce:
                 else np.asarray(record["ball_centre_m"], dtype=float)
             ),
             force_world=None if force is None else np.asarray(force, dtype=float),
+            trigger=str(record.get("trigger", "time")),
+            passage_point_m=(
+                None
+                if record.get("passage_point_m") is None
+                else np.asarray(record["passage_point_m"], dtype=float)
+            ),
+            scheduled=bool(record.get("scheduled", False)),
         )
 
 
@@ -295,6 +392,10 @@ def step_through_impact(
     if impact is None:
         q, v, extra = step(t, dt, q, v, None)
         return q, v, None, extra
+    impact = impact.schedule(t, dt, q, v, poses)
+    if not impact.is_scheduled:
+        q, v, extra = step(t, dt, q, v, None)
+        return q, v, impact, extra
     parts = impact.sub_intervals(t, dt)
     if len(parts) == 1 and not parts[0][2]:
         q, v, extra = step(t, dt, q, v, None)  # bit-identical outside the window
