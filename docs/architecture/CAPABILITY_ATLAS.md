@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**64 launcher tiles · 53 feature contracts.**
+**64 launcher tiles · 54 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -206,6 +206,7 @@ flowchart LR
 | Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/drake_dashboard.py) |
 | Engine load/probe + basic simulation loop | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_simulation.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/engines.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Simulation.tsx) |
 | Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/data_io/export.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/export.py) |
+| Time-based native video export with full- and half-speed clips and an impact slow-motion clip | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/native_viewer_export/cli.py) |
 | Docker engine management dialog | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/docker_manager.py) |
 | Embedded tool host (tabs + docks) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/embedded_host.py) |
 | MCP server configuration writer/preferences | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/mcp_config_writer.py) |

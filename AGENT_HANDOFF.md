@@ -2,6 +2,10 @@
 
 - Branch `claude/gcv-4-arrow-scaling` (PR #11738): body-weight and peak arrow scale modes; overlay route takes a `ForceOverlayQuery` dependency. Next: GCV-5 (#11711) plots, API and web.
 
+# Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
+
+- Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
+
 # Active: Shared Grip Wrench Core — #11713
 
 - Branch `claude/gcv-7-grip-wrench`; epic #11706. Module `src/shared/python/biomechanics/grip_wrench.py` (hand-on-club wrench, midpoint net force and couple, contact-moment/free-torque split, per-hand MOF, club-local frame, `split_method`).

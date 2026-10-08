@@ -165,6 +165,21 @@ class TestExportVideo:
         frames = imageio.mimread(str(res))
         assert len(frames) == 5
 
+    def test_export_video_speed_sets_time_based_stride(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        pytest.importorskip("imageio.v2")
+        from unittest.mock import patch
+
+        out_gif = tmp_path / "speed.gif"
+        with patch(
+            "src.shared.python.motion_matching.export._render_video_frames",
+            return_value=[np.zeros((8, 8, 3), np.uint8)] * 2,
+        ) as render:
+            export_video(mock_candidate, "mujoco", out_gif, fps=10, speed=0.5)
+        dt_s = mock_candidate.time_s[1] - mock_candidate.time_s[0]
+        assert render.call_args.args[2] == max(1, round(0.5 / (10 * dt_s)))
+
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path
     ) -> None:
