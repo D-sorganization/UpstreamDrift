@@ -199,10 +199,12 @@ class SwingInput:
         return np.arange(self._source_steps(), dtype=float) * self.bundle.dt_s
 
     def _source_steps(self) -> int:
-        return int(self.bundle.reference_q.shape[0])
+        reference = self.bundle.reference_q
+        return int(reference.shape[0])
 
     def _provenance_value(self, key: str) -> Any:
-        return self.bundle.provenance.get(key)
+        provenance = self.bundle.provenance
+        return provenance.get(key)
 
     @property
     def impact_time_s(self) -> float:
