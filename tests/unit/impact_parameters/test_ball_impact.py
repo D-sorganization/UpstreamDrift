@@ -23,16 +23,29 @@ NORMAL = np.array([0.0, -1.0, 0.0])  # square face, target along native -Y
 
 
 def _collide(**overrides: object) -> bi.BallCollision:
-    kwargs: dict[str, object] = {
+    face: dict[str, object] = {
         "face_normal": NORMAL,
         "face_velocity_mps": np.array([0.0, -45.0, 0.0]),
         "application_point_m": np.array([0.0, 0.0, 0.02]),
         "effective_mass_kg": 0.20,
-        "time_s": 1.3,
-        "swing_span_s": (0.0, 1.8),
     }
-    kwargs.update(overrides)
-    return bi.collision_impulse(**kwargs)  # type: ignore[arg-type]
+    ball_fields = {"ball_mass_kg": "mass_kg", "cor": "cor", "duration_s": "duration_s"}
+    ball: dict[str, object] = {}
+    timing: dict[str, object] = {"time_s": 1.3, "swing_span_s": (0.0, 1.8)}
+    for key, value in overrides.items():
+        if key in face:
+            face[key] = value
+        elif key in ball_fields:
+            ball[ball_fields[key]] = value
+        elif key == "ball_centre_m":
+            ball["centre_m"] = value
+        else:
+            timing[key] = value
+    return bi.collision_impulse(
+        bi.FaceContact(**face),  # type: ignore[arg-type]
+        ball=bi.BallSpec(**ball),  # type: ignore[arg-type]
+        **timing,  # type: ignore[arg-type]
+    )
 
 
 def test_impulse_matches_momentum_and_restitution() -> None:

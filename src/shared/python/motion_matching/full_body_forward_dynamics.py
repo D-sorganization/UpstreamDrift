@@ -26,6 +26,12 @@ from src.shared.python.motion_matching.ground_support import (
     convex_hull_contains,
     support_report,
 )
+from src.shared.python.motion_matching.impact_force import (
+    ImpactForce,
+    reference_rates,
+    sample_rate_table,
+    step_through_impact,
+)
 from src.shared.python.motion_matching.polynomial_torque import (
     evaluate_polynomial_torque,
 )
@@ -874,6 +880,7 @@ class SimulationRecord:
     centre_of_pressure_m: Array
     inside_support_polygon: Array
     lowest_sphere_height_m: Array
+    ball_impact: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -940,12 +947,21 @@ class FullBodySimulator:
             [adapter.data.xaxis[model.joint(name).id] for name in self.names[:3]]
         )
 
-    def acceleration(self, q: Array, v: Array, tau: Array) -> Array:
-        """Constrained acceleration with contact; root torques are forced to zero."""
+    def acceleration(
+        self, q: Array, v: Array, tau: Array, external: Array | None = None
+    ) -> Array:
+        """Constrained acceleration with contact; root torques are forced to zero.
+
+        ``external`` is an applied generalized force (e.g. the ball impact,
+        GCV-20) added after the root torques are zeroed, so it acts on the
+        root too.
+        """
         effort = np.asarray(tau, dtype=float).copy()
         if effort.shape != (self.nv,):
             raise ValueError("Torque vector must match the coordinate count")
         effort[self.root] = 0.0
+        if external is not None:
+            effort = effort + np.asarray(external, dtype=float)
         result = self.adapter.accelerations(
             self._map(q), self._map(v), self._map(effort)
         )
@@ -1091,13 +1107,24 @@ class FullBodySimulator:
         return report, float(lowest)
 
     def step(
-        self, t: float, q: Array, v: Array, controller: Controller, dt: float
+        self,
+        t: float,
+        q: Array,
+        v: Array,
+        controller: Controller,
+        dt: float,
+        external: Callable[[Array], Array] | None = None,
     ) -> tuple[Array, Array, Array]:
-        """One RK4 step; returns the new state and the torque used at the start."""
+        """One RK4 step; returns the new state and the torque used at the start.
+
+        ``external(q)`` is an optional applied generalized force evaluated at
+        every stage (the ball impact); the controller never sees it.
+        """
 
         def rate(t_k: float, q_k: Array, v_k: Array) -> tuple[Array, Array, Array]:
             tau_k = np.asarray(controller(t_k, q_k, v_k), dtype=float)
-            return v_k, self.acceleration(q_k, v_k, tau_k), tau_k
+            ext = None if external is None else external(q_k)
+            return v_k, self.acceleration(q_k, v_k, tau_k, ext), tau_k
 
         k1q, k1v, tau = rate(t, q, v)
         k2q, k2v, _ = rate(t + dt / 2, q + dt / 2 * k1q, v + dt / 2 * k1v)
@@ -1118,8 +1145,14 @@ class FullBodySimulator:
         duration_s: float,
         dt_s: float,
         record_every: int = 1,
+        impact: ImpactForce | None = None,
     ) -> SimulationRecord:
-        """Integrate from ``(q0, v0)`` and sample every ``record_every`` steps."""
+        """Integrate from ``(q0, v0)`` and sample every ``record_every`` steps.
+
+        ``impact`` applies the ball's collision force over its contact window
+        (GCV-20); steps are split at the window edges and the latched force is
+        returned in ``SimulationRecord.ball_impact``.
+        """
         q_curr: Array = np.asarray(q0, dtype=float).copy()
         v_curr: Array = np.asarray(v0, dtype=float).copy()
         if tuple(q_curr.shape) != (self.nv,) or tuple(v_curr.shape) != (self.nv,):
@@ -1133,8 +1166,15 @@ class FullBodySimulator:
         supports: list[tuple[SupportReport, float]] = [self.support(q_curr, v_curr)]
         tau_prev: Array = np.zeros(self.nv)
         for k in range(1, steps + 1):
-            q_curr, v_curr, tau_prev = self.step(
-                (k - 1) * dt_s, q_curr, v_curr, controller, dt_s
+            q_curr, v_curr, impact, tau_prev = step_through_impact(
+                impact,
+                (k - 1) * dt_s,
+                dt_s,
+                q_curr,
+                v_curr,
+                lambda t, h, q, v, ext: self.step(t, q, v, controller, h, ext),
+                poses=self.frame_poses,
+                accel=self.applied_force_acceleration,
             )
             if k % record_every == 0 or k == steps:
                 times.append(k * dt_s)
@@ -1165,7 +1205,16 @@ class FullBodySimulator:
                 [r.inside_support_polygon for r, _ in supports]
             ),
             lowest_sphere_height_m=np.array([h for _, h in supports]),
+            ball_impact=None if impact is None else impact.to_record(),
         )
+
+    def frame_poses(self, q: Array) -> Mapping[str, Array]:
+        """Engine 4x4 world poses of the spec frames at ``q``."""
+        return self.adapter.frame_poses(self._map(np.asarray(q, dtype=float)))
+
+    def applied_force_acceleration(self, q: Array, v: Array, force: Array) -> Array:
+        """Acceleration with no effort and an applied generalized ``force``."""
+        return self.acceleration(q, v, np.zeros(self.nv), force)
 
 
 def preload_feet(
@@ -1359,8 +1408,13 @@ def _tracking_controller_from_gains(
     gains: ComputedTorqueGains,
     *,
     acceleration_feedforward: float = 1.0,
+    split_time_s: float | None = None,
 ) -> Controller:
-    """Computed-torque tracking with pre-built gains."""
+    """Computed-torque tracking with pre-built gains.
+
+    ``split_time_s`` (ball impact, GCV-20) differentiates the reference on
+    each side of impact separately so the feedforward has no spike there.
+    """
     if not 0.0 <= acceleration_feedforward <= 1.0:
         raise ValueError("acceleration_feedforward must lie in [0, 1]")
     times = np.asarray(time_ref, dtype=float)
@@ -1372,19 +1426,16 @@ def _tracking_controller_from_gains(
         or not np.isfinite(reference).all()
     ):
         raise ValueError("Reference times must increase with one finite q row each")
-    if times.size > 1:
-        velocity = np.gradient(reference, times, axis=0)
-        acceleration = acceleration_feedforward * np.gradient(velocity, times, axis=0)
-    else:
-        velocity = np.zeros_like(reference)
-        acceleration = np.zeros_like(reference)
+    velocity, acceleration, last = reference_rates(times, reference, split_time_s)
+    acceleration = acceleration_feedforward * acceleration
+    split = None if last is None else (float(split_time_s or 0.0), last)
 
     def sample(table: Array, t: float) -> Array:
-        return np.array([np.interp(t, times, table[:, k]) for k in range(simulator.nv)])
+        return sample_rate_table(times, table, t, split)
 
     def controller(t: float, q: Array, v: Array) -> Array:
         q_t, v_t, a_t = (
-            sample(reference, t),
+            sample_rate_table(times, reference, t, None),
             sample(velocity, t),
             sample(acceleration, t),
         )
@@ -1436,14 +1487,19 @@ def tracking_controller(
     balance: tuple[float, float] | None = None,
     root_regulation: tuple[float, float] | None = None,
     acceleration_feedforward: float = 1.0,
+    split_time_s: float | None = None,
 ) -> Controller:
-    """Computed-torque tracking of a reference trajectory (linear interpolation)."""
+    """Computed-torque tracking of a reference trajectory (linear interpolation).
+
+    ``split_time_s`` splits the reference rates at the ball impact (GCV-20).
+    """
     return _tracking_controller_from_gains(
         simulator,
         time_ref,
         q_ref,
         _tracking_gains(omega_rad_s, zeta, balance, root_regulation),
         acceleration_feedforward=acceleration_feedforward,
+        split_time_s=split_time_s,
     )
 
 

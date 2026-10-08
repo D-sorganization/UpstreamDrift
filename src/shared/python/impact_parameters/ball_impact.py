@@ -139,18 +139,36 @@ def validate_window(
         )
 
 
+@dataclass(frozen=True)
+class FaceContact:
+    """Clubhead state at the start of contact (world frame, SI).
+
+    ``effective_mass_kg`` is the plant's mass along the face normal at
+    ``application_point_m`` (supplied by the caller).
+    """
+
+    face_normal: Vector
+    face_velocity_mps: Vector
+    application_point_m: Vector
+    effective_mass_kg: float
+
+
+@dataclass(frozen=True)
+class BallSpec:
+    """Ball and contact constants (defaults: see the module docstring)."""
+
+    mass_kg: float = BALL_MASS_KG
+    cor: float = COR_LIMIT
+    duration_s: float = CONTACT_DURATION_S
+    centre_m: Vector | None = None
+
+
 def collision_impulse(
+    face: FaceContact,
     *,
-    face_normal: Vector,
-    face_velocity_mps: Vector,
-    application_point_m: Vector,
-    effective_mass_kg: float,
     time_s: float,
     swing_span_s: tuple[float, float],
-    ball_mass_kg: float = BALL_MASS_KG,
-    cor: float = COR_LIMIT,
-    duration_s: float = CONTACT_DURATION_S,
-    ball_centre_m: Vector | None = None,
+    ball: BallSpec | None = None,
 ) -> BallCollision:
     """Impulse exchanged between a ball at rest and the approaching face.
 
@@ -160,20 +178,21 @@ def collision_impulse(
     Postconditions: the club impulse is ``-J n``; normal momentum is
     conserved and the post-collision separation speed is ``cor * v_n``.
     """
-    m_eff = _positive(effective_mass_kg, "effective_mass_kg")
-    m_ball = _positive(ball_mass_kg, "ball_mass_kg")
-    restitution = float(cor)
+    ball = BallSpec() if ball is None else ball
+    m_eff = _positive(face.effective_mass_kg, "effective_mass_kg")
+    m_ball = _positive(ball.mass_kg, "ball_mass_kg")
+    restitution = float(ball.cor)
     if not np.isfinite(restitution) or not 0.0 < restitution <= 1.0:
-        raise ValueError(f"cor must lie in (0, 1], got {cor!r}")
-    duration = _positive(duration_s, "duration_s")
+        raise ValueError(f"cor must lie in (0, 1], got {ball.cor!r}")
+    duration = _positive(ball.duration_s, "duration_s")
     validate_window(float(time_s), duration, swing_span_s)
-    normal = _vector3(face_normal, "face_normal")
+    normal = _vector3(face.face_normal, "face_normal")
     length = float(np.linalg.norm(normal))
     if length < 1e-12:
         raise ValueError("face_normal must be nonzero")
     normal = normal / length
-    velocity = _vector3(face_velocity_mps, "face_velocity_mps")
-    point = _vector3(application_point_m, "application_point_m")
+    velocity = _vector3(face.face_velocity_mps, "face_velocity_mps")
+    point = _vector3(face.application_point_m, "application_point_m")
     v_n = float(velocity @ normal)
     if v_n <= 0.0:
         raise ValueError(
@@ -181,8 +200,8 @@ def collision_impulse(
         )
     magnitude = (1.0 + restitution) * m_eff * m_ball * v_n / (m_eff + m_ball)
     contact = None
-    if ball_centre_m is not None:
-        contact = _vector3(ball_centre_m, "ball_centre_m") - BALL_RADIUS_M * normal
+    if ball.centre_m is not None:
+        contact = _vector3(ball.centre_m, "ball_centre_m") - BALL_RADIUS_M * normal
     return BallCollision(
         face_normal=normal,
         application_point_m=point,

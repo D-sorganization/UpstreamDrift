@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Any
+
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.signal import butter, filtfilt
@@ -126,6 +128,14 @@ def _validate_impact_index(impact_index: object, frames: int) -> int:
             f"both sides of impact, got {split}"
         )
     return split
+
+
+def smooth_lane(q: np.ndarray, lane: Any, cutoff_hz: float) -> np.ndarray:
+    """:func:`smooth_reference` at the lane's rate, split at its capture
+    impact (``lane.impact_index``; unsplit when the lane has none)."""
+    return smooth_reference(
+        q, lane.rate_hz, cutoff_hz, impact_index=getattr(lane, "impact_index", None)
+    )
 
 
 def smooth_reference_bayesian(

@@ -372,6 +372,7 @@ class Lane:
         #: split there. None filters across impact (no club triad observed).
         self.impact_index: int | None = None
         self.impact_split_reason = "not computed"
+        self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
 
     def set_face_targets(
         self,
@@ -393,6 +394,16 @@ class Lane:
         self.face_weight = float(weight)
         self.face_targets = targets if any(targets) else None
 
+    def set_club_targets(
+        self,
+        attachments: Mapping[str, tuple[str, Sequence[float]]],
+        spec: Mapping[str, Any],
+        face_weight: float,
+    ) -> None:
+        """Face-orientation targets (OSV-10) and the capture impact (GCV-20)."""
+        self.set_face_targets(attachments, spec, face_weight)
+        self.set_impact_split(attachments, spec)
+
     def set_impact_split(
         self,
         attachments: Mapping[str, tuple[str, Sequence[float]]],
@@ -402,18 +413,25 @@ class Lane:
         #11767). Impact is the capture face centre's ball passage; when the
         club triad cannot be observed the split is unavailable and the reason
         is kept for the receipt (never a guessed frame)."""
-        from src.shared.python.motion_matching.club_face_target import (
-            capture_impact_index,
-        )
+        from src.shared.python.motion_matching.club_face_target import capture_impact
+        from src.shared.python.motion_matching.impact_force import ImpactForce
 
         try:
-            self.impact_index = capture_impact_index(
+            hit = capture_impact(
                 self.times, self.points, self.valid, self.labels, attachments, spec
+            )
+            self.ball_impact = ImpactForce.for_spec(
+                spec,
+                t_start_s=hit.time_s,
+                swing_span_s=(float(self.times[0]), float(self.times[-1])),
+                ball_centre_m=hit.ball_centre_m,
             )
         except ValueError as exc:
             self.impact_index = None
+            self.ball_impact = None
             self.impact_split_reason = f"unavailable: {exc}"
         else:
+            self.impact_index = hit.index
             self.impact_split_reason = "capture face-centre ball passage"
 
     def impact_split_report(self) -> dict[str, Any]:
@@ -422,6 +440,8 @@ class Lane:
         if self.impact_index is not None:
             report["frame"] = self.impact_index
             report["time_s"] = float(self.times[self.impact_index] - self.times[0])
+        if self.ball_impact is not None:
+            report["impact_time_s"] = float(self.ball_impact.t_start_s)
         return report
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:

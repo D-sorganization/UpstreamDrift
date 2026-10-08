@@ -128,3 +128,29 @@ def test_capture_impact_index_rejects_mismatched_times(
     )
     with pytest.raises(ValueError, match="times"):
         cft.capture_impact_index(np.arange(10.0), None, None, (), {}, {})
+
+
+def test_capture_impact_reports_sub_sample_time_and_the_shared_ball(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.shared.python.model_appearance.ball import BALL_RADIUS_M
+    from src.shared.python.motion_matching import club_face_target as cft
+
+    rate = 333.0
+    centres = _capture_centres(rate=rate)
+    normals = np.tile([0.0, 1.0, 0.0], (len(centres), 1))
+    normals[0] = np.nan  # first observed normal is used
+    monkeypatch.setattr(cft, "observe_capture_face", lambda *a, **k: (normals, centres))
+    times = np.arange(len(centres)) / rate
+    hit = cft.capture_impact(times, None, None, (), {}, {})
+    assert times[hit.index] <= hit.time_s <= times[hit.index + 1]
+    assert hit.time_s == pytest.approx(1.4, abs=2e-3)
+    # Ball centre: one radius along the address face normal, at the address
+    # face-centre height.
+    np.testing.assert_allclose(
+        hit.ball_centre_m, centres[0] + [0.0, BALL_RADIUS_M, 0.0], atol=1e-12
+    )
+    monkeypatch.setattr(
+        cft, "observe_capture_face", lambda *a, **k: (normals * 0.0, centres)
+    )
+    assert cft.capture_impact(times, None, None, (), {}, {}).ball_centre_m is None

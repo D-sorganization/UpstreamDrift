@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -327,6 +327,59 @@ def fill_unobserved(
     return np.column_stack([np.interp(t, t[seen], c[seen, j]) for j in range(3)])
 
 
+class CaptureImpact(NamedTuple):
+    """Capture ball passage on the capture clock (GCV-20, #11767).
+
+    ``index`` is the last pre-contact frame (``times[index] <= time_s <=
+    times[index + 1]``); ``ball_centre_m`` is the shared ball
+    (:func:`model_appearance.ball.ball_position_at_address`) at the address
+    face, centred at the address face-centre height, or ``None`` when no
+    face normal was observed.
+    """
+
+    time_s: float
+    index: int
+    ball_centre_m: Array | None
+
+
+def capture_impact(
+    times: Sequence[float] | Array,
+    points: Array,
+    valid: NDArray[np.bool_],
+    labels: Sequence[str],
+    attachments: Mapping[str, tuple[str, Sequence[float]]],
+    spec: Mapping[str, Any],
+) -> CaptureImpact:
+    """Sub-sample capture impact and the ball it strikes.
+
+    The capture face centre (head triad through the calibrated
+    ``attachments``, gaps interpolated) passes the ball at the sub-sample
+    :func:`model_appearance.club_face.ball_passage`. Raises ``ValueError``
+    when ``times`` does not match the frames, the triad cannot be observed,
+    or the face centre never returns to the ball.
+    """
+    from src.shared.python.model_appearance.ball import (
+        BALL_RADIUS_M,
+        ball_position_at_address,
+    )
+    from src.shared.python.model_appearance.club_face import ball_passage
+
+    normals, centres = observe_capture_face(points, valid, labels, attachments, spec)
+    t = np.asarray(times, dtype=float)
+    if t.shape != (len(centres),):
+        raise ValueError("times must hold one entry per capture frame")
+    filled = fill_unobserved(t, centres)
+    t_impact, k, _ = ball_passage(t, filled)
+    seen = np.isfinite(normals).all(axis=1) & (np.linalg.norm(normals, axis=1) > 0)
+    ball = None
+    if seen.any():
+        normal = normals[int(np.argmax(seen))]
+        ball = ball_position_at_address(
+            filled[0], normal, ground_height_m=float(filled[0, 2]) - BALL_RADIUS_M
+        )
+    return CaptureImpact(t_impact, int(k), ball)
+
+
 def capture_impact_index(
     times: Sequence[float] | Array,
     points: Array,
@@ -335,20 +388,5 @@ def capture_impact_index(
     attachments: Mapping[str, tuple[str, Sequence[float]]],
     spec: Mapping[str, Any],
 ) -> int:
-    """Last pre-contact capture frame (GCV-20, #11767).
-
-    The capture face centre (head triad through the calibrated
-    ``attachments``, gaps interpolated) passes the ball at the sub-sample
-    :func:`model_appearance.club_face.ball_passage`; the frame returned is the
-    start ``k`` of that segment, so ``times[k] <= t_impact <= times[k + 1]``.
-    Raises ``ValueError`` when ``times`` does not match the frames, the triad
-    cannot be observed, or the face centre never returns to the ball.
-    """
-    from src.shared.python.model_appearance.club_face import ball_passage
-
-    _, centres = observe_capture_face(points, valid, labels, attachments, spec)
-    t = np.asarray(times, dtype=float)
-    if t.shape != (len(centres),):
-        raise ValueError("times must hold one entry per capture frame")
-    _, k, _ = ball_passage(t, fill_unobserved(t, centres))
-    return int(k)
+    """Last pre-contact capture frame (:func:`capture_impact` ``.index``)."""
+    return capture_impact(times, points, valid, labels, attachments, spec).index

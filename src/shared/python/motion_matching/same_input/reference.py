@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from src.shared.python.motion_matching.impact_force import ImpactForce
 from src.shared.python.motion_matching.pipeline.constants import DT_S
 from src.shared.python.motion_matching.same_input.bundle import InputBundle
 from src.shared.python.motion_matching.same_input.closure import project_to_closure
@@ -28,13 +29,18 @@ Array = NDArray[np.float64]
 
 
 def _tracking_setup(
-    spec_bytes: bytes, track_time_s: Array, q_track: Array, duration_s: float | None
+    spec_bytes: bytes,
+    track_time_s: Array,
+    q_track: Array,
+    duration_s: float | None,
+    split_time_s: float | None = None,
 ) -> tuple[Any, Array, Array, int]:
     """Controller, start state and step count shared by every closed-loop run.
 
     The controller is the pipeline computed-torque law built once on the
     MuJoCo model, so closed-loop runs in different engines use the identical
-    control function of ``(t, q, v)``.
+    control function of ``(t, q, v)``.  ``split_time_s`` (bundle clock) splits
+    its reference rates at the ball impact.
     """
     from src.engines.physics_engines.mujoco.python.full_body_model import (
         NativeMujocoFullBodyModel,
@@ -54,7 +60,7 @@ def _tracking_setup(
     sim = fs.FullBodySimulator(NativeMujocoFullBodyModel(spec_bytes))
     q0 = fs.preload_feet(sim, track[0])
     v0 = sim.consistent_velocity(q0, np.gradient(track, times, axis=0)[0])
-    controller = build_tracking_controller(sim, times, track)
+    controller = build_tracking_controller(sim, times, track, split_time_s=split_time_s)
     return controller, q0, v0, int(round(span / DT_S))
 
 
@@ -65,10 +71,16 @@ def closed_loop(
     q_track: Array,
     *,
     duration_s: float | None = None,
+    impact: ImpactForce | None = None,
 ) -> Rollout:
-    """Track ``q_track`` in ``engine`` with the shared controller held per step."""
+    """Track ``q_track`` in ``engine`` with the shared controller held per step.
+
+    ``impact`` is the ball force plan on the bundle clock (time zero at
+    ``track_time_s[0]``); it is latched from this engine's own state.
+    """
+    split = None if impact is None else float(impact.t_start_s)
     controller, q0, v0, steps = _tracking_setup(
-        spec_bytes, track_time_s, q_track, duration_s
+        spec_bytes, track_time_s, q_track, duration_s, split
     )
     plant = VectorPlant(engine, spec_bytes)
     start = project_to_closure(plant, q0, v0)
@@ -79,6 +91,7 @@ def closed_loop(
         lambda _k, t, q, v: controller(t, q, v),
         steps=steps,
         dt_s=DT_S,
+        impact=impact,
     )
 
 
@@ -89,6 +102,7 @@ def generate_reference_bundle(
     *,
     duration_s: float | None = None,
     provenance: dict[str, Any] | None = None,
+    impact: ImpactForce | None = None,
 ) -> InputBundle:
     """Track ``q_track`` in MuJoCo with the pipeline controller held per step.
 
@@ -98,9 +112,17 @@ def generate_reference_bundle(
         q_track: Tracked reference (len(track_time_s), nv) in spec order.
         duration_s: Horizon; defaults to the reference span.
         provenance: Extra manifest fields (source run, capture, ...).
+        impact: Ball force plan on the bundle clock; the force latched in
+            MuJoCo is recorded as ``provenance["ball_impact"]`` so every
+            engine's replay applies it identically (GCV-20).
     """
     rollout = closed_loop(
-        "mujoco", spec_bytes, track_time_s, q_track, duration_s=duration_s
+        "mujoco",
+        spec_bytes,
+        track_time_s,
+        q_track,
+        duration_s=duration_s,
+        impact=impact,
     )
     return InputBundle(
         spec_bytes=bytes(spec_bytes),
@@ -115,6 +137,7 @@ def generate_reference_bundle(
         provenance={
             "controller": "pipeline computed-torque (kkt), held per step",
             "max_pose_drift_m": float(rollout.pose_drift.max()),
+            "ball_impact": rollout.ball_impact,
             **(provenance or {}),
         },
     )
