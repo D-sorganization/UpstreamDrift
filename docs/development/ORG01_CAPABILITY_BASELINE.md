@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 169
+- **Total Cataloged Entries**: 170
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -32,7 +32,7 @@ packages, saved layouts, and golden test fixtures.
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
-| `simulation` | 87 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
+| `simulation` | 88 | Physics engines, multi-body kinematics, dynamics solvers, and forward simulation |
 | `training` | 17 | Drills, objective laboratories, movement/swing optimization, and skill reinforcement |
 
 ## Representative Golden Preservation Fixtures
@@ -111,6 +111,7 @@ packages, saved layouts, and golden test fixtures.
 | `engines.dashboards` | Per-engine interactive dashboards (Drake/MuJoCo/Pinocchio) | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/launchers/drake_dashboard.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `engines.load_and_simulate` | Engine load/probe + basic simulation loop | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/launcher_simulation.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `export.recordings_downloads` | Export/recording parity (HDF5/MAT/C3D/CSV/video, persisted recordings) | `feature` | `capture` | — | `core` | 🔵 planned | `src/shared/python/data_io/export.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `export.video_speed_variants` | Time-based native video export with full- and half-speed clips and an impact slow-motion clip | `feature` | `simulation` | — | `core` | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `force_overlays` | Force Overlays | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_environment` | Golf Environment | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_environment/gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `golf_simulation_suite` | Golf Simulation Suite | `tile` | `simulation` | — | `core` | 🟢 active_feature | `src/tools/golf_simulation_suite/__main__.py` | `tests/config/test_launcher_registry_parity.py` |

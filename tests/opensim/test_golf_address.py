@@ -257,3 +257,40 @@ def test_real_tour_capture_address_pose_fit_and_metrics() -> None:
     assert receipt["tolerance_profile_sha256"] == FROZEN_ADDRESS_TOLERANCE_SHA256
     assert receipt["acceptance_gates"]["grip_closure_pass"]
     assert receipt["acceptance_gates"]["marker_rms_pass"]
+
+
+def test_opensim_toe_out_seed_reaches_target_within_two_degrees() -> None:
+    """OSV-4 (#11730): the OpenSim address seed turns both feet to the target."""
+    pytest.importorskip("opensim")
+    if not SCALED_MODEL_PATH.is_file():
+        pytest.skip("Required input models not found.")
+    from src.engines.physics_engines.opensim.python.tour_matching.address_feet import (
+        apply_toe_out_seed,
+        opensim_foot_progression_deg,
+    )
+
+    q = {
+        "hip_flexion_r": 0.35,
+        "knee_angle_r": 0.35,
+        "ankle_angle_r": 0.1,
+        "hip_flexion_l": 0.35,
+        "knee_angle_l": 0.35,
+        "ankle_angle_l": 0.1,
+        "pelvis_tilt": -0.15,
+    }
+    legacy = opensim_foot_progression_deg(SCALED_MODEL_PATH, q)
+    block = apply_toe_out_seed(SCALED_MODEL_PATH, q, {"left": 16.4, "right": 4.0})
+    achieved = opensim_foot_progression_deg(SCALED_MODEL_PATH, q)
+    assert block["method"] == "fk"
+    assert achieved["left"] == pytest.approx(16.4, abs=2.0)
+    assert achieved["right"] == pytest.approx(4.0, abs=2.0)
+    assert abs(legacy["left"] - 16.4) > 2.0  # the legacy neutral feet were off
+
+
+def test_opensim_toe_out_seed_rejects_missing_foot() -> None:
+    from src.engines.physics_engines.opensim.python.tour_matching.address_feet import (
+        apply_toe_out_seed,
+    )
+
+    with pytest.raises(ValueError, match="right"):
+        apply_toe_out_seed("model.osim", {}, {"left": 10.0})

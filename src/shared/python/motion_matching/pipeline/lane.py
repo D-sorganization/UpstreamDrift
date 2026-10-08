@@ -30,6 +30,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     HEAD_MARKER_WEIGHT,
     IK_UNBOUNDED,
     LEG_LABELS,
+    LEG_SEEDS,
     PRIOR,
     SPIN_COORDINATES,
     SPIN_PRIOR,
@@ -41,6 +42,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     TRAJECTORY_RESTARTS,
     WRIST_COORDINATES,
     rate_from_times,
+    square_forefoot_seeds,
 )
 from src.shared.python.motion_matching.range_of_motion import (
     HUMAN_RANGES_DEG,
@@ -248,6 +250,14 @@ class Lane:
         self.gaze_face_offset_m = 0.0
         self.gaze_axis_targets_cache: list[Any] | None = None
         self.gaze_plan: Any = None
+        #: Address toe-out targets (OSV-4); None keeps the legacy behaviour.
+        self.feet: Any = None
+
+    def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
+        """Leg marker seeds; forefoot markers squared when foot progression is on."""
+        if self.feet is None:
+            return dict(LEG_SEEDS)
+        return dict(square_forefoot_seeds(LEG_SEEDS))
 
     @property
     def rate_hz(self) -> float:

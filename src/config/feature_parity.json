@@ -20,6 +20,15 @@
       "reason": "Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673).",
       "tiles": []
     },
+    "export.video_speed_variants": {
+      "title": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "pyqt": "src/tools/native_viewer_export/cli.py",
+      "api": null,
+      "web": null,
+      "status": "exempt",
+      "reason": "Headless CLI batch export of mp4 clips (60 fps, 1x and 0.5x, optional 0.1x impact window) through each engine's desktop viewer; no web route renders or serves these clips, so there is no browser equivalent until one is added (GCV-14, #11720, epic #11706).",
+      "tiles": []
+    },
     "tools.necromatcher": {
       "title": "Historical Player Library And Source Review",
       "pyqt": "src/tools/necromatcher/gui.py",

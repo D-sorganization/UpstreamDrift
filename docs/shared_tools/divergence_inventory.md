@@ -72,6 +72,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 14 | 26 | 9 | 36 | 0 | 40 |
+| `impact_parameters` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -82,7 +83,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 6 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 272 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 274 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
@@ -136,9 +137,10 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `ux` | 0 | 0 | 0 | 7 | 0 | 0 |
 | `validation_pkg` | 0 | 0 | 0 | 13 | 0 | 0 |
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
+| `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1669** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1678** | **777** | **673** |
 
 ## Diverged Files by Package
 

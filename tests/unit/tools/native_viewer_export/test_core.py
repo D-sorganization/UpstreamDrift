@@ -141,19 +141,19 @@ def test_export_clip_set_and_geometry(tmp_path: Path) -> None:
     result = export_swing(
         _FakeBackend(),
         _swing(),
-        ExportSettings(width=80, height=60, stride=40, fps=12),
+        ExportSettings(width=80, height=60, fps=100, speeds=(1.0,)),
         tmp_path,
         writer_factory=lambda p, fps: _Writer(p, fps, sink),
     )
-    assert not result.skipped and result.frames == 4
+    assert not result.skipped and result.frames == 11  # 0.1 s at 100 fps
     assert sorted(sink) == sorted(
-        [f"driver_fake_{v}.mp4" for v in (*VIEW_ORDER, "2x2")]
+        [f"driver_fake_{v}_1x.mp4" for v in (*VIEW_ORDER, "2x2")]
     )
-    assert all(w.closed and len(w.frames) == 4 and w.fps == 12 for w in sink.values())
-    assert sink["driver_fake_face_on.mp4"].frames[0].shape == (60, 80, 3)
-    assert sink["driver_fake_2x2.mp4"].frames[0].shape == (120, 160, 3)
+    assert all(w.closed and len(w.frames) == 11 and w.fps == 100 for w in sink.values())
+    assert sink["driver_fake_face_on_1x.mp4"].frames[0].shape == (60, 80, 3)
+    assert sink["driver_fake_2x2_1x.mp4"].frames[0].shape == (120, 160, 3)
     # label and HUD pixels were drawn on top of the flat 40-grey tile
-    assert sink["driver_fake_face_on.mp4"].frames[0].max() == 255
+    assert sink["driver_fake_face_on_1x.mp4"].frames[0].max() == 255
 
 
 def test_export_without_multiview_or_overlay(tmp_path: Path) -> None:
@@ -165,7 +165,10 @@ def test_export_without_multiview_or_overlay(tmp_path: Path) -> None:
         tmp_path,
         writer_factory=lambda p, fps: _Writer(p, fps, sink),
     )
-    assert list(sink) == ["driver_fake_overhead.mp4"]
+    assert sorted(sink) == [
+        "driver_fake_overhead_0p5x.mp4",
+        "driver_fake_overhead_1x.mp4",
+    ]
     assert result.glyph_counts == ()
 
 
@@ -204,7 +207,7 @@ def test_overlay_feed_counts_glyphs_and_legend_in_hud(tmp_path: Path) -> None:
     result = export_swing(
         _FakeBackend(),
         _swing(),
-        ExportSettings(width=320, height=240, stride=50),
+        ExportSettings(width=320, height=240, fps=20, speeds=(1.0,)),
         tmp_path,
         overlay=OverlayFeed(frame_at),
         writer_factory=lambda p, fps: _Writer(p, fps, sink),

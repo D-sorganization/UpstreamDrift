@@ -4,7 +4,7 @@ function tests = test_gs3dx_observation_identity
 %   Verifies:
 %     1. Omitted default semantics: unmasked capture, EXPORTED_COORDINATE_VALIDITY_ONLY
 %     2. Explicit mask binding acceptance: SOURCE_AVAILABILITY_MASK_CALLER_BOUND
-%     3. Acceptance of caller-attested raw GEARS source hash without cap.source_sha256
+%     3. Acceptance of caller-attested raw native-capture source hash without cap.source_sha256
 %     4. Fail-closed rejection of C3D export hash mismatch
 %     5. Fail-closed rejection of malformed SHA-256 strings (length, hex syntax, non-char)
 %     6. Fail-closed rejection of label mismatches and order permutations
@@ -57,7 +57,7 @@ function cap = helperSyntheticCap(n_markers, n_frames, rate_hz, labels)
     cap.units = 'm';
     cap.source_units = 'mm';
     cap.observed_mask = [];
-    % Note: cap does NOT contain source_sha256; raw GEARS source hash is caller-attested.
+    % Note: cap does NOT contain source_sha256; raw native-capture source hash is caller-attested.
 end
 
 function c = helperValidContract(cap, export_sha, source_sha)
@@ -144,7 +144,7 @@ function testExplicitMaskBindingAcceptance(t)
 end
 
 % -------------------------------------------------------------------------
-% Test 3: Acceptance of caller-attested raw GEARS source hash without cap.source_sha256
+% Test 3: Acceptance of caller-attested raw native-capture source hash without cap.source_sha256
 % -------------------------------------------------------------------------
 function testCallerBoundSourceHashAccepted(t)
     cap = helperSyntheticCap(4, 50);
