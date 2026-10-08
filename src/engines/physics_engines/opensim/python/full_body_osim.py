@@ -626,6 +626,17 @@ def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
         ET.SubElement(marker_elem, "fixed").text = "false"
 
 
+def _check_grip_model(grip_model: str) -> None:
+    """Reject an unknown grip model and the not-yet-implemented contact grip."""
+    if grip_model not in GRIP_MODELS:
+        raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
+    if grip_model == "contact":
+        raise NotImplementedError(  # tracked: #11739
+            "grip_model='contact' (distributed ElasticFoundation grip) is "
+            "phase 2 of issue #11739 and is not implemented yet"
+        )
+
+
 @precondition(
     lambda spec, **kwargs: bool(spec), "spec mapping or bytes must not be empty"
 )
@@ -673,13 +684,7 @@ def export_full_body_osim(
         raw_bytes = json.dumps(spec_or_bytes, sort_keys=True).encode("utf-8")
         spec = dict(spec_or_bytes)
 
-    if grip_model not in GRIP_MODELS:
-        raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
-    if grip_model == "contact":
-        raise NotImplementedError(
-            "grip_model='contact' (distributed ElasticFoundation grip) is "
-            "phase 2 of issue #11739 and is not implemented yet"
-        )
+    _check_grip_model(grip_model)
     _validate_spec(spec)
     interface: GripInterface | None = None
     if grip_model == "bushing":

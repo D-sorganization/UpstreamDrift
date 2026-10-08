@@ -58,9 +58,11 @@ class ClubDynamics:
             )
             placed.append((float(s["mass_kg"]), com, inertia))
         mass = sum(m for m, _, _ in placed)
-        com = sum(m * c for m, c, _ in placed) / mass
+        com_tot = np.asarray(sum(m * c for m, c, _ in placed) / mass, dtype=float)
         inertia_tot = np.zeros((3, 3))
         for m, c, inertia in placed:
-            d = c - com
+            d = c - com_tot
             inertia_tot += inertia + m * ((d @ d) * np.eye(3) - np.outer(d, d))
-        return cls(mass, (float(com[0]), float(com[1]), float(com[2])), inertia_tot)
+        return cls(
+            mass, (float(com_tot[0]), float(com_tot[1]), float(com_tot[2])), inertia_tot
+        )

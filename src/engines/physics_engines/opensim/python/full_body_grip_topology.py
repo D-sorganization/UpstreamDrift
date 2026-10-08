@@ -64,7 +64,8 @@ def _move_solids(
     club_to_target: np.ndarray,
 ) -> None:
     """Move named solids from the club to ``target``, preserving world pose."""
-    keep, moved = [], []
+    keep: list[dict[str, Any]] = []
+    moved: list[dict[str, Any]] = []
     for solid in club["solids"]:
         (moved if solid["name"] in names else keep).append(solid)
     if {s["name"] for s in moved} != set(names):

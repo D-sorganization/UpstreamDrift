@@ -65,6 +65,11 @@ class BushingRun:
     body_positions_m: dict[str, np.ndarray]  # tracked body origins (n, 3), world
 
 
+def _downcast(osim: Any, class_name: str, obj: Any) -> Any:
+    """``osim.<class_name>.safeDownCast(obj)`` without a deep attribute chain."""
+    return getattr(osim, class_name).safeDownCast(obj)
+
+
 def _inv(t: np.ndarray) -> np.ndarray:
     out = np.eye(4)
     out[:3, :3] = t[:3, :3].T
@@ -355,11 +360,13 @@ class BushingGripSimulator:
 
     def _frame(self, side_name: str, kind: str) -> Any:
         """Hand (frame1) or club (frame2) frame actually connected to the bushing."""
-        force = self._osim.BushingForce.safeDownCast(
-            self._model.getForceSet().get(f"grip_bushing_{side_name}")
+        force = _downcast(
+            self._osim,
+            "BushingForce",
+            self._model.getForceSet().get(f"grip_bushing_{side_name}"),
         )
         socket = "frame1" if kind == "hand" else "frame2"
-        return self._osim.PhysicalOffsetFrame.safeDownCast(force.getConnectee(socket))
+        return _downcast(self._osim, "PhysicalOffsetFrame", force.getConnectee(socket))
 
     def _sample(self, state: Any) -> dict[str, Any]:
         model = self._model
@@ -389,8 +396,10 @@ class BushingGripSimulator:
             [body.getAngularVelocityInGround(state).get(i) for i in range(3)]
         )
         for side, name in _SIDES:
-            force = self._osim.BushingForce.safeDownCast(
-                model.getForceSet().get(f"grip_bushing_{name}")
+            force = _downcast(
+                self._osim,
+                "BushingForce",
+                model.getForceSet().get(f"grip_bushing_{name}"),
             )
             rec = force.getRecordValues(state)
             vals = np.array([rec.get(i) for i in range(rec.size())])

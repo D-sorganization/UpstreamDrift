@@ -114,7 +114,7 @@ def design_damping(
     for axis in range(6):
         unit = np.zeros(6)
         unit[axis] = 1.0
-        c_axis = _blocks(unit[:3], unit[3:], (left, right), com)
+        c_axis = _blocks(unit[:3].tolist(), unit[3:].tolist(), (left, right), com)
         for mode in range(6):
             gain[mode, axis] = vec[:, mode] @ c_axis @ vec[:, mode] / (2 * omega[mode])
     coeff, residual = nnls(gain, damping_ratio * np.ones(6))
