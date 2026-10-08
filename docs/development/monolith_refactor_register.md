@@ -83,6 +83,7 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 999 | `src/shared/python/estimation/dime_contracts.py` |
 | 990 | `src/engines/physics_engines/drake/python/motion_matching/simulate.py` |
 | 988 | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_data_core.py` |
+| 984 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 981 | `src/engines/physics_engines/drake/python/motion_matching/fit_swing_autodiff.py` |
 | 975 | `src/api/routes/simulation_ws.py` |
 | 974 | `src/launchers/embedded_host.py` |
@@ -114,7 +115,6 @@ Priority order (highest coupling / duplicated logic first): launchers, engine si
 | 940 | `src/shared/python/sidekick/lab/bio/c3d_reader.py` |
 | 934 | `src/shared/python/sidekick/ui/tools_sidebar/os_terminal.py` |
 | 932 | `src/shared/python/model_generation/library/model_library.py` |
-| 928 | `src/shared/python/motion_matching/pipeline/cli.py` |
 | 926 | `src/shared/python/engine_core/cross_engine_validator.py` |
 | 926 | `src/tools/bunker_shot_gui/gui.py` |
 | 924 | `src/research/differentiable/engine.py` |

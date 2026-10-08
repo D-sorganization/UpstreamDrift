@@ -1,0 +1,371 @@
+{
+ "clubs": {
+  "driver": {
+   "after": {
+    "faces": {
+     "capture": {
+      "address_deg": 0.22340294590528312,
+      "impact_deg": 8.838922457637947,
+      "impact_time_s": 1.3229858082256876,
+      "peak_speed_gap_to_ball_m": 0.17648421931749925,
+      "peak_speed_time_s": 1.3194444444444444,
+      "top_deg": 97.68413121291846,
+      "top_time_s": 1.1027777777777779
+     },
+     "model": {
+      "address_deg": 0.18271734921995458,
+      "impact_deg": 11.330914281434668,
+      "impact_time_s": 1.3258726215619583,
+      "peak_speed_gap_to_ball_m": 1.0808579259294167,
+      "peak_speed_time_s": 1.302,
+      "top_deg": 98.77144978959201,
+      "top_time_s": 1.104
+     }
+    }
+   },
+   "before": {
+    "faces": {
+     "capture": {
+      "address_deg": 0.22340294590528312,
+      "impact_deg": 8.838922457637947,
+      "impact_time_s": 1.3229858082256876,
+      "peak_speed_gap_to_ball_m": 0.17648421931749925,
+      "peak_speed_time_s": 1.3194444444444444,
+      "top_deg": 97.68413121291846,
+      "top_time_s": 1.1027777777777779
+     },
+     "model": {
+      "address_deg": 0.0004244928846457687,
+      "impact_deg": 29.461307064974225,
+      "impact_time_s": 1.3273887369596358,
+      "peak_speed_gap_to_ball_m": 1.034862203572416,
+      "peak_speed_time_s": 1.304,
+      "top_deg": 102.10233967394426,
+      "top_time_s": 1.104
+     }
+    },
+    "fixture_sha256": "3874590a4ee3a6157253b68de5add0907aef073b7c8767714d581cc949059aef"
+   },
+   "bundle_manifest": {
+    "coordinate_order": [
+     "TranslationInputX",
+     "TranslationInputY",
+     "TranslationInputZ",
+     "HipInputX",
+     "HipInputY",
+     "HipInputZ",
+     "SpineInputX",
+     "SpineInputY",
+     "TorsoInput",
+     "LEInput",
+     "LFInput",
+     "LScapInputX",
+     "LScapInputY",
+     "LSInputX",
+     "LSInputY",
+     "LSInputZ",
+     "LWInputX",
+     "LWInputY",
+     "REInput",
+     "RFInput",
+     "RScapInputX",
+     "RScapInputY",
+     "RSInputX",
+     "RSInputY",
+     "RSInputZ",
+     "RWInputX",
+     "RWInputY",
+     "NeckInputX",
+     "NeckInputY",
+     "NeckInputZ",
+     "hip_flexion_r",
+     "hip_adduction_r",
+     "hip_rotation_r",
+     "knee_angle_r",
+     "ankle_angle_r",
+     "subtalar_angle_r",
+     "mtp_angle_r",
+     "hip_flexion_l",
+     "hip_adduction_l",
+     "hip_rotation_l",
+     "knee_angle_l",
+     "ankle_angle_l",
+     "subtalar_angle_l",
+     "mtp_angle_l"
+    ],
+    "dt_s": 0.001,
+    "duration_s": 1.814,
+    "policy": {
+     "closure_projection": "closest_point_each_step",
+     "effort_hold": "zero_order",
+     "integrator": "rk4",
+     "kkt": "exact",
+     "projection_tolerance": 1e-13,
+     "root_efforts": "zero",
+     "substeps": 8
+    },
+    "provenance": {
+     "capture": "driver",
+     "capture_sha256": "cbcb4d84aca0a1f558073f0c2328c3f501c4726aaf699e382cf20c5861a0971d",
+     "controller": "pipeline computed-torque (kkt), held per step",
+     "dynamics_record_sha256": "aa3d593a00f9a39cb8adbf80f22322383d22d5853d4129070b572365805cb61c",
+     "max_pose_drift_m": 2.9537013195099094e-11,
+     "run_dir": "driver",
+     "spec_file": "full_body_spec_hipcal_scaled.json"
+    },
+    "reference_engine": "mujoco",
+    "schema": "same-input-bundle/v1",
+    "spec_sha256": "2d36810168f90941fc786edb20e0a34eddf9d0dccd406150d0f8fbfbacc7180b",
+    "steps": 1814
+   },
+   "bundle_sha256": "061c3f00ffef9561b304645d4d828c4d690de728c51b80c658166f0504f8e860",
+   "capture": "driver",
+   "capture_triad_offsets_m": {
+    "Marker_2:2:1": [
+     -6.57624833736772e-05,
+     -0.08325134132350236,
+     -0.0063159919575855655
+    ],
+    "Marker_2:2:2": [
+     0.04974814418057197,
+     -0.016134951952307176,
+     -0.045730581112637274
+    ],
+    "Marker_2:2:3": [
+     0.061711191778321246,
+     -0.010888398617822552,
+     0.00464315313489838
+    ]
+   },
+   "face_orientation": {
+    "frame": "Clubhead",
+    "ik": {
+     "frames_observed": 618,
+     "frames_unobserved": 36,
+     "max_deg": 3.149464343475709,
+     "p95_deg": 2.071835195383923,
+     "rms_deg": 0.8638624875636263
+    },
+    "reference": {
+     "frames_observed": 618,
+     "frames_unobserved": 36,
+     "max_deg": 2.9627643014561587,
+     "p95_deg": 1.85449240401566,
+     "rms_deg": 0.762975784377546
+    },
+    "targeted_frames": 618,
+    "triad": [
+     "Marker_2:2:1",
+     "Marker_2:2:2",
+     "Marker_2:2:3"
+    ],
+    "weight": 3.0
+   },
+   "face_weight": 3.0,
+   "fixture_sha256": "41a8db49f55a12c21b6ae08f917699b5222294ddbd96a3674c9f9087e0c0ed0b",
+   "generated_at_commit": "3545b36273e9a55870005c82992f58c39b8feed0",
+   "marker_rms_m": {
+    "ik": 0.033628466191190955,
+    "reference": 0.032555957988497225,
+    "tracking": 0.06500005384934877
+   },
+   "pipeline_argv": [
+    "--spec",
+    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv10/docs/development/full_body_models/full_body_spec_anthro_driver.json",
+    "--capture",
+    "driver",
+    "--static-seeds",
+    "--face-weight",
+    "3.0",
+    "--out",
+    "/tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/osv10/regen/driver"
+   ],
+   "run_receipt_sha256": "9719c0cecc1f497a6ad79f0bb27463cd4f9d36234f2190f6182acade7b9e213a"
+  },
+  "iron7": {
+   "after": {
+    "faces": {
+     "capture": {
+      "address_deg": -0.30175862350882926,
+      "impact_deg": 8.425239466561205,
+      "impact_time_s": 1.3340254452418927,
+      "peak_speed_gap_to_ball_m": 0.10555209709351912,
+      "peak_speed_time_s": 1.3314763231197773,
+      "top_deg": 109.69555504188783,
+      "top_time_s": 1.0974930362116992
+     },
+     "model": {
+      "address_deg": -0.3520537686618838,
+      "impact_deg": 7.627746525746561,
+      "impact_time_s": 1.3368994664598575,
+      "peak_speed_gap_to_ball_m": 0.8812831158648321,
+      "peak_speed_time_s": 1.312,
+      "top_deg": 110.27836038657283,
+      "top_time_s": 1.1
+     }
+    }
+   },
+   "before": {
+    "faces": {
+     "capture": {
+      "address_deg": -0.30175862350882926,
+      "impact_deg": 8.425239466561205,
+      "impact_time_s": 1.3340254452418927,
+      "peak_speed_gap_to_ball_m": 0.10555209709351912,
+      "peak_speed_time_s": 1.3314763231197773,
+      "top_deg": 109.69555504188783,
+      "top_time_s": 1.0974930362116992
+     },
+     "model": {
+      "address_deg": 0.0016363402681265887,
+      "impact_deg": 17.880477406722743,
+      "impact_time_s": 1.3370349931330336,
+      "peak_speed_gap_to_ball_m": 0.8156401385563139,
+      "peak_speed_time_s": 1.314,
+      "top_deg": 108.02614932443625,
+      "top_time_s": 1.098
+     }
+    },
+    "fixture_sha256": "abade2d191009ef0ad80bb272f8fa8abd0fb813a67a2225f6f33bc3d67a4328c"
+   },
+   "bundle_manifest": {
+    "coordinate_order": [
+     "TranslationInputX",
+     "TranslationInputY",
+     "TranslationInputZ",
+     "HipInputX",
+     "HipInputY",
+     "HipInputZ",
+     "SpineInputX",
+     "SpineInputY",
+     "TorsoInput",
+     "LEInput",
+     "LFInput",
+     "LScapInputX",
+     "LScapInputY",
+     "LSInputX",
+     "LSInputY",
+     "LSInputZ",
+     "LWInputX",
+     "LWInputY",
+     "REInput",
+     "RFInput",
+     "RScapInputX",
+     "RScapInputY",
+     "RSInputX",
+     "RSInputY",
+     "RSInputZ",
+     "RWInputX",
+     "RWInputY",
+     "NeckInputX",
+     "NeckInputY",
+     "NeckInputZ",
+     "hip_flexion_r",
+     "hip_adduction_r",
+     "hip_rotation_r",
+     "knee_angle_r",
+     "ankle_angle_r",
+     "subtalar_angle_r",
+     "mtp_angle_r",
+     "hip_flexion_l",
+     "hip_adduction_l",
+     "hip_rotation_l",
+     "knee_angle_l",
+     "ankle_angle_l",
+     "subtalar_angle_l",
+     "mtp_angle_l"
+    ],
+    "dt_s": 0.001,
+    "duration_s": 1.827,
+    "policy": {
+     "closure_projection": "closest_point_each_step",
+     "effort_hold": "zero_order",
+     "integrator": "rk4",
+     "kkt": "exact",
+     "projection_tolerance": 1e-13,
+     "root_efforts": "zero",
+     "substeps": 8
+    },
+    "provenance": {
+     "capture": "iron",
+     "capture_sha256": "00a70c1ec0a887c28f9c0397766904eb9e79dee9f6d2bbd0cbb0062445adf561",
+     "controller": "pipeline computed-torque (kkt), held per step",
+     "dynamics_record_sha256": "77290505c188a383dc8296d7f46201d2f2adc3a030218a8ee4292dd591c9e652",
+     "max_pose_drift_m": 8.269586101706085e-11,
+     "run_dir": "iron",
+     "spec_file": "full_body_spec_hipcal_scaled.json"
+    },
+    "reference_engine": "mujoco",
+    "schema": "same-input-bundle/v1",
+    "spec_sha256": "0c1f5ca2f4f61f3fa63a7a88963aff1774f24ce89c18997922c7649387f297ce",
+    "steps": 1827
+   },
+   "bundle_sha256": "cac5f537a32b831d335a7da06d8be2d704303d40972e4044ae06c4664bc06ff1",
+   "capture": "iron",
+   "capture_triad_offsets_m": {
+    "Marker_2:2:1": [
+     -0.005108632448239634,
+     -0.090921349428073,
+     -0.015203263362751102
+    ],
+    "Marker_2:2:2": [
+     0.03936192786275875,
+     -0.023262058373729747,
+     -0.08340855396050521
+    ],
+    "Marker_2:2:3": [
+     -0.044802215312550686,
+     -0.08764420084074293,
+     -0.012424924856700088
+    ]
+   },
+   "face_orientation": {
+    "frame": "Clubhead",
+    "ik": {
+     "frames_observed": 640,
+     "frames_unobserved": 17,
+     "max_deg": 4.358618512955468,
+     "p95_deg": 1.216751480555939,
+     "rms_deg": 0.5764241132420801
+    },
+    "reference": {
+     "frames_observed": 640,
+     "frames_unobserved": 17,
+     "max_deg": 3.093897491074809,
+     "p95_deg": 1.19300508919366,
+     "rms_deg": 0.5778769923967089
+    },
+    "targeted_frames": 640,
+    "triad": [
+     "Marker_2:2:1",
+     "Marker_2:2:2",
+     "Marker_2:2:3"
+    ],
+    "weight": 3.0
+   },
+   "face_weight": 3.0,
+   "fixture_sha256": "2b6d382f298612c14a9ca45f5ef9543d79db553fb89121db3214aacf430843af",
+   "generated_at_commit": "3545b36273e9a55870005c82992f58c39b8feed0",
+   "marker_rms_m": {
+    "ik": 0.0316487650783191,
+    "reference": 0.03080485093885836,
+    "tracking": 0.0529711665173356
+   },
+   "pipeline_argv": [
+    "--spec",
+    "/home/dieterolson/Repositories/UpstreamDrift-worktrees/claude-osv10/docs/development/full_body_models/full_body_spec_anthro_iron7.json",
+    "--capture",
+    "iron",
+    "--static-seeds",
+    "--zmp-filter",
+    "--face-weight",
+    "3.0",
+    "--out",
+    "/tmp/claude-1000/-home-dieterolson-Repositories-UpstreamDrift/16836c4a-59a5-46dd-92ff-37c7c6bab2f1/scratchpad/osv10/regen/iron"
+   ],
+   "run_receipt_sha256": "b767fcc8f6eb5afee22d1f4a24447dff10748bb0d5fbc5a93e49de36d8d7a45a"
+  }
+ },
+ "generator": "scripts/regenerate_club_face_fixtures.py",
+ "schema": "club-face-fixture-provenance/v1"
+}

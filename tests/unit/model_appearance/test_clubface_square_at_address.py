@@ -1,19 +1,22 @@
-"""OSV-8 (#11755): the rendered clubface is square to the target at address.
+"""OSV-8 (#11755) / OSV-10 (#11759): the rendered clubface at address and impact.
 
 For every engine the club body is placed by that engine's own forward
 kinematics at the captured address pose (capture A: driver, capture B:
 7-iron). The world face normal of the rendered head mesh must agree with the
 spec ``Clubface Vector`` direction to 1 degree, and the horizontal face angle
 against the target axis (native -Y, positive open for a right-handed golfer)
-must be square to 2 degrees.
+must be square to 2 degrees. Over the matched swing (OSV-10) each engine's
+face must stay within 5 degrees of the capture head-triad face at address,
+the top of the backswing and impact.
 """
 
 from __future__ import annotations
 
+import functools
 import json
 import math
 import types
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import numpy as np
@@ -62,8 +65,10 @@ def _unit_angle_deg(a: np.ndarray, b: np.ndarray) -> float:
 
 
 # ----------------------------------------------- engine forward kinematics
-# Each returns (R_geom_world, engine_mesh_vertices): the world rotation of the
-# frame the engine's head mesh is expressed in, and that mesh's vertices.
+# Each factory returns (pose, engine_mesh_vertices): ``pose(coords)`` is the
+# world placement (R, p) of the frame the engine's head mesh is expressed in,
+# by that engine's own forward kinematics, and the vertices are that mesh.
+Pose = Callable[[Mapping[str, float]], tuple[np.ndarray, np.ndarray]]
 
 
 def _assembly_head_vertices(club: str) -> np.ndarray:
@@ -71,7 +76,7 @@ def _assembly_head_vertices(club: str) -> np.ndarray:
     return ca.assembly_meshes(assembly)["head"].vertices
 
 
-def _opensim(club: str) -> tuple[np.ndarray, np.ndarray]:
+def _opensim(club: str) -> tuple[Pose, np.ndarray]:
     osim = pytest.importorskip("opensim")
     import tempfile
 
@@ -79,6 +84,7 @@ def _opensim(club: str) -> tuple[np.ndarray, np.ndarray]:
     from src.engines.physics_engines.opensim.python.full_body_osim import (
         export_full_body_osim,
     )
+    from src.shared.python.model_appearance.mesh_io import read_stl_bytes
 
     xml, _ = export_full_body_osim(_spec_bytes(club), club_geometry_ref="")
     club_visuals.register_geometry_path()
@@ -88,15 +94,19 @@ def _opensim(club: str) -> tuple[np.ndarray, np.ndarray]:
         model = osim.Model(str(path))
     state = model.initSystem()
     coordinates = model.getCoordinateSet()
-    for name, value in _coords(club).items():
-        coordinates.get(name).setValue(state, float(value), False)
-    model.realizePosition(state)
-    rot = model.getBodySet().get("Clubhead").getTransformInGround(state).R()
-    matrix = np.array([[rot.get(i, j) for j in range(3)] for i in range(3)])
-    stl = club_visuals.asset_paths(club)["head"]
-    from src.shared.python.model_appearance.mesh_io import read_stl_bytes
+    body = model.getBodySet().get("Clubhead")
 
-    return matrix, read_stl_bytes(stl.read_bytes()).vertices
+    def pose(coords: Mapping[str, float]) -> tuple[np.ndarray, np.ndarray]:
+        for name, value in coords.items():
+            coordinates.get(name).setValue(state, float(value), False)
+        model.realizePosition(state)
+        transform = body.getTransformInGround(state)
+        rot, pos = transform.R(), transform.p()
+        matrix = np.array([[rot.get(i, j) for j in range(3)] for i in range(3)])
+        return matrix, np.array([pos.get(i) for i in range(3)])
+
+    stl = club_visuals.asset_paths(club)["head"]
+    return pose, read_stl_bytes(stl.read_bytes()).vertices
 
 
 def _mujoco_model(club: str, arena: bool = False):  # noqa: ANN202
@@ -116,31 +126,35 @@ def _mujoco_model(club: str, arena: bool = False):  # noqa: ANN202
     return mujoco, mujoco.MjModel.from_xml_string(xml)
 
 
-def _mujoco_like(club: str, arena: bool) -> tuple[np.ndarray, np.ndarray]:
+def _mujoco_like(club: str, arena: bool) -> tuple[Pose, np.ndarray]:
     mujoco, model = _mujoco_model(club, arena)
     data = mujoco.MjData(model)
-    for name, value in _coords(club).items():
-        data.qpos[model.joint(name).qposadr[0]] = value
-    mujoco.mj_forward(model, data)
     mesh_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_MESH, "vmesh_club_head")
     assert mesh_id >= 0
     geom = int(np.flatnonzero(model.geom_dataid == mesh_id)[0])
     adr, num = model.mesh_vertadr[mesh_id], model.mesh_vertnum[mesh_id]
-    return (
-        np.array(data.geom_xmat[geom]).reshape(3, 3),
-        np.array(model.mesh_vert[adr : adr + num], dtype=float),
-    )
+
+    def pose(coords: Mapping[str, float]) -> tuple[np.ndarray, np.ndarray]:
+        for name, value in coords.items():
+            data.qpos[model.joint(name).qposadr[0]] = value
+        mujoco.mj_forward(model, data)
+        return (
+            np.array(data.geom_xmat[geom]).reshape(3, 3),
+            np.array(data.geom_xpos[geom]),
+        )
+
+    return pose, np.array(model.mesh_vert[adr : adr + num], dtype=float)
 
 
-def _mujoco(club: str) -> tuple[np.ndarray, np.ndarray]:
+def _mujoco(club: str) -> tuple[Pose, np.ndarray]:
     return _mujoco_like(club, arena=False)
 
 
-def _myosuite(club: str) -> tuple[np.ndarray, np.ndarray]:
+def _myosuite(club: str) -> tuple[Pose, np.ndarray]:
     return _mujoco_like(club, arena=True)
 
 
-def _drake(club: str) -> tuple[np.ndarray, np.ndarray]:
+def _drake(club: str) -> tuple[Pose, np.ndarray]:
     _real_module("pydrake")
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
@@ -156,16 +170,24 @@ def _drake(club: str) -> tuple[np.ndarray, np.ndarray]:
     )
     plant.Finalize()
     ctx = plant.CreateDefaultContext()
-    full = np.zeros(plant.num_positions())
-    for name, value in _coords(club).items():
-        full[plant.GetJointByName(name, inst).position_start()] = value
-    plant.SetPositions(ctx, full)
-    name = ca.club_body_name(json.loads(_spec_bytes(club)))
-    pose = plant.EvalBodyPoseInWorld(ctx, plant.GetBodyByName(links[name], inst))
-    return np.array(pose.rotation().matrix()), _assembly_head_vertices(club)
+    body = plant.GetBodyByName(
+        links[ca.club_body_name(json.loads(_spec_bytes(club)))], inst
+    )
+
+    def pose(coords: Mapping[str, float]) -> tuple[np.ndarray, np.ndarray]:
+        full = np.zeros(plant.num_positions())
+        for name, value in coords.items():
+            full[plant.GetJointByName(name, inst).position_start()] = value
+        plant.SetPositions(ctx, full)
+        placement = plant.EvalBodyPoseInWorld(ctx, body)
+        return np.array(placement.rotation().matrix()), np.array(
+            placement.translation()
+        )
+
+    return pose, _assembly_head_vertices(club)
 
 
-def _pinocchio(club: str) -> tuple[np.ndarray, np.ndarray]:
+def _pinocchio(club: str) -> tuple[Pose, np.ndarray]:
     pin = _real_module("pinocchio")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
@@ -173,15 +195,18 @@ def _pinocchio(club: str) -> tuple[np.ndarray, np.ndarray]:
 
     spec = json.loads(_spec_bytes(club))
     adapter = FullBodyPinocchioModel(spec)
-    q = adapter.configuration(_coords(club))
     data = adapter.model.createData()
-    pin.forwardKinematics(adapter.model, data, q)
     joint, body_pose = adapter._bodies[ca.club_body_name(spec)]  # noqa: SLF001
-    placement = data.oMi[joint] * body_pose
-    return np.array(placement.rotation), _assembly_head_vertices(club)
+
+    def pose(coords: Mapping[str, float]) -> tuple[np.ndarray, np.ndarray]:
+        pin.forwardKinematics(adapter.model, data, adapter.configuration(coords))
+        placement = data.oMi[joint] * body_pose
+        return np.array(placement.rotation), np.array(placement.translation)
+
+    return pose, _assembly_head_vertices(club)
 
 
-ENGINES: dict[str, Callable[[str], tuple[np.ndarray, np.ndarray]]] = {
+ENGINES: dict[str, Callable[[str], tuple[Pose, np.ndarray]]] = {
     "opensim": _opensim,
     "mujoco": _mujoco,
     "drake": _drake,
@@ -211,7 +236,8 @@ def _procrustes(mesh, dst: np.ndarray) -> np.ndarray:  # noqa: ANN001
 
 def _world_vectors(engine: str, club: str) -> tuple[np.ndarray, np.ndarray]:
     """(world normal of the rendered head mesh, world spec Clubface Vector)."""
-    geom_rot, engine_vertices = ENGINES[engine](club)
+    pose, engine_vertices = ENGINES[engine](club)
+    geom_rot, _ = pose(_coords(club))
     assembly = ca.assembly_from_spec(json.loads(_spec_bytes(club)))
     head = load_club_head(assembly.head_alias)
     club_head = ca.assembly_meshes(assembly)["head"]
@@ -315,39 +341,36 @@ def test_spec_club_block_overrides_the_default_roll() -> None:
 SWING_DT_S = 0.002  # fixtures hold every second sample of the 1 kHz reference
 
 
-def _face_centre_series(club: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """(time, face-centre world xyz, face horizontal angle) over the swing (MuJoCo FK)."""
-    mujoco, model = _mujoco_model(club)
+@functools.cache
+def _face_series(engine: str, club: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(time, world face normal, world face centre) of the fixture swing.
+
+    Placed by ``engine``'s own forward kinematics; the normal and centre are
+    those of the rendered head mesh as that engine holds it.
+    """
     from src.shared.python.model_appearance.club_head_mesh import face_centre
 
-    q = np.load(ROOT / f"tests/fixtures/club_face/swing_q_{club}.npz")["q"]
-    order = POSES[club]["coordinate_order"]
-    adr = [model.joint(n).qposadr[0] for n in order]
-    data = mujoco.MjData(model)
-    mesh_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_MESH, "vmesh_club_head")
-    geom = int(np.flatnonzero(model.geom_dataid == mesh_id)[0])
-    vadr, vnum = model.mesh_vertadr[mesh_id], model.mesh_vertnum[mesh_id]
-    vertices = np.array(model.mesh_vert[vadr : vadr + vnum], dtype=float)
+    pose, vertices = ENGINES[engine](club)
     assembly = ca.assembly_from_spec(json.loads(_spec_bytes(club)))
     head = load_club_head(assembly.head_alias)
-    src = head.mesh.vertices
     rot = _procrustes(head.mesh, vertices)
-    trans = vertices.mean(axis=0) - rot @ src.mean(axis=0)
-    centre_g = rot @ face_centre(head.head_mesh) + trans
+    centre_g = rot @ face_centre(head.head_mesh) + (
+        vertices.mean(axis=0) - rot @ head.mesh.vertices.mean(axis=0)
+    )
     normal_g = rot @ measured_face_normal(head.head_mesh)
-    centres, angles = [], []
+    q = np.load(ROOT / f"tests/fixtures/club_face/swing_q_{club}.npz")["q"]
+    order = POSES[club]["coordinate_order"]
+    normals, centres = [], []
     for row in q.astype(float):
-        data.qpos[adr] = row
-        mujoco.mj_forward(model, data)
-        r = np.array(data.geom_xmat[geom]).reshape(3, 3)
-        centres.append(np.array(data.geom_xpos[geom]) + r @ centre_g)
-        angles.append(cf.horizontal_face_angle_deg(r @ normal_g))
-    return np.arange(len(q)) * SWING_DT_S, np.array(centres), np.array(angles)
+        r, p = pose(dict(zip(order, row, strict=True)))
+        normals.append(r @ normal_g)
+        centres.append(r @ centre_g + p)
+    return np.arange(len(q)) * SWING_DT_S, np.array(normals), np.array(centres)
 
 
 @pytest.mark.parametrize("capture", sorted(CAPTURES))
 def test_impact_frame_puts_the_clubhead_at_the_ball(capture: str) -> None:
-    time, head, _ = _face_centre_series(CAPTURES[capture])
+    time, _, head = _face_series("mujoco", CAPTURES[capture])
     k = cf.impact_frame(time, head)
     assert k > cf.top_of_backswing_index(time, head)
     assert abs(head[k, 2] - head[0, 2]) <= 0.10
@@ -355,16 +378,69 @@ def test_impact_frame_puts_the_clubhead_at_the_ball(capture: str) -> None:
     assert 1.2 < time[k] < 1.45  # downswing of the 1.8 s captures, not the finish
 
 
+# ------------------------------------------- face tracks the capture (OSV-10)
+FACE_TRACK_TOL_DEG = 5.0
+PROVENANCE = ROOT / "tests/fixtures/club_face/provenance.json"
+CAPTURE_NAMES = {"driver": "driver", "iron7": "iron"}
+
+
+@functools.cache
+def _capture_events(club: str) -> cf.FaceEvents:
+    """Face events of the capture head triad (calibrated offsets of the fit)."""
+    from src.shared.python.motion_matching import club_face_target as cft
+    from src.shared.python.motion_matching.ground_support import (
+        capture_to_native_world,
+    )
+    from src.shared.python.motion_matching.pipeline.constants import capture_path
+    from src.shared.python.motion_matching.tour_capture_contract import (
+        load_tour_capture,
+    )
+
+    record = json.loads(PROVENANCE.read_text(encoding="utf-8"))["clubs"][club]
+    offsets = record["capture_triad_offsets_m"]
+    capture = load_tour_capture(capture_path(CAPTURE_NAMES[club])).subset(
+        tuple(offsets)
+    )
+    attachments = {k: (cft.FACE_FRAME, tuple(v)) for k, v in offsets.items()}
+    normals, centres = cft.observe_capture_face(
+        capture_to_native_world(capture.points_m),
+        capture.valid,
+        tuple(capture.labels),
+        attachments,
+        json.loads(_spec_bytes(club)),
+    )
+    t = np.asarray(capture.time_s, dtype=float)
+    t = t - t[0]
+    return cf.face_events(t, normals, cft.fill_unobserved(t, centres))
+
+
+def _wrapped_deg(a: float, b: float) -> float:
+    return abs((a - b + 180.0) % 360.0 - 180.0)
+
+
 @pytest.mark.parametrize("capture", sorted(CAPTURES))
-@pytest.mark.xfail(
-    strict=True,
-    reason="#11755 open: the matched trajectory leaves the face 18-30 degrees "
-    "open at impact while the capture head triad is square; needs an IK refit "
-    "with head-triad weight, not a constant roll",
-)
-def test_face_is_square_at_impact(capture: str) -> None:
-    time, head, angle = _face_centre_series(CAPTURES[capture])
-    assert abs(angle[cf.impact_frame(time, head)]) <= 10.0
+@pytest.mark.parametrize("engine", sorted(ENGINES))
+def test_face_tracks_the_capture_at_address_top_and_impact(
+    engine: str, capture: str
+) -> None:
+    """Model face (engine FK, own impact) within 5 deg of the capture triad face.
+
+    Each swing is measured at its own events: impact is the sub-sample ball
+    passage of its face centre, so the rollout's few-ms tracking lag (about
+    6 degrees of face rotation at a fixed time) is not mistaken for a face
+    error.
+    """
+    club = CAPTURES[capture]
+    model = cf.face_events(*_face_series(engine, club))
+    truth = _capture_events(club)
+    for event in ("address_deg", "top_deg", "impact_deg"):
+        gap = _wrapped_deg(getattr(model, event), getattr(truth, event))
+        assert gap <= FACE_TRACK_TOL_DEG, (
+            event,
+            getattr(model, event),
+            getattr(truth, event),
+        )
+    assert abs(model.impact_time_s - truth.impact_time_s) <= 0.010
 
 
 def _swing(n: int = 400) -> tuple[np.ndarray, np.ndarray]:
@@ -394,3 +470,75 @@ def test_impact_frame_rejects_bad_shapes_and_tolerances() -> None:
         cf.impact_frame(t[:-1], head)
     with pytest.raises(ValueError, match="tolerances"):
         cf.impact_frame(t, head, height_tol_m=0.0)
+
+
+def test_ball_passage_finds_the_sub_sample_crossing() -> None:
+    t = np.linspace(0.0, 2.0, 41)  # coarse: 5 cm per sample near the ball
+    head = np.zeros((len(t), 3))
+    phase = np.pi * t / 2.0
+    head[:, 1] = -np.sin(2.0 * phase) * 0.8  # back, through the ball, through
+    head[:, 2] = 0.1 + 0.9 * np.sin(phase) ** 2 * (t < 1.0)
+    t_imp, k, s = cf.ball_passage(t, head)
+    assert t[k] <= t_imp <= t[k + 1] and 0.0 <= s <= 1.0
+    point = head[k] + s * (head[k + 1] - head[k])
+    assert np.linalg.norm(point - head[0]) < 1e-9
+    assert t_imp == pytest.approx(1.0)
+
+
+def test_ball_passage_contracts() -> None:
+    t, head = _swing()
+    with pytest.raises(ValueError, match="clubhead"):
+        cf.ball_passage(t[:-1], head)
+    with pytest.raises(ValueError, match="tolerances"):
+        cf.ball_passage(t, head, ball_radius_m=-1.0)
+    bad = head.copy()
+    bad[3, 0] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        cf.ball_passage(t, bad)
+    head[1:, 2] += 0.5
+    with pytest.raises(ValueError, match="no valid impact"):
+        cf.ball_passage(t, head)
+
+
+def test_face_angle_at_blends_neighbouring_normals() -> None:
+    a, b = math.radians(10.0), math.radians(-10.0)
+    normals = np.array(
+        [[-math.sin(a), -math.cos(a), 0.0], [-math.sin(b), -math.cos(b), 0]]
+    )
+    assert cf.face_angle_at(normals, 0, 0.5) == pytest.approx(0.0, abs=1e-9)
+    assert cf.face_angle_at(normals, 0, 0.0) == pytest.approx(10.0)
+    with pytest.raises(ValueError, match="segment"):
+        cf.face_angle_at(normals, 1, 0.5)
+    with pytest.raises(ValueError, match="segment"):
+        cf.face_angle_at(normals, 0, 1.5)
+
+
+def _circle_swing(t: np.ndarray) -> np.ndarray:
+    """Head on a 1 m circle: slow backswing to the top at t = 1, back to the
+    ball at t = 1.4 at full speed, then through."""
+    theta = np.where(
+        t < 1.0,
+        np.pi / 2.0 * (1.0 - np.cos(np.pi * t)),
+        np.pi * np.cos(np.pi / 2.0 * (t - 1.0) / 0.4),
+    )
+    head = np.zeros((len(t), 3))
+    head[:, 1] = np.sin(theta)
+    head[:, 2] = 0.1 + (1.0 - np.cos(theta))
+    return head
+
+
+def test_face_events_report_address_top_impact_and_peak_speed() -> None:
+    t = np.linspace(0.0, 1.6, 801)
+    head = _circle_swing(t)
+    turn = np.radians(15.0) * t  # face opens 15 degrees per second
+    normals = np.column_stack([-np.sin(turn), -np.cos(turn), np.zeros_like(t)])
+    events = cf.face_events(t, normals, head)
+    assert events.address_deg == pytest.approx(0.0)
+    assert events.top_time_s == pytest.approx(1.0, abs=0.01)
+    assert events.top_deg == pytest.approx(15.0 * events.top_time_s)
+    assert events.impact_time_s == pytest.approx(1.4, abs=1e-3)
+    assert events.impact_deg == pytest.approx(21.0, abs=0.02)
+    assert events.peak_speed_time_s == pytest.approx(1.4, abs=0.01)
+    assert events.peak_speed_gap_to_ball_m < 0.01
+    with pytest.raises(ValueError, match="normals"):
+        cf.face_events(t, normals[:-1], head)

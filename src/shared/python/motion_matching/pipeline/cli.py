@@ -16,6 +16,14 @@ from src.shared.python.contracts import precondition
 from src.shared.python.motion_matching import (
     full_body_forward_dynamics as fs,
 )
+from src.shared.python.motion_matching.club_face_target import (
+    FACE_FRAME,
+    FACE_ORIENTATION_WEIGHT,
+    HEAD_TRIAD_LABELS,
+    face_fit_summary,
+    model_face_normals,
+    observe_capture_face,
+)
 from src.shared.python.motion_matching.full_body_spec import (
     validate_full_body_spec,
 )
@@ -273,7 +281,53 @@ def build_parser() -> argparse.ArgumentParser:
             "seeds and records model vs capture angles in the receipt."
         ),
     )
+    parser.add_argument(
+        "--face-weight",
+        type=float,
+        default=FACE_ORIENTATION_WEIGHT,
+        help=(
+            "weight of the club-face orientation residual (OSV-10, #11759): the "
+            "IK pulls the rendered face normal onto the one the capture head "
+            "triad implies; 0 restores the marker-only fit"
+        ),
+    )
     return parser
+
+
+def _attach_face_report(
+    ik_report: dict[str, Any],
+    lane: Lane,
+    cal_res: Any,
+    q_pair: tuple[np.ndarray, np.ndarray],
+    weight: float,
+) -> None:
+    """Add the face residual's receipt block when the residual was active."""
+    if lane.face_targets is not None:
+        ik_report["face_orientation"] = _face_orientation_report(
+            lane, cal_res, *q_pair, weight
+        )
+
+
+def _face_orientation_report(
+    lane: Lane, cal_res: Any, q_ik: np.ndarray, q_ref: np.ndarray, weight: float
+) -> dict[str, Any]:
+    """Receipt block of the face residual: weight and model-vs-capture fit."""
+    report: dict[str, Any] = {
+        "weight": weight,
+        "frame": FACE_FRAME,
+        "triad": list(HEAD_TRIAD_LABELS),
+        "targeted_frames": sum(t is not None for t in lane.face_targets or ()),
+    }
+    if not hasattr(cal_res.kin, "body_poses"):
+        report["reason"] = "IK provider has no body_poses; fit not measured"
+        return report
+    capture, _ = observe_capture_face(
+        lane.points, lane.valid, lane.labels, cal_res.attachments, cal_res.scaled_spec
+    )
+    for name, q in (("ik", q_ik), ("reference", q_ref)):
+        model = model_face_normals(cal_res.kin, q, cal_res.scaled_spec)
+        report[name] = face_fit_summary(model, capture)
+    return report
 
 
 @dataclass(frozen=True)
@@ -847,6 +901,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
         ctx.log.info("wrists and forearms bounded to the human ranges in the IK")
 
     cal_res = _calibrate_and_scale(ctx, lane, base_spec, upper_base, upper, labels)
+    lane.set_face_targets(cal_res.attachments, cal_res.scaled_spec, args.face_weight)
 
     (
         q_ik,
@@ -893,6 +948,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
+    _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",
         time_s=lane.times,

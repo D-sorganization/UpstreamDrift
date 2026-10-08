@@ -363,6 +363,7 @@ def shooting_fit(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             locked_per_frame=locked,
+            axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
         q_track = smooth_reference(q_fit, rate_hz, TRACKING_CUTOFF_HZ)
     zmp = fs.reference_zmp(sim, lane.times, best_q, lane.ground)
@@ -431,6 +432,7 @@ def zmp_filter(
             prior_trajectory=q_track,
             bounds=lane.bounds,
             com_targets_per_frame=goals,
+            axis_targets_per_frame=getattr(lane, "face_targets", None),
         )
         q_track = smooth_reference(q_new, rate_hz, TRACKING_CUTOFF_HZ)
         zmp = fs.reference_zmp(sim, lane.times, q_track, lane.ground)
