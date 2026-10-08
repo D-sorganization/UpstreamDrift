@@ -72,6 +72,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `gui_launcher` | 4 | 4 | 0 | 3 | 1 | 8 |
 | `gui_pkg` | 0 | 0 | 0 | 12 | 0 | 0 |
 | `humanoid_character_builder` | 14 | 26 | 9 | 36 | 0 | 40 |
+| `impact_parameters` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `import_aliases.py` | 0 | 1 | 0 | 0 | 0 | 1 |
 | `injury` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `interfaces.py` | 0 | 0 | 0 | 1 | 0 | 0 |
@@ -139,7 +140,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `video_timing` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1670** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1675** | **777** | **673** |
 
 ## Diverged Files by Package
 
