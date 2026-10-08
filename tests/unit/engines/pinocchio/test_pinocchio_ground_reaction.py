@@ -68,12 +68,16 @@ def _stance_samples() -> dict[str, ContactSample]:
     return out
 
 
-@pytest.fixture(scope="module")
-def source_and_q():
+def build_stance():
     model = pin.buildModelFromXML(URDF, pin.JointModelFreeFlyer())
     q = pin.neutral(model)
     q[2] = 0.9
     return PinocchioForceTorqueSource(model), q
+
+
+@pytest.fixture(scope="module")
+def source_and_q():
+    return build_stance()
 
 
 def _frame(source, q, samples):

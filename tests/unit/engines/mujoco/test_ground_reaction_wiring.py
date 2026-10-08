@@ -53,14 +53,18 @@ STANCE = f"""
 WEIGHT_N = (PELVIS_KG + 2 * FOOT_KG) * G
 
 
-@pytest.fixture(scope="module")
-def stance():
+def build_stance():
     model = mujoco.MjModel.from_xml_string(STANCE)
     data = mujoco.MjData(model)
     mujoco.mj_forward(model, data)
     while data.time < SETTLE_S:
         mujoco.mj_step(model, data)
     return model, data
+
+
+@pytest.fixture(scope="module")
+def stance():
+    return build_stance()
 
 
 def _by_label(frame):

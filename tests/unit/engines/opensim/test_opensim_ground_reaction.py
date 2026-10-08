@@ -104,9 +104,8 @@ def _stance_model_path(directory: Path) -> Path:
     return path
 
 
-@pytest.fixture(scope="module")
-def stance(tmp_path_factory):
-    path = _stance_model_path(tmp_path_factory.mktemp("osim_stance"))
+def build_stance(directory):
+    path = _stance_model_path(directory)
     model = osim.Model(str(path))
     state = model.initSystem()
     joint = model.getJointSet().get("root")
@@ -115,6 +114,11 @@ def stance(tmp_path_factory):
     state.setTime(0.0)
     manager.initialize(state)
     return model, osim.State(manager.integrate(SETTLE_S))
+
+
+@pytest.fixture(scope="module")
+def stance(tmp_path_factory):
+    return build_stance(tmp_path_factory.mktemp("osim_stance"))
 
 
 def _labelled(stance):

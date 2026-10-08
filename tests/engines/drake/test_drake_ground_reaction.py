@@ -54,8 +54,7 @@ GROUND_SDF = """<?xml version="1.0"?>
 <geometry><box><size>5 5 1</size></box></geometry></collision></link></model></sdf>"""
 
 
-@pytest.fixture(scope="module")
-def stance():
+def build_stance():
     builder = DiagramBuilder()
     plant, _ = AddMultibodyPlantSceneGraph(builder, 1e-3)
     parser = Parser(plant)
@@ -70,6 +69,11 @@ def stance():
     )
     Simulator(diagram, ctx).AdvanceTo(SETTLE_S)
     return plant, diagram, pctx
+
+
+@pytest.fixture(scope="module")
+def stance():
+    return build_stance()
 
 
 def _labelled(stance):
