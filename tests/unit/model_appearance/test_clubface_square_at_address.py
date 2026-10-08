@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import types
 from collections.abc import Callable
 from pathlib import Path
 
@@ -26,6 +27,16 @@ from src.shared.python.model_appearance.club_head_mesh import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def _real_module(name: str) -> types.ModuleType:
+    """Import ``name`` or skip; a mock another test left in ``sys.modules`` skips too."""
+    module = pytest.importorskip(name)
+    if not isinstance(module, types.ModuleType) or not hasattr(module, "__file__"):
+        pytest.skip(f"{name} in sys.modules is a test double, not the real package")
+    return module
+
+
 ROOT = Path(__file__).resolve().parents[3]
 SPEC_DIR = ROOT / "docs/development/full_body_models"
 POSES = json.loads(
@@ -130,7 +141,7 @@ def _myosuite(club: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _drake(club: str) -> tuple[np.ndarray, np.ndarray]:
-    pytest.importorskip("pydrake")
+    _real_module("pydrake")
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
 
@@ -155,7 +166,7 @@ def _drake(club: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _pinocchio(club: str) -> tuple[np.ndarray, np.ndarray]:
-    pin = pytest.importorskip("pinocchio")
+    pin = _real_module("pinocchio")
     from src.engines.physics_engines.pinocchio.python.native_model import (
         FullBodyPinocchioModel,
     )
