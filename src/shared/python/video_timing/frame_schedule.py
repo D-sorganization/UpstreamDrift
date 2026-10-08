@@ -52,9 +52,11 @@ def slerp(q0: Array, q1: Array, t: float) -> Array:
     """
     a = np.asarray(q0, dtype=float)
     b = np.asarray(q1, dtype=float)
-    require(a.shape == (4,) and b.shape == (4,), "quaternions must have shape (4,)")
+    require(
+        bool(a.shape == (4,) and b.shape == (4,)), "quaternions must have shape (4,)"
+    )
     na, nb = np.linalg.norm(a), np.linalg.norm(b)
-    require(na > 0.0 and nb > 0.0, "quaternions must be non-zero")
+    require(bool(na > 0.0 and nb > 0.0), "quaternions must be non-zero")
     a, b = a / na, b / nb
     dot = float(a @ b)
     if dot < 0.0:
@@ -133,7 +135,7 @@ class FrameSchedule:
     @property
     def sample_times_s(self) -> Array:
         """Swing time shown by each video frame."""
-        return self._start + np.arange(self.n_frames) * self.speed / self.fps  # type: ignore[no-any-return]
+        return self._start + np.arange(self.n_frames) * self.speed / self.fps  # type: ignore[no-any-return,return-value]
 
     def nearest_indices(self) -> NDArray[np.int_]:
         """Source sample nearest to each video frame (non-decreasing)."""

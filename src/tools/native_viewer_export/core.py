@@ -196,13 +196,18 @@ class SwingInput:
     @property
     def source_times_s(self) -> NDArray[np.float64]:
         """Swing time of every state of the original (unresampled) rollout."""
-        steps = self.bundle.reference_q.shape[0]
-        return np.arange(steps, dtype=float) * self.bundle.dt_s
+        return np.arange(self._source_steps(), dtype=float) * self.bundle.dt_s
+
+    def _source_steps(self) -> int:
+        return int(self.bundle.reference_q.shape[0])
+
+    def _provenance_value(self, key: str) -> Any:
+        return self.bundle.provenance.get(key)
 
     @property
     def impact_time_s(self) -> float:
         """Bundle ``provenance['impact_time_s']`` when present, else the last sample."""
-        value = self.bundle.provenance.get("impact_time_s")
+        value = self._provenance_value("impact_time_s")
         return float(value) if value is not None else float(self.source_times_s[-1])
 
 
