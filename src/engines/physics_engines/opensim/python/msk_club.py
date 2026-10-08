@@ -389,7 +389,7 @@ def set_default_pose(model: ET.Element, address_q: Mapping[str, float]) -> int:
     count = 0
     for coord in model.iter("Coordinate"):
         name = coord.get("name")
-        if name not in address_q:
+        if name is None or name not in address_q:
             continue
         default = coord.find("default_value")
         if default is None:
@@ -430,6 +430,23 @@ def attach_club(
         _free_joint(model, calibration.club_in_ground)
         _bushings(model, club)
     set_default_pose(model, calibration.address_q)
+
+
+def _default_pose(model: ET.Element) -> dict[str, float]:
+    pose = {}
+    for coord in model.iter("Coordinate"):
+        text = coord.findtext("default_value")
+        if coord.get("name") and text is not None:
+            pose[str(coord.get("name"))] = float(text)
+    return pose
+
+
+def grip_model_of(model: ET.Element) -> str:
+    """``"bushing"`` when ``model``'s club hangs on a free joint, else ``"weld"``."""
+    for joint in model.iter("FreeJoint"):
+        if joint.get("name") == FREE_JOINT:
+            return "bushing"
+    return "weld"
 
 
 def hand_grip_point(side: str) -> np.ndarray:

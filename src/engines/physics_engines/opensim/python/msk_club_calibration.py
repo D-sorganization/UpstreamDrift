@@ -13,8 +13,9 @@ address_poses.json``):
    address, where the sole rests) maps to y = 0.
 3. Inverse kinematics over the Rajagopal coordinates (bounded by their
    ranges) puts each hand's :data:`msk_club.HAND_GRIP_POINT_M` on its grip
-   point on the shaft (2 mm weight), turns each thumb toward the head end of
-   the shaft (0.1 weight) and follows the landmarks (4 cm weight), with a
+   point on the shaft (2 mm weight), lays the shaft diagonally across each
+   palm toward the thumb (0.1 weight), keeps the wrists in their
+   physiological deviation range and follows the landmarks (4 cm weight), with a
    weak pull toward the neutral pose.
 4. Each hand-side grip frame is the club grip frame seen from that hand at
    the solution, so both welds are exact at the address pose and the club
@@ -49,26 +50,69 @@ logger = logging.getLogger(__name__)
 #: Rajagopal world (Y up, facing +X, target -Z).
 NATIVE_TO_OPENSIM = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
 ADDRESS_POSES = mc.REPO_ROOT / "tests" / "fixtures" / "club_face" / "address_poses.json"
-#: Generated-model body -> Rajagopal body whose origins are the same joint centre.
+#: Generated-model body -> Rajagopal body whose origins are the same joint
+#: centre. The generated model's knees and ankles are not followed: its feet
+#: are unobserved in the capture and leave the floor (ankles 0.14-0.5 m up,
+#: 0.35 m behind the hips at address), so the feet are planted instead.
 LANDMARKS = {
     "femur_r": "femur_r",
     "femur_l": "femur_l",
-    "tibia_r": "tibia_r",
-    "tibia_l": "tibia_l",
-    "talus_r": "talus_r",
-    "talus_l": "talus_l",
     "RS": "humerus_r",
     "LS": "humerus_l",
     "RE": "ulna_r",
     "LE": "ulna_l",
 }
+#: Planted feet: ankle centres this far either side of the address hip
+#: midpoint along the target line, under the hips, feet flat and square.
+STANCE_HALF_WIDTH_M = 0.22
+#: Rajagopal foot body origins relative to the ankle centre with the foot
+#: flat (x toward the ball, z toward the trail side); y is height above floor.
+FOOT_TEMPLATE = {
+    "talus": (0.0, 0.080, 0.0),
+    "calcn": (-0.044, 0.038, 0.008),
+    "toes": (0.118, 0.036, 0.009),
+}
+FOOT_WEIGHT_M = 0.01
 GENERATED_CLUB_BODY = "Clubhead"
 GRIP_WEIGHT_M = 0.002
 THUMB_WEIGHT = 0.1
 LANDMARK_WEIGHT_M = 0.04
 NEUTRAL_WEIGHT_RAD = 2.0
-#: Thumb (radial) axis of each hand frame; the head end of the shaft is club +y.
-THUMB_AXIS = {"L": np.array([0.0, 0.0, -1.0]), "R": np.array([0.0, 0.0, 1.0])}
+#: Angle of the shaft from the radial axis toward the fingers: in a golf grip
+#: the shaft lies diagonally across the palm, from the heel pad (ulnar,
+#: proximal) to the index finger (radial, distal).
+GRIP_DIAGONAL_DEG = 40.0
+_DIAGONAL = np.radians(GRIP_DIAGONAL_DEG)
+#: Direction of the head end of the shaft (club +y) in each hand frame: radial
+#: (thumb, -z left / +z right) tilted toward the fingers (-y).
+THUMB_AXIS = {
+    "L": np.array([0.0, -np.sin(_DIAGONAL), -np.cos(_DIAGONAL)]),
+    "R": np.array([0.0, -np.sin(_DIAGONAL), np.cos(_DIAGONAL)]),
+}
+#: Static address limits narrower than the golf models' swing ranges: the
+#: Rajagopal physiological wrist deviation (the golf models widen it to
+#: +/-45 deg for the swing, #10003), so the address pose also loads in the
+#: muscle model, which keeps the physiological range.
+ADDRESS_RANGES = {
+    "wrist_dev_r": (-0.43633231, 0.61086524),
+    "wrist_dev_l": (-0.43633231, 0.61086524),
+}
+
+
+def planted_feet(hips: Mapping[str, np.ndarray]) -> dict[str, np.ndarray]:
+    """Rajagopal foot-body targets under ``hips`` (``femur_r``/``femur_l``)."""
+    middle = 0.5 * (np.asarray(hips["femur_r"]) + np.asarray(hips["femur_l"]))
+    feet = {}
+    for suffix, side in (("r", 1.0), ("l", -1.0)):
+        for body, (x, y, z) in FOOT_TEMPLATE.items():
+            centre_z = middle[2] + side * STANCE_HALF_WIDTH_M
+            feet[f"{body}_{suffix}"] = np.array([middle[0] + x, y, centre_z + side * z])
+    return feet
+
+
+def landmark_weight(body: str) -> float:
+    """Residual weight (m) of a landmark target on Rajagopal ``body``."""
+    return FOOT_WEIGHT_M if body.split("_")[0] in FOOT_TEMPLATE else LANDMARK_WEIGHT_M
 
 
 def _osim() -> Any:
@@ -141,33 +185,62 @@ class AddressTargets:
     floor_native_z: float
 
 
+class GeneratedSwing:
+    """The generated full-body model of ``club``, posed by its own OpenSim FK.
+
+    Gives the club pose and landmarks in the Rajagopal world at any generated
+    pose; the floor is fixed at the address pose (lowest head-mesh point).
+    """
+
+    def __init__(self, club: str) -> None:
+        from src.engines.physics_engines.opensim.python.full_body_osim import (
+            export_full_body_osim,
+        )
+
+        spec_bytes = mc.spec_path(club).read_bytes()
+        address = json.loads(ADDRESS_POSES.read_text(encoding="utf-8"))["poses"][club]
+        self.coordinate_order: list[str] = list(address["coordinate_order"])
+        xml, _ = export_full_body_osim(spec_bytes, club_geometry_ref="")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "generated.osim"
+            path.write_text(xml, encoding="utf-8")
+            self._probe = PoseProbe(path)
+        assembly = ca.assembly_from_spec(json.loads(spec_bytes))
+        if assembly is None:
+            raise ValueError(f"{club} spec has no club assembly")
+        self._head = ca.assembly_meshes(assembly)["head"].vertices
+        self._probe.set(self._pose(address["q_rad"]))
+        club_native = self._probe.body(GENERATED_CLUB_BODY)
+        head = self._head @ club_native[:3, :3].T + club_native[:3, 3]
+        self.floor_native_z = float(head[:, 2].min())
+        self._feet = planted_feet(self._landmarks())
+
+    def _landmarks(self) -> dict[str, np.ndarray]:
+        floor = self.floor_native_z
+        return {
+            target: native_to_opensim(self._probe.body(source), floor)[:3, 3]
+            for source, target in LANDMARKS.items()
+        }
+
+    def _pose(self, row: Sequence[float]) -> dict[str, float]:
+        return dict(zip(self.coordinate_order, map(float, row), strict=True))
+
+    def targets(self, row: Sequence[float]) -> AddressTargets:
+        """Club pose and landmarks (Rajagopal world) at generated pose ``row``."""
+        self._probe.set(self._pose(row))
+        floor = self.floor_native_z
+        landmarks = {**self._landmarks(), **self._feet}
+        club = native_to_opensim(self._probe.body(GENERATED_CLUB_BODY), floor)
+        return AddressTargets(club, landmarks, floor)
+
+
 def generated_address_targets(club: str) -> AddressTargets:
     """Targets from the generated model's OpenSim FK at its address pose."""
-    from src.engines.physics_engines.opensim.python.full_body_osim import (
-        export_full_body_osim,
-    )
-
-    spec_bytes = mc.spec_path(club).read_bytes()
-    pose = json.loads(ADDRESS_POSES.read_text(encoding="utf-8"))["poses"][club]
-    xml, _ = export_full_body_osim(spec_bytes, club_geometry_ref="")
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "generated.osim"
-        path.write_text(xml, encoding="utf-8")
-        probe = PoseProbe(path)
-    probe.set(dict(zip(pose["coordinate_order"], pose["q_rad"], strict=True)))
-    club_native = probe.body(GENERATED_CLUB_BODY)
-    assembly = ca.assembly_from_spec(json.loads(spec_bytes))
-    assert assembly is not None
-    head = ca.assembly_meshes(assembly)["head"].vertices
-    floor = float((head @ club_native[:3, :3].T + club_native[:3, 3])[:, 2].min())
-    landmarks = {
-        target: native_to_opensim(probe.body(source), floor)[:3, 3]
-        for source, target in LANDMARKS.items()
-    }
-    return AddressTargets(native_to_opensim(club_native, floor), landmarks, floor)
+    address = json.loads(ADDRESS_POSES.read_text(encoding="utf-8"))["poses"][club]
+    return GeneratedSwing(club).targets(address["q_rad"])
 
 
-def _grip_frames(club: mc.MskClub, club_in_ground: np.ndarray) -> dict[str, np.ndarray]:
+def grip_frames(club: mc.MskClub, club_in_ground: np.ndarray) -> dict[str, np.ndarray]:
     frames = {}
     for side in mc.HAND_BODIES:
         grip = np.eye(4)
@@ -201,13 +274,21 @@ class _Residual:
             thumb = pose[:3, :3] @ THUMB_AXIS[side]
             parts.append(np.array([(1.0 - float(thumb @ self.shaft)) / THUMB_WEIGHT]))
         for body, target in self.targets.landmarks.items():
-            parts.append((self.probe.body(body)[:3, 3] - target) / LANDMARK_WEIGHT_M)
+            residual = self.probe.body(body)[:3, 3] - target
+            parts.append(residual / landmark_weight(body))
         parts.append(np.asarray(q)[self.rotational] / NEUTRAL_WEIGHT_RAD)
         return np.concatenate(parts)
 
 
-def _free_coordinates(model_xml: ET.Element) -> list[str]:
+def free_coordinates(model_xml: ET.Element) -> list[str]:
     return [n for n in mc.unlocked_coordinates(model_xml) if not n.endswith("_beta")]
+
+
+def _address_range(probe: PoseProbe, name: str) -> tuple[float, float]:
+    """``name``'s range in the skeleton, narrowed by :data:`ADDRESS_RANGES`."""
+    low, high = probe.coordinate_range(name)
+    limit = ADDRESS_RANGES.get(name, (low, high))
+    return max(low, limit[0]), min(high, limit[1])
 
 
 def solve_address(
@@ -218,10 +299,10 @@ def solve_address(
 
     from defusedxml import ElementTree as SafeET
 
-    names = _free_coordinates(SafeET.parse(str(skeleton_path)).getroot())
+    names = free_coordinates(SafeET.parse(str(skeleton_path)).getroot())
     probe = PoseProbe(skeleton_path)
-    bounds = np.array([probe.coordinate_range(n) for n in names])
-    grips = _grip_frames(club, targets.club_in_ground)
+    bounds = np.array([_address_range(probe, n) for n in names])
+    grips = grip_frames(club, targets.club_in_ground)
     residual = _Residual(probe, names, targets, grips)
     q0 = np.clip(np.zeros(len(names)), bounds[:, 0], bounds[:, 1])
     pelvis = {"pelvis_tx": 0, "pelvis_ty": 1, "pelvis_tz": 2}

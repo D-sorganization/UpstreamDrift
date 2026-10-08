@@ -327,3 +327,48 @@ def test_strip_club_removes_every_club_reference() -> None:
     text = "".join(e.text or "" for e in model.iter())
     assert "/bodyset/Club" not in text
     assert not [b for b in model.find("BodySet/objects") if b.get("name") == "Club"]
+
+
+def test_grip_model_of_reads_the_attachment() -> None:
+    model = _model("golf_humanoid")
+    assert mc.grip_model_of(model) == "weld"
+    calibration = mc.load_calibration("golf_humanoid")
+    mc.attach_club(model, mc.load_msk_club(), calibration, grip_model="bushing")
+    assert mc.grip_model_of(model) == "bushing"
+
+
+def test_passive_club_coordinates_match_the_free_joint() -> None:
+    from src.engines.physics_engines.opensim.python import musculoskeletal_swing as ms
+
+    assert ms.PASSIVE_CLUB_COORDINATES == mc.FREE_COORDINATES
+
+
+def test_muscle_model_holds_the_golf_humanoid_club(osim) -> None:  # noqa: ANN001
+    from src.engines.physics_engines.opensim.python import musculoskeletal_swing as ms
+
+    try:
+        ms.resolve_base_model()
+    except FileNotFoundError as exc:
+        pytest.skip(str(exc))
+    model, info = ms.build_musculoskeletal_model(MODELS["golf_humanoid_scaled"])
+    assert info["n_muscles"] == 80  # unchanged muscle count
+    gaps = info["grip_calibration"]["hand_grip_point_gap_m"]
+    assert max(gaps.values()) <= GRIP_GAP_TOL_M
+    state = model.initSystem()
+    assert model.getBodySet().get("Club").getMass() == pytest.approx(
+        DRIVER.total_mass_kg
+    )
+    assert model.getJointSet().contains(mc.LEAD_JOINT)
+    assert model.getConstraintSet().contains(mc.TRAIL_CONSTRAINT)
+    meshes = model.getBodySet().get("Club").getPropertyByName("attached_geometry")
+    assert meshes.size() >= 1  # shared club meshes
+    model.realizePosition(state)
+    hand = _pose(model.getComponent("/bodyset/hand_r/hand_r_grip_offset"), state)
+    club = _pose(model.getComponent("/bodyset/Club/club_trail_grip_offset"), state)
+    assert np.linalg.norm(hand[:3, 3] - club[:3, 3]) <= CLOSURE_TOL_M
+    from src.engines.physics_engines.opensim.python.msk_club_calibration import (
+        face_angle_deg,
+    )
+
+    face = face_angle_deg(model, state, mc.load_msk_club())
+    assert abs(face) <= SQUARE_TOL_DEG
