@@ -158,6 +158,28 @@ rotation_world_from_local, point_world, source)` wraps `transform_wrench`
   - `GRAVITY` `#999999`
   - `MUSCLE` `#D55E00`
 
+### Grip Label Table (GCV-7, #11713)
+
+`grip_wrench.to_overlay_wrenches` emits these `GRIP` labels. Every wrench is the
+loading **exerted by the hand on the club**, in the world frame. Unavailable
+quantities are omitted (never zero). `grip_wrench.GripAnalysis` carries
+`split_method`, because the left/right split of two rigid welds is set by the
+solver.
+
+| Label                 | Application point | Force half            | Torque half                          |
+| :-------------------- | :---------------- | :-------------------- | :----------------------------------- |
+| `grip:hand_left`      | left grip point   | `F_L`                 | `tau_L` (omitted if not supplied)    |
+| `grip:hand_right`     | right grip point  | `F_R`                 | `tau_R` (omitted if not supplied)    |
+| `grip:net_midpoint`   | grip midpoint     | `R = F_L + F_R`       | none                                 |
+| `grip:couple_midpoint`| grip midpoint     | none                  | `M_M` = contact moment + free torque |
+| `grip:mof_left`       | grip midpoint     | none                  | `(r_L - r_M) x F_L`                  |
+| `grip:mof_right`      | grip midpoint     | none                  | `(r_R - r_M) x F_R`                  |
+
+The Simscape channel labels `grip:total_hand`, `grip:lh_mof`, `grip:rh_mof` and
+`grip:midpoint_couple` in `src/engines/simscape/force_channels.py` remain the
+logged-signal forms; their reference points must be confirmed from the model
+before asserting equality with the shared definitions (see GCV-9, #11715).
+
 ### 3. Renderer Adapters — `src/shared/python/force_overlay/renderers/`
 
 Each adapter consumes only `GlyphSet` and draws no physics. Each has the
