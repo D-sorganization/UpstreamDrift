@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1663,
+    "ud-only": 1665,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -497,7 +497,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 268,
+      "ud-only": 270,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -15293,7 +15293,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 27989,
+      "ud_bytes": 28341,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15329,7 +15329,31 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 25976,
+      "ud_bytes": 26086,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/pipeline/finish_feasibility.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 18222,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
+      "path": "motion_matching/pipeline/finish_feasibility_cli.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 4265,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15473,7 +15497,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 13826,
+      "ud_bytes": 18200,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15497,7 +15521,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 12547,
+      "ud_bytes": 12657,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -40004,9 +40028,9 @@
     {
       "path": "humanoid_character_builder/presets/__init__.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
@@ -40017,9 +40041,9 @@
     {
       "path": "humanoid_character_builder/presets/loader.py",
       "ud": {
-        "author": "fleet-orchestrator",
-        "date": "2026-10-07",
-        "commit": "78586f18526be00b12fc2dcdb185e6959e2991c5"
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
         "author": "d-sorgcodexagent[bot]",
