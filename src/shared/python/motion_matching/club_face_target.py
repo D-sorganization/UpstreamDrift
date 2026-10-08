@@ -236,8 +236,8 @@ def face_axis_targets(
 
 
 def merge_axis_targets(
-    *per_frame: Sequence[Mapping[str, AxisTarget] | None] | None,
-) -> list[dict[str, AxisTarget] | None] | None:
+    *per_frame: Sequence[Mapping[str, Any] | None] | None,
+) -> list[dict[str, Any] | None] | None:
     """Frame-wise union of several per-frame axis-target lists.
 
     ``None`` lists are skipped; the lists must have equal length. A frame
@@ -249,9 +249,9 @@ def merge_axis_targets(
         return None
     if len({len(item) for item in lists}) != 1:
         raise ValueError("axis-target lists must have one entry per capture frame")
-    merged: list[dict[str, AxisTarget] | None] = []
+    merged: list[dict[str, Any] | None] = []
     for entries in zip(*lists, strict=True):
-        frame: dict[str, AxisTarget] = {}
+        frame: dict[str, Any] = {}
         for entry in entries:
             for name, target in (entry or {}).items():
                 if name in frame:

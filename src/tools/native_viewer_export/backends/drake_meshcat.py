@@ -68,7 +68,7 @@ class DrakeMeshcatBackend:
             plant.RegisterVisualGeometry(
                 plant.GetBodyByName(links[head.body], inst),
                 RigidTransform(),  # type: ignore[arg-type]
-                Mesh(str(head.path)),
+                Mesh(head.path),
                 f"head_{head.name}",
                 np.array(head.rgba),
             )
