@@ -27,6 +27,9 @@ from defusedxml import ElementTree as SafeET
 import numpy as np
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.opensim.python.tour_matching.address_feet import (
+    apply_toe_out_seed,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.club_geometry import (
     LEAD_HAND_OFFSET_M,
     TRAIL_HAND_OFFSET_M,
@@ -131,6 +134,7 @@ class AddressFitResult:
     tolerance_profile_sha256: str
     is_qualified: bool
     failure_reasons: tuple[str, ...]
+    foot_progression: dict[str, Any] | None = None
 
     def to_receipt(self) -> dict[str, Any]:
         """Serialize structured address calibration receipt."""
@@ -167,6 +171,11 @@ class AddressFitResult:
             "posture": asdict(self.posture),
             "grip_closure": asdict(self.grip_closure),
             "coordinate_violations": {k: list(v) for k, v in violations.items()},
+            **(
+                {"foot_progression": self.foot_progression}
+                if self.foot_progression is not None
+                else {}
+            ),
         }
 
 
@@ -469,8 +478,13 @@ def fit_address_pose(
     candidate_range: tuple[int, int] = (0, 24),
     holdout_ratio: float = 0.15,
     tolerance_profile: AddressToleranceProfile = FROZEN_ADDRESS_TOLERANCE_PROFILE,
+    toe_out_deg: Mapping[str, float] | None = None,
 ) -> AddressFitResult:
-    """Fit and qualify a two-handed address pose on the OpenSim golf model."""
+    """Fit and qualify a two-handed address pose on the OpenSim golf model.
+
+    ``toe_out_deg`` (``left``/``right`` degrees, OSV-4 #11730) sets each foot's
+    toe-out through ``hip_rotation_*``; None keeps the legacy neutral feet.
+    """
     path = Path(model_path)
     if not path.is_file():
         raise FileNotFoundError(f"Model file not found: {path}")
@@ -620,6 +634,11 @@ def fit_address_pose(
         "wrist_dev_l": 0.0,
     }
 
+    foot_block = (
+        apply_toe_out_seed(path, q_dict, toe_out_deg)
+        if toe_out_deg is not None
+        else None
+    )
     limits_audit = audit_coordinate_limits(path, q_dict)
 
     # Acceptance qualification evaluation
@@ -660,4 +679,5 @@ def fit_address_pose(
         tolerance_profile_sha256=tolerance_profile.sha256,
         is_qualified=is_qualified,
         failure_reasons=tuple(failure_reasons),
+        foot_progression=foot_block,
     )
