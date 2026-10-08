@@ -106,3 +106,19 @@ def test_generated_osim_loads_in_opensim_with_unchanged_mass() -> None:
         state = model.initSystem()
         masses.append(model.getTotalMass(state))
     assert masses[0] == masses[1]
+
+
+@pytest.mark.parametrize("key", sorted(CLUBS))
+def test_club_is_jointed_to_the_lead_hand_and_welded_to_the_trail_hand(key) -> None:
+    """OSV-1: the visible club chain is attached to both hands, not free floating."""
+    root = _parse((MODELS / f"full_body_anthro_{key}.osim").read_text("utf-8"))
+    joints = {j.get("name"): j for j in root.iter("CustomJoint")}
+    lead = joints["joint_Clubhead"]
+    assert lead.findtext(".//frames/PhysicalOffsetFrame/socket_parent") == "/bodyset/LF"
+    assert "/bodyset/Clubhead" in {e.text for e in lead.iter("socket_parent") if e.text}
+    assert "joint_Grip" in joints  # trail-hand standoff body
+    weld = next(root.iter("WeldConstraint"))
+    assert weld.get("name") == "two_hand_grip_closure"
+    assert weld.findtext("isEnforced") == "true"
+    parents = {e.text for e in weld.iter("socket_parent")}
+    assert parents == {"/bodyset/Grip", "/bodyset/Clubhead"}

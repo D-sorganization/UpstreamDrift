@@ -76,3 +76,20 @@ def test_head_vertex_extent_matches_the_club() -> None:
     adr, num = model.mesh_vertadr[head_id], model.mesh_vertnum[head_id]
     extent = np.ptp(model.mesh_vert[adr : adr + num], axis=0)
     assert 0.11 < float(extent.max()) < 0.20  # head plus hosel, metres
+
+
+@pytest.mark.parametrize("key", sorted(SPECS))
+def test_plain_visual_layer_shows_the_mesh_head_not_the_ellipsoid(key) -> None:
+    """MyoSuite renders the plain ``visual=True`` export, so it needs the mesh."""
+    mujoco = pytest.importorskip("mujoco")
+    xml, _ = exporter.export_full_body_mjcf(SPECS[key].read_bytes(), visual=True)
+    model = mujoco.MjModel.from_xml_string(xml)
+    meshes = {
+        mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MESH, i)
+        for i in range(model.nmesh)
+    }
+    assert {"vmesh_club_head", "vmesh_club_shaft", "vmesh_club_grip"} <= meshes
+    for i in range(model.ngeom):
+        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, i) or ""
+        if "Clubface" in name:
+            assert model.geom_type[i] != mujoco.mjtGeom.mjGEOM_ELLIPSOID

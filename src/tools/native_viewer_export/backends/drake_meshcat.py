@@ -10,6 +10,8 @@ from __future__ import annotations
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
 import json
+from pathlib import Path
+import tempfile
 from typing import Any
 
 import numpy as np
@@ -19,6 +21,7 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import drake_meshcat_camera_pose
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts, write_obj
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -52,6 +55,7 @@ class DrakeMeshcatBackend:
             Box,
             Capsule,
             Ellipsoid,
+            Mesh,
             Meshcat,
             MeshcatVisualizer,
             MeshcatVisualizerParams,
@@ -84,7 +88,22 @@ class DrakeMeshcatBackend:
                 np.array(_CAPSULE_RGBA),
             )
             n += 1
+        club = club_parts(json.loads(spec_bytes))
+        if club is not None:
+            club_body, parts = club
+            self._mesh_dir = tempfile.TemporaryDirectory(prefix="club_meshes_")
+            for part in parts:
+                path = write_obj(part.mesh, self._mesh_dir.name, part.name)
+                plant.RegisterVisualGeometry(
+                    plant.GetBodyByName(links[club_body], inst),
+                    RigidTransform(),
+                    Mesh(Path(path)),
+                    part.name,
+                    np.array(part.rgba),
+                )
         for shp in skeleton.shapes:
+            if club is not None and shp.body == club[0]:
+                continue  # the mesh head replaces the ellipsoid hint
             shape = (
                 Ellipsoid(*shp.half_size_m)
                 if shp.kind == "ellipsoid"

@@ -41,6 +41,13 @@
 
 # Historical Player Capture Handoff
 
+## Active: Realistic Club Meshes in Every Engine Visual Layer (#11717, #11727)
+
+- One adapter, `src/shared/python/model_appearance/club_head_mesh.py`, builds the head from the Tools parametric builder, with committed STLs in `assets/club_heads/` as fallback. `club_assembly.py` adds the shaft and grip. Never edit `vendor/ud-tools` for this.
+- Wired: MuJoCo (appearance and plain visual layers), OpenSim (`club_visuals.py`, `full_body_osim.py`, `tour_matching/club_geometry.py`), Drake and Pinocchio MeshCat exports, MyoSuite via the plain visual layer, and the native OpenSim viewer.
+- Open: the web `ClubHead` component (#11717) and the ball visual (#11719) are tracked by gap entry `render.club_head_and_ball`. The head centre of mass is not moved to the mesh centre.
+- Saved OpenSim models use bare mesh names; loaders call `club_visuals.register_geometry_path()`.
+
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 
 Same spec, same initial state, same joint torques: every engine must reproduce

@@ -116,3 +116,11 @@ def assembly_meshes(club: ClubAssembly) -> dict[str, Mesh]:
         "grip": grip,
         "head": club_frame_mesh(head, axis_offset_m=z),
     }
+
+
+def club_body_name(spec: Mapping[str, Any]) -> str | None:
+    """Name of the spec body that carries the club solids, else ``None``."""
+    for body in spec["bodies"]:
+        if str(body["name"]).endswith(CLUB_BODY_SUFFIX):
+            return str(body["name"])
+    return None

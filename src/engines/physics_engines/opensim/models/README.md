@@ -169,3 +169,28 @@ python -m src.engines.physics_engines.opensim.python.full_body_osim \
   --out src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim \
   --receipt src/engines/physics_engines/opensim/models/generated/export_receipt.json
 ```
+
+### Club Visuals (OSV-1 #11727, GCV-11 #11717)
+
+Every generated full-body model carries three `<Mesh>` visual geometries on
+the `Clubhead` body: shaft, grip rubber and a parametric clubhead. They come
+from the shared adapter `src/shared/python/model_appearance/club_head_mesh.py`
+(Tools parametric builder, with committed STLs under `assets/club_heads/` as
+fallback) and are written to `geometry/club/` with a `provenance.json` that
+records the spec hash, assembly parameters and a sha256 per file.
+
+- Visual only: the meshes add no mass, inertia or contact. The `Clubhead`
+  body mass properties are identical to a bare export (checked by
+  `tests/unit/motion_matching/test_full_body_osim_club.py`).
+- The saved models reference the files by bare name. OpenSim 4.6 does not
+  resolve relative paths containing `..`, so loaders call
+  `club_visuals.register_geometry_path()` first. In the OpenSim GUI, add
+  `models/geometry/club` to File > Preferences > Geometry Search Path, or
+  re-export with `--club-geometry-ref <absolute directory>`.
+- `tour_matching/club_geometry.py::attach_visual_club` applies the same three
+  meshes to `golf_humanoid.osim` through a `club_visual_frame` offset frame.
+- Limitation: the visual head follows the specification solid placement; the
+  head centre of mass in the dynamics model is not moved to the mesh centre.
+- Regenerate with the exporter command above; `--no-club-geometry` produces a
+  bare club.
+

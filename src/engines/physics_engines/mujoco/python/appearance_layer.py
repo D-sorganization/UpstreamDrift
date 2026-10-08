@@ -24,6 +24,7 @@ from src.shared.python.model_appearance.schema import (
     AppearanceDocument,
     Material,
     Texture,
+    document_from_dict,
 )
 from src.shared.python.motion_matching.visual_skeleton import (
     Capsule,
@@ -304,3 +305,31 @@ def attach_appearance(
         "club_head": None if club is None else club.head_alias,
         "offscreen": list(OFFSCREEN_SIZE),
     }
+
+
+def attach_club_meshes(
+    root: ET.Element,
+    elements: Mapping[str, ET.Element],
+    offsets: Mapping[str, np.ndarray],
+    body: str,
+    club: ClubAssembly,
+    finish: str = "satin_steel",
+) -> int:
+    """Add only the shaft, grip and mesh head of ``club`` (plain visual layer).
+
+    For the plain ``visual=True`` export, which keeps its capsule skeleton but
+    should still show the real head (GCV-11). Visual only, massless,
+    non-colliding. Returns the number of meshes added.
+    """
+    doc = document_from_dict({"schema_version": "appearance-v1"})
+    assets = _Assets(root, doc)
+    for label, mesh, material in _club_meshes(club, finish):
+        mesh_name = f"vmesh_club_{label}"
+        assets.mesh(mesh_name, _mesh_to_mjcf(offsets[body], mesh))
+        _add_geom(
+            elements[body],
+            f"visual_{mesh_name}",
+            mesh_name,
+            assets.material(material),
+        )
+    return assets.n_meshes
