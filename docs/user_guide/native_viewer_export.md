@@ -13,7 +13,35 @@ python3 -m src.tools.native_viewer_export \
   --receipt-drake driver_closed_drake.json
 ```
 
-Clips are named `<swing>_<engine>_<view>.mp4` and `<swing>_<engine>_2x2.mp4`.
+Clips are named `<swing>_<engine>_<view>_<speed>.mp4` and
+`<swing>_<engine>_2x2_<speed>.mp4`, for example `driver_drake_face_on_1x.mp4`
+and `driver_drake_face_on_0p5x.mp4`.
+
+## Playback Speed and Frame Rate
+
+Playback is time-based. Video frame `j` shows the swing at
+`t0 + j * speed / fps`, so a 1x clip really runs at real time and a 0.5x clip
+at half speed, independent of the source time step. When the source step is
+coarser than that, the pose is interpolated (linear for joint coordinates,
+spherical for free and ball joint quaternions) instead of repeated. Force and
+torque glyphs come from the nearest source sample.
+
+- `--fps` (default 60) sets the frame rate.
+- `--speeds 1,0.5` (default) writes one clip set per speed, each in `(0, 4]`;
+  suffixes are `_1x`, `_0p5x`, `_0p25x`.
+- `--impact-window 0.1` adds a clip of that many swing seconds centred on
+  impact at 0.1x speed (suffix `_impact_0p1x`). Impact is `--impact-time`, else
+  the bundle provenance `impact_time_s`, else the last sample.
+- `--stride` is deprecated: it still works as an alias (one clip at the speed
+  that stride implies) and logs a warning.
+- The heads-up display shows the playback speed and the real swing time in
+  milliseconds from impact.
+
+## Quality Presets
+
+`--preset hq` (default) renders 1280x720 tiles encoded with libx264,
+`yuv420p`, CRF 18. `--preset preview` keeps the small 640x544 tiles at CRF 23.
+`--size WIDTHxHEIGHT` overrides the preset size.
 
 ## Camera Views
 
