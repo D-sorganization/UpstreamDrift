@@ -18,6 +18,7 @@ from src.shared.python.biomechanics.ground_reaction_plot_model import (
     GroundReactionPlotSeries,
     build_ground_reaction_plot_series,
     plot_series_to_json,
+    series_from_payload,
     unavailable_ground_reaction_plot,
 )
 from src.shared.python.biomechanics.plot_traces import none_if_nan, vector_trace
@@ -159,3 +160,27 @@ def test_payload_is_strict_json_with_labels_in_title_case() -> None:
     assert payload["units"]["left_cop_m"] == "m"
     assert payload["units"]["net_free_moment_nm"] == "N*m"
     assert isinstance(plot, GroundReactionPlotSeries)
+
+
+def test_payload_round_trips_with_none_gaps_and_events() -> None:
+    plot = build_ground_reaction_plot_series(
+        _series(), body_weight_n=BODY_WEIGHT_N, events={"impact": 0.2}
+    )
+    again = series_from_payload(json.loads(plot_series_to_json(plot)))
+    assert again == plot
+    unavailable = unavailable_ground_reaction_plot("no GRF")
+    assert series_from_payload(unavailable.to_dict()) == unavailable
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"traces": {}},
+        {"time_s": [0.0], "traces": {"net_force_n": {"x": [1.0]}}},
+        {"time_s": [0.0], "traces": {}, "load_share": {"left": [0.5, 0.5]}},
+        {"time_s": [0.0], "traces": {"bogus_trace": {"x": [1.0]}}},
+    ],
+)
+def test_malformed_payload_raises(payload) -> None:
+    with pytest.raises(ValueError):
+        series_from_payload(payload)

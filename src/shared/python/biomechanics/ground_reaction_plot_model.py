@@ -38,6 +38,7 @@ __all__ = [
     "GroundReactionPlotSeries",
     "build_ground_reaction_plot_series",
     "plot_series_to_json",
+    "series_from_payload",
     "unavailable_ground_reaction_plot",
 ]
 
@@ -185,3 +186,39 @@ def unavailable_ground_reaction_plot(reason: str) -> GroundReactionPlotSeries:
 def plot_series_to_json(series: GroundReactionPlotSeries) -> str:
     """Strict JSON text (``allow_nan=False``) of ``series``."""
     return json.dumps(series.to_dict(), allow_nan=False)
+
+
+def _checked_lists(
+    name: str, values: Mapping[str, Any], n: int, components: tuple[str, ...]
+) -> dict[str, list[float | None]]:
+    missing = [c for c in components if c not in values]
+    if missing or any(len(v) != n for v in values.values()):
+        raise ValueError(f"{name!r} is malformed (missing {missing} or wrong length)")
+    return {c: list(v) for c, v in values.items()}
+
+
+def series_from_payload(payload: Mapping[str, Any]) -> GroundReactionPlotSeries:
+    """Rebuild a :class:`GroundReactionPlotSeries` from its ``to_dict`` / API form.
+
+    Raises:
+        ValueError: if ``time_s`` or ``traces`` is missing, a trace name is
+            unknown, or a trace or load-share list is incomplete.
+    """
+    if "time_s" not in payload or "traces" not in payload:
+        raise ValueError("ground-reaction payload needs 'time_s' and 'traces'")
+    n = len(payload["time_s"])
+    traces: dict[str, dict[str, list[float | None]]] = {}
+    for name, trace in dict(payload["traces"]).items():
+        _describe(name)  # raises ValueError for an unknown trace
+        traces[name] = _checked_lists(name, trace, n, ("x", "y", "z", "magnitude"))
+    shares = dict(payload.get("load_share") or {})
+    load_share = _checked_lists("load_share", shares, n, tuple(shares))
+    return GroundReactionPlotSeries(
+        time_s=tuple(float(t) for t in payload["time_s"]),
+        feet=tuple(str(f) for f in payload.get("feet") or ()),
+        traces=traces,
+        load_share=load_share,
+        available=bool(payload.get("available", True)),
+        reason=str(payload.get("reason") or ""),
+        events=_validated_events(payload.get("events")),
+    )
