@@ -59,50 +59,63 @@ def _t3(arr: np.ndarray) -> Vec3:
     return (float(arr[0]), float(arr[1]), float(arr[2]))
 
 
+_CLUB_KEYS = (
+    "mass_kg",
+    "gravity_m_s2",
+    "com_m",
+    "com_acceleration_m_s2",
+    "inertia_world_kg_m2",
+    "angular_velocity_rad_s",
+    "angular_acceleration_rad_s2",
+)
+
+
 def holding_hand_wrench(
     *,
-    mass_kg: float,
-    gravity_m_s2: ArrayLike,
-    com_m: ArrayLike,
-    com_acceleration_m_s2: ArrayLike,
-    inertia_world_kg_m2: ArrayLike,
-    angular_velocity_rad_s: ArrayLike,
-    angular_acceleration_rad_s2: ArrayLike,
     closing_force_n: ArrayLike,
     closing_torque_nm: ArrayLike,
     closing_point_m: ArrayLike,
     holding_point_m: ArrayLike,
+    **club: Any,
 ) -> tuple[Vec3, Vec3]:
     """Force and free torque of the holding hand from club Newton-Euler.
 
     Args:
-        mass_kg: club mass ``m`` (positive).
-        gravity_m_s2: gravity vector ``g`` (world).
-        com_m, com_acceleration_m_s2: club centre of mass and its acceleration.
-        inertia_world_kg_m2: 3x3 inertia about the centre of mass, world axes.
-        angular_velocity_rad_s, angular_acceleration_rad_s2: club ``omega``
-            and ``alpha`` (world).
         closing_force_n, closing_torque_nm, closing_point_m: wrench exerted
             on the club by the closing hand and its application point.
         holding_point_m: grip point of the holding hand.
+        **club: the club keywords ``mass_kg`` (positive), ``gravity_m_s2``
+            (world ``g``), ``com_m`` and ``com_acceleration_m_s2`` (centre of
+            mass and its acceleration), ``inertia_world_kg_m2`` (3x3 about
+            the centre of mass, world axes), ``angular_velocity_rad_s`` and
+            ``angular_acceleration_rad_s2`` (world ``omega`` and ``alpha``).
 
     Returns:
         ``(force_n, torque_nm)`` exerted by the holding hand on the club at
         ``holding_point_m``; the torque is a free (couple) torque.
 
     Raises:
-        ValueError: on non-positive mass, non-finite input or a bad inertia.
+        ValueError: on a missing or unknown club keyword, non-positive mass,
+            non-finite input or a bad inertia.
     """
+    missing = [k for k in _CLUB_KEYS if k not in club]
+    unknown = sorted(set(club) - set(_CLUB_KEYS))
+    if missing or unknown:
+        raise ValueError(
+            f"club keywords missing {missing} / unknown {unknown}; "
+            f"expected {list(_CLUB_KEYS)}"
+        )
+    mass_kg = club["mass_kg"]
     if not np.isfinite(mass_kg) or mass_kg <= 0.0:
         raise ValueError(f"mass_kg must be positive and finite, got {mass_kg}")
-    inertia = np.asarray(inertia_world_kg_m2, dtype=np.float64)
+    inertia = np.asarray(club["inertia_world_kg_m2"], dtype=np.float64)
     if inertia.shape != (3, 3) or not np.isfinite(inertia).all():
         raise ValueError("inertia_world_kg_m2 must be a finite 3x3 matrix")
-    g = _v3(gravity_m_s2, "gravity_m_s2")
-    c = _v3(com_m, "com_m")
-    a_c = _v3(com_acceleration_m_s2, "com_acceleration_m_s2")
-    omega = _v3(angular_velocity_rad_s, "angular_velocity_rad_s")
-    alpha = _v3(angular_acceleration_rad_s2, "angular_acceleration_rad_s2")
+    g = _v3(club["gravity_m_s2"], "gravity_m_s2")
+    c = _v3(club["com_m"], "com_m")
+    a_c = _v3(club["com_acceleration_m_s2"], "com_acceleration_m_s2")
+    omega = _v3(club["angular_velocity_rad_s"], "angular_velocity_rad_s")
+    alpha = _v3(club["angular_acceleration_rad_s2"], "angular_acceleration_rad_s2")
     f_close = _v3(closing_force_n, "closing_force_n")
     t_close = _v3(closing_torque_nm, "closing_torque_nm")
     r_close = _v3(closing_point_m, "closing_point_m")
