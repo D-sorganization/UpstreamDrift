@@ -1282,6 +1282,18 @@
       "evidence": "src/tools/native_viewer_export/cli.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
     },
+    "export.video_speed_variants": {
+      "id": "export.video_speed_variants",
+      "name": "Time-based native video export with full- and half-speed clips and an impact slow-motion clip",
+      "entity_kind": "feature",
+      "primary_workspace": "simulation",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "exempt",
+      "alias_target": null,
+      "evidence": "src/tools/native_viewer_export/cli.py",
+      "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
     "contraction": {
       "id": "contraction",
       "name": "Tools Package: contraction",

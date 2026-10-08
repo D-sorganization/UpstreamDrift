@@ -27,8 +27,16 @@ python3 -m src.tools.native_viewer_export \
 - `--receipt-<engine>` plays that engine's closed-loop rollout (the receipt's
   specification hash must match the bundle); without it the bundle reference
   trajectory is shown.
-- `--no-overlay`, `--no-grid`, `--views`, `--stride`, `--fps` and `--size`
-  control the output.
+- `--no-overlay`, `--no-grid`, `--views`, `--fps` (default 60), `--size` and
+  `--preset hq|preview` control the output. `hq` is 1280x720, libx264,
+  `yuv420p`, CRF 18; `preview` is 640x544.
+- `--speeds 1,0.5` (default) writes one clip set per playback speed, named
+  `_1x`, `_0p5x`, `_0p25x`. Frames are chosen by the time-based
+  `video_timing.FrameSchedule` and interpolated when the source step is coarse.
+- `--impact-window 0.1` (with optional `--impact-time`) adds a `_impact_0p1x`
+  clip of that many swing seconds centred on impact.
+- `--stride` is deprecated (alias for one fixed index step; warns).
+- The HUD shows playback speed and milliseconds from impact.
 
 Environment: `NATIVE_VIEWER_CHROMIUM` (Chromium executable; a full Playwright
 build renders much faster than the headless shell), and
@@ -39,7 +47,8 @@ The OpenSim backend only ever runs under `xvfb-run` and refuses to start when
 
 ## Layout
 
-- `core.py`: settings, frame selection, the backend protocol, `export_swing`.
+- `core.py`: settings, clip plans (speeds, impact window), the backend protocol,
+  `export_swing`; frame timing lives in `src/shared/python/video_timing`.
 - `compositor.py`: labelled 2x2 grid and HUD text.
 - `overlay.py`: overlay feed built from `force_overlay.bundle_provider`.
 - `overlay2d.py`: pinhole projection for the OpenSim 2D glyphs.
