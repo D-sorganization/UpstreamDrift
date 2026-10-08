@@ -203,4 +203,10 @@ def test_trimmed_simscape_force_fixture_carries_channels() -> None:
     assert len(series.frames) == t_rows
     # 26 wrenches per frame (all joints and external wrenches except the 2 with missing actuators)
     assert len(series.frames[0].wrenches) == 26
-    assert missing == ("joint_actuator:LF:torque", "joint_actuator:RF:torque")
+    # The canonical model has no feet on the ground: GRF is unavailable (#11709).
+    assert missing == (
+        "joint_actuator:LF:torque",
+        "joint_actuator:RF:torque",
+        "contact:grf_left:force",
+        "contact:grf_right:force",
+    )

@@ -26,6 +26,14 @@ from typing import Any, Literal, TypeAlias
 
 import numpy as np
 
+from src.engines.simscape.ground_contact import (
+    COM_PREFIX,
+    FOOT_CONTACTS,
+    GROUND_HEIGHT_COLUMN,
+    contact_columns,
+    ground_reaction_series,
+    overlay_wrenches,
+)
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
     ForceTorqueSeries,
@@ -294,6 +302,32 @@ def _tuple3(row: np.ndarray) -> tuple[float, float, float]:
     return (float(row[0]), float(row[1]), float(row[2]))
 
 
+def _ground_reactions(
+    columns: Mapping[str, _Column],
+) -> tuple[Any, ...] | None:
+    """GCV-1 breakdown per row from sole-contact columns, or None when absent."""
+    names = [c for foot in FOOT_CONTACTS.values() for c in foot]
+    forces = {n: _vec_array(columns, contact_columns(n, "Force")) for n in names}
+    points = {n: _vec_array(columns, contact_columns(n, "Point")) for n in names}
+    com = _vec_array(columns, _cols(COM_PREFIX))
+    arrays = [*forces.values(), *points.values(), com]
+    if (
+        com is None
+        or any(a is None for a in arrays)
+        or GROUND_HEIGHT_COLUMN not in columns
+    ):
+        return None
+    height = _floats(columns[GROUND_HEIGHT_COLUMN], GROUND_HEIGHT_COLUMN)
+    if np.ptp(height) > 0.0:
+        raise ValueError("ground height must be constant over the run")
+    return ground_reaction_series(
+        {n: a for n, a in forces.items() if a is not None},
+        {n: a for n, a in points.items() if a is not None},
+        com,
+        float(height[0]),
+    )
+
+
 def load_simscape_force_series(
     csv_path: str | Path, *, rotation_tol: float = DEFAULT_ROTATION_TOL
 ) -> tuple[ForceTorqueSeries, tuple[str, ...]]:
@@ -340,6 +374,10 @@ def force_series_from_columns(
     world frame (Z-up, SI). Each unavailable half is ``None`` and listed in
     the returned ``missing`` tuple as ``"<label>:force"`` / ``"<label>:torque"``.
     A joint-local channel with missing rotation columns is unavailable.
+    Sole-contact columns (:mod:`ground_contact`) add the GCV-1 ``CONTACT``
+    wrenches (``contact:grf_left/right/net`` at the CoP, free moments,
+    moments about the CoM); without them ``contact:grf_<foot>:force`` is
+    listed as missing (the canonical model has no feet on the ground).
 
     Raises:
         ValueError: bad tolerance, no ``time`` column or rows, non-finite
@@ -375,10 +413,15 @@ def force_series_from_columns(
         if spec.torque_cols is not None and torque is None:
             missing.append(f"{spec.label}:torque")
         per_spec.append((spec, point, force, torque))
+    ground = _ground_reactions(columns)
+    if ground is None:
+        missing.extend(f"contact:grf_{foot}:force" for foot in FOOT_CONTACTS)
 
     frames = []
     for i, t in enumerate(times):
         wrenches = []
+        if ground is not None:
+            wrenches.extend(overlay_wrenches(ground[i], source=wrench_source))
         for spec, point, force, torque in per_spec:
             if point is None or (force is None and torque is None):
                 continue
