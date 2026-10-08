@@ -7,7 +7,7 @@ publishes it and headless Chromium captures each requested view.
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from importlib.util import find_spec
 import json
 from pathlib import Path
@@ -51,6 +51,43 @@ class DrakeMeshcatBackend:
             return "pydrake is not installed"
         return playwright_unavailable_reason()
 
+    def _register_meshes(
+        self, plant: Any, inst: Any, links: Mapping[str, str], spec: Any
+    ) -> tuple[str | None, str | None]:
+        """Register the shared head and club meshes; return their spec bodies.
+
+        The head mesh replaces the head capsule and the club mesh replaces the
+        club ellipsoid hint (visual only). ``None`` means no mesh was drawn.
+        """
+        from pydrake.geometry import Mesh
+        from pydrake.math import RigidTransform
+
+        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
+        heads = head_mesh_files(spec, Path(self._head_dir))
+        for head in heads:
+            plant.RegisterVisualGeometry(
+                plant.GetBodyByName(links[head.body], inst),
+                RigidTransform(),  # type: ignore[arg-type]
+                Mesh(str(head.path)),
+                f"head_{head.name}",
+                np.array(head.rgba),
+            )
+        club = club_parts(spec)
+        if club is None:
+            return (heads[0].body if heads else None), None
+        club_body, parts = club
+        self._mesh_dir = tempfile.TemporaryDirectory(prefix="club_meshes_")
+        for part in parts:
+            path = write_obj(part.mesh, self._mesh_dir.name, part.name)
+            plant.RegisterVisualGeometry(
+                plant.GetBodyByName(links[club_body], inst),
+                RigidTransform(),
+                Mesh(Path(path)),
+                part.name,
+                np.array(part.rgba),
+            )
+        return (heads[0].body if heads else None), club_body
+
     def _build(self, swing: SwingInput) -> tuple[Any, Any, Any, Any, Any, list[int]]:
         from pydrake.geometry import (
             Box,
@@ -79,18 +116,9 @@ class DrakeMeshcatBackend:
             plant.world_frame(), plant.GetBodyByName(links["world"], inst).body_frame()
         )
         n = 0
-        # The shared visual head replaces the head capsule (visual only).
-        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
-        heads = head_mesh_files(json.loads(spec_bytes), Path(self._head_dir))
-        head_body = heads[0].body if heads else None
-        for head in heads:
-            plant.RegisterVisualGeometry(
-                plant.GetBodyByName(links[head.body], inst),
-                RigidTransform(),  # type: ignore[arg-type]
-                Mesh(str(head.path)),
-                f"head_{head.name}",
-                np.array(head.rgba),
-            )
+        head_body, club_body = self._register_meshes(
+            plant, inst, links, json.loads(spec_bytes)
+        )
         for cap in skeleton.capsules:
             if cap.body == head_body:
                 continue
@@ -103,21 +131,8 @@ class DrakeMeshcatBackend:
                 np.array(_CAPSULE_RGBA),
             )
             n += 1
-        club = club_parts(json.loads(spec_bytes))
-        if club is not None:
-            club_body, parts = club
-            self._mesh_dir = tempfile.TemporaryDirectory(prefix="club_meshes_")
-            for part in parts:
-                path = write_obj(part.mesh, self._mesh_dir.name, part.name)
-                plant.RegisterVisualGeometry(
-                    plant.GetBodyByName(links[club_body], inst),
-                    RigidTransform(),
-                    Mesh(Path(path)),
-                    part.name,
-                    np.array(part.rgba),
-                )
         for shp in skeleton.shapes:
-            if club is not None and shp.body == club[0]:
+            if shp.body == club_body:
                 continue  # the mesh head replaces the ellipsoid hint
             shape = (
                 Ellipsoid(*shp.half_size_m)
