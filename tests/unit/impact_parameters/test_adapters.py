@@ -8,6 +8,7 @@ face-centre series and the same impact parameters.
 from __future__ import annotations
 
 import math
+import types
 
 import numpy as np
 import pytest
@@ -93,20 +94,35 @@ def rollout():
     return t, q, v
 
 
+def _real_engine(name: str):
+    """Import an engine binding, skipping when it is absent or a test stub.
+
+    Other tests may leave a mock or bare stub in ``sys.modules`` on hosts
+    without the engine; a real binding always has a ``__file__``.
+    """
+    module = pytest.importorskip(name)
+    if not isinstance(module, types.ModuleType) or not getattr(
+        module, "__file__", None
+    ):
+        pytest.skip(f"{name} is a test stub, not the real binding")
+    return module
+
+
 def _mujoco_model():
-    mujoco = pytest.importorskip("mujoco")
+    mujoco = _real_engine("mujoco")
     return mujoco.MjModel.from_xml_string(MJCF)
 
 
 def _pinocchio_model(tmp_path):
-    pin = pytest.importorskip("pinocchio")
+    pin = _real_engine("pinocchio")
     path = tmp_path / "chain.urdf"
     path.write_text(URDF)
     return pin.buildModelFromUrdf(str(path))
 
 
 def _drake_plant(tmp_path):
-    pytest.importorskip("pydrake")
+    _real_engine("pydrake")
+    _real_engine("pydrake.multibody.plant")
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
 
@@ -120,7 +136,7 @@ def _drake_plant(tmp_path):
 
 
 def _opensim_model():
-    osim = pytest.importorskip("opensim")
+    osim = _real_engine("opensim")
     model = osim.Model()
     model.setName("chain")
     half = math.pi / 2
