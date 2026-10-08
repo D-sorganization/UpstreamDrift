@@ -1,3 +1,10 @@
+# Active: Shared Club in the Musculoskeletal OpenSim Models, OSV-9 #11756
+
+- Branch `claude/osv-9-msk-club`, epic #11726. `golf_humanoid.osim`, `golf_humanoid_scaled.osim` and the muscle model (`musculoskeletal_swing.build_musculoskeletal_model`) hold the shared club (`msk_club.py`: spec mass/inertia, shared STLs, `GripInterface` grips) in both hands: lead `WeldJoint hand_l_to_club` plus trail `WeldConstraint hand_r_to_club`, or `--grip-model bushing`.
+- Hand frames and address pose: `msk_club_calibration.py` (IK to the generated model's FK at the captured address; feet planted because the generated feet are unobserved) into `models/msk_club_grip_calibration.json`; the muscle model is calibrated on build. `msk_club_tracking.track_swing` follows a generated swing; `scripts/render_msk_club.py` renders under xvfb.
+- Base models are not in the clone (submodule fetch failed): set `UPSTREAMDRIFT_RAJAGOPAL_OPENSENSE` / `UPSTREAMDRIFT_MSK_BASE_MODEL`.
+- Open: no MyoFullBody OpenSim export exists; static optimisation not run; scaled-model address fit is weaker (wrists at their bounds); `opensim_golf/fk.py` `State.isValid` failure predates this.
+
 # Active: Shared Ground Reaction Core — GCV-1, Epic #11706
 
 - Branch `claude/gcv-1-ground-reaction` (PR #11733): per-foot and net GRF, CoP, free moment and moment about the CoM in `src/shared/python/biomechanics/ground_reaction.py`. Next: GCV-2 (#11708) engine wiring.
