@@ -194,7 +194,7 @@ def _body_meshes(
         if part in library.BLEND_PARTS:  # ball joint hides the segment seam
             ball = geometry.ellipsoid_mesh(
                 start,
-                np.full(3, radius * library.BLEND_RADIUS_SCALE),
+                np.full(3, radius * library.blend_scale(garment is not None)),
                 end - start,
                 rings=14,
                 sides=24,

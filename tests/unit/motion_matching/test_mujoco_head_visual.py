@@ -159,3 +159,27 @@ def test_meshes_body_model_is_rejected_until_available() -> None:
     )
     with pytest.raises(ValueError, match="rigid-bind"):
         exporter.export_full_body_mjcf(DRIVER.read_bytes(), appearance=doc)
+
+
+def test_blend_balls_are_no_larger_than_the_adjoining_limb() -> None:
+    from src.engines.physics_engines.mujoco.python import appearance_layer
+    from src.shared.python.model_appearance import library
+    from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+
+    assert library.blend_scale(True) <= 1.1 and library.blend_scale(False) <= 1.1
+    spec = json.loads(DRIVER.read_text())
+    doc = document_from_dict({"schema_version": "appearance-v1"})
+    caps: dict[str, list] = {}
+    for cap in derive_visual_skeleton(spec).capsules:
+        caps.setdefault(cap.body, []).append(cap)
+    seen = 0
+    for body, group in caps.items():
+        part = library.classify_body(body)
+        if part not in library.BLEND_PARTS:
+            continue
+        for label, mesh, _ in appearance_layer._body_meshes(doc, body, group):
+            if label.startswith("blend"):
+                seen += 1
+                extent = np.ptp(mesh.vertices, axis=0).max() / 2.0
+                assert extent <= 1.1 * library.PART_RADIUS_M[part] + 1e-9
+    assert seen >= 4  # both shoulders and both hips

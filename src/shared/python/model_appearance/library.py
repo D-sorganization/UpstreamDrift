@@ -112,6 +112,7 @@ CLOTHING: dict[str, dict[str, str]] = {
         "torso": "polo_navy",
         "pelvis": "shorts_khaki",
         "upper_arm": "polo_navy",
+        "shoulder": "polo_navy",
         "thigh": "shorts_khaki",
         "foot": "shoe_white",
         "hand": "glove_white",
@@ -120,6 +121,7 @@ CLOTHING: dict[str, dict[str, str]] = {
         "torso": "polo_white",
         "pelvis": "trousers_charcoal",
         "upper_arm": "polo_white",
+        "shoulder": "polo_white",
         "thigh": "trousers_charcoal",
         "shin": "trousers_charcoal",
         "foot": "shoe_black",
@@ -140,8 +142,8 @@ PART_RULES: tuple[tuple[str, str], ...] = (
     ("*elbow*", "forearm"),
     ("*radius*", "forearm"),
     ("*ulna*", "forearm"),
+    ("*hubto*", "shoulder"),
     ("*torso*", "torso"),
-    ("*hubto*", "torso"),
     ("*comrod*", "torso"),
     ("*spine*", "torso"),
     ("*pelvis*", "pelvis"),
@@ -165,6 +167,7 @@ PART_RADIUS_M: dict[str, float] = {
     "torso": 0.145,
     "pelvis": 0.125,
     "upper_arm": 0.043,
+    "shoulder": 0.05,
     "forearm": 0.036,
     "hand": 0.042,
     "thigh": 0.078,
@@ -184,8 +187,15 @@ GARMENT_COVERAGE: dict[str, tuple[float, float]] = {
 # Segment smoothness: loft resolution, and ball blends where limbs meet the trunk.
 LOFT_RINGS, LOFT_SIDES = 22, 36
 BLEND_PARTS = ("upper_arm", "thigh")
-BLEND_RADIUS_SCALE = 1.1
-GARMENT_PARTS = ("torso", "pelvis", "upper_arm", "thigh", "shin")
+BLEND_RADIUS_SCALE = 1.0  # ball only fills the seam; never wider than the limb
+
+
+def blend_scale(garment: bool) -> float:
+    """Blend-ball radius over the limb radius (<= 1.1 incl. garment thickness)."""
+    return BLEND_RADIUS_SCALE * (GARMENT_THICKNESS if garment else 1.0)
+
+
+GARMENT_PARTS = ("torso", "pelvis", "shoulder", "upper_arm", "thigh", "shin")
 
 
 def classify_body(body_name: str) -> str:

@@ -11933,7 +11933,7 @@
       "classification": "ud-only",
       "package": "model_appearance",
       "subpackage": "",
-      "ud_bytes": 9453,
+      "ud_bytes": 9812,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
