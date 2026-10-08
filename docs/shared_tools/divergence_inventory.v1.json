@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1666,
+    "ud-only": 1669,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -483,7 +483,7 @@
     "model_appearance": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 5,
+      "ud-only": 6,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -497,7 +497,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 270,
+      "ud-only": 272,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -11905,6 +11905,18 @@
       "spelling_only": false
     },
     {
+      "path": "model_appearance/ball.py",
+      "classification": "ud-only",
+      "package": "model_appearance",
+      "subpackage": "",
+      "ud_bytes": 2193,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "model_appearance/geometry.py",
       "classification": "ud-only",
       "package": "model_appearance",
@@ -14353,6 +14365,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/gaze.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 12189,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/grip_fit.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -15305,7 +15329,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 28341,
+      "ud_bytes": 29230,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15373,11 +15397,23 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/pipeline/gaze_residual.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "pipeline",
+      "ud_bytes": 9705,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/pipeline/lane.py",
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 15931,
+      "ud_bytes": 18301,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -15545,7 +15581,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 14775,
+      "ud_bytes": 14836,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
