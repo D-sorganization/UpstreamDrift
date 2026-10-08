@@ -28,6 +28,13 @@ from src.shared.python.motion_matching.pipeline.address import (
     search_segment_scales,
     solve_address_stage,
 )
+from src.shared.python.motion_matching.pipeline.address_feet import (
+    build_foot_targets,
+    foot_progression_series,
+    model_feet_deg,
+    record_foot_progression,
+    seed_document_feet,
+)
 from src.shared.python.motion_matching.pipeline.constants import (
     BUILD_RECEIPT,
     CANDIDATE,
@@ -56,9 +63,13 @@ from src.shared.python.motion_matching.pipeline.dynamics import (
     shooting_fit,
     zmp_filter,
 )
+from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+    finish_feasibility_report,
+)
 from src.shared.python.motion_matching.pipeline.lane import (
     Lane,
     configure_lane,
+    document_seed,
     fitted_grip,
     wrist_bounds,
 )
@@ -81,6 +92,10 @@ from src.shared.python.motion_matching.pipeline.plant import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+#: Receipt stride of the model toe-out time series (frames).
+FOOT_SERIES_STRIDE = 6
 
 
 def _positive_int(value: str) -> int:
@@ -246,6 +261,18 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="optional explicit path to qualified neural model checkpoint",
     )
+    parser.add_argument(
+        "--foot-progression",
+        choices=("off", "capture", "default"),
+        default="off",
+        help=(
+            "address foot toe-out (OSV-4, #11730): 'capture' sets each foot to the "
+            "capture's measured toe-out (flagged 20 deg default where the markers "
+            "are unreliable), 'default' forces 20 deg per foot, 'off' (default) "
+            "keeps the legacy multi-start result. Also squares the forefoot marker "
+            "seeds and records model vs capture angles in the receipt."
+        ),
+    )
     return parser
 
 
@@ -405,6 +432,7 @@ def _calibrate_and_scale(
     address_report["calibrated"] = calibrated_address_summary(
         sim, kin, address2, lane, labels, adapter
     )
+    record_foot_progression(address_report, kin, address2.q, lane.feet)
     return _CalibrateAndScaleResult(
         scaled_spec,
         spec_bytes,
@@ -728,6 +756,15 @@ def _simulate_and_receipt(
             ),
         )
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
+    finish = finish_feasibility_report(
+        sim,
+        times_track=lane.times,
+        q_track=q_track,
+        record=record,
+        zmp=zmp,
+        ground=lane.ground,
+        q_ik=q_ref,
+    )
     dynamics_report, sim_errors = build_dynamics_report(
         DynamicsReportInputs(
             lane=lane,
@@ -741,6 +778,7 @@ def _simulate_and_receipt(
             zmp_filter_report=zmp_filter_report,
             shooting_report=shooting_report,
             tracking_backend=tracking,
+            finish_feasibility=finish,
         )
     )
     _save_dynamics_record(out_dir, record, sim_errors, lane, q_track)
@@ -796,6 +834,12 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     plant = get_plant(ctx.engine, base_spec)
     lane = Lane(labels, ctx.c3d_path, plant=plant)
     configure_lane(lane, base_spec)
+    lane.feet = build_foot_targets(lane, getattr(args, "foot_progression", "off"))
+    if lane.feet is not None:
+        seed_kin = plant.create_ik(lane.leg_seeds())
+        base_spec = seed_document_feet(
+            base_spec, seed_kin, lane.feet, document_seed(base_spec, seed_kin)
+        )
     if args.bound_wrists and args.free_wrists:
         raise ValueError("--bound-wrists and --free-wrists exclude each other")
     if args.bound_wrists or (fitted_grip(base_spec) and not args.free_wrists):
@@ -815,6 +859,15 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     ) = _solve_trajectory_ik(
         ctx, lane, cal_res.kin, cal_res.scaled_spec, labels, cal_res.address2.q
     )
+
+    if lane.feet is not None:
+        cal_res.address_report["foot_progression"]["trajectory"] = {
+            "stride_frames": FOOT_SERIES_STRIDE,
+            "finish_model_deg": model_feet_deg(cal_res.kin, q_ik[-1], lane.feet),
+            "series_model_deg": foot_progression_series(
+                cal_res.kin, q_ik, lane.feet, FOOT_SERIES_STRIDE
+            ),
+        }
 
     ik_report = build_ik_report(
         IKReportInputs(

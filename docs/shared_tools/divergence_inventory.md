@@ -30,7 +30,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `app_state` | 0 | 0 | 0 | 9 | 0 | 0 |
 | `assessment` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `biomech` | 0 | 0 | 0 | 4 | 0 | 0 |
-| `biomechanics` | 0 | 0 | 0 | 29 | 0 | 0 |
+| `biomechanics` | 0 | 0 | 0 | 30 | 0 | 0 |
 | `body_part_viz` | 0 | 0 | 0 | 35 | 0 | 0 |
 | `calc_backend` | 31 | 14 | 5 | 2 | 0 | 45 |
 | `camera` | 0 | 0 | 0 | 0 | 4 | 0 |
@@ -82,7 +82,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `math_utils` | 0 | 0 | 0 | 2 | 0 | 0 |
 | `model_appearance` | 0 | 0 | 0 | 5 | 0 | 0 |
 | `model_generation` | 27 | 52 | 14 | 20 | 1 | 79 |
-| `motion_matching` | 0 | 0 | 0 | 268 | 0 | 0 |
+| `motion_matching` | 0 | 0 | 0 | 272 | 0 | 0 |
 | `motion_pipeline` | 0 | 0 | 0 | 60 | 0 | 0 |
 | `movement_optimizer` | 0 | 0 | 0 | 169 | 0 | 0 |
 | `myofullbody` | 0 | 0 | 0 | 14 | 0 | 0 |
@@ -138,7 +138,7 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `version_info.py` | 0 | 0 | 0 | 1 | 0 | 0 |
 | `visualization` | 0 | 0 | 0 | 4 | 0 | 0 |
 | `workspace` | 0 | 0 | 0 | 36 | 0 | 0 |
-| **Total** | **401** | **272** | **121** | **1663** | **777** | **673** |
+| **Total** | **401** | **272** | **121** | **1668** | **777** | **673** |
 
 ## Diverged Files by Package
 
@@ -316,8 +316,8 @@ Do not edit by hand; regenerate after any change under `src/shared/python` or a 
 | `humanoid_character_builder/mesh/collision_generator.py` | -6767 |  | Dieter Olson 2026-09-07 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/inertia_calculator.py` | +60 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/mesh/primitive_inertia.py` | +90 |  | Dieter Olson 2026-08-03 | Dieter Olson 2026-08-20 |
-| `humanoid_character_builder/presets/__init__.py` | +226 |  | fleet-orchestrator 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
-| `humanoid_character_builder/presets/loader.py` | +2867 |  | fleet-orchestrator 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/__init__.py` | +226 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
+| `humanoid_character_builder/presets/loader.py` | +2867 |  | Dieter Olson 2026-10-07 | d-sorgcodexagent[bot] 2026-06-16 |
 | `humanoid_character_builder/tests/test_api.py` | -423 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-09-26 |
 | `humanoid_character_builder/tests/test_urdf_contracts_integration.py` | +71 |  | Dieter Olson 2026-08-01 | Dieter Olson 2026-08-20 |
 | `humanoid_character_builder/validation/physics_validator.py` | +4 | yes | Dieter Olson 2026-08-01 | d-sorgcodexagent[bot] 2026-06-16 |

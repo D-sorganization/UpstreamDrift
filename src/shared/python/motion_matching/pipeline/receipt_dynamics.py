@@ -151,6 +151,110 @@ class WeightFractionReceipt(BaseModel):
     )
 
 
+class FinishSideReceipt(BaseModel):
+    """Finish-window feasibility metrics of one trajectory (reference or simulation)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    zmp_inside_fraction_1_0_to_1_5s: float = Field(
+        ...,
+        description="Fraction of 1.0-1.5 s frames loaded with the pressure point inside the support polygon",
+        json_schema_extra={"unit": "ratio", "stage": "dynamics"},
+    )
+    zmp_inside_fraction_finish: float = Field(
+        ...,
+        description="Fraction of finish-window frames loaded with the pressure point inside the support polygon",
+        json_schema_extra={"unit": "ratio", "stage": "dynamics"},
+    )
+    friction_utilisation_max: float = Field(
+        ...,
+        description="Peak tangential over normal force divided by the dynamic friction coefficient",
+        json_schema_extra={"unit": "ratio", "stage": "dynamics"},
+    )
+    friction_saturated_fraction: float = Field(
+        ...,
+        description="Fraction of loaded finish frames above 0.95 of the friction limit",
+        json_schema_extra={"unit": "ratio", "stage": "dynamics"},
+    )
+    foot_slide_mm_max: float = Field(
+        ...,
+        description="Worst-foot centre displacement from the start of the finish window",
+        json_schema_extra={"unit": "mm", "stage": "dynamics"},
+    )
+    foot_yaw_pivot_deg_max: float = Field(
+        ...,
+        description="Worst-foot heel-to-toe yaw change from the start of the finish window",
+        json_schema_extra={"unit": "deg", "stage": "dynamics"},
+    )
+    pelvis_yaw_error_deg_max: float | None = Field(
+        None,
+        description="Largest absolute pelvis yaw error in the finish window",
+        json_schema_extra={"unit": "deg", "stage": "dynamics"},
+    )
+    pelvis_yaw_error_deg_final: float | None = Field(
+        None,
+        description="Pelvis yaw error at the last finish-window frame",
+        json_schema_extra={"unit": "deg", "stage": "dynamics"},
+    )
+    vertical_force_bw_min: float = Field(
+        ...,
+        description="Minimum vertical ground reaction in the finish window",
+        json_schema_extra={"unit": "BW", "stage": "dynamics"},
+    )
+    vertical_force_bw_max: float = Field(
+        ...,
+        description="Maximum vertical ground reaction in the finish window",
+        json_schema_extra={"unit": "BW", "stage": "dynamics"},
+    )
+
+
+class FinishFeasibilityReceipt(BaseModel):
+    """Finish-window feasibility of the tracked reference and of the simulation (#11668)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    description: str = Field(
+        ...,
+        description="How the reference and simulation columns are defined",
+        json_schema_extra={"unit": "text", "stage": "dynamics"},
+    )
+    window_s: list[float] = Field(
+        ...,
+        description="Finish window start and end",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    zmp_window_s: list[float] = Field(
+        ...,
+        description="Window of the ZMP-inside fraction used by the epic acceptance",
+        json_schema_extra={"unit": "s", "stage": "dynamics"},
+    )
+    friction_limit_mu: float = Field(
+        ...,
+        description="Dynamic friction coefficient the utilisation is normalised by",
+        json_schema_extra={"unit": "dimensionless", "stage": "dynamics"},
+    )
+    friction_saturation_fraction: float = Field(
+        ...,
+        description="Utilisation above which a frame counts as saturated",
+        json_schema_extra={"unit": "ratio", "stage": "dynamics"},
+    )
+    min_load_bw: float = Field(
+        ...,
+        description="Vertical force below which a frame counts as unloaded",
+        json_schema_extra={"unit": "BW", "stage": "dynamics"},
+    )
+    reference: FinishSideReceipt = Field(
+        ...,
+        description="Load the tracked reference demands (inverse dynamics)",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+    simulation: FinishSideReceipt = Field(
+        ...,
+        description="Load the simulated plant delivers",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
+
+
 class BackswingReceipt(BaseModel):
     """Dynamic tracking performance up to top of backswing (0 to 1.0 s)."""
 
@@ -361,6 +465,11 @@ class DynamicsReceipt(BaseModel):
         ...,
         description="Maximum elevation of lowest foot contact sphere in simulation",
         json_schema_extra={"unit": "m", "stage": "dynamics"},
+    )
+    finish_feasibility: FinishFeasibilityReceipt | None = Field(
+        None,
+        description="Finish-window feasibility metrics of reference and simulation",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
     zmp_filter: ZmpFilterReport | None = Field(
         None,
