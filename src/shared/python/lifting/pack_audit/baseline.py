@@ -17,6 +17,15 @@ from .model import Anthropometry, EngineAdapter, PoseEval
 from .names import ENGINES, LIFTS, SIDES
 from .packs import PackLocation, locate_pack
 
+_AUDIT_ERRORS = (
+    RuntimeError,
+    ValueError,
+    KeyError,
+    TypeError,
+    AttributeError,
+    OSError,
+    ImportError,
+)
 SCHEMA = "lift-pack-parity-baseline/v1"
 POSITION_TOL_M = 0.02  # cross_engine_position_abs_m in the parity standard
 MASS_REL_TOL = 1e-6  # mass_rel in the parity standard
@@ -334,7 +343,7 @@ def run_baseline(
         for engine, pack in located.items():
             try:
                 per_engine[engine] = audit_pack_lift(pack, lift, anthro, pose_sets)
-            except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
+            except _AUDIT_ERRORS as exc:
                 deferred.append(
                     {
                         "engine": engine,

@@ -78,6 +78,10 @@ class DrakeAdapter(EngineAdapter):
                     out[side] = f"{j.type_name()} joint (bar is child)"
         return out
 
+    def _initial_pose_name(self) -> str | None:
+        pose = self.loaded.initial_pose
+        return pose.name if pose else None
+
     def _bar_parent(self) -> str:
         p = self.plant
         for i in p.GetJointIndices(self.loaded.model_instance):
@@ -113,9 +117,7 @@ class DrakeAdapter(EngineAdapter):
             "bar_hand_attachment": self._hand_attachment(),
             "weld_constraints": [j for j in joints if "barbell" in j and "hand" in j],
             "n_keyframes": 0,
-            "initial_pose": (
-                self.loaded.initial_pose.name if self.loaded.initial_pose else None
-            ),
+            "initial_pose": self._initial_pose_name(),
             "contact": {
                 "model": "hydroelastic (compliant) foot boxes",
                 "foot_contact_geoms": contacts,
