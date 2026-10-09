@@ -481,7 +481,7 @@ def _rolling_series_to_records(
     rolling: Any, time_column: str
 ) -> list[dict[str, object]]:
     """Serialize the rolling-statistics frame to JSON-safe row dicts."""
-    records = rolling.to_dict(orient="records")
+    records: list[dict[str, Any]] = rolling.to_dict(orient="records")
     for entry in records:
         entry[time_column] = entry[time_column].isoformat()
         for key, value in entry.items():
