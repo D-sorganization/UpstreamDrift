@@ -10376,6 +10376,18 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+# Native Torque Replay Development Boundary
+
+F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
+actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
+distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
+and uninterrupted no-reset execution are required. Canonical calculation
+reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
+Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
+Tools T01 is consumed through merged pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
+Six-engine and muscular OpenSim real-capture gates remain open.
+
 ## Native Thelen Replay Boundary (F07b, #11826)
 
 Early native excitation replay explicitly admits compliant Thelen2003Muscle
@@ -10384,7 +10396,6 @@ length, complete restoration, ordered law identity and ignored-mode refusal
 are required. Canonical reference: native muscle replay chapter; turnover:
 `docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
 contact/grip, licensing and real-capture scientific gates remain open.
-
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative

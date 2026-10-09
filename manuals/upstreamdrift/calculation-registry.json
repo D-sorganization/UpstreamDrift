@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-torque-replay-inventory",
+      "owner": "UpstreamDrift issue #11823",
+      "resolution": "Inventory native MuJoCo full mjSTATE_INTEGRATION restoration, distinct quaternion configuration/tangent velocity, direct unit hinge-motor post-limit ZOH input and actual native effort checks in native_torque_replay.py and chapters/19-native-torque-replay.qmd. Synthetic replay and negative admission tests establish a bounded same-provider path only. Merged Tools T01 pin, six-engine parity, refinement, anatomy, native muscle/contact/grip and real capture qualification remain open. Exclusive process ownership is required; no subprocess isolation or complete transitive-library attestation is claimed."
+    },
+    {
       "id": "UP-D1-native-thelen-replay-inventory",
       "owner": "UpstreamDrift issue #11826",
       "resolution": "Inventory explicit compliant Thelen2003Muscle and Millard2012EquilibriumMuscle native state minima, ordered concrete-law identity, independent restored force and ignored-mode refusal in muscle_replay.py and chapters/13-native-muscle-replay.qmd. Native fixture tests do not establish full-body anatomy, physiological parameters, external-resource identity, ignored-state modes, contact/grip or real capture acceptance. Keep F07/F08 gates open."
