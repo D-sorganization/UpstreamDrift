@@ -524,4 +524,5 @@ python3 -m pytest tests/unit/engines/myosuite/test_retarget.py tests/unit/engine
 
 ### Evidence Receipt
 
+- LaTeX reference: [`myosuite_retarget_map.tex`](../../research/myosuite_retarget_map/myosuite_retarget_map.tex). The MyoFullBody neck capacities are also in [`myofullbody_swing.tex`](../../research/myofullbody_swing/myofullbody_swing.tex).
 - Tests: `tests/unit/engines/myosuite/test_retarget.py` (`test_primary_source_alone_drives_its_target`, `test_fixture_map_targets_are_one_to_one`, `test_secondary_sources_are_omitted_and_documented`, `test_fixture_map_round_trips_mapped_sources`, `test_loader_rejects_two_sources_on_one_target`, `test_loader_rejects_duplicate_source`, `test_loader_rejects_zero_sign`); `tests/unit/engines/myofullbody/test_myofullbody_neck.py` (`test_capacities_follow_anthro_neck_axes`). All of them failed before the fix.
