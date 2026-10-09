@@ -10,6 +10,7 @@ import json
 import platform
 from dataclasses import asdict, fields
 from pathlib import Path
+from typing import Any, cast
 
 import numpy as np
 
@@ -17,18 +18,26 @@ from src.shared.python.physics.ball_launch_conditions import EnvironmentalCondit
 from src.shared.python.physics.ball_properties import BallProperties
 from src.shared.python.physics.impact_model import ImpactParameters
 
-from .core import PATTERNS, AnalysisResult, ShotRecord
-from .uncertainty import paired_variance_ratio
+from .core import PATTERNS, AnalysisConfig, AnalysisResult, ShotRecord
+from .dispersion_stats import landing_dispersion
+from .range_control import equal_range_endpoint, equal_range_summary
+from .uncertainty import paired_hit_difference, paired_variance_ratio
 
 _COLORS = {"Straight": "#83d7ff", "Draw": "#f8bf58", "Fade": "#e98ac0"}
-_PATTERN_LABELS = {
-    p.name: f"{p.name}  Face {p.face_deg:+g}° / Path {p.path_deg:+g}°" for p in PATTERNS
-}
 _LIMITATION = (
-    "Simplified rigid-body impact sends the ball along the face normal; "
-    "path changes spin but does not directly change launch direction. "
+    "Simplified central rigid-body impulse and shaft-axis delivery geometry; "
+    "no measured player covariance, off-center gear physics, or ground roll. "
     "Results are model-conditional, not observed player performance."
 )
+
+
+def _scenario_footer(config: AnalysisConfig) -> str:
+    return (
+        f"Model-Conditional | {config.club_id} | {config.club_speed_mps:g} m/s | "
+        f"Loft {config.loft_deg:g}° | AoA {config.attack_angle_deg:+g}° | "
+        f"Face SD {config.face_sd_deg:g}° | Curve ×{config.curve_scale:g} | "
+        f"{config.delivery_mode}, lie {config.lie_deg:g}°, lean {config.shaft_lean_deg:g}°"
+    )
 
 
 def _source_hash(path: Path) -> str:
@@ -41,7 +50,7 @@ def _variance_comparisons(result: AnalysisResult) -> dict[str, dict]:
         pattern.name: [row for row in result.shots if row.pattern == pattern.name]
         for pattern in PATTERNS
     }
-    comparisons = {}
+    comparisons: dict[str, dict[str, dict[str, float | str | None]]] = {}
     for name in ("Draw", "Fade"):
         comparisons[name] = {}
         for label, field in (("raw", "carry_y_m"), ("aimed", "aimed_y_m")):
@@ -53,10 +62,65 @@ def _variance_comparisons(result: AnalysisResult) -> dict[str, dict]:
                     "reason": "Requires >=10 pairs and positive straight variance",
                 }
             else:
-                comparisons[name][label] = paired_variance_ratio(
-                    curved, reference, seed=result.config.seed
+                comparisons[name][label] = cast(
+                    dict[str, float | str | None],
+                    paired_variance_ratio(curved, reference, seed=result.config.seed),
                 )
     return comparisons
+
+
+def _hit_comparisons(result: AnalysisResult) -> dict[str, dict]:
+    """Bootstrap paired curved-minus-straight target-hit differences."""
+    grouped = {
+        name: [row for row in result.shots if row.pattern == name] for name in _COLORS
+    }
+    comparisons: dict[str, dict[str, dict[str, float | str | None]]] = {}
+    for name in ("Draw", "Fade"):
+        comparisons[name] = {}
+        for label, x_field, y_field in (
+            ("raw", "carry_x_m", "carry_y_m"),
+            ("aimed", "aimed_x_m", "aimed_y_m"),
+        ):
+            if len(grouped["Straight"]) < 10:
+                comparisons[name][label] = {
+                    "estimate": None,
+                    "reason": "Requires >=10 paired shots",
+                }
+            else:
+                comparisons[name][label] = cast(
+                    dict[str, float | str | None],
+                    paired_hit_difference(
+                        _hit_flags(grouped[name], x_field, y_field, result),
+                        _hit_flags(grouped["Straight"], x_field, y_field, result),
+                        seed=result.config.seed,
+                    ),
+                )
+    return comparisons
+
+
+def _hit_flags(
+    rows: list[ShotRecord], x_field: str, y_field: str, result: AnalysisResult
+) -> np.ndarray:
+    return np.array(
+        [
+            int(
+                np.hypot(
+                    getattr(row, x_field) - result.target_x_m,
+                    getattr(row, y_field),
+                )
+                <= result.config.target_radius_m
+            )
+            for row in rows
+        ]
+    )
+
+
+def _pattern_label(name: str, config: AnalysisConfig) -> str:
+    pattern = next(p for p in PATTERNS if p.name == name)
+    return (
+        f"{name}  Face {pattern.face_deg * config.curve_scale:+g}° / "
+        f"Path {pattern.path_deg * config.curve_scale:+g}°"
+    )
 
 
 def _style() -> None:
@@ -109,7 +173,7 @@ def _save_flight(result: AnalysisResult, path: Path) -> None:
                 nominal[:, 1],
                 color=color,
                 lw=3.2,
-                label=_PATTERN_LABELS[name],
+                label=_pattern_label(name, result.config),
             )
             ax.scatter(
                 nominal[-1, 0],
@@ -135,7 +199,7 @@ def _save_flight(result: AnalysisResult, path: Path) -> None:
     fig.text(
         0.07,
         0.065,
-        f"Model-Conditional: simplified impact; {result.config.club_speed_mps:g} m/s, loft {result.config.loft_deg:g}°, fixed path, face SD {result.config.face_sd_deg:g}°, level strike, no wind.",
+        _scenario_footer(result.config),
         fontsize=11,
         color="#f4b986",
     )
@@ -143,7 +207,50 @@ def _save_flight(result: AnalysisResult, path: Path) -> None:
     plt.close(fig)
 
 
-def _save_dispersion(result: AnalysisResult, path: Path) -> None:
+def _equal_range_diagnostic(result: AnalysisResult) -> dict:
+    grouped = {
+        name: [row for row in result.shots if row.pattern == name] for name in _COLORS
+    }
+    endpoints = {
+        name: [
+            equal_range_endpoint(row.aimed_x_m, row.aimed_y_m, result.target_x_m)
+            for row in rows
+        ]
+        for name, rows in grouped.items()
+    }
+    patterns = {
+        name: equal_range_summary(
+            [(row.aimed_x_m, row.aimed_y_m) for row in rows],
+            result.target_x_m,
+            result.config.target_radius_m,
+        )
+        for name, rows in grouped.items()
+    }
+    paired: dict[str, dict[str, float | str | None]] = {}
+    reference = [y for _, y in endpoints["Straight"]]
+    for name in ("Draw", "Fade"):
+        curved = [y for _, y in endpoints[name]]
+        if len(reference) < 10 or np.var(reference, ddof=1) == 0:
+            paired[name] = {
+                "estimate": None,
+                "reason": "Requires >=10 pairs and positive straight variance",
+            }
+        else:
+            paired[name] = cast(
+                dict[str, float | str | None],
+                paired_variance_ratio(curved, reference, seed=result.config.seed),
+            )
+    return {
+        "method": "Geometric radial normalization of aimed carry endpoints; no impact or flight re-simulation",
+        "target_range_m": result.target_x_m,
+        "patterns": patterns,
+        "paired_variance_ratios": paired,
+    }
+
+
+def _save_dispersion(
+    result: AnalysisResult, path: Path, *, equal_range: bool = False
+) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -153,26 +260,53 @@ def _save_dispersion(result: AnalysisResult, path: Path) -> None:
     _style()
     fig, axes = plt.subplots(1, 3, figsize=(16, 9), dpi=120, sharex=True, sharey=True)
     fig.subplots_adjust(left=0.075, right=0.97, top=0.79, bottom=0.20, wspace=0.09)
-    fig.text(0.07, 0.94, "Shot Dispersion at Carry", fontsize=28, weight="bold")
+    title = (
+        "Equal-Range Dispersion Diagnostic"
+        if equal_range
+        else "Shot Dispersion at Carry"
+    )
+    fig.text(0.07, 0.94, title, fontsize=28, weight="bold")
     fig.text(
         0.07,
         0.885,
-        f"{result.config.n_shots:,} Shots Each  |  Face Variation SD {result.config.face_sd_deg:g}°  |  Nominal Aim Adjusted",
+        (
+            f"Geometric Equal-Range Diagnostic — Not Re-Simulated  |  All Shots Set to {result.target_x_m:.2f} m"
+            if equal_range
+            else f"{result.config.n_shots:,} Shots Each  |  Face Variation SD {result.config.face_sd_deg:g}°  |  Nominal Aim Adjusted"
+        ),
         fontsize=15,
         color="#bed0df",
+    )
+    fig.text(
+        0.07,
+        0.835,
+        "  |  ".join(_pattern_label(name, result.config) for name in _COLORS),
+        fontsize=11,
+        color="#d1deeb",
     )
     all_rows = {
         name: [r for r in result.shots if r.pattern == name] for name in _COLORS
     }
-    lateral_bound = max(abs(r.aimed_y_m) for r in result.shots)
+    points = {
+        name: [
+            equal_range_endpoint(r.aimed_x_m, r.aimed_y_m, result.target_x_m)
+            if equal_range
+            else (r.aimed_x_m, r.aimed_y_m)
+            for r in rows
+        ]
+        for name, rows in all_rows.items()
+    }
+    lateral_bound = max(abs(y) for rows in points.values() for _, y in rows)
     lateral_bound = max(25.0, lateral_bound * 1.05)
     downrange_bound = max(
-        25.0, max(abs(r.aimed_x_m - result.target_x_m) for r in result.shots) * 1.05
+        25.0,
+        max(abs(x - result.target_x_m) for rows in points.values() for x, _ in rows)
+        * 1.05,
     )
     for ax, (name, rows) in zip(axes, all_rows.items(), strict=True):
         color = _COLORS[name]
-        x = [r.aimed_y_m for r in rows]
-        y = [r.aimed_x_m - result.target_x_m for r in rows]
+        x = [y for _, y in points[name]]
+        y = [x - result.target_x_m for x, _ in points[name]]
         ax.scatter(x, y, s=4, color=color, alpha=0.10, linewidths=0, rasterized=True)
         ax.add_patch(
             Circle(
@@ -191,12 +325,24 @@ def _save_dispersion(result: AnalysisResult, path: Path) -> None:
         ax.set_aspect("equal", adjustable="box")
         ax.grid(alpha=0.25)
         ax.set_xlabel("Lateral (m; Right Positive)")
-        stats = result.summary[name]
+        stats = (
+            equal_range_summary(
+                [(r.aimed_x_m, r.aimed_y_m) for r in rows],
+                result.target_x_m,
+                result.config.target_radius_m,
+            )
+            if equal_range
+            else result.summary[name]
+        )
+        sd_key = "lateral_sd_m" if equal_range else "aimed_lateral_sd_m"
+        hit_key = "target_hit_fraction" if equal_range else "aimed_target_hit_fraction"
+        sd_text = f"{stats[sd_key]:.2f}" if equal_range else f"{stats[sd_key]:.1f}"
+        hit_text = f"{stats[hit_key]:.2%}" if equal_range else f"{stats[hit_key]:.1%}"
         ax.text(
             0.04,
             0.04,
-            f"Lateral SD  {stats['aimed_lateral_sd_m']:.1f} m\n"
-            f"15 m Circle  {stats['aimed_target_hit_fraction']:.1%}",
+            f"Lateral SD  {sd_text} m\n"
+            f"{result.config.target_radius_m:g} m Circle  {hit_text}",
             transform=ax.transAxes,
             va="bottom",
             fontsize=11,
@@ -206,14 +352,18 @@ def _save_dispersion(result: AnalysisResult, path: Path) -> None:
     fig.text(
         0.07,
         0.115,
-        "Each point is one simulated landing. Aim rotates each nominal pattern onto the target line; target distance is fixed.",
+        (
+            "Each existing aimed landing is radially scaled to the straight nominal carry. Bearing is preserved; no flight is re-simulated."
+            if equal_range
+            else "Each point is one simulated landing. Aim rotates each nominal pattern onto the target line; target distance is fixed."
+        ),
         fontsize=11,
         color="#bfd2df",
     )
     fig.text(
         0.07,
         0.075,
-        f"Model-Conditional: simplified impact; {result.config.club_speed_mps:g} m/s, loft {result.config.loft_deg:g}°, fixed path, face SD {result.config.face_sd_deg:g}°, level strike, no wind.",
+        _scenario_footer(result.config),
         fontsize=11,
         color="#f4b986",
     )
@@ -222,7 +372,7 @@ def _save_dispersion(result: AnalysisResult, path: Path) -> None:
 
 
 def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]:
-    """Write raw results, summary, provenance, and two shareable PNG figures."""
+    """Write raw results, summary, provenance, and three shareable PNG figures."""
     if not isinstance(result, AnalysisResult):
         raise TypeError("result must be AnalysisResult")
     output_dir = Path(output_dir)
@@ -233,6 +383,7 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
         "receipt_json": output_dir / "receipt.json",
         "overhead_png": output_dir / "overhead_flight.png",
         "dispersion_png": output_dir / "dispersion.png",
+        "dispersion_equal_range_png": output_dir / "dispersion_equal_range.png",
     }
     with paths["shots_csv"].open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=[f.name for f in fields(ShotRecord)])
@@ -247,6 +398,20 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
             name: asdict(outcome) for name, outcome in result.nominal_outcomes.items()
         },
         "paired_variance_comparisons": _variance_comparisons(result),
+        "paired_hit_comparisons": _hit_comparisons(result),
+        "equal_range_diagnostic": _equal_range_diagnostic(result),
+        "landing_dispersion": {
+            name: landing_dispersion(
+                [
+                    (row.aimed_x_m, row.aimed_y_m)
+                    for row in result.shots
+                    if row.pattern == name
+                ],
+                result.target_x_m,
+                nominal_point=(result.target_x_m, 0.0),
+            )
+            for name in _COLORS
+        },
         "bootstrap": {
             "method": "Paired percentile bootstrap; curved/straight lateral variance",
             "resamples": 500,
@@ -258,13 +423,22 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
     paths["summary_json"].write_text(json.dumps(summary, indent=2) + "\n")
     package_dir = Path(__file__).parent
     repo_root = Path(__file__).resolve().parents[3]
-    source_files = (
+    source_files: tuple[Path, ...] = (
         package_dir / "core.py",
         package_dir / "physics.py",
+        package_dir / "delivery_geometry.py",
+        package_dir / "presets.py",
+        package_dir / "dispersion_stats.py",
+        package_dir / "scoring.py",
+        package_dir / "scoring_cache.py",
+        package_dir / "scenario_scoring.py",
         package_dir / "reporting.py",
+        package_dir / "range_control.py",
         repo_root / "src/shared/python/physics/impact_model/models.py",
+        repo_root / "src/shared/python/physics/impact_model/solver.py",
         repo_root / "src/shared/python/physics/impact_model/types.py",
         repo_root / "src/shared/python/physics/ball_simulator.py",
+        repo_root / "src/shared/python/physics/ball_launch_conditions.py",
         repo_root / "src/shared/python/physics/ball_properties.py",
         repo_root / "src/shared/python/core/physics_constants.py",
         repo_root / "rust_core/upstream-physics/Cargo.toml",
@@ -295,7 +469,11 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
         "physics": {
             "impact_model": "rigid_body",
             "flight_model": "BallFlightSimulator (upstream_physics Rust RK4)",
-            "club_attack_deg": 0.0,
+            "club_attack_deg": result.config.attack_angle_deg,
+            "clubhead_mass_kg": result.config.clubhead_mass_kg,
+            "delivery_mode": result.config.delivery_mode,
+            "lie_deg": result.config.lie_deg,
+            "shaft_lean_deg": result.config.shaft_lean_deg,
             "contact_offset_m": [0.0, 0.0],
             "environment": "Default EnvironmentalConditions, zero wind",
             "rust_package_version": rust_version,
@@ -326,4 +504,55 @@ def export_analysis(result: AnalysisResult, output_dir: Path) -> dict[str, Path]
     paths["receipt_json"].write_text(json.dumps(receipt, indent=2) + "\n")
     _save_flight(result, paths["overhead_png"])
     _save_dispersion(result, paths["dispersion_png"])
+    _save_dispersion(result, paths["dispersion_equal_range_png"], equal_range=True)
     return paths
+
+
+def augment_saved_bundle_with_equal_range(output_dir: Path) -> Path:
+    """Add the geometric equal-range diagnostic to a completed raw-data bundle.
+
+    This reads saved shot endpoints and does not run impact or flight again.
+    Existing numerical outcomes, figures, and receipt are preserved.
+    """
+    output_dir = Path(output_dir)
+    summary_path = output_dir / "summary.json"
+    shots_path = output_dir / "shots.csv"
+    summary = json.loads(summary_path.read_text())
+    with shots_path.open(newline="") as handle:
+        raw_rows = list(csv.DictReader(handle))
+    rows = tuple(
+        ShotRecord(
+            **cast(
+                Any,
+                {
+                    field.name: (
+                        raw[field.name]
+                        if field.name == "pattern"
+                        else int(raw[field.name])
+                        if field.name == "shot_index"
+                        else float(raw[field.name])
+                    )
+                    for field in fields(ShotRecord)
+                },
+            )
+        )
+        for raw in raw_rows
+    )
+    config = AnalysisConfig(**summary["config"])
+    if len(rows) != len(PATTERNS) * config.n_shots:
+        raise ValueError("saved shots.csv does not contain the expected shot count")
+    result = AnalysisResult(
+        config=config,
+        shots=rows,
+        summary=summary["patterns"],
+        flight_samples={},
+        target_x_m=float(summary["target_x_m"]),
+        nominal_outcomes={},
+    )
+    summary["equal_range_diagnostic"] = _equal_range_diagnostic(result)
+    summary["paired_hit_comparisons"] = _hit_comparisons(result)
+    summary_path.write_text(json.dumps(summary, indent=2) + "\n")
+    graphic = output_dir / "dispersion_equal_range.png"
+    _save_dispersion(result, output_dir / "dispersion.png")
+    _save_dispersion(result, graphic, equal_range=True)
+    return graphic

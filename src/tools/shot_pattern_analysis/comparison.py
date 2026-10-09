@@ -136,18 +136,36 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
 
 
 def validate_scoring_comparison(summaries: list[dict[str, Any]]) -> None:
-    """Reject partial or incompatible API scoring before comparing estimates."""
+    """Require complete, compatible scoring through either verified API route."""
     validate_comparison(summaries)
+    reports = []
     for summary in summaries:
-        scoring = summary.get("approach_scoring", {})
-        if scoring.get("api_scored_shots") != 3 * summary["config"]["n_shots"]:
-            raise ValueError("The public scoring API must evaluate every shot")
-    baseline = summaries[0]["approach_scoring"]["baseline"]["table_sha256"]
-    radius = summaries[0]["approach_scoring"]["green_radius_m"]
-    for summary in summaries:
-        scoring = summary["approach_scoring"]
-        if (
-            scoring["baseline"]["table_sha256"] != baseline
-            or scoring["green_radius_m"] != radius
-        ):
-            raise ValueError("Scoring benchmarks and green layouts must match")
+        expected = 3 * summary["config"]["n_shots"]
+        if "course_scoring" in summary:
+            scoring = summary["course_scoring"]
+            if (
+                scoring.get("status") != "available"
+                or scoring.get("scored_shots") != expected
+                or scoring.get("api_evaluated_states", 0) <= 0
+                or scoring.get("interpolation_tolerance_strokes") != 1e-12
+            ):
+                raise ValueError("Verified public API scoring must cover every shot")
+        else:
+            scoring = summary.get("approach_scoring", {})
+            if scoring.get("api_scored_shots") != expected:
+                raise ValueError("The public scoring API must evaluate every shot")
+        reports.append(scoring)
+    reference = reports[0]
+    fields = (
+        "scenario_id",
+        "start_lie",
+        "start_distance_m",
+        "hole_distance_m",
+        "fairway_half_width_m",
+        "green_radius_m",
+    )
+    for scoring in reports:
+        if scoring["baseline"]["table_sha256"] != reference["baseline"]["table_sha256"]:
+            raise ValueError("Scoring benchmarks must match")
+        if any(scoring.get(key) != reference.get(key) for key in fields):
+            raise ValueError("Scoring contexts and course layouts must match")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Callable, Protocol
 
 import numpy as np
 
@@ -25,26 +25,44 @@ PATTERNS = (
 )
 
 
+class AnalysisCancelled(RuntimeError):
+    """Raised when a caller cancels a running Monte Carlo comparison."""
+
+
 @dataclass(frozen=True)
 class AnalysisConfig:
+    club_id: str = "custom"
     n_shots: int = 10_000
     face_sd_deg: float = 1.0
+    curve_scale: float = 1.0
     seed: int = 20_261_008
     club_speed_mps: float = 45.0
     loft_deg: float = 10.9
+    attack_angle_deg: float = 0.0
+    clubhead_mass_kg: float = 0.2
+    delivery_mode: str = "fixed_loft"
+    lie_deg: float = 58.0
+    shaft_lean_deg: float = 0.0
     dt_s: float = 0.02
     max_time_s: float = 12.0
     target_radius_m: float = 15.0
 
     def __post_init__(self) -> None:
+        if not isinstance(self.club_id, str) or not self.club_id.strip():
+            raise ValueError("club_id must be a non-empty string")
         if not isinstance(self.n_shots, int) or self.n_shots < 2:
             raise ValueError("n_shots must be an integer >= 2")
         if not isinstance(self.seed, int) or self.seed < 0:
             raise ValueError("seed must be a non-negative integer")
         for name in (
             "face_sd_deg",
+            "curve_scale",
             "club_speed_mps",
             "loft_deg",
+            "attack_angle_deg",
+            "clubhead_mass_kg",
+            "lie_deg",
+            "shaft_lean_deg",
             "dt_s",
             "max_time_s",
             "target_radius_m",
@@ -54,8 +72,22 @@ class AnalysisConfig:
                 raise ValueError(f"{name} must be finite")
         if self.face_sd_deg < 0 or self.face_sd_deg > 5:
             raise ValueError("face_sd_deg must be in [0, 5]")
+        if not 0 < self.curve_scale <= 2:
+            raise ValueError("curve_scale must be in (0, 2]")
         if self.club_speed_mps <= 0 or not (0 < self.loft_deg < 45):
             raise ValueError("club speed must be positive and loft in (0, 45) degrees")
+        if self.clubhead_mass_kg <= 0 or abs(self.attack_angle_deg) >= 30:
+            raise ValueError("clubhead mass must be positive and attack angle below 30 degrees")
+        if self.delivery_mode not in ("fixed_loft", "shaft_rotation"):
+            raise ValueError("delivery_mode must be fixed_loft or shaft_rotation")
+        from .delivery_geometry import delivery_from_face_angle
+
+        delivery_from_face_angle(
+            0.0,
+            base_loft_deg=self.loft_deg,
+            lie_deg=self.lie_deg,
+            shaft_lean_deg=self.shaft_lean_deg,
+        )
         if not (0 < self.dt_s <= 0.05) or self.max_time_s <= self.dt_s:
             raise ValueError("dt_s must be in (0, .05] and below max_time_s")
         if self.target_radius_m < 0:
@@ -96,6 +128,7 @@ class PhysicsProtocol(Protocol):
         path_deg: float,
         config: AnalysisConfig,
         sample_trajectory: bool = False,
+        nominal_face_deg: float = 0.0,
     ) -> ShotOutcome: ...
 
 
@@ -197,7 +230,11 @@ def _summarize(
 
 
 def run_analysis(
-    config: AnalysisConfig, *, physics: PhysicsProtocol | None = None
+    config: AnalysisConfig,
+    *,
+    physics: PhysicsProtocol | None = None,
+    progress_callback: Callable[[int, int], None] | None = None,
+    cancel_check: Callable[[], bool] | None = None,
 ) -> AnalysisResult:
     """Simulate three paired patterns using common normal face deviations.
 
@@ -206,6 +243,17 @@ def run_analysis(
     """
     if not isinstance(config, AnalysisConfig):
         raise TypeError("config must be AnalysisConfig")
+    patterns = tuple(
+        PatternConfig(
+            p.name, p.face_deg * config.curve_scale, p.path_deg * config.curve_scale
+        )
+        for p in PATTERNS
+    )
+    total_shots = len(patterns) * config.n_shots
+    completed = 0
+    report_every = max(1, total_shots // 100)
+    if progress_callback is not None:
+        progress_callback(completed, total_shots)
     engine = physics if physics is not None else ShotPhysics()
     rng = np.random.default_rng(config.seed)
     face_deviations = rng.normal(0.0, config.face_sd_deg, config.n_shots)
@@ -215,36 +263,46 @@ def run_analysis(
             np.linspace(0, config.n_shots - 1, 9, dtype=int)
         ]
     }
-    nominal = {
-        pattern.name: _validate_outcome(
-            engine.simulate(
-                face_deg=pattern.face_deg,
+    def simulate_pattern(
+        pattern: PatternConfig, face_deg: float, *, sample_trajectory: bool
+    ) -> ShotOutcome:
+        if config.delivery_mode == "shaft_rotation":
+            return engine.simulate(
+                face_deg=face_deg,
                 path_deg=pattern.path_deg,
                 config=config,
-                sample_trajectory=True,
+                sample_trajectory=sample_trajectory,
+                nominal_face_deg=pattern.face_deg,
             )
+        return engine.simulate(
+            face_deg=face_deg,
+            path_deg=pattern.path_deg,
+            config=config,
+            sample_trajectory=sample_trajectory,
         )
-        for pattern in PATTERNS
+
+    nominal = {
+        pattern.name: _validate_outcome(
+            simulate_pattern(pattern, pattern.face_deg, sample_trajectory=True)
+        )
+        for pattern in patterns
     }
     target_x_m = nominal["Straight"].carry_x_m
     rows: list[ShotRecord] = []
     samples: dict[str, tuple[tuple[tuple[float, float], ...], ...]] = {}
     stats: dict[str, dict[str, float]] = {}
-    for pattern in PATTERNS:
+    for pattern in patterns:
         aim = math.atan2(
             nominal[pattern.name].carry_y_m, nominal[pattern.name].carry_x_m
         )
         pattern_rows: list[ShotRecord] = []
         trajectories = [nominal[pattern.name].trajectory_xy_m]
         for index, deviation in enumerate(face_deviations):
+            if cancel_check is not None and cancel_check():
+                raise AnalysisCancelled("shot pattern analysis cancelled")
             face = pattern.face_deg + float(deviation)
             outcome = _validate_outcome(
-                engine.simulate(
-                    face_deg=face,
-                    path_deg=pattern.path_deg,
-                    config=config,
-                    sample_trajectory=index in sample_indices,
-                )
+                simulate_pattern(pattern, face, sample_trajectory=index in sample_indices)
             )
             ax, ay = _rotate_to_aim(outcome.carry_x_m, outcome.carry_y_m, aim)
             pattern_rows.append(
@@ -265,6 +323,11 @@ def run_analysis(
             )
             if outcome.trajectory_xy_m:
                 trajectories.append(outcome.trajectory_xy_m)
+            completed += 1
+            if progress_callback is not None and (
+                completed % report_every == 0 or completed == total_shots
+            ):
+                progress_callback(completed, total_shots)
         stats[pattern.name] = _summarize(
             pattern_rows, target_x_m, config.target_radius_m
         )
@@ -276,6 +339,7 @@ def run_analysis(
 
 
 __all__ = [
+    "AnalysisCancelled",
     "AnalysisConfig",
     "AnalysisResult",
     "PATTERNS",

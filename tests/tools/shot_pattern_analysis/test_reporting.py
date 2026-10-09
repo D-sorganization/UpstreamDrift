@@ -10,7 +10,12 @@ import pytest
 
 from src.tools.shot_pattern_analysis.core import AnalysisConfig, run_analysis
 from src.tools.shot_pattern_analysis.physics import ShotOutcome
-from src.tools.shot_pattern_analysis.reporting import export_analysis
+from src.tools.shot_pattern_analysis.reporting import (
+    augment_saved_bundle_with_equal_range,
+    export_analysis,
+)
+
+pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 
 class FakePhysics:
@@ -36,23 +41,40 @@ def test_export_writes_reproducible_data_and_social_graphics(tmp_path) -> None:
         "receipt_json",
         "overhead_png",
         "dispersion_png",
+        "dispersion_equal_range_png",
     }
     assert all(path.exists() for path in paths.values())
     assert paths["overhead_png"].read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
     assert paths["dispersion_png"].read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+    assert paths["dispersion_equal_range_png"].read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
     assert paths["overhead_png"].stat().st_size > 20_000
     assert paths["dispersion_png"].stat().st_size > 20_000
+    assert paths["dispersion_equal_range_png"].stat().st_size > 20_000
     with paths["shots_csv"].open(newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == 60
     assert rows[0]["pattern"] == "Straight"
     summary = json.loads(paths["summary_json"].read_text())
+    assert set(summary["landing_dispersion"]) == {"Straight", "Draw", "Fade"}
+    assert "corr_lateral_downrange_error" in summary["landing_dispersion"]["Draw"]
     assert summary["patterns"]["Draw"]["n"] == 20
+    assert summary["equal_range_diagnostic"]["target_range_m"] == pytest.approx(
+        result.target_x_m
+    )
+    assert summary["equal_range_diagnostic"]["patterns"]["Draw"][
+        "range_min_m"
+    ] == pytest.approx(result.target_x_m)
     ratio = summary["paired_variance_comparisons"]["Draw"]["raw"]
     assert ratio["estimate"] == pytest.approx(1.0)
     assert ratio["lower_95"] == pytest.approx(1.0)
     assert ratio["upper_95"] == pytest.approx(1.0)
+    hit = summary["paired_hit_comparisons"]["Draw"]["aimed"]
+    assert set(hit) == {"estimate", "lower_95", "upper_95"}
+    assert summary["config"]["curve_scale"] == 1.0
     receipt = json.loads(paths["receipt_json"].read_text())
     assert receipt["seed"] == 71
     assert receipt["physics"]["impact_model"] == "rigid_body"
     assert "simplified" in receipt["limitations"][0].lower()
+    first_graphic = paths["dispersion_equal_range_png"].read_bytes()
+    augmented = augment_saved_bundle_with_equal_range(tmp_path)
+    assert augmented.read_bytes() == first_graphic

@@ -1,0 +1,898 @@
+{
+  "schema": "shot-pattern-timestep-refinement/1",
+  "status": "passed",
+  "criterion_m": 0.05,
+  "method": "Landing Euclidean refinement at .02/.01/.005 seconds; three clubs, two delivery modes, five nominal patterns, errors -3/0/+3 degrees",
+  "timesteps_s": [
+    0.02,
+    0.01,
+    0.005
+  ],
+  "configs": {
+    "driver": {
+      "club_speed_mps": 45.0,
+      "loft_deg": 12.8,
+      "attack_angle_deg": -0.9,
+      "lie_deg": 58.5,
+      "shaft_lean_deg": 0.0,
+      "clubhead_mass_kg": 0.2,
+      "max_time_s": 12.0
+    },
+    "seven_iron": {
+      "club_speed_mps": 36.0,
+      "loft_deg": 24.0,
+      "attack_angle_deg": -4.0,
+      "lie_deg": 63.0,
+      "shaft_lean_deg": 0.0,
+      "clubhead_mass_kg": 0.272,
+      "max_time_s": 12.0
+    },
+    "pitching_wedge": {
+      "club_speed_mps": 32.0,
+      "loft_deg": 36.7,
+      "attack_angle_deg": -5.0,
+      "lie_deg": 64.0,
+      "shaft_lean_deg": 0.0,
+      "clubhead_mass_kg": 0.3,
+      "max_time_s": 12.0
+    }
+  },
+  "cases": [
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00041598880880341736,
+      "dt_010_vs_005_m": 7.422240792634016e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0003587631900643373,
+      "dt_010_vs_005_m": 3.1119012106728405e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00041598880880341736,
+      "dt_010_vs_005_m": 7.422240792634016e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00010553127040334325,
+      "dt_010_vs_005_m": 5.25753440143139e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002578883316740231,
+      "dt_010_vs_005_m": 8.463652610894422e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0002578883315068734,
+      "dt_010_vs_005_m": 8.463652655505846e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0002578883315068734,
+      "dt_010_vs_005_m": 8.463652655505846e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002578883316740231,
+      "dt_010_vs_005_m": 8.463652610894422e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00010553127040334325,
+      "dt_010_vs_005_m": 5.25753440143139e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00016142693699257847,
+      "dt_010_vs_005_m": 7.442469979135395e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0004159888086057083,
+      "dt_010_vs_005_m": 7.4222410827101994e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00035876319019724685,
+      "dt_010_vs_005_m": 3.111901192385891e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00035876319019724685,
+      "dt_010_vs_005_m": 3.111901192385891e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0004159888086057083,
+      "dt_010_vs_005_m": 7.4222410827101994e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00016142693699257847,
+      "dt_010_vs_005_m": 7.442469979135395e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0005732150011190322,
+      "dt_010_vs_005_m": 5.511871141188547e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0003587631900643373,
+      "dt_010_vs_005_m": 3.1119012106728405e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0002683975735137555,
+      "dt_010_vs_005_m": 2.9486443483502256e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00028912051903486486,
+      "dt_010_vs_005_m": 0.0001440213552897368
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00025788833167396185,
+      "dt_010_vs_005_m": 8.46365261089236e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0003146331866879645,
+      "dt_010_vs_005_m": 7.569338580256828e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0002415244110642263,
+      "dt_010_vs_005_m": 0.00012031855499225117
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00025788833167396185,
+      "dt_010_vs_005_m": 8.46365261089236e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 2.1116515652018476e-05,
+      "dt_010_vs_005_m": 1.750819476717511e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00030845578741832197,
+      "dt_010_vs_005_m": 0.0001531644673788345
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0004159888086057083,
+      "dt_010_vs_005_m": 7.4222410827101994e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00011379568291185036,
+      "dt_010_vs_005_m": 5.709581456069465e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0004958546245177091,
+      "dt_010_vs_005_m": 3.943947054021236e-05
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0004159888086057083,
+      "dt_010_vs_005_m": 7.4222410827101994e-06
+    },
+    {
+      "club_id": "driver",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0001174999964402135,
+      "dt_010_vs_005_m": 5.895430270477653e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00016753213215024048,
+      "dt_010_vs_005_m": 6.339547799920681e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00022876157524365226,
+      "dt_010_vs_005_m": 3.145248226132935e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00016753213215024048,
+      "dt_010_vs_005_m": 6.339547799920681e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00021137126093018178,
+      "dt_010_vs_005_m": 4.3966620934809645e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00016096939257463294,
+      "dt_010_vs_005_m": 6.540690276889548e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00016096939274713306,
+      "dt_010_vs_005_m": 6.540690269552027e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00016096939274713306,
+      "dt_010_vs_005_m": 6.540690269552027e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00016096939257463294,
+      "dt_010_vs_005_m": 6.540690276889548e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00021137126093018178,
+      "dt_010_vs_005_m": 4.3966620934809645e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00023358349703850163,
+      "dt_010_vs_005_m": 3.5449894826388475e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0001675321322878722,
+      "dt_010_vs_005_m": 6.339547767843782e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0002287615750699708,
+      "dt_010_vs_005_m": 3.145248240019708e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0002287615750699708,
+      "dt_010_vs_005_m": 3.145248240019708e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0001675321322878722,
+      "dt_010_vs_005_m": 6.339547767843782e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00023358349703850163,
+      "dt_010_vs_005_m": 3.5449894826388475e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00016108891571231174,
+      "dt_010_vs_005_m": 7.473217801742123e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00022876157521523055,
+      "dt_010_vs_005_m": 3.145248228975106e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0001841353959075611,
+      "dt_010_vs_005_m": 4.849838734075152e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00027609335730265316,
+      "dt_010_vs_005_m": 1.985513340958656e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00016096939257464004,
+      "dt_010_vs_005_m": 6.54069027688943e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00023921999385346308,
+      "dt_010_vs_005_m": 1.974470628890818e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.0002241325675554627,
+      "dt_010_vs_005_m": 4.1868769950595725e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00016096939257464004,
+      "dt_010_vs_005_m": 6.54069027688943e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00010604277823168072,
+      "dt_010_vs_005_m": 5.322185237956081e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 4.9439300760795174e-05,
+      "dt_010_vs_005_m": 2.4627167801301642e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0001675321322878722,
+      "dt_010_vs_005_m": 6.339547767843782e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 7.175372457772653e-05,
+      "dt_010_vs_005_m": 3.5741278489264034e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00016374686064396876,
+      "dt_010_vs_005_m": 7.19977988379503e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0001675321322878722,
+      "dt_010_vs_005_m": 6.339547767843782e-05
+    },
+    {
+      "club_id": "seven_iron",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 7.526214547170166e-05,
+      "dt_010_vs_005_m": 3.7773282170173836e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 6.356929204460622e-05,
+      "dt_010_vs_005_m": 3.16520333962391e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00029191208970758,
+      "dt_010_vs_005_m": 4.0002262835514557e-07
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 6.356929204460622e-05,
+      "dt_010_vs_005_m": 3.16520333962391e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 7.9072427632255e-05,
+      "dt_010_vs_005_m": 3.9701696702598944e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002040330193619926,
+      "dt_010_vs_005_m": 4.4324447129901455e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00020403301944878034,
+      "dt_010_vs_005_m": 4.432444687839936e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00020403301944878034,
+      "dt_010_vs_005_m": 4.432444687839936e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002040330193619926,
+      "dt_010_vs_005_m": 4.4324447129901455e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 7.9072427632255e-05,
+      "dt_010_vs_005_m": 3.9701696702598944e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 4.6351098358339076e-05,
+      "dt_010_vs_005_m": 2.327263908309508e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 6.356929206058514e-05,
+      "dt_010_vs_005_m": 3.165203320366869e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00029191208965006116,
+      "dt_010_vs_005_m": 4.0002255605310744e-07
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00029191208965006116,
+      "dt_010_vs_005_m": 4.0002255605310744e-07
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 6.356929206058514e-05,
+      "dt_010_vs_005_m": 3.165203320366869e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "fixed_loft",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 4.6351098358339076e-05,
+      "dt_010_vs_005_m": 2.327263908309508e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 4.531909914663622e-05,
+      "dt_010_vs_005_m": 2.256585474649005e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.00029191208970758,
+      "dt_010_vs_005_m": 4.0002262835514557e-07
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 0.0,
+      "path_deg": 0.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00027881239431077487,
+      "dt_010_vs_005_m": 5.271249292256558e-06
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 7.459156315052014e-05,
+      "dt_010_vs_005_m": 3.745049489469999e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002040330193619926,
+      "dt_010_vs_005_m": 4.4324447129901455e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 1.5,
+      "path_deg": 3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 4.919153712543256e-05,
+      "dt_010_vs_005_m": 2.4492178275781438e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.00024298676160430867,
+      "dt_010_vs_005_m": 2.7828307007722533e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 0.0002040330193619926,
+      "dt_010_vs_005_m": 4.4324447129901455e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -1.5,
+      "path_deg": -3.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.0001393838269327195,
+      "dt_010_vs_005_m": 6.93982370506868e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 5.733003370986574e-06,
+      "dt_010_vs_005_m": 2.8784055658339713e-06
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 6.356929206058514e-05,
+      "dt_010_vs_005_m": 3.165203320366869e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": 3.0,
+      "path_deg": 6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 3.4336516544135716e-05,
+      "dt_010_vs_005_m": 1.7240681651903425e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": -3.0,
+      "dt_020_vs_010_m": 0.000258116383433739,
+      "dt_010_vs_005_m": 2.0277640873666726e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 0.0,
+      "dt_020_vs_010_m": 6.356929206058514e-05,
+      "dt_010_vs_005_m": 3.165203320366869e-05
+    },
+    {
+      "club_id": "pitching_wedge",
+      "delivery_mode": "shaft_rotation",
+      "nominal_face_deg": -3.0,
+      "path_deg": -6.0,
+      "face_error_deg": 3.0,
+      "dt_020_vs_010_m": 0.00014276258403051592,
+      "dt_010_vs_005_m": 7.108017829094325e-05
+    }
+  ],
+  "max_dt_020_vs_010_m": 0.0005732150011190322,
+  "max_dt_010_vs_005_m": 0.0001531644673788345,
+  "provenance": {
+    "python_version": "3.12.13",
+    "package_versions": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "upstream-physics": "2.1.3"
+    },
+    "source_sha256": {
+      "Cargo.lock": "bd136e723ee90edfcf6836d73ba45213e2122372da997428f02ec3144d69dfe9",
+      "Cargo.toml": "b095d1623823ca77ba9a3ce8b88a739fcdd8b7b7516aa533a8601d4846cbfb06",
+      "rust_core/upstream-physics/src/aero_engine.rs": "274675f38957a3bcf7adc5e8b127dae53fcf3ce7ea47cc4bb019c0c7f96558e3",
+      "rust_core/upstream-physics/src/aerodynamics.rs": "29859f3f21cbff7aa5c5113e47748216e07d88f7a4f4050d7a4633dd8613125e",
+      "rust_core/upstream-physics/src/ball_flight.rs": "7d92d7122cdce94f81d930afc70137ab57f62510d481e0ad1c62319bb65f190d",
+      "rust_core/upstream-physics/src/contact.rs": "ea41fdc56a6d5a69baa6a8d9d60feb51064db509eb06c9e0024da2fc9390a765",
+      "rust_core/upstream-physics/src/fsp.rs": "5688801b4d416b5590beb6e5820175c14d236ed95430c1442c29aa8493cf8e5f",
+      "rust_core/upstream-physics/src/lib.rs": "dc76edb8fe8d92b69fd9317f2e1d9d76467b0481270e27a9309f11e2762f7227",
+      "rust_core/upstream-physics/src/rk4.rs": "d9edb9bc960cf48663d837116fd22aa511af8a99f1f65ba6dfc718677476e51b",
+      "rust_core/upstream-physics/src/shaft_fem.rs": "882cedc99f87c73c8c6a7f08a3c0a9b0451586c699f77ba1163702240e391e43",
+      "rust_core/upstream-physics/src/swing_plane.rs": "4630f52c5b1c46b175a80b7b3b23fe67f21e39ce8b13be76c78d2c353af32b6a",
+      "rust_core/upstream-physics/src/wind.rs": "ea7bfb94eb6227bb115212d26b21a79b36f5719a107c5fc91f2e6d8625d9225e",
+      "src/shared/python/core/physics_constants.py": "ed1152072384caf1118f23483ec0076e1a2150332da5f2c32c966a4e67c3ed38",
+      "src/shared/python/physics/ball_launch_conditions.py": "7a4540b99160799cf2f98b20a8e3fedb6bc0a6f73f4e72ae248c7f95bafcc253",
+      "src/shared/python/physics/ball_properties.py": "0df69e5db7db6d0822851bd48c382d87b01524df07b19e35afaea8aa82b4b6b3",
+      "src/shared/python/physics/ball_simulator.py": "98d1db42577578501187c3b6042b715f3bb2d2ff77caa4807e26af931e2b1858",
+      "src/shared/python/physics/impact_model/__init__.py": "fe809a0b151ea4b0d8c5a9aa625305f1ecdfe3c96c2b052af4187318ddc620be",
+      "src/shared/python/physics/impact_model/models.py": "121c43c4430e13c139727616b5e946c0b943a38fdad8d951fd487c4f976cbb9a",
+      "src/shared/python/physics/impact_model/solver.py": "2c8bce4fad0adc2bf8eafbfa332a8c158665af81b78ef706f972de11c32103e0",
+      "src/shared/python/physics/impact_model/types.py": "48445f0c2baa4ff4ea6c975c82a368561f36fd92ff38b787a482e99abf1dd627",
+      "src/shared/python/physics/impact_model/utils.py": "06a79b5414370f502d32f36f99ba04eabb5ff2f6dd6587f5f284ea4beba9eca9",
+      "src/shared/python/physics/rust_kernel.py": "f3ccf4e3bdaa74480edc3069e409169c510839a0649c2419493ce3923c5f1529",
+      "src/tools/shot_pattern_analysis/core.py": "1de6a15aef4873c1626531a12b10da9f8b1d0c79a4bf480c41f103622faabc99",
+      "src/tools/shot_pattern_analysis/delivery_geometry.py": "f8938a47b98b6057cb3e48619ab4453109f1865a74f3f45a3b40e8012b0168a9",
+      "src/tools/shot_pattern_analysis/numerics.py": "fc32946645424e6eeaecc84de940a8902f3319b1d049c4cf1fa655ccd08862ab",
+      "src/tools/shot_pattern_analysis/physics.py": "19e8d9a4c6c7e55edb9d1fe7dbacc3544b195131499707e0b06c4bbb34aafc1c",
+      "src/tools/shot_pattern_analysis/presets.py": "5be2a521220c9dc5474baa020babbb09de037783aee8fb353656c03069ed292a",
+      "src/tools/shot_pattern_analysis/sensitivity.py": "7a4a776737cb4be0da57a7755409cf532091e7dea19701c318b09fdeb1991907"
+    },
+    "native_binary_sha256": {
+      "upstream_physics.cpython-312-x86_64-linux-gnu.so": "2e014290b3fe18034ab68743514806e7dea6137377ecafd8961091cdade1e2ce"
+    },
+    "reproduction_command": "python3 -m src.tools.shot_pattern_analysis.numerics --output docs/research/shot_pattern_analysis/corrected_numerical_validation.json",
+    "native_build_command": "maturin develop --release --manifest-path rust_core/upstream-physics/Cargo.toml",
+    "qualification": "software-level deterministic study; no measured club/golfer validation"
+  }
+}
