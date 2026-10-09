@@ -29,3 +29,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/17-sparse-collocation-benchmark.qmd >}}
 
 {{< include chapters/32-native-constrained-state.qmd >}}
+
+{{< include chapters/33-native-passive-readiness.qmd >}}

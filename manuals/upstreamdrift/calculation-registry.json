@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-passive-readiness-inventory",
+      "owner": "UpstreamDrift issue #11939",
+      "resolution": "Inventory tour_matching/native_passive_readiness.py and provisional chapter33: native exact-law elastic/damping/net passive and tendon force observations, explicit model-bound per-muscle sourced limits and runtime flags. Native tests demonstrate equilibrium with excessive loading and damping cancellation that defeats a net-only check. Passing declared limits is only a necessary gate and always remains not-qualified-for-muscle-matching. The unchanged 520-muscle source has no approved passive policy; donor ancestry, anatomy, complete state, assistance, contact/grip, capture calibration and independent replay remain blocked. No physiological thresholds, source-law edits or publication approval are inferred."
+    },
+    {
       "id": "UP-D1-native-constrained-state-inventory",
       "owner": "UpstreamDrift issue #11923",
       "resolution": "Inventory tour_matching/native_constraint_state.py and provisional chapter32: actual coordinate locks, prescription, clamping, dependency, constraint enforcement, scalar actuator/assistance observations, named and registered native values, derivatives and mixed-unit constraint residuals. Native fixtures prove registered maps plus model XML are not complete state and shared Model lock targets can affect another State. Fresh-source evaluation owns XML bytes and rejects ignored locked-state restoration; actual lock targets, arbitrary restart, resource/DLL closure, physiology, contact/grip and full capture acceptance remain unqualified. Preserve unchanged 520-muscle source passive-load and anatomical readiness failures before tuning. No scientific or publication approval follows."
