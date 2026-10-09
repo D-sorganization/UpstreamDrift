@@ -51,8 +51,10 @@ def test_driver_receipt_validates_and_has_expected_zmp() -> None:
     receipt = validate_receipt(doc)
     assert isinstance(receipt, Receipt)
     assert receipt.dynamics.reference_zmp is not None
+    # 5/6 since the receipt was regenerated on the mirrored left hip (#11737);
+    # the pre-OSV-6 receipt under anthro_driver_pre_osv6/ recorded 2/3.
     assert receipt.dynamics.reference_zmp.outside_fraction_1s_to_1_5s == pytest.approx(
-        0.6666666666666666, rel=1e-5
+        0.8333333333333334, rel=1e-5
     )
 
 
