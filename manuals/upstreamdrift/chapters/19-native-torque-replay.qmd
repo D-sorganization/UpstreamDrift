@@ -1,0 +1,69 @@
+---
+title: "Native Torque Replay"
+---
+
+# Native Torque Replay
+
+## Calculation and Input Meaning
+
+The F06a adapter consumes the authoritative Tools experiment-replay bundle
+through `sidekick.lab.mocap`. It drives actual MuJoCo stepping, with the model's
+own constraints and contact. For each admitted unit-gain hinge motor,
+\(p_i=u_i\), and generalized actuator effort is
+\(\tau=\sum_i e_{d(i)}u_i\), where \(d(i)\) is the native hinge velocity
+index. Native effort is checked against this mapping at every step.
+
+The stored values are post-limit actuator torques in N m. Nonunit gears,
+internal actuator dynamics, actuator/joint force clamps, disabled actuator
+groups, gravity compensation, plugins, mocap driving and native callbacks
+require separate policies and are rejected. Commands outside the native
+control range fail instead of being clipped.
+
+## State, Time, and Execution
+
+The complete `mjSTATE_INTEGRATION` vector is restored into a fresh plant,
+including input and solver warm-start state. Named `qpos` and `qvel` views must
+agree with that vector. Their dimensions remain `nq` and `nv`; quaternion
+configuration is never flattened into tangent velocity. Translation uses
+metres, hinge angles radians, quaternion entries dimensionless, and native
+velocity coordinates use metres/second or radians/second as appropriate.
+The auxiliary vector uses the installed native state enumeration, with its
+provider identity bound to the bundle.
+
+The grid begins at zero and includes every native fixed timestep. Input row
+\(u_k\) is held throughout the entire native step, including RK stages.
+The final row is an unused explicit sentinel equal to the preceding input.
+The adapter records the solver, integrator, timestep, initialization and
+input-player policy. Native automatic resetting is disabled; a failed or
+nonfinite trajectory raises an error. Initial external applied forces are
+forbidden. No feedback law, reference trajectory or observation callback is
+accepted by the replay interface.
+
+## Identity and Preconditions
+
+Tools validates canonical bundle integrity. Replay also compares actual
+source XML, compiled MJB, loaded native function-module and adapter digests,
+ordered channels, complete initial state and executed policy. The fresh
+execution model is checked again after validation, closing model replacement
+between those phases. Compiled identity captures included model resources;
+this is not a complete operating-system or transitive-library attestation.
+Run in an exclusively owned process: process-global callbacks must not be
+mutated concurrently. A subprocess sandbox is not implemented by this slice.
+
+## Evidence and Remaining Qualification
+
+The synthetic floating-root fixture has `nq != nv`, a hinge motor and a
+bounded reference controller. Independent replay of its saved held torque
+matches native controlled positions within absolute tolerance `1e-12`.
+Tests verify saturation occurred before export, exact restoration of nonzero
+warm-start state, callback refusal without evaluation, malformed state,
+quaternion, bounds, grid, transmission and model replacement rejection.
+These are deterministic same-provider replay checks, not a measured-error
+tolerance or proof of numerical convergence.
+
+F06a does not close six-engine parity or certify anatomy, contact/grip,
+full-horizon capture agreement, muscle recruitment or robustness. F06 and
+F07/F08 retain those gates. The first local run imports the pending Tools
+T01 branch explicitly; consumer acceptance requires its merged pinned commit.
+See `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md` for
+executed commands and dependency status.
