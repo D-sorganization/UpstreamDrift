@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import csv
 import hashlib
 import json
@@ -11,12 +10,8 @@ import subprocess
 
 import numpy as np
 
-from .scoring import (
-    SOURCE_PDF_SHA256,
-    YARDS_PER_METRE,
-    build_broadie_approx_baseline,
-)
-from .scoring_cache import source_backed_score_cache
+from .course_score_vectors import score_course_endpoint_vectors
+from .scoring import SOURCE_PDF_SHA256, build_broadie_approx_baseline
 from .uncertainty import paired_mean_difference
 
 
@@ -37,74 +32,32 @@ def score_course_endpoints(
     rough elsewhere. Every endpoint is a carry-only stop, without roll,
     hazards, elevation, or directional course features.
     """
-    if club_id not in {"driver", "seven_iron", "pitching_wedge"}:
-        raise ValueError("club_id must be a named illustrative preset")
-    dimensions = (target_x_m, hole_distance_m, fairway_half_width_m, green_radius_m)
-    if not all(math.isfinite(value) and value > 0 for value in dimensions):
-        raise ValueError("course dimensions must be finite and positive")
-    if set(endpoints) != {"Straight", "Draw", "Fade"}:
-        raise ValueError("all three paired patterns are required")
-    indices = [index for index, _, _ in endpoints["Straight"]]
-    if (
-        len(indices) < 2
-        or len(indices) != len(set(indices))
-        or any(not isinstance(index, int) or index < 0 for index in indices)
-    ):
-        raise ValueError("at least two distinct paired shot indices are required")
-    for shots in endpoints.values():
-        if [index for index, _, _ in shots] != indices:
-            raise ValueError("patterns must share ordered shot indices")
-        if any(not math.isfinite(x) or not math.isfinite(y) for _, x, y in shots):
-            raise ValueError("endpoints must be finite")
-
+    vectors = score_course_endpoint_vectors(
+        endpoints,
+        club_id=club_id,
+        target_x_m=target_x_m,
+        hole_distance_m=hole_distance_m,
+        fairway_half_width_m=fairway_half_width_m,
+        green_radius_m=green_radius_m,
+    )
     driver = club_id == "driver"
-    start_lie = "tee" if driver else "fairway"
-    start_distance_m = hole_distance_m if driver else target_x_m
-    finish_lies = ("fairway", "rough") if driver else ("green", "rough")
-    baseline = build_broadie_approx_baseline()
-    try:
-        cache = source_backed_score_cache(
-            baseline,
-            start_lie=start_lie,
-            start_distance_yards=start_distance_m * YARDS_PER_METRE,
-            finish_lies=finish_lies,
-        )
-        scores: dict[str, np.ndarray] = {}
-        patterns: dict[str, dict[str, float | int]] = {}
-        for name, shots in endpoints.items():
-            xy = np.array([(x, y) for _, x, y in shots], dtype=float)
-            if driver:
-                fair = np.abs(xy[:, 1]) <= fairway_half_width_m
-                primary_lie = "fairway"
-                primary_name = "fairway_fraction"
-                distances = np.hypot(hole_distance_m - xy[:, 0], xy[:, 1])
-            else:
-                distances = np.hypot(xy[:, 0] - target_x_m, xy[:, 1])
-                fair = distances <= green_radius_m
-                primary_lie = "green"
-                primary_name = "green_fraction"
-            distances_yards = distances * YARDS_PER_METRE
-            shot_scores = np.empty(len(shots))
-            for lie, mask in ((primary_lie, fair), ("rough", ~fair)):
-                if bool(np.any(mask)):
-                    shot_scores[mask] = cache.score_many(lie, distances_yards[mask])
-            scores[name] = shot_scores
-            patterns[name] = {
-                "n": len(shots),
-                "mean_strokes_gained": float(np.mean(shot_scores)),
-                primary_name: float(np.mean(fair)),
-            }
-    except ValueError as exc:
-        raise ValueError(
-            f"course state outside published baseline support: {exc}"
-        ) from exc
+    patterns: dict[str, dict[str, float | int]] = {
+        name: {
+            "n": len(shots),
+            "mean_strokes_gained": float(np.mean(vectors.scores[name])),
+            vectors.primary_fraction_name: vectors.primary_fraction[name],
+        }
+        for name, shots in endpoints.items()
+    }
     paired = {
-        name: paired_mean_difference(scores[name], scores["Straight"], seed=seed)
+        name: paired_mean_difference(
+            vectors.scores[name], vectors.scores["Straight"], seed=seed
+        )
         for name in ("Draw", "Fade")
     }
     return {
         "status": "available",
-        "scenario_id": "tee_fairway_rough" if driver else "approach_green_rough",
+        "scenario_id": vectors.scenario_id,
         "scenario": (
             f"Historical PGA tee shot on a flat {hole_distance_m:g} m hole "
             f"with a {2 * fairway_half_width_m:g} m fairway corridor"
@@ -112,23 +65,18 @@ def score_course_endpoints(
             else "Historical PGA approach to a centered circular green with rough outside"
         ),
         "club_id": club_id,
-        "start_lie": start_lie,
-        "start_distance_m": start_distance_m,
+        "start_lie": vectors.start_lie,
+        "start_distance_m": vectors.start_distance_m,
         "target_x_m": target_x_m,
         "hole_distance_m": hole_distance_m if driver else None,
         "fairway_half_width_m": fairway_half_width_m if driver else None,
         "green_radius_m": green_radius_m if not driver else None,
         "source_backed_status": "available",
         "evaluation": "Public Tools API scored each baseline knot; endpoint scores are exact piecewise-linear interpolation of those returned values",
-        "api_evaluated_states": cache.api_evaluated_states,
+        "api_evaluated_states": vectors.api_evaluated_states,
         "scored_shots": sum(len(shots) for shots in endpoints.values()),
         "interpolation_tolerance_strokes": 1e-12,
-        "baseline": {
-            "id": baseline.baseline_id,
-            "version": baseline.version,
-            "table_sha256": baseline.table_sha256,
-            "source_url": baseline.source_url,
-        },
+        "baseline": vectors.baseline,
         "patterns": patterns,
         "paired_benefit_vs_straight": paired,
         "limitations": [
