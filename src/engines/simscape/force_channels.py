@@ -182,6 +182,25 @@ SIMSCAPE_FORCE_CHANNELS: tuple[ChannelSpec, ...] = (
         point_cols=_MP,
         frame="world",
     ),
+    # Per-hand loading of the hand ON the club (#11715), as in grip_wrench.
+    ChannelSpec(
+        label="grip:hand_left",
+        kind=WrenchKind.GRIP,
+        body="club",
+        force_cols=_cols("LWLogs_LHonClubFGlobal_"),
+        torque_cols=_cols("LWLogs_LHonClubTGlobal_"),
+        point_cols=_cols("LWLogs_LHGlobalPosition_"),
+        frame="world",
+    ),
+    ChannelSpec(
+        label="grip:hand_right",
+        kind=WrenchKind.GRIP,
+        body="club",
+        force_cols=_cols("RWLogs_RHonClubFGlobal_"),
+        torque_cols=_cols("RWLogs_RHonClubTGlobal_"),
+        point_cols=_cols("RWLogs_RHGlobalPosition_"),
+        frame="world",
+    ),
     ChannelSpec(
         label="grip:lh_mof",
         kind=WrenchKind.GRIP,

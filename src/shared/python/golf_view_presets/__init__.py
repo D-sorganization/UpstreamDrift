@@ -15,7 +15,13 @@ from .adapters import (
     mujoco_fixed_camera,
     simbody_camera_transform,
 )
-from .presets import VIEW_ORDER, VIEW_PRESETS, ViewPreset, get_view_preset
+from .presets import (
+    VIEW_ORDER,
+    VIEW_PRESETS,
+    ViewPreset,
+    get_view_preset,
+    tracked_lookats,
+)
 
 __all__ = [
     "VIEW_ORDER",
@@ -30,4 +36,5 @@ __all__ = [
     "mujoco_camera_params",
     "mujoco_fixed_camera",
     "simbody_camera_transform",
+    "tracked_lookats",
 ]

@@ -1,0 +1,21 @@
+{
+  "issue": "#11715",
+  "matlab_release": "2025b",
+  "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
+  "model": "GolfSwing3D_Kinetic",
+  "model_sha256": "daca9a90ad0ab819c7d61641ed594b8f230f8658f2a5f4ce34026db44b52ddc9",
+  "coefficient_source": "model_workspace",
+  "theta_sha256": "306cf2c6ac4ad95eb28953f89297165cf8e19d56d90879154188a430cdc8ade6",
+  "stop_time_s": 0.3,
+  "sim_wall_clock_s": 106.9200561,
+  "samples_logged": 4236,
+  "fixture_rows": 31,
+  "fixture_csv": "simscape_grip_wrench_fixture.csv",
+  "fixture_sha256": "77569fbb65bcaa1b17d012c3123762fab37b01ad07a41e3eebfdc7a35a427dc5",
+  "couple_residual_max_abs_nm": 3.7252902984619141e-8,
+  "couple_logged_max_abs_nm": 4.6830857114679456e7,
+  "midpoint_residual_max_abs_m": 4.4408920985006262e-16,
+  "net_force_residual_max_abs_n": 0,
+  "net_force_logged_max_abs_n": 8.47164596164768e7,
+  "convention": "hand on club, world frame, SI"
+}
