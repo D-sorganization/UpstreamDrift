@@ -188,6 +188,10 @@ class ClubOnBushings:
     def _club_state(self) -> RigidBodyState:
         return body_state(self._mj, self.model, self.data, self._body)
 
+    def set_passive_callback(self, callback: Any) -> None:
+        """Install (or clear with ``None``) the MuJoCo passive callback."""
+        self._mj.set_mjcb_passive(callback)
+
     def passive(self, m: Any, d: Any) -> None:
         """``mjcb_passive``: add both bushing wrenches to ``qfrc_passive``."""
         if m is not self.model or self.hand_source is None:
@@ -226,11 +230,11 @@ class _PassiveCallback:
         self._target = target
 
     def __enter__(self) -> ClubOnBushings:
-        self._target._mj.set_mjcb_passive(self._target.passive)  # noqa: SLF001
+        self._target.set_passive_callback(self._target.passive)
         return self._target
 
     def __exit__(self, *exc: object) -> None:
-        self._target._mj.set_mjcb_passive(None)  # noqa: SLF001
+        self._target.set_passive_callback(None)
 
 
 def _record(samples: list[_Sample], club_rot: list[np.ndarray]) -> dict[str, Any]:
