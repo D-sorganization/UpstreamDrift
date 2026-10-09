@@ -110,7 +110,7 @@ plus four provenance aliases. Original records remain immutable.
 ## Protocol Timing and Resolved Presentation
 
 This supplement was adapted after the nominal feasibility audit and predeclared
-before its Monte Carlo execution. It is not part of the original preregistered
+before its Monte Carlo execution. It is not part of the original predeclared
 324/72-cell protocol. Root accepted the separate driver speed extension, making
 the exact new inventory 26 unique cells plus four PW zero-lean control aliases.
 
