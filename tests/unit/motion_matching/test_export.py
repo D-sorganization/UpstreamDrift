@@ -31,6 +31,7 @@ from src.shared.python.motion_matching.candidate_io import save_candidate
 from src.shared.python.motion_matching.export import (
     export_report,
     export_video,
+    export_video_variants,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -179,6 +180,42 @@ class TestExportVideo:
             export_video(mock_candidate, "mujoco", out_gif, fps=10, speed=0.5)
         dt_s = mock_candidate.time_s[1] - mock_candidate.time_s[0]
         assert render.call_args.args[2] == max(1, round(0.5 / (10 * dt_s)))
+
+    @pytest.mark.parametrize(
+        "engine", ["mujoco", "myosuite", "drake", "pinocchio", "opensim", "simscape"]
+    )
+    def test_export_video_variants_per_engine_full_half_quarter(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate, engine: str
+    ) -> None:
+        pytest.importorskip("imageio.v2")
+        from unittest.mock import patch
+
+        dt_s = mock_candidate.time_s[1] - mock_candidate.time_s[0]
+        with patch(
+            "src.shared.python.motion_matching.export._render_video_frames",
+            return_value=[np.zeros((8, 8, 3), np.uint8)] * 2,
+        ) as render:
+            paths = export_video_variants(
+                mock_candidate, engine, tmp_path / "swing.gif"
+            )
+        assert sorted(paths) == [0.25, 0.5, 1.0]
+        assert paths[1.0].name == "swing_1x.gif"
+        assert paths[0.5].name == "swing_0p5x.gif"
+        assert paths[0.25].name == "swing_0p25x.gif"
+        strides = [c.args[2] for c in render.call_args_list]
+        assert strides == [max(1, round(v / (60 * dt_s))) for v in (1.0, 0.5, 0.25)]
+
+    def test_export_video_variants_rejects_bad_speeds(
+        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    ) -> None:
+        with pytest.raises(ValueError, match="empty"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=()
+            )
+        with pytest.raises(ValueError, match="unique"):
+            export_video_variants(
+                mock_candidate, "mujoco", tmp_path / "a.gif", speeds=(0.5, 0.5)
+            )
 
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path
