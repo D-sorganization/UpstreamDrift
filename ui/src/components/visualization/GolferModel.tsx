@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber';
 import { Line } from '@react-three/drei';
 import * as THREE from 'three';
 import type { SimulationFrame } from '@/api/client';
+import { ClubHead } from './ClubHead';
+import { HeadModel } from './HeadModel';
 
 const MAX_TRAIL_POINTS = 100;
 
@@ -93,14 +95,13 @@ export function GolferModel({
         {getMaterial('torso', '#4a90d9')}
 
         {/* Head (child of torso) */}
-        <mesh
-          position={[0, 0.52, 0]}
-          name="head"
-          onClick={(e) => handleMeshClick(e, 'head')}
-        >
-          <sphereGeometry args={[0.12]} />
-          {getMaterial('head', '#e5e7eb')}
-        </mesh>
+        <group position={[0, 0.42, 0]}>
+          <HeadModel
+            name="head"
+            selected={selectedBodyName === 'head'}
+            onClick={(e) => handleMeshClick(e, 'head')}
+          />
+        </group>
 
         {/* Left Arm */}
         <mesh
@@ -137,15 +138,14 @@ export function GolferModel({
               {getMaterial('club_shaft', '#666666')}
             </mesh>
             {/* Club Head */}
-            <mesh
-              position={[0, -0.85, 0]}
-              rotation={[0.3, 0, 0]}
-              name="club_head"
-              onClick={(e) => handleMeshClick(e, 'club_head')}
-            >
-              <boxGeometry args={[0.1, 0.03, 0.08]} />
-              {getMaterial('club_head', '#333333')}
-            </mesh>
+            <group position={[0, -0.8, 0]}>
+              <ClubHead
+                club="driver"
+                name="club_head"
+                material={getMaterial('club_head', '#8a8f98')}
+                onClick={(e) => handleMeshClick(e, 'club_head')}
+              />
+            </group>
           </group>
         </mesh>
       </mesh>
