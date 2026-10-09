@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
@@ -394,8 +394,16 @@ class BushingGripSimulator:
         self._model.realizePosition(state)
         return self._assemble(self.time_s[:1], [self._sample(state)])
 
-    def run(self, t_end: float | None = None, accuracy: float = 1e-5) -> BushingRun:
-        """Integrate to ``t_end`` and sample at the trajectory times."""
+    def run(
+        self,
+        t_end: float | None = None,
+        accuracy: float = 1e-5,
+        on_sample: Callable[[float], None] | None = None,
+    ) -> BushingRun:
+        """Integrate to ``t_end`` and sample at the trajectory times.
+
+        ``on_sample(t)`` (optional) is called after each sample, for progress.
+        """
         osim = self._osim
         model, state = self._model, self._state
         stop = float(self.time_s[-1] if t_end is None else t_end)
@@ -410,6 +418,8 @@ class BushingGripSimulator:
         for t in samples[1:]:
             state = manager.integrate(float(t))
             rows.append(self._sample(state))
+            if on_sample is not None:
+                on_sample(float(t))
         return self._assemble(samples, rows)
 
     def _frame(self, side_name: str, kind: str) -> Any:

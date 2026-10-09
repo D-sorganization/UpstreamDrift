@@ -95,7 +95,15 @@ def main() -> int:
         spec_bytes, swing.names, swing.time_s, swing.q, pads, interface
     )
     build_s = time.perf_counter() - start
-    run = sim.run(t_end=args.t_end, accuracy=args.accuracy)
+    sys.stderr.write(f"model built in {build_s:.1f} s\n")
+    t0 = time.perf_counter()
+
+    def progress(t: float) -> None:
+        if round(t / 0.002) % 25 == 0:
+            sys.stderr.write(f"t={t:.3f} s  wall={time.perf_counter() - t0:.1f} s\n")
+            sys.stderr.flush()
+
+    run = sim.run(t_end=args.t_end, accuracy=args.accuracy, on_sample=progress)
     wall = time.perf_counter() - start
     ef = sim.contact_config.ef
     info: dict[str, Any] = {
