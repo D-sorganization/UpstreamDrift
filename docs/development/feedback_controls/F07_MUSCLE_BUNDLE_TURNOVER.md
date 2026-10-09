@@ -62,3 +62,14 @@ The repaired MuJoCo main merge `abfdd9d8f9` propagates through genuine Drake
 needed resolution in this child; native adapter/kernel and shared admission
 bytes are unchanged from the 134-test checkpoint. Native evidence is retained
 without a redundant simulation run.
+
+## CI Seam Integration Regression
+
+Full Linux unit CI on PR11917 reported 22636 passed, 504 skipped and one stale
+ownership-test failure. The generic fallback must still decline gaps inside
+UD-owned clusters. F06 separately and explicitly extends the Lab package path
+to the pinned Tools-owned mocap leaf. A focused RED run reproduces the former
+assertion after that extension; the corrected boundary test preserves both
+direct fallback negatives, verifies the explicit leaf origin and rejects a
+genuine typo. Combined fallback/native-torque tests pass31. No replay provider
+or native model bytes changed; native134-test evidence remains scoped.
