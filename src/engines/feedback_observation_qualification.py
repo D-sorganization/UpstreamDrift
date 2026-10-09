@@ -605,11 +605,11 @@ def build_feedback_observation_report(
 ) -> FeedbackObservationReport:
     """Score supplied native rows and retain every required inventory cell."""
     case_map: dict[str, NativeObservationCase] = {}
-    for case in cases:
-        key = _case_key(case)
+    for observation_case in cases:
+        key = _case_key(observation_case)
         if key in case_map:
             raise ValueError(f"duplicate native observation row: {key}")
-        case_map[key] = case
+        case_map[key] = observation_case
 
     inventory_rows = {
         comparison_key(row.package_id, row.variant_id, row.drive_mode.value): row
