@@ -444,7 +444,7 @@ class Lane:
             self.impact_time_s = None
             self.impact_split_reason = f"unavailable: {exc}"
         else:
-            self.impact_index = hit.index
+            self.impact_index = hit.frame_index
             self.impact_split_reason = "capture face-centre ball passage"
 
     def select_release_cutoff(

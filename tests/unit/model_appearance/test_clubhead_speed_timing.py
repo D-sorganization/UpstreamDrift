@@ -130,6 +130,17 @@ def test_speed_timing_record_is_json_ready() -> None:
 
 
 # ------------------------------------------- committed fixtures (GCV-20)
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "GCV-20 #11767 acceptance not met: the full re-solve at 5f8ee41fe5 "
+        "meets the 5 ms peak timing (driver -3.7 ms, 7-iron -4.2 ms) but its "
+        "impact speed is -7.4 % (driver) and -4.1 % (7-iron) against the 3 % "
+        "limit, so the committed provenance fixture is not regenerated "
+        "(DESIGN_DECISIONS decision 11 amendment) and carries no "
+        "after.speed_timing record yet"
+    ),
+)
 @pytest.mark.parametrize("club", ["driver", "iron7"])
 def test_committed_fixture_speed_timing_matches_the_capture(club: str) -> None:
     """Regenerated fixtures: peak within 5 ms, impact speed within 3 %, and

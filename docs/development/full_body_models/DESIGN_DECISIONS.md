@@ -288,14 +288,14 @@ Tracking raw unfiltered kinematic trajectories (caused severe impact torque spik
 
 The post-contact half keeps 12 Hz. The pre-contact half (the filter is split at the capture impact) now uses the lowest of 12, 15, 18, 20, 25, 30 Hz that keeps the unfiltered reference's speed-peak time within one sample and its last whole pre-contact segment speed within 1 % (`pipeline.release_cutoff`); both captures select 25 Hz (driver reference at 12 Hz: peak 13.1 ms before impact, 46.40 m/s; at 25 Hz: 2.0 ms, 50.62 m/s; unfiltered 2.0 ms, 50.46 m/s). The filtered track is then projected onto the grip weld over the trail-arm coordinates (`pipeline.weld_projection`), because per-coordinate filtering opens it by up to 16.1 mm.
 
-| Club   | Tracked reference    | Peak vs capture (ms) | Impact speed vs capture | Face gap at impact (deg) |
-| ------ | -------------------- | -------------------- | ----------------------- | ------------------------ |
-| Driver | 12 Hz (before)       | -20.0                | -20.1 %                 | -                        |
-| Driver | 25 Hz                | -10.2                | -12.5 %                 | 1.8                      |
-| Driver | 25 Hz + weld (after) | -4.1                 | -8.0 %                  | 1.7                      |
-| 7-iron | 12 Hz (before)       | -11.6                | -9.8 %                  | -                        |
-| 7-iron | 25 Hz                | -4.8                 | -6.1 %                  | 0.99                     |
-| 7-iron | 25 Hz + weld (after) | -3.7                 | -5.4 %                  | 1.36                     |
+| Club | Tracked reference | Peak vs capture (ms) | Impact speed vs capture | Face gap at impact (deg) |
+| --- | --- | --- | --- | --- |
+| Driver | 12 Hz (before) | -20.0 | -20.1 % | - |
+| Driver | 25 Hz | -10.2 | -12.5 % | 1.8 |
+| Driver | 25 Hz + weld (after) | -4.1 | -8.0 % | 1.7 |
+| 7-iron | 12 Hz (before) | -11.6 | -9.8 % | - |
+| 7-iron | 25 Hz | -4.8 | -6.1 % | 0.99 |
+| 7-iron | 25 Hz + weld (after) | -3.7 | -5.4 % | 1.36 |
 
 Measured by re-exporting the same-input bundle from the committed runs with one change at a time. Timing now meets the 5 ms acceptance; impact speed does not (3 % limit). Remaining causes: ground yaw slip of the unactuated root (decision 13; an actuated-root diagnostic gives -1.4 ms/-4.9 % and -0.1 ms/-4.0 %) and residual tracking loss. Failed experiments (12 Hz + weld fails the 7-iron face gate at 7.98 deg; a ball-passage release metric picked the straddling segment; leg root regulation, contact parameters, wrench-QP, no controller split) and reproduction commands are in the calculation reference `docs/research/simscape_matching_reference/simscape_matching_reference.tex` (GCV-20 second pass). Fixtures are not regenerated until acceptance and the OSV-10 gate pass.
 
@@ -423,10 +423,10 @@ Foot yaw has no coordinate of its own: it is pelvis yaw plus `hip_rotation_*` (p
 
 **Measured Capture Values (Degrees of Toe-Out at Address)**
 
-| Capture     | Lead (left) | Trail (right) |
-| ----------- | ----------- | ------------- |
-| Tour driver | 16.4        | 4.0           |
-| Tour 7-iron | 15.0        | -0.4          |
+| Capture | Lead (left) | Trail (right) |
+| --- | --- | --- |
+| Tour driver | 16.4 | 4.0 |
+| Tour 7-iron | 15.0 | -0.4 |
 
 The tour players are not at 20 degrees per foot (the trail foot is close to square), so 20 degrees is only the fallback for unreliable markers. The owner's capture O value is not measured here: its C3D is private and was not present on the implementing host; run `python3 -m scripts.foot_progression_report` with `CAPTURE_DATA_DIR` set. Until then it takes the flagged 20 degree default.
 
@@ -489,16 +489,16 @@ Small motion of the rigid club about its centre of mass, state $(u, \theta)$. Bu
 
 Before and after (default stiffness):
 
-| Quantity                           | First run (to 1.3 s) | Valid window (0 to 0.94 s) | Full 1.8 s, conditioned |
-| ---------------------------------- | -------------------- | -------------------------- | ----------------------- |
-| Peak per-hand force L / R (N)      | 5466 / 6626          | 142 / 162                  | 21058 / 27981           |
-| Peak net force (N)                 | 1830                 | 28                         | 22501                   |
-| Peak internal force (N)            | 6038                 | 151                        | 23761                   |
-| Squeeze part / couple (N, N m)     | 460 / 484            | 1.3 / 12.1                 | 5861 / 1850             |
-| Max deflection L / R (mm)          | 5.5 / 6.7            | 0.14 / 0.16                | 19.9 / 26.8             |
-| Max rotation (deg)                 | 8.9                  | 0.22                       | 37                      |
-| Modal damping ratio (lowest modes) | 0.21                 | 0.70                       | 0.70                    |
-| Static hold error                  | 4.4e-5               | 1.1e-5                     | n/a                     |
+| Quantity | First run (to 1.3 s) | Valid window (0 to 0.94 s) | Full 1.8 s, conditioned |
+| --- | --- | --- | --- |
+| Peak per-hand force L / R (N) | 5466 / 6626 | 142 / 162 | 21058 / 27981 |
+| Peak net force (N) | 1830 | 28 | 22501 |
+| Peak internal force (N) | 6038 | 151 | 23761 |
+| Squeeze part / couple (N, N m) | 460 / 484 | 1.3 / 12.1 | 5861 / 1850 |
+| Max deflection L / R (mm) | 5.5 / 6.7 | 0.14 / 0.16 | 19.9 / 26.8 |
+| Max rotation (deg) | 8.9 | 0.22 | 37 |
+| Modal damping ratio (lowest modes) | 0.21 | 0.70 | 0.70 |
+| Static hold error | 4.4e-5 | 1.1e-5 | n/a |
 
 Stiffness sensitivity on the valid window: $\times 0.1$ gives 84 / 98 N, 0.84 / 0.98 mm and 1.3 degrees; $\times 10$ gives 159 / 180 N, 0.016 / 0.018 mm and 0.02 degrees. Left share of the hand force: 46.4 % at peak and 46.1 % median with the bushing, against 48.4 % and 48.1 % for the minimum-norm weld proxy.
 

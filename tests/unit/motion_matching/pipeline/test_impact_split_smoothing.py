@@ -143,7 +143,7 @@ def test_capture_impact_reports_sub_sample_time_and_the_shared_ball(
     monkeypatch.setattr(cft, "observe_capture_face", lambda *a, **k: (normals, centres))
     times = np.arange(len(centres)) / rate
     hit = cft.capture_impact(times, None, None, (), {}, {})
-    assert times[hit.index] <= hit.time_s <= times[hit.index + 1]
+    assert times[hit.frame_index] <= hit.time_s <= times[hit.frame_index + 1]
     assert hit.time_s == pytest.approx(1.4, abs=2e-3)
     # Ball centre: one radius along the address face normal, at the address
     # face-centre height.

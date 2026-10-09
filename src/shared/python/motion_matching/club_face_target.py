@@ -348,15 +348,16 @@ def fill_unobserved(
 class CaptureImpact(NamedTuple):
     """Capture ball passage on the capture clock (GCV-20, #11767).
 
-    ``index`` is the last pre-contact frame (``times[index] <= time_s <=
-    times[index + 1]``); ``ball_centre_m`` is the shared ball
+    ``frame_index`` is the last pre-contact frame (``times[frame_index] <=
+    time_s <= times[frame_index + 1]``); named to avoid shadowing
+    ``tuple.index``. ``ball_centre_m`` is the shared ball
     (:func:`model_appearance.ball.ball_position_at_address`) at the address
     face, centred at the address face-centre height, or ``None`` when no
     face normal was observed.
     """
 
     time_s: float
-    index: int
+    frame_index: int
     ball_centre_m: Array | None
 
 
@@ -406,5 +407,5 @@ def capture_impact_index(
     attachments: Mapping[str, tuple[str, Sequence[float]]],
     spec: Mapping[str, Any],
 ) -> int:
-    """Last pre-contact capture frame (:func:`capture_impact` ``.index``)."""
-    return capture_impact(times, points, valid, labels, attachments, spec).index
+    """Last pre-contact capture frame (:func:`capture_impact` ``.frame_index``)."""
+    return capture_impact(times, points, valid, labels, attachments, spec).frame_index

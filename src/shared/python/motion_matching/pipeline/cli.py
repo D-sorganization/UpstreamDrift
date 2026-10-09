@@ -853,6 +853,59 @@ def _feasibility_filters(
     return q_track, zmp, zmp_report, centroidal_report
 
 
+def _maybe_shooting_fit(
+    args: argparse.Namespace,
+    context: tuple[Lane, Any, Any, logging.Logger],
+    q_track: np.ndarray,
+    q_ref: np.ndarray,
+    zmp: dict[str, Any],
+    tracking: str,
+) -> tuple[np.ndarray, dict[str, Any], dict[str, Any] | None]:
+    """Run the optional multiple-shooting refit stage."""
+    lane, kin, sim, log = context
+    shooting_report: dict[str, Any] | None = None
+    if args.shooting_fit > 0:
+        q_track, zmp, shooting_report = shooting_fit(
+            lane,
+            kin,
+            sim,
+            q_track,
+            q_ref,
+            log,
+            ShootingFitConfig(
+                iterations=args.shooting_fit,
+                gain=args.shooting_gain,
+                tracking_backend=tracking,
+            ),
+        )
+    return q_track, zmp, shooting_report
+
+
+def _finalize_receipt(
+    ctx: PipelineContext,
+    receipt: dict[str, Any],
+    context: tuple[Lane, Any, Any, logging.Logger],
+    *,
+    ik_report: dict[str, Any],
+    cal_res: _CalibrateAndScaleResult,
+    weld_report: dict[str, Any],
+    q_ref: np.ndarray,
+) -> None:
+    """Attach engine/gaze/weld metadata, run the optimiser stage and persist
+    the receipt."""
+    lane, kin, sim, log = context
+    receipt["engine"] = ctx.engine
+    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
+    receipt["tracking_weld_projection"] = weld_report
+    _apply_trajectory_optimiser(
+        ctx.args, ctx.out_dir, receipt, lane=lane, kin=kin, sim=sim
+    )
+    _write_receipt(ctx.out_dir, receipt)
+    log_pipeline_summary(
+        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    )
+
+
 def _simulate_and_receipt(
     ctx: PipelineContext,
     lane: Lane,
@@ -875,21 +928,9 @@ def _simulate_and_receipt(
     q_track, zmp, zmp_filter_report, centroidal_report = _feasibility_filters(
         args, (lane, kin, sim, log), q_track, zmp
     )
-    shooting_report: dict[str, Any] | None = None
-    if args.shooting_fit > 0:
-        q_track, zmp, shooting_report = shooting_fit(
-            lane,
-            kin,
-            sim,
-            q_track,
-            q_ref,
-            log,
-            ShootingFitConfig(
-                iterations=args.shooting_fit,
-                gain=args.shooting_gain,
-                tracking_backend=tracking,
-            ),
-        )
+    q_track, zmp, shooting_report = _maybe_shooting_fit(
+        args, (lane, kin, sim, log), q_track, q_ref, zmp, tracking
+    )
     q_track, weld_report = weld_consistent_track(kin, cal_res.scaled_spec, q_track)
     record, sim_q = replay(sim, lane, q_track, tracking_backend=tracking)
     finish = finish_feasibility_report(
@@ -946,15 +987,36 @@ def _simulate_and_receipt(
             elapsed_s=time.perf_counter() - ctx.t_start,
         )
     )
-    receipt["engine"] = ctx.engine
-    receipt["head_gaze"] = head_gaze_receipt(lane, kin, q_ref)
-    receipt["tracking_weld_projection"] = weld_report
-    _apply_trajectory_optimiser(args, out_dir, receipt, lane=lane, kin=kin, sim=sim)
-    _write_receipt(out_dir, receipt)
-    log_pipeline_summary(
-        log, receipt, ik_report, cal_res.calibration, cal_res.calibration2
+    _finalize_receipt(
+        ctx,
+        receipt,
+        (lane, kin, sim, log),
+        ik_report=ik_report,
+        cal_res=cal_res,
+        weld_report=weld_report,
+        q_ref=q_ref,
     )
     return receipt
+
+
+def _save_ik_trajectory(
+    ctx: PipelineContext,
+    lane: Lane,
+    q_ik: np.ndarray,
+    q_ref: np.ndarray,
+    errors: np.ndarray,
+    ref_errors: np.ndarray,
+) -> None:
+    """Persist the IK and reference trajectories the MJX exporter reads back."""
+    np.savez(
+        ctx.out_dir / "ik_trajectory.npz",
+        time_s=lane.times,
+        q=q_ik,
+        q_ref=q_ref,
+        errors_m=errors,
+        ref_errors_m=ref_errors,
+        valid=lane.valid,
+    )
 
 
 @precondition(lambda args: args is not None, "args must not be None")
@@ -1037,15 +1099,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
     )
     lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
-    np.savez(
-        ctx.out_dir / "ik_trajectory.npz",
-        time_s=lane.times,
-        q=q_ik,
-        q_ref=q_ref,
-        errors_m=errors,
-        ref_errors_m=ref_errors,
-        valid=lane.valid,
-    )
+    _save_ik_trajectory(ctx, lane, q_ik, q_ref, errors, ref_errors)
 
     return _simulate_and_receipt(
         ctx,
