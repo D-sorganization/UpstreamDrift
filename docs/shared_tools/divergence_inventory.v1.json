@@ -41119,9 +41119,9 @@
     {
       "path": "humanoid_character_builder/interfaces/api.py",
       "ud": {
-        "author": null,
-        "date": null,
-        "commit": null
+        "author": "Dieter Olson",
+        "date": "2026-08-01",
+        "commit": "b547c90a86f8d09f4106b136b7a2db76b55cacce"
       },
       "tools": {
         "author": "Dieter Olson",
