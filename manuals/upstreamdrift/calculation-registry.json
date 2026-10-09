@@ -36,6 +36,11 @@
       "resolution": "Inventory prefix_fit.py normalized/Bernstein polynomial conversion, weighted growing-prefix least squares, resample_logged_signal.m physical-clock interpolation, extract_golf_joint_kinematics.m direct-sensor unit conversion build_golf_kinematics.m native-frame snapshot, capture_fit_sim_options.m complete-horizon torque gating and repaired referenced-joint initialization pathways before a manual coverage claim. Native workspace, timestamp, joint mapping and initialization tests and a 20 ms live baseline are recorded; geometric calibration and qualified full-swing replay remain outstanding."
     },
     {
+      "id": "UP-D1-feedback-comparison-admission-inventory",
+      "owner": "UpstreamDrift issue #11785",
+      "resolution": "Inventory F01 controlled-swing admission in src/engines/feedback_comparison.py and manuals/upstreamdrift/chapters/13-feedback-comparison.qmd: all 16 registered packages plus declared OpenSim torque/muscle variants stay required; support, availability and qualification remain separate; exact model/provider/state/policy/input/physics/contact/integrator/actuator identities and time-only full-state no-reset replay guard comparison levels. The existing Euclidean same-input-bundle/v1 lacks policy/input hash binding and cannot qualify native muscle or manifold replay. Common-model, externally forced and restarted short-horizon evidence cannot qualify native own-contact muscle full-swing physics. Unit admission tests and source hashes do not establish matching accuracy, measured contact or EMG agreement, runtime speed, or native six-engine qualification. Full calculation coverage and publication remain blocked."
+    },
+    {
       "id": "UP-D1-inventory-required",
       "owner": "UpstreamDrift issue #9067",
       "resolution": "Inventory and classify every in-scope calculation and module before any coverage or release claim."
@@ -83,7 +88,7 @@
     {
       "id": "UP-D1-same-input-parity-inventory",
       "owner": "UpstreamDrift issue #11614",
-      "resolution": "Inventory the epic #11605 same-input parity pathway in src/shared/python/motion_matching/same_input (plant, closure, integrator, bundle, reference, scoring), documented provisionally in chapters/13-same-input-parity.qmd with the calculation reference docs/research/same_input_parity/same_input_parity.tex: exact weld KKT solve with MuJoCo kkt_regularization set to 0, convention-free closest-point closure projection (Newton stop max|r| <= 1e-13, 25-iteration cap, ArithmeticError otherwise), zero-order-hold RK4 with 1 ms steps and 8 substeps, zero root efforts, the same-input-bundle/v1 schema, and the L0-L3 levels against the MuJoCo reference. tests/unit/motion_matching/same_input and the committed pointwise receipt establish cross-engine software consistency of the spec-built models on two bundles; they do not qualify the model against capture data, the full-horizon open-loop swing (perturbation growth 39-41 1/s), Simscape (P-8 #11613, pending) or any uncertainty."
+      "resolution": "Inventory the epic #11605 same-input parity pathway in src/shared/python/motion_matching/same_input (plant, closure, integrator, bundle, reference, scoring), documented provisionally in chapters/14-same-input-parity.qmd with the calculation reference docs/research/same_input_parity/same_input_parity.tex: exact weld KKT solve with MuJoCo kkt_regularization set to 0, convention-free closest-point closure projection (Newton stop max|r| <= 1e-13, 25-iteration cap, ArithmeticError otherwise), zero-order-hold RK4 with 1 ms steps and 8 substeps, zero root efforts, the same-input-bundle/v1 schema, and the L0-L3 levels against the MuJoCo reference. tests/unit/motion_matching/same_input and the committed pointwise receipt establish cross-engine software consistency of the spec-built models on two bundles; they do not qualify the model against capture data, the full-horizon open-loop swing (perturbation growth 39-41 1/s), Simscape (P-8 #11613, pending) or any uncertainty."
     },
     {
       "id": "UP-D1-impact-parameters-inventory",
