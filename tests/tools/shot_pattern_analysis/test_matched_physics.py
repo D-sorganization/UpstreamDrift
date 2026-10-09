@@ -55,11 +55,12 @@ def test_toe_strike_and_bulge_change_launch(engine: MatchedShotPhysics) -> None:
     )
     assert toe.outcome.carry_y_m != pytest.approx(flat.outcome.carry_y_m)
     # Positive native spin tilt is draw/left: landing lies left of launch ray.
-    launch_ray_y = toe.outcome.carry_x_m * math.tan(
-        math.radians(toe.outcome.launch_azimuth_deg)
+    launch_ray_y = flat.outcome.carry_x_m * math.tan(
+        math.radians(flat.outcome.launch_azimuth_deg)
     )
-    assert toe.outcome.spin_axis_tilt_deg > 0
-    assert toe.outcome.carry_y_m < launch_ray_y
+    # Isolate gear effect on a flat face: bulge can overpower its net spin.
+    assert flat.outcome.spin_axis_tilt_deg > 0
+    assert flat.outcome.carry_y_m < launch_ray_y
 
 
 def test_lean_and_high_loft_are_physical_inputs(engine: MatchedShotPhysics) -> None:
@@ -99,3 +100,17 @@ def test_simulate_has_same_nominal_geometry(engine: MatchedShotPhysics) -> None:
     protocol = engine.simulate(face_deg=1.5, path_deg=3.0, config=cfg)
     assert protocol.carry_x_m == pytest.approx(direct.carry_x_m)
     assert protocol.carry_y_m == pytest.approx(direct.carry_y_m)
+
+
+def test_curved_contact_normal_is_reported_separately(
+    engine: MatchedShotPhysics,
+) -> None:
+    cfg = matched_preset("driver")
+    high = engine.simulate_delivery(0, 0, cfg, contact_vertical_m=0.00635)
+    toe = engine.simulate_delivery(0, 0, cfg, contact_horizontal_m=0.00635)
+    assert high.delivered_loft_deg == pytest.approx(10)
+    assert high.contact_loft_deg == pytest.approx(
+        10 + math.degrees(math.atan(0.00635 / 0.3))
+    )
+    assert toe.delivered_face_deg == pytest.approx(0)
+    assert toe.contact_face_deg > 0

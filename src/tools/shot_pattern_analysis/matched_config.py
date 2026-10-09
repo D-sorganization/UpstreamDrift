@@ -70,7 +70,8 @@ def matched_preset(club_id: str) -> MatchedConfig:
     driver = MatchedConfig()
     if club_id == "driver":
         return driver
-    common = dict(
+    iron = replace(
+        driver,
         club_id=club_id,
         bulge_radius_m=0.0,
         roll_radius_m=0.0,
@@ -79,8 +80,7 @@ def matched_preset(club_id: str) -> MatchedConfig:
     )
     if club_id == "seven_iron":
         return replace(
-            driver,
-            **common,
+            iron,
             club_speed_mps=36.0,
             loft_deg=34.0,
             lie_deg=63.0,
@@ -92,8 +92,7 @@ def matched_preset(club_id: str) -> MatchedConfig:
         )
     if club_id == "pitching_wedge":
         return replace(
-            driver,
-            **common,
+            iron,
             club_speed_mps=32.0,
             loft_deg=46.0,
             lie_deg=64.0,

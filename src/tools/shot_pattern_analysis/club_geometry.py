@@ -26,6 +26,10 @@ class ClubDelivery:
     loft_deg: float
 
 
+def _tuple3(vector: np.ndarray) -> tuple[float, float, float]:
+    return float(vector[0]), float(vector[1]), float(vector[2])
+
+
 def club_delivery(
     static_loft_deg: float,
     lie_deg: float,
@@ -88,10 +92,10 @@ def club_delivery(
     frame = rotation @ orientation @ face
     normal = frame[:, 0]
     return ClubDelivery(
-        normal=tuple(float(v) for v in normal),
-        heel_axis=tuple(float(v) for v in frame[:, 1]),
-        up_axis=tuple(float(v) for v in frame[:, 2]),
-        shaft_axis=tuple(float(v) for v in shaft),
+        normal=_tuple3(normal),
+        heel_axis=_tuple3(frame[:, 1]),
+        up_axis=_tuple3(frame[:, 2]),
+        shaft_axis=_tuple3(shaft),
         face_deg=math.degrees(math.atan2(-normal[1], normal[0])),
         loft_deg=math.degrees(math.atan2(normal[2], math.hypot(*normal[:2]))),
     )

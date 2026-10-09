@@ -38,6 +38,8 @@ class MatchedDeliveryOutcome:
     outcome: ShotOutcome
     delivered_face_deg: float
     delivered_loft_deg: float
+    contact_face_deg: float
+    contact_loft_deg: float
 
 
 class MatchedShotPhysics:
@@ -164,4 +166,10 @@ class MatchedShotPhysics:
             outcome=outcome,
             delivered_face_deg=delivered.face_deg,
             delivered_loft_deg=delivered.loft_deg,
+            contact_face_deg=math.degrees(
+                math.atan2(-surface_normal[1], surface_normal[0])
+            ),
+            contact_loft_deg=math.degrees(
+                math.atan2(surface_normal[2], math.hypot(*surface_normal[:2]))
+            ),
         )
