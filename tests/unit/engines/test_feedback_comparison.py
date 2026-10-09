@@ -39,6 +39,8 @@ def _valid_evidence(registry: FeedbackComparisonRegistry) -> ComparisonEvidence:
         provider_id=row.provider_id,
         provider_sha256=row.provider_sha256,
         state_schema_sha256="b" * 64,
+        initial_state_sha256="a" * 64,
+        comparison_contract_version="feedback-comparison/1.1.0",
         policy_sha256="c" * 64,
         applied_input_sha256="d" * 64,
         input_kind=InputKind.GENERALIZED_EFFORT,
@@ -258,12 +260,38 @@ def test_same_input_requires_common_physics_and_time_grid(
 ) -> None:
     left = _valid_evidence(registry)
     for bad in (
+        replace(left, initial_state_sha256="8" * 64),
         replace(left, time_grid_sha256="8" * 64),
         replace(left, physics_sha256="9" * 64),
         replace(left, channel_ids=("hip",)),
     ):
         with pytest.raises(ValueError, match="differs"):
             registry.compare(ComparisonRequest(ComparisonLevel.SAME_INPUT, left, bad))
+
+
+@pytest.mark.parametrize(
+    "level",
+    [ComparisonLevel.WITHIN_ENGINE_REPLAY, ComparisonLevel.SAME_INPUT],
+)
+def test_replay_requires_versioned_initial_payload_digest(
+    registry: FeedbackComparisonRegistry, level: ComparisonLevel
+) -> None:
+    evidence = _valid_evidence(registry)
+    for bad in (
+        replace(evidence, initial_state_sha256=""),
+        replace(evidence, initial_state_sha256="not-a-digest"),
+        replace(evidence, comparison_contract_version=""),
+        replace(evidence, comparison_contract_version="feedback-comparison/1.0.0"),
+    ):
+        with pytest.raises(ValueError, match="initial_state|comparison contract"):
+            registry.admit(bad, level)
+
+    legacy = replace(evidence, initial_state_sha256="", comparison_contract_version="")
+    registry.admit(legacy, ComparisonLevel.IDENTITY)
+    registry.admit(
+        replace(legacy, transcription_receipt_sha256="9" * 64),
+        ComparisonLevel.TRANSCRIPTION_FEASIBILITY,
+    )
 
 
 def test_direct_effort_must_be_held_for_each_step(

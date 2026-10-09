@@ -10381,7 +10381,10 @@ provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
 mixed torque/excitation, and incomparable same-input horizons/channels/policies
 fail closed. Truncated replay cannot establish within-engine or same-input
 levels; observation scoring requires its own time-grid digest, distinct from
-the applied-input grid. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
+the applied-input grid. Contract `feedback-comparison/1.1.0` additionally
+requires the exact Tools T01 initial-state payload digest for every independent
+replay level and equality of that digest for same-input comparison; older
+unbound receipts remain limited to identity/transcription admission. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
 new replay admission because it does not bind execution policy and applied
 inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and

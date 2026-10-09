@@ -33,6 +33,14 @@ time-only input player with no state feedback or resets. Its model, provider,
 physical state schema, execution policy, actuator schema, contact and
 integration identities, applied input, observation set, horizon, and channel
 order and simulation-relative timebase are bound by SHA-256 evidence. Each
+replay receipt also binds the **actual initial-state payload** with the Tools
+T01 `integrity.initial_state_sha256` digest under
+`feedback-comparison/1.1.0`. Matching state-schema digests alone do not show
+that two simulations started from the same physical state. Earlier/unversioned
+comparison receipts remain usable for identity and transcription inventory,
+but fail closed for independent replay claims. Same-input admission requires
+equal initial-state payload digests in addition to equal schemas.
+Each
 input-channel schema digest includes target, coordinate, unit, and force frame.
 Direct torque/force/effort is held
 exactly over each integration step; excitation interpolation is declared.
