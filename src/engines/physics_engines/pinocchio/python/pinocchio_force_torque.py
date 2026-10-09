@@ -4,7 +4,10 @@ Builds a world-frame :class:`ForceTorqueFrame` from Pinocchio's recursive
 Newton-Euler pass. Joint reactions come from ``data.f`` evaluated with the
 **actual** acceleration (never zeroed torque), applied torques come from the
 caller's generalized torque vector, and contact wrenches pass through the
-existing ``ContactSample`` records unchanged.
+existing ``ContactSample`` records unchanged.  Those records are all ground
+contacts, so they also yield the per-foot and net ground-reaction breakdown
+(GCV-2, #11708); without them the ground reaction is reported unavailable (a
+reason in ``frame.metadata``), never zero.
 
 The source owns its own ``pin.Data`` and never mutates an engine's data.
 
@@ -19,6 +22,7 @@ from __future__ import annotations
 import math
 import re
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
@@ -30,6 +34,9 @@ from src.shared.python.biomechanics.grip_extraction import (
 from src.shared.python.biomechanics.grip_wrench import (
     GripAnalysis,
     to_overlay_wrenches,
+)
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
 )
 from src.shared.python.force_overlay import (
     ForceTorqueFrame,
@@ -57,6 +64,10 @@ _AXIS_BY_SUFFIX = {
 }
 _FIXED_AXIS = re.compile(r"^JointModelR(?:UB)?([XYZ])$")
 _MIN_SEGMENT_LENGTH_M = 1e-12
+_NO_CONTACT_MODEL_REASON = (
+    "Pinocchio has no contact model and no contact samples were supplied; "
+    "ground reaction is unavailable, not zero"
+)
 
 
 def _label(prefix: str, name: str) -> str:
@@ -187,16 +198,41 @@ class PinocchioForceTorqueSource:
             actuator = self._actuator(i, joint, tau_arr)
             if actuator is not None:
                 wrenches.append(actuator)
-        wrenches.extend(self._contacts(contact_samples))
+        contacts = self._contacts(contact_samples)
+        wrenches.extend(contacts)
+        ground, unavailable = self._ground_reaction(q_arr, contacts, contact_samples)
+        wrenches.extend(ground)
         if grip is not None:
             wrenches.extend(to_overlay_wrenches(grip, source=_GRIP_SOURCE))
 
+        metadata = {"ground_reaction_unavailable": unavailable} if unavailable else {}
         frame = ForceTorqueFrame(
-            time_s=time_s, engine=_ENGINE, wrenches=tuple(wrenches)
+            time_s=time_s,
+            engine=_ENGINE,
+            wrenches=tuple(wrenches),
+            metadata=metadata,
         )
         if not axes:
             return frame
-        return frame_with_axial_loads(frame, axes, _REACTION_SOURCE)
+        return replace(
+            frame_with_axial_loads(frame, axes, _REACTION_SOURCE), metadata=metadata
+        )
+
+    def _ground_reaction(
+        self,
+        q: np.ndarray,
+        contacts: list[OverlayWrench],
+        samples: Mapping[str, ContactSample] | None,
+    ) -> tuple[list[OverlayWrench], str]:
+        """Per-foot and net GRF breakdown (GCV-2) and, if absent, the reason.
+
+        Pinocchio has no contact model: the ground contact is the caller's
+        shared-law ``ContactSample`` records, all of which are ground contacts.
+        """
+        if samples is None:
+            return [], _NO_CONTACT_MODEL_REASON
+        com = pin.centerOfMass(self.model, self._data, q)  # type: ignore[attr-defined]
+        return list(ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE)), ""
 
     @staticmethod
     def grip_from_allocation(

@@ -1,0 +1,122 @@
+# Native Constrained-State Readiness
+
+This provisional F07 chapter accompanies child #11923 under #11791 and #11792.
+It extends the evidence discussion in [Native Muscle Replay](13-native-muscle-replay.qmd).
+It does not extend that replay provider's supported component set or qualify
+full-model anatomy, capture matching or an arbitrary native restart.
+
+## State Authority and the Native Counterexample
+
+`audit_native_constraint_state` in `tour_matching/native_constraint_state.py`
+observes actual native coordinates, recursive constraints and scalar actuators,
+named continuous values, registered discrete/modeling-option values, forces,
+derivatives and native constraint residuals. A copied State isolates realization
+caches. The caller must own the native Model and State and prevent concurrent
+mutation: copying a State does not isolate model-owned lock functions.
+
+The original PinJoint fixture has mass 1 kg, centre of mass `(0,-0.5,0)` m,
+diagonal inertia `(1,1,1)` kg m² and angle 0.3 rad under native default gravity.
+Locking it leaves its named values, registered maps and serialized model hash
+identical. Nevertheless, its active constraint Jacobian changes from 0 by 1 to
+1 by 1, and acceleration changes from approximately -1.1592253 rad/s² to
+numerical zero. Therefore those maps and hashes are not complete native state.
+
+The matching runtime's [Coordinate implementation](https://github.com/opensim-org/opensim-core/blob/85aaf64/OpenSim/Simulation/SimbodyEngine/Coordinate.cpp)
+uses Simbody constraint enable state for locking and a model-owned mutable lock
+target. Clamping is a separate registered modeling option. In another native
+test, locking a second State at 0.6 rad changes the first State's freshly
+realized position error to -0.3 rad while its q remains 0.3 rad. Separate States
+of one Model cannot establish independent restart isolation for this mechanism.
+
+## Inputs, Units and Observations
+
+`audit_source_constraint_state` owns frozen XML bytes and constructs a fresh
+native Model and State. It restores every named continuous value and checks
+exact achieved equality; native setters can otherwise silently ignore a locked
+coordinate assignment. It never unlocks, assembles, equilibrates or integrates.
+Registered and unexposed state retain native initialization defaults. External
+resource closure and transitive runtime dependencies remain unverified.
+
+Coordinate values, speeds and motion-type tags retain native conventions.
+Actuation retains its concrete force-law units; scalar values are not all joint
+torques. Power is in watts. Constraint residual vectors can contain mixed units;
+no global norm or zero threshold is used as physiological acceptance. The
+observation records native G dimensions, but neither dimensions nor a source
+coordinate count establish an independent-DOF or global-rank claim.
+
+For generalized speeds $u$, native constrained acceleration has the form
+
+$$M(q)\dot u + b(q,u)=f(q,u,e)+G(q)^T\lambda,$$
+$$G(q)\dot u + \dot G(q,u)u = 0.$$
+
+The diagnostic reports native position, velocity and acceleration errors; it
+does not solve a second constraint system or identify reaction-force physiology.
+The sign/convention of reported native multipliers must be established by a
+separate wrench interface before interpreting them as anatomical loads.
+
+## Lock Targets and Fail-Closed Scope
+
+Optional declared targets use absolute coordinate paths and native units. The
+provider records them and any exact difference from achieved q. It does not
+claim native target readback: the relevant model-owned value is not exposed by
+the reviewed SWIG interface. Source defaults and current q are not substitutes.
+Locked coordinates therefore retain `native-lock-target-unverified`, including
+when a declared target agrees with q. Constraint, assistance and full-state
+qualification blockers remain explicit. The immutable result's qualification
+field cannot be replaced with an accepted status through its constructor.
+
+The observation digest binds the measured diagnostic fields and source/runtime
+identities. It is neither a complete-state serialization nor an authenticity or
+scientific certificate. The Tools experiment authority remains unchanged.
+
+## Actual Full-Body Source Evidence
+
+The local unchanged public 520-muscle candidate at source commit
+`3cfbe329a8ef9412494980419cb7177c41183a53` has source SHA-256
+`a55c64341680551fb5a41be254bdfdb3b2be0ac789336ea44902b22fc9a83913`.
+The new provider reproduced its previously prepared 1348 named values exactly,
+with 549 registered discrete values, 1760 options, 54 retained locks, two
+couplers, 29 retained nonmuscle actuators and native G dimensions 56 by 171.
+No source parameters, locks or assistance channels were removed. Its result is
+explicitly `not-qualified-for-native-restart`.
+
+Separate native source probes retain roughly 48 kN IL_L4 passive-dominated
+loads; bilateral MF_m5_laminar reaches about 62 times maximum-isometric force.
+Lowering activation to each native law's minimum and equilibrating once before
+export leaves these loads essentially unchanged. This requires source geometry,
+parameter and neutral-posture provenance review before tuning. Optimal fiber
+length projected by pennation plus tendon slack is a geometric reference, not
+an anatomical maximum or a reason to soften the force law. Locked wrists,
+missing hand muscle attachments, rigid tendons, absent native ground/grip contact
+and unresolved marker correspondence remain separate readiness gates.
+
+## Reproduction and Limits
+
+Run actual native tests serially with the installed OpenSim interpreter:
+
+```text
+python -m pytest tests/opensim/test_native_constraint_state.py -o addopts='' -q
+```
+
+To repeat source evaluation, use the unchanged licensed XML and the complete
+named-state map from the prior, explicitly declared pre-export preparation:
+
+```python
+receipt = audit_source_constraint_state(source_path, prepared_named_state)
+assert receipt.source_sha256 == prepared_source_sha256
+assert receipt.loaded_model_sha256 == prepared_loaded_sha256
+assert dict(receipt.named_state) == prepared_named_state
+```
+
+Retain the source/preparation hashes, runtime/provider identities, full returned
+observations and failed checks locally. No private capture is required. Native
+tests cover the registered-map collision, shared mutable lock target, coupler
+enforcement, source isolation, ignored locked-state assignments, assistance,
+finite target validation and older XML logging on Windows. Missing visual mesh
+warnings do not justify modifying geometry; owned temporary XML cleanup avoids
+deleting directories containing a process-owned native log.
+
+Next, qualify an explicit fixed-lock and coupler initialization policy in fresh
+models, including targets, achieved configuration/velocity, reactions and force/
+derivative identity. Then address source physiology, ground/grip and independent
+full-horizon replay. Local tests do not approve publication or close F07/F08.
