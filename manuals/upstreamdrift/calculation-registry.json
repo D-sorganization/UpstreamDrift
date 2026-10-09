@@ -74,6 +74,11 @@
       "id": "UP-D1-ground-reaction-breakdown-inventory",
       "owner": "UpstreamDrift issue #11724",
       "resolution": "Inventory the GCV-1 (#11707) ground-reaction core in src/shared/python/biomechanics/ground_reaction.py documented provisionally in chapters/10-ground-reaction.qmd: per-foot resultant force and moment about the world origin, centre of pressure on the plane z = z_g and free moment about it (unavailable below COP_MIN_FZ_N = 10 N, never zero), net wrench with its own CoP and free moment, and moments about the whole-body CoM (net exactly the sum of the feet), plus the GCV-5 (#11711) plot series and vertical load share derived from it. tests/unit/biomechanics/test_ground_reaction.py establishes algebraic agreement with hand-computed wrenches and the stated invariants; it does not qualify any engine contact model, compare against measured force-plate data, or establish an uncertainty. The 10 N threshold is a numerical guard, not an instrument or physiological limit."
+    },
+    {
+      "id": "UP-D1-grip-wrench-reduction-inventory",
+      "owner": "UpstreamDrift issue #11724",
+      "resolution": "Inventory the GCV-7 (#11713) grip-wrench core in src/shared/python/biomechanics/grip_wrench.py and the GCV-8 (#11714) engine-agnostic extraction in src/shared/python/biomechanics/grip_extraction.py, documented provisionally in chapters/11-grip-wrench.qmd: hand-on-club wrenches in the world frame, grip midpoint net force, equivalent couple split into contact force moment and applied free torque (exact postconditions), per-hand moments of force, club-local components by the transpose rotation, the club Newton-Euler holding-hand recovery, the reference minimum-norm split, and the recorded split_method (rigid-weld splits are solver-defined; bushing is determinate). Unavailable values are None/NaN/null with a reason, never zero. tests/unit/biomechanics/test_grip_wrench.py and test_grip_extraction.py establish algebraic agreement with hand-computed wrenches and these invariants; they do not qualify any engine constraint solver or grip model, compare against instrumented-grip measurements, or establish an uncertainty."
     }
   ],
   "calculations": []
