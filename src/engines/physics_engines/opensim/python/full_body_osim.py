@@ -26,6 +26,10 @@ from src.engines.physics_engines.opensim.python.full_body_grip_topology import (
     build_bushing_spec,
 )
 from src.shared.python.contracts import precondition
+from src.engines.physics_engines.opensim.python.full_body_grip_contact import (
+    ContactGripConfig,
+    build_contact_grip,
+)
 from src.shared.python.grip_contact import GripInterface
 from src.shared.python.model_appearance.club_assembly import assembly_from_spec
 
@@ -628,6 +632,15 @@ def _build_bushing_forces(
             )
 
 
+def _grip_body_names(spec: Mapping[str, Any]) -> dict[str, str]:
+    """Spec body name -> OpenSim body name for the hand and club grip bodies."""
+    names = {}
+    for side in spec["grip_bushing"].values():
+        for key in ("hand_body", "club_body"):
+            names[side[key]] = clean_osim_body_name(side[key])
+    return names
+
+
 def _build_markerset(model: ET.Element, spec: Mapping[str, Any]) -> None:
     """Construct MarkerSet containing all tour capture marker offsets."""
     markerset = ET.SubElement(model, "MarkerSet", attrib={"name": "markerset"})
@@ -673,15 +686,19 @@ def _parse_spec_input(
     return raw_bytes, dict(spec_or_bytes)
 
 
-def _check_grip_model(grip_model: str) -> None:
-    """Reject an unknown grip model and the not-yet-implemented contact grip."""
+def _check_grip_model(
+    grip_model: str, grip_contact: ContactGripConfig | None = None
+) -> None:
+    """Reject an unknown grip model and a contact grip without its configuration."""
     if grip_model not in GRIP_MODELS:
         raise ValueError(f"grip_model must be one of {GRIP_MODELS}, got {grip_model!r}")
-    if grip_model == "contact":
-        raise NotImplementedError(  # tracked: #11739
-            "grip_model='contact' (distributed ElasticFoundation grip) is "
-            "phase 2 of issue #11739 and is not implemented yet"
+    if grip_model == "contact" and grip_contact is None:
+        raise ValueError(
+            "grip_model='contact' needs grip_contact (pad model and an absolute "
+            "mesh_dir for the closed grip meshes)"
         )
+    if grip_model != "contact" and grip_contact is not None:
+        raise ValueError("grip_contact is only valid with grip_model='contact'")
 
 
 @precondition(
@@ -697,6 +714,7 @@ def export_full_body_osim(
     club_finish: str = club_visuals.DEFAULT_FINISH,
     grip_model: str = DEFAULT_GRIP_MODEL,
     grip_interface: GripInterface | None = None,
+    grip_contact: ContactGripConfig | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Export anthropometric full-body specification to OpenSim 4.0 XML string.
 
@@ -719,10 +737,13 @@ def export_full_body_osim(
     grip_model : str
         ``"weld"`` (default, rigid closure), ``"bushing"`` (free club, one
         six-axis ``BushingForce`` per hand; wrench is the force on the club)
-        or ``"contact"`` (not implemented; raises ``NotImplementedError``).
+        or ``"contact"`` (free club held by pad spheres on closed grip meshes
+        through ``ElasticFoundationForce``; needs ``grip_contact``).
     grip_interface : GripInterface | None
-        Grip frames and bushing parameters for ``"bushing"``; built from the
-        spec with engineering-default parameters when omitted.
+        Grip frames and bushing parameters for ``"bushing"`` and ``"contact"``;
+        built from the spec with engineering-default parameters when omitted.
+    grip_contact : ContactGripConfig | None
+        Pad model, foundation parameters and mesh directory for ``"contact"``.
 
     Returns
     -------
@@ -730,10 +751,10 @@ def export_full_body_osim(
         (osim_xml_string, metadata_receipt)
     """
     raw_bytes, spec = _parse_spec_input(spec_or_bytes)
-    _check_grip_model(grip_model)
+    _check_grip_model(grip_model, grip_contact)
     _validate_spec(spec)
     interface: GripInterface | None = None
-    if grip_model == "bushing":
+    if grip_model in ("bushing", "contact"):
         interface = grip_interface or GripInterface.from_spec(spec)
         spec = build_bushing_spec(spec, interface)
 
@@ -757,10 +778,15 @@ def export_full_body_osim(
 
     _build_constraintset(model, spec, closure_type=closure_type)
     _build_forceset(model, spec, coords, actuate_root=actuate_root)
-    if interface is not None:
+    if interface is not None and grip_model == "bushing":
         _build_bushing_forces(model, spec, interface)
     _build_markerset(model, spec)
     _build_contact_geometries(model, spec)
+    contact_receipt = None
+    if interface is not None and grip_contact is not None:
+        contact_receipt = build_contact_grip(
+            model, spec, interface, grip_contact, _grip_body_names(spec)
+        )
 
     xml_text = ET.tostring(root, encoding="utf-8").decode("utf-8")
     model_sha = hashlib.sha256(raw_bytes).hexdigest()
@@ -782,6 +808,8 @@ def export_full_body_osim(
     }
     if interface is not None:
         metadata["free_body_coordinates"] = list(spec["passive_coordinates"])
+    if contact_receipt is not None:
+        metadata["grip_contact"] = contact_receipt
 
     return xml_text, metadata
 
@@ -839,7 +867,7 @@ def main() -> int:
         type=str,
         choices=list(GRIP_MODELS),
         default=DEFAULT_GRIP_MODEL,
-        help="Hand-club interface: rigid weld, bushing, or contact (not implemented)",
+        help="Hand-club interface: rigid weld, bushing, or contact (library use only)",
     )
     parser.add_argument(
         "--actuate-root",
