@@ -10376,6 +10376,15 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
+
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative

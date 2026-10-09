@@ -244,8 +244,10 @@ def test_allowlist_cannot_promote_arbitrary_external_force_to_contact(
         )
 
 
-@pytest.fixture
-def muscle_fixture(tmp_path: Path) -> tuple[Path, dict[str, float]]:
+@pytest.fixture(params=["Millard2012EquilibriumMuscle", "Thelen2003Muscle"])
+def muscle_fixture(
+    tmp_path: Path, request: pytest.FixtureRequest
+) -> tuple[Path, dict[str, float]]:
     """Create an actual one-DOF compliant-tendon model, not a golf substitute."""
     osim = pytest.importorskip("opensim")
     model = osim.Model()
@@ -266,7 +268,7 @@ def muscle_fixture(tmp_path: Path) -> tuple[Path, dict[str, float]]:
     coordinate.setName("slide")
     coordinate.setDefaultValue(0.31)
     model.addJoint(joint)
-    muscle = osim.Millard2012EquilibriumMuscle("flexor", 10.0, 0.1, 0.2, 0.0)
+    muscle = getattr(osim, request.param)("flexor", 10.0, 0.1, 0.2, 0.0)
     muscle.addNewPathPoint("origin", model.getGround(), osim.Vec3(0))
     muscle.addNewPathPoint("insertion", body, osim.Vec3(0))
     model.addForce(muscle)
@@ -309,6 +311,53 @@ def test_native_replay_preserves_complete_nonzero_initial_state(
     assert first.policy["input_boundary"] == "muscle_excitation"
     assert first.policy["interpolation"] == "linear"
     assert first.policy["state_resets"] is False
+    native_model = pytest.importorskip("opensim").Model(str(path))
+    actual_law = native_model.getMuscles().get(0).getConcreteClassName()
+    assert actual_law in first.policy["muscle_laws"]
+
+
+def test_zero_fiber_length_is_not_an_admissible_physical_initial_state(
+    muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    path, initial = muscle_fixture
+    initial[next(name for name in initial if name.endswith("/fiber_length"))] = 0
+    with pytest.raises(ValueError, match="muscle state domain|fiber length.*positive"):
+        replay_muscle_excitations(
+            path, initial, np.array([0, 0.01]), {"flexor": np.array([0.4, 0.4])}
+        )
+
+
+@pytest.mark.parametrize("mode", ["activation_dynamics", "tendon_compliance"])
+def test_ignored_muscle_dynamics_need_a_separate_state_policy(
+    muscle_fixture: tuple[Path, dict[str, float]], mode: str
+) -> None:
+    osim = pytest.importorskip("opensim")
+    path, initial = muscle_fixture
+    model = osim.Model(str(path))
+    muscle = model.updMuscles().get(0)
+    getattr(muscle, "set_ignore_" + mode)(True)
+    model.printToXML(str(path))
+    with pytest.raises(ValueError, match="ignored.*dynamics.*policy"):
+        replay_muscle_excitations(
+            path, initial, np.array([0, 0.01]), {"flexor": np.array([0.4, 0.4])}
+        )
+
+
+def test_restored_native_force_matches_independent_physical_state(
+    muscle_fixture: tuple[Path, dict[str, float]],
+) -> None:
+    osim = pytest.importorskip("opensim")
+    path, initial = muscle_fixture
+    model = osim.Model(str(path))
+    state = model.initSystem()
+    for name, value in initial.items():
+        model.setStateVariableValue(state, name, value)
+    model.realizeDynamics(state)
+    expected = model.getMuscles().get(0).getActuation(state)
+    result = replay_muscle_excitations(
+        path, initial, np.array([0, 0.01]), {"flexor": np.array([0.4, 0.4])}
+    )
+    np.testing.assert_allclose(result.muscle_forces_n[0, 0], expected, atol=1e-12)
 
 
 def test_excitation_changes_native_motion_not_just_recorded_controls(
@@ -537,17 +586,24 @@ def test_locked_coordinate_with_inconsistent_speed_cannot_be_repaired_silently(
         )
 
 
-@pytest.mark.parametrize(
-    "state_suffix,value", [("/activation", 0.0), ("/fiber_length", 1e-8)]
-)
+@pytest.mark.parametrize("state_suffix", ["/activation", "/fiber_length"])
 def test_initial_state_respects_model_specific_muscle_domain(
     muscle_fixture: tuple[Path, dict[str, float]],
     state_suffix: str,
-    value: float,
 ) -> None:
     path, initial = muscle_fixture
+    osim = pytest.importorskip("opensim")
+    model = osim.Model(str(path))
+    model.initSystem()
+    native = model.getMuscles().get(0)
+    law = getattr(osim, native.getConcreteClassName()).safeDownCast(native)
+    minimum = (
+        law.getMinimumActivation()
+        if state_suffix == "/activation"
+        else law.getMinimumFiberLength()
+    )
     name = next(name for name in initial if name.endswith(state_suffix))
-    initial[name] = value
+    initial[name] = minimum - 1e-8
     with pytest.raises(ValueError, match="muscle state domain"):
         replay_muscle_excitations(
             path, initial, np.array([0.0, 0.01]), {"flexor": np.array([0.1, 0.1])}
