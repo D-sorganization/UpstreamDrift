@@ -406,6 +406,13 @@ class NativeBenchmarkReport:
         return None
 
 
+@dataclass(frozen=True)
+class _AttemptTiming:
+    preparation_seconds: float
+    solve_seconds: float
+    native_seconds: float | None
+
+
 def _export_attempt(
     path: Path,
     *,
@@ -414,9 +421,7 @@ def _export_attempt(
     start: BenchmarkStart,
     reason: str | None,
     receipt: NativeCandidateReceipt | None,
-    preparation_seconds: float,
-    solve_seconds: float,
-    native_seconds: float | None,
+    timing: _AttemptTiming,
 ) -> tuple[str, float]:
     """Write one deterministic synthetic receipt, including rejected starts."""
     began = time.perf_counter()
@@ -428,9 +433,9 @@ def _export_attempt(
         "warm": start.warm,
         "failure_reason": reason,
         "candidate": None if receipt is None else asdict(receipt),
-        "preparation_seconds": preparation_seconds,
-        "solve_seconds": solve_seconds,
-        "native_seconds": native_seconds,
+        "preparation_seconds": timing.preparation_seconds,
+        "solve_seconds": timing.solve_seconds,
+        "native_seconds": timing.native_seconds,
     }
     data = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
     digest = hashlib.sha256(data).hexdigest()
@@ -484,9 +489,7 @@ def _run_native_attempt(
         start=start,
         reason=reason,
         receipt=receipt,
-        preparation_seconds=preparation_seconds,
-        solve_seconds=solve_seconds,
-        native_seconds=native_seconds,
+        timing=_AttemptTiming(preparation_seconds, solve_seconds, native_seconds),
     )
     total_seconds = time.perf_counter() - began
     _, peak = tracemalloc.get_traced_memory()
