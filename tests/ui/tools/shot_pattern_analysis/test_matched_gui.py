@@ -237,6 +237,43 @@ def test_completed_report_shows_solved_nominal_delivery_and_target_protocol(
     assert widget.cleanup()
 
 
+def test_completed_report_handles_zero_spin_with_undefined_tilt(qapp, tmp_path) -> None:  # noqa: ANN001
+    from dataclasses import asdict
+
+    from src.tools.shot_pattern_analysis.matched_config import matched_preset
+
+    widget = _study(qapp)
+    nominal = {
+        "face_deg": 0.0,
+        "path_deg": 0.0,
+        "speed_mps": 32.0,
+        "residual_m": 0.0,
+        "outcome": {"spin_rpm": 0.0, "spin_axis_tilt_deg": None},
+    }
+    payload = {
+        "status": "completed",
+        "config": {"club": asdict(matched_preset("seven_iron")), "target_x_m": None},
+        "target_x_m": 180.0,
+        "nominals": dict.fromkeys(("Straight", "Draw", "Fade"), nominal),
+        "summary": {
+            name: {
+                "total_n": 1,
+                "supported_n": 1,
+                "unsupported_reasons": {},
+                "realized_face_path_correlation": None,
+            }
+            for name in ("Straight", "Draw", "Fade")
+        },
+    }
+    (tmp_path / "summary.json").write_text(json.dumps(payload), encoding="utf-8")
+
+    widget._completed({"output_dir": tmp_path})
+
+    assert "spin_axis_tilt_deg" not in widget.result_label.text()
+    assert "empirical face/path ρ=unavailable" in widget.result_label.text()
+    assert widget.cleanup()
+
+
 def test_cancellation_during_runner_never_starts_export(
     qapp, tmp_path, monkeypatch
 ) -> None:  # noqa: ANN001
