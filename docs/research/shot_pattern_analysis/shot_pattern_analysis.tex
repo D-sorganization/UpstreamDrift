@@ -1,0 +1,177 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,booktabs,graphicx,hyperref}
+\title{Straight, Draw, and Fade: Shot Pattern Variance}
+\author{UpstreamDrift}
+\date{October 8, 2026}
+\begin{document}
+\maketitle
+\section{Status and Scope}
+This is an editable standalone experiment reference, separate from the governed
+engineering design manual. The canonical manual remains the QMD source under
+\texttt{manuals/upstreamdrift}. This experiment does not qualify the underlying
+impact or flight model against measured shot populations. It estimates
+conditional outcome variance from face-angle error, not a golfer's ability to
+produce a chosen pattern. All results are first ground contact (carry); bounce
+and roll are excluded.
+
+\section{Inputs, Frames, and Pairing}
+User-facing face and path angles are measured from the target, positive right
+for a right-handed golfer. Straight uses $(f,p)=(0,0)$ degrees, draw uses
+$(1.5,3)$, and fade uses $(-1.5,-3)$. The draw face is therefore $1.5$ degrees
+left of its path. The repository solver uses $x$ forward, $y$ left, and $z$ up;
+the adapter changes the sign of horizontal input and output angles once.
+The CSV diagnostic \texttt{spin\_axis\_tilt\_deg} instead retains the native
+axis tilt convention, positive toward draw/left curvature. It is not
+Trackman's right-positive spin-axis convention.
+Every pattern receives the same 10,000 independent errors
+$\epsilon_i\sim\mathcal{N}(0,\sigma_F^2)$, with separate trials at
+$\sigma_F=1$ and $2$ degrees. In each trial,
+$f_i=\bar f+\epsilon_i$ and $p_i=\bar p$. Shared errors provide paired
+comparisons; finite draw and fade samples need not be exact mirrors.
+The random seed is 20261008, using NumPy's default generator.
+
+The illustrative driver case fixes club speed at $45\,\mathrm{m/s}$,
+dynamic loft at $10.9$ degrees, attack angle at zero, and centered impact.
+The ball begins stationary without spin. Clubhead mass, coefficient of
+restitution, friction, ball mass and radius, and environmental parameters are
+the existing solver defaults and are captured in the execution receipt.
+There is no wind, changing lie, speed error, strike error, or path error.
+
+\section{Impact Equations and a Material Limitation}
+The experiment calls the public \texttt{ImpactSolverAPI} with its rigid-body
+model. For unit face normal $\mathbf n$, relative velocity $\mathbf v_r$,
+ball mass $m_b$, effective club mass $m_c$, and restitution $e$:
+\[
+ m_*=(m_b^{-1}+m_c^{-1})^{-1},\qquad
+ J=(1+e)m_*\mathbf v_r\cdot\mathbf n,\qquad
+ \mathbf v_b^+=\mathbf v_b^-+J\mathbf n/m_b.
+\]
+For a stationary ball, launch azimuth equals face azimuth exactly in this
+model. Tangential relative speed $v_t$ generates friction impulse magnitude
+\[
+ J_f=\min\{\mu J,\; (2/7)m_b v_t\},\qquad
+ \Delta\boldsymbol\omega=(R J_f/I_b)(\hat{\mathbf t}\times\mathbf n),
+ \quad I_b=\tfrac25m_b R^2.
+\]
+The implementation adds this spin but omits the matching tangential impulse
+from translational ball and club velocities. Thus its mapping is simplified;
+this experiment must not be interpreted as empirical proof of a preferred
+shot shape. Centered contact avoids the separate gear-effect approximation.
+No changes to the underlying physics are part of this experiment.
+
+\section{Flight Integration and Landing}
+Each shot calls the existing \texttt{BallFlightSimulator}, backed by the
+\texttt{upstream-physics} Rust kernel. Launch velocity uses metres per second,
+launch and azimuth angles radians, and spin magnitude RPM at the Python
+boundary, converted to radians per second inside the kernel. The spin axis
+is normalized. The solver integrates position, velocity and decaying spin
+with RK4, drag and spin-induced aerodynamic force:
+\[
+ \dot{\mathbf r}=\mathbf v,\qquad
+ m_b\dot{\mathbf v}=m_b\mathbf g+\mathbf F_D+\mathbf F_M,\qquad
+ \dot\omega=-\lambda\omega.
+\]
+The production step is $0.02\,\mathrm{s}$ with a $12\,\mathrm{s}$ horizon.
+Landing is linearly interpolated between the last above-ground and first
+nonpositive-height samples. Failure to land raises an error; it never
+silently treats the final airborne sample as a landing.
+The Rust coefficient path is distinct from the constant-spin Waterloo/Penner
+model in \texttt{flight\_models.py}; their calibrations must not be mixed.
+The kernel applies a single spin force (not separate additive backspin lift
+and sidespin Magnus forces). With $A=\pi R^2$ and relative airspeed $V$:
+\[
+ \mathbf F_D=-\tfrac12\rho C_D A V\mathbf v,\qquad
+ S=R|\boldsymbol\omega|/V,\qquad
+ C_L=\min(0.26,\;0.70 S^{0.645}),
+\]
+\[
+ \mathbf F_M=\tfrac12\rho C_L A V^2
+ \frac{\boldsymbol\omega\times\mathbf v}
+ {|\boldsymbol\omega\times\mathbf v|}.
+\]
+The zero-cross-product case returns zero spin force. The shared drag-crisis
+curve evaluates Reynolds number $\rho V(2R)/\mu$ with
+$\mu=1.81\times10^{-5}\,\mathrm{Pa\,s}$ and base drag coefficient $0.25$,
+using the exact source-bound constants in \texttt{aerodynamics.rs}.
+Spin decay uses $\lambda=0.05\,\mathrm{s}^{-1}$.
+
+\section{Aiming and Outcome Statistics}
+Raw outcomes keep the requested target-relative angles. A second comparison
+rotates each entire pattern by a single angle computed from its nominal,
+zero-error landing, placing that nominal landing on the target line. This is
+an aiming adjustment, not per-shot correction or a sample-mean fit. The
+fixed target distance is the straight nominal carry; differences in curved
+carry remain in the error metric.
+\[
+ \alpha=\operatorname{atan2}(y_0,x_0),\qquad
+ \begin{pmatrix}x'\\y'\end{pmatrix}=
+ \begin{pmatrix}\cos\alpha&\sin\alpha\\-\sin\alpha&\cos\alpha\end{pmatrix}
+ \begin{pmatrix}x\\y\end{pmatrix}.
+\]
+Lateral variance is the unbiased sample variance with denominator $n-1$;
+standard deviation is its square root. Central 90\% width is the empirical
+95th minus 5th percentile. Target RMSE is
+$\sqrt{n^{-1}\sum_i[(x_i-x_T)^2+y_i^2]}$. Target-hit probability counts
+landings within a $15\,\mathrm m$ radius circle, not a fairway strip.
+Paired percentile-bootstrap variance-ratio intervals resample common shot
+indices 500 times. These intervals describe Monte Carlo error only; they
+exclude model discrepancy and parameter uncertainty.
+
+\section{Distance Control}
+Carry is not fixed: face error changes impact and spin, and curved patterns
+have shorter mean carry. The supplementary common-range diagnostic maps each
+nominal-aimed endpoint to
+\[
+ (x'',y'')=\frac{x_T}{\sqrt{x'^2+y'^2}}(x',y').
+\]
+It preserves landing bearing and sets every radial range to the same straight
+nominal distance. It is geometric normalization, not a new flight simulation,
+and cannot isolate a causal physical mechanism. At one degree face SD, the
+curved SD reduction falls from about 0.95\% at actual carry to 0.76\% at common
+range; therefore distance explains part, but not all, of this modeled effect.
+
+\section{Interpretation and Observability Limits}
+The relevant question is whether curved patterns reduce spread or target
+error after equal aiming treatment, not whether their nominal balls curve
+back toward the line. A symmetric, still-air model cannot establish a
+physical draw-versus-fade asymmetry. A nonzero face-to-path mean also does
+not eliminate opposite curvature: a $1.5$-standard-deviation offset leaves
+about $6.68\%$ probability of crossing zero face-to-path under the assumed
+normal error distribution. At two degrees SD, the theoretical crossing
+probability rises to about $22.66\%$. Real golfers may have correlated face/path
+errors, different variability by intention, strike-dependent gear effect,
+wind, varying speed or loft, and asymmetric hazards. Those require measured
+inputs and additional experiments.
+With only one uncertain input, the landing set is a narrow one-dimensional
+curve in the horizontal plane, not a measured two-dimensional dispersion
+ellipse. No ellipse-area advantage is inferred from this experiment.
+For intuition, a local linear landing model
+$Y\simeq aF+b(F-P)$ with fixed path gives
+$\operatorname{Var}(Y)\simeq(a+b)^2\sigma_F^2$, independent of the mean
+face and path if the sensitivities are constant. Any simulated spread
+difference therefore arises from changing nonlinear sensitivities, not the
+mere existence of a nonzero curvature mean. This linearization explains the
+comparison; it is not used to generate any trajectory or landing.
+
+\section{Evidence and Reproduction}
+The adjacent README and checked-in result bundle record numerical results,
+validation commands, dependency/source hashes and graphic provenance.
+The graphics show a limited set of representative flights while the
+dispersion and statistics use all 10,000 shots per pattern. Full reproduction:
+\begin{verbatim}
+python3 -m src.tools.shot_pattern_analysis \
+  --shots 10000 --seed 20261008 \
+  --output docs/research/shot_pattern_analysis/results
+\end{verbatim}
+The native Rust dependency must be installed from this checkout. Compilation
+of this reference is a document check, not scientific acceptance.
+
+\section{External Context}
+Trackman defines face-to-path as the horizontal difference between face and
+path and relates it to curvature; see
+\url{https://www.trackman.com/blog/face-to-path} and
+\url{https://www.trackman.com/blog/spin-axis}.
+These definitions support the input interpretation, not validation of this
+repository's numerical predictions.
+\end{document}

@@ -3,7 +3,54 @@
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
+
+
+def _paired_arrays(
+    curved: ArrayLike, straight: ArrayLike, resamples: int, seed: int
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    a = np.asarray(curved, dtype=float)
+    b = np.asarray(straight, dtype=float)
+    if a.ndim != 1 or b.ndim != 1 or a.shape != b.shape or a.size < 10:
+        raise ValueError("inputs must be equal one-dimensional arrays of >=10 pairs")
+    if not np.all(np.isfinite(a)) or not np.all(np.isfinite(b)):
+        raise ValueError("paired values must be finite")
+    if not isinstance(resamples, int) or isinstance(resamples, bool) or resamples < 100:
+        raise ValueError("resamples must be an integer >=100")
+    if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
+        raise ValueError("seed must be a nonnegative integer")
+    return a, b
+
+
+def paired_hit_difference(
+    curved: ArrayLike,
+    straight: ArrayLike,
+    *,
+    resamples: int = 500,
+    seed: int = 20261008,
+) -> dict[str, float]:
+    """Return curved-minus-straight hit fraction and paired 95% bootstrap interval.
+
+    Inputs must be equal finite one-dimensional binary arrays of >=10 pairs.
+    Resample matching shot indices, preserving correlated hits. The interval
+    reflects Monte Carlo sampling only, excluding model uncertainty.
+    Postcondition: finite estimates and bounds within [-1, 1].
+    """
+    a, b = _paired_arrays(curved, straight, resamples, seed)
+    if not np.all(np.isin(a, [0, 1])) or not np.all(np.isin(b, [0, 1])):
+        raise ValueError("hit arrays must be binary (zero or one)")
+    differences = a - b
+    rng = np.random.default_rng(seed)
+    estimates = np.empty(resamples)
+    for i in range(resamples):
+        indices = rng.integers(0, a.size, size=a.size)
+        estimates[i] = np.mean(differences[indices])
+    lower, upper = np.quantile(estimates, [0.025, 0.975])
+    return {
+        "estimate": float(np.mean(differences)),
+        "lower_95": float(lower),
+        "upper_95": float(upper),
+    }
 
 
 def paired_variance_ratio(
@@ -22,16 +69,7 @@ def paired_variance_ratio(
     The interval describes Monte Carlo sampling uncertainty only, excluding
     model discrepancy, uncertain parameters, and player-to-player variation.
     """
-    a = np.asarray(curved, dtype=float)
-    b = np.asarray(straight, dtype=float)
-    if a.ndim != 1 or b.ndim != 1 or a.shape != b.shape or a.size < 10:
-        raise ValueError("inputs must be equal one-dimensional arrays of >=10 pairs")
-    if not np.all(np.isfinite(a)) or not np.all(np.isfinite(b)):
-        raise ValueError("paired values must be finite")
-    if not isinstance(resamples, int) or isinstance(resamples, bool) or resamples < 100:
-        raise ValueError("resamples must be an integer >=100")
-    if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
-        raise ValueError("seed must be a nonnegative integer")
+    a, b = _paired_arrays(curved, straight, resamples, seed)
     reference = float(np.var(b, ddof=1))
     if reference <= 0:
         raise ValueError("straight reference variance must be positive")

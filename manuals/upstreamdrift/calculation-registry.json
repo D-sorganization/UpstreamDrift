@@ -109,6 +109,11 @@
       "id": "UP-D1-native-muscle-contact-inventory",
       "owner": "UpstreamDrift issue #11815",
       "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
+    },
+    {
+      "id": "UP-D1-shot-pattern-variance-inventory",
+      "owner": "UpstreamDrift Shot Pattern Analysis",
+      "resolution": "Inventory src/tools/shot_pattern_analysis and its separate editable experiment reference docs/research/shot_pattern_analysis/shot_pattern_analysis.tex: paired Monte Carlo face-only variation, rigid-body impact launch/spin mapping, Rust RK4 carry endpoints, nominal aiming rotation, empirical variance/quantiles/target-hit metrics and paired bootstrap uncertainty. Impact translation omits the tangential friction impulse while spin includes friction; this simplified mapping and the fixed-speed/loft/path centered-strike case are model-conditional, not observed golfer outcomes or scientific qualification. Keep manual publication and release blocked pending governed calculation inventory, measured validation, source/dependency provenance and page review."
     }
   ],
   "calculations": []
