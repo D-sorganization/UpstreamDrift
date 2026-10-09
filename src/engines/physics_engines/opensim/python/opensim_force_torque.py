@@ -14,6 +14,8 @@ Builds a world-frame (Z-up) :class:`ForceTorqueFrame` from an OpenSim state:
 * ``MUSCLE`` wrenches (FTO-16, #11301): for every enabled ``Muscle`` the tendon
   force along the path's effective end directions, one wrench at the origin and
   one at the insertion (labels ``muscle:<name>:origin`` / ``:insertion``).
+* Ground reaction (GCV-2, #11708): per-foot and net GRF, CoP, free moment and
+  moment about the centre of mass from the foot-body sphere contacts.
 * Axial loads of each joint-child segment from its proximal reaction.
 
 ``grip:*`` wrenches are deliberately absent: the OpenSim grip model still
@@ -41,6 +43,9 @@ import numpy as np
 import opensim
 
 from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
+)
 from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.body_part_viz.axial_loads import (
@@ -202,7 +207,9 @@ class OpenSimForceTorqueSource:
         wrenches: list[OverlayWrench] = []
         wrenches.extend(self._reactions(state))
         wrenches.extend(self._actuators(state))
-        wrenches.extend(self._contacts(state))
+        contacts = self._contacts(state)
+        wrenches.extend(contacts)
+        wrenches.extend(self._ground_reaction(contacts, state))
         if self._include_muscles:
             wrenches.extend(self.muscle_wrenches(state))
         axial = self._axial_loads(state)
@@ -465,6 +472,17 @@ class OpenSimForceTorqueSource:
         start = names.index(key)
         values = force.getRecordValues(state)
         return np.array([values.get(start + i) for i in range(6)])
+
+    def _ground_reaction(
+        self, contacts: list[OverlayWrench], state: Any
+    ) -> list[OverlayWrench]:
+        """Per-foot and net GRF breakdown of the sphere/half-space contacts (GCV-2).
+
+        Every supported contact is a sphere against a half-space, i.e. a ground
+        contact.  The centre of mass comes from ``Model.calcMassCenterPosition``.
+        """
+        com = self._world(_vec3(self._model.calcMassCenterPosition(state)))
+        return list(ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE))
 
     def _contacts(self, state: Any) -> list[OverlayWrench]:
         wrenches = []
