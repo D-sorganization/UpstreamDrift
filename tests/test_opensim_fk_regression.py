@@ -135,6 +135,49 @@ def test_canonical_extractors_reject_none_inputs() -> None:
             func(object(), None)
 
 
+class _FakeState:
+    """Mirrors the OpenSim 4.6 ``State`` binding: no ``isValid`` (issue #11796)."""
+
+    def __init__(self, n_subsystems: int) -> None:
+        self._n_subsystems = n_subsystems
+
+    def getNumSubsystems(self) -> int:  # noqa: N802 - OpenSim binding name
+        return self._n_subsystems
+
+
+class _FakeModel:
+    def __init__(self) -> None:
+        self.realized: list[object] = []
+
+    def realizePosition(self, state: object) -> None:  # noqa: N802 - OpenSim name
+        self.realized.append(state)
+
+
+@pytest.mark.unit
+def test_position_realisation_works_without_state_isvalid() -> None:
+    """A state from ``initSystem()`` is realised; the binding has no ``isValid``."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        _ensure_position_realised,
+    )
+
+    model, state = _FakeModel(), _FakeState(n_subsystems=3)
+    _ensure_position_realised(model, state)
+    assert model.realized == [state]
+
+
+@pytest.mark.unit
+def test_position_realisation_rejects_uninitialised_state() -> None:
+    """A state with no subsystems never came from ``initSystem()``."""
+    from src.engines.physics_engines.opensim.python.opensim_golf.fk import (
+        _ensure_position_realised,
+    )
+
+    model = _FakeModel()
+    with pytest.raises(RuntimeError, match="initSystem"):
+        _ensure_position_realised(model, _FakeState(n_subsystems=0))
+    assert model.realized == []
+
+
 # ---------------------------------------------------------------------------
 # Layer 2: actual OpenSim load + extraction (binding required).
 # ---------------------------------------------------------------------------
