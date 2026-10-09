@@ -181,7 +181,8 @@ async def build_assembly(request: AssemblyPlanRequest) -> AssemblyStateResponse:
     Postcondition: ``placed[0]`` is the base part and ``drop`` is set exactly
     when ``candidate`` was given; the candidate is never applied.
     """
-    return await anyio.to_thread.run_sync(_state, request)
+    state: AssemblyStateResponse = await anyio.to_thread.run_sync(_state, request)
+    return state
 
 
 @router.post(
@@ -189,4 +190,5 @@ async def build_assembly(request: AssemblyPlanRequest) -> AssemblyStateResponse:
 )
 async def export_assembly(request: AssemblyExportRequest) -> AssemblyExportResponse:
     """Serialize an assembly plan; validation errors are a 422 unless forced."""
-    return await anyio.to_thread.run_sync(_export, request)
+    exported: AssemblyExportResponse = await anyio.to_thread.run_sync(_export, request)
+    return exported
