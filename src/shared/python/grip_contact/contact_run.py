@@ -12,6 +12,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from typing import Any
+
 import numpy as np
 
 from src.shared.python.grip_contact.parity import GripKineticsSeries
@@ -44,7 +46,7 @@ class ContactRun:
     def save_npz(self, path: Path) -> None:
         """Write the series and the contact outputs (``<path>`` and ``.contact.npz``)."""
         self.series.save_npz(path)
-        extra: dict[str, np.ndarray] = {}
+        extra: dict[str, Any] = {}
         for s in SIDES:
             extra[f"normal_force_{s}_n"] = np.asarray(self.normal_force_n[s])
             extra[f"roll_slip_{s}_rad"] = np.asarray(self.roll_slip_rad[s])
