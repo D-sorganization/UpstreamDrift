@@ -13,7 +13,7 @@
   "totals": {
     "identical": 401,
     "diverged": 272,
-    "ud-only": 1734,
+    "ud-only": 1735,
     "tools-only": 777,
     "spelling-only": 121
   },
@@ -518,7 +518,7 @@
     "motion_matching": {
       "identical": 0,
       "diverged": 0,
-      "ud-only": 277,
+      "ud-only": 278,
       "tools-only": 0,
       "spelling-only": 0
     },
@@ -15101,6 +15101,18 @@
       "spelling_only": false
     },
     {
+      "path": "motion_matching/gaze_sweep.py",
+      "classification": "ud-only",
+      "package": "motion_matching",
+      "subpackage": "",
+      "ud_bytes": 5233,
+      "tools_bytes": null,
+      "byte_delta": null,
+      "byte_identical": false,
+      "ud_has_child_copy_header": false,
+      "spelling_only": false
+    },
+    {
       "path": "motion_matching/grip_fit.py",
       "classification": "ud-only",
       "package": "motion_matching",
@@ -16149,7 +16161,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 9364,
+      "ud_bytes": 10075,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -16161,7 +16173,7 @@
       "classification": "ud-only",
       "package": "motion_matching",
       "subpackage": "pipeline",
-      "ud_bytes": 24503,
+      "ud_bytes": 24003,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
