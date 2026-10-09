@@ -1,3 +1,17 @@
+## Native Muscle-Model Asset Admission (F07 Child #11819)
+
+`tour_matching.audit_muscle_model_asset` requires a pinned source SHA-256 and
+returns serialized declarations plus optional actual native initialization,
+recursive components, effective muscle options, path attachment frames,
+coordinate locks/prescription, state names and runtime/loaded-serialization
+identity. Region and coordinate-role maps use exact native paths and retain
+unverified anatomical status. Unknown paths fail; unavailable native loading
+retains source facts and required evidence. Local mesh candidates are hashed
+without claiming complete native dependency closure. This API never qualifies
+anatomy, muscle capacity, model provenance, contact, full state or replay.
+See canonical manual chapter 18 and F07_MODEL_ADMISSION_TURNOVER.md; F07 #11791
+and the full feedback-controls epic #11784 remain open.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
