@@ -19,6 +19,8 @@ from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_replay_contract_types,
+    require_no_global_mujoco_callbacks,
     validate_native_replay_bundle,
 )
 
@@ -26,16 +28,6 @@ if TYPE_CHECKING:
     from sidekick.lab.mocap import ExperimentReplayBundle
 
 _VERSION = "1.0.0"
-_CALLBACKS = (
-    "control",
-    "passive",
-    "act_dyn",
-    "act_gain",
-    "act_bias",
-    "sensor",
-    "contactfilter",
-    "time",
-)
 
 
 @dataclass(frozen=True)
@@ -53,25 +45,13 @@ class NativeTorqueReplay:
 
 
 def _contracts() -> Any:
-    """Resolve the single Tools authority, requiring its implemented T01 API."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
-
-    if not hasattr(mocap, "ExperimentReplayBundle"):
-        raise RuntimeError(
-            "Native replay requires the Tools T01 experiment-replay contract"
-        )
-    return mocap
+    return native_replay_contract_types()
 
 
 def _load_native(path: Path) -> tuple[Any, Any]:
     import mujoco as mj
 
-    for name in _CALLBACKS:
-        if getattr(mj, "get_mjcb_" + name)() is not None:
-            raise ValueError("native callbacks are forbidden in independent replay")
+    require_no_global_mujoco_callbacks(mj)
     source_hash = hashlib.sha256(path.read_bytes()).digest()
     model = mj.MjModel.from_xml_path(str(path))
     if hashlib.sha256(path.read_bytes()).digest() != source_hash:
@@ -343,6 +323,68 @@ def replay_native_torque_bundle(
     ):
         raise ValueError("native direct-motor replay requires held actuator torque")
     return _step_native(bundle, Path(model_path))
+
+
+def native_marker_positions_from_replay(
+    bundle: ExperimentReplayBundle,
+    model_path: str | Path,
+    replay: NativeTorqueReplay,
+    attachments: tuple[tuple[str, str, tuple[float, float, float]], ...],
+) -> Any:
+    """Map replay configurations to named body-local points using MuJoCo FK."""
+    import mujoco as mj
+
+    from src.shared.python.motion_matching.replay_metrics import (
+        NativeMarkerPositionOutput,
+    )
+
+    contracts = _contracts()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    path = Path(model_path)
+    model, data = _load_native(path)
+    if _native_identity(model, path, contracts) != bundle.model:
+        raise ValueError("marker FK model identity differs from frozen replay bundle")
+    times = np.asarray(replay.time_seconds, dtype=np.float64)
+    qpos = np.asarray(replay.qpos, dtype=np.float64)
+    if (
+        qpos.shape != (len(times), model.nq)
+        or not np.isfinite(times).all()
+        or not np.isfinite(qpos).all()
+        or len(times) < 2
+        or not np.all(np.diff(times) > 0)
+    ):
+        raise ValueError("marker FK requires finite full-horizon native qpos samples")
+    labels = tuple(item[0] for item in attachments)
+    if not labels or len(labels) != len(set(labels)):
+        raise ValueError("marker labels must be non-empty, unique and ordered")
+    resolved: list[tuple[int, np.ndarray]] = []
+    for label, body_name, offset in attachments:
+        if not label or not body_name:
+            raise ValueError("marker labels and native body names must be explicit")
+        local = np.asarray(offset, dtype=np.float64)
+        if local.shape != (3,) or not np.isfinite(local).all():
+            raise ValueError("marker body-local offset must be a finite 3-vector")
+        body_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, body_name)
+        if body_id < 0:
+            raise ValueError(f"unknown native marker body: {body_name}")
+        resolved.append((body_id, local))
+    positions: NDArray[np.float64] = np.empty(
+        (len(times), len(attachments), 3), dtype=np.float64
+    )
+    for sample, configuration in enumerate(qpos):
+        data.qpos[:] = configuration
+        mj.mj_forward(model, data)
+        for marker, (body_id, local) in enumerate(resolved):
+            positions[sample, marker] = (
+                data.xpos[body_id] + data.xmat[body_id].reshape(3, 3) @ local
+            )
+    return NativeMarkerPositionOutput(
+        times,
+        positions,
+        labels,
+        "world",
+        bundle.input_history.timebase_id,
+    )
 
 
 def _step_native(bundle: Any, path: Path) -> NativeTorqueReplay:

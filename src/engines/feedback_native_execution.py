@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -23,6 +24,15 @@ if TYPE_CHECKING:
     )
     from src.engines.physics_engines.mujoco.python.native_torque_replay import (
         NativeTorqueReplay,
+    )
+    from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+        NativeMyoSuiteExcitationReplay,
+    )
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        NativeDirectModelReplay,
+    )
+    from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+        NativePinocchioTorqueReplay,
     )
 
 
@@ -61,6 +71,19 @@ class NativeReplayRequest:
             "row_key": f"{self.binding.package_id}/{self.binding.variant_id}/{drive_mode.value}",
             "bundle_schema": str(self.bundle.schema_version),
         }
+
+
+@dataclass(frozen=True)
+class NativeReplayExecution:
+    """Validated receipt and actual output from one native replay invocation."""
+
+    receipt: NativeExecutionReceipt
+    output: (
+        NativeTorqueReplay
+        | NativeDrakeTorqueReplay
+        | NativePinocchioTorqueReplay
+        | NativeMyoSuiteExcitationReplay
+    )
 
 
 @dataclass(frozen=True)
@@ -105,6 +128,49 @@ class NativeExecutionReceipt:
     full_horizon: bool
     state_reset_allowed: bool
     state_reset_count: int | None
+
+
+@dataclass(frozen=True)
+class NativeActuatorCommandReceipt:
+    """Actual direct-MuJoCo command replay with separate inventory provenance."""
+
+    schema_version: str
+    package_id: str
+    variant_id: str
+    inventory_engine: str
+    native_engine: str
+    native_model_id: str
+    native_variant_id: str
+    native_provider_id: str
+    native_provider_sha256: str
+    native_source_model_sha256: str
+    loaded_native_model_sha256: str
+    compiled_actuator_profile_sha256: str
+    actuator_law_manifest_sha256: str
+    state_schema_sha256: str
+    initial_state_sha256: str
+    input_channel_schema_sha256: str
+    applied_input_sha256: str
+    policy_sha256: str
+    time_grid_sha256: str
+    resource_closure_sha256: str
+    output_state_sha256: str
+    ordered_channel_ids: tuple[str, ...]
+    horizon_s: float
+    state_sample_count: int
+    input_sample_count: int
+    nq: int
+    nv: int
+    full_state: bool
+    full_horizon: bool
+    state_reset_count: int
+    qualification: str = "unqualified"
+
+
+@dataclass(frozen=True)
+class NativeActuatorCommandExecution:
+    receipt: NativeActuatorCommandReceipt
+    output: NativeDirectModelReplay
 
 
 @dataclass(frozen=True)
@@ -161,6 +227,8 @@ def _binding_row(row: ComparisonRow, binding: NativeAdapterBinding) -> None:
         binding.drive_mode,
     ):
         raise ValueError("binding does not identify the declared inventory row")
+    if row.source_model_sha256 != binding.source_model_sha256:
+        raise ValueError("binding inventory source model identity differs")
     if row.engine not in TARGET_ENGINES:
         raise ValueError("inventory engine is outside the required parity set")
     if row.support != "supported":
@@ -202,6 +270,13 @@ def _validate_bundle(
     from sidekick.lab.mocap import ActuationInputKind, InputInterpolation, ReplayMode
 
     _binding_row(row, binding)
+    if row.engine == "myosuite":
+        from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+            validate_myo_suite_bundle_contract,
+        )
+
+        validate_myo_suite_bundle_contract(row, binding, bundle)
+        return
     if bundle.schema_version != "experiment-replay/1.0.0":
         raise ValueError("unsupported frozen replay bundle schema")
     if bundle.blocking_capabilities:
@@ -261,7 +336,10 @@ def _validate_bundle(
 
 
 def _output_digest(
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
 ) -> str:
     digest = hashlib.sha256()
     for name in (
@@ -272,6 +350,10 @@ def _output_digest(
         "discrete_states",
         "applied_actuator_torques",
         "generalized_actuator_torques",
+        "muscle_activations",
+        "actuator_controls",
+        "wrapper_states",
+        "applied_muscle_excitations",
     ):
         if not hasattr(output, name):
             continue
@@ -284,13 +366,8 @@ def _output_digest(
     return digest.hexdigest()
 
 
-def validate_native_replay_output(
-    row: ComparisonRow,
-    binding: NativeAdapterBinding,
-    bundle: Any,
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
-) -> NativeExecutionReceipt:
-    """Validate the adapter's complete actual output against the frozen bundle."""
+def _validate_output_type(row: ComparisonRow, output: Any) -> None:
+    """Require the registered provider's concrete output type."""
     if row.engine == "mujoco":
         from src.engines.physics_engines.mujoco.python.native_torque_replay import (
             NativeTorqueReplay,
@@ -305,12 +382,66 @@ def validate_native_replay_output(
 
         if not isinstance(output, NativeDrakeTorqueReplay):
             raise ValueError("Drake native adapter returned an unknown output type")
+    elif row.engine == "pinocchio":
+        from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+            NativePinocchioTorqueReplay,
+        )
+
+        if not isinstance(output, NativePinocchioTorqueReplay):
+            raise ValueError("Pinocchio native adapter returned an unknown output type")
+    elif row.engine == "myosuite":
+        from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+            NativeMyoSuiteExcitationReplay,
+        )
+
+        if not isinstance(output, NativeMyoSuiteExcitationReplay):
+            raise ValueError("MyoSuite native adapter returned an unknown output type")
     else:
         raise ValueError("no native output contract is registered for this engine")
+
+
+def _validate_myo_output(
+    output: Any, times: NDArray[np.float64], inputs: NDArray[np.float64]
+) -> None:
+    muscle = np.asarray(output.muscle_activations, dtype=np.float64)
+    controls = np.asarray(output.actuator_controls, dtype=np.float64)
+    wrappers = np.asarray(output.wrapper_states, dtype=np.float64)
+    if muscle.shape[0] != len(times) or controls.shape[0] != len(times):
+        raise ValueError("MyoSuite muscle and actuator state must cover full horizon")
+    if wrappers.shape[0] != len(times):
+        raise ValueError("MyoSuite wrapper state must cover full horizon")
+    if (
+        not np.isfinite(muscle).all()
+        or not np.isfinite(controls).all()
+        or not np.isfinite(wrappers).all()
+    ):
+        raise ValueError("MyoSuite native state contains nonfinite evidence")
+    if not np.array_equal(controls[1:], inputs):
+        raise ValueError("MyoSuite actual applied controls differ from bundle")
+    if not np.all(wrappers == wrappers[0]):
+        raise ValueError("MyoSuite wrapper state changed during wrapper-free replay")
+
+
+def validate_native_replay_output(
+    row: ComparisonRow,
+    binding: NativeAdapterBinding,
+    bundle: Any,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
+) -> NativeExecutionReceipt:
+    """Validate the adapter's complete actual output against the frozen bundle."""
+    _validate_output_type(row, output)
     _validate_bundle(row, binding, bundle)
     times = np.asarray(output.time_seconds, dtype=np.float64)
     expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
-    inputs = np.asarray(output.applied_actuator_torques, dtype=np.float64)
+    applied_field = (
+        "applied_muscle_excitations"
+        if row.engine == "myosuite"
+        else "applied_actuator_torques"
+    )
+    inputs = np.asarray(getattr(output, applied_field), dtype=np.float64)
     expected_inputs = np.asarray(bundle.input_history.values[:-1], dtype=np.float64)
     qpos = np.asarray(output.qpos, dtype=np.float64)
     qvel = np.asarray(output.qvel, dtype=np.float64)
@@ -320,15 +451,14 @@ def validate_native_replay_output(
         inputs, expected_inputs
     ):
         raise ValueError("native output actual inputs differ from frozen bundle")
-    qpos = np.asarray(output.qpos, dtype=np.float64)
-    qvel = np.asarray(output.qvel, dtype=np.float64)
-    generalized_effort = np.asarray(output.generalized_actuator_torques)
-    if generalized_effort.shape != (
-        len(inputs),
-        qvel.shape[1] if qvel.ndim == 2 else -1,
-    ):
-        raise ValueError("native generalized actuator effort dimensions differ")
-    _validate_native_output_state(bundle, output, times, qpos, qvel)
+    if row.engine != "myosuite":
+        generalized_effort = getattr(output, "generalized_actuator_torques", None)
+        if generalized_effort is None or np.asarray(generalized_effort).shape != (
+            len(inputs),
+            qvel.shape[1] if qvel.ndim == 2 else -1,
+        ):
+            raise ValueError("native generalized actuator effort dimensions differ")
+    _validate_native_output_state(row, bundle, output, times, inputs, qpos, qvel)
     if (
         output.input_sha256 != bundle.applied_input_sha256
         or output.policy_sha256 != bundle.policy_sha256
@@ -341,9 +471,14 @@ def validate_native_replay_output(
 
 
 def _validate_native_output_state(
+    row: ComparisonRow,
     bundle: Any,
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
     times: NDArray[np.float64],
+    inputs: NDArray[np.float64],
     qpos: NDArray[np.float64],
     qvel: NDArray[np.float64],
 ) -> None:
@@ -358,37 +493,79 @@ def _validate_native_output_state(
     if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
         raise ValueError("native qpos and qvel dimensions must be positive")
     state_component = {item.component_id: item.values for item in bundle.initial_state}
-    auxiliary_name = (
-        "integration_states"
-        if hasattr(output, "integration_states")
-        else "discrete_states"
-    )
-    expected_auxiliary_name = (
-        "integration" if auxiliary_name == "integration_states" else "discrete"
-    )
-    if tuple(state_component) != ("qpos", "qvel", expected_auxiliary_name):
-        raise ValueError(
-            "native adapter cannot preserve every declared state component"
+    if row.engine == "myosuite":
+        from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+            NativeMyoSuiteExcitationReplay,
         )
-    if auxiliary_name not in ("integration_states", "discrete_states"):
-        raise ValueError("native replay output lacks its complete numerical state")
-    auxiliary = np.asarray(getattr(output, auxiliary_name), dtype=np.float64)
-    if (
-        auxiliary.ndim != 2
-        or auxiliary.shape[0] != len(times)
-        or auxiliary.shape[1] <= 0
-    ):
-        raise ValueError("native output lacks full integration initialization state")
-    if auxiliary.shape[1] != len(state_component.get(expected_auxiliary_name, ())):
-        raise ValueError("native output auxiliary state differs from T01 state schema")
+
+        if not isinstance(output, NativeMyoSuiteExcitationReplay):
+            raise ValueError("MyoSuite native adapter returned an unknown output type")
+        _validate_myo_output(output, times, inputs)
+        expected_components = (
+            "qpos",
+            "qvel",
+            "muscle_activation",
+            "actuator_internal",
+            "integration",
+            "wrapper_state",
+        )
+        if tuple(state_component) != expected_components:
+            raise ValueError(
+                "native adapter cannot preserve every declared state component"
+            )
+        auxiliary_name = "integration"
+        auxiliary = np.asarray(output.integration_states, dtype=np.float64)
+        for field, key in (
+            (output.muscle_activations[0], "muscle_activation"),
+            (output.actuator_controls[0], "actuator_internal"),
+            (output.wrapper_states[0], "wrapper_state"),
+        ):
+            if not np.array_equal(field, state_component[key]):
+                raise ValueError(f"native initial MyoSuite {key} differs")
+    elif row.engine == "pinocchio":
+        if tuple(state_component) != ("qpos", "qvel"):
+            raise ValueError(
+                "Pinocchio adapter cannot preserve undeclared native cache state"
+            )
+        if hasattr(output, "integration_states") or hasattr(output, "discrete_states"):
+            raise ValueError("Pinocchio output declares unsupported cache state")
+        auxiliary_name = ""
+        auxiliary = np.empty((0, 0), dtype=np.float64)
+    else:
+        auxiliary_field = (
+            "integration_states"
+            if hasattr(output, "integration_states")
+            else "discrete_states"
+        )
+        auxiliary_name = (
+            "integration" if auxiliary_field == "integration_states" else "discrete"
+        )
+        if tuple(state_component) != ("qpos", "qvel", auxiliary_name):
+            raise ValueError(
+                "native adapter cannot preserve every declared state component"
+            )
+        auxiliary = np.asarray(getattr(output, auxiliary_field), dtype=np.float64)
+    if row.engine != "pinocchio":
+        if (
+            auxiliary.ndim != 2
+            or auxiliary.shape[0] != len(times)
+            or auxiliary.shape[1] <= 0
+        ):
+            raise ValueError(
+                "native output lacks full integration initialization state"
+            )
+        if auxiliary.shape[1] != len(state_component.get(auxiliary_name, ())):
+            raise ValueError(
+                "native output auxiliary state differs from T01 state schema"
+            )
     if not np.array_equal(
         qpos[0], state_component.get("qpos", ())
     ) or not np.array_equal(qvel[0], state_component.get("qvel", ())):
         raise ValueError(
             "native output initial physical state differs from frozen bundle"
         )
-    if not np.array_equal(
-        auxiliary[0], state_component.get(expected_auxiliary_name, ())
+    if row.engine != "pinocchio" and not np.array_equal(
+        auxiliary[0], state_component.get(auxiliary_name, ())
     ):
         raise ValueError(
             "native output initial numerical state differs from frozen bundle"
@@ -408,11 +585,12 @@ def _native_execution_receipt(
     """Build an unqualified integrity receipt from validated native samples."""
     input_history = bundle.input_history
     replay_policy = bundle.policy
+    drive_mode = binding.drive_mode
     return NativeExecutionReceipt(
         "native-execution/1.0.0",
         row.package_id,
         row.variant_id,
-        row.drive_mode.value,
+        drive_mode.value,
         row.engine,
         row.required,
         row.support,
@@ -454,13 +632,257 @@ def execute_native_replay(
     request: NativeReplayRequest, registry: Any
 ) -> NativeExecutionReceipt:
     """Execute one frozen bundle through its exact reviewed native adapter."""
+    return execute_native_replay_with_output(request, registry).receipt
+
+
+def _validate_command_evidence_row(
+    request: NativeReplayRequest, evidence_row: Any, profile_bytes: bytes
+) -> Any:
+    """Validate T02's structural link before resolving native model semantics."""
+    from sidekick.lab.mocap import (
+        ActuationInputKind,
+        CapabilityAvailability,
+        CapabilitySupport,
+        COMPILED_ACTUATOR_PROFILE_ID,
+        COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION,
+        COMPILED_ACTUATOR_PROFILE_VERSION,
+        EvidenceArtifactKind,
+        ImplementationEvidenceKind,
+    )
+
+    if evidence_row.replay_bundle != request.bundle:
+        raise ValueError("T02 evidence row does not contain this exact T01 bundle")
+    binding = request.binding
+    binding_drive_mode = binding.drive_mode
+    if (
+        evidence_row.package_id != binding.package_id
+        or evidence_row.variant_id != binding.variant_id
+        or evidence_row.drive_mode.value != binding_drive_mode.value
+    ):
+        raise ValueError("T02 evidence row differs from the F01 inventory binding")
+    if (
+        evidence_row.support is not CapabilitySupport.SUPPORTED
+        or evidence_row.availability is not CapabilityAvailability.AVAILABLE
+    ):
+        raise ValueError("T02 command evidence is not supported and available")
+    bundle = request.bundle
+    if bundle.input_history.input_kind is not ActuationInputKind.ACTUATOR_COMMAND:
+        raise ValueError("compiled profile admission requires ACTUATOR_COMMAND input")
+    if evidence_row.drive_mode.value != "muscle_excitation":
+        raise ValueError("compiled command profile applies only to the muscle row")
+    implementations = tuple(
+        item
+        for item in evidence_row.implementation_evidence
+        if item.kind is ImplementationEvidenceKind.ACTUATOR
+    )
+    artifacts = tuple(
+        item
+        for item in evidence_row.artifacts
+        if item.kind is EvidenceArtifactKind.ACTUATOR
+    )
+    if len(implementations) != 1 or len(artifacts) != 1:
+        raise ValueError("T02 must provide exactly one actuator profile reference")
+    implementation = implementations[0]
+    artifact = artifacts[0]
+    if (
+        not implementation.required
+        or not implementation.is_available
+        or implementation.implementation_id != COMPILED_ACTUATOR_PROFILE_ID
+        or implementation.version != COMPILED_ACTUATOR_PROFILE_VERSION
+        or implementation.evidence_reference_id != artifact.reference_id
+        or implementation.sha256 != artifact.sha256
+    ):
+        raise ValueError("T02 actuator implementation reference is stale or invalid")
+    if not isinstance(profile_bytes, bytes):
+        raise TypeError("resolved compiled actuator profile must be immutable bytes")
+    actual_digest = hashlib.sha256(profile_bytes).hexdigest()
+    if actual_digest != artifact.sha256:
+        raise ValueError("resolved profile bytes differ from the T02 artifact digest")
+    try:
+        profile = json.loads(profile_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(
+            "resolved compiled actuator profile is invalid JSON"
+        ) from error
+    if (
+        not isinstance(profile, dict)
+        or profile.get("schema_version") != COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION
+        or json.dumps(profile, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        != profile_bytes
+    ):
+        raise ValueError("resolved compiled actuator profile is not canonical v1")
+    return profile
+
+
+def _validate_direct_command_binding(
+    request: NativeReplayRequest, registration: Any
+) -> None:
+    binding = request.binding
+    bundle = request.bundle
+    if registration.engine_id != "mujoco":
+        raise ValueError("ACTUATOR_COMMAND direct execution requires native MuJoCo")
+    if request.model_path.resolve(strict=True) != registration.model_path.resolve(
+        strict=True
+    ):
+        raise ValueError("request model path differs from its direct registration")
+    if (
+        binding.native_model_id != registration.model_id
+        or binding.native_variant_id != registration.variant_id
+        or binding.native_execution_provider_id != registration.provider_id
+        or binding.native_execution_provider_sha256 != registration.provider_sha256
+        or binding.loaded_native_model_sha256 != registration.loaded_native_model_sha256
+    ):
+        raise ValueError("direct model identity differs from the explicit binding")
+    if (
+        bundle.model.engine_id != registration.engine_id
+        or bundle.model.model_id != registration.model_id
+        or bundle.model.variant_id != registration.variant_id
+        or bundle.model.source_model_sha256 != registration.source_model_sha256
+        or bundle.model.provider_id != registration.provider_id
+        or bundle.model.provider_sha256 != registration.provider_sha256
+        or bundle.model.loaded_native_model_sha256
+        != registration.loaded_native_model_sha256
+    ):
+        raise ValueError("T01 native identity differs from its direct registration")
+    channel_ids = tuple(channel.channel_id for channel in bundle.input_history.channels)
+    if (
+        bundle.state_schema_sha256 != registration.state_schema_sha256
+        or binding.state_schema_sha256 != bundle.state_schema_sha256
+        or bundle.input_channel_schema_sha256
+        != registration.input_channel_schema_sha256
+        or binding.input_channel_schema_sha256 != bundle.input_channel_schema_sha256
+        or channel_ids != registration.ordered_channel_ids
+        or binding.ordered_input_channel_ids != channel_ids
+    ):
+        raise ValueError("T01 schemas or ordered command channels differ from binding")
+
+
+def _direct_command_output_digest(output: NativeDirectModelReplay) -> str:
+    digest = hashlib.sha256()
+    for name in (
+        "time_seconds",
+        "qpos",
+        "qvel",
+        "actuator_activation",
+        "actuator_controls",
+        "integration_states",
+        "applied_actuator_commands",
+    ):
+        values = np.asarray(getattr(output, name), dtype="<f8")
+        if not np.isfinite(values).all():
+            raise ValueError("direct command output contains nonfinite state")
+        digest.update(name.encode("ascii") + b"\0")
+        digest.update(np.asarray(values.shape, dtype="<u8").tobytes())
+        digest.update(values.tobytes(order="C"))
+    return digest.hexdigest()
+
+
+def execute_native_actuator_command_replay(
+    request: NativeReplayRequest,
+    registry: Any,
+    evidence_row: Any,
+    resolved_profile_bytes: bytes,
+    registration: Any,
+    factory: Any,
+    *,
+    claim_native_muscle: bool = False,
+) -> NativeActuatorCommandExecution:
+    """Resolve a structural T02 profile and validate it against native MuJoCo.
+
+    ACTUATOR_COMMAND can contain mixed motor, muscle, filter or other compiled
+    actuator laws. It therefore never proves a muscle-only assistance claim.
+    Inventory/provider provenance remains separate from the native executor.
+    """
+    if claim_native_muscle:
+        raise ValueError(
+            "mixed compiled actuator commands cannot claim muscle-only drive"
+        )
+    row = registry.get(
+        request.binding.package_id,
+        request.binding.variant_id,
+        request.binding.drive_mode,
+    )
+    _binding_row(row, request.binding)
+    if request.binding.drive_mode is not DriveMode.MUSCLE_EXCITATION:
+        raise ValueError("compiled actuator command row must be muscle-classified")
+    bundle = request.bundle
+    replay_policy = bundle.policy.replay_mode
+    input_kind = bundle.input_history.input_kind
+    bundle_integrity = bundle.integrity
+    initial_state_sha256 = bundle_integrity.initial_state_sha256
+    if replay_policy.value != "native_own_contact":
+        raise ValueError("compiled actuator command replay requires native contact")
+    if input_kind.value != "actuator_command":
+        raise ValueError("compiled actuator command replay requires ACTUATOR_COMMAND")
+    _validate_command_evidence_row(request, evidence_row, resolved_profile_bytes)
+    _validate_direct_command_binding(request, registration)
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        replay_direct_model_actuator_commands,
+    )
+
+    output = replay_direct_model_actuator_commands(
+        request.bundle,
+        registration,
+        factory,
+        compiled_profile_bytes=resolved_profile_bytes,
+    )
+    if (
+        output.compiled_actuator_profile_sha256
+        != hashlib.sha256(resolved_profile_bytes).hexdigest()
+    ):
+        raise ValueError("native executor did not bind the resolved profile bytes")
+    times = np.asarray(output.time_seconds, dtype=np.float64)
+    receipt = NativeActuatorCommandReceipt(
+        "native-actuator-command/1.0.0",
+        row.package_id,
+        row.variant_id,
+        row.engine,
+        registration.engine_id,
+        registration.model_id,
+        registration.variant_id,
+        registration.provider_id,
+        registration.provider_sha256,
+        registration.source_model_sha256,
+        registration.loaded_native_model_sha256,
+        output.compiled_actuator_profile_sha256,
+        output.actuator_law_manifest_sha256,
+        request.bundle.state_schema_sha256,
+        initial_state_sha256,
+        request.bundle.input_channel_schema_sha256,
+        request.bundle.applied_input_sha256,
+        request.bundle.policy_sha256,
+        request.bundle.time_grid_sha256,
+        output.resource_closure_sha256,
+        _direct_command_output_digest(output),
+        tuple(registration.ordered_channel_ids),
+        float(times[-1] - times[0]),
+        len(times),
+        len(times) - 1,
+        int(output.qpos.shape[1]),
+        int(output.qvel.shape[1]),
+        True,
+        True,
+        0,
+    )
+    return NativeActuatorCommandExecution(receipt, output)
+
+
+def execute_native_replay_with_output(
+    request: NativeReplayRequest, registry: Any
+) -> NativeReplayExecution:
+    """Execute once and return both the integrity receipt and native trajectory."""
     row = registry.get(
         request.binding.package_id,
         request.binding.variant_id,
         request.binding.drive_mode,
     )
     _validate_bundle(row, request.binding, request.bundle)
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay
+    output: (
+        NativeTorqueReplay
+        | NativeDrakeTorqueReplay
+        | NativePinocchioTorqueReplay
+        | NativeMyoSuiteExcitationReplay
+    )
     if (
         row.engine == "mujoco"
         and request.binding.native_execution_provider_id
@@ -480,9 +902,36 @@ def execute_native_replay(
         )
 
         output = replay_native_drake_torque_bundle(request.bundle, request.model_path)
+    elif (
+        row.engine == "pinocchio"
+        and request.binding.native_execution_provider_id
+        == "pinocchio-native-torque-replay"
+    ):
+        from src.engines.physics_engines.pinocchio.python.native_torque_replay import (
+            replay_native_pinocchio_torque_bundle,
+        )
+
+        output = replay_native_pinocchio_torque_bundle(
+            request.bundle, request.model_path
+        )
+    elif (
+        row.engine == "myosuite"
+        and request.binding.native_execution_provider_id
+        == "myosuite-native-muscle-excitation-replay"
+    ):
+        from src.engines.physics_engines.myosuite.python.native_excitation_replay import (
+            replay_native_myo_suite_excitation_bundle,
+        )
+
+        output = replay_native_myo_suite_excitation_bundle(
+            request.bundle, str(request.model_path)
+        )
     else:
         raise ValueError("no reviewed native adapter is registered for this row")
-    return validate_native_replay_output(row, request.binding, request.bundle, output)
+    receipt = validate_native_replay_output(
+        row, request.binding, request.bundle, output
+    )
+    return NativeReplayExecution(receipt, output)
 
 
 def build_native_replay_report(
@@ -516,7 +965,7 @@ def build_native_replay_report(
                 _row_result(row, "missing_binding", "no explicit adapter binding")
             )
             continue
-        if row.engine not in {"mujoco", "drake"}:
+        if row.engine not in {"mujoco", "drake", "pinocchio", "myosuite"}:
             results.append(
                 _row_result(row, "unsupported_adapter", "no reviewed native adapter")
             )

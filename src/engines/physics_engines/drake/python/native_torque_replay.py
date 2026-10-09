@@ -21,6 +21,9 @@ from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_replay_contract_types,
+    require_native_replay_equivalence,
+    validate_frozen_torque_history,
     validate_native_replay_bundle,
 )
 
@@ -45,14 +48,7 @@ class NativeDrakeTorqueReplay:
 
 
 def _contracts() -> Any:
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
-
-    if not hasattr(mocap, "ExperimentReplayBundle"):
-        raise RuntimeError("native replay requires the merged Tools T01 contract")
-    return mocap
+    return native_replay_contract_types()
 
 
 def _admit_source(raw: bytes) -> None:
@@ -283,24 +279,12 @@ def _policy(plant: Any, identity: Any, contracts: Any) -> Any:
 def _history(
     plant: Any, times: NDArray[np.float64], values: NDArray[np.float64]
 ) -> None:
-    if (
-        times.ndim != 1
-        or len(times) < 2
-        or times[0] != 0
-        or not np.isfinite(times).all()
-        or not np.allclose(np.diff(times), plant.time_step(), atol=1e-12, rtol=0)
-    ):
-        raise ValueError("time grid must begin at zero and match native timestep")
-    if (
-        values.shape != (len(times), plant.num_actuated_dofs())
-        or not np.isfinite(values).all()
-    ):
-        raise ValueError("finite torque rows must match ordered native motors")
-    if not np.array_equal(values[-1], values[-2]):
-        raise ValueError("terminal ZOH sentinel must equal the last executed input")
-    limits = np.array([a.effort_limit() for a in _actuators(plant)])
-    if np.any(np.abs(values) > limits):
-        raise ValueError("saved torque must already satisfy native effort limits")
+    validate_frozen_torque_history(
+        times,
+        values,
+        float(plant.time_step()),
+        np.array([a.effort_limit() for a in _actuators(plant)]),
+    )
 
 
 def build_native_drake_torque_bundle(
@@ -367,27 +351,70 @@ def replay_native_drake_torque_bundle(
         time_step=bundle.policy.step_size_seconds,
         experiment_id=bundle.experiment_id,
     )
-    if (
-        bundle.model,
-        bundle.initial_state,
-        bundle.input_history.channels,
-        bundle.policy,
-    ) != (
-        expected.model,
-        expected.initial_state,
-        expected.input_history.channels,
-        expected.policy,
-    ):
-        raise ValueError(
-            "native model, state, channel or executed policy identity differs"
-        )
-    if (
-        bundle.input_history.input_kind != contracts.ActuationInputKind.ACTUATOR_TORQUE
-        or bundle.input_history.interpolation
-        != contracts.InputInterpolation.ZERO_ORDER_HOLD
-    ):
-        raise ValueError("native replay requires held actuator torque")
+    require_native_replay_equivalence(bundle, expected, contracts)
     return _step_native(bundle, Path(model_path))
+
+
+def native_marker_positions_from_replay(
+    bundle: ExperimentReplayBundle,
+    model_path: str | Path,
+    replay: NativeDrakeTorqueReplay,
+    attachments: tuple[tuple[str, str, tuple[float, float, float]], ...],
+) -> Any:
+    """Map replay configurations to named Drake frame points using native FK."""
+    from src.shared.python.motion_matching.replay_metrics import (
+        NativeMarkerPositionOutput,
+    )
+
+    contracts = _contracts()
+    bundle = validate_native_replay_bundle(bundle, contracts)
+    path = Path(model_path)
+    timestep = bundle.policy.step_size_seconds
+    if timestep is None:
+        raise ValueError("Drake marker FK requires the frozen native step size")
+    plant, context = _load_native(path, timestep)
+    if _identity(plant, context, path, contracts) != bundle.model:
+        raise ValueError("marker FK model identity differs from frozen replay bundle")
+    times = np.asarray(replay.time_seconds, dtype=np.float64)
+    qpos = np.asarray(replay.qpos, dtype=np.float64)
+    if (
+        qpos.shape != (len(times), plant.num_positions())
+        or not np.isfinite(times).all()
+        or not np.isfinite(qpos).all()
+        or len(times) < 2
+        or not np.all(np.diff(times) > 0)
+    ):
+        raise ValueError("marker FK requires finite full-horizon native qpos samples")
+    labels = tuple(item[0] for item in attachments)
+    if not labels or len(labels) != len(set(labels)):
+        raise ValueError("marker labels must be non-empty, unique and ordered")
+    resolved: list[tuple[Any, np.ndarray]] = []
+    for label, frame_name, offset in attachments:
+        if not label or not frame_name:
+            raise ValueError("marker labels and native frame names must be explicit")
+        local = np.asarray(offset, dtype=np.float64)
+        if local.shape != (3,) or not np.isfinite(local).all():
+            raise ValueError("marker frame-local offset must be a finite 3-vector")
+        try:
+            frame = plant.GetFrameByName(frame_name)
+        except (RuntimeError, ValueError) as error:
+            raise ValueError(f"unknown native marker frame: {frame_name}") from error
+        resolved.append((frame, local))
+    positions = np.empty((len(times), len(attachments), 3), dtype=np.float64)
+    world = plant.world_frame()
+    for sample, configuration in enumerate(qpos):
+        plant.SetPositions(context, configuration)
+        for marker, (frame, local) in enumerate(resolved):
+            positions[sample, marker] = plant.CalcPointsPositions(
+                context, frame, local.reshape(3, 1), world
+            )[:, 0]
+    return NativeMarkerPositionOutput(
+        times,
+        positions,
+        labels,
+        "world",
+        bundle.input_history.timebase_id,
+    )
 
 
 def _step_native(bundle: Any, path: Path) -> NativeDrakeTorqueReplay:

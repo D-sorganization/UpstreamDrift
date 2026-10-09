@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-pinocchio-torque-replay-inventory",
+      "owner": "UpstreamDrift issue #11900",
+      "resolution": "Inventory existing public PinocchioPhysicsEngine ABA/RK4 manifold integration, complete q/v restoration, explicit unit generalized motor mapping, source/native model/provider identity and fixed post-limit inputs in chapter25. Twelve actual native Pinocchio4.1 synthetic checks establish independent replay and fixture-specific refinement. Native contact/grip, physiological actuation, required production models, private capture accuracy and all-model six-engine parity remain unqualified. Shared Tools contract/history/identity admission remains canonical and provider-bound."
+    },
+    {
       "id": "UP-D1-native-drake-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11838",
       "resolution": "Inventory native Drake complete discrete-state frozen motor-torque replay, factory-default abstract parameter identity, actual solver/approximation, numeric parameter byte identity and native net effort in chapter22 and native_torque_replay.py. Eleven actual Drake1.57 synthetic tests establish a restricted same-provider replay path. Native collision/contact, nonunit transmission, external-resource identity, convergence, all-model six-engine parity, anatomy/muscle recruitment and private capture acceptance remain open. Source review does not attest binary equivalence or transitive libraries."
@@ -109,6 +114,11 @@
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+    },
+    {
+      "id": "UP-D1-compiled-actuator-command-admission",
+      "owner": "UpstreamDrift issue #11955",
+      "resolution": "Inventory the versioned compiled-command profile and F09 native execution receipt in feedback_native_execution.py, feedback_comparison.py, and chapter 37. The exact MuJoCo 3.8.0 synthetic fixture binds ordered compiled actuator laws, the T01 full initial state/input/policy/time grid, provider/model identities and native output digest. The inventory MyoSuite label remains distinct from underlying MuJoCo execution; official MyoSuite runtime, production full-body model binding, muscle-only assistance, cross-engine command equivalence, six-engine parity and private-capture acceptance remain open. Receipts are integrity records, not signatures; external serialized receipts require independent verification or replay."
     }
   ],
   "calculations": []

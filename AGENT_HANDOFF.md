@@ -612,3 +612,31 @@ initial-state payload binding. It does not establish native replay,
 cross-engine parity, muscle physiology, or private-capture acceptance. Resume
 from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
 rerun the focused command recorded there with the pinned Tools submodule.
+
+## Native Pinocchio Replay Handoff (#11900)
+
+Native RED f273e45f2f precedes implementation; twelve actual Pinocchio4.1 tests pass including saturated torque reproduction and fixture refinement. See docs/development/feedback_controls/F06_PINOCCHIO_NATIVE_TURNOVER.md and canonical chapter25 for equations, commands, failed setups, resource ownership and remaining full-model/capture gates. Shared native admission changes require actual Drake/MuJoCo regression evidence before publication. This child does not close F06 or the full matching epic.
+
+## F09e Pinocchio Native Marker FK (#11914)
+
+Branch `feat/11914-f09e-pinocchio-marker-fk` is stacked on F09d #11913 and
+merges the exact native replay provider head from #11906. Actual Pinocchio 4.1
+`nq=8`, `nv=7` marker FK passes with independent nonzero floating-base and
+frame-offset transforms. The public `PinocchioPhysicsEngine.get_link_transforms`
+frame index was made compatible with Pinocchio 4.1. Native receipts retain
+separate inventory and adapter identities, complete q/v, and unknown reset
+count; marker results remain unqualified. See
+`docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` and chapter30.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a distinct MyoSuite
+muscle-excitation consumer to the F09 native execution path. It writes exact
+post-mapping normalized excitation directly to native `data.ctrl`; it never
+calls Gym `step` or treats `[-1, 1]` actions as muscle excitation. MyoSuite
+3.0.0/MuJoCo 3.6.0 public elbow fixture passes in the owned Python 3.12 runtime.
+The built-in fixture does not bind required production driver/iron models;
+those rows and the six-engine denominator remain unqualified. See
+`docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md` and
+canonical chapter31. The generic legacy four-value Gym step issue remains
+separate because this provider uses native plant stepping only.
