@@ -82,7 +82,8 @@ def _audit_drive_components(
     """Audit recursive native components, including those outside legacy sets.
 
     SWIG exposes heterogeneous Component proxies without Python type stubs;
-    native safeDownCast is the runtime type authority at this boundary.
+    Native casts establish inheritance; exact concrete-law identity separately
+    restricts muscles to the explicitly tested state and force policies.
     """
     muscle_paths = set()
     found_contacts = set()
@@ -97,6 +98,13 @@ def _audit_drive_components(
             raise ValueError("constraint needs a qualified initialization policy")
         muscle = osim.Muscle.safeDownCast(component)
         if muscle is not None:
+            if muscle.getConcreteClassName() not in (
+                "Millard2012EquilibriumMuscle",
+                "Thelen2003Muscle",
+            ):
+                raise ValueError(
+                    "concrete muscle law needs an explicit qualified state/force policy"
+                )
             if (
                 muscle.get_ignore_activation_dynamics()
                 or muscle.get_ignore_tendon_compliance()
@@ -341,7 +349,7 @@ def _native_replay_policy(
 
     muscles = model.getMuscles()
     return {
-        "adapter": "native-muscle-replay/1.2.1",
+        "adapter": "native-muscle-replay/1.3.1",
         "input_boundary": "muscle_excitation",
         "interpolation": "linear",
         "state_resets": False,
@@ -365,6 +373,7 @@ def _native_replay_policy(
         "contact_frame": "world-z-up",
         "constraint_policy": "unconstrained-unlocked-only",
         "muscle_domain_policy": "explicit-equilibrium-muscle-native-minima/1.1.0",
+        "muscle_class_policy": "exact-supported-concrete-law/1.0.0",
         "muscle_laws": json.dumps(
             [muscles.get(i).getConcreteClassName() for i in range(muscles.getSize())],
             separators=(",", ":"),

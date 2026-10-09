@@ -22,6 +22,7 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/19-native-torque-replay.qmd >}}
 {{< include chapters/22-native-drake-torque-replay.qmd >}}
+{{< include chapters/25-native-pinocchio-torque-replay.qmd >}}
 
 {{< include chapters/17-native-muscle-contact.qmd >}}
 
@@ -32,3 +33,9 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/17-sparse-collocation-benchmark.qmd >}}
 
 {{< include chapters/26-native-opensim-geometry.qmd >}}
+
+{{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
+
+{{< include chapters/30-native-simscape-restart.qmd >}}
+
+{{< include chapters/35-native-moco-initial-bindings.qmd >}}
