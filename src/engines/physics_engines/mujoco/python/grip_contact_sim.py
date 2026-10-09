@@ -170,7 +170,7 @@ class ClubInHands:
         self.delta0 = delta0
         self.hand_source: Any = None
         #: diagnostic drift of the trail hand, in its grip frame (issue #11986)
-        self.trail_shift_m = np.zeros(3)
+        self.trail_shift_m: np.ndarray = np.zeros(3)
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
         damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m
@@ -447,7 +447,7 @@ def simulate_grip_contact(
         raise ValueError("trail_shift_m must be a finite 3-vector")
     sim.trail_shift_m = shift
     spline = CoordinateSpline(swing.time_s, swing.q)
-    times = swing.time_s
+    times: np.ndarray = swing.time_s
     if t_start_s is not None:
         times = times[times >= t_start_s - 1e-12]
     if t_end_s is not None:
