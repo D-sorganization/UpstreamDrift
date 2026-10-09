@@ -52,6 +52,28 @@ class RigidContactResult:
     pre_kinetic_energy_j: float
     post_kinetic_energy_j: float
     friction_regime: str
+    contact_law: str = "maximum_dissipation_newton"
+    compression_work_j: float | None = None
+    rebound_work_j: float | None = None
+    fastpath_used: bool = False
+
+
+@dataclass(frozen=True)
+class _ContactSystem:
+    state: RigidContactInput
+    vc: np.ndarray
+    wc: np.ndarray
+    vb: np.ndarray
+    wb: np.ndarray
+    normal: np.ndarray
+    rc: np.ndarray
+    rb: np.ndarray
+    inertia: np.ndarray
+    club_inverse_inertia: np.ndarray
+    ball_inverse_inertia: np.ndarray
+    effective_inverse_mass: np.ndarray
+    relative_velocity: np.ndarray
+    approach_mps: float
 
 
 def _cross_matrix(vector: np.ndarray) -> np.ndarray:
@@ -92,6 +114,112 @@ def _kinetic_energy(
         + club_w @ club_inertia @ club_w
         + float(GOLF_BALL_MASS_KG) * (ball_v @ ball_v)
         + float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2) * (ball_w @ ball_w)
+    )
+
+
+def _prepare_contact(state: RigidContactInput) -> _ContactSystem:
+    """Validate common two-body inputs and assemble the symmetric contact map."""
+    if not isinstance(state, RigidContactInput):
+        raise ValueError("state must be a RigidContactInput")
+    vc = _validated_vector(state.club_velocity_mps, "club velocity")
+    wc = _validated_vector(state.club_angular_velocity_rad_s, "club angular velocity")
+    vb = _validated_vector(state.ball_velocity_mps, "ball velocity")
+    wb = _validated_vector(state.ball_angular_velocity_rad_s, "ball angular velocity")
+    normal = _validated_vector(state.normal, "contact normal")
+    rc = _validated_vector(state.club_lever_m, "club lever")
+    inertia = _validated_inertia(state.club_inertia_world_kg_m2)
+    if abs(float(normal @ normal) - 1.0) > 1e-10:
+        raise ValueError("contact normal must have unit length")
+    if (
+        not all(
+            math.isfinite(v)
+            for v in (state.club_mass_kg, state.restitution, state.friction_coefficient)
+        )
+        or state.club_mass_kg <= 0
+        or not 0 <= state.restitution <= 1
+        or state.friction_coefficient < 0
+    ):
+        raise ValueError("mass, restitution, and friction must be physical")
+    rb = -float(GOLF_BALL_RADIUS_M) * normal
+    relative = vc + np.cross(wc, rc) - vb - np.cross(wb, rb)
+    approach = float(relative @ normal)
+    if approach <= 0:
+        raise ValueError("club and ball must be approaching at contact")
+    club_inverse_inertia = np.linalg.inv(inertia)
+    ball_inverse_inertia = np.eye(3) / float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
+    src, srb = _cross_matrix(rc), _cross_matrix(rb)
+    k = (
+        (1.0 / state.club_mass_kg + 1.0 / float(GOLF_BALL_MASS_KG)) * np.eye(3)
+        - src @ club_inverse_inertia @ src
+        - srb @ ball_inverse_inertia @ srb
+    )
+    if float(np.linalg.eigvalsh(k).min()) <= 0:
+        raise RuntimeError("contact inverse mass must be positive definite")
+    return _ContactSystem(
+        state,
+        vc,
+        wc,
+        vb,
+        wb,
+        normal,
+        rc,
+        rb,
+        inertia,
+        club_inverse_inertia,
+        ball_inverse_inertia,
+        k,
+        relative,
+        approach,
+    )
+
+
+def _finish_contact(
+    system: _ContactSystem,
+    impulse: np.ndarray,
+    *,
+    friction_regime: str,
+    contact_law: str,
+    compression_work_j: float | None = None,
+    rebound_work_j: float | None = None,
+    fastpath_used: bool = False,
+) -> RigidContactResult:
+    """Apply the shared impulse once and enforce passivity postconditions."""
+    s = system
+    post_vc = s.vc - impulse / s.state.club_mass_kg
+    post_wc = s.wc - s.club_inverse_inertia @ np.cross(s.rc, impulse)
+    post_vb = s.vb + impulse / float(GOLF_BALL_MASS_KG)
+    post_wb = s.wb + s.ball_inverse_inertia @ np.cross(s.rb, impulse)
+    post_relative = (
+        post_vc + np.cross(post_wc, s.rc) - post_vb - np.cross(post_wb, s.rb)
+    )
+    pre_energy = _kinetic_energy(
+        s.vc, s.wc, s.vb, s.wb, club_mass=s.state.club_mass_kg, club_inertia=s.inertia
+    )
+    post_energy = _kinetic_energy(
+        post_vc,
+        post_wc,
+        post_vb,
+        post_wb,
+        club_mass=s.state.club_mass_kg,
+        club_inertia=s.inertia,
+    )
+    if post_energy > pre_energy + 1e-8:
+        raise RuntimeError("contact passivity postcondition failed")
+    return RigidContactResult(
+        club_velocity_mps=post_vc,
+        club_angular_velocity_rad_s=post_wc,
+        ball_velocity_mps=post_vb,
+        ball_angular_velocity_rad_s=post_wb,
+        ball_impulse_n_s=impulse,
+        pre_relative_normal_mps=s.approach_mps,
+        post_relative_normal_mps=float(post_relative @ s.normal),
+        pre_kinetic_energy_j=pre_energy,
+        post_kinetic_energy_j=post_energy,
+        friction_regime=friction_regime,
+        contact_law=contact_law,
+        compression_work_j=compression_work_j,
+        rebound_work_j=rebound_work_j,
+        fastpath_used=fastpath_used,
     )
 
 
@@ -154,45 +282,11 @@ def solve_rigid_contact(state: RigidContactInput) -> RigidContactResult:
     ball. The ball contact lever is minus radius times that normal. Purely
     normal impulse is always an admissible fallback for nonnegative friction.
     """
-    if not isinstance(state, RigidContactInput):
-        raise ValueError("state must be a RigidContactInput")
-    vc = _validated_vector(state.club_velocity_mps, "club velocity")
-    wc = _validated_vector(state.club_angular_velocity_rad_s, "club angular velocity")
-    vb = _validated_vector(state.ball_velocity_mps, "ball velocity")
-    wb = _validated_vector(state.ball_angular_velocity_rad_s, "ball angular velocity")
-    normal = _validated_vector(state.normal, "contact normal")
-    rc = _validated_vector(state.club_lever_m, "club lever")
-    inertia = _validated_inertia(state.club_inertia_world_kg_m2)
-    if abs(float(normal @ normal) - 1.0) > 1e-10:
-        raise ValueError("contact normal must have unit length")
-    if (
-        not all(
-            math.isfinite(v)
-            for v in (state.club_mass_kg, state.restitution, state.friction_coefficient)
-        )
-        or state.club_mass_kg <= 0
-        or not 0 <= state.restitution <= 1
-        or state.friction_coefficient < 0
-    ):
-        raise ValueError("mass, restitution, and friction must be physical")
-
-    rb = -float(GOLF_BALL_RADIUS_M) * normal
-    relative = vc + np.cross(wc, rc) - vb - np.cross(wb, rb)
-    approach = float(relative @ normal)
-    if approach <= 0:
-        raise ValueError("club and ball must be approaching at contact")
-
-    club_inverse_inertia = np.linalg.inv(inertia)
-    ball_inverse_inertia = np.eye(3) / float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
-    src = _cross_matrix(rc)
-    srb = _cross_matrix(rb)
-    effective_inverse_mass = (
-        (1.0 / state.club_mass_kg + 1.0 / float(GOLF_BALL_MASS_KG)) * np.eye(3)
-        - src @ club_inverse_inertia @ src
-        - srb @ ball_inverse_inertia @ srb
-    )
-    if float(np.linalg.eigvalsh(effective_inverse_mass).min()) <= 0:
-        raise RuntimeError("contact inverse mass must be positive definite")
+    system = _prepare_contact(state)
+    normal = system.normal
+    relative = system.relative_velocity
+    approach = system.approach_mps
+    effective_inverse_mass = system.effective_inverse_mass
     normal_target = (1.0 + state.restitution) * approach
     # Equality-constrained energy minimizer. A zero-tangential-post-slip
     # impulse is not generally the minimizer when off-center inertia couples
@@ -230,36 +324,12 @@ def solve_rigid_contact(state: RigidContactInput) -> RigidContactResult:
         )
         regime = "slide"
 
-    post_vc = vc - impulse / state.club_mass_kg
-    post_wc = wc - club_inverse_inertia @ np.cross(rc, impulse)
-    post_vb = vb + impulse / float(GOLF_BALL_MASS_KG)
-    post_wb = wb + ball_inverse_inertia @ np.cross(rb, impulse)
-    post_relative = post_vc + np.cross(post_wc, rc) - post_vb - np.cross(post_wb, rb)
-    pre_energy = _kinetic_energy(
-        vc, wc, vb, wb, club_mass=state.club_mass_kg, club_inertia=inertia
-    )
-    post_energy = _kinetic_energy(
-        post_vc,
-        post_wc,
-        post_vb,
-        post_wb,
-        club_mass=state.club_mass_kg,
-        club_inertia=inertia,
-    )
-    post_normal = float(post_relative @ normal)
-    if abs(post_normal + state.restitution * approach) > 1e-8:
-        raise RuntimeError("contact restitution postcondition failed")
-    if post_energy > pre_energy + 1e-8:
-        raise RuntimeError("contact passivity postcondition failed")
-    return RigidContactResult(
-        club_velocity_mps=post_vc,
-        club_angular_velocity_rad_s=post_wc,
-        ball_velocity_mps=post_vb,
-        ball_angular_velocity_rad_s=post_wb,
-        ball_impulse_n_s=impulse,
-        pre_relative_normal_mps=approach,
-        post_relative_normal_mps=post_normal,
-        pre_kinetic_energy_j=pre_energy,
-        post_kinetic_energy_j=post_energy,
+    result = _finish_contact(
+        system,
+        impulse,
         friction_regime=regime,
+        contact_law="maximum_dissipation_newton",
     )
+    if abs(result.post_relative_normal_mps + state.restitution * approach) > 1e-8:
+        raise RuntimeError("contact restitution postcondition failed")
+    return result
