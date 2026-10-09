@@ -35,3 +35,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/27-native-muscle-experiment-bundle.qmd >}}
 
 {{< include chapters/35-native-moco-initial-bindings.qmd >}}
+{{< include chapters/32-native-constrained-state.qmd >}}
+
+{{< include chapters/33-native-passive-readiness.qmd >}}
+
+{{< include chapters/38-native-reference-conventions.qmd >}}
