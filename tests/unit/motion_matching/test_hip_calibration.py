@@ -293,8 +293,8 @@ def test_lateral_offsets_match_the_leg_marker_seeds() -> None:
     for side in ("R", "L"):
         knee = LEG_SEEDS[f"{side}KneeOut"][1]
         ankle = LEG_SEEDS[f"{side}AnkleOut"][1]
-        assert module.KNEE_OUT_LATERAL_M == pytest.approx(np.hypot(knee[0], knee[2]))
-        assert module.ANKLE_OUT_LATERAL_M == pytest.approx(np.hypot(ankle[0], ankle[2]))
+        assert pytest.approx(np.hypot(knee[0], knee[2])) == module.KNEE_OUT_LATERAL_M
+        assert pytest.approx(np.hypot(ankle[0], ankle[2])) == module.ANKLE_OUT_LATERAL_M
 
 
 def test_knee_flexion_axis_rejects_a_straight_leg() -> None:
