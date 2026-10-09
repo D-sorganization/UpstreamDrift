@@ -4,6 +4,12 @@
 - Full re-solve at `5f8ee41fe5`: peak timing passes (driver -3.7 ms, 7-iron -4.2 ms; limit 5 ms); impact speed does not (driver -7.4 %, 7-iron -4.1 %; limit 3 %). `test_clubhead_speed_peaks_with_the_capture_and_matches_it_at_impact` is a strict xfail with those numbers; tolerances unchanged; fixtures not regenerated.
 - Next: the remaining gap is the unactuated root's ground yaw slip (DESIGN_DECISIONS decision 13). It needs a foot yaw-moment / contact model change, tracked outside GCV-20. Details: calculation reference, GCV-20 "Second Pass" and "Full Re-Solve".
 
+# Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
+
+- Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
+- Every CoP goes through `biomechanics.ground_reaction.center_of_pressure`; legacy helpers are `DeprecationWarning` shims. Tests: `tests/integration/cross_engine/test_ground_reaction_parity.py` plus per-engine `*ground_reaction*` tests (static stance net Fz = weight within 2 %).
+- GCV-5 (#11711) plots, API and web display landed in #11781; the remaining #11711 item is the real-MuJoCo-run plot sheet. Open for GCV-2: Pinocchio GRF render (1x + 0.5x) on an engine host.
+
 # Active: Native OpenSim Geometry — #11903
 
 Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical

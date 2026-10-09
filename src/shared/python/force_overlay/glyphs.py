@@ -29,6 +29,7 @@ __all__ = [
     "DEFAULT_GROUPS",
     "SCALE_MODES",
     "build_glyphs",
+    "clamped_tip_shift",
     "label_group",
     "scale_for_view",
 ]
@@ -589,6 +590,33 @@ def _compute_arc_basis(
         ax * u[1] - ay * u[0],
     )
     return u, v
+
+
+def clamped_tip_shift(
+    tip: Sequence[float], base_center: Sequence[float], ratio: float = 0.6
+) -> tuple[float, ...]:
+    """Translation vector for a second, trailing tip marking a clamped glyph.
+
+    ADR-0052 draws force arrows clamped at ``max_length_m`` with a double
+    chevron: a second head, identical in shape, shifted backward
+    along the shaft by ``ratio`` of the tip-to-base-center distance. Every
+    renderer applies this single offset to its own head representation (a 2D
+    pixel polygon for OpenCV/QPainter, a 3D cone apex/base for matplotlib)
+    instead of re-deriving the geometry (DRY).
+
+    Precondition: ``tip`` and ``base_center`` have equal, nonzero length and
+    ``ratio`` is finite and positive.
+    Postcondition: the returned vector has the same dimensionality as the
+    inputs and points from ``tip`` toward ``base_center``.
+    """
+    if len(tip) != len(base_center) or len(tip) == 0:
+        raise ValueError(
+            "tip and base_center must have equal, nonzero length; got "
+            f"{len(tip)} and {len(base_center)}"
+        )
+    if not math.isfinite(ratio) or ratio <= 0.0:
+        raise ValueError(f"ratio must be finite and positive, got {ratio}")
+    return tuple((base_center[i] - tip[i]) * ratio for i in range(len(tip)))
 
 
 def _build_force_arrow(
