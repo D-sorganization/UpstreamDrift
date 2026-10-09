@@ -1,3 +1,11 @@
+## Native Muscle Replay Development Boundary (F07, #11791)
+
+`tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
+## Native Muscle Contact Replay (F07b, #11815)
+
+Independent native excitation replay accepts an explicit exact contact-force path allowlist for supported native sphere/half-space laws. It reuses OpenSimForceTorqueSource and fails on incomplete wrench evidence. Policy/hash records native law identity; arbitrary external forces, controllers, reserves and state corrections remain forbidden. Native synthetic contact/refinement tests do not qualify full-body golf anatomy, contact/grip calibration or private mocap matching.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
@@ -10385,3 +10393,16 @@ inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and
 budget. This is an admission contract, not a successful native replay or
 scientific match; numerical gate qualification belongs to follow-on issues.
+
+## Sparse Collocation and Shooting Benchmark Spike (F03, #11787)
+
+`sparse_collocation_spike.py` adds a bounded synthetic rotary fixture with
+sparse analytic midpoint inverse-dynamics defects, hard ZOH torque and slew
+constraints, and fresh adaptive forward reintegration. It also adapts the
+existing multiple-shooting solver to the same synthetic truth and target.
+Backend receipts retain input degrees of freedom, defect type, objective,
+feasibility, replay gap and observation error separately, with predeclared
+cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
+fixture uses one constant torque while the spike uses one input per interval,
+so no production backend is selected from these results. Native F06 replay,
+private protocol D02, contact and full-body engine evidence remain open.
