@@ -166,3 +166,8 @@ repository config disabled because that environment lacks pytest-asyncio;
 its only warning is the unregistered `unit` mark in that isolated invocation.
 The canonical calculation note is
 `manuals/upstreamdrift/chapters/28-native-marker-forward-kinematics.qmd`.
+
+The branch also contains the actual F09c parent merge. Combined replay,
+observation, capture, and marker tests pass; two Drake cases skip on local
+Windows because its optional `pydrake` bindings are absent. F09c's lazy Tools
+seam and bounded replay receipt validators preserve source behavior.
