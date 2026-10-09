@@ -10452,6 +10452,10 @@ fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
 
+## Frozen Marker Holdout Scoring (#11899)
+
+The shared marker calibration provider exposes score_frozen_marker_offsets for fixed placements and predicted poses on the original observation clock. It performs no fitting and rejects missing support or invalid rigid transforms. Existing exploratory OpenSim holdout refitting remains available and is not independent predictive evidence. Training-only model, anthropometry, attachment and split provenance remains a campaign gate; no real capture or F07/F08 qualification is claimed. See canonical chapter 13 and F07_FROZEN_HOLDOUT_TURNOVER.md.
+
 ## Native OpenSim Marker Geometry (F07/F08, #11903)
 
 Explicit native model/frame/station bindings supply actual OpenSim geometry to
