@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-pinocchio-torque-replay-inventory",
+      "owner": "UpstreamDrift issue #11900",
+      "resolution": "Inventory existing public PinocchioPhysicsEngine ABA/RK4 manifold integration, complete q/v restoration, explicit unit generalized motor mapping, source/native model/provider identity and fixed post-limit inputs in chapter25. Twelve actual native Pinocchio4.1 synthetic checks establish independent replay and fixture-specific refinement. Native contact/grip, physiological actuation, required production models, private capture accuracy and all-model six-engine parity remain unqualified. Shared Tools contract/history/identity admission remains canonical and provider-bound."
+    },
+    {
       "id": "UP-D1-native-drake-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11838",
       "resolution": "Inventory native Drake complete discrete-state frozen motor-torque replay, factory-default abstract parameter identity, actual solver/approximation, numeric parameter byte identity and native net effort in chapter22 and native_torque_replay.py. Eleven actual Drake1.57 synthetic tests establish a restricted same-provider replay path. Native collision/contact, nonunit transmission, external-resource identity, convergence, all-model six-engine parity, anatomy/muscle recruitment and private capture acceptance remain open. Source review does not attest binary equivalence or transitive libraries."

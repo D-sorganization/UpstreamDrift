@@ -22,6 +22,7 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/19-native-torque-replay.qmd >}}
 {{< include chapters/22-native-drake-torque-replay.qmd >}}
+{{< include chapters/25-native-pinocchio-torque-replay.qmd >}}
 {{< include chapters/13-feedback-comparison.qmd >}}
 
 {{< include chapters/28-native-marker-forward-kinematics.qmd >}}

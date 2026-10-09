@@ -612,3 +612,7 @@ initial-state payload binding. It does not establish native replay,
 cross-engine parity, muscle physiology, or private-capture acceptance. Resume
 from `docs/development/feedback_controls/F09B-OBSERVATION-QUALIFICATION.md`;
 rerun the focused command recorded there with the pinned Tools submodule.
+
+## Native Pinocchio Replay Handoff (#11900)
+
+Native RED f273e45f2f precedes implementation; twelve actual Pinocchio4.1 tests pass including saturated torque reproduction and fixture refinement. See docs/development/feedback_controls/F06_PINOCCHIO_NATIVE_TURNOVER.md and canonical chapter25 for equations, commands, failed setups, resource ownership and remaining full-model/capture gates. Shared native admission changes require actual Drake/MuJoCo regression evidence before publication. This child does not close F06 or the full matching epic.

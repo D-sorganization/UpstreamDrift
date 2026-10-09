@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_replay_contract_types,
     validate_native_replay_bundle,
 )
 
@@ -53,17 +54,7 @@ class NativeTorqueReplay:
 
 
 def _contracts() -> Any:
-    """Resolve the single Tools authority, requiring its implemented T01 API."""
-    from src.shared.python._seam_redirect import extend_sidekick_lab_path
-
-    extend_sidekick_lab_path()
-    from sidekick.lab import mocap
-
-    if not hasattr(mocap, "ExperimentReplayBundle"):
-        raise RuntimeError(
-            "Native replay requires the Tools T01 experiment-replay contract"
-        )
-    return mocap
+    return native_replay_contract_types()
 
 
 def _load_native(path: Path) -> tuple[Any, Any]:
