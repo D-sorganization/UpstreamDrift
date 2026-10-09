@@ -2,7 +2,7 @@
 
 ## Identity and Scope
 
-Repository: UpstreamDrift. Worktree: `C:/Users/diete/Repositories/Worktrees/feedback-muscle-evidence-11791`. Branch: `fix/feedback-muscle-evidence-11791`. Baseline: `44f091273884439bef43f61b90c1c10f68b77726`. Current commit: `SELF`; resolve with `git rev-parse HEAD`. Test-first commit: `d66e31ed2d`. PR: not created. Scoped child #11810 under F07 #11791 and #11784; this is a narrow evidence-integrity correction, not completion of either parent. The child claim was clear and a codex lease was posted before publication.
+Repository: UpstreamDrift. Worktree: `C:/Users/diete/Repositories/Worktrees/feedback-muscle-evidence-11791`. Branch: `fix/feedback-muscle-evidence-11791`. Baseline: `44f091273884439bef43f61b90c1c10f68b77726`. Current commit: `SELF`; resolve with `git rev-parse HEAD`. Test-first commit: `d66e31ed2d`. PR: [#11814](https://github.com/D-sorganization/UpstreamDrift/pull/11814). Scoped child #11810 under F07 #11791 and #11784; this is a narrow evidence-integrity correction, not completion of either parent. The child claim was clear and a codex lease was posted before publication.
 
 Owned paths: `tour_matching/muscle_qualification.py`, focused tests, calculation reference and this turnover. The coordinating task owns `muscle_replay.py`; do not modify it here. No capture or native full-body model is needed for this guard. No unrelated/user-owned changes observed.
 
@@ -34,4 +34,4 @@ The governed manual chapter 14 describes this boundary. Its inventory blocker re
 
 ## Next Bounded Step
 
-Publish the scoped guard through normal PR protections. Continue actual native model/state/input/contact verification in F07/F08. The requested full native qualification and independent excitation replay remain open.
+The initial publication passed normal pre-push type, security and unit-test hooks and armed protected auto-merge. A subsequent real conflict with main's chapter 12 required merging `8f4a2d731b`; the manual index now preserves both chapter 12 and this chapter 14, and the registry retains both inventories. The merged guard passed all five central pre-PR gates again, including 31 focused tests with 3 private-fixture deselections. The coordinating PR #11812 owns the shared governance test correction from a fixed QMD count to the actual canonical source count; this guard retains its release-blocking semantics and does not edit that test. Do not re-arm or bypass protected checks. Continue actual native model/state/input/contact verification in F07/F08. The requested full native qualification and independent excitation replay remain open.
