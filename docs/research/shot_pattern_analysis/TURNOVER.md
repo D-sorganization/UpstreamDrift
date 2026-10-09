@@ -12,11 +12,15 @@ SPA-001–014 map to #11840–11853; SPA-015/016 map to #11862/11863. Check `iss
 
 All 24 corrected cells finished with exit code zero. The frozen flight source archive includes 32 source files and the native binary, each hash matching every cell's `run_start.json`. The pre-correction scoring archive includes the prior summary, receipt, baseline, SG report, manifest, and run start for every cell. The V2 rescore completed from saved CSVs without re-simulating a shot. All 24 current manifests were verified file by file, 720,000 scored rows are present, every green expected-strokes knot is at least one, and the V2 baseline hash is `7b0b858eb86581ef26538b1c836271822c98df9d94bc86b4cbb2371543cc1ca1`. Astra independently checked all 24 bundles and metric recomputation.
 
-## Required Remaining Work
+## Release State
 
-1. Finish the final overview and README/research LaTeX text with V2 tables, carry/equal-range controls, paired SG confidence intervals, and qualified conclusions. Refresh the GUI preview.
-2. Finish the canonical pre-PR runner and any relevant lint/type gates, then push safely, open a ready PR, attach it to this task, and arm the merge queue through the guard. Keep unresolved gates explicit. The scientific baseline, saved flights, and Astra's independent review are complete.
-3. Preserve the two ZIP snapshots and per-cell `run_start.json` when packaging. Do not rerun the full matrix merely to update scores or plots.
+The final overview, 72-row statistics, corrected README/LaTeX tables, GUI preview,
+and independent Astra review are complete. All 18 issues are published and remain
+open pending a merged implementing PR. No flights need rerunning.
+
+The branch was rebased only to resolve actual conflicts with current main.
+Shared generated maps are regenerated and their integration boundary is explicitly
+revalidated. Full local gates and publication status are recorded below when complete.
 
 ## Resume Commands
 
@@ -26,7 +30,7 @@ Use `/home/dieterolson/Repositories/UpstreamDrift/.venv/bin/python` and headless
 git status --short
 git log -8 --oneline
 python -m src.tools.shot_pattern_analysis.matrix docs/research/shot_pattern_analysis/corrected_results
-python -m src.tools.shot_pattern_analysis.overview docs/research/shot_pattern_analysis/corrected_results --output-dir docs/research/shot_pattern_analysis/overview
+python -m src.tools.shot_pattern_analysis.overview docs/research/shot_pattern_analysis/corrected_results --output-dir docs/research/shot_pattern_analysis/overview_v2
 python -m pytest tests/tools/shot_pattern_analysis tests/ui/tools/shot_pattern_analysis
 python /home/dieterolson/Repositories/Repository_Management/scripts/pre_pr.py --base-ref origin/main
 ```
@@ -63,8 +67,17 @@ PY
 
 ## Known External Gates
 
-Standalone LaTeX compilation is unverified: the built-in compiler could not download its uncached Tectonic bundle. The canonical engineering manual remains `blocked-inventory-required`; this separate research reference does not qualify that release. Full-repository title-case debt is pre-existing and must not be described as fixed. Earlier mypy processes crashed under concurrent simulation load; a successful final type check is still required.
+Standalone LaTeX compilation is unverified: the built-in compiler could not download its uncached Tectonic bundle. The canonical engineering manual remains `blocked-inventory-required`; this separate research reference does not qualify that release. Full-repository title-case debt is pre-existing and must not be described as fixed. Earlier mypy processes crashed under concurrent simulation load; targeted changed-source type checks have passed; canonical release checks are recorded separately.
 
-## User-Requested Pause Checkpoint
+## Resumed Validation
 
-The user explicitly requested pausing the goal for connection loss. All agents stopped; the expensive matrix is complete and no simulation needs to remain running. Final fast tool/UI suite: 126 passed. Focused provenance/scoring changes and five-module mypy passed. The canonical pre-PR attempt reported duplicate module naming (`tools.shot_pattern_analysis` and `src.tools.shot_pattern_analysis`) and was interrupted at the pause request; its log is `pre_pr_checkpoint.log`. Full release acceptance is not claimed. No push or PR has occurred. Next: resolve the canonical diff-mypy package-path issue, run complete required gates, verify the clean Git checkout hashes, then publish the ready PR and arm the merge queue. Do not restart the matrix or recreate the 18 already-filed issues.
+The user resumed the goal after the connection-loss checkpoint. Final headless
+tool/UI suite including slow: 134 passed. Launcher/registry suites: 108 passed.
+Impact/landing Python suite: 105 passed. Native Rust: 99 unit and 3 integration tests
+passed. Astra independently verified all committed CSV/archive/artifact hashes.
+
+The prior DiffMypy failure had conflicting package roots. Use `MYPYPATH=$PWD`
+with the canonical runner. The shared host environment contains NumPy 2.5 stubs
+requiring Python 3.12 while the project intentionally supports Python 3.11;
+validation uses an isolated environment with compatible NumPy rather than changing
+project support or suppressing type errors. Exact final environment/gates follow.

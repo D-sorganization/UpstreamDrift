@@ -878,6 +878,22 @@
       "id": "tools.rate_of_closure"
     },
     {
+      "feature_id": "tools.shot_pattern_analysis",
+      "title": "Shot Pattern Analysis Workbench",
+      "status": "exempt",
+      "pyqt": "src/tools/shot_pattern_analysis/gui.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "The current product surface is a local PyQt6 launcher and headless CLI for deterministic physics simulation and local CSV, JSON, and PNG exports. There is no API route or React page, so browser parity is not claimed.",
+      "pending_decision": false,
+      "tiles": [
+        "shot_pattern_analysis"
+      ],
+      "notes": "The GUI runs the canonical CLI in a cancellable managed subprocess. The Python solver delegates impact and flight to shared UpstreamDrift physics.",
+      "id": "tools.shot_pattern_analysis"
+    },
+    {
       "feature_id": "tools.terrain_engine",
       "title": "Terrain and topography configuration",
       "status": "parity",
@@ -1595,6 +1611,20 @@
         "monitor_comparison",
         "dispersion",
         "longitudinal_trends"
+      ]
+    },
+    {
+      "id": "shot_pattern_analysis",
+      "title": "Shot Pattern Analysis",
+      "description": "Compare paired straight, draw, and fade patterns with adjustable face SD and curve magnitude. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel.",
+      "path": "src/tools/shot_pattern_analysis/__main__.py",
+      "launch_target": "src/tools/shot_pattern_analysis/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "shot_pattern_analysis",
+        "shot_dispersion",
+        "impact_physics"
       ]
     },
     {
@@ -3130,9 +3160,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
-    "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "175efe0624320b8cd6a149029ad5cc848834ccc5a27aef9f3fe243dae7fe50da",
+    "src/config/models.yaml": "8827a8f2b44ccc7336e03cb4a02a6a5b5887c38a75c895a0c17f70d34417629e",
+    "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
+    "src/config/feature_parity.json": "0dd3f989a97c612120c733763b0d24d47c751035a6315168d6ba714a32e72a2e",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

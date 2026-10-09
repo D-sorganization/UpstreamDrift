@@ -19,14 +19,14 @@
       "rationale": "Preserve capture boundary review under baseline capability inventory ORG-01"
     },
     "launcher-atlas": {
-      "fingerprint": "948ddf5c80b335cd86e2e0fcdcff5f881d2acb6f74fcd4086861a8b5b52257bd",
+      "fingerprint": "07b3a1728b534f49642bc8d6d6cde1e9672e21f2eb993770f6c915f04d656f42",
       "inputs": {
         "docs/agent_context/contracts/launcher-atlas.md": "f5976baa4ef78bcf71ede27afb4e7a85f3f72cfedbb3cdbe9b40e48d4016ae94",
         "scripts/capability_atlas/goals.py": "a4c449dbd07dc398530d7c85eefc697d36b6acaee48b7953b7e060fb413cc131",
         "scripts/capability_atlas/model.py": "ecca5889caad0e087c895f6c56c0fcd966b646bda5c3ab5a87a65c4694eb41cf",
         "scripts/capability_atlas/render.py": "7981df3ea262536a2c847b693c104e9600ce2aad85d17d4e0f3048e80ee066a5",
         "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
-        "src/config/feature_parity.json": "a6344c296e3e8ede5e5ba4d51ce9668ab12c2cd4f188bc46b8861a7dbbbb8b2b",
+        "src/config/feature_parity.json": "0dd3f989a97c612120c733763b0d24d47c751035a6315168d6ba714a32e72a2e",
         "src/config/launcher_manifest.json": "45b6cea9134f9896b1a719c23c6fc77d59d4aed751bfe62908ad888acdc86037",
         "src/config/launcher_manifest_loader.py": "aed6769fbdfc595400d0bd5d15bb75e8fbfda80243a586894d73d36b2d056a00",
         "src/config/models.yaml": "8827a8f2b44ccc7336e03cb4a02a6a5b5887c38a75c895a0c17f70d34417629e",
@@ -36,7 +36,7 @@
         "tests/tools/capture_rig/test_goal_catalog.py": "0463f0cd9f58509d9afe4caf2bb58e7bf34aab863e5ec8e2d91828c90962da18",
         "tests/tools/capture_rig/test_goal_planner.py": "ae70c49067ddb672a92a86f7db60bf31f95252f2d6f1cb09a57ea1372f115414"
       },
-      "rationale": "Registered the shot-pattern analysis tool in launcher_manifest.json and models.yaml with a matching feature-parity exemption; the optional PyQt adapter imports GUI dependencies lazily and is registered through both the pyproject entry point and editable-install bootstrap fallback. Source inspection and tests cover adapter imports, manifest parity, registry hygiene, capability migration and atlas freshness. The focused config suite passed 45 tests; non-slow UI/launcher registration tests are being rerun after final core changes."
+      "rationale": "Reviewed the current launcher-atlas contract and source inputs after the rebase: models.yaml and launcher_manifest.json define the shot-pattern tile; feature_parity.json records its local PyQt/CLI surface as browser-parity-exempt; launcher_manifest_loader.py supplies typed launcher metadata; capability_atlas/model.py projects registries and validates graph references. The embed adapter remains lazy and is registered through pyproject entry points with bootstrap fallback. Validation: 108 launcher, feature-parity, atlas, category, and tool registration tests passed."
     },
     "model-backends": {
       "fingerprint": "da739fcd3c56f6c4a3923b4f31202e515023487a49d54ca449090d33186a9685",
