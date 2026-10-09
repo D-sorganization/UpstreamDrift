@@ -192,7 +192,171 @@ offset. See `docs/development/feedback_controls/F09E-NATIVE-MARKER-FK.md` for
 the exact command, environment, observed API incompatibility, and validation
 limits. The canonical calculation note is
 `manuals/upstreamdrift/chapters/30-pinocchio-native-marker-forward-kinematics.qmd`.
-The branch also contains the actual F09c parent merge. Combined replay,
-observation, capture, and marker tests pass; two Drake cases skip on local
-Windows because its optional `pydrake` bindings are absent. F09c's lazy Tools
-seam and bounded replay receipt validators preserve source behavior.
+
+## F09f MyoSuite Native Excitation Replay (#11918)
+
+Branch `feat/11918-f09f-myosuite-native-replay` adds a native MyoSuite 3.0.0 /
+MuJoCo 3.6.0 consumer for Tools T01 muscle-excitation bundles. The input is the
+actual normalized post-mapping excitation written to native `data.ctrl`; Gym
+`[-1, 1]` actions are not called excitation and are not inverse-mapped. The
+adapter steps the plant directly using explicit frame skip and fixed-horizon
+ZOH input and does not invoke Gym `step`, observation, reward, task termination,
+or reset. It binds full physical/numerical initial state plus supported wrapper
+flags and counters and verifies exact native control readback. The current
+source also rejects global MuJoCo callbacks, observes and verifies each
+post-step `data.time`, checks restored full integration state, rejects
+nonfinite output, and ensures `mj_forward` does not change the clock.
+
+Wrapper snapshot and restore now share one chain-walk helper. Focused tests
+check the explicit supported order and restoration of the captured counters
+and flags.
+
+Focused local validation: Ruff passes and 17 tests pass; two optional runtime
+tests skip in the local Python 3.13 environment because MyoSuite/Drake are
+absent. The actual MyoSuite runtime test passed in the isolated, task-owned
+Python 3.12 environment on DeskComputer (`MyoSuite 3.0.0`, `myo-sim 0.2.3`,
+Gymnasium 1.2.3, MuJoCo 3.6.0): 1 passed with two overlay-only unknown pytest
+mark warnings. The fixture is the public elbow pose demo and does not qualify a
+production golf model. F01's required MyoSuite driver and iron rows remain
+unqualified, and all six engine rows remain represented. The generic legacy
+Gym four-tuple path was not changed because this provider avoids `env.step()`.
+The wrapper-state refactor adds one contract test; its focused bundle-contract
+and runtime suite passes 7 tests with one optional runtime skip locally.
+
+The callback/clock/full-state hardening is newer than the cited DeskComputer
+runtime execution. Synthetic MuJoCo regressions and local affected tests cover
+the new checks; native MyoSuite revalidation of this exact source revision is
+pending. Keep the prior runtime receipt bound to its executed source and do not
+promote it to evidence for the current revision.
+
+See `docs/development/feedback_controls/F09F-MYOSUITE-NATIVE-EXCITATION.md`
+for exact validation and limits, and
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd` for
+the canonical boundary note. Keep the pull request stacked/unarmed until its
+F09c, T01, F09e marker handling, and runtime-provider dependencies are in the
+required ancestry; none of this work closes F09 or F10. The integrated branch
+also contains the actual F09c ancestry merge and the F09e q/v-only Pinocchio
+state check. Combined replay, observation, capture, and marker tests pass; two
+Drake cases skip on local Windows because its optional `pydrake` bindings are
+absent. F09c's lazy Tools seam and bounded replay receipt validators preserve
+source behavior.
+
+## F09g Direct Model-Path Replay Kernel (#11945)
+
+Branch `feat/11945-myosuite-direct-model-provider` adds a reusable T01
+`ACTUATOR_COMMAND` replay kernel in
+`src/engines/physics_engines/myosuite/python/native_direct_model_replay.py`.
+The source-bound direct factory receives the unchanged XML model path and
+declared resource root; it verifies the declared resource set, compiled
+loaded-model identity, ordered `actuator:<name>` mappings, MuJoCo 3.8 actuator
+law manifest, contact digest, solver/integrator, full initial integration
+state, and actual stepped clock. It checks command readback, warnings, callback
+absence, plugin/wrapper exclusion, finite output, and direct-policy
+restrictions. The final T01 input row remains integrity-bound as the horizon
+endpoint; it is not injected as an extra step and need not repeat the previous
+command.
+
+TDD found and removed an over-restriction on the terminal command row: the
+public driver/iron histories contain a distinct value at the final sample, so
+requiring that it repeat the previous value incorrectly rejected an
+otherwise well-defined `N-1` interval replay. The opt-in integration test
+replays both prepared public variants in the existing MuJoCo 3.8.0 environment.
+All 31 saved integration-state samples match exactly for both models, across
+the ordered 100-channel direct command bundle. Synthetic regressions cover
+resource tampering, actuator law mismatch, warning/wrapper rejection, and
+prevent a synthetic class from claiming the MyoSuite SDK. No private or raw
+mocap data was used.
+
+This is underlying MuJoCo execution of pinned MyoSuite-sourced XML, not
+official MyoSuite `MujocoEnv` execution. The earlier MyoSuite 3.0/MuJoCo 3.6
+elbow smoke is not evidence for this source revision or either golfer model.
+No official SDK constructor was inspected or invoked here; no production F09
+registration or qualification receipt is emitted, and required driver/iron
+and six-engine denominator rows stay open. See
+`docs/development/feedback_controls/F09G-DIRECT-MODEL-REPLAY.md` and the
+canonical boundary section in
+`manuals/upstreamdrift/chapters/31-myosuite-native-excitation-replay.qmd`.
+The kernel accepts only `engine_id="mujoco"`; all other engine identities are
+rejected before factory invocation. Its bounded MuJoCo 3.8.0 disk-MJCF audit
+follows native-tested include resolution and MjSpec mesh/texture/cube-face
+metadata, requiring every discovered path and hash to appear in the supplied
+inventory before checking the compiled MJB identity. It rejects unreviewed
+loaders and formats before native parsing; this is not a general MJCF closure
+parser. The exact official SDK constructor/runtime remains uninspected, and no
+official MyoSuite or capture-model qualification follows from this route.
+
+An additional unqualified native diagnostic now covers the pinned public
+MyoSim `arm/myoarm.xml` donor. MuJoCo 3.8 compiles 63 muscle/tendon actuators
+and replays a 60 ms native `ACTUATOR_COMMAND` pulse exactly from the complete
+integration state. A one-step `139 x 139` state and `139 x 63` input finite-
+difference probe is executable. Its apparent derivative blow-up is now
+traced to central perturbations crossing `md3_flexion`'s lower joint limit:
+the initial coordinate is exactly `0 rad` at the compiled lower bound. An
+in-memory diagnostic model with only limit constraints disabled stabilizes
+that derivative; disabling equalities or contacts alone does not. Muscle
+force, tendon length and estimated moment arms vary smoothly across the
+critical pair, while the constraint-force component changes from zero to
+about `0.412 N`. These modified copies are diagnostic only and do not qualify
+a plant or alter the donor. The source default also has two penetrating
+contacts, including a large humerus/thorax contact force; it is not an
+admissible equilibrium or capture pose. This is a muscle-only upper-limb
+candidate, not a golfer variant or official MyoSuite SDK run. See
+`docs/development/feedback_controls/F09G-MYOARM-DIAGNOSTIC.md` and the
+source-hashed `F09G-MYOARM-FD-AUDIT-MJ38.json` receipt for details. F05's
+current tangent derivative remains a two-motor torque-only fixture; its
+Jacobians do not cover muscle activation dynamics.
+
+## F09h Direct Model and Resource Closure (#11950)
+
+Branch `feat/f09h-native-muscle-replay-11950` extends the direct replay seam
+with a bounded MuJoCo 3.8.0 source/resource admission. Hardened XML traversal
+uses the native-tested model-root-first include selection, while `MjSpec`
+provides the reviewed mesh, texture, compiler-directory and cube-face asset
+metadata. The preflight requires every discovered source and resource to be
+contained under the declared root and hash-matched to the existing manifest;
+it verifies the compiled MJB before model construction and rechecks files after
+construction. The closure is restricted to the inspected disk XML, STL/MSH,
+and PNG path, not a general MJCF parser or VFS/custom-loader guarantee.
+
+Adversarial TDD covers include priority/fallback, undeclared, missing,
+changed/outside-root and symlink resources, texture cube faces, mesh formats,
+URI references, compiler directories, unsupported source loaders, and refusal
+of process-global callbacks before preflight compilation. On the retained
+MuJoCo 3.8.0 runtime, driver/iron closures each discover 49 exact-hash files
+from the pinned 310-file public inventory, with compiled MJB identity matching
+the receipts; driver, iron and MyoArm replay tests pass. The Windows symlink
+test skips because this account lacks symlink privilege. The official MyoSuite
+SDK/provider and production physiology/contact/capture gates remain open. See
+[`F09H-NATIVE-RESOURCE-CLOSURE.md`](F09H-NATIVE-RESOURCE-CLOSURE.md).
+
+## F01f Compiled Actuator Command Admission (#11955)
+
+Branch `feat/f01f-compiled-command-admission-11955` adds a native-bound
+compiled command pathway across the existing T02 structural profile row, F09
+execution, and F01 comparison admission. T02 artifact bytes are resolved by
+reference and digest, then recomputed against the loaded MuJoCo model and T01
+bundle. The typed native receipt binds source/loaded model, inventory and
+execution providers, runtime, full initial state, ordered actuator laws,
+input/policy/time grid, resource closure and output-state digest. F01's
+`feedback-comparison/1.2.0` path admits matched within-engine replay and refuses
+muscle-only claims for mixed `ACTUATOR_COMMAND` input. Cross-engine comparison
+still needs a reviewed semantic mapping.
+
+The integrity receipt is not a signature: serialized external receipts need
+independent lineage verification or native replay. Current tests use an
+independent synthetic model on MuJoCo 3.8.0. The native engine remains MuJoCo
+even when the inventory source row is MyoSuite; official MyoSuite runtime and
+production driver/iron binding remain unqualified. All six-engine and
+physiological acceptance gates stay open. See
+[`F01F-COMPILED-COMMAND-ADMISSION.md`](F01F-COMPILED-COMMAND-ADMISSION.md) and
+[`manuals/upstreamdrift/chapters/37-compiled-actuator-command-admission.qmd`](../../../../manuals/upstreamdrift/chapters/37-compiled-actuator-command-admission.qmd).
+
+The exact Tools feature pin adds nine `sidekick.lab` API files to the
+shared-tools divergence inventory. The supported generator also corrected
+stale prior last-touch entries: for example, the unchanged Tools root
+`src/shared/python/__init__.py` has the same blob at the T01 base pin and this
+feature pin, and `git log` reports the same historical commit for both, while
+the old generated report incorrectly listed the T01 pin commit as its last
+touch. The submodule contains complete history and the old/new feature commits
+share their expected merge base. The complete generated JSON/Markdown output
+is retained; no generated authorship values were edited manually.
