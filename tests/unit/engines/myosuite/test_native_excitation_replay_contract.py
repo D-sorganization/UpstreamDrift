@@ -266,6 +266,10 @@ def test_executor_dispatches_to_explicit_myo_suite_excitation_provider(
     assert observed == [(bundle, "test-env-v0")]
     assert receipt.engine == "myosuite"
     assert receipt.qualification == "unqualified"
+    assert receipt.input_kind == bundle.input_history.input_kind.value
+    assert receipt.interpolation == bundle.input_history.interpolation.value
+    assert receipt.timebase_id == bundle.input_history.timebase_id
+    assert receipt.evidence_mode == bundle.policy.replay_mode.value
 
 
 def test_required_six_engine_denominator_stays_blocking_without_real_bindings() -> None:

@@ -13,7 +13,7 @@ import importlib.metadata
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -97,22 +97,29 @@ def _load_environment(environment_id: str) -> tuple[Any, Any, Any, Any, Path]:
     if not environment_id or gym.spec(environment_id).id != environment_id:
         raise ValueError("a registered MyoSuite environment id is required")
     spec = gym.spec(environment_id)
-    source_path_text = spec.kwargs.get("model_path")
+    spec_kwargs = spec.kwargs
+    source_path_text = spec_kwargs.get("model_path")
     source_path = Path(source_path_text) if source_path_text else None
     if source_path is None or not source_path.is_file():
         raise ValueError("registered MyoSuite model source is not an owned file")
     source_before = hashlib.sha256(source_path.read_bytes()).digest()
     env = gym.make(environment_id)
-    plant = env.unwrapped
+    plant = cast(Any, env.unwrapped)
     model = getattr(plant, "model", None)
     data = getattr(plant, "data", None)
     if model is None or data is None:
         env.close()
         raise ValueError("MyoSuite runtime lacks its native model or data")
-    if not isinstance(getattr(plant, "frame_skip", None), int) or plant.frame_skip <= 0:
+    frame_skip = getattr(plant, "frame_skip", None)
+    if not isinstance(frame_skip, int) or frame_skip <= 0:
         env.close()
         raise ValueError("MyoSuite frame_skip must be a positive integer")
-    model_path = Path(env.spec.kwargs.get("model_path", ""))
+    environment_spec = env.spec
+    if environment_spec is None:
+        env.close()
+        raise ValueError("MyoSuite environment has no registered Gym specification")
+    environment_kwargs = environment_spec.kwargs
+    model_path = Path(environment_kwargs.get("model_path", ""))
     if (
         model_path != source_path
         or hashlib.sha256(model_path.read_bytes()).digest() != source_before
@@ -141,7 +148,8 @@ def _load_environment(environment_id: str) -> tuple[Any, Any, Any, Any, Path]:
     if getattr(plant, "ctrl_stages", ()):
         env.close()
         raise ValueError("stateful MyoSuite control stages need an explicit adapter")
-    if len(env.action_space.shape) != 1 or env.action_space.shape[0] != model.nu:
+    action_shape = env.action_space.shape
+    if action_shape is None or len(action_shape) != 1 or action_shape[0] != model.nu:
         env.close()
         raise ValueError(
             "MyoSuite action-to-muscle mapping differs from native channels"
@@ -490,8 +498,9 @@ def validate_myo_suite_bundle_contract(row: Any, binding: Any, bundle: Any) -> N
     )
     if component_ids != expected_components:
         raise ValueError("MyoSuite complete physical and wrapper state is required")
+    model_state_schema = bundle.model.state_schema
     if (
-        tuple(item.component_id for item in bundle.model.state_schema.components)
+        tuple(item.component_id for item in model_state_schema.components)
         != expected_components
     ):
         raise ValueError("MyoSuite initial-state schema is incomplete or reordered")
