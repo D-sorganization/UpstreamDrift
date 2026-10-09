@@ -22,6 +22,12 @@ import numpy as np
 from defusedxml import ElementTree
 from numpy.typing import NDArray
 
+from src.engines.physics_engines.mujoco.python import native_manifold_calculus
+from src.engines.physics_engines.mujoco.python.native_manifold_calculus import (
+    difference_jacobians,
+    integration_jacobians,
+    set_tracking_cost_derivatives,
+)
 from src.engines.physics_engines.mujoco.python.native_torque_replay import _CALLBACKS
 
 Array = NDArray[np.float64]
@@ -236,35 +242,13 @@ class NativeActivationState(crocoddyl.StateAbstract):
     ) -> list[Array]:
         before, after = self.checked(x0), self.checked(x1)
 
-        def first(d: Array) -> Array:
-            return self.diff(self.integrate(before, d), after)
-
-        def second(d: Array) -> Array:
-            return self.diff(before, self.integrate(after, d))
-
-        if firstsecond == crocoddyl.Jcomponent.first:
-            return [self._jacobian(first)]
-        if firstsecond == crocoddyl.Jcomponent.second:
-            return [self._jacobian(second)]
-        return [self._jacobian(first), self._jacobian(second)]
+        return difference_jacobians(self, before, after, firstsecond)
 
     def Jintegrate(
         self, x: Array, dx: Array, firstsecond: Any = crocoddyl.Jcomponent.both
     ) -> list[Array]:
         base, tangent = self.checked(x), _vector(dx, self.ndx, "native tangent")
-        output = self.integrate(base, tangent)
-
-        def first(d: Array) -> Array:
-            return self.diff(output, self.integrate(self.integrate(base, d), tangent))
-
-        def second(d: Array) -> Array:
-            return self.diff(output, self.integrate(base, tangent + d))
-
-        if firstsecond == crocoddyl.Jcomponent.first:
-            return [self._jacobian(first)]
-        if firstsecond == crocoddyl.Jcomponent.second:
-            return [self._jacobian(second)]
-        return [self._jacobian(first), self._jacobian(second)]
+        return integration_jacobians(self, base, tangent, firstsecond)
 
     def JintegrateTransport(
         self, x: Array, dx: Array, Jin: Array, firstsecond: Any
@@ -374,10 +358,11 @@ class NativeActivationProvider:
 
     def _finish_step(self, data: mj.MjData, before_time: float) -> Array:
         _callbacks_absent()
+        options = self.model.opt
         if (
             data.ncon
             or data.nefc
-            or data.time != before_time + self.model.opt.timestep
+            or data.time != before_time + options.timestep
             or data.time <= before_time
             or not np.isfinite(data.qpos).all()
             or not np.isfinite(data.qvel).all()
@@ -458,7 +443,7 @@ def load_native_activation_provider(model_path: str | Path) -> NativeActivationP
         _compiled_hash(model),
         _law_identity(model, names),
         hashlib.sha256(Path(runtime.__file__).read_bytes()).hexdigest(),
-        hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        _adapter_source_hash(),
         mj.__version__,
         names,
         "actuator_command",
@@ -469,12 +454,24 @@ def load_native_activation_provider(model_path: str | Path) -> NativeActivationP
     return NativeActivationProvider(path, model, identity)
 
 
+def _adapter_source_hash() -> str:
+    """Bind the adapter and the shared native tangent/cost implementation."""
+    sources = (Path(__file__), Path(native_manifold_calculus.__file__))
+    closure = {
+        source.name: hashlib.sha256(source.read_bytes()).hexdigest()
+        for source in sources
+    }
+    return hashlib.sha256(json.dumps(closure, sort_keys=True).encode()).hexdigest()
+
+
 class NativeActivationAction(crocoddyl.ActionModelAbstract):
     """One admitted native step and tangent tracking cost for BoxFDDP."""
 
     def __init__(self, provider: NativeActivationProvider, reference: Array):
         super().__init__(provider.state, provider.model.nu, provider.state.ndx)
         self.provider = provider
+        self.command_count = provider.model.nu
+        self.native_state = provider.state
         self.reference = provider.state.checked(reference).copy()
         self.state_weights = np.ones(provider.state.ndx)
         self.input_weights = np.full(provider.model.nu, 0.01)
@@ -482,39 +479,35 @@ class NativeActivationAction(crocoddyl.ActionModelAbstract):
         self.u_ub = provider.model.actuator_ctrlrange[:, 1] - _DERIVATIVE_EPSILON
 
     def calc(self, data: Any, x: Array, u: Array) -> None:
-        command = _vector(u, self.provider.model.nu, "native command")
+        command = _vector(u, self.command_count, "native command")
         data.xnext = self.provider.step(x, command)
-        error = self.provider.state.diff(self.reference, data.xnext)
+        error = self.native_state.diff(self.reference, data.xnext)
         data.cost = float(
             np.dot(self.state_weights, error**2)
             + np.dot(self.input_weights, command**2)
         )
 
     def calcDiff(self, data: Any, x: Array, u: Array) -> None:
-        command = _vector(u, self.provider.model.nu, "native command")
+        command = _vector(u, self.command_count, "native command")
         derivative = self.provider.linearize(x, command)
         if (
             np.max(
                 np.abs(
-                    self.provider.state.diff(derivative.next_physical_state, data.xnext)
+                    self.native_state.diff(derivative.next_physical_state, data.xnext)
                 )
             )
             > 1e-10
         ):
             raise ValueError("native action and derivative disagree")
         data.Fx, data.Fu = derivative.A, derivative.B
-        error = self.provider.state.diff(self.reference, data.xnext)
-        jacobian = self.provider.state.Jdiff(
-            self.reference, data.xnext, crocoddyl.Jcomponent.second
-        )[0]
-        weighted = self.state_weights * error
-        gradient = 2 * jacobian.T @ weighted
-        curvature = 2 * jacobian.T @ np.diag(self.state_weights) @ jacobian
-        data.Lx = data.Fx.T @ gradient
-        data.Lu = data.Fu.T @ gradient + 2 * self.input_weights * command
-        data.Lxx = data.Fx.T @ curvature @ data.Fx
-        data.Lxu = data.Fx.T @ curvature @ data.Fu
-        data.Luu = data.Fu.T @ curvature @ data.Fu + 2 * np.diag(self.input_weights)
+        set_tracking_cost_derivatives(
+            data,
+            self.native_state,
+            self.reference,
+            self.state_weights,
+            command,
+            self.input_weights,
+        )
 
 
 def replay_native_activation_commands(

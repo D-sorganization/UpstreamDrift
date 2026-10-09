@@ -10557,6 +10557,14 @@ calculation is chapter 26; turnover is
 
 ## Native Activation-Aware Manifold Boundary (F05e, #11958)
 
+Both native manifold adapters share difference/retraction Jacobians and
+Gauss–Newton tracking derivatives in `native_manifold_calculus.py`. Model-specific
+state admission and native stepping remain at each boundary. Activation replay
+identity binds adapter and shared-helper bytes; mutation rejects the previous
+identity. The F05e receipt is regenerated against this closure. Existing F05d
+paired timings retain their pre-extraction hashes and historical scope, distinct
+from the twenty native regression cases run after extraction.
+
 `native_activation_manifold.py` admits a self-contained, contact-free
 MuJoCo 3.8.0 Euler floating-root model with built-in joint muscles,
 bounded dimensionless actuator commands, and disabled warmstart/autoreset.

@@ -58,3 +58,19 @@ an independently validated fallback and account for all preparation, failures,
 export, replay and validation costs. This is synthetic software evidence,
 not golfer anatomy, muscle physiological validation, contact/grip, private
 capture, hard deadline, full swing, or six-engine qualification.
+
+## Shared Calculus and CI Remediation
+
+The published PR's DRY and LoD gates exposed repeated manifold/calculation
+logic and chained state access. Both manifold adapters now delegate tangent
+Jacobians and Gauss–Newton tracking derivatives to `native_manifold_calculus.py`;
+the activation action retains its directly supplied native state. Native state
+admission and dynamics remain model-specific. The activation adapter identity
+and regenerated diagnostic receipt include the helper's source bytes. A native
+regression first failed on an unbound helper change, then passed with source
+closure binding; old identities reject before replay. Twenty actual MuJoCo
+3.8/Crocoddyl 3.2.1 activation and direct-motor regression cases passed.
+The existing F05d paired benchmark receipt retains its original source hashes
+and measurements. Chapter 26 explicitly labels that pre-extraction baseline;
+the new regression run does not relabel its historical timings or acceptance
+counts as measurements of the shared implementation.

@@ -181,6 +181,8 @@ def run_receipt(path: Path) -> dict[str, object]:
                 repository
                 / "src/engines/physics_engines/mujoco/python/native_activation_manifold.py",
                 repository
+                / "src/engines/physics_engines/mujoco/python/native_manifold_calculus.py",
+                repository
                 / "src/engines/physics_engines/mujoco/python/native_activation_bundle.py",
                 repository
                 / "tests/unit/motion_matching/test_native_activation_manifold.py",

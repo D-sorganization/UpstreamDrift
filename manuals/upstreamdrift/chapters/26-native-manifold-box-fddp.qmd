@@ -71,6 +71,14 @@ when a bounded optimizer reports success.
 
 ## Paired Development Measurement and Limits
 
+F05e extracts the difference/retraction Jacobians and Gauss–Newton action-cost
+derivatives into `native_manifold_calculus.py`, shared with the activation
+adapter. Model-specific state admission and native steps remain here. Twenty
+actual native activation/direct-motor regression cases pass after extraction.
+The paired benchmark receipt and figures below are retained evidence for their
+recorded pre-extraction source hashes; they are not a new performance measurement
+of the shared implementation or a fresh solver-selection result.
+
 The source-hashed receipt
 `docs/development/feedback_controls/F05D_NATIVE_MANIFOLD_RECEIPT_MJ38.json`
 uses the same synthetic model, exact initial native state, a moving

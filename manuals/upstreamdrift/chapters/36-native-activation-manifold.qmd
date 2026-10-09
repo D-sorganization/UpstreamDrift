@@ -47,6 +47,16 @@ quaternion sign/retraction identities, and seeded Crocoddyl state Jacobian
 checks exercise this boundary. The source-hashed diagnostic receipt records
 the actual errors and dimensions. It does not run or select an optimizer.
 
+The activation and direct-motor manifold adapters share
+`native_manifold_calculus.py` for difference/retraction Jacobians and quadratic
+tracking derivatives. Their model-specific state validation and native dynamics
+remain at each adapter boundary. Tracking curvature is Gauss–Newton: it omits
+second derivatives of the composed residual, including the native step and
+manifold difference. The activation adapter identity binds
+both its own source and the shared calculus bytes; a changed helper rejects
+replay against the previous identity. This source closure is separate from the
+self-contained model XML closure.
+
 ## Frozen Command Replay and Limits
 
 The command is a compiled actuator control in unit `1`. It is not a joint

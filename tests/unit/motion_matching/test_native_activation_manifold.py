@@ -17,6 +17,27 @@ if mj.__version__ != "3.8.0":
     )
 
 
+def test_shared_calculus_bytes_are_bound_to_native_replay_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from src.engines.physics_engines.mujoco.python import (
+        native_activation_manifold as adapter,
+        native_manifold_calculus as calculus,
+    )
+
+    path, full = _fixture(tmp_path)
+    original = adapter.load_native_activation_provider(path)
+    changed_source = tmp_path / "changed_calculus.py"
+    changed_source.write_bytes(Path(calculus.__file__).read_bytes() + b"\n# changed\n")
+    monkeypatch.setattr(calculus, "__file__", str(changed_source))
+    changed = adapter.load_native_activation_provider(path)
+    assert changed.identity.adapter_sha256 != original.identity.adapter_sha256
+    with pytest.raises(ValueError, match="identity changed"):
+        adapter.replay_native_activation_commands(
+            path, full, np.array([[0.4]]), original.identity
+        )
+
+
 def _model_xml() -> str:
     fixture = (
         Path(__file__).resolve().parents[3]
