@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from src.shared.python.motion_matching.pipeline.finish_feasibility import (
+    ratcheted_metrics,
     regressions,
 )
 from src.shared.python.motion_matching.pipeline.receipt_dynamics import (
@@ -60,4 +61,4 @@ def test_receipt_finish_feasibility_has_not_regressed(name: str) -> None:
     block = receipt["dynamics"].get("finish_feasibility")
     if block is None:
         pytest.skip("canonical receipt predates finish-feasibility metrics")
-    assert regressions(block, _baseline()[name]) == []
+    assert regressions(block, ratcheted_metrics(_baseline()[name])) == []
