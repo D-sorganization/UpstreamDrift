@@ -52,5 +52,18 @@
     "corrected_results/seven_iron_shaft_rotation_sd1_scale2/manifest.json": "0f71222f6f958ad8ed5690ef68367e610d3868ae4a93693f52bb44db8aa35855",
     "corrected_results/seven_iron_shaft_rotation_sd2_scale1/manifest.json": "de9f85c8432f197bc0f5d1e17c959718515b1650ca7e2c7a6cec6999aa69ee2d",
     "corrected_results/seven_iron_shaft_rotation_sd2_scale2/manifest.json": "727cbcf3f63e01985a7c8906f58384b6e7924fa0e07ee2e0c505b95c688a31ec"
+  },
+  "resumed_committed_evidence_check": {
+    "checked_at_utc": "2026-10-09T09:07:18.491621+00:00",
+    "git_head": "a2eb2ace3629dd362db5230c958a83a8f61fec45",
+    "head_csv_blobs_matching_frozen_manifests": 24,
+    "reviewed_artifact_hashes_still_matching": 7,
+    "cell_manifest_hashes_still_matching": 24,
+    "flight_rerun": false,
+    "head_artifact_blobs_matching_audit": 7,
+    "archive_member_hashes_verified": {
+      "flight_source_snapshot": 33,
+      "pre_tapin_fix_scoring_snapshot": 144
+    }
   }
 }

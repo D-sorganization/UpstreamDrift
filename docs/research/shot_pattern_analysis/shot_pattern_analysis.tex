@@ -9,7 +9,7 @@
 \section{Status and Scope}
 The original four driver result bundles are historical controls from a
 superseded impact approximation: tangential impulse changed spin but not
-linear velocity. Corrected three-club experiments must replace their
+linear velocity. The completed corrected three-club experiments replace their
 conclusions. Fixed loft also excluded face--loft covariance.
 
 This is an editable standalone experiment reference, separate from the governed
@@ -343,14 +343,19 @@ comparison; it is not used to generate any trajectory or landing.
 The adjacent README and checked-in result bundle record numerical results,
 validation commands, dependency/source hashes and graphic provenance.
 The graphics show a limited set of representative flights while the
-dispersion and statistics use all 10,000 shots per pattern. Full reproduction:
+dispersion and statistics use all 10,000 shots per pattern. Full fresh reproduction uses a new output directory so preserved historical
+controls are never overwritten. Existing corrected bundles may instead be
+validated and summarized by the overview command.
 \begin{verbatim}
-python3 -m src.tools.shot_pattern_analysis \
-  --shots 10000 --seed 20261008 \
-  --output docs/research/shot_pattern_analysis/results
-python3 -m src.tools.shot_pattern_analysis \
-  --shots 10000 --seed 20261008 --face-sd 2 --curve-scale 2 \
-  --output docs/research/shot_pattern_analysis/results_large_curve_sd2
+python3 -m src.tools.shot_pattern_analysis.matrix \
+  shot_pattern_reproduction/corrected_results
+python3 -m src.tools.shot_pattern_analysis.overview \
+  shot_pattern_reproduction/corrected_results \
+  --output-dir shot_pattern_reproduction/overview
+python3 -m src.tools.shot_pattern_analysis.sensitivity \
+  --output shot_pattern_reproduction/sensitivity.json
+python3 -m src.tools.shot_pattern_analysis.numerics \
+  --output shot_pattern_reproduction/numerics.json
 \end{verbatim}
 The native Rust dependency must be installed from this checkout. Compilation
 of this reference is a document check, not scientific acceptance.

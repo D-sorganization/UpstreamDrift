@@ -1,9 +1,10 @@
 # Straight, Draw, and Fade: Shot Pattern Analysis
 
-**Status:** The four original driver result bundles below are superseded
-impact-approximation controls. Independent review found a missing tangential
-translational impulse. Corrected driver, 7-iron, and wedge experiments are in
-progress; the historical precision and scoring numbers are not final conclusions.
+**Status:** All 24 corrected driver, 7-iron, and wedge experiments are complete,
+with 720,000 synthetic shots and independent internal-consistency review.
+The four original driver bundles are [superseded historical controls](historical_control_report.md).
+Corrected V2 scoring and final graphics support the conditional results below;
+empirical model qualification remains outside this study.
 
 This experiment compares 10,000 shots per pattern with independent normally
 distributed face errors at both 1° and 2° standard deviation and fixed path. It is a
@@ -216,6 +217,7 @@ statistics remain separate from GUI code.
 
 - [Trackman Dynamic Loft](https://www.trackman.com/blog/dynamic-loft): definitions and driver/PW loft context.
 - [Titleist GT3](https://www.titleist.com/golf-clubs/drivers/gt3): static driver lie, used only as a geometry assumption.
+- [Titleist T100 Specifications](https://www.titleist.com/golf-clubs/irons/t100-2023): static 7-iron/PW lie of 63°/64°, used only as assumed shaft geometry.
 - [Broadie 2011 Primary Paper](https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf): historical tee/fairway/rough table and putting discussion.
 - [MacKenzie 2018 Shaft Torque Study](https://people.stfx.ca/smackenz/Publications/MacKenzie%202018%20The%20influence%20of%20golf%20shaft%20torque%20on%20clubhead%20kinematics%20and%20ball%20flight.pdf): setup-specific face/loft interaction; not a universal player covariance.
 

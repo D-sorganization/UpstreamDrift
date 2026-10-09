@@ -12,7 +12,7 @@ implementing PR or an explicitly permitted disposition.
 | --- | --- | --- | --- |
 | SPA-001 | Friction Changed Spin Without Tangential Translation | Corrected Locally | Three Regression Tests Failed Before the Fix; Broad Impact Suite: 117 Passed |
 | SPA-002 | Sticking Impulse Assumed Infinite Club Mass | Corrected Locally | Finite-Mass Slip and Momentum Tests; Independent 3D Conservation Review: Six Passed |
-| SPA-003 | Earlier Results Used the Defective Impact Model | Corrected 24-Cell V2 Matrix Complete | Status in All Four Summary, Scoring, and Receipt Files |
+| SPA-003 | Earlier Results Used the Defective Impact Model | Corrected 24-Cell V2 Matrix Complete | Four Historical Bundles Marked Superseded; All 24 Corrected V2 Manifests Verified |
 | SPA-004 | Fixed Loft Omitted Face–Loft Geometry | Geometric Mode and Full Matrix Complete | 17 Geometry Tests and 24 Core/Physics Tests Passed |
 | SPA-005 | Dispersion Summary Omitted Long/Short Covariance | Covariance and Report Integration Complete | Eight Tests Passed, Including Mirror and Zero-Variance Cases |
 | SPA-006 | Driver Approach Scoring Did Not Match Tee Context | Tee/Approach Contexts and V2 Scoring Complete | Historical Table 9 Tee/Fairway/Rough; Dense API Parity; 24 V2 Manifests Verified |
@@ -26,9 +26,7 @@ implementing PR or an explicitly permitted disposition.
 | SPA-014 | Extended Scoring Table Retained the Abbreviated Baseline Version | V2 Baseline and Separate Postprocess Provenance Complete | Content SHA Is Authoritative; Version and Postprocess Receipts Must Identify Full Table |
 | SPA-015 | Mirror Symmetry Was Overgeneralized to Coupled Delivery | Documentation Corrected; Astra Verified Geometry | Fixed Loft Is Symmetric; Same Right-Handed Axis Coupling Can Differ Structurally |
 | SPA-016 | Putting Baseline Awarded Partial Hole-Outs at Positive Distance | Corrected; All 24 Saved-Flight Bundles Re-Scored | Unholed Expected Strokes Must Be at Least One; Terminal Holed State Must Be Separate |
-
 | SPA-017 | Shared SG Legend Repeated Entries and Overlapped a Panel Title | Corrected; Regenerated V2 Overview | Red–Green Legend Test and Visually Verified 1080p PNGs |
-
 | SPA-018 | Git Line-Ending Normalization Changed Evidence Hashes | Corrected and Committed | All 24 Indexed CSV Hashes Match Frozen Manifests |
 
 ## Regression and Resolution Requirements

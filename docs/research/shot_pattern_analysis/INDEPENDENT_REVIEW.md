@@ -77,10 +77,27 @@ The 2011 benchmark and reconciled putting model are historical and approximate.
 The course geometry is hypothetical. Sampling intervals exclude these uncertainties.
 
 The study is suitable as a reproducible geometric and model-sensitivity analysis.
-It does not establish a preferred shot shape for a golfer. Release-level Git
-byte-preservation checks, repository-wide gates, document compilation, and any PR
+It does not establish a preferred shot shape for a golfer. Repository-wide gates, document compilation, and any PR
 lifecycle steps are tracked by the parent agent separately; this review does not
 claim those have passed merely because the scientific artifact checks passed.
+
+## Resumed Committed-Evidence Check
+
+At commit `a2eb2ace3629dd362db5230c958a83a8f61fec45`, all 24 CSVs read directly
+from Git HEAD matched their frozen manifest SHA-256 values. All seven recorded
+artifact/archive hashes and all 24 cell-manifest hashes in the audit receipt
+still matched. The seven audited artifacts also matched their Git HEAD blobs;
+all 33 source-archive and 144 historical-scoring-archive member hashes verified.
+No flight rerun was needed. The 18 issue acceptance records
+continue to distinguish local implementation from merged-PR closure; the
+canonical type/release gate is not accepted solely from focused checks.
+
+The resumed reading identified stale completion wording in the main README and
+reference, and old reference reproduction commands targeting historical output
+directories. These were reported to the parent for correction before publication.
+The corrected completion wording and fresh-output matrix/refinement reproduction
+commands were subsequently verified, as was the added primary iron-lie source.
+These corrections do not change the audited numerical results.
 
 ## Focused Reproduction
 
