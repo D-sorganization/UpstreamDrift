@@ -248,41 +248,8 @@ class FeedbackComparisonRegistry:
         if len(value) != 64 or any(c not in "0123456789abcdef" for c in value.lower()):
             raise ValueError(f"{name} must be a SHA-256 hex digest")
 
-    def admit(
-        self,
-        evidence: ComparisonEvidence,
-        level: ComparisonLevel,
-        *,
-        claim_qualified: bool = False,
-        claim_native_muscle: bool = False,
-    ) -> ComparisonRow:
-        """Check prerequisites for a claim, never certify a numerical gate."""
-        row = self.get(evidence.package_id, evidence.variant_id, evidence.drive_mode)
-        if (
-            evidence.source_model_sha256 != row.source_model_sha256
-            or not row.source_model_sha256
-        ):
-            raise ValueError("stale or missing model identity")
-        if evidence.provider_id != row.provider_id or not row.provider_id:
-            raise ValueError("stale or missing provider identity")
-        if evidence.provider_sha256 != row.provider_sha256 or not row.provider_sha256:
-            raise ValueError("stale or missing provider source hash")
-        for name in (
-            "provider_sha256",
-            "state_schema_sha256",
-            "policy_sha256",
-            "observation_sha256",
-        ):
-            self._digest(getattr(evidence, name), name)
-        if claim_qualified and row.qualification != "qualified":
-            raise ValueError("unqualified row cannot be claimed qualified")
-        if level == ComparisonLevel.IDENTITY:
-            return row
-        if level == ComparisonLevel.TRANSCRIPTION_FEASIBILITY:
-            self._digest(
-                evidence.transcription_receipt_sha256, "transcription_receipt_sha256"
-            )
-            return row
+    def _admit_replay_evidence(self, evidence: ComparisonEvidence) -> None:
+        """Validate independent applied-input replay without scoring accuracy."""
         self._digest(evidence.applied_input_sha256, "applied_input_sha256")
         for name in (
             "physical_model_sha256",
@@ -347,38 +314,79 @@ class FeedbackComparisonRegistry:
             InputKind.GENERALIZED_EFFORT,
         }:
             raise ValueError("torque drive requires an actuator or effort input")
+
+    def _admit_biomechanical_evidence(
+        self,
+        evidence: ComparisonEvidence,
+        row: ComparisonRow,
+        claim_native_muscle: bool,
+    ) -> None:
+        if evidence.evidence_mode == EvidenceMode.EXTERNALLY_FORCED:
+            raise ValueError(
+                "externally forced replay cannot establish biomechanical equivalence"
+            )
+        if not evidence.full_horizon or evidence.state_resets:
+            raise ValueError(
+                "biomechanical evidence requires uninterrupted full horizon"
+            )
+        self._digest(evidence.contact_evidence_sha256, "contact_evidence_sha256")
+        self._digest(evidence.force_evidence_sha256, "force_evidence_sha256")
+        if claim_native_muscle:
+            if row.capability_support["native_own_contact"] != "supported":
+                raise ValueError("native own-contact capability is not supported")
+            if evidence.drive_mode != DriveMode.MUSCLE_EXCITATION:
+                raise ValueError("native muscle claim requires excitation drive")
+            if evidence.evidence_mode != EvidenceMode.NATIVE_OWN_CONTACT:
+                raise ValueError(
+                    "native muscle claim requires native own-contact physics"
+                )
+            self._digest(
+                evidence.muscle_state_evidence_sha256, "muscle_state_evidence_sha256"
+            )
+
+    def admit(
+        self,
+        evidence: ComparisonEvidence,
+        level: ComparisonLevel,
+        *,
+        claim_qualified: bool = False,
+        claim_native_muscle: bool = False,
+    ) -> ComparisonRow:
+        """Check prerequisites for a claim, never certify a numerical gate."""
+        row = self.get(evidence.package_id, evidence.variant_id, evidence.drive_mode)
+        if (
+            evidence.source_model_sha256 != row.source_model_sha256
+            or not row.source_model_sha256
+        ):
+            raise ValueError("stale or missing model identity")
+        if evidence.provider_id != row.provider_id or not row.provider_id:
+            raise ValueError("stale or missing provider identity")
+        if evidence.provider_sha256 != row.provider_sha256 or not row.provider_sha256:
+            raise ValueError("stale or missing provider source hash")
+        for name in (
+            "provider_sha256",
+            "state_schema_sha256",
+            "policy_sha256",
+            "observation_sha256",
+        ):
+            self._digest(getattr(evidence, name), name)
+        if claim_qualified and row.qualification != "qualified":
+            raise ValueError("unqualified row cannot be claimed qualified")
+        if level == ComparisonLevel.IDENTITY:
+            return row
+        if level == ComparisonLevel.TRANSCRIPTION_FEASIBILITY:
+            self._digest(
+                evidence.transcription_receipt_sha256, "transcription_receipt_sha256"
+            )
+            return row
+        self._admit_replay_evidence(evidence)
         if level == ComparisonLevel.OBSERVATION_ACCURACY:
             self._digest(
                 evidence.observation_score_receipt_sha256,
                 "observation_score_receipt_sha256",
             )
         if level == ComparisonLevel.BIOMECHANICAL_EQUIVALENCE or claim_native_muscle:
-            if evidence.evidence_mode == EvidenceMode.EXTERNALLY_FORCED:
-                raise ValueError(
-                    "externally forced replay cannot establish biomechanical equivalence"
-                )
-            if not evidence.full_horizon or evidence.state_resets:
-                raise ValueError(
-                    "biomechanical evidence requires uninterrupted full horizon"
-                )
-            self._digest(evidence.contact_evidence_sha256, "contact_evidence_sha256")
-            self._digest(evidence.force_evidence_sha256, "force_evidence_sha256")
-            if claim_native_muscle:
-                if row.capability_support["native_own_contact"] != "supported":
-                    raise ValueError("native own-contact capability is not supported")
-                if evidence.drive_mode != DriveMode.MUSCLE_EXCITATION:
-                    raise ValueError("native muscle claim requires excitation drive")
-                if evidence.evidence_mode != EvidenceMode.NATIVE_OWN_CONTACT:
-                    raise ValueError(
-                        "native muscle claim requires native own-contact physics"
-                    )
-                self._digest(
-                    evidence.muscle_state_evidence_sha256,
-                    "muscle_state_evidence_sha256",
-                )
-                self._digest(
-                    evidence.contact_evidence_sha256, "contact_evidence_sha256"
-                )
+            self._admit_biomechanical_evidence(evidence, row, claim_native_muscle)
         return row
 
     def compare(self, request: ComparisonRequest) -> None:
