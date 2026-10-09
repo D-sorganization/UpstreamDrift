@@ -92,7 +92,13 @@ ENGINES = sorted(ENGINE_MODULES)
 
 
 @pytest.mark.timeout(600)
-@pytest.mark.parametrize("engine", ENGINES)
+@pytest.mark.parametrize(
+    "engine",
+    [
+        pytest.param(e, marks=pytest.mark.slow) if e == "pinocchio" else e
+        for e in ENGINES
+    ],
+)
 def test_static_hold_supports_the_club_weight(engine: str) -> None:
     module = _engine(engine)
     spec_bytes = _spec_bytes("driver")
