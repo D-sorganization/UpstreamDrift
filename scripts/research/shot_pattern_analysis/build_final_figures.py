@@ -259,8 +259,8 @@ def _cell_metadata(
         "club": club.get("club_id"),
         "delivery mode": config.get("delivery_mode", "unspecified"),
         "contact law": club.get("contact_law", "unspecified"),
-        "club speed mps": club.get("club_speed_mps"),
-        "nominal delivered loft deg": club.get("loft_deg"),
+        "reference club speed mps": club.get("club_speed_mps"),
+        "static loft deg": club.get("loft_deg"),
         "nominal shaft lean deg": club.get("shaft_lean_deg"),
         "curve scale": config.get("curve_scale"),
         "random seed": config.get("seed"),
@@ -545,6 +545,29 @@ def _write_comparison_ledger(rows: list[dict[str, Any]], output_root: Path) -> P
     return path
 
 
+def _validate_final_protocol(report: dict[str, Any], output_name: str) -> None:
+    """Require the complete predeclared final population and target protocol."""
+    expected = 324 if output_name == "final_figures_v1" else 72
+    cells = report["cells"]
+    if report.get("stage") != "final" or report.get("planned_cells") != expected or len(cells) != expected:
+        raise ValueError("final figures require the complete 324/72-cell final protocol")
+    fixed_target = output_name == "control_final_figures_v1"
+    if any(cell["config"]["n_shots"] != 10_000 for cell in cells):
+        raise ValueError("final figures require 10,000 attempts per pattern")
+    if any((cell["config"].get("target_x_m") is not None) != fixed_target for cell in cells):
+        raise ValueError("final figure target protocol does not match output kind")
+
+
+def _assert_inputs_unchanged(source_root: Path, report: dict[str, Any], *, preview: bool) -> None:
+    """Revalidate every input byte after rendering, before publishing a manifest."""
+    from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+
+    current = load_matrix_report(source_root, require_complete=not preview)
+    for key in ("plan_sha256", "cell_manifest_sha256", "report_source_sha256"):
+        if current[key] != report[key]:
+            raise RuntimeError(f"figure source changed during rendering: {key}")
+
+
 def build_final_figures(
     source_root: Path,
     output_root: Path,
@@ -573,6 +596,8 @@ def build_final_figures(
         raise ValueError(
             "final figures require a non-pilot report and final_figures_v1/control_final_figures_v1 sibling output root"
         )
+    if not preview:
+        _validate_final_protocol(report, output_root.name)
     if selected_cells and not preview:
         raise ValueError("selected_cells is allowed only for explicit pilot previews")
     if preview and not selected_cells:
@@ -709,6 +734,7 @@ def build_final_figures(
             "This postprocessor performs no simulation or score calculation."
         ),
     }
+    _assert_inputs_unchanged(source_root, report, preview=preview)
     manifest_path = output_root / "figure_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest_path

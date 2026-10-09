@@ -241,3 +241,51 @@ def test_pilot_preview_writes_separate_manifest_and_facebook_pngs(tmp_path, monk
     assert manifest["facebook_ready_image_count"] == 6
     assert manifest["facebook_overhead_image_count"] == 1
     assert all((output_root / path).is_file() for path in manifest["outputs"])
+
+
+def test_detail_metadata_identifies_static_loft() -> None:
+    from scripts.research.shot_pattern_analysis.build_final_figures import _cell_metadata
+    metadata = _cell_metadata({'config': {'club': {'loft_deg': 34, 'shaft_lean_deg': 10}}}, {}, {})
+    assert metadata['static loft deg'] == 34
+    assert 'nominal delivered loft deg' not in metadata
+
+
+@pytest.mark.parametrize('stage,count,shots', [('unknown',324,10000), ('final',32,10000), ('final',324,32)])
+def test_final_protocol_rejects_wrong_stage_size_or_population(stage, count, shots) -> None:
+    from scripts.research.shot_pattern_analysis.build_final_figures import _validate_final_protocol
+    report = {'stage': stage, 'planned_cells': count, 'cells': [{'config': {'n_shots': shots, 'target_x_m': None}}] * count}
+    with pytest.raises(ValueError):
+        _validate_final_protocol(report, 'final_figures_v1')
+
+
+def test_final_publication_rechecks_input_bytes(monkeypatch, tmp_path) -> None:
+    from scripts.research.shot_pattern_analysis.build_final_figures import _assert_inputs_unchanged
+    from src.tools.shot_pattern_analysis import matched_report
+    def changed(*args, **kwargs):
+        raise ValueError('cell integrity failure: changed CSV')
+    monkeypatch.setattr(matched_report, 'load_matrix_report', changed)
+    with pytest.raises(ValueError, match='integrity failure'):
+        _assert_inputs_unchanged(tmp_path, {}, preview=False)
+
+
+@pytest.mark.parametrize('rewrite_manifest', [False, True])
+def test_publication_rejects_changed_saved_bytes_even_with_new_manifest(tmp_path, rewrite_manifest) -> None:
+    import hashlib
+    from scripts.research.shot_pattern_analysis.build_final_figures import _assert_inputs_unchanged
+    from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
+    config = {'n_shots': 1}
+    cell = tmp_path / 'cell'
+    cell.mkdir()
+    (tmp_path / 'matrix_plan.json').write_text(json.dumps({'stage': 'pilot', 'execution': {}, 'cells': {'cell': config}}))
+    (cell / 'run_start.json').write_text(json.dumps({'config': config, 'execution': {}}))
+    (cell / 'summary.json').write_text(json.dumps({'config': config, 'status': 'unavailable'}))
+    (cell / 'shots.csv.gz').write_bytes(b'original saved bytes')
+    def write_manifest():
+        (cell / 'manifest.json').write_text(json.dumps({'files_sha256': {name: hashlib.sha256((cell / name).read_bytes()).hexdigest() for name in ('run_start.json', 'summary.json', 'shots.csv.gz')}}))
+    write_manifest()
+    report = load_matrix_report(tmp_path)
+    (cell / 'shots.csv.gz').write_bytes(b'changed after initial validation')
+    if rewrite_manifest:
+        write_manifest()
+    with pytest.raises((ValueError, RuntimeError)):
+        _assert_inputs_unchanged(tmp_path, report, preview=True)
