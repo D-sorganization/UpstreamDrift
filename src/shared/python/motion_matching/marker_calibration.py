@@ -118,6 +118,59 @@ def _marker_rms(
     return rms
 
 
+def score_frozen_marker_offsets(
+    capture: TourCapture,
+    offsets: Offsets,
+    poses: Sequence[Mapping[str, Pose]],
+) -> tuple[float, dict[str, float]]:
+    """Score withheld observations against fixed placements and predicted poses.
+
+    Return Euclidean marker-distance RMS in metres, pooled over valid samples,
+    and per-marker RMS. No placement, anthropometry, IK, alignment or pose is
+    fitted here. Callers must freeze those quantities using calibration/training
+    data before inspecting withheld observations; this pure scorer cannot verify
+    their provenance. Within-trial marker holdout is not independent-trial or
+    subject validation. Poses must already be on the unchanged observation clock.
+
+    Every requested marker needs a finite placement and observed support. Every
+    frame needs a proper body rotation and translation, including masked frames.
+    Missing support raises instead of becoming a misleading zero residual.
+    Inputs are neither changed nor passed to a fitting callback.
+    """
+    if len(poses) != capture.frames or not capture.labels:
+        raise ValueError("One predicted pose set per observation frame is required")
+    for index, label in enumerate(capture.labels):
+        if label not in offsets:
+            raise ValueError(f"Missing frozen placement for {label}")
+        body, offset = offsets[label]
+        point = np.asarray(offset, dtype=float)
+        if not body or point.shape != (3,) or not np.isfinite(point).all():
+            raise ValueError(f"Invalid frozen placement for {label}")
+        if not capture.valid[:, index].any():
+            raise ValueError(f"No observed support for {label}")
+        for pose in poses:
+            if body not in pose:
+                raise ValueError(f"No predicted pose for body {body}")
+            _validate_scoring_pose(pose[body])
+    rms, per_marker = _marker_rms_and_per_marker(capture, offsets, list(poses))
+    if not np.isfinite(rms) or not all(np.isfinite(v) for v in per_marker.values()):
+        raise ValueError("Marker residuals must be finite")
+    return rms, per_marker
+
+
+def _validate_scoring_pose(pose: Pose) -> None:
+    rotation, translation = (np.asarray(value, dtype=float) for value in pose)
+    if (
+        rotation.shape != (3, 3)
+        or translation.shape != (3,)
+        or not np.isfinite(rotation).all()
+        or not np.isfinite(translation).all()
+        or not np.allclose(rotation.T @ rotation, np.eye(3), rtol=0, atol=1e-10)
+        or not np.isclose(np.linalg.det(rotation), 1.0, rtol=0, atol=1e-10)
+    ):
+        raise ValueError("Predicted body pose must be a finite proper rigid transform")
+
+
 def _marker_rms_and_per_marker(
     capture: TourCapture, offsets: Offsets, poses: list[Mapping[str, Pose]]
 ) -> tuple[float, dict[str, float]]:
