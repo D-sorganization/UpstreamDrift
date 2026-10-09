@@ -403,8 +403,8 @@ def validate_native_replay_output(
     ):
         raise ValueError("native output actual inputs differ from frozen bundle")
     if row.engine != "myosuite":
-        generalized_effort = np.asarray(output.generalized_actuator_torques)
-        if generalized_effort.shape != (
+        generalized_effort = getattr(output, "generalized_actuator_torques", None)
+        if generalized_effort is None or np.asarray(generalized_effort).shape != (
             len(inputs),
             qvel.shape[1] if qvel.ndim == 2 else -1,
         ):
