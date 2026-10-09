@@ -36,6 +36,7 @@ from src.shared.python.biomechanics.grip_wrench import (
     analyze_grip,
 )
 from src.shared.python.grip_contact import (
+    ClubKinematics,
     ConditioningReport,
     GripInterface,
     condition_trajectory,
@@ -62,6 +63,9 @@ class BushingRun:
     club_com_m: np.ndarray  # (n, 3) world
     club_velocity_m_s: np.ndarray  # (n, 3) club body origin, world
     club_omega_rad_s: np.ndarray  # (n, 3) world
+    club_alpha_rad_s2: np.ndarray  # (n, 3) angular acceleration, world
+    club_com_acceleration_m_s2: np.ndarray  # (n, 3) world
+    rigid_club: ClubKinematics  # the club welded to the prescribed left hand
     body_positions_m: dict[str, np.ndarray]  # tracked body origins (n, 3), world
 
 
@@ -128,6 +132,10 @@ def prepare_motion(
 
 def _osim() -> Any:
     return import_module("opensim")
+
+
+def _vec(v: Any) -> np.ndarray:
+    return np.array([v.get(i) for i in range(3)])
 
 
 def _transform_to_rt(transform: Any) -> tuple[np.ndarray, np.ndarray]:
@@ -318,6 +326,30 @@ class BushingGripSimulator:
         for name, value in zip(CLUB_FREE_COORDINATES, [*euler, *pos], strict=True):
             coords.get(name).setValue(self._state, float(value), False)
         self._model.realizePosition(self._state)
+        # The rigid (weld) club: fixed on the left hand body at its initial
+        # pose, i.e. the club motion that the prescribed input demands.
+        hand = self._model.getBodySet().get("LGrip")
+        r_h, p_h = _transform_to_rt(hand.getTransformInGround(self._state))
+        club = self._model.getBodySet().get(CLUB_BODY)
+        com = club.getMassCenter()
+        com_world = rot @ np.array([com.get(i) for i in range(3)]) + pos
+        self._rigid_offset = (r_h.T @ rot, r_h.T @ (com_world - p_h))
+
+    def _rigid_sample(self, state: Any) -> dict[str, np.ndarray]:
+        """Club kinematics if it were welded to the left hand (acceleration stage)."""
+        hand = self._model.getBodySet().get("LGrip")
+        r_off, station = self._rigid_offset
+        r_h, p_h = _transform_to_rt(hand.getTransformInGround(state))
+        acc = hand.findStationAccelerationInGround(
+            state, self._osim.Vec3(*(float(x) for x in station))
+        )
+        return {
+            "rot": r_h @ r_off,
+            "w": _vec(hand.getAngularVelocityInGround(state)),
+            "alpha": _vec(hand.getAngularAccelerationInGround(state)),
+            "com": r_h @ station + p_h,
+            "a_com": _vec(acc),
+        }
 
     def probe_deflection(
         self, translation_m: Sequence[float], rotvec_rad: Sequence[float]
@@ -395,6 +427,13 @@ class BushingGripSimulator:
         out["w"] = np.array(
             [body.getAngularVelocityInGround(state).get(i) for i in range(3)]
         )
+        model.realizeAcceleration(state)
+        out["alpha"] = np.array(
+            [body.getAngularAccelerationInGround(state).get(i) for i in range(3)]
+        )
+        acc = body.findStationAccelerationInGround(state, body.getMassCenter())
+        out["a_com"] = np.array([acc.get(i) for i in range(3)])
+        out["rigid"] = self._rigid_sample(state)
         for side, name in _SIDES:
             force = _downcast(
                 self._osim,
@@ -447,6 +486,14 @@ class BushingGripSimulator:
             club_com_m=np.array([r["com"] for r in rows]),
             club_velocity_m_s=np.array([r["v"] for r in rows]),
             club_omega_rad_s=np.array([r["w"] for r in rows]),
+            club_alpha_rad_s2=np.array([r["alpha"] for r in rows]),
+            club_com_acceleration_m_s2=np.array([r["a_com"] for r in rows]),
+            rigid_club=ClubKinematics(
+                *(
+                    np.array([r["rigid"][k] for r in rows])
+                    for k in ("rot", "w", "alpha", "com", "a_com")
+                )
+            ),
             body_positions_m={
                 name: np.array([r["bodies"][name] for r in rows])
                 for name in TRACKED_BODIES

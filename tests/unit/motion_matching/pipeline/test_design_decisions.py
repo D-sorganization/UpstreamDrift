@@ -19,7 +19,7 @@ def test_design_decisions_file_exists() -> None:
 
 
 def test_design_decisions_parser_and_order() -> None:
-    """Verify all 16 decisions exist in order, each with what, why, receipt, rejected."""
+    """Verify all 17 decisions exist in order, each with what, why, receipt, rejected."""
     from src.shared.python.motion_matching.pipeline.design_decisions import (
         parse_design_decisions,
         validate_design_decisions,
@@ -27,7 +27,7 @@ def test_design_decisions_parser_and_order() -> None:
 
     content = DOC_PATH.read_text(encoding="utf-8")
     decisions = parse_design_decisions(content)
-    assert len(decisions) == 16, f"Expected 16 decisions, got {len(decisions)}"
+    assert len(decisions) == 17, f"Expected 17 decisions, got {len(decisions)}"
 
     # Validate decision contents and verify all referenced receipt links exist on disk
     validate_design_decisions(decisions, repo_root=REPO_ROOT)
@@ -92,6 +92,7 @@ def test_design_decisions_rejects_broken_link(tmp_path: Path) -> None:
                 "MJX Differentiable Optimisation (Windowed)",
                 "Address Foot Progression (OSV-4, #11730)",
                 "Compliant Bushing Grip Model (OSV-7 Phase 1)",
+                "Impact-Phase Bushing Grip From the Closure-Consistent Fits (OSV-7)",
             ]
         )
     ]
