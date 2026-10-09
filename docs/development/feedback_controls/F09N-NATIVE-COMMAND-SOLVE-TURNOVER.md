@@ -91,6 +91,41 @@ Actual capability probes and served-bundle verification must precede a new
 Tools acceptance declaration; no metadata stamp or blanket CI-green claim is
 made. Reconcile the admitted private consumer/pin stack before integration.
 
+## Reproduction Commands
+
+Use the actual pinned MyoSuite 3.0.0/MuJoCo 3.6.0 environment, not the portable
+environment that skips SDK tests. Point `FEEDBACK_NATIVE_PYTHON` to its existing
+interpreter and `FEEDBACK_MYOSUITE_PRODUCTION_ROOT` to the verified unchanged
+production model/resources directory. Run from this checkout with the committed
+Tools gitlink initialized at `e775bce870690bba1b56f3d6297513003fb7dbac`.
+Keep later provider/pin integration evidence separate from this campaign.
+
+```powershell
+$taskRoot = (Get-Location).Path
+$env:PYTHONPATH = "$taskRoot;$taskRoot/src;$taskRoot/vendor/ud-tools/src/shared/python;$taskRoot/vendor/ud-tools/src"
+$env:TOOLS_REPO_PATH = "$taskRoot/vendor/ud-tools"
+$env:PYTHONUTF8 = '1'
+$nativeTestFiles = @(
+    'tests/unit/engines/myosuite/test_project_task_producer.py',
+    'tests/unit/engines/myosuite/test_project_task_feedback.py',
+    'tests/unit/engines/myosuite/test_project_task_forecast.py',
+    'tests/unit/engines/myosuite/test_project_task_artifact_admission.py',
+    'tests/unit/engines/myosuite/test_native_model_resource_closure.py',
+    'tests/unit/engines/myosuite/test_project_task_native_search.py',
+    'tests/unit/engines/myosuite/test_project_task_tracking.py',
+    'tests/unit/engines/myosuite/test_project_task_command_solve.py',
+    'tests/unit/motion_matching/test_bounded_candidate_search.py'
+)
+& $env:FEEDBACK_NATIVE_PYTHON -m pytest --noconftest -o addopts='' @nativeTestFiles -q --junitxml=f09n-native-campaign.xml
+```
+
+Record actual versions, exact source/resource hashes before and after, JUnit,
+full solve metrics and committed-source correspondence. Preserve existing
+receipts rather than replacing them. Repeat canonical local checks and normal
+hooks before publication. The final fixture's declared criteria/reference and
+physical scales are in the committed test source; production criteria are not
+inferred from that fixture.
+
 ## Remaining Full Epic Work
 
 Qualify model-specific hard criteria and reference mapping, optimize and execute
