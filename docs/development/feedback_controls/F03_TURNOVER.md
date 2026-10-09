@@ -1,4 +1,4 @@
-# F03 Synthetic Collocation Spike Turnover (#11787)
+# F03 Synthetic Collocation Spike Turnover (#11821; Parent #11787)
 
 F03 work is isolated on `feat/f03-constrained-ocp-11787`, based on F01 PR
 #11808. It uses the existing multiple-shooting solver as one synthetic
@@ -18,7 +18,8 @@ library versions. The timer covers the synthetic callback only. It excludes
 private capture preparation, F06 native validation, artifact export and a
 full-body engine. The private data protocol D02 and early F06 replay validator
 are integration prerequisites before capture fitting or a production backend
-decision. Keep this issue open until those receipts exist.
+decision. Child #11821 can close when this scoped benchmark merges; keep parent
+#11787 open until those receipts exist.
 
 Reproduce with `python -m pytest
 tests/unit/motion_matching/test_sparse_collocation_spike.py -q`, then run
