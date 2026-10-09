@@ -1,10 +1,14 @@
 {
   "schema_version": 1,
-  "tools_pin": "2e7665111b06f92ffbfe178b92d74d6a81c95388",
+  "tools_pin": "e775bce870690bba1b56f3d6297513003fb7dbac",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
-    "contracts": "vendor/ud-tools/src/contracts.py"
+    "sidekick": "vendor/ud-tools/src/sidekick",
+    "chat": "vendor/ud-tools/src/chat",
+    "chat_contracts": "vendor/ud-tools/src/chat_contracts",
+    "contracts": "vendor/ud-tools/src/contracts.py",
+    "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
     "identical": 400,

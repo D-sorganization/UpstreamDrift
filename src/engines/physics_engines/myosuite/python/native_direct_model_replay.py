@@ -26,6 +26,8 @@ from defusedxml.common import DefusedXmlException
 
 from src.engines.native_replay_contracts import (
     native_replay_admission_bytes,
+    native_clock_interval_matches,
+    require_native_step_clock,
     require_no_global_mujoco_callbacks,
     validate_native_replay_bundle,
 )
@@ -63,6 +65,17 @@ _ACTUATOR_MODEL_FIELDS = (
     "actuator_trntype",
     "actuator_user",
 )
+
+# Exact reviewed native layouts: absent 3.6 fields must never be fabricated.
+_ACTUATOR_FIELDS_BY_VERSION = {
+    "3.8.0": _ACTUATOR_MODEL_FIELDS,
+    "3.6.0": tuple(
+        field
+        for field in _ACTUATOR_MODEL_FIELDS
+        if field
+        not in {"actuator_armature", "actuator_damping", "actuator_dampingpoly"}
+    ),
+}
 
 _CONTACT_GEOMETRY_FIELDS = (
     "geom_bodyid",
@@ -123,30 +136,14 @@ def _require_sha256(value: str, field_name: str) -> None:
         raise ValueError(f"{field_name} must be a lowercase SHA-256 digest")
 
 
-def _clock_close(
-    actual: float, expected: float, step_size: float, accumulated_steps: int = 0
-) -> bool:
-    if not np.isfinite(actual) or not np.isfinite(expected):
-        return False
-    if actual == expected:
-        return True
-    scale = max(abs(actual), abs(expected), abs(step_size))
-    tolerance = (4.0 + 2.0 * accumulated_steps) * float(np.spacing(scale))
-    return tolerance < step_size / 2.0 and abs(actual - expected) <= tolerance
-
-
 def _time_grid_matches_step(times: NDArray[np.float64], step_size: float) -> bool:
     if times.ndim != 1 or times.size < 2 or times[0] != 0.0:
         return False
     if not np.isfinite(times).all() or step_size <= 0.0:
         return False
     return all(
-        _clock_close(
-            float(interval),
-            step_size,
-            max(step_size, abs(float(times[index])), abs(float(times[index + 1]))),
-        )
-        for index, interval in enumerate(np.diff(times))
+        native_clock_interval_matches(float(interval), step_size)
+        for interval in np.diff(times)
     )
 
 
@@ -320,8 +317,8 @@ def _discover_native_resource_files(entry: Path, root: Path) -> tuple[set[Path],
     """Audit source loaders, then ask pinned native MjSpec for asset semantics."""
     import mujoco as mj
 
-    if mj.__version__ != "3.8.0":
-        raise ValueError("resource discovery is pinned to MuJoCo 3.8.0")
+    if mj.__version__ not in _ACTUATOR_FIELDS_BY_VERSION:
+        raise ValueError("resource discovery requires reviewed MuJoCo 3.6.0 or 3.8.0")
     files = _included_xml_sources(entry, root)
     spec = mj.MjSpec.from_file(str(entry))
     if spec.strippath or spec.hfields or spec.skins or spec.assets:
@@ -520,6 +517,11 @@ def actuator_law_manifest_sha256(model: Any, channels: tuple[Any, ...]) -> str:
     """Digest ordered channel identities and the compiled native actuator laws."""
     import mujoco as mj
 
+    fields = _ACTUATOR_FIELDS_BY_VERSION.get(mj.__version__)
+    if fields is None:
+        raise ValueError("actuator laws require a reviewed native runtime version")
+    if any(not hasattr(model, field) for field in fields):
+        raise ValueError("compiled model is missing a required native actuator field")
     if len(channels) != int(model.nu) or int(model.nu) <= 0:
         raise ValueError("one explicit T01 channel is required per native actuator")
     rows = []
@@ -536,7 +538,7 @@ def actuator_law_manifest_sha256(model: Any, channels: tuple[Any, ...]) -> str:
                 "frame_id": channel.frame_id,
                 "native_law": {
                     field: np.asarray(getattr(model, field)[index]).tolist()
-                    for field in _ACTUATOR_MODEL_FIELDS
+                    for field in fields
                 },
             }
         )
@@ -861,7 +863,7 @@ def _validate_native_execution_identity(
     if (
         bundle.policy.initialization_policy_id
         != "mujoco-integration-state-restore-forward"
-        or bundle.policy.initialization_policy_version != "1.0.0"
+        or bundle.policy.initialization_policy_version not in {"1.0.0", "1.1.0"}
         or bundle.policy.input_player_id != "native-mj-step-direct-actuator-command"
         or bundle.policy.input_player_version != "1.0.0"
     ):
@@ -931,12 +933,16 @@ def replay_direct_model_actuator_commands(
             mj.mjtState.mjSTATE_INTEGRATION,
         )
         _verify_restored_state(model, data, states)
+        if data.time != 0.0 and bundle.policy.initialization_policy_version != "1.1.0":
+            raise ValueError(
+                "nonzero native epoch requires initialization policy 1.1.0"
+            )
         require_no_global_mujoco_callbacks(mj)
         start_time = float(data.time)
         mj.mj_forward(model, data)
         require_no_global_mujoco_callbacks(mj)
         _require_no_native_warnings(data)
-        if not np.isclose(data.time, start_time, atol=1e-12, rtol=0):
+        if data.time != start_time:
             raise ValueError("direct initialization forward changed native time")
         schedule = _DirectCommandSchedule(
             times,
@@ -1024,8 +1030,12 @@ def _verify_restored_state(
     mj.mj_getState(model, data, actual, mj.mjtState.mjSTATE_INTEGRATION)
     if not np.array_equal(actual, states["integration"]):
         raise ValueError("direct full integration-state restore differs")
-    if data.time != 0.0 or np.any(data.qfrc_applied) or np.any(data.xfrc_applied):
-        raise ValueError("direct initial time and external-load state must be zero")
+    if (
+        not np.isfinite(data.time)
+        or np.any(data.qfrc_applied)
+        or np.any(data.xfrc_applied)
+    ):
+        raise ValueError("direct initial time must be finite and external loads zero")
 
 
 def _require_normalized_quaternions(model: Any, qpos: NDArray[np.float64]) -> None:
@@ -1057,14 +1067,15 @@ def _execute_commands(
     law_digest = schedule.law_digest
     profile_sha256 = schedule.profile_sha256
     require_no_global_mujoco_callbacks(mj)
-    if data.time != times[0]:
+    origin = float(data.time)
+    if times[0] != 0.0 or not np.isfinite(origin):
         raise ValueError("direct native initial clock differs from frozen grid")
     qpos = [data.qpos.copy()]
     qvel = [data.qvel.copy()]
     activation = [data.act.copy()]
     controls = [data.ctrl.copy()]
     integration = [initial_integration.copy()]
-    observed_times = [float(data.time)]
+    observed_times = [0.0]
     applied = []
     limited = np.asarray(model.actuator_ctrllimited, dtype=bool)
     limits = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
@@ -1079,6 +1090,7 @@ def _execute_commands(
         ):
             raise ValueError("T01 command violates native actuator control limits")
         applied.append(actual_command)
+        previous_time = float(data.time)
         mj.mj_step(model, data)
         require_no_global_mujoco_callbacks(mj)
         _require_no_native_warnings(data)
@@ -1086,12 +1098,11 @@ def _execute_commands(
         if not np.array_equal(data.ctrl, command):
             raise ValueError("native actuator command changed during integration")
         observed_time = float(data.time)
-        if not _clock_close(
-            observed_time,
-            float(times[index + 1]),
-            float(model.opt.timestep),
-            index + 1,
-        ):
+        require_native_step_clock(
+            previous_time, observed_time, float(model.opt.timestep)
+        )
+        elapsed = observed_time - origin
+        if not native_clock_interval_matches(elapsed, float(times[index + 1])):
             raise ValueError("observed direct native clock differs from T01")
         mj.mj_forward(model, data)
         require_no_global_mujoco_callbacks(mj)
@@ -1107,7 +1118,7 @@ def _execute_commands(
             raise ValueError("direct native replay produced nonfinite state")
         if data.time != observed_time:
             raise ValueError("direct forward evaluation changed native time")
-        observed_times.append(observed_time)
+        observed_times.append(elapsed)
         qpos.append(data.qpos.copy())
         qvel.append(data.qvel.copy())
         activation.append(data.act.copy())

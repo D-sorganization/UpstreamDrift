@@ -1,3 +1,14 @@
+## Project MyoSuite Task and Independent Replay (F09i, #11983)
+
+Actual MyoSuite 3.0/MuJoCo 3.6 project tasks retain mixed native action bounds and
+exercise SDK lifecycle hooks. Freeze original source/resource bytes before
+native construction, retain concrete SDK helper/distribution identity, export
+existing T01/profile artifacts and verify every claimed state using the existing
+independent executor. Initialization 1.1 preserves absolute native epochs with
+measured relative clocks for suffix replay. Chapter 38 and F09i turnover govern
+the pathway. Three-step production probes do not qualify full capture,
+physiology, muscle-only drive, six-engine parity or the muscular OpenSim endpoint.
+
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.

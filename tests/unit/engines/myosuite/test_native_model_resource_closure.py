@@ -20,8 +20,10 @@ pytestmark = pytest.mark.unit
 @pytest.fixture(autouse=True)
 def _require_supported_native_mujoco() -> None:
     mujoco = pytest.importorskip("mujoco")
-    if mujoco.__version__ != "3.8.0":
-        pytest.skip("bounded resource admission requires MuJoCo 3.8.0")
+    if mujoco.__version__ not in {"3.6.0", "3.8.0"}:
+        pytest.skip(
+            "bounded resource admission requires reviewed MuJoCo 3.6.0 or 3.8.0"
+        )
 
 
 def _declared_files(root: Path, *paths: str) -> tuple[DeclaredModelResource, ...]:

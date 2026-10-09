@@ -237,6 +237,61 @@
         }
       ],
       "tags": ["retrieval", "question", "answer", "canonical", "reference"]
+    },
+    {
+      "id": "project-myosuite-tasks",
+      "title": "Project MyoSuite Tasks",
+      "summary": "SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.",
+      "owner": "UpstreamDrift: src/engines",
+      "status": "implemented",
+      "sources": [
+        "src/engines/myosuite_project_task_producer.py",
+        "src/engines/project_task_replay_artifacts.py"
+      ],
+      "documentation": [
+        "manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd",
+        "docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md"
+      ],
+      "tests": [
+        "tests/unit/engines/myosuite/test_project_task_producer.py",
+        "tests/unit/engines/myosuite/test_project_task_artifact_admission.py",
+        "tests/unit/engines/myosuite/test_native_model_resource_closure.py"
+      ],
+      "entrypoints": [
+        {
+          "path": "src/engines/myosuite_project_task_producer.py",
+          "symbol": "create_project_golf_task"
+        }
+      ],
+      "tags": ["myosuite", "native", "replay", "feedback-controls"]
+    },
+    {
+      "id": "native-direct-command-replay",
+      "title": "Independent Native Command Replay",
+      "summary": "SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.",
+      "owner": "UpstreamDrift: src/engines",
+      "status": "implemented",
+      "sources": [
+        "src/engines/native_direct_model_provider.py",
+        "src/engines/native_replay_contracts.py",
+        "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py"
+      ],
+      "documentation": [
+        "manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd",
+        "docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md"
+      ],
+      "tests": [
+        "tests/unit/engines/myosuite/test_project_task_producer.py",
+        "tests/unit/engines/myosuite/test_project_task_artifact_admission.py",
+        "tests/unit/engines/myosuite/test_native_model_resource_closure.py"
+      ],
+      "entrypoints": [
+        {
+          "path": "src/engines/native_direct_model_provider.py",
+          "symbol": "create_native_direct_model"
+        }
+      ],
+      "tags": ["myosuite", "native", "replay", "feedback-controls"]
     }
   ],
   "relations": [
@@ -324,6 +379,25 @@
         "tests/tools/capture_rig/test_workflow.py",
         "tests/tools/capture_rig/test_goal_catalog.py",
         "tests/tools/capture_rig/test_goal_planner.py"
+      ]
+    },
+    {
+      "id": "project-task-native-replay",
+      "provider": "project-myosuite-tasks",
+      "consumer": "native-direct-command-replay",
+      "kind": "freezes",
+      "contract": "docs/agent_context/contracts/project-task-native-replay.md",
+      "inputs": [
+        "src/engines/myosuite_project_task_producer.py",
+        "src/engines/project_task_replay_artifacts.py",
+        "src/engines/native_direct_model_provider.py",
+        "src/engines/native_replay_contracts.py",
+        "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py"
+      ],
+      "tests": [
+        "tests/unit/engines/myosuite/test_project_task_producer.py",
+        "tests/unit/engines/myosuite/test_project_task_artifact_admission.py",
+        "tests/unit/engines/myosuite/test_native_model_resource_closure.py"
       ]
     }
   ],

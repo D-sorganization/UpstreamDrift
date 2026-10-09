@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from math import ulp
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -22,6 +23,25 @@ _MUJOCO_GLOBAL_CALLBACKS = (
     "contactfilter",
     "time",
 )
+
+
+def native_clock_interval_matches(represented: float, requested: float) -> bool:
+    """Apply T04's interval precision independently of epoch and run length."""
+    if (
+        not np.isfinite([represented, requested]).all()
+        or min(represented, requested) <= 0
+    ):
+        return False
+    tolerance = max(1e-9 * requested, 64 * ulp(requested))
+    return tolerance < requested / 2 and abs(represented - requested) <= tolerance
+
+
+def require_native_step_clock(before: float, after: float, step: float) -> None:
+    """Reject stalled/distorted actual native time, including finite large epochs."""
+    if not np.isfinite([before, after]).all() or not native_clock_interval_matches(
+        after - before, step
+    ):
+        raise ValueError("native clock differs from one declared positive step")
 
 
 def require_no_global_mujoco_callbacks(mujoco: Any) -> None:

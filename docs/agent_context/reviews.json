@@ -71,6 +71,21 @@
         "tests/unit/pose_interchange/adapters/test_mujoco_protocol.py": "ea910a2a4cdcc1b026f9f6e56376226a15343cac5484f286db3edf3ea6a0ebc7"
       },
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
+    },
+    "project-task-native-replay": {
+      "fingerprint": "a55a3419f848a1ab9caf87a28c2548f54583364d5061d2b3a3e9c39b12d225cf",
+      "inputs": {
+        "docs/agent_context/contracts/project-task-native-replay.md": "5c33d8aa2b6c5aae95a534ad22a2f9c3d0d53cb455875511056b53648e206cfa",
+        "src/engines/myosuite_project_task_producer.py": "1bf0701772de1e42b8613894c4d0f3f45f4067c4674cb29ed4831b24dabc515b",
+        "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
+        "src/engines/native_replay_contracts.py": "a8da8d7080b9cfc3c3452dccb05a69428a3502fa348bf33c2290caa4b52626d2",
+        "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "daa670e49f3d3e4b2940d321ef8104f0e9aef0ff8524659b1b65bd6cec08b719",
+        "src/engines/project_task_replay_artifacts.py": "d90d74512f9ec89a994ff330ceac20b64d9fb33302cc0ae8f11ab53bb2343a97",
+        "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
+        "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
+        "tests/unit/engines/myosuite/test_project_task_producer.py": "a95b6b20c32aced6b2a8752642d9649563f810a7955ddf8964543364410bf8d4"
+      },
+      "rationale": "Verified actual MyoSuite 3.0 / MuJoCo 3.6 production driver and iron source closure, SDK helper and metadata binding, independent full-state T01 replay and suffix/future continuity: 70 native tests pass. Interval checks reject stalled and distorted clocks. LoD receiver refactor preserves the admitted model and interval. Full-swing matching and physiological acceptance remain open."
     }
   },
   "version": 1

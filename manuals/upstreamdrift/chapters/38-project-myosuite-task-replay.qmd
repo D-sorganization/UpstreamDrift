@@ -1,0 +1,129 @@
+# Project MyoSuite Task and Independent Native Replay
+
+Issue #11983 implements an explicitly project-defined task using the actual
+MyoSuite 3.0.0 `MyoGymnasiumEnv` lifecycle on MuJoCo 3.6.0. It is not an
+official supplied golf benchmark. The independent physics executor retains
+its MuJoCo identity, separately from the MyoSuite inventory correspondence.
+All six ecosystems and all 17 required model/variant rows remain required.
+
+## Model, State, and Action Semantics
+
+`myosuite_project_task_producer.py` loads the original MJCF path with its
+relative resource layout. The SDK performs reset, action clipping, one native
+step and forward realization, observation construction and reward bookkeeping.
+The project observations contain native configuration, velocity and activation;
+the constant bookkeeping reward is not a motion-matching score. The original
+model defines units, frames, actuator order, dynamics, timestep and integrator.
+This integration does not recalibrate anatomy or contact.
+
+For action $c_k$, the recorded command is the actual native control readback
+$u_k=\operatorname{clip}(c_k,\ell,h)$. Compiled limited channels retain their
+finite bounds. Unlimited channels use infinite action bounds; unused native
+`ctrlrange` entries are not zero limits. The production driver and iron have
+14 motor and 86 muscle channels, 100 commands and 86 activations. Their inputs
+remain mixed `ACTUATOR_COMMAND`, not generalized torques or pure excitation.
+
+The state $S_k$ is the complete native `mjSTATE_INTEGRATION` vector, including
+native time, configuration, velocity, activation, controls and numerical
+history. It is read after the SDK's native forward realization. Record
+$N$ commands with $N+1$ state/time samples. The exporter repeats the last command
+once as the T01 ZOH terminal boundary value; the executor integrates only the
+first $N$ commands. No terminal step is invented.
+
+## Clock and Restart Policy
+
+Initialization policy `mujoco-integration-state-restore-forward` version 1.1.0
+restores the complete hashed native state and derives its actual native clock
+origin $t_0$ from `data.time`. T01 time remains simulation-relative:
+
+$$\tau_k=t_k-t_0,\qquad t_k=t_0+\tau_k.$$
+
+Native state rows retain absolute epochs. Returned replay timestamps are
+measured elapsed times, not the requested grid substituted into output. Initial
+forward realization must preserve time exactly. Version 1.0.0 retains its
+zero-native-origin restriction. Nonzero applied external forces remain forbidden
+in this native-own-contact pathway.
+
+Every observed interval must be finite, strictly positive and satisfy
+
+$$|\Delta t-\delta|\leq
+\max(10^{-9}\delta,64\operatorname{ulp}(\delta)),\qquad
+\text{tolerance}<\delta/2.$$
+
+This is the existing T04 numerical clock precision policy, not an experimental
+physical acceptance threshold. It uses neither absolute-epoch ULPs nor a
+completed-step count. Elapsed-horizon agreement is checked separately. Large
+finite epochs that stall or materially distort a native step fail admission.
+Suffix replay restores $S_j$ and applies $u_j$ next, preserving the original
+boundary state's prior control until that input is applied.
+
+## Interchange, Verification, and Provenance
+
+`project_task_replay_artifacts.py` builds the existing Tools T01 replay bundle
+and compiled-actuator profile. `native_direct_model_provider.py` creates a fresh
+native model/data pair with no SDK step, reset, observation or reward methods.
+`native_direct_model_replay.py` owns the existing independent stepping loop.
+No second replay format or physics engine is introduced.
+
+Source entry-point and resource-closure bytes are frozen before SDK model
+construction and checked after loading, around recording and at export.
+Rehashed comments or whitespace that leave the compiled MJB unchanged still
+fail original-source admission. A post-hoc equivalent compilation cannot prove
+the exact source bytes that produced a history.
+
+The freezer admits SDK/task/source identity, complete finite dimensions,
+state-clock consistency, native control bounds and the original transitive
+include/mesh/texture closure. It compiles that closure against the producer's
+executed MJB digest. The existing direct executor then independently verifies
+every claimed state, command and elapsed time before artifacts are returned.
+This adds one linear native replay to export; it does not rerun an optimizer.
+
+SDK version/base source and project source are retained separately from the
+native replay provider, binary/runtime, compiled model, resource closure,
+ordered actuator laws, state/input schemas, initial-state digest and profile.
+Method replacement checks are misuse guards. Integrity records are not
+signatures; caller-supplied provenance requires independent lineage verification.
+The exact reviewed SDK base-source SHA-256 is
+`53ad8bc71fc07a2e7fcead164ca027a33418b9ac1aa953ea6c4042fa48eed154`.
+An actual reset/step execution profile identified the CPU accessor in that
+same file and the concrete `envs/muscle_stages.py` helper. Its reviewed digest
+is `eb2d5af2b2c4e842626aa3b29eb1a9c77c93a62a4650a6a50bda492832d3b107`;
+distribution METADATA is separately bound to
+`39e5fbbea88bb4aa29c42fc1d13f5846877b179094402d7c80e839f25ceb9698`.
+This is a bounded execution-source audit, not recursive package attestation.
+
+MuJoCo 3.6.0 and 3.8.0 use exact reviewed required actuator field sets.
+Only 3.6 omits its nonexistent `actuator_armature`, `actuator_damping` and
+`actuator_dampingpoly` fields. Missing required fields and unknown versions fail;
+absent values are never manufactured. Shared schema identity does not imply
+that different native runtimes or compiled models are physically interchangeable.
+
+## Evidence and Reproduction
+
+The 2026-10-09 actual MyoSuite 3.0.0/MuJoCo 3.6.0 campaign passed 70 tests with
+zero skips, including both unchanged production resource closures, T01 reload,
+complete-state uninterrupted/suffix/changed-future replay, real SDK lifecycle,
+mixed control mapping, poisoned SDK hooks during independent replay, source and
+law/channel mutations, malformed histories, unexecuted transitions and large
+epoch clock failures. Earlier RED attempts are retained. Separate MuJoCo 3.8
+regression evidence is 44 passes and three explicitly unavailable fixture or
+environment skips; it is not substituted for the actual SDK runtime.
+
+Run with the reviewed actual SDK/native pair, exact Tools pin and retained
+complete public production resource root:
+
+```powershell
+$env:FEEDBACK_MYOSUITE_PRODUCTION_ROOT = '<complete-myosuite-resource-root>'
+python -m pytest --noconftest -o addopts= `
+  tests/unit/engines/myosuite/test_project_task_producer.py `
+  tests/unit/engines/myosuite/test_project_task_artifact_admission.py `
+  tests/unit/engines/myosuite/test_native_model_resource_closure.py `
+  --junitxml='<retained-attempt-path>.xml'
+```
+
+The production positive is a three-step numerical integration probe, with
+nonzero activation and velocity and nonconstant mixed commands. Its suffix and
+changed future are correspondingly short. This is not a full-capture fit,
+physiological force validation, convergence study, muscle-only assistance
+qualification or parity completion. Complete capture horizon, calibration,
+anatomy, contact/grip and fully muscle-driven OpenSim acceptance remain open.

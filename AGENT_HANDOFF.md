@@ -1,3 +1,14 @@
+# Active: Project MyoSuite Task and Independent Replay — F09i #11983
+
+Branch `feat/f09i-myosuite-task-producer-11983` stacks on published F01f source
+`73319871c74dbafeefc6548081e606cadc61de54`; parent merges and actual Tools main
+authority remain required. Read canonical chapter 38 and
+`docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md`. Actual SDK
+production probes cover resource closure, T01/profile freeze and full-state
+uninterrupted/suffix/changed-future replay. Preserve original source bytes,
+separate SDK/helper/native-provider identities and all-model/full-horizon gates.
+Native evidence does not qualify anatomy, capture fit or muscle-only OpenSim.
+
 # Active: MeshCat Camera Framing - NV-9 #11697
 
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.

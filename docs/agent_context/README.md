@@ -2,7 +2,7 @@
 
 Generated from catalog.json and current source evidence. Edit the sources and regenerate.
 
-Source fingerprint: `7212e1be418e317d5783f7d3ea9d88caf9567de1c45429e15e3ce79379ae0b7b`.
+Source fingerprint: `5329b443fcd41fc0902edf9835244deede13583640d1f53a1bc70bb67c25de5d`.
 
 This map covers registered components. A source match is not scientific approval or proof that tests passed.
 
@@ -166,6 +166,32 @@ Existing bounded local retrieval for canonical-core reference questions, separat
 - **Consumers:** None registered
 - **Providers:** None registered
 
+### Project MyoSuite Tasks
+
+ID: `project-myosuite-tasks` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
+
+- **Sources:** [myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py), [project_task_replay_artifacts.py](../../src/engines/project_task_replay_artifacts.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py)
+- **Public Interfaces:** `create_project_golf_task` in [src/engines/myosuite_project_task_producer.py](../../src/engines/myosuite_project_task_producer.py)
+- **Consumers:** native-direct-command-replay
+- **Providers:** None registered
+
+### Independent Native Command Replay
+
+ID: `native-direct-command-replay` · Owner: UpstreamDrift: src/engines · Status: implemented
+
+SDK source-bound production task histories and exact independent native replay; short integration evidence does not qualify capture or physiology.
+
+- **Sources:** [native_direct_model_provider.py](../../src/engines/native_direct_model_provider.py), [native_replay_contracts.py](../../src/engines/native_replay_contracts.py), [native_direct_model_replay.py](../../src/engines/physics_engines/myosuite/python/native_direct_model_replay.py)
+- **Documentation:** [38-project-myosuite-task-replay.qmd](../../manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd), [F09I-PROJECT-TASK-TURNOVER.md](../../docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md)
+- **Tests:** [test_project_task_producer.py](../../tests/unit/engines/myosuite/test_project_task_producer.py), [test_project_task_artifact_admission.py](../../tests/unit/engines/myosuite/test_project_task_artifact_admission.py), [test_native_model_resource_closure.py](../../tests/unit/engines/myosuite/test_native_model_resource_closure.py)
+- **Public Interfaces:** `create_native_direct_model` in [src/engines/native_direct_model_provider.py](../../src/engines/native_direct_model_provider.py)
+- **Consumers:** None registered
+- **Providers:** project-myosuite-tasks
+
 ## Integration Contracts
 
 | Provider | Consumer | Interaction | Contract |
@@ -175,6 +201,7 @@ Existing bounded local retrieval for canonical-core reference questions, separat
 | canonical-pose | pose-adapters | translates | [pose-conventions](../../docs/agent_context/contracts/pose-conventions.md) |
 | launcher | capability-atlas | generates | [launcher-atlas](../../docs/agent_context/contracts/launcher-atlas.md) |
 | capture-workflow | capability-atlas | generates | [capture-atlas](../../docs/agent_context/contracts/capture-atlas.md) |
+| project-myosuite-tasks | native-direct-command-replay | freezes | [project-task-native-replay](../../docs/agent_context/contracts/project-task-native-replay.md) |
 
 ```mermaid
 flowchart LR
@@ -190,11 +217,14 @@ flowchart LR
     n9["Capture Workflow State"]
     n10["Application Route Registry"]
     n11["Canonical Core Retrieval"]
+    n12["Project MyoSuite Tasks"]
+    n13["Independent Native Command Replay"]
     n2 -->|"calls"| n3
     n4 -->|"constructs"| n5
     n6 -->|"translates"| n7
     n0 -->|"generates"| n1
     n9 -->|"generates"| n1
+    n12 -->|"freezes"| n13
 ```
 
 ## Existing Inventories
@@ -205,7 +235,7 @@ flowchart LR
 
 ## Provenance and Limits
 
-- 52 source files hashed with SHA-256; UTF-8 line endings normalized.
+- 63 source files hashed with SHA-256; UTF-8 line endings normalized.
 - Generated documents omit absolute paths and commit IDs to remain reproducible across worktrees.
 - Live CLI/MCP results include checkout identity and current revision.
 - Read integration contracts and their tests before modifying a boundary.
