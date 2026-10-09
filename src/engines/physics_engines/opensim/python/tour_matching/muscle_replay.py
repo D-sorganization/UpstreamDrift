@@ -128,6 +128,91 @@ def _validate_muscle_state(
             )
 
 
+def _configure_input_player(
+    model: Any,
+    muscles: Any,
+    muscle_names: tuple[str, ...],
+    grid: NDArray[np.float64],
+    controls: Mapping[str, NDArray[np.float64]],
+) -> None:
+    """Install only the internally owned time-driven excitation player."""
+    import opensim as osim
+
+    player = osim.PrescribedController()
+    player.setName("independent_time_only_excitation_player")
+    for name in muscle_names:
+        function = osim.PiecewiseLinearFunction()
+        for time, value in zip(grid, controls[name], strict=True):
+            function.addPoint(float(time), float(value))
+        player.addActuator(muscles.get(name))
+        player.prescribeControlForActuator(name, function)
+    model.addController(player)
+
+
+def _restore_continuous_state(
+    model: Any,
+    initial: Mapping[str, float],
+    initial_time: float,
+) -> tuple[Any, tuple[str, ...], dict[str, tuple[float, float]]]:
+    """Initialize once and restore every supplied physical continuous state."""
+    import opensim as osim
+
+    state = model.initSystem()
+    names = model.getStateVariableNames()
+    state_names = tuple(names.get(i) for i in range(names.getSize()))
+    if set(initial) != set(state_names):
+        raise ValueError("complete initial state must match every native state name")
+    domains = _muscle_state_domains(model, osim)
+    _validate_muscle_state(initial, domains)
+    for name in state_names:
+        value = initial[name]
+        if name.endswith("/activation") and not 0 <= value <= 1:
+            raise ValueError("initial muscle activation must lie in [0, 1]")
+        if name.endswith("/fiber_length") and value <= 0:
+            raise ValueError("initial muscle fiber length must be positive")
+        model.setStateVariableValue(state, name, value)
+    state.setTime(float(initial_time))
+    model.realizeDynamics(state)
+    return state, state_names, domains
+
+
+def _integrate_native_replay(
+    model: Any,
+    muscles: Any,
+    state: Any,
+    state_names: tuple[str, ...],
+    grid: NDArray[np.float64],
+    domains: Mapping[str, tuple[float, float]],
+    accuracy: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    """Advance one native manager without reinitialization or corrections."""
+    import opensim as osim
+
+    manager = osim.Manager(model)
+    manager.setIntegratorMethod(osim.Manager.IntegratorMethod_RungeKuttaMerson)
+    manager.setIntegratorAccuracy(float(accuracy))
+    manager.setWriteToStorage(False)
+    manager.initialize(state)
+    states = np.empty((len(grid), len(state_names)), dtype=np.float64)
+    forces = np.empty((len(grid), muscles.getSize()), dtype=np.float64)
+    applied = np.empty_like(forces)
+    for row, time in enumerate(grid):
+        if row:
+            state = manager.integrate(float(time))
+        model.realizeDynamics(state)
+        states[row] = [model.getStateVariableValue(state, n) for n in state_names]
+        _validate_muscle_state(
+            dict(zip(state_names, states[row], strict=True)), domains
+        )
+        forces[row] = [
+            muscles.get(i).getActuation(state) for i in range(muscles.getSize())
+        ]
+        applied[row] = [
+            muscles.get(i).getExcitation(state) for i in range(muscles.getSize())
+        ]
+    return states, forces, applied
+
+
 def replay_muscle_excitations(
     model_path: str | Path,
     initial_state: Mapping[str, float],
@@ -179,32 +264,11 @@ def replay_muscle_excitations(
     if set(controls) != set(muscle_names):
         raise ValueError("excitation names must exactly match native muscle names")
 
-    player = osim.PrescribedController()
-    player.setName("independent_time_only_excitation_player")
-    for name in muscle_names:
-        function = osim.PiecewiseLinearFunction()
-        for time, value in zip(grid, controls[name], strict=True):
-            function.addPoint(float(time), float(value))
-        player.addActuator(muscles.get(name))
-        player.prescribeControlForActuator(name, function)
-    model.addController(player)
+    _configure_input_player(model, muscles, muscle_names, grid, controls)
     model.finalizeConnections()
-    state = model.initSystem()
-    names = model.getStateVariableNames()
-    state_names = tuple(names.get(i) for i in range(names.getSize()))
-    if set(initial) != set(state_names):
-        raise ValueError("complete initial state must match every native state name")
-    domains = _muscle_state_domains(model, osim)
-    _validate_muscle_state(initial, domains)
-    for name in state_names:
-        value = initial[name]
-        if name.endswith("/activation") and not 0 <= value <= 1:
-            raise ValueError("initial muscle activation must lie in [0, 1]")
-        if name.endswith("/fiber_length") and value <= 0:
-            raise ValueError("initial muscle fiber length must be positive")
-        model.setStateVariableValue(state, name, value)
-    state.setTime(float(grid[0]))
-    model.realizeDynamics(state)
+    state, state_names, domains = _restore_continuous_state(
+        model, initial, float(grid[0])
+    )
     if any(
         muscles.get(i).isActuationOverridden(state) for i in range(len(muscle_names))
     ):
@@ -235,28 +299,9 @@ def replay_muscle_excitations(
     input_digest = hashlib.sha256(
         json.dumps(payload, sort_keys=True, allow_nan=False).encode("utf-8")
     ).hexdigest()
-    manager = osim.Manager(model)
-    manager.setIntegratorMethod(osim.Manager.IntegratorMethod_RungeKuttaMerson)
-    manager.setIntegratorAccuracy(float(accuracy))
-    manager.setWriteToStorage(False)
-    manager.initialize(state)
-    states = np.empty((len(grid), len(state_names)), dtype=np.float64)
-    forces = np.empty((len(grid), len(muscle_names)), dtype=np.float64)
-    applied = np.empty_like(forces)
-    for row, time in enumerate(grid):
-        if row:
-            state = manager.integrate(float(time))
-        model.realizeDynamics(state)
-        states[row] = [model.getStateVariableValue(state, n) for n in state_names]
-        _validate_muscle_state(
-            dict(zip(state_names, states[row], strict=True)), domains
-        )
-        forces[row] = [
-            muscles.get(i).getActuation(state) for i in range(len(muscle_names))
-        ]
-        applied[row] = [
-            muscles.get(i).getExcitation(state) for i in range(len(muscle_names))
-        ]
+    states, forces, applied = _integrate_native_replay(
+        model, muscles, state, state_names, grid, domains, accuracy
+    )
     if not np.isfinite(states).all() or not np.isfinite(forces).all():
         raise RuntimeError("native muscle replay produced nonfinite state or force")
     expected = np.column_stack([controls[name] for name in muscle_names])
