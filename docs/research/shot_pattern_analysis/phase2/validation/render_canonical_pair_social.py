@@ -5,6 +5,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
+from typing import Any
 from src.tools.shot_pattern_analysis.matched_export import matched_source_snapshot
 from src.tools.shot_pattern_analysis.matched_report import load_validated_cell
 from src.tools.shot_pattern_analysis.matched_sensitivity import _supported_endpoints
@@ -48,7 +49,7 @@ plan_path = root / "matrix_plan.json"
 plan_hash = sha(plan_path)
 plan = json.loads(plan_path.read_text())
 names = [f"driver_lean5_curve1_rotation{sd}_combined2" for sd in (1, 2)]
-refs = []
+refs: list[dict[str, Any]] = []
 loaded = []
 for name in names:
     manifest = root / name / "manifest.json"

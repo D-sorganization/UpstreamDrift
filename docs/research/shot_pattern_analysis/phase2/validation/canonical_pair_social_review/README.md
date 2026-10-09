@@ -59,3 +59,8 @@ docs/research/shot_pattern_analysis/phase2/validation/render_canonical_pair_soci
 The first argument contains the saved original cells and immutable transition
 receipt. Source changes require a new review receipt; a successful rerender
 does not qualify the complete experiment or resolve the cosmetic finding.
+
+The exact executed reproducer is preserved at `76eb0eff77`. Its later typing-only
+annotation correction passes mypy and has normalized execution-AST equivalence
+in `reproducer_typing_followup.json`; it does not rewrite the historical
+graphic receipt or claim another executed render.
