@@ -1,0 +1,138 @@
+"""Native synthetic convergence evidence; no capture or physiology acceptance."""
+
+from pathlib import Path
+from types import SimpleNamespace
+import hashlib
+import json
+import os
+import sys
+import time
+import traceback
+
+import numpy as np
+import opensim as osim
+
+REPO = Path("C:/Users/diete/Repositories/Worktrees/feedback-moco-state-binding-11791")
+sys.path.insert(0, str(REPO))
+from tests.opensim.test_native_muscle_replay import muscle_fixture
+from src.engines.physics_engines.opensim.python.tour_matching import (
+    MocoInitialBindings, MocoTrackingConfig, build_moco_study, replay_muscle_excitations,
+)
+from src.engines.physics_engines.opensim.python.tour_matching.native_muscle_bundle import (
+    build_native_muscle_replay_bundle, replay_native_muscle_bundle,
+)
+from src.engines.physics_engines.opensim.python.tour_matching.trc import read_trc, write_trc
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
+from src.engines.native_replay_contracts import native_replay_contract_types
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def run(mesh):
+    out = Path(__file__).parent / f"grid-preserving-final-mesh-{mesh}"
+    out.mkdir(exist_ok=False)
+    start = time.perf_counter()
+    receipt = {"scope": "synthetic compliant Millard; no production/capture acceptance",
+               "mesh_intervals": mesh, "runtime": osim.__version__,
+               "executable": sys.executable, "casadi_plugin_search": os.environ.get("CASADIPATH"),
+               "script_sha256": digest(Path(__file__))}
+    try:
+        path, initial = muscle_fixture.__wrapped__(out, SimpleNamespace(param="Millard2012EquilibriumMuscle"))
+        model = osim.Model(str(path))
+        model.addMarker(osim.Marker("load_marker", model.getBodySet().get("load"), osim.Vec3(0)))
+        model.finalizeConnections()
+        model.printToXML(str(path))
+        times = np.linspace(0, .1, 21)
+        teacher = replay_muscle_excitations(path, initial, times, {"flexor": .3 + 2 * times}, accuracy=1e-10)
+        index = teacher.state_names.index("/jointset/slider/slide/value")
+        points = np.zeros((len(times), 1, 3))
+        points[:, 0, 0] = teacher.states[:, index]
+        trc = write_trc(TourCapture(times, ("load_marker",), points, np.ones((len(times), 1), bool)), out / "teacher.trc", rate_hz=200)
+        table = osim.TimeSeriesTable()
+        labels = osim.StdVectorString()
+        for name in teacher.state_names:
+            labels.append(name)
+        table.setColumnLabels(labels)
+        for t in times:
+            row = osim.RowVector(len(initial))
+            for k, name in enumerate(teacher.state_names):
+                row[k] = initial[name]
+            table.appendRow(float(t), row)
+        guess = out / "constant_initial_guess.sto"
+        osim.STOFileAdapter.write(table, str(guess))
+        bounds = {}
+        for name in initial:
+            bounds[name] = (.2, .4) if name.endswith("/value") else ((-2, 2) if name.endswith("/speed") else ((.001, 1) if name.endswith("/activation") else (.05, .2)))
+        bindings = MocoInitialBindings(bounds, initial, {"/forceset/flexor": (.001, 1)})
+        config = MocoTrackingConfig(horizon_s=.1, mesh_interval_s=.1 / mesh, effort_weight=1e-8, marker_weight=1, optim_max_iterations=60, optim_convergence_tolerance=1e-7, optim_constraint_tolerance=1e-7, allow_unused_references=False)
+        study = build_moco_study(str(path), str(trc), str(guess), config, initial_bindings=bindings)
+        solver = osim.MocoCasADiSolver.safeDownCast(study.updSolver())
+        solver.set_parallel(0)
+        solve_start = time.perf_counter()
+        solution = study.solve()
+        receipt.update(solve_elapsed_s=time.perf_counter() - solve_start, solver_success=bool(solution.success()), solver_status=solution.getStatus())
+        if not solution.success():
+            raise RuntimeError("Native solver did not accept solution")
+        solution.write(str(out / "solution.sto"))
+        grid = np.asarray(solution.getTimeMat()).reshape(-1)
+        controls = np.asarray(solution.getControlMat("/forceset/flexor")).reshape(-1)
+        bundle = build_native_muscle_replay_bundle(path, initial, grid, {"flexor": controls})
+        contracts = native_replay_contract_types()
+        serialized = contracts.dumps_experiment_replay_bundle(bundle)
+        (out / "native_replay_bundle.json").write_text(serialized, encoding="utf-8")
+        bundle = contracts.load_experiment_replay_bundle(serialized)
+        native = replay_native_muscle_bundle(bundle, path)
+        repeat = replay_native_muscle_bundle(bundle, path)
+        tight = replay_muscle_excitations(path, initial, grid, {"flexor": controls}, accuracy=1e-10)
+        errors = {}
+        for i, name in enumerate(native.state_names):
+            optimized = np.asarray(solution.getStateMat(name)).reshape(-1)
+            errors[name] = {"optimized_vs_native_max_abs": float(np.max(np.abs(optimized - native.states[:, i]))),
+                            "tight_vs_default_max_abs": float(np.max(np.abs(tight.states[:, i] - native.states[:, i])))}
+        requested = np.linspace(0, .1, 101)
+        extras = [t for t in requested if not np.any(np.abs(grid-t) <= 64*np.finfo(float).eps)]
+        dense_grid = np.sort(np.concatenate((grid, extras)))
+        dense_controls = np.interp(dense_grid, grid, controls)
+        assert np.array_equal(dense_grid[np.searchsorted(dense_grid, grid)], grid)
+        assert np.array_equal(dense_controls[np.searchsorted(dense_grid, grid)], controls)
+        probes = np.linspace(0, .1, 1001)
+        control_difference = float(np.max(np.abs(np.interp(probes,grid,controls)-np.interp(probes,dense_grid,dense_controls))))
+        assert control_difference <= 4*np.finfo(float).eps
+        receipt["dense_input_policy"] = {"all_original_knots_exact": True, "requested_output_probes": 101, "actual_output_samples": len(dense_grid), "control_function_probe_difference_max": control_difference}
+        dense = replay_muscle_excitations(path, initial, dense_grid, {"flexor": dense_controls}, accuracy=1e-10)
+        dense_teacher = replay_muscle_excitations(path, initial, dense_grid, {"flexor": .3 + 2 * dense_grid}, accuracy=1e-10)
+        dense_index = dense.state_names.index("/jointset/slider/slide/value")
+        rounded = read_trc(trc)
+        # This diagnostic is linear interpolation of the rounded TRC, not Moco's spline objective.
+        rounded_reference = np.interp(dense_grid, rounded.time_s, rounded.points_m[:, 0, 0])
+        indexes = np.array([int(np.argmin(np.abs(dense_grid-t))) for t in requested])
+        assert np.max(np.abs(dense_grid[indexes]-requested)) <= 64*np.finfo(float).eps
+        receipt["dense_input_policy"]["scoring_samples"] = len(indexes)
+        receipt["dense_input_policy"]["scoring_clock_max_abs_s"] = float(np.max(np.abs(dense_grid[indexes]-requested)))
+        receipt["dense_input_policy"]["scoring_policy"] = "common 101 requested physical-time probes; coincident original control knots retained exactly"
+        receipt.update(
+            state_errors=errors, fullstate_repeat_max_abs=float(np.max(np.abs(native.states - repeat.states))),
+            dense_marker_rmse_vs_native_teacher_m=float(np.sqrt(np.mean((dense.states[indexes, dense_index] - dense_teacher.states[indexes, dense_index])**2))),
+            dense_marker_rmse_vs_linearly_interpolated_rounded_trc_m=float(np.sqrt(np.mean((dense.states[indexes, dense_index] - rounded_reference[indexes])**2))),
+            complete_initial_state=dict(initial), state_bounds=dict(bindings.state_bounds), control_bounds=dict(bindings.control_bounds),
+            optimized_objective=float(solution.getObjective()),
+            solver_configuration={"parallel": 0, "mesh": mesh, "convergence": 1e-7, "constraint": 1e-7, "effort_weight": 1e-8},
+            qualification="synthetic optimization and independent replay evidence only")
+        np.savez(out / "native_evidence.npz", grid=grid, controls=controls, native=native.states, tight=tight.states, dense_grid=dense_grid, dense=dense.states, dense_teacher=dense_teacher.states, muscle_forces_n=dense.muscle_forces_n)
+        source_paths = [REPO / "src/engines/physics_engines/opensim/python/tour_matching" / name for name in ("moco_tracking.py", "moco_initial_bindings.py", "muscle_replay.py", "native_muscle_bundle.py")]
+        receipt["source_sha256"] = {str(p.relative_to(REPO)): digest(p) for p in source_paths}
+        receipt["artifact_sha256"] = {p.name: digest(p) for p in out.iterdir() if p.is_file()}
+        receipt["runtime_binary_sha256"] = {p.name: digest(p) for p in Path(osim.__file__).parent.iterdir() if p.suffix.lower() in (".dll", ".pyd")}
+    except Exception as error:
+        receipt.update(error=str(error), traceback=traceback.format_exc(), qualification="failed; no acceptance")
+    finally:
+        receipt["total_elapsed_s"] = time.perf_counter() - start
+        (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(receipt, indent=2))
+    return "error" not in receipt
+
+
+if __name__ == "__main__":
+    raise SystemExit(0 if run(int(sys.argv[1])) else 1)
