@@ -281,10 +281,47 @@ The across-grip shifts (0.01 mm) give internal 2576 / 2178 N (driver, y / z) and
 
 Acceptance read-out for #11986: the mechanism is identified with numbers (drift and sensitivity); the drift does not explain the result, so there is no rigid-consistent re-run to report beyond the controls above; no tolerance and no default changed. The per-hand force difference remains an indeterminacy property of the two-ring contact model.
 
+### OpenSim Contact Grip (OSV-7 Phase 4, #11739)
+
+**Model.** The contact variant is `grip_model="contact"` in `export_full_body_osim(..., grip_contact=ContactGripConfig(...))`; the weld stays the default. It reuses the bushing topology (free club with `ClubFree*` coordinates, hands prescribed) and replaces the bushings with the shared pad layout: 2 rings of 6 pads per hand, pad radius 8 mm, grip radius 12.7 mm, axial offsets $\pm 0.04$ m. Each pad is a `ContactSphere` (`grip_pad_<Side><nn>`) on the hand body, each hand has a closed `ContactMesh` cylinder (`grip_mesh_<Side>`, 96 segments, 1 mm ring pitch) on the club, and each pad has its own `ElasticFoundationForce` (`grip_contact_<Side><nn>`), so per-pad normal force is observable. The right hand is tied to the left hand body, as in the bushing; right pads are re-parented to `LGrip` with the tie transform. Meshes pass `validate_closed_mesh`, which raises `ValueError` for open, non-manifold or inward-wound meshes.
+
+**Parameters (matched to the shared pad law, not fitted).** OpenSim's elastic foundation is a Winkler law, $F = k_\mathrm{ef}\,\pi\,\delta^2/\sqrt{AB}$ with $A = 1/R_p + 1/R_g$, $B = 1/R_p$, so it is quadratic in penetration where the shared law is linear. Documented difference, handled by matching at the operating point: the preload interference is $\delta_0 = 2 f_\mathrm{pad}/k_\mathrm{pad}$ (twice the shared preload) so that both the squeeze and the tangent stiffness $dF/d\delta = 2F/\delta_0 = k_\mathrm{pad}$ equal the shared values, and $k_\mathrm{ef} = f_\mathrm{pad}/(\mathrm{factor}\,\delta_0^2)$. The real mesh gives about 0.89 of the analytic value, so one static single-pad evaluation against the actual mesh rescales $k_\mathrm{ef}$ (calibration, not tuning against the swing). Dissipation, static and dynamic friction (0.9 / 0.7) and the 1 mm/s transition speed are the shared values. Driver: squeeze 1104 N per hand, $k_\mathrm{pad} = 1.71 \times 10^5$ N/m, $k_\mathrm{ef} = 4.53 \times 10^9$ N/m$^3$, $\delta_0 = 1.08$ mm; the 7-iron squeeze is 1155 N. Both squeezes are derived from the same swing's bushing demand.
+
+**Numerical method.** Explicit Runge-Kutta-Merson is infeasible: the regularised-Coulomb friction acts as a damper of about $\mu N/v_t \approx 8 \times 10^4$ N s/m per pad, which forces steps near $10^{-7}$ s (a 20 ms hold exceeded a 120 s budget at $t = 4$ ms). CPodes (implicit BDF) completes the same 20 ms hold in 12.7 s. Full swings use CPodes. The club is released with the weld velocity (hand velocity carried to the club origin; the free joint's rotational speeds are the ground-frame angular velocity, checked by a postcondition and a test), because releasing at rest against moving hands produced a 1328 N impulse at $t = 0$.
+
+**Verification (tests first).** `tests/unit/grip_contact/test_grip_mesh.py`, `test_elastic_foundation.py`, `test_opensim_contact_grip.py` and the export test cover: closed-mesh validation, a single pad carrying the matched squeeze, tangent stiffness within 10 % of the shared one, no force without contact, a pad on a fixed grip supporting the expected load, a static hold summing to the club weight within 1 % with moment residual and squeeze checks, friction preventing sliding (and a near-frictionless grip slipping), and the weld-velocity release.
+
+**Results (CPodes, accuracy $10^{-8}$; peak values, OpenSim contact / OpenSim bushing).**
+
+| Quantity | Driver | 7-iron |
+| --- | --- | --- |
+| Net force at midpoint | 428.0 / 439.3 N (-2.6 %) | 442.5 / 456.7 N (-3.1 %) |
+| Net force RMS error over the swing, relative to bushing RMS | 7.1 N (7.4 %) | 4.3 N (4.4 %) |
+| Left hand force | 697 / 515 N | 603 / 533 N |
+| Right hand force | 804 / 564 N | 733 / 584 N |
+| Internal force | 728 / 510 N | 638 / 524 N |
+| Axial squeeze (internal) | 151 / 3.3 N | 93 / 3.9 N |
+| Couple at midpoint | 129 / 99.5 N m | 119 / 98.6 N m |
+| Lead share at peak net | 0.51 / 0.43 | 0.43 / 0.50 |
+| Pad normal force sum (per hand, peak) | 1365 N | 1353 N |
+| Hand-to-club deflection | 0.59 mm, 0.75 deg | 0.44 mm, 0.62 deg |
+| Peak axial slip, roll slip | 0.38 mm, 8.7 mrad | 0.18 mm, 2.3 mrad |
+| Wall time (ControlTower) | 355 s | 404 s |
+
+Convergence: driver accuracy $10^{-4}$ gives a net-force RMS error of 131 N (spikes, not converged), $10^{-6}$ gives 10.7 N and $10^{-8}$ gives 7.1 N; peak net force is 428.04 N at $10^{-6}$ and 428.00 N at $10^{-8}$.
+
+**Internal pair, read honestly.** The net force, which the club motion fixes, matches the bushing to within about 3 % at the peak. The per-hand split and the internal force do not match and are not expected to: the two-hand contact is hyperstatic (see the indeterminacy report and the #11986 analysis above). The OpenSim contact grip carries 1.3 to 1.4 times the bushing's per-hand peak and an internal force 1.2 to 1.4 times larger, far below the MuJoCo contact grip (about 4 times the bushing), and its pad normal force sum stays near the squeeze (1.4 kN per hand against 29 kN in MuJoCo). The lead share at peak net force differs between models, which is the indeterminacy and not a measurement. None of these internal numbers is a measured grip squeeze.
+
+**Differences from the shared law.** Quadratic force-penetration relation (matched at the operating point), mesh-based normal direction, a different contact solver (implicit CPodes with an elastic foundation rather than MuJoCo's soft constraints), and a calibrated stiffness factor.
+
+**Failed experiments.** Hunt-Crossley sphere-sphere, sphere-cylinder and sphere-ellipsoid pairs gave no force; open meshes throw at construction; explicit RK-Merson (above); a rest release (1328 N impulse); accuracy $10^{-4}$ (net-force spikes).
+
+**Reproduce.** On a heavy host, one run at a time: `PYTHONPATH=.:src python3 docs/development/full_body_models/evidence/grip_kinetics/run_grip_contact_opensim.py --club driver --accuracy 1e-8 --tag _acc1e-8` (likewise `--club iron7`). Timing: `bench_opensim_contact_integrators.py --method CPodes --accuracy 1e-8`. Evidence: `contact/opensim_<club>_acc1e-8_{series.npz,series.contact.npz,summary.json}`, `contact/opensim_driver_acc1e-6_*` and `contact/integrator_bench_*.json`.
+
 ### Limitations
 
 - Software correctness only. Stiffness, damping, friction, pad count and radius are engineering defaults with derived matching, not measured values.
-- The OpenSim contact variant (`ElasticFoundationForce` against a closed `ContactMesh`) is not implemented, so contact exists in MuJoCo (full swing), and Drake and Pinocchio (holds, 0.05 s). A full-swing Drake or Pinocchio contact run was not attempted: Drake's implicit Euler and Pinocchio's Radau at these stiffnesses cost hours per swing on the shared host.
+- Contact exists in MuJoCo and OpenSim (full swings), and Drake and Pinocchio (holds, 0.05 s). A full-swing Drake or Pinocchio contact run was not attempted: Drake's implicit Euler and Pinocchio's Radau at these stiffnesses cost hours per swing on the shared host.
 - The cross-engine contact comparison is the hold acceptance (weight within 1 %, slip), not a full-swing comparison.
 - The contact grip has no distributed ball (palm) of the hand and no finger geometry beyond the two pad rings; all pads are rigid-hand-anchored and the hand is prescribed.
 - The squeeze for the contact grip is derived from the OpenSim bushing demand of the same swing, so it inherits that model's indeterminacy.
@@ -292,7 +329,7 @@ Acceptance read-out for #11986: the mechanism is identified with numbers (drift 
 ### What Was Tried and Rejected
 
 - Hunt-Crossley sphere-sphere and sphere-cylinder contact pairs, as tried in the earlier phase 3 probes, gave no force for the pad geometry, so the Drake contact uses point contact between pad spheres and a primitive cylinder with the shared Hunt-Crossley parameters set on the geometry.
-- Open (non-closed) meshes failed as contact geometry; an elastic-foundation contact needs a closed mesh. This is one reason the OpenSim contact variant is not done.
+- Open (non-closed) meshes failed as contact geometry; an elastic-foundation contact needs a closed mesh. The OpenSim contact variant therefore builds closed capped-cylinder meshes and validates them.
 - MuJoCo defaults: a single `solref` for all pads gave pad forces that did not follow $k\,\delta$ (the negative geometric stiffness was not included in $k_\mathrm{pad}$), friction rows with default `solreffriction` crept with the timestep, and a 1e-4 s step gave creep; the club also needed the weld velocity at release.
 - Drake explicit RK3: step sizes near $5 \times 10^{-7}$ s, abandoned for implicit Euler.
 - Pyramidal cone in MuJoCo: loses grip (slip 317 mm in the window run), kept the elliptic cone.

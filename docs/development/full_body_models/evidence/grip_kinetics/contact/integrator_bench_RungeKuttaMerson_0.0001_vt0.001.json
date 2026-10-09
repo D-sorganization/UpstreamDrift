@@ -1,0 +1,10 @@
+{
+  "method": "RungeKuttaMerson",
+  "accuracy": 0.0001,
+  "transition_velocity_m_s": 0.001,
+  "window_s": 0.02,
+  "build_s": 2.3530293999938294,
+  "completed": false,
+  "wall_s": 231.90765504701994,
+  "note": "budget 120.0 s exceeded at t=0.004"
+}
