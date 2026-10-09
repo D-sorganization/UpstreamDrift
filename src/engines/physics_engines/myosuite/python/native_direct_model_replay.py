@@ -446,6 +446,18 @@ class NativeDirectModelReplay:
     policy_sha256: str
     resource_closure_sha256: str
     actuator_law_manifest_sha256: str
+    compiled_actuator_profile_sha256: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class _DirectCommandSchedule:
+    times: NDArray[np.float64]
+    commands: NDArray[np.float64]
+    initial_integration: NDArray[np.float64]
+    bundle: Any
+    resource_digest: str
+    law_digest: str
+    profile_sha256: str
 
 
 def resource_closure_sha256(
@@ -530,6 +542,64 @@ def actuator_law_manifest_sha256(model: Any, channels: tuple[Any, ...]) -> str:
         )
     payload = json.dumps(rows, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def compiled_actuator_profile_bytes(
+    bundle: Any,
+    registration: DirectModelRegistration,
+    model: Any,
+    resource_digest: str,
+) -> bytes:
+    """Build canonical profile bytes from the exact loaded native interpretation."""
+    import mujoco as mj
+    from src.engines.native_replay_contracts import native_replay_contract_types
+
+    channels = bundle.input_history.channels
+    contracts = native_replay_contract_types()
+    channel_rows = []
+    for index, channel in enumerate(channels):
+        actuator_name = mj.mj_id2name(model, mj.mjtObj.mjOBJ_ACTUATOR, index)
+        if actuator_name is None:
+            raise ValueError("compiled actuator is missing its native name")
+        channel_rows.append(
+            {
+                "index": index,
+                "channel_id": channel.channel_id,
+                "target_id": channel.target_id,
+                "unit": channel.unit,
+                "coordinate_id": channel.coordinate_id,
+                "frame_id": channel.frame_id,
+                "actuator_name": actuator_name,
+                "native_dynamics": mj.mjtDyn(int(model.actuator_dyntype[index])).name,
+                "native_transmission": mj.mjtTrn(
+                    int(model.actuator_trntype[index])
+                ).name,
+            }
+        )
+    profile = {
+        "schema_version": contracts.COMPILED_ACTUATOR_PROFILE_SCHEMA_VERSION,
+        "engine_id": registration.engine_id,
+        "model_id": registration.model_id,
+        "variant_id": registration.variant_id,
+        "model_version": registration.model_version,
+        "source_model_sha256": registration.source_model_sha256,
+        "loaded_native_model_sha256": _native_model_sha256(model),
+        "provider_id": registration.provider_id,
+        "provider_version": registration.provider_version,
+        "provider_sha256": registration.provider_sha256,
+        "runtime_id": "mujoco",
+        "runtime_version": mj.__version__,
+        "state_schema_sha256": bundle.state_schema_sha256,
+        "initial_state_sha256": bundle.integrity.initial_state_sha256,
+        "input_channel_schema_sha256": bundle.input_channel_schema_sha256,
+        "actuator_law_manifest_sha256": actuator_law_manifest_sha256(model, channels),
+        "resource_closure_sha256": resource_digest,
+        "policy_sha256": bundle.policy_sha256,
+        "time_grid_sha256": bundle.time_grid_sha256,
+        "applied_input_sha256": bundle.applied_input_sha256,
+        "ordered_channels": channel_rows,
+    }
+    return json.dumps(profile, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
 def native_contact_policy_sha256(model: Any) -> str:
@@ -803,6 +873,8 @@ def replay_direct_model_actuator_commands(
     bundle: Any,
     registration: DirectModelRegistration,
     factory: DirectModelFactory,
+    *,
+    compiled_profile_bytes: bytes | None = None,
 ) -> NativeDirectModelReplay:
     """Load the exact source path and replay T01 commands through a direct model.
 
@@ -818,36 +890,10 @@ def replay_direct_model_actuator_commands(
     contracts = native_replay_contract_types()
     bundle = validate_native_replay_bundle(bundle, contracts)
     _validate_bundle_identity(bundle, registration, contracts)
-    resource_digest = resource_closure_sha256(
-        registration.resource_root,
-        registration.model_path,
-        registration.resources,
-        expected_loaded_native_model_sha256=registration.loaded_native_model_sha256,
+    environment, model, data, resource_digest = _load_registered_direct_model(
+        registration, factory, mj
     )
-    model_path = registration.model_path.resolve(strict=True)
-    factory_owner: object = factory if inspect.isroutine(factory) else type(factory)
-    _source_bytes(factory_owner, registration.factory_source_sha256)
-    module_name, separator, _ = registration.environment_class_id.rpartition(".")
-    if not separator:
-        raise ValueError("direct environment class identity must be fully qualified")
-    module = sys.modules.get(module_name)
-    module_path = getattr(module, "__file__", None) if module else None
-    if module_path is None or hashlib.sha256(
-        Path(module_path).read_bytes()
-    ).hexdigest() != (registration.environment_class_sha256):
-        raise ValueError("registered direct environment source is not loaded exactly")
-    environment = factory(str(model_path))
     try:
-        if hasattr(environment, "env"):
-            raise ValueError(
-                "direct model loader must return the unwrapped environment"
-            )
-        model = getattr(environment, "model", None)
-        data = getattr(environment, "data", None)
-        if not isinstance(model, mj.MjModel) or not isinstance(data, mj.MjData):
-            raise ValueError("direct loader must expose native MuJoCo model and data")
-        if int(model.nplugin) != 0:
-            raise ValueError("direct model replay does not admit native plugins")
         require_no_global_mujoco_callbacks(mj)
         loaded_resource_digest = resource_closure_sha256(
             registration.resource_root,
@@ -865,6 +911,18 @@ def replay_direct_model_actuator_commands(
             resource_digest,
             contracts,
         )
+        profile_sha256 = ""
+        if compiled_profile_bytes is not None:
+            if not isinstance(compiled_profile_bytes, bytes):
+                raise TypeError("compiled actuator profile must be immutable bytes")
+            expected_profile = compiled_actuator_profile_bytes(
+                bundle, registration, model, resource_digest
+            )
+            if compiled_profile_bytes != expected_profile:
+                raise ValueError(
+                    "compiled actuator profile differs from loaded native identity"
+                )
+            profile_sha256 = hashlib.sha256(compiled_profile_bytes).hexdigest()
         states = _bundle_state(bundle, model)
         mj.mj_setState(
             model,
@@ -880,20 +938,68 @@ def replay_direct_model_actuator_commands(
         _require_no_native_warnings(data)
         if not np.isclose(data.time, start_time, atol=1e-12, rtol=0):
             raise ValueError("direct initialization forward changed native time")
-        return _execute_commands(
-            model,
-            data,
+        schedule = _DirectCommandSchedule(
             times,
             commands,
             states["integration"],
             bundle,
             resource_digest,
             registration.actuator_law_manifest_sha256,
+            profile_sha256,
         )
+        return _execute_commands(model, data, schedule)
     finally:
         close = getattr(environment, "close", None)
         if callable(close):
             close()
+
+
+def _load_registered_direct_model(
+    registration: DirectModelRegistration,
+    factory: DirectModelFactory,
+    mujoco_module: Any,
+) -> tuple[Any, Any, Any, str]:
+    """Verify registered provider code, resource bytes and native model types."""
+    resource_digest = resource_closure_sha256(
+        registration.resource_root,
+        registration.model_path,
+        registration.resources,
+        expected_loaded_native_model_sha256=registration.loaded_native_model_sha256,
+    )
+    model_path = registration.model_path.resolve(strict=True)
+    factory_owner: object = factory if inspect.isroutine(factory) else type(factory)
+    _source_bytes(factory_owner, registration.factory_source_sha256)
+    module_name, separator, _ = registration.environment_class_id.rpartition(".")
+    if not separator:
+        raise ValueError("direct environment class identity must be fully qualified")
+    module = sys.modules.get(module_name)
+    module_path = getattr(module, "__file__", None) if module else None
+    if (
+        module_path is None
+        or hashlib.sha256(Path(module_path).read_bytes()).hexdigest()
+        != registration.environment_class_sha256
+    ):
+        raise ValueError("registered direct environment source is not loaded exactly")
+    environment = factory(str(model_path))
+    try:
+        if hasattr(environment, "env"):
+            raise ValueError(
+                "direct model loader must return the unwrapped environment"
+            )
+        model = getattr(environment, "model", None)
+        data = getattr(environment, "data", None)
+        if not isinstance(model, mujoco_module.MjModel) or not isinstance(
+            data, mujoco_module.MjData
+        ):
+            raise ValueError("direct loader must expose native MuJoCo model and data")
+        if int(model.nplugin) != 0:
+            raise ValueError("direct model replay does not admit native plugins")
+    except Exception:
+        close = getattr(environment, "close", None)
+        if callable(close):
+            close()
+        raise
+    return environment, model, data, resource_digest
 
 
 def _verify_restored_state(
@@ -939,15 +1045,17 @@ def _require_no_native_warnings(data: Any) -> None:
 def _execute_commands(
     model: Any,
     data: Any,
-    times: NDArray[np.float64],
-    commands: NDArray[np.float64],
-    initial_integration: NDArray[np.float64],
-    bundle: Any,
-    resource_digest: str,
-    law_digest: str,
+    schedule: _DirectCommandSchedule,
 ) -> NativeDirectModelReplay:
     import mujoco as mj
 
+    times = schedule.times
+    commands = schedule.commands
+    initial_integration = schedule.initial_integration
+    bundle = schedule.bundle
+    resource_digest = schedule.resource_digest
+    law_digest = schedule.law_digest
+    profile_sha256 = schedule.profile_sha256
     require_no_global_mujoco_callbacks(mj)
     if data.time != times[0]:
         raise ValueError("direct native initial clock differs from frozen grid")
@@ -1017,6 +1125,7 @@ def _execute_commands(
         bundle.policy_sha256,
         resource_digest,
         law_digest,
+        profile_sha256,
     )
 
 
@@ -1026,6 +1135,7 @@ __all__ = [
     "DirectModelRegistration",
     "NativeDirectModelReplay",
     "actuator_law_manifest_sha256",
+    "compiled_actuator_profile_bytes",
     "direct_provider_sha256",
     "native_contact_policy_sha256",
     "replay_direct_model_actuator_commands",

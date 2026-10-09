@@ -531,6 +531,276 @@ def test_direct_mujoco_kernel_rejects_other_engine_id_before_factory(
     assert not _FACTORY_MODEL_PATHS
 
 
+def test_direct_replay_binds_compiled_actuator_profile_to_loaded_model(
+    tmp_path: Path,
+) -> None:
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        compiled_actuator_profile_bytes,
+    )
+
+    registration, bundle, closure = _case(tmp_path)
+    environment = _DirectModelFixture(str(registration.model_path))
+    profile = compiled_actuator_profile_bytes(
+        bundle, registration, environment.model, closure
+    )
+
+    replay = replay_direct_model_actuator_commands(
+        bundle,
+        registration,
+        _direct_factory,
+        compiled_profile_bytes=profile,
+    )
+
+    assert (
+        replay.compiled_actuator_profile_sha256 == hashlib.sha256(profile).hexdigest()
+    )
+    assert replay.time_seconds.shape == (3,)
+    bad_profile = profile.replace(
+        b'"model_id":"synthetic-direct-model"',
+        b'"model_id":"tampered-direct-model"',
+    )
+    with pytest.raises(ValueError, match="profile differs"):
+        replay_direct_model_actuator_commands(
+            bundle,
+            registration,
+            _direct_factory,
+            compiled_profile_bytes=bad_profile,
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        lambda profile: profile.__setitem__("initial_state_sha256", "1" * 64),
+        lambda profile: profile.__setitem__("applied_input_sha256", "2" * 64),
+        lambda profile: profile.__setitem__("provider_sha256", "3" * 64),
+        lambda profile: profile.__setitem__("actuator_law_manifest_sha256", "4" * 64),
+        lambda profile: profile.__setitem__("engine_id", "opensim"),
+        lambda profile: profile["ordered_channels"].reverse(),
+    ),
+    ids=(
+        "initial-state",
+        "input-history",
+        "provider",
+        "actuator-law",
+        "engine",
+        "channel-order",
+    ),
+)
+def test_direct_replay_rejects_rehashed_profile_identity_mutations(
+    tmp_path: Path, mutation
+) -> None:
+    import json
+
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        compiled_actuator_profile_bytes,
+    )
+
+    registration, bundle, closure = _case(tmp_path)
+    environment = _DirectModelFixture(str(registration.model_path))
+    profile = json.loads(
+        compiled_actuator_profile_bytes(
+            bundle, registration, environment.model, closure
+        )
+    )
+    mutation(profile)
+    rehashed_profile = json.dumps(
+        profile, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+
+    with pytest.raises(ValueError, match="profile differs"):
+        replay_direct_model_actuator_commands(
+            bundle,
+            registration,
+            _direct_factory,
+            compiled_profile_bytes=rehashed_profile,
+        )
+
+
+def test_f09_command_executor_binds_t02_row_without_relabeling_native_engine(
+    tmp_path: Path,
+) -> None:
+    from src.engines.feedback_comparison import (
+        DriveMode as F01DriveMode,
+        FeedbackComparisonRegistry,
+    )
+    from src.engines.feedback_native_execution import (
+        NativeAdapterBinding,
+        NativeReplayRequest,
+        _validate_direct_command_binding,
+        execute_native_actuator_command_replay,
+    )
+    from src.engines.model_inventory import EngineModelInventory
+    from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+        compiled_actuator_profile_bytes,
+    )
+
+    from sidekick.lab.mocap import (
+        COMPILED_ACTUATOR_PROFILE_ID,
+        COMPILED_ACTUATOR_PROFILE_VERSION,
+        ComparisonEvidenceRow,
+        DriveMode as T02DriveMode,
+        EvidenceArtifactKind,
+        EvidenceArtifactReference,
+        ImplementationEvidence,
+        ImplementationEvidenceKind,
+    )
+
+    registration, bundle, closure = _case(tmp_path)
+    environment = _DirectModelFixture(str(registration.model_path))
+    profile = compiled_actuator_profile_bytes(
+        bundle, registration, environment.model, closure
+    )
+    profile_sha = hashlib.sha256(profile).hexdigest()
+    reference = "opaque:synthetic-compiled-profile"
+    t02_row = ComparisonEvidenceRow(
+        "myosuite/driver/default/muscle_excitation",
+        "myosuite/driver",
+        "default",
+        T02DriveMode.MUSCLE_EXCITATION,
+        bundle,
+        CapabilitySupport.SUPPORTED,
+        CapabilityAvailability.AVAILABLE,
+        (
+            ImplementationEvidence(
+                ImplementationEvidenceKind.ACTUATOR,
+                COMPILED_ACTUATOR_PROFILE_ID,
+                COMPILED_ACTUATOR_PROFILE_VERSION,
+                profile_sha,
+                True,
+                CapabilitySupport.SUPPORTED,
+                CapabilityAvailability.AVAILABLE,
+                evidence_reference_id=reference,
+            ),
+        ),
+        (
+            EvidenceArtifactReference(
+                EvidenceArtifactKind.ACTUATOR, reference, profile_sha
+            ),
+        ),
+    )
+    root = Path(__file__).resolve().parents[4]
+    registry = FeedbackComparisonRegistry(EngineModelInventory.load(repo_root=root))
+    inventory_row = replace(
+        registry.get("myosuite/driver", "default", F01DriveMode.MUSCLE_EXCITATION),
+        availability="available",
+    )
+    registry.rows = (inventory_row,)
+    binding = NativeAdapterBinding(
+        inventory_row.package_id,
+        inventory_row.variant_id,
+        inventory_row.drive_mode,
+        registration.model_id,
+        registration.variant_id,
+        registration.provider_id,
+        registration.provider_sha256,
+        inventory_row.source_model_sha256,
+        registration.loaded_native_model_sha256,
+        bundle.state_schema_sha256,
+        bundle.input_channel_schema_sha256,
+        registration.ordered_channel_ids,
+    )
+
+    mismatched_bindings = (
+        replace(binding, state_schema_sha256="0" * 64),
+        replace(binding, input_channel_schema_sha256="1" * 64),
+        replace(
+            binding,
+            ordered_input_channel_ids=tuple(
+                reversed(binding.ordered_input_channel_ids)
+            ),
+        ),
+    )
+    for mismatched_binding in mismatched_bindings:
+        with pytest.raises(ValueError, match="differ from binding"):
+            _validate_direct_command_binding(
+                NativeReplayRequest(
+                    mismatched_binding, bundle, registration.model_path
+                ),
+                registration,
+            )
+
+    execution = execute_native_actuator_command_replay(
+        NativeReplayRequest(binding, bundle, registration.model_path),
+        registry,
+        t02_row,
+        profile,
+        registration,
+        _direct_factory,
+    )
+
+    assert execution.receipt.inventory_engine == "myosuite"
+    assert execution.receipt.native_engine == "mujoco"
+    assert execution.receipt.compiled_actuator_profile_sha256 == profile_sha
+    assert (
+        execution.receipt.initial_state_sha256 == bundle.integrity.initial_state_sha256
+    )
+    assert execution.receipt.qualification == "unqualified"
+    from src.engines.feedback_comparison import (
+        CompiledCommandExecutionProof,
+        ComparisonEvidence,
+        ComparisonLevel,
+        EvidenceMode,
+        InputKind,
+        ReplayPolicy,
+    )
+
+    proof = CompiledCommandExecutionProof(execution.receipt)
+    assert proof.output_state_sha256 == execution.receipt.output_state_sha256
+    assert proof.resource_closure_sha256 == execution.receipt.resource_closure_sha256
+    comparison = ComparisonEvidence(
+        package_id=inventory_row.package_id,
+        variant_id=inventory_row.variant_id,
+        drive_mode=inventory_row.drive_mode,
+        source_model_sha256=inventory_row.source_model_sha256,
+        provider_id=inventory_row.provider_id,
+        provider_sha256=inventory_row.provider_sha256,
+        physical_model_sha256="1" * 64,
+        physics_sha256="2" * 64,
+        contact_sha256="3" * 64,
+        integrator_sha256="4" * 64,
+        state_schema_sha256=bundle.state_schema_sha256,
+        initial_state_sha256=bundle.integrity.initial_state_sha256,
+        comparison_contract_version="feedback-comparison/1.2.0",
+        policy_sha256=bundle.policy_sha256,
+        applied_input_sha256=bundle.applied_input_sha256,
+        input_kind=InputKind.ACTUATOR_COMMAND,
+        input_interpolation="zero_order_hold",
+        timebase_id="simulation_relative",
+        replay_policy=ReplayPolicy.INDEPENDENT_TIME_ONLY,
+        evidence_mode=EvidenceMode.NATIVE_OWN_CONTACT,
+        horizon_s=execution.receipt.horizon_s,
+        observation_sha256="f" * 64,
+        channel_ids=execution.receipt.ordered_channel_ids,
+        full_state=execution.receipt.full_state,
+        full_horizon=execution.receipt.full_horizon,
+        state_resets=execution.receipt.state_reset_count,
+        nq=execution.receipt.nq,
+        nv=execution.receipt.nv,
+        time_grid_sha256=bundle.time_grid_sha256,
+        input_channel_schema_sha256=bundle.input_channel_schema_sha256,
+        loaded_native_model_sha256=execution.receipt.loaded_native_model_sha256,
+        native_engine_id=execution.receipt.native_engine,
+        native_execution_provider_id=execution.receipt.native_provider_id,
+        native_execution_provider_sha256=execution.receipt.native_provider_sha256,
+        actuator_law_manifest_sha256=execution.receipt.actuator_law_manifest_sha256,
+        compiled_actuator_profile_sha256=execution.receipt.compiled_actuator_profile_sha256,
+        native_source_model_sha256=execution.receipt.native_source_model_sha256,
+        native_output_state_sha256=execution.receipt.output_state_sha256,
+        native_command_proof=proof,
+    )
+    registry.admit(comparison, ComparisonLevel.WITHIN_ENGINE_REPLAY)
+    altered_receipt = replace(execution.receipt, state_reset_count=1)
+    with pytest.raises(ValueError, match="proof differs"):
+        registry.admit(
+            replace(
+                comparison,
+                native_command_proof=CompiledCommandExecutionProof(altered_receipt),
+            ),
+            ComparisonLevel.WITHIN_ENGINE_REPLAY,
+        )
+
+
 def test_native_contact_replay_rejects_external_load_payload(tmp_path: Path) -> None:
     registration, bundle, _ = _case(tmp_path)
     policy = replace(bundle.policy, external_loads_sha256="a" * 64)
@@ -734,8 +1004,25 @@ def test_public_driver_and_iron_native_receipts_replay_exactly() -> None:
         registration, bundle = _public_receipt_case(
             resource_root, artifact_root, variant
         )
+        from src.engines.physics_engines.myosuite.python.native_direct_model_replay import (
+            compiled_actuator_profile_bytes,
+        )
+
+        resource_digest = resource_closure_sha256(
+            registration.resource_root,
+            registration.model_path,
+            registration.resources,
+        )
+        environment = _direct_factory(str(registration.model_path))
+        profile = compiled_actuator_profile_bytes(
+            bundle, registration, environment.model, resource_digest
+        )
+        environment.close()
         output = replay_direct_model_actuator_commands(
-            bundle, registration, _direct_factory
+            bundle,
+            registration,
+            _direct_factory,
+            compiled_profile_bytes=profile,
         )
         with np.load(
             artifact_root / f"replay_{variant}_producer.npz", allow_pickle=False
