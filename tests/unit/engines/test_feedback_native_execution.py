@@ -179,6 +179,17 @@ def test_native_receipt_binds_bundle_and_actual_output_without_qualification(
     assert receipt.state_reset_count is None
 
 
+def test_receipt_rejects_changed_native_initial_numerical_state(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row, bundle, binding = _bundle(registry)
+    output = _output(bundle)
+    output.integration_states[0, 0] = 1.0
+
+    with pytest.raises(ValueError, match="initial numerical state"):
+        validate_native_replay_output(row, binding, bundle, output)
+
+
 @pytest.mark.parametrize(
     ("binding_field", "value", "message"),
     [
@@ -254,7 +265,10 @@ def test_request_references_bundle_model_path_without_serializing_it(
 
     assert request.model_path == model_path
     assert str(model_path) not in str(request.as_dict())
-    assert row.package_id in request.as_dict()["row_key"]
+    assert request.as_dict()["row_key"] == (
+        f"{row.package_id}/{row.variant_id}/{row.drive_mode.value}"
+    )
+    assert request.as_dict()["bundle_schema"] == bundle.schema_version
 
 
 def test_execution_calls_native_mujoco_adapter_on_independent_synthetic_model(
