@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -599,6 +599,23 @@ class ForceOverlayRequest(BaseModel):
         None, description="Only show forces on these bodies (None = all)"
     )
     show_labels: bool = Field(False, description="Show magnitude labels")
+    scale_mode: Literal["fixed", "body_weight", "peak"] = Field(
+        "fixed", description="Arrow scaling: fixed, body_weight or peak"
+    )
+    reference_force_n: float | None = Field(
+        None,
+        gt=0,
+        description="Body weight (N) for body_weight; series peak (N) for peak",
+    )
+    reference_length_m: float = Field(
+        0.5, gt=0, description="Arrow length (m) for one reference force"
+    )
+    kind_scale: dict[str, float] | None = Field(
+        None, description="Per-WrenchKind length multipliers"
+    )
+    groups: list[str] | None = Field(
+        None, description="Enabled overlay groups (None = defaults)"
+    )
 
     @field_validator("force_types")
     @classmethod

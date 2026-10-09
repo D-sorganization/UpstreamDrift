@@ -61,6 +61,7 @@ class ProjectedArrowGlyph:
     units: str
     shaft_width_px: float
     halo_width_px: float
+    clamped: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -76,6 +77,7 @@ class ProjectedArrowGlyph:
             "units": self.units,
             "shaft_width_px": float(self.shaft_width_px),
             "halo_width_px": float(self.halo_width_px),
+            "clamped": bool(self.clamped),
         }
 
 
@@ -270,6 +272,7 @@ def _project_single_arrow(
         units=str(arrow.units),
         shaft_width_px=float(line_px),
         halo_width_px=float(halo_px),
+        clamped=bool(arrow.clamped),
     )
     return glyph, False, False
 

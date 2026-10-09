@@ -622,6 +622,54 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "impact_parameters"
+    help: "docs/help/impact_parameters.md"
+    name: "Impact Parameters"
+    description: "Launch-monitor-style clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft and spin loft relative to a target line"
+    type: "special_app"
+    path: "src/tools/impact_parameters_panel/__main__.py"
+    capabilities:
+      - "impact_parameters"
+      - "launch_monitor"
+      - "target_line"
+    launcher:
+      category: "tool"
+      logo: "assets/impact_parameters.png"
+      status: "ready"
+      default_launch: "dock"
+
+  - id: "grip_wrench_plots"
+    help: "docs/help/grip_wrench_plots.md"
+    name: "Grip Wrench Plots"
+    description: "Hand force on the club per hand, net force and equivalent couple at the grip midpoint over time, with the left/right split method"
+    type: "special_app"
+    path: "src/tools/grip_wrench_plots/__main__.py"
+    capabilities:
+      - "grip_wrench"
+      - "club_forces"
+      - "force_plots"
+    launcher:
+      category: "tool"
+      logo: "assets/grip_wrench_plots.png"
+      status: "ready"
+      default_launch: "dock"
+
+  - id: "ground_reaction_plots"
+    help: "docs/help/ground_reaction_plots.md"
+    name: "Ground Reaction Plots"
+    description: "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass"
+    type: "special_app"
+    path: "src/tools/ground_reaction_plots/__main__.py"
+    capabilities:
+      - "ground_reaction"
+      - "foot_forces"
+      - "force_plots"
+    launcher:
+      category: "tool"
+      logo: "assets/ground_reaction_plots.png"
+      status: "ready"
+      default_launch: "dock"
+
   - id: "data_explorer"
     help: "docs/help/data_explorer.md"
     name: "Data Explorer (Import & Visualize)"

@@ -29,7 +29,7 @@ SOURCE = (
     "15 N m (means, rounded)."
 )
 CAPACITY_NM: dict[str, float] = {
-    # Anthro neck joint Rx(X) Ry(Y) Rz(Z), head forward +x (DESIGN_DECISIONS 16).
+    # Anthro neck joint Rx(X) Ry(Y) Rz(Z), head forward +x (DESIGN_DECISIONS 18).
     "NeckInputX": 36.0,  # lateral bending
     "NeckInputY": 30.0,  # flexion/extension: the smaller (flexion) maximum
     "NeckInputZ": 15.0,  # axial rotation

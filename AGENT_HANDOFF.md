@@ -1,3 +1,110 @@
+# Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
+
+- Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
+- Every CoP goes through `biomechanics.ground_reaction.center_of_pressure`; legacy helpers are `DeprecationWarning` shims. Tests: `tests/integration/cross_engine/test_ground_reaction_parity.py` plus per-engine `*ground_reaction*` tests (static stance net Fz = weight within 2 %).
+- GCV-5 (#11711) plots, API and web display landed in #11781; the remaining #11711 item is the real-MuJoCo-run plot sheet. Open for GCV-2: Pinocchio GRF render (1x + 0.5x) on an engine host.
+
+# Active: Native OpenSim Geometry — #11903
+
+Scoped F07/F08 branch `feat/feedback-native-markers-11903`. Read canonical
+`manuals/upstreamdrift/chapters/26-native-opensim-geometry.qmd` and
+`docs/development/feedback_controls/F07_NATIVE_GEOMETRY_TURNOVER.md` before
+continuing. Explicit native frame/station geometry and bounded shared IK are
+implemented; metadata-only physical placeholders fail closed. The unchanged
+520-muscle candidate's three-pose pelvis probe remains unqualified and reaches
+its source rotation bound. Preserve native replay, anatomy and registration gates.
+
+# Active: MeshCat Camera Framing - NV-9 #11697
+
+- Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
+- Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
+
+# Active: Feedback Controls Planning — #11784
+
+Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
+
+# Active: Impact-Phase Bushing Grip, OSV-7 #11739
+
+- Branch `claude/osv-7-impact-grip`. The OpenSim bushing grip is driven over 0 to 1.8 s by the OSV-10 fits (`tests/fixtures/club_face/swing_q_*.npz`), mapped by name with `grip_contact.load_coordinate_swing`. Loop closure is below 0.001 mm and hand speeds are within 12 % of the measured wrist markers.
+- Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. Owner decision on PR #11774: the flat 500 N internal-force bound is replaced by `grip_contact.couple_check` (squeeze at most 50 N; transverse pair equals the couple/d Newton-Euler prediction within 5 %, 2 N m noise floor). Both pass for driver and iron (squeeze 3.3 / 3.9 N), so the full-window test is no longer an xfail. The club-welded-to-hand demand is 89 / 87 N m against the realised 100 / 99 N m (bushing amplification). Grip-frame spacing is 80.3 mm, not 76. See DESIGN_DECISIONS.md section 17.
+- Next: MuJoCo (soft weld) and Drake (`LinearBushingRollPitchYaw`) bushing parity on the same fixtures. The plan is on #11739.
+
+# Active: Ground Reaction Design Manual Slice - GCV-18 #11724
+
+- Branch `claude/gcv-18-grf-design-manual`. Provisional QMD chapter `manuals/upstreamdrift/chapters/10-ground-reaction.qmd` (GCV-1 equations, conventions, unavailable values, symbols, tests, limitations) and registry blocker `UP-D1-ground-reaction-breakdown-inventory`; the registry stays `blocked-inventory-required` with no calculations. User manual §12.4/§12.7 now state what `grf_metrics.py`/`stability_metrics.py` do not compute and give the correct CoP and free-moment equations.
+- Open in #11724: grip wrench (GCV-7) and impact parameters (GCV-15) chapters, ADR-0052, force-overlay and native-export user guides, shared-infrastructure and C4 entries.
+
+# Active: Club Force and Torque Overlays - GCV-10 #11716
+
+- Branch `claude/gcv-10-grip-overlays`; epic #11706. Per-hand, net-at-midpoint and couple glyphs (groups `grip_per_hand`, `grip_net`, `grip_couple`, `grip_mof`) carry the `split_method` label; unavailable quantities are listed as unavailable, never zero (`force_overlay/grip_frame.py`, frame metadata `grip_unavailable_labels`).
+- Plots: `biomechanics/grip_plot_model.py` (series), `GET /analysis/grip-wrench`, web `GripWrenchCharts.tsx`, PyQt tile `grip_wrench_plots` (`src/tools/grip_wrench_plots/`). `analysis.grip_wrench` parity gap closed.
+- Native export: `--grip` adds the overlay (Drake uses its own KKT multiplier; other viewers show the MuJoCo plant at that engine's pose) and writes `<swing>_<engine>_grip_wrench.json`; `--views hands_closeup --no-grid` tracks the grip midpoint per frame (`view_lookats`, `WorkerJob.lookats`).
+- Videos: `~/Videos/Parity Audit/forces_and_impact/club_forces/` (MyoSuite/MuJoCo arena, 1080p60, 1x/0.5x, clean 0.25x impact clip, plot PNG). Follow-up: Drake render did not finish under load (14 frames in about 12 minutes, then a Playwright EPIPE crash); rerun when the host is idle.
+- Open: `hands_closeup` azimuth is judged by eye only; Pinocchio gives a net allocation only and OpenSim is unavailable.
+
+# Active: Lift Pack Parity Baseline - LIFT-1 #11741, Epic #11740
+
+- Branch `claude/lift-1-pack-parity-baseline` (PR #11771). Audit package `src/shared/python/lifting/pack_audit/`; run `python3 scripts/lifting/run_pack_parity_baseline.py`; results in `docs/development/lifting/PACK_PARITY_BASELINE.md` and `pack_parity_baseline.json`.
+- Finding: same-q FK, feet and total mass agree across the four packs; grips, start poses, limits, phases, bench mass and contacts do not. Nine new pack issues filed (MuJoCo_Models#427-#428, OpenSim_Models#414-#416, Drake_Models#390-#391, Pinocchio_Models#449-#451).
+- Next: LIFT-2 shared exercise spec.
+
+# Active: Shared Ground Reaction Core — GCV-1, Epic #11706
+
+- Branch `claude/gcv-1-ground-reaction` (PR #11733): per-foot and net GRF, CoP, free moment and moment about the CoM in `src/shared/python/biomechanics/ground_reaction.py`. Next: GCV-2 (#11708) engine wiring.
+
+# Active: Force Arrow Scaling — GCV-4, Epic #11706
+
+- Branch `claude/gcv-4-arrow-scaling` (PR #11738): body-weight and peak arrow scale modes; overlay route takes a `ForceOverlayQuery` dependency. Next: GCV-5 (#11711) plots, API and web.
+
+# Active: Club-Face Orientation Residual, OSV-10 #11759
+
+- Branch `claude/osv-10-face-roll-refit`, stacked on PR #11752 (OSV-8). The shared marker IK adds `sqrt(w)(R(q)a - R_capture a)` on the `Clubhead` frame from the capture head triad (`motion_matching/club_face_target.py`, `FACE_ORIENTATION_WEIGHT = 3`, `--face-weight 0` = marker-only). It applies in the full-capture IK, the consistency re-solve and the ZMP/shooting re-solves through the existing `axis_targets` path.
+- Fixtures: `tests/fixtures/club_face/*` are regenerated only by `python3 -m scripts.regenerate_club_face_fixtures --work RUNS --capture {driver,iron}` (about 40 min each); `provenance.json` holds the hashes, calibrated triad offsets and before/after face events.
+- Result (model vs capture, each at its own sub-sample impact `club_face.ball_passage`): the driver impact is 11.3 vs 8.8 deg (was 29.5) and the iron 7.6 vs 8.4 (was 17.9); top and address are within 1.1 deg. Marker RMS: driver IK +2.5 %, iron flat; dynamics improved. The strict xfail is replaced by `test_face_tracks_the_capture_at_address_top_and_impact` (5 deg, every engine's FK). MyoSuite was not installed locally.
+- Open: the model's peak clubhead speed falls about 24 ms before the ball (the capture's falls about 3 ms before it). Reference: `docs/research/simscape_matching_reference/simscape_matching_reference.tex` (OSV-10 section).
+
+# Active: Clubface Roll at Address, OSV-8 #11755
+
+- On PR #11752. The matched hand-club chain leaves the club roll to fitted wrist constants, so club `+x` was open 30.7 deg (driver) and 44.8 deg (7-iron) at address in every engine. One shared constant, `ADDRESS_SQUARE_FACE_ROLL_DEG` in `model_appearance/club_assembly.py`, now rolls the head about the shaft (and defines `clubface_vector`); `club.face_roll_deg` in a spec overrides it.
+- Tests: `tests/unit/model_appearance/test_clubface_square_at_address.py` (each engine's own FK at the captured address pose, `tests/fixtures/club_face/address_poses.json`). OpenSim STLs and `provenance.json` regenerated.
+- Impact: `club_face.impact_frame` (shared `detect_impact_index`, closest-approach fallback, raises if not at the ball). True impact face is +30 deg (driver, t=1.327) and +18 deg (iron, t=1.337) open, while the capture head triad is about +2 deg: the IK/matched trajectory under-rotates the club through release (grows from 4 deg at the top), so a constant roll cannot fix it; needs an IK refit with head-triad weight (test `test_face_is_square_at_impact` is a strict xfail). `tour_matching` club models are unrolled.
+
+# Active: Visible Head and Neck (GCV-12) - #11718
+
+- Branch `claude/gcv-12-visible-head`; epic #11706. The anthropometric specs already carry a `Head` body on a three-axis neck at the cervicale; only the native Simscape spec (v1/v2) has none, so the head rides the `Head` body (follows the fitted neck) and falls back to the torso for v1/v2 in MuJoCo only.
+- Code: `model_appearance/head.py` (procedural head, face, ears, neck, hair or cap), `mujoco/python/head_visual.py`, native viewer `backends/_head.py`; schema fields `head` and `body_model`. Visual only: no mass, inertia or DOF change (identity tests). Gaze channel `head.orientation_override` plus `drive_visual_head` for OSV-3 #11729.
+- Blend balls are capped at 1.1x the adjoining limb radius (test); `*hubto*` bodies are a small `shoulder` part, not torso-sized pads.
+- Not done: `body_model: meshes` (rejected until CMB-6 #11657), web `GolferModel.tsx` head. Owner renders in `~/Videos/Parity Audit/forces_and_impact/visuals/head/`.
+
+# Active: Head Gaze Stabilisation - #11729
+
+- Branch `claude/osv-3-head-gaze`; epic #11726. `motion_matching/gaze.py` (eye point, gaze error, schedule, metrics, neck IK), `pipeline/gaze_residual.py` (soft residual, receipt `head_gaze`), `model_appearance/ball.py` (the one ball-at-address function, reuse in GCV-13). `--gaze-weight` defaults to 0 (marker-faithful).
+- Reference: `docs/development/full_body_models/HEAD_GAZE_REFERENCE.md` (+ `.tex`). Capture-A driver, weight 10: theta_gaze RMS 21.3 to 0.8 deg, marker RMS 28.0 to 33.8 mm. Gaze axis is calibrated at address (nominal +x is 37 deg off).
+- Open: iron and other engines, neck PD in forward dynamics, MyoSuite neck map audit (X is lateral bending, Y flexion; map not changed), published tour head ranges.
+
+# Active: Compliant Bushing Grip Model - #11739
+
+- Branch `claude/osv-7-bushing-grip` (phase 1, Refs #11739 #11726): `src/shared/python/grip_contact/` interface, OpenSim `grip_model="bushing"` (`weld` default unchanged, `contact` raises), `split_method="bushing"`.
+- Valid window 0 to 0.94 s with designed damping (zeta 0.7): per-hand peak 142/162 N, internal 151 N (bound 500), 0.16 mm and 0.22 deg. Beyond 0.95 s the committed OpenSim IK candidate is unusable (marker RMS 262 mm, branch switches); the full-window test is a strict xfail.
+- Next: phase 2 contact model, other engine parity, full 1.8 s run, `golf_humanoid.osim` builder.
+- Next: qualified closure-consistent OpenSim IK input, then re-run the receipt; phase 2 contact model, other engine parity, `golf_humanoid.osim` builder.
+
+# Active: Impact Parameters Panel - GCV-17 (#11723)
+
+- Branch `claude/gcv-17-impact-panel`, stacked on GCV-16 (PR #11769, adapters); epic #11706. Shared card model `impact_parameters/panel_model.py` feeds `GET /api/analysis/impact-parameters`, the PyQt6 dock `src/tools/impact_parameters_panel/` (tile `impact_parameters`) and web `ImpactParametersPanel.tsx`. Parity entry `analysis.impact_parameters`.
+- Run series come from `run.simulation_data["clubhead_series"]`, an engine `get_clubhead_series()`, or a MuJoCo run with a `clubhead` body; otherwise the card is unavailable with a reason. Matched-swing ledger ids are not simulation run ids, so that view shows unavailable until candidates carry a club series.
+- Next: wire engine runs to record `clubhead_series`; video HUD stamp (GCV-14); Impact Explorer prefill is owned by Tools (#9546).
+
+# Active: ClubheadSeries Engine Adapters - GCV-16 (#11722)
+
+- Branch `claude/gcv-16-clubhead-adapters`; epic #11706. Package `src/shared/python/impact_parameters/adapters/`: one `ClubFaceSpec` (face centre and axes in the club body frame) and one `rigid_body_series` kernel; MuJoCo/MyoSuite, Drake, Pinocchio, OpenSim and Simscape adapters only supply their own FK.
+- Impact time: `adapters/impact_time.py::select_impact_index` is the single integration point for the OSV-8/OSV-10 closest-approach rule (not on main yet). `ClubFaceSpec` default centre is the club body origin until GCV-11 face geometry lands.
+- Next: GCV-17 impact panel consumes these adapters.
+
+# Active: Centroidal Feasibility Filter V2 — #11669
+
+- Branch `feat/centroidal-filter-v2-11669` (PR #11703); epic #11667. Next: Balance-3 contact-consistent inverse dynamics.
+
 # Active: High-FPS Video Frame Schedule — GCV-14, Epic #11706
 
 - Branch `claude/gcv-14-frame-schedule` (PR #11734): half- and full-speed video variants. Next: impact-time detection from clubhead kinematics.
@@ -63,6 +170,22 @@
 - Next: finish library acceptance/import real captures, publish focused PR, add player tiles and web/desktop review, integrate real fitting and downstream simulation/impact/analysis. Do not certify fixed-output coordinator artifacts or uncalibrated source time.
 
 # Historical Player Capture Handoff
+
+## Active: Grip Wrench Extraction in Every Engine (GCV-8 #11714, Epic #11706)
+
+Per-hand `WrenchKind.GRIP` frames, wrench exerted by the hand ON THE CLUB (ADR-0052):
+
+- MuJoCo and MyoSuite scene: `mujoco/python/grip_efc.py` reads the weld `efc_force` rows (`efc_type`, `efc_id`) and maps them to a club wrench with the club-point Jacobians; `MujocoForceTorqueSource` emits it when `grip_weld_l`/`grip_weld_r` exist.
+- Full-body MuJoCo, MyoSuite spec and Drake: `solve_with_multipliers` (qacc bitwise unchanged) and `grip_analysis`; the closing (right) hand is the multiplier, the holding (left) hand is club Newton-Euler, see `biomechanics/grip_extraction.py`.
+- Pinocchio: `PinocchioForceTorqueSource.grip_from_allocation` gives the net with `split_method="allocation"`, no per-hand values. OpenSim: `grip_analysis()` is unavailable with a reason.
+- Open: web/video overlays are GCV-10 (#11716, `analysis.grip_wrench` is a gap). The pinned myo_sim assets are absent on some hosts, so the golfer-scene test skips there.
+
+## Active: Realistic Club Meshes in Every Engine Visual Layer (#11717, #11727)
+
+- One adapter, `src/shared/python/model_appearance/club_head_mesh.py`, builds the head from the Tools parametric builder, with committed STLs in `assets/club_heads/` as fallback. `club_assembly.py` adds the shaft and grip. Never edit `vendor/ud-tools` for this.
+- Wired: MuJoCo (appearance and plain visual layers), OpenSim (`club_visuals.py`, `full_body_osim.py`, `tour_matching/club_geometry.py`), Drake and Pinocchio MeshCat exports, MyoSuite via the plain visual layer, and the native OpenSim viewer.
+- Open: the web `ClubHead` component (#11717) and the ball visual (#11719) are tracked by gap entry `render.club_head_and_ball`. The head centre of mass is not moved to the mesh centre.
+- Saved OpenSim models use bare mesh names; loaders call `club_visuals.register_geometry_path()`.
 
 ## Active: Same-Input Cross-Engine Dynamics Parity (Epic #11605)
 
@@ -482,3 +605,7 @@ The selected club fits were tested at all anchors and midpoints using independen
 The private production integration candidate passed 17 native pre-model contract cases (parent RED, candidate GREEN, 51 recorded checks) at 20:20:58 UTC. Numerical whole-output parity and positive-fit validation remain separate pending gates. Original failed runner receipts are preserved. A custom vector measurement block built successfully, but the eight-axis instrumented simulation hit the Home license's 1,000-nonvirtual-block limit. No all-35 measured torque or moving feedback-off replay claim follows from these tests. Original physical model files were not saved.
 
 See the separate editable research reference and the extended aggregate `tangent_c2_checkpoint_20261003.json` for scope and provenance. The built-in LaTeX compiler still fails with `Unable to find standard directories for platform`; PDF compilation/page review are unverified. Canonical calculation inventory and governed manual release remain blocked; this update grants neither a release exemption nor scientific approval.
+
+### Impact Parameters Package (GCV-15, 2026-10-07)
+
+`src/shared/python/impact_parameters/` extracts speed, attack angle, club path, face angle, face-to-path, dynamic and spin loft, swing plane and low point relative to an explicit `TargetFrame` (default recorded: Z-up, target -Y, ADR-0041). Definitions are in the package docstring for design-manual transfer via GCV-18. Tools delivery and D-plane are reached only through the fail-closed `tools_gateway.py` and agree with the UD definitions within 0.01 deg. Open: launch direction has no Tools provider; toe/high needs GCV-11 face geometry and GCV-13 ball; smash factor needs an impact model with calibration status; `rate_of_closure` `delivery_at` is not called directly.

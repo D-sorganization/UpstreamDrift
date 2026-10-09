@@ -45,7 +45,7 @@ world orientation `HipInput*`, all four scapula inputs and neck lateral bending
 `omitted_source`. The map is one-to-one: the loader rejects two sources on one
 target (section 17 of the design decisions; LaTeX reference
 [`myosuite_retarget_map.tex`](../research/myosuite_retarget_map/myosuite_retarget_map.tex)). `NeckInputY` (head pitch) drives
-`neck_flexion` with sign -1 by forward kinematics; see section 16 of
+`neck_flexion` with sign -1 by forward kinematics; see section 18 of
 `docs/development/full_body_models/DESIGN_DECISIONS.md` (#11729). A partial map does **not**
 prove dynamics equivalence or satisfy 15 mm marker parity.
 

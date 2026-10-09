@@ -96,6 +96,9 @@ In `Model Explorer`, `Capture Rig`, `Simscape 3D Viewer`, and `Tour Matching Vie
 - **Torque Arcs Toggle:** Enable "Show Torques" to render moment arcs around joint rotation axes.
 - **Model Volumes (Shaded):** Enable shaded capsule or mesh volumes with tension/compression fill.
 - **Scale Controls:** Adjust `force_scale_m_per_n` and `torque_scale_m_per_nm` sliders to scale visual glyph lengths for clear inspection.
+- **Scale Mode:** Choose how force arrows are sized. `Fixed (Slider)` uses the slider scale. `Body Weight` draws one body weight (body mass times 9.80665) as the reference length, 0.5 m by default, so a 3 BW ground reaction is 1.5 m long whatever the golfer's mass. `Series Peak` draws the given peak force as the reference length. Native export defaults to `Body Weight` using the model mass.
+- **Clamped Arrows:** An arrow longer than the maximum length is shortened and drawn with a second head (double tip, or a white marker in the MuJoCo viewport). The legend reports how many arrows are clamped.
+- **Group Toggles:** Per-Foot GRF, Net GRF, Free Moment, Moment About CoM, Contact Points, Grip Per Hand, Grip Net, Grip Couple and Grip MOF. Contact Points (raw per-sphere contacts) and Moment About CoM are off by default.
 
 ### 2. Web Interface (React & Three.Js)
 
@@ -103,6 +106,7 @@ In `Scene3D.tsx` and `SimulationControls.tsx`:
 
 - Open the **Visualization** tab in the left control sidebar.
 - Toggle **Show Forces** and **Show Torques**.
+- Use the same **Scale Mode**, body mass or peak force, length per reference and **Groups** controls as the desktop Visualization tab.
 - Live `GlyphSet` objects stream over WebSocket `/ws/overlays/force-torque/{model_id}` with Three.js rendering via `GlyphLayer.tsx`.
 
 ### 3. Web Video Analyzer (SVG)
@@ -124,6 +128,28 @@ When compositing physical overlays onto calibrated camera footage:
   - `skipped_behind_camera`: Glyphs culled because anchor or tip falls behind the camera plane ($Z_{\text{cam}} \le 0$).
   - `skipped_out_of_frame`: Glyphs entirely outside image boundaries.
   - `unavailable_labels`: Joints or bodies where kinetic data was missing or non-finite.
+
+---
+
+## Ground Reaction Breakdown
+
+The shared core `src/shared/python/biomechanics/ground_reaction.py` (GCV-1, #11707) turns contact wrenches into the complete ground-reaction breakdown. Every engine and surface should display these quantities instead of recomputing them.
+
+| Quantity                        | Label                                   | Notes                                              |
+| :------------------------------ | :-------------------------------------- | :------------------------------------------------- |
+| Foot and net GRF                | `contact:grf_<foot>`, `contact:grf_net` | Force by the ground on the foot, drawn at the CoP  |
+| Centre of pressure (CoP)        | Arrow anchor                            | On the ground plane `z = z_g`; needs `F_z >= 10 N` |
+| Free moment                     | `contact:free_moment_<foot>`, `..._net` | Vertical torque about the CoP                      |
+| Moment about the whole-body CoM | `contact:moment_com_<foot>`, `..._net`  | `M_O - c x F`; the net equals the sum of the feet  |
+
+Behavior to know when reading the overlays:
+
+- Below 10 N vertical force the CoP and free moment are unavailable (not zero); the force arrow remains, anchored at the contact centroid.
+- A foot with no active contact shows nothing and reports zero force.
+- The net free moment is computed from the net wrench about the net CoP. It is generally not the sum of the two foot free moments, because the foot CoPs differ and shear forces at those offset points contribute a vertical moment. The two agree when the CoPs coincide.
+- Engine availability (GCV-2, #11708): MuJoCo, MyoSuite, Drake and OpenSim emit the breakdown from their native contact output (Drake: any body welded to the world is ground; OpenSim: Y-up contact mapped to Z-up). Pinocchio has no contact model, so it emits the breakdown from the caller-supplied shared-contact-law `ContactSample` records and otherwise reports `ground_reaction_unavailable` with a reason in the frame metadata. Simscape reports it unavailable until its channels land (GCV-3, #11709). Club and other non-ground contacts are never counted as ground reaction.
+- A quasi-static check: with prescribed (kinematic) playback, as in the swing videos, contact forces follow the shared contact law and show penetration-driven spikes when a foot lifts and lands; the mean net vertical force over the swing is body weight, the instantaneous value is not.
+- Time series use `GroundReactionSeries` (NaN marks unavailable values, `to_dataframe()` for export).
 
 ---
 

@@ -4,7 +4,7 @@
 
 [Open the Interactive Reference](../../ui/public/capability-atlas/index.html)
 
-**64 launcher tiles · 54 feature contracts.**
+**67 launcher tiles · 59 feature contracts.**
 This catalog follows the existing launcher and parity registries. A registry
 status is not a runtime health check or scientific validation.
 
@@ -195,6 +195,9 @@ flowchart LR
 | Analysis Tools REST endpoints (swing metrics, biomechanics) | gap | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis_tools.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/AnalysisTools.tsx) |
 | ZTCF/ZVCF + induced-acceleration counterfactuals | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/biomechanics/ztcf.py) |
 | Cross-engine robustness dashboard (perturbation/CV) | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/cross_engine_dashboard.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/cross_engine.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CrossEngineDashboard.tsx) |
+| Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/grip_wrench_plots/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/GripWrenchCharts.tsx) |
+| Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/ground_reaction_plots/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/GroundReactionCharts.tsx) |
+| Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/impact_parameters_panel/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/ImpactParametersPanel.tsx) |
 | Static analysis plots (20+ plot types) | parity | [pyqt](https://github.com/D-sorganization/Tools/blob/main/src/shared/python/plot_engine/pyqt6_widget.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/analysis_plots.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/analysis/PlotsSection.tsx) |
 | Exercise + injury-risk biomechanics dashboards | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/exercise_dashboard.py) |
 | Canonical-core estimation/comparison workspaces | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/canonical_core/estimation.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/CanonicalCoreShell.tsx) |
@@ -218,6 +221,8 @@ flowchart LR
 | OpenCap session import action and OpenSim engine handoff | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/engines/physics_engines/opensim/python/opencap_import_action.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/opencap.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/components/opencap/OpenCapImportModal.tsx) |
 | Swing Optimizer (trajectory optimization GUI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/optimization/swing_optimizer.py) |
 | AI Protocol (AIP) structured method dispatch | parity | [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/aip.py) |
+| Golfer body appearance with a visible head, face and neck in every engine render | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_appearance/head.py) |
+| Realistic Club Head And Ball Rendering | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/shared/python/model_appearance/club_head_mesh.py) |
 | Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/settings_dialog.py) |
 | Settings/preferences surface + persistence | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/settings_dialog.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/settings.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Settings.tsx) |
 | Sidekick OS terminal / REPL / Jupyter / skills | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/launcher_sidekick_sidebar.py) |
@@ -236,7 +241,7 @@ flowchart LR
 | Matched Swing Results Browser | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/matched_swing_browser/gui.py) |
 | MATLAB/Simscape model suite | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/launchers/matlab_suite_dialog.py) |
 | Model Explorer (browse/select/build URDF-MJCF) | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/launch_model_explorer.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/ModelExplorer.tsx) |
-| Frankenstein drag-and-drop assembly with typed attachment ports | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/frankenstein_editor/assembly_panel.py) |
+| Frankenstein drag-and-drop assembly with typed attachment ports | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/model_explorer/frankenstein_editor/assembly_panel.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/model_explorer_assembly.py) |
 | Motion Matching tour-average and club-only Excel matching | parity | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/motion_matching/gui.py) |
 | Native per-engine viewer video export (CLI) | exempt | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/native_viewer_export/cli.py) |
 | Historical Player Library And Source Review | gap | [pyqt](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/tools/necromatcher/gui.py) · [api](https://github.com/D-sorganization/UpstreamDrift/blob/main/src/api/routes/necromatcher.py) · [web](https://github.com/D-sorganization/UpstreamDrift/blob/main/ui/src/pages/Necromatcher.tsx) |

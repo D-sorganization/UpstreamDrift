@@ -166,19 +166,42 @@ quantities are omitted (never zero). `grip_wrench.GripAnalysis` carries
 `split_method`, because the left/right split of two rigid welds is set by the
 solver.
 
-| Label                 | Application point | Force half            | Torque half                          |
-| :-------------------- | :---------------- | :-------------------- | :----------------------------------- |
-| `grip:hand_left`      | left grip point   | `F_L`                 | `tau_L` (omitted if not supplied)    |
-| `grip:hand_right`     | right grip point  | `F_R`                 | `tau_R` (omitted if not supplied)    |
-| `grip:net_midpoint`   | grip midpoint     | `R = F_L + F_R`       | none                                 |
-| `grip:couple_midpoint`| grip midpoint     | none                  | `M_M` = contact moment + free torque |
-| `grip:mof_left`       | grip midpoint     | none                  | `(r_L - r_M) x F_L`                  |
-| `grip:mof_right`      | grip midpoint     | none                  | `(r_R - r_M) x F_R`                  |
+| Label                  | Application point | Force half      | Torque half                          |
+| :--------------------- | :---------------- | :-------------- | :----------------------------------- |
+| `grip:hand_left`       | left grip point   | `F_L`           | `tau_L` (omitted if not supplied)    |
+| `grip:hand_right`      | right grip point  | `F_R`           | `tau_R` (omitted if not supplied)    |
+| `grip:net_midpoint`    | grip midpoint     | `R = F_L + F_R` | none                                 |
+| `grip:couple_midpoint` | grip midpoint     | none            | `M_M` = contact moment + free torque |
+| `grip:mof_left`        | grip midpoint     | none            | `(r_L - r_M) x F_L`                  |
+| `grip:mof_right`       | grip midpoint     | none            | `(r_R - r_M) x F_R`                  |
 
 The Simscape channel labels `grip:total_hand`, `grip:lh_mof`, `grip:rh_mof` and
 `grip:midpoint_couple` in `src/engines/simscape/force_channels.py` remain the
 logged-signal forms; their reference points must be confirmed from the model
 before asserting equality with the shared definitions (see GCV-9, #11715).
+GCV-9 added `grip:hand_left` and `grip:hand_right` to the Simscape channels
+from the logged hand-on-club force and torque signals (world frame); absent
+columns are unavailable, never zero. On the R2025b fixture, `analyze_grip` on
+those channels reproduces the logged `EquivalentMidpointCoupleGlobal` to
+3.7e-8 N·m on a 4.7e7 N·m peak and the net hand force exactly. That is
+software-consistency evidence only, because the run diverges after about
+0.26 s (#11778).
+
+**Derived labels on every surface (GCV-10, #11716).**
+`force_overlay/grip_frame.py` is the one place that turns a `GripAnalysis` into
+a `ForceTorqueFrame`:
+
+- A label that cannot be computed is not emitted. It is listed in the frame
+  metadata `grip_unavailable_labels`, with `grip_unavailable_reason` when one
+  is known.
+- `grip_split_method` names the left/right split so that the legend can show
+  it.
+- `grip_midpoint_m` is the focus of the hands close-up camera.
+
+All grip labels share the `GRIP` colour. `palette.label_variant_hex` lightens
+`grip:hand_left` and `grip:mof_left` and darkens `grip:hand_right` and
+`grip:mof_right`, so each hand and its moment of force stay distinguishable
+from the net. Other labels keep the kind colour.
 
 ### 3. Renderer Adapters — `src/shared/python/force_overlay/renderers/`
 
@@ -220,6 +243,27 @@ implements `AxialLoadProvider` through `axial_loads_from_reactions`. It sets
 the engine adapter packages (`src/engines/...`), never in
 `src/shared/python/force_overlay/`. New MuJoCo-specific code goes beside the
 engine, not into `body_part_viz`.
+
+### Contact Label Table (GCV-1, #11707)
+
+Ground-reaction overlays come from one pure-numpy core,
+`src/shared/python/biomechanics/ground_reaction.py`
+(`to_overlay_wrenches`). All are `WrenchKind.CONTACT`, world frame, force
+exerted **by the ground on the foot**. `<foot>` is the sanitised foot label.
+
+| Label                        | Halves | Application point | Meaning                                                  |
+| :--------------------------- | :----- | :---------------- | :------------------------------------------------------- |
+| `contact:grf_<foot>`         | force  | foot CoP          | Resultant foot GRF (contact centroid when CoP is absent) |
+| `contact:grf_net`            | force  | net CoP           | Both-feet resultant GRF (`body="system"`)                |
+| `contact:free_moment_<foot>` | torque | foot CoP          | Vertical free moment `T_z` of the foot about its CoP     |
+| `contact:free_moment_net`    | torque | net CoP           | Free moment of the net wrench about the net CoP          |
+| `contact:moment_com_<foot>`  | torque | whole-body CoM    | `M_O,f - c x F_f`, the foot wrench moment about the CoM  |
+| `contact:moment_com_net`     | torque | whole-body CoM    | Sum of the foot CoM moments (exactly)                    |
+
+The CoP exists only when `F_z >= 10 N` (`COP_MIN_FZ_N`); below that the free
+moment labels are omitted (unavailable, never zero) and the GRF arrow is
+anchored at the loaded-contact centroid. The net free moment is computed from
+the net wrench and is not the sum of the foot free moments.
 
 ### Semantics That Renderers and Reviewers Rely On
 
@@ -320,3 +364,38 @@ Calibrated cameras exhibit radial/tangential distortion ($k_1, k_2, \dots$), whi
   - Avoids non-linear resampling blur and artifacting on rendered 3D meshes and alpha edges.
   - The arrow layer (FTO-8 `opencv_glyphs.py`) and MuJoCo scene glyphs (`add_glyphs_to_scene`) share the identical rectilinear pinhole geometry.
   - Verified by unit tests demonstrating that 3D arrows and mesh attachment points agree within $\le 1.5\text{ px}$.
+
+## Addendum: Arrow Scale Modes, Clamping and Group Toggles (GCV-4, #11710)
+
+The fixed 1 mm per N scale clamped at 0.6 m drew every ground reaction force
+above about 600 N at the same length, so peak loads looked small and identical.
+
+- **Scale modes.** `ForceGlyphStyle.scale_mode` is `fixed` (default,
+  `force_scale_m_per_n`), `body_weight` or `peak`. The last two map
+  `reference_force_n` to `reference_length_m` (default 0.5 m): the caller passes
+  body weight $m g$ for `body_weight` and the series peak for `peak`. Both
+  require `reference_force_n`; an unknown mode raises `ValueError`.
+  The effective scale is $L_\mathrm{ref} / F_\mathrm{ref}$ metres per newton.
+  `kind_scale` multiplies that scale for one `WrenchKind`.
+- **Clamping is surfaced.** `ArrowGlyph.clamped` is true iff the raw length
+  exceeds `max_length_m`. Raising a tiny arrow to `min_length_m` is a floor, not
+  a clamp. `LegendSpec` gains `scale_mode` and `clamped_labels` (optional keys, so
+  older payloads still load). Renderers draw a clamped arrow with a distinct tip:
+  a double chevron in OpenCV and Three.js, a white marker arrow past the tip in
+  the MuJoCo scene; the legend reports the count.
+- **Group toggles.** `ForceGlyphStyle.groups` selects overlay groups by label
+  prefix only, so providers never import this module: `per_foot`
+  (`contact:grf_<foot>`), `net` (`contact:grf_net`), `free_moment`
+  (`contact:free_moment_*`), `moment_about_com` (`contact:moment_com_*`),
+  `contact_points` (any other `contact:` label), and the grip groups
+  `grip_per_hand` (`grip:hand_*`), `grip_net` (`grip:net_midpoint`),
+  `grip_couple` (`grip:couple_midpoint`) and `grip_mof` (`grip:mof_*`).
+  Ungrouped labels are never filtered. `contact_points` and `moment_about_com`
+  are off by default; raw contacts are still shown when the frame carries no
+  aggregated GRF label, so engines that predate the aggregated labels keep their
+  arrows.
+- **Surfaces.** The PyQt Visualization tab, the web `ForceOverlayPanel`, the
+  `/simulation/forces` API and the WebSocket style object expose the same
+  controls. Native export defaults to `body_weight` with the model mass, so one
+  body weight is 0.5 m and a 3 m ceiling avoids silent clamping in a swing.
+- The default shaft radius is now 12 mm, and the OpenCV shaft is 4 px at 1080p.

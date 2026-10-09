@@ -73,14 +73,20 @@ def _evaluate_weld_closure(
     return jac, drift
 
 
-def _solve_kkt_dynamics(
+def _solve_kkt_with_multipliers(
     mass: np.ndarray,
     rhs_force: np.ndarray,
     jac: np.ndarray,
     drift: np.ndarray,
     regularization: float = 1e-6,
-) -> np.ndarray:
-    """Solve M a - J.T lambda = rhs_force, J a = -drift."""
+) -> tuple[np.ndarray, np.ndarray]:
+    """Solve M a - J.T lambda = rhs_force, J a = -drift; return (a, lambda).
+
+    ``lambda`` is the 6-D multiplier of the rigid weld (rows ordered
+    [force; torque], world frame): ``J.T @ lambda`` is the generalised force
+    the closure applies, so it acts as ``+lambda`` on the first closure site's
+    body and ``-lambda`` on the second's.
+    """
     rhs = np.column_stack((rhs_force, jac.T))
     try:
         unconstrained = np.linalg.solve(mass, rhs)
@@ -101,7 +107,18 @@ def _solve_kkt_dynamics(
         multiplier, _, _, _ = np.linalg.lstsq(
             weld_matrix, -drift - jac @ free, rcond=None
         )
-    return free + response @ multiplier
+    return free + response @ multiplier, multiplier
+
+
+def _solve_kkt_dynamics(
+    mass: np.ndarray,
+    rhs_force: np.ndarray,
+    jac: np.ndarray,
+    drift: np.ndarray,
+    regularization: float = 1e-6,
+) -> np.ndarray:
+    """Solve M a - J.T lambda = rhs_force, J a = -drift."""
+    return _solve_kkt_with_multipliers(mass, rhs_force, jac, drift, regularization)[0]
 
 
 def _compute_closure_errors(

@@ -14,6 +14,8 @@ Builds a world-frame (Z-up) :class:`ForceTorqueFrame` from an OpenSim state:
 * ``MUSCLE`` wrenches (FTO-16, #11301): for every enabled ``Muscle`` the tendon
   force along the path's effective end directions, one wrench at the origin and
   one at the insertion (labels ``muscle:<name>:origin`` / ``:insertion``).
+* Ground reaction (GCV-2, #11708): per-foot and net GRF, CoP, free moment and
+  moment about the centre of mass from the foot-body sphere contacts.
 * Axial loads of each joint-child segment from its proximal reaction.
 
 ``grip:*`` wrenches are deliberately absent: the OpenSim grip model still
@@ -40,6 +42,11 @@ from typing import Any
 import numpy as np
 import opensim
 
+from src.shared.python.biomechanics.grip_extraction import unavailable_analysis
+from src.shared.python.biomechanics.ground_reaction_wrenches import (
+    ground_reaction_overlay,
+)
+from src.shared.python.biomechanics.grip_wrench import GripAnalysis
 from src.shared.python.body_part_viz import AxialLoadFrame
 from src.shared.python.body_part_viz.axial_loads import (
     axial_force_from_proximal_reaction,
@@ -167,6 +174,18 @@ class OpenSimForceTorqueSource:
         """The wrapped ``opensim.Model``."""
         return self._model
 
+    #: Why grip wrenches cannot be reported (GCV-8, #11714).
+    GRIP_UNAVAILABLE_REASON = (
+        "OpenSim grip model is a placeholder (#11161, #10286): no constraint "
+        "multipliers or per-hand wrenches are computed"
+    )
+
+    def grip_analysis(self, state: Any = None) -> GripAnalysis:
+        """Explicitly unavailable grip analysis: ``None`` values, never zero."""
+        return unavailable_analysis(
+            self.GRIP_UNAVAILABLE_REASON, metadata={"engine": _ENGINE}
+        )
+
     def sample(self, state: Any) -> ForceTorqueFrame:
         """Return the overlay frame for ``state``.
 
@@ -188,7 +207,9 @@ class OpenSimForceTorqueSource:
         wrenches: list[OverlayWrench] = []
         wrenches.extend(self._reactions(state))
         wrenches.extend(self._actuators(state))
-        wrenches.extend(self._contacts(state))
+        contacts = self._contacts(state)
+        wrenches.extend(contacts)
+        wrenches.extend(self._ground_reaction(contacts, state))
         if self._include_muscles:
             wrenches.extend(self.muscle_wrenches(state))
         axial = self._axial_loads(state)
@@ -404,6 +425,42 @@ class OpenSimForceTorqueSource:
             return None
         return spheres[0], planes[0]
 
+    def validate_ground_contact_paths(self, paths: tuple[str, ...]) -> None:
+        """Require exactly one sphere and ground-fixed plane per replay force.
+
+        This bounded replay policy reports the sphere-side wrench. General
+        overlay rendering may omit unsupported geometry; independent replay
+        must reject it, including extra geometry or a moving other body.
+        """
+        catalog = self._model.getContactGeometrySet()
+        for path in paths:
+            force = self._model.getComponent(path)
+            smooth = opensim.SmoothSphereHalfSpaceForce.safeDownCast(force)
+            if smooth is None:
+                names = _geometry_names(force)
+                if (
+                    len(names) != 2
+                    or len(set(names)) != 2
+                    or not all(catalog.contains(name) for name in names)
+                ):
+                    raise ValueError(
+                        "native contact requires exactly two supported geometries"
+                    )
+            pair = self._contact_geometry(force)
+            if pair is None:
+                raise ValueError(
+                    "native contact requires one sphere and one half-space"
+                )
+            sphere, plane = pair
+            base = plane.getFrame().findBaseFrame()
+            if opensim.Ground.safeDownCast(base) is None:
+                raise ValueError("native replay requires a ground-fixed half-space")
+            if (
+                opensim.Ground.safeDownCast(sphere.getFrame().findBaseFrame())
+                is not None
+            ):
+                raise ValueError("native replay requires a non-ground contact sphere")
+
     @staticmethod
     def _record(force: Any, state: Any, prefix: str) -> np.ndarray | None:
         """Body force then torque (ground frame) from the force's report values."""
@@ -415,6 +472,17 @@ class OpenSimForceTorqueSource:
         start = names.index(key)
         values = force.getRecordValues(state)
         return np.array([values.get(start + i) for i in range(6)])
+
+    def _ground_reaction(
+        self, contacts: list[OverlayWrench], state: Any
+    ) -> list[OverlayWrench]:
+        """Per-foot and net GRF breakdown of the sphere/half-space contacts (GCV-2).
+
+        Every supported contact is a sphere against a half-space, i.e. a ground
+        contact.  The centre of mass comes from ``Model.calcMassCenterPosition``.
+        """
+        com = self._world(_vec3(self._model.calcMassCenterPosition(state)))
+        return list(ground_reaction_overlay(contacts, com, source=_CONTACT_SOURCE))
 
     def _contacts(self, state: Any) -> list[OverlayWrench]:
         wrenches = []

@@ -21,7 +21,14 @@ routine lives here.  A quantity that cannot be computed is ``None`` (NaN in
 :class:`GripSeries`) with a reason string, never zero.
 
 The left/right split of two rigid welds is indeterminate and is set by the
-solver; every result therefore records ``split_method``.
+solver; every result therefore records ``split_method``.  Two compliant grip
+models make the split determinate (issue #11739, OSV-7):
+
+* ``"bushing"``: one six-axis ``BushingForce`` per hand; each hand wrench is the
+  bushing record on the club (frame2 of the force), in the world frame, with
+  the torque taken about that hand's grip point.
+* ``"contact"``: reserved for the distributed-contact grip (summed
+  ``ElasticFoundationForce`` records per hand); not produced yet.
 """
 
 from __future__ import annotations
@@ -43,7 +50,13 @@ from src.shared.python.motion_matching.force_torque import (
 
 Vec3 = tuple[float, float, float]
 SplitMethod = Literal[
-    "constraint_multiplier", "efc_force", "allocation", "logged", "unavailable"
+    "constraint_multiplier",
+    "efc_force",
+    "allocation",
+    "logged",
+    "bushing",
+    "contact",
+    "unavailable",
 ]
 SPLIT_METHODS: tuple[str, ...] = get_args(SplitMethod)
 
@@ -51,6 +64,7 @@ _BODY = "club"
 _ZERO: Vec3 = (0.0, 0.0, 0.0)
 
 __all__ = [
+    "allocate_min_norm",
     "SPLIT_METHODS",
     "GripAnalysis",
     "GripSeries",
@@ -290,6 +304,34 @@ def analyze_grip(
     )
 
 
+def allocate_min_norm(
+    g: GripAnalysis,
+) -> tuple[Vec3, Vec3]:
+    """Minimum-norm force split ``(F_L, F_R)`` reproducing the net wrench.
+
+    Reference allocation for comparing a determinate grip model (``bushing``)
+    with a rigid weld, whose split is solver-defined: with both free torques
+    taken as zero, ``F_L + F_R = R`` and ``h x (F_R - F_L) = M`` (``h`` the
+    half hand separation) are solved with minimum ``|F_L|^2 + |F_R|^2``.  The
+    component of ``M`` along ``h`` cannot be produced by forces and is dropped
+    (it needs a free torque); the axial force is split equally.
+
+    Raises:
+        ValueError: if the net wrench is unavailable or the hands coincide.
+    """
+    if g.left is None or g.right is None or g.net_force_n is None:
+        raise ValueError("net wrench unavailable; cannot allocate")
+    if g.couple_at_midpoint_nm is None:
+        raise ValueError("couple unavailable; cannot allocate")
+    h = (np.array(g.right.point_m) - np.array(g.left.point_m)) / 2.0
+    h2 = float(h @ h)
+    if h2 <= 0.0:
+        raise ValueError("hand grip points coincide")
+    net = np.array(g.net_force_n)
+    diff = np.cross(np.array(g.couple_at_midpoint_nm), h) / h2
+    return _tuple3((net - diff) / 2.0), _tuple3((net + diff) / 2.0)
+
+
 def to_overlay_wrenches(g: GripAnalysis, *, source: str) -> list[OverlayWrench]:
     """Build ADR-0052 ``GRIP`` overlay wrenches; unavailable ones are omitted.
 
@@ -354,6 +396,10 @@ class GripSeries:
     applied_free_torque_nm: np.ndarray
     mof_left_nm: np.ndarray
     mof_right_nm: np.ndarray
+    left_force_n: np.ndarray
+    right_force_n: np.ndarray
+    net_force_local_n: np.ndarray
+    couple_local_nm: np.ndarray
     split_method: tuple[str, ...]
     unavailable_reason: tuple[str, ...]
 
@@ -361,7 +407,7 @@ class GripSeries:
     def from_analyses(
         cls, time_s: Sequence[float], analyses: Sequence[GripAnalysis]
     ) -> GripSeries:
-        """Stack analyses into arrays.
+        """Stack analyses into arrays (per-hand forces, world and club-local).
 
         Raises:
             ValueError: if lengths differ.
@@ -373,6 +419,13 @@ class GripSeries:
             rows = [getattr(a, attr) or _NAN3 for a in analyses]
             return np.array(rows, dtype=np.float64).reshape(len(analyses), 3)
 
+        def hand_force(side: str) -> np.ndarray:
+            rows = []
+            for a in analyses:
+                hand = a.left if side == "L" else a.right
+                rows.append(_NAN3 if hand is None else hand.force_on_club_n)
+            return np.array(rows, dtype=np.float64).reshape(len(analyses), 3)
+
         return cls(
             time_s=np.asarray(time_s, dtype=np.float64),
             midpoint_m=stack("midpoint_m"),
@@ -382,6 +435,10 @@ class GripSeries:
             applied_free_torque_nm=stack("applied_free_torque_nm"),
             mof_left_nm=stack("mof_left_nm"),
             mof_right_nm=stack("mof_right_nm"),
+            left_force_n=hand_force("L"),
+            right_force_n=hand_force("R"),
+            net_force_local_n=stack("net_force_local_n"),
+            couple_local_nm=stack("couple_local_nm"),
             split_method=tuple(a.split_method for a in analyses),
             unavailable_reason=tuple(a.unavailable_reason for a in analyses),
         )
@@ -394,6 +451,8 @@ class GripSeries:
         blocks = {
             "midpoint": (self.midpoint_m, "m"),
             "net_force": (self.net_force_n, "n"),
+            "left_force": (self.left_force_n, "n"),
+            "right_force": (self.right_force_n, "n"),
             "couple": (self.couple_nm, "nm"),
             "contact_moment": (self.contact_force_moment_nm, "nm"),
             "free_torque": (self.applied_free_torque_nm, "nm"),

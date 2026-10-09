@@ -15,6 +15,10 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.model_appearance.club_assembly import (
+    assembly_from_spec,
+    club_body_name,
+)
 from src.shared.python.model_appearance.schema import AppearanceDocument
 from src.shared.python.motion_matching.visual_skeleton import (
     VisualSkeleton,
@@ -61,6 +65,8 @@ def attach_visual_layer(
     offsets: Mapping[str, np.ndarray],
     spec: Mapping[str, Any],
     appearance: AppearanceDocument | None = None,
+    *,
+    with_head: bool = False,
 ) -> dict[str, Any]:
     """Attach the shared skeleton to an MJCF document; returns a summary.
 
@@ -89,11 +95,26 @@ def attach_visual_layer(
         )
 
         appearance_meta = attach_appearance(
-            root, elements, offsets, skeleton, appearance
+            root, elements, offsets, skeleton, appearance, assembly_from_spec(spec)
         )
+    head_doc = appearance or (AppearanceDocument() if with_head else None)
+    if head_doc is not None:  # visible head and neck, visual only (GCV-12)
+        from src.engines.physics_engines.mujoco.python.head_visual import (
+            attach_head_visual,
+        )
+
+        appearance_meta["head"] = attach_head_visual(
+            root, elements, offsets, spec, head_doc
+        )
+    head_meta = appearance_meta.get("head") or {}
+    if appearance is not None and head_meta.get("enabled"):
+        appearance_meta["meshes"] += len(head_meta["parts"])
+    head_body = head_meta["body"] if head_meta.get("source") == "head_body" else None
     for index, capsule in enumerate(
         () if appearance is not None else skeleton.capsules
     ):
+        if capsule.body == head_body:
+            continue  # the head mesh replaces the head capsule
         offset = offsets[capsule.body]
         start = _to_mjcf_frame(offset, np.asarray(capsule.start_m))
         end = _to_mjcf_frame(offset, np.asarray(capsule.end_m))
@@ -107,7 +128,18 @@ def attach_visual_layer(
             rgba=_CAPSULE_RGBA,
             attrib={"class": _VISUAL_CLASS},
         )
+    club = assembly_from_spec(spec)
+    club_body = club_body_name(spec)
+    mesh_club = appearance is None and club is not None and club_body in elements
+    if mesh_club:
+        from src.engines.physics_engines.mujoco.python.appearance_layer import (
+            attach_club_meshes,
+        )
+
+        attach_club_meshes(root, elements, offsets, club_body, club)  # type: ignore[arg-type]
     for index, shape in enumerate(() if appearance is not None else skeleton.shapes):
+        if mesh_club and shape.body == club_body:
+            continue  # the mesh head replaces the ellipsoid hint
         ET.SubElement(
             elements[shape.body],
             "geom",

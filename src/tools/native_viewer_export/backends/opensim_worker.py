@@ -19,10 +19,16 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.opensim.python import club_visuals
 from src.shared.python.force_overlay.glyphs import GlyphSet
-from src.shared.python.golf_view_presets import simbody_camera_transform
+from src.shared.python.golf_view_presets import (
+    VIEWER_FOV_Y_RAD,
+    simbody_camera_transform,
+)
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._scene import (
     fit_to_size,
     y_axis_rotation,
@@ -31,7 +37,7 @@ from src.tools.native_viewer_export.backends._worker_job import WorkerJob
 from src.tools.native_viewer_export.overlay2d import draw_glyphs_rgb, pinhole_for_view
 
 UI_STRIP_PX = 40
-FOV_Y_RAD = 0.7
+FOV_Y_RAD = VIEWER_FOV_Y_RAD
 SETTLE_S = 0.6
 _GREY = (0.75, 0.78, 0.85)
 _SHAPE_GREY = (0.7, 0.72, 0.8)
@@ -103,6 +109,7 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
         export_full_body_osim,
     )
 
+    club_visuals.register_geometry_path()
     skeleton = derive_visual_skeleton(json.loads(spec_bytes))
     xml, _ = export_full_body_osim(spec_bytes)
     with tempfile.TemporaryDirectory() as tmp:
@@ -120,7 +127,25 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     model.finalizeFromProperties()
     bodies = model.getBodySet()
     n = 0
+    # The shared visual head replaces the head capsule (visual only).
+    head_dir = tempfile.mkdtemp(prefix="ud_head_")
+    heads = head_mesh_files(json.loads(spec_bytes), Path(head_dir))
+    head_body = heads[0].body if heads else None
+    for head in heads:
+        body = bodies.get(clean_osim_body_name(head.body))
+        _attach(
+            osim,
+            body,
+            np.eye(3),
+            (0.0, 0.0, 0.0),
+            osim.Mesh(str(head.path)),
+            head.rgba[:3],
+            n,
+        )
+        n += 1
     for cap in skeleton.capsules:
+        if cap.body == head_body:
+            continue
         body = bodies.get(clean_osim_body_name(cap.body))
         a, b = np.array(cap.start_m), np.array(cap.end_m)
         rot = y_axis_rotation(b - a)
@@ -137,7 +162,10 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
             n += 1
             _attach(osim, body, np.eye(3), end, osim.Sphere(cap.radius_m), _GREY, n)
         n += 1
+    club = club_parts(json.loads(spec_bytes))
     for shp in skeleton.shapes:
+        if club is not None and shp.body == club[0]:
+            continue  # the exported model carries the club meshes instead
         body = bodies.get(clean_osim_body_name(shp.body))
         half = [float(v) for v in shp.half_size_m]
         geom = (
@@ -150,9 +178,11 @@ def build_model(osim: Any, spec_bytes: bytes) -> tuple[Any, float]:
     return model, float(skeleton.ground.height_m)
 
 
-def set_camera(osim: Any, viz: Any, view: str, job: WorkerJob) -> None:
-    """Point the simbody camera for a golf view preset."""
-    rows, pos = simbody_camera_transform(view, job.lookat_m, job.distance_m)
+def set_camera(
+    osim: Any, viz: Any, view: str, job: WorkerJob, lookat_m: list[float]
+) -> None:
+    """Point the simbody camera for a golf view preset at ``lookat_m``."""
+    rows, pos = simbody_camera_transform(view, lookat_m, job.distance_m)
     mat = osim.Mat33()
     for i in range(3):
         for j in range(3):
@@ -185,14 +215,15 @@ def main(job_path: str) -> None:
             coords.get(name).setValue(state, float(value), False)
         model.realizePosition(state)
         for view in job.views:
-            set_camera(osim, viz, view, job)
+            look = job.lookat_for(view, pos)
+            set_camera(osim, viz, view, job, look)
             viz.drawFrameNow(state)
             time.sleep(SETTLE_S)
             window = grab_window()
             if glyph_sets is not None:
                 cam = pinhole_for_view(
                     view,
-                    job.lookat_m,
+                    look,
                     job.distance_m,
                     FOV_Y_RAD,
                     (window.shape[1], window.shape[0]),

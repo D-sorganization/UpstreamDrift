@@ -909,3 +909,73 @@ class EngineLoadResponse(BaseModel):
         default_factory=list, description="Engine capability tags"
     )
     message: str | None = Field(None, description="Human-readable status message")
+
+
+class ImpactParameterRow(BaseModel):
+    """One launch-monitor row; ``value`` is null when unavailable (GCV-17)."""
+
+    key: str
+    label: str
+    unit: str
+    value: float | None = None
+    reason: str | None = Field(None, description="Why the value is unavailable")
+    note: str | None = None
+
+
+class ImpactParametersResponse(BaseModel):
+    """Target-relative impact parameters card for a run (GCV-17, #11723)."""
+
+    run_id: str | None = None
+    engine: str | None = None
+    available: bool = Field(..., description="False when no card can be computed")
+    reason: str | None = Field(None, description="Why the card is unavailable")
+    units: str = "mph"
+    impact_time_s: float | None = None
+    impact_time_source: str | None = None
+    frame: dict[str, Any] = Field(default_factory=dict)
+    rows: list[ImpactParameterRow] = Field(default_factory=list)
+    d_plane: dict[str, float | None] = Field(default_factory=dict)
+
+
+class GripWrenchResponse(BaseModel):
+    """Per-hand grip force, net force and midpoint couple time series (GCV-10, #11716)."""
+
+    run_id: str | None = None
+    engine: str | None = None
+    available: bool = Field(..., description="False when no grip data exists")
+    reason: str | None = Field(None, description="Why the series is unavailable")
+    time_s: list[float] = Field(default_factory=list)
+    split_method: str = Field(
+        "unavailable", description="How the left/right split was obtained"
+    )
+    split_method_by_sample: list[str] = Field(default_factory=list)
+    unavailable_reasons: list[str] = Field(default_factory=list)
+    events: dict[str, float] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
+    labels: dict[str, str] = Field(default_factory=dict)
+    traces: dict[str, dict[str, list[float | None]]] = Field(
+        default_factory=dict,
+        description="Per-trace x/y/z/magnitude lists; null marks unavailable samples",
+    )
+
+
+class GroundReactionResponse(BaseModel):
+    """Per-foot and net ground reaction time series on the body (GCV-5, #11711)."""
+
+    run_id: str | None = None
+    engine: str | None = None
+    available: bool = Field(..., description="False when no ground contact exists")
+    reason: str | None = Field(None, description="Why the series is unavailable")
+    time_s: list[float] = Field(default_factory=list)
+    feet: list[str] = Field(default_factory=list)
+    events: dict[str, float] = Field(default_factory=dict)
+    units: dict[str, str] = Field(default_factory=dict)
+    labels: dict[str, str] = Field(default_factory=dict)
+    load_share: dict[str, list[float | None]] = Field(
+        default_factory=dict,
+        description="Each foot's share of the summed vertical force; null below 10 N",
+    )
+    traces: dict[str, dict[str, list[float | None]]] = Field(
+        default_factory=dict,
+        description="Per-trace x/y/z/magnitude lists; null marks unavailable samples",
+    )

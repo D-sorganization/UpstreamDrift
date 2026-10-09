@@ -92,6 +92,7 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_torque_vectors = False
         self.force_scale = 0.1
         self.torque_scale = 0.1
+        self.force_style_options: dict[str, Any] | None = None
 
         self.show_induced_vectors = False
         self.show_cf_vectors = False
@@ -684,6 +685,13 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.show_force_vectors = enabled
         if scale is not None:
             self.force_scale = scale
+
+    def set_force_style_options(self, options: dict[str, Any] | None) -> None:
+        """Set GRF scale mode, reference and group toggles (GCV-4, #11710).
+
+        ``None`` restores the slider-driven fixed scale.
+        """
+        self.force_style_options = None if options is None else dict(options)
 
     def set_ellipsoid_visualization(
         self, mobility_enabled: bool, force_enabled: bool

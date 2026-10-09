@@ -189,6 +189,8 @@ def test_split_method_validated_and_recorded():
         "efc_force",
         "allocation",
         "logged",
+        "bushing",
+        "contact",
         "unavailable",
     }
     g = _analyze(None, None, split_method="efc_force", metadata={"solver": "x"})
@@ -288,3 +290,20 @@ def test_grip_analysis_is_frozen():
 def test_net_wrench_at_raises_when_unavailable():
     with pytest.raises(ValueError, match="unavailable"):
         _analyze(None, None).net_wrench_at((0, 0, 0))
+
+
+def test_allocate_min_norm_reproduces_net_wrench():
+    from src.shared.python.biomechanics.grip_wrench import allocate_min_norm
+
+    lw = _hand("L", RL, (3.0, 4.0, -9.0))
+    rw = _hand("R", RR, (-2.0, 1.0, 12.0))
+    g = _analyze(lw, rw)
+    f_l, f_r = allocate_min_norm(g)
+    assert np.allclose(np.add(f_l, f_r), g.net_force_n)
+    h = (np.array(RR) - np.array(RL)) / 2.0
+    moment = np.cross(-h, f_l) + np.cross(h, f_r)
+    couple_perp = np.array(g.couple_at_midpoint_nm)
+    couple_perp = couple_perp - h * (h @ couple_perp) / (h @ h)
+    assert np.allclose(moment, couple_perp)
+    with pytest.raises(ValueError):
+        allocate_min_norm(_analyze(None, None))

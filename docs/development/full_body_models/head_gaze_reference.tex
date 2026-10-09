@@ -1,0 +1,31 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\title{Head Gaze Stabilisation Reference}
+\date{OSV-3 (\#11729)}
+\begin{document}
+\maketitle
+\section{Definitions}
+Eye point $e = R_{h} o_{\mathrm{eye}} + t_{h}$ with $o_{\mathrm{eye}} = (0.09, 0, 0.128)$~m
+(head frame: $+x$ anterior, $+y$ left, $+z$ up, origin at the neck joint).
+Gaze direction $g = R_{h} a$, with $a$ the head gaze axis calibrated at address as the
+head-frame direction of the line of sight to the ball. Gaze error
+$\theta_{\mathrm{gaze}} = \angle(g,\, b - e)$.
+Ball at address $b = c + r\hat n$ with $r = 0.021335$~m, lowered so that $b_z = z_{\mathrm{ground}} + r$.
+\section{Schedule}
+The target direction is $(b-e)/\lVert b-e\rVert$ until $t_i + t_{\mathrm{hold}}$
+($t_{\mathrm{hold}} = 0.03$~s), then a great-circle blend to the target-line direction
+$\hat x_t$ with fraction $s(u) = 10u^3 - 15u^4 + 6u^5$,
+$u = (t - t_i - t_{\mathrm{hold}})/T_{\mathrm{rel}}$, $T_{\mathrm{rel}} = 0.35$~s.
+The blend is $C^2$ at both ends. The impact time $t_i$ is the lowest clubhead point within
+0.05~s of the peak clubhead speed.
+\section{Neck Inverse Kinematics}
+$\min_q \lVert R_{p} R_x(q_1) R_y(q_2) R_z(q_3)\, a - d \rVert^2 + \epsilon \lVert q - q_0 \rVert^2$
+subject to the neck ranges $\pm 45^\circ, \pm 60^\circ, \pm 80^\circ$; clamping is reported.
+\section{Soft Residual}
+Axis row $\sqrt{w}\,(R_{h} a - d_k)$ per frame in the matching inverse kinematics.
+Weight $w = 0$ (default) is marker faithful; $w > 0$ is a prior, never measured data.
+\section{Results and Limitations}
+See \texttt{HEAD\_GAZE\_REFERENCE.md} for the weight sweep on the capture-A driver
+(marker RMS 28.0 to 33.8~mm; $\theta_{\mathrm{gaze}}$ RMS 21.3$^\circ$ to 0.8$^\circ$ at $w = 10$),
+the failed first attempt with the nominal $+x$ axis, and the open items.
+\end{document}

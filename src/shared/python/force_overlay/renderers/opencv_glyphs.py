@@ -20,6 +20,7 @@ from src.shared.python.force_overlay.glyphs import (
     GlyphSet,
     LegendSpec,
     TorqueArcGlyph,
+    clamped_tip_shift,
 )
 from src.shared.python.force_overlay.palette import FORCE_KIND_PALETTE
 
@@ -145,7 +146,7 @@ class VideoGlyphStyle:
     font_face: int = cv2.FONT_HERSHEY_DUPLEX
 
     def resolve_line_px(self, h: int) -> int:
-        return self.line_px or max(1, int(round(2.5 * h / 1080.0)))
+        return self.line_px or max(2, int(round(4.0 * h / 1080.0)))
 
     def resolve_halo_px(self, line_px: int) -> int:
         return self.halo_px or line_px + 2
@@ -243,6 +244,22 @@ def _draw_projected_item(
     return any_drawn
 
 
+def clamped_chevron_poly(
+    head_poly: Sequence[tuple[float, float]] | np.ndarray,
+) -> np.ndarray:
+    """Second arrowhead trailing the first, marking an arrow clamped at max length.
+
+    Postcondition: same shape as ``head_poly`` (tip, base+, base-), shifted back
+    along the shaft by 60 % of the head length so the pair reads as a double
+    chevron.
+    """
+    poly = np.asarray(head_poly, dtype=float)
+    tip, b1, b2 = poly[0], poly[1], poly[2]
+    base_center = tuple(0.5 * (b1 + b2))
+    shift = np.array(clamped_tip_shift(tuple(tip), base_center))
+    return poly + shift
+
+
 def draw_legend_box(
     frame: np.ndarray,
     legend: LegendSpec,
@@ -262,9 +279,16 @@ def draw_legend_box(
     if legend.engine:
         lines.append((f"Engine: {legend.engine}{src}", None))
     if legend.force_reference_n is not None:
-        lines.append((f"Force ref: {legend.force_reference_n:.1f} N", None))
+        unit = " (1 BW)" if legend.scale_mode == "body_weight" else ""
+        lines.append((f"Force ref: {legend.force_reference_n:.1f} N{unit}", None))
     if legend.torque_reference_nm is not None:
         lines.append((f"Torque ref: {legend.torque_reference_nm:.1f} N*m", None))
+    if legend.clamped_labels:
+        lines.append(
+            (f"Clamped (double tip): {len(legend.clamped_labels)}", (120, 200, 255))
+        )
+    if legend.grip_split_method is not None:
+        lines.append((f"Grip split: {legend.grip_split_method}", (233, 180, 86)))
     if legend.unavailable_labels:
         lines.append(
             (f"Unavailable: {', '.join(legend.unavailable_labels)}", (100, 100, 255))
@@ -356,6 +380,9 @@ def draw_glyphs_on_frame(
             bgr,
             ctx,
         )
+        if arrow.clamped:
+            chevron = np.rint(clamped_chevron_poly(arrow.head_poly_px)).astype(np.int32)
+            ctx.heads.append((chevron, bgr))
 
     for arc in projected.torque_arcs:
         bgr = _rgba_to_bgr(arc.rgba)

@@ -7,13 +7,16 @@ Generated from [`src/config/feature_parity.json`](../../src/config/feature_parit
 The PyQt6 desktop app is the canonical model; the web app must match
 (epic #7462, registry mechanism #7445).
 
-**Summary:** 24 parity · 15 gap · 15 exempt (12 pending decision in #7460).
+**Summary:** 27 parity · 16 gap · 16 exempt (12 pending decision in #7460).
 
 | Feature | Status | PyQt6 | API | Web | Tracking |
 | --- | --- | --- | --- | --- | --- |
 | `analysis.analysis_tools_api`<br>Analysis Tools REST endpoints (swing metrics, biomechanics) | 🔴 gap | — | `src/api/routes/analysis_tools.py` | `ui/src/pages/AnalysisTools.tsx` | #7448 |
 | `analysis.counterfactuals`<br>ZTCF/ZVCF + induced-acceleration counterfactuals | 🔴 gap | `src/shared/python/biomechanics/ztcf.py` | — | — | #7450 |
 | `analysis.cross_engine_robustness`<br>Cross-engine robustness dashboard (perturbation/CV) | ✅ parity | `src/launchers/cross_engine_dashboard.py` | `src/api/routes/cross_engine.py` | `ui/src/pages/CrossEngineDashboard.tsx` | — |
+| `analysis.grip_wrench`<br>Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots | ✅ parity | `src/tools/grip_wrench_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GripWrenchCharts.tsx` | — |
+| `analysis.ground_reaction`<br>Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM | ✅ parity | `src/tools/ground_reaction_plots/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/GroundReactionCharts.tsx` | — |
+| `analysis.impact_parameters`<br>Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line | ✅ parity | `src/tools/impact_parameters_panel/gui.py` | `src/api/routes/analysis.py` | `ui/src/components/analysis/ImpactParametersPanel.tsx` | — |
 | `analysis.static_plots`<br>Static analysis plots (20+ plot types) | ✅ parity | `vendor/ud-tools/src/shared/python/plot_engine/pyqt6_widget.py` | `src/api/routes/analysis_plots.py` | `ui/src/components/analysis/PlotsSection.tsx` | — |
 | `biomech.exercise_injury_dashboards`<br>Exercise + injury-risk biomechanics dashboards | ⚪ exempt | `src/launchers/exercise_dashboard.py` | — | — | Desktop biomechanics dashboards; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `canonical_core.workspaces`<br>Canonical-core estimation/comparison workspaces | ✅ parity | `src/tools/canonical_core/estimation.py` | — | `ui/src/pages/CanonicalCoreShell.tsx` | — |
@@ -37,6 +40,8 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `opencap.session_import`<br>OpenCap session import action and OpenSim engine handoff | ✅ parity | `src/engines/physics_engines/opensim/python/opencap_import_action.py` | `src/api/routes/opencap.py` | `ui/src/components/opencap/OpenCapImportModal.tsx` | — |
 | `optimization.swing_optimizer`<br>Swing Optimizer (trajectory optimization GUI) | ⚪ exempt | `src/shared/python/optimization/swing_optimizer.py` | — | — | Desktop optimization GUI; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `platform.aip_protocol`<br>AI Protocol (AIP) structured method dispatch | ✅ parity | — | `src/api/routes/aip.py` | — | — |
+| `render.body_appearance`<br>Golfer body appearance with a visible head, face and neck in every engine render | ⚪ exempt | `src/shared/python/model_appearance/head.py` | — | — | Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706). |
+| `render.club_head_and_ball`<br>Realistic Club Head And Ball Rendering | 🔴 gap | `src/shared/python/model_appearance/club_head_mesh.py` | — | — | #11717 |
 | `settings.desktop_only_tabs`<br>Desktop-only settings tabs (MCP Servers, Processes, Startup/Docker, Layout, Performance) | ⚪ exempt | `src/launchers/settings_dialog.py` | — | — | Desktop-process management (MCP server processes, Docker startup, window layout, app zoom of native widgets) has no browser equivalent; awaiting the desktop-only exemption decision in issue #7460. — **pending decision (#7460)** |
 | `settings.preferences`<br>Settings/preferences surface + persistence | ✅ parity | `src/launchers/settings_dialog.py` | `src/api/routes/settings.py` | `ui/src/pages/Settings.tsx` | — |
 | `sidekick.terminal_repl_jupyter_skills`<br>Sidekick OS terminal / REPL / Jupyter / skills | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | — | — | Desktop-native OS integration (terminal/REPL/Jupyter/skills) per ADR-0028; final disposition pending #7460. — **pending decision (#7460)** |
@@ -55,7 +60,7 @@ The PyQt6 desktop app is the canonical model; the web app must match
 | `tools.matched_swing_browser`<br>Matched Swing Results Browser | 🔴 gap | `src/tools/matched_swing_browser/gui.py` | — | — | #10353 |
 | `tools.matlab_suite`<br>MATLAB/Simscape model suite | ⚪ exempt | `src/launchers/matlab_suite_dialog.py` | — | — | Requires a local MATLAB installation; desktop-only candidate pending #7460. — **pending decision (#7460)** |
 | `tools.model_explorer`<br>Model Explorer (browse/select/build URDF-MJCF) | 🔴 gap | `src/tools/model_explorer/launch_model_explorer.py` | `src/api/routes/model_explorer.py` | `ui/src/pages/ModelExplorer.tsx` | #7448 |
-| `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | — | — | #11661 |
+| `tools.model_explorer.frankenstein_assembly`<br>Frankenstein drag-and-drop assembly with typed attachment ports | 🔴 gap | `src/tools/model_explorer/frankenstein_editor/assembly_panel.py` | `src/api/routes/model_explorer_assembly.py` | — | #11661 |
 | `tools.motion_matching`<br>Motion Matching tour-average and club-only Excel matching | ✅ parity | `src/tools/motion_matching/gui.py` | — | — | — |
 | `tools.native_viewer_export`<br>Native per-engine viewer video export (CLI) | ⚪ exempt | `src/tools/native_viewer_export/cli.py` | — | — | Headless command-line batch tool that drives each engine's own desktop viewer (MeshCat via headless Chromium, simbody-visualizer under xvfb, MuJoCo EGL); the artefacts are mp4 files, so there is no interactive browser equivalent (epic #11673). |
 | `tools.necromatcher`<br>Historical Player Library And Source Review | 🔴 gap | `src/tools/necromatcher/gui.py` | `src/api/routes/necromatcher.py` | `ui/src/pages/Necromatcher.tsx` | #11234 |
@@ -91,6 +96,9 @@ Tiles from `src/config/launcher_manifest.json` mapped to registry entries:
 | `force_overlays` | `simulation.controls_wiring` |
 | `golf_simulation_suite` | `simulation.golf_suite_batch` |
 | `golf_simulator` | `tools.golf_simulator` |
+| `grip_wrench_plots` | `analysis.grip_wrench` |
+| `ground_reaction_plots` | `analysis.ground_reaction` |
+| `impact_parameters` | `analysis.impact_parameters` |
 | `injury_analysis` | `biomech.exercise_injury_dashboards` |
 | `launch_monitor_analytics` | `tools.launch_monitor_analytics` |
 | `matched_swing_browser` | `tools.matched_swing_browser` |

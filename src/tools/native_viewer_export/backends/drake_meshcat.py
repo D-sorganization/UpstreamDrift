@@ -7,9 +7,11 @@ publishes it and headless Chromium captures each requested view.
 
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from importlib.util import find_spec
 import json
+from pathlib import Path
+import tempfile
 from typing import Any
 
 import numpy as np
@@ -19,6 +21,8 @@ from src.shared.python.force_overlay.renderers.meshcat_glyphs import (
 )
 from src.shared.python.golf_view_presets import drake_meshcat_camera_pose
 from src.shared.python.motion_matching.visual_skeleton import derive_visual_skeleton
+from src.tools.native_viewer_export.backends._club import club_parts, write_obj
+from src.tools.native_viewer_export.backends._head import head_mesh_files
 from src.tools.native_viewer_export.backends._meshcat_page import (
     MeshcatPage,
     playwright_unavailable_reason,
@@ -30,6 +34,7 @@ from src.tools.native_viewer_export.core import (
     Image8,
     OverlayFeed,
     SwingInput,
+    view_lookats,
 )
 
 _CAPSULE_RGBA = (0.75, 0.78, 0.85, 1.0)
@@ -47,11 +52,49 @@ class DrakeMeshcatBackend:
             return "pydrake is not installed"
         return playwright_unavailable_reason()
 
+    def _register_meshes(
+        self, plant: Any, inst: Any, links: Mapping[str, str], spec: Any
+    ) -> tuple[str | None, str | None]:
+        """Register the shared head and club meshes; return their spec bodies.
+
+        The head mesh replaces the head capsule and the club mesh replaces the
+        club ellipsoid hint (visual only). ``None`` means no mesh was drawn.
+        """
+        from pydrake.geometry import Mesh
+        from pydrake.math import RigidTransform
+
+        self._head_dir = tempfile.mkdtemp(prefix="ud_head_")
+        heads = head_mesh_files(spec, Path(self._head_dir))
+        for head in heads:
+            plant.RegisterVisualGeometry(
+                plant.GetBodyByName(links[head.body], inst),
+                RigidTransform(),  # type: ignore[arg-type]
+                Mesh(head.path),
+                f"head_{head.name}",
+                np.array(head.rgba),
+            )
+        club = club_parts(spec)
+        if club is None:
+            return (heads[0].body if heads else None), None
+        club_body, parts = club
+        self._mesh_dir = tempfile.TemporaryDirectory(prefix="club_meshes_")
+        for part in parts:
+            path = write_obj(part.mesh, self._mesh_dir.name, part.name)
+            plant.RegisterVisualGeometry(
+                plant.GetBodyByName(links[club_body], inst),
+                RigidTransform(),
+                Mesh(Path(path)),
+                part.name,
+                np.array(part.rgba),
+            )
+        return (heads[0].body if heads else None), club_body
+
     def _build(self, swing: SwingInput) -> tuple[Any, Any, Any, Any, Any, list[int]]:
         from pydrake.geometry import (
             Box,
             Capsule,
             Ellipsoid,
+            Mesh,
             Meshcat,
             MeshcatVisualizer,
             MeshcatVisualizerParams,
@@ -74,7 +117,12 @@ class DrakeMeshcatBackend:
             plant.world_frame(), plant.GetBodyByName(links["world"], inst).body_frame()
         )
         n = 0
+        head_body, club_body = self._register_meshes(
+            plant, inst, links, json.loads(spec_bytes)
+        )
         for cap in skeleton.capsules:
+            if cap.body == head_body:
+                continue
             rot, centre, length = z_axis_frame(cap.start_m, cap.end_m)
             plant.RegisterVisualGeometry(
                 plant.GetBodyByName(links[cap.body], inst),
@@ -85,6 +133,8 @@ class DrakeMeshcatBackend:
             )
             n += 1
         for shp in skeleton.shapes:
+            if shp.body == club_body:
+                continue  # the mesh head replaces the ellipsoid hint
             shape = (
                 Ellipsoid(*shp.half_size_m)
                 if shp.kind == "ellipsoid"
@@ -155,16 +205,17 @@ class DrakeMeshcatBackend:
             else None
         )
         with MeshcatPage(meshcat.web_url(), settings.width, settings.height) as page:
-            for k in indices:
+            looks = view_lookats(settings, indices, overlay)
+            for pos, k in enumerate(indices):
                 set_state(k)
                 if glyphs is not None and overlay is not None:
                     glyphs.update(overlay.glyphs_at(k))
                 tiles: dict[str, Image8] = {}
                 for view in settings.views:
-                    pos, target = drake_meshcat_camera_pose(
-                        view, settings.lookat_m, settings.distance_m
+                    eye, target = drake_meshcat_camera_pose(
+                        view, looks[view][pos], settings.distance_m
                     )
-                    meshcat.SetCameraPose(list(pos), list(target))
+                    meshcat.SetCameraPose(list(eye), list(target))
                     page.settle()
                     tiles[view] = page.screenshot()
                 yield tiles

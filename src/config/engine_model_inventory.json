@@ -1,6 +1,6 @@
 {
-  "schema_version": "engine-model-inventory/1.0.0",
-  "description": "MS-102 (#10376) engine/model inventory derived from models.yaml, engine_capability_matrix.json, and ENGINE_TIERS. Not a competing catalog.",
+  "schema_version": "engine-model-inventory/1.1.0",
+  "description": "MS-102 (#10376) package authority with F01 (#11785) variant declarations; derived from models.yaml, engine_capability_matrix.json, and ENGINE_TIERS.",
   "authorities": {
     "models_yaml": "src/config/models.yaml",
     "engine_capability_matrix": "src/config/engine_capability_matrix.json",
@@ -347,7 +347,7 @@
       "source_spec": "docs/development/full_body_models/full_body_spec_anthro_driver.json",
       "source_sha256": "a376e6889b2b9d3b05a0b2f110f386c83f17f4ec0c94c9f4b9289a887ba4643e",
       "generated_model": "src/engines/physics_engines/opensim/models/generated/full_body_anthro_driver.osim",
-      "generated_sha256": "6fa980a3ccda49b1051c55fb025da596c9a7b66e1687a4b3254df19d49536a21",
+      "generated_sha256": "1c6a938da4bc5edd70728e1458125afb9e2a3effaf4c2a3dcb73b57f3da6d05b",
       "generator": "src.engines.physics_engines.opensim.python.full_body_osim",
       "generator_version": "native-full-body-osim-v1",
       "units": "SI",
@@ -382,7 +382,7 @@
       "source_spec": "docs/development/full_body_models/full_body_spec_anthro_iron7.json",
       "source_sha256": "b75a9c056633c41cc400fe1a0b64253669028abb8edb27d6fe26735b10659c5a",
       "generated_model": "src/engines/physics_engines/opensim/models/generated/full_body_anthro_iron7.osim",
-      "generated_sha256": "3e7be1486821578efd6474916f21a25e794c353bf698b61b5cac28d725778688",
+      "generated_sha256": "f8e20067fbf28eb8772950b5533f879a430d2e68f3a222d367494ff94e962597",
       "generator": "src.engines.physics_engines.opensim.python.full_body_osim",
       "generator_version": "native-full-body-osim-v1",
       "units": "SI",
@@ -428,6 +428,22 @@
       "grip_config": { "closure": "weld", "joint": "hand_r_to_club" },
       "contact_config": null,
       "actuation": { "type": "coordinate_actuator" },
+      "matching_variants": [
+        {
+          "id": "golf_humanoid_torque_variant",
+          "drive_mode": "torque",
+          "factory": "src.engines.physics_engines.opensim.python.tour_matching.model_variants:create_torque_model_variant",
+          "support": "supported",
+          "scope_note": "Coordinate-actuator factory; native own-contact swing replay is unqualified."
+        },
+        {
+          "id": "golf_humanoid_muscle_variant",
+          "drive_mode": "muscle_excitation",
+          "factory": "src.engines.physics_engines.opensim.python.tour_matching.model_variants:create_muscle_model_variant",
+          "support": "supported",
+          "scope_note": "Eight-muscle factory has activation/fiber states; full-swing physiological qualification is absent."
+        }
+      ],
       "required_assets": [],
       "license_terms": "Derived from opensim-org/opensim-models Rajagopal OpenSense; see opensim/models/README.md.",
       "launcher_tile_ids": ["opensim_golf"],

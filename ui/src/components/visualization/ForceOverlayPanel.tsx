@@ -6,11 +6,23 @@
  * falling back to REST polling when disconnected.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import type { ForceOverlayConfig } from './ForceOverlay';
-import type { GlyphSetV1 } from '@/types/glyphs';
-import { apiFetch } from '@/api/fetch';
-import { usePolling } from '@/hooks/usePolling';
+import { useState, useCallback, useEffect, useMemo } from "react";
+import type { ForceOverlayConfig } from "./ForceOverlay";
+import {
+  ALL_GLYPH_GROUPS,
+  DEFAULT_GLYPH_GROUPS,
+  GLYPH_GROUP_LABELS,
+  SCALE_MODE_LABELS,
+  type GlyphGroup,
+  type GlyphSetV1,
+  type ScaleMode,
+} from "@/types/glyphs";
+import {
+  appendStyleParams,
+  styleOptionsFromControls,
+} from "./forceStyleParams";
+import { apiFetch } from "@/api/fetch";
+import { usePolling } from "@/hooks/usePolling";
 
 export interface ForceOverlayPanelProps {
   /** Primary callback when serialized GlyphSet updates (FTO-23) */
@@ -31,21 +43,26 @@ export const FORCE_POLL_INTERVAL_MS = 500;
 
 const DEFAULT_CONFIG: ForceOverlayConfig = {
   enabled: false,
-  forceTypes: ['applied', 'contact', 'joint_reaction'],
+  forceTypes: ["applied", "contact", "joint_reaction"],
   scaleFactor: 0.01,
   colorByMagnitude: true,
   showLabels: false,
   bodyFilter: null,
+  scaleMode: "fixed",
+  bodyMassKg: 75,
+  peakForceN: 2000,
+  referenceLengthM: 0.5,
+  groups: DEFAULT_GLYPH_GROUPS,
 };
 
 const FORCE_TYPE_OPTIONS = [
-  { value: 'applied', label: 'Applied Torques', color: 'text-orange-400' },
-  { value: 'joint_reaction', label: 'Joint Reactions', color: 'text-blue-400' },
-  { value: 'contact', label: 'Contact Forces', color: 'text-emerald-400' },
-  { value: 'gravity', label: 'Gravity', color: 'text-amber-500' },
-  { value: 'muscle', label: 'Muscle Forces', color: 'text-pink-400' },
-  { value: 'grip', label: 'Grip Forces', color: 'text-yellow-400' },
-  { value: 'external', label: 'External Forces', color: 'text-sky-400' },
+  { value: "applied", label: "Applied Torques", color: "text-orange-400" },
+  { value: "joint_reaction", label: "Joint Reactions", color: "text-blue-400" },
+  { value: "contact", label: "Contact Forces", color: "text-emerald-400" },
+  { value: "gravity", label: "Gravity", color: "text-amber-500" },
+  { value: "muscle", label: "Muscle Forces", color: "text-pink-400" },
+  { value: "grip", label: "Grip Forces", color: "text-yellow-400" },
+  { value: "external", label: "External Forces", color: "text-sky-400" },
 ];
 
 export function ForceOverlayPanel({
@@ -78,7 +95,7 @@ export function ForceOverlayPanel({
     }
 
     const glyphs = socketForceOverlay as GlyphSetV1;
-    if (glyphs.schema_version === 'glyph-set-v1') {
+    if (glyphs.schema_version === "glyph-set-v1") {
       onGlyphsChange?.(glyphs);
     }
   }, [config.enabled, isConnected, socketForceOverlay, onGlyphsChange]);
@@ -89,7 +106,7 @@ export function ForceOverlayPanel({
       return { force: 0, torque: 0 };
     }
     const glyphs = socketForceOverlay as GlyphSetV1;
-    if (glyphs.schema_version !== 'glyph-set-v1') {
+    if (glyphs.schema_version !== "glyph-set-v1") {
       return { force: 0, torque: 0 };
     }
     let fSum = 0;
@@ -126,14 +143,15 @@ export function ForceOverlayPanel({
 
     try {
       const params = new URLSearchParams({
-        force_types: config.forceTypes.join(','),
+        force_types: config.forceTypes.join(","),
         color_by_magnitude: String(config.colorByMagnitude),
         show_labels: String(config.showLabels),
         scale_factor: String(config.scaleFactor),
       });
       if (config.bodyFilter) {
-        params.set('body_filter', config.bodyFilter.join(','));
+        params.set("body_filter", config.bodyFilter.join(","));
       }
+      appendStyleParams(params, styleOptionsFromControls(config));
 
       const data = await apiFetch<{
         glyphs?: GlyphSetV1 | null;
@@ -141,7 +159,7 @@ export function ForceOverlayPanel({
         total_torque_magnitude?: number;
       }>(`/api/simulation/forces?${params}`);
 
-      if (data.glyphs && data.glyphs.schema_version === 'glyph-set-v1') {
+      if (data.glyphs && data.glyphs.schema_version === "glyph-set-v1") {
         onGlyphsChange?.(data.glyphs);
       }
       setPolledTotals({
@@ -164,9 +182,28 @@ export function ForceOverlayPanel({
       const types = prev.forceTypes.includes(forceType)
         ? prev.forceTypes.filter((t) => t !== forceType)
         : [...prev.forceTypes, forceType];
-      return { ...prev, forceTypes: types.length > 0 ? types : ['applied'] };
+      return { ...prev, forceTypes: types.length > 0 ? types : ["applied"] };
     });
   }, []);
+
+  const toggleGroup = useCallback((group: GlyphGroup) => {
+    setConfig((prev) => ({
+      ...prev,
+      groups: prev.groups.includes(group)
+        ? prev.groups.filter((g) => g !== group)
+        : [...prev.groups, group],
+    }));
+  }, []);
+
+  const setNumber = useCallback(
+    (key: "bodyMassKg" | "peakForceN" | "referenceLengthM", raw: string) => {
+      const value = parseFloat(raw);
+      if (Number.isFinite(value) && value > 0) {
+        setConfig((prev) => ({ ...prev, [key]: value }));
+      }
+    },
+    [],
+  );
 
   return (
     <div className="bg-gray-700/50 p-3 rounded-md">
@@ -184,7 +221,7 @@ export function ForceOverlayPanel({
             className="rounded border-gray-500 text-blue-500 focus:ring-blue-400"
           />
           <span className="text-xs text-gray-400">
-            {config.enabled ? 'On' : 'Off'}
+            {config.enabled ? "On" : "Off"}
           </span>
         </label>
       </div>
@@ -197,11 +234,11 @@ export function ForceOverlayPanel({
             <span
               className={
                 isConnected
-                  ? 'text-green-400 font-mono'
-                  : 'text-amber-400 font-mono'
+                  ? "text-green-400 font-mono"
+                  : "text-amber-400 font-mono"
               }
             >
-              {isConnected ? 'WebSocket (Real-time)' : 'REST Polling (2 Hz)'}
+              {isConnected ? "WebSocket (Real-time)" : "REST Polling (2 Hz)"}
             </span>
           </div>
 
@@ -221,6 +258,95 @@ export function ForceOverlayPanel({
                     className="rounded border-gray-600 text-blue-500 focus:ring-blue-400"
                   />
                   <span className={`text-xs ${opt.color}`}>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrow scale mode (GCV-4, #11710) */}
+          <div className="space-y-1">
+            <label
+              htmlFor="force-scale-mode"
+              className="text-xs text-gray-400 block"
+            >
+              Scale Mode
+            </label>
+            <select
+              id="force-scale-mode"
+              value={config.scaleMode}
+              onChange={(e) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  scaleMode: e.target.value as ScaleMode,
+                }))
+              }
+              className="w-full bg-gray-800 text-xs text-gray-200 rounded p-1"
+            >
+              {(Object.keys(SCALE_MODE_LABELS) as ScaleMode[]).map((mode) => (
+                <option key={mode} value={mode}>
+                  {SCALE_MODE_LABELS[mode]}
+                </option>
+              ))}
+            </select>
+            <label className="text-xs text-gray-400 flex items-center justify-between">
+              Body Mass (kg)
+              <input
+                type="number"
+                min="1"
+                step="0.5"
+                aria-label="Body Mass (kg)"
+                value={config.bodyMassKg}
+                disabled={config.scaleMode !== "body_weight"}
+                onChange={(e) => setNumber("bodyMassKg", e.target.value)}
+                className="w-20 bg-gray-800 rounded p-1 text-right"
+              />
+            </label>
+            <label className="text-xs text-gray-400 flex items-center justify-between">
+              Peak Force (N)
+              <input
+                type="number"
+                min="1"
+                step="10"
+                aria-label="Peak Force (N)"
+                value={config.peakForceN}
+                disabled={config.scaleMode !== "peak"}
+                onChange={(e) => setNumber("peakForceN", e.target.value)}
+                className="w-20 bg-gray-800 rounded p-1 text-right"
+              />
+            </label>
+            <label className="text-xs text-gray-400 flex items-center justify-between">
+              Length per Reference (m)
+              <input
+                type="number"
+                min="0.05"
+                step="0.05"
+                aria-label="Length per Reference (m)"
+                value={config.referenceLengthM}
+                disabled={config.scaleMode === "fixed"}
+                onChange={(e) => setNumber("referenceLengthM", e.target.value)}
+                className="w-20 bg-gray-800 rounded p-1 text-right"
+              />
+            </label>
+          </div>
+
+          {/* Group toggles */}
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400">Groups</label>
+            <div className="grid grid-cols-1 gap-1">
+              {ALL_GLYPH_GROUPS.map((group) => (
+                <label
+                  key={group}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={config.groups.includes(group)}
+                    onChange={() => toggleGroup(group)}
+                    className="rounded border-gray-600 text-blue-500 focus:ring-blue-400"
+                  />
+                  <span className="text-xs text-gray-300">
+                    {GLYPH_GROUP_LABELS[group]}
+                  </span>
                 </label>
               ))}
             </div>

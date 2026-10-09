@@ -319,6 +319,145 @@ export interface ArmShotResponse {
   state: string;
 }
 
+/**
+ * The browsable part library.
+ */
+export interface AssemblyCatalogResponse {
+  categories: AssemblyCategory[];
+  parts: AssemblyPart[];
+}
+
+/**
+ * A catalog category id and its display label.
+ */
+export interface AssemblyCategory {
+  id: string;
+  label: string;
+}
+
+/**
+ * Whether the candidate drop is allowed, and why.
+ */
+export interface AssemblyDropDecision {
+  accepted: boolean;
+  reason: string;
+  part_id: string;
+  host_port: string;
+  findings: AssemblyFinding[];
+}
+
+/**
+ * An assembly to rebuild and serialize.
+ */
+export interface AssemblyExportRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Export format */
+  format: "urdf" | "mjcf";
+  /** Export despite validation errors */
+  force: boolean;
+}
+
+/**
+ * Serialized assembly content.
+ */
+export interface AssemblyExportResponse {
+  format: "urdf" | "mjcf";
+  content: string;
+  validation: AssemblyValidation;
+}
+
+/**
+ * One composition-validation finding.
+ */
+export interface AssemblyFinding {
+  code: string;
+  severity: string;
+  message: string;
+  elements?: string[];
+  category: string;
+}
+
+/**
+ * A catalog part that can be dragged into an assembly.
+ */
+export interface AssemblyPart {
+  part_id: string;
+  name: string;
+  category: string;
+  description: string;
+  ports: AssemblyPort[];
+}
+
+/**
+ * A part instance inside the assembly (base first).
+ */
+export interface AssemblyPlacedPart {
+  instance_id: string;
+  part_id: string;
+  host_port: string | null;
+  host_instance: string | null;
+  links: string[];
+  joints: string[];
+}
+
+/**
+ * An assembly to rebuild, plus an optional drop to evaluate (drag hover).
+ */
+export interface AssemblyPlanRequest {
+  /** Base part id */
+  base_part_id: string;
+  /** Drops applied in order */
+  steps?: AssemblyStep[];
+  /** Drop to evaluate without applying it */
+  candidate?: AssemblyStep | null;
+}
+
+/**
+ * A typed attachment port (``AttachmentPoint.to_dict`` shape).
+ */
+export interface AssemblyPort {
+  name: string;
+  link_name: string;
+  role: string;
+  interface_frame?: Record<string, number[]>;
+  tags?: string[];
+  max_payload_kg?: number | null;
+  port_type?: string | null;
+  polarity?: string | null;
+}
+
+/**
+ * The rebuilt assembly: tree, placed parts, free sockets, validation.
+ */
+export interface AssemblyStateResponse {
+  model: ModelExplorerResponse;
+  placed: AssemblyPlacedPart[];
+  free_sockets: AssemblyPort[];
+  validation: AssemblyValidation;
+  drop?: AssemblyDropDecision | null;
+}
+
+/**
+ * One drop: put ``part_id`` on the host socket ``host_port``.
+ */
+export interface AssemblyStep {
+  /** Catalog part id */
+  part_id: string;
+  /** Model-level name of the host socket */
+  host_port: string;
+}
+
+/**
+ * Composition validation for the assembled model.
+ */
+export interface AssemblyValidation {
+  ok: boolean;
+  findings: AssemblyFinding[];
+}
+
 export interface AssetRequest {
   id: string;
   source_path: string;
@@ -1565,6 +1704,16 @@ export interface ForceOverlayRequest {
   body_filter?: string[] | null;
   /** Show magnitude labels */
   show_labels: boolean;
+  /** Arrow scaling: fixed, body_weight or peak */
+  scale_mode: "fixed" | "body_weight" | "peak";
+  /** Body weight (N) for body_weight; series peak (N) for peak */
+  reference_force_n?: number | null;
+  /** Arrow length (m) for one reference force */
+  reference_length_m: number;
+  /** Per-WrenchKind length multipliers */
+  kind_scale?: Record<string, number> | null;
+  /** Enabled overlay groups (None = defaults) */
+  groups?: string[] | null;
 }
 
 /**
@@ -1678,6 +1827,49 @@ export interface GreenReadingResponse {
   slopes: number[][];
 }
 
+/**
+ * Per-hand grip force, net force and midpoint couple time series (GCV-10, #11716).
+ */
+export interface GripWrenchResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no grip data exists */
+  available: boolean;
+  /** Why the series is unavailable */
+  reason?: string | null;
+  time_s?: number[];
+  /** How the left/right split was obtained */
+  split_method: string;
+  split_method_by_sample?: string[];
+  unavailable_reasons?: string[];
+  events?: Record<string, number>;
+  units?: Record<string, string>;
+  labels?: Record<string, string>;
+  /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
+  traces?: Record<string, Record<string, (number | null)[]>>;
+}
+
+/**
+ * Per-foot and net ground reaction time series on the body (GCV-5, #11711).
+ */
+export interface GroundReactionResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no ground contact exists */
+  available: boolean;
+  /** Why the series is unavailable */
+  reason?: string | null;
+  time_s?: number[];
+  feet?: string[];
+  events?: Record<string, number>;
+  units?: Record<string, string>;
+  labels?: Record<string, string>;
+  /** Each foot's share of the summed vertical force; null below 10 N */
+  load_share?: Record<string, (number | null)[]>;
+  /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
+  traces?: Record<string, Record<string, (number | null)[]>>;
+}
+
 export interface GroupSummaryV1 {
   dimension: "player" | "session" | "club";
   group_value: string;
@@ -1700,6 +1892,37 @@ export interface HTTPValidationError {
 export interface IdentityRequest {
   id: string;
   name: string;
+}
+
+/**
+ * One launch-monitor row; ``value`` is null when unavailable (GCV-17).
+ */
+export interface ImpactParameterRow {
+  key: string;
+  label: string;
+  unit: string;
+  value?: number | null;
+  /** Why the value is unavailable */
+  reason?: string | null;
+  note?: string | null;
+}
+
+/**
+ * Target-relative impact parameters card for a run (GCV-17, #11723).
+ */
+export interface ImpactParametersResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no card can be computed */
+  available: boolean;
+  /** Why the card is unavailable */
+  reason?: string | null;
+  units: string;
+  impact_time_s?: number | null;
+  impact_time_source?: string | null;
+  frame?: Record<string, unknown>;
+  rows?: ImpactParameterRow[];
+  d_plane?: Record<string, number | null>;
 }
 
 /**

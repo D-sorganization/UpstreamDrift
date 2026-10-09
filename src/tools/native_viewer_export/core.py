@@ -21,7 +21,11 @@ from numpy.typing import NDArray
 
 from src.shared.python.force_overlay.glyphs import ForceGlyphStyle, GlyphSet
 from src.shared.python.force_overlay.renderers.meshcat_glyphs import legend_text
-from src.shared.python.golf_view_presets import VIEW_ORDER, get_view_preset
+from src.shared.python.golf_view_presets import (
+    VIEW_ORDER,
+    get_view_preset,
+    tracked_lookats,
+)
 from src.shared.python.motion_matching.same_input import InputBundle
 from src.shared.python.video_timing.frame_schedule import (
     DEFAULT_FPS,
@@ -85,6 +89,8 @@ class ExportSettings:
     impact_speed: float = IMPACT_CLIP_SPEED
     overlays: bool = True
     multiview: bool = True
+    hud: bool = True  # False: clean frames, no view label or HUD text
+    grip: bool = False  # hands/grip overlay (GCV-10); hands_closeup tracks it
     lookat_m: tuple[float, float, float] = (1.0, 0.0, 0.9)
     distance_m: float | None = None
 
@@ -99,8 +105,8 @@ class ExportSettings:
         return cls(**{**base, **overrides})
 
     def _validate_clips(self) -> None:
-        if not self.speeds:
-            raise ValueError("speeds must not be empty")
+        if not self.speeds and self.impact_window_s is None:
+            raise ValueError("speeds must not be empty (or set impact_window_s)")
         for speed in (*self.speeds, self.impact_speed):
             if not (math.isfinite(speed) and 0.0 < speed <= MAX_SPEED):
                 raise ValueError(f"speeds must lie in (0, {MAX_SPEED:g}], got {speed}")
@@ -207,6 +213,11 @@ class SwingInput:
         return provenance.get(key)
 
     @property
+    def has_impact_provenance(self) -> bool:
+        """Whether the bundle records an impact time."""
+        return self._provenance_value("impact_time_s") is not None
+
+    @property
     def impact_time_s(self) -> float:
         """Bundle ``provenance['impact_time_s']`` when present, else the last sample."""
         value = self._provenance_value("impact_time_s")
@@ -269,12 +280,40 @@ def frame_indices(n_states: int, stride: int) -> list[int]:
     return idx
 
 
-def default_glyph_style() -> ForceGlyphStyle:
-    """Golfer-scale glyph style (about 0.7 m per kN, 0.5 m radius per 250 N m)."""
+STANDARD_GRAVITY_M_S2 = 9.80665
+BODY_WEIGHT_ARROW_M = 0.5
+
+
+def default_glyph_style(body_mass_kg: float | None = None) -> ForceGlyphStyle:
+    """Golfer-scale glyph style.
+
+    With ``body_mass_kg`` the force arrows use ``body_weight`` scaling so one
+    body weight is ``BODY_WEIGHT_ARROW_M`` (0.5 m) long, with a 3 m ceiling
+    (6 BW) so a driver swing is never silently clamped. Without it the legacy
+    fixed 0.7 m per kN scale is kept.
+
+    Raises ``ValueError`` when ``body_mass_kg`` is not finite and positive.
+    """
+    if body_mass_kg is None:
+        return ForceGlyphStyle(
+            force_scale_m_per_n=0.7 / 1000.0,
+            torque_scale_m_per_nm=0.5 / 250.0,
+            max_length_m=0.9,
+            min_length_m=0.04,
+            shaft_radius_m=0.014,
+            magnitude_floor_nm=8.0,
+            magnitude_floor_n=20.0,
+        )
+    if not math.isfinite(body_mass_kg) or body_mass_kg <= 0.0:
+        raise ValueError(
+            f"body_mass_kg must be finite and positive, got {body_mass_kg}"
+        )
     return ForceGlyphStyle(
-        force_scale_m_per_n=0.7 / 1000.0,
+        scale_mode="body_weight",
+        reference_force_n=body_mass_kg * STANDARD_GRAVITY_M_S2,
+        reference_length_m=BODY_WEIGHT_ARROW_M,
         torque_scale_m_per_nm=0.5 / 250.0,
-        max_length_m=0.9,
+        max_length_m=3.0,
         min_length_m=0.04,
         shaft_radius_m=0.014,
         magnitude_floor_nm=8.0,
@@ -284,11 +323,25 @@ def default_glyph_style() -> ForceGlyphStyle:
 
 @dataclass
 class OverlayFeed:
-    """Glyph sets by state index, built lazily from an overlay provider."""
+    """Glyph sets by state index, built lazily from an overlay provider.
+
+    Frames are cached per index: a frame may need an engine solve (the grip
+    wrench), and both the glyphs and the tracked camera read it.
+    """
 
     frame_at: Callable[[int], Any]
     style: ForceGlyphStyle = field(default_factory=default_glyph_style)
     build: Callable[[Any, ForceGlyphStyle], GlyphSet] | None = None
+    #: grip analyses at given indices (set when the grip overlay is enabled)
+    grip_analyses: Callable[[Sequence[int]], list[Any]] | None = None
+    _frames: dict[int, Any] = field(
+        default_factory=dict, init=False, repr=False, compare=False
+    )
+
+    def _frame(self, index: int) -> Any:
+        if index not in self._frames:
+            self._frames[index] = self.frame_at(index)
+        return self._frames[index]
 
     def glyphs_at(self, index: int) -> GlyphSet:
         build = self.build
@@ -296,11 +349,42 @@ class OverlayFeed:
             from src.shared.python.force_overlay.glyphs import build_glyphs
 
             build = build_glyphs
-        return build(self.frame_at(index), self.style)
+        return build(self._frame(index), self.style)
+
+    def focus_at(self, index: int) -> tuple[float, float, float] | None:
+        """Grip midpoint of state ``index`` (camera focus), or ``None`` if unknown."""
+        metadata = getattr(self._frame(index), "metadata", None) or {}
+        point = metadata.get("grip_midpoint_m")
+        if point is None:
+            return None
+        return (float(point[0]), float(point[1]), float(point[2]))
 
     @staticmethod
     def legend(glyphs: GlyphSet | None) -> str:
         return "" if glyphs is None else legend_text(glyphs)
+
+
+def view_lookats(
+    settings: ExportSettings, indices: Sequence[int], overlay: OverlayFeed | None
+) -> dict[str, list[tuple[float, float, float]]]:
+    """Look-at point per view and frame (``indices`` order).
+
+    A tracking view (``hands_closeup``) follows the overlay's grip midpoint; a
+    fixed view, or a tracking view without an overlay, keeps
+    ``settings.lookat_m``.
+    """
+    focus: list[tuple[float, float, float] | None] | None = None
+    out: dict[str, list[tuple[float, float, float]]] = {}
+    for name in settings.views:
+        preset = get_view_preset(name)
+        if preset.tracks is not None and overlay is not None and focus is None:
+            focus = [overlay.focus_at(k) for k in indices]
+        out[name] = tracked_lookats(
+            preset,
+            settings.lookat_m,
+            focus if focus is not None else [None] * len(indices),
+        )
+    return out
 
 
 @runtime_checkable
@@ -361,6 +445,7 @@ class ExportResult:
     skipped_reason: str | None = None
     glyph_counts: tuple[int, ...] = ()
     frames_by_suffix: dict[str, int] = field(default_factory=dict)
+    grip_json: Path | None = None  # grip plot payload (GCV-10), when enabled
 
     @property
     def skipped(self) -> bool:
@@ -474,13 +559,17 @@ def _export_clip(
             )
             labelled = {
                 v: draw_label(tiles[v], get_view_preset(v).label, (8, 6))
+                if settings.hud
+                else tiles[v]
                 for v in settings.views
             }
-            outputs = {v: draw_hud(labelled[v], hud) for v in settings.views}
+            outputs = {
+                v: draw_hud(labelled[v], hud) if settings.hud else labelled[v]
+                for v in settings.views
+            }
             if settings.multiview:
-                outputs[GRID_VIEW] = draw_hud(
-                    compose_grid([labelled[v] for v in settings.views]), hud
-                )
+                grid = compose_grid([labelled[v] for v in settings.views])
+                outputs[GRID_VIEW] = draw_hud(grid, hud) if settings.hud else grid
             for name, frame in outputs.items():
                 key = f"{name}{plan.suffix}"
                 if key not in writers:

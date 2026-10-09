@@ -161,6 +161,36 @@ plot_cartesian_delta_summary, summarize_for_pr_comment}` —
 - Schema: `schemas/force-torque-frame-v1.json` and shared fixtures in `schemas/force-torque-frame-examples.json`.
 - User Guide: `docs/user_guide/force_overlay.md` for wrench palettes, moment arcs, web and video overlays.
 - `biomechanics/grip_wrench.py` — shared hand-on-club grip wrench (`analyze_grip`, `GripAnalysis`, `GripSeries`): per-hand wrench, net force at the grip midpoint, equivalent couple split into contact-force moment and free torque, per-hand MOF, club-local components and `split_method`. Transport reuses `force_overlay.conversions.move_wrench_point`; do not write another (GCV-7, #11713).
+- `biomechanics/grip_extraction.py` — per-engine helpers that build a `GripAnalysis` from engine data (`holding_hand_wrench`, `closure_and_club_analysis`, `allocation_grip_analysis`, `net_only_analysis`, `unavailable_analysis`) (GCV-8, #11714).
+- `force_overlay/grip_frame.py` — `grip_frame`, `grip_wrenches_and_metadata`, `GRIP_LABELS`: the one `GripAnalysis` to `ForceTorqueFrame` conversion, with `grip_split_method` and `grip_unavailable_labels` metadata. `force_overlay/palette.label_variant_hex` shades the per-hand grip labels (GCV-10, #11716).
+- `biomechanics/grip_plot_model.py` — `GripPlotSeries`, `build_grip_plot_series`, JSON round trip for the Grip Wrench Plots tile and API (GCV-10).
+- `biomechanics/plot_traces.py` — `vector_trace`, `none_if_nan`: NaN to JSON `null` for every plot payload; reuse it instead of writing another serializer (GCV-5, #11711).
+
+### Ground-Reaction Analysis Core
+
+`src/shared/python/biomechanics/ground_reaction.py` — the single implementation of per-foot and net GRF, CoP (with ground height `z_g` and the named `COP_MIN_FZ_N` = 10 N threshold), free moment, and moments about the whole-body CoM (GCV-1, #11707, epic #11706).
+
+- `foot_reaction(label, forces, points, torques=None, *, ground_height_m, cop_min_fz_n)` and `analyze_ground_reaction(contacts_by_foot, com_m)` return `FootReaction` / `GroundReactionBreakdown`; unavailable CoP quantities are `None`, never zero.
+- `to_overlay_wrenches` emits the `contact:grf_*`, `contact:free_moment_*`, `contact:moment_com_*` labels (ADR-0052); `to_contact_reaction` populates `motion_matching.force_torque.ContactReaction`; `GroundReactionSeries` stacks frames for plots and export.
+- `center_of_pressure(force, moment_about_origin, ground_height_m, min_fz)` is the one CoP implementation (GCV-6, #11712). `physics.ground_reaction_forces.compute_cop_from_grf`, `motion_matching.force_torque.compute_center_of_pressure` and `physics._grip_forces.compute_center_of_pressure` are deprecation shims (the grip one is now `compute_grip_pressure_centre`, a pressure-weighted centroid, not a ground CoP). Do not add another CoP helper.
+- `biomechanics/ground_reaction_wrenches.py` (`foot_contact_sets`, `ground_reaction_overlay`) and `biomechanics/foot_membership.py` map contact bodies to feet; `mujoco/python/ground_contacts.py` extracts MuJoCo/MyoSuite contacts. Every engine's force-torque source and `force_overlay/bundle_provider.py` route through them (GCV-2, #11708); parity test `tests/integration/cross_engine/test_ground_reaction_parity.py`.
+
+### Impact Parameters
+
+`src/shared/python/impact_parameters/` — the target-line club delivery at impact for every engine (GCV-15, #11721).
+
+- `TargetFrame` (`target_frame.py`) — the target line, up and handedness; the UpstreamDrift default is Z-up with the target along -Y (ADR-0041).
+- `ClubheadSeries` and `adapters/` — clubhead pose and twist series from MuJoCo, MyoSuite, Drake, Pinocchio, OpenSim and Simscape; `select_impact_index` picks the impact sample. Simscape has no clubhead orientation, so face quantities are unavailable.
+- `extract_impact_parameters` returns `ImpactParameters` at the last pre-contact state (speed, attack angle, path, face, face-to-path, dynamic and spin loft, swing direction and plane, low point, toe/high, smash factor). The optional `BallObservation` carries the impact-model ball contact point, speed and calibration status that the smash factor needs. An unavailable quantity is `None` with its reason in `unavailable`, never zero.
+- `tools_gateway` maps the result onto the Tools D-plane (`load_tools_delivery_gateway`); keep the Tools runtime behind this gateway.
+- `panel_model.build_impact_card` feeds the impact card in the PyQt and web panels.
+
+### Video Timing
+
+`src/shared/python/video_timing/` — time-based frame selection for every video export (GCV-14, #11720).
+
+- `FrameSchedule` — frame `j` shows the swing at `t0 + j * speed / fps`; coarse source steps are interpolated (linear joints, `slerp` for free and ball quaternions found by `quaternion_groups_from_model`).
+- `speed_suffix` (`_1x`, `_0p5x`, `_0p25x`) and `DEFAULT_FPS` = 60, `MAX_SPEED` = 4. `stride_for_speed` exists only for the deprecated `--stride` alias.
 
 ### MyoFullBody Muscle-Driven Swing
 
@@ -290,8 +320,24 @@ forward-dynamics matching. Design reference:
 - `library` — named PBR materials, skin tones, clothing presets, club finishes,
   `classify_body` (body name to anatomical part).
 - `geometry` — `lofted_segment` / `ellipsoid_mesh` smooth meshes.
+- `head` — parametric visible head (skull, eyes, brows, nose, mouth, ears, neck,
+  optional hair or cap), `build_head_parts`, `resolve_head_anchor` (the spec
+  `Head` body on the neck at the cervicale; head length from de Leva), and
+  `head_override_rotation`. Licence: procedural geometry, CC0-1.0, no third-party mesh.
+- Document fields `head` (`enabled`, `headwear` none/hair/cap, `scale`,
+  `forward_axis`/`up_axis`, `orientation_override`) and `body_model`
+  (`ellipsoid`; `meshes` is rejected until CMB-6 #11657 lands).
+- Gaze channel: `head.orientation_override` (`frame` parent/world, `yaw_rad`,
+  `pitch_rad`, `roll_rad`, `channel` name) detaches the visual head onto a massless
+  mocap body; `head_visual.drive_visual_head(model, data, yaw, pitch, roll, frame)`
+  places it per frame. Axes: x forward, y left, z up; yaw left-positive, pitch
+  up-positive, roll toward the right shoulder. OSV-3 #11729 drives it for engines
+  without a neck.
 - MuJoCo translation: `src/engines/physics_engines/mujoco/python/appearance_layer.py`
-  via `attach_visual_layer(..., appearance=doc)`.
+  via `attach_visual_layer(..., appearance=doc)`; the head is `head_visual.py`
+  (`with_head=True` adds only the head to the legacy capsule layer, used by MyoSuite).
+  Drake, Pinocchio and OpenSim native viewers use
+  `src/tools/native_viewer_export/backends/_head.py` (OBJ per part).
 
 ### Theme / Typography
 
@@ -610,3 +656,17 @@ and the simbody visualizer. `force_overlay.bundle_provider` builds
 ForceTorqueFrame series from same-input bundles (efforts to joint-torque arcs,
 the shared contact law to per-foot GRF at the CoP, weight at the CoM); the
 MuJoCo `overlay_source` supplies its contact and kinematics. Epic #11673.
+
+### Lift Pack Parity Audit
+
+`src/shared/python/lifting/pack_audit/` loads the OpenSim, MuJoCo, Drake and Pinocchio lift model packs behind one `EngineAdapter` (canonical frame, FK, CoM, closure), and reduces the receipt to tables and gap rules (`analysis.py`, `gaps.py`, `report.py`). Reuse it for same-input lift parity (LIFT-2 onward) instead of writing another per-engine loader. Entry point: `scripts/lifting/run_pack_parity_baseline.py`; record: `docs/development/lifting/PACK_PARITY_BASELINE.md`.
+
+## Native OpenSim Marker Geometry
+
+`tour_matching/native_marker_geometry.py` supplies explicit native body-attached
+frame poses and station positions for `OpensimMatchingPlant` and existing shared
+calibration/trajectory IK. It validates actual native assembly and all source
+coordinate ranges; it does not supply dynamics or grip closure. Reuse the existing
+`full_body_ik.solve_full_body_ik_trajectory` optional finite `coordinate_bounds`
+for bounded TRF. See canonical chapter26 and #11903; do not reintroduce metadata
+placeholders or revive the retired OpenSim IK backend.

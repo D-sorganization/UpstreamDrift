@@ -159,3 +159,39 @@ def test_payload_schema_validation() -> None:
 
     jsonschema.validate(instance=payload["glyphs"], schema=glyph_schema)
     jsonschema.validate(instance=payload["frame"], schema=frame_schema)
+
+
+def test_style_from_request_params_accepts_scale_keys() -> None:
+    style = style_from_request_params(
+        force_types=["contact"],
+        scale_mode="body_weight",
+        reference_force_n=800.0,
+        reference_length_m=0.4,
+        kind_scale={"contact": 1.5},
+        groups=["net", "per_foot"],
+    )
+    assert style.scale_mode == "body_weight"
+    assert style.force_scale_for(WrenchKind.CONTACT) == pytest.approx(0.4 / 800.0 * 1.5)
+    assert style.groups == frozenset({"net", "per_foot"})
+
+
+def test_style_from_request_params_rejects_bad_scale_mode() -> None:
+    with pytest.raises(ValueError):
+        style_from_request_params(scale_mode="bogus")
+    with pytest.raises(ValueError):
+        style_from_request_params(scale_mode="body_weight")
+
+
+def test_payload_mapping_style_accepts_new_keys() -> None:
+    payload = force_overlay_payload(
+        _make_sample_frame(),
+        {
+            "scale_mode": "peak",
+            "reference_force_n": 1000.0,
+            "reference_length_m": 0.8,
+            "groups": ["net"],
+        },
+    )
+    assert payload["style"]["scale_mode"] == "peak"
+    assert payload["style"]["groups"] == ["net"]
+    assert payload["glyphs"]["legend"]["scale_mode"] == "peak"

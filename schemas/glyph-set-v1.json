@@ -155,6 +155,12 @@
           "items": { "type": "string" }
         },
         "engine": { "type": "string" },
+        "scale_mode": { "enum": ["fixed", "body_weight", "peak"] },
+        "grip_split_method": { "type": "string" },
+        "clamped_labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "source_labels": {
           "type": "array",
           "items": { "type": "string" }

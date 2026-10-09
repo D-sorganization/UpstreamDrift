@@ -21,6 +21,7 @@ try:
         LegendSpec,
         TorqueArcGlyph,
         build_glyphs,
+        clamped_tip_shift,
         scale_for_view,
     )
 except ImportError:
@@ -53,7 +54,7 @@ def test_force_glyph_style_defaults_and_validation() -> None:
     assert style.torque_scale_m_per_nm == pytest.approx(1.0 / 200.0)
     assert style.min_length_m == pytest.approx(0.02)
     assert style.max_length_m == pytest.approx(0.6)
-    assert style.shaft_radius_m == pytest.approx(0.006)
+    assert style.shaft_radius_m == pytest.approx(0.012)
     assert style.head_length_ratio == pytest.approx(0.22)
     assert style.head_radius_ratio == pytest.approx(2.4)
     assert style.torque_style == "arc"
@@ -149,7 +150,7 @@ def test_build_glyphs_clamping() -> None:
     assert large_arrow.tip_m[2] == pytest.approx(0.6)
 
     small_arrow = arrows_by_label["contact:small"]
-    assert small_arrow.clamped
+    assert not small_arrow.clamped  # raised to the floor, not clamped (GCV-4)
     assert small_arrow.tip_m[0] == pytest.approx(0.02)
 
 
@@ -261,3 +262,35 @@ def test_scale_for_view() -> None:
     assert scaled.arrows[0].magnitude == pytest.approx(500.0)
     assert scaled.arrows[0].tail_m == (2.0, 4.0, 6.0)
     assert scaled.arrows[0].tip_m[0] == pytest.approx((1.0 + 0.5) * 2.0)
+
+
+def test_clamped_tip_shift_moves_toward_base_in_any_dimension() -> None:
+    """clamped_tip_shift returns the translation renderers apply for a double tip.
+
+    ADR-0052's double-chevron indicator is drawn by every renderer translating
+    its own head geometry back toward the base by this vector; the formula must
+    therefore work identically for 2D pixel heads (OpenCV, QPainter) and 3D
+    world-space cones (matplotlib).
+    """
+    shift_2d = clamped_tip_shift((100.0, 50.0), (80.0, 50.0))
+    assert shift_2d == pytest.approx((-12.0, 0.0))
+
+    shift_3d = clamped_tip_shift((1.0, 0.0, 0.0), (0.8, 0.0, 0.0))
+    assert shift_3d == pytest.approx((-0.12, 0.0, 0.0))
+
+    # Default ratio is 0.6 of the tip-to-base-center distance.
+    tip = (0.0, 0.0)
+    base = (1.0, 0.0)
+    assert clamped_tip_shift(tip, base, ratio=0.6) == pytest.approx((0.6, 0.0))
+
+
+def test_clamped_tip_shift_rejects_invalid_inputs() -> None:
+    """clamped_tip_shift validates dimensionality and ratio (DbC)."""
+    with pytest.raises(ValueError, match="length"):
+        clamped_tip_shift((0.0, 0.0), (1.0, 0.0, 0.0))
+
+    with pytest.raises(ValueError, match="ratio"):
+        clamped_tip_shift((0.0, 0.0), (1.0, 0.0), ratio=0.0)
+
+    with pytest.raises(ValueError, match="ratio"):
+        clamped_tip_shift((0.0, 0.0), (1.0, 0.0), ratio=float("nan"))

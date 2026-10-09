@@ -5,9 +5,9 @@
  * Pure geometric mapping with no physics and no client-side scaling/clamping maths.
  */
 
-import { useMemo } from 'react';
-import type { GlyphSetV1 } from '@/types/glyphs';
-import { buildForceOverlayScene } from './forceOverlayScene';
+import { useMemo } from "react";
+import type { GlyphGroup, GlyphSetV1, ScaleMode } from "@/types/glyphs";
+import { buildForceOverlayScene } from "./forceOverlayScene";
 
 /** Legacy overlay configuration interface */
 export interface ForceOverlayConfig {
@@ -17,6 +17,15 @@ export interface ForceOverlayConfig {
   colorByMagnitude: boolean;
   showLabels: boolean;
   bodyFilter: string[] | null;
+  /** Arrow scaling mode (GCV-4, #11710); `fixed` uses `scaleFactor`. */
+  scaleMode: ScaleMode;
+  /** Body mass in kg; 1 body weight is the `body_weight` reference. */
+  bodyMassKg: number;
+  /** Series peak force in N; the `peak` reference. */
+  peakForceN: number;
+  /** Arrow length in metres for one reference force. */
+  referenceLengthM: number;
+  groups: GlyphGroup[];
 }
 
 export interface ForceOverlayProps {

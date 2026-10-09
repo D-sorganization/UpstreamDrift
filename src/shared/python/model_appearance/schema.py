@@ -74,6 +74,45 @@ class Environment:
     lighting: str = "studio"
 
 
+HEAD_AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
+HEADWEAR = ("none", "hair", "cap")
+BODY_MODELS = ("ellipsoid", "meshes")
+HEAD_OVERRIDE_FRAMES = ("parent", "world")
+
+
+@dataclass(frozen=True)
+class HeadOrientationOverride:
+    """Visual-only head orientation channel (yaw, pitch, roll in radians).
+
+    Declaring it detaches the visual head from the physics body so a gaze
+    controller can drive the same stabilised head in every engine, including
+    models without a neck joint. Head axes: x forward, y left, z up. Yaw is a
+    left turn about +z, pitch looks up, roll tilts the head toward the right
+    shoulder. ``frame`` says what the angles are relative to: ``parent`` (the
+    head's own body frame) or ``world`` (a gaze-stabilised head). The values
+    stored here are the static default; ``channel`` names the runtime feed.
+    """
+
+    frame: str = "parent"
+    yaw_rad: float = 0.0
+    pitch_rad: float = 0.0
+    roll_rad: float = 0.0
+    channel: str = "gaze_head_ypr"
+
+
+@dataclass(frozen=True)
+class HeadSettings:
+    """Visible head (skull, face features, neck, hair or cap), visual only."""
+
+    enabled: bool = True
+    headwear: str = "hair"
+    headwear_material: str | None = None
+    scale: float = 1.0
+    forward_axis: str = "+x"
+    up_axis: str = "+z"
+    orientation_override: HeadOrientationOverride | None = None
+
+
 @dataclass(frozen=True)
 class AppearanceDocument:
     name: str = "default"
@@ -84,6 +123,8 @@ class AppearanceDocument:
     segments: tuple[SegmentRule, ...] = ()
     environment: Environment = field(default_factory=Environment)
     spec_sha256: str | None = None
+    head: HeadSettings = field(default_factory=HeadSettings)
+    body_model: str = "ellipsoid"
 
 
 @lru_cache(maxsize=1)
@@ -133,6 +174,54 @@ def _material(raw: Mapping[str, Any]) -> Material:
     )
 
 
+def _head_settings(raw: Mapping[str, Any]) -> HeadSettings:
+    defaults = HeadSettings()
+    ovr_raw = raw.get("orientation_override")
+    override = None
+    if ovr_raw is not None:
+        d = HeadOrientationOverride()
+        override = HeadOrientationOverride(
+            ovr_raw.get("frame", d.frame),
+            float(ovr_raw.get("yaw_rad", 0.0)),
+            float(ovr_raw.get("pitch_rad", 0.0)),
+            float(ovr_raw.get("roll_rad", 0.0)),
+            ovr_raw.get("channel", d.channel),
+        )
+    if raw.get("forward_axis", "+x")[1] == raw.get("up_axis", "+z")[1]:
+        raise ValueError("head forward_axis and up_axis must be different axes")
+    return HeadSettings(
+        bool(raw.get("enabled", defaults.enabled)),
+        raw.get("headwear", defaults.headwear),
+        raw.get("headwear_material"),
+        float(raw.get("scale", defaults.scale)),
+        raw.get("forward_axis", defaults.forward_axis),
+        raw.get("up_axis", defaults.up_axis),
+        override,
+    )
+
+
+def _head_to_dict(head: HeadSettings) -> dict[str, Any]:
+    out: dict[str, Any] = {
+        "enabled": head.enabled,
+        "headwear": head.headwear,
+        "scale": head.scale,
+        "forward_axis": head.forward_axis,
+        "up_axis": head.up_axis,
+    }
+    if head.headwear_material is not None:
+        out["headwear_material"] = head.headwear_material
+    ovr = head.orientation_override
+    if ovr is not None:
+        out["orientation_override"] = {
+            "frame": ovr.frame,
+            "yaw_rad": ovr.yaw_rad,
+            "pitch_rad": ovr.pitch_rad,
+            "roll_rad": ovr.roll_rad,
+            "channel": ovr.channel,
+        }
+    return out
+
+
 def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
     """Validate and parse a document. Unknown library names are rejected."""
     from src.shared.python.model_appearance import library
@@ -164,6 +253,8 @@ def document_from_dict(data: Mapping[str, Any]) -> AppearanceDocument:
         ),
         environment=environment,
         spec_sha256=data.get("spec_sha256"),
+        head=_head_settings(data.get("head", {})),
+        body_model=data.get("body_model", "ellipsoid"),
     )
     library.check_references(doc)
     return doc
@@ -220,6 +311,8 @@ def document_to_dict(doc: AppearanceDocument) -> dict[str, Any]:
             "sky_bottom": list(env.sky_bottom),
             "lighting": env.lighting,
         },
+        "head": _head_to_dict(doc.head),
+        "body_model": doc.body_model,
     }
     if doc.spec_sha256 is not None:
         out["spec_sha256"] = doc.spec_sha256

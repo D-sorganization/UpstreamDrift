@@ -9,7 +9,7 @@ Documentation) for #11729. The engineering design manual source remains
 | Item                                                      | Status                      |
 | --------------------------------------------------------- | --------------------------- |
 | Source and target frames, one-to-one map, exact inverse   | Documented, unit-tested     |
-| `NeckInputY -> neck_flexion` sign (-1)                    | Derived by FK (section 16)  |
+| `NeckInputY -> neck_flexion` sign (-1)                    | Derived by FK (section 18)  |
 | Hip, scapula and neck lateral-bending sources             | Omitted, with reasons       |
 | Pelvis orientation and shoulder girdle in MyoSuite replay | Not represented (follow-up) |
 

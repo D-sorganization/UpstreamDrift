@@ -52,6 +52,30 @@
     }
   },
   "properties": {
+    "head": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "headwear": {"enum": ["none", "hair", "cap"]},
+        "headwear_material": {"$ref": "#/$defs/name"},
+        "scale": {"type": "number", "minimum": 0.5, "maximum": 2},
+        "forward_axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
+        "up_axis": {"enum": ["+x", "-x", "+y", "-y", "+z", "-z"]},
+        "orientation_override": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "frame": {"enum": ["parent", "world"]},
+            "yaw_rad": {"type": "number", "minimum": -3.2, "maximum": 3.2},
+            "pitch_rad": {"type": "number", "minimum": -1.6, "maximum": 1.6},
+            "roll_rad": {"type": "number", "minimum": -1.6, "maximum": 1.6},
+            "channel": {"$ref": "#/$defs/name"}
+          }
+        }
+      }
+    },
+    "body_model": {"enum": ["ellipsoid", "meshes"]},
     "schema_version": {"const": "appearance-v1"},
     "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "name": {"type": "string", "minLength": 1},

@@ -130,7 +130,7 @@ class GolfEquipmentSpec:
     grip_frame_id: str = "grip_frame"
     shaft_length_m: float = 1.15
     head_mass_kg: float = 0.200
-    geometry_asset_path: str = "models/geometry/club_head.obj"
+    geometry_asset_path: str = "models/geometry/club/club_driver_head.stl"
 
 
 @dataclass(frozen=True)
@@ -431,7 +431,7 @@ def _build_default_driver_equipment() -> GolfEquipmentSpec:
         grip_frame_id="grip_frame",
         shaft_length_m=DRIVER.length_m,
         head_mass_kg=DRIVER.head_mass_kg,
-        geometry_asset_path="",
+        geometry_asset_path="models/geometry/club/club_driver_head.stl",
     )
 
 

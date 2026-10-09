@@ -476,6 +476,11 @@ class DynamicsReceipt(BaseModel):
         description="Optional cart-table zero-moment-point filter report",
         json_schema_extra={"unit": "compound", "stage": "dynamics"},
     )
+    centroidal_filter: dict[str, Any] | None = Field(
+        None,
+        description="Optional centroidal feasibility filter (v2) before/after report",
+        json_schema_extra={"unit": "compound", "stage": "dynamics"},
+    )
     shooting_fit: ShootingFitReport | None = Field(
         None,
         description="Optional contact-aware shooting fit report",

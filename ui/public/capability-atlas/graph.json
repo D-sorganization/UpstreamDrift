@@ -51,6 +51,54 @@
       "id": "analysis.cross_engine_robustness"
     },
     {
+      "feature_id": "analysis.grip_wrench",
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
+      "status": "parity",
+      "pyqt": "src/tools/grip_wrench_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GripWrenchCharts.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "grip_wrench_plots"
+      ],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero.",
+      "id": "analysis.grip_wrench"
+    },
+    {
+      "feature_id": "analysis.ground_reaction",
+      "title": "Ground reaction plots: per-foot and net force (N and body weights), vertical load share, CoP path, free moment and moment about CoM",
+      "status": "parity",
+      "pyqt": "src/tools/ground_reaction_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GroundReactionCharts.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "ground_reaction_plots"
+      ],
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero. GCV-2 (#11708): MuJoCo, MyoSuite, Drake and OpenSim emit the contact:grf_/free_moment_/moment_com_ breakdown from their native contacts, Pinocchio from caller-supplied shared-contact-law samples, Simscape reports unavailable; GCV-6 (#11712): every CoP routes through biomechanics.ground_reaction.",
+      "id": "analysis.ground_reaction"
+    },
+    {
+      "feature_id": "analysis.impact_parameters",
+      "title": "Impact parameters panel (speed, attack angle, path, face, face-to-path, dynamic loft, spin loft) relative to a target line",
+      "status": "parity",
+      "pyqt": "src/tools/impact_parameters_panel/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/ImpactParametersPanel.tsx",
+      "issue": null,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [
+        "impact_parameters"
+      ],
+      "notes": "GCV-17 (#11723): shared card model (impact_parameters.panel_model) feeds the PyQt6 dock, GET /api/analysis/impact-parameters and the web panel; unavailable quantities are null with a reason in all three. Engine adapters are GCV-16 (#11722). Video HUD stamping is GCV-14 follow-up; matched-swing ledger entries show unavailable until candidates carry a club series.",
+      "id": "analysis.impact_parameters"
+    },
+    {
       "feature_id": "analysis.static_plots",
       "title": "Static analysis plots (20+ plot types)",
       "status": "parity",
@@ -169,7 +217,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308.",
+      "notes": "Drake PyQt6 GUI draws provider force/torque glyphs in MeshCat and shades segments by axial load (#11297); the web Three.js overlay is tracked in #11308. GCV-4 (#11710) changed the shared glyph defaults (12 mm shaft, group toggles, clamped flag only above the maximum length) that this overlay consumes.",
       "id": "drake.gui_force_overlay"
     },
     {
@@ -347,7 +395,7 @@
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308).",
+      "notes": "FTO-10 (#11295): the PyQt6 MuJoCo GUI renders shaded 3D force arrows and torque arcs from the engine provider through add_glyphs_to_scene and MeshcatGlyphRenderer. The web Three.js renderer is FTO-23 (#11308). GCV-4 (#11710): the Visualization tab and the web ForceOverlayPanel share scale-mode (fixed, body weight, peak), reference-length and group controls; clamped arrows draw a distinct tip.",
       "id": "mujoco.force_overlays"
     },
     {
@@ -409,6 +457,34 @@
       ],
       "notes": "API-backed protocol; both shells are thin consumers.",
       "id": "platform.aip_protocol"
+    },
+    {
+      "feature_id": "render.body_appearance",
+      "title": "Golfer body appearance with a visible head, face and neck in every engine render",
+      "status": "exempt",
+      "pyqt": "src/shared/python/model_appearance/head.py",
+      "api": null,
+      "web": null,
+      "issue": null,
+      "reason": "Engine-render appearance layer (MuJoCo appearance and visual layers, Drake and Pinocchio MeshCat, MyoSuite, OpenSim native viewers) that produces mp4 and PNG artefacts and has no interactive PyQt6 surface; the web GolferModel.tsx head is a follow-up under #11718 (epic #11706).",
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "Visual-only parametric head (skull, eyes, brows, nose, mouth, ears, neck, optional hair or cap) attached to the spec Head body, with a visual-only yaw/pitch/roll orientation channel for gaze (OSV-3 #11729). No mass, inertia or degree of freedom changes.",
+      "id": "render.body_appearance"
+    },
+    {
+      "feature_id": "render.club_head_and_ball",
+      "title": "Realistic Club Head And Ball Rendering",
+      "status": "gap",
+      "pyqt": "src/shared/python/model_appearance/club_head_mesh.py",
+      "api": null,
+      "web": null,
+      "issue": 11717,
+      "reason": null,
+      "pending_decision": false,
+      "tiles": [],
+      "notes": "The desktop engine visual layers (MuJoCo, OpenSim, Drake and Pinocchio MeshCat exports, MyoSuite) draw the parametric club head, shaft and grip from one shared adapter (#11717, #11727). The web ClubHead component (#11717) and the ball visual (#11719) have not landed, so the web app still draws the placeholder head.",
+      "id": "render.club_head_and_ball"
     },
     {
       "feature_id": "settings.desktop_only_tabs",
@@ -698,13 +774,13 @@
       "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
       "status": "gap",
       "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
-      "api": null,
+      "api": "src/api/routes/model_explorer_assembly.py",
       "web": null,
       "issue": 11661,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661).",
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Stateless REST over the same AssemblySession (parts, plan replay + drop evaluation, URDF/MJCF export) landed in CMB-10 slice 1; the web drag-and-drop canvas is still open (CMB-10, #11661).",
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
@@ -1425,6 +1501,48 @@
         "ledger",
         "video_export",
         "report_export"
+      ]
+    },
+    {
+      "id": "impact_parameters",
+      "title": "Impact Parameters",
+      "description": "Launch-monitor-style clubhead speed, attack angle, club path, face angle, face-to-path, dynamic loft and spin loft relative to a target line",
+      "path": "src/tools/impact_parameters_panel/__main__.py",
+      "launch_target": "src/tools/impact_parameters_panel/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "impact_parameters",
+        "launch_monitor",
+        "target_line"
+      ]
+    },
+    {
+      "id": "grip_wrench_plots",
+      "title": "Grip Wrench Plots",
+      "description": "Hand force on the club per hand, net force and equivalent couple at the grip midpoint over time, with the left/right split method",
+      "path": "src/tools/grip_wrench_plots/__main__.py",
+      "launch_target": "src/tools/grip_wrench_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "grip_wrench",
+        "club_forces",
+        "force_plots"
+      ]
+    },
+    {
+      "id": "ground_reaction_plots",
+      "title": "Ground Reaction Plots",
+      "description": "Ground reaction under each foot and in total over time: vertical force in body weights, load share, centre-of-pressure path, free moment and moment about the centre of mass",
+      "path": "src/tools/ground_reaction_plots/__main__.py",
+      "launch_target": "src/tools/ground_reaction_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "ground_reaction",
+        "foot_forces",
+        "force_plots"
       ]
     },
     {
@@ -3012,9 +3130,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "3c89aac228ec96d2f3e827975c4199db06aeac92fec0e3de2356ca624968a338",
-    "src/config/launcher_manifest.json": "5838582f9c884f72b1256a6c776ee342f13f1aac5e5fc4de8f9e91e1360b19a5",
-    "src/config/feature_parity.json": "96d7dac5317a7e0fc8e808b5d0357879aa540ea5a17147cf208dd42c463ccfbd",
+    "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
+    "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
+    "src/config/feature_parity.json": "78d2ce935fc24bbdc7b3978ff9f82f68c2354deb495e861220d5c69d72386268",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

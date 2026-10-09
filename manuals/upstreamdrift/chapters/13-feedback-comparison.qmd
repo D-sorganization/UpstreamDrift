@@ -1,0 +1,112 @@
+# Feedback-Control Comparison Admission (Provisional)
+
+## Scope and Authority
+
+This chapter records the F01 (#11785) **admission contract**, not a qualified
+matching calculation. `src/config/engine_model_inventory.json` is the package
+authority; `src/engines/feedback_comparison.py` derives required model/variant/
+drive rows from it. Every registered package remains in the program denominator.
+Required capability, declared support, runtime availability, and scientific
+qualification are separate fields. An unavailable engine stays required and
+unqualified. The calculation registry remains blocked for release.
+
+The common forward-dynamics form is
+
+$$
+M(q;\theta)\dot v + h(q,v;\theta)
+= S(q)^T\tau + J_c(q)^T\lambda + f_{\mathrm{external}},
+\qquad \dot q=N(q)v.
+$$
+
+Here $q$ may lie on a configuration manifold and need not have the dimension
+of $v$. A muscle plant replaces direct generalized effort with an excitation
+input $e(t)$, internal activation/tendon/fiber state $z$, and a state-dependent
+mapping $\tau=\tau(q,v,z,e;\theta_m)$. Recorded torque cannot be substituted
+for excitation, or vice versa, as the same native input. Units are SI for
+effort and seconds for time; excitation is dimensionless. Force, contact,
+instrumented grip, and EMG observations are distinct evidence sources.
+
+## Replay and Comparison Preconditions
+
+An independent replay uses one saved full initial physical state and a
+time-only input player with no state feedback or resets. Its model, provider,
+physical state schema, execution policy, actuator schema, contact and
+integration identities, applied input, observation set, horizon, and channel
+order and simulation-relative timebase are bound by SHA-256 evidence. Each
+input-channel schema digest includes target, coordinate, unit, and force frame.
+Direct torque/force/effort is held
+exactly over each integration step; excitation interpolation is declared.
+Holding a command does not imply that a state-dependent actuator delivers
+constant force. A matching state trajectory from a
+transcription is insufficient; the native plant must reproduce it when
+integrated separately. The existing `same-input-bundle/v1` has Euclidean
+`nq=nv` arrays and does not bind policy and applied-input hashes, so it cannot
+qualify this contract. F01 does not alter that older schema.
+
+Identity, transcription-native feasibility, within-engine independent input
+reproduction, cross-engine same-input, observation accuracy, and bounded
+biomechanical equivalence are separate admission levels. A transcription
+receipt does not satisfy an independent replay or observation-score receipt.
+Same-input
+requires equal physical-model, physics, contact, integrator, actuator,
+state-schema, policy, time-grid, input, observation, horizon, and channel identities.
+Common rigid-body emulation, native own-contact, and externally forced runs
+must keep different evidence-mode labels. The shared full-body OpenSim parity
+path removes native ForceSet/ConstraintSet/ContactGeometrySet, and MyoSuite's
+shared-body path uses the MuJoCo rigid-body core. Neither establishes native
+muscle/contact parity. A restarted 50 ms L2 result cannot establish continuous
+full-swing native-muscle replay. Native muscle claims additionally require
+muscle-state, contact, and force evidence across an uninterrupted horizon.
+
+The prospective baseline names are independent polynomial, computed torque,
+MOSAIC with time-varying LQR, and selected OCP. They must share observation
+identity, physical horizon, and compute budget before accuracy or speed can be
+compared. No F01 test measures tracking error, pass rate, energy, GRF, grip
+load, muscle physiology, or runtime. `tests/unit/engines/test_feedback_comparison.py`
+checks admission failures; F09 and later native lanes own numerical receipts.
+
+## F09a Positions-Only Sampling on the Observation Clock
+
+The provisional observation boundary in
+`src/shared/python/motion_matching/replay_metrics.py` samples native output
+positions at measured-observation times before the existing replay metrics are
+evaluated. The native output clock $t_i^n$ and observation clock $t_k^o$ are
+separate evidence. For ordered native 3-D marker positions $p_{ij}^n$, the
+declared method `linear_position/v1` defines
+
+$$
+\hat p_{kj} = (1-\alpha_k)p_{ij}^n + \alpha_k p_{i+1,j}^n,
+\qquad
+\alpha_k = \frac{t_k^o - t_i^n}{t_{i+1}^n - t_i^n},
+\qquad t_i^n \le t_k^o \le t_{i+1}^n.
+$$
+
+Both clocks must be finite, strictly increasing, and contain at least two
+samples. The observation interval must be contained by the native-output
+interval; the sampler rejects extrapolation. Native and measured positions
+must declare the same frame, timebase, and ordered marker identities. The
+interpolation applies only to 3-D marker positions. It is not a generalized
+coordinate, velocity, quaternion, or engine-state integrator. Missing measured
+positions retain the existing validity mask; only valid measured entries must
+be finite. The exact observation clock is passed to
+`compute_replay_five_metrics`, keeping early-window and terminal metrics tied
+to the measured clock.
+
+The helper records source, native-output, observation, and alignment hashes so
+downstream receipts can identify the arrays and both clocks. These hashes are
+content identities, not evidence that a producer is authentic or that the
+motion is physically correct. This F09a implementation adds no tolerance,
+acceptance threshold, capture approval, engine qualification, or physiology
+claim. The calculation inventory remains empty and manual release remains
+blocked pending its owner program; this provisional calculation note does not
+register or approve a released engineering calculation.
+
+## Uncertainty and Release Boundary
+
+The inventory declares a flexible-club requirement but currently records its
+support as unknown. OpenSim's eight-muscle variant factory and MyoSuite's
+upstream myo_sim anatomy are declared, not calibrated full-swing physiology.
+Provider/model hashes identify code and files, not physical validity. Model
+parameters, observation clocks, camera/marker registration, contact forces,
+muscle redundancy, and EMG coverage remain unqualified until independent
+measured evidence and native replay receipts establish a bounded scope.
