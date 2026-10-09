@@ -68,6 +68,18 @@ $10^{-5}$ m diagnostic bound. Discrete error is $1.11\times10^{-16}$ against
 $10^{-12}$, and force-injection error is zero in both cases. These bounds
 describe this fixture and solver, not general production accuracy.
 
+The v5 replay rejects nonfinite or nonscalar saved times, a two-ULP metadata
+clock change, absent or mismatched saved provider identity, and a different
+loaded SLX path. The authoritative producer and consumer check the loaded
+source path; an older two-argument configuration probe does not make that
+claim. The provider digest `10d890272361f57152d07e0d71e2e8afaf2034595db106475caa678dd7efad41`
+binds the seven executed MATLAB source files. Both v5 request digests and all
+native output hashes are recorded in the receipt and the 59-file fleet-local
+archive manifest `F06D2_NATIVE_EVIDENCE_ARCHIVE_V5.json`. Its ZIP SHA-256 is
+`23f04ada1c235ec50f7af4eae5e9a5876927d9ddc6fa5a6b2f32a945ed4c4ff6`.
+The archive includes the executed model and operating point, so keep it in the
+restricted fleet workspace; the committed manifest exposes hashes only.
+
 The independent full runs share the original prehistory and each chosen future.
 Replay uses only the suffix, with no prehistory integration or clock reset.
 Conflicting base/model-workspace sentinels, compile termination, workspace

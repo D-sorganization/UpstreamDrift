@@ -71,3 +71,30 @@ contact/load policies survive materialization for actual decoder comparison.
 Production model/variant mislabeling produced two meaningful failing tests
 before the diagnostic inventory guard. The guard changes no accepted request
 bytes; it prevents the synthetic fixture from claiming driver/iron coverage.
+
+## V5 Native Evidence and Handoff
+
+The final executed provider hash is
+`10d890272361f57152d07e0d71e2e8afaf2034595db106475caa678dd7efad41`.
+Five actual R2025b Update 5 negative tests reject saved NaN/vector/two-ULP
+clock changes and missing/wrong provider identity. The authoritative producer
+and owned consumer also require the loaded SLX path to match the owned source;
+an older two-argument configuration-only probe does not assert this check.
+Both independent v5 full runs and their suffix replays pass the same and changed
+future-force comparisons. The position errors are 7.45931094670027e-17 m and
+1.275659919260097e-7 m; discrete errors are 1.1102230246251565e-16, and
+executed-force errors are zero. These are synthetic fixture results only.
+
+`F06D2_NATIVE_EVIDENCE_ARCHIVE_V5.json` indexes a deterministic 59-file
+fleet-local ZIP with SHA-256
+`23f04ada1c235ec50f7af4eae5e9a5876927d9ddc6fa5a6b2f32a945ed4c4ff6`.
+It preserves the v5 native model/operating point, requests, actual logs, source
+and outputs without committing binary data. The archive is under
+`docs/development/feedback_controls_planning/simscape_owned_11942_v5` in the
+fleet workspace. The new v5 Desktop diagnostic preview is under
+`Motion_Matching_Previews/simscape_owned_replay_11942_v5`; the older preview is
+retained separately. The receipt gives exact reproduction and source hashes.
+
+The PR is stacked on #11921 and remains unarmed until that parent is on main.
+Production Simscape model variants, native control mapping, private capture and
+six-engine parity remain open under the broader epic.

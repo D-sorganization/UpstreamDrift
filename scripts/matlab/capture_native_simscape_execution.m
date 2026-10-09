@@ -1,17 +1,21 @@
-function binding = capture_native_simscape_execution(mdl, input)
+function binding = capture_native_simscape_execution(mdl, input, model_path)
 %CAPTURE_NATIVE_SIMSCAPE_EXECUTION Observe diagnostic simulation compatibility.
 %   Compilation is explicitly for simulation. Its structural checksum is
 %   separate from effective tunable values and the immutable SLX byte digest.
 %   The temporary model-workspace input is restored even if compilation fails.
+%   Authoritative producer/consumer calls supply MODEL_PATH for exact loaded
+%   source admission. Legacy two-argument fixture checks do not assert its path.
     arguments
         mdl (1,1) string
         input (1,1) timeseries
+        model_path (1,1) string = ""
     end
     assert(strcmp(version('-release'), '2025b'), 'NativeOwned:R2025bRequired');
     assert(strcmp(mdl, 'native_restart_fixture_11921'), ...
         'NativeOwned:UnsupportedModel');
     assert(strcmp(get_param(mdl, 'SimulationStatus'), 'stopped'), ...
         'NativeOwned:ModelMustBeStopped');
+    local_assert_source(mdl, model_path);
     before = local_configuration(mdl);
     workspace = get_param(mdl, 'ModelWorkspace');
     existed = hasVariable(workspace, 'native_force_input');
@@ -23,6 +27,7 @@ function binding = capture_native_simscape_execution(mdl, input)
     feval(char(mdl), [], [], [], 'compile');
     checksum = Simulink.BlockDiagram.getChecksum(char(mdl));
     during = local_configuration(mdl);
+    local_assert_source(mdl, model_path);
     assert(isequal(before, during), 'NativeOwned:CompileChangedConfiguration');
     compatibility = struct('context', 'explicit-simulation-compile', ...
         'checksum_uint32', double(checksum(:).'));
@@ -30,8 +35,20 @@ function binding = capture_native_simscape_execution(mdl, input)
         'runtime_id', version, 'solver_id', during.model.Solver, ...
         'solver_version', regexp(version, '^[0-9]+\.[0-9]+\.[0-9]+', 'match', 'once'), ...
         'effective_configuration', during, 'compatibility', compatibility, ...
+        'loaded_model_filename', get_param(mdl, 'FileName'), ...
+        'source_path_checked', strlength(model_path) > 0, ...
         'effective_configuration_sha256', local_json_sha256(during), ...
         'compatibility_sha256', local_json_sha256(compatibility));
+end
+
+function local_assert_source(mdl, requested)
+    if strlength(requested) == 0; return; end
+    loaded = get_param(mdl, 'FileName');
+    actual = string(java.io.File(loaded).getCanonicalPath());
+    expected = string(java.io.File(char(requested)).getCanonicalPath());
+    if ispc; same = strcmpi(actual, expected); else; same = strcmp(actual, expected); end
+    assert(same, 'NativeOwned:LoadedModelPathMismatch', ...
+        'Loaded model filename differs from the requested SLX source');
 end
 
 function configuration = local_configuration(mdl)

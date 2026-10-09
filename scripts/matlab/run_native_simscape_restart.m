@@ -30,7 +30,7 @@ function receipt = run_native_simscape_restart(out_dir)
     replayed_input_sha256 = local_hash_input(saved.input_time, saved.input_force);
 
     execution_binding = capture_native_simscape_execution( ...
-        string(mdl), timeseries(input_force, input_time));
+        string(mdl), timeseries(input_force, input_time), model_path);
     base = Simulink.SimulationInput(mdl);
     base = setVariable(base, 'native_force_input', ...
         timeseries(input_force, input_time));

@@ -13,7 +13,7 @@
         "physical_position": "c40b40968fc9772a84dd4ed0405fb310256fece4a1afc8ad8b405367ce0c2910"
       },
       "position_bound_m": 1e-5,
-      "request_sha256": "3e7ba11cd634430cc685a610a1c8a2aca0aa9eaa8c974b877ffe8a73e59267b4",
+      "request_sha256": "d2a40465aacbddd59f739236e932a8ded6baf06c5be4bfadce0623739cb54fb5",
       "scope": "synthetic diagnostic only",
       "snapshot_time_s": 0.2,
       "stop_time_s": 0.4,
@@ -32,7 +32,7 @@
         "physical_position": "9d4ee45554a4c790b9ac38cc458372e6cb5b77118e4629629bb22732f2475124"
       },
       "position_bound_m": 1e-5,
-      "request_sha256": "2eed5a53cafc6f130993a70c6ee9ca9add234417f8dc1fafe59da882d69fb9bd",
+      "request_sha256": "6b33e414e572306ec2fa004bff41a649d201105d1967668224e9d6f39919f782",
       "scope": "synthetic diagnostic only",
       "snapshot_time_s": 0.2,
       "stop_time_s": 0.4,
@@ -41,6 +41,12 @@
   },
   "dependency_merge_required": false,
   "issue": 11942,
+  "loaded_source_admission": {
+    "evidence_log": "native-configuration-tests-v5.out",
+    "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
+    "source_path_checked": true,
+    "wrong_path_identifier": "NativeOwned:LoadedModelPathMismatch"
+  },
   "matlab_version": "25.2.0.3177638 (R2025b) Update 5",
   "native_binding_tests": {
     "binding": {
@@ -182,10 +188,12 @@
         "schema_version": "simscape-diagnostic-config/1.0.0"
       },
       "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
+      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
       "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
       "runtime_release": "2025b",
       "solver_id": "ode23t",
-      "solver_version": "25.2.0"
+      "solver_version": "25.2.0",
+      "source_path_checked": false
     },
     "compile_terminated": true,
     "input_scope_restored": true,
@@ -193,25 +201,21 @@
     "repeatable": true,
     "tunable_configuration_bound": true
   },
+  "native_evidence_archive": {
+    "bytes": 715154,
+    "file_count": 59,
+    "location": "fleet-local docs/development/feedback_controls_planning/simscape_owned_11942_v5/evidence-archive-v5.zip",
+    "manifest_sha256": "b5153b055c9df418597ce47f42f7c248e93befb07378d4e20357ca4a749dfb59",
+    "sha256": "23f04ada1c235ec50f7af4eae5e9a5876927d9ddc6fa5a6b2f32a945ed4c4ff6"
+  },
   "post_native_admission_validation": {
     "all_materialized_files_byte_identical_to_executed_inputs": true,
     "reproduced_request_sha256": {
-      "changed": "3e7ba11cd634430cc685a610a1c8a2aca0aa9eaa8c974b877ffe8a73e59267b4",
-      "same": "2eed5a53cafc6f130993a70c6ee9ca9add234417f8dc1fafe59da882d69fb9bd"
+      "changed": "d2a40465aacbddd59f739236e932a8ded6baf06c5be4bfadce0623739cb54fb5",
+      "same": "6b33e414e572306ec2fa004bff41a649d201105d1967668224e9d6f39919f782"
     },
-    "scope": "Python admission-only model/variant rejection guards; no changed MATLAB source or executed file bytes",
-    "source_changes": {
-      "src/engines/Simscape_Multibody_Models/python/native_owned_replay.py": {
-        "admission_guard_sha256": "5f89fef5a07cea9da6c8fdbe8a69d93dee76f5af799fa39f14d91d007373163d",
-        "native_execution_preceding_admission_sha256": "ae8fefbfb5b2f79a06334d773d341c7fb1b23f60f7dbdaee025cdbfa57eea05a"
-      },
-      "tests/unit/motion_matching/test_simscape_owned_native_replay.py": {
-        "admission_guard_sha256": "78b5e6bcc6710a4b14f93b5b299ec184841adf159bcb73915f8a6152d4787a17",
-        "native_execution_preceding_admission_sha256": "39c217ea04fe594a13676f33388b8976450502fc617968e67ed8e040b229ac56"
-      }
-    },
-    "tools_commit": "89415ee859d6fcfe3384b95e5a53691e68bf9c1b",
-    "unit_tests_passed": 15
+    "scope": "Current v5 source and materialized bytes reproduced from trusted producer; no new physics run implied",
+    "tools_commit": "89415ee859d6fcfe3384b95e5a53691e68bf9c1b"
   },
   "producer": {
     "actual_replay_start_s": 0.2,
@@ -385,16 +389,18 @@
         "schema_version": "simscape-diagnostic-config/1.0.0"
       },
       "effective_configuration_sha256": "c8d6873d216ed54e74b5814ab1a5431fe86523262e80f089723cf75423bfdb2c",
+      "loaded_model_filename": "C:\\Users\\diete\\Repositories\\.codex-feedback-simscape-11784\\owned-11942-v5\\native_restart_fixture_11921.slx",
       "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
       "runtime_release": "2025b",
       "solver_id": "ode23t",
-      "solver_version": "25.2.0"
+      "solver_version": "25.2.0",
+      "source_path_checked": true
     },
     "fixture": "native_restart_fixture_11921",
     "input_after_final_value": "Holding final value",
     "input_converter_filtering": "zero",
     "input_converter_unit": "N",
-    "input_file_sha256": "39cf5fe5fdcd2beb54c859e388cf5f8ed53b9167983a9f91b95103003927abad",
+    "input_file_sha256": "b85d7af0bfe71118e48240ab6c763bc5780888e35312876a64c2b4d184712472",
     "input_interpolation": "zero_order_hold",
     "issue": "#11921",
     "matlab_release": "2025b",
@@ -402,18 +408,18 @@
     "max_discrete_state_error": 0,
     "max_executed_input_error_n": 0,
     "max_physical_position_error_m": 0,
-    "model_sha256": "f253684df31a238f5f01a9d6361b60fc1cd8ecde38f3af25db8743ce648eecad",
+    "model_sha256": "7159d8242a0347b8a610ded199c1f6a500369ad4db09fb55b1a22a67d0129df8",
     "native_state_reloaded": true,
     "native_state_saved": true,
     "physical_samples": 366,
     "physical_span_m": 0.016083947008273015,
     "position_bound_m": 1e-5,
-    "provider_sha256": "7545e7e08b8d182b1967e97f2ce6540ff92907da918e833ead5fd2cb83a03f21",
+    "provider_sha256": "10d890272361f57152d07e0d71e2e8afaf2034595db106475caa678dd7efad41",
     "replayed_input_sha256": "c78777fe007d28c2b572c6b3008302be22bf4fed5c74646580c09f3fc958a634",
     "saved_input_sha256": "c78777fe007d28c2b572c6b3008302be22bf4fed5c74646580c09f3fc958a634",
     "scope": "small native Simscape plus Unit Delay; no golfer qualification",
     "snapshot_class": "Simulink.op.ModelOperatingPoint",
-    "snapshot_sha256": "3ebf04c9dcb3f06ffe87c7c33177b5c86ea026f59de086d512289ce48dd81f0b",
+    "snapshot_sha256": "fec3bbe6c027ce3c3e877c538ed4896f437f6788f455c2777b0946b2b91acde9",
     "solver_id": "ode23t",
     "split_time_s": 0.2,
     "stop_time_s": 0.4
@@ -432,16 +438,50 @@
   ],
   "schema_version": "simscape-owned-native-evidence/1.0.0",
   "scope": "synthetic mass-spring-damper plus Unit Delay; no production or capture qualification",
+  "semantic_metadata_tests": {
+    "cases": {
+      "missing_provider": {
+        "expected_identifier": "NativeRestart:NativeProviderMismatch",
+        "observed_identifier": "NativeRestart:NativeProviderMismatch",
+        "passed": true
+      },
+      "nan_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "nearby_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "vector_clock": {
+        "expected_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "observed_identifier": "NativeRestart:NativeSnapshotTimeMismatch",
+        "passed": true
+      },
+      "wrong_provider": {
+        "expected_identifier": "NativeRestart:NativeProviderMismatch",
+        "observed_identifier": "NativeRestart:NativeProviderMismatch",
+        "passed": true
+      }
+    },
+    "issue": "#11942",
+    "runtime_id": "25.2.0.3177638 (R2025b) Update 5",
+    "scope": "trusted diagnostic metadata"
+  },
   "source_sha256": {
     "docs/development/feedback_controls/prepare_f06d2_native_fixture.py": "c5475f76fca0d3d6d67038aef642d8cd292dcb3e0eec039c9106d87e1a4ed725",
-    "scripts/matlab/capture_native_simscape_execution.m": "eb0e45419985ba690ef89837dc9d0287cd084bb783088fda5a023e22a01ba736",
-    "scripts/matlab/load_native_simscape_snapshot.m": "4626a0c6f8883c61d698861dfdaec49d5af692b14b612890dcaef1bcd8ac66a0",
+    "scripts/matlab/capture_native_simscape_execution.m": "895a541e1d69f05e8623d5d7aee6411fe526563a054155f29b27b76887f92f03",
+    "scripts/matlab/load_native_simscape_snapshot.m": "1884f59f7ecd69a9da8147f762c0cef8e022cbfd4a24f9397abddca3c337c65c",
     "scripts/matlab/native_simscape_bytes_sha256.m": "fa5c762272967f4e7c8aa449b891d5d9ac379515332922618568dc1cb35e5171",
     "scripts/matlab/native_simscape_file_sha256.m": "3e51f94acb948371070f373dbcd93d7028f717e507890d0763add34aae97dfd8",
     "scripts/matlab/native_simscape_provider_sha256.m": "140da4756fcb73274b2d64c6eafcc63ab1cf4bf0eb50752929e12d3ee5bc876d",
-    "scripts/matlab/run_native_simscape_restart.m": "1d7d2bfdc73d9037732acf94fde3bf5db0fd51543741271b5340bde8aa06c66c",
-    "scripts/matlab/run_owned_native_simscape_replay.m": "7d397e2bbe6183628d6515e6969d170a26c6c48d366b6542746955059e320f92",
+    "scripts/matlab/run_native_simscape_restart.m": "39b1ddc1d83cfe1a91a428e5f1acd2676199d334bdf648ea3828ab368ca3fa0b",
+    "scripts/matlab/run_owned_native_simscape_replay.m": "93aac362fb22eeff1a5fe4cd8c7e785cfc7bcbb697875223c0db570dff76ea9f",
     "scripts/matlab/test_native_simscape_execution_binding.m": "2a4b7f58b7c07ea17b212403949a250d189c727dfcab7e81f08c80f6687254e8",
+    "scripts/matlab/test_native_simscape_loaded_source.m": "4cffddf1d00bf29f05d2eb10b741eb3b69c86ac50ce0a3f2e4f45bc0f970f8fa",
+    "scripts/matlab/test_native_simscape_snapshot_metadata.m": "d23189a6d630416b44acde9951e15f617173d6aac123dc78fa00e505c4f20635",
     "scripts/matlab/test_owned_native_simscape_replay.m": "6f9c481dc1c8afb58821503ba69e878331d4da1bfacc13a58d7e66a2cc965b4d",
     "src/engines/Simscape_Multibody_Models/python/native_owned_replay.py": "5f89fef5a07cea9da6c8fdbe8a69d93dee76f5af799fa39f14d91d007373163d",
     "src/engines/native_replay_contracts.py": "ba59f3241e5e6100c55d52b12a0351be079341ccb6848c4b1876f9834b9ff810",

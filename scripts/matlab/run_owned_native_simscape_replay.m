@@ -36,23 +36,26 @@ function receipt = run_owned_native_simscape_replay(directory, request_sha256)
     assert(~bdIsLoaded(mdl), 'NativeOwned:ModelAlreadyLoaded');
     cleanup = onCleanup(@() local_close(mdl)); %#ok<NASGU>
     load_system(model_path);
-    observed = capture_native_simscape_execution(mdl, input);
+    observed = capture_native_simscape_execution(mdl, input, model_path);
     local_binding(observed, request);
     expected = struct('owned_directory', directory, ...
         'snapshot_sha256', request.snapshot_sha256, 'model_name', mdl, ...
         'model_sha256', request.model_sha256, ...
         'input_sha256', request.producer_input_sha256, 'solver_id', request.solver_id, ...
-        'runtime_release', version('-release'), 'snapshot_time_s', request.snapshot_time_s);
+        'runtime_release', version('-release'), 'snapshot_time_s', request.snapshot_time_s, ...
+        'provider_sha256', request.provider_sha256);
     snapshot_path = fullfile(directory, 'native-operating-point.mat');
     op = load_native_simscape_snapshot(snapshot_path, expected);
     meta = load(snapshot_path, 'native_meta');
     local_binding(meta.native_meta.execution_binding, request);
     assert(double(op.startTime) == request.start_time_s, 'NativeOwned:StartClockMismatch');
+    assert(double(op.snapshotTime) == request.snapshot_time_s, ...
+        'NativeOwned:SnapshotClockMismatch', 'Native snapshot clock differs');
     simulation = Simulink.SimulationInput(mdl);
     simulation = setVariable(simulation, 'native_force_input', input, 'Workspace', mdl);
     simulation = setInitialState(simulation, op);
     output = sim(setModelParameter(simulation, 'StopTime', num2str(request.stop_time_s, 17)));
-    after = capture_native_simscape_execution(mdl, input);
+    after = capture_native_simscape_execution(mdl, input, model_path);
     local_binding(after, request);
     local_digest(request_path, request_sha256);
     local_digest(model_path, request.model_sha256);

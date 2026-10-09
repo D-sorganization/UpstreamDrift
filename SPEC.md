@@ -10460,6 +10460,12 @@ through immutable owned bytes. Actual R2025b class/clock/configuration and
 explicit simulation-checksum bindings precede strict complete-state restore.
 Native tests cover suffix-only and changed-future forces, independent full-run
 outputs, conflicting workspace inputs, byte identity and failure cleanup.
+The v5 source boundary additionally rejects a two-ULP snapshot-clock change,
+nonfinite or nonscalar saved time, wrong/missing saved provider identity and
+loaded-SLX path mismatch before native replay. The public evidence manifest
+binds an immutable 59-file fleet-local archive of source, request, model,
+operating point, native logs and outputs. The archive is a synthetic diagnostic
+artifact, not production-model or capture evidence.
 Canonical reference: `manuals/upstreamdrift/chapters/34-owned-native-simscape-replay.qmd`;
 turnover and source-hashed receipt: `docs/development/feedback_controls/F06D2_OWNED_SIMSCAPE_TURNOVER.md`
 and `F06D2_NATIVE_OWNED_RECEIPT.json`. This trusted synthetic diagnostic does not
