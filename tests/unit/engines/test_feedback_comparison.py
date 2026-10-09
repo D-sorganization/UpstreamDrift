@@ -39,6 +39,8 @@ def _valid_evidence(registry: FeedbackComparisonRegistry) -> ComparisonEvidence:
         provider_id=row.provider_id,
         provider_sha256=row.provider_sha256,
         state_schema_sha256="b" * 64,
+        initial_state_sha256="a" * 64,
+        comparison_contract_version="feedback-comparison/1.2.0",
         policy_sha256="c" * 64,
         applied_input_sha256="d" * 64,
         input_kind=InputKind.GENERALIZED_EFFORT,
@@ -253,17 +255,219 @@ def test_same_input_rejects_mixed_torque_and_excitation(
         registry.compare(ComparisonRequest(ComparisonLevel.SAME_INPUT, left, right))
 
 
+def test_actuator_command_on_torque_row_requires_compiled_profile_proof(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row = registry.get("mujoco/driver", "default", DriveMode.TORQUE)
+    evidence = replace(
+        _valid_evidence(registry),
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        source_model_sha256=row.source_model_sha256,
+        provider_id=row.provider_id,
+        provider_sha256=row.provider_sha256,
+        input_kind=InputKind.ACTUATOR_COMMAND,
+        native_command_proof=None,
+    )
+    with pytest.raises(ValueError, match="compiled command requires an F09"):
+        registry.admit(evidence, ComparisonLevel.WITHIN_ENGINE_REPLAY)
+
+
+def test_command_replay_needs_compiled_profile_proof_and_cannot_claim_muscle_only(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
+    evidence = replace(
+        _valid_evidence(registry),
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        source_model_sha256=row.source_model_sha256,
+        provider_id=row.provider_id,
+        provider_sha256=row.provider_sha256,
+        input_kind=InputKind.ACTUATOR_COMMAND,
+        evidence_mode=EvidenceMode.NATIVE_OWN_CONTACT,
+        native_engine_id="mujoco",
+    )
+    with pytest.raises(ValueError, match="F09 execution proof"):
+        registry.admit(evidence, ComparisonLevel.WITHIN_ENGINE_REPLAY)
+
+    from src.engines.feedback_comparison import CompiledCommandExecutionProof
+    from src.engines.feedback_native_execution import NativeActuatorCommandReceipt
+
+    native_receipt = NativeActuatorCommandReceipt(
+        schema_version="native-actuator-command/1.0.0",
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        inventory_engine=row.engine,
+        native_engine="mujoco",
+        native_model_id="native-model",
+        native_variant_id="native-variant",
+        native_provider_id="native-provider",
+        native_provider_sha256="1" * 64,
+        native_source_model_sha256="8" * 64,
+        loaded_native_model_sha256="4" * 64,
+        compiled_actuator_profile_sha256="3" * 64,
+        actuator_law_manifest_sha256="2" * 64,
+        state_schema_sha256=evidence.state_schema_sha256,
+        initial_state_sha256=evidence.initial_state_sha256,
+        input_channel_schema_sha256=evidence.input_channel_schema_sha256,
+        applied_input_sha256=evidence.applied_input_sha256,
+        policy_sha256=evidence.policy_sha256,
+        time_grid_sha256=evidence.time_grid_sha256,
+        resource_closure_sha256="a" * 64,
+        output_state_sha256="b" * 64,
+        ordered_channel_ids=evidence.channel_ids,
+        horizon_s=evidence.horizon_s,
+        state_sample_count=2,
+        input_sample_count=1,
+        nq=evidence.nq,
+        nv=evidence.nv,
+        full_state=True,
+        full_horizon=True,
+        state_reset_count=0,
+    )
+    evidenced = replace(
+        evidence,
+        native_engine_id="mujoco",
+        native_execution_provider_id="native-provider",
+        native_execution_provider_sha256="1" * 64,
+        actuator_law_manifest_sha256="2" * 64,
+        compiled_actuator_profile_sha256="3" * 64,
+        loaded_native_model_sha256="4" * 64,
+        native_source_model_sha256="8" * 64,
+        native_output_state_sha256="b" * 64,
+        native_command_proof=CompiledCommandExecutionProof(native_receipt),
+        contact_evidence_sha256="5" * 64,
+        force_evidence_sha256="6" * 64,
+        muscle_state_evidence_sha256="7" * 64,
+    )
+    registry.admit(evidenced, ComparisonLevel.WITHIN_ENGINE_REPLAY)
+    with pytest.raises(ValueError, match="cannot claim muscle-only"):
+        registry.admit(
+            evidenced,
+            ComparisonLevel.BIOMECHANICAL_EQUIVALENCE,
+            claim_native_muscle=True,
+        )
+
+
+def test_command_same_input_requires_same_native_interpretation(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row = registry.get("myosuite/driver", "default", DriveMode.MUSCLE_EXCITATION)
+    evidence = replace(
+        _valid_evidence(registry),
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        drive_mode=row.drive_mode,
+        source_model_sha256=row.source_model_sha256,
+        provider_id=row.provider_id,
+        provider_sha256=row.provider_sha256,
+        input_kind=InputKind.ACTUATOR_COMMAND,
+        evidence_mode=EvidenceMode.NATIVE_OWN_CONTACT,
+        native_engine_id="mujoco",
+        native_execution_provider_id="native-provider",
+        native_execution_provider_sha256="1" * 64,
+        actuator_law_manifest_sha256="2" * 64,
+        compiled_actuator_profile_sha256="3" * 64,
+        loaded_native_model_sha256="4" * 64,
+        native_source_model_sha256="8" * 64,
+        native_output_state_sha256="b" * 64,
+    )
+    from src.engines.feedback_comparison import CompiledCommandExecutionProof
+    from src.engines.feedback_native_execution import NativeActuatorCommandReceipt
+
+    receipt = NativeActuatorCommandReceipt(
+        schema_version="native-actuator-command/1.0.0",
+        package_id=row.package_id,
+        variant_id=row.variant_id,
+        inventory_engine=row.engine,
+        native_engine="mujoco",
+        native_model_id="native-model",
+        native_variant_id="native-variant",
+        native_provider_id="native-provider",
+        native_provider_sha256="1" * 64,
+        native_source_model_sha256="8" * 64,
+        loaded_native_model_sha256="4" * 64,
+        compiled_actuator_profile_sha256="3" * 64,
+        actuator_law_manifest_sha256="2" * 64,
+        state_schema_sha256=evidence.state_schema_sha256,
+        initial_state_sha256=evidence.initial_state_sha256,
+        input_channel_schema_sha256=evidence.input_channel_schema_sha256,
+        applied_input_sha256=evidence.applied_input_sha256,
+        policy_sha256=evidence.policy_sha256,
+        time_grid_sha256=evidence.time_grid_sha256,
+        resource_closure_sha256="a" * 64,
+        output_state_sha256="b" * 64,
+        ordered_channel_ids=evidence.channel_ids,
+        horizon_s=evidence.horizon_s,
+        state_sample_count=2,
+        input_sample_count=1,
+        nq=evidence.nq,
+        nv=evidence.nv,
+        full_state=True,
+        full_horizon=True,
+        state_reset_count=0,
+    )
+    evidence = replace(
+        evidence, native_command_proof=CompiledCommandExecutionProof(receipt)
+    )
+    registry.compare(ComparisonRequest(ComparisonLevel.SAME_INPUT, evidence, evidence))
+    with pytest.raises(ValueError, match="cross-engine mapping"):
+        other_engine_receipt = replace(receipt, native_engine="drake")
+        registry.compare(
+            ComparisonRequest(
+                ComparisonLevel.SAME_INPUT,
+                evidence,
+                replace(
+                    evidence,
+                    native_engine_id="drake",
+                    native_command_proof=CompiledCommandExecutionProof(
+                        other_engine_receipt
+                    ),
+                ),
+            )
+        )
+
+
 def test_same_input_requires_common_physics_and_time_grid(
     registry: FeedbackComparisonRegistry,
 ) -> None:
     left = _valid_evidence(registry)
     for bad in (
+        replace(left, initial_state_sha256="8" * 64),
         replace(left, time_grid_sha256="8" * 64),
         replace(left, physics_sha256="9" * 64),
         replace(left, channel_ids=("hip",)),
     ):
         with pytest.raises(ValueError, match="differs"):
             registry.compare(ComparisonRequest(ComparisonLevel.SAME_INPUT, left, bad))
+
+
+@pytest.mark.parametrize(
+    "level",
+    [ComparisonLevel.WITHIN_ENGINE_REPLAY, ComparisonLevel.SAME_INPUT],
+)
+def test_replay_requires_versioned_initial_payload_digest(
+    registry: FeedbackComparisonRegistry, level: ComparisonLevel
+) -> None:
+    evidence = _valid_evidence(registry)
+    for bad in (
+        replace(evidence, initial_state_sha256=""),
+        replace(evidence, initial_state_sha256="not-a-digest"),
+        replace(evidence, comparison_contract_version=""),
+        replace(evidence, comparison_contract_version="feedback-comparison/1.0.0"),
+    ):
+        with pytest.raises(ValueError, match="initial_state|comparison contract"):
+            registry.admit(bad, level)
+
+    legacy = replace(evidence, initial_state_sha256="", comparison_contract_version="")
+    registry.admit(legacy, ComparisonLevel.IDENTITY)
+    registry.admit(
+        replace(legacy, transcription_receipt_sha256="9" * 64),
+        ComparisonLevel.TRANSCRIPTION_FEASIBILITY,
+    )
 
 
 def test_direct_effort_must_be_held_for_each_step(

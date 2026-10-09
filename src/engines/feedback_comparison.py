@@ -20,6 +20,36 @@ from src.engines.model_inventory import (
     sha256_file,
 )
 
+REPLAY_COMPARISON_CONTRACT_VERSION = "feedback-comparison/1.2.0"
+_SUPPORTED_REPLAY_COMPARISON_CONTRACTS = frozenset(
+    {"feedback-comparison/1.1.0", REPLAY_COMPARISON_CONTRACT_VERSION}
+)
+_COMPILED_PROOF_FIELD_PAIRS = (
+    ("package_id", "package_id"),
+    ("variant_id", "variant_id"),
+    ("native_engine_id", "native_engine_id"),
+    ("native_execution_provider_id", "native_execution_provider_id"),
+    ("state_schema_sha256", "state_schema_sha256"),
+    ("initial_state_sha256", "initial_state_sha256"),
+    ("applied_input_sha256", "applied_input_sha256"),
+    ("policy_sha256", "policy_sha256"),
+    ("time_grid_sha256", "time_grid_sha256"),
+    ("input_channel_schema_sha256", "input_channel_schema_sha256"),
+    ("channel_ids", "channel_ids"),
+    ("loaded_native_model_sha256", "loaded_native_model_sha256"),
+    ("native_execution_provider_sha256", "native_execution_provider_sha256"),
+    ("actuator_law_manifest_sha256", "actuator_law_manifest_sha256"),
+    ("compiled_actuator_profile_sha256", "compiled_actuator_profile_sha256"),
+    ("native_source_model_sha256", "native_source_model_sha256"),
+    ("output_state_sha256", "native_output_state_sha256"),
+    ("horizon_s", "horizon_s"),
+    ("nq", "nq"),
+    ("nv", "nv"),
+    ("full_state", "full_state"),
+    ("full_horizon", "full_horizon"),
+    ("state_reset_count", "state_resets"),
+)
+
 
 class DriveMode(str, enum.Enum):
     TORQUE = "torque"
@@ -116,6 +146,16 @@ class ComparisonEvidence:
     transcription_receipt_sha256: str = ""
     observation_score_receipt_sha256: str = ""
     observation_time_grid_sha256: str = ""
+    initial_state_sha256: str = ""
+    comparison_contract_version: str = ""
+    native_engine_id: str = ""
+    native_execution_provider_id: str = ""
+    native_execution_provider_sha256: str = ""
+    actuator_law_manifest_sha256: str = ""
+    compiled_actuator_profile_sha256: str = ""
+    native_source_model_sha256: str = ""
+    native_output_state_sha256: str = ""
+    native_command_proof: CompiledCommandExecutionProof | None = None
 
 
 @dataclass(frozen=True)
@@ -123,6 +163,80 @@ class ComparisonRequest:
     level: ComparisonLevel
     left: ComparisonEvidence
     right: ComparisonEvidence
+
+
+@dataclass(frozen=True, init=False)
+class CompiledCommandExecutionProof:
+    """F01 handoff constructed from the F09 native command receipt."""
+
+    schema_version: str
+    package_id: str
+    variant_id: str
+    inventory_engine: str
+    native_engine_id: str
+    native_execution_provider_id: str
+    native_source_model_sha256: str
+    native_execution_provider_sha256: str
+    loaded_native_model_sha256: str
+    compiled_actuator_profile_sha256: str
+    actuator_law_manifest_sha256: str
+    state_schema_sha256: str
+    initial_state_sha256: str
+    applied_input_sha256: str
+    policy_sha256: str
+    time_grid_sha256: str
+    input_channel_schema_sha256: str
+    channel_ids: tuple[str, ...]
+    output_state_sha256: str
+    resource_closure_sha256: str
+    horizon_s: float
+    state_sample_count: int
+    input_sample_count: int
+    nq: int
+    nv: int
+    full_state: bool
+    full_horizon: bool
+    state_reset_count: int
+
+    def __init__(self, receipt: object) -> None:
+        from src.engines.feedback_native_execution import NativeActuatorCommandReceipt
+
+        if not isinstance(receipt, NativeActuatorCommandReceipt):
+            raise TypeError("compiled-command proof requires an F09 native receipt")
+        if receipt.schema_version != "native-actuator-command/1.0.0":
+            raise ValueError("native command receipt schema is unsupported")
+        values = {
+            "schema_version": receipt.schema_version,
+            "package_id": receipt.package_id,
+            "variant_id": receipt.variant_id,
+            "inventory_engine": receipt.inventory_engine,
+            "native_engine_id": receipt.native_engine,
+            "native_execution_provider_id": receipt.native_provider_id,
+            "native_source_model_sha256": receipt.native_source_model_sha256,
+            "native_execution_provider_sha256": receipt.native_provider_sha256,
+            "loaded_native_model_sha256": receipt.loaded_native_model_sha256,
+            "compiled_actuator_profile_sha256": receipt.compiled_actuator_profile_sha256,
+            "actuator_law_manifest_sha256": receipt.actuator_law_manifest_sha256,
+            "state_schema_sha256": receipt.state_schema_sha256,
+            "initial_state_sha256": receipt.initial_state_sha256,
+            "applied_input_sha256": receipt.applied_input_sha256,
+            "policy_sha256": receipt.policy_sha256,
+            "time_grid_sha256": receipt.time_grid_sha256,
+            "input_channel_schema_sha256": receipt.input_channel_schema_sha256,
+            "channel_ids": receipt.ordered_channel_ids,
+            "output_state_sha256": receipt.output_state_sha256,
+            "resource_closure_sha256": receipt.resource_closure_sha256,
+            "horizon_s": receipt.horizon_s,
+            "state_sample_count": receipt.state_sample_count,
+            "input_sample_count": receipt.input_sample_count,
+            "nq": receipt.nq,
+            "nv": receipt.nv,
+            "full_state": receipt.full_state,
+            "full_horizon": receipt.full_horizon,
+            "state_reset_count": receipt.state_reset_count,
+        }
+        for name, value in values.items():
+            object.__setattr__(self, name, value)
 
 
 @dataclass(frozen=True)
@@ -249,8 +363,16 @@ class FeedbackComparisonRegistry:
         if len(value) != 64 or any(c not in "0123456789abcdef" for c in value.lower()):
             raise ValueError(f"{name} must be a SHA-256 hex digest")
 
-    def _admit_replay_evidence(self, evidence: ComparisonEvidence) -> None:
+    def _admit_replay_evidence(
+        self, evidence: ComparisonEvidence, row: ComparisonRow
+    ) -> None:
         """Validate independent applied-input replay without scoring accuracy."""
+        if (
+            evidence.comparison_contract_version
+            not in _SUPPORTED_REPLAY_COMPARISON_CONTRACTS
+        ):
+            raise ValueError("replay comparison contract version is unsupported")
+        self._digest(evidence.initial_state_sha256, "initial_state_sha256")
         self._digest(evidence.applied_input_sha256, "applied_input_sha256")
         for name in (
             "physical_model_sha256",
@@ -275,6 +397,23 @@ class FeedbackComparisonRegistry:
             raise ValueError("replay horizon must be positive and finite")
         if evidence.nq <= 0 or evidence.nv <= 0 or not evidence.channel_ids:
             raise ValueError("replay requires dimensions and channel identities")
+        self._admit_replay_bundle_and_input(evidence)
+        if evidence.input_kind is InputKind.ACTUATOR_COMMAND or (
+            evidence.drive_mode == DriveMode.MUSCLE_EXCITATION
+            and evidence.input_kind != InputKind.MUSCLE_EXCITATION
+        ):
+            self._admit_compiled_command_evidence(evidence, row)
+        if evidence.drive_mode == DriveMode.TORQUE and evidence.input_kind not in {
+            InputKind.ACTUATOR_COMMAND,
+            InputKind.ACTUATOR_TORQUE,
+            InputKind.ACTUATOR_FORCE,
+            InputKind.GENERALIZED_EFFORT,
+        }:
+            raise ValueError("torque drive requires an actuator or effort input")
+
+    @staticmethod
+    def _admit_replay_bundle_and_input(evidence: ComparisonEvidence) -> None:
+        """Validate the replay schema, timebase and input interpolation."""
         if evidence.bundle_schema == "same-input-bundle/v1":
             if evidence.nq != evidence.nv:
                 raise ValueError("Euclidean v1 bundle cannot represent nq != nv")
@@ -305,18 +444,62 @@ class FeedbackComparisonRegistry:
             }
         ):
             raise ValueError("muscle excitation interpolation is undeclared")
+
+    def _admit_compiled_command_evidence(
+        self, evidence: ComparisonEvidence, row: ComparisonRow
+    ) -> None:
+        """Require a native receipt matching the compiled command execution."""
+        if evidence.comparison_contract_version != REPLAY_COMPARISON_CONTRACT_VERSION:
+            raise ValueError(
+                "compiled command admission requires feedback-comparison/1.2.0"
+            )
+        if evidence.input_kind is not InputKind.ACTUATOR_COMMAND:
+            raise ValueError(
+                "muscle drive requires excitation or a verified command profile"
+            )
+        proof = evidence.native_command_proof
+        if not isinstance(proof, CompiledCommandExecutionProof):
+            raise ValueError("compiled command requires an F09 execution proof")
+        if evidence.evidence_mode is not EvidenceMode.NATIVE_OWN_CONTACT:
+            raise ValueError("compiled command replay requires native own-contact")
+        if not evidence.native_engine_id or not evidence.native_execution_provider_id:
+            raise ValueError("compiled command requires native engine and provider ids")
         if (
-            evidence.drive_mode == DriveMode.MUSCLE_EXCITATION
-            and evidence.input_kind != InputKind.MUSCLE_EXCITATION
+            any(
+                getattr(proof, proof_name) != getattr(evidence, evidence_name)
+                for proof_name, evidence_name in _COMPILED_PROOF_FIELD_PAIRS
+            )
+            or proof.inventory_engine != row.engine
         ):
-            raise ValueError("muscle drive requires excitation, not effort")
-        if evidence.drive_mode == DriveMode.TORQUE and evidence.input_kind not in {
-            InputKind.ACTUATOR_COMMAND,
-            InputKind.ACTUATOR_TORQUE,
-            InputKind.ACTUATOR_FORCE,
-            InputKind.GENERALIZED_EFFORT,
-        }:
-            raise ValueError("torque drive requires an actuator or effort input")
+            raise ValueError("compiled command proof differs from replay evidence")
+        if (
+            proof.state_sample_count < 2
+            or proof.input_sample_count < 1
+            or not proof.full_state
+            or not proof.full_horizon
+            or proof.state_reset_count != 0
+        ):
+            raise ValueError("compiled command receipt lacks full reset-free execution")
+        for name in (
+            "native_source_model_sha256",
+            "output_state_sha256",
+            "resource_closure_sha256",
+            "native_execution_provider_sha256",
+            "actuator_law_manifest_sha256",
+            "compiled_actuator_profile_sha256",
+            "loaded_native_model_sha256",
+        ):
+            value = (
+                getattr(proof, name)
+                if name
+                in {
+                    "native_source_model_sha256",
+                    "output_state_sha256",
+                    "resource_closure_sha256",
+                }
+                else getattr(evidence, name)
+            )
+            self._digest(value, name)
 
     def _admit_biomechanical_evidence(
         self,
@@ -335,6 +518,10 @@ class FeedbackComparisonRegistry:
         self._digest(evidence.contact_evidence_sha256, "contact_evidence_sha256")
         self._digest(evidence.force_evidence_sha256, "force_evidence_sha256")
         if claim_native_muscle:
+            if evidence.input_kind == InputKind.ACTUATOR_COMMAND:
+                raise ValueError(
+                    "compiled mixed actuator commands cannot claim muscle-only drive"
+                )
             if row.capability_support["native_own_contact"] != "supported":
                 raise ValueError("native own-contact capability is not supported")
             if evidence.drive_mode != DriveMode.MUSCLE_EXCITATION:
@@ -382,7 +569,7 @@ class FeedbackComparisonRegistry:
                 evidence.transcription_receipt_sha256, "transcription_receipt_sha256"
             )
             return row
-        self._admit_replay_evidence(evidence)
+        self._admit_replay_evidence(evidence, row)
         if level == ComparisonLevel.OBSERVATION_ACCURACY:
             self._digest(
                 evidence.observation_time_grid_sha256,
@@ -415,6 +602,7 @@ class FeedbackComparisonRegistry:
                 "applied_input_sha256",
                 "policy_sha256",
                 "state_schema_sha256",
+                "initial_state_sha256",
                 "observation_sha256",
                 "channel_ids",
                 "timebase_id",
@@ -426,6 +614,47 @@ class FeedbackComparisonRegistry:
                     raise ValueError(f"same-input comparison differs in {name}")
             if request.left.evidence_mode != request.right.evidence_mode:
                 raise ValueError("same-input physics evidence mode differs")
+            if request.left.input_kind is InputKind.ACTUATOR_COMMAND:
+                for evidence in (request.left, request.right):
+                    if not evidence.native_execution_provider_id:
+                        raise ValueError(
+                            "compiled command requires its native provider id"
+                        )
+                    for name in (
+                        "native_execution_provider_sha256",
+                        "actuator_law_manifest_sha256",
+                        "compiled_actuator_profile_sha256",
+                        "loaded_native_model_sha256",
+                    ):
+                        self._digest(getattr(evidence, name), name)
+                if request.left.native_engine_id != request.right.native_engine_id:
+                    raise ValueError(
+                        "compiled command replay lacks a reviewed cross-engine mapping"
+                    )
+                for name in (
+                    "native_execution_provider_sha256",
+                    "actuator_law_manifest_sha256",
+                    "compiled_actuator_profile_sha256",
+                    "loaded_native_model_sha256",
+                ):
+                    if getattr(request.left, name) != getattr(request.right, name):
+                        raise ValueError(
+                            f"same-input compiled command differs in {name}"
+                        )
+                if (
+                    request.left.native_execution_provider_id
+                    != request.right.native_execution_provider_id
+                ):
+                    raise ValueError(
+                        "same-input compiled command differs in native provider id"
+                    )
+                if (
+                    request.left.native_source_model_sha256
+                    != request.right.native_source_model_sha256
+                ):
+                    raise ValueError(
+                        "same-input compiled command differs in native source model"
+                    )
 
     def validate_baselines(self, runs: tuple[BaselineRun, ...]) -> None:
         """Require a fair prospective benchmark; actual metrics live elsewhere."""
