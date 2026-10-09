@@ -89,3 +89,12 @@ MuJoCo Euler derivatives are checked in the $n_v$ configuration tangent and
 the complete post-limit torque history independently replays through the
 pinned Tools T01 contract. The source-hashed receipt retains derivative and
 cold replay timing; it does not select a multi-DOF optimizer or promote F05.
+
+## F05D Native Multi-DOF Manifold Candidate
+
+`F05D_NATIVE_MANIFOLD_BOX_FDDP_TURNOVER.md` and provisional chapter 26
+describe the contact-free floating-root/two-hinge Crocoddyl state and
+native-step action. Supported MuJoCo 3.8/Crocoddyl 3.2.1 paired evidence
+retains matched native nonlinear admission, both solver orders, every
+fallback and full-state frozen-torque replay. BoxFDDP is a restricted
+candidate; F02 TVLQR remains the broader default and F05 remains open.

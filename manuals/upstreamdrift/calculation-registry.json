@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-manifold-box-fddp-inventory",
+      "owner": "UpstreamDrift issue #11932",
+      "resolution": "Inventory provisional chapter 26 and F05d: a contact-free native floating-root/two-hinge fixture with nq=9, nv=8, nx=17, ndx=16 and two direct torque motors; Crocoddyl manifold diff/integrate and native MuJoCo Euler mjd_transitionFD actions; bounded BoxFDDP proposals admitted only after finite whole-plan nonlinear native scoring against verified zero-torque fallback, exact compiled-model/input-policy checks and complete initial-state Tools T01 ZOH replay. The supported MuJoCo 3.8/Crocoddyl 3.2.1 receipt pairs both start states against SciPy native shooting at the same reference, truth, torque limits and cooperative budget, retaining timed-out fallbacks and cold/warm cost. This restricted synthetic software candidate does not establish a hard deadline, anatomical/contact/muscle/ground/grip validity, private capture, full-body swing matching or six-engine qualification. F05 parent and manual publication remain blocked."
+    },
+    {
       "id": "UP-D1-native-manifold-derivative-inventory",
       "owner": "UpstreamDrift issue #11920",
       "resolution": "Inventory provisional chapter 25 and F05c: a contact-free native floating-root/two-hinge fixture with nq=9, nv=8 and two named direct unit motors; true MuJoCo Euler mjd_transitionFD on the 16-dimensional configuration tangent/velocity state, independently checked via mj_integratePos/mj_differentiatePos native perturbations and ordered motor-column permutation; complete initial mjSTATE_INTEGRATION and exact post-limit ZOH torque export through Tools T01 with independent full-state replay. The supported-provider source-hashed receipt records derivative and cold-bundle/replay timings and exact identities. This establishes neither multi-DOF optimal-control selection nor hard real-time, contact/grip, muscle, private capture, full-body, six-engine or full-swing qualification. Full calculation coverage and publication remain blocked."
