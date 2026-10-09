@@ -158,21 +158,7 @@ def _module_bytes(module_name: str) -> bytes:
     return Path(path).read_bytes()
 
 
-def _native_identity(
-    environment_id: str, env: Any, model: Any, model_path: Path, contracts: Any
-) -> tuple[Any, tuple[str, ...], tuple[float, ...]]:
-    import mujoco as mj
-
-    wrapper_names, wrapper_values = _wrapper_state(env)
-    names = tuple(
-        mj.mj_id2name(model, mj.mjtObj.mjOBJ_ACTUATOR, index)
-        for index in range(model.nu)
-    )
-    if any(not name for name in names) or len(set(names)) != len(names):
-        raise ValueError("native muscle actuators require unique explicit names")
-    native = np.zeros(mj.mj_sizeModel(model), dtype=np.uint8)
-    mj.mj_saveModel(model, buffer=native)
-    loaded_hash = hashlib.sha256(native.tobytes()).hexdigest()
+def _provider_digest(environment_id: str, env: Any) -> str:
     module_names = (
         "myosuite.envs.myo.tasks.basic.muscle_mixin",
         "myosuite.envs.gymnasium_env",
@@ -206,7 +192,17 @@ def _native_identity(
             separators=(",", ":"),
         ).encode("utf-8")
     )
-    provider_hash = digest.hexdigest()
+    return digest.hexdigest()
+
+
+def _initial_state_schema(
+    model: Any,
+    wrapper_values: tuple[float, ...],
+    wrapper_names: tuple[str, ...],
+    contracts: Any,
+) -> Any:
+    import mujoco as mj
+
     wrapper_representation = (
         ";".join(wrapper_names)
         + "|"
@@ -258,9 +254,28 @@ def _native_identity(
             wrapper_representation,
         ),
     )
-    schema = contracts.InitialStateSchema(
+    return contracts.InitialStateSchema(
         "myosuite-native-excitation-state", _VERSION, components
     )
+
+
+def _native_identity(
+    environment_id: str, env: Any, model: Any, model_path: Path, contracts: Any
+) -> tuple[Any, tuple[str, ...], tuple[float, ...]]:
+    import mujoco as mj
+
+    wrapper_names, wrapper_values = _wrapper_state(env)
+    names = tuple(
+        mj.mj_id2name(model, mj.mjtObj.mjOBJ_ACTUATOR, index)
+        for index in range(model.nu)
+    )
+    if any(not name for name in names) or len(set(names)) != len(names):
+        raise ValueError("native muscle actuators require unique explicit names")
+    native = np.zeros(mj.mj_sizeModel(model), dtype=np.uint8)
+    mj.mj_saveModel(model, buffer=native)
+    loaded_hash = hashlib.sha256(native.tobytes()).hexdigest()
+    provider_hash = _provider_digest(environment_id, env)
+    schema = _initial_state_schema(model, wrapper_values, wrapper_names, contracts)
     source = model_path.read_bytes()
     identity = contracts.ModelIdentity(
         "myosuite",
@@ -480,6 +495,11 @@ def validate_myo_suite_bundle_contract(row: Any, binding: Any, bundle: Any) -> N
         != expected_components
     ):
         raise ValueError("MyoSuite initial-state schema is incomplete or reordered")
+    _validate_myo_input_history(bundle, binding)
+
+
+def _validate_myo_input_history(bundle: Any, binding: Any) -> None:
+    """Validate ordered channels and the finite normalized ZOH history."""
     channels = tuple(item.channel_id for item in bundle.input_history.channels)
     if (
         channels != binding.ordered_input_channel_ids
@@ -523,13 +543,7 @@ def _restore_wrapper_state(env: Any, values: tuple[float, ...]) -> None:
             setattr(wrapper, attribute, bool(value))
 
 
-def replay_native_myo_suite_excitation_bundle(
-    bundle: Any, environment_id: str
-) -> NativeMyoSuiteExcitationReplay:
-    """Replay a validated T01 excitation bundle through native MyoSuite/MuJoCo."""
-    import mujoco as mj
-
-    contracts = _contracts()
+def _validate_replay_request(bundle: Any, environment_id: str, contracts: Any) -> Any:
     bundle = validate_native_replay_bundle(bundle, contracts)
     if bundle.schema_version != "experiment-replay/1.0.0":
         raise ValueError("unsupported frozen MyoSuite replay schema")
@@ -558,6 +572,109 @@ def replay_native_myo_suite_excitation_bundle(
         )
     if bundle.model.engine_id != "myosuite" or bundle.model.model_id != environment_id:
         raise ValueError("frozen native MyoSuite environment identity differs")
+    return bundle
+
+
+def _restore_replay_state(
+    env: Any, model: Any, data: Any, bundle: Any
+) -> dict[str, NDArray[np.float64]]:
+    import mujoco as mj
+
+    states = {
+        item.component_id: np.asarray(item.values, dtype=np.float64)
+        for item in bundle.initial_state
+    }
+    expected = (
+        "qpos",
+        "qvel",
+        "muscle_activation",
+        "actuator_internal",
+        "integration",
+        "wrapper_state",
+    )
+    if tuple(states) != expected:
+        raise ValueError(
+            "complete ordered MyoSuite physical and wrapper state is required"
+        )
+    mj.mj_setState(model, data, states["integration"], mj.mjtState.mjSTATE_INTEGRATION)
+    _restore_wrapper_state(env, tuple(states["wrapper_state"]))
+    if not np.array_equal(data.qpos, states["qpos"]) or not np.array_equal(
+        data.qvel, states["qvel"]
+    ):
+        raise ValueError("restored MyoSuite configuration or velocity differs")
+    if not np.array_equal(data.act, states["muscle_activation"]) or not np.array_equal(
+        data.ctrl, states["actuator_internal"]
+    ):
+        raise ValueError("restored MyoSuite muscle or actuator state differs")
+    if data.time != 0.0 or np.any(data.qfrc_applied) or np.any(data.xfrc_applied):
+        raise ValueError("initial native time and external-load state must be zero")
+    if not np.array_equal(
+        np.asarray(_state_values(env, model, data)[-1][1]), states["wrapper_state"]
+    ):
+        raise ValueError("restored Gymnasium wrapper state differs")
+    return states
+
+
+def _execute_native_steps(
+    plant: Any,
+    model: Any,
+    data: Any,
+    times: NDArray[np.float64],
+    expected_input: NDArray[np.float64],
+    states: dict[str, NDArray[np.float64]],
+    bundle: Any,
+) -> NativeMyoSuiteExcitationReplay:
+    import mujoco as mj
+
+    qpos = [data.qpos.copy()]
+    qvel = [data.qvel.copy()]
+    activations = [data.act.copy()]
+    controls = [data.ctrl.copy()]
+    integration = [states["integration"].copy()]
+    wrapper_states = [states["wrapper_state"].copy()]
+    applied = []
+    for excitation in expected_input[:-1]:
+        data.ctrl[:] = excitation
+        actual = np.asarray(data.ctrl, dtype=np.float64).copy()
+        if not np.array_equal(actual, excitation):
+            raise ValueError("native applied excitation readback differs")
+        limited = np.asarray(model.actuator_ctrllimited, dtype=bool)
+        limits = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
+        if np.any(actual[limited] < limits[limited, 0]) or np.any(
+            actual[limited] > limits[limited, 1]
+        ):
+            raise ValueError("native applied excitation violates actuator limits")
+        applied.append(actual)
+        mj.mj_step(model, data, nstep=int(plant.frame_skip))
+        mj.mj_forward(model, data)
+        qpos.append(data.qpos.copy())
+        qvel.append(data.qvel.copy())
+        activations.append(data.act.copy())
+        controls.append(data.ctrl.copy())
+        state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
+        mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
+        integration.append(state)
+        wrapper_states.append(states["wrapper_state"].copy())
+    return NativeMyoSuiteExcitationReplay(
+        times.copy(),
+        np.asarray(qpos),
+        np.asarray(qvel),
+        np.asarray(activations),
+        np.asarray(controls),
+        np.asarray(integration),
+        np.asarray(wrapper_states),
+        np.asarray(applied),
+        bundle.applied_input_sha256,
+        bundle.policy_sha256,
+    )
+
+
+def replay_native_myo_suite_excitation_bundle(
+    bundle: Any, environment_id: str
+) -> NativeMyoSuiteExcitationReplay:
+    """Replay a validated T01 excitation bundle through native MyoSuite/MuJoCo."""
+    contracts = _contracts()
+    bundle = _validate_replay_request(bundle, environment_id, contracts)
     env, plant, model, data, model_path = _load_environment(environment_id)
     try:
         identity, _, _ = _native_identity(
@@ -584,79 +701,9 @@ def replay_native_myo_suite_excitation_bundle(
             rtol=0,
         ):
             raise ValueError("frozen input clock differs from native frame_skip")
-        states = {
-            item.component_id: np.asarray(item.values, dtype=np.float64)
-            for item in bundle.initial_state
-        }
-        if tuple(states) != (
-            "qpos",
-            "qvel",
-            "muscle_activation",
-            "actuator_internal",
-            "integration",
-            "wrapper_state",
-        ):
-            raise ValueError(
-                "complete ordered MyoSuite physical and wrapper state is required"
-            )
-        mj.mj_setState(
-            model, data, states["integration"], mj.mjtState.mjSTATE_INTEGRATION
-        )
-        _restore_wrapper_state(env, tuple(states["wrapper_state"]))
-        if not np.array_equal(data.qpos, states["qpos"]) or not np.array_equal(
-            data.qvel, states["qvel"]
-        ):
-            raise ValueError("restored MyoSuite configuration or velocity differs")
-        if not np.array_equal(
-            data.act, states["muscle_activation"]
-        ) or not np.array_equal(data.ctrl, states["actuator_internal"]):
-            raise ValueError("restored MyoSuite muscle or actuator state differs")
-        if data.time != 0.0 or np.any(data.qfrc_applied) or np.any(data.xfrc_applied):
-            raise ValueError("initial native time and external-load state must be zero")
-        if not np.array_equal(
-            np.asarray(_state_values(env, model, data)[-1][1]), states["wrapper_state"]
-        ):
-            raise ValueError("restored Gymnasium wrapper state differs")
-        qpos = [data.qpos.copy()]
-        qvel = [data.qvel.copy()]
-        activations = [data.act.copy()]
-        controls = [data.ctrl.copy()]
-        integration = [states["integration"].copy()]
-        wrapper_states = [states["wrapper_state"].copy()]
-        applied = []
-        for excitation in expected_input[:-1]:
-            data.ctrl[:] = excitation
-            actual = np.asarray(data.ctrl, dtype=np.float64).copy()
-            if not np.array_equal(actual, excitation):
-                raise ValueError("native applied excitation readback differs")
-            limited = np.asarray(model.actuator_ctrllimited, dtype=bool)
-            limits = np.asarray(model.actuator_ctrlrange, dtype=np.float64)
-            if np.any(actual[limited] < limits[limited, 0]) or np.any(
-                actual[limited] > limits[limited, 1]
-            ):
-                raise ValueError("native applied excitation violates actuator limits")
-            applied.append(actual)
-            mj.mj_step(model, data, nstep=int(plant.frame_skip))
-            mj.mj_forward(model, data)
-            qpos.append(data.qpos.copy())
-            qvel.append(data.qvel.copy())
-            activations.append(data.act.copy())
-            controls.append(data.ctrl.copy())
-            state = np.empty(mj.mj_stateSize(model, mj.mjtState.mjSTATE_INTEGRATION))
-            mj.mj_getState(model, data, state, mj.mjtState.mjSTATE_INTEGRATION)
-            integration.append(state)
-            wrapper_states.append(states["wrapper_state"].copy())
-        return NativeMyoSuiteExcitationReplay(
-            expected_times.copy(),
-            np.asarray(qpos),
-            np.asarray(qvel),
-            np.asarray(activations),
-            np.asarray(controls),
-            np.asarray(integration),
-            np.asarray(wrapper_states),
-            np.asarray(applied),
-            bundle.applied_input_sha256,
-            bundle.policy_sha256,
+        states = _restore_replay_state(env, model, data, bundle)
+        return _execute_native_steps(
+            plant, model, data, expected_times, expected_input, states, bundle
         )
     finally:
         env.close()
