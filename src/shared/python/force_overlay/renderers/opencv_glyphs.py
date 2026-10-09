@@ -285,6 +285,8 @@ def draw_legend_box(
         lines.append(
             (f"Clamped (double tip): {len(legend.clamped_labels)}", (120, 200, 255))
         )
+    if legend.grip_split_method is not None:
+        lines.append((f"Grip split: {legend.grip_split_method}", (233, 180, 86)))
     if legend.unavailable_labels:
         lines.append(
             (f"Unavailable: {', '.join(legend.unavailable_labels)}", (100, 100, 255))

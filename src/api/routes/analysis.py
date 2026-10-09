@@ -28,7 +28,12 @@ from ..models.requests import (
     CandidateCounterfactualRequest,
     CounterfactualRequest,
 )
-from ..models.responses import AnalysisResponse, ImpactParametersResponse
+from ..models.responses import (
+    AnalysisResponse,
+    GripWrenchResponse,
+    ImpactParametersResponse,
+)
+from ..services.grip_wrench_service import compute_grip_plot
 from ..services.impact_parameters_service import compute_impact_card
 from ..utils.datetime_compat import UTC
 
@@ -298,3 +303,31 @@ async def get_impact_parameters(
     return ImpactParametersResponse(
         run_id=run.run_id, engine=run.engine_type, **payload
     )
+
+
+# ──────────────────────────────────────────────────────────────
+#  Grip wrench plots (GCV-10, #11716)
+# ──────────────────────────────────────────────────────────────
+
+
+@router.get("/analysis/grip-wrench", response_model=GripWrenchResponse)
+async def get_grip_wrench(
+    run_id: str | None = Query(None, description="Run id; defaults to the active run"),
+    impact_time_s: float | None = Query(None, description="Impact event marker (s)"),
+    service: SimulationService = Depends(get_simulation_service),
+) -> GripWrenchResponse:
+    """Per-hand force, net force and equivalent couple at the grip midpoint.
+
+    Wrenches are exerted by the hand on the club (world frame).  Unavailable
+    samples are ``null``, never zero, and ``split_method`` names how the
+    left/right split was obtained.  404 for an unknown run, 400 for malformed
+    grip data.
+    """
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="No such simulation run")
+    try:
+        payload = compute_grip_plot(run, impact_time_s=impact_time_s)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return GripWrenchResponse(run_id=run.run_id, engine=run.engine_type, **payload)

@@ -1688,6 +1688,28 @@ export interface GreenReadingResponse {
   slopes: number[][];
 }
 
+/**
+ * Per-hand grip force, net force and midpoint couple time series (GCV-10, #11716).
+ */
+export interface GripWrenchResponse {
+  run_id?: string | null;
+  engine?: string | null;
+  /** False when no grip data exists */
+  available: boolean;
+  /** Why the series is unavailable */
+  reason?: string | null;
+  time_s?: number[];
+  /** How the left/right split was obtained */
+  split_method: string;
+  split_method_by_sample?: string[];
+  unavailable_reasons?: string[];
+  events?: Record<string, number>;
+  units?: Record<string, string>;
+  labels?: Record<string, string>;
+  /** Per-trace x/y/z/magnitude lists; null marks unavailable samples */
+  traces?: Record<string, Record<string, (number | null)[]>>;
+}
+
 export interface GroupSummaryV1 {
   dimension: "player" | "session" | "club";
   group_value: string;

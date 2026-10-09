@@ -4,11 +4,20 @@
 - Deflection is 0.56 / 0.58 mm and 0.84 deg, inside the bounds. Owner decision on PR #11774: the flat 500 N internal-force bound is replaced by `grip_contact.couple_check` (squeeze at most 50 N; transverse pair equals the couple/d Newton-Euler prediction within 5 %, 2 N m noise floor). Both pass for driver and iron (squeeze 3.3 / 3.9 N), so the full-window test is no longer an xfail. The club-welded-to-hand demand is 89 / 87 N m against the realised 100 / 99 N m (bushing amplification). Grip-frame spacing is 80.3 mm, not 76. See DESIGN_DECISIONS.md section 17.
 - Next: MuJoCo (soft weld) and Drake (`LinearBushingRollPitchYaw`) bushing parity on the same fixtures. The plan is on #11739.
 
+# Active: Club Force and Torque Overlays - GCV-10 #11716
+
+- Branch `claude/gcv-10-grip-overlays`; epic #11706. Per-hand, net-at-midpoint and couple glyphs (groups `grip_per_hand`, `grip_net`, `grip_couple`, `grip_mof`) carry the `split_method` label; unavailable quantities are listed as unavailable, never zero (`force_overlay/grip_frame.py`, frame metadata `grip_unavailable_labels`).
+- Plots: `biomechanics/grip_plot_model.py` (series), `GET /analysis/grip-wrench`, web `GripWrenchCharts.tsx`, PyQt tile `grip_wrench_plots` (`src/tools/grip_wrench_plots/`). `analysis.grip_wrench` parity gap closed.
+- Native export: `--grip` adds the overlay (Drake uses its own KKT multiplier; other viewers show the MuJoCo plant at that engine's pose) and writes `<swing>_<engine>_grip_wrench.json`; `--views hands_closeup --no-grid` tracks the grip midpoint per frame (`view_lookats`, `WorkerJob.lookats`).
+- Videos: `~/Videos/Parity Audit/forces_and_impact/club_forces/` (MyoSuite/MuJoCo arena, 1080p60, 1x/0.5x, clean 0.25x impact clip, plot PNG). Follow-up: Drake render did not finish under load (14 frames in about 12 minutes, then a Playwright EPIPE crash); rerun when the host is idle.
+- Open: `hands_closeup` azimuth is judged by eye only; Pinocchio gives a net allocation only and OpenSim is unavailable.
+
 # Active: Lift Pack Parity Baseline - LIFT-1 #11741, Epic #11740
 
 - Branch `claude/lift-1-pack-parity-baseline` (PR #11771). Audit package `src/shared/python/lifting/pack_audit/`; run `python3 scripts/lifting/run_pack_parity_baseline.py`; results in `docs/development/lifting/PACK_PARITY_BASELINE.md` and `pack_parity_baseline.json`.
 - Finding: same-q FK, feet and total mass agree across the four packs; grips, start poses, limits, phases, bench mass and contacts do not. Nine new pack issues filed (MuJoCo_Models#427-#428, OpenSim_Models#414-#416, Drake_Models#390-#391, Pinocchio_Models#449-#451).
 - Next: LIFT-2 shared exercise spec.
+
 
 # Active: Shared Ground Reaction Core — GCV-1, Epic #11706
 

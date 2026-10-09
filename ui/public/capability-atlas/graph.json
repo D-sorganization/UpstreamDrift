@@ -52,16 +52,18 @@
     },
     {
       "feature_id": "analysis.grip_wrench",
-      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force) emitted as GRIP overlay frames",
-      "status": "gap",
-      "pyqt": "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/force_torque_source.py",
-      "api": null,
-      "web": null,
-      "issue": 11716,
+      "title": "Per-hand grip wrench on the club (weld multipliers and efc_force): overlay glyphs and force/couple plots",
+      "status": "parity",
+      "pyqt": "src/tools/grip_wrench_plots/gui.py",
+      "api": "src/api/routes/analysis.py",
+      "web": "ui/src/components/analysis/GripWrenchCharts.tsx",
+      "issue": null,
       "reason": null,
       "pending_decision": false,
-      "tiles": [],
-      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. The club force and torque overlays and plots in PyQt, web and video are GCV-10 (#11716); the web surface lands there.",
+      "tiles": [
+        "grip_wrench_plots"
+      ],
+      "notes": "GCV-8 (#11714): MuJoCo, MyoSuite and Drake emit per-hand WrenchKind.GRIP frames, Pinocchio the allocation net, OpenSim reports unavailable. GCV-10 (#11716): one glyph frame (force_overlay.grip_frame) and one plot series (biomechanics.grip_plot_model) feed the PyQt6 plot tool and Visualization-tab group toggles, GET /api/analysis/grip-wrench with the web charts and ForceOverlayPanel group toggles, and the native video export (per-hand arrows at each grip point, net arrow and couple arc at the midpoint, hands close-up camera). The split_method is labelled on the legend, the plots and the HUD; an unavailable split is listed as unavailable, never drawn as zero.",
       "id": "analysis.grip_wrench"
     },
     {
@@ -1497,6 +1499,20 @@
         "impact_parameters",
         "launch_monitor",
         "target_line"
+      ]
+    },
+    {
+      "id": "grip_wrench_plots",
+      "title": "Grip Wrench Plots",
+      "description": "Hand force on the club per hand, net force and equivalent couple at the grip midpoint over time, with the left/right split method",
+      "path": "src/tools/grip_wrench_plots/__main__.py",
+      "launch_target": "src/tools/grip_wrench_plots/__main__.py",
+      "category": "tool",
+      "status": "ready",
+      "capabilities": [
+        "grip_wrench",
+        "club_forces",
+        "force_plots"
       ]
     },
     {
@@ -3084,9 +3100,9 @@
     ]
   },
   "inputs": {
-    "src/config/models.yaml": "948ce17feb5638b2f0d75ee4911d7b67b93c89646311a306a320efd676ae85d5",
-    "src/config/launcher_manifest.json": "b30567afc0dc4662be92e0b308a9ba0b0e70c53047a99068df25d4977f15409b",
-    "src/config/feature_parity.json": "684d1f45325c871ae2c5a74fb337c3ddaad719aa2f58f83cce0e2f06c92b0852",
+    "src/config/models.yaml": "dece91b25bf128054b74ac90562668cf18dc75bc042360e96b3d4f42801c5414",
+    "src/config/launcher_manifest.json": "2c1c60c07fbdc12466c114065a0a2ca1a839f58995850097b9648a9ac2d8f792",
+    "src/config/feature_parity.json": "71314b8627e13e5f0f0af563e3c79150813ac61511578c5acbc711fc6dd50092",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
