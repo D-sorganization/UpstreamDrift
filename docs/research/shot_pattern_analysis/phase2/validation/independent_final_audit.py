@@ -417,11 +417,13 @@ def main():
     parser.add_argument("--max-cells", type=int)
     parser.add_argument("--supplement-stage", choices=("pilot", "final"))
     parser.add_argument("--alias-references", type=Path)
+    parser.add_argument("--supplement-acceptance", type=Path)
     args = parser.parse_args()
     from docs.research.shot_pattern_analysis.phase2.validation.supplement_audit_protocol import (
         load_json_strict,
         validate_supplement_plan,
         validate_control_aliases,
+        validate_execution_acceptance,
     )
 
     plan = load_json_strict(args.root / "matrix_plan.json")
@@ -433,7 +435,13 @@ def main():
         )
     else:
         assert args.supplement_stage is None and args.alias_references is None
+        assert args.supplement_acceptance is None
         assert len(plan["cells"]) in (72, 324), "unexpected factorial plan size"
+    acceptance_review = None
+    if protocol_review is not None and args.supplement_stage == "final":
+        acceptance_review = validate_execution_acceptance(
+            plan, args.supplement_acceptance, evidence
+        )
     alias_review = None
     if args.alias_references is not None:
         alias_review = validate_control_aliases(
@@ -472,6 +480,7 @@ def main():
         "data_stage": plan["stage"],
         "protocol_review": protocol_review,
         "alias_review": alias_review,
+        "acceptance_review": acceptance_review,
         "protocol_auditor_sha256": sha(
             Path(__file__).with_name("supplement_audit_protocol.py")
         ),

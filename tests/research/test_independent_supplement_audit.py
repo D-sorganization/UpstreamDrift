@@ -231,3 +231,77 @@ def test_aliases_are_exact_verified_references(tmp_path, mutation):
     else:
         with pytest.raises(ValueError):
             api.validate_control_aliases(path, "pilot", EVIDENCE)
+
+
+def _acceptance(tmp_path):
+    import hashlib
+
+    execution = {"source_sha256": {"reviewed": "same"}}
+    protocols = {}
+    evidence = {}
+    for protocol in _api().PROTOCOLS:
+        final = _plan("final", protocol)
+        pilot = _plan("pilot", protocol)
+        pilot["execution"] = execution
+        name = protocol.replace("/", "_") + ".json"
+        path = tmp_path / name
+        path.write_text(json.dumps(pilot))
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        protocols[protocol] = {
+            "final_cells": final["cells"],
+            "pilot_plan": name,
+            "pilot_plan_sha256": digest,
+        }
+        evidence[name] = digest
+    for name in ("review.txt", "numerics.txt"):
+        path = tmp_path / name
+        path.write_text("fixture reviewed evidence")
+        evidence[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    receipt = {
+        "status": "accepted_for_conditional_simulation",
+        "supplement_stage": "final",
+        "execution": execution,
+        "checks": dict.fromkeys(("pilot", "numerical_refinement", "independent_review", "rendered_figures", "software_tests"), True),
+        "evidence_files": evidence,
+        "supplement_protocols": protocols,
+    }
+    plan = _plan("final")
+    plan["execution"] = execution
+    return receipt, plan
+
+
+@pytest.mark.parametrize(
+    "mutation", [None, "source", "missing_protocol", "pilot_config", "gate"]
+)
+def test_final_audit_requires_source_and_protocol_bound_acceptance(tmp_path, mutation):
+    import hashlib
+
+    api = _api()
+    receipt, plan = _acceptance(tmp_path)
+    if mutation == "source":
+        receipt["execution"] = {"source_sha256": {"reviewed": "stale"}}
+    elif mutation == "missing_protocol":
+        receipt["supplement_protocols"].pop("driver-control-speed-bounds/1")
+    elif mutation == "gate":
+        receipt["checks"]["independent_review"] = False
+    elif mutation == "pilot_config":
+        item = receipt["supplement_protocols"]["pw-primary-face-bounds/1"]
+        path = tmp_path / item["pilot_plan"]
+        pilot = json.loads(path.read_text())
+        next(iter(pilot["cells"].values()))["seed"] += 1
+        path.write_text(json.dumps(pilot))
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        item["pilot_plan_sha256"] = digest
+        receipt["evidence_files"][item["pilot_plan"]] = digest
+    path = tmp_path / "acceptance.json"
+    path.write_text(json.dumps(receipt))
+    if mutation is None:
+        assert (
+            api.validate_execution_acceptance(plan, path, EVIDENCE)[
+                "verified_protocols"
+            ]
+            == 3
+        )
+    else:
+        with pytest.raises(ValueError):
+            api.validate_execution_acceptance(plan, path, EVIDENCE)

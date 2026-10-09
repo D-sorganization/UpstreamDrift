@@ -28,15 +28,17 @@ raw delivered path or speed between rematched patterns would be incorrect.
 The separate report comparison must use common supported indices and centered
 primitive errors across source populations.
 
-Twenty focused tests passed, including all three protocols at both stages and
+Twenty-five focused tests passed, including all three protocols at both stages and
 negative alias-integrity cases. Mypy (Python 3.12), Ruff, and diff checks passed.
 A zero-cell base-plan CLI smoke check accepted the unchanged 324-cell plan but
 correctly reported incomplete/false acceptance; it did not read or score a new
 population. No Monte Carlo or large data audit was run for this software change.
 
-Final supplement qualification must additionally bind the new immutable
-execution-acceptance record to each plan's execution snapshot after the source
-transition is approved. The current helper verifies protocol identity and the
-row auditor verifies per-cell source equality; neither replaces that independent
-scientific source-transition review. Final 26-cell data and four-reference audits
-remain pending future accepted runs.
+Final supplemental audits now require `--supplement-acceptance PATH`. The
+independent acceptance check requires all five review gates, the exact accepted
+execution snapshot, and all three protocol inventories. Every hashed 32-shot
+pilot plan must match its protocol and final configuration after the declared
+population change. Changed source, missing protocol, changed pilot input, or a
+failed review gate is rejected. This is independently checked by the auditor;
+it does not rely on a claim that the production launcher performed the check.
+Final 26-cell data and four-reference audits remain pending future accepted runs.

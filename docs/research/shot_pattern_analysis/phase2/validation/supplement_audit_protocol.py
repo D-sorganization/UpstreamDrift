@@ -166,3 +166,62 @@ def validate_control_aliases(path: Path, expected_stage: str, evidence: Path) ->
         "new_executions": 0,
         "reference_file_sha256": _sha(path),
     }
+
+
+def validate_execution_acceptance(
+    plan: dict, path: Path | None, evidence: Path
+) -> dict:
+    """Independently bind final audit to every reviewed pilot and execution."""
+    if path is None or plan.get("stage") != "final":
+        raise ValueError("final supplement acceptance receipt required")
+    receipt = load_json_strict(path)
+    required = (
+        "pilot",
+        "numerical_refinement",
+        "independent_review",
+        "rendered_figures",
+        "software_tests",
+    )
+    if (
+        receipt.get("status") != "accepted_for_conditional_simulation"
+        or receipt.get("supplement_stage") != "final"
+        or any(receipt.get("checks", {}).get(key) is not True for key in required)
+    ):
+        raise ValueError("supplement acceptance gates incomplete")
+    if receipt.get("execution") != plan["execution"]:
+        raise ValueError("stale supplement acceptance execution")
+    files = receipt.get("evidence_files", {})
+    if not isinstance(files, dict) or len(files) < 5:
+        raise ValueError("supplement acceptance lacks hashed evidence")
+    for name, digest in files.items():
+        if _sha(path.parent / name) != digest:
+            raise ValueError("supplement acceptance evidence changed")
+    protocols = receipt.get("supplement_protocols", {})
+    if set(protocols) != set(PROTOCOLS):
+        raise ValueError("supplement acceptance must cover all three protocols")
+    for protocol, group in protocols.items():
+        final = {
+            "stage": "final",
+            "supplement_protocol": protocol,
+            "selected_cell_names": list(group["final_cells"]),
+            "cells": group["final_cells"],
+        }
+        validate_supplement_plan(final, "final", evidence)
+        pilot_path = path.parent / group["pilot_plan"]
+        digest = group["pilot_plan_sha256"]
+        if files.get(group["pilot_plan"]) != digest or _sha(pilot_path) != digest:
+            raise ValueError("supplement pilot hash mismatch")
+        pilot = load_json_strict(pilot_path)
+        if (
+            pilot.get("supplement_protocol") != protocol
+            or pilot.get("execution") != plan["execution"]
+        ):
+            raise ValueError("supplement pilot source/protocol mismatch")
+        validate_supplement_plan(pilot, "pilot", evidence)
+    if protocols[plan["supplement_protocol"]]["final_cells"] != plan["cells"]:
+        raise ValueError("final plan differs from accepted cells")
+    return {
+        "verified_protocols": 3,
+        "acceptance_sha256": _sha(path),
+        "execution_matches": True,
+    }
