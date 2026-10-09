@@ -17,7 +17,9 @@ URDF = '<robot name="replay_probe"><link name="base"><inertial><mass value="1"/>
 
 @pytest.fixture
 def native_fixture(tmp_path: Path) -> tuple[Path, Any, Any]:
-    pytest.importorskip("pydrake.multibody.plant")
+    module = pytest.importorskip("pydrake.multibody.plant")
+    if not isinstance(getattr(module, "__file__", None), str):
+        pytest.skip("real native Drake binding required; mock is not evidence")
     from pydrake.multibody.parsing import Parser
     from pydrake.multibody.plant import MultibodyPlant
 
@@ -64,6 +66,13 @@ def test_native_drake_reproduces_recorded_held_feedback_torque(
     np.testing.assert_allclose(replay.qpos, np.array(states)[:, :8], atol=1e-12, rtol=0)
     np.testing.assert_allclose(replay.qvel, np.array(states)[:, 8:], atol=1e-12, rtol=0)
     assert not replay.qpos.flags.writeable
+    np.testing.assert_array_equal(replay.applied_actuator_torques, values[:-1])
+    expected_effort = (plant.MakeActuationMatrix() @ values[:-1].T).T
+    np.testing.assert_allclose(
+        replay.generalized_actuator_torques, expected_effort, atol=1e-12, rtol=0
+    )
+    assert "kSap" in bundle.policy.solver_id
+    assert "kLagged" in bundle.policy.solver_id
 
 
 @pytest.mark.parametrize("defect", ["missing_state", "quaternion", "limit", "grid"])
@@ -117,3 +126,33 @@ def test_native_drake_rejects_changed_model_after_bundle_export(
     )
     with pytest.raises(ValueError, match="identity|model|policy"):
         replay_native_drake_torque_bundle(bundle, path)
+
+
+@pytest.mark.parametrize("tag", ["collision", "gazebo", "mimic"])
+def test_native_drake_rejects_unqualified_model_modes(
+    native_fixture: tuple[Path, Any, Any], tag: str
+) -> None:
+    path, plant, context = native_fixture
+    path.write_text(URDF.replace("</robot>", f"<{tag}/></robot>"), encoding="utf-8")
+    with pytest.raises(ValueError, match="another native policy"):
+        build_native_drake_torque_bundle(
+            path,
+            context.get_discrete_state_vector().CopyToVector(),
+            np.arange(3) * 0.001,
+            np.zeros((3, 1)),
+        )
+
+
+def test_native_drake_rejects_a_changed_terminal_sentinel(
+    native_fixture: tuple[Path, Any, Any],
+) -> None:
+    path, plant, context = native_fixture
+    values = np.zeros((3, 1))
+    values[-1] = 0.1
+    with pytest.raises(ValueError, match="sentinel"):
+        build_native_drake_torque_bundle(
+            path,
+            context.get_discrete_state_vector().CopyToVector(),
+            np.arange(3) * 0.001,
+            values,
+        )

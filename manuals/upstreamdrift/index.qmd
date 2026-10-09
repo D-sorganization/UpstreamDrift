@@ -21,4 +21,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/13-native-muscle-replay.qmd >}}
 
 {{< include chapters/19-native-torque-replay.qmd >}}
+{{< include chapters/22-native-drake-torque-replay.qmd >}}
 {{< include chapters/13-feedback-comparison.qmd >}}
