@@ -396,6 +396,10 @@ class GripSeries:
     applied_free_torque_nm: np.ndarray
     mof_left_nm: np.ndarray
     mof_right_nm: np.ndarray
+    left_force_n: np.ndarray
+    right_force_n: np.ndarray
+    net_force_local_n: np.ndarray
+    couple_local_nm: np.ndarray
     split_method: tuple[str, ...]
     unavailable_reason: tuple[str, ...]
 
@@ -403,7 +407,7 @@ class GripSeries:
     def from_analyses(
         cls, time_s: Sequence[float], analyses: Sequence[GripAnalysis]
     ) -> GripSeries:
-        """Stack analyses into arrays.
+        """Stack analyses into arrays (per-hand forces, world and club-local).
 
         Raises:
             ValueError: if lengths differ.
@@ -415,6 +419,13 @@ class GripSeries:
             rows = [getattr(a, attr) or _NAN3 for a in analyses]
             return np.array(rows, dtype=np.float64).reshape(len(analyses), 3)
 
+        def hand_force(side: str) -> np.ndarray:
+            rows = []
+            for a in analyses:
+                hand = a.left if side == "L" else a.right
+                rows.append(_NAN3 if hand is None else hand.force_on_club_n)
+            return np.array(rows, dtype=np.float64).reshape(len(analyses), 3)
+
         return cls(
             time_s=np.asarray(time_s, dtype=np.float64),
             midpoint_m=stack("midpoint_m"),
@@ -424,6 +435,10 @@ class GripSeries:
             applied_free_torque_nm=stack("applied_free_torque_nm"),
             mof_left_nm=stack("mof_left_nm"),
             mof_right_nm=stack("mof_right_nm"),
+            left_force_n=hand_force("L"),
+            right_force_n=hand_force("R"),
+            net_force_local_n=stack("net_force_local_n"),
+            couple_local_nm=stack("couple_local_nm"),
             split_method=tuple(a.split_method for a in analyses),
             unavailable_reason=tuple(a.unavailable_reason for a in analyses),
         )
@@ -436,6 +451,8 @@ class GripSeries:
         blocks = {
             "midpoint": (self.midpoint_m, "m"),
             "net_force": (self.net_force_n, "n"),
+            "left_force": (self.left_force_n, "n"),
+            "right_force": (self.right_force_n, "n"),
             "couple": (self.couple_nm, "nm"),
             "contact_moment": (self.contact_force_moment_nm, "nm"),
             "free_torque": (self.applied_free_torque_nm, "nm"),

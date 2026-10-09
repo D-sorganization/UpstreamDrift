@@ -20,6 +20,7 @@ from src.tools.native_viewer_export.core import (
     Image8,
     OverlayFeed,
     SwingInput,
+    view_lookats,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -68,6 +69,10 @@ def stage_job(
         distance_m=settings.distance_m,
         out_dir=str(frames),
         glyphs_path=str(glyphs_path) if glyphs_path else None,
+        lookats={
+            v: [list(p) for p in points]
+            for v, points in view_lookats(settings, indices, overlay).items()
+        },
     )
 
 
