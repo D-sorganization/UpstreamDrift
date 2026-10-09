@@ -165,20 +165,38 @@ class TestExportVideo:
         frames = imageio.mimread(str(res))
         assert len(frames) == 5
 
-    def test_export_video_speed_sets_time_based_stride(
-        self, tmp_path: Path, mock_candidate: MatchedSwingCandidate
+    @pytest.mark.parametrize(
+        ("fps", "speed", "expected"),
+        [
+            # 0.18 s swing, 10 samples (dt 0.02 s); frames = floor(T*fps/speed)+1.
+            (10, 1.0, 2),  # decimates the source
+            (10, 0.1, 19),  # slower than the source: samples are held
+        ],
+    )
+    def test_export_video_speed_is_time_based(
+        self,
+        tmp_path: Path,
+        mock_candidate: MatchedSwingCandidate,
+        fps: int,
+        speed: float,
+        expected: int,
     ) -> None:
-        pytest.importorskip("imageio.v2")
-        from unittest.mock import patch
+        import cv2
 
-        out_gif = tmp_path / "speed.gif"
+        out_mp4 = tmp_path / "speed.mp4"
         with patch(
-            "src.shared.python.motion_matching.export._render_video_frames",
-            return_value=[np.zeros((8, 8, 3), np.uint8)] * 2,
+            "src.shared.python.motion_matching.cross_engine_replay.render_replay_frames",
+            side_effect=lambda *a, frame_indices, **k: [
+                np.full((8, 8, 3), i, np.uint8) for i in frame_indices
+            ],
         ) as render:
-            export_video(mock_candidate, "mujoco", out_gif, fps=10, speed=0.5)
-        dt_s = mock_candidate.time_s[1] - mock_candidate.time_s[0]
-        assert render.call_args.args[2] == max(1, round(0.5 / (10 * dt_s)))
+            export_video(mock_candidate, "mujoco", out_mp4, fps=fps, speed=speed)
+        cap = cv2.VideoCapture(str(out_mp4))
+        count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        cap.release()
+        assert count == expected
+        rendered = list(render.call_args.kwargs["frame_indices"])
+        assert rendered == sorted(set(rendered))  # each sample rendered once
 
     def test_export_video_gif_from_path(
         self, tmp_path: Path, candidate_path: Path

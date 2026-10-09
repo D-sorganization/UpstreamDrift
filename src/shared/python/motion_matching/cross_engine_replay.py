@@ -426,12 +426,15 @@ def render_replay_frames(
     stride: int = 5,
     valid_mask: BoolArray | None = None,
     size_px: tuple[int, int] = (480, 480),
+    frame_indices: Sequence[int] | None = None,
 ) -> list[np.ndarray]:
     """Render 3D marker overlay frames comparing target and model markers.
 
     ``size_px`` is the ``(width, height)`` of every frame; text scales with
     the height (a 480 px frame keeps the original 6 in at 80 dpi layout).
     Raises ``ValueError`` unless both are positive integers.
+    ``frame_indices`` renders exactly those samples, in order; otherwise every
+    ``stride``-th sample is rendered.
     """
     width, height = validate_frame_size(size_px)
     import matplotlib
@@ -458,7 +461,8 @@ def render_replay_frames(
     center = np.nanmean(t0, axis=0) if np.isnan(t0).any() else np.mean(t0, axis=0)
     box_half = 1.0
 
-    for k in range(0, n_frames, stride):
+    indices = range(0, n_frames, stride) if frame_indices is None else frame_indices
+    for k in indices:
         ax.clear()
         t_k = target_markers_m[k]
         m_k = model_markers_m[k]
