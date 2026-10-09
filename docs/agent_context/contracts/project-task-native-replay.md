@@ -71,6 +71,16 @@ but do not fit capture motion or qualify contact/constraint readiness.
 
 ## Rationale
 
+Persistent `ProjectTaskNativeSearch` reuses the independent native kernel with
+invocation-boundary model fingerprints. Predictions are provisional and retain
+the genuine planned T01 bundle; they never qualify execution or physiological
+acceptance. Promotion recomputes selected commands through the fully guarded
+SDK forecaster and independently verifies serialized/reloaded T01 replay.
+Numerical callbacks receive bytes-backed immutable history arrays, require
+strict hard admission and a finite cost. A validated future plan is separate
+from a live executed prefix. Caller objective dependencies remain declarations,
+not independently authenticated scoring provenance.
+
 Actual SDK task execution and independent native reproduction are different
 boundaries. Retain separate provenance for both while reusing canonical Tools
 contracts and one native executor. Physical agreement cannot authenticate

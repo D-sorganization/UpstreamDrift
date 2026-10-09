@@ -102,6 +102,23 @@ def _require_current_observation(
         raise ValueError("forecast observation differs from current live plant")
 
 
+def _admit_observation_native_state(
+    model: Any, data: Any, observation: ProjectTaskObservation
+) -> None:
+    """Apply the existing replay restoration/scope check to a native snapshot."""
+    _verify_restored_state(
+        model,
+        data,
+        {
+            "qpos": observation.qpos,
+            "qvel": observation.qvel,
+            "actuator_internal": observation.control,
+            "actuator_activation": observation.activation,
+            "integration": observation.integration_state,
+        },
+    )
+
+
 class ProjectTaskForecaster:
     """Reuse one owned native plant, restoring every integration field per call.
 
@@ -199,16 +216,8 @@ class ProjectTaskForecaster:
                 current = snapshot_project_task_state(
                     self._live.model, self._live.data, sample_index=0
                 )
-                _verify_restored_state(
-                    self._live.model,
-                    self._live.data,
-                    {
-                        "qpos": current.qpos,
-                        "qvel": current.qvel,
-                        "actuator_internal": current.control,
-                        "actuator_activation": current.activation,
-                        "integration": current.integration_state,
-                    },
+                _admit_observation_native_state(
+                    self._live.model, self._live.data, current
                 )
                 _require_current_observation(observation, current)
                 actions = np.asarray(commands, dtype=np.float64).copy()

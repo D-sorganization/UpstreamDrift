@@ -1,4 +1,13 @@
-# Active: Owned Project MyoSuite Forecasting — F09k #12009
+# Active: Persistent Project MyoSuite Native Search — F09l #12014
+
+Branch `feat/f09l-persistent-native-search-12014` starts at published F09k
+`d50db51b603e967c9e09a4b3c31f7f97a0fdaaac`, draft PR #12011. Read
+`docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md` for the
+provisional-search/guarded-promotion authority boundary and retained TDD evidence.
+The shared forecast admission extraction changes executed source identity;
+historical F09k receipts apply to their published head, not this new source.
+
+## Previous Forecast Foundation
 
 Branch `feat/f09k-owned-sdk-forecast-12009` starts at F09j
 `43e925dd7171f12593d6c8149e3468c720048bc7` (draft PR #12005).

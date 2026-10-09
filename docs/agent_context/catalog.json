@@ -248,18 +248,21 @@
         "src/engines/myosuite_project_task_producer.py",
         "src/engines/myosuite_project_feedback.py",
         "src/engines/myosuite_project_forecast.py",
+        "src/engines/myosuite_project_native_search.py",
         "src/engines/project_task_replay_artifacts.py"
       ],
       "documentation": [
         "manuals/upstreamdrift/chapters/38-project-myosuite-task-replay.qmd",
         "docs/development/feedback_controls/F09I-PROJECT-TASK-TURNOVER.md",
         "docs/development/feedback_controls/F09J-FEEDBACK-RECORDING-TURNOVER.md",
-        "docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md"
+        "docs/development/feedback_controls/F09K-OWNED-FORECAST-TURNOVER.md",
+        "docs/development/feedback_controls/F09L-NATIVE-SEARCH-TURNOVER.md"
       ],
       "tests": [
         "tests/unit/engines/myosuite/test_project_task_producer.py",
         "tests/unit/engines/myosuite/test_project_task_feedback.py",
         "tests/unit/engines/myosuite/test_project_task_forecast.py",
+        "tests/unit/engines/myosuite/test_project_task_native_search.py",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py"
       ],
@@ -401,6 +404,7 @@
         "src/engines/myosuite_project_task_producer.py",
         "src/engines/myosuite_project_feedback.py",
         "src/engines/myosuite_project_forecast.py",
+        "src/engines/myosuite_project_native_search.py",
         "src/engines/project_task_replay_artifacts.py",
         "src/engines/native_direct_model_provider.py",
         "src/engines/native_replay_contracts.py",
@@ -410,6 +414,7 @@
         "tests/unit/engines/myosuite/test_project_task_producer.py",
         "tests/unit/engines/myosuite/test_project_task_feedback.py",
         "tests/unit/engines/myosuite/test_project_task_forecast.py",
+        "tests/unit/engines/myosuite/test_project_task_native_search.py",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py"
       ]

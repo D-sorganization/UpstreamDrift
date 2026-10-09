@@ -1,4 +1,20 @@
-## Project MyoSuite Task, Forecast, Feedback and Independent Replay (F09i/F09j/F09k)
+## Project MyoSuite Native Search, Forecast, Feedback and Independent Replay (F09i–F09l)
+
+F09l #12014 adds `ProjectTaskNativeSearch`, a persistent separately owned native
+context using the existing direct-command kernel and genuine Tools T01 bundles.
+Its invocation-boundary model guards leave every candidate explicitly
+provisional. Return immutable copied arrays plus the existing planned bundle
+binding the current initial state, model, channels, clock and policy. Commands
+are ordered post-mapping controls, bounded by native actuator limits and an
+explicit positive maximum horizon; no implicit clamping is allowed.
+
+Promotion accepts commands only and recomputes the entire plan through the
+guarded SDK forecaster. Both numerical callbacks receive bytes-backed immutable
+history arrays. Hard criteria must return `True`; objective must be finite.
+Existing export independently replays the serialized/reloaded T01 contract.
+No provisional states or scores qualify the plan. A validated future plan is
+separate from a live executed prefix, capture acceptance and physiological
+validation. Chapter 38 and F09l turnover retain the boundaries and evidence.
 
 F09k #12009 adds a reusable owned SDK forecasting plant for current-state
 shooting. Every candidate restores complete native integration state, including

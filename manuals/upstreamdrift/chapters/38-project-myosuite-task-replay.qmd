@@ -283,3 +283,68 @@ This is neither learned control tuning nor production pose, capture-fit,
 physiology, muscle-only actuation or all-model qualification. Initial assembly,
 qualified observation mapping and whole-horizon controller optimization remain
 required before the muscular OpenSim endpoint can be accepted.
+
+## Provisional Persistent Native Search and Guarded Promotion
+
+F09l (#12014) adds `ProjectTaskNativeSearch` beside the owned SDK forecaster.
+Allocate a separately owned original-source native context from a genuinely
+frozen, independently verified seed. Reuse the existing direct-command kernel;
+there is no alternate integration loop or weakened SDK recording mode.
+Each candidate starts from the complete current live integration state and an
+explicit finite horizon bounded by `max_steps`. Inputs are ordered post-mapping
+native controls. Native control limits are enforced without implicit clamping.
+Unsupported applied external loads are refused before owned restoration.
+
+Source, compiled-model, live-state, adapter and callback checks surround every
+attempt. Owned model fingerprints are checked at invocation boundaries, rather
+than the SDK producer's per-step model checks. Consequently every returned
+trajectory and ranking is provisional. Immutable arrays accompany the existing
+genuine T01 planned bundle, retaining model/provider, current initial state,
+channel, clock, policy and input identity. This is a planned input artifact;
+it does not qualify the candidate trajectory or establish execution.
+
+`promote` accepts commands alone. Recompute the entire plan through the guarded
+SDK forecast, require exact applied-command correspondence, and evaluate both
+caller numerical callbacks on bytes-backed immutable history arrays. Hard
+criteria must return the Boolean `True`, and the objective must be finite.
+Existing export verifies complete transitions with an independent native model;
+its canonical admission serializes and reloads T01 before replay. A poisoned
+provisional state or score cannot supply the promoted objective. Callbacks can
+still depend on undeclared external data: their returned scalar is a numerical
+result, not authenticated scientific scoring. The optimizer layer must bind
+reference, scales, objective and hard-criterion provenance independently.
+
+A validated future plan is distinct from the live executed prefix. Search and
+promotion never reset or step the live task. Owned reset clears only owned
+warning/history state; full state readback includes nonzero epoch, activation,
+controls and warmstart. Reject reentrancy and stale snapshots. Preserve
+failure→A recovery even after a real owned step has completed. Idempotent
+closure releases only the search context; the caller retains its forecaster.
+
+Actual SDK API-absence RED contains seven failures. The first native GREEN has
+seven passes in 23.22 seconds. Astra then identified writable owning arrays at
+the promotion callback boundary; two actual regressions failed before the
+immutable-copy fix. The subsequent twelve-case campaign passed in 28.89 seconds.
+These are distinct historical checkpoints, not a claim that later expanded
+source is covered by earlier receipts. Retain final combined JUnit and all
+executed source/test hashes as specified in F09l turnover.
+
+The final expanded actual SDK campaign passes 130 cases with zero failures,
+errors or skips in 126.06 seconds. All fourteen executed source/test hashes
+match. This includes both unchanged original production driver/iron models:
+twenty-step A→B→A search histories exactly match the guarded SDK full histories,
+and promotion independently replays every state, command and clock. Separate
+partial-owned-execution failure recovery also matches every guarded state row.
+The numerical finite-state criterion in those production tests establishes no
+contact/constraint feasibility, fitted motion or physiological acceptance.
+
+`construction_seconds`, `last_attempt_seconds` and plan `validation_seconds`
+include their admission/final-guard overhead and failed attempts. A separate
+unchanged-source twenty-step prototype measured four full histories exactly
+equal to guarded SDK histories: persistent native attempts took approximately
+0.45–0.51 seconds and guarded forecasts 2.49–2.66 seconds. These uncontrolled
+diagnostics do not establish a general speedup, real-time operation or an
+accepted optimizer. Full capture, calibrated markers/ground, contact/grip,
+physiological validity, all seventeen model rows and six ecosystems remain
+required, with muscular OpenSim and full-horizon independent excitation replay
+as the final endpoint.

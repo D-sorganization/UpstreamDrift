@@ -73,11 +73,12 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "b22dcbd9994b0a212f26294ed658a35d34f30094e5a301a42d2cf5877da4c24c",
+      "fingerprint": "508569aec06da4a2be30a4c9af831715c6b52088f5b2bcdbd8fb09789035523f",
       "inputs": {
-        "docs/agent_context/contracts/project-task-native-replay.md": "706fcb8a844c418c14b9fe8b68a8afb6cd7d174e6b47f32d3734ba393fa93bfa",
+        "docs/agent_context/contracts/project-task-native-replay.md": "fb688e8087fd2b56fbcfff0c4b25f8f52671d4668f84af22c9a32ffa5e412861",
         "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
-        "src/engines/myosuite_project_forecast.py": "f8583d0b0fca2d914647591421ef115a54a61146d278893802c9cf864f0e86df",
+        "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
+        "src/engines/myosuite_project_native_search.py": "3195899213ca1b48dc8cfe040f5fd82ca7742bc9e4b92eeff96ef64da4939105",
         "src/engines/myosuite_project_task_producer.py": "59e63dca8f2c178d9dbc92adcc0047c70feac1052967f7055f8d5b8d77a074d1",
         "src/engines/native_direct_model_provider.py": "053927847888280af9a0d6271d9f8a74ecb00b6d90cd6142fee884f4cb49b149",
         "src/engines/native_replay_contracts.py": "a8da8d7080b9cfc3c3452dccb05a69428a3502fa348bf33c2290caa4b52626d2",
@@ -87,9 +88,10 @@
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
         "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
+        "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
         "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf"
       },
-      "rationale": "Reviewed owned current-state SDK forecasting, pinned handles/compiled model/source/SDK lineage, guarded caller conversion and exact post-forward integration-state restoration. Actual MyoSuite3.0/MuJoCo3.6 final five-module campaign:109PASS zero failures/errors/skips in39.89s; all12 executed source/test hashes match. Native driver/iron nonzero-epoch/warmstart suffix predictions independently replay exact full states/commands; lookahead replay disables feedback. Two actual external-load RED cases resolved by existing replay admission before owned execution. Candidate repeatability/recovery/reentrancy/closure/constructor-owned cleanup tested. No optimizer/deadline/capture/physiology/parity completion claim."
+      "rationale": "F09l12014: separately provisional persistent original-source native context reuses genuine T01 and existing direct-command kernel. Selected commands recomputed through guarded SDK with bytes-backed immutable numerical-callback histories and independent canonical dump/load/native replay. Actual SDK API RED7 and callback RED2 retained; final six-module MyoSuite3.0/MuJoCo3.6 campaign130PASS0F/E/S126.06s, all14 executed source/test SHA256 match. Includes real partial-owned-step failure recovery and unchanged original driver/iron20step A-to-B-to-A plus complete guarded promotion. Astra review fixes resolved. No capture, physiology, online-deadline or full-epic acceptance; validated future plan remains separate from executed live prefix."
     }
   },
   "version": 1
