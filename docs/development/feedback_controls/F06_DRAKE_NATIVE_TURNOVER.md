@@ -86,3 +86,18 @@ Next integrate native F03 candidates and the F09 acceptance registry, then
 measure refinement and full-horizon time-to-accepted costs. Required engines
 and full-body/muscle variants remain in the denominator while unsupported.
 No private capture match or new preview video is claimed by this slice.
+
+## Merge-Group Seam Regression (2026-10-09)
+
+The first merge-group failed during Rust toolchain installation, before tests.
+A single bounded re-enqueue then ran 22,748 unit tests and exposed one stale
+fallback assertion: it expected `sidekick.lab.mocap` absent after the explicit
+Tools Lab extension had been activated. The assertion reproduced locally as
+RED using the same extension-before-test order. This branch carries forward
+only the already-reviewed test correction from `8687f9222c`: both generic
+fallback namespace checks still decline the owned cluster, the explicit
+extension must resolve mocap inside the pinned Tools tree, and a genuinely
+missing Lab module must remain absent. All 18 fallback tests then passed.
+No native dynamics or import-loader implementation changed; this does not
+extend the native replay qualification scope. Failed-group logs are retained
+in the fleet planning directory for runs 37944318366 and 37949680010.
