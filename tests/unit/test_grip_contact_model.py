@@ -17,7 +17,7 @@ from src.shared.python.physics.grip_contact_model import (
     PressureVisualizationData,
     check_friction_cone,
     classify_contact_state,
-    compute_center_of_pressure,
+    compute_grip_pressure_centre,
     compute_pressure_visualization,
     create_mujoco_grip_contacts,
     decompose_contact_force,
@@ -146,7 +146,7 @@ class TestCenterOfPressure:
             )
         ]
 
-        cop = compute_center_of_pressure(contacts)
+        cop = compute_grip_pressure_centre(contacts)
 
         np.testing.assert_allclose(cop, [1.0, 2.0, 0.0])
 
@@ -171,7 +171,7 @@ class TestCenterOfPressure:
             ),
         ]
 
-        cop = compute_center_of_pressure(contacts)
+        cop = compute_grip_pressure_centre(contacts)
 
         np.testing.assert_allclose(cop, [1.0, 0.0, 0.0])
 
@@ -196,7 +196,7 @@ class TestCenterOfPressure:
             ),
         ]
 
-        cop = compute_center_of_pressure(contacts)
+        cop = compute_grip_pressure_centre(contacts)
 
         # COP = (100*0 + 50*3) / (100 + 50) = 150/150 = 1.0
         np.testing.assert_allclose(cop, [1.0, 0.0, 0.0])
