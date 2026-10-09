@@ -16,3 +16,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/10-ground-reaction.qmd >}}
 
 {{< include chapters/11-grip-wrench.qmd >}}
+
+{{< include chapters/13-same-input-parity.qmd >}}

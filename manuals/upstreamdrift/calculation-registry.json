@@ -79,6 +79,11 @@
       "id": "UP-D1-grip-wrench-reduction-inventory",
       "owner": "UpstreamDrift issue #11724",
       "resolution": "Inventory the GCV-7 (#11713) grip-wrench core in src/shared/python/biomechanics/grip_wrench.py and the GCV-8 (#11714) engine-agnostic extraction in src/shared/python/biomechanics/grip_extraction.py, documented provisionally in chapters/11-grip-wrench.qmd: hand-on-club wrenches in the world frame, grip midpoint net force, equivalent couple split into contact force moment and applied free torque (exact postconditions), per-hand moments of force, club-local components by the transpose rotation, the club Newton-Euler holding-hand recovery, the reference minimum-norm split, and the recorded split_method (rigid-weld splits are solver-defined; bushing is determinate). Unavailable values are None/NaN/null with a reason, never zero. tests/unit/biomechanics/test_grip_wrench.py and test_grip_extraction.py establish algebraic agreement with hand-computed wrenches and these invariants; they do not qualify any engine constraint solver or grip model, compare against instrumented-grip measurements, or establish an uncertainty."
+    },
+    {
+      "id": "UP-D1-same-input-parity-inventory",
+      "owner": "UpstreamDrift issue #11614",
+      "resolution": "Inventory the epic #11605 same-input parity pathway in src/shared/python/motion_matching/same_input (plant, closure, integrator, bundle, reference, scoring), documented provisionally in chapters/13-same-input-parity.qmd with the calculation reference docs/research/same_input_parity/same_input_parity.tex: exact weld KKT solve with MuJoCo kkt_regularization set to 0, convention-free closest-point closure projection (Newton stop max|r| <= 1e-13, 25-iteration cap, ArithmeticError otherwise), zero-order-hold RK4 with 1 ms steps and 8 substeps, zero root efforts, the same-input-bundle/v1 schema, and the L0-L3 levels against the MuJoCo reference. tests/unit/motion_matching/same_input and the committed pointwise receipt establish cross-engine software consistency of the spec-built models on two bundles; they do not qualify the model against capture data, the full-horizon open-loop swing (perturbation growth 39-41 1/s), Simscape (P-8 #11613, pending) or any uncertainty."
     }
   ],
   "calculations": []
