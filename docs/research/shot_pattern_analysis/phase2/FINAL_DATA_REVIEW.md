@@ -63,3 +63,7 @@ conclusion follows from these two cells. The current partial receipt is
 `validation/independent_final_partial.json`.
 
 Auditor source SHA256: `e7452f6dedb9e52191d31ebc405b99f58b359720c5c7f065f7a68cb8fe7dd86e`.
+
+## Expanded Partial Check
+
+The next bounded audit checked 16 completed final cells (480,000 shot records). All integrity, pairing, population, statistics and scoring checks passed. Selected cells also exercised direct public-API scoring and independent paired bootstrap checks; exact counts and numerical maxima are recorded in `validation/independent_final_partial_16.json`. The maximum reconstructed summary/paired-estimate difference was 3.56e−15, direct scoring difference 2.23e−16 strokes and bootstrap-bound difference 1.16e−14. The receipt remains `complete=false` and `pass=false`: this is partial evidence, not acceptance of the 324-cell primary matrix or the 72-cell control. No physical flight was rerun.
