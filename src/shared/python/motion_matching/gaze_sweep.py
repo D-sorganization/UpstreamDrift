@@ -11,8 +11,9 @@ chord joining the front's two ends in normalised coordinates.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 MARKER_TOLERANCE = 0.10
 FACE_CAP_DEG = 5.0
@@ -93,3 +94,48 @@ def select_knee(
 
     # Normalised chord runs (0, 1) -> (1, 0); distance below it is 1 - x - y.
     return max(front, key=lambda p: 1.0 - sum(coords(p)))
+
+
+def point_from_row(row: Mapping[str, Any]) -> SweepPoint:
+    """``SweepPoint`` from a ``sweep_row.json`` (face error = OSV-10 fit RMS)."""
+    try:
+        return SweepPoint(
+            weight=float(row["gaze_weight"]),
+            marker_rms_mm=float(row["marker_rms_mm"]),
+            gaze_rms_deg=float(
+                row["head_gaze"]["address_to_impact"]["theta_gaze_rms_deg"]
+            ),
+            face_error_deg=float(row["face_fit_deg"]["rms_deg"]),
+        )
+    except KeyError as exc:
+        raise ValueError(f"sweep row is missing {exc}") from exc
+
+
+def select_default(
+    sweeps: Mapping[str, Sequence[SweepPoint]],
+    marker_tolerance: float = MARKER_TOLERANCE,
+    face_cap_deg: float = FACE_CAP_DEG,
+) -> float:
+    """One gaze weight for every capture: the smallest per-capture knee.
+
+    Only weights feasible in every capture are considered, so the result keeps
+    each capture within its marker tolerance and face cap. Postcondition: the
+    returned weight is feasible in every capture (0 if nothing else is).
+    """
+    if not sweeps:
+        raise ValueError("need at least one capture sweep")
+    common = set.intersection(
+        *(
+            {p.weight for p in feasible(pts, marker_tolerance, face_cap_deg)}
+            for pts in sweeps.values()
+        )
+    )
+    if 0.0 not in common:
+        raise ValueError("the weight 0 baseline must be feasible in every capture")
+    knees = [
+        select_knee(
+            [p for p in pts if p.weight in common], marker_tolerance, face_cap_deg
+        )
+        for pts in sweeps.values()
+    ]
+    return min(k.weight for k in knees)
