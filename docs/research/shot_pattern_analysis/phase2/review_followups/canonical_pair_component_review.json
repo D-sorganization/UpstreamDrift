@@ -1,0 +1,26 @@
+{
+  "attempted_n": 10000,
+  "commit": "04c6f17aa4",
+  "common_six_n": 9939,
+  "exclusions": [
+    "final_study_acceptance",
+    "final_all_assets_visual_acceptance",
+    "changes_to_accepted_2e_snapshot"
+  ],
+  "focused_tests": 5,
+  "followups": [
+    "final caller must replace Combined 2 with explicit noise units",
+    "adjacent 175 and 0.00 marginal tick labels overlap slightly",
+    "integration and final ledger/source binding required"
+  ],
+  "inspected_png": "/tmp/p2-canonical-pair-social-v1/driver_sd_comparison_draw_social.png",
+  "inspected_png_sha256": "3489f9e729c09dce7119856e3ce824323459c0bc436974757322bbcde9ce230c",
+  "schema": "independent-pair-presentation-component-review/1",
+  "source_sha256": {
+    "src/tools/shot_pattern_analysis/matched_pair_social.py": "6b5c8bac66601a51d8ce04900c29b5e496bb0b9e46da3c3832746133c44ec907",
+    "tests/tools/shot_pattern_analysis/test_matched_pair_social.py": "e360033821846573c48eb4e33da26f2d6f3b270d1e1cbc0541787a442f0cf50b"
+  },
+  "status": "component_contract_accepted_visual_followups_pending",
+  "test_exit_code": 0,
+  "test_log_sha256": "4439dc470d95d1e24fbc7779801a84ce88c2e33e904b2259062d3e6f3d60d3a8"
+}

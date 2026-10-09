@@ -1,0 +1,7 @@
+# Canonical Pair Presentation Component Review
+
+The isolated thin wrapper at `04c6f17aa4` passes five independent focused tests. It reuses the accepted canonical density/HDR/marginal renderer, accepts exactly three physical patterns by two condition labels, and checks finite equally sized populations. The qualified caller must establish common shot identities; shape equality alone does not do so. No new physics or density algorithm is introduced.
+
+The actual Draw PNG from the driver 5° SD comparison was independently viewed. Its six-population count of 9,939/10,000, condition labels, units, highest-density-region meaning, sampled-dot disclosure and per-figure scale qualification are visible. Adjacent main-panel `175` and marginal `0.00` tick labels overlap slightly in both condition panels. The original `Combined 2` shorthand also needs explicit noise units at the final call site.
+
+Accept the component contract, not final publication presentation. Root has separately produced an explicit-units example; that does not silently correct the remaining tick overlap. Since the canonical renderer is execution-hashed, any cosmetic source correction needs a separate reviewed presentation/source transition or must wait until numerical runs finish. Preserve the accepted `2e0a74` snapshot and its immutable receipt. Final integration, source/asset ledgers, all-image visual checks and complete study acceptance remain separate gates.
