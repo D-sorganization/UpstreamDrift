@@ -10496,3 +10496,35 @@ residuals and failures through existing frozen-loader/TRC contracts. Its source
 candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
 registration and anatomical calibration are unresolved. Canonical authority is
 chapter26; no capture, whole-body or full-state replay acceptance is claimed.
+
+## Native Offline OpenSim Muscle Matching (#11968)
+
+The maintained `tour_matching.cli moco-native` command consumes a strict,
+file-driven request binding native source, marker reference, state/control
+bounds, exact source and observation hashes, selected marker correspondence,
+weights, units, registration, passive policy and native exclusions. Preparation
+retains every independent blocker before solver construction. The solve stage
+revalidates source and registered observation bytes, calls the existing Moco
+builder, reads back native marker weights, rejects incomplete state/control
+names, and retains numbered attempts including failed solves.
+
+A successful native solution is exported at every original control knot plus
+each original observation time to the versioned T01 excitation bundle. The
+saved bundle is serialized and reloaded before a fresh observation-free native
+model replay; its exact state and input identities remain separate from the
+Moco transcription. Scoring uses original observation times and validity
+masks, while optimized objective, independent replay marker error and
+optimized-versus-replayed full-state disagreement remain distinct quantities.
+The tested two-DOF/two-muscle synthetic fixtures support ordered controls and
+two mesh refinements; native integration refinement was measured at common
+times under distinct declared numerical policies. No solver-success or
+synthetic result qualifies whole-body biomechanics or the private capture.
+
+The unchanged pinned 520-muscle source and frozen driver/iron references were
+prepared without constructing a solve. Missing source-valid guess, registration,
+marker placements, passive policy, nonmuscle-assistance policy, native
+constraint policy and complete prepared native state remain explicit blockers.
+Private marker arrays and identities stay outside the public repository.
+Canonical chapter39 and `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` hold equations,
+tests, exact diagnostic scope and continuation instructions. All six engines
+and 17 required production rows remain in the acceptance denominator.
