@@ -5366,7 +5366,7 @@ frame of the closure-consistent fitted swings
 (\texttt{tests/fixtures/club\_face/swing\_q\_*.npz}, 908 and 914 frames at
 2 ms), against the frozen 5 mm tolerance of
 \texttt{tour\_matching.address}. Reproduce:
-\texttt{python3 -m scripts.grip\_closure\_report}.
+\texttt{python3 -m scripts.grip\_closure\_report --output report.json}.
 
 \begin{table}[h]
 \centering
@@ -5377,7 +5377,7 @@ Engine & Driver maximum (m) & 7-Iron Maximum (m) \\
 MuJoCo & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
 Pinocchio & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
 OpenSim (generated full-body weld) & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
-Drake & unavailable & unavailable \\
+Drake & $5.0\times10^{-8}$ & $1.7\times10^{-7}$ \\
 MyoSuite & unavailable & unavailable \\
 \hline
 \end{tabular}
@@ -5389,9 +5389,10 @@ MyoSuite & unavailable & unavailable \\
 \item These swings were fitted with the closure enforced, so a residual near
  zero confirms engine consistency of the closure frames, not an independent
  reachability test of the hand geometry.
-\item Drake is unavailable on the execution host: the plant import fails on a
- missing \texttt{shared.python.model\_generation.inertia.result} in the pinned
- Tools tree (a Tools gap). It is reported unavailable, never zero.
+\item Drake ran on the ControlTower container. On the brick host its plant
+ import fails on a missing
+ \texttt{shared.python.model\_generation.inertia.result} in the pinned Tools
+ tree (a Tools gap) and is reported unavailable there, never zero.
 \item MyoSuite is unavailable: the pinned \texttt{myo\_sim} assets and a swing
  in the retargeted coordinate space are not committed. Its shaft capsule is
  drawn only half the club length, which predates this change.

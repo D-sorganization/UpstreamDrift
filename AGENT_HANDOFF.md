@@ -1,7 +1,7 @@
 # Active: Two-Hand Grip Pose - OSV-2 #11728 (slice 1)
 
 - Branch `claude/osv-2-grip-pose`. `model_appearance/grip_pose.py` is the single grip definition (lead 1.5 cm below the butt, spacing 0.0762 m from the native spec, V angles, overlap default); `club_geometry`, `address.py`, the MyoSuite scene sites and the builder import it. `golf_humanoid.osim` (regenerate with `scripts/build_humanoid_osim.py`) now has the `hand_l_to_club` weld, and the trail weld puts the club 0.0912 m further along the shaft.
-- Canned-swing closure residual (`python3 -m scripts.grip_closure_report`): MuJoCo, Pinocchio, OpenSim full-body weld <= 1.8e-7 m; Drake (Tools pin lacks `inertia.result`) and MyoSuite unavailable. Open: finger meshes, stills and clips (slice 2), `golf_humanoid_scaled.osim` and `musculoskeletal_swing` still weld one hand, no `golf_humanoid` swing residual (no consistent Rajagopal swing).
+- Canned-swing closure residual (`python3 -m scripts.grip_closure_report --output r.json`): MuJoCo, Drake (ControlTower), Pinocchio, OpenSim full-body weld <= 1.8e-7 m; MyoSuite unavailable (no canned swing in its space). On brick Drake is unavailable (Tools pin lacks `inertia.result`). Open: finger meshes, stills and clips (slice 2), `golf_humanoid_scaled.osim` and `musculoskeletal_swing` still weld one hand, no `golf_humanoid` swing residual (no consistent Rajagopal swing).
 
 # Active: Simscape URDF Exchange — #11569 Task 3
 

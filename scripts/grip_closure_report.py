@@ -81,11 +81,19 @@ def swing_closure_report(club: str) -> dict[str, dict[str, object]]:
     return {s.engine: s.as_document() for s in series}
 
 
-def main() -> int:
-    import sys  # noqa: PLC0415
+def main(argv: list[str] | None = None) -> int:
+    import argparse  # noqa: PLC0415
 
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="JSON report path (OpenSim writes its own log lines to stdout)",
+    )
+    args = parser.parse_args(argv)
     report = {club: swing_closure_report(club) for club in CLUBS}
-    sys.stdout.write(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     return 0
 
 
