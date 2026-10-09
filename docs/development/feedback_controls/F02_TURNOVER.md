@@ -45,3 +45,9 @@ The canonical divergence inventory is regenerated without attribution edits.
 Twenty-seven focused tests passed in the installed native MuJoCo environment,
 including the real hinge step and eleven manual-governance cases. This does not
 extend the original synthetic/one-joint scope or qualify full-model parity.
+
+The merge-group seam regression exposed on the Drake branch is also carried
+forward here: generic fallback checks still reject owned cluster gaps, while
+an explicitly enabled Tools Lab overlay must resolve the canonical mocap leaf.
+A genuinely missing Lab module remains unavailable. This is the existing test
+correction from `8687f9222c`, with no import-loader or controller source change.
