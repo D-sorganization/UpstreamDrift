@@ -10387,6 +10387,15 @@ Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
 Tools T01 is consumed through merged pin
 `2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
 Six-engine and muscular OpenSim real-capture gates remain open.
+
+## Native Thelen Replay Boundary (F07b, #11826)
+
+Early native excitation replay explicitly admits compliant Thelen2003Muscle
+alongside Millard2012EquilibriumMuscle. Model-owned state minima, positive fiber
+length, complete restoration, ordered law identity and ignored-mode refusal
+are required. Canonical reference: native muscle replay chapter; turnover:
+`docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
+contact/grip, licensing and real-capture scientific gates remain open.
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
