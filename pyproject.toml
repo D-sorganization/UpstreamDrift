@@ -375,6 +375,7 @@ matched_swing_browser = "src.tools.matched_swing_browser._embed_adapter"
 impact_parameters = "src.tools.impact_parameters_panel._embed_adapter"
 grip_wrench_plots = "src.tools.grip_wrench_plots._embed_adapter"
 ground_reaction_plots = "src.tools.ground_reaction_plots._embed_adapter"
+shot_pattern_analysis = "src.tools.shot_pattern_analysis._embed_adapter"
 necromatcher = "src.tools.necromatcher._embed_adapter"
 
 [project.urls]

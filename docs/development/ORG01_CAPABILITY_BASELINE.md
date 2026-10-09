@@ -18,7 +18,7 @@ packages, saved layouts, and golden test fixtures.
 
 ## Baseline Metrics
 
-- **Total Cataloged Entries**: 178
+- **Total Cataloged Entries**: 180
 - **Observed Launcher Tiles / Models**: 104 (61 base desktop models + 29 discovered provider models + 14 web catalog tiles)
 - **Feature Parity Contracts**: 45
 - **Excluded Tool Packages / Libraries**: 9
@@ -28,7 +28,7 @@ packages, saved layouts, and golden test fixtures.
 
 | Workspace | Primary Capability Count | Description |
 | :--- | :---: | :--- |
-| `analysis` | 33 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
+| `analysis` | 35 | Telemetry extraction, metric calculation, video/data analysis, and flight comparison |
 | `capture` | 21 | Multi-camera mocap, pose estimation, marker tracking, and 3D reconstruction |
 | `governance` | 13 | Configuration setup, project architecture mapping, sidekick docks, and registry admin |
 | `putting` | 6 | Putting physics, green surface simulation, and ball rolling dynamics |
@@ -202,6 +202,7 @@ packages, saved layouts, and golden test fixtures.
 | `settings.preferences` | Settings/preferences surface + persistence | `feature` | `simulation` | — | `core` | 🟢 active_feature | `src/launchers/settings_dialog.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `sg_optimizer` | Tools Package: sg_optimizer | `cli_tool` | `training` | `simulation` | `core` | 🔵 planned | `src/tools/sg_optimizer/__init__.py` | `tests/config/test_registry_exclusions.py` |
 | `shadow_tracker` | Shadow Tracker | `tile` | `capture` | — | `core` | 🟢 active_feature | `src/tools/shadow_tracker/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
+| `shot_pattern_analysis` | Shot Pattern Analysis | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/shot_pattern_analysis/__main__.py` | `tests/config/test_launcher_registry_parity.py` |
 | `shot_tracer` | Shot Tracer | `tile` | `analysis` | — | `core` | 🟢 active_feature | `src/launchers/_shot_tracer_gui.py` | `tests/config/test_launcher_registry_parity.py` |
 | `sidekick` | Sidekick | `tile` | `governance` | — | `core` | 🟢 active_feature | `src/tools/sidekick/_embed_adapter.py` | `tests/config/test_launcher_registry_parity.py` |
 | `sidekick.terminal_repl_jupyter_skills` | Sidekick OS terminal / REPL / Jupyter / skills | `feature` | `governance` | — | `core` | ⚪ exempt | `src/launchers/launcher_sidekick_sidebar.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
@@ -233,6 +234,7 @@ packages, saved layouts, and golden test fixtures.
 | `tools.pose_editing` | Pose Studio interactive pose editing | `feature` | `capture` | — | `core` | ⚪ exempt | `src/tools/pose_studio/__main__.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.putting_green` | Putting green simulation | `feature` | `putting` | — | `core` | 🟢 active_feature | `src/engines/physics_engines/putting_green/python/simulator.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.rate_of_closure` | Rate of Closure Impact Explorer (swing-impact-flight-putting simulation suite) | `feature` | `putting` | — | `core` | 🟢 active_feature | `vendor/ud-tools/src/rate_of_closure/launch_pyqt6.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
+| `tools.shot_pattern_analysis` | Shot Pattern Analysis Workbench | `feature` | `analysis` | — | `core` | 🟢 active_feature | `src/tools/shot_pattern_analysis/gui.py` | `tests/config/test_feature_parity_registry.py` |
 | `tools.terrain_engine` | Terrain and topography configuration | `feature` | `governance` | — | `core` | 🟢 active_feature | `src/api/routes/terrain.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools.video_analyzer` | Video Analyzer (pose tracking and force/torque overlay) | `feature` | `capture` | `analysis` | `core` | 🟢 active_feature | `src/tools/video_analyzer/gui.py` | `tests/config/feature_parity/test_feature_parity_registry.py` |
 | `tools_calculator_hub` | Tools Calculator Suite | `cli_tool` | `analysis` | — | `tools` | 🟢 active_feature | `src/config/models.yaml` | `tests/config/test_launcher_registry_parity.py` |

@@ -728,6 +728,21 @@ models:
       status: "ready"
       default_launch: "tab"
 
+  - id: "shot_pattern_analysis"
+    name: "Shot Pattern Analysis"
+    description: "Compare paired straight, draw, and fade patterns with adjustable face SD and curve magnitude. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel."
+    type: "special_app"
+    path: "src/tools/shot_pattern_analysis/__main__.py"
+    capabilities:
+      - "shot_pattern_analysis"
+      - "shot_dispersion"
+      - "impact_physics"
+    launcher:
+      category: "tool"
+      logo: "assets/data_explorer_modern.png"
+      status: "ready"
+      default_launch: "tab"
+
   - id: "rate_of_closure"
     help: "docs/help/rate_of_closure.md"
     name: "Rate of Closure Impact Explorer"

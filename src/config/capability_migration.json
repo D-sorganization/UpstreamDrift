@@ -634,6 +634,18 @@
       "evidence": "src/tools/launch_monitor_analytics/__main__.py",
       "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
     },
+    "shot_pattern_analysis": {
+      "id": "shot_pattern_analysis",
+      "name": "Shot Pattern Analysis",
+      "entity_kind": "tile",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/shot_pattern_analysis/__main__.py",
+      "acceptance_owner": "tests/config/test_launcher_registry_parity.py"
+    },
     "shadow_tracker": {
       "id": "shadow_tracker",
       "name": "Shadow Tracker",
@@ -1977,6 +1989,18 @@
       "alias_target": null,
       "evidence": "src/tools/launch_monitor_analytics/gui.py",
       "acceptance_owner": "tests/config/feature_parity/test_feature_parity_registry.py"
+    },
+    "tools.shot_pattern_analysis": {
+      "id": "tools.shot_pattern_analysis",
+      "name": "Shot Pattern Analysis Workbench",
+      "entity_kind": "feature",
+      "primary_workspace": "analysis",
+      "secondary_links": [],
+      "provider_authority": "core",
+      "lifecycle": "active_feature",
+      "alias_target": null,
+      "evidence": "src/tools/shot_pattern_analysis/gui.py",
+      "acceptance_owner": "tests/config/test_feature_parity_registry.py"
     },
     "tools.matlab_suite": {
       "id": "tools.matlab_suite",

@@ -92,3 +92,37 @@ def test_every_knot_midpoint_and_100_random_states_match_public_api(
     assert [row.source_index for row in result.row_results] == list(range(len(rows)))
     direct = [row.strokes_gained for row in result.row_results]
     np.testing.assert_allclose(expected, direct, rtol=0, atol=1e-12)
+
+
+@pytest.mark.parametrize(
+    "bundle",
+    ["results", "results_sd2", "results_large_curve_sd1", "results_large_curve_sd2"],
+)
+def test_cached_means_match_preserved_full_api_historical_bundles(bundle):
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[3]
+    directory = root / "docs/research/shot_pattern_analysis" / bundle
+    report = json.loads((directory / "strokes_gained.json").read_text())
+    assert report["api_scored_shots"] == 30000
+    samples = pd.read_csv(directory / "shots.csv")
+    target = report["target_distance_m"]
+    radius = report["green_radius_m"]
+    cache = source_backed_score_cache(
+        build_broadie_approx_baseline(),
+        start_lie="fairway",
+        start_distance_yards=target * YARDS_PER_METRE,
+        finish_lies=("green", "rough"),
+    )
+    for pattern, expected in report["patterns"].items():
+        group = samples[samples["pattern"] == pattern]
+        assert len(group) == expected["n"]
+        distance_m = np.hypot(
+            group["aimed_x_m"].to_numpy() - target, group["aimed_y_m"].to_numpy()
+        )
+        green = distance_m <= radius
+        scores = np.empty(len(group))
+        for lie, mask in (("green", green), ("rough", ~green)):
+            scores[mask] = cache.score_many(lie, distance_m[mask] * YARDS_PER_METRE)
+        assert abs(float(np.mean(scores)) - expected["mean_strokes_gained"]) <= 1e-12

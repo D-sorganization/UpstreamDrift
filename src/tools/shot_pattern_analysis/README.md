@@ -7,14 +7,17 @@ submodule within this repository, rather than a separately hosted Git submodule.
 
 ## Run an Analysis
 
-From the repository root, with the native `upstream-physics` wheel installed:
+From the repository root, with the native `upstream-physics` wheel installed,
+select the Shot Pattern Analysis tile or run
+`python3 -m src.tools.shot_pattern_analysis` to open the tool. For headless export:
 
 ```bash
-python3 -m src.tools.shot_pattern_analysis --shots 10000 --seed 20261008 \
-  --output docs/research/shot_pattern_analysis/results
-python3 -m src.tools.shot_pattern_analysis --shots 10000 --seed 20261008 \
-  --face-sd 2 --curve-scale 2 \
-  --output docs/research/shot_pattern_analysis/results_large_curve_sd2
+python3 -m src.tools.shot_pattern_analysis --club-preset driver \
+  --shots 10000 --seed 20261008 --output shot_pattern_results/driver_sd1
+python3 -m src.tools.shot_pattern_analysis --club-preset seven_iron \
+  --face-sd 2 --curve-scale 2 --delivery-mode shaft_rotation \
+  --shots 10000 --seed 20261008 --output shot_pattern_results/seven_iron_coupled_sd2
+python3 -m src.tools.shot_pattern_analysis.matrix shot_pattern_results/full_matrix
 ```
 
 The bundle contains per-shot CSV, summary JSON, a provenance receipt, and
@@ -40,16 +43,30 @@ The trials vary face angle with a normal standard deviation of 1° or 2°.
 `--face-sd` sets that standard deviation; `--curve-scale 2` doubles the mean
 draw angles to face +3° and path +6°, with the fade mirrored. The straight
 baseline stays at 0°/0°. Both controls are available in the launcher tile.
-It uses the same random deviations for each pattern. Speed is 45 m/s, loft
-10.9°, attack angle 0°, contact centered, and wind zero. Both raw outcomes and
-outcomes after a single nominal aiming rotation are reported. Aiming uses the
-zero-error shot, never the random sample's mean. The target circle has a 15 m
-radius at the straight nominal carry distance.
+It uses the same random deviations for each pattern. Illustrative driver,
+7-iron, and pitching-wedge presets supply explicit speed, nominal delivered loft,
+attack angle, head mass, and assumed shaft elevation. They are hybrid research
+inputs, not measured player averages. Controls can be edited while retaining
+the selected club's scoring context.
 
-The rigid-body impact model launches translation along the face normal while
-adding friction spin separately; it omits the corresponding tangential
-translational impulse. Results are conditional on this simplified model.
-They do not establish how well a golfer can control each shot pattern.
+Fixed-loft mode holds delivered loft constant as face varies. Shaft-rotation
+mode couples face error and loft through an assumed rigid shaft axis around
+each pattern nominal. All shapes share the same zero-error loft. Lie and lean
+control that geometry; no measured closure covariance or shaft bending is
+inferred. Contact is central and wind is zero.
+
+Both raw endpoints and outcomes after one nominal aiming rotation are reported.
+Aiming uses the zero-error shot, never the sample mean. The generic 15 m target
+circle is centered at straight nominal carry. Driver scoring separately uses a
+hypothetical 400 m tee hole and 30 m fairway corridor; iron/PW scoring uses an
+approach to a 15 m green with rough outside. Historical PGA benchmarks and an
+approximate putting fit provide conditional SG, not player predictions.
+
+The corrected rigid-body model applies matching tangential linear and spin
+impulses, includes finite club mass in the sticking condition, and rejects
+separating contact. Independent conservation tests verify central-contact
+consistency. Off-center gear effect and measured player accuracy remain
+unqualified. Face-only randomness is not a calibrated 2D golfer dispersion.
 
 See the [Experiment Reference](../../../docs/research/shot_pattern_analysis/README.md)
 and its [Editable LaTeX Source](../../../docs/research/shot_pattern_analysis/shot_pattern_analysis.tex)
