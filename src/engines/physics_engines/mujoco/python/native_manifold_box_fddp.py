@@ -12,7 +12,7 @@ import hashlib
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 import crocoddyl
 import mujoco as mj
@@ -35,6 +35,17 @@ from src.shared.python.motion_matching.bounded_nmpc import MPCCommandReceipt
 Array = NDArray[np.float64]
 _EPSILON = 1e-6
 _BOUND_MARGIN = 1e-4
+
+
+class NativeObservationCost(Protocol):
+    """Optional exact-grid observation objective shared by solve and admission."""
+
+    @property
+    def time_seconds(self) -> Array: ...
+
+    def cost(self, physical: Array, index: int) -> float: ...
+
+    def tangent(self, physical: Array, index: int) -> tuple[Array, Array]: ...
 
 
 def _vector(values: Array, length: int, label: str) -> Array:
@@ -183,12 +194,18 @@ class NativeManifoldAction(crocoddyl.ActionModelAbstract):
         reference: Array,
         state_weights: Array,
         input_weights: Array,
+        observation_cost: NativeObservationCost | None = None,
+        observation_index: int | None = None,
     ) -> None:
         super().__init__(state, 2, 16)
         self.native_state = state
         self.reference = state._checked(reference).copy()
         self.state_weights = _vector(state_weights, 16, "state weights").copy()
         self.input_weights = _vector(input_weights, 2, "input weights").copy()
+        if (observation_cost is None) != (observation_index is None):
+            raise ValueError("native observation cost and index must be paired")
+        self.observation_cost = observation_cost
+        self.observation_index = observation_index
         if np.any(self.state_weights <= 0) or np.any(self.input_weights <= 0):
             raise ValueError("native weights must be positive")
         bounds = state.model.actuator_ctrlrange
@@ -208,6 +225,8 @@ class NativeManifoldAction(crocoddyl.ActionModelAbstract):
             np.dot(self.state_weights, error**2)
             + np.dot(self.input_weights, command**2)
         )
+        if self.observation_cost is not None and self.observation_index is not None:
+            data.cost += self.observation_cost.cost(data.xnext, self.observation_index)
 
     def calcDiff(self, data: Any, x: Array, u: Array) -> None:
         physical = self.native_state._checked(x)
@@ -234,22 +253,44 @@ class NativeManifoldAction(crocoddyl.ActionModelAbstract):
         data.Lxx = data.Fx.T @ curvature @ data.Fx
         data.Lxu = data.Fx.T @ curvature @ data.Fu
         data.Luu = data.Fu.T @ curvature @ data.Fu + 2 * np.diag(self.input_weights)
+        if self.observation_cost is not None and self.observation_index is not None:
+            observation_gradient, observation_curvature = self.observation_cost.tangent(
+                data.xnext, self.observation_index
+            )
+            data.Lx += data.Fx.T @ observation_gradient
+            data.Lu += data.Fu.T @ observation_gradient
+            data.Lxx += data.Fx.T @ observation_curvature @ data.Fx
+            data.Lxu += data.Fx.T @ observation_curvature @ data.Fu
+            data.Luu += data.Fu.T @ observation_curvature @ data.Fu
 
 
 class NativeManifoldTerminal(crocoddyl.ActionModelAbstract):
     """Terminal native manifold tracking cost without an actuator input."""
 
-    def __init__(self, state: NativeManifoldState, reference: Array, weights: Array):
+    def __init__(
+        self,
+        state: NativeManifoldState,
+        reference: Array,
+        weights: Array,
+        observation_cost: NativeObservationCost | None = None,
+        observation_index: int | None = None,
+    ):
         super().__init__(state, 0, 16)
         self.native_state = state
         self.reference = state._checked(reference).copy()
         self.weights = _vector(weights, 16, "terminal weights").copy()
+        if (observation_cost is None) != (observation_index is None):
+            raise ValueError("terminal observation cost and index must be paired")
+        self.observation_cost = observation_cost
+        self.observation_index = observation_index
 
     def calc(self, data: Any, x: Array, u: Array | None = None) -> None:
         physical = self.native_state._checked(x)
         data.xnext = physical.copy()
         error = self.native_state.diff(self.reference, physical)
         data.cost = float(np.dot(self.weights, error**2))
+        if self.observation_cost is not None and self.observation_index is not None:
+            data.cost += self.observation_cost.cost(physical, self.observation_index)
 
     def calcDiff(self, data: Any, x: Array, u: Array | None = None) -> None:
         physical = self.native_state._checked(x)
@@ -259,6 +300,12 @@ class NativeManifoldTerminal(crocoddyl.ActionModelAbstract):
         )[0]
         data.Lx = 2 * jacobian.T @ (self.weights * error)
         data.Lxx = 2 * jacobian.T @ np.diag(self.weights) @ jacobian
+        if self.observation_cost is not None and self.observation_index is not None:
+            gradient, curvature = self.observation_cost.tangent(
+                physical, self.observation_index
+            )
+            data.Lx += gradient
+            data.Lxx += curvature
 
 
 @dataclass(frozen=True)
@@ -284,6 +331,9 @@ class NativeManifoldBoxFDDP:
         horizon_steps: int,
         max_iterations: int,
         max_wall_s: float,
+        observation_cost: NativeObservationCost | None = None,
+        state_weights: Array | None = None,
+        input_weights: Array | None = None,
     ) -> None:
         self.state = NativeManifoldState(model)
         self.references = np.asarray(references, dtype=np.float64)
@@ -303,9 +353,30 @@ class NativeManifoldBoxFDDP:
         self.horizon_steps = horizon_steps
         self.max_iterations = max_iterations
         self.max_wall_s = max_wall_s
-        self.state_weights = np.r_[np.ones(6), 20.0, 20.0, np.full(8, 0.1)]
+        self.state_weights = (
+            np.r_[np.ones(6), 20.0, 20.0, np.full(8, 0.1)]
+            if state_weights is None
+            else _vector(state_weights, 16, "state weights").copy()
+        )
         self.terminal_weights = self.state_weights * 3
-        self.input_weights = np.array([0.01, 0.01])
+        self.input_weights = (
+            np.array([0.01, 0.01])
+            if input_weights is None
+            else _vector(input_weights, 2, "input weights").copy()
+        )
+        if np.any(self.state_weights <= 0) or np.any(self.input_weights <= 0):
+            raise ValueError("native weights must be positive")
+        if observation_cost is not None and (
+            len(observation_cost.time_seconds) != len(self.references)
+            or not np.allclose(
+                observation_cost.time_seconds,
+                np.arange(len(self.references)) * float(model.opt.timestep),
+                atol=1e-12,
+                rtol=0,
+            )
+        ):
+            raise ValueError("native observation clock must equal reference grid")
+        self.observation_cost = observation_cost
         _require_no_native_callbacks()
         linearize_native_tangent_step(
             model, _full_state(model, self.references[0]), np.zeros(2)
@@ -334,8 +405,13 @@ class NativeManifoldBoxFDDP:
                     np.dot(self.state_weights, error**2)
                     + np.dot(self.input_weights, command**2)
                 )
+                if self.observation_cost is not None:
+                    total += self.observation_cost.cost(state, index + offset + 1)
             terminal = self.state.diff(self.references[index + len(plan)], state)
-            return total + float(np.dot(self.terminal_weights, terminal**2))
+            total += float(np.dot(self.terminal_weights, terminal**2))
+            if self.observation_cost is not None:
+                total += self.observation_cost.cost(state, index + len(plan))
+            return total
         except ValueError:
             return float("inf")
 
@@ -346,6 +422,8 @@ class NativeManifoldBoxFDDP:
                 self.references[index + offset + 1],
                 self.state_weights,
                 self.input_weights,
+                self.observation_cost,
+                index + offset + 1 if self.observation_cost is not None else None,
             )
             for offset in range(self.horizon_steps)
         ]
@@ -353,6 +431,8 @@ class NativeManifoldBoxFDDP:
             self.state,
             self.references[index + self.horizon_steps],
             self.terminal_weights,
+            self.observation_cost,
+            index + self.horizon_steps if self.observation_cost is not None else None,
         )
         shooting = crocoddyl.ShootingProblem(x0, running, terminal)
         states = [x0.copy()]
