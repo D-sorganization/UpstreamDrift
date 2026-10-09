@@ -369,6 +369,7 @@ def test_compute_jacobian_returns_none(slx_pair: Path) -> None:
     a.close()
 
 
+@pytest.mark.unit
 def test_compute_contact_forces_unavailable_not_zero(slx_pair: Path) -> None:
     """#11709: the model has no foot-ground contact; never report zero GRF."""
     a = SimscapeAdapter()
@@ -382,6 +383,7 @@ def test_compute_contact_forces_unavailable_not_zero(slx_pair: Path) -> None:
     a.close()
 
 
+@pytest.mark.unit
 def test_compute_contact_forces_requires_loaded_model() -> None:
     with pytest.raises(SimscapeStateError):
         SimscapeAdapter().compute_contact_forces()
