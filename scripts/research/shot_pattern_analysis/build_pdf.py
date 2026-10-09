@@ -243,6 +243,13 @@ class _FlowBuilder:
                     ("RIGHTPADDING", (0, 0), (-1, -1), 6),
                     ("TOPPADDING", (0, 0), (-1, -1), 5),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    # Keep a small tail together so an otherwise full page
+                    # does not strand one result row on a new page.
+                    *(
+                        [("NOSPLIT", (0, len(rows) - 4), (-1, -1))]
+                        if len(rows) - len(header) >= 4
+                        else []
+                    ),
                 ]
             )
         )

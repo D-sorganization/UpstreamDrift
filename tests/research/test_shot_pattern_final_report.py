@@ -113,6 +113,8 @@ def test_report_shows_completed_and_unavailable_without_fabricating_effects():
     assert "Phase One" in text
     assert "Missing Metric in Completed Cells" in text
     assert "1 unavailable planned cell" in text
+    assert "successful nominal matching under the stated bounds" in text
+    assert "Infeasible cells" not in text
     assert "| Mean Radial Error Difference | Draw | 1 | 0 | 0 | 0 |" in text
 
 
@@ -205,6 +207,22 @@ def test_unavailable_inventory_separates_planned_from_attempted_shots():
     assert all(row["planned_n_per_pattern"] == "10000" for row in rows)
     assert all(row["attempted_n_per_pattern"] == "0" for row in rows)
     assert all(row["supported_n"] == "" for row in rows)
+
+
+def test_compact_comparison_table_does_not_wrap_full_optimizer_failure() -> None:
+    unavailable = _cell("driver_lean0_curve2_rotation2_combined2", status="unavailable")
+    unavailable["reason"] = (
+        "nominal landing unreachable within bounds: residual=0.351838 m"
+    )
+    rendered = "\n".join(
+        build_final_report._selected_comparison_lines(_matrix([unavailable], "final"))
+    )
+    assert "Nominal Match Unavailable (See Inventory)" in rendered
+    assert "residual=0.351838" not in rendered
+    inventory = build_final_report.render_cell_inventory(
+        _matrix([unavailable], "final"), _matrix([], "final")
+    )
+    assert "residual=0.351838" in inventory
 
 
 def test_matrix_input_change_is_rejected_before_publication(tmp_path):

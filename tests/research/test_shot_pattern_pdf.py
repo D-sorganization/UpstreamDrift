@@ -111,3 +111,23 @@ def test_identical_markdown_produces_identical_pdf_bytes(tmp_path):
     build_pdf.render_markdown_to_pdf(source, first)
     build_pdf.render_markdown_to_pdf(source, second)
     assert first.read_bytes() == second.read_bytes()
+
+
+def test_long_table_keeps_last_four_body_rows_together(tmp_path):
+    source = tmp_path / "table.md"
+    source.write_text(
+        "# Table Pagination\n\n## Complete Results\n\n"
+        "| Club | Mean | Low | High | Note |\n"
+        "| --- | ---: | ---: | ---: | --- |\n"
+        + "".join(
+            f"| row-{index:02} | {index}.1234 | {index}.0001 | {index}.9999 | Matched Pair |\n"
+            for index in range(32)
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "table.pdf"
+    build_pdf.render_markdown_to_pdf(source, output)
+    pages = pypdf.PdfReader(output).pages
+    assert len(pages) == 2
+    tail = pages[-1].extract_text() or ""
+    assert all(f"row-{index:02}" in tail for index in range(28, 32))

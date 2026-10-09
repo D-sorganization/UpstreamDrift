@@ -267,7 +267,7 @@ def _experimental_control_lines(primary: dict) -> list[str]:
     return lines
 
 
-def _anchor_lines(primary: dict) -> list[str]:
+def _anchor_lines(primary: dict, *, n_shots: int = 10_000) -> list[str]:
     anchors = [
         cell
         for cell in primary["cells"]
@@ -281,7 +281,7 @@ def _anchor_lines(primary: dict) -> list[str]:
         "",
         "The following three club cells use zero lean, curve scale 1, shaft-twist SD 2°, and the combined-2 profile. Each named pattern has its own nominal face, path and speed solved before noise. Mean carry, spread and RMSE are conditional on supported shots; this is one selected stratum, not the entire grid.",
         "",
-        "| Club | Pattern | Mean Carry (m) | Downrange SD (m) | Lateral SD (m) | Target RMSE (m) | Supported / 10,000 |",
+        f"| Club | Pattern | Mean Carry (m) | Downrange SD (m) | Lateral SD (m) | Target RMSE (m) | Supported / {n_shots:,} |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for cell in anchors:
@@ -315,7 +315,7 @@ def _anchor_lines(primary: dict) -> list[str]:
             "",
             "### Long-and-Short Directional Check",
             "",
-            "A closed-face or left-side miss is not assumed to be long. The selected combined-2/2° cells directly report mean downrange error and all four empirical endpoint quadrants. Signs are relative to the common physical target; fractions are conditional on supported shots.",
+            "A closed-face or left-side miss is not assumed to be long. The selected combined-2/2° cells directly report mean downrange error and all four simulated endpoint quadrants. Signs are relative to the common physical target; fractions are conditional on supported shots.",
             "",
             "| Club | Pattern | Mean X Error (m) | Left-Long | Left-Short | Right-Long | Right-Short |",
             "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
@@ -363,7 +363,7 @@ def _selected_comparison_lines(primary: dict) -> list[str]:
                     [
                         *descriptor,
                         "Unavailable",
-                        cell.get("reason", "unavailable"),
+                        "Nominal Match Unavailable (See Inventory)",
                         "—",
                     ]
                 )
@@ -403,7 +403,7 @@ def _selected_comparison_lines(primary: dict) -> list[str]:
             continue
         if cell["status"] != "completed":
             lines.append(
-                f"| {config['club']['club_id']} | Unavailable | {cell.get('reason', 'unavailable')} | — |"
+                f"| {config['club']['club_id']} | Unavailable | Nominal Match Unavailable (See Inventory) | — |"
             )
             continue
         paired = cell["paired_comparisons"]
@@ -584,6 +584,17 @@ def render_final_report(
         "[Phase One](../README.md) included both a fixed-delivered-loft face-error experiment and earlier shaft-rotation geometric controls. Those historical outputs remain separate. The original face-angle SD is not interchangeable with this phase's primitive shaft-twist SD. This phase pitches the complete club, matches raw nominal landings, adds path/speed/strike noise, and uses the independently reviewed two-body incremental contact law. Numeric phase-one and phase-two effects must not be pooled as if they were the same experiment.",
         "",
     ]
+    unavailable_example = next(
+        (cell for cell in primary["cells"] if cell["status"] == "unavailable"),
+        None,
+    )
+    if unavailable_example is not None:
+        lines.extend(
+            [
+                f"One unavailable planned cell is `{unavailable_example['cell']}`: `{unavailable_example.get('reason', 'unspecified')}`. The complete inventory preserves every reason.",
+                "",
+            ]
+        )
     lines.extend(_experimental_control_lines(primary))
     lines.extend(
         [
@@ -620,7 +631,7 @@ def render_final_report(
             "",
             "## Across-Lean Control Cell Accounting",
             "",
-            "The [Control Matrix Plan](control_final_v1/matrix_plan.json) fixes target distance to the zero-lean reference. Infeasible cells are retained and named in the complete CSV inventory. This does not by itself identify a pure lean effect because the optimizer rematches delivery inputs. Driver lean can shorten or eliminate the physically airborne nominal; all comparisons are conditioned on reachability.",
+            "The [Control Matrix Plan](control_final_v1/matrix_plan.json) fixes target distance to the zero-lean reference. Unavailable cells are retained and named in the complete CSV inventory. This does not by itself identify a pure lean effect because the optimizer rematches delivery inputs. Driver lean can shorten or eliminate a physically airborne nominal; all comparisons are conditioned on successful nominal matching under the stated bounds.",
             "",
         )
     )
