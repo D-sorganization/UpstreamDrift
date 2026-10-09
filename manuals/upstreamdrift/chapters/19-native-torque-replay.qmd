@@ -8,7 +8,9 @@ title: "Native Torque Replay"
 
 The F06a adapter consumes the authoritative Tools experiment-replay bundle
 through `sidekick.lab.mocap`. It drives actual MuJoCo stepping, with the model's
-own constraints and contact. For each admitted unit-gain hinge motor,
+own constraints and contact. The local split lab namespace resolves Tools-owned
+subpackages through the central vendor-search helper; the replay schema is
+never copied into UD. For each admitted unit-gain hinge motor,
 \(p_i=u_i\), and generalized actuator effort is
 \(\tau=\sum_i e_{d(i)}u_i\), where \(d(i)\) is the native hinge velocity
 index. Native effort is checked against this mapping at every step.
