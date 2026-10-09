@@ -1,8 +1,31 @@
 # Straight, Draw, and Fade: Shot Pattern Analysis
 
+**Status:** The four original driver result bundles below are superseded
+impact-approximation controls. Independent review found a missing tangential
+translational impulse. Corrected driver, 7-iron, and wedge experiments are in
+progress; the historical precision and scoring numbers are not final conclusions.
+
 This experiment compares 10,000 shots per pattern with independent normally
 distributed face errors at both 1° and 2° standard deviation and fixed path. It is a
 conditional simulation study, not a measured golfer study or physics qualification.
+
+## Expanded Goal and Acceptance
+
+The active goal now includes driver, 7-iron, and wedge cases with
+club-appropriate tee/approach scoring, an independent Astra review, and
+correction of the inconsistent impact impulse. It also includes face–loft coupling, rotation about the shaft,
+shaft-lean sensitivity, and the observed long-left/short-right pattern. The
+fixed-delivered-loft experiments below are retained as controls; their results
+must not be generalized to players whose face error covaries with delivered
+loft, attack angle, speed, or strike. The analysis is complete only after:
+
+- The 3D rotation geometry, frames, and shaft-lean effects are derived and tested.
+- Coupled delivery trials preserve matched random errors and report actual delivered loft.
+- Carry–lateral covariance and long-left/short-right behavior are quantified rather than assumed.
+- Carry-versus-loft sensitivity is checked for both low- and higher-loft cases.
+- Dispersion, equal-range controls, approach scoring, graphics, and tile controls reflect the expanded model.
+- Implementation errors are corrected with failing tests first; unresolved physical validation remains explicit.
+- Every finding is tracked in the [Analysis Issue Register](issues/README.md), with GitHub publication and closure reported truthfully.
 
 ## Experiment Definition
 
@@ -11,6 +34,10 @@ conditional simulation study, not a measured golfer study or physics qualificati
 | Straight | 0° | 0° |
 | Draw | +1.5° | +3° |
 | Fade | −1.5° | −3° |
+
+The larger-curve trials double both means: draw face +3° / path +6°, and
+fade face −3° / path −6°. Straight remains 0°/0°. Each magnitude is evaluated
+at face SD 1° and 2° with the same paired random errors.
 
 Positive means right for a right-handed golfer. The draw face is 1.5° left of
 the path. All three patterns receive the same 10,000 random face errors,
@@ -26,7 +53,7 @@ rotates each pattern by a single angle calculated from its zero-error landing.
 It uses the straight nominal carry as the fixed target distance and a 15 m
 radius target circle. No per-shot aiming or sample-mean correction is applied.
 
-## Results and Practical Meaning
+## Fixed-Loft Control Results and Practical Meaning
 
 After each pattern receives its single nominal aiming adjustment:
 
@@ -60,6 +87,46 @@ than the roughly 1% difference in spread. Opposite curvature occurs in 6.92%
 of draw-intended shots and 6.59% of fade-intended shots. The small draw/fade
 asymmetry is consistent with finite sampling of a symmetric model.
 
+## The 2° Face-Variability Trial
+
+| Measure | Straight | Draw | Fade |
+| --- | ---: | ---: | ---: |
+| Lateral Standard Deviation (m) | 18.940 | 18.772 | 18.763 |
+| Landings Within 15 m of Target | 56.04% | 56.34% | 56.31% |
+| Mean Carry (m) | 194.613 | 194.211 | 194.204 |
+
+Doubling face SD almost doubles landing SD and reduces target-hit fraction
+from about 88% to 56%. The curve-related SD reduction remains below 1%:
+approximately 0.88% for draw and 0.93% for fade. Greater impact variability
+therefore does not create a substantially larger proportional curve benefit
+in this conditional model. Target-hit gains are 0.30 and 0.27 percentage points.
+
+## Doubled-Curve Trials
+
+The larger draw uses face +3° / path +6°; fade mirrors these angles.
+
+| Face SD | Measure | Straight | Draw | Fade |
+| --- | --- | ---: | ---: | ---: |
+| 1° | Lateral Standard Deviation (m) | 9.677 | 9.313 | 9.308 |
+| 1° | Central 90% Lateral Width (m) | 31.799 | 30.602 | 30.570 |
+| 1° | Landings Within 15 m | 87.56% | 88.31% | 88.33% |
+| 1° | Target RMSE (m) | 9.704 | 9.608 | 9.605 |
+| 1° | Mean Carry (m) | 195.154 | 193.531 | 193.525 |
+| 2° | Lateral Standard Deviation (m) | 18.940 | 18.270 | 18.252 |
+| 2° | Central 90% Lateral Width (m) | 62.338 | 60.111 | 59.990 |
+| 2° | Landings Within 15 m | 56.04% | 56.95% | 56.95% |
+| 2° | Target RMSE (m) | 19.149 | 18.795 | 18.782 |
+| 2° | Mean Carry (m) | 194.613 | 193.001 | 192.988 |
+
+Doubling curve magnitude increases the modeled lateral-SD reduction to
+3.5–3.8%, but costs approximately 1.62 m mean carry. The target RMSE improves
+less than lateral SD because it also counts longitudinal error. At equal range,
+the larger-curve SD benefit is approximately 2.9–3.0%, versus 0.7–0.8% for the
+original curves. Thus part of the apparent precision benefit is shorter range.
+Greater face variability still does not produce a larger proportional benefit.
+The straight-shot rows are identical across curve magnitudes within each SD,
+providing a matched control rather than a fresh random baseline.
+
 ## Carry Distance and the Equal-Range Check
 
 Shots do not all travel the same distance. Face error changes impact and spin,
@@ -78,12 +145,47 @@ Shorter carry therefore explains part of the apparent improvement, while a
 small angular-spread difference remains in this model. This normalization
 cannot identify a causal physical mechanism or validate the impact model.
 
+## Approach Strokes-Gained Scenario
+
+This estimate treats the shot as a fairway approach from 195.334 m to a hole
+at the center of a circular green of radius 15 m, with rough surrounding it.
+The carry endpoint is assumed to be the final resting position: no bounce,
+roll, slopes, bunkers, water, or out-of-bounds. The saved scoring outputs also
+include 10 m and 20 m green radii to expose layout sensitivity.
+
+Every endpoint is evaluated with the pinned Tools public source-backed
+strokes-gained API. Fairway and rough expected strokes are factual numerical
+values from [Broadie's Historical PGA Tour Benchmark, Table 9](https://www.columbia.edu/~mnb2/broadie/Assets/strokes_gained_pga_broadie_20110408.pdf),
+based on 2003–2010 data. Putting uses the paper's one-putt expression and an
+explicitly approximate three-putt reconciliation. The printed coefficient
+order produces invalid probabilities; the chosen approximation agrees with
+the stated 33-foot/two-putt and 40-foot/10% three-putt anchors, with a joint
+probability bound for tap-ins. This is not an independently verified exact
+reproduction of the author's fit. The baseline artifact stores every knot,
+source PDF hash, interpolation support, and its own verified digest.
+
+Strokes gained equals expected strokes at the start minus one shot minus
+expected strokes remaining. Because every pattern starts at the same point,
+the relative benefit comes entirely from its finishing outcomes. Positive
+paired differences favor the curved pattern. These values are per approach,
+not per round, and are not predictions of a real player's score.
+
+For the original 1° trial, mean SG is +0.4460 straight, +0.4436 draw and
++0.4431 fade. The curved-minus-straight changes are −0.00239 strokes for draw
+(95% paired Monte Carlo interval −0.00339 to −0.00150) and −0.00291 for fade
+(−0.00390 to −0.00208). A slightly narrower lateral pattern therefore need
+not improve scoring. Model, course-layout, and benchmark uncertainty are
+excluded from these sampling intervals and can exceed these tiny differences.
+
 ## Data and Shareable Graphics
 
-The result bundle lives in `results/`: `shots.csv` contains all 30,000 landings,
+The four bundles are `results/` (1° SD, 1× curve), `results_sd2/` (2° SD,
+1× curve), `results_large_curve_sd1/` and `results_large_curve_sd2/` (2× curve).
+Each contains the following files: `shots.csv` contains all 30,000 landings,
 `summary.json` contains variance, standard deviation, percentiles, target RMSE,
 target-hit fractions, Wilson intervals and paired-bootstrap variance ratios,
 and `receipt.json` records model parameters and source/runtime hashes.
+The overview `curve_magnitude_comparison.png` compares all four trials.
 The Facebook graphics are 1920 × 1080 PNG files:
 
 - `overhead_flight.png`: nominal and nine representative flights per pattern.
@@ -113,8 +215,15 @@ Because only face angle is random, the landing cloud lies on a narrow curved
 one-dimensional locus. It is not a realistic two-dimensional golfer dispersion
 ellipse; adding independent speed, path and strike errors would change its shape.
 
-A 1.5° face-to-path offset with 1° standard deviation leaves a theoretical
-6.68% chance of opposite curvature. Curving intention does not eliminate one
+The normal-error assumption gives the following theoretical chance of crossing
+zero face-to-path and curving opposite the intended direction:
+
+| Curve Magnitude | Face SD 1° | Face SD 2° |
+| --- | ---: | ---: |
+| Original: 1.5° Mean Face-to-Path Offset | 6.68% | 22.66% |
+| Doubled: 3° Mean Face-to-Path Offset | 0.135% | 6.68% |
+
+These are direction probabilities, not accuracy or scoring improvements. Curving intention does not eliminate one
 curvature direction under the assumed error distribution. Draw/fade differences
 in a finite sample can arise from sampling; the still-air centered-strike model
 is symmetric under mirroring all horizontal angles.

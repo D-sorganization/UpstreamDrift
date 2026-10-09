@@ -61,3 +61,17 @@ def test_bootstrap_seed_is_reproducible():
     second = paired_variance_ratio(values**2, values, resamples=100, seed=19)
     assert first == second
     assert first["lower_95"] < first["estimate"] < first["upper_95"]
+
+
+def test_generic_paired_mean_preserves_known_offset():
+    from src.tools.shot_pattern_analysis.uncertainty import paired_mean_difference
+
+    result = paired_mean_difference([3.2, 5.4], [1.2, 3.4])
+    assert result == pytest.approx({"estimate": 2, "lower_95": 2, "upper_95": 2})
+
+
+def test_generic_paired_mean_rejects_nonfinite_pairs():
+    from src.tools.shot_pattern_analysis.uncertainty import paired_mean_difference
+
+    with pytest.raises(ValueError, match="finite"):
+        paired_mean_difference([1, float("nan")], [1, 2])
