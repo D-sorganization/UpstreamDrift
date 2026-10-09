@@ -14,13 +14,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 import math
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .presets import ViewPreset, check_point3
 
-Array = NDArray[np.float64]
+Array: TypeAlias = NDArray[np.float64]
 
 #: Vertical field of view of every native viewer camera (OpenSim's 0.7 rad).
 VIEWER_FOV_Y_RAD = 0.7
