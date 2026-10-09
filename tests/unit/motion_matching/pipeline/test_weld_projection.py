@@ -19,6 +19,8 @@ from src.shared.python.motion_matching.pipeline.weld_projection import (
     weld_consistent_track,
 )
 
+pytestmark = pytest.mark.unit
+
 TARGET = np.array([1.2, 0.7])
 
 
