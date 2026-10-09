@@ -33,6 +33,7 @@ __all__ = [
     "GroupMass",
     "UrdfInventory",
     "exchange_report",
+    "lf_sha256",
     "load_exchange_receipt",
     "urdf_inventory",
 ]
@@ -132,6 +133,11 @@ def urdf_inventory(path: Path) -> UrdfInventory:
     return UrdfInventory(n_coordinates=dof, link_masses_kg=masses)
 
 
+def lf_sha256(path: Path) -> str:
+    """SHA-256 of a text file with CR bytes removed (CRLF and LF checkouts agree)."""
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r", b"")).hexdigest()
+
+
 def _items(value: Any) -> list[Mapping[str, Any]]:
     """MATLAB ``jsonencode`` writes a one-element struct array as an object."""
     if isinstance(value, Mapping):
@@ -167,9 +173,7 @@ def exchange_report(receipt: Mapping[str, Any], urdf_path: Path) -> ExchangeRepo
     if not spec.get("smimport_ok"):
         raise ValueError(f"spec URDF smimport failed: {spec.get('smimport_error')!r}")
     urdf = urdf_inventory(urdf_path)
-    current = (
-        spec["urdf_sha256"] == hashlib.sha256(Path(urdf_path).read_bytes()).hexdigest()
-    )
+    current = spec["urdf_sha256_lf"] == lf_sha256(urdf_path)
     canonical = receipt["canonical"]["inventory"]
     imported = spec["inventory"]
 

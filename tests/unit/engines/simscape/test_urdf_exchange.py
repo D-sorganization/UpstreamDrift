@@ -17,6 +17,7 @@ import pytest
 from src.engines.simscape.urdf_exchange import (
     SEGMENT_GROUPS,
     exchange_report,
+    lf_sha256,
     load_exchange_receipt,
     urdf_inventory,
 )
@@ -70,7 +71,7 @@ def _receipt(urdf_sha: str) -> dict:
         "smexport_available": False,
         "canonical": {"model": "m", "model_sha256": "0" * 64, "inventory": canonical},
         "spec_urdf": {
-            "urdf_sha256": urdf_sha,
+            "urdf_sha256_lf": urdf_sha,
             "smimport_ok": True,
             "smimport_error": "",
             "inventory": imported,
@@ -82,9 +83,8 @@ def _receipt(urdf_sha: str) -> dict:
 def mini(tmp_path: Path) -> tuple[Path, dict]:
     urdf = tmp_path / "mini.urdf"
     urdf.write_text(MINI_URDF, encoding="utf-8")
-    sha = hashlib.sha256(urdf.read_bytes()).hexdigest()
     path = tmp_path / "receipt.json"
-    path.write_text(json.dumps(_receipt(sha)), encoding="utf-8")
+    path.write_text(json.dumps(_receipt(lf_sha256(urdf))), encoding="utf-8")
     return urdf, load_exchange_receipt(path)
 
 
@@ -127,6 +127,13 @@ def test_unevaluated_mass_is_reported_not_zeroed(mini) -> None:
     broken["canonical"]["inventory"]["bodies"].append(_body("m/Odd Solid", None))
     report = exchange_report(broken, urdf)
     assert report.unavailable_simscape == ("m/Odd Solid",)
+
+
+def test_receipt_hash_ignores_crlf_checkouts(mini, tmp_path: Path) -> None:
+    urdf, receipt = mini
+    crlf = tmp_path / "crlf.urdf"
+    crlf.write_bytes(MINI_URDF.replace("\n", "\r\n").encode("utf-8"))
+    assert exchange_report(receipt, crlf).receipt_current is True
 
 
 def test_stale_urdf_hash_marks_receipt_not_current(mini) -> None:

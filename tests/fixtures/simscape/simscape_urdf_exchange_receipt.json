@@ -391,7 +391,7 @@
   },
   "spec_urdf": {
     "urdf_file": "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf",
-    "urdf_sha256": "1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
+    "urdf_sha256_lf": "1a91720cd7539fb009b2ab42b62526213152d78cf7af5bb1865913c2d6e9f824",
     "smimport_ok": true,
     "smimport_error": "",
     "inventory": {

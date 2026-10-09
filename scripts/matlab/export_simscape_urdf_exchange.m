@@ -36,13 +36,14 @@ function receipt = export_simscape_urdf_exchange(repo, out_dir)
     load_system(model_file);
     canonical = struct('model', model, ...
         'model_file', 'src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/GolfSwing3D_Kinetic.slx', ...
-        'model_sha256', local_sha256(model_file), ...
+        'model_sha256', local_sha256(model_file, false), ...
         'inventory', simscape_model_inventory(model));
     close_system(model, 0);
 
     urdf_rel = 'src/engines/physics_engines/pinocchio/models/generated/golfer.urdf';
     urdf = fullfile(repo, urdf_rel);
-    spec = struct('urdf_file', urdf_rel, 'urdf_sha256', local_sha256(urdf), ...
+    % LF-normalised so Windows (CRLF) and Linux checkouts hash the same.
+    spec = struct('urdf_file', urdf_rel, 'urdf_sha256_lf', local_sha256(urdf, true), ...
         'smimport_ok', false, 'smimport_error', '', 'inventory', struct());
     imported = 'ud_spec_urdf_import';
     try
@@ -71,11 +72,14 @@ function receipt = export_simscape_urdf_exchange(repo, out_dir)
         spec.smimport_ok);
 end
 
-function h = local_sha256(file)
+function h = local_sha256(file, lf_only)
     fid = fopen(file, 'r');
     assert(fid > 0, 'OpenFailed: %s', file);
     bytes = fread(fid, Inf, '*uint8');
     fclose(fid);
+    if lf_only
+        bytes(bytes == 13) = [];
+    end
     md = java.security.MessageDigest.getInstance('SHA-256');
     md.update(bytes);
     h = lower(reshape(dec2hex(typecast(md.digest(), 'uint8'), 2).', 1, []));
