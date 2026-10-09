@@ -8,9 +8,16 @@ unfiltered reference peaks with the capture. The release is signal, not
 noise, so the pre-contact cutoff is chosen per reference:
 
     the lowest candidate cutoff whose pre-contact filtered reference keeps
-    the unfiltered reference's clubhead speed-peak time relative to impact
-    within one sample and its pre-contact impact speed within
+    the unfiltered reference's clubhead speed-peak time relative to the
+    split within one sample and its last pre-contact segment speed within
     ``RELEASE_SPEED_TOL``.
+
+Both are measured on whole pre-contact segments only (ending at or before
+the split sample). The segment that straddles the split joins the separately
+filtered halves, and the model's face passes the ball within a sample of the
+capture's, so a ball-passage measure can pick that straddling segment and
+hide a lost release (it did on the 7-iron: 41.1 m/s against 36.4 m/s for
+the last whole pre-contact segment).
 
 Only the reference itself is used (never the capture's speed), so the choice
 is a convergence criterion on the filter, not a fit to the acceptance target.
@@ -61,13 +68,22 @@ class ReleaseCutoff:
         }
 
 
-def _timing(time: np.ndarray, head: np.ndarray) -> dict[str, float]:
-    from src.shared.python.model_appearance.club_face import clubhead_speed_timing
+def _release(time: np.ndarray, head: np.ndarray, split: int) -> dict[str, float]:
+    """Peak time (relative to the split sample) and last segment speed of
+    the whole pre-contact clubhead segments in the speed-peak window."""
+    from src.shared.python.model_appearance.club_face import SPEED_PEAK_WINDOW_S
 
-    timing = clubhead_speed_timing(time, head)
+    pts = np.asarray(head, dtype=float)[: split + 1]
+    if pts.shape != (split + 1, 3) or not np.isfinite(pts).all():
+        raise ValueError("clubhead must map q to a finite (n, 3) path")
+    t = time[: split + 1]
+    speed = np.linalg.norm(np.diff(pts, axis=0), axis=1) / np.diff(t)
+    mid = 0.5 * (t[1:] + t[:-1]) - t[-1]
+    window = np.flatnonzero(mid >= SPEED_PEAK_WINDOW_S[0])
+    peak = int(window[np.argmax(speed[window])])
     return {
-        "peak_minus_impact_s": float(timing.peak_minus_impact_s),
-        "impact_speed_mps": float(timing.impact_speed_mps),
+        "peak_minus_split_s": float(mid[peak]),
+        "last_pre_contact_speed_mps": float(speed[-1]),
     }
 
 
@@ -116,8 +132,8 @@ def release_preserving_cutoff(
         candidate is returned) when no candidate keeps the release.
 
     Raises:
-        ValueError: bad shapes or time, bad candidates or tolerance, or a
-            reference whose clubhead never passes the ball.
+        ValueError: bad shapes, time or split, bad candidates or tolerance,
+            or a non-finite clubhead path.
     """
     t = np.asarray(time, dtype=float)
     rows = np.asarray(q, dtype=float)
@@ -131,7 +147,12 @@ def release_preserving_cutoff(
     if not (math.isfinite(speed_tol) and speed_tol > 0.0):
         raise ValueError(f"speed_tol must be positive, got {speed_tol}")
     timing_tol_s = float(np.median(step))
-    raw = _timing(t, clubhead(rows))
+    split = int(impact_index)
+    if not 1 <= split < rows.shape[0] - 2:
+        raise ValueError(
+            f"impact_index must lie in [1, {rows.shape[0] - 2}), got {split}"
+        )
+    raw = _release(t, clubhead(rows), split)
     table: list[dict[str, Any]] = []
     chosen: float | None = None
     for cutoff in cands:
@@ -142,11 +163,14 @@ def release_preserving_cutoff(
             impact_index=impact_index,
             pre_contact_cutoff_hz=cutoff,
         )
-        got = _timing(t, clubhead(smooth))
+        got = _release(t, clubhead(smooth), split)
         keeps = (
-            abs(got["peak_minus_impact_s"] - raw["peak_minus_impact_s"])
+            abs(got["peak_minus_split_s"] - raw["peak_minus_split_s"])
             <= timing_tol_s * (1.0 + 1e-9)
-            and abs(got["impact_speed_mps"] / raw["impact_speed_mps"] - 1.0)
+            and abs(
+                got["last_pre_contact_speed_mps"] / raw["last_pre_contact_speed_mps"]
+                - 1.0
+            )
             <= speed_tol
         )
         table.append({"cutoff_hz": cutoff, **got, "preserved": bool(keeps)})

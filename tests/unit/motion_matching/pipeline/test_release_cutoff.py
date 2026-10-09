@@ -134,14 +134,14 @@ def test_smooth_lane_applies_the_lane_release_cutoff() -> None:
 
 # ---------------------------------------------------- release preservation
 def test_a_release_inside_the_base_band_keeps_the_base_cutoff() -> None:
-    t, q, k = _swing(ramp_power=1.0)
+    t, q, k = _swing(ramp_power=0.5)
     result = release_preserving_cutoff(t, q, k, _head, base_cutoff_hz=12.0)
     assert result.cutoff_hz == 12.0
     assert result.preserved
 
 
 def test_a_sharp_release_raises_the_pre_contact_cutoff() -> None:
-    t, q, k = _swing(ramp_power=3.0)
+    t, q, k = _swing(ramp_power=1.0)
     result = release_preserving_cutoff(t, q, k, _head, base_cutoff_hz=12.0)
     assert result.preserved
     assert result.cutoff_hz > 12.0
@@ -149,12 +149,15 @@ def test_a_sharp_release_raises_the_pre_contact_cutoff() -> None:
     rows = {row["cutoff_hz"]: row for row in result.candidates}
     assert not any(rows[f]["preserved"] for f in rows if f < result.cutoff_hz)
     chosen = rows[result.cutoff_hz]
+    raw = result.unfiltered
     assert (
-        abs(chosen["impact_speed_mps"] / result.unfiltered["impact_speed_mps"] - 1)
+        abs(
+            chosen["last_pre_contact_speed_mps"] / raw["last_pre_contact_speed_mps"] - 1
+        )
         <= 0.01
     )
     assert (
-        abs(chosen["peak_minus_impact_s"] - result.unfiltered["peak_minus_impact_s"])
+        abs(chosen["peak_minus_split_s"] - raw["peak_minus_split_s"])
         <= 1.0 / RATE_HZ + 1e-12
     )
 
@@ -244,7 +247,7 @@ def test_lane_selects_and_reports_the_release_cutoff(
     from src.shared.python.motion_matching import club_face_target as cft
 
     monkeypatch.setattr(cft, "model_face_centres", lambda kin, q, spec: _head(q))
-    t, q, k = _swing(ramp_power=3.0)
+    t, q, k = _swing(ramp_power=1.0)
     lane = _lane(k, t)
     lane.select_release_cutoff(None, {}, q)
     assert lane.pre_contact_cutoff_hz is not None and lane.pre_contact_cutoff_hz > 12.0
@@ -262,23 +265,34 @@ def test_lane_without_an_impact_split_keeps_the_base_cutoff() -> None:
     assert lane.impact_split_report()["release_cutoff"]["source"] == "no impact split"
 
 
-def test_lane_keeps_the_base_cutoff_when_the_reference_misses_the_ball(
+def test_lane_keeps_the_base_cutoff_when_the_clubhead_path_is_not_finite(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from src.shared.python.motion_matching import club_face_target as cft
 
     monkeypatch.setattr(
-        cft,
-        "model_face_centres",
-        lambda kin, q, spec: (
-            _head(q) + [0.0, 0.0, 0.5] * (np.arange(len(q))[:, None] > 10)
-        ),
+        cft, "model_face_centres", lambda kin, q, spec: _head(q) * np.nan
     )
     t, q, k = _swing(ramp_power=3.0)
     lane = _lane(k, t)
     lane.select_release_cutoff(None, {}, q)
     assert lane.pre_contact_cutoff_hz is None
     assert lane.release_cutoff["source"].startswith("unavailable")
+
+
+def test_the_segment_straddling_the_split_is_not_measured() -> None:
+    """The segment joining the two filtered halves never decides the choice
+    (on the 7-iron it read 41.1 m/s where the release had dropped to 36.4)."""
+    t, q, k = _swing(ramp_power=3.0)
+
+    def jumpy(rows: np.ndarray) -> np.ndarray:
+        head = _head(rows)
+        head[k + 1 :] += [0.0, 0.5, 0.0]  # a huge post-split jump
+        return head
+
+    assert release_preserving_cutoff(
+        t, q, k, jumpy, base_cutoff_hz=12.0
+    ) == release_preserving_cutoff(t, q, k, _head, base_cutoff_hz=12.0)
 
 
 def test_model_face_centres_places_the_face_centre_with_the_frame_pose(
