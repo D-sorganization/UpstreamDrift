@@ -258,7 +258,9 @@ def _validate_bundle(
         raise ValueError("native ordered input channel mapping differs")
 
 
-def _output_digest(output: Any) -> str:
+def _output_digest(
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
+) -> str:
     digest = hashlib.sha256()
     for name in (
         "time_seconds",
@@ -281,9 +283,28 @@ def _output_digest(output: Any) -> str:
 
 
 def validate_native_replay_output(
-    row: ComparisonRow, binding: NativeAdapterBinding, bundle: Any, output: Any
+    row: ComparisonRow,
+    binding: NativeAdapterBinding,
+    bundle: Any,
+    output: NativeTorqueReplay | NativeDrakeTorqueReplay,
 ) -> NativeExecutionReceipt:
     """Validate the adapter's complete actual output against the frozen bundle."""
+    if row.engine == "mujoco":
+        from src.engines.physics_engines.mujoco.python.native_torque_replay import (
+            NativeTorqueReplay,
+        )
+
+        if not isinstance(output, NativeTorqueReplay):
+            raise ValueError("MuJoCo native adapter returned an unknown output type")
+    elif row.engine == "drake":
+        from src.engines.physics_engines.drake.python.native_torque_replay import (
+            NativeDrakeTorqueReplay,
+        )
+
+        if not isinstance(output, NativeDrakeTorqueReplay):
+            raise ValueError("Drake native adapter returned an unknown output type")
+    else:
+        raise ValueError("no native output contract is registered for this engine")
     _validate_bundle(row, binding, bundle)
     times = np.asarray(output.time_seconds, dtype=np.float64)
     expected_times = np.asarray(bundle.input_history.time_seconds, dtype=np.float64)
@@ -445,6 +466,13 @@ def build_native_replay_report(
     }
     if len(by_key) != len(request_items):
         raise ValueError("duplicate native replay request row")
+    inventory_keys = {
+        (row.package_id, row.variant_id, row.drive_mode) for row in registry.rows
+    }
+    if set(by_key) - inventory_keys:
+        raise ValueError(
+            "native replay request references an unregistered inventory row"
+        )
     results: list[NativeReplayRowResult] = []
     for row in registry.rows:
         key = (row.package_id, row.variant_id, row.drive_mode)
@@ -472,7 +500,7 @@ def build_native_replay_report(
             results.append(
                 _row_result(row, "runtime_unavailable", type(error).__name__)
             )
-        except (ValueError, RuntimeError) as error:
+        except (TypeError, ValueError, RuntimeError) as error:
             results.append(_row_result(row, "rejected", type(error).__name__))
         else:
             results.append(_row_result(row, "replayed", "", receipt))

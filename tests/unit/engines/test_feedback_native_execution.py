@@ -212,6 +212,15 @@ def test_receipt_rejects_tampered_output_input_or_short_horizon(
         validate_native_replay_output(row, binding, bundle, output)
 
 
+def test_receipt_rejects_unknown_native_output_type(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    row, bundle, binding = _bundle(registry)
+
+    with pytest.raises(ValueError, match="unknown output type"):
+        validate_native_replay_output(row, binding, bundle, object())  # type: ignore[arg-type]
+
+
 def test_report_keeps_all_six_engines_blocking_without_explicit_bindings(
     registry: FeedbackComparisonRegistry,
 ) -> None:
@@ -222,6 +231,17 @@ def test_report_keeps_all_six_engines_blocking_without_explicit_bindings(
     assert report.executed_row_count == 0
     assert not report.is_complete
     assert all(row.status == "missing_binding" for row in report.rows if row.required)
+
+
+def test_report_rejects_request_for_unregistered_inventory_row(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    _, bundle, binding = _bundle(registry)
+    unregistered = replace(binding, package_id="unregistered/test-model")
+    request = NativeReplayRequest(unregistered, bundle, Path("synthetic.xml"))
+
+    with pytest.raises(ValueError, match="unregistered inventory row"):
+        build_native_replay_report(registry, (request,))
 
 
 def test_request_references_bundle_model_path_without_serializing_it(
