@@ -1,3 +1,9 @@
+# Active: Simscape URDF Exchange — #11569 Task 3
+
+- Branch `claude/simscape-urdf-exchange-11569`; commit `SELF`. `smexport` is absent in R2025b, so `scripts/matlab/simscape_model_inventory.m` reads joints (type, DOF) and solid/inertia masses (unit-converted, density x volume where needed; NaN when not evaluable) from the canonical `GolfSwing3D_Kinetic` and from an `smimport` of the spec `golfer.urdf`. `export_simscape_urdf_exchange.m` writes `tests/fixtures/simscape/simscape_urdf_exchange_receipt.json`; `src/engines/simscape/urdf_exchange.py` diffs it against the URDF.
+- R2025b result: smimport round trip exact (43/43 coordinates, 77.969 kg, error 0). Canonical 27 coordinates vs spec 43; totals 77.606 vs 77.969 kg, but the Simscape model has no legs and puts +17 kg in the shoulder bars (`HubtoLS`/`HubtoRS`), +4.3 kg trunk, +2.0 kg head/neck.
+- Next: #11569 task 1 (inverse dynamics) or task 4 (run-102 playback video). The mass redistribution is a model decision for the owner.
+
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
