@@ -36,7 +36,7 @@ Pilot data and figures are committed losslessly as bounded archives in `data_arc
 
 ## Running Jobs
 
-Started 2026-10-09 at approximately 10:22 UTC. Detached wrapper `/tmp/p2-final-worker.py`: worker 0 PID 1155177, worker 1 PID 1155178. Logs `/tmp/p2-final-worker{0,1}.log`; each worker first runs its `final_v1` shard, then its `control_final_v1` shard. Each command writes `/tmp/p2-{final_v1,control_final_v1}-shard{0,1}-exit.json`; aggregate worker receipts end in `-exit.json`. Read logs and inspect processes before resuming anything. No more than two workers. A completed manifest is authoritative only after integrity validation; any failed command must be investigated.
+Started 2026-10-09 at approximately 17:22 UTC (10:22 PDT). Detached wrapper `/tmp/p2-final-worker.py`: worker 0 PID 1155177, worker 1 PID 1155178. Logs `/tmp/p2-final-worker{0,1}.log`; each worker first runs its `final_v1` shard, then its `control_final_v1` shard. Each command writes `/tmp/p2-{final_v1,control_final_v1}-shard{0,1}-exit.json`; aggregate worker receipts end in `-exit.json`. Read logs and inspect processes before resuming anything. No more than two workers. A completed manifest is authoritative only after integrity validation; any failed command must be investigated.
 
 ## Environment and Reproduction
 
