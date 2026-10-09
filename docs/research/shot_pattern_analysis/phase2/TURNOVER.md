@@ -62,6 +62,15 @@ The five-page `matched_delivery_reference.pdf` was generated with the tested Rep
 
 The standalone LaTeX reference is regenerated from `DESIGN.md` via `pandoc --from=gfm+tex_math_dollars --to=latex --standalone`. Built-in compilation is unverified because Tectonic cannot fetch its uncached bundle; the separate ReportLab PDF must be rendered and visually reviewed before delivery.
 
+## Final Publication Preparation
+
+- `scripts/research/shot_pattern_analysis/build_final_report.py` (commit `e0acaeb892`) validates exactly 324 primary and 72 control planned cells, final stage and 10,000 shots per pattern before generating `REPORT.md` and all-cell effect inventories. Five tests pass. The checked-in report is an explicitly pending scaffold until complete data are available.
+- `validation/independent_final_audit.py` (commit `ed60f608f6`) was verified on the full control pilot, corrupted-input rejection, and the first two final cells (60,000 rows). `FINAL_DATA_REVIEW.md` correctly withholds full acceptance; partial checks cannot produce a final pass.
+- Deterministic archive builder now has 12 passing tests after three independently reproduced integrity/portability findings were fixed. AGY added them to #11988. Existing pilot bundles retain all original bytes and hashes.
+- Launcher/manifest checks passed 54 tests; architecture-map contract passes. The expanded CLI/GUI guide distinguishes matched shaft-twist noise from the historical face-only trial.
+- Preliminary canonical pre-PR is running via Sol; log `/tmp/shot-pattern-pre-pr-preliminary.log`. It found two frozen `density.py` float-array typing errors. **Do not edit density or any accepted source while runs are active.** After completion, apply a minimal verified typing-only correction and document an explicit source transition, preserving historical execution evidence. Four independent validation scripts also need typing-only corrections; Astra owns these outside the frozen simulation snapshot and preserves immutable JSON receipts.
+- Luna owns `build_final_figures.py` and its tests; all temporary preview roots are outside the immutable pilots and ignored. Final figure production should cover selected shaft-only/combined2 detailed views and all matrix strata, plus direct SD1/SD2 and curve1/curve2 two-panel density comparisons on common axes/scales. Coordinate exact paths with the report builder.
+
 ## Repository Baselines
 
 Design-manual structural governance passes, but release remains `blocked-inventory-required`. Architecture-map contract passes. Full tracked title audit has 2,505 pre-existing violations across 1,861 documents; development-log validation has existing owner/state/WIP/size failures. Preserve unrelated handoff content; root `AGENT_HANDOFF.md` already exceeds the fleet size target. Prior baseline issues #11934/#11935/#11940 must be checked at final pre-PR validation. Do not bypass hooks, change tolerances, force-push, or edit unrelated fleet work to make the study appear accepted.
