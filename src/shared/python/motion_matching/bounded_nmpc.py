@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 import time
-from typing import TypeAlias
+from typing import TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -244,7 +244,8 @@ class BoundedNMPC:
             predicted = state.copy()
             prior = previous
             cost = 0.0
-            for offset, effort in enumerate(plan):
+            for offset, plan_row in enumerate(plan):
+                effort = cast(Array, plan_row)
                 margins.append(self._input_margin(effort, prior))
                 predicted = self._next(model, predicted, effort)
                 margins.extend(
