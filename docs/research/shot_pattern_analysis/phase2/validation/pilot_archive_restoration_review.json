@@ -1,0 +1,60 @@
+{
+  "schema": "shot-study-restoration-review/1",
+  "status": "passed",
+  "scope": "Existing 32-shot pilot archives only; no scientific recomputation or final-run acceptance",
+  "created_utc": "2026-10-09T19:48:03.219079+00:00",
+  "datasets": {
+    "pilot_v1": {
+      "files_restored": 2178,
+      "archive_manifest_sha256": "838917606c860f4135b4304a5c45d7640813dc8caef347d6173e652e92f64a0b",
+      "archive_parts": {
+        "pilot_v1-001.zip": {
+          "bytes": 79982242,
+          "sha256": "9c52674af1c3d17914eb555f692cf9b10c793716967b3ae2e9663d587efece6a"
+        },
+        "pilot_v1-002.zip": {
+          "bytes": 5450553,
+          "sha256": "7289774527b20448b3a02b7a26b3345f42b4656d1d38c075b89bf525a14b88c8"
+        }
+      },
+      "matrix_counts": {
+        "completed": 270,
+        "unavailable": 54,
+        "not_run": 0
+      },
+      "planned_cells": 324,
+      "restored_report_equals_local_report": true,
+      "all_restored_file_bytes_match": true,
+      "archive_verified_before_and_after": true
+    },
+    "control_pilot_v1": {
+      "files_restored": 426,
+      "archive_manifest_sha256": "bd149803e65df3ae8e48b8a844cda573abd8d3c461346a79259df4cc1a9f6d80",
+      "archive_parts": {
+        "control_pilot_v1-001.zip": {
+          "bytes": 11518803,
+          "sha256": "83504664fdba0bd20218b43dde5f7adda6ea122baeb640da228b73db9c26cf44"
+        }
+      },
+      "matrix_counts": {
+        "completed": 52,
+        "unavailable": 20,
+        "not_run": 0
+      },
+      "planned_cells": 72,
+      "restored_report_equals_local_report": true,
+      "all_restored_file_bytes_match": true,
+      "archive_verified_before_and_after": true
+    }
+  },
+  "source_sha256": {
+    "scripts/research/shot_pattern_analysis/archive_data.py": "5f0c483dd31e11517e5d5dbeb464f499df56c94aedcab6bbf049f65537a57969",
+    "src/tools/shot_pattern_analysis/matched_report.py": "9caf80abb414cad94c9aeae6fc85c2024502f6126f38b23df87e5d4ca1aa6237",
+    "src/tools/shot_pattern_analysis/provenance.py": "70f67276f3de4d0a0934da93b0a4fc1f71cc000993cef04dde145dcb12166975",
+    "docs/research/shot_pattern_analysis/phase2/validation/restore_pilot_archives.py": "ca7c7bcb166035880da1a9b73eee15c5640edf0ec2b239ca0d64096a70df9f1e"
+  },
+  "limitations": [
+    "This verifies packaging, restoration and source-bound report loading; prior independent scientific pilot audits remain separate.",
+    "Final and supplemental datasets are not yet complete or archived."
+  ]
+}
