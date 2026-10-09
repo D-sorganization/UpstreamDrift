@@ -314,6 +314,23 @@ def _matrix(value: Any) -> Array:
     return m
 
 
+def _twist_axis_sign(child_to_follower: Any) -> float:
+    """-1 if the hip's ``Rz`` axis (follower z) runs down the femur (-y), else +1.
+
+    ``hip_rotation_zero`` offsets are twists about the thigh's long axis pointing
+    up. A hip mirrored to OpenSim's left-side convention
+    (``spec_builder.HIP_MIRROR``) has its ``Rz`` axis pointing down the femur, so
+    the same physical twist is ``Rz(-theta)``. Other layouts (the v1 spec's
+    permutation) keep the unsigned ``Rz(theta)`` they always had.
+    """
+    return -1.0 if hip_is_mirrored({"child_to_follower": child_to_follower}) else 1.0
+
+
+def hip_is_mirrored(joint: Mapping[str, Any]) -> bool:
+    """True when a hip's ``Rz`` (rotation) axis runs down the femur (-y)."""
+    return float(_matrix(joint["child_to_follower"])[1, 2]) < -0.5
+
+
 def apply_hip_calibration(
     document: Mapping[str, Any],
     calibration: HipCalibration,
@@ -377,7 +394,7 @@ def apply_hip_calibration(
             new = h @ a_new @ x
             twist = twist_r if is_r else twist_l
             if twist != 0.0:
-                rad = np.radians(twist)
+                rad = np.radians(twist) * _twist_axis_sign(joint["child_to_follower"])
                 c, s = np.cos(rad), np.sin(rad)
                 rz = np.array(
                     [
