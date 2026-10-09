@@ -17,6 +17,7 @@ handling is needed.
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -38,6 +39,15 @@ SIDES = bushing.SIDES
 DEFAULT_RTOL = 1.0e-6
 DEFAULT_ATOL = 1.0e-9
 DEFAULT_MAX_STEP_S = 2.0e-4
+
+
+@dataclass(frozen=True)
+class IntegratorTolerances:
+    """Radau tolerances and step cap for the contact integration."""
+
+    rtol: float = DEFAULT_RTOL
+    atol: float = DEFAULT_ATOL
+    max_step_s: float = DEFAULT_MAX_STEP_S
 
 
 class ClubInHands(bushing.ClubOnBushings):
@@ -84,9 +94,7 @@ def simulate_grip_contact(
     swing: CoordinateSwing,
     pads: PadContactModel,
     interface: GripInterface | None = None,
-    rtol: float = DEFAULT_RTOL,
-    atol: float = DEFAULT_ATOL,
-    max_step_s: float = DEFAULT_MAX_STEP_S,
+    tolerances: IntegratorTolerances | None = None,
     t_end_s: float | None = None,
     hold: bool = False,
 ) -> ContactRun:
@@ -100,6 +108,7 @@ def simulate_grip_contact(
     Raises:
         RuntimeError: if the integrator fails.
     """
+    tol = tolerances or IntegratorTolerances()
     spec = json.loads(spec_bytes)
     interface = interface or GripInterface.from_spec(spec)
     sim = ClubInHands(spec, list(swing.names), interface, pads)
@@ -121,9 +130,9 @@ def simulate_grip_contact(
         y0,
         method="Radau",
         t_eval=times,
-        rtol=rtol,
-        atol=atol,
-        max_step=max_step_s,
+        rtol=tol.rtol,
+        atol=tol.atol,
+        max_step=tol.max_step_s,
     )
     if not sol.success:
         raise RuntimeError(f"pinocchio contact integration failed: {sol.message}")
@@ -157,8 +166,8 @@ def simulate_grip_contact(
         np.array(club_rot),
         metadata={
             "integrator": "SciPy solve_ivp Radau, error controlled",
-            "rtol": rtol,
-            "atol": atol,
+            "rtol": tol.rtol,
+            "atol": tol.atol,
             "rhs_evaluations": int(sol.nfev),
             "force_law": "shared pad contact law, Pinocchio aba",
         },
@@ -167,4 +176,4 @@ def simulate_grip_contact(
     return ContactRun(series, {s: np.array(normal[s]) for s in SIDES}, roll, axial)
 
 
-__all__ = ["ClubInHands", "simulate_grip_contact"]
+__all__ = ["ClubInHands", "IntegratorTolerances", "simulate_grip_contact"]

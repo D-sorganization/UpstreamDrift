@@ -137,11 +137,14 @@ class ClubInHands:
         spec = json.loads(spec_bytes)
         self._mj = mj
         self.interface, self.pads, self.timestep_s = interface, pads, timestep_s
+        self.pad_count = pads.layout.pad_count
+        self._preload_m = pads.layout.preload_penetration_m
+        self._dissipation_s_m = pads.law.dissipation_s_m
         self.kinematics = WeldClubKinematics(spec_bytes, names)
         self.club = ClubDynamics.from_spec(spec)
         self.gravity = np.asarray(spec["gravity_m_s2"], float)
-        n_pad = pads.layout.pad_count
-        delta0 = pads.layout.preload_penetration_m
+        n_pad = self.pad_count
+        delta0 = self._preload_m
         # first guess: unit contact-row inverse inertia of about 4 / kg
         k0 = pads.law.stiffness_n_m * 4.0 / IMPEDANCE**2
         self.solref = {(s, k): self._solref(k0) for s in SIDES for k in range(n_pad)}
@@ -150,8 +153,7 @@ class ClubInHands:
         self.hand_source: Any = None
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
-        delta0 = self.pads.layout.preload_penetration_m
-        damping = k_solref * IMPEDANCE * delta0 * self.pads.law.dissipation_s_m
+        damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m
         return (-k_solref, -damping)
 
     def _rebuild(self) -> None:
@@ -171,7 +173,7 @@ class ClubInHands:
         self._offsets = {s: self.interface.frame(s).matrix() for s in SIDES}
         self._pad_geom = {}
         for s in SIDES:
-            for k in range(self.pads.layout.pad_count):
+            for k in range(self.pad_count):
                 self._pad_geom[int(self.model.geom(f"pad_{s}{k}").id)] = (s, k)
 
     # ------------------------------------------------------------ placement
@@ -226,7 +228,7 @@ class ClubInHands:
         frames = {s: club.frame(self._offsets[s]) for s in SIDES}
         force = {s: np.zeros(3) for s in SIDES}
         moment = {s: np.zeros(3) for s in SIDES}
-        normal = {s: np.zeros(self.pads.layout.pad_count) for s in SIDES}
+        normal = {s: np.zeros(self.pad_count) for s in SIDES}
         res = np.zeros(6)
         for i in range(d.ncon):
             c = d.contact[i]
@@ -280,7 +282,7 @@ class ClubInHands:
         for _ in range(iterations):
             self.hold_pose(q)
             force, depth = self.pad_forces_and_penetrations()
-            if len(force) != 2 * self.pads.layout.pad_count:
+            if len(force) != 2 * self.pad_count:
                 raise RuntimeError("every pad must touch the grip at the held pose")
             worst = 0.0
             for key, f in force.items():

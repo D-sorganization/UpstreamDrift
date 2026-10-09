@@ -67,6 +67,7 @@ class ClubInHands:
         self._math = math_mod
         self._mpl = _module("pydrake.multibody.math")
         self.interface, self.pads = interface, pads
+        self.pad_count = pads.layout.pad_count
         club = ClubDynamics.from_spec(spec)
         builder = framework.DiagramBuilder()
         plant, scene_graph = plant_mod.AddMultibodyPlantSceneGraph(builder, 0.0)
@@ -194,10 +195,7 @@ class ClubInHands:
         """Per hand: force on the club, moment about the grip origin, pad normals."""
         rot, origin = self.club_pose()
         grip_origin = {s: origin + rot @ self._offsets[s][:3, 3] for s in SIDES}
-        out = {
-            s: [np.zeros(3), np.zeros(3), np.zeros(self.pads.layout.pad_count)]
-            for s in SIDES
-        }
+        out = {s: [np.zeros(3), np.zeros(3), np.zeros(self.pad_count)] for s in SIDES}
         results = self.plant.get_contact_results_output_port().Eval(self.context)
         club_index = self.club.index()
         for n in range(results.num_point_pair_contacts()):
