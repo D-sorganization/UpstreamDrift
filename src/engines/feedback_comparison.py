@@ -20,6 +20,8 @@ from src.engines.model_inventory import (
     sha256_file,
 )
 
+REPLAY_COMPARISON_CONTRACT_VERSION = "feedback-comparison/1.1.0"
+
 
 class DriveMode(str, enum.Enum):
     TORQUE = "torque"
@@ -115,6 +117,9 @@ class ComparisonEvidence:
     muscle_state_evidence_sha256: str = ""
     transcription_receipt_sha256: str = ""
     observation_score_receipt_sha256: str = ""
+    observation_time_grid_sha256: str = ""
+    initial_state_sha256: str = ""
+    comparison_contract_version: str = ""
 
 
 @dataclass(frozen=True)
@@ -250,6 +255,9 @@ class FeedbackComparisonRegistry:
 
     def _admit_replay_evidence(self, evidence: ComparisonEvidence) -> None:
         """Validate independent applied-input replay without scoring accuracy."""
+        if evidence.comparison_contract_version != REPLAY_COMPARISON_CONTRACT_VERSION:
+            raise ValueError("replay comparison contract version is unsupported")
+        self._digest(evidence.initial_state_sha256, "initial_state_sha256")
         self._digest(evidence.applied_input_sha256, "applied_input_sha256")
         for name in (
             "physical_model_sha256",
@@ -268,6 +276,8 @@ class FeedbackComparisonRegistry:
             raise ValueError("replay must use an independent time-only input player")
         if evidence.state_resets or not evidence.full_state:
             raise ValueError("replay must preserve full physical state without resets")
+        if not evidence.full_horizon:
+            raise ValueError("replay must cover the full horizon")
         if not math.isfinite(evidence.horizon_s) or evidence.horizon_s <= 0:
             raise ValueError("replay horizon must be positive and finite")
         if evidence.nq <= 0 or evidence.nv <= 0 or not evidence.channel_ids:
@@ -382,6 +392,10 @@ class FeedbackComparisonRegistry:
         self._admit_replay_evidence(evidence)
         if level == ComparisonLevel.OBSERVATION_ACCURACY:
             self._digest(
+                evidence.observation_time_grid_sha256,
+                "observation_time_grid_sha256",
+            )
+            self._digest(
                 evidence.observation_score_receipt_sha256,
                 "observation_score_receipt_sha256",
             )
@@ -408,6 +422,7 @@ class FeedbackComparisonRegistry:
                 "applied_input_sha256",
                 "policy_sha256",
                 "state_schema_sha256",
+                "initial_state_sha256",
                 "observation_sha256",
                 "channel_ids",
                 "timebase_id",
