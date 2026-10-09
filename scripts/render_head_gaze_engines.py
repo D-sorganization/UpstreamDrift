@@ -199,7 +199,11 @@ def pair_clips(off_dir: Path, on_dir: Path, out: Path, capture: str) -> list[Pat
             imageio.get_reader(str(clip_off)) as ra,
             imageio.get_reader(str(clip_on)) as rb,
             imageio.get_writer(
-                str(dest), fps=ra.get_meta_data()["fps"], codec="libx264", quality=7
+                str(dest),
+                fps=ra.get_meta_data()["fps"],
+                codec="libx264",
+                quality=7,
+                macro_block_size=8,  # keep 1080 rows (the default 16 pads to 1088)
             ) as writer,
         ):
             for fa, fb in zip(ra, rb, strict=False):
