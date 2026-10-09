@@ -78,7 +78,11 @@ class ShotPhysics:
             loft = math.radians(config.loft_deg)
         # Golf-positive right -> world-negative y.
         club_v = config.club_speed_mps * np.array(
-            [math.cos(attack) * math.cos(path), -math.cos(attack) * math.sin(path), math.sin(attack)]
+            [
+                math.cos(attack) * math.cos(path),
+                -math.cos(attack) * math.sin(path),
+                math.sin(attack),
+            ]
         )
         normal = np.array(
             [

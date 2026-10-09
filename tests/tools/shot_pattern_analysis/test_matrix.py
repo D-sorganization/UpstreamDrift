@@ -2,7 +2,11 @@
 
 import pytest
 
-from src.tools.shot_pattern_analysis.matrix import corrected_matrix, matrix_shard, source_snapshot
+from src.tools.shot_pattern_analysis.matrix import (
+    corrected_matrix,
+    matrix_shard,
+    source_snapshot,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -14,10 +18,13 @@ def test_corrected_matrix_has_24_paired_10k_scenarios() -> None:
     assert all(config.n_shots == 10_000 for _, config in scenarios)
     assert {config.seed for _, config in scenarios} == {20_261_008}
     assert {config.club_id for _, config in scenarios} == {
-        "driver", "seven_iron", "pitching_wedge"
+        "driver",
+        "seven_iron",
+        "pitching_wedge",
     }
     assert {config.delivery_mode for _, config in scenarios} == {
-        "fixed_loft", "shaft_rotation"
+        "fixed_loft",
+        "shaft_rotation",
     }
     assert {config.face_sd_deg for _, config in scenarios} == {1.0, 2.0}
     assert {config.curve_scale for _, config in scenarios} == {1.0, 2.0}
@@ -42,4 +49,5 @@ def test_execution_snapshot_covers_scientific_sources_and_native_binary() -> Non
     assert "src/tools/shot_pattern_analysis/core.py" in sources
     assert "src/tools/shot_pattern_analysis/scoring_cache.py" in sources
     assert "rust_core/upstream-physics/src/ball_flight.rs" in sources
+    assert snapshot["cargo_lock_present"] == ("Cargo.lock" in sources)
     assert len(snapshot["native_binary_sha256"]) == 64

@@ -29,7 +29,9 @@ def _state(*, pre_spin: np.ndarray | None = None) -> PreImpactState:
     )
 
 
-def _slip(club_velocity: np.ndarray, ball_velocity: np.ndarray, spin: np.ndarray) -> np.ndarray:
+def _slip(
+    club_velocity: np.ndarray, ball_velocity: np.ndarray, spin: np.ndarray
+) -> np.ndarray:
     n = np.array([1.0, 0.0, 0.0])
     relative = club_velocity - ball_velocity + GOLF_BALL_RADIUS_M * np.cross(spin, n)
     return relative - np.dot(relative, n) * n
@@ -45,13 +47,20 @@ def test_uncapped_contact_reaches_no_slip_with_finite_club_mass() -> None:
         np.zeros(3),
         atol=1e-11,
     )
-    before = GOLF_BALL_MASS_KG * state.ball_velocity + state.clubhead_mass * state.clubhead_velocity
-    after = GOLF_BALL_MASS_KG * post.ball_velocity + state.clubhead_mass * post.clubhead_velocity
+    before = (
+        GOLF_BALL_MASS_KG * state.ball_velocity
+        + state.clubhead_mass * state.clubhead_velocity
+    )
+    after = (
+        GOLF_BALL_MASS_KG * post.ball_velocity
+        + state.clubhead_mass * post.clubhead_velocity
+    )
     np.testing.assert_allclose(after, before, atol=1e-12)
     impulse = GOLF_BALL_MASS_KG * (post.ball_velocity - state.ball_velocity)
     np.testing.assert_allclose(
         post.ball_angular_velocity - state.ball_angular_velocity,
-        GOLF_BALL_RADIUS_M / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
+        GOLF_BALL_RADIUS_M
+        / GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
         * np.cross(impulse, np.array([1.0, 0.0, 0.0])),
         atol=1e-10,
     )
@@ -64,8 +73,12 @@ def test_coulomb_cap_and_zero_friction_recovery() -> None:
         state, ImpactParameters(cor=0.8, friction_coefficient=0.0)
     )
     np.testing.assert_allclose(no_friction.ball_velocity[1:], np.zeros(2))
-    np.testing.assert_allclose(no_friction.clubhead_velocity[1:], state.clubhead_velocity[1:])
-    np.testing.assert_allclose(no_friction.ball_angular_velocity, state.ball_angular_velocity)
+    np.testing.assert_allclose(
+        no_friction.clubhead_velocity[1:], state.clubhead_velocity[1:]
+    )
+    np.testing.assert_allclose(
+        no_friction.ball_angular_velocity, state.ball_angular_velocity
+    )
 
     mu = 0.01
     capped = RigidBodyImpactModel().solve(
@@ -74,7 +87,16 @@ def test_coulomb_cap_and_zero_friction_recovery() -> None:
     normal_impulse = GOLF_BALL_MASS_KG * capped.ball_velocity[0]
     tangent_impulse = GOLF_BALL_MASS_KG * capped.ball_velocity[1]
     assert tangent_impulse == pytest.approx(mu * normal_impulse, rel=1e-12)
-    assert np.linalg.norm(_slip(capped.clubhead_velocity, capped.ball_velocity, capped.ball_angular_velocity)) > 0
+    assert (
+        np.linalg.norm(
+            _slip(
+                capped.clubhead_velocity,
+                capped.ball_velocity,
+                capped.ball_angular_velocity,
+            )
+        )
+        > 0
+    )
 
 
 def test_preexisting_spin_reverses_tangential_friction() -> None:

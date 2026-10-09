@@ -59,7 +59,9 @@ def test_dt_refinement_and_landing_horizon(physics: ShotPhysics) -> None:
         physics.simulate(face_deg=0, path_deg=0, config=too_short)
 
 
-def test_shaft_rotation_matches_nominal_loft_then_couples_face_error(physics: ShotPhysics) -> None:
+def test_shaft_rotation_matches_nominal_loft_then_couples_face_error(
+    physics: ShotPhysics,
+) -> None:
     fixed = AnalysisConfig(n_shots=2, delivery_mode="fixed_loft")
     coupled = AnalysisConfig(n_shots=2, delivery_mode="shaft_rotation", lie_deg=58.5)
     for nominal, path in ((0.0, 0.0), (1.5, 3.0), (-1.5, -3.0)):

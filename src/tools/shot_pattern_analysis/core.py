@@ -77,7 +77,9 @@ class AnalysisConfig:
         if self.club_speed_mps <= 0 or not (0 < self.loft_deg < 45):
             raise ValueError("club speed must be positive and loft in (0, 45) degrees")
         if self.clubhead_mass_kg <= 0 or abs(self.attack_angle_deg) >= 30:
-            raise ValueError("clubhead mass must be positive and attack angle below 30 degrees")
+            raise ValueError(
+                "clubhead mass must be positive and attack angle below 30 degrees"
+            )
         if self.delivery_mode not in ("fixed_loft", "shaft_rotation"):
             raise ValueError("delivery_mode must be fixed_loft or shaft_rotation")
         from .delivery_geometry import delivery_from_face_angle
@@ -263,6 +265,7 @@ def run_analysis(
             np.linspace(0, config.n_shots - 1, 9, dtype=int)
         ]
     }
+
     def simulate_pattern(
         pattern: PatternConfig, face_deg: float, *, sample_trajectory: bool
     ) -> ShotOutcome:
@@ -302,7 +305,9 @@ def run_analysis(
                 raise AnalysisCancelled("shot pattern analysis cancelled")
             face = pattern.face_deg + float(deviation)
             outcome = _validate_outcome(
-                simulate_pattern(pattern, face, sample_trajectory=index in sample_indices)
+                simulate_pattern(
+                    pattern, face, sample_trajectory=index in sample_indices
+                )
             )
             ax, ay = _rotate_to_aim(outcome.carry_x_m, outcome.carry_y_m, aim)
             pattern_rows.append(

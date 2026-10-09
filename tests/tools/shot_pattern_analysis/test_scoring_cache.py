@@ -22,20 +22,33 @@ def _direct(lie: str, distance: float) -> float:
     baseline = build_broadie_approx_baseline()
     request = StrokesGainedRequestV1(
         start=CourseStateColumnsV1(
-            lie_column="start_lie", context_column="context", target_column="target",
-            distance_column="start_distance", distance_unit="yd",
+            lie_column="start_lie",
+            context_column="context",
+            target_column="target",
+            distance_column="start_distance",
+            distance_unit="yd",
         ),
         finish=CourseStateColumnsV1(
-            lie_column="finish_lie", context_column="context", target_column="target",
-            distance_column="finish_distance", distance_unit="yd",
+            lie_column="finish_lie",
+            context_column="context",
+            target_column="target",
+            distance_column="finish_distance",
+            distance_unit="yd",
         ),
         min_samples=1,
     )
-    frame = pd.DataFrame([{
-        "start_lie": "fairway", "finish_lie": lie,
-        "context": "standard", "target": "hole",
-        "start_distance": 200.0, "finish_distance": distance,
-    }])
+    frame = pd.DataFrame(
+        [
+            {
+                "start_lie": "fairway",
+                "finish_lie": lie,
+                "context": "standard",
+                "target": "hole",
+                "start_distance": 200.0,
+                "finish_distance": distance,
+            }
+        ]
+    )
     result = analyze_source_backed_strokes_gained(frame, baseline, request)
     assert result.exclusions.total_excluded == 0
     return result.row_results[0].strokes_gained
@@ -63,7 +76,8 @@ def test_cache_parity_at_knots_midpoints_and_random_interior() -> None:
 def test_cache_refuses_extrapolation_and_invalid_distance() -> None:
     cache = source_backed_score_cache(
         build_broadie_approx_baseline(),
-        start_lie="fairway", start_distance_yards=200.0,
+        start_lie="fairway",
+        start_distance_yards=200.0,
         finish_lies=("green", "rough"),
     )
     for distance in (-1.0, math.nan, math.inf, 700.0):

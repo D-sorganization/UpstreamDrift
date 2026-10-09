@@ -81,7 +81,15 @@ def test_coupled_delivery_passes_pattern_nominal_face_reference() -> None:
         def __init__(self) -> None:
             self.calls: list[tuple[float, float]] = []
 
-        def simulate(self, *, face_deg, path_deg, config, sample_trajectory=False, nominal_face_deg=0.0):
+        def simulate(
+            self,
+            *,
+            face_deg,
+            path_deg,
+            config,
+            sample_trajectory=False,
+            nominal_face_deg=0.0,
+        ):
             self.calls.append((face_deg, nominal_face_deg))
             return super().simulate(
                 face_deg=face_deg,

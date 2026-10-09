@@ -95,7 +95,9 @@ def score_course_endpoints(
                 primary_name: float(np.mean(fair)),
             }
     except ValueError as exc:
-        raise ValueError(f"course state outside published baseline support: {exc}") from exc
+        raise ValueError(
+            f"course state outside published baseline support: {exc}"
+        ) from exc
     paired = {
         name: paired_mean_difference(scores[name], scores["Straight"], seed=seed)
         for name in ("Draw", "Fade")
@@ -151,8 +153,13 @@ def score_corrected_bundle(output_dir: Path) -> Path:
     with (output_dir / "shots.csv").open(newline="") as handle:
         for row in csv.DictReader(handle):
             endpoints[row["pattern"]].append(
-                (int(row["shot_index"]), float(row["aimed_x_m"]), float(row["aimed_y_m"]))
+                (
+                    int(row["shot_index"]),
+                    float(row["aimed_x_m"]),
+                    float(row["aimed_y_m"]),
+                )
             )
+
     def sensitivity(**changes: float) -> dict:
         try:
             return score_course_endpoints(
@@ -184,7 +191,7 @@ def score_corrected_bundle(output_dir: Path) -> Path:
                 for hole in (350.0, 400.0, 450.0)
             }
             report["fairway_width_sensitivity_m"] = {
-                f"{2*half:g}": compact(
+                f"{2 * half:g}": compact(
                     report if half == 15.0 else sensitivity(fairway_half_width_m=half)
                 )
                 for half in (10.0, 15.0, 20.0)
@@ -241,7 +248,9 @@ def score_corrected_bundle(output_dir: Path) -> Path:
     receipt = json.loads(receipt_path.read_text())
     repo_root = Path(__file__).resolve().parents[3]
     provider_root = repo_root / "vendor/ud-tools"
-    provider_source = provider_root / "src/shared/python/launch_monitor/strokes_gained.py"
+    provider_source = (
+        provider_root / "src/shared/python/launch_monitor/strokes_gained.py"
+    )
     provider_commit = subprocess.run(
         ["git", "-C", str(provider_root), "rev-parse", "HEAD"],
         check=True,
@@ -252,9 +261,13 @@ def score_corrected_bundle(output_dir: Path) -> Path:
         "method": "Public Tools API at baseline knots; exact piecewise-linear interpolation of returned scores at endpoints",
         "api_evaluated_states": report.get("total_api_evaluated_states", 0),
         "scored_shots": report.get("scored_shots", 0),
-        "baseline_artifact_sha256": hashlib.sha256(baseline_path.read_bytes()).hexdigest(),
+        "baseline_artifact_sha256": hashlib.sha256(
+            baseline_path.read_bytes()
+        ).hexdigest(),
         "source_pdf_sha256": SOURCE_PDF_SHA256,
-        "scoring_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "scoring_source_sha256": hashlib.sha256(
+            Path(__file__).read_bytes()
+        ).hexdigest(),
         "scoring_cache_source_sha256": hashlib.sha256(
             (Path(__file__).parent / "scoring_cache.py").read_bytes()
         ).hexdigest(),
@@ -262,7 +275,9 @@ def score_corrected_bundle(output_dir: Path) -> Path:
             (Path(__file__).parent / "scoring.py").read_bytes()
         ).hexdigest(),
         "provider_commit": provider_commit,
-        "provider_source_sha256": hashlib.sha256(provider_source.read_bytes()).hexdigest(),
+        "provider_source_sha256": hashlib.sha256(
+            provider_source.read_bytes()
+        ).hexdigest(),
     }
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
     return report_path
