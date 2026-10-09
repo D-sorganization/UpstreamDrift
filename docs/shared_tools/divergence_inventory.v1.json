@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tools_pin": "3678409fc51024150ab28970b72e3b468935f345",
+  "tools_pin": "2e7665111b06f92ffbfe178b92d74d6a81c95388",
   "ud_root": "src/shared/python",
   "tools_root": "vendor/ud-tools/src/shared/python",
   "vendor_shim_roots": {
@@ -11,8 +11,8 @@
     "utils": "vendor/ud-tools/src/python/src/utils"
   },
   "totals": {
-    "identical": 399,
-    "diverged": 274,
+    "identical": 400,
+    "diverged": 273,
     "ud-only": 1736,
     "tools-only": 796,
     "spelling-only": 121
@@ -761,8 +761,8 @@
       "spelling-only": 0
     },
     "sidekick": {
-      "identical": 210,
-      "diverged": 68,
+      "identical": 211,
+      "diverged": 67,
       "ud-only": 36,
       "tools-only": 80,
       "spelling-only": 23
@@ -1029,7 +1029,7 @@
       "classification": "ud-only",
       "package": "_seam_redirect.py",
       "subpackage": "",
-      "ud_bytes": 10187,
+      "ud_bytes": 11009,
       "tools_bytes": null,
       "byte_delta": null,
       "byte_identical": false,
@@ -27090,13 +27090,13 @@
     },
     {
       "path": "sidekick/lab/__init__.py",
-      "classification": "diverged",
+      "classification": "identical",
       "package": "sidekick",
       "subpackage": "lab",
-      "ud_bytes": 599,
+      "ud_bytes": 163,
       "tools_bytes": 163,
-      "byte_delta": 436,
-      "byte_identical": false,
+      "byte_delta": 0,
+      "byte_identical": true,
       "ud_has_child_copy_header": false,
       "spelling_only": false
     },
@@ -42080,19 +42080,6 @@
         "author": "d-sorgcodexagent[bot]",
         "date": "2026-06-16",
         "commit": "25c842e5e0421576e4f4a7c4d31ce04e956229b6"
-      }
-    },
-    {
-      "path": "sidekick/lab/__init__.py",
-      "ud": {
-        "author": "Dieter Olson",
-        "date": "2026-10-08",
-        "commit": "aab7ebef194276d251000f3c4e491e27eee2f6e0"
-      },
-      "tools": {
-        "author": "Dieter Olson",
-        "date": "2026-05-22",
-        "commit": "4eeae7b532d81a0bd28fbfd4ee8135f0e69e99ef"
       }
     },
     {
