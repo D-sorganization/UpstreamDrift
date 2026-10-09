@@ -73,9 +73,10 @@
       "rationale": "Reviewed canonical pose ownership and MuJoCo adapter protocol, explicit coordinate conventions and capability limits. Existing test_mujoco_protocol.py passed in the 41-test boundary run on 2026-09-09; no scientific validity assertion is added."
     },
     "project-task-native-replay": {
-      "fingerprint": "55bf5d25d6ec9728dfb6ea71285a6172361949d38f1f83c3720140c263cbde37",
+      "fingerprint": "03ce15d8728adb3076bd9036961363c2bf74144a353101ff3488055e3fa6f86e",
       "inputs": {
-        "docs/agent_context/contracts/project-task-native-replay.md": "d47df94f1644489aaa5711c5427736bbd7225ab03620ffabebb8dd1f82af02fe",
+        "docs/agent_context/contracts/project-task-native-replay.md": "15a144311fb3ef7394cb2e575cef4df5e0be3c07022d3f9d95f353434a826ba0",
+        "src/engines/myosuite_project_command_solve.py": "a8b3168dfb20b8f94322d2b8dc1e2b8570d4e11b3d4222f8b1300e71711cd2e2",
         "src/engines/myosuite_project_feedback.py": "c0d4f3f2e2f5ec0fac1c0cb9861d1e02e2d7cc6012c66d38283ac1aec864f7c5",
         "src/engines/myosuite_project_forecast.py": "b07b9f00d98f4b27e60be0de2ec255b294875255198f9a010ff12a67e13ab45f",
         "src/engines/myosuite_project_native_search.py": "3195899213ca1b48dc8cfe040f5fd82ca7742bc9e4b92eeff96ef64da4939105",
@@ -85,15 +86,18 @@
         "src/engines/native_replay_contracts.py": "a8da8d7080b9cfc3c3452dccb05a69428a3502fa348bf33c2290caa4b52626d2",
         "src/engines/physics_engines/myosuite/python/native_direct_model_replay.py": "daa670e49f3d3e4b2940d321ef8104f0e9aef0ff8524659b1b65bd6cec08b719",
         "src/engines/project_task_replay_artifacts.py": "8ea937a502755fb456815c212bf5aa0c7fa4987be3eba570d3faf87d0b5449b2",
+        "src/shared/python/motion_matching/bounded_candidate_search.py": "b1f5c83ca8bcc686d68c76c12a759dbba333efdba8422028646ee40c789dae3d",
         "tests/unit/engines/myosuite/test_native_model_resource_closure.py": "662eb43722a90a9c77fe01128ca8d22483259f6492e8d36d7b22c65460abbbef",
         "tests/unit/engines/myosuite/test_project_task_artifact_admission.py": "ea9e6d1da8bd2a6725d2b675607deafba8d9eac29e956a56e113cda2765a6fe1",
+        "tests/unit/engines/myosuite/test_project_task_command_solve.py": "c5c7d0c34b61ac352e279ffb635adf41e46a97f61a04838fb6d8fad0c1abb775",
         "tests/unit/engines/myosuite/test_project_task_feedback.py": "d9d8f9ae7b58e3c5fb9e641a32b1eeacf7b9873a26839d4c0724c27ad3ceff00",
         "tests/unit/engines/myosuite/test_project_task_forecast.py": "a35bdf3f3ab2d8941743f1409d36a925c8f07f366ffd6cb58ac0719dd4d97fc1",
         "tests/unit/engines/myosuite/test_project_task_native_search.py": "63795cc637ab7b62cca3ef213836584df94383dfdc9cfb10ef14352962dde63b",
         "tests/unit/engines/myosuite/test_project_task_producer.py": "ead3c9f3eb031cf78bc63e011b8a9e1fe203a6b16af3c3e8f3120950f81f6faf",
-        "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4"
+        "tests/unit/engines/myosuite/test_project_task_tracking.py": "8b329a3e676b28906e3c5a0f7439d483625ce071400f949420be0021488c0dc4",
+        "tests/unit/motion_matching/test_bounded_candidate_search.py": "5a256b469fe1f4fdd502626f125cd50eb64a62b1ec304488eda64335ca72ee4d"
       },
-      "rationale": "F09m12023 frozen source-bound native manifold objective; native qvel-coordinate discrete sums with physical scales, immutable reference, exact complete initial anchor and clock/control lineage. API RED10; corrected genuine lineage RED2; original driver/iron20step guarded promotion and independent replay pass. Actual pre-push mypy required explicit TypeAlias; exact hook now passes. Final seven-module MyoSuite3.0/MuJoCo3.6 campaign146PASS0F/E/S179.14s and all16 executed hashes match final source. Actual INTEGRATION16383 includes CTRL64; retain decoded control correspondence. No capture/contact/physiology/online/all-epic acceptance. Soft slew remains separate from physical hard criteria."
+      "rationale": "F09n12036 reuses exact shared F02 kernel4f9d2e4 and native tracking/persistent prediction; complete-horizon command/increment and declared state margins, independently replayed fallback and guarded recomputed improvement. Genuine API RED7, criteria API RED1 and mutation RED1 retained; final actual MyoSuite3.0/MuJoCo3.6 nine-module campaign170PASS0F/E/S250.31s with20 before/after hashes matching source. Synthetic objective16.3614474 to0.000299930,189 evaluations44.93s: correctness only, no rapid/real-time/private-fit/contact/physiology acceptance. Current central5gates,pinnedmypy,LoD/DRY/architecture/title/size PASS. Parent Tools capability acceptance needs actual probes and admitted pin/private-consumer integration; all17/six/muscularOpenSim remain open."
     }
   },
   "version": 1

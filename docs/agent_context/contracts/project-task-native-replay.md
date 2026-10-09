@@ -98,3 +98,18 @@ Reject stale anchors and changed lineage. Command slew cost is a soft penalty.
 Provisional scores remain provisional; guarded promotion recomputes the same
 objective from its full SDK history before independent serialized T01 replay.
 No objective digest authenticates anatomical correspondence or scientific fit.
+
+## Bounded Native Solve Boundary
+
+`NativeCommandSolveProblem` and `solve_native_command_plan` connect this native
+boundary to the authoritative shared F02 candidate kernel. Full-horizon applied
+command bounds and first/subsequent increments are hard constraints. Complete-
+state signed margins and guarded Boolean admission are mandatory caller inputs,
+with explicit criteria provenance and frozen-parameter/callback checks.
+Independently promote/replay the fallback before search. Recompute selected
+command plans through guarded SDK histories and canonical independent replay,
+requiring recomputed improvement. A numerical success cannot qualify a plan.
+No live prefix is applied, and all future execution requires current-state
+admission. Cooperative budgets include solve-local validation overhead; external
+preparation belongs to campaign timing. Fixture criteria do not qualify contact,
+physiology, private capture or the full all-model muscular OpenSim endpoint.

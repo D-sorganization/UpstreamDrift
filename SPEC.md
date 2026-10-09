@@ -1,3 +1,18 @@
+## Project MyoSuite Bounded Native Command Solve (F09n)
+
+F09n #12036 connects the source-bound native objective and persistent native
+predictor to the existing shared F02 bounded search kernel. Freeze command
+plans, native bounds, first/subsequent command increments and declared hard
+criteria; verify unchanged parameters/callback identity. Independently admit
+and replay the complete fallback before search. Promote commands only through
+guarded SDK recomputation, full-horizon criteria and canonical replay; require
+guarded improvement. Return the admitted fallback on numerical or hard-criterion
+rejection, cancellation or timeout. Changed native/source/state identities fail.
+The adapter applies no live command. Its elapsed metric includes this solve's
+validation overhead; external preparation remains part of campaign timing.
+Chapter 38 and F09n turnover preserve source-specific proof and the remaining
+all-model muscular OpenSim endpoint. No physiology/private-fit acceptance follows.
+
 ## Project MyoSuite Native Tracking Objective (F09m)
 
 F09m #12023 adds source-bound frozen native tracking costs shared by provisional

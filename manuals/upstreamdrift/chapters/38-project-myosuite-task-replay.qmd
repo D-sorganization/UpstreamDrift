@@ -386,3 +386,50 @@ See F09m turnover for final combined evidence and bounded-search integration.
 The final seven-module actual SDK campaign passes 146 tests with zero failures,
 errors or skips in 179.14 seconds; all sixteen executed source/test hashes match.
 All seventeen production rows, six ecosystems and muscular OpenSim remain open.
+
+## Bounded Native Command Solve With Guarded Fallback
+
+F09n (#12036) connects the native predictor and frozen tracking objective to
+the shared F02 bounded candidate search. `NativeCommandSolveProblem` freezes
+ordered post-mapping initial/fallback plans, channel bounds, per-sample command
+increments and a caller-declared hard-criteria provenance digest. Parameter
+and callback-identity checks reject changed solve declarations. The digest is
+an integrity binding of a declaration, not physiological authentication.
+
+For each native sample, require lower and upper command bounds and
+`abs(c[k]-c[k-1]) <= increment`, with `c[-1]` equal to the actual observed
+previous control. These are applied-command constraints, not coefficient bounds
+or continuous rates. Require explicit nonempty finite complete-state signed
+margins throughout the horizon. Their physical laws, units and tolerances are
+model-specific caller obligations; dummy finite-state fixture margins cannot
+admit native contact or physiology. The shared optimizer's numerical feasibility
+tolerance does not relax the exact guarded command/increment checks.
+
+Promote and independently replay the full fallback before numerical search.
+Numerical success proposes commands only. Recompute selected commands through
+the guarded SDK history, recompute full-horizon hard criteria and objective,
+and independently replay the existing serialized/reloaded T01 artifact.
+Require improvement over the guarded fallback cost. Rejection, cancellation or
+budget expiry retains the admitted fallback; changed live anchor, source,
+identity or solve parameters cause failure. No live command is applied here.
+Future prefix execution still requires current-state admission.
+
+The receipt measures fallback, search and promotion overhead within this solve.
+Complete time-to-accepted-match also includes external preparation, model/provider
+construction, reference mapping, failed solves and export. Cooperative budgets
+cannot establish a hard real-time guarantee, and native contact smoothness is
+not assumed for SLSQP. The synthetic motor/activation fixture demonstrates a
+real numerical improvement and guarded replay; it does not qualify a private
+swing, production hard margins, muscle physiology or full-model parity.
+Current-source evidence and remaining integration gates are recorded in F09n
+turnover. All seventeen model rows, six ecosystems and muscular OpenSim remain
+required.
+
+The final affected actual MyoSuite 3.0/MuJoCo 3.6 campaign passes 170 tests with
+zero failures/errors/skips in 250.31 seconds. Twenty executed source/test hashes
+match before/after and the current worktree. In the synthetic three-step case,
+the objective falls from 16.3614474 to 0.000299930 in 189 numerical evaluations;
+whole solve elapsed time is 44.93 seconds. This establishes a correct numerical
+baseline and a measured performance bottleneck, not rapid matching. Profile
+native guard/prediction work and derivative strategy under the same source,
+state and physical admission requirements before claiming production speed.

@@ -1,4 +1,26 @@
-# Active: Native Tracking Objective — F09m #12023
+# Active: Native Command Solve — F09n #12036
+
+Branch `feat/f09n-native-command-solve-12036` starts at F09m `ab0a1a37d2`.
+Reuse the exact shared F02 kernel/test dependency from PR #12024 `4f9d2e4b9f`.
+The new native solve admits/replays fallback first, applies complete-horizon
+command/increment and declared state margins, and requires guarded candidate
+improvement plus independent canonical replay. Source/state/criteria mutation
+fails. No live command, private fit, contact, physiology or parity is qualified.
+
+Read `docs/development/feedback_controls/F09N-NATIVE-COMMAND-SOLVE-TURNOVER.md`.
+The initial 169-test SDK campaign predates the final criteria-mutation fix.
+The final 170-test campaign passes with zero failures/errors/skips in 250.31s;
+all twenty executed hashes match current source. Global central five gates,
+pinned mypy hook, LoD/DRY/architecture/title/size checks pass. The synthetic
+objective improves 16.3614 to 0.000299930, but whole solve takes 44.93s/189
+evaluations for three native steps: rapid matching remains unqualified.
+Preserve genuine RED receipts, historical runs, missing local mypy-provider
+result and stopped exploratory type check. Parent CI still needs actual Tools
+capability probes/served-bundle reconciliation; the monolith register is refreshed.
+Current context and normal commit/push validation remain required. Full
+epic remains active. Sol/Luna/Astra account quota exhaustion is unchanged.
+
+# Prior Native Tracking Objective — F09m #12023
 
 Branch `feat/f09m-native-tracking-objective-12023` starts at published F09l
 `d5f003614426aef0ec6fdf2c0ed203942e25101c`, draft PR #12017. Read
