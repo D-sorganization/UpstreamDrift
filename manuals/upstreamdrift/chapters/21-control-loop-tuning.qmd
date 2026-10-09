@@ -39,7 +39,9 @@ evaluation budget and a scaled trust region. A checkpoint records its solver
 status, attempted parameters, objective, per-group loss, constraint violation,
 saturation fraction, evaluations and accept/reject reason. Nonconvergence,
 constraint violation, cross-group regression and lack of objective improvement
-prevent promotion. Joint refinement is needed because block independence is a
+prevent promotion. Returned numerical evidence arrays are detached read-only
+snapshots so later caller edits cannot change a reported outcome. Joint
+refinement is needed because block independence is a
 hypothesis; a group can improve alone while degrading the coupled plant.
 
 Training and holdout trials are declared separately. The holdout report

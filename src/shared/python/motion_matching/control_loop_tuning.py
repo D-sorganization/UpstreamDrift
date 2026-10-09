@@ -23,6 +23,13 @@ ParameterKind = Literal["gain", "task_weight"]
 TrialSplit = Literal["train", "holdout"]
 
 
+def _readonly(values: Array) -> Array:
+    """Detach result arrays so later caller edits cannot rewrite evidence."""
+    frozen = np.array(values, dtype=np.float64, copy=True)
+    frozen.setflags(write=False)
+    return frozen
+
+
 @dataclass(frozen=True)
 class LoopParameter:
     """One bounded, scaled control parameter; nominal feedforward is frozen."""
@@ -87,9 +94,7 @@ class TuningEvaluation:
             or self.saturation_fraction > 1
         ):
             raise ValueError("tuning evaluation must be finite nonnegative evidence")
-        frozen = losses.copy()
-        frozen.setflags(write=False)
-        object.__setattr__(self, "phase_losses", frozen)
+        object.__setattr__(self, "phase_losses", _readonly(losses))
 
 
 Evaluator = Callable[[Array, TuningTrial, tuple[str, ...]], TuningEvaluation]
@@ -190,6 +195,12 @@ class TuningScore:
     saturation_fraction: float
     wall_seconds: float
 
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "group_losses", _readonly(self.group_losses))
+        object.__setattr__(
+            self, "phase_group_losses", _readonly(self.phase_group_losses)
+        )
+
 
 @dataclass(frozen=True)
 class TuningCheckpoint:
@@ -215,6 +226,15 @@ class FrozenCouplingDiagnostics:
     singular_values: Array
     interpretation: str = "frozen_controller_association_not_causation"
 
+    def __post_init__(self) -> None:
+        for name in (
+            "jacobian",
+            "cross_jacobian_norms",
+            "cross_hessian",
+            "singular_values",
+        ):
+            object.__setattr__(self, name, _readonly(getattr(self, name)))
+
 
 @dataclass(frozen=True)
 class PhaseCovariance:
@@ -223,6 +243,12 @@ class PhaseCovariance:
     phases: tuple[str, ...]
     groups: tuple[str, ...]
     causal_claim: bool = False
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "pooled_covariance", _readonly(self.pooled_covariance))
+        object.__setattr__(
+            self, "within_phase_covariance", _readonly(self.within_phase_covariance)
+        )
 
 
 @dataclass(frozen=True)
@@ -241,6 +267,9 @@ class LoopTuningResult:
     generalization_status: str
     feedforward_policy: str = "frozen_not_jointly_identified"
 
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "parameters", _readonly(self.parameters))
+
 
 @dataclass(frozen=True)
 class PerturbationComparison:
@@ -251,6 +280,11 @@ class PerturbationComparison:
     reoptimized_parameters: Array
     scaled_parameter_shift: float
     interpretation: str = "refit_compensation_not_frozen_controller_sensitivity"
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "reoptimized_parameters", _readonly(self.reoptimized_parameters)
+        )
 
 
 def _score(

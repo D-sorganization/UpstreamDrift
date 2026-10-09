@@ -493,3 +493,16 @@ def test_coupling_diagnostic_budget_fails_before_expensive_rollouts() -> None:
     problem = _quadratic_problem()
     with pytest.raises(ValueError, match="diagnostic budget"):
         frozen_coupling_diagnostics(problem, problem.initial, max_evaluations=12)
+
+
+def test_report_arrays_are_immutable_evidence_snapshots() -> None:
+    result = tune_control_loops(_quadratic_problem(), LoopTuningConfig())
+    with pytest.raises(ValueError):
+        result.parameters[0] = 99.0
+    with pytest.raises(ValueError):
+        result.holdout_full.group_losses[0] = 99.0
+    with pytest.raises(ValueError):
+        result.coupling.jacobian[0, 0, 0] = 99.0
+    assert result.phase_covariance is not None
+    with pytest.raises(ValueError):
+        result.phase_covariance.pooled_covariance[0, 0] = 99.0

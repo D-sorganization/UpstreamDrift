@@ -15,7 +15,7 @@ implementation now uses finite differences of the frozen training objective;
 analytic coupled and uncoupled tests verify the off-diagonal value. Further
 negatives cover cross-group regression, solver nonconvergence, constraint
 violation, phase confounding, parameter permutation, unbounded diagnostics,
-missing holdout and nonfinite data.
+missing holdout, nonfinite data, and mutation of returned evidence arrays.
 
 The code has not run against a native full-body engine or private capture.
 Native F06 torque replay, independent observation scoring, contact/force
