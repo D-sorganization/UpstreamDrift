@@ -22,7 +22,8 @@ Hunt-Crossley form linearised at the nominal penetration.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from collections.abc import Sequence
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -172,6 +173,8 @@ class ClubInHands:
         self._rebuild()
         self.delta0 = delta0
         self.hand_source: Any = None
+        #: diagnostic drift of the trail hand, in its grip frame (issue #11986)
+        self.trail_shift_m = np.zeros(3)
 
     def _solref(self, k_solref: float) -> tuple[float, float]:
         damping = k_solref * IMPEDANCE * self._preload_m * self._dissipation_s_m
@@ -227,6 +230,10 @@ class ClubInHands:
             h = hands[s]
             if s == "R" and self.hand_mode == "trail_follows_club":
                 h = hands[s] = vel[s] = self.club_state_now().frame(self._offsets[s])
+            if s == "R" and self.trail_shift_m.any():
+                h = hands[s] = replace(
+                    h, position_m=h.position_m + h.rotation @ self.trail_shift_m
+                )
             self._set_free(self._hand[s], h.rotation, h.position_m)
             dof = self._dof(self._hand[s])
             self.data.qvel[dof : dof + 3] = vel[s].velocity_m_s
@@ -412,6 +419,7 @@ def simulate_grip_contact(
     t_start_s: float | None = None,
     friction_time_s: float | None = None,
     hand_mode: str = "prescribed",
+    trail_shift_m: Sequence[float] = (0.0, 0.0, 0.0),
 ) -> ContactRun:
     """Integrate the free club held by pads over the prescribed swing.
 
@@ -438,6 +446,10 @@ def simulate_grip_contact(
         hand_mode,
     )
     sim.calibrate(np.asarray(swing.q[0], float))
+    shift = np.asarray(trail_shift_m, dtype=float)
+    if shift.shape != (3,) or not np.isfinite(shift).all():
+        raise ValueError("trail_shift_m must be a finite 3-vector")
+    sim.trail_shift_m = shift
     spline = CoordinateSpline(swing.time_s, swing.q)
     times = swing.time_s
     if t_start_s is not None:
@@ -464,6 +476,7 @@ def simulate_grip_contact(
             "force_law": "MuJoCo native sphere-cylinder contact, condim 6",
             "solreffriction_time_s": friction_time_s or 2.0 * timestep_s,
             "hand_mode": hand_mode,
+            "trail_shift_m": [float(v) for v in shift],
             "squeeze_per_hand_n": pads.layout.pad_count
             * pads.law.stiffness_n_m
             * pads.layout.preload_penetration_m,

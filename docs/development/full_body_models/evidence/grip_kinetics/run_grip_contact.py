@@ -71,6 +71,13 @@ def main() -> int:
         help="solreffriction time constant [s] (default 2 timesteps; issue #11986)",
     )
     ap.add_argument(
+        "--trail-shift-mm",
+        type=float,
+        nargs=3,
+        default=(0.0, 0.0, 0.0),
+        help="constant trail-hand offset in its grip frame [mm] (issue #11986)",
+    )
+    ap.add_argument(
         "--hand-mode",
         choices=("prescribed", "trail_follows_club", "lead_only"),
         default="prescribed",
@@ -114,6 +121,7 @@ def main() -> int:
         t_end_s=args.t_end,
         friction_time_s=args.friction_time,
         hand_mode=args.hand_mode,
+        trail_shift_m=[v * 1e-3 for v in args.trail_shift_mm],
     )
     wall = time.perf_counter() - start
     OUT.mkdir(exist_ok=True)

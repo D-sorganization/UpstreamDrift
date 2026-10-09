@@ -180,3 +180,21 @@ def test_diagnostic_hand_modes_support_the_club_weight(mode: str) -> None:
     up = -gravity / np.linalg.norm(gravity)
     total = run.series.force_on_club_n["L"][-1] + run.series.force_on_club_n["R"][-1]
     assert float(total @ up) == pytest.approx(weight, rel=WEIGHT_TOLERANCE)
+
+
+def test_trail_shift_moves_only_the_trail_hand() -> None:
+    """Issue #11986: a constant trail shift is applied in the trail grip frame."""
+    module = _engine("mujoco")
+    spec_bytes, _, names, swing, interface, pads = _setup()
+    q0 = np.asarray(swing.q[0], float)
+    sim = module.ClubInHands(spec_bytes, names, interface, pads)
+    base = sim.hold_pose(q0)
+    sim.trail_shift_m = np.array([1e-3, 0.0, 0.0])
+    moved = sim.hold_pose(q0)
+    axis = base["R"].rotation[:, 0]
+    assert moved["R"].position_m - base["R"].position_m == pytest.approx(1e-3 * axis)
+    assert moved["L"].position_m == pytest.approx(base["L"].position_m)
+    with pytest.raises(ValueError, match="trail_shift_m"):
+        module.simulate_grip_contact(
+            spec_bytes, swing, pads, interface, t_end_s=0.0, trail_shift_m=(0.0, 0.0)
+        )
