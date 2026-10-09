@@ -19,6 +19,10 @@ its source rotation bound. Preserve native replay, anatomy and registration gate
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.
 - Open (engine host): verify the Drake/Pinocchio renders at 720p, feed the per-swing body bounding box from engine FK into `fit_distance_m` per view, and judge glyph legibility.
 
+# Active: Muscle Qualification Evidence Guard — F07 #11791
+
+Branch `fix/feedback-muscle-evidence-11791`; current commit `SELF`; PR #11814. Scoped child #11810: parameter-only orchestration now returns no native replay and no unperformed audit successes. The test-first commit records two failures; 31 focused tests pass after correction. Read [Guard Turnover](docs/development/feedback_controls/F07_MUSCLE_EVIDENCE_TURNOVER.md). Merged current main while preserving its impact chapter and this evidence chapter. Next: normal protected PR checks; F07 and native model qualification remain open.
+
 # Active: Feedback Controls Planning — #11784
 
 Documentation branch `docs/feedback-controls-11784`; commit `SELF`. Read [Design](docs/development/feedback_controls/DESIGN.md), [Issue Dependencies](docs/development/feedback_controls/IMPLEMENTATION_PLAN.md) and [Turnover](docs/development/feedback_controls/TURNOVER.md). Goal: all-model six-engine parity culminating in muscle-driven OpenSim and independent excitation replay. Planning only; no new model/video is qualified. Next: F01 inventory/gate freeze, coordinate MOSAIC #11532 and parity #11605.
