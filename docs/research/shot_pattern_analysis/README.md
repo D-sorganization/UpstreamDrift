@@ -130,6 +130,21 @@ Narrower lateral spread alone does not determine approach scoring either. For PW
 
 Effects are small, conditional predictions under illustrative inputs, not measured strokes gained. Model and delivery uncertainty are excluded from the bootstrap intervals. Use the baseline version and digest in the receipts when comparing results. The original driver bundles remain only in the [Superseded Historical Control Report](historical_control_report.md).
 
+## Distance-Normalized Comparison
+
+For face SD 2°, doubled curves, and assumed shaft rotation, percentages below compare lateral SD with the same-cell Straight pattern. Negative is narrower. The common-range column sets every landing to the Straight target range while retaining bearing; this diagnostic removes geometric range scaling but does not isolate a physical cause.
+
+| Club | Shape | Actual Lateral SD Change | Common-Range Lateral SD Change | Mean Carry Change |
+| --- | --- | --- | --- | --- |
+| Driver | Draw | -4.05% | -3.76% | -1.51 m |
+| Driver | Fade | -1.93% | -1.24% | -1.15 m |
+| 7-Iron | Draw | +1.57% | +2.03% | -0.48 m |
+| 7-Iron | Fade | -4.66% | -4.55% | -0.40 m |
+| PW | Draw | +2.00% | +2.37% | -0.26 m |
+| PW | Fade | -3.58% | -3.47% | -0.24 m |
+
+The driver reduction is partly distance scaling: common-range normalization reduces the apparent narrowing. The residual bearing-based lateral-spread differences remain model-conditional. The iron/PW contrast also persists under this control; its smaller changes are consistent with the smaller carry shifts.
+
 ## Shareable Graphics and Complete Statistics
 
 The 1920 × 1080 PNGs are ready for Facebook sharing. Each cell has an overhead flight comparison, a full dispersion comparison, and a distance-control graphic. Representative 7-iron, two-degree-SD, doubled-curve, assumed shaft-rotation views:

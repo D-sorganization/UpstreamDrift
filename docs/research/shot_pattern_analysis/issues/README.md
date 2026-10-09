@@ -28,6 +28,10 @@ implementing PR or an explicitly permitted disposition.
 | SPA-016 | Putting Baseline Awarded Partial Hole-Outs at Positive Distance | Corrected; All 24 Saved-Flight Bundles Re-Scored | Unholed Expected Strokes Must Be at Least One; Terminal Holed State Must Be Separate |
 | SPA-017 | Shared SG Legend Repeated Entries and Overlapped a Panel Title | Corrected; Regenerated V2 Overview | Red–Green Legend Test and Visually Verified 1080p PNGs |
 | SPA-018 | Git Line-Ending Normalization Changed Evidence Hashes | Corrected and Committed | All 24 Indexed CSV Hashes Match Frozen Manifests |
+| SPA-019 | Bare Test Module Name Collided During Broad Collection | Corrected and Committed | Red Canonical Collection; Green Combined Collection of Both Test Modules |
+
+| SPA-020 | Provenance Required an Ignored Generated Lockfile | Corrected in the Canonical Run/Export Snapshot | Red Clean-Clone CLI/Export; Optional Lock Presence Explicit; Required Sources and Native Binary Retained |
+| SPA-021 | Native Provenance Ignored Windows `.pyd` Layouts | Corrected and Committed | Ten Native-Discovery Tests Cover Direct/Packaged Layouts and Ambiguity |
 
 ## Regression and Resolution Requirements
 
@@ -66,7 +70,7 @@ consistency within the stated model; empirical accuracy remains unestablished.
 
 ## Published Issue Links
 
-SPA-001–014: #11840–11853. SPA-015: [#11862](https://github.com/D-sorganization/UpstreamDrift/issues/11862). SPA-016: [#11863](https://github.com/D-sorganization/UpstreamDrift/issues/11863). SPA-017: [#11864](https://github.com/D-sorganization/UpstreamDrift/issues/11864). SPA-018: [#11865](https://github.com/D-sorganization/UpstreamDrift/issues/11865). Exact receipts are in `publication_receipt.json`.
+SPA-001–014: #11840–11853. SPA-015: [#11862](https://github.com/D-sorganization/UpstreamDrift/issues/11862). SPA-016: [#11863](https://github.com/D-sorganization/UpstreamDrift/issues/11863). SPA-017: [#11864](https://github.com/D-sorganization/UpstreamDrift/issues/11864). SPA-018: [#11865](https://github.com/D-sorganization/UpstreamDrift/issues/11865). SPA-019: [#11930](https://github.com/D-sorganization/UpstreamDrift/issues/11930). SPA-020: [#11936](https://github.com/D-sorganization/UpstreamDrift/issues/11936). SPA-021: [#11937](https://github.com/D-sorganization/UpstreamDrift/issues/11937). Exact receipts are in `publication_receipt.json`.
 
 ## Publication and Closure
 
@@ -75,3 +79,15 @@ duplicates, and link their regression evidence and implementing PR. Keep issues
 open until a merged PR implements their acceptance criteria, or an explicitly
 permitted disposition applies. Physical measurements are deferred validation,
 not a completed simulation acceptance claim.
+
+## Separate Baseline Release Follow-Ups
+
+These are not model-analysis defects and are not claimed fixed by this feature:
+
+- [Drake Offscreen Native Abort #11934](https://github.com/D-sorganization/UpstreamDrift/issues/11934): isolated reproduction aborts in unchanged Drake/Qt widget construction.
+- [Development-Log Policy Debt #11935](https://github.com/D-sorganization/UpstreamDrift/issues/11935): unchanged shared log fails field-provenance, WIP and size policies. Other live owners' state must not be rewritten to make this feature gate green.
+
+The ready PR carries a merge hold while baseline validation remains unresolved;
+no protection bypass or false full-suite pass is permitted.
+
+| FOLLOWUP-003 | [#11940](https://github.com/D-sorganization/UpstreamDrift/issues/11940) | Unchanged Research Atlas Provenance | Open Baseline Blocker; Separate Governed Correction |

@@ -4,7 +4,7 @@
   "repository": "D-sorganization/UpstreamDrift",
   "branch": "codex/shot-pattern-analysis",
   "published_at": "2026-10-09T05:38:32.115062+00:00",
-  "total_records": 18,
+  "total_records": 24,
   "issues": [
     {
       "local_id": "SPA-001",
@@ -167,7 +167,61 @@
       "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11865",
       "published_at": "2026-10-09T05:40:24.616349+00:00",
       "body_sha256": "bb446fef7f5bafc3ad060aacba5f77554a6ccee7e0bc8c38419a9f2f8aa11eb9"
+    },
+    {
+      "local_id": "SPA-019",
+      "title": "Namespace Shot Pattern Tests to Prevent Repository Collection Collisions",
+      "action": "created",
+      "issue_number": 11930,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11930",
+      "published_at": "2026-10-09T09:16:25.000000+00:00",
+      "body_sha256": "44a2f419369838f9544f021976ce2bd35cf31aeda11d792c5bc3742621a4310d"
+    },
+    {
+      "local_id": "FOLLOWUP-001",
+      "title": "Fix the Existing Drake Embed Widget Abort in Offscreen Tests",
+      "action": "reused",
+      "issue_number": 11934,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11934",
+      "published_at": "2026-10-09T09:29:09.177913+00:00",
+      "body_sha256": "bedbad750ad1c57916e4c943068096636eb91c3a92e8dc49fb3dc33cd573a9eb"
+    },
+    {
+      "local_id": "FOLLOWUP-002",
+      "title": "Resolve Existing Development-Log Fleet Policy Failures Through Governed Collation",
+      "action": "reused",
+      "issue_number": 11935,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11935",
+      "published_at": "2026-10-09T09:29:10.018948+00:00",
+      "body_sha256": "108387a3956fab4e7e0644687db79903b1e1ae2e31a7d8545aaf9074fb81a7b0"
+    },
+    {
+      "local_id": "SPA-020",
+      "title": "Make Generated Rust Lockfile Presence Explicit in Clean-Clone Provenance",
+      "action": "created",
+      "issue_number": 11936,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11936",
+      "published_at": "2026-10-09T09:29:12.678236+00:00",
+      "body_sha256": "dd076ec10e9353f6a046c8bc35ff4d229129dbf898657d56c8fb2f2a8b881647"
+    },
+    {
+      "local_id": "SPA-021",
+      "title": "Recognize Windows Native Extension Binaries in Scientific Provenance",
+      "action": "created",
+      "issue_number": 11937,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11937",
+      "published_at": "2026-10-09T09:31:13.838454+00:00",
+      "body_sha256": "ee16298b49c68cb4a31f9340eb9c467cfb06f00578f7ffb84d2de0d3e68316e4"
+    },
+    {
+      "local_id": "FOLLOWUP-003",
+      "title": "Regenerate Stale Articulated Ground Sensitivity Provenance Against Its Actual Atlas",
+      "action": "created",
+      "issue_number": 11940,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11940",
+      "published_at": "2026-10-09T09:39:47.681725+00:00",
+      "body_sha256": "63d3dfd2ab4d472be34f60c5d8aecaa4eb167ae4c70d2605542ea6000b871d72"
     }
   ],
-  "synchronized_at": "2026-10-09T09:14:21.594527+00:00"
+  "synchronized_at": "2026-10-09T09:16:49.658147+00:00"
 }

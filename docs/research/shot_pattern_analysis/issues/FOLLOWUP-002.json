@@ -1,0 +1,8 @@
+{
+  "local_id": "FOLLOWUP-002",
+  "title": "Resolve Existing Development-Log Fleet Policy Failures Through Governed Collation",
+  "body": "The canonical Repository_Management pre-PR runner fails shared_scripts/development_log.py on unchanged docs/development/DEVELOPMENT_LOG.md from upstream main. It reports invalid or missing Last verified SHA fields, missing State/Owner fields (including DL-#9349), 143 active entries against a ceiling of75, and more than200000bytes. The shot-pattern branch does not edit this shared log; it supplies a per-PR change fragment.\n\n## Acceptance Criteria\n\nRepair field provenance and archive/park/ship entries through the governed collation workflow with owner-confirmed statuses. Do not fabricate verification SHAs, park other live sessions or loosen budgets to green the gate. Verify development_log.py and canonical fleet gate.\n\n## Handoff\n\nBaseline release blocker discovered during codex/shot-pattern-analysis validation. Not included in that feature PR closure list; keep open until a separately evidenced governed correction.",
+  "publication_status": "published",
+  "github_issue_number": 11935,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11935"
+}
