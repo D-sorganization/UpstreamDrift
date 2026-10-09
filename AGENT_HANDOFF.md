@@ -1,3 +1,9 @@
+# Active: Native Export Impact Time From Ball Passage - GCV-14 #11720
+
+- Branch `claude/gcv-14-impact-evidence`. `native_viewer_export.overlay.detect_impact_time_s` called `model_appearance.club_face.impact_frame` and reported that frame's exact timestamp; on the committed driver fixture the accepted peak-speed sample sits 9.2 cm above and 9.2 cm from address (the height check alone let it through), not the true closest approach. It now returns `club_face.ball_passage`'s sub-sample `t_impact` on the same `Clubhead`-origin trajectory (one detector, OSV-10); docstring and README (`src/tools/native_viewer_export/README.md`) updated.
+- Kept the `Clubhead` frame origin rather than the true face-centre point (`club_assembly.clubface_centre`): deriving the centre here would need the club spec resolved into a `ClubAssembly` and composed with the frame's rotation, a larger change than this fix's scope.
+- Tests added/updated in `tests/unit/tools/native_viewer_export/test_grip_tracking.py`: `test_hud_impact_time_matches_ball_passage` (basic contract), `test_hud_impact_time_uses_ball_passage_not_the_peak_speed_sample` (reproduces the bug with a synthetic overshoot trajectory), `test_hud_impact_time_raises_when_the_head_never_returns_to_the_ball`, and the capture-A fixture test now compares against `ball_passage` instead of `impact_frame`.
+
 # Active: GRF Engine Wiring and CoP Consolidation - GCV-2 #11708, GCV-6 #11712
 
 - Branch `claude/gcv-2-grf-wiring`. MuJoCo, MyoSuite, Drake and OpenSim emit `contact:grf_/free_moment_/moment_com_` per foot and net from native contacts; Pinocchio from shared-contact-law `ContactSample`s (else `ground_reaction_unavailable`); Simscape is unavailable (GCV-3 #11709). `BundleOverlayProvider` uses `ground_reaction_overlay`, so the native videos show per-foot and net GRF.
