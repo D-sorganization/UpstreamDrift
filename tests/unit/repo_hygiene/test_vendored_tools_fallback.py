@@ -218,6 +218,9 @@ def test_the_fallback_declines_gaps_inside_a_cluster_upstreamdrift_owns() -> Non
 
     assert finder.find_spec("src.shared.python.sidekick.lab.mocap") is None
     assert finder.find_spec("shared.python.sidekick.lab.mocap") is None
+    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+
+    extend_sidekick_lab_path()
     resolved = importlib.util.find_spec("sidekick.lab.mocap")
     assert resolved is not None and resolved.origin is not None
     assert Path(resolved.origin).resolve().is_relative_to(_VENDORED_SHARED.resolve())
