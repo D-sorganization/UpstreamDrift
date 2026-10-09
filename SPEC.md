@@ -10379,7 +10379,9 @@ independent input reproduction, and observation accuracy have distinct
 receipts. Missing rows, stale model or
 provider identities, absent SHA-256 bindings, feedback-driven or reset replay,
 mixed torque/excitation, and incomparable same-input horizons/channels/policies
-fail closed. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
+fail closed. Truncated replay cannot establish within-engine or same-input
+levels; observation scoring requires its own time-grid digest, distinct from
+the applied-input grid. The legacy Euclidean `same-input-bundle/v1` cannot satisfy the
 new replay admission because it does not bind execution policy and applied
 inputs. Baselines must include independent polynomial, computed torque,
 MOSAIC+TVLQR, and selected OCP under one observation identity, horizon, and

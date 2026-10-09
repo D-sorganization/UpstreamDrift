@@ -115,6 +115,7 @@ class ComparisonEvidence:
     muscle_state_evidence_sha256: str = ""
     transcription_receipt_sha256: str = ""
     observation_score_receipt_sha256: str = ""
+    observation_time_grid_sha256: str = ""
 
 
 @dataclass(frozen=True)
@@ -268,6 +269,8 @@ class FeedbackComparisonRegistry:
             raise ValueError("replay must use an independent time-only input player")
         if evidence.state_resets or not evidence.full_state:
             raise ValueError("replay must preserve full physical state without resets")
+        if not evidence.full_horizon:
+            raise ValueError("replay must cover the full horizon")
         if not math.isfinite(evidence.horizon_s) or evidence.horizon_s <= 0:
             raise ValueError("replay horizon must be positive and finite")
         if evidence.nq <= 0 or evidence.nv <= 0 or not evidence.channel_ids:
@@ -381,6 +384,10 @@ class FeedbackComparisonRegistry:
             return row
         self._admit_replay_evidence(evidence)
         if level == ComparisonLevel.OBSERVATION_ACCURACY:
+            self._digest(
+                evidence.observation_time_grid_sha256,
+                "observation_time_grid_sha256",
+            )
             self._digest(
                 evidence.observation_score_receipt_sha256,
                 "observation_score_receipt_sha256",

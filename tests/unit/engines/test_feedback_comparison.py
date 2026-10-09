@@ -48,6 +48,7 @@ def _valid_evidence(registry: FeedbackComparisonRegistry) -> ComparisonEvidence:
         evidence_mode=EvidenceMode.SHARED_RIGID_BODY_EMULATION,
         horizon_s=1.0,
         observation_sha256="e" * 64,
+        observation_time_grid_sha256="f" * 64,
         channel_ids=("hip", "knee"),
         full_state=True,
         full_horizon=True,
@@ -277,6 +278,28 @@ def test_direct_effort_must_be_held_for_each_step(
         registry.admit(
             replace(_valid_evidence(registry), timebase_id="capture_source"),
             ComparisonLevel.WITHIN_ENGINE_REPLAY,
+        )
+
+
+@pytest.mark.parametrize(
+    "level",
+    [ComparisonLevel.WITHIN_ENGINE_REPLAY, ComparisonLevel.SAME_INPUT],
+)
+def test_truncated_replay_cannot_pass_full_horizon_levels(
+    registry: FeedbackComparisonRegistry, level: ComparisonLevel
+) -> None:
+    with pytest.raises(ValueError, match="full horizon"):
+        registry.admit(replace(_valid_evidence(registry), full_horizon=False), level)
+
+
+def test_observation_score_requires_separate_output_clock_digest(
+    registry: FeedbackComparisonRegistry,
+) -> None:
+    evidence = _valid_evidence(registry)
+    with pytest.raises(ValueError, match="observation_time_grid_sha256"):
+        registry.admit(
+            replace(evidence, observation_time_grid_sha256=""),
+            ComparisonLevel.OBSERVATION_ACCURACY,
         )
 
 
