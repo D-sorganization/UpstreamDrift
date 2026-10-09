@@ -6,6 +6,10 @@ steps (IK, Moco tracking) live in drivers under
 docs/development/opensim_tour_matching and skip without ``opensim``.
 """
 
+from src.engines.physics_engines.opensim.python.tour_matching.wrist_compatibility import (
+    WristKinematicContract,
+    observe_native_wrist,
+)
 from src.engines.physics_engines.opensim.python.tour_matching.cli import (
     CheckpointManifest,
     RunConfig,
@@ -318,4 +322,6 @@ __all__ = [
     "verify_model_qualification",
     "write_model",
     "write_trc",
+    "WristKinematicContract",
+    "observe_native_wrist",
 ]

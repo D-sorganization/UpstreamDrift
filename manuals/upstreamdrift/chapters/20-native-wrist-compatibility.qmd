@@ -1,0 +1,162 @@
+# Native Wrist Kinematic Compatibility (Provisional)
+
+## Scope and Evidence Boundary
+
+F07 child #11834 supplies `tour_matching.observe_native_wrist`, an executable
+native geometry assay before donor assembly. It reuses the public model
+checkpoint and path-length finite-difference providers. The existing F07 asset
+inventory (#11819) remains the structural inventory boundary; this assay does
+not duplicate it or claim complete component coverage from a selected path list.
+All results have `scientific_status="unqualified"`. No third-party anatomy,
+capture or display mesh is included in the synthetic test fixture.
+
+This assay does not integrate dynamics, prepare muscle equilibrium, fit a
+capture or build an anatomical derivative. Donor compatibility needs a reviewed
+registration and comparison against a proposed derivative. A source measured
+against itself does not establish that assembly.
+
+## Frames, Coordinates and Native Assembly
+
+The contract names exact native independent/dependent coordinate paths, muscle
+paths, required components, anchor and hand frames, poses and numerical
+tolerances. Requested wrist values are declared in radians. Native rotational
+coordinates are admitted directly; native `Coupled` coordinates require an
+explicit `declared_coupled_radian_coordinates` entry grounded in the source
+functions and their units. This declaration is recorded, not anatomically
+certified. Native translational input coordinates are rejected.
+
+OpenSim [CustomJoint motion classification](https://github.com/opensim-org/opensim-core/blob/4.6/OpenSim/Simulation/SimbodyEngine/CustomJoint.cpp)
+can mark scaled/nonlinear rotation functions as `Coupled`; the enum is not
+equivalent to a coordinate-coupler constraint. The assay separately checks
+`Coordinate.isDependent(state)`. It never changes those functions or relabels
+the native enum to make an input pass.
+
+Each sample copies the initialized native state, sets all requested coordinates
+without intermediate enforcement, calls `Model.assemble`, and realizes
+Position. All achieved native coordinates and position-constraint errors are
+recorded. Independent coordinates outside the requested set must stay at their
+baseline values within the declared angular or translational tolerance.
+Requested coordinates must achieve their values and remain inside native ranges.
+Missing components, locked/prescribed inputs, disabled required constraints,
+unsupported held-coordinate motion types and non-finite observations fail.
+Required component dumps retain exact native coupler/wrap/joint settings.
+
+The returned transform maps hand-frame coordinates into the anchor frame:
+
+$$X_{AH}=X_{GA}^{-1}X_{GH}.$$
+
+Its translation is in meters and its rotation is dimensionless. Neither frame
+names nor this transform alone establish homologous anatomical registration.
+
+## Path Derivatives and Numerical Policy
+
+For each pose, independent coordinate, muscle and strictly decreasing positive
+step $h$, the assay reassembles both sides. It records native
+`Muscle.computeMomentArm` and the constrained path derivative
+
+$$r_{\mathrm{FD}}=-\frac{\ell_{MT}(q^+)-\ell_{MT}(q^-)}
+{q_i^+-q_i^-}.$$
+
+The denominator uses achieved coordinates. Steps must exceed the coordinate
+tolerance. Every stencil retains all achieved coordinates, path lengths and
+constraint errors, allowing detection of motion in other coordinates or
+changes in wrapping. The sign convention is the negative length derivative;
+with the declared angular coordinates the result is meters per radian, normally
+reported as a moment-arm length in meters. The native generalized-force and
+moving-path semantics must be examined when these disagree; a small numerical
+residual is not a physiological capacity check.
+
+`assembly_accuracy=None` preserves the model's numerical setting. An explicitly
+requested value calls native `Model.set_assembly_accuracy` before initialization.
+The receipt binds source/default/requested/effective policy, pre-policy model
+serialization, prepared model serialization, source-file SHA-256, provider
+source hashes, native version and loaded extension hashes. Transitive DLL and
+external resource closure remain unverified. File bytes and prepared parameters
+are rechecked after observation. Numerical policy is never changed silently;
+an explicit accuracy override does not edit anatomical parameters. Native loader
+transformations still require admission review: this donor reports a massless
+thorax with nonzero inertia and resets that inertia. Loaded identity does not
+prove equality to the source's declared physical properties.
+
+`within_declared_tolerance` is reported for each comparison; disagreement is
+retained without raising or promoting a qualified status. The numerical
+tolerance is an operator declaration, not a measured uncertainty. Changing
+the tolerance after inspecting results cannot establish preregistered acceptance.
+Finite differences need explicit refinement and differentiation-path evidence,
+particularly for analytic wraps and coordinate-dependent moving path points.
+
+## Pinned Donor Findings and Remaining Gates
+
+The local evaluation used `MOBL_ARMS_41.osim` at CEINMS-RT/UpperLimbModel commit
+`459e2ebbf47acb72b0ecbc59950a2d0a983d28db`, SHA-256
+`58bacbc1c61d1d42cff9a48b0a9dced9c648893f44adc7d9817cca56441a9fcf`,
+in native OpenSim `4.6-2026-06-22-85aaf64`. Its
+[artifact-specific notices](https://github.com/CEINMS-RT/UpperLimbModel/blob/459e2ebbf47acb72b0ecbc59950a2d0a983d28db/README.md)
+separate the MoBL model from Apache-licensed code and restrict the model's
+listed uses to noncommercial research, academic, evaluation or personal use;
+commercial use requires its stated licensing route. Older catalog MIT entries
+do not establish identity or broad redistribution rights for this exact file.
+Keep original notices, citations and geometry/version provenance.
+
+The donor chain is `/jointset/radiocarpal` (radius to proximal_row) followed by
+`/jointset/wrist_hand` (proximal_row to hand). Preserve
+`/constraintset/wrist_hand_r1_con` and `/constraintset/wrist_hand_r3_con`, all
+selected paths and passive forces. ECRL uses
+`/bodyset/humerus/wrapobjectset/Elbow_PT_ECRL` (ellipsoid) and
+`/bodyset/proximal_row/wrapobjectset/ECRL` (torus). These are analytic wraps,
+distinct from missing display meshes. Donor flexion/deviation are natively
+`Coupled` because of their spline transforms; their declared angular input
+domains must be preserved.
+
+An unchanged-source default-accuracy run failed the $10^{-7}$-rad isolation
+gate: elbow flexion moved by $9.52935\times10^{-6}$ rad at a wrist stencil.
+Explicit accuracy refinement from $10^{-9}$ through $10^{-14}$ reduced the
+observed maximum held-coordinate drift at the two initial test samples to
+$2.55629\times10^{-8}$ rad, passing the same isolation gate. Both direct
+`Model.assemble` and coordinate `setValue(..., True)` produced the same result
+in that controlled comparison. Native assembly accuracy is not itself a bound
+on coordinate drift.
+
+The separate $10^{-14}$-accuracy run completed 432 comparisons: 3 poses, 24
+hand-reaching muscles, 2 wrist coordinates and 3 steps ($10^{-3}$, $10^{-4}$,
+$10^{-5}$ rad). Of these, 180 exceeded the predeclared $10^{-5}$-m diagnostic
+tolerance. Neutral ECRL/deviation retained a 0.199353-mm discrepancy. The
+largest was FPL/flexion at $(0.1,0.05)$ rad: native 9.67396 mm versus finite
+difference 14.81422 mm, with about 5.14026-mm disagreement persisting under
+step refinement. These are unresolved geometry/generalized-force/derivative
+gates, not proof of a particular runtime bug. The complete receipts remain in
+the local planning evaluation folder; no foreign asset is redistributed here.
+
+Before anatomical splicing, compare the preserved donor and proposed derivative
+under explicit frame registration, all coordinate/coupler conventions, native
+hand transforms, path lengths, analytic wraps, moment arms and capacity over a
+reviewed workspace. Include the moving-path functions in the derivative audit;
+OpenSim documents [their coordinate-dependent locations and derivatives](https://opensim-org.github.io/opensim-moco-site/docs/1.3.0/html_user/classOpenSim_1_1MovingPathPoint.html).
+No mass or muscle may be counted twice, and left-side mirroring needs separate
+axis/inertia/handedness validation. A rigid hand with extrinsic paths does not
+qualify articulated-finger recruitment, grip strength, slip or club contact.
+
+F07/F08 still require native muscle law/state policies, assistance disposition,
+contact/grip readiness, frozen real-capture protocol, coupled identification and
+full-horizon independently restored excitation replay under model-owned contact.
+The accepted milestone DAG and model/engine denominator are unchanged.
+
+## Verification and Reproduction
+
+Use an installed native OpenSim Python provider and run serially:
+
+```sh
+python3 -m pytest -o addopts='' tests/opensim/test_native_wrist_compatibility.py tests/scripts/test_design_manual_governance_contract.py -q
+python3 -m scripts.check_design_manual_governance
+```
+
+The original synthetic fixture exercises native two-stage coupling, relative
+hand rotation, active wrap-radius effects, locks/prescription/disabled couplers,
+range checks, actual requested and held values, explicit numerical policy and
+scaled CustomJoint unit declarations. Intentional native-state corruption
+tests the rejection guards; those injected failures are not donor evidence.
+The scaled rotational synthetic moment arm agrees with its path derivative,
+so the `Coupled` enum alone does not explain the donor disagreement. Tests skip
+native cases when OpenSim is unavailable; skips do not qualify the provider.
+The engineering-manual release remains blocked pending governed inventory,
+rendering, evidence and review.

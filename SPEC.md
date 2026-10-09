@@ -1,3 +1,20 @@
+## Native Wrist Kinematic Compatibility (F07 Child #11834)
+
+`tour_matching.observe_native_wrist` accepts a pinned source and explicit
+`WristKinematicContract`. It observes actual native assembled coordinates,
+constraint errors, hand transform relative to the declared anchor, muscle
+path lengths, native moment arms and central differences on achieved coordinate
+spans. It rejects missing components, locked/prescribed/dependent input
+coordinates, unachieved requests, non-target independent drift and invalid
+numerics. Coupled motion types require explicit source-reviewed radian
+declarations; names do not establish units. Optional assembly accuracy is an
+explicit numerical policy with original/effective settings and prepared model
+identity. Source files and anatomical parameters are not edited. Derivative
+disagreement remains evidence; all results remain scientifically unqualified.
+Model admission, anatomical registration, capacity, contact/grip and independent
+complete-state excitation replay remain F07/F08 acceptance gates. See canonical
+chapter 20 and `docs/development/feedback_controls/F07_WRIST_TURNOVER.md`.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):

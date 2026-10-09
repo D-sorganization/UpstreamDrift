@@ -19,3 +19,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/12-impact-parameters.qmd >}}
 
 {{< include chapters/13-feedback-comparison.qmd >}}
+
+{{< include chapters/20-native-wrist-compatibility.qmd >}}
