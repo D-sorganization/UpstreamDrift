@@ -38,7 +38,10 @@ def fixed_club_pitch(*, base_loft_deg: float, lie_deg: float, pitch_deg: float) 
         [0.0, math.cos(math.radians(lie_deg)), math.sin(math.radians(lie_deg))]
     )
     rotation = Rotation.from_euler("y", pitch_deg, degrees=True)
-    normal, axis = rotation.apply(np.array([face.face_normal, shaft]))
+    rotated = np.asarray(
+        rotation.apply(np.array([face.face_normal, shaft])), dtype=float
+    )
+    normal, axis = rotated
     return {
         "pitch_deg": pitch_deg,
         "dynamic_loft_deg": math.degrees(
