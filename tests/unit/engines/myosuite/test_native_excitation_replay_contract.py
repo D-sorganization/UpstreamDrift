@@ -192,6 +192,57 @@ def test_myo_suite_bundle_contract_rejects_torque_inventory_row() -> None:
         validate_myo_suite_bundle_contract(row, binding, bundle)
 
 
+def test_wrapper_state_restore_uses_the_explicit_supported_chain() -> None:
+    import src.engines.physics_engines.myosuite.python.native_excitation_replay as provider
+
+    def wrapper(module: str, name: str, **attributes: object) -> object:
+        wrapper_type = type(name, (), {"__module__": module})
+        instance = wrapper_type()
+        for attribute, value in attributes.items():
+            setattr(instance, attribute, value)
+        return instance
+
+    checker = wrapper(
+        "gymnasium.wrappers.common",
+        "PassiveEnvChecker",
+        checked_reset=True,
+        checked_step=True,
+        checked_render=False,
+        close_called=False,
+    )
+    order = wrapper("gymnasium.wrappers.common", "OrderEnforcing", _has_reset=True)
+    limit = wrapper("gymnasium.wrappers.common", "TimeLimit", _elapsed_steps=None)
+    myosuite = wrapper(
+        "myosuite.envs.wrappers",
+        "MjInstabilityTerminationWrapper",
+        mj_instability_termination=False,
+    )
+    checker.env = None
+    order.env = checker
+    limit.env = order
+    myosuite.env = limit
+
+    chain, names = provider._wrapper_chain(myosuite)
+
+    assert chain == [myosuite, limit, order, checker]
+    assert names == (
+        "myosuite.envs.wrappers.MjInstabilityTerminationWrapper",
+        "gymnasium.wrappers.common.TimeLimit",
+        "gymnasium.wrappers.common.OrderEnforcing",
+        "gymnasium.wrappers.common.PassiveEnvChecker",
+    )
+    provider._restore_wrapper_state(myosuite, (5.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0))
+    assert provider._wrapper_state(myosuite)[1] == (
+        5.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+    )
+
+
 def test_t01_contract_rejects_observation_enabled_replay_policy() -> None:
     registry = _registry()
     _, bundle, _ = _case(registry)

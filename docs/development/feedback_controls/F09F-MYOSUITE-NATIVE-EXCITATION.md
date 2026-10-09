@@ -35,7 +35,9 @@ golf model.
 
 The contract tests cover valid open-loop excitation, torque-row rejection,
 observation-enabled policy rejection, exact input digest and unqualified
-receipt, actual F09 dispatch, and all-engine/all-row blocker retention.
+receipt, actual F09 dispatch, all-engine/all-row blocker retention, and
+wrapper-state snapshot/restore through the explicit supported wrapper chain.
+The shared chain-walk helper keeps snapshot and restore traversal identical.
 
 Local Windows command:
 
@@ -44,8 +46,9 @@ ruff check src/engines/feedback_native_execution.py src/engines/physics_engines/
 pytest -q tests/unit/engines/myosuite/test_native_excitation_replay_contract.py tests/unit/engines/myosuite/test_native_excitation_replay_runtime.py tests/unit/engines/test_feedback_native_execution.py
 ```
 
-Result: Ruff passes; 17 tests pass and two optional tests skip locally because
-the Python 3.13 environment lacks MyoSuite and the Drake Python package. An
+Before the wrapper-state refactor: Ruff passed; 17 tests passed and two
+optional tests skipped locally because the Python 3.13 environment lacks
+MyoSuite and the Drake Python package. An
 isolated owned Python 3.12 environment on DeskComputer has MyoSuite 3.0.0,
 myo-sim 0.2.3, Gymnasium 1.2.3, and MuJoCo 3.6.0. Its runtime test was run
 after copying the final adapter source into a disposable task-owned test
@@ -65,6 +68,10 @@ The installed `myo-sim` 0.2.3 metadata reports `License: Apache 2.0`; its
 model package. This records the software and model-package provenance for the
 public test lane; it makes no license or provenance claim about future golf
 models or captured data.
+
+The follow-up wrapper-state refactor adds one contract test; its focused suite
+passes 7 tests, with the optional native MyoSuite runtime test skipped in the
+local Python 3.13 environment.
 
 ## Follow-Up
 

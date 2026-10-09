@@ -60,13 +60,18 @@ def _contracts() -> Any:
     return native_replay_contract_types()
 
 
-def _wrapper_state(env: Any) -> tuple[tuple[str, ...], tuple[float, ...]]:
+def _wrapper_chain(env: Any) -> tuple[list[Any], tuple[str, ...]]:
     chain: list[Any] = []
     current = env
     while hasattr(current, "env"):
         chain.append(current)
         current = current.env
     names = tuple(f"{type(item).__module__}.{type(item).__name__}" for item in chain)
+    return chain, names
+
+
+def _wrapper_state(env: Any) -> tuple[tuple[str, ...], tuple[float, ...]]:
+    chain, names = _wrapper_chain(env)
     expected = (
         "myosuite.envs.wrappers.MjInstabilityTerminationWrapper",
         "gymnasium.wrappers.common.TimeLimit",
@@ -528,12 +533,7 @@ def _validate_myo_input_history(bundle: Any, binding: Any) -> None:
 
 
 def _restore_wrapper_state(env: Any, values: tuple[float, ...]) -> None:
-    chain: list[Any] = []
-    current = env
-    while hasattr(current, "env"):
-        chain.append(current)
-        current = current.env
-    names = tuple(f"{type(item).__module__}.{type(item).__name__}" for item in chain)
+    chain, names = _wrapper_chain(env)
     expected, _ = _wrapper_state(env)
     if names != expected or len(values) != len(_WRAPPER_STATE):
         raise ValueError("native wrapper state schema differs")
