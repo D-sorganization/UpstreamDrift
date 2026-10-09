@@ -16,6 +16,7 @@ from src.shared.python.force_overlay.glyphs import (
     GlyphSet,
     LegendSpec,
     TorqueArcGlyph,
+    clamped_tip_shift,
 )
 from src.shared.python.motion_matching.diagnostics._skeleton_render import (
     equalize_3d_axes,
@@ -63,13 +64,38 @@ def _build_cone_facets(
     return facets
 
 
+def _add_cone_artist(
+    ax: Any,
+    base_center: Any,
+    apex: Any,
+    radius: float,
+    rgba: tuple[float, ...],
+) -> Artist | None:
+    """Build cone facets and add a Poly3DCollection artist to ``ax``, or None if degenerate."""
+    facets = _build_cone_facets(base_center, apex, radius, 12)
+    if not facets:
+        return None
+    cone = Poly3DCollection(
+        facets,
+        facecolors=rgba,
+        edgecolors=rgba,
+        alpha=rgba[3] if len(rgba) > 3 else 1.0,
+    )
+    ax.add_collection3d(cone)
+    return cone
+
+
 def _draw_single_arrow_3d(
     ax: Any,
     arrow: ArrowGlyph,
     linewidth_pt: float,
     halo: bool,
 ) -> list[Artist]:
-    """Render a single 3D force arrow with optional halo."""
+    """Render a single 3D force arrow with optional halo.
+
+    A clamped arrow (ADR-0052) gets a second, trailing cone — the double
+    chevron also drawn by the OpenCV and QPainter renderers.
+    """
     artists: list[Artist] = []
     tail = np.asarray(arrow.tail_m, dtype=float)
     head_base = np.asarray(arrow.head_base_m, dtype=float)
@@ -97,16 +123,17 @@ def _draw_single_arrow_3d(
     )[0]
     artists.append(shaft)
 
-    cone_facets = _build_cone_facets(head_base, tip, arrow.head_radius_m, 12)
-    if cone_facets:
-        cone = Poly3DCollection(
-            cone_facets,
-            facecolors=arrow.rgba,
-            edgecolors=arrow.rgba,
-            alpha=arrow.rgba[3] if len(arrow.rgba) > 3 else 1.0,
-        )
-        ax.add_collection3d(cone)
+    cone = _add_cone_artist(ax, head_base, tip, arrow.head_radius_m, arrow.rgba)
+    if cone is not None:
         artists.append(cone)
+
+    if arrow.clamped:
+        shift = np.array(clamped_tip_shift(tuple(tip), tuple(head_base)))
+        chevron = _add_cone_artist(
+            ax, head_base + shift, tip + shift, arrow.head_radius_m, arrow.rgba
+        )
+        if chevron is not None:
+            artists.append(chevron)
 
     return artists
 
@@ -227,6 +254,8 @@ def draw_legend(ax: Axes, legend: LegendSpec) -> Axes:
         lines_text.append(f"Force Ref: {legend.force_reference_n:g} N")
     if legend.torque_reference_nm is not None:
         lines_text.append(f"Torque Ref: {legend.torque_reference_nm:g} N·m")
+    if legend.clamped_labels:
+        lines_text.append(f"Clamped (double tip): {len(legend.clamped_labels)}")
 
     y = 0.88
     for line in lines_text:
