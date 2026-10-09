@@ -286,7 +286,10 @@ def _validate_bundle(
 
 
 def _output_digest(
-    output: NativeTorqueReplay | NativeDrakeTorqueReplay | NativePinocchioTorqueReplay,
+    output: NativeTorqueReplay
+    | NativeDrakeTorqueReplay
+    | NativePinocchioTorqueReplay
+    | NativeMyoSuiteExcitationReplay,
 ) -> str:
     digest = hashlib.sha256()
     for name in (
@@ -491,10 +494,13 @@ def validate_native_replay_output(
         raise ValueError("native output state does not cover the full horizon")
     if qpos.shape[1] <= 0 or qvel.shape[1] <= 0:
         raise ValueError("native qpos and qvel dimensions must be positive")
-    if row.engine != "myosuite" and np.asarray(
-        output.generalized_actuator_torques
-    ).shape != (len(inputs), qvel.shape[1]):
-        raise ValueError("native generalized actuator effort dimensions differ")
+    if row.engine != "myosuite":
+        generalized_effort = getattr(output, "generalized_actuator_torques", None)
+        if generalized_effort is None or np.asarray(generalized_effort).shape != (
+            len(inputs),
+            qvel.shape[1],
+        ):
+            raise ValueError("native generalized actuator effort dimensions differ")
     _validate_output_state(row, bundle, output, times, inputs, qpos, qvel)
     if (
         output.input_sha256 != bundle.applied_input_sha256
