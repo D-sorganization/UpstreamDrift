@@ -175,7 +175,9 @@ def shared_histogram_density(
             highs[axis] += pad
 
     edges = tuple(
-        np.linspace(float(lows[axis]), float(highs[axis]), shape[axis] + 1)
+        np.linspace(
+            float(lows[axis]), float(highs[axis]), shape[axis] + 1, dtype=np.float64
+        )
         for axis in range(2)
     )
     x_edges, y_edges = edges

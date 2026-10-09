@@ -22,9 +22,7 @@ _COLORS = {
     "Draw": "#c66a19",
     "Fade": "#7b4a9e",
 }
-_PILOT_FIGURE_LABEL = (
-    "Illustrative Simulation • Assumed Head Properties • Carry Only"
-)
+_PILOT_FIGURE_LABEL = "Illustrative Simulation • Assumed Head Properties • Carry Only"
 _LineStyle = Literal["solid", "dashed", "dotted"]
 _HDR_STYLES = {
     0.50: ("solid", "50% HDR"),

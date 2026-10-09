@@ -69,7 +69,11 @@ def metric_value(cell: Mapping[str, Any], metric: str, pattern: str) -> float | 
         value = pattern_stats.get("supported_fraction")
     elif metric == "radial_p95_m":
         stats = pattern_stats.get("statistics")
-        value = stats.get("p95_radial_target_error_m") if isinstance(stats, Mapping) else None
+        value = (
+            stats.get("p95_radial_target_error_m")
+            if isinstance(stats, Mapping)
+            else None
+        )
     else:
         scoring = cell.get("course_scoring")
         if not isinstance(scoring, Mapping) or scoring.get("status") not in (
@@ -135,24 +139,35 @@ def _validate_cells(
     if len(laws) > 1:
         raise ValueError("selected cells must use one contact law; facet by law")
     expected = {
-        (club, lean, curve)
-        for club in CLUBS
-        for lean in leans
-        for curve in curves
+        (club, lean, curve) for club in CLUBS for lean in leans for curve in curves
     }
     if set(indexes) != expected:
-        raise ValueError("incomplete matrix axes: include explicit unavailable/not-run cells")
-    return [indexes[key] for key in sorted(indexes)], tuple(sorted(leans)), tuple(sorted(curves))
+        raise ValueError(
+            "incomplete matrix axes: include explicit unavailable/not-run cells"
+        )
+    return (
+        [indexes[key] for key in sorted(indexes)],
+        tuple(sorted(leans)),
+        tuple(sorted(curves)),
+    )
 
 
 def _format_metric(metric: str, value: float, stats: Mapping[str, Any]) -> str:
     supported = stats.get("supported_n")
     total = stats.get("total_n")
-    count = f"{supported}/{total}" if isinstance(supported, int) and isinstance(total, int) else ""
+    count = (
+        f"{supported}/{total}"
+        if isinstance(supported, int) and isinstance(total, int)
+        else ""
+    )
     if metric in ("target_hit_fraction", "supported_fraction"):
         return f"{value:.0%}" + (f"\nn={count}" if count else "")
     if metric == "conditional_sg":
-        marker = "conditional " if supported is not None and total is not None and supported < total else ""
+        marker = (
+            "conditional "
+            if supported is not None and total is not None and supported < total
+            else ""
+        )
         return f"{value:+.2f}" + (f"\n{marker}n={count}" if count else "")
     return f"{value:.2f}" + (f"\nn={count}" if count else "")
 
@@ -283,7 +298,11 @@ def _draw_metric(
                     cell = by_key[(club, lean, curve)]
                     value = metric_value(cell, metric, pattern)
                     stats_map = cell.get("summary", {})
-                    stats = stats_map.get(pattern, {}) if isinstance(stats_map, Mapping) else {}
+                    stats = (
+                        stats_map.get(pattern, {})
+                        if isinstance(stats_map, Mapping)
+                        else {}
+                    )
                     if value is None:
                         axis.add_patch(
                             Rectangle(
@@ -371,7 +390,9 @@ def _draw_metric(
     output_stem.parent.mkdir(parents=True, exist_ok=True)
     for extension in formats:
         path = output_stem.with_suffix(f".{extension}")
-        fig.savefig(path, format=extension, dpi=dpi, bbox_inches="tight", facecolor="white")
+        fig.savefig(
+            path, format=extension, dpi=dpi, bbox_inches="tight", facecolor="white"
+        )
         outputs[extension] = path
     plt.close(fig)
     return outputs
@@ -401,7 +422,9 @@ def export_matched_matrix_heatmaps(
     if not chosen_metrics or any(metric not in _METRICS for metric in chosen_metrics):
         raise ValueError("metrics must contain known metric names")
     chosen_formats = tuple(formats)
-    if not chosen_formats or any(fmt not in ("png", "pdf", "svg") for fmt in chosen_formats):
+    if not chosen_formats or any(
+        fmt not in ("png", "pdf", "svg") for fmt in chosen_formats
+    ):
         raise ValueError("formats must be selected from png, pdf, svg")
     selected, leans, curves = _validate_cells(cells)
     output_dir = Path(output_dir)
@@ -418,7 +441,9 @@ def export_matched_matrix_heatmaps(
             dpi=dpi,
             formats=chosen_formats,
         )
-        outputs.update({f"{metric}_{extension}": path for extension, path in paths.items()})
+        outputs.update(
+            {f"{metric}_{extension}": path for extension, path in paths.items()}
+        )
     return outputs
 
 
