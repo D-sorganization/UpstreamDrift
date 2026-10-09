@@ -21,11 +21,13 @@ The execution model now revalidates loaded identity immediately before state
 restoration and stepping. Nonzero numerical warm-start restoration is exact.
 The first 12-test native run passes on Python 3.13 and MuJoCo 3.3.4.
 
-The initial provider-enabled command preloads the pending Tools T01 public
-facade from its isolated worktree via `PYTHONPATH`, then executes:
+The current development run passes 24 tests (13 replay/namespace and 11
+governance). Set `TOOLS_T01_WORKTREE` to the absolute pending Tools T01 checkout.
+The provider-enabled command retains the local split namespace and preloads
+the pending Tools public facade before pytest:
 
 ```text
-python3 -c "import sidekick.lab.mocap; import pytest; raise SystemExit(pytest.main(['tests/unit/motion_matching/test_native_torque_replay.py','--override-ini=addopts=','-q']))"
+python3 -c "import os,sys; from pathlib import Path; sys.path.insert(0,'src/shared/python'); import sidekick.lab as lab; lab.__path__.insert(0,str(Path(os.environ['TOOLS_T01_WORKTREE'])/'src/shared/python/sidekick/lab')); import sidekick.lab.mocap; import pytest; raise SystemExit(pytest.main(['tests/unit/motion_matching/test_native_torque_replay.py','tests/scripts/test_design_manual_governance_contract.py','--override-ini=addopts=','-q']))"
 ```
 
 This development override is not a portable dependency pin. Before publishing
