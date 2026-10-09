@@ -94,6 +94,11 @@
       "id": "UP-D1-native-wrist-compatibility-inventory",
       "owner": "UpstreamDrift issue #11834",
       "resolution": "Inventory tour_matching.wrist_compatibility: source-pinned native assembly, explicit radian declarations for native Coupled coordinates, declared optional assembly accuracy and original/effective/prepared identities, all achieved coordinates and native position errors, relative hand transforms, exact selected component dumps, muscle path lengths and native-versus-refined finite-difference moment arms. Synthetic native coupling/wrapping tests establish implementation behavior only. The unchanged pinned donor default numerical policy failed coordinate isolation; explicitly refined accuracy passed isolation but retained 180/432 derivative discrepancies beyond the declared diagnostic tolerance. Artifact-specific donor licensing, source/resource closure, anatomical registration, moving-path/wrap/generalized-force consistency, capacities, native muscle dynamics, contact/grip and complete-state independent full-horizon replay remain unqualified. Keep release blocked and all required model/engine/drive cells in the denominator. Canonical reference: chapters/20-native-wrist-compatibility.qmd."
+    },
+    {
+      "id": "UP-D1-native-muscle-replay-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     }
   ],
   "calculations": []

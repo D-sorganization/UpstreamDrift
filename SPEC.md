@@ -15,6 +15,10 @@ Model admission, anatomical registration, capacity, contact/grip and independent
 complete-state excitation replay remain F07/F08 acceptance gates. See canonical
 chapter 20 and `docs/development/feedback_controls/F07_WRIST_TURNOVER.md`.
 
+## Native Muscle Replay Development Boundary (F07, #11791)
+
+`tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
+
 ## Capture-O Video Companion: Error Budget, Guidance Derivation, and Public Summary (COV-11, #11279)
 
 Specifies machine-readable error budgeting, frozen-rule guidance classification, and privacy-preserving summary generation (#11268, #11279):
