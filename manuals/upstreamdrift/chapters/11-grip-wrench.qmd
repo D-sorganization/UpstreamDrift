@@ -1,0 +1,119 @@
+# Grip Wrench Reduction
+
+## Status
+
+Evidence class: derived, provisional. This chapter records the grip-wrench
+reduction delivered by GCV-7 (#11713), and the engine-agnostic extraction
+helpers from GCV-8 (#11714) that feed it, so they can be inventoried. It is not
+approved. The registry blocker `UP-D1-grip-wrench-reduction-inventory` stays
+open until UP-D1 inventories the pathway and a human reviews it.
+
+## Purpose
+
+Reduce the two hand-on-club loads to the quantities shown by every engine and
+display surface:
+
+- each hand's wrench at its grip point;
+- the net force drawn at the grip midpoint;
+- the equivalent couple about that midpoint, split into the moment of the
+  hand forces and the hands' free torques;
+- each hand's moment of force about the midpoint;
+- optionally, the net force and couple in club-local axes.
+
+## Conventions
+
+- Sign (binding, ADR-0052): every wrench is the loading **exerted by the hand on
+  the club**.
+- World frame, SI units: force in N, position in m, moment in N·m.
+- Hand $h \in \{L, R\}$ acts at grip point $r_h$ with force $F_h$ and free
+  torque $\tau_h$. A free torque may be unavailable when an engine does not
+  supply it; it is then absent, not zero.
+- Every result records `split_method`. The left/right split of two rigid welds
+  is indeterminate and is set by the solver: `constraint_multiplier`,
+  `efc_force`, `allocation`, `logged` or `unavailable`. The compliant `bushing`
+  grip makes the split determinate. `contact` is reserved for a distributed
+  contact grip and is not produced yet.
+
+## Equations
+
+1. Grip midpoint and net force:
+   $$r_M = \tfrac{1}{2}\left(r_L + r_R\right), \qquad R = F_L + F_R$$
+2. Moment of force of each hand about the midpoint:
+   $$MOF_h = (r_h - r_M) \times F_h$$
+3. Equivalent couple at the midpoint:
+   $$M_M = \underbrace{MOF_L + MOF_R}_{\text{contact force moment}}
+     + \underbrace{\tau_L + \tau_R}_{\text{applied free torque}}$$
+4. Club-local values, given an orthonormal world-from-club rotation $Q$:
+   $R_{local} = Q^{\top} R$ and $M_{M,local} = Q^{\top} M_M$.
+5. Holding-hand wrench (GCV-8). With one closed weld, only the *closing* hand
+   has a constraint multiplier. The *holding* hand follows from the club's
+   Newton-Euler equations, with club mass $m$, centre of mass $c$, world inertia
+   $I$ about $c$, gravity $g$, angular velocity $\omega$ and angular
+   acceleration $\alpha$:
+   $$F_{hold} = m\,(a_c - g) - F_{close}$$
+   $$\tau_{hold} = I\alpha + \omega \times (I\omega) - \tau_{close}
+     - (r_{close} - c) \times F_{close} - (r_{hold} - c) \times F_{hold}$$
+6. Reference minimum-norm split, used to compare a determinate (`bushing`) grip
+   with a rigid weld. Take both free torques as zero and let
+   $h = \tfrac{1}{2}(r_R - r_L)$. Solve $F_L + F_R = R$ and
+   $h \times (F_R - F_L) = M_M$ with minimum $|F_L|^2 + |F_R|^2$:
+   $$F_{L,R} = \tfrac{1}{2}\left(R \mp \frac{M_M \times h}{h \cdot h}\right)$$
+   The component of $M_M$ along $h$ cannot be produced by forces and is dropped,
+   and the axial force is split equally.
+
+The postconditions $M_M = (MOF_L + MOF_R) + (\tau_L + \tau_R)$ and
+contact force moment $= MOF_L + MOF_R$ hold exactly. Wrench transport uses the
+shared `force_overlay.conversions.move_wrench_point`; no second transport
+routine exists.
+
+## Unavailable Values
+
+- If either hand wrench is missing, the midpoint, net force, couple and moments
+  of force are unavailable.
+- If either free torque is missing, the applied free torque and the couple are
+  unavailable, while the net force and moments of force remain.
+- An engine that supplies only one six-component grip wrench (for example the
+  Pinocchio allocation) reports the net wrench with no per-hand split.
+
+Unavailable values are `None` in an analysis, NaN in a series and `null` over
+the API, each with an `unavailable_reason`. They are never reported as zero.
+
+## Implementation
+
+| Symbol | Location |
+| --- | --- |
+| `HandWrench`, `analyze_grip`, `GripAnalysis`, `GripSeries` | `src/shared/python/biomechanics/grip_wrench.py` |
+| `allocate_min_norm`, `about_axis` | `src/shared/python/biomechanics/grip_wrench.py` |
+| `to_overlay_wrenches` (labels `grip:hand_*`, `grip:net_midpoint`, `grip:couple_midpoint`, `grip:mof_*`) | `src/shared/python/biomechanics/grip_wrench.py` |
+| `holding_hand_wrench`, `net_only_analysis`, `unavailable_analysis` | `src/shared/python/biomechanics/grip_extraction.py` |
+
+Both modules are pure numpy with no engine imports. The per-engine adapters
+supply hand points, multiplier-derived wrenches and club kinematics. They are
+outside this chapter.
+
+## Tests and Reproduction
+
+```bash
+python3 -m pytest tests/unit/biomechanics/test_grip_wrench.py \
+  tests/unit/biomechanics/test_grip_extraction.py -q
+```
+
+These tests check the algebra against hand-computed wrenches and the stated
+postconditions: couple decomposition, moments of force, club-local rotation,
+the Newton-Euler holding-hand recovery and the minimum-norm split. They do not
+check any engine's constraint solver or grip model.
+
+## Assumptions and Limitations
+
+- The club is a rigid body. The holding-hand recovery is only as accurate as
+  the club mass, inertia and accelerations supplied by the engine.
+- For two rigid welds the per-hand split is a solver artefact. Only the net
+  force and couple at the midpoint are determinate, so per-hand values must be
+  read together with `split_method`.
+- These are software outputs of each engine's grip model, not measured hand
+  loads. No comparison with instrumented-grip measurements has been made for
+  this pathway.
+- No uncertainty or tolerance against an external reference has been
+  established; none is claimed.
+- Reference derivation: `docs/research/proximal_distal_energy_transfer/`,
+  section "Reduction of Two Contacts to an Equivalent Wrench".

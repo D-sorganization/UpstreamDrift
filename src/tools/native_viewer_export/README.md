@@ -30,6 +30,14 @@ python3 -m src.tools.native_viewer_export \
 - `--no-overlay`, `--no-grid`, `--views`, `--fps` (default 60), `--size` and
   `--preset hq|preview` control the output. `hq` is 1280x720, libx264,
   `yuv420p`, CRF 18; `preview` is 640x544.
+- `--grip` adds the grip overlay (per-hand force, net force and couple at the
+  grip midpoint, labelled with the split method; unavailable is shown, never
+  zero) and writes `<swing>_<engine>_grip_wrench.json`. Drake uses its own KKT
+  multiplier; the other viewers show the MuJoCo plant at that engine's pose.
+  `--views hands_closeup --no-grid` follows the grip midpoint per frame.
+  `--no-hud` writes clean frames. `--speeds= --impact-window 0.6
+  --impact-speed 0.25` writes only the 0.25x impact clip. Impact time defaults
+  to `model_appearance.club_face.impact_frame` on the `Clubhead` frame.
 - `--speeds 1,0.5` (default) writes one clip set per playback speed, named
   `_1x`, `_0p5x`, `_0p25x`. Frames are chosen by the time-based
   `video_timing.FrameSchedule` and interpolated when the source step is coarse.

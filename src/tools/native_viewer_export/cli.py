@@ -5,12 +5,14 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 from dataclasses import replace
+from functools import partial
 import logging
 from pathlib import Path
 import sys
 
 from src.shared.python.golf_view_presets import VIEW_ORDER
 from src.tools.native_viewer_export.core import ENGINES, ExportSettings
+from src.tools.native_viewer_export.overlay import build_overlay_feed
 from src.tools.native_viewer_export.runner import ExportJob, run_export
 
 logger = logging.getLogger(__name__)
@@ -63,6 +65,17 @@ def build_parser() -> argparse.ArgumentParser:
         "at 0.1x speed (suffix _impact_0p1x)",
     )
     p.add_argument(
+        "--impact-speed",
+        type=float,
+        default=None,
+        help="playback speed of the --impact-window clip (default 0.1)",
+    )
+    p.add_argument(
+        "--no-hud",
+        action="store_true",
+        help="clean frames: no view label, HUD or legend text",
+    )
+    p.add_argument(
         "--impact-time",
         type=float,
         default=None,
@@ -81,6 +94,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--size", default=None, help="tile size WIDTHxHEIGHT (overrides the preset)"
     )
     p.add_argument("--no-overlay", action="store_true", help="skip force/torque glyphs")
+    p.add_argument(
+        "--grip",
+        action="store_true",
+        help="add the grip overlay (per-hand, net and couple; GCV-10) and write a "
+        "<swing>_<engine>_grip_wrench.json plot payload; pair with --views "
+        "hands_closeup",
+    )
     p.add_argument("--no-grid", action="store_true", help="skip the 2x2 clip")
     return p
 
@@ -118,6 +138,11 @@ def build_settings(args: argparse.Namespace) -> ExportSettings:
         impact_window_s=args.impact_window,
         overlays=not args.no_overlay,
         multiview=not args.no_grid,
+        grip=args.grip,
+        hud=not args.no_hud,
+        **(
+            {"impact_speed": args.impact_speed} if args.impact_speed is not None else {}
+        ),
     )
 
 
@@ -143,7 +168,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             tuple(e for e in args.engines.split(",") if e),
             receipts,
         )
-        results = run_export(job, settings)
+        results = run_export(
+            job,
+            settings,
+            overlay_factory=partial(build_overlay_feed, grip=settings.grip),
+        )
     except (ValueError, FileNotFoundError) as exc:
         sys.stderr.write(f"error: {exc}\n")
         return 2

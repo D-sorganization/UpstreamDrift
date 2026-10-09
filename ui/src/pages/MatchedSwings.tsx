@@ -26,6 +26,7 @@ import {
   type MatchedSwingRun,
 } from '@/api/matchedSwings';
 import { ImpactParametersPanel } from '@/components/analysis/ImpactParametersPanel';
+import { GripWrenchCharts } from '@/components/analysis/GripWrenchCharts';
 import type { MocapJoint } from '@/components/visualization/MocapSkeleton3D';
 
 const MocapSkeleton3D = lazy(
@@ -265,6 +266,7 @@ export function MatchedSwingsPage() {
 
       {/* Impact parameters relative to the target line (GCV-17, #11723) */}
       <ImpactParametersPanel runId={selectedRun.id} />
+      <GripWrenchCharts runId={selectedRun.id} />
     </div>
   ) : (
     <div className="p-4 text-sm text-gray-400">Select a run to inspect metrics.</div>
