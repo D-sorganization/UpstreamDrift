@@ -20,6 +20,8 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/13-native-muscle-replay.qmd >}}
 
+{{< include chapters/19-native-torque-replay.qmd >}}
+
 {{< include chapters/17-native-muscle-contact.qmd >}}
 
 {{< include chapters/13-feedback-comparison.qmd >}}
@@ -31,3 +33,5 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/26-native-opensim-geometry.qmd >}}
 
 {{< include chapters/29-frozen-capture-registration.qmd >}}
+
+{{< include chapters/32-native-constrained-state.qmd >}}
