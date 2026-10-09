@@ -10,6 +10,29 @@ from pathlib import Path
 from .provenance import assert_source_unchanged, manifest_files_match
 
 
+def load_validated_cell(
+    directory: Path,
+    expected_config: dict | None = None,
+    expected_execution: dict | None = None,
+) -> dict:
+    """Read a saved cell only after manifest, inputs, and source bind together."""
+    directory = Path(directory)
+    if not manifest_files_match(directory / "manifest.json"):
+        raise ValueError(f"cell integrity failure: {directory.name}")
+    start = json.loads((directory / "run_start.json").read_text())
+    summary = json.loads((directory / "summary.json").read_text())
+    config = start["config"]
+    if summary.get("config") != config or (
+        expected_config is not None and config != expected_config
+    ):
+        raise ValueError(f"cell input mismatch: {directory.name}")
+    if expected_execution is not None:
+        assert_source_unchanged(expected_execution, start["execution"])
+    if summary.get("status") not in ("completed", "unavailable"):
+        raise ValueError(f"unrecognized cell status: {directory.name}")
+    return summary
+
+
 def load_matrix_report(root: Path, *, require_complete: bool = True) -> dict:
     """Load every planned cell; reject tampering and preserve unavailable outcomes.
 
@@ -30,15 +53,7 @@ def load_matrix_report(root: Path, *, require_complete: bool = True) -> dict:
         if not directory.exists():
             cells.append({"cell": name, "config": config, "status": "not_run"})
             continue
-        if not manifest_files_match(manifest):
-            raise ValueError(f"cell integrity failure: {name}")
-        start = json.loads((directory / "run_start.json").read_text())
-        summary = json.loads((directory / "summary.json").read_text())
-        if start["config"] != config or summary.get("config") != config:
-            raise ValueError(f"cell input mismatch: {name}")
-        assert_source_unchanged(plan["execution"], start["execution"])
-        if summary.get("status") not in ("completed", "unavailable"):
-            raise ValueError(f"unrecognized cell status: {name}")
+        summary = load_validated_cell(directory, config, plan["execution"])
         if summary["status"] == "completed":
             for item in summary["summary"].values():
                 if item["total_n"] != config["n_shots"]:
