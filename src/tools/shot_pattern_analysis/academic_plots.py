@@ -7,9 +7,10 @@ aim points, launch a GUI, or infer player-level precision from face variance.
 from __future__ import annotations
 
 import math
+import textwrap
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,6 +22,7 @@ _COLORS = {
     "Draw": "#c66a19",
     "Fade": "#7b4a9e",
 }
+_LineStyle = Literal["solid", "dashed", "dotted"]
 _HDR_STYLES = {
     0.50: ("solid", "50% HDR"),
     0.80: ("dashed", "80% HDR"),
@@ -40,7 +42,7 @@ def _validate_metadata(metadata: Mapping[str, Any]) -> str:
         if isinstance(value, float) and not math.isfinite(value):
             raise ValueError(f"metadata value for {key!r} must be finite")
         values.append(f"{key.replace('_', ' ')}: {value}")
-    return "  |  ".join(values)
+    return textwrap.fill("  |  ".join(values), width=145, break_long_words=False)
 
 
 def _count_map(
@@ -212,9 +214,9 @@ def write_academic_dispersion_figure(
         raise ValueError("metadata valid_shots_by_pattern differs from endpoint counts")
     population = _population_caption(names, actual_valid_counts, total_counts)
     plt = _matplotlib()
-    figure = plt.figure(figsize=(16.5, 8.8), facecolor="white")
+    figure = plt.figure(figsize=(16.5, 9.8), facecolor="white")
     outer = figure.add_gridspec(
-        1, len(names), left=0.06, right=0.91, top=0.82, bottom=0.17, wspace=0.27
+        1, len(names), left=0.06, right=0.91, top=0.69, bottom=0.17, wspace=0.27
     )
     for name, panel_index in zip(names, range(len(names)), strict=True):
         inner = outer[0, panel_index].subgridspec(
@@ -255,6 +257,7 @@ def write_academic_dispersion_figure(
             if threshold <= 0 or threshold >= estimate.density_vmax_per_m2:
                 continue
             style, _ = _HDR_STYLES.get(mass_value, ("solid", f"{mass_value:.0%} HDR"))
+            style = cast(_LineStyle, style)
             axis.contour(
                 _axis_centers(estimate.x_edges_m),
                 _axis_centers(estimate.y_edges_m),
@@ -280,7 +283,9 @@ def write_academic_dispersion_figure(
         axis.axhline(target_point_m[1], color="#333333", linewidth=0.55, alpha=0.55)
         axis.set_xlim(estimate.x_limits_m)
         axis.set_ylim(estimate.y_limits_m)
-        axis.set_title(f"{name}  (n={pattern.n:,})", fontsize=12, fontweight="bold")
+        axis_top.set_title(
+            f"{name}  (n={pattern.n:,})", fontsize=12, fontweight="bold", pad=5
+        )
         axis.set_xlabel("Downrange Endpoint (m)")
         if panel_index == 0:
             axis.set_ylabel("Lateral Endpoint (m; Right Positive)")
@@ -321,7 +326,11 @@ def write_academic_dispersion_figure(
     figure.text(
         0.06,
         0.885,
-        f"{metadata_caption}  |  {population}" if metadata_caption else population,
+        textwrap.fill(
+            f"{metadata_caption}  |  {population}" if metadata_caption else population,
+            width=145,
+            break_long_words=False,
+        ),
         fontsize=9,
         ha="left",
         color="#333333",
@@ -333,6 +342,7 @@ def write_academic_dispersion_figure(
     for mass in region_masses:
         mass_value = float(mass)
         style, label = _HDR_STYLES.get(mass_value, ("solid", f"{mass_value:.0%} HDR"))
+        style = cast(_LineStyle, style)
         hdr_handles.append(
             Line2D(
                 [0], [0], color="#222222", linestyle=style, linewidth=1.2, label=label
@@ -351,28 +361,34 @@ def write_academic_dispersion_figure(
     )
     figure.legend(
         handles=hdr_handles,
-        loc="lower center",
-        bbox_to_anchor=(0.48, 0.085),
+        loc="upper center",
+        bbox_to_anchor=(0.48, 0.775),
         ncol=len(hdr_handles),
         frameon=False,
         title="Empirical Highest-Density Regions",
     )
-    achieved_text = "  |  ".join(
-        f"{name}: "
-        + ", ".join(
-            f"{mass:.0%} request→{estimate.patterns[name].hdr_achieved_mass[float(mass)]:.1%}"
-            for mass in region_masses
+    achieved_text = (
+        "Achieved HDR Mass By Pattern (Discrete Ties May Exceed Request): "
+        + "  |  ".join(
+            f"{name} "
+            + "/".join(
+                f"{estimate.patterns[name].hdr_achieved_mass[float(mass)]:.1%}"
+                for mass in region_masses
+            )
+            for name in names
         )
-        for name in names
     )
     dx, dy = estimate.bin_resolution_m
     figure.text(
         0.06,
         0.025,
-        f"Empirical histogram only; tied bins can exceed requested HDR mass. "
-        f"No KDE or synthetic covariance spread; not calibrated player precision. "
-        f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}",
-        fontsize=8,
+        textwrap.fill(
+            f"Empirical histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
+            f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}",
+            width=180,
+            break_long_words=False,
+        ),
+        fontsize=8.5,
         ha="left",
     )
     outputs = _save_formats(figure, _validate_stem(output_stem), dpi=dpi)
@@ -470,6 +486,7 @@ def write_overhead_trajectory_figure(
         squeeze=False,
         facecolor="white",
     )
+    figure.subplots_adjust(top=0.70, bottom=0.16, left=0.075, right=0.98, wspace=0.15)
     for axis, name in zip(axes[0], names, strict=True):
         color = _COLORS.get(name, "#286090")
         for trajectory in trajectories[name]:
@@ -499,18 +516,23 @@ def write_overhead_trajectory_figure(
     figure.suptitle(
         "Raw Overhead Flight-Trajectory Comparison",
         x=0.06,
-        y=0.97,
+        y=0.985,
         ha="left",
         fontsize=18,
         fontweight="bold",
     )
-    figure.text(0.06, 0.92, scenario, fontsize=12, ha="left")
+    figure.text(0.06, 0.925, scenario, fontsize=12, ha="left", va="top")
     figure.text(
         0.06,
-        0.885,
-        f"{metadata_caption}  |  {population}" if metadata_caption else population,
+        0.89,
+        textwrap.fill(
+            f"{metadata_caption}  |  {population}" if metadata_caption else population,
+            width=145,
+            break_long_words=False,
+        ),
         fontsize=9,
         ha="left",
+        va="top",
         color="#333333",
     )
     figure.text(

@@ -213,7 +213,8 @@ class MainWidget(QtWidgets.QWidget):
             self.figure_labels[key] = image
             self.figures.addTab(image, label)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        legacy_page = QtWidgets.QWidget(self)
+        layout = QtWidgets.QVBoxLayout(legacy_page)
         layout.addWidget(title)
         layout.addWidget(description)
         layout.addLayout(output_row)
@@ -230,6 +231,16 @@ class MainWidget(QtWidgets.QWidget):
         layout.addWidget(self.scoring_label)
         layout.addWidget(self.figures, stretch=1)
         layout.addWidget(self.status_label)
+
+        self.mode_tabs = QtWidgets.QTabWidget(self)
+        self.mode_tabs.addTab(legacy_page, "Independent Pattern Comparison")
+        from .matched_gui import MatchedStudyWidget
+
+        self.matched_study = MatchedStudyWidget(self.mode_tabs)
+        self.mode_tabs.addTab(self.matched_study, "Matched Delivery Study")
+        root_layout = QtWidgets.QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.addWidget(self.mode_tabs)
 
     def _browse_output(self) -> None:
         directory = QtWidgets.QFileDialog.getExistingDirectory(
@@ -565,13 +576,32 @@ class MainWidget(QtWidgets.QWidget):
     def cleanup(self) -> bool:
         """Cancel and join the active process worker before host teardown."""
         self._closed = True
-        return self.action_bar.shutdown()
+        legacy_stopped = self.action_bar.shutdown()
+        matched_stopped = self.matched_study.cleanup()
+        return legacy_stopped and matched_stopped
 
     def delete_when_idle(self) -> None:
         """Defer QObject deletion until a worker that outlived shutdown ends."""
-        self.action_bar.finished.connect(self.deleteLater)
-        self.action_bar.failed.connect(self.deleteLater)
-        self.action_bar.cancelled.connect(self.deleteLater)
+        self.action_bar.finished.connect(self._legacy_worker_idle)
+        self.action_bar.failed.connect(self._legacy_worker_idle)
+        self.action_bar.cancelled.connect(self._legacy_worker_idle)
+        self.matched_study.action_bar.finished.connect(self._matched_worker_idle)
+        self.matched_study.action_bar.failed.connect(self._matched_worker_idle)
+        self.matched_study.action_bar.cancelled.connect(self._matched_worker_idle)
+
+    def _legacy_worker_idle(self, *_args: object) -> None:
+        if (
+            not self.action_bar.is_running
+            and not self.matched_study.action_bar.is_running
+        ):
+            self.deleteLater()
+
+    def _matched_worker_idle(self, *_args: object) -> None:
+        if (
+            not self.action_bar.is_running
+            and not self.matched_study.action_bar.is_running
+        ):
+            self.deleteLater()
 
     def resizeEvent(self, event: QtGui.QResizeEvent | None) -> None:
         super().resizeEvent(event)
