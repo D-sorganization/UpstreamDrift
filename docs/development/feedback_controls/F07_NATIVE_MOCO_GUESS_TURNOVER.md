@@ -57,6 +57,18 @@ rejects that case before it can become a misleading optimization result.
 The positive cases use a supplied native fixture model; no fixture shape or
 muscle count is hard-coded in production source.
 
+The qualified OpenSim 4.6 environment passed 60 focused tests spanning the
+existing Moco bindings/runner, the new guess, and TRC export. Ruff, direct
+mypy, architecture, file-size, DRY, LoD, document title-case, and canonical
+manual governance checks passed. The central pre-PR runner reported four
+passing gates and one affected-test failure: 245 passed, 34 skipped, and the
+unchanged-main SG optimizer `test_cli_end_to_end` failure. The same test
+failure was independently reproduced at unchanged main
+`50784017c607f764e9c28db2d3c66b8211211f7a` in the parent handoff;
+it is outside this OpenSim change. The central generic interpreter has no
+OpenSim bindings, so native behavior is covered by the separate actual 4.6
+run, not inferred from its skips.
+
 Reproduce a reviewed local seed from the repository root in the qualified
 OpenSim environment, using the exact source/TRC and an empty owned output
 directory:
