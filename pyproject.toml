@@ -104,6 +104,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Optional JIT for the profiled incremental contact loop; Python reference remains available.
+shot-pattern-acceleration = ["numba>=0.68,<0.69"]
 # Default extras policy:
 #   extras_default = "core"
 # The runtime dependencies list above is the canonical core dependency set.

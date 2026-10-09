@@ -1,0 +1,8 @@
+{
+  "number": 11976,
+  "state": "OPEN",
+  "title": "Publish Reviewed Matched-Delivery Matrix and Traceable Scientific Reference",
+  "url": "https://github.com/D-sorganization/UpstreamDrift/issues/11976",
+  "local_id": "P2-005",
+  "acceptance": "Use small pilot data until reviewed and functional, then final10000-shot-per-pattern studies for threeclubs, two curves, threeleans, rotationSD1/2 and progressive additional noise/covariance. Save raw data, source hashes, calibration residuals, numerical checks, statistics, scoring context, traceable design/reference and comprehensive Astra review. Explicitly distinguish inaccessible cases, empirical validation gaps and conditional outcomes."
+}
