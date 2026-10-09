@@ -625,6 +625,7 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
         "total_n_per_population",
         "conditioning",
         "input_error_max_abs_difference",
+        "analysis_source_sha256",
         "radial_difference_m",
         "radial_difference_lower_95_m",
         "radial_difference_upper_95_m",
@@ -675,6 +676,9 @@ def render_supplement_comparisons(results: list[dict[str, Any]]) -> str:
                     "conditioning": result.get("conditioning", ""),
                     "input_error_max_abs_difference": result.get(
                         "input_error_max_abs_difference", ""
+                    ),
+                    "analysis_source_sha256": json.dumps(
+                        result.get("analysis_source_sha256", {}), sort_keys=True
                     ),
                     "radial_difference_m": radial.get("estimate", ""),
                     "radial_difference_lower_95_m": radial.get("lower_95", ""),

@@ -741,6 +741,7 @@ def analyze_explicit_source_pair(
         "input_error_tolerance": 1e-12,
         "input_error_max_abs_difference": max_error,
         "input_error_comparison": input_error_note,
+        "analysis_source_sha256": scoring_sources,
         "source_protocols": [protocol_a, protocol_b],
         "source_transition_receipt_sha256": transition_sha,
         "sources": [
