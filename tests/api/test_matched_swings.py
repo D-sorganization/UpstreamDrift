@@ -136,6 +136,70 @@ def test_list_matched_swings(
     assert data["runs"][0]["verdict"] == "PASSED"
     assert data["runs"][0]["capabilities"]["has_candidate_npz"] is True
     assert "receipt_path" not in json.dumps(data)
+    assert data["runs"][0]["gates"] == [
+        {"name": "G1", "status": "", "measured": None, "threshold": None, "unit": "m"}
+    ]
+
+
+def test_run_summary_gates_empty_without_acceptance_gates(tmp_path: Path) -> None:
+    """A run whose acceptance block has no "gates" key reports an empty list
+    (unavailable, not a fabricated zero/blank entry)."""
+    ledger_path = tmp_path / "reports" / "matched_swing_ledger.json"
+    ledger_path.parent.mkdir(parents=True)
+    row = LedgerRow(
+        receipt_path="evidence/receipt.json",
+        sha256="a" * 64,
+        engine="mujoco",
+        lane="matched",
+    )
+    ledger = Ledger(
+        schema_version="1.0.0",
+        generated_at="2026-09-21T00:00:00Z",
+        total_receipts=1,
+        rows=[row],
+    )
+    ledger_path.write_text(ledger.to_json(), encoding="utf-8")
+    service = MatchedSwingsService.from_ledger_file(ledger_path, repo_root=tmp_path)
+
+    summary = service.get_run_summary(row.sha256)
+
+    assert summary.gates == []
+    assert summary.to_dict()["gates"] == []
+
+
+def test_run_summary_gate_values_are_finite_floats_or_none(tmp_path: Path) -> None:
+    """Non-numeric, boolean and non-finite gate values are unavailable (None)."""
+    ledger_path = tmp_path / "reports" / "matched_swing_ledger.json"
+    ledger_path.parent.mkdir(parents=True)
+    row = LedgerRow(
+        receipt_path="evidence/receipt.json",
+        sha256="b" * 64,
+        engine="mujoco",
+        lane="matched",
+        acceptance={
+            "gates": [
+                {"name": "G1", "status": "pass", "measured": 2, "threshold": 0.05},
+                {"name": "G2", "measured": "n/a", "threshold": True},
+                {"name": "G3", "measured": float("nan"), "threshold": None},
+            ]
+        },
+    )
+    ledger = Ledger(
+        schema_version="1.0.0",
+        generated_at="2026-09-21T00:00:00Z",
+        total_receipts=1,
+        rows=[row],
+    )
+    ledger_path.write_text(ledger.to_json(), encoding="utf-8")
+    service = MatchedSwingsService.from_ledger_file(ledger_path, repo_root=tmp_path)
+
+    gates = service.get_run_summary(row.sha256).gates
+
+    assert [(g.name, g.status, g.measured, g.threshold) for g in gates] == [
+        ("G1", "PASS", 2.0, 0.05),
+        ("G2", "", None, None),
+        ("G3", "", None, None),
+    ]
 
 
 def test_get_receipt(client: TestClient, ledger_fixture: tuple[Path, str]) -> None:
