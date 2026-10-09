@@ -14,6 +14,9 @@ pytestmark = pytest.mark.unit
 
 
 def test_lab_namespace_exposes_pinned_tools_without_copying_contracts() -> None:
+    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+
+    extend_sidekick_lab_path()
     from sidekick import lab
 
     root = Path(__file__).resolve().parents[3]
