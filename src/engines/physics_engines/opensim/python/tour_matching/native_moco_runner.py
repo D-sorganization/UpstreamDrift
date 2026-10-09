@@ -32,6 +32,7 @@ from .native_reference_conventions import (
 )
 from .registration import CaptureRegistration, register_points
 from .trc import read_trc, write_trc
+from src.shared.python.motion_matching.tour_capture_contract import TourCapture
 
 
 def _sha(path: Path) -> str:
@@ -269,6 +270,39 @@ def _native_preparation(
     return loaded, reference_sha, passive_sha, blockers
 
 
+def _load_observation_capture(
+    request: NativeMocoRequest, directory: Path
+) -> tuple[TourCapture | None, str | None, list[str]]:
+    """Read the frozen observation clock and report its independent defects."""
+    blockers: list[str] = []
+    try:
+        capture = read_trc(request.trc_path)
+        clock_sha = hashlib.sha256(capture.time_s.tobytes()).hexdigest()
+        (directory / "observation_clock.json").write_text(
+            json.dumps(capture.time_s.tolist(), allow_nan=False) + "\n",
+            encoding="utf-8",
+        )
+        if (
+            capture.time_s[0] != request.config.t_start_s
+            or capture.time_s[-1] != request.config.horizon_s
+        ):
+            blockers.append("observation-horizon-mismatch")
+        if set(capture.labels) != set(request.marker_weights):
+            blockers.append("reference-marker-coverage")
+        if not bool(np.all(np.any(capture.valid, axis=0))):
+            blockers.append("missing-marker-observation-support")
+        if capture.frames < 2 or not np.allclose(
+            np.diff(capture.time_s),
+            np.diff(capture.time_s)[0],
+            rtol=0,
+            atol=1e-9,
+        ):
+            blockers.append("irregular-observation-clock")
+        return capture, clock_sha, blockers
+    except (OSError, ValueError):
+        return None, None, ["capture-trc-invalid"]
+
+
 def prepare_native_moco(
     request: NativeMocoRequest, output_dir: Path
 ) -> NativeMocoPreparation:
@@ -298,40 +332,15 @@ def prepare_native_moco(
     clock_sha = None
     registered_sha = None
     if actual["capture"] == request.trc_sha256:
-        try:
-            capture = read_trc(request.trc_path)
-            clock_sha = hashlib.sha256(capture.time_s.tobytes()).hexdigest()
-            (directory / "observation_clock.json").write_text(
-                json.dumps(capture.time_s.tolist(), allow_nan=False) + "\n",
-                encoding="utf-8",
-            )
-            if (
-                capture.time_s[0] != request.config.t_start_s
-                or capture.time_s[-1] != request.config.horizon_s
-            ):
-                blockers.append("observation-horizon-mismatch")
-            if set(capture.labels) != set(request.marker_weights):
-                blockers.append("reference-marker-coverage")
-            if not bool(np.all(np.any(capture.valid, axis=0))):
-                blockers.append("missing-marker-observation-support")
-            if capture.frames < 2 or not np.allclose(
-                np.diff(capture.time_s),
-                np.diff(capture.time_s)[0],
-                rtol=0,
-                atol=1e-9,
-            ):
-                blockers.append("irregular-observation-clock")
-        except (OSError, ValueError):
-            blockers.append("capture-trc-invalid")
+        capture, clock_sha, capture_blockers = _load_observation_capture(
+            request, directory
+        )
+        blockers.extend(capture_blockers)
     if request.registration is None:
         blockers.append("capture-registration-unavailable")
     elif capture is not None and "irregular-observation-clock" not in blockers:
         try:
             transformed = register_points(capture.points_m, request.registration)
-            from src.shared.python.motion_matching.tour_capture_contract import (
-                TourCapture,
-            )
-
             registered = TourCapture(
                 capture.time_s, capture.labels, transformed, capture.valid
             )
