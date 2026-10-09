@@ -2,8 +2,10 @@
 
 Final runs include per-cell endpoint-density and raw overhead figures for the
 shaft-only and combined-noise profiles, shared-scale matrix heatmaps for every
-noise profile, an explicit feasibility ledger, and a Facebook-ready PNG
-selection. Pilot previews require an explicit flag and a preview-named output.
+noise profile, an explicit feasibility ledger, and separate concise 16:9
+Facebook-ready PNGs. The academic figures retain full provenance captions;
+both modes use the same endpoint histogram/HDR and raw trajectory primitives.
+Pilot previews require an explicit flag and a preview-named output.
 """
 
 from __future__ import annotations
@@ -16,11 +18,16 @@ import json
 import math
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 PATTERNS = ("Straight", "Draw", "Fade")
 _COMBINED_NOISE = (0.5, 0.89408, 0.00635, 0.00635, 0.0, 0.0)
 _MATCHED_RAW_LANDING = "Matched Raw Landing"
+_CLUB_NAMES = {
+    "driver": "Driver",
+    "seven_iron": "7-Iron",
+    "pitching_wedge": "Pitching Wedge",
+}
 
 
 def _delivery_mode_label(config: dict[str, Any]) -> str:
@@ -34,11 +41,15 @@ def _detail_profile(standard_deviations: list[float]) -> str | None:
         return None
     if standard_deviations[0] not in (1.0, 2.0):
         return None
-    if all(math.isclose(value, 0.0, abs_tol=1e-10) for value in standard_deviations[1:]):
+    if all(
+        math.isclose(value, 0.0, abs_tol=1e-10) for value in standard_deviations[1:]
+    ):
         return "shaft_only"
     if all(
         math.isclose(actual, expected, abs_tol=1e-8)
-        for actual, expected in zip(standard_deviations[1:], _COMBINED_NOISE, strict=True)
+        for actual, expected in zip(
+            standard_deviations[1:], _COMBINED_NOISE, strict=True
+        )
     ):
         return "combined2"
     return None
@@ -69,7 +80,12 @@ def _facebook_selection(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Select lean-0 social comparisons, using labeled PW lean-5 fallbacks."""
     groups: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
     for cell in cells:
-        if _detail_profile(cell.get("config", {}).get("noise", {}).get("standard_deviations", [])) is None:
+        if (
+            _detail_profile(
+                cell.get("config", {}).get("noise", {}).get("standard_deviations", [])
+            )
+            is None
+        ):
             continue
         groups[_facebook_key(cell)].append(cell)
 
@@ -77,7 +93,11 @@ def _facebook_selection(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for group in groups.values():
         club_id = _club_config(group[0]).get("club_id")
         lean_zero = next(
-            (cell for cell in group if math.isclose(_club_config(cell).get("shaft_lean_deg", math.nan), 0.0)),
+            (
+                cell
+                for cell in group
+                if math.isclose(_club_config(cell).get("shaft_lean_deg", math.nan), 0.0)
+            ),
             None,
         )
         if lean_zero is None:
@@ -89,7 +109,9 @@ def _facebook_selection(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 (
                     cell
                     for cell in group
-                    if math.isclose(_club_config(cell).get("shaft_lean_deg", math.nan), 5.0)
+                    if math.isclose(
+                        _club_config(cell).get("shaft_lean_deg", math.nan), 5.0
+                    )
                     and cell.get("status") == "completed"
                 ),
                 None,
@@ -140,8 +162,7 @@ def _stratum_name(group: list[dict[str, Any]]) -> str:
     noise = config.get("noise", {}).get("standard_deviations", [])
     labels = ("rot", "path", "speed", "contactx", "contacty", "lean", "attack")
     noise_label = "_".join(
-        f"{label}{float(value):g}"
-        for label, value in zip(labels, noise, strict=False)
+        f"{label}{float(value):g}" for label, value in zip(labels, noise, strict=False)
     )
     return (
         f"{_delivery_mode_label(config).lower().replace(' ', '-')}__{law}__"
@@ -219,10 +240,14 @@ def _comparison_pair_specs(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return pairs
 
 
-def _supported_points(cell_dir: Path) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
+def _supported_points(
+    cell_dir: Path,
+) -> tuple[dict[str, list[list[float]]], dict[str, int]]:
     points: dict[str, list[list[float]]] = {pattern: [] for pattern in PATTERNS}
     total = dict.fromkeys(PATTERNS, 0)
-    with gzip.open(cell_dir / "shots.csv.gz", "rt", encoding="utf-8", newline="") as stream:
+    with gzip.open(
+        cell_dir / "shots.csv.gz", "rt", encoding="utf-8", newline=""
+    ) as stream:
         for row in csv.DictReader(stream):
             pattern = row.get("pattern")
             if pattern not in points:
@@ -289,13 +314,49 @@ def _cell_metadata(
     }
 
 
-def _render_detail(
+def _social_metadata(
+    cell: dict[str, Any], valid_counts: dict[str, int], total_counts: dict[str, int]
+) -> tuple[str, dict[str, Any]]:
+    """Describe only the controls needed to interpret a shareable figure."""
+    config = cell["config"]
+    club = _club_config(cell)
+    noise = config["noise"]["standard_deviations"]
+    if len(noise) != 7:
+        raise ValueError("social figure requires all seven noise standard deviations")
+    club_id = str(club.get("club_id"))
+    if club_id not in _CLUB_NAMES:
+        raise ValueError(f"unrecognized club for social figure: {club_id}")
+    subtitle = (
+        f"Lean {float(club['shaft_lean_deg']):g}° • "
+        f"Shaft Twist SD {float(noise[0]):g}° • Curve ×{float(config['curve_scale']):g}"
+    )
+    protocol = (
+        cell.get("protocol_id")
+        or config.get("supplement_protocol")
+        or "Original Matched-Delivery Protocol"
+    )
+    return subtitle, {
+        "social_club": _CLUB_NAMES[club_id],
+        "Protocol": protocol,
+        "Noise": (
+            f"Path SD {float(noise[1]):g}° • Speed SD {float(noise[2]) * 2.2369362921:.2g} mph • "
+            f"Strike SD {float(noise[3]) * 1000:g}/{float(noise[4]) * 1000:g} mm "
+            "horizontal/vertical"
+        ),
+        "Matched Target": f"{float(cell['target_x_m']):.2f} m downrange",
+        "valid_shots_by_pattern": valid_counts,
+        "total_shots_by_pattern": total_counts,
+    }
+
+
+def _render_cell_figures(
     cell: dict[str, Any],
     source_root: Path,
     output_root: Path,
     *,
     dpi: int,
     preview: bool,
+    presentation: Literal["academic", "social"],
 ) -> list[Path]:
     from src.tools.shot_pattern_analysis.academic_plots import (
         write_academic_dispersion_figure,
@@ -310,13 +371,19 @@ def _render_detail(
     club = _club_config(cell)
     mode = _delivery_mode_label(config)
     profile = _detail_profile(config.get("noise", {}).get("standard_deviations", []))
-    scenario = (
-        f"{'PILOT PREVIEW — ' if preview else ''}{cell['cell']} — {club.get('club_id')} — {profile}; "
-        f"shaft rotation SD {config['noise']['standard_deviations'][0]:g}°; "
-        f"curve ×{config.get('curve_scale')}; {mode}"
-    )
-    metadata = _cell_metadata(cell, valid_counts, total_counts)
-    cell_output = output_root / "details" / cell["cell"]
+    if presentation == "social":
+        scenario, metadata = _social_metadata(cell, valid_counts, total_counts)
+        if preview:
+            scenario = f"PILOT PREVIEW — {scenario}"
+        cell_output = output_root / "social" / "details" / cell["cell"]
+    else:
+        scenario = (
+            f"{'PILOT PREVIEW — ' if preview else ''}{cell['cell']} — {club.get('club_id')} — {profile}; "
+            f"shaft rotation SD {config['noise']['standard_deviations'][0]:g}°; "
+            f"curve ×{config.get('curve_scale')}; {mode}"
+        )
+        metadata = _cell_metadata(cell, valid_counts, total_counts)
+        cell_output = output_root / "details" / cell["cell"]
     cell_output.mkdir(parents=True, exist_ok=True)
     paths: list[Path] = []
     density_paths = write_academic_dispersion_figure(
@@ -325,6 +392,7 @@ def _render_detail(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(target_x, 0.0),
+        presentation=presentation,
         dpi=dpi,
     )
     paths.extend(density_paths.values())
@@ -338,10 +406,42 @@ def _render_detail(
         target_x_m=float(raw["target_x_m"]),
         scenario=scenario,
         metadata=metadata,
+        presentation=presentation,
         dpi=dpi,
     )
     paths.extend(overhead_paths.values())
     return paths
+
+
+def _render_detail(
+    cell: dict[str, Any],
+    source_root: Path,
+    output_root: Path,
+    *,
+    dpi: int,
+    preview: bool,
+) -> list[Path]:
+    return _render_cell_figures(
+        cell,
+        source_root,
+        output_root,
+        dpi=dpi,
+        preview=preview,
+        presentation="academic",
+    )
+
+
+def _render_social_detail(
+    cell: dict[str, Any],
+    source_root: Path,
+    output_root: Path,
+    *,
+    dpi: int,
+    preview: bool,
+) -> list[Path]:
+    return _render_cell_figures(
+        cell, source_root, output_root, dpi=dpi, preview=preview, presentation="social"
+    )
 
 
 def _render_density_comparison(
@@ -352,7 +452,9 @@ def _render_density_comparison(
     dpi: int,
     preview: bool,
 ) -> tuple[dict[str, Any], list[Path]]:
-    from src.tools.shot_pattern_analysis.academic_plots import write_academic_dispersion_figure
+    from src.tools.shot_pattern_analysis.academic_plots import (
+        write_academic_dispersion_figure,
+    )
 
     first, second = pair["cells"]
     row: dict[str, Any] = {
@@ -379,10 +481,15 @@ def _render_density_comparison(
             row["reason"] = str(candidate.get("reason") or candidate.get("status"))
             return row, []
     target_x_values = [first.get("target_x_m"), second.get("target_x_m")]
-    if any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in target_x_values):
+    if any(
+        not isinstance(value, (int, float)) or not math.isfinite(value)
+        for value in target_x_values
+    ):
         row["reason"] = "matched target unavailable"
         return row, []
-    if not math.isclose(float(target_x_values[0]), float(target_x_values[1]), abs_tol=1e-9):
+    if not math.isclose(
+        float(target_x_values[0]), float(target_x_values[1]), abs_tol=1e-9
+    ):
         row["reason"] = "comparison cells do not share a common target"
         return row, []
 
@@ -406,32 +513,31 @@ def _render_density_comparison(
     club = _club_config(first)
     residuals = [
         max(
-            (float(value.get("residual_m", 0.0)) for value in cell.get("nominals", {}).values()),
+            (
+                float(value.get("residual_m", 0.0))
+                for value in cell.get("nominals", {}).values()
+            ),
             default=0.0,
         )
         for cell in (first, second)
     ]
     metadata = {
-        "club": club.get("club_id"),
-        "pattern": pair["pattern"],
-        "profile": pair["profile"],
-        "comparison": pair["comparison"],
-        "contact law": club.get("contact_law"),
-        "nominal shaft lean deg": club.get("shaft_lean_deg"),
-        "common target downrange m": float(target_x_values[0]),
-        "first condition": pair["first_label"],
-        "second condition": pair["second_label"],
-        "target residuals m": f"{residuals[0]:.3g} vs {residuals[1]:.3g}",
+        "social_club": _CLUB_NAMES.get(str(pair["club_id"]), str(pair["club_id"])),
+        "Protocol": first.get("protocol_id") or "Original Matched-Delivery Protocol",
+        "Target": f"{float(target_x_values[0]):.2f} m downrange",
+        "Nominal Lean": f"{float(club.get('shaft_lean_deg', 0.0)):g}°",
+        "Match Residuals": f"{residuals[0]:.3g} vs {residuals[1]:.3g} m",
         "valid_shots_by_pattern": valid_counts,
         "total_shots_by_pattern": total_counts,
     }
     scenario = (
-        f"{'PILOT PREVIEW — ' if preview else ''}{pair['club_id']} {pair['pattern']}; "
-        f"{pair['profile']}; {pair['first_label']} versus {pair['second_label']}; "
-        f"matched target {float(target_x_values[0]):.2f} m; nominal lean 0°"
+        f"{'PILOT PREVIEW — ' if preview else ''}"
+        f"{pair['pattern']} • {pair['first_label']} vs {pair['second_label']} • "
+        f"{'Shaft Twist Only' if pair['profile'] == 'shaft_only' else 'Combined Delivery Noise'}"
     )
     stem = (
         output_root
+        / "social"
         / "comparisons"
         / str(pair["club_id"])
         / str(pair["profile"])
@@ -444,11 +550,17 @@ def _render_density_comparison(
         scenario=scenario,
         metadata=metadata,
         target_point_m=(float(target_x_values[0]), 0.0),
+        presentation="social",
         dpi=dpi,
     )
     row["status"] = "completed"
     row["target_x_m"] = float(target_x_values[0])
-    row.update({extension: path.relative_to(output_root).as_posix() for extension, path in paths.items()})
+    row.update(
+        {
+            extension: path.relative_to(output_root).as_posix()
+            for extension, path in paths.items()
+        }
+    )
     return row, list(paths.values())
 
 
@@ -457,12 +569,20 @@ def _write_ledgers(
     output_root: Path,
     rendered_cells: set[str],
     comparison_rows: list[dict[str, Any]],
-) -> tuple[Path, Path, Path]:
+) -> tuple[Path, Path, Path, Path]:
     availability = output_root / "availability.csv"
     with availability.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(
             stream,
-            fieldnames=("cell", "status", "reason", "club", "lean_deg", "curve_scale", "shaft_rotation_sd_deg"),
+            fieldnames=(
+                "cell",
+                "status",
+                "reason",
+                "club",
+                "lean_deg",
+                "curve_scale",
+                "shaft_rotation_sd_deg",
+            ),
         )
         writer.writeheader()
         for cell in cells:
@@ -485,8 +605,19 @@ def _write_ledgers(
         writer = csv.DictWriter(
             stream,
             fieldnames=(
-                "comparison", "pattern", "club", "profile", "first_cell", "second_cell",
-                "first_condition", "second_condition", "status", "reason", "target_x_m", "nominal_lean_deg", "png",
+                "comparison",
+                "pattern",
+                "club",
+                "profile",
+                "first_cell",
+                "second_cell",
+                "first_condition",
+                "second_condition",
+                "status",
+                "reason",
+                "target_x_m",
+                "nominal_lean_deg",
+                "png",
             ),
         )
         writer.writeheader()
@@ -501,25 +632,94 @@ def _write_ledgers(
                         else row.get(field, "")
                     )
                     for field in (
-                        "comparison", "pattern", "club", "profile", "first_cell", "second_cell",
-                        "first_condition", "second_condition", "status", "reason", "target_x_m",
-                        "nominal_lean_deg", "png",
+                        "comparison",
+                        "pattern",
+                        "club",
+                        "profile",
+                        "first_cell",
+                        "second_cell",
+                        "first_condition",
+                        "second_condition",
+                        "status",
+                        "reason",
+                        "target_x_m",
+                        "nominal_lean_deg",
+                        "png",
                     )
                 }
             )
 
     social_overhead = output_root / "facebook_overhead.csv"
+    social_pattern_density = output_root / "facebook_pattern_density.csv"
+    selected_social = _facebook_selection(cells)
+    with social_pattern_density.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=(
+                "cell",
+                "status",
+                "reason",
+                "club",
+                "lean_deg",
+                "curve_scale",
+                "shaft_rotation_sd_deg",
+                "selection_note",
+                "png_density",
+            ),
+        )
+        writer.writeheader()
+        for cell in selected_social:
+            config = cell["config"]
+            club = _club_config(cell)
+            noise = config.get("noise", {}).get("standard_deviations", [])
+            density_source = (
+                output_root / "social" / "details" / cell["cell"] / "density.png"
+            )
+            completed = (
+                cell.get("status") == "completed"
+                and cell["cell"] in rendered_cells
+                and density_source.is_file()
+            )
+            writer.writerow(
+                {
+                    "cell": cell["cell"],
+                    "status": cell["status"],
+                    "reason": cell.get("reason", ""),
+                    "club": club.get("club_id"),
+                    "lean_deg": club.get("shaft_lean_deg"),
+                    "curve_scale": config.get("curve_scale"),
+                    "shaft_rotation_sd_deg": noise[0] if noise else "",
+                    "selection_note": cell["selection_note"],
+                    "png_density": density_source.relative_to(output_root).as_posix()
+                    if completed
+                    else "",
+                }
+            )
     with social_overhead.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(
             stream,
-            fieldnames=("cell", "status", "reason", "club", "lean_deg", "curve_scale", "shaft_rotation_sd_deg", "selection_note", "png_overhead"),
+            fieldnames=(
+                "cell",
+                "status",
+                "reason",
+                "club",
+                "lean_deg",
+                "curve_scale",
+                "shaft_rotation_sd_deg",
+                "selection_note",
+                "png_overhead",
+            ),
         )
         writer.writeheader()
-        for cell in _facebook_selection(cells):
+        for cell in selected_social:
             config = cell["config"]
             noise = config.get("noise", {}).get("standard_deviations", [])
-            completed = cell.get("status") == "completed" and cell["cell"] in rendered_cells
-            overhead_source = output_root / "details" / cell["cell"] / "overhead.png"
+            completed = (
+                cell.get("status") == "completed" and cell["cell"] in rendered_cells
+            )
+            overhead_source = (
+                output_root / "social" / "details" / cell["cell"] / "overhead.png"
+            )
             completed = completed and overhead_source.is_file()
             writer.writerow(
                 {
@@ -531,18 +731,31 @@ def _write_ledgers(
                     "curve_scale": config.get("curve_scale"),
                     "shaft_rotation_sd_deg": noise[0] if noise else "",
                     "selection_note": cell["selection_note"],
-                    "png_overhead": overhead_source.relative_to(output_root).as_posix() if completed else "",
+                    "png_overhead": overhead_source.relative_to(output_root).as_posix()
+                    if completed
+                    else "",
                 }
             )
-    return availability, social_density, social_overhead
+    return availability, social_density, social_overhead, social_pattern_density
 
 
 def _write_comparison_ledger(rows: list[dict[str, Any]], output_root: Path) -> Path:
     path = output_root / "comparison_availability.csv"
     fields = (
-        "comparison", "pattern", "club", "profile", "first_cell", "second_cell",
-        "first_condition", "second_condition", "status", "reason", "target_x_m",
-        "png", "pdf", "svg",
+        "comparison",
+        "pattern",
+        "club",
+        "profile",
+        "first_cell",
+        "second_cell",
+        "first_condition",
+        "second_condition",
+        "status",
+        "reason",
+        "target_x_m",
+        "png",
+        "pdf",
+        "svg",
     )
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
@@ -563,16 +776,26 @@ def _validate_final_protocol(report: dict[str, Any], output_name: str) -> None:
     """Require the complete predeclared final population and target protocol."""
     expected = 324 if output_name == "final_figures_v1" else 72
     cells = report["cells"]
-    if report.get("stage") != "final" or report.get("planned_cells") != expected or len(cells) != expected:
-        raise ValueError("final figures require the complete 324/72-cell final protocol")
+    if (
+        report.get("stage") != "final"
+        or report.get("planned_cells") != expected
+        or len(cells) != expected
+    ):
+        raise ValueError(
+            "final figures require the complete 324/72-cell final protocol"
+        )
     fixed_target = output_name == "control_final_figures_v1"
     if any(cell["config"]["n_shots"] != 10_000 for cell in cells):
         raise ValueError("final figures require 10,000 attempts per pattern")
-    if any((cell["config"].get("target_x_m") is not None) != fixed_target for cell in cells):
+    if any(
+        (cell["config"].get("target_x_m") is not None) != fixed_target for cell in cells
+    ):
         raise ValueError("final figure target protocol does not match output kind")
 
 
-def _assert_inputs_unchanged(source_root: Path, report: dict[str, Any], *, preview: bool) -> None:
+def _assert_inputs_unchanged(
+    source_root: Path, report: dict[str, Any], *, preview: bool
+) -> None:
     """Revalidate every input byte after rendering, before publishing a manifest."""
     from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
 
@@ -592,7 +815,9 @@ def build_final_figures(
 ) -> Path:
     """Render source-bound figures and a provenance manifest for one report."""
     from src.tools.shot_pattern_analysis.matched_report import load_matrix_report
-    from src.tools.shot_pattern_analysis.matched_report_plots import export_matched_matrix_heatmaps
+    from src.tools.shot_pattern_analysis.matched_report_plots import (
+        export_matched_matrix_heatmaps,
+    )
 
     source_root = Path(source_root).resolve()
     output_root = Path(output_root).resolve()
@@ -602,7 +827,9 @@ def build_final_figures(
     stage = str(report.get("stage", "unknown"))
     if preview:
         if stage != "pilot" or "preview" not in output_root.name.lower():
-            raise ValueError("pilot rendering requires --preview and a preview-named output directory")
+            raise ValueError(
+                "pilot rendering requires --preview and a preview-named output directory"
+            )
     elif stage == "pilot" or output_root.name not in (
         "final_figures_v1",
         "control_final_figures_v1",
@@ -615,7 +842,9 @@ def build_final_figures(
     if selected_cells and not preview:
         raise ValueError("selected_cells is allowed only for explicit pilot previews")
     if preview and not selected_cells:
-        raise ValueError("pilot previews require at least one explicit --cell selection")
+        raise ValueError(
+            "pilot previews require at least one explicit --cell selection"
+        )
     if output_root.exists() and any(output_root.iterdir()):
         raise FileExistsError(f"figure output directory is not empty: {output_root}")
     output_root.mkdir(parents=True, exist_ok=True)
@@ -632,13 +861,25 @@ def build_final_figures(
         cell
         for cell in detail_candidates
         if cell.get("status") == "completed"
-        and _detail_profile(cell.get("config", {}).get("noise", {}).get("standard_deviations", [])) is not None
+        and _detail_profile(
+            cell.get("config", {}).get("noise", {}).get("standard_deviations", [])
+        )
+        is not None
     ]
     detail_paths: list[Path] = []
     for cell in detail_cells:
         detail_paths.extend(
             _render_detail(cell, source_root, output_root, dpi=dpi, preview=preview)
         )
+    detail_ids = {cell["cell"] for cell in detail_cells}
+    social_detail_paths: list[Path] = []
+    for cell in _facebook_selection(cells):
+        if cell["cell"] in detail_ids and cell["status"] == "completed":
+            social_detail_paths.extend(
+                _render_social_detail(
+                    cell, source_root, output_root, dpi=dpi, preview=preview
+                )
+            )
 
     comparison_pairs = _comparison_pair_specs(cells)
     if preview:
@@ -682,14 +923,17 @@ def build_final_figures(
             formats=("png",),
         )
         matrix_paths.extend(matrix_exports.values())
-    availability, social_density, social_overhead = _write_ledgers(
-        cells,
-        output_root,
-        {cell["cell"] for cell in detail_cells},
-        comparison_rows,
+    availability, social_density, social_overhead, social_pattern_density = (
+        _write_ledgers(
+            cells,
+            output_root,
+            detail_ids,
+            comparison_rows,
+        )
     )
     social_density_count = sum(
-        row["status"] == "completed" and bool(row.get("png"))
+        row["status"] == "completed"
+        and bool(row.get("png"))
         and (output_root / str(row["png"])).is_file()
         for row in comparison_rows
     )
@@ -699,20 +943,35 @@ def build_final_figures(
             and (output_root / str(row["png_overhead"])).is_file()
             for row in csv.DictReader(stream)
         )
+    with social_pattern_density.open(encoding="utf-8", newline="") as stream:
+        social_pattern_density_count = sum(
+            bool(row.get("png_density"))
+            and (output_root / str(row["png_density"])).is_file()
+            for row in csv.DictReader(stream)
+        )
 
     source_files = {
-        "matched_report.py": _sha256(_repository_root() / "src/tools/shot_pattern_analysis/matched_report.py"),
-        "academic_plots.py": _sha256(_repository_root() / "src/tools/shot_pattern_analysis/academic_plots.py"),
-        "matched_report_plots.py": _sha256(_repository_root() / "src/tools/shot_pattern_analysis/matched_report_plots.py"),
+        "matched_report.py": _sha256(
+            _repository_root() / "src/tools/shot_pattern_analysis/matched_report.py"
+        ),
+        "academic_plots.py": _sha256(
+            _repository_root() / "src/tools/shot_pattern_analysis/academic_plots.py"
+        ),
+        "matched_report_plots.py": _sha256(
+            _repository_root()
+            / "src/tools/shot_pattern_analysis/matched_report_plots.py"
+        ),
         "build_final_figures.py": _sha256(Path(__file__)),
     }
     output_files = [
         *detail_paths,
+        *social_detail_paths,
         *comparison_paths,
         *matrix_paths,
         availability,
         social_density,
         social_overhead,
+        social_pattern_density,
         comparison_ledger,
     ]
     manifest = {
@@ -734,11 +993,17 @@ def build_final_figures(
             for status in ("completed", "unavailable")
         },
         "availability_ledger": availability.relative_to(output_root).as_posix(),
-        "comparison_availability_ledger": comparison_ledger.relative_to(output_root).as_posix(),
+        "comparison_availability_ledger": comparison_ledger.relative_to(
+            output_root
+        ).as_posix(),
         "facebook_ready_index": social_density.relative_to(output_root).as_posix(),
         "facebook_ready_image_count": social_density_count,
         "facebook_overhead_index": social_overhead.relative_to(output_root).as_posix(),
         "facebook_overhead_image_count": social_overhead_count,
+        "facebook_pattern_density_index": social_pattern_density.relative_to(
+            output_root
+        ).as_posix(),
+        "facebook_pattern_density_image_count": social_pattern_density_count,
         "outputs": {
             path.relative_to(output_root).as_posix(): _sha256(path)
             for path in output_files
@@ -750,16 +1015,27 @@ def build_final_figures(
     }
     _assert_inputs_unchanged(source_root, report, preview=preview)
     manifest_path = output_root / "figure_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return manifest_path
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source_root", type=Path, help="integrity-checked matched-study report root")
+    parser.add_argument(
+        "source_root", type=Path, help="integrity-checked matched-study report root"
+    )
     parser.add_argument("output_root", type=Path, help="new figure output root")
-    parser.add_argument("--preview", action="store_true", help="explicitly label a pilot preview")
-    parser.add_argument("--cell", action="append", default=[], help="pilot preview cell; repeat to select multiple")
+    parser.add_argument(
+        "--preview", action="store_true", help="explicitly label a pilot preview"
+    )
+    parser.add_argument(
+        "--cell",
+        action="append",
+        default=[],
+        help="pilot preview cell; repeat to select multiple",
+    )
     parser.add_argument("--dpi", type=int, default=180)
     args = parser.parse_args()
     print(

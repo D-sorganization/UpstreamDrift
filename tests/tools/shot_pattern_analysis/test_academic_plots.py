@@ -295,6 +295,33 @@ def test_density_overlay_is_a_disclosed_deterministic_subset(
     assert any("600/1,000" in artist.get_text() for artist in figure.texts)
 
 
+def test_density_marginals_use_common_probability_scales(tmp_path, monkeypatch) -> None:
+    write_dispersion, _ = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = {}
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured["figure"] = figure
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    broad = np.column_stack((np.linspace(-10, 10, 100), np.linspace(-5, 5, 100)))
+    narrow = np.column_stack((np.linspace(-2, 2, 100), np.linspace(-1, 1, 100)))
+    write_dispersion(
+        {"Straight": broad, "Draw": narrow},
+        tmp_path / "common_marginal_scale",
+        scenario="Synthetic Marginal Scale",
+        metadata={},
+        target_point_m=(0.0, 0.0),
+        bins=32,
+        dpi=96,
+    )
+    axes = captured["figure"].axes
+    assert axes[0].get_ylim() == axes[3].get_ylim()
+    assert axes[2].get_xlim() == axes[5].get_xlim()
+
+
 def test_overhead_discloses_actual_axis_magnification_and_legible_paths(
     tmp_path, monkeypatch
 ) -> None:
@@ -327,6 +354,84 @@ def test_overhead_discloses_actual_axis_magnification_and_legible_paths(
     path = axis.lines[0]
     assert path.get_alpha() >= 0.6
     assert path.get_linewidth() >= 1.1
+
+
+@pytest.mark.slow
+def test_social_presentation_keeps_data_and_uses_readable_16_by_9_layout(
+    tmp_path, monkeypatch
+) -> None:
+    write_dispersion, write_overhead = _plot_api()
+    import src.tools.shot_pattern_analysis.academic_plots as plots
+
+    captured = []
+
+    def capture_figure(figure, _stem, *, dpi):
+        captured.append(figure)
+        return {}
+
+    monkeypatch.setattr(plots, "_save_formats", capture_figure)
+    endpoints = {
+        "Straight": np.array([[170.0, -2.0], [180.0, 2.0]]),
+        "Draw": np.array([[171.0, -1.0], [179.0, 1.0]]),
+        "Fade": np.array([[172.0, -3.0], [178.0, 3.0]]),
+    }
+    social_metadata = {
+        "social_club": "Driver",
+        "protocol": "Original Matched-Delivery Protocol",
+        "noise": "Shaft Twist SD 2° • Path SD 0.5° • Speed SD 0.9 m/s",
+        "valid_shots_by_pattern": dict.fromkeys(endpoints, 2),
+        "total_shots_by_pattern": dict.fromkeys(endpoints, 2),
+    }
+    write_dispersion(
+        endpoints,
+        tmp_path / "social_density",
+        scenario="Lean 0° • Curve ×1",
+        metadata=social_metadata,
+        target_point_m=(180.0, 0.0),
+        presentation="social",
+        dpi=96,
+    )
+    write_overhead(
+        {
+            name: [np.array([[0.0, 0.0], endpoint[0]])]
+            for name, endpoint in endpoints.items()
+        },
+        tmp_path / "social_overhead",
+        target_x_m=180.0,
+        scenario="Lean 0° • Curve ×1",
+        metadata=social_metadata,
+        presentation="social",
+        dpi=96,
+    )
+    write_dispersion(
+        endpoints,
+        tmp_path / "academic_density_same_data",
+        scenario="Synthetic Academic Control",
+        metadata=social_metadata,
+        target_point_m=(180.0, 0.0),
+        dpi=96,
+    )
+    assert len(captured) == 3
+    for figure in captured[:2]:
+        width, height = figure.get_size_inches()
+        assert width / height == pytest.approx(16 / 9)
+        full_text = " ".join(item.get_text() for item in figure.texts)
+        assert "Lean 0° • Curve ×1" in full_text
+        assert "Original Matched-Delivery Protocol" in full_text
+        assert "Model-Conditional" in full_text
+        assert "2/2" in full_text
+    assert any(
+        "Driver: Shot Dispersion" in item.get_text() for item in captured[0].texts
+    )
+    assert any(
+        "Driver: Sample Flight Paths" in item.get_text() for item in captured[1].texts
+    )
+    np.testing.assert_array_equal(
+        captured[0].axes[1].collections[0].get_array(),
+        captured[2].axes[1].collections[0].get_array(),
+    )
+    assert captured[0].axes[1].get_xlim() == captured[2].axes[1].get_xlim()
+    assert captured[0].axes[1].get_ylim() == captured[2].axes[1].get_ylim()
 
 
 @pytest.mark.slow

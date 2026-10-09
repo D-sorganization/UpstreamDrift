@@ -37,9 +37,14 @@ def _validate_metadata(metadata: Mapping[str, Any]) -> str:
         raise ValueError("metadata must be a mapping of scenario inputs")
     if not all(isinstance(key, str) and key.strip() for key in metadata):
         raise ValueError("metadata keys must be non-empty strings")
+    social_club = metadata.get("social_club")
+    if social_club is not None and (
+        not isinstance(social_club, str) or not social_club.strip()
+    ):
+        raise ValueError("social_club must be a non-empty display name")
     values: list[str] = []
     for key, value in metadata.items():
-        if key in ("valid_shots_by_pattern", "total_shots_by_pattern"):
+        if key in ("social_club", "valid_shots_by_pattern", "total_shots_by_pattern"):
             continue
         if isinstance(value, float) and not math.isfinite(value):
             raise ValueError(f"metadata value for {key!r} must be finite")
@@ -174,6 +179,7 @@ def write_academic_dispersion_figure(
     target_point_m: tuple[float, float],
     bins: int | tuple[int, int] = 64,
     region_masses: Sequence[float] = (0.50, 0.80, 0.95),
+    presentation: Literal["academic", "social"] = "academic",
     dpi: int = 300,
 ) -> dict[str, Path]:
     """Export raw endpoint density with marginals and empirical HDR contours.
@@ -182,6 +188,9 @@ def write_academic_dispersion_figure(
     common bounds are explicit; no aim correction or translation is applied.
     Each pattern uses the same histogram edges and shared density color scale.
     The marginal curves are normalized histogram densities, not KDE curves.
+    Histograms, marginals, and HDR regions use every supported endpoint; the
+    colored dot overlay shows at most 600 deterministic samples and discloses
+    that count. ``social`` changes only layout and caption density.
 
     Args:
         points_by_pattern: Pattern-name to N×2 endpoint array, in metres.
@@ -200,6 +209,8 @@ def write_academic_dispersion_figure(
         raise ValueError("scenario must be a non-empty string")
     if not isinstance(dpi, int) or not 72 <= dpi <= 600:
         raise ValueError("dpi must be an integer in [72, 600]")
+    if presentation not in ("academic", "social"):
+        raise ValueError("presentation must be academic or social")
     metadata_caption = _validate_metadata(metadata)
     estimate = shared_histogram_density(
         points_by_pattern,
@@ -219,10 +230,17 @@ def write_academic_dispersion_figure(
         name: min(actual_valid_counts[name], _MAX_OVERLAY_DOTS) for name in names
     }
     plt = _matplotlib()
-    figure = plt.figure(figsize=(16.5, 9.8), facecolor="white")
+    figure = plt.figure(
+        figsize=(16.0, 9.0) if presentation == "social" else (16.5, 9.8),
+        facecolor="white",
+    )
     outer = figure.add_gridspec(
         1, len(names), left=0.06, right=0.91, top=0.69, bottom=0.17, wspace=0.27
     )
+    top_axes: list[Any] = []
+    right_axes: list[Any] = []
+    common_top_max = 0.0
+    common_right_max = 0.0
     for name, panel_index in zip(names, range(len(names)), strict=True):
         inner = outer[0, panel_index].subgridspec(
             2, 2, height_ratios=(1, 4), width_ratios=(4, 1), hspace=0.04, wspace=0.04
@@ -233,6 +251,10 @@ def write_academic_dispersion_figure(
         pattern = estimate.patterns[name]
         density = pattern.density_per_m2
         marginal_x, marginal_y = _density_marginals(estimate, density)
+        top_axes.append(axis_top)
+        right_axes.append(axis_right)
+        common_top_max = max(common_top_max, float(np.max(marginal_x)))
+        common_right_max = max(common_right_max, float(np.max(marginal_y)))
         color = _COLORS.get(name, "#286090")
 
         mesh = axis.pcolormesh(
@@ -319,18 +341,30 @@ def write_academic_dispersion_figure(
         axis_right.set_xlabel("Density", fontsize=8)
         axis_right.grid(axis="x", linewidth=0.3, alpha=0.25)
 
+    if common_top_max <= 0 or common_right_max <= 0:
+        raise ValueError("marginal density maxima must be positive")
+    for axis_top, axis_right in zip(top_axes, right_axes, strict=True):
+        axis_top.set_ylim(0.0, common_top_max * 1.05)
+        axis_right.set_xlim(0.0, common_right_max * 1.05)
+
     colorbar_axis = figure.add_axes((0.93, 0.28, 0.014, 0.48))
     colorbar = figure.colorbar(mesh, cax=colorbar_axis)
     colorbar.set_label("Endpoint Probability Density (m⁻²)")
     figure.suptitle(
-        "Shot-Endpoint Density Conditional on Supported Airborne Shots",
+        (
+            f"{metadata.get('social_club', 'Shot')}: Shot Dispersion"
+            if presentation == "social"
+            else "Shot-Endpoint Density Conditional on Supported Airborne Shots"
+        ),
         x=0.06,
         y=0.965,
         ha="left",
         fontsize=18,
         fontweight="bold",
     )
-    figure.text(0.06, 0.92, scenario, fontsize=12, ha="left")
+    figure.text(
+        0.06, 0.92, scenario, fontsize=14 if presentation == "social" else 12, ha="left"
+    )
     figure.text(
         0.06,
         0.885,
@@ -339,7 +373,7 @@ def write_academic_dispersion_figure(
             width=145,
             break_long_words=False,
         ),
-        fontsize=9,
+        fontsize=10 if presentation == "social" else 9,
         ha="left",
         va="top",
         color="#333333",
@@ -392,18 +426,28 @@ def write_academic_dispersion_figure(
         f"{name} {overlay_counts[name]:,}/{actual_valid_counts[name]:,}"
         for name in names
     )
+    if presentation == "social":
+        footer = (
+            "Model-Conditional Simulation • Carry Only • Not Calibrated Player Precision. "
+            f"{overlay_caption}. Density, HDR, and marginals use every valid endpoint. "
+            "Shared axes and density scale; contours are simulated-sample HDR."
+        )
+    else:
+        footer = (
+            f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
+            f"{overlay_caption}; density, HDR, and marginals use every valid endpoint. "
+            "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
+            f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}"
+        )
     figure.text(
         0.06,
         0.025,
         textwrap.fill(
-            f"{_PILOT_FIGURE_LABEL}. HDR mass is sample-derived from simulated endpoints. "
-            f"{overlay_caption}; density, HDR, and marginals use every valid endpoint. "
-            "Histogram only; no KDE or synthetic covariance spread; not calibrated player precision. "
-            f"Bin resolution: {dx:.3g} × {dy:.3g} m. {achieved_text}",
-            width=210,
+            footer,
+            width=180 if presentation == "social" else 210,
             break_long_words=False,
         ),
-        fontsize=8.5,
+        fontsize=9.5 if presentation == "social" else 8.5,
         ha="left",
     )
     outputs = _save_formats(figure, _validate_stem(output_stem), dpi=dpi)
@@ -449,6 +493,7 @@ def write_overhead_trajectory_figure(
     scenario: str,
     metadata: Mapping[str, Any],
     trajectories_are_aimed: bool = False,
+    presentation: Literal["academic", "social"] = "academic",
     dpi: int = 300,
 ) -> dict[str, Path]:
     """Export a shared-axis comparison of supplied raw overhead trajectories.
@@ -457,6 +502,8 @@ def write_overhead_trajectory_figure(
     lateral coordinates. They are not rotated to an aim line or re-simulated.
     Set ``trajectories_are_aimed`` only to trigger a fail-fast contract error;
     this figure is explicitly for raw, un-aimed simulator trajectories.
+    The displayed path count and calculated vertical display magnification are
+    always disclosed. ``social`` changes only layout and caption density.
     """
     if trajectories_are_aimed:
         raise ValueError("overhead trajectory input must be raw, not aim-adjusted")
@@ -466,6 +513,8 @@ def write_overhead_trajectory_figure(
         raise ValueError("scenario must be a non-empty string")
     if not isinstance(dpi, int) or not 72 <= dpi <= 600:
         raise ValueError("dpi must be an integer in [72, 600]")
+    if presentation not in ("academic", "social"):
+        raise ValueError("presentation must be academic or social")
     metadata_caption = _validate_metadata(metadata)
     trajectories = _validated_trajectories(trajectories_by_pattern)
     names_tuple = tuple(trajectories)
@@ -476,8 +525,12 @@ def write_overhead_trajectory_figure(
     ):
         raise ValueError("valid_shots_by_pattern cannot be below displayed paths")
     path_counts = {name: len(trajectories[name]) for name in names_tuple}
-    population = _trajectory_population_caption(
-        names_tuple, path_counts, valid_counts, total_counts
+    population = (
+        _population_caption(names_tuple, valid_counts, total_counts)
+        if presentation == "social" and valid_counts
+        else _trajectory_population_caption(
+            names_tuple, path_counts, valid_counts, total_counts
+        )
     )
     all_points = np.concatenate(
         [path for paths in trajectories.values() for path in paths], axis=0
@@ -495,13 +548,19 @@ def write_overhead_trajectory_figure(
     figure, axes = plt.subplots(
         1,
         len(names),
-        figsize=(6.0 * len(names), 6.0),
+        figsize=(16.0, 9.0) if presentation == "social" else (6.0 * len(names), 6.0),
         sharex=True,
         sharey=True,
         squeeze=False,
         facecolor="white",
     )
-    figure.subplots_adjust(top=0.70, bottom=0.16, left=0.075, right=0.98, wspace=0.15)
+    figure.subplots_adjust(
+        top=0.69 if presentation == "social" else 0.70,
+        bottom=0.16,
+        left=0.075,
+        right=0.98,
+        wspace=0.15,
+    )
     for axis, name in zip(axes[0], names, strict=True):
         color = _COLORS.get(name, "#286090")
         for trajectory in trajectories[name]:
@@ -521,7 +580,11 @@ def write_overhead_trajectory_figure(
         valid_text = f"; valid={valid_counts[name]:,}" if valid_counts else ""
         total_text = f"/{total_counts[name]:,}" if total_counts and valid_counts else ""
         axis.set_title(
-            f"{name}  (paths shown={path_counts[name]:,}{valid_text}{total_text})",
+            (
+                name
+                if presentation == "social"
+                else f"{name}  (paths shown={path_counts[name]:,}{valid_text}{total_text})"
+            ),
             fontsize=11,
             fontweight="bold",
         )
@@ -529,14 +592,25 @@ def write_overhead_trajectory_figure(
         axis.grid(color="#666666", linewidth=0.35, alpha=0.25)
     axes[0][0].set_ylabel("Lateral Position (m; Right Positive)")
     figure.suptitle(
-        "Raw Overhead Flight-Trajectory Comparison",
+        (
+            f"{metadata.get('social_club', 'Shot')}: Sample Flight Paths"
+            if presentation == "social"
+            else "Raw Overhead Flight-Trajectory Comparison"
+        ),
         x=0.06,
         y=0.985,
         ha="left",
         fontsize=18,
         fontweight="bold",
     )
-    figure.text(0.06, 0.925, scenario, fontsize=12, ha="left", va="top")
+    figure.text(
+        0.06,
+        0.925,
+        scenario,
+        fontsize=14 if presentation == "social" else 12,
+        ha="left",
+        va="top",
+    )
     figure.text(
         0.06,
         0.89,
@@ -545,7 +619,7 @@ def write_overhead_trajectory_figure(
             width=145,
             break_long_words=False,
         ),
-        fontsize=9,
+        fontsize=10 if presentation == "social" else 9,
         ha="left",
         va="top",
         color="#333333",
@@ -556,17 +630,27 @@ def write_overhead_trajectory_figure(
     x_unit_px = axis_for_scale.transData.transform((1.0, 0.0))
     y_unit_px = axis_for_scale.transData.transform((0.0, 1.0))
     vertical_scale_ratio = (y_unit_px[1] - origin_px[1]) / (x_unit_px[0] - origin_px[0])
+    shown_paths_note = (
+        "Paths Shown: "
+        + "; ".join(f"{name} {path_counts[name]}" for name in names)
+        + ". Samples from supported airborne shots."
+        if presentation == "social"
+        else "Only the displayed paths are plotted; paths are sampled from supported airborne shots."
+    )
+    overhead_footer = (
+        "Model-Conditional Simulation • Carry Only • Not Calibrated Player Precision. "
+        if presentation == "social"
+        else f"{_PILOT_FIGURE_LABEL}. "
+    ) + (
+        "Raw trajectories; no aim-line rotation. "
+        f"Vertical display magnification: {vertical_scale_ratio:.1f}× versus downrange. "
+        + shown_paths_note
+    )
     figure.text(
         0.06,
         0.025,
-        textwrap.fill(
-            f"{_PILOT_FIGURE_LABEL}. Raw simulation trajectories; no aim-line rotation. "
-            f"Vertical display magnification: {vertical_scale_ratio:.1f}× versus downrange. "
-            "Only the displayed sample paths are plotted; paths are sampled from supported airborne shots.",
-            width=180,
-            break_long_words=False,
-        ),
-        fontsize=9,
+        textwrap.fill(overhead_footer, width=180, break_long_words=False),
+        fontsize=10 if presentation == "social" else 9,
         ha="left",
     )
     outputs = _save_formats(figure, _validate_stem(output_stem), dpi=dpi)
