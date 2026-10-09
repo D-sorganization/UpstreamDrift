@@ -1065,7 +1065,7 @@ class TestCIEnvironmentCompatibility:
             "using serial pytest to avoid xdist worker termination" in core_step["run"]
         )
 
-    def test_unit_gate_fetches_pr_base_before_child_copy_guard(self) -> None:
+    def test_unit_gate_fetches_default_branch_before_child_copy_guard(self) -> None:
         """The unit ownership guard must have its fail-closed comparison ref."""
         try:
             import yaml
@@ -1080,7 +1080,7 @@ class TestCIEnvironmentCompatibility:
         steps = workflow["jobs"]["unit-test-gate"]["steps"]
         step_names = [step.get("name", "") for step in steps]
 
-        fetch_index = step_names.index("Fetch PR base for ownership guards")
+        fetch_index = step_names.index("Fetch default branch for ownership guards")
         unit_index = step_names.index("Run Green-Suite Unit Gate")
         fetch_step = steps[fetch_index]
 
@@ -1090,7 +1090,8 @@ class TestCIEnvironmentCompatibility:
             "github.event_name == 'pull_request' || github.event_name == 'merge_group'"
         )
         assert (
-            'git fetch --no-tags --depth=1 origin "${{ github.base_ref || '
+            'git fetch --no-tags --depth=1 origin "${{ '
+            "github.event.repository.default_branch }}:refs/remotes/origin/${{ "
             'github.event.repository.default_branch }}"' in fetch_step["run"]
         )
 
