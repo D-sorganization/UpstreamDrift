@@ -78,3 +78,12 @@ in other environments do not establish native acceptance. Full-body anatomy,
 native contact force traces, grip and club dynamics, reserve audits, uncertainty,
 full-horizon mocap accuracy and clean-host reproduction remain required gates.
 See the binding [architecture review](../../../docs/development/feedback_controls/ASTRA_REVIEW.md).
+
+## Native Law and Contact Integration
+
+Main integration combines the listed native contact policy with both compliant
+Millard and Thelen laws. Adapter version1.2.1 retains ordered muscle laws,
+model-owned state minima and every contact/force policy field. The combined
+actual OpenSim4.6 suite passes106 cases; two extra-geometry tests are inapplicable
+to SmoothSphereHalfSpace and are skipped explicitly. These synthetic probes do
+not qualify full-body anatomy, capture matching or production contact.
