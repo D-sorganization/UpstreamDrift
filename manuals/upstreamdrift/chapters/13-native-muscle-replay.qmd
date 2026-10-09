@@ -11,9 +11,13 @@ controllers, prescribed motion/coordinates, locks and unsupported constraints
 are rejected through recursive component auditing, including components outside
 legacy ForceSet/ControllerSet containers. Recursively owned muscle paths must
 match the native muscle registry, preventing an undeclared undriven muscle. The early muscle-law domain policy
-supports Millard2012EquilibriumMuscle; other laws require explicit domain
-qualification. Initial and sampled trajectory activation/fiber state must
-respect native model-specific minima without clipping. Contact geometry counts
+supports Millard2012EquilibriumMuscle and Thelen2003Muscle with active activation
+and compliant tendon dynamics. Ignored activation/tendon modes fail before
+native initialization; other laws require explicit domain qualification.
+Initial and sampled trajectory activation/fiber state must respect each native
+instance's minima without clipping, and fiber length must remain positive.
+The zero-pennation Thelen fixture has a zero native minimum fiber length;
+the Millard numerical floor must not be copied to it. Contact geometry counts
 are metadata, not evidence of contact dynamics. Full anatomical/contact model
 qualification and capture matching remain open.
 
@@ -44,7 +48,9 @@ until their initialization is qualified.
 
 The receipt binds model bytes, ordered native state and muscle names, full
 continuous initial state, time grid, excitation samples, interpolation,
-integrator accuracy and installed provider version. Native applied excitations
+integrator accuracy, installed provider version and ordered concrete muscle
+laws. Adapter `native-muscle-replay/1.2.0` declares the executed subtype policy.
+Native applied excitations
 are checked at output times separately from native muscle forces. This local
 receipt is a development adapter; the versioned Tools bundle remains the
 durable interchange authority. The model file alone is not a complete hash of
@@ -54,8 +60,9 @@ qualification before use.
 ## Evidence and Limits
 
 `tests/opensim/test_native_muscle_replay.py` creates a genuine one-DOF native
-Millard2012EquilibriumMuscle fixture, including nonzero activation and compliant
-fiber state. Tests check restoring muscle motion, native applied commands,
+Millard2012EquilibriumMuscle and Thelen2003Muscle fixtures, including nonzero
+activation and compliant fiber state. Tests check independent restored native
+force, restoring muscle motion, native applied commands,
 same-policy reproduction, tighter-accuracy/output-grid refinement and rejection
 of invalid inputs, missing state and hidden drives. This is independent of
 capture fitting and is not a physiological parameter validation.
