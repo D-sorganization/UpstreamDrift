@@ -7,14 +7,14 @@ import math
 import os
 from pathlib import Path
 from types import TracebackType
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.golf_view_presets import VIEWER_FOV_Y_RAD
 
-Image8 = NDArray[np.uint8]
+Image8: TypeAlias = NDArray[np.uint8]
 CHROMIUM_ARGS = (
     "--use-gl=angle",
     "--use-angle=swiftshader",
