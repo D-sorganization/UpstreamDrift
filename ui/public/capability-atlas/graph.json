@@ -758,13 +758,13 @@
       "title": "Frankenstein drag-and-drop assembly with typed attachment ports",
       "status": "gap",
       "pyqt": "src/tools/model_explorer/frankenstein_editor/assembly_panel.py",
-      "api": null,
+      "api": "src/api/routes/model_explorer_assembly.py",
       "web": null,
       "issue": 11661,
       "reason": null,
       "pending_decision": false,
       "tiles": [],
-      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Web drag-and-drop is CMB-10 (#11661).",
+      "notes": "PyQt6 library tree + assembly canvas: drop parts on compatible typed ports with live composition validation, undo/redo and 3D preview refresh (CMB-9, #11660; ports and catalog CMB-8, #11659). Stateless REST over the same AssemblySession (parts, plan replay + drop evaluation, URDF/MJCF export) landed in CMB-10 slice 1; the web drag-and-drop canvas is still open (CMB-10, #11661).",
       "id": "tools.model_explorer.frankenstein_assembly"
     },
     {
@@ -3102,7 +3102,7 @@
   "inputs": {
     "src/config/models.yaml": "dece91b25bf128054b74ac90562668cf18dc75bc042360e96b3d4f42801c5414",
     "src/config/launcher_manifest.json": "2c1c60c07fbdc12466c114065a0a2ca1a839f58995850097b9648a9ac2d8f792",
-    "src/config/feature_parity.json": "71314b8627e13e5f0f0af563e3c79150813ac61511578c5acbc711fc6dd50092",
+    "src/config/feature_parity.json": "4e1ab51b32ae79beddc70d7ecdb9f2565421ea23f7390d143f173498ff14a267",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }
