@@ -102,6 +102,12 @@ impl BallTrajectoryResult {
         self.points.clone()
     }
 
+    /// Final two native states for landing interpolation without Python
+    /// conversion of the full trajectory. Returns fewer only if unavailable.
+    fn get_final_points(&self) -> Vec<TrajectoryPoint> {
+        self.points[self.points.len().saturating_sub(2)..].to_vec()
+    }
+
     /// Flatten trajectory to a list of `[t, x, y, z, vx, vy, vz]` tuples.
     fn to_flat_list(&self) -> Vec<Vec<f64>> {
         self.points

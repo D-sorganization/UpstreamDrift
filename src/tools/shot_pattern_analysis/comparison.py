@@ -17,6 +17,20 @@ def validate_comparison(summaries: list[dict[str, Any]]) -> None:
         for key in ("seed", "n_shots"):
             if summary["config"][key] != reference["config"][key]:
                 raise ValueError(f"Experiments must be matched on {key}")
+        for key in (
+            "club_id",
+            "club_speed_mps",
+            "loft_deg",
+            "attack_angle_deg",
+            "clubhead_mass_kg",
+            "lie_deg",
+            "shaft_lean_deg",
+            "dt_s",
+            "max_time_s",
+            "target_radius_m",
+        ):
+            if summary["config"].get(key) != reference["config"].get(key):
+                raise ValueError(f"Experiments must share a delivery baseline: {key}")
         if not math.isclose(
             summary["target_x_m"], reference["target_x_m"], abs_tol=1e-6
         ):
@@ -67,13 +81,16 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
                 )
             ):
                 values = [s["patterns"][pattern][key] * factor for s in summaries]
-                ax.bar(
-                    x + (index - 1) * 0.24,
-                    values,
-                    width=0.23,
-                    color=color,
-                    label=pattern,
-                )
+                if key == "mean_carry_m":
+                    ax.scatter(x + (index - 1) * 0.24, values, color=color, s=85)
+                else:
+                    ax.bar(
+                        x + (index - 1) * 0.24,
+                        values,
+                        width=0.23,
+                        color=color,
+                        label=pattern,
+                    )
             ax.set(title=title, ylabel=unit, xticks=x, xticklabels=labels)
             ax.grid(axis="y", alpha=0.15)
             ax.spines[["top", "right"]].set_visible(False)
@@ -85,7 +102,13 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
                     + 0.5,
                 )
         axes[0].legend(frameon=False)
-        fig.suptitle("Does More Curve Improve Shot Outcomes?", fontsize=29, y=0.92)
+        fig.suptitle(
+            "Historical Control: Superseded Impact Approximation"
+            if summaries[0].get("analysis_status") == "superseded_impact_approximation"
+            else "Does More Curve Improve Shot Outcomes?",
+            fontsize=26,
+            y=0.92,
+        )
         fig.text(
             0.5,
             0.84,
@@ -110,3 +133,21 @@ def export_comparison(bundles: list[Path], output: Path) -> Path:
         fig.savefig(output)
         plt.close(fig)
     return output
+
+
+def validate_scoring_comparison(summaries: list[dict[str, Any]]) -> None:
+    """Reject partial or incompatible API scoring before comparing estimates."""
+    validate_comparison(summaries)
+    for summary in summaries:
+        scoring = summary.get("approach_scoring", {})
+        if scoring.get("api_scored_shots") != 3 * summary["config"]["n_shots"]:
+            raise ValueError("The public scoring API must evaluate every shot")
+    baseline = summaries[0]["approach_scoring"]["baseline"]["table_sha256"]
+    radius = summaries[0]["approach_scoring"]["green_radius_m"]
+    for summary in summaries:
+        scoring = summary["approach_scoring"]
+        if (
+            scoring["baseline"]["table_sha256"] != baseline
+            or scoring["green_radius_m"] != radius
+        ):
+            raise ValueError("Scoring benchmarks and green layouts must match")

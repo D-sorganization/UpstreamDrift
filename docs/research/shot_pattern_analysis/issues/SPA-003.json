@@ -1,0 +1,6 @@
+{
+  "local_id": "SPA-003",
+  "title": "Replace Shot Pattern Results Generated With Superseded Impact Physics",
+  "body": "## Problem\n\nOriginal four 30,000-shot bundles used inconsistent friction physics.\n\n## Acceptance Criteria\n\nMark historical artifacts superseded; regenerate all final three-club comparisons with source/build receipts.\n\n## Validation\n\nCorrected experiment receipts and matched-seed validation\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
+  "publication_status": "pending_agent_bot_authentication"
+}

@@ -15,6 +15,8 @@ route was found on this host. No issue is claimed to have been filed or closed.
 | SPA-006 | Driver Approach Scoring Did Not Match Tee Context | Replacement Tee Scoring Pending | Requires Source-Verified Tee/Fairway/Rough Baselines and API Parity |
 | SPA-007 | Presets Could Be Mistaken for Measured Club/Player Data | Qualifications Required in Final Reports | Astra Identified Assumed 7-Iron Loft, Optimizer PW Example, and Static-Lie Assumptions |
 | SPA-008 | Physics Qualification Could Be Overstated | Scope Limits Required in Final Reports | Central Contact Only; Off-Center Club Rotation and Player Validation Remain Unqualified |
+| SPA-009 | Separating Contact Produced an Attracting Normal Impulse | Corrected Locally | Separating-Contact Regression Failed Then Passed; Zero Approach Remains No Impulse |
+| SPA-010 | Comparison Accepted Different Delivery Baselines | Corrected Locally | Three New Tests Failed Before the Baseline Contract; Eight Comparison Tests Passed |
 
 ## Regression and Resolution Requirements
 

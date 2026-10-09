@@ -1,0 +1,6 @@
+{
+  "local_id": "SPA-009",
+  "title": "Reject Separating Contact in the Rigid-Body Impact Solver",
+  "body": "## Problem\n\nNegative normal approach produces a negative normal impulse that attracts separating bodies. The experiment uses approaching impacts, so this defect does not alter its positive-contact shots.\n\n## Acceptance Criteria\n\nAdd a clear input contract rejecting separating contact; zero approach produces no impulse. Write the failing regression first and preserve approaching-contact behavior and conservation tests.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Keep open until the implementing PR merges.",
+  "publication_status": "pending_agent_bot_authentication"
+}

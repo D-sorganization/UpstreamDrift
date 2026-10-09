@@ -76,6 +76,41 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
         is delegated to the native Rust implementation for performance.
         Otherwise, falls back to the Python/Numba implementation.
         """
+        return self._post_process_rust(
+            self._simulate_native(launch, max_time, dt), launch
+        )
+
+    def simulate_landing(
+        self, launch: LaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> np.ndarray:
+        """Return interpolated first ground-contact position in metres.
+
+        Uses precisely the same native RK4 trajectory as ``simulate_trajectory``;
+        only its last two states cross into Python. No per-sample force or
+        trajectory-object reconstruction is performed. Raises if the time limit
+        is reached before ground contact. Linear interpolation matches the
+        historical shot-pattern landing convention.
+        """
+        result = self._simulate_native(launch, max_time, dt)
+        points = result.get_final_points()
+        if len(points) < 2 or points[-1].z > 0.0:
+            raise RuntimeError("flight exceeded max_time before landing")
+        previous, final = points
+        prev = np.array([previous.x, previous.y, previous.z])
+        end = np.array([final.x, final.y, final.z])
+        fraction = previous.z / (previous.z - final.z) if previous.z > 0 else 1.0
+        return prev + fraction * (end - prev)
+
+    def _simulate_native(
+        self, launch: LaunchConditions, max_time: float, dt: float
+    ) -> Any:
+        """Shared native call; retain all states inside Rust until requested."""
+        if (
+            not math.isfinite(max_time)
+            or not math.isfinite(dt)
+            or min(max_time, dt) <= 0
+        ):
+            raise ValueError("max_time and dt must be finite and positive")
         if launch is None:
             raise ValueError("launch must be provided")
         self._validate_launch_contract(launch)
@@ -134,7 +169,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             float(self.environment.wind_velocity[2]),
         ]
         logger.debug("Using Rust ball_flight trajectory (dt=%.4f)", dt)
-        rust_result = upstream_physics.simulate_ball_trajectory_py(
+        return upstream_physics.simulate_ball_trajectory_py(
             pos0,
             vel0,
             spin_axis,
@@ -145,7 +180,6 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             air_props,
             config,
         )
-        return self._post_process_rust(rust_result, launch)
 
     @staticmethod
     def _validate_launch_contract(launch: LaunchConditions) -> None:

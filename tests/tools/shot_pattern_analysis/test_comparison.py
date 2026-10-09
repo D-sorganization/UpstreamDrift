@@ -42,3 +42,25 @@ def test_mismatched_pairing_rejected(field, value):
 def test_empty_comparison_rejected():
     with pytest.raises(ValueError):
         validate_comparison([])
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("club_id", "seven_iron"), ("club_speed_mps", 36.0), ("loft_deg", 24.0)],
+)
+def test_different_delivery_baselines_rejected(field, value):
+    reference, other = _summary(), _summary()
+    reference["config"].update(club_id="driver", club_speed_mps=45.0, loft_deg=12.8)
+    other["config"].update(reference["config"])
+    other["config"][field] = value
+    with pytest.raises(ValueError, match="baseline"):
+        validate_comparison([reference, other])
+
+
+def test_scoring_comparison_rejects_partial_api_evaluation():
+    from src.tools.shot_pattern_analysis.comparison import validate_scoring_comparison
+
+    summary = _summary()
+    summary["approach_scoring"] = {"api_scored_shots": 90}
+    with pytest.raises(ValueError, match="every shot"):
+        validate_scoring_comparison([summary])

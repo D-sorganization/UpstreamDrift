@@ -1,0 +1,6 @@
+{
+  "local_id": "SPA-006",
+  "title": "Use Club-Appropriate Tee and Approach Scoring Contexts",
+  "body": "## Problem\n\nHistorical driver-to-green control does not answer the requested tee-shot context; distance bounds and baseline origin matter.\n\n## Acceptance Criteria\n\nSource-verify tee/fairway/rough benchmarks; score driver tee and irons/PW approaches; exact API cache parity and no extrapolation.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_scoring.py and corrected scoring receipts\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
+  "publication_status": "pending_agent_bot_authentication"
+}
