@@ -9,7 +9,8 @@ public responses (run ids are receipt SHA-256 digests from the ledger).
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
@@ -26,6 +27,7 @@ from src.tools.matched_swing_browser.model import MatchedSwingBrowserModel
 __all__ = [
     "MatchedSwingJobError",
     "MatchedSwingsService",
+    "PhysicalGate",
     "RunCapabilities",
     "RunSummary",
 ]
@@ -62,6 +64,34 @@ class RunCapabilities:
         }
 
 
+def _optional_float(value: object) -> float | None:
+    """Return ``value`` as a finite float, or None (unavailable, never zero)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value) if math.isfinite(value) else None
+
+
+@dataclass(frozen=True)
+class PhysicalGate:
+    """A single physical acceptance gate evaluated for a run (desktop parity,
+    see ``MatchedSwingBrowserWidget._populate_gates_info``)."""
+
+    name: str
+    status: str
+    measured: float | None
+    threshold: float | None
+    unit: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "status": self.status,
+            "measured": self.measured,
+            "threshold": self.threshold,
+            "unit": self.unit,
+        }
+
+
 @dataclass(frozen=True)
 class RunSummary:
     """Public ledger row summary — no absolute paths."""
@@ -77,6 +107,7 @@ class RunSummary:
     metrics: dict[str, float | None]
     capabilities: RunCapabilities
     reason: str | None = None
+    gates: list[PhysicalGate] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -91,6 +122,7 @@ class RunSummary:
             "metrics": self.metrics,
             "capabilities": self.capabilities.to_dict(),
             "reason": self.reason,
+            "gates": [gate.to_dict() for gate in self.gates],
         }
 
 
@@ -419,6 +451,7 @@ class MatchedSwingsService:
             metrics=metrics,
             capabilities=caps,
             reason=row.reason,
+            gates=self._extract_gates(row),
         )
 
     @staticmethod
@@ -428,6 +461,30 @@ class MatchedSwingsService:
         if isinstance(profile, str) and profile.strip():
             return profile.strip()
         return None
+
+    @staticmethod
+    def _extract_gates(row: LedgerRow) -> list[PhysicalGate]:
+        """Build the public gate list from the ledger acceptance block.
+
+        Mirrors ``MatchedSwingBrowserWidget._populate_gates_info`` so the web
+        and desktop clients render the same physical-gate evidence.
+        """
+        if not row.acceptance or "gates" not in row.acceptance:
+            return []
+        gates: list[PhysicalGate] = []
+        for gate in row.acceptance.get("gates") or []:
+            if not isinstance(gate, dict):
+                continue
+            gates.append(
+                PhysicalGate(
+                    name=str(gate.get("name", "gate")),
+                    status=str(gate.get("status", "")).upper(),
+                    measured=_optional_float(gate.get("measured")),
+                    threshold=_optional_float(gate.get("threshold")),
+                    unit=str(gate.get("unit", "m")),
+                )
+            )
+        return gates
 
     @classmethod
     def from_ledger_file(
