@@ -233,7 +233,11 @@ class MainWidget(QtWidgets.QWidget):
         layout.addWidget(self.status_label)
 
         self.mode_tabs = QtWidgets.QTabWidget(self)
-        self.mode_tabs.addTab(legacy_page, "Independent Pattern Comparison")
+        legacy_scroll = QtWidgets.QScrollArea()
+        legacy_scroll.setObjectName("independentPatternScroll")
+        legacy_scroll.setWidgetResizable(True)
+        legacy_scroll.setWidget(legacy_page)
+        self.mode_tabs.addTab(legacy_scroll, "Independent Pattern Comparison")
         from .matched_gui import MatchedStudyWidget
 
         self.matched_study = MatchedStudyWidget(self.mode_tabs)

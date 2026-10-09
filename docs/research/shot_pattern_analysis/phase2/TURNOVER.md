@@ -16,6 +16,10 @@ Read [Design](DESIGN.md), [Astra Review](ASTRA_REVIEW.md), [Validation](validati
 - Independent head-parameter sensitivity and analytical geometry derivatives are saved in `validation/`. Fixed twist SD does not imply fixed face SD. Driver closure gives left/short for these low-launch presets; iron/wedge closure gives left/long. Neither is a universal player claim.
 - Broad focused suite: 256 passed. Frozen physics/GUI/figure acceptance suite: 124 passed after the SG heatmap sample-count correction. The exact current source snapshot is accepted by Astra in immutable `FINAL_RUN_ACCEPTANCE.md` and validated by `final_acceptance.json`.
 
+## Publication Review Progress
+
+The GUI fits a 1000 × 760 launcher window with scrollable controls and readable correlation headers; 27 UI tests, focused Ruff and mypy pass. Offscreen screenshots and the review receipt are in `validation/gui_layout_review.json`. Final report and figure builders are implemented; Astra is correcting publication-only labeling, protocol guards, input integrity and planned-versus-attempted count reporting. These changes do not modify the frozen execution snapshot. The preliminary pre-PR run remains failed/incomplete; inventory and audit-script typing findings are fixed, while frozen-source formatting/type-only fixes wait until production completes. Unrelated API authentication fixture failures are tracked in [#11995](https://github.com/D-sorganization/UpstreamDrift/issues/11995), with source-equivalent baseline evidence in `review_followups/`.
+
 ## Completed Pilots
 
 `pilot_v1`: all 324 planned cells accounted for; 270 completed, 54 unavailable; all 25,920 sampled rows supported. Independent audit checked 1,770 artifact hashes, exact seeded input pairing, statistics/covariance and direct public-API scoring. Original tool sessions returned 143 despite complete artifacts; the audit accepts artifacts, not successful process exit.

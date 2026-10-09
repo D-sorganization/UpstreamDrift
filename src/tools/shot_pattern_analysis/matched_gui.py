@@ -62,6 +62,14 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         )
         intro.setWordWrap(True)
         root.addWidget(intro)
+        controls = QtWidgets.QWidget()
+        controls_layout = QtWidgets.QVBoxLayout(controls)
+        controls_layout.setContentsMargins(0, 0, 0, 0)
+        self.controls_scroll = QtWidgets.QScrollArea()
+        self.controls_scroll.setObjectName("matchedControlsScroll")
+        self.controls_scroll.setWidgetResizable(True)
+        self.controls_scroll.setWidget(controls)
+        root.addWidget(self.controls_scroll, stretch=2)
 
         self.output_edit = QtWidgets.QLineEdit(
             str(Path.cwd() / "matched_delivery_results")
@@ -98,7 +106,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         form.addRow("Target Downrange (m; 0 = match within lean)", self.target_distance)
         form.addRow("Nominal Match Tolerance (m)", self.match_tolerance)
         form.addRow("Target Radius (m)", self.target_radius)
-        root.addLayout(form)
+        controls_layout.addLayout(form)
 
         club_box = QtWidgets.QGroupBox("Illustrative Club Assumptions")
         club_form = QtWidgets.QFormLayout(club_box)
@@ -161,7 +169,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         club_form.addRow(self.contact_law_help)
         club_form.addRow(self.static_loft_label)
         club_form.addRow(self.assumption_label)
-        root.addWidget(club_box)
+        controls_layout.addWidget(club_box)
         self._set_club_values(self.club_config)
 
         noise_box = QtWidgets.QGroupBox("Delivery Variation (Gaussian SD Assumptions)")
@@ -183,17 +191,32 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             )
             self.noise_inputs[field] = control
             noise_form.addRow(label, control)
-        root.addWidget(noise_box)
+        controls_layout.addWidget(noise_box)
 
         corr_box = QtWidgets.QGroupBox("Editable Input Correlation Matrix")
         corr_layout = QtWidgets.QVBoxLayout(corr_box)
         self.correlation_table = QtWidgets.QTableWidget(7, 7)
-        self.correlation_table.setHorizontalHeaderLabels(
-            [f.replace("_", " ") for f in NOISE_FIELDS]
+        correlation_labels = (
+            "Shaft Twist",
+            "Path",
+            "Speed",
+            "Toe/Heel",
+            "High/Low",
+            "Shaft Lean",
+            "Attack",
         )
-        self.correlation_table.setVerticalHeaderLabels(
-            [f.replace("_", " ") for f in NOISE_FIELDS]
-        )
+        self.correlation_table.setHorizontalHeaderLabels(correlation_labels)
+        self.correlation_table.setVerticalHeaderLabels(correlation_labels)
+        header_view = self.correlation_table.horizontalHeader()
+        assert header_view is not None
+        header_view.setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
+        for index, field in enumerate(NOISE_FIELDS):
+            tooltip = f"{self._DISPLAY[field][0]} • Export Field: {field}. Correlations are dimensionless."
+            horizontal_item = self.correlation_table.horizontalHeaderItem(index)
+            vertical_item = self.correlation_table.verticalHeaderItem(index)
+            assert horizontal_item is not None and vertical_item is not None
+            horizontal_item.setToolTip(tooltip)
+            vertical_item.setToolTip(tooltip)
         self._setting_correlation = False
         for i in range(7):
             for j in range(7):
@@ -223,7 +246,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
         )
         self.correlation_help.setWordWrap(True)
         corr_layout.addWidget(self.correlation_help)
-        root.addWidget(corr_box, stretch=1)
+        controls_layout.addWidget(corr_box)
 
         actions = QtWidgets.QHBoxLayout()
         self.run_button = QtWidgets.QPushButton("Run Matched Study")
@@ -263,7 +286,7 @@ class MatchedStudyWidget(QtWidgets.QWidget):
             preview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.previews.addTab(self.preview, "Endpoint Density")
         self.previews.addTab(self.overhead_preview, "Raw Flight Trajectories")
-        root.addWidget(self.previews)
+        root.addWidget(self.previews, stretch=1)
 
     def _set_club_values(self, config: MatchedConfig) -> None:
         was_applying_config = self._applying_config

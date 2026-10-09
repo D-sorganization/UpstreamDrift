@@ -334,3 +334,69 @@ def test_cleanup_joins_an_active_matched_worker(qapp, tmp_path, monkeypatch) -> 
     assert widget.cleanup()
     assert not widget.action_bar.is_running
     assert not list(tmp_path.iterdir())
+
+
+def test_matched_delivery_controls_fit_launcher_height_with_scroll(qapp) -> None:  # noqa: ANN001
+    from PyQt6 import QtCore, QtWidgets
+
+    widget = _study(qapp)
+    try:
+        widget.resize(1000, 760)
+        widget.show()
+        qapp.processEvents()
+        assert widget.height() <= 760
+        assert widget.rect().contains(
+            widget.run_button.mapTo(widget, QtCore.QPoint(0, 0))
+        )
+        scroll = widget.findChild(QtWidgets.QScrollArea, "matchedControlsScroll")
+        assert scroll is not None
+        assert scroll.widgetResizable()
+        assert scroll.verticalScrollBar().maximum() > 0
+        scroll.ensureWidgetVisible(widget.correlation_table)
+        qapp.processEvents()
+        origin = widget.correlation_table.mapTo(scroll.viewport(), QtCore.QPoint(0, 0))
+        assert (
+            scroll.viewport()
+            .rect()
+            .intersects(QtCore.QRect(origin, widget.correlation_table.size()))
+        )
+    finally:
+        widget.cleanup()
+        widget.close()
+
+
+def test_launcher_matched_tab_respects_embedded_minimum_height(qapp) -> None:  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.gui import MainWidget
+
+    widget = MainWidget()
+    try:
+        widget.mode_tabs.setCurrentIndex(1)
+        widget.resize(1000, 760)
+        widget.show()
+        qapp.processEvents()
+        assert widget.height() <= 760
+    finally:
+        widget.cleanup()
+        widget.close()
+
+
+def test_correlation_headers_are_readable_and_identify_export_fields(qapp) -> None:  # noqa: ANN001
+    from src.tools.shot_pattern_analysis.noise import NOISE_FIELDS
+
+    widget = _study(qapp)
+    try:
+        widget.resize(1000, 760)
+        widget.show()
+        qapp.processEvents()
+        table = widget.correlation_table
+        metrics = table.horizontalHeader().fontMetrics()
+        for column, field in enumerate(NOISE_FIELDS):
+            header = table.horizontalHeaderItem(column)
+            assert field in header.toolTip()
+            assert (
+                table.columnWidth(column)
+                >= metrics.horizontalAdvance(header.text()) + 8
+            )
+    finally:
+        widget.cleanup()
+        widget.close()
