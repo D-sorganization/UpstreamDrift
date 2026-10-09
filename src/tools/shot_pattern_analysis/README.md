@@ -15,12 +15,48 @@ with energetic restitution; the Newton impulse law is a separate comparator.
 Install optional acceleration with `pip install -e '.[shot-pattern-acceleration]'`.
 All head properties beyond documented loft/lie remain research assumptions.
 
-See the [Matched Study Design](../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md)
+See the [Matched Study Design](../../../docs/research/shot_pattern_analysis/phase2/DESIGN.md),
+the [Reviewed Design PDF](../../../docs/research/shot_pattern_analysis/phase2/matched_delivery_reference.pdf),
 and [Turnover](../../../docs/research/shot_pattern_analysis/phase2/TURNOVER.md).
 The commands and results below describe the historical phase-one controls.
-Phase-two final results remain pending the documented pilot and review gates.
+Phase-two pilots and execution gates have passed; the final matrices are running.
+Final conclusions require the complete source-bound results and independent audit.
 
-## Run an Analysis
+### Configure the Matched Study
+
+1. Select Driver, 7-Iron, or Pitching Wedge and set static loft and forward lean.
+   Static loft is a club-face geometry input; delivered loft is calculated after
+   lean and shaft rotation. Driver 10° loft at 10° forward lean can be nonairborne.
+2. Choose curve strength and the nominal target. Matching adjusts face, path and
+   speed within declared bounds; it never rotates the finished trajectories.
+3. Set each delivery SD in its displayed units. Shaft rotation SD is not face-angle
+   SD: delivered face angle is a derived output. Strike SD applies separately to
+   heel/toe and high/low position. Zero SD holds a variable exactly fixed.
+4. Enter correlations in the symmetric seven-variable matrix. The diagonal is one;
+   a non-positive-semidefinite matrix is rejected. A shaft/path correlation is not
+   an exact delivered face/path correlation; inspect realized output covariance.
+5. Run into a new output directory. Review matching status and supported-shot
+   counts before interpreting density or conditional strokes gained. Unsupported
+   samples remain in the export and are never replaced with extra draws.
+
+Save/load configuration controls retain the full input specification. A cancelled
+or failed export does not publish a complete result directory. Both contact laws
+are research assumptions; the incremental energetic law is the reviewed primary
+pathway and the Newton impulse law is a sensitivity comparator.
+
+For a small headless matched matrix:
+
+```bash
+QT_QPA_PLATFORM=offscreen MPLBACKEND=Agg \
+  python -m src.tools.shot_pattern_analysis.matched_matrix /tmp/matched-pilot \
+  --stage pilot --shots 32 --profiles shaft_only combined2 --figures selected
+```
+
+The final research matrix uses exactly 10,000 shots per pattern and requires a
+reviewed acceptance JSON matching current source, runtime and evidence hashes.
+See the phase-two Turnover for final run commands and archive restoration.
+
+## Run a Historical Phase-One Analysis
 
 From the repository root, with the native `upstream-physics` wheel installed,
 select the Shot Pattern Analysis tile or run

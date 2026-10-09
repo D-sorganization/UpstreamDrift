@@ -730,7 +730,7 @@ models:
 
   - id: "shot_pattern_analysis"
     name: "Shot Pattern Analysis"
-    description: "Compare paired straight, draw, and fade patterns with adjustable face SD and curve magnitude. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel."
+    description: "Compare straight, draw, and fade patterns with matched delivery, shaft rotation, strike variation, and covariance. Install: pip install -e '.[gui-tools]'; requires the native upstream-physics wheel."
     type: "special_app"
     path: "src/tools/shot_pattern_analysis/__main__.py"
     capabilities:

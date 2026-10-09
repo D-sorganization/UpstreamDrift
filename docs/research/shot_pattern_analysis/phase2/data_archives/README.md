@@ -48,6 +48,6 @@ python -m scripts.research.shot_pattern_analysis.archive_data \
 
 The publisher rejects existing destinations, nested output directories, hidden
 pending work, symbolic links, and files larger than one archive budget. It verifies
-every stored payload before atomically publishing the bundle. Seven focused tests
+every stored payload before atomically publishing the bundle. Twelve focused tests
 cover reproducibility, round-trip bytes, corruption, inventory completeness, and
-input rejection. ZIP storage deliberately preserves existing compressed bytes.
+input rejection, publication-time source changes, and unsafe ZIP member metadata. ZIP storage deliberately preserves existing compressed bytes.

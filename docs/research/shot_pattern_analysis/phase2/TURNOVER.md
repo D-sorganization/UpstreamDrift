@@ -24,7 +24,7 @@ Read [Design](DESIGN.md), [Astra Review](ASTRA_REVIEW.md), [Validation](validati
 
 Numerical sources are unchanged between pilots. Only declared plotting/export-snapshot/matrix-selection sources changed; `validation/source_transition_review.json` records the exact union-of-paths diff. The new snapshot includes the final SG-count annotation fix and is independently accepted. Never rewrite historical execution hashes.
 
-Pilot figure reviews are under `pilot_v1/figure_review/`. Use the final simulation-labelled rerenders; earlier layouts are explicitly superseded. Final 10,000-shot matrices are running; do not treat partial outputs as final results.
+Pilot data and figures are committed losslessly as bounded archives in `data_archives/`; see its README for verification and restoration. Unpacked local roots remain present and ignored by Git. Pilot figure reviews are under `pilot_v1/figure_review/`. Use the final simulation-labelled rerenders; earlier layouts are explicitly superseded. Final 10,000-shot matrices are running; do not treat partial outputs as final results.
 
 ## Immediate Next Steps
 
@@ -57,6 +57,8 @@ python -m src.tools.shot_pattern_analysis.matched_matrix CONTROL_OUTPUT \
 ```
 
 Run the second shard with index 1. Review current `--help` before execution. Source snapshots include numerical sources, rendering/orchestration, native binary identity and scientific runtime versions. Preserve every accepted source snapshot and its evidence files unchanged during execution.
+
+The five-page `matched_delivery_reference.pdf` was generated with the tested ReportLab renderer and all five pages visually checked; see `validation/design_pdf_review.json`. It is separate from LaTeX compiler acceptance.
 
 The standalone LaTeX reference is regenerated from `DESIGN.md` via `pandoc --from=gfm+tex_math_dollars --to=latex --standalone`. Built-in compilation is unverified because Tectonic cannot fetch its uncached bundle; the separate ReportLab PDF must be rendered and visually reviewed before delivery.
 

@@ -11,9 +11,10 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import tempfile
 import zipfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import IO, Any
 
 
@@ -31,7 +32,12 @@ def _sha(path: Path) -> str:
 
 def _member_name(name: str) -> None:
     path = PurePosixPath(name)
-    if path.is_absolute() or ".." in path.parts or "\\" in name:
+    if (
+        path.is_absolute()
+        or PureWindowsPath(name).drive
+        or ".." in path.parts
+        or "\\" in name
+    ):
         raise ValueError("unsafe archive member name")
 
 
@@ -112,6 +118,18 @@ def build_archives(
             json.dumps(manifest, indent=2, sort_keys=True) + "\n"
         )
         verify_archives(temporary)
+        current = sorted(source.rglob("*"))
+        if current != inventory or any(path.is_symlink() for path in current):
+            raise ValueError("source changed before publication: inventory")
+        for path in files:
+            member = path.relative_to(source.parent).as_posix()
+            expected = manifest["files"][member]
+            if (
+                not path.is_file()
+                or path.stat().st_size != expected["bytes"]
+                or _sha(path) != expected["sha256"]
+            ):
+                raise ValueError(f"source changed before publication: {member}")
         os.rename(temporary, output)
         return manifest
     finally:
@@ -135,6 +153,8 @@ def verify_archives(output: Path) -> int:
         with zipfile.ZipFile(archive) as bundle:
             for info in bundle.infolist():
                 member = info.filename
+                if not stat.S_ISREG(info.external_attr >> 16):
+                    raise ValueError(f"archive member must be a regular file: {member}")
                 _member_name(member)
                 entry = manifest["files"].get(member)
                 if member in seen or entry is None or entry["archive"] != name:

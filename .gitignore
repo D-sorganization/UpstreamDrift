@@ -298,5 +298,5 @@ test_event_filter.py
 /docs/research/shot_pattern_analysis/phase2/control_pilot_v1/
 /docs/research/shot_pattern_analysis/phase2/final_v1/
 /docs/research/shot_pattern_analysis/phase2/control_final_v1/
-/docs/research/shot_pattern_analysis/phase2/presentation_preview/
+/docs/research/shot_pattern_analysis/phase2/presentation_preview*/
 !docs/research/shot_pattern_analysis/phase2/data_archives/**/*.zip
