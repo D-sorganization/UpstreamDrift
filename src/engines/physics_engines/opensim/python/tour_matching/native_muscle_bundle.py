@@ -139,7 +139,7 @@ def _prepare(
     if raw != path.read_bytes():
         raise ValueError("source model changed during native load")
     _audit_components(model)
-    muscles, muscle_names = muscle_replay._admit_native_muscles(model, controls)
+    muscles, muscle_names = muscle_replay._admit_native_muscles(model, controls, ())
     coordinates = model.getCoordinateSet()
     if any(
         coordinates.get(i).getDefaultClamped() for i in range(coordinates.getSize())

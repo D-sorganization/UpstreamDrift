@@ -14,8 +14,10 @@ DRY, LoD, architecture, canonical governance and generated context pass.
 Central mypy uses MYPYPATH equal to the repository root: its default dual
 src/root path assigns two module names to the same OpenSim facade; the single
 canonical package root passes without suppressions. Default-Python provider
-skips are excluded from physics evidence. The expanded suite requires final
-gates again after the native-contact parent integration.
+skips are excluded from physics evidence. Combined native-contact/Thelen parent564a4657e1 is integrated locally. The
+actual combined suite passes134 tests with2 inapplicable contact-fixture skips;
+all five final central gates pass. Native policy1.3.1 preserves exact concrete
+law admission and the parent listed-contact identity.
 
 ## Native Reproduction
 
@@ -35,8 +37,9 @@ The component subset is deliberately narrow. Source review does not prove
 binary equivalence. Negative capability, input/policy, external-resource and runtime identity
 cases are now covered. Required native capabilities cannot be replaced by
 other valid capabilities. A self-contained XML audit rejects external file
-references before native loading. Initialization derivative/force checks and
-combined contact-parent integration remain pending before publication. Owned immutable source snapshots and the returned model digest bind actual replay.
+references before native loading. Initialization derivative/force checks remain pending for full-model
+qualification. The bundle adapter still excludes contact; the shared kernel
+retains its separately explicit listed-contact policy. Owned immutable source snapshots and the returned model digest bind actual replay.
 The source-replacement regression verifies that changes to the caller file after
 admission do not change executed bytes.
 

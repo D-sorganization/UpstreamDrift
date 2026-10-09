@@ -62,8 +62,10 @@ force rejection. Self-contained XML admission rejects external resources
 before native loading; required owned capabilities cannot be replaced. These
 are synthetic development fixtures only. The source-byte ownership and explicit-unit regressions also pass. Scoped
 mypy, all five central gates, DRY, LoD, architecture, canonical governance and
-generated-context checks pass. The expanded law/admission suite requires final central gates after contact
-parent integration. Derivative/force initialization audits and publication
+generated-context checks pass. After genuine contact-parent integration,134 actual native tests pass with
+two inapplicable contact-fixture skips. Shared kernel policy1.3.1 combines
+exact concrete-law admission with listed native-contact identity. The bundle
+subset continues to exclude contact. All five final central gates pass. Derivative/force initialization audits and publication
 remain pending at this checkpoint.
 
 The 520-muscle candidate has locked coordinates, couplers and non-muscle

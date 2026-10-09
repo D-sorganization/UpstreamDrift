@@ -418,6 +418,42 @@ class OpenSimForceTorqueSource:
             return None
         return spheres[0], planes[0]
 
+    def validate_ground_contact_paths(self, paths: tuple[str, ...]) -> None:
+        """Require exactly one sphere and ground-fixed plane per replay force.
+
+        This bounded replay policy reports the sphere-side wrench. General
+        overlay rendering may omit unsupported geometry; independent replay
+        must reject it, including extra geometry or a moving other body.
+        """
+        catalog = self._model.getContactGeometrySet()
+        for path in paths:
+            force = self._model.getComponent(path)
+            smooth = opensim.SmoothSphereHalfSpaceForce.safeDownCast(force)
+            if smooth is None:
+                names = _geometry_names(force)
+                if (
+                    len(names) != 2
+                    or len(set(names)) != 2
+                    or not all(catalog.contains(name) for name in names)
+                ):
+                    raise ValueError(
+                        "native contact requires exactly two supported geometries"
+                    )
+            pair = self._contact_geometry(force)
+            if pair is None:
+                raise ValueError(
+                    "native contact requires one sphere and one half-space"
+                )
+            sphere, plane = pair
+            base = plane.getFrame().findBaseFrame()
+            if opensim.Ground.safeDownCast(base) is None:
+                raise ValueError("native replay requires a ground-fixed half-space")
+            if (
+                opensim.Ground.safeDownCast(sphere.getFrame().findBaseFrame())
+                is not None
+            ):
+                raise ValueError("native replay requires a non-ground contact sphere")
+
     @staticmethod
     def _record(force: Any, state: Any, prefix: str) -> np.ndarray | None:
         """Body force then torque (ground frame) from the force's report values."""

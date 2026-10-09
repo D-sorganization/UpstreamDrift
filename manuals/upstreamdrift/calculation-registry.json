@@ -129,6 +129,16 @@
       "id": "UP-D1-native-exact-muscle-law-inventory",
       "owner": "UpstreamDrift issue #11867",
       "resolution": "Inventory exact concrete Millard2012EquilibriumMuscle/Thelen2003Muscle admission before native initialization in muscle_replay.py and chapter13. Native casts remain necessary for state-domain getters but inheritance is not qualification of an unknown derived law. Proxy identity negative tests preserve native cast success and trap initialization; they do not validate a compiled plugin. Adapter1.3.0 hashes the exact-class admission policy. All anatomy, path consistency, contact, full-state full-capture and manual-release gates remain open."
+    },
+    {
+      "id": "UP-D1-lift-pack-audit-inventory",
+      "owner": "UpstreamDrift issue #11751",
+      "resolution": "Inventory the LIFT-1 (#11741) cross-engine lift model pack audit in src/shared/python/lifting/pack_audit/ (frames.py, geometry.py, poses.py, baseline.py, analysis.py, gaps.py and the per-engine adapters) documented provisionally in chapters/15-lift-pack-audit.qmd: the OpenSim Y-up to canonical Z-up rotation, the sleeve-defined bar axis, per-hand lateral offset and perpendicular hand-to-bar distance, foot-midpoint pose summaries, pelvis-relative same-input pairwise parity over the standard and generic lift-shape poses, the lifter-only CoM with bar and bench removed (zero mass-centre offset assumed), segment mass and joint-limit deviation against the biomech parity standard, grip half-width mismatch, start-pose bar height above the lowest foot contact against the 0.225 m plate radius, reference FK error and the measured discrepancy list mapped to per-pack issues. Unavailable values (Drake/Pinocchio contact force and closure, lifter CoM without lifter mass, bar height without foot geometry) are None with a reason, never zero. tests/unit/lifting/pack_audit/ and docs/development/lifting/PACK_PARITY_BASELINE.md establish software parity between the packs at recorded commits; they do not simulate a lift, compute joint moments, spine loads or muscle forces, compare against measured lifts, or establish an uncertainty. The 0.01 m grip and 0.05 m floor-height thresholds are audit flags, not acceptance limits."
+    },
+    {
+      "id": "UP-D1-native-muscle-contact-inventory",
+      "owner": "UpstreamDrift issue #11815",
+      "resolution": "Inventory explicit native contact policies in tour_matching/muscle_replay.py and chapters/17-native-muscle-contact.qmd. Actual synthetic OpenSim smooth sphere/half-space tests establish native wrench direction, independent replay repeatability, contact-dependent motion and numerical refinement only. Contact calibration, smoothing leakage budgets, HuntCrossley law parity, full-body anatomy/grip and full-horizon private mocap qualification remain open."
     }
   ],
   "calculations": []
