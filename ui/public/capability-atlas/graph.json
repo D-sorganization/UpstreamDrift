@@ -79,7 +79,7 @@
       "tiles": [
         "ground_reaction_plots"
       ],
-      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero.",
+      "notes": "GCV-5 (#11711): one plot series (biomechanics.ground_reaction_plot_model, built from the GCV-1 GroundReactionSeries) feeds the PyQt6 Ground Reaction Plots tile (six-panel sheet from plotting.renderers.ground_reaction), GET /api/analysis/ground-reaction and the web GroundReactionCharts on the Analysis Tools page, so both surfaces draw the same panels with address/top/impact/finish markers. CoP and load share are null below 10 N of vertical load; an engine without ground reaction (Simscape until GCV-3) is shown as unavailable with its reason, never as zero. GCV-2 (#11708): MuJoCo, MyoSuite, Drake and OpenSim emit the contact:grf_/free_moment_/moment_com_ breakdown from their native contacts, Pinocchio from caller-supplied shared-contact-law samples, Simscape reports unavailable; GCV-6 (#11712): every CoP routes through biomechanics.ground_reaction.",
       "id": "analysis.ground_reaction"
     },
     {
@@ -3132,7 +3132,7 @@
   "inputs": {
     "src/config/models.yaml": "e11682df79d7467f1eba9579d835f5d7019bfd7eb09cf81c14e22bd08d0bf844",
     "src/config/launcher_manifest.json": "1ae28f872b54c237440fcaacec40b735b93a7b80d710adc9228ef671b7831032",
-    "src/config/feature_parity.json": "175efe0624320b8cd6a149029ad5cc848834ccc5a27aef9f3fe243dae7fe50da",
+    "src/config/feature_parity.json": "78d2ce935fc24bbdc7b3978ff9f82f68c2354deb495e861220d5c69d72386268",
     "src/config/capability_connections.json": "9253d79d136ebb217a46ff83883125ed0db6c042d95a92c9de06a7e5a9ec5915",
     "src/tools/capture_rig/workflow.py": "816a2932ee0bfea69aa244eb005abba3de938bdfc956b2632910258b30b1ee29"
   }

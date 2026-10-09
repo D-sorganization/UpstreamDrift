@@ -1,6 +1,6 @@
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
-Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.0` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
+Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.1` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
 
 `tour_matching.replay_muscle_excitations` restores complete named continuous state, plays bounded linear native muscle excitation inputs, and cold-starts Runge-Kutta-Merson once without observations, feedback or resets. It audits actual native applied excitations and binds state/input/model/policy identities. Existing controllers, prescribed coordinates, non-muscle actuators and undeclared non-muscle forces fail closed. This early fixture does not qualify discrete/plugin initialization, contact, full-body anatomy or mocap matching; #11791 remains open. The revised feedback-controls milestone DAG separates schema/provider readiness from scientific acceptance and private evidence delivery.
 
@@ -10378,6 +10378,18 @@ Enables owner capture (`capture-O`) resolution through the MuJoCo native ground-
 - Contact ground calibration via `prepare_hip_spec` aligns toe contact boundaries to meet ground-support specification tolerances.
 - Timeline samples past capture durations are skipped cleanly rather than clamped; short capture root errors report `None` safely.
 - Divergence inventory and matched swing ledger reconciled with full unit test coverage.
+# Native Torque Replay Development Boundary
+
+F06a (#11823, parent #11790) consumes the Tools experiment-replay bundle through
+actual native MuJoCo stepping for unit hinge motors. Full `mjSTATE_INTEGRATION`,
+distinct `nq`/`nv`, post-limit held torque, exact model/provider/policy identity
+and uninterrupted no-reset execution are required. Canonical calculation
+reference: `manuals/upstreamdrift/chapters/19-native-torque-replay.qmd`.
+Turnover: `docs/development/feedback_controls/F06_NATIVE_TORQUE_TURNOVER.md`.
+Tools T01 is consumed through merged pin
+`2e7665111b06f92ffbfe178b92d74d6a81c95388` and the UD-owned seam helper.
+Six-engine and muscular OpenSim real-capture gates remain open.
+
 ## Native Thelen Replay Boundary (F07b, #11826)
 
 Early native excitation replay explicitly admits compliant Thelen2003Muscle
@@ -10386,7 +10398,6 @@ length, complete restoration, ordered law identity and ignored-mode refusal
 are required. Canonical reference: native muscle replay chapter; turnover:
 `docs/development/feedback_controls/F07_THELEN_REPLAY_TURNOVER.md`. Full-body,
 contact/grip, licensing and real-capture scientific gates remain open.
-
 ## Controlled-Swing Comparison Admission (F01, #11785)
 
 `src/engines/feedback_comparison.py` projects the authoritative
@@ -10417,3 +10428,17 @@ cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
 fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
+
+## Native OpenSim Marker Geometry (F07/F08, #11903)
+
+Explicit native model/frame/station bindings supply actual OpenSim geometry to
+shared calibration and trajectory IK. Selected coordinates must be independent;
+native assembly must achieve them, preserve other independent coordinates and
+respect every source range, including dependent coordinates. Metadata-only
+geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
+opt into TRF in the existing shared trajectory solver; default LM is unchanged.
+The three-sample pelvis diagnostic retains source clock, hashes, native identity,
+residuals and failures through existing frozen-loader/TRC contracts. Its source
+candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
+registration and anatomical calibration are unresolved. Canonical authority is
+chapter26; no capture, whole-body or full-state replay acceptance is claimed.

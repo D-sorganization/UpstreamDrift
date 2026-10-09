@@ -59,21 +59,32 @@ def test_native_contact_is_explicit_and_recorded_without_external_drive(
 ) -> None:
     path, initial = contact_muscle_fixture
     times = np.linspace(0, 0.04, 17)
-    kwargs = {"contact_force_paths": ("/forceset/native_contact",)}
+    contact_paths = ("/forceset/native_contact",)
     first = replay_muscle_excitations(
-        path, initial, times, {"flexor": times * 0 + 0.4}, **kwargs
+        path,
+        initial,
+        times,
+        {"flexor": times * 0 + 0.4},
+        contact_force_paths=contact_paths,
     )
     repeat = replay_muscle_excitations(
-        path, initial, times, {"flexor": times * 0 + 0.4}, **kwargs
+        path,
+        initial,
+        times,
+        {"flexor": times * 0 + 0.4},
+        contact_force_paths=contact_paths,
     )
     assert first.policy["force_policy"] == "muscle-gravity-and-listed-native-contact"
     assert first.policy["contact_frame"] == "world-z-up"
     assert len(first.contact_wrenches) == len(times)
     assert all(len(frame) == 1 for frame in first.contact_wrenches)
-    assert first.contact_wrenches[-1][0].force_n[0] > 0
+    final_force = first.contact_wrenches[-1][0].force_n
+    initial_force = first.contact_wrenches[0][0].force_n
+    assert final_force is not None and initial_force is not None
+    assert final_force[0] > 0
     # Fixture-specific smoothing leakage at initial geometric touch is small
     # relative to its 10 N maximum-isometric muscle force, never assumed zero.
-    assert abs(first.contact_wrenches[0][0].force_n[0]) < 0.01
+    assert abs(initial_force[0]) < 0.01
     assert first.contact_wrenches[-1][0].label == "contact:native_contact"
     assert first.contact_wrenches == repeat.contact_wrenches
     np.testing.assert_allclose(first.states, repeat.states, atol=1e-10, rtol=0)
@@ -105,7 +116,9 @@ def test_fixture_contact_leakage_is_bounded_across_off_contact_gap_sweep(
     )
     # Smooth off-contact leakage is nonmonotone near touch. Sweep the frozen
     # fixture's gaps; do not infer zero leakage from its exact-touch value.
-    assert abs(result.contact_wrenches[0][0].force_n[0]) < 0.01
+    force = result.contact_wrenches[0][0].force_n
+    assert force is not None
+    assert abs(force[0]) < 0.01
 
 
 def test_moving_halfspace_requires_bilateral_contact_evidence_policy(
@@ -314,7 +327,9 @@ def test_native_replay_preserves_complete_nonzero_initial_state(
     assert first.policy["state_resets"] is False
     native_model = pytest.importorskip("opensim").Model(str(path))
     actual_law = native_model.getMuscles().get(0).getConcreteClassName()
-    assert actual_law in first.policy["muscle_laws"]
+    muscle_laws = first.policy["muscle_laws"]
+    assert isinstance(muscle_laws, str)
+    assert actual_law in muscle_laws
     assert first.policy["muscle_class_policy"] == "exact-supported-concrete-law/1.0.0"
 
 

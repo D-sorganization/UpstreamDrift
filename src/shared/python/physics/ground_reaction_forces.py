@@ -22,6 +22,7 @@ Cross-engine consistency thresholds:
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -62,16 +63,19 @@ class GroundReactionForce:
     Attributes:
         force: GRF vector in global frame [N] (3,)
         moment: GRF moment about origin [N·m] (3,)
-        cop: Center of pressure position [m] (3,)
+        cop: Center of pressure position [m] (3,), or ``None`` when unavailable
         timestamp: Time of measurement [s]
         foot_side: Which foot (LEFT, RIGHT, or COMBINED)
+        estimated: True when the force is a static-weight estimate rather than
+            a contact measurement (legacy fallback; not for new features)
     """
 
     force: np.ndarray
     moment: np.ndarray
-    cop: np.ndarray
+    cop: np.ndarray | None
     timestamp: float
     foot_side: FootSide = FootSide.COMBINED
+    estimated: bool = False
 
 
 @dataclass
@@ -261,39 +265,26 @@ def compute_cop_from_grf(
     force: np.ndarray,
     moment: np.ndarray,
     ground_height: float = 0.0,
-) -> np.ndarray:
-    """Compute center of pressure from GRF and moment.
+) -> np.ndarray | None:
+    """Deprecated shim for :func:`biomechanics.ground_reaction.center_of_pressure`.
 
-    The COP is where the vertical GRF acts to produce the measured moment.
-
-    COP_x = -M_y / F_z
-    COP_y = M_x / F_z
-    COP_z = ground_height
-
-    Args:
-        force: GRF vector [N] (3,)
-        moment: Moment about origin [N·m] (3,)
-        ground_height: Height of ground plane [m]
-
-    Returns:
-        COP position [m] (3,)
+    ``moment`` is the moment about the world origin.  Returns ``None`` (never a
+    zero position) when the vertical force is below the canonical 10 N
+    threshold.
     """
+    warnings.warn(
+        "compute_cop_from_grf is deprecated; use "
+        "src.shared.python.biomechanics.ground_reaction.center_of_pressure",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from src.shared.python.biomechanics.ground_reaction import center_of_pressure
+
     force = np.asarray(force)
     moment = np.asarray(moment)
     require(force.shape == (3,), "force must be a (3,) vector", force.shape)
     require(moment.shape == (3,), "moment must be a (3,) vector", moment.shape)
-    # Avoid division by zero for small vertical forces
-    min_vertical_force = 10.0  # [N] threshold
-    fz = force[2]
-
-    if abs(fz) < min_vertical_force:
-        return np.array([0.0, 0.0, ground_height])
-
-    cop_x = -moment[1] / fz
-    cop_y = moment[0] / fz
-    cop_z = ground_height
-
-    return np.array([cop_x, cop_y, cop_z])
+    return center_of_pressure(force, moment, ground_height_m=ground_height)
 
 
 def compute_cop_trajectory_length(cops: np.ndarray) -> float:
@@ -511,8 +502,12 @@ def extract_grf_from_contacts(  # noqa: C901
     """Extract GRF from physics engine contact forces.
 
     Tries the engine's native contact solver first (``compute_contact_forces``).
-    Falls back to static gravity approximation when the engine does not
-    report contact data (returns zero vector).
+    Falls back to a static-weight estimate (``estimated=True``) when the engine
+    does not report contact data.  New features must not use this function:
+    the per-foot breakdown with CoP, free moment and moment about the CoM comes
+    from ``biomechanics.ground_reaction`` (GCV-1/GCV-2).  The result never
+    carries a CoP or moment (``None`` / NaN): the engine supplies no contact
+    points.
 
     Args:
         engine: Physics engine with active simulation
@@ -524,8 +519,6 @@ def extract_grf_from_contacts(  # noqa: C901
     """
     require(engine is not None, "engine must be provided")
     total_force = np.zeros(3)
-    total_moment = np.zeros(3)
-    total_weighted_pos = np.zeros(3)
 
     # --- Primary path: query the engine's native contact solver -----------
     try:
@@ -549,16 +542,6 @@ def extract_grf_from_contacts(  # noqa: C901
     if has_contact_data:
         total_force[: len(contact_force)] = contact_force[:3]
 
-        # Compute COP from body Jacobians when contact data is available
-        for body_name in contact_body_names:
-            jac_dict = engine.compute_jacobian(body_name)
-            if jac_dict is None:
-                continue
-            # Use linear Jacobian row-means as proxy for body position
-            if "linear" in jac_dict:
-                body_pos = np.mean(jac_dict["linear"], axis=1)
-                total_weighted_pos += body_pos * abs(total_force[2])
-
         logger.debug("GRF extracted from engine contact solver")
     else:
         # --- Fallback: static gravity approximation -----------------------
@@ -578,29 +561,15 @@ def extract_grf_from_contacts(  # noqa: C901
 
         logger.debug("GRF estimated from gravity approximation (no contact data)")
 
-    # Compute COP
-    if total_force[2] > 10.0:  # Minimum force threshold
-        cop = np.array(
-            [
-                total_weighted_pos[0] / total_force[2],
-                total_weighted_pos[1] / total_force[2],
-                ground_height,
-            ]
-        )
-    else:
-        cop = np.array([0.0, 0.0, ground_height])
-
-    # Compute moment from force and COP
-    if has_contact_data and total_force[2] > 10.0:
-        r = cop - np.array([0.0, 0.0, ground_height])
-        total_moment = np.cross(r, total_force)
-
+    # The engine reports a total force only: no contact points and no moment,
+    # so a centre of pressure and the moment are unavailable, not fabricated.
     return GroundReactionForce(
         force=total_force,
-        moment=total_moment,
-        cop=cop,
+        moment=np.full(3, np.nan),
+        cop=None,
         timestamp=engine.get_time(),
         foot_side=FootSide.COMBINED,
+        estimated=not has_contact_data,
     )
 
 
