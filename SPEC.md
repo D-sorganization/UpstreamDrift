@@ -1,3 +1,11 @@
+## Unit Gate Rust Installation State (#11977)
+
+The unit-test gate allocates distinct empty Rust and Cargo homes under runtime
+`RUNNER_TEMP` and publishes them through `GITHUB_ENV` before installing Rust.
+Missing runtime paths or invalid environment destinations fail setup explicitly.
+Existing toolchains remain untouched. Toolchain verification, wheel build and
+the unit suite remain required; local preparation tests do not qualify a CI run.
+
 ## Native Muscle Replay Development Boundary (F07, #11791)
 
 Child #11867 restricts recursive native admission before `initSystem` to exact `Millard2012EquilibriumMuscle` and `Thelen2003Muscle` concrete identities. Inheritance-compatible unknown laws fail closed; supported native casts still supply model-owned state limits. Adapter `native-muscle-replay/1.3.0` hashes an explicit exact-class policy. The negative identity-proxy test is not compiled-plugin qualification, and neither this guard nor the positive native fixtures establish full-body/capture acceptance.
@@ -10444,6 +10452,10 @@ cold/warm starts, failures, timing and Python-tracked peak memory. The shooting
 fixture uses one constant torque while the spike uses one input per interval,
 so no production backend is selected from these results. Native F06 replay,
 private protocol D02, contact and full-body engine evidence remain open.
+
+## Frozen Marker Holdout Scoring (#11899)
+
+The shared marker calibration provider exposes score_frozen_marker_offsets for fixed placements and predicted poses on the original observation clock. It performs no fitting and rejects missing support or invalid rigid transforms. Existing exploratory OpenSim holdout refitting remains available and is not independent predictive evidence. Training-only model, anthropometry, attachment and split provenance remains a campaign gate; no real capture or F07/F08 qualification is claimed. See canonical chapter 13 and F07_FROZEN_HOLDOUT_TURNOVER.md.
 
 ## Native OpenSim Marker Geometry (F07/F08, #11903)
 

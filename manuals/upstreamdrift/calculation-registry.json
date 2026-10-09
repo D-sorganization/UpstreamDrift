@@ -21,6 +21,11 @@
       "resolution": "Inventory native Drake complete discrete-state frozen motor-torque replay, factory-default abstract parameter identity, actual solver/approximation, numeric parameter byte identity and native net effort in chapter22 and native_torque_replay.py. Eleven actual Drake1.57 synthetic tests establish a restricted same-provider replay path. Native collision/contact, nonunit transmission, external-resource identity, convergence, all-model six-engine parity, anatomy/muscle recruitment and private capture acceptance remain open. Source review does not attest binary equivalence or transitive libraries."
     },
     {
+      "id": "UP-D1-muscle-qualification-evidence-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory tour_matching/muscle_qualification.py parameter-only orchestration and the provisional chapters/14-muscle-qualification-evidence.qmd evidence contract. Anatomy/parameter checks do not establish path geometry, moment arms, equilibrium, activation trajectories or native replay. Unperformed audits remain false and native replay is absent; a metrics container defaults to unverified. Pure behavioral regressions guard against invented pilot metrics but do not qualify models, contact, physiological parameters or full-horizon excitation replay. Existing lower-level audit helpers require their own actual evidence. Keep F07/F08 scientific qualification open."
+    },
+    {
       "id": "UP-D1-native-torque-replay-inventory",
       "owner": "UpstreamDrift issue #11823",
       "resolution": "Inventory native MuJoCo full mjSTATE_INTEGRATION restoration, distinct quaternion configuration/tangent velocity, direct unit hinge-motor post-limit ZOH input and actual native effort checks in native_torque_replay.py and chapters/19-native-torque-replay.qmd. Synthetic replay and negative admission tests establish a bounded same-provider path only. Merged Tools T01 pin, six-engine parity, refinement, anatomy, native muscle/contact/grip and real capture qualification remain open. Exclusive process ownership is required; no subprocess isolation or complete transitive-library attestation is claimed."
@@ -154,6 +159,11 @@
       "id": "UP-D1-lift-pack-audit-inventory",
       "owner": "UpstreamDrift issue #11751",
       "resolution": "Inventory the LIFT-1 (#11741) cross-engine lift model pack audit in src/shared/python/lifting/pack_audit/ (frames.py, geometry.py, poses.py, baseline.py, analysis.py, gaps.py and the per-engine adapters) documented provisionally in chapters/15-lift-pack-audit.qmd: the OpenSim Y-up to canonical Z-up rotation, the sleeve-defined bar axis, per-hand lateral offset and perpendicular hand-to-bar distance, foot-midpoint pose summaries, pelvis-relative same-input pairwise parity over the standard and generic lift-shape poses, the lifter-only CoM with bar and bench removed (zero mass-centre offset assumed), segment mass and joint-limit deviation against the biomech parity standard, grip half-width mismatch, start-pose bar height above the lowest foot contact against the 0.225 m plate radius, reference FK error and the measured discrepancy list mapped to per-pack issues. Unavailable values (Drake/Pinocchio contact force and closure, lifter CoM without lifter mass, bar height without foot geometry) are None with a reason, never zero. tests/unit/lifting/pack_audit/ and docs/development/lifting/PACK_PARITY_BASELINE.md establish software parity between the packs at recorded commits; they do not simulate a lift, compute joint moments, spine loads or muscle forces, compare against measured lifts, or establish an uncertainty. The 0.01 m grip and 0.05 m floor-height thresholds are audit flags, not acceptance limits."
+    },
+    {
+      "id": "UP-D1-frozen-marker-holdout-inventory",
+      "owner": "UpstreamDrift issue #11899",
+      "resolution": "Inventory score_frozen_marker_offsets and chapter 13 frozen marker scoring: supplied body-local placements and proper predicted transforms, pooled valid-sample Euclidean RMS, fail-closed missing support, and unchanged observation clock. Existing exploratory heldout placement refitting is not independent prediction. This pure scoring boundary cannot establish training-only provenance, anthropometry, anatomical attachments, independent subject/trial splits or native replay qualification; private D02 and publication remain blocked."
     },
     {
       "id": "UP-D1-native-muscle-contact-inventory",
