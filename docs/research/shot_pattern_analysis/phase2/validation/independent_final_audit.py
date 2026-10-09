@@ -14,6 +14,7 @@ import json
 import math
 from pathlib import Path
 import sys
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -35,6 +36,7 @@ from src.tools.shot_pattern_analysis.scoring import (
 )
 from src.tools.shot_pattern_analysis.scoring_cache import source_backed_score_cache
 
+AUDIT_VERSION = "independent-saved-data/2"
 PATTERNS = ("Straight", "Draw", "Fade")
 LIMITS = {
     "input": 1e-12,
@@ -413,9 +415,30 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--allow-partial", action="store_true")
     parser.add_argument("--max-cells", type=int)
+    parser.add_argument("--supplement-stage", choices=("pilot", "final"))
+    parser.add_argument("--alias-references", type=Path)
     args = parser.parse_args()
-    plan = json.loads((args.root / "matrix_plan.json").read_text())
-    assert len(plan["cells"]) in (72, 324), "unexpected factorial plan size"
+    from docs.research.shot_pattern_analysis.phase2.validation.supplement_audit_protocol import (
+        load_json_strict,
+        validate_supplement_plan,
+        validate_control_aliases,
+    )
+
+    plan = load_json_strict(args.root / "matrix_plan.json")
+    evidence = Path(__file__).resolve().parents[1]
+    protocol_review = None
+    if "supplement_protocol" in plan:
+        protocol_review = validate_supplement_plan(
+            plan, args.supplement_stage, evidence
+        )
+    else:
+        assert args.supplement_stage is None and args.alias_references is None
+        assert len(plan["cells"]) in (72, 324), "unexpected factorial plan size"
+    alias_review = None
+    if args.alias_references is not None:
+        alias_review = validate_control_aliases(
+            args.alias_references, args.supplement_stage, evidence
+        )
     repo = Path(__file__).resolve().parents[5]
     checked_sources = (
         "src/tools/shot_pattern_analysis/noise.py",
@@ -426,9 +449,9 @@ def main():
     for name in checked_sources:
         assert sha(repo / name) == plan["execution"]["source_sha256"][name], name
     maxima = dict.fromkeys(LIMITS, 0.0)
-    results = {}
+    results: dict[str, Any] = {}
     failures = []
-    caches = {}
+    caches: dict[Any, Any] = {}
     baseline = build_broadie_approx_baseline()
     for key, config in plan["cells"].items():
         if args.max_cells is not None and len(results) >= args.max_cells:
@@ -444,7 +467,14 @@ def main():
             failures.append({"cell": key, "error": repr(exc)})
     complete = len(results) == len(plan["cells"]) and not failures
     receipt = {
-        "scope": "Independent saved-data audit; partial runs do not establish final results",
+        "scope": "Independent per-plan saved-data audit; partial runs do not establish final results",
+        "audit_version": AUDIT_VERSION,
+        "data_stage": plan["stage"],
+        "protocol_review": protocol_review,
+        "alias_review": alias_review,
+        "protocol_auditor_sha256": sha(
+            Path(__file__).with_name("supplement_audit_protocol.py")
+        ),
         "execution": plan["execution"],
         "plan_sha256": sha(args.root / "matrix_plan.json"),
         "script_sha256": sha(Path(__file__)),
