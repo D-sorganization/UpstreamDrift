@@ -41,10 +41,14 @@ its feature base into FETCH_HEAD, leaving ownership guards without origin/main.
 This mirrors that scoped repair; no required check or threshold is weakened.
 
 The policy records ordered concrete laws and changes adapter version to
-`native-muscle-replay/1.2.0`. Model bytes bind serialized subtype parameters;
-external-resource identity remains a separate gate. The contact extension
-PR #11820 is a sibling dependency; reconcile its policy builder and recursive
-audit when both branches merge, retaining native-law and force-policy fields.
+`native-muscle-replay/1.2.0` originally. Current main integration preserves
+merged native contact PR #11820 and both muscle laws in the shared policy
+builder, version `native-muscle-replay/1.2.1`. Model bytes bind serialized
+subtype parameters; external-resource identity remains a separate gate.
+The combined actual native suite passes106 cases with2 skips that apply only
+to HuntCrossley extra geometry, not SmoothSphereHalfSpace. The native contact
+fixtures run with both muscle laws; all law, force-policy and contact fields
+remain bound. No full-body contact qualification is inferred.
 
 ## Remaining Gates
 

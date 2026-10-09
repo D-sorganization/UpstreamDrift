@@ -17,7 +17,7 @@ Recursive muscle admission now requires the exact native concrete names
 `Millard2012EquilibriumMuscle` or `Thelen2003Muscle` before system
 initialization. Successful `safeDownCast` alone is insufficient for an unknown
 derived force/state law. The supported laws retain native downcasts for their
-own activation/fiber minima. Adapter version 1.3.0 records and hashes
+own activation/fiber minima. Adapter version 1.3.1 records and hashes
 `exact-supported-concrete-law/1.0.0` alongside the ordered actual muscle laws.
 All existing ignore-mode, force, controller, constraint, input and complete-state
 checks remain active.
@@ -42,3 +42,15 @@ source/license/resource closure and full-capture full-state independent replay
 remain required. No donor/runtime patch, capture download or plugin installation
 is part of this change. The sparse Tools checkout borrows from the retained
 native-admission object store; preserve that store until borrowers are independent.
+
+## Contact and Thelen Parent Integration
+
+Merged the actual parent commit `564a4657e1`, retaining its contact and Thelen
+fixtures and shared `_native_replay_policy` helper. Version 1.3.1 combines
+explicit native contact paths/laws and ordered muscle laws with the exact-class
+admission policy. No parent branch was rewritten and no native force law or
+state-domain bound was relaxed. The original proxy test remains explicitly
+not a compiled-plugin qualification.
+
+Combined native replay and governance validation: 119 passed, two inapplicable
+contact-fixture cases skipped (108 native tests and 11 governance tests).
