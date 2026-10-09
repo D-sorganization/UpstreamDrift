@@ -21,6 +21,8 @@ from src.shared.python.physics.ground_reaction_forces import (
     validate_grf_cross_engine,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestLinearImpulse:
     """Tests for linear impulse computation."""
@@ -134,14 +136,14 @@ class TestCOPComputation:
         np.testing.assert_allclose(cop[0], 0.2, atol=1e-10)
         np.testing.assert_allclose(cop[1], 0.1, atol=1e-10)
 
-    def test_low_vertical_force_gives_zero_cop(self) -> None:
-        """Very small vertical force should return origin COP."""
+    def test_low_vertical_force_gives_no_cop(self) -> None:
+        """Below the threshold the CoP is unavailable (None), not the origin (GCV-6)."""
         force = np.array([0.0, 0.0, 5.0])  # Below threshold
         moment = np.array([100.0, 100.0, 0.0])
 
         cop = compute_cop_from_grf(force, moment)
 
-        np.testing.assert_allclose(cop, np.array([0.0, 0.0, 0.0]), atol=1e-10)
+        assert cop is None
 
 
 class TestCOPTrajectoryLength:
@@ -307,6 +309,7 @@ class TestExtractGRFFromContacts:
 
         # Should call gravity fallback
         engine.compute_gravity_forces.assert_called()
+        assert grf.estimated is True
         # Force should be non-zero (gravity-based estimate)
         assert grf.force[2] > 0
 
@@ -324,7 +327,8 @@ class TestExtractGRFFromContacts:
 
         grf = extract_grf_from_contacts(engine, ["foot"], ground_height=0.05)
 
-        assert grf.cop[2] == 0.05
+        # the engine reports a force only: no contact point, so no CoP (GCV-6)
+        assert grf.cop is None
 
     def test_empty_contact_bodies_returns_zero(self) -> None:
         """No contact bodies should give zero force."""
