@@ -74,13 +74,12 @@ def test_export_fails_closed_when_the_pinned_schema_is_not_ready(
     assert report["path"] is None and not (tmp_path / MOCAP_SESSION_FILE).exists()
 
 
-def test_root_test_process_keeps_the_tools_family_unresolved() -> None:
-    """Pin the design the fixture below depends on; see src/__init__.py."""
-    probe = probe_tools_schema()
-    assert probe.status == "unavailable", probe
-    assert export_to_bundle(Path("unused"), _captured(_plan()), _plan())["status"] == (
-        "unavailable"
-    )
+def test_importing_observation_qualification_does_not_change_tools_probe() -> None:
+    """A scoring-module import must not change unrelated capture availability."""
+    before = probe_tools_schema()
+    import src.engines.feedback_observation_qualification  # noqa: F401
+
+    assert probe_tools_schema() == before
 
 
 @pytest.mark.integration

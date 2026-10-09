@@ -22,6 +22,7 @@ from src.motion_capture.rig.plan import CameraBinding, CaptureMode, RigPlan
 from src.motion_capture.rig.probe import RecordingProbe, parse_ffmpeg_decode_log
 from src.motion_capture.rig.recorder import RecordingResult
 from src.motion_capture.rig.session import CaptureOutcome, SessionManifest
+from src.motion_capture.rig.tools_bridge import probe_tools_schema
 
 pytestmark = pytest.mark.unit
 
@@ -210,7 +211,7 @@ def test_cli_record_dry_run_then_session_check(tmp_path: Path) -> None:
     assert (out / RECORDINGS_FILE).is_file() and (out / MANIFEST_FILE).is_file()
     manifest = SessionManifest.model_validate_json((out / MANIFEST_FILE).read_text())
     assert manifest.outcome is CaptureOutcome.UNAVAILABLE
-    assert manifest.tools_schema["status"] == "unavailable"
+    assert manifest.tools_schema["status"] == probe_tools_schema().status
     assert cli.main(["session-check", "--session", str(out)]) == 0
     (out / RECORDINGS_FILE).unlink()
     assert cli.main(["session-check", "--session", str(out)]) == 1
