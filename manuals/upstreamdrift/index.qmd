@@ -26,9 +26,11 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 
 {{< include chapters/13-feedback-comparison.qmd >}}
 
-{{< include chapters/14-same-input-parity.qmd >}}
+{{< include chapters/14-muscle-qualification-evidence.qmd >}}
 
 {{< include chapters/15-lift-pack-audit.qmd >}}
+
+{{< include chapters/16-same-input-parity.qmd >}}
 
 {{< include chapters/17-sparse-collocation-benchmark.qmd >}}
 
