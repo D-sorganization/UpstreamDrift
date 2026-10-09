@@ -1,0 +1,102 @@
+# Native OpenSim Marker Geometry
+
+This provisional calculation pathway belongs to F07/F08 and scoped child
+#11903. It does not qualify anatomical calibration, capture matching or
+independent dynamics. The [native muscle replay chapter](13-native-muscle-replay.qmd)
+retains the separate full-state, actuation and native-contact gates.
+
+## Inputs, Frames and Identity
+
+`tour_matching.native_marker_geometry.NativeMarkerGeometry` loads an explicit
+OpenSim model and distinct absolute native coordinate paths. Bindings pair each
+observed label with an existing absolute body-attached `PhysicalFrame` path
+and a finite local station offset in metres. Coordinate values use native SI
+units (metres/radians); no body-name alias, marker correspondence, world-axis
+registration or anthropometric calibration is inferred.
+
+Source bytes, loaded native serialization, runtime version, native simulation
+extension, provider source, selected coordinates and numerical policies enter
+the identity. This does not pin the entire dependent DLL/resource closure.
+Structural counts do not establish anatomical coverage or correct muscle paths.
+Source model muscles, forces, locks, constraints and parameters remain intact.
+
+## Position Calculation and Assembly
+
+Each evaluation starts from a copy of the initialized native state, sets only
+selected independent coordinates, calls native assembly and realizes position.
+Locked, prescribed and dependent selected coordinates are rejected. All assembled
+coordinates must remain in their source ranges. Selected achieved values must
+match requests within $10^{-7}$ native units; other independent coordinates must
+retain their initial values. Dependents follow the actual native constraints.
+The explicit assembly accuracy is $10^{-14}$. These are numerical policies,
+not physiological or measurement tolerances.
+
+For local station $s_b$, the world position is
+$p_W=R_{Wb}s_b+t_{Wb}$. Native `findStationLocationInGround` is checked against
+the frame-transform calculation. Native body poses replace the previous
+identity-pose/raw-offset placeholders. Metadata-only plants now reject physical
+geometry requests. Closure and dynamics stepping remain unavailable and raise;
+zero closure or an unchanged state cannot stand in for native computation.
+The IK adapter supplies a real `pose_fn` for shared trajectory fitting; its
+generic grip/ground `solve_pose` pathway is not implemented or qualified.
+
+## Bounded Shared Trajectory Fit
+
+The existing `solve_full_body_ik_trajectory` minimizes observed marker residuals
+and the existing warm-start regularizer $w_r(q-q_{previous})$. An explicit
+finite lower/upper bound pair selects SciPy TRF; omission retains the previous
+LM behavior. Invalid bounds or an out-of-bounds initial pose are rejected,
+without clipping or widening the model. Native assembly checks still apply at
+every evaluated configuration. Finite output and optimizer stopping do not
+establish feasibility or convergence; residuals remain mandatory evidence.
+The bounded path disables cost-only stopping, matching the existing pose TRF
+policy, so an initial tiny step from an active bound is not mistaken for convergence.
+
+The bounded diagnostic reuses frozen capture loading, `static_marker_offsets`,
+shared trajectory IK and shared RMS calculation. It fits only original frames
+$0,\lfloor(N-1)/2\rfloor,N-1$ of the existing pelvis segment. All four markers
+must be observed. First-frame offsets impose a reference gauge and are held
+fixed thereafter; they are not measured anatomical attachment locations.
+Three samples are neither continuous motion nor independent trials.
+
+## Actual Exploratory Evidence and Limitations
+
+A locally retained, hash-pinned public candidate with 520 muscles, 80 bodies,
+549 forces, two constraints and 1348 continuous states completed the three-pose
+diagnostic under OpenSim 4.6. Aggregate RMS was 37.704 mm; the final sample was
+65.192 mm. Pelvis rotation reached its unchanged source bound. An earlier
+unbounded LM attempt was rejected for exceeding that bound and is retained.
+Native stations agreed with native frame transforms within $1.1\times10^{-14}$ m.
+Detailed capture identities, offsets and pose arrays remain private.
+
+This result does not distinguish anatomical infeasibility from unresolved
+fixed capture-to-model frame/yaw registration. Any registration must be estimated
+from declared training anchors, frozen before independent evaluation and retained
+in the identity. The near-zero first-frame error is constructed by calibration.
+World/ground alignment, donor landmark semantics, nonpelvic bindings, subject
+anthropometry, independent capture ancestry, noise/events, wrists, grip, passive
+muscle loads, reserves, contact and full-state muscle replay remain open.
+No source geometry or anatomy was modified to obtain this result.
+
+## Reproduction and Runtime Isolation
+
+Run the native tests serially with an installed OpenSim runtime:
+
+```bash
+python3 -m pytest -o addopts='' tests/opensim/test_native_marker_geometry.py tests/opensim/test_native_pelvis_probe_contract.py tests/unit/motion_matching/test_trajectory_coordinate_bounds.py
+python3 -m scripts.diagnostics.native_pelvis_geometry --model MODEL.osim --model-sha256 SHA256 --capture FROZEN.c3d --capture-python C3D_PYTHON --output PRIVATE_RECEIPT.json
+```
+
+The Windows OpenSim and ezc3d wheels loaded incompatible DLL symbols together
+in the tested process. The diagnostic therefore runs the existing frozen loader
+in a separate SDK process and transfers through the existing TRC writer/reader.
+It records source/TRC hashes and rounding (at most $5.1\times10^{-7}$ m and
+$5.1\times10^{-10}$ s), validates labels/frame count, and restores the exact
+frozen source clock. It introduces no new capture parser, interpolation or
+retiming. Native execution clocks and independent replay are outside this probe.
+
+Tests include analytic rigid transforms, physical offset frames, actual native
+coupler assembly and dependent-range rejection, source-bound preservation,
+missing-observation rejection and placeholder evidence rejection. They do not
+qualify plugins, scientific uncertainty or whole-model muscle dynamics. Canonical
+inventory, generated LaTeX/PDF parity, page review and publication remain blocked.

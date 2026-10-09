@@ -1,6 +1,7 @@
 """OpenSim MatchingPlant implementation (MS-41 #10340).
 
-Provides IK-only MatchingPlant integration for the anthropometric document model.
+Provides explicit native geometry callbacks for shared calibration and IK.
+Metadata-only construction cannot supply placeholder geometry or dynamics.
 Dynamics stage reports 'not_run: use moco'.
 """
 
@@ -9,11 +10,11 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 import hashlib
 import json
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from src.shared.python.contracts import postcondition, precondition
 from src.shared.python.motion_matching.contact_law import GroundPlane
 from src.shared.python.motion_matching.full_body_ik import BaseFullBodyIK
 
@@ -25,26 +26,30 @@ class OpensimFullBodyIK(BaseFullBodyIK):
         self,
         specification: Mapping[str, Any] | bytes | str,
         attachments: Mapping[str, tuple[str, Sequence[float]]] | None = None,
+        *,
+        native_geometry: Any = None,
     ) -> None:
         super().__init__(specification)
         self.attachments = attachments or {}
+        self._native_geometry = native_geometry
 
     def pose_fn(self, q: np.ndarray) -> dict[str, tuple[np.ndarray, np.ndarray]]:
         """Compute world poses for bodies."""
-        poses: dict[str, tuple[np.ndarray, np.ndarray]] = {}
-        for b in self.marker_bodies:
-            poses[b] = (np.eye(3), np.zeros(3))
-        return poses
+        if self._native_geometry is None:
+            raise NotImplementedError("Native OpenSim geometry is required")
+        return self._native_geometry.frame_poses(self.attachments, q)
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
         """Evaluate loop closure residuals."""
-        return np.zeros(3)
+        raise NotImplementedError("Native grip closure is not qualified")
 
 
 class OpensimMatchingPlant:
     """OpenSim implementation of MatchingPlant protocol."""
 
-    def __init__(self, spec: bytes | Mapping[str, Any]) -> None:
+    def __init__(
+        self, spec: bytes | Mapping[str, Any], *, native_model_path: Path | None = None
+    ) -> None:
         if isinstance(spec, bytes):
             self.spec_bytes = spec
             self.spec_dict: dict[str, Any] = json.loads(spec.decode("utf-8"))
@@ -54,6 +59,15 @@ class OpensimMatchingPlant:
 
         self.coords: tuple[str, ...] = tuple(self.spec_dict.get("coordinate_order", ()))
         self._sha256 = hashlib.sha256(self.spec_bytes).hexdigest()
+        self._native_geometry: Any = None
+        if native_model_path is not None:
+            from src.engines.physics_engines.opensim.python.tour_matching.native_marker_geometry import (
+                NativeMarkerGeometry,
+            )
+
+            self._native_geometry = NativeMarkerGeometry(native_model_path, self.coords)
+            identity = self.spec_bytes + self._native_geometry.identity_sha256.encode()
+            self._sha256 = hashlib.sha256(identity).hexdigest()
 
         gp_spec = self.spec_dict.get("ground_plane", {})
         normal = tuple(gp_spec.get("normal", (0.0, 0.0, 1.0)))
@@ -90,7 +104,13 @@ class OpensimMatchingPlant:
             raise ValueError(
                 f"IK backend {ik_backend!r} is only supported on the MuJoCo plant"
             )
-        return OpensimFullBodyIK(self.spec_dict, attachments=attachments)
+        if self._native_geometry is None:
+            raise NotImplementedError("Native OpenSim geometry is required")
+        return OpensimFullBodyIK(
+            self.spec_dict,
+            attachments=attachments,
+            native_geometry=self._native_geometry,
+        )
 
     def frame_poses(
         self, mapping: Mapping[str, tuple[str, Sequence[float]]], q: np.ndarray
@@ -102,10 +122,9 @@ class OpensimMatchingPlant:
     def marker_positions(
         self, q: np.ndarray, attachments: Mapping[str, tuple[str, Sequence[float]]]
     ) -> np.ndarray:
-        positions = [
-            np.asarray(offset, dtype=float) for _, offset in attachments.values()
-        ]
-        return np.asarray(positions, dtype=float)
+        if self._native_geometry is None:
+            raise NotImplementedError("Native OpenSim geometry is required")
+        return self._native_geometry.marker_positions(q, attachments)
 
     def contact_forces(
         self, coordinates: Mapping[str, float], rates: Mapping[str, float]
@@ -136,9 +155,11 @@ class OpensimMatchingPlant:
         return None
 
     def closure_residuals(self, q: np.ndarray) -> np.ndarray:
-        return np.zeros(3)
+        raise NotImplementedError("Native grip closure is not qualified")
 
     def step(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
     ) -> tuple[np.ndarray, np.ndarray]:
-        return q, v
+        raise NotImplementedError(
+            "Use the independent native replay provider; no placeholder step"
+        )

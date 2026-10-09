@@ -99,6 +99,11 @@
       "id": "UP-D1-native-muscle-replay-inventory",
       "owner": "UpstreamDrift issue #11791",
       "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
+    },
+    {
+      "id": "UP-D1-native-opensim-marker-geometry-inventory",
+      "owner": "UpstreamDrift issue #11903",
+      "resolution": "Inventory explicit native body/PhysicalFrame marker bindings, achieved independent/dependent-coordinate assembly and source-range checks, source/loaded/runtime identities, optional finite-bound TRF trajectory IK, and the isolated frozen-C3D/TRC diagnostic documented in chapters/26-native-opensim-geometry.qmd. Metadata-only identity poses/raw offsets/zero closure/no-op stepping cannot establish physical evidence. The unchanged 520-muscle source three-pose pelvis probe is exploratory in-sample geometry only; unresolved capture-to-model registration, anatomical offsets, nonpelvic bindings, grip/contact, muscle dynamics, independent trials and full-state replay remain blocking. Detailed private observations and poses stay private. Native fixture tests and finite solver output do not establish scientific acceptance or approved manual coverage."
     }
   ],
   "calculations": []
