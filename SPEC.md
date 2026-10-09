@@ -10528,3 +10528,22 @@ Private marker arrays and identities stay outside the public repository.
 Canonical chapter39 and `F07_NATIVE_MOCO_RUNNER_TURNOVER.md` hold equations,
 tests, exact diagnostic scope and continuation instructions. All six engines
 and 17 required production rows remain in the acceptance denominator.
+
+## Source-Bound Native Moco Numerical Guess (#11990)
+
+The `moco-native-guess` command reads exact source XML and the existing frozen
+TRC clock, initializes the source through native OpenSim assembly and muscle
+equilibration, and writes every native named continuous state at every original
+time in a 17-digit STO table. Native readback must preserve complete ordered
+names, values and clock exactly. The receipt hashes source, loaded model,
+runtime/provider, state order/values, clock and serialized artifact, while
+declaring external-resource closure unavailable. The existing Moco builder
+checks complete state-table names and actual created state/control guess
+channels before accepting caller bindings; no control bounds are inferred.
+
+This is a numerical optimization seed only. It is not observed motion,
+physiological readiness, static equilibrium or a complete SimTK restart. The
+unchanged 520-muscle source produced 1,348 finite states at the driver and
+iron clocks. Both #11968 private preparations then lost exactly the artificial
+guess-file blocker, retaining six scientific/native blockers and doing no solve.
+Canonical chapter39 and the child turnover preserve the proof and limits.

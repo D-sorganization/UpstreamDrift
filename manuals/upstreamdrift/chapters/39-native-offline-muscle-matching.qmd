@@ -104,7 +104,7 @@ different numerical policy, not a same-policy T01 equivalence claim.
 
 The unchanged pinned 520-muscle XML and both frozen private reference captures
 were prepared without a solver call. Original 654/657-frame clocks and validity
-masks round-trip exactly. The diagnostic exposes missing source-valid guess,
+masks round-trip exactly. The original diagnostic exposed a missing numerical guess,
 registration, marker correspondence, passive limits, full prepared native
 state, assistance and constraint policies. It cannot certify anatomical
 attachments from shared names or derive physiological bounds from source
@@ -112,3 +112,35 @@ defaults. No capture tracking solve, qualified contact/grip or independent
 muscle-driven golf replay has occurred. Detailed private marker arrays and
 source paths remain in local private staging; the public turnover retains only
 counts, blocker kinds and reviewed aggregate evidence.
+
+## Source-Bound Numerical State Seed
+
+The `moco-native-guess` preparation command now generates a state-only Moco
+table from the exact source XML and original frozen observation clock. It
+reads the native post-`initSystem` state, applies OpenSim's native muscle
+equilibration, then writes every named continuous state in native order at
+every observation time. This constant trajectory is only a numerical seed:
+native initialization includes assembly, muscle equilibration is not whole-body
+static equilibrium, and the source state is neither a measurement nor a
+physiologically approved initial condition. The command does not add control
+values, bounds, anatomical placement or a native complete-state restart.
+
+The state table uses 17 significant decimal digits for binary64 round-trip
+before native `TimeSeriesTable` readback. The installed native STO writer
+rounded a synthetic Thelen state by one binary64 ULP at its default precision;
+the 17-digit writer and independent native readback reject any changed clock,
+column order, nonfinite value or state value. The receipt binds source XML,
+loaded native model, runtime, producer, ordered state names, all serialized
+values, exact clock and final STO bytes. Its source hash covers the entrypoint
+XML only; external geometry/resource closure remains unverified.
+
+For the unchanged pinned 520-muscle source, both frozen private clocks yielded
+1,348 ordered finite continuous states; native equilibration changed 486 from
+the post-initialization values. The driver and iron STOs retain 654 and 657
+exact observation times. Independent preparation with those files removed the
+missing-guess blocker and left six blockers unchanged: capture registration,
+marker binding, passive policy, nonmuscle assistance, native constraints and
+complete bounded native state. No real-source Moco problem or solve was
+constructed. A synthetic native Moco problem confirms that its `createGuess`
+supplies the actual control channels and the complete state table is inserted;
+missing state columns now reject instead of being silently filled.

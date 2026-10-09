@@ -173,7 +173,12 @@
     {
       "id": "UP-D1-native-offline-muscle-matching-inventory",
       "owner": "UpstreamDrift issue #11968",
-      "resolution": "Inventory the maintained file-driven OpenSim native Moco preparation/solve/exact-knot T01 export/observation-free replay/masked physical scoring in tour_matching/native_moco_runner.py, native_moco_request.py, native_moco_replay.py and chapter39. Synthetic Millard/Thelen and ordered two-DOF two-muscle native tests establish only software execution; the unchanged 520-muscle source with frozen driver/iron references is blocked before solve by missing reviewed placements, registration, passive policy, full native state/guess, assistance and constraint/contact policy. The canonical calculation inventory and scientific acceptance remain unapproved."
+      "resolution": "Inventory the maintained file-driven OpenSim native Moco preparation/solve/exact-knot T01 export/observation-free replay/masked physical scoring in tour_matching/native_moco_runner.py, native_moco_request.py, native_moco_replay.py and chapter39. Synthetic Millard/Thelen and ordered two-DOF two-muscle native tests establish only software execution; the unchanged 520-muscle source with frozen driver/iron references originally lacked a source-valid numerical guess, which child #11990 now supplies. Reviewed placements, registration, passive policy, complete bounded native state, assistance and constraint/contact policy still block any real solve. The canonical calculation inventory and scientific acceptance remain unapproved."
+    },
+    {
+      "id": "UP-D1-native-moco-numerical-guess-inventory",
+      "owner": "UpstreamDrift issue #11990",
+      "resolution": "Inventory the source-bound native OpenSim numerical state seed in tour_matching/native_moco_guess.py and chapter39. Exact native source/loaded/runtime, 17-digit STO readback, ordered complete continuous states and frozen observation clocks are checked; synthetic MocoGuess state/control coverage and real pinned 520-muscle driver/iron preparation remove only the missing-guess blocker. Equilibrated model defaults are not measured or physiologically approved state, source XML hash does not close external resources, and six production blockers remain before any solve."
     }
   ],
   "calculations": []
