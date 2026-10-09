@@ -291,6 +291,24 @@ def model_face_normals(
     return np.array([kin.body_poses(row, [frame])[frame][0] @ axis for row in rows])
 
 
+def model_face_centres(
+    kin: Any, q: Array, spec: Mapping[str, Any], frame: str = FACE_FRAME
+) -> Array:
+    """World rendered face centre per row of ``q`` from the IK provider's FK.
+
+    Same contract as :func:`model_face_normals` (GCV-20 clubhead speed).
+    """
+    rows = np.asarray(q, dtype=float)
+    if rows.ndim != 2:
+        raise ValueError("q must be (frames, coordinates)")
+    centre = face_centre_in_frame(spec, frame)
+    out = []
+    for row in rows:
+        rot, pos = kin.body_poses(row, [frame])[frame]
+        out.append(rot @ centre + pos)
+    return np.array(out)
+
+
 def face_fit_summary(model_normals: Array, capture_normals: Array) -> dict[str, Any]:
     """Separation statistics (degrees) over the frames the capture observes.
 

@@ -119,8 +119,15 @@ def export_mjx_package(run: Path | str, timestep: float = 5e-4) -> dict[str, Any
     model = adapter.model
     rate_hz = rate_from_times(times)
     # The run's impact split (GCV-20, #11767); absent in older receipts.
-    split = receipt["ik"].get("impact_split", {}).get("frame")
-    q_track = smooth_reference(q_ref, rate_hz, TRACKING_CUTOFF_HZ, impact_index=split)
+    impact_split = receipt["ik"].get("impact_split", {})
+    split = impact_split.get("frame")
+    q_track = smooth_reference(
+        q_ref,
+        rate_hz,
+        TRACKING_CUTOFF_HZ,
+        impact_index=split,
+        pre_contact_cutoff_hz=impact_split.get("pre_contact_cutoff_hz"),
+    )
 
     xml = stiffen_weld(adapter.xml)
     root = DET.fromstring(xml)

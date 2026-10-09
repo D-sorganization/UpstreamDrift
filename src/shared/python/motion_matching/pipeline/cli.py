@@ -1030,6 +1030,7 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, Any]:
             constrained_ik=constrained_ik_dict,
         )
     )
+    lane.select_release_cutoff(cal_res.kin, cal_res.scaled_spec, q_ref)
     _attach_face_report(ik_report, lane, cal_res, (q_ik, q_ref), args.face_weight)
     np.savez(
         ctx.out_dir / "ik_trajectory.npz",

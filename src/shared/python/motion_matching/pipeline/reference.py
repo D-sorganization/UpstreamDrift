@@ -60,6 +60,7 @@ def smooth_reference(
     cutoff_hz: float,
     *,
     impact_index: int | None = None,
+    pre_contact_cutoff_hz: float | None = None,
 ) -> np.ndarray:
     """Zero-phase Butterworth low-pass of every coordinate (edge-padded).
 
@@ -77,6 +78,10 @@ def smooth_reference(
         cutoff_hz: Filter cutoff frequency in Hz (0 < cutoff_hz < 0.5 * rate_hz).
         impact_index: Last pre-contact sample, ``1 <= impact_index < N - 2``,
             or ``None`` to filter the whole trajectory in one pass.
+        pre_contact_cutoff_hz: Cutoff of the pre-contact samples only
+            (needs ``impact_index``; default ``cutoff_hz``). The release
+            selection of :mod:`.release_cutoff` raises it when the base
+            cutoff removes the late release (GCV-20).
 
     Returns:
         (N, nq) array of smoothed coordinate trajectories.
@@ -96,17 +101,33 @@ def smooth_reference(
         )
     if q.ndim != 2:
         raise ValueError(f"q must be a 2D array, got shape {q.shape}")
+    pre_cutoff = _pre_contact_cutoff(pre_contact_cutoff_hz, cutoff_hz, impact_index)
+    if not 0.0 < pre_cutoff < nyquist:
+        raise ValueError(
+            f"pre_contact_cutoff_hz must lie in (0, {nyquist}), got {pre_cutoff}"
+        )
     if impact_index is not None:
         split = _validate_impact_index(impact_index, q.shape[0])
         return np.vstack(
             [
-                _lowpass(q[: split + 1], cutoff_hz / nyquist),
+                _lowpass(q[: split + 1], pre_cutoff / nyquist),
                 _lowpass(q[split + 1 :], cutoff_hz / nyquist),
             ]
         )
     if q.shape[0] < 2:
         return q.copy()
     return _lowpass(q, cutoff_hz / nyquist)
+
+
+def _pre_contact_cutoff(
+    pre_contact_cutoff_hz: float | None, cutoff_hz: float, impact_index: object
+) -> float:
+    """The pre-contact cutoff; only meaningful with an impact split."""
+    if pre_contact_cutoff_hz is None:
+        return float(cutoff_hz)
+    if impact_index is None:
+        raise ValueError("pre_contact_cutoff_hz needs an impact_index split")
+    return float(pre_contact_cutoff_hz)
 
 
 def _lowpass(q: np.ndarray, normalised_cutoff: float) -> np.ndarray:
@@ -132,9 +153,13 @@ def _validate_impact_index(impact_index: object, frames: int) -> int:
 
 def smooth_lane(q: np.ndarray, lane: Any, cutoff_hz: float) -> np.ndarray:
     """:func:`smooth_reference` at the lane's rate, split at its capture
-    impact (``lane.impact_index``; unsplit when the lane has none)."""
+    impact (``lane.impact_index``; unsplit when the lane has none), with the
+    lane's release-preserving pre-contact cutoff when one was selected
+    (``lane.pre_contact_cutoff_hz``, GCV-20)."""
+    split = getattr(lane, "impact_index", None)
+    pre = getattr(lane, "pre_contact_cutoff_hz", None) if split is not None else None
     return smooth_reference(
-        q, lane.rate_hz, cutoff_hz, impact_index=getattr(lane, "impact_index", None)
+        q, lane.rate_hz, cutoff_hz, impact_index=split, pre_contact_cutoff_hz=pre
     )
 
 

@@ -38,6 +38,7 @@ from src.shared.python.motion_matching.pipeline.constants import (
     STANCE_TOLERANCE_M,
     TOE_SPHERES,
     TOE_STANDOFF_M,
+    TRACKING_CUTOFF_HZ,
     TRAJECTORY_RESTART_MARGIN_M,
     TRAJECTORY_RESTART_THRESHOLD_M,
     TRAJECTORY_RESTARTS,
@@ -374,6 +375,10 @@ class Lane:
         self.impact_split_reason = "not computed"
         self.ball_impact: Any = None  # ImpactForce plan (GCV-20)
         self.impact_time_s: float | None = None
+        #: Release-preserving pre-contact tracking cutoff (GCV-20); None keeps
+        #: the base cutoff on both sides of impact.
+        self.pre_contact_cutoff_hz: float | None = None
+        self.release_cutoff: dict[str, Any] | None = None
 
     def set_face_targets(
         self,
@@ -442,6 +447,41 @@ class Lane:
             self.impact_index = hit.index
             self.impact_split_reason = "capture face-centre ball passage"
 
+    def select_release_cutoff(
+        self, kin: Any, spec: Mapping[str, Any], q_ref: np.ndarray
+    ) -> None:
+        """Pick the pre-contact tracking cutoff that keeps the reference's
+        late release (GCV-20, #11767; DESIGN_DECISIONS section 11).
+
+        Needs the capture impact split; without it, or when the reference's
+        clubhead never passes the ball, the base cutoff stays and the reason
+        is kept for the receipt.
+        """
+        from src.shared.python.motion_matching.club_face_target import (
+            model_face_centres,
+        )
+        from src.shared.python.motion_matching.pipeline.release_cutoff import (
+            release_preserving_cutoff,
+        )
+
+        self.pre_contact_cutoff_hz = None
+        if self.impact_index is None:
+            self.release_cutoff = {"source": "no impact split"}
+            return
+        try:
+            result = release_preserving_cutoff(
+                self.times,
+                q_ref,
+                self.impact_index,
+                lambda q: model_face_centres(kin, q, spec),
+                base_cutoff_hz=TRACKING_CUTOFF_HZ,
+            )
+        except ValueError as exc:
+            self.release_cutoff = {"source": f"unavailable: {exc}"}
+            return
+        self.pre_contact_cutoff_hz = result.cutoff_hz
+        self.release_cutoff = result.to_record()
+
     def impact_split_report(self) -> dict[str, Any]:
         """Receipt block describing where the reference low-pass is split."""
         report: dict[str, Any] = {"source": self.impact_split_reason}
@@ -450,6 +490,10 @@ class Lane:
             report["time_s"] = float(self.times[self.impact_index] - self.times[0])
         if self.impact_time_s is not None:
             report["impact_time_s"] = float(self.impact_time_s)
+        if self.pre_contact_cutoff_hz is not None:
+            report["pre_contact_cutoff_hz"] = float(self.pre_contact_cutoff_hz)
+        if self.release_cutoff is not None:
+            report["release_cutoff"] = self.release_cutoff
         return report
 
     def leg_seeds(self) -> dict[str, tuple[str, Sequence[float]]]:
