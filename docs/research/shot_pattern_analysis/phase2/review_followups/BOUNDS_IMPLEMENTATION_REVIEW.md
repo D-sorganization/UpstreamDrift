@@ -31,3 +31,11 @@ original pathway. This review is not final supplemental run authorization.
 Independent source-projection review, nominal fine replay, the 32-shot pilot,
 strict saved-data/alias checks, and immutable final acceptance remain required.
 The separate symmetry review also forbids arbitrary draw/fade symmetry claims.
+
+## Acceptance and GUI Follow-Up
+
+Independently inspected isolated commit `22747504f3f529a0a9b46460a6c319674484028b`. The final gate now rejects custom selected cells or bounds without an explicit supplemental protocol. It binds all three exact current-source final catalogs, source identity, and three hashed pilot plans whose only configuration difference is 32 rather than 10,000 shots. This addresses the previously reported protocol authorization gap. Independent supplemental/GUI verification passed 24 tests (offscreen), recorded in `/tmp/astra-bounds-followup-tests.log`; no supplemental Monte Carlo was executed.
+
+This is code-level acceptance only. Real pilot audits, numerical refinement, source transition, and a new immutable supplemental final acceptance remain required. The auditor's protocol schema agrees with the execution gate. GUI explicit bounds preserve legacy defaults and reject nonrepresentable imported values instead of silently clamping them.
+
+The isolated plot typing changes in `ecc82796ce` were checked against the original frozen files and the recorded new files: the before/after hashes and reproducer hash agree. The recorded 84 exact density comparisons support the explicit float64 construction change; formatting changes have matching normalized ASTs. This limited equivalence evidence must be included in the eventual full source transition, not used to rewrite original acceptance.
