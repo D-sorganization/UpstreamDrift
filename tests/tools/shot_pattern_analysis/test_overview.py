@@ -188,6 +188,15 @@ def test_cli_accepts_matrix_root_and_output_directory(monkeypatch, capsys) -> No
     assert capsys.readouterr().out.strip().endswith("overview_statistics.csv")
 
 
+def test_forest_legend_is_one_draw_and_fade_pair() -> None:
+    from src.tools.shot_pattern_analysis.overview import _pattern_legend_handles
+
+    assert [handle.get_label() for handle in _pattern_legend_handles()] == [
+        "Draw",
+        "Fade",
+    ]
+
+
 @pytest.mark.parametrize(
     "failure",
     [

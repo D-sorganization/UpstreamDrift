@@ -1,0 +1,154 @@
+{
+  "authenticated_identity": "dieterolson",
+  "authorization": "User explicit authorization overriding AGENTS.md GOV-1 restriction for personal identity dieterolson",
+  "repository": "D-sorganization/UpstreamDrift",
+  "branch": "codex/shot-pattern-analysis",
+  "published_at": "2026-10-09T05:38:32.115062+00:00",
+  "total_records": 17,
+  "issues": [
+    {
+      "local_id": "SPA-001",
+      "title": "Apply Tangential Impact Impulse to Ball and Club Translation",
+      "action": "created",
+      "issue_number": 11840,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11840",
+      "published_at": "2026-10-09T05:08:52.125074+00:00"
+    },
+    {
+      "local_id": "SPA-002",
+      "title": "Use Finite Club Mass in the Sticking-Contact Impulse",
+      "action": "created",
+      "issue_number": 11841,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11841",
+      "published_at": "2026-10-09T05:09:02.741419+00:00"
+    },
+    {
+      "local_id": "SPA-003",
+      "title": "Replace Shot Pattern Results Generated With Superseded Impact Physics",
+      "action": "created",
+      "issue_number": 11842,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11842",
+      "published_at": "2026-10-09T05:09:12.700598+00:00"
+    },
+    {
+      "local_id": "SPA-004",
+      "title": "Add Explicit Geometric Face\u2013Loft and Shaft-Lean Sensitivity",
+      "action": "created",
+      "issue_number": 11843,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11843",
+      "published_at": "2026-10-09T05:09:21.666468+00:00"
+    },
+    {
+      "local_id": "SPA-005",
+      "title": "Report Long/Short Covariance in Shot Pattern Dispersion",
+      "action": "created",
+      "issue_number": 11844,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11844",
+      "published_at": "2026-10-09T05:09:31.306470+00:00"
+    },
+    {
+      "local_id": "SPA-006",
+      "title": "Use Club-Appropriate Tee and Approach Scoring Contexts",
+      "action": "created",
+      "issue_number": 11845,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11845",
+      "published_at": "2026-10-09T05:09:41.661783+00:00"
+    },
+    {
+      "local_id": "SPA-007",
+      "title": "Identify Illustrative Club Inputs and Their Evidence Provenance",
+      "action": "created",
+      "issue_number": 11846,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11846",
+      "published_at": "2026-10-09T05:09:51.027503+00:00"
+    },
+    {
+      "local_id": "SPA-008",
+      "title": "Bound Physical Acceptance Claims to the Tested Central-Contact Model",
+      "action": "created",
+      "issue_number": 11847,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11847",
+      "published_at": "2026-10-09T05:10:01.454083+00:00"
+    },
+    {
+      "local_id": "SPA-009",
+      "title": "Reject Separating Contact in the Rigid-Body Impact Solver",
+      "action": "created",
+      "issue_number": 11848,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11848",
+      "published_at": "2026-10-09T05:10:11.591757+00:00"
+    },
+    {
+      "local_id": "SPA-010",
+      "title": "Reject Incompatible Delivery Baselines in Saved Experiment Comparisons",
+      "action": "created",
+      "issue_number": 11849,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11849",
+      "published_at": "2026-10-09T05:10:20.889057+00:00"
+    },
+    {
+      "local_id": "SPA-011",
+      "title": "Accept Custom Delivery Inputs Through the Shot Pattern GUI Subprocess",
+      "action": "created",
+      "issue_number": 11850,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11850",
+      "published_at": "2026-10-09T05:10:30.169324+00:00"
+    },
+    {
+      "local_id": "SPA-012",
+      "title": "Correct Static Types at Shot Pattern GUI and Physics Boundaries",
+      "action": "created",
+      "issue_number": 11851,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11851",
+      "published_at": "2026-10-09T05:10:40.157584+00:00"
+    },
+    {
+      "local_id": "SPA-013",
+      "title": "Freeze Source Provenance Before Long Shot Pattern Experiments",
+      "action": "created",
+      "issue_number": 11852,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11852",
+      "published_at": "2026-10-09T05:10:50.144149+00:00"
+    },
+    {
+      "local_id": "SPA-014",
+      "title": "Version the Extended Historical Scoring Baseline Explicitly",
+      "action": "created",
+      "issue_number": 11853,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11853",
+      "published_at": "2026-10-09T05:11:00.856354+00:00"
+    },
+    {
+      "local_id": "SPA-015",
+      "title": "Qualify Mirror Symmetry to Fixed-Loft Shot Delivery",
+      "action": "created",
+      "issue_number": 11862,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11862",
+      "published_at": "2026-10-09T05:36:09.574214+00:00"
+    },
+    {
+      "local_id": "SPA-016",
+      "title": "Remove Artificial Partial Hole-Out Rewards From the Putting Baseline",
+      "action": "created",
+      "issue_number": 11863,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11863",
+      "published_at": "2026-10-09T05:36:09.574214+00:00"
+    },
+    {
+      "local_id": "SPA-017",
+      "title": "Remove Duplicate Legends From the Shareable Scoring Overview",
+      "action": "created",
+      "issue_number": 11864,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11864",
+      "published_at": "2026-10-09T05:38:32.115062+00:00"
+    },
+    {
+      "local_id": "SPA-018",
+      "title": "Preserve Exact Shot Evidence Bytes Across Git Checkouts",
+      "action": "created",
+      "issue_number": 11865,
+      "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11865",
+      "published_at": "2026-10-09T05:40:24.616349+00:00"
+    }
+  ]
+}

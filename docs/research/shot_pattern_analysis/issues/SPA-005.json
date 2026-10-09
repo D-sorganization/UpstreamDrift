@@ -1,6 +1,10 @@
 {
   "local_id": "SPA-005",
   "title": "Report Long/Short Covariance in Shot Pattern Dispersion",
-  "body": "## Problem\n\nLateral spread alone omitted carry covariance and long-left/short-right orientation.\n\n## Acceptance Criteria\n\nReport descriptive covariance, correlations, percentiles, quadrants and nominal offsets; avoid calibrated 2D confidence claims.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_dispersion_stats.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
-  "publication_status": "pending_agent_bot_authentication"
+  "body": "## Problem\n\nLateral spread alone omitted carry covariance and long-left/short-right orientation.\n\n## Acceptance Criteria\n\nReport descriptive covariance, correlations, percentiles, quadrants and nominal offsets; avoid calibrated 2D confidence claims.\n\n## Validation\n\ntests/tools/shot_pattern_analysis/test_dispersion_stats.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11844,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11844",
+  "issue_number": 11844,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11844"
 }

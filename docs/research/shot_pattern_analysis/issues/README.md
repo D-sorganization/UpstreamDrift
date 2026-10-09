@@ -1,22 +1,35 @@
 # Analysis Issue Register
 
-These are reviewable issue records requested by the user. GitHub publication is
-pending: the CLI and connector authenticate as `dieterolson`; GOV-1 requires
-the agent's GitHub App identity. No configured App key or installation-token
-route was found on this host. No issue is claimed to have been filed or closed.
+These are reviewable issue records requested by the user. The user explicitly
+authorized the personal GitHub identity for this task: “use my personal identity -
+I authorize this.” This is a task-specific exception to the earlier user-provided
+GOV-1 restriction; credentials and repository settings remain unchanged.
+Gemini 3.8 Flash High through `agy` is filing these records and retaining actual
+issue URLs in publication receipts. No issue is claimed closed without a merged
+implementing PR or an explicitly permitted disposition.
 
 | Record | Finding | Implementation State | Acceptance Evidence |
 | --- | --- | --- | --- |
 | SPA-001 | Friction Changed Spin Without Tangential Translation | Corrected Locally | Three Regression Tests Failed Before the Fix; Broad Impact Suite: 117 Passed |
 | SPA-002 | Sticking Impulse Assumed Infinite Club Mass | Corrected Locally | Finite-Mass Slip and Momentum Tests; Independent 3D Conservation Review: Six Passed |
-| SPA-003 | Earlier Results Used the Defective Impact Model | Historical Bundles Marked Superseded; Replacement Pending | Status in All Four Summary, Scoring, and Receipt Files |
-| SPA-004 | Fixed Loft Omitted Face–Loft Geometry | Geometric Mode Implemented; Expanded Results Pending | 17 Geometry Tests and 24 Core/Physics Tests Passed |
-| SPA-005 | Dispersion Summary Omitted Long/Short Covariance | Pure Statistics Implemented; Report Integration Pending | Eight Tests Passed, Including Mirror and Zero-Variance Cases |
-| SPA-006 | Driver Approach Scoring Did Not Match Tee Context | Replacement Tee Scoring Pending | Requires Source-Verified Tee/Fairway/Rough Baselines and API Parity |
-| SPA-007 | Presets Could Be Mistaken for Measured Club/Player Data | Qualifications Required in Final Reports | Astra Identified Assumed 7-Iron Loft, Optimizer PW Example, and Static-Lie Assumptions |
-| SPA-008 | Physics Qualification Could Be Overstated | Scope Limits Required in Final Reports | Central Contact Only; Off-Center Club Rotation and Player Validation Remain Unqualified |
+| SPA-003 | Earlier Results Used the Defective Impact Model | Corrected 24-Cell V2 Matrix Complete | Status in All Four Summary, Scoring, and Receipt Files |
+| SPA-004 | Fixed Loft Omitted Face–Loft Geometry | Geometric Mode and Full Matrix Complete | 17 Geometry Tests and 24 Core/Physics Tests Passed |
+| SPA-005 | Dispersion Summary Omitted Long/Short Covariance | Covariance and Report Integration Complete | Eight Tests Passed, Including Mirror and Zero-Variance Cases |
+| SPA-006 | Driver Approach Scoring Did Not Match Tee Context | Tee/Approach Contexts and V2 Scoring Complete | Historical Table 9 Tee/Fairway/Rough; Dense API Parity; 24 V2 Manifests Verified |
+| SPA-007 | Presets Could Be Mistaken for Measured Club/Player Data | Assumptions Qualified in Final Reports | Astra Identified Assumed 7-Iron Loft, Optimizer PW Example, and Static-Lie Assumptions |
+| SPA-008 | Physics Qualification Could Be Overstated | Scope and Deferred Physical Validation Explicit | Central Contact Only; Off-Center Club Rotation and Player Validation Remain Unqualified |
 | SPA-009 | Separating Contact Produced an Attracting Normal Impulse | Corrected Locally | Separating-Contact Regression Failed Then Passed; Zero Approach Remains No Impulse |
 | SPA-010 | Comparison Accepted Different Delivery Baselines | Corrected Locally | Three New Tests Failed Before the Baseline Contract; Eight Comparison Tests Passed |
+| SPA-011 | GUI Custom Inputs Passed a Rejected CLI Preset | Corrected Locally; Custom CLI/GUI Regressions Passed | Permit Explicit Custom Mode and Preserve User Delivery Overrides |
+| SPA-012 | New GUI/Core Boundaries Failed Static Type Checks | Local Corrections and Focused Mypy Passed; Canonical Gate Pending | Guard Qt Headers; Compatible Resize Signature; Typed Physics Calls and Numeric Refinement Rows |
+| SPA-013 | Export-Time Hashes Could Misidentify Loaded Experiment Sources | Matrix and Standalone Provenance Corrected; Resume Hash Checks Tested | Freeze Worker Sources Before Simulation; Verify and Link Source/Native Receipts |
+| SPA-014 | Extended Scoring Table Retained the Abbreviated Baseline Version | V2 Baseline and Separate Postprocess Provenance Complete | Content SHA Is Authoritative; Version and Postprocess Receipts Must Identify Full Table |
+| SPA-015 | Mirror Symmetry Was Overgeneralized to Coupled Delivery | Documentation Corrected; Astra Verified Geometry | Fixed Loft Is Symmetric; Same Right-Handed Axis Coupling Can Differ Structurally |
+| SPA-016 | Putting Baseline Awarded Partial Hole-Outs at Positive Distance | Corrected; All 24 Saved-Flight Bundles Re-Scored | Unholed Expected Strokes Must Be at Least One; Terminal Holed State Must Be Separate |
+
+| SPA-017 | Shared SG Legend Repeated Entries and Overlapped a Panel Title | Corrected; Regenerated V2 Overview | Red–Green Legend Test and Visually Verified 1080p PNGs |
+
+| SPA-018 | Git Line-Ending Normalization Changed Evidence Hashes | Corrected and Committed | All 24 Indexed CSV Hashes Match Frozen Manifests |
 
 ## Regression and Resolution Requirements
 
@@ -40,6 +53,9 @@ correlation, target-error percentiles, and explicit quadrant conventions. A
 face-only random experiment does not qualify a two-dimensional golfer error
 distribution or confidence ellipse.
 
+SPA-016 additionally requires the unholed putting lower bound of one; API
+parity alone is insufficient to validate baseline physics.
+
 SPA-006 requires driver tee scoring and iron/PW approach scoring. Do not replace
 a tee starting baseline with a fairway baseline. Unsupported baseline distances
 must be unavailable rather than extrapolated. Any exact cache must reconstruct
@@ -50,9 +66,13 @@ SPA-007 and SPA-008 are resolved by truthful assumptions, bounds, and deferred
 validation, not by inventing measurements. Numerical tests establish internal
 consistency within the stated model; empirical accuracy remains unestablished.
 
+## Published Issue Links
+
+SPA-001–014: #11840–11853. SPA-015: [#11862](https://github.com/D-sorganization/UpstreamDrift/issues/11862). SPA-016: [#11863](https://github.com/D-sorganization/UpstreamDrift/issues/11863). SPA-017: [#11864](https://github.com/D-sorganization/UpstreamDrift/issues/11864). SPA-018: [#11865](https://github.com/D-sorganization/UpstreamDrift/issues/11865). Exact receipts are in `publication_receipt.json`.
+
 ## Publication and Closure
 
-Publish these records under the agent bot once authenticated, check for existing
+Publish these records under the expressly authorized identity, check for existing
 duplicates, and link their regression evidence and implementing PR. Keep issues
 open until a merged PR implements their acceptance criteria, or an explicitly
 permitted disposition applies. Physical measurements are deferred validation,

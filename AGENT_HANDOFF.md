@@ -1,3 +1,12 @@
+# Active: Shot Pattern Analysis — Resume Checkpoint
+
+- Branch `codex/shot-pattern-analysis`; checkout `/home/dieterolson/.codex/worktrees/shot-pattern-analysis/UpstreamDrift`. Read [Turnover](docs/research/shot_pattern_analysis/TURNOVER.md), [Results](docs/research/shot_pattern_analysis/README.md), and [Issue Register](docs/research/shot_pattern_analysis/issues/README.md) before resuming. This checkpoint preserves work for the user's upcoming connection loss.
+- All 24 cells / 720,000 synthetic shots finished. Driver tee and 7-iron/PW approach V2 scoring complete; flight CSVs unchanged, all manifest hashes independently verified. Exact frozen source/native archive and rejected V1 scoring archive are tracked. Commit `1601ac294c` preserves CSV bytes across Git checkouts.
+- Corrected central impact, geometric face–loft/lean sensitivity, full launcher tile, custom CLI/GUI, covariance/common-range controls, 72-row statistics and 1080p shareable graphics implemented. Astra independently recomputed statistics (max discrepancy 2.84e-14). No universal curvature benefit; carry and longitudinal spread affect scoring.
+- Gemini 3.8 via `agy` filed 18 issues: SPA-001–014 #11840–11853; SPA-015–018 #11862–11865. Personal GitHub identity expressly authorized for this task. All issues stay open until merged acceptance evidence; no PR/push yet.
+- Latest fast tool/UI suite: 126 passed. Five-module mypy and focused provenance tests passed; full pre-PR gates remain incomplete. Exact resume commands belong in Turnover. Canonical pre-PR runner is Repository_Management/scripts/pre_pr.py; an initial run exposed duplicate module names during diff mypy. Do not publish as fully validated until resolved or explicitly bounded.
+- Limits: illustrative geometric inputs, no measured golfer populations or qualified off-center gear effect. Canonical engineering manual remains blocked-inventory-required. Standalone research LaTeX compilation unverified because the compiler could not download its uncached Tectonic bundle. Preserve unrelated handoff entries below.
+
 # Active: MeshCat Camera Framing - NV-9 #11697
 
 - Branch `claude/nv-9-meshcat-framing-11697`; epic #11673. MeshCat kept the 75 deg three.js default FOV; `MeshcatPage` now sets the shared `golf_view_presets.VIEWER_FOV_Y_RAD` (0.7 rad, OpenSim's value) on entry and raises if the page has no viewer camera. New `golf_view_presets.framing`: `projected_extent` and `fit_distance_m` (15 % margin) with unit tests.

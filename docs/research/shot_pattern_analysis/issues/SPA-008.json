@@ -1,6 +1,10 @@
 {
   "local_id": "SPA-008",
   "title": "Bound Physical Acceptance Claims to the Tested Central-Contact Model",
-  "body": "## Problem\n\nNumerical consistency does not validate off-center club rotation, real shaft dynamics, or player populations.\n\n## Acceptance Criteria\n\nPublish limitations and deferred empirical validation; qualify central-contact consistency only.\n\n## Validation\n\nIndependent conservation tests, research reference, and explicit unqualified gates\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
-  "publication_status": "pending_agent_bot_authentication"
+  "body": "## Problem\n\nNumerical consistency does not validate off-center club rotation, real shaft dynamics, or player populations.\n\n## Acceptance Criteria\n\nPublish limitations and deferred empirical validation; qualify central-contact consistency only.\n\n## Validation\n\nIndependent conservation tests, research reference, and explicit unqualified gates\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11847,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11847",
+  "issue_number": 11847,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11847"
 }

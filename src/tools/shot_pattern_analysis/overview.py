@@ -50,6 +50,7 @@ ROW_FIELDS = (
     "paired_delta_sg_lower_95",
     "paired_delta_sg_upper_95",
 )
+PATTERN_COLORS = {"Draw": "#ffbf69", "Fade": "#64d9ff"}
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -314,7 +315,6 @@ def _plot_scoring_forest(
         "pitching_wedge": "Pitching Wedge Approach Outcomes",
     }
     cell_order = ((1.0, 1.0), (2.0, 1.0), (1.0, 2.0), (2.0, 2.0))
-    colors = {"Draw": "#ffbf69", "Fade": "#64d9ff"}
     selected = [row for row in rows if row["delivery_mode"] == delivery_mode]
     minimum = min(row["paired_delta_sg_lower_95"] for row in selected)
     maximum = max(row["paired_delta_sg_upper_95"] for row in selected)
@@ -342,6 +342,7 @@ def _plot_scoring_forest(
             ax.set_yticklabels(
                 [f"SD {sd:g}°, Curve {scale:g}×" for sd, scale in cell_order]
             )
+            ax.tick_params(axis="y", length=0)
             ax.invert_yaxis()
             ax.set_title(club_titles[club], fontsize=15, fontweight="bold")
             ax.grid(axis="x", alpha=0.18)
@@ -363,11 +364,10 @@ def _plot_scoring_forest(
                         position + offset,
                         xerr=[[estimate - lower], [upper - estimate]],
                         fmt="o",
-                        color=colors[pattern],
+                        color=PATTERN_COLORS[pattern],
                         markersize=6,
                         capsize=3,
                         linewidth=1.5,
-                        label=pattern if position == 0 else None,
                     )
         fig.suptitle(
             f"Paired Model-Conditional Strokes-Gained Effects — {delivery_mode.replace('_', ' ').title()}",
@@ -379,7 +379,11 @@ def _plot_scoring_forest(
             "Paired Strokes Gained vs. Straight (Strokes; Positive Is Better)", y=0.14
         )
         fig.legend(
-            loc="upper center", bbox_to_anchor=(0.5, 0.905), ncol=2, frameon=False
+            handles=_pattern_legend_handles(),
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.91),
+            ncol=2,
+            frameon=False,
         )
         fig.text(
             0.5,
@@ -395,11 +399,29 @@ def _plot_scoring_forest(
             ha="center",
             fontsize=11,
         )
-        fig.subplots_adjust(left=0.09, right=0.98, bottom=0.22, top=0.84, wspace=0.25)
+        fig.subplots_adjust(left=0.09, right=0.98, bottom=0.22, top=0.80, wspace=0.25)
         output.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(output, dpi=100)
         plt.close(fig)
     return output
+
+
+def _pattern_legend_handles() -> list[Any]:
+    """Build the one shared two-entry legend used by both forest plots."""
+    from matplotlib.lines import Line2D
+
+    return [
+        Line2D(
+            [0],
+            [0],
+            color=color,
+            marker="o",
+            linestyle="none",
+            markersize=7,
+            label=pattern,
+        )
+        for pattern, color in PATTERN_COLORS.items()
+    ]
 
 
 def export_overview(matrix_root: Path, output_dir: Path) -> dict[str, Path]:

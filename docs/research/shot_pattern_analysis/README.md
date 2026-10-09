@@ -125,6 +125,8 @@ Each triple below is Straight / Draw / Fade; lateral SD and carry are in metres.
 
 The shots do **not** carry the same distance. Curved driver patterns generally lose carry; narrower lateral spread can coexist with worse tee scoring. The equal-range bearing control separates geometric distance scaling from the remaining change in angular spread; it does not establish causation. In the assumed shaft-rotation iron/PW cases, the fade is often narrower than the draw, and that distinction persists at common range. This follows from the specified right-handed face–loft geometry, rather than a universal advantage of curving shots. Increasing face SD broadens every pattern and can increase these conditional differences. Bigger curves do not give a universal accuracy or scoring improvement.
 
+Narrower lateral spread alone does not determine approach scoring either. For PW shaft rotation, SD 1° and nominal curves, Draw has lateral SD 1.999 m versus Fade 1.941 m, but lower total target RMSE (2.279 versus 2.312 m) and modeled ΔSG +0.0023 versus −0.0024. The longitudinal spread explains this difference; downrange biases are nearly equal.
+
 Effects are small, conditional predictions under illustrative inputs, not measured strokes gained. Model and delivery uncertainty are excluded from the bootstrap intervals. Use the baseline version and digest in the receipts when comparing results. The original driver bundles remain only in the [Superseded Historical Control Report](historical_control_report.md).
 
 ## Shareable Graphics and Complete Statistics

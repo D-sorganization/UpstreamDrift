@@ -1,6 +1,10 @@
 {
   "local_id": "SPA-007",
   "title": "Identify Illustrative Club Inputs and Their Evidence Provenance",
-  "body": "## Problem\n\nHybrid presets risk being mistaken for measured player or complete manufacturer specifications.\n\n## Acceptance Criteria\n\nLabel assumed speed/mass/attack/7i loft, optimizer PW example, and static-lie to delivered-axis assumption in reports and receipts.\n\n## Validation\n\nAstra source audit and final calculation reference\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
-  "publication_status": "pending_agent_bot_authentication"
+  "body": "## Problem\n\nHybrid presets risk being mistaken for measured player or complete manufacturer specifications.\n\n## Acceptance Criteria\n\nLabel assumed speed/mass/attack/7i loft, optimizer PW example, and static-lie to delivered-axis assumption in reports and receipts.\n\n## Validation\n\nAstra source audit and final calculation reference\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11846,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11846",
+  "issue_number": 11846,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11846"
 }

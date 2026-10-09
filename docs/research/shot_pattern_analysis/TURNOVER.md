@@ -64,3 +64,7 @@ PY
 ## Known External Gates
 
 Standalone LaTeX compilation is unverified: the built-in compiler could not download its uncached Tectonic bundle. The canonical engineering manual remains `blocked-inventory-required`; this separate research reference does not qualify that release. Full-repository title-case debt is pre-existing and must not be described as fixed. Earlier mypy processes crashed under concurrent simulation load; a successful final type check is still required.
+
+## User-Requested Pause Checkpoint
+
+The user explicitly requested pausing the goal for connection loss. All agents stopped; the expensive matrix is complete and no simulation needs to remain running. Final fast tool/UI suite: 126 passed. Focused provenance/scoring changes and five-module mypy passed. The canonical pre-PR attempt reported duplicate module naming (`tools.shot_pattern_analysis` and `src.tools.shot_pattern_analysis`) and was interrupted at the pause request; its log is `pre_pr_checkpoint.log`. Full release acceptance is not claimed. No push or PR has occurred. Next: resolve the canonical diff-mypy package-path issue, run complete required gates, verify the clean Git checkout hashes, then publish the ready PR and arm the merge queue. Do not restart the matrix or recreate the 18 already-filed issues.

@@ -1,6 +1,10 @@
 {
   "local_id": "SPA-009",
   "title": "Reject Separating Contact in the Rigid-Body Impact Solver",
-  "body": "## Problem\n\nNegative normal approach produces a negative normal impulse that attracts separating bodies. The experiment uses approaching impacts, so this defect does not alter its positive-contact shots.\n\n## Acceptance Criteria\n\nAdd a clear input contract rejecting separating contact; zero approach produces no impulse. Write the failing regression first and preserve approaching-contact behavior and conservation tests.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Keep open until the implementing PR merges.",
-  "publication_status": "pending_agent_bot_authentication"
+  "body": "## Problem\n\nNegative normal approach produces a negative normal impulse that attracts separating bodies. The experiment uses approaching impacts, so this defect does not alter its positive-contact shots.\n\n## Acceptance Criteria\n\nAdd a clear input contract rejecting separating contact; zero approach produces no impulse. Write the failing regression first and preserve approaching-contact behavior and conservation tests.\n\n## Validation\n\ntests/unit/physics/test_impact_tangential_impulse.py and test_impact_central_contact_review.py; negative approach red then green, zero contact unchanged.\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11848,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11848",
+  "issue_number": 11848,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11848"
 }

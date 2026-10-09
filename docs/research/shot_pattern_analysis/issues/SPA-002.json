@@ -1,6 +1,10 @@
 {
   "local_id": "SPA-002",
   "title": "Use Finite Club Mass in the Sticking-Contact Impulse",
-  "body": "## Problem\n\nThe cap used infinite-club 2/7 ball mass despite finite club translation.\n\n## Acceptance Criteria\n\nInclude inverse club mass and initial-spin surface slip; verify high-friction no-slip.\n\n## Validation\n\ntests/unit/physics/test_impact_tangential_impulse.py; tests/unit/physics/test_impact_central_contact_review.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until implementing PR is merged or an explicitly permitted disposition applies.\n",
-  "publication_status": "pending_agent_bot_authentication"
+  "body": "## Problem\n\nThe cap used infinite-club 2/7 ball mass despite finite club translation.\n\n## Acceptance Criteria\n\nInclude inverse club mass and initial-spin surface slip; verify high-friction no-slip.\n\n## Validation\n\ntests/unit/physics/test_impact_tangential_impulse.py; tests/unit/physics/test_impact_central_contact_review.py\n\n## Handoff\n\nBranch: `codex/shot-pattern-analysis`. Current implementation and evidence are tracked in `docs/research/shot_pattern_analysis/issues/README.md`. Keep open until a merged implementing PR satisfies acceptance criteria or an explicitly permitted disposition applies.\n",
+  "publication_status": "published",
+  "github_issue_number": 11841,
+  "github_issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11841",
+  "issue_number": 11841,
+  "issue_url": "https://github.com/D-sorganization/UpstreamDrift/issues/11841"
 }
