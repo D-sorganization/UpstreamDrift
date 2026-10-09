@@ -10571,3 +10571,12 @@ synthetic perturbation correction, saturation and negative contact/channel
 admission. Provisional manual chapter 27 and the source-hashed F02 native
 receipt govern this child. It does not qualify a golfer, marker fit, contact,
 muscle input, multi-engine parity or a hard runtime deadline; F02 remains open.
+The native nominal-policy builder consumes a pinned T01 time-only torque
+replay with nonconstant model-derived states and inputs. It verifies each
+autonomous native successor, computes F05c tangent $A_k,B_k$ and MOSAIC
+TVLQR gains, then supplies F02 a frozen nominal feedforward schedule.
+A held-out native perturbation produces separate frozen-input and total-
+feedback bundles with matched model/initial-state/policy/grid identities,
+different applied-input hashes and exact full-state independent replay.
+This is not an F03 optimizer-to-native handoff: F03 currently exports only
+the one-dimensional synthetic sparse-collocation result.

@@ -1,13 +1,27 @@
 {
   "fixture": {
     "dt_s": 0.01,
+    "moving_steps": 20,
     "nq": 9,
     "nu": 2,
     "nv": 8,
-    "steps": 12
+    "static_steps": 12
   },
   "host_alias": "windows-owned-opensim-env",
   "issue": 11946,
+  "moving_evidence": {
+    "controlled_applied_input_sha256": "55b87ff0bc5d62bc7cfd97108a35d7dbe78029eef10b175136c4a76085930fee",
+    "controlled_final_hip_error_rad": 0.024601986737340376,
+    "frozen_applied_input_sha256": "afa861e6cb2cf13596c573cf8efd87cfddbf7b475ebc8d54600c62d275c4f8a6",
+    "frozen_final_hip_error_rad": 0.07508484611709854,
+    "heldout_initial_state_sha256": "b88f57f9d0ee0daeafa304e31cb9f304ed9215ec6abf9b1a4968be5804e3fa33",
+    "max_controlled_replay_error": 0.0,
+    "max_frozen_replay_error": 0.0,
+    "policy_sha256": "ec3e92554f04bf094e97bf21517cfadb77df9b07fc1bf6d14fee9f21f7d622a8",
+    "source_model_sha256": "51cbbd32ac9b419c415bdd0eee2db6b13c87acc5b6888c249d11e3334b9d4fbf",
+    "teacher_applied_input_sha256": "afa861e6cb2cf13596c573cf8efd87cfddbf7b475ebc8d54600c62d275c4f8a6",
+    "time_grid_sha256": "3cbabe26379843ea81637e883b344f87f295114b2e1b21ea6d7cbd6f5e7c61c5"
+  },
   "native_evidence": {
     "controlled_applied_input_sha256": "44c9f920d8780225854453402809080f3033c4fe05f212d189cf491d8e9f5e65",
     "controlled_final_hip_error_rad": 0.1260837118981273,
@@ -30,13 +44,13 @@
   "qualification": "synthetic-contact-free-fixture-only",
   "schema_version": "f02-native-manifold-feedback/1",
   "source_sha256": {
-    "scripts/f02_native_manifold_receipt.py": "e0bd610b3d70fa57492fa64750d0ad2eebbfdc692999b75a3cad0f7e2974f6a3",
-    "src/engines/physics_engines/mujoco/python/native_distributed_feedback.py": "7a9aeb37fe1d196c092498fa445dc1140b45dd794641be621f80552a5135d3f4",
+    "scripts/f02_native_manifold_receipt.py": "06adc58dbccf202d1c6e1cc7605e3d52b6506da207ffc12f2cf5212312952987",
+    "src/engines/physics_engines/mujoco/python/native_distributed_feedback.py": "8b42e284dd52fb910e720de11d807e36d18b453977ececc361fd38928dbb1174",
     "src/engines/physics_engines/mujoco/python/native_nmpc_tracking.py": "b0018d3e475af8e27ffe2dc21a9d6a2a478028ab119d6a0a5068ab2a4e5c3587",
     "src/engines/physics_engines/mujoco/python/native_tangent_derivative.py": "0ce33ffe71ee11ad7d2bb49aec0efcdf779ae2ab5fa11d3e93ffd6b86b73376e",
     "src/engines/physics_engines/mujoco/python/native_torque_replay.py": "8908ddb4ca0ed0d98ae4cc8580315335773fd5f8d5209b3159a11f3bacde6724",
     "src/shared/python/motion_matching/distributed_feedback.py": "947318d078b6463ca57e02d6dfcd957e2f2077aafb54a36651a0d5b45a7f401e",
-    "tests/unit/motion_matching/test_native_distributed_feedback.py": "9294e0e97ba2b3f4fc2e8fd1323ef75a7c425d2c2b44ddf1dbcf24fd083d2d8b"
+    "tests/unit/motion_matching/test_native_distributed_feedback.py": "1646f562b32303480913ab11ab330a242f03e5a77081b4fa191133bce896df80"
   },
   "tools_t01_gitlink_commit": "2e7665111b06f92ffbfe178b92d74d6a81c95388"
 }

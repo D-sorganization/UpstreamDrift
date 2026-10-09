@@ -7,21 +7,30 @@ from pathlib import Path
 
 import pytest
 
-from scripts.f02_native_manifold_receipt import extract_native_evidence
+from scripts.f02_native_manifold_receipt import (
+    extract_moving_evidence,
+    extract_native_evidence,
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.headless_safe]
 
 
-def _junit(tmp_path: Path, evidence: dict[str, object] | None) -> Path:
+def _junit(
+    tmp_path: Path,
+    evidence: dict[str, object] | None,
+    *,
+    test_name: str = "test_native_f02_feedback_replays_full_state_and_beats_frozen_nominal",
+    property_name: str = "f02_native_evidence",
+) -> Path:
     path = tmp_path / "native.xml"
     property_xml = (
         ""
         if evidence is None
-        else f"<properties><property name=\"f02_native_evidence\" value='{json.dumps(evidence)}'/></properties>"
+        else f"<properties><property name=\"{property_name}\" value='{json.dumps(evidence)}'/></properties>"
     )
     path.write_text(
         '<testsuite tests="1" failures="0" errors="0" skipped="0">'
-        '<testcase name="test_native_f02_feedback_replays_full_state_and_beats_frozen_nominal">'
+        f'<testcase name="{test_name}">'
         f"{property_xml}</testcase></testsuite>",
         encoding="utf-8",
     )
@@ -65,3 +74,36 @@ def test_receipt_requires_passed_native_property_and_improvement(
     evidence["source_model_sha256"] = "unbound"
     with pytest.raises(ValueError, match="SHA"):
         extract_native_evidence(_junit(tmp_path, evidence))
+
+
+def test_moving_receipt_requires_distinct_frozen_and_total_inputs(
+    tmp_path: Path,
+) -> None:
+    evidence = {
+        **dict.fromkeys(
+            (
+                "source_model_sha256",
+                "teacher_applied_input_sha256",
+                "frozen_applied_input_sha256",
+                "controlled_applied_input_sha256",
+                "heldout_initial_state_sha256",
+                "policy_sha256",
+                "time_grid_sha256",
+            ),
+            "a" * 64,
+        ),
+        "controlled_final_hip_error_rad": 0.1,
+        "frozen_final_hip_error_rad": 0.2,
+        "max_frozen_replay_error": 0.0,
+        "max_controlled_replay_error": 0.0,
+    }
+    kwargs = {
+        "test_name": "test_native_model_derived_moving_reference_frozen_and_feedback_replay",
+        "property_name": "f02_moving_evidence",
+    }
+    with pytest.raises(ValueError, match="exactly one passed"):
+        extract_moving_evidence(_junit(tmp_path, None))
+    with pytest.raises(ValueError, match="change the saved input"):
+        extract_moving_evidence(_junit(tmp_path, evidence, **kwargs))
+    evidence["controlled_applied_input_sha256"] = "b" * 64
+    assert extract_moving_evidence(_junit(tmp_path, evidence, **kwargs)) == evidence

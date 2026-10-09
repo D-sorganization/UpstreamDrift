@@ -10,10 +10,12 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+from typing import cast
 
 from defusedxml import ElementTree as ET
 
 _TEST = "test_native_f02_feedback_replays_full_state_and_beats_frozen_nominal"
+_MOVING_TEST = "test_native_model_derived_moving_reference_frozen_and_feedback_replay"
 _HASH_FIELDS = (
     "source_model_sha256",
     "loaded_native_model_sha256",
@@ -30,6 +32,21 @@ _NUMERIC_FIELDS = (
     "nominal_final_hip_error_rad",
     "max_full_state_replay_error",
 )
+_MOVING_HASH_FIELDS = (
+    "source_model_sha256",
+    "teacher_applied_input_sha256",
+    "frozen_applied_input_sha256",
+    "controlled_applied_input_sha256",
+    "heldout_initial_state_sha256",
+    "policy_sha256",
+    "time_grid_sha256",
+)
+_MOVING_NUMERIC_FIELDS = (
+    "frozen_final_hip_error_rad",
+    "controlled_final_hip_error_rad",
+    "max_frozen_replay_error",
+    "max_controlled_replay_error",
+)
 _SOURCE_PATHS = (
     "scripts/f02_native_manifold_receipt.py",
     "src/engines/physics_engines/mujoco/python/native_distributed_feedback.py",
@@ -41,10 +58,12 @@ _SOURCE_PATHS = (
 )
 
 
-def extract_native_evidence(junit: Path) -> dict[str, object]:
-    """Reject absent, failed, partial or contradictory native test properties."""
+def _passed_property(
+    junit: Path, test_name: str, property_name: str
+) -> dict[str, object]:
+    """Load only one named property from one passed native test."""
     root = ET.parse(junit).getroot()
-    cases = [case for case in root.iter("testcase") if case.get("name") == _TEST]
+    cases = [case for case in root.iter("testcase") if case.get("name") == test_name]
     if len(cases) != 1 or any(
         cases[0].find(outcome) is not None
         for outcome in ("failure", "error", "skipped")
@@ -57,21 +76,27 @@ def extract_native_evidence(junit: Path) -> dict[str, object]:
         else [
             prop.get("value")
             for prop in properties.findall("property")
-            if prop.get("name") == "f02_native_evidence"
+            if prop.get("name") == property_name
         ]
     )
     if len(values) != 1 or not values[0]:
         raise ValueError("native evidence property is missing or duplicated")
     evidence = json.loads(values[0])
-    if not isinstance(evidence, dict) or set(evidence) != set(
-        _HASH_FIELDS + _NUMERIC_FIELDS
-    ):
+    if not isinstance(evidence, dict):
+        raise ValueError("native evidence property must be a JSON object")
+    return evidence
+
+
+def _validate_fields(
+    evidence: dict[str, object], hashes: tuple[str, ...], numbers: tuple[str, ...]
+) -> None:
+    if set(evidence) != set(hashes + numbers):
         raise ValueError("native evidence property has missing or unknown fields")
-    for field in _HASH_FIELDS:
+    for field in hashes:
         value = evidence[field]
         if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
             raise ValueError(f"native {field} must be a SHA-256 hex digest")
-    for field in _NUMERIC_FIELDS:
+    for field in numbers:
         value = evidence[field]
         if (
             isinstance(value, bool)
@@ -79,18 +104,47 @@ def extract_native_evidence(junit: Path) -> dict[str, object]:
             or not math.isfinite(value)
         ):
             raise ValueError(f"native {field} must be finite")
-    if (
-        evidence["controlled_final_hip_error_rad"]
-        >= evidence["nominal_final_hip_error_rad"]
+
+
+def extract_native_evidence(junit: Path) -> dict[str, object]:
+    """Reject absent, failed, partial or contradictory native test properties."""
+    evidence = _passed_property(junit, _TEST, "f02_native_evidence")
+    _validate_fields(evidence, _HASH_FIELDS, _NUMERIC_FIELDS)
+    if cast(float, evidence["controlled_final_hip_error_rad"]) >= cast(
+        float, evidence["nominal_final_hip_error_rad"]
     ):
         raise ValueError("native feedback did not show declared hip improvement")
-    if evidence["max_full_state_replay_error"] > 1e-12:
+    if cast(float, evidence["max_full_state_replay_error"]) > 1e-12:
         raise ValueError("native full-state replay exceeded the declared tolerance")
     if (
         evidence["controlled_applied_input_sha256"]
         == evidence["nominal_applied_input_sha256"]
     ):
         raise ValueError("controlled and nominal replay inputs must differ")
+    return evidence
+
+
+def extract_moving_evidence(junit: Path) -> dict[str, object]:
+    """Admit separate frozen-feedforward and total-feedback native replays."""
+    evidence = _passed_property(junit, _MOVING_TEST, "f02_moving_evidence")
+    _validate_fields(evidence, _MOVING_HASH_FIELDS, _MOVING_NUMERIC_FIELDS)
+    if cast(float, evidence["controlled_final_hip_error_rad"]) >= cast(
+        float, evidence["frozen_final_hip_error_rad"]
+    ):
+        raise ValueError("moving native reference did not improve under feedback")
+    if (
+        max(
+            cast(float, evidence["max_frozen_replay_error"]),
+            cast(float, evidence["max_controlled_replay_error"]),
+        )
+        > 1e-12
+    ):
+        raise ValueError("moving native replay exceeded full-state tolerance")
+    if (
+        evidence["controlled_applied_input_sha256"]
+        == evidence["frozen_applied_input_sha256"]
+    ):
+        raise ValueError("moving native feedback must change the saved input")
     return evidence
 
 
@@ -130,9 +184,17 @@ def build_receipt(junit: Path, *, host_alias: str) -> dict[str, object]:
             "python": sys.version.split()[0],
         },
         "tools_t01_gitlink_commit": gitlink[2],
-        "fixture": {"nq": 9, "nv": 8, "nu": 2, "steps": 12, "dt_s": 0.01},
+        "fixture": {
+            "nq": 9,
+            "nv": 8,
+            "nu": 2,
+            "static_steps": 12,
+            "moving_steps": 20,
+            "dt_s": 0.01,
+        },
         "source_sha256": source_hashes,
         "native_evidence": extract_native_evidence(junit),
+        "moving_evidence": extract_moving_evidence(junit),
     }
 
 

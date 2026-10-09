@@ -112,3 +112,9 @@ Native quaternion tangent error, physical inverse mass, direct bounded motor
 inputs and fresh complete-state frozen-torque replay pass scoped tests. The
 source-hashed receipt measures 0.1261 rad final hip error versus 0.4 rad
 frozen nominal over 12 native steps; no capture/contact/full-body claim follows.
+A native-replayed moving teacher also supplies per-step tangent Jacobians,
+MOSAIC gains and frozen feedforward. From a held-out perturbation, the
+frozen and feedback-applied histories independently replay in full and
+finish 0.07508 versus 0.02460 rad from the teacher; the teacher/frozen
+input identities match and feedback input differs. F03 does not yet export
+an optimized native trajectory into this consumer.

@@ -8,7 +8,7 @@
     {
       "id": "UP-D1-native-manifold-feedback-inventory",
       "owner": "UpstreamDrift issue #11946",
-      "resolution": "Inventory the F02 native floating-root manifold adapter and provisional chapter 27: MuJoCo current-minus-reference nv tangent error, quaternion sign equivalence, physical inverse mass, root-unactuated direct motor map, exact-state TVLQR sampling, post-limit torque and independent complete native-state replay. Actual 9/8/2 contact-free MuJoCo fixture tests do not qualify human anatomy, gravity/contact/grip, capture matching, muscle excitation, six-engine parity or a runtime deadline. Full calculation coverage and publication remain blocked."
+      "resolution": "Inventory the F02 native floating-root manifold adapter and provisional chapter 27: MuJoCo current-minus-reference nv tangent error, quaternion sign equivalence, physical inverse mass, root-unactuated direct motor map, exact-state TVLQR sampling, post-limit torque and independent complete native-state replay. A separate native-replayed moving reference supplies per-step tangent Jacobians, MOSAIC gains and frozen feedforward; held-out frozen and total-feedback histories have distinct applied-input identities and independent full-state replay. Actual 9/8/2 contact-free MuJoCo fixture tests do not qualify an optimized F03 native handoff, human anatomy, gravity/contact/grip, capture matching, muscle excitation, six-engine parity or a runtime deadline. Full calculation coverage and publication remain blocked."
     },
     {
       "id": "UP-D1-native-manifold-box-fddp-inventory",

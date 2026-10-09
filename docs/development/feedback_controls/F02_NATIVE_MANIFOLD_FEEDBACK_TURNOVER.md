@@ -16,8 +16,8 @@ and the executed ZOH motor history. A fresh MuJoCo run independently replays
 those torques. It receives no controller or observation and must match every
 full integration-state row within $10^{-12}$.
 
-The test-first sequence had a missing-module failure, then four actual native
-tests and one receipt-parser test passed. A quaternion sign-flip gives zero
+The test-first sequence had a missing-module failure, then six actual native
+tests and two receipt-parser tests passed. A quaternion sign-flip gives zero
 native rotation error despite a nonzero Euclidean four-vector difference;
 malformed quaternion, channel permutation and contact geometry reject.
 The 12-step initial hip error is 0.4 rad. Native feedback finishes at
@@ -27,6 +27,20 @@ bounds $(2,-1.5)$ N m enter the saved bundle and independent replay. The
 source-hashed fixture evidence is
 `F02_NATIVE_MANIFOLD_RECEIPT_MJ38.json`. It is a deterministic synthetic
 software-boundary result, not a measured-golfer or runtime qualification.
+
+The moving-reference test begins with a separate native replay of varying
+admissible two-motor torque. It verifies each F05c native tangent Euler
+derivative against that replay's next state, builds MOSAIC TVLQR gains
+along the nonconstant physical trajectory, and gives F02 its exact
+replayed nominal states and frozen feedforward. At one held-out 0.25 rad
+hip perturbation, the feedforward-only trajectory ends 0.0750848 rad from
+the moving target and feedback ends 0.0246020 rad away. The teacher and
+frozen-run input SHA-256 identities match; the feedback-applied input SHA
+differs. Both runs independently reproduce every full native integration-
+state row exactly. This is a real native moving-reference handoff and input
+separation, but the teacher input was not optimized or fitted to capture.
+F03's existing sparse-collocation spike is one-DOF and has no native 9/8/2
+optimizer export yet.
 
 Reproduce using an environment with MuJoCo 3.8.0 and the pinned Tools T01
 contract:

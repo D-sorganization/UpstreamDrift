@@ -14,6 +14,10 @@ import pytest
 from src.engines.physics_engines.mujoco.python.native_tangent_derivative import (
     linearize_native_tangent_step,
 )
+from src.engines.physics_engines.mujoco.python.native_torque_replay import (
+    build_native_torque_bundle,
+    replay_native_torque_bundle,
+)
 from src.shared.python.estimation.mosaic.local_policy import (
     LinearizedDynamics,
     tvlqr_gains,
@@ -248,3 +252,155 @@ def test_native_f02_stores_post_limit_torques_not_requested_effort(
         atol=1e-12,
         rtol=0,
     )
+
+
+def test_native_model_derived_moving_reference_frozen_and_feedback_replay(
+    tmp_path: Path,
+    record_property: Callable[[str, object], None],
+) -> None:
+    mj, module = _providers()
+    path = tmp_path / "floating.xml"
+    path.write_text(_floating_two_hinge_xml(), encoding="utf-8")
+    model = mj.MjModel.from_xml_path(str(path))
+    initial = _nominal(mj, model)
+    steps = 20
+    times = np.arange(steps + 1) * model.opt.timestep
+    profile = np.column_stack(
+        (0.6 + 0.15 * np.sin(times * 5), -0.4 + 0.1 * np.cos(times * 4))
+    )
+    profile[-1] = profile[-2]
+    teacher_bundle = build_native_torque_bundle(
+        path, initial, times, profile, experiment_id="moving-native-teacher"
+    )
+    teacher = replay_native_torque_bundle(teacher_bundle, path)
+    weights = np.diag([1.0] * 6 + [30.0, 30.0] + [0.1] * 8)
+    schedule = module.build_native_nominal_policy_from_replay(
+        path,
+        teacher_bundle,
+        state_weight=weights,
+        input_weight=np.eye(model.nu) * 0.01,
+        phase_names=("swing",) * steps,
+    )
+    np.testing.assert_array_equal(schedule.feedforward, profile[:-1])
+    np.testing.assert_allclose(schedule.q, teacher.qpos[:-1], atol=1e-12)
+    assert not np.array_equal(schedule.q[0], schedule.q[-1])
+    perturbed = initial.copy()
+    perturbed[8] += 0.25
+    frozen = module.run_native_distributed_feedback_tracking(
+        path,
+        perturbed,
+        schedule,
+        max_torque_rate_nm_s=np.array([400.0, 400.0]),
+        enabled=False,
+        experiment_id="moving-frozen-feedforward",
+    )
+    controlled = module.run_native_distributed_feedback_tracking(
+        path,
+        perturbed,
+        schedule,
+        max_torque_rate_nm_s=np.array([400.0, 400.0]),
+        enabled=True,
+        experiment_id="moving-total-feedback",
+    )
+    target_hip = teacher.qpos[-1, 7]
+    frozen_error = abs(frozen.tracking.native_qpos[-1, 7] - target_hip)
+    controlled_error = abs(controlled.tracking.native_qpos[-1, 7] - target_hip)
+    assert controlled_error < frozen_error
+    assert (
+        teacher_bundle.model
+        == frozen.tracking.bundle.model
+        == controlled.tracking.bundle.model
+    )
+    assert teacher_bundle.time_grid_sha256 == frozen.tracking.bundle.time_grid_sha256
+    assert (
+        teacher_bundle.time_grid_sha256 == controlled.tracking.bundle.time_grid_sha256
+    )
+    assert (
+        teacher_bundle.applied_input_sha256
+        == frozen.tracking.bundle.applied_input_sha256
+    )
+    assert frozen.tracking.bundle.applied_input_sha256 != (
+        controlled.tracking.bundle.applied_input_sha256
+    )
+    assert frozen.tracking.bundle.integrity.initial_state_sha256 == (
+        controlled.tracking.bundle.integrity.initial_state_sha256
+    )
+    assert (
+        frozen.tracking.bundle.policy_sha256 == controlled.tracking.bundle.policy_sha256
+    )
+    assert all(
+        np.array_equal(step.feedback_correction, [0, 0])
+        for step in frozen.control_steps
+    )
+    assert any(
+        np.linalg.norm(step.feedback_correction) > 0
+        for step in controlled.control_steps
+    )
+    for result in (frozen, controlled):
+        np.testing.assert_allclose(
+            result.tracking.native_integration_states,
+            result.tracking.replay.integration_states,
+            atol=1e-12,
+            rtol=0,
+        )
+    if os.environ.get("F02_NATIVE_RECEIPT") == "1":
+        record_property(
+            "f02_moving_evidence",
+            json.dumps(
+                {
+                    "source_model_sha256": teacher_bundle.model.source_model_sha256,
+                    "teacher_applied_input_sha256": teacher_bundle.applied_input_sha256,
+                    "frozen_applied_input_sha256": frozen.tracking.bundle.applied_input_sha256,
+                    "controlled_applied_input_sha256": controlled.tracking.bundle.applied_input_sha256,
+                    "heldout_initial_state_sha256": controlled.tracking.bundle.integrity.initial_state_sha256,
+                    "policy_sha256": controlled.tracking.bundle.policy_sha256,
+                    "time_grid_sha256": controlled.tracking.bundle.time_grid_sha256,
+                    "frozen_final_hip_error_rad": float(frozen_error),
+                    "controlled_final_hip_error_rad": float(controlled_error),
+                    "max_frozen_replay_error": float(
+                        np.max(
+                            np.abs(
+                                frozen.tracking.native_integration_states
+                                - frozen.tracking.replay.integration_states
+                            )
+                        )
+                    ),
+                    "max_controlled_replay_error": float(
+                        np.max(
+                            np.abs(
+                                controlled.tracking.native_integration_states
+                                - controlled.tracking.replay.integration_states
+                            )
+                        )
+                    ),
+                },
+                sort_keys=True,
+            ),
+        )
+
+
+def test_native_feedback_rejects_hidden_control_callback_before_execution(
+    tmp_path: Path,
+) -> None:
+    mj, module = _providers()
+    path = tmp_path / "floating.xml"
+    path.write_text(_floating_two_hinge_xml(), encoding="utf-8")
+    model = mj.MjModel.from_xml_path(str(path))
+    initial = _nominal(mj, model)
+    schedule = _schedule(mj, model, initial)
+
+    def hidden_control(*_args: object) -> None:
+        raise AssertionError("hidden drive executed")
+
+    mj.set_mjcb_control(hidden_control)
+    try:
+        with pytest.raises(ValueError, match="callbacks"):
+            module.run_native_distributed_feedback_tracking(
+                path,
+                initial,
+                schedule,
+                max_torque_rate_nm_s=np.array([400.0, 400.0]),
+                experiment_id="hidden-control-rejected",
+            )
+    finally:
+        mj.set_mjcb_control(None)

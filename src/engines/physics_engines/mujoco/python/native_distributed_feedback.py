@@ -20,6 +20,15 @@ from src.engines.physics_engines.mujoco.python.native_nmpc_tracking import (
 from src.engines.physics_engines.mujoco.python.native_tangent_derivative import (
     linearize_native_tangent_step,
 )
+from src.engines.physics_engines.mujoco.python.native_torque_replay import (
+    _CALLBACKS,
+    _load_native,
+    replay_native_torque_bundle,
+)
+from src.shared.python.estimation.mosaic.local_policy import (
+    LinearizedDynamics,
+    tvlqr_gains,
+)
 from src.shared.python.motion_matching.bounded_nmpc import MPCCommandReceipt
 from src.shared.python.motion_matching.distributed_feedback import (
     ActuatorMap,
@@ -37,8 +46,14 @@ class NativeMuJoCoTangentModel:
     """MuJoCo's native current-minus-reference chart and physical mass matrix."""
 
     def __init__(self, model: Any, initial_integration_state: Array) -> None:
+        import mujoco as mj
+
+        if any(getattr(mj, "get_mjcb_" + name)() is not None for name in _CALLBACKS):
+            raise ValueError("native callbacks are forbidden for feedback admission")
         derivative = linearize_native_tangent_step(
-            model, initial_integration_state, np.zeros(model.nu)
+            model,
+            np.array(initial_integration_state, dtype=np.float64, copy=True),
+            np.zeros(model.nu),
         )
         self.model = model
         self.nq = int(model.nq)
@@ -143,6 +158,74 @@ class NativeDistributedFeedbackTracking:
     control_steps: tuple[ControlStep, ...]
 
 
+def build_native_nominal_policy_from_replay(
+    model_path: str | Path,
+    reference_bundle: Any,
+    *,
+    state_weight: Array,
+    input_weight: Array,
+    phase_names: tuple[str, ...],
+) -> NominalTrajectory:
+    """Turn an exact time-only native torque replay into a manifold TVLQR policy.
+
+    Time is normalized only for local differentiation. The admitted fixture
+    is autonomous; each differentiated Euler step must reproduce its replayed
+    successor at the actual observation clock.
+    """
+    path = Path(model_path)
+    replay = replay_native_torque_bundle(reference_bundle, path)
+    model, _ = _load_native(path)
+    tangent = NativeMuJoCoTangentModel(model, replay.integration_states[0])
+    steps = len(replay.time_seconds) - 1
+    if len(phase_names) != steps or steps < 1:
+        raise ValueError("native nominal needs one phase per replayed step")
+    if tuple(reference_bundle.model.ordered_input_channel_ids) != (
+        tangent.ordered_input_channel_ids
+    ):
+        raise ValueError("native nominal motor channel order differs")
+    q_weight = np.asarray(state_weight, dtype=np.float64)
+    r_weight = np.asarray(input_weight, dtype=np.float64)
+    if (
+        q_weight.shape != (2 * tangent.nv, 2 * tangent.nv)
+        or r_weight.shape != (model.nu, model.nu)
+        or not np.isfinite(q_weight).all()
+        or not np.isfinite(r_weight).all()
+        or not np.allclose(q_weight, q_weight.T, rtol=0, atol=1e-12)
+        or not np.allclose(r_weight, r_weight.T, rtol=0, atol=1e-12)
+        or np.linalg.eigvalsh(q_weight).min() < 0
+        or np.linalg.eigvalsh(r_weight).min() <= 0
+    ):
+        raise ValueError("native nominal requires finite symmetric Q>=0 and R>0")
+    derivatives = []
+    for index in range(steps):
+        autonomous_state = replay.integration_states[index].copy()
+        autonomous_state[0] = 0.0
+        derivative = linearize_native_tangent_step(
+            model, autonomous_state, replay.applied_actuator_torques[index]
+        )
+        if not np.allclose(
+            derivative.next_qpos, replay.qpos[index + 1], atol=1e-10, rtol=0
+        ) or not np.allclose(
+            derivative.next_qvel, replay.qvel[index + 1], atol=1e-10, rtol=0
+        ):
+            raise ValueError("native reference is not the admitted autonomous step")
+        derivatives.append(derivative)
+    dynamics = LinearizedDynamics(
+        np.stack([item.A for item in derivatives]),
+        np.stack([item.B for item in derivatives]),
+    )
+    gains = tvlqr_gains(dynamics, q_weight, r_weight)
+    return NominalTrajectory(
+        times=replay.time_seconds,
+        q=replay.qpos[:-1],
+        v=replay.qvel[:-1],
+        feedforward=replay.applied_actuator_torques,
+        gains=gains,
+        phase_names=phase_names,
+        channel_ids=tangent.ordered_input_channel_ids,
+    )
+
+
 def run_native_distributed_feedback_tracking(
     model_path: str | Path,
     initial_integration_state: Array,
@@ -153,10 +236,8 @@ def run_native_distributed_feedback_tracking(
     enabled: bool = True,
 ) -> NativeDistributedFeedbackTracking:
     """Apply F02 TVLQR to admitted 9/8/2 native motor plant, then replay."""
-    import mujoco as mj
-
     path = Path(model_path)
-    model = mj.MjModel.from_xml_path(str(path))
+    model, _ = _load_native(path)
     tangent = NativeMuJoCoTangentModel(model, initial_integration_state)
     dt = float(model.opt.timestep)
     if schedule.channel_ids != tangent.ordered_input_channel_ids:

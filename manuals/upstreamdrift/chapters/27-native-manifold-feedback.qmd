@@ -58,8 +58,30 @@ unnormalized quaternion and contact geometry. Tests run against actual
 MuJoCo 3.8.0, not an algebraic stand-in. The source-hashed receipt and
 reproduction command are in the F02 native turnover document.
 
+The same adapter also consumes a **moving reference** obtained by executing
+an admissible, varying two-motor ZOH history in an independent native replay.
+It differentiates each actual native Euler transition in the 16-dimensional
+tangent and runs the existing MOSAIC Riccati pass; the resulting
+`NominalTrajectory` contains the replayed $(q_k,v_k)$ and teacher
+feedforward torque. The fixture is autonomous, so local differentiation may
+normalize the otherwise complete saved state's time coordinate to zero;
+each differentiated successor is checked against the recorded native
+successor. This time normalization is not admitted for time-dependent
+callbacks or external drives.
+
+From one held-out $0.25\,\mathrm{rad}$ hip perturbation, a frozen-feedforward
+run and an exact-state feedback run use the **same** native model, initial
+state, input grid and policy. The frozen run's saved input hash equals the
+teacher history; the feedback run's applied-input hash differs. Their final
+hip errors against the moving teacher are $0.07508$ and $0.02460\,\mathrm{rad}$,
+respectively. Both separate complete-state replays match exactly in this
+fixture. The test retains both histories; no optimizer or fitting success
+is inferred from a teacher-created reference. F03's current sparse
+collocation spike is one-dimensional and does not export a native 9/8/2
+solution into this boundary.
+
 This only qualifies a software boundary and local synthetic fixture.
 Human anatomy, gravity/contact/grip, state-dependent transmissions, muscle
-excitation, marker observation, private capture, held-out perturbations,
+excitation, marker observation, private capture, production perturbations,
 full swing, six-engine parity and a scientific runtime deadline remain open.
 The F02 and F05 parents and the manual release remain blocked.
