@@ -6,6 +6,11 @@
   "inventory_commit": null,
   "blockers": [
     {
+      "id": "UP-D1-native-marker-fit-inventory",
+      "owner": "UpstreamDrift issue #11787",
+      "resolution": "Inventory provisional chapter 28 and F03 native marker fitting: exact native-clock ordered world-frame metre site observations, visibility masks and positive weights; MuJoCo site-position Jacobians on a 16-dimensional configuration/velocity tangent; F05c native discrete Euler derivatives chained through F05d BoxFDDP's next-state marker objective; independently scored nonlinear bounded native plan admission; actual applied ZOH torque and complete initial mjSTATE_INTEGRATION Tools T01 replay. The supported MuJoCo 3.8/Crocoddyl 3.2.1 source-hashed fixture receipt separates command acceptance from whole-trajectory acceptance, observation RMSE from optimizer objective, and wall/CPU from solver-only time. Model-generated reachable markers with no gravity/contact/biology do not qualify private capture, observation clock alignment, marker calibration, full swing, native muscles, six engines or runtime deadlines. Full calculation coverage and manual publication remain blocked."
+    },
+    {
       "id": "UP-D1-native-manifold-feedback-inventory",
       "owner": "UpstreamDrift issue #11946",
       "resolution": "Inventory the F02 native floating-root manifold adapter and provisional chapter 27: MuJoCo current-minus-reference nv tangent error, quaternion sign equivalence, physical inverse mass, root-unactuated direct motor map, exact-state TVLQR sampling, post-limit torque and independent complete native-state replay. A separate native-replayed moving reference supplies per-step tangent Jacobians, MOSAIC gains and frozen feedforward; held-out frozen and total-feedback histories have distinct applied-input identities and independent full-state replay. Actual 9/8/2 contact-free MuJoCo fixture tests do not qualify an optimized F03 native handoff, human anatomy, gravity/contact/grip, capture matching, muscle excitation, six-engine parity or a runtime deadline. Full calculation coverage and publication remain blocked."

@@ -118,3 +118,18 @@ frozen and feedback-applied histories independently replay in full and
 finish 0.07508 versus 0.02460 rad from the teacher; the teacher/frozen
 input identities match and feedback input differs. F03 does not yet export
 an optimized native trajectory into this consumer.
+
+## F03 Native Marker Fitting Boundary
+
+`F03_NATIVE_MARKER_FIT_TURNOVER.md` and provisional chapter 28 document
+exact-clock, masked site-position fitting on the same native 9/8/2
+fixture. F05c native tangent derivatives are chained through F05d's
+next-state BoxFDDP action; its bounded nonlinear admission and Tools T01
+fresh full-state torque replay are reused. The supported-provider receipt
+retains observation/model/input/source hashes, four accepted commands
+versus full-trajectory acceptance, independent marker RMSE and total
+wall/CPU work. This is model-generated data without gravity/contact;
+real capture geometry/clock, F02 optimized-reference handoff, native
+muscles, production full swing and all-engine qualification remain open.
+GitHub quota paused child claim/publication, so this source is local
+under parent-authorized F03 ownership pending coordination recovery.
