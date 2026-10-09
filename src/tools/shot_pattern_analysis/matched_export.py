@@ -47,6 +47,7 @@ def matched_source_snapshot() -> dict:
             "matched_runner.py",
             "matched_export.py",
             "matched_diagnostics.py",
+            "matched_report_plots.py",
             "noise.py",
             "nominal_matching.py",
             "density.py",

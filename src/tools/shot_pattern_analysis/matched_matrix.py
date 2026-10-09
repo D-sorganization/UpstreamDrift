@@ -31,6 +31,19 @@ PROFILES = (
 )
 
 
+def _selected_profiles(profiles: tuple[str, ...] | None) -> tuple[str, ...]:
+    """Preserve catalog ordering while rejecting empty, duplicate, unknown input."""
+    if profiles is None:
+        return PROFILES
+    if (
+        not profiles
+        or len(profiles) != len(set(profiles))
+        or any(profile not in PROFILES for profile in profiles)
+    ):
+        raise ValueError("profiles must be nonempty, distinct known profile names")
+    return tuple(profile for profile in PROFILES if profile in profiles)
+
+
 def noise_profile(name: str, rotation_sd_deg: float) -> NoiseSpec:
     """Explicit Gaussian sensitivities; correlations are assumptions, not fits."""
     if name not in PROFILES:
@@ -97,15 +110,17 @@ def matched_matrix_cells(
     n_shots: int = 32,
     seed: int = 20261009,
     common_targets: dict[str, float] | None = None,
+    profiles: tuple[str, ...] | None = None,
 ) -> tuple[tuple[str, ExperimentConfig], ...]:
-    """Return all324 candidates; feasibility is evaluated rather than presumed."""
+    """Return requested factorial cells; default contains all 324 candidates."""
+    selected_profiles = _selected_profiles(profiles)
     cells = []
     for club_id in ("driver", "seven_iron", "pitching_wedge"):
         for lean in (0.0, 5.0, 10.0):
             club = replace(matched_preset(club_id), shaft_lean_deg=lean)
             for curve in (1.0, 2.0):
                 for sd in (1.0, 2.0):
-                    for profile in PROFILES:
+                    for profile in selected_profiles:
                         key = f"{club_id}_lean{lean:g}_curve{curve:g}_rotation{sd:g}_{profile}"
                         target = (
                             None if common_targets is None else common_targets[club_id]
@@ -168,6 +183,7 @@ def run_matched_matrix(
     shard_count: int = 1,
     figures: str = "selected",
     common_targets: dict[str, float] | None = None,
+    profiles: tuple[str, ...] | None = None,
 ) -> list[dict]:
     """Publish immutable cells; resume verifies data, inputs, and execution sources."""
     if stage not in ("pilot", "final") or figures not in ("none", "selected", "all"):
@@ -183,7 +199,9 @@ def run_matched_matrix(
         raise ValueError(
             "pilot runs are limited to512 shots perpattern; use accepted final stage"
         )
-    cells = matched_matrix_cells(n_shots=n_shots, common_targets=common_targets)
+    cells = matched_matrix_cells(
+        n_shots=n_shots, common_targets=common_targets, profiles=profiles
+    )
     output_root = Path(output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     plan = {
@@ -263,6 +281,12 @@ def main() -> None:
         type=Path,
         help="JSON club-to-target-distance mapping for across-lean control",
     )
+    parser.add_argument(
+        "--profiles",
+        nargs="+",
+        choices=PROFILES,
+        help="optional profile subset; default includes all nine",
+    )
     args = parser.parse_args()
     targets = (
         json.loads(args.common_targets.read_text()) if args.common_targets else None
@@ -277,6 +301,7 @@ def main() -> None:
         shard_count=args.shard_count,
         figures=args.figures,
         common_targets=targets,
+        profiles=tuple(args.profiles) if args.profiles else None,
     )
 
 

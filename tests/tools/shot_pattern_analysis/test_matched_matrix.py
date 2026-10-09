@@ -37,6 +37,73 @@ def test_common_target_is_explicit_input():
     assert all(r.target_x_m == targets[r.club.club_id] for _, r in cells)
 
 
+def test_profile_subset_is_explicit_complete_factorial_and_validated():
+    selected = matched_matrix_cells(n_shots=32, profiles=("combined2", "shaft_only"))
+    assert len(selected) == 72
+    assert len({name for name, _ in selected}) == 72
+    assert selected == matched_matrix_cells(
+        n_shots=32, profiles=("shaft_only", "combined2")
+    )
+    assert all(name.endswith(("_shaft_only", "_combined2")) for name, _ in selected)
+    for invalid in ((), ("shaft_only", "shaft_only"), ("not_a_profile",)):
+        with pytest.raises(ValueError, match="profiles"):
+            matched_matrix_cells(profiles=invalid)
+
+
+def test_selected_matrix_plan_only_contains_requested_cells_and_resume_is_exact(
+    tmp_path, monkeypatch
+):
+    import json
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    monkeypatch.setattr(
+        module, "matched_source_snapshot", lambda: {"source_sha256": {"a": "b"}}
+    )
+    monkeypatch.setattr(
+        module,
+        "execute_and_export",
+        lambda *a, **kw: pytest.fail("no cell should run in this empty shard"),
+    )
+    selected = ("shaft_only", "combined2")
+    result = module.run_matched_matrix(
+        tmp_path, profiles=selected, shard_index=72, shard_count=73
+    )
+    assert result == []
+    plan = json.loads((tmp_path / "matrix_plan.json").read_text())
+    assert len(plan["cells"]) == 72
+    assert all(name.endswith(("_shaft_only", "_combined2")) for name in plan["cells"])
+    assert (
+        module.run_matched_matrix(
+            tmp_path,
+            profiles=("combined2", "shaft_only"),
+            shard_index=72,
+            shard_count=73,
+        )
+        == []
+    )
+    with pytest.raises(RuntimeError, match="plan differs"):
+        module.run_matched_matrix(
+            tmp_path, profiles=("shaft_only",), shard_index=72, shard_count=73
+        )
+
+
+def test_cli_profiles_are_forwarded(tmp_path, monkeypatch):
+    import sys
+    import src.tools.shot_pattern_analysis.matched_matrix as module
+
+    captured = []
+    monkeypatch.setattr(
+        module, "run_matched_matrix", lambda *a, **kw: captured.append(kw)
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["matched-matrix", str(tmp_path), "--profiles", "shaft_only", "combined2"],
+    )
+    module.main()
+    assert captured[0]["profiles"] == ("shaft_only", "combined2")
+
+
 def test_final_run_requires_source_bound_accepted_review(tmp_path):
     with pytest.raises(ValueError, match="acceptance"):
         validate_final_acceptance(None, {"source_sha256": {"a": "b"}})

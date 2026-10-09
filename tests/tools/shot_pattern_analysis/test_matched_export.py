@@ -109,6 +109,10 @@ def test_source_snapshot_records_contact_backend(monkeypatch):
     assert snapshot["numerical_runtime"]["python"]
     assert snapshot["numerical_runtime"]["numpy"]
     assert snapshot["numerical_runtime"]["scipy"]
+    assert (
+        "src/tools/shot_pattern_analysis/matched_report_plots.py"
+        in snapshot["source_sha256"]
+    )
 
 
 def test_receipt_records_selected_contact_backend(tmp_path, request_config, snapshot):
