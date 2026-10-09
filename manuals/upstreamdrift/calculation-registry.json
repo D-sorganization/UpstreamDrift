@@ -94,6 +94,11 @@
       "id": "UP-D1-lift-pack-audit-inventory",
       "owner": "UpstreamDrift issue #11751",
       "resolution": "Inventory the LIFT-1 (#11741) cross-engine lift model pack audit in src/shared/python/lifting/pack_audit/ (frames.py, geometry.py, poses.py, baseline.py, analysis.py, gaps.py and the per-engine adapters) documented provisionally in chapters/15-lift-pack-audit.qmd: the OpenSim Y-up to canonical Z-up rotation, the sleeve-defined bar axis, per-hand lateral offset and perpendicular hand-to-bar distance, foot-midpoint pose summaries, pelvis-relative same-input pairwise parity over the standard and generic lift-shape poses, the lifter-only CoM with bar and bench removed (zero mass-centre offset assumed), segment mass and joint-limit deviation against the biomech parity standard, grip half-width mismatch, start-pose bar height above the lowest foot contact against the 0.225 m plate radius, reference FK error and the measured discrepancy list mapped to per-pack issues. Unavailable values (Drake/Pinocchio contact force and closure, lifter CoM without lifter mass, bar height without foot geometry) are None with a reason, never zero. tests/unit/lifting/pack_audit/ and docs/development/lifting/PACK_PARITY_BASELINE.md establish software parity between the packs at recorded commits; they do not simulate a lift, compute joint moments, spine loads or muscle forces, compare against measured lifts, or establish an uncertainty. The 0.01 m grip and 0.05 m floor-height thresholds are audit flags, not acceptance limits."
+    },
+    {
+      "id": "UP-D1-native-muscle-replay-inventory",
+      "owner": "UpstreamDrift issue #11791",
+      "resolution": "Inventory the provisional native continuous-state excitation replay in tour_matching/muscle_replay.py and chapters/13-native-muscle-replay.qmd. Actual OpenSim 4.6 one-DOF compliant-muscle tests establish bounded input playback, continuous initialization and uninterrupted native stepping only. Discrete/plugin state, external-resource identity, passive/contact force policy, full-body anatomy, capture accuracy and full-horizon independent muscle/contact replay remain unqualified. Preserve cold-start policy and forbid weaker shared rigid-body/restarted/external-force evidence from qualifying the endpoint."
     }
   ],
   "calculations": []
