@@ -40,3 +40,4 @@ UP-D8. No generated HTML, LaTeX, PDF, or DOCX artifact is approved.
 {{< include chapters/33-native-passive-readiness.qmd >}}
 
 {{< include chapters/38-native-reference-conventions.qmd >}}
+{{< include chapters/26-native-opensim-geometry.qmd >}}

@@ -10482,3 +10482,17 @@ The bounded unchanged 520-muscle Wilkinson and 318-muscle Pose2Sim diagnostics
 are unqualified for source-resource closure, physiology, contact/grip, capture
 matching or independent excitation replay. Canonical method is provisional
 chapter 38 and the source/turnover receipt remains local.
+
+## Native OpenSim Marker Geometry (F07/F08, #11903)
+
+Explicit native model/frame/station bindings supply actual OpenSim geometry to
+shared calibration and trajectory IK. Selected coordinates must be independent;
+native assembly must achieve them, preserve other independent coordinates and
+respect every source range, including dependent coordinates. Metadata-only
+geometry, zero closure and no-op dynamics are rejected. Explicit finite bounds
+opt into TRF in the existing shared trajectory solver; default LM is unchanged.
+The three-sample pelvis diagnostic retains source clock, hashes, native identity,
+residuals and failures through existing frozen-loader/TRC contracts. Its source
+candidate reaches a pelvis rotation bound and remains unqualified: fixed frame
+registration and anatomical calibration are unresolved. Canonical authority is
+chapter26; no capture, whole-body or full-state replay acceptance is claimed.
