@@ -35,6 +35,15 @@ def _qt():
     return _APP
 
 
+def _settle() -> None:
+    """Run queued ``draw_idle`` callbacks while the widget is still alive.
+
+    Otherwise the widget is garbage-collected with a pending single-shot draw
+    that fires on the deleted canvas during a later test's event processing.
+    """
+    _APP.processEvents()
+
+
 def _plot():
     left = ContactSet(np.array([[0.0, 0.0, 700.0]]), np.array([[0.0, 0.15, 0.0]]))
     b = analyze_ground_reaction({"left": left}, (0.0, 0.0, 0.95))
@@ -53,6 +62,7 @@ def test_widget_starts_unavailable_and_draws_six_panels() -> None:
     assert len(w.figure.axes) == 6
     w.set_series(unavailable_ground_reaction_plot("no GRF in Simscape"))
     assert w.status_label.text() == "unavailable: no GRF in Simscape"
+    _settle()
     w.cleanup()
     w.cleanup()  # idempotent
 
@@ -70,6 +80,7 @@ def test_widget_loads_the_api_payload_json(tmp_path) -> None:
     bad.write_text(json.dumps([1, 2]), encoding="utf-8")
     with pytest.raises(ValueError, match="object"):
         w.load_json(bad)
+    _settle()
 
 
 def test_embed_adapter_creates_one_widget_and_cleans_up() -> None:
