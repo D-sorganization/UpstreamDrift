@@ -29,22 +29,10 @@ from src.shared.python.motion_matching.replay_metrics import (
     ObservedMarkerPositions,
     PositionInterpolation,
 )
-from sidekick.lab.mocap import (
-    ActuationInputKind,
-    CapabilityAvailability,
-    CapabilityDeclaration,
-    CapabilitySupport,
-    ExperimentReplayBundle,
-    InitialStateSchema,
-    InputChannel,
-    InputInterpolation,
-    ModelIdentity,
-    ReplayExecutionPolicy,
-    ReplayMode,
-    StateComponentRole,
-    StateComponentSpec,
-    build_experiment_replay_bundle,
-)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sidekick.lab.mocap import ExperimentReplayBundle
 
 pytestmark = pytest.mark.unit
 
@@ -66,6 +54,25 @@ def _evidence_and_bundle(
         (0.1, 0.1),
     ),
 ) -> tuple[ComparisonEvidence, ExperimentReplayBundle]:
+    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+
+    extend_sidekick_lab_path()
+    from sidekick.lab.mocap import (
+        ActuationInputKind,
+        CapabilityAvailability,
+        CapabilityDeclaration,
+        CapabilitySupport,
+        InitialStateSchema,
+        InputChannel,
+        InputInterpolation,
+        ModelIdentity,
+        ReplayExecutionPolicy,
+        ReplayMode,
+        StateComponentRole,
+        StateComponentSpec,
+        build_experiment_replay_bundle,
+    )
+
     row = registry.get("mujoco/driver", "default", DriveMode.TORQUE)
     channels = (
         InputChannel("hip", "actuator:hip", "N*m"),

@@ -14,14 +14,12 @@ from enum import Enum
 import hashlib
 import json
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from src.shared.python._seam_redirect import extend_sidekick_lab_path
 
-extend_sidekick_lab_path()
-
-from sidekick.lab.mocap import ExperimentReplayBundle  # noqa: E402
+if TYPE_CHECKING:
+    from sidekick.lab.mocap import ExperimentReplayBundle
 
 from src.engines.feedback_comparison import (
     ComparisonEvidence,
@@ -93,6 +91,16 @@ _REPLAY_IDENTITY_FIELDS = (
     "integrator_sha256",
     "input_channel_schema_sha256",
 )
+
+
+def _experiment_replay_bundle_type() -> type[Any]:
+    """Resolve the Tools bundle only when a qualified bundle is consumed."""
+    from src.shared.python._seam_redirect import extend_sidekick_lab_path
+
+    extend_sidekick_lab_path()
+    from sidekick.lab.mocap import ExperimentReplayBundle
+
+    return ExperimentReplayBundle
 
 
 @dataclass(frozen=True)
@@ -318,7 +326,7 @@ def feedback_replay_identity_sha256(
     evidence: ComparisonEvidence, replay_bundle: ExperimentReplayBundle
 ) -> str:
     """Bind F01 evidence to T01's fully hashed physical initial-state payload."""
-    if not isinstance(replay_bundle, ExperimentReplayBundle):
+    if not isinstance(replay_bundle, _experiment_replay_bundle_type()):
         raise TypeError("replay_bundle must be a validated ExperimentReplayBundle")
     return _canonical_sha256(
         {
